@@ -41,27 +41,23 @@ public class SourceTableArgument
 
 		if (argCount <= 0) return;
 		
-		String t = args.get(0);
-		
-		// If only one table argument is present, we'll have to
-		// to check for wildcards e.g. -sourcetable=theschema.*
-		if (argCount == 1 && (t.indexOf('*') > -1 || t.indexOf('%') > -1))
+		for (String t : args)
 		{
-			this.wildcardsPresent = true;
-			TableIdentifier tbl = new TableIdentifier(t);
-			if (tbl.getSchema() == null)
+			if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
 			{
-				tbl.setSchema(dbConn.getMetadata().getSchemaToUse());
+				this.wildcardsPresent = true;
+				TableIdentifier tbl = new TableIdentifier(t);
+				if (tbl.getSchema() == null)
+				{
+					tbl.setSchema(dbConn.getMetadata().getSchemaToUse());
+				}
+				tbl.adjustCase(dbConn);
+				List<TableIdentifier> l = dbConn.getMetadata().getTableList(tbl.getTableName(), tbl.getSchema());
+				this.tables.addAll(l);
 			}
-			tbl.adjustCase(dbConn);
-			List<TableIdentifier> l = dbConn.getMetadata().getTableList(tbl.getTableName(), tbl.getSchema());
-			this.tables.addAll(l);
-		}
-		else
-		{
-			for (int i=0; i < argCount; i++)
+			else
 			{
-				tables.add(new TableIdentifier(args.get(i)));
+				tables.add(new TableIdentifier(t));
 			}
 		}
 	}

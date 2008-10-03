@@ -17,9 +17,11 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.event.KeyEvent;
 import javax.swing.JMenuItem;
 import junit.framework.TestCase;
+import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JCheckBoxOperator;
+import org.netbeans.jemmy.operators.JComboBoxOperator;
 import org.netbeans.jemmy.operators.JComponentOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
 import org.netbeans.jemmy.operators.JFrameOperator;
@@ -50,6 +52,7 @@ public class EditorTest
 		try
 		{
 			testUtil.startApplication();
+			JemmyProperties.getCurrentTimeouts().load(getClass().getResourceAsStream("guitests.timeouts"));
 		}
 		catch (Exception e)
 		{
@@ -118,7 +121,7 @@ public class EditorTest
 		editor.setCaretPosition(0);
 		
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
-		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
+//		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
 		
 		QueueTool tool = new QueueTool();
 		editor.selectAll();
@@ -169,11 +172,14 @@ public class EditorTest
 		setCheckbox(dialog, "ignorecase", false);
 		setCheckbox(dialog, "wholeword", false);
 
-		setTextField(dialog, "searchtext", "person");
+		setComboboxText(dialog, "searchtext", "person");
+		QueueTool tool = new QueueTool();
+		tool.waitEmpty();
 
 		JButtonOperator ok = new JButtonOperator(dialog, "OK");
 		ok.push();
-
+		tool.waitEmpty();
+		
 		assertEquals("person", editor.getSelectedText());
 	}
 
@@ -190,19 +196,27 @@ public class EditorTest
 		mainMenu.pushMenuNoBlock("Edit|Replace");
 		JDialogOperator dialog = new JDialogOperator(mainWindow, "Replace");
 
+		QueueTool tool = new QueueTool();
+		
 		setCheckbox(dialog, "regex", false);
 		setCheckbox(dialog, "ignorecase", true);
 		setCheckbox(dialog, "wordsonly", false);
 		setCheckbox(dialog, "selectedtext", false);
 
-		setTextField(dialog, "searchtext", "*");
-		setTextField(dialog, "replacetext", "nr, firstname, lastname");
+		setComboboxText(dialog, "searchtext", "*");
+		tool.waitEmpty();
+		setComboboxText(dialog, "replacetext", "nr, firstname, lastname");
+		tool.waitEmpty();
 
 		chooser.setName("replaceallbutton");
 		JButtonOperator replaceAll = new JButtonOperator(dialog, chooser);
 		replaceAll.push();
+		
+		tool.waitEmpty();
 
-		new JButtonOperator(dialog, "Close").push();
+		chooser.setName("closebutton");
+		JButtonOperator close = new JButtonOperator(dialog, chooser);
+		close.push();
 
 		assertEquals("select nr, firstname, lastname from person;", editor.getText());
 	}
@@ -254,6 +268,14 @@ public class EditorTest
 		
 		pos = editor.getCaretPosition();
 		assertEquals("Wrong word jump", 9, pos);
+	}
+
+	private void setComboboxText(JDialogOperator dialog, String name, String newText)
+	{
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName(name);
+		JComboBoxOperator comp = new JComboBoxOperator(dialog, chooser);
+		comp.setSelectedItem(newText);
 	}
 	
 	private void setTextField(JDialogOperator dialog, String name, String newText)

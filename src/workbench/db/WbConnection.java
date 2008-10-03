@@ -742,6 +742,7 @@ public class WbConnection
 			DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
 			int major = jdbcmeta.getDatabaseMajorVersion();
 			int minor = jdbcmeta.getDatabaseMinorVersion();
+
 			return major + "." + minor;
 		}
 		catch (Throwable e)

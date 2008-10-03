@@ -17,6 +17,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractListModel;
@@ -47,7 +49,7 @@ import workbench.resource.Settings;
  */ 
 public class SettingsPanel
 	extends JPanel
-	implements ActionListener, ListSelectionListener
+	implements ActionListener, ListSelectionListener, WindowListener
 {
 	private JPanel buttonPanel;
 	private JButton cancelButton;
@@ -151,18 +153,15 @@ public class SettingsPanel
 		constraints.insets = new Insets(0, 5, 0, 0);
 		buttonPanel.add(helpButton, constraints);
 
-		constraints = new GridBagConstraints();
-		constraints.gridx = 1;
-		constraints.gridy = 0;
+		constraints.gridx ++;
 		constraints.anchor = GridBagConstraints.EAST;
-		constraints.weightx = 1.0;
 		constraints.insets = new Insets(7, 0, 7, 10);
+		constraints.weightx = 1.0;
 		buttonPanel.add(okButton, constraints);
 
-		constraints = new GridBagConstraints();
-		constraints.gridx = 2;
-		constraints.gridy = 0;
+		constraints.gridx ++;
 		constraints.anchor = GridBagConstraints.EAST;
+		constraints.weightx = 0.0;
 		constraints.insets = new Insets(7, 0, 7, 4);
 		buttonPanel.add(cancelButton, constraints);
 
@@ -184,8 +183,10 @@ public class SettingsPanel
 		this.dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.dialog.setTitle(ResourceMgr.getString("TxtSettingsDialogTitle"));
 		this.dialog.getContentPane().add(this);
+		dialog.addWindowListener(this);
 		int width = Settings.getInstance().getWindowWidth(this.getClass().getName());
 		int height = Settings.getInstance().getWindowHeight(this.getClass().getName());
+
 		if (width > 0 && height > 0)
 		{
 			this.dialog.setSize(width, height);
@@ -208,17 +209,13 @@ public class SettingsPanel
 				pageList.requestFocusInWindow();
 			}
 		});
-		// readLocales() will read the available locales in a background
-		// thread, so that they are available once the user switches
-		// to the DataFormattingOptionsPanel
-		// Reading the locales can take upt 2 seconds on a slow system
-		DataFormattingOptionsPanel.readLocales();
 		this.dialog.setVisible(true);
 	}
 
 	private void closeWindow()
 	{
 		Settings.getInstance().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
+		DataFormattingOptionsPanel.clearLocales();
 		this.dialog.setVisible(false);
 		this.dialog.dispose();
 		this.dialog = null;
@@ -240,5 +237,41 @@ public class SettingsPanel
 			HelpManager.showOptionsHelp();
 		}
 	}
+
+	public void windowActivated(WindowEvent e)
+	{
+	}
+
+	public void windowClosed(WindowEvent e)
+	{
+	}
+
+	public void windowClosing(WindowEvent e)
+	{
+		closeWindow();
+	}
+
+	public void windowDeactivated(WindowEvent e)
+	{
+	}
+
+	public void windowDeiconified(WindowEvent e)
+	{
+	}
+
+	public void windowIconified(WindowEvent e)
+	{
+	}
+
+	public void windowOpened(WindowEvent e)
+	{
+		// readLocales() will read the available locales in a background
+		// thread, so that they are available once the user switches
+		// to the DataFormattingOptionsPanel
+		// Reading the locales can take up to 2 seconds which is too
+		// long to be done when switching to the panel
+		DataFormattingOptionsPanel.readLocales();
+	}
+
 
 }

@@ -84,6 +84,14 @@ public class DataFormattingOptionsPanel
 		Settings.getInstance().setSortLocale(dl.getLocale());
 	}
 
+	public static void clearLocales()
+	{
+		synchronized (localeLock)
+		{
+			locales = null;
+		}
+	}
+	
 	public static void readLocales()
 	{
 		if (locales != null) return;
@@ -95,6 +103,7 @@ public class DataFormattingOptionsPanel
 			{
 				synchronized (localeLock)
 				{
+					try { sleep(100); } catch (Throwable th) {}
 					locales = Locale.getAvailableLocales();
 				}
 			}
@@ -107,23 +116,23 @@ public class DataFormattingOptionsPanel
 	{
 		Locale l = Settings.getInstance().getLanguage();
 		DisplayLocale sortLocale = new DisplayLocale(new WbLocale(Settings.getInstance().getSortLocale()));
-
+		List<DisplayLocale> list = new ArrayList<DisplayLocale>(50);
+		localeDropDown.removeAllItems();
+		
 		synchronized (localeLock)
 		{
 			if (locales == null)
 			{
 				locales = Locale.getAvailableLocales();
 			}
-		}
 		
-		List<DisplayLocale> list = new ArrayList<DisplayLocale>(locales.length);
-		localeDropDown.removeAllItems();
-		localeDropDown.addItem(new DisplayLocale(null));
-		for (Locale ls : locales)
-		{
-			DisplayLocale wl = new DisplayLocale(new WbLocale(ls));
-			wl.setDisplayLocale(l);
-			list.add(wl);
+			localeDropDown.addItem(new DisplayLocale(null));
+			for (Locale ls : locales)
+			{
+				DisplayLocale wl = new DisplayLocale(new WbLocale(ls));
+				wl.setDisplayLocale(l);
+				list.add(wl);
+			}
 		}
 		
 		int index = 1; // 1 because we have already added a locale

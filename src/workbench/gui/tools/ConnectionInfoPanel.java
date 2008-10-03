@@ -51,8 +51,8 @@ public class ConnectionInfoPanel
 			DbMetadata wbmeta = conn.getMetadata();
 
 			content.append("<b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + meta.getDatabaseProductName() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "<br>\n");
 			content.append("<b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "<br>\n");
 			content.append("<b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "<br>\n");
 			content.append("<b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "<br>\n");
 			content.append("<b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "<br>\n");
@@ -80,6 +80,7 @@ public class ConnectionInfoPanel
 		if (value == null) return "";
 		return value;
 	}
+	
 	public static void showConnectionInfo(WbConnection con)
 	{
 		ConnectionInfoPanel p = new ConnectionInfoPanel(con);

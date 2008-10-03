@@ -1039,6 +1039,8 @@ public class WbTable
 
 	public void setShowStatusColumn(final boolean flag)
 	{
+		if (flag == this.dwModel.getShowStatusColumn()) return;
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -1051,7 +1053,6 @@ public class WbTable
 	protected void _setShowStatusColumn(boolean flag)
 	{
 		if (this.dwModel == null) return;
-		if (flag == this.dwModel.getShowStatusColumn()) return;
 
 		int column = this.getSelectedColumn();
 		final int row = this.getSelectedRow();

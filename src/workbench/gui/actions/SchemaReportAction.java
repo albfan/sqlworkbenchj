@@ -12,16 +12,19 @@
 package workbench.gui.actions;
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.util.List;
-import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.db.report.SchemaReporter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbObjectList;
+import workbench.gui.dbobjects.ProgressDialog;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.storage.RowActionMonitor;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
 import workbench.util.WbThread;
@@ -62,10 +65,16 @@ public class SchemaReportAction
 		if (filename == null) return;
 
 		final SchemaReporter reporter = new SchemaReporter(client.getConnection());
-		reporter.setShowProgress(true, (JFrame)SwingUtilities.getWindowAncestor(caller));
 		reporter.setObjectList(objects);
 		reporter.setOutputFilename(filename);
 
+		Frame f = (Frame)SwingUtilities.getWindowAncestor(caller);
+		final ProgressDialog progress = new ProgressDialog(ResourceMgr.getString("MsgReportWindowTitle"), f, reporter);
+		progress.getInfoPanel().setObject(filename);
+		progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		reporter.setProgressMonitor(progress.getInfoPanel());
+		progress.showProgress();
+		
 		Thread t = new WbThread("Schema Report")
 		{
 			public void run()
@@ -90,6 +99,7 @@ public class SchemaReportAction
 				finally
 				{
 					dbConnection.setBusy(false);
+					progress.finished();
 				}
 			}
 		};

@@ -23,6 +23,7 @@ import javax.swing.filechooser.FileFilter;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
+import workbench.db.exporter.ExportType;
 import workbench.db.exporter.PoiHelper;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.log.LogMgr;
@@ -37,7 +38,7 @@ import workbench.util.StringUtil;
 public class ExportFileDialog
 	implements PropertyChangeListener
 {
-	private int exportType = -1;
+	private ExportType exportType = null;
 	private String selectedFilename = null;
 	private boolean isCancelled = false;
 	private Settings settings = Settings.getInstance();
@@ -128,7 +129,7 @@ public class ExportFileDialog
 		return this.selectedFilename;
 	}
 	
-	public int getExportType()
+	public ExportType getExportType()
 	{
 		return this.exportType;
 	}
@@ -194,7 +195,7 @@ public class ExportFileDialog
 	
 	public boolean selectOutput(String title)
 	{
-		this.exportType = -1;
+		this.exportType = null;
 		this.selectedFilename = null;
 		boolean result = false;
 		
@@ -271,29 +272,30 @@ public class ExportFileDialog
 	public void setExporterOptions(DataExporter exporter)
 	{
 		exporter.setOptions(this.getBasicExportOptions());
-		exporter.setOutputFilename(this.getSelectedFilename());
 		
 		switch (this.exportType)
 		{
-			case DataExporter.EXPORT_SQL:
+			case SQL_INSERT:
+			case SQL_UPDATE:
+			case SQL_DELETE_INSERT:
 				exporter.setSqlOptions(this.getSqlOptions());
 				break;
-			case DataExporter.EXPORT_TXT:
+			case TEXT:
 				exporter.setTextOptions(this.getTextOptions());
 				break;
-			case DataExporter.EXPORT_HTML:
+			case HTML:
 				exporter.setHtmlOptions(this.getHtmlOptions());
 				break;
-			case DataExporter.EXPORT_XML:
+			case XML:
 				exporter.setXmlOptions(this.getXmlOptions());
 				break;
-			case DataExporter.EXPORT_ODS:
+			case ODS:
 				exporter.setOdsOptions(getOdsOptions());
 				break;
-			case DataExporter.EXPORT_XLSX:
+			case XLSX:
 				exporter.setXlsXOptions(getXlsXOptions());
 				break;
-			case DataExporter.EXPORT_XLS:
+			case XLS:
 				exporter.setXlsOptions(getXlsOptions());
 				break;
 			default:
@@ -303,37 +305,37 @@ public class ExportFileDialog
 		}
 	}
 	
-	private int getExportType(ExtensionFileFilter ff)
+	private ExportType getExportType(ExtensionFileFilter ff)
 	{
 		if (ff.hasFilter(ExtensionFileFilter.SQL_EXT))
 		{
-			return DataExporter.EXPORT_SQL;
+			return ExportType.SQL_INSERT;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.XML_EXT))
 		{
-			return DataExporter.EXPORT_XML;
+			return ExportType.XML;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.TXT_EXT))
 		{
-			return DataExporter.EXPORT_TXT;
+			return ExportType.TEXT;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.HTML_EXT))
 		{
-			return DataExporter.EXPORT_HTML;
+			return ExportType.HTML;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.XLS_EXT))
 		{
-			return DataExporter.EXPORT_XLS;
+			return ExportType.XLS;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.XLSX_EXT))
 		{
-			return DataExporter.EXPORT_XLSX;
+			return ExportType.XLSX;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.ODS_EXT))
 		{
-			return DataExporter.EXPORT_ODS;
+			return ExportType.ODS;
 		}
-		return -1;
+		return null;
 	}
 	
 	public void propertyChange(PropertyChangeEvent evt) 
@@ -347,7 +349,7 @@ public class ExportFileDialog
 			if (ff instanceof ExtensionFileFilter)
 			{
 				ExtensionFileFilter eff = (ExtensionFileFilter)ff;
-				int type = this.getExportType(eff);
+				ExportType type = this.getExportType(eff);
 				this.exportOptions.setExportType(type);
 			}
 		}
@@ -360,31 +362,32 @@ public class ExportFileDialog
 				// case we do not change the current filter.
 				if (!(ff instanceof ExtensionFileFilter)) return;
 				
-				Integer newvalue = (Integer)evt.getNewValue();
-				int type = (newvalue == null ? -1 : newvalue.intValue());
+				ExportType type = (ExportType)evt.getNewValue();
 				this.filterChange = true;
 				
 				switch (type)
 				{
-					case DataExporter.EXPORT_SQL:
+					case SQL_INSERT:
+					case SQL_UPDATE:
+					case SQL_DELETE_INSERT:
 						this.chooser.setFileFilter(ExtensionFileFilter.getSqlFileFilter());
 						break;
-					case DataExporter.EXPORT_HTML:
+					case HTML:
 						this.chooser.setFileFilter(ExtensionFileFilter.getHtmlFileFilter());
 						break;
-					case DataExporter.EXPORT_XML:
+					case XML:
 						this.chooser.setFileFilter(ExtensionFileFilter.getXmlFileFilter());
 						break;
-					case DataExporter.EXPORT_TXT:
+					case TEXT:
 						this.chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
 						break;
-					case DataExporter.EXPORT_XLS:
+					case XLS:
 						this.chooser.setFileFilter(ExtensionFileFilter.getXlsFileFilter());
 						break;
-					case DataExporter.EXPORT_XLSX:
+					case XLSX:
 						this.chooser.setFileFilter(ExtensionFileFilter.getXlsXFileFilter());
 						break;
-					case DataExporter.EXPORT_ODS:
+					case ODS:
 						this.chooser.setFileFilter(ExtensionFileFilter.getOdsFileFilter());
 						break;
 				}

@@ -12,6 +12,7 @@
 package workbench.db.compare;
 
 import java.util.Collection;
+import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
@@ -93,13 +94,13 @@ public class RowDataComparer
 		if (targetWasNull)
 		{
 			converter.setIgnoreColumnStatus(true);
-			converter.setType(SqlRowDataConverter.SQL_INSERT);
+			converter.setType(ExportType.SQL_INSERT);
 			//result = factory.createInsertStatement(migrationData, true, le);
 		}
 		else
 		{
 			converter.setIgnoreColumnStatus(false);
-			converter.setType(SqlRowDataConverter.SQL_UPDATE);
+			converter.setType(ExportType.SQL_UPDATE);
 			//result = factory.createUpdateStatement(migrationData, false, le);
 		}
 		StrBuffer result = converter.convertRowData(migrationData, rowNumber);

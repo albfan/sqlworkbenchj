@@ -269,7 +269,14 @@ public class StatementRunner
 		this.currentCommand.setStatementRunner(this);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setResultLogger(this.resultLogger);
-		this.currentCommand.setMaxRows(maxRows);
+		if (currentConsumer == null)
+		{
+			this.currentCommand.setMaxRows(maxRows);
+		}
+		else
+		{
+			this.currentCommand.setMaxRows(0);
+		}
 		this.currentCommand.setQueryTimeout(queryTimeout);
 		this.currentCommand.setConnection(this.currentConnection);
 		this.currentCommand.setParameterPrompter(this.prompter);

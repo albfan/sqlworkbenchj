@@ -593,7 +593,10 @@ public class SqlCommand
 		this.queryTimeout = timeout;
 	}
 
-	public void setMaxRows(int max) { maxRows = max; }
+	public void setMaxRows(int max)
+	{
+		maxRows = max;
+	}
 	public boolean isResultSetConsumer() { return false; }
 	public void consumeResult(StatementRunnerResult aResult) {}
 

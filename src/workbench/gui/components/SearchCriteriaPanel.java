@@ -11,14 +11,16 @@
  */
 package workbench.gui.components;
 
-import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
@@ -34,48 +36,47 @@ import workbench.resource.Settings;
  */
 public class SearchCriteriaPanel
 	extends JPanel
-	implements ValidatingComponent
+	implements ValidatingComponent, ActionListener
 {
 	private String caseProperty;
 	private String wordProperty;
 	private String regexProperty;
-	private String criteriaProperty;
 	private String highlightProperty;
-	
+	private String baseProperty;
 	private JCheckBox ignoreCase;
 	private JCheckBox wholeWord;
 	private JCheckBox useRegEx;
 	private JCheckBox highlightAll;
-	
-	protected JTextField criteria;
+	protected HistoryTextField criteria;
 	protected JLabel label;
-	
+
 	public SearchCriteriaPanel()
 	{
 		this(null);
 	}
-	
+
 	public SearchCriteriaPanel(String initialValue)
 	{
 		this(initialValue, "workbench.sql.search", false);
 	}
-	
+
 	public SearchCriteriaPanel(String initialValue, String settingsKey, boolean showHighlight)
 	{
+		baseProperty = settingsKey;
 		caseProperty = settingsKey + ".ignoreCase";
 		wordProperty = settingsKey + ".wholeWord";
 		regexProperty = settingsKey + ".useRegEx";
-		criteriaProperty = settingsKey + ".lastValue";
+
 		if (showHighlight)
 		{
 			highlightProperty = settingsKey + ".highlight";
 		}
-		
+
 		this.ignoreCase = new JCheckBox(ResourceMgr.getString("LblSearchIgnoreCase"));
 		this.ignoreCase.setName("ignorecase");
 		this.ignoreCase.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
 		this.ignoreCase.setSelected(Settings.getInstance().getBoolProperty(caseProperty, true));
-		
+
 		this.wholeWord = new JCheckBox(ResourceMgr.getString("LblSearchWordsOnly"));
 		this.wholeWord.setToolTipText(ResourceMgr.getDescription("LblSearchWordsOnly"));
 		this.wholeWord.setSelected(Settings.getInstance().getBoolProperty(wordProperty, false));
@@ -85,69 +86,77 @@ public class SearchCriteriaPanel
 		this.useRegEx.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
 		this.useRegEx.setSelected(Settings.getInstance().getBoolProperty(regexProperty, false));
 		this.useRegEx.setName("regex");
-		
+
 		if (showHighlight)
 		{
 			this.highlightAll = new JCheckBox(ResourceMgr.getString("LblHighlightAll"));
 			this.highlightAll.setToolTipText(ResourceMgr.getDescription("LblHighlightAll"));
 			this.highlightAll.setSelected(Settings.getInstance().getBoolProperty(highlightProperty, false));
 		}
-		
+
 		this.label = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
-		this.criteria = new JTextField();
+		this.criteria = new HistoryTextField("search");
 		this.criteria.setName("searchtext");
-		
-		this.criteria.setColumns(40);
+
+		criteria.restoreSettings(Settings.getInstance(), baseProperty);
+
 		if (initialValue != null)
 		{
 			this.criteria.setText(initialValue);
-			this.criteria.selectAll();
 		}
-		else
-		{
-			this.criteria.setText(Settings.getInstance().getProperty(criteriaProperty, null));
-			this.criteria.selectAll();
-		}
-		
-		this.criteria.addMouseListener(new TextComponentMouseListener());
-		
-		this.setLayout(new BorderLayout());
-		JPanel p = new JPanel();
-		p.setLayout(new BorderLayout(5,5));
-		p.add(this.label, BorderLayout.WEST);
-		p.add(this.criteria, BorderLayout.CENTER);
-		this.add(p,BorderLayout.CENTER);
-		p = new JPanel();
+		criteria.selectAll();
+		criteria.setColumns(40);
+
+		criteria.addMouseListener(new TextComponentMouseListener());
+
+		setLayout(new GridBagLayout());
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(0, 5, 0, 10);
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.anchor = GridBagConstraints.WEST;
+		add(this.label, c);
+
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(0, 0, 0, 0);
+		c.gridx++;
+		c.weightx = 1.0;
+		c.weighty = 0.0;
+		add(this.criteria, c);
+
+		c.fill = GridBagConstraints.NONE;
+		c.anchor = GridBagConstraints.NORTHWEST;
+		c.gridx = 0;
+		c.gridy++;
+		c.gridwidth = 2;
+		add(this.ignoreCase, c);
+
 		if (showHighlight)
 		{
-			p.setLayout(new GridLayout(3,2));
-			p.add(this.ignoreCase);
-			p.add(this.highlightAll);
-			p.add(this.wholeWord);
-			p.add(new JPanel());
-			p.add(this.useRegEx);
+			c.gridy++;
+			add(this.highlightAll, c);
 		}
-		else
-		{
-			p.setLayout(new GridLayout(3,1));
-			p.add(this.ignoreCase);
-			p.add(this.wholeWord);
-			p.add(this.useRegEx);
-		}
-		
-		this.add(p, BorderLayout.SOUTH);
+
+		c.gridy++;
+		add(this.wholeWord, c);
+
+		c.gridy++;
+		c.weighty = 1.0;
+		add(this.useRegEx, c);
 	}
 
 	public String getCriteria()
 	{
 		return this.criteria.getText();
 	}
-	
+
 	public boolean getWholeWordOnly()
 	{
 		return this.wholeWord.isSelected();
 	}
-	
+
 	public boolean getIgnoreCase()
 	{
 		return this.ignoreCase.isSelected();
@@ -160,10 +169,13 @@ public class SearchCriteriaPanel
 
 	public boolean getHighlightAll()
 	{
-		if (this.highlightAll == null) return false;
+		if (this.highlightAll == null)
+		{
+			return false;
+		}
 		return this.highlightAll.isSelected();
 	}
-	
+
 	public void setSearchCriteria(String aValue)
 	{
 		this.criteria.setText(aValue);
@@ -172,19 +184,47 @@ public class SearchCriteriaPanel
 			this.criteria.selectAll();
 		}
 	}
-	
+
 	public boolean showFindDialog(Component caller)
 	{
 		return showFindDialog(caller, ResourceMgr.getString("TxtWindowTitleSearchText"));
 	}
-	
+
 	public boolean showFindDialog(Component caller, String title)
 	{
 		Window w = WbSwingUtilities.getWindowAncestor(caller);
-		boolean result = ValidatingDialog.showConfirmDialog(w, this, title, caller, 0, false);
-		
+
+		final ValidatingDialog dialog = ValidatingDialog.createDialog(w, this, title, caller, 0, false);
+
+		// The criteria is a JComboBox that is editable. When entering new text
+		// and pressing the ENTER key, the ComboBox will not trigger the OK
+		// button of the dialog, but simply "apply" the new value to the
+		// list. So the user would need to hit enter twice if this action listenter was not installed
+		criteria.addActionListener(new ActionListener()
+		{
+			private String lastCmd;
+
+			public void actionPerformed(ActionEvent e)
+			{
+				// If the last action as comboBoxChanged and we now receive a comboBoxEdited
+				// the user selected a new item from the list by using the cursor keys.
+				// In that case we do not want to close the dialog because the user should
+				// first apply his/her selection with another enter key
+				if (e.getActionCommand().equals("comboBoxEdited") && !"comboBoxChanged".equals(lastCmd))
+				{
+					dialog.approveAndClose();
+				}
+				lastCmd = e.getActionCommand();
+			}
+		});
+		dialog.setVisible(true);
+
+		boolean result = !dialog.isCancelled();
+
+		criteria.addToHistory(criteria.getText());
+
+		criteria.saveSettings(Settings.getInstance(), baseProperty);
 		Settings.getInstance().setProperty(caseProperty, this.getIgnoreCase());
-		Settings.getInstance().setProperty(criteriaProperty, this.getCriteria());
 		Settings.getInstance().setProperty(wordProperty, this.getWholeWordOnly());
 		Settings.getInstance().setProperty(regexProperty, this.getUseRegex());
 		if (this.highlightProperty != null)
@@ -203,5 +243,8 @@ public class SearchCriteriaPanel
 	{
 		criteria.requestFocusInWindow();
 	}
-	
+
+	public void actionPerformed(ActionEvent e)
+	{
+	}
 }

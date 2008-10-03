@@ -24,9 +24,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import workbench.gui.components.LogFileViewer;
 import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 
 /**
@@ -34,7 +36,6 @@ import workbench.util.StringUtil;
  */
 public class LogMgr
 {
-
 	public static final String ERROR = "ERROR";
 	public static final String WARNING = "WARN";
 	public static final String INFO = "INFO";
@@ -54,6 +55,7 @@ public class LogMgr
 	}
 
 	private static PrintStream logOut = null;
+	public static LogFileViewer viewer;
 	private static final Date theDate = new Date();
 	private static boolean logSystemErr = false;
 
@@ -77,6 +79,21 @@ public class LogMgr
 	private static boolean debugEnabled;
 	private static boolean infoEnabled;
 	private static File currentFile;
+
+	public static WbFile getLogfile()
+	{
+		return new WbFile(currentFile);
+	}
+
+	public synchronized static void removeViewer()
+	{
+		viewer = null;
+	}
+	
+	public synchronized static void registerViewer(LogFileViewer v)
+	{
+		viewer = v;
+	}
 
 	public static void setMessageFormat(String aFormat)
 	{
@@ -305,6 +322,8 @@ public class LogMgr
 		{
 			s.writeTo(System.err);
 		}
+
+		if (viewer != null) viewer.append(s.toString());
 	}
 
 	private static StrBuffer formatMessage(String aType, Object aCaller, String aMsg, Throwable th)

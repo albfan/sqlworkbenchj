@@ -14,7 +14,6 @@ package workbench.util;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -666,7 +665,6 @@ public class StringUtil
 		if (aList == null || aList.size() == 0) return "";
 		int numElements = 0;
 		StringBuilder result = new StringBuilder(aList.size() * 50);
-		Iterator itr = aList.iterator();
 		for (Object o : aList)
 		{
 			if (o == null) continue;

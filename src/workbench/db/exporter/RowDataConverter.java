@@ -172,13 +172,12 @@ public abstract class RowDataConverter
 		blobIdColumns = cols;
 	}
 	
-	public void setOutputFile(File f) 
+	public void setOutputFile(WbFile f)
 	{ 
 		this.outputFile = f; 
 		if (f != null) 
 		{
-			WbFile wf = new WbFile(f);
-			this.baseFilename = wf.getFileName();
+			this.baseFilename = f.getFileName();
 		}
 	}
 	

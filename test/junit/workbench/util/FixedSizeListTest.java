@@ -48,6 +48,7 @@ public class FixedSizeListTest extends TestCase
 			list.addEntry("Three");
 			firstEntry = list.getFirst();
 			assertEquals("Wrong entry", "Three", firstEntry);
+			assertEquals("Wrong size", 5, list.size());
 			
 			int index = 0;
 			for (String entry : list.getEntries())
@@ -74,6 +75,7 @@ public class FixedSizeListTest extends TestCase
 				}
 				index ++;
 			}
+			
 		}
 		catch (Exception e)
 		{

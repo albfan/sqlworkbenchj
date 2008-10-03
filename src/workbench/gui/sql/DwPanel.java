@@ -110,7 +110,6 @@ public class DwPanel
 	protected DeleteDependentRowsAction deleteDependentRow;
 	protected SelectKeyColumnsAction selectKeys;
 	
-	private boolean editingStarted;
 	private boolean batchUpdate;
 	private boolean readOnly;
 	
@@ -467,7 +466,7 @@ public class DwPanel
 		this.readOnly = aFlag;
 		if (this.readOnly)
 		{
-			if (editingStarted) this.dataTable.cancelEditing();
+			if (isEditingStarted()) this.dataTable.cancelEditing();
 			disableUpdateActions();
 		}
 		else
@@ -700,9 +699,6 @@ public class DwPanel
 					dataTable.reset();
 					dataTable.setAutoCreateColumnsFromModel(true);
 					dataTable.setModel(new DataStoreTableModel(newData), true);
-					//StringBuilder header = new StringBuilder(80);
-					//header.append(ResourceMgr.getString("TxtPrintHeaderResultFrom"));
-					//header.append(sql);
 					setPrintHeader(sql);
 					dataTable.checkCopyActions();
 					checkResultSetActions();
@@ -1070,8 +1066,7 @@ public class DwPanel
 	 */
 	public void endEdit()
 	{
-		if (!this.editingStarted) return;
-		editingStarted = false;
+		if (!this.isEditingStarted()) return;
 		
 		dataTable.stopEditing();
 		this.dataTable.setShowStatusColumn(false);
@@ -1084,7 +1079,12 @@ public class DwPanel
 	{
 		return startEdit(true);
 	}
-	
+
+	public boolean isEditingStarted()
+	{
+		return this.dataTable.getShowStatusColumn();
+	}
+
 	/**
 	 *	Starts the "edit" mode of the table. It will not start the edit
 	 *  mode, if the table is "read only" meaning if no update table (=database
@@ -1101,8 +1101,6 @@ public class DwPanel
 	public boolean startEdit(boolean restoreSelection)
 	{
 		if (this.readOnly) return false;
-		
-		this.editingStarted = false;
 		
 		final int[] selectedRows = this.dataTable.getSelectedRows();
 		final int currentRow = this.dataTable.getEditingRow();
@@ -1133,7 +1131,6 @@ public class DwPanel
 		if (updateable)
 		{
 			this.dataTable.setShowStatusColumn(true);
-			this.editingStarted = true;
 
 			// When changing the table model (which is happening
 			// when the status column is displayed) we need to restore
@@ -1165,7 +1162,7 @@ public class DwPanel
 				dataTable.requestFocusInWindow();
 			}
 			
-			EventQueue.invokeLater(new Runnable()
+			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
 				{
@@ -1222,11 +1219,10 @@ public class DwPanel
 	{
 		if (this.batchUpdate) return;
 		if (this.readOnly) return;
-		
-		if (!editingStarted &&
+
+		if (!isEditingStarted() && this.isModified() &&
 				e.getFirstRow() != TableModelEvent.ALL_COLUMNS &&
-				e.getFirstRow() != TableModelEvent.HEADER_ROW &&
-				this.isModified())
+				e.getFirstRow() != TableModelEvent.HEADER_ROW)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{

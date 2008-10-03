@@ -11,11 +11,15 @@
  */
 package workbench.db.exporter;
 
+import java.io.File;
 import java.sql.SQLException;
+import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.ResultInfo;
+import workbench.util.SqlUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -23,15 +27,27 @@ import workbench.storage.ResultInfo;
  */
 public class ExportJobEntry
 {
-	private ResultInfo resultInfo;
-	private String outputFileName;
+	private WbFile outputFile;
 	private String query;
+	private TableIdentifier baseTable;
+	private ResultInfo resultInfo;
 	
-	public ExportJobEntry(String outputfile, TableIdentifier table, WbConnection con)
+	public ExportJobEntry(File file, String sql, WbConnection con)
+	{
+		outputFile = new WbFile(file);
+		query = sql;
+		List<String> tables = SqlUtil.getTables(query);
+		if (tables.size() == 1)
+		{
+			this.baseTable = new TableIdentifier(tables.get(0)); 
+		}
+	}
+
+	public ExportJobEntry(File file, TableIdentifier table, WbConnection con)
 		throws SQLException
 	{
 		resultInfo = new ResultInfo(table, con);
-		outputFileName = outputfile;
+		outputFile = new WbFile(file);
 		StringBuilder sql = new StringBuilder(100);
 		sql.append("SELECT ");
 		ColumnIdentifier[] cols = resultInfo.getColumns();
@@ -42,35 +58,34 @@ public class ExportJobEntry
 			sql.append(cols[i].getColumnName());
 		}
 		sql.append(" FROM ");
-		resultInfo.setUpdateTable(table);
+		baseTable = table;
 		sql.append(table.getTableExpression(con));
+		resultInfo.setUpdateTable(baseTable);
 		this.query = sql.toString();
 	}
 	
-	public String getOutputFile()
+	public WbFile getOutputFile()
 	{
-		return outputFileName;
+		return outputFile;
+	}
+
+	public ResultInfo getResultInfo()
+	{
+		return resultInfo;
 	}
 	
-	public String getTableName()
+	public TableIdentifier getTable()
 	{
 		if (resultInfo != null)
 		{
-			return resultInfo.getUpdateTable().getTableName();
+			return resultInfo.getUpdateTable();
 		}
-		else
-		{
-			return null;
-		}
+		return baseTable;
 	}
 	
 	public String getQuerySql()
 	{
 		return query;
 	}
-	
-	public ResultInfo getResultInfo()
-	{
-		return resultInfo;
-	}
+
 }

@@ -27,7 +27,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +57,6 @@ import workbench.db.DbMetadata;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.exporter.DataExporter;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -71,8 +69,6 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
-import workbench.gui.dialogs.export.ExportFileDialog;
-import workbench.interfaces.ProgressReporter;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
 import workbench.interfaces.Exporter;
@@ -181,6 +177,10 @@ public class TableListPanel
 	private JLabel infoLabel;
 	private JLabel tableInfoLabel;
 	private String tableTypeToSelect;
+
+	private final Object connectionLock = new Object();
+	private final Object msgLock = new Object();
+
 	// </editor-fold>
 	
 	public TableListPanel(MainWindow aParent)
@@ -1313,34 +1313,30 @@ public class TableListPanel
 
 	protected void showPopupMessagePanel(final String aMsg)
 	{
-		if (this.infoWindow != null)
+		synchronized (msgLock)
 		{
-			Thread.yield();
-			WbSwingUtilities.invoke(new Runnable()
+			if (this.infoWindow != null && infoLabel != null)
 			{
-				public void run()
-				{
-					infoLabel.setText(aMsg);
-					infoWindow.invalidate();
-				}
-			});
-			return;
+				WbSwingUtilities.setLabel(infoLabel, aMsg, null);
+				return;
+			}
+
+			JPanel p = new JPanel();
+			p.setBorder(WbSwingUtilities.getBevelBorderRaised());
+			p.setLayout(new BorderLayout());
+			this.infoLabel = new JLabel(aMsg);
+			this.infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+			p.add(this.infoLabel, BorderLayout.CENTER);
+			JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
+			this.infoWindow = new JDialog(f, true);
+			this.infoWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+			this.infoWindow.getContentPane().setLayout(new BorderLayout());
+			this.infoWindow.getContentPane().add(p, BorderLayout.CENTER);
+			this.infoWindow.setUndecorated(true);
+			this.infoWindow.setSize(260,50);
+			WbSwingUtilities.center(this.infoWindow, f);
 		}
 		
-		JPanel p = new JPanel();
-		p.setBorder(WbSwingUtilities.getBevelBorderRaised());
-		p.setLayout(new BorderLayout());
-		this.infoLabel = new JLabel(aMsg);
-		this.infoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-		p.add(this.infoLabel, BorderLayout.CENTER);
-		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(this);
-		this.infoWindow = new JDialog(f, true);
-		this.infoWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.infoWindow.getContentPane().setLayout(new BorderLayout());
-		this.infoWindow.getContentPane().add(p, BorderLayout.CENTER);
-		this.infoWindow.setUndecorated(true);
-		this.infoWindow.setSize(260,50);
-		WbSwingUtilities.center(this.infoWindow, f);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -1454,7 +1450,7 @@ public class TableListPanel
 
 		try
 		{
-			synchronized (this.dbConnection)
+			synchronized (this.connectionLock)
 			{
 				switch (index)
 				{
@@ -1853,87 +1849,11 @@ public class TableListPanel
 		int rowCount = this.tableList.getSelectedRowCount();
 		if (rowCount <= 0) return;
 
-		if (rowCount > 1)
-		{
-			this.exportTables();
-			return;
-		}
-
-		int row = this.tableList.getSelectedRow();
-		if (row < 0) return;
-		TableIdentifier id = createTableIdentifier(row);
-		DataExporter exporter = new DataExporter(this.dbConnection);
-		exporter.setReportInterval(ProgressReporter.DEFAULT_PROGRESS_INTERVAL);
-		exporter.exportTable(SwingUtilities.getWindowAncestor(this), id);
-	}
-
-	private void exportTables()
-	{
-		ExportFileDialog dialog = new ExportFileDialog(this);
-		dialog.setIncludeSqlInsert(true);
-		dialog.setIncludeSqlUpdate(false);
-		dialog.setSelectDirectoryOnly(true);
-		dialog.restoreSettings();
-
-		String title = ResourceMgr.getString("LblSelectDirTitle");
-		DbMetadata meta = this.dbConnection.getMetadata();
-		boolean answer = dialog.selectOutput(title);
-		if (answer)
-		{
-			String fdir = dialog.getSelectedFilename();
-
-			DataExporter exporter = new DataExporter(this.dbConnection);
-			dialog.setExporterOptions(exporter);
-			exporter.setShowProgressWindow(true);
-			String ext = null;
-			int type = dialog.getExportType();
-
-			if (type == DataExporter.EXPORT_SQL)
-			{
-				ext = ".sql";
-			}
-			else if (type == DataExporter.EXPORT_XML)
-			{
-				ext = ".xml";
-			}
-			else if (type == DataExporter.EXPORT_TXT)
-			{
-				ext = ".txt";
-			}
-			else if (type == DataExporter.EXPORT_HTML)
-			{
-				ext = ".html";
-			}
-
-			int[] rows = this.tableList.getSelectedRows();
-			for (int i = 0; i < rows.length; i ++)
-			{
-				if (rows[i] < 0) continue;
-				TableIdentifier id = createTableIdentifier(rows[i]);
-
-				String ttype = id.getType();
-				if (ttype == null) continue;
-				if (!meta.objectTypeCanContainData(ttype)) continue;
-				String fname = StringUtil.makeFilename(id.getTableName());
-				File f = new File(fdir, fname + ext);
-				try
-				{
-					exporter.addTableExportJob(f.getAbsolutePath(), id);
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logError("TableListPanel.exportTables()", "Error adding ExportJob", e);
-					WbSwingUtilities.showMessage(this, e.getMessage());
-				}
-			}
-			exporter.setReportInterval(ProgressReporter.DEFAULT_PROGRESS_INTERVAL);
-			exporter.startExportJobs((Frame)SwingUtilities.getWindowAncestor(this));
-		}
-	}
-
-	public Window getParentWindow()
-	{
-		return SwingUtilities.getWindowAncestor(this);
+		TableExporter exporter = new TableExporter(this.dbConnection);
+		Frame f = parentWindow;
+		if (f == null) f = (Frame)SwingUtilities.getWindowAncestor(this);
+		exporter.exportTables(getSelectedObjects(), f);
+		exporter.startExport(f);
 	}
 
 	/** Invoked when the displayed tab has changed.

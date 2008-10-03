@@ -34,6 +34,7 @@ import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ControlFileFormat;
+import workbench.db.exporter.ExportType;
 import workbench.db.exporter.PoiHelper;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
@@ -50,7 +51,10 @@ public class WbExport
 {
 	public static final String VERB = "WBEXPORT";
 	private DataExporter exporter;
-	private boolean directExport = false;
+	private WbFile pendingOutput;
+	
+	//private boolean directExport = false;
+	private boolean queryExport = false;
 	private boolean continueOnError = false;
 	private String currentTable;
 	private String defaultExtension;
@@ -61,7 +65,8 @@ public class WbExport
 	public static final String ARG_BLOB_TYPE = "blobType";
 	public static final String ARG_XML_VERSION = "xmlVersion";
 	public static final String ARG_ROWNUM = "rowNumberColumn";
-	
+	public static final String ARG_EMPTY_RESULTS = "writeEmptyResults";
+
 	public WbExport()
 	{
 		cmdLine = new ArgumentParser();
@@ -103,6 +108,7 @@ public class WbExport
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.Deprecated);
 		cmdLine.addArgument("formatFile", StringUtil.stringToList("oracle,sqlserver"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_EMPTY_RESULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
 		cmdLine.addArgument("lobIdCols");
 		cmdLine.addArgument("filenameColumn");
@@ -136,6 +142,7 @@ public class WbExport
 		msg = msg.replace("%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
 		msg = msg.replace("%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		msg = msg.replace("%xmlversion%", Settings.getInstance().getDefaultXmlVersion());
+		msg = msg.replace("%empty_results_default%", Boolean.toString(Settings.getInstance().getDefaultWriteEmptyExports()));
 		return msg;
 	}
 
@@ -237,6 +244,8 @@ public class WbExport
 		{
 			exporter.setEncoding(encoding);
 		}
+		
+		exporter.setWriteEmptyResults(cmdLine.getBoolean(ARG_EMPTY_RESULTS, true));
 		exporter.setAppendToFile(cmdLine.getBoolean("append"));
 		exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
 
@@ -431,8 +440,6 @@ public class WbExport
 		this.exporter.setBlobIdColumns(columns);
 		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
 
-		this.exporter.setOutputFilename(outputFile != null ? outputFile.getFullPath() : null);
-
 		// Setting the output type should be the last step in the configuration
 		// of the exporter as this will trigger some initialization
 		// that depends on the other properties
@@ -458,7 +465,7 @@ public class WbExport
 			return result;
 		}
 
-		this.directExport = (tablesToExport.size() > 0);
+		this.queryExport = (tablesToExport.size() == 0);
 
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
@@ -501,7 +508,8 @@ public class WbExport
 
 		if (outputFile != null)
 		{
-			// For a single table export the definition of a
+			// Define the column that contains the value for blob extensions
+			// this is only valid for single table exports
 			String extCol = cmdLine.getValue("filenameColumn");
 			exporter.setFilenameColumn(extCol);
 
@@ -540,12 +548,13 @@ public class WbExport
 			}
 		}
 
-		if (!this.directExport)
+		if (queryExport)
 		{
 			// Waiting for the next SQL Statement...
 			this.exporter.setRowMonitor(this.rowMonitor);
 			this.exporter.setReportInterval(this.progressInterval);
-
+			this.pendingOutput = outputFile;
+			
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = msg.replace("%type%", exporter.getTypeDisplay());
 			String out = null;
@@ -559,11 +568,6 @@ public class WbExport
 			}
 			msg = msg.replace("%file%", out);
 			result.addMessage(msg);
-			if (this.maxRows > 0)
-			{
-				msg = ResourceMgr.getString("MsgExportMaxRowsWarning").replace("%maxrows%", Integer.toString(maxRows));
-				result.addMessage(msg);
-			}
 		}
 		else
 		{
@@ -572,7 +576,14 @@ public class WbExport
 				exporter.setRowMonitor(this);
 				exporter.setReportInterval(this.progressInterval);
 				exporter.setContinueOnError(this.continueOnError);
-				runDirectExport(tablesToExport, result, outputdir);
+				if (tablesToExport.size() > 1)
+				{
+					exportTableList(tablesToExport, result, outputdir);
+				}
+				else
+				{
+					exportSingleTable(tablesToExport.get(0), result, outputFile);
+				}
 				addMessages(result);
 			}
 			catch (Exception e)
@@ -592,70 +603,15 @@ public class WbExport
 		return types.contains(type);
 	}
 
-	private void setExportType(DataExporter exporter, String type)
+	private void setExportType(DataExporter exporter, String code)
 	{
-		if (type.equals("sql") || type.equals("sqlinsert"))
-		{
-			exporter.setOutputTypeSqlInsert();
-		}
-		else if (type.equals("sqlupdate"))
-		{
-			exporter.setOutputTypeSqlUpdate();
-		}
-		else if (type.equals("sqldeleteinsert"))
-		{
-			exporter.setOutputTypeSqlDeleteInsert();
-		}
-		else if (type.equals("xml"))
-		{
-			exporter.setOutputTypeXml();
-		}
-		else if (type.equals("text") || type.equals("txt"))
-		{
-			exporter.setOutputTypeText();
-		}
-		else if (type.equals("html"))
-		{
-			exporter.setOutputTypeHtml();
-		}
-		else if (type.equals("ods"))
-		{
-			exporter.setOutputTypeOds();
-		}
-		else if (type.equals("xls"))
-		{
-			exporter.setOutputTypeXls();
-		}
-		else if (type.equals("xlsx"))
-		{
-			exporter.setOutputTypeXlsXML();
-		}
+		ExportType type = ExportType.getExportType(code);
+		exporter.setOutputType(type);
 	}
 
-	private void runDirectExport(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir)
+	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outfile)
 		throws SQLException
 	{
-		if (tableList.size() > 1)
-		{
-			exportTableList(tableList, result, outdir);
-		}
-		else
-		{
-			exportSingleTable(tableList.get(0), result, outdir);
-		}
-	}
-
-	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outdir)
-		throws SQLException
-	{
-		String outfile = this.exporter.getOutputFilename();
-
-		if (StringUtil.isEmptyString(outfile))
-		{
-			outfile = StringUtil.makeFilename(table.getTableName());
-			File f = new File(outdir, outfile + defaultExtension);
-			outfile = f.getAbsolutePath();
-		}
 		exporter.addTableExportJob(outfile, table);
 		exporter.runJobs();
 		if (exporter.isSuccess())
@@ -713,7 +669,7 @@ public class WbExport
 			File f = new File(outdir, fname + defaultExtension);
 			try
 			{
-				exporter.addTableExportJob(f.getAbsolutePath(), tbl);
+				exporter.addTableExportJob(f, tbl);
 			}
 			catch (SQLException e)
 			{
@@ -759,12 +715,7 @@ public class WbExport
 
 	public boolean isResultSetConsumer()
 	{
-		return !this.directExport;
-	}
-
-	public void setMaxRows(int rows)
-	{
-		this.maxRows = rows;
+		return queryExport;
 	}
 
 	public void consumeResult(StatementRunnerResult aResult)
@@ -776,14 +727,14 @@ public class WbExport
 			if (aResult.hasResultSets())
 			{
 				String sql = aResult.getSourceCommand();
-				this.exporter.setSql(sql);
+				
 				ResultSet toExport = aResult.getResultSets().get(0);
-				// The exporter has already closed the resultSet that it exported
+				// The exporter will close the resultSet that it exported
 				// so we can remove it from the list of ResultSets in the StatementRunnerResult
-				// object. Thus the later call to clearResultSets() will only free any not used
-				// ResultSet
+				// object.
+				// Thus the later call to clearResultSets() will only free any not used ResultSet
 				aResult.getResultSets().remove(0);
-				long rowCount = this.exporter.startExport(toExport);
+				long rowCount = this.exporter.exportResultSet(pendingOutput, toExport, sql);
 
 				String msg = null;
 
@@ -825,7 +776,7 @@ public class WbExport
 		super.done();
 		exporter = null;
 		maxRows = 0;
-		directExport = false;
+		queryExport = false;
 		currentTable = null;
 		defaultExtension = null;
 	}
@@ -874,17 +825,16 @@ public class WbExport
 	protected String findTypeFromFilename(WbFile f)
 	{
 		if (f == null) return null;
-		String fname = f.getFullPath();
-		if (fname == null) return null;
-		if (fname.toLowerCase().endsWith(".txt")) return "text";
-		if (fname.toLowerCase().endsWith(".xml")) return "xml";
-		if (fname.toLowerCase().endsWith(".text")) return "text";
-		if (fname.toLowerCase().endsWith(".csv")) return "text";
-		if (fname.toLowerCase().endsWith(".htm")) return "html";
-		if (fname.toLowerCase().endsWith(".html")) return "html";
-		if (fname.toLowerCase().endsWith(".sql")) return "sqlinsert";
-		if (fname.toLowerCase().endsWith(".xls")) return "xls";
-		if (fname.toLowerCase().endsWith(".ods")) return "ods";
+		String fname = f.getFullPath().toLowerCase();
+		if (fname.endsWith(".txt")) return "text";
+		if (fname.endsWith(".xml")) return "xml";
+		if (fname.endsWith(".text")) return "text";
+		if (fname.endsWith(".csv")) return "text";
+		if (fname.endsWith(".htm")) return "html";
+		if (fname.endsWith(".html")) return "html";
+		if (fname.endsWith(".sql")) return "sqlinsert";
+		if (fname.endsWith(".xls")) return "xls";
+		if (fname.endsWith(".ods")) return "ods";
 		return null;
 	}
 

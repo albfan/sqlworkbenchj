@@ -11,8 +11,6 @@
  */
 package workbench.db.report;
 
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,9 +19,7 @@ import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.JDialog;
 
-import javax.swing.JFrame;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DbSettings;
@@ -33,8 +29,6 @@ import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
-import workbench.gui.dbobjects.ProgressPanel;
 import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -43,7 +37,6 @@ import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
-import workbench.util.WbThread;
 
 
 /**
@@ -70,12 +63,8 @@ public class SchemaReporter
 	private boolean includeProcedures = false;
 	private boolean includeGrants = false;
 	private boolean includeSequences = false;
-	private ProgressPanel progressPanel;
-	protected JDialog progressWindow;
-	private boolean showProgress = false;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
-	private JFrame parentWindow;
 
 	/**
 	 * Creates a new SchemaReporter for the supplied connection
@@ -104,15 +93,12 @@ public class SchemaReporter
 		
 		for (DbObject dbo : objectList)
 		{
-			if (dbo instanceof TableIdentifier)
+			for (String type : this.types)
 			{
-				for (String type : this.types)
+				if (dbo.getObjectType().equalsIgnoreCase(type))
 				{
-					if (dbo.getObjectType().equalsIgnoreCase(type))
-					{
-						this.tables.add((TableIdentifier)dbo);
-						break;
-					}
+					this.tables.add((TableIdentifier)dbo);
+					break;
 				}
 			}
 		}
@@ -121,24 +107,10 @@ public class SchemaReporter
 	/**
 	 *	Define the list of tables to run the report on
 	 */
-	public void setTableList(TableIdentifier[] tableList)
+	public void setTableList(List<TableIdentifier> tableList)
 	{
 		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
-		for (int i=0; i < tableList.length; i++)
-		{
-			if (tableList[i].getTableName().indexOf('%') > -1)
-			{
-				List<TableIdentifier> tlist = retrieveWildcardTables(tableList[i].getTableName());
-				if (tlist != null)
-				{
-					this.tables.addAll(tlist);
-				}
-			}
-			else
-			{
-				this.tables.add(tableList[i]);
-			}
-		}
+		this.tables.addAll(tableList);
 	}
 
 	public void setSchemas(List<String> list)
@@ -200,31 +172,9 @@ public class SchemaReporter
 		return out.toString();
 	}
 
-	public void setShowProgress(boolean flag, JFrame parent)
-	{
-		this.showProgress = flag;
-		this.parentWindow = parent;
-	}
-
 	public void writeXml()
 		throws IOException, SQLException
 	{
-
-		if (this.showProgress)
-		{
-			// This is the only way I can figure out to show
-			// the progress as as modal window, but let the 
-			// calling thread proceed with the work.
-			Thread t = new WbThread("ShowProgress")
-			{
-				public void run()
-				{
-					openProgressMonitor();
-				}
-			};
-			t.start();
-		}
-
 		BufferedWriter bw = null;
 
 		try
@@ -240,7 +190,6 @@ public class SchemaReporter
 		finally
 		{
 			FileUtil.closeQuitely(bw);
-			closeProgress();
 		}
 	}
 
@@ -290,11 +239,7 @@ public class SchemaReporter
 				{
 					this.monitor.setCurrentObject(tableName, totalCurrent, totalCount);
 				}
-				if (this.progressPanel != null)
-				{
-					this.progressPanel.setInfoText(tableName);
-				}
-				
+		
 				String type = table.getType();
 				if (type == null)
 				{
@@ -331,10 +276,7 @@ public class SchemaReporter
 			{
 				this.monitor.setCurrentObject(proc.getProcedureName(), totalCurrent, totalCount);
 			}
-			if (this.progressPanel != null)
-			{
-				this.progressPanel.setInfoText(proc.getProcedureName());
-			}
+
 			proc.writeXml(out);
 			out.write('\n');
 			totalCurrent ++;
@@ -349,10 +291,6 @@ public class SchemaReporter
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(name, totalCurrent, totalCount);
-			}
-			if (this.progressPanel != null)
-			{
-				this.progressPanel.setInfoText(name);
 			}
 			seq.writeXml(out);
 			out.write('\n');
@@ -412,59 +350,11 @@ public class SchemaReporter
 	public void cancelExecution()
 	{
 		this.cancel = true;
-		closeProgress();
 	}
 
 	public boolean confirmCancel()
 	{
 		return true;
-	}
-
-	private void closeProgress()
-	{
-		if (this.progressWindow != null)
-		{
-			this.progressWindow.setVisible(false);
-			this.progressWindow.dispose();
-		}
-	}
-	
-	private void openProgressMonitor()
-	{
-		progressPanel = new ProgressPanel(this);
-		this.progressPanel.setInfoSize(15);
-		this.progressPanel.setRowSize(0);
-		this.progressPanel.setFilename(this.outputfile);
-		this.progressPanel.setInfoText(ResourceMgr.getString("MsgProcessTable"));
-
-		this.progressWindow = new JDialog(this.parentWindow, true);
-		this.progressWindow.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-		this.progressWindow.getContentPane().add(progressPanel);
-		this.progressWindow.setTitle(ResourceMgr.getString("MsgReportWindowTitle"));
-		
-		this.progressWindow.addWindowListener(new WindowAdapter()
-		{
-			public void windowClosing(WindowEvent e)
-			{
-				cancel = true;
-				if (progressWindow != null)
-				{
-					progressWindow.setVisible(false);
-					progressWindow.dispose();
-				}
-			}
-		});
-		
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				progressWindow.pack();
-				progressWindow.setSize(300,120);
-				WbSwingUtilities.center(progressWindow, parentWindow);
-				progressWindow.setVisible(true);
-			}
-		});
 	}
 
 	private void retrieveTables()
@@ -488,20 +378,6 @@ public class SchemaReporter
 		if (this.monitor != null)
 		{
 			this.monitor.setCurrentObject(null, -1, -1);
-		}
-	}
-
-	private List<TableIdentifier> retrieveWildcardTables(String name)
-	{
-		try
-		{
-			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(name);
-			return this.dbConn.getMetadata().getTableList(null, schema, this.types);
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("SchemaReporter.retrieveWildcardTables()", "Error retrieving tables", e);
-			return null;
 		}
 	}
 
@@ -607,7 +483,7 @@ public class SchemaReporter
 		{
 			if (this.cancel) return;
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);	
-			this.tables = this.dbConn.getMetadata().getTableList(schema, this.types);
+			this.setTableList(dbConn.getMetadata().getTableList(schema, this.types));
 		}
 		catch (SQLException e)
 		{

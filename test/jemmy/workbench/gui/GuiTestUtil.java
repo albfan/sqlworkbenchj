@@ -39,10 +39,19 @@ public class GuiTestUtil
 	public void startApplication()
 		throws Exception
 	{
+		startApplication(false);
+	}
+
+	public void startApplication(boolean useDebugTimeouts)
+		throws Exception
+	{
 		new ClassReference("workbench.WbManager").startApplication(getArgs(false));
 		System.setProperty("workbench.system.doexit", "false");
 
-//    JemmyProperties.getCurrentTimeouts().load(getClass().getClassLoader().getResourceAsStream("org/netbeans/jemmy/debug.timeouts"));
+		if (useDebugTimeouts)
+		{
+	    JemmyProperties.getCurrentTimeouts().load(getClass().getClassLoader().getResourceAsStream("org/netbeans/jemmy/debug.timeouts"));
+		}
 		TestOut out = JemmyProperties.getProperties().getOutput().createErrorOutput();
 		JemmyProperties.getProperties().setOutput(out);
 	}

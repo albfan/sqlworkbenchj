@@ -26,11 +26,13 @@ public class XmlExportWriter
 		super(exp);
 	}
 
+	@Override
 	public RowDataConverter createConverter()
 	{
 		return new XmlRowDataConverter();
 	}
-	
+
+	@Override
 	public void configureConverter()
 	{
 		super.configureConverter();
@@ -43,10 +45,11 @@ public class XmlExportWriter
 		conv.setWriteClobToFile(exporter.getWriteClobAsFile());
 		//conv.setBaseFilename(exporter.getOutputFilename());
 	}
-	
-	public void exportFinished()
+
+	@Override
+	public long exportFinished()
 	{
-		super.exportFinished();
+		long rowsWritten = super.exportFinished();
 		String exportFile = this.exporter.getFullOutputFilename();
 		String xsltFile = this.exporter.getXsltTransformation();
 		String output = this.exporter.getXsltTransformationOutput();
@@ -62,5 +65,6 @@ public class XmlExportWriter
 				LogMgr.logError("DataSpooler.startExport()", "Error when transforming " + output + " using " + xsltFile, e);
 			}
 		}
+		return rowsWritten;
 	}
 }

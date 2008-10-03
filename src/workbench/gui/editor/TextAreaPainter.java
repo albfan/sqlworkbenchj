@@ -375,7 +375,7 @@ public class TextAreaPainter
 					if (line == caretLine && this.currentLineColor != null)
 					{
 						gfx.setColor(currentLineColor);
-						gfx.fillRect(0, y + fmHeight, cw - gutterWidth, fheight);
+						gfx.fillRect(0, y + fmHeight, cw, fheight);
 						gfx.setColor(getBackground());
 					}
 					
@@ -576,7 +576,7 @@ public class TextAreaPainter
 		int x = textArea._offsetToX(line,position);// + this.gutterWidth;
 		gfx.setColor(bracketHighlightColor);
 		// Hack!!! Since there is no fast way to get the character
-		// from the bracket matching routine, we use ( since all
+		// from the bracket matching routine, we use "(" since all
 		// brackets probably have the same width anyway
 		gfx.drawRect(x,y,fm.charWidth('(') - 1,	fm.getHeight() - 1);
 	}

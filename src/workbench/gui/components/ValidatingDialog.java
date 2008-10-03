@@ -169,7 +169,7 @@ public class ValidatingDialog
 		return showConfirmDialog(parent, editor, title, null, defaultButton, false);
 	}
 	
-	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, Component reference, int defaultButton, boolean centeredButtons)
+	public static ValidatingDialog createDialog(Window parent, JComponent editor, String title, Component reference, int defaultButton, boolean centeredButtons)
 	{
 		ValidatingDialog dialog = null;
 		if (parent == null)
@@ -178,11 +178,11 @@ public class ValidatingDialog
 		}
 		else
 		{
-			if (parent instanceof Frame) 
+			if (parent instanceof Frame)
 				dialog = new ValidatingDialog((Frame)parent, title, editor);
 			else if (parent instanceof Dialog)
 				dialog = new ValidatingDialog((Dialog)parent, title, editor);
-			else 
+			else
 				throw new IllegalArgumentException("Parent component must be Dialog or Frame");
 		}
 		if (reference != null)
@@ -193,12 +193,18 @@ public class ValidatingDialog
 		{
 			WbSwingUtilities.center(dialog, parent);
 		}
-		
+
 		dialog.setDefaultButton(defaultButton);
 		if (centeredButtons)
 		{
 			dialog.buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
 		}
+		return dialog;
+	}
+
+	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, Component reference, int defaultButton, boolean centeredButtons)
+	{
+		ValidatingDialog dialog = createDialog(parent, editor, title, reference, defaultButton, centeredButtons);
 		dialog.setVisible(true);
 		
 		return !dialog.isCancelled();
@@ -212,7 +218,7 @@ public class ValidatingDialog
 	
 	public void windowActivated(WindowEvent e)
 	{
-		editorComponent.requestFocusInWindow();
+		if (validator == null) editorComponent.requestFocusInWindow();
 	}
 	
 	public void windowClosed(WindowEvent e)
@@ -243,9 +249,16 @@ public class ValidatingDialog
 			public void run()
 			{
 				if (validator != null) validator.componentDisplayed();
-				editorComponent.requestFocus();
+				else editorComponent.requestFocus();
 			}
 		});
+	}
+
+	public void approveAndClose()
+	{
+		this.selectedOption = 0;
+		this.isCancelled = false;
+		this.close();
 	}
 	
 	public void actionPerformed(ActionEvent e)

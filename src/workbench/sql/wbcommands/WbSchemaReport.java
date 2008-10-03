@@ -97,7 +97,9 @@ public class WbSchemaReport
 		this.reporter.setReportTitle(title);
 		this.reporter.setNamespace(namespace);
 		this.reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
-		TableIdentifier[] tables = this.parseTables();
+		SourceTableArgument tableArg = new SourceTableArgument(this.cmdLine.getValue("tables"), this.currentConnection);
+
+		List<TableIdentifier> tables = tableArg.getTables();
 		if (tables != null)
 		{
 			this.reporter.setTableList(tables);
@@ -184,25 +186,6 @@ public class WbSchemaReport
 		}
 			
 		
-		return result;
-	}
-
-	private TableIdentifier[] parseTables()
-	{
-		String tables = this.cmdLine.getValue("tables");
-		if (tables == null) return null;
-		List l = StringUtil.stringToList(tables, ",");
-		int count = l.size();
-		TableIdentifier[] result = new TableIdentifier[count];
-
-		for (int i=0; i < count; i++)
-		{
-			String table = (String)l.get(i);
-			if (table == null) continue;
-			if (table.trim().length() == 0) continue;
-			table = this.currentConnection.getMetadata().adjustObjectnameCase(table);
-			result[i] = new TableIdentifier(table);
-		}
 		return result;
 	}
 

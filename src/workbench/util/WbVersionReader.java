@@ -12,7 +12,6 @@
 package workbench.util;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.InputStream;
 import java.net.URL;

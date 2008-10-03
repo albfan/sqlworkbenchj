@@ -61,7 +61,7 @@ public class SqlExportWriter
 		conv.setKeyColumnsToUse(exporter.getKeyColumnsToUse());
 		try
 		{
-			conv.setType(exporter.getSqlType());
+			conv.setType(exporter.getExportType());
 		}
 		catch (IllegalArgumentException e)
 		{

@@ -85,6 +85,12 @@ public class TableIdentifierTest
 			tbl = new TableIdentifier(t);
 			exp = tbl.getTableExpression(con);
 			assertEquals("Wrong expression", "\"123\".TABLENAME", exp);
+
+			t = "dbo.company";
+			tbl = new TableIdentifier(t);
+			exp = tbl.getTableExpression(con);
+			System.out.println("****" + exp);
+
 		}
 		catch (Exception e)
 		{

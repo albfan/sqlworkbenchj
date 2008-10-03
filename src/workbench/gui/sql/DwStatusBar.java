@@ -40,6 +40,7 @@ import javax.swing.border.LineBorder;
 
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
+import workbench.gui.components.NotifierWindow;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
 import workbench.interfaces.EditorStatusbar;
@@ -414,12 +415,14 @@ public class DwStatusBar
 		}
 		this.infoPanel.removeAll();
 		this.notificationHandler = evt.getHandler();
-		this.notificationLabel = new JLabel(ResourceMgr.getImage(evt.getIconKey()));
+		this.notificationLabel = new JLabel(ResourceMgr.getImageByName(evt.getIconKey()));
 		notificationLabel.setText(null);
 		notificationLabel.setToolTipText(evt.getTooltip());
 		notificationLabel.setIconTextGap(0);
 		this.notificationLabel.addMouseListener(this);
-		this.infoPanel.add(notificationLabel );
+		this.infoPanel.add(notificationLabel);
+		NotifierWindow w = new NotifierWindow(evt.getTooltip());
+		w.show(notificationLabel);
 		WbSwingUtilities.repaintLater(this);
 	}
 	

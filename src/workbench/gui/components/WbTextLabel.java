@@ -74,7 +74,10 @@ public class WbTextLabel
 		textY = (fm != null ? fm.getAscent() + 2 : DEFAULT_TEXT_Y);
 	}
 
-	public String getText() { return this.text; }
+	public String getText()
+	{
+		return this.text;
+	}
 	
 	public void setText(String label)
 	{

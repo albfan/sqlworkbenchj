@@ -47,7 +47,7 @@ public class ObjectScripterUI
 	protected EditorPanel editor;
 	protected JFrame window;
 	private boolean isRunning;
-	private Object runMonitor = new Object();
+	private final Object runMonitor = new Object();
 
 	public ObjectScripterUI(Scripter scripter)
 	{

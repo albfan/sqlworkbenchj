@@ -1713,6 +1713,11 @@ public class Settings
 	{
 		return getProperty("workbench.xml.default.version", "1.0");
 	}
+
+	public boolean getDefaultWriteEmptyExports()
+	{
+		return getBoolProperty("workbench.export.default.writeempty", true);
+	}
 	
 	// </editor-fold>
 
@@ -2415,6 +2420,7 @@ public class Settings
 	
 	private void renameOldProps()
 	{
+		this.renameProperty("workbench.sql.search.lastValue", "workbench.sql.search.lastvalue");
 		this.renameProperty("workbench.sql.maxcolwidth","workbench.gui.optimalwidth.maxsize");
 		this.renameProperty("workbench.sql.mincolwidth","workbench.gui.optimalwidth.minsize");
 		this.renameProperty("sort.language", "workbench.sort.language");
@@ -2439,6 +2445,9 @@ public class Settings
 		this.renameProperty("workbench.blob.text.encoding", "workbench.gui.blob.text.encoding");
 		this.renameProperty("workbench.javacode.includenewline", "workbench.clipcreate.includenewline");
 		this.renameProperty("workbench.javacode.codeprefix", "workbench.clipcreate.codeprefix");
+
+		this.renameProperty("workbench.sql.replace.criteria", "workbench.sql.replace.criteria.lastvalue");
+		this.renameProperty("workbench.sql.replace.replacement", "workbench.sql.replace.replacement.lastvalue");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

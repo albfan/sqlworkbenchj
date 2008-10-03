@@ -109,7 +109,7 @@ public class ConnectionMgr
 		WbConnection conn = this.connect(aProfile, anId);
 		conn.runPostConnectScript();
 		String driverVersion = conn.getDriverVersion();
-		String dbVersion = conn.getDatabaseVersion();
+		String dbVersion = conn.getSqlConnection().getMetaData().getDatabaseProductVersion();
 		
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" + driverVersion + "], ID: ["  + anId + "]");
 		

@@ -35,8 +35,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import workbench.gui.actions.EscAction;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
+import workbench.util.WbFile;
 
 /**
  *
@@ -59,6 +62,11 @@ public class WbAboutDialog
 		
 		getRootPane().setDefaultButton(closeButton);
 		escAction = new EscAction(this, this);
+		WbFile f = Settings.getInstance().getConfigFile();
+		String s = ResourceMgr.getFormattedString("LblSettingsLocation", f.getFullPath());
+		settingsLabel.setText(s);
+		f = LogMgr.getLogfile();
+		logfileLabel.setText("Logfile: " + f.getFullPath());
 	}
 
 	/** This method is called from within the constructor to
@@ -83,6 +91,8 @@ public class WbAboutDialog
     jdkVersion = new JLabel();
     homepageLabel = new JLabel();
     mailToLabel = new JLabel();
+    settingsLabel = new JLabel();
+    logfileLabel = new JLabel();
 
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
@@ -118,7 +128,7 @@ public class WbAboutDialog
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridheight = 7;
-    gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     contentPanel.add(logo, gridBagConstraints);
 
@@ -156,7 +166,7 @@ public class WbAboutDialog
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(12, 8, 0, 4);
     contentPanel.add(labelCopyright, gridBagConstraints);
 
@@ -171,6 +181,7 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(4, 5, 0, 4);
     contentPanel.add(builtWithNbLabel, gridBagConstraints);
 
@@ -186,6 +197,7 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(0, 5, 5, 4);
     contentPanel.add(jeditLabel, gridBagConstraints);
 
@@ -194,7 +206,7 @@ public class WbAboutDialog
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(0, 8, 0, 4);
     contentPanel.add(jdkVersion, gridBagConstraints);
 
@@ -225,6 +237,25 @@ public class WbAboutDialog
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(0, 8, 0, 4);
     contentPanel.add(mailToLabel, gridBagConstraints);
+
+    settingsLabel.setText("Settings:");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(7, 5, 0, 0);
+    contentPanel.add(settingsLabel, gridBagConstraints);
+
+    logfileLabel.setText("Log file:");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(1, 5, 0, 0);
+    contentPanel.add(logfileLabel, gridBagConstraints);
 
     getContentPane().add(contentPanel, BorderLayout.CENTER);
 
@@ -305,8 +336,10 @@ public class WbAboutDialog
   private JLabel labelDesc;
   private JLabel labelTitel;
   private JLabel labelVersion;
+  private JLabel logfileLabel;
   private JLabel logo;
   private JLabel mailToLabel;
+  private JLabel settingsLabel;
   // End of variables declaration//GEN-END:variables
 
 }

@@ -107,6 +107,7 @@ import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
+import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
@@ -1968,12 +1969,12 @@ public class MainWindow
 		result.setName(ResourceMgr.MNU_TXT_HELP);
 		new ShowHelpAction().addToMenu(result);
 		new ShowManualAction().addToMenu(result);
-		result.addSeparator();
-
 		result.add(WhatsNewAction.getInstance());
+		result.addSeparator();
+		
+		result.add(ViewLogfileAction.getInstance());
 		new VersionCheckAction().addToMenu(result);
 		new AboutAction().addToMenu(result);
-		
 		return result;
 	}
 

@@ -26,11 +26,13 @@ import javax.swing.SwingConstants;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbFilePicker;
 import workbench.gui.components.WbFontPicker;
+import workbench.gui.components.WbLabelField;
 import workbench.interfaces.Restoreable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.WbFile;
 import workbench.util.WbLocale;
 
 /**
@@ -104,6 +106,11 @@ public class GeneralOptionsPanel
 		{
 			languageDropDown.setSelectedIndex(currentIndex);
 		}
+		WbFile logFile = LogMgr.getLogfile();
+		logfilename.setText("Logfile: " + logFile.getFullPath());
+		WbFile configFile = Settings.getInstance().getConfigFile();
+		String s = ResourceMgr.getFormattedString("LblSettingsLocation", configFile.getFullPath());
+		settingsfilename.setText(s);
 	}
 
 	public void saveSettings()
@@ -191,6 +198,8 @@ public class GeneralOptionsPanel
     exitOnConnectCancel = new JCheckBox();
     autoConnect = new JCheckBox();
     autoSaveWorkspace = new JCheckBox();
+    logfilename = new WbLabelField();
+    settingsfilename = new WbLabelField();
 
     setLayout(new GridBagLayout());
 
@@ -208,6 +217,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
@@ -227,6 +237,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
@@ -254,6 +265,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
@@ -263,6 +275,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(4, 10, 0, 15);
@@ -279,6 +292,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
     add(pdfReaderPath, gridBagConstraints);
@@ -313,6 +327,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(7, 10, 0, 0);
     add(checkInterval, gridBagConstraints);
@@ -331,6 +346,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
     add(languageDropDown, gridBagConstraints);
@@ -439,13 +455,33 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 9;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(13, 12, 0, 10);
     add(jPanel2, gridBagConstraints);
+
+    logfilename.setText("jTextField1");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 12, 10, 15);
+    add(logfilename, gridBagConstraints);
+
+    settingsfilename.setText("jTextField1");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 12, 2, 15);
+    add(settingsfilename, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -461,12 +497,14 @@ public class GeneralOptionsPanel
   private JComboBox languageDropDown;
   private JComboBox logLevel;
   private JLabel logLevelLabel;
+  private JTextField logfilename;
   private JLabel msgFontLabel;
   private WbFontPicker msgLogFont;
   private WbFilePicker pdfReaderPath;
   private JLabel pdfReaderPathLabel;
   private JTextField quoteCharField;
   private JLabel quoteCharLabel;
+  private JTextField settingsfilename;
   private JCheckBox showTabIndex;
   private WbFontPicker standardFont;
   private JLabel standardFontLabel;

@@ -135,6 +135,7 @@ import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
+import workbench.gui.dialogs.export.ExportFileDialog;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
@@ -167,6 +168,7 @@ import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
@@ -1791,80 +1793,86 @@ public class SqlPanel
 
 		this.cancelExecution = false;
 
+		ExportFileDialog dialog = new ExportFileDialog(getParentWindow());
+		dialog.setQuerySql(sql, this.getConnection());
+		dialog.setIncludeSqlInsert(true);
+
+		boolean result = dialog.selectOutput();
+		if (!result) return;
+
 		final DataExporter exporter = new DataExporter(this.dbConnection);
 		exporter.setRowMonitor(this.rowMonitor);
-		exporter.setSql(sql);
+		WbFile f = new WbFile(dialog.getSelectedFilename());
+		exporter.addQueryJob(sql, f);
+		dialog.setExporterOptions(exporter);
+		
 		this.worker = exporter;
 
-		boolean selected = exporter.selectOutput(getParentWindow());
-		if (selected)
+		String msg = ResourceMgr.getString("MsgQueryExportInit");
+		msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
+		msg = StringUtil.replace(msg, "%sql%", StringUtil.getMaxSubstring(sql, 100));
+		showLogMessage(msg);
+
+		this.executionThread = new WbThread("ExportSQL")
 		{
-			String msg = ResourceMgr.getString("MsgQueryExportInit");
-			msg = StringUtil.replace(msg, "%type%", exporter.getTypeDisplay());
-			msg = StringUtil.replace(msg, "%sql%", StringUtil.getMaxSubstring(sql, 100));
-			showLogMessage(msg);
-
-			this.executionThread = new WbThread("ExportSQL")
+			public void run()
 			{
-				public void run()
+				setBusy(true);
+				setCancelState(true);
+				fireDbExecStart();
+				try
 				{
-					setBusy(true);
-					setCancelState(true);
-					fireDbExecStart();
-					try
+					boolean newLineAppended = false;
+					StringBuilder messages = new StringBuilder();
+					long start = System.currentTimeMillis();
+					long rowCount = exporter.startExport();
+					long execTime = (System.currentTimeMillis() - start);
+					CharSequence errors = exporter.getErrors();
+					if (errors.length() > 0)
 					{
-						boolean newLineAppended = false;
-						StringBuilder messages = new StringBuilder();
-						long start = System.currentTimeMillis();
-						long rowCount = exporter.startExport();
-						long execTime = (System.currentTimeMillis() - start);
-						CharSequence errors = exporter.getErrors();
-						if (errors.length() > 0)
-						{
-							messages.append('\n');
-							newLineAppended = true;
-							messages.append(errors);
-							messages.append('\n');
-						}
+						messages.append('\n');
+						newLineAppended = true;
+						messages.append(errors);
+						messages.append('\n');
+					}
 
-						CharSequence warnings = exporter.getWarnings();
-						if (warnings.length() > 0)
-						{
-							if (!newLineAppended) messages.append('\n');
-							messages.append(warnings);
-							messages.append('\n');
-						}
-						if (exporter.isSuccess())
-						{
-							String msg2 = ResourceMgr.getString("MsgSpoolOk").replace("%rows%", Long.toString(rowCount));
-							messages.append("\n");
-							messages.append(msg2);
-							messages.append("\n");
-							msg2 = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
-							messages.append(msg2);
-							messages.append("\n\n");
-						}
-						messages.append(ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s\n");
-						appendToLog(messages.toString());
-						showLogPanel();
-					}
-					catch (Exception e)
+					CharSequence warnings = exporter.getWarnings();
+					if (warnings.length() > 0)
 					{
-						LogMgr.logError("SqlPanel.spoolData()", "Error exporting data", e);
+						if (!newLineAppended) messages.append('\n');
+						messages.append(warnings);
+						messages.append('\n');
 					}
-					finally
+					if (exporter.isSuccess())
 					{
-						setBusy(false);
-						fireDbExecEnd();
-						clearStatusMessage();
-						setCancelState(false);
-						executionThread = null;
-						worker = null;
+						String msg2 = ResourceMgr.getString("MsgSpoolOk").replace("%rows%", Long.toString(rowCount));
+						messages.append("\n");
+						messages.append(msg2);
+						messages.append("\n");
+						msg2 = ResourceMgr.getString("MsgSpoolTarget") + " " + exporter.getFullOutputFilename();
+						messages.append(msg2);
+						messages.append("\n\n");
 					}
+					messages.append(ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s\n");
+					appendToLog(messages.toString());
+					showLogPanel();
 				}
-			};
-			this.executionThread.start();
-		}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlPanel.spoolData()", "Error exporting data", e);
+				}
+				finally
+				{
+					setBusy(false);
+					fireDbExecEnd();
+					clearStatusMessage();
+					setCancelState(false);
+					executionThread = null;
+					worker = null;
+				}
+			}
+		};
+		this.executionThread.start();
 	}
 
 	public void fatalError(String msg)

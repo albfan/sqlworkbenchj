@@ -79,13 +79,18 @@ public class DependencyNode
 
 	public String toString()
 	{
+		return this.table.getTableName();
+	}
+
+	public String debugString()
+	{
 		StringBuilder result = new StringBuilder(20);
 		result.append(this.table.getTableName());
 		if (fkName != null)
 		{
 			result.append(" <" + this.fkName + ">");
 		}
-		result.append(" [");
+		if (columns.size() > 0) result.append(" [");
 		boolean first = true;
 		for (String col : columns.keySet())
 		{
@@ -98,7 +103,7 @@ public class DependencyNode
 			result.append(" -> ");
 			result.append(columns.get(col));
 		}
-		result.append("]");
+		if (columns.size() > 0) result.append("]");
 		return result.toString();
 	}
 

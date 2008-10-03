@@ -129,6 +129,13 @@ public class WbExportTest
 		long fsize2 = exportFile.length();
 		assertTrue(fsize2 > fsize);
 
+		result = exportCmd.execute("wbexport -createTable=true -file='" + exportFile.getFullPath() + "' -type=sqlinsert -sourceTable=person -append=true -writeEmptyResults=false");
+		msg = result.getMessageBuffer().toString();
+		assertTrue(result.isSuccess());
+		assertTrue(exportFile.exists());
+		long fsize3 = exportFile.length();
+		assertTrue(fsize2 == fsize3);
+
 		in = new FileReader(exportFile);
 		script = FileUtil.readCharacters(in);
 		p = new ScriptParser(script);
@@ -1003,6 +1010,7 @@ public class WbExportTest
 	}
 	
 	public void testXmlExport()
+		throws Exception
 	{
 		try
 		{
@@ -1027,17 +1035,38 @@ public class WbExportTest
 			assertEquals("Blob data not exported", true, bfile.exists());
 			assertEquals("Wrong file size", 7218, bfile.length());
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			util.emptyBaseDirectory();
 		}
 	}
 
+	public void testEmptyResult()
+		throws Exception
+	{
+		try
+		{
+			WbFile f = new WbFile(util.getBaseDir(), "person.txt");
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate("delete from person");
+			connection.commit();
+			stmt.close();
+			
+			StatementRunnerResult result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=person -writeEmptyResults=false");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertFalse(f.exists());
+
+			result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=person -writeEmptyResults=false -compress=true");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			WbFile archive = new WbFile(util.getBaseDir(), "person.zip");
+			assertFalse(archive.exists());
+
+		}
+		finally
+		{
+			util.emptyBaseDirectory();
+		}
+	}
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{

@@ -392,6 +392,17 @@
 			</para>
 		</section>
 
+		<section id="option-sort-collator">
+      <title>Sort Locale</title>
+      <para>
+      	When you sort the result set, characters values will be sorted case-sensitiv by default.
+      	This is caused by the <literal>compareTo()</literal> method available in the Java
+      	environment which puts lower case characters in front of upper case characters when sorting.
+				With the "Sort Locale" option you can select which language rules should be applied
+				while sorting. Note that sorting with a locale is slower than using the "Default" setting.
+      </para>
+    </section>
+
 		<section id="column-width-settings">
 			<title>Column width settings</title>
 

@@ -307,7 +307,8 @@
 			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 	</section>
-	
+
+	<!--
   <section id="settings-sorting">
 
     <title>Controlling sorting of data</title>
@@ -364,6 +365,7 @@
     </simplesect>
     
   </section>
+	-->
   
   <section id="settings-db">
     <title>Database related settings</title>

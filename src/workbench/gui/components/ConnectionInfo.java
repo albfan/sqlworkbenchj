@@ -18,7 +18,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
-import javax.swing.JTextField;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -33,7 +32,7 @@ public class ConnectionInfo
 	extends JComponent
 	implements PropertyChangeListener, ActionListener
 {
-	private JTextField display;
+	private WbLabelField display;
 	private WbConnection sourceConnection;
 	private Color defaultBackground;
 	
@@ -41,19 +40,15 @@ public class ConnectionInfo
 	{
 		super();
 
-		this.display = new JTextField();
-
 		this.setLayout(new GridLayout(1,1,0,0));
-		this.add(this.display);
 		super.setBackground(aBackground);
-		this.defaultBackground = aBackground;
-		this.display.setEditable(false);
-		this.display.setBorder(null);
-		TextComponentMouseListener l =	new TextComponentMouseListener();
+		defaultBackground = aBackground;
 		WbAction a = new WbAction(this, "show-info");
 		a.setMenuTextByKey("MnuTxtConnInfo");
-		l.addAction(a);
-		this.display.addMouseListener(l);
+		this.display = new WbLabelField();
+		this.display.addPopupAction(a);
+		this.add(this.display);
+		updateDisplay();
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -100,7 +95,8 @@ public class ConnectionInfo
 			this.setBackground(c);
 		}
 	}
-	
+
+	@Override
 	public void setBackground(Color c)
 	{
 		super.setBackground(c);

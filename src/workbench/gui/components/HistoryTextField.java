@@ -10,12 +10,13 @@
  *
  */
 package workbench.gui.components;
-import java.util.ArrayList;
+
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
+import workbench.util.FixedSizeList;
 import workbench.util.StringUtil;
 
 /**
@@ -25,28 +26,52 @@ public class HistoryTextField
 	extends JComboBox
 {
 	private String propName;
-	private List<String> historyValues = new ArrayList<String>();
-	private int maxHistorySize = 25;
-		
+	private FixedSizeList<String> historyValues;
+
+	public HistoryTextField()
+	{
+		this(null);
+	}
+
 	public HistoryTextField(String prop)
 	{
 		super();
 		setEditable(true);
-		this.propName = prop;
-		this.maxHistorySize = Settings.getInstance().getIntProperty("workbench.history." + propName + ".size", 25);
+		setSettingsProperty(prop);
+		int maxHistorySize = Settings.getInstance().getIntProperty("workbench.history." + propName + ".size", 25);
+		historyValues = new FixedSizeList<String>(maxHistorySize);
+		getEditor().getEditorComponent().addMouseListener(new TextComponentMouseListener());
+		getEditor().getEditorComponent().setFocusTraversalKeysEnabled(true);
+		setFocusTraversalKeysEnabled(true);
+	}
+
+	public void setSettingsProperty(String prop)
+	{
+		propName = prop;
+	}
+
+	public void selectAll()
+	{
+		getEditor().selectAll();
+	}
+
+	public void setColumns(int cols)
+	{
+		StringBuilder b = new StringBuilder(cols);
+		for (int i=0; i < cols; i++) b.append('w');
+		this.setPrototypeDisplayValue(b);
 	}
 	
 	public String getText()
 	{
 		Object item = getSelectedItem();
 		if (item == null) item = getEditor().getItem();
-		if (item == null) return "";
+		if (item == null) return null;
 		return (String)item;
 	}
 	
 	public void setText(String s)
 	{
-//		this.getEditor().setItem(s);
 		this.setSelectedItem(s);
 	}
 
@@ -78,26 +103,19 @@ public class HistoryTextField
 	{
 		saveSettings(Settings.getInstance(), "workbench.quickfilter." + propName + ".");
 	}
+
+	public void storeCurrent()
+	{
+		addToHistory(getText());
+	}
 	
 	public void addToHistory(String s)
 	{
 		if (StringUtil.isEmptyString(s)) return;
 		s = s.trim();	
 		Object item = getSelectedItem();
-		int index = historyValues.indexOf(s);
-		if (index > -1)
-		{
-			this.historyValues.remove(index);
-		}
-		else
-		{
-			while (this.historyValues.size() >= this.maxHistorySize)
-			{
-				this.historyValues.remove(historyValues.size() - 1);
-			}
-		}
-		this.historyValues.add(0,s);
-		this.updateModel();
+		historyValues.addEntry(s);
+		updateModel();
 		setSelectedItem(item);
 	}
 	

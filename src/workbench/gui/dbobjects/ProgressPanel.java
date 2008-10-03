@@ -11,14 +11,31 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
-import java.io.File;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbButton;
 import workbench.interfaces.Interruptable;
+import workbench.interfaces.InterruptableJob;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.NumberStringCache;
 
 /**
  *
@@ -28,17 +45,21 @@ public class ProgressPanel
 	extends javax.swing.JPanel
 	implements RowActionMonitor
 {
-	private Interruptable job;
+	private Interruptable task;
+
+	private JDialog parent;
+	private int monitorType = RowActionMonitor.MONITOR_PLAIN;
 
 	public ProgressPanel(Interruptable aWorker)
 	{
-		this.job = aWorker;
+		this.task = aWorker;
 		initComponents();
+		setRowSize(20);
 	}
-
-	public void hideRowProgress()
+	
+	public void setParentDialog(JDialog d)
 	{
-		this.remove(this.infoPanel);
+		parent = d;
 	}
 	
 	public void setRowInfo(long aRow)
@@ -46,31 +67,41 @@ public class ProgressPanel
 		this.rowInfo.setText(Long.toString(aRow));
 	}
 
-	public void setRowInfo(String info)
-	{
-		this.rowInfo.setText(info);
-	}
-
 	public void setInfoText(String aText)
 	{
 		this.progressInfoText.setText(aText);
 	}
 
-	public void setFilename(String aFilename)
+	public void setObject(String name)
 	{
-		File f = new File(aFilename);
-		String fullName = f.getAbsolutePath();
-		this.fileNameField.setToolTipText(fullName);
-		this.fileNameField.setText(fullName);
-		FontMetrics fm = this.getFontMetrics(this.fileNameField.getFont());
-		int w = fm.stringWidth(aFilename) + 10;
-		int h = fm.getHeight() + 2;
-		Dimension d = new Dimension(w, h < 22 ? 22 : h);
-		fileNameField.setPreferredSize(d);
-		fileNameField.setMinimumSize(d);
-		this.invalidate();
+		this.fileNameField.setText(name);
+		updateLayout();
 	}
 
+	protected void updateLayout()
+	{
+		FontMetrics fm = this.getFontMetrics(fileNameField.getFont());
+		int width = fm.stringWidth(fileNameField.getText()) + 25;
+		int h = fm.getHeight() + 2;
+		Dimension d = new Dimension(width, h < 22 ? 22 : h);
+		this.fileNameField.setPreferredSize(d);
+		this.fileNameField.setMinimumSize(d);
+
+		if (parent != null)
+		{
+			parent.invalidate();
+		}
+
+		invalidate();
+		validate();
+
+		if (parent != null)
+		{
+			parent.validate();
+			parent.pack();
+		}
+	}
+	
 	public void setRowSize(int cols)
 	{
 		FontMetrics fm = this.getFontMetrics(this.getFont());
@@ -79,15 +110,14 @@ public class ProgressPanel
 		Dimension d = new Dimension(w * cols, h < 22 ? 22 : h);
 		this.rowInfo.setPreferredSize(d);
 		this.rowInfo.setMinimumSize(d);
-		this.invalidate();
+		updateLayout();
 	}
 	
 
 	public void setInfoSize(int cols)
 	{
 		this.progressInfoText.setColumns(cols);
-		this.doLayout();
-		this.updateUI();
+		this.updateLayout();
 	}
 
 	public void jobFinished()
@@ -96,17 +126,50 @@ public class ProgressPanel
 
 	public void setCurrentObject(String object, long number, long totalObjects)
 	{
+		String info = NumberStringCache.getNumberString(number) + "/"+  NumberStringCache.getNumberString(totalObjects);
+		if (monitorType == RowActionMonitor.MONITOR_EXPORT)
+		{
+			setRowInfo(0);
+			setInfoText(ResourceMgr.getString("MsgSpoolingRow"));
+			setObject(object + " [" + info + "]");
+		}
+		else
+		{
+			setInfoText(object);
+			rowInfo.setText(info);
+		}
+		updateLayout();
 	}
 
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
-		if (currentRow > -1) this.rowInfo.setText(Long.toString(currentRow));
+		if (currentRow > -1 && totalRows > -1)
+		{
+			this.rowInfo.setText(NumberStringCache.getNumberString(currentRow) + "/"+  NumberStringCache.getNumberString(totalRows));
+		}
+		if (currentRow > -1)
+		{
+			this.rowInfo.setText(NumberStringCache.getNumberString(currentRow));
+		}
+		else
+		{
+			this.rowInfo.setText("");
+		}
 	}
 
 	public void saveCurrentType(String type) {}
 	public void restoreType(String type) {}
-	public void setMonitorType(int aType) {}
-	public int getMonitorType() { return RowActionMonitor.MONITOR_PLAIN; }
+	
+	public void setMonitorType(int aType)
+	{
+		monitorType = aType;
+	}
+	
+	public int getMonitorType()
+	{
+		return monitorType;
+	}
+
 	
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -115,79 +178,96 @@ public class ProgressPanel
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+		GridBagConstraints gridBagConstraints;
 
-    fileNameField = new javax.swing.JTextField();
-    infoPanel = new javax.swing.JPanel();
-    progressInfoText = new javax.swing.JTextField();
-    rowInfo = new javax.swing.JLabel();
+    infoPanel = new JPanel();
+    progressInfoText = new JTextField();
+    rowInfo = new JLabel();
     cancelButton = new WbButton();
+    fileNameField = new JTextField();
 
-    setLayout(new java.awt.GridBagLayout());
+    setMinimumSize(new Dimension(250, 120));
+    setPreferredSize(new Dimension(250, 120));
+    setLayout(new GridBagLayout());
 
-    fileNameField.setEditable(false);
-    fileNameField.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-    fileNameField.setDisabledTextColor(java.awt.Color.black);
-    fileNameField.setMargin(new java.awt.Insets(0, 2, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 6);
-    add(fileNameField, gridBagConstraints);
-
-    infoPanel.setBorder(javax.swing.BorderFactory.createCompoundBorder(javax.swing.BorderFactory.createEtchedBorder(), javax.swing.BorderFactory.createEmptyBorder(2, 2, 2, 2)));
-    infoPanel.setLayout(new java.awt.BorderLayout(0, 5));
+    infoPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+    infoPanel.setLayout(new BorderLayout(0, 5));
 
     progressInfoText.setColumns(10);
     progressInfoText.setEditable(false);
     progressInfoText.setBorder(null);
-    progressInfoText.setDisabledTextColor(java.awt.Color.black);
-    infoPanel.add(progressInfoText, java.awt.BorderLayout.CENTER);
+    progressInfoText.setDisabledTextColor(Color.black);
+    infoPanel.add(progressInfoText, BorderLayout.CENTER);
 
-    rowInfo.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-    rowInfo.setMaximumSize(new java.awt.Dimension(32768, 18));
-    rowInfo.setMinimumSize(new java.awt.Dimension(30, 18));
-    rowInfo.setPreferredSize(new java.awt.Dimension(50, 18));
-    infoPanel.add(rowInfo, java.awt.BorderLayout.EAST);
+    rowInfo.setHorizontalAlignment(SwingConstants.RIGHT);
+    rowInfo.setMaximumSize(new Dimension(32768, 18));
+    rowInfo.setMinimumSize(new Dimension(30, 18));
+    rowInfo.setPreferredSize(new Dimension(50, 18));
+    infoPanel.add(rowInfo, BorderLayout.EAST);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 6);
+    gridBagConstraints.insets = new Insets(5, 6, 0, 6);
     add(infoPanel, gridBagConstraints);
 
     cancelButton.setText(ResourceMgr.getString("LblCancel"));
-    cancelButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    cancelButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
         cancelButtonActionPerformed(evt);
       }
     });
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.SOUTH;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(12, 0, 4, 0);
+    gridBagConstraints.insets = new Insets(12, 0, 10, 0);
     add(cancelButton, gridBagConstraints);
+
+    fileNameField.setEditable(false);
+    fileNameField.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(1, 1, 1, 1)));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(4, 6, 0, 6);
+    add(fileNameField, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
 	{//GEN-HEADEREND:event_cancelButtonActionPerformed
-		if (this.job != null)
+		if (this.task instanceof InterruptableJob)
 		{
-			if (this.job.confirmCancel()) this.job.cancelExecution();
+			String msg = ResourceMgr.getString("MsgCancelAllCurrent");
+			String current = ResourceMgr.getString("LblCancelCurrentExport");
+			String all = ResourceMgr.getString("LblCancelAllExports");
+			int answer = WbSwingUtilities.getYesNo(parent, msg, new String[] { current, all });
+			InterruptableJob job = (InterruptableJob)task;
+			if (answer == JOptionPane.YES_OPTION)
+			{
+				job.cancelCurrent();
+			}
+			else
+			{
+				job.cancelExecution();
+			}
+		}
+		else if (task != null)
+		{
+			task.cancelExecution();
 		}
 	}//GEN-LAST:event_cancelButtonActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton cancelButton;
-  private javax.swing.JTextField fileNameField;
-  private javax.swing.JPanel infoPanel;
-  private javax.swing.JTextField progressInfoText;
-  private javax.swing.JLabel rowInfo;
+  private JButton cancelButton;
+  private JTextField fileNameField;
+  private JPanel infoPanel;
+  private JTextField progressInfoText;
+  private JLabel rowInfo;
   // End of variables declaration//GEN-END:variables
 
 }

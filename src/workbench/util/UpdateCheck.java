@@ -95,12 +95,12 @@ public class UpdateCheck
 			if (update == UpdateVersion.stable)
 			{
 				LogMgr.logInfo("UpdateCheck.run()", "New stable version available");
-				event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewStableAvailable"), this);
+				event = new NotifierEvent("updates.png", ResourceMgr.getString("LblVersionNewStableAvailable"), this);
 			}
 			else if (update == UpdateVersion.devBuild)
 			{
 				LogMgr.logInfo("UpdateCheck.run()", "New dev build available");
-				event = new NotifierEvent("updates", ResourceMgr.getString("LblVersionNewDevAvailable"), this);
+				event = new NotifierEvent("updates.png", ResourceMgr.getString("LblVersionNewDevAvailable"), this);
 			}
 			else
 			{

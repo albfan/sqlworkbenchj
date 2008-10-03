@@ -87,7 +87,7 @@
 					<entry>-type</entry>
 					<entry>
 						<para>
-							Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xsl, xslt, html</literal>
+							Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xls, xlsx, html</literal>
 						</para>
 						<para>
 							Defines the type of the output file. <literal>sqlinsert</literal>
@@ -324,7 +324,17 @@
 						</para>
 					</entry>
 				</row>
-				
+				<row>
+					<entry>-append</entry>
+					<entry>
+                        <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+						<para>
+                            Controls whether results are appended to an existing file, or overwrite an existing
+                            file. This parameter is only supported for text or SQL export types.
+						</para>
+					</entry>
+				</row>
+
 				&progress-parameter;
 				
 			</tbody>
@@ -927,14 +937,9 @@ WHERE table1.column1 = table2.column1;</programlisting>
 	<simplesect id="wb-export-max-rows">
 		<title>WbExport and the "Max. Rows" option</title>
 		<para>
-			There is a difference in the behaviour of the command regarding the "Max. Rows" setting
-			in the GUI. When you use the <literal>WbExport</literal> command together with
-			a <literal>SELECT</literal> query, the Max. Rows setting will be respected
-			by the <literal>SELECT</literal> statement (and you will see a warning
-			that the result set was limited). When you use the <literal>WbExport</literal>
-			with the <literal>-sourcetable</literal> switch, the "Max. Rows" setting
-			will not be respected, and all rows from the table will be written into
-			the specified file.
+			When you use the <literal>WbExport</literal> command together with
+			a <literal>SELECT</literal> query, the Max. Rows setting will <emphasis role="bold">not</emphasis> be respected
+			by the <literal>SELECT</literal> statement.
 		</para>
 	</simplesect>
 	</section>

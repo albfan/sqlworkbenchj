@@ -12,15 +12,21 @@
 package workbench.gui.components;
 
 import java.awt.Window;
-import javax.swing.JTextPane;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.URL;
+import javax.swing.JTextArea;
 import workbench.gui.editor.SearchAndReplace;
 import workbench.interfaces.TextContainer;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 
 /**
  * @author support@sql-workbench.net
  */
 public class SearchableTextPane
-	extends JTextPane
+	extends JTextArea
 	implements TextContainer
 {
 	private SearchAndReplace searcher;
@@ -37,6 +43,21 @@ public class SearchableTextPane
 	public void setSelectedText(String aText)
 	{
 		this.setText(aText);
+	}
+
+	public void setPage(URL url)
+		throws IOException
+	{
+		InputStream in = url.openStream();
+		try
+		{
+			Reader r = EncodingUtil.createReader(in, System.getProperty("file.encoding"));
+			read(r, null);
+		}
+		finally
+		{
+			FileUtil.closeQuitely(in);
+		}
 	}
 	
 }

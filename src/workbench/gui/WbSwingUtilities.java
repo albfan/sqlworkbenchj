@@ -121,6 +121,7 @@ public class WbSwingUtilities
 			{
 				label.setText(text);
 				label.setToolTipText(tooltip);
+				callRepaint(label);
 			}
 		});
 	}

@@ -37,10 +37,6 @@ import workbench.util.StringUtil;
 public class SqlRowDataConverter
 	extends RowDataConverter
 {
-	public static final int SQL_INSERT = 1;
-	public static final int SQL_UPDATE = 2;
-	public static final int SQL_DELETE_INSERT = 3;
-	
 	// This instance can be re-used for several 
 	// table exports from DataExporter, to prevent 
 	// that one failed export for the requested type
@@ -49,8 +45,8 @@ public class SqlRowDataConverter
 	// Upon setting the ResultInfo in setResultInfo()
 	// the sqlTypeToUse is set accordingly and then 
 	// used in convertRowData()
-	private int sqlTypeToUse = SQL_INSERT;
-	private int sqlType = SQL_INSERT;
+	private ExportType sqlTypeToUse = ExportType.SQL_INSERT;
+	private ExportType sqlType = ExportType.SQL_INSERT;
 	
 	private boolean createTable = false;
 	private TableIdentifier alternateUpdateTable;
@@ -89,7 +85,7 @@ public class SqlRowDataConverter
 		
 		boolean keysPresent = this.checkKeyColumns();
 		this.sqlTypeToUse = this.sqlType;
-		if (!keysPresent && (this.sqlType == SQL_DELETE_INSERT || this.sqlType == SQL_UPDATE))
+		if (!keysPresent && (this.sqlType == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_UPDATE))
 		{
 			String tbl = "";
 			if (meta.getUpdateTable() != null)
@@ -104,7 +100,7 @@ public class SqlRowDataConverter
 			}
 			
 			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found" + tbl + " reverting back to INSERT generation");
-			this.sqlTypeToUse = SQL_INSERT;
+			this.sqlTypeToUse = ExportType.SQL_INSERT;
 		}
 		
 	}
@@ -141,16 +137,22 @@ public class SqlRowDataConverter
 		this.ignoreRowStatus = flag;
 	}
 	
-	public void setType(int type)
+	public void setType(ExportType type)
 	{
-		if (type == SQL_INSERT)
-			this.setCreateInsert();
-		else if (type == SQL_UPDATE)
-			this.setCreateUpdate();
-		else if (type == SQL_DELETE_INSERT)
-			this.setCreateInsertDelete();
-		else
-			throw new IllegalArgumentException("Invalid type specified");
+		switch (type)
+		{
+			case SQL_INSERT:
+				setCreateInsert();
+				break;
+			case SQL_UPDATE:
+				this.setCreateUpdate();
+				break;
+			case SQL_DELETE_INSERT:
+				this.setCreateInsertDelete();
+				break;
+			default:
+				throw new IllegalArgumentException("Invalid type specified");
+		}
 	}
 	
 	public StrBuffer convertRowData(RowData row, long rowIndex)
@@ -159,14 +161,14 @@ public class SqlRowDataConverter
 		DmlStatement dml = null;
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
 		
-		if (this.sqlTypeToUse == SQL_DELETE_INSERT)
+		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT)
 		{
 			dml = this.statementFactory.createDeleteStatement(row, true);
 			result.append(dml.getExecutableStatement(this.literalFormatter));
 			result.append(';');
 			result.append(lineTerminator);
 		}
-		if (this.sqlTypeToUse == SQL_DELETE_INSERT || this.sqlType == SQL_INSERT)
+		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_INSERT)
 		{
 			dml = this.statementFactory.createInsertStatement(row, ignoreRowStatus, "\n", this.exportColumns);
 		}
@@ -221,36 +223,36 @@ public class SqlRowDataConverter
 
 	public boolean isCreateInsert()
 	{
-		return this.sqlTypeToUse == SQL_INSERT;
+		return this.sqlTypeToUse == ExportType.SQL_INSERT;
 	}
 
 	public boolean isCreateUpdate()
 	{
-		return this.sqlTypeToUse == SQL_UPDATE;
+		return this.sqlTypeToUse == ExportType.SQL_UPDATE;
 	}
 	
 	public boolean isCreateInsertDelete()
 	{
-		return this.sqlTypeToUse == SQL_DELETE_INSERT;
+		return this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT;
 	}
 	
 	public void setCreateInsert()
 	{
-		this.sqlType = SQL_INSERT;
+		this.sqlType = ExportType.SQL_INSERT;
 		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
 	
 	public void setCreateUpdate()
 	{
-		this.sqlType = SQL_UPDATE;
+		this.sqlType = ExportType.SQL_UPDATE;
 		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.update.doformat",true);
 	}
 
 	public void setCreateInsertDelete()
 	{
-		this.sqlType = SQL_DELETE_INSERT;
+		this.sqlType = ExportType.SQL_DELETE_INSERT;
 		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}

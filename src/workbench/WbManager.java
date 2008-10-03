@@ -12,11 +12,9 @@
 package workbench;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -34,19 +32,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.components.TabbedPaneUIFactory;
 import workbench.gui.dbobjects.DbExplorerWindow;
-import workbench.gui.lnf.LnFDefinition;
-import workbench.gui.lnf.LnFLoader;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
@@ -59,7 +52,7 @@ import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
 import workbench.gui.filter.FilterDefinitionManager;
-import workbench.gui.lnf.LnFManager;
+import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.resource.GuiSettings;
@@ -85,6 +78,7 @@ public class WbManager
 	private boolean outOfMemoryOcurred = false;
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private AppArguments cmdLine = new AppArguments();
+	private boolean isWindowsClassic;
 
 	private WbManager()
 	{
@@ -217,93 +211,9 @@ public class WbManager
 		}
 	}
 
-	public boolean isWindowsClassic() { return isWindowsClassic; }
-
-	private boolean isWindowsClassic = false;
-
-	private void initializeLookAndFeel()
+	public boolean isWindowsClassic()
 	{
-		String className = GuiSettings.getLookAndFeelClass();
-		try
-		{
-			if (StringUtil.isEmptyString(className))
-			{
-				className = UIManager.getSystemLookAndFeelClassName();
-			}
-			LnFManager mgr = new LnFManager();
-			LnFDefinition def = mgr.findLookAndFeel(className);
-
-			if (def == null)
-			{
-				LogMgr.logError("WbManager.initializeLookAndFeel()", "Specified Look & Feel " + className + " not available!", null);
-				return;
-			}
-
-			// JGoodies Looks settings
-			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
-			UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
-
-			// Remove Synthetica's own window decorations
-			//UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
-
-			// Remove the extra icons for read only text fields and
-			// the "search bar" in the main menu for the Substance Look & Feel
-			System.setProperty("substancelaf.noExtraElements", "");
-
-			LnFLoader loader = new LnFLoader(def);
-			LookAndFeel lnf = loader.getLookAndFeel();
-
-			UIManager.setLookAndFeel(lnf);
-			try
-			{
-				String clsname = lnf.getClass().getName();
-				if (clsname.indexOf("com.sun.java.swing.plaf.windows") > -1)
-				{
-					String osVersion = System.getProperty("os.version", "1.0");
-					Float version = Float.valueOf(osVersion);
-					if (version.floatValue() <= 5.0)
-					{
-						isWindowsClassic = true;
-					}
-					else
-					{
-						isWindowsClassic = (clsname.indexOf("WindowsClassicLookAndFeel") > -1);
-						if (!isWindowsClassic)
-						{
-							Toolkit toolkit = Toolkit.getDefaultToolkit();
-							Boolean themeActive = (Boolean)toolkit.getDesktopProperty("win.xpstyle.themeActive");
-							if (themeActive != null)
-							{
-								isWindowsClassic = !themeActive.booleanValue();
-							}
-							else
-							{
-								isWindowsClassic = true;
-							}
-						}
-					}
-				}
-			}
-			catch (Throwable e)
-			{
-				isWindowsClassic = false;
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("Settings.initializeLookAndFeel()", "Could not set look and feel", e);
-			LogMgr.logWarning("Settings.initializeLookAndFeel()", "Current look and feel class [" + className + "] will be removed");
-			GuiSettings.setLookAndFeelClass(null);
-		}
-
-		try
-		{
-			Toolkit.getDefaultToolkit().setDynamicLayout(GuiSettings.getUseDynamicLayout());
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbManager.initializeLookAndFeel()", "Error setting dynamic layout property", e);
-		}
+		return isWindowsClassic;
 	}
 
 	public File getJarFile()
@@ -335,66 +245,11 @@ public class WbManager
 
 	private void initUI()
 	{
-		UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
-		UIManager.put("swing.boldMetal", Boolean.FALSE); 
-		
-		this.initializeLookAndFeel();
+		LnFHelper helper = new LnFHelper();
+		helper.initUI();
+		this.isWindowsClassic = helper.isWindowsClassic();
 
-		Settings settings = Settings.getInstance();
-		UIDefaults def = UIManager.getDefaults();
-
-		Font stdFont = settings.getStandardFont();
-		if (stdFont != null)
-		{
-			def.put("Button.font", stdFont);
-			def.put("CheckBox.font", stdFont);
-			def.put("CheckBoxMenuItem.font", stdFont);
-			def.put("ColorChooser.font", stdFont);
-			def.put("ComboBox.font", stdFont);
-			def.put("EditorPane.font", stdFont);
-			def.put("FileChooser.font", stdFont);
-			def.put("Label.font", stdFont);
-			def.put("List.font", stdFont);
-			def.put("Menu.font", stdFont);
-			def.put("MenuItem.font", stdFont);
-			def.put("OptionPane.font", stdFont);
-			def.put("Panel.font", stdFont);
-			def.put("PasswordField.font", stdFont);
-			def.put("PopupMenu.font", stdFont);
-			def.put("ProgressBar.font", stdFont);
-			def.put("RadioButton.font", stdFont);
-			def.put("TabbedPane.font", stdFont);
-			def.put("TextArea.font", stdFont);
-			def.put("TextField.font", stdFont);
-			def.put("TextPane.font", stdFont);
-			def.put("TitledBorder.font", stdFont);
-			def.put("ToggleButton.font", stdFont);
-			def.put("ToolBar.font", stdFont);
-			def.put("ToolTip.font", stdFont);
-			def.put("Tree.font", stdFont);
-			def.put("ViewPort.font", stdFont);
-		}
-
-		Font dataFont = settings.getDataFont(false);
-		if (dataFont != null)
-		{
-			def.put("Table.font", dataFont);
-			def.put("TableHeader.font", dataFont);
-		}
-
-		// Polish up the standard look & feel settings
-		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
-		def.put("Table.gridColor", c);
-		def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
-
-		// use our own classes for some GUI elements
-		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
-		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
-
-		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
-		if (cls != null) def.put("TabbedPaneUI", cls);
-
-		settings.addFontChangedListener(this);
+		Settings.getInstance().addFontChangedListener(this);
 	}
 
 	protected JDialog closeMessage;

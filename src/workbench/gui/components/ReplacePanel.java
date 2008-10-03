@@ -18,9 +18,6 @@ import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -65,12 +62,12 @@ public class ReplacePanel
 		wordProperty = settingsKey + ".wholeWord";
 		selectedProperty = settingsKey + ".selectedText";
 		regexProperty = settingsKey + ".useRegEx";
-		criteriaProperty = settingsKey + ".criteria";
-		replacementProperty = settingsKey + ".replacement";
+		criteriaProperty = "criteria";
+		replacementProperty = "replacement";
 		
 		WbTraversalPolicy policy = new WbTraversalPolicy();
-		policy.addComponent(this.criteriaTextField);
-		policy.addComponent(this.replaceValueTextField);
+		policy.addComponent(this.searchCriteria.getEditor().getEditorComponent());
+		policy.addComponent(this.replaceValue.getEditor().getEditorComponent());
 		policy.addComponent(this.ignoreCaseCheckBox);
 		policy.addComponent(this.wordsOnlyCheckBox);
 		policy.addComponent(this.useRegexCheckBox);
@@ -79,7 +76,7 @@ public class ReplacePanel
 		policy.addComponent(this.replaceNextButton);
 		policy.addComponent(this.replaceAllButton);
 		policy.addComponent(this.closeButton);
-		policy.setDefaultComponent(criteriaTextField);
+		policy.setDefaultComponent(searchCriteria.getEditor().getEditorComponent());
 		this.setFocusTraversalPolicy(policy);
 
 		this.findButton.addActionListener(this);
@@ -91,14 +88,18 @@ public class ReplacePanel
 		this.replaceNextButton.setEnabled(false);
 		this.findNextButton.setEnabled(false);
 
-		this.criteriaTextField.addMouseListener(new TextComponentMouseListener());
-		this.replaceValueTextField.addMouseListener(new TextComponentMouseListener());
+		((HistoryTextField)searchCriteria).setColumns(30);
+		((HistoryTextField)searchCriteria).setSettingsProperty(criteriaProperty);
+		((HistoryTextField)replaceValue).setColumns(30);
+		((HistoryTextField)replaceValue).setSettingsProperty(replacementProperty);
+
+		this.restoreSettings();
+		
 		if (selectedText != null)
 		{
 			this.selectedTextCheckBox.setText(selectedText);
 		}
-		
-		this.restoreSettings();
+
 	}
 
 	/** This method is called from within the constructor to
@@ -111,8 +112,6 @@ public class ReplacePanel
     java.awt.GridBagConstraints gridBagConstraints;
 
     criteriaLabel = new javax.swing.JLabel();
-    criteriaTextField = new javax.swing.JTextField();
-    replaceValueTextField = new javax.swing.JTextField();
     ignoreCaseCheckBox = new javax.swing.JCheckBox();
     wordsOnlyCheckBox = new javax.swing.JCheckBox();
     replaceLabel = new javax.swing.JLabel();
@@ -124,41 +123,18 @@ public class ReplacePanel
     closeButton = new WbButton();
     selectedTextCheckBox = new javax.swing.JCheckBox();
     useRegexCheckBox = new javax.swing.JCheckBox();
+    replaceValue = new HistoryTextField();
+    searchCriteria = new HistoryTextField();
 
     setFocusCycleRoot(true);
     setLayout(new java.awt.GridBagLayout());
 
-    criteriaLabel.setLabelFor(criteriaTextField);
     criteriaLabel.setText(ResourceMgr.getString("LblSearchCriteria"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 5, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 0);
     add(criteriaLabel, gridBagConstraints);
-
-    criteriaTextField.setColumns(30);
-    criteriaTextField.setName("searchtext"); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 5);
-    add(criteriaTextField, gridBagConstraints);
-
-    replaceValueTextField.setColumns(30);
-    replaceValueTextField.setName("replacetext"); // NOI18N
-    replaceValueTextField.addFocusListener(new java.awt.event.FocusAdapter() {
-      public void focusGained(java.awt.event.FocusEvent evt) {
-        replaceValueTextFieldFocusGained(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 5);
-    add(replaceValueTextField, gridBagConstraints);
 
     ignoreCaseCheckBox.setText(ResourceMgr.getString("LblSearchIgnoreCase"));
     ignoreCaseCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
@@ -184,14 +160,13 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
     add(wordsOnlyCheckBox, gridBagConstraints);
 
-    replaceLabel.setLabelFor(replaceValueTextField);
     replaceLabel.setText(ResourceMgr.getString("LblReplaceNewValue"));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(4, 5, 0, 0);
     add(replaceLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -199,17 +174,19 @@ public class ReplacePanel
     gridBagConstraints.weighty = 1.0;
     add(spacerPanel, gridBagConstraints);
 
-    findButton.setText(ResourceMgr.getString("LblFindNow"));
-    findButton.setToolTipText(ResourceMgr.getDescription("LblFindNow"));
+    findButton.setText(ResourceMgr.getString("LblFindNow")); // NOI18N
+    findButton.setToolTipText(ResourceMgr.getString("d_LblFindNow")); // NOI18N
     findButton.setName("findbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 5);
     add(findButton, gridBagConstraints);
 
-    findNextButton.setText(ResourceMgr.getString("LblFindNext"));
-    findNextButton.setToolTipText(ResourceMgr.getDescription("LblFindNext"));
+    findNextButton.setText(ResourceMgr.getString("LblFindNext")); // NOI18N
+    findNextButton.setToolTipText(ResourceMgr.getString("d_LblFindNext")); // NOI18N
     findNextButton.setName("findnextbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -219,8 +196,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 5);
     add(findNextButton, gridBagConstraints);
 
-    replaceNextButton.setText(ResourceMgr.getString("LblReplaceNext"));
-    replaceNextButton.setToolTipText(ResourceMgr.getDescription("LblReplaceNext"));
+    replaceNextButton.setText(ResourceMgr.getString("LblReplaceNext")); // NOI18N
+    replaceNextButton.setToolTipText(ResourceMgr.getString("d_LblReplaceNext")); // NOI18N
     replaceNextButton.setName("replacenextbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -230,8 +207,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 5);
     add(replaceNextButton, gridBagConstraints);
 
-    replaceAllButton.setText(ResourceMgr.getString("LblReplaceAll"));
-    replaceAllButton.setToolTipText(ResourceMgr.getDescription("LblReplaceAll"));
+    replaceAllButton.setText(ResourceMgr.getString("LblReplaceAll")); // NOI18N
+    replaceAllButton.setToolTipText(ResourceMgr.getString("d_LblReplaceAll")); // NOI18N
     replaceAllButton.setName("replaceallbutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -241,7 +218,7 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(2, 0, 0, 5);
     add(replaceAllButton, gridBagConstraints);
 
-    closeButton.setText(ResourceMgr.getString("LblClose"));
+    closeButton.setText(ResourceMgr.getString("LblClose")); // NOI18N
     closeButton.setName("closebutton"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -274,17 +251,25 @@ public class ReplacePanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
     add(useRegexCheckBox, gridBagConstraints);
-  }// </editor-fold>//GEN-END:initComponents
 
-	private void replaceValueTextFieldFocusGained(java.awt.event.FocusEvent evt)//GEN-FIRST:event_replaceValueTextFieldFocusGained
-	{//GEN-HEADEREND:event_replaceValueTextFieldFocusGained
-		// When the popup menu for copy & paste is used, the oppositeComponent()
-		// is the RootPane. In this case we don't want to chage the selection
-		if (!(evt.getOppositeComponent() instanceof javax.swing.JRootPane))
-		{
-			this.replaceValueTextField.selectAll();
-		}
-	}//GEN-LAST:event_replaceValueTextFieldFocusGained
+    replaceValue.setName("replacetext"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 8);
+    add(replaceValue, gridBagConstraints);
+
+    searchCriteria.setName("searchtext"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(5, 6, 0, 8);
+    add(searchCriteria, gridBagConstraints);
+  }// </editor-fold>//GEN-END:initComponents
 
 	public void showReplaceDialog(Component caller, final String selectedText)
 	{
@@ -327,12 +312,9 @@ public class ReplacePanel
 
 			if (!StringUtil.isEmptyString(selectedText) && selectedText.indexOf('\n') == -1 && selectedText.indexOf('\r') == -1)
 			{
-				criteriaTextField.setText(selectedText);
+				((HistoryTextField)searchCriteria).setText(selectedText);
 				hasSelectedText = true;
 			}
-
-			InputMap im = this.dialog.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-			ActionMap am = this.dialog.getRootPane().getActionMap();
 
 			escAction = new EscAction(dialog, this);
 
@@ -344,13 +326,13 @@ public class ReplacePanel
 				{
 					if (criteriaAdded)
 					{
-						replaceValueTextField.selectAll();
-						replaceValueTextField.requestFocus();
+						((HistoryTextField)replaceValue).selectAll();
+						((HistoryTextField)replaceValue).requestFocus();
 					}
 					else
 					{
-						criteriaTextField.selectAll();
-						criteriaTextField.requestFocus();
+						((HistoryTextField)searchCriteria).selectAll();
+						((HistoryTextField)searchCriteria).requestFocus();
 					}
 				}
 			});
@@ -364,6 +346,7 @@ public class ReplacePanel
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		Object source = e.getSource();
+		updateHistoryFields();
 		if (source == this.findButton)
 		{
 			this.findFirst();
@@ -399,9 +382,10 @@ public class ReplacePanel
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
 		}
 	}
+	
 	private void findFirst()
 	{
-		String toFind = this.criteriaTextField.getText();
+		String toFind = ((HistoryTextField)searchCriteria).getText();
 		try
 		{
 			this.lastPos = this.client.findFirst(toFind, this.ignoreCaseCheckBox.isSelected(), this.wordsOnlyCheckBox.isSelected(), this.useRegexCheckBox.isSelected());
@@ -418,7 +402,7 @@ public class ReplacePanel
 	{
 		if (this.lastPos < 0) this.findFirst();
 
-		if (this.client.replaceCurrent(this.replaceValueTextField.getText(), this.useRegexCheckBox.isSelected()))
+		if (this.client.replaceCurrent(((HistoryTextField)replaceValue).getText(), this.useRegexCheckBox.isSelected()))
 		{
 			this.findNext();
 		}
@@ -431,8 +415,8 @@ public class ReplacePanel
 	private void replaceAll()
 	{
 		boolean selected = this.selectedTextCheckBox.isEnabled() && this.selectedTextCheckBox.isSelected();
-		this.client.replaceAll(this.criteriaTextField.getText(),
-		                       this.replaceValueTextField.getText(),
+		this.client.replaceAll(((HistoryTextField)searchCriteria).getText(),
+		                       ((HistoryTextField)replaceValue).getText(),
 													 selected,
 		                       this.ignoreCaseCheckBox.isSelected(),
 													 this.wordsOnlyCheckBox.isSelected(),
@@ -451,14 +435,20 @@ public class ReplacePanel
 		}
 	}
 
+	private void updateHistoryFields()
+	{
+		((HistoryTextField)searchCriteria).storeCurrent();
+		((HistoryTextField)replaceValue).storeCurrent();
+	}
+	
 	private void saveSettings()
 	{
 		Settings.getInstance().setProperty(caseProperty, Boolean.toString(this.ignoreCaseCheckBox.isSelected()));
 		Settings.getInstance().setProperty(wordProperty, Boolean.toString(this.wordsOnlyCheckBox.isSelected()));
 		Settings.getInstance().setProperty(selectedProperty, Boolean.toString(this.selectedTextCheckBox.isSelected()));
 		Settings.getInstance().setProperty(regexProperty, Boolean.toString(this.useRegexCheckBox.isSelected()));
-		Settings.getInstance().setProperty(criteriaProperty, this.criteriaTextField.getText());
-		Settings.getInstance().setProperty(replacementProperty, this.replaceValueTextField.getText());
+		((HistoryTextField)searchCriteria).saveSettings(Settings.getInstance(), settingsKey + ".");
+		((HistoryTextField)replaceValue).saveSettings(Settings.getInstance(), settingsKey + ".");
 		Settings.getInstance().storeWindowPosition(this.dialog, settingsKey + ".window");
 	}
 
@@ -468,8 +458,8 @@ public class ReplacePanel
 		this.wordsOnlyCheckBox.setSelected(Settings.getInstance().getBoolProperty(wordProperty, false));
 		this.selectedTextCheckBox.setSelected(Settings.getInstance().getBoolProperty(selectedProperty, false));
 		this.useRegexCheckBox.setSelected(Settings.getInstance().getBoolProperty(regexProperty, true));
-		this.criteriaTextField.setText(Settings.getInstance().getProperty(criteriaProperty, ""));
-		this.replaceValueTextField.setText(Settings.getInstance().getProperty(replacementProperty, ""));
+		((HistoryTextField)searchCriteria).restoreSettings(Settings.getInstance(), settingsKey + ".");
+		((HistoryTextField)replaceValue).restoreSettings(Settings.getInstance(), settingsKey + ".");
 	}
 
 	public void windowActivated(java.awt.event.WindowEvent e)
@@ -504,14 +494,14 @@ public class ReplacePanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JButton closeButton;
   protected javax.swing.JLabel criteriaLabel;
-  protected javax.swing.JTextField criteriaTextField;
   protected javax.swing.JButton findButton;
   protected javax.swing.JButton findNextButton;
   protected javax.swing.JCheckBox ignoreCaseCheckBox;
   protected javax.swing.JButton replaceAllButton;
   protected javax.swing.JLabel replaceLabel;
   protected javax.swing.JButton replaceNextButton;
-  protected javax.swing.JTextField replaceValueTextField;
+  protected javax.swing.JComboBox replaceValue;
+  protected javax.swing.JComboBox searchCriteria;
   protected javax.swing.JCheckBox selectedTextCheckBox;
   protected javax.swing.JPanel spacerPanel;
   protected javax.swing.JCheckBox useRegexCheckBox;

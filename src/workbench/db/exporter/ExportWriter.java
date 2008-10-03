@@ -11,7 +11,6 @@
  */
 package workbench.db.exporter;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
@@ -45,16 +44,16 @@ public abstract class ExportWriter
 	protected WbFile outputFile;
 	protected boolean canAppendStart = false;
   protected boolean trimCharData = false;
-	
+
 	private int progressInterval = 10;
-	
+
 	public ExportWriter(DataExporter exp)
 	{
 		this.exporter = exp;
 		converter = createConverter();
 		// configureConverter() might be called more than once!
 		// To prevent connection dependent information to be read
-		// more than once, call setOriginalConnection() only 
+		// more than once, call setOriginalConnection() only
 		// here and now
 		converter.setOriginalConnection(this.exporter.getConnection());
 		configureConverter();
@@ -73,9 +72,6 @@ public abstract class ExportWriter
 		converter.setFilenameColumn(exporter.getFilenameColumn());
 		converter.setPageTitle(exporter.getPageTitle());
 		converter.setWriteHeader(exporter.getExportHeaders());
-		
-		String file = this.exporter.getOutputFilename();
-		if (file != null) converter.setOutputFile(new File(file));
     trimCharData = getTrimCharData();
 	}
 
@@ -113,14 +109,14 @@ public abstract class ExportWriter
 		}
 		return trim;
 	}
-	
+
 	public void writeExport(DataStore ds)
 		throws SQLException, IOException
 	{
 		ResultInfo info = ds.getResultInfo();
-		this.converter.setGeneratingSql(exporter.getSql());
+		this.converter.setGeneratingSql(ds.getGeneratingSql());
 		this.converter.setResultInfo(info);
-		
+
 		if (this.converter.needsUpdateTable())
 		{
 			ds.checkUpdateTable();
@@ -129,11 +125,8 @@ public abstract class ExportWriter
 		this.cancel = false;
 		this.rows = 0;
 
-		if (this.rowMonitor != null && this.progressInterval > 0)
-		{
-			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
-		}
-		
+		startProgress();
+
 		writeStart();
 
 		int rowCount = ds.getRowCount();
@@ -141,11 +134,7 @@ public abstract class ExportWriter
 		{
 			if (this.cancel) break;
 
-			if (this.rowMonitor != null && this.progressInterval > 0 &&
-				  (this.rows == 1 || this.rows % this.progressInterval == 0))
-			{
-				this.rowMonitor.setCurrentRow((int)this.rows, -1);
-			}
+			updateProgress(rows);
 			RowData row = ds.getRow(i);
 			row.setTrimCharData(trimCharData);
 			writeRow(row, rows);
@@ -158,52 +147,72 @@ public abstract class ExportWriter
 	{
 		return false;
 	}
-	
+
 	public void setOutputFile(WbFile out)
 	{
 		this.outputWriter = null;
 		this.outputFile = out;
+		this.converter.setOutputFile(out);
 	}
+
 	public void setOutputWriter(Writer out)
 	{
 		this.outputWriter = out;
 		this.outputFile = null;
 	}
 
-	public void writeExport(ResultSet rs, ResultInfo info)
+	public void writeExport(ResultSet rs, ResultInfo info, String query)
 		throws SQLException, IOException
 	{
 		this.converter.setResultInfo(info);
-		this.converter.setGeneratingSql(exporter.getSql());
+		this.converter.setGeneratingSql(query);
 
 		this.cancel = false;
 		this.rows = 0;
 
-		if (this.rowMonitor != null && this.progressInterval > 0)
-		{
-			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
-		}
 		int colCount = info.getColumnCount();
-		
-		if (!this.exporter.getAppendToFile() || canAppendStart) writeStart();
+		startProgress();
+
+		boolean first = true;
+		if (this.exporter.writeEmptyResults()) writeStart();
+
 		while (rs.next())
 		{
 			if (this.cancel) break;
-
-			if (this.rowMonitor != null && this.progressInterval > 0 &&
-				  (this.rows == 1 || this.rows % this.progressInterval == 0))
+			
+			if (first)
 			{
-				this.rowMonitor.setCurrentRow((int)this.rows, -1);
+				first = false;
+				if (!this.exporter.writeEmptyResults()) writeStart();
 			}
+			updateProgress(rows);
+
 			RowData row = new RowData(colCount);
 			row.setTrimCharData(trimCharData);
 			row.read(rs, info);
 			writeRow(row, rows);
 			rows ++;
 		}
-		writeEnd(rows);
+		if (rows > 0 || this.exporter.writeEmptyResults()) writeEnd(rows);
 	}
 
+	protected void startProgress()
+	{
+		if (this.rowMonitor != null && this.progressInterval > 0)
+		{
+			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_EXPORT);
+		}
+	}
+
+	protected void updateProgress(long currentRow)
+	{
+		if (this.rowMonitor != null && this.progressInterval > 0 &&
+				(currentRow == 1 || this.rows % this.progressInterval == 0))
+		{
+			this.rowMonitor.setCurrentRow((int)currentRow, -1);
+		}
+	}
+	
 	protected void writeRow(RowData row, long numRows)
 		throws IOException
 	{
@@ -213,10 +222,11 @@ public abstract class ExportWriter
 			data.writeTo(this.outputWriter);
 		}
 	}
-	
+
 	protected void writeStart()
 		throws IOException
 	{
+		if (this.exporter.getAppendToFile() && !canAppendStart) return;
 		writeFormatFile();
 		StrBuffer data = converter.getStart();
 		if (data != null && outputWriter != null)
@@ -238,10 +248,10 @@ public abstract class ExportWriter
 	public void exportStarting()
 		throws IOException
 	{
-		
+
 	}
-	
-	public void exportFinished()
+
+	public long exportFinished()
 	{
 		FileUtil.closeQuitely(outputWriter);
 		try
@@ -251,8 +261,9 @@ public abstract class ExportWriter
 		catch (Exception e)
 		{
 			LogMgr.logError("ExportWriter.exportFinished()", "Error closing output stream", e);
+			return -1;
 		}
-		
+		return this.rows;
 	}
 
 	public void cancel()
