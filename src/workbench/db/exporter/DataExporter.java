@@ -616,12 +616,12 @@ public class DataExporter
 		return this.chrFunc;
 	}
 
-	public void setDecimalSymbol(char aSymbol)
+	public void setDecimalSymbol(String aSymbol)
 	{
-		if (aSymbol != 0)
+		if (StringUtil.isNonBlank(aSymbol))
 		{
 			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-			symbols.setDecimalSeparator(aSymbol);
+			symbols.setDecimalSeparator(aSymbol.charAt(0));
 			numberFormatter = new DecimalFormat("0.#", symbols);
 			numberFormatter.setGroupingUsed(false);
 			numberFormatter.setMaximumFractionDigits(999);
@@ -637,12 +637,7 @@ public class DataExporter
 		return this.numberFormatter;
 	}
 
-	public void setDecimalSymbol(String aSymbol)
-	{
-		if (StringUtil.isEmptyString(aSymbol)) return;
-		this.setDecimalSymbol(aSymbol.charAt(0));
-	}
-
+	
 	public void addQueryJob(String query, WbFile outputFile)
 	{
 		ExportJobEntry entry = new ExportJobEntry(outputFile, query);

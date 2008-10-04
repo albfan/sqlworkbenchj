@@ -120,7 +120,7 @@ public class DataImporter
 	// to update the table
 	private int[] columnMap = null;
 
-	private ColumnIdentifier[] targetColumns;
+	private List<ColumnIdentifier> targetColumns;
 	private List<ColumnIdentifier> keyColumns;
 	
 	// A map that stores constant values for the import. 
@@ -708,7 +708,7 @@ public class DataImporter
 	private void createTarget()
 		throws SQLException
 	{
-		TableCreator creator = new TableCreator(this.dbConn, this.targetTable, Arrays.asList(this.targetColumns));
+		TableCreator creator = new TableCreator(this.dbConn, this.targetTable, this.targetColumns);
 		creator.useDbmsDataType(true);
 		creator.createTable();
 		String table = creator.getTable().getTableName();
@@ -957,16 +957,16 @@ public class DataImporter
 		catch (SQLException e)
 		{
 			this.hasErrors = true;
+			ValueDisplay display = new ValueDisplay(row);
 			LogMgr.logError("DataImporter.processRow()", "Error importing row " + currentImportRow + ": " + ExceptionUtil.getDisplay(e), null);
 			if (this.badWriter == null)
 			{
-				String value = this.getValueDisplay(row);			
 				this.addError(ResourceMgr.getString("ErrImportingRow") + " " + currentImportRow + "\n");
 				this.addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
-				this.addError(ResourceMgr.getString("ErrImportValues") + " " + value + "\n\n");
+				this.addError(ResourceMgr.getString("ErrImportValues") + " " + display.toString() + "\n\n");
 				if (errorLimitAdded)
 				{
-					LogMgr.logError("DataImporter.processRow()", "Values: " + value, null);
+					LogMgr.logError("DataImporter.processRow()", "Values: " + display.toString(), null);
 				}
 			}
 			errorCount ++;
@@ -974,7 +974,7 @@ public class DataImporter
 			String rec = this.source.getLastRecord();
 			if (rec == null)
 			{
-				rec = this.getValueDisplay(row);
+				rec = display.toString();
 			}
 			recordRejected(rec);
 		}
@@ -1128,28 +1128,6 @@ public class DataImporter
 		}
 	}
 	
-	private String getValueDisplay(Object[] row)
-	{
-		int count = row.length;
-		StringBuilder values = new StringBuilder(count * 20);
-		values.append('[');
-
-		for (int i=0; i < count; i++)
-		{
-			if (i > 0) values.append(',');
-			if (row[i] == null)
-			{
-				values.append("NULL");
-			}
-			else
-			{
-				values.append(row[i].toString());
-			}
-		}
-		values.append(']');
-		return values.toString();
-	}
-
 	/**
 	 *	Insert a row of data into the target table.
 	 *	This method relies on insertStatement correctly initialized with
@@ -1222,8 +1200,8 @@ public class DataImporter
 				colIndex = this.columnMap[i] + 1;
 			}
 			
-			int targetSqlType = this.targetColumns[i].getDataType();
-			String targetDbmsType = this.targetColumns[i].getDbmsType(); 
+			int targetSqlType = this.targetColumns.get(i).getDataType();
+			String targetDbmsType = this.targetColumns.get(i).getDbmsType();
 			
 			if (row[i] == null)
 			{
@@ -1505,7 +1483,7 @@ public class DataImporter
 		try
 		{
 			this.targetTable = table.createCopy();
-			this.targetColumns = columns;
+			this.targetColumns = Arrays.asList(columns);
 			
 			// Key columns might have been externally defined if
 			// a single table import is run which is not possible
@@ -1516,7 +1494,7 @@ public class DataImporter
 				this.keyColumns = null;
 			}
 			
-			this.colCount = this.targetColumns.length;
+			this.colCount = this.targetColumns.size();
 
 			if (this.parser != null)
 			{
@@ -1663,8 +1641,8 @@ public class DataImporter
 	private void prepareInsertStatement()
 		throws SQLException
 	{
-		StringBuilder text = new StringBuilder(this.targetColumns.length * 50);
-		StringBuilder parms = new StringBuilder(targetColumns.length * 20);
+		StringBuilder text = new StringBuilder(this.targetColumns.size() * 50);
+		StringBuilder parms = new StringBuilder(targetColumns.size() * 20);
 
 		String sql = dbConn.getDbSettings().getInsertForImport();
 		if (!StringUtil.isEmptyString(sql))
@@ -1685,7 +1663,7 @@ public class DataImporter
 				text.append(',');
 				parms.append(',');
 			}
-			text.append(this.targetColumns[i].getColumnName());
+			text.append(this.targetColumns.get(i).getColumnName());
 			parms.append('?');
 		}
 		if (this.columnConstants != null)
@@ -1758,7 +1736,7 @@ public class DataImporter
 		boolean pkAdded = false;
 		for (int i=0; i < this.colCount; i++)
 		{
-			ColumnIdentifier col = this.targetColumns[i];
+			ColumnIdentifier col = this.targetColumns.get(i);
 			if (keyColumns.contains(col))
 			{
 				this.columnMap[i] = pkIndex;
