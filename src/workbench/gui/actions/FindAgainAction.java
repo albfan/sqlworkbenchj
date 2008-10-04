@@ -24,7 +24,8 @@ import workbench.resource.ResourceMgr;
  *	Find the next occurance of a search string.
  *	@author  support@sql-workbench.net
  */
-public class FindAgainAction extends WbAction
+public class FindAgainAction
+	extends WbAction
 {
 	private Searchable client;
 
@@ -38,6 +39,6 @@ public class FindAgainAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		int pos = this.client.findNext();
+		this.client.findNext();
 	}
 }

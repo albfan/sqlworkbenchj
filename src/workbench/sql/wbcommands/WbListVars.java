@@ -13,7 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
-import workbench.db.WbConnection;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
 import workbench.sql.StatementRunnerResult;
@@ -25,14 +24,11 @@ import workbench.sql.StatementRunnerResult;
 public class WbListVars extends SqlCommand
 {
 	public static final String VERB = "WBVARLIST";
-	public WbListVars()
-	{
-	}
 
 	public String getVerb() { return VERB; }
 
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{

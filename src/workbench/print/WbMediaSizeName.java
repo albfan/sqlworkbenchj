@@ -27,17 +27,6 @@ public class WbMediaSizeName
 		super(aValue);
 	}
 	
-
-	public String[] getStringTable()
-	{
-		return super.getStringTable();
-	}
-	
-	public EnumSyntax[] getEnumValueTable() 
-	{
-		return super.getEnumValueTable();
-	}
-	
 	public static String getName(MediaSizeName aMedia)
 	{
 		int value = aMedia.getValue();

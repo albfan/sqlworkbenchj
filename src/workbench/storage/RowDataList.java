@@ -27,7 +27,8 @@ public class RowDataList
 	// growth factor when increasing the array
 	private float grow = 1.10f;
 	private int size;
-	private RowData data[];
+	private RowData[] data;
+	private final Object dataLock = new Object();
 
 	public RowDataList()
 	{
@@ -51,9 +52,9 @@ public class RowDataList
 			int newStorage = (int)(this.data.length * grow) + 1;
 			if (newStorage < minStorage) newStorage = minStorage;
 
-			synchronized (this.data)
+			synchronized (this.dataLock)
 			{
-				RowData newBuf[] = new RowData[newStorage];
+				RowData[] newBuf = new RowData[newStorage];
 				System.arraycopy(this.data, 0, newBuf, 0, this.size);
 				this.data = newBuf;
 			}
@@ -77,7 +78,7 @@ public class RowDataList
 	public void reset()
 	{
 		if (data == null) return;
-		synchronized (this.data)
+		synchronized (this.dataLock)
 		{
 			for (RowData row : data)
 			{
@@ -113,7 +114,7 @@ public class RowDataList
 	public RowData get(int index)
 	{
 		if (data == null) throw new ArrayIndexOutOfBoundsException(index);
-		synchronized (this.data)
+		synchronized (this.dataLock)
 		{
 			return this.data[index];
 		}
@@ -127,7 +128,7 @@ public class RowDataList
 		if (data == null) throw new ArrayIndexOutOfBoundsException(index);
 		int count = size - index - 1;
 
-		synchronized (this.data)
+		synchronized (this.dataLock)
 		{
 			if (count > 0)
 			{
@@ -151,7 +152,7 @@ public class RowDataList
 		
 		int newlen = this.size + 1;
 		
-		synchronized (this.data)
+		synchronized (this.dataLock)
 		{
 			if (newlen > this.data.length) grow(newlen);
 			this.data[newlen - 1] = row;
@@ -166,7 +167,7 @@ public class RowDataList
 	public int add(int index, RowData row)
 	{
 		int newlen = this.size + 1;
-		synchronized (this.data)
+		synchronized (this.dataLock)
 		{
 			if (data == null)
 			{
@@ -176,7 +177,7 @@ public class RowDataList
 			{
 				// we are not using ensureCapacity here to optimize
 				// the calls to System.arraycopy
-				RowData newBuf[] = new RowData[(int)(newlen * grow)];
+				RowData[] newBuf = new RowData[(int)(newlen * grow)];
 				System.arraycopy(this.data, 0, newBuf, 0, index);
 				System.arraycopy(this.data, index, newBuf, index + 1, (size - index));
 				this.data = newBuf;
@@ -194,7 +195,7 @@ public class RowDataList
 	public void sort(Comparator<RowData> comp)
 	{
 		if (size == 0 || data == null) return;
-		synchronized (this.data)
+		synchronized (this.dataLock)
 		{
 			Arrays.sort(this.data, 0, this.size, comp);
 		}

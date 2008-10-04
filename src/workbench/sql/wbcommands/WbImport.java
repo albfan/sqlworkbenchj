@@ -86,6 +86,7 @@ public class WbImport
 
 	public WbImport()
 	{
+		super();
 		this.isUpdatingCommand = true;
 		this.cmdLine = new ArgumentParser();
 		CommonArgs.addDelimiterParameter(cmdLine);
@@ -288,7 +289,7 @@ public class WbImport
 
 		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		ImportFileParser parser = null;
-			
+
 		if ("text".equalsIgnoreCase(type) || "txt".equalsIgnoreCase(type))
 		{
 			if (table == null && dir == null)
@@ -301,12 +302,12 @@ public class WbImport
 			}
 
 			defaultExtension = "txt";
-			
+
 			TextFileParser textParser = new TextFileParser();
 			parser = textParser;
 
 			textParser.setTableName(table);
-			
+
 			if (inputFile != null)
 			{
 				textParser.setInputFile(inputFile);
@@ -364,7 +365,7 @@ public class WbImport
 			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
 			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
 			textParser.setContainsHeader(header);
-			
+
 			if (dir == null)
 			{
 				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
@@ -411,7 +412,7 @@ public class WbImport
 			{
 				addColumnFilter(colFilter, textParser);
 			}
-			
+
 			textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));
 
 			String filter = cmdLine.getValue(ARG_LINE_FILTER);
@@ -442,7 +443,7 @@ public class WbImport
 		else if ("xml".equalsIgnoreCase(type))
 		{
 			defaultExtension = "xml";
-			
+
 			XmlDataFileParser xmlParser = new XmlDataFileParser();
 			xmlParser.setConnection(currentConnection);
 			xmlParser.setAbortOnError(!continueOnError);
@@ -485,7 +486,7 @@ public class WbImport
 			parser.setSourceFiles(sorter);
 		}
 		parser.setTrimValues(cmdLine.getBoolean(ARG_TRIM_VALUES, getTrimDefault()));
-		
+
 		ValueConverter converter = null;
 		try
 		{
@@ -528,7 +529,7 @@ public class WbImport
 		{
 			parser.setMultiFileImport(true);
 		}
-		
+
 		if (badFile != null) imp.setBadfileName(badFile);
 
 		String value = cmdLine.getValue(CommonArgs.ARG_PROGRESS);
@@ -614,7 +615,7 @@ public class WbImport
 				imp.setUseTruncate(useTruncate);
 			}
 		}
-		
+
 		int startRow = cmdLine.getIntValue(ARG_START_ROW, -1);
 		if (startRow > 0) imp.setStartRow(startRow);
 
@@ -674,18 +675,16 @@ public class WbImport
 		if (dir == null) return null;
 		String ext = cmdLine.getValue(ARG_FILE_EXT);
 		if (ext == null) ext = defaultExt;
-		
+
 		ImportFileLister lister = new ImportFileLister(this.currentConnection, new File(dir), ext);
 		lister.setIgnoreSchema(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
 		lister.ignoreFiles(cmdLine.getListValue(ARG_EXCLUDE_FILES));
 		lister.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
 		return lister;
 	}
-	
+
 	private void addColumnFilter(String filters, TextFileParser textParser)
 	{
-		if (filters == null || filters.trim().length() == 0) return;
-
 		List<String> filterList = StringUtil.stringToList(filters, ",", false);
 
 		if (filterList.size() < 1) return;

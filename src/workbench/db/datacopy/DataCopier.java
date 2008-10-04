@@ -37,19 +37,20 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
  * A class to copy data from one database to another.
  * DataCopier supports copying multiple tables or just a single table. When
- * copying multiple tables (using {@link #setTableList(java.util.List)} the 
- * tables between source and destination are matched by name. 
- * 
+ * copying multiple tables (using {@link #setTableList(java.util.List)} the
+ * tables between source and destination are matched by name.
+ *
  * When copying a single table, source and target table need not have the same
- * name. 
- * 
- * The source data is always retrieved using a {@link QueryCopySource} 
- * 
+ * name.
+ *
+ * The source data is always retrieved using a {@link QueryCopySource}
+ *
  * @author  support@sql-workbench.net
  */
 public class DataCopier
@@ -66,13 +67,13 @@ public class DataCopier
 	private DataImporter importer;
 
 	// the columnMap will contain elements of type ColumnIdentifier
-	private HashMap<ColumnIdentifier, ColumnIdentifier> columnMap;
+	private Map<ColumnIdentifier, ColumnIdentifier> columnMap;
 
 	private ColumnIdentifier[] targetColumnsForQuery;
 	private MessageBuffer messages = null;
 	private MessageBuffer errors = null;
 	private boolean doSyncDelete = false;
-	
+
 	public DataCopier()
 	{
 		this.importer = new DataImporter();
@@ -97,28 +98,28 @@ public class DataCopier
 	{
 		this.importer.setTransactionControl(flag);
 	}
-	
+
 	public void beginMultiTableCopy()
 		throws SQLException
 	{
 		this.importer.beginMultiTable();
 	}
-	
+
 	public void endMultiTableCopy()
 	{
 		this.importer.endMultiTable();
 	}
-	
+
 	public RowDataProducer getSource()
 	{
 		return this.sourceData;
 	}
-	
+
 	public RowDataReceiver getReceiver()
 	{
 		return this.importer;
 	}
-	
+
 	public void setKeyColumns(List<ColumnIdentifier> keys)
 	{
 		this.importer.setKeyColumns(keys);
@@ -133,7 +134,7 @@ public class DataCopier
 	{
 		this.importer.setPerTableStatements(stmt);
 	}
-	
+
 	/**
 	 *	Forwards the setMode() call to the DataImporter.
 	 *	@see workbench.db.importer.DataImporter#setMode(String)
@@ -166,13 +167,13 @@ public class DataCopier
 	 *	It is expected that the mapping contains String objects. The key is the name of the
 	 *	source column, the mapped value is the name of the target column
 	 */
-	public void copyFromTable(WbConnection source, 
-														WbConnection target, 
-														TableIdentifier aSourceTable, 
-														TableIdentifier aTargetTable, 
-														Map<String, String> columnMapping, 
-														String additionalWhere, 
-														boolean createTable, 
+	public void copyFromTable(WbConnection source,
+														WbConnection target,
+														TableIdentifier aSourceTable,
+														TableIdentifier aTargetTable,
+														Map<String, String> columnMapping,
+														String additionalWhere,
+														boolean createTable,
 														boolean dropTable)
 		throws SQLException
 	{
@@ -190,12 +191,12 @@ public class DataCopier
 		}
 
 		this.initColumnMapping(columnMapping, createTable);
-			
-		if (createTable) 
+
+		if (createTable)
 		{
 			createTable(this.columnMap.values(), dropTable);
 		}
-		
+
 		this.initImporterForTable(additionalWhere);
 	}
 
@@ -238,14 +239,14 @@ public class DataCopier
 			throw e;
 		}
 	}
-		
+
 	/**
 	 *	Copy data from a SQL SELECT result to the given target table.
 	 */
-	public void copyFromQuery(WbConnection source, 
-														WbConnection target, 
-														String aSourceQuery, 
-														TableIdentifier aTargetTable, 
+	public void copyFromQuery(WbConnection source,
+														WbConnection target,
+														String aSourceQuery,
+														TableIdentifier aTargetTable,
 														ColumnIdentifier[] queryColumns,
 														boolean createTarget,
 														boolean dropTarget)
@@ -286,7 +287,7 @@ public class DataCopier
 	{
 		this.importer.setTableList(tables);
 	}
-	
+
 	public void setDeleteTarget(boolean delete)
 	{
 		this.importer.setDeleteTarget(delete);
@@ -306,22 +307,22 @@ public class DataCopier
 	{
 		this.importer.setCommitBatch(flag);
 	}
-	
+
 	public int getBatchSize()
 	{
 		return this.importer.getBatchSize();
 	}
-	
-	public void setBatchSize(int size) 
+
+	public void setBatchSize(int size)
 	{
 		this.importer.setBatchSize(size);
 	}
-	
+
 	public void commitNothing()
 	{
 		this.importer.commitNothing();
 	}
-	
+
 	public void setCommitEvery(int interval)
 	{
 		this.importer.setCommitEvery(interval);
@@ -331,7 +332,7 @@ public class DataCopier
 	{
 		this.doSyncDelete = flag;
 	}
-	
+
 	public void startBackgroundCopy()
 	{
 		Thread t = new WbThread("DataCopier Thread")
@@ -375,7 +376,7 @@ public class DataCopier
 			// depending on which source we set for the importer
 			this.sourceData.setAbortOnError(!this.importer.getContinueOnError());
 			this.importer.startImport();
-			
+
 			if (this.doSyncDelete)
 			{
 				TableDeleteSync sync = new TableDeleteSync(this.targetConnection, this.sourceConnection);
@@ -439,7 +440,7 @@ public class DataCopier
 	private void initImporterForTable(String addWhere)
 		throws SQLException
 	{
-		if (this.columnMap == null || this.columnMap.size() == 0)  
+		if (this.columnMap == null || this.columnMap.size() == 0)
 		{
 			throw new SQLException("No columns defined");
 		}
@@ -463,11 +464,11 @@ public class DataCopier
 			cols[col] = tid;
 			col ++;
 		}
-		
+
 		sql.append(" FROM ");
 		sql.append(this.sourceTable.getTableExpression(this.sourceConnection));
 
-		if (addWhere != null && addWhere.trim().length() > 0)
+		if (StringUtil.isNonBlank(addWhere))
 		{
 			sql.append(' ');
 			String first = SqlUtil.getSqlVerb(addWhere);
@@ -478,7 +479,7 @@ public class DataCopier
 			sql.append(addWhere);
 		}
 		initQuerySource(sql.toString());
-		
+
 		try
 		{
 			this.importer.setTargetTable(this.targetTable, cols);
@@ -518,12 +519,12 @@ public class DataCopier
 		}
 		return sourceCols;
 	}
-	
+
 	private ColumnIdentifier findColumn(List<ColumnIdentifier> columns, String colname)
 	{
 		if (columns == null) return null;
 		if (colname == null) return null;
-		
+
 		for (ColumnIdentifier col : columns)
 		{
 			String name = col.getColumnName();
@@ -531,7 +532,7 @@ public class DataCopier
 		}
 		return null;
 	}
-	
+
 	private void addTargetColumn(ColumnIdentifier sourceCol, String targetName, List<ColumnIdentifier> targetCols)
 	{
 		if (sourceCol == null) return;
@@ -547,7 +548,7 @@ public class DataCopier
 			this.addMessage(msg);
 		}
 	}
-	
+
 	/**
 	 *	Initialize the column mapping between source and target table.
 	 *	If a mapping is provided, it is used (after checking that the columns
@@ -562,7 +563,7 @@ public class DataCopier
 		if (!createNew) targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
 
 		this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(sourceCols.size());
-		
+
 		if (columnMapping != null)
 		{
 			int colPos = 0;
@@ -581,9 +582,9 @@ public class DataCopier
 							// Mapping specified, change the name of the column to the specified value
 							targetCol.setColumnName(entry.getValue());
 						}
-						
+
 						// Make sure the order of the columns is preserved
-						// when creating the table later, the columns will 
+						// when creating the table later, the columns will
 						// be sorted by the position before generating the SQL
 						targetCol.setPosition(colPos);
 						colPos++;
@@ -615,7 +616,7 @@ public class DataCopier
 				{
 					addTargetColumn(scol, null, targetCols);
 				}
-				
+
 			}
 		}
 	}
@@ -649,12 +650,12 @@ public class DataCopier
 		buf.append(this.errors);
 		return buf;
 	}
-	
+
 	public CharSequence getAllMessages()
 	{
 		StringBuilder log = new StringBuilder(2000);
 
-		if (this.messages != null) 
+		if (this.messages != null)
 		{
 			log.append(messages.getBuffer());
 			log.append('\n');

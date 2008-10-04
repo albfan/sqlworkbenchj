@@ -17,23 +17,18 @@ import javax.swing.plaf.basic.BasicSplitPaneUI;
 
 /**
  * WB's own SplitPaneUI in order to be able to control the Divider
- * 
- * @author support@sql-workbench.net  
- */ 
+ *
+ * @author support@sql-workbench.net
+ */
 public class WbSplitPaneUI
 	extends BasicSplitPaneUI
 {
-	
-	public WbSplitPaneUI()
-	{
-		super();
-	}
-	
+
 	public BasicSplitPaneDivider createDefaultDivider()
 	{
 		return new WbSplitPaneDivider(this);
 	}
-	
+
 	public void setOneTouchTooltip(String tip)
 	{
 		if (divider instanceof WbSplitPaneDivider)

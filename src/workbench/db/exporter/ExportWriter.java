@@ -284,9 +284,9 @@ public abstract class ExportWriter
 	 * Setter for property tableToUse.
 	 * @param tableToUse New value of property tableToUse.
 	 */
-	public void setTableToUse(String tableToUse)
+	public void setTableToUse(String tableName)
 	{
-		this.tableToUse = tableToUse;
+		this.tableToUse = tableName;
 	}
 
 	protected void writeFormatFile()

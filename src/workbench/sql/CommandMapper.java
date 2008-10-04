@@ -14,6 +14,7 @@ package workbench.sql;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -63,7 +64,7 @@ import workbench.util.StringUtil;
  */
 public class CommandMapper
 {
-	private HashMap<String, SqlCommand> cmdDispatch;
+	private Map<String, SqlCommand> cmdDispatch;
 	private List<String> dbSpecificCommands;
 	private boolean supportsSelectInto = false;
 	private DbMetadata metaData;

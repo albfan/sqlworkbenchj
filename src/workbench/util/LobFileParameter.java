@@ -12,7 +12,6 @@
 package workbench.util;
 
 import java.io.Closeable;
-import workbench.util.FileUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -23,23 +22,23 @@ public class LobFileParameter
 	private String filename;
 	private String encoding;
 	private boolean binary;
-	
+
 	public LobFileParameter()
 	{
 	}
-	
+
 	public LobFileParameter(String fname, String enc, boolean isBinary)
 	{
 		setFilename(fname);
 		setEncoding(enc);
 		setBinary(isBinary);
 	}
-	
+
 	public String toString()
 	{
 		return "filename=[" + filename + "], binary=" + binary + ", encoding=" + encoding;
 	}
-	
+
 	public void setDataStream(Closeable in)
 	{
 		this.dataStream = in;
@@ -49,12 +48,12 @@ public class LobFileParameter
 	{
 		FileUtil.closeQuitely(dataStream);
 	}
-	
+
 	public void setBinary(boolean flag) { binary = flag; }
 	public boolean isBinary() { return binary; }
 	public String getFilename() { return filename; }
 	public void setFilename(String fname) { filename = fname; }
-	
+
 	public String getEncoding() { return encoding; }
 	public void setEncoding(String enc) { encoding = enc; }
 }

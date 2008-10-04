@@ -25,11 +25,6 @@ public class WbListTables extends SqlCommand
 {
 	public static final String VERB = "WBLIST";
 
-	/** Creates a new instance of WbListTables */
-	public WbListTables()
-	{
-	}
-
 	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(String aSql)

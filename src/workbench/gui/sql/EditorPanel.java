@@ -110,7 +110,6 @@ public class EditorPanel
 	private static final int SQL_EDITOR = 0;
 	private static final int TEXT_EDITOR = 1;
 	private int editorType;
-	private String lastSearchCriteria;
 
 	private FormatSqlAction formatSql;
 	private SearchAndReplace replacer;

@@ -51,15 +51,15 @@ public class IndexReporter
 	{
 		indexList  = new LinkedList<IndexDefinition>();
 		indexList.add(index);
-	}	
-	
+	}
+
 	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
 		int numIndex = this.indexList.size();
 		if (numIndex == 0) return;
 		StrBuffer defIndent = new StrBuffer(indent);
 		defIndent.append("  ");
-		
+
 		for (IndexDefinition index : indexList)
 		{
 			if (index == null) continue;
@@ -79,10 +79,10 @@ public class IndexReporter
 				result.append('\n');
 				for (IndexColumn col : columns)
 				{
-					
+
 					List<TagAttribute> attrs = new ArrayList<TagAttribute>(2);
 					attrs.add(new TagAttribute("name", col.getColumn()));
-					
+
 					if (col.getDirection() != null)
 					{
 						attrs.add(new TagAttribute("direction", col.getDirection()));
@@ -94,7 +94,6 @@ public class IndexReporter
 			}
 			tagWriter.appendCloseTag(result, indent, TAG_INDEX);
 		}
-		return;
 	}
 
 	public void setNamespace(String name)
@@ -106,7 +105,7 @@ public class IndexReporter
 	{
 		return this.indexList;
 	}
-	
+
 	public void done()
 	{
 	}

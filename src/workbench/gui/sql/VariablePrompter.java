@@ -17,11 +17,11 @@ import workbench.sql.VariablePool;
 import workbench.storage.DataStore;
 
 /**
- * Examine SQL statements whether they need parameters to be entered. 
+ * Examine SQL statements whether they need parameters to be entered.
  * If the passed SQL Statement contains Workbench specific variables
  * the user is prompted to enter them.
  * @see workbench.sql.VariablePool
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class VariablePrompter
@@ -30,21 +30,17 @@ public class VariablePrompter
 	private	VariablePool pool = VariablePool.getInstance();
 	private String sql;
 
-	public VariablePrompter()
-	{
-	}
-
 	public void setSql(String input)
 	{
 		this.sql = input;
 		this.toPrompt = null;
 	}
-	
+
 	public boolean hasPrompt()
 	{
 		return this.pool.hasPrompt(this.sql);
 	}
-	
+
 	public boolean needsInput()
 	{
 		if (!this.hasPrompt()) return false;
@@ -54,7 +50,7 @@ public class VariablePrompter
 		}
 		return (this.toPrompt.size() > 0);
 	}
-	
+
 	public boolean getPromptValues()
 	{
 		if (this.toPrompt == null)
@@ -62,9 +58,9 @@ public class VariablePrompter
 			this.toPrompt = this.pool.getVariablesNeedingPrompt(this.sql);
 		}
 		if (this.toPrompt.size() == 0) return true;
-		
+
 		DataStore vars = this.pool.getVariablesDataStore(this.toPrompt);
-		
+
 		return VariablesEditor.showVariablesDialog(vars);
 	}
 

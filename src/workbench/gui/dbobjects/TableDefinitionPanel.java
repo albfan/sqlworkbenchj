@@ -53,13 +53,14 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
  * A panel to display the table definition information inside the DbExplorer.
- * 
+ *
  * @see workbench.db.DbMetadata#getTableDefinition(TableIdentifier)
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class TableDefinitionPanel
@@ -68,7 +69,7 @@ public class TableDefinitionPanel
 {
 	public static final String INDEX_PROP = "index";
 	public static final String DEFINITION_PROP = "tableDefinition";
-	
+
 	private WbTable tableDefinition;
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
@@ -82,6 +83,7 @@ public class TableDefinitionPanel
 
 	public TableDefinitionPanel()
 	{
+		super();
 		this.tableDefinition = new WbTable(true, false, false);
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		this.tableDefinition.setSelectOnRightButtonClick(true);
@@ -97,7 +99,7 @@ public class TableDefinitionPanel
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
 		columnFilter.addToToolbar(reloadAction, 0);
 		GridBagConstraints cc = new GridBagConstraints();
-		
+
 		cc.anchor = GridBagConstraints.WEST;
 		cc.fill = GridBagConstraints.HORIZONTAL;
 		cc.gridx = 0;
@@ -120,12 +122,12 @@ public class TableDefinitionPanel
 		cc.fill = GridBagConstraints.NONE;
 		cc.insets = new Insets(0, 0, 0, 0);
 		toolbar.add(tableNameLabel, cc);
-		
+
 		cc.gridx ++;
 		cc.weightx = 1.0;
 		cc.fill = GridBagConstraints.HORIZONTAL;
 		toolbar.add(new JPanel(), cc);
-		
+
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		this.setLayout(new BorderLayout());
 		this.add(toolbar, BorderLayout.NORTH);
@@ -143,7 +145,7 @@ public class TableDefinitionPanel
 	{
 		firePropertyChange(DEFINITION_PROP, null, this.currentTable.getTableName());
 	}
-	
+
 	protected void fireIndexChanged(String indexName)
 	{
 		firePropertyChange(INDEX_PROP, null, indexName);
@@ -153,7 +155,7 @@ public class TableDefinitionPanel
 	{
 		this.tableDefinition.showFocusBorder();
 	}
-	
+
 	private final Object busyLock = new Object();
 	public boolean isBusy()
 	{
@@ -186,7 +188,7 @@ public class TableDefinitionPanel
 		throws SQLException
 	{
 		if (this.isBusy()) return;
-		
+
 		synchronized (this.dbConnection)
 		{
 			try
@@ -260,7 +262,7 @@ public class TableDefinitionPanel
 		}
 		tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
 	}
-	
+
 	public void reset()
 	{
 		this.currentTable = null;
@@ -277,7 +279,7 @@ public class TableDefinitionPanel
 		}
 		return dropColumnsAction;
 	}
-	
+
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -306,7 +308,7 @@ public class TableDefinitionPanel
 		if (this.dbConnection == null) return;
 
 		this.tableDefinition.reset();
-		
+
 		WbThread t = new WbThread("TableDefinition Retrieve")
 		{
 			public void run()
@@ -336,10 +338,10 @@ public class TableDefinitionPanel
 	public List<DbObject> getSelectedObjects()
 	{
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return null;
-		int rows[] = this.tableDefinition.getSelectedRows();
-		
+		int[] rows = this.tableDefinition.getSelectedRows();
+
 		List<DbObject> columns = new ArrayList<DbObject>(rows.length);
-		
+
 		for (int i=0; i < rows.length; i++)
 		{
 			String column = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
@@ -362,16 +364,16 @@ public class TableDefinitionPanel
 	{
 		return this.currentTable;
 	}
-	
+
 	protected void createIndex()
 	{
 		if (this.tableDefinition.getSelectedRowCount() <= 0) return;
-		int rows[] = this.tableDefinition.getSelectedRows();
+		int[] rows = this.tableDefinition.getSelectedRows();
 		int count = rows.length;
 		List<IndexColumn> columns = new ArrayList<IndexColumn>(count);
 		String indexName = ResourceMgr.getString("TxtNewIndexName");
 		//String indexName = WbSwingUtilities.getUserInput(this, msg, defaultName);
-		if (indexName == null || indexName.trim().length() == 0) return;
+		if (StringUtil.isBlank(indexName)) return;
 
 		for (int i=0; i < count; i++)
 		{
@@ -383,7 +385,7 @@ public class TableDefinitionPanel
 		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		Frame owner = null;
-		if (parent != null && parent instanceof Frame)
+		if (parent instanceof Frame)
 		{
 			owner = (Frame)parent;
 		}

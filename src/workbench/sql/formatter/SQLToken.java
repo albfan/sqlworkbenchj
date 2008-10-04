@@ -108,7 +108,7 @@ public class SQLToken
 	private int charBegin;
 	private int charEnd;
 	private int state;
-	
+
 	private static final Pattern WHITESPACE = Pattern.compile("[ \t\r\n]+");
 	/**
 	 * Create a new token.
@@ -138,6 +138,7 @@ public class SQLToken
 	 */
 	public SQLToken(int ID, String text, int lineNumber, int charBegin, int charEnd, int state)
 	{
+		super();
 		this.ID = ID;
 		this.contents = text;
 		this.lineNumber = lineNumber;
@@ -145,7 +146,7 @@ public class SQLToken
 		this.charEnd = charEnd;
 		this.state = state;
 	}
-	
+
 	/**
 	 * Get an integer representing the state the tokenizer is in after
 	 * returning this token.
@@ -171,23 +172,23 @@ public class SQLToken
 	}
 
 	/**
-	 * Returned an uparsed version of the contents of this 
+	 * Returned an uparsed version of the contents of this
 	 * token. To get a "parsed" version (i.e. with keywords
 	 * capitalized) use getContents()
-	 * @see #getContents() 
+	 * @see #getContents()
 	 */
 	public String getText()
 	{
 		return this.contents;
 	}
-	
+
 	/**
 	 * Get the contents of this token. Reserved words (keywords)
 	 * will be returned in upper case and with multiple whitespaces
 	 * replaced by a single whitespace to make comparisons easier.
 	 * "is    Null" will be returned as "IS NULL".
 	 * To get the real text from the underlying SQL, use getText().
-	 * For all tokens where isReservedWord() == false getText and 
+	 * For all tokens where isReservedWord() == false getText and
 	 * getContents() will return exactly the same.
 	 *
 	 * @return A string representing the text of the token
@@ -249,12 +250,12 @@ public class SQLToken
 	{
 		return (ID == LITERAL_INTEGER);
 	}
-	
+
 	public boolean isNumberLiteral()
 	{
 		return (ID == LITERAL_INTEGER) || (ID == LITERAL_FLOAT);
 	}
-	
+
 	/**
 	 * Checks this token to see if it is an identifier.
 	 *
@@ -339,35 +340,35 @@ public class SQLToken
 		if (isReservedWord())
 		{
 			return("reservedWord");
-		} 
+		}
 		else if (isIdentifier())
 		{
 			return("identifier");
-		} 
+		}
 		else if (isLiteral())
 		{
 			return("literal");
-		} 
+		}
 		else if (isSeparator())
 		{
 			return("separator");
-		} 
+		}
 		else if (isOperator())
 		{
 			return("operator");
-		} 
+		}
 		else if (isComment())
 		{
 			return("comment");
-		} 
+		}
 		else if (isWhiteSpace())
 		{
 			return("whitespace");
-		} 
+		}
 		else if (isError())
 		{
 			return("error");
-		} 
+		}
 		else
 		{
 			return("unknown");

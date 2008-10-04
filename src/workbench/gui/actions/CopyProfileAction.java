@@ -28,6 +28,7 @@ public class CopyProfileAction
 
 	public CopyProfileAction(FileActions aClient)
 	{
+		super();
 		this.client = aClient;
 		this.setIcon("CopyProfile");
 		this.initMenuDefinition("LblCopyProfile");

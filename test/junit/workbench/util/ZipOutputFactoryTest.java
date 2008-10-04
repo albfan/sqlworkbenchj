@@ -14,8 +14,6 @@ package workbench.util;
 import java.io.File;
 import java.io.PrintWriter;
 import workbench.TestUtil;
-import workbench.TestUtil;
-import workbench.util.ZipOutputFactory;
 
 /**
  *

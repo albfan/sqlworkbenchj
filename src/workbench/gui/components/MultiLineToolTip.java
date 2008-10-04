@@ -14,24 +14,25 @@ package workbench.gui.components;
 import javax.swing.JToolTip;
 
 /**
- * 
- * @author support@sql-workbench.net  
- */ 
+ *
+ * @author support@sql-workbench.net
+ */
 public class MultiLineToolTip
 	extends JToolTip
 {
 	private static final MultiLineToolTipUI SHARED_UI = new MultiLineToolTipUI();
-	
+
 	public MultiLineToolTip()
 	{
+		super();
     setOpaque(true);
 		updateUI();
 	}
-	
+
 	public void updateUI()
 	{
 		setUI(SHARED_UI);
 	}
-	
+
 }
 

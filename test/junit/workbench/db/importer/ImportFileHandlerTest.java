@@ -14,8 +14,6 @@ package workbench.db.importer;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.PrintWriter;
-import java.io.Reader;
-import java.nio.CharBuffer;
 import workbench.TestUtil;
 import workbench.util.ZipOutputFactory;
 
@@ -25,7 +23,7 @@ import workbench.util.ZipOutputFactory;
  */
 public class ImportFileHandlerTest extends junit.framework.TestCase
 {
-	
+
 	public ImportFileHandlerTest(String testName)
 	{
 		super(testName);
@@ -37,11 +35,11 @@ public class ImportFileHandlerTest extends junit.framework.TestCase
 		{
 			TestUtil util = new TestUtil("outputFactoryTest");
 			File importFile  = new File(util.getBaseDir(), "datafile.txt");
-			
+
 			File archive = new File(util.getBaseDir(), "archive.zip");
 			ZipOutputFactory zout = new ZipOutputFactory(archive);
 			PrintWriter out = new PrintWriter(zout.createWriter(importFile, "UTF-8"));
-			
+
 			String firstline = "nr\tfirstname\tlastname";
 			out.println(firstline);
 			out.print(Integer.toString(1));
@@ -49,18 +47,18 @@ public class ImportFileHandlerTest extends junit.framework.TestCase
 			out.println("First\t\"Last");
 			out.println("name\"");
 			out.close();
-			
-			zout.done();			
-	
+
+			zout.done();
+
 			ImportFileHandler handler = new ImportFileHandler();
 			handler.setMainFile(archive, "UTF-8");
 			assertEquals("ZIP Archive not recognized", true, handler.isZip());
-			
+
 			BufferedReader br = handler.getMainFileReader();
 			String line = br.readLine();
-			
+
 			assertEquals("Wrong data read", firstline, line);
-			
+
 			handler.done();
 			handler.setMainFile(archive, "UTF-8");
 			handler.done();

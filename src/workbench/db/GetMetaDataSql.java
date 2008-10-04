@@ -32,10 +32,6 @@ public class GetMetaDataSql
 	private int catalogArgumentPos;
 	private int objectNameArgumentPos;
 
-	public GetMetaDataSql()
-	{
-	}
-
 	public String getSql()
 	{
 		if (this.isProcedureCall) return this.getProcedureCallSql();

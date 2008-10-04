@@ -21,15 +21,17 @@ import workbench.db.JdbcProcedureReader;
  *
  * @author  support@sql-workbench.net
  */
-public class ProcStatusRenderer 
+public class ProcStatusRenderer
 	extends DefaultTableCellRenderer
 	implements WbRenderer
 {
+	
 	public ProcStatusRenderer()
 	{
+		super();
 		this.setHorizontalAlignment(JLabel.LEFT);
 	}
-	
+
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
 		try
@@ -42,17 +44,17 @@ public class ProcStatusRenderer
 		{
 			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
-		
+
 	}
 
 	public void setUseAlternatingColors(boolean flag)
 	{
 		// not implemented
 	}
-	
+
 	public String getDisplayValue()
 	{
 		return getText();
 	}
-	
+
 }

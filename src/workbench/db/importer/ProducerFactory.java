@@ -64,9 +64,9 @@ public class ProducerFactory
 	private WbConnection connection;
 	private int batchSize = -1;
 	
-	public ProducerFactory(File inputFile)
+	public ProducerFactory(File file)
 	{
-		this.setInputFile(inputFile);
+		this.setInputFile(file);
 	}
 	
 	public void setBatchSize(int size) 

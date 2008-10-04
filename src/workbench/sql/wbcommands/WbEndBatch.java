@@ -23,13 +23,9 @@ public class WbEndBatch
 	extends SqlCommand
 {
 	public static final String VERB = "WBENDBATCH";
-	
-	public WbEndBatch()
-	{
-	}
-	
+
 	public String getVerb() { return VERB; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
@@ -38,5 +34,5 @@ public class WbEndBatch
 		result.addMessage(ResourceMgr.getString("MsgJdbcBatchProcessingEnded"));
 		return result;
 	}
-	
+
 }

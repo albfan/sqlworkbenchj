@@ -26,10 +26,6 @@ public class ByteBuffer
 {
 	private byte[] byteData;
 	
-	public ByteBuffer()
-	{
-	}
-	
 	/**
 	 * Expand the storage size to 'minStorage' number of bytes.
 	 */
@@ -45,7 +41,7 @@ public class ByteBuffer
 		}
 		else 
 		{
-			byte newBuf[] = new byte[minStorage];
+			byte[] newBuf = new byte[minStorage];
 			System.arraycopy(this.byteData, 0, newBuf, 0, byteData.length);
 			this.byteData = newBuf;
 		}

@@ -31,13 +31,14 @@ import workbench.util.WbThread;
 /**
  * @author support@sql-workbench.net
  */
-public class SchemaReportAction 
+public class SchemaReportAction
 	extends WbAction
 {
 	private DbObjectList client;
-	
+
 	public SchemaReportAction(DbObjectList list)
 	{
+		super();
 		initMenuDefinition("MnuTxtSchemaReport");
 		client = list;
 	}
@@ -47,14 +48,14 @@ public class SchemaReportAction
 	{
 		saveReport();
 	}
-	
+
 	protected void saveReport()
 	{
 		if (client == null) return;
-		
+
 		final WbConnection dbConnection = client.getConnection();
 		final Component caller = client.getComponent();
-		
+
 		if (!WbSwingUtilities.checkConnection(caller, dbConnection)) return;
 		List<? extends DbObject> objects = client.getSelectedObjects();
 		if (objects == null) return;
@@ -74,7 +75,7 @@ public class SchemaReportAction
 		progress.getInfoPanel().setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		reporter.setProgressMonitor(progress.getInfoPanel());
 		progress.showProgress();
-		
+
 		Thread t = new WbThread("Schema Report")
 		{
 			public void run()
@@ -105,5 +106,5 @@ public class SchemaReportAction
 		};
 		t.start();
 	}
-	
+
 }

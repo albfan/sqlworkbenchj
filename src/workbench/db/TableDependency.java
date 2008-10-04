@@ -27,7 +27,7 @@ public class TableDependency
 	private TableIdentifier theTable;
 	private DependencyNode tableRoot;
 	private DbMetadata wbMetadata;
-	private ArrayList<DependencyNode> leafs;
+	private List<DependencyNode> leafs;
 	private boolean directChildrenOnly = false;
 	private boolean readAborted = false;
 	

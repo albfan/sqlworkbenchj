@@ -18,18 +18,14 @@ import java.util.Properties;
  *
  * @author support@sql-workbench.net
  */
-public class PropertiesCopier 
+public class PropertiesCopier
 {
 
-	public PropertiesCopier()
-	{
-	}
-	
 	public void copyToSystem(Properties source)
 	{
 		copy(source, System.getProperties());
 	}
-	
+
 	public void copy(Properties source, Properties target)
 	{
 		if (source == null || target == null) return;
@@ -41,12 +37,12 @@ public class PropertiesCopier
 			target.setProperty(key, value);
 		}
 	}
-	
+
 	public void removeFromSystem(Properties source)
 	{
 		remove(source, System.getProperties());
 	}
-	
+
 	public void remove(Properties source, Properties target)
 	{
 		if (source == null || target == null) return;

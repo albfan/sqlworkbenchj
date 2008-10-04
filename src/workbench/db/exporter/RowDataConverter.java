@@ -154,7 +154,7 @@ public abstract class RowDataConverter
 	
 	public void setFilenameColumn(String colname)
 	{
-		if (StringUtil.isWhitespaceOrEmpty(colname))
+		if (StringUtil.isBlank(colname))
 		{
 			this.filenameColumn = null;
 		}

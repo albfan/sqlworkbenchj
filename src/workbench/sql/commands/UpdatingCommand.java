@@ -33,9 +33,10 @@ public class UpdatingCommand extends SqlCommand
 
 	private String verb;
 	private boolean checkLobParameter = false;
-	
+
 	public UpdatingCommand(String aVerb)
 	{
+		super();
 		this.verb = aVerb;
 		this.isUpdatingCommand = true;
 		checkLobParameter = aVerb.equals("UPDATE") || aVerb.equals("INSERT");
@@ -46,11 +47,11 @@ public class UpdatingCommand extends SqlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		LobFileStatement lob = null;
-		
+
 		try
 		{
 			boolean isPrepared = false;
-			
+
 			if (checkLobParameter)
 			{
 				try
@@ -64,9 +65,9 @@ public class UpdatingCommand extends SqlCommand
 					return result;
 				}
 			}
-			
+
 			runner.setSavepoint();
-			
+
 			if (lob != null && lob.containsParameter())
 			{
 				isPrepared = true;

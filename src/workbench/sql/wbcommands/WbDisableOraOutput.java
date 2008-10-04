@@ -26,10 +26,6 @@ public class WbDisableOraOutput extends SqlCommand
 {
 	public static final String VERB = "DISABLEOUT";
 
-	public WbDisableOraOutput()
-	{
-	}
-
 	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(String aSql)

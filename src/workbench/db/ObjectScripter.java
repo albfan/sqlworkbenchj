@@ -45,9 +45,9 @@ public class ObjectScripter
 	private boolean cancel;
 	private String nl = Settings.getInstance().getInternalEditorLineEnding();
 	
-	public ObjectScripter(List<? extends DbObject> objectList, WbConnection aConnection)
+	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
-		this.objectList = objectList;
+		this.objectList = objects;
 		this.dbConnection = aConnection;
 	}
 

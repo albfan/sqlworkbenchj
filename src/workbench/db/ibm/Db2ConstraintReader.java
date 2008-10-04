@@ -26,10 +26,6 @@ public class Db2ConstraintReader
 					 "and tabschema = ?";
 
 						 
-	public Db2ConstraintReader()
-	{
-	}
-	
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
 	

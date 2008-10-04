@@ -13,19 +13,19 @@ package workbench.gui.dialogs.dataimport;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.gui.dialogs.export.XmlOptions;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class XmlOptionsPanel 
+public class XmlOptionsPanel
 	extends javax.swing.JPanel
 	implements XmlImportOptions
 {
-	
+
 	public XmlOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 
@@ -34,23 +34,23 @@ public class XmlOptionsPanel
 		Settings s = Settings.getInstance();
 		s.setProperty("workbench.export.xml.verbosexml", this.getUseVerboseXml());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
 		this.setUseVerboseXml(s.getBoolProperty("workbench.export.xml.verbosexml", true));
 	}
-	
+
 	public boolean getUseVerboseXml()
 	{
 		return this.verboseXmlCheckBox.isSelected();
 	}
-	
+
 	public void setUseVerboseXml(boolean flag)
 	{
 		this.verboseXmlCheckBox.setSelected(flag);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -78,10 +78,10 @@ public class XmlOptionsPanel
 
   }
   // </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox verboseXmlCheckBox;
   // End of variables declaration//GEN-END:variables
-	
+
 }

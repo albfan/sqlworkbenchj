@@ -34,10 +34,6 @@ import workbench.util.WbFile;
 public class OracleControlFileWriter
 	implements FormatFileWriter
 {
-	public OracleControlFileWriter()
-	{
-	}
-
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
 		ResultInfo resultInfo = converter.getResultInfo();
@@ -125,7 +121,7 @@ public class OracleControlFileWriter
 				}
 				out.println();
 			}
-			
+
 			if (blobColumns.size() > 0)
 			{
 				Iterator<String> itr = blobColumns.iterator();
@@ -171,7 +167,7 @@ public class OracleControlFileWriter
 		if (encoding.equalsIgnoreCase("UTF-16BE")) return "AL16UTF16";
 		return encoding.toUpperCase();
 	}
-	
+
 	private String convertJavaDateFormatToOracle(String format)
 	{
 		String result = format.replace("HH", "HH24");

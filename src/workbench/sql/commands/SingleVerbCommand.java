@@ -13,7 +13,6 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -30,6 +29,7 @@ public class SingleVerbCommand extends SqlCommand
 
 	public SingleVerbCommand(String aVerb)
 	{
+		super();
 		this.verb = aVerb;
 		this.isUpdatingCommand = "COMMIT".equalsIgnoreCase(this.verb);
 	}

@@ -18,7 +18,6 @@ import javax.swing.JLabel;
 import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.components.ValidatingDialog;
-import workbench.gui.components.ValidatingDialog;
 import workbench.resource.ResourceMgr;
 
 /**

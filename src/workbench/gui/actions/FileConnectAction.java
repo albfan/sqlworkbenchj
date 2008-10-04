@@ -18,7 +18,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
-import workbench.resource.ResourceMgr;
 
 /**
  * Display the connect dialog

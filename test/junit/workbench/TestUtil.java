@@ -52,7 +52,7 @@ import workbench.util.WbFile;
  */
 public class TestUtil
 {
-	
+
 	private String basedir;
 	private String testName;
 
@@ -64,14 +64,14 @@ public class TestUtil
 	{
 		this(name, true);
 	}
-	
+
 	/**
 	 * Creates a new TestUtil with the given test name, but makes sure no
 	 * driver templates are loaded by WbManager
 	 *
 	 * @param name
 	 * @param noTemplates
-	 * @see workbench.WbManager#prepareForTest(java.lang.String[]) 
+	 * @see workbench.WbManager#prepareForTest(java.lang.String[])
 	 */
 	public TestUtil(String name, boolean noTemplates)
 	{
@@ -91,18 +91,18 @@ public class TestUtil
 	{
 		prepareEnvironment(true);
 	}
-	
+
 	public void prepareEnvironment(boolean noTemplates)
 		throws IOException
 	{
 		prepareBaseDir();
 		WbManager.prepareForTest(getArgs(noTemplates));
 	}
-	
+
 	public String[] getArgs(boolean noTemplates)
 	{
 		String cmdline = "-nosettings -configdir='" + basedir + "' ";
-		
+
 		if (noTemplates)
 		{
 			cmdline +=  " -notemplates";
@@ -110,7 +110,7 @@ public class TestUtil
 
 		return new String[] { cmdline };
 	}
-	
+
 	public void prepareBaseDir()
 		throws IOException
 	{
@@ -131,33 +131,33 @@ public class TestUtil
 		pw.close();
 		emptyBaseDirectory();
 	}
-	
+
 	public void emptyBaseDirectory()
 	{
 		// Cleanup old database files
 		File dir = new File(basedir);
 		deleteFiles(dir);
 	}
-	
+
 	private void deleteFiles(File dir)
 	{
 		File[] files = dir.listFiles();
 		for (int i = 0; i < files.length; i++)
-		{ 
+		{
 			if (files[i].isDirectory())
 			{
 				deleteFiles(files[i]);
 			}
 			if (files[i].getName().equals("workbench.settings")) continue;
 			if (files[i].getName().equals("workbench.log")) continue;
-			
+
 			if (!files[i].delete())
 			{
 				System.out.println("Could not delete file: " + files[i].getAbsolutePath());
 			}
 		}
 	}
-	
+
 	public WbConnection getHSQLConnection(String dbName)
 		throws SQLException, ClassNotFoundException
 	{
@@ -180,7 +180,7 @@ public class TestUtil
 	{
 		return getConnection(this.testName);
 	}
-	
+
 	public WbConnection getConnection(String db)
 		throws SQLException, ClassNotFoundException
 	{
@@ -219,13 +219,13 @@ public class TestUtil
 			SqlUtil.closeStatement(stmt);
 		}
 	}
-	
+
 	public WbConnection getConnection(File db)
 		throws SQLException, ClassNotFoundException
 	{
 		return getConnection(db, "WbUnitTest");
 	}
-	
+
 	public WbConnection getConnection(File db, String id)
 		throws SQLException, ClassNotFoundException
 	{
@@ -237,13 +237,13 @@ public class TestUtil
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, id);
 		return con;
 	}
-	
+
 	public StatementRunner createConnectedStatementRunner()
 		throws Exception
 	{
 		return createConnectedStatementRunner(getConnection());
 	}
-	
+
 	public StatementRunner createConnectedStatementRunner(WbConnection con)
 		throws Exception
 	{
@@ -260,19 +260,19 @@ public class TestUtil
 	{
 		return readLines(new StringReader(s));
 	}
-	
+
 	public static List<String> readLines(File f)
 		throws IOException
 	{
 		return readLines(new FileReader(f));
 	}
-	
+
 	public static List<String> readLines(Reader source)
 		throws IOException
 	{
 		ArrayList<String> result = new ArrayList<String>();
 		BufferedReader in = null;
-		int lines = 0;
+
 		try
 		{
 			in = new BufferedReader(source);
@@ -289,7 +289,7 @@ public class TestUtil
 		}
 		return result;
 	}
-	
+
 	public static int countLines(File f)
 		throws IOException
 	{
@@ -311,7 +311,7 @@ public class TestUtil
 		}
 		return lines;
 	}
-	
+
 	public static String getXPathValue(String xml, String expression)
 	{
 		return getXPathValue(xml, expression, null);
@@ -331,7 +331,7 @@ public class TestUtil
 			{
 			  xpath.setNamespaceContext(new SimpleNamespaceContext(namespaceMapping));
 			}
-			String value = (String) xpath.evaluate(expression, doc, XPathConstants.STRING);		
+			String value = (String) xpath.evaluate(expression, doc, XPathConstants.STRING);
 			return value;
 		}
 		catch (Exception e)
@@ -339,8 +339,8 @@ public class TestUtil
 			e.printStackTrace();
 			return null;
 		}
-	}	
-	
+	}
+
 	public static void writeFile(File f, String content)
 		throws IOException
 	{
@@ -348,7 +348,7 @@ public class TestUtil
 		w.write(content);
 		w.close();
 	}
-	
+
 	public static void executeScript(WbConnection con, String script)
 		throws SQLException
 	{
@@ -472,5 +472,5 @@ public class TestUtil
 		// Make sure the new profiles are read
 		ConnectionMgr.getInstance().readProfiles();
 	}
-	
+
 }

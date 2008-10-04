@@ -29,10 +29,6 @@ public class DerbyConstraintReader
              "and   s.schemaname = ?";
 
 						 
-	public DerbyConstraintReader()
-	{
-	}
-	
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
 	

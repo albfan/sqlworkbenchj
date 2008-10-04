@@ -262,7 +262,7 @@ public class SelectAnalyzer
 		{
 			boolean afterFrom = false;
 			boolean inONPart = false;
-			int lastJoin = -1;
+
 			SQLLexer lexer = new SQLLexer(this.sql);
 			SQLToken token = lexer.getNextToken(false, false);
 			int bracketCount = 0;

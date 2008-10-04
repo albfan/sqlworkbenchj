@@ -15,7 +15,7 @@ import java.lang.reflect.Method;
 import workbench.log.LogMgr;
 
 /**
- * A renderer that uses reflection to obtain the real data value 
+ * A renderer that uses reflection to obtain the real data value
  * from the object retrieved from the database.
  * @author support@sql-workbench.net
  */
@@ -29,6 +29,7 @@ public class DynamicRenderer
 	public DynamicRenderer(Class clz, String getterName)
 		throws ClassNotFoundException, NoSuchMethodException
 	{
+		super();
 		this.valueClass = clz;
 		this.getter = valueClass.getMethod(getterName, (Class[]) null);
 	}

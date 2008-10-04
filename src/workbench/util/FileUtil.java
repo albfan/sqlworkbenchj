@@ -129,7 +129,7 @@ public class FileUtil
 		throws IOException
 	{
 		String ending = null;
-		char c = (char)in.read();
+		int c = in.read();
 		while (c != -1)
 		{
 			if (c == '\r')
@@ -146,7 +146,7 @@ public class FileUtil
 				ending = "\n";
 				break;
 			}
-			c = (char)in.read();
+			c = in.read();
 		}
 		return ending;
 	}

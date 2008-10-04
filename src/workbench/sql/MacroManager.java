@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.SwingUtilities;
@@ -34,13 +35,13 @@ import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
- * A class to manage, store and apply SQL macros (alias) 
- * 
+ * A class to manage, store and apply SQL macros (alias)
+ *
  * @author support@sql-workbench.net
  */
 public class MacroManager
 {
-	private HashMap<String, String> macros;
+	private Map<String, String> macros;
 	private boolean modified = false;
 	private List<MacroChangeListener> changeListeners = null;
 	private boolean errorDuringLoad = false;
@@ -49,7 +50,7 @@ public class MacroManager
 	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current_statement}$");
 	private String editorTextKey = Settings.getInstance().getProperty("workbench.macro.key.editortext", "${text}$");
 	private static MacroManager instance = new MacroManager();
-	
+
 	private MacroManager()
 	{
 	}
@@ -77,35 +78,35 @@ public class MacroManager
 		if (sql == null) return false;
 		return (sql.indexOf(editorTextKey) > - 1);
 	}
-	
+
 	public synchronized boolean hasSelectedKey(String sql)
 	{
 		if (sql == null) return false;
 		return (sql.indexOf(selectedTextKey) > - 1) || (sql.indexOf(selectedStatementKey) > -1);
 	}
-	
+
 	public synchronized boolean hasCurrentKey(String sql)
 	{
 		if (sql == null) return false;
 		return (sql.indexOf(currentStatementKey) > - 1);
 	}
-	
+
 	public synchronized String replaceCurrent(String sql, String statementAtCursor)
 	{
 		if (statementAtCursor == null || sql == null) return sql;
 		return StringUtil.replace(sql, currentStatementKey, statementAtCursor);
 	}
-	
+
 	public synchronized String replaceEditorText(String sql, String text)
 	{
 		if (text == null || sql == null) return sql;
 		return StringUtil.replace(sql, currentStatementKey, text);
 	}
-	
+
 	public synchronized String replaceSelected(String sql, String selectedText)
 	{
 		if (selectedText == null || sql == null) return sql;
-		
+
 		if (sql.indexOf(selectedTextKey) > -1)
 		{
 			return StringUtil.replace(sql, selectedTextKey, selectedText);
@@ -121,7 +122,7 @@ public class MacroManager
 		}
 		return sql;
 	}
-	
+
 	public synchronized void removeMacro(String aKey)
 	{
 		loadIfNecessary();
@@ -155,17 +156,17 @@ public class MacroManager
 	public synchronized void setMacro(String aKey, String aText)
 	{
 		loadIfNecessary();
-		if (aKey == null || aKey.trim().length() == 0) return;
+		if (StringUtil.isBlank(aKey)) return;
 		this.macros.put(aKey.toLowerCase(), aText);
 		this.modified = true;
 		this.fireMacroListChange();
 	}
-	
+
 	public synchronized void setMacros(Collection<MacroEntry> newMacros)
 	{
 		if (newMacros == null) return;
 		this.macros = new HashMap<String, String>(); // clear out the old entries
-		
+
 		for (MacroEntry entry : newMacros)
 		{
 			this.macros.put(entry.getName().toLowerCase(), entry.getText());
@@ -217,11 +218,11 @@ public class MacroManager
 		if (this.macros != null && this.modified)
 		{
 			WbPersistence writer = new WbPersistence(this.getMacroFile().getAbsolutePath());
-			try 
-			{ 
-				writer.writeObject(this.macros); 
-			} 
-			catch (Exception th) 
+			try
+			{
+				writer.writeObject(this.macros);
+			}
+			catch (Exception th)
 			{
 				LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
 			}
@@ -229,7 +230,7 @@ public class MacroManager
 			this.errorDuringLoad = false;
 		}
 	}
-	
+
 	private void loadIfNecessary()
 	{
 		if (this.macros == null) this.loadMacros();

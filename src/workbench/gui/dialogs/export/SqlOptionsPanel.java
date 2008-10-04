@@ -25,21 +25,23 @@ import workbench.gui.components.KeyColumnSelectorPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class SqlOptionsPanel 
+public class SqlOptionsPanel
 	extends javax.swing.JPanel
 	implements SqlOptions, ActionListener
 {
 	private List<String> keyColumns;
-	private ColumnSelectorPanel columnSelectorPanel;	
+	private ColumnSelectorPanel columnSelectorPanel;
 	private ResultInfo tableColumns;
-	
+
 	public SqlOptionsPanel(ResultInfo info)
 	{
+		super();
 		initComponents();
 		setResultInfo(info);
 		List<String> types = Settings.getInstance().getLiteralTypeList();
@@ -50,14 +52,14 @@ public class SqlOptionsPanel
 	public void setResultInfo(ResultInfo info)
 	{
 		this.tableColumns = info;
-		
+
 		boolean hasColumns = tableColumns != null;
 		boolean keysPresent = (info == null ? false : info.hasPkColumns());
 		this.selectKeys.setEnabled(hasColumns);
-		
+
 		this.setIncludeDeleteInsert(keysPresent);
 		this.setIncludeUpdate(keysPresent);
-		
+
 		if (info != null)
 		{
 			TableIdentifier table = info.getUpdateTable();
@@ -71,7 +73,7 @@ public class SqlOptionsPanel
 			}
 		}
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -79,7 +81,7 @@ public class SqlOptionsPanel
 		s.setProperty("workbench.export.sql.createtable", this.getCreateTable());
 		s.setProperty("workbench.export.sql.saveas.dateliterals", this.getDateLiteralType());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -94,14 +96,14 @@ public class SqlOptionsPanel
 	{
 		return (String)literalTypes.getSelectedItem();
 	}
-	
+
 	public String getAlternateUpdateTable()
 	{
 		String s = alternateTable.getText();
-		if (s != null && s.trim().length() > 0) return s.trim();
+		if (StringUtil.isNonBlank(s)) return s.trim();
 		return null;
 	}
-	
+
 	public void setAlternateUpdateTable(String table)
 	{
 		this.alternateTable.setText((table == null ? "" : table.trim()));
@@ -131,34 +133,34 @@ public class SqlOptionsPanel
 
 	public boolean updateEnabled() { return useUpdate.isEnabled(); }
 	public boolean deleteInsertEnabled() { return useDeleteInsert.isEnabled(); }
-	
+
 	public boolean isSqlAllowed()
 	{
 		return updateEnabled() || deleteInsertEnabled();
 	}
-	
+
 	public void setIncludeUpdate(boolean flag)
 	{
 		useUpdate.setEnabled(flag);
 	}
-	
+
 	public void setIncludeDeleteInsert(boolean flag)
 	{
 		useDeleteInsert.setEnabled(flag);
 	}
-	
+
 	public boolean getCreateInsert()
 	{
 		if (useInsert.isSelected()) return true;
 		return false;
 	}
-	
+
 	public boolean getCreateUpdate()
 	{
 		if (useUpdate.isEnabled()) return useUpdate.isSelected();
 		return false;
 	}
-	
+
 	public boolean getCreateDeleteInsert()
 	{
 		if (useDeleteInsert.isEnabled()) return useDeleteInsert.isSelected();
@@ -186,7 +188,7 @@ public class SqlOptionsPanel
 	{
 		this.useInsert.setSelected(true);
 	}
-	
+
 	public void setCreateUpdate()
 	{
 		if (this.useUpdate.isEnabled()) this.useUpdate.setSelected(true);
@@ -196,7 +198,7 @@ public class SqlOptionsPanel
 	{
 		if (this.useDeleteInsert.isEnabled()) this.useDeleteInsert.setSelected(true);
 	}
-	
+
 	public void setCreateTable(boolean flag)
 	{
 		this.createTable.setSelected(flag);
@@ -210,8 +212,8 @@ public class SqlOptionsPanel
 	private void selectColumns()
 	{
 		if (this.tableColumns == null) return;
-		
-		if (this.columnSelectorPanel == null) 
+
+		if (this.columnSelectorPanel == null)
 		{
 			this.columnSelectorPanel = new KeyColumnSelectorPanel(this.tableColumns.getColumns(), this.tableColumns.getUpdateTable());
 		}
@@ -219,13 +221,13 @@ public class SqlOptionsPanel
 		{
 			this.columnSelectorPanel.selectColumns(this.keyColumns);
 		}
-		
+
 		int choice = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(this), this.columnSelectorPanel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 
 		if (choice == JOptionPane.OK_OPTION)
 		{
 			this.keyColumns = null;
-			
+
 			List selected = this.columnSelectorPanel.getSelectedColumns();
 			int size = selected.size();
 			this.keyColumns = new ArrayList<String>(size);
@@ -234,13 +236,13 @@ public class SqlOptionsPanel
 				ColumnIdentifier col = (ColumnIdentifier)selected.get(i);
 				this.keyColumns.add(col.getColumnName());
 			}
-			
+
 			boolean keysPresent = (size > 0);
 			this.setIncludeDeleteInsert(keysPresent);
 			this.setIncludeUpdate(keysPresent);
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -375,8 +377,8 @@ public class SqlOptionsPanel
 private void selectKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectKeysActionPerformed
 	selectColumns();
 }//GEN-LAST:event_selectKeysActionPerformed
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JTextField alternateTable;
   public javax.swing.JTextField commitCount;
@@ -393,5 +395,5 @@ private void selectKeysActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FI
   public javax.swing.JRadioButton useInsert;
   public javax.swing.JRadioButton useUpdate;
   // End of variables declaration//GEN-END:variables
-	
+
 }

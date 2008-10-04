@@ -28,13 +28,13 @@ public class SqlKeywordHelperTest
 {
 
 	private TestUtil util;
-	
+
 	public SqlKeywordHelperTest(String testName)
 	{
 		super(testName);
 		util = getTestUtil();
 	}
-	
+
 	public void testGetKeywords()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
@@ -55,7 +55,7 @@ public class SqlKeywordHelperTest
 		assertTrue(keywords.contains("IDENTIFIED"));
 		assertTrue(keywords.contains("EXCEPTION"));
 	}
-	
+
 	public void testGetDataTypes()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
@@ -76,18 +76,16 @@ public class SqlKeywordHelperTest
 		Set<String> result = helper.getSqlFunctions();
 		assertTrue(result.size() > 0);
 	}
-	
+
 	public void testCustomKeywords()
 		throws IOException
 	{
-		PrintWriter out = null;
-
 		File custom = new File(util.getBaseDir(), "keywords.wb");
 		TestUtil.writeFile(custom, "ARTHUR\nDENT");
 
 		File custom2 = new File(util.getBaseDir(), "myid.keywords.wb");
 		TestUtil.writeFile(custom2, "ZAPHOD\nBEBLEBROX");
-		
+
 		File custom3 = new File(util.getBaseDir(), "testid.keywords.wb");
 		TestUtil.writeFile(custom3, " FORD\nPREFECT ");
 
@@ -102,10 +100,10 @@ public class SqlKeywordHelperTest
 
 		assertFalse(result.contains("ZAPHOD"));
 		assertFalse(result.contains("BEBLEBROX"));
-		
+
 		custom.delete();
 		custom2.delete();
 		custom3.delete();
 	}
-	
+
 }

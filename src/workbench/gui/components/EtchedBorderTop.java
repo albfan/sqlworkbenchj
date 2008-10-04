@@ -26,17 +26,8 @@ public class EtchedBorderTop
 {
 	protected Color color;
 	
-	/**
-	 * Creates a spacer top border with the specified thickness
-	 */
-	public EtchedBorderTop()
-	{
-	}
-	
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)
 	{
-		Color oldColor = g.getColor();
-
 		Color bg = c.getBackground();
 		Color light = bg.brighter();
 		Color shade = bg.darker();

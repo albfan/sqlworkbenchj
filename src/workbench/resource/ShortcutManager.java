@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.Action;
@@ -35,15 +36,15 @@ public class ShortcutManager
 	private String filename;
 
 	// key to the map is the action's class name,
-	private HashMap<String, ShortcutDefinition> keyMap;
+	private Map<String, ShortcutDefinition> keyMap;
 
-	private HashMap<String, String> actionNames;
+	private Map<String, String> actionNames;
 	
 	// we need the list of registered actions, in order to be able to
 	// display the label for the action for the customization dialog
 	private List<WbAction> allActions = new LinkedList<WbAction>();
 	
-	private HashMap<KeyStroke, WbAction> keyDebugMap;
+	private Map<KeyStroke, WbAction> keyDebugMap;
 
 	private boolean modified;
 	
@@ -53,7 +54,7 @@ public class ShortcutManager
   }
 
 	@SuppressWarnings("unchecked")
-	private ShortcutManager(String aFilename)
+	protected ShortcutManager(String aFilename)
 	{
 		this.filename = aFilename;
 		LogMgr.logDebug("ShortcutManager", "Using file: " + filename);
@@ -150,7 +151,7 @@ public class ShortcutManager
 			String actionClass = action.getClass().getName();
 			if (actionClass.equals(clazz))
 			{
-				return action.getTooltipText();
+				return action.getToolTipText();
 			}
 		}		
 		return null;

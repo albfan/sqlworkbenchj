@@ -31,8 +31,8 @@ import javax.swing.table.TableCellEditor;
 import workbench.gui.WbSwingUtilities;
 
 /**
- * 
- * @author support@sql-workbench.net  
+ *
+ * @author support@sql-workbench.net
  */
 public class WbCellEditor
 	extends AbstractCellEditor
@@ -41,9 +41,10 @@ public class WbCellEditor
 	private TextAreaEditor editor;
 	private WbTable parentTable;
 	private JScrollPane scroll;
-	
+
 	public WbCellEditor(WbTable parent)
 	{
+		super();
 		parentTable = parent;
 		editor = new TextAreaEditor();
 		setDefaultCopyPasteKeys(editor);
@@ -59,9 +60,9 @@ public class WbCellEditor
 		editor.addMouseListener(this);
 	}
 
-	protected void setDefaultCopyPasteKeys(JComponent editor)
+	protected void setDefaultCopyPasteKeys(JComponent edit)
 	{
-		InputMap im = editor.getInputMap();
+		InputMap im = edit.getInputMap();
 		KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK);
 		KeyStroke ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_MASK);
 
@@ -169,8 +170,8 @@ public class WbCellEditor
 	{
 	}
 
-	
-	class TextAreaEditor
+
+	static class TextAreaEditor
 		extends JTextArea
 	{
 		public TextAreaEditor()
@@ -191,7 +192,7 @@ public class WbCellEditor
 
 			// Remove the default action for the Enter key and replace it with
 			// the "stop-editing" action which is the default for all other
-			// editors. 
+			// editors.
 			Object enterAction = this.getInputMap().get(WbSwingUtilities.ENTER);
 
 			this.getInputMap().put(WbSwingUtilities.ENTER, "wb-stop-editing");

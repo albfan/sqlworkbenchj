@@ -35,12 +35,12 @@ public class PostgresSequenceReader
 	implements SequenceReader
 {
 	private WbConnection dbConnection;
-	
+
 	public PostgresSequenceReader(WbConnection conn)
 	{
 		this.dbConnection = conn;
 	}
-	
+
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
@@ -69,7 +69,7 @@ public class PostgresSequenceReader
 				buf.append(nl + "       MINVALUE ");
 				buf.append(min);
 			}
-			long maxMarker = 9223372036854775807l;
+			long maxMarker = 9223372036854775807L;
 			if (max != maxMarker)
 			{
 				buf.append(nl + "       MAXVALUE ");
@@ -90,12 +90,10 @@ public class PostgresSequenceReader
 		{
 			LogMgr.logError("PgSequenceReader.getSequenceSource()", "Error reading sequence definition", e);
 		}
-		
+
 		def.setSource(buf);
-		
-		return;
 	}
-	
+
 	/**
 	 *	Return the source SQL for a PostgreSQL sequence definition.
 	 *
@@ -112,18 +110,18 @@ public class PostgresSequenceReader
 		// Already returned by JDBC driver
 		return Collections.emptyList();
 	}
-	
+
 	/**
 	 * Retrieve the list of full SequenceDefinitions from the database.
 	 */
 	public List<SequenceDefinition> getSequences(String owner)
 	{
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
-		
+
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		Savepoint sp = null;
-		try 
+		try
 		{
 			sp = this.dbConnection.setSavepoint();
 			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
@@ -149,7 +147,7 @@ public class PostgresSequenceReader
 		}
 		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
 		if (sequence == null) return null;
@@ -159,9 +157,7 @@ public class PostgresSequenceReader
 		{
 			sequence = sequence.substring(pos);
 		}
-		
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		SequenceDefinition result = new SequenceDefinition(owner, sequence);
@@ -179,12 +175,12 @@ public class PostgresSequenceReader
 				long inc = rs.getLong(3);
 				long cache = rs.getLong(4);
 				String cycle = rs.getString(5);
-				
-				result.setSequenceProperty("INCREMENT", new Long(inc));
-				result.setSequenceProperty("MINVALUE", new Long(min));
+
+				result.setSequenceProperty("INCREMENT", Long.valueOf(inc));
+				result.setSequenceProperty("MINVALUE", Long.valueOf(min));
 				result.setSequenceProperty("CACHE", cache);
 				result.setSequenceProperty("CYCLE", cycle);
-				result.setSequenceProperty("MAXVALUE", new Long(max));
+				result.setSequenceProperty("MAXVALUE", Long.valueOf(max));
 				readSequenceSource(result);
 			}
 			this.dbConnection.releaseSavepoint(sp);
@@ -201,7 +197,7 @@ public class PostgresSequenceReader
 		}
 		return result;
 	}
-	
+
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
 		// The definition can be displayed by doing a SELECT * FROM sequence

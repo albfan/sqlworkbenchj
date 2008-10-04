@@ -38,12 +38,11 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
 import workbench.util.ClipboardFile;
-import workbench.util.StringUtil;
 
 /**
  * This class checks the content of an input string and tries to match
  * it against a ResultInfo.
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class ImportStringVerifier
@@ -55,13 +54,13 @@ public class ImportStringVerifier
 	private GeneralImportOptionsPanel generalOptions;
 	private boolean columnNamesMatched = false;
 	private boolean columnCountMatched = false;
-	
+
 	public ImportStringVerifier(String data, ResultInfo result)
 	{
 		this.target = result;
 		this.content = data;
 	}
-	
+
 	/**
 	 * Check the contents of the data string if it matches
 	 * the structure of our target ResultInfo.
@@ -70,11 +69,11 @@ public class ImportStringVerifier
 	 * The following things are checked:
 	 * <ul>
 	 * <li>the input data has to have a header line which defines the columns</li>
-	 * <li>If there is no header line (i.e. no matching columns found) then 
+	 * <li>If there is no header line (i.e. no matching columns found) then
 	 *     the import is OK, if the column count is the same</li>
 	 * <li>at least one column from the input data must occur in the ResultInfo</li>
 	 * </ul>
-	 * 
+	 *
 	 * @return false if the data cannot be imported
 	 */
 	public boolean checkData()
@@ -85,15 +84,15 @@ public class ImportStringVerifier
 		if (this.textOptions != null)
 		{
 			// textOptions != null then we have displayed the options
-			// dialog to the user. If the ClipBoard does not contain 
+			// dialog to the user. If the ClipBoard does not contain
 			// a header line, we simply assume that it matches the c
 			// columns from the result set.
 			if (!textOptions.getContainsHeader()) return true;
-			
+
 			parser.setDelimiter(textOptions.getTextDelimiter());
 		}
 		List cols = parser.getColumnsFromFile();
-		
+
 		int matchingColumns = 0;
 		Iterator itr = cols.iterator();
 		while (itr.hasNext())
@@ -104,33 +103,33 @@ public class ImportStringVerifier
 				matchingColumns ++;
 			}
 		}
-		
+
 		this.columnCountMatched = (cols.size() == target.getColumnCount());
 		this.columnNamesMatched = (matchingColumns > 0);
 		return (columnCountMatched || columnNamesMatched);
 	}
-	
+
 	private void createOptionsPanel()
 	{
 		if (this.optionsPanel != null)	return;
-		
+
 		this.textOptions = new TextOptionsPanel();
 		this.textOptions.restoreSettings("clipboard");
 		if (this.columnCountMatched && !this.columnNamesMatched)
 		{
 			textOptions.setContainsHeader(false);
 		}
-		
+
 		this.generalOptions = new GeneralImportOptionsPanel();
 		this.generalOptions.setModeSelectorEnabled(false);
 		this.generalOptions.setEncodingVisible(false);
 		this.generalOptions.restoreSettings("clipboard");
-		
+
 		this.optionsPanel = new JPanel(new BorderLayout());
 		this.optionsPanel.add(generalOptions, BorderLayout.NORTH);
 		this.optionsPanel.add(textOptions, BorderLayout.SOUTH);
 	}
-	
+
 	/**
 	 * If no columns are found, then most probably the (default) column
 	 * delimiter is not correct, so let the user supply the import options
@@ -139,7 +138,7 @@ public class ImportStringVerifier
 	{
 		createOptionsPanel();
 		JPanel p = new JPanel(new BorderLayout(0,5));
-		
+
 		JTextArea preview = new JTextArea();
 		StringBuilder s = getLines(content, 15);
 		int l = s.length();
@@ -152,13 +151,13 @@ public class ImportStringVerifier
 		preview.setEditable(false);
 		preview.setDisabledTextColor(Color.BLACK);
 		preview.setCaretPosition(0);
-		
+
 		JScrollPane scroll = new JScrollPane(preview);
 		Dimension d = new Dimension(350, 250);
 		preview.setMaximumSize(d);
 		scroll.setMaximumSize(d);
 		scroll.setPreferredSize(d);
-		
+
 		JTextField msg = new JTextField();
 		msg.setEnabled(false);
 		msg.setText(ResourceMgr.getString("MsgClipFormat"));
@@ -166,11 +165,11 @@ public class ImportStringVerifier
 		msg.setDisabledTextColor(Color.BLACK);
 		Border b = new EmptyBorder(4,2,4,2);
 		msg.setBorder(b);
-		
+
 		p.add(this.optionsPanel, BorderLayout.EAST);
 		p.add(msg, BorderLayout.NORTH);
 		p.add(scroll, BorderLayout.CENTER);
-		
+
 		Frame f = WbManager.getInstance().getCurrentWindow();
 		ValidatingDialog dialog = new ValidatingDialog(f, "Import", p);
 		WbSwingUtilities.center(dialog, f);
@@ -184,7 +183,7 @@ public class ImportStringVerifier
 	{
 		return generalOptions;
 	}
-	
+
 	public TextImportOptions getTextImportOptions()
 	{
 		return textOptions;
@@ -213,5 +212,5 @@ public class ImportStringVerifier
 		}
 		return result;
 	}
-	
+
 }

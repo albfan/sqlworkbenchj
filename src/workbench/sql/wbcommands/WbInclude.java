@@ -42,6 +42,7 @@ public class WbInclude
 
 	private WbInclude(String aVerb)
 	{
+		super();
 		this.verb = aVerb;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
@@ -56,16 +57,16 @@ public class WbInclude
 	public String getVerb() { return verb; }
 
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		
+
 		String clean = SqlUtil.makeCleanSql(aSql, false, '"');
 		boolean isShortInclude = false;
-		
+
 		if (clean.charAt(0) == '@')
 		{
 			clean = clean.substring(1);
@@ -75,7 +76,7 @@ public class WbInclude
 		{
 			clean = SqlUtil.stripVerb(clean);
 		}
-		
+
 		WbFile file = null;
 
 		if (isShortInclude)

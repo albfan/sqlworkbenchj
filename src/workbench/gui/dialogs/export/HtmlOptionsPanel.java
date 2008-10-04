@@ -22,10 +22,9 @@ public class HtmlOptionsPanel
 	extends javax.swing.JPanel
 	implements HtmlOptions
 {
-	
-	/** Creates new form HtmlOptionsPanel */
 	public HtmlOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 

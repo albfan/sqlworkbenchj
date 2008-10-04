@@ -40,6 +40,7 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollBar;
@@ -106,17 +107,17 @@ public class JEditTextArea
 	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener
 {
 	protected boolean rightClickMovesCursor = false;
-	
+
 	private Color alternateSelectionColor;
 	private static final Color ERROR_COLOR = Color.RED.brighter();
 	private static final Color TEMP_COLOR = Color.GREEN.brighter();
 	private boolean currentSelectionIsTemporary;
 	protected String commentChar;
 	private TokenMarker currentTokenMarker;
-	
+
 	private KeyListener keyEventInterceptor;
 	private EditorStatusbar statusBar;
-	
+
 	protected static final String CENTER = "center";
 	protected static final String RIGHT = "right";
 	protected static final String BOTTOM = "bottom";
@@ -167,21 +168,22 @@ public class JEditTextArea
 	protected boolean overwrite;
 	protected boolean rectSelect;
 	protected boolean modified;
-	
+
 	private int invalidationInterval = 10;
-	
-	
+
+
 	/**
 	 * Creates a new JEditTextArea with the default settings.
 	 */
 	public JEditTextArea()
 	{
+		super();
 		// Enable the necessary events
 		enableEvents(AWTEvent.KEY_EVENT_MASK);
 
 		painter = new TextAreaPainter(this);
 		setBackground(Color.WHITE);
-		
+
 		documentHandler = new DocumentHandler();
 		listeners = new EventListenerList();
 		caretEvent = new MutableCaretEvent();
@@ -210,11 +212,11 @@ public class JEditTextArea
 		setInputHandler(new DefaultInputHandler());
 		this.inputHandler.addDefaultKeyBindings();
 		setDocument(new SyntaxDocument());
-		
+
 		// Let the focusGained() event display the caret
 		caretVisible = false;
 		caretBlinks = true;
-		
+
 		electricScroll = Settings.getInstance().getElectricScroll();
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.popup = new TextPopup(this);
@@ -231,7 +233,7 @@ public class JEditTextArea
 		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 	}
-	
+
 	public int getHScrollBarHeight()
 	{
 		if (horizontal != null && horizontal.isVisible())
@@ -239,7 +241,7 @@ public class JEditTextArea
 		else
 			return 0;
 	}
-	
+
 	public Point getCursorLocation()
 	{
 		int line = getCaretLine();
@@ -253,7 +255,7 @@ public class JEditTextArea
 		x += this.getPainter().getGutterWidth();
 		return new Point(x,y);
 	}
-	
+
 //	public void setShowLineNumbers(boolean aFlag)
 //	{
 //		this.painter.setShowLineNumbers(aFlag);
@@ -268,7 +270,7 @@ public class JEditTextArea
 	{
 		return StringUtil.makePlainLinefeed(input);
 	}
-	
+
 	private void changeCase(boolean toLower)
 	{
 		String sel = this.getSelectedText();
@@ -287,7 +289,7 @@ public class JEditTextArea
 	{
 		return this.commentChar;
 	}
-	
+
 	public void toLowerCase()
 	{
 		this.changeCase(true);
@@ -297,7 +299,7 @@ public class JEditTextArea
 	{
 		this.changeCase(false);
 	}
-		
+
 	public void matchBracket()
 	{
 		try
@@ -335,7 +337,7 @@ public class JEditTextArea
 	{
 		this.getInputHandler().removeKeyBinding(key);
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	public final boolean isManagingFocus()
 	{
@@ -383,11 +385,11 @@ public class JEditTextArea
 		}
 		caretTimer = null;
 	}
-	
+
 	private void startBlinkTimer()
 	{
 		if (caretTimer != null) return;
-		
+
 		final int blinkInterval = 750;
 		caretTimer = new Timer(blinkInterval,
 		 new ActionListener()
@@ -400,7 +402,7 @@ public class JEditTextArea
 		caretTimer.setInitialDelay(blinkInterval);
 		caretTimer.start();
 	}
-	
+
 	/**
 	 * Toggles caret blinking.
 	 * @param caretBlinks True if the caret should blink, false otherwise
@@ -437,7 +439,7 @@ public class JEditTextArea
 		int end = this.getSelectionEnd();
 		return (start < end);
 	}
-	
+
 	/**
 	 * Sets if the caret should be visible.
 	 * @param caretVisible True if the caret should be visible, false
@@ -459,14 +461,14 @@ public class JEditTextArea
 	{
 		setCaretVisible(false);
 	}
-	
+
 	/**
 	 * Blinks the caret.
 	 */
 	public final void blinkCaret()
 	{
 		if (!caretVisible) return;
-		
+
 		if (caretBlinks)
 		{
 			blink = !blink;
@@ -520,7 +522,7 @@ public class JEditTextArea
 				add(RIGHT, vertical);
 			}
 		}
-		
+
 		int charWidth = painter.getFontMetrics().charWidth('M');
 		int maxLineLength = getDocument().getMaxLineLength();
 		int maxLineWidth = (charWidth * maxLineLength) + this.painter.getGutterWidth() + 10;
@@ -557,12 +559,12 @@ public class JEditTextArea
 	{
 		if (firstLine == this.firstLine) return;
 		this.firstLine = firstLine;
-		
+
 		if (firstLine != vertical.getValue())
 		{
 			updateScrollBars();
 		}
-		
+
 		painter.repaint();
 	}
 
@@ -682,11 +684,11 @@ public class JEditTextArea
 			});
 			return false;
 		}
-		
+
 		int newFirstLine = firstLine;
 		int newHorizontalOffset = horizontalOffset;
 		int lineCount = getLineCount();
-		
+
 		if (line < firstLine + electricScroll)
 		{
 			newFirstLine = Math.max(0, line - electricScroll);
@@ -704,11 +706,11 @@ public class JEditTextArea
 				newFirstLine = 0;
 			}
 		}
-		
+
 		int x = _offsetToX(line, offset);
 		int width = painter.getFontMetrics().charWidth('w');
 		int pwidth = painter.getWidth();
-		
+
 		if (x < 0)
 		{
 			newHorizontalOffset = Math.min(0, horizontalOffset - x + width + 5);
@@ -786,7 +788,7 @@ public class JEditTextArea
 			// If syntax coloring is enabled, we have to do this because
 			// tokens can vary in width
 			Token tokens = tokenMarker.markTokens(lineSegment, line);
-			
+
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
 
@@ -868,7 +870,7 @@ public class JEditTextArea
 		else
 		{
 			Token tokens = tokenMarker.markTokens(lineSegment, line);
-			
+
 			int offset = 0;
 			Font defaultFont = painter.getFont();
 			SyntaxStyle[] styles = painter.getStyles();
@@ -876,7 +878,7 @@ public class JEditTextArea
 			while (tokens != null)
 			{
 				byte id = tokens.id;
-				
+
 				if (id == Token.NULL)
 				{
 					fm = painter.getFontMetrics();
@@ -892,7 +894,7 @@ public class JEditTextArea
 				{
 					char c = segmentArray[segmentOffset + offset + i];
 					int charWidth = fm.charWidth(c);
-					
+
 					if (c == '\t')
 					{
 						charWidth = (int)painter.nextTabStop(width, offset + i) - width;
@@ -908,7 +910,7 @@ public class JEditTextArea
 			}
 			return offset;
 		}
-		
+
 	}
 
 	/**
@@ -944,20 +946,20 @@ public class JEditTextArea
 			this.document.removeDocumentListener(documentHandler);
 			this.document.dispose();
 		}
-		
+
 		this.document = document;
 
 		if(this.document != null)
 		{
 			painter.calculateTabSize();
-			
+
 			if (this.currentTokenMarker != null)
 			{
 				this.document.setTokenMarker(this.currentTokenMarker);
 			}
-			
+
 			this.document.addDocumentListener(documentHandler);
-		
+
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -1031,9 +1033,9 @@ public class JEditTextArea
 		int pos = getCaretPosition();
 		int start = getLineStartOffset(line);
 		return (pos - start);
-		
+
 	}
-	
+
 	/**
 	 * Returns the start offset of the specified line.
 	 * @param line The line
@@ -1065,13 +1067,13 @@ public class JEditTextArea
 	}
 
 	/**
-	 * Returns the length of the specified line, without the line end terminator 
+	 * Returns the length of the specified line, without the line end terminator
 	 * @param line The line
 	 */
 	public int getLineLength(int line)
 	{
 		Element lineElement = document.getDefaultRootElement().getElement(line);
-		
+
 		if(lineElement == null)
 			return -1;
 		else
@@ -1101,7 +1103,7 @@ public class JEditTextArea
 	 */
 	public void setTabSize(int aSize)
 	{
-		document.putProperty(PlainDocument.tabSizeAttribute, new Integer(aSize));
+		document.putProperty(PlainDocument.tabSizeAttribute, Integer.valueOf(aSize));
 	}
 
 
@@ -1139,13 +1141,13 @@ public class JEditTextArea
 			document.endCompoundEdit();
 		}
 	}
-	
+
 	public void reset()
 	{
 		setText("");
 		resetModified();
 	}
-	
+
 	/**
 	 * Sets the entire text of this text area.
 	 */
@@ -1174,7 +1176,7 @@ public class JEditTextArea
 			document.endCompoundEdit();
 			document.tokenizeLines();
 		}
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -1225,7 +1227,7 @@ public class JEditTextArea
 			segment.offset = segment.count = 0;
 		}
 	}
-	
+
 	/**
 	 * Returns the word that is left of the cursor.
 	 * If the character left of the cursor is a whitespace
@@ -1251,7 +1253,7 @@ public class JEditTextArea
 		if (pos <= 0) return;
 		if (Character.isWhitespace(line.charAt(pos - 1))) return;
 		int start = StringUtil.findWordBoundary(line, pos - 1, wordBoundaries);
-		if (start > -1) 
+		if (start > -1)
 		{
 			this.select(lineStart + start + 1, caret);
 		}
@@ -1761,7 +1763,7 @@ public class JEditTextArea
 		{
 			document.endCompoundEdit();
 		}
-		
+
 		updateScrollBars();
 		setCaretPosition(selectionEnd);
 //		this.invalidate();
@@ -1772,7 +1774,7 @@ public class JEditTextArea
 	{
 		insertText(getCaretPosition(), text);
 	}
-	
+
 	public void insertText(int position, String text)
 	{
 		try
@@ -1789,7 +1791,7 @@ public class JEditTextArea
 			document.endCompoundEdit();
 		}
 	}
-	
+
 	public void setAutoIndent(boolean aFlag)  { this.autoIndent = aFlag; }
 	public boolean getAutoIndent() 	{ return this.autoIndent; }
 
@@ -2046,7 +2048,6 @@ public class JEditTextArea
 			catch(Exception e)
 			{
 				getToolkit().beep();
-				System.err.println("Clipboard does not contain a string");
 			}
 		}
 	}
@@ -2055,12 +2056,12 @@ public class JEditTextArea
 	{
 		this.keyEventInterceptor = c;
 	}
-	
+
 	public void removeKeyEventInterceptor()
 	{
 		this.keyEventInterceptor = null;
 	}
-	
+
 	private void forwardKeyEvent(KeyEvent evt)
 	{
 		switch(evt.getID())
@@ -2076,7 +2077,7 @@ public class JEditTextArea
 			break;
 		}
 	}
-	
+
 	/**
 	 * Forwards key events directly to the input handler.
 	 * This is slightly faster than using a KeyListener
@@ -2091,7 +2092,7 @@ public class JEditTextArea
 			forwardKeyEvent(evt);
 			return;
 		}
-		
+
 		int oldcount = NumberStringCache.getNumberString(this.getLineCount()).length();
 		switch(evt.getID())
 		{
@@ -2156,7 +2157,7 @@ public class JEditTextArea
 		this.statusBar = bar;
 		updateStatusBar();
 	}
-	
+
 	private void updateStatusBar()
 	{
 		if (this.statusBar != null)
@@ -2165,7 +2166,7 @@ public class JEditTextArea
 			this.statusBar.setEditorLocation(line + 1, this.getCaretPositionInLine(line) + 1);
 		}
 	}
-	
+
 	protected void fireCaretEvent()
 	{
 		Object[] list = listeners.getListenerList();
@@ -2178,7 +2179,7 @@ public class JEditTextArea
 		}
 		updateStatusBar();
 	}
-	
+
 	protected void updateBracketHighlight(int newCaretPosition)
 	{
 		if(newCaretPosition == 0)
@@ -2218,10 +2219,10 @@ public class JEditTextArea
 		{
 			count = ch.getChildrenAdded().length - ch.getChildrenRemoved().length;
 		}
-		
+
 		int line = getLineOfOffset(evt.getOffset());
 		invalidateLines(line);
-		
+
 		if (count == 0)
 		{
 			painter.invalidateLine(line);
@@ -2230,10 +2231,10 @@ public class JEditTextArea
 		{
 			painter.invalidateLineRange(line,(firstLine < 0 ? 0 : firstLine) + visibleLines);
 		}
-		
+
 		boolean wasModified = this.modified;
 		this.modified = true;
-		
+
 		// only fire event if modified status is changed
 		if (!wasModified)
 		{
@@ -2241,38 +2242,38 @@ public class JEditTextArea
 		}
 		updateScrollBars();
 	}
-	
+
 	private void invalidateLines(int changedLine)
 	{
 		TokenMarker marker = getTokenMarker();
 		if (marker == null) return;
-		
+
 		// In order to display multi-line literals correctly
 		// I simply invalidate some line above and below the
 		// currently changed line. This still can leave
 		// incorrect tokens with regards to multiline literals
-		// but my assumptioin is, that literals spanning more than 
-		// 'delta' number lines are used very rarely in SQL scripts. 
-		
-		// Testing for possible literals in those lines and then only 
-		// invalidating the lines that need it, is probably 
+		// but my assumptioin is, that literals spanning more than
+		// 'delta' number lines are used very rarely in SQL scripts.
+
+		// Testing for possible literals in those lines and then only
+		// invalidating the lines that need it, is probably
 		// not much faster then simply invalidating a constant range of lines
 		int startInvalid = changedLine - this.invalidationInterval;
 		int endInvalid = changedLine + this.invalidationInterval;
-		
+
 		if (startInvalid < 0) startInvalid = 0;
 		if (endInvalid > marker.getLineCount()) endInvalid = marker.getLineCount() - 1;
 
 		// re-tokenize all lines
 		document.tokenizeLines(startInvalid, endInvalid);
-			
+
 		// re-paint the lines that need it
 		int repaintStart = (startInvalid < getFirstLine() ? getFirstLine() : startInvalid);
 		int repaintEnd = (endInvalid > (repaintStart + getVisibleLines()) ? repaintStart + getVisibleLines() : endInvalid);
 		painter.invalidateLineRange(repaintStart, repaintEnd);
 	}
-	
-	
+
+
 	public boolean isModified() { return this.modified; }
 	public void resetModified()
 	{
@@ -2373,7 +2374,7 @@ public class JEditTextArea
 				Dimension rightPref = right.getMinimumSize();
 				dim.width += rightPref.width;
 			}
-			
+
 			if (bottom != null)
 			{
 				Dimension bottomPref = bottom.getMinimumSize();
@@ -2421,9 +2422,9 @@ public class JEditTextArea
 		private Component center;
 		private Component right;
 		private Component bottom;
-		private ArrayList<Component> leftOfScrollBar = new ArrayList<Component>();
+		private List<Component> leftOfScrollBar = new ArrayList<Component>();
 	}
-		
+
 	class MutableCaretEvent extends CaretEvent
 	{
 		MutableCaretEvent()
@@ -2452,7 +2453,7 @@ public class JEditTextArea
 			// If this is not done, mousePressed events accumilate
 			// and the result is that scrolling doesn't stop after
 			// the mouse is released
-			EventQueue.invokeLater(new Runnable() 
+			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
@@ -2685,13 +2686,15 @@ public class JEditTextArea
 		}
 	}
 
-	class CaretUndo extends AbstractUndoableEdit
+	class CaretUndo
+		extends AbstractUndoableEdit
 	{
 		private int start;
 		private int end;
 
 		CaretUndo(int start, int end)
 		{
+			super();
 			this.start = start;
 			this.end = end;
 		}

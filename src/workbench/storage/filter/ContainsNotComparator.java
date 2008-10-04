@@ -17,10 +17,6 @@ package workbench.storage.filter;
 public class ContainsNotComparator
 	extends ContainsComparator
 {
-	public ContainsNotComparator()
-	{
-	}
-
 	public String getName() { return "Contains not"; }
 	public String getOperator() { return "contains not"; }
 	

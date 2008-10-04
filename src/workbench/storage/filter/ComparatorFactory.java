@@ -10,49 +10,49 @@
  *
  */
 package workbench.storage.filter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author support@sql-workbench.net
  */
 public class ComparatorFactory
 {
-	private ColumnComparator[] comparatorList;
+	private final List<ColumnComparator> comparatorList = new ArrayList<ColumnComparator>(17);
 
 	public ComparatorFactory()
 	{
-		comparatorList = new ColumnComparator[]
-		{
-			new ContainsComparator(),
-			new StartsWithComparator(),
-			new NotStartsWithComparator(),
-			new ContainsNotComparator(),
-			new StringEqualsComparator(),
-			new StringNotEqualsComparator(),
-			new NumberEqualsComparator(),
-			new DateEqualsComparator(),
-			new NumberNotEqualsComparator(),
-			new LessThanComparator(),
-			new LessOrEqualComparator(),
-			new GreaterThanComparator(),
-			new GreaterOrEqualComparator(),
-			new IsNullComparator(),
-			new IsNotNullComparator(),
-			new RegExComparator()
-		};
+		comparatorList.add(new ContainsComparator());
+		comparatorList.add(new StartsWithComparator());
+		comparatorList.add(new NotStartsWithComparator());
+		comparatorList.add(new ContainsNotComparator());
+		comparatorList.add(new StringEqualsComparator());
+		comparatorList.add(new StringNotEqualsComparator());
+		comparatorList.add(new NumberEqualsComparator());
+		comparatorList.add(new DateEqualsComparator());
+		comparatorList.add(new NumberNotEqualsComparator());
+		comparatorList.add(new LessThanComparator());
+		comparatorList.add(new LessOrEqualComparator());
+		comparatorList.add(new GreaterThanComparator());
+		comparatorList.add(new GreaterOrEqualComparator());
+		comparatorList.add(new IsNullComparator());
+		comparatorList.add(new IsNotNullComparator());
+		comparatorList.add(new RegExComparator());
 	}
 
-	public ColumnComparator[] getAvailableComparators()
+	public List<ColumnComparator> getAvailableComparators()
 	{
 		return comparatorList;
 	}
 
 	public ColumnComparator findEqualityComparatorFor(Class clz)
 	{
-		for (int i=0; i < comparatorList.length; i++)
+		for (ColumnComparator comp : comparatorList)
 		{
-			if (comparatorList[i].supportsType(clz) && comparatorList[i].comparesEquality()) 
+			if (comp.supportsType(clz) && comp.comparesEquality())
 			{
-				return comparatorList[i];
+				return comp;
 			}
 		}
 		return null;
@@ -60,9 +60,9 @@ public class ComparatorFactory
 	
 	public ColumnComparator findComparatorFor(Class clz)
 	{
-		for (int i=0; i < comparatorList.length; i++)
+		for (ColumnComparator comp : comparatorList)
 		{
-			if (comparatorList[i].supportsType(clz)) return comparatorList[i];
+			if (comp.supportsType(clz)) return comp;
 		}
 		return null;
 	}

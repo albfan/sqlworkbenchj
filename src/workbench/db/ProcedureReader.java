@@ -15,31 +15,31 @@ import java.sql.SQLException;
 import workbench.storage.DataStore;
 
 /**
- * Read the definition (source, parameters etc) of a stored procedures from 
+ * Read the definition (source, parameters etc) of a stored procedures from
  * the database
  * @author support@sql-workbench.net
  */
 public interface ProcedureReader
 {
 	// Column index definition for the procedure list
-	public static final int COLUMN_IDX_PROC_LIST_NAME = 0;
-	public static final int COLUMN_IDX_PROC_LIST_TYPE = 1;
-	public static final int COLUMN_IDX_PROC_LIST_CATALOG = 2;
-	public static final int COLUMN_IDX_PROC_LIST_SCHEMA = 3;
-	public static final int COLUMN_IDX_PROC_LIST_REMARKS = 4;
-	public static final int COLUMN_IDX_PROC_LIST_SPECIFIC_NAME = 5;
-	
+	int COLUMN_IDX_PROC_LIST_NAME = 0;
+	int COLUMN_IDX_PROC_LIST_TYPE = 1;
+	int COLUMN_IDX_PROC_LIST_CATALOG = 2;
+	int COLUMN_IDX_PROC_LIST_SCHEMA = 3;
+	int COLUMN_IDX_PROC_LIST_REMARKS = 4;
+	int COLUMN_IDX_PROC_LIST_SPECIFIC_NAME = 5;
+
 	// column index definitions for the list of procedure columns
-	public final static int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
-	public final static int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 1;
-	public final static int COLUMN_IDX_PROC_COLUMNS_DATA_TYPE = 2;
-	public final static int COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE = 3;
-	public final static int COLUMN_IDX_PROC_COLUMNS_REMARKS = 4;
-	
-	public static final String PROC_RESULT_UNKNOWN = "";
-	public static final String PROC_RESULT_YES = "RESULT";
-	public static final String PROC_RESULT_NO = "NO RESULT";
-	
+	int COLUMN_IDX_PROC_COLUMNS_COL_NAME = 0;
+	int COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE = 1;
+	int COLUMN_IDX_PROC_COLUMNS_DATA_TYPE = 2;
+	int COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE = 3;
+	int COLUMN_IDX_PROC_COLUMNS_REMARKS = 4;
+
+	final String PROC_RESULT_UNKNOWN = "";
+	final String PROC_RESULT_YES = "RESULT";
+	final String PROC_RESULT_NO = "NO RESULT";
+
 	StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType);
 	boolean procedureExists(String catalog, String schema, String name, int type);
 	DataStore getProcedures(String aCatalog, String aSchema)

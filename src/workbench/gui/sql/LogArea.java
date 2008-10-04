@@ -28,17 +28,18 @@ public class LogArea
 
 	public LogArea()
 	{
+		super();
 		// Save the default background while the log component is enabled/editable
 		// because we want to use that color when turning off editing again
 		// The JGoodies look and feel displays the area in gray if it is not editable
 		Color bg = getBackground();
-		
+
 		setBorder(logBorder);
 		setFont(Settings.getInstance().getMsgLogFont());
 		setEditable(false);
 		setLineWrap(true);
 		setWrapStyleWord(true);
-		
+
 		// Now that the text area is set to readonly, re-apply the default background color
 		setBackground(bg);
 		addMouseListener(new TextComponentMouseListener());

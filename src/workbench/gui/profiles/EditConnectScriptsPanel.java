@@ -38,19 +38,20 @@ import workbench.util.StringUtil;
  */
 public class EditConnectScriptsPanel
 	extends JPanel
-	implements ValidatingComponent 
+	implements ValidatingComponent
 {
 	private EditorPanel postConnectEditor;
 	private EditorPanel preDisconnectEditor;
 	private EditorPanel keepAliveScriptEditor;
 	private JTextField keepAliveInterval;
-	
+
 	public EditConnectScriptsPanel(ConnectionProfile profile)
 	{
+		super();
 		if (profile == null) throw new NullPointerException("Null profile specified!");
-		
+
 		this.setLayout(new GridBagLayout());
-		
+
 		JPanel p1 = new JPanel(new BorderLayout(0,5));
 		JLabel l1 = new JLabel(ResourceMgr.getString("LblPostConnectScript"));
 		postConnectEditor = EditorPanel.createSqlEditor();
@@ -59,7 +60,7 @@ public class EditConnectScriptsPanel
 		postConnectEditor.setPreferredSize(d);
 		p1.add(l1, BorderLayout.NORTH);
 		p1.add(postConnectEditor, BorderLayout.CENTER);
-		
+
 		JPanel p2 = new JPanel(new BorderLayout(0,5));
 		JLabel l2 = new JLabel(ResourceMgr.getString("LblPreDisconnectScript"));
 		preDisconnectEditor = EditorPanel.createSqlEditor();
@@ -81,12 +82,12 @@ public class EditConnectScriptsPanel
 		JLabel time = new JLabel(ResourceMgr.getString("LblIdleScriptTime"));
 		time.setToolTipText(ResourceMgr.getDescription("LblIdleScriptTime"));
 		p4.add(time);
-		
+
 		keepAliveInterval = new JTextField(8);
 		keepAliveInterval.setText(KeepAliveDaemon.getTimeDisplay(profile.getIdleTime()));
 		p4.add(keepAliveInterval);
 		p3.add(p4, BorderLayout.SOUTH);
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -94,14 +95,14 @@ public class EditConnectScriptsPanel
 		c.weighty = 0.5;
 		c.fill = GridBagConstraints.BOTH;
 		this.add(p1, c);
-		
+
 		c.gridy ++;
 		c.insets = new Insets(10,0,0,0);
 		this.add(p2, c);
-		
+
 		c.gridy ++;
 		this.add(p3, c);
-		
+
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.addComponent(this.postConnectEditor);
 		pol.addComponent(this.preDisconnectEditor);
@@ -111,18 +112,18 @@ public class EditConnectScriptsPanel
 		this.setFocusTraversalPolicy(pol);
 		this.setFocusCycleRoot(false);
 	}
-	
+
 	public String getKeepAliveScript()
 	{
 		return keepAliveScriptEditor.getText().trim();
 	}
-	
+
 	private long getIdleTime()
 	{
 		String s = this.keepAliveInterval.getText().trim().toLowerCase();
 		if (s.length() == 0) return 0;
 		long result = 0;
-		
+
 		if (s.endsWith("s"))
 		{
 			s = s.substring(0, s.length() - 1);
@@ -133,24 +134,24 @@ public class EditConnectScriptsPanel
 			s = s.substring(0, s.length() - 1);
 			result = StringUtil.getLongValue(s, 0) * 1000 * 60;
 		}
-		else 
+		else
 		{
 			result = StringUtil.getLongValue(s, 0);
 		}
 		return result;
 	}
-	
-	public String getPostConnectScript() 
+
+	public String getPostConnectScript()
 	{
 		return postConnectEditor.getText().trim();
 	}
-	
+
 	public String getPreDisconnectScript()
 	{
 		return preDisconnectEditor.getText().trim();
 	}
-	
-	
+
+
 	public static boolean editScripts(Dialog owner, ConnectionProfile profile)
 	{
 		EditConnectScriptsPanel p = new EditConnectScriptsPanel(profile);

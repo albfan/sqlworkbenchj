@@ -36,7 +36,6 @@ public class LobFileStatement
 	private String sqlToUse;
 	private LobFileParameter[] parameters;
 	private int parameterCount = 0;
-	private String baseDir;
 	
 	public LobFileStatement(String sql)
 		throws FileNotFoundException
@@ -44,10 +43,9 @@ public class LobFileStatement
 		this(sql, null);
 	}
 	
-	public LobFileStatement(String sql, String dir)
+	public LobFileStatement(String sql, final String dir)
 		throws FileNotFoundException
 	{
-		this.baseDir = dir;
 
 		LobFileParameterParser p = new LobFileParameterParser(sql);
 		
@@ -70,9 +68,9 @@ public class LobFileStatement
 			}
 			File f = new File(parameters[index].getFilename());
 
-			if (!f.isAbsolute() && this.baseDir != null)
+			if (!f.isAbsolute() && dir != null)
 			{
-				f = new File(this.baseDir, parameters[index].getFilename());
+				f = new File(dir, parameters[index].getFilename());
 				parameters[index].setFilename(f.getAbsolutePath());
 			}
 						

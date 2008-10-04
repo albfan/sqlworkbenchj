@@ -24,10 +24,10 @@ public class NewListEntryAction
 	extends WbAction
 {
 	private FileActions client;
-	private boolean checkShift = true;
 
 	public NewListEntryAction(FileActions aClient, String aKey)
 	{
+		super();
 		this.client = aClient;
 		this.initMenuDefinition(aKey);
 		this.setIcon("New");
@@ -35,9 +35,9 @@ public class NewListEntryAction
 
 	public NewListEntryAction(FileActions aClient)
 	{
+		super();
 		this.client = aClient;
 		this.setIcon("New");
-		this.checkShift = true;
 		String tip = ResourceMgr.getDescription("LblNewListEntry", true);
 		this.initMenuDefinition(ResourceMgr.getString("LblNewListEntry"), tip, null);
 	}

@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
 import workbench.db.postgres.PostgresViewGrantReader;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,10 +38,6 @@ import workbench.util.StringUtil;
  */
 public abstract class ViewGrantReader
 {
-
-	public ViewGrantReader()
-	{
-	}
 
 	public static ViewGrantReader createViewGrantReader(WbConnection conn)
 	{
@@ -135,13 +132,13 @@ public abstract class ViewGrantReader
 				result.add(grant);
 			}
 		}
-		catch (Exception e)
+		catch (SQLException e)
 		{
 			LogMgr.logError("ViewGrantReader", "Error when reading view grants", e);
 		}
 		finally
 		{
-			SqlUtil.closeResult(rs);
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 
@@ -185,7 +182,7 @@ public abstract class ViewGrantReader
 			String grantee = entry.getKey();
 			// Ignore grants to ourself
 			if (user.equalsIgnoreCase(grantee)) continue;
-			
+
 			List<String> privs = entry.getValue();
 			result.append("GRANT ");
 			result.append(StringUtil.listToString(privs, ','));
@@ -196,5 +193,5 @@ public abstract class ViewGrantReader
 			result.append(";\n");
 		}
 		return result;
-	}	
+	}
 }

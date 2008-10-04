@@ -43,10 +43,9 @@ public class GeneralOptionsPanel
 	extends JPanel
 	implements Restoreable
 {
-
-	/** Creates new form GeneralOptionsPanel */
 	public GeneralOptionsPanel()
 	{
+		super();
 		initComponents();
 		pdfReaderPath.setAllowMultiple(false);
 		standardFont.setAllowFontReset(true);
@@ -134,9 +133,6 @@ public class GeneralOptionsPanel
 		int index = checkInterval.getSelectedIndex();
 		switch (index)
 		{
-			case 0:
-				set.setUpdateCheckInterval(-1);
-				break;
 			case 1:
 				set.setUpdateCheckInterval(1);
 				break;

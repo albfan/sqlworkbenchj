@@ -19,19 +19,21 @@ import workbench.sql.StatementRunnerResult;
 
 /**
  * This class simply ignores the command and does not send it to the DBMS
- * 
- * Thus scripts e.g. intended for SQL*Plus (containing WHENEVER or EXIT) 
+ *
+ * Thus scripts e.g. intended for SQL*Plus (containing WHENEVER or EXIT)
  * can be executed from within the workbench.
  * The commands to be ignored can be configured in workbench.settings
  *
  * @author  support@sql-workbench.net
  */
-public class IgnoredCommand extends SqlCommand
+public class IgnoredCommand
+	extends SqlCommand
 {
 	private String verb;
 
 	public IgnoredCommand(String aVerb)
 	{
+		super();
 		this.verb = aVerb;
 	}
 
@@ -50,5 +52,5 @@ public class IgnoredCommand extends SqlCommand
 	{
 		return verb;
 	}
-	
+
 }

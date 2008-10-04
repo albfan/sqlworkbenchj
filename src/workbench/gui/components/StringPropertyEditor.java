@@ -104,7 +104,7 @@ public class StringPropertyEditor
 		if (!this.changed) return;
 		if (this.source == null) return;
 		if (this.setter == null) return;
-		Object args[] = new Object[1];
+		Object[] args = new Object[1];
 		args[0] = this.getText();
 		try
 		{

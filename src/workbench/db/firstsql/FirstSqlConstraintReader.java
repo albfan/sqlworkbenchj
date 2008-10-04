@@ -37,9 +37,6 @@ public class FirstSqlConstraintReader
              "  and cons.constraint_name = ch.constraint_name" + 
              "  and cons.table_schema = ? \n" + 
              "  and cons.table_name = ? ";
-	public FirstSqlConstraintReader()
-	{
-	}
 
 	public Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
 	{

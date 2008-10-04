@@ -30,6 +30,7 @@ public class WbListCatalogs extends SqlCommand
 
 	private WbListCatalogs(String verb)
 	{
+		super();
 		this.VERB = verb;
 	}
 

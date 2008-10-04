@@ -40,10 +40,6 @@ public class SetCommand extends SqlCommand
 {
 	public static final String VERB = "SET";
 
-	public SetCommand()
-	{
-	}
-
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -67,7 +63,7 @@ public class SetCommand extends SqlCommand
 				e.printStackTrace();
 			}
 			boolean execSql = true;
-			
+
 			if (command != null)
 			{
 				// those SET commands that have a SQL Workbench equivalent
@@ -98,9 +94,9 @@ public class SetCommand extends SqlCommand
 			{
 				result = new StatementRunnerResult();
 				this.currentStatement = currentConnection.createStatement();
-				// Using a generic execute ensures that servers that 
-				// can process more than one statement with a single SQL 
-				// are treated correctly. E.g. when sending a SET and a SELECT 
+				// Using a generic execute ensures that servers that
+				// can process more than one statement with a single SQL
+				// are treated correctly. E.g. when sending a SET and a SELECT
 				// as one statement for SQL Server
 				boolean hasResult = this.currentStatement.execute(aSql);
 				processMoreResults(aSql, result, hasResult);
@@ -162,7 +158,7 @@ public class SetCommand extends SqlCommand
 	private StatementRunnerResult setAutocommit(WbConnection aConnection, String param)
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		
+
 		if (StringUtil.isEmptyString(param))
 		{
 			result.setFailure();

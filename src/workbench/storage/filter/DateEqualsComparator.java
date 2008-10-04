@@ -20,24 +20,24 @@ public class DateEqualsComparator
 	implements ColumnComparator
 {
 	private int sqlType;
-	
+
 	public DateEqualsComparator()
 	{
 		this.sqlType = java.sql.Types.TIMESTAMP;
 	}
-	
+
 	public DateEqualsComparator(int type)
 	{
 		this.sqlType = type;
 	}
-	
+
 	public boolean supportsIgnoreCase() { return false; }
 
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "="; }
 	public boolean needsValue() { return true; }
 	public boolean comparesEquality() { return true; }
-	
+
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
@@ -50,23 +50,23 @@ public class DateEqualsComparator
 			return false;
 		}
 	}
-	
+
 	public boolean supportsType(Class valueClass)
 	{
-		return (java.util.Date.class.isAssignableFrom(valueClass));
+		return java.util.Date.class.isAssignableFrom(valueClass);
 	}
 
 	public boolean equals(Object other)
 	{
 		return (other instanceof DateEqualsComparator);
 	}
-	
+
 	public boolean validateInput(Object value)
 	{
 		if (value == null) return false;
-		
+
 		if (value instanceof java.util.Date) return true;
-		
+
 		ValueConverter converter = new ValueConverter();
 		try
 		{
@@ -77,6 +77,6 @@ public class DateEqualsComparator
 		{
 			return false;
 		}
-	}	
+	}
 
 }

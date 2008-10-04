@@ -34,11 +34,6 @@ import workbench.util.MessageBuffer;
  */
 public class DwUpdatePreview
 {
-	
-	public DwUpdatePreview()
-	{
-	}
-
 	public boolean confirmUpdate(Component caller, DataStore ds, WbConnection dbConn)
 	{
 		boolean doSave = true;
@@ -81,7 +76,7 @@ public class DwUpdatePreview
 			{
 				public void run()
 				{
-					preview.setText(text.toString());
+					preview.setText(text);
 					preview.setCaretPosition(0);
 					preview.repaint();
 				}

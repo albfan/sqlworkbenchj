@@ -110,14 +110,13 @@ public class ImportOptionsPanel
 	 */
 	public void setImportType(ProducerFactory.ImportType type)
 	{
-		switch (type)
+		if (type == ProducerFactory.ImportType.Text)
 		{
-			case Text:
-				setTypeText();
-				break;
-			case XML:
-				setTypeXml();
-				break;
+			setTypeText();
+		}
+		else if (type == ProducerFactory.ImportType.XML)
+		{
+			setTypeXml();
 		}
 	}
 

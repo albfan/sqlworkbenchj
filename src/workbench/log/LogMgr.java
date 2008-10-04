@@ -55,7 +55,7 @@ public class LogMgr
 	}
 
 	private static PrintStream logOut = null;
-	public static LogFileViewer viewer;
+	private static LogFileViewer viewer;
 	private static final Date theDate = new Date();
 	private static boolean logSystemErr = false;
 
@@ -68,7 +68,7 @@ public class LogMgr
 	private static final int NUM_ELEMENTS = 5;
 	private static String[] MSG_ELEMENTS = new String[NUM_ELEMENTS];
 
-	private static SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
+	private final static SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
 
 	private static int loglevel = 3;
 
@@ -411,8 +411,11 @@ public class LogMgr
 
 	private static String getTimeString()
 	{
-		theDate.setTime(System.currentTimeMillis());
-		return formatter.format(theDate);
+		synchronized (formatter)
+		{
+			theDate.setTime(System.currentTimeMillis());
+			return formatter.format(theDate);
+		}
 	}
 
 }

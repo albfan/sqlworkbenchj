@@ -56,7 +56,7 @@ public class SyntaxDocument
 	protected void initDefaultProperties()
 	{
 		this.putProperty("filterNewlines", Boolean.FALSE);
-		this.putProperty(PlainDocument.tabSizeAttribute,new Integer(Settings.getInstance().getEditorTabWidth()));
+		this.putProperty(PlainDocument.tabSizeAttribute,Integer.valueOf(Settings.getInstance().getEditorTabWidth()));
 	}
 	/**
 	 * Returns the token marker that is to be used to split lines

@@ -30,27 +30,27 @@ import workbench.util.StringUtil;
  * Retrieve information about stored procedures from the database.
  * To retrieve the source of the Stored procedure, SQL statements need
  * to be defined in the ProcSourceStatements.xml
- * 
+ *
  * @see workbench.db.MetaDataSqlManager
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class JdbcProcedureReader
 	implements ProcedureReader
 {
-	protected WbConnection connection;
+	final protected WbConnection connection;
 	protected boolean useSavepoint = false;
-	
+
 	public JdbcProcedureReader(WbConnection conn)
 	{
 		this.connection = conn;
 	}
-	
+
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StringUtil.emptyBuffer();
 	}
-	
+
 	/**
 	 * Checks if the given procedure exists in the database
 	 */
@@ -61,7 +61,7 @@ public class JdbcProcedureReader
 		Savepoint sp = null;
 		try
 		{
-			if (useSavepoint) 
+			if (useSavepoint)
 			{
 				sp = this.connection.setSavepoint();
 			}
@@ -69,7 +69,7 @@ public class JdbcProcedureReader
 			if (rs.next())
 			{
 				int type = rs.getInt(8);
-				if (type == DatabaseMetaData.procedureResultUnknown || 
+				if (type == DatabaseMetaData.procedureResultUnknown ||
 					  procType == DatabaseMetaData.procedureResultUnknown ||
 						type == procType)
 				{
@@ -89,7 +89,7 @@ public class JdbcProcedureReader
 		}
 		return exists;
 	}
-	
+
 	public DataStore getProcedures(String aCatalog, String aSchema)
 		throws SQLException
 	{
@@ -97,11 +97,11 @@ public class JdbcProcedureReader
 		{
 			aSchema = null;
 		}
-		
+
 		Savepoint sp = null;
 		try
 		{
-			if (useSavepoint) 
+			if (useSavepoint)
 			{
 				sp = this.connection.setSavepoint();
 			}
@@ -120,9 +120,9 @@ public class JdbcProcedureReader
 	public DataStore buildProcedureListDataStore(DbMetadata meta, boolean addSpecificName)
 	{
 		String[] cols  = null;
-		int types[] = null;
-		int sizes[] = null;
-		
+		int[] types = null;
+		int[] sizes = null;
+
 		if (addSpecificName)
 		{
 			cols = new String[] {"PROCEDURE_NAME", "TYPE", meta.getCatalogTerm().toUpperCase(), meta.getSchemaTerm().toUpperCase(), "REMARKS", "SPECIFIC_NAME"};
@@ -139,16 +139,16 @@ public class JdbcProcedureReader
 		DataStore ds = new DataStore(cols, types, sizes);
 		return ds;
 	}
-	
+
 	public DataStore fillProcedureListDataStore(ResultSet rs)
 		throws SQLException
 	{
 
 		int specIndex = JdbcUtils.getColumnIndex(rs, "SPECIFIC_NAME");
 		boolean useSpecificName = specIndex > -1;
-		
+
 		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), useSpecificName);
-		
+
 		try
 		{
 			while (rs.next())
@@ -157,16 +157,16 @@ public class JdbcProcedureReader
 				String schema = rs.getString("PROCEDURE_SCHEM");
 				String name = rs.getString("PROCEDURE_NAME");
 				String remark = rs.getString("REMARKS");
-				short type = rs.getShort("PROCEDURE_TYPE");
-				Integer iType = null;
+				int type = rs.getInt("PROCEDURE_TYPE");
+				Integer iType;
 				if (rs.wasNull())
 				{
 					//sType = "N/A";
-					iType = new Integer(DatabaseMetaData.procedureResultUnknown);
+					iType = Integer.valueOf(DatabaseMetaData.procedureResultUnknown);
 				}
 				else
 				{
-					iType = new Integer(type);
+					iType = Integer.valueOf(type);
 				}
 				int row = ds.addRow();
 				if (useSpecificName)
@@ -192,7 +192,7 @@ public class JdbcProcedureReader
 		}
 		return ds;
 	}
-	
+
 	public static String convertProcType(int type)
 	{
 		if (type == DatabaseMetaData.procedureNoResult)
@@ -202,16 +202,16 @@ public class JdbcProcedureReader
 		else
 			return ProcedureReader.PROC_RESULT_UNKNOWN;
 	}
-	
+
 	protected DataStore createProcColsDataStore()
 	{
-		final String cols[] = {"COLUMN_NAME", "TYPE", "TYPE_NAME", "java.sql.Types", "REMARKS"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR};
-		final int sizes[] =   {20, 10, 18, 5, 30};
+		final String[] cols = {"COLUMN_NAME", "TYPE", "TYPE_NAME", "java.sql.Types", "REMARKS"};
+		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR};
+		final int[] sizes =   {20, 10, 18, 5, 30};
 		DataStore ds = new DataStore(cols, types, sizes);
 		return ds;
 	}
-	
+
 	private String stripVersionInfo(String procname)
 	{
 		DbSettings dbS = this.connection.getMetadata().getDbSettings();
@@ -221,7 +221,7 @@ public class JdbcProcedureReader
 		if (pos < 0) return procname;
 		return procname.substring(0,pos);
 	}
-	
+
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{
@@ -230,7 +230,7 @@ public class JdbcProcedureReader
 		Savepoint sp = null;
 		try
 		{
-			if (useSavepoint) 
+			if (useSavepoint)
 			{
 				sp = this.connection.setSavepoint();
 			}
@@ -293,7 +293,7 @@ public class JdbcProcedureReader
 
 		return ds;
 	}
-	
+
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
@@ -302,11 +302,11 @@ public class JdbcProcedureReader
 		GetMetaDataSql sql = this.connection.getMetadata().metaSqlMgr.getProcedureSourceSql();
 		if (sql == null)
 		{
-			throw new NoConfigException();
+			throw new NoConfigException("No sql configured to retrieve procedure source");
 		}
-		
+
 		String procName = stripVersionInfo(def.getProcedureName());
-		
+
 		StringBuilder source = new StringBuilder(500);
 
 		StringBuilder header = getProcedureHeader(def.getCatalog(), def.getSchema(), procName, def.getResultType());
@@ -315,12 +315,10 @@ public class JdbcProcedureReader
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
-		
-    int linecount = 0;
-		
+
 		try
 		{
-			if (useSavepoint) 
+			if (useSavepoint)
 			{
 				sp = this.connection.setSavepoint();
 			}
@@ -339,7 +337,6 @@ public class JdbcProcedureReader
 				String line = rs.getString(1);
 				if (line != null)
 				{
-					linecount ++;
 					source.append(line);
 				}
 			}
@@ -365,20 +362,20 @@ public class JdbcProcedureReader
 			source.append(delimiter.getDelimiter());
 			if (delimiter.isSingleLine()) source.append('\n');
 		}
-		
+
 		String result = source.toString();
-		
+
 		String dbId = this.connection.getMetadata().getDbId();
 		boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + dbId + ".replacenl.proceduresource", false);
-		
+
 		if (replaceNL)
 		{
 			String nl = Settings.getInstance().getInternalEditorLineEnding();
 			result = StringUtil.replace(source.toString(), "\\n", nl);
 		}
-		
+
 		def.setSource(result);
 	}
-	
+
 
 }

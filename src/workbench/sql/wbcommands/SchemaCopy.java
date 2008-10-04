@@ -50,7 +50,6 @@ public class SchemaCopy
 	private List<TableIdentifier> sourceTables;
 	private RowActionMonitor rowMonitor;
 	private boolean cancel = false;
-	private ArgumentParser arguments;
 	private boolean doSyncDelete = false;
 	private String cmdLineMode = null;
 	
@@ -264,7 +263,7 @@ public class SchemaCopy
 		this.sourceConnection = source;
 		this.targetConnection = target;
 		
-		this.arguments = cmdLine;
+		ArgumentParser arguments = cmdLine;
 
 		boolean deleteTarget = cmdLine.getBoolean(WbCopy.PARAM_DELETETARGET);
 		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);

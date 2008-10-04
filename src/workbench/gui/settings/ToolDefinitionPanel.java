@@ -43,9 +43,9 @@ public class ToolDefinitionPanel
 	private ToolDefinition currentTool;
 	private PropertyChangeListener changeListener;
 
-	/** Creates new form BeanForm */
 	public ToolDefinitionPanel()
 	{
+		super();
 		initComponents();
 		tfName.addFocusListener(new FocusAdapter()
 		{
@@ -175,7 +175,7 @@ public class ToolDefinitionPanel
 		{
 			LogMgr.logError("ToolDefinitionPanel.selectTool()", "Error selecting file", e);
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
-		}			
+		}
 	}//GEN-LAST:event_selectTool
 
 	private void initPropertyEditors()

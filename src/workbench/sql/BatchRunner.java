@@ -43,8 +43,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
- * A class to run several statements from a script file. 
- * This is used when running SQL Workbench in batch mode and 
+ * A class to run several statements from a script file.
+ * This is used when running SQL Workbench in batch mode and
  * for the {@link workbench.sql.wbcommands.WbInclude} command.
  *
  * @author  support@sql-workbench.net
@@ -83,12 +83,12 @@ public class BatchRunner
 
 	/**
 	 * The baseDir is used when including other scripts using WbInclude.
-	 * 
+	 *
 	 * If the filename of the included script is a relative filename
 	 * then the StatementRunner will assume the script is located relative
-	 * to the baseDir. This call is delegated to 
+	 * to the baseDir. This call is delegated to
 	 * {@link StatementRunner#setBaseDir(String)}
-	 * 
+	 *
 	 * @param dir the base directory to be used
 	 * @see StatementRunner#setBaseDir(String)
 	 */
@@ -106,7 +106,7 @@ public class BatchRunner
 	{
 		this.stmtRunner.setExecutionController(controller);
 	}
-	
+
 	public void setParameterPrompter(ParameterPrompter p)
 	{
 		this.stmtRunner.setParameterPrompter(p);
@@ -136,7 +136,7 @@ public class BatchRunner
 	{
 		this.consolidateMessages = flag;
 	}
-	
+
 	public void setIgnoreDropErrors(boolean flag)
 	{
 		this.stmtRunner.setIgnoreDropErrors(flag);
@@ -419,14 +419,13 @@ public class BatchRunner
 
 		parser.startIterator();
 		long totalRows = 0;
-		long successCount = 0;
 		long errorCount = 0;
-		
+
 		while (parser.hasNext())
 		{
 			sql = parser.getNextCommand();
 			if (sql == null) continue;
-			
+
 			try
 			{
 				if (this.resultDisplay == null)
@@ -452,15 +451,14 @@ public class BatchRunner
 					boolean hasMessage = result.hasMessages();
 					String feedback = result.getMessageBuffer().toString();
 
-					if (error) 
+					if (error)
 					{
 						LogMgr.logError("BatchRunner.execute()", feedback, null);
 						errorCount ++;
 					}
-					else 
+					else
 					{
 						if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
-						successCount ++;
 						totalRows += result.getTotalUpdateCount();
 					}
 
@@ -522,7 +520,7 @@ public class BatchRunner
 			if (resultDisplay == null) msg.insert(0, '\n'); // force newline on console
 			this.printMessage(msg.toString());
 		}
-		
+
 		if (consolidateMessages)
 		{
 			if (errorCount > 0)
@@ -531,7 +529,7 @@ public class BatchRunner
 			}
 			if (verboseLogging) this.printMessage(totalRows + " " + ResourceMgr.getString("MsgTotalRowsAffected"));
 		}
-		
+
 		parser.done();
 
 		if (this.showTiming)
@@ -553,7 +551,7 @@ public class BatchRunner
 		if (!result.hasDataStores()) return;
 
 		List<DataStore> data = result.getDataStores();
-		
+
 		console.println();
 		console.println(sql);
 		console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
@@ -567,7 +565,7 @@ public class BatchRunner
 		}
 		console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 	}
-	
+
 	public void setEncoding(String enc)
 		throws UnsupportedEncodingException
 	{
@@ -668,7 +666,7 @@ public class BatchRunner
 			result.setRemoveComments(cmdLine.getBoolean(AppArguments.ARG_CONN_REMOVE_COMMENTS, false));
 			result.setReadOnly(cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false));
 			result.setHideWarnings(cmdLine.getBoolean(AppArguments.ARG_HIDE_WARNINGS, false));
-			
+
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);
@@ -698,7 +696,7 @@ public class BatchRunner
 	public static BatchRunner createBatchRunner(ArgumentParser cmdLine)
 	{
 		String scripts = cmdLine.getValue(AppArguments.ARG_SCRIPT);
-		if (scripts == null || scripts.trim().length() == 0) return null;
+		if (StringUtil.isBlank(scripts)) return null;
 
 		String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
 

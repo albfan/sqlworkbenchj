@@ -77,8 +77,8 @@ public class TriggerReader
 		throws SQLException
 	{
 		final String[] cols = {"NAME", "TYPE", "EVENT"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int sizes[] =   {30, 30, 20};
+		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int[] sizes =   {30, 30, 20};
 
 		DataStore result = new DataStore(cols, types, sizes);
 		

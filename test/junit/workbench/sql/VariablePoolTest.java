@@ -18,7 +18,6 @@ import java.util.Set;
 import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
-import workbench.TestUtil;
 import workbench.util.ArgumentParser;
 
 /**

@@ -71,8 +71,6 @@ public class DataImporter
 	public static final int MODE_UPDATE_INSERT = 3;
 
 	private WbConnection dbConn;
-	private String insertSql;
-	private String updateSql;
 
 	private RowDataProducer source;
 	private PreparedStatement insertStatement;
@@ -1712,15 +1710,15 @@ public class DataImporter
 		text.append(parms);
 		text.append(')');
 
+		String insertSql = text.toString();
 		try
 		{
-			this.insertSql = text.toString();
-			this.insertStatement = this.dbConn.getSqlConnection().prepareStatement(this.insertSql);
-			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Statement for insert: " + this.insertSql);
+			this.insertStatement = this.dbConn.getSqlConnection().prepareStatement(insertSql);
+			LogMgr.logInfo("DataImporter.prepareInsertStatement()", "Statement for insert: " + insertSql);
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DataImporter.prepareInsertStatement()", "Error when preparing INSERT statement: " + this.insertSql, e);
+			LogMgr.logError("DataImporter.prepareInsertStatement()", "Error when preparing INSERT statement: " + insertSql, e);
 			this.messages.append(ResourceMgr.getString("ErrImportInitTargetFailed"));
 			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.insertStatement = null;
@@ -1789,7 +1787,6 @@ public class DataImporter
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available\n", null);
 			this.messages.append(ResourceMgr.getString("ErrImportNoKeyForUpdate"));
 			this.messages.appendNewLine();
-			this.updateSql = null;
 			this.updateStatement = null;
 			this.hasErrors = true;
 			throw new SQLException("No key columns defined for update mode");
@@ -1799,7 +1796,6 @@ public class DataImporter
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "At least one of the supplied primary key columns was not found in the target table!", null);
 			this.messages.append(ResourceMgr.getString("ErrImportUpdateKeyColumnNotFound") + "\n");
-			this.updateSql = null;
 			this.updateStatement = null;
 			this.hasErrors = true;
 			throw new SQLException("Not enough key columns defined for update mode");
@@ -1810,7 +1806,6 @@ public class DataImporter
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!", null);
 			this.messages.append(ResourceMgr.getString("ErrImportOnlyKeyColumnsForUpdate"));
 			this.messages.appendNewLine();
-			this.updateSql = null;
 			this.updateStatement = null;
 			if (this.isModeUpdate())
 			{
@@ -1844,11 +1839,11 @@ public class DataImporter
 			if (addBracket) sql.append(")");
 		}
 
+		String updateSql = sql.toString();
 		try
 		{
-			this.updateSql = sql.toString();
-			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(this.updateSql);
-			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Statement for update: " + this.updateSql);
+			LogMgr.logInfo("DataImporter.prepareUpdateStatement()", "Statement for update: " + updateSql);
+			this.updateStatement = this.dbConn.getSqlConnection().prepareStatement(updateSql);
 		}
 		catch (SQLException e)
 		{
@@ -1859,7 +1854,6 @@ public class DataImporter
 			this.hasErrors = true;
 			throw e;
 		}
-		return;
 	}
 
 	/**

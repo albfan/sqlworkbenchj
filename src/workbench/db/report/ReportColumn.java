@@ -42,7 +42,7 @@ public class ReportColumn
 	private TagWriter tagWriter = new TagWriter();
 	private boolean isRealColumn = true;
 	private boolean isReferenced = false;
-	
+
 	public ReportColumn(ColumnIdentifier col)
 	{
 		this.column = col;
@@ -66,7 +66,7 @@ public class ReportColumn
 	{
 		return isReferenced;
 	}
-	
+
 	public void setForeignKeyReference(ColumnReference ref)
 	{
 		this.fk = ref;
@@ -80,12 +80,12 @@ public class ReportColumn
 	{
 		appendXml(result, indent, true);
 	}
-	
+
 	public void appendXml(StrBuffer result, StrBuffer indent, boolean includePosition)
 	{
 		appendXml(result, indent, includePosition, TAG_COLUMN_DEFINITION, false);
 	}
-	
+
 	public void appendXml(StrBuffer result, StrBuffer indent, boolean includePosition, String mainTagToUse, boolean shortInfo)
 	{
 		StrBuffer myindent = new StrBuffer(indent);
@@ -119,7 +119,6 @@ public class ReportColumn
 			result.append(fk.getXml(myindent));
 		}
 		tagWriter.appendCloseTag(result, indent, mainTagToUse);
-		return;
 	}
 
 	public void setNamespace(String namespace)
@@ -131,11 +130,11 @@ public class ReportColumn
 		}
 	}
 
-	public void setRealColumn(boolean flag) 
-	{ 
-		this.isRealColumn = flag; 
+	public void setRealColumn(boolean flag)
+	{
+		this.isRealColumn = flag;
 	}
-	
+
 	public String toString()
 	{
 		return column.toString();

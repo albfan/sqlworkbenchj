@@ -30,10 +30,10 @@ import workbench.util.WbFile;
 import workbench.util.ZipUtil;
 
 /**
- * This class manages access to an import file and possible attachments that 
- * were created by {@link workbench.db.exporter.DataExporter} 
- * The import file can either be a regular file, or stored in a ZIP archive. 
- * 
+ * This class manages access to an import file and possible attachments that
+ * were created by {@link workbench.db.exporter.DataExporter}
+ * The import file can either be a regular file, or stored in a ZIP archive.
+ *
  * @author support@sql-workbench.net
  */
 public class ImportFileHandler
@@ -45,20 +45,16 @@ public class ImportFileHandler
 	private ZipFile mainArchive;
 	private ZipFile attachments;
 	private BufferedReader mainReader;
-	
-	public ImportFileHandler()
-	{
-	}
-	
+
 	/**
 	 * Define the main input file used by this handler.
-	 * If the file is a ZIP Archive getMainFileReader() will 
+	 * If the file is a ZIP Archive getMainFileReader() will
 	 * return a Reader for the first file in the archive.
 	 * (DataExporter creates an archive with a single
 	 * file in it).
 	 * @param mainFile the basefile
 	 * @param enc the encoding for the basefile
-	 */ 
+	 */
 	public void setMainFile(File mainFile, String enc)
 		throws IOException
 	{
@@ -66,19 +62,19 @@ public class ImportFileHandler
 		this.mainArchive = null;
 		this.attachments = null;
 		this.encoding = enc;
-	
+
 		this.baseFile = mainFile;
 		this.baseDir = baseFile.getParentFile();
 		if (this.baseDir == null) baseDir = new File(".");
 		isZip = ZipUtil.isZipFile(baseFile);
 		this.initAttachements();
 	}
-	
+
 	boolean isZip() { return isZip; }
 
 	/**
 	 * Return a Reader that is suitable for reading the contents
-	 * of the main file. The reader will be created with the 
+	 * of the main file. The reader will be created with the
 	 * encoding that was specified in {@link #setMainFile(File, String)}
 	 * @return a BufferedReader for the main file
 	 * @see #setMainFile(File, String)
@@ -123,7 +119,7 @@ public class ImportFileHandler
 		throws IOException
 	{
 		if (baseFile instanceof ClipboardFile) return;
-		
+
 		WbFile f = new WbFile(baseFile);
 		String basename = f.getFileName();
 		String attFileName = basename + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip";
@@ -139,23 +135,23 @@ public class ImportFileHandler
 	{
 		ZipEntry entry = this.attachments.getEntry(f.getName());
 		if (entry != null) return entry;
-		
-		throw new FileNotFoundException("Attachment file " + f.getName() + " not found in archive " + this.attachments.getName());	
+
+		throw new FileNotFoundException("Attachment file " + f.getName() + " not found in archive " + this.attachments.getName());
 	}
-	
+
 	/**
 	 * When exporting LOB data {@link workbench.db.exporter.DataExporter} will write
-	 * the LOB data for each row/column into separate files. These files might 
+	 * the LOB data for each row/column into separate files. These files might
 	 * reside in a second ZIP archive.
 	 * @param attachmentFile the attachment to read
 	 * @return an InputStream to read the attachment
 	 */
-	
+
 	public InputStream getAttachedFileStream(File attachmentFile)
 		throws IOException
 	{
 		if (baseFile instanceof ClipboardFile) throw new IOException("Attachments not supported for Clipboard");
-		
+
 		if (this.isZip)
 		{
 			ZipEntry entry = findEntry(attachmentFile);
@@ -194,7 +190,7 @@ public class ImportFileHandler
 		}
 		return result;
 	}
-	
+
 	public long getLength(File f)
 		throws IOException
 	{
@@ -215,7 +211,7 @@ public class ImportFileHandler
 	}
 
 	public String getEncoding() { return this.encoding; }
-	
+
 	public void done()
 	{
 

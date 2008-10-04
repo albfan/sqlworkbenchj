@@ -21,10 +21,6 @@ public class DefaultImportOptions
 	implements ImportOptions
 {
 	
-	public DefaultImportOptions()
-	{
-	}
-	
 	public String getEncoding() {  return "UTF-8"; }
 	public String getDateFormat() {	return Settings.getInstance().getDefaultDateFormat(); }
 	public String getTimestampFormat() { return Settings.getInstance().getDefaultTimestampFormat(); }

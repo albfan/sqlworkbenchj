@@ -34,6 +34,7 @@ public class WbXslt
 
 	public WbXslt()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_STYLESHEET);
 		cmdLine.addArgument(ARG_OUTPUT);
@@ -79,14 +80,14 @@ public class WbXslt
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (outputFile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrXsltMissingOutputFile"));
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (xsltFile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrXsltMissingStylesheet"));

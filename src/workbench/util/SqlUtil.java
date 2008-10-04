@@ -274,7 +274,7 @@ public class SqlUtil
 
 		ResultSet rs = null;
 		Statement stmt = null;
-		ResultInfo result = null;
+		final ResultInfo result;
 
 		try
 		{
@@ -423,7 +423,7 @@ public class SqlUtil
 	public static List<String> getTables(String sql, boolean includeAlias)
 	{
 		String from = SqlUtil.getFromPart(sql);
-		if (from == null || from.trim().length() == 0) return Collections.emptyList();
+		if (StringUtil.isBlank(from)) return Collections.emptyList();
 		List<String> result = new LinkedList<String>();
 		try
 		{

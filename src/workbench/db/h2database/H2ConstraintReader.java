@@ -27,10 +27,6 @@ public class H2ConstraintReader
            "and table_schema = ? \n" +
 					 "and (check_constraint is not null and check_constraint <> '')";
 	
-	public H2ConstraintReader()
-	{
-	}
-	
 	public int getIndexForSchemaParameter() { return 2; }
 	public int getIndexForTableNameParameter() { return 1; }
 	public String getColumnConstraintSql() { return this.TABLE_SQL; }

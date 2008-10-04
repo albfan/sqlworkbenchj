@@ -14,23 +14,19 @@ package workbench.storage;
 import java.sql.SQLException;
 
 /**
- * A class to format a byte[] array to be used as a literal in a SQL 
- * statement for Postgres. 
- * 
- * PG accepts binary contents as octal Strings, e.g. 
+ * A class to format a byte[] array to be used as a literal in a SQL
+ * statement for Postgres.
+ *
+ * PG accepts binary contents as octal Strings, e.g.
  * \001\002\004
- * 
+ *
  * See also: http://www.postgresql.org/docs/8.2/static/datatype-binary.html
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class PostgresBlobFormatter
 	implements BlobLiteralFormatter
 {
-	
-	public PostgresBlobFormatter()
-	{
-	}
 
 	public CharSequence getBlobLiteral(Object value)
 		throws SQLException
@@ -48,7 +44,7 @@ public class PostgresBlobFormatter
 				int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
 				String s = Integer.toOctalString(c);
 				int l = s.length();
-				if (l == 1) 
+				if (l == 1)
 				{
 					result.append("00");
 				}

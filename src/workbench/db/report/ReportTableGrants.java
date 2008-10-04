@@ -21,8 +21,8 @@ import workbench.util.StrBuffer;
 
 /**
  * Generate XML report information about table grants.
- * 
- * @see workbench.db.TableGrantReader#getTableGrants(workbench.db.WbConnection, workbench.db.TableIdentifier) 
+ *
+ * @see workbench.db.TableGrantReader#getTableGrants(workbench.db.WbConnection, workbench.db.TableIdentifier)
  * @author support@sql-workbench.net
  */
 public class ReportTableGrants
@@ -32,26 +32,26 @@ public class ReportTableGrants
 	public static final String TAG_GRANT_PRIV = "privilege";
 	public static final String TAG_GRANT_GRANTABLE = "grantable";
 	private Collection<TableGrant> grants;
-	private String namespace; 
-	
+	private String namespace;
+
 	public ReportTableGrants(WbConnection con, TableIdentifier tbl)
 	{
 		TableGrantReader reader = new TableGrantReader();
 		grants = reader.getTableGrants(con, tbl);
 	}
-	
+
 	public ReportTableGrants(Collection<TableGrant> tableGrants)
 	{
 		this.grants = tableGrants;
 	}
-	
+
 	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
 		if (grants.size() == 0) return;
-		
+
 		TagWriter tagWriter = new TagWriter();
 		tagWriter.setNamespace(this.namespace);
-		
+
 		StrBuffer indent1 = new StrBuffer(indent);
 		indent1.append("  ");
 
@@ -64,18 +64,16 @@ public class ReportTableGrants
 			tagWriter.appendTag(result, indent1, TAG_GRANT_GRANTABLE, grant.isGrantable());
 			tagWriter.appendCloseTag(result, indent, TAG_GRANT);
 		}
-		
-		return;
 	}
 
 	public Collection<TableGrant> getGrants()
 	{
 		return Collections.unmodifiableCollection(grants);
 	}
-	
-	public void setNamespace(String namespace)
+
+	public void setNamespace(String nspace)
 	{
-		this.namespace = namespace;
-	}	
+		this.namespace = nspace;
+	}
 }
 

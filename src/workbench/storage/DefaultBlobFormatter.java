@@ -27,10 +27,6 @@ public class DefaultBlobFormatter
 	private boolean upperCase = false;
 	private BlobLiteralType literalType = BlobLiteralType.hex;
 	
-	public DefaultBlobFormatter()
-	{
-	}
-
 	public void setLiteralType(BlobLiteralType type)
 	{
 		this.literalType = (type == null ? BlobLiteralType.hex : type);

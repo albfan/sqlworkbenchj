@@ -33,9 +33,9 @@ public class FixedLengthLineParser
 		this.widths = colWidths;
 	}
 
-	public void setTrimValues(boolean trimValues)
+	public void setTrimValues(boolean flag)
 	{
-		this.trimValues = trimValues;
+		this.trimValues = flag;
 	}
 	
 	public void setLine(String newLine)

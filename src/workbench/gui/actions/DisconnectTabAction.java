@@ -20,20 +20,21 @@ import workbench.resource.ResourceMgr;
  *
  * @author support@sql-workbench.net
  */
-public class DisconnectTabAction 
+public class DisconnectTabAction
 	extends WbAction
 {
 	private MainWindow window;
-	
+
 	public DisconnectTabAction(MainWindow client)
 	{
+		super();
 		this.initMenuDefinition("MnuTxtDisconnectTab");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		this.setEnabled(false);
 		this.window = client;
 		checkState();
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
@@ -54,6 +55,6 @@ public class DisconnectTabAction
 			this.setEnabled(window.canUseSeparateConnection() && window.usesSeparateConnection());
 		}
 	}
-					
-	
+
+
 }

@@ -28,6 +28,7 @@ public class ClearCompletionCacheAction
 	
 	public ClearCompletionCacheAction()
 	{
+		super();
 		this.initMenuDefinition("MnuTxtClearCompletionCache");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);

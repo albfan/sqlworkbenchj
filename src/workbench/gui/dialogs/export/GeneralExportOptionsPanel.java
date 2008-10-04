@@ -19,14 +19,14 @@ import workbench.resource.Settings;
  *
  * @author  support@sql-workbench.net
  */
-public class GeneralExportOptionsPanel 
+public class GeneralExportOptionsPanel
 	extends javax.swing.JPanel
 	implements ExportOptions
 {
-	
-	/** Creates new form GeneralExportOptionsPanel */
+
 	public GeneralExportOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 
@@ -37,7 +37,7 @@ public class GeneralExportOptionsPanel
 		s.setProperty("workbench.export.general.timestampformat", this.getTimestampFormat());
 		s.setProperty("workbench.export.general.encoding", this.getEncoding());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -45,7 +45,7 @@ public class GeneralExportOptionsPanel
 		this.setTimestampFormat(s.getProperty("workbench.export.general.timestampformat", ""));
 		this.setEncoding(s.getProperty("workbench.export.general.encoding", s.getDefaultDataEncoding()));
 	}
-	
+
 	public String getDateFormat()
 	{
 		return this.dateFormat.getText();
@@ -75,12 +75,12 @@ public class GeneralExportOptionsPanel
 	{
 		timestampFormat.setText(format);
 	}
-	
+
 	public void showRetrieveColumnsLabel()
 	{
 		selectColumnsButton.setText(ResourceMgr.getString("LblRetrieveColumns"));
 	}
-	
+
 	public void showSelectColumnsLabel()
 	{
 		selectColumnsButton.setText(ResourceMgr.getString("LblSelectColumns"));
@@ -89,13 +89,13 @@ public class GeneralExportOptionsPanel
 	{
 		this.selectColumnsButton.setEnabled(flag);
 	}
-	
+
 	public Object addColumnSelectListener(ActionListener l)
 	{
 		this.selectColumnsButton.addActionListener(l);
 		return this.selectColumnsButton;
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -168,8 +168,8 @@ public class GeneralExportOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
     add(selectColumnsButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JTextField dateFormat;
   private javax.swing.JLabel dateFormatLabel;
@@ -179,5 +179,5 @@ public class GeneralExportOptionsPanel
   private javax.swing.JTextField timestampFormat;
   private javax.swing.JLabel timestampFormatLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

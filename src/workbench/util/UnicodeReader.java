@@ -21,7 +21,8 @@ import java.io.*;
  * Generic unicode textreader, which will use BOM mark
  * to identify the encoding to be used.
  */
-public class UnicodeReader extends Reader
+public class UnicodeReader
+	extends Reader
 {
 	PushbackInputStream internalIn;
 	InputStreamReader internalIn2 = null;
@@ -32,6 +33,7 @@ public class UnicodeReader extends Reader
 	public UnicodeReader(InputStream in, String encoding)
 		throws IOException
 	{
+		super();
 		this.internalIn = new PushbackInputStream(in, BOM_SIZE);
 		this.defaultEnc = encoding;
 		this.init();
@@ -57,7 +59,7 @@ public class UnicodeReader extends Reader
 		if (internalIn2 != null) return;
 		
 		String encoding;
-		byte bom[] = new byte[BOM_SIZE];
+		byte[] bom = new byte[BOM_SIZE];
 		int n, unread;
 		n = internalIn.read(bom, 0, bom.length);
 		

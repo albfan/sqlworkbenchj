@@ -18,7 +18,6 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import javax.swing.border.Border;
 import workbench.gui.components.WbToolbarButton;
 
 import workbench.resource.ResourceMgr;
@@ -28,7 +27,7 @@ import workbench.resource.Settings;
  *	Toggle the "ignore errors" settings
  *	@author  support@sql-workbench.net
  */
-public class IgnoreErrorsAction 
+public class IgnoreErrorsAction
 	extends WbAction
 {
 	private boolean switchedOn = false;
@@ -57,13 +56,13 @@ public class IgnoreErrorsAction
 		this.toggleButton.setSelected(this.switchedOn);
 		return this.toggleButton;
 	}
-	
+
 	public void addToToolbar(JToolBar aToolbar)
 	{
 		if (this.toggleButton == null) this.createButton();
 		aToolbar.add(this.toggleButton);
 	}
-	
+
 	public boolean isSwitchedOn() { return this.switchedOn; }
 
 	public void setSwitchedOn(boolean aFlag)
@@ -93,5 +92,5 @@ public class IgnoreErrorsAction
 		}
 		aMenu.add(this.toggleMenu);
 	}
-	
+
 }

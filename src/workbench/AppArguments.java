@@ -73,6 +73,7 @@ public class AppArguments
 
 	public AppArguments()
 	{
+		super();
 		addArgument(ARG_PROFILE, ArgumentType.ProfileArgument);
 		addArgument(ARG_FEEDBACK);
 		addArgument(ARG_PROFILE_GROUP);

@@ -28,7 +28,7 @@ public class KeepAliveDaemon
 	private long idleTime;
 	private WbThread idleThread;
 	private boolean stopThread;
-	private WbConnection dbConnection;
+	final private WbConnection dbConnection;
 	private String sqlScript;
 	private long lastAction;
 
@@ -57,7 +57,6 @@ public class KeepAliveDaemon
 			try
 			{
 				this.stopThread = true;
-				this.dbConnection = null;
 				this.idleThread.interrupt();
 			}
 			catch (Exception e)

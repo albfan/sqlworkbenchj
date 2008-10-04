@@ -40,13 +40,14 @@ public class ConnectionInfoPanel
 
 	public ConnectionInfoPanel(WbConnection conn)
 	{
+		super();
 		initComponents();
-		
+
 		try
 		{
 			StringBuilder content = new StringBuilder();
 			content.append("<html>");
-			
+
 			DatabaseMetaData meta = conn.getSqlConnection().getMetaData();
 			DbMetadata wbmeta = conn.getMetadata();
 
@@ -80,7 +81,7 @@ public class ConnectionInfoPanel
 		if (value == null) return "";
 		return value;
 	}
-	
+
 	public static void showConnectionInfo(WbConnection con)
 	{
 		ConnectionInfoPanel p = new ConnectionInfoPanel(con);
@@ -91,7 +92,7 @@ public class ConnectionInfoPanel
 		d.setVisible(true);
 		d.dispose();
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -150,7 +151,7 @@ public class ConnectionInfoPanel
 		StringSelection sel = new StringSelection(clean);
 		clp.setContents(sel, sel);
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JButton copyButton;
   private javax.swing.JEditorPane infotext;
@@ -160,21 +161,15 @@ public class ConnectionInfoPanel
 	private class InfoEditorPane
 		extends JEditorPane
 	{
-		public InfoEditorPane()
-		{
-			super();
-		}
-		
 		public String getSelection()
 		{
 			Document doc = getDocument();
 			int start = Math.min(getCaret().getDot(), getCaret().getMark());
 			int end = Math.max(getCaret().getDot(), getCaret().getMark());
-			if (start == end) return null; 
+			if (start == end) return null;
 			StringWriter out = new StringWriter();
 			try
 			{
-				int len = getSelectionEnd() - getSelectionStart();
 				getUI().getEditorKit(this).write(out, doc, start, end - start);
 			}
 			catch (Exception e)
@@ -183,12 +178,12 @@ public class ConnectionInfoPanel
 			}
 			return out.toString();
 		}
-		
+
 		public void copy()
 		{
 			String content = getSelection();
 			if (content == null) content = getText();
 			copyText(content);
 		}
-	}	
+	}
 }

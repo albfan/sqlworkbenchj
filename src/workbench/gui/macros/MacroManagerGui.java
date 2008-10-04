@@ -46,11 +46,11 @@ import workbench.sql.MacroManager;
 
 /**
  * Displays all stored macros and lets the user add, edit and delete macros.
- * It uses {@link workbench.sql.MacroManager} to retrieve and store 
+ * It uses {@link workbench.sql.MacroManager} to retrieve and store
  * the macros.
- * 
- * @author support@sql-workbench.net  
- */ 
+ *
+ * @author support@sql-workbench.net
+ */
 public class MacroManagerGui
 	extends JPanel
 	implements FileActions, ListSelectionListener, PropertyChangeListener
@@ -66,6 +66,7 @@ public class MacroManagerGui
 
 	public MacroManagerGui()
 	{
+		super();
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new SaveListFileAction(this));
@@ -300,10 +301,11 @@ public class MacroManagerGui
 class MacroListModel
 	extends AbstractListModel
 {
-	ArrayList<MacroEntry> macros;
+	List<MacroEntry> macros;
 
 	public MacroListModel()
 	{
+		super();
 		List<String> keys = MacroManager.getInstance().getMacroList();
 		Collections.sort(keys);
 		int size = keys.size();

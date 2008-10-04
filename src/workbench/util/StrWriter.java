@@ -24,16 +24,17 @@ public class StrWriter
 	extends Writer
 {
 	private StrBuffer buf;
-	
+
 	/**
 	 * Create a new string writer, using the default initial string-buffer
 	 * size.
 	 */
 	public StrWriter()
 	{
+		super();
 		buf = new StrBuffer();
 	}
-	
+
 	/**
 	 * Create a new string writer, using the specified initial string-buffer
 	 * size.
@@ -42,13 +43,14 @@ public class StrWriter
 	 */
 	public StrWriter(int initialSize)
 	{
+		super();
 		if (initialSize < 0)
 		{
 			throw new IllegalArgumentException("Negative buffer size");
 		}
 		buf = new StrBuffer(initialSize);
 	}
-	
+
 	/**
 	 * Write a single character.
 	 */
@@ -56,7 +58,7 @@ public class StrWriter
 	{
 		buf.append((char) c);
 	}
-	
+
 	/**
 	 * Write a portion of an array of characters.
 	 *
@@ -64,20 +66,20 @@ public class StrWriter
 	 * @param  off   Offset from which to start writing characters
 	 * @param  len   Number of characters to write
 	 */
-	public void write(char cbuf[], int off, int len)
+	public void write(char[] cbuf, int off, int len)
 	{
 		if ((off < 0) || (off > cbuf.length) || (len < 0) ||
 		((off + len) > cbuf.length) || ((off + len) < 0))
 		{
 			throw new IndexOutOfBoundsException();
-		} 
+		}
 		else if (len == 0)
 		{
 			return;
 		}
 		buf.append(cbuf, off, len);
 	}
-	
+
 	/**
 	 * Write a string.
 	 */
@@ -85,7 +87,7 @@ public class StrWriter
 	{
 		buf.append(str);
 	}
-	
+
 	/**
 	 * Write a portion of a string.
 	 *
@@ -97,7 +99,7 @@ public class StrWriter
 	{
 		buf.append(str.substring(off, off + len));
 	}
-	
+
 	/**
 	 * Return the buffer's current value as a string.
 	 */
@@ -105,7 +107,7 @@ public class StrWriter
 	{
 		return buf.toString();
 	}
-	
+
 	/**
 	 * Return the string buffer itself.
 	 *
@@ -115,14 +117,14 @@ public class StrWriter
 	{
 		return buf;
 	}
-	
+
 	/**
 	 * Flush the stream.
 	 */
 	public void flush()
 	{
 	}
-	
+
 	/**
 	 * Closing a <tt>StrWriter</tt> has no effect. The methods in this
 	 * class can be called after the stream has been closed without generating
@@ -131,5 +133,5 @@ public class StrWriter
 	public void close() throws IOException
 	{
 	}
-	
+
 }

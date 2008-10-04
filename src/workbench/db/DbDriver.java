@@ -270,7 +270,7 @@ public class DbDriver
 		{
 			this.classLoader = null;
 			LogMgr.logError("DbDriver.loadDriverClass()", "Error loading driver class: " + this.driverClass, e);
-			throw new Exception("Could not load driver class " + this.driverClass);
+			throw new Exception("Could not load driver class " + this.driverClass, e);
 		}
 	}
 
@@ -296,8 +296,8 @@ public class DbDriver
 			// as we are not using the DriverManager, we need to supply username
 			// and password in the connection properties!
 			Properties props = new Properties();
-			if (user != null && user.trim().length() > 0) props.put("user", user);
-			if (password != null && password.trim().length() > 0) props.put("password", password);
+			if (StringUtil.isNonBlank(user)) props.put("user", user);
+			if (StringUtil.isNonBlank(password)) props.put("password", password);
 
 			// copy the user defined connection properties into the actually used ones!
 			if (connProps != null)
@@ -377,18 +377,18 @@ public class DbDriver
 				throw new SQLException("Driver did not return a connection for url=" + url);
 			}
 		}
-		catch (ClassNotFoundException e)
-		{
-			// do not log this error, the caller will log it
-			//LogMgr.logError("DbDriver.connect()", "Driver class not found", e);
-			throw e;
-		}
-		catch (SQLException e)
-		{
-			// do not log this error, the caller will log it
-			//LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, e);
-			throw e;
-		}
+//		catch (ClassNotFoundException e)
+//		{
+//			// do not log this error, the caller will log it
+//			//LogMgr.logError("DbDriver.connect()", "Driver class not found", e);
+//			throw e;
+//		}
+//		catch (SQLException e)
+//		{
+//			// do not log this error, the caller will log it
+//			//LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, e);
+//			throw e;
+//		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, th);

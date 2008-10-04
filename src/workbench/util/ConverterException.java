@@ -11,19 +11,17 @@
  */
 package workbench.util;
 
-import workbench.util.SqlUtil;
-
 /**
  * @author support@sql-workbench.net
  */
 public class ConverterException extends java.lang.Exception
 {
-	
+
 	public ConverterException(String msg)
 	{
 		super(msg);
 	}
-	
+
 	public ConverterException(Object input, int type,  Exception cause)
 	{
 		super("Could not convert [" + input + "] for datatype " + SqlUtil.getTypeName(type), cause);

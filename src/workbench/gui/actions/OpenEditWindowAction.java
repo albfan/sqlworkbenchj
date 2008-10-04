@@ -16,10 +16,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.gui.components.WbTextCellEditor;
-import workbench.gui.sql.SqlPanel;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.sql.MacroManager;
 
 /**
  *
@@ -29,7 +25,7 @@ public class OpenEditWindowAction
 	extends WbAction
 {
 	private WbTextCellEditor editor;
-	
+
 	public OpenEditWindowAction(WbTextCellEditor ed)
 	{
 		super();
@@ -37,10 +33,10 @@ public class OpenEditWindowAction
 		this.setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
 		this.setIcon(null);
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		editor.openEditWindow();
 	}
-	
+
 }

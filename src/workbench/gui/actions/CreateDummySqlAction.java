@@ -29,26 +29,27 @@ import workbench.gui.dbobjects.ObjectScripterUI;
 /**
  * @author support@sql-workbench.net
  */
-public class CreateDummySqlAction 
+public class CreateDummySqlAction
 	extends WbAction
 	implements ListSelectionListener
 {
 	private DbObjectList source;
 	private ListSelectionModel selection;
 	private String scriptType;
-	
+
 	public static CreateDummySqlAction createDummyInsertAction(DbObjectList client, ListSelectionModel list)
 	{
 		return new CreateDummySqlAction("MnuTxtCreateDummyInsert", client, list, ObjectScripter.TYPE_INSERT);
 	}
-	
+
 	public static CreateDummySqlAction createDummySelectAction(DbObjectList client, ListSelectionModel list)
 	{
 		return new CreateDummySqlAction("MnuTxtCreateDefaultSelect", client, list, ObjectScripter.TYPE_SELECT);
 	}
-	
+
 	private CreateDummySqlAction(String key, DbObjectList client, ListSelectionModel list, String type)
 	{
+		super();
 		this.initMenuDefinition(key);
 		this.source = client;
 		this.selection = list;
@@ -56,7 +57,7 @@ public class CreateDummySqlAction
 		setEnabled(false);
 		list.addListSelectionListener(this);
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
@@ -66,7 +67,7 @@ public class CreateDummySqlAction
 		{
 			if (dbo instanceof TableIdentifier)
 			{
-				TableIdentifier tbl = (TableIdentifier)dbo;
+				TableIdentifier tbl = (TableIdentifier) dbo;
 				if (scriptType.equalsIgnoreCase("select"))
 				{
 					dummy.add(new DummySelect(tbl));
@@ -81,10 +82,9 @@ public class CreateDummySqlAction
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		setEnabled(this.selection.getMinSelectionIndex() >= 0);
 	}
-	
 }

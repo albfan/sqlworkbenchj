@@ -55,8 +55,8 @@ import workbench.resource.Settings;
 import workbench.util.WbThread;
 
 /**
- * @author support@sql-workbench.net  
- */ 
+ * @author support@sql-workbench.net
+ */
 public class PrintPreview
 	extends JDialog
 	implements ActionListener, WindowListener
@@ -283,8 +283,7 @@ public class PrintPreview
 		}
 		catch (PrinterException ex)
 		{
-			ex.printStackTrace();
-			System.err.println("Printing error: " + ex.toString());
+			LogMgr.logError("PrintPreview.doPrint()", "Error when printing", ex);
 		}
 	}
 
@@ -296,7 +295,7 @@ public class PrintPreview
 		{
 			return;
 		}
-		
+
 		pageDialogShowing = true;
 		PrinterJob prnJob = PrinterJob.getPrinterJob();
 		PageFormat oldFormat = this.printTarget.getPageFormat();
@@ -305,7 +304,7 @@ public class PrintPreview
 		pageDialogShowing = false;
 		applyNewPage(newFormat, oldFormat);
 	}
-	
+
 	protected void showNativePageSetup()
 	{
 		if (pageDialogShowing)
@@ -320,11 +319,11 @@ public class PrintPreview
 		pageDialogShowing = false;
 		applyNewPage(newFormat, oldFormat);
 	}
-	
+
 	protected void applyNewPage(final PageFormat newFormat, final PageFormat oldFormat)
 	{
 		if (newFormat == null) return;
-		
+
 		if (!PrintUtil.pageFormatEquals(newFormat, oldFormat))
 		{
 			Settings.getInstance().setPageFormat(newFormat);
@@ -339,7 +338,7 @@ public class PrintPreview
 					preview.doLayout();
 				}
 			});
-			
+
 		}
 	}
 
@@ -614,10 +613,12 @@ public class PrintPreview
 
 		public PagePreview()
 		{
+			super();
 		}
 
 		public PagePreview(int w, int h, Image source)
 		{
+			super();
 			this.setImage(w, h, source);
 		}
 

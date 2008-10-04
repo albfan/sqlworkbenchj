@@ -55,6 +55,7 @@ public class TableDeleterUI
 
 	public TableDeleterUI()
 	{
+		super();
 		initComponents();
 	}
 
@@ -484,7 +485,7 @@ public class TableDeleterUI
 
 		this.statusLabel.setText("");
 		this.deleter = null;
-		
+
 		if (!hasError)
 		{
 			this.closeWindow();

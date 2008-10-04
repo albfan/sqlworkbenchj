@@ -100,7 +100,7 @@ public class McKoiSequenceReader
 		DataStore result = null;
 		try
 		{
-			stmt = this.connection.prepareStatement(sql.toString());
+			stmt = this.connection.prepareStatement(sql);
 			stmt.setString(1, owner);
 			if (!StringUtil.isEmptyString(sequence)) stmt.setString(2, sequence);
 			rs = stmt.executeQuery();
@@ -177,8 +177,6 @@ public class McKoiSequenceReader
 			result.append("\n      INCREMENT ");
 			result.append(increment);
 		}
-
-		BigInteger max = new BigInteger(Long.toString(Long.MAX_VALUE));
 
 		if (minvalue.longValue() != 0)
 		{

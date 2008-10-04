@@ -22,23 +22,19 @@ import workbench.sql.formatter.SQLToken;
 import workbench.util.StringUtil;
 
 /**
- * MS SQL Server's and MySQL's USE command. 
- * 
+ * MS SQL Server's and MySQL's USE command.
+ *
  * Actually this will be in effect if the JDBC driver reports
- * that catalog's are supported 
+ * that catalog's are supported
  *
  * This class will notify the connection used that the current database has changed
  * so that the connection display in the main window can be updated.
  * @author  support@sql-workbench.net
  */
-public class UseCommand 
+public class UseCommand
 	extends SqlCommand
 {
 	public static final String VERB = "USE";
-	
-	public UseCommand()
-	{
-	}
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
@@ -47,28 +43,28 @@ public class UseCommand
 		try
 		{
 			SQLLexer lexer = new SQLLexer(aSql);
-			
+
 			// The first token should be the USE verb;
 			SQLToken t = lexer.getNextToken(false, false);
-			
+
 			// everything after the USE command is the catalog name
 			String catName = aSql.substring(t.getCharEnd()).trim();
 
-			// DbMetadata.setCurrentCatalog() will fire the 
+			// DbMetadata.setCurrentCatalog() will fire the
 			// catalogChanged() event on the connection!
 			// no need to do this here
 			currentConnection.getMetadata().setCurrentCatalog(catName);
-			
+
 			String newCatalog = currentConnection.getMetadata().getCurrentCatalog();
-			
+
 			String msg = ResourceMgr.getString("MsgCatalogChanged");
 			String term = currentConnection.getMetadata().getCatalogTerm();
-			
+
 			msg = StringUtil.replace(msg, "%newcatalog%", newCatalog);
 			msg = StringUtil.replace(msg, "%catalogterm%", StringUtil.capitalize(term));
 			result.addMessage(msg);
 			result.setSuccess();
-			
+
 		}
 		catch (Exception e)
 		{

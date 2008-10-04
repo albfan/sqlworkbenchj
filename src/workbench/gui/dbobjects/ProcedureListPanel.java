@@ -84,19 +84,20 @@ public class ProcedureListPanel
 	private String currentCatalog;
 	private boolean shouldRetrieve;
 	private CompileDbObjectAction compileAction;
-	
+
 	private JLabel infoLabel;
 	private boolean isRetrieving;
 	protected ProcStatusRenderer statusRenderer;
 
-	public ProcedureListPanel(MainWindow parent) 
+	public ProcedureListPanel(MainWindow parent)
 		throws Exception
 	{
+		super();
 		this.displayTab = new WbTabbedPane();
 		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
 
 		this.procColumns = new DbObjectTable();
-		
+
 		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
 		Reloadable sourceReload = new Reloadable()
@@ -115,7 +116,7 @@ public class ProcedureListPanel
 				}
 			}
 		};
-		
+
 		source = new DbObjectSourcePanel(parent, sourceReload);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), source);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
@@ -124,21 +125,21 @@ public class ProcedureListPanel
 		this.statusRenderer = new ProcStatusRenderer();
 		this.procList = new DbObjectTable()
 		{
-			public TableCellRenderer getCellRenderer(int row, int column) 
+			public TableCellRenderer getCellRenderer(int row, int column)
 			{
 				if (column == ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE) return statusRenderer;
 				return super.getCellRenderer(row, column);
 			}
 		};
-		
+
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
 		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
 		this.findPanel = new QuickFilterPanel(this.procList, cols, false, "procedurelist");
-		
+
 		ReloadAction a = new ReloadAction(this);
-		
+
 		this.findPanel.addToToolbar(a, true, false);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshProcedureList"));
 		this.listPanel.setLayout(new BorderLayout());
@@ -176,10 +177,10 @@ public class ProcedureListPanel
 	{
 		ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, procList.getSelectionModel());
 		procList.addPopupAction(createScript, true);
-		
+
 		this.compileAction = new CompileDbObjectAction(this, this.procList.getSelectionModel());
 		procList.addPopupAction(compileAction, false);
-		
+
 		DropDbObjectAction dropAction = new DropDbObjectAction(this, procList.getSelectionModel(), this);
 		procList.addPopupAction(dropAction, false);
 	}
@@ -225,7 +226,7 @@ public class ProcedureListPanel
 	{
 		retrieveIfNeeded();
 	}
-	
+
 	public void retrieveIfNeeded()
 	{
 		if (this.shouldRetrieve) this.retrieve();
@@ -235,7 +236,7 @@ public class ProcedureListPanel
 	{
 		if (this.isRetrieving) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		
+
 		try
 		{
 			this.reset();
@@ -247,7 +248,7 @@ public class ProcedureListPanel
 			WbSwingUtilities.showWaitCursorOnWindow(this);
 			DataStore ds = meta.getProcedures(currentCatalog, currentSchema);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
-			
+
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
@@ -287,38 +288,38 @@ public class ProcedureListPanel
 	{
 		return "dbexplorer" + index + ".procedurelist.";
 	}
-	
+
 	public void saveSettings()
 	{
 		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
 		findPanel.saveSettings();
 	}
-	
+
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(w.getSettings(), prefix);
 		findPanel.saveSettings(w.getSettings(), prefix);
 	}
-	
+
 	private void storeSettings(PropertyStorage props, String prefix)
 	{
 		props.setProperty(prefix + "divider", this.splitPane.getDividerLocation());
 	}
-	
+
 	public void restoreSettings()
 	{
 		readSettings(Settings.getInstance(), this.getClass().getName() + ".");
 		findPanel.restoreSettings();
 	}
-	
+
 	public void readFromWorkspace(WbWorkspace w, int index)
 	{
 		String prefix = getWorkspacePrefix(index);
 		readSettings(w.getSettings(), prefix);
 		this.findPanel.restoreSettings(w.getSettings(), prefix);
 	}
-	
+
 	private void readSettings(PropertyStorage props, String prefix)
 	{
 		int loc = props.getIntProperty(prefix + "divider", 200);
@@ -331,7 +332,7 @@ public class ProcedureListPanel
 		if (e.getValueIsAdjusting()) return;
 		retrieveCurrentProcedure();
 	}
-	
+
 	protected void retrieveCurrentProcedure()
 	{
 		int row = this.procList.getSelectedRow();
@@ -355,7 +356,7 @@ public class ProcedureListPanel
 	{
 		if (this.dbConnection == null) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		
+
 		DbMetadata meta = dbConnection.getMetadata();
 		Container parent = this.getParent();
 		WbSwingUtilities.showWaitCursor(parent);
@@ -367,7 +368,7 @@ public class ProcedureListPanel
 			{
 				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
 				procColumns.setModel(model, true);
-				
+
 				TableColumnModel colmod = procColumns.getColumnModel();
 				// Assign the correct renderer to display java.sql.Types values
 				TableColumn col = colmod.getColumn(ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE);
@@ -401,7 +402,7 @@ public class ProcedureListPanel
 		}
 		// The package name is stored in the catalog field if this is an Oracle database
 		final int pos = findOracleProcedureInPackage(sql, catalog, proc);
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -411,24 +412,24 @@ public class ProcedureListPanel
 			}
 		});
 	}
-	
+
 	private int findOracleProcedureInPackage(CharSequence sql, String packageName, String procName)
 	{
 		if (sql == null) return 0;
 		if (this.dbConnection == null) return 0;
 		if (!this.dbConnection.getMetadata().isOracle()) return 0;
-		
+
 		if (StringUtil.isEmptyString(packageName)) return 0;
 		int pos = OraclePackageParser.findProcedurePosition(sql, procName);
-		
+
 		return (pos < 0 ? 0 : pos);
 	}
-	
+
 	public TableIdentifier getObjectTable()
 	{
 		return null;
 	}
-	
+
 	public Component getComponent()
 	{
 		return this;
@@ -442,7 +443,7 @@ public class ProcedureListPanel
 	public List<? extends DbObject> getSelectedObjects()
 	{
 		if (this.procList.getSelectedRowCount() == 0) return null;
-		int rows[] = this.procList.getSelectedRows();
+		int[] rows = this.procList.getSelectedRows();
 		int count = rows.length;
 		List<ProcedureDefinition> result = new ArrayList<ProcedureDefinition>(count);
 		if (count == 0) return result;
@@ -472,5 +473,5 @@ public class ProcedureListPanel
 		this.reset();
 		this.retrieve();
 	}
-	
+
 }

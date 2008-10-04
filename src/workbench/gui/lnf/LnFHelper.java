@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.lnf;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Toolkit;
@@ -30,15 +31,10 @@ public class LnFHelper
 {
 	private boolean isWindowsClassic;
 
-	public LnFHelper()
-	{
-	}
-
 	public boolean isWindowsClassic()
 	{
 		return isWindowsClassic;
 	}
-
 
 	public void initUI()
 	{
@@ -101,7 +97,7 @@ public class LnFHelper
 		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
 		if (cls != null) def.put("TabbedPaneUI", cls);
 	}
-	
+
 	protected void initializeLookAndFeel()
 	{
 		String className = GuiSettings.getLookAndFeelClass();
@@ -186,5 +182,5 @@ public class LnFHelper
 			LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Error setting dynamic layout property", e);
 		}
 	}
-	
+
 }

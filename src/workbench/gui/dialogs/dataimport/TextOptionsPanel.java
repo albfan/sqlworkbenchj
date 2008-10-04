@@ -14,24 +14,24 @@ package workbench.gui.dialogs.dataimport;
 import javax.swing.JPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.CharacterRange;
 import workbench.util.StringUtil;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class TextOptionsPanel 
+public class TextOptionsPanel
 	extends JPanel
 	implements TextImportOptions
 {
-	
+
 	/** Creates new form TextoptionsPanel */
 	public TextOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
-	
+
 	public void saveSettings()
 	{
 		saveSettings("text");
@@ -46,12 +46,12 @@ public class TextOptionsPanel
 		s.setProperty("workbench.import." + key + ".quotechar", this.getTextQuoteChar());
 		s.setProperty("workbench.import." + key + ".decimalchar", this.getDecimalChar());
 	}
-	
+
 	public void restoreSettings()
 	{
 		restoreSettings("text");
 	}
-	
+
 	public void restoreSettings(String key)
 	{
 		Settings s = Settings.getInstance();
@@ -61,17 +61,17 @@ public class TextOptionsPanel
 		this.setTextDelimiter(s.getDelimiter("workbench.import." + key + ".fielddelimiter", "\\t", true));
 		this.setDecimalChar(s.getProperty("workbench.import." + key + ".decimalchar", "."));
 	}
-	
+
 	public boolean getDecode()
 	{
 		return this.decode.isSelected();
 	}
-	
+
 	public void setDecode(boolean flag)
 	{
 		this.decode.setSelected(flag);
 	}
-	
+
 	public boolean getContainsHeader()
 	{
 		return this.headerIncluded.isSelected();
@@ -109,14 +109,14 @@ public class TextOptionsPanel
 	public String getDecimalChar()
 	{
 		String s = this.decimalCharTextField.getText();
-		if (s == null || s.trim().length() == 0) return ".";
+		if (StringUtil.isBlank(s)) return ".";
 		return s.trim();
 	}
 	public void setDecimalChar(String s)
 	{
 		this.decimalCharTextField.setText(s);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -217,8 +217,8 @@ public class TextOptionsPanel
 
   }
   // </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel decimalCharLabel;
   private javax.swing.JTextField decimalCharTextField;
@@ -230,5 +230,5 @@ public class TextOptionsPanel
   private javax.swing.JTextField quoteChar;
   private javax.swing.JLabel quoteCharLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

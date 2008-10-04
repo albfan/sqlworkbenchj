@@ -22,8 +22,10 @@ public class NewGroupAction
 	extends WbAction
 {
 	private ProfileTree client;
+	
 	public NewGroupAction(ProfileTree panel)
 	{
+		super();
 		this.client = panel;
 		this.setIcon("NewFolder");
 		this.initMenuDefinition("LblNewProfileGroup");

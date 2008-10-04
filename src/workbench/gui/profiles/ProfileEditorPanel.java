@@ -64,7 +64,6 @@ public class ProfileEditorPanel
 	private JToolBar toolbar;
 	protected ConnectionEditorPanel connectionEditor;
 	private MouseListener listMouseListener;
-	private ProfileFilter filter;
 	private NewListEntryAction newItem;
 	private CopyProfileAction copyItem;
 	private DeleteListEntryAction deleteItem;
@@ -72,6 +71,7 @@ public class ProfileEditorPanel
 
 	public ProfileEditorPanel(String lastProfileKey)
 	{
+		super();
 		initComponents(); // will initialize the model!
 
 		this.connectionEditor = new ConnectionEditorPanel();
@@ -139,14 +139,10 @@ public class ProfileEditorPanel
 			});
 		}
 	}
-	
+
 	public void done()
 	{
-		if (this.filter != null)
-		{
-			ConnectionMgr.getInstance().removeDriverChangeListener(this);
-			this.filter.done();
-		}
+		ConnectionMgr.getInstance().removeDriverChangeListener(this);
 	}
 
 	public JComponent getInitialFocusComponent()
@@ -183,7 +179,7 @@ public class ProfileEditorPanel
 		if (pos < 200)
 		{
 			pos = 200; // make sure the whole toolbar for the tree is visible!
-		} 
+		}
 		this.jSplitPane.setDividerLocation(pos);
 		String groups = Settings.getInstance().getProperty("workbench.profiles.expandedgroups", null);
 		List<String> l = StringUtil.stringToList(groups, ",", true, true);
@@ -219,7 +215,7 @@ public class ProfileEditorPanel
 	{
 		this.listMouseListener = aListener;
 	}
-	
+
 	private boolean checkGroupWithProfiles(DefaultMutableTreeNode groupNode)
 	{
 		List<String> groups = model.getGroups();
@@ -491,7 +487,7 @@ public class ProfileEditorPanel
 		{
 			return;
 		}
-		
+
 		if (evt.getSource() == this.profileTree)
 		{
 			try
@@ -511,7 +507,6 @@ public class ProfileEditorPanel
 				{
 					TreePath p = profileTree.getSelectionPath();
 					TreeNode n = (TreeNode)(p != null ? p.getLastPathComponent() : null);
-					int count = (n == null ? -1 : n.getChildCount());
 					this.connectionEditor.setVisible(false);
 					this.deleteItem.setEnabled(true);
 					this.copyItem.setEnabled(false);
@@ -523,7 +518,7 @@ public class ProfileEditorPanel
 			}
 		}
 	}//GEN-LAST:event_profileTreeValueChanged
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JScrollPane jScrollPane1;
   protected javax.swing.JSplitPane jSplitPane;

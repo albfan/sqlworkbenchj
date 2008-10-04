@@ -16,14 +16,9 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
-import java.util.ArrayList;
-import java.util.List;
-import workbench.db.ColumnIdentifier;
-import workbench.gui.components.WbTable;
 import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.util.WbStringTokenizer;
 
 /**
  * Import data from the clipboard into a table
@@ -33,31 +28,25 @@ public class ImportClipboardAction
 	extends WbAction
 {
 	private SqlPanel client;
-	private WbTable dataTable;
-	
+
 	public ImportClipboardAction(SqlPanel panel)
 	{
+		super();
 		this.initMenuDefinition("MnuTxtImportClip");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		client = panel;
 		this.setEnabled(false);
 	}
-	
-	public void setTargetTable(WbTable table)
-	{
-		this.dataTable = table;
-		this.setEnabled(table != null);
-	}
-	
+
 	public boolean hasCtrlModifier() { return true; }
-	
+
 	public void executeAction(ActionEvent evt)
 	{
 		String content = getClipboardContents();
 		if (content == null) return;
 		client.importString(content, isCtrlPressed(evt));
 	}
-	
+
 	private String getClipboardContents()
 	{
 		if (client == null) return null;
@@ -69,10 +58,10 @@ public class ImportClipboardAction
 			return s;
 		}
 		catch (Throwable e)
-		{ 
+		{
 			LogMgr.logError("ImportClipboardAction.checkContents()", "Error accessing clipboard", e);
 		}
 		return null;
-	} 
-	
+	}
+
 }

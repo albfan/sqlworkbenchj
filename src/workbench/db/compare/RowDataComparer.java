@@ -86,11 +86,6 @@ public class RowDataComparer
 	
 	public String getMigrationSql(SqlRowDataConverter converter, long rowNumber)
 	{
-		String le = Settings.getInstance().getInternalEditorLineEnding();
-
-		String sql = null;
-		
-
 		if (targetWasNull)
 		{
 			converter.setIgnoreColumnStatus(true);

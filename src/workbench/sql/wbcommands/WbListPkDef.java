@@ -26,22 +26,18 @@ public class WbListPkDef
 {
 	public static final String VERB = "WBLISTPKDEF";
 	public static final String FORMATTED_VERB = "WblistPkDef";
-	
-	public WbListPkDef()
-	{
-	}
-	
+
 	public String getVerb() { return VERB; }
-	
+
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		
+
 		result.setSuccess();
-		
+
 		String info = PkMapping.getInstance().getMappingAsText();
 		if (info != null)
 		{
@@ -55,5 +51,5 @@ public class WbListPkDef
 			result.addMessage(ResourceMgr.getString("MsgPkDefinitionsEmpty"));
 		}
 		return result;
-	}	
+	}
 }

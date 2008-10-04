@@ -30,27 +30,27 @@ import workbench.util.ValueConverter;
 public class ParameterDefinition
 {
 	private final ValueConverter converter = new ValueConverter();
-	private int type;
-	private int index;
-	private String name;
+	private int dataType;
+	private int parameterIndex;
+	private String parameterName;
 
 	private boolean valueValid = false;
 	private Object value = null;
 	
 	public ParameterDefinition(int index, int type)
 	{
-		this.index = index;
-		this.type = type;
+		this.parameterIndex = index;
+		this.dataType = type;
 	}
 	
-	public int getIndex() { return this.index; }
-	public int getType() { return this.type; }
+	public int getIndex() { return this.parameterIndex; }
+	public int getType() { return this.dataType; }
 	
 	public boolean isValueValid(String v)
 	{
 		try
 		{
-			converter.convertValue(v, this.type);
+			converter.convertValue(v, this.dataType);
 			return true;
 		}
 		catch (Exception e)
@@ -61,26 +61,26 @@ public class ParameterDefinition
 
 	public void setParameterName(String parm)
 	{
-		this.name = parm;
+		this.parameterName = parm;
 	}
 
 	public String getParameterName()
 	{
-		if (name == null) return NumberStringCache.getNumberString(this.index);
-		return name;
+		if (parameterName == null) return NumberStringCache.getNumberString(this.parameterIndex);
+		return parameterName;
 	}
 
 	public boolean setValue(String v)
 	{
 		try
 		{
-			this.value = converter.convertValue(v, this.type);
+			this.value = converter.convertValue(v, this.dataType);
 			this.valueValid = true;
 		}
 		catch (Exception e)
 		{
 			this.valueValid = false;
-			LogMgr.logError("ParameterDefinition.setValue()", "Error applying value " + v + " for type " + SqlUtil.getTypeName(this.type), e);
+			LogMgr.logError("ParameterDefinition.setValue()", "Error applying value " + v + " for type " + SqlUtil.getTypeName(this.dataType), e);
 		}
 		return this.valueValid;
 	}
@@ -93,8 +93,8 @@ public class ParameterDefinition
 	public void setStatementValue(PreparedStatement stmt)
 		throws IllegalStateException, SQLException
 	{
-		if (!this.valueValid) throw new IllegalStateException("No valid value defined for parameter " + this.index);
-		stmt.setObject(this.index, this.value);
+		if (!this.valueValid) throw new IllegalStateException("No valid value defined for parameter " + this.parameterIndex);
+		stmt.setObject(this.parameterIndex, this.value);
 	}
 
 	public static void sortByIndex(List<ParameterDefinition> parameters)
@@ -103,7 +103,7 @@ public class ParameterDefinition
 		{
 			public int compare(ParameterDefinition p1, ParameterDefinition p2)
 			{
-				return p1.index - p2.index;
+				return p1.parameterIndex - p2.parameterIndex;
 			}
 		};
 		Collections.sort(parameters, comp);

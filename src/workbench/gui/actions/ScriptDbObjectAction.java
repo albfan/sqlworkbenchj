@@ -35,6 +35,7 @@ public class ScriptDbObjectAction
 
 	public ScriptDbObjectAction(DbObjectList client, ListSelectionModel list)
 	{
+		super();
 		this.initMenuDefinition("MnuTxtCreateScript");
 		this.source = client;
 		this.selection = list;

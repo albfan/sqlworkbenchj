@@ -70,8 +70,9 @@ public class CharacterRange
 				return RANGE_8BIT;
 			case 4: 
 				return RANGE_8BIT_EXTENDED;
+			default:
+				return null;
 		}
-		return null;
 	}
 	
 	public int getId()
@@ -93,8 +94,9 @@ public class CharacterRange
 				return (c < 32 || c > 255);
 			case 4: 
 				return (c < 32 || (c > 126 && c < 161) || c > 255);
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	public String getFilterDescription()
@@ -111,8 +113,9 @@ public class CharacterRange
 				return ResourceMgr.getString("LblExportRange8Bit");
 			case 4: 
 				return ResourceMgr.getString("LblExportRange8BitExtended");
+			default:
+				return "";
 		}
-		return "";
 	}
 	
 	public String toString()

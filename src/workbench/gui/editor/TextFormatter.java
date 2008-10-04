@@ -24,13 +24,9 @@ import workbench.util.StringUtil;
  *
  * @author support@sql-workbench.net
  */
-public class TextFormatter 
+public class TextFormatter
 {
 
-	public TextFormatter()
-	{
-	}
-	
 	public void formatSql(EditorPanel editor, DelimiterDefinition alternateDelimiter, Set<String> dbFunctions, Set<String> dbDatatypes, String lineComment)
 	{
 		String sql = editor.getSelectedStatement();
@@ -39,7 +35,7 @@ public class TextFormatter
 		parser.setReturnStartingWhitespace(true);
 		parser.setAlternateLineComment(lineComment);
 		parser.setScript(sql);
-		
+
 		String delimit = parser.getDelimiterString();
 
 		int count = parser.getSize();
@@ -47,8 +43,6 @@ public class TextFormatter
 
 		StringBuilder newSql = new StringBuilder(sql.length() + 100);
 
-		String end = Settings.getInstance().getInternalEditorLineEnding();
-		
 		for (int i=0; i < count; i++)
 		{
 			String command = parser.getCommand(i);
@@ -59,11 +53,11 @@ public class TextFormatter
 				newSql.append(command);
 				continue;
 			}
-			
+
 			SqlFormatter f = new SqlFormatter(command, Settings.getInstance().getFormatterMaxSubselectLength());
 			f.setDBFunctions(dbFunctions);
 			f.setDbDataTypes(dbDatatypes);
-			
+
 			try
 			{
 				String formattedSql = f.getFormattedSql().toString();

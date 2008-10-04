@@ -39,9 +39,9 @@ public class DependencyNode
 	 * Maps the columns of the base table (this.table) to the matching column
 	 * of the parent table (parentNode.getTable())
 	 */
-	private HashMap<String, String> columns = new HashMap<String, String>();
+	private Map<String, String> columns = new HashMap<String, String>();
 	
-	private ArrayList<DependencyNode> childTables = new ArrayList<DependencyNode>();
+	private List<DependencyNode> childTables = new ArrayList<DependencyNode>();
 
 	public DependencyNode(TableIdentifier aTable)
 	{

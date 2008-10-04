@@ -17,21 +17,17 @@ package workbench.storage.filter;
 public class IsNullComparator
 	implements ColumnComparator
 {
-	public IsNullComparator()
-	{
-	}
-	
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "is null"; }
-	public boolean needsValue() { return false; }	
+	public boolean needsValue() { return false; }
 	public boolean validateInput(Object value) { return true; }
 	public boolean comparesEquality() { return false; }
-	
+
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		return (value == null);
 	}
-	
+
 	public boolean supportsType(Class valueClass)
 	{
 		return true;
@@ -45,5 +41,5 @@ public class IsNullComparator
 	public boolean equals(Object other)
 	{
 		return (other instanceof IsNullComparator);
-	}		
+	}
 }

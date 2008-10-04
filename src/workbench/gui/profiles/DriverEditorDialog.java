@@ -21,16 +21,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
-import java.util.List;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.border.EtchedBorder;
 
-import workbench.db.ConnectionMgr;
 import workbench.db.DbDriver;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -39,8 +34,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- * @author support@sql-workbench.net  
- */ 
+ * @author support@sql-workbench.net
+ */
 public class DriverEditorDialog extends JDialog
 	implements ActionListener
 {
@@ -65,7 +60,7 @@ public class DriverEditorDialog extends JDialog
 			this.setSize(600,400);
 		}
 		driverListPanel.restoreSettings();
-		
+
 		// when invoked from the connection dialog, it seems that under
 		// Linux the dialog is not visible (because it's behind the connection
 		// dialog), so we're trying to make this window visible
@@ -147,7 +142,7 @@ public class DriverEditorDialog extends JDialog
 			this.driverListPanel.selectDriver(name);
 		}
 	}
-	
+
 	private void okButtonActionPerformed(ActionEvent evt)
 	{
 		try
@@ -179,7 +174,7 @@ public class DriverEditorDialog extends JDialog
 	}
 
 	/**
-	 * 
+	 *
 	 * @param parentFrame
 	 * @param current
 	 * @return true if the dialog was closed with OK, false if it was cancelled

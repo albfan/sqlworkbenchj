@@ -31,6 +31,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -99,7 +100,7 @@ public class ExecuteSqlDialog
 
 	private void highlightText(String aText)
 	{
-		if (aText == null || aText.trim().length() == 0) return;
+		if (StringUtil.isBlank(aText)) return;
 		sqlEditor.reformatSql();
 		sqlEditor.setCaretPosition(0);
 		int start = sqlEditor.getReplacer().findFirst(aText, true, true, false);

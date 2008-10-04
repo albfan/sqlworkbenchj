@@ -18,6 +18,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -46,25 +47,26 @@ public class ColumnExpressionPanel
 	private JComboBox comparatorDropDown;
 	private JCheckBox ignoreCase;
 	protected JComboBox columnSelector;
-	private ArrayList<ComparatorListItem> comparatorItems;
+	private List<ComparatorListItem> comparatorItems;
 	private ListComboBoxModel activeItems;
 	private ResultInfo columnInfo;
 	protected JTextField valueField;
 	private ValueConverter converter = new ValueConverter();
-	private Class lastColumnClass;
+	//private Class lastColumnClass;
 	private boolean ignoreComparatorChange = false;
 
 	public ColumnExpressionPanel(ResultInfo info, ExpressionValue filter)
 	{
+		super();
 		columnInfo = info;
 		comparatorDropDown = new JComboBox();
 		activeItems = new ListComboBoxModel();
 
-		ColumnComparator[] comps = factory.getAvailableComparators();
-		comparatorItems = new ArrayList<ComparatorListItem>(comps.length);
-		for (int i=0; i < comps.length; i++)
+		List<ColumnComparator> comps = factory.getAvailableComparators();
+		comparatorItems = new ArrayList<ComparatorListItem>(comps.size());
+		for (ColumnComparator comp : comps)
 		{
-			comparatorItems.add(new ComparatorListItem(comps[i]));
+			comparatorItems.add(new ComparatorListItem(comp));
 		}
 
 		// pre-fill dropdown to calculate space
@@ -330,14 +332,14 @@ public class ColumnExpressionPanel
 	{
 		try
 		{
-			if (lastColumnClass != null && columnClass.equals(lastColumnClass))
-			{
-				if (comparatorDropDown.getSelectedItem() == null)
-				{
-					comparatorDropDown.setSelectedIndex(0);
-				}
-				return;
-			}
+//			if (lastColumnClass != null && columnClass.equals(lastColumnClass))
+//			{
+//				if (comparatorDropDown.getSelectedItem() == null)
+//				{
+//					comparatorDropDown.setSelectedIndex(0);
+//				}
+//				return;
+//			}
 			int count = comparatorItems.size();
 			int added = 0;
 			final ArrayList<ComparatorListItem> l = new ArrayList<ComparatorListItem>(count);

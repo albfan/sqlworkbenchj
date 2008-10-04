@@ -11,13 +11,7 @@
  */
 package workbench.util;
 
-import junit.framework.*;
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
+import junit.framework.TestCase;
 
 /**
  *
@@ -34,7 +28,7 @@ public class WbStringTokenizerTest extends TestCase
 	{
 		String data = "value1\t\"quoted value\"\t  \tlast";
 		WbStringTokenizer tok = new WbStringTokenizer(data, "\t", true, "\"", false);
-		
+
 		int count = 0;
 		while (tok.hasMoreTokens())
 		{

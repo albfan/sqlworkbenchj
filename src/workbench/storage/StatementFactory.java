@@ -375,9 +375,9 @@ public class StatementFactory
 	 *
 	 * @param tableToUse The table to be used
 	 */
-	public void setTableToUse(TableIdentifier tableToUse)
+	public void setTableToUse(TableIdentifier table)
 	{
-		this.tableToUse = tableToUse;
+		this.tableToUse = table;
 	}
 
 	/**

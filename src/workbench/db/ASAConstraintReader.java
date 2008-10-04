@@ -26,10 +26,6 @@ public class ASAConstraintReader
            "and   cons.table_id = tbl.table_id \n" + 
            "and   tbl.table_name = ? \n";
 
-	public ASAConstraintReader()
-	{
-	}
-	
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
 	public int getIndexForTableNameParameter() { return 1; }

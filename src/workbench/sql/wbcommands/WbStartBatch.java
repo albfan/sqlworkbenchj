@@ -24,13 +24,10 @@ public class WbStartBatch
 	extends SqlCommand
 {
 	public static final String VERB = "WBSTARTBATCH";
-	private Statement batch; 
-	public WbStartBatch()
-	{
-	}
+	private Statement batch;
 
 	public String getVerb() { return VERB; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
@@ -49,14 +46,14 @@ public class WbStartBatch
 		}
 		return result;
 	}
-	
+
 	public void addStatement(String sql)
 		throws SQLException
 	{
 		if (this.currentStatement == null) throw new SQLException("Batch mode not supported");
 		this.batch.addBatch(sql);
 	}
-	
+
 	public StatementRunnerResult executeBatch()
 		throws SQLException
 	{
@@ -70,13 +67,13 @@ public class WbStartBatch
 		long totalRows = 0;
 		result.setSuccess();
 		result.addMessage(ResourceMgr.getString("MsgJdbcBatchProcessingEnded"));
-		
+
 		int[] rows = this.batch.executeBatch();
 		if (rows == null || rows.length == 0)
 		{
 			result.addMessage(ResourceMgr.getString("MsgJdbcBatchStatementNoInfo"));
 		}
-		else 
+		else
 		{
 			for (int i=0; i < rows.length; i++)
 			{
@@ -100,5 +97,5 @@ public class WbStartBatch
 		}
 		return result;
 	}
-	
+
 }

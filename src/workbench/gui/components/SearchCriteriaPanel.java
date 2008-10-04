@@ -28,10 +28,10 @@ import workbench.resource.Settings;
 
 /**
  * A search dialog panel.
- * 
+ *
  * @see workbench.gui.components.TableReplacer
  * @see workbench.gui.editor.SearchAndReplace
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class SearchCriteriaPanel
@@ -62,6 +62,7 @@ public class SearchCriteriaPanel
 
 	public SearchCriteriaPanel(String initialValue, String settingsKey, boolean showHighlight)
 	{
+		super();
 		baseProperty = settingsKey;
 		caseProperty = settingsKey + ".ignoreCase";
 		wordProperty = settingsKey + ".wholeWord";

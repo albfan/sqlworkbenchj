@@ -58,20 +58,20 @@ public class WbTabbedPane
 		}
 		return fontHeight + 5;
 	}
-	
+
 	public WbTabbedPane(int placement)
 	{
 		super(placement);
 		init();
 	}
-	
+
 	public JToolTip createToolTip()
 	{
 		JToolTip tip = new MultiLineToolTip();
 		tip.setComponent(this);
 		return tip;
 	}
-	
+
 	private void init()
 	{
 		// For use with the jGoodies Plastic look & feel
@@ -92,7 +92,11 @@ public class WbTabbedPane
 	{
 		return new Insets(0,0,0,0);
 	}
-	
+
+	/**
+	 * The empty override is intended, to give public access to the method
+	 */
+	@Override
 	public void fireStateChanged()
 	{
 		super.fireStateChanged();
@@ -131,14 +135,14 @@ public class WbTabbedPane
 		this.tabMover = null;
 		draggedTabIndex = -1;
 	}
-	
+
 	public void enableDragDropReordering(Moveable mover)
 	{
 		this.addMouseListener(this);
 		this.addMouseMotionListener(this);
 		this.tabMover = mover;
 		draggedTabIndex = -1;
-	}		
+	}
 
 	public void mouseClicked(MouseEvent e)
 	{
@@ -191,5 +195,5 @@ public class WbTabbedPane
 	public void mouseMoved(MouseEvent e)
 	{
 	}
-	
+
 }

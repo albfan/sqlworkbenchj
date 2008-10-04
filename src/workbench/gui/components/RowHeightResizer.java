@@ -20,9 +20,9 @@ import javax.swing.JTable;
 import javax.swing.event.MouseInputAdapter;
 
 /**
- * 
- * @author support@sql-workbench.net  
- */ 
+ *
+ * @author support@sql-workbench.net
+ */
 public class RowHeightResizer
 	extends MouseInputAdapter
 {
@@ -37,9 +37,10 @@ public class RowHeightResizer
 	private Cursor lastCursor;
 	private static Cursor resizeCursor = Cursor.getPredefinedCursor(Cursor.S_RESIZE_CURSOR);
 
-	public RowHeightResizer(JTable table)
+	public RowHeightResizer(JTable tbl)
 	{
-		this.table = table;
+		super();
+		this.table = tbl;
 		this.table.addMouseListener(this);
 		this.table.addMouseMotionListener(this);
 		this.row = -1;

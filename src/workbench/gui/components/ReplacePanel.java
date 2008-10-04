@@ -47,7 +47,7 @@ public class ReplacePanel
 	private int lastPos = -1;
 	private JDialog dialog;
 	private EscAction escAction;
-	
+
 	public ReplacePanel(Replaceable aClient)
 	{
 		this(aClient, "workbench.sql.replace", null);
@@ -55,6 +55,7 @@ public class ReplacePanel
 
 	public ReplacePanel(Replaceable aClient, String key, String selectedText)
 	{
+		super();
 		initComponents();
 		this.client = aClient;
 		settingsKey = key;
@@ -64,7 +65,7 @@ public class ReplacePanel
 		regexProperty = settingsKey + ".useRegEx";
 		criteriaProperty = "criteria";
 		replacementProperty = "replacement";
-		
+
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(this.searchCriteria.getEditor().getEditorComponent());
 		policy.addComponent(this.replaceValue.getEditor().getEditorComponent());
@@ -94,7 +95,7 @@ public class ReplacePanel
 		((HistoryTextField)replaceValue).setSettingsProperty(replacementProperty);
 
 		this.restoreSettings();
-		
+
 		if (selectedText != null)
 		{
 			this.selectedTextCheckBox.setText(selectedText);
@@ -275,7 +276,7 @@ public class ReplacePanel
 	{
 		showReplaceDialog(caller, selectedText, ResourceMgr.getString("TxtWindowTitleReplaceText"));
 	}
-	
+
 	public void showReplaceDialog(Component caller, final String selectedText, String title)
 	{
 		if (this.dialog != null)
@@ -287,9 +288,9 @@ public class ReplacePanel
 		try
 		{
 			Window w = WbSwingUtilities.getWindowAncestor(caller);
-			Frame f = null;
+
 			this.dialog = null;
-			
+
 			if (w instanceof Frame)
 			{
 				this.dialog = new JDialog((Frame)w);
@@ -382,7 +383,7 @@ public class ReplacePanel
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
 		}
 	}
-	
+
 	private void findFirst()
 	{
 		String toFind = ((HistoryTextField)searchCriteria).getText();
@@ -440,7 +441,7 @@ public class ReplacePanel
 		((HistoryTextField)searchCriteria).storeCurrent();
 		((HistoryTextField)replaceValue).storeCurrent();
 	}
-	
+
 	private void saveSettings()
 	{
 		Settings.getInstance().setProperty(caseProperty, Boolean.toString(this.ignoreCaseCheckBox.isSelected()));

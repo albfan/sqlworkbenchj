@@ -175,6 +175,10 @@ public class ExportFileDialog
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
 		}
+		if (includeSqlDeleteInsert)
+		{
+			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlInsertDeleteFilter());
+		}
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
 		fc.addChoosableFileFilter(ExtensionFileFilter.getOdsFileFilter());
 		if (PoiHelper.isPoiAvailable())

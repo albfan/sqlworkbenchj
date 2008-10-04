@@ -18,6 +18,7 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 import workbench.gui.actions.ClearStatementHistoryAction;
 import workbench.gui.actions.WbAction;
 
@@ -40,7 +41,7 @@ public class SqlHistory
 {
 	private static final String LIST_DELIMITER = "----------- WbStatement -----------";
 
-	private ArrayList<SqlHistoryEntry> history;
+	final private List<SqlHistoryEntry> history;
 	private int currentEntry;
 	private int maxSize;
 	private boolean changed = false;
@@ -51,10 +52,10 @@ public class SqlHistory
 	private LastStatementAction lastStmtAction;
 	private ClearStatementHistoryAction clearAction;
 
-	public SqlHistory(EditorPanel ed, int maxSize)
+	public SqlHistory(EditorPanel ed, int size)
 	{
-		this.maxSize = maxSize;
-		this.history = new ArrayList<SqlHistoryEntry>(maxSize + 2);
+		this.maxSize = size;
+		this.history = new ArrayList<SqlHistoryEntry>(size + 2);
 		this.editor = ed;
 		this.firstStmtAction = new FirstStatementAction(this);
 		this.firstStmtAction.setEnabled(false);
@@ -78,27 +79,27 @@ public class SqlHistory
 	public WbAction getShowPreviousStatementAction() { return this.prevStmtAction; }
 	public WbAction getClearHistoryAction() { return this.clearAction; }
 	
-	public synchronized void addContent(EditorPanel editor)
+	public synchronized void addContent(EditorPanel edit)
 	{
 		boolean includeFiles = Settings.getInstance().getStoreFilesInHistory();
-		if (!includeFiles && editor.hasFileLoaded()) return;
+		if (!includeFiles && edit.hasFileLoaded()) return;
 		
 		int maxLength = Settings.getInstance().getIntProperty("workbench.sql.history.maxtextlength", 1024*1024*10);
-		if (editor.getDocumentLength() > maxLength) return;
+		if (edit.getDocumentLength() > maxLength) return;
 		
-		String text = editor.getText();
+		String text = edit.getText();
 		if (text == null || text.length() == 0) return;
 
 		try
 		{
 			SqlHistoryEntry entry = null;
-			if (editor.currentSelectionIsTemporary())
+			if (edit.currentSelectionIsTemporary())
 			{
-				entry = new SqlHistoryEntry(text, editor.getCaretPosition(), 0, 0);
+				entry = new SqlHistoryEntry(text, edit.getCaretPosition(), 0, 0);
 			}
 			else
 			{
-				entry = new SqlHistoryEntry(text, editor.getCaretPosition(), editor.getSelectionStart(), editor.getSelectionEnd());
+				entry = new SqlHistoryEntry(text, edit.getCaretPosition(), edit.getSelectionStart(), edit.getSelectionEnd());
 			}
 
 			SqlHistoryEntry top = this.getTopEntry();

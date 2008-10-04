@@ -25,9 +25,6 @@ import workbench.util.SqlUtil;
 public class WbRemoveVar extends SqlCommand
 {
 	public static final String VERB = "WBVARDELETE";
-	public WbRemoveVar()
-	{
-	}
 
 	public String getVerb() { return VERB; }
 	protected boolean isConnectionRequired() { return false; }

@@ -20,18 +20,13 @@ import workbench.util.StringUtil;
 
 /**
  * Convert row data to our own XML format.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class XlsXMLRowDataConverter
 	extends RowDataConverter
 {
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	
-	public XlsXMLRowDataConverter()
-	{
-		super();
-	}
 
 	public StrBuffer getStart()
 	{
@@ -65,7 +60,7 @@ public class XlsXMLRowDataConverter
 			if (!this.includeColumnInExport(i)) continue;
 			out.append("<Column ss:AutoFitWidth=\"1\"/>\n");
 		}
-		
+
 		if (writeHeader)
 		{
 			out.append("<Row>\n");
@@ -78,7 +73,7 @@ public class XlsXMLRowDataConverter
 			}
 			out.append("</Row>");
 		}
-		
+
 		out.append('\n');
 		return out;
 	}
@@ -105,7 +100,7 @@ public class XlsXMLRowDataConverter
 			}
 			boolean isDate = (row.getValue(i) instanceof Date);
 			String value = null;
-			
+
 			if (isDate)
 			{
 				Date d = (Date)row.getValue(i);
@@ -116,7 +111,7 @@ public class XlsXMLRowDataConverter
 				value = getValueAsFormattedString(row, i);
 			}
 			boolean isMultiline = (value == null ? false : value.indexOf('\n') > 0);
-			
+
 			if (isDate)
 			{
 				xml.append("  <Cell ss:StyleID=\"wbTS\">");
@@ -125,20 +120,20 @@ public class XlsXMLRowDataConverter
 			{
 				xml.append("  <Cell ss:StyleID=\"wbML\">");
 			}
-			else 
+			else
 			{
 				xml.append("  <Cell>");
 			}
 			xml.append("<Data ss:Type=\"");
 			xml.append(getDataType(row.getValue(i)));
 			xml.append("\">");
-			
+
 			writeEscapedXML(xml, value, false);
-			
+
 			xml.append("</Data></Cell>\n");
 		}
 		xml.append("</Row>\n\n");
-		
+
 		return xml;
 	}
 
@@ -150,7 +145,7 @@ public class XlsXMLRowDataConverter
 		excelFormat = StringUtil.replace(excelFormat, "/", "\\/");
 		return excelFormat.toLowerCase();
 	}
-	
+
 	private String getDataType(Object data)
 	{
 		if (data instanceof Number)

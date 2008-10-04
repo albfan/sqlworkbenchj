@@ -37,6 +37,7 @@ public class CharSequenceReader
 	 */
 	public CharSequenceReader(CharSequence s)
 	{
+		super();
 		this.str = s;
 		this.length = s.length();
 	}

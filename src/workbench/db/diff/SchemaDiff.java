@@ -43,7 +43,7 @@ import workbench.util.StringUtil;
 
 /**
  * Compare two Schemas for differences in the definition of the tables
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class SchemaDiff
@@ -55,7 +55,7 @@ public class SchemaDiff
 	public static final String TAG_DROP_PROC = "drop-procedure";
 	public static final String TAG_ADD_PROC = "add-procedure";
 	public static final String TAG_DROP_SEQUENCE = "drop-sequence";
-	
+
 	public static final String TAG_REF_CONN = "reference-connection";
 	public static final String TAG_TARGET_CONN = "target-connection";
 	public static final String TAG_COMPARE_INFO = "compare-settings";
@@ -71,7 +71,7 @@ public class SchemaDiff
 	public static final String TAG_PROC_INFO = "include-procs";
 	public static final String TAG_SEQUENCE_INFO = "include-sequences";
 	public static final String TAG_VIEWS_AS_TABLE = "views-as-tables";
-	
+
 	private WbConnection sourceDb;
 	private WbConnection targetDb;
 	private List<Object> objectsToCompare;
@@ -79,7 +79,7 @@ public class SchemaDiff
 	private List<ProcedureDefinition> procsToDelete;
 	private List<TableIdentifier> viewsToDelete;
 	private List<SequenceDefinition> sequencesToDelete;
-	
+
 	private String namespace;
 	private String encoding = "UTF-8";
 	private boolean compareJdbcTypes = false;
@@ -92,14 +92,14 @@ public class SchemaDiff
 	private boolean diffProcs = true;
 	private boolean diffSequences = true;
 	private boolean treatViewAsTable = false;
-	
+
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 	private String referenceSchema;
 	private String targetSchema;
 	private Set<String> tablesToIgnore = new TreeSet<String>(new CaseInsensitiveComparator());
-	
+
 	public SchemaDiff()
 	{
 	}
@@ -111,11 +111,11 @@ public class SchemaDiff
 	{
 		this(source, target, null);
 	}
-	
+
 	/**
-	 * Create a new SchemaDiff for the given connections with the given 
+	 * Create a new SchemaDiff for the given connections with the given
 	 * namespace to be used when writing the XML.
-	 * 
+	 *
 	 * @param source The connection to the reference schema
 	 * @param target the connection to the target schema
 	 * @param xmlNameSpace the namespace to be used for the XML, may be null.
@@ -129,7 +129,7 @@ public class SchemaDiff
 
 	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
 	public boolean getIncludeSequences() { return this.diffSequences; }
-	
+
 	/**
 	 * Control whether foreign keys should be compared as well.
 	 * The default is to compare foreign keys.
@@ -143,7 +143,7 @@ public class SchemaDiff
 	 */
 	public void setIncludeIndex(boolean flag) { this.diffIndex = flag; }
 	public boolean getIncludeIndex() { return this.diffIndex; }
-	
+
 	/**
 	 * Control whether primary keys should be compared as well.
 	 * The default is to compare primary keys.
@@ -160,18 +160,18 @@ public class SchemaDiff
 
 	public void setCompareJdbcTypes(boolean flag) { this.compareJdbcTypes = flag; }
 	public boolean getCompareJdbcTypes() { return this.compareJdbcTypes; }
-	
+
 	public void setIncludeViews(boolean flag) { this.diffViews = flag; }
-	
+
 	public void setIncludeProcedures(boolean flag) { this.diffProcs = flag; }
-	
+
 	public void setIncludeTableGrants(boolean flag) { this.diffGrants = flag; }
 	public boolean getIncludeTableGrants() { return this.diffGrants; }
 
 	public void setTreatViewAsTable(boolean flag) { this.treatViewAsTable = flag; }
-	
+
 //	public void setIncludeComments(boolean flag) { this.diffComments = flag; }
-	
+
 	/**
 	 *	Set the {@link workbench.storage.RowActionMonitor} for reporting progress
 	 */
@@ -179,7 +179,7 @@ public class SchemaDiff
 	{
 		this.monitor = mon;
 	}
-	
+
 	/**
 	 *	Cancel the creation of the XML file
 	 *  @see #isCancelled()
@@ -198,15 +198,15 @@ public class SchemaDiff
 		return this.cancel;
 	}
 
-	/** 
+	/**
 	 * Define table names to be compared. The table names in the passed
-	 * lists will be converted to TableIdentifiers and then passed 
+	 * lists will be converted to TableIdentifiers and then passed
 	 * on to setTables(List<TableIdentifier>, List<TableIdentifier>)
-	 * 
+	 *
 	 * No name matching will take place. Thus it's possible to compare
 	 * tables that might have different names but are supposed to be identical
-	 * otherwise. 
-	 * 
+	 * otherwise.
+	 *
 	 * @see #setTables(List, List)
 	 * @see #compareAll()
 	 */
@@ -215,7 +215,7 @@ public class SchemaDiff
 	{
 		ArrayList<TableIdentifier> reference = new ArrayList<TableIdentifier>(referenceList.size());
 		ArrayList<TableIdentifier> target = new ArrayList<TableIdentifier>(targetList.size());
-		
+
 		String ttype = this.sourceDb.getMetadata().getTableTypeName();
 		for (String tname : referenceList)
 		{
@@ -233,16 +233,16 @@ public class SchemaDiff
 		}
 		setTables(reference, target);
 	}
-	
-	/** 
-	 * Define the tables to be compared. They will be compared based 
+
+	/**
+	 * Define the tables to be compared. They will be compared based
 	 * on the position in the arrays (i.e. reference at index 0 will be
 	 * compared to target at index 0...)
-	 * 
+	 *
 	 * No name matching will take place. Thus it's possible to compare
 	 * tables that might have different names but are supposed to be identical
-	 * otherwise. 
-	 * 
+	 * otherwise.
+	 *
 	 * @see #setTables(List)
 	 * @see #compareAll()
 	 */
@@ -254,24 +254,24 @@ public class SchemaDiff
 		if (referenceList.size() != targetList.size()) throw new IllegalArgumentException("Number of source and target tables have to match");
 		int count = referenceList.size();
 		this.objectsToCompare = new ArrayList<Object>(count);
-		
+
 		if (this.monitor != null)
 		{
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
-		
+
 		for (int i=0; i < count; i++)
 		{
-			if (this.cancel) 
+			if (this.cancel)
 			{
 				this.objectsToCompare = null;
 				break;
 			}
 			TableIdentifier reference = referenceList.get(i);
-			
+
 			if (reference == null) continue;
-			
+
 			TableIdentifier target = targetList.get(i);
 			DiffEntry entry = new DiffEntry(reference, target);
 			this.objectsToCompare.add(entry);
@@ -285,17 +285,17 @@ public class SchemaDiff
 		ReportView view = new ReportView(tbl, con, diffIndex, this.namespace);
 		return view;
 	}
-	
+
 	private ReportTable createReportTableInstance(TableIdentifier tbl, WbConnection con)
 		throws SQLException
 	{
 		tbl.adjustCase(con);
 		return new ReportTable(tbl, con, this.namespace, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants);
 	}
-	
+
 	/**
 	 * Define a list of table names that should not be compared.
-	 * Tables in the reference/source database that match one of the 
+	 * Tables in the reference/source database that match one of the
 	 * names in this list will be skipped.
 	 */
 	public void setExcludeTables(List<String> tables)
@@ -326,7 +326,7 @@ public class SchemaDiff
 				{
 					LogMgr.logError("SchemaDiff.setExcludeTables()","Could not retrieve excluded tables", e);
 				}
-				
+
 			}
 			else
 			{
@@ -334,15 +334,15 @@ public class SchemaDiff
 			}
 		}
 	}
-	
+
 	/**
 	 *	Setup this SchemaDiff object to compare all tables that the user
 	 *  can access in the reference connection with all matching (=same name)
 	 *  tables in the target connection.
 	 *  This will retrieve all user tables from the reference (=source)
 	 *  connection and will match them to the tables in the target connection.
-	 *  
-	 *  When using compareAll() drop statements will be created for tables 
+	 *
+	 *  When using compareAll() drop statements will be created for tables
 	 *  present in the target connection but not existing in the reference
 	 *  connection.
 	 *
@@ -361,8 +361,8 @@ public class SchemaDiff
 	 *  tables in the target connection.
 	 *  This will retrieve all user tables from the reference (=source)
 	 *  connection and will match them to the tables in the target connection.
-	 *  
-	 *  When using compareAll() drop statements will be created for tables 
+	 *
+	 *  When using compareAll() drop statements will be created for tables
 	 *  present in the target connection but not existing in the reference
 	 *  connection.
 	 *
@@ -377,10 +377,10 @@ public class SchemaDiff
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
-		
+
 		this.referenceSchema = (rSchema == null ? this.sourceDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(rSchema));
 		this.targetSchema = (tSchema == null ? this.targetDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(tSchema));
-		
+
 		String[] types;
 		if (diffViews || treatViewAsTable)
 		{
@@ -393,7 +393,7 @@ public class SchemaDiff
 
 		List<TableIdentifier> refTables = sourceDb.getMetadata().getTableList(this.referenceSchema, types);
 		List<TableIdentifier> target = targetDb.getMetadata().getTableList(this.targetSchema, types);
-	
+
 		if (treatViewAsTable)
 		{
 			String viewType = sourceDb.getMetadata().getViewTypeName();
@@ -406,16 +406,16 @@ public class SchemaDiff
 				}
 			}
 		}
-		
+
 		processTableList(refTables, target);
-		
+
 		if (diffProcs)
 		{
 			List<ProcedureDefinition> refProcs = sourceDb.getMetadata().getProcedureList(null, this.referenceSchema);
 			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureList(null, this.targetSchema);
 			processProcedureList(refProcs, targetProcs);
 		}
-		
+
 		if (diffSequences)
 		{
 			List<SequenceDefinition> refSeqs = Collections.emptyList();
@@ -439,39 +439,39 @@ public class SchemaDiff
 	{
 		int count = refTables.size();
 		HashSet<String> refTableNames = new HashSet<String>();
-		
+
 		this.objectsToCompare = new ArrayList<Object>(count);
 
 		if (this.monitor != null)
 		{
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		}
-		
+
 		for (int i=0; i < count; i++)
 		{
-			if (this.cancel) 
+			if (this.cancel)
 			{
 				this.objectsToCompare = null;
 				break;
 			}
-			
+
 			TableIdentifier rid = refTables.get(i);
-			
+
 			String tname = StringUtil.trimQuotes(rid.getTableName());
-			
+
 			if (this.tablesToIgnore.contains(tname)) continue;
-			
+
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(ResourceMgr.getFormattedString("MsgLoadTableInfo", tname), -1, -1);
 			}
-			
+
 			TableIdentifier tid = rid.createCopy();
 			tid.setSchema(targetSchema);
 			tid.setCatalog(null);
 			tid.setNeverAdjustCase(false);
 			tid.adjustCase(targetDb);
-				
+
 			DiffEntry entry = null;
 			if (targetDb.getMetadata().objectExists(tid, rid.getType()))
 			{
@@ -487,10 +487,10 @@ public class SchemaDiff
 		}
 
 		if (cancel) return;
-		
+
 		this.tablesToDelete = new ArrayList<TableIdentifier>();
 		this.viewsToDelete = new ArrayList<TableIdentifier>();
-		
+
 		if (targetTables != null)
 		{
 			String tableType = targetDb.getMetadata().getTableTypeName();
@@ -500,7 +500,7 @@ public class SchemaDiff
 				TableIdentifier t = targetTables.get(i);
 				String tbl = StringUtil.trimQuotes(t.getTableName());
 				if (this.tablesToIgnore.contains(tbl)) continue;
-				
+
 				if (targetDb.getMetadata().isDefaultCase(tbl))
 				{
 					tbl = sourceDb.getMetadata().adjustObjectnameCase(tbl);
@@ -516,10 +516,10 @@ public class SchemaDiff
 						this.viewsToDelete.add(t);
 					}
 				}
-			}	
+			}
 		}
 	}
-	
+
 	private void processSequenceList(List<SequenceDefinition> refSeqs, List<SequenceDefinition> targetSeqs)
 	{
 		HashSet<String> refSeqNames = new HashSet<String>();
@@ -529,12 +529,12 @@ public class SchemaDiff
 		{
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		}
-		
+
 		SequenceReader targetReader = this.targetDb.getMetadata().getSequenceReader();
-		
+
 		for (SequenceDefinition refSeq : refSeqs)
 		{
-			if (this.cancel) 
+			if (this.cancel)
 			{
 				this.objectsToCompare = null;
 				break;
@@ -554,9 +554,9 @@ public class SchemaDiff
 				refSeqNames.add(refSeq.getSequenceName());
 			}
 		}
-		
+
 		if (cancel) return;
-		
+
 		for (SequenceDefinition tSeq : targetSeqs)
 		{
 			String seqname = tSeq.getSequenceName();
@@ -564,24 +564,24 @@ public class SchemaDiff
 			{
 				this.sequencesToDelete.add(tSeq);
 			}
-		}	
+		}
 	}
-	
+
 	private void processProcedureList(List<ProcedureDefinition> refProcs, List<ProcedureDefinition> targetProcs)
 	{
 		HashSet<String> refProcNames = new HashSet<String>();
 		this.procsToDelete = new ArrayList<ProcedureDefinition>();
-		
+
 		DbMetadata targetMeta = this.targetDb.getMetadata();
-		
+
 		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
-		
+
 		if (refProcs == null) refProcs = Collections.emptyList();
 		if (targetProcs == null) targetProcs = Collections.emptyList();
-		
+
 		for (ProcedureDefinition refProc : refProcs)
 		{
-			if (this.cancel) 
+			if (this.cancel)
 			{
 				this.objectsToCompare = null;
 				break;
@@ -605,9 +605,9 @@ public class SchemaDiff
 			objectsToCompare.add(entry);
 			refProcNames.add(refProc.getProcedureName());
 		}
-		
+
 		if (cancel) return;
-		
+
 		for (ProcedureDefinition tProc : targetProcs)
 		{
 			String procname = tProc.getProcedureName();
@@ -615,12 +615,12 @@ public class SchemaDiff
 			{
 				this.procsToDelete.add(tProc);
 			}
-		}	
+		}
 	}
-	
+
 	/**
-	 * Define the reference tables to be compared with the matching 
-	 * tables (based on the name) in the target connection. The list 
+	 * Define the reference tables to be compared with the matching
+	 * tables (based on the name) in the target connection. The list
 	 * has to contain objects of type {@link workbench.db.TableIdentifier}
 	 *
 	 * @see #setTables(List, List)
@@ -631,13 +631,13 @@ public class SchemaDiff
 	{
 		this.processTableList(reference, null);
 	}
-	
+
 	/**
-	 *	Return the XML that describes how the target schema needs to be 
+	 *	Return the XML that describes how the target schema needs to be
 	 *  modified in order to get the same structure as the reference schema.
 	 *
 	 *	For this, each defined table in the reference schema will be compared
-	 *  to the corresponding table in the target schema. 
+	 *  to the corresponding table in the target schema.
 	 *
 	 *  @see TableDiff#getMigrateTargetXml()
 	 */
@@ -662,19 +662,19 @@ public class SchemaDiff
 	{
 		return encoding;
 	}
-	
+
 	/**
 	 *	Set the encoding that is used for writing the XML. This will
 	 *  be put into the <?xml tag at the beginning of the generated XML
 	 */
-	public void setEncoding(String encoding)
+	public void setEncoding(String enc)
 	{
-		this.encoding = encoding;
+		this.encoding = enc;
 	}
 
 	/**
 	 *	Write the XML of the schema differences to the supplied writer.
-	 *  This writes some meta information about the compare, and then 
+	 *  This writes some meta information about the compare, and then
 	 *  creates a {@link TableDiff} object for each pair of tables that
 	 *  needs to be compared. The output of {@link TableDiff#getMigrateTargetXml()}
 	 *  will then be written into the writer.
@@ -683,19 +683,19 @@ public class SchemaDiff
 		throws IOException
 	{
 		if (objectsToCompare == null) throw new NullPointerException("Source tables may not be null");
-		
+
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer tblIndent = new StrBuffer("    ");
 		TagWriter tw = new TagWriter(this.namespace);
 		out.write("<?xml version=\"1.0\" encoding=\"");
 		out.write(this.encoding);
 		out.write("\"?>\n");
-		
+
 		if (this.monitor != null)
 		{
 			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
 		}
-		
+
 		writeTag(out, null, "schema-diff", true);
 		writeDiffInfo(out);
 		int count = this.objectsToCompare.size();
@@ -707,10 +707,10 @@ public class SchemaDiff
 			Object o = objectsToCompare.get(i);
 			if (o instanceof ProcDiffEntry) continue;
 			if (o instanceof SequenceDiffEntry) continue;
-			
+
 			DiffEntry entry = (DiffEntry)o;
 			if (this.cancel) break;
-			
+
 			if (this.monitor != null)
 			{
 				this.monitor.setCurrentObject(entry.reference.getTableExpression(), i+1, count);
@@ -765,38 +765,38 @@ public class SchemaDiff
 				LogMgr.logError("SchemaDiff.writeXml()", "Error comparing " + entry.toString(), sql);
 			}
 		}
-		
+
 		if (this.cancel) return;
-		
+
 		this.appendDropTables(out, indent);
 		out.write("\n");
-		
+
 		if (this.diffViews)
 		{
 			this.appendViewDiff(viewDiffs, out);
 			//out.write("\n");
-			this.appendDropViews(out, indent, tw);
+			this.appendDropViews(out, indent);
 		}
 		if (this.diffSequences)
 		{
 			this.appendSequenceDiff(out, indent, tw);
 			out.write("\n");
 		}
-		
+
 		if (this.diffProcs)
 		{
 			this.appendProcDiff(out, indent, tw);
 			out.write("\n");
 		}
-		
+
 		if (this.cancel) return;
-		
+
 		if (this.diffProcs)
 		{
 			this.appendProcDiff(out, indent, tw);
 			out.write("\n");
 		}
-		
+
 		writeTag(out, null, "schema-diff", false);
 	}
 
@@ -809,7 +809,7 @@ public class SchemaDiff
 			Object o = objectsToCompare.get(i);
 			if (o instanceof DiffEntry) continue;
 			if (o instanceof ProcDiffEntry) continue;
-			
+
 			SequenceDiffEntry entry = (SequenceDiffEntry)o;
 			ReportSequence rp = new ReportSequence(entry.reference, this.namespace);
 			ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target, this.namespace));
@@ -821,23 +821,22 @@ public class SchemaDiff
 			{
 				out.write("\n");
 				xml.writeTo(out);
-			}			
+			}
 		}
 
 		if (this.sequencesToDelete == null || sequencesToDelete.size() == 0) return;
-		
+
 		out.write('\n');
 		writeTag(out, indent, TAG_DROP_SEQUENCE, true);
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
-		Iterator itr = this.sequencesToDelete.iterator();
 		for (SequenceDefinition def : sequencesToDelete)
 		{
 			writeTagValue(out, myindent, ReportSequence.TAG_SEQ_NAME, def.getSequenceName());
 		}
 		writeTag(out, indent, TAG_DROP_SEQUENCE, false);
 	}
-	
+
 	private void appendProcDiff(Writer out, StrBuffer indent, TagWriter tw)
 		throws IOException
 	{
@@ -847,7 +846,7 @@ public class SchemaDiff
 			Object o = objectsToCompare.get(i);
 			if (o instanceof DiffEntry) continue;
 			if (o instanceof SequenceDiffEntry) continue;
-			
+
 			ProcDiffEntry entry = (ProcDiffEntry)o;
 			ReportProcedure rp = new ReportProcedure(entry.reference, this.sourceDb);
 			ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
@@ -859,11 +858,11 @@ public class SchemaDiff
 			{
 				out.write("\n");
 				xml.writeTo(out);
-			}			
+			}
 		}
 
 		if (this.procsToDelete == null || procsToDelete.size() == 0) return;
-		
+
 		out.write('\n');
 		writeTag(out, indent, TAG_DROP_PROC, true);
 		StrBuffer myindent = new StrBuffer(indent);
@@ -879,22 +878,22 @@ public class SchemaDiff
 		}
 		writeTag(out, indent, TAG_DROP_PROC, false);
 	}
-	
+
 	private void appendViewDiff(List<ViewDiff> diffs, Writer out)
 		throws IOException
 	{
 		for (ViewDiff d : diffs)
 		{
 			StrBuffer source = d.getMigrateTargetXml();
-			if (source.length() > 0)  
+			if (source.length() > 0)
 			{
 				out.write("\n");
 				source.writeTo(out);
 			}
 		}
 	}
-	
-	private void appendDropViews(Writer out, StrBuffer indent, TagWriter tw)
+
+	private void appendDropViews(Writer out, StrBuffer indent)
 		throws IOException
 	{
 		if (this.viewsToDelete == null || this.viewsToDelete.size() == 0) return;
@@ -910,7 +909,7 @@ public class SchemaDiff
 		}
 		writeTag(out, indent, TAG_DROP_VIEW, false);
 	}
-	
+
 	private void appendDropTables(Writer out, StrBuffer indent)
 		throws IOException
 	{
@@ -927,7 +926,7 @@ public class SchemaDiff
 		}
 		writeTag(out, indent, TAG_DROP_TABLE, false);
 	}
-	
+
 	private void writeDiffInfo(Writer out)
 		throws IOException
 	{
@@ -946,10 +945,10 @@ public class SchemaDiff
 		info.writeTo(out);
 		writeTag(out, indent, TAG_TARGET_CONN, false);
 		out.write("\n");
-		
+
 		info = new StrBuffer();
 		TagWriter tw = new TagWriter(this.namespace);
-		
+
 		tw.appendOpenTag(info, indent, TAG_COMPARE_INFO);
 		info.append('\n');
 		tw.appendTag(info, indent2, TAG_INDEX_INFO, this.diffIndex);
@@ -966,9 +965,9 @@ public class SchemaDiff
 			tw.appendTag(info, indent2, "target-schema", this.targetSchema);
 		}
 		int count = this.objectsToCompare.size();
-		String tattr[] = new String[] { "type", "reference", "compareTo"};
-		String pattr[] = new String[] { "referenceProcedure", "compareTo" };
-		String tbls[] = new String[3];
+		String[] tattr = new String[] { "type", "reference", "compareTo"};
+		String[] pattr = new String[] { "referenceProcedure", "compareTo" };
+		String[] tbls = new String[3];
 		DbSettings dbs = this.sourceDb.getMetadata().getDbSettings();
 		for (int i=0; i < count; i++)
 		{
@@ -1006,13 +1005,13 @@ public class SchemaDiff
 				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
 			}
 			info.append("/>\n");
-			
+
 		}
 		tw.appendCloseTag(info, indent, TAG_COMPARE_INFO);
 
 		info.writeTo(out);
 	}
-	
+
 	private void writeTag(Writer out, StrBuffer indent, String tag, boolean isOpeningTag)
 		throws IOException
 	{
@@ -1046,7 +1045,7 @@ public class SchemaDiff
 		}
 		out.write(">\n");
 	}
-	
+
 	private void writeTagValue(Writer out, StrBuffer indent, String tag, String value)
 		throws IOException
 	{
@@ -1103,7 +1102,7 @@ class DiffEntry
 		reference = ref;
 		target = tar;
 	}
-	
+
 	public String toString()
 	{
 		if (target == null)

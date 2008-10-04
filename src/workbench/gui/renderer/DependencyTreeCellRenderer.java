@@ -27,7 +27,6 @@ import javax.swing.tree.TreeCellRenderer;
 import workbench.db.DependencyNode;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 
 /**
  *
@@ -44,9 +43,10 @@ public class DependencyTreeCellRenderer
 	private ImageIcon fk;
 	private ImageIcon table;
 	private boolean isSelected;
-	
+
 	public DependencyTreeCellRenderer()
 	{
+		super();
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setVerticalAlignment(SwingConstants.TOP);
 		this.setHorizontalAlignment(SwingConstants.LEFT);
@@ -57,7 +57,7 @@ public class DependencyTreeCellRenderer
 		this.unselectedForeground = UIManager.getColor("Tree.textForeground");
 		this.unselectedBackground = UIManager.getColor("Tree.textBackground");
 	}
-	
+
 	public Component getTreeCellRendererComponent(JTree tree, Object value, boolean selected, boolean expanded, boolean leaf, int row, boolean hasFocus)
 	{
 		this.isSelected = selected;
@@ -70,7 +70,7 @@ public class DependencyTreeCellRenderer
 			this.setForeground(this.unselectedForeground);
 			//this.setBackground(this.unselectedBackground);
 		}
-		
+
 		if (value instanceof DefaultMutableTreeNode)
 		{
 			DefaultMutableTreeNode node = (DefaultMutableTreeNode)value;
@@ -86,13 +86,13 @@ public class DependencyTreeCellRenderer
 					StringBuilder tooltip = new StringBuilder(50);
 					tooltip.append("<html>");
 					boolean needBreak = false;
-					if (uaction.length() > 0) 
+					if (uaction.length() > 0)
 					{
 						tooltip.append("ON UPDATE ");
 						tooltip.append(uaction);
 						needBreak = true;
 					}
-					if (daction.length() > 0) 
+					if (daction.length() > 0)
 					{
 						if (needBreak) tooltip.append("<br>");
 						tooltip.append("ON DELETE ");
@@ -117,18 +117,18 @@ public class DependencyTreeCellRenderer
 			this.setIcon(null);
 		}
 		this.setText(value.toString());
-		
+
 		return this;
 	}
 
 	public void paint(Graphics g)
 	{
 		Color bColor;
-		
+
 		if(this.isSelected)
 		{
 			bColor = this.selectedBackground;
-		} 
+		}
 		else
 		{
 			bColor = this.unselectedBackground;
@@ -137,7 +137,7 @@ public class DependencyTreeCellRenderer
 		int imageOffset = -1;
 		if(bColor != null)
 		{
-			
+
 			imageOffset = getLabelStart();
 			Color oldColor = g.getColor();
 			g.setColor(bColor);
@@ -145,7 +145,7 @@ public class DependencyTreeCellRenderer
 			{
 				g.fillRect(imageOffset, 0, getWidth() - 1 - imageOffset,
 				getHeight());
-			} 
+			}
 			else
 			{
 				g.fillRect(0, 0, getWidth() - 1 - imageOffset,
@@ -165,5 +165,5 @@ public class DependencyTreeCellRenderer
 		}
 		return 0;
 	}
-	
+
 }

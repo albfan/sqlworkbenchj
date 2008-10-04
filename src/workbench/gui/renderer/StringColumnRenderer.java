@@ -17,17 +17,13 @@ package workbench.gui.renderer;
  * reasons we are assuming the values are all of type string.
  * So we can use a type cast in the getDisplay() method
  * instead of toString() which is much faster when no exceptions
- * are thrown. 
+ * are thrown.
  *
  * @author  support@sql-workbench.net
  */
-public class StringColumnRenderer 
+public class StringColumnRenderer
 	extends ToolTipRenderer
 {
-	public StringColumnRenderer()
-	{
-		super();
-	}
 
 	public void prepareDisplay(Object aValue)
 	{

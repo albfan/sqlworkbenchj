@@ -31,7 +31,7 @@ import workbench.resource.Settings;
 
 /**
  * An enhanced Properties class
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class WbProperties
@@ -40,7 +40,7 @@ public class WbProperties
 {
 	private int distinctSections;
 
-	private Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<String, List<PropertyChangeListener>>();
+	private final Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<String, List<PropertyChangeListener>>();
 	private Object changeNotificationSource = null;
 
 	protected WbProperties()
@@ -52,9 +52,10 @@ public class WbProperties
 	{
 		this(notificationSource, 2);
 	}
-	
+
 	public WbProperties(Object notificationSource, int num)
 	{
+		super();
     this.changeNotificationSource = (notificationSource == null ? this : notificationSource);
 		this.distinctSections = num;
 	}
@@ -73,7 +74,7 @@ public class WbProperties
 			out.close();
 		}
 	}
-	
+
 	public synchronized void save(OutputStream out)
 		throws IOException
 	{
@@ -98,12 +99,12 @@ public class WbProperties
 					bw.newLine();
 				}
 			}
-			
+
 			Object v = this.get(key);
 			if (v != null)
 			{
 				value = v.toString();
-				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT); 
+				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT);
 				if (value.length() > 0)
 				{
 					bw.write(key + "=" + value);
@@ -131,24 +132,24 @@ public class WbProperties
 		if (value == null) return defaultValue;
 		return StringUtil.getIntValue(value, defaultValue);
 	}
-	
+
 	public boolean getBoolProperty(String property, boolean defaultValue)
 	{
 		String value = this.getProperty(property, null);
 		if (value == null) return defaultValue;
 		return StringUtil.stringToBool(value);
 	}
-	
+
 	public void setProperty(String property, int value)
 	{
 		this.setProperty(property, Integer.toString(value));
 	}
-	
+
 	public void setProperty(String property, boolean value)
 	{
 		this.setProperty(property, Boolean.toString(value));
 	}
-	
+
 	private String getSections(String aString, int aNum)
 	{
 		int pos = aString.indexOf(".");
@@ -188,7 +189,7 @@ public class WbProperties
 			}
 		}
 	}
-	
+
 	public void removePropertyChangeListener(PropertyChangeListener aListener)
 	{
 		synchronized (this.changeListeners)
@@ -202,15 +203,15 @@ public class WbProperties
 			}
 		}
 	}
-	
+
 	private void firePropertyChanged(String name, String oldValue, String newValue)
 	{
 		List<PropertyChangeListener> listeners = this.changeListeners.get(name);
 		if (listeners == null || listeners.size() == 0) return;
-		
+
 		// Making a shallow copy of the list prevents a ConcurrentModificationException
 		List<PropertyChangeListener> l2 = new ArrayList<PropertyChangeListener>(listeners);
-		PropertyChangeEvent evt = new PropertyChangeEvent(this, name, oldValue, newValue);
+		PropertyChangeEvent evt = new PropertyChangeEvent(this.changeNotificationSource, name, oldValue, newValue);
 
 		for (PropertyChangeListener l : l2)
 		{
@@ -220,7 +221,7 @@ public class WbProperties
 			}
 		}
 	}
-	
+
 	public Object setProperty(String name, String value)
 	{
     return setProperty(name, value, true);
@@ -229,9 +230,9 @@ public class WbProperties
 	public Object setProperty(String name, String value, boolean firePropChange)
 	{
 		if (name == null) return null;
-		
+
 		String oldValue = null;
-		
+
 		synchronized (this)
 		{
 			if (value == null)
@@ -241,7 +242,7 @@ public class WbProperties
 			}
 			oldValue = (String) super.setProperty(name, value);
 		}
-		
+
 		if (firePropChange && !StringUtil.equalString(oldValue, value))
 		{
 			this.firePropertyChanged(name, oldValue, value);
@@ -258,8 +259,8 @@ public class WbProperties
 	public void addPropertyDefinition(String line)
 	{
 		if (line == null) return;
-		if (line.trim().length() == 0) return;
-		if (line.startsWith("#")) return;
+		if (StringUtil.isBlank(line)) return;
+		if (line.charAt(0) == '#') return;
 		int pos = line.indexOf("=");
 		if (pos == -1) return;
 		String key = line.substring(0, pos);
@@ -271,7 +272,7 @@ public class WbProperties
 		}
 		this.setProperty(key, value.trim());
 	}
-	
+
 	public void loadTextFile(String filename)
 		throws IOException
 	{
@@ -282,14 +283,14 @@ public class WbProperties
 	 * Read the content of the file into this properties object.
 	 * This method does not support line continuation, but supports
 	 * an encoding (as opposed to the original properties class)
-	 * 
+	 *
 	 */
 	public void loadTextFile(String filename, String encoding)
 		throws IOException
 	{
 		BufferedReader in = null;
 		File f = new File(filename);
-		if(encoding == null) 
+		if(encoding == null)
 		{
 			encoding = Settings.getInstance().getDefaultEncoding();
 		}
@@ -308,5 +309,5 @@ public class WbProperties
 			try { in.close(); } catch (Throwable th) {}
 		}
 	}
-	
+
 }

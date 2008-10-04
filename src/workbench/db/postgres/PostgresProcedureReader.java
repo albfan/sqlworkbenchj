@@ -41,7 +41,7 @@ public class PostgresProcedureReader
 	private Map<String, Integer> pgTypeMap;
 	private Map<Integer, PGType> pgTypes;
 	private PGType voidType;
-	
+
 	public PostgresProcedureReader(WbConnection conn)
 	{
 		super(conn);
@@ -54,47 +54,47 @@ public class PostgresProcedureReader
 			this.useSavepoint = false;
 		}
 	}
-	
+
 	private Map<String, Integer> getJavaTypeMapping()
 	{
 		if (pgTypeMap == null)
 		{
 			// This mapping has been copied from the JDBC driver.
-			// This map is deeply hidden in the driver and even 
-			// if I hard-coded references to the driver into the 
+			// This map is deeply hidden in the driver and even
+			// if I hard-coded references to the driver into the
 			// class I wouldn't know how to retrieve them.
 			pgTypeMap = new HashMap<String, Integer>();
-			pgTypeMap.put("int2", new Integer(Types.SMALLINT));
-			pgTypeMap.put("int4", new Integer(Types.INTEGER));
-			pgTypeMap.put("oid", new Integer(Types.INTEGER));
-			pgTypeMap.put("int8", new Integer(Types.BIGINT));
-			pgTypeMap.put("money", new Integer(Types.DOUBLE));
-			pgTypeMap.put("numeric", new Integer(Types.NUMERIC));
-			pgTypeMap.put("float4", new Integer(Types.REAL));
-			pgTypeMap.put("float8", new Integer(Types.DOUBLE));
-			pgTypeMap.put("bpchar", new Integer(Types.CHAR));
-			pgTypeMap.put("varchar", new Integer(Types.VARCHAR));
-			pgTypeMap.put("text", new Integer(Types.VARCHAR));
-			pgTypeMap.put("name", new Integer(Types.VARCHAR));
-			pgTypeMap.put("bytea", new Integer(Types.BINARY));
-			pgTypeMap.put("bool", new Integer(Types.BIT));
-			pgTypeMap.put("bit", new Integer(Types.BIT));
-			pgTypeMap.put("date", new Integer(Types.DATE));
-			pgTypeMap.put("time", new Integer(Types.TIME));
-			pgTypeMap.put("timetz", new Integer(Types.TIME));
-			pgTypeMap.put("timestamp", new Integer(Types.TIMESTAMP));
-			pgTypeMap.put("timestamptz", new Integer(Types.TIMESTAMP));
+			pgTypeMap.put("int2", Integer.valueOf(Types.SMALLINT));
+			pgTypeMap.put("int4", Integer.valueOf(Types.INTEGER));
+			pgTypeMap.put("oid", Integer.valueOf(Types.INTEGER));
+			pgTypeMap.put("int8", Integer.valueOf(Types.BIGINT));
+			pgTypeMap.put("money", Integer.valueOf(Types.DOUBLE));
+			pgTypeMap.put("numeric", Integer.valueOf(Types.NUMERIC));
+			pgTypeMap.put("float4", Integer.valueOf(Types.REAL));
+			pgTypeMap.put("float8", Integer.valueOf(Types.DOUBLE));
+			pgTypeMap.put("bpchar", Integer.valueOf(Types.CHAR));
+			pgTypeMap.put("varchar", Integer.valueOf(Types.VARCHAR));
+			pgTypeMap.put("text", Integer.valueOf(Types.VARCHAR));
+			pgTypeMap.put("name", Integer.valueOf(Types.VARCHAR));
+			pgTypeMap.put("bytea", Integer.valueOf(Types.BINARY));
+			pgTypeMap.put("bool", Integer.valueOf(Types.BIT));
+			pgTypeMap.put("bit", Integer.valueOf(Types.BIT));
+			pgTypeMap.put("date", Integer.valueOf(Types.DATE));
+			pgTypeMap.put("time", Integer.valueOf(Types.TIME));
+			pgTypeMap.put("timetz", Integer.valueOf(Types.TIME));
+			pgTypeMap.put("timestamp", Integer.valueOf(Types.TIMESTAMP));
+			pgTypeMap.put("timestamptz", Integer.valueOf(Types.TIMESTAMP));
     }
 		return pgTypeMap;
 	}
-	
+
 	private Integer getJavaType(String pgType)
 	{
 		Integer i = getJavaTypeMapping().get(pgType);
-		if (i == null) return new Integer(Types.OTHER);
+		if (i == null) return Integer.valueOf(Types.OTHER);
 		return i;
 	}
-	
+
 	private Map<Integer, PGType> getPGTypes()
 	{
 		if (pgTypes == null)
@@ -110,7 +110,7 @@ public class PostgresProcedureReader
 				rs = stmt.executeQuery("select oid, typname, format_type(oid, null) from pg_type");
 				while (rs.next())
 				{
-					Integer oid = new Integer(rs.getInt(1));
+					Integer oid = Integer.valueOf(rs.getInt(1));
 					PGType typ = new PGType();
 					typ.rawType = rs.getString(2);
 					typ.formattedType = StringUtil.trimQuotes(rs.getString(3));
@@ -136,23 +136,23 @@ public class PostgresProcedureReader
 		}
 		return pgTypes;
 	}
-	
+
 	private String getRawTypeNameFromOID(int oid)
 	{
-		PGType typ = getPGTypes().get(new Integer(oid));
+		PGType typ = getPGTypes().get(Integer.valueOf(oid));
 		return typ.rawType;
 	}
 
 	private String getFormattedTypeFromOID(int oid)
 	{
-		PGType typ = getPGTypes().get(new Integer(oid));
+		PGType typ = getPGTypes().get(Integer.valueOf(oid));
 		return typ.formattedType;
 	}
-	
+
 	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
 	{
 		StringBuilder source = new StringBuilder();
-		
+
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		Savepoint sp = null;
 		try
@@ -160,7 +160,7 @@ public class PostgresProcedureReader
 			sp = this.connection.setSavepoint();
 			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
 			source.append("CREATE OR REPLACE FUNCTION ");
-			
+
 			source.append(aProcname);
 			source.append(" (");
 			String retType = null;
@@ -181,7 +181,7 @@ public class PostgresProcedureReader
 					if (added > 0) source.append(',');
 					source.append(mode);
 					source.append(' ');
-					if (varname != null) 
+					if (varname != null)
 					{
 						source.append(varname);
 						source.append(' ');
@@ -214,7 +214,7 @@ public class PostgresProcedureReader
 //		String version = connection.getMetadata().getDbVersion();
 //		int majorVersion = 0;
 //		int minorVersion = 0;
-//		
+//
 //		try
 //		{
 //			String[] parts = version.split("\\.");
@@ -226,8 +226,8 @@ public class PostgresProcedureReader
 //			majorVersion = 0;
 //			minorVersion = 0;
 //		}
-//		
-		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true) 
+//
+		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
 			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{
 			return getColumns(catalog, schema, procname);
@@ -237,12 +237,12 @@ public class PostgresProcedureReader
 			return super.getProcedureColumns(catalog, schema, procname);
 		}
 	}
-	
-	/** 
+
+	/**
 	 * A workaround for pre 8.3 drivers so that argument names are retrieved properly
 	 * from the database. This was mainly inspired by the source code of pgAdmin III
 	 * and the current 8.3 driver sources
-	 * 
+	 *
 	 * @param catalog
 	 * @param schema
 	 * @param procname
@@ -252,30 +252,30 @@ public class PostgresProcedureReader
 	private DataStore getColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{
-		String sql = "SELECT format_type(p.prorettype, NULL) as formatted_type, \n" + 
-			       "       t.typname as pg_type, \n" + 
-						 "       array_to_string(p.proargtypes, ';') as argtypes, \n" + 
-             "       array_to_string(p.proallargtypes, ';') as allargtypes, \n" + 
-             "       array_to_string(p.proargnames, ';') as argnames, \n" + 		
+		String sql = "SELECT format_type(p.prorettype, NULL) as formatted_type, \n" +
+			       "       t.typname as pg_type, \n" +
+						 "       array_to_string(p.proargtypes, ';') as argtypes, \n" +
+             "       array_to_string(p.proallargtypes, ';') as allargtypes, \n" +
+             "       array_to_string(p.proargnames, ';') as argnames, \n" +
 						 "       array_to_string(p.proargmodes, ';') as modes, \n" +
-						 "       t.typtype " + 
-             "FROM pg_catalog.pg_proc p, \n" + 
+						 "       t.typtype " +
+             "FROM pg_catalog.pg_proc p, \n" +
              "     pg_catalog.pg_namespace n, \n " +
-						 "     pg_catalog.pg_type t " + 
-             "WHERE p.pronamespace = n.oid \n" + 
+						 "     pg_catalog.pg_type t " +
+             "WHERE p.pronamespace = n.oid \n" +
              "AND   n.nspname = ? \n " +
-						 "AND   p.prorettype = t.oid \n" + 
-             "AND   p.proname = ?";		
-		
+						 "AND   p.prorettype = t.oid \n" +
+             "AND   p.proname = ?";
+
 		DataStore result = createProcColsDataStore();
-		
+
 		Savepoint sp = null;
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		try
 		{
 			sp = this.connection.setSavepoint();
-			
+
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, schema);
 			stmt.setString(2, procname);
@@ -290,7 +290,7 @@ public class PostgresProcedureReader
 				String names = rs.getString("argnames");
 				String modes = rs.getString("modes");
 				String returnTypeType = rs.getString("typtype");
-			
+
 				// pgAdmin II distinguishes functions from procedures using only the "modes" information
 				// the driver uses the returnTypeType as well
 				boolean isFunction = (returnTypeType.equals("b") || returnTypeType.equals("d") || (returnTypeType.equals("p") && modes == null));
@@ -303,7 +303,7 @@ public class PostgresProcedureReader
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, getJavaType(pgType));
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, StringUtil.trimQuotes(typeName));
 				}
-				
+
 				List<String> argNames = null;
 				List<String> argTypes = null;
 				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
@@ -311,7 +311,7 @@ public class PostgresProcedureReader
 				{
 					argTypes = StringUtil.stringToList(allTypes, ";", true, true);
 					argNames = StringUtil.stringToList(names, ";", true, true);
-				}	
+				}
 				else
 				{
 					argTypes = StringUtil.stringToList(types, ";", true, true);
@@ -331,14 +331,14 @@ public class PostgresProcedureReader
 						typeOid = (voidType != null ? voidType.oid : 2278);
 					}
 					String pgt = getRawTypeNameFromOID(typeOid);
-					
+
 					String nm = "$" + (i + 1);
-					if (argNames != null && i < argNames.size()) 
+					if (argNames != null && i < argNames.size())
 					{
 						nm = argNames.get(i);
 					}
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, nm);
-					
+
 					String md = "IN";
 					if (argModes != null && i < argModes.size())
 					{
@@ -352,19 +352,19 @@ public class PostgresProcedureReader
 							md = "INOUT";
 						}
 					}
-					
+
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, md);
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, getJavaType(pgt));
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, getFormattedTypeFromOID(typeOid));
 				}
-				
+
 			}
 			else
 			{
 				LogMgr.logWarning("PostgreProcedureReader.getProcedureHeader()", "Could not retrieve columns", null);
 				return super.getProcedureColumns(catalog, schema, procname);
 			}
-			
+
 			this.connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
@@ -386,8 +386,4 @@ class PGType
 	String rawType;
 	String formattedType;
 	int oid;
-	
-	public PGType()
-	{
-	}
 }

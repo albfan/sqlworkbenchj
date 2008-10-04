@@ -19,9 +19,6 @@ import java.util.Map;
 public class AndExpression
 	extends ComplexExpression
 {
-	public AndExpression()
-	{
-	}
 	
 	public boolean evaluate(Map<String, Object> columnValues)
 	{

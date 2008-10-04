@@ -307,10 +307,7 @@ public class DbMetadata
 			this.indexReader = new JdbcIndexReader(this);
 		}
 		
-		if (this.schemaInfoReader == null)
-		{
-			this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
-		}
+		this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
 		
 		if (this.dataTypeResolver == null)
 		{
@@ -995,7 +992,7 @@ public class DbMetadata
 		// character but still accepts the dreaded brackets as quoted characters...
 		if (this.isSqlServer)
 		{
-			if (name.startsWith("[")) return true;
+			if (name.charAt(0) == '[') return true;
 		}
 		return false;
 	}
@@ -2092,10 +2089,10 @@ public class DbMetadata
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, nullable);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, defaultValue);
 				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, remarks);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, new Integer(sqlType));
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, new Integer(size));
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, digits >= 0 ? new Integer(digits) : null);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_POSITION, new Integer(position));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Integer.valueOf(sqlType));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, Integer.valueOf(size));
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, digits >= 0 ? Integer.valueOf(digits) : null);
+				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_POSITION, Integer.valueOf(position));
 			}
 		}
 		finally
@@ -2636,13 +2633,13 @@ public class DbMetadata
 				ds.setValue(row, 5, rs.getString(6));
 				ds.setValue(row, 6, rs.getString(7));
 				ds.setValue(row, 7, rs.getString(8));
-				ds.setValue(row, 8, new Integer(rs.getInt(9)));
-				ds.setValue(row, 9, new Integer(rs.getInt(10)));
+				ds.setValue(row, 8, Integer.valueOf(rs.getInt(9)));
+				ds.setValue(row, 9, Integer.valueOf(rs.getInt(10)));
 				ds.setValue(row, 10, rs.getString(11));
 				String fk_name = this.fixFKName(rs.getString(12));
 				ds.setValue(row, 11, fk_name);
 				ds.setValue(row, 12, rs.getString(13));
-				ds.setValue(row, 13, new Integer(rs.getInt(14)));
+				ds.setValue(row, 13, Integer.valueOf(rs.getInt(14)));
 			}
 		}
 		finally
@@ -2777,9 +2774,9 @@ public class DbMetadata
 				ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE, deferrable);
 				if (includeNumericRuleValue)
 				{
-					ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, new Integer(deleteAction));
-					ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, new Integer(updateAction));
-					ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, new Integer(deferrableCode));
+					ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, Integer.valueOf(deleteAction));
+					ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, Integer.valueOf(updateAction));
+					ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, Integer.valueOf(deferrableCode));
 				}
 			}
 		}

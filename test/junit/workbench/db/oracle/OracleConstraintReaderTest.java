@@ -25,16 +25,6 @@ public class OracleConstraintReaderTest extends TestCase
 		super(testName);
 	}
 	
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-	
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
-	
 	public void testIsDefaultNNConstraint()
 	{
 		OracleConstraintReader instance = new OracleConstraintReader();

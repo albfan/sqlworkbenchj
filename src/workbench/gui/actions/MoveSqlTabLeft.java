@@ -13,7 +13,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import workbench.gui.MainWindow;
-import workbench.resource.ResourceMgr;
 
 /**
  *	@author  support@sql-workbench.net

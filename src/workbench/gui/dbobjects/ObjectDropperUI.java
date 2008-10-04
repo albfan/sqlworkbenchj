@@ -52,6 +52,7 @@ public class ObjectDropperUI
 
 	public ObjectDropperUI(ObjectDropper drop)
 	{
+		super();
 		dropper = drop;
 		initComponents();
 		if (!dropper.supportsFKSorting())
@@ -387,12 +388,12 @@ private void showScriptButtonActionPerformed(java.awt.event.ActionEvent evt) {//
 			}
 		});
 	}
-	
+
 private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_checkFKButtonActionPerformed
 
 	final WbConnection conn = dropper.getConnection();
 	if (conn == null || conn.isBusy()) return;
-	
+
 	this.dropButton.setEnabled(false);
 	this.cancelButton.setEnabled(false);
 	showScriptButton.setEnabled(false);
@@ -409,9 +410,9 @@ private void checkFKButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN
 			{
 				conn.setBusy(true);
 				TableDependencySorter sorter = new TableDependencySorter(conn);
-				
+
 				// The tableDependencySorter will only accept TableIdentifier objects
-				// not DbObjects, so I need to create a new list. 
+				// not DbObjects, so I need to create a new list.
 				// The list should not contain only TableIdentifiers anyway, otherwise
 				// the ObjectDropper wouldn't (or shouldn't) support FK checking
 				List<TableIdentifier> tables = new ArrayList<TableIdentifier>();

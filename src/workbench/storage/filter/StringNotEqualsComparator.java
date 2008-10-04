@@ -17,17 +17,13 @@ package workbench.storage.filter;
 public class StringNotEqualsComparator
 	implements ColumnComparator
 {
-	public StringNotEqualsComparator()
-	{
-	}
-	
 	public boolean supportsIgnoreCase() { return true; }
 	public String getValueExpression(Object value) { return "'" + value + "'";}
 	public String getOperator() { return "<>"; }
 	public boolean needsValue() { return true; }
 	public boolean validateInput(Object value) { return value instanceof String; }
 	public boolean comparesEquality() { return false; }
-	
+
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
@@ -43,7 +39,7 @@ public class StringNotEqualsComparator
 			return false;
 		}
 	}
-	
+
 	public boolean supportsType(Class valueClass)
 	{
 		return (String.class.isAssignableFrom(valueClass));
@@ -53,5 +49,5 @@ public class StringNotEqualsComparator
 	{
 		return (other instanceof StringNotEqualsComparator);
 	}
-	
+
 }

@@ -119,10 +119,10 @@ public class IntegerPropertyEditor
 		if (!this.changed) return;
 		if (this.source == null) return;
 		if (this.setter == null) return;
-		Object args[] = new Object[1];
+		Object[] args = new Object[1];
 		try
 		{
-			args[0] = new Integer(this.getValue());
+			args[0] = Integer.valueOf(this.getValue());
 			this.setter.invoke(this.source, args);
 			this.changed = false;
 		}

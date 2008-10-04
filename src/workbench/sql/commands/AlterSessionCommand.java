@@ -22,6 +22,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -32,11 +33,6 @@ public class AlterSessionCommand
 {
 	public static final String VERB = "ALTER SESSION";
 	
-	public AlterSessionCommand()
-	{
-		super();
-	}
-
 	public String getVerb() { return VERB; }
 	
 	public StatementRunnerResult execute(String sql)
@@ -58,7 +54,7 @@ public class AlterSessionCommand
 		{
 			// check for known statements
 			token = lexer.getNextToken(false, false);
-			String parm = (token != null ? token.getContents() : null);
+			String parm = (token == null ? null : token.getContents());
 			if ("CURRENT_SCHEMA".equalsIgnoreCase(parm))
 			{
 				oldSchema = meta.getCurrentSchema();
@@ -72,7 +68,7 @@ public class AlterSessionCommand
 				token = lexer.getNextToken(false, false);
 				if (token != null)
 				{
-					if (changeOracleTimeZone(currentConnection, result, token.getContents()))
+					if (changeOracleTimeZone(result, token.getContents()))
 					{
 						return result;
 					}
@@ -109,7 +105,7 @@ public class AlterSessionCommand
 		return result;
 	}
 	
-	private boolean changeOracleTimeZone(WbConnection con, StatementRunnerResult result, String tz)
+	private boolean changeOracleTimeZone(StatementRunnerResult result, String tz)
 	{
 		Connection sqlCon = currentConnection.getSqlConnection();
 		Method setTimezone = null;
@@ -139,7 +135,9 @@ public class AlterSessionCommand
 			}
 			catch (Exception e)
 			{
-				e.printStackTrace();
+				result.addMessage(ExceptionUtil.getDisplay(e));
+				result.setFailure();
+				LogMgr.logError("AlterSessionCommand.changeOracleTimeZone()", "Error setting timezone", e);
 			}
 		}
 		return false;

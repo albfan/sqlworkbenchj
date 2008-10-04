@@ -55,10 +55,6 @@ public class HsqlShutdownHook
 				LogMgr.logInfo("HsqlShutdownHook.shutdown()", "Local HSQL connection detected. Sending SHUTDOWN to the engine before disconnecting");
 				stmt.executeUpdate("SHUTDOWN");
 			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("HsqlShutdownHook.shutdown()", "Error when executing SHUTDOWN", e);
-			}
 			finally
 			{
 				SqlUtil.closeStatement(stmt);
@@ -66,17 +62,5 @@ public class HsqlShutdownHook
 		}
 		con.shutdown();
 	}
-
-	/**
-	 *	Disconnects a local HSQL connection. Beginning with 1.7.2 the local
-	 *  (=in process) engine should be closed down with SHUTDOWN when
-	 *  disconnecting. It shouldn't hurt for pre-1.7.2 either :-)
-	 */
-	private void shutdownHsql(WbConnection con)
-	{
-		
-	}
-	
-
 	
 }

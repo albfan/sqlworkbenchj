@@ -40,11 +40,11 @@ import workbench.storage.DataStore;
  * A panel to enter the value for Workbench variables inside SQL statements
  * @see VariablePrompter
  * @see workbench.sql.VariablePool
- * 
+ *
  * @author  support@sql-workbench.net
  */
-public class VariablesEditor 
-	extends JPanel 
+public class VariablesEditor
+	extends JPanel
 	implements ValidatingComponent
 {
 	private DataStore varData;
@@ -52,6 +52,7 @@ public class VariablesEditor
 
 	public VariablesEditor(DataStore data)
 	{
+		super();
 
 		this.variablesTable = new WbTable();
 		this.variablesTable.setRowSelectionAllowed(false);
@@ -68,14 +69,14 @@ public class VariablesEditor
 		l.setBackground(Color.WHITE);
 		l.setOpaque(true);
 		l.setHorizontalAlignment(SwingConstants.CENTER);
-		
+
 		this.setLayout(new BorderLayout());
 
 		JScrollPane scroll = new JScrollPane(this.variablesTable);
 		b = BorderFactory.createEmptyBorder(5, 0, 0, 0);
 		Border b2 = BorderFactory.createCompoundBorder(b, scroll.getBorder());
 		scroll.setBorder(b2);
-		
+
 		this.add(l, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 	}
@@ -91,9 +92,9 @@ public class VariablesEditor
 			wbedit.selectAll();
 			wbedit.requestFocus();
 		}
-		
+
 	}
-	
+
 	public boolean validateInput()
 	{
 		this.variablesTable.stopEditing();
@@ -112,7 +113,7 @@ public class VariablesEditor
 		}
 		return true;
 	}
-	
+
 	public static boolean showVariablesDialog(DataStore vardata)
 	{
 		VariablesEditor editor = new VariablesEditor(vardata);
@@ -120,7 +121,7 @@ public class VariablesEditor
 		editor.setMinimumSize(d);
 		editor.setPreferredSize(d);
 
-		boolean result = false; 
+		boolean result = false;
 		boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"));
 		if (ok)
 		{
@@ -137,5 +138,5 @@ public class VariablesEditor
 		}
 		return result;
 	}
-	
+
 }

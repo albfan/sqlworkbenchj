@@ -25,16 +25,17 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class SqlGenerationOptionsPanel 
+public class SqlGenerationOptionsPanel
 	extends JPanel
 	implements Restoreable
 {
-	
+
 	/** Creates new form FormatterOptionsPanel */
 	public SqlGenerationOptionsPanel()
 	{
+		super();
 		initComponents();
-		
+
 		List<String> types = Settings.getInstance().getLiteralTypeList();
 		ComboBoxModel model1 = new DefaultComboBoxModel(types.toArray());
 		literalTypes.setModel(model1);
@@ -43,19 +44,19 @@ public class SqlGenerationOptionsPanel
 		ComboBoxModel model3 = new DefaultComboBoxModel(types.toArray());
 		diffLiteralsType.setModel(model3);
 	}
-	
+
 	public void restoreSettings()
 	{
 		String genCase = Settings.getInstance().getGeneratedSqlTableCase();
 		if ("lower".equals(genCase)) this.tableNameCase.setSelectedIndex(1);
 		else if ("upper".equals(genCase)) this.tableNameCase.setSelectedIndex(2);
-		else this.tableNameCase.setSelectedIndex(0);		
+		else this.tableNameCase.setSelectedIndex(0);
 		this.literalTypes.setSelectedItem(Settings.getInstance().getDefaultCopyDateLiteralType());
 		this.exportLiteralTypes.setSelectedItem(Settings.getInstance().getDefaultExportDateLiteralType());
 		this.diffLiteralsType.setSelectedItem(Settings.getInstance().getDefaultDiffDateLiteralType());
 		this.includeEmptyComments.setSelected(Settings.getInstance().getIncludeEmptyComments());
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings set = Settings.getInstance();
@@ -415,8 +416,8 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
     add(diffLiteralsType, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel colsPerLineLabel;
   private javax.swing.JLabel copyLiteralLabel;
@@ -447,5 +448,5 @@ public class SqlGenerationOptionsPanel
   private javax.swing.JLabel updateColThresholdLbl;
   private javax.swing.JTextField updateThreshold;
   // End of variables declaration//GEN-END:variables
-	
+
 }

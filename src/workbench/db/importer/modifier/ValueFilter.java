@@ -19,15 +19,11 @@ import workbench.db.ColumnIdentifier;
  *
  * @author support@sql-workbench.net
  */
-public class ValueFilter 
+public class ValueFilter
 	implements ImportValueModifier
 {
 	private List<ImportValueModifier> modifiers = new LinkedList<ImportValueModifier>();
 
-	public ValueFilter()
-	{
-	}
-	
 	public int getSize()
 	{
 		int size = 0;
@@ -37,7 +33,7 @@ public class ValueFilter
 		}
 		return size;
 	}
-	
+
 	public String modifyValue(ColumnIdentifier column, String value)
 	{
 		for (ImportValueModifier modifier : modifiers)
@@ -48,14 +44,14 @@ public class ValueFilter
 	}
 
 	/**
-	 * Adds a column modifier. 
+	 * Adds a column modifier.
 	 * The modifiers are called in the order how they are added.
-	 * 
+	 *
 	 * @param modifier
 	 */
 	public void addColumnModifier(ImportValueModifier modifier)
 	{
 		this.modifiers.add(modifier);
 	}
-	
+
 }

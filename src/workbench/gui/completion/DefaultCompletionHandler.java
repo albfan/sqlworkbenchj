@@ -142,7 +142,7 @@ public class DefaultCompletionHandler
 			{
 				boolean selectWord = (ctx.getAnalyzer().getOverwriteCurrentWord() && currentWord != null);
 				BaseAnalyzer analyzer = ctx.getAnalyzer();
-				if (analyzer != null && currentWord != null && analyzer.isWbParam() && currentWord.startsWith("-"))
+				if (analyzer != null && currentWord != null && analyzer.isWbParam() && currentWord.charAt(0) == '-')
 				{
 					currentWord = currentWord.substring(1);
 				}

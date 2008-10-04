@@ -34,7 +34,8 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class DdlCommand extends SqlCommand
+public class DdlCommand
+	extends SqlCommand
 {
 	public static final DdlCommand CREATE = new DdlCommand("CREATE");
 	public static final DdlCommand DROP = new DdlCommand("DROP");
@@ -44,10 +45,9 @@ public class DdlCommand extends SqlCommand
 
 	// Firebird RECREATE VIEW command
 	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
-
 	public static final List<DdlCommand> DDL_COMMANDS;
-
 	private Savepoint ddlSavepoint;
+
 
 	static
 	{
@@ -59,11 +59,11 @@ public class DdlCommand extends SqlCommand
 		l.add(REVOKE);
 		DDL_COMMANDS = Collections.unmodifiableList(l);
 	}
-
 	private String verb;
 
 	private DdlCommand(String aVerb)
 	{
+		super();
 		this.verb = aVerb;
 		this.isUpdatingCommand = true;
 	}
@@ -190,9 +190,15 @@ public class DdlCommand extends SqlCommand
 
 	public boolean isDropCommand(String sql)
 	{
-		if ("DROP".equals(this.verb)) return true;
-		if (!"ALTER".equals(this.verb)) return false;
-		// If this is an ALTER ... command it might also be a DROP 
+		if ("DROP".equals(this.verb))
+		{
+			return true;
+		}
+		if (!"ALTER".equals(this.verb))
+		{
+			return false;
+		}
+		// If this is an ALTER ... command it might also be a DROP
 		// e.g. ALTER TABLE someTable DROP PRIMARY KEY
 		Pattern p = Pattern.compile("DROP\\s+(PRIMARY\\s+KEY|CONSTRAINT)\\s+", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(sql);
@@ -207,13 +213,22 @@ public class DdlCommand extends SqlCommand
 	{
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
-		if (t == null) return null;
+		if (t == null)
+		{
+			return null;
+		}
 		String v = t.getContents();
-		if (!v.equals("CREATE") && !v.equals("CREATE OR REPLACE")) return null;
+		if (!v.equals("CREATE") && !v.equals("CREATE OR REPLACE"))
+		{
+			return null;
+		}
 
 		// next token must be the type
 		t = l.getNextToken(false, false);
-		if (t == null) return null;
+		if (t == null)
+		{
+			return null;
+		}
 
 		// the token after the type must be the object's name
 		t = l.getNextToken(false, false);
@@ -231,10 +246,16 @@ public class DdlCommand extends SqlCommand
 	private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
 	{
 		String type = SqlUtil.getCreateType(sql);
-		if (type == null) return false;
+		if (type == null)
+		{
+			return false;
+		}
 
 		String name = getObjectName(sql);
-		if (name == null) return false;
+		if (name == null)
+		{
+			return false;
+		}
 
 		String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
 		if (msg != null && msg.length() > 0)
@@ -247,11 +268,10 @@ public class DdlCommand extends SqlCommand
 		{
 			return false;
 		}
-  }
+	}
 
 	public String getVerb()
 	{
 		return verb;
 	}
-
 }

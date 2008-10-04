@@ -16,7 +16,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.exporter.SqlRowDataConverter;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
-import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 import workbench.util.SqlUtil;
 
@@ -76,13 +75,13 @@ public class RowDataComparerTest
 		String verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("UPDATE", verb);
 		assertTrue(sql.indexOf("SET FIRSTNAME = 'Zaphod'") > -1);
-		
+
 		instance = new RowDataComparer(reference, null);
 		sql = instance.getMigrationSql(converter, 1);
 		verb = SqlUtil.getSqlVerb(sql);
 		assertEquals("INSERT", verb);
 		assertTrue(sql.indexOf("(42, 'Zaphod', 'Beeblebrox')") > -1);
-		
+
 		reference = new RowData(info);
 		reference.setValue(0, new Integer(42));
 		reference.setValue(1, "Zaphod");
@@ -94,7 +93,7 @@ public class RowDataComparerTest
 		target.setValue(1, "Zaphod");
 		target.setValue(2, null);
 		target.resetStatus();
-		
+
 		instance = new RowDataComparer(reference, target);
 		sql = instance.getMigrationSql(converter, 1);
 		assertNull(sql);

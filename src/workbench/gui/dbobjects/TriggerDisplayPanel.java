@@ -48,19 +48,20 @@ public class TriggerDisplayPanel
 	private WbSplitPane splitPane;
 	private String triggerSchema;
 	private String triggerCatalog;
-	
+
 	public TriggerDisplayPanel()
 	{
+		super();
 		this.triggers = new WbTable();
 		WbScrollPane scroll = new WbScrollPane(this.triggers);
 		scroll.setBorder(new EtchedBorder());
 		//scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		
+
 		this.source = EditorPanel.createSqlEditor();
 		this.source.setEditable(false);
 		this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		
+
 		this.setLayout(new BorderLayout());
 		this.splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, scroll, this.source);
 		this.add(splitPane, BorderLayout.CENTER);
@@ -72,20 +73,20 @@ public class TriggerDisplayPanel
 	{
 		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", this.splitPane.getDividerLocation());
 	}
-	
+
 	public void restoreSettings()
 	{
 		int loc = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 200);
 		this.splitPane.setDividerLocation(loc);
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		this.reader = new TriggerReader(aConnection);
 		this.source.setDatabaseConnection(aConnection);
 		this.reset();
 	}
-	
+
 	public void reset()
 	{
 		this.triggers.reset();
@@ -93,7 +94,7 @@ public class TriggerDisplayPanel
 		this.triggerSchema = null;
 		this.triggerCatalog = null;
 	}
-	
+
 	public void readTriggers(TableIdentifier table)
 	{
 		try
@@ -116,7 +117,7 @@ public class TriggerDisplayPanel
 			this.reset();
 		}
 	}
-	
+
 	/**
 	 * Called whenever the value of the selection changes.
 	 * @param e the event that characterizes the change.
@@ -126,7 +127,7 @@ public class TriggerDisplayPanel
 		if (e.getValueIsAdjusting()) return;
 		int row = this.triggers.getSelectedRow();
 		if (row < 0) return;
-		
+
 		try
 		{
 			String triggerName = this.triggers.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
@@ -140,6 +141,6 @@ public class TriggerDisplayPanel
 			this.source.setText("");
 		}
 	}
-	
+
 }
 

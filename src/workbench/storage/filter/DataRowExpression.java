@@ -34,9 +34,9 @@ public class DataRowExpression
 	 * @param comparator the comparator to be used to compare the reference value against the actual values
 	 * @param referenceValue the filter value to compare against the actual values
 	 */
-	public DataRowExpression(ColumnComparator comparator, Object referenceValue)
+	public DataRowExpression(ColumnComparator comp, Object referenceValue)
 	{
-		setComparator(comparator);
+		setComparator(comp);
 		setFilterValue(referenceValue);
 	}
 	
@@ -104,9 +104,9 @@ public class DataRowExpression
 		return ignoreCase;
 	}
 
-	public void setIgnoreCase(boolean ignoreCase)
+	public void setIgnoreCase(boolean flag)
 	{
-		this.ignoreCase = ignoreCase;
+		this.ignoreCase = flag;
 	}
 	
 	public String getColumnName() { return "*"; }

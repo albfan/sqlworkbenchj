@@ -22,7 +22,6 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
-import workbench.util.WbThread;
 
 
 /**
@@ -32,7 +31,6 @@ import workbench.util.WbThread;
 public class TableDeleter 
 {
 	private WbConnection connection;
-	private WbThread deleteThread;
 	private boolean cancelExecution;
 	private Statement currentStatement;
 	private JobErrorHandler errorHandler;
@@ -46,10 +44,6 @@ public class TableDeleter
 	public void cancel()
 	{
 		this.cancelExecution = true;
-		if (this.deleteThread != null)
-		{
-			this.deleteThread.interrupt();
-		}
 	}
 
 	/**

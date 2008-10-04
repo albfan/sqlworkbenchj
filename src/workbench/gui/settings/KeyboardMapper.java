@@ -29,9 +29,10 @@ public class KeyboardMapper
 {
 	private JTextField display;
 	private KeyStroke newkey;
-	
+
 	public KeyboardMapper()
 	{
+		super();
 		this.display = new JTextField(20);
 		this.display.addKeyListener(this);
 		this.display.setEditable(false);
@@ -39,28 +40,28 @@ public class KeyboardMapper
 		this.display.setBackground(Color.WHITE);
 		this.add(display);
 	}
-	
+
 	public void grabFocus()
 	{
 		this.display.grabFocus();
 		this.display.requestFocusInWindow();
 	}
-	
+
 	public void keyPressed(KeyEvent e)
 	{
 	}
-	
+
 	public void keyReleased(KeyEvent e)
 	{
 		int modifier = e.getModifiers();
 		int code = e.getKeyCode();
 
 		// only allow function keys without modifier!
-		if (modifier == 0) 
+		if (modifier == 0)
 		{
 			if (code < KeyEvent.VK_F1 || code > KeyEvent.VK_F12) return;
 		}
-		
+
 		// keyReleased is also called when the Ctrl or Shift keys are release
 		// in that case the keycode is 0 --> ignore it
 		if (code >= 32)
@@ -77,9 +78,9 @@ public class KeyboardMapper
 	{
 		return this.newkey;
 	}
-	
+
 	public void keyTyped(KeyEvent e)
 	{
 	}
-	
+
 }

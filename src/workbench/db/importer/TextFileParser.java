@@ -63,7 +63,6 @@ public class TextFileParser
 	private String quoteChar = null;
 	private boolean decodeUnicode = false;
 	private boolean enableMultiLineMode = true;
-	private boolean checkDependencies = false;
 	
 	// this indicates an import of several files from a single
 	// directory into one table
@@ -190,11 +189,6 @@ public class TextFileParser
 	public void setQuoteEscaping(QuoteEscapeType type)
 	{
 		this.quoteEscape = type;
-	}
-
-	public void setCheckDependencies(boolean flag)
-	{
-		this.checkDependencies = flag;
 	}
 
 	public QuoteEscapeType getQuoteEscaping()
@@ -563,7 +557,7 @@ public class TextFileParser
 
 	public void setQuoteChar(String aChar)
 	{
-		if (aChar != null && aChar.trim().length() > 0)
+		if (StringUtil.isNonBlank(aChar))
 		{
 			this.quoteChar = aChar;
 		}
@@ -872,18 +866,16 @@ public class TextFileParser
 
 				if (!processRow)
 				{
+					try
 					{
-						try
-						{
-							currentLine = in.readLine();
-						}
-						catch (IOException e)
-						{
-							LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
-							currentLine = null;
-						}
-						continue;
+						currentLine = in.readLine();
 					}
+					catch (IOException e)
+					{
+						LogMgr.logError("TextFileParser.processOneFile()", "Error reading source file", e);
+						currentLine = null;
+					}
+					continue;
 				}
 
 				tok.setLine(currentLine);
@@ -1355,9 +1347,9 @@ public class TextFileParser
 		return trimValues;
 	}
 
-	public void setTrimValues(boolean trimValues)
+	public void setTrimValues(boolean trim)
 	{
-		this.trimValues = trimValues;
+		this.trimValues = trim;
 	}
 
 	public void setErrorHandler(JobErrorHandler handler)

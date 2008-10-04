@@ -45,28 +45,29 @@ public class DbObjectSourcePanel
 	protected DropDownButton editButton;
 	private EditorTabSelectMenu selectTabMenu;
 	private MainWindow parentWindow;
-	
+
 	public DbObjectSourcePanel(MainWindow parent, Reloadable reloader)
 	{
+		super();
 		parentWindow = parent;
 		if (reloader != null)
 		{
 			reloadSource = new ReloadAction(reloader);
 			reloadSource.setEnabled(false);
 		}
-	
+
 		this.sourceEditor = EditorPanel.createSqlEditor();
 		this.sourceEditor.showFindOnPopupMenu();
 		this.sourceEditor.setEditable(false);
 		this.setLayout(new BorderLayout());
 		WbToolbar toolbar = new WbToolbar();
-	
-		if (reloadSource != null) 
+
+		if (reloadSource != null)
 		{
 			toolbar.add(reloadSource);
 			reloadSource.addToInputMap(sourceEditor);
 		}
-		
+
 		this.add(this.sourceEditor, BorderLayout.CENTER);
 		if (reloadSource != null)
 		{
@@ -94,7 +95,7 @@ public class DbObjectSourcePanel
 			try
 			{
 				final int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
-				
+
 				// Allow the selection change to finish so that
 				// we have the correct table name in the instance variables
 				EventQueue.invokeLater(new Runnable()
@@ -111,7 +112,7 @@ public class DbObjectSourcePanel
 			}
 		}
 	}
-		
+
 	private void editText(final int panelIndex, final boolean appendText)
 	{
 		if (this.parentWindow != null)
@@ -125,7 +126,7 @@ public class DbObjectSourcePanel
 	{
 		setEditorText(sql, false);
 	}
-	
+
 	/**
 	 * Set the SQL source. If the text contains an error message
 	 * indicating that the source is not available (as returned by DbMetadata
@@ -138,7 +139,7 @@ public class DbObjectSourcePanel
 		if (reloadSource != null) reloadSource.setEnabled(hasText);
 
 		if (editButton != null) editButton.setEnabled(hasText);
-		if (hasText && sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) || 
+		if (hasText && sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) ||
 				sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
 				sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
 			 )
@@ -161,7 +162,7 @@ public class DbObjectSourcePanel
 		{
 			sourceEditor.disableSqlHighlight();
 		}
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -169,13 +170,13 @@ public class DbObjectSourcePanel
 				sourceEditor.setText(text == null ? "" : text);
 			}
 		});
-		
+
 	}
 	public String getText()
 	{
 		return sourceEditor.getText();
 	}
-	
+
 	public void requestFocus()
 	{
 		this.sourceEditor.requestFocus();
@@ -185,7 +186,7 @@ public class DbObjectSourcePanel
 	{
 		return this.sourceEditor.requestFocusInWindow();
 	}
-	
+
 	public void setCaretPosition(int pos, boolean selectLine)
 	{
 		sourceEditor.setCaretPosition(pos);
@@ -200,17 +201,17 @@ public class DbObjectSourcePanel
 			}
 		}
 	}
-	
+
 	public void scrollToCaret()
 	{
 		sourceEditor.scrollToCaret();
 	}
-	
+
 	public void setDatabaseConnection(WbConnection con)
 	{
 		sourceEditor.setDatabaseConnection(con);
 	}
-	
+
 	public void setEditable(boolean flag)
 	{
 		sourceEditor.setEditable(flag);

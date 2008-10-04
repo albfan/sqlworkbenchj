@@ -160,7 +160,7 @@ public class SQLTokenMarkerTest
 			else
 			{
 				assertEquals("Wrong token at line: " + lineIndex + ", token: " + tokenIndex +
-					" expected: " + Token.typeString(expectedTokens[tokenIndex]) + " got: " + Token.typeString(token.id) + "", expectedTokens[tokenIndex], token.id);
+					" expected: " + Token.typeString(expectedTokens[tokenIndex]) + " got: " + Token.typeString(token.id), expectedTokens[tokenIndex], token.id);
 			}
 			token = token.next;
 			tokenIndex ++;

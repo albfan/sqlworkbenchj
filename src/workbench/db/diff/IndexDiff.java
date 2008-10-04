@@ -21,9 +21,9 @@ import workbench.db.report.TagWriter;
 import workbench.util.StrBuffer;
 
 /**
- * Compare two index definitions and create an XML 
+ * Compare two index definitions and create an XML
  * representation of the differences.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class IndexDiff
@@ -31,39 +31,38 @@ public class IndexDiff
 	public static final String TAG_MODIFY_INDEX = "modify-index";
 	public static final String TAG_ADD_INDEX = "add-index";
 	public static final String TAG_DROP_INDEX = "drop-index";
-	
+
 	private Collection<IndexDefinition> reference = Collections.emptyList();
 	private Collection<IndexDefinition> target = Collections.emptyList();
 	private TagWriter writer;
 	private StrBuffer indent;
-	
+
 	public IndexDiff(Collection<IndexDefinition> ref, Collection<IndexDefinition> targ)
 	{
 		if (ref != null) this.reference = ref;
 		if (targ != null) this.target = targ;
 	}
-	
+
 	public void setTagWriter(TagWriter w) { this.writer = w; }
-	
+
 	public void setIndent(StrBuffer ind)
 	{
 		this.indent = ind;
 	}
-	
+
 	public StrBuffer getMigrateTargetXml()
 	{
 		if (this.writer == null) this.writer = new TagWriter();
 		StrBuffer result = new StrBuffer();
 		List<IndexDefinition> indexToAdd = new LinkedList<IndexDefinition>();
 		List<IndexDefinition> indexToDrop = new LinkedList<IndexDefinition>();
-		int count = this.reference.size();
-		
+
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
-		
+
 		StrBuffer idxIndent = new StrBuffer(myindent);
 		idxIndent.append("  ");
-		
+
 		for (IndexDefinition refIndex : reference)
 		{
 			IndexDefinition ind = this.findIndexInTarget(refIndex.getExpression());
@@ -76,7 +75,7 @@ public class IndexDiff
 				boolean uniqueDiff = ind.isUnique() != refIndex.isUnique();
 				boolean pkDiff = ind.isPrimaryKeyIndex() != refIndex.isPrimaryKeyIndex();
 				boolean typeDiff = !(ind.getIndexType().equals(refIndex.getIndexType()));
-				
+
 				if (uniqueDiff || pkDiff || typeDiff)
 				{
 					writer.appendOpenTag(result, myindent, TAG_MODIFY_INDEX, "name", ind.getName());
@@ -88,16 +87,16 @@ public class IndexDiff
 					if (pkDiff)
 					{
 						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_PK, refIndex.isPrimaryKeyIndex());
-					}	
+					}
 					if (pkDiff)
 					{
 						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_TYPE, refIndex.getIndexType());
-					}	
+					}
 					writer.appendCloseTag(result, myindent, TAG_MODIFY_INDEX);
 				}
 			}
 		}
-		
+
 		for (IndexDefinition targetIndex : target)
 		{
 			String expr = targetIndex.getExpression();
@@ -106,8 +105,8 @@ public class IndexDiff
 			{
 				indexToDrop.add(targetIndex);
 			}
-		}		
-		
+		}
+
 		if (indexToAdd.size() > 0)
 		{
 			writer.appendOpenTag(result, myindent, TAG_ADD_INDEX);
@@ -119,7 +118,7 @@ public class IndexDiff
 			}
 			writer.appendCloseTag(result, myindent, TAG_ADD_INDEX);
 		}
-		
+
 		if (indexToDrop.size() > 0)
 		{
 			for (IndexDefinition idx : indexToDrop)
@@ -129,17 +128,17 @@ public class IndexDiff
 		}
 		return result;
 	}
-	
+
 	private IndexDefinition findIndexInTarget(String expr)
 	{
 		return findIndex(target, expr);
 	}
-	
+
 	private IndexDefinition findIndexInReference(String expr)
 	{
 		return findIndex(reference, expr);
 	}
-	
+
 	private IndexDefinition findIndex(Collection<IndexDefinition> defs, String expr)
 	{
 		for (IndexDefinition idx : defs)

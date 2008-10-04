@@ -176,7 +176,7 @@ public class WbConnection
 	
 	private void runConnectScript(String sql, String type)
 	{
-		if (StringUtil.isWhitespaceOrEmpty(sql)) return;
+		if (StringUtil.isBlank(sql)) return;
 		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script...");
 		
 		StatementRunner runner = new StatementRunner();
@@ -575,8 +575,7 @@ public class WbConnection
 
 	public boolean isClosed()
 	{
-		if (this.sqlConnection == null) return true;
-		else return false;
+		return (this.sqlConnection == null);
 //		try
 //		{
 //			return this.sqlConnection.isClosed();
@@ -771,7 +770,7 @@ public class WbConnection
 	{
 		if (o instanceof WbConnection)
 		{
-			return (this.id.equals(((WbConnection)o).id));
+			return this.id.equals(((WbConnection)o).id);
 		}
 		return false;
 	}
@@ -932,7 +931,7 @@ public class WbConnection
 		
 		if (this.profile == null) return;
 		String sql = this.profile.getIdleScript();
-		if (sql == null || sql.trim().length() == 0) return;
+		if (StringUtil.isBlank(sql)) return;
 		long idleTime = this.profile.getIdleTime();
 		if (idleTime <= 0) return;
 		this.keepAlive = new KeepAliveDaemon(idleTime, this, sql);

@@ -12,6 +12,7 @@
 package workbench.gui.editor;
 
 import java.util.ArrayList;
+import java.util.List;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
@@ -23,12 +24,8 @@ import javax.swing.undo.UndoableEdit;
 public class WbCompoundEdit
 	implements UndoableEdit
 {
-	private ArrayList<UndoableEdit> edits = new ArrayList<UndoableEdit>();
+	private List<UndoableEdit> edits = new ArrayList<UndoableEdit>();
 	private boolean acceptNew = true;
-
-	public WbCompoundEdit()
-	{
-	}
 
 	public int getSize()
 	{

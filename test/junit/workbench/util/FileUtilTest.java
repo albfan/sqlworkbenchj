@@ -31,17 +31,17 @@ import workbench.WbTestCase;
  *
  * @author support@sql-workbench.net
  */
-public class FileUtilTest 
+public class FileUtilTest
 	extends WbTestCase
 {
 	private TestUtil testUtil;
-	
+
 	public FileUtilTest(String testName)
 	{
 		super(testName);
 		testUtil = getTestUtil();
 	}
-	
+
 	public void testGetLines()
 	{
 		try
@@ -53,10 +53,10 @@ public class FileUtilTest
 			{
 				w.write("line_" + i + "\n");
 			}
-			w.close();	
-			
+			w.close();
+
 			BufferedReader in = new BufferedReader(new FileReader(f));
-			
+
 			Collection<String> lines = FileUtil.getLines(in);
 			assertEquals(100, lines.size());
 			for (int i=0; i < 100; i++)
@@ -70,7 +70,7 @@ public class FileUtilTest
 			fail(th.getMessage());
 		}
 	}
-	
+
 	public void testReadLines()
 	{
 		try
@@ -81,14 +81,14 @@ public class FileUtilTest
 			w.write("Line 1\n");
 			w.write("Line 2\n");
 			w.close();
-			
+
 			BufferedReader in = EncodingUtil.createBufferedReader(f, encoding);
 			StringBuilder content = new StringBuilder();
 			int lines = FileUtil.readLines(in, content, 5, "\n");
 			in.close();
 			assertEquals("Not enough lines", 2, lines);
 			assertEquals("Content not read properly", "Line 1\nLine 2\n", content.toString());
-			
+
 			StringBuilder fileContent = new StringBuilder();
 			for (int i = 0; i < 15; i++)
 			{
@@ -96,8 +96,8 @@ public class FileUtilTest
 			}
 			w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
 			w.write(fileContent.toString());
-			w.close();			
-			
+			w.close();
+
 			content = new StringBuilder();
 			in = EncodingUtil.createBufferedReader(f, encoding);
 			lines = FileUtil.readLines(in, content, 10, "\n");
@@ -106,7 +106,7 @@ public class FileUtilTest
 			in.close();
 			assertEquals("Not enough lines", 4, lines);
 			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());
-			
+
 			fileContent = new StringBuilder();
 			for (int i = 0; i < 237; i++)
 			{
@@ -114,8 +114,8 @@ public class FileUtilTest
 			}
 			w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
 			w.write(fileContent.toString());
-			w.close();				
-			
+			w.close();
+
 			content = new StringBuilder(1000);
 			in = EncodingUtil.createBufferedReader(f, encoding);
 			lines = FileUtil.readLines(in, content, 10, "\n");
@@ -124,7 +124,7 @@ public class FileUtilTest
 				lines = FileUtil.readLines(in, content, 10, "\n");
 			}
 			in.close();
-			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());			
+			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());
 		}
 		catch (Exception e)
 		{
@@ -132,31 +132,31 @@ public class FileUtilTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testGetLineEnding()
 		throws Exception
 	{
 		try
 		{
 			File f = new File(testUtil.getBaseDir(), "ending.txt");
-			
+
 			String encoding = "ISO-8859-1";
 			Writer w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
 			w.write("Line 1\n");
 			w.write("Line 2");
 			w.close();
-			
+
 			Reader r = EncodingUtil.createReader(f, encoding);
 			String ending = FileUtil.getLineEnding(r);
 			assertEquals("Unix line ending not detected", "\n", ending);
 			r.close();
-			
+
 			w = EncodingUtil.createWriter(new FileOutputStream(f), encoding);
 			w.write("Line 1");
 			w.write("\r\n");
 			w.write("Line 2");
-			w.close();			
-			
+			w.close();
+
 			r = EncodingUtil.createReader(f, encoding);
 			ending = FileUtil.getLineEnding(r);
 			assertEquals("DOS line ending not detected", "\r\n", ending);
@@ -168,7 +168,7 @@ public class FileUtilTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testEstimateRecords() throws Exception
 	{
 		try
@@ -216,14 +216,13 @@ public class FileUtilTest
 			}
 			out.close();
 			InputStream in = new FileInputStream(sf);
-			
+
 			File tf = new File("copy.dat");
 			OutputStream target = new FileOutputStream("copy.dat");
 			FileUtil.copy(in, target);
-			
-			long size = tf.length();
+
 			assertEquals("Wrong file size", tf.length(), sf.length());
-			
+
 			sf.delete();
 			tf.delete();
 		}
@@ -243,7 +242,7 @@ public class FileUtilTest
 			String content = "Don't panic, count to ten... then panic!";
 			pw.print(content);
 			pw.close();
-			
+
 			FileReader in = new FileReader(f);
 			String result = FileUtil.readCharacters(in);
 			assertEquals("Wrong content retrieved", content, result);
@@ -282,7 +281,7 @@ public class FileUtilTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testGetCharacterLength()
 	{
 		try
@@ -293,18 +292,18 @@ public class FileUtilTest
 			String content = "This is a test";
 			out.write(content);
 			out.close();
-			
+
 			assertEquals(content.length(), FileUtil.getCharacterLength(f, encoding));
-			
+
 			encoding = "UTF-8";
 			content = "This is a test for the UTF-8 length \u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153. "+
 				"Let's see how it works";
 			out = new OutputStreamWriter(new FileOutputStream(f),encoding);
 			out.write(content);
 			out.close();
-			
+
 			assertEquals(content.length(), FileUtil.getCharacterLength(f, encoding));
-			
+
 			f.delete();
 		}
 		catch (Throwable e)
@@ -312,6 +311,6 @@ public class FileUtilTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-			
+
 	}
 }

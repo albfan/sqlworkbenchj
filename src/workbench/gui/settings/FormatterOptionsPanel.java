@@ -26,10 +26,9 @@ public class FormatterOptionsPanel
 	extends JPanel
 	implements Restoreable
 {
-
-	/** Creates new form FormatterOptionsPanel */
 	public FormatterOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 

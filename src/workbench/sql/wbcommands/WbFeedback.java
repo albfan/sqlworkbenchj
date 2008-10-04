@@ -27,15 +27,16 @@ public class WbFeedback
 	extends SqlCommand
 {
 	public static final String VERB = "WBFEEDBACK";
-	private final String command; 
-	
+	private final String command;
+
 	public WbFeedback()
 	{
 		this(VERB);
 	}
-	
+
 	public WbFeedback(String verb)
 	{
+		super();
 		this.command = verb;
 		this.cmdLine = new ArgumentParser(false);
 		this.cmdLine.addArgument("on");
@@ -43,23 +44,23 @@ public class WbFeedback
 	}
 
 	public String getVerb() { return command; }
-	
+
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		
+
 		SQLLexer lexer = new SQLLexer(sql);
 		// Skip the SQL Verb
 		SQLToken token = lexer.getNextToken(false, false);
-		
+
 		// get the parameter
 		token = lexer.getNextToken(false, false);
 		String parm = (token != null ? token.getContents() : null);
-		
+
 		if (parm == null)
 		{
 			if (runner.getVerboseLogging())
@@ -89,5 +90,5 @@ public class WbFeedback
 		}
 		return result;
 	}
-	
+
 }

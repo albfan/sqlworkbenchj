@@ -30,7 +30,6 @@ package workbench.sql.formatter;
 
 import java.io.*;
 import workbench.util.CharSequenceReader;
-import workbench.sql.syntax.SqlKeywordHelper;
 
 /**
  * SQLLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:
@@ -72,9 +71,9 @@ import workbench.sql.syntax.SqlKeywordHelper;
 	 * next Token method that allows you to control if whitespace and comments are
 	 * returned as tokens.
 	 */
-	public SQLToken getNextToken(boolean returnComments, boolean returnWhiteSpace) 
+	public SQLToken getNextToken(boolean returnComments, boolean returnWhiteSpace)
 	{
-		try 
+		try
 		{
 			SQLToken t = getNextToken();
 			while (t != null && ((!returnWhiteSpace && t.isWhiteSpace()) || (!returnComments && t.isComment())))
@@ -116,7 +115,7 @@ import workbench.sql.syntax.SqlKeywordHelper;
 	 * @param yycolumn The position (relative to the line) of the first token.
 	 * @throws IOException if an IOExecption occurs while switching readers.
 	 */
-	public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn) 
+	public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn)
 		throws IOException
 	{
 		yyreset(reader);

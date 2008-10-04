@@ -36,6 +36,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  * A panel to map columns from one table definition to another.
@@ -48,7 +49,6 @@ public class ColumnMapper
 	extends JPanel
 {
 	private JTable columnDisplay;
-	private JTextField targetEditor;
 	private List<ColumnIdentifier> sourceColumns;
 	private List<ColumnIdentifier> targetColumns;
 	private ColumnMapRow[] mapping;
@@ -63,6 +63,7 @@ public class ColumnMapper
 
 	public ColumnMapper()
 	{
+		super();
 		this.setLayout(new BorderLayout());
 		this.columnDisplay = this.createMappingTable();
 		this.columnDisplay.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -169,10 +170,10 @@ public class ColumnMapper
 		DefaultCellEditor edit = new DefaultCellEditor(this.sourceDropDown);
 		col.setCellEditor(edit);
 
-		this.targetEditor = new JTextField();
-		this.targetEditor.setFont(Settings.getInstance().getDataFont(true));
-		this.targetEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		edit = new DefaultCellEditor(this.targetEditor);
+		JTextField targetEditor = new JTextField();
+		targetEditor.setFont(Settings.getInstance().getDataFont(true));
+		targetEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		edit = new DefaultCellEditor(targetEditor);
 		col = colMod.getColumn(1);
 		col.setCellEditor(edit);
 
@@ -273,7 +274,7 @@ public class ColumnMapper
 			if (row.getSource() != null)
 			{
 				s = row.getSource().getColumnName();
-				if (s == null || s.trim().length() == 0) continue;
+				if (StringUtil.isBlank(s)) continue;
 				realCount ++;
 			}
 		}
@@ -291,7 +292,7 @@ public class ColumnMapper
 			if (row.getSource() != null)
 			{
 				s = row.getSource().getColumnName();
-				if (s == null || s.trim().length() == 0) continue;
+				if (StringUtil.isBlank(s)) continue;
 				def.sourceColumns[index] = row.getSource();
 				def.targetColumns[index] = row.getTarget();
 				index ++;
@@ -319,6 +320,7 @@ class MapDataModel
 
 	public MapDataModel(ColumnMapRow[] data)
 	{
+		super();
 		this.data = data;
 	}
 
@@ -344,8 +346,9 @@ class MapDataModel
 				return this.targetColName;
 			case 2:
 				return ResourceMgr.getString("LblDPKeyColumnTitle");
+			default:
+				return "";
 		}
-		return "";
 	}
 
 	public int getRowCount()
@@ -422,7 +425,7 @@ class MapDataModel
 				{
 					ColumnIdentifier col = row.getSource();
 					String s = (String)aValue;
-					if (s.trim().length() > 0)
+					if (!StringUtil.isBlank(s))
 					{
 						if (col == null)
 						{
@@ -495,9 +498,6 @@ class SkipColumnIndicator
 {
 	private final String display = ResourceMgr.getString("LblDPDoNotCopyColumns");
 
-	public SkipColumnIndicator()
-	{
-	}
 	public String toString()
 	{
 		return display;

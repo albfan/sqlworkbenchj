@@ -21,12 +21,8 @@ import workbench.util.StringUtil;
  *
  * @author support@sql-workbench.net
  */
-public class WindowTitleBuilder 
+public class WindowTitleBuilder
 {
-
-	public WindowTitleBuilder() 
-	{
-	}
 
 	public String getWindowTitle(ConnectionProfile profile, String workspaceFile, String editorFile)
 	{
@@ -37,13 +33,13 @@ public class WindowTitleBuilder
 		boolean showWorkspace = GuiSettings.getShowWorkspaceInWindowTitle();
 		String enclose = GuiSettings.getTitleGroupBracket();
 		String sep = GuiSettings.getTitleGroupSeparator();
-		
+
 		if (!showProductNameAtEnd)
 		{
 			title.append(ResourceMgr.TXT_PRODUCT_NAME);
 			title.append(" - ");
 		}
-		
+
 		if (profile == null)
 		{
 			title.append(ResourceMgr.getString("TxtNotConnected"));
@@ -54,7 +50,7 @@ public class WindowTitleBuilder
 			{
 				char open = getOpeningBracket(enclose);
 				char close = getClosingBracket(enclose);
-				
+
 				if (open != 0 && close != 0)
 				{
 					title.append(open);
@@ -81,7 +77,7 @@ public class WindowTitleBuilder
 		int showTitle = GuiSettings.getShowFilenameInWindowTitle();
 		if (editorFile != null && showTitle != GuiSettings.SHOW_NO_FILENAME)
 		{
-			
+
 			title.append(" - ");
 			if (showTitle == GuiSettings.SHOW_FULL_PATH)
 			{
@@ -93,22 +89,22 @@ public class WindowTitleBuilder
 				title.append(f.getName());
 			}
 		}
-		
+
 		if (showProductNameAtEnd)
 		{
 			title.append(" - ");
 			title.append(ResourceMgr.TXT_PRODUCT_NAME);
 		}
-		
+
 		return title.toString();
 	}
-	
+
 	private char getOpeningBracket(String settingsValue)
 	{
 		if (StringUtil.isEmptyString(settingsValue)) return 0;
 		return settingsValue.charAt(0);
 	}
-	
+
 	private char getClosingBracket(String settingsValue)
 	{
 		if (StringUtil.isEmptyString(settingsValue)) return 0;
@@ -118,7 +114,7 @@ public class WindowTitleBuilder
 		if (open == '(') return ')';
 		if (open == '<') return '>';
 		return 0;
-		
+
 	}
-	
+
 }

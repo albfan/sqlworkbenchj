@@ -11,7 +11,6 @@
  */
 package workbench.gui.settings;
 
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -27,6 +26,7 @@ public class WindowTitleOptionsPanel
 
 	public WindowTitleOptionsPanel()
 	{
+		super();
 		initComponents();
 		// It is important to add these in the correct order
 		// which is defined by the numeric values from Settings.SHOW_NO_FILENAME

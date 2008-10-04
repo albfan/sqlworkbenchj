@@ -65,8 +65,7 @@ public class ProfileTree
 	private int clipboardType = 0;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
-	private RenameGroupAction renameGroup;
-	private ProfileTreeDragHandler ds;
+	
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
 	
 	public ProfileTree()
@@ -102,11 +101,11 @@ public class ProfileTree
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
 		popup.addAction(pasteToFolderAction, true);
 		
-		renameGroup = new RenameGroupAction(this);
+		RenameGroupAction renameGroup = new RenameGroupAction(this);
 		popup.addAction(renameGroup, false);
 		
 		setCellRenderer(new ProfileTreeCellRenderer());
-    ds = new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
+    new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		setAutoscrolls(true);
 	}
 	

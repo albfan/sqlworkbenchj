@@ -31,16 +31,6 @@ public class ValueConverterTest
 		super(testName);
 	}
 	
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-	
-	protected void tearDown() throws Exception
-	{
-		super.tearDown();
-	}
-	
 	public void testConvertBoolLiterals()
 	{
 		ValueConverter converter = new ValueConverter();

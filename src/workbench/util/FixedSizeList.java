@@ -166,7 +166,7 @@ public class FixedSizeList<T>
 
 	public synchronized T get(int index)
 	{
-		return get(index);
+		return entries.get(index);
 	}
 
 	public synchronized T set(int index, T element)

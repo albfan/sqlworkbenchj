@@ -31,7 +31,6 @@ public class TextRowDataConverter
 	private String quoteCharacter = null;
 	private boolean quoteAlways = false;
 	private CharacterRange escapeRange = null;
-	private String additionalEncodeCharacters = null;
 	private String delimiterAndQuote = null;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private boolean writeBlobFiles = true;
@@ -39,16 +38,11 @@ public class TextRowDataConverter
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName = null;
 
-	public TextRowDataConverter()
-	{
-		super();
-	}
-
 	public void setWriteClobToFile(boolean flag)
 	{
 		this.writeClobFiles = flag;
 	}
-	
+
 	public void setWriteBlobToFile(boolean flag)
 	{
 		writeBlobFiles = flag;
@@ -57,7 +51,7 @@ public class TextRowDataConverter
 	/**
 	 * Define a column name to include the rowindex in the output
 	 * If the name is null, the rowindex column will not be written.
-	 * 
+	 *
 	 * @param colname
 	 */
 	public void setRowIndexColName(String colname)
@@ -81,12 +75,12 @@ public class TextRowDataConverter
 	{
 		this.quoteEscape = type;
 	}
-	
+
 	public QuoteEscapeType getQuoteEscaping()
 	{
 		return this.quoteEscape;
 	}
-	
+
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		int count = this.metaData.getColumnCount();
@@ -98,7 +92,7 @@ public class TextRowDataConverter
 			result.append(Long.toString(rowIndex + 1));
 			result.append(this.delimiter);
 		}
-		
+
 		for (int c=0; c < count; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
@@ -108,13 +102,13 @@ public class TextRowDataConverter
 			}
 			int colType = this.metaData.getColumnType(c);
 			String value = null;
-			
+
 			boolean addQuote = quoteAlways;
-			
+
 			if (writeBlobFiles && SqlUtil.isBlobType(colType))
 			{
 				File blobFile = createBlobFile(row, c, rowIndex);
-				
+
 				value = blobFile.getName();
 				try
 				{
@@ -129,7 +123,7 @@ public class TextRowDataConverter
 					LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing BLOB file", e);
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
-				
+
 			}
 			else if (writeClobFiles && SqlUtil.isClobType(colType, this.originalConnection.getDbSettings()))
 			{
@@ -149,18 +143,18 @@ public class TextRowDataConverter
 					}
 				}
 			}
-			else 
+			else
 			{
 				value = this.getValueAsFormattedString(row, c);
 			}
-			
+
 			if (value == null) value = "";
 
 			if (SqlUtil.isCharacterType(colType))
 			{
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
 				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
-				
+
 				if (this.escapeRange != null && this.escapeRange != CharacterRange.RANGE_NONE)
 				{
 					if (addQuote)
@@ -186,7 +180,7 @@ public class TextRowDataConverter
 			}
 
 			if (addQuote) result.append(this.quoteCharacter);
-			
+
 			result.append(value);
 
 			if (addQuote) result.append(this.quoteCharacter);
@@ -210,7 +204,7 @@ public class TextRowDataConverter
 
 		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
-		
+
 		boolean first = true;
 		if (rowIndexColumnName != null)
 		{
@@ -222,7 +216,7 @@ public class TextRowDataConverter
 		{
 			if (!this.includeColumnInExport(c)) continue;
 			String name = this.metaData.getColumnName(c);
-			if (first) 
+			if (first)
 			{
 				first = false;
 			}
@@ -238,7 +232,7 @@ public class TextRowDataConverter
 
 	public void setDelimiter(String delimit)
 	{
-		if (delimit == null || delimit.trim().length() == 0) return;
+		if (StringUtil.isBlank(delimit)) return;
 
 		if (delimit.equals("\\t"))
 		{
@@ -261,15 +255,14 @@ public class TextRowDataConverter
 		// escape the quote character in values
 		if (this.quoteCharacter != null)
 		{
-			this.additionalEncodeCharacters = this.quoteCharacter;
 			this.delimiterAndQuote += this.quoteCharacter;
 		}
-		
+
 	}
 
 	public void setQuoteCharacter(String quote)
 	{
-		if (quote != null && quote.trim().length() > 0)
+		if (StringUtil.isNonBlank(quote))
 		{
 			this.quoteCharacter = quote;
 			setAdditionalEncodeCharacters();
@@ -282,7 +275,7 @@ public class TextRowDataConverter
 	}
 
 	/**
-	 *	Define the range of characters to be escaped 
+	 *	Define the range of characters to be escaped
 	 *  @see workbench.util.StringUtil
 	 */
 	public void setEscapeRange(CharacterRange range)

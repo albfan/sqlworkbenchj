@@ -24,7 +24,7 @@ import workbench.util.NumberStringCache;
  * @author support@sql-workbench.net
  */
 public class GenericRowMonitor
-	implements RowActionMonitor 
+	implements RowActionMonitor
 {
 	private StatusBar statusBar;
 	private String updateMsg;
@@ -39,7 +39,7 @@ public class GenericRowMonitor
 	}
 
 	public int getMonitorType() { return this.monitorType; }
-	
+
 	public void setMonitorType(int type)
 	{
 		this.monitorType = type;
@@ -134,7 +134,7 @@ public class GenericRowMonitor
 		statusBar.clearStatusMessage();
 	}
 
-	public void saveCurrentType(String type) 
+	public void saveCurrentType(String type)
 	{
 		TypeEntry entry = new TypeEntry();
 		entry.msg = this.updateMsg;
@@ -142,8 +142,8 @@ public class GenericRowMonitor
 		entry.obj = this.currentMonitorObject;
 		this.typeStack.put(type, entry);
 	}
-	
-	public void restoreType(String type) 
+
+	public void restoreType(String type)
 	{
 		TypeEntry entry = typeStack.get(type);
 		if (entry == null) return;
@@ -159,8 +159,4 @@ class TypeEntry
 	int type;
 	String msg;
 	String obj;
-	
-	public TypeEntry()
-	{
-	}
 }

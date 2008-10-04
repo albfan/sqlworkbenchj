@@ -21,23 +21,24 @@ import workbench.util.StringUtil;
 
 /**
  * A SQL Statement to halt a script and confirm execution by the user
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class WbConfirm
 	extends SqlCommand
 {
 	public static final String VERB = "WBCONFIRM";
-	
+
 	public WbConfirm()
 	{
+		super();
 		this.isUpdatingCommand = false;
 	}
 
 	public String getVerb() { return VERB; }
-	
+
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -46,21 +47,21 @@ public class WbConfirm
 		result.setSuccess();
 
 		if (WbManager.getInstance().isBatchMode()) return result;
-		
+
 		String msg = getCommandLine(sql);
-		
+
 		if (StringUtil.isEmptyString(msg))
 		{
 			msg = ResourceMgr.getString("MsgConfirmContinue");
 		}
-		
+
 		boolean continueScript = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), StringUtil.trimQuotes(msg));
 		if (!continueScript)
 		{
 			result.setStopScript(true);
 		}
-		
+
 		return result;
 	}
-	
+
 }

@@ -110,12 +110,12 @@ public class ModifierArguments
 				
 				if (limits.length == 1)
 				{
-					end = Integer.valueOf(limits[0].trim()).intValue();
+					end = Integer.parseInt(limits[0].trim());
 				}
 				else if (limits.length == 2)
 				{
-					start = Integer.valueOf(limits[0].trim()).intValue();
-					end = Integer.valueOf(limits[1].trim()).intValue();
+					start = Integer.parseInt(limits[0].trim());
+					end = Integer.parseInt(limits[1].trim());
 				}
 				substring.addDefinition(col, start, end);
 			}

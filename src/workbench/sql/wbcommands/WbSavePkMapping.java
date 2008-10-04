@@ -32,16 +32,17 @@ public class WbSavePkMapping
 {
 	public static final String VERB = "WBSAVEPKMAP";
 	public static final String FORMATTED_VERB = "WbSavePKMap";
-	
+
 	public WbSavePkMapping()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
 	}
 
 	public String getVerb() { return VERB; }
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
@@ -57,14 +58,14 @@ public class WbSavePkMapping
 			WbFile cd = new WbFile(Settings.getInstance().getConfigDir());
 			file = StringUtil.replace(file, FileDialogUtil.CONFIG_DIR_KEY, cd.getFullPath());
 		}
-		
+
 		if (file == null)
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getString("ErrPkDefNoFile"));
 			return result;
 		}
-		
+
 		PkMapping.getInstance().saveMapping(file);
 		String msg = ResourceMgr.getString("MsgPkMappingSaved");
 		File f = new File(file);
@@ -72,6 +73,6 @@ public class WbSavePkMapping
 		result.addMessage(msg);
 		result.setSuccess();
 		return result;
-	}	
-	
+	}
+
 }

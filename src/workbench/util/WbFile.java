@@ -106,7 +106,7 @@ public class WbFile
 		}
 		finally
 		{
-			try	{ out.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(out);
 			this.delete();
 		}
 	}

@@ -19,19 +19,20 @@ import workbench.db.AbstractConstraintReader;
  * Constraint reader for HSQLDB
  * @author  support@sql-workbench.net
  */
-public class HsqlConstraintReader 
+public class HsqlConstraintReader
 	extends AbstractConstraintReader
 {
-	private String TABLE_SQL = "select chk.check_clause \n" + 
-           "from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" + 
-           "where chk.constraint_name = cons.constraint_name  \n" + 
-           "and cons.constraint_type = 'CHECK' \n" + 
+	private String TABLE_SQL = "select chk.check_clause \n" +
+           "from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" +
+           "where chk.constraint_name = cons.constraint_name  \n" +
+           "and cons.constraint_type = 'CHECK' \n" +
            "and cons.table_name = ?; \n";
-	
+
 	private String sql;
 
 	public HsqlConstraintReader(Connection dbConnection)
 	{
+		super();
 		if (HsqlMetadata.supportsInformationSchema(dbConnection))
 		{
 			this.sql = TABLE_SQL;
@@ -41,10 +42,10 @@ public class HsqlConstraintReader
 			this.sql = TABLE_SQL.replaceAll("information_schema\\.","");
 		}
 	}
-	
+
 	public String getPrefixTableConstraintKeyword() { return "check("; }
 	public String getSuffixTableConstraintKeyword() { return ")"; }
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return this.sql; }
-	
+
 }

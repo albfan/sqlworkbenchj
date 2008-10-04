@@ -31,7 +31,7 @@ import workbench.interfaces.Reloadable;
 /**
  * @author support@sql-workbench.net
  */
-public class DropDbObjectAction 
+public class DropDbObjectAction
 	extends WbAction
 	implements ListSelectionListener
 {
@@ -40,14 +40,15 @@ public class DropDbObjectAction
 	private ObjectDropper dropper;
 	private Reloadable data;
 	private boolean available = true;
-	
+
 	public DropDbObjectAction(DbObjectList client, ListSelectionModel list, Reloadable r)
 	{
 		this("MnuTxtDropDbObject", client, list, r);
 	}
-	
+
 	public DropDbObjectAction(String labelKey, DbObjectList client, ListSelectionModel list, Reloadable r)
 	{
+		super();
 		this.initMenuDefinition(labelKey);
 		this.source = client;
 		this.selection = list;
@@ -55,7 +56,7 @@ public class DropDbObjectAction
 		setEnabled(false);
 		list.addListSelectionListener(this);
 	}
-	
+
 	@Override
 	public void executeAction(ActionEvent e)
 	{
@@ -67,16 +68,16 @@ public class DropDbObjectAction
 		this.available = flag;
 		if (!available) this.setEnabled(false);
 	}
-	
+
 	public void setDropper(ObjectDropper dropperToUse)
 	{
 		this.dropper = dropperToUse;
 	}
-	
+
 	private void dropObjects()
 	{
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
-		
+
 		List<? extends DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.size() == 0) return;
 
@@ -84,12 +85,12 @@ public class DropDbObjectAction
 		dropperToUse.setObjects(objects);
 		dropperToUse.setConnection(source.getConnection());
 		dropperToUse.setObjectTable(source.getObjectTable());
-		
+
 		ObjectDropperUI dropperUI = new ObjectDropperUI(dropperToUse);
-		
+
 		JFrame f = (JFrame)SwingUtilities.getWindowAncestor(source.getComponent());
 		dropperUI.showDialog(f);
-		
+
 		if (!dropperUI.dialogWasCancelled() && data != null)
 		{
 			EventQueue.invokeLater(new Runnable()
@@ -101,7 +102,7 @@ public class DropDbObjectAction
 			});
 		}
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		WbConnection conn = this.source.getConnection();
@@ -114,5 +115,5 @@ public class DropDbObjectAction
 			setEnabled(this.available && this.selection.getMinSelectionIndex() >= 0);
 		}
 	}
-	
+
 }

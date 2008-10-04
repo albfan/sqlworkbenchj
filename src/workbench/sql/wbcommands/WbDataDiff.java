@@ -38,19 +38,19 @@ import workbench.util.WbFile;
 /**
  * Compare the data of one or more tables and generate SQL scripts to migrate
  * the target data to match the reference data.
- * 
- * This is esentiall the SQL "front end" for a TableDataDiff 
- * 
+ *
+ * This is esentiall the SQL "front end" for a TableDataDiff
+ *
  * @see workbench.db.compare.TableDataDiff
  * @see workbench.db.compare.TableDeleteSync
- * 
+ *
  * @author support@sql-workbench.net
  */
-public class WbDataDiff 
+public class WbDataDiff
 	extends SqlCommand
 {
 	public static final String VERB = "WBDATADIFF";
-	
+
 	public static final String PARAM_INCLUDE_DELETE = "includeDelete";
 	public static final String PARAM_IGNORE_COLS = "ignoreColumns";
 
@@ -58,19 +58,20 @@ public class WbDataDiff
 	private WbFile mainScript;
 	private TableDataDiff dataDiff;
 	private TableDeleteSync deleteSync;
-	
+
 	public WbDataDiff()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_INCLUDE_DELETE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbExport.ARG_CREATE_OUTPUTDIR);
 		cmdLine.addArgument(PARAM_IGNORE_COLS);
 		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, BlobMode.getTypes());
-		
+
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
 		CommonArgs.addProgressParameter(cmdLine);
-		
+
 		// Add common diff parameters
 		new CommonDiffParameters(this.cmdLine);
 	}
@@ -115,7 +116,7 @@ public class WbDataDiff
 			setUnknownMessage(result, cmdLine, getWrongArgumentsMessage());
 			return result;
 		}
-		
+
 		mainScript = evaluateFileArgument(cmdLine.getValue(CommonDiffParameters.PARAM_FILENAME));
 		if (mainScript == null)
 		{
@@ -124,18 +125,18 @@ public class WbDataDiff
 			result.addMessage(getWrongArgumentsMessage());
 			return result;
 		}
-		
+
 		outputDir = new WbFile(mainScript.getParentFile());
 		String encoding = cmdLine.getValue(CommonDiffParameters.PARAM_ENCODING);
-		if (encoding == null) 
+		if (encoding == null)
 		{
 			encoding = Settings.getInstance().getDefaultEncoding();
 		}
-		
+
 		boolean createDir = cmdLine.getBoolean(WbExport.ARG_CREATE_OUTPUTDIR, false);
 		String literalType = cmdLine.getValue(CommonArgs.ARG_DATE_LITERAL_TYPE);
 		if (literalType == null) literalType = SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE;
-		
+
 		if (createDir && !outputDir.exists())
 		{
 			boolean created = outputDir.mkdirs();
@@ -151,17 +152,17 @@ public class WbDataDiff
 				return result;
 			}
 		}
-		
+
 		if (!outputDir.exists())
 		{
 			result.addMessage(ResourceMgr.getFormattedString("ErrOutputDirNotFound", outputDir.getFullPath()));
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (this.rowMonitor != null) this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		params.setMonitor(rowMonitor);
-		
+
 		WbConnection targetCon = params.getTargetConnection(currentConnection, result);
 		if (!result.isSuccess()) return result;
 		WbConnection sourceCon = params.getSourceConnection(currentConnection, result);
@@ -181,24 +182,24 @@ public class WbDataDiff
 		boolean includeDelete = cmdLine.getBoolean(PARAM_INCLUDE_DELETE, true);
 		boolean checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, true);
 		String nl = Settings.getInstance().getExternalEditorLineEnding();
-		
+
 		CommonDiffParameters.TableMapping mapping = params.getTables(sourceCon, targetCon);
 		int tableCount = mapping.referenceTables.size();
 		dataDiff = new TableDataDiff(sourceCon, targetCon);
 		dataDiff.setSqlDateLiteralType(literalType);
-		
+
 		dataDiff.setRowMonitor(rowMonitor);
 
 		if (rowMonitor != null)
 		{
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS_TABLE);
 		}
-		
+
 		CommonArgs.setProgressInterval(dataDiff, cmdLine);
 
 		List<String> ignoreColumns = CommonArgs.getListArgument(cmdLine, PARAM_IGNORE_COLS);
 		dataDiff.setColumnsToIgnore(ignoreColumns);
-		
+
 		try
 		{
 			for (int i=0; i < tableCount; i++)
@@ -221,7 +222,7 @@ public class WbDataDiff
 					FileUtil.closeQuitely(updates);
 					FileUtil.closeQuitely(inserts);
 				}
-				
+
 				if (includeDelete && !this.isCancelled)
 				{
 					WbFile deleteFile = createFilename("delete", targetTable);
@@ -230,7 +231,7 @@ public class WbDataDiff
 					{
 						deleteSync = new TableDeleteSync(targetCon, sourceCon);
 						CommonArgs.setProgressInterval(deleteSync, cmdLine);
-						
+
 						deleteSync.setRowMonitor(rowMonitor);
 						deleteSync.setOutputWriter(deleteOut);
 
@@ -262,7 +263,7 @@ public class WbDataDiff
 				String targetInfo = targetCon.getDisplayString();
 				int len = sourceInfo.length();
 				if (targetInfo.length() > len) len = targetInfo.length();
-				
+
 				StringBuffer line = new StringBuffer(len);
 				line.append("-- ");
 				for (int i=0; i < len; i++) line.append('*');
@@ -280,7 +281,7 @@ public class WbDataDiff
 				out.write("------------------------" + nl);
 				out.write("-- UPDATE/INSERT scripts" + nl);
 				out.write("------------------------" + nl);
-				
+
 				TableDependencySorter sorter = new TableDependencySorter(targetCon);
 				if (checkDependencies)
 				{
@@ -291,9 +292,9 @@ public class WbDataDiff
 					}
 					sorter.sortForInsert(mapping.targetTables);
 				}
-				
+
 				int count = 0;
-				
+
 				for (TableIdentifier table : mapping.targetTables)
 				{
 					WbFile ins = createFilename("insert", table);
@@ -323,10 +324,10 @@ public class WbDataDiff
 						}
 					}
 				}
-				
+
 				if (count > 0) out.write(nl + "COMMIT;" + nl);
 				count = 0;
-				
+
 				if (checkDependencies)
 				{
 					if (this.rowMonitor != null)
@@ -336,9 +337,9 @@ public class WbDataDiff
 					}
 					sorter.sortForDelete(mapping.targetTables, false);
 				}
-				
+
 				boolean first = true;
-				
+
 				for (TableIdentifier table : mapping.targetTables)
 				{
 					WbFile f = createFilename("delete", table);
@@ -375,7 +376,7 @@ public class WbDataDiff
 		{
 			this.rowMonitor.jobFinished();
 		}
-		
+
 		if (result.isSuccess() && !isCancelled)
 		{
 			result.addMessage(ResourceMgr.getFormattedString("MsgDataDiffSuccess", this.mainScript.getFullPath()));

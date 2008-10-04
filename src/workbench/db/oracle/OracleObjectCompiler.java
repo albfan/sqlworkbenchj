@@ -26,7 +26,6 @@ public class OracleObjectCompiler
 {
 	private WbConnection dbConnection;
 	private Statement stmt;
-	private String lastError = null;
 	
 	public OracleObjectCompiler(WbConnection conn)
 		throws SQLException
@@ -43,15 +42,9 @@ public class OracleObjectCompiler
 		}
 	}
 	
-	public String getLastError()
-	{
-		return this.lastError;
-	}
-	
 	public String compileObject(DbObject object)
 	{
 		String sql = "ALTER " + object.getObjectType() + " " + object.getObjectExpression(dbConnection) + " COMPILE";
-		this.lastError = null;
 		try
 		{
 			this.dbConnection.setBusy(true);

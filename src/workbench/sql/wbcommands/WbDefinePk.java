@@ -17,7 +17,6 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.PkMapping;
 import workbench.util.SqlUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
@@ -29,22 +28,18 @@ public class WbDefinePk
 	extends SqlCommand
 {
 	public static final String VERB = "WBDEFINEPK";
-	
-	public WbDefinePk()
-	{
-	}
-	
+
 	public String getVerb() { return VERB; }
-	
+
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		String sql = SqlUtil.stripVerb(aSql);
-		
+
 		WbStringTokenizer tok = new WbStringTokenizer("=", true, "\"'", false);
 		tok.setSourceString(sql);
 		String columns = null;
@@ -58,7 +53,7 @@ public class WbDefinePk
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (tok.hasMoreTokens()) columns = tok.nextToken();
 		String msg = null;
 		if (columns == null)
@@ -75,5 +70,5 @@ public class WbDefinePk
 		result.setSuccess();
 		result.addMessage(msg);
 		return result;
-	}	
+	}
 }

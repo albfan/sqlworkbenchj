@@ -64,7 +64,7 @@ public class LineNumberTable
 		
 		public Object getValueAt(int row, int column)
 		{
-			return new Integer(row + 1);
+			return Integer.valueOf(row + 1);
 		}
 
 		public String getColumnName(int columnIndex)

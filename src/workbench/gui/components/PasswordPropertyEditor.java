@@ -78,8 +78,7 @@ public class PasswordPropertyEditor
 		if (!this.changed) return;
 		if (this.source == null) return;
 		if (this.setter == null) return;
-		Object args[] = new Object[1];
-		args[0] = new String(this.getPassword());
+		Object[] args = new Object[] { getPassword() };
 		try
 		{
 			this.setter.invoke(this.source, args);

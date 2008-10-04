@@ -41,7 +41,7 @@ public class ResultInfo
 	private int realColumns;
 	private TableIdentifier updateTable;
 	private boolean treatLongVarcharAsClob = false;
-	
+
 	public ResultInfo(ColumnIdentifier[] cols)
 	{
 		this.colCount = cols.length;
@@ -51,7 +51,7 @@ public class ResultInfo
 			this.columns[i] = cols[i].createCopy();
 		}
 	}
-	
+
 	public ResultInfo(String[] colNames, int[] colTypes, int[] colSizes)
 	{
 		this.colCount = colNames.length;
@@ -70,9 +70,9 @@ public class ResultInfo
 	{
 		DbMetadata meta = conn.getMetadata();
 		// If the TableIdentifier has no type, we need to find
-		// the type. getTableColumns() uses the type "TABLE" if no 
-		// type is passed. This constructor is mainly used when 
-		// exporting data, which might not come from a real 
+		// the type. getTableColumns() uses the type "TABLE" if no
+		// type is passed. This constructor is mainly used when
+		// exporting data, which might not come from a real
 		// table, but could also be a VIEW or a SYNONYM
 		if (table.getType() == null)
 		{
@@ -90,8 +90,8 @@ public class ResultInfo
 		this.colCount = this.columns.length;
 		this.treatLongVarcharAsClob = conn.getDbSettings().longVarcharIsClob();
 	}
-	
-	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection) 
+
+	public ResultInfo(ResultSetMetaData metaData, WbConnection sourceConnection)
 		throws SQLException
 	{
 		this.colCount = metaData.getColumnCount();
@@ -102,12 +102,12 @@ public class ResultInfo
 			dbMeta = sourceConnection.getMetadata();
 			treatLongVarcharAsClob = sourceConnection.getDbSettings().longVarcharIsClob();
 		}
-		
+
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = metaData.getColumnName(i + 1);
 			boolean realColumn = true;
-			if (name != null && name.trim().length() > 0)
+			if (StringUtil.isNonBlank(name))
 			{
 				this.realColumns ++;
 			}
@@ -116,7 +116,7 @@ public class ResultInfo
 				name = "Col" + (i+1);
 				realColumn = false;
 			}
-			
+
 			int type = metaData.getColumnType(i + 1);
 			if (dbMeta != null) type = dbMeta.fixColumnType(type); // currently only for Oracle's DATE type
 			ColumnIdentifier col = new ColumnIdentifier(name);
@@ -139,7 +139,7 @@ public class ResultInfo
 			}
 			catch (Exception e)
 			{
-				typename = null; 
+				typename = null;
 			}
 
 			if (StringUtil.isEmptyString(typename))
@@ -147,13 +147,13 @@ public class ResultInfo
 				// use the Java name if the driver did not return a type name for this column
 				typename = SqlUtil.getTypeName(col.getDataType());
 			}
-			
+
 			col.setColumnTypeName(typename);
-			
+
 			int scale = 0;
 			int prec = 0;
-			
-			// Some JDBC drivers (e.g. Oracle, MySQL) do not like 
+
+			// Some JDBC drivers (e.g. Oracle, MySQL) do not like
 			// getPrecision or getScale() on all column types, so we only call
 			// it for number data types (the only ones were it seems to make sense)
 			try
@@ -166,7 +166,7 @@ public class ResultInfo
 				//LogMgr.logError("ResultInfo.<init>", "Error when obtaining scale for column " + name, th);
 				scale = -1;
 			}
-			
+
 			try
 			{
 				prec = metaData.getPrecision(i + 1);
@@ -208,7 +208,7 @@ public class ResultInfo
 				col.setColumnSize(size);
 			}
 			col.setDbmsType(dbmsType);
-			
+
 			try
 			{
 				String cls = metaData.getColumnClassName(i + 1);
@@ -226,12 +226,12 @@ public class ResultInfo
 	{
 		return treatLongVarcharAsClob;
 	}
-	
+
 	public ColumnIdentifier getColumn(int i)
 	{
 		return this.columns[i];
 	}
-	
+
 	public ColumnIdentifier[] getColumns()
 	{
 		return this.columns;
@@ -241,7 +241,7 @@ public class ResultInfo
 	{
 		return this.columns[col].isNullable();
 	}
-	
+
 	public void resetPkColumns()
 	{
 		for (int i=0; i < this.colCount; i++)
@@ -249,33 +249,33 @@ public class ResultInfo
 			this.columns[i].setIsPkColumn(false);
 		}
 	}
-	
+
 	public void setIsPkColumn(String column, boolean flag)
 	{
 		int index = this.findColumn(column);
 		if (index > -1) this.setIsPkColumn(index, flag);
 	}
-	
+
 	public void setIsPkColumn(int col, boolean flag)
 	{
 		this.columns[col].setIsPkColumn(flag);
 	}
-	
+
 	public boolean hasUpdateableColumns()
 	{
 		return this.realColumns > 0;
 	}
-	
+
 	public boolean isUpdateable(int col)
 	{
 		return this.columns[col].isUpdateable();
 	}
-	
-	public void setIsNullable(int col, boolean flag) 
+
+	public void setIsNullable(int col, boolean flag)
 	{
 		this.columns[col].setIsNullable(flag);
 	}
-	
+
 	public void setUpdateable(int col, boolean flag)
 	{
 		this.columns[col].setUpdateable(flag);
@@ -285,7 +285,7 @@ public class ResultInfo
 	{
 		return this.columns[col].isPkColumn();
 	}
-	
+
 	public void setPKColumns(ColumnIdentifier[] cols)
 	{
 		for (int i=0; i < cols.length; i++)
@@ -313,25 +313,25 @@ public class ResultInfo
 			}
 		}
 	}
-	
+
 	public boolean hasPkColumns()
 	{
 		for (int i=0; i < this.colCount; i++)
 		{
 			if (this.columns[i].isPkColumn())
 			{
-				return true; 
+				return true;
 			}
 		}
 		return false;
 	}
-	
-	
+
+
 	public void setUpdateTable(TableIdentifier table)
 	{
 		this.updateTable = table;
 	}
-	
+
 	public TableIdentifier getUpdateTable()
 	{
 		return this.updateTable;
@@ -341,7 +341,7 @@ public class ResultInfo
 	{
 		return this.columns[col].getColumnSize();
 	}
-	
+
 	public void setColumnSizes(int[] sizes)
 	{
 		if (sizes == null) return;
@@ -350,30 +350,30 @@ public class ResultInfo
 		{
 			this.columns[i].setColumnSize(sizes[i]);
 		}
-	}	
-	
-	public int getColumnType(int i) 
-	{ 
-		if (i >= this.columns.length) return Types.OTHER;
-		return this.columns[i].getDataType(); 
 	}
-	
+
+	public int getColumnType(int i)
+	{
+		if (i >= this.columns.length) return Types.OTHER;
+		return this.columns[i].getDataType();
+	}
+
 	public void setColumnClassName(int i, String name)
 	{
 		this.columns[i].setColumnClassName(name);
 	}
-	
-	public String getColumnClassName(int i) 
-	{ 
+
+	public String getColumnClassName(int i)
+	{
 		String className = this.columns[i].getColumnClassName();
 		if (className != null) return className;
 		return this.getColumnClass(i).getName();
 	}
-	
+
 	public String getColumnName(int i) { return this.columns[i].getColumnName(); }
 	public String getDbmsTypeName(int i) { return this.columns[i].getDbmsType(); }
 	public int getColumnCount() { return this.colCount; }
-	
+
 	public Class getColumnClass(int aColumn)
 	{
 		if (aColumn > this.colCount) return null;
@@ -392,24 +392,22 @@ public class ResultInfo
 		String schema = aConnection.getMetadata().adjustObjectnameCase(this.updateTable.getSchema());
 
 		resetPkColumns();
-		
+
 		ResultSet rs = meta.getPrimaryKeys(null, schema, table);
 		boolean found = this.readPkColumns(rs);
-		
+
 		if (!found)
 		{
-			found = readPkColumnsFromMapping(aConnection); 
+			found = readPkColumnsFromMapping(aConnection);
 		}
-		
-		return;
 	}
-	
+
 	public int findColumn(String name)
 	{
 		if (name == null) return -1;
 
 		String plain = StringUtil.trimQuotes(name);
-		
+
 		for (int i = 0; i < this.colCount; i++)
 		{
 			String col = StringUtil.trimQuotes(this.getColumnName(i));
@@ -439,13 +437,13 @@ public class ResultInfo
 				found = true;
 			}
 		}
-		if (found) 
+		if (found)
 		{
 			LogMgr.logInfo("ResultInfo.readPkColumnsFromMapping()", "Using pk definition for " + updateTable.getTableName() + " from mapping file: " + StringUtil.listToString(cols, ',', false));
 		}
 		return found;
 	}
-	
+
 	private boolean readPkColumns(ResultSet rs)
 	{
 		boolean found = false;
@@ -472,5 +470,5 @@ public class ResultInfo
 		}
 		return found;
 	}
-	
+
 }

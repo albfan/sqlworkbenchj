@@ -17,9 +17,9 @@ package workbench.interfaces;
  */
 public interface JobErrorHandler
 {
-	final int JOB_CONTINUE = 1;
-	final int JOB_IGNORE_ALL = 2;
-	final int JOB_ABORT = 3;
+	int JOB_CONTINUE = 1;
+	int JOB_IGNORE_ALL = 2;
+	int JOB_ABORT = 3;
 
 	/**
 	 * Callback function if an error occurs.

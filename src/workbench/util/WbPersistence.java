@@ -55,7 +55,7 @@ public class WbPersistence
 		try
 		{
 			BeanInfo info = Introspector.getBeanInfo( clazz );
-			PropertyDescriptor propertyDescriptors[] = info.getPropertyDescriptors();
+			PropertyDescriptor[] propertyDescriptors = info.getPropertyDescriptors();
 			for (int i = 0; i < propertyDescriptors.length; i++)
 			{
 				PropertyDescriptor pd = propertyDescriptors[i];

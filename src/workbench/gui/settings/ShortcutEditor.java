@@ -23,15 +23,11 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Types;
-import javax.swing.ActionMap;
 import javax.swing.Box;
-import javax.swing.InputMap;
 import javax.swing.JButton;
-import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -69,25 +65,26 @@ public class ShortcutEditor
 	private DataStoreTableModel model;
 	private JDialog window;
 	private Frame parent;
-	
+
 	private JButton okButton;
 	private JButton cancelButton;
 	private JButton assignButton;
 	private JButton resetButton;
 	private JButton resetAllButton;
 	private JButton clearButton;
-	
+
 	private String escActionCommand;
-	
-	public ShortcutEditor(Frame parent)
+
+	public ShortcutEditor(Frame fparent)
 	{
-		this.parent = parent;
-		
+		super();
+		this.parent = fparent;
+
 		// make sure actions that are not created upon startup are
 		// registered with us!
 		ActionRegistration.registerActions();
 	}
-	
+
 	public void showWindow()
 	{
 		WbSwingUtilities.showWaitCursor(parent);
@@ -95,7 +92,7 @@ public class ShortcutEditor
 		window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		window.addWindowListener(this);
 		JPanel contentPanel = new JPanel(new BorderLayout());
-		
+
 		this.keysTable = new WbTable();
 		this.keysTable.useMultilineTooltip(false);
 		this.keysTable.setShowPopupMenu(false);
@@ -103,10 +100,10 @@ public class ShortcutEditor
 		this.setLayout(new BorderLayout());
 		JScrollPane scroll = new JScrollPane(this.keysTable);
 		contentPanel.add(scroll, BorderLayout.CENTER);
-		
+
 		EscAction esc = new EscAction(window, this);
 		escActionCommand = esc.getActionName();
-		
+
 		this.createModel();
 		this.keysTable.setRowSelectionAllowed(true);
 		this.keysTable.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -119,7 +116,7 @@ public class ShortcutEditor
 
 		okButton = new WbButton(ResourceMgr.getString("LblOK"));
 		okButton.addActionListener(this);
-		
+
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 		buttonPanel.add(this.okButton);
@@ -131,7 +128,7 @@ public class ShortcutEditor
 
 		Dimension min = new Dimension(90, 24);
 		Dimension max = new Dimension(160, 24);
-		
+
 		this.assignButton = new WbButton(ResourceMgr.getString("LblAssignShortcut"));
 		this.assignButton.setToolTipText(ResourceMgr.getDescription("LblAssignShortcut"));
 		this.assignButton.addActionListener(this);
@@ -147,7 +144,7 @@ public class ShortcutEditor
 		this.clearButton.setPreferredSize(min);
 		this.clearButton.setMinimumSize(min);
 		this.clearButton.setMaximumSize(max);
-		
+
 		this.resetButton = new WbButton(ResourceMgr.getString("LblResetShortcut"));
 		this.resetButton.setToolTipText(ResourceMgr.getDescription("LblResetShortcut"));
 		this.resetButton.addActionListener(this);
@@ -162,7 +159,7 @@ public class ShortcutEditor
 		this.resetAllButton.setPreferredSize(min);
 		this.resetAllButton.setMinimumSize(min);
 		this.resetAllButton.setMaximumSize(max);
-		
+
 		editBox.add(Box.createVerticalStrut(2));
 		editBox.add(this.assignButton);
 		editBox.add(Box.createVerticalStrut(2));
@@ -195,32 +192,32 @@ public class ShortcutEditor
 		p.setMinimumSize(d);
 		p.setPreferredSize(d);
 		contentPanel.add(p, BorderLayout.NORTH);
-		
+
 		this.add(contentPanel, BorderLayout.CENTER);
-		
+
 		window.getContentPane().add(this);
 		if (!Settings.getInstance().restoreWindowSize(this.window, KEY_WINDOW_SIZE))
-		{	
+		{
 			window.setSize(600,400);
 		}
 		WbSwingUtilities.center(window, parent);
 		WbSwingUtilities.showDefaultCursor(parent);
 		window.setVisible(true);
 	}
-	
+
 	private void createModel()
 	{
 		ShortcutManager mgr = ShortcutManager.getInstance();
 		ShortcutDefinition[] keys = mgr.getDefinitions();
-		
-		String[] cols = new String[] { ResourceMgr.getString("LblKeyDefCommandCol"), 
+
+		String[] cols = new String[] { ResourceMgr.getString("LblKeyDefCommandCol"),
                                    ResourceMgr.getString("LblKeyDefKeyCol"),
 				                           ResourceMgr.getString("LblKeyDefDefaultCol") };
 		int[] types = new int[] { Types.VARCHAR, Types.OTHER, Types.OTHER };
-		
+
 		this.definitions = new DataStore(cols, types);
-		
-		
+
+
 		for (int i=0; i < keys.length; i++)
 		{
 			int row = this.definitions.addRow();
@@ -244,8 +241,8 @@ public class ShortcutEditor
 	public void actionPerformed(ActionEvent e)
 	{
 		Object source = e.getSource();
-		
-		if (source == this.cancelButton) 
+
+		if (source == this.cancelButton)
 		{
 			this.closeWindow();
 		}
@@ -290,7 +287,7 @@ public class ShortcutEditor
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
 			ShortcutDefinition def = d.getShortcut();
 			if (d.isModified())
-			{	
+			{
 				if (d.isCleared())
 				{
 					mgr.removeShortcut(def.getActionClass());
@@ -307,7 +304,7 @@ public class ShortcutEditor
 		}
 		mgr.updateActions();
 	}
-	
+
 	private void closeWindow()
 	{
 		this.saveSettings();
@@ -322,25 +319,25 @@ public class ShortcutEditor
 		this.assignButton.setEnabled(enabled);
 		this.clearButton.setEnabled(enabled);
 	}
-	
+
 	private void assignKey()
 	{
 		int row = this.keysTable.getSelectedRow();
 		if (row < 0) return;
 		final KeyboardMapper mapper = new KeyboardMapper();
-		EventQueue.invokeLater(new Runnable() 
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				mapper.grabFocus();
 			}
 		});
-		
-		String[] options = new String[] { 
-			ResourceMgr.getPlainString("LblOK"), 
+
+		String[] options = new String[] {
+			ResourceMgr.getPlainString("LblOK"),
 			ResourceMgr.getPlainString("LblCancel")
 		};
-		
+
 		JOptionPane overwritePane = new JOptionPane(mapper, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
 		JDialog dialog = overwritePane.createDialog(this, ResourceMgr.getString("LblEnterKeyWindowTitle"));
 
@@ -348,7 +345,7 @@ public class ShortcutEditor
 		dialog.setVisible(true);
 		Object result = overwritePane.getValue();
 		dialog.dispose();
-		
+
 		if (options[0].equals(result))
 		{
 			KeyStroke key = mapper.getKeyStroke();
@@ -365,12 +362,12 @@ public class ShortcutEditor
 				old.clearKey();
 				this.model.fireTableRowsUpdated(oldrow, oldrow);
 			}
-			
+
 			d.setNewKey(key);
 			this.model.fireTableRowsUpdated(row, row);
 		}
 	}
-	
+
 	private void clearKey()
 	{
 		int row = this.keysTable.getSelectedRow();
@@ -379,7 +376,7 @@ public class ShortcutEditor
 		old.clearKey();
 		this.model.fireTableRowsUpdated(row, row);
 	}
-	
+
 	private void resetCurrentKey()
 	{
 		int row = this.keysTable.getSelectedRow();
@@ -395,17 +392,17 @@ public class ShortcutEditor
 		int selected = this.keysTable.getSelectedRow();
 		int count = this.keysTable.getRowCount();
 		for (int row=0; row < count; row++)
-		{	
+		{
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
 			d.resetToDefault();
 		}
 		this.model.fireTableDataChanged();
 		if (selected > -1)
-		{	
+		{
 			this.keysTable.getSelectionModel().setSelectionInterval(selected, selected);
 		}
 	}
-	
+
 	private int findKey(KeyStroke key)
 	{
 		int count = this.definitions.getRowCount();
@@ -430,7 +427,7 @@ public class ShortcutEditor
 
 	public void windowClosing(WindowEvent e)
 	{
-		this.closeWindow();	
+		this.closeWindow();
 	}
 
 	public void windowDeactivated(WindowEvent e)
@@ -451,7 +448,7 @@ public class ShortcutEditor
 
 	public void mouseClicked(MouseEvent e)
 	{
-		if (e.getSource() == this.keysTable && 
+		if (e.getSource() == this.keysTable &&
 				e.getClickCount() == 2 &&
 				e.getButton() == MouseEvent.BUTTON1)
 		{
@@ -481,21 +478,21 @@ class ShortcutDisplay
 	public static final int TYPE_DEFAULT_KEY = 1;
 	public static final int TYPE_PRIMARY_KEY = 2;
 	public static final int TYPE_ALTERNATE_KEY = 3;
-	
+
 	private boolean isModified = false;
 	private int displayType;
 	private ShortcutDefinition shortcut;
 	private boolean clearKey = false;
 	private boolean resetToDefault = false;
-	
+
 	private StoreableKeyStroke newKey = null;
-	
+
 	ShortcutDisplay(ShortcutDefinition def, int type)
 	{
 		this.shortcut = def;
 		this.displayType = type;
 	}
-	
+
 	public ShortcutDefinition getShortcut()
 	{
 		return this.shortcut;
@@ -506,7 +503,7 @@ class ShortcutDisplay
 	{
 		return this.clearKey;
 	}
-	
+
 	public void clearKey()
 	{
 		this.newKey = null;
@@ -514,7 +511,7 @@ class ShortcutDisplay
 		this.isModified = true;
 		this.resetToDefault = false;
 	}
-	
+
 	public void setNewKey(KeyStroke aKey)
 	{
 		this.newKey = new StoreableKeyStroke(aKey);
@@ -527,7 +524,7 @@ class ShortcutDisplay
 	{
 		return this.newKey;
 	}
-	
+
 	public boolean isMappedTo(KeyStroke aKey)
 	{
 		boolean mapped = false;
@@ -541,12 +538,12 @@ class ShortcutDisplay
 		}
 		return mapped;
 	}
-	
+
 	public boolean doReset()
 	{
 		return this.resetToDefault;
 	}
-	
+
 	public void resetToDefault()
 	{
 		this.isModified = true;
@@ -554,7 +551,7 @@ class ShortcutDisplay
 		this.clearKey = false;
 		this.resetToDefault = true;
 	}
-	
+
 	public String toString()
 	{
 		StoreableKeyStroke key = null;
@@ -576,7 +573,7 @@ class ShortcutDisplay
 				{
 					key = this.shortcut.getActiveKey();
 				}
-				else 
+				else
 				{
 					key = this.newKey;
 				}

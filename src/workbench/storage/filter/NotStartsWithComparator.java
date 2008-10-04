@@ -17,17 +17,13 @@ package workbench.storage.filter;
 public class NotStartsWithComparator
 	implements ColumnComparator
 {
-	public NotStartsWithComparator()
-	{
-	}
-	
 	public boolean supportsIgnoreCase() { return true; }
 	public String getValueExpression(Object value) { return "'" + value + "'";}
 	public String getOperator() { return "does not start with"; }
 	public boolean needsValue() { return true; }
 	public boolean validateInput(Object value) { return value instanceof String; }
 	public boolean comparesEquality() { return false; }
-	
+
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
@@ -45,15 +41,15 @@ public class NotStartsWithComparator
 			return false;
 		}
 	}
-	
+
 	public boolean supportsType(Class valueClass)
 	{
 		return (CharSequence.class.isAssignableFrom(valueClass));
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		return (other instanceof NotStartsWithComparator);
 	}
-	
+
 }

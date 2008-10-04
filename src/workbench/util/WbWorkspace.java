@@ -115,12 +115,12 @@ public class WbWorkspace
 		count ++;
 		this.tabInfo.setProperty("dbexplorer.visible", count);
 	}
-	
+
 	public int getDbExplorerVisibleCount()
 	{
 		return this.tabInfo.getIntProperty("dbexplorer.visible", 0);
 	}
-	
+
 	public void addHistoryEntry(String aFilename, SqlHistory history)
 		throws IOException
 	{
@@ -156,7 +156,6 @@ public class WbWorkspace
 		{
 			LogMgr.logError("WbWorkspace.readHistoryData()", "Requested ZipEntry for index " + anIndex + " was null!", null);
 		}
-		return;
 	}
 
 	public WbProperties getSettings()
@@ -225,7 +224,7 @@ public class WbWorkspace
 		String key = "dbexplorer" + index + ".currentschema";
 		return this.tabInfo.containsKey(key);
 	}
-	
+
 	public void setTabTitle(int index, String name)
 	{
 		String key = "tab" + index + ".title";
@@ -315,7 +314,7 @@ public class WbWorkspace
 		String value = (String)this.tabInfo.get(key);
 		return StringUtil.decodeUnicode(value);
 	}
-	
+
 	public String getExternalFileEncoding(int tabIndex)
 	{
 		if (this.tabInfo == null) return null;

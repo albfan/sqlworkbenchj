@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.NoSuchElementException;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -36,7 +37,7 @@ public class ScriptParser
 {
 
 	private String originalScript = null;
-	private ArrayList<ScriptCommandDefinition> commands = null;
+	private List<ScriptCommandDefinition> commands = null;
 	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 	private DelimiterDefinition alternateDelimiter;
 	private int currentIteratorIndex = -42;
@@ -48,9 +49,9 @@ public class ScriptParser
 	private boolean returnTrailingWhitesapce = false;
 	private String alternateLineComment = "--";
 	private boolean useAlternateDelimiter = false;
-	
+
 	private int maxFileSize;
-	
+
 	public ScriptParser()
 	{
 		this(Settings.getInstance().getInMemoryScriptSizeThreshold());
@@ -65,7 +66,7 @@ public class ScriptParser
 		this.setScript(aScript);
 	}
 
-	
+
 	/** Create a ScriptParser
 	 *
 	 *	The actual script needs to be specified with setScript()
@@ -85,7 +86,7 @@ public class ScriptParser
 	{
 		this(f, null);
 	}
-	
+
 	/**
 	 *	Initialize a ScriptParser from a file.
 	 *	The delimiter will be evaluated dynamically
@@ -101,7 +102,7 @@ public class ScriptParser
 	{
 		setFile(f, null);
 	}
-	
+
 	/**
 	 * Define the source file for this ScriptParser.
 	 * Depending on the size the file might be read into memory or not
@@ -110,7 +111,7 @@ public class ScriptParser
 		throws IOException
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
-		
+
 		if (f.length() < this.maxFileSize)
 		{
 			this.readScriptFromFile(f, encoding);
@@ -122,7 +123,7 @@ public class ScriptParser
 			configureParserInstance(this.iteratingParser);
 		}
 	}
-	
+
 	public int getScriptLength()
 	{
 		if (this.iteratingParser != null)
@@ -135,13 +136,13 @@ public class ScriptParser
 		}
 		return 0;
 	}
-	
+
 	public void readScriptFromFile(File f)
 		throws IOException
 	{
 		this.readScriptFromFile(f, null);
 	}
-	
+
 	public void readScriptFromFile(File f, String encoding)
 		throws IOException
 	{
@@ -170,7 +171,7 @@ public class ScriptParser
 		}
 		this.setScript(content == null ? "" : content.toString());
 	}
-	
+
 	public void allowEmptyLineAsSeparator(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
@@ -180,22 +181,22 @@ public class ScriptParser
 	{
 		this.alternateLineComment = comment;
 	}
-	
+
 	public void setReturnStartingWhitespace(boolean flag)
 	{
 		this.returnTrailingWhitesapce = flag;
 	}
-	
+
 	public void setCheckForSingleLineCommands(boolean flag)
 	{
 		this.checkSingleLineCommands = flag;
 	}
-	
+
 	public void setSupportOracleInclude(boolean flag)
 	{
 		this.supportOracleInclude = flag;
 	}
-	
+
 	/**
 	 *	Define the script to be parsed.
 	 *	The delimiter to be used will be checked automatically
@@ -213,17 +214,17 @@ public class ScriptParser
 		this.commands = null;
 		this.iteratingParser = null;
 	}
-	
+
 	public void setDelimiter(DelimiterDefinition delim)
 	{
 		this.setDelimiters(delim, null);
 	}
 
 	/**
-	 * Sets the alternate delimiter. This implies that 
-	 * by default the semicolon is used, and only if 
+	 * Sets the alternate delimiter. This implies that
+	 * by default the semicolon is used, and only if
 	 * the alternate delimiter is detected, that will be used.
-	 * 
+	 *
 	 * If only one delimiter should be used (and no automatic checking
 	 * for an alternate delimiter), use {@link #setDelimiter(DelimiterDefinition)}
 	 */
@@ -231,9 +232,9 @@ public class ScriptParser
 	{
 		setDelimiters(DelimiterDefinition.STANDARD_DELIMITER, alt);
 	}
-	
+
 	/**
-	 * Define the delimiters to be used. If the (in-memory) script ends with 
+	 * Define the delimiters to be used. If the (in-memory) script ends with
 	 * the defined alternate delimiter, then the alternate is used, otherwise
 	 * the default
 	 */
@@ -241,7 +242,7 @@ public class ScriptParser
 	{
 		this.delimiter = defaultDelim;
 		this.alternateDelimiter = alternateDelim;
-		
+
 		if (this.originalScript != null)
 		{
 			findDelimiterToUse();
@@ -259,15 +260,15 @@ public class ScriptParser
 	{
 		if (this.alternateDelimiter == null) return;
 		if (this.originalScript == null) return;
-		
-		useAlternateDelimiter = (alternateDelimiter.terminatesScript(originalScript));
+
+		useAlternateDelimiter = alternateDelimiter.terminatesScript(originalScript);
 		this.commands = null;
 	}
 
 	/**
-	 * Return the index from the overall script mapped to the 
+	 * Return the index from the overall script mapped to the
 	 * index inside the specified command. For a single command
-	 * script scriptCursorLocation will be the same as 
+	 * script scriptCursorLocation will be the same as
 	 * the location inside the dedicated command.
 	 * @param commandIndex the index for the command to check
 	 * @param cursorPos the index in the overall script
@@ -289,7 +290,7 @@ public class ScriptParser
 		}
 		return relativePos;
 	}
-	
+
 	/**
 	 *	Return the command index for the command which is located at
 	 *	the given index of the current script.
@@ -362,7 +363,7 @@ public class ScriptParser
 	{
 		return getCommand(index, true);
 	}
-	
+
 	/**
 	 * Return the command at the given index position.
 	 */
@@ -382,14 +383,14 @@ public class ScriptParser
 	 * script will be loaded into memory!
 	 * @return
 	 */
-	public int getSize() 
+	public int getSize()
 	{
 		if (this.commands == null) this.parseCommands();
 		return this.commands.size();
 	}
 
 	/**
-	 * Return an Iterator which allows to iterate over 
+	 * Return an Iterator which allows to iterate over
 	 * the commands from the script. The Iterator
 	 * will return objects of type {@link ScriptCommandDefinition}
 	 */
@@ -398,7 +399,7 @@ public class ScriptParser
 		startIterator();
 		return this;
 	}
-	
+
 	public void startIterator()
 	{
 		this.currentIteratorIndex = 0;
@@ -410,10 +411,10 @@ public class ScriptParser
 		{
 			configureParserInstance(this.iteratingParser);
 			this.iteratingParser.reset();
-				
+
 		}
 	}
-	
+
 	public void done()
 	{
 		if (this.iteratingParser != null)
@@ -424,11 +425,11 @@ public class ScriptParser
 	}
 
 	/**
-	 * Check for quote characters that are escaped using a 
+	 * Check for quote characters that are escaped using a
 	 * backslash. If turned on (flag == true) the following
 	 * SQL statement would be valid (different to the SQL standard):
 	 * <pre>INSERT INTO myTable (column1) VALUES ('Arthurs\'s house');</pre>
-	 * but the following Script would generate an error: 
+	 * but the following Script would generate an error:
 	 * <pre>INSERT INTO myTable (file_path) VALUES ('c:\');</pre>
 	 * because the last quote would not bee seen as a closing quote
 	 */
@@ -461,7 +462,7 @@ public class ScriptParser
 			p.setCheckForSingleLineCommands(this.checkSingleLineCommands);
 		}
 	}
-	
+
 	/**
 	 *	Parse the given SQL Script into a List of single SQL statements.
 	 */
@@ -472,9 +473,9 @@ public class ScriptParser
 		configureParserInstance(p);
 		p.setScript(this.originalScript);
 
-		ScriptCommandDefinition c = null; 
+		ScriptCommandDefinition c = null;
 		int index = 0;
-		
+
 		while ((c = p.getNextCommand()) != null)
 		{
 			c.setIndexInScript(index);
@@ -484,7 +485,7 @@ public class ScriptParser
 	}
 
 	/**
-	 *	Check if more commands are present. 
+	 *	Check if more commands are present.
 	 */
 	public boolean hasNext()
 	{
@@ -500,7 +501,7 @@ public class ScriptParser
 	}
 
 	/**
-	 * Return the next SQL command from the script. 
+	 * Return the next SQL command from the script.
 	 * This is delegated to {@link #getNextCommand()}
 	 * @return a String object representing the SQL command
 	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
@@ -515,8 +516,8 @@ public class ScriptParser
 	}
 
 	/**
-	 * Return the next {@link ScriptCommandDefinition} from the script. 
-	 * 
+	 * Return the next {@link ScriptCommandDefinition} from the script.
+	 *
 	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
 	 * @see IteratingScriptParser#getNextCommand()
 	 * @see #next()

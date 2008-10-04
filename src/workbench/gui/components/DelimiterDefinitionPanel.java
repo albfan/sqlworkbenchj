@@ -21,7 +21,7 @@ import workbench.sql.DelimiterDefinition;
  *
  * @author support@sql-workbench.net
  */
-public class DelimiterDefinitionPanel 
+public class DelimiterDefinitionPanel
 	extends JPanel
 	implements PropertyChangeListener
 {
@@ -31,9 +31,10 @@ public class DelimiterDefinitionPanel
 	public static final String PROP_DELIM = "delimiter";
 	public static final String PROP_SLD = "singleLine";
 	private boolean updating = false;
-	
+
 	public DelimiterDefinitionPanel()
 	{
+		super();
 		initComponents();
 		this.delimitTextField.setImmediateUpdate(true);
 		this.singleLineCheckBox.setImmediateUpdate(true);
@@ -44,10 +45,10 @@ public class DelimiterDefinitionPanel
 		try
 		{
 			updating = true;
-			
+
 			delimitTextField.removePropertyChangeListener(PROP_DELIM, this);
 			singleLineCheckBox.removePropertyChangeListener(PROP_SLD, this);
-			
+
 			if (delim != null)
 			{
 				this.delimiter = delim;
@@ -70,7 +71,7 @@ public class DelimiterDefinitionPanel
 		{
 			updating = false;
 		}
-		
+
 		delimitTextField.addPropertyChangeListener(PROP_DELIM, this);
 		singleLineCheckBox.addPropertyChangeListener(PROP_SLD, this);
 	}
@@ -79,24 +80,24 @@ public class DelimiterDefinitionPanel
 	{
 		return this.delimiter;
 	}
-	
+
 	public javax.swing.JTextField getTextField()
 	{
 		return this.delimitTextField;
 	}
-	
+
 	public javax.swing.JCheckBox getCheckBox()
 	{
 		return this.singleLineCheckBox;
 	}
-	
+
   private void initComponents()
   {
 		java.awt.GridBagConstraints gridBagConstraints;
 
 		delimitTextField = new StringPropertyEditor();
 		singleLineCheckBox = new BooleanPropertyEditor();
-		
+
 		setLayout(new java.awt.GridBagLayout());
 
     //delimitTextField.setMinimumSize(new java.awt.Dimension(72, 20));

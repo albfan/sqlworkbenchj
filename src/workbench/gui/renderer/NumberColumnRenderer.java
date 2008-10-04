@@ -33,6 +33,7 @@ public class NumberColumnRenderer
 	
 	public NumberColumnRenderer()
 	{
+		super();
 		String sep = Settings.getInstance().getDecimalSymbol();
 		this.symb.setDecimalSeparator(sep.charAt(0));
 		decimalFormatter = new DecimalFormat("0.#", symb);
@@ -42,6 +43,7 @@ public class NumberColumnRenderer
 
 	public NumberColumnRenderer(int maxDigits)
 	{
+		super();
 		String sep = Settings.getInstance().getDecimalSymbol();
 		this.symb.setDecimalSeparator(sep.charAt(0));
 		decimalFormatter = new DecimalFormat("0.#", symb);
@@ -51,6 +53,7 @@ public class NumberColumnRenderer
 
 	public NumberColumnRenderer(int maxDigits, char sep)
 	{
+		super();
 		this.symb.setDecimalSeparator(sep);
 		decimalFormatter = new DecimalFormat("0.#", symb);
 		this.setMaxDigits(maxDigits);

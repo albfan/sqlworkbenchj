@@ -35,7 +35,7 @@ import workbench.util.SqlUtil;
 /**
  * Generates a SQL script to delete a record from the given table and
  * any dependent tables.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class DeleteScriptGenerator
@@ -45,13 +45,12 @@ public class DeleteScriptGenerator
 	private List<ColumnData> columnValues;
 	private TableDependency dependency;
 	private DbMetadata meta;
-	private DataStore tableDefinition;
 	private TableIdentifier rootTable = null;
 	private WbTable sourceTable = null;
 	private ScriptGenerationMonitor monitor;
 	private List<String> statements = new LinkedList<String>();
 	private SqlLiteralFormatter formatter;
-	
+
 	public DeleteScriptGenerator(WbConnection aConnection)
 		throws SQLException
 	{
@@ -64,7 +63,7 @@ public class DeleteScriptGenerator
 	{
 		this.formatter.setDateLiteralType("jdbc");
 	}
-	
+
 	public void setSource(WbTable aTable)
 	{
 		this.sourceTable = aTable;
@@ -79,7 +78,6 @@ public class DeleteScriptGenerator
 		// otherwise comparisons won't work correctly
 		this.rootTable = this.meta.findTable(table);
 		this.dependency = new TableDependency(this.connection, this.rootTable);
-		this.tableDefinition = this.meta.getTableDefinition(this.rootTable);
 	}
 
 	public void setValues(List<ColumnData> colValues)
@@ -92,19 +90,19 @@ public class DeleteScriptGenerator
 		// not implemented yet
 		return false;
 	}
-	
+
 	public void cancel()
 	{
 		// not implemented yet
 	}
-	
+
 	private void createStatements(boolean includeRoot)
 	{
 		ArrayList<DependencyNode> parents = new ArrayList<DependencyNode>();
 		List<DependencyNode> visitedTables = new ArrayList<DependencyNode>();
 		this.dependency.readDependencyTree(true);
 		List<DependencyNode> leafs = this.dependency.getLeafs();
-		
+
 		for (DependencyNode node : leafs)
 		{
 			if (visitedTables.contains(node)) continue;
@@ -153,7 +151,7 @@ public class DeleteScriptGenerator
 			return sql.toString();
 		}
 	}
-	
+
 	private String createDeleteStatement(DependencyNode node)
 	{
 		if (node == null) return null;
@@ -165,7 +163,7 @@ public class DeleteScriptGenerator
 		this.addParentWhere(sql, node);
 		return formatSql(sql);
 	}
-	
+
 	private void addParentWhere(StringBuilder sql, DependencyNode node)
 	{
 		try
@@ -178,11 +176,11 @@ public class DeleteScriptGenerator
 			{
 				String column = entry.getKey();
 				String parentColumn = entry.getValue();
-				
+
 				boolean addRootWhere = this.rootTable.equals(parent.getTable());
-				
+
 				if (count > 0) sql.append(" AND ");
-				
+
 				if (!addRootWhere)
 				{
 					sql.append(" (");
@@ -211,7 +209,7 @@ public class DeleteScriptGenerator
 	private boolean isMasterTable(DependencyNode node)
 	{
 		TableIdentifier table = node.getTable();
-		return (this.rootTable.equals(table));
+		return this.rootTable.equals(table);
 	}
 
 	private void addRootTableWhere(StringBuilder sql)
@@ -236,10 +234,10 @@ public class DeleteScriptGenerator
 		for (ColumnData col : this.columnValues)
 		{
 			if (col.getIdentifier().getColumnName().equalsIgnoreCase(column)) return col;
-		}		
+		}
 		return null;
 	}
-	
+
 	private void addRootTableWhere(StringBuilder sql, String parentColumn, String childColumn)
 	{
 		ColumnData data = findColData(parentColumn);
@@ -259,7 +257,7 @@ public class DeleteScriptGenerator
 			sql.append(formatter.getDefaultLiteral(data));
 		}
 	}
-	
+
 	public void startGenerate()
 	{
 		ObjectScripterUI ui = new ObjectScripterUI(this);
@@ -278,13 +276,13 @@ public class DeleteScriptGenerator
 			this.generateScript();
 		}
 		StringBuilder script = new StringBuilder();
-		
+
 		for (String dml : statements)
 		{
 			script.append(dml);
 			script.append(";\n\n");
 		}
-		
+
 		return script.toString();
 	}
 
@@ -296,7 +294,7 @@ public class DeleteScriptGenerator
 		this.createStatements(true);
 		return getScript();
 	}
-	
+
 	public List<String> getStatementsForValues(List<ColumnData> values, boolean includeRoot)
 	{
 		this.statements.clear();
@@ -304,7 +302,7 @@ public class DeleteScriptGenerator
 		this.createStatements(includeRoot);
 		return Collections.unmodifiableList(statements);
 	}
-	
+
 	public void generateScript()
 	{
 		if (this.sourceTable == null) return;
@@ -323,17 +321,17 @@ public class DeleteScriptGenerator
 			Exception e = new Exception("Connection is busy");
 			LogMgr.logError("DeleteScriptGenerator.generateScript()", "Connection is busy!", e);
 		}
-		
+
 		ds.checkUpdateTable();
 		TableIdentifier tbl = ds.getUpdateTable();
-			
+
 		int numRows = rows.length;
-		
+
 		try
 		{
 			connection.setBusy(true);
 			this.setTable(tbl);
-			
+
 			for (int i=0; i < numRows; i++)
 			{
 				List<ColumnData> pkvalues = ds.getPkValues(rows[i]);
@@ -351,5 +349,5 @@ public class DeleteScriptGenerator
 			connection.setBusy(false);
 		}
 	}
-	
+
 }

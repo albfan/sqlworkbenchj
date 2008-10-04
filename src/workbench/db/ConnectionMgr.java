@@ -44,15 +44,15 @@ import workbench.util.WbPersistence;
 
 /**
  * A connection factory for the application.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class ConnectionMgr
 	implements PropertyChangeListener
 {
 	private Map<String, WbConnection> activeConnections = new HashMap<String, WbConnection>();
-	
-	private ArrayList<ConnectionProfile> profiles;
+
+	private List<ConnectionProfile> profiles;
 	private List<DbDriver> drivers;
 	private boolean profilesChanged;
 	private boolean readTemplates = true;
@@ -60,24 +60,24 @@ public class ConnectionMgr
 	private List<PropertyChangeListener> groupsChangeListener;
 	private List<PropertyChangeListener> driverChangeListener;
 	private static ConnectionMgr instance = new ConnectionMgr();
-	
+
 	private ConnectionMgr()
 	{
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_PROFILE_STORAGE);
 	}
-	
+
 	public static ConnectionMgr getInstance()
 	{
 		return instance;
 	}
-	
+
 	/**
 	 * Create a new connection. The profile to be used
 	 * is searched by the given profile key
 	 * @param def the profile to be used
 	 * @param anId the id to be assigned to the connection
 	 * @return a new Connection
-	 * 
+	 *
 	 * @throws java.lang.ClassNotFoundException
 	 * @throws java.sql.SQLException
 	 * @throws java.lang.Exception
@@ -87,10 +87,10 @@ public class ConnectionMgr
 	{
 		ConnectionProfile prof = this.getProfile(def);
 		if (prof == null) return null;
-		
+
 		return this.getConnection(prof, anId);
 	}
-	
+
 	public WbConnection findConnection(String id)
 	{
 		return this.activeConnections.get(id);
@@ -100,7 +100,7 @@ public class ConnectionMgr
 	{
 		return this.activeConnections.size();
 	}
-	
+
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException
 	{
@@ -110,14 +110,14 @@ public class ConnectionMgr
 		conn.runPostConnectScript();
 		String driverVersion = conn.getDriverVersion();
 		String dbVersion = conn.getSqlConnection().getMetaData().getDatabaseProductVersion();
-		
+
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" + driverVersion + "], ID: ["  + anId + "]");
-		
+
 		this.activeConnections.put(anId, conn);
-		
+
 		return conn;
 	}
-	
+
 	public Class loadClassFromDriverLib(ConnectionProfile profile, String className)
 		throws ClassNotFoundException
 	{
@@ -127,11 +127,11 @@ public class ConnectionMgr
 		if (drv == null) return null;
 		return drv.loadClassFromDriverLib(className);
 	}
-	
+
 	WbConnection connect(ConnectionProfile aProfile, String anId)
 		throws ClassNotFoundException, SQLException
 	{
-		
+
 		String drvClass = aProfile.getDriverclass();
 		String drvName = aProfile.getDriverName();
 		//long start, end;
@@ -143,9 +143,9 @@ public class ConnectionMgr
 		{
 			throw new SQLException("Driver class not registered");
 		}
-		
+
 		copyPropsToSystem(aProfile);
-		
+
 		Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
 		try
 		{
@@ -160,22 +160,22 @@ public class ConnectionMgr
 		WbConnection conn = new WbConnection(anId, sql, aProfile);
 		return conn;
 	}
-	
+
 	private void copyPropsToSystem(ConnectionProfile profile)
 	{
 		if (profile != null && profile.getCopyExtendedPropsToSystem())
 		{
 			PropertiesCopier copier = new PropertiesCopier();
 			copier.copyToSystem(profile.getConnectionProperties());
-		}		
+		}
 	}
-	
+
 	private void removePropsFromSystem(ConnectionProfile profile)
 	{
 		if (profile != null && profile.getCopyExtendedPropsToSystem())
 		{
 			// Check if there is another connection open which uses
-			// the same profile. If that is the case the 
+			// the same profile. If that is the case the
 			// properties should not be removed from the system properties
 			for (WbConnection con : activeConnections.values())
 			{
@@ -186,17 +186,17 @@ public class ConnectionMgr
 			}
 			PropertiesCopier copier = new PropertiesCopier();
 			copier.removeFromSystem(profile.getConnectionProperties());
-		}		
+		}
 	}
-					
+
 	public DbDriver findDriverByName(String drvClassName, String aName)
 	{
 		DbDriver firstMatch = null;
-		
+
 		if (this.drivers == null) this.readDrivers();
-		
+
 		if (aName == null || aName.length() == 0) return this.findDriver(drvClassName);
-		
+
 		for (DbDriver db : drivers)
 		{
 			if (db.getDriverClass().equals(drvClassName))
@@ -211,7 +211,7 @@ public class ConnectionMgr
 				}
 			}
 		}
-		
+
 		// In batch mode the default drivers (DriverTemplates.xml) are not loaded.
 		if (firstMatch == null && WbManager.getInstance().isBatchMode())
 		{
@@ -219,18 +219,18 @@ public class ConnectionMgr
 			// the ODBC Bridge work without a WbDrivers.xml
 			return new DbDriver(aName, drvClassName, null);
 		}
-		
+
 		LogMgr.logDebug("ConnectionMgr.findDriverByName()", "Did not find driver with name="+ aName + ", using " + (firstMatch == null ? "(n/a)" : firstMatch.getName()));
-		
+
 		return firstMatch;
 	}
-	
+
 	public DbDriver findRegisteredDriver(String drvClassName)
 	{
 		if (this.drivers == null)	this.readDrivers();
-		
+
 		DbDriver db = null;
-		
+
 		for (int i=0; i < this.drivers.size(); i ++)
 		{
 			db = this.drivers.get(i);
@@ -238,7 +238,7 @@ public class ConnectionMgr
 		}
 		return null;
 	}
-	
+
 	public DbDriver findDriver(String drvClassName)
 	{
 		if (drvClassName == null)
@@ -246,9 +246,9 @@ public class ConnectionMgr
 			LogMgr.logError("ConnectionMgr.findDriver()", "Called with a null classname!", new NullPointerException());
 			return null;
 		}
-		
+
 		DbDriver db = this.findRegisteredDriver(drvClassName);
-		
+
 		if (db == null)
 		{
 			LogMgr.logWarning("ConnectionMgr.findDriver()", "Did not find a registered driver with classname = ["+drvClassName+"]");
@@ -268,7 +268,7 @@ public class ConnectionMgr
 		}
 		return db;
 	}
-	
+
 	/**
 	 * Add a new, dynamically defined driver to the list of available
 	 * drivers.
@@ -279,19 +279,19 @@ public class ConnectionMgr
 	public DbDriver registerDriver(String drvClassName, String jarFile)
 	{
 		if (this.drivers == null) this.readDrivers();
-		
+
 		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
-		
+
 		// this method is called from BatchRunner.createCmdLineProfile() when
 		// the user passed all driver information on the command line.
 		// as most likely this is the correct driver it has to be put
 		// at the beginning of the list, to prevent a different driver
 		// with the same driver class in WbDrivers.xml to be used instead
 		this.drivers.add(0,drv);
-		
+
 		return drv;
 	}
-	
+
 	/**
 	 *	Returns a List of registered drivers.
 	 *	This list is read from WbDrivers.xml
@@ -304,7 +304,7 @@ public class ConnectionMgr
 		}
 		return this.drivers;
 	}
-	
+
 	public void setDrivers(List<DbDriver> aDriverList)
 	{
 		this.drivers = aDriverList;
@@ -317,10 +317,10 @@ public class ConnectionMgr
 			}
 		}
 	}
-	
+
 	/**
 	 * Find a connection profile identified by the given key.
-	 * 
+	 *
 	 * @param key the key of the profile
 	 * @return a connection profile with that name or null if none was found.
 	 */
@@ -349,7 +349,7 @@ public class ConnectionMgr
 		}
 		return firstMatch;
 	}
-	
+
 	public synchronized Collection<String> getProfileGroups()
 	{
 		Set<String> result = new TreeSet<String>();
@@ -368,7 +368,7 @@ public class ConnectionMgr
 		if (this.driverChangeListener == null) this.driverChangeListener = new ArrayList<PropertyChangeListener>();
 		this.driverChangeListener.add(l);
 	}
-	
+
 	public void removeDriverChangeListener(PropertyChangeListener l)
 	{
 		if (this.driverChangeListener == null) return;
@@ -380,17 +380,16 @@ public class ConnectionMgr
 		if (this.groupsChangeListener == null) this.groupsChangeListener = new ArrayList<PropertyChangeListener>();
 		this.groupsChangeListener.add(l);
 	}
-	
+
 	public void removeProfileGroupChangeListener(PropertyChangeListener l)
 	{
 		if (groupsChangeListener == null) return;
 		groupsChangeListener.remove(l);
 	}
-	
+
 	public void profileGroupChanged(ConnectionProfile profile)
 	{
 		if (this.groupsChangeListener == null) return;
-		Iterator itr = this.groupsChangeListener.iterator();
 		PropertyChangeEvent evt = new PropertyChangeEvent(profile, ConnectionProfile.PROPERTY_PROFILE_GROUP, null, profile.getGroup());
 		for (PropertyChangeListener l : this.groupsChangeListener)
 		{
@@ -407,27 +406,26 @@ public class ConnectionMgr
 		if (this.profiles == null) this.readProfiles();
 		return Collections.unmodifiableList(this.profiles);
 	}
-	
+
 	/**
 	 *	Disconnects all connections
 	 */
 	public void disconnectAll()
 	{
-		Iterator<WbConnection> itr = this.activeConnections.values().iterator();
 		for (WbConnection con : this.activeConnections.values())
 		{
 			this.closeConnection(con);
 		}
 		this.activeConnections.clear();
 	}
-	
+
 	public synchronized void disconnect(WbConnection con)
 	{
 		if (con == null) return;
 		this.activeConnections.remove(con.getId());
 		this.closeConnection(con);
 	}
-	
+
 	/**
 	 *	Disconnect the connection with the given id
 	 */
@@ -436,7 +434,7 @@ public class ConnectionMgr
 		WbConnection con = this.activeConnections.get(anId);
 		disconnect(con);
 	}
-	
+
 	/**
 	 * Disconnect the given connection.
 	 * @param conn the connection to disconnect.
@@ -445,18 +443,18 @@ public class ConnectionMgr
 	{
 		if (conn == null) return;
 		if (conn.isClosed()) return;
-		
+
 		try
 		{
 			if (conn.getProfile() != null)
 			{
 				LogMgr.logInfo("ConnectionMgr.disconnect()", "Disconnecting: [" + conn.getProfile().getName() + "], ID=" + conn.getId());
 			}
-			
+
 			conn.runPreDisconnectScript();
-			
+
 			removePropsFromSystem(conn.getProfile());
-			
+
 			DbShutdownHook hook = DbShutdownFactory.getShutdownHook(conn);
 			if (hook != null)
 			{
@@ -472,36 +470,36 @@ public class ConnectionMgr
 			LogMgr.logError(this, ResourceMgr.getString("ErrOnDisconnect"), e);
 		}
 	}
-	
+
 	/**
 	 * Check if there is another connection active with the same URL.
-	 * This is used when the connection to an embedded database that 
+	 * This is used when the connection to an embedded database that
 	 * needs a {@link workbench.db.shutdown.DbShutdownHook} is called.
-	 * 
-	 * @return true if there is another active connection. 
+	 *
+	 * @return true if there is another active connection.
 	 */
 	public boolean isActive(WbConnection aConn)
 	{
 		String url = aConn.getUrl();
 		String id = aConn.getId();
-		
+
 		Iterator itr = this.activeConnections.values().iterator();
 		while (itr.hasNext())
 		{
 			WbConnection c = (WbConnection)itr.next();
 			if (c == null) continue;
-			
+
 			if (c.getId().equals(id)) continue;
-			
+
 			String u = c.getUrl();
 			if (u == null) continue;
-			// we found one connection with the same URL 
+			// we found one connection with the same URL
 			if (u.equals(url)) return true;
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Save profile and driver definitions to external files.
 	 * This merely calls {@link #saveProfiles()} and {@link #saveDrivers()}
@@ -513,10 +511,10 @@ public class ConnectionMgr
 		this.saveProfiles();
 		this.saveDrivers();
 	}
-	
+
 	/**
-	 * Saves the driver definitions to an external file. 
-	 * 
+	 * Saves the driver definitions to an external file.
+	 *
 	 * The name of the file defaults to <tt>WbDrivers.xml</tt>. The exact location
 	 * can be set in the configuration file.
 	 * @see workbench.resource.Settings#getDriverConfigFilename()
@@ -534,7 +532,7 @@ public class ConnectionMgr
 			LogMgr.logError("ConnectionMgr.saveDrivers()", "Could not save drivers", e);
 		}
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void readDrivers()
 	{
@@ -561,7 +559,7 @@ public class ConnectionMgr
 			LogMgr.logDebug(this, "Could not load driver definitions. Creating new one...", e);
 			this.drivers = null;
 		}
-		
+
 		if (this.drivers == null)
 		{
 			this.drivers = new ArrayList<DbDriver>();
@@ -571,28 +569,28 @@ public class ConnectionMgr
 			this.importTemplateDrivers();
 		}
 	}
-	
+
 	public void setReadTemplates(boolean aFlag)
 	{
 		this.readTemplates = aFlag;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void importTemplateDrivers()
 	{
 		if (this.templatesImported) return;
-		
+
 		if (this.drivers == null) this.readDrivers();
-		
+
 		// now read the templates and append them to the driver list
 		InputStream in = null;
 		try
 		{
 			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
-			
+
 			WbPersistence reader = new WbPersistence();
 			ArrayList<DbDriver> templates = (ArrayList<DbDriver>)reader.readObject(in);
-			
+
 			for (int i=0; i < templates.size(); i++)
 			{
 				DbDriver drv = templates.get(i);
@@ -612,9 +610,9 @@ public class ConnectionMgr
 		}
 		this.templatesImported = true;
 	}
-	
+
 	/**
-	 * Remove all defined connection profiles. 
+	 * Remove all defined connection profiles.
 	 * This does not make sure that all connections are closed!
 	 * This method is used in Unit tests to setup a new set of profiles.
 	 */
@@ -623,10 +621,10 @@ public class ConnectionMgr
 		if (this.profiles == null) return;
 		this.profiles.clear();
 	}
-	
+
 	/**
 	 * Retrieves the connection profiles from an XML file.
-	 * 
+	 *
 	 * @see WbPersistence#readObject()
 	 * @see workbench.resource.Settings#getProfileStorage()
 	 */
@@ -648,40 +646,32 @@ public class ConnectionMgr
 			LogMgr.logError("ConnectionMgr.readProfiles()", "Error when reading connection profiles", e);
 			result = null;
 		}
-		
+
 		this.profiles = new ArrayList<ConnectionProfile>();
-		
+
 		if (result instanceof Collection)
 		{
 			Collection c = (Collection)result;
-			this.profiles.ensureCapacity(c.size());
-			Iterator itr = c.iterator();
-			while (itr.hasNext())
-			{
-				ConnectionProfile prof = (ConnectionProfile)itr.next();
-				this.profiles.add(prof);
-			}
+			this.profiles.addAll(c);
 		}
 		else if (result instanceof Object[])
 		{
 			// This is to support the very first version of the profile storage
 			// probably obsolete by know, but you never know...
 			Object[] l = (Object[])result;
-			this.profiles.ensureCapacity(l.length);
-			for (int i=0; i < l.length; i++)
+			for (Object prof : l)
 			{
-				ConnectionProfile prof = (ConnectionProfile)l[i];
-				this.profiles.add(prof);
+				this.profiles.add((ConnectionProfile)prof);
 			}
 		}
 		this.resetProfiles();
 	}
-	
-	
+
+
 	/**
 	 * Reset the changed status on the profiles.
-	 * 
-	 * Called after saving the profiles. 
+	 *
+	 * Called after saving the profiles.
 	 */
 	private synchronized void resetProfiles()
 	{
@@ -694,14 +684,14 @@ public class ConnectionMgr
 			this.profilesChanged = false;
 		}
 	}
-	
+
 	/**
 	 * Save the connectioin profiles to an external file.
-	 * 
+	 *
 	 * This will also reset the changed flag for any modified or new
 	 * profiles. The name of the file defaults to <tt>WbProfiles.xml</tt>, but
 	 * can be defined in the configuration properties.
-	 * 
+	 *
 	 * @see workbench.resource.Settings#getProfileStorage()
 	 * @see WbPersistence#writeObject(Object)
 	 */
@@ -721,7 +711,7 @@ public class ConnectionMgr
 			}
 		}
 	}
-	
+
 	/**
 	 *	Returns true if any of the profile definitions has changed.
 	 *	(Or if a profile has been deleted or added)
@@ -739,7 +729,7 @@ public class ConnectionMgr
 		}
 		return false;
 	}
-	
+
 	/**
 	 *	This is called from the ProfileListModel when a new profile is added.
 	 *	The caller needs to make sure that the status is set to new if that
@@ -754,14 +744,14 @@ public class ConnectionMgr
 		this.profiles.add(aProfile);
 		this.profilesChanged = true;
 	}
-	
+
 	/**
 	 *	This is called from the ProfileListModel when a profile has been deleted
 	 */
 	public void removeProfile(ConnectionProfile aProfile)
 	{
 		if (this.profiles == null) return;
-		
+
 		this.profiles.remove(aProfile);
 		// deleting a new profile should not change the status to changed
 		if (!aProfile.isNew())
@@ -769,11 +759,11 @@ public class ConnectionMgr
 			this.profilesChanged = true;
 		}
 	}
-	
+
 	/**
 	 * When the property {@link Settings#PROPERTY_PROFILE_STORAGE} is changed
 	 * the current list of profiles is cleared.
-	 * 
+	 *
 	 * @param evt
 	 * @see #clearProfiles()
 	 */
@@ -784,5 +774,5 @@ public class ConnectionMgr
 			this.clearProfiles();
 		}
 	}
-	
+
 }

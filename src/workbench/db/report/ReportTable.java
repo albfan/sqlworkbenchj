@@ -257,7 +257,6 @@ public class ReportTable
 		if (col == null) return null;
 		if (columns == null)
 		{
-			System.out.println("ReportTable " + getTable().getTableName() +  " has no columns!");
 			return null;
 		}
 		ReportColumn result = null;

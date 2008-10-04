@@ -49,7 +49,7 @@ public class ScrollToColumnAction extends WbAction
 	
 	protected void scrollToColumn(String toFind)
 	{
-		if (StringUtil.isWhitespaceOrEmpty(toFind)) return;
+		if (StringUtil.isBlank(toFind)) return;
 
 		for (int idx = 0; idx < client.getModel().getColumnCount(); idx++)
 		{

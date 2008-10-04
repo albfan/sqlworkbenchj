@@ -43,10 +43,10 @@ public class ColumnExpression
 	 * @see #setFilterValue(Object)
 	 * @see #setComparator(ColumnComparator)
 	 */
-	public ColumnExpression(String column, ColumnComparator comparator, Object filterValue)
+	public ColumnExpression(String column, ColumnComparator comp, Object value)
 	{
-		setComparator(comparator);
-		setFilterValue(filterValue);
+		setComparator(comp);
+		setFilterValue(value);
 		setColumnName(column);
 	}
 
@@ -59,10 +59,10 @@ public class ColumnExpression
 	 * @see #setFilterValue(Object)
 	 * @see #setComparator(ColumnComparator)
 	 */
-	public ColumnExpression(ColumnComparator comparator, Object filterValue)
+	public ColumnExpression(ColumnComparator comp, Object value)
 	{
-		setComparator(comparator);
-		setFilterValue(filterValue);
+		setComparator(comp);
+		setFilterValue(value);
 		setColumnName("*");
 	}
 	
@@ -138,9 +138,9 @@ public class ColumnExpression
 		return ignoreCase;
 	}
 
-	public void setIgnoreCase(boolean ignoreCase)
+	public void setIgnoreCase(boolean ignore)
 	{
-		this.ignoreCase = ignoreCase;
+		this.ignoreCase = ignore;
 	}
 	
 	public boolean isColumnSpecific() 

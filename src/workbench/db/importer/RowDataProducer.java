@@ -22,7 +22,7 @@ import workbench.util.ValueConverter;
  */
 public interface RowDataProducer
 {
-	public static final String SKIP_INDICATOR = "$wb_skip$";
+	String SKIP_INDICATOR = "$wb_skip$";
 	
 	void setReceiver(RowDataReceiver receiver);
 	void start() throws Exception;

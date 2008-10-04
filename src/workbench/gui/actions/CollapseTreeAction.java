@@ -13,7 +13,6 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import workbench.gui.profiles.ProfileTree;
-import workbench.resource.ResourceMgr;
 
 /**
  * Action to collapse all nodes in the connection profile tree
@@ -24,7 +23,7 @@ public class CollapseTreeAction
 	extends WbAction
 {
 	private ProfileTree client;
-	
+
 	public CollapseTreeAction(ProfileTree tree)
 	{
 		super();
@@ -36,5 +35,5 @@ public class CollapseTreeAction
 	public void executeAction(ActionEvent e)
 	{
 		this.client.collapseAll();
-	}	
+	}
 }

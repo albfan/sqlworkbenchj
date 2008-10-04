@@ -58,21 +58,21 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class DwStatusBar 
+public class DwStatusBar
 	extends JPanel
 	implements StatusBar, EditorStatusbar, ActionListener, EventDisplay, MouseListener
 {
 	private JTextField tfRowCount;
 
 	protected WbTextLabel tfStatus;
-	
+
 	private JTextField tfMaxRows;
 	private String readyMsg;
 	private JTextField tfTimeout;
 	private WbTextLabel execTime;
 	private JLabel editorStatus;
 	private JPanel infoPanel;
-	
+
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
 	private DecimalFormat numberFormatter;
@@ -93,9 +93,10 @@ public class DwStatusBar
 	{
 		this(false, false);
 	}
-	
+
 	public DwStatusBar(boolean showTimeout, boolean showEditorStatus)
 	{
+		super();
 		Dimension d = new Dimension(40, FIELD_HEIGHT);
 		this.tfRowCount = new JTextField();
 		this.tfMaxRows = new JTextField(6);
@@ -125,14 +126,14 @@ public class DwStatusBar
 		tfRowCount.setPreferredSize(null);
 		tfRowCount.setAutoscrolls(false);
 		tfRowCount.setEnabled(false);
-		
+
 		this.tfStatus = new WbTextLabel();
 		tfStatus.setMaximumSize(new Dimension(32768, FIELD_HEIGHT));
 		tfStatus.setMinimumSize(new Dimension(80, FIELD_HEIGHT));
 		tfStatus.setPreferredSize(null);
 
 		this.add(tfStatus, BorderLayout.CENTER);
-		
+
 		JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0,0));
 		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
@@ -140,7 +141,7 @@ public class DwStatusBar
 		this.infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		p.add(infoPanel);
-		
+
 		this.execTime = new WbTextLabel();
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.execTime.setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
@@ -148,7 +149,7 @@ public class DwStatusBar
 		Font f = execTime.getFont();
 		FontMetrics fm = null;
 		if (f != null) fm = execTime.getFontMetrics(f);
-		
+
 		if (showTimer)
 		{
 			this.executionTimer = new Timer(timerInterval, this);
@@ -167,19 +168,19 @@ public class DwStatusBar
 			this.editorColPrefix = ResourceMgr.getString("LblEditorPosCol");
 			this.editorLinePrefix = ResourceMgr.getString("LblEditorPosLine");
 		}
-		
+
 		b = new CompoundBorder(new DividerBorder(DividerBorder.LEFT_RIGHT), new EmptyBorder(0, 3, 0, 3));
 		int width = (fm == null ? 100 : fm.stringWidth("000000000000s"));
 		d = new Dimension(width + 4, FIELD_HEIGHT);
 		execTime.setPreferredSize(d);
 		execTime.setMaximumSize(d);
-		execTime.setBorder(b);	
+		execTime.setBorder(b);
 		p.add(execTime);
-		
+
 		if (showTimeout)
 		{
 			JLabel l = new JLabel(" " + ResourceMgr.getString("LblQueryTimeout") + " ");
-			//l.setBorder(new DividerBorder(DividerBorder.LEFT));		
+			//l.setBorder(new DividerBorder(DividerBorder.LEFT));
 			p.add(l);
 			this.tfTimeout = new JTextField(3);
 			this.tfTimeout.setBorder(b);
@@ -199,7 +200,7 @@ public class DwStatusBar
 
 		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
-		
+
 		numberFormatter = DwStatusBar.createTimingFormatter();
 		EventNotifier.getInstance().addEventDisplay(this);
 	}
@@ -208,12 +209,12 @@ public class DwStatusBar
 	{
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
 		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
-		symb.setDecimalSeparator(sep.charAt(0));		
+		symb.setDecimalSeparator(sep.charAt(0));
 		DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
 		numberFormatter.setMaximumFractionDigits(2);
 		return numberFormatter;
 	}
-	
+
 	public void setReadyMsg(String aMsg)
 	{
 		if (aMsg == null)
@@ -243,7 +244,7 @@ public class DwStatusBar
 		 text.append(NumberStringCache.getNumberString(column));
 		 this.editorStatus.setText(text.toString());
 	}
-	
+
 	public void executionStart()
 	{
 		if (!showTimer) return;
@@ -251,14 +252,14 @@ public class DwStatusBar
 		executionTimer.setInitialDelay(timerDelay);
 		executionTimer.setDelay(timerInterval);
 		timerRunning = true;
-		executionTimer.start();	
+		executionTimer.start();
 	}
-	
+
 	public void executionEnd()
 	{
 		if (!showTimer) return;
 		timerRunning = false;
-		executionTimer.stop();		
+		executionTimer.stop();
 	}
 
 	private String formatDuration(long millis)
@@ -270,21 +271,21 @@ public class DwStatusBar
 		else
 			return timeFormatter.format(new java.util.Date(millis));
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (!timerRunning) return;
 		long time = System.currentTimeMillis() - timerStarted;
 		this.execTime.setText(formatDuration(time));
 	}
-	
+
 	public void setExecutionTime(long millis)
 	{
 		final long oneMinute = (1000 * 60);
 		final long oneHour = oneMinute * 60;
-		
+
 		if (timerRunning) executionEnd();
-		
+
 		// Access to the formatters is not synchronized
 		// as they setExecutionTime() will not be called
 		// from multiple Threads
@@ -305,7 +306,7 @@ public class DwStatusBar
 		}
 		this.execTime.repaint();
 	}
-	
+
 	public void setRowcount(int start, int end, int count)
 	{
 		final StringBuilder s = new StringBuilder(20);
@@ -323,7 +324,7 @@ public class DwStatusBar
 		tfRowCount.setText(s.toString());
 		refresh();
 	}
-	
+
 	private Runnable refresher = new Runnable()
 	{
 		public void run()
@@ -332,26 +333,26 @@ public class DwStatusBar
 			repaint();
 		}
 	};
-	
+
 	protected void refresh()
 	{
 		EventQueue.invokeLater(refresher);
 	}
-	
+
 	public void clearRowcount()
 	{
 		tfRowCount.setText("");
 		refresh();
 	}
 
-	public String getText() 
+	public String getText()
 	{
-		return this.tfStatus.getText(); 
+		return this.tfStatus.getText();
 	}
 
 	/**
 	 *	Show a message in the status panel.
-	 * 
+	 *
 	 *	This method might be called from within a background thread, so we
 	 *  need to make sure the actual setText() stuff is called on the AWT
 	 *  thread in order to update the GUI correctly.
@@ -362,12 +363,12 @@ public class DwStatusBar
 		if (aMsg == null) return;
 		tfStatus.setText(aMsg);
 	}
-	
+
 	public void forcePaint()
 	{
 		tfStatus.forcePaint();
 	}
-	
+
 	/**
 	 * Clears the status bar by displaying the default message.
 	 */
@@ -383,7 +384,7 @@ public class DwStatusBar
 			this.tfTimeout.setText(Integer.toString(timeout));
 		}
 	}
-	
+
 	public int getQueryTimeout()
 	{
 		if (this.tfTimeout == null) return 0;
@@ -425,7 +426,7 @@ public class DwStatusBar
 		w.show(notificationLabel);
 		WbSwingUtilities.repaintLater(this);
 	}
-	
+
 	public void removeAlert()
 	{
 		this.infoPanel.removeAll();
@@ -438,26 +439,26 @@ public class DwStatusBar
 	{
 		if (e.getSource() != this.notificationLabel) return;
 		if (this.notificationHandler == null) return;
-		
+
 		if (e.getButton() == MouseEvent.BUTTON1)
 		{
 			ActionEvent evt = new ActionEvent(this, -1, "notifierClicked");
 			this.notificationHandler.actionPerformed(evt);
 		}
 	}
-	
+
 	public void mousePressed(MouseEvent e)
 	{
 	}
-	
+
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-	
+
 	public void mouseEntered(MouseEvent e)
 	{
 	}
-	
+
 	public void mouseExited(MouseEvent e)
 	{
 	}

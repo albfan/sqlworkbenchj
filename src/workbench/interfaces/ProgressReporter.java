@@ -21,7 +21,7 @@ public interface ProgressReporter
 	 * The default progress interval when reporting 
 	 * progress of the export.
 	 */
-	public static final int DEFAULT_PROGRESS_INTERVAL = 10;
+	int DEFAULT_PROGRESS_INTERVAL = 10;
 	
 	/**
 	 * Define the interval in which progress messages are displayed.

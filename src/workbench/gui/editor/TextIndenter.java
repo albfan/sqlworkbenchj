@@ -13,20 +13,21 @@ package workbench.gui.editor;
 
 import javax.swing.text.BadLocationException;
 import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class TextIndenter 
+public class TextIndenter
 {
 	private JEditTextArea editor;
-	
+
 	public TextIndenter(JEditTextArea client)
 	{
 		this.editor = client;
 	}
-	
+
 	public void indentSelection()
 	{
 		this.shiftSelection(true);
@@ -36,7 +37,7 @@ public class TextIndenter
 	{
 		this.shiftSelection(false);
 	}
-	
+
 	private void shiftSelection(boolean indent)
 	{
 		int startline = editor.getSelectionStartLine();
@@ -50,14 +51,14 @@ public class TextIndenter
 		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
 		if (pos == 0) endline --;
 		SyntaxDocument document = editor.getDocument();
-		
+
 		try
 		{
 			document.beginCompoundEdit();
 			for (int line = startline; line <= endline; line ++)
 			{
 				String text = editor.getLineText(line);
-				if (text == null || text.trim().length() == 0) continue;
+				if (StringUtil.isBlank(text)) continue;
 				int lineStart = editor.getLineStartOffset(line);
 				if (indent)
 				{
@@ -88,5 +89,5 @@ public class TextIndenter
 			document.endCompoundEdit();
 		}
 	}
-	
+
 }

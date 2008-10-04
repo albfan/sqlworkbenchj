@@ -33,6 +33,7 @@ public class DataEditOptionsPanel
 
 	public DataEditOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 

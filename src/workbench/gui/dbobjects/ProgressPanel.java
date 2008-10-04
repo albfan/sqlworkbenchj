@@ -52,16 +52,17 @@ public class ProgressPanel
 
 	public ProgressPanel(Interruptable aWorker)
 	{
+		super();
 		this.task = aWorker;
 		initComponents();
 		setRowSize(20);
 	}
-	
+
 	public void setParentDialog(JDialog d)
 	{
 		parent = d;
 	}
-	
+
 	public void setRowInfo(long aRow)
 	{
 		this.rowInfo.setText(Long.toString(aRow));
@@ -101,7 +102,7 @@ public class ProgressPanel
 			parent.pack();
 		}
 	}
-	
+
 	public void setRowSize(int cols)
 	{
 		FontMetrics fm = this.getFontMetrics(this.getFont());
@@ -112,7 +113,7 @@ public class ProgressPanel
 		this.rowInfo.setMinimumSize(d);
 		updateLayout();
 	}
-	
+
 
 	public void setInfoSize(int cols)
 	{
@@ -159,18 +160,18 @@ public class ProgressPanel
 
 	public void saveCurrentType(String type) {}
 	public void restoreType(String type) {}
-	
+
 	public void setMonitorType(int aType)
 	{
 		monitorType = aType;
 	}
-	
+
 	public int getMonitorType()
 	{
 		return monitorType;
 	}
 
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

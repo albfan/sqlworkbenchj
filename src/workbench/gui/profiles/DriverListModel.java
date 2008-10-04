@@ -20,7 +20,6 @@ import javax.swing.ListModel;
 import javax.swing.event.ListDataListener;
 
 import workbench.db.DbDriver;
-import workbench.db.DbDriver;
 
 /**
  *
@@ -29,12 +28,11 @@ import workbench.db.DbDriver;
 class DriverListModel 
 	implements ListModel
 {
-	private ArrayList<DbDriver> drivers;
+	private List<DbDriver> drivers;
 	
 	public DriverListModel(List<DbDriver> aDriverList)
 	{
-		this.drivers = new ArrayList<DbDriver>(aDriverList.size());
-		this.drivers.addAll(0, aDriverList);
+		this.drivers = new ArrayList<DbDriver>(aDriverList);
 		Comparator<DbDriver> comp = new Comparator<DbDriver>()
 		{
 			public int compare(DbDriver o1, DbDriver o2)

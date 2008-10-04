@@ -70,7 +70,7 @@ import workbench.util.WbWorkspace;
 
 /**
  * A display for the results of a {@link workbench.db.TableSearcher}
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class TableSearchPanel
@@ -80,7 +80,6 @@ public class TableSearchPanel
 	private TableModel tableListModel;
 	private TableSearcher searcher;
 	private WbConnection connection;
-	private boolean tableLogged;
 	private String fixedStatusText;
 	private ShareableDisplay tableListSource;
 	private ColumnExpression searchPattern;
@@ -90,6 +89,7 @@ public class TableSearchPanel
 
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
+		super();
 		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
 		this.tableListSource = aTableListSource;
 		initComponents();
@@ -215,7 +215,6 @@ public class TableSearchPanel
 	 */
 	public synchronized void setCurrentTable(String table, String sql)
 	{
-		this.tableLogged = false;
 		if (sql == null)
 		{
 			String msg = ResourceMgr.getFormattedString("MsgNoCharCols", table);
@@ -460,7 +459,7 @@ public class TableSearchPanel
 			if (l != null) l.executionStart(this.connection, this);
 		}
 	}
-	
+
 	protected synchronized void fireDbExecEnd()
 	{
 		this.connection.executionEnd(this.connection, this);
@@ -470,7 +469,7 @@ public class TableSearchPanel
 			if (l != null) l.executionEnd(this.connection, this);
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

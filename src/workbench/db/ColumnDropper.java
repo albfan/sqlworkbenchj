@@ -119,7 +119,7 @@ public class ColumnDropper
 			result.append(sql);
 			result.append(";\n");
 			if (needCommit) result.append("COMMIT;\n");
-			result.append("\n");
+			result.append('\n');
 		}
 		return result;
 	}

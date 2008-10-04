@@ -39,7 +39,7 @@ import workbench.util.ToolDefinition;
  *
  * @author support@sql-workbench.net
  */
-public class ExternalToolsPanel 
+public class ExternalToolsPanel
 	extends JPanel
 	implements Restoreable, ListSelectionListener, FileActions,
 	           PropertyChangeListener
@@ -48,11 +48,12 @@ public class ExternalToolsPanel
 	private ToolDefinitionPanel definitionPanel;
 	private WbToolbar toolbar;
 	private DefaultListModel tools;
-	
+
 	public ExternalToolsPanel()
 	{
+		super();
 		setLayout(new BorderLayout());
-		
+
 		toolList = new JList();
 		toolList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		toolList.setBorder(new EmptyBorder(2,1,2,1));
@@ -65,14 +66,14 @@ public class ExternalToolsPanel
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new DeleteListEntryAction(this));
 		toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
-		
+
 		definitionPanel = new ToolDefinitionPanel();
-		
+
 		add(toolbar, BorderLayout.NORTH);
 		add(scroll, BorderLayout.WEST);
 		add(definitionPanel, BorderLayout.CENTER);
 	}
-	
+
 	public void saveSettings()
 	{
 		List<ToolDefinition> l = new LinkedList<ToolDefinition>();
@@ -83,7 +84,7 @@ public class ExternalToolsPanel
 		}
 		Settings.getInstance().setExternalTools(l);
 	}
-	
+
 	public void restoreSettings()
 	{
 		tools = new DefaultListModel();
@@ -96,7 +97,7 @@ public class ExternalToolsPanel
 		toolList.addListSelectionListener(this);
 		toolList.setSelectedIndex(0);
 	}
-	
+
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		ToolDefinition def = (ToolDefinition)toolList.getSelectedValue();
@@ -128,7 +129,7 @@ public class ExternalToolsPanel
 			ToolDefinition tool = new ToolDefinition("path_to_program", "New Tool");
 			tools.addElement(tool);
 			toolList.setSelectedIndex(tools.size()-1);
-			
+
 		}
 		catch (Exception e)
 		{

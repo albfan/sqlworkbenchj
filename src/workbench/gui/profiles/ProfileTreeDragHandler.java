@@ -12,8 +12,6 @@
 package workbench.gui.profiles;
 
 import java.awt.Point;
-import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
@@ -38,7 +36,7 @@ import workbench.log.LogMgr;
  * Handle drag and drop in the profile Tree
  * @author support@sql-workbench.net
  */
-class ProfileTreeDragHandler 
+class ProfileTreeDragHandler
 	implements DragSourceListener, DragGestureListener, DropTargetListener
 {
 	private DropTarget dropTarget;
@@ -46,7 +44,7 @@ class ProfileTreeDragHandler
 	private DragGestureRecognizer recognizer;
 	private ProfileTree profileTree;
 	private TreePath[] draggedProfiles;
-	
+
 	public ProfileTreeDragHandler(ProfileTree tree, int actions)
 	{
 		profileTree = tree;
@@ -54,24 +52,24 @@ class ProfileTreeDragHandler
 		dropTarget = new DropTarget(profileTree, this);
 		recognizer = dragSource.createDefaultDragGestureRecognizer(profileTree, actions, this);
 	}
-	
+
 	public void dragGestureRecognized(DragGestureEvent dge)
 	{
 		if (!profileTree.onlyProfilesSelected()) return;
-		
+
 		// For some reason the TreePaths stored in the TransferableProfileNode
 		// are losing their UserObjects, so I'm storing them as a variable
-		// as well (as all Drag&Drop processing is done in this class anyway, 
+		// as well (as all Drag&Drop processing is done in this class anyway,
 		// that should not do any harm.
 		draggedProfiles = profileTree.getSelectionPaths();
 		TransferableProfileNode transferable = new TransferableProfileNode(draggedProfiles);
-		
+
 		dragSource.startDrag(dge, DragSource.DefaultMoveNoDrop, transferable, this);
 		setCurrentDropTargetItem(null);
 	}
-	
+
 	// ------------ DragSourceListener ---------------------
-	
+
 	private void handleDragSourceEvent(DragSourceDragEvent dsde)
 	{
 		int action = dsde.getDropAction();
@@ -91,27 +89,27 @@ class ProfileTreeDragHandler
 			}
 		}
 	}
-	
+
 	public void dragEnter(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
-	
+
 	public void dragExit(DragSourceEvent dse)
 	{
 		dse.getDragSourceContext().setCursor(DragSource.DefaultMoveNoDrop);
 	}
-	
+
 	public void dragOver(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
-	
+
 	public void dropActionChanged(DragSourceDragEvent dsde)
 	{
 		handleDragSourceEvent(dsde);
 	}
-	
+
 	public void dragDropEnd(DragSourceDropEvent dsde)
 	{
 		setCurrentDropTargetItem(null);
@@ -122,16 +120,16 @@ class ProfileTreeDragHandler
 	{
 		Point p = dtde.getLocation();
 		profileTree.autoscroll(p);
-		
+
 		TreePath path = profileTree.getClosestPathForLocation(p.x, p.y);
-		
-		if (path == null) 
+
+		if (path == null)
 		{
 			dtde.rejectDrag();
 			setCurrentDropTargetItem(null);
 			return;
 		}
-		
+
 		TreeNode node = (TreeNode)path.getLastPathComponent();
 		if (node.getAllowsChildren())
 		{
@@ -144,48 +142,47 @@ class ProfileTreeDragHandler
 			setCurrentDropTargetItem(null);
 		}
 	}
-	
+
 	private void setCurrentDropTargetItem(Object item)
 	{
 		ProfileTreeCellRenderer rend = (ProfileTreeCellRenderer)profileTree.getCellRenderer();
 		rend.setDropTargetItem(item);
 		profileTree.repaint();
 	}
-	
+
 	public void dragEnter(DropTargetDragEvent dtde)
 	{
 		handleDragTargetEvent(dtde);
 	}
-	
+
 	public void dragOver(DropTargetDragEvent dtde)
 	{
 		handleDragTargetEvent(dtde);
 	}
-	
+
 	public void dragExit(DropTargetEvent dte)
 	{
 		setCurrentDropTargetItem(null);
 	}
-	
+
 	public void dropActionChanged(DropTargetDragEvent dtde)
 	{
 	}
-	
+
 	public void drop(DropTargetDropEvent dtde)
 	{
 		Point pt = dtde.getLocation();
-		DropTargetContext dtc = dtde.getDropTargetContext();
-		
+
 		TreePath parentpath = profileTree.getClosestPathForLocation(pt.x, pt.y);
 		DefaultMutableTreeNode parent = (DefaultMutableTreeNode) parentpath.getLastPathComponent();
-		
+
 		if (!parent.getAllowsChildren() || draggedProfiles == null)
 		{
 			dtde.rejectDrop();
 			dtde.dropComplete(false);
 			return;
 		}
-		
+
 		try
 		{
 			DefaultMutableTreeNode[] nodes = new DefaultMutableTreeNode[draggedProfiles.length];

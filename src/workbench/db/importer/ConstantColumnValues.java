@@ -35,7 +35,7 @@ public class ConstantColumnValues
 	// I'm using two arraylists to ensure that the
 	// order of the columns is always maintained.
 	private List<ColumnData> columnValues;
-	
+
 	/**
 	 * Parses a parameter value for column value definitions.
 	 * e.g. description=something,firstname=arthur
@@ -51,7 +51,7 @@ public class ConstantColumnValues
 		if (tableColumns.size() == 0) throw new SQLException("Table '" + tablename + "' not found!");
 		init(parameterValue, tableColumns, converter);
 	}
-	
+
 	/**
 	 * For Unit-Testing without a Database Connection
 	 */
@@ -60,16 +60,16 @@ public class ConstantColumnValues
 	{
 		init(parameterValue, targetColumns, new ValueConverter());
 	}
-	
-	
+
+
 	protected void init(String parameterValue, List<ColumnIdentifier> tableColumns, ValueConverter converter)
 		throws SQLException, ConverterException
 	{
 		if (parameterValue == null) return;
-		
+
 		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
 		if (entries.size() == 0) return;
-		
+
 		this.columnValues = new ArrayList<ColumnData>(entries.size());
 
 		for (String entry : entries)
@@ -117,7 +117,7 @@ public class ConstantColumnValues
 			}
 		}
 	}
-	
+
 	private ColumnIdentifier findColumn(List<ColumnIdentifier> columns, String name)
 	{
 		for (ColumnIdentifier col : columns)
@@ -126,21 +126,21 @@ public class ConstantColumnValues
 		}
 		return null;
 	}
-	
+
 	public String getFunctionLiteral(int index)
 	{
 		if (!this.isFunctionCall(index)) return null;
 		String value = (String)this.getValue(index);
-		
+
 		// The function call is enclosed in ${...}
 		return value.substring(2, value.length() - 1);
 	}
-	
+
 	public boolean isFunctionCall(int index)
 	{
 		Object value = this.getValue(index);
 		if (value == null) return false;
-		
+
 		if (value instanceof String)
 		{
 			String f = (String)value;
@@ -148,28 +148,28 @@ public class ConstantColumnValues
 		}
 		return false;
 	}
-	
+
 	public int getColumnCount()
 	{
 		if (this.columnValues == null) return 0;
 		return this.columnValues.size();
 	}
-	
+
 	public ColumnIdentifier getColumn(int index)
 	{
 		return this.columnValues.get(index).getIdentifier();
 	}
-	
+
 	public Object getValue(int index)
 	{
 		return this.columnValues.get(index).getValue();
 	}
-	
+
 	public boolean removeColumn(ColumnIdentifier col)
 	{
 		if (this.columnValues == null) return false;
 		if (col == null) return false;
-		
+
 		int index = -1;
 		for (int i=0; i < this.columnValues.size(); i++)
 		{
@@ -179,21 +179,20 @@ public class ConstantColumnValues
 				break;
 			}
 		}
-		
+
 		if (index > -1)
 		{
 			this.columnValues.remove(index);
 		}
 		return (index > -1);
 	}
-	
+
 	public void setParameter(PreparedStatement pstmt, int statementIndex, int columnIndex)
 		throws SQLException
 	{
 		ColumnIdentifier col = getColumn(columnIndex);
 		Object value = getValue(columnIndex);
-		int type = col.getDataType();
-		
+
 		// If the column value is a function call, this will not
 		// be used in a prepared statement. It is expected that the caller
 		// (that prepared the statement) inserted the literal value of the

@@ -27,11 +27,6 @@ public class HtmlRowDataConverter
 	private boolean createFullPage = true;
 	private boolean escapeHtml = false;
 
-	public HtmlRowDataConverter()
-	{
-		super();
-	}
-	
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer html = new StrBuffer("</table>\n");
@@ -43,12 +38,12 @@ public class HtmlRowDataConverter
 	{
 		this.createFullPage = flag;
 	}
-	
+
 	public void setPageTitle(String title)
 	{
 		this.pageTitle = title;
 	}
-	
+
 	public void setEscapeHtml(boolean flag)
 	{
 		this.escapeHtml = flag;
@@ -104,17 +99,17 @@ public class HtmlRowDataConverter
 	public StrBuffer getStart()
 	{
 		StrBuffer result = new StrBuffer(250);
-		
+
 		if (createFullPage)
 		{
 			result.append("<html>\n");
-			
+
 			if (pageTitle != null && pageTitle.length() > 0)
 			{
 				result.append("<head>\n<title>");
 				result.append(pageTitle);
 				result.append("</title>\n");
-			}			
+			}
 			result.append("<style type=\"text/css\">\n");
 			result.append("<!--\n");
 			result.append("  table { border-spacing:0; border-collapse:collapse}\n");

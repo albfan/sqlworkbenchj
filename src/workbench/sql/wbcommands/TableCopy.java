@@ -31,36 +31,28 @@ import workbench.util.StringUtil;
  *
  * @author support@sql-workbench.net
  */
-public class TableCopy 
+public class TableCopy
 	implements CopyTask
 {
-	private WbConnection sourceConnection;
-	private WbConnection targetConnection;
 	private DataCopier copier;
-	
-	public TableCopy()
-	{
-	}
-	
+
 	public void copyData()
 		throws SQLException, Exception
 	{
 		this.copier.startCopy();
 	}
 
-	public boolean init(WbConnection source, WbConnection target, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
+	public boolean init(WbConnection sourceConnection, WbConnection targetConnection, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException
 	{
-		this.sourceConnection = source;
-		this.targetConnection = target;
-		
+
 		String sourcetable = cmdLine.getValue(WbCopy.PARAM_SOURCETABLE);
 		String sourcequery = cmdLine.getValue(WbCopy.PARAM_SOURCEQUERY);
 		String targettable = cmdLine.getValue(WbCopy.PARAM_TARGETTABLE);
-		
+
 		boolean delete = cmdLine.getBoolean(WbCopy.PARAM_DELETETARGET);
 		boolean cont = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
-		
+
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		String keys = cmdLine.getValue(WbCopy.PARAM_KEYS);
@@ -80,11 +72,11 @@ public class TableCopy
 		CommonArgs.setProgressInterval(copier, cmdLine);
 		copier.setRowActionMonitor(monitor);
 		copier.setContinueOnError(cont);
-		
+
 		CommonArgs.setCommitAndBatchParams(copier, cmdLine);
-		
+
 		copier.setDeleteTarget(delete);
-		
+
 		TableIdentifier targetId = new TableIdentifier(targettable);
 		targetId.setNewTable(createTable);
 
@@ -126,7 +118,7 @@ public class TableCopy
 			this.copier.cancel();
 		}
 	}
-	
+
 	private ColumnIdentifier[] parseColumns(ArgumentParser cmdLine, String sourceQuery, WbConnection sourceCon)
 	{
 		// First read the defined columns from the passed parameter
@@ -170,7 +162,7 @@ public class TableCopy
 
 		List l = StringUtil.stringToList(cols, ",");
 		int count = l.size();
-		
+
 		// Use a LinkedHashMap to make sure the order of the columns
 		// are preserved (in case -createTable) was also specified
 		Map<String, String> mapping = new LinkedHashMap<String, String>();
@@ -192,5 +184,5 @@ public class TableCopy
 		}
 		return mapping;
 	}
-	
+
 }

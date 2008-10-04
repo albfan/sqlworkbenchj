@@ -12,9 +12,6 @@
 package workbench.util;
 
 import junit.framework.*;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.Writer;
 
 /**
  *
@@ -22,7 +19,7 @@ import java.io.Writer;
  */
 public class ByteBufferTest extends TestCase
 {
-	
+
 	public ByteBufferTest(String testName)
 	{
 		super(testName);
@@ -53,11 +50,11 @@ public class ByteBufferTest extends TestCase
 			byte[] more = new byte[20];
 			buffer.append(more);
 			l = buffer.getLength();
-			assertEquals("Wrong buffer size", 2068, l);			
-			
+			assertEquals("Wrong buffer size", 2068, l);
+
 			more = new byte[2345];
 			buffer.append(more);
-			assertEquals("Wrong buffer size", 2068 + 2345, buffer.getLength());			
+			assertEquals("Wrong buffer size", 2068 + 2345, buffer.getLength());
 		}
 		catch (Exception e)
 		{
@@ -65,5 +62,5 @@ public class ByteBufferTest extends TestCase
 			fail();
 		}
 	}
-	
+
 }

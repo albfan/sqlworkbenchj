@@ -17,15 +17,15 @@ package workbench.storage;
  */
 public interface RowActionMonitor
 {
-	final int MONITOR_INSERT = 0;
-	final int MONITOR_UPDATE = 1;
-	final int MONITOR_LOAD = 2;
-	final int MONITOR_EXPORT = 3;
-	final int MONITOR_COPY = 4;
-	final int MONITOR_PROCESS_TABLE = 5;
-	final int MONITOR_PROCESS = 6;
-	final int MONITOR_PLAIN = 7;
-	final int MONITOR_DELETE = 8;
+	int MONITOR_INSERT = 0;
+	int MONITOR_UPDATE = 1;
+	int MONITOR_LOAD = 2;
+	int MONITOR_EXPORT = 3;
+	int MONITOR_COPY = 4;
+	int MONITOR_PROCESS_TABLE = 5;
+	int MONITOR_PROCESS = 6;
+	int MONITOR_PLAIN = 7;
+	int MONITOR_DELETE = 8;
 
 	void setMonitorType(int aType);
 	int getMonitorType();

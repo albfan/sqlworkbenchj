@@ -62,7 +62,6 @@ public class StatementRunner
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
 	private Savepoint savepoint;
-	private boolean confirmUpdates = false;
 	private boolean returnOnlyErrorMessages = false;
 	
 	public StatementRunner()
@@ -192,7 +191,6 @@ public class StatementRunner
     {
       this.ignoreDropErrors = profile.getIgnoreDropErrors();
       this.removeComments = profile.getRemoveComments();
-      this.confirmUpdates = profile.getConfirmUpdates();
       this.hideWarnings = profile.isHideWarnings();
     }
     

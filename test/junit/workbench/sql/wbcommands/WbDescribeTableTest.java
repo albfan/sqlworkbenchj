@@ -30,11 +30,6 @@ public class WbDescribeTableTest extends TestCase
 		super(testName);
 	}
 
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-	}
-
 	protected void tearDown() throws Exception
 	{
 		ConnectionMgr.getInstance().disconnectAll();

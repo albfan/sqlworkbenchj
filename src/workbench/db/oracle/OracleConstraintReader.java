@@ -37,10 +37,6 @@ public class OracleConstraintReader
            " and owner = ? \n" +
            " and table_name = ?  \n";
 
-	public OracleConstraintReader()
-	{
-	}
-
 	public int getIndexForSchemaParameter()
 	{
 		return 1;
@@ -114,13 +110,13 @@ public class OracleConstraintReader
 	}
 
 	/**
-	 * Checks if the constraint definition is a "default" Not null definition 
-	 * as created by Oracle. Those constraints will be included in the column 
+	 * Checks if the constraint definition is a "default" Not null definition
+	 * as created by Oracle. Those constraints will be included in the column
 	 * definition already and do not need to be returned.
-	 * but a definition like COL_1 IS NOT NULL OR COL_2 IS NOT NULL must 
+	 * but a definition like COL_1 IS NOT NULL OR COL_2 IS NOT NULL must
 	 * not be treated as a "default" constraint.
-	 * 
-	 * A "default" NN constraint is assumed if an identifier is 
+	 *
+	 * A "default" NN constraint is assumed if an identifier is
 	 * immediately followed by the keyword IS NOT NULL and no further
 	 * definitions exist.
 	 */
@@ -131,19 +127,19 @@ public class OracleConstraintReader
 			SQLLexer lexer = new SQLLexer(definition);
 			SQLToken tok = lexer.getNextToken(false, false);
 			if (tok == null) return false;
-			
+
 			if (!tok.isIdentifier()) return false;
-			
+
 			// If no further tokens exist, this cannot be a not null constraint
 			tok = lexer.getNextToken(false, false);
 			if (tok == null) return false;
-			
+
 			SQLToken tok2 = lexer.getNextToken(false, false);
 			if (tok2 == null)
 			{
 				return "IS NOT NULL".equalsIgnoreCase(tok.getContents());
 			}
-			else 
+			else
 			{
 				return false;
 			}

@@ -85,7 +85,6 @@ public class DataPumperTest
 		chooser.setName("profileTree");
 
 		JTreeOperator tree = new JTreeOperator(dialog, chooser);
-		TreeModel model = tree.getModel();
 		tree.selectRow(profileIndex);
 		new JButtonOperator(dialog, "OK").push();
 
@@ -101,9 +100,9 @@ public class DataPumperTest
 		JFrameOperator mainWindow = new JFrameOperator("Data Pumper");
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("sourceTable");
-		
+
 		final JComboBoxOperator srctbl = new JComboBoxOperator(mainWindow, chooser);
-		
+
 		tool.invokeAndWait(new Runnable()
 		{
 			public void run()
@@ -111,7 +110,7 @@ public class DataPumperTest
 				srctbl.setSelectedIndex(0);
 			}
 		});
-		
+
 		tool.waitEmpty();
 		try
 		{
@@ -126,7 +125,7 @@ public class DataPumperTest
 		chooser.setName("targetTable");
 		final JComboBoxOperator targettbl = new JComboBoxOperator(mainWindow, chooser);
 		assertEquals(2, targettbl.getItemCount());
-		
+
 		tool.invokeAndWait(new Runnable()
 		{
 			public void run()
@@ -134,7 +133,7 @@ public class DataPumperTest
 				targettbl.setSelectedIndex(1);
 			}
 		});
-		
+
 		tool.waitEmpty();
 
 		chooser.setName("modeSelector");
@@ -168,7 +167,7 @@ public class DataPumperTest
 		JButtonOperator start = new JButtonOperator(mainWindow, chooser);
 		start.push();
 		tool.waitEmpty();
-		
+
 		// Wait until copy has finished
 		int count = 0;
 		int sleepTime = 50;
@@ -177,7 +176,7 @@ public class DataPumperTest
 			Thread.yield();
 			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
 			count ++;
-			if (count * sleepTime > 5000) 
+			if (count * sleepTime > 5000)
 			{
 				System.out.println("*** Cancelling wait !!!!!");
 				break;
@@ -185,12 +184,12 @@ public class DataPumperTest
 		}
 		tool.waitEmpty();
 	}
-	
+
 	public void checkData()
 	{
 		WbConnection target = ConnectionMgr.getInstance().findConnection("Dp-Target");
 		assertNotNull(target);
-		
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		try
@@ -215,7 +214,7 @@ public class DataPumperTest
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-		}		
+		}
 	}
 
 	public void waitUntilConnected(DataPumper pumper)
@@ -239,7 +238,7 @@ public class DataPumperTest
 		JButtonOperator close = new JButtonOperator(mainWindow, chooser);
 		close.push();
 	}
-	
+
 	public void testDataPumper()
 	{
 		try

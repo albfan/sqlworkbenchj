@@ -193,7 +193,7 @@ public class GuiSettings
 
 	public static void setTitleGroupSeparator(String sep)
 	{
-		if (StringUtil.isEmptyString(sep) || sep.trim().length() == 0) sep = "XXX";
+		if (StringUtil.isBlank(sep)) sep = "XXX";
 		Settings.getInstance().setProperty("workbench.gui.display.titlegroupsep", sep);
 	}
 

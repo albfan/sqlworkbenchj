@@ -28,28 +28,29 @@ public class WbHideWarnings
 	extends SqlCommand
 {
 	public static final String VERB = "WBHIDEWARNINGS";
-	
+
 	public WbHideWarnings()
 	{
+		super();
 		this.cmdLine = new ArgumentParser(false);
 		this.cmdLine.addArgument("on");
 		this.cmdLine.addArgument("off");
 	}
 
 	public String getVerb() { return VERB; }
-	
+
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		
+
 		SQLLexer lexer = new SQLLexer(sql);
 		// Skip the SQL Verb
 		SQLToken token = lexer.getNextToken(false, false);
-		
+
 		// get the parameter
 		token = lexer.getNextToken(false, false);
 		String parm = (token != null ? token.getContents() : null);
@@ -68,7 +69,7 @@ public class WbHideWarnings
 				this.runner.setHideWarnings(StringUtil.stringToBool(parm));
 			}
 		}
-		
+
 		if (runner.getHideWarnings())
 		{
 			result.addMessage(ResourceMgr.getString("MsgWarningsDisabled"));
@@ -79,5 +80,5 @@ public class WbHideWarnings
 		}
 		return result;
 	}
-	
+
 }

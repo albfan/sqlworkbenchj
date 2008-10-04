@@ -258,7 +258,6 @@ public class SqlPanel
 	protected ConnectionInfo connectionInfo;
 
 	protected WbConnection dbConnection;
-	private Connectable connectionClient;
 	
 	private final Object connectionLock = new Object();
 	
@@ -347,7 +346,6 @@ public class SqlPanel
 
 	public void setConnectionClient(Connectable client)
 	{
-		this.connectionClient = client;
 	}
 
 	public boolean getAppendResults() 
@@ -960,7 +958,7 @@ public class SqlPanel
 			fireDbExecEnd();
 			WbSwingUtilities.showDefaultCursor(this);
 		}
-		appendToLog(this.currentData.getLastMessage());
+//		appendToLog(this.currentData.getLastMessage());
 		this.checkResultSetActions();
 	}
 
@@ -1458,27 +1456,25 @@ public class SqlPanel
 			{
 				String msg = ResourceMgr.getString("MsgCommitPartialUpdate");
 				WbSwingUtilities.TransactionEnd action = WbSwingUtilities.getCommitRollbackQuestion(this, msg);
+				try
 				{
-					try
+					if (action == WbSwingUtilities.TransactionEnd.Rollback)
 					{
-						if (action == WbSwingUtilities.TransactionEnd.Rollback)
-						{
-							this.dbConnection.commit();
-							ds.resetStatusForSentRows();
-						}
-						else
-						{
-							this.dbConnection.rollback();
-							ds.resetDmlSentStatus();
-						}
+						this.dbConnection.commit();
+						ds.resetStatusForSentRows();
+					}
+					else
+					{
+						this.dbConnection.rollback();
+						ds.resetDmlSentStatus();
+					}
 
-					}
-					catch (SQLException e)
-					{
-						LogMgr.logError("SqlPanel.cancelExecution()", "Commit failed!", e);
-						msg = e.getMessage();
-						WbSwingUtilities.showErrorMessage(this, msg);
-					}
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("SqlPanel.cancelExecution()", "Commit failed!", e);
+					msg = e.getMessage();
+					WbSwingUtilities.showErrorMessage(this, msg);
 				}
 				this.currentData.rowCountChanged();
 				WbSwingUtilities.repaintLater(this);
@@ -1517,7 +1513,7 @@ public class SqlPanel
 		if (this.executionThread == null) return true;
 
 		boolean success = false;
-		int wait = Settings.getInstance().getIntProperty(this.getClass().getName() + ".abortwait", 1);
+		long wait = Settings.getInstance().getIntProperty(this.getClass().getName() + ".abortwait", 1);
 		try
 		{
 			LogMgr.logDebug("SqlPanel.abortExecution()", "Interrupting SQL Thread...");
@@ -1745,7 +1741,7 @@ public class SqlPanel
 
 		MacroManager mgr = MacroManager.getInstance();
 		String sql = mgr.getMacroText(macroName);
-		if (sql == null || sql.trim().length() == 0) return;
+		if (StringUtil.isBlank(sql)) return;
 
 		if (mgr.hasSelectedKey(sql))
 		{

@@ -77,7 +77,7 @@ public class DisplayLocale
 			{
 				s.append(" (");
 				s.append(country);
-				s.append(")");
+				s.append(')');
 			}
 			this.display = s.toString();
 		}

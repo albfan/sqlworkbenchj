@@ -13,20 +13,19 @@ package workbench.gui.dialogs.export;
 
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.gui.dialogs.export.XmlOptions;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class XmlOptionsPanel 
+public class XmlOptionsPanel
 	extends javax.swing.JPanel
 	implements XmlOptions
 {
-	
-	/** Creates new form XmlOptionsPanel */
+
 	public XmlOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 
@@ -37,7 +36,7 @@ public class XmlOptionsPanel
 		s.setProperty("workbench.export.xml.verbosexml", this.getUseVerboseXml());
 		s.setProperty("workbench.export.xml.xmlversion", getXMLVersion());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -53,7 +52,7 @@ public class XmlOptionsPanel
 			xml11.setSelected(true);
 		}
 	}
-	
+
 	public String getXMLVersion()
 	{
 		if (xml11.isSelected())
@@ -62,27 +61,27 @@ public class XmlOptionsPanel
 		}
 		return "1.0";
 	}
-	
+
 	public boolean getUseVerboseXml()
 	{
 		return this.verboseXmlCheckBox.isSelected();
 	}
-	
+
 	public void setUseVerboseXml(boolean flag)
 	{
 		this.verboseXmlCheckBox.setSelected(flag);
 	}
-	
+
 	public boolean getUseCDATA()
 	{
 		return useCdata.isSelected();
 	}
-	
+
 	public void setUseCDATA(boolean flag)
 	{
 		useCdata.setSelected(flag);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -138,8 +137,8 @@ public class XmlOptionsPanel
     gridBagConstraints.weighty = 1.0;
     add(xml11, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox useCdata;
   private javax.swing.JCheckBox verboseXmlCheckBox;
@@ -147,5 +146,5 @@ public class XmlOptionsPanel
   private javax.swing.JRadioButton xml10;
   private javax.swing.JRadioButton xml11;
   // End of variables declaration//GEN-END:variables
-	
+
 }

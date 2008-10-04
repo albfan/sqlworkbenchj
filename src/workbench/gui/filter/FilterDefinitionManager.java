@@ -30,7 +30,7 @@ import workbench.util.WbPersistence;
  */
 public class FilterDefinitionManager
 {
-	private LinkedList<PropertyChangeListener> listeners;
+	private List<PropertyChangeListener> listeners;
 	private FixedSizeList<WbFile> filterFiles;
 	private static final int DEFAULT_MAX_SIZE = 15;
 	
@@ -113,7 +113,7 @@ public class FilterDefinitionManager
 	private synchronized void firePropertyChanged()
 	{
 		if (this.listeners == null) return;
-		PropertyChangeEvent evt = new PropertyChangeEvent(this, "mruList", null, new Integer(filterFiles.size()));
+		PropertyChangeEvent evt = new PropertyChangeEvent(this, "mruList", null, Integer.valueOf(filterFiles.size()));
 		for(PropertyChangeListener l : listeners)
 		{
 			if (l == null) continue;

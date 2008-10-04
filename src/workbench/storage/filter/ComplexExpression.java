@@ -23,10 +23,6 @@ public abstract class ComplexExpression
 {
 	protected List<FilterExpression> filter = new LinkedList<FilterExpression>();
 	
-	public ComplexExpression()
-	{
-	}
-
 	public void addExpression(FilterExpression expr)
 	{
 		filter.add(expr);

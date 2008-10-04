@@ -30,14 +30,17 @@ import workbench.util.SqlUtil;
 public abstract class AbstractConstraintReader
 	implements ConstraintReader
 {
-	public AbstractConstraintReader()
-	{
-	}
-
 	public abstract String getColumnConstraintSql();
 	public abstract String getTableConstraintSql();
-	public String getPrefixTableConstraintKeyword() { return ""; }
-	public String getSuffixTableConstraintKeyword() { return ""; }
+	public String getPrefixTableConstraintKeyword()
+	{
+		return "";
+	}
+	
+	public String getSuffixTableConstraintKeyword()
+	{
+		return "";
+	}
 
 	public boolean isColumnConstraintNameIncluded() { return false; }
 	public boolean isTableConstraintNameIncluded() { return false; }
@@ -98,7 +101,7 @@ public abstract class AbstractConstraintReader
 		}
 		finally
 		{
-			SqlUtil.closeResult(rs);
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}

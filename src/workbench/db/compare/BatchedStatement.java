@@ -27,7 +27,6 @@ public class BatchedStatement
 	private PreparedStatement statement;
 	private int batchSize;
 	private int currentSize;
-	private boolean commitBatch = false;
 
 	public BatchedStatement(PreparedStatement pstmt, WbConnection conn)
 	{
@@ -53,11 +52,6 @@ public class BatchedStatement
 			this.batchSize = 1;
 		}
 		this.currentSize = 0;
-	}
-
-	public void setCommitBatch(boolean flag)
-	{
-		this.commitBatch = flag;
 	}
 
 	public void setObject(int index, Object value)

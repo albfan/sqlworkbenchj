@@ -290,7 +290,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.8 $ \n" + 
+					 "* $Revision: 1.9 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 
@@ -487,7 +487,7 @@ public class SqlUtilTest
 		{
 //			System.out.println("Checking if all types defined by java.sql.Types are covered by getTypeName()...");
 //			System.out.println(System.getProperty("java.version"));
-			Field fields[] = java.sql.Types.class.getDeclaredFields();
+			Field[] fields = java.sql.Types.class.getDeclaredFields();
 			boolean missing = false;
 			for (int i=0; i < fields.length; i++)
 			{

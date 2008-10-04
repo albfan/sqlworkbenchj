@@ -18,14 +18,15 @@ import workbench.resource.Settings;
  *
  * @author  support@sql-workbench.net
  */
-public class SpreadSheetOptionsPanel 
+public class SpreadSheetOptionsPanel
 	extends javax.swing.JPanel
 	implements SpreadSheetOptions
 {
 	private String exportType;
-	
+
 	public SpreadSheetOptionsPanel(String type)
 	{
+		super();
 		exportType = type;
 		initComponents();
 	}
@@ -36,7 +37,7 @@ public class SpreadSheetOptionsPanel
 		s.setProperty("workbench.export." + exportType + ".pagetitle", this.getPageTitle());
 		s.setProperty("workbench.export." + exportType + ".header", getExportHeaders());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -45,17 +46,17 @@ public class SpreadSheetOptionsPanel
 		boolean header = s.getBoolProperty("workbench.export." + exportType + ".header", headerDefault);
 		this.setExportHeaders(header);
 	}
-	
+
 	public boolean getExportHeaders()
 	{
 		return exportHeaders.isSelected();
 	}
-	
+
 	public void setExportHeaders(boolean flag)
 	{
 		exportHeaders.setSelected(flag);
 	}
-	
+
 	public String getPageTitle()
 	{
 		return pageTitle.getText();
@@ -65,7 +66,7 @@ public class SpreadSheetOptionsPanel
 	{
 		pageTitle.setText(title);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -111,13 +112,13 @@ public class SpreadSheetOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(7, 6, 3, 6);
     add(exportHeaders, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox exportHeaders;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JTextField pageTitle;
   private javax.swing.JLabel pageTitleLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

@@ -49,10 +49,10 @@ public class ObjectScripterUI
 	private boolean isRunning;
 	private final Object runMonitor = new Object();
 
-	public ObjectScripterUI(Scripter scripter)
+	public ObjectScripterUI(Scripter script)
 	{
 		super();
-		this.scripter = scripter;
+		this.scripter = script;
 		this.scripter.setProgressMonitor(this);
 
 		this.statusMessage = new JLabel("");

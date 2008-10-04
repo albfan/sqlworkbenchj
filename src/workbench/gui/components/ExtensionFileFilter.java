@@ -30,12 +30,13 @@ public class ExtensionFileFilter
 	extends FileFilter
 {
 	// The created FileFilters are stored in variables
-	// as in some cases it is necessary to access the 
+	// as in some cases it is necessary to access the
 	// instance (e.g. for JFileChooser.setFileFilter()
 	private static Map<String, FileFilter> filters = new HashMap<String, FileFilter>();
 	private static FileFilter jarFileFilter;
 	private static FileFilter sqlUpdateFileFilter;
-	
+	private static FileFilter sqlInsertDeleteFilter;
+
 	private List<String> extensions;
 	private String desc;
 	public static final String SQL_EXT = "sql";
@@ -51,12 +52,13 @@ public class ExtensionFileFilter
 
 	public ExtensionFileFilter(String aDescription, String extension, boolean ignore)
 	{
+		super();
 		this.desc = aDescription;
 		this.extensions = new ArrayList<String>();
 		this.extensions.add(extension);
 		this.ignoreCase = ignore;
 	}
-	
+
 	public ExtensionFileFilter(String aDescription, List<String> anExtensionList)
 	{
 		this(aDescription, anExtensionList, true);
@@ -64,6 +66,7 @@ public class ExtensionFileFilter
 
 	public ExtensionFileFilter(String aDescription, List<String> anExtensionList, boolean ignoreCase)
 	{
+		super();
 		this.desc = aDescription;
 		this.extensions = anExtensionList;
 		this.ignoreCase = ignoreCase;
@@ -73,7 +76,7 @@ public class ExtensionFileFilter
 	{
 		return this.extensions.contains(extension);
 	}
-	
+
 	public String getDefaultExtension()
 	{
 		return this.extensions.get(0);
@@ -83,7 +86,7 @@ public class ExtensionFileFilter
 	{
 		return getExtension(f.getName());
 	}
-	
+
 	public static String getExtension(String s)
 	{
 		WbFile f = new WbFile(s);
@@ -133,7 +136,7 @@ public class ExtensionFileFilter
 		{
 			for (int i=0; i < this.extensions.size(); i ++)
 			{
-				if (extension.equalsIgnoreCase(this.extensions.get(i).toString())) return true;
+				if (extension.equalsIgnoreCase(this.extensions.get(i))) return true;
 			}
 		}
 
@@ -156,6 +159,16 @@ public class ExtensionFileFilter
 	public static FileFilter getSqlFileFilter()
 	{
 		return getFileFilter(SQL_EXT, "TxtFileFilterSql");
+	}
+
+	public static FileFilter getSqlInsertDeleteFilter()
+	{
+		if (sqlInsertDeleteFilter == null)
+		{
+			String desc = ResourceMgr.getString("TxtFileFilterSqlInsDel");
+			sqlInsertDeleteFilter = new ExtensionFileFilter(desc, SQL_EXT, true);
+		}
+		return sqlInsertDeleteFilter;
 	}
 
 	public static FileFilter getSqlUpdateFileFilter()
@@ -197,12 +210,12 @@ public class ExtensionFileFilter
 	{
 		return getFileFilter(XLSX_EXT, "TxtFileFilterXls");
 	}
-	
+
 	public static FileFilter getOdsFileFilter()
 	{
 		return getFileFilter(ODS_EXT, "TxtFileFilterOds");
 	}
-	
+
 	private static FileFilter getFileFilter(String ext, String key)
 	{
 		FileFilter ff = filters.get(ext);

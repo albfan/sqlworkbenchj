@@ -107,7 +107,7 @@ public class SqlFormatter
 		GROUP_BY_TERMINAL.add("CREATE");
 		GROUP_BY_TERMINAL.add("CREATE OR REPLACE");
 	}
-	
+
 	private final Set<String> ORDER_BY_TERMINAL = new HashSet<String>();
 	{
 		ORDER_BY_TERMINAL.remove("GROUP BY");
@@ -132,7 +132,7 @@ public class SqlFormatter
 		TABLE_CONSTRAINTS_KEYWORDS .add("PRIMARY KEY");
 		TABLE_CONSTRAINTS_KEYWORDS .add("CONSTRAINT");
 	}
-	
+
 	private CharSequence sql;
 	private SQLLexer lexer;
 	private StringBuilder result;
@@ -149,13 +149,13 @@ public class SqlFormatter
 	{
 		this(aScript, 0, Settings.getInstance().getFormatterMaxSubselectLength());
 	}
-	
-	public SqlFormatter(CharSequence aScript, int maxSubselectLength)
+
+	public SqlFormatter(CharSequence aScript, int maxLength)
 	{
-		this(aScript, 0, maxSubselectLength);
+		this(aScript, 0, maxLength);
 	}
 
-	private SqlFormatter(CharSequence aScript, int indentCount, int maxSubselectLength)
+	private SqlFormatter(CharSequence aScript, int indentCount, int maxLength)
 	{
 		this.sql = aScript;
 		Reader in = new CharSequenceReader(this.sql);
@@ -166,7 +166,7 @@ public class SqlFormatter
 			this.indent = new StringBuilder(indentCount);
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
-		this.maxSubselectLength = maxSubselectLength;
+		this.maxSubselectLength = maxLength;
 		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
 		this.lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
 		addStandardFunctions(dbFunctions);
@@ -176,18 +176,18 @@ public class SqlFormatter
 	{
 		this.lowerCaseFunctions = flag;
 	}
-	
+
 	public String getLineEnding()
 	{
 		return NL;
 	}
-	
+
 	public void setDbDataTypes(Set<String> types)
 	{
 		this.dataTypes = new TreeSet<String>(new CaseInsensitiveComparator());
 		dataTypes.addAll(types);
 	}
-	
+
 	public void setDBFunctions(Set<String> functionNames)
 	{
 		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
@@ -197,20 +197,20 @@ public class SqlFormatter
 		}
 		addStandardFunctions(dbFunctions);
 	}
-	
+
 	private void addStandardFunctions(Set<String> functions)
 	{
-		SqlKeywordHelper keyWords = new SqlKeywordHelper();		
+		SqlKeywordHelper keyWords = new SqlKeywordHelper();
 		functions.addAll(keyWords.getSqlFunctions());
 	}
-	
+
 	private void saveLeadingWhitespace()
 	{
 		if (this.sql.length() == 0) return;
 		char c = this.sql.charAt(0);
 		int pos = 0;
 		if (!Character.isWhitespace(c)) return;
-		
+
 		this.leadingWhiteSpace = new StringBuilder(50);
 		while (Character.isWhitespace(c))
 		{
@@ -221,13 +221,13 @@ public class SqlFormatter
 		}
 		this.sql = this.sql.toString().trim();
 	}
-	
+
 	public CharSequence getFormattedSql()
 		throws Exception
 	{
 		saveLeadingWhitespace();
 		if (this.sql.length() == 0) return sql;
-		
+
 		this.formatSql();
 		StringUtil.trimTrailingWhitespace(result);
 		if (this.leadingWhiteSpace != null)
@@ -290,7 +290,7 @@ public class SqlFormatter
 		}
 		appendText(text);
 	}
-	
+
 	private void appendComment(String text)
 	{
 		if (text.startsWith("--"))
@@ -311,13 +311,13 @@ public class SqlFormatter
 			this.appendText(' ');
 		}
 	}
-	
+
 	private void appendText(String text)
 	{
 		this.realLength += text.length();
 		this.result.append(text);
 	}
-	
+
 	private void appendText(StringBuilder text)
 	{
 		if (text.length() == 0) return;
@@ -349,17 +349,17 @@ public class SqlFormatter
 		}
 		return this.dbFunctions.contains(key.toUpperCase());
 	}
-	
+
 	private boolean isDatatype(String key)
 	{
-		if (dataTypes == null) 
+		if (dataTypes == null)
 		{
 			SqlKeywordHelper keyWords = new SqlKeywordHelper();
 			dataTypes = keyWords.getDataTypes();
 		}
 		return this.dataTypes.contains(key.toUpperCase());
 	}
-	
+
 	/**
 	 * 	Return true if a whitespace should be added before the current token.
 	 */
@@ -376,7 +376,7 @@ public class SqlFormatter
 		boolean isCurrentOpenBracket = "(".equals(currentV);
 		boolean isLastOpenBracket = "(".equals(lastV);
 		boolean isLastCloseBracket = ")".equals(lastV);
-		
+
 		if (isCurrentOpenBracket && last.isIdentifier()) return false;
 		if (isCurrentOpenBracket && isDbFunction(lastV)) return false;
 		if (isCurrentOpenBracket && isDatatype(lastV)) return false;
@@ -385,15 +385,15 @@ public class SqlFormatter
 		if (isLastCloseBracket && (current.isIdentifier() || current.isReservedWord())) return true;
 
 		if ((lastChar == '-' || lastChar == '+') && current.isLiteral() && StringUtil.isNumber(currentV)) return false;
-		
+
 		if (last.isLiteral() && (current.isIdentifier() || current.isReservedWord() || current.isOperator())) return true;
 
 		//if (last.isLiteral() && current.isLiteral()) return false;
-		
+
 		if (currChar == '?') return true;
 		if (currentV.equals("=")) return true;
 		if (lastV.equals("=")) return true;
-		
+
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '.' && currChar == '*') return true; // e.g. person.*
 		if (lastChar == '.' && currChar == '[') return true; // e.g. p.[id] for the dreaded SQL Server "quotes"
@@ -491,7 +491,7 @@ public class SqlFormatter
 		}
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
-		
+
 		while (t != null)
 		{
 			final String text = t.getContents();
@@ -511,7 +511,7 @@ public class SqlFormatter
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText(text);
 				int caseIndent = indentCount;
-				if (!isSelect) 
+				if (!isSelect)
 				{
 					caseIndent = this.getCurrentLineLength() - 4;
 				}
@@ -526,8 +526,8 @@ public class SqlFormatter
 			{
 				if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 				this.appendText("(");
-				// an equal sign immediately followed by an opening 
-				// bracket cannot be a function call (the function name 
+				// an equal sign immediately followed by an opening
+				// bracket cannot be a function call (the function name
 				// is missing) so it has to be a sub-select
 				if ("=".equals(lastToken.getContents()))
 				{
@@ -620,7 +620,7 @@ public class SqlFormatter
 		this.appendText(subSql);
 		return t;
 	}
-	
+
 	private void appendSubSelect(StringBuilder subSql, int lastIndent)
 		throws Exception
 	{
@@ -632,24 +632,22 @@ public class SqlFormatter
 		}
 		this.appendText(s.trim());
 	}
-	
-	private SQLToken processDecode(int indent)
+
+	private SQLToken processDecode(int myIndent)
 		throws Exception
 	{
-		StringBuilder current = new StringBuilder(indent);
+		StringBuilder current = new StringBuilder(myIndent);
 
-		for (int i=0; i < indent; i++) current.append(' ');
-		
-		StringBuilder b = new StringBuilder(indent + 2);
-		for (int i=0; i < indent; i++) b.append(' ');
+		for (int i=0; i < myIndent; i++) current.append(' ');
+
+		StringBuilder b = new StringBuilder(myIndent + 2);
+		for (int i=0; i < myIndent; i++) b.append(' ');
 		b.append("      ");
-		
-		boolean newLinePending = false;
-		
+
 		SQLToken t = this.lexer.getNextToken(true,true);
 		int commaCount = 0;
 		int bracketCount = 0;
-		
+
 		boolean inQuotes = false;
 		while (t != null)
 		{
@@ -666,9 +664,9 @@ public class SqlFormatter
 			{
 				bracketCount ++;
 			}
-			
+
 			if (",".equals(text) && !inQuotes && bracketCount == 1) commaCount ++;
-			
+
 			if (",".equals(text) && !inQuotes && bracketCount == 1)
 			{
 				this.appendText(text);
@@ -695,23 +693,23 @@ public class SqlFormatter
 		return null;
 	}
 
-	private SQLToken processCase(int indent)
+	private SQLToken processCase(int myIndent)
 		throws Exception
 	{
-		StringBuilder current = new StringBuilder(indent);
+		StringBuilder current = new StringBuilder(myIndent);
 
-		for (int i=0; i < indent; i++) current.append(' ');
-		
-		StringBuilder b = new StringBuilder(indent + 2);
-		for (int i=0; i < indent; i++) b.append(' ');
+		for (int i=0; i < myIndent; i++) current.append(' ');
+
+		StringBuilder b = new StringBuilder(myIndent + 2);
+		for (int i=0; i < myIndent; i++) b.append(' ');
 		b.append("  ");
-		
+
 		SQLToken last = null;
 		SQLToken t = this.lexer.getNextToken(true,false);
 		while (t != null)
 		{
 			final String text = t.getContents();
-			
+
 			if ("SELECT".equals(text) && last.getContents().equals("("))
 			{
 				t = this.processSubSelect(true);
@@ -734,7 +732,7 @@ public class SqlFormatter
 				this.appendNewline();
 				this.indent(current);
 				this.appendText(text);
-				// Get the next token after the END. If that is the keyword AS, 
+				// Get the next token after the END. If that is the keyword AS,
 				// the CASE statement ist not yet ended and we have to add the AS keyword
 				// and the alias that was given before returning to the caller
 				t = this.lexer.getNextToken(true, false);
@@ -743,7 +741,7 @@ public class SqlFormatter
 					this.appendText(' ');
 					this.appendText(t.getContents());
 					t = this.lexer.getNextToken(true, false);
-					if (t != null) 
+					if (t != null)
 					{
 						this.appendText(' ');
 						this.appendText(t.getContents());
@@ -770,7 +768,7 @@ public class SqlFormatter
 		}
 		return null;
 	}
-	
+
 	private SQLToken processWbCommand(String wbVerb)
 		throws Exception
 	{
@@ -781,10 +779,10 @@ public class SqlFormatter
 		this.appendText(' ');
 
 		CommandMapper mapper = new CommandMapper();
-		
+
 		SQLToken t = this.lexer.getNextToken(true,false);
 		SqlCommand cmd = mapper.getCommandToUse(wbVerb);
-		
+
 		boolean first = true;
 		boolean isParm = false;
 		boolean inQuotes = false;
@@ -795,8 +793,8 @@ public class SqlFormatter
 			{
 				inQuotes = !inQuotes;
 			}
-			
-			if (isParm) 
+
+			if (isParm)
 			{
 				ArgumentParser p = cmd.getArgumentParser();
 				if (p != null)
@@ -804,7 +802,7 @@ public class SqlFormatter
 					List<String> args = p.getRegisteredArguments();
 					for (String regArg : args)
 					{
-						if (regArg.equalsIgnoreCase(text)) 
+						if (regArg.equalsIgnoreCase(text))
 						{
 							text = regArg;
 							break;
@@ -812,10 +810,10 @@ public class SqlFormatter
 					}
 				}
 			}
-			
+
 			if (text.equals("-") && !inQuotes)
 			{
-				if (!first) 
+				if (!first)
 				{
 					this.appendNewline();
 					this.indent(b);
@@ -827,18 +825,18 @@ public class SqlFormatter
 				isParm = false;
 			}
 
-			// true, false should be written in lowercase for 
+			// true, false should be written in lowercase for
 			// WB Commands
 			if (text.equalsIgnoreCase("true")) text = "true";
 			if (text.equalsIgnoreCase("false")) text = "false";
-			
+
 			this.appendText(text);
 			t = this.lexer.getNextToken(true,inQuotes);
 			first = false;
 		}
 		return null;
 	}
-	
+
 	private SQLToken processBracketList(int indentCount, int elementsPerLine)
 		throws Exception
 	{
@@ -853,7 +851,7 @@ public class SqlFormatter
 			this.appendNewline();
 			this.appendText(b);
 		}
-		else 
+		else
 		{
 			this.appendText(b);
 			b.append(' ');
@@ -908,7 +906,7 @@ public class SqlFormatter
 		throws Exception
 	{
 		if (current == null) return null;
-		ArrayList<StringBuilder> list = new ArrayList<StringBuilder>(25);
+		List<StringBuilder> list = new ArrayList<StringBuilder>(25);
 		list.add(new StringBuilder(""));
 		SQLToken t = current;
 
@@ -971,7 +969,7 @@ public class SqlFormatter
 		return null;
 	}
 
-	private void appendCommaList(ArrayList aList)
+	private void appendCommaList(List<StringBuilder> aList)
 	{
 		int indentCount = this.getCurrentLineLength();
 		StringBuilder ind = new StringBuilder(indentCount);
@@ -980,7 +978,7 @@ public class SqlFormatter
 		int count = aList.size();
 		for (int i=0; i < count; i++)
 		{
-			this.appendText((StringBuilder)aList.get(i));
+			this.appendText(aList.get(i));
 			if (i < count - 1) this.appendText(", ");
 			if (newline)
 			{
@@ -995,17 +993,17 @@ public class SqlFormatter
 	{
 		int len = this.result.length();
 		if (len == 0) return true;
-		
+
 		// simulates endsWith() on a StringBuilder
 		int pos = result.lastIndexOf(SqlFormatter.NL);
-		if (pos == len - NL.length()) return true; 
-		
+		if (pos == len - NL.length()) return true;
+
 		// Current text does not end with a newline, but
-		// if the "current line" consist of the current indent, it 
+		// if the "current line" consist of the current indent, it
 		// is considered as a "start of line" as well.
 		String remain = result.substring(pos + NL.length());
 		int indentLength = (indent == null ? 0 : indent.length());
-		if (remain.trim().length() == 0 && remain.length() == indentLength) return true;
+		if (StringUtil.isWhitespace(remain) && remain.length() == indentLength) return true;
 		return false;
 	}
 
@@ -1015,7 +1013,7 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = t;
 		CommandTester wbTester = new CommandTester();
-		
+
 		while (t != null)
 		{
 			final String word = t.getContents().toUpperCase();
@@ -1031,9 +1029,9 @@ public class SqlFormatter
 				if (LINE_BREAK_BEFORE.contains(word))
 				{
 					if (!isStartOfLine()) this.appendNewline();
-					
+
 					// For UPDATE statements
-					if ("SET".equals(word)) 
+					if ("SET".equals(word))
 					{
 						this.indent("   ");
 					}
@@ -1043,16 +1041,16 @@ public class SqlFormatter
 					//if (!lastToken.isSeparator() && lastToken != t && !isStartOfLine()) this.appendText(' ');
 					if (needsWhitespace(lastToken, t)) this.appendText(' ');
 				}
-				
+
 				if (wbTester.isWbCommand(word))
 				{
 					this.appendText(wbTester.formatVerb(word));
 				}
-				else 
+				else
 				{
 					this.appendTokenText(t);
 				}
-				
+
 				if (LINE_BREAK_AFTER.contains(word))
 				{
 					this.appendNewline();
@@ -1065,7 +1063,7 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
-				
+
 				if (word.equals("SELECT"))
 				{
 					lastToken = t;
@@ -1081,15 +1079,15 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
-				
+
 				if (word.equals("CREATE") || word.equals("CREATE OR REPLACE"))
 				{
 					lastToken = t;
 					t = this.processCreate(t);
 					if (t == null) return;
 					continue;
-				}				
-				
+				}
+
 				if (word.equals("FROM"))
 				{
 					lastToken = t;
@@ -1097,7 +1095,7 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
-				
+
 				if (word.equals("GROUP BY"))
 				{
 					lastToken = t;
@@ -1105,7 +1103,7 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
-				
+
 				if (word.equals("ORDER BY"))
 				{
 					lastToken = t;
@@ -1140,12 +1138,12 @@ public class SqlFormatter
 					if (t == null) return;
 					continue;
 				}
-				
+
 				if (wbTester.isWbCommand(word))
 				{
 					t = this.processWbCommand(word);
 				}
-				
+
 			}
 			else
 			{
@@ -1188,14 +1186,14 @@ public class SqlFormatter
 		if (previousToken == null) return null;
 
 		SQLToken lastToken = null;
-		
+
 		this.appendText(' ');
-		
+
 		SQLToken t = skipComments();
-		
+
 		int bracketCount = 0;
 		boolean afterAs = false;
-		
+
 		while (t != null)
 		{
 			String verb = t.getContents();
@@ -1256,8 +1254,8 @@ public class SqlFormatter
 		}
 		return null;
 	}
-	
-	
+
+
 	private SQLToken processWhere(SQLToken previousToken)
 		throws Exception
 	{
@@ -1290,14 +1288,14 @@ public class SqlFormatter
 			else if (t.getContents().equals("("))
 			{
 				String lastWord = lastToken.getContents();
-				
+
 				if (lastWord != null) lastWord = lastWord.toUpperCase();
 				if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
 				this.appendText(t.getContents());
-				
+
 				SQLToken next = skipComments();
 				if (next == null) return null;
-				
+
 				if ("SELECT".equals(next.getContents()))
 				{
 					t = this.processSubSelect(true);
@@ -1315,9 +1313,9 @@ public class SqlFormatter
 			}
 			else if (bracketCount == 0 && t.isReservedWord() && (verb.equals("AND") || verb.equals("OR")) )
 			{
-				// TODO: this attempt to keep conditions in bracktes together results
-				// in effectively no formatting when the whole WHERE clause is put 
-				// between brackets (because bracketCount will never be zero until 
+				// TODO: this attempt to keep conditions in bracktes together, results
+				// in effectively no formatting when the whole WHERE clause is put
+				// between brackets (because bracketCount will never be zero until
 				// the end of the WHERE clause)
 				if (!this.isStartOfLine()) this.appendNewline();
 				this.appendText(verb);
@@ -1342,7 +1340,7 @@ public class SqlFormatter
 		SQLToken next = lexer.getNextToken(true, false);
 		if (next == null) return null;
 		if (!next.isComment()) return next;
-		while (next != null) 
+		while (next != null)
 		{
 			if (!next.isComment()) return next;
 			this.appendComment(next.getContents());
@@ -1350,7 +1348,7 @@ public class SqlFormatter
 		}
 		return null;
 	}
-	
+
 	private SQLToken processIntoKeyword()
 		throws Exception
 	{
@@ -1383,7 +1381,7 @@ public class SqlFormatter
 	{
 		int bracketCount = 1;
 		SQLToken t = this.lexer.getNextToken(true, false);
-		
+
 		if (t != null && t.getContents().equals("SELECT"))
 		{
 			t = processSubSelect(true);
@@ -1391,12 +1389,11 @@ public class SqlFormatter
 			if (t.getContents().equals(")"))
 			{
 				this.appendText(')');
-				SQLToken l = t;
 				t = this.lexer.getNextToken(true, false);
 			}
 			return t;
 		}
-		
+
 		SQLToken lastToken = last;
 		while (t != null)
 		{
@@ -1427,7 +1424,7 @@ public class SqlFormatter
 	{
 		SQLToken t = this.lexer.getNextToken(true, false);
 		String verb = t.getContents();
-		
+
 		if (verb.equals("TABLE"))
 		{
 			this.appendText(' ');
@@ -1478,20 +1475,20 @@ public class SqlFormatter
 		int maxColLength = 0;
 
 		boolean isColstart = true;
-		
+
 		int bracketCount = 0;
-		
+
 		SQLToken last = null;
-		
+
 		while (t != null)
 		{
 			String w = t.getContents();
-			
-			if ("(".equals(w)) 
+
+			if ("(".equals(w))
 			{
 				bracketCount ++;
 			}
-			else if (")".equals(w)) 
+			else if (")".equals(w))
 			{
 				bracketCount --;
 			}
@@ -1503,7 +1500,7 @@ public class SqlFormatter
 				break;
 			}
 
-			if (isColstart || 
+			if (isColstart ||
 				  (last != null && last.isIdentifier() && "(".equals(w)) ||
 				  (needsWhitespace(last, t, true) && bracketCount == 0)
 				)
@@ -1525,11 +1522,11 @@ public class SqlFormatter
 				line = new StringBuilder(50);
 				isColstart = true;
 			}
-			
+
 			last = t;
 			t = this.lexer.getNextToken(true, false);
 		}
-		
+
 		// Now process the collected column definitions
 		for (StringBuilder col : cols)
 		{
@@ -1539,7 +1536,7 @@ public class SqlFormatter
 
 			int len = colname.length();
 			String def = col.substring(column.getCharEnd()).trim();
-			
+
 			appendText("  ");
 			appendText(colname);
 			if (column.isReservedWord())
@@ -1560,7 +1557,7 @@ public class SqlFormatter
 		}
 
 		if (t == null) return t;
-		
+
 		// now the definitions are added
 		// check if we need to process more
 		if (!t.getContents().equals(")"))
@@ -1568,13 +1565,13 @@ public class SqlFormatter
 			appendText("  ");
 			bracketCount = 0;
 			last = null;
-			
+
 			while (t != null)
 			{
 				String w = t.getContents();
 				if ("(".equals(w)) bracketCount ++;
-				
-				if (")".equals(w)) 
+
+				if (")".equals(w))
 				{
 					if (bracketCount == 0)
 					{
@@ -1585,34 +1582,34 @@ public class SqlFormatter
 						bracketCount --;
 					}
 				}
-				
+
 				if (last != null && needsWhitespace(last, t, true))
 				{
 					appendText(' ');
 				}
 				appendText(w);
-				
+
 				if (",".equals(w) && bracketCount == 0)
 				{
 					this.appendNewline();
 					this.appendText("  ");
 				}
-				
+
 				last = t;
 				t = this.lexer.getNextToken(true, false);
 			}
 			appendNewline();
 		}
-		
+
 		appendText(')');
 		appendNewline();
 		t = this.lexer.getNextToken(false, false);
 
 		return t;
 	}
-	
+
 	/**
-	 * Process a CREATE TABLE statement. 
+	 * Process a CREATE TABLE statement.
 	 * The CREATE TABLE has already been added!
 	 */
 	private SQLToken processCreateTable(SQLToken previous)
@@ -1620,17 +1617,17 @@ public class SqlFormatter
 	{
 		SQLToken t = this.lexer.getNextToken(false, false);
 		if (t == null) return t;
-		
-		// the next token has to be the table name, so 
+
+		// the next token has to be the table name, so
 		// we can simply write it out
-		
+
 		this.appendText(t.getContents());
 		this.appendText(' ');
-	
+
 		t = this.skipComments();
-		
+
 		if (t == null) return t;
-		
+
 		// this has to be the opening bracket before the table definition
 		if (t.getContents().equals("AS"))
 		{
@@ -1657,16 +1654,16 @@ public class SqlFormatter
 
 			t = processTableDefinition();
 		}
-		
+
 		return t;
 	}
-	
+
 	/**
 	 *	Process the elements in a () combination
 	 *	Any bracket inside the brackets are assumed to be "function calls"
 	 *  and just treated as further elements.
 	 *	It is assumed that the passed SQLToken is the opening bracket
-	 * 
+	 *
 	 *  @return the token after the closing bracket
 	 */
 	private SQLToken processCommaList(SQLToken previous, int maxElements, int indentCount)
@@ -1783,7 +1780,6 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(false, false);
 		SQLToken last = previous;
 		int bracketCount = 0;
-		StringBuilder definition = new StringBuilder(200);
 
 		while (t != null)
 		{
@@ -1796,7 +1792,7 @@ public class SqlFormatter
 				}
 				bracketCount ++;
 			}
-			
+
 			if ("SELECT".equals(t.getContents()))
 			{
 				return t;

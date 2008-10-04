@@ -25,7 +25,7 @@ import workbench.storage.DataStore;
 /**
  * @author  support@sql-workbench.net
  */
-public class RowStatusRenderer 
+public class RowStatusRenderer
 	extends DefaultTableCellRenderer
 {
 	private static final ImageIcon STATUS_MODIFIED_ICON = ResourceMgr.getPicture("modifiedrow");
@@ -35,9 +35,10 @@ public class RowStatusRenderer
 	private final String newTip = ResourceMgr.getString("TxtRowNew");
 	private final String modifiedTip = ResourceMgr.getString("TxtRowModified");
 	private final String notModifiedTip = ResourceMgr.getString("TxtRowNotModified");
-	
+
 	public RowStatusRenderer()
 	{
+		super();
 		Dimension dim = new Dimension(18, 18);
 		this.setMaximumSize(dim);
 		this.setMinimumSize(dim);
@@ -46,7 +47,7 @@ public class RowStatusRenderer
 		this.setIconTextGap(0);
 		this.setHorizontalAlignment(JLabel.LEFT);
 	}
-	
+
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
 		try
@@ -66,7 +67,7 @@ public class RowStatusRenderer
 			{
 				this.setIcon(STATUS_NOT_MODIFIED_ICON);
 				this.setToolTipText(notModifiedTip);
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -75,5 +76,5 @@ public class RowStatusRenderer
 		}
 		return this;
 	}
-	
+
 }

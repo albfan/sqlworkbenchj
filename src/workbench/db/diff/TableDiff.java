@@ -168,8 +168,8 @@ public class TableDiff
 		appendRemoveColumns(result, colsToBeRemoved);
 		
 		String pkTagToUse = null;
-		String attr[] = new String[] { "name" };
-		String value[] = new String[1];
+		String[] attr = new String[] { "name" };
+		String[] value = new String[1];
 		List pkcols = null;
 
 		if (refPk.size() == 0 && tPk.size() > 0)

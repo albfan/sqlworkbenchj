@@ -58,9 +58,9 @@ public class DataStore
 {
 	// Needed for the status display in the table model
 	// as RowData is only package visible. Thus we need to provide the objects here
-	public static final Integer ROW_MODIFIED = new Integer(RowData.MODIFIED);
-	public static final Integer ROW_NEW = new Integer(RowData.NEW);
-	public static final Integer ROW_ORIGINAL = new Integer(RowData.NOT_MODIFIED);
+	public static final Integer ROW_MODIFIED = Integer.valueOf(RowData.MODIFIED);
+	public static final Integer ROW_NEW = Integer.valueOf(RowData.NEW);
+	public static final Integer ROW_ORIGINAL = Integer.valueOf(RowData.NOT_MODIFIED);
 
 	private RowActionMonitor rowActionMonitor;
 
@@ -1414,14 +1414,13 @@ public class DataStore
 		{
 			this.resetUpdateRowCounters();
 			row = this.getNextDeletedRow();
-			DmlStatement dml = null;
 			while (row != null)
 			{
 				currentRow ++;
 				this.updateProgressMonitor(currentRow, totalRows);
 				if (!row.isDmlSent())
 				{
-					dml = factory.createDeleteStatement(row);
+					DmlStatement dml = factory.createDeleteStatement(row);
 					rows += this.executeGuarded(aConnection, row, dml, errorHandler, -1);
 				}
 				Thread.yield();
@@ -1436,7 +1435,7 @@ public class DataStore
 				this.updateProgressMonitor(currentRow, totalRows);
 				if (!row.isDmlSent())
 				{
-					dml = factory.createUpdateStatement(row, false, le);
+					DmlStatement dml = factory.createUpdateStatement(row, false, le);
 					rows += this.executeGuarded(aConnection, row, dml, errorHandler, currentUpdateRow);
 				}
 				Thread.yield();
@@ -1451,7 +1450,7 @@ public class DataStore
 				this.updateProgressMonitor(currentRow, totalRows);
 				if (!row.isDmlSent())
 				{
-					dml = factory.createInsertStatement(row, false, le);
+					DmlStatement dml = factory.createInsertStatement(row, false, le);
 					rows += this.executeGuarded(aConnection, row, dml, errorHandler, currentInsertRow);
 				}
 				Thread.yield();

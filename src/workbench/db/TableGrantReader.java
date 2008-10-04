@@ -28,10 +28,6 @@ import workbench.util.StringUtil;
  */
 public class TableGrantReader
 {
-	public TableGrantReader()
-	{
-	}
-	
 	/**
 	 *	Return the GRANTs for the given table
 	 *
@@ -107,7 +103,7 @@ public class TableGrantReader
 			String grantee = entry.getKey();
 			// Ignore grants to ourself
 			if (user.equalsIgnoreCase(grantee)) continue;
-			
+
 			List<String> privs = entry.getValue();
 			result.append("GRANT ");
 			result.append(StringUtil.listToString(privs, ','));
@@ -118,5 +114,5 @@ public class TableGrantReader
 			result.append(";\n");
 		}
 		return result;
-	}	
+	}
 }

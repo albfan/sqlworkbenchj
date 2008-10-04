@@ -43,13 +43,14 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
 	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
-	
+
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
 	private int currentTable = 0;
 
 	public WbSchemaReport()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("types");
 		cmdLine.addArgument("file");
@@ -115,7 +116,7 @@ public class WbSchemaReport
 		this.reporter.setSchemaNameToUse(alternateSchema);
 
 		this.reporter.setProgressMonitor(this);
-		
+
 		if (this.rowMonitor != null)
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
@@ -125,7 +126,7 @@ public class WbSchemaReport
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));
 		this.reporter.setIncludeGrants(cmdLine.getBoolean(PARAM_INCLUDE_GRANTS, false));
 		this.reporter.setIncludeSequences(cmdLine.getBoolean(PARAM_INCLUDE_SEQUENCES, false));
-		
+
 		if (currentConnection != null && currentConnection.getMetadata().isOracle())
 		{
 			// check if remarksReporting is turned on for Oracle, if not issue a warning.
@@ -142,7 +143,7 @@ public class WbSchemaReport
 				result.addMessage("");
 			}
 		}
-		
+
 		// currentTable will be incremented as we have registered
 		// this object as the RowActionMonitor of the SchemaReporter
 		// see setCurrentObject()
@@ -182,10 +183,10 @@ public class WbSchemaReport
 			{
 				LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
 				result.addMessage(e.getMessage());
-			}			
+			}
 		}
-			
-		
+
+
 		return result;
 	}
 
@@ -229,5 +230,5 @@ public class WbSchemaReport
 	public void jobFinished() {}
 	public void saveCurrentType(String type) {}
 	public void restoreType(String type) {}
-	
+
 }

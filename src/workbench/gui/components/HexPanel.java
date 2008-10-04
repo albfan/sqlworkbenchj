@@ -33,12 +33,12 @@ import workbench.util.NumberStringCache;
 public class HexPanel
 	extends JPanel
 {
-	
 	private JTable dataTable;
 	private LineNumberTable lines;
-	
+
 	public HexPanel()
 	{
+		super();
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		dataTable = new JTable();
 		dataTable.setAutoCreateColumnsFromModel(true);
@@ -59,13 +59,13 @@ public class HexPanel
 		this.add(header, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 	}
-	
+
 	public HexPanel(byte[] buffer)
 	{
 		this();
 		setData(buffer);
 	}
-	
+
 	public void setData(byte[] buffer)
 	{
 		ByteBufferTableModel model = new ByteBufferTableModel(buffer);
@@ -82,13 +82,13 @@ public class HexPanel
 			col.setMinWidth(width);
 			col.setMaxWidth(width);
 		}
-		
+
 		width = fm.stringWidth("MMMMMMMMMMMMMMMMM");
 		TableColumn col = tmod.getColumn(cols - 1);
 		col.setPreferredWidth(width);
 		col.setMinWidth(width);
 		col.setMaxWidth(width);
-		
+
 		String rowCount = NumberStringCache.getNumberString(model.getRowCount());
 		width = fm.stringWidth(rowCount);
 		lines.setPreferredScrollableViewportSize(new Dimension(width + 5,32768));
@@ -103,7 +103,7 @@ class ByteBufferTableModel
 	private int rowCount;
 	private int columns = 16;
 	private String[] labels;
-	
+
 	public ByteBufferTableModel(byte[] buffer)
 	{
 		data = buffer;
@@ -159,7 +159,7 @@ class ByteBufferTableModel
 				{
 					result.append('.');
 				}
-				
+
 			}
 			return result.toString();
 		}
@@ -167,7 +167,7 @@ class ByteBufferTableModel
 		if (offset >= data.length) return "";
 		int c = (data[offset] < 0 ? 256 + data[offset] : data[offset]);
 		return NumberStringCache.getHexString(c);
-		
+
 //		if (c < 16) return "0" + Integer.toHexString(c);
 //		else return Integer.toHexString(c);
 	}
@@ -183,6 +183,6 @@ class ByteBufferTableModel
 	public void removeTableModelListener(TableModelListener l)
 	{
 	}
-	
+
 
 }

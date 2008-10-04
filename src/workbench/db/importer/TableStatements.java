@@ -48,13 +48,13 @@ public class TableStatements
 	public TableStatements(ArgumentParser cmdLine)
 	{
 		String sql = cmdLine.getValue(CommonArgs.ARG_PRE_TABLE_STMT);
-		if (!StringUtil.isWhitespaceOrEmpty(sql))
+		if (!StringUtil.isBlank(sql))
 		{
 			this.preStatement = sql;
 		}
 		
 		sql = cmdLine.getValue(CommonArgs.ARG_POST_TABLE_STMT);
-		if (!StringUtil.isWhitespaceOrEmpty(sql))
+		if (!StringUtil.isBlank(sql))
 		{
 			this.postStatement = sql;
 		}
@@ -108,7 +108,7 @@ public class TableStatements
 	protected void runStatement(WbConnection con, TableIdentifier tbl, String sql)
 		throws SQLException
 	{
-		if (StringUtil.isWhitespaceOrEmpty(sql)) return;
+		if (StringUtil.isBlank(sql)) return;
 		
 		Savepoint sp = null;
 		Statement stmt = null;

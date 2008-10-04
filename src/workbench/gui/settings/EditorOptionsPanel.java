@@ -33,6 +33,7 @@ public class EditorOptionsPanel
 	/** Creates new form EditorOptionsPanel */
 	public EditorOptionsPanel()
 	{
+		super();
 		initComponents();
 		editorFont.setListMonospacedOnly(true);
 	}

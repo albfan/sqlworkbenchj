@@ -16,7 +16,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A class to analyze the {$blobfile= } and {$clobfile= } 
+ * A class to analyze the {$blobfile= } and {$clobfile= }
  * parameters in a SQL statement. This class supports INSERT and UPDATE
  * statements. To retrieve a blob from the database {@link workbench.sql.wbcommands.WbSelectBlob}
  * has to be used.
@@ -28,31 +28,33 @@ public class LobFileParameterParser
 	private final Pattern MARKER_PATTERN = Pattern.compile(MARKER, Pattern.CASE_INSENSITIVE);
 	private LobFileParameter[] parameters;
 	private int parameterCount = 0;
-	
+
 	public LobFileParameterParser(String sql)
 		throws FileNotFoundException
 	{
 		Matcher m = MARKER_PATTERN.matcher(sql);
-		if (!m.find()) return;
-		
+		if (!m.find())
+		{
+			return;
+		}
+
 		// Calculate number of parameters
-		parameterCount ++;
+		parameterCount++;
 		while (m.find())
 		{
-			parameterCount ++;
+			parameterCount++;
 		}
 		m.reset();
 		parameters = new LobFileParameter[parameterCount];
 		int index = 0;
 		WbStringTokenizer tok = new WbStringTokenizer(" \t", false, "\"'", false);
-		int lastStart = 0;
+
 		while (m.find())
 		{
 			int start = m.start();
 			int end = sql.indexOf("}", start + 1);
 			if (end > -1)
 			{
-				lastStart = end + 1; 
 				String parm = sql.substring(start + 2, end);
 				tok.setSourceString(parm);
 				parameters[index] = new LobFileParameter();
@@ -78,7 +80,7 @@ public class LobFileParameterParser
 					}
 				}
 			}
-			index ++;
+			index++;
 		}
 	}
 
@@ -86,5 +88,4 @@ public class LobFileParameterParser
 	{
 		return parameters;
 	}
-	
 }

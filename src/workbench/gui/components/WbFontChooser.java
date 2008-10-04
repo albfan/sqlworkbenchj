@@ -33,19 +33,21 @@ public class WbFontChooser
 {
 	private boolean updateing;
 	private boolean fontReset = false;
-	
+
 	public WbFontChooser(boolean monospacedOnly)
 	{
 		this(monospacedOnly, false);
 	}
+	
 	public WbFontChooser(boolean monospacedOnly, boolean allowReset)
 	{
+		super();
 		initComponents();
 		resetButton.setVisible(allowReset);
 		resetButton.setEnabled(allowReset);
 		fillFontList(monospacedOnly);
 	}
-	
+
 	public void setSelectedFont(Font aFont)
 	{
 		this.updateing = true;
@@ -56,7 +58,7 @@ public class WbFontChooser
 				String name = aFont.getFamily();
 				String size = Integer.toString(aFont.getSize());
 				int style = aFont.getStyle();
-				
+
 				this.fontNameList.setSelectedValue(name, true);
 				this.fontSizeComboBox.setSelectedItem(size);
 				this.boldCheckBox.setSelected((style & Font.BOLD) == Font.BOLD);
@@ -81,7 +83,7 @@ public class WbFontChooser
 	{
 		return this.fontReset;
 	}
-	
+
 	public Font getSelectedFont()
 	{
 		String fontName = (String)this.fontNameList.getSelectedValue();
@@ -92,11 +94,11 @@ public class WbFontChooser
 			style = style | Font.ITALIC;
 		if (this.boldCheckBox.isSelected())
 			style = style | Font.BOLD;
-		
+
 		Font f = new Font(fontName, style, size);
 		return f;
 	}
-	
+
 	public static Font chooseFont(JComponent owner, Font defaultFont, boolean monospacedOnly, boolean allowReset)
 	{
 		WbFontChooser chooser = new WbFontChooser(monospacedOnly, allowReset);
@@ -104,7 +106,7 @@ public class WbFontChooser
 		Dimension d = new Dimension(320, 240);
 		chooser.setSize(d);
 		chooser.setPreferredSize(d);
-		
+
 		JOptionPane option = new JOptionPane(chooser, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 		//int answer = JOptionPane.showConfirmDialog(owner, chooser, ResourceMgr.getString("TxtWindowTitleChooseFont"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
 		JDialog dialog = option.createDialog(owner, ResourceMgr.getString("TxtWindowTitleChooseFont"));
@@ -126,13 +128,13 @@ public class WbFontChooser
 		}
 		return result;
 	}
-	
-	
+
+
 	private void fillFontList(boolean monospacedOnly)
 	{
 		String[] fonts = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 		DefaultListModel model = new DefaultListModel();
-		
+
 		for (int i = 0; i < fonts.length; i++)
 		{
 			if (monospacedOnly)
@@ -147,7 +149,7 @@ public class WbFontChooser
 		}
 		this.fontNameList.setModel(model);
 	}
-	
+
 	private void updateFontDisplay()
 	{
 		if (!this.updateing)
@@ -175,7 +177,7 @@ public class WbFontChooser
 			}
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -301,7 +303,7 @@ public class WbFontChooser
     gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 0);
     add(resetButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
+
 private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resetButtonActionPerformed
 	setSelectedFont(null);
 	fontReset = true;
@@ -311,22 +313,22 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 	{//GEN-HEADEREND:event_fontNameListValueChanged
 		updateFontDisplay();
 	}//GEN-LAST:event_fontNameListValueChanged
-	
+
 	private void italicCheckBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_italicCheckBoxupdateFontDisplay
 	{//GEN-HEADEREND:event_italicCheckBoxupdateFontDisplay
 		updateFontDisplay();
 	}//GEN-LAST:event_italicCheckBoxupdateFontDisplay
-	
+
 	private void boldCheckBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_boldCheckBoxupdateFontDisplay
 	{//GEN-HEADEREND:event_boldCheckBoxupdateFontDisplay
 		updateFontDisplay();
 	}//GEN-LAST:event_boldCheckBoxupdateFontDisplay
-	
+
 	private void fontSizeComboBoxupdateFontDisplay(java.awt.event.ItemEvent evt)//GEN-FIRST:event_fontSizeComboBoxupdateFontDisplay
 	{//GEN-HEADEREND:event_fontSizeComboBoxupdateFontDisplay
 		updateFontDisplay();
 	}//GEN-LAST:event_fontSizeComboBoxupdateFontDisplay
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   public javax.swing.JCheckBox boldCheckBox;
   public javax.swing.JList fontNameList;
@@ -336,5 +338,5 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
   public javax.swing.JButton resetButton;
   public javax.swing.JLabel sampleLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

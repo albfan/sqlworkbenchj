@@ -38,24 +38,25 @@ public class XmlTableDefinitionParser
 	private ImportFileHandler fileHandler;
 	private StringBuilder chars;
 	private String tagFormat;
-	
+
 	public XmlTableDefinitionParser(ImportFileHandler handler)
 		throws IOException, SAXException
 	{
+		super();
 		this.fileHandler = handler;
 		this.parseTableStructure();
 	}
-	
+
 	public ColumnIdentifier[] getColumns()
 	{
 		return this.columnList;
 	}
-	
+
 	public String getTagFormat()
 	{
 		return this.tagFormat;
 	}
-	
+
 	public String getTableName()
 	{
 		return this.tableName;
@@ -98,7 +99,7 @@ public class XmlTableDefinitionParser
 			try { fileHandler.done(); } catch (Throwable th) {}
 		}
 	}
-	
+
 	public void startElement(String namespaceURI, String sName, String qName, Attributes attrs)
 		throws SAXException
 	{
@@ -108,7 +109,7 @@ public class XmlTableDefinitionParser
 			this.columnList[this.currentColIndex] = new ColumnIdentifier();
 		}
 	}
-	
+
 	public void endElement(String namespaceURI, String sName, String qName)
 		throws SAXException
 	{
@@ -127,7 +128,7 @@ public class XmlTableDefinitionParser
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlTableDefinitionParser.endElement", "Incorrec value for " + XmlRowDataConverter.COLUMN_COUNT_TAG + ": " + this.chars, e);
-				throw new SAXException("Invalid column count");
+				throw new SAXException("Invalid column count", e);
 			}
 		}
 		else if (qName.equals(XmlRowDataConverter.COLUMN_DEF_TAG))
@@ -140,7 +141,7 @@ public class XmlTableDefinitionParser
 		}
 		else if (qName.equals(XmlRowDataConverter.COLUMN_NAME_TAG))
 		{
-			this.columnList[this.currentColIndex].setColumnName(this.chars.toString()); 
+			this.columnList[this.currentColIndex].setColumnName(this.chars.toString());
 		}
 		else if (qName.equals(XmlRowDataConverter.JAVA_TYPE_TAG))
 		{
@@ -152,7 +153,7 @@ public class XmlTableDefinitionParser
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlTableDefinitionParser.endElement()", "Could not read columnn type!", e);
-				throw new SAXException("Could not read columnn type");
+				throw new SAXException("Could not read columnn type", e);
 			}
 		}
 		else if (qName.equals("dbms-data-type"))
@@ -164,7 +165,7 @@ public class XmlTableDefinitionParser
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlDataFileParser.endElement()", "Could not read dbms columnn type!", e);
-				throw new SAXException("Could not read dbms columnn type");
+				throw new SAXException("Could not read dbms columnn type", e);
 			}
 		}
 		else if (qName.equals(XmlRowDataConverter.JAVA_CLASS_TAG))
@@ -176,22 +177,22 @@ public class XmlTableDefinitionParser
 			catch (Exception e)
 			{
 				LogMgr.logError("XmlTableDefinitionParser.endElement()", "Could not read columnn class name!", e);
-				throw new SAXException("Could not read columnn name");
+				throw new SAXException("Could not read columnn name", e);
 			}
 		}
 		else if (qName.equals(XmlRowDataConverter.TABLE_DEF_TAG))
 		{
 			throw new ParsingEndedException();
 		}
-	}	
-	
-	public void characters(char buf[], int offset, int len)
+	}
+
+	public void characters(char[] buf, int offset, int len)
 		throws SAXException
 	{
 		if (chars != null)
 		{
 			this.chars.append(buf, offset, len);
 		}
-	}		
+	}
 
 }

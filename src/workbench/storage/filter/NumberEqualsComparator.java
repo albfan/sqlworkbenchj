@@ -19,17 +19,13 @@ import workbench.util.StringUtil;
 public class NumberEqualsComparator
 	implements ColumnComparator
 {
-	public NumberEqualsComparator()
-	{
-	}
-	
 	public boolean supportsIgnoreCase() { return false; }
 
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "="; }
 	public boolean needsValue() { return true; }
 	public boolean comparesEquality() { return true; }
-	
+
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
@@ -42,20 +38,20 @@ public class NumberEqualsComparator
 			return false;
 		}
 	}
-	
+
 	public boolean supportsType(Class valueClass)
 	{
-		return (Number.class.isAssignableFrom(valueClass));
+		return Number.class.isAssignableFrom(valueClass);
 	}
 
 	public boolean equals(Object other)
 	{
-		return (other instanceof NumberEqualsComparator);
+		return other instanceof NumberEqualsComparator;
 	}
-	
+
 	public boolean validateInput(Object value)
 	{
 		return value == null ? false : StringUtil.isNumber(value.toString());
-	}	
+	}
 
 }

@@ -54,7 +54,7 @@ import workbench.util.WbProperties;
 public class VariablePool
 {
 	public static final String PROP_PREFIX = "wbp.";
-	private Map<String, String> data = new HashMap<String, String>(); 
+	final private Map<String, String> data = new HashMap<String, String>();
 	private static final VariablePool POOL = new VariablePool();
 	private String prefix;
 	private String suffix;
@@ -247,7 +247,7 @@ public class VariablePool
 	private String replaceParameters(Set<String> varNames, String sql, boolean forPrompt)
 	{
 		if (sql == null) return null;
-		if (sql.trim().length() == 0) return StringUtil.EMPTY_STRING;
+		if (StringUtil.isBlank(sql)) return StringUtil.EMPTY_STRING;
 		if (sql.indexOf(this.prefix) == -1) return sql;
 		StringBuilder newSql = new StringBuilder(sql);
 		for (String name : varNames)
@@ -358,8 +358,8 @@ public class VariablePool
 	public void readDefinition(String parameter)
 		throws Exception
 	{
-		if (parameter == null || parameter.trim().length() == 0) return;
-		if (parameter.startsWith("#"))
+		if (StringUtil.isBlank(parameter)) return;
+		if (parameter.charAt(0) == '#')
 		{
 			readNameList(parameter.substring(1));
 		}
@@ -423,9 +423,9 @@ public class VariablePool
 class VariableDataStore 
 	extends DataStore
 {
-	private static final String cols[] = {ResourceMgr.getString("LblVariableName"), ResourceMgr.getString("LblVariableValue") };
-	private static final int types[] =   {Types.VARCHAR, Types.VARCHAR};
-	private static final int sizes[] =   {20, 50};
+	private static final String[] cols = {ResourceMgr.getString("LblVariableName"), ResourceMgr.getString("LblVariableValue") };
+	private static final int[] types =   {Types.VARCHAR, Types.VARCHAR};
+	private static final int[] sizes =   {20, 50};
 	private static final TableIdentifier TABLE_ID = new TableIdentifier("WB$VARIABLE_DEFINITION");
 	
 	public VariableDataStore()

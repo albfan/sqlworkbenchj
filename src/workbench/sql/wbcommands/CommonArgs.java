@@ -270,7 +270,7 @@ public class CommonArgs
 		catch (Exception e)
 		{
 			String msg = ResourceMgr.getFormattedString("ErrIllegalDateTimeFormat", format);
-			throw new IllegalArgumentException(msg);
+			throw new IllegalArgumentException(msg, e);
 		}
 		
 		String decimal = cmdLine.getValue(ARG_DECCHAR);

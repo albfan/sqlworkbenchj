@@ -18,6 +18,7 @@ import java.util.EventObject;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import java.util.Map;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
@@ -31,7 +32,7 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.27 2008-03-21 09:55:25 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.28 2008-10-04 13:03:01 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter
@@ -87,7 +88,7 @@ public abstract class InputHandler extends KeyAdapter
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
-	private static HashMap<String, ActionListener> actions;
+	private static Map<String, ActionListener> actions;
 
 	static
 	{
@@ -500,7 +501,6 @@ public abstract class InputHandler extends KeyAdapter
 					textArea.getToolkit().beep();
 					return;
 				}
-				int linePos = textArea.getCaretPositionInLine(textArea.getCaretLine());
 				SyntaxDocument doc = textArea.getDocument();
 				try
 				{
@@ -650,7 +650,7 @@ public abstract class InputHandler extends KeyAdapter
 
 			int line = textArea.getCaretLine();
 			int caret = textArea.getCaretPosition();
-			
+
 			int lastOfLine = textArea.getLineEndOffset(line) - 1;
 			int lastVisibleLine = textArea.getFirstLine()	+ textArea.getVisibleLines();
 			if(lastVisibleLine >= textArea.getLineCount())
@@ -661,7 +661,7 @@ public abstract class InputHandler extends KeyAdapter
 			{
 				lastVisibleLine -= (textArea.getElectricScroll() + 1);
 			}
-			
+
 			int lastVisible = textArea.getLineEndOffset(lastVisibleLine) - 1;
 			int lastDocument = textArea.getDocumentLength();
 
@@ -870,12 +870,12 @@ public abstract class InputHandler extends KeyAdapter
 			}
 
 			caret = textArea.getLineStartOffset(line + 1) + textArea.xToOffset(line + 1,magic);
-			
+
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else
 				textArea.setCaretPosition(caret);
-			
+
 			textArea.setMagicCaretPosition(magic);
 		}
 	}
@@ -905,7 +905,7 @@ public abstract class InputHandler extends KeyAdapter
 			textArea.setFirstLine(firstLine);
 
 			int caret = textArea.getLineStartOffset(Math.min(textArea.getLineCount() - 1,line + visibleLines));
-			
+
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else
@@ -1018,12 +1018,12 @@ public abstract class InputHandler extends KeyAdapter
 			}
 
 			caret = textArea.getLineStartOffset(line - 1) + textArea.xToOffset(line - 1,magic);
-			
+
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else
 				textArea.setCaretPosition(caret);
-			
+
 			textArea.setMagicCaretPosition(magic);
 		}
 	}
@@ -1049,7 +1049,7 @@ public abstract class InputHandler extends KeyAdapter
 			textArea.setFirstLine(firstLine - visibleLines);
 
 			int caret = textArea.getLineStartOffset(Math.max(0,line - visibleLines));
-			
+
 			if(select)
 				textArea.select(textArea.getMarkPosition(),caret);
 			else

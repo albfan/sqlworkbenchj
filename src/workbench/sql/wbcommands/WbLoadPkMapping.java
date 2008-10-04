@@ -33,17 +33,18 @@ public class WbLoadPkMapping
 {
 	public final static String VERB = "WBLOADPKMAP";
 	public final static String FORMATTED_VERB = "WbLoadPKMap";
-	
+
 	public WbLoadPkMapping()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
 	}
 
 	public String getVerb() { return VERB; }
-	
+
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -60,30 +61,30 @@ public class WbLoadPkMapping
 			WbFile cd = new WbFile(Settings.getInstance().getConfigDir());
 			file = StringUtil.replace(file, FileDialogUtil.CONFIG_DIR_KEY, cd.getFullPath());
 		}
-		
+
 		if (file == null)
 		{
 			result.setFailure();
 			result.addMessage(ResourceMgr.getString("ErrPkDefNoFile"));
 			return result;
 		}
-		
+
 		PkMapping.getInstance().loadMapping(file);
 		String msg = ResourceMgr.getString("MsgPkMappingLoaded");
 		File f = new File(file);
 		msg = StringUtil.replace(msg, "%filename%", f.getAbsolutePath());
 		result.addMessage(msg);
 		result.addMessage("");
-		
+
 		String info = PkMapping.getInstance().getMappingAsText();
 		if (info != null)
 		{
 			result.addMessage(info);
 			result.addMessage(ResourceMgr.getString("MsgPkDefinitionsEnd"));
 		}
-		
+
 		result.setSuccess();
 		return result;
-	}	
-	
+	}
+
 }

@@ -245,10 +245,9 @@ public class IngresMetadata
 				result.append("\n      INCREMENT BY ");
 				result.append(increment);
 
-				BigInteger one = new BigInteger("1");
 				BigInteger max = new BigInteger(Integer.toString(Integer.MAX_VALUE));
 
-				if (minvalue.compareTo(one) == 0)
+				if (minvalue.compareTo(BigInteger.ONE) == 0)
 				{
 					result.append("\n      NO MINVALUE");
 				}

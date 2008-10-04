@@ -17,7 +17,6 @@ import javax.swing.JButton;
 import javax.swing.JToolBar;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.gui.WbSwingUtilities;
@@ -27,12 +26,13 @@ import workbench.gui.actions.WbAction;
  *
  * @author  support@sql-workbench.net
  */
-public class WbToolbar 
+public class WbToolbar
 	extends JToolBar
 {
 
 	public WbToolbar()
 	{
+		super();
 		this.setFloatable(false);
 		this.setRollover(true);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
@@ -67,7 +67,7 @@ public class WbToolbar
 	{
 		return add(a, -1);
 	}
-	
+
 	public JButton add(WbAction a, int index)
 	{
 		JButton button = a.getToolbarButton();
@@ -87,7 +87,7 @@ public class WbToolbar
 		else
 			super.addSeparator();
 	}
-	
+
 	public void addDefaultBorder()
 	{
 		Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());

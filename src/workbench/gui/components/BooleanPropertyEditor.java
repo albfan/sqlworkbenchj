@@ -35,11 +35,6 @@ public class BooleanPropertyEditor
 	private String propName;
 	private boolean immediateUpdate = false;
 	
-	public BooleanPropertyEditor()
-	{
-		super();
-	}
-	
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
@@ -108,7 +103,7 @@ public class BooleanPropertyEditor
 	{
 		if (!this.changed) return;
 		if (this.setter == null) return;
-		Object args[] = new Object[1];
+		Object[] args = new Object[1];
 		args[0] = Boolean.valueOf(this.isSelected());
 		try
 		{

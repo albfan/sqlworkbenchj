@@ -22,9 +22,9 @@ public class GeneralImportOptionsPanel
 	extends javax.swing.JPanel
 	implements ImportOptions
 {
-	/** Creates new form GeneralExportOptionsPanel */
 	public GeneralImportOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 
@@ -33,7 +33,7 @@ public class GeneralImportOptionsPanel
 		this.encodingPanel.setEnabled(false);
 		this.encodingPanel.setVisible(false);
 	}
-	
+
 	public void setModeSelectorEnabled(boolean flag)
 	{
 		this.modeComboBox.setEnabled(flag);
@@ -53,7 +53,7 @@ public class GeneralImportOptionsPanel
 		s.setProperty("workbench.import." + key + ".encoding", this.getEncoding());
 		s.setProperty("workbench.import." + key + ".mode", this.getMode());
 	}
-	
+
 	public void restoreSettings()
 	{
 		restoreSettings("general");

@@ -78,7 +78,7 @@ public class HsqlSequenceReader
 		
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("HsqlSequenceReader.getRawSequenceDefinition()", "Using query=" + query.toString());
+			LogMgr.logInfo("HsqlSequenceReader.getRawSequenceDefinition()", "Using query=" + query);
 		}
 		
 		PreparedStatement stmt = null;
@@ -86,7 +86,7 @@ public class HsqlSequenceReader
 		DataStore result = null;
 		try
 		{
-			stmt = this.dbConn.prepareStatement(query.toString());
+			stmt = this.dbConn.prepareStatement(query);
 			if (!isEmptyString(sequence)) stmt.setString(1, sequence.trim());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);

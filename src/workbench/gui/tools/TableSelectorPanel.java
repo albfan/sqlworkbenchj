@@ -32,12 +32,12 @@ import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
- * A Panel to select a table. 
- * 
+ * A Panel to select a table.
+ *
  * A list of available schemas and tables is displayed using two dropdowns.
- * If the selected table has changed, a PropertyChangeListener 
- * is notified. 
- * 
+ * If the selected table has changed, a PropertyChangeListener
+ * is notified.
+ *
  * @author  support@sql-workbench.net
  */
 public class TableSelectorPanel
@@ -54,6 +54,7 @@ public class TableSelectorPanel
 
 	public TableSelectorPanel()
 	{
+		super();
 		initComponents();
 		this.schemaLabel.setText(ResourceMgr.getString("LblSchema"));
 		this.tableLabel.setText(ResourceMgr.getString("LblTable"));
@@ -68,7 +69,7 @@ public class TableSelectorPanel
 		this.schemaSelector.removeAllItems();
 		this.tableSelector.removeAllItems();
 	}
-	
+
 	public void resetNewTableItem()
 	{
 		if (this.newTableId != null)
@@ -155,7 +156,7 @@ public class TableSelectorPanel
 	{
 		this.tableSelector.setName(name);
 	}
-	
+
 	public void retrieveSchemas()
 	{
 		try
@@ -176,7 +177,7 @@ public class TableSelectorPanel
 
 			List schemas = this.dbConnection.getMetadata().getSchemas();
 			String current = this.dbConnection.getMetadata().getCurrentSchema();
-			
+
 			for (int i=0; i < schemas.size(); i++)
 			{
 				String schema = (String)schemas.get(i);
@@ -188,7 +189,7 @@ public class TableSelectorPanel
 			{
 				schemaSelector.setSelectedItem(this.currentSchema);
 			}
-			else 
+			else
 			{
 				this.schemaSelector.setSelectedIndex(0);
 			}
@@ -241,7 +242,6 @@ public class TableSelectorPanel
 			{
 				this.tableSelector.addItem(this.newTableId);
 			}
-			int count = tables.size();
 			for (TableIdentifier table : tables)
 			{
 				table.setShowTablenameOnly(true);

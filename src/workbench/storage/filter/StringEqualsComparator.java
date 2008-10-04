@@ -17,10 +17,6 @@ package workbench.storage.filter;
 public class StringEqualsComparator
 	implements ColumnComparator
 {
-	public StringEqualsComparator()
-	{
-	}
-	
 	public boolean supportsIgnoreCase() { return true; }
 
 	public String getValueExpression(Object value) { return "'" + value + "'";}
@@ -28,7 +24,7 @@ public class StringEqualsComparator
 	public boolean needsValue() { return true; }
 	public boolean validateInput(Object value) { return value instanceof String; }
 	public boolean comparesEquality() { return true; }
-	
+
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
@@ -44,7 +40,7 @@ public class StringEqualsComparator
 			return false;
 		}
 	}
-	
+
 	public boolean supportsType(Class valueClass)
 	{
 		return (String.class.isAssignableFrom(valueClass));
@@ -52,7 +48,7 @@ public class StringEqualsComparator
 
 	public boolean equals(Object other)
 	{
-		return (other instanceof StringEqualsComparator);
+		return other instanceof StringEqualsComparator;
 	}
-	
+
 }

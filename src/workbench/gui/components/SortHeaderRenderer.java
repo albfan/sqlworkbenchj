@@ -21,9 +21,9 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 
 /**
- * 
- * @author support@sql-workbench.net  
- */ 
+ *
+ * @author support@sql-workbench.net
+ */
 public class SortHeaderRenderer
 	extends DefaultTableCellRenderer
 {
@@ -31,6 +31,7 @@ public class SortHeaderRenderer
 
 	public SortHeaderRenderer()
 	{
+		super();
 		setHorizontalTextPosition(LEFT);
 		setHorizontalAlignment(LEFT);
 		setBorder(DEFAULT_HEADER_BORDER);

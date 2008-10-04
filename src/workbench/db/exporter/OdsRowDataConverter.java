@@ -27,7 +27,7 @@ import workbench.util.ZipOutputFactory;
 
 /**
  * Convert row data to OpenDocument Spreadsheet format (OpenOffice).
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class OdsRowDataConverter
@@ -37,11 +37,6 @@ public class OdsRowDataConverter
 	private SimpleDateFormat tFormat = new SimpleDateFormat("HH:mm:ss");
 	private SimpleDateFormat dtFormat = new SimpleDateFormat("yyyy-MM-dd");
 	private SimpleDateFormat tsFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-	
-	public OdsRowDataConverter()
-	{
-		super();
-	}
 
 	public StrBuffer getStart()
 	{
@@ -62,9 +57,9 @@ public class OdsRowDataConverter
 			out.write(" <manifest:file-entry manifest:media-type=\"text/xml\" manifest:full-path=\"meta.xml\"/>\n");
 			out.write("</manifest:manifest>\n");
 			out.close();
-			
+
 			writeMeta();
-			
+
 			out = factory.createWriter("mimetype", "UTF-8");
 			out.write("application/vnd.oasis.opendocument.spreadsheet");
 			out.close();
@@ -72,9 +67,9 @@ public class OdsRowDataConverter
 
 			content.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n");
 			content.write("<office:document-content xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" xmlns:style=\"urn:oasis:names:tc:opendocument:xmlns:style:1.0\" xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\" xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:meta=\"urn:oasis:names:tc:opendocument:xmlns:meta:1.0\" xmlns:number=\"urn:oasis:names:tc:opendocument:xmlns:datastyle:1.0\" xmlns:presentation=\"urn:oasis:names:tc:opendocument:xmlns:presentation:1.0\" xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\" xmlns:chart=\"urn:oasis:names:tc:opendocument:xmlns:chart:1.0\" xmlns:dr3d=\"urn:oasis:names:tc:opendocument:xmlns:dr3d:1.0\" xmlns:math=\"http://www.w3.org/1998/Math/MathML\" xmlns:form=\"urn:oasis:names:tc:opendocument:xmlns:form:1.0\" xmlns:script=\"urn:oasis:names:tc:opendocument:xmlns:script:1.0\" xmlns:ooo=\"http://openoffice.org/2004/office\" xmlns:ooow=\"http://openoffice.org/2004/writer\" xmlns:oooc=\"http://openoffice.org/2004/calc\" xmlns:dom=\"http://www.w3.org/2001/xml-events\" xmlns:xforms=\"http://www.w3.org/2002/xforms\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" office:version=\"1.0\"> \n");
-			
+
 			writeInlineStyles();
-			
+
 			content.write("<office:body>\n");
 			content.write("<office:spreadsheet> \n");
 			content.write("<table:table table:name=\"" + getPageTitle("Export") + "\"  table:style-name=\"ta1\">\n\n");
@@ -147,7 +142,7 @@ public class OdsRowDataConverter
 		}
 		catch (Exception e)
 		{
-			
+
 		}
 		finally
 		{
@@ -155,24 +150,24 @@ public class OdsRowDataConverter
 		}
 	}
 
-	private void writeStyles()
-	{
-		Writer out = null;
-		try
-		{
-			out = factory.createWriter("styles.xml", "UTF-8");
-			out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-		}
-		catch (Exception e)
-		{
-			
-		}
-		finally
-		{
-			FileUtil.closeQuitely(out);
-		}
-	}
-	
+//	private void writeStyles()
+//	{
+//		Writer out = null;
+//		try
+//		{
+//			out = factory.createWriter("styles.xml", "UTF-8");
+//			out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+//		}
+//		catch (Exception e)
+//		{
+//
+//		}
+//		finally
+//		{
+//			FileUtil.closeQuitely(out);
+//		}
+//	}
+
 	private void writeInlineStyles()
 		throws IOException
 	{
@@ -185,7 +180,7 @@ public class OdsRowDataConverter
 			content.write("  <style:table-column-properties style:use-optimal-column-width=\"true\"/> \n");
 			content.write("</style:style> \n");
 		}
-		String styles = 
+		String styles =
 			"<style:style style:name=\"ro1\" style:family=\"table-row\"> \n" +
 			"  <style:table-row-properties fo:break-before=\"auto\" style:use-optimal-row-height=\"true\"/> \n" +
 			"</style:style> \n" +
@@ -235,7 +230,7 @@ public class OdsRowDataConverter
 			xml.append("<table:table-cell ");
 			xml.append(getCellAttribs(o, i));
 			xml.append(">\n");
-			
+
 			String value = getValueAsFormattedString(row, i);
 			if (SqlUtil.isCharacterType(metaData.getColumnType(i)))
 			{
@@ -271,7 +266,7 @@ public class OdsRowDataConverter
 	{
 		StringBuilder attr = new StringBuilder("office:value-type=");
 		int type = metaData.getColumnType(column);
-		
+
 		if (SqlUtil.isNumberType(type))
 		{
 			attr.append("\"float\" ");
@@ -281,7 +276,7 @@ public class OdsRowDataConverter
 		{
 			attr.append("\"date\" ");
 			attr.append(" office:date-value=\"");
-			if (data != null && data instanceof Date)
+			if (data instanceof Date)
 			{
 				Date d = (Date)data;
 				attr.append(dtFormat.format(d));
@@ -292,7 +287,7 @@ public class OdsRowDataConverter
 		{
 			attr.append("\"date\" ");
 			attr.append(" office:date-value=\"");
-			if (data != null && data instanceof Date)
+			if (data instanceof Date)
 			{
 				Date d = (Date)data;
 				attr.append(tsFormat.format(d));
@@ -303,7 +298,7 @@ public class OdsRowDataConverter
 		{
 			attr.append("\"date\" ");
 			attr.append(" office:time-value=\"");
-			if (data != null && data instanceof Date)
+			if (data instanceof Date)
 			{
 				Date d = (Date)data;
 				attr.append(tFormat.format(d));
@@ -316,5 +311,5 @@ public class OdsRowDataConverter
 		}
 		return attr;
 	}
-	
+
 }

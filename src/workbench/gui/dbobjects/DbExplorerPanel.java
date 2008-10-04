@@ -67,15 +67,15 @@ import workbench.util.WbWorkspace;
 
 
 /**
- * The main container panel for the DbExplorer. 
- * 
- * This panel incorporates the panels to 
+ * The main container panel for the DbExplorer.
+ *
+ * This panel incorporates the panels to
  * <ul>
  *	<li>Display a list of tables, views, etc {@link workbench.gui.dbobjects.TableListPanel}</li>
  *  <li>Display a list of procedures: {@link workbench.gui.dbobjects.ProcedureListPanel}</li>
  *	<li>Allow search across several table and columns: {@link workbench.gui.dbobjects.TableSearchPanel}</li>
  * </ul>
- * This panel can either be displayed inside the MainWindow as a tab, or as 
+ * This panel can either be displayed inside the MainWindow as a tab, or as
  * a separate Window (@link workbench.gui.dbobjects.DbExplorerWindow}
  * @author  support@sql-workbench.net
  */
@@ -112,7 +112,7 @@ public class DbExplorerPanel
 	private String catalogFromWorkspace;
 	private boolean switchCatalog = false;
 	private JComponent currentFocus = null;
-	
+
 	public DbExplorerPanel()
 	{
 		this(null);
@@ -120,6 +120,7 @@ public class DbExplorerPanel
 
 	public DbExplorerPanel(MainWindow aParent)
 	{
+		super();
 		this.internalId = ++instanceCount;
 		this.mainWindow = aParent;
 		try
@@ -131,7 +132,7 @@ public class DbExplorerPanel
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerTables"), tables);
 			tabPane.setToolTipTextAt(0, ResourceMgr.getDescription("TxtDbExplorerTables"));
 			setDbExecutionListener(aParent);
-			
+
 			String tabLocation = Settings.getInstance().getProperty("workbench.gui.dbobjects.maintabs", "top");
 			int location = JTabbedPane.TOP;
 			if (tabLocation.equalsIgnoreCase("bottom"))
@@ -147,25 +148,25 @@ public class DbExplorerPanel
 				location = JTabbedPane.RIGHT;
 			}
 			tabPane.setTabPlacement(location);
-			
+
 			int index = 1;
-			
+
 			tabPane.add(ResourceMgr.getString("TxtDbExplorerProcs"), procs);
 			tabPane.setToolTipTextAt(index, ResourceMgr.getDescription("TxtDbExplorerProcs"));
-			
+
 			if (Settings.getInstance().getShowTriggerPanel())
 			{
 				triggers = new TriggerListPanel(aParent);
 				tabPane.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
 				tabPane.setToolTipTextAt(index ++, ResourceMgr.getDescription("TxtDbExplorerTriggers"));
-			}			
+			}
 			tabPane.add(ResourceMgr.getString("TxtSearchTables"), this.searchPanel);
 			tabPane.setToolTipTextAt(index ++, ResourceMgr.getDescription("TxtSearchTables"));
 			tabPane.setFocusable(false);
 
 			this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 			this.setLayout(new BorderLayout());
-			
+
 			this.selectorPanel = new JPanel();
 			this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
@@ -184,7 +185,7 @@ public class DbExplorerPanel
 			this.catalogLabel.setVisible(false);
 			this.selectorPanel.add(catalogLabel);
 			this.selectorPanel.add(catalogSelector);
-			
+
 			this.add(this.selectorPanel, BorderLayout.NORTH);
 			this.add(tabPane, BorderLayout.CENTER);
 			this.searchPanel.restoreSettings();
@@ -198,7 +199,7 @@ public class DbExplorerPanel
 			this.connectionInfo.setMinimumSize(d);
 			this.toolbar.add(this.connectionInfo);
 			if (mainWindow != null) mainWindow.addExecutionListener(this);
-			
+
 			KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
 			focusManager.addPropertyChangeListener("focusOwner", this);
 		}
@@ -214,17 +215,17 @@ public class DbExplorerPanel
 		String prop = evt.getPropertyName();
 
 		Object o = evt.getNewValue();
-		if (o instanceof JComponent && "focusOwner".equals(prop)) 
+		if (o instanceof JComponent && "focusOwner".equals(prop))
 		{
 			currentFocus = (JComponent)evt.getNewValue();
-		}		
+		}
 	}
-	
+
 	public void setConnectionClient(Connectable client)
 	{
 		// not used
 	}
-	
+
 	public void setDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.tables != null)
@@ -236,12 +237,12 @@ public class DbExplorerPanel
 			this.searchPanel.addDbExecutionListener(l);
 		}
 	}
-	
+
 	public void setSwitchCatalog(boolean flag)
 	{
 		this.switchCatalog = flag && Settings.getInstance().getSwitchCatalogInExplorer();
 	}
-	
+
 	public void showConnectButton(ConnectionSelector selector)
 	{
 		this.connectionSelector = selector;
@@ -277,19 +278,19 @@ public class DbExplorerPanel
 
 	private void readSchemas()
 	{
-		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null || this.dbConnection.getMetadata() == null) 
+		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null || this.dbConnection.getMetadata() == null)
 		{
 			this.schemaRetrievePending = true;
 			return;
 		}
-		
+
 		String schemaToSelect = null;
 		try
 		{
 			this.schemaSelector.removeActionListener(this);
 
 			setBusy(true);
-			
+
 			List schemas = this.dbConnection.getMetadata().getSchemas();
 			String currentSchema = null;
 			boolean workspaceSchema = false;
@@ -298,10 +299,10 @@ public class DbExplorerPanel
 				currentSchema = this.schemaFromWorkspace;
 				workspaceSchema = true;
 			}
-			
+
 			if (currentSchema == null) currentSchema = this.dbConnection.getCurrentSchema();
 			if (currentSchema == null) currentSchema = this.dbConnection.getCurrentUser();
-			
+
 			if (schemas.size() > 0)
 			{
 				this.schemaSelector.setEnabled(true);
@@ -313,27 +314,27 @@ public class DbExplorerPanel
 				for (int i=0; i < schemas.size(); i++)
 				{
 					String schema = (String)schemas.get(i);
-					if (schema != null) 
+					if (schema != null)
 					{
 						this.schemaSelector.addItem(schema.trim());
 						if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
 					}
 				}
-				
+
 				if (workspaceSchema && schemaToSelect == null)
 				{
 					// when using the workspace for multiple connections
-					// it can happen that the stored schema does not exist 
+					// it can happen that the stored schema does not exist
 					// for the current connection, in this case we revert
 					// to "current" schema
 					schemaToSelect = this.dbConnection.getMetadata().getCurrentSchema();
 				}
 				//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Selected schema entry: " + schemaToSelect);
-				if (schemaToSelect != null) 
+				if (schemaToSelect != null)
 				{
 					schemaSelector.setSelectedItem(schemaToSelect);
 				}
-				else 
+				else
 				{
 					schemaSelector.setSelectedIndex(0);
 				}
@@ -347,7 +348,7 @@ public class DbExplorerPanel
 				currentSchema = null;
 			}
 			readCatalogs();
-			
+
 			tables.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
 			procs.setCatalogAndSchema(getSelectedCatalog(), currentSchema, false);
 		}
@@ -393,7 +394,7 @@ public class DbExplorerPanel
 			WbSwingUtilities.showDefaultCursor(this);
 		}
 	}
-	
+
 	public void connect(final ConnectionProfile profile)
 	{
 		// connecting can be pretty time consuming on a slow system
@@ -410,14 +411,14 @@ public class DbExplorerPanel
 			t.start();
 		}
 	}
-	
+
 	private boolean isConnectionBusy()
 	{
 		if (this.dbConnection == null) return false;
 		if (this.dbConnection.getProfile().getUseSeparateConnectionPerTab()) return this.isBusy();
 		return dbConnection.isBusy();
 	}
-	
+
 	private void initConnection()
 	{
 		if (this.dbConnection == null) return;
@@ -442,23 +443,23 @@ public class DbExplorerPanel
 		s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
 		this.schemaLabel.setText(s.toString());
 	}
-	
+
 	public void setConnection(WbConnection aConnection)
 	{
 		if (this.isBusy()) return;
-		
+
 		this.dbConnection = aConnection;
 		setSwitchCatalog(false);
-		
+
 		if (aConnection == null)
 		{
 			this.reset();
 			this.connectionInitPending = false;
 			return;
 		}
-		
+
 		WbSwingUtilities.showWaitCursorOnWindow(this);
-		
+
 		try
 		{
 			if (this.connectionSelector != null)
@@ -473,15 +474,15 @@ public class DbExplorerPanel
 				// when dealing with tables that have LONG or LONG RAW columns
 				// and DBMS_OUTPUT was enabled, then retrieval of those columns
 				// does not work. If we have separate connections for each tab
-				// we can safely disable the DBMS_OUTPUT on this connection 
+				// we can safely disable the DBMS_OUTPUT on this connection
 				// as there won't be a way to view the output anyway
 				if (separateConnection) aConnection.getMetadata().disableOutput();
 			}
-			
+
 			this.connectionInitPending = true;
 			this.schemaRetrievePending = true;
 			this.retrievePending = Settings.getInstance().getRetrieveDbExplorer();
-			
+
 			if (this.window != null)
 			{
 				String name = null;
@@ -489,10 +490,10 @@ public class DbExplorerPanel
 				if (prof != null) name = prof.getName();
 				if (name != null) this.window.setProfileName(name);
 			}
-			
+
 			this.connectionInfo.setConnection(aConnection);
-			
-			// Try to avoid concurrent execution on the 
+
+			// Try to avoid concurrent execution on the
 			// same connection object
 			if (!this.isConnectionBusy())
 			{
@@ -527,14 +528,14 @@ public class DbExplorerPanel
 		{
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
-		
+
 	}
 
 	private void readCatalogs()
 	{
 		DataStore ds = this.dbConnection.getMetadata().getCatalogInformation();
 		this.catalogSelector.removeActionListener(this);
-		if (ds.getRowCount() == 0) 
+		if (ds.getRowCount() == 0)
 		{
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
@@ -566,7 +567,7 @@ public class DbExplorerPanel
 		}
 		this.selectorPanel.validate();
 	}
-	
+
 	public void setVisible(boolean flag)
 	{
 		boolean wasVisible = this.isVisible();
@@ -614,7 +615,7 @@ public class DbExplorerPanel
 			this.triggers.panelSelected();
 		}
 	}
-	
+
 	public WbConnection getConnection()
 	{
 		return this.dbConnection;
@@ -686,30 +687,30 @@ public class DbExplorerPanel
 		if (this.catalogSelector == null) return null;
 		return (String)catalogSelector.getSelectedItem();
 	}
-	
+
 	protected void retrieve()
 	{
 		if (this.dbConnection == null) return;
-		
-		if (this.isBusy() || isConnectionBusy()) 
+
+		if (this.isBusy() || isConnectionBusy())
 		{
 			this.retrievePending = true;
 			return;
 		}
-		
+
 		if (this.connectionInitPending)
 		{
 			this.initConnection();
 		}
-		
+
 		if (this.schemaRetrievePending)
 		{
 			this.readSchemas();
 		}
-		
+
 		final String schema = (String)schemaSelector.getSelectedItem();
 		final Component c = this;
-		
+
 		Thread t = new WbThread("SchemaChange")
 		{
 			public void run()
@@ -738,7 +739,7 @@ public class DbExplorerPanel
 	}
 
 	public String getName() { return getTabTitle(); }
-	
+
 	public void setTabName(String name)
 	{
 		this.tabTitle = name;
@@ -763,11 +764,11 @@ public class DbExplorerPanel
 	{
 		return ResourceMgr.getString("LblDbExplorer");
 	}
-	
+
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
 		String plainTitle = (this.tabTitle == null ? getTabTitle() : this.tabTitle);
-		
+
 		String realTitle = plainTitle;
 		if (GuiSettings.getShowTabIndex())
 		{
@@ -807,7 +808,7 @@ public class DbExplorerPanel
 	}
 
 	public void showLogMessage(String aMsg) {}
-	public void clearStatusMessage() {} 
+	public void clearStatusMessage() {}
 	public void showStatusMessage(String aMsg) {}
 	public void clearLog() {}
 	public void appendToLog(String msg) { }
@@ -818,7 +819,7 @@ public class DbExplorerPanel
 	public void addToToolbar(WbAction anAction, boolean aFlag)
 	{
 	}
-	
+
 	void explorerWindowClosed()
 	{
 		if (this.dbConnection != null)
@@ -874,7 +875,7 @@ public class DbExplorerPanel
 		}
 	}
 
-	public void saveToWorkspace(WbWorkspace w, int index) 
+	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
 		// this will increase the visible count for DbExplorer Panels in the workspace
@@ -888,11 +889,11 @@ public class DbExplorerPanel
 		}
 		else if (this.schemaFromWorkspace != null)
 		{
-			// if the DbExplorer was never "really" displayed we have to 
+			// if the DbExplorer was never "really" displayed we have to
 			// save the schema that we retrieved initially from the workspace
 			p.setProperty(key, this.schemaFromWorkspace);
 		}
-		
+
 		key = "dbexplorer" + index + ".currentcatalog";
 		s = this.getSelectedCatalog();
 		if (s != null)
@@ -925,7 +926,7 @@ public class DbExplorerPanel
 		return canClose;
 	}
 
-	public void readFromWorkspace(WbWorkspace w, int index) 
+	public void readFromWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
 		this.schemaFromWorkspace = null;

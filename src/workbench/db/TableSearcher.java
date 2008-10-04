@@ -42,10 +42,6 @@ public class TableSearcher
 	private int maxRows = 0;
 	private boolean excludeLobColumns = true;
 	private DataStore result = null;
-	
-	public TableSearcher()
-	{
-	}
 
 	public void search()
 	{
@@ -128,13 +124,13 @@ public class TableSearcher
 	{
 		this.excludeLobColumns = flag;
 	}
-	
+
 	private void searchTable(TableIdentifier table)
 	{
 		ResultSet rs = null;
 		Savepoint sp = null;
 		boolean useSavepoint = connection.getDbSettings().useSavePointForDML();
-		
+
 		try
 		{
 			String sql = this.buildSqlForTable(table);
@@ -161,10 +157,10 @@ public class TableSearcher
 			result = new DataStore(rs, this.connection, true);
 			result.setGeneratingSql(sql);
 			result.setUpdateTableToBeUsed(table);
-			
+
 			if (this.display != null) this.display.tableSearched(table, result);
 			result = null;
-			
+
 			if (sp != null)
 			{
 				connection.releaseSavepoint(sp);
@@ -191,7 +187,7 @@ public class TableSearcher
 			if (sp != null)
 			{
 				connection.releaseSavepoint(sp);
-			}			
+			}
 		}
 	}
 
@@ -204,7 +200,7 @@ public class TableSearcher
 		int cols = def.getRowCount();
 		StringBuilder sql = new StringBuilder(cols * 120);
 		sql.append("SELECT ");
-		
+
 		if (this.excludeLobColumns)
 		{
 			int added = 0;
@@ -218,7 +214,7 @@ public class TableSearcher
 					sql.append(this.connection.getMetadata().quoteObjectname(column));
 					added ++;
 				}
-			}			
+			}
 		}
 		else
 		{
@@ -236,13 +232,13 @@ public class TableSearcher
 			if (sqlType == Types.VARCHAR || sqlType == Types.CHAR)
 			{
 				column = this.connection.getMetadata().quoteObjectname(column);
-				
+
 				colcount ++;
 				if (!first)
 				{
 					sql.append(" OR ");
 				}
-				
+
 				if (this.columnFunction != null)
 				{
 					sql.append(StringUtil.replace(this.columnFunction, "$col$", column));
@@ -255,7 +251,7 @@ public class TableSearcher
 				sql.append(this.criteria);
 				sql.append('\'');
 				if (i < cols - 1) sql.append('\n');
-				
+
 				first = false;
 			}
 		}
@@ -280,20 +276,20 @@ public class TableSearcher
 		// lcase, ucase is for Access and HSQLDB
 		if (func.indexOf("upper") > -1 || func.indexOf("ucase") > -1)
 		{
-			return (this.criteria.toUpperCase().equals(this.criteria));
+			return this.criteria.toUpperCase().equals(this.criteria);
 		}
 		if (func.indexOf("lower") > -1 || func.indexOf("lcase") > -1)
 		{
-			return (this.criteria.toLowerCase().equals(this.criteria));
+			return this.criteria.toLowerCase().equals(this.criteria);
 		}
 		return false;
 	}
-	
+
 	public boolean setColumnFunction(String aColFunc)
 	{
 		this.columnFunction = null;
 		boolean setResult = false;
-		if (aColFunc != null && aColFunc.trim().length() > 0)
+		if (StringUtil.isNonBlank(aColFunc))
 		{
 			if (aColFunc.equalsIgnoreCase("$col$"))
 			{
@@ -346,9 +342,9 @@ public class TableSearcher
 		this.connection = conn;
 	}
 
-	public void setMaxRows(int maxRows)
+	public void setMaxRows(int max)
 	{
-		this.maxRows = maxRows;
+		this.maxRows = max;
 	}
 
 }

@@ -19,6 +19,7 @@ import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
 import workbench.sql.MacroManager;
+import workbench.util.StringUtil;
 
 /**
  * Action to add a new macro.
@@ -53,7 +54,7 @@ public class AddMacroAction extends WbAction
 	public void executeAction(ActionEvent e)
 	{
 		String text = client.getSelectedText();
-		if (text == null || text.trim().length() == 0) 
+		if (StringUtil.isBlank(text))
 		{
 			Toolkit.getDefaultToolkit().beep();
 			return;

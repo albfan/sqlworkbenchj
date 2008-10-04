@@ -16,20 +16,20 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CharacterRange;
 import workbench.util.StringUtil;
-import workbench.gui.dialogs.export.TextOptions;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class TextOptionsPanel 
+public class TextOptionsPanel
 	extends JPanel
 	implements TextOptions
 {
-	
+
 	/** Creates new form TextoptionsPanel */
 	public TextOptionsPanel()
 	{
+		super();
 		initComponents();
 		CharacterRange[] ranges = CharacterRange.getRanges();
 		for (int i=0; i < ranges.length; i++)
@@ -50,7 +50,7 @@ public class TextOptionsPanel
 		s.setDefaultTextDelimiter(this.getTextDelimiter());
 		s.setQuoteChar(this.getTextQuoteChar());
 	}
-	
+
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -70,12 +70,12 @@ public class TextOptionsPanel
 	{
 		this.decimalChar.setText(symbol);
 	}
-	
+
 	public String getDecimalSymbol()
 	{
 		return decimalChar.getText();
 	}
-	
+
 	public boolean getExportHeaders()
 	{
 		return this.exportHeaders.isSelected();
@@ -110,7 +110,7 @@ public class TextOptionsPanel
 	{
 		return this.quoteAlways.isSelected();
 	}
-	
+
 	public void setQuoteAlways(boolean flag)
 	{
 		this.quoteAlways.setSelected(flag);
@@ -120,23 +120,29 @@ public class TextOptionsPanel
 	{
 		this.escapeRange.setSelectedItem(range);
 	}
-	
+
 	public CharacterRange getEscapeRange()
 	{
 		return (CharacterRange)this.escapeRange.getSelectedItem();
 	}
-	
+
 	public String getLineEnding()
 	{
-		String s = (String)lineEnding.getSelectedItem();;
+		String s = (String)lineEnding.getSelectedItem();
 		if ("LF".equals(s))
+		{
 			return "\n";
+		}
 		else if ("CRLF".equals(s))
+		{
 			return "\r\n";
-		else 
+		}
+		else
+		{
 			return StringUtil.LINE_TERMINATOR;
+		}
 	}
-	
+
 	public void setLineEnding(String ending)
 	{
 		if (ending == null) return;
@@ -148,12 +154,12 @@ public class TextOptionsPanel
 		{
 			lineEnding.setSelectedItem("CRLF");
 		}
-		else 
+		else
 		{
 			lineEnding.setSelectedItem(ending.toUpperCase());
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -284,8 +290,8 @@ public class TextOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(decimalChar, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
-	
+
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JTextField decimalChar;
   private javax.swing.JLabel decimalLabel;
@@ -301,5 +307,5 @@ public class TextOptionsPanel
   private javax.swing.JTextField quoteChar;
   private javax.swing.JLabel quoteCharLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

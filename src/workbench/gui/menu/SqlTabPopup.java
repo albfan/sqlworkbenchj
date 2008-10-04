@@ -29,64 +29,57 @@ import workbench.gui.actions.ToggleExtraConnection;
 /**
  * @author  support@sql-workbench.net
  */
-public class SqlTabPopup 
+public class SqlTabPopup
 	extends JPopupMenu
 {
-	private AddTabAction add;
-	private NewDbExplorerPanelAction newDbExp;
-	private RemoveTabAction remove;
-	private RenameTabAction rename;
-	private MoveSqlTabLeft moveLeft;
-	private MoveSqlTabRight moveRight;
-	private InsertTabAction insert;
-	
 	public SqlTabPopup(MainWindow aClient)
 	{
-		this.add = new AddTabAction(aClient);
+		super();
+		AddTabAction add = new AddTabAction(aClient);
 		this.add(add);
-		this.insert = new InsertTabAction(aClient);
+		InsertTabAction insert = new InsertTabAction(aClient);
 		this.add(insert);
-		
-		this.remove = new RemoveTabAction(aClient);
+
+		RemoveTabAction remove = new RemoveTabAction(aClient);
 		this.add(remove);
 
 		if (aClient.canRenameTab())
 		{
-			this.rename = new RenameTabAction(aClient);
+			RenameTabAction rename = new RenameTabAction(aClient);
 			this.add(rename);
 		}
 
 		this.addSeparator();
-		
-		this.newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
-		this.newDbExp.removeIcon();
-		this.add(newDbExp);
+
+		NewDbExplorerPanelAction newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
+		newDbExp.removeIcon();
+		add(newDbExp);
 
 		if (aClient.canUseSeparateConnection())
 		{
 			ToggleExtraConnection toggle = new ToggleExtraConnection(aClient);
 			this.add(toggle.getMenuItem());
 		}
-		
+
 		MainPanel panel = aClient.getCurrentPanel();
 		if (panel instanceof SqlPanel)
 		{
 			this.addSeparator();
-			
+
 			SqlPanel spanel = (SqlPanel)panel;
 			int currentIndex = aClient.getCurrentPanelIndex();
-			moveLeft = new MoveSqlTabLeft(aClient);
+			MoveSqlTabLeft moveLeft = new MoveSqlTabLeft(aClient);
 			moveLeft.setEnabled(currentIndex > 0);
 			this.add(moveLeft);
 			int lastIndex = aClient.getLastSqlPanelIndex();
-			moveRight = new MoveSqlTabRight(aClient);
+			MoveSqlTabRight moveRight = new MoveSqlTabRight(aClient);
 			moveRight.setEnabled(currentIndex < lastIndex);
 			this.add(moveRight);
-			
+
 			this.addSeparator();
 
 			EditorPanel editor = spanel.getEditor();
-			
+
 			this.add(editor.getFileSaveAction());
 			this.add(editor.getFileOpenAction());
 			this.add(editor.getReloadAction());
@@ -94,7 +87,7 @@ public class SqlTabPopup
 			FileDiscardAction discard = new FileDiscardAction(spanel);
 			discard.removeIcon();
 			this.add(discard);
-			this.remove.setEnabled(aClient.canCloseTab());
+			remove.setEnabled(aClient.canCloseTab());
 		}
 	}
 

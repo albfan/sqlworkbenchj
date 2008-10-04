@@ -69,20 +69,21 @@ public class DefineFilterExpressionPanel
 	private JScrollPane scroll;
 	private	JButton saveButton = new JButton();
 	private	JButton loadButton = new JButton();
-	
+
 	public DefineFilterExpressionPanel(ResultInfo source)
 	{
 		this(source,true);
 	}
-	
+
 	public DefineFilterExpressionPanel(ResultInfo source, boolean allowSave)
 	{
+		super();
 		columnInfo = source;
 		expressions = new JPanel();
 		this.expressions.setLayout(new GridBagLayout());
-		
+
 		this.setLayout(new BorderLayout(0,2));
-		
+
 		Insets ins = new Insets(0,0,0,0);
 		orButton = new JRadioButton(ResourceMgr.getString("LblFilterOrOption"));
 		orButton.setToolTipText(ResourceMgr.getDescription("LblFilterOrOption"));
@@ -100,7 +101,7 @@ public class DefineFilterExpressionPanel
 		radioPanel.setBorder(BorderFactory.createEtchedBorder());
 		radioPanel.add(andButton);
 		radioPanel.add(orButton);
-		
+
 		JPanel p = new JPanel();
 		p.setLayout(new GridBagLayout());
 		GridBagConstraints c = new GridBagConstraints();
@@ -109,7 +110,7 @@ public class DefineFilterExpressionPanel
 		c.anchor = GridBagConstraints.EAST;
 		c.weighty = 0;
 		c.weightx = 0;
-		
+
 		if (allowSave)
 		{
 			WbToolbar bar = new WbToolbar();
@@ -128,12 +129,12 @@ public class DefineFilterExpressionPanel
 			bar.addSeparator();
 			bar.add(saveButton);
 			p.add(bar, c);
-		}		
+		}
 		c.anchor = GridBagConstraints.EAST;
 		c.gridx ++;
 		c.weightx = 1;
 		p.add(radioPanel, c);
-		
+
 		addLineButton = new FlatButton(ResourceMgr.getString("LblFilterAddLine"));
 		Dimension d = radioPanel.getPreferredSize();
 		int ph = (int)d.getHeight();
@@ -147,7 +148,7 @@ public class DefineFilterExpressionPanel
 		c.insets = new Insets(0,15,0,2);
 		p.add(addLineButton);
 
-		
+
 		this.add(p, BorderLayout.NORTH);
 		scroll = new JScrollPane(this.expressions);
 		scroll.setBorder(BorderFactory.createEtchedBorder());
@@ -155,7 +156,7 @@ public class DefineFilterExpressionPanel
 		d = addExpressionPanel();
 		scroll.getVerticalScrollBar().setUnitIncrement((int)d.getHeight());
 		scroll.getHorizontalScrollBar().setUnitIncrement(25);
-		
+
 		double w = d.getWidth() + scroll.getHorizontalScrollBar().getPreferredSize().getWidth();
 		double h = (d.getHeight() * 3) + andButton.getPreferredSize().getHeight() + scroll.getHorizontalScrollBar().getPreferredSize().getHeight();
 		this.setPreferredSize(new Dimension((int)w,(int)h));
@@ -164,12 +165,12 @@ public class DefineFilterExpressionPanel
 	private void saveFilter()
 	{
 		FilterExpression filter = this.getExpression();
-		if (filter == null) 
+		if (filter == null)
 		{
 			WbSwingUtilities.showMessageKey(this, "ErrFilterNotPresent");
 			return;
 		}
-			
+
 		String lastDir = Settings.getInstance().getLastFilterDir();
 		FileFilter ff = ExtensionFileFilter.getXmlFileFilter();
 		JFileChooser fc = new JFileChooser(lastDir);
@@ -197,7 +198,7 @@ public class DefineFilterExpressionPanel
 			}
 		}
 	}
-	
+
 	private void loadFilter()
 	{
 		String lastDir = Settings.getInstance().getLastFilterDir();
@@ -217,7 +218,7 @@ public class DefineFilterExpressionPanel
 				{
 					this.setFilter(f);
 				}
-			} 
+			}
 			catch (Exception e)
 			{
 				String msg = ResourceMgr.getString("ErrLoadingFilter");
@@ -226,17 +227,17 @@ public class DefineFilterExpressionPanel
 			}
 		}
 	}
-	
+
 	private void removeAllPanels()
 	{
 		this.panels.clear();
 		this.expressions.removeAll();
 	}
-	
+
 	public void setFilter(FilterExpression filter)
 	{
 		if (filter == null) return;
-		
+
 		if (filter instanceof AndExpression)
 		{
 			this.andButton.setSelected(true);
@@ -255,7 +256,7 @@ public class DefineFilterExpressionPanel
 		int count = expList.size();
 		for (int i=0; i < count; i++)
 		{
-			
+
 			try
 			{
 				ExpressionValue exp = (ExpressionValue)expList.get(i);
@@ -285,7 +286,7 @@ public class DefineFilterExpressionPanel
 				WbSwingUtilities.showErrorMessage(this, msg);
 				return false;
 			}
-			
+
 			if (!entry.expressionPanel.validateInput())
 			{
 				String msg = ResourceMgr.getString("ErrFilterWrongValue");
@@ -297,11 +298,11 @@ public class DefineFilterExpressionPanel
 		}
 		return true;
 	}
-	
+
 	public FilterExpression getExpression()
 	{
 		ComplexExpression exp = null;
-		
+
 		for (PanelEntry entry : panels)
 		{
 			FilterExpression f = (FilterExpression)entry.expressionPanel.getExpressionValue();
@@ -319,12 +320,12 @@ public class DefineFilterExpressionPanel
 		}
 		return exp;
 	}
-	
+
 	private Dimension addExpressionPanel()
 	{
 		return addExpressionPanel(null);
 	}
-	
+
 	private Dimension addExpressionPanel(ExpressionValue filter)
 	{
 		final ColumnExpressionPanel exp = new ColumnExpressionPanel(columnInfo, filter);
@@ -340,12 +341,12 @@ public class DefineFilterExpressionPanel
 		c1.weighty = 0.0;
 		c1.weightx = 1.0;
 		p.add(exp, c1);
-		
+
 		c1.gridx++;
 		c1.weightx = 0.0;
 		c1.fill = GridBagConstraints.NONE;
 		p.add(b, c1);
-		
+
 		PanelEntry item = new PanelEntry(p, exp);
 		b.putClientProperty("panel", item);
 		this.panels.add(item);
@@ -374,7 +375,7 @@ public class DefineFilterExpressionPanel
 		Dimension prefSize = new Dimension((int)(ps.getWidth() + bs.getWidth()), (int)ps.getHeight());
 		return prefSize;
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == saveButton)
@@ -413,22 +414,22 @@ public class DefineFilterExpressionPanel
 			this.repaint();
 		}
 	}
-	
+
 	public static void showDialog(WbTable source)
 	{
 		DataStore ds = source.getDataStore();
 		if (ds == null) return;
 		ResultInfo info = ds.getResultInfo();
 		if (info == null) return;
-		
+
 		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(info);
-		
+
 		panel.setFilter(source.getLastFilter());
 		String title = ResourceMgr.getString("MsgFilterWindowTitle");
 		boolean showDialog = true;
 		while (showDialog)
 		{
-			
+
 			boolean result = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(source), panel, title);
 			if (result)
 			{
@@ -459,7 +460,7 @@ public class DefineFilterExpressionPanel
 		if (entry == null || entry.expressionPanel == null) return;
 		entry.expressionPanel.setFocusToColumn();
 	}
-	
+
 }
 
 class PanelEntry

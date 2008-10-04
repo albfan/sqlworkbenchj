@@ -88,7 +88,7 @@ public class SqlRowDataConverterTest
 			converter.setCreateUpdate();
 			line = converter.convertRowData(data, 0).toString().trim();
 			
-			verb = SqlUtil.getSqlVerb(line.toString());
+			verb = SqlUtil.getSqlVerb(line);
 			assertEquals("No UPDATE generated", "UPDATE", verb);
 			assertEquals("Wrong WHERE statement", true, line.endsWith("WHERE char_col = 'data1';"));
 			

@@ -29,6 +29,7 @@ public class DriverEditorPanel
 	/** Creates new form BeanForm */
 	public DriverEditorPanel()
 	{
+		super();
 		initComponents();
 		String text = ResourceMgr.getDescription("LblDriverLibrary");
 		text = text.replace("%path_sep%", StringUtil.getPathSeparator());
@@ -193,7 +194,7 @@ public class DriverEditorPanel
 		this.libraryPath.setFilename("");
 		this.tfSampleUrl.setText("");
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel jPanel1;
   private javax.swing.JLabel lblClassName;

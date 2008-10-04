@@ -72,6 +72,7 @@ public class ValueConverter
 	private String defaultDateFormat;
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
+
 	private SimpleDateFormat dateFormatter;
 	private SimpleDateFormat timestampFormatter;
 	private SimpleDateFormat formatter = new SimpleDateFormat();
@@ -87,6 +88,7 @@ public class ValueConverter
 	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
 	
 	private static final String FORMAT_MILLIS = "millis";
+	
 
 	public ValueConverter()
 	{
@@ -196,11 +198,11 @@ public class ValueConverter
 			BigDecimal d = new BigDecimal(this.adjustDecimalString(value));
 			if (useInt)
 			{
-				return new Integer(d.intValueExact());
+				return Integer.valueOf(d.intValueExact());
 			}
 			else
 			{
-				return new Long(d.longValueExact());
+				return Long.valueOf(d.longValueExact());
 			}
 		}
 		catch (Exception e)
@@ -258,7 +260,7 @@ public class ValueConverter
 
 		try
 		{
-			return new Integer(value);
+			return Integer.valueOf(value);
 		}
 		catch (NumberFormatException e)
 		{

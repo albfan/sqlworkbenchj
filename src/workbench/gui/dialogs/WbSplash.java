@@ -18,38 +18,36 @@ import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.MediaTracker;
 import java.awt.Toolkit;
 import java.awt.Window;
-import java.net.URL;
 import workbench.resource.ResourceMgr;
 
 /**
  * @author support@sql-workbench.net
  */
-public class WbSplash 
+public class WbSplash
 		extends Window
 {
 	private Image splashImage;
 	private final int windowWidth = 280;
 	private final int windowHeight = 230;
-	
+
 	private final int imageWidth = 172;
 	private final int imageHeight = 128;
 	private final int imageX;
 	private final int imageY = 25;
-	
+
 	private final int panicX;
 	private final int panicY = imageHeight + imageY + 40;
-	
+
 	private final int loadingX;
 	private final int loadingY = panicY + 25;
-	
+
 	private final String dontPanic = "Don't panic";
 	private final String loading = "Loading SQL Workbench/J ...";
 	private final Font panicFont;
 	private final Font loadingFont;
-	
+
 	public WbSplash()
 	{
 		super(new Frame());
@@ -57,7 +55,7 @@ public class WbSplash
 		/*
 		URL location = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/hitchguide.gif");
 		splashImage = Toolkit.getDefaultToolkit().getImage(location);
-		
+
 		MediaTracker tracker = new MediaTracker(this);
 		tracker.addImage(splashImage, 1);
 		try
@@ -73,11 +71,11 @@ public class WbSplash
 		*/
 
 		setBackground(Color.LIGHT_GRAY);
-		
+
 		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 		setBounds((screenSize.width-windowWidth)/2, (screenSize.height-windowHeight)/2, windowWidth, windowHeight);
 		imageX = (int)((windowWidth - imageWidth) / 2);
-		
+
 		panicFont = new Font("Serif", Font.PLAIN, 36);
 		loadingFont = new Font("Dialog", Font.PLAIN, 12);
 		FontMetrics fm = getFontMetrics(panicFont);
@@ -85,7 +83,7 @@ public class WbSplash
 		panicX = (int)((windowWidth - w) / 2);
 		fm = getFontMetrics(loadingFont);
 		w = fm.stringWidth(loading);
-		loadingX = (int)((windowWidth - w) / 2);	
+		loadingX = (int)((windowWidth - w) / 2);
 	}
 
 	public void paint(Graphics g)
@@ -100,7 +98,7 @@ public class WbSplash
 		g.setFont(loadingFont);
 		g.drawString(loading, loadingX, loadingY);
 	}
-	
+
 //	public static void main(String args[])
 //	{
 //		try
@@ -114,5 +112,5 @@ public class WbSplash
 //		}
 //		System.out.println("Done.");
 //	}
-	
+
 }

@@ -60,9 +60,6 @@ public class XmlDataFileParser
 	private String tableName;
 	private String tableNameFromFile;
 
-	private boolean ignoreOwner = false;
-	private List<String> filenamesToIgnore = null;
-
 	private int currentRowNumber = 1;
 	private int colCount;
 	private int realColCount;
@@ -109,6 +106,7 @@ public class XmlDataFileParser
 
   public XmlDataFileParser()
   {
+		super();
     this.messages = new MessageBuffer();
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setValidating(false);
@@ -123,15 +121,15 @@ public class XmlDataFileParser
     }
   }
 
-	public XmlDataFileParser(File inputFile)
+	public XmlDataFileParser(File file)
 	{
 		this();
-		this.inputFile = inputFile;
+		this.inputFile = file;
 	}
 
-	public void setTrimValues(boolean trimValues)
+	public void setTrimValues(boolean flag)
 	{
-		this.trimValues = trimValues;
+		this.trimValues = flag;
 	}
 
 	/**
@@ -183,24 +181,6 @@ public class XmlDataFileParser
 		return false;
 	}
 
-	/**
-	 * Defines a "pattern" for files to ignore if a complete directory is imported.
-	 * Any file that contains the given pattern in its name will be removed from the
-	 * list of files to be processed.
-	 *
-	 * @param pattern
-	 * @see FileNameSorter#ignoreFiles(java.lang.String)
-	 */
-	public void setFilesToIgnore(List<String> nameStart)
-	{
-		this.filenamesToIgnore = nameStart;
-	}
-
-	public void setIgnoreSchema(boolean flag)
-	{
-		this.ignoreOwner = flag;
-	}
-
 	public void setValueConverter(ValueConverter convert)
 	{
 		this.converter = convert;
@@ -209,7 +189,7 @@ public class XmlDataFileParser
 	public void setColumns(String columnList)
 		throws SQLException
 	{
-		if (columnList != null && columnList.trim().length() > 0)
+		if (StringUtil.isNonBlank(columnList))
 		{
 			WbStringTokenizer tok = new WbStringTokenizer(columnList, ",");
 			this.columnsToImport = new ArrayList<ColumnIdentifier>();
@@ -594,7 +574,7 @@ public class XmlDataFileParser
 			this.hasErrors = true;
       throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
     }
-   
+
 		sourceFiles.setTableNameResolver(new XmlTableNameResolver(encoding));
 
 		List<WbFile> toProcess = null;
@@ -802,7 +782,7 @@ public class XmlDataFileParser
 		this.chars = null;
 	}
 
-	public void characters(char buf[], int offset, int len)
+	public void characters(char[] buf, int offset, int len)
 		throws SAXException
 	{
 		Thread.yield();

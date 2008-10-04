@@ -29,10 +29,6 @@ import workbench.util.WbFile;
 public class SqlServerFormatFileWriter
 	implements FormatFileWriter
 {
-	public SqlServerFormatFileWriter()
-	{
-	}
-
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
 		ResultInfo resultInfo = converter.getResultInfo();

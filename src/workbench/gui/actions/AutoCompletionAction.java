@@ -33,17 +33,18 @@ public class AutoCompletionAction
 	private JEditTextArea editor;
 	private StatusBar status;
 	
-	public AutoCompletionAction(JEditTextArea editor, StatusBar status)
+	public AutoCompletionAction(JEditTextArea edit, StatusBar bar)
 	{
-		this.editor = editor;
-		this.status = status;
+		super();
+		this.editor = edit;
+		this.status = bar;
 		this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,KeyEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
 		
 		// we have to register this keybinding with the editor
 		// otherwise Ctrl-Space will not work properly
-		editor.addKeyBinding(this);
+		edit.addKeyBinding(this);
 	}
 
 	public void closePopup()

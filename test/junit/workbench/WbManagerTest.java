@@ -66,7 +66,7 @@ public class WbManagerTest extends TestCase
 			
 			File db = new File(util.getBaseDir(), getName());
 			String script = createScript(util.getBaseDir());
-			String args[] = { "-embedded ", 
+			String[] args = { "-embedded ",
 												"-nosettings ",
 												"-configdir=" + util.getBaseDir(),
 												"-url='jdbc:h2:" + db.getAbsolutePath() + "'",

@@ -25,10 +25,6 @@ public class DefaultOutputFactory
 	implements OutputFactory
 {
 	
-	public DefaultOutputFactory()
-	{
-	}
-
 	public boolean isArchive() { return false; }
 	
 	public OutputStream createOutputStream(File output) 

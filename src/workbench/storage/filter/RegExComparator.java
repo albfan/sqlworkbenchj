@@ -16,23 +16,19 @@ import java.util.regex.Pattern;
 
 /**
  * Implementation of the ColumnComparator using regular expressions.
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class RegExComparator
 	implements ColumnComparator
 {
-	public RegExComparator()
-	{
-	}
-	
 	public boolean supportsIgnoreCase() { return true; }
-	
+
 	public String getValueExpression(Object value) { return "'" + value + "'";}
 	public String getOperator() { return "matches"; }
 	public boolean needsValue() { return true; }
 	public boolean comparesEquality() { return false; }
-	
+
 	public boolean supportsType(Class valueClass)
 	{
 		return (String.class.isAssignableFrom(valueClass));
@@ -42,7 +38,7 @@ public class RegExComparator
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		if (reference == null || value == null) return false;
-		
+
 		Pattern p = null;
 		if (ignoreCase)
 		{
@@ -61,11 +57,11 @@ public class RegExComparator
 	{
 		return (other instanceof RegExComparator);
 	}
-	
+
 	public boolean validateInput(Object value)
 	{
 		if (!(value instanceof String)) return false;
-		
+
 		try
 		{
 			Pattern.compile((String)value);
@@ -76,5 +72,5 @@ public class RegExComparator
 			return false;
 		}
 	}
-	
+
 }

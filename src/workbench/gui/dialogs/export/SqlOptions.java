@@ -33,5 +33,4 @@ public interface SqlOptions
 	void setAlternateUpdateTable(String table);
 	List<String> getKeyColumns();
 	String getDateLiteralType();
-	
 }

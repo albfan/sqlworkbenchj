@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
@@ -29,7 +30,7 @@ import workbench.util.SqlUtil;
 public class TypeMapper
 {
 	private WbConnection targetDb;
-	private HashMap<Integer, String> typeInfo;
+	private Map<Integer, String> typeInfo;
 	private List<String> ignoreTypes;
 
 	/**
@@ -50,10 +51,10 @@ public class TypeMapper
 		// BLOBs are reported as BLOB, VARBINARY (Postgres), LONGVARBNARY (HSQL) and 
 		// possibly as BINARY. So we need to test each of them. The order here
 		// is a personal feeling which type should be preferred over others ;)
-		if (type != Types.BLOB) allBlobTypes.add(new Integer(Types.BLOB));
-		if (type != Types.LONGVARBINARY) allBlobTypes.add(new Integer(Types.LONGVARBINARY));
-		if (type != Types.VARBINARY) allBlobTypes.add(new Integer(Types.VARBINARY));
-		if (type != Types.BINARY) allBlobTypes.add(new Integer(Types.BINARY));
+		if (type != Types.BLOB) allBlobTypes.add(Integer.valueOf(Types.BLOB));
+		if (type != Types.LONGVARBINARY) allBlobTypes.add(Integer.valueOf(Types.LONGVARBINARY));
+		if (type != Types.VARBINARY) allBlobTypes.add(Integer.valueOf(Types.VARBINARY));
+		if (type != Types.BINARY) allBlobTypes.add(Integer.valueOf(Types.BINARY));
 		
 		for (Integer blobType : allBlobTypes)
 		{
@@ -65,23 +66,23 @@ public class TypeMapper
 
 	private String findAlternateClobType(int type)
 	{
-		String name = null;
+		final String name;
 		
 		// CLOBs can either be reported as LONVARCHAR or CLOB
 		if (type == Types.CLOB)
 		{
-			name = typeInfo.get(new Integer(Types.LONGVARCHAR));
+			name = typeInfo.get(Integer.valueOf(Types.LONGVARCHAR));
 		}
 		else 
 		{
-			name = typeInfo.get(new Integer(Types.CLOB));
+			name = typeInfo.get(Integer.valueOf(Types.CLOB));
 		}
 		return name;
 	}
 	
 	public String getTypeName(int type, int size, int digits)
 	{
-		Integer key = new Integer(type);
+		Integer key = Integer.valueOf(type);
 		String name = this.typeInfo.get(key);
 		
 		// BLOBs and CLOBs are mapped to different types in different
@@ -129,7 +130,7 @@ public class TypeMapper
 				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
 				if (this.ignoreTypes.contains(name)) continue;
 
-				Integer key = new Integer(type);
+				Integer key = Integer.valueOf(type);
 				if (this.typeInfo.containsKey(key))
 				{
 					LogMgr.logWarning("TypeMapper.createTypeMap()", "The mapping from JDBC type "  + SqlUtil.getTypeName(type) + " to  DB type " + name + " will be ignored. A mapping is already present.");

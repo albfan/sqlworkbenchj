@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 /**
  * A class to control the dbms_output package in Oracle through JDBC
@@ -38,13 +39,22 @@ public class DbmsOutput
 	public void enable(long size) throws SQLException
 	{
 		if (this.enabled && size == this.lastSize) return;
-		CallableStatement enableStatement = conn.prepareCall( "begin dbms_output.enable(:1); end;" );
-		enableStatement.setLong( 1, size );
-		enableStatement.executeUpdate();
-		enableStatement.close();
-		this.enabled = true;
-		this.lastSize = size;
-		LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (max size=" + size + ")");
+		
+		CallableStatement enableStatement = null;
+		try
+		{
+			enableStatement = conn.prepareCall( "begin dbms_output.enable(:1); end;" );
+			enableStatement.setLong( 1, size );
+			enableStatement.executeUpdate();
+			enableStatement.close();
+			this.enabled = true;
+			this.lastSize = size;
+			LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (max size=" + size + ")");
+		}
+		finally
+		{
+			SqlUtil.closeStatement(enableStatement);
+		}
 	}
 
 	public void enable()
@@ -58,10 +68,18 @@ public class DbmsOutput
 	 */
 	public void disable() throws SQLException
 	{
-		CallableStatement disableStatement = conn.prepareCall( "begin dbms_output.disable; end;" );
-		disableStatement.executeUpdate();
-		disableStatement.close();
-		this.enabled = false;
+		CallableStatement disableStatement = null;
+		try
+		{
+			disableStatement = conn.prepareCall( "begin dbms_output.disable; end;" );
+			disableStatement.executeUpdate();
+			disableStatement.close();
+			this.enabled = false;
+		}
+		finally
+		{
+			SqlUtil.closeStatement(disableStatement);
+		}
 	}
 
 	/*

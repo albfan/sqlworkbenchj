@@ -41,7 +41,7 @@ public class WbSchemaDiff
 	extends SqlCommand
 {
 	public static final String VERB = "WBSCHEMADIFF";
-	
+
 	public static final String ARG_NAMESPACE = "namespace";
 	public static final String ARG_INCLUDE_INDEX = "includeIndex";
 	public static final String ARG_INCLUDE_FK = "includeForeignKeys";
@@ -50,12 +50,13 @@ public class WbSchemaDiff
 	public static final String ARG_INCLUDE_VIEWS = "includeViews";
 	public static final String ARG_DIFF_JDBC_TYPES = "useJdbcTypes";
 	public static final String ARG_VIEWS_AS_TABLES = "viewAsTable";
-	
+
 	private SchemaDiff diff;
-	private CommonDiffParameters params; 
-	
+	private CommonDiffParameters params;
+
 	public WbSchemaDiff()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		params = new CommonDiffParameters(cmdLine);
 		cmdLine.addArgument(ARG_NAMESPACE);
@@ -70,7 +71,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(ARG_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
-		cmdLine.addArgument(WbXslt.ARG_OUTPUT);		
+		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
 
 	@Override
@@ -78,7 +79,7 @@ public class WbSchemaDiff
 	{
 		return VERB;
 	}
-	
+
 	@Override
 	protected boolean isConnectionRequired()
 	{
@@ -91,7 +92,7 @@ public class WbSchemaDiff
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		cmdLine.parse(getCommandLine(sql));
-		
+
 		if (cmdLine.getArgumentCount() == 0)
 		{
 			result.addMessage(ResourceMgr.getString("ErrDiffWrongParameters"));
@@ -104,13 +105,13 @@ public class WbSchemaDiff
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrDiffWrongParameters"));
 			return result;
 		}
-	
+
 		if (this.rowMonitor != null) this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 		params.setMonitor(rowMonitor);
-		
+
 		WbConnection targetCon = params.getTargetConnection(currentConnection, result);
 		if (!result.isSuccess()) return result;
-		
+
 		WbConnection referenceConnection = params.getSourceConnection(currentConnection, result);
 
 		if (referenceConnection == null && targetCon != null && targetCon != currentConnection)
@@ -119,7 +120,7 @@ public class WbSchemaDiff
 			return result;
 		}
 		if (!result.isSuccess()) return result;
-		
+
 		this.diff = new SchemaDiff(referenceConnection, targetCon);
 		diff.setMonitor(this.rowMonitor);
 
@@ -201,11 +202,11 @@ public class WbSchemaDiff
 			}
 			diff.setTableNames(rl, tl);
 		}
-		
+
 		Writer out = null;
 		boolean outputToConsole = false;
 		WbFile output = evaluateFileArgument(cmdLine.getValue(CommonDiffParameters.PARAM_FILENAME));
-		
+
 		try
 		{
 			if (output == null)
@@ -226,9 +227,9 @@ public class WbSchemaDiff
 				}
 				out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(output), encoding), 256*1024);
 			}
-			
+
 			// this will start the actual diff process
-			if (!diff.isCancelled()) 
+			if (!diff.isCancelled())
 			{
 				diff.writeXml(out);
 			}
@@ -249,7 +250,7 @@ public class WbSchemaDiff
 				targetCon.disconnect();
 			}
 		}
-		
+
 		if (diff.isCancelled())
 		{
 			result.addMessage(ResourceMgr.getString("MsgDiffCancelled"));
@@ -264,10 +265,10 @@ public class WbSchemaDiff
 			{
 				String msg = ResourceMgr.getString("MsgDiffFileWritten") + " " + output.getFullPath();
 				result.addMessage(msg);
-				
+
 				String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 				String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
-				
+
 				if (!StringUtil.isEmptyString(xslt) && !StringUtil.isEmptyString(xsltOutput))
 				{
 					try

@@ -10,12 +10,12 @@
  *
  */
 package workbench.gui.completion;
+
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
-import workbench.util.SqlUtil;
 
 /**
  * Analyze an ALTER TABLE statement to provide completion for tables and columns
@@ -24,21 +24,20 @@ import workbench.util.SqlUtil;
 public class AlterTableAnalyzer
 	extends BaseAnalyzer
 {
-	
+
 	public AlterTableAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		super(conn, statement, cursorPos);
 	}
-	
+
 	protected void checkContext()
 	{
 		int addPos = -1;
 		int modifyPos = -1;
 		int tablePos = -1;
 		int tableEnd = -1;
-		int columnKeyWordPos = -1;
 		SQLLexer lexer = new SQLLexer(this.sql);
-		
+
 		try
 		{
 			SQLToken token = lexer.getNextToken(false, false);
@@ -59,10 +58,6 @@ public class AlterTableAnalyzer
 					modifyPos = token.getCharEnd();
 					tableEnd = token.getCharBegin() - 1;
 				}
-				else if ("COLUMN".equalsIgnoreCase(v))
-				{
-					columnKeyWordPos = token.getCharEnd();
-				}
 				token = lexer.getNextToken(false, false);
 			}
 		}
@@ -70,7 +65,7 @@ public class AlterTableAnalyzer
 		{
 			LogMgr.logError("AlterTableAnalyzer", "Error parsing SQL", e);
 		}
-		
+
 		String q = this.getQualifierLeftOfCursor();
 		if (q != null)
 		{
@@ -80,8 +75,8 @@ public class AlterTableAnalyzer
 		{
 			this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
 		}
-		
-		if (between(cursorPos, tablePos, modifyPos) || between(cursorPos, tablePos, addPos) || 
+
+		if (between(cursorPos, tablePos, modifyPos) || between(cursorPos, tablePos, addPos) ||
 			 (modifyPos == -1 && addPos == -1))
 		{
 			context = CONTEXT_TABLE_LIST;
@@ -93,7 +88,7 @@ public class AlterTableAnalyzer
 			context = CONTEXT_COLUMN_LIST;
 			tableForColumnList = new TableIdentifier(table);
 		}
-		
+
 	}
-	
+
 }

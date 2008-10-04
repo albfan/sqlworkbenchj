@@ -34,9 +34,9 @@ public class WbFontPicker
 	private boolean monospacedOnly = false;
 	private boolean allowFontReset = false;
 
-	/** Creates new form WbFontPicker */
 	public WbFontPicker()
 	{
+		super();
 		initComponents();
 		this.setAllowFontReset(false);
 	}
@@ -127,20 +127,20 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 		Dimension d = new Dimension(320, 240);
 		chooser.setSize(d);
 		chooser.setPreferredSize(d);
-		
+
 		JOptionPane option = new JOptionPane(chooser, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
 		JDialog dialog = option.createDialog(this, ResourceMgr.getString("TxtWindowTitleChooseFont"));
 		dialog.pack();
 		WbSwingUtilities.center(dialog, SwingUtilities.getWindowAncestor(this));
 		dialog.setVisible(true);
 		dialog.dispose();
-		
+
 		if (chooser.isFontReset())
 		{
 			this.setSelectedFont(null);
 			return;
 		}
-		
+
 		Object value= option.getValue();
 		if (value == null) return;
 		Font result = null;
@@ -156,9 +156,9 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 		{
 			this.setSelectedFont(result);
 		}
-		
+
 	}//GEN-LAST:event_selectFontButtonMouseClicked
-	
+
 	public Font getSelectedFont()
 	{
 		return this.selectedFont;
@@ -167,7 +167,7 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 	public void setSelectedFont(Font f)
 	{
 		this.selectedFont = f;
-		if (f == null) 
+		if (f == null)
 		{
 			Font df = UIManager.getDefaults().getFont("Label.font");
 			this.fontName.setFont(df);
@@ -179,11 +179,11 @@ private void resetButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-F
 			this.fontName.setText(f.getFontName() + ", " + f.getSize());
 		}
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JLabel fontName;
   private javax.swing.JButton resetButton;
   private javax.swing.JButton selectFontButton;
   // End of variables declaration//GEN-END:variables
-	
+
 }

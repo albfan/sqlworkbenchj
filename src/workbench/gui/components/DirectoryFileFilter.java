@@ -19,14 +19,16 @@ import javax.swing.filechooser.FileFilter;
  *
  * @author  support@sql-workbench.net
  */
-public class DirectoryFileFilter extends FileFilter
+public class DirectoryFileFilter
+	extends FileFilter
 {
 	private final String desc;
 	public DirectoryFileFilter(String aDesc)
 	{
+		super();
 		this.desc = aDesc;
 	}
-	
+
 	public boolean accept(File f)
 	{
 		return f.isDirectory();

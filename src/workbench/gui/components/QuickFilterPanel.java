@@ -50,33 +50,33 @@ import workbench.storage.filter.RegExComparator;
 import workbench.util.StringUtil;
 
 /**
- * A small panel with a find and find next button, and a criteria field 
+ * A small panel with a find and find next button, and a criteria field
  * which provides a quick search facitiliy for a WbTable component
  * @author  support@sql-workbench.net
  */
-public class QuickFilterPanel 
-	extends JPanel 
+public class QuickFilterPanel
+	extends JPanel
 	implements QuickFilter, CriteriaPanel, ActionListener, MouseListener, PropertyChangeListener
 {
 	private WbTable searchTable;
 	private String searchColumn;
-	
+
 	private HistoryTextField filterValue;
 	private WbToolbar toolbar;
-	private JComboBox columnDropDown; 
-	private QuickFilterAction filterAction;	
-	private ResetFilterAction resetFilterAction;
+	private JComboBox columnDropDown;
+	private QuickFilterAction filterAction;
 	private final ColumnComparator comparator = new RegExComparator();
 	private String[] columnList;
 	private boolean showColumnDropDown;
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
-	
+
 	public QuickFilterPanel(WbTable table, String[] columns, boolean showDropDown, String historyProperty)
 	{
+		super();
 		this.searchTable = table;
 		this.searchTable.addPropertyChangeListener("model", this);
-		if (columns != null && columns.length == 1) 
+		if (columns != null && columns.length == 1)
 		{
 			showColumnDropDown = false;
 		}
@@ -88,19 +88,20 @@ public class QuickFilterPanel
 		this.searchColumn = columns[0];
 		this.initGui(historyProperty);
 	}
-	
+
 	public QuickFilterPanel(WbTable table, String column, String historyProperty)
 	{
+		super();
 		this.searchTable = table;
 		this.searchColumn = column;
 		showColumnDropDown = false;
 		this.initGui(historyProperty);
 	}
-	
+
 	private void initGui(String historyProperty)
 	{
 		GridBagConstraints gridBagConstraints;
-		
+
 		this.setLayout(new GridBagLayout());
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
@@ -113,15 +114,15 @@ public class QuickFilterPanel
 			columnDropDown.setSelectedIndex(0);
 			columnDropDown.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnSelector"));
 		}
-		
+
 		initPopup();
-		
+
 		this.toolbar = new WbToolbar();
 		this.filterAction = new QuickFilterAction(this);
-		this.resetFilterAction = this.searchTable.getResetFilterAction();
-		
+		ResetFilterAction resetFilterAction = this.searchTable.getResetFilterAction();
+
 		this.toolbar.add(this.filterAction);
-		this.toolbar.add(this.resetFilterAction);
+		this.toolbar.add(resetFilterAction);
 		this.toolbar.setMargin(new Insets(0,0,0,0));
 		toolbar.setBorderPainted(true);
 
@@ -142,7 +143,7 @@ public class QuickFilterPanel
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
 			gridBagConstraints.weightx = 0.8;
 			this.add(filterValue, gridBagConstraints);
-			
+
 			gridBagConstraints.gridx ++;
 			//gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
 			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
@@ -157,7 +158,7 @@ public class QuickFilterPanel
 			gridBagConstraints.weightx = 1.0;
 			this.add(filterValue, gridBagConstraints);
 		}
-		
+
 		InputMap im = new ComponentInputMap(this);
 		ActionMap am = new ActionMap();
 		setupActionMap(im, am);
@@ -166,7 +167,7 @@ public class QuickFilterPanel
 
 		this.filterValue.setInputMap(JComponent.WHEN_FOCUSED, im);
 		this.filterValue.setActionMap(am);
-		
+
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(filterValue);
 		pol.addComponent(filterValue);
@@ -181,7 +182,7 @@ public class QuickFilterPanel
 	{
 		this.toolbar.setBorder(b);
 	}
-	
+
 	public void addToToolbar(WbAction action, int index)
 	{
 		this.toolbar.add(action, index);
@@ -190,10 +191,10 @@ public class QuickFilterPanel
 	private void initPopup()
 	{
 		if (this.columnList == null) return;
-		
+
 		Component ed = filterValue.getEditor().getEditorComponent();
 		if (this.textListener != null) ed.removeMouseListener(this.textListener);
-		
+
 		this.textListener = new TextComponentMouseListener();
 		JMenu menu = new WbMenu(ResourceMgr.getString("MnuTextFilterOnColumn"));
 		//menu.setIcon(null);
@@ -209,14 +210,14 @@ public class QuickFilterPanel
 		textListener.addMenuItem(menu);
 		ed.addMouseListener(textListener);
 	}
-	
+
 	private void updateColumnDropDown()
 	{
 		if (this.columnList == null || this.columnDropDown == null) return;
 		columnDropDown = new JComboBox(columnList);
 		columnDropDown.setModel(new DefaultComboBoxModel(this.columnList));
 	}
-	
+
 	public void setColumnList(String[] columns)
 	{
 		if (StringUtil.arraysEqual(columns, columnList)) return;
@@ -224,7 +225,7 @@ public class QuickFilterPanel
 		initPopup();
 		updateColumnDropDown();
 	}
-	
+
 	private void setupActionMap(InputMap im, ActionMap am)
 	{
 		im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), filterAction.getActionName());
@@ -245,19 +246,19 @@ public class QuickFilterPanel
 		filterValue.restoreSettings(props, prefix);
 		filterValue.addActionListener(this);
 	}
-	
+
 	public void saveSettings()
 	{
 		filterValue.saveSettings();
 	}
-	
+
 	public void restoreSettings()
 	{
 		filterValue.removeActionListener(this);
 		filterValue.restoreSettings();
 		filterValue.addActionListener(this);
 	}
-	
+
 	public void setFocusToEntryField()
 	{
 		this.filterValue.grabFocus();
@@ -266,7 +267,7 @@ public class QuickFilterPanel
 	public void applyQuickFilter()
 	{
 		String value = this.filterValue.getText();
-		if (StringUtil.isEmptyString(value)) 
+		if (StringUtil.isEmptyString(value))
 		{
 			this.searchTable.resetFilter();
 		}
@@ -278,7 +279,7 @@ public class QuickFilterPanel
 			filterValue.addToHistory(value);
 		}
 	}
-	
+
 	public String getText()
 	{
 		return filterValue.getText();
@@ -309,7 +310,7 @@ public class QuickFilterPanel
 		}
 	}
 
-	
+
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == filterValue)

@@ -23,6 +23,7 @@ public class WbCheckBox
 	
 	public WbCheckBox()
 	{
+		super();
 	}
 	
 	public WbCheckBox(String text)

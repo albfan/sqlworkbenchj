@@ -29,12 +29,10 @@ public class SearchableTextPane
 	extends JTextArea
 	implements TextContainer
 {
-	private SearchAndReplace searcher;
-	
 	public SearchableTextPane(Window owner)
 	{
 		super();
-		searcher = new SearchAndReplace(owner, this);
+		SearchAndReplace searcher = new SearchAndReplace(owner, this);
 		TextComponentMouseListener l = new TextComponentMouseListener(this);
 		l.addAction(searcher.getFindAction());
 		l.addAction(searcher.getFindAgainAction());

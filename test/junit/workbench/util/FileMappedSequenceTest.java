@@ -32,13 +32,6 @@ public class FileMappedSequenceTest
 		util = new TestUtil("ScriptParserTest");
 	}
 
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-	}
-
   public void testLastChar()
     throws Exception
   {

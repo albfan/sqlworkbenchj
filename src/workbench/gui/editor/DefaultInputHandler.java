@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.swing.KeyStroke;
@@ -21,9 +22,9 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.27 2008-03-21 09:55:25 thomas Exp $
+ * @version $Id: DefaultInputHandler.java,v 1.28 2008-10-04 13:03:01 thomas Exp $
  */
-public class DefaultInputHandler 
+public class DefaultInputHandler
 	extends InputHandler
 {
 	/**
@@ -31,6 +32,7 @@ public class DefaultInputHandler
 	 */
 	public DefaultInputHandler()
 	{
+		super();
 		bindings = currentBindings = new HashMap();
 	}
 
@@ -97,7 +99,7 @@ public class DefaultInputHandler
 	@SuppressWarnings("unchecked")
 	public void addKeyBinding(String keyBinding, ActionListener action)
 	{
-		HashMap current = bindings;
+		Map current = bindings;
 
 		StringTokenizer st = new StringTokenizer(keyBinding);
 		while(st.hasMoreTokens())
@@ -173,7 +175,7 @@ public class DefaultInputHandler
 			keyCode == KeyEvent.VK_ALT ||
 			keyCode == KeyEvent.VK_META)
 			return;
-		
+
 		if((modifiers & ~KeyEvent.SHIFT_MASK) != 0
 			|| evt.isActionKey()
 			|| keyCode == KeyEvent.VK_BACK_SPACE
@@ -210,7 +212,7 @@ public class DefaultInputHandler
 
 			KeyStroke keyStroke = KeyStroke.getKeyStroke(keyCode,modifiers);
 			Object o = currentBindings.get(keyStroke);
-			
+
 			if(o == null)
 			{
 				// Don't beep if the user presses some
@@ -253,11 +255,11 @@ public class DefaultInputHandler
 	 */
 	public void keyTyped(KeyEvent evt)
 	{
-		// 
-		if (evt.isControlDown() || evt.isAltDown()) return; 
-		
+		//
+		if (evt.isControlDown() || evt.isAltDown()) return;
+
 		char c = evt.getKeyChar();
-		
+
 		if(c != KeyEvent.CHAR_UNDEFINED)
 		{
 			if(c >= 0x20 && c != 0x7f)
@@ -348,7 +350,6 @@ public class DefaultInputHandler
 		}
 		else if(key.length() == 0)
 		{
-			System.err.println("Invalid key stroke: " + keyStroke);
 			return null;
 		}
 		else
@@ -370,11 +371,12 @@ public class DefaultInputHandler
 	}
 
 	// private members
-	private HashMap bindings;
-	private HashMap currentBindings;
+	private Map bindings;
+	private Map currentBindings;
 
 	private DefaultInputHandler(DefaultInputHandler copy)
 	{
+		super();
 		bindings = currentBindings = copy.bindings;
 	}
 }

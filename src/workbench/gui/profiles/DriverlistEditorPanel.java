@@ -29,8 +29,8 @@ import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 
 /**
- * @author support@sql-workbench.net  
- */ 
+ * @author support@sql-workbench.net
+ */
 public class DriverlistEditorPanel
 	extends JPanel
 	implements FileActions
@@ -38,12 +38,13 @@ public class DriverlistEditorPanel
 	private DriverListModel model;
 	private JToolBar toolbar;
 	private int lastIndex = -1;
-	
+
 	private DriverEditorPanel driverEditor;
 	private JList driverList;
-	
+
 	public DriverlistEditorPanel()
 	{
+		super();
 		initComponents();
 		this.fillDriverList();
 		WbTraversalPolicy policy = new WbTraversalPolicy();
@@ -51,7 +52,7 @@ public class DriverlistEditorPanel
 		policy.addComponent(driverEditor);
 		policy.setDefaultComponent(driverList);
 	}
-	
+
 	private void fillDriverList()
 	{
 		this.model = new DriverListModel(ConnectionMgr.getInstance().getDrivers());
@@ -61,14 +62,14 @@ public class DriverlistEditorPanel
 			this.driverList.setSelectedIndex(0);
 		}
 	}
-	
+
 	private void initComponents()
 	{
 		driverList = new JList();
 		driverEditor = new DriverEditorPanel();
-		
+
 		setLayout(new BorderLayout());
-		
+
 		driverList.addListSelectionListener(new javax.swing.event.ListSelectionListener()
 		{
 			public void valueChanged(javax.swing.event.ListSelectionEvent evt)
@@ -76,20 +77,20 @@ public class DriverlistEditorPanel
 				driverListValueChanged(evt);
 			}
 		});
-		
+
 		JScrollPane scroll = new JScrollPane(driverList);
-		
+
 		this.toolbar = new WbToolbar();
 		toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new DeleteListEntryAction(this));
-		
+
 		add(toolbar, BorderLayout.NORTH);
 		add(scroll, BorderLayout.WEST);
 		add(driverEditor, BorderLayout.CENTER);
-		
+
 	}
-	
+
 	private void driverListValueChanged(javax.swing.event.ListSelectionEvent evt)
 	{
 		if (evt.getSource() == this.driverList)
@@ -108,7 +109,7 @@ public class DriverlistEditorPanel
 			lastIndex = index;
 		}
 	}
-	
+
 	public DbDriver getSelectedDriver()
 	{
 		this.updateUI();
@@ -117,15 +118,15 @@ public class DriverlistEditorPanel
 		DbDriver drv = this.model.getDriver(index);
 		return drv;
 	}
-	
+
 	public void selectDriver(String aDriverName)
 	{
 		if (aDriverName == null) return;
-		
+
 		try
 		{
 			int count = this.model.getSize();
-			
+
 			for (int i=0; i < count; i++)
 			{
 				DbDriver drv = this.model.getDriver(i);
@@ -143,7 +144,7 @@ public class DriverlistEditorPanel
 			driverList.setSelectedIndex(0);
 		}
 	}
-	
+
 	/**
 	 *	Remove an item from the listmodel
 	 */
@@ -153,14 +154,14 @@ public class DriverlistEditorPanel
 		this.driverList.clearSelection();
 		this.driverEditor.reset();
 		this.model.deleteDriver(index);
-		
+
 		// check if the last driver was deleted
 		if (index > this.model.getSize() - 1) index--;
-		
+
 		this.driverList.setSelectedIndex(index);
 		this.driverList.repaint();
 	}
-	
+
 	/**
 	 *	Create a new profile. This will only be
 	 *	created in the ListModel.
@@ -181,7 +182,7 @@ public class DriverlistEditorPanel
 		this.selectDriver(drv.getName());
 		this.driverList.updateUI();
 	}
-	
+
 	public void saveItem() throws Exception
 	{
 		ConnectionMgr conn = ConnectionMgr.getInstance();
@@ -189,13 +190,13 @@ public class DriverlistEditorPanel
 		conn.setDrivers(this.model.getValues());
 		conn.saveDrivers();
 	}
-	
+
 	public void saveSettings()
 	{
 		//		int location = this.jSplitPane1.getDividerLocation();
 		//		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", location);
 	}
-	
+
 	public void restoreSettings()
 	{
 		//		int location = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 140);

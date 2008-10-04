@@ -57,7 +57,8 @@ public class MetaDataSqlManager
 	private String foreignKeyTemplate = NO_STRING;
 	private String columnCommentTemplate = NO_STRING;
 	private String tableCommentTemplate = NO_STRING;
-	
+	private final Object LOCK = new Object();
+		
 	public MetaDataSqlManager(String product)
 	{
 		this.productName = product;
@@ -67,9 +68,9 @@ public class MetaDataSqlManager
 	{
 		if (this.procedureSource == MARKER)
 		{
-			synchronized (MARKER)
+			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("ProcSourceStatements.xml");
+				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ProcSourceStatements.xml");
 				this.procedureSource = (GetMetaDataSql)sql.get(this.productName);
 			}
 		}
@@ -80,7 +81,7 @@ public class MetaDataSqlManager
 	{
 		if (this.viewSource == MARKER)
 		{
-			synchronized (MARKER)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("ViewSourceStatements.xml");
 				this.viewSource = (GetMetaDataSql)sql.get(this.productName);
@@ -94,7 +95,7 @@ public class MetaDataSqlManager
 	{
 		if (this.listTrigger == MARKER)
 		{
-			synchronized (MARKER)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("ListTriggersStatements.xml");
 				this.listTrigger = (GetMetaDataSql)sql.get(this.productName);
@@ -107,7 +108,7 @@ public class MetaDataSqlManager
 	{
 		if (this.triggerSource == MARKER)
 		{
-			synchronized (MARKER)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("TriggerSourceStatements.xml");
 				this.triggerSource = (GetMetaDataSql)sql.get(this.productName);
@@ -120,7 +121,7 @@ public class MetaDataSqlManager
 	{
 		if (this.primaryKeyTemplate == NO_STRING)
 		{
-			synchronized (NO_STRING)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("CreatePkStatements.xml");
 				this.primaryKeyTemplate = (String)sql.get(this.productName);
@@ -137,7 +138,7 @@ public class MetaDataSqlManager
 	{
 		if (this.foreignKeyTemplate == NO_STRING)
 		{
-			synchronized (MARKER)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("CreateFkStatements.xml");
 				String template = (String)sql.get(this.productName);
@@ -162,7 +163,7 @@ public class MetaDataSqlManager
 	{
 		if (this.indexTemplate == NO_STRING)
 		{
-			synchronized (NO_STRING)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("CreateIndexStatements.xml");
 				this.indexTemplate = (String)sql.get(this.productName);
@@ -179,7 +180,7 @@ public class MetaDataSqlManager
 	{
 		if (this.columnCommentTemplate == NO_STRING)
 		{
-			synchronized (NO_STRING)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("ColumnCommentStatements.xml");
 				this.columnCommentTemplate = (String)sql.get(this.productName);
@@ -196,7 +197,7 @@ public class MetaDataSqlManager
 	{
 		if (this.tableCommentTemplate == NO_STRING)
 		{
-			synchronized (NO_STRING)
+			synchronized (LOCK)
 			{
 				HashMap sql = this.readStatementTemplates("TableCommentStatements.xml");
 				if (sql == null) return null;
@@ -272,7 +273,7 @@ public class MetaDataSqlManager
 			}
 			if (value instanceof HashMap)
 			{
-				HashMap m = (HashMap)value;
+				HashMap m = (HashMap<String, GetMetaDataSql>)value;
 				if (result != null)
 				{
 					result.putAll(m);
@@ -290,7 +291,7 @@ public class MetaDataSqlManager
 		return result;
 	}
 
-	public static void main(String args[])
+	public static void main(String[] args)
 	{
 		String sql = "ALTER TABLE CONFIGURATION \n" + 
 								 "  ADD CONSTRAINT FK_CONFIG_RES FOREIGN KEY (RESOURCE_KEY) \n" + 

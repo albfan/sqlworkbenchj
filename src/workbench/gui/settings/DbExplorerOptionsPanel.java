@@ -27,6 +27,7 @@ public class DbExplorerOptionsPanel
 {
 	public DbExplorerOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
 

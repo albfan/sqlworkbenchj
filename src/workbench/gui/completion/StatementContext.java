@@ -164,11 +164,11 @@ public class StatementContext
 						if (t2.getContents().equals("ALL"))
 						{
 							// swallow potential UNION ALL
-							unionStarts.add(new Integer(t.getCharBegin()));
+							unionStarts.add(Integer.valueOf(t.getCharBegin()));
 						}
 						else
 						{
-							unionStarts.add(new Integer(t.getCharEnd()));
+							unionStarts.add(Integer.valueOf(t.getCharEnd()));
 							
 							// continue with the token just read
 							lastToken = t;
@@ -178,7 +178,7 @@ public class StatementContext
 					}
 					else
 					{
-						unionStarts.add(new Integer(t.getCharEnd()));
+						unionStarts.add(Integer.valueOf(t.getCharEnd()));
 					}
 				}
 				
@@ -193,12 +193,11 @@ public class StatementContext
 			
 			if (unionStarts.size() > 0)
 			{
-				boolean found = false;
 				int index = 0;
 				int lastPos = 0;
 				while (index < unionStarts.size())
 				{
-					int startPos = (unionStarts.get(index)).intValue();
+					int startPos = unionStarts.get(index).intValue();
 					if (lastPos <= pos && pos <= startPos)
 					{
 						int newPos = pos - lastPos;
@@ -208,7 +207,7 @@ public class StatementContext
 					index ++;
 				}
 				// check last union
-				int startPos = (unionStarts.get(unionStarts.size() - 1)).intValue();
+				int startPos = unionStarts.get(unionStarts.size() - 1).intValue();
 				if (pos >= startPos)
 				{
 					int newPos = pos - startPos;

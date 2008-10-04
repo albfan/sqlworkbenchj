@@ -221,7 +221,7 @@ public class Db2SequenceReader
 		{
 			result.append(nl + "      NO MAXVALUE");
 		}
-		if (cache != null || cache.longValue() > 0)
+		if (cache != null && cache.longValue() > 0)
 		{
 			result.append(nl + "      CACHE ");
 			result.append(cache);

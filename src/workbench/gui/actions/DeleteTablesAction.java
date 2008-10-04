@@ -30,16 +30,17 @@ import workbench.interfaces.TableDeleteListener;
 /**
  * @author support@sql-workbench.net
  */
-public class DeleteTablesAction 
+public class DeleteTablesAction
 	extends WbAction
 	implements ListSelectionListener
 {
 	private DbObjectList source;
 	private ListSelectionModel selection;
 	private TableDeleteListener deleteListener;
-	
+
 	public DeleteTablesAction(DbObjectList client, ListSelectionModel list, TableDeleteListener l)
 	{
+		super();
 		this.initMenuDefinition("MnuTxtDeleteTableData");
 		this.source = client;
 		this.selection = list;
@@ -47,13 +48,13 @@ public class DeleteTablesAction
 		setEnabled(false);
 		list.addListSelectionListener(this);
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
 
 		List<TableIdentifier> tables = getSelectedTables();
-		
+
 		TableDeleterUI deleter = new TableDeleterUI();
 		deleter.addDeleteListener(this.deleteListener);
 		deleter.setObjects(tables);
@@ -66,7 +67,7 @@ public class DeleteTablesAction
 	{
 		List<? extends DbObject> objects = source.getSelectedObjects();
 		if (objects == null || objects.size() == 0) return null;
-		
+
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(objects.size());
 		for (DbObject dbo : objects)
 		{
@@ -79,7 +80,7 @@ public class DeleteTablesAction
 		}
 		return tables;
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		WbConnection conn = this.source.getConnection();
@@ -90,7 +91,7 @@ public class DeleteTablesAction
 		else
 		{
 			setEnabled(this.selection.getMinSelectionIndex() >= 0);
-		}		
+		}
 	}
-	
+
 }

@@ -33,7 +33,7 @@ public class EncodingPanel
 {
 	protected JComboBox encodings = new JComboBox();
 	private JLabel label;
-	
+
 	public EncodingPanel()
 	{
 		this(System.getProperty("file.encoding"), true);
@@ -46,6 +46,7 @@ public class EncodingPanel
 
 	public EncodingPanel(String encoding, boolean showLabel)
 	{
+		super();
 		String[] charsets = EncodingUtil.getEncodings();
 		int count = charsets.length;
 		for (int i=0; i < count; i++)
@@ -60,7 +61,7 @@ public class EncodingPanel
 		Dimension d = new Dimension(300, 22);
 		encodings.setMaximumSize(d);
 		this.setLayout(new GridBagLayout());
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 		if (showLabel)
 		{
@@ -90,13 +91,13 @@ public class EncodingPanel
 		if (this.label == null) return;
 		this.label.setVisible(flag);
 	}
-	
+
 	public boolean isLabelVisible()
 	{
 		if (this.label == null) return false;
 		return this.label.isVisible();
 	}
-	
+
 	public void setEncoding(String enc)
 	{
 		encodings.setSelectedItem(enc);

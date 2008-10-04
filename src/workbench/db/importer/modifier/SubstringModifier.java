@@ -23,11 +23,7 @@ public class SubstringModifier
 	implements ImportValueModifier
 {
 	public Map<ColumnIdentifier, ColumnValueSubstring> limits =  new HashMap<ColumnIdentifier, ColumnValueSubstring>();
-	
-	public SubstringModifier()
-	{
-	}
-	
+
 	public int getSize()
 	{
 		return limits.size();
@@ -36,7 +32,7 @@ public class SubstringModifier
 	/**
 	 * Define substring limits for a column.
 	 * An existing mapping for that column will be overwritten.
-	 * 
+	 *
 	 * @param col the column for which to apply the substring
 	 * @param start the start of the substring
 	 * @param end the end of the substring
@@ -46,7 +42,7 @@ public class SubstringModifier
 		ColumnValueSubstring s = new ColumnValueSubstring(start, end);
 		this.limits.put(col.createCopy(), s);
 	}
-	
+
 	public String modifyValue(ColumnIdentifier col, String value)
 	{
 		ColumnValueSubstring s = this.limits.get(col);
@@ -56,7 +52,7 @@ public class SubstringModifier
 		}
 		return value;
 	}
-	
+
 	/**
 	 * For testing purposes to allow access to the actual "modifier"
 	 */
@@ -64,6 +60,6 @@ public class SubstringModifier
 	{
 		return this.limits.get(col);
 	}
-	
+
 }
 

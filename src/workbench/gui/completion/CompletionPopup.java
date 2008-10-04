@@ -397,7 +397,7 @@ public class CompletionPopup
 		if (!StringUtil.isEmptyString(value))
 		{
 			editor.setSelectedText(value);
-			if (value.startsWith("<") && value.endsWith(">"))
+			if (value.charAt(0) == '<' && value.charAt(0) == '>')
 			{
 				editor.selectWordAtCursor(" =-\t\n");
 			}
@@ -618,7 +618,7 @@ public class CompletionPopup
 	{
 	}
 	
-	class DummyPanel
+	static class DummyPanel
 		extends JPanel
 	{
 		@SuppressWarnings("deprecation")

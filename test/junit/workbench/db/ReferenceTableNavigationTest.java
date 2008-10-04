@@ -215,13 +215,12 @@ public class ReferenceTableNavigationTest
 					 "INSERT INTO base (id, data) VALUES (1, 'one');\n" +
 					 "INSERT INTO base (id, data) VALUES (2, 'two');\n" +
 					 "INSERT INTO link_table (link_id, original_id) vALUES (1,2);\n" +
-					 "COMMIT;\n" +
-					 "";
+					 "COMMIT;\n";
 		TestUtil.executeScript(con, script);
 		ReferenceTableNavigation nav = new ReferenceTableNavigation(new TableIdentifier("base"), con);
 		nav.readTreeForChildren();
-		TableDependency dep = nav.getTree();
-		List<DependencyNode> tables = dep.getLeafs();
+//		TableDependency dep = nav.getTree();
+//		List<DependencyNode> tables = dep.getLeafs();
 //		System.out.println("***************");
 //		for (DependencyNode node : tables)
 //		{

@@ -30,7 +30,7 @@ import workbench.util.StringUtil;
 /**
  * @author support@sql-workbench.net
  */
-public class WbConnect 
+public class WbConnect
 	extends SqlCommand
 {
 	private static int connectionId;
@@ -38,6 +38,7 @@ public class WbConnect
 
 	public WbConnect()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(AppArguments.ARG_PROFILE, ArgumentType.ProfileArgument);
 		cmdLine.addArgument(AppArguments.ARG_PROFILE_GROUP);
@@ -61,17 +62,17 @@ public class WbConnect
 	{
 		return false;
 	}
-	
+
 	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setFailure();
-		
+
 		String args = getCommandLine(aSql);
 		cmdLine.parse(args);
-		
+
 		ConnectionProfile profile = null;
 		String profName = cmdLine.getValue(AppArguments.ARG_PROFILE);
 		if (StringUtil.isEmptyString(profName))
@@ -83,13 +84,13 @@ public class WbConnect
 			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
 			profile = ConnectionMgr.getInstance().getProfile(new ProfileKey(profName, group));
 		}
-		
+
 		if (profile == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrConnNoArgs"));
 			return result;
 		}
-		
+
 		WbConnection newConn = null;
 		try
 		{
@@ -100,7 +101,7 @@ public class WbConnect
 			LogMgr.logInfo("WbConnect.execute()", "Connected to: " + newConn.getDisplayString());
 
 			// The runner will switch back to the original connection automatically once
-			// the current script has ended. 
+			// the current script has ended.
 			this.runner.changeConnection(newConn);
 			result.addMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", newConn.getDisplayString()));
 			result.setSuccess();
@@ -112,8 +113,8 @@ public class WbConnect
 			result.addMessage(err);
 			result.setFailure();
 		}
-			 
+
 		return result;
 	}
-	
+
 }

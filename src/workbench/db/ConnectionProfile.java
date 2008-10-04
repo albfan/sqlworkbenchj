@@ -786,7 +786,7 @@ public class ConnectionProfile
 	{
 		if (!StringUtil.equalStringOrEmpty(script, this.postConnectScript))
 		{
-			if (StringUtil.isEmptyString(script) || script.trim().length() == 0)
+			if (StringUtil.isBlank(script))
 			{
 				this.postConnectScript = null;
 			}
@@ -807,7 +807,7 @@ public class ConnectionProfile
 	{
 		if (!StringUtil.equalStringOrEmpty(script, this.preDisconnectScript))
 		{
-			if (StringUtil.isEmptyString(script) || script.trim().length() == 0)
+			if (StringUtil.isBlank(script))
 			{
 				this.preDisconnectScript = null;
 			}
@@ -842,7 +842,7 @@ public class ConnectionProfile
 	{
 		if (!StringUtil.equalStringOrEmpty(script, this.idleScript))
 		{
-			if (StringUtil.isEmptyString(script) || script.trim().length() == 0)
+			if (StringUtil.isBlank(script))
 			{
 				this.idleScript = null;
 			}

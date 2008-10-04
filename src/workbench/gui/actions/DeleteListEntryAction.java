@@ -33,6 +33,7 @@ public class DeleteListEntryAction extends WbAction
 
 	public DeleteListEntryAction(FileActions aClient, String aKey)
 	{
+		super();
 		this.client = aClient;
 		this.setMenuTextByKey(aKey);
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));

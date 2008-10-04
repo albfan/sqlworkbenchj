@@ -28,7 +28,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
 
-import workbench.db.DbMetadata;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -62,7 +61,6 @@ import workbench.util.WbWorkspace;
 /**
  *
  * @author  support@sql-workbench.net
- *
  */
 public class TriggerListPanel
 	extends JPanel
@@ -70,7 +68,6 @@ public class TriggerListPanel
 {
 	private WbConnection dbConnection;
 	private TriggerReader reader;
-	private JPanel listPanel;
 	private CriteriaPanel findPanel;
 	private WbTable triggerList;
 
@@ -82,13 +79,14 @@ public class TriggerListPanel
 	private JLabel infoLabel;
 	private boolean isRetrieving;
 	protected ProcStatusRenderer statusRenderer;
-	
+
 	private CompileDbObjectAction compileAction;
 	private DropDbObjectAction dropAction;
-	
-	public TriggerListPanel(MainWindow parent) 
+
+	public TriggerListPanel(MainWindow parent)
 		throws Exception
 	{
+		super();
 		Reloadable sourceReload = new Reloadable()
 		{
 			public void reload()
@@ -106,20 +104,20 @@ public class TriggerListPanel
 				}
 			}
 		};
-		
+
 		this.source = new DbObjectSourcePanel(parent, sourceReload);
 
-		this.listPanel = new JPanel();
+		JPanel listPanel = new JPanel();
 		this.statusRenderer = new ProcStatusRenderer();
 		this.triggerList = new WbTable(true, false, false)
 		{
-			public TableCellRenderer getCellRenderer(int row, int column) 
+			public TableCellRenderer getCellRenderer(int row, int column)
 			{
 				if (column == ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE) return statusRenderer;
 				return super.getCellRenderer(row, column);
 			}
 		};
-		
+
 		this.triggerList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.triggerList.setCellSelectionEnabled(false);
 		this.triggerList.setColumnSelectionAllowed(false);
@@ -129,27 +127,27 @@ public class TriggerListPanel
 
 		String[] cols = new String[] {"NAME", "TYPE", "EVENT"};
 		this.findPanel = new QuickFilterPanel(this.triggerList, cols, false, "triggerlist");
-		
+
 		ReloadAction a = new ReloadAction(this);
-		
+
 		this.findPanel.addToToolbar(a, true, false);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTriggerList"));
-		this.listPanel.setLayout(new BorderLayout());
-		this.listPanel.add((JPanel)findPanel, BorderLayout.NORTH);
+		listPanel.setLayout(new BorderLayout());
+		listPanel.add((JPanel)findPanel, BorderLayout.NORTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		this.splitPane.setOneTouchExpandable(true);
 		this.splitPane.setDividerSize(6);
 		WbScrollPane scroll = new WbScrollPane(this.triggerList);
 
-		this.listPanel.add(scroll, BorderLayout.CENTER);
+		listPanel.add(scroll, BorderLayout.CENTER);
 
 		this.infoLabel = new JLabel("");
 		EmptyBorder b = new EmptyBorder(1, 3, 0, 0);
 		this.infoLabel.setBorder(b);
-		this.listPanel.add(this.infoLabel, BorderLayout.SOUTH);
+		listPanel.add(this.infoLabel, BorderLayout.SOUTH);
 
-		this.splitPane.setLeftComponent(this.listPanel);
+		this.splitPane.setLeftComponent(listPanel);
 		this.splitPane.setRightComponent(source);
 		this.splitPane.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
@@ -161,7 +159,7 @@ public class TriggerListPanel
 		pol.addComponent(this.triggerList);
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
-		
+
 		this.dropAction = new DropDbObjectAction(this, triggerList.getSelectionModel(), this);
 		triggerList.addPopupAction(dropAction, true);
 		this.compileAction = new CompileDbObjectAction(this, this.triggerList.getSelectionModel());
@@ -217,7 +215,7 @@ public class TriggerListPanel
 		if (this.reader == null) return;
 		if (this.isRetrieving) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		
+
 		try
 		{
 			this.reset();
@@ -225,10 +223,10 @@ public class TriggerListPanel
 			this.isRetrieving = true;
 			this.infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			
+
 			DataStore ds = reader.getTriggers(currentCatalog, currentSchema);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
-			
+
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
@@ -268,38 +266,38 @@ public class TriggerListPanel
 	{
 		return "dbexplorer" + index + ".triggerlist.";
 	}
-	
+
 	public void saveSettings()
 	{
 		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
 		findPanel.saveSettings();
 	}
-	
+
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
 		String prefix = getWorkspacePrefix(index);
 		storeSettings(w.getSettings(), prefix);
 		findPanel.saveSettings(w.getSettings(), prefix);
 	}
-	
+
 	private void storeSettings(PropertyStorage props, String prefix)
 	{
 		props.setProperty(prefix + "divider", this.splitPane.getDividerLocation());
 	}
-	
+
 	public void restoreSettings()
 	{
 		readSettings(Settings.getInstance(), this.getClass().getName() + ".");
 		findPanel.restoreSettings();
 	}
-	
+
 	public void readFromWorkspace(WbWorkspace w, int index)
 	{
 		String prefix = getWorkspacePrefix(index);
 		readSettings(w.getSettings(), prefix);
 		this.findPanel.restoreSettings(w.getSettings(), prefix);
 	}
-	
+
 	private void readSettings(PropertyStorage props, String prefix)
 	{
 		int loc = props.getIntProperty(prefix + "divider", 200);
@@ -312,7 +310,7 @@ public class TriggerListPanel
 		if (e.getValueIsAdjusting()) return;
 		retrieveCurrentTrigger();
 	}
-	
+
 	protected void retrieveCurrentTrigger()
 	{
 		int row = this.triggerList.getSelectedRow();
@@ -333,8 +331,7 @@ public class TriggerListPanel
 	{
 		if (this.dbConnection == null || this.reader == null) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
-		
-		DbMetadata meta = dbConnection.getMetadata();
+
 		Container parent = this.getParent();
 		parent.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
@@ -358,7 +355,7 @@ public class TriggerListPanel
 			parent.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			dbConnection.setBusy(false);
 		}
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -373,7 +370,7 @@ public class TriggerListPanel
 	{
 		return null;
 	}
-	
+
 	public Component getComponent()
 	{
 		return this;
@@ -383,15 +380,15 @@ public class TriggerListPanel
 	{
 		return this.dbConnection;
 	}
-	
+
 	public List<DbObject> getSelectedObjects()
 	{
 		if (this.triggerList.getSelectedRowCount() == 0) return null;
-		int rows[] = this.triggerList.getSelectedRows();
+		int[] rows = this.triggerList.getSelectedRows();
 		int count = rows.length;
 		List<DbObject> objects = new ArrayList<DbObject>(count);
 		if (count == 0) return objects;
-		
+
 		for (int i=0; i < count; i ++)
 		{
 			String name = this.triggerList.getValueAsString(rows[i], TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
@@ -403,10 +400,10 @@ public class TriggerListPanel
 				name = name.substring(0, pos);
 			}
 
-			// To build the correct schema, catalog and trigger name 
+			// To build the correct schema, catalog and trigger name
 			// we use the functionality built into TableIdentifier
 			// The name of a trigger should follow the same rules as a table
-			// name. So it should be save to apply the same algorithm to 
+			// name. So it should be save to apply the same algorithm to
 			// build a correctly qualified name
 			TriggerDefinition trg = new TriggerDefinition(currentCatalog, currentSchema, name);
 			objects.add(trg);
@@ -419,5 +416,5 @@ public class TriggerListPanel
 		this.reset();
 		this.retrieve();
 	}
-	
+
 }

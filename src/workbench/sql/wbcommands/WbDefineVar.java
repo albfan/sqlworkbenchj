@@ -28,14 +28,14 @@ import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
 
 /**
- * SQL Command to define a variable that gets stored in the system 
+ * SQL Command to define a variable that gets stored in the system
  * wide parameter pool.
- * 
+ *
  * @see workbench.sql.VariablePool
- * 
+ *
  * @author  support@sql-workbench.net
  */
-public class WbDefineVar 
+public class WbDefineVar
 	extends SqlCommand
 {
 	public static final String VERB_DEFINE_LONG = "WBVARDEFINE";
@@ -44,9 +44,10 @@ public class WbDefineVar
 	public static final WbDefineVar DEFINE_SHORT = new WbDefineVar(VERB_DEFINE_SHORT);
 
 	private String verb = null;
-	
+
 	private WbDefineVar(String aVerb)
 	{
+		super();
 		this.verb = aVerb;
 		this.cmdLine = new ArgumentParser();
 		this.cmdLine.addArgument("file", ArgumentType.StringArgument);
@@ -56,7 +57,7 @@ public class WbDefineVar
 	public String getVerb() { return verb; }
 
 	protected boolean isConnectionRequired() { return false; }
-	
+
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -65,7 +66,7 @@ public class WbDefineVar
 
 		cmdLine.parse(sql);
 		WbFile file = this.evaluateFileArgument(cmdLine.getValue("file"));
-		
+
 		if (file != null)
 		{
 			// if the file argument has been supplied, no variable definition
@@ -148,7 +149,7 @@ public class WbDefineVar
 				}
 				else
 				{
-					// WbStringTokenizer returned any quotes that were used, so 
+					// WbStringTokenizer returned any quotes that were used, so
 					// we have to remove them again as they should not be part of the variable value
 					value = StringUtil.trimQuotes(value.trim());
 				}
@@ -179,10 +180,10 @@ public class WbDefineVar
 
 		return result;
 	}
-	
+
 	/**
-	 *	Return the result of the given SQL string and return 
-	 *	the value of the first column of the first row 
+	 *	Return the result of the given SQL string and return
+	 *	the value of the first column of the first row
 	 *	as a string value.
 	 *
 	 *	If the SQL gives an error, an empty string will be returned
@@ -196,11 +197,11 @@ public class WbDefineVar
 		{
 			throw new SQLException("Cannot evaluate SQL based variable without a connection");
 		}
-		
+
 		try
 		{
 			this.currentStatement = conn.createStatement();
-			
+
 			if (sql.endsWith(";"))
 			{
 				sql = sql.substring(0, sql.length() - 1);
@@ -219,7 +220,7 @@ public class WbDefineVar
 		{
 			try { rs.close(); } catch (Throwable th) {}
 		}
-		
+
 		return result;
 	}
 

@@ -135,7 +135,7 @@ public class ColumnIdentifier
 	public void setIsNullable(boolean flag) { this.isNullable = flag; }
 	public boolean isNullable() { return this.isNullable; }
 
-	public void setDbmsType(String type) { this.dbmsType = type; }
+	public void setDbmsType(String dbType) { this.dbmsType = dbType; }
 	public String getDbmsType() { return this.dbmsType; }
 	
 	public boolean isIdentityColumn()
@@ -267,9 +267,9 @@ public class ColumnIdentifier
 		return comment;
 	}
 
-	public void setComment(String comment)
+	public void setComment(String cmt)
 	{
-		this.comment = comment;
+		this.comment = cmt;
 	}
 
 	public String getDefaultValue()
@@ -277,9 +277,9 @@ public class ColumnIdentifier
 		return defaultValue;
 	}
 
-	public void setDefaultValue(String defaultValue)
+	public void setDefaultValue(String value)
 	{
-		this.defaultValue = defaultValue;
+		this.defaultValue = value;
 	}
 
 	public int getPosition()
@@ -297,24 +297,24 @@ public class ColumnIdentifier
 		return columnClassName;
 	}
 
-	public void setColumnClassName(String columnClass)
+	public void setColumnClassName(String colClass)
 	{
-		if (columnClass != null && columnClass.endsWith("[]"))
+		if (colClass != null && colClass.endsWith("[]"))
 		{
 			// Workaround for long[] 
-			if (columnClass.startsWith("long"))
+			if (colClass.startsWith("long"))
 			{
 				this.columnClassName = "[J";
 			}
-			else if (Character.isLowerCase(columnClass.charAt(0)))
+			else if (Character.isLowerCase(colClass.charAt(0)))
 			{
 				// If it's a lower case class name we assume a native array type
-				this.columnClassName = "[" + columnClass.toUpperCase().charAt(0);
+				this.columnClassName = "[" + colClass.toUpperCase().charAt(0);
 			}
 		}
 		else
 		{
-			this.columnClassName = columnClass;
+			this.columnClassName = colClass;
 		}
 		this.columnClass = null;
 		if (this.columnClassName == null) return;
@@ -380,9 +380,9 @@ public class ColumnIdentifier
 		return this.columnTypeName;
 	}
 
-	public void setColumnTypeName(String columnTypeName)
+	public void setColumnTypeName(String colTypeName)
 	{
-		this.columnTypeName = columnTypeName;
+		this.columnTypeName = colTypeName;
 	}
 
 	public boolean isUpdateable()
@@ -390,9 +390,9 @@ public class ColumnIdentifier
 		return isUpdateable;
 	}
 
-	public void setUpdateable(boolean isUpdateable)
+	public void setUpdateable(boolean update)
 	{
-		this.isUpdateable = isUpdateable;
+		this.isUpdateable = update;
 	}
 
 	public int compareTo(ColumnIdentifier other)

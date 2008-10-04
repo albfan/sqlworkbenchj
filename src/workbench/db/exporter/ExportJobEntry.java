@@ -32,7 +32,7 @@ public class ExportJobEntry
 	private TableIdentifier baseTable;
 	private ResultInfo resultInfo;
 	
-	public ExportJobEntry(File file, String sql, WbConnection con)
+	public ExportJobEntry(File file, String sql)
 	{
 		outputFile = new WbFile(file);
 		query = sql;

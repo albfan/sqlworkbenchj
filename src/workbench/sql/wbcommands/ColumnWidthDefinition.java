@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.util.StringUtil;
-import workbench.util.StringUtil;
 
 /**
  * Parse the argument for defining column widths for a fixed-width
@@ -52,7 +51,7 @@ public class ColumnWidthDefinition
 			{
 				throw new MissingWidthDefinition(def);
 			}
-			this.columnWidths.put(col, new Integer(width));
+			this.columnWidths.put(col, Integer.valueOf(width));
 		}
 	}
 

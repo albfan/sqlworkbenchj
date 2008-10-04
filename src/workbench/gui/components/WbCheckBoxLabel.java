@@ -41,17 +41,6 @@ public class WbCheckBoxLabel
 		this.addMouseListener(this);
 	}
 
-	@Override
-	public void setLabelFor(Component c)
-	{
-		super.setLabelFor(c);
-//		if (c instanceof JCheckBox)
-//		{
-//			JCheckBox check = (JCheckBox)c;
-//			check.addFocusListener(this);
-//		}
-	}
-	
 	public void mouseClicked(MouseEvent e)
 	{
 		Component c = this.getLabelFor();

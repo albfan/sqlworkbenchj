@@ -28,15 +28,11 @@ public class UpdateCheck
 {
 	private WbVersionReader versionReader;
 
-	public UpdateCheck()
-	{
-	}
-
 	public void startUpdateCheck()
 	{
 		int interval = Settings.getInstance().getUpdateCheckInterval();
 		if (interval < 1) return;
-		
+
 		Date lastCheck = Settings.getInstance().getLastUpdateCheck();
 
 		if (needCheck(interval, new java.util.Date(), lastCheck))

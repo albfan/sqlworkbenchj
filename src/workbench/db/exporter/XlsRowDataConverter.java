@@ -39,12 +39,7 @@ public class XlsRowDataConverter
 	private HSSFSheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
 
-	public XlsRowDataConverter()
-	{
-		super();
-	}
-
-	// This should not be called in the constructor as 
+	// This should not be called in the constructor as
 	// at that point in time the formatters are not initialized
 	public void createFormatters()
 	{
@@ -57,9 +52,9 @@ public class XlsRowDataConverter
 	public StrBuffer getStart()
 	{
 		createFormatters();
-		
+
 		wb = new HSSFWorkbook();
-		
+
 		excelFormat.setupWithWorkbook(wb);
 		sheet = wb.createSheet(getPageTitle("SQLExport"));
 
@@ -70,19 +65,19 @@ public class XlsRowDataConverter
 			for (int c = 0; c < this.metaData.getColumnCount(); c++)
 			{
 				HSSFCell cell = headRow.createCell((short)c);
-				setCellValueAndStyle(wb, cell, this.metaData.getColumnName(c), true);
+				setCellValueAndStyle(cell, this.metaData.getColumnName(c), true);
 			}
 		}
 		return null;
 	}
-	
+
 	public StrBuffer getEnd(long totalRows)
 	{
 		for (short i = 0; i <this.metaData.getColumnCount(); i++)
 		{
 			sheet.autoSizeColumn(i);
 		}
-		
+
 		FileOutputStream fileOut = null;
 		try
 		{
@@ -130,26 +125,26 @@ public class XlsRowDataConverter
 
 			Object value = row.getValue(c);
 
-			setCellValueAndStyle(wb, cell, value, false);
+			setCellValueAndStyle(cell, value, false);
 		}
 		return ret;
 	}
 
-	private void setCellValueAndStyle(HSSFWorkbook wb, HSSFCell cell, Object value, boolean isHead)
+	private void setCellValueAndStyle(HSSFCell cell, Object value, boolean isHead)
 	{
 		HSSFCellStyle cellStyle = null;
 
-		if (value instanceof BigDecimal && value != null)
+		if (value instanceof BigDecimal)
 		{
 			cellStyle = excelFormat.decimalCellStyle;
 			cell.setCellValue(((BigDecimal)value).doubleValue());
 		}
-		else if (value instanceof Double && value != null)
+		else if (value instanceof Double)
 		{
 			cellStyle = excelFormat.decimalCellStyle;
 			cell.setCellValue(((Double)value).doubleValue());
 		}
-		else if (value instanceof Number && value != null)
+		else if (value instanceof Number)
 		{
 			cellStyle = excelFormat.integerCellStyle;
 			cell.setCellValue(((Number)value).doubleValue());

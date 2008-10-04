@@ -14,7 +14,6 @@ package workbench.db.oracle;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import workbench.db.JdbcProcedureReader;
-import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
@@ -69,7 +68,6 @@ public class OracleProcedureReader
 		try
 		{
 			int lineCount = 0;
-			String lastline = null;
 			
 			synchronized (connection)
 			{
@@ -114,7 +112,6 @@ public class OracleProcedureReader
 						}
 						result.append(line);
 					}
-					lastline = line;
 				}
 			}
 			result.append(nl);

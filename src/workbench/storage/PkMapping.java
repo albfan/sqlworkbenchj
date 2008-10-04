@@ -31,6 +31,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -39,7 +40,7 @@ import workbench.util.StringUtil;
  */
 public class PkMapping
 {
-	private HashMap<String, String> columnMapping = new HashMap<String, String>();
+	private final Map<String, String> columnMapping = new HashMap<String, String>();
 	
 	private static PkMapping instance;
 	
@@ -99,11 +100,11 @@ public class PkMapping
 		catch (Exception e)
 		{
 			LogMgr.logError("PkMapping.readMappingFile()", "Error reading mapping file", e);
-			this.columnMapping = null;
+			this.columnMapping.clear();
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(in);
 		}
 		
 		LogMgr.logInfo("PkMapping.readMappingFile()", "Using PK mappings from " + f.getAbsolutePath());
@@ -194,7 +195,7 @@ public class PkMapping
 		}
 		finally
 		{
-			try { out.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(out);
 		}
 	}
 	

@@ -116,9 +116,9 @@ import workbench.util.FileDialogUtil;
 import workbench.util.SqlUtil;
 
 /**
- * 
- * @author support@sql-workbench.net  
- */ 
+ *
+ * @author support@sql-workbench.net
+ */
 public class WbTable
 	extends JTable
 	implements ActionListener, FocusListener, MouseListener,
@@ -143,9 +143,9 @@ public class WbTable
 	private SetColumnWidthAction setColWidth;
 
 	private TableReplacer replacer;
-	
+
 	private SaveDataAsAction saveDataAsAction;
-	
+
 	private CopyAsTextAction copyAsTextAction;
 	private CopyAsSqlInsertAction copyInsertAction;
 	private CopyAsSqlDeleteInsertAction copyDeleteInsertAction;
@@ -155,10 +155,10 @@ public class WbTable
 	private CopySelectedAsSqlInsertAction copySelectedAsInsertAction;
 	private CopySelectedAsSqlDeleteInsertAction copySelectedAsDeleteInsertAction;
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
-	
+
 	private ResetHighlightAction resetHighlightAction;
 	private ColumnExpression highlightExpression;
-	
+
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
 
@@ -166,8 +166,7 @@ public class WbTable
 	private PrintPreviewAction printPreviewAction;
 
 	private boolean adjustToColumnLabel = false;
-	private boolean modelChanging = false;
-	
+
 	private int headerPopupX = -1;
 	private Map<String, Integer> savedColumnSizes;
 
@@ -176,7 +175,7 @@ public class WbTable
 	private JScrollPane scrollPane;
 
 	private DwStatusBar statusBar;
-	
+
 	private String defaultPrintHeader = null;
 	private boolean showPopup = true;
 	private boolean selectOnRightButtonClick = false;
@@ -184,13 +183,13 @@ public class WbTable
 	private boolean useMultilineTooltip = true;
 	private boolean rowHeightWasOptimized;
 	private Color requiredColor;
-	
+
 	private boolean showFocusPending = false;
 	private FocusIndicator focusIndicator = null;
 	private ListSelectionControl selectionController;
-	
+
 	// </editor-fold>
-	
+
 	public WbTable()
 	{
 		this(true, true, false);
@@ -204,7 +203,7 @@ public class WbTable
 	public WbTable(boolean printEnabled, boolean sqlCopyAllowed, boolean replaceAllowed)
 	{
 		super(EmptyTableModel.EMPTY_MODEL);
-		
+
 		this.sortAscending = new SortAscendingAction(this);
 		this.sortAscending.setEnabled(false);
 		this.sortDescending = new SortDescendingAction(this);
@@ -222,13 +221,13 @@ public class WbTable
 		this.defaultEditor.setFont(dataFont);
 
 		super.setFont(dataFont);
-		
+
 		// Create a separate editor for numbers that is right aligned
 		numberEditorTextField = new JTextField();
 		numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField);
-		
+
 		this.multiLineEditor = new WbCellEditor(this);
 		this.multiLineRenderer = RendererFactory.getMultiLineRenderer();
 
@@ -238,7 +237,7 @@ public class WbTable
 
 		this.copyAsTextAction = new CopyAsTextAction(this);
 		this.saveDataAsAction = new SaveDataAsAction(this);
-		
+
 		this.saveDataAsAction.setEnabled(true);
 
 		this.filterAction = new FilterDataAction(this);
@@ -247,7 +246,7 @@ public class WbTable
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.addPopupAction(this.saveDataAsAction, false);
 		this.addPopupAction(this.copyAsTextAction, true);
-		
+
 
 		if (sqlCopyAllowed)
 		{
@@ -258,7 +257,7 @@ public class WbTable
 			this.addPopupAction(this.copyUpdateAction, false);
 			this.addPopupAction(this.copyInsertAction, false);
 			this.addPopupAction(this.copyDeleteInsertAction, false);
-			
+
 			WbMenu copy = this.getCopySelectedMenu();
 			this.addPopupSubMenu(copy, true);
 		}
@@ -271,14 +270,14 @@ public class WbTable
 		this.addPopupAction(this.replacer.getFindAction(), true);
 		this.addPopupAction(this.replacer.getFindAgainAction(), false);
 		this.resetHighlightAction = new ResetHighlightAction(this);
-		
-		if (replaceAllowed) 
+
+		if (replaceAllowed)
 		{
 			this.addPopupAction(this.replacer.getReplaceAction(), false);
 		}
 
 		this.addPopupAction(resetHighlightAction, false);
-		
+
 		if (printEnabled)
 		{
 			this.printDataAction = new PrintAction(this);
@@ -297,13 +296,13 @@ public class WbTable
 		this.copyAsTextAction.addToInputMap(im, am);
 		this.saveDataAsAction.addToInputMap(im, am);
 		this.optimizeAllCol.addToInputMap(im, am);
-		
+
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().registerDateFormatChangeListener(this);
-		
+
 		this.initDefaultRenderers();
 		this.initDefaultEditors();
-					
+
 		Action a = new AbstractAction()
 		{
 			public void actionPerformed(ActionEvent evt)
@@ -321,7 +320,7 @@ public class WbTable
 	{
 		this.selectionController = controller;
 	}
-	
+
 	@Override
 	public void changeSelection(int rowIndex, int columnIndex, boolean toggle, boolean extend)
 	{
@@ -355,7 +354,7 @@ public class WbTable
 			}
 		}
 	}
-	
+
 	public void setShowPopupMenu(boolean aFlag)
 	{
 		this.showPopup = aFlag;
@@ -381,7 +380,7 @@ public class WbTable
 	{
 		this.statusBar = bar;
 	}
-	
+
 	/**
 	 * For some reason my Renderers do not display bigger
 	 * fonts properly. So I have to adjust the row height
@@ -410,7 +409,7 @@ public class WbTable
 	{
 		Font f = getFont();
 		if (f == null) return;
-		
+
 		Graphics g = getGraphics();
 
 		// Depending on the stage of initialization
@@ -443,7 +442,7 @@ public class WbTable
 	{
 		this.useMultilineTooltip = flag;
 	}
-	
+
 	public JToolTip createToolTip()
 	{
 		if (useMultilineTooltip)
@@ -509,7 +508,7 @@ public class WbTable
 		if (copySelectedAsInsertAction != null) copyMenu.add(copySelectedAsInsertAction);
 		if (copySelectedAsDeleteInsertAction != null) copyMenu.add(copySelectedAsDeleteInsertAction);
 	}
-	
+
 	public WbMenu getCopySelectedMenu()
 	{
 		WbMenu copyMenu = createCopySelectedMenu();
@@ -523,7 +522,7 @@ public class WbTable
 		copyMenu.setParentMenuId(ResourceMgr.MNU_TXT_DATA);
 		return copyMenu;
 	}
-	
+
 	public CopyAsSqlInsertAction getCopyAsInsertAction()
 	{
 		 return this.copyInsertAction;
@@ -551,7 +550,7 @@ public class WbTable
 
 
 	public TableReplacer getReplacer() { return this.replacer; }
-	
+
 	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
 	public boolean getSelectOnRightButtonClick() { return this.selectOnRightButtonClick; }
 
@@ -569,7 +568,7 @@ public class WbTable
 			this.popup = null;
 		}
 	}
-	
+
 	public void reset()
 	{
 		this.cancelEditing();
@@ -592,7 +591,7 @@ public class WbTable
 		}
 		this.popup.add(submenu);
 	}
-	
+
 	public void addPopupAction(WbAction anAction, boolean withSep)
 	{
 		this.addPopupMenu(anAction.getMenuItem(), withSep);
@@ -603,7 +602,7 @@ public class WbTable
 		if (this.popup == null) return;
 		this.popup.remove(item);
 	}
-	
+
 	public void addPopupMenu(JMenuItem item, boolean withSep)
 	{
 		if (this.popup == null) this.popup = new JPopupMenu();
@@ -622,7 +621,7 @@ public class WbTable
 			this.popup.add(item);
 		}
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		super.valueChanged(e);
@@ -671,7 +670,7 @@ public class WbTable
 				}
 			}
 		}
-		
+
 		if (this.showFocusPending && this.scrollPane != null)
 		{
 			this.showFocusPending = false;
@@ -698,7 +697,7 @@ public class WbTable
 
 	/**
 	 * Set the header to be used for printing.
-	 * 
+	 *
 	 * @param aHeader the print header
 	 * @see workbench.print.TablePrinter#setHeaderText(String)
 	 */
@@ -709,7 +708,7 @@ public class WbTable
 
 	/**
 	 * Return the header to be used for printing.
-	 * 
+	 *
 	 * @return the print header
 	 * @see workbench.print.TablePrinter
 	 */
@@ -721,10 +720,10 @@ public class WbTable
 	protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
 	{
 		boolean result = true;
-		
+
 		try
 		{
-			// Don't start when non-printing keys are typed. 
+			// Don't start when non-printing keys are typed.
 			// Keystrokes like Alt-F4 should not automatically start editing mode
 			int code = e.getModifiers();
 			boolean modifierKeyPressed = ((code & KeyEvent.ALT_MASK) == KeyEvent.ALT_MASK || (code & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK);
@@ -741,7 +740,7 @@ public class WbTable
 		}
 		return result;
 	}
-	 
+
 	public Component prepareEditor(TableCellEditor editor, int row, int column)
 	{
 		Component comp = super.prepareEditor(editor, row, column);
@@ -771,10 +770,10 @@ public class WbTable
 
 	public void selectCell(int row, int col)
 	{
-		scrollToRow(row);		
+		scrollToRow(row);
 		Rectangle rect = getCellRect(row,col,true);
 		setColumnSelectionAllowed(true);
-		scrollRectToVisible(rect); 
+		scrollRectToVisible(rect);
 		setRowSelectionInterval(row, row);
 		setColumnSelectionInterval(col, col);
 	}
@@ -782,7 +781,7 @@ public class WbTable
 	public boolean editCellAt(final int row, int column, EventObject e)
 	{
 		boolean result = super.editCellAt(row, column, e);
-		if (result) 
+		if (result)
 		{
 			if (this.highlightRequiredFields)
 			{
@@ -811,7 +810,7 @@ public class WbTable
 			boolean nullable = info.isNullable(i);
 			highlightCols[i+offset] = !nullable;
 		}
-		
+
 		for (int i=0; i < tableCols; i++)
 		{
 			TableCellRenderer rend = getCellRenderer(row, i);
@@ -837,16 +836,16 @@ public class WbTable
 		final int row = this.getEditingRow();
 		final int col = this.getEditingColumn();
 		super.removeEditor();
-		
-		resetHighlightRenderers(row, col);
-		
+
+		resetHighlightRenderers(row);
+
 		requestFocusInWindow();
 		// Make sure the editing column/row is selected
 		changeSelection(row, -1, false, false);
 		changeSelection(row, col, false, false);
 	}
 
-	private void resetHighlightRenderers(final int row, final int col)
+	private void resetHighlightRenderers(final int row)
 	{
 		if (!this.highlightRequiredFields) return;
 		int colcount = this.getColumnCount();
@@ -910,16 +909,11 @@ public class WbTable
 
 		try
 		{
-			this.modelChanging = true;
 			super.setModel(aModel);
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("WbTable.setModel()", "Error setting table model", th);
-		}
-		finally
-		{
-			this.modelChanging = false;
 		}
 
 		resetFilter();
@@ -956,7 +950,7 @@ public class WbTable
 		if (keepGeneralFilter && this.lastFilter != null && !this.lastFilter.isColumnSpecific()) return;
 		this.lastFilter = null;
 	}
-	
+
 	public void resetFilter()
 	{
 		this.currentFilter = null;
@@ -997,7 +991,7 @@ public class WbTable
 	public void restoreOriginalValues()
 	{
 		if (this.dwModel == null) return;
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -1049,7 +1043,7 @@ public class WbTable
 			}
 		});
 	}
-	
+
 	protected void _setShowStatusColumn(boolean flag)
 	{
 		if (this.dwModel == null) return;
@@ -1112,14 +1106,14 @@ public class WbTable
 		int col = this.convertColumnIndexToModel(viewIndex);
 		return this.dwModel.isPrimarySortColumn(col);
 	}
-	
+
 	public boolean isViewColumnSorted(int viewIndex)
 	{
 		if (this.dwModel == null) return false;
 		int col = this.convertColumnIndexToModel(viewIndex);
 		return this.dwModel.isSortColumn(col);
 	}
-	
+
 	public boolean isViewColumnSortAscending(int viewIndex)
 	{
 		if (this.dwModel == null) return true;
@@ -1130,7 +1124,7 @@ public class WbTable
 	public void sortingStarted()
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -1173,7 +1167,7 @@ public class WbTable
 		{
 			TableColumn col = colMod.getColumn(i);
 			String name = this.getColumnName(i);
-			savedColumnSizes.put(name, new Integer(col.getPreferredWidth()));
+			savedColumnSizes.put(name, Integer.valueOf(col.getPreferredWidth()));
 		}
 	}
 
@@ -1193,18 +1187,18 @@ public class WbTable
 	}
 
 	private boolean useDefaultStringRenderer = true;
-	
+
 	public void setUseDefaultStringRenderer(boolean aFlag)
 	{
 		this.useDefaultStringRenderer = aFlag;
 	}
-	
+
 	public boolean getUseDefaultStringRenderer() { return this.useDefaultStringRenderer; }
 
 	private void initDateRenderers()
 	{
 		Settings sett = Settings.getInstance();
-		
+
 		String format = sett.getDefaultDateFormat();
 		this.setDefaultRenderer(java.sql.Date.class, RendererFactory.getDateRenderer(format));
 		this.setDefaultRenderer(java.util.Date.class, RendererFactory.getDateRenderer(format));
@@ -1232,18 +1226,18 @@ public class WbTable
 	/**
 	 * For some reason setting a default renderer for BLOB columns
 	 * is not working. So getCellRenderer is overwritten, to first
-	 * check for a BLOB column. If the specified column is not 
+	 * check for a BLOB column. If the specified column is not
 	 * a BLOB column, the default handling from JTable will be used.
 	 */
-	public TableCellRenderer getCellRenderer(int row, int column) 
+	public TableCellRenderer getCellRenderer(int row, int column)
 	{
 		TableCellRenderer rend = null;
-		
-		if (isBlobColumn(column)) 
+
+		if (isBlobColumn(column))
 		{
 			rend = RendererFactory.getBlobRenderer();
 		}
-		else 
+		else
 		{
 			rend = super.getCellRenderer(row,column);
 		}
@@ -1264,7 +1258,7 @@ public class WbTable
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Initialize the default renderers for this table
 	 * @see workbench.gui.renderer.RendererFactory
@@ -1283,9 +1277,9 @@ public class WbTable
 		TableCellRenderer numberRenderer = RendererFactory.createNumberRenderer(maxDigits, sep);
 
 		this.setDefaultRenderer(Object.class, RendererFactory.getTooltipRenderer());
-		
+
 		this.setDefaultRenderer(byte[].class, RendererFactory.getBlobRenderer());
-		
+
 		this.setDefaultRenderer(Number.class, numberRenderer);
 		this.setDefaultRenderer(Double.class, numberRenderer);
 		this.setDefaultRenderer(Float.class, numberRenderer);
@@ -1311,12 +1305,12 @@ public class WbTable
 	{
 		return this.resetHighlightAction;
 	}
-	
+
 	public boolean isHighlightEnabled()
 	{
 		return (highlightExpression != null);
 	}
-	
+
 	public void clearHighlightExpression()
 	{
 		applyHighlightExpression(null);
@@ -1326,19 +1320,19 @@ public class WbTable
 	{
 		return highlightExpression;
 	}
-	
+
 	public void applyHighlightExpression(ColumnExpression filter)
 	{
 		this.highlightExpression = filter;
 		this.resetHighlightAction.setEnabled(filter != null);
 		WbSwingUtilities.repaintLater(this);
 	}
-	
+
 	private void initMultiLineRenderer()
 	{
 		if (!this.useDefaultStringRenderer) return;
-		
-		if (this.dwModel != null) 
+
+		if (this.dwModel != null)
 		{
 			TableColumnModel colMod = this.getColumnModel();
 			for (int i=0; i < colMod.getColumnCount(); i++)
@@ -1359,7 +1353,7 @@ public class WbTable
 		int offset = (this.dwModel.getShowStatusColumn() ? 1 : 0);
 		int sqlType = this.dwModel.getColumnType(col);
 		int charLength = 0;
-		
+
 		if (SqlUtil.isClobType(sqlType))
 		{
 			charLength = Integer.MAX_VALUE;
@@ -1368,31 +1362,30 @@ public class WbTable
 		{
 			charLength = this.dwModel.getDataStore().getResultInfo().getColumn(col - offset).getColumnSize();
 		}
-		else 
+		else
 		{
 			return false;
 		}
-		
+
 		int sizeThreshold = Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 250);
 		return charLength >= sizeThreshold;
 	}
-	
+
 	protected void initDefaultEditors()
 	{
-		Exception e = new Exception();
 		TableColumnModel colMod = this.getColumnModel();
-		
+
 		for (int i=0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
 			if (col == null) continue;
 			Class clz = null;
-			
-			if (this.dwModel != null) 
+
+			if (this.dwModel != null)
 			{
 				clz = this.dwModel.getColumnClass(i);
 			}
-			
+
 			if (clz != null && Number.class.isAssignableFrom(clz))
 			{
 				col.setCellEditor(this.defaultNumberEditor);
@@ -1414,9 +1407,9 @@ public class WbTable
 
 	/**
 	 * Enhance the column width display.
-	 * 
+	 *
 	 * If the user chose to automatically optimize the column
-	 * width according to the content, this will 
+	 * width according to the content, this will
 	 * call {@link TableColumnOptimizer#optimizeAllColWidth()}
 	 * otherwise this will call {@link TableColumnOptimizer#adjustColumns(boolean)}
 	 */
@@ -1440,14 +1433,14 @@ public class WbTable
 	{
 		return rowHeightWasOptimized;
 	}
-	
+
 	public void optimizeRowHeight()
 	{
 		RowHeightOptimizer optimizer = new RowHeightOptimizer(this);
 		optimizer.optimizeAllRows();
 		rowHeightWasOptimized = true;
 	}
-	
+
 	public void cancelEditing()
 	{
 		if (this.isEditing())
@@ -1463,7 +1456,7 @@ public class WbTable
 	public boolean stopEditing()
 	{
 		boolean result = false;
-		
+
 		if (this.isEditing())
 		{
 			CellEditor editor = this.getCellEditor();
@@ -1480,7 +1473,7 @@ public class WbTable
 		int row = getEditingRow();
 		checkRowHeight(row);
 	}
-	
+
 	public void checkRowHeight(int row)
 	{
 		if (getRowCount() == 0) return;
@@ -1500,7 +1493,7 @@ public class WbTable
 		int row = this.getEditingRow();
 		String data = null;
 		TableCellEditor editor = this.getCellEditor();
-		
+
 		if (editor instanceof WbTextCellEditor)
 		{
 			WbTextCellEditor wbeditor = (WbTextCellEditor)editor;
@@ -1517,14 +1510,14 @@ public class WbTable
 		{
 			data = (String)editor.getCellEditorValue();
 		}
-		
+
 		Window owner = SwingUtilities.getWindowAncestor(this);
 		Frame ownerFrame = null;
 		if (owner instanceof Frame)
 		{
 			ownerFrame = (Frame)owner;
 		}
-		
+
 		String title = ResourceMgr.getString("TxtEditWindowTitle");
 		EditWindow w = new EditWindow(ownerFrame, title, data);
 		try
@@ -1599,7 +1592,7 @@ public class WbTable
 	}
 
 
-	/** 
+	/**
 	 * Scroll the given row into view.
 	 */
 	public void scrollToRow(int aRow)
@@ -1656,7 +1649,7 @@ public class WbTable
 							}
 						});
 					}
-				}	
+				}
 				final int x = e.getX();
 				final int y = e.getY();
 
@@ -1741,7 +1734,7 @@ public class WbTable
 		int column = this.convertColumnIndexToModel(viewColumn);
 		return column;
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		int column = getPopupColumnIndex();
@@ -1794,27 +1787,27 @@ public class WbTable
 		DataStore ds = this.getDataStore();
 		ColumnIdentifier[] originalCols = ds.getColumns();
 		TableIdentifier table = ds.getUpdateTable();
-		
-		if (table == null) 
+
+		if (table == null)
 		{
 			table = selectUpdateTable();
-			if (table != null) 
+			if (table != null)
 			{
 				ds.setUpdateTable(table);
 			}
 		}
-		
+
 		if (table == null)
 		{
 			Window w = SwingUtilities.getWindowAncestor(this);
 			WbSwingUtilities.showErrorMessageKey(w, "MsgNoUpdateTable");
 			return false;
 		}
-		
+
 		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, table);
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		boolean selected = ValidatingDialog.showConfirmDialog(parent, panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), null, 0, true);
-		
+
 		if (selected)
 		{
 			ColumnIdentifier[] cols = panel.getColumns();
@@ -1825,7 +1818,7 @@ public class WbTable
 				PkMapping.getInstance().addMapping(table, cols);
 				FileDialogUtil.selectPkMapFileIfNecessary(parent);
 			}
-			
+
 			return true;
 		}
 		return false;
@@ -1863,12 +1856,12 @@ public class WbTable
 		{
 			saveDataAsAction.setEnabled(hasRows);
 		}
-		
+
 		if (this.copyAsTextAction != null)
 		{
 			this.copyAsTextAction.setEnabled(hasRows);
 		}
-		
+
 		if (this.copyInsertAction != null)
 		{
 			this.copyInsertAction.setEnabled(hasRows);
@@ -1888,7 +1881,7 @@ public class WbTable
 	public TableIdentifier selectUpdateTable()
 	{
 		if (this.getDataStore() == null) return null;
-		
+
 		String csql = this.getDataStore().getGeneratingSql();
 		List<String> tables = SqlUtil.getTables(csql, false);
 		TableIdentifier table = null;
@@ -1898,8 +1891,8 @@ public class WbTable
 			String s = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
 				null, ResourceMgr.getString("MsgEnterUpdateTable"),
 				JOptionPane.QUESTION_MESSAGE,
-				null,tables.toArray(),null);
-			
+				null,tables.toArray(new TableIdentifier[tables.size()]),null);
+
 			if (s != null)
 			{
 				table = new TableIdentifier(s);
@@ -1915,7 +1908,7 @@ public class WbTable
 		}
 		return table;
 	}
-	
+
 	/**
 	 * Checks if the underlying DataStore has PrimaryKey columns defined.
 	 * @return true, if the DataStore has PK columns. false if no PKs defined or no DataStore attached to this Table
@@ -1927,7 +1920,7 @@ public class WbTable
 		if (ds == null) return false;
 		return ds.hasPkColumns();
 	}
-	
+
 	/**
 	 *	Check for any defined PK columns.
 	 *	If no key columns can be found, the user
@@ -1935,7 +1928,7 @@ public class WbTable
 	 *
 	 *  @param promptWhenNeeded if true, the user is asked to supply PK columns if none were found
 	 *  @return true, if primary key columns where found (or selected by the user) for the underlying table.
-	 * 
+	 *
 	 *	@see #detectDefinedPkColumns()
 	 *	@see #selectKeyColumns()
 	 */
@@ -1946,7 +1939,7 @@ public class WbTable
 
 		boolean hasPK = detectDefinedPkColumns();
 		boolean pkColumnsComplete = ds.pkColumnsComplete();
-		
+
 		if (hasPK && pkColumnsComplete) return true;
 
 		if (promptWhenNeeded)
@@ -2053,7 +2046,7 @@ public class WbTable
 			return false;
 		}
 	}
-	
+
 	public boolean deleteRow(boolean withDependencies)
 		throws SQLException
 	{
@@ -2072,7 +2065,7 @@ public class WbTable
 		return true;
 	}
 
-	
+
 	public boolean isHighlightRequiredFields()
 	{
 		return highlightRequiredFields;

@@ -25,19 +25,20 @@ public class DateColumnRenderer
 	private final SimpleDateFormat dateFormatter;
 
 	public static final String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
-	
+
 	public DateColumnRenderer()
 	{
+		super();
 		this.dateFormatter = new SimpleDateFormat(DEFAULT_FORMAT);
 		this.setHorizontalAlignment(SwingConstants.RIGHT);
 	}
-	
+
 	public DateColumnRenderer(String aDateFormat)
 	{
 		this();
 		this.setFormat(aDateFormat);
 	}
-	
+
 	public void setFormat(String aDateFormat)
 	{
 		try
@@ -71,5 +72,5 @@ public class DateColumnRenderer
 			setTooltip(displayValue);
 		}
 	}
-	
+
 }

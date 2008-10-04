@@ -27,19 +27,15 @@ public class RegexModifier
 {
 	public Map<ColumnIdentifier, RegexDef> limits = new HashMap<ColumnIdentifier, RegexDef>();
 
-	public RegexModifier()
-	{
-	}
-
 	public int getSize()
 	{
 		return limits.size();
 	}
-	
+
 	/**
 	 * Define regex replacement for a column.
 	 * An existing mapping for that column will be overwritten.
-	 * 
+	 *
 	 * @param col the column for which to apply the substring
 	 * @param regex the regular expression to search for
 	 * @param replacement the replacement for the regex

@@ -46,7 +46,7 @@ public class StrBuffer
 	/**
 	 * Used for character storage.
 	 */
-	private char charData[];
+	private char[] charData;
 
 	public static final StrBuffer emptyBuffer() { return new StrBuffer(0); }
 	
@@ -122,7 +122,7 @@ public class StrBuffer
 		}
 		if (this.charData != null)
 		{
-			char newBuf[] = new char[newStorage];
+			char[] newBuf = new char[newStorage];
 			System.arraycopy(this.charData, 0, newBuf, 0, this.numchar);
 			this.charData = newBuf;
 		}
@@ -217,7 +217,7 @@ public class StrBuffer
 		int newlen = this.numchar + 1;
 		if (newlen > this.charData.length)
 		{
-			char newBuf[] = new char[newlen + 10];
+			char[] newBuf = new char[newlen + 10];
 			System.arraycopy(this.charData, 0, newBuf, 0, index);
 			System.arraycopy(this.charData, index, newBuf, index + 1, (numchar - index));
 			this.charData = newBuf;

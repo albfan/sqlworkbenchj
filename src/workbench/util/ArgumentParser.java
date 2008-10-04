@@ -96,7 +96,7 @@ public class ArgumentParser
 		this.argTypes.put(key, type);
 	}
 
-	public void parse(String args[])
+	public void parse(String[] args)
 	{
 		this.reset();
 		StringBuilder line = new StringBuilder(200);
@@ -307,7 +307,7 @@ public class ArgumentParser
 	public boolean getBoolean(String key,boolean defaultValue)
 	{
 		String value = this.getValue(key);
-		if (value == null || value.trim().length() == 0) return defaultValue;
+		if (StringUtil.isBlank(value)) return defaultValue;
 		return StringUtil.stringToBool(value);
 	}
 

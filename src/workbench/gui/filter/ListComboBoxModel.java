@@ -30,11 +30,12 @@ public class ListComboBoxModel
 
 	public ListComboBoxModel()
 	{
-		data = new ArrayList<Object>();
+		this(new ArrayList<Object>());
 	}
 
 	public ListComboBoxModel(List<? extends Object> l)
 	{
+		super();
 		data = l;
 	}
 

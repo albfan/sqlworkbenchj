@@ -38,8 +38,7 @@ public class HexViewer
 	private HexPanel panel;
 	private JButton closeButton = new JButton(ResourceMgr.getString("LblClose"));
 	private final String settingsId = "workbench.gui.imageviewer";
-	private EscAction escAction;
-	
+
 	/** Creates a new instance of ImageViewer */
 	public HexViewer(JDialog parent, String title)
 	{
@@ -58,9 +57,9 @@ public class HexViewer
 		{
 			setSize(320,200);
 		}
-		
+
 		getRootPane().setDefaultButton(closeButton);
-		escAction = new EscAction(this, this);
+		new EscAction(this, this);
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 
@@ -68,7 +67,7 @@ public class HexViewer
 	{
 		panel.setData(data);
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		this.setVisible(false);
@@ -103,5 +102,5 @@ public class HexViewer
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
-	
+
 }

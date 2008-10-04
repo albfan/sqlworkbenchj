@@ -40,6 +40,7 @@ public class CompileDbObjectAction
 	
 	public CompileDbObjectAction(DbObjectList client, ListSelectionModel list)
 	{
+		super();
 		this.initMenuDefinition("MnuTxtRecompile");
 		this.source = client;
 		this.selection = list;

@@ -36,31 +36,31 @@ public class OracleIndexReader
 	extends JdbcIndexReader
 {
 	private PreparedStatement indexStatement;
-	
+
 	public OracleIndexReader(DbMetadata meta)
 	{
 		super(meta);
 	}
-	
+
 	public void indexInfoProcessed()
 	{
-		try 
-		{ 
-			this.indexStatement.close(); 
+		try
+		{
+			this.indexStatement.close();
 			this.indexStatement = null;
-		} 
-		catch (Throwable th) 
+		}
+		catch (Throwable th)
 		{
 		}
 	}
-	
+
 	/**
 	 * Replacement for the DatabaseMetaData.getIndexInfo() method.
 	 * Oracle's JDBC driver does an ANALYZE INDEX each time an indexInfo is
 	 * requested which slows down the retrieval of index information.
 	 * (and is not necessary at all for the Workbench, as we don't use the
 	 * cardinality field anyway)
-	 * 
+	 *
 	 * Additionally function based indexes are not returned correctly by the
 	 * Oracle driver.
 	 */
@@ -72,10 +72,10 @@ public class OracleIndexReader
 			LogMgr.logWarning("OracleIndexReader.getIndexInfo()", "getIndexInfo() called with pending results!");
 			indexInfoProcessed();
 		}
-		
+
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.metaData.getWbConnection());
-		
+
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT null as table_cat, \n" +
 			"       i.owner as table_schem, \n" +
@@ -93,7 +93,7 @@ public class OracleIndexReader
 			"       i.index_type \n" +
 			"FROM all_indexes i, all_ind_columns c \n" +
 			"WHERE i.table_name = ? \n");
-		
+
 		if (tbl.getSchema() != null)
 		{
 			sql.append("  AND i.owner = ? \n");
@@ -107,7 +107,7 @@ public class OracleIndexReader
 			"  and i.table_name = c.table_name \n" +
 			"  and i.owner = c.index_owner \n");
 		sql.append("ORDER BY non_unique, type, index_name, ordinal_position ");
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleIndexReader.getIndexInfo()", "Using SQL to retrieve index info for " + table.getTableExpression() + ":\n" + sql.toString());
@@ -118,7 +118,7 @@ public class OracleIndexReader
 		ResultSet rs = this.indexStatement.executeQuery();
 		return rs;
 	}
-	
+
 	/**
 	 * 	Read the definition for function based indexes into the Map provided.
 	 * 	The map should contain the names of the indexes as keys, and an List
@@ -128,7 +128,7 @@ public class OracleIndexReader
 	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
 	{
 		if (indexDefs.size() == 0) return;
-		
+
 		String base="SELECT i.index_name, e.column_expression, e.column_position \n" +
 			"FROM all_indexes i, all_ind_expressions e  \n" +
 			" WHERE i.index_name = e.index_name   \n" +
@@ -139,13 +139,13 @@ public class OracleIndexReader
 		StringBuilder sql = new StringBuilder(300);
 		sql.append(base);
 		String schema = tbl.getSchema();
-		
+
 		if (schema != null && schema.length() > 0)
 		{
 			sql.append(" AND i.owner = '" + schema + "' ");
 		}
 		boolean found = false;
-		
+
 		sql.append(" AND i.index_name IN (");
 		for (IndexDefinition def : indexDefs)
 		{
@@ -162,9 +162,9 @@ public class OracleIndexReader
 		}
 		sql.append(") \n");
 		sql.append(" ORDER BY 1,3");
-		
+
 		if (!found) return;
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleIndexReader.processIndexList()", "Using SQL to enhance index info for " + tbl.getTableExpression() + ":\n" + sql.toString());
@@ -181,10 +181,10 @@ public class OracleIndexReader
 				String name = rs.getString(1);
 				String exp = rs.getString(2);
 				int position = rs.getInt(3);
-				
+
 				IndexDefinition def = findIndex(indexDefs, name);
 				if (def == null) continue;
-				
+
 				List<IndexColumn> indexCols = def.getColumns();
 				if (position >= 0 && position <= indexCols.size())
 				{
@@ -192,7 +192,7 @@ public class OracleIndexReader
 					IndexColumn col = indexCols.get(position - 1);
 					col.setColumn(StringUtil.trimQuotes(exp));
 				}
-				
+
 				String type = def.getIndexType();
 				if (type.startsWith("FUNCTION-BASED"))
 				{
@@ -213,7 +213,6 @@ public class OracleIndexReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return;
 	}
 
 	private IndexDefinition findIndex(Collection<IndexDefinition> indexes, String indexName)

@@ -334,14 +334,14 @@ public abstract class BaseAnalyzer
 	protected void checkOverwrite()
 	{
 		String currentWord = getCurrentWord();
-		if (!StringUtil.isEmptyString(currentWord))
+		if (StringUtil.isEmptyString(currentWord))
 		{
-			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
-			setOverwriteCurrentWord(!keyWord);
+			setOverwriteCurrentWord(false);
 		}
 		else
 		{
-			setOverwriteCurrentWord(false);
+			boolean keyWord = this.dbConnection.getMetadata().isKeyword(currentWord);
+			setOverwriteCurrentWord(!keyWord);
 		}
 	}
 	

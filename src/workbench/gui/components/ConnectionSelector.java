@@ -52,10 +52,10 @@ public class ConnectionSelector
 	protected JLabel connectLabel;
 	private String propertyKey;
 
-	public ConnectionSelector(Frame parent, Connectable conn)
+	public ConnectionSelector(Frame frame, Connectable conn)
 	{
 		this.client = conn;
-		this.parent = parent;
+		this.parent = frame;
 	}
 
 	public void setPropertyKey(String key)

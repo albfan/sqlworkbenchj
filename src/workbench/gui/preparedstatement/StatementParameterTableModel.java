@@ -37,7 +37,7 @@ public class StatementParameterTableModel
 		this.values = new String[count];
 		for (int i=0; i < count; i++)
 		{
-			this.parameterIndex[i] = new Integer(i+1);
+			this.parameterIndex[i] = Integer.valueOf(i+1);
 			this.types[i] = SqlUtil.getTypeName(parm.getParameterType(i));
 			Object v = parm.getParameterValue(i);
 			this.values[i] = (v == null ? "" : v.toString());

@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import workbench.gui.actions.WbAction;
-import workbench.log.LogMgr;
 
 /**
  * @author support@sql-workbench.net
@@ -25,14 +24,15 @@ public class RenameGroupAction
 	implements TreeSelectionListener
 {
 	private ProfileTree client;
-	
+
 	public RenameGroupAction(ProfileTree panel)
 	{
+		super();
 		this.client = panel;
 		this.client.addTreeSelectionListener(this);
 		this.initMenuDefinition("LblRenameProfileGroup");
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		client.renameGroup();
@@ -42,5 +42,5 @@ public class RenameGroupAction
 	{
 		this.setEnabled(client.onlyGroupSelected());
 	}
-	
+
 }

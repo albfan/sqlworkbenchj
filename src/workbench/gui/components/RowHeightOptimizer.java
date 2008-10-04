@@ -120,7 +120,7 @@ public class RowHeightOptimizer
 				int start = text.getLineStartOffset(line);
 				int end = text.getLineEndOffset(line);
 				String content = text.getText(start, end - start);
-				if (StringUtil.isWhitespaceOrEmpty(content))
+				if (StringUtil.isBlank(content))
 				{
 					len = 0;
 				}

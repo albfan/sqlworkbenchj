@@ -92,13 +92,13 @@ public class TableDependencySorter
 		return result;
 	}
 
-	private void dumpMapping(List<LevelNode> mapping)
-	{
-		for (LevelNode lvl : mapping)
-		{
-			System.out.println(lvl.toString());
-		}
-	}
+//	private void dumpMapping(List<LevelNode> mapping)
+//	{
+//		for (LevelNode lvl : mapping)
+//		{
+//			System.out.println(lvl.toString());
+//		}
+//	}
 	
 	private List<LevelNode> createLevelMapping(List<TableIdentifier> tables, boolean bottomUp)
 	{

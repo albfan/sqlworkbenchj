@@ -16,7 +16,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.interfaces.Replaceable;
-import workbench.interfaces.Replaceable;
 import workbench.resource.ResourceMgr;
 
 /**

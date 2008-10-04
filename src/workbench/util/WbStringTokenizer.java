@@ -46,12 +46,12 @@ public class WbStringTokenizer
 		this.setSourceString(aSource);
 	}
 
-	public WbStringTokenizer(char aDelim, String quoteChars, boolean keepQuotes)
+	public WbStringTokenizer(char aDelim, String quotingChars, boolean keep)
 	{
 		this.delimit = new String(new char[] { aDelim });
 		this.singleWordDelimiter = false;
-		this.quoteChars = quoteChars;
-		this.keepQuotes = keepQuotes;
+		this.quoteChars = quotingChars;
+		this.keepQuotes = keep;
 		this.endOfInput = true;
 		this.maxDelim = this.delimit.length() - 1;		
 	}
@@ -66,22 +66,22 @@ public class WbStringTokenizer
 	 *	setSourceString()
 	 *
 	 */
-	public WbStringTokenizer(String aDelim, boolean isSingleDelimiter, String quoteChars, boolean keepQuotes)
+	public WbStringTokenizer(String aDelim, boolean isSingleDelimiter, String quotingChars, boolean keep)
 	{
 		this.delimit = aDelim;
 		this.singleWordDelimiter = isSingleDelimiter;
-		this.quoteChars = quoteChars;
-		this.keepQuotes = keepQuotes;
+		this.quoteChars = quotingChars;
+		this.keepQuotes = keep;
 		this.endOfInput = true;
 		this.maxDelim = this.delimit.length() - 1;		
 	}
 	
-	public WbStringTokenizer(String input, String aDelim, boolean isSingleDelimiter, String quoteChars, boolean keepQuotes)
+	public WbStringTokenizer(String input, String aDelim, boolean isSingleDelimiter, String quotingChars, boolean keep)
 	{
 		this.delimit = aDelim;
 		this.singleWordDelimiter = isSingleDelimiter;
-		this.quoteChars = quoteChars;
-		this.keepQuotes = keepQuotes;
+		this.quoteChars = quotingChars;
+		this.keepQuotes = keep;
 		this.maxDelim = this.delimit.length() - 1;		
 		this.setSourceString(input);
 	}

@@ -14,7 +14,6 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
-import workbench.resource.ResourceMgr;
 
 /**
  * Exit and close the application

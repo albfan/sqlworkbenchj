@@ -12,7 +12,6 @@
 package workbench.gui.components;
 
 import java.awt.Dialog;
-import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -47,10 +46,6 @@ public class BlobHandler
 	private byte[] newValue;
 
 	private boolean setToNull = false;
-
-	public BlobHandler()
-	{
-	}
 
 	public StringBuilder getByteDisplay(Object value)
 	{
@@ -264,7 +259,7 @@ public class BlobHandler
 
 	public void showBlobAsImage(Dialog parent, Object value)
 	{
-		ImageViewer v = null;
+		ImageViewer v;
 		if (parent != null)
 		{
 			v = new ImageViewer(parent, ResourceMgr.getString("TxtBlobData"));

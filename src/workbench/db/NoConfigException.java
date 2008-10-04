@@ -18,10 +18,6 @@ public class NoConfigException
 	extends java.lang.Exception
 {
 	
-	public NoConfigException()
-	{
-	}
-	
 	public NoConfigException(String msg)
 	{
 		super(msg);

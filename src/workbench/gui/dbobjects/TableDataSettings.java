@@ -20,18 +20,19 @@ import workbench.util.StringUtil;
  *
  * @author support@sql-workbench.net
  */
-public class TableDataSettings 
-	extends javax.swing.JPanel	
+public class TableDataSettings
+	extends javax.swing.JPanel
 	implements ActionListener
 {
-	
+
 	/** Creates new form ConfigureWarningThreshold */
 	public TableDataSettings()
 	{
+		super();
 		initComponents();
 		this.checkBoxEnableWarning.addActionListener(this);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -108,7 +109,7 @@ public class TableDataSettings
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
-	
+
 	public int getThresholdValue()
 	{
 		if (this.checkBoxEnableWarning.isSelected())
@@ -120,13 +121,13 @@ public class TableDataSettings
 			return -1;
 		}
 	}
-	
+
 	public void setAutoloadRowCount(boolean flag) { this.autoloadRowCount.setSelected(flag); }
 	public boolean getAutoloadRowCount() { return this.autoloadRowCount.isSelected(); }
-	
+
 	public void setAutoloadData(boolean flag) { this.autoloadData.setSelected(flag); }
 	public boolean getAutoloadData() { return this.autoloadData.isSelected(); }
-	
+
 	public void setThresholdValue(int aValue)
 	{
 		this.checkBoxEnableWarning.setSelected(aValue > 0);
@@ -141,7 +142,7 @@ public class TableDataSettings
 			this.textFieldThresholdValue.setText(Integer.toString(aValue));
 		}
 	}
-	
+
 	public void actionPerformed(java.awt.event.ActionEvent e)
 	{
 		if (e.getSource() == this.checkBoxEnableWarning)
@@ -150,7 +151,7 @@ public class TableDataSettings
 			this.thresholdLabel.setEnabled(this.checkBoxEnableWarning.isSelected());
 		}
 	}
-	
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JCheckBox autoloadData;
   private javax.swing.JCheckBox autoloadRowCount;
@@ -159,5 +160,5 @@ public class TableDataSettings
   private javax.swing.JTextField textFieldThresholdValue;
   private javax.swing.JLabel thresholdLabel;
   // End of variables declaration//GEN-END:variables
-	
+
 }

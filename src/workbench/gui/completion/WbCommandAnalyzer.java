@@ -141,7 +141,7 @@ public class WbCommandAnalyzer
 		
 		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, " \t");
 		if (word == null) return null;
-		if (word.startsWith("-") && word.length() > 2)
+		if (word.charAt(0) == '-' && word.length() > 2)
 		{
 			int end = word.indexOf('=');
 			if (end == -1)

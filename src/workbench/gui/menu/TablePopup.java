@@ -32,10 +32,10 @@ public class TablePopup extends JPopupMenu
 	private ClearAction clear;
 	private SelectAllAction selectAll;
 	private CutAction cut;
-	
-	/** Creates new LogPanelPopup */
+
 	public TablePopup(ClipboardSupport aClient)
 	{
+		super();
 		this.cut = new CutAction(aClient);
 		this.add(cut);
 		this.copy = new CopyAction(aClient);
@@ -48,7 +48,7 @@ public class TablePopup extends JPopupMenu
 		this.selectAll = new SelectAllAction(aClient);
 		this.add(this.selectAll);
 	}
-	
+
 	public void addAction(Action anAction, boolean withSep)
 	{
 		if (withSep) this.addSeparator();

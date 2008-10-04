@@ -17,14 +17,10 @@ import workbench.util.SqlUtil;
 /**
  * @author support@sql-workbench.net
  */
-public class PostgresDataTypeResolver 
+public class PostgresDataTypeResolver
 	implements DataTypeResolver
 {
 
-	public PostgresDataTypeResolver()
-	{
-	}
-	
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int wbTypeInfo)
 	{
 		if (sqlType == java.sql.Types.NUMERIC || sqlType == java.sql.Types.DECIMAL)

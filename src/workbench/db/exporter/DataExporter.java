@@ -76,7 +76,7 @@ public class DataExporter
 	// When compressing the output this holds the name of the archive.
 	private WbFile realOutputfile;
 	private WbFile outputfile;
-	
+
 	private String xsltFile = null;
 	private String transformOutputFile = null;
 	private ExportType exportType = ExportType.TEXT;
@@ -90,7 +90,6 @@ public class DataExporter
 	private CharacterRange escapeRange = null;
 	private String lineEnding = "\n";
 	private String tableName;
-	private String sqlTable;
 	private String encoding;
 	private List<ColumnIdentifier> columnsToExport;
 
@@ -100,7 +99,6 @@ public class DataExporter
 	private boolean quoteAlways = false;
 	private String dateFormat = null;
 	private String dateTimeFormat = null;
-	private char decimalSymbol = '.';
 	private String chrFunc = null;
 	private String concatString = "||";
 	private String concatFunction = null;
@@ -121,7 +119,7 @@ public class DataExporter
 	private boolean cancelJobs = false;
 	private RowActionMonitor rowMonitor;
 
-	private List keyColumnsToUse;
+	private List<String> keyColumnsToUse;
 	private String dateLiteralType = null;
 
 	// The columns to be used for generating blob file names
@@ -132,14 +130,14 @@ public class DataExporter
 	private List<ExportJobEntry> jobQueue;
 	private boolean jobsRunning;
 	private ExportWriter exportWriter;
-	
+
 	private int tablesExported;
 	private long totalRows;
 
 	private Set<ControlFileFormat> controlFiles = new HashSet<ControlFileFormat>();
 	private boolean compressOutput = false;
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
-	
+
 	/**
 	 * Should the ExportWriter create an output file, even if the result set
 	 * for the export is empty?
@@ -177,7 +175,7 @@ public class DataExporter
 	{
 		this.listener.add(l);
 	}
-	
+
 
 	/**
 	 * Define the format for date and timestamp literals
@@ -210,7 +208,7 @@ public class DataExporter
 
 	public void setFilenameColumn(String colname)
 	{
-		if (StringUtil.isWhitespaceOrEmpty(colname))
+		if (StringUtil.isBlank(colname))
 		{
 			this.filenameColumn  = null;
 		}
@@ -410,7 +408,7 @@ public class DataExporter
 	{
 		return exportType;
 	}
-	
+
 	public String getTypeDisplay()
 	{
 		if (exportType == null) return "";
@@ -471,7 +469,7 @@ public class DataExporter
 
 	public void setTextDelimiter(String aDelimiter)
 	{
-		if (aDelimiter != null && aDelimiter.trim().length() > 0) this.delimiter = aDelimiter;
+		if (StringUtil.isNonBlank(aDelimiter)) this.delimiter = aDelimiter;
 	}
 	public String getTextDelimiter() { return this.delimiter; }
 
@@ -620,11 +618,10 @@ public class DataExporter
 
 	public void setDecimalSymbol(char aSymbol)
 	{
-		this.decimalSymbol = aSymbol;
-		if (this.decimalSymbol != 0)
+		if (aSymbol != 0)
 		{
 			DecimalFormatSymbols symbols = new DecimalFormatSymbols();
-			symbols.setDecimalSeparator(this.decimalSymbol);
+			symbols.setDecimalSeparator(aSymbol);
 			numberFormatter = new DecimalFormat("0.#", symbols);
 			numberFormatter.setGroupingUsed(false);
 			numberFormatter.setMaximumFractionDigits(999);
@@ -648,7 +645,7 @@ public class DataExporter
 
 	public void addQueryJob(String query, WbFile outputFile)
 	{
-		ExportJobEntry entry = new ExportJobEntry(outputFile, query, this.dbConn);
+		ExportJobEntry entry = new ExportJobEntry(outputFile, query);
 		this.jobQueue.add(entry);
 	}
 
@@ -779,7 +776,7 @@ public class DataExporter
 		try
 		{
 			outputfile = job.getOutputFile();
-			
+
 			if (!this.dbConn.isBusy())
 			{
 				// only set the busy flag if the caller did not already do this!
@@ -846,7 +843,7 @@ public class DataExporter
 		this.outputfile = output;
 		return startExport(rs, null, generatingSql);
 	}
-	
+
 	protected long startExport(ResultSet rs, ExportJobEntry job)
 		throws IOException, SQLException, Exception
 	{
@@ -875,7 +872,7 @@ public class DataExporter
 					}
 				}
 			}
-			configureExportWriter(info == null ? rsInfo : info);
+			configureExportWriter();
 			this.exportWriter.exportStarting();
 			this.exportWriter.writeExport(rs, info == null ? rsInfo : info, generatingSql);
 		}
@@ -901,8 +898,7 @@ public class DataExporter
 	{
 		try
 		{
-			ResultInfo info = ds.getResultInfo();
-			configureExportWriter(info);
+			configureExportWriter();
 			this.exportWriter.exportStarting();
 			this.exportWriter.writeExport(ds);
 		}
@@ -948,21 +944,16 @@ public class DataExporter
 			LogMgr.logDebug("DataExporter.exportFinished()", "Empty result written. Deleting outputfile " + realOutputfile);
 			f.delete();
 		}
-		
+
 //		if (!jobsRunning) this.closeProgress();
 	}
 
 	/**
 	 *	Export a table to an external file.
 	 */
-	private void configureExportWriter(ResultInfo info)
+	private void configureExportWriter()
 		throws IOException, SQLException, Exception
 	{
-		if (this.sqlTable != null)
-		{
-			info.setUpdateTable(new TableIdentifier(this.sqlTable));
-		}
-
 		if (this.encoding == null) this.encoding = Settings.getInstance().getDefaultDataEncoding();
 
 		if (this.tableName != null)
@@ -1023,7 +1014,7 @@ public class DataExporter
 		}
 
 	}
-	
+
 	public void setOptions(ExportOptions options)
 	{
 		this.setEncoding(options.getEncoding());
@@ -1121,16 +1112,16 @@ public class DataExporter
 		return includeCreateTable;
 	}
 
-	public void setIncludeCreateTable(boolean includeCreateTable)
+	public void setIncludeCreateTable(boolean flag)
 	{
-		this.includeCreateTable = includeCreateTable;
+		this.includeCreateTable = flag;
 	}
 
 	/**
 	 * Getter for property keyColumnsToUse.
 	 * @return Value of property keyColumnsToUse.
 	 */
-	public List getKeyColumnsToUse()
+	public List<String> getKeyColumnsToUse()
 	{
 		return keyColumnsToUse;
 	}
@@ -1139,9 +1130,9 @@ public class DataExporter
 	 * Setter for property keyColumnsToUse.
 	 * @param keyColumnsToUse New value of property keyColumnsToUse.
 	 */
-	public void setKeyColumnsToUse(java.util.List keyColumnsToUse)
+	public void setKeyColumnsToUse(List<String> keyCols)
 	{
-		this.keyColumnsToUse = keyColumnsToUse;
+		this.keyColumnsToUse = keyCols;
 	}
 
 	/**

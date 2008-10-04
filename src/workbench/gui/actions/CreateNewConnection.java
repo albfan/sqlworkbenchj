@@ -26,6 +26,7 @@ public class CreateNewConnection
 	
 	public CreateNewConnection(MainWindow client)
 	{
+		super();
 		this.initMenuDefinition("MnuTxtCreateNewConn");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		this.setEnabled(false);

@@ -29,7 +29,7 @@ import workbench.util.WbFile;
  *
  * @author support@sql-workbench.net
  */
-public class ImportFileLister 
+public class ImportFileLister
 {
 	private List<WbFile> toProcess;
 	private List<TableIdentifier> tables;
@@ -39,11 +39,11 @@ public class ImportFileLister
 	private WbFile sourceDir = null;
 	private boolean checkDependencies = false;
 	private String extension;
-	
+
 	public ImportFileLister(WbConnection con, File dir, final String ext)
 	{
 		if (!dir.isDirectory()) throw new IllegalArgumentException(dir + " is not a directory");
-		
+
 		toProcess = new ArrayList<WbFile>();
 		dbConn = con;
 		sourceDir = new WbFile(dir);
@@ -55,12 +55,12 @@ public class ImportFileLister
 				if (pathname.isDirectory()) return false;
 				String fname = pathname.getName();
 				if (fname == null) return false;
-				return (fname.toLowerCase().endsWith(ext.toLowerCase()));
+				return fname.toLowerCase().endsWith(ext.toLowerCase());
 			}
 		};
-		
+
 		File[] files = sourceDir.listFiles(ff);
-		
+
 		for (File f : files)
 		{
 			toProcess.add(new WbFile(f));
@@ -88,7 +88,7 @@ public class ImportFileLister
 	{
 		return checkDependencies;
 	}
-	
+
 	public void setCheckDependencies(boolean flag)
 	{
 		this.checkDependencies = flag;
@@ -98,7 +98,7 @@ public class ImportFileLister
 	{
 		return this.extension;
 	}
-	
+
 	/**
 	 * Specify the Resolver that returns the table name for a filename
 	 */
@@ -111,13 +111,13 @@ public class ImportFileLister
   {
     return toProcess != null && toProcess.size() > 0;
   }
-  
+
 	public String getDirectory()
 	{
 		if (this.sourceDir == null) return null;
 		return this.sourceDir.getFullPath();
 	}
-	
+
 	/**
 	 * Removes any file that contains the given string i
 	 * @param contained
@@ -141,7 +141,7 @@ public class ImportFileLister
 			}
 		}
 	}
-	
+
 	public void setIgnoreSchema(boolean flag)
 	{
 		this.ignoreSchema = flag;
@@ -157,7 +157,7 @@ public class ImportFileLister
 		if (tables == null) return null;
 		return Collections.unmodifiableList(tables);
 	}
-	
+
 	public List<WbFile> getFiles()
 		throws CycleErrorException
 	{
@@ -170,7 +170,7 @@ public class ImportFileLister
 			return toProcess;
 		}
 	}
-	
+
 	public TableIdentifier getTableForFile(WbFile file)
 	{
 		String tablename = this.resolver.getTableName(file);
@@ -187,7 +187,7 @@ public class ImportFileLister
 		throws CycleErrorException
 	{
 		Map<String, WbFile> fileMapping = new HashMap<String, WbFile>(toProcess.size());
-		
+
 		tables = new LinkedList<TableIdentifier>();
 		for (WbFile f : toProcess)
 		{
@@ -195,18 +195,14 @@ public class ImportFileLister
 			tables.add(tbl);
 			fileMapping.put(tbl.getTableExpression().toLowerCase(), f);
 		}
-		
+
 		TableDependencySorter sorter = new TableDependencySorter(dbConn);
 		List<TableIdentifier> sorted = sorter.sortForInsert(tables);
-		for (TableIdentifier t : sorted)
-		{
-			System.out.println(t.getTableName());
-		}
 		if (sorter.hasErrors())
 		{
 			throw new CycleErrorException(sorter.getErrorTables().get(0));
 		}
-		
+
 		List<WbFile> result = new LinkedList<WbFile>();
 		for (TableIdentifier tbl : sorted)
 		{

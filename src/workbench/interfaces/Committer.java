@@ -21,7 +21,7 @@ public interface Committer
 	 * The integer value that identifies the fact that no COMMIT statement
 	 * at all should be written to the output file
 	 */
-	public static final int NO_COMMIT_FLAG = Integer.MIN_VALUE;
+	static final int NO_COMMIT_FLAG = Integer.MIN_VALUE;
 	
 	/** 
 	 * Define the interval when commits should be send to the DBMS

@@ -66,7 +66,7 @@ import workbench.util.WbThread;
  *
  * @author  support@sql-workbench.net
  */
-public class WbManager
+public final class WbManager
 	implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler
 {
 	private static WbManager wb;
@@ -139,7 +139,6 @@ public class WbManager
 
 	public void showOutOfMemoryError()
 	{
-		System.gc();
 		outOfMemoryOcurred = true;
 		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgOutOfMemoryError");
 	}
@@ -477,13 +476,9 @@ public class WbManager
 				ConnectionMgr.getInstance().saveProfiles();
 				return true;
 			}
-			else if (answer == JOptionPane.NO_OPTION)
-			{
-				return true;
-			}
 			else
 			{
-				return false;
+				return answer == JOptionPane.NO_OPTION;
 			}
 		}
 		return true;
@@ -700,7 +695,6 @@ public class WbManager
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace(System.err);
 			LogMgr.logError("WbManager.initCdmLine()", "Error initializing command line arguments!", e);
 		}
 	}
@@ -865,7 +859,7 @@ public class WbManager
 
 	public static void main(String[] args)
 	{
-		if (wb == null) wb = new WbManager();
+		wb = new WbManager();
 
 		wb.cmdLine.parse(args);
 		boolean showHelp = wb.cmdLine.isArgPresent("help");

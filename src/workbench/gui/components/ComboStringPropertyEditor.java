@@ -46,10 +46,6 @@ public class ComboStringPropertyEditor
 	protected boolean changed;
 	private boolean immediateUpdate = false;
 	private ActionListener listener;
-	public ComboStringPropertyEditor()
-	{
-		super();
-	}
 	
 	public void setSourceObject(Object aSource, String aProperty)
 	{
@@ -153,7 +149,7 @@ public class ComboStringPropertyEditor
 	public void applyChanges()
 	{
 		if (!this.changed) return;
-		Object args[] = new Object[1];
+		Object[] args = new Object[1];
 		if (this.isEditable())
 		{
 			args[0] = this.getEditor().getItem().toString();

@@ -52,7 +52,7 @@ public class WbExport
 	public static final String VERB = "WBEXPORT";
 	private DataExporter exporter;
 	private WbFile pendingOutput;
-	
+
 	//private boolean directExport = false;
 	private boolean queryExport = false;
 	private boolean continueOnError = false;
@@ -69,6 +69,7 @@ public class WbExport
 
 	public WbExport()
 	{
+		super();
 		cmdLine = new ArgumentParser();
 		CommonArgs.addDelimiterParameter(cmdLine);
 		CommonArgs.addEncodingParameter(cmdLine);
@@ -77,7 +78,7 @@ public class WbExport
 		CommonArgs.addVerboseXmlParameter(cmdLine);
 		CommonArgs.addQuoteEscaping(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
-		
+
 		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,xls,html"));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
@@ -136,7 +137,7 @@ public class WbExport
 		header += ", ods="  + Boolean.toString(getHeaderDefault("ods"));
 		header += ", xls="  + Boolean.toString(getHeaderDefault("xls"));
 		header += ", xlsx="  + Boolean.toString(getHeaderDefault("xlsx"));
-		
+
 		msg = msg.replace("%header_flag_default%", header);
 		msg = msg.replace("%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
 		msg = msg.replace("%date_literal_default%", Settings.getInstance().getDefaultExportDateLiteralType());
@@ -155,7 +156,7 @@ public class WbExport
 	{
 		return Settings.getInstance().getBoolProperty("workbench.export." + type + ".default.header", false);
 	}
-	
+
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -183,12 +184,12 @@ public class WbExport
 
 		WbFile outputFile = evaluateFileArgument(cmdLine.getValue("file"));
 		String type = cmdLine.getValue("type");
-		
+
 		if (type == null)
 		{
 			type = findTypeFromFilename(outputFile);
 		}
-		
+
 		if (type == null)
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportTypeRequired"));
@@ -207,7 +208,7 @@ public class WbExport
 
 		type = type.trim().toLowerCase();
 		if ("txt".equals(type)) type = "text";
-		
+
 		this.exporter = new DataExporter(this.currentConnection);
 
 		String tables = cmdLine.getValue("sourcetable");
@@ -236,7 +237,7 @@ public class WbExport
 			result.addMessage(ResourceMgr.getFormattedString("ErrNoAppend", type));
 			return result;
 		}
-		
+
 		String updateTable = cmdLine.getValue("table");
 
 		String encoding = cmdLine.getValue("encoding");
@@ -244,7 +245,7 @@ public class WbExport
 		{
 			exporter.setEncoding(encoding);
 		}
-		
+
 		exporter.setWriteEmptyResults(cmdLine.getBoolean(ARG_EMPTY_RESULTS, true));
 		exporter.setAppendToFile(cmdLine.getBoolean("append"));
 		exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
@@ -257,13 +258,13 @@ public class WbExport
 
 		format = cmdLine.getValue("timestampformat");
 		if (format != null) exporter.setTimestampFormat(format);
-		
+
 		format = cmdLine.getValue("decimal");
 		if (format != null) exporter.setDecimalSymbol(format);
-		
+
 		exporter.setPageTitle(cmdLine.getValue("title"));
-		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));		
-		
+		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
+
 		if ("text".equals(type))
 		{
 			// Support old parameter Syntax
@@ -271,7 +272,7 @@ public class WbExport
 			{
 				exporter.addControlFileFormat(ControlFileFormat.oracle);
 			}
-			
+
 			exporter.addControlFileFormats(ControlFileFormat.parseCommandLine(cmdLine.getValue("formatfile")));
 
 			String delimiter = cmdLine.getValue("delimiter");
@@ -354,7 +355,7 @@ public class WbExport
 			{
 				exporter.setXMLVersion(version);
 			}
-			
+
 			if (xsl != null && output != null)
 			{
 				File f = new File(xsl);
@@ -405,7 +406,7 @@ public class WbExport
 		}
 
 		exporter.setAppendToFile(appendToFile);
-		
+
 		String ending = cmdLine.getValue("lineending");
 		if (ending != null)
 		{
@@ -498,7 +499,7 @@ public class WbExport
 				}
 			}
 		}
-		
+
 		if (outputdir != null && !outputdir.exists())
 		{
 			result.addMessage(ResourceMgr.getFormattedString("ErrOutputDirNotFound", outputdir.getFullPath()));
@@ -554,7 +555,7 @@ public class WbExport
 			this.exporter.setRowMonitor(this.rowMonitor);
 			this.exporter.setReportInterval(this.progressInterval);
 			this.pendingOutput = outputFile;
-			
+
 			String msg = ResourceMgr.getString("MsgSpoolInit");
 			msg = msg.replace("%type%", exporter.getTypeDisplay());
 			String out = null;
@@ -727,7 +728,7 @@ public class WbExport
 			if (aResult.hasResultSets())
 			{
 				String sql = aResult.getSourceCommand();
-				
+
 				ResultSet toExport = aResult.getResultSets().get(0);
 				// The exporter will close the resultSet that it exported
 				// so we can remove it from the list of ResultSets in the StatementRunnerResult

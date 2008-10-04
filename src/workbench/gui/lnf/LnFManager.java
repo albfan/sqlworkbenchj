@@ -96,7 +96,6 @@ public class LnFManager
 	{
 		Settings set = Settings.getInstance();
 		removeLnFEntries();
-		int count = this.lnfList.size();
 		int lnfCount = 0;
 		for (LnFDefinition lnf : lnfList)
 		{

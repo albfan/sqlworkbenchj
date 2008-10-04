@@ -21,23 +21,19 @@ import workbench.log.LogMgr;
 /**
  * This class - if running on Mac OS - will install an ApplicationListener
  * that responds to the Apple-Q keystroke (handleQuit).
- * 
+ *
  * Information taken from
- * 
+ *
  * http://developer.apple.com/documentation/Java/Reference/1.4.2/appledoc/api/com/apple/eawt/Application.html
  * http://developer.apple.com/samplecode/OSXAdapter/index.html
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class MacOSHelper
 	implements InvocationHandler
 {
 	private Object proxy;
-	
-	public MacOSHelper()
-	{
-	}
-	
+
 	public void installApplicationHandler()
 	{
 		String osName = System.getProperty("os.name");
@@ -50,10 +46,10 @@ public class MacOSHelper
 			if (application != null)
 			{
 				LogMgr.logDebug("MacOSHelper.installApplicationHandler()", "Obtained Application object");
-				
+
 				// Create a dynamic Proxy that can be registered as the ApplicationListener
 				Class listener = Class.forName("com.apple.eawt.ApplicationListener");
-				this.proxy = Proxy.newProxyInstance(listener.getClassLoader(), new Class[] { listener },this);			
+				this.proxy = Proxy.newProxyInstance(listener.getClassLoader(), new Class[] { listener },this);
 				Method add = appClass.getMethod("addApplicationListener", new Class[] { listener });
 				if (add != null)
 				{
@@ -62,7 +58,7 @@ public class MacOSHelper
 					add.invoke(application, this.proxy);
 					LogMgr.logInfo("MacOSHelper.installApplicationHandler()", "Mac OS ApplicationListener installed");
 				}
-				
+
 				// Now register for the Preferences... menu
 				Method enablePrefs = appClass.getMethod("setEnabledPreferencesMenu", boolean.class);
 				enablePrefs.invoke(application, Boolean.TRUE);
@@ -77,10 +73,10 @@ public class MacOSHelper
 		{
 			LogMgr.logError("MacOSHelper.installApplicationHandler()", "Could not install ApplicationListener", e);
 		}
-		
+
 	}
-	
-	public Object invoke(Object prx, Method method, Object[] args) 
+
+	public Object invoke(Object prx, Method method, Object[] args)
 		throws Throwable
 	{
 		if (prx != proxy)
@@ -103,7 +99,7 @@ public class MacOSHelper
 			else if ("handleAbout".equals(methodName))
 			{
 //				LogMgr.logDebug("MacOSHelper.invoke()", "Showing about dialog...");
-				WbManager.getInstance().showDialog("workbench.gui.dialogs.WbAboutDialog");			
+				WbManager.getInstance().showDialog("workbench.gui.dialogs.WbAboutDialog");
 				setHandled(args[0], true);
 			}
 			else if ("handlePreferences".equals(methodName))
@@ -112,7 +108,7 @@ public class MacOSHelper
 				OptionsDialogAction.showOptionsDialog();
 				setHandled(args[0], true);
 			}
-			else 
+			else
 			{
 				LogMgr.logInfo("MacOSHelper.invoke()", "Ignoring unknown event.");
 			}
@@ -120,7 +116,7 @@ public class MacOSHelper
 		catch (Throwable e)
 		{
 			StringBuilder arguments = new StringBuilder();
-			
+
 			for (int i=0; i < args.length; i++)
 			{
 				if (i > 0) arguments.append(", ");
@@ -140,12 +136,12 @@ public class MacOSHelper
 		}
 		return null;
 	}
-	
+
 	private void setHandled(Object event, boolean flag)
 	{
-		if (event == null) 
+		if (event == null)
 		{
-			LogMgr.logError("MacOSHelper.setHandled()", "No event object passed!", null); 
+			LogMgr.logError("MacOSHelper.setHandled()", "No event object passed!", null);
 			return;
 		}
 		try

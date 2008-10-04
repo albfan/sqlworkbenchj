@@ -31,8 +31,8 @@ import workbench.util.StringUtil;
  * lines of text.
  * @author Slava Pestov
  */
-public class TextAreaPainter 
-	extends JComponent 
+public class TextAreaPainter
+	extends JComponent
 	implements TabExpander, PropertyChangeListener
 {
 	int currentLineIndex;
@@ -56,13 +56,14 @@ public class TextAreaPainter
 	protected boolean showLineNumbers = false;
 	protected int gutterWidth = 0;
 	protected int gutterCharWidth = 0;
-	
+
 	protected static final int GUTTER_MARGIN = 2;
 	private static final Color GUTTER_BACKGROUND = new Color(238,240,238);
 	private static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
 	public TextAreaPainter(JEditTextArea textArea)
 	{
+		super();
 		this.textArea = textArea;
 
 		setDoubleBuffered(true);
@@ -83,8 +84,8 @@ public class TextAreaPainter
 		bracketHighlightColor = Color.BLACK;
 		bracketHighlight = true;
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
-		Settings.getInstance().addPropertyChangeListener(this, 
-			Settings.PROPERTY_EDITOR_TAB_WIDTH, 
+		Settings.getInstance().addPropertyChangeListener(this,
+			Settings.PROPERTY_EDITOR_TAB_WIDTH,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
 			Settings.PROPERTY_SHOW_LINE_NUMBERS);
 	}
@@ -93,7 +94,7 @@ public class TextAreaPainter
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
-	
+
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (Settings.PROPERTY_EDITOR_TAB_WIDTH.equals(evt.getPropertyName()))
@@ -111,10 +112,10 @@ public class TextAreaPainter
 			invalidate();
 		}
 	}
-	 
-//	public final boolean getShowLineNumbers() 
-//	{ 
-//		return this.showLineNumbers; 
+
+//	public final boolean getShowLineNumbers()
+//	{
+//		return this.showLineNumbers;
 //	}
 
 	/**
@@ -254,7 +255,7 @@ public class TextAreaPainter
 	private void calculateGutterWidth()
 	{
 		FontMetrics cfm = getFontMetrics();
-		if (cfm == null) 
+		if (cfm == null)
 		{
 			this.gutterCharWidth = 18;
 		}
@@ -271,7 +272,7 @@ public class TextAreaPainter
 		else
 		{
 			this.gutterWidth = 0;
-		}		
+		}
 	}
 	public void calculateTabSize()
 	{
@@ -280,10 +281,10 @@ public class TextAreaPainter
 		if (this.textArea.getDocument() == null) return;
 		FontMetrics cfm = this.getFontMetrics();
 		if (cfm == null) return;
-		
+
 		Object tab = textArea.getDocument().getProperty(PlainDocument.tabSizeAttribute);
 		int t = -1;
-		if (tab == null) 
+		if (tab == null)
 		{
 			t = Settings.getInstance().getEditorTabWidth();
 		}
@@ -294,7 +295,7 @@ public class TextAreaPainter
 		}
 		this.tabSize = cfm.charWidth(' ') * t;
 	}
-	
+
 	public void paint(Graphics gfx)
 	{
 		calculateGutterWidth();
@@ -303,7 +304,7 @@ public class TextAreaPainter
 
 		int cw = getWidth() - gutterWidth;
 		int ch = getHeight();
-		
+
 		if (clipRect != null)
 		{
 			gfx.setColor(this.getBackground());
@@ -316,74 +317,74 @@ public class TextAreaPainter
 			}
 		}
 
-		
+
 		final int lastLine = textArea.getLineCount();
 		final int visibleCount = textArea.getVisibleLines();
 		final int firstVisible = textArea.getFirstLine();
-		
+
 		int fheight = fm.getHeight();
 		int firstInvalid = firstVisible + clipRect.y / fheight;
 		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / fheight);
 		if (lastInvalid > lastLine) lastInvalid = lastLine;
-		
-		try 
+
+		try
 		{
 			TokenMarker tokenMarker = textArea.getDocument().getTokenMarker();
 			int x = textArea.getHorizontalOffset();
 
 			int endLine = firstVisible + visibleCount + 1;
 			if (endLine > lastLine) endLine = lastLine;
-			
+
 			int gutterX = this.gutterWidth - GUTTER_MARGIN;
 
 			final int caretLine = textArea.getCaretLine();
 			final int fmHeight = fm.getLeading() + fm.getMaxDescent();
-			
+
 			for (int line = firstVisible; line <= endLine; line++)
 			{
 				int y = textArea.lineToY(line);
-				
+
 				if (this.showLineNumbers)
 				{
 					// It seems that the Objects created by Integer.toString()
 					// that are passed to drawString() are not garbage collected
 					// correctly (as seen in the profiler). So each time
 					// the editor gets redrawn a small amount of memory is lost
-					// To workaround this, I'm caching (some of) the values 
+					// To workaround this, I'm caching (some of) the values
 					// that are needed here.
 					String s = NumberStringCache.getNumberString(line);
-					
+
 					// As we are only allowing fixed-width fonts, this should be ok
 					// otherwise fm.stringWidth(str) needs to be used
 					int w = s.length() * this.gutterCharWidth;
-					
+
 					// make sure the line numbers do not show up outside the gutter
-					gfx.setClip(0, 0, gutterWidth, ch); 
-					
+					gfx.setClip(0, 0, gutterWidth, ch);
+
 					gfx.setColor(GUTTER_COLOR);
 					gfx.drawString(s, gutterX - w, y);
 				}
-				
-				if (line >= firstInvalid && line < lastInvalid) 
+
+				if (line >= firstInvalid && line < lastInvalid)
 				{
 					if (this.showLineNumbers)
 					{
 						gfx.setClip(this.gutterWidth, 0, cw, ch);
-						gfx.translate(this.gutterWidth,0);		
-					}		
-					
+						gfx.translate(this.gutterWidth,0);
+					}
+
 					if (line == caretLine && this.currentLineColor != null)
 					{
 						gfx.setColor(currentLineColor);
 						gfx.fillRect(0, y + fmHeight, cw, fheight);
 						gfx.setColor(getBackground());
 					}
-					
+
 					paintLine(gfx, tokenMarker, line, y, x);
-					
+
 					if (this.showLineNumbers)
 					{
-						gfx.translate(-this.gutterWidth,0);				
+						gfx.translate(-this.gutterWidth,0);
 						gfx.setClip(null);
 					}
 				}
@@ -406,9 +407,9 @@ public class TextAreaPainter
 
 	public int getGutterWidth()
 	{
-		return this.gutterWidth; 
+		return this.gutterWidth;
 	}
-	
+
 	/**
 	 * Marks a range of lines as needing a repaint.
 	 * @param firstLine The first line to invalidate
@@ -465,7 +466,7 @@ public class TextAreaPainter
 	protected void paintPlainLine(Graphics gfx, int line, Font defaultFont, Color defaultColor, int x, int y)
 	{
 		textArea.getLineText(line,currentLine);
-		
+
 		paintHighlight(gfx,line,y);
 
 		gfx.setFont(defaultFont);
@@ -479,7 +480,7 @@ public class TextAreaPainter
 		int line, Font defaultFont, Color defaultColor, int x, int y)
 	{
 		textArea.getLineText(line,currentLine);
-		
+
 		currentLineTokens = tokenMarker.markTokens(currentLine,	line);
 
 		paintHighlight(gfx,line,y);
@@ -501,7 +502,7 @@ public class TextAreaPainter
 		{
 			paintBracketHighlight(gfx,line,y);
 		}
-		
+
 		if (line == textArea.getCaretLine())
 		{
 			paintCaret(gfx,line,y);
@@ -512,9 +513,9 @@ public class TextAreaPainter
 	{
 		int selectionStart = textArea.getSelectionStart();
 		int selectionEnd = textArea.getSelectionEnd();
-		
+
 		if (selectionStart == selectionEnd) return;
-		
+
 		int height = fm.getHeight();
 		y += fm.getLeading() + fm.getMaxDescent();
 
@@ -561,7 +562,7 @@ public class TextAreaPainter
 			x2 = getWidth();
 		}
 
-		
+
 		// "inlined" min/max()
 		gfx.fillRect(x1 > x2 ? x2 : x1,y,x1 > x2 ? (x1 - x2) : (x2 - x1),height);
 

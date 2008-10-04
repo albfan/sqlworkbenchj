@@ -19,12 +19,13 @@ import javax.swing.JPanel;
  *
  * @author  support@sql-workbench.net
  */
-public class WbToolbarSeparator 
+public class WbToolbarSeparator
 	extends JPanel
 {
 
 	public WbToolbarSeparator()
 	{
+		super();
 		Dimension d = new Dimension(7, 16);
 		this.setPreferredSize(d);
 		this.setMinimumSize(d);

@@ -58,7 +58,6 @@ public class TablePrinter
 	private int pageCount = -1;
 
 	private Font printFont;
-	private String[] colHeaders;
 	private String headerText = null;
 	private TablePrintPage[] pages = null;
 
@@ -252,9 +251,9 @@ public class TablePrinter
 		Map<Integer, Integer> horizontalBrakeColumns = new HashMap<Integer, Integer>();
 
 		// First page always starts at column 0 
-		horizontalBrakeColumns.put(new Integer(0), new Integer(0));
+		horizontalBrakeColumns.put(Integer.valueOf(0), Integer.valueOf(0));
 
-		this.colHeaders = new String[colCount];
+		String[] colHeaders = new String[colCount];
 		this.pagesAcross = 1;
 
 		Rectangle paintIconR = new Rectangle();
@@ -277,7 +276,7 @@ public class TablePrinter
 			paintIconR.x = paintIconR.y = paintIconR.width = paintIconR.height = 0;
 			paintTextR.x = paintTextR.y = paintTextR.width = paintTextR.height = 0;
 
-			this.colHeaders[col] =
+			colHeaders[col] =
 					SwingUtilities.layoutCompoundLabel(fm,title,(Icon)null
 							,SwingConstants.TOP
 							,SwingConstants.LEFT
@@ -287,7 +286,7 @@ public class TablePrinter
 
 			if ((currentPageWidth + width[col] + colSpacing) >= pageWidth)
 			{
-				horizontalBrakeColumns.put(new Integer(pagesAcross), new Integer(col));
+				horizontalBrakeColumns.put(Integer.valueOf(pagesAcross), Integer.valueOf(col));
 				pagesAcross++;
 				currentPageWidth = 0;
 			}
@@ -328,7 +327,7 @@ public class TablePrinter
 					p.setPageNumberAcross(pa + 1);
 				}
 				p.setSpacing(lineSpacing, colSpacing);
-				p.setColumnHeaders(this.colHeaders);
+				p.setColumnHeaders(colHeaders);
 				p.setColumnWidths(width);
 				p.setFont(this.printFont);
 				this.pages[currentPage] = p;

@@ -46,12 +46,11 @@ public class ConnectionPropertiesEditor
 	private DataStore propData;
 	private WbTable propTable;
 
-	private NewListEntryAction newItem;
-	private DeleteListEntryAction deleteItem;
 	private JCheckBox copyProps;
-	
+
 	public ConnectionPropertiesEditor(ConnectionProfile profile)
 	{
+		super();
 		String[] cols = new String[] { ResourceMgr.getString("TxtConnDataPropName"), ResourceMgr.getString("TxtConnDataPropValue") };
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR };
 		int[] sizes = new int[] { 15, 5 };
@@ -59,7 +58,7 @@ public class ConnectionPropertiesEditor
 		this.propData = new DataStore(cols, types, sizes);
 		this.propData.setAllowUpdates(true);
 		Properties source = profile.getConnectionProperties();
-		
+
 		if (source != null)
 		{
 			Enumeration keys = source.propertyNames();
@@ -83,11 +82,11 @@ public class ConnectionPropertiesEditor
 
 		WbToolbar toolbar = new WbToolbar();
 		toolbar.addDefaultBorder();
-		this.newItem = new NewListEntryAction(this);
-		this.deleteItem = new DeleteListEntryAction(this);
+		NewListEntryAction newItem = new NewListEntryAction(this);
+		DeleteListEntryAction deleteItem = new DeleteListEntryAction(this);
 
-		toolbar.add(this.newItem);
-		toolbar.add(this.deleteItem);
+		toolbar.add(newItem);
+		toolbar.add(deleteItem);
 		this.add(toolbar, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 		copyProps = new JCheckBox(ResourceMgr.getString("LblCpProps2System"));
@@ -100,7 +99,7 @@ public class ConnectionPropertiesEditor
 	{
 		return this.copyProps.isSelected();
 	}
-	
+
 	public Properties getProperties()
 	{
 		Properties props = new Properties();

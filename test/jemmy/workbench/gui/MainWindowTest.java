@@ -68,27 +68,27 @@ public class MainWindowTest
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|About", "|");
-		
+
 		JDialogOperator dialog = new JDialogOperator(mainWindow, "About SQL Workbench/J");
-		
+
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("close");
 		JButtonOperator close = new JButtonOperator(dialog, chooser);
 		close.push();
-	}	
-	
+	}
+
 	private void whatsNewTest()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
 		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|What's new", "|");
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();
-		
+
 		JDialogOperator dialog = new JDialogOperator(mainWindow, "What's new");
 		dialog.setVisible(false);
 		dialog.dispose();
-	}	
-	
+	}
+
 	private void settingsTest()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -135,7 +135,7 @@ public class MainWindowTest
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 
 		QueueTool tool = new QueueTool();
-		
+
 		chooser.setName("sqlpanel1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
 		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
@@ -144,7 +144,7 @@ public class MainWindowTest
 		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
 		final JMenuItemOperator save = new JMenuItemOperator(saveItem);
 //		assertFalse(save.isEnabled());
-		
+
 		runSql(sqlPanel, "create table nopk (id1 integer, data varchar(20));\n" +
 			"commit;\n" +
 			"insert into nopk (id1, data) values (1,'Ford');\n" +
@@ -157,12 +157,12 @@ public class MainWindowTest
 		assertEquals(2, rows);
 		assertEquals(2, result.getColumnCount());
 		result.setValueAt("Arthur", 0, 1);
-		
+
 		tool.waitEmpty();
 		assertEquals(3, result.getColumnCount());
 		assertTrue(save.isEnabled());
-		
-		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Define key columns", "|");		
+
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Define key columns", "|");
 		JDialogOperator definePK = new JDialogOperator("Select Key Columns");
 
 		JTableOperator table = new JTableOperator(definePK);
@@ -171,20 +171,20 @@ public class MainWindowTest
 
 		table.clickOnCell(0, 1, 1);
 		ok.push();
-		
+
 		saveChanges(sqlPanel);
-		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");		
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");
 		testUtil.waitWhileBusy(sqlPanel);
 		tool.waitEmpty();
-		
+
 		assertEquals(2, result.getColumnCount());
 		runSql(sqlPanel, "select id1, data from nopk where data = 'Arthur';");
-		
+
 		result = new JTableOperator(mainWindow);
 		rows = result.getRowCount();
 		assertEquals(1, rows);
-	}	
-	
+	}
+
 	private void pkWarningsTest()
 	{
 		NamedComponentChooser chooser = new NamedComponentChooser();
@@ -193,7 +193,7 @@ public class MainWindowTest
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 
 		QueueTool tool = new QueueTool();
-		
+
 		chooser.setName("sqlpanel1");
 		JComponentOperator panel = new JComponentOperator(mainWindow, chooser);
 		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
@@ -202,7 +202,7 @@ public class MainWindowTest
 		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
 		final JMenuItemOperator save = new JMenuItemOperator(saveItem);
 		assertFalse(save.isEnabled());
-		
+
 		runSql(sqlPanel, "create table jtest (id1 integer, id2 integer, data varchar(20), primary key (id1, id2));\n" +
 			"commit;\n" +
 			"insert into jtest (id1, id2, data) values (1,1,'Ford');\n" +
@@ -214,23 +214,23 @@ public class MainWindowTest
 		assertEquals(1, rows);
 		assertEquals(2, result.getColumnCount());
 		result.setValueAt("Arthur", 0, 1);
-		
+
 		tool.waitEmpty();
 		assertEquals(3, result.getColumnCount());
 		assertTrue(save.isEnabled());
-		
-		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");		
+
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Data|Save changes to database", "|");
 		JDialogOperator warning = new JDialogOperator("Missing key columns");
 		JButtonOperator cancel = new JButtonOperator(warning, "Cancel");
 		cancel.push();
 		assertEquals(3, result.getColumnCount());
 	}
-	
+
 	private void connect()
 	{
 		// Make sure not profiles exist
 		ConnectionMgr.getInstance().clearProfiles();
-		
+
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
 		JMenuBar bar = mainWindow.getJMenuBar();
 		//		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
@@ -261,7 +261,7 @@ public class MainWindowTest
 		JTextFieldOperator username = new JTextFieldOperator(dialog, chooser);
 		username.setText("sa");
 		new JButtonOperator(dialog, "OK").push();
-		
+
 		// Connecting can take some time...
 		QueueTool tool = new QueueTool();
 		tool.waitEmpty();
@@ -283,7 +283,7 @@ public class MainWindowTest
 			assertTrue(op.isEnabled());
 		}
 	}
-	
+
 	private void runSql()
 	{
 		NamedComponentChooser chooser = new NamedComponentChooser();
@@ -314,7 +314,7 @@ public class MainWindowTest
 		assertEquals(nr, new Integer(42));
 
 		testCopyActions(mainMenu);
-		
+
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
 		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
 		JMenuItemOperator save = new JMenuItemOperator(saveItem);
@@ -327,7 +327,7 @@ public class MainWindowTest
 		// the status column
 		assertEquals(4, result.getColumnCount());
 
-		// because of the status column the lastname column 
+		// because of the status column the lastname column
 		// is the column with index 3 (not 2)
 		result.setValueAt("Dent", 0, 3);
 
@@ -341,7 +341,7 @@ public class MainWindowTest
 		runSql(sqlPanel, "select nr, firstname, lastname from person where lastname = 'Dent';");
 		tool.waitEmpty();
 
-		// Obtain a new referenct to the result table as the 
+		// Obtain a new referenct to the result table as the
 		// SQLPanel has created a new instance when running the select
 		result = new JTableOperator(mainWindow);
 		assertEquals(1, result.getRowCount());
@@ -359,7 +359,7 @@ public class MainWindowTest
 
 		result = new JTableOperator(mainWindow);
 		firstname = (String)result.getValueAt(0, 1);
-		assertTrue(StringUtil.isWhitespaceOrEmpty(firstname));
+		assertTrue(StringUtil.isBlank(firstname));
 
 		result.setValueAt("Arthur", 0, 1);
 		tool.waitEmpty();
@@ -379,34 +379,34 @@ public class MainWindowTest
 		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
 
 		JMenuItem appendItem = sqlMenu.getItem(18);
-		JMenuItemOperator append = new JMenuItemOperator(appendItem);
+
 		AppendResultsAction action = (AppendResultsAction)appendItem.getAction();
 		assertFalse(appendItem.isSelected());
-		
+
 		runSql(sqlPanel, "select * from person");
-		
+
 		chooser.setName("resultspane");
 		JComponentOperator comp = new JComponentOperator(mainWindow, chooser);
 		JTabbedPane resultTab = (JTabbedPane)comp.getSource();
-		
+
 		assertEquals(2, resultTab.getTabCount());
-		
+
 		QueueTool tool = new QueueTool();
-		mainMenu.pushMenu("SQL|Append new results", "|");		
+		mainMenu.pushMenu("SQL|Append new results", "|");
 		tool.waitEmpty();
 		assertTrue(sqlPanel.getAppendResults());
 		assertTrue(appendItem.isSelected());
 		assertTrue(action.getButton().isSelected());
-		
+
 		runSql(sqlPanel, "select * from person");
 		assertEquals(3, resultTab.getTabCount());
-		
-		mainMenu.pushMenu("SQL|Append new results", "|");		
+
+		mainMenu.pushMenu("SQL|Append new results", "|");
 		tool.waitEmpty();
 		assertFalse(sqlPanel.getAppendResults());
 		assertFalse(appendItem.isSelected());
 		assertFalse(action.getButton().isSelected());
-		
+
 		runSql(sqlPanel, "select * from person");
 		try { Thread.sleep(500); } catch (Throwable th) {}
 		assertEquals(2, resultTab.getTabCount());

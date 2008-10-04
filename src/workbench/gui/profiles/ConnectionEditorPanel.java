@@ -74,6 +74,7 @@ public class ConnectionEditorPanel
 
 	public ConnectionEditorPanel()
 	{
+		super();
 		this.initComponents();
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();
@@ -121,7 +122,7 @@ public class ConnectionEditorPanel
 	{
 		return tfProfileName;
 	}
-	
+
 	public void setFocusToTitle()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -969,10 +970,8 @@ public class ConnectionEditorPanel
 		{
 			if (evt.getSource() == this.altDelimiter)
 			{
-				DelimiterDefinition del = altDelimiter.getDelimiter();
 				// As the alternateDelimiter is a not attached to the profile itself,
 				// we have to propagate any updated delimiter object to the profile
-
 				this.currentProfile.setAlternateDelimiter(altDelimiter.getDelimiter());
 			}
 			this.sourceModel.profileChanged(this.currentProfile);

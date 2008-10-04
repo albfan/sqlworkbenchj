@@ -32,7 +32,6 @@ package workbench.sql.formatter;
 
 import java.io.*;
 import workbench.util.CharSequenceReader;
-import workbench.sql.syntax.SqlKeywordHelper;
 
 /**
  * SQLLexer is a SQL language lexer.  Created with JFlex.  An example of how it is used:

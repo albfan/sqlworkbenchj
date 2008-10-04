@@ -21,18 +21,19 @@ import workbench.interfaces.ClipboardSupport;
 
 /**
  * A popup menu with the usual Cut, Copy and Paste entries for text fields.
- * 
+ *
  * @author  support@sql-workbench.net
  */
-public class CutCopyPastePopup 
+public class CutCopyPastePopup
 	extends JPopupMenu
 {
 	private CopyAction copy;
 	private PasteAction paste;
 	private CutAction cut;
-	
+
 	public CutCopyPastePopup(ClipboardSupport aClient)
 	{
+		super();
 		this.cut = new CutAction(aClient);
 		this.add(cut.getMenuItem());
 		this.copy = new CopyAction(aClient);
@@ -40,13 +41,13 @@ public class CutCopyPastePopup
 		this.paste = new PasteAction(aClient);
 		this.add(this.paste.getMenuItem());
 	}
-	
+
 	public void addAction(WbAction anAction, boolean withSep)
 	{
 		if (withSep) this.addSeparator();
 		this.add(anAction.getMenuItem());
 	}
-	
+
 	public WbAction getCopyAction() { return this.copy; }
 	public WbAction getCutAction() { return this.cut; }
 	public WbAction getPasteAction() { return this.paste; }

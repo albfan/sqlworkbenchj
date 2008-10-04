@@ -30,11 +30,6 @@ import workbench.util.SqlUtil;
 public class Db2SynonymReader
 	implements SynonymReader
 {
-	
-	public Db2SynonymReader()
-	{
-	}
-
 	/**
 	 * Returns an empty list, as the standard JDBC driver 
 	 * alread returns synonyms in the getTables() method.

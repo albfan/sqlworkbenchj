@@ -32,14 +32,15 @@ public class WbColorPicker
 {
 	private Border sampleBorder;
 	private ActionListener actionListener;
-	
+
 	public WbColorPicker()
 	{
 		this(false);
 	}
-	
+
 	public WbColorPicker(boolean showReset)
 	{
+		super();
 		initComponents();
 		this.resetButton.setEnabled(showReset);
 		this.resetButton.setVisible(showReset);
@@ -146,13 +147,13 @@ public class WbColorPicker
 	{
 		this.actionListener = l;
 	}
-	
+
 	private void resetColor()
 	{
 		this.resetButton.setEnabled(false);
 		this.samplePanel.setBackground(this.getBackground());
 		this.samplePanel.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
-		this.defaultLabel.setVisible(true);		
+		this.defaultLabel.setVisible(true);
 	}
 
 	public void setSelectedColor(Color c)

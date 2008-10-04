@@ -31,14 +31,10 @@ import javax.xml.transform.stream.StreamSource;
 /**
  *  Xslt transformer using the JDK built-in XSLT stuff
  *
- * @author support@sql-workbench.net  
- */ 
+ * @author support@sql-workbench.net
+ */
 public class XsltTransformer
 {
-	public XsltTransformer()
-	{
-	}
-
 	public void transform(String inputFileName, String outputFileName, String xslFileName)
 		throws IOException, TransformerException
 	{
@@ -63,12 +59,12 @@ public class XsltTransformer
 		try
 		{
 			xlsInput = new FileInputStream(xslfile);
-			
+
 			Source sxslt = new StreamSource(xlsInput);
 			sxslt.setSystemId(xslfile.getName());
 			TransformerFactory factory = TransformerFactory.newInstance();
 			transformer = factory.newTransformer(sxslt);
-			
+
 			in = new BufferedInputStream(new FileInputStream(inputFile),32*1024);
 			out = new BufferedOutputStream(new FileOutputStream(outputFile), 32*1024);
 			Source xmlSource = new StreamSource(in);
@@ -84,7 +80,7 @@ public class XsltTransformer
 		}
 	}
 
-	public static void main(String args[])
+	public static void main(String[] args)
 	{
 		try
 		{

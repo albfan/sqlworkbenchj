@@ -55,7 +55,7 @@ public class SqlRowDataConverter
 	private String chrFunction;
 	private String concatFunction;
 	private StatementFactory statementFactory;
-	private List keyColumnsToUse;
+	private List<String> keyColumnsToUse;
 	private String lineTerminator = "\n";
 	private String doubleLineTerminator = "\n\n";
 	private boolean includeOwner = true;
@@ -263,14 +263,12 @@ public class SqlRowDataConverter
 		
 		if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
 		{
-			int keyCount = this.keyColumnsToUse.size();
-			
 			// make sure the default key columns are not used
 			this.metaData.resetPkColumns();
 
-			for (int i=0; i < keyCount; i++)
+			for (String col : keyColumnsToUse )
 			{
-				this.metaData.setIsPkColumn((String)this.keyColumnsToUse.get(i), true);
+				this.metaData.setIsPkColumn(col, true);
 			}
 			keysPresent = true;
 		}
@@ -290,9 +288,9 @@ public class SqlRowDataConverter
 		return keysPresent;
 	}
 	
-	public void setCommitEvery(int commitEvery)
+	public void setCommitEvery(int interval)
 	{
-		this.commitEvery = commitEvery;
+		this.commitEvery = interval;
 	}
 
 	public void setConcatString(String concat)
@@ -314,9 +312,9 @@ public class SqlRowDataConverter
 		return chrFunction;
 	}
 
-	public void setChrFunction(String chrFunction)
+	public void setChrFunction(String function)
 	{
-		this.chrFunction = chrFunction;
+		this.chrFunction = function;
 	}
 
 	/**
@@ -369,9 +367,9 @@ public class SqlRowDataConverter
 	 * Setter for property keyColumnsToUse.
 	 * @param keyColumnsToUse New value of property keyColumnsToUse.
 	 */
-	public void setKeyColumnsToUse(List keyColumnsToUse)
+	public void setKeyColumnsToUse(List<String> cols)
 	{
-		this.keyColumnsToUse = keyColumnsToUse;
+		this.keyColumnsToUse = cols;
 	}
 
 	public void setLineTerminator(String lineEnd)

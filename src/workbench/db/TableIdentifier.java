@@ -324,7 +324,7 @@ public class TableIdentifier
 
 	public void setTable(String aTable)
 	{
-		if (!this.isNewTable && (aTable == null || aTable.trim().length() == 0))
+		if (!this.isNewTable && (StringUtil.isBlank(aTable)))
 			throw new IllegalArgumentException("Table name may not be null");
 
 		if (aTable == null)
@@ -385,7 +385,7 @@ public class TableIdentifier
 	{
 		if (this.isNewTable) return;
 
-		if (aSchema == null || aSchema.trim().length() == 0)
+		if (StringUtil.isBlank(aSchema))
 		{
 			this.schema = null;
 		}
@@ -413,7 +413,7 @@ public class TableIdentifier
 	{
 		if (this.isNewTable) return;
 
-		if (aCatalog == null || aCatalog.trim().length() == 0)
+		if (StringUtil.isBlank(aCatalog))
 		{
 			this.catalog = null;
 		}

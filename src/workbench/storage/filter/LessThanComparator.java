@@ -11,24 +11,19 @@
  */
 package workbench.storage.filter;
 
-import workbench.util.StringUtil;
-
 /**
  * @author support@sql-workbench.net
  */
 public class LessThanComparator
 	implements ColumnComparator
 {
-	public LessThanComparator()
-	{
-	}
-	
+
 	public boolean supportsIgnoreCase() { return false; }
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "<"; }
 	public boolean needsValue() { return true; }
-	public boolean comparesEquality() { return false; }	
-	
+	public boolean comparesEquality() { return false; }
+
 	@SuppressWarnings("unchecked")
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
@@ -42,20 +37,20 @@ public class LessThanComparator
 			return false;
 		}
 	}
-	
+
 	public boolean supportsType(Class valueClass)
 	{
 		return Comparable.class.isAssignableFrom(valueClass);
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		return (other instanceof LessThanComparator);
 	}
-	
+
 	public boolean validateInput(Object value)
 	{
 		return (value instanceof Comparable);
-	}	
+	}
 
 }

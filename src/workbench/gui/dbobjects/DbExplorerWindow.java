@@ -198,12 +198,12 @@ public class DbExplorerWindow
 		{
 			public void run()
 			{
-				DbExplorerPanel panel = new DbExplorerPanel();
-				DbExplorerWindow window = new DbExplorerWindow(panel);
+				DbExplorerPanel dbPanel = new DbExplorerPanel();
+				DbExplorerWindow window = new DbExplorerWindow(dbPanel);
 				window.setStandalone(true);
 
 				window.restorePosition();
-				panel.restoreSettings();
+				dbPanel.restoreSettings();
 
 				window.setVisible(true);
 				window.selectConnection();

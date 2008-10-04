@@ -24,11 +24,6 @@ import workbench.util.StringUtil;
  */
 public class TableCommentReader
 {
-
-	public TableCommentReader()
-	{
-	}
-
 	/**
 	 * Return the SQL that is needed to re-create the comment on the given table.
 	 * The syntax to be used, can be configured in the TableCommentStatements.xml file.
@@ -36,13 +31,13 @@ public class TableCommentReader
 	public String getTableCommentSql(WbConnection dbConnection, TableIdentifier table)
 	{
 		String commentStatement = dbConnection.getMetadata().metaSqlMgr.getTableCommentSql();
-		if (commentStatement == null || commentStatement.trim().length() == 0)
+		if (StringUtil.isBlank(commentStatement))
 		{
 			return null;
 		}
 		String comment = getTableComment(dbConnection, table);
 		String result = null;
-		if (Settings.getInstance().getIncludeEmptyComments() || comment != null && comment.trim().length() > 0)
+		if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
 		{
 			result = StringUtil.replace(commentStatement, MetaDataSqlManager.COMMENT_TABLE_PLACEHOLDER, table.getTableName());
 			result = StringUtil.replace(result, MetaDataSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
@@ -84,7 +79,7 @@ public class TableCommentReader
 
 		return result;
 	}
-	
+
 	/**
 	 * Return the SQL that is needed to re-create the comment on the given columns.
 	 * The syntax to be used, can be configured in the ColumnCommentStatements.xml file.
@@ -92,13 +87,13 @@ public class TableCommentReader
 	public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		String columnStatement = con.getMetadata().metaSqlMgr.getColumnCommentSql();
-		if (columnStatement == null || columnStatement.trim().length() == 0) return null;
+		if (StringUtil.isBlank(columnStatement)) return null;
 		StringBuilder result = new StringBuilder(columns.size() * 25);
 		for (ColumnIdentifier col : columns)
 		{
 			String column = col.getColumnName();
 			String comment = col.getComment();
-			if (Settings.getInstance().getIncludeEmptyComments() || comment != null && comment.trim().length() > 0)
+			if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
 			{
 				try
 				{
@@ -117,5 +112,5 @@ public class TableCommentReader
 		}
 		return result;
 	}
-	
+
 }

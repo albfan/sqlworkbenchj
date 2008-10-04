@@ -19,10 +19,6 @@ import java.util.Map;
 public class OrExpression
 	extends ComplexExpression
 {
-	public OrExpression()
-	{
-	}
-	
 	public boolean evaluate(Map<String, Object> columnValues)
 	{
 		for (FilterExpression expr : filter)
@@ -31,7 +27,7 @@ public class OrExpression
 		}
 		return false;
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other instanceof OrExpression)
@@ -43,7 +39,7 @@ public class OrExpression
 			return false;
 		}
 	}
-	
+
 	public String toString()
 	{
 		StringBuilder value = new StringBuilder();
@@ -54,5 +50,5 @@ public class OrExpression
 		}
 		return value.toString();
 	}
-	
+
 }

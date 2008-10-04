@@ -35,7 +35,7 @@ import workbench.resource.Settings;
  * A simple text editor based on a JTextArea.
  * The panel displays also a checkbox to turn word wrapping on and off
  * and optionally an information label.
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class PlainEditor
@@ -44,21 +44,21 @@ public class PlainEditor
 {
 	private JTextArea editor;
 	private JCheckBox wordWrap;
-	private	SearchAndReplace replacer;
 	private Color enabledBackground;
 	private JLabel infoText;
 	private JPanel toolPanel;
-	
-	public PlainEditor(Window parent)
+
+	public PlainEditor()
 	{
+		super();
 		editor = new JTextArea();
 		this.enabledBackground = editor.getBackground();
 		editor.putClientProperty("JTextArea.infoBackground", Boolean.TRUE);
 		TextComponentMouseListener l = new TextComponentMouseListener(this.editor);
-		
+
 		JScrollPane scroll = new JScrollPane(editor);
 		editor.setLineWrap(true);
-		editor.setWrapStyleWord(true); 
+		editor.setWrapStyleWord(true);
 		editor.setFont(Settings.getInstance().getEditorFont());
 		this.setLayout(new BorderLayout());
 		toolPanel = new JPanel();
@@ -74,19 +74,19 @@ public class PlainEditor
 		if (d != null)
 		{
 			int tabSize = Settings.getInstance().getEditorTabWidth();
-			d.putProperty(PlainDocument.tabSizeAttribute, new Integer(tabSize));
+			d.putProperty(PlainDocument.tabSizeAttribute, Integer.valueOf(tabSize));
 		}
-		replacer = new SearchAndReplace(this, this);
+		SearchAndReplace replacer = new SearchAndReplace(this, this);
 		l.addAction(replacer.getFindAction());
 		l.addAction(replacer.getFindAgainAction());
 		l.addAction(replacer.getReplaceAction());
 	}
-	
+
 	public int getCaretPosition() { return this.editor.getCaretPosition(); }
 	public int getSelectionEnd() { return this.editor.getSelectionEnd(); }
 	public int getSelectionStart() { return this.editor.getSelectionStart(); }
 	public void select(int start, int end) { this.editor.select(start, end); }
-	
+
 	public void setInfoText(String text)
 	{
 		if (this.infoText == null)
@@ -97,24 +97,24 @@ public class PlainEditor
 		}
 		this.infoText.setText(text);
 	}
-	
+
 	public void requestFocus()
 	{
 		this.editor.requestFocus();
 	}
-	
+
 	public boolean requestFocusInWindow()
 	{
 		return this.editor.requestFocusInWindow();
 	}
-	
+
 	public void restoreSettings()
 	{
 		boolean wrap = Settings.getInstance().getPlainEditorWordWrap();
 		wordWrap.setSelected(wrap);
 		this.editor.setLineWrap(wrap);
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings.getInstance().setPlainEditorWordWrap(wordWrap.isSelected());

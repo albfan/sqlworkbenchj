@@ -43,16 +43,17 @@ import workbench.util.SqlUtil;
  *
  * An component to enter parameters for prepared statements
  */
-public class ParameterEditor 
-	extends JPanel 
+public class ParameterEditor
+	extends JPanel
 	implements ValidatingComponent
 {
 	private WbTable parameterTable;
 	private StatementParameters parameters;
 	private StatementParameterTableModel model;
-	
+
 	public ParameterEditor(StatementParameters parms)
 	{
+		super();
 		this.parameters = parms;
 		this.model = new StatementParameterTableModel(this.parameters);
 		this.parameterTable = new WbTable();
@@ -69,14 +70,14 @@ public class ParameterEditor
 		l.setBackground(Color.WHITE);
 		l.setOpaque(true);
 		l.setHorizontalAlignment(SwingConstants.LEFT);
-		
+
 		this.setLayout(new BorderLayout());
 
 		JScrollPane scroll = new JScrollPane(this.parameterTable);
 		b = BorderFactory.createEmptyBorder(5, 0, 0, 0);
 		Border b2 = BorderFactory.createCompoundBorder(b, scroll.getBorder());
 		scroll.setBorder(b2);
-		
+
 		this.add(l, BorderLayout.NORTH);
 		this.add(scroll, BorderLayout.CENTER);
 	}
@@ -91,7 +92,7 @@ public class ParameterEditor
 			this.parameters.setParameterValue(i, v);
 		}
 	}
-	
+
 	public void componentDisplayed()
 	{
 		this.parameterTable.setColumnSelectionInterval(2,2);
@@ -104,7 +105,7 @@ public class ParameterEditor
 			wbedit.requestFocus();
 		}
 	}
-	
+
 	public boolean validateInput()
 	{
 		this.parameterTable.stopEditing();
@@ -112,7 +113,7 @@ public class ParameterEditor
 		for (int i=0; i < count; i++)
 		{
 			String v = this.model.getParameterValue(i);
-			if (!this.parameters.isValueValid(i, v)) 
+			if (!this.parameters.isValueValid(i, v))
 			{
 				String error = ResourceMgr.getString("ErrInvalidPSParameterValue").replace("%value%", v);
 				error = error.replace("%type%", SqlUtil.getTypeName(this.parameters.getParameterType(i)));
@@ -122,7 +123,7 @@ public class ParameterEditor
 		}
 		return true;
 	}
-	
+
 	public static boolean showParameterDialog(StatementParameters parms)
 	{
 		ParameterEditor editor = new ParameterEditor(parms);
@@ -130,7 +131,7 @@ public class ParameterEditor
 		editor.setMinimumSize(d);
 		editor.setPreferredSize(d);
 
-		boolean result = false; 
+		boolean result = false;
 		//boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
 		MainWindow parent = WbManager.getInstance().getCurrentWindow();
 		boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
@@ -149,5 +150,5 @@ public class ParameterEditor
 		}
 		return result;
 	}
-	
+
 }

@@ -90,7 +90,7 @@ public class RendererFactory
 			Class cls = Class.forName("workbench.gui.renderer.NumberColumnRenderer");
 			Class[] types = new Class[] { int.class, char.class };
 			Constructor cons = cls.getConstructor(types);
-			Object[] args = new Object[] { new Integer(maxDigits), new Character(sep) };
+			Object[] args = new Object[] { Integer.valueOf(maxDigits), Character.valueOf(sep) };
 			TableCellRenderer rend = (TableCellRenderer)cons.newInstance(args);
 			return rend;
 		}

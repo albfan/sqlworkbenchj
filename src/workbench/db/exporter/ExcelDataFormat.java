@@ -22,7 +22,7 @@ class ExcelDataFormat
 {
 	protected String decimalFormat;
 	protected String dateFormat;
-	protected String tsFormat;
+	protected String timestampFormat;
 	protected String integerFormat;
 	protected HSSFCellStyle headerCellStyle = null;
 	protected HSSFCellStyle dateCellStyle = null;
@@ -36,13 +36,13 @@ class ExcelDataFormat
 	protected short gridIntegerFormat;
 	protected short gridTsFormat;
 
-	public ExcelDataFormat(String decimalFormat, String dateFormat,
-		String integerFormat, String tsFormat)
+	public ExcelDataFormat(String decFormat, String dtFormat,
+		String intFormat, String tsFormat)
 	{
-		this.decimalFormat = decimalFormat;
-		this.dateFormat = dateFormat;
-		this.integerFormat = integerFormat;
-		this.tsFormat = tsFormat;
+		this.decimalFormat = decFormat;
+		this.dateFormat = dtFormat;
+		this.integerFormat = intFormat;
+		this.timestampFormat = tsFormat;
 	}
 
 	protected void setupWithWorkbook(HSSFWorkbook wb)
@@ -100,7 +100,7 @@ class ExcelDataFormat
 	{
 		tsCellStyle = wb.createCellStyle();
 		tsCellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);
-		gridTsFormat = safeGetFormat(dataFormat, tsFormat);
+		gridTsFormat = safeGetFormat(dataFormat, timestampFormat);
 		tsCellStyle.setDataFormat(gridTsFormat);
 	}
 

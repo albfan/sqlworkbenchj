@@ -24,15 +24,11 @@ import workbench.util.SqlUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class WbDescribeTable 
+public class WbDescribeTable
 	extends SqlCommand
 {
 	public static final String VERB = "DESC";
 	public static final String VERB_LONG = "DESCRIBE";
-
-	public WbDescribeTable()
-	{
-	}
 
 	public String getVerb() { return VERB; }
 

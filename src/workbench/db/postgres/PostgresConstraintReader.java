@@ -29,20 +29,16 @@ import workbench.util.SqlUtil;
  * (column constraints are stored on table level...)
  * @author  support@sql-workbench.net
  */
-public class PostgresConstraintReader 
+public class PostgresConstraintReader
 	extends AbstractConstraintReader
 {
-	private static final String TABLE_SQL = 
-					 "select rel.consrc, rel.conname \n" + 
-           "from pg_class t, pg_constraint rel \n" + 
-           "where t.relname = ? \n" + 
+	private static final String TABLE_SQL =
+					 "select rel.consrc, rel.conname \n" +
+           "from pg_class t, pg_constraint rel \n" +
+           "where t.relname = ? \n" +
            "and   t.oid = rel.conrelid " +
 		       "and   rel.contype = 'c'";
-	
-	public PostgresConstraintReader()
-	{
-	}
-	
+
 	public String getPrefixTableConstraintKeyword() { return "check"; }
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
@@ -55,7 +51,7 @@ public class PostgresConstraintReader
 		StringBuilder result = new StringBuilder(100);
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
+
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		Savepoint sp = null;
@@ -78,7 +74,7 @@ public class PostgresConstraintReader
 						result.append(indent);
 						result.append(',');
 					}
-					if (name != null) 
+					if (name != null)
 					{
 						result.append("CONSTRAINT ");
 						result.append(name);
@@ -103,5 +99,5 @@ public class PostgresConstraintReader
 		}
 		return result.toString();
 	}
-	
+
 }

@@ -72,7 +72,7 @@ public class CleanJavaCodeAction extends WbAction
 		if (StringUtil.isEmptyString(aString)) return "";
 		// a regex to find escaped newlines in the literal
 		Pattern newline = Pattern.compile("\\\\n|\\\\r");
-		String lines[] = StringUtil.PATTERN_CRLF.split(aString);
+		String[] lines = StringUtil.PATTERN_CRLF.split(aString);
 		StringBuilder result = new StringBuilder(aString.length());
 		int count = lines.length;
 		for (int i=0; i < count; i ++)

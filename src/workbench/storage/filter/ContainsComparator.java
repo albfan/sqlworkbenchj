@@ -17,10 +17,6 @@ package workbench.storage.filter;
 public class ContainsComparator
 	implements ColumnComparator
 {
-	public ContainsComparator()
-	{
-	}
-	
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getName() { return "Contains"; }
 	public String getOperator() { return "contains"; }

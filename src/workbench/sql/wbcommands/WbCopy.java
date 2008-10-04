@@ -53,11 +53,12 @@ public class WbCopy
 	public static final String PARAM_DELETE_SYNC = "syncDelete";
 
 	private static final String ID_PREFIX = "$Wb-Copy$";
-	
+
 	private CopyTask copier;
 
 	public WbCopy()
 	{
+		super();
 		this.isUpdatingCommand = true;
 		cmdLine = new ArgumentParser();
 		CommonArgs.addCommitParameter(cmdLine);
@@ -68,7 +69,7 @@ public class WbCopy
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addTableStatements(cmdLine);
 		CommonArgs.addTransactionControL(cmdLine);
-		
+
 		cmdLine.addArgument(PARAM_SOURCETABLE);
 		cmdLine.addArgument(PARAM_SOURCEQUERY);
 		cmdLine.addArgument(PARAM_TARGETTABLE);
@@ -99,7 +100,7 @@ public class WbCopy
 		}
 	}
 
-	private ProfileKey getTargetProfile(ArgumentParser cmd)
+	private ProfileKey getTargetProfile()
 	{
 		String targetProfile = cmdLine.getValue(PARAM_TARGETPROFILE);
 		String targetGroup = cmdLine.getValue(PARAM_TARGETPROFILE_GROUP);
@@ -107,8 +108,8 @@ public class WbCopy
 		if (targetProfile != null) targetKey = new ProfileKey(targetProfile, targetGroup);
 		return targetKey;
 	}
-	
-	private ProfileKey getSourceProfile(ArgumentParser cmd)
+
+	private ProfileKey getSourceProfile()
 	{
 		String sourceProfile = cmdLine.getValue(PARAM_SOURCEPROFILE);
 		String sourceGroup = cmdLine.getValue(PARAM_SOURCEPROFILE_GROUP);
@@ -116,23 +117,23 @@ public class WbCopy
 		if (sourceProfile != null) sourceKey = new ProfileKey(sourceProfile, sourceGroup);
 		return sourceKey;
 	}
-	
+
 	public StatementRunnerResult execute(final String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		
+
 		cmdLine.parse(getCommandLine(sql));
-		
+
 		if (cmdLine.hasUnknownArguments())
 		{
 			setUnknownMessage(result, cmdLine, ResourceMgr.getString("ErrCopyWrongParameters"));
 			return result;
 		}
-		
-		ProfileKey sourceKey = getSourceProfile(cmdLine);
-		ProfileKey targetKey = getTargetProfile(cmdLine);
-		
+
+		ProfileKey sourceKey = getSourceProfile();
+		ProfileKey targetKey = getTargetProfile();
+
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 
@@ -142,13 +143,13 @@ public class WbCopy
 			addWrongParams(result);
 			return result;
 		}
-		
+
 		WbConnection targetCon = getConnection(result, targetKey, ID_PREFIX + "-Target$");
 		if (targetCon == null || !result.isSuccess())
 		{
 			return result;
 		}
-		
+
 		WbConnection sourceCon = getConnection(result, sourceKey, ID_PREFIX + "-Source$");
 		if (sourceCon == null || !result.isSuccess())
 		{
@@ -177,7 +178,7 @@ public class WbCopy
 		}
 
 		boolean schemaCopy = tablesToExport.size() > 1;
-		
+
 		String targettable = cmdLine.getValue(PARAM_TARGETTABLE);
 		if (targettable == null && !schemaCopy)
 		{
@@ -185,7 +186,7 @@ public class WbCopy
 			addWrongParams(result);
 			return result;
 		}
-		
+
 		if (schemaCopy)
 		{
 			this.copier = new SchemaCopy(tablesToExport);
@@ -195,16 +196,16 @@ public class WbCopy
 			this.copier = new TableCopy();
 		}
 
-		
+
 		try
 		{
 			if (!copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor))
 			{
 				return result;
 			}
-			
+
 			copier.copyData();
-			if (copier.isSuccess()) 
+			if (copier.isSuccess())
 			{
 				result.setSuccess();
 			}
@@ -240,7 +241,7 @@ public class WbCopy
 		{
 			closeConnections(sourceCon, targetCon);
 		}
-		
+
 		return result;
 	}
 
@@ -303,7 +304,7 @@ public class WbCopy
 				result.setFailure();
 				return null;
 			}
-			
+
 			try
 			{
 				return ConnectionMgr.getInstance().getConnection(profileKey, id);
@@ -325,7 +326,7 @@ public class WbCopy
 	public ConnectionProfile getModificationTarget(WbConnection con, String sql)
 	{
 		cmdLine.parse(getCommandLine(sql));
-		ProfileKey target = getTargetProfile(cmdLine);
+		ProfileKey target = getTargetProfile();
 		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(target);
 		return prof;
 	}

@@ -43,7 +43,10 @@ public class StringUtil
 
 	public static final String getCurrentTimestampWithTZString()
 	{
-		return ISO_TZ_TIMESTAMP_FORMATTER.format(now());
+		synchronized (ISO_TZ_TIMESTAMP_FORMATTER)
+		{
+			return ISO_TZ_TIMESTAMP_FORMATTER.format(now());
+		}
 	}
 
 	private static final java.util.Date now()
@@ -102,7 +105,7 @@ public class StringUtil
 
 	public static boolean lineStartsWith(CharSequence text, int lineStartPos, String compareTo)
 	{
-		if (isWhitespaceOrEmpty(compareTo)) return false;
+		if (isBlank(compareTo)) return false;
 		int textLength = text.length();
 
 		// skip whitespace at the beginning
@@ -111,7 +114,7 @@ public class StringUtil
 		{
 			lineStartPos = pos;
 		}
-		
+
 		int len = compareTo.length();
 		for (int i=0; i < len; i++)
 		{
@@ -361,14 +364,14 @@ public class StringUtil
 		}
 		return true;
 	}
-	
+
 	/**
 	 * Find the longest line in the give string and return its length.
 	 * Up to maxLines lines are evaluated.
-	 * 
+	 *
 	 * @param text
 	 * @param maxLines
-	 * @return the length of the longest line 
+	 * @return the length of the longest line
 	 */
 	public static String getLongestLine(String text, int maxLines)
 	{
@@ -380,7 +383,7 @@ public class StringUtil
 		int maxlen = 0;
 		int linestart = 0;
 		int lineend = 0;
-		
+
 		while (m.find(lastpos))
 		{
 			linecount ++;
@@ -395,7 +398,7 @@ public class StringUtil
 			lastpos = pos + 1;
 			if (linecount >= maxLines) break;
 		}
-		
+
 		if (m.hitEnd())
 		{
 			int len = text.length() - lastpos;
@@ -412,7 +415,7 @@ public class StringUtil
 		}
 		return text;
 	}
-	
+
 	public static boolean isNumber(String value)
 	{
 		try
@@ -426,11 +429,16 @@ public class StringUtil
 		}
 	}
 
+	public static final boolean isNonBlank(CharSequence value)
+	{
+		return !isBlank(value);
+	}
+
 	/**
 	 * Checks if the given parameter is "empty",
 	 * i.e: either null, length == 0 or contains only whitespace
 	 */
-	public static final boolean isWhitespaceOrEmpty(CharSequence value)
+	public static final boolean isBlank(CharSequence value)
 	{
 		if (isEmptyString(value)) return true;
 		return isWhitespace(value);
@@ -454,7 +462,7 @@ public class StringUtil
 	{
 		return findFirstNonWhitespace(line, 0);
 	}
-	
+
 	public static final int findFirstNonWhitespace(final CharSequence line, int startPos)
 	{
 		if (line == null) return -1;
@@ -470,7 +478,7 @@ public class StringUtil
 		}
 		return pos;
 	}
-	
+
 	public static final String getStartingWhiteSpace(final String line)
 	{
 		if (line == null) return null;
@@ -541,7 +549,7 @@ public class StringUtil
 	 */
 	public static final boolean equalStringOrEmpty(String one, String other)
 	{
-		if (isWhitespaceOrEmpty(one) && isWhitespaceOrEmpty(other)) return true;
+		if (isBlank(one) && isBlank(other)) return true;
 		return equalString(one, other);
 	}
 
@@ -623,7 +631,7 @@ public class StringUtil
 	{
 		return toArray(strings, false);
 	}
-	
+
 	public static final String[] toArray(Collection<String> strings, boolean toUpper)
 	{
 		if (strings == null) return null;
@@ -974,49 +982,44 @@ public class StringUtil
 
 	/**
 	 * Encodes characters to Unicode &#92;uxxxx (or simple escape like \r)
-	 * 
+	 *
 	 * This has partially been "borrowed" from the Properties class, because the code
 	 * there is not usable from the outside.
-	 * 
+	 *
 	 * Backslash, CR, LF, Tab and FormFeed (\f) will always be replaced.
-	 * 
+	 *
 	 * @param value the string to be encoded
-	 * @param range the CharacterRange which defines the characters to be encoded. If isOutsideRange() 
+	 * @param range the CharacterRange which defines the characters to be encoded. If isOutsideRange()
 	 *        returns true, the character will be encoded.
 	 * @param additionalCharsToEncode additional characters not covered by the range may be null
 	 */
 	public static String escapeUnicode(String value, CharacterRange range, String additionalCharsToEncode)
 	{
 		if (value == null) return null;
-		
+
 		int len = value.length();
 		StringBuilder outBuffer = new StringBuilder((int)(len*1.5));
 
 		for (int x = 0; x < len; x++)
 		{
 			char aChar = value.charAt(x);
-			boolean replaced = false;
+
 			switch (aChar)
 			{
 				case '\\':
 					outBuffer.append("\\\\");
-					replaced = true;
 					break;
 				case '\t':
 					outBuffer.append("\\t");
-					replaced = true;
 					break;
 				case '\n':
 					outBuffer.append("\\n");
-					replaced = true;
 					break;
 				case '\r':
 					outBuffer.append("\\r");
-					replaced = true;
 					break;
 				case '\f':
 					outBuffer.append("\\f");
-					replaced = true;
 					break;
 				default:
 					if ((range != null && range.isOutsideRange(aChar)) ||

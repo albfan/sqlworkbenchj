@@ -34,7 +34,7 @@ import workbench.util.WbThread;
 
 /**
  * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class DataStoreTableModel
@@ -43,17 +43,18 @@ public class DataStoreTableModel
 	private DataStore dataCache;
 	private boolean showStatusColumn = false;
 	private int columnStartIndex = 0;
-	
+
 	private int lockColumn = -1;
 
 	private SortDefinition sortColumns = new SortDefinition();
-	
+
 	private boolean allowEditing = true;
 	private final Object model_change_lock = new Object();
 
-	public DataStoreTableModel(DataStore aDataStore) 
+	public DataStoreTableModel(DataStore aDataStore)
 		throws IllegalArgumentException
 	{
+		super();
 		if (aDataStore == null) throw new IllegalArgumentException("DataStore cannot be null");
 		this.setDataStore(aDataStore);
 	}
@@ -139,7 +140,7 @@ public class DataStoreTableModel
 	private boolean isNull(Object value, int column)
 	{
 		if (value == null) return true;
-		String s = value.toString(); 
+		String s = value.toString();
 		int type = this.dataCache.getColumnType(column);
 		if (SqlUtil.isCharacterType(type))
 		{
@@ -153,7 +154,7 @@ public class DataStoreTableModel
 		}
 		return StringUtil.isEmptyString(s);
 	}
-	
+
 	public void setValueAt(Object aValue, int row, int column)
 	{
 		// Updates to the status column shouldn't happen anyway ....
@@ -203,9 +204,9 @@ public class DataStoreTableModel
 	 *	Returns the current width of the given column.
 	 *	It returns the value of {@link workbench.storage.DataStore#getColumnDisplaySize(int)}
 	 *  for every column which is not the status column.
-	 * 
+	 *
 	 * @param aColumn the column index
-	 * 
+	 *
 	 * @return the width of the column as defined by the DataStore or 0
 	 * @see workbench.storage.DataStore#getColumnDisplaySize(int)
 	 * @see #findColumn(String)
@@ -248,7 +249,7 @@ public class DataStoreTableModel
 		{
 			return null;
 		}
-		
+
 	}
 	/**
 	 *	Returns the type (java.sql.Types) of the given column.
@@ -298,7 +299,7 @@ public class DataStoreTableModel
 		this.fireTableRowsInserted(row, row);
 		return row;
 	}
-	
+
 	public void deleteRow(int aRow, boolean withDependencies)
 		throws SQLException
 	{
@@ -372,10 +373,10 @@ public class DataStoreTableModel
 		}
 	}
 
-	
+
 	/**
 	 * Clear the locked column. After a call to clearLockedColumn()
-	 * all columns (except the status column) are editable 
+	 * all columns (except the status column) are editable
 	 * when the table is in edit mode.
 	 * @see #setLockedColumn(int)
 	 */
@@ -385,7 +386,7 @@ public class DataStoreTableModel
 	}
 
 	/**
-	 * Define a column that may not be edited even if the 
+	 * Define a column that may not be edited even if the
 	 * table is in "Edit mode"
 	 * @param column the column to be set as non-editable
 	 * @see #clearLockedColumn()
@@ -402,39 +403,39 @@ public class DataStoreTableModel
 
 
 	/**
-	 * Clears the filter that is currently defined on the underlying 
+	 * Clears the filter that is currently defined on the underlying
 	 * DataStore. A tableDataChanged Event will be fired after this
 	 */
 	public void resetFilter()
 	{
 		if (isSortInProgress()) return;
-		
+
 		dataCache.clearFilter();
-		// sort() will already fire a tableDataChanged() 
+		// sort() will already fire a tableDataChanged()
 		// if a sort column was defined
-		if (!sort()) 
+		if (!sort())
 		{
 			fireTableDataChanged();
 		}
 	}
-	
+
 	/**
-	 * Applys the given filter to the underlying 
+	 * Applys the given filter to the underlying
 	 * DataStore. A tableDataChanged Event will be fired after this
 	 */
 	public void applyFilter(FilterExpression filter)
 	{
 		if (isSortInProgress()) return;
-		
+
 		dataCache.applyFilter(filter);
-		// sort() will already fire a tableDataChanged() 
+		// sort() will already fire a tableDataChanged()
 		// if a sort column was defined
-		if (!sort()) 	
+		if (!sort())
 		{
 			this.fireTableDataChanged();
 		}
 	}
-	
+
 	private void setSortInProgress(final boolean flag)
 	{
 		this.sortingInProgress = flag;
@@ -446,7 +447,7 @@ public class DataStoreTableModel
 	}
 
 
-	/** 
+	/**
 	 * Return true if the data is sorted in ascending order.
 	 * @return True if sorted in ascending order
 	 */
@@ -455,12 +456,12 @@ public class DataStoreTableModel
 		return this.sortColumns.isSortAscending(col - columnStartIndex);
 	}
 
-	
+
 	public boolean isPrimarySortColumn(int col)
 	{
 		return this.sortColumns.isPrimarySortColumn(col - columnStartIndex);
 	}
-	
+
 	/**
 	 * Check if the table is sorted by a column
 	 * @return true if the given column is a sort column
@@ -474,14 +475,14 @@ public class DataStoreTableModel
 	/**
 	 * Returns a snapshot of the current sort columns identified
 	 * by their names instead of their column index (as done by SortDefinition)
-	 * 
+	 *
 	 * @return the current sort definition with named columns
 	 */
 	public NamedSortDefinition getSortDefinition()
 	{
 		return new NamedSortDefinition(this.dataCache, this.sortColumns);
 	}
-	
+
 	public void setSortDefinition(NamedSortDefinition definition)
 	{
 		if (definition == null) return;
@@ -492,7 +493,7 @@ public class DataStoreTableModel
 			applySortColumns();
 		}
 	}
-	
+
 	/**
 	 * Sort the data by the given column. If the data is already
 	 * sorted by this column, then the sort order will be reversed
@@ -505,7 +506,7 @@ public class DataStoreTableModel
 		boolean ascending = !isSortAscending(column);
 		sortByColumn(column, ascending, false);
 	}
-	
+
 	/**
 	 *	Re-apply the last sort order defined.
 	 *  If no sort order was defined this method does nothing
@@ -521,7 +522,7 @@ public class DataStoreTableModel
 	{
 		boolean isPrimaryColumn = this.sortColumns.isPrimarySortColumn(column);
 		this.sortColumns.removeSortColumn(column);
-		
+
 		// if the primary (== first) column was removed
 		// we have to re-apply the sort definition
 		if (isPrimaryColumn)
@@ -529,7 +530,7 @@ public class DataStoreTableModel
 			applySortColumns();
 		}
 	}
-	
+
 	/**
 	 * Sort the data by the given column in the defined order
 	 */
@@ -545,12 +546,12 @@ public class DataStoreTableModel
 		}
 		applySortColumns();
 	}
-	
+
 	private void applySortColumns()
 	{
 		if (this.sortColumns == null) return;
 		if (this.dataCache == null) return;
-		
+
 		synchronized (this.dataCache)
 		{
 			try

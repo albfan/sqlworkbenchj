@@ -21,34 +21,30 @@ import workbench.sql.formatter.SQLToken;
 public class PostgresDDLFilter
 	implements DDLFilter
 {
-	
-	public PostgresDDLFilter()
-	{
-	}
 
 	/**
 	 * PG's documentation shows CREATE FUNCTION samples that use
 	 * a "dollar quoting" to avoid the nested single quotes
 	 * e.g. http://www.postgresql.org/docs/8.0/static/plpgsql-structure.html
-	 * 
-	 * But the JDBC driver does not (yet) understand this - this 
+	 *
+	 * But the JDBC driver does not (yet) understand this - this
 	 * seems to be only implemented in the psql command line tool.
-	 * 
+	 *
 	 * So we'll replace the "dollar quotes" with regular single quotes
-	 * Every single quote inside the function body will be replaced with 
+	 * Every single quote inside the function body will be replaced with
 	 * two single quotes to properly "escape" them.
-	 * 
+	 *
 	 * This does not mimic psql's quoting completely as basically
-	 * you can also use some descriptive words between the dollar signs, such 
+	 * you can also use some descriptive words between the dollar signs, such
 	 * as $body$ which will not be detected by this method.
 	 */
 	public String adjustDDL(String sql)
 	{
 		int bodyStart = -1;
 		int bodyEnd = -1;
-		
+
 		SQLLexer lexer = new SQLLexer(sql);
-		
+
 		try
 		{
 			SQLToken t = lexer.getNextToken(false, false);
@@ -57,7 +53,7 @@ public class PostgresDDLFilter
 				String v = t.getContents();
 				if (!"CREATE".equals(v) && !"CREATE OR REPLACE".equals(v)) return sql;
 			}
-			
+
 			while (t != null)
 			{
 				String value = t.getContents();
@@ -71,11 +67,11 @@ public class PostgresDDLFilter
 		}
 		catch (Exception e)
 		{
-			
+
 		}
-		
+
 		if (bodyStart == -1 || bodyEnd == -1) return sql;
-		
+
 		String body = sql.substring(bodyStart, bodyEnd);
 		body = body.replace("'", "''");
 

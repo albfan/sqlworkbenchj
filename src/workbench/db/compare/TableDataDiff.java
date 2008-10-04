@@ -41,23 +41,23 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to compare the data of two tables and generate approriate INSERT or UPDATE 
+ * A class to compare the data of two tables and generate approriate INSERT or UPDATE
  * statements in order to sync the tables.
- * 
- * The table that should be synchronized needs to exist in both the target and 
- * the reference database and it is expected that both tables have the same primary 
+ *
+ * The table that should be synchronized needs to exist in both the target and
+ * the reference database and it is expected that both tables have the same primary
  * key definition.
- * 
- * To improve performance (a bit), the rows are retrieved in chunks from the 
+ *
+ * To improve performance (a bit), the rows are retrieved in chunks from the
  * target table by dynamically constructing a WHERE clause for the rows
- * that were retrieved from the reference table. The chunk size 
+ * that were retrieved from the reference table. The chunk size
  * can be controlled using the property workbench.sql.sync.chunksize
  * The chunk size defaults to 25. This is a conservative setting to avoid
- * problems with long SQL statements when processing tables that have 
+ * problems with long SQL statements when processing tables that have
  * a PK with multiple columns.
- * 
- * @see workbench.resource.Settings#getSyncChunkSize() 
- * 
+ *
+ * @see workbench.resource.Settings#getSyncChunkSize()
+ *
  * @author support@sql-workbench.net
  */
 public class TableDataDiff
@@ -68,30 +68,30 @@ public class TableDataDiff
 	private TableIdentifier referenceTable;
 	private TableIdentifier tableToSync;
 	private int chunkSize = 15;
-	
+
 	private Statement checkStatement;
 	private RowActionMonitor monitor;
 	private Writer updateWriter;
 	private Writer insertWriter;
-	
+
 	private boolean firstUpdate;
 	private boolean firstInsert;
-		
+
 	private SqlLiteralFormatter formatter;
 	private List<ColumnIdentifier> pkColumns;
 	private String lineEnding = "\n";
 
 	private boolean cancelExecution;
 	private int progressInterval = 10;
-	
+
 	private Set<String> columnsToIgnore;
-	
+
 	private SqlRowDataConverter converter;
-	
+
 	private MessageBuffer warnings = new MessageBuffer();
 	private MessageBuffer errors = new MessageBuffer();
 	private long currentRowNumber;
-	
+
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
 		throws SQLException
 	{
@@ -101,7 +101,7 @@ public class TableDataDiff
 		chunkSize = Settings.getInstance().getSyncChunkSize();
 		converter = new SqlRowDataConverter(compareTo);
 	}
-	
+
 	public void setRowMonitor(RowActionMonitor rowMonitor)
 	{
 		this.monitor = rowMonitor;
@@ -118,11 +118,11 @@ public class TableDataDiff
 		this.errors.append(msg);
 		this.errors.appendNewLine();
 	}
-	
+
 	/**
 	 * Define how blobs should be handled during export.
-	 * 
-	 * @param type the blob mode to be used. 
+	 *
+	 * @param type the blob mode to be used.
 	 *        null means no special treatment (toString() will be called)
 	 */
 	public void setBlobMode(String type)
@@ -138,18 +138,18 @@ public class TableDataDiff
 		{
 			converter.setBlobMode(mode);
 		}
-		
+
 	}
-	
+
 	/**
-	 * Define a list of column names which should not considered when 
+	 * Define a list of column names which should not considered when
 	 * checking for differences (e.g. a "MODIFIED" column)
-	 * 
+	 *
 	 * @param columnNames
 	 */
 	public void setColumnsToIgnore(List<String> columnNames)
 	{
-		if (columnNames == null) 
+		if (columnNames == null)
 		{
 			this.columnsToIgnore = null;
 			return;
@@ -162,23 +162,23 @@ public class TableDataDiff
 	{
 		this.progressInterval = interval;
 	}
-	
+
 	/**
 	 * Define the literal type of the date literals.
-	 * This is simply delegated to the instance of the 
+	 * This is simply delegated to the instance of the
 	 * {@link workbench.storage.SqlLiteralFormatter} that is used internally.
-	 * 
-	 * @see workbench.storage.SqlLiteralFormatter#setDateLiteralType(java.lang.String) 
+	 *
+	 * @see workbench.storage.SqlLiteralFormatter#setDateLiteralType(java.lang.String)
 	 * @param type
 	 */
 	public void setSqlDateLiteralType(String type)
 	{
 		formatter.setDateLiteralType(type);
 	}
-	
+
 	/**
 	 * Set the Writers to write the generated UPDATE and INSERT statements.
-	 * 
+	 *
 	 * @param updates the Writer to write UPDATEs to
 	 * @param inserts the Writer to write INSERTs to
 	 * @param lineEnd the line end character(s) to be used when writing the text files
@@ -192,11 +192,11 @@ public class TableDataDiff
 
 
 	/**
-	 * Define the tables to be compared. 
-	 * 
+	 * Define the tables to be compared.
+	 *
 	 * @param tableToCheck the table with the "reference" data
 	 * @param tableToDelete the table from which obsolete rows should be deleted
-	 * @throws java.sql.SQLException if the refTable does not have a primary key 
+	 * @throws java.sql.SQLException if the refTable does not have a primary key
 	 * or the tableToVerify is not found
 	 */
 	public void setTableName(TableIdentifier refTable, TableIdentifier tableToVerify)
@@ -218,12 +218,12 @@ public class TableDataDiff
 				pkColumns.add(col);
 			}
 		}
-		
+
 		if (pkColumns.size() == 0)
 		{
 			throw new SQLException("No primary key found for table " + referenceTable);
 		}
-		
+
 		this.tableToSync = this.toSync.getMetadata().findTable(tableToVerify);
 		if (tableToSync == null)
 		{
@@ -235,11 +235,11 @@ public class TableDataDiff
 	{
 		this.cancelExecution = true;
 	}
-	
+
 	/**
 	 * This starts the actual creation of the necessary update and inserts
-	 * statements. 
-	 * 
+	 * statements.
+	 *
 	 * @throws java.sql.SQLException
 	 * @throws java.io.IOException
 	 */
@@ -247,13 +247,13 @@ public class TableDataDiff
 		throws SQLException, IOException
 	{
 		String retrieve = "SELECT * FROM " + this.referenceTable.getTableExpression(this.reference);
-		
+
 		LogMgr.logDebug("SyncDeleter.deleteTarget()", "Using " + retrieve + " to retrieve rows from reference database");
-	
+
 		checkStatement = toSync.createStatement();
-		
+
 		cancelExecution = false;
-		
+
 		ResultSet rs = null;
 		Statement stmt = null;
 		currentRowNumber = 0;
@@ -263,25 +263,25 @@ public class TableDataDiff
 			stmt = this.reference.createStatementForQuery();
 			rs = stmt.executeQuery(retrieve);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.reference);
-			
+
 			if (this.monitor != null)
 			{
 				//this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 				String msg = ResourceMgr.getFormattedString("MsgDataDiffProcessUpd", this.tableToSync.getTableName());
 				this.monitor.setCurrentObject(msg, -1, -1);
 			}
-			
+
 			int cols = info.getColumnCount();
 			List<RowData> packetRows = new ArrayList<RowData>(chunkSize);
-			
+
 			while (rs.next())
 			{
 				if (cancelExecution) break;
-				
+
 				RowData row = new RowData(cols);
 				row.read(rs, info);
 				packetRows.add(row);
-				
+
 				if (packetRows.size() == chunkSize)
 				{
 					checkRows(packetRows, info);
@@ -316,7 +316,7 @@ public class TableDataDiff
 			ri.setUpdateTable(this.tableToSync);
 
 			if (currentRowNumber == 0) converter.setResultInfo(ri);
-			
+
 			while (rs.next())
 			{
 				RowData r = new RowData(ri);
@@ -324,25 +324,25 @@ public class TableDataDiff
 				checkRows.add(r);
 				if (cancelExecution) break;
 			}
-			
+
 			for (RowData toInsert : referenceRows)
 			{
 				if (cancelExecution) break;
-				
+
 				int i = findRowByPk(checkRows, info, toInsert, ri);
-				
+
 				currentRowNumber ++;
 				if (this.monitor != null && (currentRowNumber % progressInterval == 0))
 				{
 					monitor.setCurrentRow(currentRowNumber, -1);
 				}
-				
+
 				Writer writerToUse = null;
 				RowDataComparer comp = new RowDataComparer(toInsert, i > -1 ? checkRows.get(i) : null);
 				comp.ignoreColumns(columnsToIgnore, ri);
 
 				String migrateSql = comp.getMigrationSql(converter, currentRowNumber);
-				
+
 				if (migrateSql != null)
 				{
 					if (i > -1)
@@ -379,7 +379,6 @@ public class TableDataDiff
 		{
 			SqlUtil.closeResult(rs);
 		}
-		return;
 	}
 
 	protected int findRowByPk(List<RowData> reference, ResultInfo refInfo, RowData toFind, ResultInfo findInfo)
@@ -401,11 +400,11 @@ public class TableDataDiff
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Creates the Statement to retrieve the corresponding rows of the target
 	 * table based on the data retrieved from the reference table
-	 * 
+	 *
 	 * @param rows the data from the reference table
 	 * @param info the result set definition of the reference table
 	 * @return
@@ -422,11 +421,11 @@ public class TableDataDiff
 		sql.append(" FROM ");
 		sql.append(this.tableToSync.getTableExpression(toSync));
 		sql.append(" WHERE ");
-		
+
 		for (int row=0; row < rows.size(); row++)
 		{
 			if (row > 0) sql.append (" OR ");
-			sql.append("(");
+			sql.append('(');
 			int pkCount = 0;
 			for (int c=0; c < info.getColumnCount(); c++)
 			{
@@ -446,7 +445,7 @@ public class TableDataDiff
 		}
 		return sql.toString();
 	}
-	
+
 	private void writeGenerationInfo(Writer out)
 		throws IOException
 	{

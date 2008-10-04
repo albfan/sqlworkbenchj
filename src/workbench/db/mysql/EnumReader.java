@@ -22,11 +22,11 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
- * A class to retrieve enum definitions from a MySQL database. 
+ * A class to retrieve enum definitions from a MySQL database.
  * The method {@link #updateEnumDefinition(workbench.db.TableIdentifier, workbench.storage.DataStore, workbench.db.WbConnection) }
- * can be used to post-process the DataStore that is returned from 
+ * can be used to post-process the DataStore that is returned from
  * {@link workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier) }
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class EnumReader
@@ -42,7 +42,6 @@ public class EnumReader
 		{
 			stmt = connection.createStatement();
 			rs = stmt.executeQuery("SHOW COLUMNS FROM " + tbl.getTableExpression(connection));
-			int colCount = 0;
 			while (rs.next())
 			{
 				String column = rs.getString(1);
@@ -50,11 +49,10 @@ public class EnumReader
 
 				String type = rs.getString(2);
 				if (type == null)	continue;
-				
+
 				String ltype = type.toLowerCase();
 				if (ltype.startsWith("enum") || ltype.startsWith("set"))
 				{
-					colCount++;
 					defs.put(column, type);
 				}
 			}

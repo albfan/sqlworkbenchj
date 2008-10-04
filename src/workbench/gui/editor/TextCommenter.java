@@ -13,20 +13,21 @@ package workbench.gui.editor;
 
 import javax.swing.text.BadLocationException;
 import workbench.log.LogMgr;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class TextCommenter 
+public class TextCommenter
 {
 	private JEditTextArea editor;
-	
+
 	public TextCommenter(JEditTextArea client)
 	{
 		this.editor = client;
 	}
-	
+
 	public void commentSelection()
 	{
 		String commentChar = editor.getCommentChar();
@@ -36,12 +37,12 @@ public class TextCommenter
 		// the comments will be removed.
 		doComment(commentChar, !isCommented);
 	}
-	
+
 	public void unCommentSelection()
 	{
 		doComment(editor.getCommentChar(), false);
 	}
-	
+
 	private void doComment(String commentChar, boolean comment)
 	{
 		int startline = editor.getSelectionStartLine();
@@ -49,20 +50,20 @@ public class TextCommenter
 		int endline = realEndline;
 
 		if (commentChar == null) commentChar = "--";
-		
+
 		int cLength = commentChar.length();
-		
+
 		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
 		if (pos == 0 && endline > 0) endline --;
 		SyntaxDocument document = editor.getDocument();
-		
+
 		try
 		{
 			document.beginCompoundEdit();
 			for (int line = startline; line <= endline; line ++)
 			{
 				String text = editor.getLineText(line);
-				if (text == null || text.trim().length() == 0) continue;
+				if (StringUtil.isBlank(text)) continue;
 				int lineStart = editor.getLineStartOffset(line);
 				if (comment)
 				{
@@ -94,17 +95,17 @@ public class TextCommenter
 		int realEndline = editor.getSelectionEndLine();
 		int endline = realEndline;
 		if (commentChar == null) commentChar = "--";
-		
+
 		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
 		if (pos == 0 && endline > 0) endline --;
-		
+
 		for (int line = startline; line <= endline; line ++)
 		{
 			String text = editor.getLineText(line);
-			if (text == null || text.trim().length() == 0) continue;
+			if (StringUtil.isBlank(text)) continue;
 			if (!text.startsWith(commentChar)) return false;
 		}
 		return true;
 	}
-	
+
 }

@@ -58,7 +58,7 @@ public class SqlFormatterTest
 //		String expected = "";
 //		System.out.println("**************\n" + formatted + "\n**********");
 //	}
-	
+
 	public void testCTE()
 		throws Exception
 	{
@@ -91,7 +91,7 @@ public class SqlFormatterTest
 
 		SqlFormatter f = new SqlFormatter(sql);
 		String formatted = f.getFormattedSql().toString();
-		String expected = 
+		String expected =
 						"WITH RECURSIVE DirectReports (ManagerID, EmployeeID, Title, DeptID, LEVEL) \n" +
 						"AS\n" +
 						"(\n" +
@@ -154,18 +154,18 @@ public class SqlFormatterTest
 					"WITH CHECK OPTION";
 		f = new SqlFormatter(sql);
 		formatted = f.getFormattedSql().toString();
-		
+
 		expected = "CREATE VIEW vfoo \n" +
-							"AS\n" + 
-							"SELECT id,\n" + 
+							"AS\n" +
+							"SELECT id,\n" +
 							"       name\n" +
-							"FROM foo\n" + 
-							"WHERE id BETWEEN 1\n" + 
+							"FROM foo\n" +
+							"WHERE id BETWEEN 1\n" +
 							"AND   10000 WITH CHECK OPTION";
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 	}
-	
+
 	public void testCTAS()
 		throws Exception
 	{
@@ -181,7 +181,7 @@ public class SqlFormatterTest
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected + "\n*************");
 		assertEquals(expected, formatted);
 	}
-	
+
 	public void testUnknown()
 		throws Exception
 	{
@@ -275,7 +275,7 @@ public class SqlFormatterTest
 		String formatted = (String) f.getFormattedSql();
 		assertEquals(expected, formatted);
 	}
-	
+
 	public void testCreateTable()
 		throws Exception
 	{
@@ -305,7 +305,7 @@ public class SqlFormatterTest
 		assertEquals("  id1           INTEGER NOT NULL,", lines.get(2));
 		assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
 	}
-	
+
 	public void testFileParam()
 		throws Exception
 	{
@@ -314,7 +314,7 @@ public class SqlFormatterTest
 		String formatted = f.getFormattedSql().toString();
 		assertTrue(formatted.indexOf("\"c:\\Documents and Settings\\test.txt\"") > 0);
 	}
-	
+
 	public void testWbConfirm()
 		throws Exception
 	{
@@ -367,12 +367,12 @@ public class SqlFormatterTest
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
-	
+
 	public void testCase()
 		throws Exception
 	{
 		String sql = "SELECT col1 as bla, case when x = 1 then 2 else 3 end AS y FROM person";
-		String expected = 
+		String expected =
 			"SELECT col1 AS bla,\n" +
 			"       CASE\n" +
 			"         WHEN x = 1 THEN 2\n" +
@@ -384,7 +384,7 @@ public class SqlFormatterTest
 		assertEquals("CASE alias not formatted", expected, formatted);
 
 		sql = "SELECT case when x = 1 then 2 else 3 end AS y FROM person";
-		expected = 
+		expected =
 			"SELECT CASE\n" +
 			"         WHEN x = 1 THEN 2\n" +
 			"         ELSE 3\n" +
@@ -396,16 +396,16 @@ public class SqlFormatterTest
 		assertEquals("CASE alias not formatted", expected, formatted);
 
 		sql = "SELECT a,b,c from table order by b,case when a=1 then 2 when a=2 then 1 else 3 end";
-		expected = 
-			"SELECT a,\n" + 
-			"       b,\n" + 
-			"       c\n" + 
-			"FROM TABLE\n" + 
-			"ORDER BY b,\n" + 
-			"         CASE\n" + 
-			"           WHEN a = 1 THEN 2\n" + 
-			"           WHEN a = 2 THEN 1\n" + 
-			"           ELSE 3\n" + 
+		expected =
+			"SELECT a,\n" +
+			"       b,\n" +
+			"       c\n" +
+			"FROM TABLE\n" +
+			"ORDER BY b,\n" +
+			"         CASE\n" +
+			"           WHEN a = 1 THEN 2\n" +
+			"           WHEN a = 2 THEN 1\n" +
+			"           ELSE 3\n" +
 			"         END";
 		f = new SqlFormatter(sql, 100);
 		formatted = f.getFormattedSql();
@@ -528,7 +528,7 @@ public class SqlFormatterTest
 			Settings.getInstance().setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
 
 			SqlFormatter f = new SqlFormatter(sql, 100);
-			String nl = f.getLineEnding();
+
 			CharSequence formatted = f.getFormattedSql();
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
 			String expected = "--comment\nSELECT *\nFROM blub;";
@@ -565,16 +565,16 @@ public class SqlFormatterTest
 			assertEquals(expected, formatted);
 
 			sql = "UPDATE customer " + "   SET duplicate_flag = CASE (SELECT COUNT(*) FROM customer c2 WHERE c2.f_name = customer.f_name AND c2.s_name = customer.s_name GROUP BY f_name,s_name)  \n" + "                           WHEN 1 THEN 0  " + "                           ELSE 1  " + "                        END";
-			expected = 
-				"UPDATE customer\n" + 
-				"   SET duplicate_flag = CASE (SELECT COUNT(*)\n" + 
-				"                              FROM customer c2\n" + 
-				"                              WHERE c2.f_name = customer.f_name\n" + 
-				"                              AND   c2.s_name = customer.s_name\n" + 
-				"                              GROUP BY f_name,\n" + 
-				"                                       s_name)\n" + 
-				"                          WHEN 1 THEN 0\n" + 
-				"                          ELSE 1\n" + 
+			expected =
+				"UPDATE customer\n" +
+				"   SET duplicate_flag = CASE (SELECT COUNT(*)\n" +
+				"                              FROM customer c2\n" +
+				"                              WHERE c2.f_name = customer.f_name\n" +
+				"                              AND   c2.s_name = customer.s_name\n" +
+				"                              GROUP BY f_name,\n" +
+				"                                       s_name)\n" +
+				"                          WHEN 1 THEN 0\n" +
+				"                          ELSE 1\n" +
 				"                        END";
 			f = new SqlFormatter(sql, 10);
 

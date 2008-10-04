@@ -37,12 +37,13 @@ public class DataFormattingOptionsPanel
 {
 	private static Locale[] locales;
 	private static final Object localeLock = new Object();
-	
+
 	public DataFormattingOptionsPanel()
 	{
+		super();
 		initComponents();
 	}
-	
+
 	public void restoreSettings()
 	{
 		rowHeightResize.setSelected(GuiSettings.getAllowRowHeightResizing());
@@ -91,11 +92,11 @@ public class DataFormattingOptionsPanel
 			locales = null;
 		}
 	}
-	
+
 	public static void readLocales()
 	{
 		if (locales != null) return;
-		
+
 		WbThread readThread = new WbThread("Read Thread")
 		{
 			@Override
@@ -111,21 +112,21 @@ public class DataFormattingOptionsPanel
 		readThread.setPriority(Thread.MIN_PRIORITY);
 		readThread.start();
 	}
-	
+
 	private void fillLanguageDropDown()
 	{
 		Locale l = Settings.getInstance().getLanguage();
 		DisplayLocale sortLocale = new DisplayLocale(new WbLocale(Settings.getInstance().getSortLocale()));
 		List<DisplayLocale> list = new ArrayList<DisplayLocale>(50);
 		localeDropDown.removeAllItems();
-		
+
 		synchronized (localeLock)
 		{
 			if (locales == null)
 			{
 				locales = Locale.getAvailableLocales();
 			}
-		
+
 			localeDropDown.addItem(new DisplayLocale(null));
 			for (Locale ls : locales)
 			{
@@ -134,7 +135,7 @@ public class DataFormattingOptionsPanel
 				list.add(wl);
 			}
 		}
-		
+
 		int index = 1; // 1 because we have already added a locale
 		int currentIndex = -1;
 

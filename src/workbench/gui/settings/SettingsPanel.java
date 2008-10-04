@@ -45,19 +45,18 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- * @author support@sql-workbench.net  
- */ 
+ * @author support@sql-workbench.net
+ */
 public class SettingsPanel
 	extends JPanel
 	implements ActionListener, ListSelectionListener, WindowListener
 {
-	private JPanel buttonPanel;
 	private JButton cancelButton;
 	private JButton helpButton;
 	private JPanel content;
 	private JList pageList;
 	private JPanel currentPanel;
-	
+
 	private JButton okButton;
 
 	private JDialog dialog;
@@ -66,6 +65,7 @@ public class SettingsPanel
 
 	public SettingsPanel()
 	{
+		super();
 		pages = new ArrayList<OptionPanelPage>();
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
@@ -77,22 +77,22 @@ public class SettingsPanel
 		pages.add(new OptionPanelPage("SqlGenerationOptionsPanel", "LblSqlGeneration"));
 		pages.add(new OptionPanelPage("ExternalToolsPanel", "LblExternalTools"));
 		pages.add(new OptionPanelPage("LnFOptionsPanel", "LblLnFOptions"));
-		
+
 		initComponents();
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;
-		
+
 		int index = this.pageList.getSelectedIndex();
-		
+
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			OptionPanelPage option = pages.get(index);
 			JPanel panel = option.getPanel();
-		
+
 			if (currentPanel != null)
 			{
 				content.remove(currentPanel);
@@ -117,13 +117,13 @@ public class SettingsPanel
 			{
 				return pages.get(index);
 			}
-		
+
 			public int getSize()
 			{
 				return pages.size();
 			}
 		};
-		
+
 		pageList = new JList(model);
 		pageList.setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(2, 2, 2, 2)));
 		pageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -143,7 +143,7 @@ public class SettingsPanel
 
 		setLayout(new BorderLayout());
 
-		buttonPanel = new JPanel(new GridBagLayout());
+		JPanel buttonPanel = new JPanel(new GridBagLayout());
 
 		GridBagConstraints constraints;
 		constraints = new GridBagConstraints();
@@ -197,7 +197,7 @@ public class SettingsPanel
 		}
 
 		this.dialog.getRootPane().setDefaultButton(this.okButton);
-		
+
 		escAction = new EscAction(dialog, this);
 
 		WbSwingUtilities.center(this.dialog, aReference);

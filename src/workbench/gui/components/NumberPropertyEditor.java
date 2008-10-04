@@ -77,7 +77,7 @@ public class NumberPropertyEditor
 		if (this.setter == null) return;
 		if (!this.changed) return;
 		
-		Object args[] = new Object[1];
+		Object[] args = new Object[1];
 		args[0] = this.getText();
 		try
 		{

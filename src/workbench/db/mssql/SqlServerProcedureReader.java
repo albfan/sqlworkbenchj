@@ -53,7 +53,7 @@ public class SqlServerProcedureReader
 	{
 		CallableStatement cstmt = this.connection.getSqlConnection().prepareCall(GET_PROC_SQL);
 		
-		DataStore ds = null;
+		DataStore ds;
 		ResultSet rs = null;
 		try 
 		{
@@ -79,11 +79,11 @@ public class SqlServerProcedureReader
 					name = name.substring(0, name.length() - 2);
 				}
 				String remark = rs.getString("REMARKS");
-				short type = rs.getShort("PROCEDURE_TYPE");
-				Integer iType = null;
+				int type = rs.getShort("PROCEDURE_TYPE");
+				Integer iType;
 				if (rs.wasNull())
 				{
-					iType = new Integer(DatabaseMetaData.procedureResultUnknown);
+					iType = Integer.valueOf(DatabaseMetaData.procedureResultUnknown);
 				}
 				else
 				{
@@ -91,16 +91,16 @@ public class SqlServerProcedureReader
 					{
 						if (procType == '0')
 						{
-							iType = new Integer(DatabaseMetaData.procedureReturnsResult);
+							iType = Integer.valueOf(DatabaseMetaData.procedureReturnsResult);
 						}
 						else
 						{
-							iType = new Integer(DatabaseMetaData.procedureNoResult);
+							iType = Integer.valueOf(DatabaseMetaData.procedureNoResult);
 						}
 					}
 					else
 					{
-						iType = new Integer(type);
+						iType = Integer.valueOf(type);
 					}
 				}
 				int row = ds.addRow();

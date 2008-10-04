@@ -23,15 +23,11 @@ public class SQLTokenMarker
 	protected KeywordMap keywords;
 	private char literalChar = 0;
 
-	public SQLTokenMarker()
-	{
-	}
-
 	public char getPendingLiteralChar()
 	{
 		return literalChar;
 	}
-	
+
 	private static byte getLiteralId(char literal)
 	{
 		switch (literal)
@@ -45,27 +41,27 @@ public class SQLTokenMarker
 		}
 		return 0;
 	}
-	
+
 	public void markTokensImpl(Token lastToken, Segment line, int lineIndex)
 	{
 		byte token = Token.NULL;
 		this.literalChar = (lastToken == null ? 0 : lastToken.getPendingLiteralChar());
-		
+
 		if (literalChar != 0)
 		{
 			token = getLiteralId(literalChar);
 		}
-	
+
 		// Check for multi line comments.
 		if (lastToken != null && lastToken.id == Token.COMMENT1)
 		{
 			token = Token.COMMENT1;
 		}
-		
+
 		char[] array = line.array;
 		offset = lastOffset = lastKeyword = line.offset;
 		int currentLength = line.count + offset;
-		
+
 		loop:
 		for (int i = offset; i < currentLength; i++)
 		{
@@ -78,10 +74,10 @@ public class SQLTokenMarker
 						token = Token.NULL;
 						i++;
 						addToken(lineIndex, (i + 1) - lastOffset, Token.COMMENT1);
-						
+
 						// if the comment ends at the end of the current line
-						// add a NULL token in order to mark the end of the block comment 
-						// if there is at least another character on the line, that will 
+						// add a NULL token in order to mark the end of the block comment
+						// if there is at least another character on the line, that will
 						// "reset" the comment token.
 						if (i + 1 >= currentLength)
 						{

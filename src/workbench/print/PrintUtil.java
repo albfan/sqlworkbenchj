@@ -26,11 +26,6 @@ import javax.print.attribute.standard.OrientationRequested;
 public class PrintUtil
 {
 
-	/** Creates a new instance of PrintUtil */
-	public PrintUtil()
-	{
-	}
-
 	public static PrintRequestAttributeSet getPrintAttributes(PageFormat format)
 	{
 		PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
@@ -49,12 +44,12 @@ public class PrintUtil
 				break;
 		}
 		attr.add(att);
-		att = new MediaPrintableArea((float)format.getImageableX(), 
-		                             (float)format.getImageableY(), 
-																 (float)format.getImageableWidth(), 
+		att = new MediaPrintableArea((float)format.getImageableX(),
+		                             (float)format.getImageableY(),
+																 (float)format.getImageableWidth(),
 																 (float)format.getImageableHeight(), MediaPrintableArea.INCH);
 		attr.add(att);
-		
+
 		return attr;
 	}
 

@@ -718,7 +718,7 @@ public class WbSwingUtilities
 			case KeyEvent.VK_PAGE_UP:
 				return "VK_PAGE_UP";
 			case KeyEvent.VK_PAGE_DOWN:
-				return "VK_PAGE_UP";
+				return "VK_PAGE_DOWN";
 			case KeyEvent.VK_END:
 				return "VK_END";
 			case KeyEvent.VK_HOME:

@@ -17,7 +17,6 @@ import java.awt.event.WindowListener;
 import javax.swing.JDialog;
 import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.Interruptable;
-import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.WbThread;
 
@@ -57,18 +56,18 @@ public class ProgressDialog
 	{
 		return progressPanel;
 	}
-	
+
 	public void finished()
 	{
 		removeWindowListener(this);
 		setVisible(false);
 	}
-	
+
 	public RowActionMonitor getMonitor()
 	{
 		return progressPanel;
 	}
-	
+
 	/**
 	 * Open the progress monitor window.
 	 */

@@ -37,10 +37,6 @@ public class GenericObjectDropper
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
 
-	public GenericObjectDropper()
-	{
-	}
-
 	public List<? extends DbObject> getObjects()
 	{
 		return objects;
@@ -124,7 +120,7 @@ public class GenericObjectDropper
 			result.append(sql);
 			result.append(";\n");
 			if (needCommit) result.append("COMMIT;\n");
-			result.append("\n");
+			result.append('\n');
 		}
 		return result;
 	}

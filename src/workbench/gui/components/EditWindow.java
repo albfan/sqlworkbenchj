@@ -58,32 +58,32 @@ public class EditWindow
 		this(owner, title, text, "workbench.data.edit.window", createSqlEditor, true, showCloseButtonOnly);
 	}
 	
-	public EditWindow(Frame owner, String title, String text, String settingsId)
+	public EditWindow(Frame owner, String title, String text, String id)
 	{
-		this(owner, title, text, settingsId, false);
+		this(owner, title, text, id, false);
 	}
 	
-	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor)
+	public EditWindow(Frame owner, String title, String text, String id, boolean createSqlEditor)
 	{
-		this(owner, title, text, settingsId, createSqlEditor, true, false);
+		this(owner, title, text, id, createSqlEditor, true, false);
 	}
 	
-	public EditWindow(Frame owner, String title, String text, String settingsId, boolean createSqlEditor, boolean modal)
+	public EditWindow(Frame owner, String title, String text, String id, boolean createSqlEditor, boolean modal)
 	{
-		this(owner, title, text, settingsId, createSqlEditor, modal, false);
+		this(owner, title, text, id, createSqlEditor, modal, false);
 	}
 	
-	public EditWindow(final Frame owner, final String title, final String text, final String settingsId, final boolean createSqlEditor, final boolean modal, final boolean showCloseButtonOnly)
+	public EditWindow(final Frame owner, final String title, final String text, final String id, final boolean createSqlEditor, final boolean modal, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, modal);
-		init(text, settingsId, createSqlEditor, showCloseButtonOnly);
+		init(text, id, createSqlEditor, showCloseButtonOnly);
 		WbSwingUtilities.center(this, owner);
 	}
 
-	public EditWindow(final Dialog owner, final String title, final String text, final String settingsId, final boolean createSqlEditor)
+	public EditWindow(final Dialog owner, final String title, final String text, final String id, final boolean createSqlEditor)
 	{
 		super(owner, title, true);
-		init(text, settingsId, createSqlEditor, true);
+		init(text, id, createSqlEditor, true);
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
 	
@@ -116,7 +116,7 @@ public class EditWindow
 		{
 			if (Settings.getInstance().getUsePlainEditorForData())
 			{
-				PlainEditor ed = new PlainEditor(this);
+				PlainEditor ed = new PlainEditor();
 				ed.restoreSettings();
 				this.componentSettings = ed;
 				this.textContainer = ed;

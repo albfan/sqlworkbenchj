@@ -26,7 +26,7 @@ import workbench.util.SqlUtil;
 /**
  * @author  support@sql-workbench.net
  */
-public class SqlTypeRenderer 
+public class SqlTypeRenderer
 	extends DefaultTableCellRenderer
 	implements WbRenderer
 {
@@ -34,16 +34,12 @@ public class SqlTypeRenderer
 	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
 	private boolean isPrinting = false;
 	private Font printFont;
-	
-	public SqlTypeRenderer()
-	{
-	}
-	
+
 	public void setUseAlternatingColors(boolean flag)
 	{
 		this.useAlternatingColors = flag;
 	}
-	
+
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
 		try
@@ -107,5 +103,5 @@ public class SqlTypeRenderer
 		super.print(g);
 		this.isPrinting = false;
 	}
-	
+
 }

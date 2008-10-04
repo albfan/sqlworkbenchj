@@ -40,31 +40,30 @@ public class ImagePanel
 {
 	private Image displayImage;
 	private JLabel label = new JLabel();
-	private int imageWidth;
-	private int imageHeight;
-	
+
 	public ImagePanel()
 	{
+		super();
 		this.setLayout(new BorderLayout());
 		this.add(label, BorderLayout.CENTER);
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setBorder(new EtchedBorder());
 	}
-	
+
 	public void setImage(File imageData)
 		throws IOException, SQLException
 	{
 		InputStream in = new BufferedInputStream(new FileInputStream(imageData));
 		this.readImageData(in);
-	}	
-	
+	}
+
 	public void setImage(Blob imageData)
 		throws IOException, SQLException
 	{
 		byte[] data = imageData.getBytes(1, (int)imageData.length());
 		setImage(data);
 	}
-	
+
 	public void setImage(byte[] imageData)
 		throws IOException
 	{
@@ -75,7 +74,7 @@ public class ImagePanel
 	}
 
 	public boolean hasImage() { return this.displayImage != null; }
-	
+
 	private void readImageData(InputStream in)
 		throws IOException
 	{
@@ -97,7 +96,7 @@ public class ImagePanel
 		{
 			FileUtil.closeQuitely(in);
 		}
-		
+
 		if (displayImage == null)
 		{
 			label.setText(ResourceMgr.getString("ErrImgNotSupp"));
@@ -107,5 +106,5 @@ public class ImagePanel
 			label.setIcon(new ImageIcon(this.displayImage));
 		}
 	}
-	
+
 }

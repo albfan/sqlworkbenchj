@@ -44,10 +44,6 @@ public class FileDialogUtil
 	public static final String CONFIG_DIR_KEY = "%ConfigDir%";
 	private String encoding = null;
 
-	public FileDialogUtil()
-	{
-	}
-
 	public int getLastSelectedFileType()
 	{
 		return this.lastFileType;

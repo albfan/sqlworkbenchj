@@ -36,7 +36,6 @@ public class WbVersionReader
 	private final String userAgent;
 	private boolean success = false;
 	private Timer timeout;
-	private boolean timedOut = false;	
 	private ActionListener client;
 	private WbThread readThread;
 	
@@ -67,7 +66,6 @@ public class WbVersionReader
 	public void startCheckThread()
 	{
 		this.timeout = new Timer(60 * 1000, this);
-		this.timedOut = false;
 		this.timeout.start();
 		
 		this.readThread = new WbThread("VersionReaderThread")
@@ -168,7 +166,6 @@ public class WbVersionReader
 	{
 		if (e.getSource() == this.timeout)
 		{
-			this.timedOut = true;
 			if (this.readThread != null)
 			{
 				this.readThread.interrupt();

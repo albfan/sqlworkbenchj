@@ -121,7 +121,7 @@ import workbench.util.WbFile;
 /**
  * The main window for the Workbench.
  * It will display several {@link workbench.gui.sql.SqlPanel}s in
- * a tabbed pane. Additionally one or more {@link workbench.gui.dbobjects.DbExplorerPanel} 
+ * a tabbed pane. Additionally one or more {@link workbench.gui.dbobjects.DbExplorerPanel}
  * might also be displayed inside the JTabbedPane
  *
  * @author  support@sql-workbench.net
@@ -148,7 +148,7 @@ public class MainWindow
 
 	private WbTabbedPane sqlTab;
 	private WbToolbar currentToolbar;
-	private ArrayList<JMenuBar> panelMenus = new ArrayList<JMenuBar>(13);
+	private List<JMenuBar> panelMenus = new ArrayList<JMenuBar>(13);
 
 	private String currentWorkspaceFile;
 
@@ -158,7 +158,6 @@ public class MainWindow
 	private LoadWorkspaceAction loadWorkspaceAction;
 	private AssignWorkspaceAction assignWorkspaceAction;
 
-	private boolean isProfileWorkspace;
 	private boolean tabRemovalInProgress;
 
 	// will indicate a connect or disconnect in progress
@@ -168,20 +167,20 @@ public class MainWindow
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
-	
+
 	private List<ToolWindow> explorerWindows = new ArrayList<ToolWindow>();
-	
+
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
-		
+
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
 		this.windowId = ++instanceCount;
-		
+
 		sqlTab = new WbTabbedPane();
 		sqlTab.setFocusable(false);
-		
+
 		String policy = Settings.getInstance().getProperty("workbench.gui.sqltab.policy", "wrap");
 		if ("wrap".equalsIgnoreCase(policy))
 		{
@@ -191,12 +190,12 @@ public class MainWindow
 		{
 			sqlTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 		}
-		
+
 		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		initMenu();
 		setIconImage(ResourceMgr.getPicture("workbench16").getImage());
-		
+
 		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 
 		this.restoreSettings();
@@ -205,7 +204,7 @@ public class MainWindow
 		this.sqlTab.addMouseListener(this);
 		this.addWindowListener(this);
 		MacroManager.getInstance().addChangeListener(this);
-		
+
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_TOOLBAR, Settings.PROPERTY_SHOW_TAB_INDEX);
@@ -219,7 +218,7 @@ public class MainWindow
 		this.updateGuiForTab(0);
 		this.updateWindowTitle();
 	}
-	
+
 	/**
 	 * The listener will be notified when the name of a tab changes.
 	 * This is used in the {@link workbench.gui.dbobjects.TableListPanel}
@@ -242,7 +241,7 @@ public class MainWindow
 	/**
 	 * Remove the file name change listener.
 	 * @see #addFilenameChangeListener(FilenameChangeListener )
-	 */	
+	 */
 	public void removeFilenameChangeListener(FilenameChangeListener aListener)
 	{
 		for (int i=0; i < this.sqlTab.getTabCount(); i++)
@@ -284,7 +283,7 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	public void removeExecutionListener(DbExecutionListener l)
 	{
 		int count = this.sqlTab.getTabCount();
@@ -297,7 +296,7 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	protected void checkWorkspaceActions()
 	{
 		this.saveWorkspaceAction.setEnabled(this.currentWorkspaceFile != null);
@@ -314,10 +313,10 @@ public class MainWindow
 
 		this.createNewConnection = new CreateNewConnection(this);
 		this.disconnectTab = new DisconnectTabAction(this);
-		
+
 		this.loadWorkspaceAction = new LoadWorkspaceAction(this);
 		this.saveWorkspaceAction = new SaveWorkspaceAction(this);
-		
+
 		this.createMacro = new AddMacroAction();
 		this.manageMacros = new ManageMacroAction(this);
 
@@ -357,7 +356,7 @@ public class MainWindow
 		this.createNewConnection.addToMenu(menu);
 		this.disconnectTab.addToMenu(menu);
 		menu.addSeparator();
-		
+
 		action = new FileSaveProfiles();
 		action.addToMenu(menu);
 
@@ -519,7 +518,7 @@ public class MainWindow
 			this.currentToolbar = null;
 			needInvalidate = true;
 		}
-		
+
 		if (GuiSettings.getShowToolbar())
 		{
 			final MainPanel curPanel = this.getCurrentPanel();
@@ -540,23 +539,14 @@ public class MainWindow
 	{
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
 		{
-			this.setShowToolbar(GuiSettings.getShowToolbar());
+			this.updateToolbarVisibility();
 		}
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
 			this.renumberTabs();
 		}
 	}
-	
-	private void setShowToolbar(final boolean show)
-	{
-		final MainPanel current = this.getCurrentPanel();
-		if (current != null)
-		{
-			this.updateToolbarVisibility();
-		}
-	}
-	
+
 	private void checkViewMenu(int index)
 	{
 		JMenu view = getViewMenu(index);
@@ -574,7 +564,7 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	private void checkMacroMenuForPanel(int index)
 	{
 		MainPanel p = this.getSqlPanel(index);
@@ -588,7 +578,7 @@ public class MainWindow
 			LogMgr.logError("MainWindow.checkMacroMenuForPanel()", "Error during macro update", e);
 		}
 	}
-	
+
 	private void setMacroMenuEnabled(boolean enabled)
 	{
 		int count = this.sqlTab.getTabCount();
@@ -611,7 +601,7 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	public void macroListChanged()
 	{
 		int count = this.sqlTab.getTabCount();
@@ -665,7 +655,7 @@ public class MainWindow
 		}
 		return -1;
 	}
-	
+
 	public String[] getPanelLabels()
 	{
 		int tabCount = this.sqlTab.getTabCount();
@@ -735,15 +725,15 @@ public class MainWindow
 	{
 		return this.connectInProgress;
 	}
-	
+
 	private void clearConnectIsInProgress()
 	{
 		this.connectInProgress = false;
 	}
 
-	private void setConnectIsInProgress() 
-	{ 
-		this.connectInProgress = true; 
+	private void setConnectIsInProgress()
+	{
+		this.connectInProgress = true;
 	}
 
 	private void checkConnectionForPanel(final MainPanel aPanel)
@@ -772,11 +762,11 @@ public class MainWindow
 	{
 		if (this.currentProfile == null) return;
 		if (this.currentProfile.getUseSeparateConnectionPerTab()) return;
-		
+
 		final MainPanel p = this.getCurrentPanel();
 		WbConnection con = p.getConnection();
 		if (con == this.currentConnection) return;
-		
+
 		Thread t = new WbThread("Disconnect panel " + p.getId())
 		{
 			public void run()
@@ -786,13 +776,13 @@ public class MainWindow
 		};
 		t.start();
 	}
-	
+
 	protected void disconnectPanel(final MainPanel panel)
 	{
 		if (this.isConnectInProgress()) return;
 		boolean inProgress = isConnectInProgress();
 		if (!inProgress) setConnectIsInProgress();
-		
+
 		showDisconnectInfo();
 		showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
 		try
@@ -826,22 +816,22 @@ public class MainWindow
 			}
 		});
 	}
-	
+
 	public boolean canUseSeparateConnection()
 	{
 		if (this.currentProfile == null) return false;
 		return !this.currentProfile.getUseSeparateConnectionPerTab();
 	}
-	
+
 	public boolean usesSeparateConnection()
 	{
 		if (!canUseSeparateConnection()) return false;
 		final MainPanel current = this.getCurrentPanel();
 		WbConnection conn = current.getConnection() ;
-		
+
 		return (currentConnection != null && conn != this.currentConnection);
 	}
-	
+
 	public void createNewConnectionForCurrentPanel()
 	{
 		final MainPanel panel = getCurrentPanel();
@@ -855,12 +845,12 @@ public class MainWindow
 			}
 		});
 	}
-	
+
 	protected void createNewConnectionForPanel(final MainPanel aPanel)
 	{
 		if (this.isConnectInProgress()) return;
 		if (this.connectThread != null) return;
-		
+
 		this.connectThread = new WbThread("Panel Connect " + aPanel.getId())
 		{
 			public void run()
@@ -870,9 +860,9 @@ public class MainWindow
 		};
 		this.connectThread.start();
 	}
-	
+
 	/**
-	 * Connect the given panel to the database. This will always 
+	 * Connect the given panel to the database. This will always
 	 * create a new physical connection to the database.
 	 */
 	protected void connectPanel(final MainPanel aPanel)
@@ -916,12 +906,12 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	private void tabConnected(final MainPanel panel, WbConnection conn, final int anIndex)
 	{
 		this.closeConnectingInfo();
 		panel.setConnection(conn);
-		
+
 		WbSwingUtilities.waitForEmptyQueue();
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -936,7 +926,6 @@ public class MainWindow
 	{
 		if (anIndex < 0) return;
 
-		Container content = this.getContentPane();
 		final MainPanel current = this.getSqlPanel(anIndex);
 		if (current == null) return;
 
@@ -946,10 +935,10 @@ public class MainWindow
 		this.setJMenuBar(menu);
 
 		this.updateToolbarVisibility();
-	
+
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
-		
+
 		this.checkMacroMenuForPanel(anIndex);
 		this.checkViewMenu(anIndex);
 		SwingUtilities.invokeLater(new Runnable()
@@ -965,7 +954,7 @@ public class MainWindow
 	{
 		if (index < 0) return;
 		if (index >= sqlTab.getTabCount()) return;
-		
+
 		// Make sure this is executed on the EDT
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -985,7 +974,7 @@ public class MainWindow
 		this.updateWindowTitle();
 		this.checkConnectionForPanel(current);
 	}
-	
+
 	protected void updateAddMacroAction()
 	{
 		SqlPanel sql = this.getCurrentSqlPanel();
@@ -1070,7 +1059,7 @@ public class MainWindow
 	{
 		final MainPanel current = this.getCurrentPanel();
 		if (current == null) return;
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -1105,9 +1094,9 @@ public class MainWindow
 		// this has to be set AFTER calling disconnect(), because
 		// disconnect respects this flag and does nothing...
 		this.setConnectIsInProgress();
-		
+
 		this.currentProfile = aProfile;
-		
+
 		showStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 		if (info != null) info.setStatusMessage(ResourceMgr.getString("MsgLoadingWorkspace"));
 		loadWorkspaceForProfile(currentProfile);
@@ -1121,7 +1110,7 @@ public class MainWindow
 	}
 
 	/**
-	 * Return the internal ID that should be used when connecting 
+	 * Return the internal ID that should be used when connecting
 	 * to the given connection profile
 	 * @return an id specific for the current tab or a "global" id the connection
 	 *         is shared between all tabs of this window
@@ -1146,7 +1135,7 @@ public class MainWindow
 		}
 		return this.connectionSelector;
 	}
-	
+
 	public void connectTo(ConnectionProfile profile, boolean showDialog)
 	{
 		getSelector().connectTo(profile, showDialog);
@@ -1166,7 +1155,7 @@ public class MainWindow
 		{
 			this.setConnection(conn);
 		}
-		
+
 		this.setMacroMenuEnabled(true);
 		this.updateWindowTitle();
 
@@ -1188,7 +1177,7 @@ public class MainWindow
 	{
 		disconnected();
 		tabSelected(0);
-		
+
 		try
 		{
 			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error);
@@ -1279,10 +1268,10 @@ public class MainWindow
 		this.closeWorkspace(false);
 		this.resetTabTitles();
 	}
-	
+
 	private boolean resultForWorkspaceClose;
-	
-	
+
+
 	public boolean loadWorkspace(String filename)
 	{
 		if (filename == null) return false;
@@ -1303,7 +1292,7 @@ public class MainWindow
 		this.currentWorkspaceFile = null;
 		this.resultForWorkspaceClose = false;
 		this.closeWorkspace(false);
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -1330,7 +1319,6 @@ public class MainWindow
 						p.readFromWorkspace(w, i);
 						if (p instanceof SqlPanel)
 						{
-							SqlPanel sql = (SqlPanel) p;
 							updateViewMenu(i, getPlainTabTitle(i));
 						}
 					}
@@ -1344,7 +1332,7 @@ public class MainWindow
 						sqlTab.setSelectedIndex(newIndex);
 					}
 					resultForWorkspaceClose = true;
-					
+
 					updateWindowTitle();
 					checkWorkspaceActions();
 					updateAddMacroAction();
@@ -1364,9 +1352,9 @@ public class MainWindow
 				}
 			}
 		});
-		
+
 		WbSwingUtilities.repaintLater(this);
-		
+
 		return resultForWorkspaceClose;
 	}
 
@@ -1377,10 +1365,10 @@ public class MainWindow
 		{
 			String workspaceFilename = aProfile.getWorkspaceFile();
 			if (workspaceFilename != null && !workspaceFilename.endsWith(".wksp")) workspaceFilename += ".wksp";
-			
+
 			realFilename = FileDialogUtil.replaceConfigDir(workspaceFilename);
 			if (realFilename == null) realFilename = "";
-			
+
 			File f = new File(realFilename);
 			if (realFilename.length() > 0 && !f.exists())
 			{
@@ -1409,11 +1397,10 @@ public class MainWindow
 				}
 			}
 
-			if (workspaceFilename != null && workspaceFilename.trim().length() > 0)
+			if (StringUtil.isNonBlank(workspaceFilename))
 			{
 				// loadWorkspace will replace the %ConfigDir% placeholder,
 				// so we need to pass the original filename
-				this.isProfileWorkspace = true;
 				this.loadWorkspace(workspaceFilename);
 			}
 			else
@@ -1451,7 +1438,7 @@ public class MainWindow
 				}
 			}
 		};
-		
+
 		if (background)
 		{
 			Thread t = new WbThread(run, "MainWindow Disconnect");
@@ -1570,17 +1557,17 @@ public class MainWindow
 		}
 		return filename;
 	}
-	
+
 	protected synchronized RunningJobIndicator getJobIndicator()
 	{
 		if (this.jobIndicator == null)
 		{
 			this.jobIndicator = new RunningJobIndicator(this);
 		}
-			
+
 		return this.jobIndicator;
 	}
-	
+
 	protected void updateWindowTitle()
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -1629,9 +1616,9 @@ public class MainWindow
 	{
 		selectConnection(false);
 	}
-	
+
 	private boolean exitOnCancel = false;
-	
+
 	public void selectConnection(boolean exit)
 	{
 		this.exitOnCancel = exit;
@@ -1769,13 +1756,13 @@ public class MainWindow
 			}
 		}
 	}
-	
+
 	private WbConnection getConnectionForTab(MainPanel aPanel, boolean returnNew)
 		throws Exception
 	{
 		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
-		
+
 		aPanel.showStatusMessage(ResourceMgr.getString("MsgConnectingTo") + " " + this.currentProfile.getName() + " ...");
 		ConnectionMgr mgr = ConnectionMgr.getInstance();
 		WbConnection conn = null;
@@ -1902,7 +1889,7 @@ public class MainWindow
 			this.tabRemovalInProgress = true;
 			while (sqlTab.getTabCount() > 1)
 			{
-				// I'm not using removeTab() as that will also 
+				// I'm not using removeTab() as that will also
 				// update the GUI and immediately check for a new
 				// connection which is not necessary when removing all tabs.
 				removeTab(1, false);
@@ -1924,7 +1911,7 @@ public class MainWindow
 			if (!inProgress) clearConnectIsInProgress();
 		}
 	}
-	
+
 	public void newDbExplorerWindow()
 	{
 		DbExplorerPanel explorer = new DbExplorerPanel(this);
@@ -1958,9 +1945,9 @@ public class MainWindow
 		}
 	}
 
-	public ConnectionProfile getCurrentProfile() 
-	{ 
-		return this.currentProfile; 
+	public ConnectionProfile getCurrentProfile()
+	{
+		return this.currentProfile;
 	}
 
 	public JMenu buildHelpMenu()
@@ -1971,7 +1958,7 @@ public class MainWindow
 		new ShowManualAction().addToMenu(result);
 		result.add(WhatsNewAction.getInstance());
 		result.addSeparator();
-		
+
 		result.add(ViewLogfileAction.getInstance());
 		new VersionCheckAction().addToMenu(result);
 		new AboutAction().addToMenu(result);
@@ -2119,11 +2106,7 @@ public class MainWindow
 		if (filename == null) return;
 		if (this.loadWorkspace(filename) && Settings.getInstance().getBoolProperty("workbench.gui.workspace.load.askassign", true))
 		{
-			this.isProfileWorkspace = this.checkMakeProfileWorkspace();
-		}
-		else
-		{
-			this.isProfileWorkspace = false;
+			checkMakeProfileWorkspace();
 		}
 	}
 
@@ -2131,7 +2114,7 @@ public class MainWindow
 	{
 		closeWorkspace(true);
 	}
-	
+
 	/**
 	 *	Closes the current workspace.
 	 *  The tab count is reset to 1, the SQL history for the tab will be emptied
@@ -2140,7 +2123,6 @@ public class MainWindow
 	public void closeWorkspace(boolean checkUnsaved)
 	{
 		this.currentWorkspaceFile = null;
-		this.isProfileWorkspace = false;
 
 		if (checkUnsaved)
 		{
@@ -2180,7 +2162,6 @@ public class MainWindow
 		FileDialogUtil util = new FileDialogUtil();
 		String filename = util.putConfigDirKey(this.currentWorkspaceFile);
 		this.currentProfile.setWorkspaceFile(filename);
-		this.isProfileWorkspace = true;
 		this.updateWindowTitle();
 	}
 
@@ -2222,7 +2203,7 @@ public class MainWindow
 
 		String realFilename = FileDialogUtil.replaceConfigDir(filename);
 
-		// Make a backup of the existing workspace 
+		// Make a backup of the existing workspace
 		// if saving of the workspace fails, the backup
 		// will be renamed back to the original name
 		// otherwise it will be deleted if no backups should be made
@@ -2251,10 +2232,6 @@ public class MainWindow
 					if (!p.canCloseTab()) return false;
 				}
 			}
-			else
-			{
-
-			}
 			w = new WbWorkspace(realFilename, true);
 			int selected = this.sqlTab.getSelectedIndex();
 			w.setSelectedTab(selected);
@@ -2262,12 +2239,12 @@ public class MainWindow
 			{
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
-				
+
 			}
 			if (WbManager.getInstance().outOfMemoryOcurred())
 			{
 				// sometimes when an OoM occurred, saving of the workspace
-				// succeeds but the ZIP file is not written correctly. 
+				// succeeds but the ZIP file is not written correctly.
 				// This tries to prevent the old file from beeing overwritten, just in case...
 				f.makeBackup();
 			}
@@ -2283,7 +2260,7 @@ public class MainWindow
 		}
 		finally
 		{
-			try { w.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(w);
 		}
 
 		this.currentWorkspaceFile = filename;
@@ -2317,7 +2294,7 @@ public class MainWindow
 	{
 		return addTab(true, true, false);
 	}
-	
+
 	public MainPanel addTab()
 	{
 		return this.addTab(true, true, true);
@@ -2336,7 +2313,7 @@ public class MainWindow
 	{
 		return addTab(selectNew, checkConnection, true);
 	}
-	
+
 	public MainPanel addTab(boolean selectNew, boolean checkConnection, boolean append)
 	{
 		int index = -1;
@@ -2348,7 +2325,7 @@ public class MainWindow
 		{
 			index = this.sqlTab.getSelectedIndex() + 1;
 		}
-		
+
 		if (index == -1) index = sqlTab.getTabCount();
 		final SqlPanel sql = new SqlPanel(index+1);
 		sql.setConnectionClient(this);
@@ -2369,10 +2346,10 @@ public class MainWindow
 		this.renumberTabs();
 
 		sql.initDivider(sqlTab.getHeight() - sqlTab.getTabHeight());
-		
-		if (selectNew) 	
+
+		if (selectNew)
 		{
-			// if no connection was created initially the switcht to a new 
+			// if no connection was created initially the switcht to a new
 			// panel will initiate the connection.
 			this.sqlTab.setSelectedIndex(index);
 		}
@@ -2527,32 +2504,32 @@ public class MainWindow
 		this.tabRemovalInProgress = false;
 		this.tabSelected(finalIndex);
 	}
-	
+
 	public void startMove()
 	{
 		this.tabRemovalInProgress = true;
 	}
-	
+
 	public boolean moveTab(int oldIndex, int newIndex)
 	{
 		MainPanel p = this.getSqlPanel(newIndex);
 		if (p instanceof DbExplorerPanel) return false;
-		
+
 		MainPanel panel = this.getSqlPanel(oldIndex);
-		
+
 		JMenuBar oldMenu = this.panelMenus.get(oldIndex);
 		this.sqlTab.remove(oldIndex);
 		this.panelMenus.remove(oldIndex);
 		this.panelMenus.add(newIndex, oldMenu);
-		
+
 		this.sqlTab.add((JComponent)panel, newIndex);
 		this.sqlTab.setSelectedIndex(newIndex);
-		
+
 		renumberTabs();
 		this.validate();
 		return true;
 	}
-	
+
 	/**
 	 * Removes the tab at the give location. If the current profile
 	 * uses a separate connection per tab, then a disconnect will be
@@ -2566,11 +2543,11 @@ public class MainWindow
 		if (!panel.canCloseTab()) return;
 		removeTab(index, true);
 	}
-	
+
 	/**
 	 * Removes the indicated tab without checking for modified file etc.
 	 * If the tab has a separate connection, the connection is closed (disconnected)
-	 * as well. 
+	 * as well.
 	 * If a single connection for all tabs is used, the connection is <b>not</b> closed.
 	 */
 	protected void removeTab(int index, boolean updateGUI)
@@ -2582,7 +2559,7 @@ public class MainWindow
 
 		boolean inProgress = this.isConnectInProgress();
 		if (!inProgress) this.setConnectIsInProgress();
-		
+
 		try
 		{
 			this.tabRemovalInProgress = true;
@@ -2604,7 +2581,7 @@ public class MainWindow
 
 			WbConnection conn = panel.getConnection();
 			boolean doDisconnect = conn != null && this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab();
-			
+
 			if (doDisconnect)
 			{
 				showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
@@ -2614,8 +2591,8 @@ public class MainWindow
 
 			this.panelMenus.remove(index);
 			this.sqlTab.remove(index);
-			
-			if (updateGUI) 
+
+			if (updateGUI)
 			{
 				this.renumberTabs();
 				newTab = this.sqlTab.getSelectedIndex();
@@ -2630,11 +2607,10 @@ public class MainWindow
 			this.tabRemovalInProgress = false;
 			if (!inProgress) this.clearConnectIsInProgress();
 		}
-		if (newTab >= 0 && updateGUI) 
+		if (newTab >= 0 && updateGUI)
 		{
 			this.tabSelected(newTab);
 		}
-		return;
 	}
 
 	public void mouseClicked(MouseEvent e)

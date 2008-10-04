@@ -22,6 +22,7 @@ public class MissingWidthDefinition
 
 	public MissingWidthDefinition(String col)
 	{
+		super();
 		colname = col;
 	}
 

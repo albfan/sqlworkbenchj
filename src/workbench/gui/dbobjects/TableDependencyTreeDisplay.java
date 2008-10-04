@@ -40,17 +40,18 @@ import workbench.log.LogMgr;
  *
  * @author  support@sql-workbench.net
  */
-public class TableDependencyTreeDisplay 
+public class TableDependencyTreeDisplay
   extends JPanel
 	implements Resettable
 {
 	private WbConnection connection;
 	private DependencyTreeCellRenderer renderer;
-	private ArrayList<TreeNode[]> nodesToExpand;
+	private List<TreeNode[]> nodesToExpand;
 	private boolean showExported;
-	
+
 	public TableDependencyTreeDisplay()
 	{
+		super();
 		this.setLayout(new BorderLayout());
 	}
 
@@ -58,19 +59,19 @@ public class TableDependencyTreeDisplay
 	{
 		this.connection = aConn;
 	}
-	
+
 	public void readReferencedTables(TableIdentifier table)
 	{
 		if (table == null) return;
 		readTree(table, true);
 	}
-	
+
 	public void readReferencingTables(TableIdentifier table)
 	{
 		if (table == null) return;
 		readTree(table, false);
 	}
-	
+
 	private void readTree(TableIdentifier aTable, boolean exportedKeys)
 	{
 		this.renderer = new DependencyTreeCellRenderer();
@@ -109,7 +110,7 @@ public class TableDependencyTreeDisplay
 		this.repaint();
 		this.doLayout();
 	}
-	
+
 	private void createTreeDisplay(DefaultMutableTreeNode root)
 	{
 		this.removeAll();
@@ -124,7 +125,7 @@ public class TableDependencyTreeDisplay
 		this.updateUI();
 		this.repaint();
 	}
-	
+
   private void readTreeNodes(DependencyNode root)
   {
 		DefaultMutableTreeNode treeRoot = null;
@@ -139,15 +140,15 @@ public class TableDependencyTreeDisplay
 			this.reset();
 		}
   }
-	
+
 	private void buildTree(DependencyNode parent, DefaultMutableTreeNode treeParent)
 	{
 		String parenttable = parent.getTable().getTableName();
-			
+
 		DependencyNode child = null;
 		DefaultMutableTreeNode treeNode = null;
 		String table = null;
-			
+
 		List children = parent.getChildren();
 		int count = children.size();
 		for (int i=0; i<count; i++)
@@ -198,7 +199,7 @@ public class TableDependencyTreeDisplay
 				colnode.setAllowsChildren(false);
 				treeNode.add(colnode);
 			}
-			
+
 			if (childrenCount > 0)
 			{
 				this.buildTree(child, treeNode);
@@ -206,9 +207,9 @@ public class TableDependencyTreeDisplay
 				if (this.nodesToExpand == null) this.nodesToExpand = new ArrayList<TreeNode[]>();
 				this.nodesToExpand.add(path);
 			}
-		}	
+		}
 	}
-	
+
 	private void expandNodes(JTree tree)
 	{
 		if (this.nodesToExpand == null) return;
@@ -220,5 +221,5 @@ public class TableDependencyTreeDisplay
 		this.nodesToExpand.clear();
 		this.nodesToExpand = null;
 	}
-	
+
 }

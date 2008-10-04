@@ -11,8 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -35,9 +33,10 @@ public class WbFilePicker
 	private boolean allowMultiple;
 	private File[] selectedFiles;
 	private String lastDirProperty = null;
-	
+
 	public WbFilePicker()
 	{
+		super();
 		initComponents();
 	}
 
@@ -45,7 +44,7 @@ public class WbFilePicker
 	{
 		this.tfFilename.setName(name);
 	}
-	
+
 	public void setTextfieldTooltip(String text)
 	{
 		tfFilename.setToolTipText(text);
@@ -55,20 +54,20 @@ public class WbFilePicker
 	{
 		selectFileButton.setToolTipText(text);
 	}
-	
+
 	public void setLastDirProperty(String prop)
 	{
 		this.lastDirProperty = prop;
 		this.lastDir = Settings.getInstance().getProperty(prop, null);
 	}
-	
+
 	public void setEnabled(boolean flag)
 	{
 		super.setEnabled(flag);
 		this.tfFilename.setEnabled(flag);
 		this.selectFileButton.setEnabled(flag);
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

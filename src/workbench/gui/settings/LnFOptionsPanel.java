@@ -39,9 +39,9 @@ import workbench.resource.ResourceMgr;
  *
  * @author support@sql-workbench.net
  */
-public class LnFOptionsPanel 
+public class LnFOptionsPanel
 	extends JPanel
-	implements Restoreable, ListSelectionListener, FileActions, 
+	implements Restoreable, ListSelectionListener, FileActions,
 	           PropertyChangeListener
 {
 	private JList lnfList;
@@ -49,17 +49,19 @@ public class LnFOptionsPanel
 	protected LnFManager manager = new LnFManager();
 	private WbToolbar toolbar;
 	private DeleteListEntryAction deleteEntry = null;
+
 	public LnFOptionsPanel()
 	{
+		super();
 		setLayout(new BorderLayout());
-		
+
 		lnfList = new JList();
 		lnfList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		lnfList.setBorder(new EmptyBorder(2,1,2,1));
 		FontMetrics fm = getFontMetrics(getFont());
 		int width= fm.stringWidth("MMMMMMMMMMMMMMM");
 		lnfList.setFixedCellWidth(width);
-		
+
 		JScrollPane scroll = new JScrollPane(lnfList);
 
 		deleteEntry = new DeleteListEntryAction(this);
@@ -67,7 +69,7 @@ public class LnFOptionsPanel
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(deleteEntry);
 		toolbar.setBorder(DividerBorder.BOTTOM_DIVIDER);
-		
+
 		definitionPanel = new LnFDefinitionPanel();
 		definitionPanel.setPropertyListener(this);
 
@@ -79,24 +81,24 @@ public class LnFOptionsPanel
 		lnfList.setModel(model);
 		lnfList.addListSelectionListener(this);
 	}
-	
+
 	public void saveSettings()
 	{
 		manager.saveLookAndFeelDefinitions();
 	}
-	
+
 	public void restoreSettings()
 	{
 		LnFDefinition clnf = manager.getCurrentLnF();
 		lnfList.setSelectedValue(clnf, true);
 		definitionPanel.setCurrentLookAndFeeld(clnf);
 	}
-	
+
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		LnFDefinition def = (LnFDefinition)lnfList.getSelectedValue();
 		definitionPanel.setDefinition(def);
-		if (def != null) 
+		if (def != null)
 		{
 			this.deleteEntry.setEnabled(!def.isBuiltInLnF());
 		}
@@ -162,7 +164,7 @@ public class LnFOptionsPanel
 		}
 	}
 
-	class LnfList 
+	class LnfList
 		extends AbstractListModel
 	{
 		public Object getElementAt(int index)
@@ -175,5 +177,5 @@ public class LnFOptionsPanel
 			return manager.getAvailableLookAndFeels().size();
 		}
 	}
-	
+
 }

@@ -16,6 +16,7 @@ import java.awt.Container;
 import java.awt.FocusTraversalPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  *
@@ -24,12 +25,8 @@ import java.util.Iterator;
 public class WbTraversalPolicy
 	extends FocusTraversalPolicy
 {
-	private ArrayList<Component> components = new ArrayList<Component>();
+	final private List<Component> components = new ArrayList<Component>();
 	private Component defaultComponent = null;
-
-	public WbTraversalPolicy()
-	{
-	}
 
 	public void setDefaultComponent(Component aComp)
 	{
@@ -55,8 +52,8 @@ public class WbTraversalPolicy
 		}
 		return false;
 	}
-	
-	/** 
+
+	/**
 	 * Returns the Component that should receive the focus after aComponent.
 	 * focusCycleRoot must be a focus cycle root of aComponent.
 	 *
@@ -75,12 +72,12 @@ public class WbTraversalPolicy
 		// Make sure we have at least one enabled component
 		// otherwise the recursion would never terminate!
 		if (!checkAvailable()) return null;
-		
+
 		int index = this.components.indexOf(aComponent);
 		Component result = null;
-		if (index < 0 || index == this.components.size() - 1) 
+		if (index < 0 || index == this.components.size() - 1)
 			result = this.components.get(0);
-		else 
+		else
 			result = this.components.get(index + 1);
 		if (result.isEnabled())
 		{
@@ -89,7 +86,7 @@ public class WbTraversalPolicy
 		return getComponentAfter(focusCycleRoot, result);
 	}
 
-	/** 
+	/**
 	 * Returns the Component that should receive the focus before aComponent.
 	 * focusCycleRoot must be a focus cycle root of aComponent.
 	 *
@@ -108,15 +105,15 @@ public class WbTraversalPolicy
 		// Make sure we have at least one enabled component
 		// otherwise the recursion would never terminate!
 		if (!checkAvailable()) return null;
-		
+
 		int index = this.components.indexOf(aComponent);
-		
+
 		Component result = null;
-		if (index <= 0) 
+		if (index <= 0)
 			result = this.components.get(this.components.size() - 1);
-		else 
+		else
 			result = this.components.get(index - 1);
-		
+
 		if (result.isEnabled())
 		{
 			return result;

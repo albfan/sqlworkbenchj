@@ -60,7 +60,7 @@ public class VersionCheckDialog
 
 	public void setVisible(boolean flag)
 	{
-		if (flag == true) startRetrieveVersions();
+		if (flag) startRetrieveVersions();
 		super.setVisible(flag);
 	}
 	

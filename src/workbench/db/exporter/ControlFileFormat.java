@@ -48,12 +48,13 @@ public enum ControlFileFormat
 	
 	public static FormatFileWriter createFormatWriter(ControlFileFormat format)
 	{
-		switch (format)
+		if (format == oracle)
 		{
-			case oracle:
-				return new OracleControlFileWriter();
-			case sqlserver:
-				return new SqlServerFormatFileWriter();
+			return new OracleControlFileWriter();
+		}
+		else if (format == sqlserver)
+		{
+			return new SqlServerFormatFileWriter();
 		}
 		return null;
 	}

@@ -22,14 +22,10 @@ public class TableNameComparator
 	implements Comparator<TableIdentifier>
 {
 	private Comparator<String> stringComparator = new CaseInsensitiveComparator();
-	
-	public TableNameComparator()
-	{
-	}
 
 	public int compare(TableIdentifier t1, TableIdentifier t2)
 	{
 		return stringComparator.compare(t1.getTableName(), t2.getTableName());
 	}
-	
+
 }

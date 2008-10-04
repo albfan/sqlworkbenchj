@@ -26,10 +26,6 @@ public class WbListProcedures
 {
 	public static final String VERB = "WBLISTPROCS";
 
-	public WbListProcedures()
-	{
-	}
-
 	public String getVerb() { return VERB; }
 
 	public StatementRunnerResult execute(String aSql)

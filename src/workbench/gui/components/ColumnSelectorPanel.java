@@ -61,6 +61,7 @@ public class ColumnSelectorPanel
           boolean showHeaderSelection,
           boolean showSelectedCheckBox)
 	{
+		super();
 		this.setLayout(new BorderLayout());
 		this.selectTable = new JTable();
 		this.selectTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);

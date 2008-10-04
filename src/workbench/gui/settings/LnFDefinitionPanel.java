@@ -43,9 +43,10 @@ public class LnFDefinitionPanel
 {
 	private LnFDefinition currentLnF;
 	private PropertyChangeListener changeListener;
-	
+
 	public LnFDefinitionPanel()
 	{
+		super();
 		initComponents();
 		String text = ResourceMgr.getDescription("LblLnFLib");
 		text = text.replace("%path_sep%", StringUtil.getPathSeparator());
@@ -97,7 +98,7 @@ public class LnFDefinitionPanel
 		this.libraryPath.setEnabled(flag);
 		this.tfName.setEnabled(flag);
 	}
-	
+
 	private boolean testLnF(LnFDefinition lnf)
 	{
 		try
@@ -110,7 +111,7 @@ public class LnFDefinitionPanel
 			return false;
 		}
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -263,7 +264,7 @@ public class LnFDefinitionPanel
 	{
 		if (lnf != null) currentLabel.setText(lnf.getName());
 	}
-	
+
 	public void setDefinition(LnFDefinition lnf)
 	{
 		this.currentLnF = lnf;

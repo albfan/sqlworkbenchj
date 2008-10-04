@@ -30,14 +30,10 @@ import workbench.util.SqlUtil;
 public class OracleSynonymReader
 	implements SynonymReader
 {
-	public OracleSynonymReader()
-	{
-	}
-
 	/**
 	 * The Oracle driver already returns the SYNONYMS in the getTables() call
 	 */
-	public List<String> getSynonymList(Connection con, String owner) 
+	public List<String> getSynonymList(Connection con, String owner)
 		throws SQLException
 	{
 		return Collections.emptyList();
@@ -58,15 +54,15 @@ public class OracleSynonymReader
 		PreparedStatement stmt = null;
 
 		ResultSet rs = null;
-			
+
 		TableIdentifier result = null;
 		try
 		{
 			stmt = con.prepareStatement(sql.toString());
 			stmt.setString(1, aSynonym);
 			stmt.setString(2, anOwner == null ? con.getMetaData().getUserName() : anOwner);
-			stmt.setString(3, aSynonym);			
-			
+			stmt.setString(3, aSynonym);
+
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{

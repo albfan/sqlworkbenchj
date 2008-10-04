@@ -234,7 +234,7 @@ public class TableReplacer
 		boolean ignoreCase, boolean wholeWord,
 		boolean useRegex)
 	{
-		int rows[] = null;
+		int[] rows = null;
 	
 		if (selectedText)
 		{

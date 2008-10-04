@@ -36,37 +36,32 @@ import workbench.gui.actions.WbAction;
  *
  *	This UI fixes a problem with the incorrect display of shortcuts
  *	in the tooltip. If the shortcut for a menu item does not contain
- *	a modifief (e.g. when the shortcut is F5) the original tooltip will 
+ *	a modifief (e.g. when the shortcut is F5) the original tooltip will
  *	display an incorrect shortcut (e.g. Alt-e).
  *	This class fixes this bug.
  *	To enable this ToolTipUI use:
  *	<code>
  *	UIManager.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
  *	</code>
- * 
- * @author support@sql-workbench.net  
- */ 
+ *
+ * @author support@sql-workbench.net
+ */
 public class WbToolTipUI extends BasicToolTipUI
 {
-	
+
 	static WbToolTipUI sharedInstance = new WbToolTipUI();
 	private Font smallFont;
-	
+
 	// Refer to note in getAcceleratorString about this field.
 	private JToolTip tip;
 	public static final int padSpaceBetweenStrings = 12;
 	private String acceleratorDelimiter;
-	
-	public WbToolTipUI()
-	{
-		super();
-	}
-	
+
 	public static ComponentUI createUI(JComponent c)
 	{
 		return sharedInstance;
 	}
-	
+
 	public void installUI(JComponent c)
 	{
 		super.installUI(c);
@@ -78,23 +73,23 @@ public class WbToolTipUI extends BasicToolTipUI
 		}
 		acceleratorDelimiter = UIManager.getString( "MenuItem.acceleratorDelimiter" );
 		if ( acceleratorDelimiter == null )
-		{ 
-			acceleratorDelimiter = "-"; 
+		{
+			acceleratorDelimiter = "-";
 		}
 	}
-	
+
 	public void uninstallUI(JComponent c)
 	{
 		super.uninstallUI(c);
 		tip = null;
 	}
-	
+
 	public void paint(Graphics g, JComponent c)
 	{
 		JToolTip tp = (JToolTip)c;
-		
+
 		super.paint(g, c);
-		
+
 		Font font = c.getFont();
 		if (smallFont == null && font != null)
 		{
@@ -114,11 +109,11 @@ public class WbToolTipUI extends BasicToolTipUI
 			g.drawString(keyText,metrics.stringWidth(tipText) + padSpaceBetweenStrings,2 + metrics.getAscent());
 		}
 	}
-	
+
 	public Dimension getPreferredSize(JComponent c)
 	{
 		Dimension d = super.getPreferredSize(c);
-		
+
 		String key = getAcceleratorString((JToolTip)c);
 		if (! (key.equals("")))
 		{
@@ -128,23 +123,23 @@ public class WbToolTipUI extends BasicToolTipUI
 		}
 		return d;
 	}
-	
+
 	protected boolean isAcceleratorHidden()
 	{
 		Boolean b = (Boolean)UIManager.get("ToolTip.hideAccelerator");
 		return b != null && b.booleanValue();
 	}
-	
+
 	private String getAcceleratorString(JToolTip toolTip)
 	{
 		this.tip = toolTip;
-		
+
 		String retValue = getAcceleratorString();
-		
+
 		this.tip = null;
 		return retValue;
 	}
-	
+
 	public String getAcceleratorString()
 	{
 		if (tip == null || isAcceleratorHidden())
@@ -158,16 +153,16 @@ public class WbToolTipUI extends BasicToolTipUI
 		}
 		KeyStroke[] keys =comp.getRegisteredKeyStrokes();
 		String controlKeyStr = "";
-		
+
 		for (int i = 0; i < keys.length; i++)
 		{
 			int mod = keys[i].getModifiers();
 			int condition =  comp.getConditionForKeyStroke(keys[i]);
 			int key = keys[i].getKeyCode();
-			
+
 			if ( condition == JComponent.WHEN_IN_FOCUSED_WINDOW &&
 			     ( (mod & InputEvent.ALT_MASK) != 0 || (mod & InputEvent.CTRL_MASK) != 0 ||
-			     (mod & InputEvent.SHIFT_MASK) != 0 || (mod & InputEvent.META_MASK) != 0 ) 
+			     (mod & InputEvent.SHIFT_MASK) != 0 || (mod & InputEvent.META_MASK) != 0 )
 				 )
 			{
 				controlKeyStr = KeyEvent.getKeyModifiersText(mod) +
@@ -175,7 +170,7 @@ public class WbToolTipUI extends BasicToolTipUI
 												KeyEvent.getKeyText(keys[i].getKeyCode());
 				break;
 			}
-			
+
 			else if (mod == 0 && (key == KeyEvent.VK_F1 ||
 					 key == KeyEvent.VK_F2 ||
 					 key == KeyEvent.VK_F3 ||
@@ -187,14 +182,14 @@ public class WbToolTipUI extends BasicToolTipUI
 					 key == KeyEvent.VK_F9 ||
 					 key == KeyEvent.VK_F10 ||
 					 key == KeyEvent.VK_F11 ||
-					 key == KeyEvent.VK_F12) && 
-					 (comp instanceof JMenu || comp instanceof JMenuItem)) 
+					 key == KeyEvent.VK_F12) &&
+					 (comp instanceof JMenu || comp instanceof JMenuItem))
 			{
 				controlKeyStr = KeyEvent.getKeyText(keys[i].getKeyCode());
 				break;
 			}
 		}
-	
+
 		if (controlKeyStr.length() == 0 && comp instanceof WbToolbarButton)
 		{
 			WbAction action = (WbAction)((WbToolbarButton)comp).getAction();
@@ -208,5 +203,5 @@ public class WbToolTipUI extends BasicToolTipUI
 		}
 		return controlKeyStr;
 	}
-	
+
 }

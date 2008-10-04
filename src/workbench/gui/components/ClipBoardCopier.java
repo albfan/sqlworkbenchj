@@ -231,7 +231,7 @@ public class ClipBoardCopier
 		try
 		{
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
-			int rows[] = null;
+			int[] rows = null;
 			if (selectedOnly) rows = this.client.getSelectedRows();
 			
 			SqlRowDataConverter converter = new SqlRowDataConverter(data.getOriginalConnection());

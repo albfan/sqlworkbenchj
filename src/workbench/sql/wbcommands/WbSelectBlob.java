@@ -40,21 +40,22 @@ public class WbSelectBlob
 
 	public WbSelectBlob()
 	{
+		super();
 		this.isUpdatingCommand = false;
 	}
-	
+
 	public String getVerb() { return VERB; }
-	
+
 	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		SQLLexer lexer = new SQLLexer(sqlCommand);
-		
+
 		StringBuilder sql = new StringBuilder(sqlCommand.length());
-		
+
 		WbFile outputFile = null;
-		
+
 		SQLToken token  = lexer.getNextToken(false, false);
 		if (!token.getContents().equals("WBSELECTBLOB"))
 		{
@@ -88,19 +89,19 @@ public class WbSelectBlob
 			sql.append(' ');
 			sql.append(sqlCommand.substring(token.getCharEnd() + 1));
 		}
-		
+
 		LogMgr.logDebug("WbSelectBlob.execute()", "Using SQL=" + sql + " for file: " + outputFile.getFullPath());
 		ResultSet rs = null;
 		OutputStream out = null;
 		InputStream in = null;
 		long filesize = 0;
-		
+
 		File outputDir = outputFile.getParentFile();
 		String baseFilename = outputFile.getFileName();
 		String extension = outputFile.getExtension();
 		if (StringUtil.isEmptyString(extension)) extension = "";
 		else extension = "." + extension;
-		
+
 		try
 		{
 			currentStatement = currentConnection.createStatementForQuery();
@@ -109,7 +110,7 @@ public class WbSelectBlob
 			while (rs.next())
 			{
 				WbFile currentFile = null;
-				
+
 				in = rs.getBinaryStream(1);
 				if (in == null)
 				{
@@ -119,7 +120,7 @@ public class WbSelectBlob
 					result.setWarning(true);
 					continue;
 				}
-				
+
 				if (row == 0)
 				{
 					currentFile = outputFile;
@@ -128,7 +129,7 @@ public class WbSelectBlob
 				{
 					currentFile = new WbFile(outputDir, baseFilename + "_" + Integer.toString(row) + extension);
 				}
-				
+
 				out = new FileOutputStream(currentFile);
 				filesize = FileUtil.copy(in, out);
 				String msg = ResourceMgr.getString("MsgBlobSaved");
@@ -162,5 +163,5 @@ public class WbSelectBlob
 
 		return result;
 	}
-	
+
 }
