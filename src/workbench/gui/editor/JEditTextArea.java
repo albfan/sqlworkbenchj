@@ -61,6 +61,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
 
+import workbench.WbManager;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
@@ -70,6 +71,7 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.interfaces.Undoable;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.MemoryWatcher;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
@@ -1127,6 +1129,12 @@ public class JEditTextArea
 
 	public void appendLine(String aLine)
 	{
+		if (MemoryWatcher.isMemoryLow())
+		{
+			WbManager.getInstance().showLowMemoryError();
+			return;
+		}
+		
 		try
 		{
 			document.beginCompoundEdit();
@@ -1678,7 +1686,7 @@ public class JEditTextArea
 	 */
 	public void setSelectedText(String selectedText)
 	{
-		if(!editable) return;
+		if (!editable) return;
 
 		try
 		{
@@ -1777,6 +1785,12 @@ public class JEditTextArea
 
 	public void insertText(int position, String text)
 	{
+		if (MemoryWatcher.isMemoryLow())
+		{
+			WbManager.getInstance().showLowMemoryError();
+			return;
+		}
+
 		try
 		{
 			document.beginCompoundEdit();
@@ -2037,8 +2051,14 @@ public class JEditTextArea
 	 */
 	public void paste()
 	{
-		if(editable)
+		if (editable)
 		{
+			if (MemoryWatcher.isMemoryLow())
+			{
+				WbManager.getInstance().showLowMemoryError();
+				return;
+			}
+			
 			Clipboard clipboard = getToolkit().getSystemClipboard();
 			try
 			{

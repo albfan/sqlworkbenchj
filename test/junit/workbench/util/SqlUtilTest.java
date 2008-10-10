@@ -128,8 +128,6 @@ public class SqlUtilTest
 			sql = "delete from \"FROM\"";
 			table = SqlUtil.getDeleteTable(sql);
 			assertEquals("Wrong table returned", "\"FROM\"", table);
-			
-			//sql "table = SqlUtil.getDeleteTable(sql);"
 		}
 		catch (Exception e)
 		{
@@ -138,18 +136,91 @@ public class SqlUtilTest
 		}
 		
 	}
-	
-	public void testGetCreateTable()
+
+	public void testGetObjectInfo()
 		throws Exception
 	{
-		String sql = "create\n-- drop something\ntable mytable (id integer)";
-		String table = SqlUtil.getCreateTable(sql);
-		assertEquals("Wrong table returned", "mytable", table);
+		String sql = "-- test\ncreate or \t replace\n\nprocedure bla";
+		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "bla");
+		assertEquals(info.getDisplayType(), "Procedure");
 
-		sql = "create view v_view as select * from mytable";
-		table = SqlUtil.getCreateTable(sql);
-		assertNull(table);
+		sql = "-- test\ncreate unique bitmap index idx_test on table (x,y);";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "idx_test");
+		assertEquals(info.getDisplayType(), "Index");
+
+		sql = "recreate view v_test as select * from t;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "v_test");
+		assertEquals(info.getDisplayType(), "View");
+
+		sql = "create nonclustered index idx_test on table (x,y);";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "idx_test");
+		assertEquals(info.getDisplayType(), "Index");
+
+		sql = "-- test\ncreate memory table my_table (nr integer);";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "my_table");
+		assertEquals(info.getDisplayType(), "Table");
+
+		sql = "create table dbo.my_table (nr integer);";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "dbo.my_table");
+		assertEquals(info.getDisplayType(), "Table");
+
+		sql = "create force view v_test as select * from t;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "v_test");
+		assertEquals(info.getDisplayType(), "View");
+
+		sql = "drop memory table my_table;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "my_table");
+		assertEquals(info.getDisplayType(), "Table");
+
+		sql = "drop index idx_test;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "idx_test");
+		assertEquals(info.getDisplayType(), "Index");
+
+		sql = "drop function f_answer;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "f_answer");
+		assertEquals(info.getDisplayType(), "Function");
+
+		sql = "drop procedure f_answer;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "f_answer");
+		assertEquals(info.getDisplayType(), "Procedure");
+
+		sql = "drop sequence s;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals(info.objectName, "s");
+		assertEquals(info.getDisplayType(), "Sequence");
+
+		sql = "drop role s;";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertNull(info);
+
+		sql = "-- test\ncreate \n\ntrigger test_trg for mytable";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("test_trg", info.objectName);
+		assertEquals("TRIGGER", info.objectType);
+
+		sql = "-- test\ncreate or replace package \n\n some_package \t\t\n as something";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("some_package", info.objectName);
+		assertEquals("PACKAGE", info.objectType);
+
+		sql = "-- test\ncreate package body \n\n some_body \t\t\n as something";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("some_body", info.objectName);
+		assertEquals("PACKAGE BODY", info.objectType);
 	}
+
+	
 	
 	public void testGetInsertTable()
 	{
@@ -290,7 +361,7 @@ public class SqlUtilTest
 		
 		sql = "/* \n" + 
 					 "* $URL: some_script.sql $ \n" + 
-					 "* $Revision: 1.9 $ \n" + 
+					 "* $Revision: 1.10 $ \n" + 
 					 "* $LastChangedDate: 2006-05-05 20:29:15 -0400 (Fri, 05 May 2006) $ \n" + 
 					 "*/ \n" + 
 					 "-- A quis Lorem consequat Aenean tellus risus convallis velit Maecenas arcu. \n" + 

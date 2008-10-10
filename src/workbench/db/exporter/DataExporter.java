@@ -628,7 +628,7 @@ public class DataExporter
 		}
 		else
 		{
-			numberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
+			numberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 		}
 	}
 

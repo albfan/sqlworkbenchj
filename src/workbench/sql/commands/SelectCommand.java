@@ -21,6 +21,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.LowMemoryException;
 import workbench.util.StringUtil;
 
 /**
@@ -130,6 +131,13 @@ public class SelectCommand extends SqlCommand
 			}
 
 			this.runner.releaseSavepoint();
+		}
+		catch (LowMemoryException mem)
+		{
+			result.clear();
+			result.setFailure();
+			this.runner.rollbackSavepoint();
+			throw mem;
 		}
 		catch (Exception e)
 		{

@@ -18,6 +18,7 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -30,6 +31,7 @@ import java.text.SimpleDateFormat;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
@@ -38,9 +40,11 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
+import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.NotifierWindow;
+import workbench.gui.components.SelectionDisplay;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTextLabel;
 import workbench.interfaces.EditorStatusbar;
@@ -71,8 +75,9 @@ public class DwStatusBar
 	private JTextField tfTimeout;
 	private WbTextLabel execTime;
 	private JLabel editorStatus;
+	private JPanel alertPanel;
 	private JPanel infoPanel;
-
+	
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
 	private DecimalFormat numberFormatter;
@@ -88,6 +93,7 @@ public class DwStatusBar
 	private JLabel notificationLabel;
 	private String editorLinePrefix;
   private String editorColPrefix;
+	private SelectionDisplay selectionDisplay;
 
 	public DwStatusBar()
 	{
@@ -134,13 +140,11 @@ public class DwStatusBar
 
 		this.add(tfStatus, BorderLayout.CENTER);
 
-		JPanel p = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0,0));
-		p.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		p.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
+		infoPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0,0));
+		infoPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		infoPanel.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
 
-		this.infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
-		p.add(infoPanel);
 
 		this.execTime = new WbTextLabel();
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
@@ -164,7 +168,7 @@ public class DwStatusBar
 			editorStatus.setMinimumSize(d);
 			this.editorStatus.setBorder(new CompoundBorder(new DividerBorder(DividerBorder.LEFT), new EmptyBorder(0, 3, 0, 3)));
 			this.editorStatus.setToolTipText(ResourceMgr.getDescription("LblEditorStatus"));
-			p.add(editorStatus);
+			infoPanel.add(editorStatus);
 			this.editorColPrefix = ResourceMgr.getString("LblEditorPosCol");
 			this.editorLinePrefix = ResourceMgr.getString("LblEditorPosLine");
 		}
@@ -175,13 +179,13 @@ public class DwStatusBar
 		execTime.setPreferredSize(d);
 		execTime.setMaximumSize(d);
 		execTime.setBorder(b);
-		p.add(execTime);
+		infoPanel.add(execTime);
 
 		if (showTimeout)
 		{
 			JLabel l = new JLabel(" " + ResourceMgr.getString("LblQueryTimeout") + " ");
 			//l.setBorder(new DividerBorder(DividerBorder.LEFT));
-			p.add(l);
+			infoPanel.add(l);
 			this.tfTimeout = new JTextField(3);
 			this.tfTimeout.setBorder(b);
 			this.tfTimeout.setMargin(new Insets(0, 2, 0, 2));
@@ -189,14 +193,14 @@ public class DwStatusBar
 			this.tfTimeout.setHorizontalAlignment(SwingConstants.RIGHT);
 			this.tfTimeout.addMouseListener(new TextComponentMouseListener());
 			l.setToolTipText(this.tfTimeout.getToolTipText());
-			p.add(this.tfTimeout);
+			infoPanel.add(this.tfTimeout);
 		}
 		JLabel l = new JLabel(" " + ResourceMgr.getString("LblMaxRows") + " ");
 		l.setToolTipText(this.tfRowCount.getToolTipText());
-		p.add(l);
-		p.add(tfMaxRows);
-		p.add(tfRowCount);
-		this.add(p, BorderLayout.EAST);
+		infoPanel.add(l);
+		infoPanel.add(tfMaxRows);
+		infoPanel.add(tfRowCount);
+		this.add(infoPanel, BorderLayout.EAST);
 
 		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
@@ -215,6 +219,22 @@ public class DwStatusBar
 		return numberFormatter;
 	}
 
+	public void removeSelectionIndicator(JTable client)
+	{
+		if (this.selectionDisplay == null) return;
+		this.selectionDisplay.removeClient(client);
+	}
+	
+	public void showSelectionIndicator(JTable client)
+	{
+		if (this.selectionDisplay == null)
+		{
+			this.selectionDisplay = new SelectionDisplay();
+		}
+		this.selectionDisplay.setClient(client);
+		this.infoPanel.add(this.selectionDisplay, 0);
+	}
+	
 	public void setReadyMsg(String aMsg)
 	{
 		if (aMsg == null)
@@ -414,25 +434,45 @@ public class DwStatusBar
 		{
 			this.removeAlert();
 		}
-		this.infoPanel.removeAll();
+		if (this.alertPanel == null)
+		{
+			alertPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
+			infoPanel.add(alertPanel, 0);
+		}
+		else
+		{
+			this.alertPanel.removeAll();
+		}
 		this.notificationHandler = evt.getHandler();
 		this.notificationLabel = new JLabel(ResourceMgr.getImageByName(evt.getIconKey()));
 		notificationLabel.setText(null);
 		notificationLabel.setToolTipText(evt.getTooltip());
 		notificationLabel.setIconTextGap(0);
 		this.notificationLabel.addMouseListener(this);
-		this.infoPanel.add(notificationLabel);
-		NotifierWindow w = new NotifierWindow(evt.getTooltip());
-		w.show(notificationLabel);
+		this.alertPanel.add(notificationLabel);
+		Frame f = WbManager.getInstance().getCurrentWindow();
+		final NotifierWindow w = new NotifierWindow(f, evt.getTooltip());
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				w.show(notificationLabel);
+			}
+		});
+
 		WbSwingUtilities.repaintLater(this);
 	}
 
 	public void removeAlert()
 	{
-		this.infoPanel.removeAll();
-		this.notificationLabel.removeMouseListener(this);
-		this.notificationHandler = null;
-		WbSwingUtilities.repaintLater(this);
+		if (alertPanel != null)
+		{
+			this.infoPanel.remove(alertPanel);
+			this.alertPanel.removeAll();
+			this.notificationLabel.removeMouseListener(this);
+			this.notificationHandler = null;
+			WbSwingUtilities.repaintLater(this);
+		}
 	}
 
 	public void mouseClicked(MouseEvent e)

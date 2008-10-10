@@ -78,7 +78,10 @@ public class PasswordPropertyEditor
 		if (!this.changed) return;
 		if (this.source == null) return;
 		if (this.setter == null) return;
-		Object[] args = new Object[] { getPassword() };
+
+		// getPassword returns a char[] so this needs to be converted to a String
+		Object[] args = new Object[] { new String(getPassword()) };
+		
 		try
 		{
 			this.setter.invoke(this.source, args);
@@ -86,13 +89,16 @@ public class PasswordPropertyEditor
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("PasswordPropertyEditor.applyChanges", "Error applying changes", e);
 		}
 	}
 
-	public boolean isChanged() { return this.changed; }
+	public boolean isChanged()
+	{
+		return this.changed;
+	}
 
-		public void changedUpdate(DocumentEvent e)
+	public void changedUpdate(DocumentEvent e)
 	{
 		this.changed = true;
 		if (this.immediateUpdate)

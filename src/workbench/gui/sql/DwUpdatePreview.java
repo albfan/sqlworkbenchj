@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.util.List;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -27,6 +28,7 @@ import workbench.storage.DataStore;
 import workbench.storage.DmlStatement;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ExceptionUtil;
+import workbench.util.MemoryWatcher;
 import workbench.util.MessageBuffer;
 
 /**
@@ -39,6 +41,7 @@ public class DwUpdatePreview
 		boolean doSave = true;
 		
 		Window win = SwingUtilities.getWindowAncestor(caller);
+		MessageBuffer buffer = null;
 		try
 		{
 			List<DmlStatement> stmts = ds.getUpdateStatements(dbConn);
@@ -59,17 +62,29 @@ public class DwUpdatePreview
 			{
 				LogMgr.logWarning("DwUpdatePreview.confirmUpdate()", "Only " + maxStatements + " of " + stmts.size() + " statments displayed. To view all statements increase the value of the property 'workbench.db.previewsql.maxstatements'");
 			}
-			MessageBuffer buffer = new MessageBuffer(maxStatements);
+			buffer = new MessageBuffer(maxStatements);
 
 			SqlLiteralFormatter f = new SqlLiteralFormatter(dbConn);
 
+			boolean lowMemory = false;
 			for (DmlStatement dml : stmts)
 			{
 				buffer.append(dml.getExecutableStatement(f));
 				buffer.append(";");
 				buffer.appendNewLine();
+				if (MemoryWatcher.isMemoryLow())
+				{
+					lowMemory = true;
+					buffer.clear();
+				}
 			}
-			
+
+			if (lowMemory)
+			{
+				WbManager.getInstance().showLowMemoryError();
+				return false;
+			}
+
 			final String text = buffer.getBuffer().toString();
 			
 			WbSwingUtilities.invoke(new Runnable()
@@ -94,20 +109,26 @@ public class DwUpdatePreview
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("DwUpdatePreview.confirmUpdate()", "Error generating preview", e);
+			LogMgr.logError("DwUpdatePreview.confirmUpdate()", "Error when previewing SQL", e);
 			String msg = ExceptionUtil.getDisplay(e);
 			WbSwingUtilities.showErrorMessage(win, msg);
 			return false;
 		}
 		catch (OutOfMemoryError mem)
 		{
-			String msg = ResourceMgr.getString("MsgOutOfMemorySQLPreview");
-			WbSwingUtilities.showErrorMessage(caller, msg);
+			if (buffer != null)
+			{
+				buffer.clear();
+				System.gc();
+			}
+			WbManager.getInstance().showOutOfMemoryError();
 			return false;
 		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("DwUpdatePreview.confirmUpdate()", "Error when previewing SQL", th);
+			WbSwingUtilities.showErrorMessage(caller, ExceptionUtil.getDisplay(th));
+			return false;
 		}
 		return doSave;
 		

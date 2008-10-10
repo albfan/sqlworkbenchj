@@ -77,9 +77,14 @@ public class SqlCommand
 	public void setFullErrorReporting(boolean flag) { reportFullStatementOnError = flag; }
 	public void setReturnOnlyErrorMessages(boolean flag) { this.errorMessagesOnly = flag; }
 
+	protected String getDefaultSuccessMessage()
+	{
+		return this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK");
+	}
+	
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
-		result.addMessage(this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK"));
+		result.addMessage(getDefaultSuccessMessage());
 	}
 
 	public void setParameterPrompter(ParameterPrompter p)
@@ -207,6 +212,7 @@ public class SqlCommand
 		try { currentConnection.clearWarnings(); } catch (Exception e) {}
 		this.currentStatement = null;
 		this.isCancelled = false;
+		currentRetrievalData = null;
 	}
 
 	/**
@@ -388,8 +394,8 @@ public class SqlCommand
 						// without using statement.cancel()
 						// The DataStore checks for the cancel flag during processing
 						// of the ResulSet
-						this.currentRetrievalData.initData(rs, maxRows);
 						this.currentRetrievalData.setGeneratingSql(result.getSourceCommand());
+						this.currentRetrievalData.initData(rs, maxRows);
 					}
 					catch (SQLException e)
 					{

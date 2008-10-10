@@ -13,15 +13,17 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Timer;
 import java.util.TimerTask;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JTextArea;
-import javax.swing.JWindow;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
@@ -32,17 +34,19 @@ import workbench.resource.Settings;
  * @author support@sql-workbench.net
  */
 public class NotifierWindow
-	extends JWindow
+	extends JDialog
 	implements MouseListener
 {
-	public NotifierWindow(String msg)
+	public NotifierWindow(Frame owner, String msg)
 	{
-		super();
+		super(owner, false);
+		setUndecorated(true);
 		setFocusable(false);
-		
 		setLayout(new BorderLayout());
 
-		Font textFont = UIManager.getFont("ToolTip.font");
+		Font ttFont = UIManager.getFont("ToolTip.font");
+		float size = (float)(ttFont.getSize() * 1.2);
+		Font textFont = ttFont.deriveFont(size);
 		Color textColor = UIManager.getColor("ToolTip.foreground");
 		Color backgroundColor = UIManager.getColor("ToolTip.background");
 
@@ -50,11 +54,15 @@ public class NotifierWindow
 
 		JTextArea text = new JTextArea(msg);
 		text.setFont(textFont);
+		text.setEnabled(false);
+		text.setEditable(false);
 		text.setForeground(textColor);
+		text.setDisabledTextColor(textColor);
 		text.setBackground(backgroundColor);
 		text.setBorder(new EmptyBorder(10,10,10,10));
 		text.addMouseListener(this);
-
+		text.setCursor(Cursor.getDefaultCursor());
+		
 		add(text, BorderLayout.CENTER);
 		
 		getRootPane().setBorder(new LineBorder(Color.GRAY, 1));
@@ -88,6 +96,7 @@ public class NotifierWindow
 		setVisible(false);
 		dispose();
 	}
+
 	public void mouseClicked(MouseEvent e)
 	{
 		closeWindow();
@@ -108,4 +117,5 @@ public class NotifierWindow
 	public void mouseExited(MouseEvent e)
 	{
 	}
+
 }

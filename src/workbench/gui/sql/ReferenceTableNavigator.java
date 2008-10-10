@@ -285,21 +285,36 @@ public class ReferenceTableNavigator
 			{
 				for (DependencyNode node : tables)
 				{
-					Collection<String> cols = node.getColumns().keySet();
+					Map<String, String> columnMap = node.getColumns();
+					Collection<String> cols = node.getColumns().values();
 					StringBuilder display = new StringBuilder(cols.size() * 10);
-					display.append(node.getTable().getTableExpression(con));
+					StringBuilder tooltip = new StringBuilder(cols.size() * 20);
+					
+					display.append(node.getTable().getTableName());
 					display.append(" (");
 					int index = 0;
-					for (String col : cols)
+					for (Map.Entry<String, String> entry : columnMap.entrySet())
 					{
-						if (index > 0) display.append(',');
-						display.append(col);
+						if (index > 0)
+						{
+							display.append(',');
+							tooltip.append(',');
+						}
+						display.append(entry.getKey());
+						tooltip.append(this.getUpdateTable().getTableName());
+						tooltip.append('.');
+						tooltip.append(entry.getValue());
+						tooltip.append(" > ");
+						tooltip.append(node.getTable().getTableName());
+						tooltip.append('.');
+						tooltip.append(entry.getKey());
 						index++;
 					}
 					display.append(')');
 					EditorTabSelectMenu item = new EditorTabSelectMenu(this, display.toString(), "LblShowDataInNewTab", "MsgRelatedTabHint", container);
 					item.setDependencyNode(node);
 					item.setVisible(true);
+					item.setToolTipText(tooltip.toString());
 					boolean hasColumns = hasColumns(node);
 					item.setEnabled(hasColumns);
 					if (!hasColumns)

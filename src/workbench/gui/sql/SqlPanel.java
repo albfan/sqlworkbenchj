@@ -77,6 +77,7 @@ import workbench.gui.actions.AutoJumpNextStatement;
 import workbench.gui.actions.CheckPreparedStatementsAction;
 import workbench.gui.actions.CleanJavaCodeAction;
 import workbench.gui.actions.ClearCompletionCacheAction;
+import workbench.gui.actions.ClearMessagesAction;
 import workbench.gui.actions.CommitAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
@@ -164,6 +165,7 @@ import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
+import workbench.util.LowMemoryException;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
@@ -612,6 +614,7 @@ public class SqlPanel
 		this.actions.add(new SelectResultAction(this));
 		this.actions.add(new SelectMaxRowsAction(this.statusBar));
 		this.actions.add(new ViewMessageLogAction(this));
+		this.actions.add(new ClearMessagesAction(this));
 
 		SplitPaneExpander expander = new SplitPaneExpander(this.contentPanel);
 		a = new ExpandEditorAction(expander);
@@ -2709,6 +2712,10 @@ public class SqlPanel
 		{
 			if (statementResult != null) this.showLogMessage(statementResult.getMessageBuffer().toString());
 		}
+		catch (LowMemoryException mem)
+		{
+			WbManager.getInstance().showLowMemoryError();
+		}
 		catch (Throwable e)
 		{
 			if (e instanceof OutOfMemoryError)
@@ -2736,17 +2743,18 @@ public class SqlPanel
 
 	private void showResultMessage(StatementRunnerResult result)
 	{
-		CharSequence msg = result.getMessageBuffer();
-		if (msg == null) return;
+		if (!result.hasMessages()) return;
 		try
 		{
-			this.appendToLog(msg.toString() + "\n");
+			result.appendMessages(this);
+			this.appendToLog("\n");
 		}
 		catch (OutOfMemoryError oome)
 		{
 			result.clearMessageBuffer();
+			clearLog();
 			System.gc();
-			WbManager.getInstance().outOfMemoryOcurred();
+			WbManager.getInstance().setOutOfMemoryOcurred();
 			final boolean success = result.isSuccess();
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -3179,6 +3187,7 @@ public class SqlPanel
 			this.threadBusy = busy;
 			this.showBusyIcon(busy);
 			this.setExecuteActionStates(!busy);
+			this.editor.setEditable(!busy);
 		}
 	}
 

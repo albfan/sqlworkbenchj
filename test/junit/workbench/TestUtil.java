@@ -41,6 +41,8 @@ import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -473,4 +475,26 @@ public class TestUtil
 		ConnectionMgr.getInstance().readProfiles();
 	}
 
+	/**
+	 * If the given SQL command is a CREATE TABLE command, return
+	 * the table that is created, otherwise return null;
+	 */
+	public static String getCreateTable(CharSequence sql)
+	{
+		try
+		{
+			SQLLexer lexer = new SQLLexer(sql);
+			SQLToken t = lexer.getNextToken(false, false);
+			if (t == null || !t.getContents().equals("CREATE")) return null;
+			t = lexer.getNextToken(false, false);
+			if (t == null || !t.getContents().equals("TABLE")) return null;
+			t = lexer.getNextToken(false, false);
+			if (t == null) return null;
+			return t.getContents();
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}	
 }

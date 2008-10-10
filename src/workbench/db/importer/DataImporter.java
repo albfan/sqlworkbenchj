@@ -48,6 +48,7 @@ import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
+import workbench.util.MemoryWatcher;
 import workbench.util.MessageBuffer;
 import workbench.util.WbThread;
 
@@ -979,6 +980,16 @@ public class DataImporter
 			recordRejected(rec);
 		}
 
+		if (MemoryWatcher.isMemoryLow())
+		{
+			this.hasErrors = true;
+			closeStatements();
+			this.messages.clear();
+			this.messages.append(ResourceMgr.getString("MsgLowMemoryError"));
+			this.messages.appendNewLine();
+			throw new SQLException("Not enough memory!");
+		}
+
 		if (this.useBatch && this.batchSize > 0 && ((this.totalRows % this.batchSize) == 0))
 		{
 			try
@@ -1360,7 +1371,7 @@ public class DataImporter
 				else
 				{
 					pstmt.setNull(colIndex, Types.BLOB);
-					this.messages.append(ResourceMgr.getFormattedString("MsgBlobNotRead", i+1));
+					this.messages.append(ResourceMgr.getFormattedString("MsgBlobNotRead", Integer.valueOf(i+1)));
 					this.messages.appendNewLine();
 				}
 			}

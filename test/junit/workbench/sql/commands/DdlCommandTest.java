@@ -29,40 +29,6 @@ public class DdlCommandTest
 		super(testName);
 	}
 
-	public void testGetTypeAndObject() throws Exception
-	{
-		try
-		{
-			// detection of the type is already tested for SqlUtil.getCreateType()
-			// so we only need to test getName();
-			String sql = "-- test\ncreate or \t replace\n\nprocedure bla";
-			String name = DdlCommand.CREATE.getObjectName(sql);
-			assertEquals("bla", name);
-			
-			sql = "-- test\ncreate \n\ntrigger test_trg for mytable";
-			name = DdlCommand.CREATE.getObjectName(sql);
-			assertEquals("test_trg", name);
-			
-			sql = "-- test\ncreate function \n\n myfunc\n as something";
-			name = DdlCommand.CREATE.getObjectName(sql);
-			assertEquals("myfunc", name);
-
-			sql = "-- test\ncreate or replace package \n\n some_package \t\t\n as something";
-			name = DdlCommand.CREATE.getObjectName(sql);
-			assertEquals("some_package", name);
-			
-			sql = "-- test\ncreate package body \n\n some_body \t\t\n as something";
-			name = DdlCommand.CREATE.getObjectName(sql);
-			assertEquals("some_body", name);
-			
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
-	
 	public void testIgnoreDropErrors()
 	{
 		try

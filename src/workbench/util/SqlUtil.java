@@ -44,7 +44,40 @@ import workbench.storage.ResultInfo;
 public class SqlUtil
 {
 	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
-	
+
+	protected static class KnowTypesHolder
+	{
+		protected final static Set<String> KNOWN_TYPES;
+		static
+		{
+			Set<String> types = new HashSet<String>(19);
+			types.add("INDEX");
+			types.add("TABLE");
+			types.add("PROCEDURE");
+			types.add("FUNCTION");
+			types.add("VIEW");
+			types.add("PACKAGE");
+			types.add("PACKAGE BODY");
+			types.add("SYNONYM");
+			types.add("SEQUENCE");
+			types.add("ALIAS");
+			types.add("TRIGGER");
+			types.add("DOMAIN");
+			types.add("ROLE");
+			types.add("CAST");
+			types.add("AGGREGATE");
+			types.add("TABLESPACE");
+			types.add("TYPE");
+			types.add("USER");
+			KNOWN_TYPES = Collections.unmodifiableSet(types);
+		}
+	}
+
+	public static final Set<String> getKnownTypes()
+	{
+		return KnowTypesHolder.KNOWN_TYPES;
+	}
+
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
@@ -97,32 +130,77 @@ public class SqlUtil
 	}
 
 	/**
+	 * Extract the name of the created object for Oracle stored procedures.
+	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
+	 */
+	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql)
+	{
+		SQLLexer lexer = new SQLLexer(sql);
+		SQLToken t = lexer.getNextToken(false, false);
+
+		if (t == null) return null;
+		String verb = t.getContents();
+		
+		if (!verb.startsWith("CREATE") && !verb.equals("DROP") && !verb.equals("RECREATE")) return null;
+
+		try
+		{
+			DdlObjectInfo info = new DdlObjectInfo();
+
+			boolean typeFound = false;
+			SQLToken token = lexer.getNextToken(false, false);
+			while (token != null)
+			{
+				String c = token.getContents();
+				if (getKnownTypes().contains(c))
+				{
+					typeFound = true;
+					info.objectType = c;
+					break;
+				}
+				token = lexer.getNextToken(false, false);
+			}
+
+			if (!typeFound) return null;
+
+			// if a type was found we assume the next keyword is the name
+			SQLToken name = lexer.getNextToken(false, false);
+			if (name == null) return null;
+			info.objectName = name.getContents();
+
+			return info;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("SqlUtil.getDDLObjectInfo()", "Error finding object info", e);
+			return null;
+		}
+	}
+
+	public static class DdlObjectInfo
+	{
+		public String objectType;
+		public String objectName;
+		
+		public String toString()
+		{
+			return "Type: " + objectType + ", name: " + objectName;
+		}
+		
+		public String getDisplayType()
+		{
+			return StringUtil.capitalize(objectType);
+		}
+	}
+
+	/**
 	 * Returns the type that is beeing created e.g. TABLE, VIEW, PROCEDURE
 	 */
 	public static String getCreateType(CharSequence sql)
 	{
-		try
-		{
-			SQLLexer lexer = new SQLLexer(sql);
-			SQLToken t = lexer.getNextToken(false, false);
-			String v = t.getContents();
-			if (!v.equals("CREATE") && !v.equals("RECREATE") && !v.equals("CREATE OR REPLACE")) return null;
-			SQLToken type = lexer.getNextToken(false, false);
-			if (type == null) return null;
-			
-			// check for CREATE FORCE VIEW 
-			if (type.getContents().equals("FORCE"))
-			{
-				SQLToken t2 = lexer.getNextToken(false, false);
-				if (t2 == null) return null;
-				return t2.getContents();
-			}
-			return type.getContents();
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
+		DdlObjectInfo info = getDDLObjectInfo(sql);
+		if (info == null) return null;
+		return info.objectType;
 	}
 
 	/**
@@ -195,28 +273,7 @@ public class SqlUtil
 		}
 	}	
 
-	/**
-	 * If the given SQL command is a CREATE TABLE command, return 
-	 * the table that is created, otherwise return null;
-	 */
-	public static String getCreateTable(CharSequence sql)
-	{
-		try
-		{
-			SQLLexer lexer = new SQLLexer(sql);
-			SQLToken t = lexer.getNextToken(false, false);
-			if (t == null || !t.getContents().equals("CREATE")) return null;
-			t = lexer.getNextToken(false, false);
-			if (t == null || !t.getContents().equals("TABLE")) return null;
-			t = lexer.getNextToken(false, false);
-			if (t == null) return null;
-			return t.getContents();
-		}
-		catch (Exception e)
-		{
-			return null;
-		}
-	}		
+	
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
 	 */

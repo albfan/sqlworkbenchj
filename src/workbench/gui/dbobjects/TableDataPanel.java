@@ -61,11 +61,13 @@ import java.beans.PropertyChangeListener;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
+import workbench.WbManager;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
 import workbench.storage.NamedSortDefinition;
+import workbench.util.LowMemoryException;
 import workbench.util.WbWorkspace;
 
 /**
@@ -367,9 +369,6 @@ public class TableDataPanel
 			setSavepoint();
 			retrieveStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
-
-//			LogMgr.logDebug("TableDataPanel.showRowCount()", "Using query=\n" + sql);
-
 			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
 			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
@@ -527,6 +526,7 @@ public class TableDataPanel
 	private void retrieveEnd()
 	{
 		this.retrieveRunning = false;
+		this.dataDisplay.updateStatusBar();
 		fireDbExecEnd();
 	}
 
@@ -640,24 +640,30 @@ public class TableDataPanel
 				}
 			});
 		}
+		catch (LowMemoryException mem)
+		{
+			WbSwingUtilities.showDefaultCursor(this);
+			error = true;
+			WbManager.getInstance().showLowMemoryError();
+		}
 		catch (Throwable e)
 		{
 			WbSwingUtilities.showDefaultCursor(this);
 			error = true;
-			final String msg;
 
 			if (e instanceof OutOfMemoryError)
 			{
 				try { dataDisplay.getTable().reset(); } catch (Throwable th) {}
-				msg = ResourceMgr.getString("MsgOutOfMemoryError");
+				//msg = ResourceMgr.getString("MsgOutOfMemoryError");
+				WbManager.getInstance().showOutOfMemoryError();
 			}
 			else
 			{
-				msg = ExceptionUtil.getDisplay(e);
+				String msg = ExceptionUtil.getDisplay(e);
+				LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
+				WbSwingUtilities.showErrorMessage(this, msg);
 			}
 
-			LogMgr.logError("TableDataPanel.doRetrieve()", "Error retrieving table data", e);
-			WbSwingUtilities.showErrorMessage(this, msg);
 		}
 		finally
 		{

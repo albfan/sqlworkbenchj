@@ -97,6 +97,7 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.Reloadable;
 import workbench.resource.GuiSettings;
+import workbench.util.LowMemoryException;
 import workbench.util.WbWorkspace;
 import workbench.util.WbProperties;
 
@@ -838,6 +839,12 @@ public class TableListPanel
 			reset();
 			setDirty(true);
 			WbManager.getInstance().showOutOfMemoryError();
+		}
+		catch (LowMemoryException mem)
+		{
+			reset();
+			setDirty(true);
+			WbManager.getInstance().showLowMemoryError();
 		}
 		catch (Throwable e)
 		{

@@ -112,7 +112,7 @@ public class BooleanPropertyEditor
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("BooleanPropertyEditor.setSourceObject()", "Error when applying changes", e);
 		}
 	}
 	

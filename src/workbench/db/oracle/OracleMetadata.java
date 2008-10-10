@@ -421,7 +421,7 @@ public class OracleMetadata
 				int line = rs.getInt(1);
 				int pos = rs.getInt(2);
 				String msg = rs.getString(3);
-				result.append(ResourceMgr.getFormattedString("ErrAtLinePos", line, pos));
+				result.append(ResourceMgr.getFormattedString("ErrAtLinePos", Integer.valueOf(line), Integer.valueOf(pos)));
 				result.append("\n");
 				result.append(msg);
 				count++;

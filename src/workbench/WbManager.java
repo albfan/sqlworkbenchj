@@ -132,6 +132,11 @@ public final class WbManager
 		}
 	}
 
+	public void setOutOfMemoryOcurred()
+	{
+		this.outOfMemoryOcurred = true;
+	}
+
 	public boolean outOfMemoryOcurred()
 	{
 		return this.outOfMemoryOcurred;
@@ -140,7 +145,12 @@ public final class WbManager
 	public void showOutOfMemoryError()
 	{
 		outOfMemoryOcurred = true;
-		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgOutOfMemoryError");
+		showLowMemoryError();
+	}
+
+	public void showLowMemoryError()
+	{
+		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgLowMemoryError");
 	}
 
 	public MainWindow getCurrentWindow()

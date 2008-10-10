@@ -1,5 +1,5 @@
 /*
- * SelectMaxRowsAction.java
+ * ClearCompletionCacheAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -12,30 +12,33 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
-import workbench.gui.sql.DwStatusBar;
+import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ * Action to clear the contents of the message display
+ *
+ * @author  support@sql-workbench.net
  */
-public class SelectMaxRowsAction
+public class ClearMessagesAction
 	extends WbAction
 {
-	private DwStatusBar client;
-
-	public SelectMaxRowsAction(DwStatusBar aClient)
+	private ResultLogger logdisplay;
+	
+	public ClearMessagesAction(ResultLogger log)
 	{
 		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtSelectMaxRows", KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0));
+		logdisplay = log;
+		this.initMenuDefinition("MnuTxtClearLog");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.setEnabled(true);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		client.selectMaxRowsField();
+		if (logdisplay != null)
+		{
+			logdisplay.clearLog();
+		}
 	}
 }

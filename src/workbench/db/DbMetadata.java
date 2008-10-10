@@ -161,8 +161,8 @@ public class DbMetadata
 		// Some JDBC drivers do not return a value for getCatalogTerm() or getSchemaTerm()
 		// and don't throw an Exception. This is to ensure that our getCatalogTerm() will
 		// always return something usable.
-		if (StringUtil.isEmptyString(this.schemaTerm)) this.schemaTerm = "Schema";
-		if (StringUtil.isEmptyString(this.catalogTerm))	this.catalogTerm = "Catalog";
+		if (StringUtil.isBlank(this.schemaTerm)) this.schemaTerm = "Schema";
+		if (StringUtil.isBlank(this.catalogTerm))	this.catalogTerm = "Catalog";
 
 		try
 		{

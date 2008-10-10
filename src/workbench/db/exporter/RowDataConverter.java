@@ -84,7 +84,7 @@ public abstract class RowDataConverter
 	{
 		this.defaultDateFormatter = Settings.getInstance().getDefaultDateFormatter();
 		this.defaultTimestampFormatter = Settings.getInstance().getDefaultTimestampFormatter();
-		this.defaultNumberFormatter = Settings.getInstance().getDefaultDecimalFormatter();
+		this.defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 	}
 
 	public void setWriteHeader(boolean writeHeader)

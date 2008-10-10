@@ -64,7 +64,6 @@ public class ComboStringPropertyEditor
 			Class[] parms = { String.class };
 
 			this.setter = cls.getMethod(name, parms);
-			//this.setEditable(true);
 			if (this.getModel() != null) 
 			{
 				this.initData();
@@ -72,8 +71,7 @@ public class ComboStringPropertyEditor
 		}
 		catch (Exception e)
 		{
-			System.out.println("Error on init");
-			e.printStackTrace();
+			LogMgr.logError("ComboStringPropertyEditor.setSourceObject()", "Error during init", e);
 		}
 		startEvents();
 	}
@@ -140,7 +138,7 @@ public class ComboStringPropertyEditor
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ComboProperty.intiData", "Error", e);
+			LogMgr.logError("ComboStringPropertyEditor.intiData", "Error", e);
 		}
 	}
 	
@@ -164,7 +162,7 @@ public class ComboStringPropertyEditor
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("ComboStringPropertyEditor.setSourceObject()", "Error during init", e);
 		}
 	}
 	

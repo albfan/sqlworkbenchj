@@ -89,6 +89,7 @@ public class QueryCopySource
 				// CLOB data as a String which I hope will be
 				// more flexible when copying from Oracle
 				// to other systems
+				// That's why I'm reading the result set into a RowData object
 				currentRow.read(rs, info);
 				if (!keepRunning) break;
 				

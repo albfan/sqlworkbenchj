@@ -1967,29 +1967,18 @@ public class Settings
 	public void setMaxFractionDigits(int aValue)
 	{
 		this.props.setProperty("workbench.gui.display.maxfractiondigits", Integer.toString(aValue));
-		this.defaultDecimalFormatter = null;
 	}
 
-	private DecimalFormat defaultDecimalFormatter = null;
-	private DecimalFormatSymbols decSymbols = new DecimalFormatSymbols();
-
-	public DecimalFormat getDefaultDecimalFormatter()
+	public DecimalFormat createDefaultDecimalFormatter()
 	{
-		this.initFormatter();
-		return this.defaultDecimalFormatter;
-	}
-
-	private void initFormatter()
-	{
-		if (this.defaultDecimalFormatter == null)
-		{
-			this.defaultDecimalFormatter = new DecimalFormat("0.#");
-			String sep = this.getDecimalSymbol();
-			int maxDigits = this.getMaxFractionDigits();
-			this.decSymbols.setDecimalSeparator(sep.charAt(0));
-			this.defaultDecimalFormatter.setDecimalFormatSymbols(this.decSymbols);
-			this.defaultDecimalFormatter.setMaximumFractionDigits(maxDigits);
-		}
+		DecimalFormat formatter = new DecimalFormat("0.#");
+		String sep = this.getDecimalSymbol();
+		int maxDigits = this.getMaxFractionDigits();
+		DecimalFormatSymbols decSymbols = new DecimalFormatSymbols();
+		decSymbols.setDecimalSeparator(sep.charAt(0));
+		formatter.setDecimalFormatSymbols(decSymbols);
+		formatter.setMaximumFractionDigits(maxDigits);
+		return formatter;
 	}
 
 	public String getDecimalSymbol()
@@ -2000,7 +1989,6 @@ public class Settings
 	public void setDecimalSymbol(String aSep)
 	{
 		this.props.setProperty("workbench.gui.display.decimal.separator", aSep);
-		this.defaultDecimalFormatter = null;
 	}
 
 	// </editor-fold>

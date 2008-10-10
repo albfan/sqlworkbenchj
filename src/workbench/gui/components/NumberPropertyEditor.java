@@ -86,7 +86,7 @@ public class NumberPropertyEditor
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("NumberPropertyEditor.applyChanges", "Error applying changes", e);
 		}
 	}
 	

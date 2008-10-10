@@ -63,6 +63,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.renderer.RendererFactory;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
+import workbench.util.LowMemoryException;
 import workbench.util.WbWorkspace;
 
 /**
@@ -259,6 +260,10 @@ public class ProcedureListPanel
 				}
 			});
 			shouldRetrieve = false;
+		}
+		catch (LowMemoryException mem)
+		{
+			WbManager.getInstance().showLowMemoryError();
 		}
 		catch (OutOfMemoryError mem)
 		{

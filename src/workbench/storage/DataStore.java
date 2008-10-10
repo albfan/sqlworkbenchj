@@ -37,6 +37,8 @@ import workbench.resource.Settings;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
+import workbench.util.LowMemoryException;
+import workbench.util.MemoryWatcher;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -1040,6 +1042,8 @@ public class DataStore
 		}
 
 		this.cancelRetrieve = false;
+		boolean lowMemory = false;
+		
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 
 		try
@@ -1062,6 +1066,12 @@ public class DataStore
 				this.data.add(row);
 				if (this.cancelRetrieve) break;
 				if (maxRows > 0 && rowCount > maxRows) break;
+				if (MemoryWatcher.isMemoryLow())
+				{
+					LogMgr.logError("DataStore.initData()", "Memory is running low. Aborting reading...", null);
+					lowMemory = true;
+					break;
+				}
 			}
 			this.cancelRetrieve = false;
 		}
@@ -1091,6 +1101,11 @@ public class DataStore
 		finally
 		{
 			this.modified = false;
+		}
+		
+		if (lowMemory)
+		{
+			throw new LowMemoryException();
 		}
 	}
 

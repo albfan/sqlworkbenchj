@@ -144,12 +144,12 @@ public class WbExportTest
 		String create1 = p.getCommand(0);
 		assertEquals("CREATE", SqlUtil.getSqlVerb(create1));
 		assertEquals("TABLE", SqlUtil.getCreateType(create1));
-		assertEquals("JUNIT_TEST", SqlUtil.getCreateTable(create1));
+		assertEquals("JUNIT_TEST", TestUtil.getCreateTable(create1));
 		
 		String create2 = p.getCommand(3);
 		assertEquals("CREATE", SqlUtil.getSqlVerb(create2));
 		assertEquals("TABLE", SqlUtil.getCreateType(create2));
-		assertEquals("PERSON", SqlUtil.getCreateTable(create2));
+		assertEquals("PERSON", TestUtil.getCreateTable(create2));
 	}
 
 	public void testExportRownum()

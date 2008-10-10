@@ -85,7 +85,18 @@ public class DelimiterDefinitionTest
 			d = DelimiterDefinition.parseCmdLineArgument("/   ");
 			assertEquals(false, d.isEmpty());
 			assertEquals(false, d.isSingleLine());
-			assertEquals("/", d.getDelimiter());			
+			assertEquals("/", d.getDelimiter());
+
+			d = DelimiterDefinition.parseCmdLineArgument("GO:nl");
+			assertEquals(false, d.isEmpty());
+			assertEquals(true, d.isSingleLine());
+			assertEquals("GO", d.getDelimiter());
+
+			d = DelimiterDefinition.parseCmdLineArgument("/:nl");
+			assertEquals(false, d.isEmpty());
+			assertEquals(true, d.isSingleLine());
+			assertEquals("/", d.getDelimiter());
+
 		}
 		catch (Exception e)
 		{

@@ -39,6 +39,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import javax.swing.table.TableModel;
+import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -71,6 +72,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.RowActionMonitor;
+import workbench.util.LowMemoryException;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -123,7 +125,7 @@ public class DwPanel
 		this(null);
 	}
 
-	public DwPanel(DwStatusBar aStatusBar)
+	public DwPanel(DwStatusBar statusBar)
 	{
 		super();
 		JTextField stringField = new JTextField();
@@ -135,7 +137,7 @@ public class DwPanel
 		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
 		numberField.addMouseListener(new TextComponentMouseListener());
 
-		this.initLayout(aStatusBar);
+		this.initLayout(statusBar);
 
 		this.setDoubleBuffered(true);
 		this.dataTable.addTableModelListener(this);
@@ -668,15 +670,23 @@ public class DwPanel
 		// passing the maxrows to the datastore is a workaround for JDBC drivers
 		// which do not support the setMaxRows() method.
 		// The datastore will make sure that not more rows are read than really requested
-		if (this.showLoadProgress)
+		try
 		{
-			newData = new DataStore(result, true, this.genericRowMonitor, this.getMaxRows(), this.dbConnection);
+			if (this.showLoadProgress)
+			{
+				newData = new DataStore(result, true, this.genericRowMonitor, this.getMaxRows(), this.dbConnection);
+			}
+			else
+			{
+				newData = new DataStore(result, true, null, this.getMaxRows(), this.dbConnection);
+			}
+			showData(newData, sql);
 		}
-		else
+		catch (LowMemoryException mem)
 		{
-			newData = new DataStore(result, true, null, this.getMaxRows(), this.dbConnection);
+			WbManager.getInstance().showLowMemoryError();
 		}
-		showData(newData, sql);
+
 	}
 
 	public void showData(final DataStore newData, final String statement)
@@ -721,6 +731,7 @@ public class DwPanel
 		if (this.readOnly)
 		{
 			this.disableUpdateActions();
+			dataTable.getDataStoreTableModel().setAllowEditing(false);
 		}
 		else
 		{
@@ -929,6 +940,10 @@ public class DwPanel
 	public void updateStatusBar()
 	{
 		this.rowCountChanged();
+		if (this.statusBar != null)
+		{
+			statusBar.showSelectionIndicator(this.dataTable);
+		}
 	}
 	/**
 	 *	Show a message in the status panel.
@@ -985,6 +1000,7 @@ public class DwPanel
 	public void clearContent()
 	{
 		this.dataTable.reset();
+		statusBar.removeSelectionIndicator(dataTable);
 		this.hasResultSet = false;
 		this.lastMessage = null;
 		this.sql = null;
@@ -1221,9 +1237,12 @@ public class DwPanel
 		if (this.batchUpdate) return;
 		if (this.readOnly) return;
 
-		if (!isEditingStarted() && this.isModified() &&
-				e.getFirstRow() != TableModelEvent.ALL_COLUMNS &&
-				e.getFirstRow() != TableModelEvent.HEADER_ROW)
+		boolean editing = isEditingStarted();
+		boolean modified = this.isModified();
+		int firstRow = e.getFirstRow();
+		boolean structureChange = (firstRow == TableModelEvent.ALL_COLUMNS || firstRow == TableModelEvent.HEADER_ROW);
+
+		if (!editing && modified && !structureChange)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{

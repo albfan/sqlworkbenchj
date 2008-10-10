@@ -23,7 +23,6 @@ import java.util.ResourceBundle;
 import javax.swing.ImageIcon;
 
 import workbench.log.LogMgr;
-import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
@@ -104,19 +103,6 @@ public class ResourceMgr
 	public static String getDefaultTabLabel()
 	{
 		return getString("LblTabStatement");
-	}
-
-	public static String getFormattedString(String key, int value1)
-	{
-		return MessageFormat.format(getString(key), NumberStringCache.getNumberString(value1));
-	}
-	
-	public static String getFormattedString(String key, int value1, int value2)
-	{
-		return MessageFormat.format(getString(key), 
-			NumberStringCache.getNumberString(value1),
-			NumberStringCache.getNumberString(value2)
-		);
 	}
 	
 	public static String getFormattedString(String key, Object ... values)

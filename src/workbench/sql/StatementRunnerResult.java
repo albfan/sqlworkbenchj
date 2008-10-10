@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import workbench.gui.sql.DwStatusBar;
+import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
 
 import workbench.storage.DataStore;
@@ -72,6 +73,12 @@ public class StatementRunnerResult
 		double time = ((double)executionTime) / 1000.0;
 		msg.append(timingFormatter.format(time));
 		return msg.toString();
+	}
+
+	public void appendMessages(ResultLogger log)
+	{
+		if (this.messages == null) return;
+		messages.appendTo(log);
 	}
 	
 	public void setSuccess() { this.success = true; }

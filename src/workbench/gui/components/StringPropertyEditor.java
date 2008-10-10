@@ -113,7 +113,7 @@ public class StringPropertyEditor
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
+			LogMgr.logError("StringPropertyEditor.setSourceObject()", "Error when applying changes", e);
 		}
 	}
 	

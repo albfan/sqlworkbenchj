@@ -14,6 +14,7 @@ package workbench.util;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.interfaces.ResultLogger;
 import workbench.resource.Settings;
 
 /**
@@ -44,7 +45,7 @@ public class MessageBuffer
 	 */
 	public MessageBuffer()
 	{
-		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 2500));
+		this(Settings.getInstance().getIntProperty("workbench.messagebuffer.maxentries", 1500));
 	}
 	
 	/**
@@ -70,7 +71,26 @@ public class MessageBuffer
 		this.messages.clear();
 		this.length = 0;
 	}
-	
+
+	/**
+	 * Write the messages of this MessageBuffer directly to a ResultLogger
+	 * The internal buffer is cleared during the writing
+	 * 
+	 * @return the total number of characters written
+	 */
+	public synchronized int appendTo(ResultLogger log)
+	{
+		int size = 0;
+		while (messages.size() > 0)
+		{
+			CharSequence s = messages.removeFirst();
+			size += s.length();
+			log.appendToLog(s.toString());
+		}
+		length = 0;
+		return size;
+	}
+
 	/**
 	 * Create a StringBuilder that contains the collected messages.
 	 * Once the result is returned, the internal list is emptied. 

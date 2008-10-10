@@ -102,6 +102,16 @@ public class LogFileViewer
 		}
 	}
 
+	@Override
+	public void setVisible(boolean b)
+	{
+		super.setVisible(b);
+		if (b && sourceFile != null)
+		{
+			load();
+		}
+	}
+
 	protected Runnable _scroller = new Runnable()
 		{
 			public void run()
@@ -121,7 +131,7 @@ public class LogFileViewer
 	{
 		sourceFile = new WbFile(f);
 		setTitle(sourceFile.getFullPath());
-		load();
+		// load() is not necessary because setVisible() will do that
 	}
 
 	protected void saveSettings()

@@ -78,17 +78,27 @@ public class DelimiterDefinition
 	public static DelimiterDefinition parseCmdLineArgument(String arg)
 	{
 		if (StringUtil.isEmptyString(arg)) return null;
-		
-		String[] elements = arg.split(";");
-		
-		// as the argument is never empty, we always have at least one element		
-		String delim = elements[0];
-		boolean single = false;
-		
-		if (elements.length > 1)
+
+		String delim = null;
+		final boolean single;
+		int pos = arg.indexOf(':');
+		if (pos == -1)
 		{
-			single = "nl".equalsIgnoreCase(elements[1]);
+			pos = arg.indexOf(';', 1);
 		}
+
+		if (pos > -1)
+		{
+			String type = arg.substring(pos + 1);
+			single = "nl".equalsIgnoreCase(type);
+			delim = arg.substring(0, pos);
+		}
+		else
+		{
+			delim = arg;
+			single = false;
+		}
+		
 		return new DelimiterDefinition(delim, single);
 	}
 	

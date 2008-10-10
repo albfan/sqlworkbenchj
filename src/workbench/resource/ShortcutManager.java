@@ -57,7 +57,7 @@ public class ShortcutManager
 	protected ShortcutManager(String aFilename)
 	{
 		this.filename = aFilename;
-		LogMgr.logDebug("ShortcutManager", "Using file: " + filename);
+//		LogMgr.logDebug("ShortcutManager", "Using file: " + filename);
 		try
 		{
 			WbPersistence reader = new WbPersistence(this.filename);
@@ -255,6 +255,7 @@ public class ShortcutManager
 		if (!modified)
 		{
 			LogMgr.logDebug("ShortcutManager.saveSettings()", "Nothing modified. Definitions will not be saved");
+			return;
 		}
 		
 		// we only want to save those definitions where a different mapping is defined

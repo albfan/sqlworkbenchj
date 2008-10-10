@@ -20,8 +20,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
-import workbench.sql.formatter.SQLLexer;
-import workbench.sql.formatter.SQLToken;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -44,10 +42,8 @@ public class DdlCommand
 	public static final DdlCommand REVOKE = new DdlCommand("REVOKE");
 
 	// Firebird RECREATE VIEW command
-	public static final SqlCommand RECREATE = new DdlCommand("RECREATE");
+	public static final DdlCommand RECREATE = new DdlCommand("RECREATE");
 	public static final List<DdlCommand> DDL_COMMANDS;
-	private Savepoint ddlSavepoint;
-
 
 	static
 	{
@@ -59,7 +55,9 @@ public class DdlCommand
 		l.add(REVOKE);
 		DDL_COMMANDS = Collections.unmodifiableList(l);
 	}
+	
 	private String verb;
+	private Savepoint ddlSavepoint;
 
 	private DdlCommand(String aVerb)
 	{
@@ -82,6 +80,8 @@ public class DdlCommand
 			LogMgr.logWarning("DdlCommand.execute()", "A savepoint should be used for this DDL command, but the driver does not support savepoints!");
 		}
 
+		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(aSql);
+		
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();
@@ -100,7 +100,7 @@ public class DdlCommand
 				try
 				{
 					this.currentStatement.executeUpdate(aSql);
-					result.addMessage(ResourceMgr.getString("MsgDropSuccess"));
+					result.addMessage(getSuccessMessage(info));
 				}
 				catch (Exception th)
 				{
@@ -123,7 +123,7 @@ public class DdlCommand
 				// Process result will have added any warnings and set the warning flag
 				if (result.hasWarning())
 				{
-					if (this.addExtendErrorInfo(currentConnection, aSql, result))
+					if (this.addExtendErrorInfo(currentConnection, info, result))
 					{
 						result.setFailure();
 					}
@@ -131,20 +131,8 @@ public class DdlCommand
 
 				if (result.isSuccess())
 				{
-					if ("DROP".equals(verb))
-					{
-						result.addMessage(ResourceMgr.getString("MsgDropSuccess"));
-					}
-					else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
-					{
-						result.addMessage(ResourceMgr.getString("MsgCreateSuccess"));
-					}
-					else
-					{
-						appendSuccessMessage(result);
-					}
+					result.addMessage(getSuccessMessage(info));
 				}
-
 			}
 			this.currentConnection.releaseSavepoint(ddlSavepoint);
 		}
@@ -168,7 +156,7 @@ public class DdlCommand
 			result.addMessageNewLine();
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 
-			addExtendErrorInfo(currentConnection, aSql, result);
+			addExtendErrorInfo(currentConnection, info, result);
 			result.setFailure();
 			LogMgr.logSqlError("DdlCommand.execute()", aSql, e);
 		}
@@ -205,34 +193,25 @@ public class DdlCommand
 		return m.find();
 	}
 
-	/**
-	 * Extract the name of the created object for Oracle stored procedures.
-	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
-	 */
-	protected String getObjectName(String sql)
+	private String getSuccessMessage(SqlUtil.DdlObjectInfo info)
 	{
-		SQLLexer l = new SQLLexer(sql);
-		SQLToken t = l.getNextToken(false, false);
-		if (t == null)
+		if ("DROP".equals(verb))
 		{
-			return null;
+			if (info == null)
+			{
+				return ResourceMgr.getString("MsgGenDropSuccess");
+			}
+			return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
 		}
-		String v = t.getContents();
-		if (!v.equals("CREATE") && !v.equals("CREATE OR REPLACE"))
+		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
 		{
-			return null;
+			if (info == null)
+			{
+				return ResourceMgr.getString("MsgGenCreateSuccess");
+			}
+			return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
 		}
-
-		// next token must be the type
-		t = l.getNextToken(false, false);
-		if (t == null)
-		{
-			return null;
-		}
-
-		// the token after the type must be the object's name
-		t = l.getNextToken(false, false);
-		return t.getContents();
+		return getDefaultSuccessMessage();
 	}
 
 	/**
@@ -243,21 +222,11 @@ public class DdlCommand
 	 * @see #getObjectName(String)
 	 * @see #getObjectType(String)
 	 */
-	private boolean addExtendErrorInfo(WbConnection aConnection, String sql, StatementRunnerResult result)
+	private boolean addExtendErrorInfo(WbConnection aConnection, SqlUtil.DdlObjectInfo info , StatementRunnerResult result)
 	{
-		String type = SqlUtil.getCreateType(sql);
-		if (type == null)
-		{
-			return false;
-		}
+		if (info == null) return false;
 
-		String name = getObjectName(sql);
-		if (name == null)
-		{
-			return false;
-		}
-
-		String msg = aConnection.getMetadata().getExtendedErrorInfo(null, name, type);
+		String msg = aConnection.getMetadata().getExtendedErrorInfo(null, info.objectName, info.objectType);
 		if (msg != null && msg.length() > 0)
 		{
 			result.addMessageNewLine();
@@ -274,4 +243,5 @@ public class DdlCommand
 	{
 		return verb;
 	}
+
 }

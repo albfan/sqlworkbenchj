@@ -90,14 +90,15 @@ import workbench.resource.Settings;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
+import workbench.util.MemoryWatcher;
 import workbench.util.StringUtil;
 
 /**
  * An extension to {@link workbench.gui.editor.JEditTextArea}. This class
  * implements Workbench (SQL) specific extensions to the original jEdit class.
- * 
+ *
  * @see workbench.gui.editor.JEditTextArea
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class EditorPanel
@@ -113,13 +114,13 @@ public class EditorPanel
 
 	private FormatSqlAction formatSql;
 	private SearchAndReplace replacer;
-	
+
 	protected FileOpenAction fileOpen;
 	protected FileSaveAsAction fileSaveAs;
-	
+
 	protected FileSaveAction fileSave;
 	protected FileReloadAction fileReloadAction;
-	
+
 	private ColumnSelectionAction columnSelection;
 	private MatchBracketAction matchBracket;
 	private CommentAction commentAction;
@@ -132,7 +133,7 @@ public class EditorPanel
 	private Set<String> dbDatatypes = null;
 	private boolean isMySQL = false;
 	private DelimiterDefinition alternateDelimiter;
-	
+
 	public static EditorPanel createSqlEditor()
 	{
 		AnsiSQLTokenMarker sql = new AnsiSQLTokenMarker();
@@ -167,7 +168,7 @@ public class EditorPanel
 
 		this.fileReloadAction = new FileReloadAction(this);
 		this.fileReloadAction.setEnabled(false);
-		
+
 		this.replacer = new SearchAndReplace(this, this);
 		this.addKeyBinding(this.getFindAction());
 		this.addKeyBinding(this.getFindAgainAction());
@@ -197,7 +198,7 @@ public class EditorPanel
 	{
 		this.setTokenMarker(null);
 	}
-	
+
 	public void enableSqlHighlight()
 	{
 		if (this.sqlTokenMarker == null)
@@ -206,13 +207,13 @@ public class EditorPanel
 		}
 		this.setTokenMarker(this.sqlTokenMarker);
 	}
-	
+
 	public void setDatabaseConnection(WbConnection aConnection)
 	{
 		dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
 		dbDatatypes = new TreeSet<String>(new CaseInsensitiveComparator());
-		
-		if (aConnection == null) 
+
+		if (aConnection == null)
 		{
 			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
 		}
@@ -223,7 +224,7 @@ public class EditorPanel
 		}
 
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
-		
+
 		if (token == null) return;
 
 		token.initKeywordMap(); // reset keywords, to get rid of old DBMS specific ones
@@ -236,7 +237,7 @@ public class EditorPanel
 
 		this.commentChar = "--";
 		String dbId = (aConnection == null ? null : aConnection.getMetadata().getDbId());
-		
+
 		SqlDataTypesHandler handler = new SqlDataTypesHandler(dbId);
 		dbDatatypes.addAll(handler.getDataTypes());
 
@@ -248,7 +249,7 @@ public class EditorPanel
 		token.addDatatypes(dbDatatypes);
 		token.addSqlKeyWords(helper.getKeywords());
 		token.addOperators(helper.getOperators());
-		
+
 		if (aConnection != null)
 		{
 			this.isMySQL = aConnection.getMetadata().isMySql();
@@ -270,7 +271,7 @@ public class EditorPanel
 			this.setFont(aFont);
 		}
 	}
-	
+
 	public AnsiSQLTokenMarker getSqlTokenMarker()
 	{
 		TokenMarker marker = this.getTokenMarker();
@@ -303,7 +304,7 @@ public class EditorPanel
 	protected ReplaceAction getReplaceAction() { return this.replacer.getReplaceAction(); }
 
 	public SearchAndReplace getReplacer() { return this.replacer; }
-	
+
 	public FileSaveAction getFileSaveAction() { return this.fileSave; }
 	public FileSaveAsAction getFileSaveAsAction() { return this.fileSaveAs; }
 	public FormatSqlAction getFormatSqlAction() { return this.formatSql; }
@@ -377,7 +378,7 @@ public class EditorPanel
 		this.setDocument(new SyntaxDocument());
 	}
 	/**
-	 * Return the selected statement of the editor. If no 
+	 * Return the selected statement of the editor. If no
 	 * text is selected, the whole text will be returned
 	 */
 	public String getSelectedStatement()
@@ -410,7 +411,7 @@ public class EditorPanel
 		this.fileSave.setEnabled(hasFile);
 		this.fileReloadAction.setEnabled(hasFile);
 	}
-	
+
 	public void fireFilenameChanged(String aNewName)
 	{
 		this.checkFileActions();
@@ -478,7 +479,7 @@ public class EditorPanel
 			LogMgr.logError("EditorPanel.openFile()", "Error selecting file", e);
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
 			return false;
-		}			
+		}
 	}
 
 	public boolean reloadFile()
@@ -541,7 +542,7 @@ public class EditorPanel
 		{
 			return YesNoCancelResult.no;
 		}
-		else 
+		else
 		{
 			return YesNoCancelResult.cancel;
 		}
@@ -561,12 +562,12 @@ public class EditorPanel
 			WbSwingUtilities.showErrorMessageKey(this, "MsgFileTooBig");
 			return false;
 		}
-		
+
 		boolean result = false;
-		
+
 		BufferedReader reader = null;
 		SyntaxDocument doc = null;
-		
+
 		try
 		{
 			// try to free memory by releasing the current document
@@ -574,10 +575,10 @@ public class EditorPanel
 			{
 				this.document.removeDocumentListener(documentHandler);
 				this.document.dispose();
-			}			
+			}
 			System.gc();
 			System.runFinalization();
-			
+
 			String filename = aFile.getAbsolutePath();
 			File f = new File(filename);
 			try
@@ -594,7 +595,9 @@ public class EditorPanel
 					FileInputStream in = new FileInputStream(filename);
 					reader = new BufferedReader(new InputStreamReader(in, "UTF-8"), 8192);
 				}
-				catch (Throwable ignore) {}
+				catch (Throwable ignore)
+				{
+				}
 			}
 
 			// Creating a SyntaxDocument with a filled GapContent
@@ -605,16 +608,17 @@ public class EditorPanel
 			GapContent  content = new GapContent((int)aFile.length() + 1500);
 			doc = new SyntaxDocument(content);
 			doc.suspendUndo();
-			
+
 			int pos = 0;
-			
+
 			final int numLines = 50;
 			StringBuilder lineBuffer = new StringBuilder(numLines * 100);
-			
-			// Inserting the text in chunks is much faster than 
+			boolean lowMemory = false;
+
+			// Inserting the text in chunks is much faster than
 			// inserting it line by line. Optimal speed would probably
 			// when reading everything into a buffer, and then call insertString()
-			// only once, but that will double the memory usage during loading 
+			// only once, but that will double the memory usage during loading
 			int lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
 			while (lines > 0)
 			{
@@ -622,15 +626,28 @@ public class EditorPanel
 				pos += lineBuffer.length();
 				lineBuffer.setLength(0);
 				lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
+				if (MemoryWatcher.isMemoryLow())
+				{
+					lowMemory = true;
+					break;
+				}
 			}
-			
-			doc.resumeUndo();
-			this.setDocument(doc);
-			
-			this.currentFile = aFile;
-			this.fileEncoding = encoding;
-			result = true;
-			this.fireFilenameChanged(filename);
+
+			if (lowMemory)
+			{
+				doc.dispose();
+				result = false;
+				WbManager.getInstance().showLowMemoryError();
+			}
+			else
+			{
+				doc.resumeUndo();
+				this.setDocument(doc);
+				this.currentFile = aFile;
+				this.fileEncoding = encoding;
+				result = true;
+				this.fireFilenameChanged(filename);
+			}
 		}
 		catch (BadLocationException bl)
 		{
@@ -740,7 +757,7 @@ public class EditorPanel
 	{
 		this.saveFile(aFile, encoding, Settings.getInstance().getExternalEditorLineEnding());
 	}
-	
+
 	public void saveFile(File aFile, String encoding, String lineEnding)
 		throws IOException
 	{
@@ -758,11 +775,11 @@ public class EditorPanel
 				filename = filename + ".sql";
 				aFile = new File(filename);
 			}
-			
+
 			Writer writer = EncodingUtil.createWriter(aFile, encoding, false);
-			
+
 			int count = this.getLineCount();
-			
+
 			for (int i=0; i < count; i++)
 			{
 				String line = this.getLineText(i);

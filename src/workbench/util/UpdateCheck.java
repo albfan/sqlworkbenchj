@@ -27,7 +27,8 @@ public class UpdateCheck
 	implements ActionListener
 {
 	private WbVersionReader versionReader;
-
+	private final boolean debug = Boolean.getBoolean("workbench.debug.versioncheck");
+	
 	public void startUpdateCheck()
 	{
 		int interval = Settings.getInstance().getUpdateCheckInterval();
@@ -35,14 +36,14 @@ public class UpdateCheck
 
 		Date lastCheck = Settings.getInstance().getLastUpdateCheck();
 
-		if (needCheck(interval, new java.util.Date(), lastCheck))
+		if (debug || needCheck(interval, new java.util.Date(), lastCheck))
 		{
 			startRead();
 		}
 	}
 
 	/**
-	 * This is so that the method is accessible for Unit-Testing
+	 * This is public so that the method is accessible for Unit-Testing
 	 */
 	public boolean needCheck(int interval, Date today, Date lastCheck)
 	{
@@ -79,7 +80,7 @@ public class UpdateCheck
 		versionReader.startCheckThread();
 	}
 
-	private void versionAvailable()
+	private void showNotification()
 	{
 		try
 		{
@@ -88,7 +89,7 @@ public class UpdateCheck
 
 			UpdateVersion update = this.versionReader.getAvailableUpdate();
 			NotifierEvent event = null;
-			if (update == UpdateVersion.stable)
+			if (debug || update == UpdateVersion.stable)
 			{
 				LogMgr.logInfo("UpdateCheck.run()", "New stable version available");
 				event = new NotifierEvent("updates.png", ResourceMgr.getString("LblVersionNewStableAvailable"), this);
@@ -130,7 +131,7 @@ public class UpdateCheck
 	{
 		if (e.getSource() == this.versionReader)
 		{
-			versionAvailable();
+			showNotification();
 			return;
 		}
 		try

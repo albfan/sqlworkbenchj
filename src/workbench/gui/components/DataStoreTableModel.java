@@ -369,10 +369,9 @@ public class DataStoreTableModel
 		}
 		else
 		{
-			return this.allowEditing;// && !SqlUtil.isBlobType(this.dataCache.getColumnType(column));
+			return this.allowEditing;
 		}
 	}
-
 
 	/**
 	 * Clear the locked column. After a call to clearLockedColumn()
