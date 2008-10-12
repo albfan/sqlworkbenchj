@@ -11,6 +11,8 @@
  */
 package workbench.gui.tools;
 
+import java.awt.Dimension;
+import java.awt.FontMetrics;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
@@ -45,22 +47,22 @@ public class ConnectionInfoPanel
 
 		try
 		{
-			StringBuilder content = new StringBuilder();
+			StringBuilder content = new StringBuilder(500);
 			content.append("<html>");
 
 			DatabaseMetaData meta = conn.getSqlConnection().getMetaData();
 			DbMetadata wbmeta = conn.getMetadata();
 
-			content.append("<b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + meta.getDatabaseProductName() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "<br>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + meta.getDatabaseProductName() + "</div>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "</div>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "</div>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "</div>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoClass") + ":</b> " + conn.getProfile().getDriverclass() + "</div>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "</div>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "</div>\n");
 			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\n");
-			content.append("<b>" + StringUtil.capitalize(wbmeta.getSchemaTerm()) + ":</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\n");
-			content.append("<b>" + StringUtil.capitalize(wbmeta.getCatalogTerm()) + ":</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblSchema") + " (" + StringUtil.capitalize(wbmeta.getSchemaTerm()) + "):</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\n");
+			content.append("<b>" + ResourceMgr.getString("LblCatalog") + " (" + StringUtil.capitalize(wbmeta.getCatalogTerm()) + "):</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\n");
 			content.append("<b>Workbench DBID:</b> " + wbmeta.getDbId() + " \n");
 			content.append("</html>");
 			infotext.setContentType("text/html");
@@ -69,6 +71,12 @@ public class ConnectionInfoPanel
 			infotext.setText(content.toString());
 			infotext.setCaretPosition(0);
 			new TextComponentMouseListener(infotext);
+			FontMetrics fm = infotext.getFontMetrics(infotext.getFont());
+			int height = fm.getHeight() * 11 + 32;
+			Dimension d = new Dimension(450, height);
+			jScrollPane1.setSize(d);
+			jScrollPane1.setPreferredSize(d);
+			jScrollPane1.setMaximumSize(d);
 		}
 		catch (Exception e)
 		{
@@ -87,7 +95,8 @@ public class ConnectionInfoPanel
 		ConnectionInfoPanel p = new ConnectionInfoPanel(con);
 		JFrame f = WbManager.getInstance().getCurrentWindow();
 		ValidatingDialog d = new ValidatingDialog(f, ResourceMgr.getString("LblConnInfo"), p, false);
-		d.setSize(450,350);
+		//d.setSize(450,350);
+		d.pack();
 		WbSwingUtilities.center(d, f);
 		d.setVisible(true);
 		d.dispose();
@@ -110,7 +119,7 @@ public class ConnectionInfoPanel
 
     infotext.setContentType("text/html");
     infotext.setEditable(false);
-    infotext.setFont(new java.awt.Font("Dialog", 0, 11));
+    infotext.setFont(new java.awt.Font("Dialog", 0, 11)); // NOI18N
     jScrollPane1.setViewportView(infotext);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -161,6 +170,11 @@ public class ConnectionInfoPanel
 	private class InfoEditorPane
 		extends JEditorPane
 	{
+		public InfoEditorPane()
+		{
+			super();
+		}
+
 		public String getSelection()
 		{
 			Document doc = getDocument();

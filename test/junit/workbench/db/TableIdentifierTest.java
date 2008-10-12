@@ -21,10 +21,9 @@ import workbench.TestUtil;
  *
  * @author support@sql-workbench.net
  */
-public class TableIdentifierTest 
+public class TableIdentifierTest
 	extends TestCase
 {
-	
 	public TableIdentifierTest(String testName)
 	{
 		super(testName);
@@ -41,24 +40,24 @@ public class TableIdentifierTest
 			tbl.setPreserveQuotes(true);
 			String exp = tbl.getTableExpression(con);
 			assertEquals("Wrong expression", t, exp);
-			
+
 			t = "table:bla";
 			tbl = new TableIdentifier(t);
 			tbl.setPreserveQuotes(true);
 			exp = tbl.getTableExpression(con);
-			assertEquals("Wrong expression", "\""+ t.toUpperCase() + "\"", exp);
+			assertEquals("Wrong expression", "\"" + t.toUpperCase() + "\"", exp);
 
 			t = "table\\bla";
 			tbl = new TableIdentifier(t);
 			tbl.setPreserveQuotes(true);
 			exp = tbl.getTableExpression(con);
-			assertEquals("Wrong expression", "\""+ t.toUpperCase() + "\"", exp);
-			
+			assertEquals("Wrong expression", "\"" + t.toUpperCase() + "\"", exp);
+
 			t = "table bla";
 			tbl = new TableIdentifier(t);
 			tbl.setPreserveQuotes(true);
 			exp = tbl.getTableExpression(con);
-			assertEquals("Wrong expression", "\""+ t.toUpperCase() + "\"", exp);
+			assertEquals("Wrong expression", "\"" + t.toUpperCase() + "\"", exp);
 
 			t = "\"TABLE.BLA\"";
 			tbl = new TableIdentifier(t);
@@ -80,7 +79,7 @@ public class TableIdentifierTest
 			exp = tbl.getTableExpression(con);
 			assertEquals("Wrong expression", "\"" + t.toUpperCase() + "\"", exp);
 			assertNull("Schema present", tbl.getSchema());
-			
+
 			t = "123.TABLENAME";
 			tbl = new TableIdentifier(t);
 			exp = tbl.getTableExpression(con);
@@ -120,20 +119,20 @@ public class TableIdentifierTest
 		tbl.setPreserveQuotes(true);
 		assertEquals("\"APP\"", tbl.getSchema());
 		assertEquals("\"BLOB_TEST\"", tbl.getTableName());
-		
+
 		sql = "\"Some.Table\"";
 		tbl = new TableIdentifier(sql);
 		tbl.setPreserveQuotes(true);
 		assertEquals("\"Some.Table\"", tbl.getTableName());
-		
+
 		sql = "\"123\".mytable";
 		tbl = new TableIdentifier(sql);
 		tbl.setPreserveQuotes(true);
 		assertEquals("mytable", tbl.getTableName());
 		assertEquals("\"123\"", tbl.getSchema());
-		
+
 	}
-	
+
 	public void testCopy()
 	{
 		String sql = "\"catalog\".\"schema\".\"table\"";
@@ -142,9 +141,9 @@ public class TableIdentifierTest
 		assertEquals("\"catalog\"", tbl.getCatalog());
 		assertEquals("\"schema\"", tbl.getSchema());
 		assertEquals("\"table\"", tbl.getTableName());
-		
+
 		assertEquals(sql, tbl.getTableExpression());
-		
+
 		TableIdentifier t2 = tbl.createCopy();
 		assertEquals("\"catalog\"", t2.getCatalog());
 		assertEquals("\"schema\"", t2.getSchema());
@@ -152,7 +151,7 @@ public class TableIdentifierTest
 		assertEquals(sql, t2.getTableExpression());
 		assertEquals(true, tbl.equals(t2));
 	}
-	
+
 	public void testEqualsAndHashCode()
 	{
 		TableIdentifier one = new TableIdentifier("person");

@@ -17,6 +17,7 @@ import workbench.db.TableIdentifier;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
@@ -30,8 +31,19 @@ public class WbDescribeTable
 	public static final String VERB = "DESC";
 	public static final String VERB_LONG = "DESCRIBE";
 
-	public String getVerb() { return VERB; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
+	@Override
+	public String getAlternateVerb()
+	{
+		return VERB_LONG;
+	}
+
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -50,8 +62,10 @@ public class WbDescribeTable
 		}
 		else
 		{
+			ColumnRemover remover = new ColumnRemover(ds);
+			DataStore cols = remover.removeColumnsByName("java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION");
 			result.setSuccess();
-			result.addDataStore(ds);
+			result.addDataStore(cols);
 		}
 		return result;
 	}

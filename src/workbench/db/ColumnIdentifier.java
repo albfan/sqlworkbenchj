@@ -17,6 +17,7 @@ import java.sql.Types;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -40,6 +41,7 @@ public class ColumnIdentifier
 	private Class columnClass;
 	private String columnTypeName;
 
+	private int displaySize = -1;
 	private int position;
 
 	private int size; // for VARCHAR etc
@@ -107,9 +109,45 @@ public class ColumnIdentifier
 	/**
 	 *	Define the size for this column (e.g. for VARCHAR columns)
 	 */
-	public void setColumnSize(int aSize) { this.size = aSize; }
-	public int getColumnSize() { return this.size; }
+	public void setColumnSize(int aSize) 
+	{
+		this.size = aSize;
+	}
 
+	/**
+	 * The data size of this columne (e.g. for VARCHAR columns)
+	 * @return
+	 */
+	public int getColumnSize()
+	{
+		return this.size;
+	}
+
+	public void setDisplaySize(int size)
+	{
+		this.displaySize = size;
+	}
+	
+	/**
+	 * The display size of this column as reported by the JDBC driver.
+	 * 
+	 * For some types (e.g Integer) some sensible sizes are used
+	 * instead of the JDBC driver supplied values, as this method is 
+	 * currently only used to "format" the output for the Console interface
+	 *
+	 * @return the recommended display size of the column
+	 */
+	public int getDisplaySize()
+	{
+		if (SqlUtil.isIntegerType(type)) return 10;
+		if (SqlUtil.isDecimalType(type, size, digits)) return 15;
+		if (SqlUtil.isCharacterType(type)) return size;
+		if (SqlUtil.isBlobType(type)) return 5;
+		
+		if (displaySize < 0) return size;
+		return this.displaySize;
+	}
+	
 	/**
 	 *	Define the decimal digits for this column (e.g. for DECIMAL columns)
 	 */
@@ -126,7 +164,7 @@ public class ColumnIdentifier
 	public String getDigitsDisplay()
 	{
 		if (digits < 0) return "";
-		return Integer.toString(digits);
+		return NumberStringCache.getNumberString(digits);
 	}
 	
 	public void setIsPkColumn(boolean flag) { this.isPk = flag; }
@@ -177,6 +215,8 @@ public class ColumnIdentifier
 		result.columnClassName = this.columnClassName;
 		result.columnTypeName = this.columnTypeName;
 		result.position = this.position;
+		result.displaySize = this.displaySize;
+		
 		return result;
 	}
 

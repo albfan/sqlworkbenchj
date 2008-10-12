@@ -476,6 +476,11 @@ public class SqlCommand
 		return StringUtil.EMPTY_STRING;
 	}
 
+	public String getAlternateVerb()
+	{
+		return null;
+	}
+	
 	/**
 	 * 	The commands producing a result set need this flag.
 	 * 	If no consumer is waiting, the can directly produce a DataStore
@@ -517,6 +522,7 @@ public class SqlCommand
 	 */
 	public boolean needConfirmation(WbConnection con, String sql)
 	{
+		if (con == null || con.isClosed()) return false;
 		ConnectionProfile prof = getModificationTarget(con, sql);
 		if (prof == null) return false;
 		if (isUpdatingCommand(con, sql))
@@ -542,6 +548,7 @@ public class SqlCommand
 	public boolean isUpdatingCommand(WbConnection con, String sql)
 	{
 		if (con == null) return isUpdatingCommand;
+		if (con.isClosed()) return isUpdatingCommand;
 		if (this.isUpdatingCommand) return true;
 		String verb = SqlUtil.getSqlVerb(sql);
 		boolean updating = con.getDbSettings().isUpdatingCommand(verb);
@@ -581,6 +588,7 @@ public class SqlCommand
 	 */
 	public boolean isModificationAllowed(WbConnection con, String sql)
 	{
+		if (con == null || con.isClosed()) return true;
 		ConnectionProfile prof = getModificationTarget(con, sql);
 		if (prof == null) return true;
 		if (isUpdatingCommand(con, sql))

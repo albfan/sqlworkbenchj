@@ -940,7 +940,7 @@ public class DwPanel
 	public void updateStatusBar()
 	{
 		this.rowCountChanged();
-		if (this.statusBar != null)
+		if (GuiSettings.getShowSelectionSummary() && this.statusBar != null)
 		{
 			statusBar.showSelectionIndicator(this.dataTable);
 		}

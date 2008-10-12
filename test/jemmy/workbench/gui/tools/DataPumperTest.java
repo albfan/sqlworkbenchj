@@ -13,7 +13,6 @@ package workbench.gui.tools;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import javax.swing.tree.TreeModel;
 import junit.framework.TestCase;
 import org.netbeans.jemmy.ClassReference;
 import org.netbeans.jemmy.JemmyProperties;
@@ -31,6 +30,7 @@ import workbench.gui.GuiTestUtil;
 import workbench.gui.NamedComponentChooser;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
+import workbench.util.WbThread;
 
 /**
  *
@@ -174,7 +174,7 @@ public class DataPumperTest
 		while (pumper.isRunning())
 		{
 			Thread.yield();
-			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
+			WbThread.sleepSilently(sleepTime);
 			count ++;
 			if (count * sleepTime > 5000)
 			{
@@ -224,7 +224,7 @@ public class DataPumperTest
 		while (pumper.isConnecting)
 		{
 			Thread.yield();
-			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
+			WbThread.sleepSilently(sleepTime);
 			count ++;
 			if (count * sleepTime > 5000) break;
 		}
@@ -251,7 +251,7 @@ public class DataPumperTest
 			copyData();
 			checkData();
 			closeWindow();
-			Thread.sleep(500);
+			WbThread.sleep(500);
 			util.stopApplication();
 			util.emptyBaseDirectory();
 		}

@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
@@ -64,12 +65,14 @@ public class TextRowDataConverterTest extends junit.framework.TestCase
 		StrBuffer line = converter.convertRowData(data, 0);
 		assertEquals("Wrong columns exporter", "data1;42;2006-10-26;2006-10-26 17:00:00", line.toString().trim());
 
-		List columns = new ArrayList();
+		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
 		columns.add(info.getColumn(0));
 		columns.add(info.getColumn(1));
 		converter.setColumnsToExport(columns);
 		line = converter.convertRowData(data, 0);
 		assertNotNull("Data not converted", line);
 		assertEquals("Wrong columns exporter", "data1;42", line.toString().trim());
+
+
 	}
 }

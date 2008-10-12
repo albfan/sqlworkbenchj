@@ -109,7 +109,11 @@ public class StatementRunnerResult
 		this.totalUpdateCount += count;
 		addMessage(count + " " + ResourceMgr.getString("MsgRowsAffected"));
 	}
-	
+
+	public void addMessageByKey(String key)
+	{
+		addMessage(ResourceMgr.getString(key));
+	}
 	public void addMessage(MessageBuffer buffer)
 	{
 		if (buffer == null) return;

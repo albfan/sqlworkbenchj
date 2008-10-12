@@ -35,6 +35,7 @@ import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.sql.SqlPanel;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbThread;
 
 /**
  * @author support@sql-workbench.net
@@ -297,7 +298,7 @@ public class MainWindowTest
 
 		String msg = runSql(sqlPanel, "create table person (nr integer primary key, firstname varchar(20), lastname varchar(20));");
 		System.out.println("Create message: " + msg);
-		assertTrue(msg.indexOf("Object created") > -1);
+		assertTrue(msg.indexOf("Table 'person' created") > -1);
 
 		msg = runSql(sqlPanel, "insert into person (nr, firstname, lastname) values (42, 'Ford', 'Prefect');\ncommit;");
 		assertNotNull(msg);
@@ -408,7 +409,7 @@ public class MainWindowTest
 		assertFalse(action.getButton().isSelected());
 
 		runSql(sqlPanel, "select * from person");
-		try { Thread.sleep(500); } catch (Throwable th) {}
+		WbThread.sleepSilently(500);
 		assertEquals(2, resultTab.getTabCount());
 	}
 

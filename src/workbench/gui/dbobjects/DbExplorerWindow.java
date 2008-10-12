@@ -63,6 +63,11 @@ public class DbExplorerWindow
 		this.panel.setDbExecutionListener(this);
 	}
 
+	public JFrame getWindow()
+	{
+		return this;
+	}
+	
 	public void activate()
 	{
 		setVisible(true);

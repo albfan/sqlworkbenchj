@@ -197,7 +197,12 @@ public class ArgumentParser
 	{
 		return this.argTypes.get(arg);
 	}
-	
+
+	/**
+	 * Checks if any arguments have been defined.
+	 * 
+	 * @return
+	 */
 	public boolean hasArguments()
 	{
 		return this.argCount > 0;

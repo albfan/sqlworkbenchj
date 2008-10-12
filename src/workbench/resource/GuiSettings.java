@@ -328,4 +328,13 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.edit.warn.discard.changes", false);
 	}
 
+	public static boolean getShowSelectionSummary()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.selection.summar", true);
+	}
+
+	public static void setShowSelectionSummary(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.selection.summar", flag);
+	}
 }

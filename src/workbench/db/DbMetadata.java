@@ -2546,6 +2546,11 @@ public class DbMetadata
 		return (isPostgres && Settings.getInstance().getBoolProperty("workbench.db.postgres.hideindex", true));
 	}
 
+	/**
+	 * Return a list of types that identify tables in the target database.
+	 * e.g. TABLE, SYSTEM TABLE, ...
+	 * @return
+	 */
 	public Collection<String> getTableTypes()
 	{
 		TreeSet<String> result = new TreeSet<String>();

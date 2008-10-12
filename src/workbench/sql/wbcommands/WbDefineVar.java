@@ -38,23 +38,20 @@ import workbench.util.WbStringTokenizer;
 public class WbDefineVar
 	extends SqlCommand
 {
-	public static final String VERB_DEFINE_LONG = "WBVARDEFINE";
-	public static final String VERB_DEFINE_SHORT = "WBVARDEF";
-	public static final WbDefineVar DEFINE_LONG = new WbDefineVar(VERB_DEFINE_LONG);
-	public static final WbDefineVar DEFINE_SHORT = new WbDefineVar(VERB_DEFINE_SHORT);
+	public static final String VERB = "WBVARDEF";
 
-	private String verb = null;
-
-	private WbDefineVar(String aVerb)
+	public WbDefineVar()
 	{
 		super();
-		this.verb = aVerb;
 		this.cmdLine = new ArgumentParser();
 		this.cmdLine.addArgument("file", ArgumentType.StringArgument);
 		this.cmdLine.addArgument("encoding", ArgumentType.StringArgument);
 	}
 
-	public String getVerb() { return verb; }
+	public String getVerb()
+	{
+		return VERB;
+	}
 
 	protected boolean isConnectionRequired() { return false; }
 

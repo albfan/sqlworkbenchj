@@ -21,6 +21,7 @@ import workbench.TestUtil;
 import workbench.WbManager;
 import workbench.gui.sql.SqlPanel;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  *
@@ -97,7 +98,7 @@ public class GuiTestUtil
 		int sleepTime = 10;
 		while (panel.isBusy())
 		{
-			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
+			WbThread.sleepSilently(sleepTime);
 			count ++;
 			if (count * sleepTime > 30000) break;
 		}
@@ -109,8 +110,7 @@ public class GuiTestUtil
 		int sleepTime = 10;
 		while (!panel.isConnected())
 		{
-			//Thread.yield();
-			try { Thread.sleep(sleepTime); } catch (Throwable th) {}
+			WbThread.sleepSilently(sleepTime);
 			count ++;
 			if (count * sleepTime > 5000) break;
 		}

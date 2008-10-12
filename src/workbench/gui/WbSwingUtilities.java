@@ -47,6 +47,7 @@ import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  * Some helper functions to deal with Swing stuff
@@ -98,13 +99,7 @@ public class WbSwingUtilities
 		int counter = 0;
 		while (queue.peekEvent() != null)
 		{
-			try
-			{
-				Thread.sleep(25);
-			}
-			catch (Throwable th)
-			{
-			}
+			WbThread.sleepSilently(25);
 			counter++;
 			if (counter > 20)
 			{

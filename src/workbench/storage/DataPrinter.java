@@ -19,6 +19,7 @@ import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.TextRowDataConverter;
 import workbench.log.LogMgr;
+import workbench.util.CharacterRange;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -55,11 +56,13 @@ public class DataPrinter
 	{
 		converter = new TextRowDataConverter();
 		converter.setResultInfo(data.getResultInfo());
+		converter.setConsoleType(true);
 		converter.setWriteBlobToFile(false);
 		converter.setWriteHeader(includeHeader);
 		converter.setLineEnding(lineEnd);
 		converter.setDelimiter(delimiter);
 		converter.setColumnsToExport(columns);
+		converter.setEscapeRange(CharacterRange.RANGE_CONTROL);
 	}
 	
 	public void printTo(PrintStream out)

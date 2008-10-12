@@ -23,6 +23,7 @@ import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 
 /**
@@ -49,7 +50,8 @@ public class ScriptParser
 	private boolean returnTrailingWhitesapce = false;
 	private String alternateLineComment = "--";
 	private boolean useAlternateDelimiter = false;
-
+	private File source;
+	
 	private int maxFileSize;
 
 	public ScriptParser()
@@ -111,7 +113,7 @@ public class ScriptParser
 		throws IOException
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
-
+		
 		if (f.length() < this.maxFileSize)
 		{
 			this.readScriptFromFile(f, encoding);
@@ -122,8 +124,20 @@ public class ScriptParser
 			this.iteratingParser = new IteratingScriptParser(f, encoding);
 			configureParserInstance(this.iteratingParser);
 		}
+		this.source = f;
 	}
 
+	/**
+	 * Returns the file that was parsed if available. 
+	 * May be null (if the parser has been initialized from a String)
+	 * @return
+	 */
+	public WbFile getScriptFile()
+	{
+		if (this.iteratingParser == null || source == null) return null;
+		return new WbFile(this.source);
+	}
+	
 	public int getScriptLength()
 	{
 		if (this.iteratingParser != null)
@@ -213,6 +227,7 @@ public class ScriptParser
 		this.findDelimiterToUse();
 		this.commands = null;
 		this.iteratingParser = null;
+		this.source = null;
 	}
 
 	public void setDelimiter(DelimiterDefinition delim)

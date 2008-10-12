@@ -12,8 +12,8 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import javax.swing.JFrame;
 import workbench.WbManager;
-import workbench.gui.MainWindow;
 import workbench.gui.settings.ShortcutEditor;
 
 /**
@@ -33,7 +33,7 @@ public class ConfigureShortcutsAction
 
 	public void executeAction(ActionEvent e)
 	{
-		final MainWindow main = WbManager.getInstance().getCurrentWindow();
+		final JFrame main = WbManager.getInstance().getCurrentWindow();
 		ShortcutEditor editor = new ShortcutEditor(main);
 		editor.showWindow();
 	}

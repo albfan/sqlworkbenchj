@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import workbench.sql.wbcommands.console.WbDisconnect;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -43,8 +44,7 @@ public class CommandTester
 		commands.add(WbCopy.VERB);
 		commands.add(WbDataDiff.VERB);
 		commands.add(WbDefinePk.VERB);
-		commands.add(WbDefineVar.VERB_DEFINE_LONG);
-		commands.add(WbDefineVar.VERB_DEFINE_SHORT);
+		commands.add(WbDefineVar.VERB);
 		commands.add(WbDescribeTable.VERB);
 		commands.add(WbDescribeTable.VERB_LONG);
 		commands.add(WbDisableOraOutput.VERB);
@@ -56,6 +56,7 @@ public class CommandTester
 		commands.add(WbInclude.VERB);
 		commands.add(WbListPkDef.VERB);
 		commands.add(WbListVars.VERB);
+		commands.add(WbListTables.VERB);
 		commands.add(WbLoadPkMapping.VERB);
 		commands.add(WbRemoveVar.VERB);
 		commands.add(WbSavePkMapping.VERB);
@@ -65,13 +66,13 @@ public class CommandTester
 		commands.add(WbStartBatch.VERB);
 		commands.add(WbXslt.VERB);
 		commands.add(WbConnect.VERB);
+		commands.add(WbDisconnect.VERB);
 		commands.add(WbHideWarnings.VERB);
 		
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
 		formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);
-		formattedWords.put(WbDefineVar.DEFINE_LONG.getVerb(), "WbVarDefine");
-		formattedWords.put(WbDefineVar.DEFINE_SHORT.getVerb(), "WbVarDef");
+		formattedWords.put(WbDefineVar.VERB, "WbVarDefine");
 		formattedWords.put(WbListPkDef.VERB, WbListPkDef.FORMATTED_VERB);
 		formattedWords.put(WbEndBatch.VERB, "WbEndBatch");
 		formattedWords.put(WbStartBatch.VERB, "WbStartBatch");

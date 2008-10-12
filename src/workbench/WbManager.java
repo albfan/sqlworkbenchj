@@ -56,6 +56,7 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.resource.GuiSettings;
+import workbench.util.ArgumentParser;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -96,6 +97,11 @@ public final class WbManager
 		LogMgr.logError("WbManager.uncaughtException()", "Thread + " + thread.getName() + " caused an exception!", error);
 	}
 
+	public ArgumentParser getCommandLine()
+	{
+		return cmdLine;
+	}
+	
 	public boolean getSettingsShouldBeSaved()
 	{
 		return this.writeSettings;
@@ -104,6 +110,8 @@ public final class WbManager
 	public void showDialog(String clazz)
 	{
 		JFrame parent = WbManager.getInstance().getCurrentWindow();
+		if (parent == null) return;
+
 		JDialog dialog = null;
 		try
 		{
@@ -153,20 +161,44 @@ public final class WbManager
 		WbSwingUtilities.showErrorMessageKey(getCurrentWindow(), "MsgLowMemoryError");
 	}
 
-	public MainWindow getCurrentWindow()
+	public JFrame getCurrentWindow()
 	{
-		if (this.mainWindows == null) return null;
+		if (this.mainWindows == null) return getCurrentToolWindow();
+
 		if (this.mainWindows.size() == 1)
 		{
 			return this.mainWindows.get(0);
 		}
+		
 		for (MainWindow w : mainWindows)
 		{
-			if (w.hasFocus()) return w;
+			if (w != null && w.hasFocus()) return w;
 		}
+		
 		return null;
 	}
 
+	protected JFrame getCurrentToolWindow()
+	{
+		if (this.toolWindows == null) return null;
+		if (this.toolWindows.size() == 1)
+		{
+			ToolWindow w = toolWindows.get(0);
+			if (w != null) return w.getWindow();
+		}
+
+		for (ToolWindow t : toolWindows)
+		{
+			if (t != null)
+			{
+				JFrame f = t.getWindow();
+				if (f.hasFocus()) return f;
+			}
+		}
+		
+		return null;
+
+	}
 	public void registerToolWindow(ToolWindow aWindow)
 	{
 		synchronized (toolWindows)
@@ -180,21 +212,11 @@ public final class WbManager
 		if (aWindow == null) return;
 		synchronized (toolWindows)
 		{
-			int index = this.toolWindows.indexOf(aWindow);
-			if (index > -1)
-			{
-				this.toolWindows.remove(index);
-			}
+			this.toolWindows.remove(aWindow);
+			
 			if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
 			{
-				if (aWindow instanceof JFrame)
-				{
-					this.exitWorkbench((JFrame)aWindow);
-				}
-				else
-				{
-					this.exitWorkbench();
-				}
+				this.exitWorkbench(aWindow.getWindow());
 			}
 		}
 	}
@@ -266,24 +288,15 @@ public final class WbManager
 	private boolean saveWindowSettings()
 	{
 		if (!this.writeSettings) return true;
-		MainWindow w = this.getCurrentWindow();
 		boolean settingsSaved = false;
 
-		// the settings (i.e. size and position) should only be saved
-		// for the first visible window
-		if (w != null)
-		{
-			w.saveSettings();
-			settingsSaved = true;
-		}
-
-		if (!this.checkProfiles(w)) return false;
+		if (!this.checkProfiles(getCurrentWindow())) return false;
 
 		boolean result = true;
 		for (MainWindow win : mainWindows)
 		{
 			if (win == null) continue;
-			if (!settingsSaved)
+			if (!settingsSaved && win.hasFocus())
 			{
 				win.saveSettings();
 				settingsSaved = true;
@@ -295,6 +308,18 @@ public final class WbManager
 			result = win.saveWorkspace(true);
 			if (!result) return false;
 		}
+		
+		if (!settingsSaved)
+		{
+			for (MainWindow win : mainWindows)
+			{
+				if (win != null)
+				{
+					win.saveSettings();
+				}
+			}
+		}
+		
 		return true;
 	}
 
@@ -324,7 +349,7 @@ public final class WbManager
 
 	public void exitWorkbench()
 	{
-		MainWindow w = this.getCurrentWindow();
+		JFrame w = this.getCurrentWindow();
 		this.exitWorkbench(w);
 	}
 
@@ -458,7 +483,7 @@ public final class WbManager
 		}
 	}
 
-	protected void doShutdown(int errorCode)
+	public void doShutdown(int errorCode)
 	{
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		this.closeAllWindows();
@@ -476,7 +501,7 @@ public final class WbManager
 		return WbSwingUtilities.getYesNo(win, ResourceMgr.getString("MsgAbortRunningSql"));
 	}
 
-	private boolean checkProfiles(MainWindow win)
+	private boolean checkProfiles(JFrame win)
 	{
 		if (ConnectionMgr.getInstance().profilesAreModified())
 		{
@@ -702,6 +727,10 @@ public final class WbManager
 					System.err.println("Invalid parameter(s): " + unknown);
 				}
 			}
+			
+			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
+			LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
+			LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
 		}
 		catch (Exception e)
 		{
@@ -711,10 +740,6 @@ public final class WbManager
 
 	public void startApplication()
 	{
-		LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
-		LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
-		LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
-
 		// batchMode flag is set by readParameters()
 		if (this.batchMode)
 		{
@@ -837,6 +862,13 @@ public final class WbManager
 		this.doShutdown(exitCode);
 	}
 
+	public static void initConsoleMode(String[] args)
+	{
+		wb = new WbManager();
+		wb.readParameters(args);
+		wb.writeSettings = false;
+	}
+
 	/**
 	 * Prepare the Workbench "environment" to be used inside another
 	 * application (e.g. for Unit testing)
@@ -851,7 +883,12 @@ public final class WbManager
 		System.setProperty("workbench.gui.testmode", "true");
 		wb.readParameters(new String[] { args} );
 	}
-		
+
+	public boolean isTestMode()
+	{
+		return Boolean.getBoolean("workbench.gui.testmode");
+	}
+	
 	public static void prepareForTest(String[] args)
 	{
 		wb = new WbManager();

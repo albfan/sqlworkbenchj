@@ -49,6 +49,7 @@ public class DbDriver
 	protected String name;
 	private String driverClass;
 	private List<String> libraryList;
+	private boolean isInternal = false;
 
 	private String sampleUrl;
 
@@ -76,6 +77,16 @@ public class DbDriver
 		this.setLibrary(aLibrary);
 	}
 
+	public boolean isInternal()
+	{
+		return this.isInternal;
+	}
+
+	void setInternal(boolean flag)
+	{
+		isInternal = flag;
+	}
+	
 	public String getName() 
 	{
 		return this.name; 

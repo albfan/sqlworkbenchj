@@ -11,6 +11,8 @@
  */
 package workbench.sql;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -50,6 +52,7 @@ import workbench.util.WbFile;
  * @author  support@sql-workbench.net
  */
 public class BatchRunner
+	implements PropertyChangeListener
 {
 	public static final String CMD_LINE_PROFILE_NAME = "WbCommandLineProfile";
 	private List<String> filenames;
@@ -73,12 +76,21 @@ public class BatchRunner
 	private PrintStream console = System.out;
 //	private boolean quiet = false;
 	private boolean consolidateMessages = false;
+	private boolean showStatementWithResult = true;
+	private boolean showSummary = verboseLogging;
+	private boolean showResultBorders = true;
+	
+	public BatchRunner()
+	{
+		this.stmtRunner = new StatementRunner();
+		this.stmtRunner.setFullErrorReporting(true);
+		this.stmtRunner.addChangeListener(this);
+	}
 
 	public BatchRunner(String aFilelist)
 	{
+		this();
 		this.filenames = StringUtil.stringToList(aFilelist, ",", true);
-		this.stmtRunner = new StatementRunner();
-		this.stmtRunner.setFullErrorReporting(true);
 	}
 
 	/**
@@ -102,6 +114,16 @@ public class BatchRunner
 		return this.connection;
 	}
 
+	public SqlCommand getCommand(String verb)
+	{
+		return stmtRunner.cmdMapper.getCommandToUse(verb);
+	}
+	
+	public void addCommand(SqlCommand cmd)
+	{
+		stmtRunner.cmdMapper.addCommand(cmd);
+	}
+	
 	public void setExecutionController(ExecutionController controller)
 	{
 		this.stmtRunner.setExecutionController(controller);
@@ -120,14 +142,30 @@ public class BatchRunner
 		this.console = output;
 	}
 
+	public void setShowStatementWithResult(boolean flag)
+	{
+		this.showStatementWithResult = flag;
+	}
+	
 	public void showResultSets(boolean flag)
 	{
 		this.showResultSets = flag;
 	}
 
+	public void setShowResultBorders(boolean flag)
+	{
+		this.showResultBorders = flag;
+	}
+	
+	public void setShowStatementSummary(boolean flag)
+	{
+		this.showSummary = flag;
+	}
+	
 	public void setVerboseLogging(boolean flag)
 	{
 		this.verboseLogging = flag;
+		this.showSummary = flag;
 		this.stmtRunner.setVerboseLogging(flag);
 		this.showTiming = this.verboseLogging;
 	}
@@ -142,6 +180,11 @@ public class BatchRunner
 		this.stmtRunner.setIgnoreDropErrors(flag);
 	}
 
+	public boolean hasProfile()
+	{
+		return this.profile != null;
+	}
+	
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
@@ -166,6 +209,14 @@ public class BatchRunner
 	public boolean isConnected()
 	{
 		return this.connection != null;
+	}
+
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getSource() == this.stmtRunner)
+		{
+			this.connection = stmtRunner.getConnection();
+		}
 	}
 
 	public void connect()
@@ -365,8 +416,23 @@ public class BatchRunner
 	private boolean executeScript(WbFile scriptFile)
 		throws IOException
 	{
-		boolean error = false;
 		ScriptParser parser = new ScriptParser();
+		parser.setFile(scriptFile, this.encoding);
+		return executeScript(parser);
+	}
+
+	public boolean executeScript(String script)
+		throws IOException
+	{
+		ScriptParser parser = new ScriptParser();
+		parser.setScript(script);
+		return executeScript(parser);
+	}
+
+	private boolean executeScript(ScriptParser parser)
+		throws IOException
+	{
+		boolean error = false;
 		DelimiterDefinition altDelim = null;
 
 		// If no delimiter has been defined, than use the default fallback
@@ -386,7 +452,7 @@ public class BatchRunner
 		// When running  a single WbCopy command it is not necessary to define a
 		// connection on the commandline
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		if (this.connection != null)
+		if (this.connection != null && !this.connection.isClosed())
 		{
 			parser.setSupportOracleInclude(this.connection.getDbSettings().supportSingleLineCommands());
 			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportShortInclude());
@@ -394,7 +460,7 @@ public class BatchRunner
 		}
 
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
-		parser.setFile(scriptFile, this.encoding);
+		
 		String sql = null;
 		this.cancelExecution = false;
 
@@ -402,11 +468,12 @@ public class BatchRunner
 		long start, end;
 
 		final int interval;
-		if (scriptFile.length() < 50000)
+		int length = parser.getScriptLength();
+		if (length < 50000)
 		{
 			interval = 1;
 		}
-		else if (scriptFile.length() < 100000)
+		else if (length < 100000)
 		{
 			interval = 10;
 		}
@@ -436,6 +503,7 @@ public class BatchRunner
 				long verbstart = System.currentTimeMillis();
 				this.stmtRunner.runStatement(sql, 0, -1);
 				long verbend = System.currentTimeMillis();
+				this.stmtRunner.statementDone();
 
 				error = false;
 
@@ -461,6 +529,8 @@ public class BatchRunner
 						if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
 						totalRows += result.getTotalUpdateCount();
 					}
+					
+					printResults(sql, result);
 
 					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
 					{
@@ -494,8 +564,6 @@ public class BatchRunner
 					if (verboseLogging) this.printMessage(ResourceMgr.getString("MsgStatementCancelled"));
 					break;
 				}
-
-				printResults(sql, result);
 			}
 			catch (Exception e)
 			{
@@ -509,11 +577,15 @@ public class BatchRunner
 
 		end = System.currentTimeMillis();
 
-		if (verboseLogging)
+		if (showSummary)
 		{
 			StringBuilder msg = new StringBuilder(50);
-			msg.append(scriptFile.getFullPath());
-			msg.append(": ");
+			WbFile scriptFile = parser.getScriptFile();
+			if (scriptFile != null)
+			{
+				msg.append(scriptFile.getFullPath());
+				msg.append(": ");
+			}
 			msg.append(executedCount);
 			msg.append(' ');
 			msg.append(ResourceMgr.getString("MsgTotalStatementsExecuted"));
@@ -552,9 +624,12 @@ public class BatchRunner
 
 		List<DataStore> data = result.getDataStores();
 
-		console.println();
-		console.println(sql);
-		console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
+		if (showStatementWithResult)
+		{
+			console.println();
+			console.println(sql);
+		}
+		if (showResultBorders) console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
 		for (DataStore ds : data)
 		{
 			if (ds != null)
@@ -563,7 +638,7 @@ public class BatchRunner
 				printer.printTo(console);
 			}
 		}
-		console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
+		if (showResultBorders) console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 	}
 
 	public void setEncoding(String enc)
@@ -627,13 +702,13 @@ public class BatchRunner
 			String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);
 			if (url == null)
 			{
-				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a connection URL!", null);
+				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a connection URL!", null);
 				return null;
 			}
 			String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
 			if (driverclass == null)
 			{
-				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect with command line settings without a driver class!", null);
+				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a driver class!", null);
 				return null;
 			}
 			String user = cmdLine.getValue(AppArguments.ARG_CONN_USER);
@@ -655,6 +730,9 @@ public class BatchRunner
 			result = ConnectionProfile.createEmptyProfile();
 			result.setName(CMD_LINE_PROFILE_NAME);
 			result.setDriverclass(driverclass);
+			result.setDriverName(null);
+			result.setUseSeparateConnectionPerTab(false);
+			result.setStoreExplorerSchema(false);
 			result.setUrl(url);
 			result.setUsername(user);
 			result.setPassword(pwd);
@@ -695,8 +773,13 @@ public class BatchRunner
 
 	public static BatchRunner createBatchRunner(ArgumentParser cmdLine)
 	{
+		return createBatchRunner(cmdLine, true);
+	}
+	
+	public static BatchRunner createBatchRunner(ArgumentParser cmdLine, boolean checkScriptPresence)
+	{
 		String scripts = cmdLine.getValue(AppArguments.ARG_SCRIPT);
-		if (StringUtil.isBlank(scripts)) return null;
+		if (checkScriptPresence && StringUtil.isBlank(scripts)) return null;
 
 		String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
 

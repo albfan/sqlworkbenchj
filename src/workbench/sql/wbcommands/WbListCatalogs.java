@@ -23,18 +23,16 @@ import workbench.storage.DataStore;
  */
 public class WbListCatalogs extends SqlCommand
 {
-	private final String VERB;
+	private final String VERB = "WBLISTDB";
+	private final String VERB_ALTERNATE = "WBLISTCAT";
 
-	public static final WbListCatalogs LISTDB = new WbListCatalogs("WBLISTDB");
-	public static final WbListCatalogs LISTCAT = new WbListCatalogs("WBLISTCAT");
-
-	private WbListCatalogs(String verb)
+	public WbListCatalogs()
 	{
 		super();
-		this.VERB = verb;
 	}
 
 	public String getVerb() { return VERB; }
+	public String getAlternateVerb() { return VERB_ALTERNATE; }
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException

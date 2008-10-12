@@ -281,7 +281,8 @@ public class ConnectionMgr
 		if (this.drivers == null) this.readDrivers();
 
 		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
-
+		drv.setInternal(true);
+		
 		// this method is called from BatchRunner.createCmdLineProfile() when
 		// the user passed all driver information on the command line.
 		// as most likely this is the correct driver it has to be put

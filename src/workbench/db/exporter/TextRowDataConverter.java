@@ -37,7 +37,13 @@ public class TextRowDataConverter
 	private boolean writeClobFiles = false;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName = null;
+	private boolean consoleType = false;
 
+	public void setConsoleType(boolean flag)
+	{
+		this.consoleType = flag;
+	}
+	
 	public void setWriteClobToFile(boolean flag)
 	{
 		this.writeClobFiles = flag;
@@ -87,16 +93,22 @@ public class TextRowDataConverter
 		StrBuffer result = new StrBuffer(count * 30);
 		boolean canQuote = this.quoteCharacter != null;
 		int currentColIndex = 0;
+
 		if (rowIndexColumnName != null)
 		{
 			result.append(Long.toString(rowIndex + 1));
 			result.append(this.delimiter);
 		}
 
+		if (consoleType)
+		{
+			result.append('|');
+		}
+
 		for (int c=0; c < count; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
-			if (currentColIndex > 0)
+			if (currentColIndex > 0 && !consoleType)
 			{
 				result.append(this.delimiter);
 			}
@@ -180,8 +192,13 @@ public class TextRowDataConverter
 			}
 
 			if (addQuote) result.append(this.quoteCharacter);
-
 			result.append(value);
+
+			if (consoleType)
+			{
+				padColumn(result, value, c);
+				result.append('|');
+			}
 
 			if (addQuote) result.append(this.quoteCharacter);
 
@@ -199,11 +216,12 @@ public class TextRowDataConverter
 	public StrBuffer getStart()
 	{
 		this.setAdditionalEncodeCharacters();
-
+		
 		if (!this.writeHeader) return null;
 
 		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
+		int lineWidth = 0;
 
 		boolean first = true;
 		if (rowIndexColumnName != null)
@@ -216,20 +234,57 @@ public class TextRowDataConverter
 		{
 			if (!this.includeColumnInExport(c)) continue;
 			String name = this.metaData.getColumnName(c);
+
 			if (first)
 			{
 				first = false;
+				if (consoleType)
+				{
+					result.append('|');
+					lineWidth ++;
+				}
 			}
-			else
+			else if (!consoleType)
 			{
 				result.append(this.delimiter);
 			}
+
 			result.append(name);
+			if (consoleType)
+			{
+				lineWidth += padColumn(result, name, c);
+				result.append('|');
+				lineWidth ++;
+			}
 		}
 		result.append(lineEnding);
+		if (consoleType)
+		{
+			for (int i=0; i < lineWidth; i++)
+			{
+				result.append('-');
+			}
+			result.append(lineEnding);
+		}
 		return result;
 	}
 
+	private int padColumn(StrBuffer result, String value, int col)
+	{
+		int width = this.metaData.getColumn(col).getDisplaySize();
+		if (width > 80) width = 80;
+		int len = (value == null ? 0 : value.length());
+		if (width > 0)
+		{
+			while (len < width)
+			{
+				result.append(' ');
+				len ++;
+			}
+		}
+		return len;
+	}
+	
 	public void setDelimiter(String delimit)
 	{
 		if (StringUtil.isBlank(delimit)) return;

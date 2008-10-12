@@ -33,28 +33,25 @@ public class WbInclude
 	extends SqlCommand
 {
 	public static final String VERB = "WBINCLUDE";
-	public static final WbInclude INCLUDE_LONG = new WbInclude(VERB);
-	public static final WbInclude INCLUDE_SHORT = new WbInclude("@");
-	public static final WbInclude INCLUDE_FB = new WbInclude("INPUT");
+	public static final String ORA_INCLUDE = "@";
 
-	private final String verb;
 	private BatchRunner batchRunner;
 
-	private WbInclude(String aVerb)
+	public WbInclude()
 	{
 		super();
-		this.verb = aVerb;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
-		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/',<char>"));
+		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/','GO:nl'"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
-	public String getVerb() { return verb; }
+	public String getVerb() { return VERB; }
+	public String getAlternateVerb() { return ORA_INCLUDE; }
 
 	protected boolean isConnectionRequired() { return false; }
 

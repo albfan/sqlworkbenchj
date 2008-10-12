@@ -186,7 +186,7 @@ public class DefaultCompletionHandler
 			{
 				String msg = ResourceMgr.getString("MsgCompletionNothingFound");
 				statusBar.setStatusMessage(msg);
-				try { Thread.sleep(2500); } catch (Throwable th) {}
+				WbThread.sleepSilently(2500);
 				String m = statusBar.getText();
 				if (msg.equals(m)) statusBar.clearStatusMessage();
 			}
@@ -203,7 +203,7 @@ public class DefaultCompletionHandler
 			{
 				String msg = "'" + verb + "' " + ResourceMgr.getString("MsgCompletionNotSupported");
 				statusBar.setStatusMessage(msg);
-				try { Thread.sleep(2500); } catch (Throwable th) {}
+				WbThread.sleepSilently(2500);
 				String m = statusBar.getText();
 				if (msg.equals(m)) statusBar.clearStatusMessage();
 			}

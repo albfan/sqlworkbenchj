@@ -10,6 +10,7 @@
  *
  */
 package workbench.interfaces;
+import javax.swing.JFrame;
 import workbench.db.WbConnection;
 /**
  * @author support@sql-workbench.net
@@ -29,4 +30,6 @@ public interface ToolWindow
 	void activate();
 	
 	WbConnection getConnection();
+
+	JFrame getWindow();
 }

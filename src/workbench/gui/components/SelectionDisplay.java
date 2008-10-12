@@ -64,13 +64,13 @@ public class SelectionDisplay
 		if (client != null)
 		{
 			ListSelectionModel rowModel = client.getSelectionModel();
-			if (rowModel != null) 
+			if (rowModel != null)
 			{
 				rowModel.removeListSelectionListener(rowListener);
 			}
 			TableColumnModel col = client.getColumnModel();
 			ListSelectionModel colModel = (col != null ? col.getSelectionModel() : null);
-			if (colModel != null) 
+			if (colModel != null)
 			{
 				colModel.removeListSelectionListener(columnListener);
 			}
@@ -80,7 +80,7 @@ public class SelectionDisplay
 	public void setClient(JTable client)
 	{
 		removeClient(table);
-		
+
 		table = client;
 		if (client != null)
 		{
@@ -97,7 +97,7 @@ public class SelectionDisplay
 			}
 		}
 	}
-	
+
 	protected void columnSelectionChanged(ListSelectionEvent e)
 	{
 		showSelection();

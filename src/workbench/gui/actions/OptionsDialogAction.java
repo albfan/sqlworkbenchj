@@ -13,8 +13,8 @@ package workbench.gui.actions;
 
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
+import javax.swing.JFrame;
 import workbench.WbManager;
-import workbench.gui.MainWindow;
 import workbench.gui.settings.SettingsPanel;
 import workbench.resource.ResourceMgr;
 
@@ -38,7 +38,7 @@ public class OptionsDialogAction
 	
 	public static void showOptionsDialog()
 	{
-		final MainWindow parent = WbManager.getInstance().getCurrentWindow();
+		final JFrame parent = WbManager.getInstance().getCurrentWindow();
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()

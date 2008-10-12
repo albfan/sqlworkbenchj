@@ -230,14 +230,10 @@ public class StatementRunnerTest
 		boolean isDrop = ((DdlCommand)command).isDropCommand(sql);
 		assertEquals(true, isDrop);
 
-		sql = "  -- comment\n   wbvardefine x=42;";
-		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, WbDefineVar.DEFINE_LONG);
-		assertEquals(false, command.isUpdatingCommand());
-
 		sql = "-- bla\nwbvardef x=42;";
 		command = runner.cmdMapper.getCommandToUse(sql);
-		assertSame(command, WbDefineVar.DEFINE_SHORT);
+		assertTrue(command instanceof WbDefineVar);
+		assertEquals(false, command.isUpdatingCommand());
 
 		sql = "   -- comment\nwbcopy -sourceprofile=x";
 		command = runner.cmdMapper.getCommandToUse(sql);

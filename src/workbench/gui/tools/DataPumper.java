@@ -152,6 +152,11 @@ public class DataPumper
 		this.targetTable.setTableDropDownName("targetTable");
 	}
 
+	public JFrame getWindow()
+	{
+		return window;
+	}
+	
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();

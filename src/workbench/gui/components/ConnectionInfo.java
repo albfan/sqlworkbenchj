@@ -35,6 +35,7 @@ public class ConnectionInfo
 	private WbLabelField display;
 	private WbConnection sourceConnection;
 	private Color defaultBackground;
+	private WbAction showInfoAction;
 	
 	public ConnectionInfo(Color aBackground)
 	{
@@ -43,10 +44,11 @@ public class ConnectionInfo
 		this.setLayout(new GridLayout(1,1,0,0));
 		super.setBackground(aBackground);
 		defaultBackground = aBackground;
-		WbAction a = new WbAction(this, "show-info");
-		a.setMenuTextByKey("MnuTxtConnInfo");
+		showInfoAction = new WbAction(this, "show-info");
+		showInfoAction.setMenuTextByKey("MnuTxtConnInfo");
+		showInfoAction.setEnabled(false);
 		this.display = new WbLabelField();
-		this.display.addPopupAction(a);
+		this.display.addPopupAction(showInfoAction);
 		this.add(this.display);
 		updateDisplay();
 	}
@@ -71,6 +73,7 @@ public class ConnectionInfo
 				bkg = p.getInfoDisplayColor();
 			}
 		}
+		showInfoAction.setEnabled(this.sourceConnection != null);
 		
 		final Color newBackground = bkg;
 		

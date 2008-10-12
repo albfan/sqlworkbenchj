@@ -40,4 +40,13 @@ public class WbThread
 	{
 		LogMgr.logError("WbThread.uncaughtException()", "Thread + " + thread.getName() + " caused an exception", error);
 	}
+
+	/**
+	 * Implementation of sleep() without throwing an exception
+	 * @param time
+	 */
+	public static void sleepSilently(long time)
+	{
+		try { Thread.sleep(time); } catch (Throwable th) {}
+	}
 }

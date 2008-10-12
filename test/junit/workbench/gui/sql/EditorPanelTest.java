@@ -83,11 +83,11 @@ public class EditorPanelTest extends TestCase
 			ActionEvent evt = new ActionEvent(p,1,"break");
 			p.setAutoIndent(false);
 			p.appendLine("Line1");
-			p.getInputHandler().INSERT_BREAK.actionPerformed(evt);
+			InputHandler.INSERT_BREAK.actionPerformed(evt);
 			p.appendLine("Line2");
-			p.getInputHandler().INSERT_BREAK.actionPerformed(evt);
+			InputHandler.INSERT_BREAK.actionPerformed(evt);
 			p.appendLine("Line3");
-			p.getInputHandler().INSERT_BREAK.actionPerformed(evt);
+			InputHandler.INSERT_BREAK.actionPerformed(evt);
 
 			String content = p.getText();
 			int pos = content.indexOf("Line2\r\n");
@@ -142,6 +142,7 @@ public class EditorPanelTest extends TestCase
 	{
 		String dir = util.getBaseDir();
 		File f = new File(dir, "editor.txt");
+
 		try
 		{
 			Settings set = Settings.getInstance();

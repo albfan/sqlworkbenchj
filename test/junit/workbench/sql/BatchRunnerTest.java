@@ -426,7 +426,7 @@ public class BatchRunnerTest
 			util.prepareEnvironment();
 			con = util.getConnection();
 			stmt = con.createStatement();
-			stmt.executeUpdate("CREATE TABLE person (nr integer, firstname varchar(100), lastname varchar(100))");
+			stmt.executeUpdate("CREATE TABLE person (nr integer, firstname varchar(20), lastname varchar(20))");
 			stmt.executeUpdate("INSERT INTO person (nr, firstname, lastname) values (1, 'Arthur', 'Dent')");
 			stmt.executeUpdate("INSERT INTO person (nr, firstname, lastname) values (2, 'Ford', 'Prefect')");
 			con.commit();
@@ -449,14 +449,14 @@ public class BatchRunnerTest
 			
 			BufferedReader in = new BufferedReader(new FileReader(out));
 			String content = FileUtil.readCharacters(in);
-
-			int pos = content.indexOf("NR\tFIRSTNAME\tLASTNAME");
+			System.out.println("*************\n" + content + "\n*****************");
+			int pos = content.indexOf("|NR        |FIRSTNAME           |LASTNAME");
 			assertEquals("Header not found", (pos > -1), true);
-			
-			pos = content.indexOf("1\tArthur\tDent");
+
+			pos = content.indexOf("|1         |Arthur              |Dent");
 			assertEquals("Record not found", (pos > -1), true);
-			
-			pos = content.indexOf("2\tFord\tPrefect");
+
+			pos = content.indexOf("|2         |Ford                |Prefect");
 			assertEquals("Record not found", (pos > -1), true);
 			
 		}

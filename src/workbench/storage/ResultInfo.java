@@ -187,6 +187,7 @@ public class ResultInfo
 				size = prec;
 			}
 
+			col.setDisplaySize(size);
 			col.setDecimalDigits(scale);
 			String dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
 			if (type == Types.VARCHAR)

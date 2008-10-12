@@ -16,6 +16,8 @@ import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 
+import java.util.ArrayList;
+import java.util.List;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
@@ -63,6 +65,7 @@ public class StatementRunner
 	private boolean useSavepoint;
 	private Savepoint savepoint;
 	private boolean returnOnlyErrorMessages = false;
+	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	
 	public StatementRunner()
 	{
@@ -74,6 +77,25 @@ public class StatementRunner
 	public void dispose()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
+	}
+
+	public void addChangeListener(PropertyChangeListener l)
+	{
+		this.changeListeners.add(l);
+	}
+
+	public void removeChangeListener(PropertyChangeListener l)
+	{
+		this.changeListeners.remove(l);
+	}
+
+	public void fireConnectionChanged()
+	{
+		PropertyChangeEvent evt = new PropertyChangeEvent(this, "connection", null, this.currentConnection);
+		for (PropertyChangeListener l : changeListeners)
+		{
+			l.propertyChange(evt);
+		}
 	}
 	
 	public void propertyChange(PropertyChangeEvent evt)
@@ -179,8 +201,17 @@ public class StatementRunner
 		this.setConnection(newConn);
 	}
 
+	public void preCloseConnection()
+	{
+		
+	}
 	public void setConnection(WbConnection aConn)
 	{
+		if (this.currentConnection != null && !currentConnection.isClosed())
+		{
+			currentConnection.disconnect();
+		}
+		
 		this.releaseSavepoint();
 		this.cmdMapper.setConnection(aConn);
 		this.currentConnection = aConn;
@@ -199,6 +230,7 @@ public class StatementRunner
 		
 		this.removeNewLines = Settings.getInstance().getBoolProperty("workbench.db." + meta.getDbId() + ".removenewlines", false);
 		setUseSavepoint(currentConnection.getDbSettings().useSavePointForDML());
+
 	}
 
 	public StatementRunnerResult getResult()
@@ -260,7 +292,8 @@ public class StatementRunner
 
 		if (this.currentConnection == null && this.currentCommand.isConnectionRequired())
 		{
-			throw new SQLException("Cannot execute command '" + this.currentCommand.getVerb() + " without a connection!");
+			String verb = SqlUtil.getSqlVerb(aSql);
+			throw new SQLException("Cannot execute command '" + verb + "' without a connection!");
 		}
 		
 		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);

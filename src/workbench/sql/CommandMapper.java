@@ -75,108 +75,50 @@ public class CommandMapper
 		cmdDispatch = new HashMap<String, SqlCommand>();
 		cmdDispatch.put("*", new SqlCommand());
 
-		SqlCommand sql = new WbListTables();
-		cmdDispatch.put(sql.getVerb(), sql);
+		addCommand(new WbListTables());
+		addCommand(new WbListProcedures());
+		addCommand(new WbDescribeTable());
+		addCommand(new WbDefineVar());
+		addCommand(new WbEnableOraOutput());
+		addCommand(new WbDisableOraOutput());
+		addCommand(new WbStartBatch());
+		addCommand(new WbEndBatch());
+		addCommand(new SelectCommand());
+		addCommand(new WbXslt());
+		addCommand(new WbRemoveVar());
+		addCommand(new WbListVars());
+		addCommand(new WbExport());
+		addCommand(new WbImport());
+		addCommand(new WbCopy());
+		addCommand(new WbSchemaReport());
+		addCommand(new WbSchemaDiff());
+		addCommand(new WbDataDiff());
+		addCommand(new SetCommand());
+		addCommand(new WbFeedback());
+		addCommand(new WbDefinePk());
+		addCommand(new WbListPkDef());
+		addCommand(new WbLoadPkMapping());
+		addCommand(new WbSavePkMapping());
+		addCommand(new WbConfirm());
+		addCommand(new WbCall());
+		addCommand(new WbConnect());
+		addCommand(new WbInclude());
+		addCommand(new WbListCatalogs());
 
-		sql = new WbListProcedures();
-		cmdDispatch.put(sql.getVerb(), sql);
+		addCommand(SingleVerbCommand.COMMIT);
+		addCommand(SingleVerbCommand.ROLLBACK);
 
-		sql = new WbDescribeTable();
-		cmdDispatch.put(sql.getVerb(), sql);
-		cmdDispatch.put(WbDescribeTable.VERB_LONG, sql);
-
-		sql = new WbEnableOraOutput();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbDisableOraOutput();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbStartBatch();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbEndBatch();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new SelectCommand();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbXslt();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		cmdDispatch.put(WbDefineVar.DEFINE_LONG.getVerb(), WbDefineVar.DEFINE_LONG);
-		cmdDispatch.put(WbDefineVar.DEFINE_SHORT.getVerb(), WbDefineVar.DEFINE_SHORT);
-
-		sql = new WbRemoveVar();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbListVars();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbExport();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbImport();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbCopy();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbSchemaReport();
-		cmdDispatch.put(sql.getVerb(), sql);
+		addCommand(UpdatingCommand.DELETE);
+		addCommand(UpdatingCommand.INSERT);
+		addCommand(UpdatingCommand.UPDATE);
+		addCommand(UpdatingCommand.TRUNCATE);
 		
-		sql = new WbSchemaDiff();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbDataDiff();
-		cmdDispatch.put(sql.getVerb(), sql);
-		
-		sql = new SetCommand();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbFeedback();
-		cmdDispatch.put(sql.getVerb(), sql);
-		
-		sql = new WbDefinePk();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbListPkDef();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbLoadPkMapping();
-		cmdDispatch.put(sql.getVerb(), sql);
-		
-		sql = new WbSavePkMapping();
-		cmdDispatch.put(sql.getVerb(), sql);
-
-		sql = new WbConfirm();
-		cmdDispatch.put(sql.getVerb(), sql);
-		
-		sql = new WbCall();
-		cmdDispatch.put(sql.getVerb(), sql);
-		
-		sql = new WbConnect();
-		cmdDispatch.put(sql.getVerb(), sql);
-		
-		cmdDispatch.put(WbInclude.INCLUDE_LONG.getVerb(), WbInclude.INCLUDE_LONG);
-		cmdDispatch.put(WbInclude.INCLUDE_SHORT.getVerb(), WbInclude.INCLUDE_SHORT);
-
-		cmdDispatch.put(WbListCatalogs.LISTCAT.getVerb(), WbListCatalogs.LISTCAT);
-		cmdDispatch.put(WbListCatalogs.LISTDB.getVerb(), WbListCatalogs.LISTDB);
-
-		cmdDispatch.put(SingleVerbCommand.COMMIT.getVerb(), SingleVerbCommand.COMMIT);
-		cmdDispatch.put(SingleVerbCommand.ROLLBACK.getVerb(), SingleVerbCommand.ROLLBACK);
-
-		cmdDispatch.put(UpdatingCommand.DELETE.getVerb(), UpdatingCommand.DELETE);
-		cmdDispatch.put(UpdatingCommand.INSERT.getVerb(), UpdatingCommand.INSERT);
-		cmdDispatch.put(UpdatingCommand.UPDATE.getVerb(), UpdatingCommand.UPDATE);
-		cmdDispatch.put(UpdatingCommand.TRUNCATE.getVerb(), UpdatingCommand.TRUNCATE);
-		
-		cmdDispatch.put(WbSelectBlob.VERB, new WbSelectBlob());
-		cmdDispatch.put(WbHideWarnings.VERB, new WbHideWarnings());
+		addCommand(new WbSelectBlob());
+		addCommand(new WbHideWarnings());
 		
 		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
 		{
-			cmdDispatch.put(cmd.getVerb(), cmd);
+			addCommand(cmd);
 		}
 		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.CREATE);
 
@@ -185,12 +127,16 @@ public class CommandMapper
 	}
 	
 	/**
-	 * For testing purposes, to that non-default commands can be added 
-	 * during a JUnit test
+	 * Add a new command definition during runtime.
 	 */
 	public void addCommand(SqlCommand command)
 	{
 		cmdDispatch.put(command.getVerb(), command);
+		String longVerb = command.getAlternateVerb();
+		if (longVerb != null)
+		{
+			cmdDispatch.put(longVerb, command);
+		}
 	}
 	
 	/**
@@ -245,8 +191,6 @@ public class CommandMapper
 		else if (metaData.isFirebird())
 		{
 			this.cmdDispatch.put(DdlCommand.RECREATE.getVerb(), DdlCommand.RECREATE);
-			this.cmdDispatch.put(WbInclude.INCLUDE_FB.getVerb(), WbInclude.INCLUDE_FB);
-			this.dbSpecificCommands.add(WbInclude.INCLUDE_FB.getVerb());
 			this.dbSpecificCommands.add(DdlCommand.RECREATE.getVerb());
 		}
 		

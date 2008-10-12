@@ -34,6 +34,8 @@ public class WbConnect
 	extends SqlCommand
 {
 	private static int connectionId;
+	private boolean persistentChange = false;
+	
 	public static final String VERB = "WBCONNECT";
 
 	public WbConnect()
@@ -57,6 +59,11 @@ public class WbConnect
 		return VERB;
 	}
 
+	public void setPersistentChange(boolean flag)
+	{
+		this.persistentChange = flag;
+	}
+	
 	@Override
 	protected boolean isConnectionRequired()
 	{
@@ -74,7 +81,18 @@ public class WbConnect
 		cmdLine.parse(args);
 
 		ConnectionProfile profile = null;
-		String profName = cmdLine.getValue(AppArguments.ARG_PROFILE);
+		String profName = null;
+
+		// Allow to directly specify a profile name without parameters
+		if (cmdLine.getArgumentCount() == 0)
+		{
+			profName = args;
+		}
+		else
+		{
+			profName = cmdLine.getValue(AppArguments.ARG_PROFILE);
+		}
+		
 		if (StringUtil.isEmptyString(profName))
 		{
 			profile = BatchRunner.createCmdLineProfile(cmdLine);
@@ -100,9 +118,17 @@ public class WbConnect
 			newConn = ConnectionMgr.getInstance().getConnection(profile, id);
 			LogMgr.logInfo("WbConnect.execute()", "Connected to: " + newConn.getDisplayString());
 
-			// The runner will switch back to the original connection automatically once
-			// the current script has ended.
-			this.runner.changeConnection(newConn);
+			if (persistentChange)
+			{
+				this.runner.setConnection(newConn);
+				this.runner.fireConnectionChanged();
+			}
+			else
+			{
+				// The runner will switch back to the original connection automatically once
+				// the current script has ended.
+				this.runner.changeConnection(newConn);
+			}
 			result.addMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", newConn.getDisplayString()));
 			result.setSuccess();
 		}

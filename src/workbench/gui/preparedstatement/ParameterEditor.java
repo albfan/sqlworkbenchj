@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import java.awt.Frame;
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -133,7 +134,7 @@ public class ParameterEditor
 
 		boolean result = false;
 		//boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
-		MainWindow parent = WbManager.getInstance().getCurrentWindow();
+		Frame parent = WbManager.getInstance().getCurrentWindow();
 		boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
 		if (ok)
 		{

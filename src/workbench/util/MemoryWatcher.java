@@ -11,23 +11,41 @@
  */
 package workbench.util;
 
+import workbench.resource.Settings;
+
 /**
  *
  * @author support@sql-workbench.net
  */
 public class MemoryWatcher
 {
-	// 2MB minimum
-	private static final long MIN_MEMORY = 2 * 1024 * 1024;
+	private static final long MIN_FREE_MEMORY =
+		Settings.getInstance().getIntProperty("workbench.memorywatcher.minmemory", 5) * 1024 * 1024;
+
+	// the maxMemory() will not change during the lifetime of the JVM
+	// so I can spare some CPU cycles by not calling maxMemory() constantly
+	private static final long MAX_MEMORY = Runtime.getRuntime().maxMemory();
 
 	public synchronized static boolean isMemoryLow()
 	{
 		long free = Runtime.getRuntime().freeMemory();
-		if (free < MIN_MEMORY)
+		long total = Runtime.getRuntime().totalMemory();
+
+		// freeMemory reports the amount of memory that is free
+		// in the totalMemory. But the total memory can actually
+		// expand to maxMemory. So we need to add the difference
+		// between max and total to the currently free memory
+		free = free + (MAX_MEMORY - total);
+
+		if (free < MIN_FREE_MEMORY)
 		{
+			// As we have not yet hit an OutOfMemoryException, running gc()
+			// can actually free some memory. This will slow down e.g.
+			// data retrieval when the memory is filled up, but at least
+			// we can prevent the OOME to a certain extent
 			System.gc();
 			free = Runtime.getRuntime().freeMemory();
 		}
-		return (free < MIN_MEMORY);
+		return (free < MIN_FREE_MEMORY);
 	}
 }
