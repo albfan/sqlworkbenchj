@@ -122,17 +122,13 @@ public class ArgumentParser
 			{
 				String word = tok.nextToken();
 				if (word == null || word.length() == 0) continue;
-				String arg = null;
+				String arg = word.trim();
 				String value = null;
 				int pos = word.indexOf('=');
 				if (pos > -1)
 				{
-					arg = word.substring(0, pos).trim().toLowerCase();
+					arg = word.substring(0, pos).trim();
 					value = word.substring(pos + 1).trim();
-				}
-				else
-				{
-					arg = word.trim().toLowerCase();
 				}
 
 				if (value == null)

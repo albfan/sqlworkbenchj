@@ -47,28 +47,28 @@ public class WbDescribeTableTest extends TestCase
 			util.prepareEnvironment();
 			runner = util.createConnectedStatementRunner();
 			String sql = "create table describe_test (nr integer, info_text varchar(100));";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertEquals("Could not create table", true, result.isSuccess());
 			
 			sql = "-- show table definition\ndesc describe_test;";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			result = runner.getResult();
 			assertEquals("Describe failed", true, result.isSuccess());
 			
 			List<DataStore> data = result.getDataStores();
 			assertNotNull("No description returned", data);
-			assertEquals("No data returned", 1, data.size());
+			assertEquals("No data returned", 2, data.size());
 			assertEquals("Wrong number of rows returned", 2, data.get(0).getRowCount());
 
 			sql = "-- show table definition\ndescribe \"DESCRIBE_TEST\"\n-- for table;";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			result = runner.getResult();
 			assertEquals("Describe failed", true, result.isSuccess());
 			
 			data = result.getDataStores();
 			assertNotNull("No description returned", data);
-			assertEquals("No data returned", 1, data.size());
+			assertEquals("No data returned", 2, data.size());
 			
 			assertEquals("Wrong number of rows returned", 2, data.get(0).getRowCount());
 			

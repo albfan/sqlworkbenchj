@@ -114,7 +114,7 @@ public class WbDataDiffTest
 			StatementRunner runner = new StatementRunner();
 			runner.setBaseDir(util.getBaseDir());
 			String sql = "WbDataDiff -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.sql -encoding=UTF8";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			
 			WbFile main = new WbFile(util.getBaseDir(), "sync.sql");
 			assertTrue(main.exists());

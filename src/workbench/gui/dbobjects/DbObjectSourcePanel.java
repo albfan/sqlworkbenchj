@@ -168,6 +168,8 @@ public class DbObjectSourcePanel
 			public void run()
 			{
 				sourceEditor.setText(text == null ? "" : text);
+				sourceEditor.invalidate();
+				sourceEditor.doLayout();
 			}
 		});
 

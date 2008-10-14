@@ -700,10 +700,16 @@ public class DbMetadata
 		return this.getExtendedViewSource(tbl, null, includeDrop);
 	}
 
+	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop)
+		throws SQLException
+	{
+		return getExtendedViewSource(view, viewTableDefinition, includeDrop, true);
+	}
+
 	/**
 	 * Returns a complete SQL statement to (re)create the given view.
 	 */
-	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop)
+	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop, boolean includeCommit)
 		throws SQLException
 	{
 		GetMetaDataSql sql = metaSqlMgr.getViewSourceSql();
@@ -741,7 +747,7 @@ public class DbMetadata
 				result.append(lineEnding);
 			}
 			result.append(source);
-			if (this.dbSettings.ddlNeedsCommit())
+			if (this.dbSettings.ddlNeedsCommit() && includeCommit)
 			{
 				result.append(lineEnding);
 				result.append("COMMIT;");
@@ -789,7 +795,7 @@ public class DbMetadata
 			}
 		}
 		
-		if (this.dbSettings.ddlNeedsCommit())
+		if (this.dbSettings.ddlNeedsCommit() && includeCommit)
 		{
 			result.append("COMMIT;");
 		}

@@ -18,6 +18,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import workbench.sql.wbcommands.console.WbDeleteProfile;
+import workbench.sql.wbcommands.console.WbListProfiles;
+import workbench.sql.wbcommands.console.WbStoreProfile;
 
 /**
  * A class to test whether a given SQL Verb is an internal 
@@ -68,7 +71,10 @@ public class CommandTester
 		commands.add(WbConnect.VERB);
 		commands.add(WbDisconnect.VERB);
 		commands.add(WbHideWarnings.VERB);
-		
+		commands.add(WbListProfiles.VERB);
+		commands.add(WbStoreProfile.VERB);
+		commands.add(WbHelp.VERB);
+
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
 		formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);
@@ -81,6 +87,12 @@ public class CommandTester
 		formattedWords.put(WbDescribeTable.VERB, WbDescribeTable.VERB.toUpperCase());
 		formattedWords.put(WbDescribeTable.VERB_LONG, WbDescribeTable.VERB_LONG.toUpperCase());
 		formattedWords.put(WbHideWarnings.VERB, "WbEnableWarnings");
+		formattedWords.put(WbStoreProfile.VERB, "WbStoreProfile");
+		formattedWords.put(WbDeleteProfile.VERB, "WbDeleteProfile");
+		formattedWords.put(WbListProfiles.VERB, "WbListProfiles");
+		formattedWords.put(WbDefinePk.VERB, "WbDefinePK");
+		formattedWords.put(WbSelectBlob.VERB, "WbSelectBlob");
+		formattedWords.put(WbRemoveVar.VERB, "WbVarDelete");
 	}
 	
 	public Collection<String> getCommands()

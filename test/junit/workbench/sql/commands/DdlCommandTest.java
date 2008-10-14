@@ -37,13 +37,13 @@ public class DdlCommandTest
 			StatementRunner runner = util.createConnectedStatementRunner();
 			String sql = "drop table does_not_exist";
 			runner.setIgnoreDropErrors(true);
-			runner.runStatement(sql, 0, 0);
+			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertTrue(result.isSuccess());
 			
 			runner.setIgnoreDropErrors(false);
 			runner.setUseSavepoint(true);
-			runner.runStatement(sql, 0, 0);
+			runner.runStatement(sql);
 			result = runner.getResult();
 			assertFalse(result.isSuccess());
 			

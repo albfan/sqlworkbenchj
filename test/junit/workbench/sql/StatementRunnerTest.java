@@ -59,15 +59,15 @@ public class StatementRunnerTest
 
 			StatementRunnerResult result = null;
 
-			runner.runStatement("create table read_only_test (id integer, data varchar(100))", -1, -1);
+			runner.runStatement("create table read_only_test (id integer, data varchar(100))");
 			result = runner.getResult();
 			assertTrue(result.isSuccess());
 
-			runner.runStatement("insert into read_only_test (id, data) values (1, 'test')", -1, -1);
+			runner.runStatement("insert into read_only_test (id, data) values (1, 'test')");
 			result = runner.getResult();
 			assertTrue(result.isSuccess());
 
-			runner.runStatement("commit", -1, -1);
+			runner.runStatement("commit");
 			result = runner.getResult();
 			assertTrue(result.isSuccess());
 
@@ -75,11 +75,11 @@ public class StatementRunnerTest
 			assertTrue(exists);
 
 			con.getProfile().setReadOnly(true);
-			runner.runStatement("insert into read_only_test (id, data) values (2, 'test')", -1, -1);
+			runner.runStatement("insert into read_only_test (id, data) values (2, 'test')");
 			result = runner.getResult();
 			assertTrue(result.hasWarning());
 
-			runner.runStatement("commit", -1, -1);
+			runner.runStatement("commit");
 			result = runner.getResult();
 			assertTrue(result.hasWarning());
 
@@ -96,6 +96,11 @@ public class StatementRunnerTest
 			ExecutionController controller = new ExecutionController()
 			{
 
+				public boolean confirmStatementExecution(String command)
+				{
+					controllerCalled = true;
+					return confirmExecution;
+				}
 				public boolean confirmExecution(String command)
 				{
 					controllerCalled = true;
@@ -108,7 +113,7 @@ public class StatementRunnerTest
 			runner.setExecutionController(controller);
 
 			controllerCalled = false;
-			runner.runStatement("select count(*) from read_only_test", -1, -1);
+			runner.runStatement("select count(*) from read_only_test");
 			result = runner.getResult();
 			assertFalse(controllerCalled);
 			assertTrue(result.isSuccess());
@@ -118,14 +123,14 @@ public class StatementRunnerTest
 
 			controllerCalled = false;
 			confirmExecution = true;
-			runner.runStatement("insert into read_only_test (id, data) values (2, 'test')", -1, -1);
+			runner.runStatement("insert into read_only_test (id, data) values (2, 'test')");
 			result = runner.getResult();
 			assertTrue(controllerCalled);
 			assertTrue(result.isSuccess());
 
 			controllerCalled = false;
 			confirmExecution = false;
-			runner.runStatement("insert into read_only_test (id, data) values (3, 'test')", -1, -1);
+			runner.runStatement("insert into read_only_test (id, data) values (3, 'test')");
 			result = runner.getResult();
 			assertTrue(controllerCalled);
 			assertTrue(result.hasWarning());
@@ -165,7 +170,7 @@ public class StatementRunnerTest
 			String sql = "--comment\n\nwbfeedback off";
 			SqlCommand command = runner.cmdMapper.getCommandToUse(sql);
 			assertTrue(command instanceof WbFeedback);
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 
 			boolean verbose = runner.getVerboseLogging();
 			assertEquals("Feedback not executed", false, verbose);

@@ -1,5 +1,5 @@
 /*
- * WbDisconnect.java
+ * WbListProfiles.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -10,9 +10,11 @@
  *
  */
 package workbench.sql.wbcommands.console;
-
 import java.sql.SQLException;
-import workbench.resource.ResourceMgr;
+import java.util.List;
+import java.util.Map;
+import workbench.db.ConnectionProfile;
+import workbench.db.ProfileGroupMap;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -20,12 +22,12 @@ import workbench.sql.StatementRunnerResult;
  *
  * @author support@sql-workbench.net
  */
-public class WbDisconnect
+public class WbListProfiles
 	extends SqlCommand
 {
-	public static final String VERB = "WBDISCONNECT";
+	public static final String VERB = "WBLISTPROFILES";
 
-	public WbDisconnect()
+	public WbListProfiles()
 	{
 		super();
 	}
@@ -36,25 +38,28 @@ public class WbDisconnect
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
+
+	@Override
+	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		if (this.currentConnection != null)
+		ProfileGroupMap groupMap = new ProfileGroupMap();
+
+		for (Map.Entry<String, List<ConnectionProfile>> entry : groupMap.entrySet())
 		{
-			//this.currentConnection.disconnect();
-			// setConnection will call disconnect() on the "old" connection
-			this.runner.setConnection(null); 
-			result.addMessage(ResourceMgr.getString("MsgDisconnected"));
-			result.setSuccess();
+			result.addMessage(entry.getKey());
+			for (ConnectionProfile profile : entry.getValue())
+			{
+				result.addMessage("  " + profile.getName());
+			}
 		}
-		else
-		{
-			result.addMessage(ResourceMgr.getString("TxtNotConnected"));
-			result.setFailure();
-		}
+		result.setSuccess();
 		return result;
 	}
-
 
 }

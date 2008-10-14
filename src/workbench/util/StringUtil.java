@@ -1056,13 +1056,18 @@ public class StringUtil
 
 	public static String padRight(String input, int length)
 	{
+		return padRight(input, length, ' ');
+	}
+
+	public static String padRight(String input, int length, char padChar)
+	{
 		if (input == null) return null;
 		if (input.length() >= length) return input;
 		StringBuilder result = new StringBuilder(length);
 		result.append(input);
 		while (result.length() < length)
 		{
-			result.append(' ');
+			result.append(padChar);
 		}
 		return result.toString();
 	}
@@ -1086,6 +1091,47 @@ public class StringUtil
 			result.append(s);
 		}
 		return result.toString();
+	}
+
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{[0-9a-zA-Z\\.\\-]*\\}");
+	/**
+	 * Replaces "variables" of the form ${some.thing} in the input string.
+	 * Any variable name is assumed to be a system property, this means
+	 * <tt>${user.home}</tt> will be replaced with the value of System.getProperty("user.home")
+	 *
+	 * @param input a string that might contain system property variables
+	 * @return the string with replaced system properties or <tt>null</tt> if the input was <tt>null</tt>
+	 */
+	public static String replaceProperties(String input)
+	{
+		if (input == null)
+		{
+			return null;
+		}
+		Matcher m = VARIABLE_PATTERN.matcher(input);
+		if (m == null)
+		{
+			return input;
+		}
+
+		while (m.find())
+		{
+			final int start = m.start();
+			final int end = m.end();
+			final String var = input.substring(start, end);
+			final String propName = input.substring(start + 2, end - 1);
+			final String propValue = System.getProperty(propName, null);
+			if (propValue != null)
+			{
+				input = input.replace(var, propValue);
+				m = VARIABLE_PATTERN.matcher(input);
+				if (m == null)
+				{
+					return input;
+				}
+			}
+		}
+		return input;
 	}
 
 	private static void appendUnicode(StringBuilder buffer, char c)

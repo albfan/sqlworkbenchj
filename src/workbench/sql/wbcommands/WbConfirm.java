@@ -12,8 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import workbench.WbManager;
-import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.ExecutionController;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -35,9 +34,15 @@ public class WbConfirm
 		this.isUpdatingCommand = false;
 	}
 
-	public String getVerb() { return VERB; }
+	public String getVerb()
+	{
+		return VERB;
+	}
 
-	protected boolean isConnectionRequired() { return false; }
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
 
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
@@ -46,21 +51,23 @@ public class WbConfirm
 		result.setStopScript(false);
 		result.setSuccess();
 
-		if (WbManager.getInstance().isBatchMode()) return result;
-
-		String msg = getCommandLine(sql);
-
-		if (StringUtil.isEmptyString(msg))
+		ExecutionController controller = runner.getExecutionController();
+		if (controller != null)
 		{
-			msg = ResourceMgr.getString("MsgConfirmContinue");
-		}
+			String msg = StringUtil.trimQuotes(getCommandLine(sql));
 
-		boolean continueScript = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), StringUtil.trimQuotes(msg));
-		if (!continueScript)
-		{
-			result.setStopScript(true);
-		}
+			if (StringUtil.isEmptyString(msg))
+			{
+				msg = ResourceMgr.getString("MsgConfirmContinue");
+			}
 
+			boolean continueScript = controller.confirmExecution(msg);
+			
+			if (!continueScript)
+			{
+				result.setStopScript(true);
+			}
+		}
 		return result;
 	}
 

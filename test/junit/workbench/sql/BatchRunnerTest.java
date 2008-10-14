@@ -450,13 +450,13 @@ public class BatchRunnerTest
 			BufferedReader in = new BufferedReader(new FileReader(out));
 			String content = FileUtil.readCharacters(in);
 			System.out.println("*************\n" + content + "\n*****************");
-			int pos = content.indexOf("|NR        |FIRSTNAME           |LASTNAME");
+			int pos = content.indexOf("NR\tFIRSTNAME\tLASTNAME");
 			assertEquals("Header not found", (pos > -1), true);
 
-			pos = content.indexOf("|1         |Arthur              |Dent");
+			pos = content.indexOf("1\tArthur\tDent");
 			assertEquals("Record not found", (pos > -1), true);
 
-			pos = content.indexOf("|2         |Ford                |Prefect");
+			pos = content.indexOf("2\tFord\tPrefect");
 			assertEquals("Record not found", (pos > -1), true);
 			
 		}

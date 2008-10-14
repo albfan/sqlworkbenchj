@@ -550,15 +550,10 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".systemtables.selectable", false);
 	}
 
-//	public boolean preferParametersFromStatement()
-//	{
-//		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".call.parameters.fromstatement", true);
-//	}
-//
-//	public boolean callStatementsNeedInput()
-//	{
-//		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".call.parameters.prompt", true);
-//	}
+	public boolean removeNewLinesInSQL()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".removenewlines", false);
+	}
 
 	public boolean canDropType(String type)
 	{

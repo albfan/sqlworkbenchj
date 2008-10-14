@@ -523,7 +523,7 @@ public class WbExportTest
 			File exportFile = new File(this.basedir, "blob_ext.txt");
 			
 			StatementRunner runner = util.createConnectedStatementRunner(connection);
-			runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;", -1, -1);
+			runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;");
 			StatementRunnerResult result = runner.getResult();
 			System.out.println("**************");
 			System.out.println(result.getMessageBuffer().toString());
@@ -535,7 +535,7 @@ public class WbExportTest
              "     else nr||'.data' \n" + 
              "   end as fname,  \n" + 
              "   data \n" + 
-             "from blob_test ", -1, -1);
+             "from blob_test ");
 			result = runner.getResult();
 			assertEquals("No export file created", true, exportFile.exists());
 			

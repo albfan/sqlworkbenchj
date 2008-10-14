@@ -33,6 +33,8 @@ import workbench.interfaces.ResultLogger;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.console.DataStorePrinter;
+import workbench.interfaces.ResultSetConsumer;
 import workbench.storage.DataPrinter;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
@@ -46,9 +48,12 @@ import workbench.util.WbFile;
 
 /**
  * A class to run several statements from a script file.
- * This is used when running SQL Workbench in batch mode and
+ * This is used when running SQL Workbench in batch/console mode and
  * for the {@link workbench.sql.wbcommands.WbInclude} command.
  *
+ * @see workbench.console.SQLConsole
+ * @see workbench.sql.wbcommands.WbInclude
+ * 
  * @author  support@sql-workbench.net
  */
 public class BatchRunner
@@ -74,11 +79,11 @@ public class BatchRunner
 	private String encoding = null;
 	private boolean showProgress = false;
 	private PrintStream console = System.out;
-//	private boolean quiet = false;
 	private boolean consolidateMessages = false;
 	private boolean showStatementWithResult = true;
 	private boolean showSummary = verboseLogging;
 	private boolean showResultBorders = true;
+	private boolean showStatementTiming = true;
 	
 	public BatchRunner()
 	{
@@ -161,6 +166,11 @@ public class BatchRunner
 	{
 		this.showSummary = flag;
 	}
+
+	public boolean getVerboseLogging()
+	{
+		return this.verboseLogging;
+	}
 	
 	public void setVerboseLogging(boolean flag)
 	{
@@ -240,14 +250,17 @@ public class BatchRunner
 			this.setConnection(c);
 			String info = c.getDisplayString();
 			LogMgr.logInfo("BatchRunner.connect()",  ResourceMgr.getFormattedString("MsgBatchConnectOk", c.getDisplayString()));
-			if (verboseLogging) this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
-			success = true;
-			String warn = c.getWarnings();
-			if (!StringUtil.isEmptyString(warn))
+			if (verboseLogging) 
 			{
-				printMessage(warn);
-				LogMgr.logWarning("BatchRunner.connect()", "Connection returned warnings: " + warn);
+				this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
+				String warn = c.getWarnings();
+				if (!StringUtil.isEmptyString(warn) && !c.getProfile().isHideWarnings())
+				{
+					printMessage(warn);
+					LogMgr.logWarning("BatchRunner.connect()", "Connection returned warnings: " + warn);
+				}
 			}
+			success = true;
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -276,7 +289,7 @@ public class BatchRunner
 	public void setSuccessScript(String aFilename)
 	{
 		if (aFilename == null) return;
-		File f = new File(aFilename);
+		WbFile f = new WbFile(aFilename);
 		if (f.exists() && !f.isDirectory())
 		{
 			this.successScript = aFilename;
@@ -290,7 +303,7 @@ public class BatchRunner
 	public void setErrorScript(String aFilename)
 	{
 		if (aFilename == null) return;
-		File f = new File(aFilename);
+		File f = new WbFile(aFilename);
 		if (f.exists() && !f.isDirectory())
 		{
 			this.errorScript = aFilename;
@@ -413,6 +426,14 @@ public class BatchRunner
 		}
 	}
 
+	public void setResultSetConsumer(ResultSetConsumer consumer)
+	{
+		if (this.stmtRunner != null)
+		{
+			this.stmtRunner.setConsumer(consumer);
+		}
+	}
+	
 	private boolean executeScript(WbFile scriptFile)
 		throws IOException
 	{
@@ -501,7 +522,7 @@ public class BatchRunner
 				}
 
 				long verbstart = System.currentTimeMillis();
-				this.stmtRunner.runStatement(sql, 0, -1);
+				this.stmtRunner.runStatement(sql);
 				long verbend = System.currentTimeMillis();
 				this.stmtRunner.statementDone();
 
@@ -548,7 +569,7 @@ public class BatchRunner
 					executedCount ++;
 				}
 
-				if (this.showTiming && !consolidateMessages)
+				if (this.showTiming && showStatementTiming && !consolidateMessages)
 				{
 					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)(verbend - verbstart)) / 1000.0) + "s");
 				}
@@ -557,6 +578,13 @@ public class BatchRunner
 				{
 					this.rowMonitor.restoreType("batchrunnerMain");
 					this.rowMonitor.setCurrentRow(executedCount, -1);
+				}
+
+				if (result != null && result.stopScript())
+				{
+					String cancelMsg = ResourceMgr.getString("MsgScriptCancelled");
+					printMessage(cancelMsg);
+					break;
 				}
 
 				if (this.cancelExecution)
@@ -629,13 +657,22 @@ public class BatchRunner
 			console.println();
 			console.println(sql);
 		}
+		
 		if (showResultBorders) console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
 		for (DataStore ds : data)
 		{
 			if (ds != null)
 			{
-				DataPrinter printer = new DataPrinter(ds);
-				printer.printTo(console);
+				if (showResultBorders)
+				{
+					DataPrinter printer = new DataPrinter(ds);
+					printer.printTo(console);
+				}
+				else
+				{
+					DataStorePrinter printer = new DataStorePrinter(ds);
+					printer.printTo(console);
+				}
 			}
 		}
 		if (showResultBorders) console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
@@ -659,6 +696,12 @@ public class BatchRunner
 	public void setShowTiming(boolean flag)
 	{
 		this.showTiming = flag;
+		this.showStatementTiming = flag;
+	}
+
+	public void setShowStatementTiming(boolean flag)
+	{
+		this.showStatementTiming = flag;
 	}
 
 	public void setAbortOnError(boolean aFlag)
@@ -748,10 +791,10 @@ public class BatchRunner
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);
-				File f = new File(wksp);
+				File f = new WbFile(wksp);
 				if (!f.exists() && !f.isAbsolute())
 				{
-					f = new File(Settings.getInstance().getConfigDir(), wksp);
+					f = new WbFile(Settings.getInstance().getConfigDir(), wksp);
 				}
 				if (f.exists())
 				{
@@ -838,7 +881,6 @@ public class BatchRunner
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
 		runner.setConsolidateLog(consolidateLog);
-//		runner.quiet = cmdLine.isArgPresent(AppArguments.ARG_QUIET);
 
 		// if no showTiming argument was provided but feedback was disabled
 		// disable the display of the timing information as well.

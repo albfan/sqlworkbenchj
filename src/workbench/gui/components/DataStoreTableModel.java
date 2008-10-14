@@ -217,7 +217,7 @@ public class DataStoreTableModel
 		if (this.dataCache == null) return 0;
 		try
 		{
-			return this.dataCache.getColumnDisplaySize(aColumn);
+			return this.dataCache.getColumnSize(aColumn);
 		}
 		catch (Exception e)
 		{

@@ -36,6 +36,7 @@ import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ControlFileFormat;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.PoiHelper;
+import workbench.interfaces.ResultSetConsumer;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
@@ -47,14 +48,14 @@ import workbench.util.WbFile;
  */
 public class WbExport
 	extends SqlCommand
-	implements RowActionMonitor, ProgressReporter
+	implements RowActionMonitor, ProgressReporter, ResultSetConsumer
 {
 	public static final String VERB = "WBEXPORT";
 	private DataExporter exporter;
 	private WbFile pendingOutput;
 
 	//private boolean directExport = false;
-	private boolean queryExport = false;
+	private boolean consumeQuery = false;
 	private boolean continueOnError = false;
 	private String currentTable;
 	private String defaultExtension;
@@ -466,7 +467,7 @@ public class WbExport
 			return result;
 		}
 
-		this.queryExport = (tablesToExport.size() == 0);
+		this.consumeQuery = (tablesToExport.size() == 0);
 
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);
@@ -549,11 +550,12 @@ public class WbExport
 			}
 		}
 
-		if (queryExport)
+		if (consumeQuery)
 		{
 			// Waiting for the next SQL Statement...
 			this.exporter.setRowMonitor(this.rowMonitor);
 			this.exporter.setReportInterval(this.progressInterval);
+			this.runner.setConsumer(this);
 			this.pendingOutput = outputFile;
 
 			String msg = ResourceMgr.getString("MsgSpoolInit");
@@ -714,27 +716,22 @@ public class WbExport
 		}
 	}
 
-	public boolean isResultSetConsumer()
-	{
-		return queryExport;
-	}
-
-	public void consumeResult(StatementRunnerResult aResult)
+	public void consumeResult(StatementRunnerResult toConsume)
 	{
 		// Run an export that is defined by a SQL Statement
 		// i.e. no sourcetable given in the initial wbexport command
 		try
 		{
-			if (aResult.hasResultSets())
+			if (toConsume.hasResultSets())
 			{
-				String sql = aResult.getSourceCommand();
+				String sql = toConsume.getSourceCommand();
 
-				ResultSet toExport = aResult.getResultSets().get(0);
+				ResultSet toExport = toConsume.getResultSets().get(0);
 				// The exporter will close the resultSet that it exported
 				// so we can remove it from the list of ResultSets in the StatementRunnerResult
 				// object.
 				// Thus the later call to clearResultSets() will only free any not used ResultSet
-				aResult.getResultSets().remove(0);
+				toConsume.getResultSets().remove(0);
 				long rowCount = this.exporter.exportResultSet(pendingOutput, toExport, sql);
 
 				String msg = null;
@@ -742,33 +739,35 @@ public class WbExport
 				if (exporter.isSuccess())
 				{
 					msg = ResourceMgr.getString("MsgSpoolOk").replace("%rows%", Long.toString(rowCount));
-					aResult.addMessage(""); // force new line in output
-					aResult.addMessage(msg);
+					toConsume.addMessage(""); // force new line in output
+					toConsume.addMessage(msg);
 					msg = ResourceMgr.getString("MsgSpoolTarget") + " " + this.exporter.getFullOutputFilename();
-					aResult.addMessage(msg);
+					toConsume.addMessage(msg);
 				}
-				addMessages(aResult);
+				addMessages(toConsume);
 
 				if (exporter.isSuccess())
 				{
-					aResult.setSuccess();
+					toConsume.setSuccess();
 				}
 				else
 				{
-					aResult.setFailure();
+					toConsume.setFailure();
 				}
 			}
 		}
 		catch (Exception e)
 		{
-			aResult.setFailure();
-			aResult.addMessage(ResourceMgr.getString("ErrExportExecute"));
-			aResult.addMessage(ExceptionUtil.getAllExceptions(e));
+			toConsume.setFailure();
+			toConsume.addMessage(ResourceMgr.getString("ErrExportExecute"));
+			toConsume.addMessage(ExceptionUtil.getAllExceptions(e));
 			LogMgr.logError("WbExportCommand.consumeResult()", "Error spooling data", e);
 		}
 		finally
 		{
-			aResult.clearResultSets();
+			toConsume.clearResultSets();
+			// Tell the statement runner we're done
+			runner.setConsumer(null);
 		}
 	}
 
@@ -777,7 +776,7 @@ public class WbExport
 		super.done();
 		exporter = null;
 		maxRows = 0;
-		queryExport = false;
+		consumeQuery = false;
 		currentTable = null;
 		defaultExtension = null;
 	}

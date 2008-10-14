@@ -859,7 +859,7 @@ public class TextFileParser
 				if (hasLineFilter && processRow)
 				{
 					Matcher m = this.lineFilter.matcher(currentLine);
-					processRow = m.matches();
+					processRow = m.find();
 				}
 
 				importRow ++;

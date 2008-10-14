@@ -35,7 +35,7 @@ public class SqlServerFormatFileWriter
 		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
 		String dir = baseFile.getParent();
 		String baseName = baseFile.getFileName();
-		File ctl = new File(dir, baseName + ".fmt");
+		WbFile ctl = new WbFile(dir, baseName + ".fmt");
 		PrintWriter out = null;
 		try
 		{

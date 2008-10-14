@@ -17,20 +17,23 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbMetadata;
-import workbench.db.WbConnection;
+import workbench.db.DbSettings;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultLogger;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.storage.RowActionMonitor;
-import workbench.util.SqlUtil;
+import workbench.db.WbConnection;
 import workbench.interfaces.ExecutionController;
+import workbench.interfaces.ResultSetConsumer;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -47,7 +50,7 @@ public class StatementRunner
 	private StatementRunnerResult result;
 
 	private SqlCommand currentCommand;
-	private SqlCommand currentConsumer;
+	private ResultSetConsumer currentConsumer;
 	private String baseDir;
 	
 	private RowActionMonitor rowMonitor;
@@ -66,6 +69,8 @@ public class StatementRunner
 	private Savepoint savepoint;
 	private boolean returnOnlyErrorMessages = false;
 	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
+	private int maxRows = -1;
+	private int queryTimeout = -1;
 	
 	public StatementRunner()
 	{
@@ -106,7 +111,10 @@ public class StatementRunner
 		}
 	}
 
-	public void setFullErrorReporting(boolean flag) { this.fullErrorReporting = flag; }
+	public void setFullErrorReporting(boolean flag)
+	{
+		this.fullErrorReporting = flag;
+	}
 
 	public ExecutionController getExecutionController()
 	{
@@ -146,6 +154,11 @@ public class StatementRunner
 	{
 		cmdMapper.addCommand(command);
 	}
+
+	public Collection<String> getAllWbCommands()
+	{
+		return cmdMapper.getAllWbCommands();
+	}
 	
 	/**
 	 * Controls the type of error reporting. 
@@ -158,6 +171,16 @@ public class StatementRunner
 	public void setReturnOnlyErrorMessages(boolean flag)
 	{
 		returnOnlyErrorMessages = flag;
+	}
+
+	public void setMaxRows(int rows)
+	{
+		this.maxRows = rows;
+	}
+
+	public void setQueryTimeout(int timeout)
+	{
+		this.queryTimeout = timeout;
 	}
 	
 	public void setParameterPrompter(ParameterPrompter filter) { this.prompter = filter; }
@@ -216,7 +239,10 @@ public class StatementRunner
 		this.cmdMapper.setConnection(aConn);
 		this.currentConnection = aConn;
 		
-		if (aConn == null) return;
+		fireConnectionChanged();
+
+		if (currentConnection == null) return;
+		
     ConnectionProfile profile = currentConnection.getProfile();
     if (profile != null)
     {
@@ -226,11 +252,10 @@ public class StatementRunner
     }
     
 		DbMetadata meta = this.currentConnection.getMetadata();
-		if (meta == null) return;
+		DbSettings db = (meta != null ? meta.getDbSettings() : null);
 		
-		this.removeNewLines = Settings.getInstance().getBoolProperty("workbench.db." + meta.getDbId() + ".removenewlines", false);
-		setUseSavepoint(currentConnection.getDbSettings().useSavePointForDML());
-
+		this.removeNewLines = (db == null ? false : db.removeNewLinesInSQL());
+		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 	}
 
 	public StatementRunnerResult getResult()
@@ -252,13 +277,8 @@ public class StatementRunner
 	{
 		return this.cmdMapper.getCommandToUse(sql);
 	}
-	
-	public ExecutionController getController()
-	{
-		return this.controller;
-	}
-	
-	public void runStatement(String aSql, int maxRows, int queryTimeout)
+
+	public void runStatement(String aSql)
 		throws SQLException, Exception
 	{
 		if (this.result != null)
@@ -296,7 +316,6 @@ public class StatementRunner
 			throw new SQLException("Cannot execute command '" + verb + "' without a connection!");
 		}
 		
-		this.currentCommand.setConsumerWaiting(this.currentConsumer != null);
 		this.currentCommand.setStatementRunner(this);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setResultLogger(this.resultLogger);
@@ -335,7 +354,7 @@ public class StatementRunner
 		
 		if (controller != null && currentCommand.needConfirmation(currentConnection, realSql))
 		{
-			boolean doExecute = this.controller.confirmExecution(realSql);
+			boolean doExecute = this.controller.confirmStatementExecution(realSql);
 			if (!doExecute)
 			{
 				this.result = new StatementRunnerResult();
@@ -365,23 +384,20 @@ public class StatementRunner
 		{
 			this.result = this.batchCommand.executeBatch();
 		}
-		else if (this.currentCommand != null && this.currentCommand.isResultSetConsumer())
-		{
-			this.currentConsumer = this.currentCommand;
-		}
-		else
-		{
-			if (this.currentConsumer != null)
-			{
-				this.currentCommand.setConsumerWaiting(false);
-				this.currentConsumer.consumeResult(this.result);
-				this.currentConsumer = null;
-			}
-		}
 		long time = (System.currentTimeMillis() - sqlExecStart);
 		result.setExecutionTime(time);
 	}
 
+	public ResultSetConsumer getConsumer()
+	{
+		return currentConsumer;
+	}
+	
+	public void setConsumer(ResultSetConsumer consumer)
+	{
+		this.currentConsumer = consumer;
+	}
+	
 	public void setVerboseLogging(boolean flag)
 	{
 		this.verboseLogging = flag;
@@ -394,7 +410,7 @@ public class StatementRunner
 
 	public void statementDone()
 	{
-		if (this.currentCommand != null && this.currentConsumer != this.currentCommand)
+		if (this.currentCommand != null && currentCommand != currentConsumer)
 		{
 			this.currentCommand.done();
 			this.currentCommand = null;
@@ -409,7 +425,7 @@ public class StatementRunner
 			{
 				this.currentConsumer.cancel();
 			}
-			else if (this.currentCommand != null)
+			if (this.currentCommand != null)
 			{
 				this.currentCommand.cancel();
 			}

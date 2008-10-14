@@ -43,6 +43,7 @@ public class WbInclude
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
+		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/','GO:nl'"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
@@ -109,6 +110,9 @@ public class WbInclude
 		boolean defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
 		boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
 		String encoding = cmdLine.getValue("encoding");
+
+		setUnknownMessage(result, cmdLine, null);
+		
 		if (encoding == null)
 		{
 			encoding = Settings.getInstance().getDefaultEncoding();
@@ -132,6 +136,9 @@ public class WbInclude
 			batchRunner.setParameterPrompter(this.prompter);
 			batchRunner.setExecutionController(runner.getExecutionController());
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
+			batchRunner.setShowResultBorders(false);
+			batchRunner.showResultSets(cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, false));
+			
 			batchRunner.execute();
 			if (batchRunner.isSuccess())
 			{

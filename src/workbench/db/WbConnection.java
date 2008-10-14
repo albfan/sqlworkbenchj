@@ -206,7 +206,7 @@ public class WbConnection
 				
 				try
 				{
-					runner.runStatement(command, -1, 0);
+					runner.runStatement(command);
 					StatementRunnerResult result = runner.getResult();
 					String msg = ResourceMgr.getString(resKey) + " " + stmtSql;
 					messages.append(msg);

@@ -161,6 +161,7 @@ import workbench.sql.DelimiterDefinition;
 import workbench.sql.MacroManager;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
+import workbench.sql.VariablePool;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
@@ -2044,11 +2045,17 @@ public class SqlPanel
 		});
 	}
 
+	public boolean confirmExecution(String prompt)
+	{
+		Window w = SwingUtilities.getWindowAncestor(this);
+		return WbSwingUtilities.getYesNo(w, prompt);
+	}
+	
 	/** Used for storing the result of the confirmExecution() callback */
 	private boolean executeAllStatements = true;
 	private boolean cancelAll = false;
 
-	public boolean confirmExecution(String command)
+	public boolean confirmStatementExecution(String command)
 	{
 		if (executeAllStatements) return true;
 		boolean result = false;
@@ -2258,15 +2265,23 @@ public class SqlPanel
 
 		scriptParser.setAlternateDelimiter(altDelim);
 		scriptParser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
-		DbSettings db = this.dbConnection.getDbSettings();
-		if (db == null)
+
+		if (this.dbConnection != null)
 		{
-			LogMgr.logError("SqlPanel.createScriptParser()", "No db settings available!", null);
-			return scriptParser;
+			DbSettings db = this.dbConnection.getDbSettings();
+			if (db == null)
+			{
+				LogMgr.logError("SqlPanel.createScriptParser()", "No db settings available!", null);
+				return scriptParser;
+			}
+			scriptParser.setSupportOracleInclude(db.supportShortInclude());
+			scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
+			scriptParser.setAlternateLineComment(db.getLineComment());
 		}
-		scriptParser.setSupportOracleInclude(db.supportShortInclude());
-		scriptParser.setCheckForSingleLineCommands(db.supportSingleLineCommands());
-		scriptParser.setAlternateLineComment(db.getLineComment());
+		else
+		{
+			LogMgr.logError("SqlPanel.createScriptParser", "Created a script parser without a connection!", null);
+		}
 		return scriptParser;
 	}
 
@@ -2276,18 +2291,17 @@ public class SqlPanel
 	{
 		boolean goOn = true;
 
-		VariablePrompter prompter = new VariablePrompter();
+		VariablePool varPool = VariablePool.getInstance();
 
-		prompter.setSql(sql);
-		if (prompter.needsInput())
+		DataStore ds = varPool.getParametersToBePrompted(sql);
+
+		if (ds != null && ds.getRowCount() > 0)
 		{
-			// the animated gif needs to be turned off when a
-			// dialog is displayed, otherwise Swing uses too much CPU
 			this.showBusyIcon(false);
-			goOn = prompter.getPromptValues();
+			goOn = VariablesEditor.showVariablesDialog(ds);
 			this.showBusyIcon(true);
 		}
-
+		
 		if (goOn && this.checkPrepared)
 		{
 			PreparedStatementPool pool = this.dbConnection.getPreparedStatementPool();
@@ -2497,7 +2511,9 @@ public class SqlPanel
 					highlightStatement(scriptParser, i, selectionOffset);
 				}
 
-				this.stmtRunner.runStatement(currentSql, maxRows, timeout);
+				this.stmtRunner.setMaxRows(maxRows);
+				this.stmtRunner.setQueryTimeout(timeout);
+				this.stmtRunner.runStatement(currentSql);
 				statementResult = this.stmtRunner.getResult();
 
 				if (statementResult == null) continue;

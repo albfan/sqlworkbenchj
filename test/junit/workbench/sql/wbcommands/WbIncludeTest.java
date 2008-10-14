@@ -68,7 +68,7 @@ public class WbIncludeTest
 			w.close();
 			
 			String sql = "-- comment\n\n@test.sql\n";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertEquals("Statement not executed", true, result.isSuccess());
 			
@@ -101,7 +101,7 @@ public class WbIncludeTest
 	{
 		try
 		{
-			runner.runStatement("WbInclude -file=/this/will/not/be/there/i_hope.sql", 0, -1);
+			runner.runStatement("WbInclude -file=/this/will/not/be/there/i_hope.sql");
 			StatementRunnerResult result = runner.getResult();
 			assertFalse("Runner was successful", result.isSuccess());
 			String msg = result.getMessageBuffer().toString();
@@ -147,7 +147,7 @@ public class WbIncludeTest
 			w.write("@./" + subdir1.getName() + "/" + include1.getName() + "\n");
 			w.close();
 			
-			runner.runStatement("wbinclude -file='" + main.getAbsolutePath() + "';\n",-1,-1);
+			runner.runStatement("wbinclude -file='" + main.getAbsolutePath() + "';\n");
 			StatementRunnerResult result = runner.getResult();
 			assertEquals("Runner not successful", true, result.isSuccess());
 			

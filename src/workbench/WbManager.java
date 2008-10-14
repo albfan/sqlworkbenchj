@@ -97,7 +97,7 @@ public final class WbManager
 		LogMgr.logError("WbManager.uncaughtException()", "Thread + " + thread.getName() + " caused an exception!", error);
 	}
 
-	public ArgumentParser getCommandLine()
+	public AppArguments getCommandLine()
 	{
 		return cmdLine;
 	}
@@ -866,6 +866,7 @@ public final class WbManager
 	{
 		wb = new WbManager();
 		wb.readParameters(args);
+		ConnectionMgr.getInstance().setReadTemplates(false);
 		wb.writeSettings = false;
 	}
 
@@ -929,6 +930,7 @@ public final class WbManager
 	public void run()
 	{
 		LogMgr.logDebug("WbManager.run()", "Shutdownhook called!");
+		ConnectionMgr.getInstance().disconnectAll();
 		saveSettings();
 	}
 

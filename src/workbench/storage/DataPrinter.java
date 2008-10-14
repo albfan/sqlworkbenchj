@@ -51,12 +51,10 @@ public class DataPrinter
 		initConverter(delimiter, lineEnd, columns, includeHeader);
 	}
 	
-
 	private void initConverter(String delimiter, String lineEnd, List<ColumnIdentifier> columns, boolean includeHeader)
 	{
 		converter = new TextRowDataConverter();
 		converter.setResultInfo(data.getResultInfo());
-		converter.setConsoleType(true);
 		converter.setWriteBlobToFile(false);
 		converter.setWriteHeader(includeHeader);
 		converter.setLineEnding(lineEnd);

@@ -76,7 +76,7 @@ public class WbCopyTest
 									 "       -syncDelete=true " +
 									 "       -batchSize=10";
 
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
@@ -136,7 +136,7 @@ public class WbCopyTest
 				"wbcopy -sourceTable=source_data " +
 				"-targettable=target_data -createTarget=false";
 
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
@@ -176,7 +176,7 @@ public class WbCopyTest
 			con.commit();
 
 			sql = "--update target table\nwbcopy -sourceTable=source_data -targettable=target_data -mode=update";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			result = runner.getResult();
 			assertEquals("Copy not successful", true, result.isSuccess());
 
@@ -229,7 +229,7 @@ public class WbCopyTest
 									"-columns=lastname/nachname, firstname/vorname, nr/id "+
 									"-createTarget=true";
 
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 

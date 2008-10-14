@@ -1788,6 +1788,7 @@ public class MainWindow
 			aPanel.appendToLog(warn);
 		}
 	}
+	
 	public void addDbExplorerTab(DbExplorerPanel explorer)
 	{
 		JMenuBar dbmenu = this.createMenuForPanel(explorer);

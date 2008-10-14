@@ -47,7 +47,7 @@ public class WbDefineVarTest extends TestCase
 			String sql = "--define some vars\nwbvardef theanswer = 42";
 			SqlCommand command = runner.getCommandToUse(sql);
 			assertTrue(command instanceof WbDefineVar);
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 
 			String varValue = VariablePool.getInstance().getParameterValue("theanswer");
 			assertEquals("Wrong variable defined", "42", varValue);
@@ -55,31 +55,31 @@ public class WbDefineVarTest extends TestCase
 			sql = "--remove the variable\nWbVarDelete theanswer";
 			command = runner.getCommandToUse(sql);
 			assertTrue(command instanceof WbRemoveVar);
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 
 			varValue = VariablePool.getInstance().getParameterValue("theanswer");
 			assertEquals("Variable not deleted", true, StringUtil.isEmptyString(varValue));
 
 			StatementRunnerResult result = null;
-			runner.runStatement("\n\n--do it\ncreate table vartest (nr integer)",-1,-1);
+			runner.runStatement("\n\n--do it\ncreate table vartest (nr integer)");
 			result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
-			runner.runStatement("-- new entry\ninsert into vartest (nr) values (7)",-1,-1);
+			runner.runStatement("-- new entry\ninsert into vartest (nr) values (7)");
 			result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
-			runner.runStatement("commit", -1, -1);
+			runner.runStatement("commit");
 			result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
 			sql = "--define some vars\nwbvardef theanswer = @\"select nr from vartest\"";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			varValue = VariablePool.getInstance().getParameterValue("theanswer");
 			assertEquals("SQL Variable not set", "7", varValue);
 
 			sql = "--define some vars\nwbvardef theanswer = \"@select nr from vartest\"";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			varValue = VariablePool.getInstance().getParameterValue("theanswer");
 			assertEquals("SQL Variable not set", "7", varValue);
 
@@ -91,12 +91,12 @@ public class WbDefineVarTest extends TestCase
 			pw.close();
 
 			sql = "--define some vars\nwbvardef -file=this_will_not_exist.blafile";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			result = runner.getResult();
 			assertEquals("Invalid file not detected", false, result.isSuccess());
 
 			sql = "--define some vars\nwbvardef -file='" + f.getAbsolutePath() + "'";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			result = runner.getResult();
 			assertEquals("File not processed", true, result.isSuccess());
 
@@ -104,7 +104,7 @@ public class WbDefineVarTest extends TestCase
 			assertEquals("SQL Variable not set", "Dent", varValue);
 
 			sql = "-- remove a variable \n   " + WbRemoveVar.VERB + " lastname";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			result = runner.getResult();
 			assertEquals("Error deleting variable", true, result.isSuccess());
 
@@ -112,14 +112,14 @@ public class WbDefineVarTest extends TestCase
 			assertEquals("SQL Variable still available ", true, StringUtil.isEmptyString(varValue));
 
 			sql = "WbVardef var5=' a '";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			varValue = VariablePool.getInstance().getParameterValue("var5");
 			result = runner.getResult();
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			assertEquals("Quoted spaces trimmed", " a ", varValue);
 
 			sql = "WbVardef var5=";
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 			varValue = VariablePool.getInstance().getParameterValue("var5");
 			assertNull("Variable not deleted", varValue);
 		}

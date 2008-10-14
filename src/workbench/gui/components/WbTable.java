@@ -1891,7 +1891,7 @@ public class WbTable
 			String s = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
 				null, ResourceMgr.getString("MsgEnterUpdateTable"),
 				JOptionPane.QUESTION_MESSAGE,
-				null,tables.toArray(new TableIdentifier[tables.size()]),null);
+				null,tables.toArray(new String[tables.size()]),null);
 
 			if (s != null)
 			{

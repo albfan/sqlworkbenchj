@@ -22,6 +22,7 @@ import workbench.interfaces.ParameterPrompter;
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ResultLogger;
+import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
@@ -45,7 +46,6 @@ public class SqlCommand
 	protected Statement currentStatement;
 	protected WbConnection currentConnection;
 	protected boolean isCancelled = false;
-	private boolean consumerWaiting = false;
 	protected RowActionMonitor rowMonitor;
 	protected boolean isUpdatingCommand = false;
 	protected boolean reportFullStatementOnError = false;
@@ -142,13 +142,15 @@ public class SqlCommand
 
 	protected void setUnknownMessage(StatementRunnerResult result, ArgumentParser cmdline, String help)
 	{
+		if (!cmdLine.hasUnknownArguments()) return;
 		StringBuilder msg = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
+		msg.append(' ');
 		msg.append(cmdLine.getUnknownArguments());
 		result.addMessage(msg.toString());
 		if (!WbManager.getInstance().isBatchMode())
 		{
 			result.addMessageNewLine();
-			result.addMessage(help);
+			if (help != null) result.addMessage(help);
 		}
 		result.setFailure();
 	}
@@ -374,15 +376,15 @@ public class SqlCommand
 					rs = this.currentStatement.getResultSet();
 				}
 
-				if (this.isConsumerWaiting() && rs != null)
+				if (rs == null) continue;
+
+				ResultSetConsumer consumer = runner.getConsumer();
+				if (consumer != null)
 				{
 					result.addResultSet(rs);
-					// only one resultSet can be exported
-					// if we call getMoreResults() another time, the previous ResultSet will be closed!
-					break;
+					consumer.consumeResult(result);
 				}
-
-				if (rs != null)
+				else
 				{
 					// we have to use an instance variable for the retrieval, otherwise the retrieval
 					// cannot be cancelled!
@@ -481,26 +483,6 @@ public class SqlCommand
 		return null;
 	}
 	
-	/**
-	 * 	The commands producing a result set need this flag.
-	 * 	If no consumer is waiting, the can directly produce a DataStore
-	 * 	for the result.
-	 * @see #isConsumerWaiting()
-	 */
-	public void setConsumerWaiting(boolean flag)
-	{
-		this.consumerWaiting = flag;
-	}
-
-	/**
-	 * Checks if a consumer is waiting for the result of this command.
-	 * @see #setConsumerWaiting(boolean)
-	 */
-	public boolean isConsumerWaiting()
-	{
-		return this.consumerWaiting;
-	}
-
 	/**
 	 * Check if this verb for this statement is considered an updating command in
 	 * all circumstances.
@@ -607,8 +589,7 @@ public class SqlCommand
 	{
 		maxRows = max;
 	}
-	public boolean isResultSetConsumer() { return false; }
-	public void consumeResult(StatementRunnerResult aResult) {}
+
 
 	/**
 	 * Get a "clean" version of the sql with the verb stripped off

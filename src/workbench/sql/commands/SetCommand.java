@@ -88,6 +88,40 @@ public class SetCommand extends SqlCommand
 						execSql = false;
 					}
 				}
+				else if (command.equalsIgnoreCase("maxrows"))
+				{
+					result = new StatementRunnerResult();
+					execSql = false;
+					try
+					{
+						int rows = Integer.parseInt(param);
+						this.runner.setMaxRows(rows);
+						result.setSuccess();
+						result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, rows));
+					}
+					catch (Exception e)
+					{
+						result.setFailure();
+						result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
+					}
+				}
+				else if (command.equalsIgnoreCase("timeout"))
+				{
+					result = new StatementRunnerResult();
+					execSql = false;
+					try
+					{
+						int timeout = Integer.parseInt(param);
+						this.runner.setQueryTimeout(timeout);
+						result.setSuccess();
+						result.addMessage(ResourceMgr.getFormattedString("MsgSetSuccess", command, timeout));
+					}
+					catch (Exception e)
+					{
+						result.setFailure();
+						result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
+					}
+				}
 			}
 
 			if (execSql)

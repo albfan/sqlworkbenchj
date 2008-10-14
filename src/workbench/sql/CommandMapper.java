@@ -11,10 +11,13 @@
  */
 package workbench.sql;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -27,6 +30,7 @@ import workbench.sql.commands.SetCommand;
 import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.commands.UpdatingCommand;
 import workbench.sql.commands.UseCommand;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbCall;
 import workbench.sql.wbcommands.WbConfirm;
 import workbench.sql.wbcommands.WbConnect;
@@ -40,6 +44,7 @@ import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbFeedback;
+import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbHideWarnings;
 import workbench.sql.wbcommands.WbImport;
 import workbench.sql.wbcommands.WbInclude;
@@ -104,6 +109,9 @@ public class CommandMapper
 		addCommand(new WbConnect());
 		addCommand(new WbInclude());
 		addCommand(new WbListCatalogs());
+		addCommand(new WbHelp());
+		addCommand(new WbSelectBlob());
+		addCommand(new WbHideWarnings());
 
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);
@@ -113,8 +121,6 @@ public class CommandMapper
 		addCommand(UpdatingCommand.UPDATE);
 		addCommand(UpdatingCommand.TRUNCATE);
 		
-		addCommand(new WbSelectBlob());
-		addCommand(new WbHideWarnings());
 		
 		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
 		{
@@ -124,6 +130,21 @@ public class CommandMapper
 
 		this.dbSpecificCommands = new LinkedList<String>();
 		this.useExecuteForSelect = Settings.getInstance().getUseGenericExecuteForSelect();
+	}
+
+	public Collection<String> getAllWbCommands()
+	{
+		Set<String> verbs = cmdDispatch.keySet();
+		TreeSet<String> result = new TreeSet<String>();
+		CommandTester tester = new CommandTester();
+		for (String verb : verbs)
+		{
+			if (tester.isWbCommand(verb))
+			{
+				result.add(tester.formatVerb(verb));
+			}
+		}
+		return result;
 	}
 	
 	/**

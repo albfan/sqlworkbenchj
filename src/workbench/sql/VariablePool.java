@@ -137,9 +137,16 @@ public class VariablePool
 	 *
 	 * @return a Set containing variable names (String objects)
 	 */
-	public Set getVariablesNeedingPrompt(String sql)
+	public Set<String> getVariablesNeedingPrompt(String sql)
 	{
 		return this.getPromptVariables(sql, false);
+	}
+
+	public DataStore getParametersToBePrompted(String sql)
+	{
+		Set<String> toPrompt = getVariablesNeedingPrompt(sql);
+		if (toPrompt.size() == 0) return null;
+		return getVariablesDataStore(toPrompt);
 	}
 	
 	public boolean hasPrompt(String sql)

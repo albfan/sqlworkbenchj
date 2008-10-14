@@ -17,20 +17,34 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 
 /**
+ * A wrapper around Java's File object to allow of automatic "expansion" of
+ * system properties and other utility functions such as getFullPath() which
+ * does not throw an exception
+ * 
  * @author support@sql-workbench.net
  */
 public class WbFile
 	extends File
 {
-	
+
+	/**
+	 * Create a new file object.
+	 *
+	 * Variables in the names are replaced with the value of the corresponding
+	 * system property (e.g. ${user.home})
+	 * 
+	 * @param parent
+	 * @param filename
+	 * @see workbench.util.StringUtil#replaceProperties(java.lang.String) 
+	 */
 	public WbFile(String parent, String filename)
 	{
-		super(parent, filename);
+		super(StringUtil.replaceProperties(parent), StringUtil.replaceProperties(filename));
 	}
 	
 	public WbFile(File parent, String filename)
 	{
-		super(parent, filename);
+		super(parent, StringUtil.replaceProperties(filename));
 	}
 	
 	public WbFile(File f)
@@ -40,7 +54,7 @@ public class WbFile
 	
 	public WbFile(String filename)
 	{
-		super(filename);
+		super(StringUtil.replaceProperties(filename));
 	}
 	
 	/**
@@ -64,7 +78,10 @@ public class WbFile
 		if (pos == -1) return name;
 		return name.substring(0, pos);
 	}
-	
+
+	/**
+	 * Returns the extension (the characters after the last dot)
+	 */
 	public String getExtension()
 	{
 		String name = getName();
@@ -72,13 +89,34 @@ public class WbFile
 		if (pos == -1) return null;
 		return name.substring(pos + 1);
 	}
-	
+
+	/**
+	 * Tests if this file is writeable for the current user.
+	 * If it exists the result of this call is super.canWrite().
+	 *
+	 * If it does not exist, an attempt will be made to create
+	 * the file to ensure that it's writeabl.
+	 *
+	 * @see #canCreate()
+	 * @see #tryCreate() 
+	 */
 	public boolean isWriteable()
 	{
 		if (exists()) return canWrite();
 		return canCreate();
 	}
-	
+
+	/**
+	 * Checks if this file can be created
+	 * Note that canCreate() does <b>not</b> check if the file already
+	 * exists. <br/>
+	 * 
+	 * <b>If the file already exists, it will be deleted!</b>
+	 *
+	 * This method calls tryCreate() and swallows any IOException
+	 * 
+	 * @return true if the file can be created
+	 */
 	public boolean canCreate()
 	{
 		try
@@ -91,7 +129,12 @@ public class WbFile
 			return false;
 		}
 	}
-	
+
+	/**
+	 * Tries to create this file.
+	 * 
+	 * @throws java.io.IOException
+	 */
 	public void tryCreate()
 		throws IOException
 	{

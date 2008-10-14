@@ -653,7 +653,7 @@ public class DataStore
 	}
 
 	/**
-	 * Return the suggested display size of the column. This is
+	 * Return the size in characters of the column. This is
 	 * delegated to the instance of the {@link workbench.storage.ResultInfo} class
 	 * that is used to store the column meta data
 	 *
@@ -663,12 +663,18 @@ public class DataStore
 	 * @see workbench.storage.ResultInfo#getColumnSize(int)
 	 * @see workbench.gui.components.DataStoreTableModel#getColumnWidth(int)
 	 */
-	public int getColumnDisplaySize(int aColumn)
+	public int getColumnSize(int aColumn)
 		throws IndexOutOfBoundsException
 	{
-		return this.resultInfo.getColumnSize(aColumn);
+		return this.resultInfo.getColumn(aColumn).getColumnSize();
 	}
 
+	public int getColumnDisplaySize(int col)
+		throws IndexOutOfBoundsException
+	{
+		return this.resultInfo.getColumn(col).getDisplaySize();
+	}
+	
 	protected Object getOriginalValue(int aRow, int aColumn)
 	{
 		RowData row = this.getRow(aRow);

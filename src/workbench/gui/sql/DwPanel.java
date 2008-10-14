@@ -607,7 +607,9 @@ public class DwPanel
 			int max = (respectMaxRows ? this.statusBar.getMaxRows() : 0);
 			int timeout = this.statusBar.getQueryTimeout();
 
-			this.stmtRunner.runStatement(aSql, max, timeout);
+			this.stmtRunner.setMaxRows(max);
+			this.stmtRunner.setQueryTimeout(timeout);
+			this.stmtRunner.runStatement(aSql);
 			StatementRunnerResult result = this.stmtRunner.getResult();
 
 			if (result != null)

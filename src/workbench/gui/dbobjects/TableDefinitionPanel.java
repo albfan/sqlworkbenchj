@@ -204,6 +204,7 @@ public class TableDefinitionPanel
 				});
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getTableDefinition(this.currentTable);
+				
 				final DataStoreTableModel model = new DataStoreTableModel(def);
 				WbSwingUtilities.invoke(new Runnable()
 				{
@@ -231,38 +232,55 @@ public class TableDefinitionPanel
 		tableDefinition.setPrintHeader(this.currentTable.getTableName());
 		tableDefinition.setAutoCreateColumnsFromModel(true);
 		tableDefinition.setModel(model, true);
+		tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
 
-		// remove the last three columns if we are not displaying a SEQUENCE
-		// these columns are "SCALE/SIZE", "PRECISION" and "POSITION"
+		// hide the the columns "SCALE/SIZE", "PRECISION"
 		// they don't need to be displayed as this is "included" in the
 		// displayed (DBMS) data type already
-		if (!"SEQUENCE".equalsIgnoreCase(this.currentTable.getType()))
+
+		// Columns may not be removed from the underlying DataStore because
+		// that is also used to retrieve the table source and DbMetadata
+		// relies on all tables being present when that datastore is passed
+		// to getTableSource()
+		
+		// So we can only remove those columns from the view
+
+		TableColumnModel colmod = tableDefinition.getColumnModel();
+
+		// Assign the correct renderer to display java.sql.Types values
+		// (should only appear for table definitions
+		try
 		{
-			TableColumnModel colmod = tableDefinition.getColumnModel();
-
-			// Assign the correct renderer to display java.sql.Types values
-			TableColumn col = colmod.getColumn(DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
+			int typeIndex = colmod.getColumnIndex("java.sql.Types");
+			TableColumn col = colmod.getColumn(typeIndex);//DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
 			col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
+		}
+		catch (IllegalArgumentException e)
+		{
+			// The IllegalArgumentException will be thrown by getColumnIndex()
+			// rather than returning a -1 as other methods do.
 
+			// If the Types column is not present, we can simply return as the
+			// other columns will then not be there as well.
+			return;
+		}
+		
+		String[] columns = new String[] { "SCALE/SIZE", "PRECISION" };
+		for (String name : columns)
+		{
 			try
 			{
-				if (colmod.getColumnCount() == DbMetadata.TABLE_DEFINITION_COLS.length)
-				{
-					for (int i = 0; i < 3; i++)
-					{
-						col = colmod.getColumn(colmod.getColumnCount() - 1);
-						colmod.removeColumn(col);
-					}
-				}
+				int index = colmod.getColumnIndex(name);
+				TableColumn col = colmod.getColumn(index);
+				colmod.removeColumn(col);
 			}
-			catch (Throwable e)
+			catch (IllegalArgumentException e)
 			{
-				LogMgr.logError("TableDefinitionPanel.applyTableModel()", "Error when applying the table model", e);
+				// ignore, this is expected for some types
 			}
 		}
-		tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
 	}
-
+	
 	public void reset()
 	{
 		this.currentTable = null;

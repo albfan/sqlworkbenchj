@@ -35,7 +35,7 @@ public class WbConnect
 {
 	private static int connectionId;
 	private boolean persistentChange = false;
-	
+
 	public static final String VERB = "WBCONNECT";
 
 	public WbConnect()
@@ -63,7 +63,7 @@ public class WbConnect
 	{
 		this.persistentChange = flag;
 	}
-	
+
 	@Override
 	protected boolean isConnectionRequired()
 	{
@@ -86,13 +86,13 @@ public class WbConnect
 		// Allow to directly specify a profile name without parameters
 		if (cmdLine.getArgumentCount() == 0)
 		{
-			profName = args;
+			profName = StringUtil.trimQuotes(args);
 		}
 		else
 		{
 			profName = cmdLine.getValue(AppArguments.ARG_PROFILE);
 		}
-		
+
 		if (StringUtil.isEmptyString(profName))
 		{
 			profile = BatchRunner.createCmdLineProfile(cmdLine);
@@ -121,7 +121,6 @@ public class WbConnect
 			if (persistentChange)
 			{
 				this.runner.setConnection(newConn);
-				this.runner.fireConnectionChanged();
 			}
 			else
 			{
@@ -130,6 +129,13 @@ public class WbConnect
 				this.runner.changeConnection(newConn);
 			}
 			result.addMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", newConn.getDisplayString()));
+			String warn = (newConn != null ? newConn.getWarnings() : null);
+			if (warn != null)
+			{
+				result.addMessage(ResourceMgr.getString("MsgConnectMsg"));
+				result.addMessage(warn);
+			}
+
 			result.setSuccess();
 		}
 		catch (Exception e)

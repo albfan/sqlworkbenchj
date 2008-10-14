@@ -13,11 +13,9 @@ package workbench.gui.profiles;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -26,6 +24,7 @@ import javax.swing.tree.TreePath;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.ProfileGroupMap;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 
@@ -256,23 +255,9 @@ class ProfileListModel
 		ArrayList<ConnectionProfile> profiles = new ArrayList<ConnectionProfile>(ConnectionMgr.getInstance().getProfiles());
 		if (profiles.size() == 0) return;
 		
-		sortList(profiles);
-		
-		Map<String, List<ConnectionProfile>> groupMap = new HashMap<String, List<ConnectionProfile>>(profiles.size());
+		ProfileGroupMap groupMap = new ProfileGroupMap();
 		
 		this.size = profiles.size();
-		
-		for (ConnectionProfile profile : profiles)
-		{
-			String group = profile.getGroup();
-			List<ConnectionProfile> l = groupMap.get(group);
-			if (l == null)
-			{
-				l = new ArrayList<ConnectionProfile>();
-				groupMap.put(group, l);
-			}
-			l.add(profile);
-		}
 		
 		// Make sure the default group is added as the first item!
 		List<String> groups = new ArrayList<String>();

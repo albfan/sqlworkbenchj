@@ -43,7 +43,7 @@ public class WbDefinePkTest extends TestCase
 			String sql = "--define a new PK for a view\nwbdefinepk junitpk=id,name";
 			SqlCommand command = runner.getCommandToUse(sql);
 			assertTrue(command instanceof WbDefinePk);
-			runner.runStatement(sql, -1, -1);
+			runner.runStatement(sql);
 
 			Map mapping = PkMapping.getInstance().getMapping();
 			String cols = (String)mapping.get("junitpk");

@@ -524,9 +524,23 @@ public class ConnectionMgr
 	public void saveDrivers()
 	{
 		WbPersistence writer = new WbPersistence(Settings.getInstance().getDriverConfigFilename());
+
+		// As drivers an profiles can be saved in console mode, we need to make
+		// sure, the "internal" drivers that are created "on-the-fly" when connecting
+		// from the commandline are not stored 
+		List<DbDriver> allDrivers = new ArrayList<DbDriver>(this.drivers);
+		Iterator<DbDriver> itr = allDrivers.iterator();
+		while (itr.hasNext())
+		{
+			if (itr.next().isInternal())
+			{
+				itr.remove();
+			}
+		}
+		
 		try
 		{
-			writer.writeObject(this.drivers);
+			writer.writeObject(allDrivers);
 		}
 		catch (IOException e)
 		{

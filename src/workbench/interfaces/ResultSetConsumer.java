@@ -1,5 +1,5 @@
 /*
- * ExecutionController.java
+ * ResultSetConsumer.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -10,14 +10,17 @@
  *
  */
 package workbench.interfaces;
+import java.sql.SQLException;
+import workbench.sql.StatementRunnerResult;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author support@sql-workbench.net
  */
-public interface ExecutionController
+public interface ResultSetConsumer
 {
-	boolean confirmStatementExecution(String command);
-	boolean confirmExecution(String prompt);
-
+	void consumeResult(StatementRunnerResult toConsume);
+	void cancel()
+		throws SQLException;
+	void done();
 }

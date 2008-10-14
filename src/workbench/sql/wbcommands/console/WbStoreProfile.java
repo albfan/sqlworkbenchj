@@ -20,6 +20,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.StringUtil;
+import workbench.util.WbFile;
 
 /**
  *
@@ -56,7 +57,7 @@ public class WbStoreProfile
 
 		if (StringUtil.isBlank(name))
 		{
-			result.addMessage("No profile name specified!");
+			result.addMessage("ErrNoProfile");
 			result.setFailure();
 			return result;
 		}
@@ -66,6 +67,8 @@ public class WbStoreProfile
 		ConnectionProfile profile = this.currentConnection.getProfile().createCopy();
 		profile.setName(key.getName());
 		profile.setGroup(key.getGroup());
+		profile.setPassword(null);
+		profile.setStorePassword(false);
 		profile.setWorkspaceFile(null);
 		
 		ConnectionMgr.getInstance().addProfile(profile);
@@ -75,10 +78,15 @@ public class WbStoreProfile
 		DbDriver drv = ConnectionMgr.getInstance().findDriver(profile.getDriverclass());
 		if (drv.isInternal())
 		{
+
 			DbDriver newDrv = drv.createCopy();
 			String drvName = currentConnection.getSqlConnection().getMetaData().getDriverName();
 			newDrv.setName(drvName);
 			newDrv.setSampleUrl(profile.getUrl());
+			WbFile f = new WbFile(drv.getLibrary());
+			newDrv.setLibrary(f.getFullPath());
+			profile.setDriverName(drvName);
+
 			ConnectionMgr.getInstance().getDrivers().add(newDrv);
 			ConnectionMgr.getInstance().saveDrivers();
 			result.addMessage(ResourceMgr.getFormattedString("MsgDriverAdded", drvName));

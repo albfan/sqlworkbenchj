@@ -159,7 +159,6 @@ public class Settings
 			}
 			else
 			{
-				configDir = StringUtil.replace(configDir, "${user.home}", System.getProperty("user.home"));
 				cfd = new WbFile(configDir);
 			}
 		}

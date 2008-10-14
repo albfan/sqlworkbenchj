@@ -37,13 +37,7 @@ public class TextRowDataConverter
 	private boolean writeClobFiles = false;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName = null;
-	private boolean consoleType = false;
 
-	public void setConsoleType(boolean flag)
-	{
-		this.consoleType = flag;
-	}
-	
 	public void setWriteClobToFile(boolean flag)
 	{
 		this.writeClobFiles = flag;
@@ -100,15 +94,11 @@ public class TextRowDataConverter
 			result.append(this.delimiter);
 		}
 
-		if (consoleType)
-		{
-			result.append('|');
-		}
-
 		for (int c=0; c < count; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
-			if (currentColIndex > 0 && !consoleType)
+
+			if (currentColIndex > 0)
 			{
 				result.append(this.delimiter);
 			}
@@ -190,16 +180,9 @@ public class TextRowDataConverter
 					}
 				}
 			}
-
+			
 			if (addQuote) result.append(this.quoteCharacter);
 			result.append(value);
-
-			if (consoleType)
-			{
-				padColumn(result, value, c);
-				result.append('|');
-			}
-
 			if (addQuote) result.append(this.quoteCharacter);
 
 			currentColIndex ++;
@@ -221,7 +204,6 @@ public class TextRowDataConverter
 
 		StrBuffer result = new StrBuffer();
 		int colCount = this.metaData.getColumnCount();
-		int lineWidth = 0;
 
 		boolean first = true;
 		if (rowIndexColumnName != null)
@@ -238,53 +220,18 @@ public class TextRowDataConverter
 			if (first)
 			{
 				first = false;
-				if (consoleType)
-				{
-					result.append('|');
-					lineWidth ++;
-				}
 			}
-			else if (!consoleType)
+			else
 			{
-				result.append(this.delimiter);
+				result.append(delimiter);
 			}
 
 			result.append(name);
-			if (consoleType)
-			{
-				lineWidth += padColumn(result, name, c);
-				result.append('|');
-				lineWidth ++;
-			}
 		}
 		result.append(lineEnding);
-		if (consoleType)
-		{
-			for (int i=0; i < lineWidth; i++)
-			{
-				result.append('-');
-			}
-			result.append(lineEnding);
-		}
 		return result;
 	}
 
-	private int padColumn(StrBuffer result, String value, int col)
-	{
-		int width = this.metaData.getColumn(col).getDisplaySize();
-		if (width > 80) width = 80;
-		int len = (value == null ? 0 : value.length());
-		if (width > 0)
-		{
-			while (len < width)
-			{
-				result.append(' ');
-				len ++;
-			}
-		}
-		return len;
-	}
-	
 	public void setDelimiter(String delimit)
 	{
 		if (StringUtil.isBlank(delimit)) return;
