@@ -108,6 +108,7 @@ public class GenericRowMonitor
 
 	public void setCurrentRow(long currentRow, long totalRows)
 	{
+		if (this.updateMsg == null && this.currentMonitorObject == null) return;
 		StringBuilder msg = new StringBuilder(40);
 		if (this.updateMsg == null)
 		{
@@ -132,6 +133,9 @@ public class GenericRowMonitor
 	public void jobFinished()
 	{
 		statusBar.clearStatusMessage();
+		updateMsg = null;
+		currentMonitorObject = null;
+		typeStack.clear();
 	}
 
 	public void saveCurrentType(String type)

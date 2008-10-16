@@ -71,6 +71,7 @@ public class StatementRunner
 	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	private int maxRows = -1;
 	private int queryTimeout = -1;
+	private boolean showDataLoadingProgress = true;
 	
 	public StatementRunner()
 	{
@@ -111,6 +112,11 @@ public class StatementRunner
 		}
 	}
 
+	public void setShowDataLoadingProgress(boolean flag)
+	{
+		this.showDataLoadingProgress = false;
+	}
+	
 	public void setFullErrorReporting(boolean flag)
 	{
 		this.fullErrorReporting = flag;
@@ -331,6 +337,7 @@ public class StatementRunner
 		this.currentCommand.setConnection(this.currentConnection);
 		this.currentCommand.setParameterPrompter(this.prompter);
 		this.currentCommand.setReturnOnlyErrorMessages(this.returnOnlyErrorMessages);
+		this.currentCommand.setShowDataLoading(this.showDataLoadingProgress);
 
 		String realSql = aSql;
 		if (VariablePool.getInstance().getParameterCount() > 0)

@@ -130,7 +130,7 @@ public class ImportFileLister
 		while (itr.hasNext())
 		{
 			WbFile f = itr.next();
-			String fname = f.getFileName().toLowerCase();
+			String fname = f.getName();
 			for (String contained : containedNames)
 			{
 				if (fname.indexOf(contained) > -1)

@@ -15,6 +15,7 @@ import java.awt.Component;
 import workbench.db.exporter.DataExporter;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.WbFile;
 
 /**
  * @author  support@sql-workbench.net
@@ -24,6 +25,7 @@ public class DataStoreExporter
 	private DataStore source;
 	private Component caller;
 	private ExportFileDialog dialog;
+	private WbFile output;
 	
 	public DataStoreExporter(DataStore source, Component caller)
 	{
@@ -40,10 +42,11 @@ public class DataStoreExporter
 		this.dialog.setIncludeSqlUpdate(update);
 		this.dialog.setIncludeSqlDeleteInsert(insert && update);
 		this.dialog.setSelectDirectoryOnly(false);
-		
+		this.output = null;
 		boolean selected = dialog.selectOutput();
 		if (selected)
 		{
+			this.output = new WbFile(dialog.getSelectedFilename());
 			writeFile();
 		}
 	}
@@ -61,12 +64,17 @@ public class DataStoreExporter
 	private void writeFile()
 	{
 		if (this.source == null) return;
+		if (this.output == null)
+		{
+			throw new NullPointerException("No outputfile defined");
+		}
 		DataExporter exporter = new DataExporter(this.source.getOriginalConnection());
 		exporter.setColumnsToExport(this.dialog.getColumnsToExport());
 		dialog.setExporterOptions(exporter);
+		
 		try
 		{
-			exporter.startExport(this.source);
+			exporter.startExport(output, this.source);
 		}
 		catch (Exception e)
 		{

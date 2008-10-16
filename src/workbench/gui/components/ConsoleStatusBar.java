@@ -13,7 +13,6 @@ package workbench.gui.components;
 
 import java.io.PrintStream;
 import workbench.interfaces.StatusBar;
-import workbench.util.StringUtil;
 
 /**
  *
@@ -32,7 +31,7 @@ public class ConsoleStatusBar
 	
 	private String createDeleteString(String original)
 	{
-		if (original == null) return StringUtil.EMPTY_STRING;
+		if (original == null) return "\r";
 		StringBuilder result = new StringBuilder(original.length()+2);
 		result.append('\r');
 		for (int i = 0; i < original.length(); i++)
@@ -59,6 +58,10 @@ public class ConsoleStatusBar
 		{
 			output.print(createDeleteString(lastMessage));
 			lastMessage = null;
+		}
+		else
+		{
+			output.print("\r");
 		}
 	}
 

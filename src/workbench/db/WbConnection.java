@@ -888,7 +888,7 @@ public class WbConnection
 	public synchronized void addChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) this.listeners = new ArrayList<PropertyChangeListener>();
-		this.listeners.add(l);
+		if (!this.listeners.contains(l)) this.listeners.add(l);
 	}
 
 	public synchronized void removeChangeListener(PropertyChangeListener l)

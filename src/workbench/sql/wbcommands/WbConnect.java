@@ -132,7 +132,6 @@ public class WbConnect
 			String warn = (newConn != null ? newConn.getWarnings() : null);
 			if (warn != null)
 			{
-				result.addMessage(ResourceMgr.getString("MsgConnectMsg"));
 				result.addMessage(warn);
 			}
 

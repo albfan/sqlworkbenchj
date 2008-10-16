@@ -916,7 +916,7 @@ public class WbTable
 			LogMgr.logError("WbTable.setModel()", "Error setting table model", th);
 		}
 
-		resetFilter();
+		this.currentFilter = null;
 
 		if (aModel instanceof DataStoreTableModel)
 		{
@@ -959,8 +959,15 @@ public class WbTable
 		adjustRowsAndColumns();
 	}
 
-	public FilterExpression getLastFilter() { return lastFilter; }
-	public boolean isFiltered() { return (currentFilter != null); }
+	public FilterExpression getLastFilter()
+	{
+		return lastFilter;
+	}
+	
+	public boolean isFiltered()
+	{
+		return (currentFilter != null);
+	}
 
 	public void applyFilter(FilterExpression filter)
 	{

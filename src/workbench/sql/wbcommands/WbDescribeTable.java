@@ -96,7 +96,10 @@ public class WbDescribeTable
 		else if (toDescribe.getType().indexOf("TABLE") > -1)
 		{
 			DataStore index = currentConnection.getMetadata().getTableIndexInformation(toDescribe);
-			result.addDataStore(index);
+			if (index.getRowCount() > 0)
+			{
+				result.addDataStore(index);
+			}
 		}
 
 		return result;

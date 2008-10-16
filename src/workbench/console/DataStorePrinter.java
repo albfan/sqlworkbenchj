@@ -74,18 +74,16 @@ public class DataStorePrinter
 			StringBuffer line = new StringBuffer(lineLength);
 			for (int i=0; i < colcount; i++)
 			{
-				line.append('+');
+				if (i > 0) line.append("-+-");
 				line.append(StringUtil.padRight("-", columnWidths.get(Integer.valueOf(i)), '-'));
 			}
-			line.append('+');
-			pw.println(line);
 			
 			for (int col = 0; col < colcount; col ++)
 			{
-				pw.print("|");
+				if (col > 0) pw.print(" | ");
 				writePadded(pw, data.getColumnName(col), columnWidths.get(Integer.valueOf(col)));
 			}
-			pw.println("|");
+			pw.println();
 
 			pw.println(line);
 			pw.flush();
@@ -94,15 +92,14 @@ public class DataStorePrinter
 			{
 				for (int col = 0; col < colcount; col ++)
 				{
-					pw.print("|");
+				if (col > 0) pw.print(" | ");
 					String value = data.getValueAsString(row, col);
 					value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_CONTROL, null);
 					writePadded(pw, value, columnWidths.get(Integer.valueOf(col)));
 				}
-				pw.println("|");
+				pw.println();
 				pw.flush();
 			}
-			pw.println(line);
 			pw.flush();
 		}
 		catch (Exception e)
@@ -127,16 +124,4 @@ public class DataStorePrinter
 		return result.length();
 	}
 
-//	public static void main(String args[])
-//	{
-//		String[] cols = new String[] { "CHAR", "INT"};
-//		int[] types = new int[] { Types.VARCHAR, Types.INTEGER };
-//		int[] sizes = new int[] { 15, 5 };
-//		DataStore ds = new DataStore(cols, types, sizes);
-//		int row = ds.addRow();
-//		ds.setValue(0, 0, "Very long Test value");
-//		ds.setValue(0, 1, Integer.valueOf(1));
-//		ConsolePrinter printer = new ConsolePrinter(ds);
-//		printer.printTo(System.out);
-//	}
 }

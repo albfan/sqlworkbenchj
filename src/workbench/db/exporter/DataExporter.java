@@ -888,11 +888,12 @@ public class DataExporter
 		return numRows;
 	}
 
-	public long startExport(DataStore ds)
+	public long startExport(WbFile output, DataStore ds)
 		throws IOException, SQLException, Exception
 	{
 		try
 		{
+			this.outputfile = output;
 			configureExportWriter();
 			this.exportWriter.exportStarting();
 			this.exportWriter.writeExport(ds);

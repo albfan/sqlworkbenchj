@@ -82,7 +82,7 @@ public class BatchRunner
 	private boolean consolidateMessages = false;
 	private boolean showStatementWithResult = true;
 	private boolean showSummary = verboseLogging;
-	private boolean showResultBorders = true;
+	private boolean plainConsoleOutput = true;
 	private boolean showStatementTiming = true;
 	
 	public BatchRunner()
@@ -147,6 +147,11 @@ public class BatchRunner
 		this.console = output;
 	}
 
+	public void setShowDataLoading(boolean flag)
+	{
+		stmtRunner.setShowDataLoadingProgress(flag);
+	}
+	
 	public void setShowStatementWithResult(boolean flag)
 	{
 		this.showStatementWithResult = flag;
@@ -157,9 +162,9 @@ public class BatchRunner
 		this.showResultSets = flag;
 	}
 
-	public void setShowResultBorders(boolean flag)
+	public void setPlainConsoleOutput(boolean flag)
 	{
-		this.showResultBorders = flag;
+		this.plainConsoleOutput = flag;
 	}
 	
 	public void setShowStatementSummary(boolean flag)
@@ -219,6 +224,19 @@ public class BatchRunner
 	public boolean isConnected()
 	{
 		return this.connection != null;
+	}
+
+	public void setShowProgress(boolean flag)
+	{
+		showProgress = flag;
+		if (showProgress)
+		{
+			setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
+		}
+		else
+		{
+			setRowMonitor(null);
+		}
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -557,7 +575,8 @@ public class BatchRunner
 					{
 						if (!this.consolidateMessages)
 						{
-							this.printMessage("\n" + feedback);
+							if (!showResultSets) printMessage("\n");
+							this.printMessage(feedback);
 						}
 					}
 					else if (result.hasWarning())
@@ -658,24 +677,26 @@ public class BatchRunner
 			console.println(sql);
 		}
 		
-		if (showResultBorders) console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
 		for (DataStore ds : data)
 		{
 			if (ds != null)
 			{
-				if (showResultBorders)
+				if (plainConsoleOutput)
 				{
+					console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
 					DataPrinter printer = new DataPrinter(ds);
 					printer.printTo(console);
+					console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
 				}
 				else
 				{
 					DataStorePrinter printer = new DataStorePrinter(ds);
 					printer.printTo(console);
 				}
+				console.println();
 			}
 		}
-		if (showResultBorders) console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
+		
 	}
 
 	public void setEncoding(String enc)
@@ -727,7 +748,11 @@ public class BatchRunner
 	{
 		if (this.resultDisplay == null)
 		{
-			if (msg != null && msg.length() > 0) System.out.println(msg);
+			if (msg != null && msg.length() > 0)
+			{
+				System.out.println("\r");
+				System.out.println(msg);
+			}
 		}
 		else
 		{
@@ -881,6 +906,7 @@ public class BatchRunner
 		runner.setProfile(profile);
 		runner.setVerboseLogging(feedback);
 		runner.setConsolidateLog(consolidateLog);
+		runner.setShowProgress(showProgress);
 
 		// if no showTiming argument was provided but feedback was disabled
 		// disable the display of the timing information as well.
@@ -892,11 +918,6 @@ public class BatchRunner
 		else
 		{
 			runner.showTiming = cmdLine.getBoolean(AppArguments.ARG_SHOW_TIMING, true);
-		}
-		runner.showProgress = showProgress;
-		if (showProgress)
-		{
-			runner.setRowMonitor(new GenericRowMonitor(new ConsoleStatusBar()));
 		}
 
 		DelimiterDefinition delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue(AppArguments.ARG_DELIMITER));
