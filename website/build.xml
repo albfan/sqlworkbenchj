@@ -52,7 +52,6 @@
     ]]>
   </scriptdef>
 
-
   <target name="updatePad">
     <tstamp>
       <format pattern="yyyy" property="pub.year"/>
@@ -97,6 +96,7 @@
 
   <target name="-noDev">
     <property name="pub.build.name" value="stable"/>
+    <property name="pub.build.number" value="${release.build.number}"/>
     <property name="dev.build" value="0"/>
   </target>
 
