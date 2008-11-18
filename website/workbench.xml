@@ -249,6 +249,29 @@ VALUES
     </content>
   </page>
 
+	<page name="source-svn" title="Source" toc="small">
+		<title>SQL Workbench/J</title>
+		<subtitle>Access to the source code</subtitle>
+		<content>
+			<p>
+				In addition to the zip archive with the source code that is part of a release, the source code is
+				hosted on a public subversion repository kindly sponsored	by <a href="http://www.mgm-tp.com">mgm technology partners</a>.
+			</p>
+			<p>
+				The repository is located at <a href="http://sqlworkbench.mgm-tp.com">http://sqlworkbench.mgm-tp.com</a> and
+				can be accessed through a web-browser or by checking it out with svn.
+			</p>
+			<p>
+				To read or checkout the sources you don't need a username.
+			</p>
+			<p>
+				I recommend to check out the trunk. If you include the tags directory as well, you get all
+				the release from the last 5 years...
+			</p>
+		</content>
+	</page>
+
+
   <page name="disclaimer" title="Disclaimer" toc="small">
         <title>SQL Workbench/J</title>
         <subtitle>Disclaimer</subtitle>
@@ -338,7 +361,10 @@ VALUES
 	    <h3>Building the jar file</h3>
 			<p>
 				Not all required libraries are included in the source distribution. To build <tt>sqlworkbench.jar</tt>
-		    from the source distribution, znpack the source archive into a directory.
+		    from the source distribution, unpack the source archive into a directory. Alternatively you can also
+				checkout the sources from the <a href="source-svn.html">subversion repository</a>.
+			</p>
+			<p>
 				This directory will be referenced as <tt>${wbroot}</tt> in this description.
 			</p>
 	    <p>Before you can build SQL Workbench/J you will need to download additional libraries</p>
