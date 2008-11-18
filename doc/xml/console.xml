@@ -1,0 +1,203 @@
+<section id="console-mode">
+	<title>Using &wb-productname; in console mode</title>
+	
+	<para>
+		&wb-productname; can also be used from the commandline without starting the GUI, e.g. when
+		you only have a console window (Putty, SSH) to access the database. In that case you can either
+		run scripts using the <link linkend="using-scripting">batch mode</link>, or start &wb-productname; 
+		in console mode, where you can run statements interactively, similar to the GUI mode (but of course with
+		less comfortable editing possibilities).
+	</para>
+	
+	<para>
+		When using &wb-productname; in console mode, you
+		<emphasis role="bold">cannot</emphasis> the <link linkend="launcher-using">Windows launcher</link>.
+		Please use the supplied scripts <literal>sqlwb.cmd</literal> (Windows batch file) or
+		<literal>sqlwb.sh</literal> (Unix shell script) to start the console.
+	</para>
+
+	<para>
+		When starting &wb-productname; in console mode, you can define the connection
+		using a <link linkend="commandline-connect-profile">profile name</link> or specifying the connection
+		properties <link linkend="commandline-connect-noprofile">directly </link>.
+		Additionally you can specify all parameters that can be used in <link linkend="using-scripting">batch mode</link>.
+	</para>
+		
+	<para>
+		The following batch mode parameters will be ignored in console mode:
+		<simplelist columns="1">
+			<member>
+				<literal>script</literal> - you cannot specify a script to be run during startup.
+				If you want to run a script in console mode, use the command <link linkend="command-wbinclude">WbInclude</link>.
+			</member>
+			<member><literal>encoding</literal> - as you cannot specify a script, the encoding parameter is ignored as well</member>
+			<member><literal>displayResult</literal> - always true in console mode)</member>
+			<member><literal>cleanupSuccess</literal> and <literal>cleanupError</literal>- as no script is run, there is no "end of script" after which a "cleanup" is necessary</member>
+			<member><literal>abortOnError</literal></member>
+		</simplelist>
+	</para>
+
+	<section id="console-running-sql">
+		<title>Entering statements</title>
+		<para>
+			After starting the console mode, &wb-productname; displays the prompt <literal>SQL&gt;</literal> where
+			you can enter SQL statements. The statement will not be sent to the database until it is either
+			terminated with the standard semicolon, or with the alternate delimiter (that can be specified either
+			in the used connection profile or on the commandline when starting the console mode).
+		</para>
+		<para>
+			As long as a statement is not complete, the prompt will change to <literal>..&gt;</literal>. Once
+			a delimiter is identified the statement(s) are sent to the database.
+		</para>
+
+		<programlisting>SQL&gt; SELECT *<keycap>&lt;ENTER&gt;</keycap>
+..&gt;FROM person;
+</programlisting>
+
+		<para>
+			A delimiter is only recognized at the end of the input line, thus you can enter more than one
+			statement on a line (or multiple lines) if the intermediate delimiter is not at the end of one
+			of the input lines:
+		</para>
+
+		<programlisting>SQL&gt; DELETE FROM person; rollback;</programlisting>
+
+		<para>
+			will produced the following output:
+		</para>
+
+		<programlisting>DELETE executed successfully
+4 row(s) affected.
+
+ROLLBACK executed successfully</programlisting>
+
+
+	</section>
+
+	<section id="console-exit">
+		<title>Exiting console mode</title>
+		<para>
+			To exit the application in console mode, enter <literal>exit</literal> when the default prompt is displayed.
+			If the "continuation prompt" (<literal>..&gt;</literal>) is displayed, this will not terminate the application.
+			The keyword <literal>exit</literal> may not be terminated with a semicolon.
+		</para>
+	</section>
+
+
+	<section id="console-mode-connection">
+		<title>Setting or changing the connection</title>
+		
+		<para>
+			If you did not specify a connection on the commandline when starting the console, you can set or
+			change the current connection in console mode using the
+			<link linkend="command-connect"><literal>WbConnect</literal></link> command.
+			Using <literal>WbConnect</literal> in console mode will automatically close the current
+			connection, before establishing the new connection.
+		</para>
+
+		<para>
+			To disconnect the current connection in console mode, run the statement <literal>WbDisconnect</literal>.
+			Note that this statement is only available in console mode.
+		</para>
+
+	</section>
+
+	<section id="console-resultset-display">
+		<title>Displaying result sets</title>
+		<para>
+			If you are running <literal>SELECT</literal> statements in console mode, the result is
+			displayed on the screen in "tabular" format. For wide tables or result sets, this is probably
+			not very readable. Note that &wb-productname; still reads the whole result into memory in order
+			to be to adjust the column widths to the displayed data.
+		</para>
+	</section>
+
+	<section id="console-maxrows">
+		<title>Controlling the number of rows displayed</title>
+		<para>
+			In the &wb-productname; GUI window, you can limit the reuslt of a query by entering
+			a value in the "Max. Rows" field. If you want to limit the number of rows in console mode
+			you can do this by running the statement
+		</para>
+		<programlisting>SET MAXROWS 42;</programlisting>
+		<para>
+			This will limit the number of rows retrieved to 42.
+		</para>
+		<para>
+			SET MAXROWS has no effect when run as a <link linkend="profile-connect-scripts">post-connect script</link>.
+		</para>
+	</section>
+
+	<section id="console-timeouts">
+		<title>Controlling the query timeout</title>
+		<para>
+			To set the query timeout in console mode, you can run the following statement
+		</para>
+		<programlisting>SET TIMEOUT 42;</programlisting>
+		<para>
+			This will set a query timeout of 42 seconds. Note that not all JDBC
+			drivers support a query timout.
+		</para>
+		<para>
+			SET TIMEOUT has no effect when run as a <link linkend="profile-connect-scripts">post-connect script</link>.
+		</para>
+	</section>
+
+	<section id="console-manage-profiles">
+		<title>Managing connection profiles</title>
+		<para>
+			Connection profiles can be managed through several commands that are only available in console
+			mode.
+		</para>
+
+		<section id="console-listprofiles">
+				<title>List available profiles - WbListProfiles</title>
+				<para>
+					The command <literal>WbListProfiles</literal> will display a list of all displayed
+					profiles
+				</para>
+		</section>
+
+		<section id="console-deleteprofiles">
+				<title>Delete a profile - WbDeleteProfile</title>
+				<para>
+					You can delete an existing profile using the command <literal>WbDeleteProfile</literal>.
+					The command takes one argument, which is the name of the profile. If the name is unique across
+					all profile groups you don't have to specify a group name. If the name is not unique, you
+					need to include the group name, e.g.
+				</para>
+				<programlisting>WbDeleteProfile {MyGroup}/SQL Server</programlisting>
+				<para>
+					As the profile name is the only parameter to this command, no quoting is necessary.
+					Everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
+					profile's name
+				</para>
+		</section>
+
+		<section id="console-saveprofile">
+				<title>Save the current profile - WbStoreProfile</title>
+				<para>
+					Saves the currently active connection as a new connection profile. This can be used
+					when &wb-productname; if the connection information was passsed using individual parameters
+					(<literal>-url</literal>, <literal>-username</literal> and so on) either on the commandline
+					or through  <literal>WbConnect</literal>.
+				</para>
+				<programlisting>WbDeleteProfile {MyGroup}/SQL Server</programlisting>
+				<para>
+					As the profile name is the only parameter to this command, no quoting is necessary.
+					Everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
+					profile's name. If there is already a profile with the same name, that profile is overwritten.
+				</para>
+				<para>
+					If the current connection references a JDBC driver that is not already defined,
+					a new entry for the driver defintions is created referencing the library
+					that was passed on the commandline.
+				</para>
+				<para>
+					The profiles are automatically saved when calling WbStoreProfile
+				</para>
+		</section>
+
+	</section>
+
+</section>
