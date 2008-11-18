@@ -60,13 +60,17 @@
 		the POI library from the Apache project's website: <ulink url="http://poi.apache.org/"/>.
 		Any version greater than 2.5 is fine. The distribution contains a jar file named 
 		e.g. <literal>poi-3.0.1-FINAL-20070705.jar</literal> (exact name depends on the version).
-		This jar file needs to be copied into the same directory as <literal>sqlworkbench.jar</literal> under
-		the name <literal>poi.jar</literal>.
 	</para>
+	
+	<note><para>
+		The poi jar file needs to be copied into the same directory as <literal>sqlworkbench.jar</literal> under
+		the name <emphasis role="bold"><literal>poi.jar</literal></emphasis>.
+	</para></note>
 
 	<para>
-		If an export to an Excel spreadsheet is needed, it is recommended to use the Excel XML format, 
-		as that doesn't need an external library (just like exporting to the OpenDocument format). 
+		If an export to an Excel spreadsheet is needed, it is recommended to use the Excel XML format 
+		(<literal>-type=xlsx</literal>), as that doesn't need an external library and works on any platform
+		(just like exporting to the OpenDocument format). 
 	</para>
 
 	<para>The command supports the following parameters:</para>

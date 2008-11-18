@@ -9,6 +9,7 @@
 	<!ENTITY editor SYSTEM "editor.xml">
 	<!ENTITY using SYSTEM "using.xml">
 	<!ENTITY scripting SYSTEM "scripting.xml">
+	<!ENTITY console-mode SYSTEM "console.xml">
 	<!ENTITY export-import SYSTEM "export-import.xml">
 	<!ENTITY wb-commands SYSTEM "wb-commands.xml">
 	<!ENTITY dbexplorer SYSTEM "dbexplorer.xml">
@@ -28,7 +29,7 @@
 
 <?xml-stylesheet href="html.css" type="text/css"?>
 <article lang="en">
-  <title>&wb-productname; User Manual</title>
+  <title>&wb-productname; User's Manual</title>
 &information;
 &install;
 &jdbc-setup;
@@ -37,6 +38,7 @@
 &using;
 &variables;
 &scripting;
+&console-mode;
 &wbexport;
 &wbimport;
 &wbcopy;

@@ -354,8 +354,9 @@
 					</row>
 					<row>
 						<entry>-columns</entry>
-						<entry>The list of columns of the target table, in the order
-						in which they appear in the source table.</entry>
+						<entry>
+							The list of columns from the target table, in the order in which they appear in the source query.
+						</entry>
 					</row>
 				</tbody>
 			</tgroup>

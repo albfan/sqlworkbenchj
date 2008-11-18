@@ -832,8 +832,8 @@
 	    <entry>
 	      Specify the delimiter that is used in the script. This defaults 
 	      to <literal>;</literal>. If you want to define a delimiter that
-	      will only be recognized when beeing on a single line, append <literal>;nl</literal>
-	      to the value, e.g.: <literal>-delimiter=/;nl</literal>
+	      will only be recognized when it's the only text in a line, append <literal>:nl</literal>
+	      to the value, e.g.: <literal>-delimiter=/:nl</literal>
 	    </entry>
 	  </row>
 	  
@@ -850,7 +850,7 @@
 	    <entry>Controls the logging level of the executed commands. <literal>-verbose=true</literal>
 	      has the same effect as adding a <literal>WbFeedback on</literal> inside
 	      the called script. <literal>-verbose=false</literal> has the same effect as adding 
-	    a <literal>WbFeedback off</literal> inside of the called script.</entry>
+	      the statement <literal>WbFeedback off</literal> to the called script.</entry>
 	  </row>
 	  
 	</tbody>
@@ -1005,9 +1005,8 @@ WHERE id=42;</programlisting>
     <para>
       You can control the buffer size of the <literal>DBMS_OUTPUT</literal> package by passing the 
       desired buffer size as a parameter to the <literal>ENABLEOUT</literal> command:
+			<literal>ENABLEOUT 32000;</literal>
     </para>
-    
-    <programlisting>ENABLEOUT 32000;</programlisting>
     
     <note><para>
 	Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
@@ -1101,20 +1100,83 @@ WHERE id=42;</programlisting>
   <section id="command-list">
     <title>List tables - WbList</title>
     
-    <para>This command lists all available tables (including views and
+    <para>
+			This command lists all available tables (including views and
       synonyms). This output is equivalent to the left part of the Database
       Object Explorer&#39;s Table tab.
     </para>
+
+    <para>
+			You can limit the displayed objects by either specifying a wildcard for the
+			names to be retrieved: <literal>WbList P%</literal> will list all tables or
+			views starting with the letter "P"
+    </para>
+
+    <para>
+			The command supports two parameters to specify the tables and objects defined
+			in a more detailed manner. If you want to limit the result by specifying a
+			wildcard for the name <emphasis role="bold">and</emphasis> the object type,
+			you have to use the parameter switches:
+			<informaltable frame="all">
+				<tgroup cols="2" align="left">
+					<colspec colname="c1"  colwidth="2.5cm" />
+					<colspec colname="c2"/>
+					<thead>
+						<row>
+							<entry>Parameter</entry>
+							<entry>Description</entry>
+						</row>
+					</thead>
+					<tbody valign="top">
+						<row>
+							<entry>-objects</entry>
+							<entry>
+								<para>
+									Select the objects to be returned using a wildcard name, e.g. <literal>-objects=P%</literal>
+								</para>
+							</entry>
+						</row>
+						<row>
+							<entry>-types</entry>
+							<entry>
+								<para>
+									Limit the result to specific object types, e.g. <literal>WbList -objects=V% -types=VIEW</literal>
+									will return all views starting with the letter "V".
+								</para>
+							</entry>
+						</row>
+					</tbody>
+				</tgroup>
+			</informaltable>
+		</para>
+
   </section>
   
   <section id="command-listprocs">
     <title>List stored procedures - WbListProcs</title>
     
-    <para>This command will list all stored procedures available to the
+    <para>
+			This command will list all stored procedures available to the
       current user. The output of this command is equivalent to the Database
-    Explorer&apos;s Procedure tab.</para>
+			Explorer&apos;s Procedure tab.
+		</para>
+		<para>
+			You can limit the list by supplying a wildcard search for the name, e.g.:
+			<programlisting>WbListProcs public.p%</programlisting>
+		</para>
   </section>
-  
+
+  <section id="command-procsource">
+    <title>Show the source of a stored procedures - WbProcSource</title>
+
+    <para>
+			This command will show the source for a single stored procedure (if the
+			current DBMS is supported by &wb-productname;). The name of the procedure
+			is given as an argument to the command:
+			<programlisting>WbProcSource theAnswer</programlisting>
+		</para>
+  </section>
+
   <section id="command-listcat">
     <title>List catalogs - WbListCat</title>
     
@@ -1149,13 +1211,17 @@ WHERE id=42;</programlisting>
 			executed together with the <literal>WbConnect</literal> command. Either by running
 			the complete script of the editor or selecting the <literal>WbConnect</literal> command
 			together with other statements. Once the script has finished, the connection is closed 
-			and the "global" connection (selected in the connect dialog) is active again.
+			and the "global" connection (selected in the connect dialog) is active again. This also applies
+			to scripts that are run in <link linkend="using-scripting">batch mode</link> or
+			scripts that are started from within the console using
+			<literal><link linkend="command-wbinclude">WbInclude</link></literal>.
 		</para>
-		
+
 		<para>
-			When this command is used in <link linkend="using-scripting">batch mode</link>, the connection
-			opened with <literal>WbConnect</literal> is kept open until the application ends, or a new 
-			connection is established using <literal>WbConnect</literal>.
+			When this command is entered directly in the commandline of the 
+			<link linkend="console-mode">console mode</link>, the current connection is closed and the
+			new connection is kept open until the application ends, or a new connection is established
+			using <literal>WbConnect</literal> on the commandline again.
 		</para>
 
 	  <para>
@@ -1164,7 +1230,7 @@ WHERE id=42;</programlisting>
 
 		<informaltable frame="all">
 			<tgroup cols="2">
-				<colspec colname="c1" colwidth="3.5cm" />
+				<colspec colname="c1" colwidth="3.6cm" />
 				<colspec colname="c2" />
 				<thead>
 					<row>
@@ -1205,6 +1271,16 @@ WHERE id=42;</programlisting>
 			</tgroup>
 		</informaltable>
 
+		<para>
+			If none of the parameters is supplied when running the command, it is assumed that any value
+			after <literal>WbConnect</literal> is the name of a connection profile, e.g.:
+		</para>
+		<programlisting>WbConnect production</programlisting>
+		<para>
+			will connect using the profile name <literal>production</literal>, and is equivalent to
+		</para>
+		<programlisting>WbConnect -profile=production</programlisting>
+		
   </section>
 
 </section>

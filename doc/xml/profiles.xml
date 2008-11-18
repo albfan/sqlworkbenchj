@@ -372,6 +372,18 @@
 			</para>
 		</section>
 
+		<section id="profile-hide-warnings">
+			<title>Hide warnings</title>
+			<para>
+				When a SQL statement returns warnings from the DBMS, these are usually displayed
+				after the SQL statement has finished. By checking this option, warnings that are
+				returned from the DBMS are never displayed. Note that for some DBMS (e.g. MS SQL Server)
+				server messages (<literal>PRINT 'Hello, world'</literal>) are also returned
+				as a warning by the driver. If you disable this property, those messages will
+				also not be displayed.
+			</para>
+		</section>
+
 		<section id="options-explorer-remember-schema" xreflabel="Remember DbExplorer Schema">
 			<title>Remember DbExplorer Schema</title>
 			
@@ -384,76 +396,19 @@
 			
 		</section>
 
-	<section id="profile-trim-char-data">
-		<title>Trim <literal>CHAR</literal> data</title>
+		<section id="profile-trim-char-data">
+			<title>Trim <literal>CHAR</literal> data</title>
 
-		<para>
-			For columns defined with the CHAR datatype, some DBMS pad the values
-			to the length defined in the column definition (e.g. a CHAR(80) column
-			will always contain 80 characters).
-			If this option is enabled, &wb-productname; will remove trailing 
-			spaces from the values retrieved from the database. When running &wb-productname;
-			in batch mode, this flag can be enabled using the <literal>-trimCharData</literal> switch.
-		</para>
-	</section>
-
-		<section id="profile-connect-scripts">
-			<title>Connect scripts</title>
-			
 			<para>
-				You can define a SQL script that is executed immediately after a connection for this 
-				profile has been established, and a script that is executed before a connection
-				is about to be closed. To define the scripts, click on the button <guibutton>Connect scripts</guibutton>.
-				A new window will be opened that contains two editors. Enter the script that should be
-				executed upon connecting into the upper editor, the script to be executed before 
-				disconnecting into the lower editor. You can put more than one statement into the 
-				scripts. The statements have to be separated by a semicolon. 
+				For columns defined with the CHAR datatype, some DBMS pad the values
+				to the length defined in the column definition (e.g. a CHAR(80) column
+				will always contain 80 characters).
+				If this option is enabled, &wb-productname; will remove trailing
+				spaces from the values retrieved from the database. When running &wb-productname;
+				in batch mode, this flag can be enabled using the <literal>-trimCharData</literal> switch.
 			</para>
-			<para>
-				The statements that are executed will be logged in the message panel of the
-				SQL panel where the connection is created. You will not see the log when 
-				a connection for the DbExplorer is created. 
-			</para>
-			<para>
-				Execution of the script will stop at the first statement that throws an error.
-				The error message will also be logged to the message panel. If the connection 
-				is made for a DbExplorer panel, the errors will only be visible in the log file.
-			</para>
-			
 		</section>
 
-		<section id="profile-keep-alive">
-			<title>Keep alive script</title>
-			
-			<para>
-				Some DBMS are configured to disconnect an application that has been idle
-				for some time. You can define an idle time and a SQL statement that is executed
-				when the connection has been idle for the defined interval. This is also available 
-				when clicking on the <guibutton>Connect scripts</guibutton>.
-			</para>
-
-			<para>
-				The keep alive statement can not be a script, it can only be a <emphasis role="bold">single</emphasis>
-				SQL statement (e.g. <literal>SELECT version()</literal> or <literal>SELECT 42 FROM dual</literal>).
-				You may not enter the trailing semicolon.
-			</para>
-
-			<para>
-				The idle time is defined im milliseconds, but you can also enter the 
-				interval in seconds or minutes by appending the letter 's' (for seconds)
-				or 'm' (for minutes) to the value. 
-				e.g.: <literal>30000</literal> (30 seconds), or <literal>45s</literal> (45 seconds), or 
-				<literal>10m</literal> (10 minutes).
-			</para>
-			<para>
-				When only one of the fields contains a value, You can disable the keep alive 
-				feature by deleting the entry for the interval but keeping the SQL statement. 
-				Thus you can quickly turn off the keep alive feature but keep the 
-				SQL statement for the next time.
-			</para>
-			
-		</section>
-		
 		<section id="profile-info-background">
 			<title>Info Background</title>
 			<para>
@@ -530,7 +485,64 @@
 				workspace for each connection profile.
 			</para></note>
 		</section>
-		
+
+		<section id="profile-connect-scripts">
+			<title>Connect scripts</title>
+
+			<para>
+				You can define a SQL script that is executed immediately after a connection for this
+				profile has been established, and a script that is executed before a connection
+				is about to be closed. To define the scripts, click on the button <guibutton>Connect scripts</guibutton>.
+				A new window will be opened that contains two editors. Enter the script that should be
+				executed upon connecting into the upper editor, the script to be executed before
+				disconnecting into the lower editor. You can put more than one statement into the
+				scripts. The statements have to be separated by a semicolon.
+			</para>
+			<para>
+				The statements that are executed will be logged in the message panel of the
+				SQL panel where the connection is created. You will not see the log when
+				a connection for the DbExplorer is created.
+			</para>
+			<para>
+				Execution of the script will stop at the first statement that throws an error.
+				The error message will also be logged to the message panel. If the connection
+				is made for a DbExplorer panel, the errors will only be visible in the log file.
+			</para>
+
+			<section id="profile-keep-alive">
+				<title>Keep alive script</title>
+
+				<para>
+					Some DBMS are configured to disconnect an application that has been idle
+					for some time. You can define an idle time and a SQL statement that is executed
+					when the connection has been idle for the defined interval. This is also available
+					when clicking on the <guibutton>Connect scripts</guibutton>.
+				</para>
+
+				<para>
+					The keep alive statement can not be a script, it can only be a <emphasis role="bold">single</emphasis>
+					SQL statement (e.g. <literal>SELECT version()</literal> or <literal>SELECT 42 FROM dual</literal>).
+					You may not enter the trailing semicolon.
+				</para>
+
+				<para>
+					The idle time is defined im milliseconds, but you can also enter the
+					interval in seconds or minutes by appending the letter 's' (for seconds)
+					or 'm' (for minutes) to the value.
+					e.g.: <literal>30000</literal> (30 seconds), or <literal>45s</literal> (45 seconds), or
+					<literal>10m</literal> (10 minutes).
+				</para>
+				<para>
+					When only one of the fields contains a value, You can disable the keep alive
+					feature by deleting the entry for the interval but keeping the SQL statement.
+					Thus you can quickly turn off the keep alive feature but keep the
+					SQL statement for the next time.
+				</para>
+
+			</section>
+
+		</section>
+	
   </section>
 
 	<section id="oracle-sysdba-connection">

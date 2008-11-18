@@ -40,14 +40,6 @@
 </row>
 
 <row>
-	<entry>-emptyStringIsNull</entry>
-	<entry>This parameter corresponds to the
-	<link linkend="profile-empty-string-is-null">Empty String is NULL</link>
-	setting of the connection profile. This will only be used in GUI mode.
-	</entry>
-</row>
-
-<row>
 	<entry>-trimCharData</entry>
 	<entry>
 		Turns on right-trimming of values retrieved from <literal>CHAR</literal>

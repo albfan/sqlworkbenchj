@@ -1,5 +1,13 @@
 <section id="troubleshooting">
 	<title>Common problems</title>
+
+  <!--
+	<section id="no-statement-cancel">
+		<title>Statements can not be cancelled</title>
+		<para>
+		</para>
+	</section>
+	-->
 	
 	<section id="oracle-problems">
 		<title>Oracle Problems</title>

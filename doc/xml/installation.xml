@@ -538,11 +538,19 @@ another_variable=24</programlisting>
 						&common-connect-args;
 
 						<row>
+							<entry>-emptyStringIsNull</entry>
+							<entry>This parameter corresponds to the
+							<link linkend="profile-empty-string-is-null">Empty String is NULL</link>
+							setting of the connection profile. This will only be when editing a result set in GUI mode.
+							</entry>
+						</row>
+
+						<row>
 							<entry>-altDelim</entry>
 							<entry>
 								The <link linkend="understand-alternate-delim">alternate delimiter</link> to be used for this connection. 
-								To define a single line delimiter append the characters ;nl to the parameter value:
-								e.g. <literal>-altDelimiter=GO;nl</literal> to define a SQL Server like GO as the 
+								To define a single line delimiter append the characters :nl to the parameter value:
+								e.g. <literal>-altDelimiter=GO:nl</literal> to define a SQL Server like GO as the
 								alternate delimiter. Note that when running in batchmode you can also override 
 								the default delimiter by specifying the 
 								<link linkend="scripting-delimiter"><literal>-delimiter</literal></link> parameter. 
@@ -573,7 +581,7 @@ another_variable=24</programlisting>
 								Puts the connection into <link linkend="profile-readonly">read-only mode</link>.
 							</entry>
 						</row>
-						
+
 					</tbody>
 				</tgroup>
 
