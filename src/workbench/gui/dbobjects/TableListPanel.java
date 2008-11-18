@@ -82,6 +82,7 @@ import workbench.util.ExceptionUtil;
 import workbench.WbManager;
 import workbench.db.DbObject;
 import workbench.db.IndexDefinition;
+import workbench.db.IndexReader;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.gui.actions.CompileDbObjectAction;
@@ -412,7 +413,7 @@ public class TableListPanel
 
 				for (int i = 0; i < rows.length; i++)
 				{
-					String name = indexes.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
+					String name = indexes.getValueAsString(rows[i], IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
 					IndexDefinition index = new IndexDefinition(tbl, name);
 					objects.add(index);
 				}
@@ -613,6 +614,7 @@ public class TableListPanel
 		{
 			public void run()
 			{
+				displayTab.setSelectedIndex(0);
 				tableDefinition.reset();
 				importedKeys.reset();
 				exportedKeys.reset();
@@ -1190,7 +1192,7 @@ public class TableListPanel
 
 			if (dbs.isViewType(type))
 			{
-				sql = meta.getExtendedViewSource(this.selectedTable, tableDefinition.getDataStore(), true);
+				sql = meta.getViewReader().getExtendedViewSource(this.selectedTable, tableDefinition.getDataStore(), true);
 			}
 			else if (dbs.isSynonymType(type))
 			{
@@ -1441,6 +1443,8 @@ public class TableListPanel
 
 	protected void retrieveCurrentPanel(final boolean withMessage)
 	{
+		if (this.dbConnection == null) return;
+		
 		if (this.isBusy() || this.dbConnection.isBusy())
 		{
 			this.invalidateData();
@@ -1571,7 +1575,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStore ds = meta.getTableIndexInformation(getObjectTable());
+			DataStore ds = meta.getIndexReader().getTableIndexInformation(getObjectTable());
 			DataStoreTableModel model = new DataStoreTableModel(ds);
 			indexes.setModel(model, true);
 			indexes.adjustRowsAndColumns();

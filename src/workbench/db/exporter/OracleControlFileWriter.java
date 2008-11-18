@@ -11,7 +11,6 @@
  */
 package workbench.db.exporter;
 
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -34,6 +33,7 @@ import workbench.util.WbFile;
 public class OracleControlFileWriter
 	implements FormatFileWriter
 {
+	
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
 		ResultInfo resultInfo = converter.getResultInfo();
@@ -44,14 +44,14 @@ public class OracleControlFileWriter
 		PrintWriter out = null;
 		try
 		{
-			out = new PrintWriter(new BufferedWriter(new FileWriter(ctl)));
+			out = new PrintWriter(new FileWriter(ctl));
 			if (exporter.getExportHeaders())
 			{
 				out.println("-- Skip the header row of the input file");
 				out.println("OPTIONS (skip=1)");
 			}
 
-			out.println("-- The specified might not be correct, please check the Oracle documentation");
+			out.println("-- The specified characterset might not be correct, please check the Oracle documentation");
 			out.print("LOAD DATA CHARACTERSET '");
 			out.println(convertJavaCharsetToOracle(exporter.getEncoding()) + "'");
 			File f = new File(exporter.getFullOutputFilename());

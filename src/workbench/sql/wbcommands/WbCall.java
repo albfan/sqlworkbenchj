@@ -317,7 +317,7 @@ public class WbCall
 		DbMetadata meta = this.currentConnection.getMetadata();
 		ArrayList<ParameterDefinition> parameterNames = null;
 
-		DataStore params = meta.getProcedureColumns(null, meta.adjustSchemaNameCase(schema),meta.adjustObjectnameCase(procname));
+		DataStore params = meta.getProcedureReader().getProcedureColumns(null, meta.adjustSchemaNameCase(schema), meta.adjustObjectnameCase(procname));
 
 		boolean needFuncCall = meta.isPostgres() && returnsRefCursor(params);
 		CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(getSqlToPrepare(sql, needFuncCall));

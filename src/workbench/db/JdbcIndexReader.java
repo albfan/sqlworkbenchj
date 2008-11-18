@@ -13,9 +13,13 @@ package workbench.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -67,13 +71,13 @@ public class JdbcIndexReader
 		int idxCount = 0;
 		for (int i = 0; i < count; i++)
 		{
-			String idx_name = indexDefinition.getValue(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
-			String unique = indexDefinition.getValue(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG).toString();
-			String is_pk  = indexDefinition.getValue(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
-			IndexDefinition definition = (IndexDefinition)indexDefinition.getValue(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
+			String idx_name = indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
+			String unique = indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG).toString();
+			String is_pk  = indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
+			IndexDefinition definition = (IndexDefinition)indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
 			if (definition == null) continue;
 			
-			String type = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
+			String type = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
 			if (type == null || type.startsWith("NORMAL")) type = "";
 			
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
@@ -162,5 +166,113 @@ public class JdbcIndexReader
 	{
 		// Nothing implemented
 	}
-	
+
+	/**
+	 * Return the index information for a table as a DataStore. This is
+	 * delegated to getTableIndexList() and from the resulting collection
+	 * the datastore is created.
+	 *
+	 * @param table the table to get the indexes for
+	 * @see #getTableIndexList(TableIdentifier)
+	 */
+	public DataStore getTableIndexInformation(TableIdentifier table)
+	{
+		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
+		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.OTHER, Types.VARCHAR};
+		final int sizes[] =   {30, 7, 6, 40, 10};
+		DataStore idxData = new DataStore(cols, types, sizes);
+		if (table == null) return idxData;
+		Collection<IndexDefinition> indexes = getTableIndexList(table);
+		for (IndexDefinition idx : indexes)
+		{
+			int row = idxData.addRow();
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx);
+			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
+		}
+		idxData.sortByColumn(0, true);
+		return idxData;
+	}
+
+	/**
+	 * Returns a list of indexes defined for the given table
+	 * @param table the table to get the indexes for
+	 */
+	public Collection<IndexDefinition> getTableIndexList(TableIdentifier table)
+	{
+		ResultSet idxRs = null;
+		TableIdentifier tbl = table.createCopy();
+		tbl.adjustCase(metaData.getWbConnection());
+
+		// This will map an indexname to an IndexDefinition object
+		// getIndexInfo() returns one row for each column
+		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
+
+		try
+		{
+			// Retrieve the name of the PK index
+			String pkName = "";
+			if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
+			{
+				ResultSet keysRs = null;
+				try
+				{
+					keysRs = this.metaData.getJdbcMetaData().getPrimaryKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+					while (keysRs.next())
+					{
+						pkName = keysRs.getString("PK_NAME");
+					}
+				}
+				catch (Exception e)
+				{
+					LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Error retrieving PK information", e);
+					pkName = "";
+				}
+				finally
+				{
+					SqlUtil.closeResult(keysRs);
+				}
+			}
+
+			idxRs = getIndexInfo(tbl, false);
+			boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
+
+			while (idxRs.next())
+			{
+				boolean unique = idxRs.getBoolean("NON_UNIQUE");
+				String indexName = idxRs.getString("INDEX_NAME");
+				if (idxRs.wasNull()) continue;
+				if (indexName == null) continue;
+				String colName = idxRs.getString("COLUMN_NAME");
+				String dir = (supportsDirection ? idxRs.getString("ASC_OR_DESC") : null);
+
+				IndexDefinition def = defs.get(indexName);
+				if (def == null)
+				{
+					def = new IndexDefinition(tbl, indexName);
+					def.setUnique(!unique);
+					def.setPrimaryKeyIndex(pkName.equals(indexName));
+					defs.put(indexName, def);
+					Object type = idxRs.getObject("TYPE");
+					def.setIndexType(metaData.getDbSettings().mapIndexType(type));
+				}
+				def.addColumn(colName, dir);
+			}
+
+			processIndexList(tbl, defs.values());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Could not retrieve indexes", e);
+		}
+		finally
+		{
+			SqlUtil.closeResult(idxRs);
+			indexInfoProcessed();
+		}
+		return defs.values();
+	}
+
 }

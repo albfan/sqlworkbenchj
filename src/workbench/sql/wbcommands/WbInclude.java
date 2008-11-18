@@ -136,7 +136,7 @@ public class WbInclude
 			batchRunner.setParameterPrompter(this.prompter);
 			batchRunner.setExecutionController(runner.getExecutionController());
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
-			batchRunner.setShowResultBorders(false);
+			batchRunner.setOptimizeColWidths(false);
 			batchRunner.showResultSets(cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, false));
 			
 			batchRunner.execute();
@@ -147,6 +147,11 @@ public class WbInclude
 			else
 			{
 				result.setFailure();
+			}
+
+			if (this.rowMonitor != null)
+			{
+				this.rowMonitor.jobFinished();
 			}
 		}
 		catch (Exception th)

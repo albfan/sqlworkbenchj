@@ -80,7 +80,7 @@ public class WbDescribeTable
 		CharSequence viewSource = null;
 		if (dbs.isViewType(toDescribe.getType()))
 		{
-			viewSource = currentConnection.getMetadata().getExtendedViewSource(toDescribe, ds, false, false);
+			viewSource = currentConnection.getMetadata().getViewReader().getExtendedViewSource(toDescribe, ds, false, false);
 		}
 		
 		ColumnRemover remover = new ColumnRemover(ds);
@@ -95,7 +95,7 @@ public class WbDescribeTable
 		}
 		else if (toDescribe.getType().indexOf("TABLE") > -1)
 		{
-			DataStore index = currentConnection.getMetadata().getTableIndexInformation(toDescribe);
+			DataStore index = currentConnection.getMetadata().getIndexReader().getTableIndexInformation(toDescribe);
 			if (index.getRowCount() > 0)
 			{
 				result.addDataStore(index);

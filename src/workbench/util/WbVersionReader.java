@@ -137,6 +137,7 @@ public class WbVersionReader
 	
 	public UpdateVersion getAvailableUpdate(VersionNumber current)
 	{
+		if (UpdateCheck.DEBUG) return UpdateVersion.stable;
 		if (currentDevBuildNumber != null && currentDevBuildNumber.isNewerThan(current)) return UpdateVersion.devBuild;
 		if (currentStableBuildNumber != null && currentStableBuildNumber.isNewerThan(current)) return UpdateVersion.stable;
 		return UpdateVersion.none;

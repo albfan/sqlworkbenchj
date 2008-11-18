@@ -18,6 +18,22 @@ public class PoiHelper
 {
 	private static boolean tested = false;
 	private static boolean available = false;
+
+//	public static boolean isPoiAvailable()
+//	{
+//		if (tested) return available;
+//		try
+//		{
+//			tested = true;
+//			Object o = DynamicPoi.createWorkbook();
+//			available = (o != null);
+//		}
+//		catch (Exception e)
+//		{
+//			available = false;
+//		}
+//		return available;
+//	}
 	
 	public static boolean isPoiAvailable()
 	{

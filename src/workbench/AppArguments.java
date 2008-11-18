@@ -59,7 +59,6 @@ public class AppArguments
 
 	// Other parameters
 	public static final String ARG_SHOWPROGRESS = "showProgress";
-//	public static final String ARG_QUIET = "quiet";
 	public static final String ARG_PROFILE_STORAGE = "profileStorage";
 	public static final String ARG_CONFIGDIR = "configDir";
 	public static final String ARG_LIBDIR = "libdir";
@@ -70,6 +69,8 @@ public class AppArguments
 	public static final String ARG_LANG = "languaqe";
 	public static final String ARG_NOSETTNGS = "noSettings";
 	public static final String ARG_NOTEMPLATES = "noTemplates";
+	public static final String ARG_CONSOLE_OPT_COLS = "optimizeColWidth";
+	public static final String ARG_CONSOLE_BUFFER_RESULTS = "bufferResults";
 
 	public AppArguments()
 	{
@@ -103,13 +104,14 @@ public class AppArguments
 		addArgument(ARG_SHOW_DBEXP, ArgumentType.BoolArgument);
 		addArgument(ARG_SHOW_TIMING, ArgumentType.BoolArgument);
 		addArgument(ARG_SHOWPROGRESS, ArgumentType.BoolArgument);
+		addArgument(ARG_CONSOLE_OPT_COLS, ArgumentType.BoolArgument);
+		addArgument(ARG_CONSOLE_BUFFER_RESULTS, ArgumentType.BoolArgument);
 		addArgument(ARG_WORKSPACE);
 		addArgument(ARG_NOSETTNGS, ArgumentType.BoolArgument);
 		addArgument(ARG_NOTEMPLATES, ArgumentType.BoolArgument);
 		addArgument(ARG_HIDE_WARNINGS, ArgumentType.BoolArgument);
 		addArgument(ARG_ALT_DELIMITER);
 		addArgument(ARG_DELIMITER);
-//		addArgument(ARG_QUIET, ArgumentType.BoolArgument);
 		addArgument(ARG_READ_ONLY, ArgumentType.BoolArgument);
 		addArgument(ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
 		addArgument(ARG_LANG);

@@ -11,9 +11,8 @@
  */
 package workbench.gui.components;
 
-import java.awt.Color;
-import java.awt.Container;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 import workbench.gui.actions.WbAction;
 
 /**
@@ -45,6 +44,8 @@ public class WbLabelField
 		setEditable(false);
 		mouseListener =	new TextComponentMouseListener();
 		addMouseListener(mouseListener);
+		this.setBackground(UIManager.getColor("Label.background"));
+		this.setForeground(UIManager.getColor("Label.foreground"));
 	}
 
 	public void addPopupAction(WbAction a)
@@ -67,21 +68,5 @@ public class WbLabelField
 			super.setText(text);
 		}
 	}
-
-	@Override
-	public void addNotify()
-	{
-		super.addNotify();
-		Container parent = getParent();
-		if (parent != null)
-		{
-			Color c = parent.getBackground();
-			if (c != null)
-			{
-				setBackground(c);
-			}
-		}
-	}
-
 
 }

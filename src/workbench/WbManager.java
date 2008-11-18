@@ -56,7 +56,6 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.resource.GuiSettings;
-import workbench.util.ArgumentParser;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -747,6 +746,7 @@ public final class WbManager
 		}
 		else
 		{
+			warmUp();
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -757,6 +757,21 @@ public final class WbManager
 		}
 	}
 
+	protected void warmUp()
+	{
+		WbThread t = new WbThread("WarmUp")
+		{
+			public void run()
+			{
+				ResourceMgr.getResources();
+				MacroManager.getInstance().getMacroList();
+				ConnectionMgr.getInstance().readProfiles();
+			}
+		};
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+	
 	public void runGui()
 	{
 		WbSplash splash = null;
@@ -803,9 +818,12 @@ public final class WbManager
 		}
 	}
 
+	// Package visible for testing purposes
+	int exitCode = 0;
+
 	private void runBatch()
 	{
-		int exitCode = 0;
+		exitCode = 0;
 
 		// Make sure batch mode is always using English
 		// System.setProperty("workbench.gui.language", "en");
@@ -865,6 +883,15 @@ public final class WbManager
 	public static void initConsoleMode(String[] args)
 	{
 		wb = new WbManager();
+		wb.cmdLine.removeArgument("abortOnError");
+		wb.cmdLine.removeArgument("cleanupError");
+		wb.cmdLine.removeArgument("cleanupSuccess");
+		wb.cmdLine.removeArgument("dbExplorer");
+		wb.cmdLine.removeArgument("dataPumper");
+		wb.cmdLine.removeArgument("encoding");
+		wb.cmdLine.removeArgument("separateConnection");
+		wb.cmdLine.removeArgument("script");
+		wb.cmdLine.removeArgument("workspace");
 		wb.readParameters(args);
 		ConnectionMgr.getInstance().setReadTemplates(false);
 		wb.writeSettings = false;
@@ -892,6 +919,7 @@ public final class WbManager
 	
 	public static void prepareForTest(String[] args)
 	{
+		
 		wb = new WbManager();
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
@@ -902,6 +930,7 @@ public final class WbManager
 		// through our own class loader because they are already present
 		// on the classpath.
 		System.setProperty("workbench.gui.testmode", "true");
+		System.setProperty("workbench.log.console", "false");
 		wb.readParameters(args);
 	}
 

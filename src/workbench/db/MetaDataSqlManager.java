@@ -71,7 +71,7 @@ public class MetaDataSqlManager
 			synchronized (LOCK)
 			{
 				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ProcSourceStatements.xml");
-				this.procedureSource = (GetMetaDataSql)sql.get(this.productName);
+				this.procedureSource = sql.get(this.productName);
 			}
 		}
 		return this.procedureSource;
@@ -83,8 +83,8 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("ViewSourceStatements.xml");
-				this.viewSource = (GetMetaDataSql)sql.get(this.productName);
+				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ViewSourceStatements.xml");
+				this.viewSource = sql.get(this.productName);
 			}
 		}
 		return this.viewSource;
@@ -97,8 +97,8 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("ListTriggersStatements.xml");
-				this.listTrigger = (GetMetaDataSql)sql.get(this.productName);
+				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("ListTriggersStatements.xml");
+				this.listTrigger = sql.get(this.productName);
 			}
 		}
 		return this.listTrigger;
@@ -110,8 +110,8 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("TriggerSourceStatements.xml");
-				this.triggerSource = (GetMetaDataSql)sql.get(this.productName);
+				HashMap<String, GetMetaDataSql> sql = this.readStatementTemplates("TriggerSourceStatements.xml");
+				this.triggerSource = sql.get(this.productName);
 			}
 		}
 		return this.triggerSource;
@@ -123,11 +123,11 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("CreatePkStatements.xml");
-				this.primaryKeyTemplate = (String)sql.get(this.productName);
+				HashMap<String, String> sql = this.readStatementTemplates("CreatePkStatements.xml");
+				this.primaryKeyTemplate = sql.get(this.productName);
 				if (this.primaryKeyTemplate == null)
 				{
-					this.primaryKeyTemplate = (String)sql.get(GENERAL_SQL);
+					this.primaryKeyTemplate = sql.get(GENERAL_SQL);
 				}
 			}
 		}
@@ -140,17 +140,17 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("CreateFkStatements.xml");
-				String template = (String)sql.get(this.productName);
+				HashMap<String, String> sql = this.readStatementTemplates("CreateFkStatements.xml");
+				String template = sql.get(this.productName);
 				if (template == null)
 				{
 					if (createInline)
 					{
-						template = (String)sql.get("All-Inline");
+						template = sql.get("All-Inline");
 					}
 					else
 					{
-						template = (String)sql.get(GENERAL_SQL);
+						template = sql.get(GENERAL_SQL);
 					}
 				}
 				this.foreignKeyTemplate = template;
@@ -165,11 +165,11 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("CreateIndexStatements.xml");
-				this.indexTemplate = (String)sql.get(this.productName);
+				HashMap<String, String> sql = this.readStatementTemplates("CreateIndexStatements.xml");
+				this.indexTemplate = sql.get(this.productName);
 				if (indexTemplate == null)
 				{
-					this.indexTemplate = (String)sql.get(GENERAL_SQL);
+					this.indexTemplate = sql.get(GENERAL_SQL);
 				}
 			}
 		}
@@ -182,11 +182,11 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("ColumnCommentStatements.xml");
-				this.columnCommentTemplate = (String)sql.get(this.productName);
+				HashMap<String, String> sql = this.readStatementTemplates("ColumnCommentStatements.xml");
+				this.columnCommentTemplate = sql.get(this.productName);
 				if (columnCommentTemplate == null)
 				{
-					this.columnCommentTemplate = (String)sql.get(GENERAL_SQL);
+					this.columnCommentTemplate = sql.get(GENERAL_SQL);
 				}
 			}
 		}
@@ -199,12 +199,12 @@ public class MetaDataSqlManager
 		{
 			synchronized (LOCK)
 			{
-				HashMap sql = this.readStatementTemplates("TableCommentStatements.xml");
+				HashMap<String, String> sql = this.readStatementTemplates("TableCommentStatements.xml");
 				if (sql == null) return null;
-				this.tableCommentTemplate = (String)sql.get(this.productName);
+				this.tableCommentTemplate = sql.get(this.productName);
 				if (tableCommentTemplate == null)
 				{
-					this.tableCommentTemplate = (String)sql.get(GENERAL_SQL);
+					this.tableCommentTemplate = sql.get(GENERAL_SQL);
 				}
 			}
 		}
@@ -289,21 +289,6 @@ public class MetaDataSqlManager
 			LogMgr.logDebug("MetaDataSqlManager.readStatementTemplates()", "No user defined template file found for " + aFilename);		
 		}
 		return result;
-	}
-
-	public static void main(String[] args)
-	{
-		String sql = "ALTER TABLE CONFIGURATION \n" + 
-								 "  ADD CONSTRAINT FK_CONFIG_RES FOREIGN KEY (RESOURCE_KEY) \n" + 
-								 "  REFERENCES %targettable% (%targetcolumnlist%) \n" + 
-								 "  %fk_delete_rule%\n" +	
-								 "  %deferrable%";	
-		
-		sql = removePlaceholder(sql, FK_DELETE_RULE, true);
-		System.out.println("|" + sql  + "|");
-		//sql = removePlaceholder(sql, DEFERRABLE, true);
-		sql = StringUtil.replace(sql, DEFERRABLE, "deferrable inititially");
-		System.out.println("|" + sql  + "|");
 	}
 
 }

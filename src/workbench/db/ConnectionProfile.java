@@ -24,7 +24,6 @@ import workbench.sql.DelimiterDefinition;
 import workbench.util.StringUtil;
 import workbench.util.WbCipher;
 import workbench.util.WbDesCipher;
-import workbench.util.WbPersistence;
 
 /**
  *	A class to store a connection definition including non-JDBC properties
@@ -72,13 +71,6 @@ public class ConnectionProfile
 	
 	private DelimiterDefinition alternateDelimiter;
 	
-	static
-	{
-		WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
-		WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
-		WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
-	}
-
 	public ConnectionProfile()
 	{
 		this.isNew = true;
@@ -627,6 +619,8 @@ public class ConnectionProfile
 		result.setAlternateDelimiter(alternateDelimiter == null ? null : alternateDelimiter.createCopy());
 		result.setHideWarnings(hideWarnings);
 		result.setCopyExtendedPropsToSystem(copyPropsToSystem);
+		result.setRemoveComments(this.removeComments);
+		
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();

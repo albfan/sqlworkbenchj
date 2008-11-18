@@ -24,19 +24,11 @@ public class MemoryWatcher
 
 	// the maxMemory() will not change during the lifetime of the JVM
 	// so I can spare some CPU cycles by not calling maxMemory() constantly
-	private static final long MAX_MEMORY = Runtime.getRuntime().maxMemory();
+	public static final long MAX_MEMORY = Runtime.getRuntime().maxMemory();
 
 	public synchronized static boolean isMemoryLow()
 	{
-		long free = Runtime.getRuntime().freeMemory();
-		long total = Runtime.getRuntime().totalMemory();
-
-		// freeMemory reports the amount of memory that is free
-		// in the totalMemory. But the total memory can actually
-		// expand to maxMemory. So we need to add the difference
-		// between max and total to the currently free memory
-		free = free + (MAX_MEMORY - total);
-
+		long free = getFreeMemory();
 		if (free < MIN_FREE_MEMORY)
 		{
 			// As we have not yet hit an OutOfMemoryException, running gc()
@@ -47,5 +39,18 @@ public class MemoryWatcher
 			free = Runtime.getRuntime().freeMemory();
 		}
 		return (free < MIN_FREE_MEMORY);
+	}
+
+	public static final long getFreeMemory()
+	{
+		long free = Runtime.getRuntime().freeMemory();
+		long total = Runtime.getRuntime().totalMemory();
+
+		// freeMemory reports the amount of memory that is free
+		// in the totalMemory. But the total memory can actually
+		// expand to maxMemory. So we need to add the difference
+		// between max and total to the currently free memory
+		free = free + (MAX_MEMORY - total);
+		return free;
 	}
 }

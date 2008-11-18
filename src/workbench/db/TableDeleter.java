@@ -164,7 +164,7 @@ public class TableDeleter
 							hasError = true;
 							break;
 						}
-						else if (choice == JobErrorHandler.JOB_IGNORE_ALL)
+						else if (choice == JobErrorHandler.JOB_CONTINUE)
 						{
 							// only ignore this error
 							hasError = false;
@@ -252,7 +252,7 @@ public class TableDeleter
 	private String getDeleteStatement(final TableIdentifier table, final boolean useTruncate)
 	{
 		String deleteSql = null;
-		String tableName = table.getTableExpression(this.connection);
+		String tableName = table.createCopy().getTableExpression(this.connection);
 		if (useTruncate)
 		{
 			deleteSql = "TRUNCATE TABLE " + tableName;

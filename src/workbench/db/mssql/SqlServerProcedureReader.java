@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -30,8 +31,9 @@ import workbench.util.StringUtil;
 public class SqlServerProcedureReader
 	extends JdbcProcedureReader
 {
-	private final String GET_PROC_SQL = "{call sp_stored_procedures '%', ?}";
-
+	private final String GET_PROC_SQL = "{call sp_stored_procedures ('%', ?) }";
+	private boolean useOwnSQL = true;
+	
 	public SqlServerProcedureReader(WbConnection db)
 	{
 		super(db);
@@ -42,21 +44,33 @@ public class SqlServerProcedureReader
 		return StringUtil.emptyBuffer();
 	}
 
+	
 	/**
 	 *	The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
 	 *  so we implement it ourselves (MS always returns RESULT which is
 	 *  - strictly speaking - true, but as MS still distinguished between
 	 *  procedures and functions we need to return this correctly
+	 *
+	 * The SQL seems to be only working with the jTDS driver. The MS driver throws
+	 * and error "Incorrect syntax near '{'." which is wrong as the syntax complies
+	 * with the JDBC
 	 */
 	public DataStore getProcedures(String catalog, String owner)
 		throws SQLException
 	{
+		if (!useOwnSQL)
+		{
+			return super.getProcedures(catalog, owner, null);
+		}
+		
 		CallableStatement cstmt = this.connection.getSqlConnection().prepareCall(GET_PROC_SQL);
 		
 		DataStore ds;
 		ResultSet rs = null;
 		try 
 		{
+			ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
+			
 			if (owner == null || "*".equals(owner))
 			{
 				cstmt.setString(1, "%");
@@ -65,8 +79,20 @@ public class SqlServerProcedureReader
 			{
 				cstmt.setString(1, owner);
 			}
-			rs = cstmt.executeQuery();
-			ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
+			
+			boolean hasResult = cstmt.execute();
+
+			if (hasResult)
+			{
+				rs = cstmt.getResultSet();
+			}
+			else
+			{
+				useOwnSQL = false;
+				LogMgr.logError("SqlServerProcedureReader.getProcedures()", "Could not retrieve procedures using a call to sp_stored_procedures", null);
+				return super.getProcedures(catalog, owner, null);
+			}
+			
 			while (rs.next())
 			{
 				String dbname = rs.getString("PROCEDURE_QUALIFIER");
@@ -110,6 +136,12 @@ public class SqlServerProcedureReader
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
 			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("SqlServerProcedureReader", "Could not retrieve procedures using a call to sp_stored_procedures", e);
+			useOwnSQL = false;
+			return super.getProcedures(catalog, owner, null);
 		}
 		finally
 		{

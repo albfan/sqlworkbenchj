@@ -64,8 +64,7 @@ public class DriverEditorPanel
     setFont(null);
     setLayout(new java.awt.GridBagLayout());
 
-    lblName.setFont(null);
-    lblName.setText(ResourceMgr.getString("LblDriverName"));
+    lblName.setText(ResourceMgr.getString("LblDriverName")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -90,8 +89,7 @@ public class DriverEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(11, 3, 0, 3);
     add(tfName, gridBagConstraints);
 
-    lblClassName.setFont(null);
-    lblClassName.setText(ResourceMgr.getString("LblDriverClass"));
+    lblClassName.setText(ResourceMgr.getString("LblDriverClass")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -115,8 +113,7 @@ public class DriverEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
     add(tfClassName, gridBagConstraints);
 
-    lblLibrary.setFont(null);
-    lblLibrary.setText(ResourceMgr.getString("LblDriverLibrary"));
+    lblLibrary.setText(ResourceMgr.getString("LblDriverLibrary")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -130,8 +127,7 @@ public class DriverEditorPanel
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    lblSample.setFont(null);
-    lblSample.setText(ResourceMgr.getString("LblSampleUrl"));
+    lblSample.setText(ResourceMgr.getString("LblSampleUrl")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;

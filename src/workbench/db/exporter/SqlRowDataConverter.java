@@ -205,17 +205,21 @@ public class SqlRowDataConverter
 	public StrBuffer getStart()
 	{
 		if (!this.createTable) return null;
-		TableIdentifier updatetable = this.metaData.getUpdateTable();
-		if (updatetable == null && alternateUpdateTable == null)
+		TableIdentifier updateTable = this.metaData.getUpdateTable();
+		if (updateTable == null && alternateUpdateTable == null)
 		{
 			LogMgr.logError("SqlRowDataConverter.getStart()", "Cannot write create table without update table!",null);
 			return null;
+		}
+		else if (updateTable == null)
+		{
+			updateTable = alternateUpdateTable;
 		}
 		
 		ColumnIdentifier[] colArray = this.metaData.getColumns();
 		List<ColumnIdentifier> cols = ArrayUtil.arrayToList(colArray);
 		DbMetadata db = this.originalConnection.getMetadata();
-		String source = db.getTableSource(updatetable, cols, (alternateUpdateTable == null ? updatetable.getTableName() : alternateUpdateTable.getTableName()));
+		String source = db.getTableSource(updateTable, cols, (alternateUpdateTable == null ? updateTable.getTableName() : alternateUpdateTable.getTableName()));
 		StrBuffer createSql = new StrBuffer(source);
 		createSql.append(doubleLineTerminator);
 		return createSql;

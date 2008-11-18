@@ -37,7 +37,8 @@ public class TextRowDataConverter
 	private boolean writeClobFiles = false;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 	private String rowIndexColumnName = null;
-
+	private char escapeHexType = 'u';
+	
 	public void setWriteClobToFile(boolean flag)
 	{
 		this.writeClobFiles = flag;
@@ -156,16 +157,16 @@ public class TextRowDataConverter
 			{
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
 				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
-
+				
 				if (this.escapeRange != null && this.escapeRange != CharacterRange.RANGE_NONE)
 				{
 					if (addQuote)
 					{
-						value = StringUtil.escapeUnicode(value, this.escapeRange, this.quoteCharacter);
+						value = StringUtil.escapeText(value, escapeHexType, this.escapeRange, this.quoteCharacter);
 					}
 					else
 					{
-						value = StringUtil.escapeUnicode(value, this.escapeRange, this.delimiterAndQuote);
+						value = StringUtil.escapeText(value, escapeHexType, this.escapeRange, this.delimiterAndQuote);
 					}
 				}
 				if (this.quoteCharacter != null && this.quoteEscape != QuoteEscapeType.none && value.indexOf(this.quoteCharacter) > -1)
@@ -253,13 +254,16 @@ public class TextRowDataConverter
 		if (this.quoteCharacter == null && this.delimiter == null) return;
 
 		this.delimiterAndQuote = this.delimiter;
+
+		// Make sure we have a quote character if quoteAlways was requested
+		if (quoteAlways && this.quoteCharacter == null) quoteCharacter="\"";
+
 		// If values should always be quoted, then we need to
 		// escape the quote character in values
 		if (this.quoteCharacter != null)
 		{
 			this.delimiterAndQuote += this.quoteCharacter;
 		}
-
 	}
 
 	public void setQuoteCharacter(String quote)

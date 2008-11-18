@@ -1570,7 +1570,7 @@ public class MainWindow
 
 	protected void updateWindowTitle()
 	{
-		WbSwingUtilities.invoke(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -2432,7 +2432,6 @@ public class MainWindow
 
 	public void removeTab()
 	{
-		if (!canCloseTab()) return;
 		int index = this.sqlTab.getSelectedIndex();
 		this.closeTab(index);
 	}
@@ -2565,6 +2564,8 @@ public class MainWindow
 		{
 			this.tabRemovalInProgress = true;
 
+			WbConnection conn = panel.getConnection();
+
 			// this does not really close the connection
 			// it simply tells the panel that it should
 			// release anything attached to the connection!
@@ -2580,7 +2581,6 @@ public class MainWindow
 				LogMgr.logError("MainWindow.removeTab()", "Error when removing tab", th);
 			}
 
-			WbConnection conn = panel.getConnection();
 			boolean doDisconnect = conn != null && this.currentProfile != null && this.currentProfile.getUseSeparateConnectionPerTab();
 
 			if (doDisconnect)

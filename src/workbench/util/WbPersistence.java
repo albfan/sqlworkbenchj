@@ -74,7 +74,7 @@ public class WbPersistence
 		throws Exception
 	{
 		if (this.filename == null) throw new IllegalArgumentException("No filename specified!");
-		InputStream in = new BufferedInputStream(new FileInputStream(filename), 32*1024);
+		InputStream in = new BufferedInputStream(new FileInputStream(filename));
 		return readObject(in);
 	}
 
@@ -90,7 +90,7 @@ public class WbPersistence
 		}
 		finally
 		{
-			try { in.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(in);
 		}
 	}
 
@@ -109,7 +109,7 @@ public class WbPersistence
 		}
 		finally
 		{
-			try { out.close(); } catch (Throwable th) {}
+			FileUtil.closeQuitely(out);
 		}
 	}
 

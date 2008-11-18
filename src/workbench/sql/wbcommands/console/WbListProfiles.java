@@ -10,11 +10,10 @@
  *
  */
 package workbench.sql.wbcommands.console;
+
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Map;
-import workbench.db.ConnectionProfile;
-import workbench.db.ProfileGroupMap;
+import workbench.db.ConnectionMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
@@ -48,15 +47,10 @@ public class WbListProfiles
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		ProfileGroupMap groupMap = new ProfileGroupMap();
-
-		for (Map.Entry<String, List<ConnectionProfile>> entry : groupMap.entrySet())
+		List<String> profiles = ConnectionMgr.getInstance().getProfileKeys();
+		for (String name : profiles)
 		{
-			result.addMessage(entry.getKey());
-			for (ConnectionProfile profile : entry.getValue())
-			{
-				result.addMessage("  " + profile.getName());
-			}
+			result.addMessage(name);
 		}
 		result.setSuccess();
 		return result;

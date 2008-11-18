@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +21,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.datacopy.DataCopier;
+import workbench.db.importer.DeleteType;
 import workbench.db.importer.RowDataReceiver;
 import workbench.db.importer.TableDependencySorter;
 import workbench.db.importer.TableStatements;
@@ -48,6 +50,8 @@ public class SchemaCopy
 	private boolean checkDependencies = false;
 
 	private List<TableIdentifier> sourceTables;
+	private Map<String, TableIdentifier> tableMap;
+	
 	private RowActionMonitor rowMonitor;
 	private boolean cancel = false;
 	private boolean doSyncDelete = false;
@@ -56,14 +60,6 @@ public class SchemaCopy
 	public SchemaCopy(List<TableIdentifier> tables)
 	{
 		this.sourceTables = tables;
-	}
-	
-	public void clearSchemaFromTables()
-	{
-		for (TableIdentifier tbl : this.sourceTables)
-		{
-			tbl.setSchema(null);
-		}
 	}
 	
 	public void copyData()
@@ -84,7 +80,7 @@ public class SchemaCopy
 		
 		try
 		{
-			copier.beginMultiTableCopy();
+			copier.beginMultiTableCopy(targetConnection);
 
 			for (TableIdentifier table : sourceTables)
 			{
@@ -98,25 +94,9 @@ public class SchemaCopy
 				copier.setMode(cmdLineMode);
 				receiver.setCurrentTable(currentTable);
 
-				TableIdentifier targetTable = null;
-				if (createTable)
-				{
-					// By creating a new identifier, we are stripping of any schema information
-					// or other source connection specific stuff.
-					targetTable = new TableIdentifier(table.getTableName());
-				}
-				else
-				{
-					targetTable = this.targetConnection.getMetadata().findTable(new TableIdentifier(table.getTableName()));
-					// check if the target table exists. DataCopier will throw an exception if 
-					// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
-					if (targetTable == null)
-					{
-						this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", table.getTableName()));
-						this.messages.appendNewLine();
-						continue;
-					}
-				}
+				TableIdentifier targetTable = tableMap.get(table.getTableName());
+				if (targetTable == null) continue;
+
 				if (messages.getLength() > 0) messages.appendNewLine();
 				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
 				this.messages.appendNewLine();
@@ -157,6 +137,31 @@ public class SchemaCopy
 		
 	}
 
+	private void mapTables()
+	{
+		tableMap = new HashMap<String, TableIdentifier>(sourceTables.size());
+
+		for (TableIdentifier table : sourceTables)
+		{
+			TableIdentifier targetTable = new TableIdentifier(table.getTableName());
+			targetTable.setSchema(this.targetConnection.getMetadata().getSchemaToUse());
+
+			if (!createTable)
+			{
+				targetTable = this.targetConnection.getMetadata().findTable(targetTable);
+				// check if the target table exists. DataCopier will throw an exception if
+				// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
+				if (targetTable == null)
+				{
+					this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", table.getTableName()));
+					this.messages.appendNewLine();
+					continue;
+				}
+			}
+			tableMap.put(table.getTableName(), targetTable);
+		}
+	}
+	
 	private void deleteRows()
 		throws SQLException, IOException
 	{
@@ -265,12 +270,13 @@ public class SchemaCopy
 		
 		ArgumentParser arguments = cmdLine;
 
-		boolean deleteTarget = cmdLine.getBoolean(WbCopy.PARAM_DELETETARGET);
+		DeleteType deleteTarget = CommonArgs.getDeleteType(cmdLine);
 		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 		createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 
 		this.copier = new DataCopier();
+
 		this.rowMonitor = monitor;
 		
 		cmdLineMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
@@ -292,12 +298,16 @@ public class SchemaCopy
 		copier.setDeleteTarget(deleteTarget);
 		copier.setRowActionMonitor(rowMonitor);
 		this.doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
+		mapTables();
+
 		if (checkDependencies && !doSyncDelete)
 		{
+			List<TableIdentifier> targetTables = new ArrayList<TableIdentifier>(tableMap.values());
+			
 			// The table list is needed if the -deleteTarget=true was specified
-			// and checkDependencies. In that case all target tables must be deleted
+			// and checkDependencies. In that case, all target tables must be deleted
 			// by the importer before starting the copy process.
-			copier.setTableList(this.sourceTables);
+			copier.setTableList(targetTables);
 		}
 		return true;
 	}

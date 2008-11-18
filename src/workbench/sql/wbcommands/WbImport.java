@@ -20,6 +20,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.importer.ConstantColumnValues;
 import workbench.db.importer.CycleErrorException;
 import workbench.db.importer.DataImporter;
+import workbench.db.importer.DeleteType;
 import workbench.db.importer.ImportFileLister;
 import workbench.db.importer.ParsingInterruptedException;
 import workbench.db.importer.RowDataProducer;
@@ -57,7 +58,6 @@ public class WbImport
 	public static final String ARG_FILECOLUMNS = "fileColumns";
 	public static final String ARG_MODE = "mode";
 	public static final String ARG_KEYCOLUMNS = "keyColumns";
-	public static final String ARG_DELETE_TARGET = "deleteTarget";
 	public static final String ARG_EMPTY_STRING_IS_NULL = "emptyStringIsNull";
 	public static final String ARG_DECODE = "decode";
 	public static final String ARG_IMPORTCOLUMNS = "importColumns";
@@ -69,7 +69,6 @@ public class WbImport
 	public static final String ARG_TRIM_VALUES = "trimValues";
 	public static final String ARG_FILE_EXT = "extension";
 	public static final String ARG_UPDATE_WHERE = "updateWhere";
-	public static final String ARG_TRUNCATE_TABLE = "truncateTable";
 	public static final String ARG_CREATE_TABLE = "createTarget";
 	public static final String ARG_BLOB_ISFILENAME = "blobIsFilename";
 	public static final String ARG_CLOB_ISFILENAME = "clobIsFilename";
@@ -110,7 +109,8 @@ public class WbImport
 		cmdLine.addArgument(ARG_FILECOLUMNS);
 		cmdLine.addArgument(ARG_MODE, StringUtil.stringToList("insert;update;insert,update;update,insert", ";"));
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
-		cmdLine.addArgument(ARG_DELETE_TARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_DELETE_TARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_EMPTY_STRING_IS_NULL, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_DECODE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_IMPORTCOLUMNS);
@@ -121,7 +121,6 @@ public class WbImport
 		cmdLine.addArgument(ARG_USE_TRUNCATE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_TRIM_VALUES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_FILE_EXT);
-		cmdLine.addArgument(ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_BLOB_ISFILENAME, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CLOB_ISFILENAME, ArgumentType.BoolArgument);
@@ -595,25 +594,8 @@ public class WbImport
 
 		if (!parser.isMultiFileImport())
 		{
-			boolean delete = false;
-			boolean useTruncate = false;
-
-			if (cmdLine.isArgPresent(ARG_TRUNCATE_TABLE))
-			{
-				delete = cmdLine.getBoolean(ARG_TRUNCATE_TABLE);
-				if (delete) useTruncate = true;
-			}
-			else
-			{
-				delete = cmdLine.getBoolean(ARG_DELETE_TARGET);
-				useTruncate = cmdLine.getBoolean(ARG_USE_TRUNCATE, false);
-			}
-
+			DeleteType delete = CommonArgs.getDeleteType(cmdLine);
 			imp.setDeleteTarget(delete);
-			if (delete)
-			{
-				imp.setUseTruncate(useTruncate);
-			}
 		}
 
 		int startRow = cmdLine.getIntValue(ARG_START_ROW, -1);

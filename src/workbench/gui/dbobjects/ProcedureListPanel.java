@@ -247,7 +247,7 @@ public class ProcedureListPanel
 			this.isRetrieving = true;
 			DbMetadata meta = dbConnection.getMetadata();
 			WbSwingUtilities.showWaitCursorOnWindow(this);
-			DataStore ds = meta.getProcedures(currentCatalog, currentSchema);
+			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
 			WbSwingUtilities.invoke(new Runnable()
@@ -371,7 +371,7 @@ public class ProcedureListPanel
 			dbConnection.setBusy(true);
 			try
 			{
-				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureColumns(catalog, schema, proc));
+				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureReader().getProcedureColumns(catalog, schema, proc));
 				procColumns.setModel(model, true);
 
 				TableColumnModel colmod = procColumns.getColumnModel();

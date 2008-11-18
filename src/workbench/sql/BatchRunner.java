@@ -24,7 +24,7 @@ import workbench.AppArguments;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.gui.components.ConsoleStatusBar;
+import workbench.console.ConsoleStatusBar;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.profiles.ProfileKey;
 import workbench.interfaces.ExecutionController;
@@ -35,7 +35,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.console.DataStorePrinter;
 import workbench.interfaces.ResultSetConsumer;
-import workbench.storage.DataPrinter;
+import workbench.sql.wbcommands.WbConnect;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
@@ -59,7 +59,7 @@ import workbench.util.WbFile;
 public class BatchRunner
 	implements PropertyChangeListener
 {
-	public static final String CMD_LINE_PROFILE_NAME = "WbCommandLineProfile";
+	public static final String CMD_LINE_PROFILE_NAME = "$Wb$CommandLineProfile";
 	private List<String> filenames;
 	private StatementRunner stmtRunner;
 	private WbConnection connection;
@@ -82,8 +82,9 @@ public class BatchRunner
 	private boolean consolidateMessages = false;
 	private boolean showStatementWithResult = true;
 	private boolean showSummary = verboseLogging;
-	private boolean plainConsoleOutput = true;
+	private boolean optimizeCols = true;
 	private boolean showStatementTiming = true;
+	private String connectionId = "BatchRunner";
 	
 	public BatchRunner()
 	{
@@ -114,6 +115,11 @@ public class BatchRunner
 		this.stmtRunner.setBaseDir(dir);
 	}
 
+	public void setConnectionId(String id)
+	{
+		this.connectionId = id;
+	}
+	
 	public WbConnection getConnection()
 	{
 		return this.connection;
@@ -162,9 +168,9 @@ public class BatchRunner
 		this.showResultSets = flag;
 	}
 
-	public void setPlainConsoleOutput(boolean flag)
+	public void setOptimizeColWidths(boolean flag)
 	{
-		this.plainConsoleOutput = flag;
+		this.optimizeCols = flag;
 	}
 	
 	public void setShowStatementSummary(boolean flag)
@@ -263,7 +269,7 @@ public class BatchRunner
 		try
 		{
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
-			WbConnection c = mgr.getConnection(this.profile, "BatchRunner");
+			WbConnection c = mgr.getConnection(this.profile, connectionId);
 
 			this.setConnection(c);
 			String info = c.getDisplayString();
@@ -297,6 +303,12 @@ public class BatchRunner
 			printMessage(msg);
 			throw e;
 		}
+	}
+
+	public void setPersistentConnect(boolean flag)
+	{
+		WbConnect connect = (WbConnect)getCommand(WbConnect.VERB);
+		connect.setPersistentChange(flag);
 	}
 
 	public boolean isSuccess()
@@ -444,6 +456,15 @@ public class BatchRunner
 		}
 	}
 
+	public ResultSetConsumer getResultSetConsumer()
+	{
+		if (this.stmtRunner != null)
+		{
+			return stmtRunner.getConsumer();
+		}
+		return null;
+	}
+	
 	public void setResultSetConsumer(ResultSetConsumer consumer)
 	{
 		if (this.stmtRunner != null)
@@ -676,24 +697,13 @@ public class BatchRunner
 			console.println();
 			console.println(sql);
 		}
-		
 		for (DataStore ds : data)
 		{
 			if (ds != null)
 			{
-				if (plainConsoleOutput)
-				{
-					console.println("---------------- " + ResourceMgr.getString("MsgResultLogStart") + " ----------------------------");
-					DataPrinter printer = new DataPrinter(ds);
-					printer.printTo(console);
-					console.println("---------------- " + ResourceMgr.getString("MsgResultLogEnd") + "   ----------------------------");
-				}
-				else
-				{
-					DataStorePrinter printer = new DataStorePrinter(ds);
-					printer.printTo(console);
-				}
-				console.println();
+				DataStorePrinter printer = new DataStorePrinter(ds);
+				printer.setFormatColumns(optimizeCols);
+				printer.printTo(console);
 			}
 		}
 		
@@ -750,7 +760,7 @@ public class BatchRunner
 		{
 			if (msg != null && msg.length() > 0)
 			{
-				System.out.println("\r");
+				System.out.print('\r');
 				System.out.println(msg);
 			}
 		}
@@ -855,6 +865,7 @@ public class BatchRunner
 		boolean showResult = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT);
 		boolean showProgress = cmdLine.getBoolean(AppArguments.ARG_SHOWPROGRESS, false);
 		boolean consolidateLog = cmdLine.getBoolean(AppArguments.ARG_CONSOLIDATE_LOG, false);
+		
 		String encoding = cmdLine.getValue(AppArguments.ARG_SCRIPT_ENCODING);
 
 		ConnectionProfile profile = null;
@@ -874,6 +885,13 @@ public class BatchRunner
 				System.err.println(msg);
 				LogMgr.logError("BatchRunner.initFromCommandLine", msg, null);
 				return null;
+			}
+			boolean readOnly = cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false);
+			if (readOnly)
+			{
+				profile.setReadOnly(readOnly);
+				// Reset the changed flag to make sure the "modified" profile is not saved
+				profile.reset();
 			}
 		}
 

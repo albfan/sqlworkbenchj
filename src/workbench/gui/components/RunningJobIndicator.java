@@ -53,12 +53,14 @@ public class RunningJobIndicator
 	
 	public synchronized void jobStarted()
 	{
+//		System.out.println("********** jobStarted() ************** \n" + ExceptionUtil.getStackTrace(new Exception()));
 		runningJobs ++;
 		updateTitle();
 	}
 	
 	public synchronized void jobEnded()
 	{
+//		System.out.println("********** jobEnded() ************** \n" + ExceptionUtil.getStackTrace(new Exception()));
 		if (runningJobs > 0) runningJobs --;
 		updateTitle();
 	}

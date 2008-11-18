@@ -261,6 +261,7 @@ public class DataExporter
 	{
 		this.writeEmptyResults = flag;
 	}
+
 	public boolean writeEmptyResults()
 	{
 		return this.writeEmptyResults;
@@ -451,11 +452,18 @@ public class DataExporter
 		return this.transformOutputFile;
 	}
 
+	/**
+	 * Set if the (text) export should contain header row.
+	 */
 	public void setExportHeaders(boolean aFlag)
 	{
 		this.exportHeaders = aFlag;
 	}
 
+	/**
+	 * Returns if the (text) export contains a header row.
+	 * @return true, if the header row should be written
+	 */
 	public boolean getExportHeaders()
 	{
 		return this.exportHeaders;

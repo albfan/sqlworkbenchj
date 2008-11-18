@@ -152,9 +152,7 @@ public class CompletionPopup
 			
 			editor.setKeyEventInterceptor(this);
 			
-			elementList.doLayout();
-			scroll.invalidate();
-			scroll.doLayout();
+			elementList.validate();
 			
 			window.setLocation(p);
 			window.setContentPane(content);

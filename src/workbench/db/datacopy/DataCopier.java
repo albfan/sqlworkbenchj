@@ -25,6 +25,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.importer.DataImporter;
+import workbench.db.importer.DeleteType;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
 import workbench.db.importer.TableStatements;
@@ -99,9 +100,10 @@ public class DataCopier
 		this.importer.setTransactionControl(flag);
 	}
 
-	public void beginMultiTableCopy()
+	public void beginMultiTableCopy(WbConnection targetConn)
 		throws SQLException
 	{
+		this.importer.setConnection(targetConn);
 		this.importer.beginMultiTable();
 	}
 
@@ -229,7 +231,7 @@ public class DataCopier
 			creator.createTable();
 
 			// no need to delete rows from a newly created table
-			this.setDeleteTarget(false);
+			this.setDeleteTarget(DeleteType.none);
 			this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableCreated", this.targetTable.getTableExpression(this.targetConnection)) + "\n");
 		}
 		catch (SQLException e)
@@ -288,7 +290,7 @@ public class DataCopier
 		this.importer.setTableList(tables);
 	}
 
-	public void setDeleteTarget(boolean delete)
+	public void setDeleteTarget(DeleteType delete)
 	{
 		this.importer.setDeleteTarget(delete);
 	}
@@ -383,9 +385,10 @@ public class DataCopier
 				sync.setTableName(this.sourceTable, this.targetTable);
 				sync.setRowMonitor(this.importer.getRowActionMonitor());
 				sync.setBatchSize(this.getBatchSize());
+				sync.setReportInterval(this.importer.getReportInterval());
 				sync.doSync();
 				long rows = sync.getDeletedRows();
-				String msg = rows + " " + ResourceMgr.getString("MsgCopyNumRowsDeleted");
+				String msg = ResourceMgr.getFormattedString("MsgCopyNumRowsDeleted", rows, targetTable.getTableName());
 				this.addMessage(msg);
 			}
 		}
@@ -644,8 +647,11 @@ public class DataCopier
 	public MessageBuffer getMessageBuffer()
 	{
 		MessageBuffer buf = new MessageBuffer();
-		buf.append(this.messages);
-		this.messages.clear();
+		if (messages != null)
+		{
+			buf.append(this.messages);
+			messages.clear();
+		}
 		importer.copyMessages(buf);
 		buf.append(this.errors);
 		return buf;

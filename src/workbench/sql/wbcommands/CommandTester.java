@@ -60,6 +60,7 @@ public class CommandTester
 		commands.add(WbListPkDef.VERB);
 		commands.add(WbListVars.VERB);
 		commands.add(WbListTables.VERB);
+		commands.add(WbListProcedures.VERB);
 		commands.add(WbLoadPkMapping.VERB);
 		commands.add(WbRemoveVar.VERB);
 		commands.add(WbSavePkMapping.VERB);
@@ -74,6 +75,7 @@ public class CommandTester
 		commands.add(WbListProfiles.VERB);
 		commands.add(WbStoreProfile.VERB);
 		commands.add(WbHelp.VERB);
+		commands.add(WbProcSource.VERB);
 
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
@@ -93,6 +95,8 @@ public class CommandTester
 		formattedWords.put(WbDefinePk.VERB, "WbDefinePK");
 		formattedWords.put(WbSelectBlob.VERB, "WbSelectBlob");
 		formattedWords.put(WbRemoveVar.VERB, "WbVarDelete");
+		formattedWords.put(WbProcSource.VERB, "WbProcSource");
+		formattedWords.put(WbListProcedures.VERB, "WbListProcs");
 	}
 	
 	public Collection<String> getCommands()

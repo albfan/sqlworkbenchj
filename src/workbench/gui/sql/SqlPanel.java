@@ -167,6 +167,7 @@ import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
 import workbench.util.LowMemoryException;
+import workbench.util.MemoryWatcher;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
@@ -361,12 +362,6 @@ public class SqlPanel
 		this.appendResults = flag;
 	}
 
-	public void initDivider()
-	{
-		int myHeight = (int)this.getPreferredSize().getHeight();
-		initDivider(myHeight);
-	}
-
 	public void initDivider(int height)
 	{
 		height -= (this.statusBar.getPreferredSize().getHeight() * 3);
@@ -450,6 +445,9 @@ public class SqlPanel
 		return true;
 	}
 
+	/**
+	 * For testing purposes, so the Unit test can access the messages
+	 */
 	public String getLogMessage()
 	{
 		return this.log.getText();
@@ -952,6 +950,7 @@ public class SqlPanel
 		}
 		catch (Exception e)
 		{
+			setLogText(ExceptionUtil.getDisplay(e));
 			LogMgr.logError("SqlPanel.updatedb()", "Error during update", e);
 		}
 		finally
@@ -962,7 +961,6 @@ public class SqlPanel
 			fireDbExecEnd();
 			WbSwingUtilities.showDefaultCursor(this);
 		}
-//		appendToLog(this.currentData.getLastMessage());
 		this.checkResultSetActions();
 	}
 
@@ -1347,10 +1345,7 @@ public class SqlPanel
 
 	public WbConnection getConnection()
 	{
-		synchronized (this.connectionLock)
-		{
-			return this.dbConnection;
-		}
+		return this.dbConnection;
 	}
 
 	public boolean isConnected()
@@ -1359,10 +1354,7 @@ public class SqlPanel
 		// MainWindow will make sure a valid connection is set
 		// for the panel. When using only one connection for all
 		// panels, isClosed() will block the entire AWT thread!
-		synchronized (this.connectionLock)
-		{
-			return (this.dbConnection != null);
-		}
+		return (this.dbConnection != null);
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -1582,15 +1574,21 @@ public class SqlPanel
 
 	protected void cancelRetrieve()
 	{
-		this.showCancelIcon();
-		this.cancelExecution = true;
-		this.setCancelState(false);
-		this.stmtRunner.cancel();
+		try
+		{
+			this.showCancelIcon();
+			this.cancelExecution = true;
+			this.setCancelState(false);
+			this.stmtRunner.cancel();
+		}
+		finally
+		{
+			showBusyIcon(false);
+		}
 	}
 
 	public void setCancelState(final boolean aFlag)
 	{
-		//this.stopAction.setEnabled(aFlag);
 		setActionState(stopAction, aFlag);
 	}
 
@@ -2043,6 +2041,13 @@ public class SqlPanel
 				log.setCaretPosition(log.getDocument().getLength());
 			}
 		});
+	}
+
+	public String getPassword(String prompt)
+	{
+		String pwd = WbSwingUtilities.getUserInput(this, ResourceMgr.getString("MsgInputPwdWindowTitle"), "", true);
+		if (StringUtil.isEmptyString(pwd)) return null;
+		return pwd;
 	}
 
 	public boolean confirmExecution(String prompt)
@@ -2762,8 +2767,11 @@ public class SqlPanel
 		if (!result.hasMessages()) return;
 		try
 		{
-			result.appendMessages(this);
-			this.appendToLog("\n");
+			if (!MemoryWatcher.isMemoryLow())
+			{
+				result.appendMessages(this);
+				this.appendToLog("\n");
+			}
 		}
 		catch (OutOfMemoryError oome)
 		{
@@ -2878,6 +2886,7 @@ public class SqlPanel
 	public int addResult(StatementRunnerResult result)
 		throws SQLException
 	{
+		if (result == null) return 0;
 		if (!result.isSuccess()) return 0;
 		final String sql = result.getSourceCommand();
 

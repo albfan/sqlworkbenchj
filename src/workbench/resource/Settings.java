@@ -313,6 +313,11 @@ public class Settings
 			return null;
 		}
 	}
+	public boolean useSinglePageHelp()
+	{
+		return getBoolProperty("workbench.help.singlepage", false);
+	}
+	
 	/**
 	 * Returns the directory where the HTML manual is located.
 	 *
@@ -564,6 +569,11 @@ public class Settings
 	}
 	// </editor-fold>
 
+	public boolean getFixSqlServerTimestampDisplay()
+	{
+		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);
+	}
+	
 	/**
 	 * Return a list of popular encodings to be used for the code-completion
 	 * of the -encoding parameter.
@@ -2523,6 +2533,9 @@ public class Settings
 			this.props.remove("workbench.print.margin.top");
 			this.props.remove("workbench.dbexplorer.defTableType");
 			this.props.remove("workbench.dbexplorer.deftabletype");
+
+			this.props.remove("workbench.db.mysql.dropindex.needstable");
+			this.props.remove("workbench.db.hxtt_dbf.dropindex.needstable");
 		}
 		catch (Throwable e)
 		{

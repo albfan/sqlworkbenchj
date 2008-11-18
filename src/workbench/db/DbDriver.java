@@ -18,6 +18,7 @@ import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.net.UnknownHostException;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.SQLException;
@@ -324,62 +325,7 @@ public class DbDriver
 					}
 				}
 			}
-
-			String userPrgName = Settings.getInstance().getProperty("workbench.db.connection.programname", null);
-			
-			// identify the program name when connecting
-			// this is different for each DBMS.
-			String propName = null;
-			if (url.startsWith("jdbc:oracle"))
-			{
-				propName = "v$session.program";
-				if (id != null && userPrgName == null) props.put("v$session.terminal", id);
-				
-				// it seems that the Oracle 10 driver does not 
-				// add this to the properties automatically
-				// (as the drivers for 8 and 9 did)
-				user = System.getProperty("user.name",null);
-				if (user != null) props.put("v$session.osuser", user);
-			}
-			else if (url.startsWith("jdbc:inetdae"))
-			{
-				propName = "appname";
-			}
-			else if (url.startsWith("jdbc:jtds"))
-			{
-				propName = "APPNAME";
-			}
-			else if (url.startsWith("jdbc:microsoft:sqlserver"))
-			{
-				// Old MS SQL Server driver
-				propName = "ProgramName";
-			}
-			else if (url.startsWith("jdbc:sqlserver:"))
-			{
-				// New SQL Server 2005 JDBC driver
-				propName = "applicationName";
-				if (!props.containsKey("workstationID"))
-				{
-					InetAddress localhost = InetAddress.getLocalHost();
-					String localName = (localhost != null ? localhost.getHostName() : null);
-					if (localName != null)
-					{
-						props.put("workstationID", localName);
-					}
-				}
-			}
-			
-			if (propName != null && !props.containsKey(propName))
-			{
-				if (userPrgName == null)
-				{
-					props.put(propName, ResourceMgr.TXT_PRODUCT_NAME + " (" + ResourceMgr.getBuildNumber() +")");
-				}
-				else if (!userPrgName.equals("<none>"))
-				{
-					props.put(propName, userPrgName);
-				}
-			}
+			setAppInfo(props, url, id, user);
 
 			c = this.driverClassInstance.connect(url, props);
 			if (c == null)
@@ -388,18 +334,6 @@ public class DbDriver
 				throw new SQLException("Driver did not return a connection for url=" + url);
 			}
 		}
-//		catch (ClassNotFoundException e)
-//		{
-//			// do not log this error, the caller will log it
-//			//LogMgr.logError("DbDriver.connect()", "Driver class not found", e);
-//			throw e;
-//		}
-//		catch (SQLException e)
-//		{
-//			// do not log this error, the caller will log it
-//			//LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, e);
-//			throw e;
-//		}
 		catch (Throwable th)
 		{
 			LogMgr.logError("DbDriver.connect()", "Error connecting to driver " + this.driverClass, th);
@@ -409,6 +343,70 @@ public class DbDriver
 		return c;
 	}
 
+	private String getProgramName()
+	{
+		String userPrgName = Settings.getInstance().getProperty("workbench.db.connection.info.programname", null);
+		if (userPrgName != null) return userPrgName;
+
+		// Since 11.1.0.7.0 Oracle does not allow regular brackets in the application name any longer.
+		return ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildNumber();
+	}
+	
+	private void setAppInfo(Properties props, String url, String id, String user)
+		throws UnknownHostException
+	{
+		boolean tweakAppName = Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
+		if (!tweakAppName) return;
+
+		// identify the program name when connecting
+		// this is different for each DBMS.
+		String appNameProperty = null;
+		
+		if (url.startsWith("jdbc:oracle:thin"))
+		{
+			appNameProperty = "v$session.program";
+			if (id != null && !props.containsKey("v$session.terminal")) props.put("v$session.terminal", StringUtil.getMaxSubstring(id, 30));
+
+			// it seems that the Oracle 10 driver does not
+			// add this to the properties automatically
+			// (as the drivers for 8 and 9 did)
+			user = System.getProperty("user.name",null);
+			if (user != null && !props.containsKey("v$session.osuser")) props.put("v$session.osuser", user);
+		}
+		else if (url.startsWith("jdbc:inetdae"))
+		{
+			appNameProperty = "appname";
+		}
+		else if (url.startsWith("jdbc:jtds"))
+		{
+			appNameProperty = "APPNAME";
+		}
+		else if (url.startsWith("jdbc:microsoft:sqlserver"))
+		{
+			// Old MS SQL Server driver
+			appNameProperty = "ProgramName";
+		}
+		else if (url.startsWith("jdbc:sqlserver:"))
+		{
+			// New SQL Server 2005 JDBC driver
+			appNameProperty = "applicationName";
+			if (!props.containsKey("workstationID"))
+			{
+				InetAddress localhost = InetAddress.getLocalHost();
+				String localName = (localhost != null ? localhost.getHostName() : null);
+				if (localName != null)
+				{
+					props.put("workstationID", localName);
+				}
+			}
+		}
+
+		if (appNameProperty != null && !props.containsKey(appNameProperty))
+		{
+			props.put(appNameProperty, getProgramName());
+		}
+
+	}
 	/**
 	 *	This is a "simplified version of the connect() method
 	 *  for issuing a "shutdown command" to Cloudscape

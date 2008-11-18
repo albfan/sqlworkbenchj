@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<java version="1.4.0_01" class="java.beans.XMLDecoder">
+<java version="1.5" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
   <void method="put">
    <string>All</string>
-   <string>CREATE %indextype% %unique_key% INDEX %indexname% 
+   <string>CREATE %indextype% %unique_key% INDEX %indexname%
     ON %tablename% (%columnlist%)</string>
   </void>
  </object>

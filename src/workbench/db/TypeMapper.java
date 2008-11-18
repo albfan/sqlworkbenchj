@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
+import workbench.util.Types40;
 
 /**
  * A class to map datatypes from one DBMS to another.
@@ -51,13 +52,17 @@ public class TypeMapper
 		// BLOBs are reported as BLOB, VARBINARY (Postgres), LONGVARBNARY (HSQL) and 
 		// possibly as BINARY. So we need to test each of them. The order here
 		// is a personal feeling which type should be preferred over others ;)
-		if (type != Types.BLOB) allBlobTypes.add(Integer.valueOf(Types.BLOB));
-		if (type != Types.LONGVARBINARY) allBlobTypes.add(Integer.valueOf(Types.LONGVARBINARY));
-		if (type != Types.VARBINARY) allBlobTypes.add(Integer.valueOf(Types.VARBINARY));
-		if (type != Types.BINARY) allBlobTypes.add(Integer.valueOf(Types.BINARY));
+		allBlobTypes.add(Integer.valueOf(Types.BLOB));
+		allBlobTypes.add(Integer.valueOf(Types.LONGVARBINARY));
+		allBlobTypes.add(Integer.valueOf(Types.VARBINARY));
+		allBlobTypes.add(Integer.valueOf(Types.BINARY));
 		
 		for (Integer blobType : allBlobTypes)
 		{
+			// we are looking for an alternative to the passed type
+			// so ignore that one
+			if (blobType == type) continue;
+
 			String name = typeInfo.get(blobType);
 			if (name != null) return name;
 		}
@@ -66,18 +71,27 @@ public class TypeMapper
 
 	private String findAlternateClobType(int type)
 	{
-		final String name;
-		
-		// CLOBs can either be reported as LONVARCHAR or CLOB
-		if (type == Types.CLOB)
+		List<Integer> allClobTypes = new ArrayList<Integer>(4);
+
+		// BLOBs are reported as BLOB, VARBINARY (Postgres), LONGVARBNARY (HSQL) and
+		// possibly as BINARY. So we need to test each of them. The order here
+		// is a personal feeling which type should be preferred over others ;)
+		allClobTypes.add(Integer.valueOf(Types.CLOB));
+		allClobTypes.add(Integer.valueOf(Types.LONGVARCHAR));
+		allClobTypes.add(Integer.valueOf(Types40.NCLOB));
+		allClobTypes.add(Integer.valueOf(Types40.LONGNVARCHAR));
+
+
+		for (Integer clobType : allClobTypes)
 		{
-			name = typeInfo.get(Integer.valueOf(Types.LONGVARCHAR));
+			// we are looking for an alternative to the passed type
+			// so ignore that one
+			if (clobType == type) continue;
+
+			String name = typeInfo.get(clobType);
+			if (name != null) return name;
 		}
-		else 
-		{
-			name = typeInfo.get(Integer.valueOf(Types.CLOB));
-		}
-		return name;
+		return null;
 	}
 	
 	public String getTypeName(int type, int size, int digits)

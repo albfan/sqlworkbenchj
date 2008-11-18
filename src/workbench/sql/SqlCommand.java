@@ -57,6 +57,7 @@ public class SqlCommand
 	protected ParameterPrompter prompter;
 	protected ArgumentParser cmdLine;
 	protected boolean errorMessagesOnly = false;
+	protected boolean showDataLoading = true;
 
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
@@ -92,6 +93,11 @@ public class SqlCommand
 		this.prompter = p;
 	}
 
+	public void setShowDataLoading(boolean flag)
+	{
+		this.showDataLoading = flag;
+	}
+	
 	protected void appendOutput(StatementRunnerResult result)
 	{
 		String s = this.currentConnection.getOutputMessages();
@@ -388,7 +394,7 @@ public class SqlCommand
 				{
 					// we have to use an instance variable for the retrieval, otherwise the retrieval
 					// cannot be cancelled!
-					this.currentRetrievalData = new DataStore(rs, false, this.rowMonitor, maxRows, this.currentConnection);
+					this.currentRetrievalData = new DataStore(rs, false, (showDataLoading ? this.rowMonitor : null), maxRows, this.currentConnection);
 					try
 					{
 						// Not reading the data in the constructor enables us

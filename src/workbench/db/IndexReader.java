@@ -23,6 +23,12 @@ import workbench.storage.DataStore;
  */
 public interface IndexReader
 {
+	int COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME = 0;
+	int COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG = 1;
+	int COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG = 2;
+	int COLUMN_IDX_TABLE_INDEXLIST_COL_DEF = 3;
+	int COLUMN_IDX_TABLE_INDEXLIST_TYPE = 4;
+
 	/**
 	 * Replacement for the JDBC's getIndexInfo method.
 	 * After the returned ResultSet has been processed, indexInfoProcessed() has to be called!
@@ -68,4 +74,19 @@ public interface IndexReader
 	 * that can't be read with getIndexInfo()
 	 */
 	void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions);
+
+	/**
+	 * Return the index information for a table as a DataStore. This is
+	 * should return the same information as getTableIndexList() 
+	 *
+	 * @param table the table to get the indexes for
+	 * @see #getTableIndexList(TableIdentifier)
+	 */
+	DataStore getTableIndexInformation(TableIdentifier table);
+
+	/**
+	 * Returns a list of indexes defined for the given table
+	 * @param table the table to get the indexes for
+	 */
+	Collection<IndexDefinition> getTableIndexList(TableIdentifier table);
 }

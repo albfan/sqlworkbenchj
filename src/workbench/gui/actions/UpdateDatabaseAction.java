@@ -19,7 +19,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class UpdateDatabaseAction extends WbAction
+public class UpdateDatabaseAction
+	extends WbAction
 {
 	private DbUpdater panel;
 	

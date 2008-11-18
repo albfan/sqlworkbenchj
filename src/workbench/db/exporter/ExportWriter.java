@@ -150,7 +150,6 @@ public abstract class ExportWriter
 
 	public void setOutputFile(WbFile out)
 	{
-		this.outputWriter = null;
 		this.outputFile = out;
 		this.converter.setOutputFile(out);
 	}
@@ -158,7 +157,6 @@ public abstract class ExportWriter
 	public void setOutputWriter(Writer out)
 	{
 		this.outputWriter = out;
-		this.outputFile = null;
 	}
 
 	public void writeExport(ResultSet rs, ResultInfo info, String query)
@@ -226,7 +224,20 @@ public abstract class ExportWriter
 	protected void writeStart()
 		throws IOException
 	{
-		if (this.exporter.getAppendToFile() && !canAppendStart) return;
+		boolean doWriteStart = true;
+		if (exporter.getAppendToFile())
+		{
+			doWriteStart = canAppendStart;
+			// If the header can be appended anyway, then there is no need
+			// to check if the file is empty
+			if (this.outputFile != null && !canAppendStart)
+			{
+				doWriteStart = !outputFile.exists() || (outputFile.length() == 0);
+			}
+		}
+
+		if (!doWriteStart) return;
+		
 		writeFormatFile();
 		StrBuffer data = converter.getStart();
 		if (data != null && outputWriter != null)

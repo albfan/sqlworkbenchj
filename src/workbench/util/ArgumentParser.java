@@ -266,6 +266,16 @@ public class ArgumentParser
 		Object value = this.arguments.get(arg);
 		return (value != null);
 	}
+
+	public void removeArgument(String arg)
+	{
+		if (arguments.get(arg) != null)
+		{
+			argCount --;
+		}
+		this.arguments.remove(arg);
+		this.argTypes.remove(arg);
+	}
 	
 	private void reset()
 	{
@@ -344,5 +354,5 @@ public class ArgumentParser
 	{
 		return StringUtil.getIntValue(this.getValue(key),def);
 	}
-	
+
 }

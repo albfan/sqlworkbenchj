@@ -12,10 +12,13 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-
+import workbench.db.DbObject;
+import workbench.db.TableIdentifier;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.util.StringUtil;
+
 
 /**
  *
@@ -26,16 +29,36 @@ public class WbListProcedures
 {
 	public static final String VERB = "WBLISTPROCS";
 
-	public String getVerb() { return VERB; }
+	public WbListProcedures()
+	{
+	}
+
+	public String getVerb()
+	{
+		return VERB;
+	}
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		DataStore ds = currentConnection.getMetadata().getProcedures(null, null);
+		String args = getCommandLine(aSql);
+
+		String schema = null;
+		String catalog = null;
+		String name = null;
+
+		if (StringUtil.isNonBlank(args))
+		{
+			DbObject db = new TableIdentifier(args);
+			schema = db.getSchema();
+			catalog = db.getCatalog();
+			name = db.getObjectName();
+		}
+
+		DataStore ds = currentConnection.getMetadata().getProcedureReader().getProcedures(catalog, schema, name);
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;
 	}
-
 }

@@ -25,7 +25,8 @@ public enum ControlFileFormat
 {
 	none,
 	oracle,
-	sqlserver;
+	sqlserver,
+	postgres;
 	
 	public static Set<ControlFileFormat> parseCommandLine(String args)
 	{
@@ -48,7 +49,11 @@ public enum ControlFileFormat
 	
 	public static FormatFileWriter createFormatWriter(ControlFileFormat format)
 	{
-		if (format == oracle)
+		if (format == postgres)
+		{
+			return new PostgresCopyStatementWriter();
+		}
+		else if (format == oracle)
 		{
 			return new OracleControlFileWriter();
 		}

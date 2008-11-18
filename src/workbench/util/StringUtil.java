@@ -980,6 +980,11 @@ public class StringUtil
 		return escapeUnicode(value, range, null);
 	}
 
+	public static String escapePostgres(String value, CharacterRange range, String additionalCharsToEncode)
+	{
+		return escapeText(value, 'x', range, additionalCharsToEncode);
+	}
+
 	/**
 	 * Encodes characters to Unicode &#92;uxxxx (or simple escape like \r)
 	 *
@@ -994,6 +999,11 @@ public class StringUtil
 	 * @param additionalCharsToEncode additional characters not covered by the range may be null
 	 */
 	public static String escapeUnicode(String value, CharacterRange range, String additionalCharsToEncode)
+	{
+		return escapeText(value, 'u', range, additionalCharsToEncode);
+	}
+
+	public static String escapeText(String value, char hexChar, CharacterRange range, String additionalCharsToEncode)
 	{
 		if (value == null) return null;
 
@@ -1025,7 +1035,8 @@ public class StringUtil
 					if ((range != null && range.isOutsideRange(aChar)) ||
 						(additionalCharsToEncode != null && additionalCharsToEncode.indexOf(aChar) > -1))
 					{
-						outBuffer.append("\\u");
+						outBuffer.append('\\');
+						outBuffer.append(hexChar);
 						appendUnicode(outBuffer, aChar);
 					}
 					else
@@ -1134,7 +1145,7 @@ public class StringUtil
 		return input;
 	}
 
-	private static void appendUnicode(StringBuilder buffer, char c)
+	public static void appendUnicode(StringBuilder buffer, char c)
 	{
 		buffer.append(hexDigit(c >> 12));
 		buffer.append(hexDigit(c >>  8));
@@ -1142,7 +1153,7 @@ public class StringUtil
 		buffer.append(hexDigit(c));
 	}
 
-	private static char hexDigit(int nibble)
+	public static char hexDigit(int nibble)
 	{
 		return hexDigit[(nibble & 0xF)];
 	}

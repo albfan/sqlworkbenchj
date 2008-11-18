@@ -13,6 +13,7 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 
+import workbench.db.CatalogChanger;
 import workbench.sql.formatter.SQLLexer;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
@@ -24,11 +25,14 @@ import workbench.util.StringUtil;
 /**
  * MS SQL Server's and MySQL's USE command.
  *
- * Actually this will be in effect if the JDBC driver reports
- * that catalog's are supported
+ * This command will also be "activated if the JDBC driver reports
+ * that catalogs are supported
  *
  * This class will notify the connection used that the current database has changed
  * so that the connection display in the main window can be updated.
+ *
+ * @see workbench.db.CatalogChanger#setCurrentCatalog(workbench.db.WbConnection, java.lang.String) 
+ * 
  * @author  support@sql-workbench.net
  */
 public class UseCommand
@@ -50,10 +54,10 @@ public class UseCommand
 			// everything after the USE command is the catalog name
 			String catName = aSql.substring(t.getCharEnd()).trim();
 
-			// DbMetadata.setCurrentCatalog() will fire the
+			// CatalogChanger.setCurrentCatalog() will fire the
 			// catalogChanged() event on the connection!
-			// no need to do this here
-			currentConnection.getMetadata().setCurrentCatalog(catName);
+			CatalogChanger changer = new CatalogChanger();
+			changer.setCurrentCatalog(currentConnection, catName);
 
 			String newCatalog = currentConnection.getMetadata().getCurrentCatalog();
 

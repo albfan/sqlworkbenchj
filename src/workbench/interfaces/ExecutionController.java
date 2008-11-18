@@ -19,5 +19,5 @@ public interface ExecutionController
 {
 	boolean confirmStatementExecution(String command);
 	boolean confirmExecution(String prompt);
-
+	String getPassword(String prompt);
 }

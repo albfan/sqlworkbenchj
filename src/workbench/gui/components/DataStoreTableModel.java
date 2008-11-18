@@ -230,10 +230,20 @@ public class DataStoreTableModel
 	 *	Returns the name of the datatype (according to java.sql.Types) of the
 	 *  given column.
 	 */
-	public String getColumnTypeName(int aColumn)
+	public String getColumnTypeName(int col)
 	{
-		if (aColumn == 0) return "";
-		return SqlUtil.getTypeName(this.getColumnType(aColumn));
+		if (this.dataCache == null) return "";
+		if (this.showStatusColumn && col == 0) return "";
+		try
+		{
+			ResultInfo info = this.dataCache.getResultInfo();
+			return info.getColumn(col - this.columnStartIndex).getColumnTypeName();
+		}
+		catch (Exception e)
+		{
+			return SqlUtil.getTypeName(this.getColumnType(col));
+		}
+		
 	}
 
 	public String getDbmsType(int col)
@@ -251,6 +261,7 @@ public class DataStoreTableModel
 		}
 
 	}
+	
 	/**
 	 *	Returns the type (java.sql.Types) of the given column.
 	 */

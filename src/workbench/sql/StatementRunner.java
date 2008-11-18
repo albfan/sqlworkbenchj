@@ -234,13 +234,9 @@ public class StatementRunner
 	{
 		
 	}
+	
 	public void setConnection(WbConnection aConn)
 	{
-		if (this.currentConnection != null && !currentConnection.isClosed())
-		{
-			currentConnection.disconnect();
-		}
-		
 		this.releaseSavepoint();
 		this.cmdMapper.setConnection(aConn);
 		this.currentConnection = aConn;

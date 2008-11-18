@@ -46,7 +46,6 @@ public class WbCopy
 	public static final String PARAM_TARGETPROFILE_GROUP = "targetGroup";
 	public static final String PARAM_COLUMNS = "columns";
 	public static final String PARAM_SOURCEWHERE = "sourceWhere";
-	public static final String PARAM_DELETETARGET = "deleteTarget";
 	public static final String PARAM_KEYS = "keyColumns";
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
@@ -79,7 +78,8 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_TARGETPROFILE_GROUP);
 		cmdLine.addArgument(PARAM_COLUMNS);
 		cmdLine.addArgument(PARAM_SOURCEWHERE);
-		cmdLine.addArgument(PARAM_DELETETARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_DELETE_TARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);

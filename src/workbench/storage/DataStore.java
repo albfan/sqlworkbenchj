@@ -278,6 +278,21 @@ public class DataStore
 		return new RowDataList();
 	}
 
+	public void copyFrom(DataStore source)
+	{
+		if (source == null) return;
+		if (source.getRowCount() == 0) return;
+		if (source.getColumnCount() != this.getColumnCount()) return;
+
+		int rows = source.getRowCount();
+		this.data.ensureCapacity(this.getRowCount() + rows);
+		for (int i=0; i < rows; i++)
+		{
+			RowData row = source.getRow(i);
+			this.addRow(row);
+		}
+	}
+	
 	public int duplicateRow(int aRow)
 	{
 		if (aRow < 0 || aRow >= this.getRowCount()) return -1;
@@ -1070,7 +1085,7 @@ public class DataStore
 				row.setTrimCharData(trimCharData);
 				row.read(aResultSet, this.resultInfo);
 				this.data.add(row);
-				if (this.cancelRetrieve) break;
+				
 				if (maxRows > 0 && rowCount > maxRows) break;
 				if (MemoryWatcher.isMemoryLow())
 				{

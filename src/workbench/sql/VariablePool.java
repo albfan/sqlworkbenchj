@@ -75,7 +75,7 @@ public class VariablePool
 		
 		if (this.suffix == null) this.suffix = StringUtil.EMPTY_STRING;
 		
-		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&][\\w]*" + StringUtil.quoteRegexMeta(suffix);
+		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&][\\w]+" + StringUtil.quoteRegexMeta(suffix);
 		this.promptPattern = Pattern.compile(expr);
 		this.initFromProperties(System.getProperties());
 	}

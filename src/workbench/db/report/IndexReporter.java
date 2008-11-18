@@ -44,7 +44,7 @@ public class IndexReporter
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn)
 	{
-		indexList  = conn.getMetadata().getTableIndexList(tbl);
+		indexList  = conn.getMetadata().getIndexReader().getTableIndexList(tbl);
 	}
 
 	public IndexReporter(IndexDefinition index)

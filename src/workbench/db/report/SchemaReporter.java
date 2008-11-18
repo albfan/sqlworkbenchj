@@ -459,7 +459,7 @@ public class SchemaReporter
 		try
 		{
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
-			List<ProcedureDefinition> procs = this.dbConn.getMetadata().getProcedureList(null, schema);
+			List<ProcedureDefinition> procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(null, schema, null);
 			
 			for (ProcedureDefinition def : procs)
 			{

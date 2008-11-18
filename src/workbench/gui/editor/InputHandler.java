@@ -32,7 +32,7 @@ import javax.swing.text.BadLocationException;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.28 2008-10-04 13:03:01 thomas Exp $
+ * @version $Id: InputHandler.java,v 1.28 2008/10/04 13:03:01 thomas Exp $
  * @see DefaultInputHandler
  */
 public abstract class InputHandler extends KeyAdapter

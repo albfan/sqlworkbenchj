@@ -45,7 +45,7 @@ public class SqlUtil
 {
 	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
 
-	protected static class KnowTypesHolder
+	private static class KnownTypesHolder
 	{
 		protected final static Set<String> KNOWN_TYPES;
 		static
@@ -75,7 +75,7 @@ public class SqlUtil
 
 	public static final Set<String> getKnownTypes()
 	{
-		return KnowTypesHolder.KNOWN_TYPES;
+		return KnownTypesHolder.KNOWN_TYPES;
 	}
 
 	/**
@@ -96,7 +96,7 @@ public class SqlUtil
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlCommand.stripVerb()", "Error cleaning up SQL", e);
+			LogMgr.logError("SqlUtil.stripVerb()", "Error cleaning up SQL", e);
 		}
 		return result;
 	}
@@ -130,7 +130,11 @@ public class SqlUtil
 	}
 
 	/**
-	 * Extract the name of the created object for Oracle stored procedures.
+	 * Extract the name of the created or dropped object.
+	 *
+	 * @return a structure that contains the type (e.g. TABLE, VIEW) and the name of the created object
+	 *         null, if the SQL statement is not a DDL CREATE statement
+	 * 
 	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
 	 */
 	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql)
@@ -774,10 +778,10 @@ public class SqlUtil
 	public static final boolean isDecimalType(int aSqlType, int aScale, int aPrecision)
 	{
 		if (aSqlType == Types.DECIMAL ||
-			aSqlType == Types.DOUBLE ||
-			aSqlType == Types.FLOAT ||
-			aSqlType == Types.NUMERIC ||
-			aSqlType == Types.REAL)
+		    aSqlType == Types.DOUBLE ||
+		    aSqlType == Types.FLOAT ||
+		    aSqlType == Types.NUMERIC ||
+		    aSqlType == Types.REAL)
 		{
 			return (aScale > 0);
 		}
@@ -898,152 +902,190 @@ public class SqlUtil
 		closeStatement(stmt);
 	}
 
-	public static final String getTypeName(int aSqlType)
+	public static final String getTypeName(int sqlType)
 	{
-		if (aSqlType == Types.ARRAY)
-			return "ARRAY";
-		else if (aSqlType == Types.BIGINT)
-			return "BIGINT";
-		else if (aSqlType == Types.BINARY)
-			return "BINARY";
-		else if (aSqlType == Types.BIT)
-			return "BIT";
-		else if (aSqlType == Types.BLOB)
-			return "BLOB";
-		else if (aSqlType == Types.BOOLEAN)
-			return "BOOLEAN";
-		else if (aSqlType == Types.CHAR)
-			return "CHAR";
-		else if (aSqlType == Types.CLOB)
-			return "CLOB";
-		else if (aSqlType == Types.DATALINK)
-			return "DATALINK";
-		else if (aSqlType == Types.DATE)
-			return "DATE";
-		else if (aSqlType == Types.DECIMAL)
-			return "DECIMAL";
-		else if (aSqlType == Types.DISTINCT)
-			return "DISTINCT";
-		else if (aSqlType == Types.DOUBLE)
-			return "DOUBLE";
-		else if (aSqlType == Types.FLOAT)
-			return "FLOAT";
-		else if (aSqlType == Types.INTEGER)
-			return "INTEGER";
-		else if (aSqlType == Types.JAVA_OBJECT)
-			return "JAVA_OBJECT";
-		else if (aSqlType == Types.LONGVARBINARY)
-			return "LONGVARBINARY";
-		else if (aSqlType == Types.LONGVARCHAR)
-			return "LONGVARCHAR";
-		else if (aSqlType == Types.NULL)
-			return "NULL";
-		else if (aSqlType == Types.NUMERIC)
-			return "NUMERIC";
-		else if (aSqlType == Types.OTHER)
-			return "OTHER";
-		else if (aSqlType == Types.REAL)
-			return "REAL";
-		else if (aSqlType == Types.REF)
-			return "REF";
-		else if (aSqlType == Types.SMALLINT)
-			return "SMALLINT";
-		else if (aSqlType == Types.STRUCT)
-			return "STRUCT";
-		else if (aSqlType == Types.TIME)
-			return "TIME";
-		else if (aSqlType == Types.TIMESTAMP)
-			return "TIMESTAMP";
-		else if (aSqlType == Types.TINYINT)
-			return "TINYINT";
-		else if (aSqlType == Types.VARBINARY)
-			return "VARBINARY";
-		else if (aSqlType == Types.VARCHAR)
-			return "VARCHAR";
-		else if (aSqlType == Types40.NCLOB)
-			return "NCLOB";
-		else if (aSqlType == Types40.SQLXML)
-			return "SQLXML";
-		else if (aSqlType == Types40.NCHAR)
-			return "NCHAR";
-		else if (aSqlType == Types40.NVARCHAR)
-			return "NVARCHAR";
-		else if (aSqlType == Types40.LONGNVARCHAR)
-			return "LONGNVARCHAR";
-		else if (aSqlType == Types40.ROWID)
-			return "ROWID";
-		else
-			return "UNKNOWN";
+		switch (sqlType)
+		{
+			case Types.ARRAY:
+				return "ARRAY";
+				
+			case Types.BIGINT:
+				return "BIGINT";
+
+			case Types.BINARY:
+				return "BINARY";
+
+			case Types.BIT:
+				return "BIT";
+
+			case Types.BLOB:
+				return "BLOB";
+
+			case Types.BOOLEAN:
+				return "BOOLEAN";
+
+			case Types.CHAR:
+				return "CHAR";
+
+			case Types.CLOB:
+				return "CLOB";
+
+			case Types.DATALINK:
+				return "DATALINK";
+
+			case Types.DATE:
+				return "DATE";
+
+			case Types.DECIMAL:
+				return "DECIMAL";
+
+			case Types.DISTINCT:
+				return "DISTINCT";
+
+			case Types.DOUBLE:
+				return "DOUBLE";
+
+			case Types.FLOAT:
+				return "FLOAT";
+
+			case Types.INTEGER:
+				return "INTEGER";
+
+			case Types.JAVA_OBJECT:
+				return "JAVA_OBJECT";
+
+			case Types.LONGVARBINARY:
+				return "LONGVARBINARY";
+
+			case Types.LONGVARCHAR:
+				return "LONGVARCHAR";
+
+			case Types.NULL:
+				return "NULL";
+
+			case Types.NUMERIC:
+				return "NUMERIC";
+
+			case Types.OTHER:
+				return "OTHER";
+
+			case Types.REAL:
+				return "REAL";
+
+			case Types.REF:
+				return "REF";
+
+			case Types.SMALLINT:
+				return "SMALLINT";
+
+			case Types.STRUCT:
+				return "STRUCT";
+
+			case Types.TIME:
+				return "TIME";
+
+			case Types.TIMESTAMP:
+				return "TIMESTAMP";
+
+			case Types.TINYINT:
+				return "TINYINT";
+
+			case Types.VARBINARY:
+				return "VARBINARY";
+
+			case Types.VARCHAR:
+				return "VARCHAR";
+
+			case Types40.NCLOB:
+				return "NCLOB";
+
+			case Types40.SQLXML:
+				return "SQLXML";
+
+			case Types40.NCHAR:
+				return "NCHAR";
+
+			case Types40.NVARCHAR:
+				return "NVARCHAR";
+
+			case Types40.LONGNVARCHAR:
+				return "LONGNVARCHAR";
+
+			case Types40.ROWID:
+				return "ROWID";
+				
+			default:
+				return "UNKNOWN";
+		}
 	}
 	
 	/**
 	 * Construct the SQL display name for the given SQL datatype.
 	 * This is used when re-recreating the source for a table
 	 */
-	public static String getSqlTypeDisplay(String aTypeName, int sqlType, int size, int digits)
+	public static String getSqlTypeDisplay(String typeName, int sqlType, int size, int digits)
 	{
-		String display = aTypeName;
+		String display = typeName;
 
 		switch (sqlType)
 		{
 			case Types.VARCHAR:
 			case Types.CHAR:
-				if ("text".equalsIgnoreCase(aTypeName) && size == Integer.MAX_VALUE) return aTypeName;
+			case Types40.NVARCHAR:
+			case Types40.NCHAR:
+				if ("text".equalsIgnoreCase(typeName) && size == Integer.MAX_VALUE) return typeName;
 				if (size > 0) 
 				{
-					display = aTypeName + "(" + size + ")";
-				}
-				else
-				{
-					display = aTypeName;
+					display = typeName + "(" + size + ")";
 				}
 				break;
+
 			case Types.DECIMAL:
 			case Types.DOUBLE:
 			case Types.NUMERIC:
 			case Types.FLOAT:
-				if ("money".equalsIgnoreCase(aTypeName)) // SQL Server
+				if ("money".equalsIgnoreCase(typeName)) // SQL Server
 				{
-					display = aTypeName;
+					display = typeName;
 				}
-				else if ((aTypeName.indexOf('(') == -1))
+				else if ((typeName.indexOf('(') == -1))
 				{
 					if (digits > 0 && size > 0)
 					{
-						display = aTypeName + "(" + size + "," + digits + ")";
+						display = typeName + "(" + size + "," + digits + ")";
 					}
 					else if (size <= 0 && digits > 0)
 					{
-						display = aTypeName + "(" + digits + ")";
+						display = typeName + "(" + digits + ")";
 					}
 					else if (size > 0 && digits <= 0)
 					{
-						display = aTypeName + "(" + size + ")";
+						display = typeName + "(" + size + ")";
 					}
 				}
 				break;
 
 			case Types.OTHER:
-				// Oracle specific datatypes
-				if (aTypeName.toUpperCase().startsWith("NVARCHAR"))
+				if (typeName.toUpperCase().startsWith("NVARCHAR"))
 				{
-					display = aTypeName + "(" + size + ")";
+					display = typeName + "(" + size + ")";
 				}
-				else if ("NCHAR".equalsIgnoreCase(aTypeName))
+				else if ("NCHAR".equalsIgnoreCase(typeName))
 				{
-					display = aTypeName + "(" + size + ")";
+					display = typeName + "(" + size + ")";
 				}
-				else if ("UROWID".equalsIgnoreCase(aTypeName))
+				else if ("UROWID".equalsIgnoreCase(typeName))
 				{
-					display = aTypeName + "(" + size + ")";
+					display = typeName + "(" + size + ")";
 				}
-				else if ("RAW".equalsIgnoreCase(aTypeName))
+				else if ("RAW".equalsIgnoreCase(typeName))
 				{
-					display = aTypeName + "(" + size + ")";
+					display = typeName + "(" + size + ")";
 				}
 				break;
+				
 			default:
-				display = aTypeName;
+				display = typeName;
 				break;
 		}
 		return display;

@@ -67,6 +67,11 @@ public class SQLToken
 	public final static int OPERATOR = 0x500;
 
 	/**
+	 * Default Workbench Variable
+	 */
+	public final static int WB_VAR = 0x600;
+
+	/**
 	 * C style comment, (except possibly nested)
 	 */
 	public final static int COMMENT_TRADITIONAL = 0xD00;
@@ -297,6 +302,16 @@ public class SQLToken
 	}
 
 	/**
+	 * Checks this token to see if it is a Operator.
+	 *
+	 * @return true if this token is a Operator, false otherwise
+	 */
+	public boolean isWbVar()
+	{
+		return ((ID >> 8) == 0x6);
+	}
+
+	/**
 	 * Checks this token to see if it is a comment.
 	 *
 	 * @return true if this token is a comment, false otherwise
@@ -340,6 +355,10 @@ public class SQLToken
 		if (isReservedWord())
 		{
 			return("reservedWord");
+		}
+		else if (isWbVar())
+		{
+			return("variable");
 		}
 		else if (isIdentifier())
 		{

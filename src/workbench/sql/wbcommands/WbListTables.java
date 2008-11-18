@@ -15,6 +15,7 @@ import java.sql.SQLException;
 
 import java.util.List;
 import workbench.db.TableIdentifier;
+import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
@@ -42,20 +43,28 @@ public class WbListTables extends SqlCommand
 	{
 		String options = getCommandLine(aSql);
 
-		String schema = null;
-		String catalog = null;
-		String tables = null;
-		String[] types = new String[] 
+		String[] types = new String[]
 			{
 				currentConnection.getMetadata().getTableTypeName(),
 				currentConnection.getMetadata().getMViewTypeName()
 			};
 
+		StatementRunnerResult result = new StatementRunnerResult();
 		cmdLine.parse(options);
-		String tableFilter = null;
+
+		String objects = options;
+
 		if (cmdLine.hasArguments())
 		{
-			tableFilter = cmdLine.getValue("objects");
+			if (cmdLine.hasUnknownArguments())
+			{
+				result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
+				result.setFailure();
+				return result;
+			}
+
+			objects = cmdLine.getValue("objects");
+
 			List<String> typeList = cmdLine.getListValue("types");
 			if (typeList.size() > 0)
 			{
@@ -63,24 +72,34 @@ public class WbListTables extends SqlCommand
 				typeList.toArray(types);
 			}
 		}
-		else
-		{
-			tableFilter = options;
-		}
 		
-		if (StringUtil.isNonBlank(tableFilter))
-		{
-			TableIdentifier tbl = new TableIdentifier(tableFilter);
-			schema = tbl.getSchema();
-			catalog = tbl.getCatalog();
-			tables = tbl.getTableName();
-		}
+		DataStore resultList = null;
 
-		StatementRunnerResult result = new StatementRunnerResult();
+		if (StringUtil.isBlank(objects))
+		{
+			objects = "%";
+		}
 		
-		DataStore ds = currentConnection.getMetadata().getTables(schema, catalog, tables, types);
+		List<String> objectFilters = StringUtil.stringToList(objects);
 		
-		result.addDataStore(ds);
+		for (String filter : objectFilters)
+		{
+			TableIdentifier tbl = new TableIdentifier(filter);
+			String schema = tbl.getSchema();
+			String catalog = tbl.getCatalog();
+			String tname = tbl.getTableName();
+			DataStore ds = currentConnection.getMetadata().getTables(schema, catalog, tname, types);
+			if (resultList == null)
+			{
+				resultList = ds;
+			}
+			else
+			{
+				resultList.copyFrom(ds);
+			}
+		}
+		
+		result.addDataStore(resultList);
 		return result;
 	}
 

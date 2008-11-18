@@ -17,6 +17,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
+import workbench.interfaces.ExecutionController;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.BatchRunner;
@@ -109,11 +110,37 @@ public class WbConnect
 			return result;
 		}
 
+		if (!profile.getStorePassword())
+		{
+			ExecutionController controller = this.runner.getExecutionController();
+			if (controller == null)
+			{
+				result.addMessage(ResourceMgr.getString("ErrConnectNoPwd"));
+				result.setFailure();
+				return result;
+			}
+			else
+			{
+				String pwd = controller.getPassword(ResourceMgr.getString("MsgInputPwd"));
+				profile.setInputPassword(pwd);
+			}
+		}
+
 		WbConnection newConn = null;
 		try
 		{
 			connectionId ++;
 			String id = "batch-connect-" + connectionId;
+
+			// persistentChange will be activated by SQLConsole
+			// in that case we need to disconnect the current connection
+			// as the statement runner will not close the current connection
+			if (persistentChange)
+			{
+				// The statement runner will not close the current connection
+				WbConnection current = runner.getConnection();
+				if (current != null && current != newConn) current.disconnect();
+			}
 
 			newConn = ConnectionMgr.getInstance().getConnection(profile, id);
 			LogMgr.logInfo("WbConnect.execute()", "Connected to: " + newConn.getDisplayString());

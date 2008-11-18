@@ -17,37 +17,57 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import workbench.log.LogMgr;
-import workbench.util.CharacterRange;
 import workbench.util.StringUtil;
 
 /**
- * A class to print the contents of a {@link DataStore} to a PrintStream
+ * A class to print the contents of a {@link DataStore} to a PrintStream.
+ * The column widths are optimized against the content of the DataStore
+ * if column formatting {@link ConsolePrinter#setFormatColumns(boolean) }
+ * is enabled
  * 
  * @author support@sql-workbench.net
  */
 public class DataStorePrinter
+	extends ConsolePrinter
 {
 	private DataStore data;
-	private Map<Integer, Integer> columnWidths;
 	private static final int MAX_WIDTH = 80;
-	private int lineLength = 0;
 	
 	public DataStorePrinter(DataStore source)
 	{
 		this.data = source;
-		checkColumnSizes();
+	}
+	
+	@Override
+	protected int getColumnType(int col)
+	{
+		return data.getColumnType(col);
 	}
 
-	private void checkColumnSizes()
+	@Override
+	protected String getColumnName(int col)
 	{
-		columnWidths = new HashMap<Integer, Integer>();
+		return data.getColumnName(col);
+	}
+
+	@Override
+	protected int getColumnCount()
+	{
+		return data.getColumnCount();
+	}
+
+	@Override
+	protected Map<Integer, Integer> getColumnSizes()
+	{
+		if (!doFormat) return null;
+		Map<Integer, Integer> widths = new HashMap<Integer, Integer>();
 		for (int i=0; i < data.getColumnCount(); i++)
 		{
 			int dataWidth = getMaxDataWidth(i);
 			int width = Math.min(dataWidth, MAX_WIDTH);
-			columnWidths.put(Integer.valueOf(i), Integer.valueOf(width));
-			lineLength += width;
+			widths.put(Integer.valueOf(i), Integer.valueOf(width));
 		}
+		return widths;
 	}
 
 	private int getMaxDataWidth(int col)
@@ -59,6 +79,11 @@ public class DataStorePrinter
 			if (value != null)
 			{
 				int len = value.length();
+				if (value.indexOf('\n') > -1)
+				{
+					String line = StringUtil.getLongestLine(value, 25);
+					len = line.length();
+				}
 				if (len > width) width = len;
 			}
 		}
@@ -68,60 +93,22 @@ public class DataStorePrinter
 	public void printTo(PrintStream out)
 	{
 		PrintWriter pw = new PrintWriter(out);
-		int colcount = data.getColumnCount();
 		try
 		{
-			StringBuffer line = new StringBuffer(lineLength);
-			for (int i=0; i < colcount; i++)
-			{
-				if (i > 0) line.append("-+-");
-				line.append(StringUtil.padRight("-", columnWidths.get(Integer.valueOf(i)), '-'));
-			}
-			
-			for (int col = 0; col < colcount; col ++)
-			{
-				if (col > 0) pw.print(" | ");
-				writePadded(pw, data.getColumnName(col), columnWidths.get(Integer.valueOf(col)));
-			}
-			pw.println();
+			printHeader(pw);
 
-			pw.println(line);
-			pw.flush();
-			
 			for (int row=0; row < data.getRowCount(); row++)
 			{
-				for (int col = 0; col < colcount; col ++)
-				{
-				if (col > 0) pw.print(" | ");
-					String value = data.getValueAsString(row, col);
-					value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_CONTROL, null);
-					writePadded(pw, value, columnWidths.get(Integer.valueOf(col)));
-				}
-				pw.println();
-				pw.flush();
+				RowData rowData = data.getRow(row);
+				printRow(pw, rowData);
 			}
+			pw.println();
 			pw.flush();
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("ConsolePrinter.printTo", "Error when printing DataStore contents", e);
 		}
-	}
-
-	private int writePadded(PrintWriter out, String value, int width)
-	{
-		StringBuffer result = new StringBuffer(width);
-		if (value != null) result.append(value);
-		
-		if (width > 0)
-		{
-			while (result.length() < width)
-			{
-				result.append(' ');
-			}
-		}
-		out.print(result.toString());
-		return result.length();
 	}
 
 }

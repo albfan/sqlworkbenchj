@@ -67,7 +67,8 @@ public class WbExport
 	public static final String ARG_XML_VERSION = "xmlVersion";
 	public static final String ARG_ROWNUM = "rowNumberColumn";
 	public static final String ARG_EMPTY_RESULTS = "writeEmptyResults";
-
+	private String exportTypes = null;
+	
 	public WbExport()
 	{
 		super();
@@ -80,7 +81,12 @@ public class WbExport
 		CommonArgs.addQuoteEscaping(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
 
-		cmdLine.addArgument("type", StringUtil.stringToList("text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,xls,html"));
+		exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,html";
+		if (PoiHelper.isPoiAvailable())
+		{
+			exportTypes +=",xls";
+		}
+		cmdLine.addArgument("type", StringUtil.stringToList(exportTypes));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
@@ -104,11 +110,12 @@ public class WbExport
 		cmdLine.addArgument("outputDir");
 		cmdLine.addArgument("useCDATA", ArgumentType.BoolArgument);
 		cmdLine.addArgument("escapeText", StringUtil.stringToList("control,7bit,8bit,extended,none"));
+		cmdLine.addArgument("escapeType", StringUtil.stringToList("unicode,hex"));
 		cmdLine.addArgument("quoteAlways", ArgumentType.BoolArgument);
 		cmdLine.addArgument("lineEnding", StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument("showEncodings");
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.Deprecated);
-		cmdLine.addArgument("formatFile", StringUtil.stringToList("oracle,sqlserver"));
+		cmdLine.addArgument("formatFile", StringUtil.stringToList("postgres,oracle,sqlserver"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_EMPTY_RESULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
@@ -145,6 +152,7 @@ public class WbExport
 		msg = msg.replace("%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		msg = msg.replace("%xmlversion%", Settings.getInstance().getDefaultXmlVersion());
 		msg = msg.replace("%empty_results_default%", Boolean.toString(Settings.getInstance().getDefaultWriteEmptyExports()));
+		msg = msg.replace("%types%", exportTypes);
 		return msg;
 	}
 
@@ -579,7 +587,7 @@ public class WbExport
 				exporter.setRowMonitor(this);
 				exporter.setReportInterval(this.progressInterval);
 				exporter.setContinueOnError(this.continueOnError);
-				if (tablesToExport.size() > 1)
+				if (tablesToExport.size() > 1 || outputdir != null)
 				{
 					exportTableList(tablesToExport, result, outputdir);
 				}

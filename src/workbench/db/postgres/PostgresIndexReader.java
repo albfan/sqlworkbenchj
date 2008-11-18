@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import workbench.db.DbMetadata;
+import workbench.db.IndexReader;
 import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -64,8 +65,8 @@ public class PostgresIndexReader
 			
 			for (int i = 0; i < count; i++)
 			{
-				String idxName = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
-				String pk = indexDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
+				String idxName = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
+				String pk = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
 				if ("YES".equalsIgnoreCase(pk)) continue;
 				if (i > 0) sql.append(',');
 				sql.append('\'');

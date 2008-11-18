@@ -26,6 +26,8 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A wrapper for Orcle's AlterSessionCommand
+ *
  * @author support@sql-workbench.net
  */
 public class AlterSessionCommand
@@ -82,10 +84,13 @@ public class AlterSessionCommand
 			this.currentStatement.executeUpdate(sql);
 			if (oldSchema == null)
 			{
+				// A "regular" ALTER SESSION was executed that does not change the
+				// current schema (user)
 				appendSuccessMessage(result);
 			}
 			else 
 			{
+				// if the current schema is changed, a schemaChanged should be fired
 				String schema = meta.getCurrentSchema();
 				if (!oldSchema.equalsIgnoreCase(schema))
 				{

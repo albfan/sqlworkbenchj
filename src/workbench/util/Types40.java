@@ -13,9 +13,9 @@ package workbench.util;
 
 
 /**
- * java.sql.Types for JDBC 4.0 copied from the Java 6 source code, so I don't have
- * to hardcode the actual values in several places, but still can check for
- * the new datatypes without having to compile agains a Java 6 JDK
+ * This are constants for java.sql.Types for JDBC 4.0 copied from the Java 6 source code,
+ * So I don't have to hardcode the actual values in several places, but still can check for
+ * the new datatypes without having to compile agains a Java 6
  *
  * @author support@sql-workbench.net
  */

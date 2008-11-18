@@ -15,10 +15,8 @@ import java.awt.Component;
 
 import javax.swing.JTable;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.JTableHeader;
 
 /**
  *
@@ -27,14 +25,12 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class SortHeaderRenderer
 	extends DefaultTableCellRenderer
 {
-	private static Border DEFAULT_HEADER_BORDER = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(0, 1, 0, 1));
-
 	public SortHeaderRenderer()
 	{
 		super();
 		setHorizontalTextPosition(LEFT);
 		setHorizontalAlignment(LEFT);
-		setBorder(DEFAULT_HEADER_BORDER);
+		setBorder(UIManager.getBorder("TableHeader.cellBorder"));
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
@@ -42,6 +38,18 @@ public class SortHeaderRenderer
 		boolean sorted = false;
 		boolean ascending = false;
 		boolean primary = false;
+
+
+		JTableHeader header = table.getTableHeader();
+		if (header != null)
+		{
+			setForeground(header.getForeground());
+			setBackground(header.getBackground());
+
+			// This seems to be necessary in order to make sure
+			// multi-byte values (e.g. chinese) are displayed correctly
+			setFont(header.getFont());
+		}
 
 		String type = null;
 

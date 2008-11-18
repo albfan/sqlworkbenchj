@@ -81,7 +81,7 @@ public class DataImporter
 
 	private int commitEvery = 0;
 
-	private boolean deleteTarget = false;
+	private DeleteType deleteTarget = DeleteType.none;
 	private boolean createTarget = false;
 	private boolean continueOnError = true;
 
@@ -92,24 +92,22 @@ public class DataImporter
 	private int mode = MODE_INSERT;
 	private boolean useBatch = false;
 	private int batchSize = -1;
-	private boolean supportsBatch = false;
 	private boolean canCommitInBatch = true;
 	private boolean commitBatch = false;
 	
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
-	private int reportInterval = 1;
+	private int reportInterval = 10;
 	private MessageBuffer messages;
 	private String targetSchema;
 
 	private int colCount;
-	private boolean useTruncate = false;
 	private int totalTables = -1;
 	private int currentTable = -1;
 	private boolean transactionControl = true;
 	private boolean useSetNull = false;
 	
-	private List<TableIdentifier> tableToBeProcessed;
+	private List<TableIdentifier> tablesToBeProcessed;
 	private TableDeleter tableDeleter;
 
 	// this array will map the columns for updating the target table
@@ -168,8 +166,6 @@ public class DataImporter
 	{
 		this.dbConn = aConn;
 		if (dbConn == null) return;
-		this.supportsBatch = this.dbConn.getMetadata().supportsBatchUpdates();
-		this.useBatch = this.useBatch && supportsBatch;
 		this.useSavepoint = this.dbConn.getDbSettings().useSavepointForImport();
 		this.useSavepoint = this.useSavepoint && !this.dbConn.getAutoCommit();
 		if (useSavepoint && !this.dbConn.supportsSavepoints())
@@ -182,6 +178,12 @@ public class DataImporter
 		this.useSetNull = this.dbConn.getDbSettings().useSetNull();
 	}
 
+	private boolean supportsBatch()
+	{
+		if (this.dbConn == null) return true;
+		return dbConn.getMetadata().supportsBatchUpdates();
+	}
+	
 	public void setTransactionControl(boolean flag)
 	{
 		this.transactionControl = flag;
@@ -237,7 +239,7 @@ public class DataImporter
 		// If more than one table is imported and those tables need to 
 		// be deleted before the import starts (due to FK constraints) the producer
 		// has sent a list of tables that need to be deleted.
-		if (this.deleteTarget && this.tableToBeProcessed != null)
+		if (this.deleteTarget != DeleteType.none && this.tablesToBeProcessed != null)
 		{
 			this.deleteTargetTables();
 		}
@@ -307,7 +309,7 @@ public class DataImporter
 		this.continueOnError = flag; 
 	}
 
-	public boolean getDeleteTarget() { return deleteTarget; }
+	public DeleteType getDeleteTarget() { return deleteTarget; }
 	
 	public int getBatchSize()
 	{
@@ -338,7 +340,7 @@ public class DataImporter
 
 	public void setTableList(List<TableIdentifier> targetTables)
 	{
-		this.tableToBeProcessed = targetTables;
+		this.tablesToBeProcessed = targetTables;
 	}
 	
 	public void deleteTargetTables()
@@ -359,7 +361,7 @@ public class DataImporter
 			// delete as well
 			tableDeleter = new TableDeleter(this.dbConn, true);
 			tableDeleter.setRowMonitor(this.progressMonitor);
-			tableDeleter.deleteRows(this.tableToBeProcessed, true);
+			tableDeleter.deleteRows(this.tablesToBeProcessed, true);
 			this.messages.append(tableDeleter.getMessages());
 		}
 		finally
@@ -382,11 +384,10 @@ public class DataImporter
 	/**
 	 *	Controls deletion of the target table.
 	 */
-	public void setDeleteTarget(boolean deleteTarget)
+	public void setDeleteTarget(DeleteType deleteTarget)
 	{
 		this.deleteTarget = deleteTarget;
 	}
-
 
 	/**
 	 * 	Use batch updates if the driver supports this
@@ -394,30 +395,9 @@ public class DataImporter
 	public void setUseBatch(boolean flag)
 	{
 		if (this.isModeInsertUpdate() || this.isModeUpdateInsert()) return;
-
-		if (flag && !this.supportsBatch)
-		{
-			LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
-			this.messages.append(ResourceMgr.getString("MsgJDBCDriverNoBatch") + "\n");
-		}
-
-		if (this.dbConn != null)
-		{
-			this.useBatch = flag && this.supportsBatch;
-		}
-		else
-		{
-			// we cannot yet decide if the driver supports batch updates.
-			// this will be checked if the connection is set
-			this.useBatch = flag;
-		}
+		this.useBatch = flag;
 	}
 
-	public boolean getUseBatch()
-	{
-		 return this.useBatch;
-	}
-	
 	public void setModeInsert() 
 	{ 
 		this.mode = MODE_INSERT; 
@@ -631,14 +611,23 @@ public class DataImporter
 		this.canCommitInBatch = true;
 		this.batchRunning = false;
 
-		// When using UPDATE/INSERT or INSERT/UPDATE
-		// we cannot use batch mode as we immediately need
-		// the result of the first statement to decide
-		// whether we have to send another one
-		if (this.useBatch && (this.isModeInsertUpdate() || this.isModeUpdateInsert()))
+		if (this.useBatch)
 		{
-			this.useBatch = false;
-			this.messages.append(ResourceMgr.getString("ErrImportNoBatchMode"));
+			if (!supportsBatch())
+			{
+				LogMgr.logWarning("DataImporter.setUseBatch()", "JDBC driver does not support batch updates. Ignoring request to use batch updates");
+				this.messages.append(ResourceMgr.getString("MsgJDBCDriverNoBatch") + "\n");
+				useBatch = false;
+			}
+			else if (this.isModeInsertUpdate() || this.isModeUpdateInsert())
+			{
+				// When using UPDATE/INSERT or INSERT/UPDATE
+				// we cannot use batch mode as we immediately need
+				// the result of the first statement to decide
+				// whether we have to send another one
+				this.useBatch = false;
+				this.messages.append(ResourceMgr.getString("ErrImportNoBatchMode"));
+			}
 		}
 		
 		try
@@ -672,6 +661,7 @@ public class DataImporter
 	private void deleteTarget()
 		throws SQLException
 	{
+		if (this.deleteTarget == DeleteType.none) return;
 		if (this.targetTable == null) return;
 		String deleteSql = null;
 
@@ -683,7 +673,7 @@ public class DataImporter
 			return;
 		}
 		
-		if (this.useTruncate)
+		if (this.deleteTarget == DeleteType.truncate)
 		{
 			deleteSql = "TRUNCATE TABLE " + this.targetTable.getTableExpression(this.dbConn);
 		}
@@ -694,7 +684,7 @@ public class DataImporter
 		Statement stmt = this.dbConn.createStatement();
 		LogMgr.logInfo("DataImporter.deleteTarget()", "Executing: [" + deleteSql + "] to delete target table...");
 		int rows = stmt.executeUpdate(deleteSql);
-		if (this.useTruncate)
+		if (this.deleteTarget == DeleteType.truncate)
 		{
 			String msg = ResourceMgr.getString("MsgImportTableTruncated").replace("%table%", this.targetTable.getTableExpression(this.dbConn));
 			this.messages.append(msg);
@@ -718,11 +708,6 @@ public class DataImporter
 		this.messages.appendNewLine();
 	}
 
-	public void setUseTruncate(boolean flag)
-	{
-		this.useTruncate = flag;
-	}
-	
 	public boolean isRunning() { return this.isRunning; }
 	public boolean isSuccess() { return !hasErrors; }
 	public boolean hasWarnings() { return this.hasWarnings; }
@@ -1563,9 +1548,17 @@ public class DataImporter
 			{
 				this.prepareUpdateStatement();
 			}
-			
-			if (this.deleteTarget && this.tableToBeProcessed == null)
+
+			if (this.deleteTarget != DeleteType.none && this.tablesToBeProcessed == null)
 			{
+				if (this.progressMonitor != null)
+				{
+					this.progressMonitor.saveCurrentType("importDelete");
+					this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+					String msg = ResourceMgr.getFormattedString("TxtDeletingTable", this.targetTable.getObjectName());
+					this.progressMonitor.setCurrentObject(msg,-1,-1);
+				}
+
 				try
 				{
 					this.deleteTarget();
@@ -1590,11 +1583,14 @@ public class DataImporter
 			this.currentImportRow = 0;
 			this.totalRows = 0;
 
+			if (progressMonitor != null) this.progressMonitor.restoreType("importDelete");
+
 			if (this.reportInterval == 0 && this.progressMonitor != null)
 			{
 				this.progressMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 				this.progressMonitor.setCurrentObject(ResourceMgr.getString("MsgImportingTableData") + " " + this.targetTable + " (" + this.getModeString() + ")",-1,-1);
 			}
+
 			if (LogMgr.isInfoEnabled())
 			{
 				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + this.targetTable.getTableExpression());
@@ -1953,16 +1949,22 @@ public class DataImporter
 			}
 			
 			String msg = this.targetTable.getTableName() + ": " + this.getInsertedRows() + " row(s) inserted. " + this.getUpdatedRows() + " row(s) updated.";
-			if (commitNeeded)
+			if (!transactionControl)
 			{
-				LogMgr.logInfo("DataImporter.finishTable()", msg + " Committing changes");
-				this.dbConn.commit();
+				msg += " Transaction control disabled. No commit sent to server.";
 			}
-			else if (!transactionControl)
+			else
 			{
-				LogMgr.logInfo("DataImporter.finishTable()", msg + " Transaction control disabled. No commit sent to server");
+				msg += " Committing changes.";
 			}
 			
+			if (commitNeeded)
+			{
+				 this.dbConn.commit();
+			}
+			
+			LogMgr.logInfo("DataImporter.finishTable()", msg);
+
 			this.messages.append(this.source.getMessages());
 			if (this.insertedRows > -1)
 			{
@@ -2111,6 +2113,11 @@ public class DataImporter
 		}
 	}
 
+	public int getReportInterval()
+	{
+		return this.reportInterval;
+	}
+	
 	public void setReportInterval(int interval)
 	{
 		if (interval > 0)

@@ -411,8 +411,8 @@ public class SchemaDiff
 
 		if (diffProcs)
 		{
-			List<ProcedureDefinition> refProcs = sourceDb.getMetadata().getProcedureList(null, this.referenceSchema);
-			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureList(null, this.targetSchema);
+			List<ProcedureDefinition> refProcs = sourceDb.getMetadata().getProcedureReader().getProcedureList(null, this.referenceSchema, null);
+			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureReader().getProcedureList(null, this.targetSchema, null);
 			processProcedureList(refProcs, targetProcs);
 		}
 
@@ -594,7 +594,7 @@ public class SchemaDiff
 
 			ProcDiffEntry entry = null;
 			ProcedureDefinition tp = new ProcedureDefinition(null, this.targetSchema, refProc.getProcedureName(), refProc.getResultType());
-			if (targetMeta.procedureExists(tp))
+			if (targetMeta.getProcedureReader().procedureExists(tp))
 			{
 				entry = new ProcDiffEntry(refProc,tp);
 			}

@@ -22,7 +22,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A helper class to drop different types of objects
+ * A helper class to drop different types of objects.
+ * To drop table columns, {@link ColumnDropper} should be used.
  * 
  * @author  support@sql-workbench.net
  */
@@ -131,29 +132,15 @@ public class GenericObjectDropper
 		String type = this.objects.get(index).getObjectType();
 
 		StringBuilder sql = new StringBuilder(120);
-		sql.append("DROP ");
-		sql.append(type);
-		sql.append(' ');
-		sql.append(name);
+		String ddl = this.connection.getDbSettings().getDropDDL(type, cascadeConstraints);
 
-		boolean needTableForIndexDrop = this.connection.getDbSettings().needsTableForDropIndex();
-		
-		if (needTableForIndexDrop && "INDEX".equals(type) && objectTable != null)
+		if (objectTable != null)
 		{
-			sql.append(" ON ");
-			sql.append(objectTable.getTableExpression(this.connection));
+			ddl = ddl.replace("%tablename%", objectTable.getTableExpression(this.connection));
 		}
+		ddl = ddl.replace("%name%", name);
+		sql.append(ddl);
 
-		String cascade = null;
-		if (this.cascadeConstraints)
-		{
-			cascade = this.connection.getDbSettings().getCascadeConstraintsVerb(type);
-			if (cascade != null)
-			{
-				sql.append(' ');
-				sql.append(cascade);
-			}
-		}
 		return sql;
 	}
 	

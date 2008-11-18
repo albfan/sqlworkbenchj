@@ -19,6 +19,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
+import workbench.db.importer.DeleteType;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
@@ -50,7 +51,6 @@ public class TableCopy
 		String sourcequery = cmdLine.getValue(WbCopy.PARAM_SOURCEQUERY);
 		String targettable = cmdLine.getValue(WbCopy.PARAM_TARGETTABLE);
 
-		boolean delete = cmdLine.getBoolean(WbCopy.PARAM_DELETETARGET);
 		boolean cont = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
@@ -75,7 +75,7 @@ public class TableCopy
 
 		CommonArgs.setCommitAndBatchParams(copier, cmdLine);
 
-		copier.setDeleteTarget(delete);
+		copier.setDeleteTarget(CommonArgs.getDeleteType(cmdLine));
 
 		TableIdentifier targetId = new TableIdentifier(targettable);
 		targetId.setNewTable(createTable);

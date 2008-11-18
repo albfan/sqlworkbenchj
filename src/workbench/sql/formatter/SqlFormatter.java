@@ -185,7 +185,10 @@ public class SqlFormatter
 	public void setDbDataTypes(Set<String> types)
 	{
 		this.dataTypes = new TreeSet<String>(new CaseInsensitiveComparator());
-		dataTypes.addAll(types);
+		if (types != null)
+		{
+			dataTypes.addAll(types);
+		}
 	}
 
 	public void setDBFunctions(Set<String> functionNames)
@@ -335,11 +338,6 @@ public class SqlFormatter
 		this.result.append(text);
 	}
 
-	private boolean needsWhitespace(SQLToken last, SQLToken current)
-	{
-		return this.needsWhitespace(last, current, false);
-	}
-
 	private boolean isDbFunction(String key)
 	{
 		if (dbFunctions == null)
@@ -358,6 +356,11 @@ public class SqlFormatter
 			dataTypes = keyWords.getDataTypes();
 		}
 		return this.dataTypes.contains(key.toUpperCase());
+	}
+
+	private boolean needsWhitespace(SQLToken last, SQLToken current)
+	{
+		return this.needsWhitespace(last, current, false);
 	}
 
 	/**
@@ -391,8 +394,11 @@ public class SqlFormatter
 		//if (last.isLiteral() && current.isLiteral()) return false;
 
 		if (currChar == '?') return true;
-		if (currentV.equals("=")) return true;
-		if (lastV.equals("=")) return true;
+		if (currChar == '=') return true;
+		if (lastChar == '=') return true;
+		if (lastChar == '[') return false;
+//		if (currChar == '[' && lastChar == '$') return false;
+//		if (lastChar == '&' && Character.isLetter(currChar) ) return false;
 
 		if (lastChar == '.' && current.isIdentifier()) return false;
 		if (lastChar == '.' && currChar == '*') return true; // e.g. person.*

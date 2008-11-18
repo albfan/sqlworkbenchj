@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
+import workbench.db.importer.DeleteType;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.Committer;
 import workbench.interfaces.ProgressReporter;
@@ -58,6 +59,8 @@ public class CommonArgs
 	public static final String ARG_IGNORE_TABLE_STMT_ERRORS = "ignorePrePostErrors";
 	public static final String ARG_TRANS_CONTROL = "transactionControl";
 	public static final String ARG_DATE_LITERAL_TYPE = "sqlDateLiterals";
+	public static final String ARG_DELETE_TARGET = "deleteTarget";
+	public static final String ARG_TRUNCATE_TABLE = "truncateTable";
 	
 	private static List<String> getDelimiterArguments()
 	{
@@ -76,7 +79,14 @@ public class CommonArgs
 		List<String> items = StringUtil.stringToList(value, ",");
 		return items;
 	}
-	
+
+	public static DeleteType getDeleteType(ArgumentParser cmdLine)
+	{
+		if (cmdLine.getBoolean(ARG_TRUNCATE_TABLE, false)) return DeleteType.truncate;
+		if (cmdLine.getBoolean(ARG_DELETE_TARGET, false)) return DeleteType.delete;
+		return DeleteType.none;
+	}
+
 	public static void addTableStatements(ArgumentParser cmdLine)
 	{
 		cmdLine.addArgument(ARG_PRE_TABLE_STMT);

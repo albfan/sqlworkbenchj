@@ -72,7 +72,9 @@ public class WbConnection
 
 	private boolean busy; 
 	private KeepAliveDaemon keepAlive = null;
-	
+	private String currentCatalog;
+	private String currentSchema;
+
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -119,6 +121,23 @@ public class WbConnection
 		return this.objectCache;
 	}
 
+	/**
+	 * Returns a "cached" version of the current schema. It is safe
+	 * to call this method any time as it does not send any
+	 * statement to the database, but might not necessarily 
+	 * return the correct schema
+	 */
+	public String getDisplaySchema()
+	{
+		return currentSchema;
+	}
+
+	/**
+	 * Return the current schema of the connection.
+	 * This will send a query to the database, so this might
+	 * not be usable if a statement or a transaction is currently
+	 * in progress.
+	 */
 	public String getCurrentSchema()
 	{
 		return this.metaData.getCurrentSchema();
@@ -246,6 +265,7 @@ public class WbConnection
 		this.sqlConnection = aConn;
 		this.metaData = new DbMetadata(this);
 		this.doOracleClear = this.metaData.isOracle();
+		this.currentCatalog = metaData.getCurrentCatalog();
 	}
 
 	/**
@@ -491,7 +511,7 @@ public class WbConnection
 	 *	because for certain DBMS some cleanup works needs to be done.
 	 *  And the ConnectionMgr is the only one who knows if there are more connections
 	 *  around, which might influence what needs to be cleaned up
-	 *
+	 *	<br/>
 	 *  (Currently this is only HSQLDB, but who knows...)
 	 */
 	public void disconnect()
@@ -504,10 +524,10 @@ public class WbConnection
 	 * This will actually close the connection to the DBMS.
 	 * It will also free an resources from the DbMetadata object and
 	 * shutdown the keep alive thread.
-	 *
+	 * <br/>
 	 * Normally {@link #disconnect()} should be used.
-	 * 
-	 * This is only public to allow cross-package calls in the workbench.db
+	 * <br/>
+	 * This is <b>only</b> public to allow cross-package calls in the workbench.db
 	 * package (basically for the shutdown hooks)
 	 *
 	 * This will <b>not</b> notify the ConnectionMgr that this connection has been closed.
@@ -911,13 +931,20 @@ public class WbConnection
 		}
 	}
 
+	public String getDisplayCatalog()
+	{
+		return currentCatalog;
+	}
+	
 	public void catalogChanged(String oldCatalog, String newCatalog)
 	{
+		this.currentCatalog = newCatalog;
 		this.fireConnectionStateChanged(PROP_CATALOG, oldCatalog, newCatalog);
 	}
 
 	public void schemaChanged(String oldSchema, String newSchema)
 	{
+		this.currentSchema = newSchema;
 		this.fireConnectionStateChanged(PROP_SCHEMA, oldSchema, newSchema);
 	}
 

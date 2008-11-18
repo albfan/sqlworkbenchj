@@ -1259,8 +1259,13 @@ public class WbTable
 	{
 		if (this.dwModel == null) return false;
 		int type = this.dwModel.getColumnType(column);
-		if (SqlUtil.isBlobType(type))// || java.sql.Blob.class.isAssignableFrom(cl))
+		if (SqlUtil.isBlobType(type))
 		{
+			if (Settings.getInstance().getFixSqlServerTimestampDisplay())
+			{
+				String tname = dwModel.getColumnTypeName(column);
+				if ("timestamp".equals(tname)) return false; // hack for SQL Server
+			}
 			return true;
 		}
 		return false;

@@ -54,6 +54,7 @@ import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbLoadPkMapping;
+import workbench.sql.wbcommands.WbProcSource;
 import workbench.sql.wbcommands.WbRemoveVar;
 import workbench.sql.wbcommands.WbSavePkMapping;
 import workbench.sql.wbcommands.WbSchemaDiff;
@@ -112,6 +113,7 @@ public class CommandMapper
 		addCommand(new WbHelp());
 		addCommand(new WbSelectBlob());
 		addCommand(new WbHideWarnings());
+		addCommand(new WbProcSource());
 
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);

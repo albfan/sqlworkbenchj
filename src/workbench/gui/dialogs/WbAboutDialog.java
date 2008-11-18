@@ -41,6 +41,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
+import workbench.util.MemoryWatcher;
 import workbench.util.WbFile;
 
 /**
@@ -69,6 +70,10 @@ public class WbAboutDialog
 		settingsLabel.setText(s);
 		f = LogMgr.getLogfile();
 		logfileLabel.setText("Logfile: " + f.getFullPath());
+
+		long freeMem = (long)(MemoryWatcher.getFreeMemory() / (1024*1024) );
+		long maxMem = (long)(MemoryWatcher.MAX_MEMORY / (1024*1024) );
+		memoryLabel.setText(ResourceMgr.getString("LblMemory") + " " + freeMem + "MB/" + maxMem + "MB");
 	}
 
 	/** This method is called from within the constructor to
@@ -95,6 +100,7 @@ public class WbAboutDialog
     mailToLabel = new JLabel();
     settingsLabel = new WbLabelField();
     logfileLabel = new WbLabelField();
+    memoryLabel = new JLabel();
 
     setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     setTitle(ResourceMgr.getString("TxtAbout") + " " + ResourceMgr.TXT_PRODUCT_NAME);
@@ -142,7 +148,7 @@ public class WbAboutDialog
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 8, 0, 4);
+    gridBagConstraints.insets = new Insets(6, 8, 0, 5);
     contentPanel.add(labelTitel, gridBagConstraints);
 
     labelDesc.setText(ResourceMgr.getString("TxtProductDescription"));
@@ -151,7 +157,7 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 8, 0, 4);
+    gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(labelDesc, gridBagConstraints);
 
     labelVersion.setText(ResourceMgr.getBuildInfo());
@@ -160,7 +166,7 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 8, 0, 4);
+    gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(labelVersion, gridBagConstraints);
 
     labelCopyright.setText(ResourceMgr.getString("TxtCopyright"));
@@ -169,7 +175,7 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(12, 8, 0, 4);
+    gridBagConstraints.insets = new Insets(12, 8, 0, 5);
     contentPanel.add(labelCopyright, gridBagConstraints);
 
     builtWithNbLabel.setText("<html>Built with NetBeans (<u>www.netbeans.org</u>)</html>");
@@ -184,7 +190,7 @@ public class WbAboutDialog
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(4, 5, 0, 4);
+    gridBagConstraints.insets = new Insets(4, 5, 0, 5);
     contentPanel.add(builtWithNbLabel, gridBagConstraints);
 
     jeditLabel.setText("<html>The editor is based on jEdit's 2.2.2 <u>syntax highlighting package</u></html>");
@@ -200,7 +206,7 @@ public class WbAboutDialog
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 5, 5, 4);
+    gridBagConstraints.insets = new Insets(0, 5, 5, 5);
     contentPanel.add(jeditLabel, gridBagConstraints);
 
     jdkVersion.setText(ResourceMgr.getString("TxtJavaVersion") + " " + System.getProperty("java.runtime.version"));
@@ -209,7 +215,7 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 8, 0, 4);
+    gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(jdkVersion, gridBagConstraints);
 
     homepageLabel.setText("<html><u>www.sql-workbench.net</u></html>");
@@ -223,7 +229,7 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 8, 0, 4);
+    gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(homepageLabel, gridBagConstraints);
 
     mailToLabel.setText("support@sql-workbench.net");
@@ -237,25 +243,35 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 8, 0, 4);
+    gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(mailToLabel, gridBagConstraints);
 
     settingsLabel.setText("jTextField1");
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(19, 0, 0, 0);
-    contentPanel.add(settingsLabel, gridBagConstraints);
-
-    logfileLabel.setText("jTextField2");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 5, 0, 5);
+    contentPanel.add(settingsLabel, gridBagConstraints);
+
+    logfileLabel.setText("jTextField2");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(1, 5, 0, 5);
     contentPanel.add(logfileLabel, gridBagConstraints);
+
+    memoryLabel.setText("Memory:");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(20, 5, 0, 0);
+    contentPanel.add(memoryLabel, gridBagConstraints);
 
     getContentPane().add(contentPanel, BorderLayout.CENTER);
 
@@ -339,6 +355,7 @@ public class WbAboutDialog
   private JTextField logfileLabel;
   private JLabel logo;
   private JLabel mailToLabel;
+  private JLabel memoryLabel;
   private JTextField settingsLabel;
   // End of variables declaration//GEN-END:variables
 

@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.CommandMapper;
 import workbench.sql.SqlCommand;
@@ -95,13 +94,7 @@ public class WbCommandAnalyzer
 			}
 			else if (type == ArgumentType.ProfileArgument)
 			{
-				List<ConnectionProfile> profiles = ConnectionMgr.getInstance().getProfiles();
-				this.elements = new ArrayList(profiles.size());
-				for (ConnectionProfile profile : profiles)
-				{
-					this.elements.add(profile.getKey().toString());
-				}
-				Collections.sort(this.elements, new CaseInsensitiveComparator());
+				this.elements = ConnectionMgr.getInstance().getProfileKeys();
 			}
 			else
 			{

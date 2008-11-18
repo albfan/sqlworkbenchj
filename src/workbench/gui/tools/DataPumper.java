@@ -51,6 +51,7 @@ import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.importer.DataImporter;
+import workbench.db.importer.DeleteType;
 import workbench.db.importer.ProducerFactory;
 import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.components.RunningJobIndicator;
@@ -1679,7 +1680,7 @@ public class DataPumper
 		}
 
 		result.append(indent);
-		result.append("-" + WbCopy.PARAM_DELETETARGET + "=");
+		result.append("-" + CommonArgs.ARG_DELETE_TARGET + "=");
 		result.append(Boolean.toString(this.deleteTargetCbx.isSelected()));
 
 		result.append(indent);
@@ -1901,7 +1902,14 @@ public class DataPumper
 		if (colMapping == null) return false;
 
 		this.copier = new DataCopier();
-		this.copier.setDeleteTarget(this.deleteTargetCbx.isSelected());
+		if (this.deleteTargetCbx.isSelected())
+		{
+			this.copier.setDeleteTarget(DeleteType.delete);
+		}
+		else
+		{
+			this.copier.setDeleteTarget(DeleteType.none);
+		}
 		this.copier.setContinueOnError(this.continueOnErrorCbx.isSelected());
 		String mode = (String)this.modeComboBox.getSelectedItem();
 		List<ColumnIdentifier> keys = this.getKeyColumns();

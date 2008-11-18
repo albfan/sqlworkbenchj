@@ -65,8 +65,8 @@ public class TableDeleteSync
 	private TableIdentifier checkTable;
 	private TableIdentifier deleteTable;
 	private BatchedStatement deleteStatement;
-	private int chunkSize = 15;
-	private int batchSize = 15;
+	private int chunkSize = 50;
+	private int batchSize = 50;
 
 	private Statement checkStatement;
 	private Map<ColumnIdentifier, Integer> columnMap = new HashMap<ColumnIdentifier, Integer>();

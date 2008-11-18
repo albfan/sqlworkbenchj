@@ -78,7 +78,6 @@ public class WbStoreProfile
 		DbDriver drv = ConnectionMgr.getInstance().findDriver(profile.getDriverclass());
 		if (drv.isInternal())
 		{
-
 			DbDriver newDrv = drv.createCopy();
 			String drvName = currentConnection.getSqlConnection().getMetaData().getDriverName();
 			newDrv.setName(drvName);

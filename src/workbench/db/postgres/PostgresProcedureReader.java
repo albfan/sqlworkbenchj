@@ -211,22 +211,6 @@ public class PostgresProcedureReader
 	public DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{
-//		String version = connection.getMetadata().getDbVersion();
-//		int majorVersion = 0;
-//		int minorVersion = 0;
-//
-//		try
-//		{
-//			String[] parts = version.split("\\.");
-//			majorVersion = (parts.length > 0 ? Integer.valueOf(parts[0]) : 0);
-//			minorVersion = (parts.length > 1 ? Integer.valueOf(parts[1]) : 0);
-//		}
-//		catch (Throwable th)
-//		{
-//			majorVersion = 0;
-//			minorVersion = 0;
-//		}
-//
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
 			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{

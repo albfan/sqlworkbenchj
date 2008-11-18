@@ -39,6 +39,11 @@ public class XlsRowDataConverter
 	private HSSFSheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
 
+	public XlsRowDataConverter()
+	{
+		super();
+	}
+	
 	// This should not be called in the constructor as
 	// at that point in time the formatters are not initialized
 	public void createFormatters()
@@ -54,6 +59,7 @@ public class XlsRowDataConverter
 		createFormatters();
 
 		wb = new HSSFWorkbook();
+		//wb = (HSSFWorkbook)DynamicPoi.createWorkbook();
 
 		excelFormat.setupWithWorkbook(wb);
 		sheet = wb.createSheet(getPageTitle("SQLExport"));

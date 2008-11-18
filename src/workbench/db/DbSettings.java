@@ -167,15 +167,6 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty("workbench.db.defaultbeforenull." + this.getDbId(), false);
 	}
 
-	/**
-	 *	Return the verb which does a DROP ... CASCADE for the given
-	 *  object type. If the current DBMS does not support cascaded dropping
-	 *  of objects, then null will be returned.
-	 *
-	 *	@param aType the database object type to drop (TABLE, VIEW etc)
-	 *  @return a String which can be appended to a DROP type name command in order to drop dependent objects as well
-	 *          or null if the current DBMS does not support this.
-	 */
 	public String getCascadeConstraintsVerb(String aType)
 	{
 		if (aType == null) return null;
@@ -208,10 +199,34 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "procs.use.wbcall", false);
 	}
 
-	public boolean needsTableForDropIndex()
+	/**
+	 * Return the complete DDL to drop the given type of DB-Object
+	 * If includeCascade is true and the DBMS supports dropping this type cascaded,
+	 * then the returned DDL will include the necessary CASCADE keyword
+	 *
+	 *	@param type the database object type to drop (TABLE, VIEW etc)
+	 *  @return the DDL Statement to drop an object of that type. The placeholder %name% must
+	 * be replaced with the correct object name
+	 */
+	public String getDropDDL(String type, boolean includeCascade)
 	{
-		boolean needsTable = Settings.getInstance().getBoolProperty(prefix + "dropindex.needstable", false);
-		return needsTable;
+		if (StringUtil.isBlank(type)) return null;
+		String cascade = getCascadeConstraintsVerb(type);
+
+		String ddl = Settings.getInstance().getProperty(prefix + "drop." + type.toLowerCase(), null);
+		if (ddl == null)
+		{
+			ddl = "DROP " + type.toUpperCase() + " %name%";
+			if (cascade != null)
+			{
+				ddl += " " + cascade;
+			}
+		}
+		else
+		{
+			ddl = ddl.replace("%cascade%", cascade == null ? "" : cascade);
+		}
+		return ddl;
 	}
 
 	public boolean useSavepointForImport()

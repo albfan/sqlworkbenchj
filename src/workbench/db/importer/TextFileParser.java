@@ -719,6 +719,11 @@ public class TextFileParser
 			try
 			{
 				lineEnding = FileUtil.getLineEnding(in);
+				if (lineEnding == null)
+				{
+					// this can happen if only a single line (without a line terminator) is present
+					lineEnding = StringUtil.LINE_TERMINATOR;
+				}
 			}
 			catch (IOException io)
 			{

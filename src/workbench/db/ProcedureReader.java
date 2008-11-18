@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.sql.SQLException;
+import java.util.List;
 import workbench.storage.DataStore;
 
 /**
@@ -41,11 +42,19 @@ public interface ProcedureReader
 	final String PROC_RESULT_NO = "NO RESULT";
 
 	StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType);
-	boolean procedureExists(String catalog, String schema, String name, int type);
-	DataStore getProcedures(String aCatalog, String aSchema)
+
+
+	boolean procedureExists(ProcedureDefinition def);
+
+	DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException;
-	DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+
+	DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException;
+
 	void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException;
+
+	List<ProcedureDefinition> getProcedureList(String catalog, String schema, String name)
+		throws SQLException;
 }

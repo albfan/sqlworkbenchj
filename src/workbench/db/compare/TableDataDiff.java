@@ -248,7 +248,7 @@ public class TableDataDiff
 	{
 		String retrieve = "SELECT * FROM " + this.referenceTable.getTableExpression(this.reference);
 
-		LogMgr.logDebug("SyncDeleter.deleteTarget()", "Using " + retrieve + " to retrieve rows from reference database");
+		LogMgr.logDebug("TableDataDiff.doSync()", "Using " + retrieve + " to retrieve rows from reference database");
 
 		checkStatement = toSync.createStatement();
 
@@ -266,7 +266,7 @@ public class TableDataDiff
 
 			if (this.monitor != null)
 			{
-				//this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+				this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 				String msg = ResourceMgr.getFormattedString("MsgDataDiffProcessUpd", this.tableToSync.getTableName());
 				this.monitor.setCurrentObject(msg, -1, -1);
 			}
@@ -372,7 +372,7 @@ public class TableDataDiff
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("TableSync.checkRows()", "Error when running check SQL " + sql, e);
+			LogMgr.logError("TableDataDiff.checkRows()", "Error when running check SQL " + sql, e);
 			throw e;
 		}
 		finally

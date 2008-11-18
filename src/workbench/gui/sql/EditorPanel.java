@@ -245,7 +245,7 @@ public class EditorPanel
 		dbFunctions.addAll(helper.getSqlFunctions());
 		dbDatatypes.addAll(helper.getDataTypes());
 
-		token.addSqlFunctions(this.dbFunctions);
+		token.addSqlFunctions(dbFunctions);
 		token.addDatatypes(dbDatatypes);
 		token.addSqlKeyWords(helper.getKeywords());
 		token.addOperators(helper.getOperators());

@@ -39,6 +39,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
@@ -671,7 +672,8 @@ public class DbExplorerPanel
 			{
 				try
 				{
-					this.dbConnection.getMetadata().setCurrentCatalog(getSelectedCatalog());
+					CatalogChanger changer = new CatalogChanger();
+					changer.setCurrentCatalog(dbConnection, getSelectedCatalog());
 				}
 				catch (SQLException ex)
 				{

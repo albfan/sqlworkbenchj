@@ -679,10 +679,13 @@ LEFT[ \t\r\n]+JOIN|
 LEFT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
 RIGHT[ \t\r\n]+JOIN|
 RIGHT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
-"NATURAL[ \t\r\n]+JOIN"
+NATURAL[ \t\r\n]+JOIN
 )
 
+/*[\w]+\])*/
+
 whitespace=([ \r\n\t\f])
+wbvar=(\$\[)(\&|\?)?[a-zA-Z]+(\])|(\$\{)(\&|\?)?[a-zA-Z]+(\})
 identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\#\%\^\&\'\~\?\(\)\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\[\,\;\:\*]*)|(\"[^\r\n\t\f\*\<\>\'\"\*]*\")
 /* identifier=([^ \"\r\n\t\f\+\-\*\/\<\>\=\~\!\#\%\^\&\'\~\?\(\)\]\,\;\:\.0-9][^ \r\n\t\f\+\-\*\/\<\>\=\~\!\%\^\&\'\"\~\?\(\)\[\,\;\:\*]*)|(\"[^\r\n\t\f\+\*\<\>\!\%\^\&\'\"\?\(\)\;\:\*]*\") */
 digit=([0-9])
@@ -758,6 +761,15 @@ commentend=(([\*]*)"/")
 <YYINITIAL> {keyword} {
     nextState = YYINITIAL;
     lastToken = SQLToken.RESERVED_WORD;
+    String text = yytext();
+    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    yybegin(nextState);
+    return(t);
+}
+
+<YYINITIAL> {wbvar} {
+    nextState = YYINITIAL;
+    lastToken = SQLToken.WB_VAR;
     String text = yytext();
     SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
     yybegin(nextState);

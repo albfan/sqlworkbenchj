@@ -17,6 +17,10 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
@@ -51,11 +55,17 @@ public class JdbcProcedureReader
 		return StringUtil.emptyBuffer();
 	}
 
+
 	/**
 	 * Checks if the given procedure exists in the database
 	 */
-	public boolean procedureExists(String catalog, String schema, String procName, int procType)
+	public boolean procedureExists(ProcedureDefinition def)
 	{
+		String catalog = def.getCatalog();
+		String schema = def.getSchema();
+		String procName = def.getProcedureName();
+		int procType = def.getResultType();
+
 		boolean exists = false;
 		ResultSet rs = null;
 		Savepoint sp = null;
@@ -90,14 +100,19 @@ public class JdbcProcedureReader
 		return exists;
 	}
 
-	public DataStore getProcedures(String aCatalog, String aSchema)
+	public DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException
 	{
-		if ("*".equals(aSchema) || "%".equals(aSchema))
+		if ("*".equals(schema) || "%".equals(schema))
 		{
-			aSchema = null;
+			schema = null;
 		}
 
+		if (StringUtil.isBlank(name))
+		{
+			name = "%";
+		}
+		
 		Savepoint sp = null;
 		try
 		{
@@ -105,7 +120,7 @@ public class JdbcProcedureReader
 			{
 				sp = this.connection.setSavepoint();
 			}
-			ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(aCatalog, aSchema, "%");
+			ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, name);
 			DataStore ds = fillProcedureListDataStore(rs);
 			this.connection.releaseSavepoint(sp);
 			return ds;
@@ -377,5 +392,46 @@ public class JdbcProcedureReader
 		def.setSource(result);
 	}
 
+	/**
+	 * Return a List of {@link workbench.db.ProcedureDefinition} objects
+	 * for Oracle packages only one ProcedureDefinition per package is returned (although
+	 * the DbExplorer will list each function of the packages).
+	 */
+	public List<ProcedureDefinition> getProcedureList(String aCatalog, String aSchema, String name)
+		throws SQLException
+	{
+		List<ProcedureDefinition> result = new LinkedList<ProcedureDefinition>();
+		DataStore procs = getProcedures(aCatalog, aSchema, name);
+		if (procs == null || procs.getRowCount() == 0) return result;
+		procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
+		int count = procs.getRowCount();
+		Set<String> oraPackages = new HashSet<String>();
+
+		for (int i = 0; i < count; i++)
+		{
+			String schema  = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+			String cat = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			String procName = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			int type = procs.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
+			ProcedureDefinition def = null;
+			if (this.connection.getMetadata().isOracle() && cat != null)
+			{
+				// The package name for Oracle is reported in the catalog column.
+				// each function/procedure of the package is listed separately,
+				// but we only want to create one ProcedureDefinition for the whole package
+				if (!oraPackages.contains(cat))
+				{
+					def = ProcedureDefinition.createOraclePackage(schema, cat);
+					oraPackages.add(cat);
+				}
+			}
+			else
+			{
+				def = new ProcedureDefinition(cat, schema, procName, type);
+			}
+			if (def != null) result.add(def);
+		}
+		return result;
+	}
 
 }

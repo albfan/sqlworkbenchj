@@ -37,6 +37,7 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
 import workbench.util.PropertiesCopier;
 import workbench.util.StringUtil;
@@ -397,10 +398,25 @@ public class ConnectionMgr
 			if (l != null) l.propertyChange(evt);
 		}
 	}
+	
 	/**
-	 *	Returns a Map with the current profiles.
-	 *	The key to the map is the profile name, the value is the actual profile
-	 *  (i.e. instances of {@link ConnectionProfile}
+	 * Return a list with profile keys that can be displayed to the user.
+	 * The returned list is already sorted.
+	 * 
+	 * @return
+	 */
+	public synchronized List<String> getProfileKeys()
+	{
+		List<String> result = new ArrayList(profiles.size());
+		for (ConnectionProfile profile : profiles)
+		{
+			result.add(profile.getKey().toString());
+		}
+		Collections.sort(result, new CaseInsensitiveComparator());
+		return result;
+	}
+	/**
+	 *	Returns a List with the current profiles.
 	 */
 	public synchronized List<ConnectionProfile> getProfiles()
 	{
@@ -714,6 +730,10 @@ public class ConnectionMgr
 	{
 		if (this.profiles != null)
 		{
+			WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
+			WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
+			WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
+			
 			WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileStorage());
 			try
 			{
@@ -756,6 +776,8 @@ public class ConnectionMgr
 		{
 			this.readProfiles();
 		}
+		
+		this.profiles.remove(aProfile);
 		this.profiles.add(aProfile);
 		this.profilesChanged = true;
 	}

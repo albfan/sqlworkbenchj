@@ -16,7 +16,7 @@ import workbench.resource.Settings;
 /**
  * Class with several utility functions used by the text area component.
  * @author Slava Pestov
- * @version $Id: TextUtilities.java,v 1.6 2007-10-19 18:06:50 thomas Exp $
+ * @version $Id: TextUtilities.java,v 1.6 2007/10/19 18:06:50 thomas Exp $
  */
 public class TextUtilities
 {

@@ -155,4 +155,11 @@ public class ExceptionUtil
 		return result;
 	}
 
+	public static String getStackTrace(Throwable th)
+	{
+		StringWriter sw = new StringWriter(250);
+		PrintWriter pw = new PrintWriter(sw);
+		th.printStackTrace(pw);
+		return sw.toString();
+	}
 }

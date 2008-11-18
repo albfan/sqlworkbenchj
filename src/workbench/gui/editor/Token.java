@@ -17,7 +17,7 @@ package workbench.gui.editor;
  * token in the text, and a pointer to the next token in the list.
  *
  * @author Slava Pestov
- * @version $Id: Token.java,v 1.2 2007-12-17 20:41:20 thomas Exp $
+ * @version $Id: Token.java,v 1.2 2007/12/17 20:41:20 thomas Exp $
  */
 public class Token
 {

@@ -1239,18 +1239,19 @@ public class DwPanel
 		if (this.batchUpdate) return;
 		if (this.readOnly) return;
 
-		boolean editing = isEditingStarted();
+		final boolean editing = isEditingStarted();
 		boolean modified = this.isModified();
 		int firstRow = e.getFirstRow();
 		boolean structureChange = (firstRow == TableModelEvent.ALL_COLUMNS || firstRow == TableModelEvent.HEADER_ROW);
 
-		if (!editing && modified && !structureChange)
+		if (modified && !structureChange)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
 				{
-					startEdit();
+					if (!editing) startEdit();
+					checkResultSetActions();
 				}
 			});
 		}
@@ -1260,6 +1261,8 @@ public class DwPanel
 	 *	This is called when the selection in the table changes.
 	 *  The copy row action will be enabled when exactly one row
 	 *  is selected
+	 * @see #disableUpdateActions()
+	 * @see #checkResultSetActions()
 	 */
 	public void valueChanged(ListSelectionEvent e)
 	{

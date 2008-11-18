@@ -28,7 +28,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
- * A simple console interface SQL Workbench/J
+ * A simple console interface for SQL Workbench/J
  *
  * @author support@sql-workbench.net
  */
@@ -36,7 +36,9 @@ public class SQLConsole
 	implements ExecutionController, ParameterPrompter
 {
 	private InputReader input;
-	
+	private static final String DEFAULT_PROMPT = "SQL> ";
+	private static final String CONTINUE_PROMPT = "..> ";
+
 	public SQLConsole()
 	{
 		input = new InputReader();
@@ -51,12 +53,22 @@ public class SQLConsole
 			System.out.println(cmdLine.getHelp());
 			WbManager.getInstance().doShutdown(0);
 		}
+
+		boolean bufferResults = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_BUFFER_RESULTS, true);
+		boolean optimizeColWidths = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_OPT_COLS, true);
 		
 		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine, false);
 		runner.showResultSets(true);
 		runner.setShowStatementWithResult(false);
 		runner.setShowStatementSummary(false);
-		runner.setShowResultBorders(false);
+		runner.setOptimizeColWidths(optimizeColWidths);
+		runner.setShowDataLoading(false);
+		runner.setConnectionId("Console");
+
+		if (!cmdLine.isArgPresent(AppArguments.ARG_SHOWPROGRESS))
+		{
+			runner.setShowProgress(true);
+		}
 
 		// Make the current directory the base directory for the BatchRunner
 		// so that e.g. WbIncludes work properly
@@ -70,11 +82,9 @@ public class SQLConsole
 			runner.setShowStatementTiming(false);
 		}
 
-		String prompt = "SQL> ";
-		String currentPrompt = prompt;
-		String continuePrompt = "..> ";
-
 		LogMgr.logInfo("SQLConsole.main()", "SQL Workbench/J Console interface started");
+		
+		String currentPrompt = DEFAULT_PROMPT;
 		
 		try
 		{
@@ -88,10 +98,9 @@ public class SQLConsole
 			runner.addCommand(new WbStoreProfile());
 			runner.addCommand(new WbDeleteProfile());
 			runner.addCommand(new WbListProfiles());
-			
-			WbConnect connect = (WbConnect)runner.getCommand(WbConnect.VERB);
-			connect.setPersistentChange(true);
-			
+
+			runner.setPersistentConnect(true);
+
 			if (runner.hasProfile())
 			{
 				runner.connect();
@@ -106,11 +115,20 @@ public class SQLConsole
 						System.out.println(warn);
 					}
 				}
+				currentPrompt = checkConnection(runner);
 			}
 
 			InputBuffer buffer = new InputBuffer();
 			runner.setExecutionController(this);
 			runner.setParameterPrompter(this);
+
+			ResultSetPrinter printer = null;
+			if (!bufferResults)
+			{
+				printer = new ResultSetPrinter(System.out);
+				printer.setFormatColumns(optimizeColWidths);
+				runner.setResultSetConsumer(printer);
+			}
 
 			boolean startOfStatement = true;
 
@@ -118,7 +136,7 @@ public class SQLConsole
 			{
 				String line = input.readLine(currentPrompt);
 				if (line == null) continue;
-				
+
 				if (startOfStatement && "exit".equalsIgnoreCase(line.trim()))
 				{
 					break;
@@ -137,13 +155,19 @@ public class SQLConsole
 						LogMgr.logError("SQLConsole.main()", "Error running statement", e);
 					}
 					buffer.clear();
-					currentPrompt = prompt;
+					currentPrompt = checkConnection(runner);
 					startOfStatement = true;
+					
+					// Restore the printing consumer in case a WbExport changed it
+					if (printer != null && runner.getResultSetConsumer() == null)
+					{
+						runner.setResultSetConsumer(printer);
+					}
 				}
 				else
 				{
 					startOfStatement = false;
-					currentPrompt = continuePrompt;
+					currentPrompt = CONTINUE_PROMPT;
 				}
 			}
 		}
@@ -158,13 +182,39 @@ public class SQLConsole
 		}
 	}
 
+
+	private String checkConnection(BatchRunner runner)
+	{
+		String newprompt = null;
+		WbConnection current = runner.getConnection();
+		if (current != null)
+		{
+			newprompt = current.getCurrentUser();
+			String catalog = current.getDisplayCatalog();
+			String schema = current.getDisplaySchema();
+			if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema))
+			{
+				newprompt += "@" + schema;
+			}
+			else if (StringUtil.isNonBlank(catalog) && StringUtil.isBlank(schema))
+			{
+				newprompt += "@" + catalog;
+			}
+			else if (StringUtil.isNonBlank(catalog) && StringUtil.isNonBlank(schema))
+			{
+				newprompt += "@" + schema + "/" + catalog;
+			}
+		}
+		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
+	}
+
 	public boolean processParameterPrompts(String sql)
 	{
 		VariablePool pool = VariablePool.getInstance();
-		
+
 		DataStore ds = pool.getParametersToBePrompted(sql);
 		if (ds == null || ds.getRowCount() == 0) return true;
-		
+
 		System.out.println(ResourceMgr.getString("TxtVariableInputText"));
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
@@ -174,7 +224,7 @@ public class SQLConsole
 			String newValue = input.readLine(varName + " [" + value + "]: ");
 			ds.setValue(row, 1, newValue);
 		}
-		
+
 		try
 		{
 			ds.updateDb(null, null);
@@ -184,6 +234,11 @@ public class SQLConsole
 			// Cannot happen
 		}
 		return true;
+	}
+
+	public String getPassword(String prompt)
+	{
+		return input.readPassword(prompt + " ");
 	}
 
 	public boolean confirmExecution(String prompt)
@@ -206,9 +261,10 @@ public class SQLConsole
 		String choice = input.readLine(msg + " ");
 		return yes.equalsIgnoreCase(choice);
 	}
-	
+
 	public static void main(String[] args)
 	{
+		System.setProperty("workbench.log.console", "false");
 		WbManager.initConsoleMode(args);
 		SQLConsole console = new SQLConsole();
 		console.run();

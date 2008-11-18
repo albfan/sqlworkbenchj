@@ -24,9 +24,9 @@ import workbench.log.LogMgr;
  */
 public class InputReader
 {
-	private boolean useConsole = true;
-	private Method readLine;
 	private Object console;
+	private Method readLine;
+	private Method readPwd;
 	private Scanner inputScanner;
 
 	public InputReader()
@@ -41,31 +41,54 @@ public class InputReader
 				
 				if (console != null)
 				{
-					readLine = console.getClass().getMethod("readLine", Array.newInstance(String.class, 0).getClass());
+					Class objectArgs = Array.newInstance(Object.class, 0).getClass();
+
+					readLine = console.getClass().getMethod("readLine", String.class, objectArgs);
+					readPwd = console.getClass().getMethod("readPassword", String.class, objectArgs);
 				}
 			}
-			useConsole = (readLine != null);
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logWarning("InputReader.<init>", "Console not available, using Java5 input");
-			useConsole = false;
+			LogMgr.logWarning("InputReader.<init>", "Console not available, using Java5 input", th);
+			readLine = null;
+			readPwd = null;
+			console = null;
 		}
+	}
+
+	public String readPassword(String prompt)
+	{
+		if (readPwd != null)
+		{
+			try
+			{
+				char[] input = (char[]) readPwd.invoke(console, prompt, null);
+				if (input == null) return null;
+				return new String(input);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("InputReader.readPassword()", "Error accessing console!", e);
+				readPwd = null;
+			}
+		}
+		return readLine(prompt);
 	}
 
 	public String readLine(String prompt)
 	{
-		if (useConsole)
+		if (readLine != null)
 		{
 			try
 			{
-				String result = (String) readLine.invoke(console, prompt);
+				String result = (String) readLine.invoke(console, prompt, null);
 				return result;
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("InputReader.readLine()", "Error accessing console!", e);
-				useConsole = false;
+				readLine = null;
 			}
 		}
 		System.out.print(prompt);
@@ -75,5 +98,19 @@ public class InputReader
 		}
 		String line = inputScanner.nextLine();
 		return line;
+	}
+
+	public static void main(String args[])
+	{
+		try
+		{
+			InputReader in = new InputReader();
+			String pwd = in.readPassword("Pwd:");
+			System.out.println("-->: " + pwd);
+		}
+		catch (Throwable th)
+		{
+			th.printStackTrace();
+		}
 	}
 }

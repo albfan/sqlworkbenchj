@@ -69,7 +69,6 @@ import workbench.db.h2database.H2SequenceReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
-import workbench.sql.formatter.SqlFormatter;
 
 /**
  * Retrieve meta data information from the database.
@@ -85,7 +84,7 @@ public class DbMetadata
 	private String productName;
 	private String dbId;
 
-	protected MetaDataSqlManager metaSqlMgr;
+	MetaDataSqlManager metaSqlMgr;
 	private DatabaseMetaData metaData;
 	private WbConnection dbConnection;
 
@@ -116,7 +115,6 @@ public class DbMetadata
 	
 	private boolean createInlineConstraints;
 	private boolean useNullKeyword = true;
-	private boolean columnsListInViewDefinitionAllowed = true;
 	
 	private String quoteCharacter;
 	private SqlKeywordHandler keywordHandler;
@@ -131,7 +129,8 @@ public class DbMetadata
 	private List catalogsToIgnore;
 	
 	private DbSettings dbSettings;
-	
+	private ViewReader viewReader;
+
 	public DbMetadata(WbConnection aConnection)
 		throws SQLException
 	{
@@ -184,7 +183,6 @@ public class DbMetadata
 			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new OracleSynonymReader();
 			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
-			this.procedureReader = new OracleProcedureReader(this.dbConnection);
 			this.errorInfoReader = this.oracleMetaData;
 			this.dataTypeResolver = this.oracleMetaData;
 			this.indexReader = new OracleIndexReader(this);
@@ -194,7 +192,6 @@ public class DbMetadata
 			this.isPostgres = true;
 			this.constraintReader = new PostgresConstraintReader();
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
-			this.procedureReader = new PostgresProcedureReader(this.dbConnection);
 			this.indexReader = new PostgresIndexReader(this);
 			this.dataTypeResolver = new PostgresDataTypeResolver();
 			
@@ -210,13 +207,11 @@ public class DbMetadata
 			this.isHsql = true;
 			this.constraintReader = new HsqlConstraintReader(this.dbConnection.getSqlConnection());
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
-			this.columnsListInViewDefinitionAllowed = JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8");
 		}
 		else if (productLower.indexOf("firebird") > -1)
 		{
 			this.isFirebird = true;
 			this.constraintReader = new FirebirdConstraintReader();
-			this.procedureReader = new FirebirdProcedureReader(this.dbConnection);
 			// Jaybird 2.0 reports the Firebird version in the 
 			// productname. To ease the DBMS handling we'll use the same
 			// product name that is reported with the 1.5 driver. 
@@ -228,11 +223,6 @@ public class DbMetadata
 		{
 			this.isSqlServer = true;
 			this.constraintReader = new SqlServerConstraintReader();
-			boolean useJdbc = Settings.getInstance().getBoolProperty("workbench.db.mssql.usejdbcprocreader", true);
-			if (!useJdbc)
-			{
-				this.procedureReader = new SqlServerProcedureReader(this.dbConnection);
-			}
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
@@ -247,7 +237,6 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
-			this.procedureReader = new MySqlProcedureReader(this.dbConnection);
 			this.isMySql = true;
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
@@ -294,12 +283,6 @@ public class DbMetadata
 		{
 			this.sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
 			this.constraintReader = new H2ConstraintReader();
-		}
-
-		// Use default implementations for non-JDBC supplied information
-		if (this.procedureReader == null)
-		{
-			this.procedureReader = new JdbcProcedureReader(this.dbConnection);
 		}
 
 		if (this.indexReader == null)
@@ -371,6 +354,58 @@ public class DbMetadata
 		}
 	}
 
+	public ProcedureReader getProcedureReader()
+	{
+		synchronized (MVIEW_NAME)
+		{
+			if (this.procedureReader == null)
+			{
+				if (this.isOracle)
+				{
+					this.procedureReader = new OracleProcedureReader(this.dbConnection);
+				}
+				else if (this.isPostgres)
+				{
+					this.procedureReader = new PostgresProcedureReader(this.dbConnection);
+				}
+				else if (this.isFirebird)
+				{
+					this.procedureReader = new FirebirdProcedureReader(this.dbConnection);
+				}
+				else if (this.isSqlServer)
+				{
+					boolean useJdbc = Settings.getInstance().getBoolProperty("workbench.db.mssql.usejdbcprocreader", false);
+					if (!useJdbc)
+					{
+						this.procedureReader = new SqlServerProcedureReader(this.dbConnection);
+					}
+				}
+				else if (this.isMySql)
+				{
+					this.procedureReader = new MySqlProcedureReader(this.dbConnection);
+				}
+				
+				if (procedureReader == null)
+				{
+					this.procedureReader = new JdbcProcedureReader(this.dbConnection);
+				}
+			}
+			return procedureReader;
+		}
+	}
+
+	public ViewReader getViewReader()
+	{
+		synchronized (MVIEW_NAME)
+		{
+			if (this.viewReader == null)
+			{
+				viewReader = new ViewReader(this.dbConnection);
+			}
+			return viewReader;
+		}
+	}
+	
 	public String[] getSelectableTypes()
 	{
 		return tableTypesSelectable;
@@ -404,6 +439,16 @@ public class DbMetadata
 		return this.dbConnection.getSqlConnection();
 	}
 
+	public IndexReader getIndexReader()
+	{
+		return this.indexReader;
+	}
+
+	public OracleMetadata getOracleMeta()
+	{
+		return this.oracleMetaData;
+	}
+	
 	/**
 	 * Check if the given DB object type can contain data. i.e. if
 	 * a SELECT FROM can be run against this type
@@ -574,6 +619,7 @@ public class DbMetadata
 	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
+		if (!supportsSchemas()) return false;
 		try
 		{
 			String tblSchema = table.getSchema();
@@ -693,195 +739,8 @@ public class DbMetadata
 		}
 		return type;
 	}
-	
-	public CharSequence getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
-		throws SQLException
-	{
-		return this.getExtendedViewSource(tbl, null, includeDrop);
-	}
 
-	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop)
-		throws SQLException
-	{
-		return getExtendedViewSource(view, viewTableDefinition, includeDrop, true);
-	}
-
-	/**
-	 * Returns a complete SQL statement to (re)create the given view.
-	 */
-	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop, boolean includeCommit)
-		throws SQLException
-	{
-		GetMetaDataSql sql = metaSqlMgr.getViewSourceSql();
-		if (sql == null)
-		{
-			SourceStatementsHelp help = new SourceStatementsHelp();
-			return help.explainMissingViewSourceSql(this.getProductName());
-		}
-
-		if (viewTableDefinition == null)
-		{
-			viewTableDefinition = this.getTableDefinition(view);
-		}
-		CharSequence source = this.getViewSource(view);
-		
-		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
-
-		StringBuilder result = new StringBuilder(source.length() + 100);
-
-		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
-		String verb = SqlUtil.getSqlVerb(source);
-		
-		// ThinkSQL and DB2 return the full CREATE VIEW statement
-		if (verb.equalsIgnoreCase("CREATE"))
-		{
-			if (includeDrop)
-			{
-				String type = SqlUtil.getCreateType(source);
-				result.append("DROP ");
-				result.append(type);
-				result.append(' ');
-				result.append(view.getTableName());
-				result.append(';');
-				result.append(lineEnding);
-				result.append(lineEnding);
-			}
-			result.append(source);
-			if (this.dbSettings.ddlNeedsCommit() && includeCommit)
-			{
-				result.append(lineEnding);
-				result.append("COMMIT;");
-				result.append(lineEnding);
-			}
-			return result.toString();
-		}
-
-		result.append(generateCreateObject(includeDrop, view.getType(), view.getTableName()));
-
-		if (columnsListInViewDefinitionAllowed && !MVIEW_NAME.equalsIgnoreCase(view.getType()))
-		{
-			result.append(lineEnding + "(" + lineEnding);
-			int rows = viewTableDefinition.getRowCount();
-			for (int i=0; i < rows; i++)
-			{
-				String colName = viewTableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-				result.append("  ");
-				result.append(quoteObjectname(colName));
-				if (i < rows - 1)
-				{
-					result.append(',');
-					result.append(lineEnding);
-				}
-			}
-			result.append(lineEnding + ")");
-		}
-		
-		result.append(lineEnding + "AS " + lineEnding);
-		result.append(source);
-		result.append(lineEnding);
-		
-		// Oracle and MS SQL Server support materialized views. For those
-		// the index definitions are of interest as well.
-		DataStore indexInfo = this.getTableIndexInformation(view);
-		if (indexInfo.getRowCount() > 0)
-		{
-			StringBuilder idx = this.indexReader.getIndexSource(view, indexInfo, null);
-			if (idx != null && idx.length() > 0)
-			{
-				result.append(lineEnding);
-				result.append(lineEnding);
-				result.append(idx);
-				result.append(lineEnding);
-			}
-		}
-		
-		if (this.dbSettings.ddlNeedsCommit() && includeCommit)
-		{
-			result.append("COMMIT;");
-		}
-		return result;
-	}
-
-	/**
-	 *	Return the source of a view definition as it is stored in the database.
-	 *	Usually (depending on how the meta data is stored in the database) the DBMS
-	 *	only stores the underlying SELECT statement, and that will be returned by this method.
-	 *	To create a complete SQL to re-create a view, use {@link #getExtendedViewSource(TableIdentifier, DataStore, boolean)}
-	 *
-	 *	@return the view source as stored in the database.
-	 */
-	public CharSequence getViewSource(TableIdentifier viewId)
-	{
-		if (viewId == null) return null;
-
-		if (this.isOracle && MVIEW_NAME.equalsIgnoreCase(viewId.getType()))
-		{
-			return oracleMetaData.getSnapshotSource(viewId);
-		}
-		
-		StringBuilder source = new StringBuilder(500);
-		Statement stmt = null;
-		ResultSet rs = null;
-		try
-		{
-			GetMetaDataSql sql = metaSqlMgr.getViewSourceSql();
-			if (sql == null) return StringUtil.EMPTY_STRING;
-			TableIdentifier tbl = viewId.createCopy();
-			tbl.adjustCase(this.dbConnection);
-			sql.setSchema(tbl.getSchema());
-			sql.setObjectName(tbl.getTableName());
-			sql.setCatalog(tbl.getCatalog());
-			stmt = this.dbConnection.createStatementForQuery();
-			String query = this.adjustHsqlQuery(sql.getSql());
-			if (Settings.getInstance().getDebugMetadataSql())
-			{
-				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);
-			}
-			rs = stmt.executeQuery(query);
-			while (rs.next())
-			{
-				String line = rs.getString(1);
-				if (line != null)
-				{
-					source.append(line);
-				}
-			}
-			StringUtil.trimTrailingWhitespace(source);
-			if (this.dbSettings.getFormatViewSource())
-			{
-				SqlFormatter f = new SqlFormatter(source);
-				source = new StringBuilder(f.getFormattedSql());
-			}
-			if (!StringUtil.endsWith(source, ';')) source.append(';');
-			source.append(Settings.getInstance().getInternalEditorLineEnding());
-
-			ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(this.dbConnection);
-			if (grantReader != null)
-			{
-				CharSequence grants = grantReader.getViewGrantSource(dbConnection, viewId);
-				if (grants != null && grants.length() > 0)
-				{
-					source.append(Settings.getInstance().getInternalEditorLineEnding());
-					source.append(grants);
-					source.append(Settings.getInstance().getInternalEditorLineEnding());
-				}
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("DbMetadata.getViewSource()", "Could not retrieve view definition for " + viewId.getTableExpression(), e);
-			source = new StringBuilder(ExceptionUtil.getDisplay(e));
-			if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-
-		return source;
-	}
-
-	private StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
+	StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
 	{
 		StringBuilder result = new StringBuilder();
 		boolean replaced = false;
@@ -959,10 +818,7 @@ public class DbMetadata
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		if (procedureReader != null)
-		{
-			this.procedureReader.readProcedureSource(def);
-		}
+		this.getProcedureReader().readProcedureSource(def);
 	}
 
 	private void initKeywordHandler()
@@ -1626,78 +1482,6 @@ public class DbMetadata
 	}
 
 	/**
-	 * Returns the columns (==parameters) defined for the given procedure.
-	 */
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
-		throws SQLException
-	{
-		return this.procedureReader.getProcedureColumns(aCatalog, aSchema, aProcname);
-	}
-
-	public boolean procedureExists(ProcedureDefinition def)
-	{
-		return procedureReader.procedureExists(def.getCatalog(), def.getSchema(), def.getProcedureName(), def.getResultType());
-	}
-	
-	/**
-	 * Return a list of stored procedures that are available
-	 * in the database. This call is delegated to the
-	 * currently defined {@link workbench.db.ProcedureReader}
-	 * If no DBMS specific reader is used, this is the {@link workbench.db.JdbcProcedureReader}
-	 * 
-	 * @return a DataStore with the list of procedures.
-	 */
-	public DataStore getProcedures(String aCatalog, String aSchema)
-		throws SQLException
-	{
-		return this.procedureReader.getProcedures(aCatalog, aSchema);
-	}
-
-	/**
-	 * Return a List of {@link workbench.db.ProcedureDefinition} objects
-	 * for Oracle packages only one ProcedureDefinition per package is returned (although
-	 * the DbExplorer will list each function of the packages).
-	 */
-	public List<ProcedureDefinition> getProcedureList(String aCatalog, String aSchema)
-		throws SQLException
-	{
-		assert(procedureReader != null);
-		
-		List<ProcedureDefinition> result = new LinkedList<ProcedureDefinition>();
-		DataStore procs = this.procedureReader.getProcedures(aCatalog, aSchema);
-		if (procs == null || procs.getRowCount() == 0) return result;
-		procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
-		int count = procs.getRowCount();
-		Set<String> oraPackages = new HashSet<String>();
-		
-		for (int i = 0; i < count; i++)
-		{
-			String schema  = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-			String cat = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-			String procName = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-			int type = procs.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
-			ProcedureDefinition def = null;
-			if (this.isOracle && cat != null)
-			{
-				// The package name for Oracle is reported in the catalog column.
-				// each function/procedure of the package is listed separately,
-				// but we only want to create one ProcedureDefinition for the whole package
-				if (!oraPackages.contains(cat))
-				{
-					def = ProcedureDefinition.createOraclePackage(schema, cat);
-					oraPackages.add(cat);
-				}
-			}
-			else
-			{
-				def = new ProcedureDefinition(cat, schema, procName, type);
-			}
-			if (def != null) result.add(def);
-		}
-		return result;
-	}
-
-	/**
 	 * Enable Oracle's DBMS_OUTPUT package with a default buffer size
 	 * @see #enableOutput(long)
 	 */
@@ -2119,12 +1903,6 @@ public class DbMetadata
 		return ds;
 	}
 
-	public static final int COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME = 0;
-	public static final int COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG = 1;
-	public static final int COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG = 2;
-	public static final int COLUMN_IDX_TABLE_INDEXLIST_COL_DEF = 3;
-	public static final int COLUMN_IDX_TABLE_INDEXLIST_TYPE = 4;
-	
 	/**
 	 * If the passed TableIdentifier is a Synonym and the current
 	 * DBMS supports synonyms, a TableIdentifier for the "real" 
@@ -2141,114 +1919,6 @@ public class DbMetadata
 		TableIdentifier syn = getSynonymTable(tbl);
 		if (syn == null) return tbl;
 		return syn;
-	}
-	
-	/**
-	 * Return the index information for a table as a DataStore. This is 
-	 * delegated to getTableIndexList() and from the resulting collection
-	 * the datastore is created.
-	 * 
-	 * @param table the table to get the indexes for
-	 * @see #getTableIndexList(TableIdentifier)
-	 */
-	public DataStore getTableIndexInformation(TableIdentifier table)
-	{
-		String[] cols = {"INDEX_NAME", "UNIQUE", "PK", "DEFINITION", "TYPE"};
-		final int types[] =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.OTHER, Types.VARCHAR};
-		final int sizes[] =   {30, 7, 6, 40, 10};
-		DataStore idxData = new DataStore(cols, types, sizes);
-		if (table == null) return idxData;
-		Collection<IndexDefinition> indexes = getTableIndexList(table);
-		for (IndexDefinition idx : indexes)
-		{
-			int row = idxData.addRow();
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME, idx.getName());
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG, (idx.isUnique() ? "YES" : "NO"));
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG, (idx.isPrimaryKeyIndex() ? "YES" : "NO"));
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_COL_DEF, idx);
-			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
-		}
-		idxData.sortByColumn(0, true);
-		return idxData;
-	}
-	
-	/**
-	 * Returns a list of indexes defined for the given table
-	 * @param table the table to get the indexes for
-	 */
-	public Collection<IndexDefinition> getTableIndexList(TableIdentifier table)
-	{
-		ResultSet idxRs = null;
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(this.dbConnection);
-		
-		// This will map an indexname to an IndexDefinition object
-		// getIndexInfo() returns one row for each column
-		HashMap<String, IndexDefinition> defs = new HashMap<String, IndexDefinition>();
-		
-		try
-		{
-			// Retrieve the name of the PK index
-			String pkName = "";
-			if (this.dbSettings.supportsGetPrimaryKeys())
-			{
-				ResultSet keysRs = null;
-				try
-				{
-					keysRs = this.metaData.getPrimaryKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
-					while (keysRs.next())
-					{
-						pkName = keysRs.getString("PK_NAME");
-					}
-				}
-				catch (Exception e)
-				{
-					LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Error retrieving PK information", e);
-					pkName = "";
-				}
-				finally
-				{
-					SqlUtil.closeResult(keysRs);
-				}
-			}
-			
-			idxRs = this.indexReader.getIndexInfo(tbl, false);
-			boolean supportsDirection = getDbSettings().supportsSortedIndex();
-			
-			while (idxRs.next())
-			{
-				boolean unique = idxRs.getBoolean("NON_UNIQUE");
-				String indexName = idxRs.getString("INDEX_NAME");
-				if (idxRs.wasNull()) continue;
-				if (indexName == null) continue;
-				String colName = idxRs.getString("COLUMN_NAME");
-				String dir = (supportsDirection ? idxRs.getString("ASC_OR_DESC") : null);
-				
-				IndexDefinition def = defs.get(indexName);
-				if (def == null)
-				{
-					def = new IndexDefinition(tbl, indexName);
-					def.setUnique(!unique);
-					def.setPrimaryKeyIndex(pkName.equals(indexName));
-					defs.put(indexName, def);
-					Object type = idxRs.getObject("TYPE");
-					def.setIndexType(dbSettings.mapIndexType(type));
-				}
-				def.addColumn(colName, dir);
-			}
-			
-			this.indexReader.processIndexList(tbl, defs.values());
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Could not retrieve indexes", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(idxRs);
-			this.indexReader.indexInfoProcessed();
-		}
-		return defs.values();
 	}
 
 	public List<TableIdentifier> getTableList()
@@ -2375,6 +2045,23 @@ public class DbMetadata
 		return catalog;
 	}
 
+	protected boolean supportsSchemas()
+	{
+		boolean supportsSchemas = false;
+		try
+		{
+			supportsSchemas = metaData.supportsSchemasInDataManipulation()
+		                  || metaData.supportsSchemasInTableDefinitions()
+											|| metaData.supportsSchemasInProcedureCalls();
+		}
+		catch (Exception e)
+		{
+			supportsSchemas = false;
+		}
+		return supportsSchemas;
+
+	}
+
 	public boolean supportsCatalogs()
 	{
 		boolean supportsCatalogs = false;
@@ -2391,76 +2078,6 @@ public class DbMetadata
 		return supportsCatalogs;
 	}
 	
-	/**
-	 * Changes the current catalog using Connection.setCatalog()
-	 * and notifies the connection object about the change.
-	 *
-	 * @param newCatalog the name of the new catalog/database that should be selected
-	 * @see WbConnection#catalogChanged(String, String)
-	 */
-	public boolean setCurrentCatalog(String newCatalog)
-		throws SQLException
-	{
-		if (StringUtil.isEmptyString(newCatalog)) return false;
-	
-		String old = getCurrentCatalog();
-		boolean useSetCatalog = dbSettings.useSetCatalog();
-		boolean clearWarnings = Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".setcatalog.clearwarnings", true);
-		
-		// MySQL does not seem to like changing the current database by executing a USE command
-		// through Statement.execute(), so we'll use setCatalog() instead
-		// which seems to work with SQL Server as well. 
-		// If for some reason this does not work, it could be turned off
-		if (useSetCatalog)
-		{
-			this.dbConnection.getSqlConnection().setCatalog(trimQuotes(newCatalog));
-		}
-		else
-		{
-			Statement stmt = null;
-			try 
-			{
-				stmt = this.dbConnection.createStatement();
-				String cat = quoteObjectname(newCatalog);
-				stmt.execute("USE " + cat);
-				if (clearWarnings) stmt.clearWarnings();
-			}
-			finally
-			{
-				SqlUtil.closeStatement(stmt);
-			}
-		}
-		
-		if (clearWarnings) this.dbConnection.clearWarnings();
-		
-		String newCat = getCurrentCatalog();
-		if (!StringUtil.equalString(old, newCat))
-		{
-			this.dbConnection.catalogChanged(old, newCatalog);
-		}
-		LogMgr.logDebug("DbMetadata.setCurrentCatalog", "Catalog changed to " + newCat);
-		
-		return true;
-	}
-	
-	/**
-	 * Remove quotes from an object's name. 
-	 * For MS SQL Server this also removes [] brackets
-	 * around the identifier.
-	 */
-	private String trimQuotes(String s)
-	{
-		if (s.length() < 2) return s;
-		if (this.isSqlServer)
-		{
-			String clean = s.trim();
-			int len = clean.length();
-			if (clean.charAt(0)=='[' && clean.charAt(len-1)==']')
-				return clean.substring(1,len-1);
-		}
-		
-		return StringUtil.trimQuotes(s);
-}
 	/**
 	 *	Returns a list of all catalogs in the database.
 	 *	Some DBMS's do not support catalogs, in this case the method
@@ -2661,9 +2278,9 @@ public class DbMetadata
 	}
 
 	/**
-	 *	Works around a bug in Postgres' JDBC driver.
-	 *	For Postgres strips everything after \000 for any
-	 *  other DBMS the given name is returned without change
+	 * Works around a bug in Postgres' JDBC driver.
+	 * For Postgres this method strips everything after a \000
+	 * For any other DBMS the given name is returned without change
 	 */
 	private String fixFKName(String aName)
 	{
@@ -2811,10 +2428,10 @@ public class DbMetadata
 		String name = null;
 		for (int row = 0; row < count; row ++)
 		{
-			String is_pk = anIndexDef.getValue(row, COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
+			String is_pk = anIndexDef.getValue(row, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
 			if ("YES".equalsIgnoreCase(is_pk))
 			{
-				name = anIndexDef.getValue(row, COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
+				name = anIndexDef.getValue(row, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
 				break;
 			}
 		}
@@ -2927,12 +2544,12 @@ public class DbMetadata
 	{
 		if (getViewTypeName().equalsIgnoreCase(table.getType())) 
 		{
-			CharSequence s = getExtendedViewSource(table, includeDrop);
+			CharSequence s = getViewReader().getExtendedViewSource(table, includeDrop);
 			if (s == null) return null;
 			return s.toString();
 		}
 		List<ColumnIdentifier> cols = getTableColumns(table);
-		DataStore index = this.getTableIndexInformation(table);
+		DataStore index = indexReader.getTableIndexInformation(table);
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.dbConnection);
 		DataStore fkDef = null;
@@ -2943,7 +2560,7 @@ public class DbMetadata
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, String tableNameToUse)
 	{
-		DataStore indexInfo = getTableIndexInformation(table);
+		DataStore indexInfo = indexReader.getTableIndexInformation(table);
 		return getTableSource(table, columns, indexInfo, null, false, tableNameToUse, true);
 	}
 
@@ -2959,7 +2576,7 @@ public class DbMetadata
 	
 		try
 		{
-			result.append(getExtendedViewSource(table, includeDrop));
+			result.append(getViewReader().getExtendedViewSource(table, includeDrop));
 		}
 		catch (SQLException e)
 		{
@@ -2982,7 +2599,8 @@ public class DbMetadata
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (columns == null || columns.size() == 0) return StringUtil.EMPTY_STRING;
-
+		if (table == null) return "";
+		
 		if ("MVIEW_NAME".equals(table.getType()))
 		{
 			return getMViewSource(table, columns, aIndexDef, includeDrop);
@@ -3259,13 +2877,20 @@ public class DbMetadata
 		Map<String, String> columnConstraints = Collections.emptyMap();
 		if (this.constraintReader != null)
 		{
+			Savepoint sp = null;
 			try
 			{
+				if (dbSettings.useSavePointForDML())
+				{
+					sp = this.dbConnection.setSavepoint();
+				}
 				columnConstraints = this.constraintReader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
+				dbConnection.releaseSavepoint(sp);
 			}
 			catch (Exception e)
 			{
-				if (this.isPostgres) try { this.dbConnection.rollback(); } catch (Throwable th) {}
+				LogMgr.logError("DbMetadata.getTableConstraints()", "Error retrieving table constraints", e);
+				dbConnection.rollback(sp);
 				columnConstraints = Collections.emptyMap();
 			}
 		}

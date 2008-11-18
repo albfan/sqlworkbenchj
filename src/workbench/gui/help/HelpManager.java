@@ -65,8 +65,19 @@ public class HelpManager
 		}
 	}
 	
-	public static void showHelpFile(String filename)
+	public static void showHelpFile(String topic)
 	{
+		String basefile;
+		
+		if (Settings.getInstance().useSinglePageHelp())
+		{
+			basefile = "workbench-manual-single.html";
+		}
+		else 
+		{
+			basefile = topic + ".html";
+		}
+		
 		File dir = Settings.getInstance().getHtmlManualDir();
 		if (dir == null)
 		{
@@ -80,19 +91,24 @@ public class HelpManager
 		File manual = null;
 		if (dir != null)
 		{
-			manual = new File(dir, filename);
+			manual = new File(dir, basefile);
 		}
 		
 		if (manual == null || !manual.exists())
 		{
-			String msg = ResourceMgr.getFormattedString("ErrHelpFileNotFound", filename, dir);
+			String msg = ResourceMgr.getFormattedString("ErrHelpFileNotFound", basefile, dir);
 			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 			return;
 		}
 		
 		try
 		{
-			BrowserLauncher.openURL(manual.toURL().toString());
+			String url = manual.toURL().toString();
+			if (Settings.getInstance().useSinglePageHelp() && topic != null)
+			{
+				url = url + "#" + topic;
+			}
+			BrowserLauncher.openURL(url);
 		}
 		catch (Exception ex)
 		{
@@ -102,22 +118,22 @@ public class HelpManager
 	
 	public static void showHelpIndex()
 	{
-		showHelpFile("workbench-manual.html");
+		showHelpFile(null);
 	}
 	
 	public static void showDataPumperHelp()
 	{
-		showHelpFile("data-pumper.html");
+		showHelpFile("data-pumper");
 	}
 	
 	public static void showOptionsHelp()
 	{
-		showHelpFile("options.html");
+		showHelpFile("options");
 	}
 	
 	public static void showProfileHelp()
 	{
-		showHelpFile("profiles.html");
+		showHelpFile("profiles");
 	}
 	
 }

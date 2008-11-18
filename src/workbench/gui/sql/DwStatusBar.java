@@ -13,6 +13,7 @@ package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -443,11 +444,12 @@ public class DwStatusBar
 		{
 			this.alertPanel.removeAll();
 		}
-		this.notificationHandler = evt.getHandler();
-		this.notificationLabel = new JLabel(ResourceMgr.getImageByName(evt.getIconKey()));
+		notificationHandler = evt.getHandler();
+		notificationLabel = new JLabel(ResourceMgr.getImageByName(evt.getIconKey()));
 		notificationLabel.setText(null);
 		notificationLabel.setToolTipText(evt.getTooltip());
 		notificationLabel.setIconTextGap(0);
+		notificationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		this.notificationLabel.addMouseListener(this);
 		this.alertPanel.add(notificationLabel);
 		Frame f = WbManager.getInstance().getCurrentWindow();
