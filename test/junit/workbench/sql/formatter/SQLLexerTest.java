@@ -41,22 +41,29 @@ public class SQLLexerTest extends TestCase
 		return result;
 	}
 
+	public void testWbVar()
+	{
+		String sql = "select $[?wbvar] from table";
+		List<SQLToken> l = getTokenList(sql);
+		assertEquals(4, l.size());
+		assertTrue(l.get(1).isWbVar());
+
+		sql = "select ${wbvar} from '$[table]'";
+		l = getTokenList(sql);
+		assertEquals(4, l.size());
+		assertTrue(l.get(1).isWbVar());
+		assertTrue(l.get(2).isReservedWord());
+		assertTrue(l.get(3).isLiteral());
+	}
+
 	public void testUnicode()
 	{
-		try
-		{
-			String sql = "insert into mytable (col1, col2, col3) values ('\u32A5\u0416','col2_value', 1234)";
-			List<SQLToken> l = getTokenList(sql);
-			assertEquals(18, l.size());
-			assertEquals("'\u32A5\u0416'", l.get(12).getText());
-			assertEquals("'col2_value'", l.get(14).getText());
-			assertEquals("1234", l.get(16).getText());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}	
+		String sql = "insert into mytable (col1, col2, col3) values ('\u32A5\u0416','col2_value', 1234)";
+		List<SQLToken> l = getTokenList(sql);
+		assertEquals(18, l.size());
+		assertEquals("'\u32A5\u0416'", l.get(12).getText());
+		assertEquals("'col2_value'", l.get(14).getText());
+		assertEquals("1234", l.get(16).getText());
 	}
 	
 	public void testQuotedIdentifier()

@@ -106,6 +106,10 @@ public class StatementRunnerTest
 					controllerCalled = true;
 					return confirmExecution;
 				}
+				public String getPassword(String prompt)
+				{
+					return null;
+				}
 			};
 
 			con.getProfile().setReadOnly(false);

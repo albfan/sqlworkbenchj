@@ -88,7 +88,7 @@ public class BatchRunnerTest
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "errtest");
 			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
-				" -user=sa -driver=org.h2.Driver "  + 
+				" -username=sa -driver=org.h2.Driver "  +
 				" -logfile='" + logfile.getFullPath() + "' " + 
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
@@ -118,7 +118,7 @@ public class BatchRunnerTest
 		}
 		finally
 		{
-			con.disconnect();
+			if (con != null) con.disconnect();
 		}
 	}
 
@@ -155,7 +155,7 @@ public class BatchRunnerTest
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "successtest");
 			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
-				" -user=sa -driver=org.h2.Driver "  + 
+				" -username=sa -driver=org.h2.Driver "  +
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
 				" -cleanupSuccess='" + successFile.getFullPath() + "' " +
@@ -187,7 +187,7 @@ public class BatchRunnerTest
 		}
 		finally
 		{
-			con.disconnect();
+			if (con != null) con.disconnect();
 		}
 	}
 	
@@ -225,7 +225,7 @@ public class BatchRunnerTest
 
 		ArgumentParser parser = new AppArguments();
 		String script = "-script='" + scriptFile.getAbsolutePath() + "'";
-		parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -user=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
+		parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -username=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
 		BatchRunner runner = BatchRunner.createBatchRunner(parser);
 
 		assertNotNull(runner);
@@ -263,7 +263,7 @@ public class BatchRunnerTest
 			
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-url='jdbc:h2:mem:testBatchRunner' " + 
-				" -user=sa " + 
+				" -username=sa " +
 				" -driver=org.h2.Driver "  + 
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -rollbackOnDisconnect=true " +
@@ -443,6 +443,7 @@ public class BatchRunnerTest
 
 			File out= new File(util.getBaseDir(), "console.txt");
 			console = new PrintStream(out);
+			runner.setOptimizeColWidths(false);
 			runner.setConsole(console);
 			runner.execute();
 			console.close();
@@ -450,13 +451,13 @@ public class BatchRunnerTest
 			BufferedReader in = new BufferedReader(new FileReader(out));
 			String content = FileUtil.readCharacters(in);
 			System.out.println("*************\n" + content + "\n*****************");
-			int pos = content.indexOf("NR\tFIRSTNAME\tLASTNAME");
+			int pos = content.indexOf("NR | FIRSTNAME | LASTNAME");
 			assertEquals("Header not found", (pos > -1), true);
 
-			pos = content.indexOf("1\tArthur\tDent");
+			pos = content.indexOf("1 | Arthur | Dent");
 			assertEquals("Record not found", (pos > -1), true);
 
-			pos = content.indexOf("2\tFord\tPrefect");
+			pos = content.indexOf("2 | Ford | Prefect");
 			assertEquals("Record not found", (pos > -1), true);
 			
 		}

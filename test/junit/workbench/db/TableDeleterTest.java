@@ -14,6 +14,8 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
@@ -83,11 +85,17 @@ public class TableDeleterTest extends TestCase {
 		try
 		{
 			con = setupDatabase();
-			List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
-			tables.add(new TableIdentifier("company"));
-			tables.add(new TableIdentifier("person"));
-			tables.add(new TableIdentifier("person_company"));
-			tables.add(new TableIdentifier("person_address"));
+			
+			final List<TableIdentifier> tables =
+				Collections.unmodifiableList(
+					Arrays.asList(new TableIdentifier[]
+					{
+						new TableIdentifier("company"),
+						new TableIdentifier("person"),
+						new TableIdentifier("person_company"),
+						new TableIdentifier("person_address")
+					}
+				));
 
 			errorCalled = false;
 			fatalError = false;
@@ -118,7 +126,7 @@ public class TableDeleterTest extends TestCase {
 			assertEquals(0, deleted.size());
 			stmt = con.createStatement();
 
-			for (TableIdentifier table : deleted)
+			for (TableIdentifier table : tables)
 			{
 				ResultSet rs = stmt.executeQuery("SELECT count(*) from " + table.getTableName());
 				int count = -1;
@@ -238,11 +246,11 @@ public class TableDeleterTest extends TestCase {
 			"insert into person_address values (3, 3);\n" + // zaphod
 			"insert into person_address values (4, 3);\n" + // tricia
 			"commit;\n" +
-			"insert into company values (1, 'Some Company');\n" +
-			"insert into company values (2, 'h2g');\n" +
+			"insert into company (company_id, company_name) values (1, 'Some Company');\n" +
+			"insert into company (company_id, company_name) values (2, 'h2g');\n" +
 			"commit; \n" +
-			"insert into person_company values (1, 2);\n" +
-			"insert into person_company values (2, 2);\n" +
+			"insert into person_company (person_id, company_id) values (1, 2);\n" +
+			"insert into person_company (person_id, company_id) values (2, 2);\n" +
 			"commit;\n";
 
 		TestUtil.executeScript(conn, data);

@@ -59,6 +59,23 @@ public class SqlFormatterTest
 //		System.out.println("**************\n" + formatted + "\n**********");
 //	}
 
+	public void testWbVars()
+		throws Exception
+	{
+		String sql = "SELECT * FROM mytable WHERE id in ($[somestuff])";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+//		System.out.println("*******\n" + formatted + "\n**********");
+		String expected = "SELECT *\nFROM mytable\nWHERE id IN ($[somestuff])";
+		assertEquals(expected, formatted);
+		
+		sql = "SELECT * FROM mytable WHERE id in ($[&somestuff])";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+		expected = "SELECT *\nFROM mytable\nWHERE id IN ($[&somestuff])";
+		assertEquals(expected, formatted);
+	}
+	
 	public void testCTE()
 		throws Exception
 	{

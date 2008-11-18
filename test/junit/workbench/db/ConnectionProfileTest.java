@@ -11,6 +11,8 @@
  */
 package workbench.db;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import junit.framework.TestCase;
 import workbench.sql.DelimiterDefinition;
@@ -49,6 +51,8 @@ public class ConnectionProfileTest
 		old.setPreDisconnectScript("shutdown abort");
 		old.setUrl("jdbc:some:database");
 		old.setHideWarnings(true);
+		old.setRemoveComments(true);
+
 
 		ConnectionProfile copy = old.createCopy();
 		assertFalse(copy.getAutocommit());
@@ -61,6 +65,8 @@ public class ConnectionProfileTest
 		assertTrue(copy.getIgnoreDropErrors());
 		assertTrue(copy.getTrimCharData());
 		assertTrue(copy.getIncludeNullInInsert());
+		assertTrue(copy.getRemoveComments());
+		
 		assertEquals(42, copy.getIdleTime());
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());
@@ -160,6 +166,34 @@ public class ConnectionProfileTest
 		profile.reset();
 		profile.setDriverName("Postgres 8.3");
 		assertTrue(profile.isChanged());
-		
+	}
+
+	public void testFindInList()
+	{
+		ConnectionProfile profile = new ConnectionProfile();
+		profile.setAlternateDelimiter(new DelimiterDefinition("/", true));
+		profile.setAutocommit(false);
+		profile.setDriverName("Postgres");
+		profile.setEmptyStringIsNull(true);
+		profile.setIgnoreDropErrors(true);
+		profile.setName("First");
+		profile.setGroup("Primary");
+		profile.setStorePassword(true);
+
+		List<ConnectionProfile> profiles = new ArrayList<ConnectionProfile>();
+		profiles.add(profile);
+
+		ConnectionProfile profile2 = new ConnectionProfile();
+		profile2.setAutocommit(false);
+		profile2.setDriverName("PostgreSQL");
+		profile2.setEmptyStringIsNull(false);
+		profile2.setIgnoreDropErrors(false);
+		profile2.setName("First");
+		profile2.setGroup("Primary");
+		profile2.setStorePassword(false);
+
+		profiles.remove(profile2);
+		profiles.add(profile2);
+		assertEquals(1, profiles.size());
 	}
 }

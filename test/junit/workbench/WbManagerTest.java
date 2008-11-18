@@ -12,14 +12,12 @@
 package workbench;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import junit.framework.TestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.util.EncodingUtil;
 import workbench.util.WbFile;
 
 /**
@@ -36,47 +34,39 @@ public class WbManagerTest extends TestCase
 
 	private static final String UMLAUTS = "\u00f6\u00e4\u00fc";
 
-	private String createScript(String basedir)
-	{
-		File f = new File(basedir, "batch_script.sql");
-		PrintWriter w = null;
-		try
-		{
-			w = new PrintWriter(EncodingUtil.createWriter(f, "UTF8", false));
-			w.println("create table batch_test (nr integer, name varchar(100));\n");
-			w.println("insert into batch_test (nr, name) values (1, '" + UMLAUTS + "');\n");
-			w.println("commit;\n");
-			w.close();
-			
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-		return f.getAbsolutePath();
-	}
-	
 	public void testBatchMode()
 	{
 		TestUtil util = new TestUtil(getName());
+		util.emptyBaseDirectory();
+		
 		WbFile logfile = new WbFile(util.getBaseDir(), "junit_wb_test.log");
+		System.setProperty("workbench.system.doexit", "false");
+		
 		try
 		{
-			System.setProperty("workbench.system.doexit", "false");
+
+			WbFile scriptFile = new WbFile(util.getBaseDir(), "batch_script.sql");
+			String script =
+				"create table batch_test (nr integer, name varchar(100));\n"  +
+				"insert into batch_test (nr, name) values (1, '" + UMLAUTS + "');\n" +
+				"commit;\n";
+			
+			TestUtil.writeFile(scriptFile, script, "UTF-8");
 			
 			File db = new File(util.getBaseDir(), getName());
-			String script = createScript(util.getBaseDir());
-			String[] args = { "-embedded ",
-												"-nosettings ",
+			String[] args = { "-" + AppArguments.ARG_NOSETTNGS,
 												"-configdir=" + util.getBaseDir(),
 												"-url='jdbc:h2:" + db.getAbsolutePath() + "'",
-												"-user=sa",
+												"-" + AppArguments.ARG_CONN_USER + "=sa",
 												"-logfile='" + logfile.getFullPath() + "'",
+												"-feedback=false",
 												"-driver=org.h2.Driver ",
-												"-script='" + script + "'",
+												"-script='" + scriptFile.getFullPath() + "'",
 												"-encoding=UTF8"
 												};
+
 			WbManager.main(args);
+			assertEquals(0, WbManager.getInstance().exitCode);
 			WbConnection con = util.getConnection(db);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select nr, name from batch_test");
@@ -91,16 +81,17 @@ public class WbManagerTest extends TestCase
 			stmt.close();
 			assertTrue(logfile.exists());
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
 		finally
 		{
+			ConnectionMgr.getInstance().clearProfiles();
 			ConnectionMgr.getInstance().disconnectAll();
 			LogMgr.shutdown();
-			logfile.delete();
+			assertTrue(logfile.delete());
 		}
 	}
 

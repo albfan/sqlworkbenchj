@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -44,6 +45,7 @@ import workbench.sql.StatementRunner;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
+import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -164,7 +166,7 @@ public class TestUtil
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = new AppArguments();
-		parser.parse("-url='jdbc:hsqldb:mem:" + dbName + ";shutdown=true' -user=sa -driver=org.hsqldb.jdbcDriver");
+		parser.parse("-url='jdbc:hsqldb:mem:" + dbName + ";shutdown=true' -username=sa -driver=org.hsqldb.jdbcDriver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(dbName);
 		ConnectionMgr.getInstance().addProfile(prof);
@@ -187,7 +189,7 @@ public class TestUtil
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = new AppArguments();
-		parser.parse("-url='jdbc:h2:mem:" + db + "' -user=sa -driver=org.h2.Driver");
+		parser.parse("-url='jdbc:h2:mem:" + db + "' -username=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(db);
 		ConnectionMgr.getInstance().addProfile(prof);
@@ -232,7 +234,7 @@ public class TestUtil
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = new AppArguments();
-		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + "' -user=sa -driver=org.h2.Driver");
+		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + "' -username=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(db.getName());
 		ConnectionMgr.getInstance().addProfile(prof);
@@ -347,6 +349,14 @@ public class TestUtil
 		throws IOException
 	{
 		FileWriter w = new FileWriter(f);
+		w.write(content);
+		w.close();
+	}
+
+	public static void writeFile(File f, String content, String encoding)
+		throws IOException
+	{
+		Writer w = EncodingUtil.createWriter(f, encoding, false);
 		w.write(content);
 		w.close();
 	}

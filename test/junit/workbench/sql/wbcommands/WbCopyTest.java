@@ -583,6 +583,40 @@ public class WbCopyTest
 			}
 			SqlUtil.closeResult(rs);
 
+
+			// Now test deleting the target first
+			sql = "WbCopy " +
+				"-sourceTable=* " +
+				"-mode=insert " +
+				"-deleteTarget=true " +
+				"-checkDependencies=true " +
+				"-sourceProfile='schemaCopySource' " +
+				"-targetProfile='schemaCopyTarget' ";
+
+			result = copyCmd.execute(sql);
+			msg = result.getMessageBuffer().toString();
+			assertEquals(msg, true, result.isSuccess());
+			
+			rs = tstmt.executeQuery("select nr, lastname, firstname from person");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String ln = rs.getString(2);
+				String fn = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Incorrect data copied", "Dent", ln);
+					assertEquals("Incorrect data copied", "Arthur", fn);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Incorrect data copied", "Beeblebrox", ln);
+					assertEquals("Incorrect data copied", "Zaphod", fn);
+				}
+			}
+			SqlUtil.closeResult(rs);
+
+
 			ConnectionMgr.getInstance().removeProfile(source.getProfile());
 			ConnectionMgr.getInstance().removeProfile(target.getProfile());
 		}
@@ -598,6 +632,7 @@ public class WbCopyTest
 		int dummy = 5;
 	}
 
+	
 	public void testCreateTarget()
 	{
 		try

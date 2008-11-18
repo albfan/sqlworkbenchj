@@ -796,7 +796,7 @@ public class ScriptParserTest
 									"select * from test;\n"+
 									"-- \u32A5\u0416\u32A5\u0416\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n"+
 									"select * from test2;\n";
-		//String sql = "/* \uD8D5\uD8D7\uD8D9 */\nINSERT INTO something;\n-- \u4E2D\u6587\u6CE8 \nSELECT * FROM test;";
+		
     ScriptParser parser = new ScriptParser(sql);
 
 		int count = parser.getSize();

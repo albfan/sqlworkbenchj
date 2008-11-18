@@ -91,7 +91,7 @@ public class WbExportTest
 		assertTrue(exp.isTypeValid("sqlUpdate"));
 		assertTrue(exp.isTypeValid("sqlInsert"));
 		assertTrue(exp.isTypeValid("SQLDeleteInsert"));
-		assertTrue(exp.isTypeValid("xls"));
+//		assertTrue(exp.isTypeValid("xls"));
 		assertTrue(exp.isTypeValid("xlsx"));
 		assertTrue(exp.isTypeValid("ods"));
 		assertFalse(exp.isTypeValid("calc"));
@@ -619,7 +619,24 @@ public class WbExportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
+	public void testSingleExportWithDir()
+	{
+		try
+		{
+			StatementRunnerResult result = exportCmd.execute("wbexport -outputdir='" + basedir + "' -type=text -header=true -sourcetable=junit_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			File exportFile = new File(this.basedir, "junit_test.txt");
+			assertEquals("Export file not created", true, exportFile.exists());
+			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
 	public void testTextExport() 
 	{
 		try
@@ -629,8 +646,6 @@ public class WbExportTest
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			
 			assertEquals("Export file not created", true, exportFile.exists());
-			// WbExport creates an empty line at the end plus the header line
-			// we end up with rowcount + 2 lines in the export file
 			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
 			
 			File ctl = new File(this.basedir, "export.ctl");
@@ -658,6 +673,7 @@ public class WbExportTest
 			fail(e.getMessage());
 		}
 	}
+
 
 	public void testXmlClobExport() 
 	{
@@ -1041,6 +1057,21 @@ public class WbExportTest
 		}
 	}
 
+	public void testEmptyWithAppend()
+		throws Exception
+	{
+			WbFile f = new WbFile(util.getBaseDir(), "person.txt");
+			Statement stmt = connection.createStatement();
+			stmt.executeUpdate("delete from person");
+			connection.commit();
+			stmt.close();
+
+			StatementRunnerResult result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=person -writeEmptyResults=false");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertFalse(f.exists());
+	}
+
+	
 	public void testEmptyResult()
 		throws Exception
 	{
@@ -1056,17 +1087,37 @@ public class WbExportTest
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertFalse(f.exists());
 
-			result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=person -writeEmptyResults=false -compress=true");
+			result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=junit_test -writeEmptyResults=false -append=true");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			WbFile archive = new WbFile(util.getBaseDir(), "person.zip");
-			assertFalse(archive.exists());
+			assertTrue(f.exists());
+			BufferedReader in = new BufferedReader(new FileReader(f));
+			List<String> lines = FileUtil.getLines(in);
+			assertEquals(rowcount + 1, lines.size());
 
+			f.delete();
+
+			result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=junit_test -writeEmptyResults=false -append=true");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertTrue(f.exists());
+			in = new BufferedReader(new FileReader(f));
+			List<String> lines1 = FileUtil.getLines(in);
+			assertEquals(rowcount + 1, lines1.size());
+
+			// The second
+			result = exportCmd.execute("wbexport -header=true -file='" + f.getFullPath() + "' -type=text -sourcetable=person -writeEmptyResults=false -append=true");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+			assertTrue(f.exists());
+			
+			in = new BufferedReader(new FileReader(f));
+			List<String> lines2 = FileUtil.getLines(in);
+			assertEquals(lines1, lines2);
 		}
 		finally
 		{
 			util.emptyBaseDirectory();
 		}
 	}
+
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
