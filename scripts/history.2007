@@ -1,0 +1,610 @@
+Build 97, 21.10.2007
+--------------------
+Enh:  (96.9) A new option has been added to define additional characters
+      that are recognized as word characters e.g. when jumping word by word
+      (using ctrl-left, ctrl-right) or selecting words in the editor using
+      a doubleclick (Available under Tools -> Options -> Editor options)
+Enh:  (96.9) Added an option to reformat the view sourced when it's retrieved
+      from the database. This is not enabled by default. To turn it on
+      set the property:
+			workbench.db.[dbid].source.view.doformat=true
+      in workbench.settings.
+Enh:  (96.8) The global option "Enable dbms_output" has been removed. If you
+      want to enable support for the DBMS_OUTPUT package, please use a
+      pre-connect script in the connection profile.
+Enh:  (96.7) When creating a new physical connection for a tab using the new
+      "Connect tab" feature, this connection can now be reset to the global
+      connection. The tab's title is also displayed in a different color.
+      The extra connection can now also be controlled through the popup
+      menu for a tab
+Enh:  (96.7) When deleting rows from a result, the rows can now be deleted
+      including all dependent rows using "Delete With Dependencies"
+Enh:  (96.6) The extended connection properties can now optionally be copied
+      into the system properties when the connection is created. This can
+      be used for JDBC drivers that only support System properties
+      (such as H2)
+Enh:  (96.6) When not using "Separate Connection per tab", a new physical
+      connection for the current tab can now be created using
+      "File -> New Connection"
+Enh:  (96.6) The definition for JDBC drivers are now stored without a path
+      separator in WbDrivers.xml in order to make the configuration file
+      work on different platforms. To save the driver definitions in the new
+      format, the "Manage Driver" dialog needs to be opened and closed once.
+Enh:  (96.6) The definition for Look And Feels (Tools -> Options) is now
+      stored with a platform independent path separator in workbench.settings
+      to make it easier to share the .settings file between platforms.
+Enh:  (96.6) When using "Check foreign keys" in the "Delete data" dialog, any
+      dependent table that was not selected, can now optionally be added
+      to the list.
+Enh:  (96.5) WbCopy can now be used with multiple tables, e.g.
+      -sourceTable=* to copy all tables, or -sourceTable=table1,table2.
+      Specific column or table mappings are not possible in that mode.
+      All tables with from the the source are copied to all tables
+      with the same name in the target DB. If copying multiple tables, it the
+      responsibility of the user to specify them in the correct order (so
+      that no foreign key constraint is violated)
+Enh:  (96.5) WbImport and WbCopy now support the -checkDependencies
+      parameter. If set to true, SQL Workbench/J will analyze the
+      foreign key dependencies of the tables and will import/copy them
+      such that the parent tables are processed before and referencing
+      child tables. The parameter is only checked if a multi-table mode
+      is used in both commands ("WbCopy -sourceTable=*" or
+      "WbImport -sourceDir=somedir".
+Enh:  (96.5) When using "Delete data" from within the DbExplorer, the
+      list of tables can now be sorted according to their FK constraints.
+Enh:  (96.5) Empty column and table comments can now be included in the
+      generated SQL source for a table. This can be configured in
+      Tools -> Options -> SQL Generation
+Enh:  (96.5) The toolbar can now be hidden (View -> Toolbar).
+      Thanks to Petr for the patch.
+Enh:  (96.4) Importing data into Oracle NCLOB columns is now possible.
+Enh:  (96.3) WbSchemaReport and WbSchemaDif can now also include sequences. To
+      include sequences, use the new parameter -includeSequences=true (the
+      default is false)
+Enh:  (96.3) WbCopy (DataPumper) and WbExport into a XML file did not work with
+      Oracle when a NVARCHAR2 column was involved. This was due to the fact that
+      the Oracle driver does not report the correct datatype for. A workaround
+      has been added so that NVARCHAR2 (and NCHAR) columns are treated as
+      java.sql.Types.VARCHAR instead of java.sql.Types.OTHER.
+      This workaround is enabled by default and can be disabled by setting
+      workbench.db.oracle.fixnvarchartype=false
+      in workbench.settings
+Enh:  (96.3) Support for stored procedures with OUT parameters has been added
+      for drivers that support the necessary calls. It has been tested with
+      Oracle (11g driver), MySQL (5.0), SQL Server 2005 (Microsoft Driver) and
+      IBM DB9 9 (Linux).
+      The procedure needs to be called with the new keyword WbCall:
+      WbCall myproc(?)
+      All out parameters of the procedure will be displayed.
+      Wehn setting the property:
+      workbench.db.[dbid].procs.use.wbcall=true
+      SQL Workbench/J will also apply the new logic when executing the CALL
+      statement. As this might potentially lead to compatibility problems it is
+      disabled by default.
+Enh:  (96.3) A background color for the connection info display can now be
+      defined on a per profile basis (to e.g. identify "critical" connections)
+Enh:  (96.1) Added support for SQLite
+Enh:  (96.1) Code completion now recognizes an alias of the outer statement
+      inside a sub-select.
+Enh:  (96.1) WbImport can now also import files with fixed columns
+      (no delimiter) using the -columnWidths parameter
+Enh:  (96.1) The code-completion dropdown now allows multi-selection
+Enh:  (96.1) WbExport can now also write a format file for SQL Server's
+      bcp utility. The file is created by using the new switch
+      -formatFile=sqlserver
+      The switch can also be used to write an SQL*Loader file using
+      '-formatFile=oracle'. Creating both files is possible using
+      '-formatFile=oracle,sqlserver'
+      The old parameter '-writeOracleLoader=true' is still supported
+Enh:  (96.1) For DDL Statements a Savepoint can now be enabled so that
+      DBMS which cannot continue the current transaction after a DDL error
+      do not require a manual rollback (e.g. Postgres). This makes the
+      option "Ignore DROP Errors" work for Postgres when not running in
+      autocommit mode.
+      This is controlled with the property
+      workbench.db.[dbid].ddl.usesavepoint=true
+      Running imports using the update/insert (or insert/update) mode
+      will not work with Postgres as well. SQL Workbench/J can now use a
+      savepoint to guard the first of the two statements so that the transaction
+      can continue. This is controlled using
+      workbench.db.[dbid].import.usesavepoint=true
+Fix:  (96.9) The JDBC/ODBC bridge could no longer be loaded
+Fix:  (96.9) Tab names with non-ISO characters were not stored correctly in
+      the workspace.
+Fix:  (96.8) WbSchemaDiff could not be run in batch mode.
+Fix:  (96.8) When changing a value in the result set from null to something else
+      the column was not included in the generated update statements.
+Fix:  (96.7) It was not possible to edit a value in the result set that was null
+      (e.g. setting a non-null value)
+Fix:  (96.7) When not specifying a database with the connection URL for MySQL and
+      not using separate connections per tab, displaying data in the DbExplorer
+      did not work (nor did the display of Enums)
+Fix:  (96.7) Displaying the table's rowcount in the DbExplorer did not work with
+      old MS SQL drivers when autocommit was turned off
+Fix:  (96.5) Single quotes in comments were not escaped correctly in generated
+      table source
+Fix:  (96.4) When using workbench.db.oracle.fixcharsemantics=true, NVARCHAR2
+      columns were also displayed with Byte/Char semantics.
+Fix:  (96.4) Retrieving sequences was broken for DB2
+Fix:  (96.3) Oracle packages were not correctly written into the output file of
+      WbSchemaReport or WbSchemaDiff
+Fix:  (96.3) The display of the source of stored procedures was broken for
+      SQL Server
+Fix:  (96.3) When reloading the list of indexes in the DbExplorer, all subsequent
+      retrieval operations were blocked.
+Fix:  (96.3) Removed the automatic detection of available translations (because
+      it slowed down startup too much). If a new  translation is added, this now
+      needs to be defined in workbench.properties
+Fix:  (96.2) The column label for the key column selection in the DataPumper was
+      not readable with certain look & feels
+Fix:  (96.2) When running WbImport -header=false on an empty file, SQL Workbench/J
+      reported an error because it could not read the header line.
+Fix:  (96.1) WbCopy when used with -createTable did no re-create NOT NULL
+      constraints on the columns.
+Fix:  (96.1) Added some missing german localizations. The Version number
+      was not displayed correctly as well, when German was selected as the
+      UI language.
+Fix:  (96.1) Search did not work in the editor if no text was selected.
+Fix:  (96.1) The parameter -trimValues for WbImport was not documented
+Fix:  (96.1) Fixed some problems when printing tables that spread horizontally
+      over more than one page.
+Fix:  (96.1) Fixed a race condition upon startup when the automatic update
+      check was enabled.
+Fix:  (96.1) Fixed a race condition when closing the application which sometimes
+      caused the application process to remain in memory.
+Fix:  (96.1) The {$clobfile} syntax could not be used with Apache Derby and
+      source files with a multi-byte encoding (such as UTF-8)
+
+Build 96, 05.08.2007
+--------------------
+Enh:  (95.5) A German localization for the GUI is now available. The GUI
+      language can be switched from within the Options Panel (General Options).
+Enh:  (95.5) A new option "Trim CHAR data" has been added to the connection.
+      profile. If this is enabled, values retrieved from columns with
+      the CHAR datatype are trimmed (as the CHAR data is padded on
+      most DBMS)
+Enh:  (95.4) A "keep alive" statement can now be defined in the
+      "Connect Scripts" dialog, that will send a statement at defined
+      intervals to the server to prevent the connection from beeing
+      closed.
+Enh:  (95.2) A new option to sort pasted columns (for auto-completion)
+       according to their position in the database has been added
+      (Tools -> Options -> Editor)
+Enh:  (95.1) When importing files using mode=insert static values can now
+      be specified for specific columns that are not part of the input file
+      (using the switch -constantValues)
+Enh:  (95.1) The filenames generated for blob files are not converted
+      to lowercase anymore. This means when using -lobIdCols to create the
+      blob filenames from the column data, the original case will be preserved.
+Fix:  (95.5) Improved the error handling when displaying table data in the
+      DbExplorer
+Fix:  (95.5) No tables where shown when invoking code completion for an
+      INSERT INTO statement was broken.
+Fix:  (95.5) "Create DDL Script" in the DbExplorer was not working for
+      sequences.
+Fix:  (95.4) The selected case for table name when generating statements (from
+      withing the options dialog) is now ignored if the driver reports that
+      the server is case sensitive for object names.
+Fix:  (95.4) SQL Workbench/J would send a SHUTDOWN command to a Derby server
+      when disconnection. This no only done for the embedded driver.
+Fix:  (95.4) Copying data as INSERT or UPDATE to the clipboard from
+      a SELECT that contained more than row failed (and did not ask
+      for the update table)
+Fix:  (95.4) -lineFilter did exclude the specified columns instead of
+      including only the matching rows.
+Fix:  (95.4) Mixing function calls and constants with the -constantValues
+      switch for WbImport did not work
+Fix:  (95.4) It was not possible to specify a blank as the delimiter when
+      importing text files. This can now be done using -delimiter="' '"
+Fix:  (95.4) WbImport would fail with a NullPointerException if a column was
+      listed twice in the -fileColumns argument.
+Fix:  (95.4) When importing text files with -quoteCharEscaping enabled,
+      WbImport would fail if a column had a null value
+Fix:  (95.3) WbExport with a SELECT as the source was broken
+Fix:  (95.3) The source for tables that contained $ characters (or other
+      characters that are used for regular expressions) could not be displayed.
+Fix:  (95.2) WbVardef trimmed spaces inside quoted values.
+Fix:  (95.2) When reformatting SELECT statements with a CASE that defines a
+      column alias (CASE .. END AS someCol) no whitespace was put before
+      the AS during reformatting.
+Fix:  (95.1) It was no longer possible to run SQL Workbench in batch mode
+      without a profile (for e.g. a single WbCopy command where the
+      profiles are specified as part of the WbCopy parameters)
+
+Build 95, 09.06.2007
+--------------------
+Enh:  (94.8) A special date and timestampformat "millis" can now be specified
+      for WbImport (e.g. -timestampFormat=millis). This will treat the value
+      as a numeric value representing the milliseconds since 1970-01-01 00:00:00
+      (and thus can be used to create a java.util.Date() object directly)
+Enh:  (94.8) When using -lobIdCols with WbExport the name of the export
+      file is no longer part of the generated LOB filename if -compress=true
+      is used.
+Enh:  (94.6) Ctrl-Shift-C (Comment Selection) now acts as a toggle. If this
+      is invoked on a text that is not commented, the line comment character
+      will be added. If the complete selection is already commented, then
+      the comments will be removed.
+      Ctrl-Shift-U (Uncomment Selection) works as before
+Enh:  (94.6) You can now select the elements that should be shown in the
+      main window's title bar. The name of profile group and the current
+      workspace can be enabled/disabled. The display of the current editor's
+      filename has been moved from the "Editor" page in the options dialog
+      to the new "Window Title" page.
+Enh:  (94.6) WbImport tries to figure the import type according to the file
+      extension of the import file. Text import is assumed for the extensions
+      txt or csv whereas XML import is assumed for the extension xml
+      When importing compressed exports, the type parameter is still
+      necesary.
+Enh:  (94.5) The handling of date/datetime keywords when entering data
+      has been modified. You can now specify keywords for the three different
+      JDBC datatypes (date, timestamp, time) and the value that is created
+      depends on the type of the keyword (keywords for date will not
+      include the time portion, keywords for time will not incude a
+      date part). The detection is independent of the type of the column
+      (i.e. you can enter current_timestamp in a date column to get the
+      time part as well for e.g. Oracle DATE columns). The differen keywords
+      can be defined in workbench.settings. The default entries are:
+      workbench.db.keyword.current_date=current_date,today
+      workbench.db.keyword.current_time=current_time,now
+      workbench.db.keyword.current_timestamp=current_timestamp,sysdate,systimestamp
+      So when you enter current_date in a date (or timestamp) column the
+      current date without the time (i.e. the time will be 00:00) part will be
+      sent to the DBMS. When you enter e.g. sysdate in a date column the value
+      sent to the DBMS will include the time part.
+Enh:  (94.5) The literals that are accepted as true/false for converting
+      boolean values can now be defined using two new parameters for the
+      WbImport command: -literalsFalse -literalsTrue this also affects
+      the parsing of values for the -booleanToNumber=true mode. The default
+      literals for the number conversion has been limited to true/false.
+      Literals that are not "known" (either through the default or by
+      specifying them using the -literalsXXX switch) are now always rejected
+      (before they were silently converted to false)
+Enh:  (94.4) The automatic conversion of the values true/false to numeric
+      values 1/0 can now be disabled for WbImport using the parameter
+      -booleanToNumber=false (the default is true)
+Enh:  (94.4) The default shortcut for auto-completion has been changed
+      to Ctrl-Space
+Enh:  (94.4) WbImport and WbExport can now control how quote characters
+      that are contained in the data are treated. The new argument
+      -quoteCharEscaping defines the expected input format or the format
+      to be written. Possible values are none,duplicate or escape.
+Enh:  (94.3) Using mode=insert,update is no possible with PostgreSQL. Due
+      to PG's error handling this required a savepoint around the INSERT
+      statement that could be rolled back. Doing the INSERT in a
+      sub-transaction with savepoints can be enabled for other DBMS using
+      workbench.db.[dbid].import.usesavepoint=true
+Enh:  (94.2) The application can now automatically check for updates
+Enh:  (94.2) The log level can now be changed from within the options dialog
+      (no need to restart SQL Workbench)
+Enh:  (94.2) When entering values in date (timestamp) columns the keywords
+      now, sysdate, current_date and current_timestamp are replaced with
+      the current date/time. Note that this will be the local timezone
+      of the machine where SQL Workbench is running, not the time of the
+      DBMS Server
+Enh:  (94.2) Under MacOS the Apple+Q shortcut is now working to exit the
+      application (as well as the about and preferences keys)
+Enh:  (94.2) Re-designed the options dialog
+Enh:  (94.2) When using "Put SELECT into" from within the DbExplorer the
+      statement can now be appended to the selected editor by holding
+      down the CTRL-Key while selecting the menu item.
+Enh:  If no encoding is supplied WbExport now uses UTF-8 as the encoding for
+      XML exports and the system default encoding for text exports. It also
+      reports the default encoding in the help when no parameter is supplied.
+      The default encoding for text exports can be changed using the property
+      workbench.file.data.encoding
+Fix:  (94.8) When entering values in the result set that could not be
+      converted to the correct data type, no error message was shown.
+Fix:  (94.7) Auto-completion for tables from other schemas was broken
+Fix:  (94.7) The update count for DELETE and UPDATE statements was not
+      shown properly.
+Fix:  (94.7) -decode now correctly decodes a \\ to a (single) \
+Fix:  (94.7) "Ignore Drop Errors" was not working any longer (that included
+      the commandline switch for running in batch mode)
+Fix:  (94.7) The automatic update check did not always work.
+Fix:  (94.7) The -sourceTable switch from WbExport did not preserve quotes
+      so that exports with case-sensitive table names could only be done
+      using a SELECT after the WbExport.
+Fix:  (94.6) Not all error messages (e.g. missing parameters for WbExport)
+      were reported in the log file during batch execution.
+Fix:  (94.6) When opening a file in a SQL tab that contained a modified
+      file, No and Cancel would both do the same when beeing asked to
+      save or discard the changes.
+Fix:  (94.6) Numeric values that were returned as BigDecimal by the
+      JDBC Driver were not displayed according to the chosen max. number of
+      digits (in the options dialog)
+Fix:  (94.6) The integration with Mac OS is now working properly.
+Fix:  (94.6) Fixed the processing of "batches" sent to SQL Server. If a
+      multi-statement SQL is sent to SQL Server that also returned result
+      sets, the result was not always shown.
+Fix:  (94.6) WbImport with -decode=true was not always working properly
+Fix:  (94.5) No error messages was shown on the console if the specified
+      driver class could not be loaded when running SQL Workbench/J in
+      batch mode.
+Fix:  (94.5) Improved the performance when importing compressed input files
+      with a large number of associated LOB files (in an extra archive).
+Fix:  (94.5) When importing a text file without a header definition and the
+      target table did not exist no proper error message was shown.
+Fix:  (94.5) When using -truncateTable=true or -deleteTarget=true for WbImport
+      an error during truncate/delete would not be reported.
+Fix:  (94.5) Some keystrokes (e.g. Alt-F4) started editing mode in the
+      result table that should not start editing.
+Fix:  (94.4) When only importing part of an import file (using -startRow
+      and -endRow) the import would fail if data in the ignored rows
+      failed validation.
+Fix:  (94.4) Conversion errors where not reported correctly when importing
+      XML files with WbImport
+Fix:  (94.4) SQL Workbench does not try to set a default font for GUI elements
+      any more. A previously selected standard font can be reset through
+      the options panel.
+Fix:  (94.3) DbExplorer now shows the source for indexes on views
+      (e.g. MATERIALIZED VIEWS) as well. The index definitions are also
+      included by WbReport and WbSchemaDiff
+Fix:  (94.4) If the text in the editor ended with a @ command executing
+      the SQL command at the cursor position did not work
+Fix:  (94.3) The type of an index was not displayed correctly with MySQL
+Fix:  (94.3) Not all comparators were selectable in the filter dialog
+Fix:  (94.3) When using the "Drop.." dialog from the DbExplorer SQL Workbench/J
+      was offering the CASCADE option for MySQL even though it is not supported
+      by MySQL.
+Fix:  (94.3) The tooltip for columns with NULL value displayed the value
+      of the previous column
+Fix:  (94.3) The history for the quickfilter in the DbExplorer's Object list
+      was not saved when the DbExplorer was opened as a separate window.
+Fix:  (94.2) When switching tabs while the completion popup was open and then
+      returning to the original tab, keystrokes would not be inserted into the
+      editor.
+Fix:  (94.2) Workaround for a bug in older Postgres drivers where
+      getMoreResults() would throw a NPE if the statement did not
+      produce a result set.
+Fix:  (94.2) WbImport with XML files did not work with columns that contained
+      special characters
+Fix:  (94.2) SQL Workbench would not load with the Substance look and feel.
+Fix:  (94.2) The search dialog did not automatically use the currently
+      selected text.
+Fix:  (94.2) The property workbench.db.oracle.syntax.functions was growing
+      with each start of the application.
+Fix:  (94.1) The quick filter for the new trigger list was not working
+
+Build 94, 31.03.2007
+--------------------
+Enh:  (93.9) When doing single-table imports with WbImport VARCHAR or CHAR
+      columns that exceed a certain limit in the input file can now be
+      truncated using the -maxLength parameter. The format is
+      -maxLength='column1=size1,column2=size2'
+Enh:  (93.9) The DbExplorer now has an additional tab that lists all triggers
+      of the selected catalog/schema. The new panel can be disabled in
+      the Options dialog (DbExplorer tab)
+Enh:  (93.7) WbImport can now write a file with records that could not
+      be imported if run with continueOnError=true. The file is specified with
+      -badFile=filename. If the filenanme indicates a directory, the actual
+      file will be constructed by using the directory and the target table's
+      name (needed for multi-table exports).
+Enh:  (93.5) If a result set does not include all pk columns from the update
+      table, a warning is show when trying to save changes for the result.
+Enh:  (93.5) Individual result tabs (when using "Append new results") can
+      now be closed (Data- > Close result)
+Enh:  (93.5) The tooltip for the connection info now displays the driver
+      version as well.
+Enh:  (93.4) Data can now be changed in the result set by using
+      search & replace (Data -> Replace In Data)
+Enh:  (93.3) The DbExplorer now displays the source for the underlying
+      table as well, when displaying the source for a synonym
+Enh:  (93.3) WbExport now can optionally create ANSI or JDBC style date
+      and timestamp literals when exporting to SQL statements. This is
+      selected with the new switch -sqlDateLiterals
+      The default literal type for copying SQL statements to the clipboard
+      can be defined in the options dialog.
+      Additional literal types can be defined through workbench.settings
+      by supplying the approriate SimpleDateFormat patterns
+Enh:  (93.2) When finding primary key columns to update the result set
+      synonyms are now resolved as well.
+Enh:  (93.1) A new command to prompt for a confirmation has been added.
+      WbConfirm will display the provided message and will allow to stop
+      the current execution or continue. This will only be evaluated
+      in GUI mode (e.g. to prevent the accidental execution of "dangerous"
+      scripts)
+Fix:  (93.9) When statements were executed in nested WbIncludes not all
+      error messages were reported to the console or the GUI (they did
+      show up in the log file only).
+Fix:  (93.9) The filemode for the Java launcher in the Mac package was not
+      set correctly so that the application could not be executed without
+      changes. To support the correct file attributes the Mac Bundle is
+      now distributed as a tgz (tar/gzip) archive which presevers the
+      file attributes.
+Fix:  (93.8) Using a SYNONYM as the source for WbCopy did not work.
+Fix:  (93.8) column constraints like (COL_1 IS NOT NULL OR COL_2 IS NOT NULL)
+      were not displayed in the DbExplorer for Oracle
+Fix:  (93.8) For synonyms pointing to views the wrong source was created
+Fix:  (93.8) If WbImport was used with -decode=true and a line contained
+      an invalid escape sequence (e.g. a single backslash) the import
+      would terminate with the wrong error message.
+Fix:  (93.8) If a SELECT statement only contained an ORDER BY clause
+      but no WHERE clause, auto completion did not show the columns
+      for the table
+Fix:  (93.7) When using search & replace in the result, the wrong column
+      was highlighted after the first item was replaced.
+Fix:  (93.6) The "internal" handling for the line ending was changed (back)
+      to always use the Unix format. SQL Statements can still be sent to the
+      DBMS with DOS line endings, but the statements will now be converted
+      before they are sent (rather than storing them with DOS line ending
+      right away), which might have a performance impact when running large
+      scripts.
+Fix:  (93.6) Sometimes the application would ask to save changed profiles
+      even if the profiles weren't changed.
+Fix:  (93.6) Made quoting of schema names with digits work without changing
+      the settings (objects with a digit at the first place are now
+      automatically quotes)
+Fix:  (93.5) Quoting only the schema name for WbImport did not work (e.g.
+      -table='"123".table'
+Fix:  (93.5) If the semicolon for the last statement in the editor was
+      placed on a single line, and the cursor was located left of the
+      semicolon in the same line, Ctrl-Enter would not work.
+Fix:  (93.5) For Oracle, columns with 'TIMESTAMP WITH [LOCAL] TIMEZONE'
+      data type are not retrieved using getTimestamp() instead of getObject()
+      to be able to properly display the data for those columns.
+Fix:  (93.5) To be able to use columns with the data type
+      TIMESTAMP WITH LOCAL TIMEZONE, the current timezone needs to be set
+      for the session. The ALTER SESSION SET TIME_ZONE is now captured
+      and translated into the approriate Java call on the Oracle driver as
+      described in
+      http://download-uk.oracle.com/docs/cd/B19306_01/java.102/b14355/oraint.htm#sthref175
+Fix:  (93.4) Quoted table names could not be passed to the WbImport command
+      (e.g. -table='"MYTABLE"') which is necessary for case-sensitive servers
+Fix:  (93.4) Warnings that are reported by the JDBC driver after switching
+      the current database are now ignored and do not set the "warning"
+      state for the executed command.
+Fix:  (93.4) When running a script in batch mode that ended with a comment
+      the process was terminated with an error status.
+Fix:  (93.3) WbImport did not always close the input files correctly.
+Fix:  (93.3) When exporting data to SQL scripts, timestamp columns were
+      not formatted correctly
+Fix:  (93.2) Code completion was not working for (Oracle) synonyms
+Fix:  (93.1) The DbExplorer failed to retrieve the table definition and table
+      data for MS SQL Server if the server was defined with a case sensitive
+      collation.
+Fix:  (93.1) The table reference navigation was not always reset in the
+      DbExplorer data tab and displayed the referenced tables from a previous
+      table
+
+Build 93, 11.02.2007
+--------------------
+Enh:  (92.6) When displaying a BLOB content as text, the content can now
+      be modified. The character set conversion will be done using the
+      selected encoding from the info dialog (both directions)
+Enh:  (92.4) WbReport and WbSchemaDiff can now optionally include the
+      table grants (new parameter -includeTableGrants)
+Enh:  (92.4) The parameter -includeProcs for WbSchemaDiff has been renamed to
+      -includeProcedures to be consistent with WbReport
+Enh:  (92.4) The deferrable attribute of a FK reference is now shown
+      in the DbExplorer and the generated SQL source.
+Enh:  (92.2) Workbench specific commands are now supported by the auto
+      completion
+Enh:  (92.2) The filter in the table list of the DbExplorer now accepts
+      regular expressions. Thanks to Petr for the patch
+Enh:  (92.1) The (plain) editor used to edit column data from within
+      the result display now supports Search & Replace.
+Enh:  (92.1) A new setting to close the application if the first connect
+      is cancelled is available
+      workbench.gui.cancel.firstconnect.exit
+      If this is set to true, the application is closed if the connection
+      dialog that is displayed during startup is cancelled
+Enh:  (92.1) For Synonyms, the DbExplorer now displays the foreign keys,
+      indexes and triggers of the underlying table.
+Fix:  (92.7) Copying BLOB columns was broken for WbCopy and DataPumper
+Fix:  (92.6) The option "Single line" for the default alternate delimiter
+      (Tool -> Options -> Editor) was not saved.
+Fix:  (92.6) The window position was not restored properly if the window
+      was moved to the uper left corner.
+Fix:  (92.5) When importing a text file that references blob files,
+      absolute filenames for the blob files did not work.
+Fix:  (92.4) WbSchemaDiff did not include the necessary entries to drop
+      views from the target database if includeViews was set to true
+Fix:  (92.4) The generated report for WbSchemaDiff did not contain tables
+      that only differed in the index definition.
+Fix:  (92.4) Code completion for the WHERE part of a DELETE statement was not
+      working.
+Fix:  (92.4) A SQL panel could be moved between two DbExplorer panels but
+      when reloading this workspace the SQL panel would be dropped.
+Fix:  (92.3) When running WbExport using -clobAsFile=true and
+       -writeOracleLoader=true the generated SQL*Loader file did not contain
+      the necessary syntax to load the CLOB data from the generated external
+      files.
+Fix:  (92.3) External tools where a parameter was needed for the executable
+      (e.g. someapp.exe /h) could not be used from within the blob
+      display window.
+Fix:  (92.3) Triggers and foreign keys were not correctly displayed
+      for SQL Server with the jTDS driver.
+Fix:  (92.3) When an invalid format for -timestampFormat or -dateFormat
+      was specified for WbExport, no warning was displayed.
+Fix:  (92.3) The manual listed incorrectly the parameter -dateTimeFormat instead
+      of -timestampFormat
+Fix:  (92.3) The -emptyStringIsNull switch for WbImport was broken.
+Fix:  (92.3) The -append switch for WbExport was broken.
+Fix:  (92.2) WbExport -sourcetable=something did not work if "something"
+      was not a table (e.g. a Synonym)
+Fix:  (92.2) When the current schema was changed in Oracle using ALTER SESSION
+      the DbExplorer (when using the same connection) failed to retrieve
+      table data for the old schema.
+Fix:  (92.2) Reference navigation was broken outside the DbExplorer
+Fix:  (92.1) Errors when committing changes in the DbExplorer were not shown
+      to the user.
+Fix:  (92.1) The DataPumper did not use the selected encoding when importing
+      a text or XML file.
+Fix:  (92.1) Escaping of the delimiter has been changed for the WbExport
+      or the "Save Data as" commands. The following rules are now applied:
+      if no character escaping is selected (-escapeText parameter) then
+      neither the quote character nor the delimiter are ever escaped.
+      If escaping is enabled, then the quote character will be escaped
+      inside a quoted value and the delimiter will be escaped inside
+      a non-quoted value regardless of the chosen escape range.
+
+Build 92, 06.01.2007
+--------------------
+Enh:  (91.5) When searching for referencing/referenced tables, synonyms are
+      now detected.
+Enh:  (91.5) Referenced/referencing rows can now be displayed into a new
+      SQL panel from within a SQL panel by holding down the Ctrl-Key when
+      selecting the menu item of the popup menu.
+Enh:  (91.4) From within a result display, related records based on
+      foreign key constrains can now be retrieved for the selected rows
+Enh:  (91.4) When displaying (SQL)Exceptions the whole exception chain is now
+      displayed (if available)
+Enh:  (91.3) New results can now be added to the already displayed result
+      (New Menu item SQL -> Append new results)
+Enh:  (91.2) Large text fields are now displayed in multi-line mode (to be
+      able to see all lines "Allow Row Height Resizing" must be enabled. For
+      performace reasons this mode is only enabled for character columns that
+      can hold more than 500 characters. This threshold can be configured using
+      the property:
+      workbench.gui.display.multilinethreshold
+Enh:  (91.1) The alternate delimiter can now be defined for each profile. If
+      one is defined in the profile, this will overwrite the globally defined
+      alternate delimiter. Additionally an alternate delimiter can now be
+      defined as "single line", which means that it has to occur as the only
+      text on a line in order to be recognized.
+Enh:  (91.1) Delimiter and alternate Delimiter can now be specified in batch
+      mode as well. The parameter -altDelimiter will only have an effect if a
+      profile-less connection is used (basically defining the alternate
+      delimiter for the temporary profile)
+      The argument -delimiter overrides the default delimiter and will turn
+      off the usage of an alternate delimiter. This can be used if the scripts
+      are not processed in memory but still use a non-standard delimiter
+      (Similar to the -delimiter argument of the WbInclude command). To define
+      a single line delimiter append the ;nl to the delimiter definition. E.g.
+      -delimter=/;nl will define the forward slash as the delimiter but
+      only if it's the only character in a line. -delimiter=GO;nl will define
+      a MS SQL Server compatible delimiter.
+      The additional automatic detection of the GO delimiter has been removed.
+      If you use GO as the delimiter, please change your profiles to use
+      that as the delimiter.
+Fix:  (91.6) When saving changes from within the result set, errors during
+      COMMIT were not reported to the user (e.g. with deferred constraints)
+Fix:  (91.6) The source of a table was not displayed in the DbExplorer if
+      a comment contained characters that are valid regular expressions.
+Fix:  (91.6) Some minor workarounds to make SQL Workbench/J work with tinySQL
+Fix:  (91.5) When using a table alias with the AS keyword, code completion
+      did not work properly
+Fix:  (91.4) The DbExplorer was not displayed when running on Debian Linux
+      (Possibly with other Look & Feels as well)
+Fix:  (91.4) The shortcuts for "Move tab left" and "Move tab right" could
+      not be configured
+Fix:  (91.4) Large integer numbers where not displayed correctly
+Fix:  (91.3) "Create DDL Script" in the DbExplorer did not create the
+      DDL for materialized views in Oracle
+Fix:  (91.3) Code completion was not working properly if the cursor was at
+      the end of the editor script
+Fix:  (91.2) Fixed some problems with external files when switching line
+      endings
+Enh:  (91.1) When running with feedback disabled (wbfeedback off) a message
+      will now be printed if a statement finished with a warning
+Fix:  (91.1) WbImport reported the wrong line number, when an error occurred
+      during converting values from a text file.
+Fix:  (91.1) Text values with embedded newlines were not displayed correctly
+      in the edit window.
+Fix:  (91.1) When importing an XML file that contains a column that does
+      exist in the target table, no error was reported (but the import
+      failed nevertheless)
+Fix:  (91.1) When running DML Statements (INSERT, DELETE, ...) with the
+      Informix JDBC driver, it would throw an exception when retrieving
+      the update count.
+

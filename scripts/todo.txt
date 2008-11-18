@@ -3,7 +3,7 @@ Features
 - Scripting 
 - Copy selected als Shortuct
 - Macros als Popup
-- WbCopy mit mehreren Tabellen und -deleteTarge (zuerst delete mit dependencies, dann erst Copy starten)
+- WbCopy mit mehreren Tabellen und -deleteTarget (zuerst delete mit dependencies, dann erst Copy starten)
 - Single record dialog/form
 - ${...} syntax als Funktionsaufruf bei Dateneingabe (analog zu -constantValues für WbImport)
 - Re-retrieve selected rows
@@ -21,8 +21,4 @@ Features
 - Close button for tabs
 - Shortcuts für Macros
 
-
-Tests
------
-- Copy to clipboard
 
