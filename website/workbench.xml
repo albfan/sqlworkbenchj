@@ -221,15 +221,15 @@ VALUES
         <title>SQL Workbench/J</title>
         <subtitle>Available Downloads</subtitle>
         <content>
-				<p style="font-size:100%;text-align:center;margin-top:10px;padding:5px;color:black;background-color:#FFFFCC">
+				<p style="font-size:100%;text-align:center;margin-top:10px;">
 					This application requires <b>Java 5</b> (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
 				</p>
 				<p style="color:red;font-size:125%;font-weight:bold;margin-top:15px;margin-bottom:10px">Change of filenames:</p>
-				<p style="background-color:#FF7000;margin-bottom:15px;margin-top:5px;padding:10px;border-style:solid;border-color:grey;border-width:1px">
+				<p style="margin-bottom:15px;margin-top:5px;padding:10px;border-style:solid;border-color:red;border-width:1px">
 				 Starting with build 99, the jar file has been renamed to <tt>sqlworkbench.jar</tt>, the 
 				 Windows launcher has been renamed to <tt>SQLWorkbench.exe</tt> and the (main) shell script 
 				 has been renamed to <tt>sqlworkbench.sh</tt>.<br/><br/>
-				 Please delete the old files <tt>jworkbench.exe</tt>, <tt>Workbench.jar</tt> and <tt>jworkbench.sh</tt><br/><br/>
+				 Please delete the old files <tt>jworkbench.exe</tt>, <tt>Workbench.jar</tt> and <tt>jworkbench.sh</tt>
 				</p>
         <h3>Stable release</h3>
         <p>Current stable release: Build <build-number/>, <build-date/>, <a target="_blank" href="history.txt">Change History</a></p>
@@ -249,12 +249,12 @@ VALUES
     </content>
   </page>
 
-	<page name="source-svn" title="Source" toc="small">
+	<page name="source-svn" title="Subversion Repository" toc="small">
 		<title>SQL Workbench/J</title>
 		<subtitle>Access to the source code</subtitle>
 		<content>
 			<p>
-				In addition to the zip archive with the source code that is part of a release, the source code is
+				In addition to the source archive from a release, the source code is
 				hosted on a public subversion repository kindly sponsored	by <a href="http://www.mgm-tp.com">mgm technology partners</a>.
 			</p>
 			<p>
@@ -265,7 +265,7 @@ VALUES
 				To read or checkout the sources you don't need a username.
 			</p>
 			<p>
-				I recommend to check out the trunk. If you include the tags directory as well, you get all
+				I recommend to only check out the trunk. If you include the tags directory as well, you get all
 				the release from the last 5 years...
 			</p>
 		</content>

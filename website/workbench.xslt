@@ -51,7 +51,11 @@
 						<xsl:with-param name="currentPage" select="$currentPage"/>
 					</xsl:call-template>
 				</xsl:for-each>
+				<li class="toclist">
+					<a class="list" href="manual/workbench-manual.html">Manual</a>
+				</li>
 			</ul>
+			
 			<ul class="toc" id="google">
 				<li class="toclist">
 					<a class="list" href="http://groups.google.com/group/sql-workbench">Forum@Google
@@ -60,11 +64,16 @@
 				</li>
 			</ul>
 
-			<ul class="toc"  id="smalltext">
+			<ul class="toc" id="smalltext">
+				<li class="toclist">
+					<a class="list" href="wb_news.xml">RSS Feed</a>
+				</li>
+				
 				<xsl:for-each select="/site/page[@toc='small']">
 					<xsl:call-template name="toc-entry"/>
 				</xsl:for-each>
 			</ul>
+
 			<div id="nblink">
 				<a target="_blank" href="http://www.netbeans.org">
 					<img border="0" style="margin-top:50px;" src="created-with-nb-2.gif"/>
