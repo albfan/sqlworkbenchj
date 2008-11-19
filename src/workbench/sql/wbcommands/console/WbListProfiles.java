@@ -31,6 +31,7 @@ public class WbListProfiles
 		super();
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;

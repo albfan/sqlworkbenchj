@@ -407,6 +407,7 @@ public class ConnectionMgr
 	 */
 	public synchronized List<String> getProfileKeys()
 	{
+		if (profiles == null) readProfiles();
 		List<String> result = new ArrayList(profiles.size());
 		for (ConnectionProfile profile : profiles)
 		{
@@ -415,6 +416,7 @@ public class ConnectionMgr
 		Collections.sort(result, new CaseInsensitiveComparator());
 		return result;
 	}
+	
 	/**
 	 *	Returns a List with the current profiles.
 	 */
