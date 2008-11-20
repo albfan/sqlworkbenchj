@@ -31,7 +31,7 @@
 				If you want to run a script in console mode, use the command <link linkend="command-wbinclude">WbInclude</link>.
 			</member>
 			<member><literal>encoding</literal> - as you cannot specify a script, the encoding parameter is ignored as well</member>
-			<member><literal>displayResult</literal> - always true in console mode)</member>
+			<member><literal>displayResult</literal> - always true in console mode</member>
 			<member><literal>cleanupSuccess</literal> and <literal>cleanupError</literal>- as no script is run, there is no "end of script" after which a "cleanup" is necessary</member>
 			<member><literal>abortOnError</literal></member>
 		</simplelist>
@@ -182,7 +182,7 @@ ROLLBACK executed successfully</programlisting>
 					(<literal>-url</literal>, <literal>-username</literal> and so on) either on the commandline
 					or through  <literal>WbConnect</literal>.
 				</para>
-				<programlisting>WbDeleteProfile {MyGroup}/SQL Server</programlisting>
+				<programlisting>WbStoreProfile {MyGroup}/Postgres Production</programlisting>
 				<para>
 					As the profile name is the only parameter to this command, no quoting is necessary.
 					Everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
@@ -194,7 +194,7 @@ ROLLBACK executed successfully</programlisting>
 					that was passed on the commandline.
 				</para>
 				<para>
-					The profiles are automatically saved when calling WbStoreProfile
+					All profiles are automatically saved after executing <literal>WbStoreProfile</literal>.
 				</para>
 		</section>
 

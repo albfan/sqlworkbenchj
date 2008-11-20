@@ -164,5 +164,47 @@
 
 	</section>
 
+	<section id="pg-problems">
+		<title>Postgres Problems</title>
+
+		<section id="pg-statement-savepoint">
+			<title>Getting the error: Current transaction is aborted</title>
+			<para>
+				Postgres - unlike other DBMS - marks a complete transaction as failed if
+				a single statement fails. In such a case the transaction cannot be committed, e.g.
+				consider the following script:
+			</para>
+			<programlisting>INSERT INTO person (id, firstname, lastname) VALUES (1, 'Arthur', 'Dent');
+INSERT INTO person (id, firstname, lastname) VALUES (2, 'Zaphod', 'Beeblebrox');
+INSERT INTO person (id, firstname, lastname) VALUES (2, 'Ford', 'Prefect');
+COMMIT;</programlisting>
+			<para>
+				As the ID column is the primary key, the third insert will fail with a unique key violation.
+				In Postgres you cannot commit anyway and thus persist the first two INSERT's.
+			</para>
+			<para>
+				This problem can only be solved by using a SAVEPOINT before and after each
+				statement. In case that statement fails, the transaction can be rolled back to the state
+				before the statement and the reminder of the script can execute.
+			</para>
+			<para>
+				Doing this manually is quite tedious, so you can tell &wb-productname; to do this
+				automatically for you by setting the properties:
+			</para>
+			<programlisting>workbench.db.postgresql.ddl.usesavepoint=true
+workbench.db.postgresql.sql.usesavepoint=true
+</programlisting>
+			<para>
+				in the file <link linkend="settings">workbench.settings</link>. If you want to use
+				the modes <link linkend="import-update-mode"><literal>update/insert</literal></link> or
+				<link linkend="import-update-mode"><literal>insert/update</literal></link>
+				for <link linkend="command-import">WbImport</link>, you should also add the
+				property:
+			</para>
+			<programlisting>workbench.db.postgresql.import.usesavepoint=true</programlisting>
+		</section>
+
+	</section>
+
 </section>
 	

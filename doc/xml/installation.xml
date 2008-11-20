@@ -457,12 +457,24 @@ var_id=42
 person_name=Dent
 another_variable=24</programlisting>
 
+      <para>
+				If the above file was saved under the name <literal>vars.txt</literal>, you can use those
+				variables by starting &wb-productname; using the following commandline:
+			</para>
+			<programlisting>java -jar sqlworkbench.jar -vardef=vars.txt</programlisting>
+
 			<para>
 				You can also define a list of variables with this parameter. In this case, the first
 				character after the = sign, has to be # (hash sign) to flag the value as a variable list:
 				<programlisting>java -jar sqlworkbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
 			</para>
-			
+
+      <para>
+				Defining variable values in this way can also be used when running in 
+				<link linkend="using-scripting">batch mode</link>.
+			</para>
+
+
 		</section>
 
 		<section id="nosettings-commandline">
@@ -492,7 +504,7 @@ another_variable=24</programlisting>
 			<para>Example (on one line):</para>
 
 			<programlisting>java -jar sqlworkbench.jar 
-     -profile='Oracle - Test' 
+     -profile='Postgres - Test'
      -script='test.sql'</programlisting>
 			<para>
 				In this case the file <literal>WbProfiles.xml</literal> must be in the current
@@ -505,7 +517,7 @@ another_variable=24</programlisting>
 				need to specify the profile group as well (in one line):
 			</para>
 			<programlisting>java -jar sqlworkbench.jar 
-     -profile='Oracle - Test' 
+     -profile='Postgres - Test'
      -profilegroup='Local' 
      -script='test.sql'</programlisting>
 		</section>

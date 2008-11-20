@@ -1111,7 +1111,11 @@
 				<listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
 			</itemizedlist>
 		</para>
-		
+
+		<para>
+			To use insert/update or update/insert with Postgres, make sure you have
+			<link linkend="pg-statement-savepoint">enabled savepoints</link> for the import.
+		</para>
 	</section>
 
   </section>

@@ -280,7 +280,17 @@
 		
 	</section>
 
-	
+	<section id="script-interactive">
+		<title>Running batch scripts interactively</title>
+		<para>
+			By default neither parameter prompts nor execution confirmations (<link linkend="profile-confirm-updates">"Confirm Updates"</link>)
+			are processed when running in batch mode. If you have batch scripts that contain
+			<link linkend="prompt-variable">parameter prompts</link> and you want to enter values
+			for the parameters while running the batch file, you have to start &wb-productname;
+			using the parameter <literal>-interactive=true</literal>.
+		</para>
+	</section>
+
 	<section id="script-properties">
 		<title>Setting configuration properties</title>
 		<para>
@@ -319,7 +329,7 @@
 		<para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>
 		<programlisting>java -jar sqlworkbench.jar
      -script='c:/scripts/script-1.sql','c:/scripts/script-2.sql',c:/scripts/script3.sql
-     -profile=Firebird
+     -profile=Postgres
      -abortOnError=false
      -cleanupSuccess=commit.sql
      -cleanupError=rollback.sql</programlisting>
