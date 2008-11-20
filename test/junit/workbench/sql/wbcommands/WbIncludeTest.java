@@ -41,6 +41,7 @@ public class WbIncludeTest
 		util = getTestUtil(testName);
 	}
 
+	@Override
 	public void setUp()
 		throws Exception
 	{

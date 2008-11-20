@@ -4,26 +4,19 @@
  */
 package workbench.console;
 
-import java.sql.SQLException;
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
-import workbench.sql.VariablePool;
-import workbench.interfaces.ExecutionController;
-import workbench.interfaces.ParameterPrompter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
-import workbench.sql.wbcommands.WbConnect;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbStoreProfile;
-import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
-import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -33,15 +26,16 @@ import workbench.util.WbFile;
  * @author support@sql-workbench.net
  */
 public class SQLConsole
-	implements ExecutionController, ParameterPrompter
 {
 	private InputReader input;
+	private ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
 
 	public SQLConsole()
 	{
 		input = new InputReader();
+		prompter = new ConsolePrompter(input);
 	}
 
 	public void run()
@@ -119,8 +113,8 @@ public class SQLConsole
 			}
 
 			InputBuffer buffer = new InputBuffer();
-			runner.setExecutionController(this);
-			runner.setParameterPrompter(this);
+			runner.setExecutionController(prompter);
+			runner.setParameterPrompter(prompter);
 
 			ResultSetPrinter printer = null;
 			if (!bufferResults)
@@ -147,6 +141,7 @@ public class SQLConsole
 				{
 					try
 					{
+						prompter.resetExecuteAll();
 						runner.executeScript(buffer.getScript());
 					}
 					catch (Exception e)
@@ -208,59 +203,7 @@ public class SQLConsole
 		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
 	}
 
-	public boolean processParameterPrompts(String sql)
-	{
-		VariablePool pool = VariablePool.getInstance();
 
-		DataStore ds = pool.getParametersToBePrompted(sql);
-		if (ds == null || ds.getRowCount() == 0) return true;
-
-		System.out.println(ResourceMgr.getString("TxtVariableInputText"));
-		for (int row = 0; row < ds.getRowCount(); row ++)
-		{
-			String varName = ds.getValueAsString(row, 0);
-			String value = ds.getValueAsString(row, 1);
-
-			String newValue = input.readLine(varName + " [" + value + "]: ");
-			ds.setValue(row, 1, newValue);
-		}
-
-		try
-		{
-			ds.updateDb(null, null);
-		}
-		catch (SQLException ignore)
-		{
-			// Cannot happen
-		}
-		return true;
-	}
-
-	public String getPassword(String prompt)
-	{
-		return input.readPassword(prompt + " ");
-	}
-
-	public boolean confirmExecution(String prompt)
-	{
-		String yes = ResourceMgr.getString("MsgConfirmConsoleYes");
-		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmConsoleNo");
-
-		String msg = prompt + " (" + yesNo + ")";
-		String choice = input.readLine(msg + " ");
-		return yes.equalsIgnoreCase(choice);
-	}
-
-	public boolean confirmStatementExecution(String command)
-	{
-		String verb = SqlUtil.getSqlVerb(command);
-		String yes = ResourceMgr.getString("MsgConfirmConsoleYes");
-		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmConsoleNo");
-
-		String msg = ResourceMgr.getFormattedString("MsgConfirmConsoleExec", verb, yesNo);
-		String choice = input.readLine(msg + " ");
-		return yes.equalsIgnoreCase(choice);
-	}
 
 	public static void main(String[] args)
 	{

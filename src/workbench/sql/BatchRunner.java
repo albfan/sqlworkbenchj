@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.AppArguments;
+import workbench.console.ConsolePrompter;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -906,6 +907,7 @@ public class BatchRunner
 		String error = cmdLine.getValue(AppArguments.ARG_ERROR_SCRIPT);
 		String feed = cmdLine.getValue(AppArguments.ARG_FEEDBACK);
 		boolean feedback = cmdLine.getBoolean(AppArguments.ARG_FEEDBACK, true);
+		boolean interactive = cmdLine.getBoolean(AppArguments.ARG_INTERACTIVE, false);
 
 		BatchRunner runner = new BatchRunner(scripts);
 		runner.showResultSets(showResult);
@@ -925,6 +927,13 @@ public class BatchRunner
 		runner.setVerboseLogging(feedback);
 		runner.setConsolidateLog(consolidateLog);
 		runner.setShowProgress(showProgress);
+
+		if (interactive)
+		{
+			ConsolePrompter prompter = new ConsolePrompter();
+			runner.setExecutionController(prompter);
+			runner.setParameterPrompter(prompter);
+		}
 
 		// if no showTiming argument was provided but feedback was disabled
 		// disable the display of the timing information as well.

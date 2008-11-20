@@ -51,11 +51,25 @@ public class WbInclude
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
-	public String getVerb() { return VERB; }
-	public String getAlternateVerb() { return ORA_INCLUDE; }
+	@Override
+	public String getVerb()
+	{
+		return VERB;
+	}
 
-	protected boolean isConnectionRequired() { return false; }
+	@Override
+	public String getAlternateVerb()
+	{
+		return ORA_INCLUDE;
+	}
 
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
+
+	@Override
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
@@ -63,28 +77,27 @@ public class WbInclude
 		result.setSuccess();
 
 		String clean = SqlUtil.makeCleanSql(aSql, false, '"');
-		boolean isShortInclude = false;
+		boolean checkParms = true;
+
+		WbFile file = null;
 
 		if (clean.charAt(0) == '@')
 		{
 			clean = clean.substring(1);
-			isShortInclude = true;
-		}
-		else
-		{
-			clean = SqlUtil.stripVerb(clean);
-		}
-
-		WbFile file = null;
-
-		if (isShortInclude)
-		{
 			file = evaluateFileArgument(clean);
+			checkParms = false;
 		}
 		else
 		{
+			clean = getCommandLine(aSql);
 			cmdLine.parse(clean);
 			file = evaluateFileArgument(cmdLine.getValue("file"));
+			if (file == null)
+			{
+				// support a short version of WbInclude that simply specifies the filename
+				file = evaluateFileArgument(clean);
+				checkParms = false;
+			}
 		}
 
 		if (file == null)
@@ -104,28 +117,38 @@ public class WbInclude
 			return result;
 		}
 
-		boolean continueOnError = cmdLine.getBoolean("continueonerror", false);
-		boolean checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
-		boolean verbose = cmdLine.getBoolean("verbose", false);
+		boolean continueOnError = false;
+		boolean checkEscape = Settings.getInstance().getCheckEscapedQuotes();
+		boolean verbose = true;
 		boolean defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
-		boolean ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
-		String encoding = cmdLine.getValue("encoding");
+		boolean ignoreDrop = defaultIgnore;
+		DelimiterDefinition delim = null;
+		String encoding = null;
 
-		setUnknownMessage(result, cmdLine, null);
+		if (checkParms)
+		{
+			continueOnError = cmdLine.getBoolean("continueonerror", false);
+			checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
+			verbose = cmdLine.getBoolean("verbose", false);
+			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
+			ignoreDrop = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, defaultIgnore);
+			encoding = cmdLine.getValue("encoding");
+			delim = DelimiterDefinition.parseCmdLineArgument(cmdLine.getValue("delimiter"));
+			setUnknownMessage(result, cmdLine, null);
+		}
 		
 		if (encoding == null)
 		{
 			encoding = Settings.getInstance().getDefaultEncoding();
 		}
 
-		String delim = cmdLine.getValue("delimiter");
 		try
 		{
 			batchRunner = new BatchRunner(file.getCanonicalPath());
 			String dir = file.getCanonicalFile().getParent();
 			batchRunner.setBaseDir(dir);
 			batchRunner.setConnection(currentConnection);
-			if (delim != null) batchRunner.setDelimiter(DelimiterDefinition.parseCmdLineArgument(delim));
+			batchRunner.setDelimiter(delim);
 			batchRunner.setResultLogger(this.resultLogger);
 			batchRunner.setVerboseLogging(verbose);
 			batchRunner.setRowMonitor(this.rowMonitor);
@@ -162,11 +185,13 @@ public class WbInclude
 		return result;
 	}
 
+	@Override
 	public void done()
 	{
 		// nothing to do
 	}
 
+	@Override
 	public void cancel()
 		throws SQLException
 	{
@@ -176,6 +201,4 @@ public class WbInclude
 			batchRunner.cancel();
 		}
 	}
-
-
 }

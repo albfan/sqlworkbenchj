@@ -46,6 +46,7 @@ public class AppArguments
 	public static final String ARG_READ_ONLY = "readOnly";
 	public static final String ARG_CONN_REMOVE_COMMENTS = "removeComments";
 	public static final String ARG_HIDE_WARNINGS = "hideWarnings";
+	public static final String ARG_INTERACTIVE = "interactive";
 	
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
@@ -116,6 +117,7 @@ public class AppArguments
 		addArgument(ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);
 		addArgument(ARG_LANG);
 		addArgument(ARG_CONSOLIDATE_LOG, ArgumentType.BoolArgument);
+		addArgument(ARG_INTERACTIVE, ArgumentType.BoolArgument);
 		addArgument("help");
 	}
 	
