@@ -8,6 +8,13 @@ Build @BUILD_NUMBER@, @BUILD_DATE@
 *************************************************************************
 **                            ATTENTION                                **
 *************************************************************************
+Enh: (102.4) A new commandline argument -interactive is available when running
+     in batch mode. This enables parameter prompting and execution confirmation
+     if necessary. 
+Enh: (102.4) WbInclude can now be called with just a filename. If no parameter
+     switch is present, it is assumed that the rest of the commandline
+     is the filename. In that mode, no further parameters can be specified
+     (WbInclude will use defaults then)
 Enh: (102.2) The HTML manual is now also distributed as a single HTML page
      The display of the single page from within the application can be 
      enabled by setting the property
