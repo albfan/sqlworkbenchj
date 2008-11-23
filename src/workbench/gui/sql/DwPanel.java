@@ -115,7 +115,6 @@ public class DwPanel
 	private boolean batchUpdate;
 	private boolean readOnly;
 
-//	private String[] lastResultMessages;
 	private StatementRunner stmtRunner;
 	private GenericRowMonitor genericRowMonitor;
 	private ReferenceTableNavigator referenceNavigator;
@@ -355,10 +354,7 @@ public class DwPanel
 		synchronized (this)
 		{
 			this.dataTable.stopEditing();
-//			if (this.manageUpdateAction)
-//			{
-				this.disableUpdateActions();
-//			}
+			this.disableUpdateActions();
 
 			try
 			{
@@ -841,14 +837,38 @@ public class DwPanel
 		t.start();
 	}
 
+	private boolean isLastRowSelected()
+	{
+		int[] rows = dataTable.getSelectedRows();
+		if (rows == null || rows.length == 0) return false;
+		return rows[rows.length - 1] == dataTable.getRowCount() - 1;
+	}
+	
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
 		if (!this.startEdit(true)) return;
 		try
 		{
-			this.dataTable.deleteRow(false);
-			this.rowCountChanged();
+			boolean needClear = isLastRowSelected();
+
+			dataTable.deleteRow(false);
+			rowCountChanged();
+			if (needClear)
+			{
+				// for same strange reason all rows are selected when
+				// the last row is selected and deleted
+				// something must try to restore the selection
+				// but as that row does not longer exist, it results in
+				// selecting all rows...
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						dataTable.clearSelection();
+					}
+				});
+			}
 		}
 		catch (SQLException e)
 		{
@@ -866,7 +886,10 @@ public class DwPanel
 		return newRow;
 	}
 
-	public boolean confirmCancel() { return true; }
+	public boolean confirmCancel()
+	{
+		return true;
+	}
 
 	public void cancelExecution()
 	{
@@ -875,25 +898,6 @@ public class DwPanel
 			this.stmtRunner.cancel();
 		}
 	}
-
-//	public String getLastMessage()
-//	{
-//		if (this.lastResultMessages != null)
-//		{
-//			StringBuilder msg = new StringBuilder(lastResultMessages.length * 80);
-//			for (int i=0; i < lastResultMessages.length; i++)
-//			{
-//				msg.append(lastResultMessages[i]);
-//				msg.append('\n');
-//			}
-//			this.lastMessage = msg.toString();
-//			this.lastResultMessages = null;
-//		}
-//
-//		if (this.lastMessage == null) this.lastMessage = "";
-//
-//		return this.lastMessage;
-//	}
 
 	public boolean hasResultSet()
 	{

@@ -2066,6 +2066,7 @@ public class WbTable
 		if (ds == null) return false;
 
 		int[] selectedRows = this.getSelectedRows();
+
 		int numRows = selectedRows.length;
 		if (numRows > 0)
 		{
@@ -2076,7 +2077,6 @@ public class WbTable
 		}
 		return true;
 	}
-
 
 	public boolean isHighlightRequiredFields()
 	{

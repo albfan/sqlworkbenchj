@@ -41,6 +41,7 @@ public class SelectCommand extends SqlCommand
 	/**
 	 * Runs the passed SQL statement using Statement.executeQuery()
 	 */
+	@Override
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
@@ -154,11 +155,13 @@ public class SelectCommand extends SqlCommand
 		return result;
 	}
 
+	@Override
 	public String getVerb()
 	{
 		return VERB;
 	}
 
+	@Override
 	public void setMaxRows(int max)
 	{
 		if (max >= 0)

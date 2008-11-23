@@ -429,12 +429,13 @@ public class DwStatusBar
 		this.tfMaxRows.requestFocusInWindow();
 	}
 
-	public void showAlert(NotifierEvent evt)
+	public void showAlert(final NotifierEvent evt)
 	{
 		if (this.notificationHandler != null)
 		{
 			this.removeAlert();
 		}
+
 		if (this.alertPanel == null)
 		{
 			alertPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 2, 0));
@@ -442,38 +443,46 @@ public class DwStatusBar
 		}
 		else
 		{
-			this.alertPanel.removeAll();
+			alertPanel.removeAll();
 		}
+		
 		notificationHandler = evt.getHandler();
 		notificationLabel = new JLabel(ResourceMgr.getImageByName(evt.getIconKey()));
 		notificationLabel.setText(null);
 		notificationLabel.setToolTipText(evt.getTooltip());
 		notificationLabel.setIconTextGap(0);
 		notificationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		this.notificationLabel.addMouseListener(this);
-		this.alertPanel.add(notificationLabel);
-		Frame f = WbManager.getInstance().getCurrentWindow();
-		final NotifierWindow w = new NotifierWindow(f, evt.getTooltip());
+		notificationLabel.addMouseListener(this);
+		
+		final Frame f = WbManager.getInstance().getCurrentWindow();
+		
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
+				alertPanel.add(notificationLabel);
+				NotifierWindow w = new NotifierWindow(f, evt.getTooltip());
 				w.show(notificationLabel);
+				validate();
 			}
 		});
-
-		WbSwingUtilities.repaintLater(this);
 	}
 
 	public void removeAlert()
 	{
 		if (alertPanel != null)
 		{
-			this.infoPanel.remove(alertPanel);
-			this.alertPanel.removeAll();
-			this.notificationLabel.removeMouseListener(this);
-			this.notificationHandler = null;
-			WbSwingUtilities.repaintLater(this);
+			notificationLabel.removeMouseListener(this);
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					infoPanel.remove(alertPanel);
+					alertPanel.removeAll();
+					notificationHandler = null;
+					validate();
+				}
+			});
 		}
 	}
 

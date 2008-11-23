@@ -403,7 +403,7 @@ public class BatchRunner
 				{
 					msg = e.getMessage();
 				}
-				if (showProgress) printMessage("\n"); // force newline in case progress reporting was turned on
+				if (showProgress) printMessage(""); // force newline in case progress reporting was turned on
 				printMessage(ResourceMgr.getString("TxtError") + ": " + msg);
 			}
 			if (error && abortOnError)
@@ -597,7 +597,7 @@ public class BatchRunner
 					{
 						if (!this.consolidateMessages)
 						{
-							if (!showResultSets) printMessage("\n");
+							if (!showResultSets) printMessage(""); // force newline
 							this.printMessage(feedback);
 						}
 					}

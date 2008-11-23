@@ -747,6 +747,11 @@ public final class WbManager
 		else
 		{
 			warmUp();
+			
+			// This will install the application listener if running under MacOS
+			MacOSHelper m = new MacOSHelper();
+			m.installApplicationHandler();
+
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -780,10 +785,6 @@ public final class WbManager
 			splash = new WbSplash();
 			splash.setVisible(true);
 		}
-
-		// This will install the application listener if running under MacOS
-		MacOSHelper m = new MacOSHelper();
-		m.installApplicationHandler();
 
 		try
 		{
