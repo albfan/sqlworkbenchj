@@ -651,13 +651,12 @@ public class SqlUtil
 	
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
-		return makeCleanSql(aSql, keepNewlines, '\'');
+		return makeCleanSql(aSql, keepNewlines, false, '\'');
 	}
 
-
-	public static String makeCleanSql(String aSql, boolean keepNewlines, char quote)
+	public static String makeCleanSql(String aSql, boolean keepNewlines, boolean keepComments)
 	{
-		return makeCleanSql(aSql, keepNewlines, false, quote);
+		return makeCleanSql(aSql, keepNewlines, keepComments, '\'');
 	}
 
 	/**
@@ -692,7 +691,7 @@ public class SqlUtil
 				inQuotes = !inQuotes;
 			}
 			
-			if (inQuotes)
+			if (inQuotes && (!inComment && !keepComments))
 			{
 				newSql.append(c);
 				last = c;
@@ -706,12 +705,12 @@ public class SqlUtil
 
 			if (!(inComment || lineComment) || keepComments)
 			{
-				if ( c == '/' && i < count - 1 && aSql.charAt(i+1) == '*')
+				if (!keepComments && c == '/' && i < count - 1 && aSql.charAt(i+1) == '*')
 				{
 					inComment = true;
 					i++;
 				}
-				else if (c == '-' && i < count - 1 && aSql.charAt(i+1) == '-')
+				else if (!keepComments && c == '-' && i < count - 1 && aSql.charAt(i+1) == '-')
 				{
 					// ignore rest of line for -- style comments
 					while (c != '\n' && i < count - 1)

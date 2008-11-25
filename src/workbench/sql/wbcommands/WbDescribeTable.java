@@ -49,7 +49,7 @@ public class WbDescribeTable
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false, '\''));
+		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 
 		TableIdentifier tbl = new TableIdentifier(table);
 
@@ -76,13 +76,13 @@ public class WbDescribeTable
 				result.addMessage(toDescribe.getTableExpression(currentConnection) + " --> " + target.getTableExpression(currentConnection));
 			}
 		}
-		
+
 		CharSequence viewSource = null;
 		if (dbs.isViewType(toDescribe.getType()))
 		{
 			viewSource = currentConnection.getMetadata().getViewReader().getExtendedViewSource(toDescribe, ds, false, false);
 		}
-		
+
 		ColumnRemover remover = new ColumnRemover(ds);
 		DataStore cols = remover.removeColumnsByName("java.sql.Types", "SCALE/SIZE", "PRECISION");
 		result.setSuccess();

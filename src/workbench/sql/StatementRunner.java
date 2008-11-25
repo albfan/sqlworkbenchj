@@ -301,7 +301,7 @@ public class StatementRunner
 		
 		if (removeComments || removeNewLines)
 		{
-			aSql = SqlUtil.makeCleanSql(aSql, !removeNewLines, !removeComments, '\'');
+			aSql = SqlUtil.makeCleanSql(aSql, !removeNewLines, !removeComments);
 		}
 		
 		this.currentCommand = this.cmdMapper.getCommandToUse(aSql);

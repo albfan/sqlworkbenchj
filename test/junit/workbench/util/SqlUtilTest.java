@@ -30,14 +30,6 @@ public class SqlUtilTest
 		super(testName);
 	}
 
-	protected void setUp() throws Exception
-	{
-	}
-
-	protected void tearDown() throws Exception
-	{
-	}
-	
 	public void testIsSelectIntoNewTable()
 		throws Exception
 	{
@@ -244,43 +236,70 @@ public class SqlUtilTest
 			fail(e.getMessage());
 		}
 	}
+
+	public void testRemoveComments()
+		throws Exception
+	{
+		String sql = "/* some comment 'something quoted' some comment */\n" +
+								"SELECT 42 from dual";
+		String clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("SELECT 42 from dual", clean);
+
+		sql = "/* some comment 'something quoted' some comment */\n" +
+								"SELECT 42\n from dual";
+		clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("SELECT 42  from dual", clean);
+
+		sql = "/* some comment 'something quoted' some comment */\n" +
+								"SELECT 42\n from dual";
+		clean = SqlUtil.makeCleanSql(sql, true, false);
+		assertEquals("SELECT 42\n from dual", clean);
+	}
 	
 	public void testCleanSql()
 	{
 		String sql = "select \r\n from project";
-		String clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
-		assertEquals("Not correctly cleaned", clean, "select   from project");
+		String clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("Not correctly cleaned", "select   from project", clean);
 
 		sql = "select \r\n from project;";
-		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
-		assertEquals("Not correctly cleaned", clean, "select   from project");
+		clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("Not correctly cleaned", "select   from project", clean);
 
 		sql = "select *\r\n from project ; ";
-		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
-		assertEquals("Not correctly cleaned", clean, "select *  from project");
+		clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("Not correctly cleaned", "select *  from project", clean);
 
 		sql = "select * from project\n;\n";
-		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
-		assertEquals("Not correctly cleaned", clean, "select * from project");
+		clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("Not correctly cleaned", "select * from project", clean);
 		
 		sql = "select 'some\nvalue' from project";
-		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		clean = SqlUtil.makeCleanSql(sql, false, false);
 		// nothing should be changed!
-		assertEquals("Not correctly cleaned", clean, sql);	
+		assertEquals("Not correctly cleaned", sql, clean);
 		
 		sql = "select 'some\nvalue' \nfrom project";
-		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
-		assertEquals("Not correctly cleaned", clean, "select 'some\nvalue'  from project");	
+		clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("Not correctly cleaned", "select 'some\nvalue'  from project", clean);
 		
 		sql = "select\t'some\n\tvalue' from project";
-		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
-		assertEquals("Not correctly cleaned", clean, "select 'some\n\tvalue' from project");	
+		clean = SqlUtil.makeCleanSql(sql, false, false);
+		assertEquals("Not correctly cleaned", "select 'some\n\tvalue' from project", clean);
 
 		sql = "select from \"project\"";
-		clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		clean = SqlUtil.makeCleanSql(sql, false, false);
 		// nothing should be changed!
-		assertEquals("Not correctly cleaned", clean, sql);	
-		
+		assertEquals("Not correctly cleaned", sql, clean);
+
+		sql = "/* this is a comment */ select from \"project\"";
+		clean = SqlUtil.makeCleanSql(sql, false, true);
+		// nothing should be changed!
+		assertEquals("Not correctly cleaned", sql, clean);
+
+		sql = "/* this is a comment */\n select from \"project\"";
+		clean = SqlUtil.makeCleanSql(sql, false, true);
+		assertEquals("Not correctly cleaned", "/* this is a comment */  select from \"project\"", clean);
 	}
 	
 	public void testGetSelectColumns()

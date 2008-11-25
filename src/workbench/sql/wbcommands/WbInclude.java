@@ -76,7 +76,7 @@ public class WbInclude
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
-		String clean = SqlUtil.makeCleanSql(aSql, false, '"');
+		String clean = SqlUtil.makeCleanSql(aSql, false, false);
 		boolean checkParms = true;
 
 		WbFile file = null;

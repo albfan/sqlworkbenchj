@@ -59,7 +59,7 @@ public class PreparedStatementPool
 		if (sql == null) return false;
 		if (sql.indexOf('?') == -1) return false;
 	
-		String clean = SqlUtil.makeCleanSql(sql, false, false, '\'');
+		String clean = SqlUtil.makeCleanSql(sql, false, false);
 		if (clean.indexOf('?') == -1) return false;
 		
 		if (this.statements.containsKey(sql))

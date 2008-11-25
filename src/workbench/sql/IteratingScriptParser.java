@@ -25,9 +25,9 @@ import workbench.util.StringUtil;
 /**
  * A class to parse a script with SQL commands. Access to the commands
  * is given through an Iterator. If a file is set as the source for
- * this parser, then the file will not be read into memory. A 
+ * this parser, then the file will not be read into memory. A
  * {@link workbench.util.FileMappedSequence} will be used to process
- * the file. If the script is defined through a String, then 
+ * the file. If the script is defined through a String, then
  * a {@link workbench.util.StringSequence} is used to process the Script
  *
  * @see workbench.interfaces.CharacterSequence
@@ -59,7 +59,7 @@ public class IteratingScriptParser
 	private boolean returnStartingWhitespace = false;
 	//private boolean checkHashComment = false;
 	private String alternateLineComment = "--";
-	
+
 	// These patterns cover the statements that
 	// can be used in a single line without a delimiter
 	// This is basically to make the parser as Oracle compatible as possible
@@ -73,13 +73,13 @@ public class IteratingScriptParser
 	       };
 
 	private Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
-		
+
 	/** Create an InteratingScriptParser
 	 */
 	public IteratingScriptParser()
 	{
 	}
-	
+
 	/**
 	 * Initialize a ScriptParser from a file with a given encoding.
 	 * @see #setFile(File, String)
@@ -90,7 +90,7 @@ public class IteratingScriptParser
 		this();
 		this.setFile(f, encoding);
 	}
-	
+
 	/**
 	 *	Create a ScriptParser for the given String.
 	 *	The delimiter to be used will be evaluated dynamically
@@ -113,7 +113,7 @@ public class IteratingScriptParser
 	{
 		this.setFile(f, Settings.getInstance().getDefaultFileEncoding());
 	}
-	
+
 	/**
 	 * Define the source file to be used and the encoding of the file.
 	 * If the encoding is null, the default encoding will be used.
@@ -134,23 +134,23 @@ public class IteratingScriptParser
 	}
 
 	/**
-	 * Should the parser check for MySQL hash comments? 
+	 * Should the parser check for MySQL hash comments?
 	 */
 	public void setAlternateLineComment(String comment)
 	{
 		this.alternateLineComment = (comment == null ? null : comment.trim());
 	}
-	
+
 	public void setCheckForSingleLineCommands(boolean flag)
 	{
 		this.checkSingleLineCommands = flag;
 	}
 
-	public void setReturnStartingWhitespace(boolean flag) 
-	{ 
+	public void setReturnStartingWhitespace(boolean flag)
+	{
 		this.returnStartingWhitespace = flag;
 	}
-	
+
 	/**
 	 * Support Oracle style @ includes
 	 */
@@ -158,17 +158,17 @@ public class IteratingScriptParser
 	{
 		this.supportOracleInclude = flag;
 	}
-	
+
 	public void allowEmptyLineAsSeparator(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
 	}
-	
+
 	private void cleanup()
 	{
 		if (this.script != null) this.script.done();
 	}
-	
+
 	/**
 	 *	Define the script to be parsed
 	 */
@@ -181,7 +181,7 @@ public class IteratingScriptParser
 		this.checkEscapedQuotes = false;
 		this.reset();
 	}
-	
+
 	public void reset()
 	{
 		lastCommandEnd = 0;
@@ -211,11 +211,11 @@ public class IteratingScriptParser
 	{
 		return this.scriptLength;
 	}
-	
+
 	public int findNextLineStart(int pos)
 	{
 		if (pos < 0) return pos;
-		
+
 		if (pos >= this.scriptLength) return pos;
 		char c = this.script.charAt(pos);
 		while (pos < this.scriptLength && (c == '\n' || c == '\r'))
@@ -235,8 +235,8 @@ public class IteratingScriptParser
 		}
 		return false;
 	}
-	
-	
+
+
 	private int findNextNonWhiteSpace(int start)
 	{
 		char ch = this.script.charAt(start);
@@ -252,7 +252,7 @@ public class IteratingScriptParser
 	{
 		return StringUtil.lineStartsWith(this.script, pos, "--") || StringUtil.lineStartsWith(this.script, pos, alternateLineComment);
 	}
-	
+
 	/**
 	 *	Parse the given SQL Script into a List of single SQL statements.
 	 *	Returns the index of the statement indicated by the currentCursorPos
@@ -262,16 +262,16 @@ public class IteratingScriptParser
 		int pos;
 		boolean delimiterOnOwnLine = this.delimiter.isSingleLine();
 		String delim = this.delimiter.getDelimiter();
-		
+
 		for (pos = this.lastPos; pos < this.scriptLength; pos++)
 		{
 			char firstChar = this.script.charAt(pos);
-			
+
 			// skip CR characters
 			if (firstChar == '\r') continue;
-			
+
 			char nextChar = (pos < scriptLength - 1 ? this.script.charAt(pos + 1) : 0);
-			
+
 			// ignore quotes in comments
 			if (!commentOn && (firstChar == '\'' || firstChar == '"'))
 			{
@@ -360,7 +360,7 @@ public class IteratingScriptParser
 
 				if (!delimiterOnOwnLine && (currWord.equals(delim) || (pos == scriptLength)))
 				{
-					if (lastPos >= pos && pos < scriptLength - 1) 
+					if (lastPos >= pos && pos < scriptLength - 1)
 					{
 						lastPos ++;
 						continue;
@@ -378,22 +378,22 @@ public class IteratingScriptParser
 					if (firstChar == '\n')
 					{
 						String line = this.script.subSequence(lastNewLineStart, pos).toString().trim();
-						String clean = SqlUtil.makeCleanSql(line, false, false, '\'');
-						
+						String clean = SqlUtil.makeCleanSql(line, false, false);
+
 						if ( (this.emptyLineIsSeparator && clean.length() == 0) ||
 							   (delimiterOnOwnLine && line.equalsIgnoreCase(delim)) )
 						{
 							int end = pos;
-							
+
 							if (clean.length() > 0)
 							{
-								// a single line delimiter was found, we have to make 
+								// a single line delimiter was found, we have to make
 								// sure this is not added to the created command
 								end = lastNewLineStart;
 							}
 							int start = lastCommandEnd;
 							ScriptCommandDefinition c = this.createCommand(start, end);
-							if (c != null) 
+							if (c != null)
 							{
 								this.lastNewLineStart = pos + 1;
 								this.lastPos = lastNewLineStart;
@@ -401,7 +401,7 @@ public class IteratingScriptParser
 								return c;
 							}
 						}
-						
+
 						if (this.checkSingleLineCommands)
 						{
 							boolean slcFound = false;
@@ -445,7 +445,7 @@ public class IteratingScriptParser
 					}
 				}
 			}
-			
+
 		} // end loop for next statement
 
 		ScriptCommandDefinition c = null;
@@ -471,14 +471,14 @@ public class IteratingScriptParser
 		String value = null;
 
 		if (startPos >= scriptLength) return null;
-		
+
 		if (endPos == -1)
 		{
 			endPos = scriptLength;
 		}
-		
+
 		int realStart = startPos;
-		
+
 		// remove whitespaces at the start
 		if (!returnStartingWhitespace)
 		{
@@ -489,7 +489,7 @@ public class IteratingScriptParser
 				if (startPos < endPos) ch = this.script.charAt(startPos);
 			}
 		}
-		
+
 		if (startPos >= endPos) return null;
 		if (storeSqlInCommands)
 		{
@@ -497,7 +497,7 @@ public class IteratingScriptParser
 		}
 		ScriptCommandDefinition c = new ScriptCommandDefinition(value, startPos, endPos);
 		c.setWhitespaceStart(realStart);
-		
+
 		return c;
 	}
 

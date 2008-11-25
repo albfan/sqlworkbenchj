@@ -82,7 +82,7 @@ public class SqlCommand
 	{
 		return this.getVerb() + " " + ResourceMgr.getString("MsgKnownStatementOK");
 	}
-	
+
 	protected void appendSuccessMessage(StatementRunnerResult result)
 	{
 		result.addMessage(getDefaultSuccessMessage());
@@ -97,7 +97,7 @@ public class SqlCommand
 	{
 		this.showDataLoading = flag;
 	}
-	
+
 	protected void appendOutput(StatementRunnerResult result)
 	{
 		String s = this.currentConnection.getOutputMessages();
@@ -488,7 +488,7 @@ public class SqlCommand
 	{
 		return null;
 	}
-	
+
 	/**
 	 * Check if this verb for this statement is considered an updating command in
 	 * all circumstances.
@@ -609,7 +609,7 @@ public class SqlCommand
 	 */
 	protected String getCommandLine(String sql)
 	{
-		return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql,false,false,'\''));
+		return SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 	}
 
 	/**
