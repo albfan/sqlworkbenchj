@@ -139,6 +139,9 @@
 				<include name="**/*.sql"/>
 				<include name="**/*.txt"/>
 			</fileset>
+			<fileset defaultexcludes="true" dir="${testsrc}/jemmy">
+				<include name="**/*.timeouts"/>
+			</fileset>
 		</copy>
 	</target>
 
