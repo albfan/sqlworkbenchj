@@ -73,9 +73,9 @@ public class ValueConverter
 	private String defaultTimestampFormat;
 	private char decimalCharacter = '.';
 
-	private SimpleDateFormat dateFormatter;
-	private SimpleDateFormat timestampFormatter;
-	private SimpleDateFormat formatter = new SimpleDateFormat();
+	private final SimpleDateFormat dateFormatter = new SimpleDateFormat();
+	private final SimpleDateFormat timestampFormatter = new SimpleDateFormat();
+	private final SimpleDateFormat formatter = new SimpleDateFormat();
 	private boolean autoConvertBooleanNumbers = true;
 	private Collection<String> booleanTrueValues = null;
 	private Collection<String> booleanFalseValues = null;
@@ -88,7 +88,7 @@ public class ValueConverter
 	private final BigDecimal BIG_FALSE = BigDecimal.valueOf(0);
 	
 	private static final String FORMAT_MILLIS = "millis";
-	
+	private boolean checkBuiltInFormats = true;
 
 	public ValueConverter()
 	{
@@ -118,6 +118,11 @@ public class ValueConverter
 		}
 	}
 
+	public void setCheckBuiltInFormats(boolean flag)
+	{
+		this.checkBuiltInFormats = flag;
+	}
+	
 	public void setDefaultDateFormat(String aFormat)
 		throws IllegalArgumentException
 	{
@@ -126,12 +131,15 @@ public class ValueConverter
 			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
 			{
 				this.defaultTimestampFormat = FORMAT_MILLIS;
-				this.dateFormatter = null;
+				//this.dateFormatter = null;
 			}
 			else
 			{
-				this.defaultDateFormat = aFormat;
-				this.dateFormatter = new SimpleDateFormat(aFormat);
+				synchronized (dateFormatter)
+				{
+					this.defaultDateFormat = aFormat;
+					this.dateFormatter.applyPattern(aFormat);
+				}
 			}
 		}
 	}
@@ -144,12 +152,15 @@ public class ValueConverter
 			if (aFormat.equalsIgnoreCase(FORMAT_MILLIS))
 			{
 				this.defaultTimestampFormat = FORMAT_MILLIS;
-				this.dateFormatter = null;
+				//this.dateFormatter = null;
 			}
 			else
 			{
-				this.defaultTimestampFormat = aFormat;
-				this.timestampFormatter = new SimpleDateFormat(aFormat);
+				synchronized (timestampFormatter)
+				{
+					this.defaultTimestampFormat = aFormat;
+					this.timestampFormatter.applyPattern(aFormat);
+				}
 			}
 		}
 	}
@@ -541,9 +552,10 @@ public class ValueConverter
 			}
 		}
 
-		if (result == null)
+		if (result == null && checkBuiltInFormats)
 		{
 			int usedPattern = -1;
+			
 			synchronized (this.formatter)
 			{
 				for (int i = 0; i < dateFormats.length; i++)
@@ -561,12 +573,17 @@ public class ValueConverter
 					}
 				}
 			}
+
 			if (usedPattern > -1)
 			{
 				LogMgr.logInfo("ValueConverter.parseTimestamp()", "Succeeded parsing '" + aDate + "' using the format: " + timestampFormats[usedPattern]);
+
 				// use this pattern from now on to avoid multiple attempts for the next values
-				this.defaultTimestampFormat = timestampFormats[usedPattern];
-				this.timestampFormatter.applyPattern(this.defaultTimestampFormat);
+				synchronized (timestampFormatter)
+				{
+					defaultTimestampFormat = timestampFormats[usedPattern];
+					timestampFormatter.applyPattern(this.defaultTimestampFormat);
+				}
 			}
 		}
 
@@ -621,7 +638,10 @@ public class ValueConverter
 		{
 			try
 			{
-				result = this.timestampFormatter.parse(aDate);
+				synchronized (timestampFormatter)
+				{
+					result = this.timestampFormatter.parse(aDate);
+				}
 			}
 			catch (ParseException e)
 			{
@@ -629,7 +649,7 @@ public class ValueConverter
 			}
 		}
 
-		if (result == null)
+		if (result == null && checkBuiltInFormats)
 		{
 			synchronized (this.formatter)
 			{
@@ -640,9 +660,13 @@ public class ValueConverter
 						this.formatter.applyPattern(dateFormats[i]);
 						result = this.formatter.parse(aDate);
 						LogMgr.logInfo("ValueConverter.parseDate()", "Succeeded parsing [" + aDate + "] using the format: " + dateFormats[i]);
+						
 						// use this format from now on...
-						this.defaultDateFormat = dateFormats[i];
-						this.dateFormatter.applyPattern(defaultDateFormat);
+						synchronized (dateFormatter)
+						{
+							defaultDateFormat = dateFormats[i];
+							dateFormatter.applyPattern(defaultDateFormat);
+						}
 						break;
 					}
 					catch (Exception e)
