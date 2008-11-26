@@ -121,7 +121,7 @@ public class TextFileParser
 	public TextFileParser()
 	{
 		// raise an error during import if the date or timestamps cannot be parsed
-		boolean checkBuiltInFormats = Settings.getInstance().getBoolProperty("workbench.import.dateformat.checkbuiltin", false);
+		boolean checkBuiltInFormats = Settings.getInstance().getBoolProperty("workbench.import.text.dateformat.checkbuiltin", false);
 		converter.setCheckBuiltInFormats(checkBuiltInFormats);
 	}
 
