@@ -472,7 +472,7 @@ public class ValueConverter
 				{
 					this.formatter.applyPattern(timeFormats[i]);
 					parsed = this.formatter.parse(time);
-					LogMgr.logInfo("ValueConverter.parseTime()", "Succeeded parsing the time string [" + time + "] using the format: " + formatter.toPattern());
+					LogMgr.logDebug("ValueConverter.parseTime()", "Succeeded parsing the time string [" + time + "] using the format: " + formatter.toPattern());
 					break;
 				}
 				catch (Exception e)
@@ -566,6 +566,7 @@ public class ValueConverter
 				LogMgr.logInfo("ValueConverter.parseTimestamp()", "Succeeded parsing '" + aDate + "' using the format: " + timestampFormats[usedPattern]);
 				// use this pattern from now on to avoid multiple attempts for the next values
 				this.defaultTimestampFormat = timestampFormats[usedPattern];
+				this.timestampFormatter.applyPattern(this.defaultTimestampFormat);
 			}
 		}
 
@@ -641,6 +642,7 @@ public class ValueConverter
 						LogMgr.logInfo("ValueConverter.parseDate()", "Succeeded parsing [" + aDate + "] using the format: " + dateFormats[i]);
 						// use this format from now on...
 						this.defaultDateFormat = dateFormats[i];
+						this.dateFormatter.applyPattern(defaultDateFormat);
 						break;
 					}
 					catch (Exception e)

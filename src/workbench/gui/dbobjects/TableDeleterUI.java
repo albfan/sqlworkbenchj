@@ -443,6 +443,8 @@ public class TableDeleterUI
 
 	protected void startDelete()
 	{
+		deleteButton.setEnabled(false);
+
 		this.deleteThread = new WbThread("TableDeleteThread")
 		{
 			public void run()
@@ -479,6 +481,16 @@ public class TableDeleterUI
 			// Basically any error should have been handled by the TableDeleter
 			// or through the JobErrorHandler callbacks
 			WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
+		}
+		finally
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					deleteButton.setEnabled(true);
+				}
+			});
 		}
 
 		this.fireTableDeleted(deletedTables);
