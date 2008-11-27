@@ -695,7 +695,6 @@ public class BatchRunner
 
 		if (showStatementWithResult)
 		{
-			console.println();
 			console.println(sql);
 		}
 		for (DataStore ds : data)

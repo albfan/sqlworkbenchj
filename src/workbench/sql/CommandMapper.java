@@ -62,6 +62,7 @@ import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbXslt;
+import workbench.sql.wbcommands.console.WbRun;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -122,7 +123,6 @@ public class CommandMapper
 		addCommand(UpdatingCommand.INSERT);
 		addCommand(UpdatingCommand.UPDATE);
 		addCommand(UpdatingCommand.TRUNCATE);
-		
 		
 		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
 		{

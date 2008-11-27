@@ -159,9 +159,13 @@ public class WbInclude
 			batchRunner.setParameterPrompter(this.prompter);
 			batchRunner.setExecutionController(runner.getExecutionController());
 			batchRunner.setIgnoreDropErrors(ignoreDrop);
-			batchRunner.setOptimizeColWidths(false);
-			batchRunner.showResultSets(cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, false));
-			
+			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, false);
+			batchRunner.showResultSets(showResults);
+			batchRunner.setOptimizeColWidths(showResults);
+			if (showResults)
+			{
+				batchRunner.setShowProgress(false);
+			}
 			batchRunner.execute();
 			if (batchRunner.isSuccess())
 			{

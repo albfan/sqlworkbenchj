@@ -15,6 +15,7 @@ import workbench.sql.BatchRunner;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbListProfiles;
+import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -92,6 +93,7 @@ public class SQLConsole
 			runner.addCommand(new WbStoreProfile());
 			runner.addCommand(new WbDeleteProfile());
 			runner.addCommand(new WbListProfiles());
+			runner.addCommand(new WbRun());
 
 			runner.setPersistentConnect(true);
 

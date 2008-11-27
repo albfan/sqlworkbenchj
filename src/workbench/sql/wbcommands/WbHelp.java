@@ -49,7 +49,7 @@ public class WbHelp
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		Collection<String> commands = this.runner.getAllWbCommands();
-		StringBuffer msg = new StringBuffer(commands.size() * 10);
+		StringBuffer msg = new StringBuffer(commands.size() * 25);
 		ResourceBundle bundle = ResourceBundle.getBundle("language/cmdhelp", Settings.getInstance().getLanguage());
 		commands.remove("DESC"); // only the "long" Verb is needed
 		if (currentConnection != null && !currentConnection.getMetadata().isOracle())

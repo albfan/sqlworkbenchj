@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbListProfiles;
+import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
 
 /**
@@ -76,6 +77,7 @@ public class CommandTester
 		commands.add(WbStoreProfile.VERB);
 		commands.add(WbHelp.VERB);
 		commands.add(WbProcSource.VERB);
+		commands.add(WbRun.VERB);
 
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
