@@ -73,9 +73,13 @@ public class HelpManager
 		{
 			basefile = "workbench-manual-single.html";
 		}
-		else 
+		else if (topic != null)
 		{
 			basefile = topic + ".html";
+		}
+		else
+		{
+			basefile = "workbench-manual.html";
 		}
 		
 		File dir = Settings.getInstance().getHtmlManualDir();
@@ -118,7 +122,7 @@ public class HelpManager
 	
 	public static void showHelpIndex()
 	{
-		showHelpFile(null);
+		showHelpFile("workbench-manual");
 	}
 	
 	public static void showDataPumperHelp()
