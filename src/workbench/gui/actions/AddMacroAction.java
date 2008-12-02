@@ -18,7 +18,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
-import workbench.sql.MacroManager;
+import workbench.sql.macros.MacroManager;
 import workbench.util.StringUtil;
 
 /**
@@ -63,7 +63,7 @@ public class AddMacroAction extends WbAction
 		String name = WbSwingUtilities.getUserInput(client, ResourceMgr.getString("TxtGetMacroNameWindowTitle"), ResourceMgr.getString("TxtEmptyMacroName"));
 		if (name != null)
 		{
-			MacroManager.getInstance().setMacro(name, text);
+			MacroManager.getInstance().getMacros().addMacro((String)null, name, text);
 		}
 	}
 

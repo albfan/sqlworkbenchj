@@ -17,11 +17,12 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import workbench.WbManager;
 import workbench.gui.MainWindow;
+import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.sql.MacroManager;
 
 /**
  *	@author  support@sql-workbench.net
@@ -41,15 +42,8 @@ public class ManageMacroAction extends WbAction
 	
 	public void executeAction(ActionEvent e)
 	{
-		SqlPanel sql = this.client.getCurrentSqlPanel();
-		if (sql != null)
-		{	
-			MacroManager.getInstance().selectAndRun(sql);
-		}
-		else
-		{
-			LogMgr.logWarning("ManageMacroAction.actionPerformed()", "Don't have a current SqlPanel!");
-		}
+		MacroManagerDialog d = new MacroManagerDialog(WbManager.getInstance().getCurrentWindow(), null);
+		d.setVisible(true);
 	}
 
 }

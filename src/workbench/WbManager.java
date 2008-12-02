@@ -40,14 +40,15 @@ import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
-import workbench.sql.MacroManager;
 import workbench.sql.VariablePool;
+import workbench.sql.macros.MacroManager;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 import workbench.gui.dialogs.WbSplash;
@@ -378,7 +379,7 @@ public final class WbManager
 		this.createCloseMessageWindow(window);
 		if (this.closeMessage != null) this.closeMessage.setVisible(true);
 
-		MacroManager.getInstance().saveMacros();
+		MacroManager.getInstance().save();
 		Thread t = new WbThread("WbManager disconnect")
 		{
 			public void run()
@@ -769,8 +770,11 @@ public final class WbManager
 			public void run()
 			{
 				ResourceMgr.getResources();
-				MacroManager.getInstance().getMacroList();
+				MacroManager.getInstance().getMacros();
 				ConnectionMgr.getInstance().readProfiles();
+
+				ProfileSelectionDialog d = new ProfileSelectionDialog(null, true, null);
+				d.dispose();
 			}
 		};
 		t.setPriority(Thread.MIN_PRIORITY);

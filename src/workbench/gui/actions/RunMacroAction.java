@@ -15,49 +15,59 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
 
+import javax.swing.KeyStroke;
 import workbench.gui.MainWindow;
 import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.StoreableKeyStroke;
+import workbench.sql.macros.MacroDefinition;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
 /**
  *	@author  support@sql-workbench.net
  */
-public class RunMacroAction extends WbAction
+public class RunMacroAction
+	extends WbAction
 {
 	private MainWindow client;
-	private String macroName;
+	private MacroDefinition macro;
 
-	public RunMacroAction(MainWindow aClient, String aName, int index)
+	public RunMacroAction(MainWindow aClient, MacroDefinition def, int index)
 	{
 		super();
-		this.macroName = aName;
+		this.macro = def;
 		this.client = aClient;
-		String menuTitle = aName;
+		String menuTitle = def.getName();
 		
 		if (index < 10)
 		{
-			menuTitle = "&" + NumberStringCache.getNumberString(index) + " - " + aName;
+			menuTitle = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
 		}
 		this.setMenuText(menuTitle);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
 		String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
-		desc = StringUtil.replace(desc, "%macro%", aName);
+		desc = StringUtil.replace(desc, "%macro%", def.getName());
 		this.putValue(Action.SHORT_DESCRIPTION, desc);
 		this.setIcon(null);
+		StoreableKeyStroke key = macro.getShortcut();
+		if (key != null)
+		{
+			KeyStroke stroke = key.getKeyStroke();
+			setAccelerator(stroke);
+		}
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		if (this.client != null && this.macroName != null)
+		if (this.client != null && this.macro != null)
 		{
 			boolean shiftPressed = isShiftPressed(e);
 			SqlPanel sql = this.client.getCurrentSqlPanel();
 			if (sql != null)
 			{	
-				sql.executeMacro(macroName, shiftPressed);
+				sql.executeMacro(macro, shiftPressed);
 			}
 			else
 			{

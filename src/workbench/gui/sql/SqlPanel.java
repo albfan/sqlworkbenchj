@@ -70,6 +70,7 @@ import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultReceiver;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.macros.MacroDefinition;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
@@ -158,7 +159,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
-import workbench.sql.MacroManager;
+import workbench.sql.macros.MacroManager;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.VariablePool;
@@ -1737,12 +1738,13 @@ public class SqlPanel
 
 	private boolean macroExecution = false;
 
-	public void executeMacro(final String macroName, final boolean replaceText)
+	public void executeMacro(final MacroDefinition macro, final boolean replaceText)
 	{
 		if (isBusy()) return;
+		if (macro == null) return;
 
 		MacroManager mgr = MacroManager.getInstance();
-		String sql = mgr.getMacroText(macroName);
+		String sql = macro.getText();
 		if (StringUtil.isBlank(sql)) return;
 
 		if (mgr.hasSelectedKey(sql))

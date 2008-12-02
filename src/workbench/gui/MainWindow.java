@@ -32,7 +32,6 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.Action;
@@ -57,6 +56,7 @@ import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.ShowManualAction;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.interfaces.Moveable;
+import workbench.sql.macros.MacroManager;
 import workbench.util.ExceptionUtil;
 import workbench.gui.actions.AddMacroAction;
 import workbench.gui.actions.AddTabAction;
@@ -96,7 +96,6 @@ import workbench.interfaces.MainPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.MacroManager;
 import workbench.util.FileDialogUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -114,6 +113,8 @@ import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.GuiSettings;
+import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroGroup;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.WbFile;
@@ -203,7 +204,7 @@ public class MainWindow
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
 		this.addWindowListener(this);
-		MacroManager.getInstance().addChangeListener(this);
+		MacroManager.getInstance().getMacros().addChangeListener(this);
 
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
@@ -623,20 +624,40 @@ public class MainWindow
 		this.createMacro.addToMenu(macroMenu);
 		this.manageMacros.addToMenu(macroMenu);
 
-		List<String> macros = MacroManager.getInstance().getMacroList();
-		if (macros == null || macros.size() == 0) return;
+		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getNonEmptyGroups();
+		
+		if (groups == null || groups.size() == 0) return;
 
 		macroMenu.addSeparator();
 
-		Collections.sort(macros);
-		int count = macros.size();
-		RunMacroAction run = null;
 		int maxItems = GuiSettings.getMaxMacrosInMenu();
-		for (int i=0; (i < count && i < maxItems); i++)
+		if (groups.size() == 1)
 		{
-			String name = macros.get(i);
-			run = new RunMacroAction(this, name, i+1);
-			run.addToMenu(macroMenu);
+			List<MacroDefinition> macros = groups.get(0).getMacros();
+			int count = macros.size();
+			
+			for (int i=0; (i < count && i < maxItems); i++)
+			{
+				RunMacroAction run = new RunMacroAction(this, macros.get(i), i+1);
+				run.addToMenu(macroMenu);
+			}
+		}
+		else
+		{
+			for (MacroGroup group : groups)
+			{
+				WbMenu groupMenu = new WbMenu(group.getName());
+				
+				List<MacroDefinition> macros = group.getMacros();
+				int count = macros.size();
+
+				for (int i=0; (i < count && i < maxItems); i++)
+				{
+					RunMacroAction run = new RunMacroAction(this, macros.get(i), i+1);
+					run.addToMenu(groupMenu);
+				}
+				macroMenu.add(groupMenu);
+			}
 		}
 	}
 

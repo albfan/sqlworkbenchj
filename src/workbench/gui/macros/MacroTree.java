@@ -9,7 +9,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.gui.profiles;
+package workbench.gui.macros;
 
 import java.awt.Insets;
 import java.awt.Point;
@@ -29,12 +29,9 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import workbench.db.ConnectionProfile;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
@@ -42,15 +39,19 @@ import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
 import workbench.interfaces.GroupTree;
 import workbench.resource.ResourceMgr;
+import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroGroup;
+import workbench.sql.macros.MacroManager;
+import workbench.sql.macros.MacroStorage;
 import workbench.util.StringUtil;
 
 /**
- * A Tree to display connection profiles
- * It supports drag & drop from profiles into different groups
+ * A Tree to display macro groups
+ * It supports drag & drop from macaros into different groups
  * 
  * @author support@sql-workbench.net
  */
-public class ProfileTree
+public class MacroTree
 	extends JTree
 	implements TreeModelListener, 
 	           MouseListener, 
@@ -59,8 +60,8 @@ public class ProfileTree
 	           TreeSelectionListener,
 						 GroupTree
 {
-	private ProfileListModel profileModel;
-	private DefaultMutableTreeNode[] clipboardNodes;
+	private MacroListModel macroModel;
+	private MacroTreeNode[] clipboardNodes;
 	private static final int CLIP_COPY = 1;
 	private static final int CLIP_CUT = 2;
 	private int clipboardType = 0;
@@ -69,9 +70,12 @@ public class ProfileTree
 	
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
 	
-	public ProfileTree()
+	public MacroTree()
 	{
 		super();
+		macroModel = new MacroListModel(MacroManager.getInstance().getMacros());
+		setModel(macroModel);
+		macroModel.addTreeModelListener(this);
 		setRootVisible(false);
 		putClientProperty("JTree.lineStyle", "Angled");
 		setShowsRootHandles(true);
@@ -80,7 +84,6 @@ public class ProfileTree
 		addMouseListener(this);
 		getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
 		addTreeSelectionListener(this);
-
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		
@@ -99,13 +102,13 @@ public class ProfileTree
 		pasteToFolderAction.removeIcon();
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
 		popup.addAction(pasteToFolderAction, true);
-		
-		RenameGroupAction renameGroup = new RenameGroupAction(this);
-		popup.addAction(renameGroup, false);
-		
-		setCellRenderer(new ProfileTreeCellRenderer());
-    new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
+
+		MacroTreeCellRenderer renderer = new MacroTreeCellRenderer();
+//		renderer.setOpenIcon(ResourceMgr.getImage("Tree"));
+//		renderer.setClosedIcon(ResourceMgr.getImage("Tree"));
+		setCellRenderer(renderer);
 		setAutoscrolls(true);
+		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 	}
 	
 	public void setDeleteAction(DeleteListEntryAction delete)
@@ -116,16 +119,6 @@ public class ProfileTree
 		ActionMap am = this.getActionMap();
 		delete.addToInputMap(im, am);
 	}
-	
-	public void setModel(TreeModel model)
-	{
-		super.setModel(model);
-		if (model instanceof ProfileListModel)
-		{
-			this.profileModel = (ProfileListModel)model;
-		}
-		model.addTreeModelListener(this);
-	}	
 
 	public boolean isPathEditable(TreePath path)
 	{
@@ -133,7 +126,7 @@ public class ProfileTree
 		// Only allow editing of groups
 		if (path.getPathCount() != 2) return false;
 		
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
+		MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
 		
 		return node.getAllowsChildren();
 	}
@@ -141,27 +134,25 @@ public class ProfileTree
 	public void treeNodesChanged(TreeModelEvent e)
 	{
 		Object[] changed = e.getChildren();
-		DefaultMutableTreeNode group = (DefaultMutableTreeNode)changed[0];
-		Object data = group.getUserObject();
+		MacroTreeNode node = (MacroTreeNode)changed[0];
+
+		Object data = node.getDataObject();
+		if (data == null) return;
 		
-		if (group.getAllowsChildren())
+		if (node.getAllowsChildren())
 		{
-			String newGroupName = (String)data;
-			renameGroup(group, newGroupName);
-		}
-		else if (data instanceof ConnectionProfile)
-		{
-			// If the connection profile has changed, the title
-			// of the profile possibly changed as well, so we need to
-			// trigger a repaint to display the correct title
-			// in the tree
-			this.repaint();
+			// If a node is edited in a JTree, the new value that has been
+			// entered by the user is passed in as the UserObject of the changed
+			// node (that's the reason why a separate MacroTreeNode class is used
+			// that preserves the original "user object"
+			MacroGroup group = (MacroGroup)node.getDataObject();
+			group.setName(data.toString());
 		}
 	}
 
 	public void expandAll()
 	{
-		TreePath[] groups = this.profileModel.getGroupNodes();
+		TreePath[] groups = this.macroModel.getGroupNodes();
 		for (int i = 0; i < groups.length; i++)
 		{
 			if (groups[i] != null) expandPath(groups[i]);
@@ -170,11 +161,45 @@ public class ProfileTree
 	
 	public void collapseAll()
 	{
-		TreePath[] groups = this.profileModel.getGroupNodes();
+		TreePath[] groups = this.macroModel.getGroupNodes();
 		for (int i = 0; i < groups.length; i++)
 		{
 			if (groups[i] != null) collapsePath(groups[i]);
 		}
+	}
+
+	public void selectMacro(String groupName, String macroName)
+	{
+		TreePath[] groupNodes = this.macroModel.getGroupNodes();
+		for (TreePath path : groupNodes)
+		{
+			MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
+			if (node.isLeaf()) continue;
+
+			MacroGroup group = (MacroGroup)node.getDataObject();
+			if (group.getName().equals(groupName))
+			{
+				expandPath(path);
+
+				int elements = node.getChildCount();
+				for (int i=0; i < elements; i++)
+				{
+					MacroTreeNode macroNode = (MacroTreeNode)node.getChildAt(i);
+					if (!macroNode.isLeaf()) continue;
+					MacroDefinition macro = (MacroDefinition)macroNode.getDataObject();
+					if (macro != null && macro.getName().equals(macroName))
+					{
+						selectNode(macroNode);
+					}
+				}
+			}
+		}
+	}
+
+	public void saveChanges()
+	{
+		MacroStorage current = this.macroModel.getMacros();
+		MacroManager.getInstance().getMacros().copyFrom(current);
 	}
 	
 	/**
@@ -182,15 +207,15 @@ public class ProfileTree
 	 * The list is expected to contain Sting objects that identify
 	 * the names of the groups. 
 	 */
-	public void expandGroups(List groupList)
+	public void expandGroups(List<String> groupList)
 	{
 		if (groupList == null) return;
-		TreePath[] groupNodes = this.profileModel.getGroupNodes();
+		TreePath[] groupNodes = this.macroModel.getGroupNodes();
 		if (groupNodes == null) return;
 		for (int i = 0; i < groupNodes.length; i++)
 		{
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)groupNodes[i].getLastPathComponent();
-			String g = (String)node.getUserObject();
+			MacroTreeNode node = (MacroTreeNode)groupNodes[i].getLastPathComponent();
+			String g = (String)node.getDataObject();
 			if (groupList.contains(g))
 			{
 				if (!isExpanded(groupNodes[i])) expandPath(groupNodes[i]);
@@ -204,13 +229,13 @@ public class ProfileTree
 	public List<String> getExpandedGroupNames()
 	{
 		LinkedList<String> result = new LinkedList<String>();
-		TreePath[] groupNodes = this.profileModel.getGroupNodes();
+		TreePath[] groupNodes = this.macroModel.getGroupNodes();
 		for (int i = 0; i < groupNodes.length; i++)
 		{
 			if (isExpanded(groupNodes[i]))
 			{
-				DefaultMutableTreeNode node = (DefaultMutableTreeNode)groupNodes[i].getLastPathComponent();
-				String g = (String)node.getUserObject();
+				MacroTreeNode node = (MacroTreeNode)groupNodes[i].getLastPathComponent();
+				String g = (String)node.getDataObject();
 				result.add(g);
 			}
 		}
@@ -245,7 +270,7 @@ public class ProfileTree
 	{
 		boolean groupSelected = onlyGroupSelected();
 		boolean canPaste = this.clipboardNodes != null && groupSelected;
-		boolean canCopy = onlyProfilesSelected();
+		boolean canCopy = onlyMacrosSelected();
 		
 		pasteToFolderAction.setEnabled(canPaste);
 
@@ -276,26 +301,11 @@ public class ProfileTree
 		}
 	}
 
-	/** 
-	 * Finds and selects the connection profile with the given 
-	 * name. If the profile is not found, the first profile
-	 * will be selected (and expanded)
-	 */
-	public void selectProfile(ProfileKey def)
-	{
-		if (profileModel == null) return;
-		TreePath path = this.profileModel.getPath(def);
-		if (path == null)
-		{
-			path = this.profileModel.getFirstProfile();
-		}
-		selectPath(path);
-	}
-	
+
 	/**
 	 * Checks if the current selection contains only profiles
 	 */
-	public boolean onlyProfilesSelected()
+	public boolean onlyMacrosSelected()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return false;
@@ -323,37 +333,53 @@ public class ProfileTree
 		return true;
 	}
 	
-	protected DefaultMutableTreeNode getSelectedGroupNode()
+	protected MacroTreeNode getSelectedGroupNode()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
 		if (selection.length != 1) return null;
 		
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
 		if (node != null && node.getAllowsChildren()) return node;
 		return null;
 	}
-	
+
+	public String getGroupForSelectedMacro()
+	{
+		TreePath[] selection = getSelectionPaths();
+		if (selection == null) return null;
+		if (selection.length != 1) return null;
+
+		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
+		if (node == null) return null;
+		MacroTreeNode parent = (MacroTreeNode)node.getParent();
+
+		Object o = parent.getDataObject();
+		if (o instanceof MacroGroup)
+		{
+			return ((MacroGroup)o).getName();
+		}
+		return null;
+	}
 	/**
-	 * Returns the currently selected Profile. If either more then one
+	 * Returns the currently selected Macro. If either more then one
 	 * entry is selected or a group is selected, null is returned
 	 *
 	 * @return the selected profile if any
 	 */
-	public ConnectionProfile getSelectedProfile()
+	public MacroDefinition getSelectedMacro()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
 		if (selection.length != 1) return null;
 		
-		DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
 		if (node == null) return null;
 		
-		Object o = node.getUserObject();
-		if (o instanceof ConnectionProfile)
+		Object o = node.getDataObject();
+		if (o instanceof MacroDefinition)
 		{
-			ConnectionProfile prof = (ConnectionProfile)o;
-			return prof;
+			return (MacroDefinition)o;
 		}
 		return null;
 	}
@@ -381,10 +407,10 @@ public class ProfileTree
 	{
 		TreePath[] p = getSelectionPaths();
 		
-		this.clipboardNodes = new DefaultMutableTreeNode[p.length];
+		this.clipboardNodes = new MacroTreeNode[p.length];
 		for (int i = 0; i < p.length; i++)
 		{
-			this.clipboardNodes[i] = (DefaultMutableTreeNode)p[i].getLastPathComponent();
+			this.clipboardNodes[i] = (MacroTreeNode)p[i].getLastPathComponent();
 		}
 	}
 	
@@ -413,7 +439,7 @@ public class ProfileTree
 		if (clipboardNodes == null) return;
 		if (clipboardNodes.length == 0) return;
 
-		DefaultMutableTreeNode group = (DefaultMutableTreeNode)getLastSelectedPathComponent();
+		MacroTreeNode group = (MacroTreeNode)getLastSelectedPathComponent();
 		if (group == null) return;
 		if (!group.getAllowsChildren()) return;
 		
@@ -421,11 +447,11 @@ public class ProfileTree
 		{
 			if (clipboardType == CLIP_CUT)
 			{
-				profileModel.moveProfilesToGroup(clipboardNodes, group);
+//				macroModel.moveMacrosToGroup(clipboardNodes, group);
 			}
 			else if (clipboardType == CLIP_COPY)
 			{
-				profileModel.copyProfilesToGroup(clipboardNodes, group);
+//				macroModel.copyMacrosToGroup(clipboardNodes, group);
 			}
 		}
 		finally
@@ -435,18 +461,18 @@ public class ProfileTree
 		}
 	}
 
-	public void handleDroppedNodes(DefaultMutableTreeNode[] nodes, DefaultMutableTreeNode newParent, int action)
+	public void handleDroppedNodes(MacroTreeNode[] nodes, MacroTreeNode newParent, int action)
 	{
 		if (nodes == null || nodes.length < 1) return;
 		if (newParent == null) return;
 		
 		if (action == DnDConstants.ACTION_MOVE)
 		{
-			profileModel.moveProfilesToGroup(nodes, newParent);
+			macroModel.moveNodes(nodes, newParent);
 		}
 		else if (action == DnDConstants.ACTION_COPY)
 		{
-			profileModel.copyProfilesToGroup(nodes, newParent);
+//			macroModel.copyMacrosToGroup(nodes, newParent);
 		}
 		selectNode(nodes[0]);
 	}
@@ -461,50 +487,24 @@ public class ProfileTree
 		}
 	}
 
-	/**
-	 * Prompts the user for a new group name and renames the currently selected group
-	 * to the supplied name.
-	 */
-	public void renameGroup()
-	{
-		DefaultMutableTreeNode group = this.getSelectedGroupNode();
-		if (group == null) return;
-		String oldName = (String)group.getUserObject();
-		String newName = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), oldName);
-		if (StringUtil.isEmptyString(newName)) return;
-		group.setUserObject(newName);
-		renameGroup(group, newName);
-	}
-
-	private void renameGroup(DefaultMutableTreeNode group, String newGroupName)
-	{
-		if (StringUtil.isEmptyString(newGroupName)) return;
-		int count = profileModel.getChildCount(group);
-		for (int i = 0; i < count; i++)
-		{
-			DefaultMutableTreeNode node = (DefaultMutableTreeNode)profileModel.getChild(group,i);
-			ConnectionProfile prof = (ConnectionProfile)node.getUserObject();
-			prof.setGroup(newGroupName);
-		}
-	}
 	
 	/**
 	 * Prompts the user for a group name and creates a new group 
 	 * with the provided name. The new group node is automatically
-	 * after creation.
+	 * selected after creation.
 	 * @return the name of the new group or null if the user cancelled the name input
 	 */
 	public String addGroup()
 	{
 		String group = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), "");
 		if (StringUtil.isEmptyString(group)) return null;
-		List groups = this.profileModel.getGroups();
-		if (groups.contains(group))
+		
+		if (macroModel.getMacros().containsGroup(group))
 		{
 			WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErrGroupNotUnique");
 			return null;
 		}
-		TreePath path = this.profileModel.addGroup(group);
+		TreePath path = this.macroModel.addGroup(group);
 		selectPath(path);
 		return group;
 	}
@@ -517,9 +517,9 @@ public class ProfileTree
 		scrollPathToVisible(path);
 	}
 
-	private void selectNode(DefaultMutableTreeNode node)
+	private void selectNode(MacroTreeNode node)
 	{
-		TreeNode[] nodes = this.profileModel.getPathToRoot(node);
+		TreeNode[] nodes = this.macroModel.getPathToRoot(node);
 		TreePath path = new TreePath(nodes);
 		this.selectPath(path);
 	}

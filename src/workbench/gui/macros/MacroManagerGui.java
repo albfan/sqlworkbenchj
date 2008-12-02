@@ -14,22 +14,20 @@ package workbench.gui.macros;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
-import javax.swing.AbstractListModel;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
+import javax.swing.event.TreeModelEvent;
+import javax.swing.event.TreeModelListener;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
@@ -38,14 +36,15 @@ import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.profiles.NewGroupAction;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.FileActions;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.MacroManager;
+import workbench.sql.macros.MacroDefinition;
 
 /**
- * Displays all stored macros and lets the user add, edit and delete macros.
+ * Displays all defined macros and lets the user add, edit and delete macros.
  * It uses {@link workbench.sql.MacroManager} to retrieve and store
  * the macros.
  *
@@ -53,54 +52,54 @@ import workbench.sql.MacroManager;
  */
 public class MacroManagerGui
 	extends JPanel
-	implements FileActions, ListSelectionListener, PropertyChangeListener
+	implements FileActions, TreeSelectionListener, PropertyChangeListener, TreeModelListener
 {
 	private JToolBar toolbar;
-	private int lastIndex = -1;
-	private MacroEntry currentEntry;
 	private JSplitPane jSplitPane1;
-	protected JList macroList;
+	private MacroTree macroTree;
 	private EditorPanel macroEditor;
 	private StringPropertyEditor macroNameField;
-	private MacroListModel model;
+	private MacroDefinition currentMacro;
 
 	public MacroManagerGui()
 	{
 		super();
+		this.macroTree = new MacroTree();
+
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
-		this.toolbar.add(new SaveListFileAction(this));
+		this.toolbar.add(new NewGroupAction(macroTree, "LblNewMacroGroup"));
 		this.toolbar.addSeparator();
 		this.toolbar.add(new DeleteListEntryAction(this));
+		this.toolbar.addSeparator();
+		this.toolbar.add(new SaveListFileAction(this));
 
-		JPanel listPanel = new JPanel();
-		listPanel.setLayout(new BorderLayout());
-		listPanel.add(this.toolbar, BorderLayout.NORTH);
+		JPanel treePanel = new JPanel();
+		treePanel.setLayout(new BorderLayout());
+		treePanel.add(this.toolbar, BorderLayout.NORTH);
 
 		this.jSplitPane1 = new WbSplitPane();
 
-		this.model = new MacroListModel();
-		this.macroList = new JList(this.model);
 
 		this.setLayout(new BorderLayout());
 
 		jSplitPane1.setDividerLocation(100);
 
-		JScrollPane scroll = new JScrollPane(this.macroList);
+		JScrollPane scroll = new JScrollPane(this.macroTree);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		listPanel.add(scroll, java.awt.BorderLayout.CENTER);
+		treePanel.add(scroll, java.awt.BorderLayout.CENTER);
 
-		this.macroEditor = EditorPanel.createSqlEditor();
-		this.macroEditor.showFindOnPopupMenu();
-		this.macroEditor.showFormatSql();
+		macroEditor = EditorPanel.createSqlEditor();
+		macroEditor.showFindOnPopupMenu();
+		macroEditor.showFormatSql();
 
-		jSplitPane1.setLeftComponent(listPanel);
+		jSplitPane1.setLeftComponent(treePanel);
 
 		JPanel namePanel = new JPanel();
 		namePanel.setLayout(new BorderLayout());
 		JLabel l = new JLabel(ResourceMgr.getString("LblMacroName"));
 		l.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5), l.getBorder()));
-		this.macroNameField = new StringPropertyEditor(); //new JTextField(40);
+		this.macroNameField = new StringPropertyEditor(); 
 		this.macroNameField.setColumns(40);
 		this.macroNameField.setImmediateUpdate(true);
 		this.macroNameField.addPropertyChangeListener(this);
@@ -115,54 +114,32 @@ public class MacroManagerGui
 		p = new JPanel();
 		namePanel.add(p, BorderLayout.NORTH);
 
-
-		JPanel editor = new JPanel();
-		editor.setLayout(new BorderLayout());
-		editor.add(namePanel, BorderLayout.NORTH);
-		editor.add(macroEditor, BorderLayout.CENTER);
-		jSplitPane1.setRightComponent(editor);
+		JPanel macroPanel = new JPanel(new BorderLayout());
+		macroPanel.setLayout(new BorderLayout());
+		macroPanel.add(namePanel, BorderLayout.NORTH);
+		macroPanel.add(macroEditor, BorderLayout.CENTER);
+		jSplitPane1.setRightComponent(macroPanel);
 
 		add(jSplitPane1, BorderLayout.CENTER);
-		macroList.addListSelectionListener(this);
+		macroTree.addTreeSelectionListener(this);
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();
-		policy.addComponent(macroList);
+		policy.addComponent(macroTree);
 		policy.addComponent(macroNameField);
 		policy.addComponent(macroEditor);
-		policy.setDefaultComponent(macroList);
+		policy.setDefaultComponent(macroTree);
 		this.setFocusTraversalPolicy(policy);
 	}
 
-	public JList getMacroList() { return this.macroList; }
 
-	public String getSelectedMacroName()
+	public MacroDefinition getSelectedMacro()
 	{
-		int index = this.macroList.getSelectedIndex();
-		if (index < 0) return null;
-		String name = this.model.getKeyAt(index);
-		return name;
+		return macroTree.getSelectedMacro();
 	}
 
 	public void deleteItem()
 		throws Exception
 	{
-		int index = this.macroList.getSelectedIndex();
-		if (index < 0) return;
-		this.macroList.clearSelection();
-		//this.macroList.setValueIsAdjusting(true);
-		this.macroEditor.setText("");
-		this.macroNameField.setText("");
-		this.model.removeElementAt(index);
-
-		// check if the last driver was deleted
-		if (index > this.model.getSize() - 1) index--;
-		//this.macroList.setValueIsAdjusting(false);
-
-		if (index >= 0)
-		{
-			this.macroList.setSelectedIndex(index);
-			this.macroList.repaint();
-		}
 	}
 
 	/**
@@ -171,31 +148,6 @@ public class MacroManagerGui
 	 */
 	public void newItem(boolean copyCurrent) throws Exception
 	{
-		String key;
-		String text;
-		if (copyCurrent)
-		{
-			int index = this.macroList.getSelectedIndex();
-			key = this.model.getKeyAt(index);
-			if (key == null)
-			{
-				key = ResourceMgr.getString("TxtEmptyMacroName");
-				text = "";
-			}
-			else
-			{
-				text = MacroManager.getInstance().getMacroText(key);
-			}
-		}
-		else
-		{
-			key = ResourceMgr.getString("TxtEmptyMacroName");
-			text = "";
-		}
-		MacroEntry entry = this.model.addMacro(key, text);
-		this.macroList.setSelectedIndex(this.model.getSize() - 1);
-		this.macroList.updateUI();
-		this.showMacro(entry);
 	}
 
 	private void selectListLater()
@@ -204,30 +156,24 @@ public class MacroManagerGui
 		{
 			public void run()
 			{
-				macroList.requestFocusInWindow();
+				macroTree.requestFocusInWindow();
 			}
 		});
 	}
 
 	public void saveItem() throws Exception
 	{
-		int index = this.macroList.getSelectedIndex();
-		if (index >= 0)
-		{
-			this.model.setMacroAt(index, this.macroNameField.getText(), this.macroEditor.getText());
-		}
-		this.model.saveMacros();
+		macroTree.saveChanges();
 	}
 
 	public void saveSettings()
 	{
 		int location = this.jSplitPane1.getDividerLocation();
 		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", location);
-		String macro = this.getSelectedMacroName();
-		if (macro != null)
-		{
-			Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacro", macro);
-		}
+		MacroDefinition macro = getSelectedMacro();
+		Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacro", macro == null ? "" : macro.getName());
+		String group = macroTree.getGroupForSelectedMacro();
+		Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacrogroup", group);
 	}
 
 	public void restoreSettings()
@@ -235,156 +181,82 @@ public class MacroManagerGui
 		int location = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 140);
 		this.jSplitPane1.setDividerLocation(location);
 		String macro = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacro", null);
-		this.selectMacro(macro);
+		String group = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacrogroup", null);
+		this.selectMacro(group, macro);
 		this.selectListLater();
 	}
 
-	private void selectMacro(String macro)
+	private void selectMacro(String group, String macro)
 	{
-		if (this.model == null || this.macroList == null) return;
-		int count = this.model.getSize();
-		if (macro == null)
+		macroTree.selectMacro(group, macro);
+	}
+
+	private void showMacro(final MacroDefinition entry)
+	{
+		if (this.currentMacro != null && macroEditor.isModified())
 		{
-			this.macroList.setSelectedIndex(0);
-			return;
+			currentMacro.setText(macroEditor.getText());
 		}
-
-		for (int i=0; i < count; i ++)
+		currentMacro = entry;
+		if (entry != null)
 		{
-			MacroEntry entry = (MacroEntry)this.model.getElementAt(i);
-			if (macro.equalsIgnoreCase(entry.getName()))
-			{
-				macroList.setSelectedIndex(i);
-				return;
-			}
+			macroEditor.setEnabled(true);
+			macroEditor.setVisible(true);
+			macroNameField.setEnabled(true);
+			macroNameField.setSourceObject(entry, "name", entry.getName());
+			macroNameField.setImmediateUpdate(true);
+			macroEditor.setText(entry.getText());
+			macroEditor.setCaretPosition(0);
 		}
-		// if we get here, the macro was not found
-		this.macroList.setSelectedIndex(0);
-	}
-
-	public void addSelectionListener(ListSelectionListener aListener)
-	{
-		this.macroList.addListSelectionListener(aListener);
-	}
-
-	public void valueChanged(ListSelectionEvent evt)
-	{
-		if (this.macroList.getValueIsAdjusting()) return;
-		if (this.lastIndex >= 0)
+		else
 		{
-			this.model.setMacroAt(this.lastIndex, this.macroNameField.getText(), this.macroEditor.getText());
+			macroNameField.setSourceObject(null, "name");
+			macroEditor.setText("");
+			macroEditor.setEnabled(false);
+			macroNameField.setEnabled(false);
+			macroEditor.setVisible(false);
 		}
-		this.lastIndex = this.macroList.getSelectedIndex();
-		if (this.lastIndex < 0) return;
-		if (this.lastIndex > this.model.getSize() - 1) return;
-
-		MacroEntry entry = (MacroEntry)this.model.getElementAt(this.lastIndex);
-		this.showMacro(entry);
 	}
 
-	private void showMacro(final MacroEntry entry)
+	public void treeNodesChanged(TreeModelEvent e)
 	{
-		this.currentEntry = entry;
-		this.macroNameField.setSourceObject(this.currentEntry, "name", entry.getName());
-		this.macroNameField.setImmediateUpdate(true);
-		this.macroEditor.setText(entry.getText());
-		this.macroEditor.setCaretPosition(0);
+		
 	}
+
+	public void treeNodesInserted(TreeModelEvent e)
+	{
+
+	}
+
+	public void treeNodesRemoved(TreeModelEvent e)
+	{
+
+	}
+
+	public void treeStructureChanged(TreeModelEvent e)
+	{
+
+	}
+
 
 	public void propertyChange(java.beans.PropertyChangeEvent evt)
 	{
-		this.macroList.repaint();
+		this.macroTree.repaint();
 	}
 
-}
-
-class MacroListModel
-	extends AbstractListModel
-{
-	List<MacroEntry> macros;
-
-	public MacroListModel()
+	public void valueChanged(TreeSelectionEvent e)
 	{
-		super();
-		List<String> keys = MacroManager.getInstance().getMacroList();
-		Collections.sort(keys);
-		int size = keys.size();
-		if (size == 0)
+		TreePath path = e.getPath();
+		if (path == null) return;
+		MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
+		if (!node.getAllowsChildren())
 		{
-			macros = new ArrayList<MacroEntry>(10);
-			return;
+			MacroDefinition macro = (MacroDefinition)node.getDataObject();
+			showMacro(macro);
 		}
-		macros = new ArrayList<MacroEntry>(size);
-
-		for (int i=0; i < size; i++)
+		else
 		{
-			String key = keys.get(i);
-			String text = MacroManager.getInstance().getMacroText(key);
-			macros.add(new MacroEntry(key, text));
+			showMacro(null);
 		}
-	}
-
-	/*
-	public void addListDataListener(javax.swing.event.ListDataListener l)
-	{
-	}
-	*/
-	public Object getElementAt(int index)
-	{
-		return this.macros.get(index);
-	}
-
-	public int getSize()
-	{
-		return this.macros.size();
-	}
-
-	/*
-	public void removeListDataListener(javax.swing.event.ListDataListener l)
-	{
-	}
-	*/
-
-	public void setMacroAt(int index, String aName, String aText)
-	{
-		if (index < 0 || index >= this.macros.size()) return;
-		MacroEntry entry = this.macros.get(index);
-		entry.setName(aName);
-		entry.setText(aText);
-		this.fireContentsChanged(this, index, index);
-	}
-
-	public MacroEntry addMacro(String aKey, String aText)
-	{
-		MacroEntry entry = new MacroEntry(aKey, aText);
-		this.macros.add(entry);
-		int size = this.macros.size();
-		this.fireContentsChanged(this, size, size);
-		return entry;
-	}
-
-	public void removeElementAt(int index)
-	{
-		this.macros.remove(index);
-		this.fireContentsChanged(this, index, index);
-	}
-
-	public String getKeyAt(int index)
-	{
-		String name = null;
-		if (index > -1 && index < this.macros.size())
-		{
-			MacroEntry entry = this.macros.get(index);
-			name = entry.getName();
-		}
-		return name;
-	}
-
-
-	public void saveMacros()
-	{
-		MacroManager mgr = MacroManager.getInstance();
-		mgr.setMacros(macros);
-		mgr.saveMacros();
 	}
 }

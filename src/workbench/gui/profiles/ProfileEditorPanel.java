@@ -93,7 +93,7 @@ public class ProfileEditorPanel
 		ProfileTree tree = (ProfileTree)profileTree;
 		tree.setBorder(null);
 
-		this.toolbar.add(new NewGroupAction(tree));
+		this.toolbar.add(new NewGroupAction(tree, "LblNewProfileGroup"));
 
 		this.toolbar.addSeparator();
 		deleteItem = new DeleteListEntryAction(this);

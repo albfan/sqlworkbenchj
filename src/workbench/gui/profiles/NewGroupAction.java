@@ -13,6 +13,7 @@ package workbench.gui.profiles;
 
 import java.awt.event.ActionEvent;
 import workbench.gui.actions.WbAction;
+import workbench.interfaces.GroupTree;
 import workbench.log.LogMgr;
 
 /**
@@ -21,21 +22,21 @@ import workbench.log.LogMgr;
 public class NewGroupAction
 	extends WbAction
 {
-	private ProfileTree client;
+	private GroupTree client;
 	
-	public NewGroupAction(ProfileTree panel)
+	public NewGroupAction(GroupTree panel, String resourceKey)
 	{
 		super();
 		this.client = panel;
 		this.setIcon("NewFolder");
-		this.initMenuDefinition("LblNewProfileGroup");
+		this.initMenuDefinition(resourceKey);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		try
 		{
-			this.client.addProfileGroup();
+			this.client.addGroup();
 		}
 		catch (Exception ex)
 		{

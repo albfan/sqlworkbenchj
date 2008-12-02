@@ -40,13 +40,14 @@ import workbench.gui.components.WbCheckBox;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.macros.MacroDefinition;
 
 /**
- * A Dialog that displays a {@link MacroManagerGui} and allows to run 
+ * A Dialog that displays a {@link MacroManagerGui} and allows to run
  * the selected macro.
  *
- * @author support@sql-workbench.net  
- */ 
+ * @author support@sql-workbench.net
+ */
 public class MacroManagerDialog
 	extends JDialog
 	implements ActionListener, ListSelectionListener, MouseListener, WindowListener
@@ -69,13 +70,21 @@ public class MacroManagerDialog
 		this.client = aTarget;
 		this.initComponents();
 		this.initWindow(parent);
-		boolean connected = this.client.isConnected();
-		boolean busy = this.client.isBusy();
+
+		boolean connected = false;
+		boolean busy = false;
+		if (client != null)
+		{
+			connected = this.client.isConnected();
+			busy = this.client.isBusy();
+		}
+
 		this.runButton.setEnabled(connected && !busy);
 		this.runButton.setVisible(connected && !busy);
 
 		this.replaceEditorText.setVisible(connected && !busy);
 		this.replaceEditorText.setEnabled(connected && !busy);
+
 		this.initKeys();
 		this.addWindowListener(this);
 	}
@@ -159,10 +168,6 @@ public class MacroManagerDialog
 		dummyPanel.setMinimumSize(new Dimension(1, 1));
 		dummyPanel.setPreferredSize(new Dimension(2, 2));
 		getContentPane().add(dummyPanel, BorderLayout.NORTH);
-
-		this.macroList = macroPanel.getMacroList();
-		this.macroList.addMouseListener(this);
-		this.macroList.addListSelectionListener(this);
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -214,8 +219,8 @@ public class MacroManagerDialog
 			this.closeDialog();
 			if (this.client != null)
 			{
-				String name = this.macroPanel.getSelectedMacroName();
-				this.client.executeMacro(name, this.replaceEditorText.isSelected());
+				MacroDefinition macro = this.macroPanel.getSelectedMacro();
+				this.client.executeMacro(macro, this.replaceEditorText.isSelected());
 			}
 		}
 		catch (Exception e)
@@ -278,7 +283,7 @@ public class MacroManagerDialog
 	public void windowOpened(WindowEvent windowEvent)
 	{
 		// Fix for JDK 6
-		// It seems that the macro editor is not repainted 
+		// It seems that the macro editor is not repainted
 		// correctly if we load the macro text while
 		// it's not visible
 		EventQueue.invokeLater(new Runnable()

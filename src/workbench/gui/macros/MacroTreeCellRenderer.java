@@ -9,7 +9,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.gui.profiles;
+package workbench.gui.macros;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -17,29 +17,28 @@ import javax.swing.JTree;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import workbench.resource.ResourceMgr;
+import workbench.gui.components.DividerBorder;
 
 /**
  * A tree cell renderer that can indicate a drop target 
  * @author support@sql-workbench.net
  */
-public class ProfileTreeCellRenderer
+public class MacroTreeCellRenderer
 	extends DefaultTreeCellRenderer
 {
-	private Object dropTargetItem = null;
-	private Border dropBorder = null;
+	private MacroTreeNode dropTargetItem = null;
+	private Border itemBorder = null;
+	private Border groupBorder = null;
 	
-	public ProfileTreeCellRenderer()
+	public MacroTreeCellRenderer()
 	{
 		super();
 		Color c = getBackgroundSelectionColor();
-		dropBorder = new LineBorder(c, 1);
-		setLeafIcon(ResourceMgr.getImage("profile"));
-		setOpenIcon(ResourceMgr.getImage("Tree"));
-		setClosedIcon(ResourceMgr.getImage("Tree"));
+		itemBorder = new DividerBorder(DividerBorder.TOP, 1);
+		groupBorder = new LineBorder(Color.GRAY, 1);
 	}
 	
-	public void setDropTargetItem(Object target)
+	public void setDropTargetItem(MacroTreeNode target)
 	{
 		this.dropTargetItem = target;
 	}
@@ -54,7 +53,14 @@ public class ProfileTreeCellRenderer
 	{
 		if (this.dropTargetItem != null && dropTargetItem == value)
 		{
-			setBorder(dropBorder);
+			if (dropTargetItem.getAllowsChildren())
+			{
+				setBorder(groupBorder);
+			}
+			else
+			{
+				setBorder(itemBorder);
+			}
 		}
 		else
 		{
