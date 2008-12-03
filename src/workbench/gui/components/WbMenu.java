@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import javax.swing.Action;
 import javax.swing.JMenu;
+import workbench.util.NumberStringCache;
 
 /**
  *
@@ -34,6 +35,17 @@ public class WbMenu
 		super(aText);
 	}
 
+	public WbMenu(String aText, int index)
+	{
+		super();
+		String title = aText;
+		if (index < 10)
+		{
+			title = "&" + NumberStringCache.getNumberString(index) + " - " + aText;
+		}
+		setText(title);
+	}
+
 	public WbMenu(String aText, boolean b)
 	{
 		super(aText, b);
@@ -48,6 +60,7 @@ public class WbMenu
 	{
 		this.parentMenuId = id;
 	}
+
 	public String getParentMenuId() 
 	{
 		return this.parentMenuId;

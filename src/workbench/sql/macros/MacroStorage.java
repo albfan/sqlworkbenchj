@@ -23,8 +23,8 @@ import java.util.TreeMap;
 import workbench.interfaces.MacroChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
-import workbench.resource.Settings;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.FileUtil;
 import workbench.util.WbPersistence;
 
 /**
@@ -51,20 +51,11 @@ public class MacroStorage
 	}
 
 
-	/**
-	 * Returns the number of groups that actually contain macros.
-	 * @return
-	 */
-	public synchronized int getGroupCount()
+	public void removeGroup(MacroGroup group)
 	{
-		int size = 0;
-		for (MacroGroup group : groups)
-		{
-			size += group.getSize();
-		}
-		return size;
+		groups.remove(group);
 	}
-
+	
 	public synchronized int getSize()
 	{
 		int size = 0;
@@ -106,21 +97,7 @@ public class MacroStorage
 		return copy;
 	}
 
-	private File getMacroFile()
-	{
-		File f = new File(Settings.getInstance().getConfigDir(), "WbMacros.xml");
-		return f;
-	}
-
-	public synchronized void saveMacros()
-	{
-		if (this.modified)
-		{
-			saveMacros(this.getMacroFile());
-		}
-	}
-	
-	protected synchronized void saveMacros(File file)
+	public synchronized void saveMacros(File file)
 	{
 		WbPersistence writer = new WbPersistence(file.getAbsolutePath());
 		try
@@ -169,13 +146,8 @@ public class MacroStorage
 		}
 	}
 
-	public void loadMacros()
-	{
-		loadMacros(getMacroFile());
-	}
-
 	@SuppressWarnings("unchecked")
-	protected synchronized void loadMacros(File source)
+	public synchronized void loadMacros(File source)
 	{
 		try
 		{
@@ -189,6 +161,8 @@ public class MacroStorage
 			}
 			else if (o instanceof HashMap)
 			{
+				File backup = new File(source.getParentFile(), source.getName() + ".bck");
+				FileUtil.copy(source, backup);
 				Map<String, String> oldMacros = (Map)o;
 				MacroGroup group = new MacroGroup(ResourceMgr.getString("LblDefGroup"));
 
@@ -217,9 +191,31 @@ public class MacroStorage
 		this.modified = false;
 	}
 
-	public synchronized void removeMacro(String key)
+	public synchronized void moveMacro(MacroDefinition macro, MacroGroup newGroup)
 	{
-		MacroDefinition macro = allMacros.remove(key);
+		for (MacroGroup group : groups)
+		{
+			if (!group.equals(newGroup))
+			{
+				group.removeMacro(macro);
+			}
+		}
+		newGroup.addMacro(macro);
+		this.modified = true;
+		this.fireMacroListChange();
+	}
+
+	public synchronized void addMacro(MacroGroup group, MacroDefinition macro)
+	{
+		allMacros.put(macro.getName(), macro);
+		group.addMacro(macro);
+		this.modified = true;
+		this.fireMacroListChange();
+	}
+	
+	public synchronized void removeMacro(MacroDefinition toDelete)
+	{
+		MacroDefinition macro = allMacros.remove(toDelete.getName());
 		for (MacroGroup group : groups)
 		{
 			group.removeMacro(macro);
@@ -277,12 +273,18 @@ public class MacroStorage
 		}
 	}
 
-	public synchronized List<MacroGroup> getNonEmptyGroups()
+	/**
+	 * Returns only groups that have isVisibleInMenu() == true and
+	 * contain only macros hat have isVisibleInMenu() == true
+	 * 
+	 * @return
+	 */
+	public synchronized List<MacroGroup> getVisibleGroups()
 	{
 		List<MacroGroup> result = new ArrayList<MacroGroup>(groups.size());
 		for (MacroGroup group : groups)
 		{
-			if (group.getSize() > 0)
+			if (group.isVisibleInMenu() && group.getVisibleMacroSize() > 0)
 			{
 				result.add(group);
 			}

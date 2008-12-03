@@ -331,7 +331,7 @@ public class ProfileEditorPanel
 			if (current != null)
 			{
 				cp = current.createCopy();
-				cp.setName(ResourceMgr.getString("TxtCopyOfProfile") + " " + current.getName());
+				cp.setName(ResourceMgr.getString("TxtCopyOf") + " " + current.getName());
 			}
 		}
 

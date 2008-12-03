@@ -14,6 +14,8 @@ package workbench.util;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -196,6 +198,14 @@ public class FileUtil
 
 	}
 
+	public static long copy(File source, File desination)
+		throws IOException
+	{
+		InputStream in = new FileInputStream(source);
+		OutputStream out = new FileOutputStream(desination);
+		return copy(in, out);
+	}
+	
 	/**
 	 * Copies the content of the InputStream to the OutputStream.
 	 * Both streams are closed automatically.

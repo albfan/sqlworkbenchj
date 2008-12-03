@@ -624,40 +624,35 @@ public class MainWindow
 		this.createMacro.addToMenu(macroMenu);
 		this.manageMacros.addToMenu(macroMenu);
 
-		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getNonEmptyGroups();
+		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getVisibleGroups();
 		
 		if (groups == null || groups.size() == 0) return;
 
 		macroMenu.addSeparator();
 
-		int maxItems = GuiSettings.getMaxMacrosInMenu();
-		if (groups.size() == 1)
+		int groupCount = groups.size();
+		int groupIndex = 0;
+		for (MacroGroup group : groups)
 		{
-			List<MacroDefinition> macros = groups.get(0).getMacros();
-			int count = macros.size();
+			groupIndex ++;
+			WbMenu groupMenu = (groupCount > 1 ? new WbMenu(group.getName(), groupIndex) : null);
 			
-			for (int i=0; (i < count && i < maxItems); i++)
+			List<MacroDefinition> macros = group.getVisibleMacros();
+			
+			int count = macros.size();
+			for (int i=0; i < count; i++)
 			{
 				RunMacroAction run = new RunMacroAction(this, macros.get(i), i+1);
-				run.addToMenu(macroMenu);
-			}
-		}
-		else
-		{
-			for (MacroGroup group : groups)
-			{
-				WbMenu groupMenu = new WbMenu(group.getName());
-				
-				List<MacroDefinition> macros = group.getMacros();
-				int count = macros.size();
-
-				for (int i=0; (i < count && i < maxItems); i++)
+				if (groupMenu == null)
 				{
-					RunMacroAction run = new RunMacroAction(this, macros.get(i), i+1);
+					run.addToMenu(macroMenu);
+				}
+				else
+				{
 					run.addToMenu(groupMenu);
 				}
-				macroMenu.add(groupMenu);
 			}
+			if (groupMenu != null) macroMenu.add(groupMenu);
 		}
 	}
 

@@ -134,6 +134,8 @@ public class MacroTree
 	public void treeNodesChanged(TreeModelEvent e)
 	{
 		Object[] changed = e.getChildren();
+		if (changed == null) return;
+		
 		MacroTreeNode node = (MacroTreeNode)changed[0];
 
 		Object data = node.getDataObject();
@@ -200,6 +202,8 @@ public class MacroTree
 	{
 		MacroStorage current = this.macroModel.getMacros();
 		MacroManager.getInstance().getMacros().copyFrom(current);
+		MacroManager.getInstance().save();
+		current.resetModified();
 	}
 	
 	/**
@@ -282,7 +286,7 @@ public class MacroTree
 
 		a = popup.getCutAction();
 		a.setEnabled(canCopy);
-		
+
 	}
 	
 	public void mouseClicked(MouseEvent e)
@@ -300,7 +304,6 @@ public class MacroTree
 			popup.show(this, e.getX(), e.getY());
 		}
 	}
-
 
 	/**
 	 * Checks if the current selection contains only profiles
@@ -333,18 +336,22 @@ public class MacroTree
 		return true;
 	}
 	
-	protected MacroTreeNode getSelectedGroupNode()
+	protected MacroTreeNode getSelectedNode()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
 		if (selection.length != 1) return null;
 		
 		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
-		if (node != null && node.getAllowsChildren()) return node;
-		return null;
+		return node;
 	}
 
-	public String getGroupForSelectedMacro()
+	/**
+	 * Returns the group for the currently selected macro
+	 * If no macro is currently selected (e.g. because nothing is selected
+	 * or a group is selected) null is returned
+	 */
+	public MacroGroup getGroupForSelectedMacro()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
@@ -352,15 +359,64 @@ public class MacroTree
 
 		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
 		if (node == null) return null;
-		MacroTreeNode parent = (MacroTreeNode)node.getParent();
 
-		Object o = parent.getDataObject();
-		if (o instanceof MacroGroup)
+		Object userData = null;
+		if (node.getAllowsChildren()) return null;
+		
+		MacroTreeNode parent = (MacroTreeNode)node.getParent();
+		if (parent != null)
 		{
-			return ((MacroGroup)o).getName();
+			userData = parent.getDataObject();
+		}
+
+		if (userData instanceof MacroGroup)
+		{
+			return (MacroGroup)userData;
 		}
 		return null;
 	}
+
+
+	/**
+	 * Returns the current group. That is either the currently selected group
+	 * or the group of the currently selected macro(s).
+	 *
+	 * @return
+	 */
+	public MacroTreeNode getCurrentGroupNode()
+	{
+		TreePath[] selection = getSelectionPaths();
+		if (selection == null) return null;
+
+		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
+		if (node == null) return null;
+
+		if (node.getAllowsChildren()) return node;
+		
+		MacroTreeNode parent = (MacroTreeNode)node.getParent();
+		return parent;
+	}
+
+	/**
+	 * Returns the current group. That is either the currently selected group
+	 * or the group of the currently selected macro(s).
+	 * 
+	 * @return
+	 */
+	public MacroGroup getCurrentGroup()
+	{
+		MacroTreeNode node = getCurrentGroupNode();
+		if (node == null) return null;
+
+		Object userData = node.getDataObject();
+		
+		if (userData instanceof MacroGroup)
+		{
+			return (MacroGroup)userData;
+		}
+		return null;
+	}
+
 	/**
 	 * Returns the currently selected Macro. If either more then one
 	 * entry is selected or a group is selected, null is returned
@@ -447,11 +503,11 @@ public class MacroTree
 		{
 			if (clipboardType == CLIP_CUT)
 			{
-//				macroModel.moveMacrosToGroup(clipboardNodes, group);
+				macroModel.moveMacrosToGroup(clipboardNodes, group);
 			}
 			else if (clipboardType == CLIP_COPY)
 			{
-//				macroModel.copyMacrosToGroup(clipboardNodes, group);
+				macroModel.copyMacrosToGroup(clipboardNodes, group);
 			}
 		}
 		finally
@@ -487,7 +543,38 @@ public class MacroTree
 		}
 	}
 
+	public void deleteSelection()
+	{
+		MacroTreeNode node = getSelectedNode();
+		TreePath newSelection = null;
+		if (node != null)
+		{
+			newSelection = macroModel.deleteNode(node);
+		}
+		selectPath(newSelection);
+	}
 	
+	public boolean addMacro(boolean copyCurrent)
+	{
+		MacroDefinition current = getSelectedMacro();
+		MacroGroup group = getCurrentGroup();
+		MacroDefinition newMacro = null;
+		if (current != null && copyCurrent)
+		{
+			newMacro = current.createCopy();
+			newMacro.setName(ResourceMgr.getString("TxtCopyOf") + " " + current.getName());
+		}
+		else
+		{
+			newMacro = new MacroDefinition(ResourceMgr.getString("LblNewMacroGroup"), "");
+		}
+		group.addMacro(newMacro);
+		TreePath newItem = macroModel.addMacro(group, newMacro);
+		selectPath(newItem);
+
+		return newItem != null;
+	}
+
 	/**
 	 * Prompts the user for a group name and creates a new group 
 	 * with the provided name. The new group node is automatically

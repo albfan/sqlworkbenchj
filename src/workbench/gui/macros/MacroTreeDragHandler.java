@@ -111,7 +111,6 @@ class MacroTreeDragHandler
 		setCurrentDropTargetItem(null);
 	}
 
-	// ----------- DropTargetListener implementation -----------------
 	private void handleDragTargetEvent(DropTargetDragEvent dtde)
 	{
 		Point p = dtde.getLocation();
@@ -119,7 +118,7 @@ class MacroTreeDragHandler
 
 		TreePath path = macroTree.getClosestPathForLocation(p.x, p.y);
 
-		if (path == null)
+		if (path == null || draggedEntries == null)
 		{
 			dtde.rejectDrag();
 			setCurrentDropTargetItem(null);

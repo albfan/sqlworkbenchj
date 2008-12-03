@@ -12,7 +12,6 @@
 package workbench.sql.macros;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +26,7 @@ public class MacroGroup
 	private List<MacroDefinition> macros = new ArrayList<MacroDefinition>();
 	private int sortOrder;
 	private boolean modified = false;
+	private boolean showInMenu = true;
 
 	public MacroGroup()
 	{
@@ -35,6 +35,16 @@ public class MacroGroup
 	public MacroGroup(String groupName)
 	{
 		this.name = groupName;
+	}
+
+	public boolean isVisibleInMenu()
+	{
+		return showInMenu;
+	}
+
+	public void setVisibleInMenu(boolean flag)
+	{
+		this.showInMenu = flag;
 	}
 
 	public int getSortOrder()
@@ -69,14 +79,6 @@ public class MacroGroup
 		modified = true;
 	}
 
-	public synchronized void setMacros(List<MacroDefinition> newMacros)
-	{
-		macros.clear();
-		macros.addAll(newMacros);
-		applySort();
-		modified = false;
-	}
-
 	public synchronized void applySort()
 	{
 		Collections.sort(macros, new Sorter());
@@ -85,7 +87,28 @@ public class MacroGroup
 			macros.get(i).setSortOrder(i);
 		}
 	}
+
+	public synchronized List<MacroDefinition> getVisibleMacros()
+	{
+		List<MacroDefinition> result = new ArrayList<MacroDefinition>(macros.size());
+		for (MacroDefinition macro : macros)
+		{
+			if (macro.isVisibleInMenu())
+			{
+				result.add(macro);
+			}
+		}
+		return result;
+	}
 	
+	public synchronized void setMacros(List<MacroDefinition> newMacros)
+	{
+		macros.clear();
+		macros.addAll(newMacros);
+		applySort();
+		modified = false;
+	}
+
 	public synchronized List<MacroDefinition> getMacros()
 	{
 		return macros;
@@ -102,6 +125,7 @@ public class MacroGroup
 		MacroGroup copy = new MacroGroup();
 		copy.name = this.name;
 		copy.sortOrder = this.sortOrder;
+		copy.showInMenu = this.showInMenu;
 		for (MacroDefinition def : macros)
 		{
 			copy.macros.add(def.createCopy());
@@ -128,6 +152,21 @@ public class MacroGroup
 		}
 	}
 
+	/**
+	 * Returns the number of macros in this groups that should be displayed in the menu
+	 * 
+	 * @return
+	 */
+	public int getVisibleMacroSize()
+	{
+		int size = 0;
+		for (MacroDefinition def : macros)
+		{
+			if (def.isVisibleInMenu()) size ++;
+		}
+		return size;
+	}
+	
 	public int getSize()
 	{
 		return macros.size();

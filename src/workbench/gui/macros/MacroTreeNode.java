@@ -12,7 +12,6 @@
 package workbench.gui.macros;
 
 import javax.swing.tree.DefaultMutableTreeNode;
-import workbench.sql.macros.MacroGroup;
 
 /**
  *
@@ -26,21 +25,13 @@ public class MacroTreeNode
 	public MacroTreeNode(Object dataObject)
 	{
 		super(dataObject);
-		this.data = dataObject;
+		setDataObject(dataObject);
 	}
 
 	public MacroTreeNode(Object dataObject, boolean allowsChildren)
 	{
 		super(dataObject, allowsChildren);
-		this.data = dataObject;
-		if (dataObject instanceof MacroGroup)
-		{
-			this.setAllowsChildren(true);
-		}
-		else
-		{
-			this.setAllowsChildren(false);
-		}
+		setDataObject(dataObject);
 	}
 
 	public Object getDataObject()

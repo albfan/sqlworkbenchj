@@ -365,7 +365,7 @@ public class TextAreaPainter
 					gfx.drawString(s, gutterX - w, y);
 				}
 
-				if (line >= firstInvalid && line <= lastInvalid)
+				if (line >= firstInvalid && line < lastInvalid)
 				{
 					if (this.showLineNumbers)
 					{

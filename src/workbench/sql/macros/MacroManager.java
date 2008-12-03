@@ -14,6 +14,7 @@ package workbench.sql.macros;
 import java.awt.Frame;
 import java.awt.Window;
 
+import java.io.File;
 import javax.swing.SwingUtilities;
 
 import workbench.gui.macros.MacroManagerDialog;
@@ -29,7 +30,7 @@ import workbench.util.StringUtil;
 public class MacroManager
 {
 	private MacroStorage storage;
-	
+
 	private String selectedTextKey = Settings.getInstance().getProperty("workbench.macro.key.selection", "${selection}$");
 	private String selectedStatementKey = Settings.getInstance().getProperty("workbench.macro.key.selectedstmt", "${selected_statement}$");
 	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current_statement}$");
@@ -43,7 +44,13 @@ public class MacroManager
 	private MacroManager()
 	{
 		storage = new MacroStorage();
-		storage.loadMacros();
+		storage.loadMacros(getMacroFile());
+	}
+
+	public File getMacroFile()
+	{
+		File f = new File(Settings.getInstance().getConfigDir(), "WbMacros.xml");
+		return f;
 	}
 
 	public static MacroManager getInstance()
@@ -125,10 +132,10 @@ public class MacroManager
 	{
 		return this.storage;
 	}
-	
+
 	public void save()
 	{
-
+		storage.saveMacros(getMacroFile());
 	}
 
 }

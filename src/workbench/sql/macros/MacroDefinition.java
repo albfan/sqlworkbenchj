@@ -26,6 +26,7 @@ public class MacroDefinition
 	private int sortOrder;
 	private boolean modified;
 	private StoreableKeyStroke shortcut;
+	private boolean showInMenu = true;
 	
 	public MacroDefinition()
 	{
@@ -37,6 +38,16 @@ public class MacroDefinition
 		this.text = macroText;
 	}
 
+	public boolean isVisibleInMenu()
+	{
+		return showInMenu;
+	}
+
+	public void setVisibleInMenu(boolean flag)
+	{
+		this.showInMenu = flag;
+	}
+	
 	public int getSortOrder()
 	{
 		return sortOrder;
@@ -74,6 +85,7 @@ public class MacroDefinition
 	{
 		MacroDefinition def = new MacroDefinition(this.name, this.text);
 		def.sortOrder = this.sortOrder;
+		def.showInMenu = this.showInMenu;
 		return def;
 	}
 	

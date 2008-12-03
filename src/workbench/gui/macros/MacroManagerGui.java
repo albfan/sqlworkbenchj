@@ -15,13 +15,10 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeListener;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
@@ -32,16 +29,13 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.NewListEntryAction;
 import workbench.gui.actions.SaveListFileAction;
-import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
-import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.profiles.NewGroupAction;
-import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.FileActions;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroGroup;
 
 /**
  * Displays all defined macros and lets the user add, edit and delete macros.
@@ -55,82 +49,50 @@ public class MacroManagerGui
 	implements FileActions, TreeSelectionListener, PropertyChangeListener, TreeModelListener
 {
 	private JToolBar toolbar;
-	private JSplitPane jSplitPane1;
+	private JSplitPane splitPane;
+	private MacroDefinitionPanel macroPanel;
+	private MacroGroupPanel groupPanel;
 	private MacroTree macroTree;
-	private EditorPanel macroEditor;
-	private StringPropertyEditor macroNameField;
-	private MacroDefinition currentMacro;
 
 	public MacroManagerGui()
 	{
 		super();
 		this.macroTree = new MacroTree();
+		this.setLayout(new BorderLayout());
 
 		this.toolbar = new WbToolbar();
 		this.toolbar.add(new NewListEntryAction(this));
 		this.toolbar.add(new NewGroupAction(macroTree, "LblNewMacroGroup"));
 		this.toolbar.addSeparator();
-		this.toolbar.add(new DeleteListEntryAction(this));
+
+		DeleteListEntryAction deleteAction = new DeleteListEntryAction(this);
+		this.toolbar.add(deleteAction);
 		this.toolbar.addSeparator();
 		this.toolbar.add(new SaveListFileAction(this));
+
+		macroTree.setDeleteAction(deleteAction);
 
 		JPanel treePanel = new JPanel();
 		treePanel.setLayout(new BorderLayout());
 		treePanel.add(this.toolbar, BorderLayout.NORTH);
 
-		this.jSplitPane1 = new WbSplitPane();
-
-
-		this.setLayout(new BorderLayout());
-
-		jSplitPane1.setDividerLocation(100);
+		splitPane = new WbSplitPane();
+		splitPane.setDividerLocation(140);
 
 		JScrollPane scroll = new JScrollPane(this.macroTree);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		treePanel.add(scroll, java.awt.BorderLayout.CENTER);
 
-		macroEditor = EditorPanel.createSqlEditor();
-		macroEditor.showFindOnPopupMenu();
-		macroEditor.showFormatSql();
+		splitPane.setLeftComponent(treePanel);
 
-		jSplitPane1.setLeftComponent(treePanel);
+		macroPanel = new MacroDefinitionPanel(this);
+		groupPanel = new MacroGroupPanel(this);
+		
+		splitPane.setRightComponent(macroPanel);
 
-		JPanel namePanel = new JPanel();
-		namePanel.setLayout(new BorderLayout());
-		JLabel l = new JLabel(ResourceMgr.getString("LblMacroName"));
-		l.setBorder(new CompoundBorder(new EmptyBorder(0,5,0,5), l.getBorder()));
-		this.macroNameField = new StringPropertyEditor(); 
-		this.macroNameField.setColumns(40);
-		this.macroNameField.setImmediateUpdate(true);
-		this.macroNameField.addPropertyChangeListener(this);
-		//this.macroNameField.setBorder(new CompoundBorder(new EmptyBorder(0,0,0,5), this.macroNameField.getBorder()));
-
-		namePanel.add(l, BorderLayout.WEST);
-		namePanel.add(this.macroNameField, BorderLayout.CENTER);
-
-		// Create some visiual space above and below the entry field
-		JPanel p = new JPanel();
-		namePanel.add(p, BorderLayout.SOUTH);
-		p = new JPanel();
-		namePanel.add(p, BorderLayout.NORTH);
-
-		JPanel macroPanel = new JPanel(new BorderLayout());
-		macroPanel.setLayout(new BorderLayout());
-		macroPanel.add(namePanel, BorderLayout.NORTH);
-		macroPanel.add(macroEditor, BorderLayout.CENTER);
-		jSplitPane1.setRightComponent(macroPanel);
-
-		add(jSplitPane1, BorderLayout.CENTER);
+		add(splitPane, BorderLayout.CENTER);
 		macroTree.addTreeSelectionListener(this);
-
-		WbTraversalPolicy policy = new WbTraversalPolicy();
-		policy.addComponent(macroTree);
-		policy.addComponent(macroNameField);
-		policy.addComponent(macroEditor);
-		policy.setDefaultComponent(macroTree);
-		this.setFocusTraversalPolicy(policy);
 	}
-
 
 	public MacroDefinition getSelectedMacro()
 	{
@@ -140,14 +102,17 @@ public class MacroManagerGui
 	public void deleteItem()
 		throws Exception
 	{
+		macroTree.deleteSelection();
+		macroTree.repaint();
 	}
 
-	/**
-	 *	Create a new profile. This will only be
-	 *	created in the ListModel.
-	 */
 	public void newItem(boolean copyCurrent) throws Exception
 	{
+		boolean ok = macroTree.addMacro(copyCurrent);
+		if (ok)
+		{
+			macroPanel.selectMacroName();
+		}
 	}
 
 	private void selectListLater()
@@ -168,18 +133,18 @@ public class MacroManagerGui
 
 	public void saveSettings()
 	{
-		int location = this.jSplitPane1.getDividerLocation();
+		int location = this.splitPane.getDividerLocation();
 		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", location);
 		MacroDefinition macro = getSelectedMacro();
 		Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacro", macro == null ? "" : macro.getName());
-		String group = macroTree.getGroupForSelectedMacro();
-		Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacrogroup", group);
+		MacroGroup group = macroTree.getGroupForSelectedMacro();
+		Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacrogroup", group == null ? "" : group.getName());
 	}
 
 	public void restoreSettings()
 	{
 		int location = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 140);
-		this.jSplitPane1.setDividerLocation(location);
+		this.splitPane.setDividerLocation(location);
 		String macro = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacro", null);
 		String group = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacrogroup", null);
 		this.selectMacro(group, macro);
@@ -191,33 +156,28 @@ public class MacroManagerGui
 		macroTree.selectMacro(group, macro);
 	}
 
+	private void showGroup(final MacroGroup group)
+	{
+		macroPanel.setMacro(null);
+		groupPanel.setMacroGroup(group);
+		changePanel(groupPanel);
+	}
+	
 	private void showMacro(final MacroDefinition entry)
 	{
-		if (this.currentMacro != null && macroEditor.isModified())
-		{
-			currentMacro.setText(macroEditor.getText());
-		}
-		currentMacro = entry;
-		if (entry != null)
-		{
-			macroEditor.setEnabled(true);
-			macroEditor.setVisible(true);
-			macroNameField.setEnabled(true);
-			macroNameField.setSourceObject(entry, "name", entry.getName());
-			macroNameField.setImmediateUpdate(true);
-			macroEditor.setText(entry.getText());
-			macroEditor.setCaretPosition(0);
-		}
-		else
-		{
-			macroNameField.setSourceObject(null, "name");
-			macroEditor.setText("");
-			macroEditor.setEnabled(false);
-			macroNameField.setEnabled(false);
-			macroEditor.setVisible(false);
-		}
+		groupPanel.setMacroGroup(null);
+		macroPanel.setMacro(entry);
+		changePanel(macroPanel);
+
 	}
 
+	private void changePanel(JPanel newPanel)
+	{
+		int location = splitPane.getDividerLocation();
+		splitPane.setRightComponent(newPanel);
+		splitPane.setDividerLocation(location);
+	}
+	
 	public void treeNodesChanged(TreeModelEvent e)
 	{
 		
@@ -249,14 +209,15 @@ public class MacroManagerGui
 		TreePath path = e.getPath();
 		if (path == null) return;
 		MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
-		if (!node.getAllowsChildren())
+		if (node.getAllowsChildren())
 		{
-			MacroDefinition macro = (MacroDefinition)node.getDataObject();
-			showMacro(macro);
+			MacroGroup group = (MacroGroup)node.getDataObject();
+			showGroup(group);
 		}
 		else
 		{
-			showMacro(null);
+			MacroDefinition macro = (MacroDefinition)node.getDataObject();
+			showMacro(macro);
 		}
 	}
 }
