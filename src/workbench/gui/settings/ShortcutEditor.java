@@ -13,7 +13,6 @@ package workbench.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
@@ -26,7 +25,6 @@ import java.sql.Types;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -49,6 +47,8 @@ import workbench.resource.Settings;
 import workbench.resource.ShortcutDefinition;
 import workbench.resource.ShortcutManager;
 import workbench.resource.StoreableKeyStroke;
+import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroManager;
 import workbench.storage.DataStore;
 
 /**
@@ -324,43 +324,33 @@ public class ShortcutEditor
 	{
 		int row = this.keysTable.getSelectedRow();
 		if (row < 0) return;
-		final KeyboardMapper mapper = new KeyboardMapper();
-		EventQueue.invokeLater(new Runnable()
+
+		KeyStroke key = KeyboardMapper.getKeyStroke(this);
+		if (key != null)
 		{
-			public void run()
-			{
-				mapper.grabFocus();
-			}
-		});
-
-		String[] options = new String[] {
-			ResourceMgr.getPlainString("LblOK"),
-			ResourceMgr.getPlainString("LblCancel")
-		};
-
-		JOptionPane overwritePane = new JOptionPane(mapper, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
-		JDialog dialog = overwritePane.createDialog(this, ResourceMgr.getString("LblEnterKeyWindowTitle"));
-
-		dialog.setResizable(true);
-		dialog.setVisible(true);
-		Object result = overwritePane.getValue();
-		dialog.dispose();
-
-		if (options[0].equals(result))
-		{
-			KeyStroke key = mapper.getKeyStroke();
+			
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
 
 			int oldrow = this.findKey(key);
 			if (oldrow > -1)
 			{
 				String name = this.definitions.getValueAsString(oldrow, 0);
-				String msg = ResourceMgr.getString("MsgShortcutAlreadyAssigned").replace("%action%", name);
+				String msg = ResourceMgr.getFormattedString("MsgShortcutAlreadyAssigned", name);
 				boolean choice = WbSwingUtilities.getYesNo(this, msg);
 				if (!choice) return;
+				
 				ShortcutDisplay old = (ShortcutDisplay)this.definitions.getValue(oldrow, 1);
 				old.clearKey();
 				this.model.fireTableRowsUpdated(oldrow, oldrow);
+			}
+
+			MacroDefinition def = MacroManager.getInstance().getMacroForKeyStroke(key);
+			if (def != null)
+			{
+				String msg = ResourceMgr.getFormattedString("MsgShortcutMacroAlreadyAssigned", def.getName());
+				boolean choice = WbSwingUtilities.getYesNo(this, msg);
+				if (!choice) return;
+				def.setShortcut(null);
 			}
 
 			d.setNewKey(key);

@@ -1,0 +1,64 @@
+/*
+ * 
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * Copyright 2002-2008, Thomas Kellerer
+ * 
+ * No part of this code maybe reused without the permission of the author
+ * 
+ * To contact the author please send an email to: support@sql-workbench.net
+ * 
+ */
+
+package workbench.gui.macros;
+
+import java.util.List;
+import javax.swing.JMenu;
+import workbench.gui.MainWindow;
+import workbench.gui.actions.RunMacroAction;
+import workbench.gui.components.WbMenu;
+import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroGroup;
+import workbench.sql.macros.MacroManager;
+
+/**
+ *
+ * @author support@sql-workbench.net
+ */
+public class MacroMenuBuilder
+{
+
+	public void buildMacroMenu(MainWindow main, JMenu macroMenu)
+	{
+		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getVisibleGroups();
+
+		if (groups == null || groups.size() == 0) return;
+
+		macroMenu.addSeparator();
+
+		int groupCount = groups.size();
+		int groupIndex = 0;
+		for (MacroGroup group : groups)
+		{
+			groupIndex ++;
+			WbMenu groupMenu = (groupCount > 1 ? new WbMenu(group.getName(), groupIndex) : null);
+
+			List<MacroDefinition> macros = group.getVisibleMacros();
+
+			int count = macros.size();
+			for (int i=0; i < count; i++)
+			{
+				RunMacroAction run = new RunMacroAction(main, macros.get(i), i+1);
+				if (groupMenu == null)
+				{
+					run.addToMenu(macroMenu);
+				}
+				else
+				{
+					run.addToMenu(groupMenu);
+				}
+			}
+			if (groupMenu != null) macroMenu.add(groupMenu);
+		}
+	}
+
+}

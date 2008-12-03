@@ -14,15 +14,25 @@ import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
+import javax.swing.JSeparator;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.WbTraversalPolicy;
+import workbench.gui.settings.KeyboardMapper;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.ResourceMgr;
+import workbench.resource.ShortcutManager;
+import workbench.resource.StoreableKeyStroke;
 import workbench.sql.macros.MacroDefinition;
 
 /**
@@ -31,10 +41,12 @@ import workbench.sql.macros.MacroDefinition;
  */
 public class MacroDefinitionPanel
 	extends javax.swing.JPanel
+	implements ActionListener
 {
+
 	private EditorPanel macroEditor;
 	private MacroDefinition currentMacro;
-	
+
 	public MacroDefinitionPanel(PropertyChangeListener l)
 	{
 		initComponents();
@@ -45,8 +57,8 @@ public class MacroDefinitionPanel
 		c.gridx = 0;
 		c.gridy = 2;
 		c.gridwidth = GridBagConstraints.REMAINDER;
-    c.gridwidth = GridBagConstraints.REMAINDER;
-    c.fill = GridBagConstraints.BOTH;
+		c.gridwidth = GridBagConstraints.REMAINDER;
+		c.fill = GridBagConstraints.BOTH;
 		c.weightx = 1.0;
 		c.weighty = 1.0;
 		c.insets = new Insets(10, 2, 2, 5);
@@ -64,19 +76,19 @@ public class MacroDefinitionPanel
 
 	public void setMacro(MacroDefinition macro)
 	{
-		if (currentMacro != null && macroEditor.isModified())
-		{
-			currentMacro.setText(macroEditor.getText());
-		}
+		applyChanges();
 		currentMacro = macro;
-		
-		BooleanPropertyEditor menu = (BooleanPropertyEditor)jCheckBox1;
+		assignShortcutButton.setEnabled(currentMacro != null);
+
+		BooleanPropertyEditor menu = (BooleanPropertyEditor) jCheckBox1;
 		menu.setSourceObject(macro, "visibleInMenu");
 		menu.setImmediateUpdate(true);
 
-		StringPropertyEditor name = (StringPropertyEditor)jTextField1;
+		StringPropertyEditor name = (StringPropertyEditor) jTextField1;
 		name.setSourceObject(macro, "name");
 		name.setImmediateUpdate(true);
+
+		updateShortcutDisplay();
 
 		if (macro != null)
 		{
@@ -89,10 +101,32 @@ public class MacroDefinitionPanel
 		}
 	}
 
+	public void applyChanges()
+	{
+		if (currentMacro != null && macroEditor.isModified())
+		{
+			currentMacro.setText(macroEditor.getText());
+		}
+	}
+
+	private void updateShortcutDisplay()
+	{
+		StoreableKeyStroke key = (currentMacro == null ? null : currentMacro.getShortcut());
+		if (key != null)
+		{
+			shortcutLabel.setText(ResourceMgr.getString("LblKeyDefKeyCol") + ": " + key.toString());
+		}
+		else
+		{
+			shortcutLabel.setText(ResourceMgr.getString("LblKeyDefKeyCol") + ": " + ResourceMgr.getString("LblNone"));
+		}
+	}
+
 	public void selectMacroName()
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
+
 			public void run()
 			{
 				jTextField1.requestFocusInWindow();
@@ -100,7 +134,6 @@ public class MacroDefinitionPanel
 		});
 	}
 
-	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -114,15 +147,20 @@ public class MacroDefinitionPanel
     jLabel1 = new JLabel();
     jTextField1 = new StringPropertyEditor();
     jCheckBox1 = new BooleanPropertyEditor();
+    shortcutLabel = new JLabel();
+    assignShortcutButton = new JButton();
+    clearShortcutButton = new JButton();
+    jSeparator1 = new JSeparator();
 
     setLayout(new GridBagLayout());
 
     jLabel1.setText(ResourceMgr.getString("LblMacroName")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 5, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(jLabel1, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridwidth = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
@@ -136,12 +174,98 @@ public class MacroDefinitionPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 5, 0, 5);
+    gridBagConstraints.insets = new Insets(8, 5, 0, 5);
     add(jCheckBox1, gridBagConstraints);
+
+    shortcutLabel.setText(ResourceMgr.getString("LblKeyDefKeyCol")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(7, 9, 0, 0);
+    add(shortcutLabel, gridBagConstraints);
+
+    assignShortcutButton.setText(ResourceMgr.getString("LblAssignShortcut")); // NOI18N
+    assignShortcutButton.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 7, 0, 0);
+    add(assignShortcutButton, gridBagConstraints);
+
+    clearShortcutButton.setText(ResourceMgr.getString("LblClearShortcut")); // NOI18N
+    clearShortcutButton.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 10, 0, 0);
+    add(clearShortcutButton, gridBagConstraints);
+
+    jSeparator1.setOrientation(SwingConstants.VERTICAL);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.VERTICAL;
+    gridBagConstraints.insets = new Insets(5, 4, 0, 0);
+    add(jSeparator1, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt) {
+    if (evt.getSource() == assignShortcutButton) {
+      MacroDefinitionPanel.this.assignShortcutButtonActionPerformed(evt);
+    }
+    else if (evt.getSource() == clearShortcutButton) {
+      MacroDefinitionPanel.this.clearShortcutButtonActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
+
+	private void assignShortcutButtonActionPerformed(ActionEvent evt)//GEN-FIRST:event_assignShortcutButtonActionPerformed
+	{//GEN-HEADEREND:event_assignShortcutButtonActionPerformed
+		if (this.currentMacro != null)
+		{
+			KeyStroke key = KeyboardMapper.getKeyStroke(this);
+			if (key != null)
+			{
+				String clazz = ShortcutManager.getInstance().getActionClassForKey(key);
+				String name = ShortcutManager.getInstance().getActionNameForClass(clazz);
+				if (name != null)
+				{
+					String msg = ResourceMgr.getFormattedString("MsgShortcutAlreadyAssigned", name);
+					boolean choice = WbSwingUtilities.getYesNo(this, msg);
+					if (!choice)
+					{
+						return;
+					}
+					ShortcutManager.getInstance().removeShortcut(clazz);
+					ShortcutManager.getInstance().updateActions();
+				}
+				StoreableKeyStroke stroke = new StoreableKeyStroke(key);
+				currentMacro.setShortcut(stroke);
+				updateShortcutDisplay();
+			}
+		}
+	}//GEN-LAST:event_assignShortcutButtonActionPerformed
+
+	private void clearShortcutButtonActionPerformed(ActionEvent evt)//GEN-FIRST:event_clearShortcutButtonActionPerformed
+	{//GEN-HEADEREND:event_clearShortcutButtonActionPerformed
+		if (this.currentMacro != null)
+		{
+			currentMacro.setShortcut(null);
+			updateShortcutDisplay();
+		}
+	}//GEN-LAST:event_clearShortcutButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JButton assignShortcutButton;
+  private JButton clearShortcutButton;
   private JCheckBox jCheckBox1;
   private JLabel jLabel1;
+  private JSeparator jSeparator1;
   private JTextField jTextField1;
+  private JLabel shortcutLabel;
   // End of variables declaration//GEN-END:variables
 }

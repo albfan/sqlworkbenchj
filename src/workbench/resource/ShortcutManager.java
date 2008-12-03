@@ -165,7 +165,7 @@ public class ShortcutManager
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Return the class name of the action to which the passed key is mapped.
 	 * @param key
@@ -174,11 +174,9 @@ public class ShortcutManager
 	public String getActionClassForKey(KeyStroke key)
 	{
 		String clazz = null;
-		Iterator itr = this.keyMap.values().iterator();
 
-		while (itr.hasNext())
+		for (ShortcutDefinition def : keyMap.values())
 		{
-			ShortcutDefinition def = (ShortcutDefinition)itr.next();
 			if (def.isMappedTo(key))
 			{
 				clazz = def.getActionClass();

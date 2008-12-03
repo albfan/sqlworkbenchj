@@ -15,11 +15,14 @@ import java.awt.Frame;
 import java.awt.Window;
 
 import java.io.File;
+import java.util.List;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.Settings;
+import workbench.resource.StoreableKeyStroke;
 import workbench.util.StringUtil;
 
 /**
@@ -133,6 +136,23 @@ public class MacroManager
 		return this.storage;
 	}
 
+	public MacroDefinition getMacroForKeyStroke(KeyStroke key)
+	{
+		if (key == null) return null;
+
+		StoreableKeyStroke sk = new StoreableKeyStroke(key);
+		List<MacroGroup> groups = this.storage.getGroups();
+		for (MacroGroup group : groups)
+		{
+			for (MacroDefinition def : group.getMacros())
+			{
+				StoreableKeyStroke macroKey = def.getShortcut();
+				if (macroKey != null && macroKey.equals(sk)) return def;
+			}
+		}
+		return null;
+	}
+	
 	public void save()
 	{
 		storage.saveMacros(getMacroFile());

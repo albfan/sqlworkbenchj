@@ -71,12 +71,12 @@ public class MacroGroupPanel
 
     jLabel1.setText(ResourceMgr.getString("LblMacroGrpName")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 5, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     add(jLabel1, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(5, 5, 0, 5);
     add(jTextField1, gridBagConstraints);

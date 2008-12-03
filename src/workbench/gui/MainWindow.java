@@ -73,7 +73,6 @@ import workbench.gui.actions.ManageMacroAction;
 import workbench.gui.actions.NewDbExplorerPanelAction;
 import workbench.gui.actions.NewDbExplorerWindowAction;
 import workbench.gui.actions.RemoveTabAction;
-import workbench.gui.actions.RunMacroAction;
 import workbench.gui.actions.SaveAsNewWorkspaceAction;
 import workbench.gui.actions.SaveWorkspaceAction;
 import workbench.gui.actions.SelectTabAction;
@@ -110,11 +109,10 @@ import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
+import workbench.gui.macros.MacroMenuBuilder;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.GuiSettings;
-import workbench.sql.macros.MacroDefinition;
-import workbench.sql.macros.MacroGroup;
 import workbench.util.FileUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.WbFile;
@@ -623,37 +621,8 @@ public class MainWindow
 		macroMenu.removeAll();
 		this.createMacro.addToMenu(macroMenu);
 		this.manageMacros.addToMenu(macroMenu);
-
-		List<MacroGroup> groups = MacroManager.getInstance().getMacros().getVisibleGroups();
-		
-		if (groups == null || groups.size() == 0) return;
-
-		macroMenu.addSeparator();
-
-		int groupCount = groups.size();
-		int groupIndex = 0;
-		for (MacroGroup group : groups)
-		{
-			groupIndex ++;
-			WbMenu groupMenu = (groupCount > 1 ? new WbMenu(group.getName(), groupIndex) : null);
-			
-			List<MacroDefinition> macros = group.getVisibleMacros();
-			
-			int count = macros.size();
-			for (int i=0; i < count; i++)
-			{
-				RunMacroAction run = new RunMacroAction(this, macros.get(i), i+1);
-				if (groupMenu == null)
-				{
-					run.addToMenu(macroMenu);
-				}
-				else
-				{
-					run.addToMenu(groupMenu);
-				}
-			}
-			if (groupMenu != null) macroMenu.add(groupMenu);
-		}
+		MacroMenuBuilder builder = new MacroMenuBuilder();
+		builder.buildMacroMenu(this, macroMenu);
 	}
 
 	public int getCurrentPanelIndex()

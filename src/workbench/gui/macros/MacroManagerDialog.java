@@ -229,9 +229,11 @@ public class MacroManagerDialog
 		}
 	}
 
-	public boolean isCancelled() { return this.cancelled; }
+	public boolean isCancelled()
+	{
+		return this.cancelled;
+	}
 
-	/** Closes the dialog */
 	private void closeDialog(WindowEvent evt)
 	{
 		this.closeDialog();

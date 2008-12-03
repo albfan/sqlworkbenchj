@@ -12,12 +12,17 @@
 package workbench.gui.settings;
 
 import java.awt.Color;
+import java.awt.EventQueue;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -81,6 +86,38 @@ public class KeyboardMapper
 
 	public void keyTyped(KeyEvent e)
 	{
+	}
+
+	public static KeyStroke getKeyStroke(JComponent parent)
+	{
+		final KeyboardMapper mapper = new KeyboardMapper();
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				mapper.grabFocus();
+			}
+		});
+
+		String[] options = new String[] {
+			ResourceMgr.getPlainString("LblOK"),
+			ResourceMgr.getPlainString("LblCancel")
+		};
+
+		JOptionPane overwritePane = new JOptionPane(mapper, JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION, null, options);
+		JDialog dialog = overwritePane.createDialog(parent, ResourceMgr.getString("LblEnterKeyWindowTitle"));
+
+		dialog.setResizable(true);
+		dialog.setVisible(true);
+		Object result = overwritePane.getValue();
+		dialog.dispose();
+
+		KeyStroke key = null;
+		if (options[0].equals(result))
+		{
+			key = mapper.getKeyStroke();
+		}
+		return key;
 	}
 
 }

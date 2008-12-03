@@ -128,9 +128,10 @@ public class MacroManagerGui
 
 	public void saveItem() throws Exception
 	{
+		macroPanel.applyChanges();
 		macroTree.saveChanges();
 	}
-
+	
 	public void saveSettings()
 	{
 		int location = this.splitPane.getDividerLocation();
@@ -168,7 +169,6 @@ public class MacroManagerGui
 		groupPanel.setMacroGroup(null);
 		macroPanel.setMacro(entry);
 		changePanel(macroPanel);
-
 	}
 
 	private void changePanel(JPanel newPanel)

@@ -86,6 +86,7 @@ public class MacroDefinition
 		MacroDefinition def = new MacroDefinition(this.name, this.text);
 		def.sortOrder = this.sortOrder;
 		def.showInMenu = this.showInMenu;
+		def.shortcut = this.shortcut;
 		return def;
 	}
 	
