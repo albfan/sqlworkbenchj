@@ -120,7 +120,7 @@ public class ImportFileLister
 
 	/**
 	 * Removes any file that contains the given string i
-	 * @param contained
+	 * @param containedNames
 	 */
 	public void ignoreFiles(List<String> containedNames)
 	{

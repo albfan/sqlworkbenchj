@@ -116,7 +116,6 @@ public class ColumnIdentifier
 
 	/**
 	 * The data size of this columne (e.g. for VARCHAR columns)
-	 * @return
 	 */
 	public int getColumnSize()
 	{

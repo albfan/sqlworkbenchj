@@ -402,8 +402,6 @@ public class ConnectionMgr
 	/**
 	 * Return a list with profile keys that can be displayed to the user.
 	 * The returned list is already sorted.
-	 * 
-	 * @return
 	 */
 	public synchronized List<String> getProfileKeys()
 	{

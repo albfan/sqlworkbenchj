@@ -164,10 +164,12 @@ public class TextFileParser
 
 	/**
 	 * Enables or disables multi-file import. If multi file
-	 * import is enabled, all file from the source directory ({@link #setSourceDirectory(java.lang.String)}
-	 * are imported into the same table defined by {@link #setTableName(java.lang.String) }
+	 * import is enabled, all files that are defined will be imported into the same
+	 * table defined by {@link #setTableName(java.lang.String) }
 	 *
 	 * @param flag
+	 * @see #setSourceFiles(workbench.db.importer.ImportFileLister)
+	 * @see #setTableName(java.lang.String) 
 	 */
 	public void setMultiFileImport(boolean flag)
 	{

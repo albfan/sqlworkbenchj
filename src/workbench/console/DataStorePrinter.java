@@ -17,6 +17,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -97,12 +98,13 @@ public class DataStorePrinter
 		{
 			printHeader(pw);
 
-			for (int row=0; row < data.getRowCount(); row++)
+			int count = data.getRowCount();
+			for (int row=0; row < count; row++)
 			{
 				RowData rowData = data.getRow(row);
 				printRow(pw, rowData);
 			}
-			pw.println();
+			pw.println(ResourceMgr.getFormattedString("MsgRows", count));
 			pw.flush();
 		}
 		catch (Exception e)

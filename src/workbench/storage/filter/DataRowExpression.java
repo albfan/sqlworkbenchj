@@ -24,14 +24,14 @@ public class DataRowExpression
 	private Object filterValue;
 	private ColumnComparator comparator;
 	private boolean ignoreCase;
-	
+
 	public DataRowExpression()
 	{
 	}
 
 	/**
 	 * Define the filter for a complete row
-	 * @param comparator the comparator to be used to compare the reference value against the actual values
+	 * @param comp the comparator to be used to compare the reference value against the actual values
 	 * @param referenceValue the filter value to compare against the actual values
 	 */
 	public DataRowExpression(ColumnComparator comp, Object referenceValue)
@@ -39,7 +39,7 @@ public class DataRowExpression
 		setComparator(comp);
 		setFilterValue(referenceValue);
 	}
-	
+
 	public Object getFilterValue()
 	{
 		return filterValue;
@@ -59,7 +59,7 @@ public class DataRowExpression
 	{
 		this.comparator = comp;
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		try
@@ -108,12 +108,12 @@ public class DataRowExpression
 	{
 		this.ignoreCase = flag;
 	}
-	
+
 	public String getColumnName() { return "*"; }
-	
-	public boolean isColumnSpecific() 
+
+	public boolean isColumnSpecific()
 	{
 		return false;
 	}
-	
+
 }

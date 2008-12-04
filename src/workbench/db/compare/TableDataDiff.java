@@ -194,8 +194,8 @@ public class TableDataDiff
 	/**
 	 * Define the tables to be compared.
 	 *
-	 * @param tableToCheck the table with the "reference" data
-	 * @param tableToDelete the table from which obsolete rows should be deleted
+	 * @param refTable the table with the "reference" data
+	 * @param tableToVerify the table from which obsolete rows should be deleted
 	 * @throws java.sql.SQLException if the refTable does not have a primary key
 	 * or the tableToVerify is not found
 	 */

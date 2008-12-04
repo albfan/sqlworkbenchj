@@ -187,7 +187,7 @@ public class DataExporter
 	 * It is the same as passing null
 	 *
 	 * @param type the literal format to use
-	 * @see workbench.storage.SqlLiteralFormatter#setProduct(String)
+	 * @see workbench.storage.SqlLiteralFormatter#setProduct(workbench.db.WbConnection)
 	 */
 	public void setDateLiteralType(String type)
 	{
@@ -360,7 +360,8 @@ public class DataExporter
 	 * for exporting a ResultSet
 	 *
 	 * @param columns the columns to be exported
-	 * @see #startExport(workbench.storage.DataStore)
+	 * @see #startExport() 
+	 * @see #startExport(workbench.util.WbFile, workbench.storage.DataStore)
 	 */
 	public void setColumnsToExport(List<ColumnIdentifier> columns)
 	{
@@ -701,13 +702,15 @@ public class DataExporter
 
 
 	/**
-	 * Start the export. This will execute the defined query
-	 * and then write the result into the outputfile
+	 * Start the export. This will execute all job definitions and
+	 * write the results to the specified file(s)
 	 *
 	 * @return the number of rows exported
 	 * @throws java.io.IOException if the output file could not be written
 	 * @throws java.sql.SQLException if an error occurred during DB access
-	 *
+	 * 
+	 * @see #addQueryJob(java.lang.String, workbench.util.WbFile)
+	 * @see #addTableExportJob(java.io.File, workbench.db.TableIdentifier) 
 	 */
 	public long startExport()
 		throws IOException, SQLException
@@ -1132,7 +1135,7 @@ public class DataExporter
 
 	/**
 	 * Setter for property keyColumnsToUse.
-	 * @param keyColumnsToUse New value of property keyColumnsToUse.
+	 * @param keyCols New value of property keyColumnsToUse.
 	 */
 	public void setKeyColumnsToUse(List<String> keyCols)
 	{

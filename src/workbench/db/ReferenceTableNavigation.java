@@ -93,7 +93,6 @@ public class ReferenceTableNavigation
 	 * @param tbl the table for which the parent rows should be retrieved
 	 * @param fkName the name of the foreign key that links tbl
 	 * @param values the values for which the SQL statement should be created
-	 * @return
 	 */
 	public String getSelectForChild(TableIdentifier tbl, String fkName, List<List<ColumnData>> values)
 	{
@@ -107,7 +106,6 @@ public class ReferenceTableNavigation
 	 * @param tbl the table for which the parent rows should be retrieved
 	 * @param fkName the name of the foreign key that links tbl
 	 * @param values the values for which the SQL statement should be created
-	 * @return
 	 */
 	public String getSelectForParent(TableIdentifier tbl, String fkName, List<List<ColumnData>> values)
 	{

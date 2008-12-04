@@ -1,12 +1,12 @@
 /*
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 
 package workbench.sql.macros;
@@ -55,7 +55,7 @@ public class MacroStorage
 	{
 		groups.remove(group);
 	}
-	
+
 	public synchronized int getSize()
 	{
 		int size = 0;
@@ -84,7 +84,7 @@ public class MacroStorage
 		updateMap();
 		fireMacroListChange();
 	}
-	
+
 	public MacroStorage createCopy()
 	{
 		MacroStorage copy = new MacroStorage();
@@ -132,7 +132,7 @@ public class MacroStorage
 			groups.get(i).applySort();
 		}
 	}
-	
+
 	private synchronized void updateMap()
 	{
 		allMacros.clear();
@@ -167,7 +167,7 @@ public class MacroStorage
 				MacroGroup group = new MacroGroup(ResourceMgr.getString("LblDefGroup"));
 
 				groups.clear();
-				
+
 				int sortOrder = 0;
 				for (Map.Entry<String, String> entry : oldMacros.entrySet())
 				{
@@ -212,7 +212,7 @@ public class MacroStorage
 		this.modified = true;
 		this.fireMacroListChange();
 	}
-	
+
 	public synchronized void removeMacro(MacroDefinition toDelete)
 	{
 		MacroDefinition macro = allMacros.remove(toDelete.getName());
@@ -276,8 +276,7 @@ public class MacroStorage
 	/**
 	 * Returns only groups that have isVisibleInMenu() == true and
 	 * contain only macros hat have isVisibleInMenu() == true
-	 * 
-	 * @return
+	 *
 	 */
 	public synchronized List<MacroGroup> getVisibleGroups()
 	{
@@ -291,7 +290,7 @@ public class MacroStorage
 		}
 		return Collections.unmodifiableList(result);
 	}
-	
+
 	public synchronized List<MacroGroup> getGroups()
 	{
 		return Collections.unmodifiableList(groups);
@@ -305,7 +304,7 @@ public class MacroStorage
 			group.resetModified();
 		}
 	}
-	
+
 	public boolean isModified()
 	{
 		if (this.modified) return true;

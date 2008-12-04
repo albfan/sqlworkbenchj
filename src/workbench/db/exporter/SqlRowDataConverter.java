@@ -37,17 +37,17 @@ import workbench.util.StringUtil;
 public class SqlRowDataConverter
 	extends RowDataConverter
 {
-	// This instance can be re-used for several 
-	// table exports from DataExporter, to prevent 
+	// This instance can be re-used for several
+	// table exports from DataExporter, to prevent
 	// that one failed export for the requested type
 	// resets the export type for subsequent tables
 	// the requested sqlType is stored in sqlType
 	// Upon setting the ResultInfo in setResultInfo()
-	// the sqlTypeToUse is set accordingly and then 
+	// the sqlTypeToUse is set accordingly and then
 	// used in convertRowData()
 	private ExportType sqlTypeToUse = ExportType.SQL_INSERT;
 	private ExportType sqlType = ExportType.SQL_INSERT;
-	
+
 	private boolean createTable = false;
 	private TableIdentifier alternateUpdateTable;
 	private int commitEvery;
@@ -59,10 +59,10 @@ public class SqlRowDataConverter
 	private String lineTerminator = "\n";
 	private String doubleLineTerminator = "\n\n";
 	private boolean includeOwner = true;
-	private boolean doFormatting = true; 
+	private boolean doFormatting = true;
 	private SqlLiteralFormatter literalFormatter;
 	private boolean ignoreRowStatus = true;
-	
+
 	public SqlRowDataConverter(WbConnection con)
 	{
 		super();
@@ -82,7 +82,7 @@ public class SqlRowDataConverter
 		this.needsUpdateTable = meta.getUpdateTable() == null;
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
 		this.statementFactory.setTableToUse(this.alternateUpdateTable);
-		
+
 		boolean keysPresent = this.checkKeyColumns();
 		this.sqlTypeToUse = this.sqlType;
 		if (!keysPresent && (this.sqlType == ExportType.SQL_DELETE_INSERT || this.sqlType == ExportType.SQL_UPDATE))
@@ -92,19 +92,19 @@ public class SqlRowDataConverter
 			{
 				tbl = " (" + meta.getUpdateTable().getTableName() + ")";
 			}
-			
+
 			if (this.errorReporter != null)
 			{
 				String msg = ResourceMgr.getString("ErrExportNoKeys") + tbl;
 				this.errorReporter.addWarning(msg);
 			}
-			
+
 			LogMgr.logWarning("SqlRowDataConverter.setResultInfo()", "No key columns found" + tbl + " reverting back to INSERT generation");
 			this.sqlTypeToUse = ExportType.SQL_INSERT;
 		}
-		
+
 	}
-	
+
 	public void setSqlLiteralType(String type)
 	{
 		if (this.literalFormatter != null)
@@ -112,7 +112,7 @@ public class SqlRowDataConverter
 			this.literalFormatter.setDateLiteralType(type);
 		}
 	}
-	
+
 	public StrBuffer getEnd(long totalRows)
 	{
 		boolean writeCommit = true;
@@ -136,7 +136,7 @@ public class SqlRowDataConverter
 	{
 		this.ignoreRowStatus = flag;
 	}
-	
+
 	public void setType(ExportType type)
 	{
 		switch (type)
@@ -154,13 +154,13 @@ public class SqlRowDataConverter
 				throw new IllegalArgumentException("Invalid type specified");
 		}
 	}
-	
+
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
 		StrBuffer result = new StrBuffer();
 		DmlStatement dml = null;
 		this.statementFactory.setIncludeTableOwner(this.includeOwner);
-		
+
 		if (this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT)
 		{
 			dml = this.statementFactory.createDeleteStatement(row, true);
@@ -177,18 +177,18 @@ public class SqlRowDataConverter
 			dml = this.statementFactory.createUpdateStatement(row, ignoreRowStatus, "\n", this.exportColumns);
 		}
 		if (dml == null) return null;
-		
+
 		dml.setChrFunction(this.chrFunction);
 		dml.setConcatString(this.concatString);
 		dml.setConcatFunction(this.concatFunction);
-		
+
 		// Needed for formatting BLOBs in the literalFormatter
 		this.currentRow = rowIndex;
 		this.currentRowData = row;
-		
+
 		result.append(dml.getExecutableStatement(this.literalFormatter));
 		result.append(';');
-		
+
 		if (doFormatting)
 			result.append(doubleLineTerminator);
 		else
@@ -215,7 +215,7 @@ public class SqlRowDataConverter
 		{
 			updateTable = alternateUpdateTable;
 		}
-		
+
 		ColumnIdentifier[] colArray = this.metaData.getColumns();
 		List<ColumnIdentifier> cols = ArrayUtil.arrayToList(colArray);
 		DbMetadata db = this.originalConnection.getMetadata();
@@ -234,19 +234,19 @@ public class SqlRowDataConverter
 	{
 		return this.sqlTypeToUse == ExportType.SQL_UPDATE;
 	}
-	
+
 	public boolean isCreateInsertDelete()
 	{
 		return this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT;
 	}
-	
+
 	public void setCreateInsert()
 	{
 		this.sqlType = ExportType.SQL_INSERT;
 		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
-	
+
 	public void setCreateUpdate()
 	{
 		this.sqlType = ExportType.SQL_UPDATE;
@@ -260,11 +260,11 @@ public class SqlRowDataConverter
 		this.sqlTypeToUse = this.sqlType;
 		this.doFormatting = Settings.getInstance().getBoolProperty("workbench.sql.generate.insert.doformat",true);
 	}
-	
+
 	private boolean checkKeyColumns()
 	{
 		boolean keysPresent = metaData.hasPkColumns();
-		
+
 		if (this.keyColumnsToUse != null && this.keyColumnsToUse.size() > 0)
 		{
 			// make sure the default key columns are not used
@@ -291,7 +291,7 @@ public class SqlRowDataConverter
 		}
 		return keysPresent;
 	}
-	
+
 	public void setCommitEvery(int interval)
 	{
 		this.commitEvery = interval;
@@ -345,7 +345,7 @@ public class SqlRowDataConverter
 	 */
 	public void setAlternateUpdateTable(TableIdentifier table)
 	{
-		if (table != null) 
+		if (table != null)
 		{
 			this.alternateUpdateTable = table;
 			this.needsUpdateTable = false;
@@ -369,7 +369,7 @@ public class SqlRowDataConverter
 
 	/**
 	 * Setter for property keyColumnsToUse.
-	 * @param keyColumnsToUse New value of property keyColumnsToUse.
+	 * @param cols New value of property keyColumnsToUse.
 	 */
 	public void setKeyColumnsToUse(List<String> cols)
 	{
@@ -381,7 +381,7 @@ public class SqlRowDataConverter
 		this.lineTerminator = lineEnd;
 		this.doubleLineTerminator = lineEnd + lineEnd;
 	}
-	
+
 	public void setIncludeTableOwner(boolean flag)
 	{
 		this.includeOwner = flag;
@@ -391,7 +391,7 @@ public class SqlRowDataConverter
 	public void setBlobMode(BlobMode type)
 	{
 		if (this.literalFormatter == null) return;
-		
+
 		if (type == BlobMode.DbmsLiteral)
 		{
 			this.literalFormatter.createDbmsBlobLiterals(originalConnection);
@@ -409,14 +409,14 @@ public class SqlRowDataConverter
 			this.literalFormatter.noBlobHandling();
 		}
 	}
-	
+
 	public void setClobAsFile(String encoding)
 	{
 		if (StringUtil.isEmptyString(encoding)) return;
-		if (this.literalFormatter != null) 
+		if (this.literalFormatter != null)
 		{
 			literalFormatter.setTreatClobAsFile(this, encoding);
 		}
 	}
-	
+
 }

@@ -297,7 +297,8 @@ public class TableIdentifier
 	 *
 	 * This will only re-add the correct quotes later, if getTableExpression(WbConnection) is used!
 	 * 
-	 * @param quoteCharacter
+	 * @param meta the DbMetadata object used for checking if a name component is quoted
+	 * @see workbench.db.DbMetadata#isQuoted(java.lang.String) 
 	 */
 	public void checkIsQuoted(DbMetadata meta)
 	{

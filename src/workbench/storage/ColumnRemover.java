@@ -34,7 +34,7 @@ public class ColumnRemover
 	 *
 	 * @param colNames
 	 * @return a new DataStore with the named columns removed
-	 * @see #removeColumnsByIndex(java.util.List<Integer>)
+	 * @see #removeColumnsByIndex(java.util.List) 
 	 */
 	public DataStore removeColumnsByName(String ... colNames)
 	{

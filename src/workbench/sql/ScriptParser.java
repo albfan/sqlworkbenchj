@@ -130,7 +130,6 @@ public class ScriptParser
 	/**
 	 * Returns the file that was parsed if available. 
 	 * May be null (if the parser has been initialized from a String)
-	 * @return
 	 */
 	public WbFile getScriptFile()
 	{
@@ -396,7 +395,6 @@ public class ScriptParser
 	 * Returns the number of statements in this script.
 	 * This will force a complete parsing of the script and the
 	 * script will be loaded into memory!
-	 * @return
 	 */
 	public int getSize()
 	{

@@ -38,7 +38,7 @@ import workbench.storage.DataStore;
 
 /**
  * A panel to enter the value for Workbench variables inside SQL statements
- * @see VariablePrompter
+ *
  * @see workbench.sql.VariablePool
  *
  * @author  support@sql-workbench.net

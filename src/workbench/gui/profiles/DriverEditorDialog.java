@@ -174,10 +174,8 @@ public class DriverEditorDialog extends JDialog
 	}
 
 	/**
-	 *
 	 * @param parentFrame
 	 * @param current
-	 * @return true if the dialog was closed with OK, false if it was cancelled
 	 */
 	public static void showDriverDialog(final Frame parentFrame, final DbDriver current)
 	{

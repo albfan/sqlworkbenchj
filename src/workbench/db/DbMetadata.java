@@ -2172,7 +2172,6 @@ public class DbMetadata
 	/**
 	 * Return a list of types that identify tables in the target database.
 	 * e.g. TABLE, SYSTEM TABLE, ...
-	 * @return
 	 */
 	public Collection<String> getTableTypes()
 	{

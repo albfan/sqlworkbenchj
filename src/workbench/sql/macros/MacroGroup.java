@@ -155,7 +155,6 @@ public class MacroGroup
 	/**
 	 * Returns the number of macros in this groups that should be displayed in the menu
 	 * 
-	 * @return
 	 */
 	public int getVisibleMacroSize()
 	{

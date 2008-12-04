@@ -379,8 +379,6 @@ public class MacroTree
 	/**
 	 * Returns the current group. That is either the currently selected group
 	 * or the group of the currently selected macro(s).
-	 *
-	 * @return
 	 */
 	public MacroTreeNode getCurrentGroupNode()
 	{
@@ -399,8 +397,6 @@ public class MacroTree
 	/**
 	 * Returns the current group. That is either the currently selected group
 	 * or the group of the currently selected macro(s).
-	 * 
-	 * @return
 	 */
 	public MacroGroup getCurrentGroup()
 	{

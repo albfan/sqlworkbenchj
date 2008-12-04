@@ -23,7 +23,8 @@ import workbench.util.StringUtil;
 
 /**
  * Action to add a new macro.
- * @see workbench.sql.MacroManager
+ * 
+ * @see workbench.sql.macros.MacroManager
  * @author  support@sql-workbench.net
  */
 public class AddMacroAction extends WbAction

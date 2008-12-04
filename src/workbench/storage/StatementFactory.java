@@ -373,7 +373,7 @@ public class StatementFactory
 	 * Defines an alternative table to be used when generating the SQL statements.
 	 * By default the table defined through the ResultInfo from the constructor is used.
 	 *
-	 * @param tableToUse The table to be used
+	 * @param table The table to be used
 	 */
 	public void setTableToUse(TableIdentifier table)
 	{

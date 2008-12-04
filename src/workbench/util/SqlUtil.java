@@ -135,7 +135,6 @@ public class SqlUtil
 	 * @return a structure that contains the type (e.g. TABLE, VIEW) and the name of the created object
 	 *         null, if the SQL statement is not a DDL CREATE statement
 	 * 
-	 * @see #addExtendErrorInfo(workbench.db.WbConnection, String, workbench.sql.StatementRunnerResult)
 	 */
 	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql)
 	{

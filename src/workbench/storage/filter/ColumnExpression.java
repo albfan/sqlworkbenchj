@@ -37,8 +37,8 @@ public class ColumnExpression
 	 * Define the filter for a column
 	 * 
 	 * @param column the column name
-	 * @param comparator the comparator to be used to compare the reference value against the actual values
-	 * @param filterValue the filter value to compare against the actual values
+	 * @param comp the comparator to be used to compare the reference value against the actual values
+	 * @param value the filter value to compare against the actual values
 	 * 
 	 * @see #setFilterValue(Object)
 	 * @see #setComparator(ColumnComparator)
@@ -53,8 +53,8 @@ public class ColumnExpression
 	/**
 	 * Define a "generic" column filter
 	 * 
-	 * @param comparator the comparator to be used to compare the reference value against the actual values
-	 * @param filterValue the filter value to compare against the actual values
+	 * @param comp the comparator to be used to compare the reference value against the actual values
+	 * @param value the filter value to compare against the actual values
 	 * 
 	 * @see #setFilterValue(Object)
 	 * @see #setComparator(ColumnComparator)

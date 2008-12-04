@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 /**
  * A class to print the contents of a ResultSet to a PrintStream.
@@ -101,11 +102,14 @@ public class ResultSetPrinter
 			printHeader(pw);
 			
 			RowData row = new RowData(info);
+			int count = 0;
 			while (data.next())
 			{
 				row.read(data, info);
 				printRow(pw, row);
+				count ++;
 			}
+			pw.println(ResourceMgr.getFormattedString("MsgRows", count));
 			pw.flush();
 		}
 		catch (Exception e)

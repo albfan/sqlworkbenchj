@@ -293,7 +293,7 @@ public abstract class ExportWriter
 
 	/**
 	 * Setter for property tableToUse.
-	 * @param tableToUse New value of property tableToUse.
+	 * @param tableName New value of property tableToUse.
 	 */
 	public void setTableToUse(String tableName)
 	{

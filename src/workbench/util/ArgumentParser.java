@@ -197,7 +197,7 @@ public class ArgumentParser
 	/**
 	 * Checks if any arguments have been defined.
 	 * 
-	 * @return
+	 * @return true if at least one argument was provided
 	 */
 	public boolean hasArguments()
 	{

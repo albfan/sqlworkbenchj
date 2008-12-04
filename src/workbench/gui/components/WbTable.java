@@ -1422,8 +1422,11 @@ public class WbTable
 	 *
 	 * If the user chose to automatically optimize the column
 	 * width according to the content, this will
-	 * call {@link TableColumnOptimizer#optimizeAllColWidth()}
-	 * otherwise this will call {@link TableColumnOptimizer#adjustColumns(boolean)}
+	 * call {@link ColumnWidthOptimizer#optimizeAllColWidth()}
+	 * otherwise this will call {@link ColumnWidthOptimizer#adjustColumns(boolean)}
+	 *
+	 * @see ColumnWidthOptimizer#optimizeAllColWidth()
+	 * @see ColumnWidthOptimizer#adjustColumns(boolean)
 	 */
 	public void adjustRowsAndColumns()
 	{

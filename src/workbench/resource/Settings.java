@@ -288,7 +288,6 @@ public class Settings
 
 	/**
 	 * Returns the full path to the PDF manual
-	 * @return
 	 */
 	public WbFile getPDFManualPath()
 	{

@@ -67,7 +67,7 @@ public class AppArguments
 	public static final String ARG_VARDEF = "varDef";
 	public static final String ARG_SHOW_PUMPER = "dataPumper";
 	public static final String ARG_SHOW_DBEXP = "dbExplorer";
-	public static final String ARG_LANG = "languaqe";
+	public static final String ARG_LANG = "language";
 	public static final String ARG_NOSETTNGS = "noSettings";
 	public static final String ARG_NOTEMPLATES = "noTemplates";
 	public static final String ARG_CONSOLE_OPT_COLS = "optimizeColWidth";

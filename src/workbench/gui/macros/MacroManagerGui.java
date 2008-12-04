@@ -39,7 +39,7 @@ import workbench.sql.macros.MacroGroup;
 
 /**
  * Displays all defined macros and lets the user add, edit and delete macros.
- * It uses {@link workbench.sql.MacroManager} to retrieve and store
+ * It uses {@link workbench.sql.macros.MacroManager} to retrieve and store
  * the macros.
  *
  * @author support@sql-workbench.net
