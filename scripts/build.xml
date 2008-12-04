@@ -305,7 +305,7 @@
 		<xslt classpathref="xalan.path"
           basedir="${html-outdir}"
           includes="Manual.xml"
-          style="${doc}/xsl/workbench-chunk.xsl"
+          style="${doc}/docbook/html/chunk.xsl"
           destdir="${html-outdir}">
 
       <xmlcatalog>
