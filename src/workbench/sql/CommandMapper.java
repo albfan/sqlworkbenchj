@@ -52,6 +52,7 @@ import workbench.sql.wbcommands.WbListCatalogs;
 import workbench.sql.wbcommands.WbListPkDef;
 import workbench.sql.wbcommands.WbListProcedures;
 import workbench.sql.wbcommands.WbListTables;
+import workbench.sql.wbcommands.WbListTriggers;
 import workbench.sql.wbcommands.WbListVars;
 import workbench.sql.wbcommands.WbLoadPkMapping;
 import workbench.sql.wbcommands.WbProcSource;
@@ -61,8 +62,8 @@ import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
+import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbXslt;
-import workbench.sql.wbcommands.console.WbRun;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -115,6 +116,8 @@ public class CommandMapper
 		addCommand(new WbSelectBlob());
 		addCommand(new WbHideWarnings());
 		addCommand(new WbProcSource());
+		addCommand(new WbListTriggers());
+		addCommand(new WbTriggerSource());
 
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);

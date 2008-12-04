@@ -1,13 +1,17 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
-*************************************************************************
-**                            ATTENTION                                **
-*************************************************************************
-** Since Build 99 the filenames have change                            **
-** Please delete the old Workbench.jar and JWorkbench.exe              **
-*************************************************************************
-**                            ATTENTION                                **
-*************************************************************************
+Enh: (102.4) Completely reworked the macro handling. Macros can now be grouped, 
+     manually sorted, hidden from the menu and can be assigned a shortcut.
+
+     ************************************************************************
+     Once the old WbMacros.xml has been opened and saved with the new version
+     older versions of SQL Workbench cannot read that file any longer
+     ************************************************************************
+
+Enh: (102.4) Added 'WbListTriggers' commands to list all triggers in the
+     database (showing the information from the "Triggers" panel in DbExplorer)
+     and WbTriggerSource to display the source of a trigger. The DESCRIBE
+     command now also returns the list of triggers for a table.
 Enh: (102.4) When importing a text file, WbImport does no longer tries to guess
      different timestamp or date formats if the default format leads to an error.
      Instead an error is reported immediately. 

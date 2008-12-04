@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 
+import workbench.db.TriggerReader;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -99,6 +100,13 @@ public class WbDescribeTable
 			if (index.getRowCount() > 0)
 			{
 				result.addDataStore(index);
+			}
+
+			TriggerReader trgReader = new TriggerReader(currentConnection);
+			DataStore triggers = trgReader.getTableTriggers(toDescribe);
+			if (triggers != null && triggers.getRowCount() > 0)
+			{
+				result.addDataStore(triggers);
 			}
 		}
 

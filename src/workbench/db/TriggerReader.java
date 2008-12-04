@@ -76,7 +76,7 @@ public class TriggerReader
 	protected DataStore getTriggers(String catalog, String schema, String tableName)
 		throws SQLException
 	{
-		final String[] cols = {"NAME", "TYPE", "EVENT"};
+		final String[] cols = {"TRIGGER_NAME", "TYPE", "EVENT"};
 		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int[] sizes =   {30, 30, 20};
 

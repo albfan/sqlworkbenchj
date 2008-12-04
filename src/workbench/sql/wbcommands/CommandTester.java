@@ -78,6 +78,8 @@ public class CommandTester
 		commands.add(WbHelp.VERB);
 		commands.add(WbProcSource.VERB);
 		commands.add(WbRun.VERB);
+		commands.add(WbListTriggers.VERB);
+		commands.add(WbTriggerSource.VERB);
 
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
@@ -99,6 +101,8 @@ public class CommandTester
 		formattedWords.put(WbRemoveVar.VERB, "WbVarDelete");
 		formattedWords.put(WbProcSource.VERB, "WbProcSource");
 		formattedWords.put(WbListProcedures.VERB, "WbListProcs");
+		formattedWords.put(WbListTriggers.VERB, WbListTriggers.FORMATTED_VERB);
+		formattedWords.put(WbTriggerSource.VERB, WbTriggerSource.FORMATTED_VERB);
 	}
 	
 	public Collection<String> getCommands()
