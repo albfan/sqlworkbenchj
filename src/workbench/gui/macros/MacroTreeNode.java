@@ -12,6 +12,7 @@
 package workbench.gui.macros;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -42,5 +43,31 @@ public class MacroTreeNode
 	public void setDataObject(Object dataObject)
 	{
 		this.data = dataObject;
+	}
+
+	public DragType getDropType(TreePath[] source)
+	{
+		if (source == null) return DragType.none;
+
+		boolean sourceIsGroup = true;
+		for (TreePath path : source)
+		{
+			MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
+			sourceIsGroup = sourceIsGroup && node.getAllowsChildren();
+		}
+
+		if (getAllowsChildren())
+		{
+			if (sourceIsGroup) return DragType.reorderItems;
+			return DragType.moveItems;
+		}
+		else if (!sourceIsGroup)
+		{
+			return DragType.reorderItems;
+		}
+		else
+		{
+			return DragType.none;
+		}
 	}
 }

@@ -22,8 +22,14 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * An implementation of the ObjectDropper interface to drop columns from a table.
+ *
+ * The necessary SQL statement is retrieved from the <tt>workbench.settings</tt>
  *
  * @author support@sql-workbench.net
+ * @see workbench.db.DbSettings#getDropMultipleColumnSql()
+ * @see workbench.db.DbSettings#getDropSingleColumnSql()
+ * 
  */
 public class ColumnDropper
 	implements ObjectDropper

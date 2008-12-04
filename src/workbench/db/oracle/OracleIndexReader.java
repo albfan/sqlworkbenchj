@@ -29,7 +29,11 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * An implementation of the IndexReader interface for Oracle.
  *
+ * This class uses its own SQL Statement to retrieve the index list from the database
+ * as Oracle's JDBC driver runs an ANALYZE before actually returning the index information
+ * 
  * @author  support@sql-workbench.net
  */
 public class OracleIndexReader

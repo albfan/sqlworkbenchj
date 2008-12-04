@@ -27,6 +27,13 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A extension to the JdbcIndexReader to construct the Postgres specific syntax
+ * for indexes.
+ *
+ * This class does not actually construct the CREATE INDEX based on the information
+ * available from the JDBC API, but retrieves the CREATE INDEX directly from the database
+ * as Postgres stores the full comannd in the table <tt>pg_indexes</tt>.
+ * 
  * @author  support@sql-workbench.net
  */
 public class PostgresIndexReader

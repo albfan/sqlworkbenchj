@@ -12,7 +12,8 @@
 package workbench.db.exporter;
 
 /**
- *
+ * An ExportWriter to generate flat files.
+ * 
  * @author  support@sql-workbench.net
  */
 public class TextExportWriter

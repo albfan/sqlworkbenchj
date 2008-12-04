@@ -12,6 +12,8 @@
 package workbench.db.exporter;
 
 /**
+ * Test if POI classes are available on the classpath.
+ * 
  * @author support@sql-workbench.net  
  */
 public class PoiHelper

@@ -16,7 +16,13 @@ import java.util.Collections;
 import java.util.List;
 
 /**
+ * A list of macros combined into a group.
  *
+ * A MacroGroup defines a sort order which is essentially maintained
+ * through the GUI.
+ * 
+ * Groups can be hidden from the menu.
+ * 
  * @author support@sql-workbench.net
  */
 public class MacroGroup

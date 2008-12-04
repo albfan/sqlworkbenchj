@@ -15,7 +15,12 @@ import workbench.resource.StoreableKeyStroke;
 import workbench.util.StringUtil;
 
 /**
+ * A single Macro that maps a name to a SQL text.
  *
+ * Each Macro defines a sort order (that is maintained through the GUI).
+ * A macro can have a keyboard shortcut assigned and can be hidden from the
+ * menu.
+ * 
  * @author support@sql-workbench.net
  */
 public class MacroDefinition

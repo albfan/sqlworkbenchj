@@ -33,6 +33,10 @@ import workbench.util.FileUtil;
 
 
 /**
+ * A panel that display a BLOB as an image.
+ *
+ * To display the image the Java built-in image rendering features are used.
+ * 
  * @author support@sql-workbench.net
  */
 public class ImagePanel

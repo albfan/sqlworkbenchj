@@ -23,6 +23,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
+ * Write control files for SQL Server's <tt>bcp</tt> command.
+ * 
  * @author support@sql-workbench.net
  */
 public class SqlServerFormatFileWriter

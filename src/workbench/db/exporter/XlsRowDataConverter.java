@@ -29,6 +29,7 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
+ * Export data into an Excel spreadsheet using Apache's POI
  *
  * @author Alessandro Palumbo
  */

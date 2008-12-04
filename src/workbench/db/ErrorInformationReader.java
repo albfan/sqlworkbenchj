@@ -12,6 +12,14 @@
 package workbench.db;
 
 /**
+ * An interface for reading extended error information from the database.
+ *
+ * This should be implemented for any database that can return additional
+ * error information after running DDL statements.
+ *
+ * Currently only implemented for Oracle to retrieve detailed error messages
+ * after a CREATE PROCEDURE or similar statement.
+ * 
  * @author support@sql-workbench.net
  */
 public interface ErrorInformationReader

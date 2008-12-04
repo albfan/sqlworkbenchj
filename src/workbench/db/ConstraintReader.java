@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.util.Map;
 
 /**
+ * An interface to read column and table constraints from the database.
+ * 
  * @author support@sql-workbench.net
  */
 public interface ConstraintReader

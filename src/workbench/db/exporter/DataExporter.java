@@ -64,7 +64,16 @@ import workbench.util.WbThread;
 
 
 /**
+ * A class to export data from the database into an external file.
  *
+ * This class provides the runtime environment to export data. It uses different ExportWriters
+ * and RowDataConverters to produce the actual output files.
+ *
+ * Data can be exported in two ways: either a complete export of a table using
+ * {@link #addTableExportJob(java.io.File, workbench.db.TableIdentifier) } or by
+ * specifying a SQL query where the generated ResultSet should be exported
+ * using {@link #addQueryJob(java.lang.String, workbench.util.WbFile) }
+ * 
  * @author  support@sql-workbench.net
  */
 public class DataExporter

@@ -14,8 +14,10 @@ package workbench.db.importer.modifier;
 import workbench.db.ColumnIdentifier;
 
 /**
- *
+ * An interface for modifiers that are applied during importing data.
+ * 
  * @author support@sql-workbench.net
+ * @see workbench.interfaces.ImportFileParser#setValueModifier(workbench.db.importer.modifier.ImportValueModifier)
  */
 public interface ImportValueModifier 
 {

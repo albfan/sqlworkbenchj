@@ -29,7 +29,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * Run a DDL (CREATE, DROP, ALTER, GRANT, REVOKE) command.
+ * 
  * @author  support@sql-workbench.net
  */
 public class DdlCommand

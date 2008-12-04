@@ -18,7 +18,8 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 
 /**
- *
+ * An interface to define a single copy task.
+ * 
  * @author support@sql-workbench.net
  */
 public interface CopyTask

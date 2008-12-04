@@ -32,6 +32,8 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
+ * A dialog to display a {@link ImpagePanel}
+ * 
  * @author support@sql-workbench.net
  */
 public class ImageViewer

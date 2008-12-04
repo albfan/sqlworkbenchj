@@ -23,7 +23,9 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * An implementation of the IndexReader interface that uses the standard JDBC API
+ * to get the index information.
+ * 
  * @author support@sql-workbench.net
  */
 public class JdbcIndexReader

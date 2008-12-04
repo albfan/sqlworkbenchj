@@ -15,6 +15,7 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.beans.PropertyChangeListener;
 
+import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
@@ -26,9 +27,10 @@ import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.DeleteListEntryAction;
+import workbench.gui.actions.ExpandTreeAction;
 import workbench.gui.actions.NewListEntryAction;
-import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.profiles.NewGroupAction;
@@ -36,6 +38,7 @@ import workbench.interfaces.FileActions;
 import workbench.resource.Settings;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
+import workbench.util.StringUtil;
 
 /**
  * Displays all defined macros and lets the user add, edit and delete macros.
@@ -68,7 +71,8 @@ public class MacroManagerGui
 		DeleteListEntryAction deleteAction = new DeleteListEntryAction(this);
 		this.toolbar.add(deleteAction);
 		this.toolbar.addSeparator();
-		this.toolbar.add(new SaveListFileAction(this));
+		this.toolbar.add(new ExpandTreeAction(macroTree));
+		this.toolbar.add(new CollapseTreeAction(macroTree));
 
 		macroTree.setDeleteAction(deleteAction);
 
@@ -88,7 +92,7 @@ public class MacroManagerGui
 		macroPanel = new MacroDefinitionPanel(this);
 		groupPanel = new MacroGroupPanel(this);
 		
-		splitPane.setRightComponent(macroPanel);
+		splitPane.setRightComponent(new JPanel());
 
 		add(splitPane, BorderLayout.CENTER);
 		macroTree.addTreeSelectionListener(this);
@@ -138,8 +142,11 @@ public class MacroManagerGui
 		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", location);
 		MacroDefinition macro = getSelectedMacro();
 		Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacro", macro == null ? "" : macro.getName());
-		MacroGroup group = macroTree.getGroupForSelectedMacro();
+		MacroGroup group = macroTree.getCurrentGroup();
 		Settings.getInstance().setProperty(this.getClass().getName() + ".lastmacrogroup", group == null ? "" : group.getName());
+
+		List<String> expandedGroups = macroTree.getExpandedGroupNames();
+		Settings.getInstance().setProperty(this.getClass().getName() + ".expandedgroups", StringUtil.listToString(expandedGroups, ',', true));
 	}
 
 	public void restoreSettings()
@@ -148,13 +155,11 @@ public class MacroManagerGui
 		this.splitPane.setDividerLocation(location);
 		String macro = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacro", null);
 		String group = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacrogroup", null);
-		this.selectMacro(group, macro);
-		this.selectListLater();
-	}
-
-	private void selectMacro(String group, String macro)
-	{
 		macroTree.selectMacro(group, macro);
+		String groups = Settings.getInstance().getProperty(this.getClass().getName() + ".expandedgroups", null);
+		List<String> l = StringUtil.stringToList(groups, ",", true, true);
+		macroTree.expandGroups(l);
+		this.selectListLater();
 	}
 
 	private void showGroup(final MacroGroup group)

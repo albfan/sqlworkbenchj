@@ -17,8 +17,10 @@ import workbench.util.StrBuffer;
 import workbench.util.HtmlUtil;
 
 /**
- *
+ * Convert RowData into HTML.
+ * 
  * @author  support@sql-workbench.net
+ * @see HtmlExportWriter
  */
 public class HtmlRowDataConverter
 	extends RowDataConverter

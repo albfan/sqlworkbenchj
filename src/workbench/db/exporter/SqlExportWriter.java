@@ -16,7 +16,8 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
 /**
- *
+ * Export data as SQL INSERT statements.
+ * 
  * @author  support@sql-workbench.net
  */
 public class SqlExportWriter

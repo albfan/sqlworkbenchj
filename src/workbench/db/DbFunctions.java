@@ -20,6 +20,11 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
+ * A helper class to retrieve function keywords from the JDBC driver.
+ *
+ * The keywords returned from the driver are merged with keywords that can be configured
+ * in <tt>workbench.settings</tt>
+ * 
  * @author support@sql-workbench.net
  */
 public class DbFunctions 

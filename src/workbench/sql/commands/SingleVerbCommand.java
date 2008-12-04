@@ -17,6 +17,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
+ * Handles COMMIT and ROLLBACK
  *
  * @author  support@sql-workbench.net
  */

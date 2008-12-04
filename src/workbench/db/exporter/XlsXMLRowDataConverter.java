@@ -19,7 +19,7 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
- * Convert row data to our own XML format.
+ * Convert row data to Microsoft's XLSX Spreadsheet format.
  *
  * @author  support@sql-workbench.net
  */

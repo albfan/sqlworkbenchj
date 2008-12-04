@@ -45,7 +45,8 @@ import workbench.util.MemoryWatcher;
 import workbench.util.WbFile;
 
 /**
- *
+ * The about box for SQL Workbench/J
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbAboutDialog 

@@ -31,6 +31,7 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
+ * Export data as SQL INSERT statements.
  *
  * @author  support@sql-workbench.net
  */

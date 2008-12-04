@@ -18,6 +18,10 @@ import workbench.util.WbFile;
 
 /**
  *
+ * Creates a COPY statement to import a flat file created by the DataExporter.
+ *
+ * This COPY statement can be used to import the flat file in Postgres
+ *
  * @author support@sql-workbench.net
  */
 public class PostgresCopyStatementWriter

@@ -29,7 +29,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * Handles a WbCopy call for a single table.
+ * 
  * @author support@sql-workbench.net
  */
 public class TableCopy

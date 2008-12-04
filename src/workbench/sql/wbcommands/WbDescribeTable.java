@@ -24,8 +24,24 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
+ * Display the definition of a table.
  *
+ * This command will return multiple result sets:
+ *
+ * For tables, the following DataStores are returned
+ * <ol>
+ *		<li>The table definition (columns)</li>
+ *		<li>A list of indexes defined for the table</li>
+ *    <li>A list of triggers defined for the table</li>
+ * </ol>
+ *
+ * For Views, the view definiton and the view source is returned.
+ * 
  * @author  support@sql-workbench.net
+ * @see workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
+ * @see workbench.db.IndexReader#getTableIndexInformation(workbench.db.TableIdentifier)
+ * @see workbench.db.TriggerReader#getTableTriggers(workbench.db.TableIdentifier)
+ * @see workbench.db.ViewReader#getExtendedViewSource(workbench.db.TableIdentifier, boolean) 
  */
 public class WbDescribeTable
 	extends SqlCommand

@@ -15,7 +15,9 @@ import java.io.PrintStream;
 import workbench.interfaces.StatusBar;
 
 /**
- *
+ * An implementation of the {@link workbench.interfaces.StatusBar} interface
+ * to display information in Console mode
+ * 
  * @author support@sql-workbench.net
  */
 public class ConsoleStatusBar

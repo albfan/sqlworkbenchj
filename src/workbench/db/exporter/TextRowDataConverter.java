@@ -21,7 +21,18 @@ import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
+ * Converts data from the database into text files.
  *
+ * The format of the output can be modified for different needs.
+ *
+ * The following things can be configured
+ * <ul>
+ *	<li>Timestamp and Date formats</li>
+ *  <li>Decimal characters</li>
+ *  <li>Escaping of non-ASCI characters</li>
+ *  <li>Line ending uses</li>
+ *  <li>Column delimiter</li>
+ * </ul>
  * @author  support@sql-workbench.net
  */
 public class TextRowDataConverter

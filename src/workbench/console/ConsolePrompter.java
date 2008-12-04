@@ -18,8 +18,16 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
+ * An implementation of {@link workbench.interfaces.ParameterPrompter} and
+ * {@link workbench.interfaces.ExecutionController} for Console and Batch mode
+ * of SQL Workbench/J
  *
+ * It will interactively prompt the user for variables or the confirmation
+ * to continue with a given SQL statement.
+ * 
  * @author support@sql-workbench.net
+ * @see workbench.interfaces.ParameterPrompter
+ * @see workbench.interfaces.ExecutionController
  */
 public class ConsolePrompter
 	implements ParameterPrompter, ExecutionController

@@ -29,6 +29,8 @@ import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
+ * Change the active connection for a SQL script or in Console mode.
+ * 
  * @author support@sql-workbench.net
  */
 public class WbConnect

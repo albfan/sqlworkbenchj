@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Define codes for the different ways how BLOBs can be handled by the export classes.
  *
  * @author support@sql-workbench.net
  */

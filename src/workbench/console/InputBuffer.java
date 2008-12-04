@@ -14,7 +14,9 @@ package workbench.console;
 import workbench.sql.DelimiterDefinition;
 
 /**
- *
+ * A buffer that collects pieces of text entered by the user until
+ * it is terminated with a {@link workbench.sql.DelimiterDefinition}
+ * 
  * @author support@sql-workbench.net
  */
 public class InputBuffer

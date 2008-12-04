@@ -19,7 +19,12 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to change the current catalog in the database.
  *
+ * This class uses DatabaseMetaData.setCatalog() to change the current catalog (database).
+ * This can be changed in <tt>workbench.settings</tt> to use the SQL command <tt>USE</tt>
+ * instead.
+ * 
  * @author support@sql-workbench.net
  */
 public class CatalogChanger

@@ -18,7 +18,12 @@ import java.util.List;
 import workbench.storage.DataStore;
 
 /**
+ * An interface to retrieve index information for a database table.
  *
+ * A default implementation uses the JDBC API to retrieve this information.
+ *
+ * Additional implementations are available to retrieve DBMS specific index information
+ * 
  * @author support@sql-workbench.net
  */
 public interface IndexReader

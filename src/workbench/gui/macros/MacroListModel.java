@@ -19,6 +19,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroStorage;
+import workbench.sql.macros.Sortable;
 
 /**
  *
@@ -178,7 +179,7 @@ public class MacroListModel
 		for (int i=0; i < nodes; i++)
 		{
 			MacroTreeNode node = (MacroTreeNode)groupNode.getChildAt(i);
-			MacroDefinition macro = (MacroDefinition)node.getDataObject();
+			Sortable macro = (Sortable)node.getDataObject();
 			macro.setSortOrder(i);
 		}
 		macros.applySort();
@@ -230,11 +231,17 @@ public class MacroListModel
 	
 	public void moveNodes(MacroTreeNode[] source, MacroTreeNode target)
 	{
-		if (source.length == 1 && !target.getAllowsChildren())
+		boolean sourceIsGroup = true;
+		for (MacroTreeNode node : source)
+		{
+			sourceIsGroup = sourceIsGroup && node.getAllowsChildren();
+		}
+		if (sourceIsGroup && target.getAllowsChildren() ||
+			 source.length == 1 && !target.getAllowsChildren())
 		{
 			putInFront(source[0], target);
 		}
-		else if (target.getAllowsChildren())
+		else if (target.getAllowsChildren() && !sourceIsGroup)
 		{
 			moveMacrosToGroup(source, target);
 		}

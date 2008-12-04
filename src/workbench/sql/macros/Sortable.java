@@ -10,10 +10,12 @@
 package workbench.sql.macros;
 
 /**
- *
- * @author Thomas Kellerer
+ * An interface for items that can have a sort order.
+ * 
+ * @author support@sql-workbench.net
  */
 public interface Sortable
 {
 	int getSortOrder();
+	void setSortOrder(int newIndex);
 }

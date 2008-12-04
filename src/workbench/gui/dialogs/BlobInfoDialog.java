@@ -31,7 +31,16 @@ import workbench.util.StringUtil;
 import workbench.util.ToolDefinition;
 
 /**
+ * A dialog to display information about a BLOB from a result set.
  *
+ * The dialog offers the following features:
+ * <ul>
+ *	<li>Download the contents of the BLOB</li>
+ *  <li>Upload a file to be stored in the BLOB column</li>
+ *  <li>View the blob information as a hex dump</li>
+ *  <li>View the BLOB information as an image</li>
+ *  <li>Open the BLOB with an external tool</li>
+ * </ul>
  * @author  support@sql-workbench.net
  */
 public class BlobInfoDialog

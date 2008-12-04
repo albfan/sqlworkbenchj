@@ -29,7 +29,12 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
+ * A panel to display a BLOB as a hex dump.
+ *
+ * It uses a HexPanel to display the data.
+ * 
  * @author support@sql-workbench.net
+ * @see workbench.gui.components.HexPanel
  */
 public class HexViewer
 	extends JDialog
@@ -39,7 +44,6 @@ public class HexViewer
 	private JButton closeButton = new JButton(ResourceMgr.getString("LblClose"));
 	private final String settingsId = "workbench.gui.imageviewer";
 
-	/** Creates a new instance of ImageViewer */
 	public HexViewer(JDialog parent, String title)
 	{
 		super(parent, title, true);

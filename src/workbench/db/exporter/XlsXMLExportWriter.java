@@ -13,6 +13,7 @@ package workbench.db.exporter;
 
 /**
  * Export writer for the new MS XML Spreadsheet format
+ * 
  * @author  support@sql-workbench.net
  */
 public class XlsXMLExportWriter

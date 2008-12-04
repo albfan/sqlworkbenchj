@@ -12,19 +12,19 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.profiles.ProfileTree;
+import workbench.interfaces.ExpandableTree;
 
 /**
- * Action to collapse all nodes in the connection profile tree
- * @see workbench.gui.profiles.ProfileTree#collapseAll()
+ * Action to collapse all nodes in a tree
+
  * @author support@sql-workbench.net
  */
 public class CollapseTreeAction
 	extends WbAction
 {
-	private ProfileTree client;
+	private ExpandableTree client;
 
-	public CollapseTreeAction(ProfileTree tree)
+	public CollapseTreeAction(ExpandableTree tree)
 	{
 		super();
 		this.client = tree;

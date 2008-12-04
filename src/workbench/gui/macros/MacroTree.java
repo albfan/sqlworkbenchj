@@ -36,6 +36,7 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.ExpandableTree;
 import workbench.interfaces.GroupTree;
 import workbench.resource.ResourceMgr;
 import workbench.sql.macros.MacroDefinition;
@@ -57,7 +58,8 @@ public class MacroTree
 	           ClipboardSupport, 
 	           ActionListener, 
 	           TreeSelectionListener,
-						 GroupTree
+						 GroupTree,
+						 ExpandableTree
 {
 	private MacroListModel macroModel;
 	private MacroTreeNode[] clipboardNodes;
@@ -191,6 +193,7 @@ public class MacroTree
 					if (macro != null && macro.getName().equals(macroName))
 					{
 						selectNode(macroNode);
+						break;
 					}
 				}
 			}
@@ -218,8 +221,9 @@ public class MacroTree
 		for (int i = 0; i < groupNodes.length; i++)
 		{
 			MacroTreeNode node = (MacroTreeNode)groupNodes[i].getLastPathComponent();
-			String g = (String)node.getDataObject();
-			if (groupList.contains(g))
+			if (!node.getAllowsChildren()) continue;
+			MacroGroup g = (MacroGroup)node.getDataObject();
+			if (groupList.contains(g.getName()))
 			{
 				if (!isExpanded(groupNodes[i])) expandPath(groupNodes[i]);
 			}
@@ -238,8 +242,8 @@ public class MacroTree
 			if (isExpanded(groupNodes[i]))
 			{
 				MacroTreeNode node = (MacroTreeNode)groupNodes[i].getLastPathComponent();
-				String g = (String)node.getDataObject();
-				result.add(g);
+				MacroGroup g = (MacroGroup)node.getDataObject();
+				result.add(g.getName());
 			}
 		}
 		return result;
@@ -319,13 +323,18 @@ public class MacroTree
 		return true;
 	}
 
-	/**
-	 * Checks if the current selection contains only groups
-	 */
 	public boolean onlyGroupSelected()
 	{
 		if (getSelectionCount() > 1) return false;
 		TreePath[] selection = getSelectionPaths();
+		return onlyGroupSelected(selection);
+	}
+
+	/**
+	 * Checks if the current selection contains only groups
+	 */
+	public boolean onlyGroupSelected(TreePath[] selection)
+	{
 		if (selection == null) return false;
 		for (int i = 0; i < selection.length; i++)
 		{
@@ -343,36 +352,6 @@ public class MacroTree
 		
 		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
 		return node;
-	}
-
-	/**
-	 * Returns the group for the currently selected macro
-	 * If no macro is currently selected (e.g. because nothing is selected
-	 * or a group is selected) null is returned
-	 */
-	public MacroGroup getGroupForSelectedMacro()
-	{
-		TreePath[] selection = getSelectionPaths();
-		if (selection == null) return null;
-		if (selection.length != 1) return null;
-
-		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
-		if (node == null) return null;
-
-		Object userData = null;
-		if (node.getAllowsChildren()) return null;
-		
-		MacroTreeNode parent = (MacroTreeNode)node.getParent();
-		if (parent != null)
-		{
-			userData = parent.getDataObject();
-		}
-
-		if (userData instanceof MacroGroup)
-		{
-			return (MacroGroup)userData;
-		}
-		return null;
 	}
 
 

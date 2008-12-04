@@ -22,7 +22,8 @@ import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
 /**
- *
+ * Evaluate table arguments that may contain wildcards.
+ * 
  * @author support@sql-workbench.net
  */
 public class SourceTableArgument

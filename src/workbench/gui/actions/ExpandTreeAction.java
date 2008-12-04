@@ -12,19 +12,19 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.gui.profiles.ProfileTree;
+import workbench.interfaces.ExpandableTree;
 
 /**
- * Expand all items in the ProfileTree
- * @see workbench.gui.profiles.ProfileTree#expandAll()
+ * Expand all items in a Tree
+
  * @author support@sql-workbench.net
  */
 public class ExpandTreeAction
 	extends WbAction
 {
-	private ProfileTree client;
+	private ExpandableTree client;
 
-	public ExpandTreeAction(ProfileTree tree)
+	public ExpandTreeAction(ExpandableTree tree)
 	{
 		super();
 		this.client = tree;

@@ -34,7 +34,8 @@ import workbench.util.ExceptionUtil;
 import workbench.util.MessageBuffer;
 
 /**
- *
+ * Handles a WbCopy call for a whole schema.
+ * 
  * @author support@sql-workbench.net
  */
 public class SchemaCopy 

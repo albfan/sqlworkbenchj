@@ -41,8 +41,7 @@ import workbench.util.WbFile;
 import workbench.util.ZipOutputFactory;
 
 /**
- * Interface for classes that can take objects of type {@link RowData}
- * and convert them to e.g. text, XML, HTML
+ * Abstract class for converting data into various output formats.
  *
  * @author  support@sql-workbench.net
  */

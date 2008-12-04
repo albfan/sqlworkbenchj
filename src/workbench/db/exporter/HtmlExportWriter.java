@@ -12,8 +12,10 @@
 package workbench.db.exporter;
 
 /**
- *
+ * An ExportWriter to generate HTML output.
+ * 
  * @author  support@sql-workbench.net
+ * @see HtmlRowDataConverter
  */
 public class HtmlExportWriter
 	extends ExportWriter

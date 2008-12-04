@@ -26,7 +26,8 @@ import workbench.gui.components.DividerBorder;
 public class MacroTreeCellRenderer
 	extends DefaultTreeCellRenderer
 {
-	private MacroTreeNode dropTargetItem = null;
+	private MacroTreeNode dropTarget;
+	private DragType type = DragType.none;
 	private Border itemBorder = null;
 	private Border groupBorder = null;
 	
@@ -38,9 +39,10 @@ public class MacroTreeCellRenderer
 		groupBorder = new LineBorder(Color.GRAY, 1);
 	}
 	
-	public void setDropTargetItem(MacroTreeNode target)
+	public void setDragType(DragType dragType, MacroTreeNode targetItem)
 	{
-		this.dropTargetItem = target;
+		this.type = dragType;
+		dropTarget = targetItem;
 	}
 
 	public Component getTreeCellRendererComponent(JTree tree, 
@@ -51,21 +53,26 @@ public class MacroTreeCellRenderer
 	                                              int row, 
 	                                              boolean hasFocus)
 	{
-		if (this.dropTargetItem != null && dropTargetItem == value)
+		if (this.dropTarget != null && dropTarget == value)
 		{
-			if (dropTargetItem.getAllowsChildren())
+			if (type == DragType.moveItems)
 			{
 				setBorder(groupBorder);
 			}
-			else
+			else if (type == DragType.reorderItems)
 			{
 				setBorder(itemBorder);
+			}
+			else
+			{
+				setBorder(null);
 			}
 		}
 		else
 		{
 			setBorder(null);
 		}
+
 		return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 	}
 

@@ -23,6 +23,8 @@ import java.awt.Window;
 import workbench.resource.ResourceMgr;
 
 /**
+ * A splash screen for SQL Workbench/J
+ * 
  * @author support@sql-workbench.net
  */
 public class WbSplash

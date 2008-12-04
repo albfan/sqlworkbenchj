@@ -23,7 +23,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * This class implements a wrapper for the SET command
+ * This class implements a wrapper for the SET command.
  *
  * Oracle's SET command is only valid from within SQL*Plus.
  * By supplying an implementation for the Workbench, we can ignore the errors

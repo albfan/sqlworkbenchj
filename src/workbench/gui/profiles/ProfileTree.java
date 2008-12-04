@@ -40,6 +40,7 @@ import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
+import workbench.interfaces.ExpandableTree;
 import workbench.interfaces.GroupTree;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
@@ -57,7 +58,8 @@ public class ProfileTree
 	           ClipboardSupport, 
 	           ActionListener, 
 	           TreeSelectionListener,
-						 GroupTree
+						 GroupTree,
+						 ExpandableTree
 {
 	private ProfileListModel profileModel;
 	private DefaultMutableTreeNode[] clipboardNodes;

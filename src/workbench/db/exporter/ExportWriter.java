@@ -29,6 +29,10 @@ import workbench.util.StrBuffer;
 import workbench.util.WbFile;
 
 /**
+ * An ExportWriter acts as a coordinating class between the DataExporter and the corresponding
+ * RowDataConverter.
+ *
+ * It manages the output file(s) and handles the transparent creation of ZIP files.
  *
  * @author  support@sql-workbench.net
  */

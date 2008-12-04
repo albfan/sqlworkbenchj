@@ -12,6 +12,8 @@
 package workbench.db;
 
 /**
+ * An interface to return the SQL code for a given JDBC data type.
+ * 
  * @author support@sql-workbench.net
  */
 public interface DataTypeResolver 

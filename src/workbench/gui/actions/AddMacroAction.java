@@ -14,10 +14,14 @@ package workbench.gui.actions;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
-import workbench.gui.WbSwingUtilities;
+import javax.swing.SwingUtilities;
+import workbench.gui.components.ValidatingDialog;
+import workbench.gui.macros.AddMacroPanel;
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.resource.ResourceMgr;
+import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
 import workbench.util.StringUtil;
 
@@ -60,11 +64,25 @@ public class AddMacroAction extends WbAction
 			Toolkit.getDefaultToolkit().beep();
 			return;
 		}
+
+		AddMacroPanel panel = new AddMacroPanel();
+
+		ValidatingDialog dialog = ValidatingDialog.createDialog(
+			SwingUtilities.getWindowAncestor(client),
+			panel,
+			ResourceMgr.getString("TxtGetMacroNameWindowTitle"), null, 0, true);
+
+		dialog.addWindowListener(panel);
+		dialog.setVisible(true);
 		
-		String name = WbSwingUtilities.getUserInput(client, ResourceMgr.getString("TxtGetMacroNameWindowTitle"), ResourceMgr.getString("TxtEmptyMacroName"));
-		if (name != null)
+		if (!dialog.isCancelled())
 		{
-			MacroManager.getInstance().getMacros().addMacro((String)null, name, text);
+			MacroGroup group = panel.getSelectedGroup();
+			String name = panel.getMacroName();
+			if (StringUtil.isNonBlank(name) && group != null)
+			{
+				MacroManager.getInstance().getMacros().addMacro(group, new MacroDefinition(name, text));
+			}
 		}
 	}
 

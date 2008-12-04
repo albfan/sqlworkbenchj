@@ -14,8 +14,10 @@ package workbench.sql.macros;
 import java.util.Comparator;
 
 /**
+ * A comparator to sort <tt>Sortable> objects.
  *
  * @author support@sql-workbench.net
+ * @see Sortable
  */
 public class Sorter
 	implements Comparator<Sortable>

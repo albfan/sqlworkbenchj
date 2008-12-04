@@ -28,6 +28,12 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
+ * Creates control files for Oracle's SQL*Loader.
+ *
+ * The format of the control file matches the exported flat file.
+ * The exported file(s) can be loaded directly with SQL*Loader and
+ * the control files created by this class.
+ * 
  * @author support@sql-workbench.net
  */
 public class OracleControlFileWriter

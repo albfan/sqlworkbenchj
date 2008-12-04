@@ -12,8 +12,10 @@
 package workbench.db.exporter;
 
 /**
+ * An export writer to create an OpenDocument spreadsheet format.
  *
  * @author  support@sql-workbench.net
+ * @see OdsRowDataConverter
  */
 public class OdsExportWriter
 	extends ExportWriter

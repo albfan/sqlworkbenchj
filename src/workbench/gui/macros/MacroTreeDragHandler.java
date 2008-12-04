@@ -53,15 +53,15 @@ class MacroTreeDragHandler
 	public void dragGestureRecognized(DragGestureEvent dge)
 	{
 
-		// For some reason the TreePaths stored in the TransferableProfileNode
+		// For some reason the TreePaths stored in the TransferableMacroNode
 		// are losing their UserObjects, so I'm storing them as a variable
 		// as well (as all Drag&Drop processing is done in this class anyway,
-		// that should not do any harm.
+		// that should not do any harm).
 		draggedEntries = macroTree.getSelectionPaths();
 		TransferableMacroNode transferable = new TransferableMacroNode(draggedEntries);
 
 		dragSource.startDrag(dge, DragSource.DefaultMoveNoDrop, transferable, this);
-		setCurrentDropTargetItem(null);
+		setCurrentDropTargetItem(null, DragType.none);
 	}
 
 	// ------------ DragSourceListener ---------------------
@@ -108,7 +108,7 @@ class MacroTreeDragHandler
 
 	public void dragDropEnd(DragSourceDropEvent dsde)
 	{
-		setCurrentDropTargetItem(null);
+		setCurrentDropTargetItem(null, DragType.none);
 	}
 
 	private void handleDragTargetEvent(DropTargetDragEvent dtde)
@@ -121,33 +121,40 @@ class MacroTreeDragHandler
 		if (path == null || draggedEntries == null)
 		{
 			dtde.rejectDrag();
-			setCurrentDropTargetItem(null);
+			setCurrentDropTargetItem(null, DragType.none);
 			return;
 		}
 		
 		MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
-		boolean dropOnDragged = false;
+		
+		boolean allowDrop = false;
 		if (draggedEntries.length == 1)
 		{
-			dropOnDragged = draggedEntries[0].getLastPathComponent().equals(node);
+			allowDrop = !draggedEntries[0].getLastPathComponent().equals(node);
 		}
 
-		if (node.getAllowsChildren() || (draggedEntries.length == 1 && !dropOnDragged))
+		DragType type = DragType.none;
+		if (allowDrop)
+		{
+			type = node.getDropType(draggedEntries);
+		}
+
+		if (type != DragType.none)
 		{
 			dtde.acceptDrag(dtde.getDropAction());
-			setCurrentDropTargetItem(node);
+			setCurrentDropTargetItem(node, type);
 		}
 		else
 		{
 			dtde.rejectDrag();
-			setCurrentDropTargetItem(null);
+			setCurrentDropTargetItem(null, DragType.none);
 		}
 	}
 
-	private void setCurrentDropTargetItem(MacroTreeNode item)
+	private void setCurrentDropTargetItem(MacroTreeNode item, DragType type)
 	{
 		MacroTreeCellRenderer rend = (MacroTreeCellRenderer)macroTree.getCellRenderer();
-		rend.setDropTargetItem(item);
+		rend.setDragType(type, item);
 		macroTree.repaint();
 	}
 
@@ -163,7 +170,7 @@ class MacroTreeDragHandler
 
 	public void dragExit(DropTargetEvent dte)
 	{
-		setCurrentDropTargetItem(null);
+		setCurrentDropTargetItem(null, DragType.none);
 	}
 
 	public void dropActionChanged(DropTargetDragEvent dtde)
@@ -180,7 +187,6 @@ class MacroTreeDragHandler
 		if (draggedEntries == null || (draggedEntries.length > 1 && !parent.getAllowsChildren()) )
 		{
 			dtde.rejectDrop();
-			dtde.dropComplete(false);
 			return;
 		}
 
@@ -199,12 +205,11 @@ class MacroTreeDragHandler
 		{
 			LogMgr.logError("MacroTreeDragHandler.drop()", "Error when finishing drop", e);
 			dtde.rejectDrop();
-			dtde.dropComplete(false);
 		}
 		finally
 		{
 			draggedEntries = null;
-			setCurrentDropTargetItem(null);
+			setCurrentDropTargetItem(null, DragType.none);
 		}
 	}
 

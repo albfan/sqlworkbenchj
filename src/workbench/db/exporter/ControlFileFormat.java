@@ -18,8 +18,13 @@ import java.util.Set;
 import workbench.util.StringUtil;
 
 /**
- *
+ * Type definitions for various control file formats.
+ * Currently Oracle, SQL Server, Postgres (COPY command) are covered
+ * 
  * @author support@sql-workbench.net
+ * @see OracleControlFileWriter
+ * @see SqlServerFormatFileWriter
+ * @see PostgresCopyStatementWriter
  */
 public enum ControlFileFormat
 {
