@@ -15,9 +15,11 @@ import java.awt.Color;
 import java.awt.Component;
 import javax.swing.JTree;
 import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import workbench.gui.components.DividerBorder;
+import workbench.resource.ResourceMgr;
 
 /**
  * A tree cell renderer that can indicate a drop target 
@@ -28,14 +30,16 @@ public class MacroTreeCellRenderer
 {
 	private MacroTreeNode dropTarget;
 	private DragType type = DragType.none;
-	private Border reorderBorder = null;
-	private Border moveToGroupBorder = null;
+	private final ReorderBorder reorderBorder = new ReorderBorder();
+	private final Border moveToGroupBorder;
+	private final Border standardBorder = new EmptyBorder(2, 2, 2, 2);
 	
 	public MacroTreeCellRenderer()
 	{
 		super();
-		reorderBorder = new DividerBorder(DividerBorder.TOP, 1);
-		moveToGroupBorder = new LineBorder(Color.GRAY, 1);
+		setIconTextGap(7);
+		setLeafIcon(ResourceMgr.getPng("macro"));
+		moveToGroupBorder = new CompoundBorder(new LineBorder(Color.DARK_GRAY, 1), new EmptyBorder(1, 1, 1, 1));
 	}
 	
 	public void setDragType(DragType dragType, MacroTreeNode targetItem)
@@ -63,7 +67,7 @@ public class MacroTreeCellRenderer
 		}
 		else
 		{
-			setBorder(null);
+			setBorder(standardBorder);
 		}
 		return result;
 	}

@@ -34,25 +34,16 @@ public class DividerBorder
 	public static final int HORIZONTAL_MIDDLE = 32;
 
 	protected int borderType;
-	protected int thickness;
-
 	public static final DividerBorder BOTTOM_DIVIDER = new DividerBorder(BOTTOM);
 
+	/**
+	 * Creates a divider border with the specified type
+	 * @param aType (LEFT, RIGHT, TOP, BOTTOM)
+	 */
 	public DividerBorder(int type)
 	{
-		this(type, 1);
-	}
-
-	/**
-	 * Creates a divider border with the specified type and thickness
-	 * @param aType (LEFT, RIGHT, TOP, BOTTOM)
-	 * @param aThickness the thickness of the border
-	 */
-	public DividerBorder(int aType, int aThickness)
-	{
 		super();
-		this.thickness = aThickness;
-		this.borderType = aType;
+		this.borderType = type;
 	}
 
 	public void paintBorder(Component c, Graphics g, int x, int y, int width, int height)

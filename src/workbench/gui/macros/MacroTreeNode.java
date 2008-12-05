@@ -50,12 +50,19 @@ public class MacroTreeNode
 		if (source == null) return DragType.none;
 
 		boolean sourceIsGroup = true;
+		boolean sourceBelongsToUs = false;
+
 		for (TreePath path : source)
 		{
 			MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
 			sourceIsGroup = sourceIsGroup && node.getAllowsChildren();
+			if (!sourceBelongsToUs && getAllowsChildren() && isNodeChild(node))
+			{
+				sourceBelongsToUs = true;
+			}
 		}
-
+		if (sourceBelongsToUs) return DragType.none;
+		
 		if (getAllowsChildren())
 		{
 			if (sourceIsGroup) return DragType.reorderItems;

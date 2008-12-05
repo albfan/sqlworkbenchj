@@ -89,7 +89,7 @@ public class MacroGroupPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(6, 5, 0, 0);
+    gridBagConstraints.insets = new Insets(11, 5, 0, 0);
     add(includeInMenu, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables

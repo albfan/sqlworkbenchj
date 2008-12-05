@@ -22,7 +22,8 @@ import javax.swing.border.LineBorder;
 import workbench.resource.Settings;
 
 /**
- *
+ * A class that draws a border around the currently focused component
+ * 
  * @author support@sql-workbench.net
  */
 public class FocusIndicator 

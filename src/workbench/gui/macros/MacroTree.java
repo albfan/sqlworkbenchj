@@ -183,7 +183,8 @@ public class MacroTree
 			if (group.getName().equals(groupName))
 			{
 				expandPath(path);
-
+				selectNode(node);
+				
 				int elements = node.getChildCount();
 				for (int i=0; i < elements; i++)
 				{
