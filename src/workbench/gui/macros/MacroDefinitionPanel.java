@@ -36,17 +36,28 @@ import workbench.resource.StoreableKeyStroke;
 import workbench.sql.macros.MacroDefinition;
 
 /**
+ * A panel displaying the definition of a macro.
  *
+ * The following macro properties can be maintained with this panel:
+ * <ul>
+ *	<li>The macro name</li>
+ *	<li>The macro text</li>
+ *	<li>The flag to show the macro in the menu</li>
+ *	<li>The keyboard shortcut for this macro</li>
+ * </ul>
  * @author support@sql-workbench.net
  */
 public class MacroDefinitionPanel
 	extends javax.swing.JPanel
 	implements ActionListener
 {
-
 	private EditorPanel macroEditor;
 	private MacroDefinition currentMacro;
 
+	/**
+	 * Create a new macro panel
+	 * @param l the listener to be notified when the macro name changes
+	 */
 	public MacroDefinitionPanel(PropertyChangeListener l)
 	{
 		initComponents();
@@ -74,6 +85,19 @@ public class MacroDefinitionPanel
 		jTextField1.addPropertyChangeListener(l);
 	}
 
+	/**
+	 * Displays the passed macro.
+	 *
+	 * Updates to the macro properties are applied immediately to the
+	 * macro instance passed with the exception of the macro text (as
+	 * it uses the standard editor which.
+	 *
+	 * To make sure the macro instance is up-to-date, applyChanges() must
+	 * be called.
+	 *
+	 * @param macro
+	 * @see #applyChanges() 
+	 */
 	public void setMacro(MacroDefinition macro)
 	{
 		applyChanges();
@@ -90,15 +114,21 @@ public class MacroDefinitionPanel
 
 		updateShortcutDisplay();
 
-		if (macro != null)
+		EventQueue.invokeLater(new Runnable()
 		{
-			macroEditor.setText(macro.getText());
-			macroEditor.setCaretPosition(0);
-		}
-		else
-		{
-			macroEditor.setText("");
-		}
+			public void run()
+			{
+				if (currentMacro != null)
+				{
+					macroEditor.setText(currentMacro.getText());
+					macroEditor.setCaretPosition(0);
+				}
+				else
+				{
+					macroEditor.setText("");
+				}
+			}
+		});
 	}
 
 	public void applyChanges()
@@ -122,11 +152,13 @@ public class MacroDefinitionPanel
 		}
 	}
 
+	/**
+	 * Puts the focus to the macro name input field.
+	 */
 	public void selectMacroName()
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
-
 			public void run()
 			{
 				jTextField1.requestFocusInWindow();

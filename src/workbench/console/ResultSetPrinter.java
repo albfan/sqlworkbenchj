@@ -109,7 +109,7 @@ public class ResultSetPrinter
 				printRow(pw, row);
 				count ++;
 			}
-			pw.println(ResourceMgr.getFormattedString("MsgRows", count));
+			if (doFormat) pw.println(ResourceMgr.getFormattedString("MsgRows", count));
 			pw.flush();
 		}
 		catch (Exception e)

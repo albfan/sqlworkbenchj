@@ -104,7 +104,10 @@ public class DataStorePrinter
 				RowData rowData = data.getRow(row);
 				printRow(pw, rowData);
 			}
-			pw.println(ResourceMgr.getFormattedString("MsgRows", count));
+			if (doFormat)
+			{
+				pw.println(ResourceMgr.getFormattedString("MsgRows", count));
+			}
 			pw.flush();
 		}
 		catch (Exception e)

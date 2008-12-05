@@ -28,20 +28,19 @@ public class MacroTreeCellRenderer
 {
 	private MacroTreeNode dropTarget;
 	private DragType type = DragType.none;
-	private Border itemBorder = null;
-	private Border groupBorder = null;
+	private Border reorderBorder = null;
+	private Border moveToGroupBorder = null;
 	
 	public MacroTreeCellRenderer()
 	{
 		super();
-		Color c = getBackgroundSelectionColor();
-		itemBorder = new DividerBorder(DividerBorder.TOP, 1);
-		groupBorder = new LineBorder(Color.GRAY, 1);
+		reorderBorder = new DividerBorder(DividerBorder.TOP, 1);
+		moveToGroupBorder = new LineBorder(Color.GRAY, 1);
 	}
 	
 	public void setDragType(DragType dragType, MacroTreeNode targetItem)
 	{
-		this.type = dragType;
+		type = dragType;
 		dropTarget = targetItem;
 	}
 
@@ -53,27 +52,19 @@ public class MacroTreeCellRenderer
 	                                              int row, 
 	                                              boolean hasFocus)
 	{
-		if (this.dropTarget != null && dropTarget == value)
+		Component result = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		if (dropTarget == value && type == DragType.moveItems)
 		{
-			if (type == DragType.moveItems)
-			{
-				setBorder(groupBorder);
-			}
-			else if (type == DragType.reorderItems)
-			{
-				setBorder(itemBorder);
-			}
-			else
-			{
-				setBorder(null);
-			}
+			setBorder(moveToGroupBorder);
+		}
+		else if (dropTarget == value && type == DragType.reorderItems)
+		{
+			setBorder(reorderBorder);
 		}
 		else
 		{
 			setBorder(null);
 		}
-
-		return super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+		return result;
 	}
-
 }

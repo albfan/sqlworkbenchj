@@ -72,7 +72,7 @@ public class DataStorePrinterTest
 		System.out.println(out);
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
-		assertEquals(9, linecount);
+		assertEquals(10, linecount);
 
 		assertEquals("DESCRIPTION           | QUANTITY | LASTNAME      ", lines[0]);
 		assertEquals("----------------------+----------+---------------", lines[1]);

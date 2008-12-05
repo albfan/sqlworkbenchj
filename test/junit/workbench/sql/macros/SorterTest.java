@@ -52,7 +52,11 @@ public class SorterTest
 		{
 			sortOrder = i;
 		}
-		
+
+		public void setSortOrder(int index)
+		{
+			sortOrder = index;
+		}
 		public int getSortOrder()
 		{
 			return sortOrder;

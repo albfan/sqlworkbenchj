@@ -58,13 +58,14 @@ public class ResultSetPrinterTest
 			Statement stmt = con.createStatement();
 			stmt.executeUpdate("create table person (nr integer, firstname varchar(20), lastname varchar(20))");
 
-			final int rowCount = 2;
+			int rowCount = 2;
 			for (int i = 0; i < rowCount; i++)
 			{
 				stmt.executeUpdate("insert into person values (" + i + ", 'firstname', 'lastname')");
 			}
 			stmt.executeUpdate("insert into person values (42, 'first\nname', 'lastname\nlines')");
 			con.commit();
+			rowCount ++;
 
 			ResultSet rs = stmt.executeQuery("select * from person");
 
@@ -78,13 +79,23 @@ public class ResultSetPrinterTest
 			rs.close();
 			
 			String out = ba.toString();
-//			System.out.println(out);
+			System.out.println(out);
 			String[] lines = out.split(StringUtil.LINE_TERMINATOR);
+			
+			// expected is one line per row in the database (rowCount)
+			// plus two lines heading
+			// plus one additional line for the multi-line values
+			// plus one line with the number of rows retrieved
+			// so we wind up with rowCount + 4
 			assertEquals(rowCount + 4, lines.length);
+			
 			assertEquals("NR         | FIRSTNAME            | LASTNAME            ", lines[0]);
 			assertEquals("-----------+----------------------+---------------------", lines[1]);
 			assertEquals("0          | firstname            | lastname            ", lines[2]);
 			assertEquals("1          | firstname            | lastname            ", lines[3]);
+			assertEquals("42         | first                | lastname            ", lines[4]);
+			assertEquals("           : name                 : lines", lines[5]);
+			assertEquals("3 Rows", lines[6]);
 
 			rs = stmt.executeQuery("select * from person");
 			ba.reset();
@@ -99,7 +110,7 @@ public class ResultSetPrinterTest
 			out = ba.toString();
 			System.out.println(out);
 			lines = out.split(StringUtil.LINE_TERMINATOR);
-			assertEquals(rowCount + 2, lines.length);
+			assertEquals(rowCount + 1, lines.length);
 			assertEquals("NR | FIRSTNAME | LASTNAME", lines[0]);
 			assertEquals("0 | firstname | lastname", lines[1]);
 			assertEquals("1 | firstname | lastname", lines[2]);

@@ -444,6 +444,7 @@ keyword=("ABORT"|
 "NOTNULL"|
 "NOW"|
 "NULL"|
+"NULLS"|
 "NULLABLE"|
 "NULLIF"|
 "NUMBER"|
