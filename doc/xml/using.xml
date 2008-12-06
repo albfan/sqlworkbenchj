@@ -1,8 +1,193 @@
 <section id="using">
 	<title>Using &wb-productname;</title>
-	
+
 	<section id="executing-sql-statements">
 		<title>Executing SQL statements</title>
+
+		<section id="execute-sql-commands">
+			<title>Control the statement to be executed</title>
+
+			<para>There are three different ways to execute a SQL command</para>
+
+			<para><emphasis role="bold">Execute the selected text</emphasis></para>
+			<para>
+				When you press <keycap>Ctrl-E</keycap> or select
+				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>
+				the currently selected text will be send to the DBMS for execution. If no text is
+				selected the complete contents of the editor will be send to the database.
+			</para>
+
+			<para id="execute-current"><emphasis role="bold">Execute current statement</emphasis></para>
+			<para>
+				When you press <keycap>Ctrl-Enter</keycap> or select
+				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute current</guimenuitem></menuchoice>
+				the current statement will be executed. The "current" statement will be the text
+				between the next delimiter before the current cursor position and the delimiter
+				after the cursor position.
+			</para>
+
+			<para>Example (| indicating the cursor position)</para>
+			<programlisting>SELECT firstname, lastname FROM person;
+
+DELETE FROM person| WHERE lastname = 'Dent';
+COMMIT;</programlisting>
+
+			<para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
+			<para>
+				You can configure &wb-productname; to automatically jump to the next statement,
+				after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
+				The check mark next to the menu item indicates if this option is enabled.
+				This option can also be changed through the <link linkend="options-autojump-statement">Options dialog</link>
+			</para>
+
+			<para><emphasis role="bold">Execute All</emphasis></para>
+			<para>
+				If you want to execute the complete text in the editor regardless
+				of the current selection, use the <guimenuitem>Execute all</guimenuitem> command.
+				Either by pressing <keycap>Ctrl-Shift-E</keycap> or selecting
+				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
+			</para>
+
+			<para>
+				When executing all statements in the editor you have to delimit each statement, so
+				that &wb-productname; can identify each statement. If your statements are not delimited
+				using a semicolon, the whole editor text is sent as a single statement to the database.
+				Some DBMS support this (e.g. Microsoft SQL Server), but most DBMS will throw an error
+				in that case.
+			</para>
+
+			<para>A script with two statements could look like this:</para>
+			<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox';
+COMMIT;</programlisting>
+
+			<para>or:</para>
+			<programlisting>DELETE FROM person;
+DELETE FROM address;
+COMMIT;
+
+INSERT INTO person
+(id, firstname, lastname)
+VALUES
+(1, 'Arthur', 'Dent');
+
+INSERT INTO person
+(id, firstname, lastname)
+VALUES
+(4, 'Mary', 'Moviestar');
+
+INSERT INTO person
+(id, firstname, lastname)
+VALUES
+(2, 'Zaphod', 'Beeblebrox');
+
+INSERT INTO person
+(id, firstname, lastname)
+VALUES
+(3, 'Tricia', 'McMillian');
+
+COMMIT;
+</programlisting>
+			<para>
+				You can specifiy an <link linkend="options-alternate-delimiter">alternate delimiter</link>
+				that can be used instead of the semicolon. See the description
+				of the <link linkend="understand-alternate-delim">alternate delimiter</link> for details.
+				This is also needed when running DDL scripts (e.g. for stored procedures) that contain
+				semicolons that should not delimit the statements.
+			</para>
+
+			<para>
+				As long as at least one statement is running the title of the main window
+				will be prefixed with the &raquo; sign. Even if the main window is minimized
+				you can still see if a statement is running by looking at the window title.
+			</para>
+
+			<para>
+				You can use variables in your SQL statements that are replaced when
+				the statement is executed. Details on how to use variables can be found in
+				the chapter <xref linkend="using-variables"/>.
+			</para>
+
+			<para>
+				JDBC drivers do not support multi-threaded execution of statements on the same physical
+				connection. If you want to run two statements at the same time, you will need to enable the
+				<link linkend="profiles">Separate connection per tab</link> option in your connection profile.
+				In this case &wb-productname; will open a physical connection for each SQL tab, so that
+				statements in the different tabs can run concurrently.
+			</para>
+
+
+		</section>
+
+		<section id="display-result">
+			<title>Displaying results</title>
+
+			<para>
+				When you run SQL statements that produce a result (such as a <literal>SELECT</literal>
+				statement) these results will be displayed in the lower pane of the window, next to
+				the message panel. For each result that is returned from the server, one tab
+				(labelled "Result") will be created. If you select and execute three <literal>SELECT</literal>
+				statements, the lower pane will show three result tabs and the message tab. If your
+				statement(s) did not produce any result, only the messages tab will be displayed.
+			</para>
+			<para>
+				When you run a SQL statement, the current results will be cleared and
+				replaced by the new results. You can turn this off by selecting
+				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
+				Every result that is retrieved while this option is turned on, will be added to the
+				set of result tabs, until you de-select this option. This can also be
+				toggled using the button on the toolbar. Additional result tabs can be closed using
+				<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
+			</para>
+
+			<para>
+				You can also run stored procedures that return result sets. These result will be
+				displayed in the same way. For DBMS's that support mulitple result sets from
+				a single stored procedure (e.g. Microsoft SQL Server), one tab will be displayed
+				for each result returned.
+			</para>
+
+			<note>
+				<para>
+					Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
+					the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal>
+					package is enabled.
+					In order to be able to display these columns, the support for
+					<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off.
+				</para>
+			</note>
+		</section>
+
+		<section id="result-names">
+			<title>Naming result tabs</title>
+			<para>
+				You can change the name of the result tab associated with a statement. To give a result
+				set a name you have to provide a comment before the SQL statement that contains the
+				keyword <literal>@wbresult</literal> followed by a whitespace and then the name that should
+				appear as the result's name. The keywords must be specified in lowercase!
+			</para>
+			<para>
+				This does not work if you have enabled the option
+				<link linkend="profile-remove-comments">Remove comments</link> in the connection profile.
+			</para>
+			<para>
+				The following examples executes two statements. The result for the first will be labelled
+				"List of contacts" and the second will be labelled "List of companies":
+			</para>
+			<programlisting>-- @wbresult List of contacts
+SELECT * FROM person;
+
+
+/*
+   @wbresult List of companies
+   this will retrieve all companies from the database
+*/
+SELECT * FROM company;</programlisting>
+			<para>
+				As you can see, you can put the <literal>@wbresult</literal> keyword into a single-line
+				or multi-line comment. The name that is used, will be everything after the keyword
+				until the end of the line.
+			</para>
+		</section>
 
 		<section id="statement-history">
 			<title>Statement history</title>
@@ -31,176 +216,16 @@
 			</para>
 			<note>
 				<para>
-				When you clear the content of the editor (e.g. by selecting the whole text 
+				When you clear the content of the editor (e.g. by selecting the whole text
 				and then pressing the <keycap>Del</keycap> key) this will not clear the statement
-				history. When you load the associated workspace the next time, the editor will 
+				history. When you load the associated workspace the next time, the editor will
 				automatically display the last statement from the history. You need to manually
-				clear the statement history, if you want an empty editor the next time you 
+				clear the statement history, if you want an empty editor the next time you
 				load the workspace.
 				</para>
 			</note>
 		</section>
 
-		<section id="execute-sql-commands">
-			<title>Control the statement to be executed</title>
-			
-			<para>There are three different ways to execute a SQL command</para>
-
-			<para><emphasis role="bold">Execute the selected text</emphasis></para>
-			<para>
-				When you press <keycap>Ctrl-E</keycap> or select
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>
-				the currently selected text will be send to the DBMS for execution. If no text is
-				selected the complete contents of the editor will be send to the database.
-			</para>
-
-			<para id="execute-current"><emphasis role="bold">Execute current statement</emphasis></para>
-			<para>
-				When you press <keycap>Ctrl-Enter</keycap> or select
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute current</guimenuitem></menuchoice>
-				the current statement will be executed. The "current" statement will be the text
-				between the next delimiter before the current cursor position and the delimiter
-				after the cursor position.
-			</para>
-			
-			<para>Example (| indicating the cursor position)</para>
-			<programlisting>SELECT firstname, lastname FROM person;
-
-DELETE FROM person| WHERE lastname = 'Dent';
-COMMIT;</programlisting>
-
-			<para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
-			<para>
-				You can configure &wb-productname; to automatically jump to the next statement,
-				after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
-				The check mark next to the menu item indicates if this option is enabled.
-				This option can also be changed through the <link linkend="options-autojump-statement">Options dialog</link>
-			</para>
-			
-			<para><emphasis role="bold">Execute All</emphasis></para>
-			<para>
-				If you want to execute the complete text in the editor regardless
-				of the current selection, use the <guimenuitem>Execute all</guimenuitem> command.
-				Either by pressing <keycap>Ctrl-Shift-E</keycap> or selecting
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute All</guimenuitem></menuchoice>
-			</para>
-
-			<para>
-				As long as at least one statement is running the title of the main window
-				will be prefixed with the &raquo; sign. Even if the main window is minimized
-				you can still see if a statement is running by looking at the window title.
-			</para>
-         
-			<para>
-				You can use variables in your SQL statements that are replaced when 
-				the statement is executed. Details on how to use variables can be found in
-				the chapter <xref linkend="using-variables"/>.
-			</para>
-			
-		</section>
-
-		<section id="display-result">
-			<title>Displaying results</title>
-			
-			<para>
-				When you run SQL statements that produce a result (such as a <literal>SELECT</literal> 
-				statement) these results will be displayed in the lower pane of the window, next to 
-				the message panel. For each result that is returned from the server, one tab 
-				(labelled "Result") will be created. If you select and execute three <literal>SELECT</literal>
-				statements, the lower pane will show three result tabs and the message tab. If your 
-				statement(s) did not produce any result, only the messages tab will be displayed.
-			</para>
-			<para>
-				When you run a SQL statement, the current results will be cleared and 
-				replaced by the new results. You can turn this off by selecting 
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
-				Every result that is retrieved while this option is turned on, will be added to the 
-				set of result tabs, until you de-select this option. This can also be 
-				toggled using the button on the toolbar. Additional result tabs can be closed using
-				<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
-			</para>				
-			
-			<para>
-				You can also run stored procedures that return result sets. These result will be 
-				displayed in the same way. For DBMS's that support mulitple result sets from 
-				a single stored procedure (e.g. Microsoft SQL Server), one tab will be displayed 
-				for each result returned. 
-			</para>
-			
-			<note>
-				<para>
-					Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
-					the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
-					package is enabled. 
-					In order to be able to display these columns, the support for 
-					<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off. 
-				</para>
-			</note>
-		</section>
-		
-		<section id="execute-dml">
-			<title>Executing DML Statements</title>
-
-			<para>
-				SQL statements can be entered in the upper part of the window.
-				Please refer to <xref linkend="editor"/> for details on the editing features
-				of &wb-productname;.
-			</para>
-			
-			<para>
-				The tabbed display allows you to keep more than one statement
-				accessible (without needing to use the history functions). Each tab
-				has its own result set and message panel. When you switch to a
-				different statement tab, the result list in the lower part of the
-				window will change to either the last result or the last message of
-				that statement.
-			</para>
-
-			<para>
-				For JDBC drivers which do not support multi-threaded execution (e.g. Oracle's
-				JDBC driver), you can configure your <link linkend="profiles">Connection Profile</link>
-				so that &wb-productname; will open a new connection for each tab.
-			</para>
-
-			<para>
-				If you enter more than one statement in the editor and want to execute all statements
-				as a batch script, you need to delimit each statement. The SQL standard for terminating a SQL
-				statement is the semicolon. 
-			</para>
-			
-			<para>
-				You can specifiy an <link linkend="options-alternate-delimiter">alternate delimiter</link>
-				that can be used instead of the semicolon. See the description
-				of the <link linkend="understand-alternate-delim">alternate delimiter</link> for details.
-			</para>
-
-			<para>Valid "scripts" are:</para>
-			<programlisting>UPDATE person SET numheads = 2 WHERE name='Beeblebrox';
-COMMIT;</programlisting>
-
-			<para>
-				You can run any statement that is valid for the current DBMS. If
-				the statement returns a result set, it will be displayed, otherwise
-				any messages from the server will be displayed in the messages tab. To
-				add or remove editor pages, right click on the tab header and choose
-				<guimenuitem>Add tab</guimenuitem> or <guimenuitem>Close tab</guimenuitem>).
-				You can re-order the tabs by right clicking on the tab label, then 
-				choose <guimenuitem>Move left</guimenuitem> or <guimenuitem>Move right</guimenuitem>
-				to change the position of the tab.
-			</para>
-
-			<para>
-				To execute the statement in which the cursor is currently
-				located use <keycap>Ctrl-Enter</keycap>. The current statement is defined as the text
-				between the previous SQL delimiter and the next SQL delimiter. 
-			</para>
-
-			<para>
-				The font that is used for the SQL editor can be defined in the
-				<link linkend="options">system preferences</link>.
-			</para>
-		</section>
-		
 	</section>
 
 	<section id="understand-alternate-delim">
@@ -242,7 +267,7 @@ END;</programlisting>
 			The solution is to terminate the script with a character
 			sequence called the "<link linkend="options-alternate-delimiter">alternate delimiter</link>".
 			The value of this sequence can be configured in the <link linkend="options">options dialog</link>
-			as a global default, or per <link linkend="profile-alternate-delimiter">connection profile</link> 
+			as a global default, or per <link linkend="profile-alternate-delimiter">connection profile</link>
 			(so you can use different alternate delimiters for different database systems).
 			The default is the forward slash <emphasis role="bold">/</emphasis> defined as a single
 			line delimiter.
@@ -284,11 +309,11 @@ END;
 			You cannot mix the standard semicolon and the alternate delimiter inside
 			one script.
 		</note></para>
-		
+
 		<para>
 			If you use the alternate delimiter (by terminating the whole script with it), then
-			<emphasis role="bold">all</emphasis> statements have to be delimited with it. 
-			You cannot mix the use	of the normal semicolon and the alternate delimiter for one execution. 
+			<emphasis role="bold">all</emphasis> statements have to be delimited with it.
+			You cannot mix the use	of the normal semicolon and the alternate delimiter for one execution.
 			The following statement (when executed completely) would produce an error message:
 		</para>
 		<programlisting>SELECT sysdate FROM DUAL;
@@ -308,93 +333,93 @@ END;
 			statement. This of course is an invalid statement. You will need to either select and run each statement
 			individually or change the delimiter after the <literal>SELECT</literal> to the alternate delimiter.
 		</para>
-		
+
 	</section>
-    
+
 	<section id="blob-support" xreflabel="BLOB support">
-			
+
 		<title>Dealing with BLOB and CLOB columns</title>
-		
+
 		<para>
 			&wb-productname; supports reading and writing <literal>BLOB</literal> (Binary Large OBject)
-			or <literal>CLOB</literal> (Character Large OBject) columns from and to external files. 
-			BLOB clumns are sometimes also referred to as binary data. CLOB columns 
-			are sometimes also referred to as <literal>LONG VARCHAR</literal>. The exact data type 
+			or <literal>CLOB</literal> (Character Large OBject) columns from and to external files.
+			BLOB clumns are sometimes also referred to as binary data. CLOB columns
+			are sometimes also referred to as <literal>LONG VARCHAR</literal>. The exact data type
 			depends on the DBMS used.
 		</para>
-			
+
 		<para>
 			To insert and update LOB columns the usual <literal>INSERT</literal> and
 			<literal>UPDATE</literal> statements can be used by using a special
-			placeholder to define the source for the LOB data. When updating the 
+			placeholder to define the source for the LOB data. When updating the
 			LOB column, a different placeholder for BLOB and CLOB columns has to be used as
 			the process of reading and sending the data is different for binary and character
 			data.
 		</para>
-		
+
 		<note><para>
-			When working with Oracle, only the 10g driver supports the standard JDBC calls used by &wb-productname; 
-			to read and write the LOB data. Earlier drivers will not work as described in this chapter. 
+			When working with Oracle, only the 10g driver supports the standard JDBC calls used by &wb-productname;
+			to read and write the LOB data. Earlier drivers will not work as described in this chapter.
 		</para></note>
 
 		<section id="using-update-blob">
-			<title>Updating binary data through SQL</title>
-			
+			<title>Updating BLOB data through SQL</title>
+
 			<para>
-				To update a BLOB (or binary) column, use the placeholder 
-				<literal>{$blobfile=path_to_file}</literal> in the place where the 
+				To update a BLOB (or binary) column, use the placeholder
+				<literal>{$blobfile=path_to_file}</literal> in the place where the
 				actual value has to occur in the <literal>INSERT</literal> or <literal>UPDATE</literal>
 				statement:
 			</para>
-			
-			<programlisting>UPDATE theTable 
-  SET blob_col = {$blobfile=c:/data/image.bmp} 
+
+			<programlisting>UPDATE theTable
+  SET blob_col = {$blobfile=c:/data/image.bmp}
 WHERE id=24;</programlisting>
-			
+
 			<para>
 				&wb-productname; will rewrite the UPDATE statement and send the contents
 				of the file located in <literal>c:/data/image.bmp</literal> to the database. The syntax
-				for inserting BLOB data is similar. Note that some DBMS might not allow you to 
-				supply a value for the blob column during an insert. In this case you need to 
+				for inserting BLOB data is similar. Note that some DBMS might not allow you to
+				supply a value for the blob column during an insert. In this case you need to
 				first insert the row without the blob column, then use an <literal>UPDATE</literal>
 				to send the blob data. You should make sure to update only one row by specifying an
 				approriate <literal>WHERE</literal> clause.
 			</para>
-			
-			<programlisting>INSERT INTO theTable 
-(id, blob_col) 
-VALUES 
+
+			<programlisting>INSERT INTO theTable
+(id, blob_col)
+VALUES
 (42,{$blobfile=c:/data/image.bmp});</programlisting>
 
 			<para>
-				This will create a new record with id=42 and the content of <literal>c:/data/image.bmp</literal> in 
+				This will create a new record with id=42 and the content of <literal>c:/data/image.bmp</literal> in
 				the column <literal>blob_col</literal>
 			</para>
-				
+
 		</section>
-			
+
 		<section id="using-update-clob">
-			<title>Updating character data through SQL</title>
+			<title>Updating CLOB data through SQL</title>
 			<para>
-				The process of updating or inserting <literal>CLOB</literal> data is identical to the 
-				process for <literal>BLOB</literal> data. The only difference is in the syntax of 
+				The process of updating or inserting <literal>CLOB</literal> data is identical to the
+				process for <literal>BLOB</literal> data. The only difference is in the syntax of
 				the placeholder used to specify the source file. Firstly, the placeholder has
-				to start with <literal>{$clobfile=</literal> and can optionally contain 
+				to start with <literal>{$clobfile=</literal> and can optionally contain
 				a parameter to define the encoding of the source file.
 			</para>
-			<programlisting>UPDATE theTable 
+			<programlisting>UPDATE theTable
   SET clob_col = {$clobfile=c:/data/manual.html encoding=utf8}
 WHERE id=42;</programlisting>
 			<para>
-				If you ommit the encoding parameter, &wb-productname; will leave the data conversion 
+				If you ommit the encoding parameter, &wb-productname; will leave the data conversion
 				to the JDBC driver (technically, it will use the <literal>PreapredStatement.setAsciiStream()</literal> method
 				whereas with an encoding it will use the <literal>PreparedStatement.setCharacterStream()</literal> method).
 			</para>
-		
+
 			<note><para>
 				The format of the <literal>{$clobfile=}</literal> or <literal>{$blobfile=}</literal> parameter
 				has to be entered exactly as described here. You may not put e.g. spaces before or after
-				the equal sign or the braces. If you do this, &wb-productname; will not recognize the parameter and 
+				the equal sign or the braces. If you do this, &wb-productname; will not recognize the parameter and
 				will pass the statement "as is" to the JDBC driver.
 			</para></note>
 
@@ -402,29 +427,29 @@ WHERE id=42;</programlisting>
 
 		<section id="read-blob">
 			<title>Saving BLOB data to a file using SQL</title>
-			
+
 			<para>
 				To save the data stored in a BLOB column, the command <link linkend="command-selectblob">WbSelectBlob</link>
 				can be used. The syntax of this command is similar to the regular <literal>SELECT</literal> command
-				except that a target file has to be specified where the read data should be stored. 
+				except that a target file has to be specified where the read data should be stored.
 			</para>
-			
+
 			<para>
 				You can also use the <link linkend="command-export">WbExport</link> command to export
-				data. The contents of the BLOB columns will be saved into separate files. This works for both 
+				data. The contents of the BLOB columns will be saved into separate files. This works for both
 				export formats (XML and Text).
 			</para>
-			
+
 		</section>
-			
+
 		<section id="update-blob-editmode">
 			<title>BLOB data in the result set</title>
 			<para>
-				When the result of your <literal>SELECT</literal> query contains BLOB columns, 
+				When the result of your <literal>SELECT</literal> query contains BLOB columns,
 				they will be displayed as <literal>(BLOB)</literal>
-				together with a button. 
+				together with a button.
 				When you click on the button a dialog will be displayed allowing
-				you to save the data to a file, view the data as text (using the selected encoding), 
+				you to save the data to a file, view the data as text (using the selected encoding),
 				display the blob as an image or display a hex view of the blob.
 			</para>
 			<para>
@@ -433,19 +458,19 @@ WHERE id=42;</programlisting>
 			</para>
 			<para>
 				The window will also let you open the contents of the BLOB data with a predefined
-				<link linkend="options-external-tools">external tool</link>. The tools that 
-				are defined in the options dialog can be selected from a dropdown. To open 
+				<link linkend="options-external-tools">external tool</link>. The tools that
+				are defined in the options dialog can be selected from a dropdown. To open
 				the BLOB content with one of the tools, select the tool from the dropdown list,
 				then click on the button <guibutton>Open with</guibutton> next to the external
 				tools dropdown. &wb-productname; will then retrieve the BLOB data from the server,
-				store it in a temporary file on your harddisk, and run the selected application, 
+				store it in a temporary file on your harddisk, and run the selected application,
 				passing the temporary file as a parameter.
 			</para>
 			<para>
 				From within this information dialog, you can also upload a file to be stored
 				in that BLOB column. The file contents will not be sent to the database server
-				until you actually save the changes to your result set (this is the same for all 
-				changes you make directly in the result set, for details please refer 
+				until you actually save the changes to your result set (this is the same for all
+				changes you make directly in the result set, for details please refer
 				to <xref linkend="edit-data"/>)
 			</para>
 			<note><para>
@@ -453,10 +478,10 @@ WHERE id=42;</programlisting>
 				will use the file content for any subsequent display of the binary data or the
 				the size information in the information dialog.
 				You will need to re-retrieve the data, in order to use
-				the blob data from the server. 
+				the blob data from the server.
 			</para></note>
 		</section>
-			
+
 	</section>
 
 	<section id="sql-performance">
@@ -464,22 +489,22 @@ WHERE id=42;</programlisting>
 		<para>
 			There are some configuration settings that affect the performance
 			of &wb-productname;. On slow computers it is recommended to turn off
-			the usage of the <link linkend="option-animated-icon">animated icon</link> 
+			the usage of the <link linkend="option-animated-icon">animated icon</link>
 			as the indicator for a running statement.
 		</para>
 		<para>
 			When running large scripts, the feedback which statement is executed
 			can also slow down the execution. It is recommended to either turn off
-			the feedback using <link linkend="command-wbfeedback">WBFEEDBACK OFF</link> or by 
+			the feedback using <link linkend="command-wbfeedback">WBFEEDBACK OFF</link> or by
 			<link linkend="options-consolidate-log">consolidating the script log</link>
 		</para>
 		<para>
-			When running <link linkend="command-import">imports</link> or 
+			When running <link linkend="command-import">imports</link> or
 			<link linkend="command-export">exports</link> it is recommended to turn
 			off the progress display in the statusbar that shows the current row
-			that is imported/exported because this will slow down the process as 
+			that is imported/exported because this will slow down the process as
 			well. In both cases you can use <literal>-showProgress</literal>
-			to turn off the display (or set it to a high number such as 1000) in 
+			to turn off the display (or set it to a high number such as 1000) in
 			order to reduce the overhead caused by updating the screen.
 		</para>
 	</section>
@@ -508,12 +533,15 @@ WHERE id=42;</programlisting>
 				Alternatively you can add a new macro through
 				<menuchoice><guimenu>Macros</guimenu><guimenuitem>Manage Macros...</guimenuitem></menuchoice>.
 				This dialog can also be used to delete and and edit existing macros.
+				You can put macros into separate groups (e.g. one for Postgres macros, one for Oracle etc).
+				If you have only one group defined (or only one visible group), all macros of that group
+				will be listed in the menu directly. If you define more than one group, each group will appear
+				as a separate sub-menu.
 			</para>
 			<para>
-				Once a macro is defined, you can execute it by simply typing the
-				macro's name in the editor and execute it like any other SQL command.
+				The order in which the macros (or groups) appear in the menu can be changed by
+				dragging them to the desired position in the manage macro dialog.
 			</para>
-
 		</section>
 
 		<section id="exec-macro">
@@ -521,28 +549,33 @@ WHERE id=42;</programlisting>
 			<para>
 				To execute a macro, you can either type the alias you have
 				defined, or select the macro from the <guimenu>Macros</guimenu> menu.
-				The first 10 macros will be listed there directly. To view the complete list of
+				Note that the alias needs to be unique to be used as a "SQL Statement". If you have
+				two different macros in two different macro groups with the same name, it is not
+				defined which of them will be executed.
+			</para>
+			<para>
+				To view the complete list of
 				macros select <menuchoice><guimenu>Macros</guimenu><guimenuitem>Manage Macros...</guimenuitem></menuchoice>
 				After selecting a macro, it can be executed by clicking on the Run <guibutton>Run</guibutton> button. If you check the
 				option "Replace current SQL", then the text in the editor will be replaced with the
 				text from the macro when you click on the run button.
 			</para>
 			<note><para>
-				Macros will no be evaluated when running in batch mode!
+				Macros will no be evaluated when running in batch mode.
 			</para></note>
 		</section>
-		
+
 		<section id="macro-parameters">
 			<title>Parameters in macros</title>
-			
+
 			<para>
-				Apart from the &wb-productname; <link linkend="using-variables">script variables</link> for SQL Statements, 
-				additional "parameters" can be used inside a macro definition. These parameters will be replaced <emphasis>before</emphasis> replacing 
+				Apart from the &wb-productname; <link linkend="using-variables">script variables</link> for SQL Statements,
+				additional "parameters" can be used inside a macro definition. These parameters will be replaced <emphasis>before</emphasis> replacing
 				the script variables.
 			</para>
-			
+
 			<informaltable frame="all">
-				
+
 				<tgroup cols="2" align="left">
 					<colspec colname="c1" colwidth="3.8cm" />
 					<colspec colname="c2" />
@@ -557,7 +590,7 @@ WHERE id=42;</programlisting>
 							<row>
 								<entry>${selection}$</entry>
 								<entry>
-									This parameter will be replaced with the currently selected text. The 
+									This parameter will be replaced with the currently selected text. The
 									selected text will not be altered in any way.
 								</entry>
 							</row>
@@ -565,32 +598,32 @@ WHERE id=42;</programlisting>
 								<entry>${selected_statement}$</entry>
 								<entry>
 									This behaves similar to <literal>${selection}$</literal> except that
-									any trailing semicolon will be removed from the selection. Thus the 
-									macro definition can always contain the semicolon (e.g. when the 
-									macro actually defines a script with multiple statements) but 
+									any trailing semicolon will be removed from the selection. Thus the
+									macro definition can always contain the semicolon (e.g. when the
+									macro actually defines a script with multiple statements) but
 									when selecting the text, you do not need to worry whether a semicolon
 									is selected or not (and would potentially break the script).
 								</entry>
 							</row>
-							
+
 							<row>
 								<entry>${current_statement}$</entry>
 								<entry>
 									This key will be replaced with the current statement (without the trailing
 									delimiter). The current statement is defined by the cursor location
-									and is the statement that would be executed when using 
+									and is the statement that would be executed when using
 									<link linkend="execute-current"><menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute current</guimenuitem></menuchoice></link>
 								</entry>
 							</row>
-							
+
 							<row>
 								<entry>${text}$</entry>
 								<entry>
-										This key will be replaced with the complete text from the editor (regardless 
+										This key will be replaced with the complete text from the editor (regardless
 										of any selection).
 								</entry>
 							</row>
-							
+
 						</tbody>
 				</tgroup>
 			</informaltable>
@@ -598,22 +631,22 @@ WHERE id=42;</programlisting>
 			<para>
 				The SQL statement that is eventually executed will be logged into the message panel
 				when invoking the macro from the menu. Macros that use the above paramters
-				cannot correctly be executed by entering the macro alias in the SQL editor (and 
+				cannot correctly be executed by entering the macro alias in the SQL editor (and
 				then executing the "statement").
 			</para>
-			
+
 			<note><para>
-				The parameter keywords are case sensitiv, i.e. 
+				The parameter keywords are case sensitiv, i.e.
 				the text <literal>${SELECTION}$</literal> will not be replaced!
 			</para></note>
-			
+
 			<para>
-				This feature can be used to create SQL scripts that work only with 
-				with an additional statement. e.g. for Oracle you could define 
+				This feature can be used to create SQL scripts that work only with
+				with an additional statement. e.g. for Oracle you could define
 				a macro to run an explain plan for the current statement:
 			</para>
-			
-				<programlisting>EXPLAIN PLAN FOR 
+
+				<programlisting>EXPLAIN PLAN FOR
 ${current_statement}$
 ;
 
@@ -624,32 +657,32 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 			<para>
 				When you run this macro, it will run an <literal>EXPLAIN PLAN</literal>
 				for the statement in which the cursor is currently located, and will
-				immediately display the results for the explain. Note that the 
-				<literal>${current_statement}$</literal> keyword is terminated with 
+				immediately display the results for the explain. Note that the
+				<literal>${current_statement}$</literal> keyword is terminated with
 				a semicolon, as the replacement for <literal>${current_statement}$</literal>
 				will never add the semicolon. If you use <literal>${selection}$</literal>
 				instead, you have to pay attention to not select the semicolon in the
 				editor before running this macro.
 			</para>
-			
+
 			<para>
-				For PostgreSQL you can define a similar macro that will automatically run 
+				For PostgreSQL you can define a similar macro that will automatically run
 				the <literal>EXPLAIN</literal> command for a statemet:
 				<programlisting>explain ${current_statement}$</programlisting>
 			</para>
-				
-			
+
+
 			<para>
 				Another usage of the parameter replacement could be a SQL Statement that
 				retrieves the rowcount that would be returned by the current statement:
 			</para>
-				<programlisting>SELECT count(*) FROM 
+				<programlisting>SELECT count(*) FROM
 (
   ${current_statement}$
 )</programlisting>
 
 		</section>
-				
+
 	</section>
 
 	<section id="using-workspaces">
@@ -675,7 +708,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 			To save the current SQL statement history and the visible tabs into a new workspace,
 			select <menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace as....</guimenuitem></menuchoice>
 		</para>
-		
+
 		<para>
 			The default file extension for workspaces is <filename>wksp</filename>.
 		</para>
@@ -691,7 +724,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 			An existing workspace can be loaded with
 			<menuchoice><guimenu>Workspace</guimenu><guimenuitem>Load Workspace</guimenuitem></menuchoice>
 		</para>
-		
+
 		<para>
 			If you have an external file open in one of the editor tabs, the filename itself
 			will be stored in workspace. When loading the workspace &wb-productname; will try to load
@@ -716,14 +749,14 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 			current editor will be remembered. To close the current file, select <menuchoice><guimenu>File</guimenu><guimenuitem>Discard file</guimenuitem></menuchoice>
 			<keycap>(Ctrl-F4)</keycap> or use the context menu on the tab label itself.
 		</para>
-		
+
 		<note><para>
 			Detaching a file from the editor will remove the text from editor as well.
 			If you only want to detach the filename from the editor
 			but keep the text, then press <keycap>Ctrl-Shift-F4</keycap> or hold down the <keycap>Shift</keycap> key
 			while selecting the Discard menu item.
 		</para></note>
-		
+
 		<para>
 			When you load a SQL script and execute the statements, be aware that due to the history management
 			in &wb-productname; the content of the external file will be placed into the history buffer. If you load
@@ -731,7 +764,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 			statements put into the history can be controlled, but not the total size of the history itself. This might
 			change with a later version.
 		</para>
-		
+
 	</section>
 
 	<section id="server-messages">
@@ -746,7 +779,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 				used in stored procedures for logging purposes, but it can also be used
 				as a command on its own:
 			</para>
-			
+
 			<programlisting>PRINT "Deleting records...";
 DELETE from my_table WHERE value = 42;
 PRINT "Done."</programlisting>
@@ -755,7 +788,7 @@ PRINT "Done."</programlisting>
 				This will execute the <literal>DELETE</literal>. Once this script has
 				finished, the <literal>Messages</literal> tab will contain the text:
 			</para>
-			
+
 			<programlisting>Deleting records...
 Done.</programlisting>
 
@@ -770,7 +803,7 @@ Done.</programlisting>
 				as using the <literal>SET SERVEROUTPUT ON</literal> command in SQL*Plus.
 			</para>
 			<para>
-				If you want to turn on support for <literal>DBMS_OUTPUT</literal> automatically when 
+				If you want to turn on support for <literal>DBMS_OUTPUT</literal> automatically when
 				connecting to an Oracle database, you can put the <literal>ENABLEOUT</literal> command
 				into the <link linkend="profile-connect-scripts">pre-connect</link> script.
 			</para>
@@ -783,12 +816,12 @@ Done.</programlisting>
 
 			<programlisting>dbms_output.put_line("The answer is 42");</programlisting>
 			<para>
-				Once the command has finished, the following will be displayed in the 
+				Once the command has finished, the following will be displayed in the
 				<literal>Messages</literal> tab.
 			</para>
-			
+
 			<programlisting>The answer is 42</programlisting>
-			
+
 		</section>
 
 		<section id="server-msg-pg">
@@ -802,12 +835,12 @@ Done.</programlisting>
 		<section id="server-msg-other">
 			<title>Other database systems</title>
 			<para>
-				If your DBMS supports something similar, please let me know. I will try 
+				If your DBMS supports something similar, please let me know. I will try
 				to implement it - provided I have free access to the DBMS. Please send your
 				request to <email>support@sql-workbench.net</email>.
 			</para>
 		</section>
-		
+
 	</section>
 
 	<section id="edit-data" xreflabel="Editing the data">
@@ -822,101 +855,101 @@ Done.</programlisting>
 
 		<para>
 			If you have primary keys defined for the underlying tables, those primary key columns will be used for the
-			<literal>WHERE</literal> statements for <literal>UPDATE</literal> and <literal>DELETE</literal>. 
+			<literal>WHERE</literal> statements for <literal>UPDATE</literal> and <literal>DELETE</literal>.
 			If no primary key columns are found, the JDBC driver is asked for a <emphasis>best row identifier</emphasis>. If
-			that doesn&#39;t return any information, your defined <link linkend="options-pkmapping">PK Mapping</link> will 
+			that doesn&#39;t return any information, your defined <link linkend="options-pkmapping">PK Mapping</link> will
 			be queried. If still no PK columns can be found, you will be prompted to select
 			the key columns based on the current result set.
 		</para>
-      
+
 		<para>
-			The changes (modified rows, new rows or deleted rows) will not be saved to the database until 
+			The changes (modified rows, new rows or deleted rows) will not be saved to the database until
 			you choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
 			If the update is successful (no database errors) a <literal>COMMIT</literal> will be
-			sent to the database automatically (if needed). 
+			sent to the database automatically (if needed).
 		</para>
 		<para>
-			If your <literal>SELECT</literal> was based 
-			on more than one table, you will be prompted to specify which table should be 
-			updated. Only columns for the chosen table will be included in the <literal>UPDATE</literal> or 
-			<literal>INSERT</literal> statements. 
-			If no primary key can be found for the update table, you will be prompted to select the 
+			If your <literal>SELECT</literal> was based
+			on more than one table, you will be prompted to specify which table should be
+			updated. Only columns for the chosen table will be included in the <literal>UPDATE</literal> or
+			<literal>INSERT</literal> statements.
+			If no primary key can be found for the update table, you will be prompted to select the
 			columns that should be used to uniquel identify a row in the update table.
 		</para>
-		
+
 		<para>
 			If an error is reported during the
 			update, a <literal>ROLLBACK</literal> will be sent to the database. The <literal>COMMIT</literal>
 			or <literal>ROLLBACK</literal> will only be sent if <link linkend="profile-autocommit">autocommit</link> is turned off.
 		</para>
-		
+
 		<para>
 			Columns containing BLOB data will be displayed with a <guibutton>...</guibutton> button.
-			By clicking on that button, you can view the blob data, save it to a file or upload 
-			the content of a file to the DBMS. Please refer to <xref linkend="blob-support"/> 
+			By clicking on that button, you can view the blob data, save it to a file or upload
+			the content of a file to the DBMS. Please refer to <xref linkend="blob-support"/>
 			for details.
 		</para>
-		
+
 		<para>
 			When editing, &wb-productname; will highlight columns that are defined as <literal>NOT NULL</literal>
-			in the database. You can turn this feature off, or change the color that is used in the 
+			in the database. You can turn this feature off, or change the color that is used in the
 			<link linkend="options-required-field-color">options dialog</link>.
 		</para>
-			
+
 		<note><para>
-			When editing date, timestamp or time fields, the format specified 
-			in the <link linkend="options-date-format">options dialog</link> is used 
-			for parsing the entered value and converting that into the internal representation 
+			When editing date, timestamp or time fields, the format specified
+			in the <link linkend="options-date-format">options dialog</link> is used
+			for parsing the entered value and converting that into the internal representation
 			of a date. The value entered must match the format defined there.
 		</para></note>
 
 		<para id="editing-date-keywords">
-			If you want to input the current date and time you can use <literal>now, today, sysdate, 
-			current_timestamp, current_date</literal> instead. This will then use the current 
+			If you want to input the current date and time you can use <literal>now, today, sysdate,
+			current_timestamp, current_date</literal> instead. This will then use the current
 			date &amp; time and will convert this to the approriate data type for that column.
-			e.g. <literal>now</literal> will be converted to the current time for a time column, 
-			the current date for a date column and the current date/time for a timestamp column. 
+			e.g. <literal>now</literal> will be converted to the current time for a time column,
+			the current date for a date column and the current date/time for a timestamp column.
 			These keywords also work when importing text files using <link linkend="command-import">WbImport</link>
-			or importing a text file into the result set. The exact keywords that are recognized can be 
+			or importing a text file into the result set. The exact keywords that are recognized can be
 			configure in the <link linkend="settings-date-keywords">settings file</link>
 		</para>
-		
+
 	</section>
 
 	<section id="edit-data-delete">
 		<title>Deleting rows from the result</title>
 		<para>
 			To delete a row from the result, select <menuchoice><guimenu>Data</guimenu><guimenuitem>Delete Row</guimenuitem></menuchoice>
-			from the menu. This will remove the currently selected row(s) from the result and will 
+			from the menu. This will remove the currently selected row(s) from the result and will
 			mark them for deletion once the changes are saved. No foreign key checks will be done
-			when using this option. 
+			when using this option.
 		</para>
 		<para>
-			The generated <literal>DELETE</literal> statements will fail if the deleted row(s) are still 
+			The generated <literal>DELETE</literal> statements will fail if the deleted row(s) are still
 			referenced by another table. In that case, you can use <guimenuitem>Delete With Dependencies</guimenuitem>.
 		</para>
 	</section>
-	
+
 	<section id="edit-data-delete-referenced">
 		<title>Deleting rows with foreign keys</title>
-	
+
 		<para>
-			To delete rows including all dependent rows, choose 
+			To delete rows including all dependent rows, choose
 			<menuchoice><guimenu>Data</guimenu><guimenuitem>Delete With Dependencies</guimenuitem></menuchoice>.
 			In this case &wb-productname; will analyze all foreign keys referencing the update table, and will
 			generate the necessary <literal>DELETE</literal> statements to delete the dependent rows, before
-			sending the <literal>DELETE</literal> for the selected row(s). 
+			sending the <literal>DELETE</literal> for the selected row(s).
 		</para>
 		<para>
-			<guimenuitem>Delete With Dependencies</guimenuitem> might take some time to detect all 
-			foreign key dependencies for the current update table. During this time a message will 
-			be displayed in the status bar. The selected row(s) will not be removed from the result 
+			<guimenuitem>Delete With Dependencies</guimenuitem> might take some time to detect all
+			foreign key dependencies for the current update table. During this time a message will
+			be displayed in the status bar. The selected row(s) will not be removed from the result
 			set until the dependency check has finished.
 		</para>
     <note>
       <para>
-        Note that the generated SQL statements to delete the dependent rows will only 
-        be shown if you have enabled the preview of generated DML statements 
+        Note that the generated SQL statements to delete the dependent rows will only
+        be shown if you have enabled the preview of generated DML statements
         in the <link linkend="options-confirm-update">options dialog</link>
       </para>
    </note>
@@ -927,13 +960,13 @@ Done.</programlisting>
 		 a script that you can run at a later time.
 	 </para>
 	</section>
-	
+
 	<section id="fk-navigation">
 		<title>Navigating referenced rows</title>
 		<para>
-			Once you have retrieved data from a table that has foreign key relations to 
+			Once you have retrieved data from a table that has foreign key relations to
 			other tables, you can navigate the relationship for specific rows in the result set.
-			Select the rows for which you want to find the data in the related tables, then 
+			Select the rows for which you want to find the data in the related tables, then
 			right click inside the result set. In the context menu two items are available:
 			<simplelist columns="1">
 				<member>Referenced rows</member>
@@ -941,7 +974,7 @@ Done.</programlisting>
 			</simplelist>
 		</para>
 		<para>
-			Consider the following tables: 
+			Consider the following tables:
 			<simplelist columns="1">
 				<member><literal>BASE</literal> (b_id, name)</member>
 				<member><literal>DETAIL</literal> (d_id, base_id, description) with <literal>base_id</literal>
@@ -950,15 +983,15 @@ Done.</programlisting>
 				referencing <literal>DETAIL</literal> (d_id)</member>
 			</simplelist>
 		</para>
-			
+
 
 		<para>
-			The context menu for the selected rows will give you the choice in 
+			The context menu for the selected rows will give you the choice in
 			which SQL tab you want the generated <literal>SELECT</literal> to be pasted. This is similar
 			to the <link linkend="dbexplorer-select-data">Put SELECT into</link> feature in the table list
 			of the DbExplorer.
 		</para>
-		
+
 		<para>
 			Once you have obtained a result set from the table <literal>BASE</literal>, select
 			(mark) the rows for which you want to retrieve the related rows, e.g. the one where id=1. Using
@@ -966,17 +999,17 @@ Done.</programlisting>
 			&wb-productname; will create the following statement:
 <programlisting>SELECT *
 FROM DETAIL
-WHERE base_id = 1;</programlisting> 
+WHERE base_id = 1;</programlisting>
 			The result of the generated statement will always be added to the existing results of the chosen
-			SQL panel. By default the generated SQL statement will be appended to the text editor. 
+			SQL panel. By default the generated SQL statement will be appended to the text editor.
 			If you don't want the generated statement to be appended to the editor,
 			hold down the <literal>Ctrl</literal> key while selecting the desired menu item.
 			In that case, the generated statement will only be written to the messages
 			panel of the SQL tab. If the target tab contains an external file, the statement will never
 			be appended to the editor's text.
 		</para>
-		
-		
+
+
 		<para>
 			To navigate from the child data to the "parent" data, use
 			<guimenu>Referenced rows</guimenu>
@@ -986,7 +1019,7 @@ WHERE base_id = 1;</programlisting>
 			<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
 		</para>
 	</section>
-	
+
 	<section id="sorting-data">
 		<title>Sorting the result</title>
 		<para>
@@ -999,7 +1032,7 @@ WHERE base_id = 1;</programlisting>
 			the sort order will be reversed. The sort order will be indicated by a little
 			triangle in the column header. If the triangle points upward the data is sorted
 			ascending, if it points downward the data is sorted descending.
-			Clicking on a column will remove any previous sorting (including the secondary 
+			Clicking on a column will remove any previous sorting (including the secondary
 			columns) and apply the new sorting.
 		</para>
 		<para>
@@ -1011,25 +1044,25 @@ WHERE base_id = 1;</programlisting>
 		</para>
 		<para>
 			To define a different secondary sort column, you first have to remove
-			the current secondary column. This can be done by holding down the <keycap>Shift</keycap> key 
-			and clicking on the secondary column again. Note that the data will not be resorted. Once you 
+			the current secondary column. This can be done by holding down the <keycap>Shift</keycap> key
+			and clicking on the secondary column again. Note that the data will not be resorted. Once you
 			have removed the secondary column, you can define a different secondary sort column.
 		</para>
-	</section>	
-	
+	</section>
+
 	<section id="filter-data">
 		<title>Filtering the result</title>
-		
+
 		<para>
 			Once the data has been retrieved from the Server it can be filtered
 			with the need to re-retrieve the data. You can define the filter in two
 			ways: either enter column and their filter values manually, or create
 			a filter from the currently selected values in the result set.
 		</para>
-		
+
 		<section id="filter-manual">
 			<title>Defining a filter manually</title>
-			
+
 			<para>
 				To define a filter, click on the <literal>Filter</literal> button (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/filter16.gif" format="GIF"/></guiicon>)
 				in the toolbar or select <menuchoice><guimenu>Data</guimenu><guimenuitem>Filter data</guimenuitem></menuchoice>.
@@ -1041,16 +1074,16 @@ WHERE base_id = 1;</programlisting>
 
 			<para>
 				To add a multi-column expression, press the <guibutton>More</guibutton> button, to create
-				a new line. To remove a column expression from the filter, click the <literal>Remove</literal> 
+				a new line. To remove a column expression from the filter, click the <literal>Remove</literal>
 				(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Remove16.gif" format="GIF"/></guiicon>) button.
 				For character based column data, you can select to ignore the case of the column's data
 				when applying the expression, i.e. when <literal>Ignore case</literal> is selected, the
-				expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>', 
+				expression <literal>'NAME = arthur'</literal> will match the column value '<literal>Arthur</literal>',
 				and '<literal>ARTHUR</literal>'.
 			</para>
 			<para>
-				By default, the column expressions are combined with an <literal>OR</literal>, i.e. 
-				that a row will be displayed if at least one of the column expressions evaluates 
+				By default, the column expressions are combined with an <literal>OR</literal>, i.e.
+				that a row will be displayed if at least one of the column expressions evaluates
 				to true. If you want to view only rows where <emphasis role="bold">all</emphasis>
 				column expressions must match, select the <literal>AND</literal> radio button
 				at the top of the dialog.
@@ -1059,56 +1092,56 @@ WHERE base_id = 1;</programlisting>
 			<para>
 				Once you have saved a filter to an external file, this filter will be available
 				in the pick list, next to the filter icon. The list will show the last filters
-				that were saved. The number of items displayed in this drop down can be 
+				that were saved. The number of items displayed in this drop down can be
 				controlled in the <link linkend="filter-picklist-size">settings file</link>.
 			</para>
-			
+
 		</section>
-		
+
 		<section id="filter-quick-filter">
 			<title>Defining a filter from the selection</title>
-			
+
 			<para>
 				You can also quickly filter the data based on the value(s) of the currenlty
 				selected column(s). To apply the filter, select the column values by which
-				you want to filter then click on the <literal>Quickfilter</literal> button 
+				you want to filter then click on the <literal>Quickfilter</literal> button
 				(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/colfilter16.gif" format="GIF"/></guiicon>)
-				in the toolbar or select 
+				in the toolbar or select
 				<menuchoice><guimenu>Data</guimenu><guimenuitem>Filter by value</guimenuitem></menuchoice>
-				from the menu bar. 
+				from the menu bar.
 			</para>
 
 			<para>
 				Using the <keycap>Alt</keycap> key you can select individual columns of one or
-				more rows. Together with the <keycap>Ctrl</keycap> key you can select e.g. the first, 
+				more rows. Together with the <keycap>Ctrl</keycap> key you can select e.g. the first,
 				third and fourth column. You can also select the e.g. second column of the first, second
 				and fifth row.
 			</para>
-			
+
 			<para>
-				Whether the quick filter is available depends on the selected rows 
+				Whether the quick filter is available depends on the selected rows
 				and columns. It will be enabled when:
 				<itemizedlist>
 					<listitem>You have selected one or more columns in a single row</listitem>
 					<listitem>You have selected one column in multiple rows</listitem>
 				</itemizedlist>
 			</para>
-			
+
 			<para>
 				If only a single row is selected, the quick filter will use
 				the values of the selected columns combined with <literal>AND</literal> to
-				define the filter (e.g. username = 'Bob' AND job = 'Clerk'). Which columns 
-				are used depends on the way you select the row and columns. 
-				If the whole row in the result is selected, the quick filter will use the 
+				define the filter (e.g. username = 'Bob' AND job = 'Clerk'). Which columns
+				are used depends on the way you select the row and columns.
+				If the whole row in the result is selected, the quick filter will use the
 				value of the focused column (the one with the yellow rectangle), otherwise
 				the individually selected columns will be used.
 			</para>
-			
+
 			<para>
-				If you select a single column in multiple rows, this will 
-				create a filter for that column, but with the values will be combined with 
-				<literal>OR</literal> (e.g. name = 'Dent' OR name = 'Prefect'). 
-				The quick filter will not be available if you select more than one column in 
+				If you select a single column in multiple rows, this will
+				create a filter for that column, but with the values will be combined with
+				<literal>OR</literal> (e.g. name = 'Dent' OR name = 'Prefect').
+				The quick filter will not be available if you select more than one column in
 				multiple rows.
 			</para>
 			<para>
@@ -1116,9 +1149,9 @@ WHERE base_id = 1;</programlisting>
 				dialog to check the definition of the filter or to further modify it.
 			</para>
 		</section>
-		
+
 	</section>
-	
+
   &export-import;
-	
+
 </section>
