@@ -70,7 +70,6 @@ import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultReceiver;
 import workbench.sql.StatementRunnerResult;
-import workbench.sql.macros.MacroDefinition;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.AutoCompletionAction;
@@ -792,8 +791,6 @@ public class SqlPanel
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
 		this.actions.add(this.printPreviewAction);
-
-		//this.setExecuteActionStates(false);
 	}
 
 	@Override
@@ -1615,15 +1612,6 @@ public class SqlPanel
 		});
 	}
 
-	private String getStatementAtCursor()
-	{
-		ScriptParser parser = createScriptParser();
-		parser.setScript(this.editor.getText());
-		int index = parser.getCommandIndexAtCursorPos(this.editor.getCaretPosition());
-		String currentStatement = parser.getCommand(index);
-		return currentStatement;
-	}
-
 	public void runCurrentStatement()
 	{
 		String sql = this.editor.getText();
@@ -1738,41 +1726,10 @@ public class SqlPanel
 
 	private boolean macroExecution = false;
 
-	public void executeMacro(final MacroDefinition macro, final boolean replaceText)
+	public void executeMacroSql(final String sql, final boolean replaceText)
 	{
 		if (isBusy()) return;
-		if (macro == null) return;
-
-		MacroManager mgr = MacroManager.getInstance();
-		String sql = macro.getText();
 		if (StringUtil.isBlank(sql)) return;
-
-		if (mgr.hasSelectedKey(sql))
-		{
-			String selected = this.editor.getSelectedText();
-			if (selected == null)
-			{
-				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrNoSelection4Macro"));
-				return;
-			}
-			sql = mgr.replaceSelected(sql, selected);
-		}
-
-		if (mgr.hasCurrentKey(sql))
-		{
-			String current = getStatementAtCursor();
-			if (current == null)
-			{
-				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("ErrNoCurrent4Macro"));
-				return;
-			}
-			sql = mgr.replaceCurrent(sql, current);
-		}
-
-		if (mgr.hasTextKey(sql))
-		{
-			sql = mgr.replaceEditorText(sql, editor.getText());
-		}
 
 		if (replaceText)
 		{
@@ -2101,6 +2058,16 @@ public class SqlPanel
 
 	private boolean ignoreStateChange = false;
 
+	/**
+	 * This is called when the user switches between the result tabs (if multiple
+	 * results are available)
+	 *
+	 * If this happens, we need to update all actions in the menu that operate on the
+	 * result to use the new datastore.
+	 * 
+	 * @param evt
+	 * @see updateResultInfos()
+	 */
 	public void stateChanged(ChangeEvent evt)
 	{
 		if (this.ignoreStateChange) return;
@@ -2265,7 +2232,7 @@ public class SqlPanel
 		}
 	}
 
-	private ScriptParser createScriptParser()
+	public ScriptParser createScriptParser()
 	{
 		ScriptParser scriptParser = new ScriptParser();
 		DelimiterDefinition altDelim = Settings.getInstance().getAlternateDelimiter(this.dbConnection);
@@ -2869,7 +2836,14 @@ public class SqlPanel
 	private void addResultTab(DwPanel data, String sql)
 	{
 		int newIndex = this.resultTab.getTabCount() - 1;
-		this.resultTab.insertTab(ResourceMgr.getString("LblTabResult"), null, data, sql, newIndex);
+		WbTable tbl = data.getTable();
+		DataStore ds = (tbl != null ? tbl.getDataStore() : null);
+		String resultName = (ds != null ? ds.getResultName() : null);
+		if (StringUtil.isBlank(resultName))
+		{
+			resultName = ResourceMgr.getString("LblTabResult");
+		}
+		this.resultTab.insertTab(resultName, null, data, sql, newIndex);
 		data.setName("dwresult" + newIndex);
 		if (this.resultTab.getTabCount() == 2)
 		{

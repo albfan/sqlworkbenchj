@@ -47,7 +47,7 @@ public class UpdatingCommand extends SqlCommand
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 		LobFileStatement lob = null;
 
 		try

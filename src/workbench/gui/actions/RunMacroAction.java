@@ -17,6 +17,7 @@ import javax.swing.Action;
 
 import javax.swing.KeyStroke;
 import workbench.gui.MainWindow;
+import workbench.gui.macros.MacroRunner;
 import workbench.gui.sql.SqlPanel;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -57,6 +58,7 @@ public class RunMacroAction
 			KeyStroke stroke = key.getKeyStroke();
 			setAccelerator(stroke);
 		}
+		setEnabled(macro != null && client != null);
 	}
 
 	public void executeAction(ActionEvent e)
@@ -66,8 +68,9 @@ public class RunMacroAction
 			boolean shiftPressed = isShiftPressed(e);
 			SqlPanel sql = this.client.getCurrentSqlPanel();
 			if (sql != null)
-			{	
-				sql.executeMacro(macro, shiftPressed);
+			{
+				MacroRunner runner = new MacroRunner();
+				runner.runMacro(macro, sql, shiftPressed);
 			}
 			else
 			{
@@ -75,5 +78,6 @@ public class RunMacroAction
 			}
 		}
 	}
+
 
 }

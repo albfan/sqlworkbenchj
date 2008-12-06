@@ -34,6 +34,7 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.ResultNameParser;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
@@ -276,6 +277,30 @@ public class DataStore
 	private RowDataList createData()
 	{
 		return new RowDataList();
+	}
+
+	private String resultName;
+
+	/**
+	 * Returns a descriptive name for this result DataStore
+	 *
+	 * @return the value of resultName
+	 */
+	public String getResultName()
+	{
+		return resultName;
+	}
+
+	/**
+	 * Set a descriptive name for this result
+	 *
+	 * This is used in the GUI when displaying result tabs.
+	 * 
+	 * @param resultName new value of resultName
+	 */
+	public void setResultName(String name)
+	{
+		this.resultName = name;
 	}
 
 	public void copyFrom(DataStore source)
@@ -1137,6 +1162,8 @@ public class DataStore
 	public void setGeneratingSql(String aSql)
 	{
 		this.sql = aSql;
+		ResultNameParser parser = new ResultNameParser();
+		this.resultName = parser.getResultName(sql);
 	}
 
 	public String getGeneratingSql() { return this.sql; }

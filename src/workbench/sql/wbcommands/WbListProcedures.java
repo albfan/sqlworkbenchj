@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
+import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
@@ -57,6 +58,7 @@ public class WbListProcedures
 		}
 
 		DataStore ds = currentConnection.getMetadata().getProcedureReader().getProcedures(catalog, schema, name);
+		ds.setResultName(ResourceMgr.getString("TxtDbExplorerProcs"));
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

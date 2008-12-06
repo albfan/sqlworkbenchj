@@ -70,7 +70,7 @@ public class DdlCommand
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 
 		DbSettings dbset = this.currentConnection.getMetadata().getDbSettings();
 		boolean useSavepoint = dbset.useSavePointForDDL() && !this.currentConnection.getAutoCommit();

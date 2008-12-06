@@ -31,8 +31,10 @@ import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import javax.swing.event.ListSelectionListener;
 
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.TreePath;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
@@ -41,6 +43,7 @@ import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.macros.MacroDefinition;
+import workbench.util.StringUtil;
 
 /**
  * A Dialog that displays a {@link MacroManagerGui} and allows to run
@@ -50,7 +53,7 @@ import workbench.sql.macros.MacroDefinition;
  */
 public class MacroManagerDialog
 	extends JDialog
-	implements ActionListener, ListSelectionListener, MouseListener, WindowListener
+	implements ActionListener, TreeSelectionListener, MouseListener, WindowListener
 {
 	private JPanel dummyPanel;
 	private JPanel buttonPanel;
@@ -87,6 +90,7 @@ public class MacroManagerDialog
 
 		this.initKeys();
 		this.addWindowListener(this);
+		macroPanel.addTreeSelectionListener(this);
 	}
 
 	private void initWindow(Frame parent)
@@ -220,7 +224,8 @@ public class MacroManagerDialog
 			if (this.client != null)
 			{
 				MacroDefinition macro = this.macroPanel.getSelectedMacro();
-				this.client.executeMacro(macro, this.replaceEditorText.isSelected());
+				MacroRunner runner = new MacroRunner();
+				runner.runMacro(macro, client, this.replaceEditorText.isSelected());
 			}
 		}
 		catch (Exception e)
@@ -247,12 +252,27 @@ public class MacroManagerDialog
 		setVisible(false);
 	}
 
-	public void valueChanged(javax.swing.event.ListSelectionEvent e)
+	public void valueChanged(TreeSelectionEvent e)
 	{
-		if (e.getValueIsAdjusting()) return;
-		boolean selected = (e.getFirstIndex() > -1) && this.macroList.getModel().getSize() > 0;
-		//this.okButton.setEnabled(selected);
-		this.runButton.setEnabled(selected);
+		TreePath[] paths = e.getPaths();
+		int selected = 0;
+		boolean selectedIsMacro = true;
+		
+		for (TreePath path : paths)
+		{
+			if (e.isAddedPath(path)) 
+			{
+				selected ++;
+				MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
+				selectedIsMacro = selectedIsMacro && !node.getAllowsChildren();
+				if (!node.getAllowsChildren())
+				{
+					MacroDefinition macro = (MacroDefinition)node.getDataObject();
+					selectedIsMacro = selectedIsMacro && StringUtil.isNonBlank(macro.getText());
+				}
+			}
+		}
+		this.runButton.setEnabled(selected == 1 && selectedIsMacro);
 	}
 
 	public void mouseClicked(java.awt.event.MouseEvent e)

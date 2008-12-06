@@ -73,7 +73,7 @@ public class WbInclude
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		result.setSuccess();
 
 		String clean = SqlUtil.makeCleanSql(aSql, false, false);

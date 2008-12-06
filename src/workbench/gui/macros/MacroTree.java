@@ -80,7 +80,7 @@ public class MacroTree
 		setRootVisible(false);
 		putClientProperty("JTree.lineStyle", "Angled");
 		setShowsRootHandles(true);
-		setEditable(true);
+		setEditable(false);
 		setExpandsSelectedPaths(true);
 		addMouseListener(this);
 		getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
@@ -119,17 +119,6 @@ public class MacroTree
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
 		delete.addToInputMap(im, am);
-	}
-
-	public boolean isPathEditable(TreePath path)
-	{
-		if (path == null) return false;
-		// Only allow editing of groups
-		if (path.getPathCount() != 2) return false;
-		
-		MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();
-		
-		return node.getAllowsChildren();
 	}
 
 	public void treeNodesChanged(TreeModelEvent e)

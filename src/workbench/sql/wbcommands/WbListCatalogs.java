@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -39,6 +40,8 @@ public class WbListCatalogs extends SqlCommand
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		DataStore ds = currentConnection.getMetadata().getCatalogInformation();
+		String catName = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());
+		ds.setResultName(catName);
 		result.addDataStore(ds);
 		result.setSuccess();
 		return result;

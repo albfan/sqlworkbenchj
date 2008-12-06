@@ -98,6 +98,11 @@ public class MacroManagerGui
 		macroTree.addTreeSelectionListener(this);
 	}
 
+	public void addTreeSelectionListener(TreeSelectionListener l)
+	{
+		macroTree.addTreeSelectionListener(l);
+	}
+	
 	public MacroDefinition getSelectedMacro()
 	{
 		return macroTree.getSelectedMacro();

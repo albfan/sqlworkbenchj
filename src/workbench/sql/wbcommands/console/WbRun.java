@@ -48,13 +48,13 @@ public class WbRun
 	}
 
 	@Override
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 		result.setSuccess();
 
-		String clean = getCommandLine(aSql);
+		String clean = getCommandLine(sql);
 		if (StringUtil.isBlank(clean))
 		{
 			result.setFailure();

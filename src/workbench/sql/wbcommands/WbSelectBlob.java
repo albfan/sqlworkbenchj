@@ -49,7 +49,7 @@ public class WbSelectBlob
 	public StatementRunnerResult execute(final String sqlCommand)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(sqlCommand);
 		SQLLexer lexer = new SQLLexer(sqlCommand);
 
 		StringBuilder sql = new StringBuilder(sqlCommand.length());

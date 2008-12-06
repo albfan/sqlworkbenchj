@@ -2107,13 +2107,13 @@ public class DbMetadata
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DbMetadata.getCatalogInformat()", "Error retrieving catalog information", e);
+			LogMgr.logError("DbMetadata.getCatalogInformation()", "Error retrieving catalog information", e);
 		}
 		finally
 		{
 			SqlUtil.closeResult(rs);
 		}
-		
+
 		if (result.getRowCount() == 1)
 		{
 			String cat = result.getValueAsString(0, 0);

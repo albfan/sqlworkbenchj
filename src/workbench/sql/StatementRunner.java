@@ -293,7 +293,7 @@ public class StatementRunner
 			boolean goOn = this.prompter.processParameterPrompts(aSql);
 			if (!goOn)
 			{
-				this.result = new StatementRunnerResult();
+				this.result = new StatementRunnerResult(aSql);
 				this.result.setPromptingWasCancelled();
 				return;
 			}				

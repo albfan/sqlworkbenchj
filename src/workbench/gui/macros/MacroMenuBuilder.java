@@ -19,6 +19,7 @@ import workbench.gui.components.WbMenu;
 import workbench.sql.macros.MacroDefinition;
 import workbench.sql.macros.MacroGroup;
 import workbench.sql.macros.MacroManager;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -44,10 +45,11 @@ public class MacroMenuBuilder
 
 			List<MacroDefinition> macros = group.getVisibleMacros();
 
-			int count = macros.size();
-			for (int i=0; i < count; i++)
+			int index = 1;
+			for (MacroDefinition macro : macros)
 			{
-				RunMacroAction run = new RunMacroAction(main, macros.get(i), i+1);
+				if (StringUtil.isBlank(macro.getText())) continue;
+				RunMacroAction run = new RunMacroAction(main, macro, index);
 				if (groupMenu == null)
 				{
 					run.addToMenu(macroMenu);
@@ -56,6 +58,7 @@ public class MacroMenuBuilder
 				{
 					run.addToMenu(groupMenu);
 				}
+				index++;
 			}
 			if (groupMenu != null) macroMenu.add(groupMenu);
 		}

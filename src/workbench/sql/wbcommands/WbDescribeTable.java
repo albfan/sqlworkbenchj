@@ -65,7 +65,7 @@ public class WbDescribeTable
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 
 		TableIdentifier tbl = new TableIdentifier(table);
@@ -102,6 +102,7 @@ public class WbDescribeTable
 
 		ColumnRemover remover = new ColumnRemover(ds);
 		DataStore cols = remover.removeColumnsByName("java.sql.Types", "SCALE/SIZE", "PRECISION");
+		cols.setResultName(toDescribe.getTableName());
 		result.setSuccess();
 		result.addDataStore(cols);
 
@@ -115,6 +116,7 @@ public class WbDescribeTable
 			DataStore index = currentConnection.getMetadata().getIndexReader().getTableIndexInformation(toDescribe);
 			if (index.getRowCount() > 0)
 			{
+				index.setResultName(ResourceMgr.getString("TxtDbExplorerIndexes"));
 				result.addDataStore(index);
 			}
 
@@ -122,6 +124,7 @@ public class WbDescribeTable
 			DataStore triggers = trgReader.getTableTriggers(toDescribe);
 			if (triggers != null && triggers.getRowCount() > 0)
 			{
+				triggers.setResultName(ResourceMgr.getString("TxtDbExplorerTriggers"));
 				result.addDataStore(triggers);
 			}
 		}

@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import workbench.db.TriggerReader;
+import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
@@ -39,7 +40,7 @@ public class WbListTriggers extends SqlCommand
 		TriggerReader reader = new TriggerReader(this.currentConnection);
 
 		DataStore ds = reader.getTriggers(currentConnection.getMetadata().getCurrentCatalog(), currentConnection.getCurrentSchema());
-		
+		ds.setResultName(ResourceMgr.getString("TxtDbExplorerTriggers"));
 		result.addDataStore(ds);
 		return result;
 	}
