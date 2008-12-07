@@ -340,11 +340,11 @@ public class JEditTextArea
 		this.getInputHandler().removeKeyBinding(key);
 	}
 
-	@SuppressWarnings("deprecation")
-	public final boolean isManagingFocus()
-	{
-		return true;
-	}
+//	@SuppressWarnings("deprecation")
+//	public final boolean isManagingFocus()
+//	{
+//		return true;
+//	}
 
 	/**
 	 * Returns the object responsible for painting this text area.

@@ -285,7 +285,11 @@ public class MacroStorage
 	{
 		if (!groups.contains(group))
 		{
-			int newIndex = groups.get(groups.size() - 1).getSortOrder() + 1;
+			int newIndex = 1;
+			if (groups.size() > 0)
+			{
+				newIndex = groups.get(groups.size() - 1).getSortOrder() + 1;
+			}
 			group.setSortOrder(newIndex);
 			groups.add(group);
 			applySort();

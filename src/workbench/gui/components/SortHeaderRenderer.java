@@ -13,44 +13,63 @@ package workbench.gui.components;
 
 import java.awt.Component;
 
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JTable;
-import javax.swing.UIManager;
-import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.JTableHeader;
+import javax.swing.SwingConstants;
+import javax.swing.table.TableCellRenderer;
 
 /**
+ * A renderer for table headers to be able to display a sort indicator and customized
+ * tooltips that show the data type of the column.
+ *
+ * If adjusts the display of the default renderer to display the sort indicator if
+ * the default renderer returns a JLabel.
+ *
+ * Otherwise a separate JLabel is used to display the header that is made to look
+ * like the original component returned from the default renderer.
  *
  * @author support@sql-workbench.net
  */
 public class SortHeaderRenderer
-	extends DefaultTableCellRenderer
+	implements TableCellRenderer
 {
+	private JLabel displayLabel = new JLabel();
+	
 	public SortHeaderRenderer()
 	{
-		super();
-		setHorizontalTextPosition(LEFT);
-		setHorizontalAlignment(LEFT);
-		setBorder(UIManager.getBorder("TableHeader.cellBorder"));
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
 	{
+		TableCellRenderer realRenderer = table.getTableHeader().getDefaultRenderer();
+
+		JComponent c = (JComponent)realRenderer.getTableCellRendererComponent (table,value, isSelected, hasFocus, row, col);
+		
 		boolean sorted = false;
 		boolean ascending = false;
 		boolean primary = false;
 
-
-		JTableHeader header = table.getTableHeader();
-		if (header != null)
+		String text = (value == null ? "" : value.toString());
+		JLabel display = null;
+		if (c instanceof JLabel)
 		{
-			setForeground(header.getForeground());
-			setBackground(header.getBackground());
-
-			// This seems to be necessary in order to make sure
-			// multi-byte values (e.g. chinese) are displayed correctly
-			setFont(header.getFont());
+			display = (JLabel)c;
 		}
-
+		else
+		{
+			displayLabel.setFont(c.getFont());
+			displayLabel.setBorder(c.getBorder());
+			displayLabel.setForeground(c.getForeground());
+			displayLabel.setBackground(c.getBackground());
+			displayLabel.setText(text);
+			displayLabel.setOpaque(c.isOpaque());
+			display = displayLabel;
+		}
+		
+		display.setHorizontalTextPosition(SwingConstants.LEFT);
+		display.setHorizontalAlignment(SwingConstants.LEFT);
+		
 		String type = null;
 
 		if (table instanceof WbTable)
@@ -74,23 +93,21 @@ public class SortHeaderRenderer
 		{
 			if (primary)
 			{
-				this.setIcon(ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP);
+				display.setIcon(ascending ? SortArrowIcon.ARROW_DOWN : SortArrowIcon.ARROW_UP);
 			}
 			else
 			{
-				this.setIcon(ascending ? SortArrowIcon.SMALL_ARROW_DOWN : SortArrowIcon.SMALL_ARROW_UP);
+				display.setIcon(ascending ? SortArrowIcon.SMALL_ARROW_DOWN : SortArrowIcon.SMALL_ARROW_UP);
 			}
 		}
 		else
 		{
-			this.setIcon(null);
+			display.setIcon(null);
 		}
-		String text = (value == null) ? "" : value.toString();
-		setText(text);
 
 		if (type == null)
 		{
-			setToolTipText(text);
+			display.setToolTipText(text);
 		}
 		else
 		{
@@ -100,9 +117,9 @@ public class SortHeaderRenderer
 			tip.append("&nbsp;<br>&nbsp;<code>");
 			tip.append(type);
 			tip.append("</code>&nbsp;</html>");
-			setToolTipText(tip.toString());
+			display.setToolTipText(tip.toString());
 		}
-		return this;
+		return display;
 	}
 }
 

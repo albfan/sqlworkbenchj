@@ -321,8 +321,8 @@ public class SqlPanel
 		this.initStatementHistory();
 
 		this.initActions();
-		this.initToolbar();
 		this.setupActionMap();
+		this.initToolbar();
 
 		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
@@ -381,10 +381,16 @@ public class SqlPanel
 
 	private void initToolbar()
 	{
-		this.toolbar = new WbToolbar();
-		this.toolbar.addDefaultBorder();
+		if (!SwingUtilities.isEventDispatchThread())
+		{
+			Exception e = new Exception("initToolbar() not called on EDT");
+			e.printStackTrace();
+		}
 
-		Iterator<WbAction> itr = this.toolbarActions.iterator();
+		toolbar = new WbToolbar();
+		toolbar.addDefaultBorder();
+
+		Iterator<WbAction> itr = toolbarActions.iterator();
 		while (itr.hasNext())
 		{
 			WbAction a = itr.next();
@@ -396,12 +402,17 @@ public class SqlPanel
 			a.addToToolbar(toolbar);
 		}
 		toolbar.addSeparator();
-		this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
-		toolbar.add(this.connectionInfo);
+		connectionInfo = new ConnectionInfo(toolbar.getBackground());
+		toolbar.add(connectionInfo);
 	}
 
 	public void addToToolbar(WbAction anAction, boolean withSeperator)
 	{
+		if (!SwingUtilities.isEventDispatchThread())
+		{
+			Exception e = new Exception("addToToolbar() not called on EDT");
+			e.printStackTrace();
+		}
 		this.toolbar.add(anAction.getToolbarButton(true), this.toolbar.getComponentCount() - 1);
 		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
 	}

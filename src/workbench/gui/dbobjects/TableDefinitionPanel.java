@@ -70,6 +70,8 @@ public class TableDefinitionPanel
 	public static final String INDEX_PROP = "index";
 	public static final String DEFINITION_PROP = "tableDefinition";
 
+	private final Object connectionLock = new Object();
+	
 	private WbTable tableDefinition;
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
@@ -180,7 +182,6 @@ public class TableDefinitionPanel
 		throws SQLException
 	{
 		this.currentTable = table;
-		this.tableDefinition.reset();
 		retrieveTableDefinition();
 	}
 
@@ -189,7 +190,7 @@ public class TableDefinitionPanel
 	{
 		if (this.isBusy()) return;
 
-		synchronized (this.dbConnection)
+		synchronized (connectionLock)
 		{
 			try
 			{
@@ -197,6 +198,7 @@ public class TableDefinitionPanel
 				{
 					public void run()
 					{
+						tableDefinition.reset();
 						reloadAction.setEnabled(false);
 						String msg = "<html>" + ResourceMgr.getString("TxtRetrieveTableDef") + " <b>" + currentTable.getTableName() + "</b></html>";
 						tableNameLabel.setText(msg);
@@ -324,8 +326,6 @@ public class TableDefinitionPanel
 	{
 		if (this.currentTable == null) return;
 		if (this.dbConnection == null) return;
-
-		this.tableDefinition.reset();
 
 		WbThread t = new WbThread("TableDefinition Retrieve")
 		{

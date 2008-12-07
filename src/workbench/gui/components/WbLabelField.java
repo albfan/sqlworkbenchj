@@ -11,19 +11,23 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
+import javax.swing.border.EmptyBorder;
 import workbench.gui.actions.WbAction;
 
 /**
  * A label that is built from a JTextField so that the text can
  * be selected and copied into the clipboard
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class WbLabelField
 	extends JTextField
 {
+	private boolean defaultOpaque = false;
+	
 	private TextComponentMouseListener mouseListener;
 
 	public WbLabelField()
@@ -31,42 +35,43 @@ public class WbLabelField
 		super();
 		init();
 	}
-	
+
 	public WbLabelField(String text)
 	{
 		super(text);
 		init();
 	}
 
+	public void setDefaultBackground()
+	{
+		String cls = UIManager.getLookAndFeel().getClass().getName();
+		if ("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel".equals(cls))
+		{
+			// setting the background to a transparent color seems to be
+			// the only way to get a "Label"-like look with the nimbus
+			setOpaque(defaultOpaque);
+			setBackground(new Color(0, 0, 0, 0));
+		}
+		else
+		{
+			setOpaque(false);
+			this.setBackground(UIManager.getColor("Label.background"));
+			this.setForeground(UIManager.getColor("Label.foreground"));
+		}
+	}
+	
 	private void init()
 	{
-		setBorder(null);
+		defaultOpaque = isOpaque();
 		setEditable(false);
-		mouseListener =	new TextComponentMouseListener();
+		mouseListener = new TextComponentMouseListener();
 		addMouseListener(mouseListener);
-		this.setBackground(UIManager.getColor("Label.background"));
-		this.setForeground(UIManager.getColor("Label.foreground"));
+		setBorder(new EmptyBorder(2, 5, 2, 2));
+		setDefaultBackground();
 	}
 
 	public void addPopupAction(WbAction a)
 	{
 		mouseListener.addAction(a);
 	}
-	
-	@Override
-	public void setText(String text)
-	{
-		if (text != null && text.charAt(0) == ' ')
-		{
-			// Due to some strange border rendering the first
-			// character is not displayed correctly without a leading space
-			// even if I add an EmptyBorder
-			super.setText(" " + text);
-		}
-		else
-		{
-			super.setText(text);
-		}
-	}
-
 }

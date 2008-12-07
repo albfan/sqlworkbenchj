@@ -102,6 +102,41 @@ public class MacroStorageTest
 		assertNotNull(exp);
 
 	}
+
+	public void testEmpty()
+	{
+		MacroStorage macros = new MacroStorage();
+		MacroGroup group1 = new MacroGroup("FirstGroup");
+		group1.setVisibleInMenu(true);
+		macros.addGroup(group1);
+
+		MacroGroup group2 = new MacroGroup("SecondGroup");
+		group2.setVisibleInMenu(true);
+		macros.addGroup(group2);
+
+		assertEquals(2, macros.getGroups().size());
+		MacroDefinition macro1 = new MacroDefinition("macro1", "macro1");
+		MacroDefinition macro2 = new MacroDefinition("macro2", "macro2");
+		MacroDefinition macro3 = new MacroDefinition("macro3", "macro3");
+		MacroDefinition macro4 = new MacroDefinition("macro4", "macro4");
+		MacroDefinition macro5 = new MacroDefinition("macro5", "macro5");
+
+		macros.addMacro(group1, macro1);
+		macros.addMacro(group1, macro2);
+
+		macros.addMacro(group2, macro3);
+		macros.addMacro(group2, macro4);
+		macros.addMacro(group2, macro5);
+
+		assertEquals(2, macros.getGroups().get(0).getSize());
+		assertEquals(3, macros.getGroups().get(1).getSize());
+
+		// a group should always be added at the end
+		MacroGroup group3 = new MacroGroup("ThirdGroup");
+		group3.setSortOrder(0);
+		macros.addGroup(group3);
+		assertEquals(2, group3.getSortOrder());
+	}
 	
 	public void testConvertOld()
 		throws Exception

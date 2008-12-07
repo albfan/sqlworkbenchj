@@ -29,7 +29,6 @@ import workbench.gui.actions.WbAction;
 public class WbToolbar
 	extends JToolBar
 {
-
 	public WbToolbar()
 	{
 		super();

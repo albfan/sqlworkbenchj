@@ -133,6 +133,8 @@ public class WbTable
 	private WbTextCellEditor defaultEditor;
 	private WbCellEditor multiLineEditor;
 	private TableCellRenderer multiLineRenderer;
+	private TableCellRenderer sortRenderer;
+
 	private WbTextCellEditor defaultNumberEditor;
 	private JTextField numberEditorTextField;
 
@@ -230,6 +232,7 @@ public class WbTable
 
 		this.multiLineEditor = new WbCellEditor(this);
 		this.multiLineRenderer = RendererFactory.getMultiLineRenderer();
+		this.sortRenderer = RendererFactory.getSortHeaderRenderer();
 
 		this.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
@@ -562,11 +565,17 @@ public class WbTable
 			this.rowResizer.done();
 		}
 		this.rowResizer = null;
-		if (this.popup != null)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			this.popup.removeAll();
-			this.popup = null;
-		}
+			public void run()
+			{
+				if (popup != null)
+				{
+					popup.removeAll();
+					popup = null;
+				}
+			}
+		});
 	}
 
 	public void reset()
@@ -582,44 +591,67 @@ public class WbTable
 		return this.popup;
 	}
 
-	private void addPopupSubMenu(WbMenu submenu, boolean withSep)
+	private void addPopupSubMenu(final WbMenu submenu, final boolean withSep)
 	{
-		if (this.popup == null) this.popup = new JPopupMenu();
-		if (withSep)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			this.popup.addSeparator();
-		}
-		this.popup.add(submenu);
+			public void run()
+			{
+				if (popup == null) popup = new JPopupMenu();
+				if (withSep)
+				{
+					popup.addSeparator();
+				}
+				popup.add(submenu);
+			}
+		});
 	}
 
-	public void addPopupAction(WbAction anAction, boolean withSep)
+	public void addPopupAction(final WbAction anAction, final boolean withSep)
 	{
-		this.addPopupMenu(anAction.getMenuItem(), withSep);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				addPopupMenu(anAction.getMenuItem(), withSep);
+			}
+		});
 	}
 
-	public void removePopupItem(JMenuItem item)
+	public void removePopupItem(final JMenuItem item)
 	{
 		if (this.popup == null) return;
-		this.popup.remove(item);
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				popup.remove(item);
+			}
+		});
 	}
 
-	public void addPopupMenu(JMenuItem item, boolean withSep)
+	public void addPopupMenu(final JMenuItem item, final boolean withSep)
 	{
-		if (this.popup == null) this.popup = new JPopupMenu();
-
-		if (this.printDataAction != null)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			if (withSep)
+			public void run()
 			{
-				this.popup.add(new Separator(), this.popup.getComponentCount() - 3);
+				if (popup == null) popup = new JPopupMenu();
+				if (printDataAction != null)
+				{
+					if (withSep)
+					{
+						popup.add(new Separator(), popup.getComponentCount() - 3);
+					}
+					popup.add(item, popup.getComponentCount() - 3);
+				}
+				else
+				{
+					if (withSep) popup.addSeparator();
+					popup.add(item);
+				}
 			}
-			this.popup.add(item, this.popup.getComponentCount() - 3);
-		}
-		else
-		{
-			if (withSep) this.popup.addSeparator();
-			this.popup.add(item);
-		}
+		});
 	}
 
 	public void valueChanged(ListSelectionEvent e)
@@ -923,7 +955,6 @@ public class WbTable
 			this.dwModel = (DataStoreTableModel)aModel;
 			if (sortIt && header != null)
 			{
-				header.setDefaultRenderer(RendererFactory.getSortHeaderRenderer());
 				header.addMouseListener(this);
 			}
 		}
@@ -933,13 +964,14 @@ public class WbTable
 			if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
 			if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
 
-			// it seems that JTable.setModel() does reset the default
-			// renderers and editors, so we'll have to do it again...
+			// it seems that JTable.setModel() resets the default renderers and editors
+			// so we'll have to do it again...
 			this.initDefaultRenderers();
 			this.initDefaultEditors();
 		}
 		addListeners();
 		adjustRowsAndColumns();
+		updateSortRenderer();
 	}
 
 	private FilterExpression lastFilter;
@@ -1136,11 +1168,38 @@ public class WbTable
 		{
 			public void run()
 			{
+				updateSortRenderer();
 				WbSwingUtilities.showWaitCursor(c.getParent());
 			}
 		});
 	}
 
+	protected void updateSortRenderer()
+	{
+		JTableHeader header = getTableHeader();
+		if (header == null) return;
+
+		TableColumnModel model = header.getColumnModel();
+		if (model == null) return;
+
+		for (int col = 0; col < model.getColumnCount(); col ++)
+		{
+			try
+			{
+				// By setting the renderer for each column seperately
+				// instead of using a default renderer, we can re-use
+				// the rendering done by the Look & Feel's default renderer
+				TableColumn column = getColumn(getColumnName(col));
+				if (column == null) continue;
+				column.setHeaderRenderer(sortRenderer);
+			}
+			catch (Throwable th)
+			{
+				// just in case, because getColumn() can throw an IllegalArgumentException
+			}
+		}
+	}
+	
 	public void sortingFinished()
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
@@ -1149,6 +1208,7 @@ public class WbTable
 		{
 			public void run()
 			{
+				updateSortRenderer();
 				WbSwingUtilities.showDefaultCursor(c.getParent());
 				// The sorting indicator is not properly displayed
 				// if repaint() is not called

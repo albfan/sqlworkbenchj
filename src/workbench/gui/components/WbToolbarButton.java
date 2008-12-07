@@ -14,9 +14,6 @@ package workbench.gui.components;
 import java.awt.Insets;
 import javax.swing.Action;
 import javax.swing.Icon;
-import javax.swing.UIManager;
-import javax.swing.plaf.metal.MetalLookAndFeel;
-import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -30,10 +27,6 @@ public class WbToolbarButton
 	public WbToolbarButton()
 	{
 		super();
-		if (UIManager.getLookAndFeel() instanceof MetalLookAndFeel)
-		{
-			enableToolbarRollover();
-		}
 	}
 
 	public WbToolbarButton(String aText)
@@ -66,14 +59,6 @@ public class WbToolbarButton
 	private void initMargin()
 	{
 		this.setMargin(MARGIN);
-	}
-	
-	public void setFlatLook()
-	{
-//		if (WbManager.getInstance().isWindowsClassic())
-//		{
-			this.setBorder(WbSwingUtilities.FLAT_BUTTON_BORDER);
-//		}
 	}
 	
 }

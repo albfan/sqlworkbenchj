@@ -40,7 +40,6 @@ import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.dbobjects.DbExplorerWindow;
-import workbench.gui.profiles.ProfileSelectionDialog;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
@@ -51,12 +50,10 @@ import workbench.sql.VariablePool;
 import workbench.sql.macros.MacroManager;
 import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
-import workbench.gui.dialogs.WbSplash;
 import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
-import workbench.resource.GuiSettings;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -772,9 +769,6 @@ public final class WbManager
 				ResourceMgr.getResources();
 				MacroManager.getInstance().getMacros();
 				ConnectionMgr.getInstance().readProfiles();
-
-				ProfileSelectionDialog d = new ProfileSelectionDialog(null, true, null);
-				d.dispose();
 			}
 		};
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -783,12 +777,12 @@ public final class WbManager
 	
 	public void runGui()
 	{
-		WbSplash splash = null;
-		if (GuiSettings.getShowSplash())
-		{
-			splash = new WbSplash();
-			splash.setVisible(true);
-		}
+//		WbSplash splash = null;
+//		if (GuiSettings.getShowSplash())
+//		{
+//			splash = new WbSplash();
+//			splash.setVisible(true);
+//		}
 
 		try
 		{
@@ -815,11 +809,11 @@ public final class WbManager
 		}
 		finally
 		{
-			if (splash != null)
-			{
-				splash.setVisible(false);
-				splash.dispose();
-			}
+//			if (splash != null)
+//			{
+//				splash.setVisible(false);
+//				splash.dispose();
+//			}
 		}
 	}
 

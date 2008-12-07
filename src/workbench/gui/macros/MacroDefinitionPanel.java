@@ -78,6 +78,8 @@ public class MacroDefinitionPanel
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(jTextField1);
 		policy.addComponent(jCheckBox1);
+		policy.addComponent(assignShortcutButton);
+		policy.addComponent(clearShortcutButton);
 		policy.addComponent(macroEditor);
 		policy.setDefaultComponent(macroEditor);
 		setFocusTraversalPolicy(policy);

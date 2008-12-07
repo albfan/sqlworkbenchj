@@ -37,8 +37,10 @@ public class MacroTreeCellRenderer
 	public MacroTreeCellRenderer()
 	{
 		super();
-		setIconTextGap(7);
+		setIconTextGap(5);
 		setLeafIcon(ResourceMgr.getPng("macro"));
+		setOpenIcon(ResourceMgr.getImage("Tree"));
+		setClosedIcon(ResourceMgr.getImage("Tree"));
 		moveToGroupBorder = new CompoundBorder(new LineBorder(Color.DARK_GRAY, 1), new EmptyBorder(1, 1, 1, 1));
 	}
 	

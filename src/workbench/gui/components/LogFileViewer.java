@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
@@ -47,6 +48,7 @@ public class LogFileViewer
 		display = new SearchableTextPane(this);
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setEditable(false);
+		display.setBackground(Color.WHITE);
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setWrapStyleWord(false);
 		scroll = new JScrollPane(display);

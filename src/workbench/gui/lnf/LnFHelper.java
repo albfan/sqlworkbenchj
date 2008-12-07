@@ -38,9 +38,6 @@ public class LnFHelper
 
 	public void initUI()
 	{
-		UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
-		UIManager.put("swing.boldMetal", Boolean.FALSE);
-
 		initializeLookAndFeel();
 
 		Settings settings = Settings.getInstance();
@@ -85,17 +82,23 @@ public class LnFHelper
 			def.put("TableHeader.font", dataFont);
 		}
 
-		// Polish up the standard look & feel settings
-		Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
-		def.put("Table.gridColor", c);
 		def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
 
 		// use our own classes for some GUI elements
-		def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
-		def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
-
+		if (!"Nimbus".equals(UIManager.getLookAndFeel().getName()))
+		{
+			def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
+			def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
+		}
+		
 		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
 		if (cls != null) def.put("TabbedPaneUI", cls);
+
+		if (settings.getBoolProperty("workbench.gui.adjustgridcolor", true))
+		{
+			Color c = settings.getColor("workbench.table.gridcolor", new Color(215,215,215));
+			def.put("Table.gridColor", c);
+		}
 	}
 
 	protected void initializeLookAndFeel()
@@ -120,8 +123,10 @@ public class LnFHelper
 			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
 			UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
+			UIManager.put("swing.boldMetal", Boolean.FALSE);
+
 			// Remove Synthetica's own window decorations
-			//UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
+			UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
 
 			// Remove the extra icons for read only text fields and
 			// the "search bar" in the main menu for the Substance Look & Feel
@@ -169,7 +174,7 @@ public class LnFHelper
 		catch (Exception e)
 		{
 			LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Could not set look and feel", e);
-			LogMgr.logWarning("LnFHelper.initializeLookAndFeel()", "Current look and feel class [" + className + "] will be removed");
+			LogMgr.logWarning("LnFHelper.initializeLookAndFeel()", "Current look and feel class [" + className + "] will be ignored");
 			GuiSettings.setLookAndFeelClass(null);
 		}
 

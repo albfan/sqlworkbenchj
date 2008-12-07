@@ -594,12 +594,20 @@ public class TableListPanel
 
 	public void disconnect()
 	{
-		this.dbConnection = null;
-		this.tableTypes.removeActionListener(this);
-		this.displayTab.removeChangeListener(this);
-		this.tableTypes.removeAllItems();
-		this.tableDefinition.setConnection(null);
-		this.reset();
+		try
+		{
+			this.ignoreStateChanged = true;
+			this.dbConnection = null;
+			this.tableTypes.removeActionListener(this);
+			this.displayTab.removeChangeListener(this);
+			this.tableTypes.removeAllItems();
+			this.tableDefinition.setConnection(null);
+			this.reset();
+		}
+		finally
+		{
+			this.ignoreStateChanged = false;
+		}
 	}
 
 	public void reset()
@@ -1723,6 +1731,8 @@ public class TableListPanel
 	 */
 	public void actionPerformed(ActionEvent e)
 	{
+		if (ignoreStateChanged) return;
+		
 		if (e.getSource() == this.tableTypes)
 		{
 			try
@@ -1881,7 +1891,6 @@ public class TableListPanel
 				{
 					startRetrieveCurrentPanel();
 				}
-
 			});
 		}
 	}

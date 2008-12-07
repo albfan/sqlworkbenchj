@@ -36,7 +36,7 @@ import workbench.gui.actions.WbAction;
  *
  *	This UI fixes a problem with the incorrect display of shortcuts
  *	in the tooltip. If the shortcut for a menu item does not contain
- *	a modifief (e.g. when the shortcut is F5) the original tooltip will
+ *	a modifier (e.g. when the shortcut is F5) the original tooltip will
  *	display an incorrect shortcut (e.g. Alt-e).
  *	This class fixes this bug.
  *	To enable this ToolTipUI use:
@@ -46,7 +46,8 @@ import workbench.gui.actions.WbAction;
  *
  * @author support@sql-workbench.net
  */
-public class WbToolTipUI extends BasicToolTipUI
+public class WbToolTipUI
+	extends BasicToolTipUI
 {
 
 	static WbToolTipUI sharedInstance = new WbToolTipUI();
