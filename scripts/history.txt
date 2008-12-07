@@ -1,12 +1,24 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
-Enh: (102.4) Completely reworked the macro handling. Macros can now be grouped, 
+Enh: (102.4) Completely reworked the macro handling. Macros can now be grouped,
      manually sorted, hidden from the menu and can be assigned a shortcut.
 
-     ************************************************************************
-     Once the old WbMacros.xml has been opened and saved with the new version
-     older versions of SQL Workbench cannot read that file any longer
-     ************************************************************************
+        Once the old WbMacros.xml has been opened and saved with the new version,
+        older versions of SQL Workbench cannot read that file any longer!
+
+Enh: (102.4) Result sets can now be named by specifying a keyword in the
+     comment prior to the statement to distinguish different result tabs.
+     To give the result tab a name, add
+     @wbresult myname
+     to the comment prior to the statement, e.g.:
+
+     -- @wbresult List of contacts
+     SELECT * FROM person;
+     /*- @wbresult List of companies */
+     SELECT * FROM company;
+
+     The keywords must be specified in lowercase.
+     It is  case-sensitive (@WbResult will not work)
 
 Enh: (102.4) Added 'WbListTriggers' commands to list all triggers in the
      database (showing the information from the "Triggers" panel in DbExplorer)
@@ -14,22 +26,22 @@ Enh: (102.4) Added 'WbListTriggers' commands to list all triggers in the
      command now also returns the list of triggers for a table.
 Enh: (102.4) When importing a text file, WbImport does no longer tries to guess
      different timestamp or date formats if the default format leads to an error.
-     Instead an error is reported immediately. 
+     Instead an error is reported immediately.
 Enh: (102.4) A new commandline argument -interactive is available when running
      in batch mode. This enables parameter prompting and execution confirmation
-     if necessary. 
+     if necessary.
 Enh: (102.4) WbInclude can now be called with just a filename. If no parameter
      switch is present, it is assumed that the rest of the commandline
      is the filename. In that mode, no further parameters can be specified
      (WbInclude will use defaults then)
 Enh: (102.2) The HTML manual is now also distributed as a single HTML page
-     The display of the single page from within the application can be 
+     The display of the single page from within the application can be
      enabled by setting the property
      workbench.help.singlepage=true
      in workbench.settings
 Enh: (102.2) A new workbench command to show the source of a stored procedure
      is available (WbProcSource)
-Enh: (102.2) WbList has been extended so that the object names and/or 
+Enh: (102.2) WbList has been extended so that the object names and/or
      types can be specified.
 Enh: (102.2) WbCopy now also supports -truncateTable (not only -deleteTarget)
 Enh: (102.2) When using a line filter for a text import the matching is less
@@ -37,10 +49,10 @@ Enh: (102.2) When using a line filter for a text import the matching is less
      but must occur in the line (technically it was changed from matches()
      to find()) to make filtering complete lines easier.
 Enh: (102.2) SQL Workbench/J can now be run interactively in console mode
-     To start the SQL Workbench/J console, use the supplied scripts 
+     To start the SQL Workbench/J console, use the supplied scripts
      sqlwb.cmd or sqlwb.sh
 Enh: (102.2) The status bar will now display the number of selected rows
-     If numberic values from a single column are selected, the sum of the 
+     If numberic values from a single column are selected, the sum of the
      values will be displayed. This can be turned off in the Options
      dialog ("Data Display" section)
 Enh: (102.2) The messages in the message tab can now be deleted manually
@@ -50,7 +62,7 @@ Enh: (102.2) A new option for WbExport is available (-writeEmptyResults) to
      The default is -writeEmptyResults=true
 Enh: (102.2) The values for search & replace in the editor are now saved and
      available as a dropdown in the dialogs
-Enh: (102.2) The logfile can now be displayed directly from within the 
+Enh: (102.2) The logfile can now be displayed directly from within the
      application using Help -> View logfile
 Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
@@ -62,28 +74,28 @@ Fix: (102.4) "Remove comments" was not working properly if the comments containe
 Fix: (102.3) When copying a connection profile, the property "Remove comments"
      was not copied.
 Fix: (102.3) Removed the brackets from the application name that is set
-     in the connection properties to work around the strange limitation 
+     in the connection properties to work around the strange limitation
      in the current Oracle drivers (11.1.0.7.0)
 Fix: (102.3) Drop Trigger from within the DB Explorer was no longer working
-Fix: (102.3) WbExport with -outputDir did not work any longer if only a single 
+Fix: (102.3) WbExport with -outputDir did not work any longer if only a single
      table was specified.
 Fix: (102.3) Using WbExport with -writeEmptyResults=false together with
      -append=true did not produce the expected result.
 Fix: (102.3) Fixed some errors in the german localisation
 Fix: (102.3) When using multiple windows together with "Separate Connection Per Tab"
      the application could lock up.
-Fix: (102.3) When changing database or schema in the DbExplorer the table 
+Fix: (102.3) When changing database or schema in the DbExplorer the table
      information was not cleared properly
-Fix: (102.2) A hack has been implemented to display SQL Server's timestamp 
+Fix: (102.2) A hack has been implemented to display SQL Server's timestamp
      columns (which are returned as a byte array) as a hex string (the same
      way the Query Analyzer displays the timestamp column)
 Fix: (102.2) The list of stored procedures was not displayed
-Fix: (102.2) When reformatting SQL Statements, Workbench variables where not 
+Fix: (102.2) When reformatting SQL Statements, Workbench variables where not
      treated correctly
-Fix: (102.2) WbCopy did not work when specifying multiple source tables 
+Fix: (102.2) WbCopy did not work when specifying multiple source tables
      with -deleteTarget and -checkDependencies
 Fix: (102.2) Column names with Chinese characters were not displayed correctly
-Fix: (102.2) WbCopy incorrectly assumed that the JDBC driver does not 
+Fix: (102.2) WbCopy incorrectly assumed that the JDBC driver does not
      support batched updated and disabled JDBC batching
 Fix: (102.2) -excludeFiles for WbImport did not work if the filename contained
      a dot (e.g. dbo.table.txt)
@@ -91,20 +103,20 @@ Fix: (102.2) Editing result sets that were retrieved from more than one table
      was no longer working.
 Fix: (102.2) Tried to make the application more robust against out of memory
      errors.
-Fix: (102.2) The parameter -delimiter for WbInclude now uses a colon as the 
+Fix: (102.2) The parameter -delimiter for WbInclude now uses a colon as the
      delimiter to specify a single line delimiter, e.g. -delimiter=GO:nl
-     in order make quoting of the parameter not necessary and avoid confusion 
+     in order make quoting of the parameter not necessary and avoid confusion
      with an actual semicolon in the definition. The old style is still
      supported but will be removed in the future.
-Fix: (102.2) When a profile is set to "Read Only", in place editing of 
+Fix: (102.2) When a profile is set to "Read Only", in place editing of
      results is now disabled.
 Fix: (102.2) When using a WbExport together with a SELECT statement, the
      "Max. Rows" option (lower right corner of the MainWindow) is not longer
      used for the SELECT.
-Fix: (102.2) The status column was not always displayed if something was 
+Fix: (102.2) The status column was not always displayed if something was
      changed in the result set
 Fix: (102.1) The setting to sort with a language specific collation was not
-     working any longer. 
+     working any longer.
 Fix: (102.1) -excludeTables did not work properly in all cases for WbSchemaDiff
 Fix: (102.1) If the definition for a Look & Feel was not complete (e.g. a
      missing classname) the "Look & Feel" panel in the Options window could no
