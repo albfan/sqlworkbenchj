@@ -1163,7 +1163,7 @@ public class DataStore
 	{
 		this.sql = aSql;
 		ResultNameParser parser = new ResultNameParser();
-		this.resultName = parser.getResultName(sql);
+		setResultName(parser.getResultName(sql));
 	}
 
 	public String getGeneratingSql() { return this.sql; }

@@ -978,6 +978,20 @@ public class JEditTextArea
 		}
 	}
 
+	@Override
+	public void validate()
+	{
+		super.validate();
+		painter.invalidateLineRange(0, getLineCount());
+	}
+
+	@Override
+	public void invalidate()
+	{
+		super.invalidate();
+		painter.invalidateLineRange(0, getLineCount());
+	}
+
 	public void setFont(Font aNewFont)
 	{
 		super.setFont(aNewFont);

@@ -13,6 +13,7 @@ package workbench.gui.sql;
 
 import java.awt.EventQueue;
 import javax.swing.JSplitPane;
+import workbench.gui.WbSwingUtilities;
 
 /**
  * @author support@sql-workbench.net
@@ -87,12 +88,13 @@ public class SplitPaneExpander
 
 	private void repaintClient()
 	{
-		EventQueue.invokeLater(new Runnable()
+		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				contentPanel.validate();
-				contentPanel.repaint();
+				WbSwingUtilities.callRepaint(contentPanel);
+				WbSwingUtilities.callRepaint(contentPanel.getTopComponent());
+				WbSwingUtilities.callRepaint(contentPanel.getBottomComponent());
 			}
 		});
 	}
