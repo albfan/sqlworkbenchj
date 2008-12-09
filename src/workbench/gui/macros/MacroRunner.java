@@ -62,7 +62,7 @@ public class MacroRunner
 		{
 			sql = mgr.replaceEditorText(sql, editor.getText());
 		}
-		panel.executeMacroSql(macro.getText(), replaceText);
+		panel.executeMacroSql(sql, replaceText);
 	}
 
 	protected String getStatementAtCursor(SqlPanel panel)
