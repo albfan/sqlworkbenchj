@@ -35,6 +35,7 @@ import javax.swing.ComponentInputMap;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -137,6 +138,7 @@ import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.dialogs.export.ExportFileDialog;
+import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.interfaces.Commitable;
@@ -190,7 +192,7 @@ public class SqlPanel
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver
+		FilenameChangeListener, ResultReceiver, MacroClient
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -880,6 +882,32 @@ public class SqlPanel
 		{
 			editor.requestFocusInWindow();
 		}
+	}
+
+	public String getText()
+	{
+		if (editor == null) return null;
+		return editor.getText();
+	}
+
+	public String getSelectedText()
+	{
+		if (editor == null) return null;
+		return editor.getSelectedText();
+	}
+
+	public JComponent getPanel()
+	{
+		return this;
+	}
+	
+	public String getStatementAtCursor()
+	{
+		ScriptParser parser = createScriptParser();
+		parser.setScript(getEditor().getText());
+		int index = parser.getCommandIndexAtCursorPos(getEditor().getCaretPosition());
+		String currentStatement = parser.getCommand(index);
+		return currentStatement;
 	}
 
 	public void reformatSql()

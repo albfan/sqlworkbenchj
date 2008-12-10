@@ -38,6 +38,14 @@ public class JdbcIndexReader
 		this.metaData = meta;
 	}
 
+	/**
+	 * This method is called after the ResultSet obtained from getIndexInfo() has been processed.
+	 *
+	 * This is a hook for sub-classes that overwrite getIndexInfo() and need to close the
+	 * returned result set.
+	 *
+	 * @see #getIndexInfo(workbench.db.TableIdentifier, boolean) 
+	 */
 	public void indexInfoProcessed()
 	{
 		// nothing to do, as we are using the driver's call
@@ -229,7 +237,7 @@ public class JdbcIndexReader
 				}
 				catch (Exception e)
 				{
-					LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Error retrieving PK information", e);
+					LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Error retrieving PK information", e);
 					pkName = "";
 				}
 				finally
@@ -267,7 +275,7 @@ public class JdbcIndexReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logWarning("DbMetadata.getTableIndexInformation()", "Could not retrieve indexes", e);
+			LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Could not retrieve indexes", e);
 		}
 		finally
 		{

@@ -14,6 +14,7 @@ package workbench.sql.macros;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import workbench.util.StringUtil;
 
 /**
  * A list of macros combined into a group.
@@ -50,6 +51,7 @@ public class MacroGroup
 
 	public void setVisibleInMenu(boolean flag)
 	{
+		this.modified = modified || flag != showInMenu;
 		this.showInMenu = flag;
 	}
 
@@ -60,6 +62,7 @@ public class MacroGroup
 
 	public void setSortOrder(int order)
 	{
+		this.modified = modified || sortOrder != order;
 		this.sortOrder = order;
 	}
 
@@ -75,6 +78,7 @@ public class MacroGroup
 
 	public void setName(String macroName)
 	{
+		this.modified = modified || !StringUtil.equalString(name, macroName);
 		this.name = macroName;
 	}
 
@@ -85,6 +89,10 @@ public class MacroGroup
 		modified = true;
 	}
 
+	/**
+	 * Synchronizes the sort order of each macro with the
+	 * order of the List in which the macros are stored.
+	 */
 	public synchronized void applySort()
 	{
 		Collections.sort(macros, new Sorter());
@@ -94,6 +102,15 @@ public class MacroGroup
 		}
 	}
 
+	/**
+	 * Returns those macros that are set to "display in menu" (i.e. where MacroDefinition.isVisibleInMenu()
+	 * returns true.
+	 *
+	 * This ignores the isVisibleInMenu() setting of this group.
+	 * 
+	 * @return
+	 * @see #getVisibleMacroSize() 
+	 */
 	public synchronized List<MacroDefinition> getVisibleMacros()
 	{
 		List<MacroDefinition> result = new ArrayList<MacroDefinition>(macros.size());
@@ -106,7 +123,15 @@ public class MacroGroup
 		}
 		return result;
 	}
-	
+
+	/**
+	 * Sets the list of macros for this group.
+	 *
+	 * This method is only here to make the class serializable for the XMLEncoder and should
+	 * not be used directly.
+	 * 
+	 * @param newMacros
+	 */
 	public synchronized void setMacros(List<MacroDefinition> newMacros)
 	{
 		macros.clear();
@@ -126,12 +151,24 @@ public class MacroGroup
 		modified = true;
 	}
 
+	/**
+	 * Creates a deep copy of this group.
+	 * For each macro definition that is part of this group, a copy
+	 * is created and added to the list of macros of the copy.
+	 *
+	 * The copy will be marked as "not modified" (i.e. isModified() will
+	 * return false on the copy), even if this group is modified.
+	 * 
+	 * @return a deep copy of this group
+	 * @see MacroDefinition#createCopy()
+	 */
 	public MacroGroup createCopy()
 	{
 		MacroGroup copy = new MacroGroup();
 		copy.name = this.name;
 		copy.sortOrder = this.sortOrder;
 		copy.showInMenu = this.showInMenu;
+		copy.modified = false;
 		for (MacroDefinition def : macros)
 		{
 			copy.macros.add(def.createCopy());
@@ -139,6 +176,15 @@ public class MacroGroup
 		return copy;
 	}
 
+	/**
+	 * Checks if this group has been modified.
+	 *
+	 * Returns true if any attribute of this group has been changed
+	 * or if any MacroDefinition in this group has been changed.
+	 *
+	 * @return true, if this group or any Macro has been modified
+	 * @see MacroDefinition#isModified()
+	 */
 	public boolean isModified()
 	{
 		if (modified) return true;
@@ -148,7 +194,12 @@ public class MacroGroup
 		}
 		return false;
 	}
-	
+
+	/**
+	 * Resets the internal modified flag and on all macros that are in this group.
+	 *
+	 * After a call to this method, isModified() will return false;
+	 */
 	public void resetModified()
 	{
 		modified = false;
@@ -159,8 +210,10 @@ public class MacroGroup
 	}
 
 	/**
-	 * Returns the number of macros in this groups that should be displayed in the menu
+	 * Returns the number of macros in this groups that should be displayed in the menu.
 	 * 
+	 * This returns a non-zero count even if isVisibleInMenu() returns false!
+	 * @see #getVisibleMacros() 
 	 */
 	public int getVisibleMacroSize()
 	{
@@ -203,6 +256,5 @@ public class MacroGroup
 		hash = 19 * hash + (this.name != null ? this.name.toLowerCase().hashCode() : 0);
 		return hash;
 	}
-
 
 }

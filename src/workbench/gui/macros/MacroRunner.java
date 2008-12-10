@@ -1,23 +1,20 @@
 /*
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 
 package workbench.gui.macros;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.sql.EditorPanel;
-import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
-import workbench.sql.ScriptParser;
+import workbench.resource.Settings;
 import workbench.sql.macros.MacroDefinition;
-import workbench.sql.macros.MacroManager;
 import workbench.util.StringUtil;
 
 /**
@@ -26,51 +23,97 @@ import workbench.util.StringUtil;
  */
 public class MacroRunner
 {
-	public void runMacro(MacroDefinition macro, SqlPanel panel, boolean replaceText)
+	private String selectedTextKey = Settings.getInstance().getProperty("workbench.macro.key.selection", "${selection}$");
+	private String selectedStatementKey = Settings.getInstance().getProperty("workbench.macro.key.selectedstmt", "${selected_statement}$");
+	private String currentStatementKey = Settings.getInstance().getProperty("workbench.macro.key.currentstatement", "${current_statement}$");
+	private String editorTextKey = Settings.getInstance().getProperty("workbench.macro.key.editortext", "${text}$");
+
+	public void runMacro(MacroDefinition macro, MacroClient client, boolean replaceText)
 	{
 		if (macro == null) return;
+		if (client == null) return;
 
-		MacroManager mgr = MacroManager.getInstance();
 		String sql = macro.getText();
-		EditorPanel editor = panel.getEditor();
 
 		if (StringUtil.isBlank(sql)) return;
 
-		if (mgr.hasSelectedKey(sql))
+		if (hasSelectedKey(sql))
 		{
-			String selected = editor.getSelectedText();
+			String selected = client.getSelectedText();
 			if (selected == null)
 			{
-				WbSwingUtilities.showErrorMessage(panel, ResourceMgr.getString("ErrNoSelection4Macro"));
+				WbSwingUtilities.showErrorMessage(client.getPanel(), ResourceMgr.getString("ErrNoSelection4Macro"));
 				return;
 			}
-			sql = mgr.replaceSelected(sql, selected);
+			sql = replaceSelected(sql, selected);
 		}
 
-		if (mgr.hasCurrentKey(sql))
+		if (hasCurrentKey(sql))
 		{
-			String current = getStatementAtCursor(panel);
+			String current = client.getStatementAtCursor();
 			if (current == null)
 			{
-				WbSwingUtilities.showErrorMessage(panel, ResourceMgr.getString("ErrNoCurrent4Macro"));
+				WbSwingUtilities.showErrorMessage(client.getPanel(), ResourceMgr.getString("ErrNoCurrent4Macro"));
 				return;
 			}
-			sql = mgr.replaceCurrent(sql, current);
+			sql = replaceCurrent(sql, current);
 		}
 
-		if (mgr.hasTextKey(sql))
+		if (hasTextKey(sql))
 		{
-			sql = mgr.replaceEditorText(sql, editor.getText());
+			sql = replaceEditorText(sql, client.getText());
 		}
-		panel.executeMacroSql(sql, replaceText);
+		client.executeMacroSql(sql, replaceText);
 	}
 
-	protected String getStatementAtCursor(SqlPanel panel)
+	protected boolean hasTextKey(String sql)
 	{
-		ScriptParser parser = panel.createScriptParser();
-		parser.setScript(panel.getEditor().getText());
-		int index = parser.getCommandIndexAtCursorPos(panel.getEditor().getCaretPosition());
-		String currentStatement = parser.getCommand(index);
-		return currentStatement;
+		if (sql == null) return false;
+		return (sql.indexOf(editorTextKey) > - 1);
 	}
+
+	protected boolean hasSelectedKey(String sql)
+	{
+		if (sql == null) return false;
+		return (sql.indexOf(selectedTextKey) > - 1) || (sql.indexOf(selectedStatementKey) > -1);
+	}
+
+	protected boolean hasCurrentKey(String sql)
+	{
+		if (sql == null) return false;
+		return (sql.indexOf(currentStatementKey) > - 1);
+	}
+
+	protected String replaceCurrent(String sql, String statementAtCursor)
+	{
+		if (statementAtCursor == null || sql == null) return sql;
+		return StringUtil.replace(sql, currentStatementKey, statementAtCursor);
+	}
+
+	protected String replaceEditorText(String sql, String text)
+	{
+		if (text == null || sql == null) return sql;
+		return StringUtil.replace(sql, editorTextKey, text);
+	}
+
+	protected String replaceSelected(String sql, String selectedText)
+	{
+		if (selectedText == null || sql == null) return sql;
+
+		if (sql.indexOf(selectedTextKey) > -1)
+		{
+			return StringUtil.replace(sql, selectedTextKey, selectedText);
+		}
+		else if (sql.indexOf(selectedStatementKey) > -1)
+		{
+			String stmt = selectedText.trim();
+			if (stmt.endsWith(";"))
+			{
+				stmt = stmt.substring(0, stmt.length() - 1);
+			}
+			return StringUtil.replace(sql, selectedStatementKey, stmt);
+		}
+		return sql;
+	}
+
 }

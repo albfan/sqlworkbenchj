@@ -166,7 +166,7 @@ public class TableDependency
 				// is not detected. Better display the user incorrect data, than 
 				// ending up in an endless loop.
 				// A circular dependency with more than 10 levels is an ugly design anyway :)
-				LogMgr.logError("TableDependency.readDependencyTree()", "Endless reference cycle detected for root=" + this.tableRoot + ", parent=" + parent, null);
+				LogMgr.logError("TableDependency.readTree()", "Endless reference cycle detected for root=" + this.tableRoot + ", parent=" + parent, null);
 				this.readAborted = true;
 				return count;
 			}

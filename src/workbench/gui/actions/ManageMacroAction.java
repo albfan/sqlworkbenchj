@@ -11,18 +11,20 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import javax.swing.SwingUtilities;
 import workbench.WbManager;
 import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
-import workbench.sql.macros.MacroManager;
 
 /**
  *	@author  support@sql-workbench.net
@@ -45,7 +47,14 @@ public class ManageMacroAction extends WbAction
 		SqlPanel sql = this.client.getCurrentSqlPanel();
 		if (sql != null)
 		{
-			MacroManager.getInstance().selectAndRun(sql);
+			Window w = SwingUtilities.getWindowAncestor(sql);
+			Frame parent = null;
+			if (w instanceof Frame)
+			{
+				parent = (Frame)w;
+			}
+			MacroManagerDialog d = new MacroManagerDialog(parent, sql);
+			d.setVisible(true);
 		}
 		else
 		{
