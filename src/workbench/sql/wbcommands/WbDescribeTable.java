@@ -11,8 +11,11 @@
  */
 package workbench.sql.wbcommands;
 
+import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import workbench.db.DbSettings;
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 
 import workbench.db.TriggerReader;
@@ -22,6 +25,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.ColumnRemover;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Display the definition of a table.
@@ -74,6 +78,31 @@ public class WbDescribeTable
 
 		if (toDescribe == null)
 		{
+			// No table or something similar found, try to find a procedure with that name
+			ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
+			ProcedureDefinition def = new ProcedureDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), DatabaseMetaData.procedureResultUnknown);
+			if (reader.procedureExists(def))
+			{
+				CharSequence source = def.getSource(currentConnection);
+				result.addMessage(source);
+				result.setSuccess();
+				return result;
+			}
+
+			// No procedure found, try to find a trigger. 
+			TriggerReader trgReader = new TriggerReader(currentConnection);
+			String source = trgReader.getTriggerSource(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+			if (StringUtil.isNonBlank(source))
+			{
+				result.addMessage(source);
+				result.setSuccess();
+				return result;
+			}
+		}
+
+		if (toDescribe == null)
+		{
+			// No table, view, procedure, trigger or something similar found
 			result.setFailure();
 			String msg = ResourceMgr.getString("ErrTableOrViewNotFound");
 			msg = msg.replace("%name%", table);
