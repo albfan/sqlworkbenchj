@@ -12,15 +12,13 @@
 package workbench.gui.components;
 
 import java.awt.Color;
-import java.awt.GridLayout;
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import javax.swing.JComponent;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
-import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.tools.ConnectionInfoPanel;
 import workbench.resource.ResourceMgr;
@@ -29,29 +27,31 @@ import workbench.resource.ResourceMgr;
  * @author  support@sql-workbench.net
  */
 public class ConnectionInfo
-	extends JComponent
+	extends WbLabelField
 	implements PropertyChangeListener, ActionListener
 {
-	private WbLabelField display;
 	private WbConnection sourceConnection;
 	private Color defaultBackground;
 	private WbAction showInfoAction;
-	
+
 	public ConnectionInfo(Color aBackground)
 	{
 		super();
-
-		this.setLayout(new GridLayout(1,1,0,0));
-		setOpaque(false);
-		setBackground(aBackground);
-		defaultBackground = aBackground;
+		if (aBackground != null)
+		{
+			setBackground(aBackground);
+			defaultBackground = aBackground;
+		}
+		else
+		{
+			defaultBackground = getBackground();
+		}
 		showInfoAction = new WbAction(this, "show-info");
 		showInfoAction.setMenuTextByKey("MnuTxtConnInfo");
 		showInfoAction.setEnabled(false);
-		this.display = new WbLabelField();
-		this.display.addPopupAction(showInfoAction);
-		this.add(this.display);
-		updateDisplay();
+		addPopupAction(showInfoAction);
+		setText(ResourceMgr.getString("TxtNotConnected"));
+
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -60,11 +60,11 @@ public class ConnectionInfo
 		{
 			this.sourceConnection.removeChangeListener(this);
 		}
-		
+
 		this.sourceConnection = aConnection;
-		
+
 		Color bkg = null;
-		
+
 		if (this.sourceConnection != null)
 		{
 			this.sourceConnection.addChangeListener(this);
@@ -75,38 +75,24 @@ public class ConnectionInfo
 			}
 		}
 		showInfoAction.setEnabled(this.sourceConnection != null);
-		
-		final Color newBackground = bkg;
-		
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				setInfoColor(newBackground);
-				updateDisplay();
-			}
-		});
-	}
 
-	private void setInfoColor(Color c)
-	{
-		if (c == null)
+		if (bkg == null)
 		{
 			setBackground(defaultBackground);
-			display.setDefaultBackground();
 		}
 		else
 		{
-			this.setBackground(c);
-			display.setBackground(c);
+			setBackground(bkg);
 		}
+
+		updateDisplay();
 	}
 
 	private void updateDisplay()
 	{
 		if (this.sourceConnection != null)
 		{
-			this.display.setText(this.sourceConnection.getDisplayString());
+			this.setText(this.sourceConnection.getDisplayString());
 			StringBuilder tip = new StringBuilder(30);
 			tip.append("<html>");
 			tip.append(this.sourceConnection.getDatabaseProductName());
@@ -115,20 +101,32 @@ public class ConnectionInfo
 			tip.append("<br>");
 			tip.append(ResourceMgr.getFormattedString("TxtDrvVersion", this.sourceConnection.getDriverVersion()));
 			tip.append("</html>");
-			this.display.setToolTipText(tip.toString());
+			setToolTipText(tip.toString());
 		}
 		else
 		{
-			this.display.setText(ResourceMgr.getString("TxtNotConnected"));
-			this.display.setToolTipText(null);
+			setText(ResourceMgr.getString("TxtNotConnected"));
+			setToolTipText(null);
 		}
-		this.display.setCaretPosition(0);
-		revalidate();
+		setCaretPosition(0);
+
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (getParent() != null)
+				{
+					// this seems to be the only way to resize the component
+					// approriately after setting a new text when using the dreaded GTK+ look and feel
+					getParent().doLayout();
+				}
+			}
+		});
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getSource() == this.sourceConnection 
+		if (evt.getSource() == this.sourceConnection
 			  && (WbConnection.PROP_CATALOG.equals(evt.getPropertyName()) ||
 			      WbConnection.PROP_SCHEMA.equals(evt.getPropertyName())))
 		{

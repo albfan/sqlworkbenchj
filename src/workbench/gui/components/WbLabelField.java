@@ -11,11 +11,13 @@
  */
 package workbench.gui.components;
 
-import java.awt.Color;
+import java.awt.Font;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
+import javax.swing.plaf.basic.BasicTextFieldUI;
 import workbench.gui.actions.WbAction;
+import workbench.resource.Settings;
 
 /**
  * A label that is built from a JTextField so that the text can
@@ -26,8 +28,6 @@ import workbench.gui.actions.WbAction;
 public class WbLabelField
 	extends JTextField
 {
-	private boolean defaultOpaque = false;
-	
 	private TextComponentMouseListener mouseListener;
 
 	public WbLabelField()
@@ -42,32 +42,22 @@ public class WbLabelField
 		init();
 	}
 
-	public void setDefaultBackground()
-	{
-		String cls = UIManager.getLookAndFeel().getClass().getName();
-		if ("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel".equals(cls))
-		{
-			// setting the background to a transparent color seems to be
-			// the only way to get a "Label"-like look with the nimbus
-			setOpaque(defaultOpaque);
-			setBackground(new Color(0, 0, 0, 0));
-		}
-		else
-		{
-			setOpaque(true);
-			this.setBackground(UIManager.getColor("Label.background"));
-			this.setForeground(UIManager.getColor("Label.foreground"));
-		}
-	}
-	
 	private void init()
 	{
-		defaultOpaque = isOpaque();
+		setUI(new BasicTextFieldUI());
 		setEditable(false);
+		setOpaque(true);
 		mouseListener = new TextComponentMouseListener();
 		addMouseListener(mouseListener);
 		setBorder(new EmptyBorder(2, 5, 2, 2));
-		setDefaultBackground();
+		Font f = UIManager.getFont("Label.font");
+		if (f == null)
+		{
+			f = Settings.getInstance().getFont(Settings.PROPERTY_STANDARD_FONT, true);
+		}
+		setFont(f);
+		setBackground(UIManager.getColor("Label.background"));
+		setForeground(UIManager.getColor("Label.foreground"));
 	}
 
 	public void addPopupAction(WbAction a)

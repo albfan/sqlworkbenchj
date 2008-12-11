@@ -12,14 +12,23 @@
 package workbench.gui.settings;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
@@ -27,6 +36,7 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
+import workbench.gui.components.WbFilePicker;
 import workbench.gui.lnf.LnFDefinition;
 import workbench.gui.lnf.LnFLoader;
 import workbench.resource.GuiSettings;
@@ -119,120 +129,118 @@ public class LnFDefinitionPanel
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+		GridBagConstraints gridBagConstraints;
 
-    lblName = new javax.swing.JLabel();
+    lblName = new JLabel();
     tfName = new StringPropertyEditor();
-    lblClassName = new javax.swing.JLabel();
+    lblClassName = new JLabel();
     tfClassName = new StringPropertyEditor();
-    lblLibrary = new javax.swing.JLabel();
-    infoText = new javax.swing.JTextArea();
-    jSeparator1 = new javax.swing.JSeparator();
+    lblLibrary = new JLabel();
+    infoText = new JTextArea();
+    jSeparator1 = new JSeparator();
     changeLnfButton = new WbButton();
     currentLabel = new HtmlLabel();
-    libraryPath = new workbench.gui.components.WbFilePicker();
+    libraryPath = new WbFilePicker();
 
-    setLayout(new java.awt.GridBagLayout());
+    setLayout(new GridBagLayout());
 
     lblName.setText(ResourceMgr.getString("LblLnFName"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 1, 7);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 10, 1, 7);
     add(lblName, gridBagConstraints);
 
-    tfName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
-    tfName.setMinimumSize(new java.awt.Dimension(50, 20));
+    tfName.setHorizontalAlignment(JTextField.LEFT);
     tfName.setName("name"); // NOI18N
-    tfName.setPreferredSize(new java.awt.Dimension(100, 20));
     tfName.addMouseListener(new TextComponentMouseListener());
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.EAST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(4, 3, 1, 3);
+    gridBagConstraints.insets = new Insets(4, 3, 1, 3);
     add(tfName, gridBagConstraints);
 
     lblClassName.setText(ResourceMgr.getString("LblLnFClass"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 7);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 10, 0, 7);
     add(lblClassName, gridBagConstraints);
 
     tfClassName.setColumns(10);
-    tfClassName.setHorizontalAlignment(javax.swing.JTextField.LEFT);
+    tfClassName.setHorizontalAlignment(JTextField.LEFT);
     tfClassName.setName("className"); // NOI18N
     tfClassName.addMouseListener(new TextComponentMouseListener());
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 3, 0, 3);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 3, 0, 3);
     add(tfClassName, gridBagConstraints);
 
     lblLibrary.setText(ResourceMgr.getString("LblLnFLib"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(2, 10, 0, 7);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 10, 0, 7);
     add(lblLibrary, gridBagConstraints);
 
     infoText.setEditable(false);
     infoText.setLineWrap(true);
     infoText.setText("Please click on the \"Make current\" button to switch the current Look and Feel");
     infoText.setWrapStyleWord(true);
-    infoText.setDisabledTextColor(new java.awt.Color(0, 0, 0));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    infoText.setDisabledTextColor(new Color(0, 0, 0));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 10);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(11, 10, 0, 10);
     add(infoText, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(jSeparator1, gridBagConstraints);
 
     changeLnfButton.setText(ResourceMgr.getString("LblActivateLnf"));
     ((WbButton)changeLnfButton).setResourceKey("LblSwitchLnF");
     changeLnfButton.addActionListener(this);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 8, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(10, 8, 0, 0);
     add(changeLnfButton, gridBagConstraints);
 
-    currentLabel.setBackground(new java.awt.Color(255, 255, 255));
-    currentLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(3, 2, 3, 2));
+    currentLabel.setBackground(new Color(255, 255, 255));
+    currentLabel.setBorder(BorderFactory.createEmptyBorder(3, 2, 3, 2));
     currentLabel.setOpaque(true);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(13, 8, 0, 8);
+    gridBagConstraints.insets = new Insets(13, 8, 0, 8);
     add(currentLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(3, 3, 0, 3);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 3, 0, 3);
     add(libraryPath, gridBagConstraints);
   }
 
@@ -279,16 +287,16 @@ public class LnFDefinitionPanel
 	}
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  public javax.swing.JButton changeLnfButton;
-  public javax.swing.JLabel currentLabel;
-  public javax.swing.JTextArea infoText;
-  public javax.swing.JSeparator jSeparator1;
-  public javax.swing.JLabel lblClassName;
-  public javax.swing.JLabel lblLibrary;
-  public javax.swing.JLabel lblName;
-  public workbench.gui.components.WbFilePicker libraryPath;
-  public javax.swing.JTextField tfClassName;
-  public javax.swing.JTextField tfName;
+  public JButton changeLnfButton;
+  public JLabel currentLabel;
+  public JTextArea infoText;
+  public JSeparator jSeparator1;
+  public JLabel lblClassName;
+  public JLabel lblLibrary;
+  public JLabel lblName;
+  public WbFilePicker libraryPath;
+  public JTextField tfClassName;
+  public JTextField tfName;
   // End of variables declaration//GEN-END:variables
 
 	static class HtmlLabel
