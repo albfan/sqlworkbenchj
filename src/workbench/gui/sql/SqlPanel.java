@@ -3067,6 +3067,10 @@ public class SqlPanel
 			{
 				String name = Settings.getInstance().getProperty("workbench.gui.animatedicon.name", "loading");
 				this.loadingIcon = ResourceMgr.getPicture(name);
+				if (loadingIcon == null)
+				{
+					this.loadingIcon = ResourceMgr.getPicture("loading");
+				}
 			}
 			else
 			{
