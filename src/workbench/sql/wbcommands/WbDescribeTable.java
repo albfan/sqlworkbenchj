@@ -116,7 +116,7 @@ public class WbDescribeTable
 			DataStore index = currentConnection.getMetadata().getIndexReader().getTableIndexInformation(toDescribe);
 			if (index.getRowCount() > 0)
 			{
-				index.setResultName(toDescribe.getTableName() +  "- " + ResourceMgr.getString("TxtDbExplorerIndexes"));
+				index.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
 				result.addDataStore(index);
 			}
 
@@ -124,7 +124,7 @@ public class WbDescribeTable
 			DataStore triggers = trgReader.getTableTriggers(toDescribe);
 			if (triggers != null && triggers.getRowCount() > 0)
 			{
-				triggers.setResultName(toDescribe.getTableName() +  "- " + ResourceMgr.getString("TxtDbExplorerTriggers"));
+				triggers.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
 				result.addDataStore(triggers);
 			}
 		}
