@@ -68,6 +68,10 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
+Fix: (102.6) Changing the background of the connection information in the 
+     toolbar only worked with the Nimbus look and feel.
+Fix: (102.6) When a macro was invoked using a shortcut with "Shift" the current
+     text in the editor was replaced.
 Fix: (102.5) The replacement of macro parameters (e.g ${current_statement}$) was 
      broken after the macro rework
 Fix: (102.4) The multi-page HTML manual was no longer displayed

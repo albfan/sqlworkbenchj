@@ -34,7 +34,7 @@ public class RunMacroAction
 {
 	private MainWindow client;
 	private MacroDefinition macro;
-
+	
 	public RunMacroAction(MainWindow aClient, MacroDefinition def, int index)
 	{
 		super();
@@ -65,7 +65,8 @@ public class RunMacroAction
 	{
 		if (this.client != null && this.macro != null)
 		{
-			boolean shiftPressed = isShiftPressed(e);
+			boolean shiftPressed = isShiftPressed(e) && invokedByMouse(e);
+
 			SqlPanel sql = this.client.getCurrentSqlPanel();
 			if (sql != null)
 			{
@@ -74,7 +75,7 @@ public class RunMacroAction
 			}
 			else
 			{
-				LogMgr.logWarning("RunMacroAction.actionPerformed()", "Don't have a curretn SqlPanel!");
+				LogMgr.logWarning("RunMacroAction.actionPerformed()", "Don't have a current SqlPanel!");
 			}
 		}
 	}

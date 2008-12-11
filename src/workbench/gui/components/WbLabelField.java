@@ -54,7 +54,7 @@ public class WbLabelField
 		}
 		else
 		{
-			setOpaque(false);
+			setOpaque(true);
 			this.setBackground(UIManager.getColor("Label.background"));
 			this.setForeground(UIManager.getColor("Label.foreground"));
 		}

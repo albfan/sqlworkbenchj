@@ -16,19 +16,18 @@ import javax.swing.Icon;
 import javax.swing.JMenuItem;
 import workbench.resource.ResourceMgr;
 
-
 /**
  *
  * @author  support@sql-workbench.net
  */
-public class WbMenuItem 
+public class WbMenuItem
 	extends JMenuItem
 {
 	public WbMenuItem()
 	{
 		super();
 	}
-	
+
 	public WbMenuItem(String aText)
 	{
 		super(aText);
@@ -39,17 +38,17 @@ public class WbMenuItem
 		super(anAction);
 	}
 
-	public WbMenuItem(String text, int mnemonic) 	
+	public WbMenuItem(String text, int mnemonic)
 	{
 		super(text, mnemonic);
 	}
-	
-	public WbMenuItem(Icon icon) 
+
+	public WbMenuItem(Icon icon)
 	{
 		super(icon);
 	}
-	
-	public WbMenuItem(String text, Icon icon) 
+
+	public WbMenuItem(String text, Icon icon)
 	{
 		super(text, icon);
 	}
@@ -59,10 +58,13 @@ public class WbMenuItem
 		this.setText(ResourceMgr.getString(key));
 		this.setToolTipText(ResourceMgr.getDescription(key));
 	}
-	
+
 	public void setText(String aText)
 	{
-		if (aText == null) return;
+		if (aText == null)
+		{
+			return;
+		}
 		int pos = aText.indexOf('&');
 		if (pos > -1)
 		{
@@ -74,7 +76,7 @@ public class WbMenuItem
 			super.setText(aText);
 			if (mnemonic != ' ' && mnemonic != '&')
 			{
-				this.setMnemonic((int)mnemonic);
+				this.setMnemonic((int) mnemonic);
 				try
 				{
 					this.setDisplayedMnemonicIndex(pos);
@@ -88,6 +90,5 @@ public class WbMenuItem
 		{
 			super.setText(aText);
 		}
-	}	
-
+	}
 }

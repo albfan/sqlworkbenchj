@@ -82,6 +82,12 @@ public class WbAction
 		putValue(ACTION_COMMAND_KEY, this.actionName);
 	}
 
+	public static boolean invokedByMouse(ActionEvent e)
+	{
+		boolean mouse = ((e.getModifiers() & InputEvent.BUTTON1_MASK) != 0);
+		return mouse;
+	}
+	
 	public static boolean isAltPressed(ActionEvent e)
 	{
 		boolean altPressed = ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);

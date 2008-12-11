@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -41,7 +42,7 @@ public class ConnectionInfo
 	{
 		super();
 
-		this.setLayout(new BorderLayout());
+		this.setLayout(new GridLayout(1,1,0,0));
 		setOpaque(false);
 		setBackground(aBackground);
 		defaultBackground = aBackground;
@@ -50,7 +51,7 @@ public class ConnectionInfo
 		showInfoAction.setEnabled(false);
 		this.display = new WbLabelField();
 		this.display.addPopupAction(showInfoAction);
-		this.add(this.display, BorderLayout.CENTER);
+		this.add(this.display);
 		updateDisplay();
 	}
 
