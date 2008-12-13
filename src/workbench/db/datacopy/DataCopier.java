@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.GenericObjectDropper;
 import workbench.db.TableCreator;
-import workbench.db.TableDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
@@ -31,6 +31,7 @@ import workbench.db.importer.RowDataReceiver;
 import workbench.db.importer.TableStatements;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.JobErrorHandler;
+import workbench.interfaces.ObjectDropper;
 import workbench.interfaces.ProgressReporter;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
@@ -207,18 +208,19 @@ public class DataCopier
 	{
 		if (dropIfExists)
 		{
-			boolean exists = this.targetConnection.getMetadata().tableExists(targetTable);
-			if (exists)
+			TableIdentifier toDrop = this.targetConnection.getMetadata().findTable(targetTable);
+			if (toDrop != null)
 			{
 				try
 				{
-					TableDropper dropper = new TableDropper(this.targetConnection);
-					dropper.dropTable(targetTable);
-					this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableDropped", targetTable.getQualifiedName()));
+					ObjectDropper dropper = new GenericObjectDropper();
+					dropper.setObjectTable(toDrop);
+					dropper.dropObjects();
+					this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableDropped", toDrop.getQualifiedName()));
 				}
 				catch (SQLException e)
 				{
-					this.addError(ResourceMgr.getFormattedString("MsgCopyErrorCreatTable",targetTable.getTableExpression(this.targetConnection),ExceptionUtil.getDisplay(e)));
+					this.addError(ResourceMgr.getFormattedString("MsgCopyErrorCreatTable",toDrop.getTableExpression(this.targetConnection),ExceptionUtil.getDisplay(e)));
 					throw e;
 				}
 			}
@@ -226,7 +228,17 @@ public class DataCopier
 
 		try
 		{
-			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, columns);
+			List<ColumnIdentifier> targetCols = new ArrayList<ColumnIdentifier>(columns.size());
+			for (ColumnIdentifier col : columns)
+			{
+				// When copying a table from MySQL or SQL Server to a standard compliant DBMS we must ensure
+				// that wrong quoting characters used are replaced with the standard characters
+				ColumnIdentifier copy = col.createCopy();
+				copy.adjustQuotes(sourceConnection.getMetadata(), targetConnection.getMetadata());
+				targetCols.add(col);
+			}
+
+			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, targetCols);
 			creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 			creator.createTable();
 

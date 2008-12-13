@@ -1759,6 +1759,12 @@ public class DataPumper
 
 			boolean newTable = target.isNewTable();
 			this.columnMapper.setAllowTargetEditing(newTable);
+			// Dropping the target table is only available if it should be created
+			// if the target exists, we do not support dropping and re-creating the table
+			if (!newTable)
+			{
+				this.dropTargetCbx.setSelected(false);
+			}
 			this.dropTargetCbx.setEnabled(newTable);
 			if (newTable)
 			{

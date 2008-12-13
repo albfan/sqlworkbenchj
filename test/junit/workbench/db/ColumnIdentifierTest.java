@@ -16,6 +16,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import junit.framework.TestCase;
+import workbench.util.StringUtil;
 
 public class ColumnIdentifierTest
 	extends TestCase
@@ -25,6 +26,96 @@ public class ColumnIdentifierTest
 		super(testName);
 	}
 
+	public void testAdjustQuotes()
+	{
+		QuoteHandler ansi = new QuoteHandler()
+		{
+			public boolean isQuoted(String name)
+			{
+				return name.startsWith("\"");
+			}
+
+			public String removeQuotes(String name)
+			{
+				if (isQuoted(name))
+				{
+					return StringUtil.trimQuotes(name);
+				}
+				return name;
+			}
+
+			public String quoteObjectname(String name)
+			{
+				if (isQuoted(name)) return name;
+				return "\"" + name + "\"";
+			}
+		};
+
+
+		QuoteHandler wrongQuoting = new QuoteHandler()
+		{
+			public boolean isQuoted(String name)
+			{
+				return name.startsWith("`");
+			}
+
+			public String removeQuotes(String name)
+			{
+				if (isQuoted(name))
+				{
+					return StringUtil.removeQuotes(name, "`");
+				}
+				return name;
+			}
+
+			public String quoteObjectname(String name)
+			{
+				if (isQuoted(name)) return name;
+				return "`" + name + "`";
+			}
+		};
+
+		QuoteHandler wrongQuoting2 = new QuoteHandler()
+		{
+			public boolean isQuoted(String name)
+			{
+				return name.startsWith("[") && name.contains("]");
+			}
+
+			public String removeQuotes(String name)
+			{
+				if (isQuoted(name))
+				{
+					String t = name.trim();
+					return t.substring(1, t.length() - 1);
+				}
+				return name;
+			}
+
+			public String quoteObjectname(String name)
+			{
+				if (isQuoted(name)) return name;
+				return "[" + name + "]";
+			}
+		};
+
+		ColumnIdentifier col1 = new ColumnIdentifier("`Special Name`");
+		col1.adjustQuotes(wrongQuoting, ansi);
+		assertEquals("\"Special Name\"", col1.getColumnName());
+
+		col1 = new ColumnIdentifier("noquotes");
+		col1.adjustQuotes(wrongQuoting, ansi);
+		assertEquals("noquotes", col1.getColumnName());
+
+		col1 = new ColumnIdentifier("\"Need quote\"");
+		col1.adjustQuotes(ansi, wrongQuoting);
+		assertEquals("`Need quote`", col1.getColumnName());
+
+		col1 = new ColumnIdentifier("[Very Wrong Quote]");
+		col1.adjustQuotes(wrongQuoting2, ansi);
+		assertEquals("\"Very Wrong Quote\"", col1.getColumnName());
+
+	}
 
 	public void testCopy()
 	{

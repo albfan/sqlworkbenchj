@@ -688,16 +688,38 @@ public class StringUtil
 		return result.toString();
 	}
 
+	/**
+	 * Removes the given quote character from the input string, but only if the
+	 * input string starts with that quote character
+	 *
+	 * @param input the string to "trim"
+	 * @param quote the quote character to be used
+	 * @return the input string with the quote character removed at the start and end
+	 */
+	public static final String removeQuotes(String input, String quote)
+	{
+		if (isEmptyString(input)) return input;
+		input = input.trim();
+		if (input.equals(quote)) return input;
+		if (!(input.startsWith(quote) && input.endsWith(quote))) return input;
+		return input.substring(quote.length(), input.length() - quote.length());
+	}
+
+	/**
+	 * Removes single or double quote character from the start and the beginning of a string.
+	 *
+	 * Removes the matching quote character at the beginning from the end of the string.
+	 * The string is trimmed before testing for the presence of the quotes.
+	 *
+	 * @param input
+	 * @return
+	 */
 	public static final String trimQuotes(String input)
 	{
-		if (input == null) return null;
-		if (input.length() == 0) return EMPTY_STRING;
-		if (input.length() == 1) return input;
+		if (isBlank(input)) return input;
 
 		String result = input.trim();
 		int len = result.length();
-		if (len == 0) return EMPTY_STRING;
-		if (len == 1) return input;
 
 		char firstChar = result.charAt(0);
 		char lastChar = result.charAt(len - 1);

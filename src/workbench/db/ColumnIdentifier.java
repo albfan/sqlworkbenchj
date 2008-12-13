@@ -212,10 +212,11 @@ public class ColumnIdentifier
 		result.comment = this.comment;
 		result.defaultValue = this.defaultValue;
 		result.columnClassName = this.columnClassName;
+		result.columnClass = this.columnClass;
 		result.columnTypeName = this.columnTypeName;
 		result.position = this.position;
 		result.displaySize = this.displaySize;
-		
+
 		return result;
 	}
 
@@ -434,6 +435,15 @@ public class ColumnIdentifier
 		this.isUpdateable = update;
 	}
 
+	public void adjustQuotes(QuoteHandler source, QuoteHandler target)
+	{
+		if (source.isQuoted(this.name))
+		{
+			String newName = source.removeQuotes(name);
+			this.name = target.quoteObjectname(newName);
+		}
+	}
+	
 	public int compareTo(ColumnIdentifier other)
 	{
 		if (other == null) return 1;

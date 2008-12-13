@@ -111,6 +111,8 @@ public class SqlUtil
 	{
 		if (aColname == null) return null;
 		if (aColname.length() == 0) return "";
+		if (aColname.charAt(0) == '"') return aColname;
+		
 		aColname = aColname.trim();
 		
 		boolean doQuote = quoteAlways;

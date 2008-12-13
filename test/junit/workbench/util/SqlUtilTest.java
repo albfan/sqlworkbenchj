@@ -30,6 +30,21 @@ public class SqlUtilTest
 		super(testName);
 	}
 
+	public void testQuoteObject()
+	{
+		String name = "test";
+		String quoted = SqlUtil.quoteObjectname(name);
+
+		// No quoting needed
+		assertEquals(quoted, name);
+
+		name = "\"test\"";
+		quoted = SqlUtil.quoteObjectname(name);
+
+		// No quoting needed because quotes are already there
+		assertEquals(quoted, name);
+
+	}
 	public void testIsSelectIntoNewTable()
 		throws Exception
 	{

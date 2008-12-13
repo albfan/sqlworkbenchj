@@ -45,7 +45,7 @@ public class TableCreatorTest extends TestCase
 		super.setUp();
 		util.emptyBaseDirectory();
 	}
-	
+
 	public void testCreateTable() 
 		throws Exception
 	{
@@ -54,8 +54,10 @@ public class TableCreatorTest extends TestCase
 		{
 			WbConnection con = util.getConnection();
 			Statement stmt = con.createStatement();
-			// Include a keyword as a column name to make sure TableCreator is properly quoting those names
-			stmt.executeUpdate("CREATE TABLE create_test (zzz integer, bbb integer, aaa integer, \"PRIMARY\" integer)");
+
+			// Include column names that are keywords or contain special characters to
+			// make sure TableCreator is properly handling those names
+			stmt.executeUpdate("CREATE TABLE create_test (zzz integer, bbb integer, aaa integer, \"PRIMARY\" decimal(10,2), \"W\u00E4hrung\" varchar(3) not null)");
 			TableIdentifier oldTable = new TableIdentifier("create_test");
 			TableIdentifier newTable = new TableIdentifier("new_table");
 			
@@ -73,14 +75,21 @@ public class TableCreatorTest extends TestCase
 			ColumnIdentifier c2 = cols.get(2);
 			cols.set(0, c2);
 			cols.set(2, c1);
+
+			// Make sure the columns are created with the default case of the target connection
+			c1.setColumnName(c1.getColumnName().toLowerCase());
+			c2.setColumnName(c2.getColumnName().toLowerCase());
 			
 			TableCreator creator = new TableCreator(con, newTable, cols);
 			creator.createTable();
 			
 			clist = con.getMetadata().getTableColumns(newTable);
-			assertEquals(4, clist.size());
+			assertEquals(5, clist.size());
 			
 			assertEquals("ZZZ", clist.get(0).getColumnName());
+			assertEquals("PRIMARY", clist.get(3).getColumnName());
+			assertEquals("\"W\u00E4hrung\"", clist.get(4).getColumnName());
+			assertFalse(clist.get(4).isNullable());
 		}
 		catch (Exception e)
 		{

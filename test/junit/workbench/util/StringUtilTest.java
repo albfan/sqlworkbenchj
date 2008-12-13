@@ -28,6 +28,38 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testRemoveQuotes()
+	{
+		String name = "test";
+		String trimmed = StringUtil.removeQuotes(name, "\"");
+		assertEquals(name, trimmed);
+
+		name = "\"test";
+		trimmed = StringUtil.removeQuotes(name, "\"");
+		assertEquals(name, trimmed);
+
+		name = "\"test\"";
+		trimmed = StringUtil.removeQuotes(name, "\"");
+		assertEquals("test", trimmed);
+
+		name = "\"test'";
+		trimmed = StringUtil.removeQuotes(name, "\"");
+		assertEquals(name, trimmed);
+
+		name = "'test'";
+		trimmed = StringUtil.removeQuotes(name, "\"");
+		assertEquals(name, trimmed);
+
+		name = "'test'";
+		trimmed = StringUtil.removeQuotes(name, "'");
+		assertEquals("test", trimmed);
+
+		name = "`test`";
+		trimmed = StringUtil.removeQuotes(name, "`");
+		assertEquals("test", trimmed);
+
+	}
+	
 	public void testLongestLine()
 	{
 		String s = "this\na test for\nseveral lines";

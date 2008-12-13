@@ -77,6 +77,7 @@ import workbench.db.postgres.PostgresDataTypeResolver;
  *  @author  support@sql-workbench.net
  */
 public class DbMetadata
+	implements QuoteHandler
 {
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
 	private String schemaTerm;
@@ -859,6 +860,16 @@ public class DbMetadata
 		return false;
 	}
 
+	public String removeQuotes(String name)
+	{
+		if (StringUtil.isEmptyString(name)) return name;
+
+		if (this.isSqlServer && name.startsWith("[") && name.endsWith("]"))
+		{
+			return name.substring(1, name.length() - 1);
+		}
+		return StringUtil.removeQuotes(name, quoteCharacter);
+	}
 
 	public String quoteObjectname(String aName)
 	{
