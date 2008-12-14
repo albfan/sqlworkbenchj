@@ -214,7 +214,10 @@ public class DataCopier
 				try
 				{
 					ObjectDropper dropper = new GenericObjectDropper();
-					dropper.setObjectTable(toDrop);
+					List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+					tables.add(toDrop);
+					dropper.setObjects(tables);
+					dropper.setConnection(targetConnection);
 					dropper.dropObjects();
 					this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableDropped", toDrop.getQualifiedName()));
 				}

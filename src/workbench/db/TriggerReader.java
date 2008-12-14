@@ -184,7 +184,7 @@ public class TriggerReader
 			}
 			
 			DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(dbConnection);
-			if (delim != null && !delim.isStandard())
+			if (result.length() > 0 && delim != null && !delim.isStandard())
 			{
 				result.append(nl);
 				result.append(delim.getDelimiter());
@@ -206,7 +206,7 @@ public class TriggerReader
 		boolean replaceNL = Settings.getInstance().getBoolProperty("workbench.db." + dbMeta.getDbId() + ".replacenl.triggersource", false);
 
 		String source = result.toString();
-		if (replaceNL)
+		if (replaceNL && source.length() > 0)
 		{
 			source = StringUtil.replace(source, "\\n", nl);
 		}

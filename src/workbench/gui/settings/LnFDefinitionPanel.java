@@ -77,14 +77,14 @@ public class LnFDefinitionPanel
 		});
 
 		Font f = UIManager.getDefaults().getFont("Label.font");
-		f = f.deriveFont((float)(f.getSize() * 1.1));
+		f = f.deriveFont(Font.BOLD, (float)(f.getSize() * 1.2));
 		infoText.setFont(f);
 		String button = changeLnfButton.getText();
 		String info = ResourceMgr.getString("TxtChangeLnFInfo").replace("%button%", button);
 		infoText.setText(info);
 		infoText.setWrapStyleWord(true);
 		infoText.setLineWrap(true);
-		infoText.setOpaque(true);
+//		infoText.setOpaque(true);
 		infoText.setBackground(this.getBackground());
 	}
 
@@ -144,7 +144,8 @@ public class LnFDefinitionPanel
 
     setLayout(new GridBagLayout());
 
-    lblName.setText(ResourceMgr.getString("LblLnFName"));
+    lblName.setLabelFor(tfName);
+    lblName.setText(ResourceMgr.getString("LblLnFClass")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -164,7 +165,8 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new Insets(4, 3, 1, 3);
     add(tfName, gridBagConstraints);
 
-    lblClassName.setText(ResourceMgr.getString("LblLnFClass"));
+    lblClassName.setLabelFor(tfClassName);
+    lblClassName.setText(ResourceMgr.getString("LblLnFClass")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -184,7 +186,8 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new Insets(2, 3, 0, 3);
     add(tfClassName, gridBagConstraints);
 
-    lblLibrary.setText(ResourceMgr.getString("LblLnFLib"));
+    lblLibrary.setLabelFor(lblLibrary);
+    lblLibrary.setText(ResourceMgr.getString("LblLnFLib")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -192,11 +195,11 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new Insets(2, 10, 0, 7);
     add(lblLibrary, gridBagConstraints);
 
-    infoText.setEditable(false);
     infoText.setLineWrap(true);
     infoText.setText("Please click on the \"Make current\" button to switch the current Look and Feel");
     infoText.setWrapStyleWord(true);
     infoText.setDisabledTextColor(new Color(0, 0, 0));
+    infoText.setOpaque(false);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -213,12 +216,16 @@ public class LnFDefinitionPanel
     gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(jSeparator1, gridBagConstraints);
 
-    changeLnfButton.setText(ResourceMgr.getString("LblActivateLnf"));
+    changeLnfButton.setText(ResourceMgr.getString("LblActivateLnf")); // NOI18N
+    changeLnfButton.setMaximumSize(new Dimension(200, 50));
+    changeLnfButton.setMinimumSize(new Dimension(140, 30));
+    changeLnfButton.setPreferredSize(new Dimension(140, 30));
     ((WbButton)changeLnfButton).setResourceKey("LblSwitchLnF");
     changeLnfButton.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(10, 8, 0, 0);
     add(changeLnfButton, gridBagConstraints);
@@ -231,9 +238,9 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.anchor = GridBagConstraints.SOUTH;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(13, 8, 0, 8);
+    gridBagConstraints.insets = new Insets(13, 8, 5, 8);
     add(currentLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
