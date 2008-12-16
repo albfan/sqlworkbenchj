@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.File;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
@@ -641,7 +640,7 @@ public class WbCopyTest
 			TestUtil util = new TestUtil("WbCopyCreateTest");
 			util.prepareEnvironment();
 
-			WbConnection source = util.getConnection(new File(util.getBaseDir(), "copyCreateTestSource"), "copyCreateTestSource");
+			WbConnection source = util.getConnection("copyCreateTestSource");
 			WbConnection target = util.getHSQLConnection("copyCreateTestTarget");
 
 			Statement tstmt = source.createStatement();
