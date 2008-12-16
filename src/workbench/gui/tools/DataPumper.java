@@ -1635,29 +1635,30 @@ public class DataPumper
 				result.append('"');
 			}
 
-//			StringBuffer mapping = new StringBuffer();
-//			boolean allEqual = true;
+			StringBuffer mapping = new StringBuffer(count*20);
+			boolean allEqual = true;
 
-			result.append(indent);
-			result.append("-" + WbCopy.PARAM_COLUMNS + "=\"");
 			for (int i=0; i < count; i++)
 			{
 				if (i > 0) result.append(", ");
 				String sourceCol = colMapping.sourceColumns[i].getColumnName();
 				String targetCol = colMapping.targetColumns[i].getColumnName();
-				result.append(sourceCol);
-				result.append('/');
-				result.append(targetCol);
-//				if (!sourceCol.equalsIgnoreCase(targetCol))
-//				{
-//					allEqual = false;
-//				}
+
+				mapping.append(sourceCol);
+				mapping.append('/');
+				mapping.append(targetCol);
+				if (!sourceCol.equalsIgnoreCase(targetCol))
+				{
+					allEqual = false;
+				}
 			}
-			result.append('"');
-//			if (!allEqual || colMapping.hasSkippedColumns)
-//			{
-//				result.append(mapping);
-//			}
+			if (!allEqual || colMapping.hasSkippedColumns)
+			{
+				result.append(indent);
+				result.append("-" + WbCopy.PARAM_COLUMNS + "='");
+				result.append(mapping);
+				result.append('\'');
+			}
 		}
 
 		String mode = (String)this.modeComboBox.getSelectedItem();

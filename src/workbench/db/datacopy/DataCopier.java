@@ -478,7 +478,7 @@ public class DataCopier
 			{
 				sql.append(", ");
 			}
-			sql.append(sid.getColumnName());
+			sql.append(sourceConnection.getMetadata().quoteObjectname(sid.getColumnName()));
 			cols[col] = tid;
 			col ++;
 		}
@@ -599,6 +599,7 @@ public class DataCopier
 						{
 							// Mapping specified, change the name of the column to the specified value
 							targetCol.setColumnName(entry.getValue());
+							targetCol.adjustQuotes(sourceConnection.getMetadata(), targetConnection.getMetadata());
 						}
 
 						// Make sure the order of the columns is preserved

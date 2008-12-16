@@ -87,7 +87,7 @@ public class TableCreatorTest extends TestCase
 			assertEquals(5, clist.size());
 			
 			assertEquals("ZZZ", clist.get(0).getColumnName());
-			assertEquals("PRIMARY", clist.get(3).getColumnName());
+			assertEquals("\"PRIMARY\"", clist.get(3).getColumnName());
 			assertEquals("\"W\u00E4hrung\"", clist.get(4).getColumnName());
 			assertFalse(clist.get(4).isNullable());
 		}
