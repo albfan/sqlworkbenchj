@@ -32,7 +32,6 @@ public class TypeMapper
 {
 	private WbConnection targetDb;
 	private Map<Integer, String> typeInfo;
-	private List<String> ignoreTypes;
 
 	/**
 	 * Create a TypeMapper for the DBMS specified through the target connection.
@@ -41,7 +40,6 @@ public class TypeMapper
 	public TypeMapper(WbConnection targetConnection)
 	{
 		this.targetDb = targetConnection;
-		this.ignoreTypes = targetConnection.getDbSettings().getDataTypesToIgnore();
 		this.createTypeMap();
 	}
 
@@ -121,7 +119,7 @@ public class TypeMapper
 		
 		if (name == null)
 		{
-			if (!this.typeInfo.containsKey(key)) return SqlUtil.getTypeName(type);
+			return SqlUtil.getTypeName(type);
 		}
 
 		return this.targetDb.getMetadata().getDataTypeResolver().getSqlTypeDisplay(name, type, size, digits, -1);
@@ -142,7 +140,6 @@ public class TypeMapper
 
 				// we can't handle arrays anyway
 				if (type == java.sql.Types.ARRAY || type == java.sql.Types.OTHER) continue;
-				if (this.ignoreTypes.contains(name)) continue;
 
 				Integer key = Integer.valueOf(type);
 				if (this.typeInfo.containsKey(key))

@@ -2535,6 +2535,8 @@ public class Settings
 
 			this.props.remove("workbench.db.mysql.dropindex.needstable");
 			this.props.remove("workbench.db.hxtt_dbf.dropindex.needstable");
+			this.props.remove("workbench.ignoretypes.postgresql");
+			this.props.remove("workbench.ignoretypes.mysql");
 		}
 		catch (Throwable e)
 		{

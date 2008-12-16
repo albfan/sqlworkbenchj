@@ -1033,17 +1033,33 @@ public class SqlUtil
 			case Types.CHAR:
 			case Types40.NVARCHAR:
 			case Types40.NCHAR:
-				if ("text".equalsIgnoreCase(typeName) && size == Integer.MAX_VALUE) return typeName;
+				// Postgres' text datatype does not have a size parameter
+				if ("text".equals(typeName)) return "text";
+				
 				if (size > 0) 
 				{
 					display = typeName + "(" + size + ")";
 				}
 				break;
 
-			case Types.DECIMAL:
 			case Types.DOUBLE:
-			case Types.NUMERIC:
+			case Types.REAL:
+				display = typeName;
+				break;
+				
 			case Types.FLOAT:
+				if (size > 0)
+				{
+					display = typeName + "(" + size + ")";
+				}
+				else
+				{
+					display = typeName;
+				}
+				break;
+
+			case Types.DECIMAL:
+			case Types.NUMERIC:
 				if ("money".equalsIgnoreCase(typeName)) // SQL Server
 				{
 					display = typeName;

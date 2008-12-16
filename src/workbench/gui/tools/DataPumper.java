@@ -1640,7 +1640,7 @@ public class DataPumper
 
 			for (int i=0; i < count; i++)
 			{
-				if (i > 0) result.append(", ");
+				if (i > 0) mapping.append(", ");
 				String sourceCol = colMapping.sourceColumns[i].getColumnName();
 				String targetCol = colMapping.targetColumns[i].getColumnName();
 

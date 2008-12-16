@@ -23,6 +23,7 @@ public class PostgresDataTypeResolver
 
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int wbTypeInfo)
 	{
+		if ("text".equalsIgnoreCase(dbmsName)) return "text";
 		if (sqlType == java.sql.Types.NUMERIC || sqlType == java.sql.Types.DECIMAL)
 		{
 			if (size == 65535 || size == 131089) size = 0;
