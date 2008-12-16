@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.File;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
@@ -640,23 +641,23 @@ public class WbCopyTest
 			TestUtil util = new TestUtil("WbCopyCreateTest");
 			util.prepareEnvironment();
 
-			WbConnection source = util.getConnection("copyCreateTestSource");
+			WbConnection source = util.getConnection(new File(util.getBaseDir(), "copyCreateTestSource"), "copyCreateTestSource");
 			WbConnection target = util.getHSQLConnection("copyCreateTestTarget");
 
 			Statement tstmt = source.createStatement();
 
-			tstmt.executeUpdate("create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50))");
-			tstmt.executeUpdate("insert into person (nr, lastname, firstname) values (1,'Dent', 'Arthur')");
-			tstmt.executeUpdate("insert into person (nr, lastname, firstname) values (2,'Beeblebrox', 'Zaphod')");
-			tstmt.executeUpdate("insert into person (nr, lastname, firstname) values (3,'Moviestar', 'Mary')");
-			tstmt.executeUpdate("insert into person (nr, lastname, firstname) values (4,'Perfect', 'Ford')");
+			tstmt.executeUpdate("create table person (nr integer not null primary key, \"Lastname\" varchar(50), firstname varchar(50))");
+			tstmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (1,'Dent', 'Arthur')");
+			tstmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (2,'Beeblebrox', 'Zaphod')");
+			tstmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (3,'Moviestar', 'Mary')");
+			tstmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (4,'Perfect', 'Ford')");
 			source.commit();
 
 			// First test a copy with a fully specified column mapping
 			String sql = "wbcopy -createTarget=true " +
 				"-sourceTable=person " +
 				"-targetTable=participants " +
-				"-columns=nr/person_id, firstname/firstname, lastname/lastname " +
+				"-columns='nr/person_id, firstname/firstname, \"Lastname\"/\"Lastname\"' " +
 				"-sourceProfile='copyCreateTestSource' " +
 				"-targetProfile='copyCreateTestTarget' ";
 
@@ -665,7 +666,7 @@ public class WbCopyTest
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
 			Statement ttstmt = target.createStatement();
-			ResultSet rs = ttstmt.executeQuery("select person_id, lastname, firstname from participants");
+			ResultSet rs = ttstmt.executeQuery("select person_id, \"Lastname\", firstname from participants");
 			while (rs.next())
 			{
 				int nr = rs.getInt(1);
@@ -696,7 +697,7 @@ public class WbCopyTest
 			result = copyCmd.execute(sql);
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 
-			rs = ttstmt.executeQuery("select nr, lastname, firstname from participants");
+			rs = ttstmt.executeQuery("select nr, \"Lastname\", firstname from participants");
 			while (rs.next())
 			{
 				int nr = rs.getInt(1);

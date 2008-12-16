@@ -19,7 +19,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
-import workbench.db.importer.DeleteType;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
@@ -124,7 +123,7 @@ public class TableCopy
 	{
 		// First read the defined columns from the passed parameter
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
-		List l = StringUtil.stringToList(cols, ",");
+		List l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
 		ColumnIdentifier[] result = new ColumnIdentifier[count];
 		for (int i=0; i < count; i++)
@@ -161,7 +160,7 @@ public class TableCopy
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
 		if (cols == null || cols.length() == 0) return null;
 
-		List l = StringUtil.stringToList(cols, ",");
+		List<String> l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
 
 		// Use a LinkedHashMap to make sure the order of the columns
@@ -169,7 +168,7 @@ public class TableCopy
 		Map<String, String> mapping = new LinkedHashMap<String, String>();
 		for (int i=0; i < count; i++)
 		{
-			String s = (String)l.get(i);
+			String s = l.get(i);
 			int pos = s.indexOf('/');
 			if (pos == -1)
 			{

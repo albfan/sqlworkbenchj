@@ -596,8 +596,14 @@ public class StringUtil
 
 	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
 	{
-		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, false);
+		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, false, false);
 	}
+
+	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
+	{
+		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, checkBrackets, false);
+	}
+
 	/**
 	 * Parses the given String and creates a List containing the elements
 	 * of the string that are separated by <tt>aDelimiter</aa>
@@ -609,11 +615,12 @@ public class StringUtil
    * @param checkBrackets flag to check for opening and closing brackets (delimiter inside brackets will not be taken into account)
 	 * @return A List of Strings
 	 */
-	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
+	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets, boolean keepQuotes)
 	{
 		if (isEmptyString(aString)) return new ArrayList<String>();
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
+		tok.setKeepQuotes(keepQuotes);
 		tok.setCheckBrackets(checkBrackets);
 		List<String> result = new LinkedList<String>();
 		while (tok.hasMoreTokens())
