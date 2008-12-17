@@ -73,280 +73,321 @@
 		(just like exporting to the OpenDocument format). 
 	</para>
 
-	<para>The command supports the following parameters:</para>
+	<simplesect id="wb-export-max-rows">
+		<title>WbExport and the "Max. Rows" option</title>
+		<para>
+			When you use the <literal>WbExport</literal> command together with
+			a <literal>SELECT</literal> query, the Max. Rows setting will <emphasis role="bold">not</emphasis> be respected
+			by the <literal>SELECT</literal> statement.
+		</para>
+	</simplesect>
 
-	<informaltable frame="all">
-		<tgroup cols="2" align="left">
-			<colspec colname="c1" colwidth="4cm" />
-			<colspec colname="c2" />
-			<thead>
-				<row>
-					<entry>Parameter</entry>
-					<entry>Description</entry>
-				</row>
-			</thead>
+	<section id="export-parameters">
+		<title>General WbExport parameters</title>
+		<informaltable frame="all">
+			<tgroup cols="2" align="left">
+				<colspec colname="c1" colwidth="4cm" />
+				<colspec colname="c2" />
+				<thead>
+					<row>
+						<entry>Parameter</entry>
+						<entry>Description</entry>
+					</row>
+				</thead>
 
-			<tbody valign="top">
-				<row>
-					<entry>-type</entry>
-					<entry>
-						<para>
-							Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xls, xlsx, html</literal>
-						</para>
-						<para>
-							Defines the type of the output file. <literal>sqlinsert</literal>
-							will create the necessary <literal>INSERT</literal> statements to put
-							the data into a table. If the records may already exist in the target table
-							but you don't want to (or cannot) delete the content of the table
-							before running the generated script, &wb-productname; can create a DELETE
-							statement for every <literal>INSERT</literal> statement. To create this
-							kind of script, use the <literal>sqldeleteinsert</literal> type.
-						</para>
-						<para>
-							In order for this to work properly the table needs to have keycolumns defined,
-							or you have to define the keycolumns manually using the <literal>-keycolumns</literal>
-							switch.
-						</para>
-						<para>
-							<literal>sqlupdate</literal> will generate UPDATE
-							statements that update all non-key columns of the table. This will only
-							generate valid <literal>UPDATE</literal> statements if at least one key
-							column is present. If the table does not have key columns defined, or you
-							want to use different columns, they can be specified using the <literal>-keycolumns</literal>
-							switch.
-						</para>
-						<para>
-							<literal>ods</literal> will generate a spreadsheet file in the OpenDocument
-							format that can e.g. be opened with OpenOffice.org.
-						</para>
-						<para>
-							<literal>xlsx</literal> will generate a spreadsheet file in the Microsoft Excel XML format and
-							is the recommended format for creating Excel spreadsheets.
-						</para>
-						<para>
-							<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
-							for Microsoft Excel. 
-						</para>
-					</entry>
-				</row>
+				<tbody valign="top">
+					<row>
+						<entry>-type</entry>
+						<entry>
+							<para>
+								Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xls, xlsx, html</literal>
+							</para>
+							<para>
+								Defines the type of the output file. <literal>sqlinsert</literal>
+								will create the necessary <literal>INSERT</literal> statements to put
+								the data into a table. If the records may already exist in the target table
+								but you don't want to (or cannot) delete the content of the table
+								before running the generated script, &wb-productname; can create a DELETE
+								statement for every <literal>INSERT</literal> statement. To create this
+								kind of script, use the <literal>sqldeleteinsert</literal> type.
+							</para>
+							<para>
+								In order for this to work properly the table needs to have keycolumns defined,
+								or you have to define the keycolumns manually using the <literal>-keycolumns</literal>
+								switch.
+							</para>
+							<para>
+								<literal>sqlupdate</literal> will generate UPDATE
+								statements that update all non-key columns of the table. This will only
+								generate valid <literal>UPDATE</literal> statements if at least one key
+								column is present. If the table does not have key columns defined, or you
+								want to use different columns, they can be specified using the <literal>-keycolumns</literal>
+								switch.
+							</para>
+							<para>
+								<literal>ods</literal> will generate a spreadsheet file in the OpenDocument
+								format that can e.g. be opened with OpenOffice.org.
+							</para>
+							<para>
+								<literal>xlsx</literal> will generate a spreadsheet file in the Microsoft Excel XML format and
+								is the recommended format for creating Excel spreadsheets.
+							</para>
+							<para>
+								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
+								for Microsoft Excel.
+							</para>
+						</entry>
+					</row>
 
-				<row>
-					<entry>-createDir</entry>
-					<entry>
-						If this parameter is set to true, &wb-productname; will create any 
-						needed directories when creating the output file. 
-					</entry>
-				</row>
+					<row>
+						<entry>-createDir</entry>
+						<entry>
+							If this parameter is set to true, &wb-productname; will create any
+							needed directories when creating the output file.
+						</entry>
+					</row>
 
-				<row>
-					<entry>-sourcetable</entry>
-					<entry>
-						<para>Defines a list of tables to be exported. If this
-							switch is used, <literal>-outputdir</literal> is also required
-							unless exactly one table is specified. If one table is
-							specified, the -file parameter is used to generate the file
-							for the table. If more then one table is specified, the
-							<literal>-outputdir</literal> parameter is used to defined
+					<row>
+						<entry>-sourcetable</entry>
+						<entry>
+							<para>Defines a list of tables to be exported. If this
+								switch is used, <literal>-outputdir</literal> is also required
+								unless exactly one table is specified. If one table is
+								specified, the -file parameter is used to generate the file
+								for the table. If more then one table is specified, the
+								<literal>-outputdir</literal> parameter is used to defined
+								the directory where the generated files should be stored.
+								Each file will be named as the exported table with the approriate
+								extension (.xml, .sql, etc). You can specify * as the table
+								name which will then export all tables accessible by the
+								current user.
+							</para>
+							<para>If you want to export tables from a different user
+								or schema you can use a schema name combined with a wildcard
+								e.g. <literal> -sourcetable=otheruser.*</literal>. In this case
+								the generated output files will contain the schema name as part of the
+								filename (e.g. <literal>otheruser.person.txt</literal>).
+								When <link linkend="command-import">importing</link> these files,
+								&wb-productname; will try to import the tables into the schema/user
+								specified in the filename. If you want to import them into
+								a different user/schema, then you have to use the <literal>-schema</literal>
+								switch for the <link linkend="command-import">import</link> command.
+							</para>
+						</entry>
+					</row>
+					<row>
+						<entry>-outputDir</entry>
+						<entry>When using the <literal>-sourcetable</literal> switch
+							with multiple tables, this parameter is mandatory and defines
 							the directory where the generated files should be stored.
-							Each file will be named as the exported table with the approriate
-							extension (.xml, .sql, etc). You can specify * as the table
-							name which will then export all tables accessible by the
-							current user.
-						</para>
-						<para>If you want to export tables from a different user
-							or schema you can use a schema name combined with a wildcard
-							e.g. <literal> -sourcetable=otheruser.*</literal>. In this case
-							the generated output files will contain the schema name as part of the
-							filename (e.g. <literal>otheruser.person.txt</literal>).
-							When <link linkend="command-import">importing</link> these files,
-							&wb-productname; will try to import the tables into the schema/user
-							specified in the filename. If you want to import them into
-							a different user/schema, then you have to use the <literal>-schema</literal>
-							switch for the <link linkend="command-import">import</link> command.
-						</para>
-					</entry>
-				</row>
-				<row>
-					<entry>-outputDir</entry>
-					<entry>When using the <literal>-sourcetable</literal> switch
-						with multiple tables, this parameter is mandatory and defines
-						the directory where the generated files should be stored.
-					</entry>
-				</row>
-				<row>
-					<entry>-continueOnError</entry>
-					<entry>When exporting more than one table, this parameter controls
-						whether the whole export will be terminated if an error occurs during 
-						export of one of the tables.
-					</entry>
-				</row>
-				<row>
-					<entry>-encoding</entry>
-					<entry>Defines the encoding in which the file should be
-						written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
-						To get a list of available encodings, execut <literal>WbExport</literal>
-						with the parameter <literal>-showencoding</literal>
-					</entry>
-				</row>
-				<row>
-					<entry>-showEncodings</entry>
-					<entry>Displays the encodings supported by your Java version and
-						operating system. If this parameter is present, all other parameters are ignored.
-					</entry>
-				</row>
-				<row>
-					<entry>-lineEnding</entry>
-					<entry>
-						<para>Possible values are: <literal>crlf</literal>, <literal>lf</literal></para>
-						<para>
-							Defines the line ending to be used for XML or text files. 
-							<literal>crlf</literal> puts the ASCII characters #13 and #10 after each line. 
-							This is the standard format on Windows based systems. <literal>dos</literal> and
-							<literal>win</literal> are synonym values for <literal>crlf</literal>,
-							<literal>unix</literal> is a synonym for <literal>lf</literal>.
-						</para>
-						<para>
-							<literal>lf</literal> puts only the ASCII character #10 at the end of each line. 
-							This is the standard format on Unix based systems (<literal>unix</literal> 
-							is a synonym value for this format).
-						</para>
-						<para>
-							The default line ending used depends on the platform where &wb-productname; is running.
-						</para>
-					</entry>
-				</row>
+						</entry>
+					</row>
+					<row>
+						<entry>-continueOnError</entry>
+						<entry>
+							When exporting more than one table, this parameter controls
+							whether the whole export will be terminated if an error occurs during
+							export of one of the tables.
+						</entry>
+					</row>
+					<row>
+						<entry>-encoding</entry>
+						<entry>
+							Defines the encoding in which the file should be
+							written. Common encodings are ISO-8859-1, ISO-8859-15, UTF-8 (or UTF8).
+							To get a list of available encodings, execut <literal>WbExport</literal>
+							with the parameter <literal>-showencoding</literal>. This parameter is ignored
+							for XLS, XLSX and ODS exports.
+						</entry>
+					</row>
+					<row>
+						<entry>-showEncodings</entry>
+						<entry>
+							Displays the encodings supported by your Java version and
+							operating system. If this parameter is present, all other parameters are ignored.
+						</entry>
+					</row>
 
-				<row>
-					<entry>-header</entry>
+					<row>
+						<entry>-lineEnding</entry>
+						<entry>
+							<para>Possible values are: <literal>crlf</literal>, <literal>lf</literal></para>
+							<para>
+								Defines the line ending to be used for XML or text files.
+								<literal>crlf</literal> puts the ASCII characters #13 and #10 after each line.
+								This is the standard format on Windows based systems. <literal>dos</literal> and
+								<literal>win</literal> are synonym values for <literal>crlf</literal>,
+								<literal>unix</literal> is a synonym for <literal>lf</literal>.
+							</para>
+							<para>
+								<literal>lf</literal> puts only the ASCII character #10 at the end of each line.
+								This is the standard format on Unix based systems (<literal>unix</literal>
+								is a synonym value for this format).
+							</para>
+							<para>
+								The default line ending used depends on the platform where &wb-productname; is running.
+							</para>
+						</entry>
+					</row>
 
-					<entry>
-						<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-						<para>
-							If this parameter is set to true, the header (i.e. the column names) are placed into the
-							first line of output file. The default is to not create a header line. You can define the default value 
-							for this parameter in the file <link linkend="export-text-header-default">workbench.settings</link>.
-							This parameter is valid for text and spreadsheet (OpenDocument, Excel) exports.
-						</para>
-					</entry>
-				</row>
+					<row>
+						<entry>-header</entry>
 
-				<row>
-					<entry>-compress</entry>
-					<entry>
-						<para>
-							Selects whether the output file should be compressed 
-							and put into a ZIP archive. An archive will be created with the name of the specified outputfile
-							but with the extension <literal>zip</literal>. The archive will then contain the specified file 
-							(e.g. if you specify <literal>data.txt</literal>, an archive <literal>data.zip</literal>
-							will be created containing exactly one entry with the name <literal>data.txt</literal>).
-							If the exported result set contains BLOBs, they will be stored in a separate archive, named 
-							<literal>data_lobs.zip</literal>.
-						</para>
-						<para>
-							When exporting multiple tables using the <literal>-sourcetable</literal> parameter, 
-							then &wb-productname; will create one ZIP archive for each table in the specified output 
-							directory with the filename <literal>"tablename".zip</literal>. For any table containing 
-							BLOB data, one additional ZIP archive is created.
-						</para>
-					</entry>
-				</row>
-				<row>
-					<entry>-clobAsFile</entry>
-					<entry>
-						<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-						<para>
-							For SQL, XML and Text export this controls how the contents of CLOB fields 
-							are exported. Usually the CLOB content is put directly into the output file
-							When generating SQL scripts with WbExport this can be a problem as not all 
-							DBMS can cope with long character literals (e.g. Oracle has a limit of 
-							4000 bytes). When this parameter is set to true, &wb-productname; will
-							create one file for each CLOB column value. This is the same behaviour 
-							as with BLOB columns.
-						</para>
-						<para>
-							Text files that are created with this parameter set to true, will
-							contain the filename of the generated output file instead of the 
-							actual column value. When importing such a file using <literal>WbImport</literal>
-							you have to specify the <literal>-clobIsFilename=true</literal> parameter.
-							Otherwise the filenames will be stored in the database and not the clob data.
-							This parameter is not necessary when importing XML exports, as <literal>WbImport</literal> will
-							automatically recognize the external files.
-						</para>
-						<note><para>
-								SQL scripts (<literal>-type=sqlinsert</literal>) generated with <literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
-						</para></note>
-						<para>
-							All CLOB files that are written using the encoding specified with the 
-							<literal>-encoding</literal> switch.
-							If the <literal>-encoding</literal> parameter is not specified the 
-							<link linkend="default-file-encoding">default file encoding</link> will be used.
-						</para>
-					</entry>
-				</row>
-				<row>
-					<entry>-lobIdCols</entry>
-					<entry>
-						<para>
-							When exporting CLOB or BLOB columns as external files, the filename with the
-							LOB content is generated using the row and column number for the currently 
-							exported LOB column (e.g. data_r15_c4.data). If you prefer to have the value
-							of a unique column combination as part of the file name, you can specify
-							those columns using the <literal>-lobIdCols</literal> parameter. The filename
-							for the LOB will then be generated using the base name of the export file, 
-							the column name of the LOB column and the values of the specified columns.
-							If you export your data into a file called user_info and specify <literal>-lobIdCols=id</literal> 
-							and your result contains a column called <literal>img</literal>, the LOB files 
-							will be named e.g. user_info_img_344.data
-						</para>
-					</entry>
-				</row>
-				<row>
-					<entry>-extensionColumn</entry>
-					<entry>
-						<para>
-							When exporting CLOB or BLOB columns as external files, the extension of the generated 
-							filenames can be defined based on a column of the result set. If the exported
-							table contains more than one type of BLOBs (e.g. JPEG, GIF, PDF) and your table
-							stores the information to define the extension based on the contents, this can be 
-							used to re-generate proper filenames. 
-						</para>
-						<para>
-							This parameter only makes sense if exactly one BLOB column is exported.
-						</para>
-					</entry>
-				</row>
-				<row>
-					<entry>-filenameColumn</entry>
-					<entry>
-						<para>
-							When exporting CLOB or BLOB columns as external files, the complete filename
-							can be taken from a column of the result set (instead of dynamically creating
-							a new file based on the row and column numbers). 
-						</para>
-						<para>
-							This parameter only makes sense if exactly one BLOB column is exported.
-						</para>
-					</entry>
-				</row>
-				<row>
-					<entry>-append</entry>
-					<entry>
-                        <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-						<para>
-                            Controls whether results are appended to an existing file, or overwrite an existing
-                            file. This parameter is only supported for text or SQL export types.
-						</para>
-					</entry>
-				</row>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								If this parameter is set to true, the header (i.e. the column names) are placed into the
+								first line of output file. The default is to not create a header line. You can define the default value
+								for this parameter in the file <link linkend="export-text-header-default">workbench.settings</link>.
+								This parameter is valid for text and spreadsheet (OpenDocument, Excel) exports.
+							</para>
+						</entry>
+					</row>
 
-				&progress-parameter;
-				
-			</tbody>
-		</tgroup>
-	</informaltable>
-		
+					<row>
+						<entry>-compress</entry>
+						<entry>
+							<para>
+								Selects whether the output file should be compressed
+								and put into a ZIP archive. An archive will be created with the name of the specified outputfile
+								but with the extension <literal>zip</literal>. The archive will then contain the specified file
+								(e.g. if you specify <literal>data.txt</literal>, an archive <literal>data.zip</literal>
+								will be created containing exactly one entry with the name <literal>data.txt</literal>).
+								If the exported result set contains BLOBs, they will be stored in a separate archive, named
+								<literal>data_lobs.zip</literal>.
+							</para>
+							<para>
+								When exporting multiple tables using the <literal>-sourcetable</literal> parameter,
+								then &wb-productname; will create one ZIP archive for each table in the specified output
+								directory with the filename <literal>"tablename".zip</literal>. For any table containing
+								BLOB data, one additional ZIP archive is created.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-clobAsFile</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+								For SQL, XML and Text export this controls how the contents of CLOB fields
+								are exported. Usually the CLOB content is put directly into the output file
+								When generating SQL scripts with WbExport this can be a problem as not all
+								DBMS can cope with long character literals (e.g. Oracle has a limit of
+								4000 bytes). When this parameter is set to true, &wb-productname; will
+								create one file for each CLOB column value. This is the same behaviour
+								as with BLOB columns.
+							</para>
+							<para>
+								Text files that are created with this parameter set to true, will
+								contain the filename of the generated output file instead of the
+								actual column value. When importing such a file using <literal>WbImport</literal>
+								you have to specify the <literal>-clobIsFilename=true</literal> parameter.
+								Otherwise the filenames will be stored in the database and not the clob data.
+								This parameter is not necessary when importing XML exports, as <literal>WbImport</literal> will
+								automatically recognize the external files.
+							</para>
+							<para>
+									Note that SQL exports (<literal>-type=sqlinsert</literal>) generated with
+									<literal>-clobAsFile=true</literal> can only be run with &wb-productname;!
+							</para>
+							<para>
+								All CLOB files that are written using the encoding specified with the
+								<literal>-encoding</literal> switch.
+								If the <literal>-encoding</literal> parameter is not specified the
+								<link linkend="default-file-encoding">default file encoding</link> will be used.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-lobIdCols</entry>
+						<entry>
+							<para>
+								When exporting CLOB or BLOB columns as external files, the filename with the
+								LOB content is generated using the row and column number for the currently
+								exported LOB column (e.g. data_r15_c4.data). If you prefer to have the value
+								of a unique column combination as part of the file name, you can specify
+								those columns using the <literal>-lobIdCols</literal> parameter. The filename
+								for the LOB will then be generated using the base name of the export file,
+								the column name of the LOB column and the values of the specified columns.
+								If you export your data into a file called user_info and specify <literal>-lobIdCols=id</literal>
+								and your result contains a column called <literal>img</literal>, the LOB files
+								will be named e.g. user_info_img_344.data
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-extensionColumn</entry>
+						<entry>
+							<para>
+								When exporting CLOB or BLOB columns as external files, the extension of the generated
+								filenames can be defined based on a column of the result set. If the exported
+								table contains more than one type of BLOBs (e.g. JPEG, GIF, PDF) and your table
+								stores the information to define the extension based on the contents, this can be
+								used to re-generate proper filenames.
+							</para>
+							<para>
+								This parameter only makes sense if exactly one BLOB column is exported.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-filenameColumn</entry>
+						<entry>
+							<para>
+								When exporting CLOB or BLOB columns as external files, the complete filename
+								can be taken from a column of the result set (instead of dynamically creating
+								a new file based on the row and column numbers).
+							</para>
+							<para>
+								This parameter only makes sense if exactly one BLOB column is exported.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-append</entry>
+						<entry>
+							<para>
+								Possible values: <literal>true</literal>,<literal>false</literal>
+							</para>
+							<para>
+								Controls whether results are appended to an existing file, or overwrite an existing
+								file. This parameter is only supported for text or SQL export types.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-dateFormat</entry>
+
+						<entry>
+							The date <link linkend="options-date-format">format</link> to be used when
+							writing date columns into the output file. This parameter is ignored for
+							SQL exports.
+						</entry>
+					</row>
+
+					<row>
+						<entry>-timestampFormat</entry>
+						<entry>
+							The <link linkend="options-date-format">format</link> to be used when writing
+							datetime (or timestamp) columns into the output file. This parameter is ignored
+							for SQL exports.
+						</entry>
+					</row>
+
+					&progress-parameter;
+
+				</tbody>
+			</tgroup>
+		</informaltable>
+	</section>
     
-	<section id="spool-text-parameters">
+	<section id="export-text-parameters">
 		<title>Parameters for the type TEXT</title>
 
 		<informaltable frame="all">
@@ -367,21 +408,6 @@
 						<entry>The given string sequence will be
 						placed between two columns. The default is a tab character
 						(<literal>-delimiter=\t</literal>
-						</entry>
-					</row>
-
-					<row>
-						<entry>-dateFormat</entry>
-
-						<entry>The date <link linkend="options-date-format">format</link> to be used when
-								writing date columns into the output file. 
-						</entry>
-					</row>
-
-					<row>
-						<entry>-timestampFormat</entry>
-						<entry>The <link linkend="options-date-format">format</link> to be used when writing
-						datetime (or timestamp) columns into the output file.
 						</entry>
 					</row>
 
@@ -491,7 +517,7 @@
 					<row>
 						<entry>-formatFile</entry>
 						<entry>
-							<para>Possible values: <literal>oracle</literal>, <literal>sqlserver</literal></para>
+							<para>Possible values: <literal>postgres</literal>, <literal>oracle</literal>, <literal>sqlserver</literal></para>
 							<para>
 								This parameter controls the creation of a control file for 
 								the bulk load utilities of Oracle and Microsoft SQL Server.
@@ -500,9 +526,12 @@
 								file for Microsoft's <literal>bcp</literal> utility.
 								The format file has the same filename as the output file but with the ending <literal>.ctl</literal>
 								for Oracle and <literal>.fmt</literal> for SQL Server.
+								For Postgres, this will create the necessary <literal>COPY</literal>
+								syntax to import the generated text file.
 							</para>
 							<para>
-								You can specify both formats. In that case two control files will be created.
+								You can specify several formats at the same time. In that case one control file for each
+								format specified will be created.
 							</para>
 							<para>
 								Note that the generated control file will most probably
@@ -516,7 +545,7 @@
 		</informaltable>
 	</section>
 
-	<section id="spool-xml-parameters">
+	<section id="export-xml-parameters">
 		<title>Parameters for type XML</title>
 
 		<informaltable frame="all">
@@ -532,21 +561,9 @@
 				<tbody valign="top">
 					<row>
 						<entry>-table</entry>
-						<entry>The given tablename will be put
-						into the &#60;table&#62; tag as an attribute.</entry>
-					</row>
-
-					<row>
-						<entry>-dateFormat</entry>
-						<entry>The date <link linkend="options-date-format">format</link> to be used when
-								writing date columns into the output file. 
-						</entry>
-					</row>
-
-					<row>
-						<entry>-timestampFormat</entry>
-						<entry>The <link linkend="options-date-format">format</link> to be used when writing
-						datetime (or timestamp) columns into the output file.
+						<entry>
+							The given tablename will be put
+							into the &#60;table&#62; tag as an attribute.
 						</entry>
 					</row>
 
@@ -613,7 +630,7 @@
 		</informaltable>
 	</section>
 
-	<section id="spool-sql-parameters">
+	<section id="export-sql-parameters">
 		<title>Parameters for type SQLUPDATE, SQLINSERT or SQLDELETEINSERT</title>
 
 		<informaltable frame="all">
@@ -673,14 +690,12 @@
 
 					<row>
 						<entry>-blobType</entry>
-
 						<entry>
 							<para>Possible values: <literal>file</literal>, <literal>dbms</literal>, <literal>ansi</literal>
 							</para>
 							<para>
-								This parameter controls how BLOB data will be put into 
-								the generated SQL statements. By default no conversion 
-								will be done, so the actual value that is written 
+								This parameter controls how BLOB data will be put into the generated SQL statements. 
+								By default no conversion will be done, so the actual value that is written
 								to the output file depends on the JDBC driver's implementation
 								of the Blob interface.
 							</para>
@@ -693,10 +708,10 @@
 								If you are planning to run the generated SQL scripts using 
 								&wb-productname; this is the recommended format.
 							</para>
-							<note><para>
-								When using <literal>-blobType=file</literal> the generated SQL script 
-								can only be run with &wb-productname;!
-							</para></note>
+							<para>
+								Note that SQL scripts generated with <literal>-blobType=file</literal>
+								can only be run with &wb-productname;
+							</para>
 							<para>
 								The parameter value <literal>ansi</literal>, will generate
 								"binary strings" that are compatible with the ANSI 
@@ -821,7 +836,7 @@
 		</informaltable>
 	</section>
 		
-	<section id="spool-ods-parameters">
+	<section id="export-ods-parameters">
 		<title>Parameters for Spreadsheet types (ods, xslx, xls)</title>
 
 		<informaltable frame="all">
@@ -847,9 +862,8 @@
 	<section id="export-compress">
 		<title>Compressing export files</title>
 		<para>
-			The <link linkend="command-export"><literal>WbExport</literal></link> command supports compressing
-			of the generated output files. This includes the "main" export file and any associated LOB
-			files.
+			The <literal>WbExport</literal> command supports compressing of the generated output files.
+			This includes the "main" export file as well as any associated LOB files.
 		</para>
 		<para>
 			When using <link linkend="command-import"><literal>WbImport</literal></link> you can import
@@ -938,14 +952,6 @@ WHERE table1.column1 = table2.column1;</programlisting>
 		if the SELECT is based on a single table (or view).
 	</para>
 
-	<simplesect id="wb-export-max-rows">
-		<title>WbExport and the "Max. Rows" option</title>
-		<para>
-			When you use the <literal>WbExport</literal> command together with
-			a <literal>SELECT</literal> query, the Max. Rows setting will <emphasis role="bold">not</emphasis> be respected
-			by the <literal>SELECT</literal> statement.
-		</para>
-	</simplesect>
 	</section>
 		
 </section>
