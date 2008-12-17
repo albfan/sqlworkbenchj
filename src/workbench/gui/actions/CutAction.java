@@ -12,16 +12,15 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
 
 import workbench.interfaces.ClipboardSupport;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to cut  the contents of a entry field
+ *	Action to cut  the contents of an entry field
+ * 
  *	@author  support@sql-workbench.net
  */
 public class CutAction extends WbAction
@@ -32,10 +31,9 @@ public class CutAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey("MnuTxtCut");
+		initMenuDefinition("MnuTxtCut", PlatformShortcuts.getDefaultCutShortcut());
 		this.setIcon("Cut");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK));
 	}
 
 	public void executeAction(ActionEvent e)

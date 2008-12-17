@@ -12,17 +12,16 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
 
 import workbench.interfaces.ClipboardSupport;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 
 /**
  *	Action to paste the contents of the clipboard into the entry field
+ * 
  *	@author  support@sql-workbench.net
  */
 public class PasteAction extends WbAction
@@ -33,10 +32,9 @@ public class PasteAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey("MnuTxtPaste");
+		initMenuDefinition("MnuTxtPaste", PlatformShortcuts.getDefaultPasteShortcut());
 		this.setIcon("Paste");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK));
 	}
 
 	public void executeAction(ActionEvent e)

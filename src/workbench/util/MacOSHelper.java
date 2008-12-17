@@ -34,10 +34,15 @@ public class MacOSHelper
 {
 	private Object proxy;
 
-	public void installApplicationHandler()
+	public static boolean isMacOS()
 	{
 		String osName = System.getProperty("os.name");
-		if (!osName.startsWith("Mac OS")) return;
+		return (osName.startsWith("Mac OS"));
+	}
+
+	public void installApplicationHandler()
+	{
+		if (!isMacOS()) return;
 		try
 		{
 			LogMgr.logDebug("MacOSHelper.installApplicationHandler()", "Trying to install Mac OS ApplicationListener");
@@ -93,18 +98,15 @@ public class MacOSHelper
 				// in order to be able to cancel exiting.
 				// See http://developer.apple.com/samplecode/OSXAdapter/listing2.html
 				setHandled(args[0], false);
-//				LogMgr.logDebug("MacOSHelper.invoke()", "Calling exitWorkbench()");
 				WbManager.getInstance().exitWorkbench();
 			}
 			else if ("handleAbout".equals(methodName))
 			{
-//				LogMgr.logDebug("MacOSHelper.invoke()", "Showing about dialog...");
 				WbManager.getInstance().showDialog("workbench.gui.dialogs.WbAboutDialog");
 				setHandled(args[0], true);
 			}
 			else if ("handlePreferences".equals(methodName))
 			{
-//				LogMgr.logDebug("MacOSHelper.invoke()", "Showing options dialog...");
 				OptionsDialogAction.showOptionsDialog();
 				setHandled(args[0], true);
 			}

@@ -12,16 +12,13 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
-
 import workbench.interfaces.ClipboardSupport;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Action to copy the contents of a entry field into the clipboard
+ *	Action to copy the contents of an entry field into the clipboard
+ * 
  *	@author  support@sql-workbench.net
  */
 public class CopyAction extends WbAction
@@ -32,10 +29,9 @@ public class CopyAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.setMenuTextByKey("MnuTxtCopy");
+		initMenuDefinition("MnuTxtCopy", PlatformShortcuts.getDefaultCopyShortcut());
 		this.setIcon("Copy");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK));
 	}
 
 	public void executeAction(ActionEvent e)

@@ -49,9 +49,9 @@ public class XlsRowDataConverter
 	// at that point in time the formatters are not initialized
 	public void createFormatters()
 	{
-		String dateFormat = this.defaultDateFormatter != null ? this.defaultDateFormatter.toLocalizedPattern() : StringUtil.ISO_DATE_FORMAT;
-		String tsFormat = this.defaultTimestampFormatter != null ? this.defaultTimestampFormatter.toLocalizedPattern() : StringUtil.ISO_TIMESTAMP_FORMAT;
-		String numFormat = this.defaultNumberFormatter != null ? this.defaultNumberFormatter.toLocalizedPattern() : "0.00";
+		String dateFormat = this.defaultDateFormatter != null ? this.defaultDateFormatter.toPattern() : StringUtil.ISO_DATE_FORMAT;
+		String tsFormat = this.defaultTimestampFormatter != null ? this.defaultTimestampFormatter.toPattern() : StringUtil.ISO_TIMESTAMP_FORMAT;
+		String numFormat = this.defaultNumberFormatter != null ? this.defaultNumberFormatter.toPattern() : "0.00";
 		excelFormat = new ExcelDataFormat(numFormat, dateFormat, "0", tsFormat);
 	}
 

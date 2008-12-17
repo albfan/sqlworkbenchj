@@ -21,7 +21,8 @@ import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 
 /**
- *
+ * A class to create a table in the database based on column definitions.
+ * 
  * @author  support@sql-workbench.net
  */
 public class TableCreator
