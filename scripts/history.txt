@@ -68,6 +68,14 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
+Fix: (102.7) The default shortcuts for Copy, Cut & Paste are now set properly
+     on Mac OS X.
+Fix: (102.7) The shortcuts for Copy, Cut & Paste can now be defined through
+     the shortcut definition dialog.
+Fix: (102.7) WbCopy (and DataPumper) did not work with tables that had
+     non-standard column names that needed quoted (either because the
+     names consited of mixed-case or they contained special characters
+     that required quoting.
 Fix: (102.6) Changing the background of the connection information in the 
      toolbar only worked with the Nimbus look and feel.
 Fix: (102.6) When a macro was invoked using a shortcut with "Shift" the current
