@@ -851,7 +851,7 @@
 				</thead>
 				<tbody valign="top">
 					<row>
-						<entry>-pageTitle</entry>
+						<entry>-title</entry>
 						<entry>The name to be used for the worksheet</entry>
 					</row>
 				</tbody>
