@@ -258,16 +258,6 @@ public class JEditTextArea
 		return new Point(x,y);
 	}
 
-//	public void setShowLineNumbers(boolean aFlag)
-//	{
-//		this.painter.setShowLineNumbers(aFlag);
-//	}
-//
-//	public boolean getShowLineNumbers()
-//	{
-//		return this.painter.getShowLineNumbers();
-//	}
-
 	private String fixLinefeed(String input)
 	{
 		return StringUtil.makePlainLinefeed(input);

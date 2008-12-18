@@ -13,7 +13,9 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
-import workbench.gui.MainWindow;
+import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.sql.RenameableTab;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -21,9 +23,9 @@ import workbench.resource.ResourceMgr;
  */
 public class RenameTabAction extends WbAction
 {
-	private MainWindow client;
+	private RenameableTab client;
 
-	public RenameTabAction(MainWindow aClient)
+	public RenameTabAction(RenameableTab aClient)
 	{
 		super();
 		this.client = aClient;
@@ -34,6 +36,13 @@ public class RenameTabAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.renameTab();
+		String oldName = client.getCurrentTabTitle();
+		String newName = WbSwingUtilities.getUserInput(WbManager.getInstance().getCurrentWindow(),
+			ResourceMgr.getString("MsgEnterNewTabName"), oldName);
+		
+		if (newName != null)
+		{
+			client.setCurrentTabTitle(newName);
+		}
 	}
 }

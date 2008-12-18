@@ -27,13 +27,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
@@ -154,7 +151,6 @@ import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.ResultLogger;
 import workbench.interfaces.Exporter;
-import workbench.interfaces.TextChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -175,7 +171,6 @@ import workbench.util.SqlUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
-import workbench.util.WbProperties;
 import workbench.util.WbThread;
 import workbench.util.WbWorkspace;
 
@@ -188,11 +183,11 @@ import workbench.util.WbWorkspace;
  */
 public class SqlPanel
 	extends JPanel
-	implements FontChangedListener, TextChangeListener,
+	implements FontChangedListener,
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient
+		FilenameChangeListener, ResultReceiver, MacroClient, ResultCloser
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -269,7 +264,6 @@ public class SqlPanel
 
 	protected boolean importRunning;
 	protected boolean updateRunning;
-	protected boolean textModified;
 	protected String tabName;
 
 	private List<DbExecutionListener> execListener;
@@ -283,6 +277,7 @@ public class SqlPanel
 	protected DwStatusBar statusBar;
 	protected StatementRunner stmtRunner;
 	protected GenericRowMonitor rowMonitor;
+	protected IconHandler iconHandler;
 //</editor-fold>
 
 	public SqlPanel(int anId)
@@ -328,15 +323,15 @@ public class SqlPanel
 
 		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
-		s.addPropertyChangeListener(this, Settings.PROPERTY_ANIMATED_ICONS);
 
 		this.rowMonitor = new GenericRowMonitor(this.statusBar);
 
 		// The listeners have to be added as late as possible to ensure
 		// that everything is created properly in case an event is fired
-		this.editor.addTextChangeListener(this);
 		this.resultTab.addChangeListener(this);
 		this.editor.addFilenameChangeListener(this);
+		new ResultTabHandler(this.resultTab, this);
+		iconHandler = new IconHandler(this);
 	}
 
 	public String getId()
@@ -363,6 +358,12 @@ public class SqlPanel
 	{
 		this.appendResults = flag;
 	}
+
+	protected void updateAppendAction()
+	{
+		if (this.appendResultsAction != null) this.appendResultsAction.setSwitchedOn(appendResults);
+	}
+
 
 	public void initDivider(int height)
 	{
@@ -419,11 +420,6 @@ public class SqlPanel
 		if (withSeperator) this.toolbar.add(new WbToolbarSeparator(), this.toolbar.getComponentCount() - 1);
 	}
 
-	public void addResultTabChangeListener(ChangeListener l)
-	{
-		this.resultTab.addChangeListener(l);
-	}
-
 	public boolean readFile(String aFilename, String encoding)
 	{
 		if (aFilename == null) return false;
@@ -439,7 +435,7 @@ public class SqlPanel
 		}
 		else
 		{
-			this.removeIconFromTab();
+			iconHandler.removeIcon();
 			result = false;
 		}
 		return result;
@@ -797,7 +793,7 @@ public class SqlPanel
 		this.actions.add(filterAction);
 		this.actions.add(selectionFilterAction);
 		this.actions.add(this.resetFilterAction );
-		CloseResultTabAction closeResult = new CloseResultTabAction(this);
+		CloseResultTabAction closeResult = new CloseResultTabAction(this.resultTab, this);
 		closeResult.setCreateMenuSeparator(true);
 		this.actions.add(closeResult);
 
@@ -939,6 +935,12 @@ public class SqlPanel
 		}
 	}
 
+	/**
+	 * Saves any change to the current result set to the database.
+	 * The saving is done in a background thread by updateDb()
+	 *
+	 * @see #updateDb()
+	 */
 	public void saveChangesToDatabase()
 	{
 		if (this.currentData == null)
@@ -964,6 +966,14 @@ public class SqlPanel
 		t.start();
 	}
 
+
+	/**
+	 * Does the actually saving of the database changes.
+	 *
+	 * The method is public to allow a direct call for GUI tests.
+	 * Normally {@link #saveChangesToDatabase() } should be called to
+	 * initiate the background thread.
+	 */
 	public void updateDb()
 	{
 		try
@@ -976,7 +986,7 @@ public class SqlPanel
 		catch (OutOfMemoryError mem)
 		{
 			setLogText(ExceptionUtil.getDisplay(mem));
-			showBusyIcon(false);
+			iconHandler.showBusyIcon(false);
 			EventQueue.invokeLater(new Runnable()
 			{
 				public void run()
@@ -1106,70 +1116,8 @@ public class SqlPanel
 	public void readFromWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
-		if (this.hasFileLoaded())
-		{
-			this.closeFile(true, false);
-		}
-		this.reset();
-
-		try
-		{
-			w.readHistoryData(index, this.sqlHistory);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("SqlPanel.readFromWorkspace()", "Could not read history data for index=" + index);
-			this.clearSqlHistory(false);
-		}
-
-		String filename = w.getExternalFileName(index);
-		this.tabName = w.getTabTitle(index);
-		if (this.tabName != null && this.tabName.length() == 0)
-		{
-			this.tabName = null;
-		}
-
-		int v = w.getMaxRows(index);
-		this.statusBar.setMaxRows(v);
-		v = w.getQueryTimeout(index);
-		this.statusBar.setQueryTimeout(v);
-
-		boolean fileLoaded = false;
-		if (filename != null)
-		{
-			String encoding = w.getExternalFileEncoding(index);
-			fileLoaded = this.readFile(filename, encoding);
-		}
-
-		if (!fileLoaded)
-		{
-			try
-			{
-				this.sqlHistory.showCurrent();
-			}
-			catch (Exception e)
-			{
-				e.printStackTrace();
-			}
-		}
-		else
-		{
-			int cursorPos = w.getExternalFileCursorPos(index);
-			if (cursorPos > -1 && cursorPos < this.editor.getText().length()) this.editor.setCaretPosition(cursorPos);
-		}
-
-		WbProperties props = w.getSettings();
-
-		int loc = props.getIntProperty("tab" + (index) + ".divider.location", 200);
-		this.contentPanel.setDividerLocation(loc);
-		loc = props.getIntProperty("tab" + (index) + ".divider.lastlocation", 0);
-		if (loc > 0) this.contentPanel.setLastDividerLocation(loc);
-
-		this.appendResults = props.getBoolProperty("tab" + (index) + ".append.results", false);
-		if (this.appendResultsAction != null) this.appendResultsAction.setSwitchedOn(this.appendResults);
-		this.updateTabTitle();
-		this.editor.clearUndoBuffer();
-		this.editor.resetModified();
+		PanelWorkspaceHandler handler = new PanelWorkspaceHandler(this);
+		handler.readFromWorkspace(w, index);
 	}
 
 	/** Do any work which should be done during the process of saving the
@@ -1191,31 +1139,8 @@ public class SqlPanel
 	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
-		this.saveHistory(w);
-		Properties props = w.getSettings();
-
-		int location = this.contentPanel.getDividerLocation();
-		int last = this.contentPanel.getLastDividerLocation();
-		props.setProperty("tab" + (index) + ".divider.location", Integer.toString(location));
-		props.setProperty("tab" + (index) + ".divider.lastlocation", Integer.toString(last));
-		props.setProperty("tab" + (index) + ".append.results", Boolean.toString(this.appendResults));
-
-		w.setMaxRows(index, this.statusBar.getMaxRows());
-		w.setQueryTimeout(index, this.statusBar.getQueryTimeout());
-		if (this.hasFileLoaded())
-		{
-			w.setExternalFileName(index, this.getCurrentFileName());
-			w.setExternalFileCursorPos(index, this.editor.getCaretPosition());
-			w.setExternalFileEncoding(index, this.editor.getCurrentFileEncoding());
-		}
-		if (this.tabName != null)
-		{
-			w.setTabTitle(index, this.tabName);
-		}
-		if (this.hasFileLoaded() && this.editor.isModified())
-		{
-			editor.saveCurrentFile();
-		}
+		PanelWorkspaceHandler handler = new PanelWorkspaceHandler(this);
+		handler.saveToWorkspace(w, index);
 	}
 
 	public void saveHistory(WbWorkspace w)
@@ -1275,7 +1200,7 @@ public class SqlPanel
 	}
 
 
-	private void updateTabTitle()
+	protected void updateTabTitle()
 	{
 		Container parent = this.getParent();
 		if (parent instanceof JTabbedPane)
@@ -1297,11 +1222,11 @@ public class SqlPanel
 		{
 			File f = new File(fname);
 			tooltip = f.getAbsolutePath();
-			this.showIconForTab(getFileIcon());
+			iconHandler.showIconForTab(iconHandler.getFileIcon());
 		}
 		else
 		{
-			this.removeIconFromTab();
+			iconHandler.removeIcon();
 		}
 
 		String plainTitle = getTabTitle();
@@ -1331,7 +1256,7 @@ public class SqlPanel
 
 	public void setTabName(String aName)
 	{
-		if (StringUtil.isEmptyString(aName))
+		if (StringUtil.isBlank(aName))
 			this.tabName = null;
 		else
 			this.tabName = aName;
@@ -1613,14 +1538,14 @@ public class SqlPanel
 	{
 		try
 		{
-			this.showCancelIcon();
+			iconHandler.showCancelIcon();
 			this.cancelExecution = true;
 			this.setCancelState(false);
 			this.stmtRunner.cancel();
 		}
 		finally
 		{
-			showBusyIcon(false);
+			iconHandler.showBusyIcon(false);
 		}
 	}
 
@@ -1741,7 +1666,6 @@ public class SqlPanel
 		fireDbExecStart();
 
 		setCancelState(true);
-//		makeReadOnly();
 
 		try
 		{
@@ -1789,7 +1713,7 @@ public class SqlPanel
 
 		this.cancelExecution = false;
 
-		ExportFileDialog dialog = new ExportFileDialog(getParentWindow());
+		ExportFileDialog dialog = new ExportFileDialog(SwingUtilities.getWindowAncestor(this));
 		dialog.setQuerySql(sql, this.getConnection());
 		dialog.setIncludeSqlInsert(true);
 
@@ -1897,9 +1821,9 @@ public class SqlPanel
 	 */
 	public int getUpdateErrorAction(int errorRow, String errorColumn, String dataLine, String errorMessage)
 	{
-		this.showBusyIcon(false);
+		iconHandler.showBusyIcon(false);
 		int choice = this.currentData.getActionOnError(errorRow, errorColumn, dataLine, errorMessage);
-		this.showBusyIcon(true);
+		iconHandler.showBusyIcon(true);
 		return choice;
 	}
 
@@ -1920,10 +1844,10 @@ public class SqlPanel
 			msg = msg.replace("%data%", dataLine == null ? "(null)" : dataLine.substring(0,40) + " ...");
 		}
 
-		this.showBusyIcon(false);
+		iconHandler.showBusyIcon(false);
 		int choice = WbSwingUtilities.getYesNoIgnoreAll(this, msg);
 		int result = JobErrorHandler.JOB_ABORT;
-		this.showBusyIcon(true);
+		iconHandler.showBusyIcon(true);
 		if (choice == JOptionPane.YES_OPTION)
 		{
 			result = JobErrorHandler.JOB_CONTINUE;
@@ -2062,7 +1986,7 @@ public class SqlPanel
 	{
 		if (executeAllStatements) return true;
 		boolean result = false;
-		this.showBusyIcon(false);
+		iconHandler.showBusyIcon(false);
 		try
 		{
 			String msg = ResourceMgr.getString("MsgConfirmExecution") + "\n" + StringUtil.getMaxSubstring(command, 60);
@@ -2090,7 +2014,7 @@ public class SqlPanel
 		}
 		finally
 		{
-			this.showBusyIcon(true);
+			iconHandler.showBusyIcon(true);
 		}
 		return result;
 	}
@@ -2310,9 +2234,9 @@ public class SqlPanel
 
 		if (ds != null && ds.getRowCount() > 0)
 		{
-			this.showBusyIcon(false);
+			iconHandler.showBusyIcon(false);
 			goOn = VariablesEditor.showVariablesDialog(ds);
-			this.showBusyIcon(true);
+			iconHandler.showBusyIcon(true);
 		}
 		
 		if (goOn && this.checkPrepared)
@@ -2323,18 +2247,18 @@ public class SqlPanel
 				if (pool.isRegistered(sql) || pool.addPreparedStatement(sql))
 				{
 					StatementParameters parms = pool.getParameters(sql);
-					this.showBusyIcon(false);
+					iconHandler.showBusyIcon(false);
 					goOn = ParameterEditor.showParameterDialog(parms);
-					this.showBusyIcon(true);
+					iconHandler.showBusyIcon(true);
 				}
 			}
 			catch (SQLException e)
 			{
-				this.showBusyIcon(false);
+				iconHandler.showBusyIcon(false);
 				String msg = ResourceMgr.getString("ErrCheckPreparedStatement");
 				msg = StringUtil.replace(msg, "%error%", ExceptionUtil.getDisplay(e));
 				WbSwingUtilities.showErrorMessage(this, msg);
-				this.showBusyIcon(true);
+				iconHandler.showBusyIcon(true);
 
 				// Ignore errors in prepared statements...
 				goOn = true;
@@ -2616,7 +2540,7 @@ public class SqlPanel
 					{
 						// the animated gif needs to be turned off when a
 						// dialog is displayed, otherwise Swing uses too much CPU
-						this.showBusyIcon(false);
+						iconHandler.showBusyIcon(false);
 
 						if (!macroRun) this.highlightError(scriptParser, commandWithError, selectionOffset);
 
@@ -2628,7 +2552,7 @@ public class SqlPanel
 							NumberStringCache.getNumberString(i+1),
 							NumberStringCache.getNumberString(count));
 						int choice = WbSwingUtilities.getYesNoIgnoreAll(this, question);
-						this.showBusyIcon(true);
+						iconHandler.showBusyIcon(true);
 
 						if (choice == JOptionPane.NO_OPTION)
 						{
@@ -2855,9 +2779,10 @@ public class SqlPanel
 			}
 			else
 			{
-				if (comment != null)
+				if (StringUtil.isNonBlank(comment))
 				{
-					this.editor.appendLine("\n" + comment + "\n");
+					if (pos > 1) this.editor.appendLine("\n");
+					this.editor.appendLine(comment + "\n");
 				}
 				else
 				{
@@ -2869,7 +2794,7 @@ public class SqlPanel
 			this.editor.setCaretPosition(pos);
 			this.editor.scrollToCaret();
 		}
-		startExecution(sql, 0, -1, false, true);
+		startExecution(comment + "\n" + sql, 0, -1, false, true);
 	}
 
 	private void addResultTab(DwPanel data, String sql)
@@ -3048,188 +2973,12 @@ public class SqlPanel
 		});
 	}
 
-	private ImageIcon fileIcon = null;
-	private ImageIcon fileModifiedIcon = null;
-	private ImageIcon cancelIcon = null;
-	private ImageIcon loadingIcon;
-
-	private void showCancelIcon()
-	{
-		this.showIconForTab(this.getCancelIndicator());
-		if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
-	}
-
-	private ImageIcon getLoadingIndicator()
-	{
-		if (this.loadingIcon == null)
-		{
-			if (GuiSettings.getUseAnimatedIcon())
-			{
-				String name = Settings.getInstance().getProperty("workbench.gui.animatedicon.name", "loading");
-				this.loadingIcon = ResourceMgr.getPicture(name);
-				if (loadingIcon == null)
-				{
-					this.loadingIcon = ResourceMgr.getPicture("loading");
-				}
-			}
-			else
-			{
-				this.loadingIcon = ResourceMgr.getPicture("loading-static");
-			}
-		}
-		return this.loadingIcon;
-	}
-
-
-	private ImageIcon getCancelIndicator()
-	{
-		if (this.cancelIcon == null)
-		{
-			if (GuiSettings.getUseAnimatedIcon())
-			{
-				this.cancelIcon = ResourceMgr.getPicture("cancelling");
-			}
-			else
-			{
-				this.cancelIcon = ResourceMgr.getPicture("cancelling-static");
-			}
-		}
-		return this.cancelIcon;
-	}
-
-	private ImageIcon getFileIcon()
-	{
-		ImageIcon icon = null;
-		if (this.textModified)
-		{
-			if (this.fileModifiedIcon == null)
-			{
-				this.fileModifiedIcon = ResourceMgr.getPicture("file-modified-icon");
-			}
-			icon = this.fileModifiedIcon;
-		}
-		else
-		{
-			if (this.fileIcon == null)
-			{
-				this.fileIcon = ResourceMgr.getPicture("file-icon");
-			}
-			icon = this.fileIcon;
-		}
-
-		return icon;
-	}
-
-	private void removeIconFromTab()
-	{
-		if (this.isBusy()) return;
-		this.showIconForTab(null);
-	}
-
-	private void showFileIcon()
-	{
-		if (this.isBusy()) return;
-		this.showIconForTab(this.getFileIcon());
-	}
-
-	protected void showIconForTab(ImageIcon icon)
-	{
-		Container parent = this.getParent();
-		if (parent instanceof JTabbedPane)
-		{
-			JTabbedPane tab = (JTabbedPane)parent;
-			int index = tab.indexOfComponent(this);
-			Icon oldIcon = tab.getIconAt(index);
-			if (icon == null && oldIcon == null) return;
-			if (icon != oldIcon)
-			{
-				tab.setIconAt(index, icon);
-			}
-		}
-	}
-
-	private Runnable hideBusyRunnable = new Runnable()
-	{
-		public void run()
-		{
-			_showBusyIcon(false);
-		}
-	};
-
-	private Runnable showBusyRunnable = new Runnable()
-	{
-		public void run()
-		{
-			_showBusyIcon(true);
-		}
-	};
-
-	private void showBusyIcon(boolean show)
-	{
-		if (show)
-		{
-			WbSwingUtilities.invoke(showBusyRunnable);
-		}
-		else
-		{
-			WbSwingUtilities.invoke(hideBusyRunnable);
-		}
-	}
-
-	private void _showBusyIcon(boolean show)
-	{
-		Container parent = this.getParent();
-		if (parent instanceof JTabbedPane)
-		{
-			final JTabbedPane tab = (JTabbedPane)parent;
-			int index = tab.indexOfComponent(this);
-			if (index >= 0 && index < tab.getTabCount())
-			{
-				try
-				{
-					if (show)
-					{
-						tab.setIconAt(index, getLoadingIndicator());
-					}
-					else
-					{
-						if (this.hasFileLoaded())
-						{
-							tab.setIconAt(index, getFileIcon());
-						}
-						else
-						{
-							tab.setIconAt(index, null);
-						}
-						if (GuiSettings.getUseAnimatedIcon())
-						{
-							// flushing the animated icons also stops the thread that
-							// is used for the animation. If this is not done it will still
-							// "animate" in the background (at least on older JDKs) and thus
-							// degrade performance
-							// For a static icon this is not necessary, actually not flushing
-							// the static icon improves performance when it's re-displayed
-							if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
-							if (this.cancelIcon != null) this.cancelIcon.getImage().flush();
-						}
-					}
-				}
-				catch (Throwable th)
-				{
-					LogMgr.logWarning("SqlPanel.setBusy()", "Error when setting busy icon!", th);
-				}
-				tab.validate();
-				tab.repaint();
-			}
-		}
-	}
-
 	protected void setBusy(final boolean busy)
 	{
 		synchronized (this)
 		{
 			this.threadBusy = busy;
-			this.showBusyIcon(busy);
+			iconHandler.showBusyIcon(busy);
 			this.setExecuteActionStates(!busy);
 			this.editor.setEditable(!busy);
 		}
@@ -3244,19 +2993,6 @@ public class SqlPanel
 		{
 			this.log.setFont(newFont);
 		}
-	}
-
-	public Window getParentWindow()
-	{
-		return SwingUtilities.getWindowAncestor(this);
-	}
-
-	public void textStatusChanged(boolean modified)
-	{
-		this.textModified = modified;
-		// Make sure the icon for the file is updated to reflect
-		// the modidified status
-		if (this.hasFileLoaded()) this.showFileIcon();
 	}
 
 	public void addDbExecutionListener(DbExecutionListener l)
@@ -3317,10 +3053,7 @@ public class SqlPanel
 		this.clearResultTabs();
 		if (this.currentData != null) this.currentData.clearContent();
 		this.currentData = null;
-		if (cancelIcon != null) cancelIcon.getImage().flush();
-		if (loadingIcon != null) loadingIcon.getImage().flush();
-		if (fileIcon != null) fileIcon.getImage().flush();
-		if (fileModifiedIcon != null) fileModifiedIcon.getImage().flush();
+		iconHandler.flush();
 		if (this.sqlHistory != null) this.sqlHistory.clear();
 	}
 
@@ -3330,7 +3063,7 @@ public class SqlPanel
 		Settings.getInstance().removeFontChangedListener(this);
 
 		reset();
-
+		iconHandler.dispose();
 		if (this.stmtRunner != null) this.stmtRunner.dispose();
 		if (this.execListener != null) execListener.clear();
 		if (this.editor != null) this.editor.dispose();
@@ -3350,20 +3083,8 @@ public class SqlPanel
 	{
 		String prop = evt.getPropertyName();
 		if (prop == null) return;
-		if (evt.getSource() == Settings.getInstance() && prop.equals(Settings.PROPERTY_ANIMATED_ICONS))
-		{
-			if (this.cancelIcon != null)
-			{
-				this.cancelIcon.getImage().flush();
-				this.cancelIcon = null;
-			}
-			if (this.loadingIcon != null)
-			{
-				this.loadingIcon.getImage().flush();
-				this.loadingIcon = null;
-			}
-		}
-		else if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
+
+		if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
 		{
 			this.checkCommitAction();
 		}

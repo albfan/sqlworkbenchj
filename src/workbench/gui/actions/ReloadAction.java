@@ -39,7 +39,7 @@ public class ReloadAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.ctrlPressed = isCtrlPressed(e);
+		this.ctrlPressed = isCtrlPressed(e) && invokedByMouse(e);
 		this.client.reload();
 	}
 

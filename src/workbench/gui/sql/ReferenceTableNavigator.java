@@ -486,7 +486,7 @@ public class ReferenceTableNavigator
 			return;
 		}
 
-		String comment = ResourceMgr.getFormattedString("MsgLoadRelatedComment", getUpdateTable().getTableExpression(con), fkName);
+		String comment = ResourceMgr.getFormattedString("MsgLoadRelatedComment", tbl.getTableName(), getUpdateTable().getTableName(), fkName);
 
 		boolean logText = WbAction.isCtrlPressed(evt);
 		

@@ -9,6 +9,7 @@ body
 	font-size: 12px;
 	font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
 	background-color: #F1F1E3;
+	line-height:150%;
 }
 
 p
@@ -120,7 +121,7 @@ h3 {
 }
 
 #main{
-	width:60%;
+	width:65%;
 	height: 100%;
 	position: relative;
 	top: -92px;
@@ -258,6 +259,11 @@ li
 	list-style: square;
 	margin-bottom: 4px;
 	padding-bottom:6px;
+}
+
+.disclaimer
+{
+	line-height:175%;
 }
 
 .note

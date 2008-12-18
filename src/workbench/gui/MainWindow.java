@@ -55,6 +55,7 @@ import workbench.gui.actions.AboutAction;
 import workbench.gui.actions.ConfigureShortcutsAction;
 import workbench.gui.actions.ShowManualAction;
 import workbench.gui.components.RunningJobIndicator;
+import workbench.gui.sql.RenameableTab;
 import workbench.interfaces.Moveable;
 import workbench.sql.macros.MacroManager;
 import workbench.util.ExceptionUtil;
@@ -128,7 +129,8 @@ import workbench.util.WbFile;
 public class MainWindow
 	extends JFrame
 	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
-						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener, Moveable
+						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener, 
+						Moveable, RenameableTab
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
 	private static int instanceCount;
@@ -2360,11 +2362,28 @@ public class MainWindow
 		return title;
 	}
 
+	public String getCurrentTabTitle()
+	{
+		int index = this.sqlTab.getSelectedIndex();
+		return this.getPlainTabTitle(index);
+	}
+	
+	public void setCurrentTabTitle(String newName)
+	{
+		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
+
+		int index = this.sqlTab.getSelectedIndex();
+
+		if (newName != null)
+		{
+			this.setTabTitle(index, newName);
+		}
+	}
 	/**
 	 *	Sets the title of a tab and appends the index number to
 	 *  the title, so that a shortcut Ctrl-n can be defined
 	 */
-	private void setTabTitle(int anIndex, String aName)
+	public void setTabTitle(int anIndex, String aName)
 	{
 		MainPanel p = this.getSqlPanel(anIndex);
 		p.setTabName(aName);
@@ -2399,20 +2418,6 @@ public class MainWindow
 		MainPanel p = this.getCurrentPanel();
 		canRename = canRename && (p instanceof SqlPanel);
 		return canRename;
-	}
-
-	public void renameTab()
-	{
-		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
-
-		int index = this.sqlTab.getSelectedIndex();
-
-		String oldName = this.getPlainTabTitle(index);
-		String newName = WbSwingUtilities.getUserInput(this.sqlTab, ResourceMgr.getString("MsgEnterNewTabName"), oldName);
-		if (newName != null)
-		{
-			this.setTabTitle(index, newName);
-		}
 	}
 
 	public void removeTab()
