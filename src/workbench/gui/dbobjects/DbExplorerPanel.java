@@ -48,6 +48,7 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.ConnectionSelector;
@@ -55,6 +56,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.MainPanel;
+import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
@@ -113,6 +115,7 @@ public class DbExplorerPanel
 	private String catalogFromWorkspace;
 	private boolean switchCatalog = false;
 	private JComponent currentFocus = null;
+	private ReloadAction reloadSchemasAction;
 
 	public DbExplorerPanel()
 	{
@@ -169,6 +172,16 @@ public class DbExplorerPanel
 			this.setLayout(new BorderLayout());
 
 			this.selectorPanel = new JPanel();
+			reloadSchemasAction =new ReloadAction(new Reloadable()
+			{
+				public void reload()
+				{
+					readSchemas(false);
+				}
+			});
+			reloadSchemasAction.setEnabled(false);
+			reloadSchemasAction.setTooltip(ResourceMgr.getString("TxtReload"));
+			
 			this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
 			this.schemaLabel = new JLabel(ResourceMgr.getString("LblSchema"));
@@ -186,6 +199,8 @@ public class DbExplorerPanel
 			this.catalogLabel.setVisible(false);
 			this.selectorPanel.add(catalogLabel);
 			this.selectorPanel.add(catalogSelector);
+			JButton b = reloadSchemasAction.getToolbarButton();
+			this.selectorPanel.add(b);
 
 			this.add(this.selectorPanel, BorderLayout.NORTH);
 			this.add(tabPane, BorderLayout.CENTER);
@@ -277,7 +292,7 @@ public class DbExplorerPanel
 		return "WbExp-" + NumberStringCache.getNumberString(this.internalId);
 	}
 
-	private void readSchemas()
+	private void readSchemas(boolean checkWorkspace)
 	{
 		if (this.isBusy() || isConnectionBusy() || this.dbConnection == null || this.dbConnection.getMetadata() == null)
 		{
@@ -295,7 +310,7 @@ public class DbExplorerPanel
 			List schemas = this.dbConnection.getMetadata().getSchemas();
 			String currentSchema = null;
 			boolean workspaceSchema = false;
-			if (this.dbConnection.getProfile().getStoreExplorerSchema())
+			if (checkWorkspace && this.dbConnection.getProfile().getStoreExplorerSchema())
 			{
 				currentSchema = this.schemaFromWorkspace;
 				workspaceSchema = true;
@@ -452,6 +467,8 @@ public class DbExplorerPanel
 		this.dbConnection = aConnection;
 		setSwitchCatalog(false);
 
+		reloadSchemasAction.setEnabled((dbConnection != null));
+		
 		if (aConnection == null)
 		{
 			this.reset();
@@ -460,6 +477,7 @@ public class DbExplorerPanel
 		}
 
 		WbSwingUtilities.showWaitCursorOnWindow(this);
+		reloadSchemasAction.setTooltip(ResourceMgr.getFormattedString("TxtReloadSchemas", dbConnection.getMetadata().getSchemaTerm()));
 
 		try
 		{
@@ -506,7 +524,7 @@ public class DbExplorerPanel
 
 						if (isVisible())
 						{
-							readSchemas();
+							readSchemas(true);
 
 							if (retrievePending)
 							{
@@ -577,7 +595,7 @@ public class DbExplorerPanel
 		{
 			if (schemaRetrievePending)
 			{
-				this.readSchemas();
+				this.readSchemas(true);
 			}
 			if (retrievePending)
 			{
@@ -707,7 +725,7 @@ public class DbExplorerPanel
 
 		if (this.schemaRetrievePending)
 		{
-			this.readSchemas();
+			this.readSchemas(true);
 		}
 
 		final String schema = (String)schemaSelector.getSelectedItem();
@@ -965,7 +983,7 @@ public class DbExplorerPanel
 		}
 		if (this.isVisible() && this.schemaRetrievePending)
 		{
-			this.readSchemas();
+			this.readSchemas(true);
 		}
 		if (this.isVisible() && this.retrievePending)
 		{
