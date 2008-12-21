@@ -56,6 +56,7 @@ public class LnFHelper
 			def.put("Label.font", stdFont);
 			def.put("List.font", stdFont);
 			def.put("Menu.font", stdFont);
+			def.put("MenuBar.font", stdFont);
 			def.put("MenuItem.font", stdFont);
 			def.put("OptionPane.font", stdFont);
 			def.put("Panel.font", stdFont);
@@ -63,6 +64,7 @@ public class LnFHelper
 			def.put("PopupMenu.font", stdFont);
 			def.put("ProgressBar.font", stdFont);
 			def.put("RadioButton.font", stdFont);
+			def.put("RadioButtonMenuItem.font", stdFont);
 			def.put("TabbedPane.font", stdFont);
 			def.put("TextArea.font", stdFont);
 			def.put("TextField.font", stdFont);
@@ -123,6 +125,7 @@ public class LnFHelper
 			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
 			UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
+			// I hate the bold menu font in the Metal LnF
 			UIManager.put("swing.boldMetal", Boolean.FALSE);
 
 			// Remove Synthetica's own window decorations

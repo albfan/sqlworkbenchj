@@ -14,8 +14,8 @@ package workbench.db.exporter;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.interfaces.Committer;
 import workbench.log.LogMgr;
@@ -219,8 +219,8 @@ public class SqlRowDataConverter
 
 		ColumnIdentifier[] colArray = this.metaData.getColumns();
 		List<ColumnIdentifier> cols = ArrayUtil.arrayToList(colArray);
-		DbMetadata db = this.originalConnection.getMetadata();
-		String source = db.getTableSource(updateTable, cols, (alternateUpdateTable == null ? updateTable.getTableName() : alternateUpdateTable.getTableName()));
+		TableSourceBuilder builder = new TableSourceBuilder(originalConnection);
+		String source = builder.getTableSource(updateTable, cols, (alternateUpdateTable == null ? updateTable.getTableName() : alternateUpdateTable.getTableName()));
 		StrBuffer createSql = new StrBuffer(source);
 		createSql.append(doubleLineTerminator);
 		return createSql;

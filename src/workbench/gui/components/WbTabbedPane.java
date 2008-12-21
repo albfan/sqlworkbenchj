@@ -28,7 +28,11 @@ import workbench.interfaces.Moveable;
 import workbench.log.LogMgr;
 
 /**
+ * A JTabbedPane that allows re-ordering of the tabs using drag & drop.
  *
+ * Additionally it installs it's own UI to remove the unnecessary borders
+ * that the standard Java Look & Feels create.
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbTabbedPane
@@ -92,6 +96,13 @@ public class WbTabbedPane
 	{
 		return new Insets(0,0,0,0);
 	}
+
+//	@Override
+//	public void insertTab(String title, Icon icon, Component component, String tip, int index)
+//	{
+//		super.insertTab(title, icon, component, tip, index);
+//		setTabComponentAt(index, new ButtonTabComponent(this));
+//	}
 
 	/**
 	 * The empty override is intended, to give public access to the method

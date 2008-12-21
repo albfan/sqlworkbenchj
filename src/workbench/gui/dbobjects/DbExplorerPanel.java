@@ -44,6 +44,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
 import workbench.db.WbConnection;
+import workbench.gui.components.FlatButton;
 import workbench.interfaces.DbExecutionListener;
 import workbench.util.ExceptionUtil;
 import workbench.gui.MainWindow;
@@ -54,6 +55,7 @@ import workbench.gui.components.ConnectionInfo;
 import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
+import workbench.gui.components.WbToolbarButton;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.Reloadable;
@@ -199,7 +201,9 @@ public class DbExplorerPanel
 			this.catalogLabel.setVisible(false);
 			this.selectorPanel.add(catalogLabel);
 			this.selectorPanel.add(catalogSelector);
-			JButton b = reloadSchemasAction.getToolbarButton();
+			FlatButton b = new FlatButton(reloadSchemasAction);
+			b.setText(null);
+			b.setMargin(WbToolbarButton.MARGIN);
 			this.selectorPanel.add(b);
 
 			this.add(this.selectorPanel, BorderLayout.NORTH);

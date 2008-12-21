@@ -13,6 +13,7 @@ package workbench.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
@@ -33,23 +34,23 @@ public class ViewReader
 	{
 		this.connection = con;
 	}
-	
+
+	public CharSequence getExtendedViewSource(TableIdentifier tbl)
+		throws SQLException
+	{
+		return getExtendedViewSource(new TableDefinition(tbl), false, false);
+	}
+
 	public CharSequence getExtendedViewSource(TableIdentifier tbl, boolean includeDrop)
 		throws SQLException
 	{
-		return this.getExtendedViewSource(tbl, null, includeDrop);
+		return getExtendedViewSource(new TableDefinition(tbl), includeDrop, false);
 	}
-
-	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop)
-		throws SQLException
-	{
-		return getExtendedViewSource(view, viewTableDefinition, includeDrop, true);
-	}
-
+	
 	/**
 	 * Returns a complete SQL statement to (re)create the given view.
 	 */
-	public CharSequence getExtendedViewSource(TableIdentifier view, DataStore viewTableDefinition, boolean includeDrop, boolean includeCommit)
+	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
 		throws SQLException
 	{
 		GetMetaDataSql sql = connection.getMetadata().metaSqlMgr.getViewSourceSql();
@@ -59,11 +60,16 @@ public class ViewReader
 			return help.explainMissingViewSourceSql(this.connection.getMetadata().getProductName());
 		}
 
-		if (viewTableDefinition == null)
+		List<ColumnIdentifier> columns = view.getColumns();
+		TableIdentifier viewTable = view.getTable();
+
+		if (columns == null || columns.size() == 0)
 		{
-			viewTableDefinition = this.connection.getMetadata().getTableDefinition(view);
+			view = this.connection.getMetadata().getTableDefinition(view.getTable());
+			columns = view.getColumns();
 		}
-		CharSequence source = this.getViewSource(view);
+		
+		CharSequence source = this.getViewSource(viewTable);
 
 		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
 
@@ -81,7 +87,7 @@ public class ViewReader
 				result.append("DROP ");
 				result.append(type);
 				result.append(' ');
-				result.append(view.getTableName());
+				result.append(viewTable.getTableName());
 				result.append(';');
 				result.append(lineEnding);
 				result.append(lineEnding);
@@ -96,18 +102,19 @@ public class ViewReader
 			return result.toString();
 		}
 
-		result.append(connection.getMetadata().generateCreateObject(includeDrop, view.getType(), view.getTableName()));
+		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable.getType(), viewTable.getTableName()));
 
-		if (!DbMetadata.MVIEW_NAME.equalsIgnoreCase(view.getType()))
+		if (!DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewTable.getType()))
 		{
 			result.append(lineEnding + "(" + lineEnding);
-			int rows = viewTableDefinition.getRowCount();
-			for (int i=0; i < rows; i++)
+			int colCount = columns.size();
+			for (int i=0; i < colCount; i++)
 			{
-				String colName = viewTableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+
+				String colName = columns.get(i).getColumnName();
 				result.append("  ");
 				result.append(connection.getMetadata().quoteObjectname(colName));
-				if (i < rows - 1)
+				if (i < colCount - 1)
 				{
 					result.append(',');
 					result.append(lineEnding);
@@ -122,10 +129,10 @@ public class ViewReader
 
 		// Oracle and MS SQL Server support materialized views. For those
 		// the index definitions are of interest as well.
-		DataStore indexInfo = connection.getMetadata().getIndexReader().getTableIndexInformation(view);
+		DataStore indexInfo = connection.getMetadata().getIndexReader().getTableIndexInformation(viewTable);
 		if (indexInfo.getRowCount() > 0)
 		{
-			StringBuilder idx = this.connection.getMetadata().getIndexReader().getIndexSource(view, indexInfo, null);
+			StringBuilder idx = this.connection.getMetadata().getIndexReader().getIndexSource(viewTable, indexInfo, null);
 			if (idx != null && idx.length() > 0)
 			{
 				result.append(lineEnding);

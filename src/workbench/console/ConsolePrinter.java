@@ -110,7 +110,16 @@ public abstract class ConsolePrinter
 				String value = "";
 				if (SqlUtil.isBlobType(type))
 				{
-					value = "(BLOB)";
+					// In case the BLOB data was converter to a string
+					// by a DataConverter
+					if (row.getValue(col) instanceof String)
+					{
+						value = (String)row.getValue(col);
+					}
+					else
+					{
+						value = "(BLOB)";
+					}
 				}
 				else if (value != null)
 				{

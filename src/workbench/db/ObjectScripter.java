@@ -113,7 +113,8 @@ public class ObjectScripter
 			
 			TableIdentifier tbl = (TableIdentifier)dbo;
 			tbl.adjustCase(this.dbConnection);
-			StringBuilder source = dbConnection.getMetadata().getFkSource(tbl);
+			TableSourceBuilder builder = new TableSourceBuilder(dbConnection);
+			StringBuilder source = builder.getFkSource(tbl);
 			if (source != null && source.length() > 0)
 			{
 				if (first)

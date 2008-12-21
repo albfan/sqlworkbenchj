@@ -35,7 +35,10 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.IndexColumn;
+import workbench.db.TableColumnsDatastore;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.DropDbObjectAction;
@@ -205,7 +208,8 @@ public class TableDefinitionPanel
 					}
 				});
 				DbMetadata meta = this.dbConnection.getMetadata();
-				DataStore def = meta.getTableDefinition(this.currentTable);
+				TableDefinition tdef = meta.getTableDefinition(this.currentTable);
+				DataStore def = new TableColumnsDatastore(tdef);
 				
 				final DataStoreTableModel model = new DataStoreTableModel(def);
 				WbSwingUtilities.invoke(new Runnable()
@@ -236,17 +240,6 @@ public class TableDefinitionPanel
 		tableDefinition.setModel(model, true);
 		tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
 
-		// hide the the columns "SCALE/SIZE", "PRECISION"
-		// they don't need to be displayed as this is "included" in the
-		// displayed (DBMS) data type already
-
-		// Columns may not be removed from the underlying DataStore because
-		// that is also used to retrieve the table source and DbMetadata
-		// relies on all tables being present when that datastore is passed
-		// to getTableSource()
-		
-		// So we can only remove those columns from the view
-
 		TableColumnModel colmod = tableDefinition.getColumnModel();
 
 		// Assign the correct renderer to display java.sql.Types values
@@ -267,6 +260,17 @@ public class TableDefinitionPanel
 			return;
 		}
 		
+		// hide the the columns "SCALE/SIZE", "PRECISION"
+		// they don't need to be displayed as this is "included" in the
+		// displayed (DBMS) data type already
+
+		// Columns may not be removed from the underlying DataStore because
+		// that is also used to retrieve the table source and DbMetadata
+		// relies on all tables being present when that datastore is passed
+		// to getTableSource()
+
+		// So we can only remove those columns from the view
+
 		String[] columns = new String[] { "SCALE/SIZE", "PRECISION" };
 		for (String name : columns)
 		{
@@ -278,7 +282,7 @@ public class TableDefinitionPanel
 			}
 			catch (IllegalArgumentException e)
 			{
-				// ignore, this is expected for some types
+				// ignore, this is expected for some table types
 			}
 		}
 	}
@@ -362,7 +366,7 @@ public class TableDefinitionPanel
 
 		for (int i=0; i < rows.length; i++)
 		{
-			String column = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			String column = this.tableDefinition.getValueAsString(rows[i], TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 			columns.add(new ColumnIdentifier(column));
 		}
 		return columns;
@@ -395,7 +399,7 @@ public class TableDefinitionPanel
 
 		for (int i=0; i < count; i++)
 		{
-			String colName = this.tableDefinition.getValueAsString(rows[i], DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toLowerCase();
+			String colName = this.tableDefinition.getValueAsString(rows[i], TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME).toLowerCase();
 			IndexColumn col = new IndexColumn(colName, null);
 			columns.add(col);
 		}
@@ -428,24 +432,9 @@ public class TableDefinitionPanel
 
 	public String getSelectForTable()
 	{
-		int colCount = this.tableDefinition.getRowCount();
-		if (colCount == 0) return null;
-
-		StringBuilder sql = new StringBuilder(colCount * 80);
-
-		sql.append("SELECT ");
-		DbMetadata meta = this.dbConnection.getMetadata();
-		for (int i=0; i < colCount; i++)
-		{
-			String column = this.tableDefinition.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			column = meta.quoteObjectname(column);
-			if (i > 0 && i < colCount) sql.append(",\n");
-			if (i > 0) sql.append("       ");
-			sql.append(column);
-		}
-		sql.append("\nFROM ");
-		sql.append(this.currentTable.getTableExpression(this.dbConnection));
-		return sql.toString();
+		List<ColumnIdentifier> cols = TableColumnsDatastore.createColumnIdentifiers(this.dbConnection.getMetadata(), this.tableDefinition.getDataStore());
+		TableSelectBuilder builder = new TableSelectBuilder(dbConnection);
+		return builder.getSelectForColumns(currentTable, cols);
 	}
 
 	public int getRowCount()

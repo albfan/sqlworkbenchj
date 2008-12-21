@@ -12,8 +12,8 @@
 package workbench.db;
 
 import java.sql.SQLException;
+import java.util.List;
 import workbench.resource.Settings;
-import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
 /**
@@ -65,24 +65,22 @@ public class DummySelect
 	{
 		DbMetadata meta = con.getMetadata();
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		DataStore tableDef = meta.getTableDefinition(table);
+		TableDefinition tableDef = meta.getTableDefinition(table);
 
-		if (tableDef.getRowCount() == 0)
-		{
-			return StringUtil.EMPTY_STRING;
-		}
-		int colCount = tableDef.getRowCount();
-		if (colCount == 0)
+		List<ColumnIdentifier> columns = tableDef.getColumns();
+		if (columns == null || columns.size() == 0)
 		{
 			return StringUtil.EMPTY_STRING;
 		}
 
+		int colCount = columns.size();
+		
 		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		sql.append("SELECT ");
 		for (int i = 0; i < colCount; i++)
 		{
-			String column = tableDef.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+			String column = columns.get(i).getColumnName();
 			if (i > 0)
 			{
 				sql.append(',');

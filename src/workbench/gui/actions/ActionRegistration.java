@@ -26,5 +26,9 @@ public class ActionRegistration
 		new MoveSqlTabLeft(null);
 		new MoveSqlTabRight(null);
 		new ReloadAction(null);
+		new CopySelectedAsTextAction(null);
+		new CopySelectedAsSqlDeleteInsertAction(null);
+		new CopySelectedAsSqlInsertAction(null);
+		new CopySelectedAsSqlUpdateAction(null);
 	}
 }

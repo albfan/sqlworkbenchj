@@ -167,6 +167,7 @@ public class DataExporter
 	public DataExporter(WbConnection con)
 	{
 		this.dbConn = con;
+		this.jobQueue = new LinkedList<ExportJobEntry>();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 	}
 
@@ -285,17 +286,12 @@ public class DataExporter
 	public void clearJobs()
 	{
 		if (this.jobsRunning) return;
-		if (this.jobQueue == null) return;
 		this.jobQueue.clear();
 	}
 
 	public void addTableExportJob(File anOutputfile, TableIdentifier table)
 		throws SQLException
 	{
-		if (this.jobQueue == null)
-		{
-			this.jobQueue = new LinkedList<ExportJobEntry>();
-		}
 		ExportJobEntry job = new ExportJobEntry(anOutputfile, table, this.dbConn);
 		this.jobQueue.add(job);
 	}

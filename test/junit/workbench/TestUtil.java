@@ -162,6 +162,9 @@ public class TestUtil
 		}
 	}
 
+	/**
+	 * Return a connection to an HSQL memory Database with the given name
+	 */
 	public WbConnection getHSQLConnection(String dbName)
 		throws SQLException, ClassNotFoundException
 	{
@@ -176,7 +179,7 @@ public class TestUtil
 	}
 
 	/**
-	 * Return a connection to an H2 Database with the name of this TestUtil
+	 * Return a connection to an H2 (in-memory) Database with the name of this TestUtil
 	 * @see TestUtil#TestUtil(String)
 	 */
 	public WbConnection getConnection()
@@ -185,6 +188,10 @@ public class TestUtil
 		return getConnection(this.testName);
 	}
 
+	/**
+	 * Return a connection to an H2 (in-memory) Database with the given name
+	 * @see TestUtil#TestUtil(String)
+	 */
 	public WbConnection getConnection(String db)
 		throws SQLException, ClassNotFoundException
 	{
@@ -224,12 +231,22 @@ public class TestUtil
 		}
 	}
 
+	/**
+	 * Creates a connection to a file-based H2 database with the given file name.
+	 * A connection profile for this connection is created with the ID "WbUnitTest".
+	 * The name of the profile is the file name (without the file path)
+	 */
 	public WbConnection getConnection(File db)
 		throws SQLException, ClassNotFoundException
 	{
 		return getConnection(db, "WbUnitTest");
 	}
 
+	/**
+	 * Creates a connection to a file-based H2 database with the given file name.
+	 * A connection profile for this connection is created with the given ID.
+	 * The name of the profile is the file name (without the file path)
+	 */
 	public WbConnection getConnection(File db, String id)
 		throws SQLException, ClassNotFoundException
 	{
@@ -242,12 +259,27 @@ public class TestUtil
 		return con;
 	}
 
+	/**
+	 * Creates a statement runner with a connection to an H2 memory database.
+	 * The basedir of the StatementRunner is set to this basedir
+	 *
+	 * @see #getConnection()
+	 * @see #getBaseDir()
+	 * @see StatementRunner#setBaseDir(java.lang.String)
+	 */
 	public StatementRunner createConnectedStatementRunner()
 		throws Exception
 	{
 		return createConnectedStatementRunner(getConnection());
 	}
 
+	/**
+	 * Creates a statement runner for the given connection.
+	 * The basedir of the StatementRunner is set to this basedir
+	 *
+	 * @see #getBaseDir()
+	 * @see StatementRunner#setBaseDir(java.lang.String) 
+	 */
 	public StatementRunner createConnectedStatementRunner(WbConnection con)
 		throws Exception
 	{
@@ -257,7 +289,10 @@ public class TestUtil
 		return runner;
 	}
 
-	public String getBaseDir() { return this.basedir; }
+	public String getBaseDir()
+	{
+		return this.basedir;
+	}
 
 	public static List<String> getLines(String s)
 		throws IOException
@@ -399,7 +434,7 @@ public class TestUtil
 			con = DriverManager.getConnection("jdbc:h2:" + sourceDb.getFullPath(), "sa", "");
 			stmt = con.createStatement();
 			stmt.executeUpdate("CREATE TABLE person (id integer primary key, firstname varchar(50), lastname varchar(50))");
-			stmt.executeUpdate("insert into person (id, firstname, lastname) values (1, 'Arthur', 'Dent')");
+			stmt.executeUpdate("insert into person (id, firstname, lastname) values (1, 'Harry', 'Handsome')");
 			stmt.executeUpdate("insert into person (id, firstname, lastname) values (2, 'Mary', 'Moviestar')");
 			stmt.executeUpdate("insert into person (id, firstname, lastname) values (3, 'Major', 'Bug')");
 			stmt.executeUpdate("insert into person (id, firstname, lastname) values (4, 'General', 'Failure')");

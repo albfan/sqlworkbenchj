@@ -22,7 +22,6 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.FileUtil;
-import workbench.util.NumberStringCache;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -59,6 +58,8 @@ public class RowData
 	private Object[] colData;
 	private Object[] originalData;
 	private List<String> dependencyDeletes;
+
+	private DataConverter converter;
 	
 	public RowData(ResultInfo info)
 	{
@@ -80,7 +81,11 @@ public class RowData
 	{ 
 		return this.colData; 
 	}
-	
+
+	public void setConverter(DataConverter conv)
+	{
+		this.converter = conv;
+	}
 	/**
 	 *	Read the row data from the supplied ResultSet
 	 */
@@ -95,6 +100,7 @@ public class RowData
 		for (int i=0; i < colCount; i++)
 		{
 			int type = info.getColumnType(i);
+
 			try
 			{
 				// Not using getObject() for timestamp columns
@@ -113,57 +119,28 @@ public class RowData
 				}
 				else if (SqlUtil.isBlobType(type))
 				{
-					value = null;
-					
-					if (Settings.getInstance().getFixSqlServerTimestampDisplay() &&
-						  type == java.sql.Types.BINARY &&
-						  rs.getMetaData().getColumnTypeName(i+1).equals("timestamp"))
+					// BLOB columns are always converted to byte[] internally
+					InputStream in = null;
+					try
 					{
-						// hack for SQL Server's "timestamp" columns
-						Object o = rs.getObject(i+1);
-						try
+						in = rs.getBinaryStream(i+1);
+						if (in != null && !rs.wasNull())
 						{
-							byte[] b = (byte[])o;
-							StringBuilder buffer = new StringBuilder(18);
-							buffer.append("0x");
-							for (byte v : b)
-							{
-								int c = (v < 0 ? 256 + v : v);
-								buffer.append(NumberStringCache.getHexString(c));
-							}
-							value = buffer.toString();
+							value = FileUtil.readBytes(in);
 						}
-						catch (Throwable th)
+						else
 						{
 							value = null;
 						}
 					}
-
-					if (value == null)
+					catch (IOException e)
 					{
-						// BLOB columns are always converted bot byte[] internally
-						InputStream in = null;
-						try
-						{
-							in = rs.getBinaryStream(i+1);
-							if (in != null && !rs.wasNull())
-							{
-								value = FileUtil.readBytes(in);
-							}
-							else
-							{
-								value = null;
-							}
-						}
-						catch (IOException e)
-						{
-							LogMgr.logError("RowData.read()", "Error retrieving binary data for column '" + info.getColumnName(i) + "'", e);
-							value = null;
-						}
-						finally
-						{
-							try { in.close(); } catch (Throwable th) {}
-						}
+						LogMgr.logError("RowData.read()", "Error retrieving binary data for column '" + info.getColumnName(i) + "'", e);
+						value = null;
+					}
+					finally
+					{
+						try { in.close(); } catch (Throwable th) {}
 					}
 				}
 				else if (SqlUtil.isClobType(type, longVarcharAsClob))
@@ -188,8 +165,6 @@ public class RowData
 						value = rs.getObject(i+1);
 					}
 				}
-				// Hack for SQL Server timestamp columns to display something more
-				// readable than a byte[] array (which is displayed as a blob in the GUI)
 				else
 				{
 					value = rs.getObject(i + 1);
@@ -218,8 +193,15 @@ public class RowData
 					throw e;
 				}
 			}
-
-			this.colData[i] = value;
+			if (converter != null)
+			{
+				String dbms = rs.getMetaData().getColumnTypeName(i+1);
+				this.colData[i] = converter.convertValue(type, dbms, value);
+			}
+			else
+			{
+				this.colData[i] = value;
+			}
 		}
 		this.resetStatus();
 	}

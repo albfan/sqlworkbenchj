@@ -85,6 +85,9 @@ import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.TableColumnsDatastore;
+import workbench.db.TableDefinition;
+import workbench.db.TableSourceBuilder;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
@@ -1182,6 +1185,8 @@ public class TableListPanel
 	protected void retrieveTableSource()
 	{
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
+		
+		TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
 
 		try
 		{
@@ -1200,7 +1205,8 @@ public class TableListPanel
 
 			if (dbs.isViewType(type))
 			{
-				sql = meta.getViewReader().getExtendedViewSource(this.selectedTable, tableDefinition.getDataStore(), true);
+				TableDefinition def = new TableDefinition(this.selectedTable, TableColumnsDatastore.createColumnIdentifiers(meta, tableDefinition.getDataStore()));
+				sql = meta.getViewReader().getExtendedViewSource(def, true, false);
 			}
 			else if (dbs.isSynonymType(type))
 			{
@@ -1214,7 +1220,8 @@ public class TableListPanel
 					try
 					{
 						TableIdentifier tbl = meta.getSynonymTable(this.selectedTable);
-						String tableSql = meta.getTableSource(tbl, false, true);
+						
+						String tableSql = builder.getTableSource(tbl, false, true);
 						if (!StringUtil.isEmptyString(tableSql))
 						{
 							StringBuilder sb = new StringBuilder(sql.length() + tableSql.length() + 50);
@@ -1260,7 +1267,7 @@ public class TableListPanel
 				// passed to getTableSource() would be empty
 				if (this.shouldRetrieveIndexes) this.retrieveIndexes();
 				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
-				sql = meta.getTableSource(selectedTable, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true, null);
+				sql = builder.getTableSource(selectedTable, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true, null);
 			}
 			final String s = (sql == null ? "" : sql.toString());
 			EventQueue.invokeLater(new Runnable()
@@ -1309,7 +1316,6 @@ public class TableListPanel
 		finally
 		{
 			WbSwingUtilities.showDefaultCursor(this);
-			tableDefinition.setIgnoreRepaint(false);
 		}
 	}
 

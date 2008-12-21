@@ -14,11 +14,12 @@ package workbench.db.mysql;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.List;
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
-import workbench.db.TableIdentifier;
+import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
@@ -29,10 +30,10 @@ import workbench.util.SqlUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class EnumReader
+public class MySqlEnumReader
 {
 
-	public static void updateEnumDefinition(TableIdentifier tbl, DataStore tableDefinition, WbConnection connection)
+	public static void updateEnumDefinition(TableDefinition tbl, WbConnection connection)
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -41,7 +42,7 @@ public class EnumReader
 		try
 		{
 			stmt = connection.createStatement();
-			rs = stmt.executeQuery("SHOW COLUMNS FROM " + tbl.getTableExpression(connection));
+			rs = stmt.executeQuery("SHOW COLUMNS FROM " + tbl.getTable().getTableExpression(connection));
 			while (rs.next())
 			{
 				String column = rs.getString(1);
@@ -56,14 +57,15 @@ public class EnumReader
 					defs.put(column, type);
 				}
 			}
-			int count = tableDefinition.getRowCount();
-			for (int row = 0; row < count; row++)
+
+			List<ColumnIdentifier> columns = tbl.getColumns();
+			for (ColumnIdentifier col : columns)
 			{
-				String column = tableDefinition.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-				String type = defs.get(column);
+				String name = col.getColumnName();
+				String type = defs.get(name);
 				if (type != null)
 				{
-					tableDefinition.setValue(row, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, type);
+					col.setDbmsType(type);
 				}
 			}
 		}

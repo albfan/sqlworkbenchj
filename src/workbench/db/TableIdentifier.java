@@ -548,7 +548,7 @@ public class TableIdentifier
 		DbMetadata meta = con.getMetadata();
 		if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(type))
 		{
-			source = meta.getViewReader().getExtendedViewSource(this, false);
+			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), false, false);
 		}
 		else if ("SYNONYM".equalsIgnoreCase(type))
 		{
@@ -556,17 +556,17 @@ public class TableIdentifier
 		}
 		else if ("VIEW".equalsIgnoreCase(type))
 		{
-			source = meta.getViewReader().getExtendedViewSource(this, false);
+			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), false, false);
 		}
 		else if ("SEQUENCE".equalsIgnoreCase(type))
 		{
 			SequenceReader reader = meta.getSequenceReader();
-			
 			source = (reader != null ? reader.getSequenceSource(getSchema(), getTableName()) : null);
 		}
 		else
 		{
-			source = meta.getTableSource(this, false, false);
+			TableSourceBuilder builder = new TableSourceBuilder(con);
+			source = builder.getTableSource(this, false, false);
 		}
 		return source;
 	}

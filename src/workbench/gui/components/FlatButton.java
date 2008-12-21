@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import javax.swing.Action;
 import javax.swing.Icon;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
@@ -28,6 +29,12 @@ public class FlatButton
 		super();
 		init();
 	}
+
+	public FlatButton(Action action)
+	{
+		super(action);
+		init();
+	}
 	
 	public FlatButton(Icon icon)
 	{
@@ -43,6 +50,8 @@ public class FlatButton
 
 	private void init()
 	{
+		// WbManager.getInstance() can be null if this component
+		// is created e.g. in the GUI designer of NetBeans
 		if (WbManager.getInstance() == null) return;
 		if (WbManager.getInstance().isWindowsClassic())
 		{

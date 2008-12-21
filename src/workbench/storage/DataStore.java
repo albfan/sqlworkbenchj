@@ -480,15 +480,16 @@ public class DataStore
 	 *	@return int - the new row number
 	 *	The new row will be marked as "Not modified".
 	 */
-	public int addRow(ResultSet rs)
-		throws SQLException
-	{
-		int cols = this.resultInfo.getColumnCount();
-		RowData row = new RowData(cols);
-		row.read(rs, this.resultInfo);
-		this.data.add(row);
-		return this.getRowCount() - 1;
-	}
+//	public int addRow(ResultSet rs)
+//		throws SQLException
+//	{
+//		int cols = this.resultInfo.getColumnCount();
+//		//RowData row = new RowData(cols);
+//		RowData row = RowDataFactory.createRowData(cols, this.originalConnection);
+//		row.read(rs, this.resultInfo);
+//		this.data.add(row);
+//		return this.getRowCount() - 1;
+//	}
 
 	/**
 	 *	Adds a new empty row to the DataStore.
@@ -1106,7 +1107,7 @@ public class DataStore
 					this.rowActionMonitor.setCurrentRow(rowCount, -1);
 				}
 
-				RowData row = new RowData(cols);
+				RowData row = RowDataFactory.createRowData(cols, this.originalConnection);
 				row.setTrimCharData(trimCharData);
 				row.read(aResultSet, this.resultInfo);
 				this.data.add(row);

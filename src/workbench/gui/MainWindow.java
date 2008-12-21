@@ -2609,7 +2609,7 @@ public class MainWindow
 		if (e.getSource() == this.sqlTab)
 		{
 			Rectangle r = sqlTab.getBoundsAt(sqlTab.getTabCount() - 1);
-			boolean overTab = r.getX() + r.getWidth() > e.getPoint().getX();
+			boolean overTab = r.getX() + r.getWidth() > e.getPoint().getX() && e.getY() < r.height;
 			if (e.getButton() == MouseEvent.BUTTON3 && overTab)
 			{
 				SqlTabPopup pop = new SqlTabPopup(this);

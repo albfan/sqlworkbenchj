@@ -45,7 +45,7 @@ public class DummySelectTest
        "       FIRSTNAME,\n" +
        "       LASTNAME\n" +
 			 "FROM PERSON;";
-//			System.out.println("+++++++++++++++++++\n" + selectSql + "\n**********\n" + expected + "\n-------------------");
+			System.out.println("+++++++++++++++++++\n" + selectSql + "\n**********\n" + expected + "\n-------------------");
 			assertEquals(expected, selectSql);
 		}
 		finally

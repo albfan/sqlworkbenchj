@@ -579,4 +579,14 @@ public class DbSettings
 		}
 		return true;
 	}
+
+	public void setDataTypeExpression(String cleanType, String expr)
+	{
+		Settings.getInstance().setProperty("workbench.db." + getDbId() + ".selectexpression." + cleanType, expr);
+	}
+	
+	public String getDataTypeExpression(String cleanType)
+	{
+		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".selectexpression." + cleanType.toLowerCase(), null);
+	}
 }

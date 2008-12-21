@@ -159,6 +159,7 @@ public class SQLConsole
 					if (printer != null && runner.getResultSetConsumer() == null)
 					{
 						runner.setResultSetConsumer(printer);
+						printer.setCurrentConnection(runner.getConnection());
 					}
 				}
 				else

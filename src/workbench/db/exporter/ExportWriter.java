@@ -24,6 +24,7 @@ import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
+import workbench.storage.RowDataFactory;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.WbFile;
@@ -189,7 +190,8 @@ public abstract class ExportWriter
 			}
 			updateProgress(rows);
 
-			RowData row = new RowData(colCount);
+			//RowData row = new RowData(colCount);
+			RowData row = RowDataFactory.createRowData(colCount, exporter.getConnection());
 			row.setTrimCharData(trimCharData);
 			row.read(rs, info);
 			writeRow(row, rows);

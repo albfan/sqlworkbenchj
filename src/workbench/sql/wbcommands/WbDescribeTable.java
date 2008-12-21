@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.TableColumnsDatastore;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 
 import workbench.db.TriggerReader;
@@ -110,7 +112,8 @@ public class WbDescribeTable
 			return result;
 		}
 
-		DataStore ds = currentConnection.getMetadata().getTableDefinition(toDescribe);
+		TableDefinition def = currentConnection.getMetadata().getTableDefinition(toDescribe);
+		DataStore ds = new TableColumnsDatastore(def);
 
 		DbSettings dbs = currentConnection.getDbSettings();
 
@@ -126,7 +129,7 @@ public class WbDescribeTable
 		CharSequence viewSource = null;
 		if (dbs.isViewType(toDescribe.getType()))
 		{
-			viewSource = currentConnection.getMetadata().getViewReader().getExtendedViewSource(toDescribe, ds, false, false);
+			viewSource = currentConnection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
 		}
 
 		ColumnRemover remover = new ColumnRemover(ds);

@@ -196,8 +196,10 @@ public class TableSearcher
 	{
 		DbMetadata meta = this.connection.getMetadata();
 
-		DataStore def = meta.getTableDefinition(tbl);
-		int cols = def.getRowCount();
+		TableDefinition def = meta.getTableDefinition(tbl);
+		int cols = def.getColumnCount();
+		if (cols == 0) return StringUtil.EMPTY_STRING;
+
 		StringBuilder sql = new StringBuilder(cols * 120);
 		sql.append("SELECT ");
 
@@ -206,8 +208,8 @@ public class TableSearcher
 			int added = 0;
 			for (int i=0; i < cols; i++)
 			{
-				String column = def.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-				int type  = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
+				String column = def.getColumns().get(i).getColumnName();
+				int type  = def.getColumns().get(i).getDataType();
 				if (!SqlUtil.isClobType(type) && !SqlUtil.isBlobType(type))
 				{
 					if (added > 0) sql.append(", ");
@@ -227,8 +229,8 @@ public class TableSearcher
 		int colcount = 0;
 		for (int i=0; i < cols; i++)
 		{
-			String column = def.getValueAsString(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			int sqlType  = def.getValueAsInt(i, DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
+			String column = def.getColumns().get(i).getColumnName();
+			int sqlType = def.getColumns().get(i).getDataType();
 			if (sqlType == Types.VARCHAR || sqlType == Types.CHAR)
 			{
 				column = this.connection.getMetadata().quoteObjectname(column);

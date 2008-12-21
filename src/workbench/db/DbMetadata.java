@@ -22,10 +22,8 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,7 +41,7 @@ import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiSequenceReader;
 import workbench.db.mssql.SqlServerConstraintReader;
 import workbench.db.mssql.SqlServerProcedureReader;
-import workbench.db.mysql.EnumReader;
+import workbench.db.mysql.MySqlEnumReader;
 import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.DbmsOutput;
 import workbench.db.oracle.OracleConstraintReader;
@@ -113,9 +111,6 @@ public class DbMetadata
 	private boolean isApacheDerby;
 	private boolean isExcel; 
 	private boolean isAccess;
-	
-	private boolean createInlineConstraints;
-	private boolean useNullKeyword = true;
 	
 	private String quoteCharacter;
 	private SqlKeywordHandler keywordHandler;
@@ -310,8 +305,6 @@ public class DbMetadata
 
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
 		Settings settings = Settings.getInstance();
-		this.createInlineConstraints = settings.getServersWithInlineConstraints().contains(productName);
-		this.useNullKeyword = !settings.getServersWithNoNullKeywords().contains(this.getDbId());
 		
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
@@ -410,6 +403,11 @@ public class DbMetadata
 	public String[] getSelectableTypes()
 	{
 		return tableTypesSelectable;
+	}
+
+	public String getQuoteCharacter()
+	{
+		return this.quoteCharacter;
 	}
 	
 	public String getTableTypeName() { return tableTypeName; }
@@ -573,6 +571,7 @@ public class DbMetadata
   public boolean isOracle() { return this.isOracle; }
 	public boolean isHsql() { return this.isHsql; }
 	public boolean isFirebird() { return this.isFirebird; }
+	public boolean isFirstSql() { return this.isFirstSql; }
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
 
@@ -1617,132 +1616,13 @@ public class DbMetadata
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table)
 		throws SQLException
 	{
-		DataStore ds = this.getTableDefinition(table);
-		if (ds == null) return Collections.emptyList();
-		return createColumnIdentifiers(ds);
-	}
-	
-	private List<ColumnIdentifier> createColumnIdentifiers(DataStore ds)
-	{
-		int count = ds.getRowCount();
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
-		for (int i=0; i < count; i++)
-		{
-			String col = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
-			int type = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Types.OTHER);
-			boolean pk = "YES".equals(ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG));
-			ColumnIdentifier ci = new ColumnIdentifier(quoteObjectname(col), fixColumnType(type), pk);
-			int size = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_SIZE, 0);
-			int digits = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_DIGITS, -1);
-			String nullable = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
-			int position = ds.getValueAsInt(i, COLUMN_IDX_TABLE_DEFINITION_POSITION, 0);
-			String dbmstype = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
-			String comment = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_REMARKS);
-			String def = ds.getValueAsString(i, COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
-			ci.setColumnSize(size);
-			ci.setDecimalDigits(digits);
-			ci.setIsNullable(StringUtil.stringToBool(nullable));
-			ci.setDbmsType(dbmstype);
-			ci.setComment(comment);
-			ci.setDefaultValue(def);
-			ci.setPosition(position);
-			result.add(ci);
-		}
-		return result;
+		TableDefinition def = this.getTableDefinition(table);
+		if (def == null) return Collections.emptyList();
+		return def.getColumns();
 	}
 
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the column name
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_COL_NAME = 0;
-
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the DBMS specific data type string
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE = 1;
-
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the primary key flag
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_PK_FLAG = 2;
-
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the nullable flag
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_NULLABLE = 3;
-
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the default value for this column
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_DEFAULT = 4;
-
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the remark for this column
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_REMARKS = 5;
-
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the integer value of the java datatype from {@link java.sql.Types}
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 6;
-	
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the integer value of siez of the column 
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_SIZE = 7;
-	
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the number of digits for the column
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_DIGITS = 8;
-	
-	/** The column index for a {@link workbench.storage.DataStore} returned
-	 *  by {@link #getTableDefinition(TableIdentifier)} that holds
-	 *  the ordinal position of the column 
-	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 9;
-
-	/**
-	 * Returns the definition of the given
-	 * table in a {@link workbench.storage.DataStore }
-	 * @return definiton of the datastore
-	 * @param id The identifier of the table
-	 * @throws SQLException If the table was not found or an error occurred 
-	 * @see #getTableDefinition(String, String, String, String)
-	 */
-	public DataStore getTableDefinition(TableIdentifier id)
-		throws SQLException
-	{
-		if (id == null) return null;
-		String type = id.getType();
-		if (type == null) type = tableTypeName;
-		TableIdentifier tbl = id.createCopy();
-		tbl.adjustCase(dbConnection);
-		tbl.checkIsQuoted(this);
-		return this.getTableDefinition(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), type);
-	}
-
-	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
-	
-	private DataStore createTableDefinitionDataStore()
-	{
-		final int[] types = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
-		final int[] sizes = {20, 18, 5, 8, 10, 25, 18, 2, 2, 2};
-		DataStore ds = new DataStore(TABLE_DEFINITION_COLS, types, sizes);
-		return ds;
-	}
-	
 	/** Return a DataStore containing the definition of the given table.
-	 * 
+	 *
 	 * @param aCatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the table is defined. This should be null if the DBMS does not support schemas
 	 * @param aTable The name of the table
@@ -1752,49 +1632,44 @@ public class DbMetadata
 	 * The individual columns should be accessed using the
 	 * COLUMN_IDX_TABLE_DEFINITION_xxx constants.
 	 */
-	protected DataStore getTableDefinition(String aCatalog, String aSchema, String aTable, String aType)
+	public TableDefinition getTableDefinition(TableIdentifier table)
 		throws SQLException
 	{
-		if (aTable == null) throw new IllegalArgumentException("Tablename may not be null!");
+		String catalog = adjustObjectnameCase(StringUtil.trimQuotes(table.getCatalog()));
+		String schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
+		String tablename = adjustObjectnameCase(StringUtil.trimQuotes(table.getTableName()));
 
-		DataStore ds = this.createTableDefinitionDataStore();
-
-		aCatalog = StringUtil.trimQuotes(aCatalog);
-		aSchema = StringUtil.trimQuotes(aSchema);
-		aTable = StringUtil.trimQuotes(aTable);
-
-		if (aSchema == null && this.isOracle()) 
+		if (schema == null && this.isOracle())
 		{
-			aSchema = this.getSchemaToUse();
-		}
-		
-		if (this.sequenceReader != null && "SEQUENCE".equalsIgnoreCase(aType))
-		{
-			DataStore seqDs = this.sequenceReader.getRawSequenceDefinition(aSchema, aTable);
-			if (seqDs != null) return seqDs;
+			schema = this.getSchemaToUse();
 		}
 
-		if ("SYNONYM".equalsIgnoreCase(aType))
+		if ("SYNONYM".equalsIgnoreCase(table.getType()))
 		{
-			TableIdentifier id = this.getSynonymTable(aSchema, aTable);
+			TableIdentifier id = this.getSynonymTable(schema, tablename);
 			if (id != null)
 			{
-				aSchema = id.getSchema();
-				aTable = id.getTableName();
-				aCatalog = null;
+				schema = id.getSchema();
+				tablename = id.getTableName();
+				catalog = null;
 			}
 		}
 
 		ArrayList<String> keys = new ArrayList<String>();
+		String pkname = null;
+		TableIdentifier resultTable = table.createCopy();
+		resultTable.setPrimaryKeyName(pkname);
+
 		if (this.dbSettings.supportsGetPrimaryKeys())
 		{
 			ResultSet keysRs = null;
 			try
 			{
-				keysRs = this.metaData.getPrimaryKeys(aCatalog, aSchema, aTable);
+				keysRs = this.metaData.getPrimaryKeys(catalog, schema, tablename);
 				while (keysRs.next())
 				{
 					keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
+					pkname = keysRs.getString("PK_NAME");
 				}
 			}
 			catch (Throwable e)
@@ -1810,28 +1685,29 @@ public class DbMetadata
 		boolean hasEnums = false;
 
 		ResultSet rs = null;
+
+		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
 		
 		try
 		{
 			if (this.oracleMetaData != null)
 			{
-				rs = this.oracleMetaData.getColumns(aCatalog, aSchema, aTable, "%");
+				rs = this.oracleMetaData.getColumns(catalog, schema, tablename, "%");
 			}
 			else
 			{
-				rs = this.metaData.getColumns(aCatalog, aSchema, aTable, "%");
+				rs = this.metaData.getColumns(catalog, schema, tablename, "%");
 			}
 
 			while (rs != null && rs.next())
 			{
-				int row = ds.addRow();
-
 				// The columns should be retrieved (getXxx()) in the order
 				// as they appear in the result set as some drivers 
 				// do not like an out-of-order processing of the columns
-				
 				String colName = rs.getString("COLUMN_NAME"); // index 4
 				int sqlType = rs.getInt("DATA_TYPE"); // index 5
+				ColumnIdentifier col = new ColumnIdentifier(quoteObjectname(colName), fixColumnType(sqlType));
+				
 				String typeName = rs.getString("TYPE_NAME");
 				if (this.isMySql && !hasEnums)
 				{
@@ -1878,22 +1754,16 @@ public class DbMetadata
 				String nullable = rs.getString("IS_NULLABLE"); // index 18
 				
 				String display = this.dataTypeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits, sqlDataType);
-				
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_COL_NAME, colName);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, display);
-				
-				if (keys.contains(colName.toLowerCase()))
-					ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "YES");
-				else
-					ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_PK_FLAG, "NO");
 
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, nullable);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, defaultValue);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, remarks);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE, Integer.valueOf(sqlType));
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, Integer.valueOf(size));
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, digits >= 0 ? Integer.valueOf(digits) : null);
-				ds.setValue(row, COLUMN_IDX_TABLE_DEFINITION_POSITION, Integer.valueOf(position));
+				col.setDbmsType(display);
+				col.setIsPkColumn(keys.contains(colName.toLowerCase()));
+				col.setIsNullable("YES".equalsIgnoreCase(nullable));
+				col.setDefaultValue(defaultValue);
+				col.setComment(remarks);
+				col.setColumnSize(size);
+				col.setDecimalDigits(digits);
+				col.setPosition(position);
+				columns.add(col);
 			}
 		}
 		finally
@@ -1905,13 +1775,13 @@ public class DbMetadata
 			}
 		}
 
+		TableDefinition result = new TableDefinition(resultTable, columns);
 		if (hasEnums)
 		{
-			TableIdentifier tbl = new TableIdentifier(aCatalog, aSchema, aTable);
-			EnumReader.updateEnumDefinition(tbl, ds, this.dbConnection);
+			MySqlEnumReader.updateEnumDefinition(result, this.dbConnection);
 		}
 
-		return ds;
+		return result;
 	}
 
 	/**
@@ -2430,24 +2300,6 @@ public class DbMetadata
 		return ds;
 	}
 
-	private String getPkIndexName(DataStore anIndexDef)
-	{
-		if (anIndexDef == null) return null;
-		int count = anIndexDef.getRowCount();
-
-		String name = null;
-		for (int row = 0; row < count; row ++)
-		{
-			String is_pk = anIndexDef.getValue(row, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
-			if ("YES".equalsIgnoreCase(is_pk))
-			{
-				name = anIndexDef.getValue(row, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
-				break;
-			}
-		}
-		return name;
-	}
-
 	public SequenceReader getSequenceReader()
 	{
 		return this.sequenceReader;
@@ -2539,54 +2391,14 @@ public class DbMetadata
 		return result;
 	}
 
-	/** 	
-   * Return the SQL statement to re-create the given table. (in the dialect for the
-	 * current DBMS)
-   *
-	 * @return the SQL statement to create the given table.
-	 * @param table the table for which the source should be retrievedcatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
-	 * @param includeDrop If true, a DROP TABLE statement will be included in the generated SQL script.
-	 * @param includeFk if true, the foreign key constraints will be added after the CREATE TABLE
-	 * @throws SQLException
-	 */
-	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
-		throws SQLException
-	{
-		if (getViewTypeName().equalsIgnoreCase(table.getType())) 
-		{
-			CharSequence s = getViewReader().getExtendedViewSource(table, includeDrop);
-			if (s == null) return null;
-			return s.toString();
-		}
-		List<ColumnIdentifier> cols = getTableColumns(table);
-		DataStore index = indexReader.getTableIndexInformation(table);
-		TableIdentifier tbl = table.createCopy();
-		tbl.adjustCase(this.dbConnection);
-		DataStore fkDef = null;
-		if (includeFk) fkDef = this.getForeignKeys(tbl, false);
-		String source = this.getTableSource(table, cols, index, fkDef, includeDrop, null, includeFk);
-		return source;
-	}
-
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, String tableNameToUse)
-	{
-		DataStore indexInfo = indexReader.getTableIndexInformation(table);
-		return getTableSource(table, columns, indexInfo, null, false, tableNameToUse, true);
-	}
-
-	public String getTableSource(TableIdentifier table, DataStore columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
-	{
-		List<ColumnIdentifier> cols = this.createColumnIdentifiers(columns);
-		return getTableSource(table, cols, aIndexDef, aFkDef, includeDrop, tableNameToUse, true);
-	}
-	
 	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, boolean includeDrop)
 	{
 		StringBuilder result = new StringBuilder(250);
 	
 		try
 		{
-			result.append(getViewReader().getExtendedViewSource(table, includeDrop));
+			TableDefinition def = new TableDefinition(table, columns);
+			result.append(getViewReader().getExtendedViewSource(def, includeDrop, false));
 		}
 		catch (SQLException e)
 		{
@@ -2606,212 +2418,7 @@ public class DbMetadata
 		return result.toString();
 	}
 	
-	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
-	{
-		if (columns == null || columns.size() == 0) return StringUtil.EMPTY_STRING;
-		if (table == null) return "";
-		
-		if ("MVIEW_NAME".equals(table.getType()))
-		{
-			return getMViewSource(table, columns, aIndexDef, includeDrop);
-		}
-		
-		StringBuilder result = new StringBuilder(250);
-
-		Map<String, String> columnConstraints = this.getColumnConstraints(table);
-
-		result.append(generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
-		result.append("\n(\n");
-
-		List<String> pkCols = new LinkedList<String>();
-		int maxColLength = 0;
-		int maxTypeLength = 0;
-
-		// calculate the longest column name, so that the display can be formatted
-		for (ColumnIdentifier column : columns)
-		{
-			String colName = quoteObjectname(column.getColumnName());
-			String type = column.getDbmsType();
-			maxColLength = Math.max(maxColLength, colName.length());
-			maxTypeLength = Math.max(maxTypeLength, (type != null ? type.length() : 0));
-		}
-		maxColLength++;
-		maxTypeLength++;
-		
-		// Some RDBMS require the "DEFAULT" clause before the [NOT] NULL clause
-		boolean defaultBeforeNull = this.dbSettings.getDefaultBeforeNull(); 
-		String nullKeyword = Settings.getInstance().getProperty("workbench.db.nullkeyword." + getDbId(), "NULL");
-		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + this.getDbId(), false);
-		
-		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
-		
-		Iterator<ColumnIdentifier> itr = columns.iterator();
-		while (itr.hasNext())
-		{
-			ColumnIdentifier column = itr.next();
-			String colName = column.getColumnName();
-			String quotedColName = quoteObjectname(colName);
-			String type = column.getDbmsType();
-			if (type == null) type = "";
-			String def = column.getDefaultValue();
-			int typeLength = type.length();
-			result.append("   ");
-			result.append(quotedColName);
-			
-			if (column.isPkColumn() && (!this.isFirstSql || this.isFirstSql && !"sequence".equals(type)))
-			{
-				pkCols.add(colName.trim());
-			}
-			
-			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
-			result.append(type);
-			
-			// Check if any additional keywords are coming after
-			// the datatype. If yes, we fill the line with spaces
-			// to align the keywords properly
-			if ( !StringUtil.isEmptyString(def) || 
-				   (!column.isNullable()) ||
-				   (column.isNullable() && this.useNullKeyword)
-					)
-			{
-				for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
-			}
-			
-
-			if (defaultBeforeNull && !StringUtil.isEmptyString(def))
-			{
-				result.append(" DEFAULT ");
-				result.append(def.trim());
-			}
-
-			if (this.isFirstSql && "sequence".equals(type))
-			{
-				// with FirstSQL a column of type "sequence" is always the primary key
-				result.append(" PRIMARY KEY");
-			}
-			else if (column.isNullable())
-			{
-				if (this.useNullKeyword)
-				{
-					result.append(' ');
-					result.append(nullKeyword);
-				}
-			}
-			else
-			{
-				result.append(" NOT NULL");
-			}
-
-			if (!defaultBeforeNull && !StringUtil.isEmptyString(def))
-			{
-				result.append(" DEFAULT ");
-				result.append(def.trim());
-			}
-
-			String constraint = columnConstraints.get(colName);
-			if (constraint != null && constraint.length() > 0)
-			{
-				result.append(' ');
-				result.append(constraint);
-			}
-			
-			if (includeCommentInTableSource && !StringUtil.isEmptyString(column.getComment()))
-			{
-				result.append(" COMMENT '");
-				result.append(column.getComment());
-				result.append('\'');
-			}
-			
-			if (itr.hasNext()) result.append(',');
-			result.append(lineEnding);
-		}
-
-		String cons = this.getTableConstraints(table, "   ");
-		if (cons != null && cons.length() > 0)
-		{
-			result.append("   ,");
-			result.append(cons);
-			result.append(lineEnding);
-		}
-
-		if (this.createInlineConstraints && pkCols.size() > 0)
-		{
-			result.append(lineEnding + "   ,PRIMARY KEY (");
-			result.append(StringUtil.listToString(pkCols, ','));
-			result.append(")" + lineEnding);
-
-			if (includeFk)
-			{
-				StringBuilder fk = this.getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
-				if (fk.length() > 0)
-				{
-					result.append(fk);
-				}
-			}
-		}
-
-		result.append(");" + lineEnding); 
-		// end of CREATE TABLE
-
-		if (!this.createInlineConstraints && pkCols.size() > 0)
-		{
-			String name = this.getPkIndexName(aIndexDef);
-			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, name);
-			result.append(pkSource);
-		}
-		
-		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, tableNameToUse);
-		if (!StringUtil.isEmptyString(indexSource))
-		{
-			result.append(lineEnding);
-			result.append(indexSource);
-		}
-		
-		if (!this.createInlineConstraints && includeFk) 
-		{
-			CharSequence fk = this.getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
-			if (!StringUtil.isEmptyString(fk))
-			{
-				result.append(lineEnding);
-				result.append(fk);
-			}
-		}
-
-		TableCommentReader commentReader = new TableCommentReader();
-		String tableComment = commentReader.getTableCommentSql(dbConnection, table);
-		if (!StringUtil.isEmptyString(tableComment))
-		{
-			result.append(lineEnding);
-			result.append(tableComment);
-		}
-		
-		StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
-		if (!StringUtil.isEmptyString(colComments))
-		{
-			result.append(lineEnding);
-			result.append(colComments);
-		}
-
-		TableGrantReader grantReader = new TableGrantReader();
-		StringBuilder grants = grantReader.getTableGrantSource(this.dbConnection, table);
-		if (grants.length() > 0)
-		{
-			result.append(lineEnding);
-			result.append(grants);
-		}
-		
-		if (this.dbSettings.ddlNeedsCommit())
-		{
-			result.append(lineEnding);
-			result.append("COMMIT;");
-		}
-		
-		result.append(lineEnding);
-
-		return result.toString();
-	}
-
-	private boolean isSystemConstraintName(String name)
+	protected boolean isSystemConstraintName(String name)
 	{
 		if (name == null) return false;
 		String regex = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".constraints.systemname", null);
@@ -2828,51 +2435,6 @@ public class DbMetadata
 			LogMgr.logError("DbMetadata.isSystemConstraintName()", "Error in regex", e);
 		}
 		return false;
-	}
-	
-	/**
-	 * Builds an ALTER TABLE to add a primary key definition for the given tablename.
-	 * 
-	 * @param table 
-	 * @param pkCols
-	 * @param pkName
-	 * @return an SQL statement to add a PK constraint on the given table.
-	 */
-	public CharSequence getPkSource(TableIdentifier table, List pkCols, String pkName)
-	{
-		String template = metaSqlMgr.getPrimaryKeyTemplate();
-		
-		if (StringUtil.isEmptyString(template)) return "";
-		
-		StringBuilder result = new StringBuilder(100);
-		String tablename = table.getTableExpression(this.dbConnection);
-		
-		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
-		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
-
-		if (isSystemConstraintName(pkName))
-		{
-			pkName = null;
-		}
-		
-		if (pkName == null && Settings.getInstance().getAutoGeneratePKName())
-		{
-			pkName = "pk_" + tablename.toLowerCase();
-		}
-		
-		if (isKeyword(pkName)) pkName = this.quoteCharacter + pkName + this.quoteCharacter;
-		
-		if (StringUtil.isEmptyString(pkName)) 
-		{
-			pkName = ""; // remove placeholder if no name is available
-			template = StringUtil.replace(template, " CONSTRAINT ", ""); // remove CONSTRAINT KEYWORD if no name is available
-		}
-
-		template = StringUtil.replace(template, MetaDataSqlManager.PK_NAME_PLACEHOLDER, pkName);
-		result.append(template);
-		result.append(";\n");
-		
-		return result;
 	}
 	
 	/**
@@ -2938,207 +2500,6 @@ public class DbMetadata
 		return cons;
 	}
 
-	public StringBuilder getFkSource(TableIdentifier table)
-	{
-		DataStore fkDef = this.getForeignKeys(table, false);
-		return getFkSource(table, fkDef, null, createInlineConstraints);
-	}
-	
-	/**
-	 *	Return a SQL script to re-create the Foreign key definition for the given table.
-	 *
-	 *	@param table the tablename for which the foreign keys should be created
-	 *  @param aFkDef a DataStore with the FK definition as returned by #getForeignKeys()
-	 *
-	 *	@return a SQL statement to add the foreign key definitions to the given table
-	 */
-	public StringBuilder getFkSource(TableIdentifier table, DataStore aFkDef, String tableNameToUse, boolean forInlineUse)
-	{
-		if (aFkDef == null) return StringUtil.emptyBuffer();
-		int count = aFkDef.getRowCount();
-		if (count == 0) return StringUtil.emptyBuffer();
-
-		String template = metaSqlMgr.getForeignKeyTemplate(forInlineUse);
-
-		// collects all columns from the base table mapped to the
-		// defining foreign key constraing.
-		// The fk name is the key.
-		// to the hashtable. The entry will be a HashSet containing the column names
-		// this ensures that each column will only be used once per fk definition
-		// (the postgres driver returns some columns twice!)
-		HashMap<String, List<String>> fkCols = new HashMap<String, List<String>>();
-
-		// this hashmap contains the columns of the referenced table
-		HashMap<String, List<String>> fkTarget = new HashMap<String, List<String>>();
-
-		HashMap<String, String> fks = new HashMap<String, String>();
-		HashMap<String, String> updateRules = new HashMap<String, String>();
-		HashMap<String, String> deleteRules = new HashMap<String, String>();
-		HashMap<String, String> deferrable = new HashMap<String, String>();
-		
-		String fkname;
-		String col;
-		String fkCol;
-		String updateRule;
-		String deleteRule;
-		String deferRule;
-		
-		for (int i=0; i < count; i++)
-		{
-			//"FK_NAME", "COLUMN_NAME", "REFERENCES"};
-			fkname = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_FK_NAME);
-			col = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_COLUMN_NAME);
-			fkCol = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
-			updateRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_UPDATE_RULE);
-			deleteRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_DELETE_RULE);
-			deferRule = aFkDef.getValueAsString(i, COLUMN_IDX_FK_DEF_DEFERRABLE);
-			
-			List<String> colList = fkCols.get(fkname);
-			if (colList == null)
-			{
-				colList = new LinkedList<String>();
-				fkCols.put(fkname, colList);
-			}
-			colList.add(col);
-			updateRules.put(fkname, updateRule);
-			deleteRules.put(fkname, deleteRule);
-			deferrable.put(fkname, deferRule);
-			
-			colList = fkTarget.get(fkname);
-			if (colList == null)
-			{
-				colList = new LinkedList<String>();
-				fkTarget.put(fkname, colList);
-			}
-			colList.add(fkCol);
-		}
-
-		// now put the real statements together
-		Iterator<Map.Entry<String, List<String>>> names = fkCols.entrySet().iterator();
-		while (names.hasNext())
-		{
-			Map.Entry<String, List<String>> mapentry = names.next();
-			fkname = mapentry.getKey();
-			List<String> colList = mapentry.getValue();
-
-			String stmt = fks.get(fkname);
-			if (stmt == null)
-			{
-				// first time we hit this FK definition in this loop
-				stmt = template;
-			}
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
-			
-			if (this.isSystemConstraintName(fkname))
-			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, "");
-				stmt = StringUtil.replace(stmt, " CONSTRAINT ", "");
-			}
-			else
-			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fkname);
-			}
-			
-			String entry = StringUtil.listToString(colList, ',');
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
-			String rule = updateRules.get(fkname);
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_UPDATE_RULE, " ON UPDATE " + rule);
-			rule = deleteRules.get(fkname);
-			if (this.isOracle())
-			{
-				// Oracle does not allow ON DELETE RESTRICT, so we'll have to
-				// remove the placeholder completely
-				if ("restrict".equalsIgnoreCase(rule))
-				{
-					stmt = MetaDataSqlManager.removePlaceholder(stmt, MetaDataSqlManager.FK_DELETE_RULE, true);
-				}
-				else
-				{
-					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, " ON DELETE " + rule);
-				}
-			}
-			else
-			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_DELETE_RULE, " ON DELETE " + rule);
-			}
-			
-			rule = getDeferrableVerb(deferrable.get(fkname));
-			if (StringUtil.isEmptyString(rule))
-			{
-				stmt = MetaDataSqlManager.removePlaceholder(stmt, MetaDataSqlManager.DEFERRABLE, true);
-			}
-			else
-			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.DEFERRABLE, rule.trim());
-			}
-			
-			colList = fkTarget.get(fkname);
-			if (colList == null)
-			{
-				LogMgr.logError("DbMetadata.getFkSource()", "Retrieved a null list for constraing [" + fkname + "] but should contain a list for table [" + table.getTableName() + "]",null);
-				continue;
-			}
-			
-			Iterator itr = colList.iterator();
-			StringBuilder colListBuffer = new StringBuilder(30);
-			String targetTable = null;
-			boolean first = true;
-			
-			while (itr.hasNext())
-			{
-				col = (String)itr.next();//tok.nextToken();
-				int pos = col.lastIndexOf('.');
-				if (targetTable == null)
-				{
-					// The last element has to be the column name!
-					String t = col.substring(0, pos);
-					TableIdentifier tbl = new TableIdentifier(t);
-					targetTable = tbl.getTableExpression(this.dbConnection);
-				}
-				if (!first)
-				{
-					colListBuffer.append(',');
-				}
-				else
-				{
-					first = false;
-				}
-				colListBuffer.append(col.substring(pos + 1));
-			}
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_TABLE_PLACEHOLDER, targetTable);
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_TARGET_COLUMNS_PLACEHOLDER, colListBuffer.toString());
-			fks.put(fkname, stmt.trim());
-		}
-		StringBuilder fk = new StringBuilder();
-
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
-		Iterator<String> values = fks.values().iterator();
-		while (values.hasNext())
-		{
-			if (forInlineUse)
-			{
-				fk.append("   ,");
-				fk.append(values.next());
-			}
-			else
-			{
-				fk.append(values.next());
-				fk.append(';');
-				fk.append(nl);
-			}
-			fk.append(nl);
-		}
-
-		return fk;
-	}
-
-	private String getDeferrableVerb(String type)
-	{
-		if (dbSettings.isNotDeferrable(type)) return StringUtil.EMPTY_STRING;
-		return " DEFERRABLE " + type;
-	}
-	
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
 	 * 	@param aTable - The table name for which the index should be constructed
