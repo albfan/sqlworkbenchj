@@ -435,6 +435,7 @@ keyword=("ABORT"|
 "NEW"|
 "NEXT"|
 "NO"|
+"NO CYCLE"|
 "NOCREATEDB"|
 "NOCREATEUSER"|
 "NONE"|

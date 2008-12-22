@@ -24,7 +24,6 @@ import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.storage.DataStore;
 
@@ -44,7 +43,6 @@ public class PostgresSequenceReader
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
 		StringBuilder buf = new StringBuilder(250);
 
@@ -59,31 +57,24 @@ public class PostgresSequenceReader
 
 			buf.append("CREATE SEQUENCE ");
 			buf.append(name);
-			if (inc != 1)
-			{
-				buf.append("\n       INCREMENT ");
-				buf.append(inc);
-			}
-			if (min != 1)
-			{
-				buf.append(nl + "       MINVALUE ");
-				buf.append(min);
-			}
+			buf.append("\n       INCREMENT BY ");
+			buf.append(inc);
+			buf.append("\n       MINVALUE ");
+			buf.append(min);
 			long maxMarker = 9223372036854775807L;
 			if (max != maxMarker)
 			{
-				buf.append(nl + "       MAXVALUE ");
+				buf.append("\n       MAXVALUE ");
 				buf.append(max.toString());
 			}
-			if (cache != 1)
+			buf.append("\n       CACHE ");
+			buf.append(cache);
+			buf.append("\n       ");
+			if ("false".equalsIgnoreCase(cycle))
 			{
-				buf.append(nl + "        CACHE ");
-				buf.append(cache);
+				buf.append("NO");
 			}
-			if ("true".equalsIgnoreCase(cycle))
-			{
-				buf.append(nl + "        CYCLE");
-			}
+			buf.append(" CYCLE");
 			buf.append(";\n");
 		}
 		catch (Exception e)
@@ -150,6 +141,28 @@ public class PostgresSequenceReader
 
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
+		SequenceDefinition result = new SequenceDefinition(owner, sequence);
+		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		if (ds == null) return result;
+		if (ds.getRowCount() == 0) return result;
+		
+		long min = ds.getValueAsLong(0, 0, -1);
+		long max = ds.getValueAsLong(0, 1, -1);
+		long inc = ds.getValueAsLong(0, 2, 1);
+		long cache = ds.getValueAsLong(0, 3, 1);
+		String cycle = ds.getValueAsString(0, 4);
+
+		result.setSequenceProperty("INCREMENT", Long.valueOf(inc));
+		result.setSequenceProperty("MINVALUE", Long.valueOf(min));
+		result.setSequenceProperty("CACHE", cache);
+		result.setSequenceProperty("CYCLE", cycle);
+		result.setSequenceProperty("MAXVALUE", Long.valueOf(max));
+		readSequenceSource(result);
+		return result;
+	}
+
+	public DataStore getRawSequenceDefinition(String owner, String sequence)
+	{
 		if (sequence == null) return null;
 
 		int pos = sequence.indexOf('.');
@@ -158,50 +171,28 @@ public class PostgresSequenceReader
 			sequence = sequence.substring(pos);
 		}
 
+		DataStore result = null;
 		Statement stmt = null;
 		ResultSet rs = null;
-		SequenceDefinition result = new SequenceDefinition(owner, sequence);
 		Savepoint sp = null;
 		try
 		{
-			String sql = "SELECT max_value, min_value, increment_by, cache_value, is_cycled FROM " + sequence;
+			String sql = "SELECT min_value, max_value, increment_by, cache_value, is_cycled FROM " + sequence;
 			sp = this.dbConnection.setSavepoint();
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
-			if (rs.next())
-			{
-  			long max = rs.getLong(1);
-				long min = rs.getLong(2);
-				long inc = rs.getLong(3);
-				long cache = rs.getLong(4);
-				String cycle = rs.getString(5);
-
-				result.setSequenceProperty("INCREMENT", Long.valueOf(inc));
-				result.setSequenceProperty("MINVALUE", Long.valueOf(min));
-				result.setSequenceProperty("CACHE", cache);
-				result.setSequenceProperty("CYCLE", cycle);
-				result.setSequenceProperty("MAXVALUE", Long.valueOf(max));
-				readSequenceSource(result);
-			}
+			result = new DataStore(rs, this.dbConnection, true);
 			this.dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
 			this.dbConnection.rollback(sp);
 			LogMgr.logDebug("PgSequenceReader.getSequenceDefinition()", "Error reading sequence definition", e);
-			result = null;
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
-	}
-
-	public DataStore getRawSequenceDefinition(String owner, String sequence)
-	{
-		// The definition can be displayed by doing a SELECT * FROM sequence
-		// so we don't need to build up the datastore here.
-		return null;
 	}
 }

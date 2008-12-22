@@ -28,8 +28,9 @@ import workbench.util.StringUtil;
 public class TableSourceBuilder
 {
 	private WbConnection dbConnection;
-	private boolean createInlineConstraints = false;
-	private boolean useNullKeyword = false;
+	private boolean createInlineConstraints;
+	private boolean useNullKeyword;
+	
 	public TableSourceBuilder(WbConnection con)
 	{
 		dbConnection = con;
@@ -75,12 +76,13 @@ public class TableSourceBuilder
 
 		TableDefinition def = meta.getTableDefinition(tbl);
 		List<ColumnIdentifier> cols = def.getColumns();
+		DataStore indexDef = meta.getIndexReader().getTableIndexInformation(tbl);
 		DataStore fkDef = null;
-		if (includeFk) fkDef = dbConnection.getMetadata().getForeignKeys(tbl, false);
+		if (includeFk) fkDef = meta.getForeignKeys(tbl, false);
 
 		// getTableDefinition() has already retrieved the necessary PK information
 		// there is no need to retrieve the index definition to get the PK information
-		String source = this.getTableSource(table, cols, null, fkDef, includeDrop, null, includeFk);
+		String source = this.getTableSource(table, cols, indexDef, fkDef, includeDrop, null, includeFk);
 		return source;
 	}
 	
@@ -131,7 +133,7 @@ public class TableSourceBuilder
 
 		// Some RDBMS require the "DEFAULT" clause before the [NOT] NULL clause
 		boolean defaultBeforeNull = meta.getDbSettings().getDefaultBeforeNull();
-		String nullKeyword = Settings.getInstance().getProperty("workbench.db.nullkeyword." + meta.getDbId(), "NULL");
+		String nullKeyword = Settings.getInstance().getProperty("workbench.db." + meta.getDbId() + ".nullkeyword", "NULL");
 		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + meta.getDbId(), false);
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
@@ -161,7 +163,7 @@ public class TableSourceBuilder
 			// Check if any additional keywords are coming after
 			// the datatype. If yes, we fill the line with spaces
 			// to align the keywords properly
-			if ( !StringUtil.isEmptyString(def) ||
+			if ( StringUtil.isNonBlank(def) ||
 				   (!column.isNullable()) ||
 				   (column.isNullable() && this.useNullKeyword)
 					)
@@ -169,8 +171,7 @@ public class TableSourceBuilder
 				for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
 			}
 
-
-			if (defaultBeforeNull && !StringUtil.isEmptyString(def))
+			if (defaultBeforeNull && StringUtil.isNonBlank(def))
 			{
 				result.append(" DEFAULT ");
 				result.append(def.trim());
@@ -253,7 +254,7 @@ public class TableSourceBuilder
 		}
 
 		StringBuilder indexSource = getIndexReader().getIndexSource(table, aIndexDef, tableNameToUse);
-		if (!StringUtil.isEmptyString(indexSource))
+		if (StringUtil.isNonBlank(indexSource))
 		{
 			result.append(lineEnding);
 			result.append(indexSource);
@@ -262,7 +263,7 @@ public class TableSourceBuilder
 		if (!this.createInlineConstraints && includeFk)
 		{
 			CharSequence fk = getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
-			if (!StringUtil.isEmptyString(fk))
+			if (StringUtil.isNonBlank(fk))
 			{
 				result.append(lineEnding);
 				result.append(fk);
@@ -271,14 +272,14 @@ public class TableSourceBuilder
 
 		TableCommentReader commentReader = new TableCommentReader();
 		String tableComment = commentReader.getTableCommentSql(dbConnection, table);
-		if (!StringUtil.isEmptyString(tableComment))
+		if (StringUtil.isNonBlank(tableComment))
 		{
 			result.append(lineEnding);
 			result.append(tableComment);
 		}
 
 		StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
-		if (!StringUtil.isEmptyString(colComments))
+		if (StringUtil.isNonBlank(colComments))
 		{
 			result.append(lineEnding);
 			result.append(colComments);
@@ -569,6 +570,5 @@ public class TableSourceBuilder
 		if (dbConnection.getDbSettings().isNotDeferrable(type)) return StringUtil.EMPTY_STRING;
 		return " DEFERRABLE " + type;
 	}
-
 
 }

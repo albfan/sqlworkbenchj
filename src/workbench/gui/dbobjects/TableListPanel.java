@@ -739,12 +739,6 @@ public class TableListPanel
 		return (w.isActive() && w.isFocused() && w.isVisible());
 	}
 
-	public void setCatalogAndSchema(String aCatalog, String aSchema)
-		throws Exception
-	{
-		this.setCatalogAndSchema(aCatalog, aSchema, true);
-	}
-
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
 		throws Exception
 	{

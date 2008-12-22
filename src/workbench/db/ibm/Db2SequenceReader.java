@@ -95,7 +95,7 @@ public class Db2SequenceReader
 			"       DATATYPEID  \n" +
 			"FROM   SYSIBM.SYSSEQUENCES \n" +
 			"WHERE schema = ?";
-			if (!StringUtil.isEmptyString(sequence))
+			if (StringUtil.isNonBlank(sequence))
 			{
 				sql += "  AND name = ? ";
 			}
@@ -113,7 +113,7 @@ public class Db2SequenceReader
 			"       DATATYPEID  \n" +
 			"FROM   syscat.sequences \n" +
 			"WHERE seqschema = ?";
-			if (!StringUtil.isEmptyString(sequence))
+			if (StringUtil.isNonBlank(sequence))
 			{
 				sql += "  AND seqname = ? ";
 			}
@@ -132,7 +132,7 @@ public class Db2SequenceReader
 		{
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, schema);
-			if (!StringUtil.isEmptyString(sequence)) stmt.setString(2, sequence);
+			if (StringUtil.isNonBlank(sequence)) stmt.setString(2, sequence);
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, this.connection, true);
 		}

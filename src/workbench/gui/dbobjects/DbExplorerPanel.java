@@ -325,6 +325,11 @@ public class DbExplorerPanel
 
 			if (schemas.size() > 0)
 			{
+				Object selected = schemaSelector.getSelectedItem();
+				if (!workspaceSchema && selected != null)
+				{
+					currentSchema = selected.toString();
+				}
 				this.schemaSelector.setEnabled(true);
 				this.schemaSelector.setVisible(true);
 				this.schemaLabel.setVisible(true);
@@ -569,12 +574,21 @@ public class DbExplorerPanel
 		{
 			String cat = StringUtil.capitalize(this.dbConnection.getMetadata().getCatalogTerm());
 
+			String catalogToSelect = null;
+			boolean selectLastCatalog = false;
+
+			if (catalogFromWorkspace == null && catalogSelector.getItemCount() > 0)
+			{
+				Object o = catalogSelector.getSelectedItem();
+				catalogToSelect = o == null ? null : o.toString();
+			}
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(cat);
 
 			for (int i = 0; i < ds.getRowCount(); i++)
 			{
 				String db = ds.getValueAsString(i, 0);
+				if (db.equalsIgnoreCase(catalogToSelect)) selectLastCatalog = true;
 				catalogSelector.addItem(db);
 			}
 			String db = this.dbConnection.getMetadata().getCurrentCatalog();
@@ -582,7 +596,13 @@ public class DbExplorerPanel
 			if (this.dbConnection.getProfile().getStoreExplorerSchema() && this.catalogFromWorkspace != null)
 			{
 				this.catalogSelector.setSelectedItem(this.catalogFromWorkspace);
+				catalogFromWorkspace = null;
 			}
+			else if (selectLastCatalog && catalogToSelect != null)
+			{
+				this.catalogSelector.setSelectedItem(catalogToSelect);
+			}
+			
 			this.catalogSelector.addActionListener(this);
 			this.catalogSelector.setVisible(true);
 			this.catalogSelector.setEnabled(true);

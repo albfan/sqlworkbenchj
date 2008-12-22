@@ -77,11 +77,15 @@ public final class WbManager
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
-
+	public final boolean isJava15;
+	
 	private WbManager()
 	{
 		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 		Thread.setDefaultUncaughtExceptionHandler(this);
+
+		String version = System.getProperty("java.version", System.getProperty("java.runtime.version"));
+		isJava15 = version.startsWith("1.5");
 	}
 
 	public static WbManager getInstance()
@@ -103,7 +107,7 @@ public final class WbManager
 	{
 		return this.writeSettings;
 	}
-
+	
 	public void showDialog(String clazz)
 	{
 		JFrame parent = WbManager.getInstance().getCurrentWindow();

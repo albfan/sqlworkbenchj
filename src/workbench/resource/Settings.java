@@ -2442,6 +2442,10 @@ public class Settings
 
 		this.renameProperty("workbench.sql.replace.criteria", "workbench.sql.replace.criteria.lastvalue");
 		this.renameProperty("workbench.sql.replace.replacement", "workbench.sql.replace.replacement.lastvalue");
+		this.renameProperty("workbench.db.nullkeyword.ingres", "workbench.db.ingres.nullkeyword");
+		this.renameProperty("workbench.db.defaultbeforenull.ingres", "workbench.db.ingres.defaultbeforenull");
+		this.renameProperty("workbench.db.defaultbeforenull.firebird", "workbench.db.firebird.defaultbeforenull");
+		this.renameProperty("workbench.db.defaultbeforenull.oracle", "workbench.db.oracle.defaultbeforenull");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

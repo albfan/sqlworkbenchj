@@ -32,7 +32,10 @@ public class WbButton
 	extends JButton
 	implements MouseListener
 {
-	protected Border rolloverBorder;
+	private static final Border SMALL_EMPTY_BORDER = new EmptyBorder(2,2,2,2);
+	private static final Border LARGE_EMPTY_BORDER = new EmptyBorder(5,5,5,5);
+
+	private Border rolloverBorder;
 	private Border emptyBorder;
 	protected boolean iconButton = false;
 	
@@ -64,6 +67,7 @@ public class WbButton
 	private void init()
 	{
 		putClientProperty("jgoodies.isNarrow", Boolean.FALSE);
+		setRolloverEnabled(true);
 	}
 	
 	public void setResourceKey(String key)
@@ -108,13 +112,12 @@ public class WbButton
 		if (iconButton)
 		{
 			this.rolloverBorder = out;
-			this.emptyBorder = new EmptyBorder(0,0,0,0);
+			this.emptyBorder = SMALL_EMPTY_BORDER;
 		}
 		else
 		{
-			Border in = new EmptyBorder(3,3,3,3);
-			this.rolloverBorder = new CompoundBorder(out, in);
-			this.emptyBorder = new EmptyBorder(6,6,6,6);
+			this.rolloverBorder = new CompoundBorder(out, SMALL_EMPTY_BORDER);
+			this.emptyBorder = LARGE_EMPTY_BORDER;
 		}
 		this.setBorderPainted(true);
 		this.setBorder(emptyBorder);
@@ -126,6 +129,7 @@ public class WbButton
 		this.rolloverBorder = null;
 		this.emptyBorder = null;
 		this.setBorderPainted(false);
+		this.setRolloverEnabled(false);
 		this.addMouseListener(this);
 	}
 	

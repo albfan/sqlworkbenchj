@@ -1889,7 +1889,7 @@ public class DataStore
 		// first, which we have already tried in checkUpdateTable()
 		if (this.updateTable != null && !this.hasPkColumns())
 		{
-			LogMgr.logInfo("Datastore.updatePkInformation()", "Trying to retrieve PK information retrieved from pk mapping");
+			LogMgr.logDebug("Datastore.updatePkInformation()", "Trying to retrieve PK information from user-defined PK mapping");
 			this.resultInfo.readPkColumnsFromMapping(aConnection);
 		}
 	}

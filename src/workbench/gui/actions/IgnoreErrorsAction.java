@@ -11,6 +11,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 
 import javax.swing.Action;
@@ -18,8 +19,8 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
-import workbench.gui.components.WbToolbarButton;
 
+import workbench.gui.components.WbToolbarButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -30,6 +31,7 @@ import workbench.resource.Settings;
 public class IgnoreErrorsAction
 	extends WbAction
 {
+	private static final Insets INSETS = new Insets(2,2,2,2);
 	private boolean switchedOn = false;
 	private JCheckBoxMenuItem toggleMenu;
 	private JToggleButton toggleButton;
@@ -63,7 +65,10 @@ public class IgnoreErrorsAction
 		aToolbar.add(this.toggleButton);
 	}
 
-	public boolean isSwitchedOn() { return this.switchedOn; }
+	public boolean isSwitchedOn()
+	{
+		return this.switchedOn;
+	}
 
 	public void setSwitchedOn(boolean aFlag)
 	{

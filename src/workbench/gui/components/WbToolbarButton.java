@@ -14,6 +14,7 @@ package workbench.gui.components;
 import java.awt.Insets;
 import javax.swing.Action;
 import javax.swing.Icon;
+import workbench.WbManager;
 
 /**
  *
@@ -23,7 +24,7 @@ public class WbToolbarButton
 	extends WbButton
 {
 	public static final Insets MARGIN = new Insets(1,1,1,1);
-	
+
 	public WbToolbarButton()
 	{
 		super();
@@ -32,7 +33,7 @@ public class WbToolbarButton
 	public WbToolbarButton(String aText)
 	{
 		super(aText);
-		initMargin();
+		init();
 	}
 	
 	public WbToolbarButton(Action a)
@@ -40,25 +41,34 @@ public class WbToolbarButton
 		super(a);
 		this.setText(null);
 		iconButton = true;
-		initMargin();
+		init();
 	}
 
 	public WbToolbarButton(Icon icon)
 	{
 		super(icon);
 		this.setText(null);
+		init();
 	}
 	
 	public void setAction(Action a)
 	{
 		super.setAction(a);
 		this.setText(null);
-		initMargin();
+		init();
 	}
 	
-	private void initMargin()
+	private void init()
 	{
 		this.setMargin(MARGIN);
+
+		// The toolbar buttons in Java 1.5 are somewhat broken
+		// the distance between buttons is too small and the rollover
+		// effect does not work with the windows classic look and feel.
+		if (WbManager.getInstance().isJava15 && WbManager.getInstance().isWindowsClassic())
+		{
+			enableBasicRollover();
+		}
 	}
 	
 }

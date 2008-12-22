@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.Container;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
@@ -33,19 +32,11 @@ public class WbToolbar
 	{
 		super();
 		this.setFloatable(false);
-		this.setRollover(true);
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		this.setBorderPainted(true);
+		this.setRollover(true);
 	}
 
-	public void addNotify()
-	{
-		super.addNotify();
-		Container p = getParent();
-		if (p != null)
-		{
-			this.setBackground(p.getBackground());
-		}
-	}
 	public JButton add(Action a)
 	{
 		JButton button;
@@ -59,6 +50,7 @@ public class WbToolbar
 			button = new WbToolbarButton(a);
 		}
 		this.add(button);
+		button.setRolloverEnabled(true);
 		return button;
 	}
 
@@ -70,6 +62,7 @@ public class WbToolbar
 	public JButton add(WbAction a, int index)
 	{
 		JButton button = a.getToolbarButton();
+		button.setRolloverEnabled(true);
 		this.add(button, index);
 		return button;
 	}

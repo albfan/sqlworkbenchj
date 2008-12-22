@@ -144,29 +144,15 @@ public class ResourceMgr
 		return value;
 	}
 
-	public static String getAcceleratorChar(String aKey)
-	{
-		try
-		{
-			String label = getString(aKey);
-			int pos = label.indexOf('&');
-			if (pos == -1) return null;
-			
-			char c = label.charAt(pos + 1);
-			StringBuilder b = new StringBuilder(1);
-			b.append(c);
-			return b.toString();
-		}
-		catch (MissingResourceException e)
-		{
-			return null;
-		}
-		catch (Exception e)
-		{
-			return  null;
-		}
-	}
-	
+	/**
+	 * Returns the description (tooltip) for the specified resource key.
+	 * The description is retrieved from the resourcebundle by addind a d_ to the
+	 * passed key.
+	 *
+	 * @param aKey
+	 * @return
+	 * @see #getString(java.lang.String) 
+	 */
 	public static String getDescription(String aKey)
 	{
 		return getDescription(aKey, false);
@@ -194,26 +180,41 @@ public class ResourceMgr
 		return in;
 	}
 
+	/**
+	 * Returns an empty 16x16 gif image
+	 */
 	public static ImageIcon getBlankImage()
 	{
 		return retrieveImage("blank16", ".gif");
 	}
-	
+
+	/**
+	 * Retrieves a 16x16 GIF image
+	 */
 	public static ImageIcon getImage(String aKey)
 	{
 		return retrieveImage(aKey + "16", ".gif");
 	}
 
+	/**
+	 * Retrieves an image specified by the full name
+	 */
 	public static ImageIcon getImageByName(String fname)
 	{
 		return retrieveImage(fname);
 	}
 
+	/**
+	 * Retrieves a GIF image with no size specified
+	 */
 	public static ImageIcon getPicture(String aName)
 	{
 		return retrieveImage(aName, ".gif");
 	}
 	
+	/**
+	 * Retrieves a PNG image with no size specified
+	 */
 	public static ImageIcon getPng(String aName)
 	{
 		return retrieveImage(aName, ".png");
