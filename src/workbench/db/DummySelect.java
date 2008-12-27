@@ -50,6 +50,11 @@ public class DummySelect
 		return null;
 	}
 
+	public String getObjectNameForDrop(WbConnection con)
+	{
+		return null;
+	}
+
 	public String getObjectType()
 	{
 		return "SELECT";

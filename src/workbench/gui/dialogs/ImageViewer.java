@@ -32,7 +32,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
- * A dialog to display a {@link ImpagePanel}
+ * A dialog to display a {@link ImagePanel}
  * 
  * @author support@sql-workbench.net
  */
@@ -43,7 +43,6 @@ public class ImageViewer
 	private ImagePanel panel;
 	private JButton closeButton = new JButton(ResourceMgr.getString("LblClose"));
 	private final String settingsId = "workbench.gui.imageviewer";
-	private EscAction escAction;
 	
 	public ImageViewer(Frame parent, String title)
 	{
@@ -77,7 +76,7 @@ public class ImageViewer
 		}
 		
 		getRootPane().setDefaultButton(closeButton);
-		escAction = new EscAction(this, this);
+		new EscAction(this, this);
 	}
 
 	public void setData(Object data)

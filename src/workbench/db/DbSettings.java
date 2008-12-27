@@ -17,15 +17,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import workbench.db.exporter.RowDataConverter;
+import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.storage.BlobLiteralType;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 
 /**
  * Stores and manages db specific settings.
+ * <br/>
+ * The settings are stored in the global Settings file using
+ * {@link workbench.resource.Settings}
+ * <br/>
+ * Any setting returned from this class will be specific to the DBMS
+ * that it was initialized for. Identified by the DBID passed to the constructor
  *
  * @author support@sql-workbench.net
+ *
+ * @see DbMetadata#getDbId()
  */
 public class DbSettings
 {
@@ -33,7 +44,6 @@ public class DbSettings
 	private boolean caseSensitive;
 	private boolean useJdbcCommit;
 	private boolean ddlNeedsCommit;
-	private boolean trimDefaults = true;
 
 	private boolean neverQuoteObjects;
 	private boolean reportsRealSizeAsDisplaySize = false;
@@ -41,7 +51,8 @@ public class DbSettings
 
 	private boolean allowsMultipleGetUpdateCounts = true;
 	private boolean supportsBatchedStatements = false;
-
+	private boolean supportsCommentInSql = true;
+	
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
 	private Set<String> updatingCommands;
@@ -56,7 +67,7 @@ public class DbSettings
 		this.caseSensitive = settings.getBoolProperty(prefix + "casesensitive", false) || settings.getCaseSensitivServers().contains(productName);
 		this.useJdbcCommit = settings.getBoolProperty(prefix + "usejdbccommit", false) || settings.getServersWhichNeedJdbcCommit().contains(productName);
 		this.ddlNeedsCommit = settings.getBoolProperty(prefix + "ddlneedscommit", false) || settings.getServersWhereDDLNeedsCommit().contains(productName);
-
+		this.supportsCommentInSql = settings.getBoolProperty(prefix + "sql.embeddedcomments", true);
 		// Migrate old list-based properties to new dbid based properties
 		// If the flags were already set with the new format, re-applying the
 		// value won't change anything
@@ -78,7 +89,6 @@ public class DbSettings
 
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
 		this.neverQuoteObjects = quote.contains(this.getDbId());
-		this.trimDefaults = settings.getBoolProperty(prefix + "trimdefaults", true);
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty(prefix + "multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty(prefix + "charsize.usedisplaysize", false);
 		this.allowExtendedCreateStatement = settings.getBoolProperty(prefix + "extended.createstmt", true);
@@ -90,6 +100,29 @@ public class DbSettings
 		return this.dbId;
 	}
 
+	public boolean supportsCommentInSql()
+	{
+		return this.supportsCommentInSql;
+	}
+	
+	/**
+	 * Checks if the given SQL verb updates the database.
+	 * In addition to the built-in detected (e.g. UPDATE, DELETE), the user
+	 * can configure DB-specific SQL commands that should be considered to update
+	 * the database.
+	 * <br/>
+	 * This is used by the options "confirm updates" and "read only"
+	 * in the connection profile
+	 * <br/><br/>
+	 * The related property is: <tt>workbench.db.[dbid].updatingcommands</tt> (comma separated list)
+	 * @param verb the SQL command to check
+	 *
+	 * @return true if the command was configured
+	 *
+	 * @see workbench.sql.SqlCommand#isUpdatingCommand()
+	 * @see ConnectionProfile#getConfirmUpdates()
+	 * @see ConnectionProfile#isReadOnly() 
+	 */
 	public boolean isUpdatingCommand(String verb)
 	{
 		if (StringUtil.isEmptyString(verb)) return false;
@@ -132,21 +165,45 @@ public class DbSettings
 		return this.reportsRealSizeAsDisplaySize;
 	}
 
+	/**
+	 * Returns true if the DBMS supports transactional DDL and thus
+	 * needs a COMMIT after any DDL statement.
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].ddlneedscommit</tt>
+	 */
 	public boolean ddlNeedsCommit()
 	{
 		return ddlNeedsCommit;
 	}
 
+	/**
+	 * Returns true if object names should never be quoted.
+	 * 
+	 */
 	public boolean neverQuoteObjects()
 	{
 		return neverQuoteObjects;
 	}
 
+
+	/**
+	 * Returns true if default values in the table definition should be trimmed
+	 * before displaying them to the user.
+	 * The default is true
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].trimdefaults</tt>
+	 */
 	public boolean trimDefaults()
 	{
-		return trimDefaults;
+		return Settings.getInstance().getBoolProperty(prefix + "trimdefaults", true);
 	}
 
+	/**
+	 * Returns true if the DataImporter should use setNull() to send NULL values
+	 * instead of setObject(int, null).
+	 * <br/>
+	 * The related property is workbench.db.[dbid].import.use.setnull
+	 */
 	public boolean useSetNull()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "import.use.setnull", false);
@@ -157,6 +214,14 @@ public class DbSettings
 		return useJdbcCommit;
 	}
 
+	/**
+	 * Check if string comparisons are case-sensitive by default for the current DBMS.
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].casesensitive</tt>
+	 *
+	 * @return true if the current DBMS is case sensitive
+	 * @see TableSearchPanel#searchData() 
+	 */
 	public boolean isStringComparisonCaseSensitive()
 	{
 		return this.caseSensitive;
@@ -176,12 +241,12 @@ public class DbSettings
 
 	public boolean needsCatalogIfNoCurrent()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".catalog.neededwhenempty", false);
+		return Settings.getInstance().getBoolProperty(prefix + "catalog.neededwhenempty", false);
 	}
 
 	public String getInsertForImport()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".import.insert", null);
+		return Settings.getInstance().getProperty(prefix + "import.insert", null);
 	}
 
 	public String getRefCursorTypeName()
@@ -200,12 +265,13 @@ public class DbSettings
 	}
 
 	/**
-	 * Return the complete DDL to drop the given type of DB-Object
+	 * Return the complete DDL to drop the given type of DB-Object.
+	 * <br/>
 	 * If includeCascade is true and the DBMS supports dropping this type cascaded,
 	 * then the returned DDL will include the necessary CASCADE keyword
 	 *
-	 *	@param type the database object type to drop (TABLE, VIEW etc)
-	 *  @return the DDL Statement to drop an object of that type. The placeholder %name% must
+	 * @param type the database object type to drop (TABLE, VIEW etc)
+	 * @return the DDL Statement to drop an object of that type. The placeholder %name% must
 	 * be replaced with the correct object name
 	 */
 	public String getDropDDL(String type, boolean includeCascade)
@@ -217,36 +283,62 @@ public class DbSettings
 		if (ddl == null)
 		{
 			ddl = "DROP " + type.toUpperCase() + " %name%";
-			if (cascade != null)
+			if (cascade != null && includeCascade)
 			{
 				ddl += " " + cascade;
 			}
 		}
-		else
+		else if (includeCascade)
 		{
 			ddl = ddl.replace("%cascade%", cascade == null ? "" : cascade);
 		}
 		return ddl;
 	}
 
-	public boolean useSavepointForImport()
+	public boolean needParametersToDropFunction()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.usesavepoint", false);
+		return Settings.getInstance().getBoolProperty(prefix + "drop.function.includeparameters", false);
 	}
 
+	/**
+	 * Returns if the DataImporter should use savepoints for each statement.
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].import.usesavepoint</tt>
+	 */
+	public boolean useSavepointForImport()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "import.usesavepoint", false);
+	}
+
+	/**
+	 * Returns if DML statements should be guarded by savepoints.
+	 * <br/>
+	 * This affects SQL statements entered by the user and generated when
+	 * updating a DataStore
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].sql.usesavepoint</tt>
+	 */
 	public boolean useSavePointForDML()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "sql.usesavepoint", false);
 	}
 
+	/**
+	 * Returns if DDL statements should be guarded by savepoints.
+	 * This affects SQL statements entered by the user and generated when
+	 * updating a DataStore
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].ddl.usesavepoint</tt>
+	 */
 	public boolean useSavePointForDDL()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "ddl.usesavepoint", false);
 	}
 
 	/**
-	 * Returns the type for the formatter
+	 * Returns the default type for the Blob formatter
 	 * @return hex, octal, char
+	 * @see BlobLiteralType
 	 */
 	public String getBlobLiteralType()
 	{
@@ -276,6 +368,10 @@ public class DbSettings
 		return dbs.contains(this.getDbId());
 	}
 
+	/**
+	 * Returns the string that is used for line comments if the DBMS does not use
+	 * the ANSI comment character (such as MySQL)
+	 */
 	public String getLineComment()
 	{
 		return Settings.getInstance().getProperty(prefix + "linecomment", null);
@@ -391,7 +487,7 @@ public class DbSettings
 	public IdentifierCase getSchemaNameCase()
 	{
 		// This allows overriding the default value returned by the JDBC driver
-		String nameCase = Settings.getInstance().getProperty("workbench.db."  + this.getDbId() + ".schemaname.case", null);
+		String nameCase = Settings.getInstance().getProperty(prefix + "schemaname.case", null);
 		if (nameCase != null)
 		{
 			if ("lower".equals(nameCase))
@@ -413,7 +509,7 @@ public class DbSettings
 	public IdentifierCase getObjectNameCase()
 	{
 		// This allows overriding the default value returned by the JDBC driver
-		String nameCase = Settings.getInstance().getProperty("workbench.db."  + this.getDbId() + ".objectname.case", null);
+		String nameCase = Settings.getInstance().getProperty(prefix + "objectname.case", null);
 		if (nameCase != null)
 		{
 			if ("lower".equals(nameCase))
@@ -471,6 +567,7 @@ public class DbSettings
 			default:
 				key = null;
 		}
+
 		if (key != null)
 		{
 			key.append('.');
@@ -478,6 +575,7 @@ public class DbSettings
 			String display = Settings.getInstance().getProperty(key.toString(), null);
 			if (display != null) return display;
 		}
+
 		switch (code)
 		{
 			case DatabaseMetaData.importedKeyNoAction:
@@ -503,7 +601,7 @@ public class DbSettings
 
 	public boolean useSetCatalog()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".usesetcatalog", true);
+		return Settings.getInstance().getBoolProperty(prefix + "usesetcatalog", true);
 	}
 
 	public boolean isNotDeferrable(String deferrable)
@@ -513,9 +611,10 @@ public class DbSettings
 	}
 
 	/**
-	 * Retrieve the list of datatypes that should be ignored for the current
-	 * dbms. The names in that list must match the names returned
-	 * by DatabaseMetaData.getTypeInfo()
+	 * Retrieve the list of datatypes that should be ignored when mapping datatypes
+	 * from one DBMS to another (e.g. when creating a table on the fly using DataCopier
+	 * <br/>
+	 * The names in that list must match the names returned by DatabaseMetaData.getTypeInfo()
 	 */
 	public List<String> getDataTypesToIgnore()
 	{
@@ -524,50 +623,98 @@ public class DbSettings
 		return ignored;
 	}
 
+	/**
+	 * Return the query to retrieve the current catalog
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].currentcatalog.query
+	 * 
+	 * @return null if no query is configured
+	 */
 	public String getQueryForCurrentCatalog()
 	{
-		String query = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".currentcatalog.query", null);
+		String query = Settings.getInstance().getProperty(prefix + "currentcatalog.query", null);
 		return query;
 	}
 
+	/**
+	 * Returns if the RowDataConverter should format instances of java.util.Date using
+	 * the supplied timestamp format (to preserve the time information).
+	 * <br/>
+	 * The related property is: <tt>workbench.db.[dbid].export.convert.date2ts
+	 * <br/>
+	 * This property defaults to true for Oracle.
+	 *
+	 * @return true if java.util.Date should be formated with the Timestamp format
+	 * @see RowDataConverter#getValueAsFormattedString(workbench.storage.RowData, int)
+	 */
 	public boolean getConvertDateInExport()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".export.convert.date2ts", false);
+		return Settings.getInstance().getBoolProperty(prefix + "export.convert.date2ts", false);
 	}
 
 	public boolean needsExactClobLength()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".exactcloblength", false);
+		return Settings.getInstance().getBoolProperty(prefix + "exactcloblength", false);
 	}
 
+	/**
+	 * Check if the source of views (in the DbExplorer) should be formatted after
+	 * it is retrieved from the server.
+	 *
+	 * The related property is: <tt>workbench.db.[dbid].source.view.doformat
+	 * 
+	 * @return true if the source should be formatted (using the SQLFormatter)
+	 * 
+	 * @see workbench.db.ViewReader#getViewSource(workbench.db.TableIdentifier)
+	 */
 	public boolean getFormatViewSource()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".source.view.doformat", false);
+		return Settings.getInstance().getBoolProperty(prefix + "source.view.doformat", false);
 	}
 
+	/**
+	 * Return the DDL to drop a single column from a table.
+	 * The statement must contain placeholders for table and column names.
+	 *
+	 * The related property is: <tt>workbench.db.[dbid].drop.column
+	 *
+	 * @return null if no statement is configured.
+	 * @see workbench.db.MetaDataSqlManager#TABLE_NAME_PLACEHOLDER
+	 * @see workbench.db.MetaDataSqlManager#COLUMN_NAME_PLACEHOLDER
+	 */
 	public String getDropSingleColumnSql()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".drop.column", null);
+		return Settings.getInstance().getProperty(prefix + "drop.column", null);
 	}
 
+	/**
+	 * Return the DDL to drop multiple columns from a table.
+	 * The statement must contain placeholders for the table name and the column list.
+	 *
+	 * The related property is: <tt>workbench.db.[dbid].drop.column.multi
+	 *
+	 * @return null if no statement is configured.
+	 * @see workbench.db.MetaDataSqlManager#TABLE_NAME_PLACEHOLDER
+	 * @see workbench.db.MetaDataSqlManager#COLUMN_LIST_PLACEHOLDER
+	 */
 	public String getDropMultipleColumnSql()
 	{
-		return Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".drop.column.multi", null);
+		return Settings.getInstance().getProperty(prefix + "drop.column.multi", null);
 	}
 
 	public boolean supportsSortedIndex()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".index.sorted", true);
+		return Settings.getInstance().getBoolProperty(prefix + "index.sorted", true);
 	}
 
 	public boolean includeSystemTablesInSelectable()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".systemtables.selectable", false);
+		return Settings.getInstance().getBoolProperty(prefix + "systemtables.selectable", false);
 	}
 
 	public boolean removeNewLinesInSQL()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + getDbId() + ".removenewlines", false);
+		return Settings.getInstance().getBoolProperty(prefix + "removenewlines", false);
 	}
 
 	public boolean canDropType(String type)
@@ -582,11 +729,25 @@ public class DbSettings
 
 	public void setDataTypeExpression(String cleanType, String expr)
 	{
-		Settings.getInstance().setProperty("workbench.db." + getDbId() + ".selectexpression." + cleanType, expr);
+		Settings.getInstance().setProperty(prefix + "selectexpression." + cleanType, expr);
 	}
-	
+
+	/**
+	 * Retrieves a "select" expression for the given datatype.
+	 * The DbExplorer will use this expression instead of the "plain" column
+	 * name to retrieve data for this data type. This can be used to make
+	 * data readable in the DbExplorer for data types that are not natively supported
+	 * by the JDBC driver.
+	 *
+	 * The expression must contain a placeholder for the column name.
+	 *
+	 * @param cleanType
+	 * @return null if nothing is configured
+	 * @see workbench.db.TableSelectBuilder#getSelectForTable(workbench.db.TableIdentifier)
+	 * @see workbench.db.TableSelectBuilder#COLUMN_PLACEHOLDER
+	 */
 	public String getDataTypeExpression(String cleanType)
 	{
-		return Settings.getInstance().getProperty("workbench.db." + getDbId() + ".selectexpression." + cleanType.toLowerCase(), null);
+		return Settings.getInstance().getProperty(prefix + "selectexpression." + cleanType.toLowerCase(), null);
 	}
 }

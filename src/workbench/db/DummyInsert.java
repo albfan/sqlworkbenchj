@@ -51,6 +51,11 @@ public class DummyInsert
 		return null;
 	}
 
+	public String getObjectNameForDrop(WbConnection con)
+	{
+		return null;
+	}
+
 	public String getObjectType()
 	{
 		return "INSERT";

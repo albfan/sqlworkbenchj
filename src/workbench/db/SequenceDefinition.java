@@ -54,7 +54,12 @@ public class SequenceDefinition
 	{
 		return null;
 	}
-	
+
+	public String getObjectNameForDrop(WbConnection con)
+	{
+		return getObjectName(con);
+	}
+
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.sequenceName);

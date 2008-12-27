@@ -67,10 +67,10 @@ public class DdlCommand
 		this.isUpdatingCommand = true;
 	}
 
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 
 		DbSettings dbset = this.currentConnection.getMetadata().getDbSettings();
 		boolean useSavepoint = dbset.useSavePointForDDL() && !this.currentConnection.getAutoCommit();
@@ -81,13 +81,14 @@ public class DdlCommand
 			LogMgr.logWarning("DdlCommand.execute()", "A savepoint should be used for this DDL command, but the driver does not support savepoints!");
 		}
 
-		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(aSql);
+		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
 		
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();
 
-			aSql = currentConnection.getMetadata().filterDDL(aSql);
+			sql = currentConnection.getMetadata().filterDDL(sql);
+			sql = getSqlToExecute(sql);
 
 			result.setSuccess();
 
@@ -96,11 +97,11 @@ public class DdlCommand
 				this.ddlSavepoint = currentConnection.setSavepoint();
 			}
 
-			if (isDropCommand(aSql) && this.runner.getIgnoreDropErrors())
+			if (isDropCommand(sql) && this.runner.getIgnoreDropErrors())
 			{
 				try
 				{
-					this.currentStatement.executeUpdate(aSql);
+					this.currentStatement.executeUpdate(sql);
 					result.addMessage(getSuccessMessage(info));
 				}
 				catch (Exception th)
@@ -114,12 +115,12 @@ public class DdlCommand
 			}
 			else
 			{
-				boolean hasResult = this.currentStatement.execute(aSql);
+				boolean hasResult = this.currentStatement.execute(sql);
 
 				// Using a generic execute and result processing ensures that DBMS that
 				// can process more than one statement with a single SQL are treated correctly.
 				// e.g. when sending a SELECT and other statements as a "batch" with SQL Server
-				processMoreResults(aSql, result, hasResult);
+				processMoreResults(sql, result, hasResult);
 
 				// Process result will have added any warnings and set the warning flag
 				if (result.hasWarning())
@@ -146,12 +147,12 @@ public class DdlCommand
 			msg.append(ResourceMgr.getString("MsgExecuteError") + "\n");
 			if (reportFullStatementOnError)
 			{
-				msg.append(aSql);
+				msg.append(sql);
 			}
 			else
 			{
 				int maxLen = 150;
-				msg.append(StringUtil.getMaxSubstring(aSql.trim(), maxLen));
+				msg.append(StringUtil.getMaxSubstring(sql.trim(), maxLen));
 			}
 			result.addMessage(msg);
 			result.addMessageNewLine();
@@ -159,7 +160,7 @@ public class DdlCommand
 
 			addExtendErrorInfo(currentConnection, info, result);
 			result.setFailure();
-			LogMgr.logSqlError("DdlCommand.execute()", aSql, e);
+			LogMgr.logSqlError("DdlCommand.execute()", sql, e);
 		}
 		finally
 		{

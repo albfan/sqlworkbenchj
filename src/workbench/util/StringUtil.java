@@ -714,12 +714,12 @@ public class StringUtil
 
 	/**
 	 * Removes single or double quote character from the start and the beginning of a string.
-	 *
+	 * <br/>
 	 * Removes the matching quote character at the beginning from the end of the string.
 	 * The string is trimmed before testing for the presence of the quotes.
 	 *
-	 * @param input
-	 * @return
+	 * @param input the string from which the quotes should be removed
+	 * @return the input with quotes removed
 	 */
 	public static final String trimQuotes(String input)
 	{

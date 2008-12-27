@@ -2029,7 +2029,7 @@ public class SqlPanel
 	 * result to use the new datastore.
 	 * 
 	 * @param evt
-	 * @see updateResultInfos()
+	 * @see #updateResultInfos() 
 	 */
 	public void stateChanged(ChangeEvent evt)
 	{

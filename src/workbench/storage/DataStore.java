@@ -234,7 +234,9 @@ public class DataStore
 
 	/**
 	 * Create an empty DataStore based on the information given in the MetaData
-	 * object. The DataStore can be populated with the {@link #addRow(ResultSet)} method.
+	 * object. 
+	 * <br/>
+	 * The DataStore can be populated with the {@link #initData(java.sql.ResultSet) }  method.
 	 */
 	public DataStore(ResultSetMetaData metaData, WbConnection aConn)
 		throws SQLException
@@ -296,7 +298,7 @@ public class DataStore
 	 *
 	 * This is used in the GUI when displaying result tabs.
 	 * 
-	 * @param resultName new value of resultName
+	 * @param name new value of resultName
 	 */
 	public void setResultName(String name)
 	{

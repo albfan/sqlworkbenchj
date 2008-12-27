@@ -248,21 +248,25 @@ public class SqlCommand
 	}
 
 	/**
-	 *	Should be overridden by a specialised SqlCommand.
-	 * setConnection should have been called before calling execute()
+	 * Should be overridden by a specialised SqlCommand.
+	 * setConnection must be called before calling execute()
+	 * 
+	 * @see #setConnection(workbench.db.WbConnection) 
 	 */
-	public StatementRunnerResult execute(String aSql)
+	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
 	{
-		StatementRunnerResult result = new StatementRunnerResult(aSql);
+		StatementRunnerResult result = new StatementRunnerResult(sql);
 
 		this.currentStatement = this.currentConnection.createStatement();
 		this.isCancelled = false;
 
+		sql = getSqlToExecute(sql);
+		
 		runner.setSavepoint();
 		try
 		{
-			boolean hasResult = this.currentStatement.execute(aSql);
+			boolean hasResult = this.currentStatement.execute(sql);
 			result.setSuccess();
 			processResults(result, hasResult);
 			runner.releaseSavepoint();
@@ -270,8 +274,8 @@ public class SqlCommand
 		catch (Exception e)
 		{
 			runner.rollbackSavepoint();
-			addErrorInfo(result, aSql, e);
-			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement: " + aSql + "\nError:" + ExceptionUtil.getDisplay(e), null);
+			addErrorInfo(result, sql, e);
+			LogMgr.logDebug("SqlCommand.execute()", "Error executing sql statement: " + sql + "\nError:" + ExceptionUtil.getDisplay(e), null);
 		}
 		finally
 		{
@@ -471,6 +475,32 @@ public class SqlCommand
 		this.currentRetrievalData = null;
 	}
 
+	/**
+	 * Remove comments from the SQL if the current DBMS does not support embedded comments.
+	 *
+	 * @param originalSql
+	 * @return the sql with comments removed if necessary.
+	 */
+	protected String getSqlToExecute(String originalSql)
+	{
+		if (this.currentConnection == null) return originalSql;
+		boolean suppportsComments = currentConnection.getDbSettings().supportsCommentInSql();
+
+		if (suppportsComments) return originalSql;
+		return SqlUtil.makeCleanSql(originalSql, true, false);
+	}
+
+	/**
+	 * Define the connection for this command.
+	 * <br/>
+	 * The StatementRunner keeps only one instance of each command, so
+	 * this must be called every time before execute() is called to make
+	 * sure the command is acting on the correct connection.
+	 * <br/>
+	 * 
+	 * @param conn the new current connection
+	 * @see #execute(java.lang.String) 
+	 */
 	public void setConnection(WbConnection conn)
 	{
 		this.currentConnection = conn;

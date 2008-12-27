@@ -69,6 +69,7 @@ public class UpdatingCommand extends SqlCommand
 			}
 
 			runner.setSavepoint();
+			sql = getSqlToExecute(sql);
 
 			if (lob != null && lob.containsParameter())
 			{

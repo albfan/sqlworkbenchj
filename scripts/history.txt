@@ -1,5 +1,18 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
+Enh: (102.7) for specific datatypes, data retrieval in the DbExplorer can now
+     be done by applying expressions to the column when building the SQL 
+     to select the data. The replacement is defined per database and 
+     datatype in workbench.settings:
+     workbench.db.[dbid].selectexpression.[type]=expression(${column})
+     [type] is a "clean" version of the datatype for which this rewrite
+     rule applies. "Clean" means without any brackets. 
+     For name of the column to be retrieved the placeholder ${column} is 
+     used. To select all varchar columns for postgres in upper case the
+     following rewrite rule can be defined:
+     workbench.db.postgresql.selectexpression.varchar=upper(${column})
+     The datatype must be specified in lowercase
+
 Enh: (102.7) The dropdowns for schema/database can now be reloaded in 
      the DbExplorer
 Enh: (102.7) The result set tabs can now be closed or renamed through their
@@ -72,8 +85,7 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
-Fix: (102.7) The default shortcuts for Copy, Cut & Paste are now set properly
-     on Mac OS X.
+Fix: (102.7) "SQL -> Export Query result" was not working
 Fix: (102.7) The shortcuts for Copy, Cut & Paste can now be defined through
      the shortcut definition dialog.
 Fix: (102.7) WbCopy (and DataPumper) did not work with tables that had

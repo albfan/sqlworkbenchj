@@ -210,7 +210,9 @@ from syscat.triggers</string>
          when 12 then &apos;INSERT, DELETE&apos; 
        end as trigger_event 
 from pg_trigger trg, pg_class tbl 
-where trg.tgrelid = tbl.oid 
+where trg.tgrelid = tbl.oid
+and trg.tgname not like 'RI_ConstraintTrigger%'
+and trg.tgname not like 'pg_sync_pg%'
 </string> 
     </void> 
     <void property="objectNameField"> 

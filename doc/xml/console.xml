@@ -12,8 +12,9 @@
 	<para>
 		When using &wb-productname; in console mode, you
 		<emphasis role="bold">cannot</emphasis> the <link linkend="launcher-using">Windows launcher</link>.
-		Please use the supplied scripts <literal>sqlwb.cmd</literal> (Windows batch file) or
-		<literal>sqlwb.sh</literal> (Unix shell script) to start the console.
+		Please use the supplied scripts <literal>sqlwbconsole.cmd</literal> (Windows batch file) or
+		<literal>sqlwbconsole.sh</literal> (Unix shell script) to start the console.
+		On Windows you can also use the <literal>sqlwbconsole.exe</literal> program to start the console mode.
 	</para>
 
 	<para>

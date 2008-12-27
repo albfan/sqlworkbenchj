@@ -189,9 +189,30 @@ public class StatementRunner
 		this.queryTimeout = timeout;
 	}
 	
-	public void setParameterPrompter(ParameterPrompter filter) { this.prompter = filter; }
-	public void setBaseDir(String dir) { this.baseDir = dir; }
-	public String getBaseDir() { return this.baseDir; }
+	public void setParameterPrompter(ParameterPrompter filter) 
+	{
+		this.prompter = filter;
+	}
+	
+	public void setBaseDir(String dir)
+	{
+		this.baseDir = dir;
+	}
+	
+	public String getBaseDir()
+	{
+		return this.baseDir;
+	}
+
+	public boolean getRemoveComments()
+	{
+		return removeComments;
+	}
+
+	public boolean getRemoveNewLines()
+	{
+		return removeNewLines;
+	}
 	
 	public WbConnection getConnection()
 	{

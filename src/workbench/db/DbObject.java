@@ -63,4 +63,14 @@ public interface DbObject
 	CharSequence getSource(WbConnection con)
 		throws SQLException;
 	
+	/**
+	 * Returns the name of the object that should be used when generating a DROP
+	 * statement. This might be different to the object name e.g. for functions
+	 * where the parameters to the function must be listed.
+	 * 
+	 * @param con
+	 * @return the name of the object to be used in a DROP statement
+	 */
+	String getObjectNameForDrop(WbConnection con);
+
 }

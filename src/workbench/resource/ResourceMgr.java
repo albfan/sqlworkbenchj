@@ -150,7 +150,6 @@ public class ResourceMgr
 	 * passed key.
 	 *
 	 * @param aKey
-	 * @return
 	 * @see #getString(java.lang.String) 
 	 */
 	public static String getDescription(String aKey)

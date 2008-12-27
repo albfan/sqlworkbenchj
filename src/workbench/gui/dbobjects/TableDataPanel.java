@@ -64,6 +64,7 @@ import java.util.Collections;
 import workbench.WbManager;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.FilterPickerAction;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
 import workbench.storage.NamedSortDefinition;
@@ -215,6 +216,11 @@ public class TableDataPanel
 		this.add(dataDisplay, BorderLayout.CENTER);
 		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_DBEXP_REMEMBER_SORT);
+		WbTraversalPolicy policy = new WbTraversalPolicy();
+		policy.addComponent(dataDisplay);
+		policy.setDefaultComponent(dataDisplay);
+		setFocusCycleRoot(false);
+		setFocusTraversalPolicy(policy);
 	}
 
 	public boolean isModified()

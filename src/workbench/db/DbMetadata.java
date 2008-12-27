@@ -1611,7 +1611,7 @@ public class DbMetadata
 	/**
 	 * Return the column list for the given table.
 	 * @param table the table for which to retrieve the column definition
-	 * @see #getTableDefinition(String, String, String, String)
+	 * @see #getTableDefinition(workbench.db.TableIdentifier) 
 	 */
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table)
 		throws SQLException
@@ -1621,16 +1621,17 @@ public class DbMetadata
 		return def.getColumns();
 	}
 
-	/** Return a DataStore containing the definition of the given table.
+	/**
+	 * Return the definition of the given table.
+	 * <br/>
+	 * To display the columns for a table in a DataStore create an
+	 * instance of {@link TableColumnsDatastore}.
 	 *
-	 * @param aCatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
-	 * @param aSchema The schema in which the table is defined. This should be null if the DBMS does not support schemas
-	 * @param aTable The name of the table
-	 * @param aType The type of the table
+	 * @param table The table for which the definition should be retrieved
+	 *
 	 * @throws SQLException
-	 * @return A DataStore with the table definition.
-	 * The individual columns should be accessed using the
-	 * COLUMN_IDX_TABLE_DEFINITION_xxx constants.
+	 * @return the definition of the table.
+	 * @see TableColumnsDatastore
 	 */
 	public TableDefinition getTableDefinition(TableIdentifier table)
 		throws SQLException

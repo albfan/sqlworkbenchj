@@ -105,10 +105,9 @@ public class MacroGroup
 	/**
 	 * Returns those macros that are set to "display in menu" (i.e. where MacroDefinition.isVisibleInMenu()
 	 * returns true.
-	 *
+	 * <br/>
 	 * This ignores the isVisibleInMenu() setting of this group.
 	 * 
-	 * @return
 	 * @see #getVisibleMacroSize() 
 	 */
 	public synchronized List<MacroDefinition> getVisibleMacros()

@@ -95,6 +95,11 @@ public class SelectCommand extends SqlCommand
 			ResultSet rs = null;
 			boolean hasResult = true;
 
+			// we can safely remove the comments here, as the StatementRunnerResult was already
+			// initialized with the "real" statement that contains the comments (and which potentially
+			// can contain a "wbdoc" to identify the result tab
+			sql = getSqlToExecute(sql);
+
 			if (isPrepared)
 			{
 				rs = ((PreparedStatement)this.currentStatement).executeQuery();

@@ -24,11 +24,11 @@ import workbench.util.SqlUtil;
 
 /**
  * A class to retrieve enum definitions from a MySQL database.
- * The method {@link #updateEnumDefinition(workbench.db.TableIdentifier, workbench.storage.DataStore, workbench.db.WbConnection) }
- * can be used to post-process the DataStore that is returned from
- * {@link workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier) }
+ * <br/>
+ * The method updateEnumDefinition() can be used to post-process a TableDefinition
  *
  * @author  support@sql-workbench.net
+ * @see workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
  */
 public class MySqlEnumReader
 {

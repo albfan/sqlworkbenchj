@@ -72,6 +72,11 @@ public class IndexDefinition
 		return SqlUtil.buildExpression(conn, null, getSchema(), indexName);
 	}
 
+	public String getObjectNameForDrop(WbConnection con)
+	{
+		return getObjectName(con);
+	}
+
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(indexName);

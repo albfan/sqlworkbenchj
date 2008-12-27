@@ -151,9 +151,12 @@ public class ViewReader
 
 	/**
 	 *	Return the source of a view definition as it is stored in the database.
+	 *  <br/>
 	 *	Usually (depending on how the meta data is stored in the database) the DBMS
-	 *	only stores the underlying SELECT statement, and that will be returned by this method.
-	 *	To create a complete SQL to re-create a view, use {@link #getExtendedViewSource(TableIdentifier, DataStore, boolean)}
+	 *	only stores the underlying SELECT statement (but not a full CREATE VIEW),
+	 *  and that will be returned by this method.
+	 *  <br/>
+	 *	To create a complete SQL to re-create a view, use {@link #getExtendedViewSource(workbench.db.TableIdentifier) }
 	 *
 	 *	@return the view source as stored in the database.
 	 */

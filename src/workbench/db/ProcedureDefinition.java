@@ -13,6 +13,10 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -34,6 +38,7 @@ public class ProcedureDefinition
 	
 	private boolean isOraclePackage = false;
 	private CharSequence source;
+	private List<String> parameterTypes;
 
 	public static ProcedureDefinition createOraclePackage(String schem, String name)
 	{
@@ -68,6 +73,56 @@ public class ProcedureDefinition
 		}
 	}
 
+
+	public synchronized List<String> getParameterTypes(WbConnection con)
+	{
+		if (this.parameterTypes == null)
+		{
+			ProcedureReader reader = con.getMetadata().getProcedureReader();
+			DbMetadata meta = con.getMetadata();
+			try
+			{
+				String cat = meta.removeQuotes(this.catalog);
+				String schem = meta.removeQuotes(this.schema);
+				String name = meta.removeQuotes(this.procName);
+				DataStore ds = reader.getProcedureColumns(cat, schem, name);
+				parameterTypes = new ArrayList<String>(ds.getRowCount());
+
+				for (int i=0; i < ds.getRowCount(); i++ )
+				{
+					String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+					if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
+					{
+						parameterTypes.add(ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE));
+					}
+				}
+			}
+			catch (SQLException s)
+			{
+			}
+		}
+		return Collections.unmodifiableList(this.parameterTypes);
+	}
+
+	public String getObjectNameForDrop(WbConnection con)
+	{
+		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
+		if (!needParameters) return getObjectName();
+
+		List<String> params = getParameterTypes(con);
+		if (params.size() == 0) return procName + "()";
+		StringBuffer result = new StringBuffer(procName.length() + params.size() * 5 + 5);
+		result.append(procName);
+		result.append('(');
+		for (int i=0; i < params.size(); i++)
+		{
+			if (i > 0) result.append(',');
+			result.append(params.get(i));
+		}
+		result.append(')');
+		return result.toString();
+	}
+	
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{

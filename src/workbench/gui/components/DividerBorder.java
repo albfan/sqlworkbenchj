@@ -38,7 +38,7 @@ public class DividerBorder
 
 	/**
 	 * Creates a divider border with the specified type
-	 * @param aType (LEFT, RIGHT, TOP, BOTTOM)
+	 * @param type (LEFT, RIGHT, TOP, BOTTOM)
 	 */
 	public DividerBorder(int type)
 	{

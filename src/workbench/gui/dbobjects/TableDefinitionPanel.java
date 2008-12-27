@@ -48,6 +48,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
 import workbench.gui.sql.ExecuteSqlDialog;
 import workbench.interfaces.Reloadable;
@@ -144,6 +145,12 @@ public class TableDefinitionPanel
 
 		this.tableDefinition.getSelectionModel().addListSelectionListener(this);
 		this.tableDefinition.addPopupAction(this.createIndexAction, true);
+
+		WbTraversalPolicy policy = new WbTraversalPolicy();
+		policy.addComponent(tableDefinition);
+		policy.setDefaultComponent(tableDefinition);
+		setFocusCycleRoot(false);
+		setFocusTraversalPolicy(policy);
 	}
 
 	protected void fireTableDefinitionChanged()

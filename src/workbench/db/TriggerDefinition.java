@@ -49,7 +49,12 @@ public class TriggerDefinition
 	{
 		return catalog;
 	}
-	
+
+	public String getObjectNameForDrop(WbConnection con)
+	{
+		return getObjectName(con);
+	}
+
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.triggerName);
