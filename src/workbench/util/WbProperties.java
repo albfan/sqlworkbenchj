@@ -137,7 +137,8 @@ public class WbProperties
 	{
 		String value = this.getProperty(property, null);
 		if (value == null) return defaultValue;
-		return StringUtil.stringToBool(value);
+		//return StringUtil.stringToBool(value);
+		return Boolean.valueOf(value);
 	}
 
 	public void setProperty(String property, int value)

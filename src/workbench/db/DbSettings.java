@@ -399,7 +399,7 @@ public class DbSettings
 
 	public String getProcVersionDelimiter()
 	{
-		return Settings.getInstance().getProperty("workbench.db.procversiondelimiter." + this.getDbId(), null);
+		return Settings.getInstance().getProperty(prefix + "procversiondelimiter", null);
 	}
 
 	public boolean supportsTruncate()

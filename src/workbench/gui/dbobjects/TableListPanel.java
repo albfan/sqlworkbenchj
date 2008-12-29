@@ -1584,9 +1584,15 @@ public class TableListPanel
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DataStore ds = meta.getIndexReader().getTableIndexInformation(getObjectTable());
-			DataStoreTableModel model = new DataStoreTableModel(ds);
-			indexes.setModel(model, true);
-			indexes.adjustRowsAndColumns();
+			final DataStoreTableModel model = new DataStoreTableModel(ds);
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					indexes.setModel(model, true);
+					indexes.adjustRowsAndColumns();
+				}
+			});
 			this.shouldRetrieveIndexes = false;
 		}
 		catch (Throwable th)
@@ -1607,9 +1613,15 @@ public class TableListPanel
 		try
 		{
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(getObjectTable()));
-			exportedKeys.setModel(model, true);
-			exportedKeys.adjustRowsAndColumns();
+			final DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(getObjectTable()));
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					exportedKeys.setModel(model, true);
+					exportedKeys.adjustRowsAndColumns();
+				}
+			});
 			this.shouldRetrieveExportedKeys = false;
 		}
 		catch (Throwable th)
@@ -1627,9 +1639,15 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			DbMetadata meta = this.dbConnection.getMetadata();
-			DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(getObjectTable(), false));
-			importedKeys.setModel(model, true);
-			importedKeys.adjustRowsAndColumns();
+			final DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(getObjectTable(), false));
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					importedKeys.setModel(model, true);
+					importedKeys.adjustRowsAndColumns();
+				}
+			});
 			this.shouldRetrieveImportedKeys = false;
 		}
 		catch (Throwable th)

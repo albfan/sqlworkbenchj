@@ -95,21 +95,27 @@ public class TriggerDisplayPanel
 		this.triggerCatalog = null;
 	}
 
-	public void readTriggers(TableIdentifier table)
+	public void readTriggers(final TableIdentifier table)
 	{
 		try
 		{
 			if (table == null) return;
 			DataStore trg = reader.getTableTriggers(table);
-			DataStoreTableModel rs = new DataStoreTableModel(trg);
-			triggers.setModel(rs, true);
-			triggers.adjustRowsAndColumns();
-			this.triggerCatalog = table.getCatalog();
-			this.triggerSchema = table.getSchema();
-			if (triggers.getRowCount() > 0)
-				this.triggers.getSelectionModel().setSelectionInterval(0,0);
-			else
-				this.source.setText("");
+			final DataStoreTableModel rs = new DataStoreTableModel(trg);
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					triggers.setModel(rs, true);
+					triggers.adjustRowsAndColumns();
+					triggerCatalog = table.getCatalog();
+					triggerSchema = table.getSchema();
+					if (triggers.getRowCount() > 0)
+						triggers.getSelectionModel().setSelectionInterval(0,0);
+					else
+						source.setText("");
+				}
+			});
 		}
 		catch (Exception e)
 		{

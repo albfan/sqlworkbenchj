@@ -1489,6 +1489,21 @@ public class Settings
 		this.setProperty("workbench.workspace.autosave", flag);
 	}
 
+	public int getMaxWorkspaceBackup()
+	{
+		return getIntProperty("workbench.workspace.maxbackup", 5);
+	}
+
+	public void setMaxWorkspaceBackup(int max)
+	{
+		setProperty("workbench.workspace.maxbackup", max);
+	}
+
+	public void setCreateWorkspaceBackup(boolean flag)
+	{
+		setProperty("workbench.workspace.createbackup", flag);
+	}
+
 	public boolean getCreateWorkspaceBackup()
 	{
 		return getBoolProperty("workbench.workspace.createbackup", false);
@@ -2184,7 +2199,7 @@ public class Settings
 		String sysValue = System.getProperty(property, null);
 		if (sysValue != null)
 		{
-			return StringUtil.stringToBool(sysValue);
+			return Boolean.valueOf(sysValue);
 		}
 		return this.props.getBoolProperty(property, defaultValue);
 	}
@@ -2446,6 +2461,9 @@ public class Settings
 		this.renameProperty("workbench.db.defaultbeforenull.ingres", "workbench.db.ingres.defaultbeforenull");
 		this.renameProperty("workbench.db.defaultbeforenull.firebird", "workbench.db.firebird.defaultbeforenull");
 		this.renameProperty("workbench.db.defaultbeforenull.oracle", "workbench.db.oracle.defaultbeforenull");
+
+		this.renameProperty("workbench.db.procversiondelimiter.microsoft_sql_server", "workbench.db.microsoft_sql_server.procversiondelimiter");
+		this.renameProperty("workbench.db.procversiondelimiter.adaptive_server_enterprise", "workbench.db.adaptive_server_enterprise.procversiondelimiter");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

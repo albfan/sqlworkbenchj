@@ -14,6 +14,8 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Locale;
 import javax.swing.DefaultComboBoxModel;
@@ -32,6 +34,7 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbLocale;
 
@@ -41,7 +44,7 @@ import workbench.util.WbLocale;
  */
 public class GeneralOptionsPanel
 	extends JPanel
-	implements Restoreable
+	implements Restoreable, ActionListener
 {
 	public GeneralOptionsPanel()
 	{
@@ -65,6 +68,7 @@ public class GeneralOptionsPanel
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
 		pdfReaderPath.setFilename(Settings.getInstance().getPDFReaderPath());
 		logLevel.setSelectedItem(LogMgr.getLevel());
+		createBackup.setSelected(Settings.getInstance().getCreateWorkspaceBackup());
 		int days = Settings.getInstance().getUpdateCheckInterval();
 		if (days == 1)
 		{
@@ -110,6 +114,8 @@ public class GeneralOptionsPanel
 		WbFile configFile = Settings.getInstance().getConfigFile();
 		String s = ResourceMgr.getFormattedString("LblSettingsLocation", configFile.getFullPath());
 		settingsfilename.setText(s);
+		backupCount.setEnabled(createBackup.isSelected());
+		backupCount.setText(Integer.toString(Settings.getInstance().getMaxWorkspaceBackup()));
 	}
 
 	public void saveSettings()
@@ -129,7 +135,7 @@ public class GeneralOptionsPanel
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
 		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
 		set.setAutoSaveWorkspace(autoSaveWorkspace.isSelected());
-
+		set.setCreateWorkspaceBackup(createBackup.isSelected());
 		int index = checkInterval.getSelectedIndex();
 		switch (index)
 		{
@@ -153,6 +159,11 @@ public class GeneralOptionsPanel
 		LogMgr.setLevel(level);
 		set.setProperty("workbench.log.level", level);
 		set.setLanguage(getSelectedLanguage());
+		int value = StringUtil.getIntValue(backupCount.getText(), -1);
+		if (value > -1)
+		{
+			set.setMaxWorkspaceBackup(value);
+		}
 	}
 
 	private Locale getSelectedLanguage()
@@ -194,13 +205,16 @@ public class GeneralOptionsPanel
     exitOnConnectCancel = new JCheckBox();
     autoConnect = new JCheckBox();
     autoSaveWorkspace = new JCheckBox();
+    createBackup = new JCheckBox();
+    backupCount = new JTextField();
+    jLabel1 = new JLabel();
     logfilename = new WbLabelField();
     settingsfilename = new WbLabelField();
 
     setLayout(new GridBagLayout());
 
-    textDelimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter"));
-    textDelimiterLabel.setToolTipText(ResourceMgr.getDescription("LblFieldDelimiter"));
+    textDelimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter")); // NOI18N
+    textDelimiterLabel.setToolTipText(ResourceMgr.getString("d_LblFieldDelimiter")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -219,8 +233,8 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
     add(textDelimiterField, gridBagConstraints);
 
-    quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar"));
-    quoteCharLabel.setToolTipText(ResourceMgr.getDescription("LblQuoteChar"));
+    quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar")); // NOI18N
+    quoteCharLabel.setToolTipText(ResourceMgr.getString("d_LblQuoteChar")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -239,8 +253,8 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
     add(quoteCharField, gridBagConstraints);
 
-    msgFontLabel.setText(ResourceMgr.getString("LblMsgLogFont"));
-    msgFontLabel.setToolTipText(ResourceMgr.getDescription("LblMsgLogFont"));
+    msgFontLabel.setText(ResourceMgr.getString("LblMsgLogFont")); // NOI18N
+    msgFontLabel.setToolTipText(ResourceMgr.getString("d_LblMsgLogFont")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -249,8 +263,8 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(4, 12, 0, 0);
     add(msgFontLabel, gridBagConstraints);
 
-    standardFontLabel.setText(ResourceMgr.getString("LblStandardFont"));
-    standardFontLabel.setToolTipText(ResourceMgr.getDescription("LblStandardFont"));
+    standardFontLabel.setText(ResourceMgr.getString("LblStandardFont")); // NOI18N
+    standardFontLabel.setToolTipText(ResourceMgr.getString("d_LblStandardFont")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -277,8 +291,8 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(4, 10, 0, 15);
     add(standardFont, gridBagConstraints);
 
-    pdfReaderPathLabel.setText(ResourceMgr.getString("LblReaderPath"));
-    pdfReaderPathLabel.setToolTipText(ResourceMgr.getDescription("LblReaderPath"));
+    pdfReaderPathLabel.setText(ResourceMgr.getString("LblReaderPath")); // NOI18N
+    pdfReaderPathLabel.setToolTipText(ResourceMgr.getString("d_LblReaderPath")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -293,8 +307,8 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(5, 10, 0, 15);
     add(pdfReaderPath, gridBagConstraints);
 
-    logLevelLabel.setText(ResourceMgr.getString("LblLogLevel"));
-    logLevelLabel.setToolTipText(ResourceMgr.getDescription("LblLogLevel"));
+    logLevelLabel.setText(ResourceMgr.getString("LblLogLevel")); // NOI18N
+    logLevelLabel.setToolTipText(ResourceMgr.getString("d_LblLogLevel")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
@@ -310,8 +324,8 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(5, 10, 0, 0);
     add(logLevel, gridBagConstraints);
 
-    checkUpdatesLabel.setText(ResourceMgr.getString("LblCheckForUpdate"));
-    checkUpdatesLabel.setToolTipText(ResourceMgr.getDescription("LblCheckForUpdate"));
+    checkUpdatesLabel.setText(ResourceMgr.getString("LblCheckForUpdate")); // NOI18N
+    checkUpdatesLabel.setToolTipText(ResourceMgr.getString("d_LblCheckForUpdate")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
@@ -328,8 +342,8 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(7, 10, 0, 0);
     add(checkInterval, gridBagConstraints);
 
-    langLabel.setText(ResourceMgr.getString("LblLanguage"));
-    langLabel.setToolTipText(ResourceMgr.getDescription("LblLanguage"));
+    langLabel.setText(ResourceMgr.getString("LblLanguage")); // NOI18N
+    langLabel.setToolTipText(ResourceMgr.getString("d_LblLanguage")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -350,8 +364,8 @@ public class GeneralOptionsPanel
     jPanel2.setLayout(new GridBagLayout());
 
     useEncryption.setSelected(Settings.getInstance().getUseEncryption());
-    useEncryption.setText(ResourceMgr.getString("LblUseEncryption"));
-    useEncryption.setToolTipText(ResourceMgr.getDescription("LblUseEncryption"));
+    useEncryption.setText(ResourceMgr.getString("LblUseEncryption")); // NOI18N
+    useEncryption.setToolTipText(ResourceMgr.getString("d_LblUseEncryption")); // NOI18N
     useEncryption.setBorder(null);
     useEncryption.setHorizontalAlignment(SwingConstants.LEFT);
     useEncryption.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -363,8 +377,8 @@ public class GeneralOptionsPanel
     jPanel2.add(useEncryption, gridBagConstraints);
 
     consolidateLog.setSelected(Settings.getInstance().getConsolidateLogMsg());
-    consolidateLog.setText(ResourceMgr.getString("LblConsolidateLog"));
-    consolidateLog.setToolTipText(ResourceMgr.getDescription("LblConsolidateLog"));
+    consolidateLog.setText(ResourceMgr.getString("LblConsolidateLog")); // NOI18N
+    consolidateLog.setToolTipText(ResourceMgr.getString("d_LblConsolidateLog")); // NOI18N
     consolidateLog.setBorder(null);
     consolidateLog.setHorizontalAlignment(SwingConstants.LEFT);
     consolidateLog.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -377,8 +391,8 @@ public class GeneralOptionsPanel
     jPanel2.add(consolidateLog, gridBagConstraints);
 
     showTabIndex.setSelected(GuiSettings.getShowTabIndex());
-    showTabIndex.setText(ResourceMgr.getString("LblShowTabIndex"));
-    showTabIndex.setToolTipText(ResourceMgr.getDescription("LblShowTabIndex"));
+    showTabIndex.setText(ResourceMgr.getString("LblShowTabIndex")); // NOI18N
+    showTabIndex.setToolTipText(ResourceMgr.getString("d_LblShowTabIndex")); // NOI18N
     showTabIndex.setBorder(null);
     showTabIndex.setHorizontalAlignment(SwingConstants.LEFT);
     showTabIndex.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -386,14 +400,15 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(6, 25, 1, 0);
     jPanel2.add(showTabIndex, gridBagConstraints);
 
     enableAnimatedIcon.setSelected(GuiSettings.getUseAnimatedIcon());
-    enableAnimatedIcon.setText(ResourceMgr.getString("LblEnableAnimatedIcon"));
-    enableAnimatedIcon.setToolTipText(ResourceMgr.getDescription("LblEnableAnimatedIcon"));
+    enableAnimatedIcon.setText(ResourceMgr.getString("LblEnableAnimatedIcon")); // NOI18N
+    enableAnimatedIcon.setToolTipText(ResourceMgr.getString("d_LblEnableAnimatedIcon")); // NOI18N
     enableAnimatedIcon.setBorder(null);
     enableAnimatedIcon.setHorizontalAlignment(SwingConstants.LEFT);
     enableAnimatedIcon.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -401,14 +416,15 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 25, 1, 0);
     jPanel2.add(enableAnimatedIcon, gridBagConstraints);
 
     exitOnConnectCancel.setSelected(Settings.getInstance().getExitOnFirstConnectCancel());
-    exitOnConnectCancel.setText(ResourceMgr.getString("LblExitOnConnectCancel"));
-    exitOnConnectCancel.setToolTipText(ResourceMgr.getDescription("LblExitOnConnectCancel"));
+    exitOnConnectCancel.setText(ResourceMgr.getString("LblExitOnConnectCancel")); // NOI18N
+    exitOnConnectCancel.setToolTipText(ResourceMgr.getString("d_LblExitOnConnectCancel")); // NOI18N
     exitOnConnectCancel.setBorder(null);
     exitOnConnectCancel.setHorizontalAlignment(SwingConstants.LEFT);
     exitOnConnectCancel.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -416,13 +432,14 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 25, 1, 0);
     jPanel2.add(exitOnConnectCancel, gridBagConstraints);
 
     autoConnect.setSelected(Settings.getInstance().getShowConnectDialogOnStartup());
-    autoConnect.setText(ResourceMgr.getString("LblShowConnect"));
-    autoConnect.setToolTipText(ResourceMgr.getDescription("LblShowConnect"));
+    autoConnect.setText(ResourceMgr.getString("LblShowConnect")); // NOI18N
+    autoConnect.setToolTipText(ResourceMgr.getString("d_LblShowConnect")); // NOI18N
     autoConnect.setBorder(null);
     autoConnect.setHorizontalAlignment(SwingConstants.LEFT);
     autoConnect.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -435,8 +452,8 @@ public class GeneralOptionsPanel
     jPanel2.add(autoConnect, gridBagConstraints);
 
     autoSaveWorkspace.setSelected(Settings.getInstance().getAutoSaveWorkspace());
-    autoSaveWorkspace.setText(ResourceMgr.getString("LblAutoSaveWksp"));
-    autoSaveWorkspace.setToolTipText(ResourceMgr.getDescription("LblAutoSaveWksp"));
+    autoSaveWorkspace.setText(ResourceMgr.getString("LblAutoSaveWksp")); // NOI18N
+    autoSaveWorkspace.setToolTipText(ResourceMgr.getString("d_LblAutoSaveWksp")); // NOI18N
     autoSaveWorkspace.setBorder(null);
     autoSaveWorkspace.setHorizontalAlignment(SwingConstants.LEFT);
     autoSaveWorkspace.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -447,6 +464,37 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 0, 1, 0);
     jPanel2.add(autoSaveWorkspace, gridBagConstraints);
+
+    createBackup.setText(ResourceMgr.getString("LblBckWksp")); // NOI18N
+    createBackup.setToolTipText(ResourceMgr.getString("d_LblBckWksp")); // NOI18N
+    createBackup.setBorder(null);
+    createBackup.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 25, 1, 0);
+    jPanel2.add(createBackup, gridBagConstraints);
+
+    backupCount.setColumns(3);
+    backupCount.setHorizontalAlignment(JTextField.TRAILING);
+    backupCount.setToolTipText(ResourceMgr.getString("d_LblMaxWkspBck")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(6, 3, 0, 0);
+    jPanel2.add(backupCount, gridBagConstraints);
+
+    jLabel1.setLabelFor(backupCount);
+    jLabel1.setText(ResourceMgr.getString("LblMaxWkspBck")); // NOI18N
+    jLabel1.setToolTipText(ResourceMgr.getString("d_LblMaxWkspBck")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(8, 13, 0, 0);
+    jPanel2.add(jLabel1, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -478,16 +526,32 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(5, 12, 2, 15);
     add(settingsfilename, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt) {
+    if (evt.getSource() == createBackup) {
+      GeneralOptionsPanel.this.createBackupActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
+
+	private void createBackupActionPerformed(ActionEvent evt)//GEN-FIRST:event_createBackupActionPerformed
+	{//GEN-HEADEREND:event_createBackupActionPerformed
+		backupCount.setEnabled(createBackup.isSelected());
+	}//GEN-LAST:event_createBackupActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox autoConnect;
   private JCheckBox autoSaveWorkspace;
+  private JTextField backupCount;
   private JComboBox checkInterval;
   private JLabel checkUpdatesLabel;
   private JCheckBox consolidateLog;
+  private JCheckBox createBackup;
   private JCheckBox enableAnimatedIcon;
   private JCheckBox exitOnConnectCancel;
+  private JLabel jLabel1;
   private JPanel jPanel2;
   private JLabel langLabel;
   private JComboBox languageDropDown;

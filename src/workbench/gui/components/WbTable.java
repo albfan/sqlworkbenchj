@@ -924,6 +924,11 @@ public class WbTable
 
 	public void setModel(TableModel aModel, boolean sortIt)
 	{
+		if (!SwingUtilities.isEventDispatchThread())
+		{
+			Exception e = new Exception("Wrong thread!");
+			LogMgr.logWarning("WbTable.setModel()", "setModel() not called in EDT!", e);
+		}
 		removeListeners();
 		rowHeightWasOptimized = false;
 

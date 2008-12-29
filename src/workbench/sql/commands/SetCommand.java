@@ -24,12 +24,13 @@ import workbench.util.StringUtil;
 
 /**
  * This class implements a wrapper for the SET command.
+ * <br/>
  *
  * Oracle's SET command is only valid from within SQL*Plus.
  * By supplying an implementation for the Workbench, we can ignore the errors
  * reported by the JDBC interface, so that SQL scripts intended for SQL*Plus
  * can also be run from within the workbench
- *
+ * <br/>
  * For other DBMS this enables the support for controlling autocommit
  * through a SQL command. All parameters except serveroutput and autocommit
  * are passed on to the server.
@@ -43,7 +44,7 @@ public class SetCommand extends SqlCommand
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = null; //
+		StatementRunnerResult result = null; 
 
 		try
 		{
@@ -66,10 +67,10 @@ public class SetCommand extends SqlCommand
 
 			if (command != null)
 			{
-				// those SET commands that have a SQL Workbench equivalent
-				// will be "executed" by calling the approriate functions
-				// we don't need to send the SQL to the server in this case
-				// everything else is sent to the server
+				// those SET commands that have a SQL Workbench equivalent (JDBC API)
+				// will be "executed" by calling the approriate functions.
+				// We don't need to send the SQL to the server in this case
+				// Any other command is sent to the server without modification.
 				if (command.equalsIgnoreCase("autocommit"))
 				{
 					result = this.setAutocommit(currentConnection, param);
@@ -127,6 +128,7 @@ public class SetCommand extends SqlCommand
 			if (execSql)
 			{
 				result = new StatementRunnerResult();
+				aSql = getSqlToExecute(aSql);
 				this.currentStatement = currentConnection.createStatement();
 				// Using a generic execute ensures that servers that
 				// can process more than one statement with a single SQL

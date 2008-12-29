@@ -75,6 +75,9 @@ public class WbConnection
 	private String currentCatalog;
 	private String currentSchema;
 
+	private boolean removeComments;
+	private boolean removeNewLines;
+	
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -85,8 +88,35 @@ public class WbConnection
 		this.id = anId;
 		setSqlConnection(aConn);
 		setProfile(aProfile);
+
+		// removeComments and removeNewLines are properties
+		// that are needed each time a SQL statement is executed
+		// To speed up SQL parsing, the value for those properties are
+		// "cached" here
+		if (profile != null)
+		{
+			removeComments = profile.getRemoveComments();
+		}
+		if (metaData != null)
+		{
+			DbSettings db = metaData.getDbSettings();
+			if (!removeComments)
+			{
+				removeComments = !db.supportsCommentInSql();
+			}
+			removeNewLines = db.removeNewLinesInSQL();
+		}
 	}
 
+	public boolean getRemoveComments()
+	{
+		return removeComments;
+	}
+
+	public boolean getRemoveNewLines()
+	{
+		return removeNewLines;
+	}
 	/**
 	 * Returns the internal ID of this connection.
 	 * 

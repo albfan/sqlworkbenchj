@@ -198,11 +198,19 @@ public class FileUtil
 
 	}
 
-	public static long copy(File source, File desination)
+	/**
+	 * Copies the source file to the destination file
+	 * @param source
+	 * @param destination
+	 * @return
+	 * @throws java.io.IOException
+	 * @see #copy(java.io.InputStream, java.io.OutputStream)
+	 */
+	public static long copy(File source, File destination)
 		throws IOException
 	{
 		InputStream in = new FileInputStream(source);
-		OutputStream out = new FileOutputStream(desination);
+		OutputStream out = new FileOutputStream(destination);
 		return copy(in, out);
 	}
 	
@@ -335,4 +343,5 @@ public class FileUtil
 			// ignore
 		}
 	}
+	
 }

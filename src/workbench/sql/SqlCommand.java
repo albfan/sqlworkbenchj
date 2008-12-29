@@ -476,18 +476,35 @@ public class SqlCommand
 	}
 
 	/**
-	 * Remove comments from the SQL if the current DBMS does not support embedded comments.
+	 * Remove comments from the SQL if the current connection profile has the 
+	 * corresponding option defined.
+	 *
+	 * Additionally the DB specific settings is checked whether the DBMS supports
+	 * comments inside SQL statements.
 	 *
 	 * @param originalSql
 	 * @return the sql with comments removed if necessary.
+	 * 
+	 * @see workbench.db.ConnectionProfile#getRemoveComments()
+	 * @see workbench.db.DbSettings#supportsCommentInSql()
+	 * @see workbench.db.DbSettings#removeNewLinesInSQL()
 	 */
 	protected String getSqlToExecute(String originalSql)
 	{
-		if (this.currentConnection == null) return originalSql;
-		boolean suppportsComments = currentConnection.getDbSettings().supportsCommentInSql();
+		try
+		{
+			boolean removeComments = currentConnection.getRemoveComments();
+			boolean removeNewLines = currentConnection.getRemoveNewLines();
 
-		if (suppportsComments) return originalSql;
-		return SqlUtil.makeCleanSql(originalSql, true, false);
+			if (!removeComments && !removeNewLines ) return originalSql;
+
+			return SqlUtil.makeCleanSql(originalSql, !removeNewLines, !removeComments);
+		}
+		catch (NullPointerException npe)
+		{
+			// Just in case currentConnection is not initialized for some reason!
+			return originalSql;
+		}
 	}
 
 	/**

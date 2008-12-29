@@ -24,14 +24,16 @@ import workbench.util.StringUtil;
 
 /**
  * MS SQL Server's and MySQL's USE command.
- *
+ * <br/>
  * This command will also be "activated if the JDBC driver reports
  * that catalogs are supported
  *
  * This class will notify the connection used that the current database has changed
  * so that the connection display in the main window can be updated.
  *
- * @see workbench.db.CatalogChanger#setCurrentCatalog(workbench.db.WbConnection, java.lang.String) 
+ * @see workbench.db.CatalogChanger#setCurrentCatalog(workbench.db.WbConnection, java.lang.String)
+ * @see workbench.sql.CommandMapper#getCommandToUse(java.lang.String)
+ * @see workbench.sql.CommandMapper#addCommand(workbench.sql.SqlCommand)
  * 
  * @author  support@sql-workbench.net
  */
@@ -43,7 +45,7 @@ public class UseCommand
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult();
+		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		try
 		{
 			SQLLexer lexer = new SQLLexer(aSql);

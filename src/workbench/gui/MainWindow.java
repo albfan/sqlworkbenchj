@@ -115,6 +115,7 @@ import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.GuiSettings;
 import workbench.util.FileUtil;
+import workbench.util.FileVersioner;
 import workbench.util.NumberStringCache;
 import workbench.util.WbFile;
 
@@ -2190,23 +2191,27 @@ public class MainWindow
 		}
 
 		String realFilename = FileDialogUtil.replaceConfigDir(filename);
-
-		// Make a backup of the existing workspace
-		// if saving of the workspace fails, the backup
-		// will be renamed back to the original name
-		// otherwise it will be deleted if no backups should be made
 		WbFile f = new WbFile(realFilename);
-		WbFile bck = new WbFile(realFilename + ".bck");
-		try
-		{
-			bck.delete();
-			f.renameTo(bck);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("MainWindow.saveWorkspace()", "Error when creating backup file!", e);
-		}
 
+		if (Settings.getInstance().getCreateWorkspaceBackup())
+		{
+			FileVersioner version = new FileVersioner(Settings.getInstance().getMaxWorkspaceBackup());
+			try
+			{
+				version.createBackup(f);
+			}
+			catch (IOException e)
+			{
+				LogMgr.logWarning("MainWindow.saveWorkspace()", "Error when creating backup file!", e);
+			}
+		}
+		else if (WbManager.getInstance().outOfMemoryOcurred())
+		{
+			// sometimes when an OoM occurred, saving of the workspace
+			// succeeds but the ZIP file is not written correctly.
+			// This tries to prevent the old file from beeing overwritten, just in case...
+			f.makeBackup();
+		}
 
 		try
 		{
@@ -2227,18 +2232,6 @@ public class MainWindow
 			{
 				MainPanel p = getSqlPanel(i);
 				p.saveToWorkspace(w,i);
-
-			}
-			if (WbManager.getInstance().outOfMemoryOcurred())
-			{
-				// sometimes when an OoM occurred, saving of the workspace
-				// succeeds but the ZIP file is not written correctly.
-				// This tries to prevent the old file from beeing overwritten, just in case...
-				f.makeBackup();
-			}
-			else if (!Settings.getInstance().getCreateWorkspaceBackup())
-			{
-				bck.delete();
 			}
 		}
 		catch (Throwable e)

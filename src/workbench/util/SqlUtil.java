@@ -661,7 +661,7 @@ public class SqlUtil
 	}
 
 	/**
-	 *	Replaces all white space characters with ' ' (But not inside
+	 *	Replaces all white space characters with a single space (But not inside
 	 *	string literals) and removes -- style and Java style comments
 	 *	@param aSql The sql script to "clean out"
 	 *  @param keepNewlines if true, newline characters (\n) are kept

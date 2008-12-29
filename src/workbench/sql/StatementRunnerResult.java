@@ -24,7 +24,13 @@ import workbench.storage.DataStore;
 import workbench.util.MessageBuffer;
 
 /**
- *
+ * Stores the result of a SQL execution.
+ * <br>
+ * If the SQL command produced a result this might be available as a DataStore or as a
+ * ResultSet (depending on the command).
+ * <br/>
+ * @see workbench.sql.SqlCommand#execute(java.lang.String)
+ * 
  * @author  support@sql-workbench.net
  */
 public class StatementRunnerResult
