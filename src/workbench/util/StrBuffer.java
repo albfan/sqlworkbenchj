@@ -240,6 +240,30 @@ public class StrBuffer
 		return this;
 	}
 
+	public StrBuffer remove(int start, int end)
+	{
+		if (start < 0)
+		{
+			throw new StringIndexOutOfBoundsException(start);
+		}
+		if (end > numchar)
+		{
+			end = numchar;
+		}
+		if (start > end)
+		{
+			throw new StringIndexOutOfBoundsException();
+		}
+
+		int len = end - start;
+		if (len > 0)
+		{
+			System.arraycopy(charData, start + len, charData, start, numchar - end);
+			numchar -= len;
+		}
+		return this;
+	}
+
 	public StrBuffer append(CharSequence s)
 	{
 		if (s == null) return this;

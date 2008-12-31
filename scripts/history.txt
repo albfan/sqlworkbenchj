@@ -1,5 +1,11 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
+Enh: (102.8) A new option to make versioned backups of the workspace is now
+     available (Tools -> Options -> General -> Create Workspace Backup)
+Enh: (102.8) The removal of comments when the "remove comments" option is active
+     has been moved to a later stage in the statement processing. This way
+     the new feature to name result sets can be used with DBMS that do not
+     support embedded comments in SQL statements.
 Enh: (102.7) for specific datatypes, data retrieval in the DbExplorer can now
      be done by applying expressions to the column when building the SQL 
      to select the data. The replacement is defined per database and 

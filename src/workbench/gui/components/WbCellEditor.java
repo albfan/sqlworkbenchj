@@ -87,7 +87,8 @@ public class WbCellEditor
 	{
 		super.cancelCellEditing();
 		// For some reason Swing resets the row height for all rows when
-		// stopping the editing. If automatic
+		// stopping the editing. If automatic row height calculation is turned on
+		// we need to re-calculate the row heights
 		parentTable.adjustRowHeight();
 	}
 
@@ -96,7 +97,8 @@ public class WbCellEditor
 	{
 		boolean result = super.stopCellEditing();
 		// For some reason Swing resets the row height for all rows when
-		// stopping the editing. If automatic
+		// stopping the editing. If automatic row height calculation is turned on
+		// we need to re-calculate the row heights
 		parentTable.adjustRowHeight();
 		return result;
 	}
@@ -191,29 +193,10 @@ public class WbCellEditor
 			}
 
 			// Remove the default action for the Enter key and replace it with
-			// the "stop-editing" action which is the default for all other
-			// editors.
+			// the "stop-editing" action which is the default for all other editors.
 			Object enterAction = this.getInputMap().get(WbSwingUtilities.ENTER);
 
 			this.getInputMap().put(WbSwingUtilities.ENTER, "wb-stop-editing");
-
-//			this.getActionMap().put("stopEditing",
-//				new AbstractAction("wb-stop-editing")
-//				{
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						try
-//						{
-//							ignoreSetBounds = true;
-//							System.out.println("**** ignoreSetBounds = true...");
-//							stopCellEditing();
-//						}
-//						finally
-//						{
-//							ignoreSetBounds = false;
-//						}
-//					}
-//				});
 
 			if (enterAction != null)
 			{

@@ -1423,6 +1423,7 @@ public class WbTable
 			}
 		}
 	}
+	
 	private boolean isMultiLineColumn(int col)
 	{
 		if (this.dwModel == null) return false;

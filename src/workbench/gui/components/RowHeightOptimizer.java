@@ -98,7 +98,7 @@ public class RowHeightOptimizer
 			optHeight = Math.max(optHeight, stringHeight);
 		}
 		
-		if (optHeight > 0)
+		if (optHeight > 0 && optHeight != table.getRowHeight(row))
 		{
 			table.setRowHeight(row, optHeight);
 		}

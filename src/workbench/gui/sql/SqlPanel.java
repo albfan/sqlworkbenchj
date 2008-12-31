@@ -2100,21 +2100,27 @@ public class SqlPanel
 		try
 		{
 			ignoreStateChange = true;
-			while (resultTab.getTabCount() > 1)
+			WbSwingUtilities.invoke(new Runnable()
 			{
-				Component c = resultTab.getComponentAt(0);
-				if (c instanceof DwPanel)
+				public void run()
 				{
-					DwPanel panel = (DwPanel)c;
-					panel.removePropertyChangeListener(SqlPanel.this);
-					panel.clearContent();
+					while (resultTab.getTabCount() > 1)
+					{
+						Component c = resultTab.getComponentAt(0);
+						if (c instanceof DwPanel)
+						{
+							DwPanel panel = (DwPanel)c;
+							panel.removePropertyChangeListener(SqlPanel.this);
+							panel.clearContent();
+						}
+						resultTab.removeTabAt(0);
+					}
+					resultTab.setSelectedIndex(0);
+					currentData = null;
+					updateProxiedActions();
+					checkResultSetActions();
 				}
-				resultTab.removeTabAt(0);
-			}
-			resultTab.setSelectedIndex(0);
-			currentData = null;
-			updateProxiedActions();
-			checkResultSetActions();
+			});
 		}
 		finally
 		{

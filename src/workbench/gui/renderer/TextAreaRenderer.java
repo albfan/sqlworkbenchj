@@ -18,6 +18,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import workbench.gui.WbSwingUtilities;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -41,6 +42,8 @@ public class TextAreaRenderer
 		};
 		textDisplay.setWrapStyleWord(false);
 		textDisplay.setLineWrap(false);
+		textDisplay.setAutoscrolls(false);
+		textDisplay.setTabSize(Settings.getInstance().getEditorTabWidth());
 	}
 
 
@@ -82,7 +85,14 @@ public class TextAreaRenderer
 		}
 		else
 		{
-			this.displayValue = value.toString();
+			try
+			{
+				this.displayValue = (String)value;
+			}
+			catch (ClassCastException cce)
+			{
+				this.displayValue = value.toString();
+			}
 			this.textDisplay.setText(this.displayValue);
 			this.textDisplay.setToolTipText(StringUtil.getMaxSubstring(this.displayValue, maxTooltipSize));
 		}

@@ -38,9 +38,13 @@ import workbench.util.StringUtil;
  * A renderer that automatically displays the value as a tooltip.
  * It also handles the highlighting of null values during display
  * and non-null columns in editing mode.
+ * <br/>
  * It can also highlight values based on a ColumnExpression that is
  * provided by WbTable.
- *
+ * <br/>
+ * For performance reasons the displayValue is drawn directly using the graphics
+ * object.
+ * 
  * @author support@sql-workbench.net
  */
 public class ToolTipRenderer
@@ -79,7 +83,6 @@ public class ToolTipRenderer
 	protected boolean isSelected;
 	protected boolean hasFocus;
 
-	//protected boolean filterMatches;
 	protected ColumnExpression filter;
 
 	private int valign = SwingConstants.TOP;
@@ -183,9 +186,13 @@ public class ToolTipRenderer
 			unselectedBackground = table.getBackground();
 		}
 
-		if (table instanceof WbTable)
+		try
 		{
 			filter = ((WbTable)table).getHighlightExpression();
+		}
+		catch (ClassCastException cce)
+		{
+			// ignore, should not happen
 		}
 	}
 
@@ -196,7 +203,7 @@ public class ToolTipRenderer
 
 		if (value != null)
 		{
-			this.prepareDisplay(value);
+			prepareDisplay(value);
 		}
 		else
 		{
@@ -352,7 +359,6 @@ public class ToolTipRenderer
 		{
 			displayValue = value.toString();
 		}
-
 		setTooltip(displayValue);
 	}
 

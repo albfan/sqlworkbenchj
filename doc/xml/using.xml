@@ -166,10 +166,6 @@ COMMIT;
 				appear as the result's name. The keywords must be specified in lowercase!
 			</para>
 			<para>
-				This does not work if you have enabled the option
-				<link linkend="profile-remove-comments">Remove comments</link> in the connection profile.
-			</para>
-			<para>
 				The following examples executes two statements. The result for the first will be labelled
 				"List of contacts" and the second will be labelled "List of companies":
 			</para>
