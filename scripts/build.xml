@@ -615,15 +615,16 @@
 				<include name="SQLWorkbench-Manual.pdf"/>
         <include name="SQLWorkbench.exe"/>
         <include name="DataPumper.exe"/>
-        <include name="DbExplorer.exe"/>
+        <include name="DataPumper.exe"/>
+        <include name="sqlwbconsole.exe"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}">
         <include name="sqlworkbench.cmd"/>
-        <include name="sqlwb.cmd"/>
+        <include name="sqlwbconsole.cmd"/>
         <include name="sqlworkbench.sh"/>
         <include name="datapumper.sh"/>
         <include name="dbexplorer.sh"/>
-        <include name="sqlwb.sh"/>
+        <include name="sqlwbconsole.sh"/>
         <include name="SQLWorkbench.desktop"/>
 				<include name="!! NEW FILE NAMES !!.txt"/>
       </zipfileset>
