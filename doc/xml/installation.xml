@@ -1,75 +1,160 @@
 <section id="install">
 	<title>Installing and starting &wb-productname;</title>
 
-	<para><note>
-		Starting with build 99 the jar file has been renamed to <literal>sqlworkbench.jar</literal>. 
-		Please delete the old file <literal>Workbench.jar</literal>. Please delete
-		<literal>JWorkbench.exe</literal> as well, and only use <literal>SQLWorkbench.exe</literal>
-	</note></para>
-	
-	<para>To run &wb-productname; a <ulink url="http://java.sun.com/j2se/">Java runtime environment</ulink> 
-		version 1.5 (or above) is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to
-		run &wb-productname;. Once you have downloaded the application, unzip the &wb-productname; archive into 
-		a directory of your choice. Apart from that, no special installation procedure is needed. 
-		When upgrading to a newer version of &wb-productname; simply overwrite the old 
-		<literal>sqlworkbench.jar</literal> and the exe launcher and shell scripts that  
-    start the application.
-	</para>
+	<section id="install-prereq">
+		<title>Pre-requisites</title>
+
+		<para>
+			To run &wb-productname; a <ulink url="http://java.sun.com/j2se/">Java 5 runtime environment</ulink>
+			is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
+		</para>
+
+		<para>
+			&wb-productname; requires Java 5 (aka "Java 1.5") but Java 6 (aka "Java 1.6) is highly recommended,
+			especially because Java 5 will reach "end-of-live" in October 2009.
+		</para>
+		
+		<para>
+			&wb-productname; does not need a "fully installed" runtime environment, you can also copy
+			the <literal>jre</literal> directory from an existing Java installation and specify the
+			JRE to be used on the commandline or by setting the <literal>WORKBENCH_JDK</literal>
+			environment variable.
+		</para>
+
+	</section>
+
+	<section id="first-time-install">
+		<title>First time installation</title>
+
+		<para>
+			Once you have downloaded the application's distribution package, unzip the archive into a directory
+			of your choice. Apart from that, no special installation procedure is needed.
+		</para>
+
+		<para>
+			You will need to configure the necessary JDBC driver(s) for your database before you
+			can connect to a database. Please refer to the chapter <link linkend="jdbc-setup">JDBC Drivers</link>
+			for details on how to make the JDBC driver available to &wb-productname;
+		</para>
+
+		<para>
+			When starting &wb-productname; for the first time, it will create a directory
+			called <literal>.sqlworkbench</literal> in the current user's home folder to
+			store all its configuration information.
+		</para>
+
+		<para>
+			The "user's home directory" is <literal>$HOME</literal> on a Linux or Unix based system,
+			and <literal>%HOMEPATH%</literal> on a Windows system. (Technically speaking
+			it is using the contents of Java system property <literal>user.home</literal> to
+			find the user's home directory)
+		</para>
+
+	</section>
+
+	<section id="upgrade-install">
+		<title>Upgrade installation</title>
+		<para>
+			When upgrading to a newer version of &wb-productname; simply overwrite the old
+			<literal>sqlworkbench.jar</literal> and the exe launcher and shell scripts that
+			start the application.
+		</para>
+
+		<para>
+			Starting with build 99 the file names have changed. The jar file is now 
+			named <literal>sqlworkbench.jar</literal> and the filename of the Windows
+			launcher is now <literal>sqlworkbench.exe</literal>.
+		</para>
+		<para>
+			If you are upgrading from build 98 or earlier, please delete the old files
+			<literal>Workbench.jar</literal> and <literal>JWorkbench.exe</literal>.
+		</para>
+
+	</section>
 
 	<section id="starting">
 		<title>Starting the program</title>
 
-		<para>sqlworkbench.jar is a self executing JAR file. This means, that if
-		your JDK is installed properly, a double click (on the Windows&reg; platform)
-		on sqlworkbench.jar will execute the application. To run the application
-		manually use the command:</para>
+		<para>
+			sqlworkbench.jar is a self executing JAR file. This means, that if
+			your JDK is installed properly, a double click (on the Windows&reg; platform)
+			on sqlworkbench.jar will execute the application. To run the application
+			manually use the command:
+		</para>
 
 		<programlisting>java -jar sqlworkbench.jar</programlisting>
 
-		<para>If you want to create a shortcut on your desktop use the above
-		line. On Windows&reg; systems - if you don&apos;t use the <link linkend="launcher-using">native launcher</link>- it
-		is recommended to use javaw instead of java, so that the console window is not displayed.</para>
-		<programlisting>javaw -jar sqlworkbench.jar</programlisting>
+		<para>
+			Native executables for Windows and Mac OSX are supplied to simple start &wb-productname; by
+			using the default Java runtime installed on your system. Details on using
+			the <link linkend="launcher-using">Windows launcher</link> can be found
+			<link linkend="launcher-using">here</link>.
+		</para>
 
-		<section id="config-dir" xreflabel="Configuration directory">
-			<title>Specifying the location of configuration files</title>
+		<para>
+			The provided shell and batch scripts make use of the <literal>JAVA_HOME</literal> or
+			<literal>WORKBENCH_JDK</literal> environment variables to detect the runtime to be used.
+			If those variables are not set, it is assumed that the <literal>java</literal> executable
+			is available through the system search path.
+		</para>
+		
+		<section id="config-dir" xreflabel="Configuration files">
+			<title>Configuration directory</title>
 
-			<para>If no configuration directory has been specified on the commandline,
-				&wb-productname; will check the current directory for a <literal>workbench.settings</literal>
-				file. If no file is present in the current directory, &wb-productname; 
-				will check the directory where <literal>sqlworkbench.jar</literal> is located. 
-				If no <literal>workbench.settings</literal> is found in that directory, 
-				&wb-productname; creates a sub-directory called <literal>.sqlworkbench</literal>
-				in the user's home folder (This is <literal>$HOME</literal> on a Linux or Unix
-				based system, or <literal>%HOMEPATH%</literal> on a Windows system.
+			<para>
+				If no configuration directory has been specified on the commandline,
+				&wb-productname; will use the following search order to find it's configuration directory:
+				<orderedlist>
+					<listitem><simpara>The current directory</simpara></listitem>
+					<listitem><simpara>The directory where <literal>sqlworkbench.jar</literal> is located</simpara></listitem>
+					<listitem>
+						<simpara>
+							In the user's home direcotry
+							(e.g. <literal>$HOME/.sqlworkbench</literal> on Unix based systems
+							or <literal>%HOMEPATH%\.sqlworkbench</literal> on Windows systems)
+						</simpara></listitem>
+				</orderedlist>
+				If the file <literal>workbench.settings</literal> is not found in any of those directories
+				it will be created in the user's home directory. 
+			</para>
+			<para>
+				The above mentioned search can be overridden by supplying the configuration directory
+				<link linkend="cmdline-parameter-configdir">on the commandline</link> when starting the application.
 			</para>
 
-			<para><note>
-				Before Build 98 the default configuration directory was the program's directory 
+			<para>
+				Note that, before Build 98 the default configuration directory was the program's directory
 				and not a directory in the user's home directory.
-			</note></para>
+			</para>
 
-			<para>The configuration files are:
+			<para>The following files are stored in the configuration directory:
 				<itemizedlist>
-					<listitem>General configuration settings (<filename>workbench.settings</filename>)</listitem>
-					<listitem>Connection profiles (<filename>WbProfiles.xml</filename>)</listitem>
-					<listitem>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</listitem>
-					<listitem>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>)</listitem>
-					<listitem>Macro definitions (<filename>WbMacros.xml</filename>)</listitem>
-					<listitem>Log file (<filename>workbench.log</filename>)</listitem>
-					<listitem>Workspace files (<filename>*.wksp</filename>)</listitem>
+					<listitem><simpara>General configuration settings (<filename>workbench.settings</filename>)</simpara></listitem>
+					<listitem><simpara>Connection profiles (<filename>WbProfiles.xml</filename>)</simpara></listitem>
+					<listitem><simpara>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</simpara></listitem>
+					<listitem><simpara>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>).
+						If you did not customize any of the shortcuts, this file does not exist</simpara>
+					</listitem>
+					<listitem><simpara>Macro definitions (<filename>WbMacros.xml</filename>)</simpara></listitem>
+					<listitem><simpara>Log file (<filename>workbench.log</filename>)</simpara></listitem>
+					<listitem><simpara>Workspace files (<filename>*.wksp</filename>)</simpara></listitem>
 				</itemizedlist>
 			</para>
 
-			<para>If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
+			<para>
+				If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
 				location of the profiles with the <literal>-profilestorage</literal> parameter on the commandline.
 				Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
 				The different shortcuts can still use the same main configuration file.
 			</para>
-			
+		</section>
+		
+		<section id="config-dir-adjust">
+			<title>Specifying the location of the configuration directory</title>
+
 			<?dbfo-need height="2cm" ?>
 			<para>
-				If you want to control the location where &bw-productname; stores the configuration 
+				If you want to control the location where &wb-productname; stores the configuration
 			  files, you have to start the application with the parameter -configDir to specify an 
 				alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
 			</para>

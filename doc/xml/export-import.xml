@@ -7,11 +7,11 @@
 	</para>
 	
 	<itemizedlist>
-		<listitem>HTML</listitem>
-		<listitem>SQL statements (INSERT, UPDATE or DELETE &amp; INSERT)</listitem>
-		<listitem>XML format</listitem>
-		<listitem>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</listitem>
-		<listitem>Spreadsheet Format (OpenDocument, Microsoft Excel)</listitem>
+		<listitem><simpara>HTML</simpara></listitem>
+		<listitem><simpara>SQL statements (INSERT, UPDATE or DELETE &amp; INSERT)</simpara></listitem>
+		<listitem><simpara>XML format</simpara></listitem>
+		<listitem><simpara>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</simpara></listitem>
+		<listitem><simpara>Spreadsheet Format (OpenDocument, Microsoft Excel)</simpara></listitem>
 	</itemizedlist>
 	
 	<para>
@@ -191,13 +191,13 @@
 		<para>
 			<itemizedlist>
 				<listitem>
-					The columns are delimited with a tab character and the first row contains column names. All
-					matching columns will then be imported
+					<simpara>The columns are delimited with a tab character and the first row contains column names. All
+					matching columns will then be imported</simpara>
 				</listitem>
 				<listitem>
-					If no column name matches (i.e. no header row is present) but the number of columns (identified
+					<simpara>If no column name matches (i.e. no header row is present) but the number of columns (identified
 					by the number of tab characters in the first row) is identical to the number of columns
-					in the current result.
+					in the current result.</simpara>
 				</listitem>
 			</itemizedlist>
 			If &wb-productname; cannot identify the format of the clipboard a dialog will be opened

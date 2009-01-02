@@ -25,7 +25,7 @@
 		When you need to quote parameters inside batch or shell scripts, you have to use single quotes 
 		(<literal>&apos;test-script.sql&apos;</literal>) to quote these values. Most command line shells 
 		(including Windows&reg;) do not pass double quotes to the application and thus the parameters would not 
-		be evaluated correctly ba &wb-productname;
+		be evaluated correctly by &wb-productname;
 	</para></note>
 
 	<para>

@@ -69,16 +69,15 @@
 
 	<para>
 		If an export to an Excel spreadsheet is needed, it is recommended to use the Excel XML format 
-		(<literal>-type=xlsx</literal>), as that doesn't need an external library and works on any platform
-		(just like exporting to the OpenDocument format). 
+		(<literal>-type=xlsx</literal>), as that doesn't need an external library. 
 	</para>
 
 	<simplesect id="wb-export-max-rows">
 		<title>WbExport and the "Max. Rows" option</title>
 		<para>
 			When you use the <literal>WbExport</literal> command together with
-			a <literal>SELECT</literal> query, the Max. Rows setting will <emphasis role="bold">not</emphasis> be respected
-			by the <literal>SELECT</literal> statement.
+			a <literal>SELECT</literal> query, the "Max. Rows" setting will be
+			<emphasis role="bold">ignored</emphasis> for the export.
 		</para>
 	</simplesect>
 

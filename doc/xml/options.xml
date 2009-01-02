@@ -1,5 +1,7 @@
 <section id="options">
+	
 	<title>Options dialog</title>
+
 	<para>
 		The options dialog enables you to influence the behaviour and
 		look of &wb-productname; to meet your needs. To open the options
@@ -642,8 +644,10 @@
 				for primary key constraint if the current constraint has no name or
 				a system generated name.
 				<note>
-					If this option is selected, the generated SQL does not reflect
-					the real statement that was used to create the table!
+					<para>
+						If this option is selected, the generated SQL does not reflect
+						the real statement that was used to create the table!
+					</para>
 				</note>
 				System generated names are identified using a regular expression
 				that can be <link linkend="manual-setting-system-names">configured</link>.

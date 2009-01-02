@@ -11,8 +11,8 @@
 		<para>The configuration of a specific driver requires at least two properties:</para>
 
 		<itemizedlist>
-			<listitem>the driver&apos;s class name</listitem>
-			<listitem>the library ("JAR file") where to find the driver class</listitem>
+			<listitem><simpara>the driver&apos;s class name</simpara></listitem>
+			<listitem><simpara>the library ("JAR file") where to find the driver class</simpara></listitem>
 		</itemizedlist>
 
 		<para>
@@ -35,7 +35,9 @@
 		<note><para>&wb-productname; is <emphasis role="bold">not</emphasis> using
 			the system CLASSPATH definition (i.e. environment variable) to load the
 			driver classes. Changing the CLASSPATH environment variable to include
-			your driver's library will not work.
+			your driver's library will not work. Using the <literal>-cp</literal> switch
+			to add a driver to the classpath when starting the application through a batch file
+			will also not work.
 		</para></note>
 
 		<para>

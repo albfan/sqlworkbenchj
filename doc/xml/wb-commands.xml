@@ -390,7 +390,9 @@
   </section>
   
 	<section id="command-data-diff">
+
 		<title>Compare data across databases - WbDataDiff</title>
+		
 		<para>
 			The <literal>WbDataDiff</literal> command can be used to generate SQL scripts
 			that update a target database such that the data is identical to a reference 
@@ -642,14 +644,13 @@
 			<para>
 				Compare a list of matching tables between two databases and write the output to the 
 				file <literal>migrate_staging.sql</literal> including <literal>DELETE</literal> statements.
-				
 			</para>
+			
 <programlisting>WbDataDiff -referenceProfile="Production"
            -targetProfile="Staging"
            -referenceTables=person,address,person_address
            -file=migrate_staging.sql
            -includeDelete=true</programlisting>
-		</simplesect>
 		
 		<para>
 			Compare three tables that are differently named in the target database and
@@ -663,6 +664,8 @@
            -ignoreColumns=last_access,last_update
            -file=migrate_staging.sql
            -includeDelete=true</programlisting>
+		</simplesect>
+		
 	</section>
 	
   <section id="command-xslt">

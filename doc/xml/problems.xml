@@ -68,7 +68,17 @@
 	
 	<section id="mysql-problems">
 		<title>MySQL Problems</title>
-		
+
+		<section id="mysql-no-info-schema">
+			<title>INFORMATION_SCHEMA tables not displayed in DbExplorer</title>
+			<para>
+				It seems that the necessary API calls to list the tables of the <literal>INFORMATION_SCHEMA</literal>
+				database (which is a database, not a schema - contrary to its name) are not implemented correctly
+				in earlier JDBC drivers of MySQL. Only the driver with the version 5.1.7 returns the list of tables
+				of the <literal>INFORMATION_SCHEMA</literal> database.
+			</para>
+		</section>
+
 		<section id="mysql-select-problems">
 			<title>"Operation not allowed" error message</title>
 			<para>
@@ -101,9 +111,9 @@
 		    This error usually occurs in the DbExplorer if an older Microsoft JDBC Driver is used
 		    and the connection does not use autocommit mode. There are three ways to fix this problem:
 		    <itemizedlist>
-		      <listitem>Upgrade to a newer Microsoft driver (e.g. the one for SQL Server 2005)</listitem>
-		      <listitem>Enable autocommit in the connection profile</listitem>
-		      <listitem>Add the parameter <literal>;SelectMethod=Cursor</literal> to your JDBC URL</listitem>
+		      <listitem><simpara>Upgrade to a newer Microsoft driver (e.g. the one for SQL Server 2005)</simpara></listitem>
+		      <listitem><simpara>Enable autocommit in the connection profile</simpara></listitem>
+		      <listitem><simpara>Add the parameter <literal>;SelectMethod=Cursor</literal> to your JDBC URL</simpara></listitem>
 		    </itemizedlist>
 		    This <ulink url="http://support.microsoft.com/?scid=kb;en-us;313181&amp;x=9&amp;y=11">article</ulink>
 		    in Microsoft's Knowledgebase gives more information regarding this problem.
@@ -120,9 +130,10 @@
 				Microsoft SQL Server (at least up to 2000) does not support concurrent reads and writes
 				to the database very well. Especially when using DDL statements, this can lead to
 				database locks that can freeze the application. This affects e.g. the display of the tables
-				in the DbExplorer.	As the JDBC driver needs to issue a SELECT statement to retrieve the table information,
-				this can be blocked by e.g. a non-committed <literal>CREATE ... </literal> statement as
-				that will lock the table(s) that store the meta information about tables and views.
+				in the DbExplorer.	As the JDBC driver needs to issue a SELECT statement to retrieve the table 
+				information, this can be blocked by e.g. a non-committed <literal>CREATE ... </literal>
+				statement as that will lock the system table(s) that store the meta information about tables
+				and views.
 		  </para>
 			<para>
 				Unfortunately there is no real solution to blocking transactions e.g. between a SQL tab and the

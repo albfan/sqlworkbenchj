@@ -8,8 +8,8 @@
 		of settings:
 		
 		<itemizedlist>
-			<listitem>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</listitem>
-			<listitem>&wb-productname; related properties such as the profile name the associated workspace, etc.</listitem>
+			<listitem><simpara>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</simpara></listitem>
+			<listitem><simpara>&wb-productname; related properties such as the profile name the associated workspace, etc.</simpara></listitem>
 		</itemizedlist>
 	</para>
 	
@@ -366,9 +366,12 @@
 			<para>
 				If this option is checked, then comments will be removed from the SQL 
 				statement before it is sent to the database. This covers 
-				single line comments using -- or multi-line comments using /* .. */ 
-				As an ANSI compliant SQL Lexer is used for this, this does <emphasis role="bold">not</emphasis>
-				include comments for MySQL that are entered using the # character.
+				single line comments using -- or multi-line comments using /* .. */
+			</para>
+			<para>
+				As an ANSI compliant SQL Lexer is used for detecting comments, this does
+				<emphasis role="bold">not</emphasis> work for non-standard MySQL comments
+				using the # character.
 			</para>
 		</section>
 
@@ -376,11 +379,17 @@
 			<title>Hide warnings</title>
 			<para>
 				When a SQL statement returns warnings from the DBMS, these are usually displayed
-				after the SQL statement has finished. By checking this option, warnings that are
-				returned from the DBMS are never displayed. Note that for some DBMS (e.g. MS SQL Server)
-				server messages (<literal>PRINT 'Hello, world'</literal>) are also returned
-				as a warning by the driver. If you disable this property, those messages will
-				also not be displayed.
+				after the SQL statement has finished. By enabling this option, warnings that are
+				returned from the DBMS are never displayed. 
+			</para>
+			<para>
+				Note that for some DBMS (e.g. MS SQL Server) server messages
+				(<literal>PRINT 'Hello, world'</literal>) are also returned	as a warning by the driver.
+				If you disable this property, those messages will also not be displayed.
+			</para>
+			<para>
+				If you hide warnings when connected to a PostgreSQL server, you will also not see
+				messages that are returned e.g. by the <literal>VACUUM</literal> command.
 			</para>
 		</section>
 

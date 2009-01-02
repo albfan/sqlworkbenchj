@@ -161,8 +161,8 @@
 				For maximum performance, choose the update strategy that will result in a succssful
 				first statement more often. As a rule of thumb:
 				<itemizedlist>
-					<listitem><para>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</para></listitem>
-					<listitem><para>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</para></listitem>
+					<listitem><simpara>Use <literal>-mode=insert,upadte</literal>, if you expect more rows to be inserted then updated.</simpara></listitem>
+					<listitem><simpara>Use <literal>-mode=update,insert</literal>, if you expect more rows to be updated then inserted.</simpara></listitem>
 				</itemizedlist>
 			</para>
 		</section>

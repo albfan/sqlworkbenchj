@@ -433,9 +433,13 @@
 							<para>
 								Please note:
 								<itemizedlist>
-									<listitem>The definition of the literals is case sensitive!</listitem>
-									<listitem>You always have to specify both switches, otherwise the definition will 
-									be ignored</listitem>
+									<listitem><simpara>The definition of the literals is case sensitive!</simpara></listitem>
+									<listitem>
+										<simpara>
+											You always have to specify both switches, otherwise the definition will
+											be ignored
+										</simpara>
+										</listitem>
 								</itemizedlist>
 							</para>
 						</entry>
