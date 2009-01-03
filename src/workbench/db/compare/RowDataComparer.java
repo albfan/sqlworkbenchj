@@ -14,7 +14,6 @@ package workbench.db.compare;
 import java.util.Collection;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.SqlRowDataConverter;
-import workbench.resource.Settings;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
