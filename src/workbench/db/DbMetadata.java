@@ -399,11 +399,6 @@ public class DbMetadata
 			return viewReader;
 		}
 	}
-	
-	public String[] getSelectableTypes()
-	{
-		return tableTypesSelectable;
-	}
 
 	public String getQuoteCharacter()
 	{
@@ -450,7 +445,21 @@ public class DbMetadata
 	
 	/**
 	 * Check if the given DB object type can contain data. i.e. if
-	 * a SELECT FROM can be run against this type
+	 * a SELECT FROM can be run against this type.
+	 * <br/>
+	 * By default these are objects of type
+	 * <ul>
+	 *	<li>table</li>
+	 *  <li>view</li>
+	 *  <li>synonym</li>
+	 *  <li>system view</li>
+	 *  <li>system table</li>
+	 * </ul>
+	 * <br/>
+	 * The list of types can be defined per DBMS using the property
+	 * <literal>workbench.db.objecttype.selectable.[dbid]</literal>.
+	 * <br/>
+	 * If that property is empty, the above defaults are used.
 	 */
 	public boolean objectTypeCanContainData(String type)
 	{
@@ -493,7 +502,11 @@ public class DbMetadata
 	}
 	
 	/**
-	 *	Return the name of the DBMS as reported by the JDBC driver
+	 *	Return the name of the DBMS as reported by the JDBC driver.
+	 * <br/>
+	 * For configuration purposes the DBID should be used as that can be part of a key
+	 * in a properties file.
+	 * @see #getDbId() 
 	 */
 	public String getProductName()
 	{
@@ -501,8 +514,8 @@ public class DbMetadata
 	}
 
 	/**
-	 * Return a clean version of the productname that can be used
-	 * as the part of a properties key
+	 * Return a clean version of the productname that can be used as the part of a properties key.
+	 *
 	 * @see #getProductName()
 	 */
 	public String getDbId()
@@ -590,7 +603,17 @@ public class DbMetadata
 		if (this.ddlFilter == null) return sql;
 		return this.ddlFilter.adjustDDL(sql);
 	}
-	
+
+	/**
+	 * Returns true if the given schema name can be ignored for the current DBMS.
+	 * <br/>
+	 * The information which schema names can be ignored for the current DBMS is
+	 * retrieved from the settings file through the property
+	 * <literal>workbench.sql.ignoreschema.[dbid]</literal>
+	 * 
+	 * @param schema
+	 * @return
+	 */
 	public boolean ignoreSchema(String schema)
 	{
 		if (StringUtil.isEmptyString(schema)) return true;
@@ -612,10 +635,15 @@ public class DbMetadata
 	/**
 	 * Check if the given {@link TableIdentifier} requires
 	 * the usage of the schema for a DML (select, insert, update, delete)
-	 * statement. By default this is not required for an Oracle
-	 * connetion where the schema is the current user.
+	 * statement.
+	 * <br/>
+	 * First the result of ignoreSchema() is tested. If that is true, then this method returns false.
+	 * <br/>
+	 * By default this is not required for an Oracle connetion where the schema is the current user.
+	 * <br/>
 	 * For all other DBMS, the usage can be disabled by setting
 	 * a property in the configuration file
+	 * @see #ignoreSchema(java.lang.String) 
 	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
@@ -641,10 +669,28 @@ public class DbMetadata
 		return true;
 	}
 
+	/**
+	 * Check if the given {@link TableIdentifier} requires
+	 * the usage of a catalog name for a DML statement.
+	 * <br/>
+	 * First the result of ignoreCatalog() is tested. If that is true, then this method returns false.
+	 * <br/>
+	 * If the current DB engine is Microsoft Access, this method always returns true.
+	 * If the current DBMS does not support catalogs, false is returned
+	 * <br/>
+	 * For all other DBMS, the result of this method depends on the setting if
+	 * a catalog is needed in case it's not the current catalog.
+   *
+	 * @see #ignoreCatalog(java.lang.String)
+	 * @see #supportsCatalogs()
+	 * @see DbSettings#needsCatalogIfNoCurrent()
+	 * @see #getCurrentCatalog() 
+	 */
 	public boolean needCatalogInDML(TableIdentifier table)
 	{
 		if (this.isAccess) return true;
 		if (!this.supportsCatalogs()) return false;
+
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
 		String currentCat = getCurrentCatalog();
@@ -958,7 +1004,7 @@ public class DbMetadata
 	 */
 	public String adjustSchemaNameCase(String schema)
 	{
-		if (schema == null) return null;
+		if (StringUtil.isBlank(schema)) return null;
 		schema = StringUtil.trimQuotes(schema).trim();
 		try
 		{

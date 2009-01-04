@@ -62,6 +62,7 @@ import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import workbench.WbManager;
+import workbench.db.TableSelectBuilder;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.FilterPickerAction;
 import workbench.gui.components.WbTraversalPolicy;
@@ -132,7 +133,6 @@ public class TableDataPanel
 			}
 		};
 
-//		this.dataDisplay.setManageUpdateAction(true);
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");
 
@@ -470,16 +470,29 @@ public class TableDataPanel
 	private String buildSqlForTable(boolean forRowCount)
 	{
 		if (this.table == null) return null;
-
-		StringBuilder sql = new StringBuilder(100);
+		
 		if (forRowCount)
+		{
+			StringBuilder sql = new StringBuilder(100);
 			sql.append("SELECT COUNT(*) FROM ");
-		else
-			sql.append("SELECT * FROM ");
+			sql.append(this.table.getTableExpression(this.dbConnection));
+			return sql.toString();
+		}
 
-		sql.append(this.table.getTableExpression(this.dbConnection));
-		String s = sql.toString();
-		return s;
+		TableSelectBuilder builder = new TableSelectBuilder(this.dbConnection);
+		try
+		{
+			String sql = builder.getSelectForTable(this.table);
+			return sql;
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("TableDataPanel.buildSqlForTable()", "Error building sql", e);
+			StringBuilder sql = new StringBuilder(100);
+			sql.append("SELECT * FROM ");
+			sql.append(this.table.getTableExpression(this.dbConnection));
+			return sql.toString();
+		}
 	}
 
 	private void clearLoadingImage()

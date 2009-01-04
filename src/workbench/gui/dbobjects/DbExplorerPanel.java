@@ -43,6 +43,7 @@ import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.DbExecutionListener;
@@ -118,6 +119,7 @@ public class DbExplorerPanel
 	private boolean switchCatalog = false;
 	private JComponent currentFocus = null;
 	private ReloadAction reloadSchemasAction;
+	private Reloadable schemaReloader;
 
 	public DbExplorerPanel()
 	{
@@ -174,13 +176,21 @@ public class DbExplorerPanel
 			this.setLayout(new BorderLayout());
 
 			this.selectorPanel = new JPanel();
-			reloadSchemasAction =new ReloadAction(new Reloadable()
+			schemaReloader = new Reloadable()
 			{
 				public void reload()
 				{
-					readSchemas(false);
+					if (schemaSelector.isVisible())
+					{
+						readSchemas(false);
+					}
+					else if (catalogSelector.isVisible())
+					{
+						readCatalogs();
+					}
 				}
-			});
+			};
+			reloadSchemasAction =new ReloadAction(schemaReloader);
 			reloadSchemasAction.setEnabled(false);
 			reloadSchemasAction.setTooltip(ResourceMgr.getString("TxtReload"));
 			
@@ -577,11 +587,17 @@ public class DbExplorerPanel
 			String catalogToSelect = null;
 			boolean selectLastCatalog = false;
 
-			if (catalogFromWorkspace == null && catalogSelector.getItemCount() > 0)
+			if (this.dbConnection.getProfile().getStoreExplorerSchema() && this.catalogFromWorkspace != null)
+			{
+				catalogToSelect = catalogFromWorkspace;
+				catalogFromWorkspace = null;
+			}
+			else if (catalogSelector.getItemCount() > 0 && !switchCatalog)
 			{
 				Object o = catalogSelector.getSelectedItem();
 				catalogToSelect = o == null ? null : o.toString();
 			}
+
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(cat);
 
@@ -591,12 +607,11 @@ public class DbExplorerPanel
 				if (db.equalsIgnoreCase(catalogToSelect)) selectLastCatalog = true;
 				catalogSelector.addItem(db);
 			}
-			String db = this.dbConnection.getMetadata().getCurrentCatalog();
-			catalogSelector.setSelectedItem(db);
-			if (this.dbConnection.getProfile().getStoreExplorerSchema() && this.catalogFromWorkspace != null)
+
+			if (switchCatalog)
 			{
-				this.catalogSelector.setSelectedItem(this.catalogFromWorkspace);
-				catalogFromWorkspace = null;
+				String db = this.dbConnection.getMetadata().getCurrentCatalog();
+				catalogSelector.setSelectedItem(db);
 			}
 			else if (selectLastCatalog && catalogToSelect != null)
 			{
@@ -782,7 +797,10 @@ public class DbExplorerPanel
 		t.start();
 	}
 
-	public String getName() { return getTabTitle(); }
+	public String getName()
+	{
+		return getTabTitle();
+	}
 
 	public void setTabName(String name)
 	{
@@ -881,21 +899,6 @@ public class DbExplorerPanel
 			this.mainWindow.explorerWindowClosed(this.window);
 		}
 		this.window = null;
-	}
-
-	public void updateUI()
-	{
-		super.updateUI();
-		if (this.toolbar != null)
-		{
-			this.toolbar.updateUI();
-			this.toolbar.repaint();
-		}
-		if (this.procs != null)
-		{
-			this.procs.updateUI();
-			this.procs.repaint();
-		}
 	}
 
 	public void stateChanged(ChangeEvent e)

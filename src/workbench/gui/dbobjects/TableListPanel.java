@@ -118,6 +118,7 @@ public class TableListPanel
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
 	protected JPanel listPanel;
+//	protected TableUsagePanel tableUsage;
 	protected CriteriaPanel findPanel;
 	protected WbTable tableList;
 	protected TableDefinitionPanel tableDefinition;
@@ -164,7 +165,7 @@ public class TableListPanel
 	protected boolean shouldRetrieveImportedKeys;
 	protected boolean shouldRetrieveExportedTree;
 	protected boolean shouldRetrieveImportedTree;
-	protected boolean shouldRetrieveTableDataCount;
+	protected boolean shouldRetrieveTableData;
 
 	protected boolean busy;
 	protected boolean ignoreStateChanged = false;
@@ -210,6 +211,7 @@ public class TableListPanel
 		}
 		this.displayTab = new WbTabbedPane(location);
 
+//		this.tableUsage = new TableUsagePanel();
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.DEFINITION_PROP, this);
@@ -506,6 +508,7 @@ public class TableListPanel
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedPanel);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedPanel);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
+//					displayTab.add("Used in", tableUsage);
 				}
 				finally
 				{
@@ -542,6 +545,8 @@ public class TableListPanel
 					exportedKeys.reset();
 					displayTab.remove(triggers);
 					triggers.reset();
+//					displayTab.remove(tableUsage);
+//					tableUsage.reset();
 					if (index < displayTab.getTabCount())
 					{
 						displayTab.setSelectedIndex(index);
@@ -568,8 +573,15 @@ public class TableListPanel
 
 	protected void removeDataPanel()
 	{
-		this.displayTab.remove(this.tableData);
-		this.tableData.reset();
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				displayTab.remove(tableData);
+				tableData.reset();
+			}
+		});
+
 	}
 
 	private boolean sourceExpanded = false;
@@ -641,38 +653,44 @@ public class TableListPanel
 
 	protected void resetCurrentPanel()
 	{
-		int index = this.displayTab.getSelectedIndex();
-		switch (index)
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			case 0:
-				this.tableDefinition.reset();
-				break;
-			case 1:
-				this.tableSource.setText("");
-				break;
-			case 2:
-				this.tableData.reset();
-				break;
-			case 3:
-				this.indexes.reset();
-				break;
-			case 4:
-				this.importedKeys.reset();
-				this.importedTableTree.reset();
-				break;
-			case 5:
-				this.exportedKeys.reset();
-				this.exportedTableTree.reset();
-				break;
-			case 6:
-				this.triggers.reset();
-		}
+			public void run()
+			{
+				int index = displayTab.getSelectedIndex();
+				switch (index)
+				{
+					case 0:
+						tableDefinition.reset();
+						break;
+					case 1:
+						tableSource.setText("");
+						break;
+					case 2:
+						tableData.reset();
+						break;
+					case 3:
+						indexes.reset();
+						break;
+					case 4:
+						importedKeys.reset();
+						importedTableTree.reset();
+						break;
+					case 5:
+						exportedKeys.reset();
+						exportedTableTree.reset();
+						break;
+					case 6:
+						triggers.reset();
+				}
+			}
+		});
 	}
 
 	protected void invalidateData()
 	{
 		this.shouldRetrieveTable = true;
-		this.shouldRetrieveTableDataCount = true;
+		this.shouldRetrieveTableData = true;
 		this.shouldRetrieveTableSource = true;
 		this.shouldRetrieveTriggers = true;
 		this.shouldRetrieveIndexes = true;
@@ -685,15 +703,17 @@ public class TableListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
+		
+		this.tableTypes.removeActionListener(this);
+		this.displayTab.removeChangeListener(this);
+
 		this.importedTableTree.setConnection(aConnection);
 		this.exportedTableTree.setConnection(aConnection);
 		this.tableData.setConnection(aConnection);
 		this.tableDefinition.setConnection(aConnection);
-
-		this.tableTypes.removeActionListener(this);
-
 		this.triggers.setConnection(aConnection);
 		this.tableSource.setDatabaseConnection(aConnection);
+		
 		this.reset();
 		try
 		{
@@ -759,7 +779,8 @@ public class TableListPanel
 
 		if (this.isReallyVisible() || this.isClientVisible())
 		{
-			this.startRetrieve(true);
+			retrieve();
+			setFocusToTableList();
 		}
 		else
 		{
@@ -771,7 +792,6 @@ public class TableListPanel
 	{
 		String info = tableList.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
 		this.tableInfoLabel.setText(info);
-
 	}
 
 	protected void setFocusToTableList()
@@ -1176,6 +1196,11 @@ public class TableListPanel
 		return meta.objectTypeCanContainData(type);
 	}
 
+//	protected void retrieveTableUsage()
+//	{
+//		tableUsage.retrieve(selectedTable);
+//	}
+	
 	protected void retrieveTableSource()
 	{
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
@@ -1480,10 +1505,10 @@ public class TableListPanel
 						if (this.shouldRetrieveTableSource) this.retrieveTableSource();
 						break;
 					case 2:
-						if (this.shouldRetrieveTableDataCount)
+						if (this.shouldRetrieveTableData)
 						{
 							this.tableData.showData(!this.shiftDown);
-							this.shouldRetrieveTableDataCount = false;
+							this.shouldRetrieveTableData = false;
 						}
 						break;
 					case 3:
@@ -1499,6 +1524,8 @@ public class TableListPanel
 						break;
 					case 6:
 						if (this.shouldRetrieveTriggers) this.retrieveTriggers();
+//					case 7:
+//						retrieveTableUsage();
 				}
 			}
 		}
@@ -1882,6 +1909,49 @@ public class TableListPanel
 		return result;
 	}
 
+	private void checkSelectedTypes(TableIdentifier toSelect)
+	{
+		String currentType = (String)this.tableTypes.getSelectedItem();
+		String newType = toSelect.getType();
+		if (StringUtil.isBlank(newType)) return;
+
+		if (currentType.equalsIgnoreCase(newType)) return;
+
+		for (int i=0; i < tableTypes.getItemCount(); i++)
+		{
+			String item = (String)tableTypes.getItemAt(i);
+			if (item.indexOf(newType) > -1)
+			{
+				tableTypes.setSelectedIndex(0);
+				return;
+			}
+		}
+		return;
+	}
+
+	public boolean selectTable(TableIdentifier table)
+	{
+		if (this.shouldRetrieve)
+		{
+			retrieve();
+		}
+		checkSelectedTypes(table);
+		
+		for (int row = 0; row < this.tableList.getRowCount(); row ++)
+		{
+			TableIdentifier tbl = createTableIdentifier(row);
+			if (tbl.equals(table))
+			{
+				ListSelectionModel model = tableList.getSelectionModel();
+				model.setValueIsAdjusting(true);
+				model.clearSelection();
+				model.setSelectionInterval(row, row);
+				return  true;
+			}
+		}
+		return false;
+	}
+	
 	public void exportData()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;

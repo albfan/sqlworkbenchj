@@ -306,8 +306,8 @@ public class TableDefinitionPanel
 	
 	public void reset()
 	{
-		this.currentTable = null;
-		this.tableDefinition.reset();
+		currentTable = null;
+		tableDefinition.reset();
 		reloadAction.setEnabled(false);
 	}
 
