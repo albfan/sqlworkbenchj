@@ -95,6 +95,7 @@ import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.components.WbTabbedPane;
+import workbench.gui.settings.PlacementChooser;
 import workbench.gui.sql.PanelContentSender;
 import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.DbExecutionListener;
@@ -195,20 +196,7 @@ public class TableListPanel
 		super();
 		this.parentWindow = aParent;
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		String tabLocation = Settings.getInstance().getProperty("workbench.gui.dbobjects.tabletabs", "bottom");
-		int location = JTabbedPane.BOTTOM;
-		if (tabLocation.equalsIgnoreCase("top"))
-		{
-			location = JTabbedPane.TOP;
-		}
-		else if (tabLocation.equalsIgnoreCase("left"))
-		{
-			location = JTabbedPane.LEFT;
-		}
-		else if (tabLocation.equalsIgnoreCase("right"))
-		{
-			location = JTabbedPane.RIGHT;
-		}
+		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
 		this.displayTab = new WbTabbedPane(location);
 
 //		this.tableUsage = new TableUsagePanel();
@@ -1210,17 +1198,12 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			CharSequence sql = "";
+			CharSequence sql = null;
 
 			DbMetadata meta = this.dbConnection.getMetadata();
 			DbSettings dbs = this.dbConnection.getDbSettings();
-			if (this.shouldRetrieveTable || tableDefinition.getRowCount() == 0)
-			{
-				this.retrieveTableDefinition();
-				this.shouldRetrieveIndexes = true;
-				this.shouldRetrieveImportedTree = true;
-			}
-			String type = this.selectedTable.getType();
+
+			String type = selectedTable.getType();
 
 			if (dbs.isViewType(type))
 			{
@@ -1229,38 +1212,10 @@ public class TableListPanel
 			}
 			else if (dbs.isSynonymType(type))
 			{
-				sql = meta.getSynonymSource(this.selectedTable);
+				sql = meta.getSynonymSource(this.selectedTable, true);
 				if (sql.length() == 0)
 				{
 					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + meta.getProductName();
-				}
-				else
-				{
-					try
-					{
-						TableIdentifier tbl = meta.getSynonymTable(this.selectedTable);
-						
-						String tableSql = builder.getTableSource(tbl, false, true);
-						if (!StringUtil.isEmptyString(tableSql))
-						{
-							StringBuilder sb = new StringBuilder(sql.length() + tableSql.length() + 50);
-							String nl = Settings.getInstance().getInternalEditorLineEnding();
-							sb.append(sql);
-							sb.append(nl);
-							sb.append(nl);
-							sb.append("-------------- ");
-							sb.append(tbl.getTableExpression(dbConnection));
-							sb.append(" --------------");
-							sb.append(nl);
-							sb.append(nl);
-							sb.append(tableSql);
-							sql = sb;
-						}
-					}
-					catch (Exception e)
-					{
-						LogMgr.logError("TableListPanel.retrieveTableSource()", "Error when retrieving source for synonym table", e);
-					}
 				}
 			}
 			else if ("sequence".equalsIgnoreCase(type))
@@ -1281,15 +1236,10 @@ public class TableListPanel
 			}
 			else if (isTableType(type))
 			{
-				// the table information has to be retrieved before
-				// the table source, because otherwise the DataStores
-				// passed to getTableSource() would be empty
-				if (this.shouldRetrieveIndexes) this.retrieveIndexes();
-				if (this.shouldRetrieveImportedTree) this.retrieveImportedTables();
-				sql = builder.getTableSource(selectedTable, tableDefinition.getDataStore(), indexes.getDataStore(), importedKeys.getDataStore(), true, null);
+				sql = builder.getTableSource(selectedTable, true, true);
 			}
 			final String s = (sql == null ? "" : sql.toString());
-			EventQueue.invokeLater(new Runnable()
+			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
 				{

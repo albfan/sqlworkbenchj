@@ -14,6 +14,7 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.log.LogMgr;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -24,12 +25,24 @@ public class TableSelectBuilder
 	public static final String COLUMN_PLACEHOLDER = "${column}";
 	
 	private WbConnection dbConnection;
+	private boolean excludeLobColumns = false;
+	private boolean useColumnAlias = false;
 
 	public TableSelectBuilder(WbConnection source)
 	{
 		this.dbConnection = source;
 	}
 
+	public void setExcludeLobColumns(boolean flag)
+	{
+		this.excludeLobColumns = flag;
+	}
+
+	public void setUseColumnAlias(boolean flag)
+	{
+		this.useColumnAlias = flag;
+	}
+	
 	public String getSelectForTable(TableIdentifier table)
 		throws SQLException
 	{
@@ -57,19 +70,34 @@ public class TableSelectBuilder
 		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		sql.append("SELECT ");
+		int colsInList = 0;
 		for (int i=0; i < colCount; i++)
 		{
-			String expr = getColumnExpression(columns.get(i));
-			if (i > 0 && i < colCount) sql.append(",\n");
-			if (i > 0) sql.append("       ");
-			sql.append(expr);
+			String expr = null;
+			int type  = columns.get(i).getDataType();
+			if (excludeLobColumns && !SqlUtil.isClobType(type) && !SqlUtil.isBlobType(type))
+			{
+				expr = getColumnExpression(columns.get(i));
+			}
+			else
+			{
+				expr = getColumnExpression(columns.get(i));
+			}
+
+			if (expr != null)
+			{
+				if (colsInList > 0) sql.append(",\n");
+				if (colsInList > 0) sql.append("       ");
+				sql.append(expr);
+				colsInList ++;
+			}
 		}
 		sql.append("\nFROM ");
 		sql.append(table.getTableExpression(this.dbConnection));
 		return sql.toString();
 	}
 
-	private String getColumnExpression(ColumnIdentifier col)
+	public String getColumnExpression(ColumnIdentifier col)
 	{
 		String colname = dbConnection.getMetadata().quoteObjectname(col.getColumnName());
 		DbSettings db = dbConnection.getDbSettings();
@@ -82,8 +110,7 @@ public class TableSelectBuilder
 			return colname;
 		}
 		
-		// If an expression without the placeholder was defined
-		// ignore the definition
+		// If an expression without the placeholder was defined ignore the definition
 		if (expr.indexOf(COLUMN_PLACEHOLDER) == -1)
 		{
 			LogMgr.logError("TableSelectBuilder.getColumnExpression()", "Expression without " + COLUMN_PLACEHOLDER + " specified for datatype '" + type + "': " + expr, null);
@@ -91,7 +118,10 @@ public class TableSelectBuilder
 		}
 
 		expr = expr.replace(COLUMN_PLACEHOLDER, colname);
-		
+		if (useColumnAlias)
+		{
+			expr = expr + " AS " + colname;
+		}
 		return expr;
 	}
 

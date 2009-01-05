@@ -17,6 +17,7 @@ import java.util.List;
 
 /**
  * Read the definition of synonyms from the database.
+ * 
  * @author support@sql-workbench.net
  */
 public interface SynonymReader

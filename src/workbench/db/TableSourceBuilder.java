@@ -228,9 +228,17 @@ public class TableSourceBuilder
 			result.append(lineEnding);
 		}
 
+		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(aIndexDef);
+
 		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
-			result.append(lineEnding + "   ,PRIMARY KEY (");
+			result.append(lineEnding + "   ,");
+			if (StringUtil.isNonBlank(pkname))
+			{
+				result.append("CONSTRAINT " + pkname);
+			}
+			result.append(" PRIMARY KEY (");
+
 			result.append(StringUtil.listToString(pkCols, ','));
 			result.append(")" + lineEnding);
 
@@ -249,8 +257,7 @@ public class TableSourceBuilder
 
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
-			String name = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(aIndexDef);
-			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, name);
+			CharSequence pkSource = getPkSource( (tableNameToUse == null ? table : new TableIdentifier(tableNameToUse)), pkCols, pkname);
 			result.append(pkSource);
 		}
 

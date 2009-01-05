@@ -160,48 +160,61 @@ public class TableSearchPanel
 		});
 	}
 
-	public synchronized void tableSearched(TableIdentifier table, DataStore result)
+	public synchronized void tableSearched(final TableIdentifier table, final DataStore result)
 	{
-		try
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			if (result.getRowCount() == 0) return;
+			public void run()
+			{
+				try
+				{
+					if (result.getRowCount() == 0)
+					{
+						return;
+					}
 
-			WbTable display = new WbTable(true, true, false);
+					WbTable display = new WbTable(true, true, false);
 
-			DataStoreTableModel model = new DataStoreTableModel(result);
-			display.setModel(model, true);
-			display.applyHighlightExpression(searchPattern);
-			display.checkCopyActions();
+					DataStoreTableModel model = new DataStoreTableModel(result);
+					display.setModel(model, true);
+					display.applyHighlightExpression(searchPattern);
+					display.checkCopyActions();
 
-			JScrollPane pane = new ParentWidthScrollPane(display);
+					JScrollPane pane = new ParentWidthScrollPane(display);
 
-			int rows = display.getRowCount();
+					int rows = display.getRowCount();
 
-			String label = table.getTableExpression()  + " (" + rows + " " + (rows == 1 ? ResourceMgr.getString("TxtFoundRow") : ResourceMgr.getString("TxtFoundRows")) + ")";
-			TitledBorder b = new TitledBorder(" " + label);
-			Font f = b.getTitleFont().deriveFont(Font.BOLD);
-			b.setTitleFont(f);
-			pane.setBorder(b);
+					String label = table.getTableExpression() + " (" + rows + " " + (rows == 1 ? ResourceMgr.getString("TxtFoundRow") : ResourceMgr.getString("TxtFoundRows")) + ")";
+					TitledBorder b = new TitledBorder(" " + label);
+					Font f = b.getTitleFont().deriveFont(Font.BOLD);
+					b.setTitleFont(f);
+					pane.setBorder(b);
 
-			GridBagConstraints constraints = new GridBagConstraints();
-			constraints.gridx = 0;
-			constraints.fill = GridBagConstraints.HORIZONTAL;
-			constraints.weightx = 1.0;
-			constraints.anchor = GridBagConstraints.WEST;
-			this.resultPanel.add(pane, constraints);
+					GridBagConstraints constraints = new GridBagConstraints();
+					constraints.gridx = 0;
+					constraints.fill = GridBagConstraints.HORIZONTAL;
+					constraints.weightx = 1.0;
+					constraints.anchor = GridBagConstraints.WEST;
+					resultPanel.add(pane, constraints);
 
-			int height = display.getRowHeight();
-			int width = pane.getWidth();
+					int height = display.getRowHeight();
+					int width = pane.getWidth();
 
-			Dimension size = pane.getPreferredSize();
-			if (rows > 25) rows = 25;
-			size.setSize(width - 20, (rows + 4) * height );
-			pane.setPreferredSize(size);
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("TableSearchPanel.tableSearched()", "Error adding result.", e);
-		}
+					Dimension size = pane.getPreferredSize();
+					if (rows > 25)
+					{
+						rows = 25;
+					}
+					size.setSize(width - 20, (rows + 4) * height);
+					pane.setPreferredSize(size);
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("TableSearchPanel.tableSearched()", "Error adding result.", e);
+				}
+
+			}
+		});
 	}
 
 	public synchronized void error(String msg)

@@ -61,6 +61,7 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.renderer.RendererFactory;
+import workbench.gui.settings.PlacementChooser;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
 import workbench.util.LowMemoryException;
@@ -95,7 +96,8 @@ public class ProcedureListPanel
 	{
 		super();
 		this.displayTab = new WbTabbedPane();
-		this.displayTab.setTabPlacement(JTabbedPane.BOTTOM);
+		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
+		this.displayTab.setTabPlacement(location);
 
 		this.procColumns = new DbObjectTable();
 

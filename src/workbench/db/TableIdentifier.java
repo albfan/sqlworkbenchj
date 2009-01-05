@@ -557,7 +557,7 @@ public class TableIdentifier
 		}
 		else if ("SYNONYM".equalsIgnoreCase(type))
 		{
-			source = meta.getSynonymSource(this);
+			source = meta.getSynonymSource(this, false);
 		}
 		else if ("VIEW".equalsIgnoreCase(type))
 		{

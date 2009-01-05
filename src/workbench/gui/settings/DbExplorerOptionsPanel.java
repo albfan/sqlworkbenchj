@@ -43,6 +43,7 @@ public class DbExplorerOptionsPanel
 		set.setRememberSortInDbExplorer(rememberSort.isSelected());
 		set.setShowFocusInDbExplorer(showFocus.isSelected());
 		set.setDefaultExplorerObjectType(this.defTableType.getText());
+		
 	}
 
 	public void restoreSettings()
@@ -50,7 +51,9 @@ public class DbExplorerOptionsPanel
 		Settings set = Settings.getInstance();
 		autogeneratePK.setSelected(set.getAutoGeneratePKName());
 		defTableType.setText(set.getDefaultExplorerObjectType());
+		((PlacementChooser)tabPlacement).setProperty("workbench.gui.dbobjects.tabletabs");
 	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -71,6 +74,8 @@ public class DbExplorerOptionsPanel
     defTableTypeLabel = new WbCheckBoxLabel();
     defTableType = new javax.swing.JTextField();
     jPanel1 = new javax.swing.JPanel();
+    jLabel1 = new javax.swing.JLabel();
+    tabPlacement = new PlacementChooser();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -210,9 +215,27 @@ public class DbExplorerOptionsPanel
     add(defTableType, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
+
+    jLabel1.setText(ResourceMgr.getString("LblObjTabPos")); // NOI18N
+    jLabel1.setToolTipText(ResourceMgr.getString("d_LblObjTabPos")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 0);
+    add(jLabel1, gridBagConstraints);
+
+    tabPlacement.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Top", "Bottom", "Left", "Right" }));
+    tabPlacement.setToolTipText(ResourceMgr.getString("d_LblObjTabPos")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 9, 0, 0);
+    add(tabPlacement, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -221,6 +244,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox autoselectDataPanel;
   private javax.swing.JTextField defTableType;
   private javax.swing.JLabel defTableTypeLabel;
+  private javax.swing.JLabel jLabel1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JCheckBox rememberObject;
   private javax.swing.JCheckBox rememberSort;
@@ -228,6 +252,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox showDbExplorer;
   private javax.swing.JCheckBox showFocus;
   private javax.swing.JCheckBox showTriggerPanel;
+  private javax.swing.JComboBox tabPlacement;
   // End of variables declaration//GEN-END:variables
 
 }

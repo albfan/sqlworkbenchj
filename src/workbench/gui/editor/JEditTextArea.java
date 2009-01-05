@@ -330,11 +330,17 @@ public class JEditTextArea
 		this.getInputHandler().removeKeyBinding(key);
 	}
 
-//	@SuppressWarnings("deprecation")
-//	public final boolean isManagingFocus()
-//	{
-//		return true;
-//	}
+	/**
+	 * isManagingFocus() returns true to make sure the tab key is handled
+	 * by the editor, and does not move the focus to the next component
+	 *
+	 * @return
+	 */
+	@SuppressWarnings("deprecation")
+	public final boolean isManagingFocus()
+	{
+		return true;
+	}
 
 	/**
 	 * Returns the object responsible for painting this text area.

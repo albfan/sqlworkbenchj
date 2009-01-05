@@ -1705,7 +1705,6 @@ public class DbMetadata
 		ArrayList<String> keys = new ArrayList<String>();
 		String pkname = null;
 		TableIdentifier resultTable = table.createCopy();
-		resultTable.setPrimaryKeyName(pkname);
 
 		if (this.dbSettings.supportsGetPrimaryKeys())
 		{
@@ -1728,6 +1727,7 @@ public class DbMetadata
 				SqlUtil.closeResult(keysRs);
 			}
 		}
+		resultTable.setPrimaryKeyName(pkname);
 		
 		boolean hasEnums = false;
 
@@ -2420,7 +2420,7 @@ public class DbMetadata
 	 *	Return the SQL statement to recreate the given synonym.
 	 *	@return the SQL to create the synonym.
 	 */
-	public String getSynonymSource(TableIdentifier synonym)
+	public String getSynonymSource(TableIdentifier synonym, boolean includeTable)
 	{
 		if (this.synonymReader == null) return StringUtil.EMPTY_STRING;
 		String result = null;
@@ -2433,6 +2433,36 @@ public class DbMetadata
 		catch (Exception e)
 		{
 			result = StringUtil.EMPTY_STRING;
+		}
+
+		try
+		{
+			TableIdentifier syn = getSynonymTable(tbl.getSchema(), tbl.getTableName());
+			if (syn != null)
+			{
+				TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
+
+				String tableSql = builder.getTableSource(syn, false, true);
+				if (StringUtil.isNonBlank(tableSql))
+				{
+					StringBuilder sb = new StringBuilder(result.length() + tableSql.length() + 50);
+					String nl = Settings.getInstance().getInternalEditorLineEnding();
+					sb.append(result);
+					sb.append(nl);
+					sb.append(nl);
+					sb.append("-------------- ");
+					sb.append(syn.getTableExpression(dbConnection));
+					sb.append(" --------------");
+					sb.append(nl);
+					sb.append(nl);
+					sb.append(tableSql);
+					result = sb.toString();
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.getSynonymSource()", "Error when retrieving source for synonym table", e);
 		}
 
 		return result;

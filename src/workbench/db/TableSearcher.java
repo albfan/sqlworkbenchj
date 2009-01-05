@@ -16,6 +16,8 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import workbench.WbManager;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
@@ -197,43 +199,44 @@ public class TableSearcher
 		DbMetadata meta = this.connection.getMetadata();
 
 		TableDefinition def = meta.getTableDefinition(tbl);
-		int cols = def.getColumnCount();
-		if (cols == 0) return StringUtil.EMPTY_STRING;
+		int colCount = def.getColumnCount();
+		if (colCount == 0) return StringUtil.EMPTY_STRING;
 
-		StringBuilder sql = new StringBuilder(cols * 120);
-		sql.append("SELECT ");
-
-		if (this.excludeLobColumns)
-		{
-			int added = 0;
-			for (int i=0; i < cols; i++)
-			{
-				String column = def.getColumns().get(i).getColumnName();
-				int type  = def.getColumns().get(i).getDataType();
-				if (!SqlUtil.isClobType(type) && !SqlUtil.isBlobType(type))
-				{
-					if (added > 0) sql.append(", ");
-					sql.append(this.connection.getMetadata().quoteObjectname(column));
-					added ++;
-				}
-			}
-		}
-		else
-		{
-			sql.append("*");
-		}
-		sql.append(" FROM ");
-		sql.append(tbl.getTableExpression(this.connection));
+		StringBuilder sql = new StringBuilder(colCount * 120);
+		TableSelectBuilder builder = new TableSelectBuilder(this.connection);
+		builder.setExcludeLobColumns(this.excludeLobColumns);
+		sql.append(builder.getSelectForColumns(tbl, def.getColumns()));
 		sql.append("\n WHERE ");
 		boolean first = true;
 		int colcount = 0;
-		for (int i=0; i < cols; i++)
+
+		Pattern aliasPattern = Pattern.compile("\\s+AS\\s+", Pattern.CASE_INSENSITIVE);
+
+		for (int i=0; i < colCount; i++)
 		{
-			String column = def.getColumns().get(i).getColumnName();
+			String colName = def.getColumns().get(i).getColumnName();
 			int sqlType = def.getColumns().get(i).getDataType();
-			if (sqlType == Types.VARCHAR || sqlType == Types.CHAR)
+			String expr = builder.getColumnExpression(def.getColumns().get(i));
+			boolean isExpression = !colName.equalsIgnoreCase(expr);
+			
+			if (isExpression || sqlType == Types.VARCHAR || sqlType == Types.CHAR)
 			{
-				column = this.connection.getMetadata().quoteObjectname(column);
+				if (!isExpression)
+				{
+					expr = this.connection.getMetadata().quoteObjectname(colName);
+				}
+				else
+				{
+					// Check if the column expression was defined with a column alias
+					// in that case we have to remove the alias otherwise it cannot be
+					// used in a WHERE condition
+					Matcher m = aliasPattern.matcher(expr);
+					if (m.find())
+					{
+						int pos = m.start();
+						expr = expr.substring(0, pos);
+					}
+				}
 
 				colcount ++;
 				if (!first)
@@ -243,16 +246,16 @@ public class TableSearcher
 
 				if (this.columnFunction != null)
 				{
-					sql.append(StringUtil.replace(this.columnFunction, "$col$", column));
+					sql.append(StringUtil.replace(this.columnFunction, "$col$", expr));
 				}
 				else
 				{
-					sql.append(column);
+					sql.append(expr);
 				}
 				sql.append(" LIKE '");
 				sql.append(this.criteria);
 				sql.append('\'');
-				if (i < cols - 1) sql.append('\n');
+				if (i < colCount - 1) sql.append('\n');
 
 				first = false;
 			}
