@@ -39,7 +39,7 @@
 		<para>
 			For some settings, where the ID is part of the property's key, a "clean" version of
 			the Database Identifer, called the DBID, is used. This DBID is displayed in the connection 
-			info dialog (right click on the connection URL in the main window, then choose "Connection Info".
+			info dialog (right click on the connection URL in the main window, then choose "Connection Info").
 		</para>
 		
 		<para>

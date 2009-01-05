@@ -1,20 +1,26 @@
 <section id="dbexplorer" xreflabel="Database Object Explorer">
 	<title>Database Object Explorer</title>
 
-	<para>The Database Object Explorer displays the available database objects
-	such as Tables, Views, Triggers and Stored Procedures.</para>
+	<para>
+		The Database Object Explorer displays the available database objects
+		such as Tables, Views, Triggers and Stored Procedures.
+	</para>
   
-	<para>There are three ways to start the DbExplorer
+	<para>
+		There are three ways to start the DbExplorer
 		<simplelist columns="1">
 			<member>Using <menuchoice><guimenu>Tools</guimenu><guimenuitem>Database Explorer</guimenuitem></menuchoice>. </member>
 			<member>Passing the paramter <literal>-dbexplorer</literal> to the main program (sqlworkbench.sh or SQLWorkbench.exe)</member>
-			<member>When using Windows with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>dbexplorer.sh</literal></member>
+			<member>When using Windows, with the <literal>DbExplorer.exe</literal> executable or in Linux/Unix using shell script <literal>dbexplorer.sh</literal></member>
 		</simplelist>
 	</para>
 
 	<para>
-		At the top of the window, the current schema (for MS SQL Server this
-		would be the current database, for Oracle this is the user) can be selected.
+		At the top of the window, the current schema and/or catalog can be selected. Whether both dropdowns
+		are available depends on the current DBMS. For Microsoft SQL Server, both the schema and the database
+		can be changed. The labels next to the dropdown are retrieved from the JDBC driver and should reflect
+		the terms used for the current DBMS (Schema for Postgres and Oracle, Owner and Database for SQL Server,
+		Database for MySQL).
 	</para>
   
 	<para>
@@ -38,7 +44,7 @@
 	</para>
 	
 	<para>
-		For Oracle (and other DBMS that support them), synonyms are displayed as well. 
+		Synonyms are displayed if the current DBMS supports them.
 		You can filter out unwanted synonyms by <link linkend="db-oracle-filter-syns">specifying a 
 		regular expression</link> in your <literal>workbench.settings</literal> file. 
 		This filter will also be applied when displaying the list of available tables when opening
@@ -52,15 +58,17 @@
 		"Table types" can vary from DBMS to DBMS.
 	</para>
 
-	<para>The menu item <guimenuitem>Database Explorer</guimenuitem> will either display the explorer
-  as a new window, or a new panel, depending on the <link linkend="options-explorer-as-tab">system options</link>.
-	</para>
 	<para>
-  You can always open additional DbExplorer tabs or windows using
-		<simplelist columns="1">
-			<member><menuchoice><guimenu>Tools</guimenu><guimenuitem>New DbExplorer panel</guimenuitem></menuchoice>. </member>
-			<member><menuchoice><guimenu>Tools</guimenu><guimenuitem>New DbExplorer window</guimenuitem></menuchoice>. </member>
-		</simplelist>
+		The menu item <guimenuitem>Database Explorer</guimenuitem> will either display the explorer
+	  as a new window or a new panel, depending on the <link linkend="options-explorer-as-tab">system options</link>.
+		If a DbExplorer is already open (either a window or a tab), the existing one is made visible (or active), when
+		using this menu item.
+	</para>
+	
+	<para>
+		You can open any number of additional DbExplorer tabs or windows using
+		<menuchoice><guimenu>Tools</guimenu><guimenuitem>New DbExplorer panel</guimenuitem></menuchoice> or
+		<menuchoice><guimenu>Tools</guimenu><guimenuitem>New DbExplorer window</guimenuitem></menuchoice>
 	</para>
 
 	<section id="dbexplorer-objectlist">
@@ -81,27 +89,38 @@
 					See the description of the <link linkend="command-export">WbExport command</link>
 					for details.
 				</para>
+				<para>
+					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for datatypes</link>
+					is <emphasis role="bold">not</emphasis> applied to the generated <literal>SELECT</literal> statement.
+				</para>
 			</blockquote>
 		</simplesect>
 
 		<simplesect id="dbexplorer-select-data">
 			<title>Put SELECT into</title>
 
-			<blockquote><para>
-				This will put a SELECT statement into the SQL editor to display
-				all data for the selected table. You can choose into which editor tab
-				the statement will be written. The currently selected editor tab is
-				displayed in bold (when displaying the DbExplorer in a separate window. 
-				You can also put the generated SQL statement into a new editor tab, by 
-				selecting the item <guimenuitem>New tab</guimenuitem>
-			</para></blockquote>
+			<blockquote>
+				<para>
+					This will put a SELECT statement into the SQL editor to display
+					all data for the selected table. You can choose into which editor tab
+					the statement will be written. The currently selected editor tab is
+					displayed in bold (when displaying the DbExplorer in a separate window).
+					You can also put the generated SQL statement into a new editor tab, by
+					selecting the item <guimenuitem>New tab</guimenuitem>
+				</para>
+				<para>
+					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for datatypes</link>
+					<emphasis role="bold">will be</emphasis> applied to the generated <literal>SELECT</literal> statement.
+				</para>
+			</blockquote>
 		</simplesect>
 
 		<simplesect id="dbexplorer-create-insert">
 			<title>Create empty INSERT</title>
         
 			<blockquote>
-				<para>This creates an empty <literal>INSERT</literal> statement for the 
+				<para>
+					This creates an empty <literal>INSERT</literal> statement for the
 					currently selected table(s). This is intended for programmers that want
 					to use the statement inside their code.
 				</para>
@@ -112,10 +131,18 @@
 			<title>Create default SELECT</title>
         
 			<blockquote>
-				<para>This creates a <literal>SELECT</literal> for the 
-					selected table(s) that includes all columns for the table. If you want to
-					generate a SELECT statement to actually retreive data from within the
-					editor, please use the <literal>Put SELECT into</literal> option.
+				<para>
+					This creates a <literal>SELECT</literal> for the
+					selected table(s) that includes all columns for the table. This feature is intended
+					for programmers who want to put a SELECT statement into their code. 
+				</para>
+				<para>
+					If you want to generate a SELECT statement to actually retrieve data from within the
+					editor, please use the <link linkend="dbexplorer-select-data">Put SELECT into</link> option.
+				</para>
+				<para>
+					When using this function, the <link linkend="customize-dbexplorer-retrieval">customization for datatypes</link>
+					is <emphasis role="bold">not</emphasis> applied to the generated <literal>SELECT</literal> statement.
 				</para>
 			</blockquote>
 		</simplesect>
@@ -129,16 +156,13 @@
 					to create a script for. Then right click and select "Create DDL Script".
 					This will generate one script for all selected items in the list.
 				</para>
-				<para>When this command is selected, a new window will be shown. The window
-				contains a statusbar which indicates the object that is currently processed. The
-				complete script will be shown as soon as all objects have been processed.
-				The objects will be processed in this order:</para>
-				<simplelist columns="1">
-					<member>SEQUENCEs</member>
-					<member>TABLEs</member>
-					<member>VIEWs</member>
-					<member>SYNONYMS</member>
-				</simplelist>
+				<para>
+					When this command is selected, a new window will be shown. The window
+					contains a statusbar which indicates the object that is currently processed. The
+					complete script will be shown as soon as all objects have been processed.
+					The objects will be processed in the order: <literal>SEQUENCES</literal>, <literal>TABLES</literal>,
+					<literal>VIEWS</literal>, <literal>SYNONYMS</literal>.
+				</para>
 			</blockquote>
 		</simplesect>
 
@@ -146,7 +170,8 @@
 			<title>Create schema report</title>
 
 			<blockquote>
-				<para>This will create an XML report of the selected tables. You will be
+				<para>
+					This will create an XML report of the selected tables. You will be
 					prompted to specify the location of the generated XML file. This report can
 					also be generated using the <link linkend="command-schema-report">WbReport</link>
 					command.
@@ -158,13 +183,24 @@
 			<title>Drop</title>
 
 			<blockquote>
-				<para>Drops the selected objects. If at least one object is a table, and
+				<para>
+					Drops the selected objects. If at least one object is a table, and
 					the currently used DBMS supports cascaded dropping of constraints, you
 					can enable cascaded delete of constraints. If this option is enabled
 					&wb-productname; would generate e.g. for Oracle a <literal>DROP TABLE
 					mytable CASCADE CONSTRAINTS</literal>. This is necessary if you want to
 					drop several tables at the same time that have foreign key constraints
 					defined.
+				</para>
+				<para>
+					If the current DBMS does not support a cascading drop, you can order the
+					tables so that foreign keys are detected and the tables are dropped in the
+					right order by clicking on the <guibutton>Check foreign keys</guibutton> button.
+				</para>
+				<para>
+					If the checkbox "Add missing tables" is selected, any table that should be dropped
+					before any of the selected tables (because of foreign key constraints) will be added
+					to the list of tables to be dropped.
 				</para>
 			</blockquote>
 		</simplesect>
@@ -186,6 +222,11 @@
 					in the table list. If the tables have foreign key constraints, 
 					you can re-order them to be processed in the correct order by 
 					clicking on the <guibutton>Check foreign keys</guibutton> button.
+				</para>
+				<para>
+					If the checkbox "Add missing tables" is selected, any table that should be deleted
+					before any of the selected tables (because of foreign key constraints) will be added
+					to the list of tables.
 				</para>
 			</blockquote>
 		</simplesect>
@@ -271,12 +312,100 @@
 		edit a value in a field, simply double click that field, start typing
 		while the field has focus (yellow border) or hit F2 while the field
 		has focus.</para>
+	</section>
 
-		<!--
-		<para>The References/Referenced by tabs display the complete
-		reference tree (any table referencing the tables referencing the
-		currently selected one, and so on).</para>
-		-->
+	<section id="customize-dbexplorer-retrieval">
+		<title>Customize data retrieval</title>
+		<para>
+			When displaying the data for a table, &wb-productname; generates a <literal>SELECT</literal>
+			statement that will retrieve all rows and columns from the database. In some cases
+			the data for certain data types cannot be displayed correctly as the JDBC drivers might
+			not implement a proper "<literal>toString()</literal>" method that converts the data
+			into a readable format.
+		</para>
+		<para>
+			You can customize the SELECT statement that is generated by &wb-productname; when retrieving
+			table data in the DbExplorer in the configuration file <literal>workbench.settings</literal>.
+			For each DBMS you can define an expression for specific data types that are used when
+			building the <literal>SELECT</literal> statement.
+		</para>
+		<para>
+			To configure this, you need to add one line per data type and DBMS to the file
+			<literal>workbench.settings</literal>:
+			<programlisting>workbench.db.[dbid].selectexpression.[type]=expression(${column})</programlisting>
+			When building the <literal>SELECT</literal> statement, the placeholder <literal>${column}</literal>
+			will be replaced with the actual column name. <literal>[dbid]</literal> is the
+			<link linkend="dbid">DBID</link> of the DBMS for which the replacement should be done.
+		</para>
+		<para>
+			The whole key (the part to the left of the equal sign) must be in lowercase.
+		</para>
+		<para>
+			<literal>[type]</literal> is the datatype of the column without any brackets or parameters:
+			<literal>varchar</literal> instead of <literal>varchar(10)</literal>, or <literal>number</literal>
+			instead of <literal>number(10,2)</literal>
+		</para>
+		<para>
+			To convert e.g. the <literal>geometry</literal> datatype of postgres to a readable format,
+			one would use the following expression <literal>astext(transform(geo_column,4326))</literal>.
+		</para>
+		<para>
+			To tell the DbExplorer to replace the retrieval of columns of type <literal>geometry</literal>
+			in Postgres with the above expression, the following line in <literal>workbench.settings</literal>
+			is necessary:
+			<programlisting>workbench.db.postgres.selectexpression.geometry=astext(transform(${column},4326)) </programlisting>
+			For e.g. the table <literal>geo_table (id integer, geo_col geometry)</literal> &wb-productname;
+			will generate the following <literal>SELECT</literal> statement:
+			<programlisting>SELECT id, astext(transform(geo_col,4326))
+FROM geo_table
+</programlisting>
+			to retrieve the data of that table.
+		</para>
+		
+		<note>
+			<para>
+				Note that the data of columns that have been "converted" through this mechanism, cannot
+				be edited any longer.
+			</para>
+		</note>
+
+		<para>
+			Another example is to replace the retrieval of Oracle's <literal>XMLTYPE</literal> datatype.
+			To configure the DbExplorer to convert all <literal>XMLTYPE</literal> columns to a string,
+			the following line in <literal>workbench.settings</literal> is necessary:
+			<programlisting>workbench.db.oracle.selectexpression.xmltype=to_clob(${column})</programlisting>
+		</para>
+		<para>
+			The column name (as displayed in the result set) will usually be the expression that you define
+			for the column which might not be convenient in all cases. As all occurances of the
+			placeholder (<literal>${column}</literal>) will be replaced you can define an alias for the
+			column:
+			<programlisting>workbench.db.oracle.selectexpression.xmltype=to_clob(${column}) AS ${column}</programlisting>
+		</para>
+
+		<para>
+			You can check the generated SELECT statement by using the 
+			<link linkend="dbexplorer-select-data">Put SELECT into</link> feature.
+			The statement that is generated and put into the editor, is the same as the one used for the
+			data retrieval.
+		</para>
+
+		<para>
+			The defined expression will also be used for the <link linkend="search-tables">Search table data</link> featre.
+			If you want to search
+			inside the data that is returned by the defined expression you have to make sure that you DBMS
+			supports the result of that expression as part of a <literal>LIKE</literal> expression. E.g. for the above
+			Oracle example, &wb-productname; will generate the following WHERE condition:
+			<programlisting>WHERE to_clob(my_clob_col) LIKE '%searchvalue%'</programlisting>
+		</para>
+		
+		<para>
+			&wb-productname; will try to remove an alias from the expression when it is used in
+			the <literal>WHERE</literal> clause. To do that, the expression is searched for the occurance
+			of the <literal>AS</literal> keyword. Therefor you <emphasis role="bold">have</emphasis> to
+			use the <literal>AS</literal> keyword even if your DBMS would allow a column alias without it.
+		</para>
+
 	</section>
   
 	<section id="view-details">
@@ -354,7 +483,7 @@
 		</para>
 
 		<para>
-			The generated SQL statements are logged in the second tab, labelled
+			The generated SQL statements are logged in the second tab, labeled
 			<literal>SQL Statements</literal>.
 		</para>
 
