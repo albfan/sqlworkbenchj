@@ -83,7 +83,6 @@ public abstract class InputHandler extends KeyAdapter
 	public static final ActionListener MAKE_LOWER_CASE = new make_lower();
 	public static final ActionListener UNDO = new undo();
 	public static final ActionListener REDO = new redo();
-	//public static final ActionListener MATCH_BRACKET = new match_bracket();
 
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();

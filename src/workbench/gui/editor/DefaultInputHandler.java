@@ -1,5 +1,4 @@
 package workbench.gui.editor;
-
 /*
  * DefaultInputHandler.java - Default implementation of an input handler
  * Copyright (C) 1999 Slava Pestov
@@ -22,7 +21,6 @@ import javax.swing.KeyStroke;
  * The default input handler. It maps sequences of keystrokes into actions
  * and inserts key typed events into the text area.
  * @author Slava Pestov
- * @version $Id: DefaultInputHandler.java,v 1.28 2008/10/04 13:03:01 thomas Exp $
  */
 public class DefaultInputHandler
 	extends InputHandler
@@ -50,7 +48,6 @@ public class DefaultInputHandler
 		addKeyBinding("TAB",INSERT_TAB);
 
 		addKeyBinding("INSERT",OVERWRITE);
-		//addKeyBinding("C+Q",TOGGLE_RECT);
 
 		addKeyBinding("HOME",HOME);
 		addKeyBinding("END",END);
@@ -79,10 +76,8 @@ public class DefaultInputHandler
 		addKeyBinding("DOWN",NEXT_LINE);
 		addKeyBinding("S+DOWN",SELECT_NEXT_LINE);
 
-		//addKeyBinding("C+ENTER",REPEAT);
 		addKeyBinding("C+U", MAKE_UPPER_CASE);
 		addKeyBinding("C+L", MAKE_LOWER_CASE);
-		//addKeyBinding("C+B", MATCH_BRACKET);
 		addKeyBinding("C+Z", UNDO);
 		addKeyBinding("C+Y", REDO);
 	}
