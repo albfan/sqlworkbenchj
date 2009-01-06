@@ -29,28 +29,35 @@
     
 	<section id="command-completion">
 		<title>Command completion</title>
-		<para>The editor can show a popup window with a list of available tables (and views) or
+		<para>
+			The editor can show a popup window with a list of available tables (and views) or
 			a list of available columns for a table. Which list is displayed depends on the position
 			of the cursor inside the statement.
 		</para>
-		<para>If the cursor is located in the column list of a <literal>SELECT</literal> statement
-		and the <literal>FROM</literal> part already contains the necessary tables, the window
-		will show the columns available in the table. Assuming you are editing the following
-		statement ( the <literal>|</literal> indicating the position of the caret):</para>
+		<para>
+			If the cursor is located in the column list of a <literal>SELECT</literal> statement
+			and the <literal>FROM</literal> part already contains the necessary tables, the window
+			will show the columns available in the table. Assuming you are editing the following
+			statement ( the <literal>|</literal> indicating the position of the caret):
+		</para>
 		<programlisting>SELECT p.|, p.firstname, a.zip, a.city
 FROM person p, address a;</programlisting>
-		<para>then pressing the <keycap>Ctrl-Space</keycap> key will show a list of columns available
+		<para>
+			then pressing the <keycap>Ctrl-Space</keycap> key will show a list of columns available
 			in the <literal>PERSON</literal> table (because the cursor is located after the <literal>p.</literal>
 			alias). If you put the cursor after the <literal>a.city</literal> column and press the
 			<keycap>Ctrl-Space</keycap> the popup window will list the two tables that are referenced
 			in the <literal>FROM</literal> part of the statement. The behaviour when editing the
 			<literal>WHERE</literal> part of an statement is similar.
 		</para>
-		<para>When editing the list of tables in the <literal>FROM</literal> part of the statement,
+
+		<para>
+			When editing the list of tables in the <literal>FROM</literal> part of the statement,
 			pressing the <keycap>Ctrl-Space</keycap> will pop up a list of available tables.
 		</para>
 			
-		<para>Usually a semicolon is used to separate statements in the editor. However 
+		<para>
+			Usually a semicolon is used to separate statements in the editor. However
 			for the auto completion of object names, this behaviour can be <link linkend="auto-completion-empty-line">configured</link>
 			to also	accept an empty line as a separator.
 		</para>
@@ -66,7 +73,45 @@ FROM person p, address a;</programlisting>
 			<literal>-mode</literal> parameter. For parameters where table names can be supplied
 			the usual table list will be shown.
 		</para>
+	</section>
 
+	<section id="editor-custom-keywords">
+		<title>Customizing keyword highlighting</title>
+		<para>
+			The keywords that the editor can highlight are based on an internal list of keywords
+			and information obtained from the JDBC driver. You can extend the list of known keywords
+			using text files located in the <link linkend="config-dir">config directory</link>.
+		</para>
+		<para>
+			&wb-productname; reads four different types of keywords: regular keywords (e.g. SELECT),
+			datatypes (e.g. VARCHAR), functions (e.g. upper()) and operators (e.g. JOIN). Each keyword type
+			is read from a separate file: <literal>keywords.wb</literal>, <literal>datatypes.wb</literal>,
+			<literal>functions.wb</literal> and <literal>operators.wb</literal>.
+		</para>
+		<para>
+			The files contain one keyword per line. Case does not matter (<literal>SELECT</literal> 
+			and <literal>select</literal> are treated identically).
+			If you want to add a specific word to the list of global keywords, simply create a plain
+			text file <literal>keywords.wb</literal> in the <link linkend="confid-dir">config directory</link>
+			and put one keyword per line into the file, e.g:
+		</para>
+		<programlisting>ALIAS
+ADD
+ALTER</programlisting>
+		<para>
+			If you want to define keywords specific for a DBMS, you need to add the <link linkend="dbid">DBID</link>
+			as a prefix to the filename, e.g. <literal>oracle.datatypes.wb</literal>.
+		</para>
+		<para>
+			To add the word <literal>geometry</literal> as a datatype for the editor when connected to a PostgreSQL
+			database, create the file <literal>postgresql.datatypes.wb</literal> in the config directory with the
+			following contents:<programlisting>geometry</programlisting>
+			The words defined for a specific database are added to the globally recognized keywords, so you
+			don't need to repeat all existing words in the file.
+		</para>
+		<para>
+			The color for each type of keyword can be changed in the options dialog.
+		</para>
 	</section>
     
 	<section id="editor-reformat-sql" xreflabel="SQL Formatter">

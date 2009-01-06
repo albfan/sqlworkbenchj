@@ -77,7 +77,7 @@
 			</para>
 			<para>
 				Using the multiline renderer has some minor drawbacks when editing the data,
-				and might be a bit slower when displaying large result sets.
+				and is be a bit slower when displaying large result sets.
 			</para>
       <para>Default: <literal>250</literal></para>
 		</simplesect>
@@ -93,6 +93,7 @@
       <para>Default: <literal>true</literal></para>
     </simplesect>
 				
+	<!--
     <simplesect id="settings-save-workspace">
       <title>Save workspaces automatically</title>
       <para><literal>workbench.workspace.autosave</literal></para>
@@ -102,7 +103,7 @@
 			</para>
       <para>Default: <literal>false</literal></para>
     </simplesect>
-        
+
 		<simplesect id="settings-workspace-backup">
 			<title>Controlling workspace backups</title>
 			<para>Property: <literal>workbench.workspace.createbackup</literal></para>
@@ -113,7 +114,7 @@
 			</para>
 			<para>Default: <literal>false</literal></para>
 		</simplesect>
-		
+
     <simplesect id="macro-menu-setting">
       <title>Controlling the number of macros in the main menu</title>
       <para>Property: <literal>workbench.gui.macro.maxmenuitems</literal></para>
@@ -123,6 +124,7 @@
       </para>
       <para>Default value: <literal>15</literal></para>
     </simplesect>
+	 -->
 	
 		<simplesect id="setting-native-print-dialog">
 			<title>Controlling the type of print dialog</title>
@@ -193,7 +195,7 @@
       </para>
     </simplesect>
 
-    <simplesect id="editor-rect-selection">
+   <simplesect id="editor-rect-selection">
       <title>Set the modifier key for rectangular selections in the edior</title>
       <para>Property: <literal>workbench.editor.rectselection.modifier</literal></para>
       <para>
@@ -274,6 +276,7 @@
 
 	<section id="db-explorer-settings">
 		<title>DbExplorer Settings</title>
+
     <simplesect id="selectable-objects-setting">
       <title>Controlling data display in the DbExplorer</title>
       <para>Property: <literal>workbench.db.objecttype.selectable.<link linkend="dbid">[dbid]</link>=value1,value2,...</literal></para>
@@ -294,18 +297,14 @@
     </simplesect>
 
 		<simplesect id="dbexplorer-focus">
-			<title>Showing the currently focused component in the DbExplorer</title>
-			<para>Property: <literal>workbench.gui.dbobjects.showfocus</literal></para>
+			<title>Customizing the SELECT to be used for the data tab</title>
 			<para>
-				To indicate the table that has currently the focus in the DbExplorer, set
-				this property to <literal>true</literal>. The currently focused table
-				(or editor) will be enclosed with a yellow border to indicate this. 
-				To change the color of the border, define the color using the property
-				<literal>workbench.gui.focusindicator.bordercolor</literal>. The value of 
-				that property are the three RGB values for the color.
+				You can customize the generated SELECT that is used to display the table
+				data depending on the column type. Please refer to the 
+				<link linkend="customize-dbexplorer-retrieval">DbExplorer chapter</link> for details.
 			</para>
-			<para>Default value: <literal>false</literal></para>
 		</simplesect>
+
 	</section>
 
 	<!--
@@ -431,6 +430,10 @@
 				list of <link linkend="dbms-identifier">Database Identifiers</link> that only support defining
 				primary and foreign keys inside the <literal>CREATE TABLE</literal> statement.
       </para>
+			<para>
+				If a DBMS is not listed here, the table constraints will be re-created using
+				 <literal>ALTER TABLE</literal>.
+			</para>
       <para>Default: <literal>FirstSQL/J</literal></para>
     </simplesect>
 
@@ -444,16 +447,6 @@
 				This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
       </para>
       <para>Default: <literal>Oracle</literal></para>
-    </simplesect>
-
-    <simplesect id="db-settings-keywords">
-      <title>Definining additional SQL keywords</title>
-      <para>Property: <literal>workbench.db.keywordlist.<link linkend="dbid">[dbid]</link>=</literal></para>
-      <para>
-				For a <link linkend="dbid">DBID</link> you can define a list of additional
-				SQL keywords. This can be used if the JDBC driver does not implement getSQLKeywords() correctly.
-      </para>
-      <para>No default</para>
     </simplesect>
 		
     <simplesect id="db-settings-updatingcommands">
@@ -770,7 +763,7 @@
 		</simplesect>
 
 		<simplesect id="import-header-default">
-			<title>Setting default for WbImport's -header parameter</title>
+			<title>Setting a default for WbImport's -header parameter</title>
 			<para>Property: <literal>workbench.import.default.header</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-header</literal>
@@ -780,7 +773,7 @@
 		</simplesect>
 		
 		<simplesect id="import-text-multiline">
-			<title>Setting default for WbImport's -multiLine parameter</title>
+			<title>Setting a default for WbImport's -multiLine parameter</title>
 			<para>Property: <literal>workbench.import.default.multilinerecord</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-multiLine</literal>
@@ -790,7 +783,7 @@
 		</simplesect>
 
 		<simplesect id="import-text-trimvalues">
-			<title>Setting default for WbImport's -trimValues parameter</title>
+			<title>Setting a default for WbImport's -trimValues parameter</title>
 			<para>Property: <literal>workbench.import.default.trimvalues</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-trimValues</literal>

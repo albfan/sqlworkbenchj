@@ -2,6 +2,8 @@ body {
     background: #FFFFFF;
     font-size: 10pt;
     font-family: sans-serif;
+    margin-left:3%;
+    margin-right:3%;
 }
 
 td,th {
@@ -41,11 +43,11 @@ h4, h5 {
 }
 
 dl.dt {
-	margin-top: 10pt;
+  margin-top: 10pt;
 }
 
 dd {
-	margin-bottom: 12pt;
+  margin-bottom: 12pt;
 }
 
 span.term {
@@ -68,9 +70,9 @@ pre.programlisting {
 }
 
 span.guisubmenu, span.guimenuitem, span.guimenu {
-	font-variant:small-caps;
-	font-stretch:extra-condensed;
-	color:#0000A0;
+  font-variant:small-caps;
+  font-stretch:extra-condensed;
+  color:#0000A0;
 }
 
 span.guibutton {
