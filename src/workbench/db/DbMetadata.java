@@ -2435,36 +2435,39 @@ public class DbMetadata
 			result = StringUtil.EMPTY_STRING;
 		}
 
-		try
+		if (includeTable)
 		{
-			TableIdentifier syn = getSynonymTable(tbl.getSchema(), tbl.getTableName());
-			if (syn != null)
+			try
 			{
-				TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
-
-				String tableSql = builder.getTableSource(syn, false, true);
-				if (StringUtil.isNonBlank(tableSql))
+				TableIdentifier syn = getSynonymTable(tbl.getSchema(), tbl.getTableName());
+				if (syn != null)
 				{
-					StringBuilder sb = new StringBuilder(result.length() + tableSql.length() + 50);
-					String nl = Settings.getInstance().getInternalEditorLineEnding();
-					sb.append(result);
-					sb.append(nl);
-					sb.append(nl);
-					sb.append("-------------- ");
-					sb.append(syn.getTableExpression(dbConnection));
-					sb.append(" --------------");
-					sb.append(nl);
-					sb.append(nl);
-					sb.append(tableSql);
-					result = sb.toString();
+					TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
+
+					String tableSql = builder.getTableSource(syn, false, true);
+					if (StringUtil.isNonBlank(tableSql))
+					{
+						StringBuilder sb = new StringBuilder(result.length() + tableSql.length() + 50);
+						String nl = Settings.getInstance().getInternalEditorLineEnding();
+						sb.append(result);
+						sb.append(nl);
+						sb.append(nl);
+						sb.append("-------------- ");
+						sb.append(syn.getTableExpression(dbConnection));
+						sb.append(" --------------");
+						sb.append(nl);
+						sb.append(nl);
+						sb.append(tableSql);
+						result = sb.toString();
+					}
 				}
 			}
+			catch (Exception e)
+			{
+				LogMgr.logError("DbMetadata.getSynonymSource()", "Error when retrieving source for synonym table", e);
+			}
 		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.getSynonymSource()", "Error when retrieving source for synonym table", e);
-		}
-
+		
 		return result;
 	}
 

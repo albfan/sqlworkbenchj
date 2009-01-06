@@ -204,10 +204,11 @@ public class DataFormattingOptionsPanel
     alternateColorLabel = new javax.swing.JLabel();
     alternateColor = new WbColorPicker(true);
     nullColor = new WbColorPicker(true);
-    nullColorLabel = new javax.swing.JLabel();
-    selectSummary = new javax.swing.JCheckBox();
+    jPanel1 = new javax.swing.JPanel();
+    jLabel2 = new javax.swing.JLabel();
     jLabel1 = new javax.swing.JLabel();
     localeDropDown = new javax.swing.JComboBox();
+    selectSummary = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -392,6 +393,7 @@ public class DataFormattingOptionsPanel
     autoRowHeight.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     rowHeightPanel.add(autoRowHeight, gridBagConstraints);
 
     ignoreEmptyRows.setText(ResourceMgr.getString("LblIgnoreRowHeightEmptyLine")); // NOI18N
@@ -402,7 +404,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 0);
     rowHeightPanel.add(ignoreEmptyRows, gridBagConstraints);
 
     maxRowHeightLabel.setText(ResourceMgr.getString("LblRowHeightMax")); // NOI18N
@@ -464,53 +466,50 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 10);
     add(oraDateFix, gridBagConstraints);
 
+    jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblColors"))); // NOI18N
     jPanel2.setLayout(new java.awt.GridBagLayout());
 
     alternateColorLabel.setText(ResourceMgr.getString("LblAlternateRowColor")); // NOI18N
     alternateColorLabel.setToolTipText(ResourceMgr.getString("d_LblAlternateRowColor")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     jPanel2.add(alternateColorLabel, gridBagConstraints);
 
     alternateColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 3, 0, 8);
+    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
     jPanel2.add(alternateColor, gridBagConstraints);
 
     nullColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 3, 0, 8);
+    gridBagConstraints.insets = new java.awt.Insets(5, 6, 4, 0);
     jPanel2.add(nullColor, gridBagConstraints);
-
-    nullColorLabel.setText(ResourceMgr.getString("LblNullValueColor")); // NOI18N
-    nullColorLabel.setToolTipText(ResourceMgr.getString("d_LblNullValueColor")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 0);
-    jPanel2.add(nullColorLabel, gridBagConstraints);
-
-    selectSummary.setText(ResourceMgr.getString("LblSelectionSummary")); // NOI18N
-    selectSummary.setToolTipText(ResourceMgr.getString("d_LblSelectionSummary")); // NOI18N
-    selectSummary.setBorder(null);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.weightx = 1.0;
-    jPanel2.add(selectSummary, gridBagConstraints);
+    gridBagConstraints.weighty = 1.0;
+    jPanel2.add(jPanel1, gridBagConstraints);
+
+    jLabel2.setText(ResourceMgr.getString("LblNullValueColor")); // NOI18N
+    jLabel2.setToolTipText(ResourceMgr.getString("d_LblNullValueColor")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    jPanel2.add(jLabel2, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -519,7 +518,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 10);
     add(jPanel2, gridBagConstraints);
 
     jLabel1.setText(ResourceMgr.getString("LblSortLocale")); // NOI18N
@@ -528,7 +527,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
     add(jLabel1, gridBagConstraints);
 
     localeDropDown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -537,8 +536,20 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 10);
     add(localeDropDown, gridBagConstraints);
+
+    selectSummary.setText(ResourceMgr.getString("LblSelectionSummary")); // NOI18N
+    selectSummary.setToolTipText(ResourceMgr.getString("d_LblSelectionSummary")); // NOI18N
+    selectSummary.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(7, 12, 6, 0);
+    add(selectSummary, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -557,6 +568,8 @@ public class DataFormattingOptionsPanel
   private javax.swing.JCheckBox ignoreEmptyRows;
   private javax.swing.JCheckBox includeHeaderWidth;
   private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel2;
+  private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JPanel jPanel4;
@@ -570,7 +583,6 @@ public class DataFormattingOptionsPanel
   private javax.swing.JTextField minColSizeField;
   private javax.swing.JLabel minColSizeLabel1;
   private workbench.gui.components.WbColorPicker nullColor;
-  private javax.swing.JLabel nullColorLabel;
   private javax.swing.JCheckBox oraDateFix;
   private javax.swing.JPanel rowHeightPanel;
   private javax.swing.JCheckBox rowHeightResize;

@@ -1202,6 +1202,7 @@ public class TextFileParser
 			// Should not happen, but just to make sure ;)
 			if (numTableCols == 0)
 			{
+				messages.append(ResourceMgr.getFormattedString("ErrImportTableNotFound", targetTable.getTableExpression()));
 				throw new SQLException("Table " + targetTable.getTableExpression() + " not found!");
 			}
 

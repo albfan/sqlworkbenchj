@@ -38,6 +38,11 @@ import workbench.util.StringUtil;
  * are read from this package. 
  * If any of those files exist in the config directory, their contents
  * is read as well and merged with the predefined keywords.
+ * <br/>
+ * For DBS specific keywords, this class looks for the above filenames with the
+ * corresponding dbid as a prefix (e.g. postgresql.functions.wb)
+ * <br/>
+ * The DBMS specific keywords will be added to the global ones.
  * @author support@sql-workbench.net
  */
 public class SqlKeywordHelper 
@@ -48,12 +53,20 @@ public class SqlKeywordHelper
 	private Set<String> operators;
 	private Set<String> functions;
 	private Set<String> datatypes;
-	
+
+	/**
+	 * Read dbms-independent keywords.
+	 */
 	public SqlKeywordHelper()
 	{
 		this(null);
 	}
 
+	/**
+	 * Read keywords specific for the DBMS identified by the given DBID
+	 * (dbms-independent keywords will be included).
+	 * @param id the DBID for the dbms
+	 */
 	public SqlKeywordHelper(String id)
 	{
 		this.dbId = id;

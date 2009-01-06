@@ -23,6 +23,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.interfaces.Restoreable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.ExceptionUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -78,6 +79,8 @@ public class OptionPanelPage
 			catch (Exception e)
 			{
 				LogMgr.logError("OptionPanelPage.getPanel()", "Could not create panel", e);
+				panel = new JPanel();
+				panel.add(new JLabel(ExceptionUtil.getDisplay(e)));
 			}
 		}
 		return this.panel;

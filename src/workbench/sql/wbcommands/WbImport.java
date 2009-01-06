@@ -265,7 +265,7 @@ public class WbImport
 		}
 		else
 		{
-			File d = new File(dir);
+			WbFile d = evaluateFileArgument(dir);//)new File(dir);
 			if (!d.exists())
 			{
 				String msg = ResourceMgr.getString("ErrImportSourceDirNotFound");
@@ -658,7 +658,8 @@ public class WbImport
 		String ext = cmdLine.getValue(ARG_FILE_EXT);
 		if (ext == null) ext = defaultExt;
 
-		ImportFileLister lister = new ImportFileLister(this.currentConnection, new File(dir), ext);
+		WbFile fdir = evaluateFileArgument(dir);
+		ImportFileLister lister = new ImportFileLister(this.currentConnection, fdir, ext);
 		lister.setIgnoreSchema(cmdLine.getBoolean(ARG_IGNORE_OWNER, false));
 		lister.ignoreFiles(cmdLine.getListValue(ARG_EXCLUDE_FILES));
 		lister.setCheckDependencies(cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, false));
