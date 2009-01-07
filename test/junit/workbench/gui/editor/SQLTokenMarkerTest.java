@@ -95,7 +95,7 @@ public class SQLTokenMarkerTest
 			
 			String sql = 
 				"SELECT x FROM thetable\n" +
-				"WHERE desc = 'this is a \n" + 
+				"WHERE desc = 'this is a \n" +
 				" multiline \n" + 
 				"string literal' \n" + 
 				"AND name = 'arthur'\n" + 
@@ -107,7 +107,7 @@ public class SQLTokenMarkerTest
 			int[][] expectedTokens = new int[][]
 			{
 				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }, // SELECT ...
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD2, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // WHERE ...
+				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // WHERE ...
 				{Token.LITERAL1 }, // multiline 
 				{Token.LITERAL1, Token.NULL }, // string literal'
 				{Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // AND name = ...
