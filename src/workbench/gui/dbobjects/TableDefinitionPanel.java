@@ -198,6 +198,8 @@ public class TableDefinitionPanel
 	protected void retrieveTableDefinition()
 		throws SQLException
 	{
+		if (currentTable == null) return;
+		
 		if (this.isBusy()) return;
 
 		synchronized (connectionLock)

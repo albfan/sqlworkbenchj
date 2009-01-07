@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,8 +47,6 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.GapContent;
 import workbench.WbManager;
-import workbench.db.DbFunctions;
-import workbench.db.SqlDataTypesHandler;
 import workbench.db.WbConnection;
 import workbench.gui.actions.FileSaveAction;
 import workbench.gui.editor.SearchAndReplace;
@@ -190,6 +187,11 @@ public class EditorPanel
 
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
+		String[] props = SyntaxUtilities.getColorProperties();
+		for (String prop : props)
+		{
+			Settings.getInstance().addPropertyChangeListener(this, prop);
+		}
 		this.setRightClickMovesCursor(Settings.getInstance().getRightClickMovesCursor());
 		new DropTarget(this, DnDConstants.ACTION_COPY, this);
 	}
@@ -213,15 +215,7 @@ public class EditorPanel
 		dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
 		dbDatatypes = new TreeSet<String>(new CaseInsensitiveComparator());
 
-		if (aConnection == null)
-		{
-			this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter();
-		}
-		else
-		{
-			DbFunctions func = new DbFunctions();
-			dbFunctions.addAll(func.getDbFunctions(aConnection.getMetadata()));
-		}
+		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection);
 
 		AnsiSQLTokenMarker token = this.getSqlTokenMarker();
 
@@ -231,37 +225,26 @@ public class EditorPanel
 
 		if (aConnection != null)
 		{
-			Collection<String> keywords = aConnection.getMetadata().getSqlKeywords();
-			token.addSqlKeyWords(keywords);
+			this.isMySQL = aConnection.getMetadata().isMySql();
+			token.setIsMySQL(isMySQL);
+			if (isMySQL && Settings.getInstance().getBoolProperty("workbench.editor.mysql.usehashcomment", false))
+			{
+				this.commentChar = "#";
+			}
 		}
 
 		this.commentChar = "--";
 		String dbId = (aConnection == null ? null : aConnection.getMetadata().getDbId());
 
-		SqlDataTypesHandler handler = new SqlDataTypesHandler(dbId);
-		dbDatatypes.addAll(handler.getDataTypes());
-
 		SqlKeywordHelper helper = new SqlKeywordHelper(dbId);
 		dbFunctions.addAll(helper.getSqlFunctions());
 		dbDatatypes.addAll(helper.getDataTypes());
-
+		
 		token.addSqlFunctions(dbFunctions);
 		token.addDatatypes(dbDatatypes);
 		token.addSqlKeyWords(helper.getKeywords());
 		token.addOperators(helper.getOperators());
-
-		if (aConnection != null)
-		{
-			this.isMySQL = aConnection.getMetadata().isMySql();
-			token.setIsMySQL(isMySQL);
-			if (aConnection.getMetadata().isMySql() && Settings.getInstance().getBoolProperty("workbench.editor.mysql.usehashcomment", false))
-			{
-				this.commentChar = "#";
-			}
-
-		}
-
-		this.alternateDelimiter = Settings.getInstance().getAlternateDelimiter(aConnection);
+		
 	}
 
 	public void fontChanged(String aKey, Font aFont)
@@ -806,6 +789,7 @@ public class EditorPanel
 		if (this.currentFile == null) return null;
 		return this.fileEncoding;
 	}
+	
 	public String getCurrentFileName()
 	{
 		if (this.currentFile == null) return null;
@@ -827,6 +811,10 @@ public class EditorPanel
 		else if (Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL.equals(evt.getPropertyName()))
 		{
 			this.setElectricScroll(Settings.getInstance().getElectricScroll());
+		}
+		else if (evt.getPropertyName().startsWith("workbench.editor.color."))
+		{
+			this.getPainter().setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
 		}
 		WbSwingUtilities.repaintNow(this);
 	}

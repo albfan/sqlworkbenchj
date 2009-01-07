@@ -43,7 +43,6 @@ import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 
-import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.components.FlatButton;
 import workbench.interfaces.DbExecutionListener;
@@ -120,6 +119,7 @@ public class DbExplorerPanel
 	private JComponent currentFocus = null;
 	private ReloadAction reloadSchemasAction;
 	private Reloadable schemaReloader;
+	private FlatButton reloadButton;
 
 	public DbExplorerPanel()
 	{
@@ -211,10 +211,10 @@ public class DbExplorerPanel
 			this.catalogLabel.setVisible(false);
 			this.selectorPanel.add(catalogLabel);
 			this.selectorPanel.add(catalogSelector);
-			FlatButton b = new FlatButton(reloadSchemasAction);
-			b.setText(null);
-			b.setMargin(WbToolbarButton.MARGIN);
-			this.selectorPanel.add(b);
+			reloadButton = new FlatButton(reloadSchemasAction);
+			reloadButton.setText(null);
+			reloadButton.setMargin(WbToolbarButton.MARGIN);
+			this.selectorPanel.add(reloadButton);
 
 			this.add(this.selectorPanel, BorderLayout.NORTH);
 			this.add(tabPane, BorderLayout.CENTER);
@@ -396,6 +396,17 @@ public class DbExplorerPanel
 			this.schemaRetrievePending = false;
 			setBusy(false);
 		}
+		if (schemaSelector.isVisible() || catalogSelector.isVisible())
+		{
+			this.reloadButton.setVisible(true);
+			this.reloadSchemasAction.setEnabled(true);
+		}
+		else
+		{
+			this.reloadButton.setVisible(false);
+			this.reloadSchemasAction.setEnabled(false);
+		}
+
 		this.schemaSelector.addActionListener(this);
 	}
 

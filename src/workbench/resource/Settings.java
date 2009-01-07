@@ -1508,6 +1508,21 @@ public class Settings
 	{
 		return getBoolProperty("workbench.workspace.createbackup", false);
 	}
+
+	public void setWorkspaceBackupDir(String dir)
+	{
+		setProperty("workbench.workspace.backup.dir", dir);
+	}
+
+	public String getWorkspaceBackupDir()
+	{
+		return getProperty("workbench.workspace.backup.dir", null);
+	}
+
+	public String getFileVersionDelimiter()
+	{
+		return getProperty("workbench.file.version.delimiter", ".");
+	}
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Database">
@@ -2559,6 +2574,7 @@ public class Settings
 			this.props.remove("workbench.db.hxtt_dbf.dropindex.needstable");
 			this.props.remove("workbench.ignoretypes.postgresql");
 			this.props.remove("workbench.ignoretypes.mysql");
+			this.props.remove("workbench.db.syntax.functions");
 		}
 		catch (Throwable e)
 		{

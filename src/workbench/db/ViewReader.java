@@ -23,8 +23,14 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to read the source of a database view.
+ * <br/>
+ * The source is retrieved by using SQL statements defined in the file
+ * <literal>ViewSourceStatements.xml</literal>.
+ * <br/>
  *
  * @author support@sql-workbench.net
+ * @see MetaDataSqlManager#getViewSourceSql() 
  */
 public class ViewReader
 {
@@ -49,6 +55,14 @@ public class ViewReader
 	
 	/**
 	 * Returns a complete SQL statement to (re)create the given view.
+	 *
+	 * This method will extend the stored source to a valid CREATE VIEW.
+	 *
+	 * @param view The view for which thee source should be created
+	 * @param includeCommit if true, terminate the whole statement with a COMMIT
+	 * @param includeDrop if true, add a DROP statement before the CREATE statement
+	 * 
+	 * @see #getViewSource(workbench.db.TableIdentifier)
 	 */
 	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
 		throws SQLException

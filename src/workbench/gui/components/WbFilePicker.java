@@ -33,6 +33,7 @@ public class WbFilePicker
 	private boolean allowMultiple;
 	private File[] selectedFiles;
 	private String lastDirProperty = null;
+	private boolean selectDirectory = false;
 
 	public WbFilePicker()
 	{
@@ -40,6 +41,16 @@ public class WbFilePicker
 		initComponents();
 	}
 
+	public void setSelectDirectoryOnly(boolean flag)
+	{
+		selectDirectory = flag;
+	}
+
+	public boolean getSelectDirectoryOnly(boolean flag)
+	{
+		return selectDirectory;
+	}
+	
 	public void setTextFieldPropertyName(String name)
 	{
 		this.tfFilename.setName(name);
@@ -67,6 +78,15 @@ public class WbFilePicker
 		this.tfFilename.setEnabled(flag);
 		this.selectFileButton.setEnabled(flag);
 	}
+
+	@Override
+	public void setToolTipText(String text)
+	{
+		super.setToolTipText(text);
+		tfFilename.setToolTipText(text);
+		selectFileButton.setToolTipText(text);
+	}
+
 
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -117,15 +137,24 @@ public class WbFilePicker
 		try
 		{
 			JFileChooser jf = new JFileChooser();
-			jf.setMultiSelectionEnabled(allowMultiple);
-			if (this.lastDir != null)
+			if (selectDirectory)
 			{
-				jf.setCurrentDirectory(new File(this.lastDir));
+				jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			}
-			if (this.fileFilter != null)
+			else
 			{
-				jf.setFileFilter(this.fileFilter);
+				jf.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				jf.setMultiSelectionEnabled(allowMultiple);
+				if (this.lastDir != null)
+				{
+					jf.setCurrentDirectory(new File(this.lastDir));
+				}
+				if (this.fileFilter != null)
+				{
+					jf.setFileFilter(this.fileFilter);
+				}
 			}
+			
 			int answer = jf.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{

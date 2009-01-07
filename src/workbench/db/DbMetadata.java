@@ -30,43 +30,29 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.db.derby.DerbyConstraintReader;
 import workbench.db.derby.DerbySynonymReader;
-import workbench.db.firebird.FirebirdProcedureReader;
-import workbench.db.firstsql.FirstSqlConstraintReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.Db2SynonymReader;
 import workbench.db.ingres.IngresMetadata;
 import workbench.db.mckoi.McKoiSequenceReader;
-import workbench.db.mssql.SqlServerConstraintReader;
-import workbench.db.mssql.SqlServerProcedureReader;
 import workbench.db.mysql.MySqlEnumReader;
-import workbench.db.mysql.MySqlProcedureReader;
 import workbench.db.oracle.DbmsOutput;
-import workbench.db.oracle.OracleConstraintReader;
-import workbench.db.oracle.OracleIndexReader;
 import workbench.db.oracle.OracleMetadata;
-import workbench.db.oracle.OracleProcedureReader;
 import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.postgres.PostgresDDLFilter;
-import workbench.db.postgres.PostgresIndexReader;
 import workbench.db.postgres.PostgresSequenceReader;
-import workbench.db.postgres.PostgresConstraintReader;
-import workbench.db.postgres.PostgresProcedureReader;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.db.hsqldb.HsqlConstraintReader;
-import workbench.db.firebird.FirebirdConstraintReader;
-import workbench.db.h2database.H2ConstraintReader;
 import workbench.db.h2database.H2SequenceReader;
-import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
+import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.util.CaseInsensitiveComparator;
 
 /**
  * Retrieve meta data information from the database.
@@ -113,7 +99,7 @@ public class DbMetadata
 	private boolean isAccess;
 	
 	private String quoteCharacter;
-	private SqlKeywordHandler keywordHandler;
+	private final Set<String> keywords = new TreeSet<String>(new CaseInsensitiveComparator());
 	
 	private Pattern selectIntoPattern = null;
 
@@ -176,19 +162,15 @@ public class DbMetadata
 		{
 			this.isOracle = true;
 			this.oracleMetaData = new OracleMetadata(this.dbConnection);
-			this.constraintReader = new OracleConstraintReader();
 			this.synonymReader = new OracleSynonymReader();
 			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
 			this.errorInfoReader = this.oracleMetaData;
 			this.dataTypeResolver = this.oracleMetaData;
-			this.indexReader = new OracleIndexReader(this);
 		}
 		else if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
-			this.constraintReader = new PostgresConstraintReader();
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
-			this.indexReader = new PostgresIndexReader(this);
 			this.dataTypeResolver = new PostgresDataTypeResolver();
 			
 			// Starting with the version 8.2 the driver supports the dollar quoting
@@ -201,13 +183,11 @@ public class DbMetadata
 		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
-			this.constraintReader = new HsqlConstraintReader(this.dbConnection.getSqlConnection());
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("firebird") > -1)
 		{
 			this.isFirebird = true;
-			this.constraintReader = new FirebirdConstraintReader();
 			// Jaybird 2.0 reports the Firebird version in the 
 			// productname. To ease the DBMS handling we'll use the same
 			// product name that is reported with the 1.5 driver. 
@@ -218,18 +198,11 @@ public class DbMetadata
 		else if (productLower.indexOf("sql server") > -1)
 		{
 			this.isSqlServer = true;
-			this.constraintReader = new SqlServerConstraintReader();
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
 			this.synonymReader = new Db2SynonymReader();
 			this.sequenceReader = new Db2SequenceReader(this.dbConnection);
-			this.constraintReader = new Db2ConstraintReader();
-		}
-		else if (productLower.indexOf("adaptive server") > -1) 
-		{
-			// this covers adaptive server Enterprise and Anywhere
-			this.constraintReader = new ASAConstraintReader();
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
@@ -238,12 +211,10 @@ public class DbMetadata
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
 			this.isApacheDerby = true;
-			this.constraintReader = new DerbyConstraintReader();
 		}
 		else if (productLower.indexOf("derby") > -1)
 		{
 			this.isApacheDerby = true;
-			this.constraintReader = new DerbyConstraintReader();
 			this.synonymReader = new DerbySynonymReader(this);
 		}
 		else if (productLower.indexOf("ingres") > -1)
@@ -264,7 +235,6 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("firstsql") > -1)
 		{
-			this.constraintReader = new FirstSqlConstraintReader();
 			this.isFirstSql = true;
 		}
 		else if (productLower.indexOf("excel") > -1)
@@ -278,14 +248,8 @@ public class DbMetadata
 		else if (productLower.equals("h2"))
 		{
 			this.sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
-			this.constraintReader = new H2ConstraintReader();
 		}
 
-		if (this.indexReader == null)
-		{
-			this.indexReader = new JdbcIndexReader(this);
-		}
-		
 		this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
 		
 		if (this.dataTypeResolver == null)
@@ -301,14 +265,13 @@ public class DbMetadata
 		{
 			this.quoteCharacter = null;
 		}
-		if (StringUtil.isEmptyString(quoteCharacter)) this.quoteCharacter = "\"";
+		if (StringUtil.isBlank(quoteCharacter)) this.quoteCharacter = "\"";
 
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
-		Settings settings = Settings.getInstance();
 		
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
-		tableTypeName = settings.getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
+		tableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 		tableTypesTable = new String[] { tableTypeName };
 		
 		// The tableTypesSelectable array will be used
@@ -350,39 +313,11 @@ public class DbMetadata
 
 	public ProcedureReader getProcedureReader()
 	{
-		synchronized (MVIEW_NAME)
+		synchronized (ReaderFactory.READER_LOCK)
 		{
 			if (this.procedureReader == null)
 			{
-				if (this.isOracle)
-				{
-					this.procedureReader = new OracleProcedureReader(this.dbConnection);
-				}
-				else if (this.isPostgres)
-				{
-					this.procedureReader = new PostgresProcedureReader(this.dbConnection);
-				}
-				else if (this.isFirebird)
-				{
-					this.procedureReader = new FirebirdProcedureReader(this.dbConnection);
-				}
-				else if (this.isSqlServer)
-				{
-					boolean useJdbc = Settings.getInstance().getBoolProperty("workbench.db.mssql.usejdbcprocreader", false);
-					if (!useJdbc)
-					{
-						this.procedureReader = new SqlServerProcedureReader(this.dbConnection);
-					}
-				}
-				else if (this.isMySql)
-				{
-					this.procedureReader = new MySqlProcedureReader(this.dbConnection);
-				}
-				
-				if (procedureReader == null)
-				{
-					this.procedureReader = new JdbcProcedureReader(this.dbConnection);
-				}
+				this.procedureReader = ReaderFactory.getProcedureReader(this);
 			}
 			return procedureReader;
 		}
@@ -435,7 +370,14 @@ public class DbMetadata
 
 	public IndexReader getIndexReader()
 	{
-		return this.indexReader;
+		synchronized (ReaderFactory.READER_LOCK)
+		{
+			if (indexReader == null)
+			{
+				indexReader = ReaderFactory.getIndexReader(this);
+			}
+			return this.indexReader;
+		}
 	}
 
 	public OracleMetadata getOracleMeta()
@@ -860,28 +802,34 @@ public class DbMetadata
 			return help.explainMissingProcSourceSql(this.getProductName());
 		}
 	}	
-	
+
+	/**
+	 * Read the source code of the given ProcedureDefinition and then
+	 * stores the source code in the passed definition
+	 *
+	 * @param def
+	 * @throws workbench.db.NoConfigException
+	 * @see ProcedureReader#readProcedureSource(workbench.db.ProcedureDefinition)
+	 * @see ProcedureDefinition#setSource(java.lang.CharSequence) 
+	 */
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
 		this.getProcedureReader().readProcedureSource(def);
 	}
 
-	private void initKeywordHandler()
-	{
-		this.keywordHandler = new SqlKeywordHandler(this.dbConnection.getSqlConnection(), this.getDbId());
-	}
-	
 	public boolean isKeyword(String name)
 	{
-		if (this.keywordHandler == null) this.initKeywordHandler();
-		return this.keywordHandler.isKeyword(name);
-	}
-	
-	public Collection<String> getSqlKeywords()
-	{
-		if (this.keywordHandler == null) this.initKeywordHandler();
-		return this.keywordHandler.getSqlKeywords();
+		synchronized (keywords)
+		{
+			if (keywords.size() == 0)
+			{
+				SqlKeywordHelper helper = new SqlKeywordHelper(this.getDbId());
+				keywords.addAll(helper.getKeywords());
+				keywords.addAll(helper.getOperators());
+			}
+			return this.keywords.contains(name);
+		}
 	}
 
 	/**
@@ -1852,7 +1800,7 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList()
 		throws SQLException
 	{
-		return getTableList(null, getCurrentSchema(), new String[] { tableTypeName} );
+		return getTableList(null, getCurrentSchema(), tableTypesTable );
 	}
 	
 	public List<TableIdentifier> getTableList(String schema, String[] types)
@@ -2516,7 +2464,19 @@ public class DbMetadata
 		}
 		return false;
 	}
-	
+
+	public synchronized ConstraintReader getConstraintReader()
+	{
+		synchronized (ReaderFactory.READER_LOCK)
+		{
+			if (constraintReader == null)
+			{
+				constraintReader = ReaderFactory.getConstraintReader(this.dbConnection);
+			}
+			return constraintReader;
+		}
+	}
+
 	/**
 	 * Return constraints defined for each column in the given table.
 	 * @param table The table to check
@@ -2527,25 +2487,26 @@ public class DbMetadata
 	public Map<String, String> getColumnConstraints(TableIdentifier table)
 	{
 		Map<String, String> columnConstraints = Collections.emptyMap();
-		if (this.constraintReader != null)
+		ConstraintReader reader = this.getConstraintReader();
+		if (reader == null) return columnConstraints;
+		
+		Savepoint sp = null;
+		try
 		{
-			Savepoint sp = null;
-			try
+			if (dbSettings.useSavePointForDML())
 			{
-				if (dbSettings.useSavePointForDML())
-				{
-					sp = this.dbConnection.setSavepoint();
-				}
-				columnConstraints = this.constraintReader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
-				dbConnection.releaseSavepoint(sp);
+				sp = this.dbConnection.setSavepoint();
 			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DbMetadata.getTableConstraints()", "Error retrieving table constraints", e);
-				dbConnection.rollback(sp);
-				columnConstraints = Collections.emptyMap();
-			}
+			columnConstraints = reader.getColumnConstraints(this.dbConnection.getSqlConnection(), table);
+			dbConnection.releaseSavepoint(sp);
 		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.getTableConstraints()", "Error retrieving table constraints", e);
+			dbConnection.rollback(sp);
+			columnConstraints = Collections.emptyMap();
+		}
+
 		return columnConstraints;
 	}
 
@@ -2558,7 +2519,9 @@ public class DbMetadata
 	 */
 	public String getTableConstraints(TableIdentifier tbl, String indent)
 	{
-		if (this.constraintReader == null) return null;
+		ConstraintReader reader = this.getConstraintReader();
+		if (reader == null) return null;
+
 		String cons = null;
 		Savepoint sp = null;
 		try
@@ -2567,7 +2530,7 @@ public class DbMetadata
 			{
 				sp = this.dbConnection.setSavepoint();
 			}
-			cons = this.constraintReader.getTableConstraints(dbConnection.getSqlConnection(), tbl, indent);
+			cons = reader.getTableConstraints(dbConnection.getSqlConnection(), tbl, indent);
 			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)

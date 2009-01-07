@@ -98,7 +98,7 @@ public class MainWindowTest
 		final JListOperator pages = new JListOperator(dialog);
 
 		int count = pages.getModel().getSize();
-		assertEquals(10, count);
+		assertEquals(11, count);
 
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("pagetitle");

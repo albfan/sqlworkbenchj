@@ -13,6 +13,8 @@ package workbench.util;
 
 import java.io.File;
 import java.io.IOException;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 /**
  * A class to create versioned backups of files up to a specified limit.
@@ -21,18 +23,47 @@ import java.io.IOException;
  */
 public class FileVersioner
 {
-	private static final char VERSION_SEPARATOR = '.';
+	private String versionSeparator = "."; // should be compatible with all file systems
 	private final int maxVersions;
-
+	private File backupDir;
 
 	/**
-	 * Create a new FileVersioner with the max. number of backup files.
-	 *
-	 * @param maxCount
+	 * Create a FileVersioner that saves the backup in the same
+	 * directory as the target file.
+	 * 
+	 * @param maxCount max. number of backups to maintain
 	 */
 	public FileVersioner(int maxCount)
 	{
+		this(maxCount, null, ".");
+	}
+
+	/**
+	 * Create a new FileVersioner that saves the backup files in a specific directory
+	 * <br/>
+	 * If the backup directory is not an absolute pathname, then it's
+	 * considered relative to the config directory.
+	 *
+	 * @param maxCount max. number of backups to maintain
+	 * @param dirName  the directory where to save the backup files
+	 * @param separator the character to put before the version number. Only the first character is used
+	 * @see Settings#getConfigDir()
+	 */
+	public FileVersioner(int maxCount, String dirName, String separator)
+	{
 		this.maxVersions = (maxCount > 0 ? maxCount : 5);
+		if (StringUtil.isNonBlank(dirName))
+		{
+			backupDir = new File(dirName);
+			if (!backupDir.isAbsolute())
+			{
+				backupDir = new File(Settings.getInstance().getConfigDir(), dirName);
+			}
+		}
+		if (StringUtil.isNonBlank(separator))
+		{
+			versionSeparator = separator;
+		}
 	}
 
 	/**
@@ -48,8 +79,11 @@ public class FileVersioner
 	 * be deleted, and the other versions will be renamed (2 -> 1, 3 -> 2, and so on).
 	 * <br/>
 	 * Then the new version will be created.
-	 * 
-	 * @param target
+	 * The backup file will be stored in the directory specified in the constructor,
+	 * or the directory of the file that is backed up (if no backup directory was
+	 * specified)
+	 *
+	 * @param target the file to backup
 	 * @throws java.io.IOException
 	 */
 	public void createBackup(File target)
@@ -58,19 +92,34 @@ public class FileVersioner
 		if (target == null) return;
 		if (!target.exists()) return;
 		int nextVersion = findNextIndex(target);
-		File backup = new File(target.getParentFile(), target.getName() + VERSION_SEPARATOR + nextVersion);
+		File dir = getTargetDir(target);
+		if (!dir.exists())
+		{
+			if (!dir.mkdirs())
+			{
+				LogMgr.logError("FileVersioner.createBackup", "Could not create backup dir: " + dir.getAbsolutePath() + ", using workspace directory: " + target.getParentFile().getAbsolutePath(), null);
+				dir = target.getParentFile();
+			}
+		}
+		File backup = new File(dir, target.getName() + versionSeparator + nextVersion);
 		FileUtil.copy(target, backup);
+	}
+
+	private File getTargetDir(File target)
+	{
+		if (backupDir != null) return backupDir;
+		return target.getParentFile();
 	}
 
 	private int findNextIndex(File target)
 	{
-		File dir = target.getParentFile();
+		File dir = getTargetDir(target);
 		String name = target.getName();
 		if (!target.exists())	return 1;
 
 		for (int index = 1; index <= maxVersions; index++)
 		{
-			File bck = new File(dir, name + "." + index);
+			File bck = new File(dir, name + versionSeparator + index);
 			if (!bck.exists())
 			{
 				return index;
@@ -87,15 +136,15 @@ public class FileVersioner
 		File dir = target.getParentFile();
 		String name = target.getName();
 
-		File max = new File(dir, name + VERSION_SEPARATOR + '1');
+		File max = new File(dir, name + versionSeparator + '1');
 		max.delete();
-		
+
 		for (int i = 2; i <= maxVersions; i++)
 		{
-			File old = new File(dir, name + VERSION_SEPARATOR + i);
+			File old = new File(dir, name + versionSeparator + i);
 			if (old.exists())
 			{
-				File newIndex = new File(dir, name + VERSION_SEPARATOR + (i - 1));
+				File newIndex = new File(dir, name + versionSeparator + (i - 1));
 				old.renameTo(newIndex);
 			}
 		}

@@ -29,6 +29,20 @@ public class FileVersionerTest
 		super(testName);
 	}
 
+	public void testBackupDir()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("FileVersioner");
+		File bckDir = new File(util.getBaseDir(), "backup");
+		FileVersioner v = new FileVersioner(3, bckDir.getAbsolutePath(), ";");
+		util.emptyBaseDirectory();
+		File main = new File(util.getBaseDir(), "mystuff.conf");
+		TestUtil.writeFile(main, "this is a test\n");
+		v.createBackup(main);
+		File bck = new File(bckDir, "mystuff.conf;1");
+		assertTrue(bck.exists());
+	}
+
 	public void testCreateBackup()
 		throws Exception
 	{

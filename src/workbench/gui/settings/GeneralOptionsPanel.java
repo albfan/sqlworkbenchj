@@ -117,6 +117,7 @@ public class GeneralOptionsPanel
 		settingsfilename.setText(s);
 		backupCount.setEnabled(createBackup.isSelected());
 		backupCount.setText(Integer.toString(Settings.getInstance().getMaxWorkspaceBackup()));
+		backupDirPicker.setFilename(Settings.getInstance().getWorkspaceBackupDir());
 	}
 
 	public void saveSettings()
@@ -165,6 +166,7 @@ public class GeneralOptionsPanel
 		{
 			set.setMaxWorkspaceBackup(value);
 		}
+		set.setWorkspaceBackupDir(backupDirPicker.getFilename());
 	}
 
 	private Locale getSelectedLanguage()
@@ -209,6 +211,8 @@ public class GeneralOptionsPanel
     createBackup = new JCheckBox();
     backupCount = new JTextField();
     jLabel1 = new JLabel();
+    jLabel2 = new JLabel();
+    backupDirPicker = new WbFilePicker();
     logfilename = new WbLabelField();
     settingsfilename = new WbLabelField();
 
@@ -491,6 +495,26 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(8, 13, 0, 0);
     jPanel2.add(jLabel1, gridBagConstraints);
 
+    jLabel2.setText(ResourceMgr.getString("LblBckDir")); // NOI18N
+    jLabel2.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 0, 0, 0);
+    jPanel2.add(jLabel2, gridBagConstraints);
+
+    backupDirPicker.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
+    backupDirPicker.setSelectDirectoryOnly(true);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 25, 1, 3);
+    jPanel2.add(backupDirPicker, gridBagConstraints);
+
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 9;
@@ -540,6 +564,7 @@ public class GeneralOptionsPanel
   private JCheckBox autoConnect;
   private JCheckBox autoSaveWorkspace;
   private JTextField backupCount;
+  private WbFilePicker backupDirPicker;
   private JComboBox checkInterval;
   private JLabel checkUpdatesLabel;
   private JCheckBox consolidateLog;
@@ -547,6 +572,7 @@ public class GeneralOptionsPanel
   private JCheckBox enableAnimatedIcon;
   private JCheckBox exitOnConnectCancel;
   private JLabel jLabel1;
+  private JLabel jLabel2;
   private JPanel jPanel2;
   private JLabel langLabel;
   private JComboBox languageDropDown;
