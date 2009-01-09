@@ -4,6 +4,13 @@
      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 >
 
+<!--
+
+Convert the output of SQL Workbench's WbSchemaDiff command to SQL Microsoft SQL Server
+Author: support@sql-workbench.net
+
+-->
+
 <xsl:output 
   encoding="iso-8859-15" 
   method="text" 
@@ -12,16 +19,11 @@
   omit-xml-declaration="yes"
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
-<!-- 
-
-Convert the output of SQL Workbench's WbSchemaDiff command to SQL Microsoft SQL Server
-Author: support@sql-workbench.net 
-
--->
-
 <xsl:strip-space elements="*"/>
 
 <xsl:template match="/">
+  <xsl:apply-templates select="/schema-diff/add-table"/>
+
   <xsl:for-each select="/schema-diff/modify-table">
     
   <xsl:variable name="table" select="@name"/>
@@ -52,8 +54,6 @@ Author: support@sql-workbench.net
 
   </xsl:for-each>
       
-  <xsl:apply-templates select="/schema-diff/add-table"/>
-  
   <xsl:for-each select="/schema-diff/create-view">
     <xsl:apply-templates select="view-def"/>
   </xsl:for-each>

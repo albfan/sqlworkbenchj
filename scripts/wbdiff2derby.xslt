@@ -6,7 +6,7 @@
 
 <!--
 
-Convert the output of SQL Workbench's WbSchemaDiff command to SQL for Postgres
+Convert the output of SQL Workbench's WbSchemaDiff command to SQL for Apache Derby
 Author: support@sql-workbench.net
 
 -->
@@ -98,16 +98,16 @@ ALTER TABLE <xsl:value-of select="$table"/> ADD COLUMN <xsl:value-of select="$co
 <xsl:param name="table"/> 
 <xsl:variable name="column" select="@name"/>
 <xsl:if test="string-length(dbms-data-type) &gt; 0">
-ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> TYPE <xsl:value-of select="dbms-data-type"/>;
+ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> SET DATA TYPE <xsl:value-of select="dbms-data-type"/>;
 </xsl:if>
 <xsl:if test="nullable = 'true'">
-ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> DROP NOT NULL;
+ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> NOT NULL;
 </xsl:if>
 <xsl:if test="nullable = 'false'">
-ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> SET NOT NULL;
+ALTER TABLE <xsl:value-of select="$table"/> ALTER COLUMN <xsl:value-of select="$column"/> NULL;
 </xsl:if>
 <xsl:if test="string-length(default-value) &gt; 0">
-ALTER TABLE <xsl:value-of select="$table"/> <xsl:value-of select="$column"/> SET DEFAULT <xsl:value-of select="default-value"/>;
+ALTER TABLE <xsl:value-of select="$table"/> <xsl:value-of select="$column"/> DEFAULT <xsl:value-of select="default-value"/>;
 </xsl:if>
 <xsl:if test="string-length(comment) &gt; 0">
 COMMENT ON COLUMN <xsl:value-of select="$table"/>.<xsl:value-of select="$column"/> IS '<xsl:value-of select="comment"/>';  
@@ -136,7 +136,7 @@ ALTER TABLE <xsl:value-of select="$table"/> DROP PRIMARY KEY;
 <!-- re-create a view -->
 <xsl:template match="view-def">
 <xsl:variable name="quote"><xsl:text>"</xsl:text></xsl:variable>
-CREATE OR REPLACE VIEW <xsl:value-of select="view-name"/>
+CREATE VIEW <xsl:value-of select="view-name"/>
 (
   <xsl:for-each select="column-def">
     <xsl:sort select="dbms-position"/>

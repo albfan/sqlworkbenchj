@@ -10,11 +10,10 @@
   indent="no" 
   standalone="yes"  
   omit-xml-declaration="yes"
-  doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
 <!-- 
 
-Convert the output of SQL Workbench's WbSchemaDiff command to SQL
+Convert the output of SQL Workbench's WbSchemaDiff command to SQL for Oracle
 Author: support@sql-workbench.net 
 
 Thanks to Etienne for his addition and bugfixes 
@@ -23,6 +22,9 @@ Thanks to Etienne for his addition and bugfixes
 <xsl:strip-space elements="*"/>
 
 <xsl:template match="/">
+
+		<xsl:apply-templates select="/schema-diff/add-table"/>
+		
     <xsl:for-each select="/schema-diff/modify-table">
       
       <xsl:variable name="table" select="@name"/>
@@ -52,8 +54,6 @@ Thanks to Etienne for his addition and bugfixes
       </xsl:apply-templates>
 
     </xsl:for-each>
-		
-		<xsl:apply-templates select="/schema-diff/add-table"/>
 		
 		<xsl:for-each select="/schema-diff/create-view">
 			<xsl:apply-templates select="view-def"/>
