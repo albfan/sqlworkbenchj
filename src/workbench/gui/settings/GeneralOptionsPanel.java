@@ -118,6 +118,7 @@ public class GeneralOptionsPanel
 		backupCount.setEnabled(createBackup.isSelected());
 		backupCount.setText(Integer.toString(Settings.getInstance().getMaxWorkspaceBackup()));
 		backupDirPicker.setFilename(Settings.getInstance().getWorkspaceBackupDir());
+		singlePageHelp.setSelected(Settings.getInstance().useSinglePageHelp());
 	}
 
 	public void saveSettings()
@@ -167,6 +168,7 @@ public class GeneralOptionsPanel
 			set.setMaxWorkspaceBackup(value);
 		}
 		set.setWorkspaceBackupDir(backupDirPicker.getFilename());
+		set.setUseSinglePageHelp(singlePageHelp.isSelected());
 	}
 
 	private Locale getSelectedLanguage()
@@ -213,6 +215,7 @@ public class GeneralOptionsPanel
     jLabel1 = new JLabel();
     jLabel2 = new JLabel();
     backupDirPicker = new WbFilePicker();
+    singlePageHelp = new JCheckBox();
     logfilename = new WbLabelField();
     settingsfilename = new WbLabelField();
 
@@ -328,15 +331,15 @@ public class GeneralOptionsPanel
     checkUpdatesLabel.setToolTipText(ResourceMgr.getString("d_LblCheckForUpdate")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 12, 0, 0);
     add(checkUpdatesLabel, gridBagConstraints);
 
     checkInterval.setModel(new DefaultComboBoxModel(new String[] { "never", "daily", "7 days", "14 days", "30 days" }));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(7, 10, 0, 0);
     add(checkInterval, gridBagConstraints);
@@ -370,8 +373,9 @@ public class GeneralOptionsPanel
     useEncryption.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 0, 1, 0);
     jPanel2.add(useEncryption, gridBagConstraints);
 
     consolidateLog.setSelected(Settings.getInstance().getConsolidateLogMsg());
@@ -383,7 +387,7 @@ public class GeneralOptionsPanel
     consolidateLog.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 0, 1, 0);
     jPanel2.add(consolidateLog, gridBagConstraints);
@@ -396,12 +400,10 @@ public class GeneralOptionsPanel
     showTabIndex.setHorizontalTextPosition(SwingConstants.RIGHT);
     showTabIndex.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 25, 1, 0);
+    gridBagConstraints.insets = new Insets(6, 0, 1, 0);
     jPanel2.add(showTabIndex, gridBagConstraints);
 
     enableAnimatedIcon.setSelected(GuiSettings.getUseAnimatedIcon());
@@ -413,11 +415,10 @@ public class GeneralOptionsPanel
     enableAnimatedIcon.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 25, 1, 0);
+    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
     jPanel2.add(enableAnimatedIcon, gridBagConstraints);
 
     exitOnConnectCancel.setSelected(Settings.getInstance().getExitOnFirstConnectCancel());
@@ -429,10 +430,10 @@ public class GeneralOptionsPanel
     exitOnConnectCancel.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 25, 1, 0);
+    gridBagConstraints.insets = new Insets(0, 16, 1, 0);
     jPanel2.add(exitOnConnectCancel, gridBagConstraints);
 
     autoConnect.setSelected(Settings.getInstance().getShowConnectDialogOnStartup());
@@ -444,9 +445,9 @@ public class GeneralOptionsPanel
     autoConnect.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 0, 1, 0);
+    gridBagConstraints.insets = new Insets(0, 0, 1, 0);
     jPanel2.add(autoConnect, gridBagConstraints);
 
     autoSaveWorkspace.setSelected(Settings.getInstance().getAutoSaveWorkspace());
@@ -457,10 +458,10 @@ public class GeneralOptionsPanel
     autoSaveWorkspace.setHorizontalTextPosition(SwingConstants.RIGHT);
     autoSaveWorkspace.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 0, 1, 0);
+    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
     jPanel2.add(autoSaveWorkspace, gridBagConstraints);
 
     createBackup.setText(ResourceMgr.getString("LblBckWksp")); // NOI18N
@@ -469,9 +470,9 @@ public class GeneralOptionsPanel
     createBackup.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 25, 1, 0);
+    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
     jPanel2.add(createBackup, gridBagConstraints);
 
     backupCount.setColumns(3);
@@ -480,9 +481,10 @@ public class GeneralOptionsPanel
     backupCount.setMinimumSize(new Dimension(30, 20));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(6, 3, 0, 0);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(6, 2, 0, 0);
     jPanel2.add(backupCount, gridBagConstraints);
 
     jLabel1.setLabelFor(backupCount);
@@ -490,16 +492,16 @@ public class GeneralOptionsPanel
     jLabel1.setToolTipText(ResourceMgr.getString("d_LblMaxWkspBck")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 13, 0, 0);
+    gridBagConstraints.insets = new Insets(8, 15, 0, 0);
     jPanel2.add(jLabel1, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblBckDir")); // NOI18N
     jLabel2.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 0, 0, 0);
     jPanel2.add(jLabel2, gridBagConstraints);
@@ -508,12 +510,22 @@ public class GeneralOptionsPanel
     backupDirPicker.setSelectDirectoryOnly(true);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 25, 1, 3);
+    gridBagConstraints.insets = new Insets(6, 16, 1, 3);
     jPanel2.add(backupDirPicker, gridBagConstraints);
+
+    singlePageHelp.setText(ResourceMgr.getString("LblHelpSingle")); // NOI18N
+    singlePageHelp.setToolTipText(ResourceMgr.getString("d_LblHelpSingle")); // NOI18N
+    singlePageHelp.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
+    jPanel2.add(singlePageHelp, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -529,7 +541,7 @@ public class GeneralOptionsPanel
     logfilename.setText("jTextField1");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
@@ -539,7 +551,7 @@ public class GeneralOptionsPanel
     settingsfilename.setText("jTextField1");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
@@ -587,6 +599,7 @@ public class GeneralOptionsPanel
   private JLabel quoteCharLabel;
   private JTextField settingsfilename;
   private JCheckBox showTabIndex;
+  private JCheckBox singlePageHelp;
   private WbFontPicker standardFont;
   private JLabel standardFontLabel;
   private JTextField textDelimiterField;

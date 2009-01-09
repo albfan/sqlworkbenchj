@@ -55,6 +55,64 @@ public class BatchRunnerTest
 		}
 	}
 
+	public void testSingleCommand()
+		throws Exception
+	{
+		try
+		{
+			util.emptyBaseDirectory();
+			util.prepareEnvironment();
+
+			WbConnection con = util.getConnection("testSingleCommand");
+			Statement stmt = con.createStatement();
+			
+			// prepare database
+			TestUtil.executeScript(con,
+				"CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+				"insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent');\n" +
+				"insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect');\n" +
+				"commit;"
+				);
+
+			ResultSet rs = stmt.executeQuery("select count(*) from person");
+			assertTrue(rs.next());
+			int count = rs.getInt(1);
+			assertEquals(2, count);
+			rs.close();
+
+
+			// Initialize the batch runner
+			ArgumentParser parser = new AppArguments();
+			parser.parse("-url='jdbc:h2:mem:testSingleCommand' " +
+				" -username=sa " +
+				" -driver=org.h2.Driver " +
+				" -rollbackOnDisconnect=true "  +
+				" -command='delete from person; commit;' ");
+
+			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+
+			assertNotNull(runner);
+
+			runner.connect();
+			con = runner.getConnection();
+			assertNotNull(con);
+
+			runner.execute();
+			assertTrue(runner.isSuccess());
+
+			rs = stmt.executeQuery("select count(*) from person");
+			assertTrue(rs.next());
+			count = rs.getInt(1);
+			assertEquals(0, count);
+
+			SqlUtil.closeAll(rs, stmt);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 	public void testTransactionControlError()
 		throws Exception
 	{

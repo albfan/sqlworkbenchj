@@ -82,22 +82,22 @@ public class ReaderFactory
 		return new JdbcIndexReader(meta);
 	}
 	
-	public static ConstraintReader getConstraintReader(WbConnection con)
+	public static ConstraintReader getConstraintReader(DbMetadata meta)
 	{
-		String dbid = con.getMetadata().getDbId();
-		if ("postgresql".equals(dbid))
+		String dbid = meta.getDbId();
+		if (meta.isPostgres())
 		{
 			return new PostgresConstraintReader();
 		}
-		if ("oracle".equals(dbid))
+		if (meta.isOracle())
 		{
 			return new OracleConstraintReader();
 		}
-		if ("hsql_database_engine".equals(dbid))
+		if (meta.isHsql())
 		{
-			return new HsqlConstraintReader(con.getSqlConnection());
+			return new HsqlConstraintReader(meta.getSqlConnection());
 		}
-		if ("microsoft_sql_server".equals(dbid))
+		if (meta.isSqlServer())
 		{
 			return new SqlServerConstraintReader();
 		}
@@ -117,11 +117,11 @@ public class ReaderFactory
 		{
 			return new ASAConstraintReader();
 		}
-		if ("apache_derby".equals(dbid) || dbid.indexOf("cloudscape") > -1)
+		if (meta.isApacheDerby())
 		{
 			return new DerbyConstraintReader();
 		}
-		if (dbid.indexOf("firstsql") > -1)
+		if (meta.isFirstSql())
 		{
 			return new FirstSqlConstraintReader();
 		}

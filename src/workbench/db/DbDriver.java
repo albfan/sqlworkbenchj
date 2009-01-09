@@ -148,19 +148,23 @@ public class DbDriver
 	{
 		return createLibraryString("|");
 	}
-	
-	public void setLibrary(String libList)
+
+	public static List<String> splitLibraryList(String libList)
 	{
-		this.libraryList = null;
-		
 		if (libList.indexOf("|") > -1)
 		{
-			this.libraryList = StringUtil.stringToList(libList, "|", true, true, false);
+			return StringUtil.stringToList(libList, "|", true, true, false);
 		}
 		else if (!StringUtil.isEmptyString(libList))
 		{
-			this.libraryList = StringUtil.stringToList(libList, StringUtil.getPathSeparator(), true, true, false);
+			return StringUtil.stringToList(libList, StringUtil.getPathSeparator(), true, true, false);
 		}
+		return null;
+	}
+	
+	public void setLibrary(String libList)
+	{
+		this.libraryList = splitLibraryList(libList);
 		this.driverClassInstance = null;
 		this.classLoader = null;
 	}

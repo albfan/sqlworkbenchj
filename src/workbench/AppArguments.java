@@ -26,6 +26,7 @@ public class AppArguments
 {
 	// Parameters for batch execution used by BatchRunner
 	public static final String ARG_SCRIPT = "script";
+	public static final String ARG_COMMAND = "command";
 	public static final String ARG_SCRIPT_ENCODING = "encoding";
 	public static final String ARG_ABORT = "abortOnError";
 	
@@ -83,6 +84,7 @@ public class AppArguments
 		addArgument(ARG_CONFIGDIR);
 		addArgument(ARG_LIBDIR);
 		addArgument(ARG_SCRIPT);
+		addArgument(ARG_COMMAND);
 		addArgument(ARG_SCRIPT_ENCODING);
 		addArgument(ARG_LOGFILE);
 		addArgument(ARG_ABORT, ArgumentType.BoolArgument);

@@ -669,11 +669,12 @@ public final class WbManager
 			Settings.getInstance().initialize();
 
 			String scriptname = cmdLine.getValue(AppArguments.ARG_SCRIPT);
+			String cmd = cmdLine.getValue(AppArguments.ARG_COMMAND);
 
 			boolean readDriverTemplates = true;
 			boolean showHelp = cmdLine.isArgPresent("help");
 
-			if (StringUtil.isEmptyString(scriptname) && !showHelp)
+			if (StringUtil.isBlank(scriptname) && StringUtil.isBlank(cmd) && !showHelp)
 			{
 				this.batchMode = false;
 				String url = cmdLine.getValue(AppArguments.ARG_CONN_URL);

@@ -86,6 +86,7 @@ public class BatchRunner
 	private boolean optimizeCols = true;
 	private boolean showStatementTiming = true;
 	private String connectionId = "BatchRunner";
+	private String command;
 	
 	public BatchRunner()
 	{
@@ -351,7 +352,45 @@ public class BatchRunner
 		this.stmtRunner.setRowMonitor(this.rowMonitor);
 	}
 
+	/**
+	 * Define a sql script that should be run instead of a list of files.
+	 * @param sql
+	 */
+	public void setCommandToRun(String sql)
+	{
+		this.command = sql;
+	}
+	
+	protected void runCommand()
+	{
+		try
+		{
+			executeScript(command);
+			this.success = true;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("BatchRunner.execute()", ResourceMgr.getString("MsgBatchStatementError"), e);
+			String msg = ExceptionUtil.getDisplay(e);
+			if (showProgress) printMessage(""); // force newline in case progress reporting was turned on
+			printMessage(ResourceMgr.getString("TxtError") + ": " + msg);
+			this.success = false;
+		}
+	}
+
 	public void execute()
+	{
+		if (filenames != null && filenames.size() > 0)
+		{
+			runFiles();
+		}
+		else
+		{
+			runCommand();
+		}
+	}
+	
+	protected void runFiles()
 	{
 		boolean error = false;
 		int count = this.filenames.size();
@@ -857,7 +896,9 @@ public class BatchRunner
 	public static BatchRunner createBatchRunner(ArgumentParser cmdLine, boolean checkScriptPresence)
 	{
 		String scripts = cmdLine.getValue(AppArguments.ARG_SCRIPT);
-		if (checkScriptPresence && StringUtil.isBlank(scripts)) return null;
+		String sqlcmd = cmdLine.getValue(AppArguments.ARG_COMMAND);
+
+		if (checkScriptPresence && StringUtil.isBlank(scripts) && StringUtil.isBlank(sqlcmd)) return null;
 
 		String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
 
@@ -908,7 +949,17 @@ public class BatchRunner
 		boolean feedback = cmdLine.getBoolean(AppArguments.ARG_FEEDBACK, true);
 		boolean interactive = cmdLine.getBoolean(AppArguments.ARG_INTERACTIVE, false);
 
-		BatchRunner runner = new BatchRunner(scripts);
+		BatchRunner runner = null;
+		if (StringUtil.isNonBlank(scripts))
+		{
+			runner = new BatchRunner(scripts);
+		}
+		else
+		{
+			runner = new BatchRunner();
+			runner.setCommandToRun(sqlcmd);
+		}
+		
 		runner.showResultSets(showResult);
 		try
 		{

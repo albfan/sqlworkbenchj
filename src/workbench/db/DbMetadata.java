@@ -2471,7 +2471,7 @@ public class DbMetadata
 		{
 			if (constraintReader == null)
 			{
-				constraintReader = ReaderFactory.getConstraintReader(this.dbConnection);
+				constraintReader = ReaderFactory.getConstraintReader(this);
 			}
 			return constraintReader;
 		}

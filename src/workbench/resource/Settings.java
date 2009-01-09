@@ -312,6 +312,12 @@ public class Settings
 			return null;
 		}
 	}
+
+	public void setUseSinglePageHelp(boolean flag)
+	{
+		setProperty("workbench.help.singlepage", flag);
+	}
+	
 	public boolean useSinglePageHelp()
 	{
 		return getBoolProperty("workbench.help.singlepage", false);
