@@ -92,7 +92,7 @@ FROM person p, address a;</programlisting>
 			The files contain one keyword per line. Case does not matter (<literal>SELECT</literal> 
 			and <literal>select</literal> are treated identically).
 			If you want to add a specific word to the list of global keywords, simply create a plain
-			text file <literal>keywords.wb</literal> in the <link linkend="confid-dir">config directory</link>
+			text file <literal>keywords.wb</literal> in the <link linkend="config-dir">config directory</link>
 			and put one keyword per line into the file, e.g:
 		</para>
 		<programlisting>ALIAS

@@ -994,43 +994,6 @@ WHERE id=42;</programlisting>
     </para></note>
   </section>
 	
-  <section id="command-enableout" xreflabel="ENABLEOUT">
-    <title>Enable Oracle's DBMS_OUTPUT package - ENABLEOUT</title>
-    
-    <para>
-      This command enables the <literal>DBMS_OUTPUT</literal> package when connected to
-      an Oracle database. On other systems this command does nothing. After
-      the <literal>DBMS_OUTPUT</literal> package is enabled, any message written with
-      dbms_output.put_line() are displayed in the message pane after
-      executing a SQL statement. It is equivalent to calling the dbms_output.enable() procedure.
-    </para>
-    
-    <para>
-      You can control the buffer size of the <literal>DBMS_OUTPUT</literal> package by passing the 
-      desired buffer size as a parameter to the <literal>ENABLEOUT</literal> command:
-			<literal>ENABLEOUT 32000;</literal>
-    </para>
-    
-    <note><para>
-	Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with 
-	the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
-	package is enabled. 
-	In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
-	to be switched off. 
-    </para></note>
-    
-  </section>
-  
-  <section id="command-disableout">
-    <title>Disable Oracle's DBMS_OUTPUT package - DISABLEOUT</title>
-    
-    <para>
-      This disables the <literal>DBMS_OUTPUT</literal> package for an Oracle database.
-      This is equivalent to calling dbms_output.disable() procedure.
-    </para>
-    
-  </section>
-  
   <section id="command-wbfeedback">
     <title>Control feedback messages - WbFeedback</title>
     <para>
@@ -1068,8 +1031,8 @@ WHERE id=42;</programlisting>
     <section id="command-set-serveroutput">
       <title>SERVEROUTPUT</title>
       <para>
-				<literal>SET serveroutput on</literal> is equivalent to the <link linkend="command-enableout">ENABLEOUT</link>
-				command and <literal>SET serveroutput off</literal> is equivalent to <link linkend="command-disableout">DISABLEOUT</link> command.
+				<literal>SET serveroutput on</literal> is equivalent to the <link linkend="command-dbms-output">ENABLEOUT</link>
+				command and <literal>SET serveroutput off</literal> is equivalent to <link linkend="command-dbms-output">DISABLEOUT</link> command.
       </para>
     </section>
     
@@ -1092,12 +1055,23 @@ WHERE id=42;</programlisting>
     
     <para>
 			Describe shows the definition of the given table. It can be
-			abbreviated with DESC. The command expects the table name as a parameter.</para>
-			<programlisting>DESC person;</programlisting>
-			<para>If you want to show the structure of a table from a different user, you need
-			to prefix the table name with the desired user
+			abbreviated with DESC. The command expects the table name as a parameter. 
+			The output of the command will be several result tabs to show the table 
+			structure, indexes and triggers (if present).
+			If the "described" object is a view, the message tab will additionally contain
+			the view source (if available).
 		</para>
-    <programlisting>DESCRIBE otheruser.person;</programlisting>
+		<programlisting>DESC person;</programlisting>
+
+		<para>
+			If you want to show the structure of a table from a different user, you need
+			to prefix the table name with the desired user <literal>DESCRIBE otheruser.person;</literal>
+		</para>
+		<note><para>
+			Although the name of this command is identical to Oracle SQL*Plus' <literal>DESC</literal>
+			command, this is a &wb-productname; specific implementation and works the same way on
+			any supported DBMS.
+		</para></note>
   </section>
   
   <section id="command-list">
@@ -1166,6 +1140,16 @@ WHERE id=42;</programlisting>
 		<para>
 			You can limit the list by supplying a wildcard search for the name, e.g.:
 			<programlisting>WbListProcs public.p%</programlisting>
+		</para>
+  </section>
+
+  <section id="command-listtriggers">
+    <title>List triggers - WbListTriggers</title>
+
+    <para>
+			This command will list all stored triggers available to the
+      current user. The output of this command is equivalent to the Database
+			Explorer&apos;s Triggers tab (if enabled)
 		</para>
   </section>
 
@@ -1285,5 +1269,40 @@ WHERE id=42;</programlisting>
 		<programlisting>WbConnect -profile=production</programlisting>
 		
   </section>
+
+  <section id="command-dbms-output" xreflabel="ENABLEOUT">
+    <title>Using Oracle's DBMS_OUTPUT package</title>
+
+    <para>
+      To turn on support for Oracle's <literal>DBMS_OUTPUT</literal> package you have to use the
+			(&wb-productname; specific) command <literal>ENABLEOUT</literal>.
+		</para>
+		<para>
+			After running <literal>ENABLEOUT</literal> the <literal>DBMS_OUTPUT</literal> package is enabled,
+			and any message written with <literal>dbms_output.put_line()</literal> is displayed in the message
+			pane after executing a SQL statement. It is equivalent to calling the dbms_output.enable() procedure.
+    </para>
+
+    <para>
+      You can control the buffer size of the <literal>DBMS_OUTPUT</literal> package by passing the
+      desired buffer size as a parameter to the <literal>ENABLEOUT</literal> command:
+			<literal>ENABLEOUT 32000;</literal>
+    </para>
+
+    <note><para>
+	Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
+	the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal>
+	package is enabled.
+	In order to be able to display these columns support for <literal>DBMS_OUTPUT</literal> has
+	to be switched off.
+    </para></note>
+
+		<para>
+			To disable the <literal>DBMS_OUTPUT</literal> package again, use the (&wb-productname; specific)
+			command <literal>DISABLEOUT</literal>. This is equivalent to calling
+			<literal>dbms_output.disable()</literal> procedure.
+		</para>
+  </section>
+
 
 </section>

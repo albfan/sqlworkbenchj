@@ -11,6 +11,15 @@
 
 	<section id="options-general">
 		<title>General options</title>
+		
+		<section id="options-gui-language">
+			<title>Language</title>
+			<para>
+				With this option you can select in which language the application
+        is shown. The new value will only be in affect when you restart the
+        application.
+			</para>
+		</section>
 
 		<section id="options-automatic-update">
 			<title>Check for updates</title>
@@ -26,54 +35,6 @@
 				If you disable this option, you can manually check
 				for updates using the menu
 				<menuchoice><guimenu>Help</guimenu><guimenuitem>Check for updates...</guimenuitem></menuchoice>.
-			</para>
-		</section>
-
-		<section id="options-gui-language">
-			<title>Language</title>
-			<para>
-				With this option you can select in which language the application
-        is shown. The new value will only be in affect when you restart the
-        application.
-			</para>
-		</section>
-
-		<section id="options-encrypt-password">
-			<title>Encrypt passwords</title>
-			<para>If this option is enabled, the password stored within a connection
-				profile will be encrypted. Whether the password should be stored at all
-				can be selected in the profile itself.
-			</para>
-			<note><para>
-				Using this option only supplies very limited security. As the
-				source code for &wb-productname; is freely available, the algorithm
-				to decrypt the passwords stored in this way can easily be extracted
-				to retrieve the plain text passwords.
-			</para></note>
-		</section>
-
-		<section id="options-consolidate-log">
-			<title>Consolidate script log</title>
-			<para>
-				Usually &wb-productname; reports the success and timings
-				for each statement that is beeing executed in the message tab
-				of the current SQL panel. For large scripts this can slow down
-				script execution dramatically. If this option is enabled, only
-				a summary of the execution is printed once the script has finished.
-				You can turn off the log during script execution by using
-				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
-			</para>
-		</section>
-
-		<section id="option-animated-icon" xreflabel="Enable animated icons">
-			<title>Enable animated icons</title>
-			<para>Enable or disable the use of an animated icons in the SQL editor to
-				indicate a running SQL statement. It has been reported, that the animated
-				icon does have a severe (negativ) impact on the performance on some computers
-				(depending on JDK/OS/Graphics driver).
-				If you experience a high CPU usage during the execution of SQL statements, or
-				if you find your SQL statements are running very slow, try
-				to turn off the usage of the animated icons.
 			</para>
 		</section>
 
@@ -93,7 +54,8 @@
 
 		<section id="options-field-delimiter">
 			<title>Field delimiter</title>
-			<para>The default delimiter used when exporting data to a text file.
+			<para>
+				The default delimiter used when exporting data to a text file.
 				This can be overridden in the file selection dialog when actually
 				exporting the data.
 			</para>
@@ -101,7 +63,8 @@
 
 		<section id="options-quote-character">
 			<title>Quote character</title>
-			<para>The default character to be used to quote column data when exporting to
+			<para>
+				The default character to be used to quote column data when exporting to
 				a text file. This value will be used when you don't specify a quote
 				character e.g. for the <link linkend="command-export"><literal>WbExport</literal></link>
 				command and when you use <menuchoice><guimenu>SQL</guimenu><guimenuitem>Save data as</guimenuitem></menuchoice>
@@ -128,6 +91,123 @@
 				application log. The most verbose level is <literal>DEBUG</literal>. With
 				<literal>ERROR</literal> only severe errors (either resulting from running
 				a user command or from an internal error) are written to the application log.
+			</para>
+		</section>
+
+		<section id="options-show-connect">
+			<title>Show connect dialog</title>
+			<para>
+				If this option is enabled, the connect dialog will be shown automatically when the
+				application is started.
+			</para>
+		</section>
+
+		<section id="options-exit-connect">
+			<title>Exit on first connect cancel</title>
+			<para>
+				If this option is enabled, then the application is closed completely if the
+				initial connect dialog is cancelled.
+			</para>
+			<para>
+				This option is only valid if "Show connect dialog" is selected.
+			</para>
+		</section>
+
+		<section id="options-encrypt-password">
+			<title>Encrypt passwords</title>
+			<para>If this option is enabled, the password stored within a connection
+				profile will be encrypted. Whether the password should be stored at all
+				can be selected in the profile itself.
+			</para>
+
+			<note><para>
+				Using this option only supplies very limited security. As the
+				source code for &wb-productname; is freely available, the algorithm
+				to decrypt the passwords stored in this way can easily be extracted
+				to retrieve the plain text passwords.
+			</para></note>
+		</section>
+
+		<section id="options-single-page-help">
+			<title>Single page HTML help</title>
+			<para>
+				If this option is enabled, the HTML help will be shown as a single
+				page in the browser instead of one page per chapter.
+			</para>
+		</section>
+
+		<section id="options-show-tab-index">
+			<title>Show tab index</title>
+			<para>
+				If this option is enabled, each editor tab will be shown with its index. You can
+				then select the first 9 tabs by pressing Ctrl-1, Ctrl-2 and so on.
+			</para>
+		</section>
+
+		<section id="option-animated-icon" xreflabel="Enable animated icons">
+			<title>Enable animated icons</title>
+			<para>Enable or disable the use of an animated icons in the SQL editor to
+				indicate a running SQL statement. It has been reported, that the animated
+				icon does have a severe (negativ) impact on the performance on some computers
+				(depending on JDK/OS/Graphics driver).
+				If you experience a high CPU usage during the execution of SQL statements, or
+				if you find your SQL statements are running very slow, try
+				to turn off the usage of the animated icons.
+			</para>
+		</section>
+
+		<section id="options-consolidate-log">
+			<title>Consolidate script log</title>
+			<para>
+				Usually &wb-productname; reports the success and timings
+				for each statement that is beeing executed in the message tab
+				of the current SQL panel. For large scripts this can slow down
+				script execution dramatically. If this option is enabled, only
+				a summary of the execution is printed once the script has finished.
+				You can turn off the log during script execution by using
+				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
+			</para>
+		</section>
+
+		<section id="options-save-wksp">
+			<title>Auto-Save workspace</title>
+			<para>
+				If this option is enabled, the current workspace is saved each time you run
+				a SQL statement.
+			</para>
+		</section>
+
+		<section id="options-backup-wksp">
+			<title>Create workspace backup</title>
+			<para>
+				If this option is enabled the current workspace file will be backed up, before
+				saving the new workspace. You can keep multiple versions of the workspace by
+				supplying a number in the "Max. Backups" input field. If a value > 1 is
+				entered, saving the workspace will create a new "version" of the backup file.
+				The versions will have the version number appended (e.g. <literal>testdata.wksp.1</literal>,
+				<literal>testdata.wksp.2</literal> and so on). The most recent version is the one with the
+				highest number.
+			</para>
+		</section>
+
+		<section id="options-wksp-bck-dir">
+			<title>Workspace backup directory</title>
+			<para>
+				By default the backups for the workspaces are stored in the same directory
+				as the workspace file itself. If you want to keep the (versioned) backups in a
+				separate directory, you can specify it here.
+			</para>
+			<para>
+				If you specify a relative directory, it will be relative to the
+				<link linkend="config-dir">config directory</link>.
+			</para>
+		</section>
+
+		<section id="options-file-info">
+			<title>Cofniguration file information</title>
+			<para>
+				At the bottom of the "General options" page, the full filename of the configuration
+				file and the logfile are listed. 
 			</para>
 		</section>
 	</section>
@@ -224,23 +304,6 @@
 			</para>
 		</section>
 
-		<section id="options-error-highlight">
-			<title>Error highlight color</title>
-			<para>
-				When a statement is not executed correctly (and the DBMS signals
-				an error) it is highlighted in the editor. With this option
-				you can select the color that is used to highlight the incorrect
-				statement.
-			</para>
-		</section>
-
-		<section id="options-selection-color">
-			<title>Selection color</title>
-			<para>
-				The color that is used to highlight selected text.
-			</para>
-		</section>
-
 		<section id="options-alternate-delimiter" xreflabel="alternate delimiter">
 			<title>Alternate Delimiter</title>
 			<para>
@@ -305,6 +368,43 @@
 
 	</section>
 
+	<section id="options-editor-colors">
+		<title>Editor colors</title>
+
+		<section id="options-editor-curr-line-color">
+			<title>Current line color</title>
+			<para>
+				If you want to highlight the line in which the cursor is located, specify
+				the color for the highlighting. To disable the highlight for the current line,
+				simply "remove" the color selection by clicking on the remove button.
+			</para>
+		</section>
+
+		<section id="options-selection-color">
+			<title>Selected text</title>
+			<para>
+				The color that is used to highlight selected text.
+			</para>
+		</section>
+
+		<section id="options-error-highlight">
+			<title>Error highlight color</title>
+			<para>
+				When a statement is not executed correctly (and the DBMS signals
+				an error) it is highlighted in the editor. With this option
+				you can select the color that is used to highlight the incorrect
+				statement.
+			</para>
+		</section>
+
+		<section id="options-syntax-highlight">
+			<title>Syntax highlighting colors</title>
+			<para>
+				You can change the colors for the different types of keywords in the editor.
+			</para>
+		</section>
+
+	</section>
 	<section id="options-data-display">
 		<title>Options for displaying data</title>
 
@@ -403,6 +503,18 @@
 				With the "Sort Locale" option you can select which language rules should be applied
 				while sorting. Note that sorting with a locale is slower than using the "Default" setting.
       </para>
+    </section>
+
+		<section id="option-selection-summary">
+      <title>Show selection summary in statusbar</title>
+      <para>
+				If this option is enabled a summary of the current selection of the data is displayed.
+				If full rows are selected, the statusbar will display the number of rows selected
+      </para>
+			<para>
+				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
+				while selecting with the mouse), the statusbar will display the sum of the selected values.
+			</para>
     </section>
 
 		<section id="column-width-settings">
@@ -643,17 +755,24 @@
 				When displaying the SQL source for a table, a name will be generated
 				for primary key constraint if the current constraint has no name or
 				a system generated name.
-				<note>
-					<para>
-						If this option is selected, the generated SQL does not reflect
-						the real statement that was used to create the table!
-					</para>
-				</note>
+			</para>
+			<para>
 				System generated names are identified using a regular expression
 				that can be <link linkend="manual-setting-system-names">configured</link>.
 			</para>
+			<para>
+				If this option is selected, the generated SQL will not reflect
+				the real statement that was used to create the table!
+			</para>
 		</section>
 
+		<section id="dbexp-options-tab-location">
+			<title>Object details tabs</title>
+			<para>
+				With this dropdown you can select the position of the details tabs
+				(Columns, Source, Data etc).
+			</para>
+		</section>
 	</section>
 
 	<section id="options-window-title">
@@ -944,13 +1063,17 @@ WHERE id = 42;</programlisting>
 		<title>External tools</title>
 		<para>
 			On this page, you can define external tools (programs). Currently the only
-			place where this is used, is in the <link linkend="update-blob-editmode">blob info dialog</link>,
-			to open the BLOB data with one of the defined external tools. This could
-			be a program to display images (like <ulink url="http://www.xnview.org">XnView</ulink>),
-			<ulink url="http://www.adobe.com/products/acrobat/index.html">Acrobat Reader</ulink>
-			to display PDF documents, <ulink url="http://www.openoffice.org">OpenOffice</ulink> to display
-			office documents or a text editor (like <ulink url="http://www.pspad.com">PSPad</ulink>) to
-			display text files.
+			place where this is used, is in the <link linkend="update-blob-editmode">BLOB info dialog</link>,
+			to open the BLOB data with one of the defined external tools. 
+		</para>
+		
+		<para>
+			This could be a program to display images, <ulink url="http://www.openoffice.org">OpenOffice</ulink> to display
+			office documents or a text editor to display text files.
+		</para>
+		<para>
+			You do not need to define the PDF Reader here, as the definition from the
+			<link linkend="options-general">general options</link> will automatically be used in the BLOB info dialog.
 		</para>
 	</section>
 
@@ -967,18 +1090,18 @@ WHERE id = 42;</programlisting>
 			of the look and feel of your choice. The name is &wb-productname; internal
 			and is only used when displaying the list of available Look and Feels.
 		</para>
-		<para>
-			When you switch the current Look &amp; Feel, you will need to restart the
-			application to activate the new look and feel. Note that if you switch
-			the current Look &amp; Feel it will be changed, regardless whether
-			you close the options dialog using Cancel or OK.
-		</para>
 		<note><para>
 			The current look and feel is only changed when you click on the
 			<guibutton>Make current</guibutton> button. Simply selecting a different entry
 			in the list on the left side will <emphasis role="bold">not</emphasis>
 			change the look and feel.
-		</para></note>
+		</para></note>		<para>
+			When you switch the current Look &amp; Feel, you will need to restart the
+			application to activate the new look and feel. Note that if you switch
+			the current Look &amp; Feel it will be changed, regardless whether
+			you close the options dialog using Cancel or OK.
+		</para>
+
 	</section>
 
 </section>

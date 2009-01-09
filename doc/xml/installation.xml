@@ -85,7 +85,7 @@
 		<programlisting>java -jar sqlworkbench.jar</programlisting>
 
 		<para>
-			Native executables for Windows and Mac OSX are supplied to simple start &wb-productname; by
+			Native executables for Windows and Mac OSX are supplied that start &wb-productname; by
 			using the default Java runtime installed on your system. Details on using
 			the <link linkend="launcher-using">Windows launcher</link> can be found
 			<link linkend="launcher-using">here</link>.
@@ -180,8 +180,6 @@
 				as the full path to the driver's jar file(s) is stored in the file (unless you 
 				define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
 			</para>
-			
-			
 		</section>
 	</section>
 
@@ -189,12 +187,28 @@
 	<section id="displaying-help">
 		<title>Displaying help</title>
 		<para>
-			You have two options to display help for &wb-productname;. Either the built-in help
-			file, which is accessible through <menuchoice><guimenu>Help</guimenu><guimenuitem>Contents</guimenuitem></menuchoice>
-			or the PDF manual by selecting <menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>. 
+			You have two possibilities to display help for &wb-productname;. Either a HTML based
+			help or a PDF version of the manual.
+		</para>
+		<para>
+			The HTML help is available through the menu item 
+			<menuchoice><guimenu>Help</guimenu><guimenuitem>Contents</guimenuitem></menuchoice>
+			It is expected that the HTML manual is stored in a directory called <literal>manual</literal>
+			in the same directory where <literal>sqlworkbench.jar</literal> is located. This is automatically the case
+			when you extract the distribution archive with sub-directories.
+		</para>
+		<para>
+			You can choose to display a single-page version of the HTML help (easier to search) or a multi-page
+			version of the help that is easier to navigatie. This can be switched in the options dialog, that is
+			accessible from <menuchoice><guimenu>Tools</guimenu><guimenuitem>Option</guimenuitem></menuchoice>.
+		</para>
+		<para>
+			The the PDF manual can be displayed by selecting <menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
 			In order to be able to display the PDF manual, you need to define the path to the executable for the PDF 
-			reader in the <link linkend="options-general">General options</link>
-			and the file <literal>SQLWorkbench-Manual.pdf</literal> must be available in the 
+			reader in the <link linkend="options-general">General options</link> section of the options dialog.
+		</para>
+		<para>
+			The file <literal>SQLWorkbench-Manual.pdf</literal> must be available in the
 			directory where <literal>sqlworkbench.jar</literal> is located.
 		</para>
 	</section>

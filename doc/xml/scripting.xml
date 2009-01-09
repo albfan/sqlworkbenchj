@@ -4,9 +4,16 @@
 	<para>
 		&wb-productname; can also be used from batch files to execute SQL scripts.
 		This can be used to e.g. automatically extract data from a database or run
-		other SQL queries or statements. If the <link linkend="scripting-scriptfile">-script</link> parameter
-		is passed on the commandline, &wb-productname; will run in batch mode, otherwise
-		in GUI mode.
+		other SQL queries or statements.
+	</para>
+	<para>
+		To start &wb-productname; in batch mode, either the 
+		<link linkend="scripting-scriptfile">-script</link> or  
+		<link linkend="scripting-command">-command</link> must be passed as an argument on
+		the commandline. 
+	</para>
+	<para>
+		If neither of these parameters is present, &wb-productname; will run in GUI mode.
 	</para>
 	
 	<para>
@@ -64,9 +71,8 @@
 		<title>Specifying the script file(s)</title>
 		
 		<para>
-			With the parameter <literal>-script=&#60;filename&#62;</literal> the script
-			file to be executed can be passed to the application. Multiple scripts can be specified by
-			separating them with a comma. The scripts will be executed in the
+			The script that should be run is specified with the parameter <literal>-script=&#60;filename&#62;</literal>
+			Multiple scripts can be specified by separating them with a comma. The scripts will then be executed in the
 			order in which they appear in the commandline. If the filenames contain spaces
 			or dashes (i.e. <literal>test-1.sql</literal>) the names have to be quoted. 
 		</para>
@@ -74,6 +80,23 @@
 			You can also execute several scripts by using the <link linkend="command-wbinclude"><literal>WbInclude</literal></link>
 			command inside a script.
 		</para>
+	</section>
+
+	<section id="scripting-command">
+		<title>Specifying a SQL command directly</title>
+
+		<para>
+			If you do not want to create an extra SQL script just to run one or more short SQL commands, you
+			can specify the commands to be executed directly with the <literal>-command</literal> parameter.
+			to specifiy more than on SQL statement use the standard delimiter to delimit them, e.g.
+			<literal>-command='delete from person; commit;'</literal>
+		</para>
+
+		<para>
+			If a script has been specified using the <literal>-script</literal> parameter, the <literal>-command</literal>
+			parameter is ignored.
+		</para>
+
 	</section>
 
 	<section id="scripting-delimiter">
@@ -305,12 +328,15 @@
 	<section id="scripting-examples">
 		<title>Examples</title>
 
-		<para>The examples in this section are displayed on several lines. If
-		you enter them manually on the commandline you will need to put everything
-		in one line, or use the escape character for your operating system to
-		extend a single command over more then one input line.
+		<note>
+		<para>
+			For readability the examples in this section are displayed on several lines. If
+			you enter them manually on the commandline you will need to put everything
+			in one line, or use the escape character for your operating system to
+			extend a single command over more then one input line.
 		</para>
-
+		</note>
+		
 		<para><emphasis role="bold">Connect to the database without specifying a connection profile:</emphasis></para>
 		<programlisting>java -jar sqlworkbench.jar -url=jdbc:postgresql:/dbserver/mydb
      -driver=org.postgresql.Driver
@@ -337,6 +363,21 @@
 			Note that you need to quote each file individually (where it's needed) and not the value for the
 			<literal>-script</literal> parameter
 		</para>
+
+		<para><emphasis role="bold">Run a SQL command in batch mode without using a script file</emphasis></para>
+		<para>
+			The following example exports the table "person" without using the -script parameter:
+		</para>
+		<programlisting>java -jar sqlworkbench.jar
+     -profile='TestData'
+     -command='WbExport -file=person.txt -type=text -sourceTable=person'</programlisting>
+
+		<para>
+			The following example shows how to run two different SQL statements without using the -script parameter:
+		</para>
+		<programlisting>java -jar sqlworkbench.jar 
+     -profile='TestData'
+     -command='delete from person; commit;'</programlisting>
 
 	</section>
 

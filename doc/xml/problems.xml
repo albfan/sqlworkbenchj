@@ -19,7 +19,7 @@
 				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal> 
 				package is enabled. 
 				In order to be able to display these columns, the support for <literal>DBMS_OUTPUT</literal> 
-				has to be switched off using the <link linkend="command-disableout">DISABLEOUT</link> command
+				has to be switched off using the <link linkend="command-dbms-output">DISABLEOUT</link> command
 				before runnnig a <literal>SELECT</literal> statement that returns <literal>LONG</literal> 
 				or <literal>LONG RAW</literal> columns.
 			</para>

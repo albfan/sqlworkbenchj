@@ -796,7 +796,7 @@ Done.</programlisting>
 			<title>Oracle</title>
 			<para>
 				For Oracle the <literal>DBMS_OUTPUT</literal> package is supported. Support for this
-				package can be turned on with the <xref linkend="command-enableout"/> command.
+				package can be turned on with the <xref linkend="command-dbms-output"/> command.
 				If this support is not turned on, the messages will not be displayed. This is the same
 				as using the <literal>SET SERVEROUTPUT ON</literal> command in SQL*Plus.
 			</para>
@@ -1024,8 +1024,10 @@ WHERE base_id = 1;</programlisting>
 			The result will be displayed in the order returned by the DBMS (i.e.
 			if you use an <literal>ORDER BY</literal> in your <literal>SELECT</literal>
 			the display will be displayed as sorted by the DBMS).
+		</para>
+		<para>
 			You can change the sorting of the displayed data by clicking on the header
-			of the column that should be used for sorting. Initially the data will be
+			of the column that should be used for sorting. After the first click the data will be
 			sorted ascending (lower values at the top). If you click on the column again
 			the sort order will be reversed. The sort order will be indicated by a little
 			triangle in the column header. If the triangle points upward the data is sorted
@@ -1035,8 +1037,8 @@ WHERE base_id = 1;</programlisting>
 		</para>
 		<para>
 			If you want to sort by more than one column, hold down the <keycap>Ctrl</keycap> key
-			will clicking on the (second) header. The initial sort order is ascending for that column.
-			To change the sort order hold down the <keycap>Ctrl</keycap> key and click on the column
+			will clicking on the (second) header. The initial sort order is ascending for that additional column.
+			To switch the sort order hold down the <keycap>Ctrl</keycap> key and click on the column
 			header again. The sort order for all "secondary" sort columns will be indicated
 			with a slightly smaller triangle than the one for the primary sort column.
 		</para>
@@ -1049,8 +1051,8 @@ WHERE base_id = 1;</programlisting>
 		<para>
 			By default &wb-productname; will use "ASCII" sorting which is case-sensitive and will not
 			sort special characters according to your language. You can change the locale that is used
-			for sorting data in the options dialog under the category "Data Display". Sorting using a 
-			locale is a bit slower than "ASCII" sorting.
+			for sorting data in the <link linkend="option-sort-collator">options dialog</link> under the category
+			"Data Display". Sorting using a locale is a bit slower than "ASCII" sorting.
 		</para>
 
 	</section>
