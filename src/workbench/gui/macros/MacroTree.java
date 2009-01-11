@@ -523,6 +523,12 @@ public class MacroTree
 	{
 		MacroDefinition current = getSelectedMacro();
 		MacroGroup group = getCurrentGroup();
+		if (group == null)
+		{
+			String newName = addGroup();
+			if (newName == null) return false;
+			group = getCurrentGroup();
+		}
 		MacroDefinition newMacro = null;
 		if (current != null && copyCurrent)
 		{
@@ -531,7 +537,7 @@ public class MacroTree
 		}
 		else
 		{
-			newMacro = new MacroDefinition(ResourceMgr.getString("LblNewMacroGroup"), "");
+			newMacro = new MacroDefinition(ResourceMgr.getString("LblNewMacro"), "");
 		}
 		group.addMacro(newMacro);
 		TreePath newItem = macroModel.addMacro(group, newMacro);

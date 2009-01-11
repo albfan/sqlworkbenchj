@@ -1512,7 +1512,7 @@ public class Settings
 
 	public boolean getCreateWorkspaceBackup()
 	{
-		return getBoolProperty("workbench.workspace.createbackup", false);
+		return getBoolProperty("workbench.workspace.createbackup", true);
 	}
 
 	public void setWorkspaceBackupDir(String dir)
