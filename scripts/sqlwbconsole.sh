@@ -21,7 +21,5 @@ then
   JAVACMD=${JAVA_BIN%/}/bin/java
 fi
 
-echo $JAVACMD
-
 $JAVACMD -Djava.awt.headless=true -Xmx256m \
          -cp $scriptpath/sqlworkbench.jar:$scriptpath/poi.jar workbench.console.SQLConsole $@ 

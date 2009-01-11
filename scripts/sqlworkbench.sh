@@ -21,8 +21,6 @@ then
   JAVACMD=${JAVA_BIN%/}/bin/java
 fi
 
-echo $JAVACMD
-
 # When running in batch mode on a system with no X11
 # installed the option -Djava.awt.headless=true might
 # be needed for some combinations of OS and JDK

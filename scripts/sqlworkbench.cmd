@@ -15,6 +15,8 @@ goto :eof
 
 :console_mode
 title SQL Workbench/J
-%JAVA_BINPATH%java -Xmx256m -cp %wbdir%sqlworkbench.jar;%wbdir%poi.jar workbench.console.SQLConsole %*  
+set cp=%wbdir%sqlworkbench.jar;%wbdir%poi.jar
+%JAVA_BINPATH%java -Xmx256m -cp %cp% workbench.console.SQLConsole %*
+
 goto :eof
 
