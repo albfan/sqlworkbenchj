@@ -103,14 +103,24 @@ public class MacroStorage
 
 	public synchronized void saveMacros(File file)
 	{
-		WbPersistence writer = new WbPersistence(file.getAbsolutePath());
-		try
+		if (this.getSize() == 0)
 		{
-			writer.writeObject(this.groups);
+			if (file.exists())
+			{
+				file.delete();
+			}
 		}
-		catch (Exception th)
+		else
 		{
-			LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
+			WbPersistence writer = new WbPersistence(file.getAbsolutePath());
+			try
+			{
+				writer.writeObject(this.groups);
+			}
+			catch (Exception th)
+			{
+				LogMgr.logError("MacroManager.saveMacros()", "Error saving macros", th);
+			}
 		}
 		this.modified = false;
 	}
