@@ -122,8 +122,16 @@ public class DmlStatement
 					try
 					{
 						InputStream in = new FileInputStream(f);
-						stmt.setBinaryStream(i + 1, in, (int)f.length());
-						streamsToClose.add(in);
+						if (aConnection.getDbSettings().useGetBytesForBlobs())
+						{
+							byte[] array = FileUtil.readBytes(in);
+							stmt.setBytes(i + 1, array);
+						}
+						else
+						{
+							stmt.setBinaryStream(i + 1, in, (int)f.length());
+							streamsToClose.add(in);
+						}
 					}
 					catch (IOException e)
 					{

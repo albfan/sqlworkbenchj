@@ -61,6 +61,37 @@ public class JdbcIndexReader
 	{
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, false);
 	}
+
+	/**
+	 * Return the name of the index supporting the primary key.
+	 * @param tbl
+	 */
+	public String getPrimaryKeyIndex(TableIdentifier tbl)
+	{
+		// Retrieve the name of the PK index
+		String pkName = "";
+		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
+		{
+			ResultSet keysRs = null;
+			try
+			{
+				keysRs = this.metaData.getJdbcMetaData().getPrimaryKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
+				while (keysRs.next())
+				{
+					pkName = keysRs.getString("PK_NAME");
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Error retrieving PK information", e);
+				pkName = "";
+			} finally
+			{
+				SqlUtil.closeResult(keysRs);
+			}
+		}
+		return pkName;
+	}
 	
 	/**
 	 * Return the SQL to re-create the indexes defined for the table.
@@ -81,10 +112,8 @@ public class JdbcIndexReader
 		int idxCount = 0;
 		for (int i = 0; i < count; i++)
 		{
-			String idx_name = indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME).toString();
-			String unique = indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_UNIQUE_FLAG).toString();
-			String is_pk  = indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG).toString();
 			IndexDefinition definition = (IndexDefinition)indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
+
 			if (definition == null) continue;
 			
 			String type = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
@@ -93,11 +122,11 @@ public class JdbcIndexReader
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
 			// are usually auto-created when the PK is defined, so there is no need
 			// to re-create a CREATE INDEX statement for them.
-			if ("NO".equalsIgnoreCase(is_pk))
+			if (!definition.isPrimaryKeyIndex())
 			{
 				idxCount ++;
 				String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
-				if ("YES".equalsIgnoreCase(unique))
+				if (definition.isUnique())
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
 					if ("unique".equalsIgnoreCase(type)) type = "";
@@ -116,8 +145,8 @@ public class JdbcIndexReader
 					sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
 				}
 				
-				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, definition.toString());
-				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, idx_name);
+				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, definition.getExpression());
+				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, definition.getName());
 				idx.append(sql);
 				idx.append(";\n");
 			}
@@ -206,6 +235,7 @@ public class JdbcIndexReader
 		return idxData;
 	}
 
+
 	/**
 	 * Returns a list of indexes defined for the given table
 	 * @param table the table to get the indexes for
@@ -222,29 +252,7 @@ public class JdbcIndexReader
 
 		try
 		{
-			// Retrieve the name of the PK index
-			String pkName = "";
-			if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
-			{
-				ResultSet keysRs = null;
-				try
-				{
-					keysRs = this.metaData.getJdbcMetaData().getPrimaryKeys(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
-					while (keysRs.next())
-					{
-						pkName = keysRs.getString("PK_NAME");
-					}
-				}
-				catch (Exception e)
-				{
-					LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Error retrieving PK information", e);
-					pkName = "";
-				}
-				finally
-				{
-					SqlUtil.closeResult(keysRs);
-				}
-			}
+			String pkName = getPrimaryKeyIndex(tbl);
 
 			idxRs = getIndexInfo(tbl, false);
 			boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
@@ -263,8 +271,14 @@ public class JdbcIndexReader
 				{
 					def = new IndexDefinition(tbl, indexName);
 					def.setUnique(!unique);
-					def.setPrimaryKeyIndex(pkName.equals(indexName));
+					def.setPrimaryKeyIndex(indexName.equals(pkName));
 					defs.put(indexName, def);
+
+					// The ResultSet produced by getIndexInfo() might not be 100%
+					// compliant with the JDBC API as e.g. our own OracleIndexReader
+					// directly returns the index type as a string not as a number
+					// So the value of the type column is retrieved as an object
+					// mapIndexType() will deal with that.
 					Object type = idxRs.getObject("TYPE");
 					def.setIndexType(metaData.getDbSettings().mapIndexType(type));
 				}

@@ -115,8 +115,16 @@ public class LobFileStatement
 			if (parameters[i].isBinary())
 			{
 				InputStream in = new BufferedInputStream(new FileInputStream(f), buffSize);
-				parameters[i].setDataStream(in);
-				pstmt.setBinaryStream(i+1, in, length);
+				if (conn.getDbSettings().useGetBytesForBlobs())
+				{
+					byte[] data = FileUtil.readBytes(in);
+					pstmt.setBytes(i+1, data);
+				}
+				else
+				{
+					parameters[i].setDataStream(in);
+					pstmt.setBinaryStream(i+1, in, length);
+				}
 			}
 			else if (parameters[i].getEncoding() == null)
 			{
@@ -131,7 +139,7 @@ public class LobFileStatement
 				// The value of the length parameter is actually wrong if 
 				// a multi-byte encoding is used. So far only Derby seems to choke
 				// on this, so we need to calculate the file length in characters
-				// which is probably very slow so this is not turned on by default.
+				// which is probably very slow. So this is not turned on by default.
 				if (conn.getDbSettings().needsExactClobLength())
 				{
 					length = (int) FileUtil.getCharacterLength(f, parameters[i].getEncoding());

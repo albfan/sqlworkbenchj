@@ -16,6 +16,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.console.RowDisplay;
 import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
@@ -45,6 +46,13 @@ public class StatementRunnerResult
 	private boolean hasWarning = false;
 	private boolean wasCancelled = false;
 	private boolean stopScriptExecution = false;
+
+	/**
+	 * Controls the printing of the results in command line mode.
+	 * If printRowsPerLine == true, each row should be printed on a single console line
+	 * If printRowsPerLine == false, each row should be printed as a "form" (one row per column)
+	 */
+	private RowDisplay rowDisplay = RowDisplay.noChange;
 	
 	private long executionTime = -1;
 	private DecimalFormat timingFormatter;
@@ -69,6 +77,21 @@ public class StatementRunnerResult
 	
 	public void setExecutionTime(long t) { this.executionTime = t; }
 	public long getExecutionTime() { return this.executionTime; }
+
+	/**
+	 * Controls the printing of the results in command line mode.
+	 * If printRowsPerLine == true, each row should be printed on a single console line
+	 * If printRowsPerLine == false, each row should be printed as a "form" (one row per column)
+	 */
+	public RowDisplay getRowDisplay()
+	{
+		return rowDisplay;
+	}
+
+	public void setRowDisplay(RowDisplay newDisplay)
+	{
+		rowDisplay = newDisplay;
+	}
 	
 	public String getTimingMessage()
 	{

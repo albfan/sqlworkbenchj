@@ -10,6 +10,8 @@
  *
  */
 package workbench.sql.wbcommands;
+
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -30,8 +32,21 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
- *
+ * A SQL statement that can retrieve the data from a blob column into a file
+ * on the client.
+ * <br/>
+ * It is intended to store the contents of a single row/column into a file.
+ * For that it accepts an "INTO &lt;filename&gt;" syntax.
+ * <br/>
+ * If the generated SELECT returns more than one row, additional files
+ * are created with a sequence counter.
+ * <br/>
+ * As WbExport can also retrieve BLOB data and allows automated control
+ * over the generated filenames (e.g. by using a different column's content)
+ * WbExport should be preferred over this command.
+ * 
  * @author support@sql-workbench.net
+ * @see WbExport
  */
 public class WbSelectBlob
 	extends SqlCommand
@@ -111,7 +126,16 @@ public class WbSelectBlob
 			{
 				WbFile currentFile = null;
 
-				in = rs.getBinaryStream(1);
+				if (currentConnection.getDbSettings().useGetBytesForBlobs())
+				{
+					byte[] data = rs.getBytes(1);
+					in = new ByteArrayInputStream(data);
+				}
+				else
+				{
+					in = rs.getBinaryStream(1);
+				}
+
 				if (in == null)
 				{
 					//result.setFailure();

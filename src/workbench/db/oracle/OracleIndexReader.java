@@ -64,7 +64,7 @@ public class OracleIndexReader
 	 * requested which slows down the retrieval of index information.
 	 * (and is not necessary at all for the Workbench, as we don't use the
 	 * cardinality field anyway)
-	 *
+	 * <br/>
 	 * Additionally function based indexes are not returned correctly by the
 	 * Oracle driver.
 	 */

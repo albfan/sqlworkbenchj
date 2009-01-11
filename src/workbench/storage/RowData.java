@@ -94,6 +94,9 @@ public class RowData
 	{
 		int colCount = this.colData.length;
 		boolean longVarcharAsClob = info.treatLongVarcharAsClob();
+		boolean useGetBytesForBlobs = info.useGetBytesForBlobs();
+		boolean useGetStringForClobs = info.useGetStringForClobs();
+		boolean ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 		
 		Object value = null;
 		
@@ -119,50 +122,62 @@ public class RowData
 				}
 				else if (SqlUtil.isBlobType(type))
 				{
-					// BLOB columns are always converted to byte[] internally
-					InputStream in = null;
-					try
+					if (useGetBytesForBlobs)
 					{
-						in = rs.getBinaryStream(i+1);
-						if (in != null && !rs.wasNull())
-						{
-							value = FileUtil.readBytes(in);
-						}
-						else
-						{
-							value = null;
-						}
+						value = rs.getBytes(i+1);
+						if (rs.wasNull()) value = null;
 					}
-					catch (IOException e)
+					else
 					{
-						LogMgr.logError("RowData.read()", "Error retrieving binary data for column '" + info.getColumnName(i) + "'", e);
-						value = null;
-					}
-					finally
-					{
-						try { in.close(); } catch (Throwable th) {}
+						// BLOB columns are always converted to byte[] internally
+						InputStream in = null;
+						try
+						{
+							in = rs.getBinaryStream(i+1);
+							if (in != null && !rs.wasNull())
+							{
+								// readBytes will close the InputStream
+								value = FileUtil.readBytes(in);
+							}
+							else
+							{
+								value = null;
+							}
+						}
+						catch (IOException e)
+						{
+							LogMgr.logError("RowData.read()", "Error retrieving binary data for column '" + info.getColumnName(i) + "'", e);
+							value = rs.getObject(i+1);
+						}
 					}
 				}
 				else if (SqlUtil.isClobType(type, longVarcharAsClob))
 				{
-					// CLOB columns are always converted to String objects internally
-					Reader in = null;
-					try
+					if (useGetStringForClobs)
 					{
-						in = rs.getCharacterStream(i+1);
-						if (in != null && !rs.wasNull())
-						{
-							value = FileUtil.readCharacters(in);
-						}
-						else 
-						{
-							value = null;
-						}
+						value = rs.getString(i + 1);
 					}
-					catch (IOException e)
+					else
 					{
-						LogMgr.logWarning("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'", e);
-						value = rs.getObject(i+1);
+						Reader in = null;
+						try
+						{
+							in = rs.getCharacterStream(i+1);
+							if (in != null && !rs.wasNull())
+							{
+								// readCharacters will close the Reader
+								value = FileUtil.readCharacters(in);
+							}
+							else
+							{
+								value = null;
+							}
+						}
+						catch (IOException e)
+						{
+							LogMgr.logWarning("RowData.read()", "Error retrieving clob data for column '" + info.getColumnName(i) + "'", e);
+							value = rs.getObject(i+1);
+						}
 					}
 				}
 				else
@@ -183,7 +198,7 @@ public class RowData
 			}
 			catch (SQLException e)
 			{
-				if (Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false))
+				if (ignoreReadErrors)
 				{
 					value = null;
 					LogMgr.logError("RowData.read()", "Error retrieving data for column '" + info.getColumnName(i) + "'. Using NULL!!", e);

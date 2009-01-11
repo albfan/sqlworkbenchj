@@ -42,6 +42,8 @@ public class ResultInfo
 	private int realColumns;
 	private TableIdentifier updateTable;
 	private boolean treatLongVarcharAsClob = false;
+	private boolean useGetBytesForBlobs = false;
+	private boolean useGetStringForClobs = false;
 
 	public ResultInfo(ColumnIdentifier[] cols)
 	{
@@ -102,6 +104,8 @@ public class ResultInfo
 		{
 			dbMeta = sourceConnection.getMetadata();
 			treatLongVarcharAsClob = sourceConnection.getDbSettings().longVarcharIsClob();
+			useGetBytesForBlobs = sourceConnection.getDbSettings().useGetBytesForBlobs();
+			useGetStringForClobs = sourceConnection.getDbSettings().useGetStringForClobs();
 		}
 
 		for (int i=0; i < this.colCount; i++)
@@ -233,6 +237,16 @@ public class ResultInfo
 		}
 	}
 
+	public boolean useGetStringForClobs()
+	{
+		return useGetStringForClobs;
+	}
+	
+	public boolean useGetBytesForBlobs()
+	{
+		return useGetBytesForBlobs;
+	}
+	
 	public boolean treatLongVarcharAsClob()
 	{
 		return treatLongVarcharAsClob;

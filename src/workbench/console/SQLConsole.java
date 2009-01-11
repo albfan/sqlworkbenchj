@@ -168,6 +168,14 @@ public class SQLConsole
 						runner.setResultSetConsumer(printer);
 						printer.setCurrentConnection(runner.getConnection());
 					}
+
+					if (printer != null)
+					{
+						// As the BatchRunner will keep track of the desired output format
+						// we need to synchronize the output format to our printer
+						printer.setPrintRowsAsLine(runner.getPrintRowsAsLine());
+					}
+					
 				}
 				else
 				{

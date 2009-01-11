@@ -165,6 +165,9 @@ public class FileUtil
 	 * This is done by reading the first <tt>sampleLines</tt> records
 	 * of the file and assuming the average size of an row in the first
 	 * lines is close to the average row in the complete file.
+	 *
+	 * @param f the file to check
+	 * @param sampleLines the number of lines to read 
 	 */
 	public static final long estimateRecords(File f, long sampleLines)
 		throws IOException
@@ -298,7 +301,7 @@ public class FileUtil
 	 * Returns the number of characters according to the 
 	 * encoding in the specified file. For single-byte 
 	 * encodings this should be identical to source.length()
-	 * 
+	 * <br/>
 	 * For large files this might take some time!
 	 * 
 	 * @param source the (text) file to check
@@ -326,7 +329,7 @@ public class FileUtil
 	}
 	
 	/**
-	 * Closes a Closeable without throwing any errors
+	 * Closes a Closeable without throwing an IOException.
 	 * 
 	 * @param c the Closeable to close
 	 */

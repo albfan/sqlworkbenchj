@@ -94,4 +94,9 @@ public interface IndexReader
 	 * @param table the table to get the indexes for
 	 */
 	Collection<IndexDefinition> getTableIndexList(TableIdentifier table);
+
+	/**
+	 * Returns the name of the index that supports the Primary Key
+	 */
+	String getPrimaryKeyIndex(TableIdentifier table);
 }

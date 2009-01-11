@@ -30,7 +30,7 @@ public class DataStorePrinterTest
 		super(testName);
 	}
 
-	public void testPrint()
+	private DataStore createTestData()
 	{
 		String[] cols = new String[] { "DESCRIPTION", "QUANTITY", "LASTNAME"};
 		int[] types = new int[] { Types.VARCHAR, Types.INTEGER, Types.VARCHAR };
@@ -61,15 +61,21 @@ public class DataStorePrinterTest
 		ds.setValue(row, 0, "Some Comment");
 		ds.setValue(row, 1, Integer.valueOf(5));
 		ds.setValue(row, 2, null);
+		return ds;
+	}
+
+
+	public void testTabularPrint()
+	{
+		DataStore ds = createTestData();
 
 		DataStorePrinter printer = new DataStorePrinter(ds);
-		
 		ByteArrayOutputStream ba = new ByteArrayOutputStream(500);
 		PrintStream ps = new PrintStream(ba);
 		printer.printTo(ps);
 		String out = ba.toString();
 		ps.close();
-		System.out.println(out);
+//		System.out.println(out);
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
 		assertEquals(10, linecount);
@@ -92,12 +98,38 @@ public class DataStorePrinterTest
 		ps.close();
 		lines = out.split(StringUtil.LINE_TERMINATOR);
 		linecount = lines.length;
-		System.out.println(out);
+//		System.out.println(out);
 		assertEquals(ds.getRowCount() + 1, linecount);
 		assertEquals("DESCRIPTION | QUANTITY | LASTNAME", lines[0]);
 		assertEquals("Very long test value | 1 | Beeblebrox", lines[1]);
 		assertEquals("Multi-line\\ntest value | 2 | Dent on\\ntwo lines", lines[2]);
 		assertEquals("My comment | 3 | lastname \\nwith two lines", lines[3]);
+	}
 
+	public void testRecordPrint()
+	{
+		DataStore ds = createTestData();
+		DataStorePrinter printer = new DataStorePrinter(ds);
+		printer.setPrintRowsAsLine(false);
+		ByteArrayOutputStream ba = new ByteArrayOutputStream(500);
+		PrintStream ps = new PrintStream(ba);
+		printer.printTo(ps);
+		String out = ba.toString();
+//		System.out.println(out);
+		ps.close();
+		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
+		int linecount = lines.length;
+		assertEquals(24, linecount);
+		assertEquals("---- [Row 1] -------------------------------", lines[0]);
+		assertEquals("DESCRIPTION : Very long test value", lines[1]);
+		assertEquals("QUANTITY    : 1", lines[2]);
+		assertEquals("LASTNAME    : Beeblebrox", lines[3]);
+		assertEquals("---- [Row 2] -------------------------------", lines[4]);
+		assertEquals("DESCRIPTION : Multi-line", lines[5]);
+		assertEquals("              test value", lines[6]);
+		assertEquals("QUANTITY    : 2", lines[7]);
+		assertEquals("LASTNAME    : Dent on", lines[8]);
+		assertEquals("              two lines", lines[9]);
+		
 	}
 }

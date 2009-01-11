@@ -184,7 +184,7 @@ public class TableSearchPanel
 
 					int rows = display.getRowCount();
 
-					String label = table.getTableExpression() + " (" + rows + " " + (rows == 1 ? ResourceMgr.getString("TxtFoundRow") : ResourceMgr.getString("TxtFoundRows")) + ")";
+					String label = table.getTableExpression() + " (" + ResourceMgr.getFormattedString("MsgRows", rows) + ")";
 					TitledBorder b = new TitledBorder(" " + label);
 					Font f = b.getTitleFont().deriveFont(Font.BOLD);
 					b.setTitleFont(f);

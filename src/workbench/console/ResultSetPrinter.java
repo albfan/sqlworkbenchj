@@ -113,7 +113,7 @@ public class ResultSetPrinter
 			while (data.next())
 			{
 				row.read(data, info);
-				printRow(pw, row);
+				printRow(pw, row, count);
 				count ++;
 			}
 			if (doFormat) pw.println(ResourceMgr.getFormattedString("MsgRows", count));

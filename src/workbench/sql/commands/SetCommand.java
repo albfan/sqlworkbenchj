@@ -13,6 +13,7 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 
+import workbench.console.RowDisplay;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -123,6 +124,22 @@ public class SetCommand extends SqlCommand
 						result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
 					}
 				}
+				else if (command.equalsIgnoreCase("display"))
+				{
+					result = new StatementRunnerResult();
+					execSql = false;
+
+					if ("row".equalsIgnoreCase(param))
+					{
+						result.setRowDisplay(RowDisplay.SingleLine);
+						result.addMessageByKey("MsgDispChangeRow");
+					}
+					else if ("record".equalsIgnoreCase(param))
+					{
+						result.setRowDisplay(RowDisplay.Form);
+						result.addMessageByKey("MsgDispChangeForm");
+					}
+				}
 			}
 
 			if (execSql)
@@ -176,17 +193,17 @@ public class SetCommand extends SqlCommand
 		if ("off".equalsIgnoreCase(param))
 		{
 			aConnection.getMetadata().disableOutput();
-			result.addMessage(ResourceMgr.getString("MsgDbmsOutputDisabled"));
+			result.addMessageByKey("MsgDbmsOutputDisabled");
 		}
 		else if ("on".equalsIgnoreCase(param))
 		{
 			aConnection.getMetadata().enableOutput();
-			result.addMessage(ResourceMgr.getString("MsgDbmsOutputEnabled"));
+			result.addMessageByKey("MsgDbmsOutputEnabled");
 		}
 		else
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrServeroutputWrongParameter"));
+			result.addMessageByKey("ErrServeroutputWrongParameter");
 		}
 		return result;
 	}
@@ -198,7 +215,7 @@ public class SetCommand extends SqlCommand
 		if (StringUtil.isEmptyString(param))
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrAutocommitWrongParameter"));
+			result.addMessageByKey("ErrAutocommitWrongParameter");
 			return result;
 		}
 
@@ -207,18 +224,18 @@ public class SetCommand extends SqlCommand
 			if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
 			{
 				aConnection.setAutoCommit(false);
-				result.addMessage(ResourceMgr.getString("MsgAutocommitDisabled"));
+				result.addMessageByKey("MsgAutocommitDisabled");
 				result.setSuccess();
 			}
 			else if ("on".equalsIgnoreCase(param) || "true".equalsIgnoreCase(param))
 			{
 				aConnection.setAutoCommit(true);
-				result.addMessage(ResourceMgr.getString("MsgAutocommitEnabled"));
+				result.addMessageByKey("MsgAutocommitEnabled");
 				result.setSuccess();
 			}
 			else
 			{
-				result.addMessage(ResourceMgr.getString("ErrAutocommitWrongParameter"));
+				result.addMessageByKey("ErrAutocommitWrongParameter");
 				result.setFailure();
 			}
 		}
@@ -236,25 +253,25 @@ public class SetCommand extends SqlCommand
 		if (StringUtil.isEmptyString(param))
 		{
 			result.setFailure();
-			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
+			result.addMessageByKey("ErrFeedbackWrongParameter");
 			return result;
 		}
 
 		if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
 		{
 			this.runner.setVerboseLogging(false);
-			result.addMessage(ResourceMgr.getString("MsgFeedbackDisabled"));
+			result.addMessageByKey("MsgFeedbackDisabled");
 			result.setSuccess();
 		}
 		else if ("on".equalsIgnoreCase(param) || "true".equalsIgnoreCase(param))
 		{
 			this.runner.setVerboseLogging(true);
-			result.addMessage(ResourceMgr.getString("MsgFeedbackEnabled"));
+			result.addMessageByKey("MsgFeedbackEnabled");
 			result.setSuccess();
 		}
 		else
 		{
-			result.addMessage(ResourceMgr.getString("ErrFeedbackWrongParameter"));
+			result.addMessageByKey("ErrFeedbackWrongParameter");
 			result.setFailure();
 		}
 

@@ -59,10 +59,8 @@ public class StatementRunner
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
 	private boolean hideWarnings;
-//	private boolean removeComments;
 	private boolean fullErrorReporting = false;
 	private ParameterPrompter prompter;
-//	private boolean removeNewLines = false;
 	private boolean ignoreDropErrors = false;
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
@@ -204,16 +202,6 @@ public class StatementRunner
 		return this.baseDir;
 	}
 
-//	public boolean getRemoveComments()
-//	{
-//		return removeComments;
-//	}
-//
-//	public boolean getRemoveNewLines()
-//	{
-//		return removeNewLines;
-//	}
-	
 	public WbConnection getConnection()
 	{
 		return this.currentConnection;
@@ -270,14 +258,12 @@ public class StatementRunner
     if (profile != null)
     {
       this.ignoreDropErrors = profile.getIgnoreDropErrors();
-//      this.removeComments = profile.getRemoveComments();
       this.hideWarnings = profile.isHideWarnings();
     }
     
 		DbMetadata meta = this.currentConnection.getMetadata();
 		DbSettings db = (meta != null ? meta.getDbSettings() : null);
 		
-//		this.removeNewLines = (db == null ? false : db.removeNewLinesInSQL());
 		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 	}
 
@@ -319,11 +305,6 @@ public class StatementRunner
 				return;
 			}				
 		}
-		
-//		if (removeComments || removeNewLines)
-//		{
-//			aSql = SqlUtil.makeCleanSql(aSql, !removeNewLines, !removeComments);
-//		}
 		
 		this.currentCommand = this.cmdMapper.getCommandToUse(aSql);
 		

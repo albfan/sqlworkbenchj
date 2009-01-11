@@ -35,6 +35,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbLabelField;
 import workbench.log.LogMgr;
@@ -69,9 +70,12 @@ public class WbAboutDialog
 		WbFile f = Settings.getInstance().getConfigFile();
 		String s = ResourceMgr.getFormattedString("LblSettingsLocation", f.getFullPath());
 		settingsLabel.setText(s);
+		settingsLabel.setCaretPosition(0);
+		settingsLabel.setBorder(new EmptyBorder(1, 0, 1, 0));
 		f = LogMgr.getLogfile();
 		logfileLabel.setText("Logfile: " + f.getFullPath());
-
+		logfileLabel.setCaretPosition(0);
+		logfileLabel.setBorder(new EmptyBorder(1, 0, 1, 0));
 		long freeMem = (long)(MemoryWatcher.getFreeMemory() / (1024*1024) );
 		long maxMem = (long)(MemoryWatcher.MAX_MEMORY / (1024*1024) );
 		memoryLabel.setText(ResourceMgr.getString("LblMemory") + " " + freeMem + "MB/" + maxMem + "MB");
@@ -247,13 +251,14 @@ public class WbAboutDialog
     gridBagConstraints.insets = new Insets(0, 8, 0, 5);
     contentPanel.add(mailToLabel, gridBagConstraints);
 
-    settingsLabel.setText("jTextField1");
+    settingsLabel.setText("Settings");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(3, 5, 0, 5);
     contentPanel.add(settingsLabel, gridBagConstraints);
 
@@ -263,14 +268,16 @@ public class WbAboutDialog
     gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(1, 5, 0, 5);
     contentPanel.add(logfileLabel, gridBagConstraints);
 
     memoryLabel.setText("Memory:");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(20, 5, 0, 0);
     contentPanel.add(memoryLabel, gridBagConstraints);
 

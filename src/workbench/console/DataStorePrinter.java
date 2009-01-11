@@ -102,7 +102,7 @@ public class DataStorePrinter
 			for (int row=0; row < count; row++)
 			{
 				RowData rowData = data.getRow(row);
-				printRow(pw, rowData);
+				printRow(pw, rowData, row);
 			}
 			if (doFormat)
 			{

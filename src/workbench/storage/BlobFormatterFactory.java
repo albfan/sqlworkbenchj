@@ -38,7 +38,7 @@ public class BlobFormatterFactory
 		DbSettings s = meta.getDbSettings();
 		String prefix = s.getBlobLiteralPrefix();
 		String suffix = s.getBlobLiteralSuffix();
-		if (!StringUtil.isEmptyString(prefix) && !StringUtil.isEmptyString(suffix))
+		if (StringUtil.isNonBlank(prefix) && StringUtil.isNonBlank(suffix))
 		{
 			DefaultBlobFormatter f = new DefaultBlobFormatter();
 			String type = s.getBlobLiteralType();
@@ -76,7 +76,7 @@ public class BlobFormatterFactory
 			f.setSuffix("'))");
 			return f;
 		}
-		else if (meta.getDbId().startsWith("db2") || "h2".equals(meta.getDbId()))
+		else if (meta.getDbId().startsWith("db2") || meta.isH2())
 		{
 			// Although the DB2 Manuals says it supports
 			// binary string constants, it is very likely

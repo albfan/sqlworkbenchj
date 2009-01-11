@@ -67,7 +67,7 @@ public class ResultSetPrinterTest
 			con.commit();
 			rowCount ++;
 
-			ResultSet rs = stmt.executeQuery("select * from person");
+			ResultSet rs = stmt.executeQuery("select * from person order by nr");
 
 			ByteArrayOutputStream ba = new ByteArrayOutputStream(500);
 			PrintStream ps = new PrintStream(ba);
@@ -79,7 +79,7 @@ public class ResultSetPrinterTest
 			rs.close();
 			
 			String out = ba.toString();
-			System.out.println(out);
+//			System.out.println(out);
 			String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 			
 			// expected is one line per row in the database (rowCount)
@@ -97,7 +97,7 @@ public class ResultSetPrinterTest
 			assertEquals("           : name                 : lines", lines[5]);
 			assertEquals("3 Rows", lines[6]);
 
-			rs = stmt.executeQuery("select * from person");
+			rs = stmt.executeQuery("select * from person order by nr");
 			ba.reset();
 			ps = new PrintStream(ba);
 			printer = new ResultSetPrinter(ps);
@@ -108,13 +108,42 @@ public class ResultSetPrinterTest
 			ps.close();
 			rs.close();
 			out = ba.toString();
-			System.out.println(out);
+//			System.out.println(out);
 			lines = out.split(StringUtil.LINE_TERMINATOR);
 			assertEquals(rowCount + 1, lines.length);
 			assertEquals("NR | FIRSTNAME | LASTNAME", lines[0]);
 			assertEquals("0 | firstname | lastname", lines[1]);
 			assertEquals("1 | firstname | lastname", lines[2]);
 			assertEquals("42 | first\\nname | lastname\\nlines", lines[3]);
+
+			rs = stmt.executeQuery("select * from person order by nr");
+			ba.reset();
+			ps = new PrintStream(ba);
+			printer = new ResultSetPrinter(ps);
+			printer.setPrintRowsAsLine(false);
+			result = new StatementRunnerResult();
+			result.addResultSet(rs);
+			printer.consumeResult(result);
+			ps.close();
+			rs.close();
+			out = ba.toString();
+//			System.out.println(out);
+			lines = out.split(StringUtil.LINE_TERMINATOR);
+			assertEquals(15, lines.length);
+			assertEquals("---- [Row 1] -------------------------------", lines[0]);
+			assertEquals("NR        : 0", lines[1]);
+			assertEquals("FIRSTNAME : firstname", lines[2]);
+			assertEquals("LASTNAME  : lastname", lines[3]);
+			assertEquals("---- [Row 2] -------------------------------", lines[4]);
+			assertEquals("NR        : 1", lines[5]);
+			assertEquals("FIRSTNAME : firstname", lines[6]);
+			assertEquals("LASTNAME  : lastname", lines[7]);
+			assertEquals("---- [Row 3] -------------------------------", lines[8]);
+			assertEquals("NR        : 42", lines[9]);
+			assertEquals("FIRSTNAME : first", lines[10]);
+			assertEquals("            name", lines[11]);
+			assertEquals("LASTNAME  : lastname", lines[12]);
+			assertEquals("            lines", lines[13]);
 		}
 		finally
 		{

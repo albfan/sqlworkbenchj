@@ -97,6 +97,7 @@ public class DbMetadata
 	private boolean isApacheDerby;
 	private boolean isExcel; 
 	private boolean isAccess;
+	private boolean isH2;
 	
 	private String quoteCharacter;
 	private final Set<String> keywords = new TreeSet<String>(new CaseInsensitiveComparator());
@@ -247,6 +248,7 @@ public class DbMetadata
 		}
 		else if (productLower.equals("h2"))
 		{
+			this.isH2 = true;
 			this.sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
 		}
 
@@ -529,6 +531,7 @@ public class DbMetadata
 	public boolean isFirstSql() { return this.isFirstSql; }
 	public boolean isSqlServer() { return this.isSqlServer; }
 	public boolean isApacheDerby() { return this.isApacheDerby; }
+	public boolean isH2() { return this.isH2; }
 
 	/**
 	 * If a DDLFilter is registered for the current DBMS, this

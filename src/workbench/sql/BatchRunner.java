@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.AppArguments;
 import workbench.console.ConsolePrompter;
+import workbench.console.RowDisplay;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -54,7 +55,7 @@ import workbench.util.WbFile;
  *
  * @see workbench.console.SQLConsole
  * @see workbench.sql.wbcommands.WbInclude
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class BatchRunner
@@ -85,9 +86,10 @@ public class BatchRunner
 	private boolean showSummary = verboseLogging;
 	private boolean optimizeCols = true;
 	private boolean showStatementTiming = true;
+	private boolean printRowsAsLine = true;
 	private String connectionId = "BatchRunner";
 	private String command;
-	
+
 	public BatchRunner()
 	{
 		this.stmtRunner = new StatementRunner();
@@ -121,7 +123,7 @@ public class BatchRunner
 	{
 		this.connectionId = id;
 	}
-	
+
 	public WbConnection getConnection()
 	{
 		return this.connection;
@@ -131,12 +133,12 @@ public class BatchRunner
 	{
 		return stmtRunner.cmdMapper.getCommandToUse(verb);
 	}
-	
+
 	public void addCommand(SqlCommand cmd)
 	{
 		stmtRunner.cmdMapper.addCommand(cmd);
 	}
-	
+
 	public void setExecutionController(ExecutionController controller)
 	{
 		this.stmtRunner.setExecutionController(controller);
@@ -147,6 +149,11 @@ public class BatchRunner
 		this.stmtRunner.setParameterPrompter(p);
 	}
 
+	public boolean getPrintRowsAsLine()
+	{
+		return printRowsAsLine;
+	}
+	
 	/**
 	 * For testing purposes to redirect the output to a file
 	 */
@@ -159,12 +166,12 @@ public class BatchRunner
 	{
 		stmtRunner.setShowDataLoadingProgress(flag);
 	}
-	
+
 	public void setShowStatementWithResult(boolean flag)
 	{
 		this.showStatementWithResult = flag;
 	}
-	
+
 	public void showResultSets(boolean flag)
 	{
 		this.showResultSets = flag;
@@ -174,7 +181,7 @@ public class BatchRunner
 	{
 		this.optimizeCols = flag;
 	}
-	
+
 	public void setShowStatementSummary(boolean flag)
 	{
 		this.showSummary = flag;
@@ -184,7 +191,7 @@ public class BatchRunner
 	{
 		return this.verboseLogging;
 	}
-	
+
 	public void setVerboseLogging(boolean flag)
 	{
 		this.verboseLogging = flag;
@@ -207,7 +214,7 @@ public class BatchRunner
 	{
 		return this.profile != null;
 	}
-	
+
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
@@ -276,7 +283,7 @@ public class BatchRunner
 			this.setConnection(c);
 			String info = c.getDisplayString();
 			LogMgr.logInfo("BatchRunner.connect()",  ResourceMgr.getFormattedString("MsgBatchConnectOk", c.getDisplayString()));
-			if (verboseLogging) 
+			if (verboseLogging)
 			{
 				this.printMessage(ResourceMgr.getFormattedString("MsgBatchConnectOk", info));
 				String warn = c.getWarnings();
@@ -360,7 +367,7 @@ public class BatchRunner
 	{
 		this.command = sql;
 	}
-	
+
 	protected void runCommand()
 	{
 		try
@@ -389,7 +396,7 @@ public class BatchRunner
 			runCommand();
 		}
 	}
-	
+
 	protected void runFiles()
 	{
 		boolean error = false;
@@ -504,7 +511,7 @@ public class BatchRunner
 		}
 		return null;
 	}
-	
+
 	public void setResultSetConsumer(ResultSetConsumer consumer)
 	{
 		if (this.stmtRunner != null)
@@ -512,7 +519,7 @@ public class BatchRunner
 			this.stmtRunner.setConsumer(consumer);
 		}
 	}
-	
+
 	private boolean executeScript(WbFile scriptFile)
 		throws IOException
 	{
@@ -560,7 +567,7 @@ public class BatchRunner
 		}
 
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
-		
+
 		String sql = null;
 		this.cancelExecution = false;
 
@@ -613,6 +620,12 @@ public class BatchRunner
 				{
 					error = !result.isSuccess();
 
+					RowDisplay display = result.getRowDisplay();
+					if (display != null && display != RowDisplay.noChange)
+					{
+						printRowsAsLine = (display == RowDisplay.SingleLine);
+					}
+					
 					// We have to store the result of hasMessages()
 					// as the getMessageBuffer() will clear the buffer
 					// and a subsequent call to hasMessages() will return false;
@@ -629,7 +642,7 @@ public class BatchRunner
 						if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
 						totalRows += result.getTotalUpdateCount();
 					}
-					
+
 					printResults(sql, result);
 
 					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
@@ -736,16 +749,18 @@ public class BatchRunner
 		{
 			console.println(sql);
 		}
+
 		for (DataStore ds : data)
 		{
 			if (ds != null)
 			{
 				DataStorePrinter printer = new DataStorePrinter(ds);
 				printer.setFormatColumns(optimizeCols);
+				printer.setPrintRowsAsLine(printRowsAsLine);
 				printer.printTo(console);
 			}
 		}
-		
+
 	}
 
 	public void setEncoding(String enc)
@@ -892,7 +907,7 @@ public class BatchRunner
 	{
 		return createBatchRunner(cmdLine, true);
 	}
-	
+
 	public static BatchRunner createBatchRunner(ArgumentParser cmdLine, boolean checkScriptPresence)
 	{
 		String scripts = cmdLine.getValue(AppArguments.ARG_SCRIPT);
@@ -906,7 +921,7 @@ public class BatchRunner
 		boolean showResult = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT);
 		boolean showProgress = cmdLine.getBoolean(AppArguments.ARG_SHOWPROGRESS, false);
 		boolean consolidateLog = cmdLine.getBoolean(AppArguments.ARG_CONSOLIDATE_LOG, false);
-		
+
 		String encoding = cmdLine.getValue(AppArguments.ARG_SCRIPT_ENCODING);
 
 		ConnectionProfile profile = null;
@@ -959,7 +974,7 @@ public class BatchRunner
 			runner = new BatchRunner();
 			runner.setCommandToRun(sqlcmd);
 		}
-		
+
 		runner.showResultSets(showResult);
 		try
 		{

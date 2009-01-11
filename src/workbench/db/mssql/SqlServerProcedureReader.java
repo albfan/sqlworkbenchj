@@ -46,14 +46,17 @@ public class SqlServerProcedureReader
 
 	
 	/**
-	 *	The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
-	 *  so we implement it ourselves (MS always returns RESULT which is
-	 *  - strictly speaking - true, but as MS still distinguished between
-	 *  procedures and functions we need to return this correctly
-	 *
+	 *The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
+	 * so we implement it ourselves (MS always returns RESULT which is
+	 * - strictly speaking - true, but as MS still distinguished between
+	 * procedures and functions we need to return this correctly.
+	 * <br/>
+	 * The correct "type" is important because e.g. a DROP from within the DbExplorer
+	 * relies on the correct type returned by getProcedures()
+	 * <br/>
 	 * The SQL seems to be only working with the jTDS driver. The MS driver throws
 	 * and error "Incorrect syntax near '{'." which is wrong as the syntax complies
-	 * with the JDBC
+	 * with the JDBC standard.
 	 */
 	public DataStore getProcedures(String catalog, String owner)
 		throws SQLException

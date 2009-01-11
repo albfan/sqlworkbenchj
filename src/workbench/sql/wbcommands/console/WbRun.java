@@ -23,6 +23,9 @@ import workbench.resource.Settings;
 import workbench.util.WbFile;
 
 /**
+ * A SQL command that runs an external file and displays the result of the
+ * query.
+ *
  * @author  support@sql-workbench.net
  */
 public class WbRun

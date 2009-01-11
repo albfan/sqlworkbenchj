@@ -714,7 +714,7 @@ public class SqlCommand
 
 	/**
 	 * Check if the passed SQL is a "batched" statement.
-	 *
+	 * <br/>
 	 * Returns true if the passed SQL string could be a "batched"
 	 * statement that actually contains more than one statement.
 	 * SQL Server supports these kind of "batches". If this is the case
@@ -722,7 +722,7 @@ public class SqlCommand
 	 * if the statement did not update anything or if it actually
 	 * updated only 0 rows (for some reason SQL Server seems to
 	 * return 0 as the updatecount even if no update was involved).
-	 *
+	 * <br/>
 	 * Currently this is only checking for newlines in the passed string.
 	 *
 	 * @param sql the statement/script to check

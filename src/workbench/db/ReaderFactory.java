@@ -16,6 +16,7 @@ import workbench.db.firebird.FirebirdConstraintReader;
 import workbench.db.firebird.FirebirdProcedureReader;
 import workbench.db.firstsql.FirstSqlConstraintReader;
 import workbench.db.h2database.H2ConstraintReader;
+import workbench.db.h2database.H2IndexReader;
 import workbench.db.hsqldb.HsqlConstraintReader;
 import workbench.db.ibm.Db2ConstraintReader;
 import workbench.db.mssql.SqlServerConstraintReader;
@@ -62,11 +63,13 @@ public class ReaderFactory
 				return new SqlServerProcedureReader(meta.getWbConnection());
 			}
 		}
+
 		if (meta.isMySql())
 		{
 			return new MySqlProcedureReader(meta.getWbConnection());
 		}
-	return new JdbcProcedureReader(meta.getWbConnection());
+		
+		return new JdbcProcedureReader(meta.getWbConnection());
 	}
 	
 	public static IndexReader getIndexReader(DbMetadata meta)
@@ -78,6 +81,10 @@ public class ReaderFactory
 		if (meta.isPostgres())
 		{
 			return new PostgresIndexReader(meta);
+		}
+		if (meta.isH2())
+		{
+			return new H2IndexReader(meta);
 		}
 		return new JdbcIndexReader(meta);
 	}

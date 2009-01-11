@@ -21,7 +21,9 @@ import workbench.db.exporter.RowDataConverter;
 import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.sql.commands.SingleVerbCommand;
 import workbench.storage.BlobLiteralType;
+import workbench.storage.DmlStatement;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.StringUtil;
 
@@ -32,10 +34,9 @@ import workbench.util.StringUtil;
  * {@link workbench.resource.Settings}
  * <br/>
  * Any setting returned from this class will be specific to the DBMS
- * that it was initialized for. Identified by the DBID passed to the constructor
+ * that it was initialized for, identified by the DBID passed to the constructor
  *
  * @author support@sql-workbench.net
- *
  * @see DbMetadata#getDbId()
  */
 public class DbSettings
@@ -47,7 +48,6 @@ public class DbSettings
 
 	private boolean neverQuoteObjects;
 	private boolean reportsRealSizeAsDisplaySize = false;
-	private boolean allowExtendedCreateStatement = true;
 
 	private boolean allowsMultipleGetUpdateCounts = true;
 	private boolean supportsBatchedStatements = false;
@@ -91,7 +91,6 @@ public class DbSettings
 		this.neverQuoteObjects = quote.contains(this.getDbId());
 		this.allowsMultipleGetUpdateCounts = settings.getBoolProperty(prefix + "multipleupdatecounts", true);
 		this.reportsRealSizeAsDisplaySize = settings.getBoolProperty(prefix + "charsize.usedisplaysize", false);
-		this.allowExtendedCreateStatement = settings.getBoolProperty(prefix + "extended.createstmt", true);
 		this.supportsBatchedStatements = settings.getBoolProperty(prefix + "batchedstatements", false);
 	}
 
@@ -140,6 +139,16 @@ public class DbSettings
 		return updatingCommands.contains(verb);
 	}
 
+	public boolean useGetStringForClobs()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", false);
+	}
+
+	public boolean useGetBytesForBlobs()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "blob.use.getbytes", false);
+	}
+
 	public boolean longVarcharIsClob()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "clob.longvarchar", true);
@@ -152,7 +161,7 @@ public class DbSettings
 
 	public boolean allowsExtendedCreateStatement()
 	{
-		return allowExtendedCreateStatement;
+		return Settings.getInstance().getBoolProperty(prefix + "extended.createstmt", true);
 	}
 
 	public boolean allowsMultipleGetUpdateCounts()
@@ -202,13 +211,24 @@ public class DbSettings
 	 * Returns true if the DataImporter should use setNull() to send NULL values
 	 * instead of setObject(int, null).
 	 * <br/>
+	 * This is also used from within the DataStore when updating data.
+	 * <br/>
 	 * The related property is workbench.db.[dbid].import.use.setnull
+	 * 
+	 * @see DmlStatement#execute(workbench.db.WbConnection)
 	 */
 	public boolean useSetNull()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "import.use.setnull", false);
 	}
 
+	/**
+	 * Some JDBC driver to not allow to run a SQL statement that contains COMMIT or ROLLBACK
+	 * as a String. They required to use Connection.commit() or Conneciton.rollback() instead.
+	 * <br/>
+	 * The related property is: workbench.db.[dbid].usejdbccommit
+	 * @see SingleVerbCommand#execute(java.lang.String)
+	 */
 	public boolean useJdbcCommit()
 	{
 		return useJdbcCommit;
@@ -430,15 +450,15 @@ public class DbSettings
 	String mapIndexType(Object type)
 	{
 		if (type == null) return null;
+		if (type instanceof Number)
+		{
+			return mapIndexType(((Number)type).intValue());
+		}
 		if (type instanceof String)
 		{
 			int t = StringUtil.getIntValue((String)type, Integer.MIN_VALUE);
 			if (t == Integer.MIN_VALUE) return (String)type;
 			return mapIndexType(t);
-		}
-		if (type instanceof Number)
-		{
-			return mapIndexType(((Number)type).intValue());
 		}
 		return null;
 	}
