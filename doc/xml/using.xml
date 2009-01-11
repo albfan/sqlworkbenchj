@@ -1,6 +1,35 @@
 <section id="using">
 	<title>Using &wb-productname;</title>
 
+	<section id="displaying-help">
+		<title>Displaying help</title>
+		<para>
+			You have two possibilities to display help for &wb-productname;. Either a HTML based
+			help or a PDF version of the manual.
+		</para>
+		<para>
+			The HTML help is available through the menu item
+			<menuchoice><guimenu>Help</guimenu><guimenuitem>Contents</guimenuitem></menuchoice>
+			It is expected that the HTML manual is stored in a directory called <literal>manual</literal>
+			in the same directory where <literal>sqlworkbench.jar</literal> is located. This is automatically the case
+			when you extract the distribution archive with sub-directories.
+		</para>
+		<para>
+			You can choose to display a single-page version of the HTML help (easier to search) or a multi-page
+			version of the help that is easier to navigatie. This can be switched in the options dialog, that is
+			accessible from <menuchoice><guimenu>Tools</guimenu><guimenuitem>Option</guimenuitem></menuchoice>.
+		</para>
+		<para>
+			The the PDF manual can be displayed by selecting <menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
+			In order to be able to display the PDF manual, you need to define the path to the executable for the PDF
+			reader in the <link linkend="options-general">General options</link> section of the options dialog.
+		</para>
+		<para>
+			The file <literal>SQLWorkbench-Manual.pdf</literal> must be available in the
+			directory where <literal>sqlworkbench.jar</literal> is located.
+		</para>
+	</section>
+
 	<section id="executing-sql-statements">
 		<title>Executing SQL statements</title>
 
@@ -182,6 +211,10 @@ SELECT * FROM company;</programlisting>
 				As you can see, you can put the <literal>@wbresult</literal> keyword into a single-line
 				or multi-line comment. The name that is used, will be everything after the keyword
 				until the end of the line.
+			</para>
+			<para>
+				The second select (with the multi-line comment), the name of the result tab will be
+				<literal>List of companies</literal>, the comment on the second line will be ignored.
 			</para>
 		</section>
 

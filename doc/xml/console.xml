@@ -107,10 +107,76 @@ ROLLBACK executed successfully</programlisting>
 		<title>Displaying result sets</title>
 		<para>
 			If you are running <literal>SELECT</literal> statements in console mode, the result is
-			displayed on the screen in "tabular" format. For wide tables or result sets, this is probably
-			not very readable. Note that &wb-productname; still reads the whole result into memory in order
-			to be to adjust the column widths to the displayed data.
+			displayed on the screen in "tabular" format. Note that &wb-productname; reads the whole result 
+			into memory in order to be to adjust the column widths to the displayed data.
 		</para>
+
+		<para>
+			You can disable the buffering of the results using the commandline parameter <literal>bufferResults=false</literal>.
+			In that case, the width of the displayed columns will not be adjusted properly. The column widths are
+			taken from the information returned by the driver which typically results is a much larger display
+			than needed.
+		</para>
+
+		<para>
+			The output in tabular format (if results are buffered) looks like this:
+		</para>
+
+		<programlisting>id | firstname | lastname   | comment
+---+-----------+------------+--------------------
+1  | Arthur    | Dent       | this is
+                            : a long
+                            : comment
+                            : with multiple lines
+2  | Zaphod    | Beeblebrox |
+4  | Mary      | Moviestar  | comment
+3  | Tricia    | McMillian  | test1
+4 Rows</programlisting>
+
+		<para>
+			If the value of a column does not contain embedded line feeds (as the above example) this might
+			be not very easy to read. In that case, you can switch the output so that each column is printed on
+			a single line.
+		</para>
+		<para>
+			This is done by running the statement: <literal>set display record;</literal>
+		</para>
+		<programlisting>
+SQL> <emphasis role="bold">set display record;</emphasis>
+Display changed to single record format
+Execution time: 0.0s
+SQL> select id, firstname, lastname, comment from person;
+---- [Row 1] -------------------------------
+id        : 1
+firstname : Arthur
+lastname  : Dent
+comment   : this is a very long comment that would not fit onto the screen when printed as the last column
+---- [Row 2] -------------------------------
+id        : 2
+firstname : Zaphod
+lastname  : Beeblebrox
+comment   :
+---- [Row 3] -------------------------------
+id        : 4
+firstname : Mary
+lastname  : Moviestar
+comment   :
+---- [Row 4] -------------------------------
+id        : 3
+firstname : Tricia
+lastname  : McMillian
+comment   :
+4 Rows</programlisting>
+
+		<para>
+			To switch back to the "tabular" display, use: <literal>set display row</literal>.
+		</para>
+		<programlisting>
+SQL> <emphasis role="bold">set display row;</emphasis>
+Display changed to tabular format
+Execution time: 0.0s
+SQL></programlisting>
+
 	</section>
 
 	<section id="console-maxrows">

@@ -103,7 +103,7 @@
 	</section>
 	
 	<section id="mssql-problems">
-		<title>SQL Server Problems</title>
+		<title>Microsoft SQL Server Problems</title>
 
 		<section id="mssql-cloned-connection">
 		  <title>Can't start a cloned connection while in manual transaction mode</title>
@@ -111,7 +111,7 @@
 		    This error usually occurs in the DbExplorer if an older Microsoft JDBC Driver is used
 		    and the connection does not use autocommit mode. There are three ways to fix this problem:
 		    <itemizedlist>
-		      <listitem><simpara>Upgrade to a newer Microsoft driver (e.g. the one for SQL Server 2005)</simpara></listitem>
+		      <listitem><simpara>Upgrade to a newer Microsoft driver (e.g. the one for <ulink url="http://www.microsoft.com/sql/technologies/jdbc/default.mspx">SQL Server 2005</ulink>)</simpara></listitem>
 		      <listitem><simpara>Enable autocommit in the connection profile</simpara></listitem>
 		      <listitem><simpara>Add the parameter <literal>;SelectMethod=Cursor</literal> to your JDBC URL</simpara></listitem>
 		    </itemizedlist>
@@ -217,5 +217,48 @@ workbench.db.postgresql.sql.usesavepoint=true
 
 	</section>
 
+	<section id="no-ddraw">
+		<title>Display problems when running under Windows&reg;</title>
+
+		<para>
+			If you experience problems when running &wb-productname; (or
+			other Java/Swing based applications) on the Windows&reg; platform, this
+			might be due to problems with the graphics driver and/or the
+			DirectDraw installation. If upgrading the graphics driver or the
+			DirectDraw/DirectX version is not an option (or does not solve the
+			problem), try to run SQL Workbench with the direct draw feature
+			turned off:
+		</para>
+
+		<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar</programlisting>
+
+		<para>
+			When using the exe launcher, you can use the following syntax:
+		</para>
+
+		<programlisting>SQLWorkbench -noddraw</programlisting>
+
+		<para>
+			If you run &wb-productname; through a program that enables remote
+			access to a Windows&reg; workstations (PC-Duo, VNC, NetMeeting, etc),
+			you may need to disable the use of DirectDraw for Java as well.
+		</para>
+
+	</section>
+
+	<section id="hi-cpu-usage">
+		<title>High CPU usage when executing statements</title>
+
+		<para>
+			If you experience a high CPU usage when running a SQL statement,
+			this might be caused by a combination of the graphics driver, the JDK and
+			the Windows&reg; version you are using. This is usually caused by the animated
+			icon which indicates a running statement (the yellow smiley). This animation can
+			be turned off in <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
+			See <xref linkend="option-animated-icon"/> for details. A different
+			icon (not animated) will be used if that option is disabled.
+		</para>
+	</section>
+	
 </section>
 	

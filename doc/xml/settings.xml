@@ -49,8 +49,10 @@
 		<programlisting>INFO  15.08.2004 10:24:42 Using DBID=hsql_database_engine</programlisting>
 		
 		<para> 
-			If the description for a property in this chapter refers to the "DBID", then this value has to be used. 
-			If the DBID is part of the property key this will be referred to as <literal>[dbid]</literal> in the key.
+			If the description for a property in this chapter refers to the "DBID", then this value has to be used.
+		</para>
+		<para>
+			If the DBID is part of a property key this will be referred to as <literal>[dbid]</literal> in this chapter.
 		</para>
 		
 	</section>
@@ -85,6 +87,7 @@
     <simplesect id="settings-show-acc-menu">
       <title>Showing accelerator in menu</title>
       <para>Property: <literal>workbench.gui.showmnemonics</literal></para>
+      <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
       <para>
         Usually the mnemonic (aka. Accelerator) for a menu item is not shown under
         Windows 2000 or later. It will only be shown, when you press the
@@ -92,43 +95,11 @@
       </para>
       <para>Default: <literal>true</literal></para>
     </simplesect>
-				
-	<!--
-    <simplesect id="settings-save-workspace">
-      <title>Save workspaces automatically</title>
-      <para><literal>workbench.workspace.autosave</literal></para>
-      <para>
-				If this is enabled, the current workspace will
-        be saved automatically, when a SQL statement is executed.
-			</para>
-      <para>Default: <literal>false</literal></para>
-    </simplesect>
 
-		<simplesect id="settings-workspace-backup">
-			<title>Controlling workspace backups</title>
-			<para>Property: <literal>workbench.workspace.createbackup</literal></para>
-			<para>
-				If this is enabled, a backup file will be created
-				before saving the workspace. This is done by renaming the current
-				file (overwriting any existing backup) and then saving the workspace.
-			</para>
-			<para>Default: <literal>false</literal></para>
-		</simplesect>
-
-    <simplesect id="macro-menu-setting">
-      <title>Controlling the number of macros in the main menu</title>
-      <para>Property: <literal>workbench.gui.macro.maxmenuitems</literal></para>
-      <para>
-	      With this setting the number of macros displayed in the Macro menu can be controlled.
-				Note that only the first 9 macros will be accessible with a menu accelerator.
-      </para>
-      <para>Default value: <literal>15</literal></para>
-    </simplesect>
-	 -->
-	
 		<simplesect id="setting-native-print-dialog">
 			<title>Controlling the type of print dialog</title>
 			<para>Property: <literal>workbench.print.nativepagedialog</literal></para>
+      <para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				When printing the contents of a table, this settings controls the type
 				of print dialog to be used. The default setting will open the 
@@ -144,24 +115,26 @@
 		<title>Editor related settings</title>
 
 		<simplesect id="auto-completion-public-syn">
-				<title>Include Oracle public synonyms in auto-completion of tables</title>
-				<para>Property: <literal>workbench.editor.autocompletion.oracle.public_synonyms</literal></para>
-				<para>
-					When using auto completion for table columns and table names, Oracle's public synonyms 
-					are not included by default. This has two reasons: first, the author believes that public
-					synonyms shouldn't be used (it's just as bad as global variables in programming) and
-					second, Oracle defines a huge number of public synonyms that would make the 
-					popup with all available tables very long and hard to use. Setting this property
-					to <literal>true</literal>, will include public synonyms in the popup. Please
-					refer to <link linkend="db-oracle-filter-syns">filtering synonyms</link> for 
-					details on how to filter out unwanted synonyms from this list.
-				</para>
-				<para>Default value: <literal>false</literal></para>
+			<title>Include Oracle public synonyms in auto-completion of tables</title>
+			<para>Property: <literal>workbench.editor.autocompletion.oracle.public_synonyms</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+			<para>
+				When using auto completion for table columns and table names, Oracle's public synonyms
+				are not included by default. This has two reasons: first, the author believes that public
+				synonyms shouldn't be used (it's just as bad as global variables in programming) and
+				second, Oracle defines a huge number of public synonyms that would make the
+				popup with all available tables very long and hard to use. Setting this property
+				to <literal>true</literal>, will include public synonyms in the popup. Please
+				refer to <link linkend="db-oracle-filter-syns">filtering synonyms</link> for
+				details on how to filter out unwanted synonyms from this list.
+			</para>
+			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 		
 		<simplesect id="auto-completion-empty-line">
 			<title>Empty line to terminate SQL statements</title>
 			<para>Property: <literal>workbench.editor.autocompletion.sql.emptylineseparator</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				When analysing statements in the editor, it is assumed that individual statements
 				separated with a semicolon. When using auto completion, &wb-productname; can be configured
@@ -173,7 +146,8 @@
 			</para></note>
 			<para>Default value: <literal>false</literal></para>
 		</simplesect>
-		
+
+		<!--
     <simplesect id="editor-color-setting">
       <title>Customizing the colors used for syntax highlighting</title>
       <para>Property: <literal>workbench.editor.color.[type]</literal></para>
@@ -194,7 +168,8 @@
         </simplelist>
       </para>
     </simplesect>
-
+		-->
+		
    <simplesect id="editor-rect-selection">
       <title>Set the modifier key for rectangular selections in the edior</title>
       <para>Property: <literal>workbench.editor.rectselection.modifier</literal></para>
@@ -239,6 +214,7 @@
     <simplesect id="manual-setting-snippet-no-newline">
 			<title>Controlling newlines in code snippets</title>
 			<para>Property: <literal>workbench.clipcreate.includenewline</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				When creating a <link linkend="editor-copy-java-code-snippet">Java code snippet</link>,
 				the newlines inside the editor are preserved by putting a <literal>\n</literal>
@@ -369,24 +345,6 @@
   <section id="settings-db">
     <title>Database related settings</title>
 		
-    <simplesect id="verify-url">
-      <title>Verifying connection URLs</title>
-      <para>Property: <literal>workbench.db.verifydriverurl</literal></para>
-      <para>
-        Usually before connecting to the DBMS, &wb-productname; will
-        call the acceptsUrl() method of the JDBC driver, to verify
-        if the entered URL is correct and will be accepted by the
-        driver. Some drivers have been reported to indicate an error
-        in the URL even if they could connect successfully.
-      </para>
-      <para>
-				If you are seeing an error indicating that the URL is not
-				accepted by the driver, but you are sure that the driver accepts
-				the URL, then set this property to <literal>false</literal>
-      </para>
-      <para>Default: <literal>true</literal></para>
-    </simplesect>
-
     <simplesect id="manual-setting-datapumper-autoconnect">
       <title>Automatically connect the DataPumper</title>
       <para>Property: <literal>workbench.datapumper.autoconnect</literal></para>
@@ -400,25 +358,25 @@
 
     <simplesect id="db-settings-ddl-commit">
       <title>Controlling COMMIT for DDL statements</title>
-      <para>Property <literal>workbench.db.ddlneedscommit</literal></para>
+      <para>Property <literal>workbench.db.<link linkend="dbid">[dbid]</link>.ddlneedscommit</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
       <para>
-				A list of <link linkend="dbms-identifier">Database Identifiers</link> that require a COMMIT after issuing DDL statements (such
-				as <literal>CREATE TABLE</literal>
+				Defines if the DBMS supports transactional DDL (CREATE TABLE, DROP TABLE, ...)
       </para>
-      <para>Default: <literal>PostgreSQL,Firebird,Cloudscape,Apache Derby,DB2/NT,Frontbase,Microsoft SQL Server</literal></para>
+      <para>Default: <literal>false</literal></para>
     </simplesect>
           
     <simplesect id="db-settings-commit">
       <title>COMMIT/ROLLBACK behaviour</title>
-      <para>Property: <literal>workbench.db.usejdbccommit</literal></para>
+      <para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.usejdbccommit</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
       <para>
 				Some DBMS return an error when <literal>COMMIT</literal> or <literal>ROLLBACK</literal> is sent as
 				a regular command through the JDBC interface. If the DBMS is listed here,
 				the JDBC functions <literal>commit()</literal> or <literal>rollback()</literal> will
 				be used instead.
       </para>
-			<para>This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link></para>
-      <para>Default: <literal>Firebird,Cloudscape</literal></para>
+      <para>Default: <literal>false</literal></para>
     </simplesect>
 
     <simplesect id="db-settings-constraint-gen">
@@ -439,22 +397,20 @@
 
     <simplesect id="db-settings-case-sensitiv">
       <title>Case sensitivity when comparing values</title>
-      <para>Property <literal>workbench.db.casesensitive</literal></para>
+      <para>Property <literal>workbench.db.<link linkend="dbid">[dbid]</link>.casesensitive</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
       <para>
 				The search panel of the DbExplorer highlights matching values in the result
 				tables. The highlighter needs to know whether string comparisons in the database
 				are case sensitive in order to highlight the correct values.
-				This is a comma separated list of <link linkend="dbms-identifier">Database Identifiers</link>
       </para>
-      <para>Default: <literal>Oracle</literal></para>
+      <para>Default: <literal>false</literal></para>
     </simplesect>
 		
     <simplesect id="db-settings-updatingcommands">
       <title>Definining SQL commands that may change the database</title>
-      <para>Property: <literal>workbench.db.updatingcommands</literal> for general SQL statements
-			</para>
-      <para>Property: <literal>workbench.db.[dbid].updatingcommands</literal> for DBMS specific update statements
-			</para>
+      <para>Property: <literal>workbench.db.updatingcommands</literal> for general SQL statements</para>
+      <para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.updatingcommands</literal> for DBMS specific update statements</para>
       <para>
 				When enabling the <link linkend="profile-readonly">read only</link> or <link linkend="profile-confirm-updates">confirm update</link>
 				option in a connection profile, &wb-productname; assumes a default set of SQL commands that 
@@ -483,7 +439,7 @@
 
 		<simplesect id="db-settings-filter-tables">
 			<title>Filtering tables</title>
-			<para>Property: <literal>workbench.db.[dbid].exclude.tables</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.exclude.tables</literal></para>
 			<para>
 				Whenever &wb-productname; retrieves a list of tables (e.g. the DbExplorer, 
 				auto completion, <link linkend="command-schema-report">WbSchemaReport</link>)
@@ -499,7 +455,7 @@
 		
 		<simplesect id="db-oracle-filter-syns">
 			<title>Filtering synonyms</title>
-			<para>Property: <literal>workbench.db.[dbid].exclude.synonyms</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.exclude.synonyms</literal></para>
 			<para>
 				The <link linkend="dbexplorer">database explorer</link> and the 
 				<link linkend="command-completion">auto completion</link> can display (Oracle public) synonyms. 
@@ -593,7 +549,8 @@
 
 		<simplesect id="db-dml-savepoint">
 			<title>Use Savepoints to guard DML statement execution</title>
-			<para>Property: <literal>workbench.db.[dbid].sql.usesavepoint</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.sql.usesavepoint</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
 				when an error occurs. A script with multiple DML statements can therefor
@@ -603,12 +560,13 @@
 				before executing a DML statement (<literal>SELECT, INSERT</literal>.
 				In case of an error the savepoint will be rolled back and the transaction can continue.
 			</para>
-			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
+			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 
 		<simplesect id="db-ddl-savepoint">
 			<title>Use Savepoints to guard DDL statement execution</title>
-			<para>Property: <literal>workbench.db.[dbid].ddl.usesavepoint</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.ddl.usesavepoint</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
 				when an error occurs. A script with multiple DDL statements can therefor
@@ -618,12 +576,13 @@
 				before executing a DDL statement. In case of an error the savepoint
 				will be rolled back and the transaction can continue.
 			</para>
-			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
+			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 
 		<simplesect id="db-import-savepoint">
 			<title>Use Savepoints for <literal>update/insert</literal> mode for WbImport</title>
-			<para>Property: <literal>workbench.db.[dbid].import.usesavepoint</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.import.usesavepoint</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				Some DBMS (such as PostgreSQL) cannot continue inside a transaction
 				when an error occurs. When running WbImport in <literal>update,insert</literal>
@@ -633,12 +592,13 @@
 				before executing the first (insert or update) statement. In case of an error the savepoint
 				will be rolledback and WbImport will try to execute the second statement.
 			</para>
-			<para>Default value: <literal>true</literal> for PostgreSQL, <literal>false</literal> for others</para>
+			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 
 		<simplesect id="db-ignore-read-errors">
 			<title>Ignore errors during data retrieval</title>
 			<para>Property: <literal>workbench.db.ignore.readerror</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				When retrieving data (e.g. using a <literal>SELECT</literal> statement) 
 				errors that are reported by the driver will be displayed to the user. 
@@ -673,7 +633,7 @@
 
     <simplesect id="settings-ignore-commands">
       <title>Ignoring certain SQL commands</title>
-      <para>Property: <literal>workbench.db.ignore.[dbid]=</literal></para>
+      <para>Property: <literal>workbench.db.ignore.<link linkend="dbid">[dbid]</link></literal></para>
       <para>
 				For a DBMS identifier you can define a list of commands
 				that are simply ignored by &wb-productname;. This is useful e.g. for Oracle,
@@ -683,12 +643,6 @@
 				If those commands are simply ignored and not send to the server, the scripts
 				can run without modification.
       </para>
-      <para>
-				The <link linkend="dbid">DBID</link> is the lower case DBMS identifier (see above) with all
-				special characters like <literal>\/,.$[]()</literal> and spaces removed.
-				The actual ID that is used to retrieve this list is reported as an
-				informational message in the log file (<literal>Using DBID=</literal>)
-	  </para>
       <para>Default: <literal>workbench.db.ignore.oracle=prompt,exit,whenever</literal></para>
     </simplesect>
 	
@@ -713,7 +667,7 @@
 				When parsing a SQL script, &wb-productname; supports statements that 
 				are put into a single line without a delimiter. This is primarily intended
 				for compatibility with Oracle's SQL*Plus and is not enabled for other
-				database systems (starting with build 86).
+				database systems.
 			</para>
 			<para>Default: <literal>oracle</literal></para>
 		</simplesect>
@@ -735,6 +689,7 @@
 		<simplesect id="export-text-header-default">
 			<title>Controlling header lines in text exports</title>
 			<para>Property: <literal>workbench.export.text.default.header</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls whether default value for the <literal>-header</literal>
 				parameter of the <link linkend="command-export">WbExport</link> command. 
@@ -745,6 +700,7 @@
 		<simplesect id="export-xml-verbose">
 			<title>Controlling XML export format</title>
 			<para>Property: <literal>workbench.export.xml.default.verbose</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls whether XML exports are done using verbose XML or 
 				short tags and only basic formatting. This property sets the default 
@@ -756,15 +712,18 @@
 		<simplesect id="import-continue-default">
 			<title>Setting default for WbImport's -continueOnError parameter</title>
 			<para>Property: <literal>workbench.import.default.continue</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-continueOnError</literal>
 				of the <link linkend="command-import">WbImport</link> command. 
 			</para>
+			<para>Default: <literal>false</literal></para>
 		</simplesect>
 
 		<simplesect id="import-header-default">
 			<title>Setting a default for WbImport's -header parameter</title>
 			<para>Property: <literal>workbench.import.default.header</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-header</literal>
 				of the <link linkend="command-import">WbImport</link> command. 
@@ -775,6 +734,7 @@
 		<simplesect id="import-text-multiline">
 			<title>Setting a default for WbImport's -multiLine parameter</title>
 			<para>Property: <literal>workbench.import.default.multilinerecord</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-multiLine</literal>
 				of the <link linkend="command-import">WbImport</link> command. 
@@ -785,6 +745,7 @@
 		<simplesect id="import-text-trimvalues">
 			<title>Setting a default for WbImport's -trimValues parameter</title>
 			<para>Property: <literal>workbench.import.default.trimvalues</literal></para>
+			<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 			<para>
 				This property controls the default value for the parameter <literal>-trimValues</literal>
 				of the <link linkend="command-import">WbImport</link> command. 
@@ -886,7 +847,7 @@
 
     <simplesect id="manual-setting-system-names">
 			<title>System generated names for contraints</title>
-			<para>Property: <literal>workbench.db.[dbid].constraints.systemname</literal></para>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.constraints.systemname</literal></para>
 			<para>
 				Defines a regular expression to identify system generated constraint names.
 				If a constraint name is identified as beeing system generated, it is treated

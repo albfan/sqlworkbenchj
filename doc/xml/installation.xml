@@ -73,7 +73,7 @@
 	</section>
 
 	<section id="starting">
-		<title>Starting the program</title>
+		<title>Starting the program from the commandline</title>
 
 		<para>
 			sqlworkbench.jar is a self executing JAR file. This means, that if
@@ -91,213 +91,44 @@
 			<link linkend="launcher-using">here</link>.
 		</para>
 
+	</section>
+
+	<section id="shell-using">
+		<title>Starting the porgram using the shell script</title>
 		<para>
-			The provided shell and batch scripts make use of the <literal>JAVA_HOME</literal> or
-			<literal>WORKBENCH_JDK</literal> environment variables to detect the runtime to be used.
-			If those variables are not set, it is assumed that the <literal>java</literal> executable
-			is available through the system search path.
+			To run &wb-productname; under an Unix-type operating system, the supplied shell script
+			<literal>sqlworkbench.sh</literal> can be used. For Linux desktop a sample ".desktop"
+			file is available.
 		</para>
-		
-		<section id="config-dir" xreflabel="Configuration files">
-			<title>Configuration directory</title>
+
+		<section id="jdk-shell">
+			<title>Specifying the Java runtime for the shell script</title>
 
 			<para>
-				If no configuration directory has been specified on the commandline,
-				&wb-productname; will use the following search order to find it's configuration directory:
-				<orderedlist>
-					<listitem><simpara>The current directory</simpara></listitem>
-					<listitem><simpara>The directory where <literal>sqlworkbench.jar</literal> is located</simpara></listitem>
-					<listitem>
-						<simpara>
-							In the user's home direcotry
-							(e.g. <literal>$HOME/.sqlworkbench</literal> on Unix based systems
-							or <literal>%HOMEPATH%\.sqlworkbench</literal> on Windows systems)
-						</simpara></listitem>
-				</orderedlist>
-				If the file <literal>workbench.settings</literal> is not found in any of those directories
-				it will be created in the user's home directory. 
+				The shell scripts first check if the environment variable <literal>WORKBENCH_JDK</literal>
+				is defined. If that variable is defined, the shell script will use <literal>$WORKBENCH_JDK/bin/java</literal>
+				to run the application.
 			</para>
 			<para>
-				The above mentioned search can be overridden by supplying the configuration directory
-				<link linkend="cmdline-parameter-configdir">on the commandline</link> when starting the application.
+				If <literal>WORKBENCH_JDK</literal> is not defined, the shell script will check
+				for the environment variable <literal>JAVA_HOME</literal>. If that is defined, the script
+				will use <literal>$JAVA_HOME/bin/java</literal> to run the application.
 			</para>
-
 			<para>
-				Note that, before Build 98 the default configuration directory was the program's directory
-				and not a directory in the user's home directory.
+				If neither <literal>WORKBENCH_JDK</literal> nor <literal>JAVA_HOME</literal> is defined,
+				the shell script will simply use <literal>java</literal> to start the application,
+				assuming that a valid Java runtime is available on the path.
 			</para>
-
-			<para>The following files are stored in the configuration directory:
-				<itemizedlist>
-					<listitem><simpara>General configuration settings (<filename>workbench.settings</filename>)</simpara></listitem>
-					<listitem><simpara>Connection profiles (<filename>WbProfiles.xml</filename>)</simpara></listitem>
-					<listitem><simpara>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</simpara></listitem>
-					<listitem><simpara>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>).
-						If you did not customize any of the shortcuts, this file does not exist</simpara>
-					</listitem>
-					<listitem><simpara>Macro definitions (<filename>WbMacros.xml</filename>)</simpara></listitem>
-					<listitem><simpara>Log file (<filename>workbench.log</filename>)</simpara></listitem>
-					<listitem><simpara>Workspace files (<filename>*.wksp</filename>)</simpara></listitem>
-				</itemizedlist>
-			</para>
-
 			<para>
-				If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
-				location of the profiles with the <literal>-profilestorage</literal> parameter on the commandline.
-				Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
-				The different shortcuts can still use the same main configuration file.
+				The shell scripts simply pass any parameter on to the application. If you want to change
+				the memory or other system settings for the JVM, you need to edit the shell script.
 			</para>
 		</section>
-		
-		<section id="config-dir-adjust">
-			<title>Specifying the location of the configuration directory</title>
 
-			<?dbfo-need height="2cm" ?>
-			<para>
-				If you want to control the location where &wb-productname; stores the configuration
-			  files, you have to start the application with the parameter -configDir to specify an 
-				alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
-			</para>
-			
-			<?dbfo-need height="2cm" ?>
-			<para>
-				or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
-				The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory 
-				(as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
-				If the specified directory does not exist, it will be created.
-			</para>
-
-			<para>
-				To copy an installation to a different computer, simply copy all the above
-				files to the other computer (the log file does not need to be copied).
-				When a profile is connected to a workspace, the filename
-				of the workspace file is usually stored with a placeholder for the configuration directory
-				(%configDir%) so that the profiles don't need to be adjusted.
-			</para>
-			
-			<para>
-				You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
-				as the full path to the driver's jar file(s) is stored in the file (unless you 
-				define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
-			</para>
-		</section>
-	</section>
-
-
-	<section id="displaying-help">
-		<title>Displaying help</title>
-		<para>
-			You have two possibilities to display help for &wb-productname;. Either a HTML based
-			help or a PDF version of the manual.
-		</para>
-		<para>
-			The HTML help is available through the menu item 
-			<menuchoice><guimenu>Help</guimenu><guimenuitem>Contents</guimenuitem></menuchoice>
-			It is expected that the HTML manual is stored in a directory called <literal>manual</literal>
-			in the same directory where <literal>sqlworkbench.jar</literal> is located. This is automatically the case
-			when you extract the distribution archive with sub-directories.
-		</para>
-		<para>
-			You can choose to display a single-page version of the HTML help (easier to search) or a multi-page
-			version of the help that is easier to navigatie. This can be switched in the options dialog, that is
-			accessible from <menuchoice><guimenu>Tools</guimenu><guimenuitem>Option</guimenuitem></menuchoice>.
-		</para>
-		<para>
-			The the PDF manual can be displayed by selecting <menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
-			In order to be able to display the PDF manual, you need to define the path to the executable for the PDF 
-			reader in the <link linkend="options-general">General options</link> section of the options dialog.
-		</para>
-		<para>
-			The file <literal>SQLWorkbench-Manual.pdf</literal> must be available in the
-			directory where <literal>sqlworkbench.jar</literal> is located.
-		</para>
-	</section>
-	
-	<section id="install-increase-memory">
-		<title>Increasing the memory available to the application</title>
-		<para>
-			&wb-productname; is a Java application and thus runs inside a
-			so-called virtual machine (JVM). The virtual machine limits the memory
-			independently from the installed memory that is available to the operating
-			system.
-		</para>
-		<para>
-			&wb-productname; reads the data that is returned by a <literal>SELECT</literal>
-			statement into the main memory. When retrieving large result sets, you might
-			get an error message, indicating that not enough memory is available. In this
-			case you need to increase the memory that the JVM requests from the operating
-			system (or change your statement to return fewer rows).
-		</para>
-		<para>
-			When you use the Windows&reg; <link linkend="launcher-using">Launcher</link> to start &wb-productname;
-			you need to pass the parameter -J-Xmx512m to the executable:
-			<programlisting>SQLWorkbench.exe -J-Xmx512m</programlisting>This example
-			will increase the maximum memory to 512MB. The recommended way
-			is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
-			to the shortcut definition. The launcher sets the available heap size
-			for &wb-productname; to 256MB.
-		</para>
-		<para>
-			If you are running &wb-productname; on a non-Windows&reg; operating system or do not
-			want to use the launcher, then you need to pass this parameter directly to the JVM
-		</para>
-		<para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
-		<para>
-			The default heap size for your Java environment depends on your operating
-			system and your JDK implementation. Most JDKs use a default of 96MB as the
-			default maximum heap size.
-		</para>
-		<note><para>
-			The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
-			memory to the given value. This does not mean that the application will use
-			that much memory
-		</para></note>
-	</section>
-
-	<section id="no-ddraw">
-		<title>Display Problems, Crashes, Bluescreens when running under Windows&reg;</title>
-
-		<para>
-			If you experience problems when running &wb-productname; (or
-			other Java/Swing based applications) on the Windows&reg; platform, this
-			might be due to problems with the graphics driver and/or the
-			DirectDraw installation. If upgrading the graphics driver or the
-			DirectDraw/DirectX version is not an option (or does not solve the
-			problem), try to run SQL Workbench with the direct draw feature
-			turned off:
-		</para>
-
-		<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar</programlisting>
-
-		<para>
-			When using the exe launcher, you can use the following syntax:
-		</para>
-
-		<programlisting>SQLWorkbench -noddraw</programlisting>
-
-		<para>
-			If you run &wb-productname; through a program that enables remote 
-			access to a Windows&reg; workstations (PC-Duo, VNC, NetMeeting, etc),
-			you may need to disable the use of DirectDraw for Java as well.
-		</para>
-
-	</section>
-
-	<section id="hi-cpu-usage">
-		<title>High CPU usage when executing statements</title>
-		
-		<para>If you experience a high CPU usage when running a SQL statement,
-			this might be caused by a combination of the graphics driver, the JDK and
-			the Windows&reg; version you are using. This is usually caused by the animated
-			icon which indicates a running statement (the yellow smiley). This animation can 
-			be turned off in <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
-			See <xref linkend="option-animated-icon"/> for details. A different
-			icon (not animated) will be used if that option is disabled.
-		</para>
 	</section>
 
 	<section id="launcher-using">
-		<title>Using the Windows launcher</title>
+		<title>Starting the program using the Windows launcher</title>
 
 		<para>
 			On the Windows&reg; platform the supplied SQLWorkbench.exe can be used to
@@ -315,7 +146,7 @@
 		</para></note>
 
 		<para>
-			By default the launcher increases the maximum JVM heap size to 128 MB. 
+			By default the launcher increases the maximum JVM heap size to 128 MB.
 			If you need more heap memory, you	need to pass the appropriate JVM parameter to the launcher.
 		</para>
 
@@ -386,7 +217,7 @@
 
 						<row>
 							<entry>-server</entry>
-							<entry>Select the server JVM (instead of the default client JVM). 
+							<entry>Select the server JVM (instead of the default client JVM).
 							This switch only works with the Sun JVM.</entry>
 						</row>
 
@@ -397,7 +228,7 @@
 
 						<row>
 							<entry>-jvmtype</entry>
-							<entry>Select the JVM type to be loaded. For the Sun JVM this 
+							<entry>Select the JVM type to be loaded. For the Sun JVM this
 								may be either <literal>client</literal> or <literal>server</literal> (equivalent
 								to the -server or -client switches). If the JDK identified with the
 								-jdk switch points to BEA's JRockit JVM, this should be
@@ -406,7 +237,7 @@
 								in the base directory specified with the -jdk switch.
 							</entry>
 						</row>
-            
+
 						<row>
 							<entry>-noddraw</entry>
 							<entry>Disable the use of DirectDraw routines for the JVM. Use this
@@ -424,21 +255,6 @@
 							<entry>-help</entry>
 							<entry>Display a message with the list of parameters</entry>
 						</row>
-
-						<!--
-						<row id="launcher-nolang">
-							<entry>-nolang</entry>
-							<entry>As &wb-productname; is (currently) only available in english, the launcher
-							sets the system property <literal>user.language</literal> to "<literal>en</literal>"
-							to get a consistent language when displaying dialogs from the Java 
-							runtime environment. If you don't want the launcher to override the system
-							property, add the parameter <literal>-nolang</literal> to the shortcut
-							starting the Windows launcher. This property might have an impact on 
-							certain JDBC drivers. It seems that the new Oracle 10g Release 2 driver
-		          does not work properly without passing this parameter.</entry>
-						</row>
-						-->
-						
 					</tbody>
 				</tgroup>
 			</informaltable>
@@ -462,15 +278,142 @@
 				With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
 				is loaded. This affects the &wb-productname; launcher due to the (new?) Microsoft C runtime distribution model.
 				If you want to run &wb-productname; under Windows Vista, please copy the file <literal>msvcr71.dll</literal>
-				into the directory where <literal>SQLWorkbench.exe</literal> is located. 
+				into the directory where <literal>SQLWorkbench.exe</literal> is located.
 			</para>
 			<para>
-				This file can be found at <literal>%SystemRoot%\System32\msvcr71.dll</literal> 
+				This file can be found at <literal>%SystemRoot%\System32\msvcr71.dll</literal>
 				(usually this is <literal>c:\Windows\System32\msvcr71.dll</literal>)
 			</para>
 			<para>Thanks to Jon for this tip.</para>
 		</section>
 
+	</section>
+		
+
+	<section id="config-dir" xreflabel="Configuration files">
+		<title>Configuration directory</title>
+
+		<para>
+			If no configuration directory has been specified on the commandline,
+			&wb-productname; will use the following search order to find it's configuration directory:
+			<orderedlist>
+				<listitem><simpara>The current directory</simpara></listitem>
+				<listitem><simpara>The directory where <literal>sqlworkbench.jar</literal> is located</simpara></listitem>
+				<listitem>
+					<simpara>
+						In the user's home direcotry
+						(e.g. <literal>$HOME/.sqlworkbench</literal> on Unix based systems
+						or <literal>%HOMEPATH%\.sqlworkbench</literal> on Windows systems)
+					</simpara></listitem>
+			</orderedlist>
+			If the file <literal>workbench.settings</literal> is not found in any of those directories
+			it will be created in the user's home directory.
+		</para>
+		<para>
+			The above mentioned search can be overridden by supplying the configuration directory
+			<link linkend="cmdline-parameter-configdir">on the commandline</link> when starting the application.
+		</para>
+
+		<para>
+			Note that, before Build 98 the default configuration directory was the program's directory
+			and not a directory in the user's home directory.
+		</para>
+
+		<para>The following files are stored in the configuration directory:
+			<itemizedlist>
+				<listitem><simpara>General configuration settings (<filename>workbench.settings</filename>)</simpara></listitem>
+				<listitem><simpara>Connection profiles (<filename>WbProfiles.xml</filename>)</simpara></listitem>
+				<listitem><simpara>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</simpara></listitem>
+				<listitem><simpara>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>).
+					If you did not customize any of the shortcuts, this file does not exist</simpara>
+				</listitem>
+				<listitem><simpara>Macro definitions (<filename>WbMacros.xml</filename>)</simpara></listitem>
+				<listitem><simpara>Log file (<filename>workbench.log</filename>)</simpara></listitem>
+				<listitem><simpara>Workspace files (<filename>*.wksp</filename>)</simpara></listitem>
+			</itemizedlist>
+		</para>
+
+		<para>
+			If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
+			location of the profiles with the <literal>-profilestorage</literal> parameter on the commandline.
+			Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
+			The different shortcuts can still use the same main configuration file.
+		</para>
+
+		<section id="config-dir-adjust">
+			<title>Specifying the location of the configuration directory</title>
+
+			<?dbfo-need height="2cm" ?>
+			<para>
+				If you want to control the location where &wb-productname; stores the configuration
+				files, you have to start the application with the parameter -configDir to specify an
+				alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
+			</para>
+
+			<?dbfo-need height="2cm" ?>
+			<para>
+				or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
+				The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory
+				(as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
+				If the specified directory does not exist, it will be created.
+			</para>
+
+			<para>
+				To copy an installation to a different computer, simply copy all the above
+				files to the other computer (the log file does not need to be copied).
+				When a profile is connected to a workspace, the filename
+				of the workspace file is usually stored with a placeholder for the configuration directory
+				(%configDir%) so that the profiles don't need to be adjusted.
+			</para>
+
+			<para>
+				You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
+				as the full path to the driver's jar file(s) is stored in the file (unless you
+				define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
+			</para>
+		</section>
+		
+	</section>
+	
+	<section id="install-increase-memory">
+		<title>Increasing the memory available to the application</title>
+		<para>
+			&wb-productname; is a Java application and thus runs inside a
+			so-called virtual machine (JVM). The virtual machine limits the memory
+			independently from the installed memory that is available to the operating
+			system.
+		</para>
+		<para>
+			&wb-productname; reads the data that is returned by a <literal>SELECT</literal>
+			statement into the main memory. When retrieving large result sets, you might
+			get an error message, indicating that not enough memory is available. In this
+			case you need to increase the memory that the JVM requests from the operating
+			system (or change your statement to return fewer rows).
+		</para>
+		<para>
+			When you use the Windows&reg; <link linkend="launcher-using">Launcher</link> to start &wb-productname;
+			you need to pass the parameter -J-Xmx512m to the executable:
+			<programlisting>SQLWorkbench.exe -J-Xmx512m</programlisting>This example
+			will increase the maximum memory to 512MB. The recommended way
+			is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
+			to the shortcut definition. The launcher sets the available heap size
+			for &wb-productname; to 256MB.
+		</para>
+		<para>
+			If you are running &wb-productname; on a non-Windows&reg; operating system or do not
+			want to use the launcher, then you need to pass this parameter directly to the JVM
+		</para>
+		<para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
+		<para>
+			The default heap size for your Java environment depends on your operating
+			system and your JDK implementation. Most JDKs use a default of 96MB as the
+			default maximum heap size.
+		</para>
+		<note><para>
+			The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
+			memory to the given value. This does not mean that the application will use
+			that much memory
+		</para></note>
 	</section>
 
 	<section id="commandline" xreflabel="command line parameters">

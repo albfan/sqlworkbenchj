@@ -1019,7 +1019,7 @@ WHERE id=42;</programlisting>
       directly to the server, except for the parameters described in this chapter (because
       they have an equivalent JDBC call that will be executed instead).
     </para>
-    
+
     <section id="command-set-feedback">
       <title>FEEEDBACK</title>
       <para>
@@ -1047,7 +1047,7 @@ WHERE id=42;</programlisting>
 				menu item.
       </para>
     </section>
-    
+
   </section>
   
   <section id="command-desc">

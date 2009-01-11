@@ -3,7 +3,8 @@
 
 	<section id="configure-drivers">
 		<title>Configuring JDBC drivers</title>
-		<para>Before you can connect to a DBMS you have to configure the JDBC
+		<para>
+			Before you can connect to a DBMS you have to configure the JDBC
 			driver to be used. The driver configuration is available in the connection
 			dialog or through <menuchoice><guimenu>File</guimenu><guimenuitem>Manage Drivers</guimenuitem></menuchoice>
 		</para>
@@ -16,14 +17,23 @@
 		</itemizedlist>
 
 		<para>
+			After you have selected the .jar file for a driver, &wb-productname; will scan the jar
+			file looking for a JDBC driver. If only a single driver is found, the classname is automatically
+			put into the entry field. If more than one class is found that is a driver implementation, you
+			will be prompted to select one. In that case, please refer to the manual of your driver, to choose
+			the correct one.
+		</para>
+		
+		<para>
 			The name of the library has to contain the full path to the driver&apos;s jar file, so that
-			&wb-productname; can find it. If a driver requires more than one library,
-			select all necessary libraries in the file open dialog, or enter all the
+			&wb-productname; can find it. Some drivers are distributed in several jar files. In that case,
+			select all necessary files in the file open dialog, or enter all the
 			filenames separated by a semicolon (or a colon on Unix style operating systems). 
 			This is also true for drivers that require a license file that is contained in a jar file. 
 			In this case you have to include the license jar in the list of files. Basically this list defines
 			the classpath for the classloader that is used to load and instantiate the driver.
 		</para>
+
 		<para>
 			If the driver accesses files through its classpath definition that are not
 			contained in a jar library, you have to include that directory as part
@@ -32,7 +42,8 @@
 			to add it manually to the library definition.
 		</para>
 
-		<note><para>&wb-productname; is <emphasis role="bold">not</emphasis> using
+		<note><para>
+			&wb-productname; is <emphasis role="bold">not</emphasis> using
 			the system CLASSPATH definition (i.e. environment variable) to load the
 			driver classes. Changing the CLASSPATH environment variable to include
 			your driver's library will not work. Using the <literal>-cp</literal> switch
@@ -45,18 +56,19 @@
 			the necessary drivers are already part of the Java runtime.
 		</para>
 
-		<para>You can assign a sample URL to each driver, which will be put into
+		<para>
+			You can assign a sample URL to each driver, which will be put into
 			the URL property of the profile, when the driver class is selected.
 		</para>
 
-		<para>&wb-productname; comes with some sample URLs pre-configured.
+		<para>
+			&wb-productname; comes with some sample URLs pre-configured.
 			Some of these sample URLs use brackets to indicate a parameters that need
 			to be replaced with the actual value for your connection: (servername)
-		</para>
-		<para>
 			In this case the entire sequence including the brackets need to be replaced with the 
 			actual value.
 		</para>
+
 	</section>
 	
 	<section id="jdbc-lib-dir">
@@ -70,14 +82,18 @@
 			switch when starting the application.
 		</para>
 	</section>
+	
 	<section id="jdbc-drivers">
 		<title>Popular JDBC drivers</title>
 
 		<para>
-			Here is an overview of common JDBC drivers, and the classname that needs 
+			Here is an overview of common JDBC drivers, and the classname that need 
 			to be used. &wb-productname; contains predefined JDBC drivers that 
-			also contain sample URLs for connecting to the database. Note that most 
-			drivers accept additional configuration parameters either in the URL
+			also contain sample URLs for connecting to the database.
+		</para>
+
+		<para>
+			Most drivers accept additional configuration parameters either in the URL
 			or through the <link linkend="profile-extended-properties">extended properties</link>.
 			Please consult the manual of your driver for more detailed information on these
 			additional parameters.
