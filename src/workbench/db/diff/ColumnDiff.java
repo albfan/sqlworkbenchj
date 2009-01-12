@@ -187,7 +187,11 @@ public class ColumnDiff
 			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", tId.getColumnName());
 			result.append('\n');
 
-			if (typeDifferent)
+			// for some DBMS the full definition of the column must be present in order
+			// to be able to generate the proper ALTER TABLE statement to change the column
+			// e.g. in SQL Server the complete data type definition must be repeated when
+			// changing the column from NOT NULL to NULL
+			if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent)
 			{
 				referenceColumn.appendXml(result, myindent, false, "reference-column-definition", true);
 			}
@@ -196,8 +200,16 @@ public class ColumnDiff
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DBMS_TYPE, sId.getDbmsType());
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_SIZE, sId.getColumnSize());
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DIGITS, sId.getDigitsDisplay());
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, sId.getColumnTypeName());
+				if (SqlUtil.isNumberType(sId.getDataType()))
+				{
+					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DIGITS, sId.getDigitsDisplay());
+				}
+				String stype = sId.getColumnTypeName();
+				String ttype = tId.getColumnTypeName();
+				if (!stype.equals(ttype))
+				{
+					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, sId.getColumnTypeName());
+				}
 			}
 			if (nullableDifferent)
 			{
