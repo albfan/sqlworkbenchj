@@ -87,7 +87,6 @@ public class DataStore
 
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
-//	private boolean adjustTableExpression;
 
 	private List<ColumnIdentifier> missingPkcolumns;
 
@@ -552,7 +551,6 @@ public class DataStore
 	public void setUpdateTableToBeUsed(TableIdentifier tbl)
 	{
 		this.updateTableToBeUsed = (tbl == null ? null : tbl.createCopy());
-//		this.adjustTableExpression = true;
 	}
 
 	public void setUpdateTable(String aTablename, WbConnection aConn)
@@ -1347,7 +1345,6 @@ public class DataStore
 		RowData row = null;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
-//		factory.setIncludeTableOwner(adjustTableExpression);
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 
 		row = this.getNextDeletedRow();
@@ -1485,7 +1482,6 @@ public class DataStore
 		this.ignoreAllUpdateErrors = false;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, aConnection);
-//		factory.setIncludeTableOwner(adjustTableExpression);
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 		boolean inCommit = false;
 
