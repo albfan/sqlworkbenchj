@@ -87,7 +87,7 @@ public class DataStore
 
 	private boolean cancelRetrieve = false;
 	private boolean cancelUpdate = false;
-	private boolean adjustTableExpression;
+//	private boolean adjustTableExpression;
 
 	private List<ColumnIdentifier> missingPkcolumns;
 
@@ -552,7 +552,7 @@ public class DataStore
 	public void setUpdateTableToBeUsed(TableIdentifier tbl)
 	{
 		this.updateTableToBeUsed = (tbl == null ? null : tbl.createCopy());
-		this.adjustTableExpression = true;
+//		this.adjustTableExpression = true;
 	}
 
 	public void setUpdateTable(String aTablename, WbConnection aConn)
@@ -628,11 +628,24 @@ public class DataStore
 			DbMetadata meta = conn.getMetadata();
 			if (meta == null) return;
 
-			this.updateTable = tbl.createCopy();
+			// Look up the table in the database to make sure
+			// we get the name correct (upper/lowercase etc)
+			this.updateTable = meta.findSelectableObject(tbl);//tbl.createCopy();
 
-			TableIdentifier synCheck = tbl.createCopy();
-			synCheck.setSchema(meta.getSchemaToUse());
+			// If the object that was used in the original SELECT is
+			// a Synonym we have to get the definition of the underlying
+			// table in order to find the primary key columns
+			TableIdentifier synCheck = updateTable.createCopy();
+
+			if (synCheck.getSchema() == null)
+			{
+				synCheck.setSchema(meta.getSchemaToUse());
+			}
+
+			// if the passed table is not a synonym resolveSynonym
+			// will return the passed table
 			TableIdentifier toCheck = meta.resolveSynonym(synCheck);
+
 			List<ColumnIdentifier> columns = meta.getTableColumns(toCheck);
 			int realColumns = 0;
 
@@ -1189,9 +1202,9 @@ public class DataStore
 		else
 		{
 			if (this.sql == null) return false;
-			List tables = SqlUtil.getTables(this.sql);
+			List<String> tables = SqlUtil.getTables(this.sql);
 			if (tables.size() != 1) return false;
-			String table = (String)tables.get(0);
+			String table = tables.get(0);
 			this.setUpdateTable(table, aConn);
 		}
 		return true;
@@ -1334,7 +1347,7 @@ public class DataStore
 		RowData row = null;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, this.originalConnection);
-		factory.setIncludeTableOwner(adjustTableExpression);
+//		factory.setIncludeTableOwner(adjustTableExpression);
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 
 		row = this.getNextDeletedRow();
@@ -1472,7 +1485,7 @@ public class DataStore
 		this.ignoreAllUpdateErrors = false;
 
 		StatementFactory factory = new StatementFactory(this.resultInfo, aConnection);
-		factory.setIncludeTableOwner(adjustTableExpression);
+//		factory.setIncludeTableOwner(adjustTableExpression);
 		String le = Settings.getInstance().getInternalEditorLineEnding();
 		boolean inCommit = false;
 

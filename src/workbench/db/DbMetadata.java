@@ -1340,6 +1340,7 @@ public class DbMetadata
 			{
 				result = new TableIdentifier(rs.getString(1), rs.getString(2), rs.getString(3));
 				result.setType(rs.getString(4));
+				result.setNeverAdjustCase(true);
 			}
 		}
 		catch (Exception e)

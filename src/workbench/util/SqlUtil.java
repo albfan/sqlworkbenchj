@@ -458,7 +458,7 @@ public class SqlUtil
 		return (String)elements.get(0);
 	}
 	
-	public static List getTables(String aSql)
+	public static List<String> getTables(String aSql)
 	{
 		return getTables(aSql, false);
 	}
@@ -466,16 +466,16 @@ public class SqlUtil
 	public static final Set<String> JOIN_KEYWORDS = new HashSet<String>(6);
 	static
 	{
-			JOIN_KEYWORDS.add("JOIN");
-			JOIN_KEYWORDS.add("INNER JOIN");
-			JOIN_KEYWORDS.add("NATURAL JOIN");
-			JOIN_KEYWORDS.add("LEFT JOIN");
-			JOIN_KEYWORDS.add("LEFT OUTER JOIN");
-			JOIN_KEYWORDS.add("RIGHT JOIN");
-			JOIN_KEYWORDS.add("RIGHT OUTER JOIN");
-			JOIN_KEYWORDS.add("CROSS JOIN");
-			JOIN_KEYWORDS.add("FULL JOIN");
-			JOIN_KEYWORDS.add("FULL OUTER JOIN");
+		JOIN_KEYWORDS.add("JOIN");
+		JOIN_KEYWORDS.add("INNER JOIN");
+		JOIN_KEYWORDS.add("NATURAL JOIN");
+		JOIN_KEYWORDS.add("LEFT JOIN");
+		JOIN_KEYWORDS.add("LEFT OUTER JOIN");
+		JOIN_KEYWORDS.add("RIGHT JOIN");
+		JOIN_KEYWORDS.add("RIGHT OUTER JOIN");
+		JOIN_KEYWORDS.add("CROSS JOIN");
+		JOIN_KEYWORDS.add("FULL JOIN");
+		JOIN_KEYWORDS.add("FULL OUTER JOIN");
 	}
 	
 	/**

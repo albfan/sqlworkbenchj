@@ -165,7 +165,7 @@ public class DataStoreTest
 	}
 	
 	
-	public void testCasePreserving()
+	public void _testCasePreserving()
 	{
 		WbConnection con = null;
 		Statement stmt = null;
