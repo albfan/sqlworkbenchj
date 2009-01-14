@@ -46,6 +46,7 @@ public class StatementRunnerResult
 	private boolean hasWarning = false;
 	private boolean wasCancelled = false;
 	private boolean stopScriptExecution = false;
+	private boolean showRowCount = true;
 
 	/**
 	 * Controls the printing of the results in command line mode.
@@ -78,6 +79,16 @@ public class StatementRunnerResult
 	public void setExecutionTime(long t) { this.executionTime = t; }
 	public long getExecutionTime() { return this.executionTime; }
 
+	public void setShowRowCount(boolean flag)
+	{
+		showRowCount = flag;
+	}
+
+	public boolean getShowRowCount()
+	{
+		return showRowCount;
+	}
+	
 	/**
 	 * Controls the printing of the results in command line mode.
 	 * If printRowsPerLine == true, each row should be printed on a single console line

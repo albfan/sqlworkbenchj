@@ -750,14 +750,17 @@ public class BatchRunner
 			console.println(sql);
 		}
 
-		for (DataStore ds : data)
+		for (int i=0; i < data.size(); i++)
 		{
+			DataStore ds = data.get(i);
 			if (ds != null)
 			{
 				DataStorePrinter printer = new DataStorePrinter(ds);
 				printer.setFormatColumns(optimizeCols);
+				printer.setPrintRowCount(result.getShowRowCount());
 				printer.setPrintRowsAsLine(printRowsAsLine);
 				printer.printTo(console);
+				if (i < data.size() -1) console.println();
 			}
 		}
 

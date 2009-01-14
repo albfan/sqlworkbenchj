@@ -116,7 +116,11 @@ public class ResultSetPrinter
 				printRow(pw, row, count);
 				count ++;
 			}
-			if (doFormat) pw.println(ResourceMgr.getFormattedString("MsgRows", count));
+			if (toConsume.getShowRowCount())
+			{
+				pw.println();
+				pw.println(ResourceMgr.getFormattedString("MsgRows", count));
+			}
 			pw.flush();
 		}
 		catch (Exception e)

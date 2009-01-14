@@ -78,7 +78,7 @@ public class DataStorePrinterTest
 //		System.out.println(out);
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
-		assertEquals(10, linecount);
+		assertEquals(11, linecount);
 
 		assertEquals("DESCRIPTION           | QUANTITY | LASTNAME      ", lines[0]);
 		assertEquals("----------------------+----------+---------------", lines[1]);
@@ -93,6 +93,7 @@ public class DataStorePrinterTest
 		ps = new PrintStream(ba);
 		printer = new DataStorePrinter(ds);
 		printer.setFormatColumns(false);
+		printer.setPrintRowCount(false);
 		printer.printTo(ps);
 		out = ba.toString();
 		ps.close();
@@ -119,7 +120,7 @@ public class DataStorePrinterTest
 		ps.close();
 		String[] lines = out.split(StringUtil.LINE_TERMINATOR);
 		int linecount = lines.length;
-		assertEquals(24, linecount);
+		assertEquals(25, linecount);
 		assertEquals("---- [Row 1] -------------------------------", lines[0]);
 		assertEquals("DESCRIPTION : Very long test value", lines[1]);
 		assertEquals("QUANTITY    : 1", lines[2]);

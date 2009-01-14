@@ -87,7 +87,7 @@ public class ResultSetPrinterTest
 			// plus one additional line for the multi-line values
 			// plus one line with the number of rows retrieved
 			// so we wind up with rowCount + 4
-			assertEquals(rowCount + 4, lines.length);
+			assertEquals(rowCount + 5, lines.length);
 			
 			assertEquals("NR         | FIRSTNAME            | LASTNAME            ", lines[0]);
 			assertEquals("-----------+----------------------+---------------------", lines[1]);
@@ -95,7 +95,7 @@ public class ResultSetPrinterTest
 			assertEquals("1          | firstname            | lastname            ", lines[3]);
 			assertEquals("42         | first                | lastname            ", lines[4]);
 			assertEquals("           : name                 : lines", lines[5]);
-			assertEquals("3 Rows", lines[6]);
+			assertEquals("(3 Rows)", lines[7]);
 
 			rs = stmt.executeQuery("select * from person order by nr");
 			ba.reset();
@@ -103,6 +103,7 @@ public class ResultSetPrinterTest
 			printer = new ResultSetPrinter(ps);
 			printer.setFormatColumns(false);
 			result = new StatementRunnerResult();
+			result.setShowRowCount(false);
 			result.addResultSet(rs);
 			printer.consumeResult(result);
 			ps.close();
@@ -129,7 +130,7 @@ public class ResultSetPrinterTest
 			out = ba.toString();
 //			System.out.println(out);
 			lines = out.split(StringUtil.LINE_TERMINATOR);
-			assertEquals(15, lines.length);
+			assertEquals(16, lines.length);
 			assertEquals("---- [Row 1] -------------------------------", lines[0]);
 			assertEquals("NR        : 0", lines[1]);
 			assertEquals("FIRSTNAME : firstname", lines[2]);

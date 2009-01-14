@@ -72,6 +72,8 @@ public class WbDescribeTable
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
+		result.setShowRowCount(false);
+		
 		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 
 		TableIdentifier tbl = new TableIdentifier(table);

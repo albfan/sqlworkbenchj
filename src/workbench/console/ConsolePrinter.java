@@ -38,7 +38,7 @@ public abstract class ConsolePrinter
 	protected abstract String getColumnName(int col);
 	protected abstract int getColumnType(int col);
 	protected boolean doFormat = true;
-
+	protected boolean showRowCount = true;
 	protected boolean printRowAsLine = true;
 
 	/**
@@ -70,6 +70,11 @@ public abstract class ConsolePrinter
 		doFormat = flag;
 	}
 
+	public void setPrintRowCount(boolean flag)
+	{
+		this.showRowCount = flag;
+	}
+	
 	protected void printHeader(PrintWriter pw)
 	{
 		if (!printRowAsLine) return;

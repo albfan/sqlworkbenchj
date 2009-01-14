@@ -130,6 +130,7 @@ public class SQLConsole
 			{
 				printer = new ResultSetPrinter(System.out);
 				printer.setFormatColumns(optimizeColWidths);
+				printer.setPrintRowCount(true);
 				runner.setResultSetConsumer(printer);
 			}
 
