@@ -43,7 +43,7 @@ public class DbExplorerOptionsPanel
 		set.setRememberSortInDbExplorer(rememberSort.isSelected());
 		set.setShowFocusInDbExplorer(showFocus.isSelected());
 		set.setDefaultExplorerObjectType(this.defTableType.getText());
-		
+		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
 	public void restoreSettings()
