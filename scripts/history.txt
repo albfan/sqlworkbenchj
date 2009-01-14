@@ -1,24 +1,33 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
-Enh: (102.8) A new option to make versioned backups of the workspace is now
-     available (Tools -> Options -> General -> Create Workspace Backup)
-Enh: (102.8) The removal of comments when the "remove comments" option is active
-     has been moved to a later stage in the statement processing. This way
-     the new feature to name result sets can be used with DBMS that do not
-     support embedded comments in SQL statements.
-Enh: (102.7) for specific datatypes, data retrieval in the DbExplorer can now
-     be done by applying expressions to the column when building the SQL 
-     to select the data. The replacement is defined per database and 
+Enh: (102.11) The "Manage Drivers" dialog now searches the selected jar file
+     for a JDBC driver if a new library is selected.
+Enh: (102.10) The placement of the details tabs in the DbExplorer's table list
+     can now be configured through the options dialog, not only in
+     the settings file.
+Enh: (102.10) The syntax highlight colors can now be configured through
+     the options dialog
+Enh: (102.10) The "select expression" replacement is now also used
+     inside the "Search table data" tab.
+Enh: (102.9) for specific datatypes, data retrieval in the DbExplorer can 
+     now be done by applying expressions to the column when building the SQL
+     to select the data. The replacement is defined per database and
      datatype in workbench.settings:
      workbench.db.[dbid].selectexpression.[type]=expression(${column})
      [type] is a "clean" version of the datatype for which this rewrite
-     rule applies. "Clean" means without any brackets. 
-     For name of the column to be retrieved the placeholder ${column} is 
+     rule applies. "Clean" means without any brackets.
+     For name of the column to be retrieved the placeholder ${column} is
      used. To select all varchar columns for postgres in upper case the
      following rewrite rule can be defined:
      workbench.db.postgresql.selectexpression.varchar=upper(${column})
      The datatype must be specified in lowercase
 
+Enh: (102.8) A new option to make versioned backups of the workspace is now
+     available (Tools -> Options -> General -> Create Workspace Backup)
+Enh: (102.8) The removal of comments when the "remove comments" option is 
+     active has been moved to a later stage in the statement processing. This
+     way the new feature to name result sets can be used with DBMS that do not
+     support embedded comments in SQL statements.
 Enh: (102.7) The dropdowns for schema/database can now be reloaded in 
      the DbExplorer
 Enh: (102.7) The result set tabs can now be closed or renamed through their
@@ -91,6 +100,13 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
+Fix: (102.11) When selecting data from another user's schema, 
+     and updating the result set, the generated SQL to update the 
+     table did not contain the schema.
+Fix: (102.10) The -sourceDir parameter for WbImport was not working 
+     with relative directories if WbImport was called from within a 
+     script using WbInclude
+Fix: (102.10) The "Tab" key was no longer working in the editor
 Fix: (102.7) "SQL -> Export Query result" was not working
 Fix: (102.7) The shortcuts for Copy, Cut & Paste can now be defined through
      the shortcut definition dialog.

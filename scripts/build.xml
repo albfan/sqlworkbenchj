@@ -309,7 +309,7 @@
           destdir="${html-outdir}">
 
       <xmlcatalog>
-				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${doc}/dtd/docbookx.dtd"/>
+				<dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN" location="${doc}/dtd/docbookx.dtd"/>
 			</xmlcatalog>
 
 			<param name="use.extensions" expression="0"/>
@@ -595,6 +595,8 @@
         <include name="**/*.*"/>
       </tarfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="wbdiff2derby.xslt"/>
+        <include name="wbdiff2mssql.xslt"/>
         <include name="wbdiff2oracle.xslt"/>
         <include name="wbdiff2pg.xslt"/>
         <include name="wbexport2text.xslt"/>
@@ -632,6 +634,8 @@
         <include name="**/*.*"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
+        <include name="wbdiff2derby.xslt"/>
+        <include name="wbdiff2mssql.xslt"/>
         <include name="wbdiff2oracle.xslt"/>
         <include name="wbdiff2pg.xslt"/>
         <include name="wbexport2text.xslt"/>
