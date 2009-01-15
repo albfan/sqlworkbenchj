@@ -80,7 +80,7 @@
     <string>DB2 UDB for AS/400</string>    
     <object id="db2_host" class="workbench.db.GetMetaDataSql">
       <void property="baseSql">      
-        <string>SELECT VIEW_DEFINITION from SYSIBM.VIEWS</string>     
+        <string>SELECT VIEW_DEFINITION from SYSIBM.SYSVIEWS</string>
       </void>     
       <void property="objectNameField">      
         <string>TABLE_NAME</string>     
