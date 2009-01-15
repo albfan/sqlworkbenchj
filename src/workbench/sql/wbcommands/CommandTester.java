@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
+import workbench.sql.wbcommands.console.WbDisplay;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
@@ -49,9 +50,11 @@ public class CommandTester
 		commands.add(WbDataDiff.VERB);
 		commands.add(WbDefinePk.VERB);
 		commands.add(WbDefineVar.VERB);
+		commands.add(WbDeleteProfile.VERB);
 		commands.add(WbDescribeTable.VERB);
 		commands.add(WbDescribeTable.VERB_LONG);
 		commands.add(WbDisableOraOutput.VERB);
+		commands.add(WbDisplay.VERB);
 		commands.add(WbEnableOraOutput.VERB);
 		commands.add(WbEndBatch.VERB);
 		commands.add(WbExport.VERB);
@@ -80,7 +83,7 @@ public class CommandTester
 		commands.add(WbRun.VERB);
 		commands.add(WbListTriggers.VERB);
 		commands.add(WbTriggerSource.VERB);
-
+		
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
 		formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);

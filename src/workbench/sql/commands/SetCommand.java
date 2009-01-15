@@ -13,7 +13,6 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 
-import workbench.console.RowDisplay;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -122,22 +121,6 @@ public class SetCommand extends SqlCommand
 					{
 						result.setFailure();
 						result.addMessage(ResourceMgr.getFormattedString("MsgSetFailure", param, command));
-					}
-				}
-				else if (command.equalsIgnoreCase("display"))
-				{
-					result = new StatementRunnerResult();
-					execSql = false;
-
-					if ("row".equalsIgnoreCase(param))
-					{
-						result.setRowDisplay(RowDisplay.SingleLine);
-						result.addMessageByKey("MsgDispChangeRow");
-					}
-					else if ("record".equalsIgnoreCase(param))
-					{
-						result.setRowDisplay(RowDisplay.Form);
-						result.addMessageByKey("MsgDispChangeForm");
 					}
 				}
 			}
