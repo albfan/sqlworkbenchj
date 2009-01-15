@@ -11,7 +11,6 @@
  */
 package workbench.db.oracle;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,6 +19,7 @@ import java.util.List;
 import workbench.db.SynonymReader;
 
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
@@ -33,13 +33,13 @@ public class OracleSynonymReader
 	/**
 	 * The Oracle driver already returns the SYNONYMS in the getTables() call
 	 */
-	public List<String> getSynonymList(Connection con, String owner)
+	public List<String> getSynonymList(WbConnection con, String owner)
 		throws SQLException
 	{
 		return Collections.emptyList();
 	}
 
-	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(400);
@@ -58,9 +58,9 @@ public class OracleSynonymReader
 		TableIdentifier result = null;
 		try
 		{
-			stmt = con.prepareStatement(sql.toString());
+			stmt = con.getSqlConnection().prepareStatement(sql.toString());
 			stmt.setString(1, aSynonym);
-			stmt.setString(2, anOwner == null ? con.getMetaData().getUserName() : anOwner);
+			stmt.setString(2, anOwner == null ? con.getCurrentUser() : anOwner);
 			stmt.setString(3, aSynonym);
 
 			rs = stmt.executeQuery();
@@ -83,7 +83,7 @@ public class OracleSynonymReader
 		return result;
 	}
 
-	public String getSynonymSource(Connection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);

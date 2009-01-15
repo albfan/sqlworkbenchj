@@ -67,7 +67,7 @@ public abstract class ViewGrantReader
 		}
 		else if (dbid.startsWith("db2"))
 		{
-			return new Db2ViewGrantReader();
+			return new Db2ViewGrantReader(dbid);
 		}
 		else if (meta.isApacheDerby())
 		{

@@ -110,7 +110,7 @@ public class ReaderFactory
 		}
 		if (dbid.startsWith("db2"))
 		{
-			return new Db2ConstraintReader();
+			return new Db2ConstraintReader(dbid);
 		}
 		if ("firebird".equals(dbid))
 		{

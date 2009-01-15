@@ -196,9 +196,15 @@ public class ProcedureListPanel
 
 	public void reset()
 	{
-		this.procList.reset();
-		this.procColumns.reset();
-		this.source.setText("");
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				procList.reset();
+				procColumns.reset();
+				source.setText("");
+			}
+		});
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -242,9 +248,15 @@ public class ProcedureListPanel
 
 		try
 		{
-			this.reset();
 			this.dbConnection.setBusy(true);
-			this.infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
+			reset();
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					infoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
+				}
+			});
 
 			this.isRetrieving = true;
 			DbMetadata meta = dbConnection.getMetadata();

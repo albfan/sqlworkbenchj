@@ -470,7 +470,7 @@ public class DbMetadata
 			
 			if (productName.startsWith("DB2"))
 			{
-				if (productName.equals("DB2") || productName.indexOf("AS/400") > -1)
+				if (productName.startsWith("DB2 UDB") || productName.equals("DB2") )
 				{
 					// DB/2 for Host-Systems
 					// apparently DB2 for z/OS identifies itself as "DB2" whereas
@@ -479,7 +479,7 @@ public class DbMetadata
 				}
 				else
 				{
-					// Use the same dbid for DB2/LINUX, DB2/NT, DB2/NT64
+					// Use the same dbid for DB2/LINUX, DB2/NT, DB2/NT64, DB2/AIX64
 					dbId = "db2";
 				}
 			}
@@ -1263,7 +1263,7 @@ public class DbMetadata
 		if (retrieveSyns && !synRetrieved && typeIncluded("SYNONYM", types) )
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
-			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection.getSqlConnection(), aSchema);
+			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection, aSchema);
 			for (String synName : syns)
 			{
 				int row = result.addRow();
@@ -2354,7 +2354,7 @@ public class DbMetadata
 		TableIdentifier id = null;
 		try
 		{
-			id = this.synonymReader.getSynonymTable(this.dbConnection.getSqlConnection(), schema, synonym);
+			id = this.synonymReader.getSynonymTable(this.dbConnection, schema, synonym);
 			if (id != null && id.getType() == null)
 			{
 				String type = getObjectType(id);
@@ -2380,7 +2380,7 @@ public class DbMetadata
 		tbl.adjustCase(dbConnection);
 		try
 		{
-			result = this.synonymReader.getSynonymSource(this.dbConnection.getSqlConnection(), tbl.getSchema(), tbl.getTableName());
+			result = this.synonymReader.getSynonymSource(this.dbConnection, tbl.getSchema(), tbl.getTableName());
 		}
 		catch (Exception e)
 		{

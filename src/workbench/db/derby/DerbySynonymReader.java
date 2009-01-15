@@ -11,7 +11,6 @@
  */
 package workbench.db.derby;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -20,6 +19,7 @@ import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
@@ -32,6 +32,7 @@ public class DerbySynonymReader
 	implements SynonymReader
 {
 	private DbMetadata meta;
+	
 	public DerbySynonymReader(DbMetadata dbMeta)
 	{
 		this.meta = dbMeta;
@@ -41,7 +42,7 @@ public class DerbySynonymReader
 	 * The DB2 JDBC driver returns Alias' automatically, so there 
 	 * is no need to retrieve them here
 	 */
-	public List<String> getSynonymList(Connection con, String owner) 
+	public List<String> getSynonymList(WbConnection con, String owner)
 		throws SQLException
 	{
 		List<String> result = new LinkedList<String>();
@@ -55,7 +56,7 @@ public class DerbySynonymReader
 		ResultSet rs = null;
 		try
 		{
-			stmt = con.prepareStatement(sql);
+			stmt = con.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, owner);
 			rs = stmt.executeQuery();
 			while (rs.next())
@@ -75,7 +76,7 @@ public class DerbySynonymReader
 		return result;
 	}
 
-	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		String sql = "select a.aliasinfo \n" + 
@@ -84,7 +85,7 @@ public class DerbySynonymReader
              " and a.alias = ?" +
 			       " and s.schemaname = ?";		
 
-		PreparedStatement stmt = con.prepareStatement(sql);
+		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner);
 		ResultSet rs = stmt.executeQuery();
@@ -115,7 +116,7 @@ public class DerbySynonymReader
 		return result;
 	}
 
-	public String getSynonymSource(Connection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);

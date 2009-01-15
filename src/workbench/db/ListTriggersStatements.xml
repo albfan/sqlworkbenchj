@@ -31,6 +31,41 @@ and   t.schemaid = s.schemaid
    </object>
   </void>
 
+  <!-- DB2 for z/OS identifies itself as DB2 -->
+  <void method="put">
+   <string>DB2</string>
+   <object id="db2_host_trg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT name as trigger_name,
+        CASE trigtime
+           when 'A' then 'AFTER'
+           when 'B' then 'BEFORE'
+           when 'I' then 'INSTEAD'
+        END as trigger_type,
+        CASE trigevent
+          when 'I' then 'INSERT'
+          when 'U' then 'UPDATE'
+          when 'D' then 'DELETE'
+        END AS trigger_event
+FROM sysibm.systriggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>schema</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY 1</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+    <string>DB2 UDB for AS/400</string>
+		<object idref="db2_host_trg"/>
+	</void>
+	
   <void method="put">
    <string>DB2/NT</string>
    <object id="db2_lst_trg" class="workbench.db.GetMetaDataSql">
@@ -59,6 +94,11 @@ from syscat.triggers</string>
     </void>
    </object>
   </void>
+
+	<void method="put">
+   <string>DB2/AIX64</string>
+   <object idref="db2_lst_trg"/>
+	</void>
 
 	<void method="put">
    <string>DB2/NT64</string>

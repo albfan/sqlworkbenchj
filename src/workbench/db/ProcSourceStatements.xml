@@ -22,6 +22,27 @@
    <object idref="derby_proc_source"/>
 	</void>
 
+  <!-- DB2 for z/OS identifies itself as DB2 -->
+	<void method="put">
+   <string>DB2</string>
+   <object id="db2_host_proc_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM sysibm.sysroutines</string>
+    </void>
+    <void property="objectNameField">
+     <string>NAME</string>
+    </void>
+    <void property="schemaField">
+     <string>SCHEMA</string>
+    </void>
+   </object>
+  </void>
+
+	<void method="put">
+   <string>DB2 UDB for AS/400</string>
+   <object idref="db2_host_proc_source"/>
+	</void>
+
 	<void method="put">  
    <string>DB2/NT</string>  
    <object id="db2_proc_source" class="workbench.db.GetMetaDataSql">  
@@ -39,6 +60,16 @@
 
 	<void method="put">  
    <string>DB2/LINUX</string>  
+   <object idref="db2_proc_source"/>
+	</void>
+
+	<void method="put">
+   <string>DB2/NT64</string>
+   <object idref="db2_proc_source"/>
+	</void>
+
+	<void method="put">
+   <string>DB2/AIX64</string>
    <object idref="db2_proc_source"/>
 	</void>
 

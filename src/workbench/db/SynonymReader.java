@@ -22,12 +22,12 @@ import java.util.List;
  */
 public interface SynonymReader
 {
-	String getSynonymSource(Connection con, String anOwner, String aSynonym)
+	String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 			throws SQLException;
 	
-	TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
+	TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 			throws SQLException;
 	
-	List<String> getSynonymList(Connection con, String owner)
+	List<String> getSynonymList(WbConnection con, String owner)
 		throws SQLException;
 }

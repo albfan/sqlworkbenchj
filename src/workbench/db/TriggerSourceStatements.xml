@@ -2,6 +2,30 @@
 <java version="1.4.0_01" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
 
+  <!-- DB2 for z/OS identifies itself as DB2 -->
+	<void method="put">
+   <string>DB2</string>
+   <object id="db2_host_trg_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT text FROM sysibm.systriggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>name</string>
+    </void>
+    <void property="schemaField">
+     <string>schema</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+    <string>DB2 UDB for AS/400</string>
+		<object idref="db2_host_trg_source"/>
+	</void>
+
   <void method="put">
    <string>DB2/NT</string>
    <object id="db2_trg_source" class="workbench.db.GetMetaDataSql">
@@ -27,6 +51,11 @@
 
 	<void method="put">
    <string>DB2/NT64</string>
+   <object idref="db2_trg_source"/>
+	</void>
+
+	<void method="put">
+   <string>DB2/AIX64</string>
    <object idref="db2_trg_source"/>
 	</void>
 

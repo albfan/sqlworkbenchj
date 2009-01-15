@@ -22,6 +22,7 @@ import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
@@ -45,7 +46,7 @@ public class IngresMetadata
 	/**
 	 * 	Get a list of synonyms for the given owner
 	 */
-	public List<String> getSynonymList(Connection conn, String owner)
+	public List<String> getSynonymList(WbConnection conn, String owner)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
@@ -60,7 +61,7 @@ public class IngresMetadata
 
 		try
 		{
-			stmt = conn.prepareStatement(sql.toString());
+			stmt = conn.getSqlConnection().prepareStatement(sql.toString());
 			if (owner != null) stmt.setString(1, owner);
 			rs = stmt.executeQuery();
 			while (rs.next())
@@ -80,14 +81,14 @@ public class IngresMetadata
 		return result;
 	}
 
-	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT synonym_name, table_owner, table_name FROM iisynonyms ");
 		sql.append(" WHERE synonym_name = ? AND synonym_owner = ?");
 
-		PreparedStatement stmt = con.prepareStatement(sql.toString());
+		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner);
 
@@ -115,7 +116,7 @@ public class IngresMetadata
 		return result;
 	}
 
-	public String getSynonymSource(Connection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);

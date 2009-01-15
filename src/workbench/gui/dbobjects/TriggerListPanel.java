@@ -175,8 +175,14 @@ public class TriggerListPanel
 
 	public void reset()
 	{
-		this.triggerList.reset();
-		this.source.setText("");
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				triggerList.reset();
+				source.setText("");
+			}
+		});
 	}
 
 	public void setConnection(WbConnection aConnection)

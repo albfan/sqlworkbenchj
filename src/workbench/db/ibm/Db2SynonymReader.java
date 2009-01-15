@@ -11,7 +11,6 @@
  */
 package workbench.db.ibm;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -19,6 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
@@ -30,27 +30,38 @@ import workbench.util.SqlUtil;
 public class Db2SynonymReader
 	implements SynonymReader
 {
+	
 	/**
 	 * Returns an empty list, as the standard JDBC driver 
 	 * alread returns synonyms in the getTables() method.
 	 * 
 	 * @return an empty list
 	 */
-	public List<String> getSynonymList(Connection con, String owner) 
+	public List<String> getSynonymList(WbConnection con, String owner)
 		throws SQLException
 	{
 		return Collections.emptyList();
 	}
 
-	public TableIdentifier getSynonymTable(Connection con, String anOwner, String aSynonym)
+	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		StringBuilder sql = new StringBuilder(200);
 
-		sql.append("SELECT base_tabschema, base_tabname FROM syscat.tables ");
-		sql.append(" WHERE TYPE = 'A' and tabname = ? and tabschema = ?");
+		boolean isHostDB2 = con.getMetadata().getDbId().equals("db2h");
+		if (isHostDB2)
+		{
+			sql.append("SELECT tbcreator, tbname FROM sysibm.syssynonyms ");
+			sql.append(" WHERE name = ? and creator = ?");
 
-		PreparedStatement stmt = con.prepareStatement(sql.toString());
+		}
+		else
+		{
+			sql.append("SELECT base_tabschema, base_tabname FROM syscat.tables ");
+			sql.append(" WHERE TYPE = 'A' and tabname = ? and tabschema = ?");
+		}
+		
+		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner);
 
@@ -78,7 +89,7 @@ public class Db2SynonymReader
 		return result;
 	}
 
-	public String getSynonymSource(Connection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
