@@ -11,7 +11,7 @@
 	
 	<para>
 		When using &wb-productname; in console mode, you
-		<emphasis role="bold">cannot</emphasis> the <link linkend="launcher-using">Windows launcher</link>.
+		<emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link>.
 		Please use the supplied scripts <literal>sqlwbconsole.cmd</literal> (Windows batch file) or
 		<literal>sqlwbconsole.sh</literal> (Unix shell script) to start the console.
 		On Windows you can also use the <literal>sqlwbconsole.exe</literal> program to start the console mode.
@@ -122,27 +122,26 @@ ROLLBACK executed successfully</programlisting>
 			The output in tabular format (if results are buffered) looks like this:
 		</para>
 
-		<programlisting>id | firstname | lastname   | comment
+		<programlisting>SQL> select id, firstname, lastname, comment from person;
+id | firstname | lastname   | comment
 ---+-----------+------------+--------------------
-1  | Arthur    | Dent       | this is
-                            : a long
-                            : comment
-                            : with multiple lines
+1  | Arthur    | Dent       | this is a comment
 2  | Zaphod    | Beeblebrox |
 4  | Mary      | Moviestar  | comment
 3  | Tricia    | McMillian  | test1
-4 Rows</programlisting>
+
+(4 Rows)</programlisting>
 
 		<para>
-			If the value of a column does not contain embedded line feeds (as the above example) this might
-			be not very easy to read. In that case, you can switch the output so that each column is printed on
+			If the size of the column values exceed the console's width the display will be wrapped, which
+			makes it hard to read. In that case, you can switch the output so that each column is printed on
 			a single line.
 		</para>
 		<para>
-			This is done by running the statement: <literal>set display record;</literal>
+			This is done by running the statement: <literal>WbDisplay record</literal>
 		</para>
 		<programlisting>
-SQL> <emphasis role="bold">set display record;</emphasis>
+SQL> <emphasis role="bold">WbDisplay record;</emphasis>
 Display changed to single record format
 Execution time: 0.0s
 SQL> select id, firstname, lastname, comment from person;
@@ -166,13 +165,14 @@ id        : 3
 firstname : Tricia
 lastname  : McMillian
 comment   :
-4 Rows</programlisting>
+
+(4 Rows)</programlisting>
 
 		<para>
-			To switch back to the "tabular" display, use: <literal>set display row</literal>.
+			To switch back to the "tabular" display, use: <literal>WbDisplay tab</literal>.
 		</para>
 		<programlisting>
-SQL> <emphasis role="bold">set display row;</emphasis>
+SQL> <emphasis role="bold">WbDisplay tab;</emphasis>
 Display changed to tabular format
 Execution time: 0.0s
 SQL></programlisting>
