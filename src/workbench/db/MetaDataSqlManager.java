@@ -243,7 +243,7 @@ public class MetaDataSqlManager
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("MetaDataSqlManager.readStatementTemplate()", "Error reading templates file " + aFilename,e);
+			LogMgr.logError("MetaDataSqlManager.readStatementTemplate()", "Error reading internal templates file " + aFilename,e);
 			value = null;
 		}
 
@@ -256,21 +256,21 @@ public class MetaDataSqlManager
 		File f = new File(aFilename);
 		if (!f.exists())
 		{
+			// Not in the current directory, check the config-dir
 			f = new File(Settings.getInstance().getConfigDir(), aFilename);
 		}
 
 		if (f.exists())
 		{
-			LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Reading user defined template file " + f.getAbsolutePath());
-			// try to read additional definitions from local file
 			try
 			{
 				WbPersistence reader = new WbPersistence(f.getAbsolutePath());
 				value = reader.readObject();
+				LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Retrieved user defined template file " + f.getAbsolutePath());
 			}
 			catch (Exception e)
 			{
-				LogMgr.logDebug("MetaDataSqlManager.readStatementTemplate()", "Error reading template file " + aFilename, e);
+				LogMgr.logWarning("MetaDataSqlManager.readStatementTemplate()", "Error reading template file " + f.getAbsolutePath(), e);
 			}
 			if (value instanceof HashMap)
 			{
