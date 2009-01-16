@@ -20,6 +20,7 @@ import java.util.Map;
 import workbench.db.ConstraintReader;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -49,6 +50,11 @@ public class FirstSqlConstraintReader
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		StringBuilder result = new StringBuilder(200);
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("FirstSqlConstraintReader.getTableConstraints()", "Using query=\n" + SQL);
+		}
+		
 		try
 		{
 			pstmt = dbConnection.prepareStatement(SQL);

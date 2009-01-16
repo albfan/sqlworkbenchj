@@ -55,13 +55,19 @@ public class H2SequenceReader
 	
 	public List<String> getSequenceList(String owner)
 	{
+		String sql = "SELECT sequence_name FROM information_schema.sequences ORDER BY 1";
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("H2SequenceReader.getSequenceList()", "Using query=\n" + sql);
+		}
+		
 		List<String> result = new LinkedList<String>();
 		ResultSet rs = null;
 		Statement stmt = null;
 		try
 		{
 			stmt = this.dbConnection.createStatement();
-			rs = stmt.executeQuery("SELECT sequence_name FROM information_schema.sequences ORDER BY 1");
+			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
 				result.add(rs.getString(1));
@@ -183,6 +189,10 @@ public class H2SequenceReader
 					sql += " AND ";
 				}
 				sql += " sequence_name = '" + sequence + "'";
+			}
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logInfo("H2SequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 			}
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);

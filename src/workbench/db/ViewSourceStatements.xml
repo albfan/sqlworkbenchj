@@ -81,8 +81,23 @@
    <object idref="db2_lst_trg"/>
 	</void>
 
+	<void method="put">
+		<string>DB2 UDB for AS/400</string>
+		<object id="db2_iseries" class="workbench.db.GetMetaDataSql">
+			<void property="baseSql">
+				<string>SELECT VIEW_DEFINITION from SYSIBM.VIEWS</string>
+			</void>
+			<void property="objectNameField">
+				<string>TABLE_NAME</string>
+			</void>
+			<void property="schemaField">
+				<string>TABLE_SCHEMA</string>
+			</void>
+		</object>
+	</void>
+
   <void method="put">    
-    <string>DB2 UDB for AS/400</string>    
+    <string>DB2</string>    
     <object id="db2_host" class="workbench.db.GetMetaDataSql">
       <void property="baseSql">      
         <string>SELECT VIEW_DEFINITION from SYSIBM.SYSVIEWS</string>
@@ -99,11 +114,6 @@
     </object>   
   </void> 
 
-	<void method="put">
-   <string>DB2</string>
-   <object idref="db2_host"/>
-	</void>
-	
   <void method="put"> 
    <string>Cloudscape</string> 
    <object id="id_list_cloudscape_views" class="workbench.db.GetMetaDataSql"> 

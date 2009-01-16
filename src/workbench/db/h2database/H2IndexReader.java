@@ -18,6 +18,7 @@ import workbench.db.DbMetadata;
 import  workbench.db.JdbcIndexReader;
 import  workbench.db.TableIdentifier;
 import  workbench.log.LogMgr;
+import workbench.resource.Settings;
 import  workbench.util.SqlUtil;
 import  workbench.util.StringUtil;
 
@@ -52,6 +53,11 @@ public class H2IndexReader
       "FROM information_schema.indexes \n" +
       "WHERE index_type_name = 'PRIMARY KEY' \n";
 
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("H2IndexReader.getPrimaryKeyIndex()", "Using query=\n" + sql);
+		}
+		
 		ResultSet rs = null;
 		Statement stmt = null;
 		try

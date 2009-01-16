@@ -19,6 +19,7 @@ import java.util.List;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
@@ -60,7 +61,12 @@ public class Db2SynonymReader
 			sql.append("SELECT base_tabschema, base_tabname FROM syscat.tables ");
 			sql.append(" WHERE TYPE = 'A' and tabname = ? and tabschema = ?");
 		}
-		
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("Db2SynonymReader.getSynonymTable()", "Using query=\n" + sql);
+		}
+
 		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql.toString());
 		stmt.setString(1, aSynonym);
 		stmt.setString(2, anOwner);

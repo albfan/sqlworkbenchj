@@ -30,6 +30,7 @@ import workbench.db.hsqldb.HsqlViewGrantReader;
 import workbench.db.ibm.Db2ViewGrantReader;
 import workbench.db.oracle.OracleViewGrantReader;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -104,6 +105,10 @@ public abstract class ViewGrantReader
 
 		String sql = this.getViewGrantSql();
 		if (sql == null) return Collections.emptyList();
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo(getClass().getName() + ".getViewGrants()", "Using SQL: " + sql);
+		}
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;

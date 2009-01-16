@@ -43,6 +43,11 @@ public class MySqlProcedureReader
              "FROM information_schema.routines " +
 		         " WHERE routine_schema like ? " +
 		         "  and  routine_name = ? ";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("MySqlProcedureReader.getProcedureHeader()", "Using query=\n" + sql);
+		}
 						 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		PreparedStatement stmt = null;
@@ -101,7 +106,7 @@ public class MySqlProcedureReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("MySqlMetadata.getProcedureHeader()", "Error retrieving procedure header", e);
+			LogMgr.logError("MySqlProcedureReader.getProcedureHeader()", "Error retrieving procedure header", e);
 			source = StringUtil.emptyBuffer();
 		}
 		finally

@@ -21,6 +21,7 @@ import java.util.Map;
 import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -67,6 +68,10 @@ public abstract class AbstractConstraintReader
 	{
 		String sql = this.getColumnConstraintSql();
 		if (sql == null) return Collections.emptyMap();
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo(getClass().getName() + ".getColumnConstraints()", "Using SQL: " + sql);
+		}
 
 		HashMap<String, String> result = new HashMap<String, String>();
 
@@ -115,6 +120,12 @@ public abstract class AbstractConstraintReader
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo(getClass().getName() + ".getTableConstraints()", "Using SQL: " + sql);
+		}
+
 		StringBuilder result = new StringBuilder(100);
 		String prefix = this.getPrefixTableConstraintKeyword();
 		String suffix = this.getSuffixTableConstraintKeyword();

@@ -19,6 +19,7 @@ import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -67,6 +68,10 @@ public class SqlServerProcedureReader
 		}
 		
 		CallableStatement cstmt = this.connection.getSqlConnection().prepareCall(GET_PROC_SQL);
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("SqlServerProcedureReader.getProcedures()", "Using query=\n" + GET_PROC_SQL);
+		}
 		
 		DataStore ds;
 		ResultSet rs = null;

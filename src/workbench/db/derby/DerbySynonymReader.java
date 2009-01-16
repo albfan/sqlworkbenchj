@@ -20,6 +20,7 @@ import workbench.db.DbMetadata;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
@@ -51,6 +52,11 @@ public class DerbySynonymReader
              "where a.schemaid = s.schemaid \n" + 
 			       " and a.aliastype = 'S' " +
 			       " and s.schemaname = ?";		
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL: " + sql);
+		}
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -84,6 +90,10 @@ public class DerbySynonymReader
              "where a.schemaid = s.schemaid \n" + 
              " and a.alias = ?" +
 			       " and s.schemaname = ?";		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Using SQL: " + sql);
+		}
 
 		PreparedStatement stmt = con.getSqlConnection().prepareStatement(sql);
 		stmt.setString(1, aSynonym);

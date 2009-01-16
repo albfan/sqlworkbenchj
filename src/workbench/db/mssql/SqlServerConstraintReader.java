@@ -18,7 +18,8 @@ import workbench.db.AbstractConstraintReader;
  *
  * @author  support@sql-workbench.net
  */
-public class SqlServerConstraintReader extends AbstractConstraintReader
+public class SqlServerConstraintReader
+	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL =
 					 "select c.text \n" +

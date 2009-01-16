@@ -12,8 +12,14 @@
 package workbench.db;
 
 /**
+ * A Filter that can be applied before running DDL statements.
+ *
+ * Currently only used for PostgreSQL
  *
  * @author support@sql-workbench.net
+ * @see workbench.db.postgres.PostgresDDLFilter
+ * @see workbench.sql.commands.DdlCommand#execute(java.lang.String)
+ * @see workbench.db.ProcedureCreator#recreate()
  */
 public interface DDLFilter
 {
