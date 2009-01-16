@@ -258,13 +258,14 @@ public class MetaDataSqlManager
 		{
 			f = new File(Settings.getInstance().getConfigDir(), aFilename);
 		}
+
 		if (f.exists())
 		{
 			LogMgr.logInfo("DbMetadata.readStatementTemplates()", "Reading user defined template file " + f.getAbsolutePath());
 			// try to read additional definitions from local file
 			try
 			{
-				WbPersistence reader = new WbPersistence(aFilename);
+				WbPersistence reader = new WbPersistence(f.getAbsolutePath());
 				value = reader.readObject();
 			}
 			catch (Exception e)
