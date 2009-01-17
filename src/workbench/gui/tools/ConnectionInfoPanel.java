@@ -53,7 +53,7 @@ public class ConnectionInfoPanel
 			DatabaseMetaData meta = conn.getSqlConnection().getMetaData();
 			DbMetadata wbmeta = conn.getMetadata();
 
-			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + meta.getDatabaseProductName() + "</div>\n");
+			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductName") + ":</b> " + wbmeta.getProductName() + "</div>\n");
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductVersion") + ":</b> " + conn.getDatabaseVersion() + "</div>\n");
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbProductInfo") + ":</b> " + meta.getDatabaseProductVersion() + "</div>\n");
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoName") + ":</b> " + meta.getDriverName() + "</div>\n");
@@ -61,8 +61,21 @@ public class ConnectionInfoPanel
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDriverInfoVersion") + ":</b> " + conn.getDriverVersion() + "</div>\n");
 			content.append("<div style=\"white-space:nowrap;\"><b>" + ResourceMgr.getString("LblDbURL") + ":</b> " + conn.getUrl() + "</div>\n");
 			content.append("<b>" + ResourceMgr.getString("LblUsername") + ":</b> " + conn.getCurrentUser() + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblSchema") + " (" + StringUtil.capitalize(wbmeta.getSchemaTerm()) + "):</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\n");
-			content.append("<b>" + ResourceMgr.getString("LblCatalog") + " (" + StringUtil.capitalize(wbmeta.getCatalogTerm()) + "):</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\n");
+			String term = wbmeta.getSchemaTerm();
+			String s = StringUtil.capitalize(term);
+			if (!"schema".equalsIgnoreCase(term))
+			{
+				s += " (" + ResourceMgr.getString("LblSchema") + ")";
+			}
+			content.append("<b>" + s + ":</b> " + getDisplayValue(conn.getCurrentSchema()) + "<br>\n");
+
+			term = wbmeta.getCatalogTerm();
+			s = StringUtil.capitalize(term);
+			if (!"catalog".equalsIgnoreCase(term))
+			{
+				s += " (" +  ResourceMgr.getString("LblCatalog") + ")";
+			}
+			content.append("<b>" + s + ":</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\n");
 			content.append("<b>Workbench DBID:</b> " + wbmeta.getDbId() + " \n");
 			content.append("</html>");
 			infotext.setContentType("text/html");
@@ -153,8 +166,10 @@ public class ConnectionInfoPanel
 	public void copyText(String content)
 	{
 		String clean = content.replaceAll(StringUtil.REGEX_CRLF, " ");
-		clean = clean.replaceAll(" {2,}", " ");
+		clean = clean.replaceAll(" {2,}", "");
 		clean = clean.replaceAll("\\<br\\>", "\r\n");
+		clean = clean.replaceAll("\\<div[0-9 a-zA-Z;=\\-\\\":]*\\>", "");
+		clean = clean.replaceAll("\\</div\\>", "\r\n");
 		clean = clean.replaceAll("\\<[/a-z]*\\>", "").trim();
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(clean);

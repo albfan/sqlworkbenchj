@@ -52,6 +52,12 @@ public class WbDisplay extends SqlCommand
 		return result;
 	}
 
+	@Override
+	protected boolean isConnectionRequired()
+	{
+		return false;
+	}
+
 	public String getVerb()
 	{
 		return VERB;

@@ -77,6 +77,7 @@ public class CommandMapper
 	private boolean supportsSelectInto = false;
 	private DbMetadata metaData;
 	private boolean useExecuteForSelect = false;
+	private boolean allowAbbreviated = false;
 	
 	public CommandMapper()
 	{
@@ -135,6 +136,7 @@ public class CommandMapper
 
 		this.dbSpecificCommands = new LinkedList<String>();
 		this.useExecuteForSelect = Settings.getInstance().getUseGenericExecuteForSelect();
+		this.allowAbbreviated = Settings.getInstance().getBoolProperty("workbench.sql.allow.abbreviation", false);
 	}
 
 	public Collection<String> getAllWbCommands()
@@ -274,6 +276,31 @@ public class CommandMapper
 		else 
 		{
 			cmd = this.cmdDispatch.get(verb);
+		}
+
+		if (cmd == null && allowAbbreviated)
+		{
+			CommandTester tester = new CommandTester();
+			Set<String> verbs = cmdDispatch.keySet();
+			int found = 0;
+			String lastVerb = null;
+			String lverb = verb.toLowerCase();
+			for (String toTest : verbs)
+			{
+				if (tester.isWbCommand(toTest))
+				{
+					if (toTest.toLowerCase().startsWith(lverb))
+					{
+						lastVerb = toTest;
+						found ++;
+					}
+				}
+			}
+			if (found == 1)
+			{
+				LogMgr.logInfo("CommandMapper.getCommandToUse()", "Found workbench command " + lastVerb + " for abbreviation " + verb);
+				cmd = cmdDispatch.get(lastVerb);
+			}
 		}
 		
 		if (cmd == null)

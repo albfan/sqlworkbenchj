@@ -30,7 +30,10 @@ import workbench.log.LogMgr;
  */
 public class FileUtil
 {
-	private static final int BUFF_SIZE = 16*1024;
+	/**
+	 * The size of the buffer used by copy()
+	 */
+	private static final int BUFF_SIZE = 32*1024;
 	
 	/*
 	 * Closes all streams in the list.

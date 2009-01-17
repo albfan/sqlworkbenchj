@@ -11,6 +11,7 @@
  */
 package workbench.db.importer;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -23,6 +24,7 @@ import java.util.Enumeration;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import workbench.db.exporter.RowDataConverter;
+import workbench.resource.Settings;
 import workbench.util.ClipboardFile;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
@@ -48,6 +50,7 @@ public class ImportFileHandler
 
 	/**
 	 * Define the main input file used by this handler.
+	 * <br/>
 	 * If the file is a ZIP Archive getMainFileReader() will
 	 * return a Reader for the first file in the archive.
 	 * (DataExporter creates an archive with a single
@@ -111,10 +114,15 @@ public class ImportFileHandler
 		{
 			r = EncodingUtil.createReader(baseFile, encoding);
 		}
-		mainReader = new BufferedReader(r, 32*1024);
+		mainReader = new BufferedReader(r, getFileBufferSize());
 		return mainReader;
 	}
 
+	private int getFileBufferSize()
+	{
+		return Settings.getInstance().getIntProperty("workbench.import.file.buffsize", 64*1024);
+	}
+	
 	private void initAttachements()
 		throws IOException
 	{
@@ -140,13 +148,15 @@ public class ImportFileHandler
 	}
 
 	/**
+	 * Get an input stream for a possible attachment (LOB file).
+	 * <br/>
 	 * When exporting LOB data {@link workbench.db.exporter.DataExporter} will write
 	 * the LOB data for each row/column into separate files. These files might
 	 * reside in a second ZIP archive.
+	 * 
 	 * @param attachmentFile the attachment to read
 	 * @return an InputStream to read the attachment
 	 */
-
 	public InputStream getAttachedFileStream(File attachmentFile)
 		throws IOException
 	{
@@ -161,17 +171,31 @@ public class ImportFileHandler
 		{
 			if (attachmentFile.isAbsolute())
 			{
-				return new FileInputStream(attachmentFile);
+				return new BufferedInputStream(new FileInputStream(attachmentFile), getFileBufferSize());
 			}
 			else
 			{
 				File realFile = new File(this.baseDir,attachmentFile.getName());
-				return new FileInputStream(realFile);
+				return new BufferedInputStream(new FileInputStream(realFile), getFileBufferSize());
 			}
 		}
 	}
 
-	public long getCharacterLength(File f) throws IOException
+	/**
+	 * Retrieve the length of the file in characters, rather than bytes.
+	 * <br/>
+	 * For single-byte encodings this  is the same, but for a multi-byte
+	 * encoding the file length is not the same as the number of
+	 * characters in the file.
+	 *
+	 * @param f the file to check
+	 * @return the number of characters (not bytes) in that file.
+	 * @throws java.io.IOException
+	 * 
+	 * @see FileUtil#getCharacterLength(java.io.File, java.lang.String)
+	 */
+	public long getCharacterLength(File f)
+		throws IOException
 	{
 		if (this.isZip)
 		{
@@ -191,6 +215,13 @@ public class ImportFileHandler
 		return result;
 	}
 
+	/**
+	 * Gets the length of the file.
+	 *
+	 * @param f
+	 * @return
+	 * @throws java.io.IOException
+	 */
 	public long getLength(File f)
 		throws IOException
 	{
@@ -214,7 +245,6 @@ public class ImportFileHandler
 
 	public void done()
 	{
-
 		try { if (mainReader != null) mainReader.close(); } catch (Throwable th) {}
 		try { if (mainArchive != null) mainArchive.close(); } catch (Throwable th) {}
 		try { if (attachments != null) attachments.close(); } catch (Throwable th) {}
