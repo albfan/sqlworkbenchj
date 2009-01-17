@@ -167,6 +167,18 @@ ul.toc
 	margin: 0;
 }
 
+li.toclist#manual
+{
+	border-top-color: #666633;
+	border-top-style: solid;
+	border-top-width: 1px;
+	font-weight:bold;
+	font-size:110%;
+	padding-top: 10px;
+	padding-bottom: 5px;
+	margin-top: 15%;
+}
+
 ul.toc#google
 {
 	border-top-color: #666633;
@@ -177,8 +189,7 @@ ul.toc#google
 	border-bottom-width: 1px;
 	padding-bottom: 10px;
 	padding-top: 10px;
-	margin-top: 20%;
-
+/*	margin-top: 15%;*/
 }
 
 ul.toc#smalltext

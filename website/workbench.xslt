@@ -51,8 +51,8 @@
 						<xsl:with-param name="currentPage" select="$currentPage"/>
 					</xsl:call-template>
 				</xsl:for-each>
-				<li class="toclist">
-					<a class="list" href="manual/workbench-manual.html">Manual</a>
+				<li class="toclist" id="manual">
+					<a class="list" title="Display the online manual of the current stable release" href="manual/workbench-manual.html">Manual</a>
 				</li>
 			</ul>
 			

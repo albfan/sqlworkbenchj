@@ -199,6 +199,7 @@ VALUES
 			  <li><a href="wbreport2html.xslt">HTML output</a></li>
 			  <li><a href="wbreport2ctl.xslt">Create an Oracle SQL*Loader skeleton</a></li>
 			  <li><a href="wbreport2proc15.xslt">Extract procedures</a></li>
+			  <li><a href="wbreport2oracle.xslt">Create a script for Oracle</a></li>
 	 		</ul>
 
 			<h2 style="text-align:left;padding-top:5px">WbSchemaDiff transformations</h2>
@@ -207,6 +208,8 @@ VALUES
 			<ul>
 			  <li><a href="wbdiff2pg.xslt">Transform to a PostgreSQL script</a></li>
 			  <li><a href="wbdiff2oracle.xslt">Transform to an Oracle script</a></li>
+			  <li><a href="wbdiff2derby.xslt">Transform to an Apache Derby script</a></li>
+			  <li><a href="wbdiff2mssql.xslt">Transform to an Microsoft SQL Server script</a></li>
 	 		</ul>
 			<h2 style="text-align:left;padding-top:5px">WbExport transformations</h2>
 			<p>The following files will transform the output of the <a href="manual/wb-commands.html#command-export">WbExport</a>
@@ -271,12 +274,12 @@ VALUES
 	</page>
 
 
-  <page name="disclaimer" title="Disclaimer" toc="small">
-        <title>SQL Workbench/J</title>
-        <subtitle>Disclaimer</subtitle>
-        <content>
-        <h3>Disclaimer</h3>
-        <p class="disclaimer">The software is provided &#34;as is&#34;, without warranty of any
+	<page name="disclaimer" title="Disclaimer" toc="small">
+		<title>SQL Workbench/J</title>
+		<subtitle>Disclaimer</subtitle>
+		<content>
+			<h3>Disclaimer</h3>
+			<p class="disclaimer">The software is provided &#34;as is&#34;, without warranty of any
         kind, express or implied, including but not limited to the warranties of merchantability,
         fitness for a particular purpose and noninfringement. In no event shall the author (Thomas Kellerer),
         be liable for any direct, indirect, incidental, special, exemplary, or consequential
@@ -285,36 +288,41 @@ VALUES
         liability, whether in contract, strict liability, or tort (including negligence or
         otherwise) arising in any way out of the use of this software, even if advised of the
         possibility of such damage.
-        </p>
-        <p>In other words: <span style="font-weight:bold">use it at your own risk, and don't blame me if you accidently delete your database!</span></p>
-    </content>
-  </page>
+			</p>
+			<p>In other words:
+				<span style="font-weight:bold">use it at your own risk, and don't blame me if you accidently delete your database!</span>
+			</p>
+		</content>
+	</page>
 
    <!-- ======================== About the author ========================== -->
-  <page name="author" title="About the author" toc="small">
-    <title>SQL Workbench/J</title>
-    <subtitle>About the author</subtitle>
-    <content>
-        <p>My name is Thomas Kellerer, I live in Munich, Germany.</p>
-        <p>SQL Workbench/J came into existance because I didn't want to learn a new SQL
+		<page name="author" title="About the author" toc="small">
+			<title>SQL Workbench/J</title>
+			<subtitle>About the author</subtitle>
+			<content>
+				<p>My name is Thomas Kellerer, I live in Munich, Germany.</p>
+				<p>SQL Workbench/J came into existance because I didn't want to learn a new SQL
         tool for every DBMS I had to use. I use this tool on a regular (daily) basis
         in my own work. I also wanted to have a tool that could do basic data migration between
-        different kinds of DBMS systems.</p>
+        different kinds of DBMS systems.
+				</p>
 
-        <p>If you have any suggestions on how to enhance the application, if you find a bug or if you are missing
-        support for a DDBMS, feel free to write me an email.</p>
+				<p>If you have any suggestions on how to enhance the application, if you find a bug or if you are missing
+        support for a DDBMS, feel free to write me an email.
+				</p>
 
-        <p>I will try to add support (beyond what JDBC offers) for any DBMS that I have free access to (e.g. a free
-        trial download).</p>
+				<p>I will try to add support (beyond what JDBC offers) for any DBMS that I have free access to (e.g. a free
+        trial download).
+				</p>
 
-        <p>Some of the DBMS specific support in the <a target="_blank" href="manual/dbexplorer.html">
-        Database Explorer</a> (e.g. display of stored procedure source, view source)
-        can be configured without building a new distribution. If you have questions regarding this, feel
-        free to write me an email.
-        </p>
+				<p>
+					Some of the DBMS specific support in the <a target="_blank" href="manual/dbexplorer.html">Database Explorer</a>
+				(e.g. display of stored procedure source, view source) can be configured without building a new
+				distribution. If you have questions regarding this, feel free to write me an email.
+				</p>
 
-        </content>
-    </page>
+			</content>
+		</page>
     
   <page link="wb_news.xml" title="RSS Feed"/>
   <page target="_blank" link="manual/workbench-manual.html" title="Manual"/>
