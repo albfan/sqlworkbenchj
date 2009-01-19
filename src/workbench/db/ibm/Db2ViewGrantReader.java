@@ -47,8 +47,8 @@ public class Db2ViewGrantReader
              "         when 'G' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from  sysibm.systabauth \n" +
              "where selectauth in ('Y', 'G') \n" +
              "UNION ALL \n" +
@@ -58,8 +58,8 @@ public class Db2ViewGrantReader
              "         when 'G' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from  sysibm.systabauth \n" +
              "where updateauth in ('Y', 'G') \n" +
              "UNION ALL \n" +
@@ -69,8 +69,8 @@ public class Db2ViewGrantReader
              "         when 'G' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from sysibm.systabauth \n" +
              "where deleteauth in ('Y', 'G') \n" +
              "UNION ALL \n" +
@@ -80,12 +80,12 @@ public class Db2ViewGrantReader
              "         when 'G' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from sysibm.systabauth \n" +
              "where insertauth in ('Y', 'G') \n" +
              ") t \n" +
-						 "where tabname = ? and tabschema = ? ";
+						 "where ttname = ? and tcreator = ? ";
 		return sql;
 	}
 	
@@ -99,8 +99,8 @@ public class Db2ViewGrantReader
              "         when 'Y' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from syscat.tabauth \n" +
              "where selectauth = 'Y' \n" +
              "UNION ALL \n" +
@@ -110,8 +110,8 @@ public class Db2ViewGrantReader
              "         when 'Y' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from syscat.tabauth \n" +
              "where updateauth = 'Y' \n" +
              "UNION ALL \n" +
@@ -121,8 +121,8 @@ public class Db2ViewGrantReader
              "         when 'Y' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from syscat.tabauth \n" +
              "where deleteauth = 'Y' \n" +
              "UNION ALL \n" +
@@ -132,12 +132,12 @@ public class Db2ViewGrantReader
              "         when 'Y' then 'YES' \n" +
              "         else 'NO' \n" +
              "       end as is_grantable, \n" +
-             "       tabname,  \n" +
-             "       tabschema \n" +
+             "       ttname,  \n" +
+             "       tcreator \n" +
              "from syscat.tabauth \n" +
              "where insertauth = 'Y' \n" +
              ") t \n" +
-						 "where tabname = ? and tabschema = ? ";
+						 "where ttname = ? and tcreator = ? ";
 		return sql;
 	}
 
