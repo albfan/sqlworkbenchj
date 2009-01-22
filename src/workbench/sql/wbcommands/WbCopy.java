@@ -26,6 +26,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.StringUtil;
 
 /**
  * A command to copy data from one DBMS to another. This is the commandline
@@ -137,7 +138,7 @@ public class WbCopy
 		String sourcetable = cmdLine.getValue(PARAM_SOURCETABLE);
 		String sourcequery = cmdLine.getValue(PARAM_SOURCEQUERY);
 
-		if (sourcetable == null && sourcequery == null)
+		if (StringUtil.isBlank(sourcetable) && StringUtil.isBlank(sourcequery))
 		{
 			result.addMessage(ResourceMgr.getString("ErrCopyNoSourceSpecified"));
 			addWrongParams(result);
