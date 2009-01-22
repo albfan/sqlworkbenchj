@@ -42,8 +42,8 @@
 						<entry>-sourceGroup</entry>
 						<entry>
 							<para>
-								If the name of your source profile is not unique across 
-								all profiles, you will need to specify the group in which the profile 
+								If the name of your source profile is not unique across
+								all profiles, you will need to specify the group in which the profile
 								is located with this parameter.
 							</para>
 							<para>
@@ -69,8 +69,8 @@
 						<entry>-targetGroup</entry>
 						<entry>
 							<para>
-								If the name of your target profile is not unique across 
-								all profiles, you will need to specify the group in which the profile 
+								If the name of your target profile is not unique across
+								all profiles, you will need to specify the group in which the profile
 								is located with this parameter.
 							</para>
 							<para>
@@ -105,7 +105,7 @@
 								Defines how the data should be sent to the database. Possible
 								values are <literal>INSERT</literal>, <literal>UPDATE</literal>,
 								'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'. Please
-								refer to the description of the <link linkend="command-import">WbImport</link> 
+								refer to the description of the <link linkend="command-import">WbImport</link>
 								command for details on.
 							</para>
 						</entry>
@@ -116,10 +116,10 @@
 						<entry>
 							<para>
 								If this option is enabled <literal>-syncDelete=true</literal>, &wb-productname; will
-								check each row from the target table if it's present in the source table. Rows in 
+								check each row from the target table if it's present in the source table. Rows in
 								the target table that are not present in the source will be deleted. As this is implemented
-								by checking each row individually in the source table, this can take some time for 
-								large tables. This option requires that each table in question has a primary key 
+								by checking each row individually in the source table, this can take some time for
+								large tables. This option requires that each table in question has a primary key
 								defined.
 							</para>
 							<para>
@@ -127,8 +127,8 @@
 								this creates an exact copy of the source table.
 							</para>
 							<para>
-								If more than one table is copied, the delete process is started after 
-								all inserts and updates have been processed. It is recommended to use the 
+								If more than one table is copied, the delete process is started after
+								all inserts and updates have been processed. It is recommended to use the
 								<literal>-checkDependencies</literal> parameter to make sure the deletes are processed
 								in the correct order (which is most probably already needed to process inserts correctly).
 							</para>
@@ -171,11 +171,11 @@
 						<entry>-commitBatch</entry>
 						<entry>
 							<para>Valid values: <literal>true</literal>, <literal>false</literal></para>
-							<para>When using the <literal>-batchSiez</literal> parameter, the 
+							<para>When using the <literal>-batchSiez</literal> parameter, the
 								<literal>-commitEvery</literal> is ignored (as not all JDBC drivers
-								support a <literal>COMMIT</literal> inside a JDBC batch operation. When 
-								using <literal>-commitBatch=true</literal> &wb-productname; will send a 
-								<literal>COMMIT</literal> to the database server after each JDBC 
+								support a <literal>COMMIT</literal> inside a JDBC batch operation. When
+								using <literal>-commitBatch=true</literal> &wb-productname; will send a
+								<literal>COMMIT</literal> to the database server after each JDBC
 								batch is sent to the server.
 							</para>
 						</entry>
@@ -191,18 +191,18 @@
 								will be halted on the first error. The default value is <literal>false</literal>.
 							</para>
 							<para>
-								With PostgreSQL <literal>continueOnError</literal> will only work, if the use of  
-								savepoints is enabled. This can be done using by setting the property 
-								<literal>workbench.db.postgresql.import.usesavepoint=true</literal> in 
+								With PostgreSQL <literal>continueOnError</literal> will only work, if the use of
+								savepoints is enabled. This can be done using by setting the property
+								<literal>workbench.db.postgresql.import.usesavepoint=true</literal> in
 								in the configuration file <literal>workbench.settings</literal>.
-								If this is enabled, then each INSERT (or UPDATE) statement will be 
+								If this is enabled, then each INSERT (or UPDATE) statement will be
 								"wrapped" between savepoints so that a statement error can be recovered.
 							</para>
 						</entry>
 					</row>
-					
+
 					&progress-parameter;
-					
+
 				</tbody>
 			</tgroup>
 		</informaltable>
@@ -224,112 +224,116 @@
 					<row>
 						<entry>-sourceTable</entry>
 						<entry>
-							The name of the table(s) to be copied. You can either specifiy a 
+							The name of the table(s) to be copied. You can either specifiy a
 							list of tables: <literal>-sourceTable=table1,table2</literal>. Or select
 							the tables using a wildcard: <literal>-sourceTable=*</literal> will copy
-							all tables accessible to the user. If more than one table is specified 
-							using this parameter, the <literal>-targetTable</literal> parameter is 
-							ignored. 
+							all tables accessible to the user. If more than one table is specified
+							using this parameter, the <literal>-targetTable</literal> parameter is
+							ignored.
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>-checkDependencies</entry>
 						<entry>
 							<para>
-								When copying more than one file into tables with foreign key constraints, 
-								this switch can be used to import the files in the correct order (child tables first). 
-								When <literal>-checkDependencies=true</literal> is passed, &wb-productname; will 
+								When copying more than one file into tables with foreign key constraints,
+								this switch can be used to import the files in the correct order (child tables first).
+								When <literal>-checkDependencies=true</literal> is passed, &wb-productname; will
 								check the foreign key dependencies for the tables specified with <literal>-sourceTable</literal>
 							</para>
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>-sourceWhere</entry>
 						<entry>
 							A <literal>WHERE</literal> condition that is applied to the source table.
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>-targetTable</entry>
 						<entry>
-							The name of the table into which the data should be written. 
+							The name of the table into which the data should be written.
 							This parameter is ignored if more than one table is copied.
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>-createTarget</entry>
 						<entry>If this parameter is set to <literal>true</literal> the target table
-						will be created, if it doesn't exist. 
+						will be created, if it doesn't exist.
 						Valid values are <literal>true</literal> or <literal>false</literal>.
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>-dropTarget</entry>
 						<entry>
 							If this parameter is set to <literal>true</literal> the target table
-							will be dropped before it is create. This parameter is ignored if 
+							will be dropped before it is create. This parameter is ignored if
 							<literal>-createtarget=true</literal>	is specified.
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>-columns</entry>
 						<entry>
-							<para>Defines the columns to be copied. If this parameter is not specified, then
-							all matching columns are copied from source to target. Matching
-							is done on name <emphasis role="bold">and</emphasis> data type. You
-							can either specify a list of columns or a column mapping.
-							</para>
-							<para>When supplying a list of columns, the data from
-							each column in the source table will be copied into the corresponding (i.e. one
-							with the same name) column in the target table.
-							If <literal>-createtarget=true</literal>, then
-							the list also defines the columns of the target table. The names have to be separated
-							by comma: <literal>-columns=firstname, lastname, zipcode</literal>
+							<para>
+								Defines the columns to be copied. If this parameter is not specified, then
+								all matching columns are copied from source to target. Matching
+								is done on name <emphasis role="bold">and</emphasis> data type. You
+								can either specify a list of columns or a column mapping.
 							</para>
 							<para>
-							A column mapping defines which column from the source table maps to which column
-							of the target table (if the column names do not match)
-							If <literal>-createtable=true</literal> then the
-							target table will be created from the specified target names:
-							<literal>-columns=firstname/surname, lastname/name, zipcode/zip</literal> Will copy the column
-							<literal>firstname</literal> from the source table to a column named <literal>surname</literal>
-							in the target table, and so on.
+								When supplying a list of columns, the data from
+								each column in the source table will be copied into the corresponding column (i.e.
+								one with the same name) in the target table.
+								If <literal>-createTarget=true</literal> is specified then this list also defines
+								the columns of the target table to be created. The names have to be separated
+								by comma: <literal>-columns=firstname, lastname, zipcode</literal>
+							</para>
+							<para>
+								A column mapping defines which column from the source table maps to which column
+								of the target table (if the column names do not match)
+								If <literal>-createtable=true</literal> then the
+								target table will be created from the specified target names:
+								<literal>-columns=firstname/surname, lastname/name, zipcode/zip</literal> Will copy the column
+								<literal>firstname</literal> from the source table to a column named <literal>surname</literal>
+								in the target table, and so on.
 							</para>
 							<para>This parameter is ignored if more than one table is copied.</para>
+							<para><literallayout>When using a SQL <emphasis>query</emphasis> as the data source a <emphasis>mapping</emphasis> cannot be specified.
+Please check <link linkend="command-copy-query">Copying data based on a SQL query</link> for details.</literallayout></para>
 						</entry>
 					</row>
-					
+
 					<row>
 						<entry>-preTableStatement</entry>
 						<entry>
 							<para>
 								This parameter defines a SQL statement that should be executed before the copy
 								process starts inserting data into the target table. The name of the current
-								table (when e.g. importing a whole directory) can be referenced using 
+								table (when e.g. importing a whole directory) can be referenced using
 								<literal>${table.name}</literal>.
 							</para>
 							<para>
-								To define a statement that should be executed after all rows have been 
-								inserted but before the data is committed, you can use the 
-								<literal>-postTableStatement</literal> parameter. 
+								To define a statement that should be executed after all rows have been
+								inserted but before the data is committed, you can use the
+								<literal>-postTableStatement</literal> parameter.
 							</para>
 							<para>
 								These parameters can e.g. be used to enable identity insert for MS SQL Server:
 								<programlisting>-preTableStatement="set identity_insert ${table.name} on"
 -postTableStatement="set identity_insert ${table.name} off"</programlisting>
-								Errors resulting from executing these statements will be ignored. If you want 
+								Errors resulting from executing these statements will be ignored. If you want
 								to abort the copy in that case you can specify <literal>-ignorePrePostErrors=false</literal>
-								and <literal>-continueOnError=false</literal>. 
+								and <literal>-continueOnError=false</literal>.
 							</para>
-							
+
 						</entry>
-					</row>					
+					</row>
 				</tbody>
 			</tgroup>
 		</informaltable>
@@ -349,13 +353,20 @@
 				</thead>
 				<tbody>
 					<row>
-						<entry>-sourcequery</entry>
+						<entry>-sourceQuery</entry>
 						<entry>The SQL query to be used as the source data (instead of a table).</entry>
 					</row>
 					<row>
 						<entry>-columns</entry>
 						<entry>
-							The list of columns from the target table, in the order in which they appear in the source query.
+							<para>
+								The <emphasis>list</emphasis> of columns from the target table, in the order in which they appear in the source query.
+							</para>
+							<para>
+								This is <emphasis role="bold">not</emphasis> a column mapping when used together with the
+								<literal>-sourceQuery</literal> parameter. It only lists the target columns in the correct order.
+								Please check the <link linkend="example-copy-query">examples section</link> for details.
+							</para>
 						</entry>
 					</row>
 				</tbody>
@@ -373,51 +384,51 @@
 
 	<section id="copy-sync">
 		<title>Synchronizing tables</title>
-		
+
 		<para>
-			Using <literal>-mode=update,insert</literal> ensures that all rows that are present in 
+			Using <literal>-mode=update,insert</literal> ensures that all rows that are present in
 			the source table do exist in the target table and that all values for non-key columns
 			are identical.
 		</para>
-		
+
 		<para>
-			When you need to keep two tables completely in sync, rows that are present in the 
+			When you need to keep two tables completely in sync, rows that are present in the
 			target table that do not exist in the source table need to be deleted. This is what the
 			parameter <literal>-syncDelete</literal> is for. If this is enabled (<literal>-syncDelete=true</literal>)
-			then &wb-productname; will check every row from the target table if it is present in the 
-			source table. This check is based on the primary keys of the target table and 
-			assumes that the source table as the same primary key. 
+			then &wb-productname; will check every row from the target table if it is present in the
+			source table. This check is based on the primary keys of the target table and
+			assumes that the source table as the same primary key.
 		</para>
-		
+
 		<para>
 			Testing if each row in the target table exists in the source table is a substantial overhead,
-			so you should enable this option only when really needed. <literal>DELETE</literal>s in the 
-			target table are batched according to the <literal>-batchSize</literal> setting of the 
-			<literal>WbCopy</literal> command. To increase performance, you should enable batching 
+			so you should enable this option only when really needed. <literal>DELETE</literal>s in the
+			target table are batched according to the <literal>-batchSize</literal> setting of the
+			<literal>WbCopy</literal> command. To increase performance, you should enable batching
 			for the whole process.
 		</para>
 
 		<para>
-			Internally the rows from the source table are checked in chunks, which means that 
-			&wb-productname; will generate a <literal>SELECT</literal> statement that contains 
-			a <literal>WHERE</literal> condition for each row retrieved from the target table. 
-			The default chunk size is relatively small to avoid problems with large SQL statements. 
+			Internally the rows from the source table are checked in chunks, which means that
+			&wb-productname; will generate a <literal>SELECT</literal> statement that contains
+			a <literal>WHERE</literal> condition for each row retrieved from the target table.
+			The default chunk size is relatively small to avoid problems with large SQL statements.
 			This approach was taken to minimize the number of statements sent to the server.
 		</para>
-		
+
 		<para>
 			The <link linkend="import-mode-downgrade">automatic fallback</link> from <literal>update,insert</literal> or <literal>insert,update</literal>
 			mode to <literal>insert</literal> mode applies for synchronizing tables using <literal>WbCopy</literal>
-			as well. 
+			as well.
 		</para>
 	</section>
-	
+
 	<section id="copy-examples">
 		<title>Examples</title>
-		
+
 		<section id="example-copy-single-table">
-			<title>Copy one table to another</title>
-			
+			<title>Copy one table to another where all column names match</title>
+
 			<programlisting>WbCopy -sourceProfile=ProfileA
        -targetProfile=ProfileB
        -sourceTable=the_table
@@ -440,12 +451,16 @@
 
 		<section id="example-copy-where">
 			<title>Copy only selected rows</title>
-		
+
 			<programlisting>WbCopy -sourceProfile=ProfileA
        -targetProfile=ProfileB
        -sourceTable=the_table
-       -sourceWhere="lastname LIKE 'D%'
+       -sourceWhere="lastname LIKE 'D%'"
        -targetTable=the_other_table;</programlisting>
+			 <para>
+				 This example will run the statement <literal>SELECT * FROM the_table WHERE lastname like 'D%'</literal>
+				 and copy all corresponding columns to the target table <literal>the_other_table</literal>.
+			 </para>
 		</section>
 
 		<section id="example-copy-column-map">
@@ -453,39 +468,43 @@
 
 			<para>
 				This example copies only selected columns from the source table. The column names
-				in the tables do not match and a column mapping is defined. Before the
+				in the two tables do not match and a column mapping is defined. Before the
 				copy is started all rows are deleted from the target table.
 			</para>
 
 			<programlisting>WbCopy -sourceProfile=ProfileA
        -targetProfile=ProfileB
        -sourceTable=person
-       -targetTable=contact
+       -targetTable=contacts
        -deleteTarget=true
-       -columns=firstname/surname, lastname/name, birthday/bday;</programlisting>
+       -columns=firstname/surname, lastname/name, birthday/dob;</programlisting>
 		</section>
-	 
+
 		<section id="example-copy-query">
 			<title>Copy data based on a SQL query</title>
 
 			<para>
-				When using a query as the source for the <literal>WbCopy</literal> command, the columns
-				from the query need to be matched to the columns of the target table. 
+				When using a query as the source for the <literal>WbCopy</literal> command, the column
+				mapping is specified by simply supplying the order of the target columns as they appear
+				in the <literal>SELECT</literal> statement.
 			</para>
 
 			<programlisting>WbCopy -sourceProfile=ProfileA
        -targetProfile=ProfileB
        -sourceQuery="SELECT firstname, lastname, birthday FROM person"
-       -targetTable=contact
+       -targetTable=contacts
        -deleteTarget=true
-       -columns=surname, name, bday;</programlisting>
+       -columns=surname, name, dob;</programlisting>
 
-			<para>
-				The order in the <literal>-columns</literal> parameter <emphasis role="bold">must</emphasis>
-				match the order in the <literal>SELECT</literal> statement!
-			</para>
+			 <para>
+				This copies the data based on the SELECT statement into the table <literal>CONTACTS</literal>
+				of the target database. The <literal>-columns</literal> parameter defines that the first column
+				of the SELECT (firstname) is copied into the target column with the name <literal>surname</literal>,
+				the second result column (lastname) is copied into the target column <literal>name</literal> and the
+				last source column (birthday) is copied into the target column <literal>dob</literal>.
+			 </para>
 		</section>
-		
+
 	</section>
 
 </section>
