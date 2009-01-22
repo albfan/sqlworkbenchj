@@ -24,12 +24,23 @@ public class TriggerDefinition
 	private String schema;
 	private String catalog;
 	private String triggerName;
+	private String comment;
 	
 	public TriggerDefinition(String cat, String schem, String name)
 	{
 		schema = schem;
 		catalog = cat;
 		triggerName = name;
+	}
+
+	public String getComment()
+	{
+		return comment;
+	}
+
+	public void setComment(String c)
+	{
+		comment = c;
 	}
 
 	public CharSequence getSource(WbConnection con)

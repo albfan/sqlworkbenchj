@@ -30,6 +30,7 @@ public class ProcedureDefinition
 	private String schema;
 	private String catalog;
 	private String procName;
+	private String comment;
 	
 	// as returned by the JDBC driver corresponds to 
 	// DatabaseMetaData.procedureNoResult
@@ -73,6 +74,15 @@ public class ProcedureDefinition
 		}
 	}
 
+	public String getComment()
+	{
+		return comment;
+	}
+
+	public void setComment(String cmt)
+	{
+		comment = cmt;
+	}
 
 	public synchronized List<String> getParameterTypes(WbConnection con)
 	{
@@ -131,7 +141,7 @@ public class ProcedureDefinition
 		{
 			try
 			{
-				con.getMetadata().readProcedureSource(this);
+				con.getMetadata().getProcedureReader().readProcedureSource(this);
 			}
 			catch (NoConfigException e)
 			{

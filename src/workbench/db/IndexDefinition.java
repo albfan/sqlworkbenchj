@@ -28,11 +28,22 @@ public class IndexDefinition
 	private String indexType;
 	private TableIdentifier baseTable;
 	private List<IndexColumn> columns = new ArrayList<IndexColumn>();
+	private String comment;
 
 	public IndexDefinition(TableIdentifier table, String name)
 	{
 		this.indexName = name;
 		this.baseTable = table;
+	}
+
+	public String getComment()
+	{
+		return comment;
+	}
+
+	public void setComment(String c)
+	{
+		comment = c;
 	}
 
 	public String getSchema()

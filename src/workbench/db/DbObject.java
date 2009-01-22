@@ -73,4 +73,15 @@ public interface DbObject
 	 */
 	String getObjectNameForDrop(WbConnection con);
 
+	/**
+	 * Return the comment on the DbObjec if defined 
+	 * @return
+	 */
+	String getComment();
+
+	/**
+	 * Set the comment on the DbObject
+	 * @param cmt
+	 */
+	void setComment(String cmt);
 }

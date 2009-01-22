@@ -362,16 +362,20 @@ public class ProcedureListPanel
 		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
 		final String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
 		final int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+		String remarks = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
+		final ProcedureDefinition def = new ProcedureDefinition(catalog, schema, proc, type);
+		def.setComment(remarks);
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				retrieveProcDefinition(catalog, schema, proc, type);
+				retrieveProcDefinition(def);
 			}
 		});
 	}
 
-	private void retrieveProcDefinition(String catalog, String schema, String proc, int type)
+	private void retrieveProcDefinition(ProcedureDefinition def )
 	{
 		if (this.dbConnection == null) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
@@ -380,12 +384,13 @@ public class ProcedureListPanel
 		Container parent = this.getParent();
 		WbSwingUtilities.showWaitCursor(parent);
 		CharSequence sql = null;
+
 		try
 		{
 			dbConnection.setBusy(true);
 			try
 			{
-				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureReader().getProcedureColumns(catalog, schema, proc));
+				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureReader().getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName()));
 				procColumns.setModel(model, true);
 
 				TableColumnModel colmod = procColumns.getColumnModel();
@@ -404,7 +409,7 @@ public class ProcedureListPanel
 
 			try
 			{
-				sql = meta.getProcedureSource(catalog, schema, proc, type);
+				sql = def.getSource(this.dbConnection);
 				source.setText(sql == null ? "" : sql.toString());
 			}
 			catch (Throwable ex)
@@ -420,7 +425,7 @@ public class ProcedureListPanel
 			dbConnection.setBusy(false);
 		}
 		// The package name is stored in the catalog field if this is an Oracle database
-		final int pos = findOracleProcedureInPackage(sql, catalog, proc);
+		final int pos = findOracleProcedureInPackage(sql, def.getCatalog(), def.getProcedureName());
 
 		EventQueue.invokeLater(new Runnable()
 		{

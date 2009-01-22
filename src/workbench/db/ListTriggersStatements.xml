@@ -50,10 +50,10 @@ and   t.schemaid = s.schemaid
 FROM sysibm.systriggers</string>
     </void>
     <void property="objectNameField">
-     <string>name</string>
+     <string>tbname</string>
     </void>
     <void property="schemaField">
-     <string>schema</string>
+     <string>tbowner</string>
     </void>
     <void property="orderBy">
      <string>ORDER BY 1</string>

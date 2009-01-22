@@ -30,6 +30,15 @@ public class DummySelect
 		this.table = tbl;
 	}
 
+	public String getComment()
+	{
+		return null;
+	}
+
+	public void setComment(String c)
+	{
+	}
+
 	public String getCatalog()
 	{
 		return null;

@@ -190,7 +190,7 @@ public abstract class ViewGrantReader
 
 			List<String> privs = entry.getValue();
 			result.append("GRANT ");
-			result.append(StringUtil.listToString(privs, ','));
+			result.append(StringUtil.listToString(privs, ", ", false));
 			result.append(" ON ");
 			result.append(view.getTableExpression(dbConnection));
 			result.append(" TO ");

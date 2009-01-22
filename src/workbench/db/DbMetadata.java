@@ -793,36 +793,6 @@ public class DbMetadata
 		return result;
 	}
 
-	public CharSequence getProcedureSource(String aCatalog, String aSchema, String aProcname, int type)
-	{
-		try
-		{
-			ProcedureDefinition def = new ProcedureDefinition(aCatalog, aSchema, aProcname, type);
-			readProcedureSource(def);
-			return def.getSource();
-		}
-		catch (NoConfigException e)
-		{
-			SourceStatementsHelp help = new SourceStatementsHelp();
-			return help.explainMissingProcSourceSql(this.getProductName());
-		}
-	}	
-
-	/**
-	 * Read the source code of the given ProcedureDefinition and then
-	 * stores the source code in the passed definition
-	 *
-	 * @param def
-	 * @throws workbench.db.NoConfigException
-	 * @see ProcedureReader#readProcedureSource(workbench.db.ProcedureDefinition)
-	 * @see ProcedureDefinition#setSource(java.lang.CharSequence) 
-	 */
-	public void readProcedureSource(ProcedureDefinition def)
-		throws NoConfigException
-	{
-		this.getProcedureReader().readProcedureSource(def);
-	}
-
 	public boolean isKeyword(String name)
 	{
 		synchronized (keywords)
@@ -1341,7 +1311,8 @@ public class DbMetadata
 			if (rs.next())
 			{
 				result = new TableIdentifier(rs.getString(1), rs.getString(2), rs.getString(3));
-				result.setType(rs.getString(4));
+				result.setType(rs.getString("TABLE_TYPE"));
+				result.setComment(rs.getString("REMARKS"));
 				result.setNeverAdjustCase(true);
 			}
 		}
@@ -1859,6 +1830,7 @@ public class DbMetadata
 			TableIdentifier tbl = new TableIdentifier(c, s, t);
 			tbl.setNeverAdjustCase(true);
 			tbl.setType(ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_TYPE));
+			tbl.setComment(ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_REMARKS));
 			tables.add(tbl);
 		}
 		return tables;
@@ -2387,6 +2359,20 @@ public class DbMetadata
 		catch (Exception e)
 		{
 			result = StringUtil.EMPTY_STRING;
+		}
+
+		if (StringUtil.isNonBlank(synonym.getComment()))
+		{
+			CommentSqlManager mgr = new CommentSqlManager(this.dbConnection);
+			String sql = mgr.getCommentSqlTemplate(synonym.getType());
+			if (StringUtil.isNonBlank(sql))
+			{
+				sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, synonym.getRawTableName());
+				sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, synonym.getComment().replace("'", "''"));
+				result += "\n";
+				result += sql;
+				result += "\n";
+			}
 		}
 
 		if (includeTable)

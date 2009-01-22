@@ -239,7 +239,7 @@ public class TableSourceBuilder
 			}
 			result.append(" PRIMARY KEY (");
 
-			result.append(StringUtil.listToString(pkCols, ','));
+			result.append(StringUtil.listToString(pkCols, ", ", false));
 			result.append(")" + lineEnding);
 
 			if (includeFk)
@@ -349,7 +349,7 @@ public class TableSourceBuilder
 		String tablename = table.getTableExpression(this.dbConnection);
 
 		template = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tablename);
-		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ','));
+		template = StringUtil.replace(template, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, StringUtil.listToString(pkCols, ", ", false));
 
 		if (meta.isSystemConstraintName(pkName))
 		{
@@ -479,7 +479,7 @@ public class TableSourceBuilder
 				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fkname);
 			}
 
-			String entry = StringUtil.listToString(colList, ',');
+			String entry = StringUtil.listToString(colList, ", ", false);
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, entry);
 			String rule = updateRules.get(fkname);
 			stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_UPDATE_RULE, " ON UPDATE " + rule);

@@ -1,5 +1,7 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
+Enh: (102.11) Display SQL source for comments for additional object types
+     such as views, sequences, procedures where possible.
 Enh: (102.11) The "Manage Drivers" dialog now searches the selected jar file
      for a JDBC driver if a new library is selected.
 Enh: (102.10) The placement of the details tabs in the DbExplorer's table list
@@ -100,6 +102,8 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
+Fix: (102.11) Fixed several issues with retrieving object sources
+     for DB2 on z/os (thanks to Frank!)
 Fix: (102.11) When selecting data from another user's schema, 
      and updating the result set, the generated SQL to update the 
      table did not contain the schema.

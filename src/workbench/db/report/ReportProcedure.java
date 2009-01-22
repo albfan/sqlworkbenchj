@@ -53,7 +53,7 @@ public class ReportProcedure
 		{
 			try
 			{
-				this.dbConn.getMetadata().readProcedureSource(this.procDef);
+				this.dbConn.getMetadata().getProcedureReader().readProcedureSource(this.procDef);
 			}
 			catch (NoConfigException e)
 			{

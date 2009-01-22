@@ -39,6 +39,8 @@ public class TableIdentifier
 	private boolean neverAdjustCase;
 	private boolean preserveQuotes;
 	private boolean showOnlyTableName;
+	private String tableComment;
+	private boolean commentWasInitialized;
 	
 	public TableIdentifier(String aName)
 	{
@@ -83,6 +85,22 @@ public class TableIdentifier
 		this.setSchema(aSchema);
 	}
 
+	public void setComment(String comment)
+	{
+		this.commentWasInitialized = true;
+		this.tableComment = comment;
+	}
+
+	public String getComment()
+	{
+		return tableComment;
+	}
+
+	public boolean commentIsDefined()
+	{
+		return commentWasInitialized;
+	}
+	
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getObjectName(con);

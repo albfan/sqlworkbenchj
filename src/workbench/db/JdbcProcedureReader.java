@@ -378,6 +378,27 @@ public class JdbcProcedureReader
 			if (delimiter.isSingleLine()) source.append('\n');
 		}
 
+		String comment = def.getComment();
+		if (StringUtil.isNonBlank(comment))
+		{
+			CommentSqlManager mgr = new CommentSqlManager(connection);
+			String template = mgr.getCommentSqlTemplate(def.getObjectType());
+			if (StringUtil.isNonBlank(template))
+			{
+				template = template.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, def.getProcedureName());
+				template = template.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, def.getSchema());
+				template = template.replace(CommentSqlManager.COMMENT_PLACEHOLDER, comment.replace("'", "''"));
+				source.append('\n');
+				source.append(template);
+				source.append('\n');
+				if (!template.endsWith(";"))
+				{
+					source.append(delimiter.getDelimiter());
+					if (delimiter.isSingleLine()) source.append('\n');
+				}
+			}
+		}
+
 		String result = source.toString();
 
 		String dbId = this.connection.getMetadata().getDbId();

@@ -141,6 +141,21 @@ public class ViewReader
 		result.append(source);
 		result.append(lineEnding);
 
+		TableCommentReader commentReader = new TableCommentReader();
+		String tableComment = commentReader.getTableCommentSql(this.connection, view.getTable());
+		if (StringUtil.isNonBlank(tableComment))
+		{
+			result.append(tableComment);
+		}
+
+		StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.connection, view.getTable(), view.getColumns());
+		if (StringUtil.isNonBlank(colComments))
+		{
+			result.append(lineEnding);
+			result.append(colComments);
+			result.append(lineEnding);
+		}
+		
 		// Oracle and MS SQL Server support materialized views. For those
 		// the index definitions are of interest as well.
 		DataStore indexInfo = connection.getMetadata().getIndexReader().getTableIndexInformation(viewTable);

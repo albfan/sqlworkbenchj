@@ -106,7 +106,7 @@ public class TableGrantReader
 
 			List<String> privs = entry.getValue();
 			result.append("GRANT ");
-			result.append(StringUtil.listToString(privs, ','));
+			result.append(StringUtil.listToString(privs, ", ", false));
 			result.append(" ON ");
 			result.append(table.getTableExpression(dbConnection));
 			result.append(" TO ");

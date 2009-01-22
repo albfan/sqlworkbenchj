@@ -34,10 +34,6 @@ public class MetaDataSqlManager
 	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";
 	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
 	public static final String FK_TARGET_COLUMNS_PLACEHOLDER = "%targetcolumnlist%";
-	public static final String COMMENT_TABLE_PLACEHOLDER = "%table%";
-	public static final String COMMENT_SCHEMA_PLACEHOLDER = "%schema%";
-	public static final String COMMENT_COLUMN_PLACEHOLDER = COLUMN_NAME_PLACEHOLDER;
-	public static final String COMMENT_PLACEHOLDER = "%comment%";
 	public static final String FK_UPDATE_RULE = "%fk_update_rule%";
 	public static final String FK_DELETE_RULE = "%fk_delete_rule%";
 	public static final String DEFERRABLE = "%deferrable%";
@@ -55,8 +51,8 @@ public class MetaDataSqlManager
 	private String primaryKeyTemplate = NO_STRING;
 	private String indexTemplate = NO_STRING;
 	private String foreignKeyTemplate = NO_STRING;
-	private String columnCommentTemplate = NO_STRING;
-	private String tableCommentTemplate = NO_STRING;
+//	private String columnCommentTemplate = NO_STRING;
+//	private String tableCommentTemplate = NO_STRING;
 	private final Object LOCK = new Object();
 		
 	public MetaDataSqlManager(String product)
@@ -176,40 +172,40 @@ public class MetaDataSqlManager
 		return this.indexTemplate;
 	}
 	
-	public String getColumnCommentSql()
-	{
-		if (this.columnCommentTemplate == NO_STRING)
-		{
-			synchronized (LOCK)
-			{
-				HashMap<String, String> sql = this.readStatementTemplates("ColumnCommentStatements.xml");
-				this.columnCommentTemplate = sql.get(this.productName);
-				if (columnCommentTemplate == null)
-				{
-					this.columnCommentTemplate = sql.get(GENERAL_SQL);
-				}
-			}
-		}
-		return this.columnCommentTemplate;
-	}
-	
-	public String getTableCommentSql()
-	{
-		if (this.tableCommentTemplate == NO_STRING)
-		{
-			synchronized (LOCK)
-			{
-				HashMap<String, String> sql = this.readStatementTemplates("TableCommentStatements.xml");
-				if (sql == null) return null;
-				this.tableCommentTemplate = sql.get(this.productName);
-				if (tableCommentTemplate == null)
-				{
-					this.tableCommentTemplate = sql.get(GENERAL_SQL);
-				}
-			}
-		}
-		return this.tableCommentTemplate;
-	}
+//	public String getColumnCommentSql()
+//	{
+//		if (this.columnCommentTemplate == NO_STRING)
+//		{
+//			synchronized (LOCK)
+//			{
+//				HashMap<String, String> sql = this.readStatementTemplates("ColumnCommentStatements.xml");
+//				this.columnCommentTemplate = sql.get(this.productName);
+//				if (columnCommentTemplate == null)
+//				{
+//					this.columnCommentTemplate = sql.get(GENERAL_SQL);
+//				}
+//			}
+//		}
+//		return this.columnCommentTemplate;
+//	}
+//
+//	public String getTableCommentSql()
+//	{
+//		if (this.tableCommentTemplate == NO_STRING)
+//		{
+//			synchronized (LOCK)
+//			{
+//				HashMap<String, String> sql = this.readStatementTemplates("TableCommentStatements.xml");
+//				if (sql == null) return null;
+//				this.tableCommentTemplate = sql.get(this.productName);
+//				if (tableCommentTemplate == null)
+//				{
+//					this.tableCommentTemplate = sql.get(GENERAL_SQL);
+//				}
+//			}
+//		}
+//		return this.tableCommentTemplate;
+//	}
 	
 	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
 	{

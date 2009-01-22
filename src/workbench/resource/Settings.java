@@ -264,6 +264,8 @@ public class Settings
 		{
 			try { in.close(); } catch (Throwable th) {}
 		}
+
+		// Now load database configurations from the same directory
 		return true;
 	}
 

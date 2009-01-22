@@ -73,6 +73,7 @@ public class Db2SequenceReader
 		result.setSequenceProperty("ORDER", ds.getValue(row, "ORDER"));
 		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
 		result.setSequenceProperty("DATATYPEID", ds.getValue(row, "DATATYPEID"));
+		result.setComment(ds.getValueAsString(row, "REMARKS"));
 		readSequenceSource(result);
 		return result;
 	}
@@ -92,7 +93,8 @@ public class Db2SequenceReader
 			"       CYCLE, \n" +
 			"       ORDER, \n" +
 			"       CACHE, \n" +
-			"       DATATYPEID  \n" +
+			"       DATATYPEID, \n" +
+			"       REMARKS \n" +
 			"FROM   SYSIBM.SYSSEQUENCES \n" +
 			"WHERE schema = ?";
 			if (StringUtil.isNonBlank(sequence))
@@ -110,7 +112,8 @@ public class Db2SequenceReader
 			"       CYCLE, \n" +
 			"       ORDER, \n" +
 			"       CACHE, \n" +
-			"       DATATYPEID  \n" +
+			"       DATATYPEID, \n" +
+		  "       NULL as remarks  \n" +
 			"FROM   syscat.sequences \n" +
 			"WHERE seqschema = ?";
 			if (StringUtil.isNonBlank(sequence))
@@ -253,6 +256,12 @@ public class Db2SequenceReader
 
 		result.append(';');
 		result.append(nl);
+
+		if (StringUtil.isNonBlank(def.getComment()))
+		{
+			result.append("COMMENT ON SEQUENCE " + def.getSequenceName() + " IS '" + def.getComment().replace("'", "''") + "';");
+			result.append(nl);
+		}
 
 		def.setSource(result);
 	}

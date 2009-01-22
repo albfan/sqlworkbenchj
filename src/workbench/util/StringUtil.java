@@ -663,9 +663,13 @@ public class StringUtil
 	 */
 	public static final String listToString(Collection aList, char aDelimiter)
 	{
-		return listToString(aList, aDelimiter, false);
+		return listToString(aList, String.valueOf(aDelimiter), false);
 	}
 
+	public static final String listToString(Collection aList, char aDelimiter, boolean quoteEntries)
+	{
+		return listToString(aList, String.valueOf(aDelimiter), quoteEntries);
+	}
 	/**
 	 * Create a String from the given list, where the elements are delimited
 	 * with the supplied delimiter
@@ -675,7 +679,7 @@ public class StringUtil
 	 * @param aDelimiter The delimiter to use
 	 * @param quoteEntries if true, all entries are quoted with a double quote
 	 */
-	public static final String listToString(Collection aList, char aDelimiter, boolean quoteEntries)
+	public static final String listToString(Collection aList, String aDelimiter, boolean quoteEntries)
 	{
 		if (aList == null || aList.size() == 0) return "";
 		int numElements = 0;

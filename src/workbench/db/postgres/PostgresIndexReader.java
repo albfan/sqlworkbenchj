@@ -65,6 +65,7 @@ public class PostgresIndexReader
 		if (count == 0) return StringUtil.emptyBuffer();
 		
 		StringBuilder source = new StringBuilder(count * 50);
+		
 		Savepoint sp = null;
 		int indexCount = 0;
 		try

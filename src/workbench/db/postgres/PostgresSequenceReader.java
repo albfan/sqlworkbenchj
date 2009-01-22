@@ -26,6 +26,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 import workbench.storage.DataStore;
+import workbench.util.StringUtil;
 
 /**
  * @author  support@sql-workbench.net
@@ -76,6 +77,12 @@ public class PostgresSequenceReader
 			}
 			buf.append(" CYCLE");
 			buf.append(";\n");
+
+			if (StringUtil.isNonBlank(def.getComment()))
+			{
+				buf.append("\n");
+				buf.append("COMMENT ON SEQUENCE " + def.getSequenceName() + " IS '" + def.getComment().replace("'", "''") + "';");
+			}
 		}
 		catch (Exception e)
 		{
@@ -119,12 +126,14 @@ public class PostgresSequenceReader
 			rs = meta.getTables(null, owner, "%", new String[] { "SEQUENCE"} );
 			while (rs.next())
 			{
-				String seq_name = rs.getString("TABLE_NAME");
-				String schema = rs.getString("TABLE_SCHEM");
-				SequenceDefinition def = getSequenceDefinition(schema, seq_name);
-				result.add(def);
+				result.add(createDefinition(rs));
 			}
 			this.dbConnection.releaseSavepoint(sp);
+
+			for (SequenceDefinition def : result)
+			{
+				updateProperties(def);
+			}
 		}
 		catch (SQLException e)
 		{
@@ -139,25 +148,74 @@ public class PostgresSequenceReader
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	private SequenceDefinition createDefinition(ResultSet rs)
+		throws SQLException
 	{
-		SequenceDefinition result = new SequenceDefinition(owner, sequence);
-		DataStore ds = getRawSequenceDefinition(owner, sequence);
-		if (ds == null) return result;
-		if (ds.getRowCount() == 0) return result;
-		
+		String seq_name = rs.getString("TABLE_NAME");
+		String schema = rs.getString("TABLE_SCHEM");
+		String comment = rs.getString("REMARKS");
+		SequenceDefinition def = new SequenceDefinition(schema, seq_name);
+		def.setComment(comment);
+		return def;
+	}
+
+	private SequenceDefinition getSequence(String owner, String sequence)
+	{
+		SequenceDefinition result = null;
+
+		ResultSet rs = null;
+		PreparedStatement stmt = null;
+		Savepoint sp = null;
+		try
+		{
+			sp = this.dbConnection.setSavepoint();
+			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
+			rs = meta.getTables(null, owner, sequence, new String[] { "SEQUENCE"} );
+			while (rs.next())
+			{
+				result = createDefinition(rs);
+			}
+			this.dbConnection.releaseSavepoint(sp);
+
+			updateProperties(result);
+		}
+		catch (SQLException e)
+		{
+			this.dbConnection.rollback(sp);
+			LogMgr.logError("PostgresSequenceReader.getSequence()", "Error retrieving sequences", e);
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
+	}
+
+	private void updateProperties(SequenceDefinition def)
+	{
+		DataStore ds = getRawSequenceDefinition(def.getSequenceOwner(), def.getSequenceName());
+		if (ds == null) return;
+		if (ds.getRowCount() == 0) return;
+
 		long min = ds.getValueAsLong(0, 0, -1);
 		long max = ds.getValueAsLong(0, 1, -1);
 		long inc = ds.getValueAsLong(0, 2, 1);
 		long cache = ds.getValueAsLong(0, 3, 1);
 		String cycle = ds.getValueAsString(0, 4);
 
-		result.setSequenceProperty("INCREMENT", Long.valueOf(inc));
-		result.setSequenceProperty("MINVALUE", Long.valueOf(min));
-		result.setSequenceProperty("CACHE", cache);
-		result.setSequenceProperty("CYCLE", cycle);
-		result.setSequenceProperty("MAXVALUE", Long.valueOf(max));
-		readSequenceSource(result);
+		def.setSequenceProperty("INCREMENT", Long.valueOf(inc));
+		def.setSequenceProperty("MINVALUE", Long.valueOf(min));
+		def.setSequenceProperty("CACHE", cache);
+		def.setSequenceProperty("CYCLE", cycle);
+		def.setSequenceProperty("MAXVALUE", Long.valueOf(max));
+		readSequenceSource(def);
+	}
+
+	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	{
+		SequenceDefinition result = getSequence(owner, sequence);
+		updateProperties(result);
 		return result;
 	}
 

@@ -27,6 +27,7 @@ public class SequenceDefinition
 	private String sequenceName;
 	private String schema;
 	private CharSequence source;
+	private String comment;
 	
 	private Map<String, Object> properties = new LinkedHashMap<String, Object>();
 	
@@ -43,6 +44,16 @@ public class SequenceDefinition
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		if (reader == null) return null;
 		return reader.getSequenceSource(schema, sequenceName);
+	}
+
+	public String getComment()
+	{
+		return comment;
+	}
+
+	public void setComment(String cmt)
+	{
+		comment = cmt;
 	}
 	
 	public String getSchema()

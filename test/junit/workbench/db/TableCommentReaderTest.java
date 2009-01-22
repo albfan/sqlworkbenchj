@@ -44,7 +44,7 @@ public class TableCommentReaderTest
 			stmt.executeUpdate("COMMENT ON COLUMN comment_test.first_name IS 'Firstname'");
 			con.commit();
 			
-			TableIdentifier table = new TableIdentifier("COMMENT_TEST");
+			TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("COMMENT_TEST"));
 			TableCommentReader reader = new TableCommentReader();
 			
 			String tableComment = reader.getTableCommentSql(con, table);
