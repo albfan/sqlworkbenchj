@@ -102,6 +102,9 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
+Fix: (102.11) When the tabs in the mainwindow where displayed on 
+     two or more lines, the context menu to rename a tab was no 
+     longer displayed.
 Fix: (102.11) Fixed several issues with retrieving object sources
      for DB2 on z/os (thanks to Frank!)
 Fix: (102.11) When selecting data from another user's schema, 
