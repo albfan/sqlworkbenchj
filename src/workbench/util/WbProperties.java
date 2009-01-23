@@ -18,6 +18,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
@@ -41,7 +43,10 @@ public class WbProperties
 	private int distinctSections;
 
 	private final Map<String, List<PropertyChangeListener>> changeListeners = new HashMap<String, List<PropertyChangeListener>>();
+	private final Map<String, String> comments = new HashMap<String, String>();
+
 	private Object changeNotificationSource = null;
+
 
 	protected WbProperties()
 	{
@@ -84,17 +89,27 @@ public class WbProperties
 		String value = null;
 		String lastKey = null;
 		String key = null;
+		boolean hadComment = false;
+
 		for (int i=0; i < keys.length; i++)
 		{
 			key = (String)keys[i];
 
+			String comment = comments.get(key);
+			if (StringUtil.isNonBlank(comment))
+			{
+				if (!hadComment) bw.newLine();
+				bw.write(comment);
+				bw.newLine();
+			}
+			
 			if (lastKey != null)
 			{
 				String k1 = null;
 				String k2 = null;
 				k1 = getSections(lastKey, this.distinctSections);
 				k2 = getSections(key, this.distinctSections);
-				if (!k1.equals(k2))
+				if (!k1.equals(k2) && StringUtil.isBlank(comment))
 				{
 					bw.newLine();
 				}
@@ -120,6 +135,16 @@ public class WbProperties
 			{
 				bw.write(key + "=");
 				bw.newLine();
+			}
+
+			if (StringUtil.isBlank(comment))
+			{
+				hadComment = false;
+			}
+			else
+			{
+				bw.newLine();
+				hadComment = true;
 			}
 			lastKey = key;
 		}
@@ -251,13 +276,28 @@ public class WbProperties
 		return oldValue;
 	}
 
+	public void clearComments()
+	{
+		this.comments.clear();
+	}
+	
+	public String getComment(String key)
+	{
+		return comments.get(key);
+	}
+	
+	public void addPropertyDefinition(String line)
+	{
+		addPropertyDefinition(line, null);
+	}
+	
 	/**
 	 *	Adds a property definition in the form key=value
 	 *	Lines starting with # are ignored
 	 *	Lines that do not contain a = character are ignored
 	 *  Any text after a # sign in the value is ignored
 	 */
-	public void addPropertyDefinition(String line)
+	public void addPropertyDefinition(String line, String comment)
 	{
 		if (line == null) return;
 		if (StringUtil.isBlank(line)) return;
@@ -272,6 +312,7 @@ public class WbProperties
 			value = value.substring(0, pos);
 		}
 		this.setProperty(key, value.trim());
+		comments.put(key, comment);
 	}
 
 	public void loadTextFile(String filename)
@@ -298,16 +339,50 @@ public class WbProperties
 		try
 		{
 			in = EncodingUtil.createBufferedReader(f, encoding);
-			String line = in.readLine();
-			while (line != null)
-			{
-				this.addPropertyDefinition(StringUtil.decodeUnicode(line));
-				line = in.readLine();
-			}
+			loadFromReader(in);
 		}
 		finally
 		{
 			try { in.close(); } catch (Throwable th) {}
+		}
+	}
+
+	public void loadFromStream(InputStream in)
+		throws IOException
+	{
+		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+		loadFromReader(reader);
+	}
+	
+	public void loadFromReader(BufferedReader in)
+		throws IOException
+	{
+		String line = in.readLine();
+		String lastComment = null;
+		while (line != null)
+		{
+			if (StringUtil.isBlank(line))
+			{
+				lastComment = null;
+			}
+
+			if (line.trim().startsWith("#") && !line.trim().startsWith("#!"))
+			{
+				if (lastComment == null)
+				{
+					lastComment = line;
+				}
+				else
+				{
+					lastComment += "\n" + line;
+				}
+			}
+			else
+			{
+				this.addPropertyDefinition(StringUtil.decodeUnicode(line), lastComment);
+				lastComment = null;
+			}
+			line = in.readLine();
 		}
 	}
 

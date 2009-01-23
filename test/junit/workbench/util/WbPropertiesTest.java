@@ -13,7 +13,9 @@ package workbench.util;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import junit.framework.TestCase;
+import workbench.TestUtil;
 
 /**
  *
@@ -30,6 +32,59 @@ public class WbPropertiesTest
 		super(testName);
 	}
 
+	public void testComments()
+		throws Exception
+	{
+		TestUtil util = new TestUtil(this.getName());
+
+		File file = new File(util.getBaseDir(), "myprops.properties");
+		TestUtil.writeFile(file,
+			"# this is a comment for the first key\n" +
+			"# second comment line\n" +
+			"firstkey=value1\n" +
+			"secondkey=value2\n" +
+			"# comment 2\n" +
+			"key4=value3\n" +
+			"\n" +
+			"# no comment\n" +
+			"\n" +
+			"key5=value5\n"
+		);
+		WbProperties props = new WbProperties();
+		props.loadTextFile(file.getAbsolutePath());
+
+		assertEquals("value1", props.getProperty("firstkey"));
+		assertEquals("# this is a comment for the first key\n# second comment line", props.getComment("firstkey"));
+
+		assertEquals("value2", props.getProperty("secondkey"));
+		assertNull(props.getComment("secondkey"));
+
+		assertEquals("value3", props.getProperty("key4"));
+		assertEquals("# comment 2", props.getComment("key4"));
+
+		assertEquals("value5", props.getProperty("key5"));
+		assertNull(props.getComment("key5"));
+
+		props.saveToFile(file);
+
+		// Make sure the comments are preserved when saving and re-loading the properties
+		props = new WbProperties();
+		props.loadTextFile(file.getAbsolutePath());
+
+		assertEquals("value1", props.getProperty("firstkey"));
+		assertEquals("# this is a comment for the first key\n# second comment line", props.getComment("firstkey"));
+
+		assertEquals("value2", props.getProperty("secondkey"));
+		assertNull(props.getComment("secondkey"));
+
+		assertEquals("value3", props.getProperty("key4"));
+		assertEquals("# comment 2", props.getComment("key4"));
+
+		assertEquals("value5", props.getProperty("key5"));
+		assertNull(props.getComment("key5"));
+
+
+	}
 	public void testChangeNotification()
 	{
     WbProperties props = new WbProperties();

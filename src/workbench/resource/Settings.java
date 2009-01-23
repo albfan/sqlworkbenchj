@@ -250,11 +250,17 @@ public class Settings
 		// this ensures that new defaults will be applied automatically.
 		fillDefaults();
 
+		if (cfile.exists() && cfile.length() > 0)
+		{
+			// default comments should only be read the very first time.
+			props.clearComments();
+		}
+
 		BufferedInputStream in = null;
 		try
 		{
 			in = new BufferedInputStream(new FileInputStream(this.configfile));
-			this.props.load(in);
+			this.props.loadFromStream(in);
 		}
 		catch (IOException e)
 		{
@@ -2614,7 +2620,7 @@ public class Settings
 		InputStream in = ResourceMgr.getDefaultSettings();
 		try
 		{
-			this.props.load(in);
+			this.props.loadFromStream(in);
 		}
 		catch (IOException e)
 		{

@@ -2071,8 +2071,16 @@ public class SqlPanel
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
 			panel.removePropertyChangeListener(SqlPanel.this);
 			panel.clearContent();
+			
 			resultTab.removeTabAt(index);
 			currentData = null;
+
+			int newIndex = resultTab.getSelectedIndex();
+			if (newIndex > 0 && newIndex == resultTab.getTabCount() - 1)
+			{
+				newIndex --;
+				resultTab.setSelectedIndex(newIndex);
+			}
 			// if the index stayed the same (e.g. because the first tab is still selected)
 			// no stateChange has been fired and we need to "fake" that because
 			// several actions need to be informed that a different ResultTab is
