@@ -1,5 +1,14 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
+Enh: (102.11) The display strategy for the tabs in the main window can now 
+     be changed between scrolling and stacked ("Scroll tabs" in the general
+     options)
+Enh: (102.11) Individual SQL panels can now be locked to prevent accidental
+     closing of the panel.
+Enh: (102.11) Comment lines in workbench.settings where the very first character
+     is a # are now preserved if immediately followed by a property line. 
+     A comment line that is followed by an empty line will still 
+     be removed.
 Enh: (102.11) Display SQL source for comments for additional object types
      such as views, sequences, procedures where possible.
 Enh: (102.11) The "Manage Drivers" dialog now searches the selected jar file
@@ -102,6 +111,9 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
+Fix: (102.11) When displaying the source for views or tables in the 
+     DbExplorer grants that were made to the current user were
+     not displaye (thanks to Marcus for pointing that out)
 Fix: (102.11) When the tabs in the mainwindow where displayed on 
      two or more lines, the context menu to rename a tab was no 
      longer displayed.
