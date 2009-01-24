@@ -204,14 +204,23 @@ public class MainWindow
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
+		updateTabPolicy();
 		this.addWindowListener(this);
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
-		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_SHOW_TOOLBAR, Settings.PROPERTY_SHOW_TAB_INDEX);
+		Settings.getInstance().addPropertyChangeListener(this, 
+			Settings.PROPERTY_SHOW_TOOLBAR, Settings.PROPERTY_SHOW_TAB_INDEX,
+			"workbench.gui.mainwindow.tabpolicy");
 	}
 
+	protected void updateTabPolicy()
+	{
+		int tabPolicy = Settings.getInstance().getIntProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
+		this.sqlTab.setTabLayoutPolicy(tabPolicy);
+	}
+	
 	public void display()
 	{
 		this.restoreState();
@@ -546,6 +555,10 @@ public class MainWindow
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
 			this.renumberTabs();
+		}
+		else if ("workbench.gui.mainwindow.tabpolicy".equals(evt.getPropertyName()))
+		{
+			updateTabPolicy();
 		}
 	}
 

@@ -180,13 +180,10 @@ public abstract class ViewGrantReader
 		}
 		Iterator<Entry<String, List<String>>> itr = grants.entrySet().iterator();
 
-		String user = dbConnection.getCurrentUser();
 		while (itr.hasNext())
 		{
 			Entry<String, List<String>> entry = itr.next();
 			String grantee = entry.getKey();
-			// Ignore grants to ourself
-			if (user.equalsIgnoreCase(grantee)) continue;
 
 			List<String> privs = entry.getValue();
 			result.append("GRANT ");
