@@ -13,6 +13,7 @@ package workbench.db.datacopy;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -278,7 +279,6 @@ public class DataCopier
 		this.importer.setConnection(target);
 		this.sourceTable = null;
 		this.targetTable = aTargetTable;
-		this.targetColumnsForQuery = queryColumns;
 
 		if (createTarget)
 		{
@@ -289,6 +289,7 @@ public class DataCopier
 			}
 			createTable(cols, dropTarget);
 		}
+		this.targetColumnsForQuery = queryColumns;
 		this.initImporterForQuery(aSourceQuery);
 	}
 
@@ -640,7 +641,7 @@ public class DataCopier
 		}
 	}
 
-	private void addError(String msg)
+	public void addError(String msg)
 	{
 		if (this.errors == null) this.errors = new MessageBuffer();
 		if (this.errors.getLength() > 0) this.errors.appendNewLine();
@@ -648,7 +649,7 @@ public class DataCopier
 	}
 
 
-	private void addMessage(String msg)
+	public void addMessage(String msg)
 	{
 		if (this.messages == null) this.messages = new MessageBuffer();
 		if (this.messages.getLength() > 0) this.messages.appendNewLine();

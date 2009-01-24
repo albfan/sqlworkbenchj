@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
@@ -89,8 +89,50 @@ public class TableCopy
 		}
 		else
 		{
-			ColumnIdentifier[] cols = this.parseColumns(cmdLine, sourcequery, sourceConnection);
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable);
+			ColumnIdentifier[] cols = this.parseColumns(cmdLine);
+			if (cols == null) return false;
+
+			// The ColumnIdentifiers passed to the copier should contain the proper
+			// datatype information.
+			List<ColumnIdentifier> targetCols = null;
+			List<ColumnIdentifier> queryCols = new ArrayList<ColumnIdentifier>();
+			if (!createTable)
+			{
+				// for an existing table, we have to find the real column definition
+				targetCols = targetConnection.getMetadata().getTableColumns(targetId);
+				for (ColumnIdentifier col : cols)
+				{
+					int index = targetCols.indexOf(col);
+					if (index > -1)
+					{
+						queryCols.add(col);
+					}
+				}
+			}
+			else
+			{
+				// if the table should be created, the column definition that is returned
+				// from the source is used. The number of columns specified must
+				// match the number of columns in the select
+				targetCols = SqlUtil.getResultSetColumns(sourcequery, sourceConnection);
+				if (targetCols.size() != cols.length)
+				{
+					copier.addError(ResourceMgr.getString("MsgCopyErrWrongColCount"));
+					return false;
+				}
+				queryCols.addAll(targetCols);
+				for (int i=0; i < cols.length; i++)
+				{
+					queryCols.get(i).setColumnName(cols[i].getColumnName());
+				}
+			}
+			
+			ColumnIdentifier[] realCols = new ColumnIdentifier[queryCols.size()];
+			for (int i=0; i < queryCols.size(); i++)
+			{
+				realCols[i] = queryCols.get(i);
+			}
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, realCols, createTable, dropTable);
 		}
 
 		boolean doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
@@ -119,38 +161,22 @@ public class TableCopy
 		}
 	}
 
-	private ColumnIdentifier[] parseColumns(ArgumentParser cmdLine, String sourceQuery, WbConnection sourceCon)
+	private ColumnIdentifier[] parseColumns(ArgumentParser cmdLine)
 	{
 		// First read the defined columns from the passed parameter
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
-		List l = StringUtil.stringToList(cols, ",", true, true, false, true);
+		List<String> l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
 		ColumnIdentifier[] result = new ColumnIdentifier[count];
 		for (int i=0; i < count; i++)
 		{
-			String c = (String)l.get(i);
-			result[i] = new ColumnIdentifier(c);
-		}
-
-		// now try to read the column definitions from the query
-		// if a matching column is found, the definition from the query
-		// is used (because it will/should contain the correct datatype information
-		try
-		{
-			List colsFromQuery = SqlUtil.getResultSetColumns(sourceQuery, sourceCon);
-			for (int i=0; i < count; i++)
+			String c = l.get(i);
+			if (c.indexOf("/") > -1)
 			{
-				int idx = colsFromQuery.indexOf(result[i]);
-				if (idx > -1)
-				{
-					ColumnIdentifier c = (ColumnIdentifier)colsFromQuery.get(idx);
-					result[i] = c;
-				}
+				copier.addError(ResourceMgr.getString("MsgCopyErrIllegalMapping"));
+				return null;
 			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("WbCopy.parseColumns()", "Error retrieving column definition from source query", e);
+			result[i] = new ColumnIdentifier(c);
 		}
 		return result;
 	}
@@ -164,7 +190,7 @@ public class TableCopy
 		int count = l.size();
 
 		// Use a LinkedHashMap to make sure the order of the columns
-		// are preserved (in case -createTable) was also specified
+		// is preserved (in case -createTable) was also specified
 		Map<String, String> mapping = new LinkedHashMap<String, String>();
 		for (int i=0; i < count; i++)
 		{

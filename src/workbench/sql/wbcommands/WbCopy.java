@@ -202,6 +202,8 @@ public class WbCopy
 		{
 			if (!copier.init(sourceCon, targetCon, result, cmdLine, rowMonitor))
 			{
+				result.addMessage(copier.getMessages());
+				result.setFailure();
 				return result;
 			}
 

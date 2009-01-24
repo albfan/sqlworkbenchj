@@ -225,9 +225,9 @@ public class DbExplorerPanel
 
 			this.toolbar = new WbToolbar();
 			this.toolbar.addDefaultBorder();
-			d = new Dimension(30, 29);
+			d = new Dimension(100, 30);
 			this.toolbar.setMinimumSize(d);
-			this.toolbar.setPreferredSize(new Dimension(100, 29));
+			this.toolbar.setPreferredSize(d);
 			this.connectionInfo = new ConnectionInfo(this.toolbar.getBackground());
 			this.connectionInfo.setMinimumSize(d);
 			this.toolbar.add(this.connectionInfo);

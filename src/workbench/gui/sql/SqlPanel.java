@@ -1226,7 +1226,6 @@ public class SqlPanel
 
 	public void setTabTitle(final JTabbedPane tab, final int index)
 	{
-		System.out.println("EDT: " + EventQueue.isDispatchThread());
 		String fname = null;
 		String tooltip = null;
 		this.setId(index + 1);
