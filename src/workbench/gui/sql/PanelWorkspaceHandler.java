@@ -88,6 +88,8 @@ public class PanelWorkspaceHandler
 		if (loc > 0) client.contentPanel.setLastDividerLocation(loc);
 
 		boolean appendResults = props.getBoolProperty("tab" + (index) + ".append.results", false);
+		boolean locked = props.getBoolProperty("tab" + (index) + ".locked", false);
+		client.setLocked(locked);
 		client.setAppendResults(appendResults);
 		client.updateAppendAction();
 		client.updateTabTitle();
@@ -108,6 +110,7 @@ public class PanelWorkspaceHandler
 		props.setProperty("tab" + (index) + ".divider.location", Integer.toString(location));
 		props.setProperty("tab" + (index) + ".divider.lastlocation", Integer.toString(last));
 		props.setProperty("tab" + (index) + ".append.results", Boolean.toString(client.getAppendResults()));
+		props.setProperty("tab" + (index) + ".locked", Boolean.toString(client.isLocked()));
 
 		w.setMaxRows(index, client.statusBar.getMaxRows());
 		w.setQueryTimeout(index, client.statusBar.getQueryTimeout());

@@ -53,4 +53,6 @@ public interface MainPanel
 	boolean canCloseTab();
 	boolean isModified();
 	void reset();
+	boolean isLocked();
+	void setLocked(boolean flag);
 }

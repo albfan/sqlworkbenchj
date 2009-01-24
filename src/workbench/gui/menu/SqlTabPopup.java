@@ -22,6 +22,7 @@ import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.gui.actions.InsertTabAction;
+import workbench.gui.actions.LockPanelAction;
 import workbench.gui.actions.MoveSqlTabLeft;
 import workbench.gui.actions.MoveSqlTabRight;
 import workbench.gui.actions.ToggleExtraConnection;
@@ -41,13 +42,21 @@ public class SqlTabPopup
 		this.add(insert);
 
 		RemoveTabAction remove = new RemoveTabAction(aClient);
+		remove.setEnabled(aClient.canCloseTab());
 		this.add(remove);
+
 
 		if (aClient.canRenameTab())
 		{
 			RenameTabAction rename = new RenameTabAction(aClient);
 			this.add(rename);
 		}
+
+		MainPanel panel = aClient.getCurrentPanel();
+		LockPanelAction lock = new LockPanelAction(panel);
+
+		this.add(lock.getMenuItem());
+		lock.setSwitchedOn(panel.isLocked());
 
 		this.addSeparator();
 
@@ -61,7 +70,6 @@ public class SqlTabPopup
 			this.add(toggle.getMenuItem());
 		}
 
-		MainPanel panel = aClient.getCurrentPanel();
 		if (panel instanceof SqlPanel)
 		{
 			this.addSeparator();

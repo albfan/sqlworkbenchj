@@ -82,9 +82,8 @@ public class WbPropertiesTest
 
 		assertEquals("value5", props.getProperty("key5"));
 		assertNull(props.getComment("key5"));
-
-
 	}
+	
 	public void testChangeNotification()
 	{
     WbProperties props = new WbProperties();

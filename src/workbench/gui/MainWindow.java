@@ -554,7 +554,6 @@ public class MainWindow
 		JMenu view = getViewMenu(index);
 		int count = view.getItemCount();
 		MainPanel p = getCurrentPanel();
-		boolean isExplorer = (p instanceof DbExplorerPanel);
 		for (int i = 0; i < count; i++)
 		{
 			JMenuItem item = view.getItem(i);
@@ -562,7 +561,7 @@ public class MainWindow
 			Action a = item.getAction();
 			if (a instanceof RemoveTabAction)
 			{
-				a.setEnabled(isExplorer || canCloseTab());
+				a.setEnabled(canCloseTab());
 			}
 		}
 	}
@@ -2402,6 +2401,10 @@ public class MainWindow
 
 	public boolean canCloseTab()
 	{
+		MainPanel panel = this.getCurrentPanel();
+		if (panel.isLocked()) return false;
+		if (panel instanceof DbExplorerPanel) return true;
+
 		int numTabs = this.getLastSqlPanelIndex();
 		int currentIndex = this.sqlTab.getSelectedIndex();
 		if (currentIndex > numTabs) return true;

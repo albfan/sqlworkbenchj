@@ -32,6 +32,11 @@ public class CheckBoxAction
 	private String settingsProperty;
 	private JCheckBoxMenuItem toggleMenu;
 
+	public CheckBoxAction(String resourceKey)
+	{
+		this(resourceKey, null);
+	}
+	
 	public CheckBoxAction(String resourceKey, String prop)
 	{
 		super();

@@ -13,6 +13,7 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -56,6 +57,7 @@ import workbench.gui.components.ConnectionSelector;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
+import workbench.gui.sql.PanelTitleSetter;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.Reloadable;
@@ -120,6 +122,7 @@ public class DbExplorerPanel
 	private ReloadAction reloadSchemasAction;
 	private Reloadable schemaReloader;
 	private FlatButton reloadButton;
+	private boolean locked;
 
 	public DbExplorerPanel()
 	{
@@ -237,6 +240,17 @@ public class DbExplorerPanel
 		{
 			LogMgr.logError(this, "Could not initialize DbExplorerPanel", e);
 		}
+	}
+
+	public void setLocked(boolean flag)
+	{
+		this.locked = flag;
+		updateTabTitle();
+	}
+
+	public boolean isLocked()
+	{
+		return locked;
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -833,6 +847,17 @@ public class DbExplorerPanel
 		return getTabTitle();
 	}
 
+	protected void updateTabTitle()
+	{
+		Container parent = this.getParent();
+		if (parent instanceof JTabbedPane)
+		{
+			JTabbedPane tab = (JTabbedPane)parent;
+			int index = tab.indexOfComponent(this);
+			setTabTitle(tab, index);
+		}
+	}
+	
 	public String getTabTitle()
 	{
 		return ResourceMgr.getString("LblDbExplorer");
@@ -841,23 +866,7 @@ public class DbExplorerPanel
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
 		String plainTitle = (this.tabTitle == null ? getTabTitle() : this.tabTitle);
-
-		String realTitle = plainTitle;
-		if (GuiSettings.getShowTabIndex())
-		{
-			realTitle += " " + Integer.toString(index+1);
-		}
-		tab.setTitleAt(index, realTitle);
-		if (index < 9 && GuiSettings.getShowTabIndex())
-		{
-			char c = Integer.toString(index+1).charAt(0);
-			int pos = plainTitle.length() + 1;
-			tab.setMnemonicAt(index, c);
-			// The Mnemonic index has to be set explicitely otherwise
-			// the display would be wrong if the tab title contains
-			// the mnemonic character
-			tab.setDisplayedMnemonicIndexAt(index, pos);
-		}
+		PanelTitleSetter.setTabTitle(tab, this, index, plainTitle);
 	}
 
 	public DbExplorerWindow openWindow(String aProfileName)
@@ -962,7 +971,8 @@ public class DbExplorerPanel
 		{
 			p.setProperty(key, this.catalogFromWorkspace);
 		}
-
+		p.setProperty("dbexplorer" + index + ".locked", this.locked);
+		
 		tables.saveToWorkspace(w, index);
 		searchPanel.saveToWorkspace(w, index);
 		procs.saveToWorkspace(w, index);
@@ -979,7 +989,7 @@ public class DbExplorerPanel
 	{
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
 		if (!isModified()) return true;
-
+		
 		boolean canClose = WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", getRealTabTitle());
 		return canClose;
 	}
@@ -999,11 +1009,19 @@ public class DbExplorerPanel
 			searchPanel.readFromWorkspace(w, index);
 			procs.readFromWorkspace(w, index);
 			if (triggers != null) triggers.readFromWorkspace(w, index);
+			this.locked = p.getBoolProperty("dbexplorer" + index + ".locked", false);
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DbExplorerPanel.readFromWorkspace()", "Error loading workspace", e);
 		}
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				updateTabTitle();
+			}
+		});
 	}
 
 	public void executionStart(WbConnection conn, Object source)

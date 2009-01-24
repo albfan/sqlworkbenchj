@@ -278,6 +278,8 @@ public class SqlPanel
 	protected StatementRunner stmtRunner;
 	protected GenericRowMonitor rowMonitor;
 	protected IconHandler iconHandler;
+	private boolean locked = false;
+	
 //</editor-fold>
 
 	public SqlPanel(int anId)
@@ -334,6 +336,17 @@ public class SqlPanel
 		iconHandler = new IconHandler(this);
 	}
 
+	public void setLocked(boolean flag)
+	{
+		this.locked = flag;
+		updateTabTitle();
+	}
+
+	public boolean isLocked()
+	{
+		return locked;
+	}
+	
 	public String getId()
 	{
 		return NumberStringCache.getNumberString(this.internalId);
@@ -1211,8 +1224,9 @@ public class SqlPanel
 		}
 	}
 
-	public void setTabTitle(JTabbedPane tab, int index)
+	public void setTabTitle(final JTabbedPane tab, final int index)
 	{
+		System.out.println("EDT: " + EventQueue.isDispatchThread());
 		String fname = null;
 		String tooltip = null;
 		this.setId(index + 1);
@@ -1229,23 +1243,8 @@ public class SqlPanel
 			iconHandler.removeIcon();
 		}
 
-		String plainTitle = getTabTitle();
-		String title = plainTitle;
-		if (GuiSettings.getShowTabIndex())
-		{
-			 title += " " + Integer.toString(index+1);
-		}
-		tab.setTitleAt(index, title);
-		if (index < 9 && GuiSettings.getShowTabIndex())
-		{
-			char c = Integer.toString(index+1).charAt(0);
-			int pos = plainTitle.length() + 1;
-			tab.setMnemonicAt(index, c);
-			// The Mnemonic index has to be set explicitely otherwise
-			// the display would be wrong if the tab title contains
-			// the mnemonic character
-			tab.setDisplayedMnemonicIndexAt(index, pos);
-		}
+		PanelTitleSetter.setTabTitle(tab, this, index, getTabTitle());
+		
 		tab.setToolTipTextAt(index, tooltip);
 	}
 
