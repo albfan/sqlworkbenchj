@@ -206,10 +206,12 @@ public class FileUtil
 
 	/**
 	 * Copies the source file to the destination file
+	 *
 	 * @param source
 	 * @param destination
-	 * @return
+	 * @return the number of bytes copied
 	 * @throws java.io.IOException
+	 *
 	 * @see #copy(java.io.InputStream, java.io.OutputStream)
 	 */
 	public static long copy(File source, File destination)
@@ -223,6 +225,8 @@ public class FileUtil
 	/**
 	 * Copies the content of the InputStream to the OutputStream.
 	 * Both streams are closed automatically.
+	 * 
+	 * @return the number of bytes copied
 	 */
 	public static long copy(InputStream in, OutputStream out)
 		throws IOException

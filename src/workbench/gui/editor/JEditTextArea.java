@@ -334,7 +334,7 @@ public class JEditTextArea
 	 * isManagingFocus() returns true to make sure the tab key is handled
 	 * by the editor, and does not move the focus to the next component
 	 *
-	 * @return
+	 * @return always true
 	 */
 	@SuppressWarnings("deprecation")
 	public final boolean isManagingFocus()

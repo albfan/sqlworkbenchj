@@ -218,25 +218,25 @@ public class ImportFileHandler
 	/**
 	 * Gets the length of the file.
 	 *
-	 * @param f
-	 * @return
+	 * @param toTest
+	 * @return the number of bytes in the given file
 	 * @throws java.io.IOException
 	 */
-	public long getLength(File f)
+	public long getLength(File toTest)
 		throws IOException
 	{
 		if (this.isZip)
 		{
-			ZipEntry entry = findEntry(f);
+			ZipEntry entry = findEntry(toTest);
 			return entry.getSize();
 		}
 		else
 		{
-			if (f.isAbsolute())
+			if (toTest.isAbsolute())
 			{
-				return f.length();
+				return toTest.length();
 			}
-			File realFile = new File(this.baseDir, f.getName());
+			File realFile = new File(this.baseDir, toTest.getName());
 			return realFile.length();
 		}
 	}

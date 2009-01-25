@@ -75,7 +75,7 @@ public interface DbObject
 
 	/**
 	 * Return the comment on the DbObjec if defined 
-	 * @return
+	 * @return the object's comment if any
 	 */
 	String getComment();
 

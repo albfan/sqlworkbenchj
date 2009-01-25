@@ -706,6 +706,7 @@ public class DbExplorerPanel
 
 	public void reset()
 	{
+		this.setLocked(false);
 		if (this.tables != null) this.tables.reset();
 		if (this.procs != null) this.procs.reset();
 		if (this.searchPanel != null) this.searchPanel.reset();

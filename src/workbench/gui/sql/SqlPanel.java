@@ -3069,6 +3069,7 @@ public class SqlPanel
 	public void reset()
 	{
 		this.editor.reset();
+		this.setLocked(false);
 		this.clearLog();
 		this.clearResultTabs();
 		if (this.currentData != null) this.currentData.clearContent();

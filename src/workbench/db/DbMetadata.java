@@ -560,7 +560,7 @@ public class DbMetadata
 	 * <literal>workbench.sql.ignoreschema.[dbid]</literal>
 	 * 
 	 * @param schema
-	 * @return
+	 * @return true if the supplied schema name should not be used
 	 */
 	public boolean ignoreSchema(String schema)
 	{

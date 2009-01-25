@@ -1302,7 +1302,7 @@ public class MainWindow
 						p.readFromWorkspace(w, i);
 						if (p instanceof SqlPanel)
 						{
-							updateViewMenu(i, getPlainTabTitle(i));
+							updateViewMenu(i, getTabTitle(i));
 						}
 					}
 					currentWorkspaceFile = realFilename;
@@ -2361,26 +2361,26 @@ public class MainWindow
 	}
 
 	/**
-	 *	Returns the real title of a tab (without the index number)
+	 * Returns the real title of a tab (without the index number or any formatting)
+	 * 
+	 * @see MainPanel#getTabTitle()
 	 */
-	private String getPlainTabTitle(int index)
+	public String getTabTitle(int index)
 	{
-		String title = this.sqlTab.getTitleAt(index);
-		if (GuiSettings.getShowTabIndex())
-		{
-			int pos = title.lastIndexOf(' ');
-			if (pos > -1)
-			{
-				title = title.substring(0, pos);
-			}
-		}
-		return title;
+		MainPanel panel = getSqlPanel(index);
+		return panel.getTabTitle();
 	}
 
+	/**
+	 * Returns the title of the currently selected tab.
+	 *
+	 * @see #getTabTitle(int)
+	 * @see MainPanel#getTabTitle()
+	 */
 	public String getCurrentTabTitle()
 	{
 		int index = this.sqlTab.getSelectedIndex();
-		return this.getPlainTabTitle(index);
+		return this.getTabTitle(index);
 	}
 	
 	public void setCurrentTabTitle(String newName)
@@ -2476,7 +2476,7 @@ public class MainWindow
 		for (int i=0; i < count; i++)
 		{
 			SelectTabAction a = new SelectTabAction(sqlTab, i);
-			a.setMenuText(getPlainTabTitle(i));
+			a.setMenuText(getTabTitle(i));
 			menu.insert(a, i);
 		}
 		if (this.sqlTab.getSelectedIndex() == panel)

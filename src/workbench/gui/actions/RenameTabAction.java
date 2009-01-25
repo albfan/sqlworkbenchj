@@ -21,7 +21,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class RenameTabAction extends WbAction
+public class RenameTabAction
+	extends WbAction
 {
 	private RenameableTab client;
 
