@@ -474,25 +474,6 @@ public class DataStore
 	}
 
 	/**
-	 *	Adds the next row from the result set
-	 *	to the DataStore. No check will be done
-	 *	if the ResultSet matches the current
-	 *	column structure!!
-	 *	@return int - the new row number
-	 *	The new row will be marked as "Not modified".
-	 */
-//	public int addRow(ResultSet rs)
-//		throws SQLException
-//	{
-//		int cols = this.resultInfo.getColumnCount();
-//		//RowData row = new RowData(cols);
-//		RowData row = RowDataFactory.createRowData(cols, this.originalConnection);
-//		row.read(rs, this.resultInfo);
-//		this.data.add(row);
-//		return this.getRowCount() - 1;
-//	}
-
-	/**
 	 *	Adds a new empty row to the DataStore.
 	 *	The new row will be marked as Modified
 	 *	@return int - the new row number

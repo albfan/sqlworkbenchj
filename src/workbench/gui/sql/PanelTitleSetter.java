@@ -14,6 +14,7 @@ package workbench.gui.sql;
 import javax.swing.JTabbedPane;
 import workbench.interfaces.MainPanel;
 import workbench.resource.GuiSettings;
+import workbench.util.NumberStringCache;
 
 /**
  *
@@ -26,10 +27,18 @@ public class PanelTitleSetter
 		String title = plainTitle;
 		if (panel.isLocked())
 		{
-			title = "<html><i>" + title + "</i>";
+			title = "<html><i>" + title + "</i> ";
 			if (GuiSettings.getShowTabIndex())
 			{
-				title += " <u>" + Integer.toString(index+1) + "</u>";
+				if (index < 9)
+				{
+					title += "<u>";
+				}
+				title += NumberStringCache.getNumberString (index+1);
+				if (index < 9) 
+				{
+					title += "</u>";
+				}
 			}
 			title += "</html>";
 			tab.setTitleAt(index, title);
@@ -38,7 +47,7 @@ public class PanelTitleSetter
 		{
 			if (GuiSettings.getShowTabIndex())
 			{
-				 title += " " + Integer.toString(index+1);
+				 title += " " + NumberStringCache.getNumberString(index+1);
 			}
 			tab.setTitleAt(index, title);
 

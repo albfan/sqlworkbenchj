@@ -17,7 +17,8 @@ import workbench.storage.DataConverter;
 import workbench.util.NumberStringCache;
 
 /**
- *
+ * A class to convert Microsofts strange binary "timestamp" to a readable display.
+ * 
  * @author support@sql-workbench.net
  */
 public class SqlServerDataConverter
@@ -36,13 +37,33 @@ public class SqlServerDataConverter
 	
 	private SqlServerDataConverter()
 	{
-
 	}
+	
+	/**
+	 * Checks if jdbcType == Types.BINARY and if dbmsType == "timestamp"
+	 *
+	 * @param jdbcType the jdbcType as returned by the driver
+	 * @param dbmsType the name of the datatype for this value
+	 *
+	 * @return true if Microsoft's "timestamp" type
+	 */
 	public boolean convertsType(int jdbcType, String dbmsType)
 	{
 		return (jdbcType == Types.BINARY && dbmsType.equals("timestamp"));
 	}
 
+	/**
+	 * If the type of the originalValue is Microsoft's "timestamp", then
+	 * the value is converted into a corresponding hex display, e.g. <br/>
+	 * <tt>0x000000000001dc91</tt>
+	 * 
+	 * @param jdbcType the jdbcType as returned by the driver
+	 * @param dbmsType the name of the datatype for this value
+	 * @param originalValue the value to be converted (or not)
+	 *
+	 * @return the originalValue or a converted value if approriate
+	 * @see #convertsType(int, java.lang.String) 
+	 */
 	public Object convertValue(int jdbcType, String dbmsType, Object originalValue)
 	{
 		if (!convertsType(jdbcType, dbmsType)) return originalValue;

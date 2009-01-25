@@ -11,7 +11,12 @@
  */
 package workbench.storage;
 
+import java.sql.ResultSet;
+import java.sql.Statement;
 import junit.framework.TestCase;
+import workbench.TestUtil;
+import workbench.db.WbConnection;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -23,6 +28,52 @@ public class RowDataTest extends TestCase
 	public RowDataTest(String testName)
 	{
 		super(testName);
+	}
+
+	public void testTrimCharData()
+		throws Exception
+	{
+		TestUtil util = new TestUtil(getName());
+		WbConnection  con = util.getHSQLConnection("charTest");
+
+		// HSQLDB does not pad a CHAR column to the defined length as defined
+		// by the ANSI standard. But it does not remove trailing spaces either
+		// so by storing trailing spaces, the trimCharData feature can be tested
+		TestUtil.executeScript(con, 
+			"CREATE TABLE char_test (char_data char(5), vchar varchar(10));\n" +
+			"INSERT INTO char_test VALUES ('1    ', '1    ');\n" +
+			"INSERT INTO char_test VALUES ('12   ', '12   ');\n" +
+			"INSERT INTO char_test VALUES ('123  ', '123  ');\n" +
+			"COMMIT;\n" +
+			"");
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = con.createStatement();
+			rs = stmt.executeQuery("select char_data, vchar from char_test");
+			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
+			RowData row = new RowData(info);
+			row.setTrimCharData(true);
+			rs.next();
+			row.read(rs, info);
+			String v = (String)row.getValue(0);
+			assertEquals("1", v);
+			v = (String)row.getValue(1);
+			assertEquals("1    ", v);
+
+			row.setTrimCharData(false);
+			rs.next();
+			row.read(rs, info);
+			v = (String)row.getValue(0);
+			assertEquals("12   ", v);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+			con.disconnect();
+		}
+		util.emptyBaseDirectory();
 	}
 
 	public void testBlobs()
@@ -66,6 +117,9 @@ public class RowDataTest extends TestCase
 		
 		row.setValue(0, "123");
 		row.setValue(1, new Integer(42));
+		assertTrue(row.isNew());
+		assertTrue(row.isModified());
+		
 		row.resetStatus();
 		assertFalse(row.isModified());
 		

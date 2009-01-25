@@ -32,6 +32,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import javax.swing.Action;
@@ -562,23 +563,6 @@ public class MainWindow
 		}
 	}
 
-	private void checkViewMenu(int index)
-	{
-		JMenu view = getViewMenu(index);
-		int count = view.getItemCount();
-		MainPanel p = getCurrentPanel();
-		for (int i = 0; i < count; i++)
-		{
-			JMenuItem item = view.getItem(i);
-			if (item == null) continue;
-			Action a = item.getAction();
-			if (a instanceof RemoveTabAction)
-			{
-				a.setEnabled(canCloseTab());
-			}
-		}
-	}
-
 	private void checkMacroMenuForPanel(int index)
 	{
 		MainPanel p = this.getSqlPanel(index);
@@ -940,7 +924,6 @@ public class MainWindow
 		this.disconnectTab.checkState();
 
 		this.checkMacroMenuForPanel(anIndex);
-		this.checkViewMenu(anIndex);
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
@@ -1475,7 +1458,7 @@ public class MainWindow
 					mgr.disconnect(conn);
 				}
 			}
-			this.closeExplorerWindows(true);
+			this.closeExplorerWindows();
 		}
 		finally
 		{
@@ -1803,40 +1786,6 @@ public class MainWindow
 	}
 
 	/**
-	 * Displays the DbExplorer. Either in a separate tab,
-	 * or as a new window. If an explorer window is already open
-	 * that instance will be re-used
-	 */
-	public void showDbExplorer()
-	{
-		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();
-		if (useTab)
-		{
-			int index = this.findFirstExplorerTab();
-			if (index > -1)
-			{
-				this.selectTab(index);
-			}
-			else
-			{
-				this.newDbExplorerPanel(true);
-			}
-		}
-		else
-		{
-			if (this.explorerWindows.size() > 0)
-			{
-				ToolWindow w = this.explorerWindows.get(0);
-				w.activate();
-			}
-			else
-			{
-				this.newDbExplorerWindow();
-			}
-		}
-	}
-
-	/**
 	 * Returns the index of the las SQL Panel
 	 */
 	public int getLastSqlPanelIndex()
@@ -1851,7 +1800,7 @@ public class MainWindow
 	/**
 	 *	Returns the index of the first explorer tab
 	 */
-	private int findFirstExplorerTab()
+	public int findFirstExplorerTab()
 	{
 		int count = this.sqlTab.getTabCount();
 		for (int i=0; i < count; i++)
@@ -1865,22 +1814,80 @@ public class MainWindow
 		return -1;
 	}
 
-	public void closeExplorerWindows(boolean doDisconnect)
+	public List<ToolWindow> getExplorerWindows()
+	{
+		return Collections.unmodifiableList(explorerWindows);
+	}
+	
+	public void closeExplorerWindows()
 	{
 		for (ToolWindow w : explorerWindows)
 		{
-			if (doDisconnect)
+			WbConnection conn = w.getConnection();
+			if (conn != this.currentConnection)
 			{
-				WbConnection conn = w.getConnection();
-				if (conn != this.currentConnection)
-				{
-					ConnectionMgr.getInstance().disconnect(conn);
-				}
-				w.closeWindow();
+				ConnectionMgr.getInstance().disconnect(conn);
 			}
+			w.closeWindow();
 		}
 	}
 
+	public void closeOtherPanels(MainPanel toKeep)
+	{
+		boolean inProgress = connectInProgress;
+		if (!inProgress) this.setConnectIsInProgress();
+		try
+		{
+			this.tabRemovalInProgress = true;
+			int index = 0;
+			while (index < sqlTab.getTabCount())
+			{
+				MainPanel p = getSqlPanel(index);
+
+				if (p != toKeep && !p.isLocked())
+				{
+					if (p.isModified())
+					{
+						// if the panel is modified the user will be asked
+						// if the panel should really be closed, in that
+						// case I think it makes sense to make that panel the current panel
+						selectTab(index);
+						// tabSelected will not be run because tabRemovalInProgress == true
+						tabSelected(index);
+					}
+					if (p.canCloseTab())
+					{
+						removeTab(index, false);
+					}
+					else
+					{
+						// if canCloseTab() returned false, then the user
+						// selected "Cancel" which means stop closing panels
+						// if the user selected "No" canCloseTab() will return "true"
+						// to indicate whatever is in progress can go on.
+						break;
+					}
+				}
+				else
+				{
+					index ++;
+				}
+			}
+			renumberTabs();
+			// make sure the toolbar and menus are updated correctly
+			updateCurrentTab(getCurrentPanelIndex());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("MainWindow.removeAllPanels()", "Error when removing all panels", e);
+		}
+		finally
+		{
+			tabRemovalInProgress = false;
+			if (!inProgress) clearConnectIsInProgress();
+		}
+	}
+	
 	protected void removeAllPanels()
 	{
 		boolean inProgress = connectInProgress;

@@ -16,7 +16,11 @@ import workbench.db.mssql.SqlServerDataConverter;
 import workbench.resource.Settings;
 
 /**
- *
+ * A factory to create instances of RowData.<br/>
+ * <br/>
+ * When creating a new instance a possible converter is automatically registered
+ * with the created instance.
+ * 
  * @author support@sql-workbench.net
  */
 public class RowDataFactory
@@ -36,7 +40,7 @@ public class RowDataFactory
 		return result;
 	}
 
-	private static DataConverter createConverter(WbConnection conn)
+	public static DataConverter createConverter(WbConnection conn)
 	{
 		if (conn != null && conn.getMetadata().isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay())
 		{

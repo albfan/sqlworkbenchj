@@ -32,6 +32,7 @@ import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
+import workbench.storage.RowDataFactory;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -297,7 +298,7 @@ public class TableDeleteSync
 			while (rs.next())
 			{
 				if (cancelExecution) break;
-				RowData r = new RowData(ri);
+				RowData r = RowDataFactory.createRowData(ri, this.reference);
 				r.read(rs, ri);
 				checkRows.add(r);
 			}

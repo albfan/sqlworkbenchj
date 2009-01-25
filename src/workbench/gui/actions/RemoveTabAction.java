@@ -17,6 +17,8 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import workbench.gui.MainWindow;
 import workbench.resource.ResourceMgr;
 
@@ -25,6 +27,7 @@ import workbench.resource.ResourceMgr;
  */
 public class RemoveTabAction 
 	extends WbAction
+	implements ChangeListener
 {
 	private MainWindow client;
 
@@ -35,10 +38,17 @@ public class RemoveTabAction
 		this.initMenuDefinition("MnuTxtRemoveTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
+		client.addIndexChangeListener(this);
+		setEnabled(false);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		client.removeTab();
+	}
+
+	public void stateChanged(ChangeEvent e)
+	{
+		this.setEnabled(client.canCloseTab());
 	}
 }

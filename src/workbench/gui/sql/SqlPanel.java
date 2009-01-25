@@ -825,7 +825,7 @@ public class SqlPanel
 		}
 	}
 
-	public boolean isModified()
+	protected boolean isDataModified()
 	{
 		if (this.currentData == null) return false;
 		if (this.resultTab.getTabCount() == 1) return false; // only messages
@@ -836,6 +836,12 @@ public class SqlPanel
 			if (panel.isModified()) return true;
 		}
 		return false;
+	}
+	
+	public boolean isModified()
+	{
+		if (isDataModified()) return true;
+		return editor.isModified();
 	}
 
 	private void setupActionMap()
@@ -1133,7 +1139,8 @@ public class SqlPanel
 		handler.readFromWorkspace(w, index);
 	}
 
-	/** Do any work which should be done during the process of saving the
+	/**
+	 *  Do any work which should be done during the process of saving the
 	 *  current workspace, but before the workspace file is actually opened!
 	 *  This is to prevent a corrupted workspace due to interrupting the saving
 	 *  because of the check for unsaved changes in the current editor file
@@ -1614,7 +1621,7 @@ public class SqlPanel
 	{
 		if (this.isBusy()) return;
 
-		if (GuiSettings.getConfirmDiscardResultSetChanges()  && !appendResult && isModified())
+		if (GuiSettings.getConfirmDiscardResultSetChanges()  && !appendResult && isDataModified())
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}

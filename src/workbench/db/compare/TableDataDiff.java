@@ -34,6 +34,7 @@ import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowActionMonitor;
 import workbench.storage.RowData;
+import workbench.storage.RowDataFactory;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.MessageBuffer;
@@ -319,7 +320,7 @@ public class TableDataDiff
 
 			while (rs.next())
 			{
-				RowData r = new RowData(ri);
+				RowData r = RowDataFactory.createRowData(ri, toSync);
 				r.read(rs, ri);
 				checkRows.add(r);
 				if (cancelExecution) break;

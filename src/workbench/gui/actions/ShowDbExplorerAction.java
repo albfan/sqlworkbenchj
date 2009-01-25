@@ -15,9 +15,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import java.util.List;
 import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
+import workbench.interfaces.ToolWindow;
+import workbench.resource.Settings;
 
 /**
  *	@author  support@sql-workbench.net
@@ -37,6 +40,31 @@ public class ShowDbExplorerAction
 
 	public void executeAction(ActionEvent e)
 	{
-		mainWin.showDbExplorer();
+		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();
+		if (useTab)
+		{
+			int index = mainWin.findFirstExplorerTab();
+			if (index > -1)
+			{
+				mainWin.selectTab(index);
+			}
+			else
+			{
+				mainWin.newDbExplorerPanel(true);
+			}
+		}
+		else
+		{
+			List<ToolWindow> windows = mainWin.getExplorerWindows();
+			if (windows.size() > 0)
+			{
+				ToolWindow w = windows.get(0);
+				w.activate();
+			}
+			else
+			{
+				mainWin.newDbExplorerWindow();
+			}
+		}
 	}
 }

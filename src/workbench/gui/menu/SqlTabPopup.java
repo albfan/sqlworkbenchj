@@ -14,6 +14,7 @@ package workbench.gui.menu;
 import javax.swing.JPopupMenu;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.AddTabAction;
+import workbench.gui.actions.CloseOtherTabsAction;
 import workbench.gui.actions.FileDiscardAction;
 import workbench.gui.actions.NewDbExplorerPanelAction;
 import workbench.gui.actions.RemoveTabAction;
@@ -45,14 +46,28 @@ public class SqlTabPopup
 		remove.setEnabled(aClient.canCloseTab());
 		this.add(remove);
 
+		MainPanel panel = aClient.getCurrentPanel();
 
+		int tabCount = aClient.getLastSqlPanelIndex();
+		int lockedCount = 0;
+		for (int i=0; i < tabCount; i++)
+		{
+			MainPanel p = aClient.getSqlPanel(i);
+			if (p.isLocked()) lockedCount ++;
+		}
+
+		if (panel instanceof SqlPanel || lockedCount > 0)
+		{
+			CloseOtherTabsAction closeOthers = new CloseOtherTabsAction(aClient);
+			this.add(closeOthers);
+		}
+		
 		if (aClient.canRenameTab())
 		{
 			RenameTabAction rename = new RenameTabAction(aClient);
 			this.add(rename);
 		}
 
-		MainPanel panel = aClient.getCurrentPanel();
 		LockPanelAction lock = new LockPanelAction(panel);
 
 		this.add(lock.getMenuItem());

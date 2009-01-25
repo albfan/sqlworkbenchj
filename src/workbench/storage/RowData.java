@@ -29,10 +29,13 @@ import workbench.util.StringUtil;
  *	A class to hold the data for a single row retrieved from the database.
  *	It will also save the originally retrieved information in case the
  *  data is changed.
- *	A row can be in three different status:
- *	NEW          - the row has not been retrieved from the database (i.e. was created on the client)
- *  MODIFIED     - the row has been retrieved but has been changed since then
- *  NOT_MODIFIED - The row has not been changed since it has been retrieved
+ * <br><<br/>
+ *
+ *	A row can be in three different status:<br/>
+ *  <br/>
+ *	NEW          - the row has not been retrieved from the database (i.e. was created on the client)<br/>
+ *  MODIFIED     - the row has been retrieved but has been changed since then<br/>
+ *  NOT_MODIFIED - The row has not been changed since it has been retrieved<br/>
  *
  * @author support@sql-workbench.net  
  */ 
@@ -82,12 +85,44 @@ public class RowData
 		return this.colData; 
 	}
 
+	/**
+	 * Define a converter that may convert the data read from the database
+	 * to e.g. a more readable format.
+	 * <br/>
+	 * Currently only one converter is used to make SQL Server's "timestamp" data type (which
+	 * is some kind of binary data but <b>not</b> a timestamp) look similar to the display in
+	 * Microsoft's tools.
+	 * <br/><br/>
+	 * As potentially a large number of rows can be created the registered converter
+	 * should be a singleton so that the memory used for retrieving the data is not increased
+	 * too much.
+	 * <br/>
+	 * @param conv the converte to be used.
+	 *
+	 * @see workbench.db.mssql.SqlServerDataConverter
+	 */
 	public void setConverter(DataConverter conv)
 	{
 		this.converter = conv;
 	}
+	
 	/**
-	 *	Read the row data from the supplied ResultSet
+	 * Read the current row from the ResultSet into this RowData.
+	 * <br/>
+	 * It is assumed that ResultSet.next() has already been called on the ResultSet.
+	 * <br/>
+	 * 
+	 * BLOBs (and similar datatypes) will be read into a byte array. CLOBs (and similar datatypes)
+	 * will be converted into a String object.
+	 * <br/>
+	 * All other types will be retrieved using getObject() from the result set, except for
+	 * timestamp and date to work around issues with the Oracle driver.
+	 * <br/>
+	 * After retrieving the value from the ResultSet it is passed to a registered DataConverter.
+	 * <br/>
+	 * The status of this RowData will be reset after the data has been retrieved.
+	 *
+	 * @see #setConverter(workbench.storage.DataConverter)
 	 */
 	public void read(ResultSet rs, ResultInfo info)
 		throws SQLException
@@ -223,7 +258,7 @@ public class RowData
 
 	/**
 	 *	Create a deep copy of this object.
-	 *	The status of the new row will be NOT_MODIFIED
+	 *	The status of the new row will be <tt>NEW</tt>
 	 */
 	public RowData createCopy()
 	{
@@ -251,12 +286,13 @@ public class RowData
 	}
 	
 	/**
-	 *	Sets the new data for the given column.
-	 *	After a call isModified() will return true
-	 *	if the row was not modified before. If the
-	 *	row is new the status will not change.
+	 * Sets the new data for the given column.
+	 * <br>
+	 * After calling setValue(), isModified() will return true.
+	 * <br/>
 	 *
-	 *	@throws IndexOutOfBoundsException
+	 * @throws IndexOutOfBoundsException
+	 * @see #isModified()
 	 */
 	public void setValue(int aColIndex, Object newValue)
 		throws IndexOutOfBoundsException
@@ -391,9 +427,11 @@ public class RowData
 	}
 
 	/**
-	 *	Check if the row has been modified.
-	 *
-	 *	@return true if the row has been modified since retrieval
+	 * Check if the row has been modified.
+	 * <br/>
+	 * A row can be modified <b>and</b> new!
+	 * 
+	 * @return true if the row has been modified since retrieval
 	 *
 	 */
 	public boolean isModified()
@@ -402,10 +440,12 @@ public class RowData
 	}
 
 	/**
-	 *	Check if the row has been added to the DataStore
-	 *	after the initial retrieve.
+	 * Check if the row has been added to the DataStore
+	 * after the initial retrieve.
 	 *
-	 *	@return true if it's a new row
+	 * A row can be modified <b>and</b> new!
+	 *
+	 * @return true if it's a new row
 	 */
 	public boolean isNew()
 	{
