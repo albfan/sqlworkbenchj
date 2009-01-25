@@ -232,6 +232,7 @@ public class JdbcIndexReader
 			idxData.setValue(row, COLUMN_IDX_TABLE_INDEXLIST_TYPE, idx.getIndexType());
 		}
 		idxData.sortByColumn(0, true);
+		idxData.resetStatus();
 		return idxData;
 	}
 

@@ -112,6 +112,7 @@ public class TableColumnsDatastore
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_REMARKS, col.getComment());
 			}
 		}
+		this.resetStatus();
 	}
 
 	/**

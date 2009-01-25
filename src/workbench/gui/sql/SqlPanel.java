@@ -841,6 +841,7 @@ public class SqlPanel
 	public boolean isModified()
 	{
 		if (isDataModified()) return true;
+		if (!editor.hasFileLoaded()) return false;
 		return editor.isModified();
 	}
 

@@ -115,6 +115,7 @@ public class TriggerReader
 				value = rs.getString(3);
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, value);
 			}
+			result.resetStatus();
 		}
 		finally
 		{

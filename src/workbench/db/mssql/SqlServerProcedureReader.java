@@ -144,6 +144,7 @@ public class SqlServerProcedureReader
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
 			}
+			ds.resetStatus();
 		}
 		catch (SQLException e)
 		{

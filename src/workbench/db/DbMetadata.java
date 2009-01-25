@@ -42,6 +42,7 @@ import workbench.db.oracle.OracleMetadata;
 import workbench.db.oracle.OracleSynonymReader;
 import workbench.db.postgres.PostgresDDLFilter;
 import workbench.db.postgres.PostgresSequenceReader;
+import workbench.storage.SortDefinition;
 import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -1094,10 +1095,11 @@ public class DbMetadata
 		boolean sequencesReturned = false;
 		boolean checkOracleSnapshots = (isOracle && Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && typeIncluded("TABLE", types));
 		boolean synRetrieved = false;
+		boolean synonymsRequested = typeIncluded("SYNONYM", types);
 		
 		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".exclude.synonyms", null);
 		Pattern synPattern = null;
-		if (typeIncluded("SYNONYM", types) && excludeSynsRegex != null)
+		if (synonymsRequested && excludeSynsRegex != null)
 		{
 			try
 			{
@@ -1124,16 +1126,6 @@ public class DbMetadata
 				excludeTablePattern = null;
 			}
 			LogMgr.logInfo("DbMetadata.getTables()", "Excluding tables that match the following regex: " + excludeTablesRegex);
-		}
-
-		if (isPostgres && types == null)
-		{
-			// The current PG drivers to not adhere to the JDBC javadocs
-			// and return nothing when passing null for the types
-			// so we retrieve all possible types, and pass them 
-			// as this is the meaning of "null" for the types parameter
-			Collection<String> typeList = this.getTableTypes();
-			types = StringUtil.toArray(typeList);
 		}
 		
 		Set snapshotList = Collections.EMPTY_SET;
@@ -1162,10 +1154,9 @@ public class DbMetadata
 				String ttype = tableRs.getString(4);
 				if (name == null) continue;
 
-				// filter out "internal" synonyms for Oracle
+				// filter out synonyms as defined by the user setting
 				if (synPattern != null)
 				{
-					//if (name.indexOf('/') > -1) continue;
 					Matcher m = synPattern.matcher(name);
 					if (m.matches()) continue;
 				}
@@ -1232,7 +1223,7 @@ public class DbMetadata
 		}
 
 		boolean retrieveSyns = (this.synonymReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
-		if (retrieveSyns && !synRetrieved && typeIncluded("SYNONYM", types) )
+		if (retrieveSyns && !synRetrieved && synonymsRequested)
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
 			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection, aSchema);
@@ -1246,7 +1237,13 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
 			}
+			SortDefinition def = new SortDefinition();
+			def.addSortColumn(COLUMN_IDX_TABLE_LIST_TYPE, true);
+			def.addSortColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
+			def.addSortColumn(COLUMN_IDX_TABLE_LIST_NAME, true);
+			result.sort(def);
 		}
+		result.resetStatus();
 		return result;
 	}
 
@@ -1976,6 +1973,7 @@ public class DbMetadata
 				result.reset();
 			}
 		}
+		result.resetStatus();
 		
 		return result;
 	}
@@ -2122,6 +2120,7 @@ public class DbMetadata
 				ds.setValue(row, 12, rs.getString(13));
 				ds.setValue(row, 13, Integer.valueOf(rs.getInt(14)));
 			}
+			ds.resetStatus();
 		}
 		finally
 		{
@@ -2260,6 +2259,7 @@ public class DbMetadata
 					ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, Integer.valueOf(deferrableCode));
 				}
 			}
+			ds.resetStatus();
 		}
 		catch (Exception e)
 		{

@@ -123,6 +123,7 @@ public class JdbcProcedureReader
 			ResultSet rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, name);
 			DataStore ds = fillProcedureListDataStore(rs);
 			this.connection.releaseSavepoint(sp);
+			ds.resetStatus();
 			return ds;
 		}
 		catch (SQLException sql)
@@ -196,6 +197,7 @@ public class JdbcProcedureReader
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
 			}
+			ds.resetStatus();
 		}
 		catch (Exception e)
 		{
