@@ -5,6 +5,8 @@ Enh: (102.11) The display strategy for the tabs in the main window can now
      options)
 Enh: (102.11) Individual SQL panels can now be locked to prevent accidental
      closing of the panel.
+Enh: (102.11) A new option to close all other tabs has been added to the 
+     popup menu of the tabs.
 Enh: (102.11) Comment lines in workbench.settings where the very first character
      is a # are now preserved if immediately followed by a property line. 
      A comment line that is followed by an empty line will still 
