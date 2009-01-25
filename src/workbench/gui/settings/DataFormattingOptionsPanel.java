@@ -221,7 +221,8 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
     add(dateFormatLabel, gridBagConstraints);
 
-    dateFormatTextField.setColumns(22);
+    dateFormatTextField.setColumns(16);
+    dateFormatTextField.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
@@ -239,6 +240,7 @@ public class DataFormattingOptionsPanel
     add(decimalLabel, gridBagConstraints);
 
     decimalField.setColumns(5);
+    decimalField.setMinimumSize(new java.awt.Dimension(20, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
@@ -257,6 +259,7 @@ public class DataFormattingOptionsPanel
     add(maxDigitsLabel, gridBagConstraints);
 
     maxDigitsField.setColumns(8);
+    maxDigitsField.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 3;
@@ -273,7 +276,8 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.insets = new java.awt.Insets(4, 12, 0, 0);
     add(timestampFormatLabel, gridBagConstraints);
 
-    timestampFormatTextField.setColumns(22);
+    timestampFormatTextField.setColumns(16);
+    timestampFormatTextField.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
@@ -291,6 +295,7 @@ public class DataFormattingOptionsPanel
     add(timeFormatLabel, gridBagConstraints);
 
     timeFormat.setColumns(8);
+    timeFormat.setMinimumSize(new java.awt.Dimension(50, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 2;
