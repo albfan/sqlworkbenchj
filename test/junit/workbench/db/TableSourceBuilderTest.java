@@ -13,6 +13,7 @@ package workbench.db;
 
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.resource.Settings;
 
 /**
  *
@@ -41,9 +42,39 @@ public class TableSourceBuilderTest
 			TableSourceBuilder builder = new TableSourceBuilder(con);
 			TableIdentifier tbl = new TableIdentifier("PERSON");
 			String sql = builder.getTableSource(tbl, false, false);
-			System.out.println(sql);
+//			System.out.println(sql);
 			assertTrue(sql.startsWith("CREATE TABLE PERSON"));
 			assertTrue(sql.indexOf("PRIMARY KEY (ID)") > -1);
+
+			String dbid = con.getMetadata().getDbId();
+			Settings.getInstance().setProperty("workbench.db." + dbid + ".defaultbeforenull", true);
+			Settings.getInstance().setProperty("workbench.db.nonullkeyword", "");
+
+			builder = new TableSourceBuilder(con);
+			sql = builder.getTableSource(tbl, false, false);
+//			System.out.println(sql);
+			assertTrue(sql.indexOf("FIRSTNAME VARCHAR(20)  NULL") > -1);
+
+			TestUtil.executeScript(con,
+				"ALTER TABLE person ALTER COLUMN firstname SET DEFAULT 'Arthur';" +
+				"COMMIT;\n");
+
+			builder = new TableSourceBuilder(con);
+			sql = builder.getTableSource(tbl, false, false);
+//			System.out.println(sql);
+			assertTrue(sql.indexOf("DEFAULT 'Arthur' NULL") > -1);
+			Settings.getInstance().setProperty("workbench.db." + dbid + ".defaultbeforenull", false);
+
+			builder = new TableSourceBuilder(con);
+			sql = builder.getTableSource(tbl, false, false);
+//			System.out.println(sql);
+			assertTrue(sql.indexOf("NULL DEFAULT 'Arthur'") > -1);
+
+			Settings.getInstance().setProperty("workbench.db.nonullkeyword", dbid);
+			builder = new TableSourceBuilder(con);
+			sql = builder.getTableSource(tbl, false, false);
+//			System.out.println(sql);
+			assertTrue(sql.indexOf("FIRSTNAME VARCHAR(20)  DEFAULT 'Arthur'") > -1);
 		}
 		finally
 		{
