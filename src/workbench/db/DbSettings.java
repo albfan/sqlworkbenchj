@@ -249,7 +249,7 @@ public class DbSettings
 
 	public boolean getDefaultBeforeNull()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db.defaultbeforenull." + this.getDbId(), false);
+		return Settings.getInstance().getBoolProperty(prefix + "defaultbeforenull", false);
 	}
 
 	public String getCascadeConstraintsVerb(String aType)
