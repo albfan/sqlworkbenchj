@@ -32,7 +32,7 @@ import workbench.util.VersionNumber;
 public class ResourceMgr
 {
 	public static final String TXT_PRODUCT_NAME = "SQL Workbench/J";
-	
+
 	public static final String TXT_OK = "LblOK";
 	public static final String TXT_CANCEL = "LblCancel";
 
@@ -45,13 +45,13 @@ public class ResourceMgr
 	public static final String MNU_TXT_EDIT = "MnuTxtEdit";
 	public static final String MNU_TXT_DATA = "MnuTxtData";
 	public static final String MNU_TXT_COPY_SELECTED = "MnuTxtCopySelected";
-		
+
 	public static final String MNU_TXT_VIEW = "MnuTxtView";
 	public static final String MNU_TXT_TOOLS = "MnuTxtTools";
 	public static final String MNU_TXT_HELP = "MnuTxtHelp";
 	public static final String MNU_TXT_OPTIONS = "MnuTxtOptions";
 	private static ResourceBundle resources;
-	
+
 	private ResourceMgr()
 	{
 	}
@@ -64,10 +64,10 @@ public class ResourceMgr
 	public static String replaceModifierText(String msg)
 	{
 		msg = StringUtil.replace(msg, "%shift%", KeyEvent.getKeyModifiersText(KeyEvent.SHIFT_MASK));
-		msg = StringUtil.replace(msg, "%control%", KeyEvent.getKeyModifiersText(KeyEvent.CTRL_MASK));
+		msg = StringUtil.replace(msg, "%control%", KeyEvent.getKeyModifiersText(PlatformShortcuts.getDefaultModifier()));
 		return msg;
 	}
-	
+
 	public static java.util.Date getBuildDate()
 	{
 		String builddate = getString("TxtBuildDate");
@@ -99,22 +99,22 @@ public class ResourceMgr
 		String nr = getString("TxtBuildNumber");
 		return new VersionNumber(nr);
 	}
-	
+
 	public static String getDefaultTabLabel()
 	{
 		return getString("LblTabStatement");
 	}
-	
+
 	public static String getFormattedString(String key, Object ... values)
 	{
 		return MessageFormat.format(getString(key), values);
 	}
-	
+
 	public static String getString(String aKey)
 	{
 		return getString(aKey, false);
 	}
-	
+
 	public static String getString(String aKey, boolean replaceModifiers)
 	{
 		try
@@ -132,10 +132,10 @@ public class ResourceMgr
 			return aKey;
 		}
 	}
-	
+
 	/**
-	 * Returns the resource string for the given key with 
-	 * all occurances of &amp; removed. 
+	 * Returns the resource string for the given key with
+	 * all occurances of &amp; removed.
 	 * @param aKey
 	 */
 	public static String getPlainString(String aKey)
@@ -150,13 +150,13 @@ public class ResourceMgr
 	 * passed key.
 	 *
 	 * @param aKey
-	 * @see #getString(java.lang.String) 
+	 * @see #getString(java.lang.String)
 	 */
 	public static String getDescription(String aKey)
 	{
 		return getDescription(aKey, false);
 	}
-	
+
 	/**
 	 *    Returns the description associcate with the given key.
 	 *    This is used for Tooltips which are associated with a
@@ -210,7 +210,7 @@ public class ResourceMgr
 	{
 		return retrieveImage(aName, ".gif");
 	}
-	
+
 	/**
 	 * Retrieves a PNG image with no size specified
 	 */

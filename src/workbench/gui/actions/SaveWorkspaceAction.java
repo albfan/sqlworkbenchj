@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -31,7 +32,7 @@ public class SaveWorkspaceAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtSaveWorkspace",KeyStroke.getKeyStroke(KeyEvent.VK_S, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtSaveWorkspace",KeyStroke.getKeyStroke(KeyEvent.VK_S, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		this.setIcon(null);
 	}

@@ -20,6 +20,7 @@ import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
 import workbench.interfaces.ToolWindow;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.Settings;
 
 /**
@@ -33,7 +34,7 @@ public class ShowDbExplorerAction
 	{
 		super();
 		mainWin = aWindow;
-		this.initMenuDefinition("MnuTxtShowDbExplorer",KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtShowDbExplorer",KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier()));
 		this.setIcon("Database");
 		setEnabled(false);
 	}

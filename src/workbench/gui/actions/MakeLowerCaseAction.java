@@ -18,6 +18,7 @@ import javax.swing.KeyStroke;
 
 import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.TextSelectionListener;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -25,7 +26,8 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.sql.EditorPanel#toLowerCase()
  *	@author  support@sql-workbench.net
  */
-public class MakeLowerCaseAction extends WbAction
+public class MakeLowerCaseAction
+	extends WbAction
 	implements TextSelectionListener
 {
 	private EditorPanel client;
@@ -35,7 +37,7 @@ public class MakeLowerCaseAction extends WbAction
 		super();
 		this.client = aClient;
 		this.client.addSelectionListener(this);
-		this.initMenuDefinition("MnuTxtMakeLowerCase", KeyStroke.getKeyStroke(KeyEvent.VK_L,KeyEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtMakeLowerCase", KeyStroke.getKeyStroke(KeyEvent.VK_L, PlatformShortcuts.getDefaultModifier()));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setEnabled(false);
 	}

@@ -12,12 +12,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.TextFileContainer;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -32,7 +32,7 @@ public class FileOpenAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier()));
 		this.setIcon("Open");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		setCreateMenuSeparator(true);

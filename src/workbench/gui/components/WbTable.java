@@ -105,6 +105,7 @@ import workbench.interfaces.ListSelectionControl;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -755,10 +756,11 @@ public class WbTable
 
 		try
 		{
+			int ctrl = PlatformShortcuts.getDefaultModifier();
 			// Don't start when non-printing keys are typed.
 			// Keystrokes like Alt-F4 should not automatically start editing mode
 			int code = e.getModifiers();
-			boolean modifierKeyPressed = ((code & KeyEvent.ALT_MASK) == KeyEvent.ALT_MASK || (code & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK);
+			boolean modifierKeyPressed = ((code & KeyEvent.ALT_MASK) == KeyEvent.ALT_MASK || (code & ctrl) == ctrl);
 			if (modifierKeyPressed)
 			{
 				// temporarily disable auto-editing
@@ -1000,7 +1002,7 @@ public class WbTable
 	{
 		return lastFilter;
 	}
-	
+
 	public boolean isFiltered()
 	{
 		return (currentFilter != null);
@@ -1204,7 +1206,7 @@ public class WbTable
 			}
 		}
 	}
-	
+
 	public void sortingFinished()
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
@@ -1423,7 +1425,7 @@ public class WbTable
 			}
 		}
 	}
-	
+
 	private boolean isMultiLineColumn(int col)
 	{
 		if (this.dwModel == null) return false;

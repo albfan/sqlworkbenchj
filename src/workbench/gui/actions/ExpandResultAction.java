@@ -12,10 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.KeyStroke;
 import workbench.gui.sql.SplitPaneExpander;
 
 import workbench.resource.ResourceMgr;
@@ -32,7 +29,7 @@ public class ExpandResultAction extends WbAction
 	{
 		super();
 		this.client = expander;
-		this.initMenuDefinition("MnuTxtExpandResult", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtExpandResult");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
 	}

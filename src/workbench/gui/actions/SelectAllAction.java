@@ -12,12 +12,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.ClipboardSupport;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -33,7 +33,7 @@ public class SelectAllAction extends WbAction
 		this.client = aClient;
 		this.setMenuTextByKey("MnuTxtSelectAll");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, InputEvent.CTRL_MASK));
+		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A, PlatformShortcuts.getDefaultModifier()));
 	}
 
 	public void executeAction(ActionEvent e)

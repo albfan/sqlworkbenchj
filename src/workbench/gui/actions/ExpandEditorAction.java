@@ -17,11 +17,12 @@ import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 import workbench.gui.sql.SplitPaneExpander;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
  * Expand the editor in a SqlPanel to the full window size.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class ExpandEditorAction extends WbAction
@@ -32,7 +33,7 @@ public class ExpandEditorAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtExpandEditor", KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtExpandEditor", KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
 	}

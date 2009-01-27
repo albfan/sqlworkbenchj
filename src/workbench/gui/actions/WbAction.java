@@ -32,6 +32,7 @@ import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.components.WbToolbarButton;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.ShortcutManager;
 
@@ -102,7 +103,8 @@ public class WbAction
 
 	public static boolean isCtrlPressed(ActionEvent e)
 	{
-		boolean ctrlPressed = ((e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+		int ctrl = PlatformShortcuts.getDefaultModifier();
+		boolean ctrlPressed = ((e.getModifiers() & ctrl) == ctrl);
 		return ctrlPressed;
 	}
 
@@ -427,7 +429,7 @@ public class WbAction
 
 		if (this.hasCtrlModifier())
 		{
-			im.put(KeyStroke.getKeyStroke(key, modifiers | InputEvent.CTRL_MASK), this.getActionName());
+			im.put(KeyStroke.getKeyStroke(key, modifiers | PlatformShortcuts.getDefaultModifier()), this.getActionName());
 		}
 	}
 
@@ -450,7 +452,7 @@ public class WbAction
 		}
 		if (this.hasCtrlModifier())
 		{
-			im.remove(KeyStroke.getKeyStroke(key, modifiers | InputEvent.CTRL_MASK));
+			im.remove(KeyStroke.getKeyStroke(key, modifiers | PlatformShortcuts.getDefaultModifier()));
 		}
 	}
 

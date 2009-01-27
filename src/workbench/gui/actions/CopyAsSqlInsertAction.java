@@ -19,6 +19,7 @@ import javax.swing.KeyStroke;
 import workbench.gui.components.ClipBoardCopier;
 
 import workbench.gui.components.WbTable;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -34,7 +35,7 @@ public class CopyAsSqlInsertAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCopyAsSqlInsert",KeyStroke.getKeyStroke(KeyEvent.VK_Q, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtCopyAsSqlInsert",KeyStroke.getKeyStroke(KeyEvent.VK_Q, PlatformShortcuts.getDefaultModifier()));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setEnabled(false);
 	}

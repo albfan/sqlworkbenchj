@@ -18,12 +18,13 @@ import workbench.db.WbConnection;
 import workbench.gui.completion.CompletionHandler;
 import workbench.gui.editor.JEditTextArea;
 import workbench.interfaces.StatusBar;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
  * Action to display the code-completion for SQL statements.
  * @see workbench.gui.completion.DefaultCompletionHandler
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class AutoCompletionAction
@@ -32,16 +33,16 @@ public class AutoCompletionAction
 	private CompletionHandler handler;
 	private JEditTextArea editor;
 	private StatusBar status;
-	
+
 	public AutoCompletionAction(JEditTextArea edit, StatusBar bar)
 	{
 		super();
 		this.editor = edit;
 		this.status = bar;
-		this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE,KeyEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtAutoComplete", KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, PlatformShortcuts.getDefaultModifier()));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);
-		
+
 		// we have to register this keybinding with the editor
 		// otherwise Ctrl-Space will not work properly
 		edit.addKeyBinding(this);
@@ -51,7 +52,7 @@ public class AutoCompletionAction
 	{
 		if (handler != null) handler.cancelPopup();
 	}
-	
+
 	public void setConnection(WbConnection conn)
 	{
 		if (conn == null)
@@ -62,7 +63,7 @@ public class AutoCompletionAction
 		{
 			try
 			{
-				// Use reflection to create the instance so 
+				// Use reflection to create the instance so
 				// that the classes are not loaded during startup
 				this.handler = (CompletionHandler)Class.forName("workbench.gui.completion.DefaultCompletionHandler").newInstance();
 			}
@@ -71,17 +72,17 @@ public class AutoCompletionAction
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (conn != null)
 		{
 			this.handler.setStatusBar(status);
 			this.handler.setEditor(editor);
 			this.handler.setConnection(conn);
 		}
-		
+
 		this.setEnabled(conn != null);
 	}
-	
+
 	public void setAccelerator(KeyStroke key)
 	{
 		KeyStroke old = this.getAccelerator();
@@ -89,7 +90,7 @@ public class AutoCompletionAction
 		super.setAccelerator(key);
 		editor.addKeyBinding(this);
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		handler.showCompletionPopup();

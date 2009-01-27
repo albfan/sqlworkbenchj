@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.sql.SqlPanel;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -33,7 +34,7 @@ public class ExecuteAllAction extends WbAction
 	{
 		super();
 		this.client = aPanel;
-		this.initMenuDefinition("MnuTxtExecuteAll", KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtExecuteAll", KeyStroke.getKeyStroke(KeyEvent.VK_E, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setIcon("ExecuteAll");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setEnabled(false);

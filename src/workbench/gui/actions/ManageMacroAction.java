@@ -24,6 +24,7 @@ import workbench.WbManager;
 import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroManagerDialog;
 import workbench.gui.sql.SqlPanel;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -37,7 +38,7 @@ public class ManageMacroAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtManageMacros",KeyStroke.getKeyStroke(KeyEvent.VK_M, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtManageMacros",KeyStroke.getKeyStroke(KeyEvent.VK_M, PlatformShortcuts.getDefaultModifier()));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setIcon(null);
 	}

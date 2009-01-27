@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.swing.KeyStroke;
+import workbench.resource.PlatformShortcuts;
 
 /**
  * The default input handler. It maps sequences of keystrokes into actions
@@ -323,11 +324,11 @@ public class DefaultInputHandler
 					modifiers |= InputEvent.ALT_MASK;
 					break;
 				case 'C':
-					modifiers |= InputEvent.CTRL_MASK;
+					modifiers |= PlatformShortcuts.getDefaultModifier();
 					break;
-				case 'M':
-					modifiers |= InputEvent.META_MASK;
-					break;
+//				case 'M':
+//					modifiers |= InputEvent.META_MASK;
+//					break;
 				case 'S':
 					modifiers |= InputEvent.SHIFT_MASK;
 					break;

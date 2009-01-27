@@ -29,6 +29,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.table.TableCellEditor;
 import workbench.gui.WbSwingUtilities;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -63,19 +64,19 @@ public class WbCellEditor
 	protected void setDefaultCopyPasteKeys(JComponent edit)
 	{
 		InputMap im = edit.getInputMap();
-		KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK);
-		KeyStroke ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.CTRL_MASK);
+		KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, PlatformShortcuts.getDefaultModifier());
+		KeyStroke ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, PlatformShortcuts.getDefaultModifier());
 
 		Object cmd = im.get(ks);
 		im.put(ksnew, cmd);
 
-		ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, InputEvent.CTRL_MASK);
+		ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, PlatformShortcuts.getDefaultModifier());
 		ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.SHIFT_MASK);
 
 		cmd = im.get(ks);
 		im.put(ksnew, cmd);
 
-		ks = KeyStroke.getKeyStroke(KeyEvent.VK_X, InputEvent.CTRL_MASK);
+		ks = KeyStroke.getKeyStroke(KeyEvent.VK_X, PlatformShortcuts.getDefaultModifier());
 		ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_MASK);
 
 		cmd = im.get(ks);

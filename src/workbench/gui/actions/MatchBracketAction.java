@@ -17,6 +17,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.sql.EditorPanel;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -30,7 +31,7 @@ public class MatchBracketAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtMatchBracket", KeyStroke.getKeyStroke(KeyEvent.VK_B,KeyEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtMatchBracket", KeyStroke.getKeyStroke(KeyEvent.VK_B, PlatformShortcuts.getDefaultModifier()));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		this.setEnabled(true);
 	}

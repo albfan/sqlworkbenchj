@@ -16,6 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.interfaces.Replaceable;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -31,7 +32,7 @@ public class ReplaceDataAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtReplaceInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtReplaceInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_H, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(false);
 	}

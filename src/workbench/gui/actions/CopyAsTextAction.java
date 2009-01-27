@@ -19,6 +19,7 @@ import javax.swing.KeyStroke;
 import workbench.gui.components.ClipBoardCopier;
 import workbench.gui.components.WbTable;
 
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -37,7 +38,7 @@ public class CopyAsTextAction
 		super();
 		this.client = aClient;
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
-		this.initMenuDefinition("MnuTxtDataToClipboard", KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtDataToClipboard", KeyStroke.getKeyStroke(KeyEvent.VK_Y, PlatformShortcuts.getDefaultModifier()));
 		copySelected = false;
 		this.setEnabled(false);
 	}

@@ -12,12 +12,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.FormattableSql;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -33,7 +33,7 @@ public class FormatSqlAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtReformatSql",KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtReformatSql",KeyStroke.getKeyStroke(KeyEvent.VK_R, PlatformShortcuts.getDefaultModifier()));
 		this.setIcon("format");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateToolbarSeparator(true);

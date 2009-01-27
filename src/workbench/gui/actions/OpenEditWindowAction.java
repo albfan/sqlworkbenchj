@@ -16,6 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.gui.components.WbTextCellEditor;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -30,7 +31,7 @@ public class OpenEditWindowAction
 	{
 		super();
 		this.editor = ed;
-		this.setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, InputEvent.CTRL_MASK));
+		this.setDefaultAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E, PlatformShortcuts.getDefaultModifier()));
 		this.setIcon(null);
 	}
 

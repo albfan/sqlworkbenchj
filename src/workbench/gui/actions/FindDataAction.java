@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Searchable;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -33,7 +34,7 @@ public class FindDataAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFindInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtFindInTableData", KeyStroke.getKeyStroke(KeyEvent.VK_F, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setIcon("Find");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setCreateToolbarSeparator(true);

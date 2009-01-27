@@ -19,11 +19,12 @@ import javax.swing.KeyStroke;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.gui.sql.ResultCloser;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
  * An action to close the currently selected result tab of a SqlPanel.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class CloseResultTabAction
@@ -32,19 +33,19 @@ public class CloseResultTabAction
 {
 	private JTabbedPane resultTab;
 	private ResultCloser client;
-	
+
 	public CloseResultTabAction(JTabbedPane tabPane, ResultCloser closer)
 	{
 		super();
 		this.resultTab = tabPane;
 		client = closer;
-		this.initMenuDefinition("MnuTxtCloseResultTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK ));
+		this.initMenuDefinition("MnuTxtCloseResultTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK ));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setIcon(null);
 		this.resultTab.addChangeListener(this);
 		checkEnabled();
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		client.closeCurrentResult();
@@ -60,5 +61,5 @@ public class CloseResultTabAction
 	{
 		checkEnabled();
 	}
-	
+
 }

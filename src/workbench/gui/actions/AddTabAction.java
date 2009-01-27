@@ -12,12 +12,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -38,7 +38,7 @@ public class AddTabAction
 		super();
 		this.client = aClient;
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
-		this.initMenuDefinition("MnuTxtAddTab", KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtAddTab", KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier()));
 		this.setIcon(null);
 	}
 

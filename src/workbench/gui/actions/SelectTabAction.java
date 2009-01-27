@@ -12,13 +12,13 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
 import workbench.log.LogMgr;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -42,31 +42,31 @@ public class SelectTabAction extends WbAction
 		switch (this.index)
 		{
 			case 0:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 1:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 2:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_3, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 3:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_4, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 4:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_5, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 5:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_6, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 6:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_7, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_7, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 7:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_8, PlatformShortcuts.getDefaultModifier()));
 				break;
 			case 8:
-				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9, InputEvent.CTRL_MASK));
+				this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_9, PlatformShortcuts.getDefaultModifier()));
 				break;
 			default:
 				this.setAccelerator(null);

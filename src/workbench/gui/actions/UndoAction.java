@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Undoable;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -31,7 +32,7 @@ public class UndoAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtUndo",KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtUndo",KeyStroke.getKeyStroke(KeyEvent.VK_Z, PlatformShortcuts.getDefaultModifier()));
 		this.setIcon("Undo");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}

@@ -19,15 +19,16 @@ import javax.swing.KeyStroke;
 import workbench.gui.editor.TextCommenter;
 import workbench.gui.sql.EditorPanel;
 
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- * Action to "comment" the currently selected text in the SQL editor. 
+ * Action to "comment" the currently selected text in the SQL editor.
  * This is done by addin single line comments to each line
- * @see workbench.gui.editor.TextCommenter#commentSelection()	
+ * @see workbench.gui.editor.TextCommenter#commentSelection()
  * @author  support@sql-workbench.net
  */
-public class CommentAction 
+public class CommentAction
 	extends WbAction
 {
 	private EditorPanel client;
@@ -36,7 +37,7 @@ public class CommentAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtCommentSelection",KeyStroke.getKeyStroke(KeyEvent.VK_C, InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtCommentSelection",KeyStroke.getKeyStroke(KeyEvent.VK_C, PlatformShortcuts.getDefaultModifier() + InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

@@ -11,6 +11,7 @@
  */
 package workbench.resource;
 
+import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
@@ -24,26 +25,22 @@ public class PlatformShortcuts
 {
 	public static KeyStroke getDefaultCopyShortcut()
 	{
-		return KeyStroke.getKeyStroke(KeyEvent.VK_C, getModifier());
+		return KeyStroke.getKeyStroke(KeyEvent.VK_C, getDefaultModifier());
 	}
 
 	public static KeyStroke getDefaultCutShortcut()
 	{
-		return KeyStroke.getKeyStroke(KeyEvent.VK_X, getModifier());
+		return KeyStroke.getKeyStroke(KeyEvent.VK_X, getDefaultModifier());
 	}
 
 	public static KeyStroke getDefaultPasteShortcut()
 	{
-		return KeyStroke.getKeyStroke(KeyEvent.VK_V, getModifier());
+		return KeyStroke.getKeyStroke(KeyEvent.VK_V, getDefaultModifier());
 	}
 
-	private static int getModifier()
+	public static int getDefaultModifier()
 	{
-		if (MacOSHelper.isMacOS())
-		{
-			return InputEvent.META_MASK;
-		}
-		return InputEvent.CTRL_MASK;
+		return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
 	}
 
 }

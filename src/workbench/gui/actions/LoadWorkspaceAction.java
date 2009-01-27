@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -31,10 +32,10 @@ public class LoadWorkspaceAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtLoadWorkspace", KeyStroke.getKeyStroke(KeyEvent.VK_O, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtLoadWorkspace", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
 		this.setIcon(null);
-		
+
 	}
 
 	public void executeAction(ActionEvent e)

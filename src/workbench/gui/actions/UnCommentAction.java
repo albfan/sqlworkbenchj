@@ -19,12 +19,13 @@ import javax.swing.KeyStroke;
 import workbench.gui.editor.TextCommenter;
 import workbench.gui.sql.EditorPanel;
 
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
  *	@author  support@sql-workbench.net
  */
-public class UnCommentAction 
+public class UnCommentAction
 	extends WbAction
 {
 	private EditorPanel client;
@@ -33,7 +34,7 @@ public class UnCommentAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtUnCommentSelection",KeyStroke.getKeyStroke(KeyEvent.VK_U, InputEvent.CTRL_MASK + InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtUnCommentSelection",KeyStroke.getKeyStroke(KeyEvent.VK_U, PlatformShortcuts.getDefaultModifier() + InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

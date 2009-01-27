@@ -12,12 +12,12 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
 
 import workbench.interfaces.Replaceable;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -32,7 +32,7 @@ public class ReplaceAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtReplace",KeyStroke.getKeyStroke(KeyEvent.VK_H, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtReplace",KeyStroke.getKeyStroke(KeyEvent.VK_H, PlatformShortcuts.getDefaultModifier()));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}
 

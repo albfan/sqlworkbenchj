@@ -20,6 +20,7 @@ import workbench.gui.components.ColumnWidthOptimizer;
 
 import workbench.gui.components.WbTable;
 import workbench.resource.GuiSettings;
+import workbench.resource.PlatformShortcuts;
 import workbench.util.WbThread;
 
 /**
@@ -34,7 +35,7 @@ public class OptimizeAllColumnsAction
 	{
 		super();
 		this.setClient(client);
-		this.initMenuDefinition("MnuTxtOptimizeAllCol",KeyStroke.getKeyStroke(KeyEvent.VK_W, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtOptimizeAllCol",KeyStroke.getKeyStroke(KeyEvent.VK_W, PlatformShortcuts.getDefaultModifier()));
 		this.setEnabled(false);
 	}
 

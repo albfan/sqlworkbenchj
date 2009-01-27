@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.dbobjects.TableListPanel;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *	@author  support@sql-workbench.net
@@ -30,7 +31,7 @@ public class ToggleTableSourceAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtToggleTableSource", KeyStroke.getKeyStroke(KeyEvent.VK_T, InputEvent.CTRL_MASK | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition("MnuTxtToggleTableSource", KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setIcon(null);
 	}
 
