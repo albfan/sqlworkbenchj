@@ -113,6 +113,8 @@ Enh: (102.2) The location of the settings file and the log file are now
      displayed in the Options dialog
 Enh: (102.1) The collation to be used when sorting a result set can now
      be selected in the options panel ("Data Display" page)
+Fix: (102.12) The placement of the NULL and DEFAULT keywords were not 
+     correct in the generated table source in the DbExplorer
 Fix: (102.11) When displaying the source for views or tables in the 
      DbExplorer grants that were made to the current user were
      not displaye (thanks to Marcus for pointing that out)
