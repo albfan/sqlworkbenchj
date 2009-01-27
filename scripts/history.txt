@@ -1,5 +1,10 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 ---------------------
+Enh: (102.12) Removed the need to specify the columns of the source query
+     for WbCopy. If -columns is not specified when using -sourceQuery it
+     is assumed that the names of the query columns match the names of 
+     columns in the target table.
+Enh: (102.12) Closing of editor tabs can now be confirmed (General Options)
 Enh: (102.11) The display strategy for the tabs in the main window can now 
      be changed between scrolling and stacked ("Scroll tabs" in the general
      options)
