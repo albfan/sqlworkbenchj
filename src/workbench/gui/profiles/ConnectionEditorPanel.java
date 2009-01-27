@@ -213,7 +213,9 @@ public class ConnectionEditorPanel
     propLabel = new javax.swing.JLabel();
     infoColorLabel = new javax.swing.JLabel();
     infoColor = new WbColorPicker(true);
+    jPanel4 = new javax.swing.JPanel();
     editConnectionScriptsButton = new FlatButton();
+    scriptLabel = new javax.swing.JLabel();
 
     FormListener formListener = new FormListener();
 
@@ -637,9 +639,18 @@ public class ConnectionEditorPanel
     gridBagConstraints.insets = new java.awt.Insets(2, 4, 0, 0);
     add(infoColor, gridBagConstraints);
 
+    jPanel4.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 0, 0));
+
     editConnectionScriptsButton.setText(ResourceMgr.getString("LblConnScripts")); // NOI18N
     editConnectionScriptsButton.setToolTipText(ResourceMgr.getString("d_LblConnScripts")); // NOI18N
     editConnectionScriptsButton.addActionListener(formListener);
+    jPanel4.add(editConnectionScriptsButton);
+
+    scriptLabel.setMaximumSize(new java.awt.Dimension(16, 16));
+    scriptLabel.setMinimumSize(new java.awt.Dimension(16, 16));
+    scriptLabel.setPreferredSize(new java.awt.Dimension(16, 16));
+    jPanel4.add(scriptLabel);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 17;
@@ -647,7 +658,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 0);
-    add(editConnectionScriptsButton, gridBagConstraints);
+    add(jPanel4, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -733,6 +744,7 @@ public class ConnectionEditorPanel
 	private void editConnectionScriptsButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_editConnectionScriptsButtonActionPerformed
 		Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
 		EditConnectScriptsPanel.editScripts(d, this.getProfile());
+		checkScripts();
 	}//GEN-LAST:event_editConnectionScriptsButtonActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -757,6 +769,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JPanel jPanel1;
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JPanel jPanel3;
+  protected javax.swing.JPanel jPanel4;
   protected javax.swing.JSeparator jSeparator2;
   protected javax.swing.JLabel lblDriver;
   protected javax.swing.JLabel lblPwd;
@@ -767,6 +780,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox rememberExplorerSchema;
   protected javax.swing.JCheckBox removeComments;
   protected javax.swing.JCheckBox rollbackBeforeDisconnect;
+  protected javax.swing.JLabel scriptLabel;
   protected javax.swing.JButton selectWkspButton;
   protected javax.swing.JButton showPassword;
   protected javax.swing.JTextField tfFetchSize;
@@ -906,6 +920,18 @@ public class ConnectionEditorPanel
 		}
 	}
 
+	private void checkScripts()
+	{
+		boolean hasScript = (currentProfile == null ? false : currentProfile.hasConnectScript());
+		if (hasScript)
+		{
+			scriptLabel.setIcon(ResourceMgr.getPicture("tick"));
+		}
+		else
+		{
+			scriptLabel.setIcon(null);
+		}
+	}
 	private void checkExtendedProps()
 	{
 		Properties props = (currentProfile == null ? null : currentProfile.getConnectionProperties());
@@ -948,6 +974,7 @@ public class ConnectionEditorPanel
 			Color c = this.currentProfile.getInfoDisplayColor();
 			this.infoColor.setSelectedColor(c);
 			checkExtendedProps();
+			checkScripts();
 		}
 		catch (Exception e)
 		{

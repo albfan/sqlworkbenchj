@@ -16,7 +16,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
-import java.awt.Rectangle;
+import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -2635,9 +2635,9 @@ public class MainWindow
 	{
 		if (e.getSource() == this.sqlTab)
 		{
-			Rectangle r = sqlTab.getBoundsAt(sqlTab.getTabCount() - 1);
-			int tabRows = sqlTab.getTabRunCount();
-			boolean overTab = tabRows > 1 || r.getX() + r.getWidth() > e.getPoint().getX() && e.getY() < r.height;
+			Point p = e.getPoint();
+			int index = sqlTab.indexAtLocation(p.x, p.y);
+			boolean overTab = index > -1; //tabRows > 1 || r.getX() + r.getWidth() > e.getPoint().getX() && e.getY() < r.height;
 			if (e.getButton() == MouseEvent.BUTTON3 && overTab)
 			{
 				SqlTabPopup pop = new SqlTabPopup(this);

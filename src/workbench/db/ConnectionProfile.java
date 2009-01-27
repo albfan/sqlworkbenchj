@@ -771,10 +771,18 @@ public class ConnectionProfile
 		}
 	}
 
+	public boolean hasConnectScript()
+	{
+		return StringUtil.isNonBlank(postConnectScript) ||
+			StringUtil.isNonBlank(preDisconnectScript) ||
+			(StringUtil.isNonBlank(idleScript) && idleTime > 0);
+	}
+	
 	public String getPostConnectScript()
 	{
 		return postConnectScript;
 	}
+
 
 	public void setPostConnectScript(String script)
 	{
