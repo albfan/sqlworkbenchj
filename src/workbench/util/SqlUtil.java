@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -337,9 +338,14 @@ public class SqlUtil
 		ResultSet rs = null;
 		Statement stmt = null;
 		final ResultInfo result;
+		Savepoint sp = null;
 
 		try
 		{
+			if (conn.getDbSettings().useSavePointForDML())
+			{
+				sp = conn.setSavepoint();
+			}
 			stmt = conn.createStatementForQuery();
 			stmt.setMaxRows(1);
 			rs = stmt.executeQuery(sql);
@@ -352,6 +358,12 @@ public class SqlUtil
 				TableIdentifier tbl = new TableIdentifier(table);
 				result.setUpdateTable(tbl);
 			}
+			conn.releaseSavepoint(sp);
+		}
+		catch (SQLException e)
+		{
+			conn.rollback(sp);
+			throw e;
 		}
 		finally
 		{
