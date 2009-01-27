@@ -90,49 +90,16 @@ public class TableCopy
 		else
 		{
 			ColumnIdentifier[] cols = this.parseColumns(cmdLine);
-			if (cols == null) return false;
-
-			// The ColumnIdentifiers passed to the copier should contain the proper
-			// datatype information.
-			List<ColumnIdentifier> targetCols = null;
-			List<ColumnIdentifier> queryCols = new ArrayList<ColumnIdentifier>();
-			if (!createTable)
+			if (cols == null)
 			{
-				// for an existing table, we have to find the real column definition
-				targetCols = targetConnection.getMetadata().getTableColumns(targetId);
-				for (ColumnIdentifier col : cols)
+				List<ColumnIdentifier> queryCols = SqlUtil.getResultSetColumns(sourcequery, sourceConnection);
+				cols = new ColumnIdentifier[queryCols.size()];
+				for (int i=0; i < queryCols.size(); i++)
 				{
-					int index = targetCols.indexOf(col);
-					if (index > -1)
-					{
-						queryCols.add(col);
-					}
+					cols[i] = queryCols.get(i);
 				}
 			}
-			else
-			{
-				// if the table should be created, the column definition that is returned
-				// from the source is used. The number of columns specified must
-				// match the number of columns in the select
-				targetCols = SqlUtil.getResultSetColumns(sourcequery, sourceConnection);
-				if (targetCols.size() != cols.length)
-				{
-					copier.addError(ResourceMgr.getString("MsgCopyErrWrongColCount"));
-					return false;
-				}
-				queryCols.addAll(targetCols);
-				for (int i=0; i < cols.length; i++)
-				{
-					queryCols.get(i).setColumnName(cols[i].getColumnName());
-				}
-			}
-			
-			ColumnIdentifier[] realCols = new ColumnIdentifier[queryCols.size()];
-			for (int i=0; i < queryCols.size(); i++)
-			{
-				realCols[i] = queryCols.get(i);
-			}
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, realCols, createTable, dropTable);
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable);
 		}
 
 		boolean doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
@@ -165,6 +132,8 @@ public class TableCopy
 	{
 		// First read the defined columns from the passed parameter
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
+		if (StringUtil.isBlank(cols)) return null;
+		
 		List<String> l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
 		ColumnIdentifier[] result = new ColumnIdentifier[count];

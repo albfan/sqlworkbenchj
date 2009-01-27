@@ -270,10 +270,6 @@ public class DataCopier
 														boolean dropTarget)
 		throws SQLException
 	{
-		if (queryColumns == null || queryColumns.length == 0)
-		{
-			throw new IllegalArgumentException("Source and target column identifiers must be specified when using a SQL query!");
-		}
 		this.sourceConnection = source;
 		this.targetConnection = target;
 		this.importer.setConnection(target);

@@ -409,6 +409,70 @@ public class WbCopyTest
 		}
 	}
 
+	public void testQueryCopyNoColumns()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyTest_testExecute");
+			util.prepareEnvironment();
+
+			WbConnection con = util.getConnection("queryCopyTest");
+
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+
+			TestUtil.executeScript(con,
+			"create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50));\n" +
+			"insert into source_data (nr, lastname, firstname) values (1,'Dent', 'Arthur');\n" +
+			"insert into source_data (nr, lastname, firstname) values (2,'Beeblebrox', 'Zaphod');\n" +
+			"insert into source_data (nr, lastname, firstname) values (3,'Moviestar', 'Mary');\n" +
+			"insert into source_data (nr, lastname, firstname) values (4,'Perfect', 'Ford');\n" +
+			"create table target_data (tnr integer not null primary key, tlastname varchar(50), tfirstname varchar(50));\n" +
+			"commit;\n");
+
+
+			String sql =
+				"wbcopy -sourceQuery='select firstname as tfirstname, nr as tnr, lastname as tlastname from source_data' " +
+				"-targetTable=target_data";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals("Copy not successful", true, result.isSuccess());
+
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Incorrect number of rows copied", 4, count);
+			}
+			SqlUtil.closeResult(rs);
+
+			rs = stmt.executeQuery("select tfirstname, tlastname from target_data where tnr = 1");
+			if (rs.next())
+			{
+				String s = rs.getString(1);
+				assertEquals("Incorrect firstname", "Arthur", s);
+				s = rs.getString(2);
+				assertEquals("Incorrect firstname", "Dent", s);
+			}
+			else
+			{
+				fail("Nothing copied");
+			}
+			SqlUtil.closeResult(rs);
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 	public void testQueryCopyNoPK()
 	{
 		try
