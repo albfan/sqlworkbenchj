@@ -15,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeListener;
 import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.resource.ResourceMgr;
@@ -90,5 +91,15 @@ public class ResultTabHandler
 	{
 		int index = this.resultTab.getSelectedIndex();
 		return resultTab.getTitleAt(index);
+	}
+
+	public boolean canRenameTab()
+	{
+		return true;
+	}
+
+	public void addTabChangeListener(ChangeListener l)
+	{
+		this.resultTab.addChangeListener(l);
 	}
 }

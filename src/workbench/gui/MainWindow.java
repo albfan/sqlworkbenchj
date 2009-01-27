@@ -107,6 +107,7 @@ import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
+import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
@@ -273,7 +274,7 @@ public class MainWindow
 	 * to highlight the current tab the context menu
 	 * @see workbench.gui.dbobjects.TableListPanel#stateChanged(ChangeEvent)
 	 */
-	public void addIndexChangeListener(ChangeListener aListener)
+	public void addTabChangeListener(ChangeListener aListener)
 	{
 		this.sqlTab.addChangeListener(aListener);
 	}
@@ -500,6 +501,7 @@ public class MainWindow
 
 		RemoveTabAction rem = new RemoveTabAction(this);
 		menu.add(rem);
+		menu.add(new RenameTabAction(this));
 		menu.addSeparator();
 		ViewLineNumbers v = new ViewLineNumbers();
 		v.addToMenu(menu);
@@ -2441,7 +2443,13 @@ public class MainWindow
 
 	public void removeTab()
 	{
+		boolean confirm = GuiSettings.getConfirmTabClose();
 		int index = this.sqlTab.getSelectedIndex();
+		if (confirm)
+		{
+			boolean doClose = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgConfirmCloseTab"));
+			if (!doClose) return;
+		}
 		this.closeTab(index);
 	}
 
@@ -2545,7 +2553,7 @@ public class MainWindow
 	 * triggered as well. This disconnect will be started in a
 	 * background thread.
 	 */
-	public void closeTab(int index)
+	protected void closeTab(int index)
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;

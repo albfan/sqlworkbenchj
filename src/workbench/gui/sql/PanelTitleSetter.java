@@ -11,7 +11,11 @@
 
 package workbench.gui.sql;
 
+import java.awt.Container;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.resource.GuiSettings;
 import workbench.util.NumberStringCache;
@@ -22,6 +26,25 @@ import workbench.util.NumberStringCache;
  */
 public class PanelTitleSetter
 {
+	public static void updateTitle(MainPanel client)
+	{
+		JPanel p = (JPanel)client;
+		Container parent = p.getParent();
+		if (parent instanceof JTabbedPane)
+		{
+			JTabbedPane tab = (JTabbedPane)parent;
+			int index = tab.indexOfComponent(p);
+			client.setTabTitle(tab, index);
+
+			ChangeListener[] listener = tab.getListeners(ChangeListener.class);
+			ChangeEvent evt = new ChangeEvent(tab);
+			for (ChangeListener l : listener)
+			{
+				l.stateChanged(evt);
+			}
+		}
+	}
+	
 	public static void setTabTitle(final JTabbedPane tab, MainPanel panel, int index, String plainTitle)
 	{
 		String title = plainTitle;

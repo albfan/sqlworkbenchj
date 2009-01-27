@@ -51,7 +51,7 @@ public class EditorTabSelectMenu
 		{
 			updateMenu();
 			parentWindow.addFilenameChangeListener(this);
-			parentWindow.addIndexChangeListener(this);
+			parentWindow.addTabChangeListener(this);
 		}
 	}
 	

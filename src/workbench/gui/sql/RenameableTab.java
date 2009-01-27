@@ -11,6 +11,8 @@
  */
 package workbench.gui.sql;
 
+import javax.swing.event.ChangeListener;
+
 /**
  *
  * @author support@sql-workbench.net
@@ -19,4 +21,6 @@ public interface RenameableTab
 {
 	void setCurrentTabTitle(String newName);
 	String getCurrentTabTitle();
+	boolean canRenameTab();
+	void addTabChangeListener(ChangeListener listener);
 }

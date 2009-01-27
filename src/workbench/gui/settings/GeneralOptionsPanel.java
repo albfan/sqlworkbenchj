@@ -123,6 +123,7 @@ public class GeneralOptionsPanel
 		singlePageHelp.setSelected(Settings.getInstance().useSinglePageHelp());
 		int tabPolicy = Settings.getInstance().getIntProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
 		scrollTabs.setSelected(tabPolicy == JTabbedPane.SCROLL_TAB_LAYOUT);
+		confirmTabClose.setSelected(GuiSettings.getConfirmTabClose());
 	}
 
 	public void saveSettings()
@@ -132,6 +133,7 @@ public class GeneralOptionsPanel
 		// General settings
 		set.setStandardFont(standardFont.getSelectedFont());
 		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
+		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		set.setMsgLogFont(msgLogFont.getSelectedFont());
 		GuiSettings.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
@@ -223,6 +225,7 @@ public class GeneralOptionsPanel
     autoConnect = new JCheckBox();
     singlePageHelp = new JCheckBox();
     scrollTabs = new JCheckBox();
+    confirmTabClose = new JCheckBox();
     settingsfilename = new WbLabelField();
     jPanel1 = new JPanel();
     jLabel2 = new JLabel();
@@ -405,11 +408,11 @@ public class GeneralOptionsPanel
     consolidateLog.setHorizontalTextPosition(SwingConstants.RIGHT);
     consolidateLog.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 0, 1, 0);
+    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
     jPanel2.add(consolidateLog, gridBagConstraints);
 
     showTabIndex.setSelected(GuiSettings.getShowTabIndex());
@@ -490,6 +493,16 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 16, 1, 0);
     jPanel2.add(scrollTabs, gridBagConstraints);
+
+    confirmTabClose.setText(ResourceMgr.getString("LblConfirmTabClose")); // NOI18N
+    confirmTabClose.setToolTipText(ResourceMgr.getString("d_LblConfirmTabClose")); // NOI18N
+    confirmTabClose.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(6, 0, 1, 0);
+    jPanel2.add(confirmTabClose, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -613,6 +626,7 @@ public class GeneralOptionsPanel
   private WbFilePicker backupDirPicker;
   private JComboBox checkInterval;
   private JLabel checkUpdatesLabel;
+  private JCheckBox confirmTabClose;
   private JCheckBox consolidateLog;
   private JCheckBox createBackup;
   private JCheckBox enableAnimatedIcon;

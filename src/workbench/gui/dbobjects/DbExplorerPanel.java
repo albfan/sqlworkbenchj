@@ -13,7 +13,6 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
@@ -850,13 +849,7 @@ public class DbExplorerPanel
 
 	protected void updateTabTitle()
 	{
-		Container parent = this.getParent();
-		if (parent instanceof JTabbedPane)
-		{
-			JTabbedPane tab = (JTabbedPane)parent;
-			int index = tab.indexOfComponent(this);
-			setTabTitle(tab, index);
-		}
+		PanelTitleSetter.updateTitle(this);
 	}
 	
 	public String getTabTitle()

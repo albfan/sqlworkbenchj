@@ -21,6 +21,16 @@ import workbench.util.StringUtil;
  */
 public class GuiSettings
 {
+	public static boolean getConfirmTabClose()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.closetab.confirm", false);
+	}
+	
+	public static void setConfirmTabClose(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.closetab.confirm", flag);
+	}
+
 	public static boolean getShowTabIndex()
 	{
 		return Settings.getInstance().getBoolProperty(Settings.PROPERTY_SHOW_TAB_INDEX, true);

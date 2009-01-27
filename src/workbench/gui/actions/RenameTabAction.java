@@ -13,6 +13,8 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.RenameableTab;
@@ -23,6 +25,7 @@ import workbench.resource.ResourceMgr;
  */
 public class RenameTabAction
 	extends WbAction
+	implements ChangeListener
 {
 	private RenameableTab client;
 
@@ -32,6 +35,8 @@ public class RenameTabAction
 		this.client = aClient;
 		this.initMenuDefinition("MnuTxtRenameTab");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
+		client.addTabChangeListener(this);
+		setEnabled(false);
 		this.setIcon(null);
 	}
 
@@ -45,5 +50,10 @@ public class RenameTabAction
 		{
 			client.setCurrentTabTitle(newName);
 		}
+	}
+
+	public void stateChanged(ChangeEvent e)
+	{
+		setEnabled(client.canRenameTab());
 	}
 }

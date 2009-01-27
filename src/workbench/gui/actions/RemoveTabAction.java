@@ -38,7 +38,7 @@ public class RemoveTabAction
 		this.initMenuDefinition("MnuTxtRemoveTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, InputEvent.CTRL_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		this.setIcon(null);
-		client.addIndexChangeListener(this);
+		client.addTabChangeListener(this);
 		setEnabled(false);
 	}
 

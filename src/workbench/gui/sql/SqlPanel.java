@@ -1223,13 +1223,7 @@ public class SqlPanel
 
 	protected void updateTabTitle()
 	{
-		Container parent = this.getParent();
-		if (parent instanceof JTabbedPane)
-		{
-			JTabbedPane tab = (JTabbedPane)parent;
-			int index = tab.indexOfComponent(this);
-			setTabTitle(tab, index);
-		}
+		PanelTitleSetter.updateTitle(this);
 	}
 
 	public void setTabTitle(final JTabbedPane tab, final int index)
