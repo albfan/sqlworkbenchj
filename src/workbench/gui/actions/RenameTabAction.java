@@ -36,7 +36,7 @@ public class RenameTabAction
 		this.initMenuDefinition("MnuTxtRenameTab");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 		client.addTabChangeListener(this);
-		setEnabled(false);
+		setEnabled(client.canRenameTab());
 		this.setIcon(null);
 	}
 

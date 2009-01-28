@@ -42,6 +42,8 @@ public class SqlTabPopup
 		InsertTabAction insert = new InsertTabAction(aClient);
 		this.add(insert);
 
+		addSeparator();
+		
 		RemoveTabAction remove = new RemoveTabAction(aClient);
 		remove.setEnabled(aClient.canCloseTab());
 		this.add(remove);
@@ -73,18 +75,6 @@ public class SqlTabPopup
 		this.add(lock.getMenuItem());
 		lock.setSwitchedOn(panel.isLocked());
 
-		this.addSeparator();
-
-		NewDbExplorerPanelAction newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
-		newDbExp.removeIcon();
-		add(newDbExp);
-
-		if (aClient.canUseSeparateConnection())
-		{
-			ToggleExtraConnection toggle = new ToggleExtraConnection(aClient);
-			this.add(toggle.getMenuItem());
-		}
-
 		if (panel instanceof SqlPanel)
 		{
 			this.addSeparator();
@@ -98,8 +88,25 @@ public class SqlTabPopup
 			MoveSqlTabRight moveRight = new MoveSqlTabRight(aClient);
 			moveRight.setEnabled(currentIndex < lastIndex);
 			this.add(moveRight);
+		}
 
+		this.addSeparator();
+
+		NewDbExplorerPanelAction newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
+		newDbExp.removeIcon();
+		add(newDbExp);
+
+		if (aClient.canUseSeparateConnection())
+		{
 			this.addSeparator();
+			ToggleExtraConnection toggle = new ToggleExtraConnection(aClient);
+			this.add(toggle.getMenuItem());
+		}
+
+		if (panel instanceof SqlPanel)
+		{
+			this.addSeparator();
+			SqlPanel spanel = (SqlPanel)panel;
 
 			EditorPanel editor = spanel.getEditor();
 
