@@ -12,7 +12,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,7 +28,7 @@ import workbench.util.StringUtil;
 
 /**
  * Handles a WbCopy call for a single table.
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class TableCopy
@@ -133,7 +132,7 @@ public class TableCopy
 		// First read the defined columns from the passed parameter
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
 		if (StringUtil.isBlank(cols)) return null;
-		
+
 		List<String> l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
 		ColumnIdentifier[] result = new ColumnIdentifier[count];
