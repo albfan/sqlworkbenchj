@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import workbench.console.RowDisplay;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.resource.ResourceMgr;
@@ -43,6 +44,8 @@ public class WbListProcedures
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
+		result.setTemporaryDisplay(RowDisplay.SingleLine);
+
 		String args = getCommandLine(aSql);
 
 		String schema = null;

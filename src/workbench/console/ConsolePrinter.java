@@ -32,14 +32,15 @@ public abstract class ConsolePrinter
 {
 	protected Map<Integer, Integer> columnWidths;
 	protected TextRowDataConverter converter = new TextRowDataConverter();
+	protected boolean doFormat = true;
+	protected boolean showRowCount = true;
+	protected boolean printRowAsLine = true;
 
+	protected abstract String getResultName();
 	protected abstract Map<Integer, Integer> getColumnSizes();
 	protected abstract int getColumnCount();
 	protected abstract String getColumnName(int col);
 	protected abstract int getColumnType(int col);
-	protected boolean doFormat = true;
-	protected boolean showRowCount = true;
-	protected boolean printRowAsLine = true;
 
 	/**
 	 * If set to true (the default) one row is printed per console line.
@@ -84,6 +85,12 @@ public abstract class ConsolePrinter
 			columnWidths = getColumnSizes();
 		}
 
+		String resultName = getResultName();
+		
+		if (StringUtil.isNonBlank(resultName))
+		{
+			pw.println("---- " + resultName);
+		}
 		int headerWidth = 0;
 		for (int col = 0; col < getColumnCount(); col ++)
 		{

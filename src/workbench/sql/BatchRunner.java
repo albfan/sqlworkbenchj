@@ -621,9 +621,18 @@ public class BatchRunner
 					error = !result.isSuccess();
 
 					RowDisplay display = result.getRowDisplay();
+					RowDisplay tempDisplay = result.getTemporaryDisplay();
+
 					if (display != null && display != RowDisplay.noChange)
 					{
 						printRowsAsLine = (display == RowDisplay.SingleLine);
+					}
+
+					boolean rowsDisplayToUse = printRowsAsLine;
+
+					if (tempDisplay != null)
+					{
+						rowsDisplayToUse = (tempDisplay == RowDisplay.SingleLine);
 					}
 					
 					// We have to store the result of hasMessages()
@@ -643,7 +652,7 @@ public class BatchRunner
 						totalRows += result.getTotalUpdateCount();
 					}
 
-					printResults(sql, result);
+					printResults(sql, result, rowsDisplayToUse);
 
 					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
 					{
@@ -735,7 +744,7 @@ public class BatchRunner
 		return error;
 	}
 
-	private void printResults(String sql, StatementRunnerResult result)
+	private void printResults(String sql, StatementRunnerResult result, boolean rowsAsLine)
 	{
 		if (!this.showResultSets) return;
 		if (console == null) return;
@@ -758,7 +767,7 @@ public class BatchRunner
 				DataStorePrinter printer = new DataStorePrinter(ds);
 				printer.setFormatColumns(optimizeCols);
 				printer.setPrintRowCount(result.getShowRowCount());
-				printer.setPrintRowsAsLine(printRowsAsLine);
+				printer.setPrintRowsAsLine(rowsAsLine);
 				printer.printTo(console);
 				if (i < data.size() -1) console.println();
 			}

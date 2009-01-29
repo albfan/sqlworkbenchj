@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.console.RowDisplay;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.VariablePool;
@@ -35,6 +36,8 @@ public class WbListVars extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
+		result.setTemporaryDisplay(RowDisplay.SingleLine);
+
 		DataStore ds = VariablePool.getInstance().getVariablesDataStore();
 		ds.setResultName(ResourceMgr.getString("TxtVariables"));
 		result.addDataStore(ds);

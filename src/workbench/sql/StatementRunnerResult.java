@@ -54,6 +54,11 @@ public class StatementRunnerResult
 	 * If printRowsPerLine == false, each row should be printed as a "form" (one row per column)
 	 */
 	private RowDisplay rowDisplay = RowDisplay.noChange;
+
+	/**
+	 * If set, indicates a temporary change of the display just for this single Result
+	 */
+	private RowDisplay tempRowDisplay = null;
 	
 	private long executionTime = -1;
 	private DecimalFormat timingFormatter;
@@ -88,11 +93,23 @@ public class StatementRunnerResult
 	{
 		return showRowCount;
 	}
-	
+
+	public RowDisplay getTemporaryDisplay()
+	{
+		RowDisplay result = tempRowDisplay;
+		tempRowDisplay = null;
+		return result;
+	}
+
+	public void setTemporaryDisplay(RowDisplay display)
+	{
+		tempRowDisplay = display;
+	}
+
 	/**
 	 * Controls the printing of the results in command line mode.
-	 * If printRowsPerLine == true, each row should be printed on a single console line
-	 * If printRowsPerLine == false, each row should be printed as a "form" (one row per column)
+	 * If RowDisplay.SingleLine, each row should be printed on a single console line
+	 * If RowDisplay.Form, each row should be printed as a "form" (one row per column)
 	 */
 	public RowDisplay getRowDisplay()
 	{

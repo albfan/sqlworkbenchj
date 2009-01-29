@@ -38,7 +38,14 @@ public class DataStorePrinter
 	{
 		this.data = source;
 	}
-	
+
+	@Override
+	protected String getResultName()
+	{
+		if (data == null) return null;
+		return data.getResultName();
+	}
+
 	@Override
 	protected int getColumnType(int col)
 	{

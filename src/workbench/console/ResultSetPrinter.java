@@ -65,6 +65,12 @@ public class ResultSetPrinter
 	}
 
 	@Override
+	protected String getResultName()
+	{
+		return null;
+	}
+
+	@Override
 	protected int getColumnType(int col)
 	{
 		return (info == null ? Types.OTHER : info.getColumnType(col));

@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import workbench.console.RowDisplay;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
@@ -73,6 +74,7 @@ public class WbDescribeTable
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 		result.setShowRowCount(false);
+		result.setTemporaryDisplay(RowDisplay.SingleLine);
 		
 		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 
@@ -160,6 +162,20 @@ public class WbDescribeTable
 			{
 				triggers.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
 				result.addDataStore(triggers);
+			}
+
+			DataStore references = currentConnection.getMetadata().getForeignKeys(toDescribe, false);
+			if (references.getRowCount() > 0)
+			{
+				references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
+				result.addDataStore(references);
+			}
+
+			DataStore referencedBy = currentConnection.getMetadata().getReferencedBy(toDescribe);
+			if (referencedBy.getRowCount() > 0)
+			{
+				referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
+				result.addDataStore(referencedBy);
 			}
 		}
 

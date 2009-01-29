@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import java.util.List;
+import workbench.console.RowDisplay;
 import workbench.db.TableIdentifier;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -29,7 +30,7 @@ import workbench.util.StringUtil;
 public class WbListTables extends SqlCommand
 {
 	public static final String VERB = "WBLIST";
-	
+
 	public WbListTables()
 	{
 		cmdLine = new ArgumentParser();
@@ -50,6 +51,8 @@ public class WbListTables extends SqlCommand
 			};
 
 		StatementRunnerResult result = new StatementRunnerResult();
+		result.setTemporaryDisplay(RowDisplay.SingleLine);
+
 		cmdLine.parse(options);
 
 		String objects = options;
@@ -72,16 +75,16 @@ public class WbListTables extends SqlCommand
 				typeList.toArray(types);
 			}
 		}
-		
+
 		DataStore resultList = null;
 
 		if (StringUtil.isBlank(objects))
 		{
 			objects = "%";
 		}
-		
+
 		List<String> objectFilters = StringUtil.stringToList(objects);
-		
+
 		for (String filter : objectFilters)
 		{
 			TableIdentifier tbl = new TableIdentifier(filter);
@@ -98,7 +101,7 @@ public class WbListTables extends SqlCommand
 				resultList.copyFrom(ds);
 			}
 		}
-		
+
 		result.addDataStore(resultList);
 		return result;
 	}
