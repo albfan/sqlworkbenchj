@@ -161,6 +161,7 @@ keyword=("ABORT"|
 "ARE"|
 "ARRAY"|
 "AS"|
+"AS[ \t\r\n]+OF"|
 "ASC"|
 "ASENSITIVE"|
 "ASSERTION"|
@@ -323,6 +324,7 @@ keyword=("ABORT"|
 "FINAL"|
 "FIRST"|
 "FLOAT"|
+"FLASHBACK"|
 "FOR"|
 "FORCE"|
 "FOREIGN[ \t\r\n]+KEY"|
