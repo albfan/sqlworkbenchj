@@ -1276,12 +1276,13 @@ public class MainWindow
 
 		this.currentWorkspaceFile = null;
 		this.resultForWorkspaceClose = false;
-		this.closeWorkspace(false);
+		closeWorkspace(false);
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
+				
 				WbWorkspace w = null;
 				try
 				{
@@ -2602,9 +2603,14 @@ public class MainWindow
 
 			if (doDisconnect)
 			{
+				LogMgr.logDebug("MainWindow.removeTab()", "Closing physical connection: " + conn.getId() + " for tab: " + index);
 				showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
 				ConnectionMgr.getInstance().disconnect(conn);
 				showStatusMessage("");
+			}
+			else
+			{
+				LogMgr.logDebug("MainWindow.removeTab()", "Disconnect not necessary for tab " + index);
 			}
 
 			this.panelMenus.remove(index);
