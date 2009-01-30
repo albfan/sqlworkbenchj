@@ -588,6 +588,31 @@ public class ConnectionProfile
 		this.storePassword = aFlag;
 	}
 
+
+	/**
+	 * Returns a copy of this profile keeping it's modified state.
+	 * isNew() and isChanged() of the copy will return the same values as this instance
+	 * 
+	 * @return a copy of this profile
+	 * @see #isNew()
+	 * @see #isChanged()
+	 */
+	public ConnectionProfile createStatefulCopy()
+	{
+		ConnectionProfile result = createCopy();
+		result.isNew = this.isNew;
+		result.changed = this.changed;
+		return result;
+	}
+
+	/**
+	 * Returns a copy of this profile.
+	 * The copy is marked as "new" and "changed", so isNew() and isChanged()
+	 * will return true on the copy
+	 * @return a copy of this profile
+	 * @see #isNew()
+	 * @see #isChanged() 
+	 */
 	public ConnectionProfile createCopy()
 	{
 		ConnectionProfile result = new ConnectionProfile();

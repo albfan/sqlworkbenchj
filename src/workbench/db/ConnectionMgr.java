@@ -26,8 +26,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import workbench.WbManager;
 import workbench.db.shutdown.DbShutdownFactory;
 import workbench.db.shutdown.DbShutdownHook;
@@ -40,7 +38,6 @@ import workbench.resource.Settings;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
 import workbench.util.PropertiesCopier;
-import workbench.util.StringUtil;
 import workbench.util.WbPersistence;
 
 /**
@@ -58,7 +55,6 @@ public class ConnectionMgr
 	private boolean profilesChanged;
 	private boolean readTemplates = true;
 	private boolean templatesImported;
-	private List<PropertyChangeListener> groupsChangeListener;
 	private List<PropertyChangeListener> driverChangeListener;
 	private static ConnectionMgr instance = new ConnectionMgr();
 
@@ -320,21 +316,16 @@ public class ConnectionMgr
 		}
 	}
 
-	/**
-	 * Find a connection profile identified by the given key.
-	 *
-	 * @param key the key of the profile
-	 * @return a connection profile with that name or null if none was found.
-	 */
-	public ConnectionProfile getProfile(ProfileKey key)
+	public static ConnectionProfile findProfile(List<ConnectionProfile> list, ProfileKey key)
 	{
 		if (key == null) return null;
-		this.getProfiles();
+		if (list == null) return null;
+
 		String name = key.getName();
 		String group = key.getGroup();
-		if (this.profiles == null) return null;
+
 		ConnectionProfile firstMatch = null;
-		for (ConnectionProfile prof : this.profiles)
+		for (ConnectionProfile prof : list)
 		{
 			if (name.equalsIgnoreCase(prof.getName()))
 			{
@@ -351,18 +342,18 @@ public class ConnectionMgr
 		}
 		return firstMatch;
 	}
-
-	public synchronized Collection<String> getProfileGroups()
+	
+	/**
+	 * Find a connection profile identified by the given key.
+	 *
+	 * @param key the key of the profile
+	 * @return a connection profile with that name or null if none was found.
+	 */
+	public ConnectionProfile getProfile(ProfileKey key)
 	{
-		Set<String> result = new TreeSet<String>();
+		if (key == null) return null;
 		if (this.profiles == null) this.readProfiles();
-		for (ConnectionProfile prof : this.profiles)
-		{
-			String group = prof.getGroup();
-			if (StringUtil.isEmptyString(group)) continue;
-			result.add(group);
-		}
-		return result;
+		return findProfile(profiles, key);
 	}
 
 	public void addDriverChangeListener(PropertyChangeListener l)
@@ -375,28 +366,6 @@ public class ConnectionMgr
 	{
 		if (this.driverChangeListener == null) return;
 		this.driverChangeListener.remove(l);
-	}
-
-	public void addProfileGroupChangeListener(PropertyChangeListener l)
-	{
-		if (this.groupsChangeListener == null) this.groupsChangeListener = new ArrayList<PropertyChangeListener>();
-		this.groupsChangeListener.add(l);
-	}
-
-	public void removeProfileGroupChangeListener(PropertyChangeListener l)
-	{
-		if (groupsChangeListener == null) return;
-		groupsChangeListener.remove(l);
-	}
-
-	public void profileGroupChanged(ConnectionProfile profile)
-	{
-		if (this.groupsChangeListener == null) return;
-		PropertyChangeEvent evt = new PropertyChangeEvent(profile, ConnectionProfile.PROPERTY_PROFILE_GROUP, null, profile.getGroup());
-		for (PropertyChangeListener l : this.groupsChangeListener)
-		{
-			if (l != null) l.propertyChange(evt);
-		}
 	}
 	
 	/**
@@ -515,18 +484,6 @@ public class ConnectionMgr
 		}
 
 		return false;
-	}
-
-	/**
-	 * Save profile and driver definitions to external files.
-	 * This merely calls {@link #saveProfiles()} and {@link #saveDrivers()}
-	 * @see #saveProfiles()
-	 * @see #saveDrivers()
-	 */
-	public void writeSettings()
-	{
-		this.saveProfiles();
-		this.saveDrivers();
 	}
 
 	/**
@@ -765,12 +722,20 @@ public class ConnectionMgr
 		return false;
 	}
 
-	/**
-	 *	This is called from the ProfileListModel when a new profile is added.
-	 *	The caller needs to make sure that the status is set to new if that
-	 *	profile was just created.
-	 */
-	public void addProfile(ConnectionProfile aProfile)
+	public synchronized void applyProfiles(List<ConnectionProfile> newProfiles)
+	{
+		if (newProfiles == null) return;
+		
+		this.profilesChanged = (profiles.size() != newProfiles.size());
+		
+		this.profiles.clear();
+		for (ConnectionProfile profile : newProfiles)
+		{
+			this.profiles.add(profile.createStatefulCopy());
+		}
+	}
+	
+	public synchronized void addProfile(ConnectionProfile aProfile)
 	{
 		if (this.profiles == null)
 		{
@@ -782,10 +747,7 @@ public class ConnectionMgr
 		this.profilesChanged = true;
 	}
 
-	/**
-	 *	This is called from the ProfileListModel when a profile has been deleted
-	 */
-	public void removeProfile(ConnectionProfile aProfile)
+	public synchronized void removeProfile(ConnectionProfile aProfile)
 	{
 		if (this.profiles == null) return;
 

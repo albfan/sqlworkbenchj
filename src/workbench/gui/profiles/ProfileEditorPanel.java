@@ -186,6 +186,16 @@ public class ProfileEditorPanel
 		((ProfileTree)profileTree).expandGroups(l);
 	}
 
+	/**
+	 * Hands the complete ProfileList over to the ConnectionMgr.
+	 */
+	public void applyProfiles()
+	{
+		this.connectionEditor.updateProfile();
+		ProfileListModel list = (ProfileListModel)profileTree.getModel();
+		list.applyProfiles();
+	}
+	
 	public void saveSettings()
 	{
 		GuiSettings.setProfileDividerLocation(this.jSplitPane.getDividerLocation());
@@ -382,9 +392,10 @@ public class ProfileEditorPanel
 	public void saveItem()
 		throws Exception
 	{
-		ConnectionMgr conn = ConnectionMgr.getInstance();
+		// Synchronize the current profile with the list
 		this.connectionEditor.updateProfile();
-		conn.saveProfiles();
+		ProfileListModel list = (ProfileListModel)profileTree.getModel();
+		list.saveProfiles();
 	}
 
 	public int getProfileCount()

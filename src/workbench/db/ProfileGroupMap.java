@@ -23,10 +23,9 @@ import java.util.TreeMap;
 public class ProfileGroupMap
 	extends TreeMap<String, List<ConnectionProfile>>
 {
-	public ProfileGroupMap()
+	public ProfileGroupMap(List<ConnectionProfile> profiles)
 	{
 		super();
-		ArrayList<ConnectionProfile> profiles = new ArrayList<ConnectionProfile>(ConnectionMgr.getInstance().getProfiles());
 
 		// If the complete list is sorted by name at the beginning
 		// the sublists per group will be sorted automatically.

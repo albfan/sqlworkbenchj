@@ -191,12 +191,14 @@ public class ProfileSelectionDialog
 	{
 		if (e.getSource() == this.okButton)
 		{
+			profiles.applyProfiles();
 			selectProfile();
 		}
 		else if (e.getSource() == this.cancelButton ||
 						e.getActionCommand().equals(escActionCommand))
 		{
 			this.selectedProfile = null;
+			this.cancelled = true;
 			this.closeDialog();
 		}
 		else if (e.getSource() == this.manageDriversButton)
