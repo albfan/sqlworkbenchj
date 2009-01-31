@@ -328,7 +328,7 @@
 								used to re-generate proper filenames.
 							</para>
 							<para>
-								This parameter only makes sense if exactly one BLOB column is exported.
+								This parameter only makes sense if exactly one BLOB column of a table is exported.
 							</para>
 						</entry>
 					</row>
@@ -339,10 +339,10 @@
 							<para>
 								When exporting CLOB or BLOB columns as external files, the complete filename
 								can be taken from a column of the result set (instead of dynamically creating
-								a new file based on the row and column numbers).
+								a new file name based on the row and column numbers).
 							</para>
 							<para>
-								This parameter only makes sense if exactly one BLOB column is exported.
+								This parameter only makes sense if exactly one BLOB column of a table is exported.
 							</para>
 						</entry>
 					</row>

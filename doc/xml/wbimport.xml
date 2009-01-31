@@ -64,6 +64,20 @@
 							<para>Defines the type of the input file</para>
 						</entry>
 					</row>
+
+					<row>
+						<entry>-mode</entry>
+						<entry>
+								<para>
+									Defines how the data should be sent to the database. Possible
+									values are '<literal>INSERT</literal>', '<literal>UPDATE</literal>',
+									'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'
+									For details please refer to the <link linkend="import-update-mode">update mode</link>
+									explanation.
+							</para>
+						</entry>
+					</row>
+
 					<row>
 						<entry>-file</entry>
 						<entry>
@@ -74,7 +88,18 @@
 							</para>
 						</entry>
 					</row>
-					
+
+					<row>
+						<entry>-table</entry>
+						<entry>
+							<para>Defines the table into which the data should be imported</para>
+							<para>
+								This parameter is ignored, if the files are imported using the
+								<literal>-sourcedir</literal> parameter
+							</para>
+						</entry>
+					</row>
+
 					<row>
 						<entry>-sourceDir</entry>
 						<entry>
@@ -85,6 +110,19 @@
 								defines the target table. If a target table is specified using the <literal>-table</literal>
 								parameter, then all files will be imported into the same table. The <literal>-deleteTarget</literal>
 								will be ignored if multiple files are imported into a single table.
+							</para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-extension</entry>
+						<entry>
+							<para>
+								When using the <literal>-sourcedir</literal> switch, the
+								extension for the files can be defined. All files ending with the supplied
+								value will be processed. (e.g. <literal>-extension=csv</literal>).
+								The extension given is case-sensitiv (i.e. <literal>TXT</literal> is something
+								different than <literal>txt</literal>
 							</para>
 						</entry>
 					</row>
@@ -133,40 +171,52 @@
 					</row>
 
 					<row>
-						<entry>-extension</entry>
+						<entry>-commitEvery</entry>
 						<entry>
 							<para>
-								When using the <literal>-sourcedir</literal> switch, the
-								extension for the files can be defined. All files ending with the supplied
-								value will be processed. (e.g. <literal>-extension=csv</literal>).
-								The extension given is case-sensitiv (i.e. <literal>TXT</literal> is something
-								different than <literal>txt</literal>
+								If your DBMS neeeds frequent commits to improve performance and reduce locking
+								on the import table you can control the number of rows after which a COMMIT is
+								sent to the server.
+							</para>
+							<para>
+								<literal>-commitEvery</literal>is numeric value that defines the number of rows
+								after which a <literal>COMMIT</literal> is sent to the DBMS.
+								If this parameter is not passed (or a value of zero or lower),
+								then the import is run as a single transaction that is committed at the end.
+							</para>
+							<para>
+								When using <link linkend="batch-import">batch import</link> and your DBMS requires
+								frequent commits to improve import performance, the <literal>-commitBatch</literal>
+								option should be used instead.
+							</para>
+							<para>
+								You can turn off committing of the import completely by using the option
+								<literal>-transactionControl=false</literal>.
+							</para>
+							<para>
+								Using <literal>-commitEvery</literal> means, that in case of an error
+								the already imported rows cannot be rolled back, leaving the data in a potential
+								invalid state.
 							</para>
 						</entry>
 					</row>
 
 					<row>
-						<entry>-commitEvery</entry>
+						<entry>-transactionControl</entry>
 						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
-								A numeric value that defines the number of rows after which a <literal>COMMIT</literal>
-								is sent to the DBMS. If this parameter is not passed (or a value of zero or lower), 
-								then &wb-productname; will commit when all rows have been imported. When using batch execution 
-								it is recommended to commit the batch using the <literal>-commitBatch</literal> parameter.
+								Controls whether &wb-productname; handles the transaction for the import,
+								or if the import must be committed (or rolled back) manually.
+								If <literal>-transactionControl=false</literal> is specified, the &wb-productname;
+								will neither send a <literal>COMMIT</literal> nor a <literal>ROLLBACK</literal> at
+								the end. This can be used when multiple files need to be imported in a single
+								transaction. This can be combined with the <link linkend="script-success">cleanup</link>
+								and <link linkend="script-failure">error</link> scripts in batch mode.
 							</para>
 						</entry>
 					</row>
-					<row>
-						<entry>-mode</entry>
-						<entry>
-								<para>Defines how the data should be sent to the database. Possible
-								values are '<literal>INSERT</literal>', '<literal>UPDATE</literal>',
-								'<literal>INSERT,UPDATE</literal>' and '<literal>UPDATE,INSERT</literal>'
-								For details please refer to the <link linkend="import-update-mode">update mode</link>
-								explanation.
-							</para>
-						</entry>
-					</row>
+
 					<row>
 						<entry>-continueOnError</entry>
 						<entry>
@@ -201,17 +251,6 @@
 							<para>
 								This parameter is ignored if files are imported using the <literal>-sourcedir</literal>
 								parameter
-							</para>
-						</entry>
-					</row>
-
-					<row>
-						<entry>-table</entry>
-						<entry>
-							<para>Defines the table into which the data should be imported</para>
-							<para>
-								This parameter is ignored, if the files are imported using the
-								<literal>-sourcedir</literal> parameter
 							</para>
 						</entry>
 					</row>
@@ -260,7 +299,7 @@
 					</row>
 
 					<row>
-						<entry>-batchSize</entry>
+						<entry id="batch-import">-batchSize</entry>
 						<entry>
 							<para>
 								A numeric value that defines the size of the batch queue. 
@@ -283,32 +322,17 @@
 							<para>
 								If using batch execution (by specifying a batch size using the <literal>-batchSize</literal>
 								parameter) each batch will be committed when this parameter is set to <literal>true</literal>.
-								This is slightly different to using <literal>-commitEvery</literal> with the value of the 
-								<literal>-batchSize</literal> parameter. The latter one will add a COMMIT statement to 
-								the batch queue, rather than calling the JDBC commit() method. Some drivers 
-								do not allow to add different statements in a batch queue. So, if a frequent 
+								This is slightly different to using <literal>-commitEvery</literal> with the value of the
+								<literal>-batchSize</literal> parameter. The latter one will add a COMMIT statement to
+								the batch queue, rather than calling the JDBC commit() method. Some drivers
+								do not allow to add different statements in a batch queue. So, if a frequent
 								<literal>COMMIT</literal> is needed, this parameter should be used.
 							</para>
 							<para>
-								When you specify <literal>-commitBatch</literal> the parameter 
-								<literal>-commitEvery</literal> will be ignored. If no batch size 
-								is given, then <literal>-commitBatch</literal> will be ignored.
-							</para>
-						</entry>
-					</row>
-
-					<row>
-						<entry>-transactionControl</entry>
-						<entry>
-							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
-							<para>
-								Controls whether &wb-productname; handles the transaction for the import, 
-								or if the import must be committed (or rolled back) manually. 
-								If <literal>-transactionControl=false</literal> is specified, the &wb-productname;
-								will neither send a <literal>COMMIT</literal> nor a <literal>ROLLBACK</literal> at
-								the end. This can be used when multiple files need to be imported in a single
-								transaction. This can be combined with the <link linkend="script-success">cleanup</link> 
-								and <link linkend="script-failure">error</link> scripts in batch mode.
+								When you specify <literal>-commitBatch</literal> the parameter
+								<literal>-commitEvery</literal> will be ignored. If no batch size
+								is given (using <literal>-batchSize</literal>, then <literal>-commitBatch</literal> 
+								will also be ignored.
 							</para>
 						</entry>
 					</row>
@@ -375,14 +399,14 @@
 						<entry>
 							<para>
 								With the parameter <literal>-maxLength</literal> you can truncate
-								data for character (VARCHAR, CAHR) columns during import. This can be used to 
-								import  data into columns that are not big enough (e.g. VARCHAR columns) to hold 
-								all values from the input file and to ensure the import can finish
-								without errors.
+								data for character columns (<literal>VARCHAR</literal>, <literal>CHAR</literal>)
+								during import. This can be used to import data into columns that are not big
+								enough (e.g. VARCHAR columns) to hold all values from the input file and to
+								ensure the import can finish without errors.
 							</para>
 							<para>
-								The parameter defines the maximum length for certain columns as 
-								using the following format: <literal>-maxLength='firstname=30,lastname=20'</literal>
+								The parameter defines the maximum length for certain columns using the following
+								format: <literal>-maxLength='firstname=30,lastname=20'</literal>
 								Where firstname and lastname are columns from the target table. The above
 								example will limit the values for the column firstname to 30 characters
 								and the values for the column lastname to 20 characters. If a non-character

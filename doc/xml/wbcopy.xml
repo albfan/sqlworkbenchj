@@ -363,9 +363,13 @@ Please check <link linkend="command-copy-query">Copying data based on a SQL quer
 								The <emphasis>list</emphasis> of columns from the target table, in the order in which they appear in the source query.
 							</para>
 							<para>
-								This is <emphasis role="bold">not</emphasis> a column mapping when used together with the
-								<literal>-sourceQuery</literal> parameter. It only lists the target columns in the correct order.
-								Please check the <link linkend="example-copy-query">examples section</link> for details.
+								If the column names in the query match the column names in the target table, this
+								parameter is not necessary.
+							</para>
+							<para>
+								If you do specify this parameter, note that this 
+								is <emphasis role="bold">not</emphasis> a column mapping.
+								It only lists the columns in the correct order .
 							</para>
 						</entry>
 					</row>
@@ -502,7 +506,16 @@ Please check <link linkend="command-copy-query">Copying data based on a SQL quer
 				of the SELECT (firstname) is copied into the target column with the name <literal>surname</literal>,
 				the second result column (lastname) is copied into the target column <literal>name</literal> and the
 				last source column (birthday) is copied into the target column <literal>dob</literal>.
-			 </para>
+			</para>
+			<para>
+				This example could also be written as:
+		  </para>
+			<programlisting>WbCopy -sourceProfile=ProfileA
+       -targetProfile=ProfileB
+       -sourceQuery="SELECT firstname <emphasis role="bold">as surname</emphasis>, lastname <emphasis role="bold">as name</emphasis>, birthday <emphasis role="bold">as dob</emphasis> FROM person"
+       -targetTable=contacts
+       -deleteTarget=true</programlisting>
+
 		</section>
 
 	</section>
