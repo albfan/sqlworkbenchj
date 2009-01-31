@@ -137,6 +137,7 @@ public class ConnectionProfile
 		
 		if ((def == null && this.alternateDelimiter != null) ||
 			  (def != null && this.alternateDelimiter == null) ||
+				(def != null && !def.equals(this.alternateDelimiter)) ||
 				(def != null && def.isChanged()))
 		{
 			this.alternateDelimiter = def;
@@ -570,7 +571,7 @@ public class ConnectionProfile
 
 	public void setName(String aName)
 	{
-		if (StringUtil.equalString(name, aName) && !changed) changed = true;
+		if (!changed && !StringUtil.equalString(name, aName)) changed = true;
 		this.name = aName;
 	}
 

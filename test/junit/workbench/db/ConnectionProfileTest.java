@@ -11,6 +11,8 @@
  */
 package workbench.db;
 
+import java.awt.Color;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -90,6 +92,7 @@ public class ConnectionProfileTest
 		throws Exception
 	{
 		ConnectionProfile profile = new ConnectionProfile();
+		profile.setName("ProfileTest");
 		profile.setAlternateDelimiter(new DelimiterDefinition("/", true));
 		profile.setAutocommit(false);
 		profile.setConfirmUpdates(true);
@@ -165,6 +168,47 @@ public class ConnectionProfileTest
 
 		profile.reset();
 		profile.setDriverName("Postgres 8.3");
+		assertTrue(profile.isChanged());
+
+		profile.reset();
+		profile.setName("NewName");
+		assertTrue(profile.isChanged());
+
+		profile.setTrimCharData(false);
+		profile.reset();
+		profile.setTrimCharData(true);
+		assertTrue(profile.isChanged());
+
+		profile.setIgnoreDropErrors(false);
+		profile.reset();
+		profile.setIgnoreDropErrors(true);
+		assertTrue(profile.isChanged());
+
+		profile.setRollbackBeforeDisconnect(false);
+		profile.reset();
+		profile.setRollbackBeforeDisconnect(true);
+		assertTrue(profile.isChanged());
+
+		profile.setReadOnly(false);
+		profile.reset();
+		profile.setReadOnly(true);
+		assertTrue(profile.isChanged());
+
+		profile.reset();
+		DelimiterDefinition def = new DelimiterDefinition("GO", true);
+		profile.setAlternateDelimiter(def);
+		assertTrue(profile.isChanged());
+
+		profile.reset();
+		profile.setInfoDisplayColor(Color.MAGENTA);
+		assertTrue(profile.isChanged());
+
+		profile.reset();
+		profile.setWorkspaceFile("Arthur.wksp");
+		assertTrue(profile.isChanged());
+
+		profile.reset();
+		profile.setDefaultFetchSize(4242);
 		assertTrue(profile.isChanged());
 	}
 
