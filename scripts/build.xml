@@ -599,8 +599,6 @@
         <include name="wbdiff2mssql.xslt"/>
         <include name="wbdiff2oracle.xslt"/>
         <include name="wbdiff2pg.xslt"/>
-        <include name="wbexport2text.xslt"/>
-        <include name="wbreport2ctl.xslt"/>
         <include name="wbreport2html.xslt"/>
         <include name="wbreport2oracle.xslt"/>
         <include name="wbreport2proc.xslt"/>
@@ -638,7 +636,6 @@
         <include name="wbdiff2mssql.xslt"/>
         <include name="wbdiff2oracle.xslt"/>
         <include name="wbdiff2pg.xslt"/>
-        <include name="wbexport2text.xslt"/>
         <include name="wbreport2ctl.xslt"/>
         <include name="wbreport2html.xslt"/>
         <include name="wbreport2oracle.xslt"/>
