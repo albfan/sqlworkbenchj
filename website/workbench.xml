@@ -211,12 +211,6 @@ VALUES
 			  <li><a href="wbdiff2derby.xslt">Transform to an Apache Derby script</a></li>
 			  <li><a href="wbdiff2mssql.xslt">Transform to an Microsoft SQL Server script</a></li>
 	 		</ul>
-			<h2 style="text-align:left;padding-top:5px">WbExport transformations</h2>
-			<p>The following files will transform the output of the <a href="manual/wb-commands.html#command-export">WbExport</a>
-			command</p>
-			<ul>
-			  <li><a href="wbexport2text.xslt">Transform into a text file</a></li>
-	 		</ul>
     </content>
   </page>
   
@@ -228,11 +222,9 @@ VALUES
 				<p style="font-size:100%;text-align:center;margin-top:10px;">
 					This application requires <b>Java 5</b> (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
 				</p>
-				<p style="margin-bottom:15px;margin-top:5px;padding:10px;border-style:solid;border-color:red;border-width:2px">
-				 Starting with build 99, the jar file has been renamed to <tt>sqlworkbench.jar</tt>, the 
-				 Windows launcher has been renamed to <tt>SQLWorkbench.exe</tt> and the (main) shell script 
-				 has been renamed to <tt>sqlworkbench.sh</tt>.<br/><br/>
-				 Please delete the old files <tt>jworkbench.exe</tt>, <tt>Workbench.jar</tt> and <tt>jworkbench.sh</tt>
+				<p style="margin-bottom:15px;margin-top:5px;padding:10px;border-style:solid;border-color:red;border-width:1px">
+				 Starting with build 99, filenames have changed.<br/> 
+				 Please delete the old files: <tt>jworkbench.exe</tt>, <tt>Workbench.jar</tt> and <tt>jworkbench.sh</tt>
 				</p>
         <h3>Stable release</h3>
         <p>Current stable release: Build <build-number/>, <build-date/>, <a target="_blank" href="history.txt">Change History</a></p>
