@@ -173,17 +173,20 @@ public class WbSwingUtilities
 
 	public static Point getLocationToCenter(Window aWinToCenter, Component aReference)
 	{
-		int screenWidth,  screenHeight;
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		boolean centerOnScreen = false;
+
+		int referenceWidth,  referenceHeight;
 		if (aReference == null)
 		{
-			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-			screenWidth = (int) screen.getWidth();
-			screenHeight = (int) screen.getHeight();
+			referenceWidth = (int) screen.getWidth();
+			referenceHeight = (int) screen.getHeight();
+			centerOnScreen = true;
 		}
 		else
 		{
-			screenWidth = aReference.getWidth();
-			screenHeight = aReference.getHeight();
+			referenceWidth = aReference.getWidth();
+			referenceHeight = aReference.getHeight();
 		}
 		int winWidth,  winHeight;
 		if (aWinToCenter == null)
@@ -195,21 +198,27 @@ public class WbSwingUtilities
 		{
 			winWidth = aWinToCenter.getWidth();
 			winHeight = aWinToCenter.getHeight();
+			if (winWidth > referenceWidth || winHeight > referenceHeight)
+			{
+				referenceWidth = (int) screen.getWidth();
+				referenceHeight = (int) screen.getHeight();
+				centerOnScreen = true;
+			}
 		}
 
 		int x = 1,  y = 1;
 
 		// Get center points
-		if (screenWidth > winWidth)
+		if (referenceWidth > winWidth)
 		{
-			x = ((screenWidth / 2) - (winWidth / 2));
+			x = ((referenceWidth / 2) - (winWidth / 2));
 		}
-		if (screenHeight > winHeight)
+		if (referenceHeight > winHeight)
 		{
-			y = ((screenHeight / 2) - (winHeight / 2));
+			y = ((referenceHeight / 2) - (winHeight / 2));
 		}
 
-		if (aReference != null && aReference.isVisible())
+		if (aReference != null && aReference.isVisible() && !centerOnScreen)
 		{
 			try
 			{
@@ -374,6 +383,13 @@ public class WbSwingUtilities
 		return (result == JOptionPane.YES_OPTION);
 	}
 
+	/**
+	 * Present a Yes/No/Cancel message to the user.
+	 *
+	 * @param aCaller the calling component
+	 * @param aMessage the message to display.
+	 * @return JOptionPane.YES_OPTION  or JOptionPane.NO_OPTION or JOptionPane.CANCEL_OPTION
+	 */
 	public static int getYesNoCancel(Component aCaller, String aMessage)
 	{
 		int result = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);

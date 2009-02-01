@@ -11,10 +11,14 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
@@ -60,6 +64,36 @@ public class DisplayDataFormAction
 		Frame window = (Frame)SwingUtilities.getWindowAncestor(client);
 
 		ValidatingDialog dialog = new ValidatingDialog(window, ResourceMgr.getString("TxtWindowTitleForm"), panel);
+		Dimension d = dialog.getPreferredSize();
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+
+		boolean doLimit = false;
+		if (d.height > screen.height)
+		{
+			d.height = screen.height - 150;
+			doLimit = true;
+			
+			// make the form wider, so that the vertical scrollbar does not 
+			// force a horizontal scrollbar to appear because the vertical space is now smaller
+			UIDefaults def = UIManager.getDefaults();
+			int scrollwidth = def.getInt("ScrollBar.width");
+			if (scrollwidth <= 0) scrollwidth = 32; // this should leave enough room...
+			d.width += scrollwidth + 2;
+		}
+
+		if (d.width > screen.width)
+		{
+			d.width = screen.width - 100;
+			doLimit = true;
+		}
+
+		if (doLimit)
+		{
+			dialog.setPreferredSize(d);
+			dialog.setMaximumSize(d);
+			dialog.pack();
+		}
+
 		try
 		{
 			WbSwingUtilities.center(dialog, window);

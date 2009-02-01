@@ -1,12 +1,12 @@
 /*
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 
 package workbench.gui.sql;
@@ -30,6 +30,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -59,7 +60,7 @@ import workbench.util.SqlUtil;
 /**
  * A Panel that displays a single record from a WbTable
  * but lets the user step through the records.
- * 
+ *
  * The fields are defined through a ResultInfo.
  *
  * @author support@sql-workbench.net
@@ -69,19 +70,20 @@ public class RecordFormPanel
 	implements ValidatingComponent, ActionListener
 {
 	private ResultInfo fieldDef;
-	private JComponent[] inputFields;
+	private JComponent[] inputControls;
 	private WbRenderer[] renderer;
 	private BlobHandler[] blobHandlers;
-	
+
 	private int currentRow;
 	private WbTable data;
 	private int toFocus = 0;
-	
+	private int scrollBarWidth = -1;
+
 	public RecordFormPanel(WbTable table, int displayRow)
 	{
 		this(table, displayRow, 0);
 	}
-	
+
 	public RecordFormPanel(WbTable table, int displayRow, int columnToFocus)
 	{
 		super(new BorderLayout());
@@ -113,7 +115,7 @@ public class RecordFormPanel
 	{
 		return data.getRowCount();
 	}
-	
+
 	protected void _buildEntryForm()
 	{
 		if (fieldDef == null) return;
@@ -127,19 +129,31 @@ public class RecordFormPanel
 		c.anchor = GridBagConstraints.NORTHWEST;
 		c.weighty = 0.0;
 
-		inputFields = new JComponent[fieldDef.getColumnCount()];
-		blobHandlers = new BlobHandler[inputFields.length];
+		inputControls = new JComponent[fieldDef.getColumnCount()];
+		blobHandlers = new BlobHandler[inputControls.length];
 		Color requiredColor = GuiSettings.getRequiredFieldColor();
 		Insets labelInsets = new Insets(2, 0,10, 0);
 		Insets fieldInsets = new Insets(0,10,10,10);
 
+		Font displayFont = Settings.getInstance().getDataFont(true);
+		FontMetrics fm = getFontMetrics(displayFont);
+		int numChars = GuiSettings.getDefaultFormFieldWidth();
+		int charWidth = fm.getMaxAdvance();
+		int charHeight = fm.getHeight() + 5;
+		int fieldWidth = charWidth * numChars;
+		int areaHeight = charHeight * GuiSettings.getDefaultFormFieldLines();
+
+		Dimension areaSize = new Dimension(fieldWidth, areaHeight);
+
+		boolean showRequired = GuiSettings.getHighlightRequiredFields() && requiredColor != null;
+		
 		for (int i=0; i < fieldDef.getColumnCount(); i++)
 		{
 			c.gridx = 0;
 			c.fill = GridBagConstraints.NONE;
 			c.weightx = 0.0;
 			c.insets = labelInsets;
-			
+
 			ColumnIdentifier col = fieldDef.getColumn(i);
 			JLabel label = new JLabel(col.getColumnName());
 			label.setToolTipText(col.getDbmsType());
@@ -149,26 +163,17 @@ public class RecordFormPanel
 			c.insets = fieldInsets;
 
 			Component toAdd = null;
-			Font displayFont = Settings.getInstance().getDataFont(true);
-			FontMetrics fm = getFontMetrics(displayFont);
-			int numChars = GuiSettings.getDefaultFormFieldWidth();
-			int charWidth = fm.getMaxAdvance();
-			int charHeight = fm.getHeight() + 5;
-			int fieldWidth = charWidth * numChars;
-			int areaHeight = charHeight * GuiSettings.getDefaultFormFieldLines();
-			
 			if (SqlUtil.isMultiLineColumn(col))
 			{
 				JTextArea area = new JTextArea(new WbDocument());
 				area.setLineWrap(false);
-				
-				inputFields[i] = area;
-				Dimension min = new Dimension(fieldWidth, areaHeight);
 
-				JScrollPane scroll = new JScrollPane(inputFields[i], ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				inputFields[i].setMinimumSize(min);
-				inputFields[i].setPreferredSize(min);
-				inputFields[i].setFont(displayFont);
+				inputControls[i] = area;
+
+				JScrollPane scroll = new JScrollPane(inputControls[i], ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				inputControls[i].setMinimumSize(areaSize);
+				inputControls[i].setPreferredSize(areaSize);
+				inputControls[i].setFont(displayFont);
 				c.fill = GridBagConstraints.BOTH;
 				c.weighty = 1.0;
 				toAdd = scroll;
@@ -177,56 +182,67 @@ public class RecordFormPanel
 			{
 				JButton b = new JButton(" (BLOB) ");
 				b.addActionListener(this);
-				inputFields[i] = b;
+				inputControls[i] = b;
 				c.fill = GridBagConstraints.NONE;
 				c.weighty = 0.0;
-				toAdd = inputFields[i];
+				toAdd = inputControls[i];
 			}
 			else
 			{
-				inputFields[i] = new JTextField(new WbDocument(), null, numChars);
-				inputFields[i].setFont(displayFont);
+				inputControls[i] = new JTextField(new WbDocument(), null, numChars);
+				inputControls[i].setFont(displayFont);
 				c.fill = GridBagConstraints.HORIZONTAL;
 				c.weighty = 0.0;
-				toAdd = inputFields[i];
+				toAdd = inputControls[i];
 			}
-			
 
 			if (i == fieldDef.getColumnCount() - 1)
 			{
 				c.weighty = 1.0;
 			}
 			formPanel.add(toAdd, c);
-			if (GuiSettings.getHighlightRequiredFields() && requiredColor != null)
+			if (showRequired && !col.isNullable())
 			{
-				if (!col.isNullable())
-				{
-					inputFields[i].setBackground(requiredColor);
-				}
+				inputControls[i].setBackground(requiredColor);
 			}
-			
+
 			c.gridy ++;
 		}
 
+		// Initialize the correct tab focus order
 		WbTraversalPolicy policy = new WbTraversalPolicy();
-		for (int i=0; i < inputFields.length; i++)
+		for (int i=0; i < inputControls.length; i++)
 		{
-			policy.addComponent(inputFields[i]);
+			policy.addComponent(inputControls[i]);
 		}
-		JScrollPane formScroll = new JScrollPane(formPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+
+		// Put the input form into a scrollpane in case there are a lot of columns in the row
+		JScrollPane formScroll = new JScrollPane(formPanel, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		formScroll.setWheelScrollingEnabled(true);
+		JScrollBar vscroll = formScroll.getVerticalScrollBar();
+		if (vscroll != null)
+		{
+			vscroll.setUnitIncrement(charHeight * 2); // clicking on the scrollbar arrows, scrolls by two "lines"
+			vscroll.setBlockIncrement(charHeight * 10); // clicking on the scrollbar "free area", scrolls by ten "lines"
+		}
 		formScroll.setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(10,5,10,5)));
 		this.add(formScroll, BorderLayout.CENTER);
-		policy.setDefaultComponent(inputFields[0]);
+
+		// make the first input field the default component
+		// this might be changed later when the componentDisplayed()
+		// method is invoked and an initial column has been defined
+		policy.setDefaultComponent(inputControls[0]);
 		initRenderer();
 
 		this.add(new FormNavigation(this), BorderLayout.SOUTH);
+		this.setMaximumSize(new Dimension(100,100));
 	}
 
 	private void initRenderer()
 	{
 		if (fieldDef == null) return;
-		if (inputFields == null) return;
-		renderer = new WbRenderer[inputFields.length];
+		if (inputControls == null) return;
+		renderer = new WbRenderer[inputControls.length];
 
 		Settings sett = Settings.getInstance();
 		String dateFormat = sett.getDefaultDateFormat();
@@ -259,7 +275,7 @@ public class RecordFormPanel
 
 	/**
 	 * Displays the data from the passed RowData.
-	 * 
+	 *
 	 * @param row
 	 */
 	public void showRecord(int toDisplay)
@@ -273,7 +289,7 @@ public class RecordFormPanel
 			}
 		});
 	}
-	
+
 	protected void _showRecord()
 	{
 		for (int i=0; i < fieldDef.getColumnCount(); i++)
@@ -281,13 +297,13 @@ public class RecordFormPanel
 			Object value = data.getValueAt(currentRow, getTableColumn(i));
 			if (value == null)
 			{
-				if (inputFields[i] instanceof JTextComponent)
+				if (inputControls[i] instanceof JTextComponent)
 				{
-					((JTextComponent)inputFields[i]).setText("");
+					((JTextComponent)inputControls[i]).setText("");
 				}
-				if (inputFields[i] instanceof BlobColumnPanel)
+				if (inputControls[i] instanceof BlobColumnPanel)
 				{
-					((BlobColumnPanel)inputFields[i]).setValue(null);
+					((BlobColumnPanel)inputControls[i]).setValue(null);
 				}
 			}
 			else
@@ -308,10 +324,10 @@ public class RecordFormPanel
 					{
 						display = value.toString();
 					}
-				
-					if (inputFields[i] instanceof JTextComponent)
+
+					if (inputControls[i] instanceof JTextComponent)
 					{
-						JTextComponent text = (JTextComponent)inputFields[i];
+						JTextComponent text = (JTextComponent)inputControls[i];
 						text.setText(display);
 						text.setCaretPosition(0);
 					}
@@ -321,31 +337,39 @@ public class RecordFormPanel
 		resetDocuments();
 	}
 
+	/**
+	 * Reset the modified flag of the input fields
+	 */
 	protected void resetDocuments()
 	{
-		for (int i=0; i < inputFields.length; i++)
+		for (int i=0; i < inputControls.length; i++)
 		{
-			if (inputFields[i] instanceof JTextComponent)
+			if (inputControls[i] instanceof JTextComponent)
 			{
-				JTextComponent text = (JTextComponent)inputFields[i];
+				JTextComponent text = (JTextComponent)inputControls[i];
 				WbDocument doc = (WbDocument)text.getDocument();
 				doc.resetModified();
 			}
 		}
 	}
-	
+
+	/**
+	 * Check if anything has changed on the input fields
+	 *
+	 * @return true if at least one column value has been modified by the user
+	 */
 	public boolean isChanged()
 	{
 		boolean isChanged = false;
-		for (int i=0; i < inputFields.length; i++)
+		for (int i=0; i < inputControls.length; i++)
 		{
-			if (inputFields[i] instanceof JTextComponent)
+			if (inputControls[i] instanceof JTextComponent)
 			{
-				JTextComponent text = (JTextComponent)inputFields[i];
+				JTextComponent text = (JTextComponent)inputControls[i];
 				WbDocument doc = (WbDocument)text.getDocument();
 				isChanged = isChanged || doc.isModified();
 			}
-			else if (inputFields[i] instanceof JButton)
+			else if (inputControls[i] instanceof JButton)
 			{
 				BlobHandler handler = blobHandlers[i];
 				if (handler != null)
@@ -372,11 +396,11 @@ public class RecordFormPanel
 
 	public void applyChanges()
 	{
-		for (int i=0; i < inputFields.length; i++)
+		for (int i=0; i < inputControls.length; i++)
 		{
-			if (inputFields[i] instanceof JTextComponent)
+			if (inputControls[i] instanceof JTextComponent)
 			{
-				JTextComponent text = (JTextComponent)inputFields[i];
+				JTextComponent text = (JTextComponent)inputControls[i];
 				WbDocument doc = (WbDocument)text.getDocument();
 				if (doc.isModified())
 				{
@@ -384,7 +408,7 @@ public class RecordFormPanel
 					data.setValueAt(newValue, currentRow, getTableColumn(i));
 				}
 			}
-			else if (inputFields[i] instanceof JButton)
+			else if (inputControls[i] instanceof JButton)
 			{
 				BlobHandler handler = blobHandlers[i];
 				if (handler != null)
@@ -412,7 +436,7 @@ public class RecordFormPanel
 		int offset = data.getShowStatusColumn() ? 1 : 0;
 		return dataColumn + offset;
 	}
-	
+
 	private boolean startEdit()
 	{
 		Container tableParent = data.getParent();
@@ -432,7 +456,7 @@ public class RecordFormPanel
 		}
 		return false;
 	}
-	
+
 	public boolean validateInput()
 	{
 		if (!isChanged()) return true;
@@ -458,22 +482,22 @@ public class RecordFormPanel
 
 	public void componentDisplayed()
 	{
-		if (inputFields == null) return;
-		
+		if (inputControls == null) return;
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				inputFields[toFocus].requestFocusInWindow();
+				inputControls[toFocus].requestFocusInWindow();
 			}
 		});
 	}
 
 	private int getColumnIndexFor(Component component)
 	{
-		for (int i=0; i < inputFields.length; i++)
+		for (int i=0; i < inputControls.length; i++)
 		{
-			if (inputFields[i] == component) return i;
+			if (inputControls[i] == component) return i;
 		}
 		return -1;
 	}
@@ -502,7 +526,7 @@ public class RecordFormPanel
 				currentValue = null;
 			}
 		}
-		
+
 		if (ctrlPressed)
 		{
 			blobHandlers[column].showBlobAsText(currentValue);

@@ -74,20 +74,32 @@ public class FormNavigation
 		int newRow = StringUtil.getIntValue(currentRow.getText(), -1);
 		if (newRow > 0 && newRow <= display.getRowCount())
 		{
-			display.showRecord(newRow - 1);
-			try
+			if (changeRow(newRow - 1))
 			{
-				scrollBar.setValueIsAdjusting(true);
-				scrollBar.setValue(display.getCurrentRow());
-			}
-			finally
-			{
-				scrollBar.setValueIsAdjusting(false);
+				try
+				{
+					scrollBar.setValueIsAdjusting(true);
+					scrollBar.setValue(display.getCurrentRow());
+				}
+				finally
+				{
+					scrollBar.setValueIsAdjusting(false);
+				}
 			}
 		}
 		updateStatus();
 	}
 
+	private boolean changeRow(int newRow)
+	{
+		if (display.validateInput())
+		{
+			display.showRecord(newRow);
+			return true;
+		}
+		return false;
+	}
+	
 	private void updateStatus()
 	{
 		currentRow.setText(Integer.toString(display.getCurrentRow() + 1));
@@ -97,8 +109,23 @@ public class FormNavigation
 	{
 		if (e.getValueIsAdjusting()) return;
 		int newRow = e.getValue();
-		display.showRecord(newRow);
-		updateStatus();
+		int current = display.getCurrentRow();
+		if (changeRow(newRow))
+		{
+			updateStatus();
+		}
+		else
+		{
+			try
+			{
+				scrollBar.setValueIsAdjusting(true);
+				scrollBar.setValue(current);
+			}
+			finally
+			{
+				scrollBar.setValueIsAdjusting(false);
+			}
+		}
 	}
 
 
