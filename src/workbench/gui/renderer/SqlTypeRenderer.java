@@ -44,10 +44,7 @@ public class SqlTypeRenderer
 	{
 		try
 		{
-			int type = ((Integer)value).intValue();
-			String display = SqlUtil.getTypeName(type);
-			this.setText(display);
-			this.setToolTipText(display);
+			prepareDisplay(value);
 			Font oldFont = null;
 			if (isPrinting && printFont != null)
 			{
@@ -102,6 +99,14 @@ public class SqlTypeRenderer
 		printFont = g.getFont();
 		super.print(g);
 		this.isPrinting = false;
+	}
+
+	public void prepareDisplay(Object value)
+	{
+		int type = ((Integer)value).intValue();
+		String display = SqlUtil.getTypeName(type);
+		this.setText(display);
+		this.setToolTipText(display);
 	}
 
 }

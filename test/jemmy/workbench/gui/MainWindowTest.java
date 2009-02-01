@@ -200,7 +200,7 @@ public class MainWindowTest
 		final SqlPanel sqlPanel = (SqlPanel)panel.getSource();
 
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
-		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
+		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(2);
 		final JMenuItemOperator save = new JMenuItemOperator(saveItem);
 		assertFalse(save.isEnabled());
 
@@ -277,7 +277,7 @@ public class MainWindowTest
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
 
 		// Copy as text menu item
-		for (int i=8; i < 12; i++)
+		for (int i=9; i < 14; i++)
 		{
 			JMenuItem item = (JMenuItem)dataMenu.getMenuComponent(i);
 			JMenuItemOperator op = new JMenuItemOperator(item);
@@ -317,7 +317,7 @@ public class MainWindowTest
 		testCopyActions(mainMenu);
 
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
-		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(1);
+		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(2);
 		JMenuItemOperator save = new JMenuItemOperator(saveItem);
 		assertFalse(save.isEnabled());
 

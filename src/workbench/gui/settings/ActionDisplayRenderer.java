@@ -82,5 +82,10 @@ public class ActionDisplayRenderer
 	{
 		this.useAlternateColors = flag;
 	}
+
+	public void prepareDisplay(Object value)
+	{
+		
+	}
 	
 }

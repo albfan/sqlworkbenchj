@@ -198,4 +198,9 @@ public class BlobColumnRenderer
 		}
 	}
 
+	public void prepareDisplay(Object value)
+	{
+		// nothing to do
+	}
+
 }

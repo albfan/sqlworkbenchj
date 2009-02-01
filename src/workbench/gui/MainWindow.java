@@ -1282,49 +1282,55 @@ public class MainWindow
 		{
 			public void run()
 			{
-				
 				WbWorkspace w = null;
 				try
 				{
+					// Ignore all stateChanged() events from the SQL Tab during loading
+					tabRemovalInProgress = true;
+					
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
 					if (entryCount == 0)
 					{
 						entryCount = 1;
 					}
-					adjustTabCount(entryCount);
 
+					for (int i = 0; i < entryCount; i++)
+					{
+						MainPanel p = null;
+						if (i == 0)
+						{
+							// after closing the workspace one (default) SQL tab will be present
+							p = getSqlPanel(i);
+						}
+						else
+						{
+							p = addTab(false, false, true, false);
+						}
+						p.readFromWorkspace(w, i);
+					}
 					int explorerCount = w.getDbExplorerVisibleCount();
-
 					adjustDbExplorerCount(explorerCount);
 
-					int count = sqlTab.getTabCount();
-					for (int i = 0; i < count; i++)
-					{
-						MainPanel p = getSqlPanel(i);
-						p.readFromWorkspace(w, i);
-						if (p instanceof SqlPanel)
-						{
-							updateViewMenu(i, getTabTitle(i));
-						}
-					}
 					currentWorkspaceFile = realFilename;
 
-					int newIndex = w.getSelectedTab();
-					if (newIndex < sqlTab.getTabCount())
-					{
-						// the stateChanged event will be ignored as we
-						// have the repainting for the tab suspended
-						sqlTab.setSelectedIndex(newIndex);
-					}
 					resultForWorkspaceClose = true;
 
+					renumberTabs();
 					updateWindowTitle();
 					checkWorkspaceActions();
 					updateAddMacroAction();
+
+					tabRemovalInProgress = false;
+					int newIndex = w.getSelectedTab();
+					if (newIndex < sqlTab.getTabCount())
+					{
+						sqlTab.setSelectedIndex(newIndex);
+					}
+
 					MainPanel p = getCurrentPanel();
 					checkConnectionForPanel(p);
-					updateGuiForTab(sqlTab.getSelectedIndex());
+//					updateGuiForTab(sqlTab.getSelectedIndex());
 				}
 				catch (Throwable e)
 				{
@@ -1334,6 +1340,7 @@ public class MainWindow
 				}
 				finally
 				{
+					tabRemovalInProgress = false;
 					FileUtil.closeQuitely(w);
 				}
 			}
@@ -1805,16 +1812,27 @@ public class MainWindow
 	 */
 	public int findFirstExplorerTab()
 	{
-		int count = this.sqlTab.getTabCount();
-		for (int i=0; i < count; i++)
+		int last = this.sqlTab.getTabCount() - 1;
+		if (last < 0) return -1;
+
+		boolean found = false;
+		while(true)
 		{
-			Component c = this.sqlTab.getComponentAt(i);
-			if (c instanceof DbExplorerPanel)
+			Component c = this.sqlTab.getComponentAt(last);
+			if (!found && c instanceof DbExplorerPanel)
 			{
-				return i;
+				found = true;
 			}
+			if (c instanceof SqlPanel)
+			{
+				break;
+			}
+			last --;
+			c = this.sqlTab.getComponentAt(last);
 		}
-		return -1;
+
+		if (!found) return -1;
+		return last;
 	}
 
 	public List<ToolWindow> getExplorerWindows()
@@ -2298,12 +2316,12 @@ public class MainWindow
 
 	public MainPanel insertTab()
 	{
-		return addTab(true, true, false);
+		return addTab(true, true, false, true);
 	}
 
 	public MainPanel addTab()
 	{
-		return this.addTab(true, true, true);
+		return this.addTab(true, true, true, true);
 	}
 
 	/**
@@ -2317,10 +2335,10 @@ public class MainWindow
 	 */
 	public MainPanel addTab(boolean selectNew, boolean checkConnection)
 	{
-		return addTab(selectNew, checkConnection, true);
+		return addTab(selectNew, checkConnection, true, true);
 	}
 
-	public MainPanel addTab(boolean selectNew, boolean checkConnection, boolean append)
+	public MainPanel addTab(boolean selectNew, boolean checkConnection, boolean append, boolean renumber)
 	{
 		int index = -1;
 		if (append)
@@ -2333,6 +2351,7 @@ public class MainWindow
 		}
 
 		if (index == -1) index = sqlTab.getTabCount();
+
 		final SqlPanel sql = new SqlPanel(index+1);
 		sql.setConnectionClient(this);
 		sql.addDbExecutionListener(this);
@@ -2349,13 +2368,13 @@ public class MainWindow
 
 		this.setMacroMenuEnabled(sql.isConnected());
 
-		this.renumberTabs();
+		if (renumber) this.renumberTabs();
 
 		sql.initDivider(sqlTab.getHeight() - sqlTab.getTabHeight());
 
 		if (selectNew)
 		{
-			// if no connection was created initially the switcht to a new
+			// if no connection was created initially the switch to a new
 			// panel will initiate the connection.
 			this.sqlTab.setSelectedIndex(index);
 		}
@@ -2714,7 +2733,7 @@ public class MainWindow
 					for (int i=0; i < files; i++)
 					{
 						File file = (File)fileList.get(i);
-						this.addTab(true, true, true);
+						this.addTab(true, true, true, true);
 						SqlPanel sql = this.getCurrentSqlPanel();
 						sql.readFile(file.getAbsolutePath(), null);
 					}

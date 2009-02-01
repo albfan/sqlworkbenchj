@@ -20,4 +20,5 @@ public interface WbRenderer
 	String getDisplayValue();
 	void setUseAlternatingColors(boolean flag);
 	int getHorizontalAlignment();
+	void prepareDisplay(Object value);
 }

@@ -53,7 +53,18 @@ public class BlobHandler
 		return getByteDisplay(l);
 	}
 
-	public boolean setToNull() { return this.setToNull; }
+	public boolean setToNull() 
+	{
+		return this.setToNull;
+	}
+
+	public Object getValueToUse()
+	{
+		if (this.setToNull) return null;
+		if (this.uploadFile != null) return uploadFile;
+		return newValue;
+	}
+	
 	public File getUploadFile()
 	{
 		return uploadFile;

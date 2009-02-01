@@ -21,6 +21,16 @@ import workbench.util.StringUtil;
  */
 public class GuiSettings
 {
+	public static int getDefaultFormFieldWidth()
+	{
+		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldwidth", 50);
+	}
+
+	public static int getDefaultFormFieldLines()
+	{
+		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldlines", 5);
+	}
+	
 	public static boolean getConfirmTabClose()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.closetab.confirm", false);

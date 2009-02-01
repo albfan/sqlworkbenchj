@@ -61,7 +61,7 @@ public class BlobColumnPanel
 		c.anchor = GridBagConstraints.NORTHWEST;
 		add(label, c);
 		
-		c.gridx = 2;
+		c.gridx = 1;
 		c.fill = GridBagConstraints.NONE;
 		c.weightx = 0;
 		add(openButton, c);

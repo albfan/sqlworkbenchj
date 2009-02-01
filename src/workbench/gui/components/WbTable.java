@@ -82,6 +82,7 @@ import workbench.gui.actions.CopySelectedAsSqlInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
 import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.CopyAsTextAction;
+import workbench.gui.actions.DisplayDataFormAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.OptimizeAllColumnsAction;
@@ -165,6 +166,7 @@ public class WbTable
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
 
+	private DisplayDataFormAction formAction;
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
 
@@ -320,6 +322,15 @@ public class WbTable
 		this.getActionMap().put("wbtable-stop-editing", a);
 	}
 
+	public void showInputFormAction()
+	{
+		if (this.popup == null) return;
+
+		formAction = new DisplayDataFormAction(this);
+		popup.insert(this.formAction.getMenuItem(), 0);
+		formAction.addToInputMap(this);
+	}
+	
 	public void setListSelectionControl(ListSelectionControl controller)
 	{
 		this.selectionController = controller;
@@ -610,13 +621,7 @@ public class WbTable
 
 	public void addPopupAction(final WbAction anAction, final boolean withSep)
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				addPopupMenu(anAction.getMenuItem(), withSep);
-			}
-		});
+		addPopupMenu(anAction.getMenuItem(), withSep);
 	}
 
 	public void removePopupItem(final JMenuItem item)

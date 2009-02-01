@@ -13,7 +13,6 @@ package workbench.gui.sql;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.Window;
@@ -86,6 +85,7 @@ import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.DeleteDependentRowsAction;
 import workbench.gui.actions.DeleteRowAction;
+import workbench.gui.actions.DisplayDataFormAction;
 import workbench.gui.actions.ExecuteAllAction;
 import workbench.gui.actions.ExecuteCurrentAction;
 import workbench.gui.actions.ExecuteSelAction;
@@ -229,6 +229,7 @@ public class SqlPanel
 	protected DeleteRowAction deleteRow;
 	protected DeleteDependentRowsAction deleteDependentRow;
 	protected SelectKeyColumnsAction selectKeys;
+	protected DisplayDataFormAction showFormAction;
 	protected FilterDataAction filterAction;
 	protected SelectionFilterAction selectionFilterAction;
 	protected FilterPickerAction filterPicker;
@@ -614,7 +615,9 @@ public class SqlPanel
 		this.deleteDependentRow = new DeleteDependentRowsAction(null);
 		this.duplicateRow = new CopyRowAction(null);
 		this.selectKeys = new SelectKeyColumnsAction(null);
+		this.showFormAction = new DisplayDataFormAction(null);
 
+		this.actions.add(this.showFormAction);
 		this.actions.add(this.selectKeys);
 		this.actions.add(this.updateAction);
 		this.actions.add(this.insertRow);
@@ -2136,6 +2139,9 @@ public class SqlPanel
 		}
 	}
 
+	/**
+	 * Update those actions that depend on the current data result.
+	 */
 	protected void updateProxiedActions()
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -2176,6 +2182,7 @@ public class SqlPanel
 			resetFilterAction.setOriginal(null);
 			selectionFilterAction.setClient(null);
 			resetHighlightAction.setOriginal(null);
+			showFormAction.setTable(null);
 		}
 		else
 		{
@@ -2206,6 +2213,7 @@ public class SqlPanel
 			resetFilterAction.setOriginal(currentData.getTable().getResetFilterAction());
 			selectionFilterAction.setClient(currentData.getTable());
 			resetHighlightAction.setOriginal(currentData.getTable().getResetHighlightAction());
+			showFormAction.setTable(currentData.getTable());
 		}
 	}
 

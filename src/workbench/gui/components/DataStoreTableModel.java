@@ -49,6 +49,7 @@ public class DataStoreTableModel
 	private SortDefinition sortColumns = new SortDefinition();
 
 	private boolean allowEditing = true;
+	private boolean showConverterError = true;
 	private final Object model_change_lock = new Object();
 
 	public DataStoreTableModel(DataStore aDataStore)
@@ -73,6 +74,10 @@ public class DataStoreTableModel
 		this.fireTableStructureChanged();
 	}
 
+	public void setShowConverterError(boolean flag)
+	{
+		this.showConverterError = flag;
+	}
 	/**
 	 *	Return the contents of the field at the given position
 	 *	in the result set.
@@ -177,8 +182,12 @@ public class DataStoreTableModel
 				Toolkit.getDefaultToolkit().beep();
 				String msg = ResourceMgr.getString("MsgConvertError");
 				msg = msg + "\r\n" + ce.getLocalizedMessage();
-				WbSwingUtilities.showErrorMessage(msg);
-				return;
+				if (showConverterError)
+				{
+					WbSwingUtilities.showErrorMessage(msg);
+					return;
+				}
+				throw new IllegalArgumentException(msg);
 			}
 		}
 		WbSwingUtilities.invoke(new Runnable()
@@ -562,7 +571,7 @@ public class DataStoreTableModel
 		if (this.sortColumns == null) return;
 		if (this.dataCache == null) return;
 
-		synchronized (this.dataCache)
+		synchronized (model_change_lock)
 		{
 			try
 			{

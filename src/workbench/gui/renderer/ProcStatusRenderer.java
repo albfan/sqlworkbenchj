@@ -57,4 +57,9 @@ public class ProcStatusRenderer
 		return getText();
 	}
 
+	public void prepareDisplay(Object value)
+	{
+		// nothing to do
+	}
+
 }

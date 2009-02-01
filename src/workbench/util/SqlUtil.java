@@ -32,6 +32,7 @@ import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
@@ -1205,6 +1206,30 @@ public class SqlUtil
 		}
 		result.append(meta.quoteObjectname(name));
 		return result.toString();
+	}
+
+	public static boolean isMultiLineColumn(ColumnIdentifier column)
+	{
+		if (column == null) return false;
+
+		int charLength = 0;
+		int sqlType = column.getDataType();
+
+		if (isClobType(sqlType))
+		{
+			charLength = Integer.MAX_VALUE;
+		}
+		else if (isCharacterType(sqlType))
+		{
+			charLength = column.getColumnSize();
+		}
+		else
+		{
+			return false;
+		}
+
+		int sizeThreshold = Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 250);
+		return charLength >= sizeThreshold;
 	}
 	
 }

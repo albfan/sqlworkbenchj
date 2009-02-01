@@ -90,8 +90,8 @@ public class SearchCriteriaPanel
 
 		if (showHighlight)
 		{
-			this.highlightAll = new JCheckBox(ResourceMgr.getString("LblHighlightAll"));
-			this.highlightAll.setToolTipText(ResourceMgr.getDescription("LblHighlightAll"));
+			this.highlightAll = new JCheckBox(ResourceMgr.getString("LblHiliteAll"));
+			this.highlightAll.setToolTipText(ResourceMgr.getDescription("LblHiliteAll"));
 			this.highlightAll.setSelected(Settings.getInstance().getBoolProperty(highlightProperty, false));
 		}
 

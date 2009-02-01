@@ -56,7 +56,7 @@ public class ValidatingDialog
 	public ValidatingDialog(Dialog owner, String title, JComponent editor)
 	{
 		super(owner, title, true);
-		init(owner, editor, new String[] { ResourceMgr.getString("LblOK") }, true);
+		init(editor, new String[] { ResourceMgr.getString("LblOK") }, true);
 	}
 	
 	public ValidatingDialog(Frame owner, String title, JComponent editor)
@@ -67,7 +67,7 @@ public class ValidatingDialog
 	public ValidatingDialog(Frame owner, String title, JComponent editor, boolean addCancelButton)
 	{
 		super(owner, title, true);
-		init(owner, editor, new String[] { ResourceMgr.getString("LblOK") }, addCancelButton);
+		init(editor, new String[] { ResourceMgr.getString("LblOK") }, addCancelButton);
 	}
 
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options)
@@ -78,7 +78,7 @@ public class ValidatingDialog
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options, boolean addCancelButton)
 	{
 		super(owner, title, true);
-		init(owner, editor, options, addCancelButton);
+		init(editor, options, addCancelButton);
 	}
 	
 	public void setDefaultButton(int index)
@@ -94,7 +94,7 @@ public class ValidatingDialog
 		}
 	}
 	
-	private void init(Window owner, JComponent editor, String[] options, boolean addCancelButton)
+	private void init(JComponent editor, String[] options, boolean addCancelButton)
 	{
 		if (editor instanceof ValidatingComponent)
 		{
