@@ -77,7 +77,6 @@ public class RecordFormPanel
 	private int currentRow;
 	private WbTable data;
 	private int toFocus = 0;
-	private int scrollBarWidth = -1;
 
 	public RecordFormPanel(WbTable table, int displayRow)
 	{
@@ -132,8 +131,8 @@ public class RecordFormPanel
 		inputControls = new JComponent[fieldDef.getColumnCount()];
 		blobHandlers = new BlobHandler[inputControls.length];
 		Color requiredColor = GuiSettings.getRequiredFieldColor();
-		Insets labelInsets = new Insets(2, 0,10, 0);
-		Insets fieldInsets = new Insets(0,10,10,10);
+		Insets labelInsets = new Insets(5, 0,5,0);
+		Insets fieldInsets = new Insets(0,10,5,5);
 
 		Font displayFont = Settings.getInstance().getDataFont(true);
 		FontMetrics fm = getFontMetrics(displayFont);
@@ -146,21 +145,24 @@ public class RecordFormPanel
 		Dimension areaSize = new Dimension(fieldWidth, areaHeight);
 
 		boolean showRequired = GuiSettings.getHighlightRequiredFields() && requiredColor != null;
-		
+
 		for (int i=0; i < fieldDef.getColumnCount(); i++)
 		{
 			c.gridx = 0;
 			c.fill = GridBagConstraints.NONE;
 			c.weightx = 0.0;
 			c.insets = labelInsets;
+			c.anchor = GridBagConstraints.NORTHEAST;
 
 			ColumnIdentifier col = fieldDef.getColumn(i);
 			JLabel label = new JLabel(col.getColumnName());
 			label.setToolTipText(col.getDbmsType());
 			formPanel.add(label, c);
+
 			c.gridx = 1;
 			c.weightx = 1.0;
 			c.insets = fieldInsets;
+			c.anchor = GridBagConstraints.NORTHWEST;
 
 			Component toAdd = null;
 			if (SqlUtil.isMultiLineColumn(col))
@@ -170,9 +172,9 @@ public class RecordFormPanel
 
 				inputControls[i] = area;
 
-				JScrollPane scroll = new JScrollPane(inputControls[i], ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-				inputControls[i].setMinimumSize(areaSize);
-				inputControls[i].setPreferredSize(areaSize);
+				JScrollPane scroll = new JScrollPane(area, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				scroll.setMinimumSize(areaSize);
+				scroll.setPreferredSize(areaSize);
 				inputControls[i].setFont(displayFont);
 				c.fill = GridBagConstraints.BOTH;
 				c.weighty = 1.0;

@@ -107,7 +107,6 @@ public class FormNavigation
 
 	public void adjustmentValueChanged(AdjustmentEvent e)
 	{
-		if (e.getValueIsAdjusting()) return;
 		int newRow = e.getValue();
 		int current = display.getCurrentRow();
 		if (changeRow(newRow))

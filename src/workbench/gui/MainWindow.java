@@ -1290,30 +1290,20 @@ public class MainWindow
 					
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
-					if (entryCount == 0)
-					{
-						entryCount = 1;
-					}
+					if (entryCount <= 0) entryCount = 1;
+					adjustTabCount(entryCount);
 
-					for (int i = 0; i < entryCount; i++)
-					{
-						MainPanel p = null;
-						if (i == 0)
-						{
-							// after closing the workspace one (default) SQL tab will be present
-							p = getSqlPanel(i);
-						}
-						else
-						{
-							p = addTab(false, false, true, false);
-						}
-						p.readFromWorkspace(w, i);
-					}
 					int explorerCount = w.getDbExplorerVisibleCount();
 					adjustDbExplorerCount(explorerCount);
 
+					int count = sqlTab.getTabCount();
+					for (int i = 0; i < count; i++)
+					{
+						MainPanel p = getSqlPanel(i);
+						p.readFromWorkspace(w, i);
+					}
+	
 					currentWorkspaceFile = realFilename;
-
 					resultForWorkspaceClose = true;
 
 					renumberTabs();
@@ -1330,7 +1320,6 @@ public class MainWindow
 
 					MainPanel p = getCurrentPanel();
 					checkConnectionForPanel(p);
-//					updateGuiForTab(sqlTab.getSelectedIndex());
 				}
 				catch (Throwable e)
 				{
@@ -2074,7 +2063,7 @@ public class MainWindow
 		{
 			for (int i=0; i < (newCount - tabCount); i++)
 			{
-				this.addTab(false, false);
+				this.addTab(false, false, true, false);
 			}
 		}
 		else if (newCount < tabCount)
