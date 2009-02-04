@@ -278,11 +278,11 @@ public class RecordFormPanel
 	/**
 	 * Displays the data from the passed RowData.
 	 *
-	 * @param row
+	 * @param rowNumber the row number to display
 	 */
-	public void showRecord(int toDisplay)
+	public void showRecord(int rowNumber)
 	{
-		currentRow = toDisplay;
+		currentRow = rowNumber;
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()

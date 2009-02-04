@@ -63,7 +63,7 @@ public class BadfileWriter
 		this.badFile.delete();
 	}
 
-	public void recordRejected(String record)
+	public synchronized void recordRejected(String record)
 	{
 		Writer w = null;
 		try
@@ -83,7 +83,10 @@ public class BadfileWriter
 		}
 	}
 	
-	public int getRows() { return badRows; }
+	public synchronized int getRows()
+	{
+		return badRows;
+	}
 	
 	public CharSequence getMessage()
 	{

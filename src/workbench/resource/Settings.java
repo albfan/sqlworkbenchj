@@ -663,6 +663,16 @@ public class Settings
 		setProperty("workbench.sql.formatter.functions.lowercase", flag);
 	}
 
+	public boolean getFormatterUpperCaseKeywords()
+	{
+		return getBoolProperty("workbench.sql.formatter.keywords.uppercase", true);
+	}
+
+	public void setFormatterUpperCaseKeywords(boolean flag)
+	{
+		setProperty("workbench.sql.formatter.keywords.uppercase", flag);
+	}
+
 	public int getFormatterMaxSubselectLength()
 	{
 		return getIntProperty("workbench.sql.formatter.subselect.maxlength", 60);

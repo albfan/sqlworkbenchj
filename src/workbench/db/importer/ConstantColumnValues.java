@@ -190,7 +190,6 @@ public class ConstantColumnValues
 	public void setParameter(PreparedStatement pstmt, int statementIndex, int columnIndex)
 		throws SQLException
 	{
-		ColumnIdentifier col = getColumn(columnIndex);
 		Object value = getValue(columnIndex);
 
 		// If the column value is a function call, this will not

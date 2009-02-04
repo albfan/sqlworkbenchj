@@ -44,7 +44,7 @@ public class DataStoreImporter
 	private RowActionMonitor rowMonitor;
 	private JobErrorHandler errorHandler;
 	private int currentRowNumber;
-	
+
 	public DataStoreImporter(DataStore data, RowActionMonitor monitor, JobErrorHandler handler)
 	{
 		this.target = data;
@@ -85,16 +85,16 @@ public class DataStoreImporter
 	{
 	}
 	public void endMultiTable() {}
-	
+
 	public boolean getCreateTarget() { return false; }
 	public boolean shouldProcessNextRow() { return true; }
 	public void nextRowSkipped() {}
-	
+
 	public void importString(String contents)
 	{
 		importString(contents, "\t", "\"");
 	}
-	
+
 	public void importString(String contents, String delimiter, String quoteChar)
 	{
 		ClipboardFile file = new ClipboardFile(contents);
@@ -106,7 +106,7 @@ public class DataStoreImporter
 		ClipboardFile file = new ClipboardFile(content);
 		setImportOptions(file, ProducerFactory.ImportType.Text, options, textOptions, null);
 	}
-	
+
 	public void setImportOptions(File file, ProducerFactory.ImportType type, ImportOptions generalOptions, TextImportOptions textOptions, XmlImportOptions xmlOptions)
 	{
 		ProducerFactory factory = new ProducerFactory(file);
@@ -115,14 +115,14 @@ public class DataStoreImporter
 		factory.setXmlOptions(xmlOptions);
 		factory.setType(type);
 		ResultInfo info = this.target.getResultInfo();
-		
+
 		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(info.getColumnCount());
 		for (int i = 0; i < info.getColumnCount(); i++)
 		{
 			cols.add(info.getColumn(i));
 		}
-		
-		try 
+
+		try
 		{
 			factory.setImportColumns(cols);
 		}
@@ -135,12 +135,12 @@ public class DataStoreImporter
 		this.source.setAbortOnError(false);
 		this.source.setErrorHandler(this.errorHandler);
 	}
-	
+
 	public MessageBuffer getMessage()
 	{
 		return this.source.getMessages();
 	}
-	
+
 	public void processRow(Object[] row) throws SQLException
 	{
 		RowData data = new RowData(row.length);
@@ -150,23 +150,23 @@ public class DataStoreImporter
 		}
 		target.addRow(data);
 		currentRowNumber ++;
-		if (this.rowMonitor != null) this.rowMonitor.setCurrentRow(currentRowNumber, -1);		
+		if (this.rowMonitor != null) this.rowMonitor.setCurrentRow(currentRowNumber, -1);
 	}
-	
-	public void recordRejected(String record)
+
+	public void recordRejected(String record, long importRow, Throwable error)
 	{
-		
+
 	}
-	
+
 	public void setTableCount(int total)
 	{
 	}
-	
+
 	public void setCurrentTable(int current)
 	{
 	}
-	
-	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns) 
+
+	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)
 		throws SQLException
 	{
 		if (columns.length != this.target.getColumnCount())
@@ -175,15 +175,15 @@ public class DataStoreImporter
 			throw new SQLException("Invalid column count");
 		}
 	}
-	
+
 	public void importFinished()
 	{
 	}
-	
+
 	public void importCancelled()
 	{
 	}
-	
+
 	public void tableImportError()
 	{
 	}
@@ -192,10 +192,10 @@ public class DataStoreImporter
 	{
 		this.source.cancel();
 	}
-	
+
 	public boolean confirmCancel()
 	{
 		return true;
 	}
-	
+
 }

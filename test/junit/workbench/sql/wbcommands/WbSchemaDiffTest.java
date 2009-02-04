@@ -134,8 +134,8 @@ public class WbSchemaDiffTest
 	{
 		util = new TestUtil("schemaDiffTest");
 		
-		WbConnection source = util.getConnection(new File(util.getBaseDir(), "source"), "source");
-		WbConnection target = util.getConnection(new File(util.getBaseDir(), "target"), "target");
+		WbConnection source = util.getConnection(new File(util.getBaseDir(), "source"), "source", false);
+		WbConnection target = util.getConnection(new File(util.getBaseDir(), "target"), "target", false);
 
 		Statement stmt = null;
 		

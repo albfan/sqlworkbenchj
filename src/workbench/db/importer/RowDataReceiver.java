@@ -57,5 +57,5 @@ public interface RowDataReceiver
 	 * Log an error with the receiver that might have occurred
 	 * during parsing of the source data. 
 	 */
-	void recordRejected(String record);
+	void recordRejected(String record, long importRow, Throwable e);
 }

@@ -144,6 +144,7 @@ public class SqlFormatter
 	private Set<String> dataTypes = Collections.emptySet();
 	private static final String NL = "\n";
 	private boolean lowerCaseFunctions;
+	private boolean upperCaseKeywords = true;
 
 	public SqlFormatter(CharSequence aScript)
 	{
@@ -169,6 +170,7 @@ public class SqlFormatter
 		this.maxSubselectLength = maxLength;
 		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
 		this.lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
+		this.upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
 		addStandardFunctions(dbFunctions);
 	}
 
@@ -284,10 +286,14 @@ public class SqlFormatter
 		this.result.append(c);
 	}
 
-	private void appendTokenText(Token t)
+	private void appendTokenText(SQLToken t)
 	{
 		String text = t.getContents();
 		if (this.lowerCaseFunctions && this.dbFunctions.contains(text))
+		{
+			text = text.toLowerCase();
+		}
+		else if (!this.upperCaseKeywords && t.isReservedWord())
 		{
 			text = text.toLowerCase();
 		}

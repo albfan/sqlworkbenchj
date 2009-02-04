@@ -747,10 +747,12 @@ public class TextFileParser
 		}
 
 		currentLine = null;
+		long lineNumber = 0;
 
 		try
 		{
 			currentLine = in.readLine();
+			lineNumber ++;
 			if (this.withHeader)
 			{
 				if (currentLine == null) throw new IOException("Could not read header line!");
@@ -994,7 +996,7 @@ public class TextFileParser
 								this.abortOnError = false;
 							}
 						}
-						this.receiver.recordRejected(currentLine);
+						this.receiver.recordRejected(currentLine, lineNumber, e);
 						includeLine = false;
 					}
 				}

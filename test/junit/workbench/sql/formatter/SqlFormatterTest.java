@@ -230,7 +230,26 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
-
+	public void testLowerCaseKeywords()
+		throws Exception
+	{
+		try
+		{
+			String sql = "SELECT foo FROM bar";
+			String expected =
+				"select foo\n" +
+				"from bar";
+			Settings.getInstance().setFormatterUpperCaseKeywords(false);
+			SqlFormatter f = new SqlFormatter(sql);
+			String formatted = f.getFormattedSql().toString();
+//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+			assertEquals(expected, formatted);
+		}
+		finally
+		{
+			Settings.getInstance().setFormatterUpperCaseKeywords(true);
+		}
+	}
 	public void testFormatInsert()
 		throws Exception
 	{

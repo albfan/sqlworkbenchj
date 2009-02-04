@@ -239,7 +239,7 @@ public class TestUtil
 	public WbConnection getConnection(File db)
 		throws SQLException, ClassNotFoundException
 	{
-		return getConnection(db, "WbUnitTest");
+		return getConnection(db, "WbUnitTest", false);
 	}
 
 	/**
@@ -247,11 +247,12 @@ public class TestUtil
 	 * A connection profile for this connection is created with the given ID.
 	 * The name of the profile is the file name (without the file path)
 	 */
-	public WbConnection getConnection(File db, String id)
+	public WbConnection getConnection(File db, String id, boolean mvcc)
 		throws SQLException, ClassNotFoundException
 	{
 		ArgumentParser parser = new AppArguments();
-		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + "' -username=sa -driver=org.h2.Driver");
+		String option = (mvcc ? ";MVCC=true" : "");
+		parser.parse("-url='jdbc:h2:" + db.getAbsolutePath() + option + "' -username=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(db.getName());
 		ConnectionMgr.getInstance().addProfile(prof);
