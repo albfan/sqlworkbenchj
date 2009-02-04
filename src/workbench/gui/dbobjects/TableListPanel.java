@@ -237,6 +237,7 @@ public class TableListPanel
 			public void reload()
 			{
 				shouldRetrieveTable = true;
+				shouldRetrieveIndexes = true;
 				if (dbConnection.isBusy()) return;
 
 				try
@@ -1197,6 +1198,9 @@ public class TableListPanel
 
 		try
 		{
+			if (shouldRetrieveTable) retrieveTableDefinition();
+			if (shouldRetrieveIndexes) retrieveIndexes();
+
 			WbSwingUtilities.showWaitCursor(this);
 			CharSequence sql = null;
 
@@ -1274,7 +1278,6 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			this.tableDefinition.retrieve(selectedTable);
-			this.shouldRetrieveTable = false;
 			shouldRetrieveTable = false;
 		}
 		catch (SQLException e)
