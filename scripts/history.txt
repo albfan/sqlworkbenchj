@@ -1,5 +1,11 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh: (103.1) A single record dialog is now available to edit data in a
+     result set (Data -> Single row dialog)
+Enh: (103.1) A new option to control the use of uppercase keywords for the
+     SQL formatter.
+Fix: (103.1) When refreshing the source for a table or a view, the column
+     definition was not reloaded from the database.
 
 Build 103, 31.01.2009
 --------------------

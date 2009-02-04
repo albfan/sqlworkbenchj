@@ -580,7 +580,7 @@
 		</jarbundler>
 
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
-      <tarfileset dir="${distdir}">
+      <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
         <include name="history.txt"/>
 				<include name="SQLWorkbench-Manual.pdf"/>
       </tarfileset>
@@ -591,7 +591,7 @@
 			<tarfileset mode="555" dir="${bundledir}">
 				<include name="**/JavaApplicationStub"/>
 			</tarfileset>
-      <tarfileset dir="${distdir}/manual" prefix="manual">
+      <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
         <include name="**/*.*"/>
       </tarfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
