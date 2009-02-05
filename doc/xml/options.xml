@@ -405,92 +405,16 @@
 		</section>
 
 	</section>
+	
 	<section id="options-data-display">
 		<title>Options for displaying data</title>
+
 
 		<section id="options-data-font">
 			<title>Data font</title>
 			<para>
 				The font that is used to display result sets. This includes
 				the object list and results in the <link linkend="dbexplorer">DbExplorer</link>.
-			</para>
-		</section>
-
-		<section id="options-date-format">
-			<title>Date, timestamp and time formats</title>
-			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
-				set. For details on the format of this option, please refer to the
-				documentation of the <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
-				This format is also used when parsing input for date or timestamp fields, so if you
-				enter a date while <link linkend="edit-data">editing</link> the data,
-				make sure you enter it the same way as defined with this option.
-			</para>
-			<para>
-				Here is an overview of the letters and their meaning that can be used to format
-				the date and timestamp values. Be aware that case matters!
-				<informaltable frame="all">
-					<tgroup cols="2" align="left">
-						<colspec colname="c1" colwidth="1cm" />
-						<colspec colname="c2" />
-						<thead>
-							<row>
-								<entry>Letter</entry>
-								<entry>Description</entry>
-							</row>
-						</thead>
-						<tbody valign="top">
-							<row><entry>G</entry><entry>Era designator (Text, e.g. AD)</entry></row>
-							<row><entry>y</entry><entry>Year (Number)</entry></row>
-							<row><entry>M</entry><entry>Month in year (Number)</entry></row>
-							<row><entry>w</entry><entry>Week in year (Number)</entry></row>
-							<row><entry>W</entry><entry>Week in month (Number)</entry></row>
-							<row><entry>D</entry><entry>Day in year (Number)</entry></row>
-							<row><entry>d</entry><entry>Day in month (Number)</entry></row>
-							<row><entry>F</entry><entry>Day of week in month (Number)</entry></row>
-							<row><entry>E</entry><entry>Day in week (Text)</entry></row>
-							<row><entry>a</entry><entry>AM/PM marker</entry></row>
-							<row><entry>H</entry><entry>Hour in day (0-23)</entry></row>
-							<row><entry>k</entry><entry>Hour in day (1-24)</entry></row>
-							<row><entry>K</entry><entry>Hour in am/pm (0-11)</entry></row>
-							<row><entry>h</entry><entry>Hour in am/pm (1-12)</entry></row>
-							<row><entry>m</entry><entry>Minute in hour</entry></row>
-							<row><entry>s</entry><entry>Second in minute</entry></row>
-							<row><entry>S</entry><entry>Milliseconds</entry></row>
-							<row><entry>z</entry><entry>General time zone (e.g. Pacific Standard Time; PST; GMT-08:00)</entry></row>
-							<row><entry>Z</entry><entry>RFC 822 time zone (e.g. -0800)</entry></row>
-						</tbody>
-					</tgroup>
-				</informaltable>
-			</para>
-		</section>
-
-		<section id="options-ora-data-timestamp">
-			<title>Oracle <literal>DATE</literal> as <literal>TIMESTAMP</literal></title>
-			<para>
-				The Oracle <literal>DATE</literal> datatype includes the time as well. But the 
-				JDBC driver does not retrieve the time part of a DATE column, so when retrieving
-				<literal>DATE</literal> values, this would remove the time stored in the database. If this option is
-				enabled, &wb-productname; will treat Oracle's <literal>DATE</literal> columns
-				as <literal>TIMESTAMP</literal> columns, thus preserving the time information.
-			</para>
-		</section>
-
-		<section id="options-decimal-symbol">
-			<title>Decimal symbol</title>
-			<para>
-				The character which is used as the decimal separator when displaying numbers.
-			</para>
-		</section>
-
-		<section id="options-decimal-digits">
-			<title>Decimal digits</title>
-			<para>Define the maximum number of digits which will be displayed for
-				numeric columns. This only affects the display of the number internally
-				they are still stored as the DBMS returned them. To see the internal
-				value, leave the mouse cursor over the cell. The tooltip which is
-				displayed will contain the number as it was returned by the JDBC driver.
-				When exporting data or copying it to the clipboard, the real value will
-				be used.
 			</para>
 		</section>
 
@@ -505,17 +429,34 @@
       </para>
     </section>
 
-		<section id="option-selection-summary">
-      <title>Show selection summary in statusbar</title>
-      <para>
-				If this option is enabled a summary of the current selection of the data is displayed.
-				If full rows are selected, the statusbar will display the number of rows selected
-      </para>
+		<section id="options-multiline">
+			<title>Displaying multi-line values</title>
 			<para>
-				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
-				while selecting with the mouse), the statusbar will display the sum of the selected values.
+				&wb-productname; uses a special renderer for the contents
+				of <literal>CLOB</literal> columns that is capable of displaying
+				multiple lines (i.e. honors newlines and linefeeds in the data retrieved from the database).
 			</para>
-    </section>
+
+			<para>
+				This multi-line renderer is usually not applied for
+				<literal>VARCHAR</literal> columns. If your database stores text
+				in VARCHAR columns that contains line breaks, you can define a threshold
+				for the length of the column. Any column that is defined with a higher value
+				will be displayed with a multiline renderer.
+			</para>
+			<para>
+				The default value of 250 means that a <literal>VARCHAR(250)</literal> column
+				will be displayed with the multiline renderer. A <literal>VARCHAR(210)</literal>
+				will be displayed in a single line.
+			</para>
+			<para>
+				Using the multiline renderer has some minor drawbacks when editing the data,
+				and is be a bit slower when displaying large result sets.
+			</para>
+			<para>
+				The feature <link linkend="options-auto-optimize-row-height">Adjust row height</link> only works with multi-line fields.
+			</para>
+		</section>
 
 		<section id="column-width-settings">
 			<title>Column width settings</title>
@@ -575,9 +516,10 @@
 				</para>
 				<para>
 					Not every (character) column is displayed in a manner that multiple lines will be displayed.
-					The default setting is to display only <literal>CLOB</literal> columns and <literal>VARCHAR</literal>
-					columns with a maximum size of more than 500 characters in multiline mode. 
-					The threshold for <literal>VARCHAR</literal> columns can be <link linkend="settings-varchar-multiline-threshold">changed</link>.
+					The default setting is to always display <literal>CLOB</literal> columns as multiline.
+					<literal>VARCHAR</literal> (and <literal>CHAR</literal>) columns will only be displayed in
+					multiline mode if they can hold more than 250 characters. This limit
+					can be <link linkend="options-multiline">changed</link>.
 				</para>
 			</simplesect>
 
@@ -613,6 +555,101 @@
 			<title>Color for <literal>NULL</literal> values</title>
 			<para>
 				If a color is defined, NULL values will be highlighted with the selected colors in the result set.
+			</para>
+		</section>
+
+		<section id="option-selection-summary">
+      <title>Show selection summary in statusbar</title>
+      <para>
+				If this option is enabled a summary of the current selection of the data is displayed.
+				If full rows are selected, the statusbar will display the number of rows selected
+      </para>
+			<para>
+				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
+				while selecting with the mouse), the statusbar will display the sum of the selected values.
+			</para>
+    </section>
+
+	</section>
+
+	<section id="options-data-formatting">
+		<title>Options for formatting data</title>
+
+		<section id="options-date-format">
+			<title>Date, timestamp and time formats</title>
+			<para>Define the format for displaying date, date/time (timestamp) and time columns in the result
+				set. For details on the format of this option, please refer to the
+				documentation of the <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/text/SimpleDateFormat.html"><literal>SimpleDateFormat</literal></ulink> class.
+				This format is also used when parsing input for date or timestamp fields, so if you
+				enter a date while <link linkend="edit-data">editing</link> the data,
+				make sure you enter it the same way as defined with this option.
+			</para>
+			<para>
+				Here is an overview of the letters and their meaning that can be used to format
+				the date and timestamp values. Be aware that case matters!
+				<informaltable frame="all">
+					<tgroup cols="2" align="left">
+						<colspec colname="c1" colwidth="1cm" />
+						<colspec colname="c2" />
+						<thead>
+							<row>
+								<entry>Letter</entry>
+								<entry>Description</entry>
+							</row>
+						</thead>
+						<tbody valign="top">
+							<row><entry>G</entry><entry>Era designator (Text, e.g. AD)</entry></row>
+							<row><entry>y</entry><entry>Year (Number)</entry></row>
+							<row><entry>M</entry><entry>Month in year (Number)</entry></row>
+							<row><entry>w</entry><entry>Week in year (Number)</entry></row>
+							<row><entry>W</entry><entry>Week in month (Number)</entry></row>
+							<row><entry>D</entry><entry>Day in year (Number)</entry></row>
+							<row><entry>d</entry><entry>Day in month (Number)</entry></row>
+							<row><entry>F</entry><entry>Day of week in month (Number)</entry></row>
+							<row><entry>E</entry><entry>Day in week (Text)</entry></row>
+							<row><entry>a</entry><entry>AM/PM marker</entry></row>
+							<row><entry>H</entry><entry>Hour in day (0-23)</entry></row>
+							<row><entry>k</entry><entry>Hour in day (1-24)</entry></row>
+							<row><entry>K</entry><entry>Hour in am/pm (0-11)</entry></row>
+							<row><entry>h</entry><entry>Hour in am/pm (1-12)</entry></row>
+							<row><entry>m</entry><entry>Minute in hour</entry></row>
+							<row><entry>s</entry><entry>Second in minute</entry></row>
+							<row><entry>S</entry><entry>Milliseconds</entry></row>
+							<row><entry>z</entry><entry>General time zone (e.g. Pacific Standard Time; PST; GMT-08:00)</entry></row>
+							<row><entry>Z</entry><entry>RFC 822 time zone (e.g. -0800)</entry></row>
+						</tbody>
+					</tgroup>
+				</informaltable>
+			</para>
+		</section>
+
+		<section id="options-ora-data-timestamp">
+			<title>Oracle <literal>DATE</literal> as <literal>TIMESTAMP</literal></title>
+			<para>
+				The Oracle <literal>DATE</literal> datatype includes the time as well. But the
+				JDBC driver does not retrieve the time part of a DATE column, so when retrieving
+				<literal>DATE</literal> values, this would remove the time stored in the database. If this option is
+				enabled, &wb-productname; will treat Oracle's <literal>DATE</literal> columns
+				as <literal>TIMESTAMP</literal> columns, thus preserving the time information.
+			</para>
+		</section>
+
+		<section id="options-decimal-symbol">
+			<title>Decimal symbol</title>
+			<para>
+				The character which is used as the decimal separator when displaying numbers.
+			</para>
+		</section>
+
+		<section id="options-decimal-digits">
+			<title>Decimal digits</title>
+			<para>Define the maximum number of digits which will be displayed for
+				numeric columns. This only affects the display of the number internally
+				they are still stored as the DBMS returned them. To see the internal
+				value, leave the mouse cursor over the cell. The tooltip which is
+				displayed will contain the number as it was returned by the JDBC driver.
+				When exporting data or copying it to the clipboard, the real value will
+				be used.
 			</para>
 		</section>
 

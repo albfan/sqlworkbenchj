@@ -60,6 +60,7 @@
   <section id="gui-settings">
     <title>GUI related settings</title>
 
+<!--
 		<simplesect id="settings-varchar-multiline-threshold">
 			<title>Controlling display of multiline values</title>
       <para>Property: <literal>workbench.gui.display.multilinethreshold</literal></para>
@@ -83,7 +84,7 @@
 			</para>
       <para>Default: <literal>250</literal></para>
 		</simplesect>
-
+-->
     <simplesect id="settings-show-acc-menu">
       <title>Showing accelerator in menu</title>
       <para>Property: <literal>workbench.gui.showmnemonics</literal></para>

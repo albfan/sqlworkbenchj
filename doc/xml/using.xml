@@ -144,46 +144,94 @@ COMMIT;
 				statements in the different tabs can run concurrently.
 			</para>
 
+			<section id="statement-history">
+				<title>Statement history</title>
+
+				<para>
+					When executing a statement the contents of the editor is put
+					into an internal buffer together with the information about the
+					text selection and the cursor position. Even when you select a part of the current
+					text and execute that statement, the whole text is stored in the history buffer together
+					with the selection information. When you select and execute different parts of the text
+					and then move through the history you will see the selection change for each history
+					entry.
+				</para>
+				<para>
+					The previous statement can be
+					recalled by pressing <keycap>Alt-Left</keycap> or choosing
+					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Previous Statement</guimenuitem></menuchoice>
+					statement from the menu. Once the previous statement(s) have been
+					recalled the next statement can be shown using <keycap>Alt-Right</keycap> or choosing
+					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice>
+					from the menu. This is similar to browsing through the history of a web browser.
+				</para>
+				<para>
+					You can clear the statement history for the current tab, but selecting
+					<menuchoice><guimenu>SQL</guimenu><guimenuitem>Clear history</guimenuitem></menuchoice>
+				</para>
+				<note>
+					<para>
+					When you clear the content of the editor (e.g. by selecting the whole text
+					and then pressing the <keycap>Del</keycap> key) this will not clear the statement
+					history. When you load the associated workspace the next time, the editor will
+					automatically display the last statement from the history. You need to manually
+					clear the statement history, if you want an empty editor the next time you
+					load the workspace.
+					</para>
+				</note>
+			</section>
 
 		</section>
+	</section>
 
-		<section id="display-result">
-			<title>Displaying results</title>
+	<section id="display-result">
+		<title>Displaying results</title>
 
+		<para>
+			When you run SQL statements that produce a result (such as a <literal>SELECT</literal>
+			statement) these results will be displayed in the lower pane of the window, next to
+			the message panel. For each result that is returned from the server, one tab
+			(labelled "Result") will be created. If you select and execute three <literal>SELECT</literal>
+			statements, the lower pane will show three result tabs and the message tab. If your
+			statement(s) did not produce any result, only the messages tab will be displayed.
+		</para>
+
+		<para>
+			When you run a SQL statement, the current results will be cleared and
+			replaced by the new results. You can turn this off by selecting
+			<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
+			Every result that is retrieved while this option is turned on, will be added to the
+			set of result tabs, until you de-select this option. This can also be
+			toggled using the button on the toolbar. Additional result tabs can be closed using
+			<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
+		</para>
+
+		<para>
+			You can also run stored procedures that return result sets. These result will be
+			displayed in the same way. For DBMS's that support mulitple result sets from
+			a single stored procedure (e.g. Microsoft SQL Server), one tab will be displayed
+			for each result returned.
+		</para>
+
+		<note>
 			<para>
-				When you run SQL statements that produce a result (such as a <literal>SELECT</literal>
-				statement) these results will be displayed in the lower pane of the window, next to
-				the message panel. For each result that is returned from the server, one tab
-				(labelled "Result") will be created. If you select and execute three <literal>SELECT</literal>
-				statements, the lower pane will show three result tabs and the message tab. If your
-				statement(s) did not produce any result, only the messages tab will be displayed.
+				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
+				the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal>
+				package is enabled.
+				In order to be able to display these columns, the support for
+				<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off.
 			</para>
+		</note>
+		
+		<section id="display-multiline">
+			<title>Displaying values with embedded newlines</title>
 			<para>
-				When you run a SQL statement, the current results will be cleared and
-				replaced by the new results. You can turn this off by selecting
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Append new results</guimenuitem></menuchoice>.
-				Every result that is retrieved while this option is turned on, will be added to the
-				set of result tabs, until you de-select this option. This can also be
-				toggled using the button on the toolbar. Additional result tabs can be closed using
-				<menuchoice><guimenu>Data</guimenu><guimenuitem>Close result</guimenuitem></menuchoice>
+				Data from <literal>VARCHAR</literal> or <literal>CHAR</literal> columns is
+				displayed as a single-line if the column's max. size is below 250 characters.
+				If you have data in smaller columns that contains newlines (linebreaks) and you want
+				to display directly in the result set, please adjust the limit to match your needs.
+				The limit can be changed in the <link linkend="options-multiline">Data Display Options</link>.
 			</para>
-
-			<para>
-				You can also run stored procedures that return result sets. These result will be
-				displayed in the same way. For DBMS's that support mulitple result sets from
-				a single stored procedure (e.g. Microsoft SQL Server), one tab will be displayed
-				for each result returned.
-			</para>
-
-			<note>
-				<para>
-					Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
-					the <literal>LONG</literal> or <literal>LONG RAW</literal> data type if the <literal>DBMS_OUTPUT</literal>
-					package is enabled.
-					In order to be able to display these columns, the support for
-					<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off.
-				</para>
-			</note>
 		</section>
 
 		<section id="result-names">
@@ -201,10 +249,9 @@ COMMIT;
 			<programlisting>-- @wbresult List of contacts
 SELECT * FROM person;
 
-
 /*
-   @wbresult List of companies
-   this will retrieve all companies from the database
+ @wbresult List of companies
+ this will retrieve all companies from the database
 */
 SELECT * FROM company;</programlisting>
 			<para>
@@ -213,49 +260,12 @@ SELECT * FROM company;</programlisting>
 				until the end of the line.
 			</para>
 			<para>
-				The second select (with the multi-line comment), the name of the result tab will be
-				<literal>List of companies</literal>, the comment on the second line will be ignored.
+				For the second select (with the multi-line comment), the name of the result tab will be
+				<literal>List of companies</literal>, the comment on the second line will not be considered.
 			</para>
 		</section>
 
-		<section id="statement-history">
-			<title>Statement history</title>
-
-			<para>
-				When executing a statement the contents of the editor is put
-				into an internal buffer together with the information about the
-				text selection and the cursor position. Even when you select a part of the current
-				text and execute that statement, the whole text is stored in the history buffer together
-				with the selection information. When you select and execute different parts of the text
-				and then move through the history you will see the selection change for each history
-				entry.
-			</para>
-			<para>
-				The previous statement can be
-				recalled by pressing <keycap>Alt-Left</keycap> or choosing
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Previous Statement</guimenuitem></menuchoice>
-				statement from the menu. Once the previous statement(s) have been
-				recalled the next statement can be shown using <keycap>Alt-Right</keycap> or choosing
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Next Statement</guimenuitem></menuchoice>
-				from the menu. This is similar to browsing through the history of a web browser.
-			</para>
-			<para>
-				You can clear the statement history for the current tab, but selecting
-				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Clear history</guimenuitem></menuchoice>
-			</para>
-			<note>
-				<para>
-				When you clear the content of the editor (e.g. by selecting the whole text
-				and then pressing the <keycap>Del</keycap> key) this will not clear the statement
-				history. When you load the associated workspace the next time, the editor will
-				automatically display the last statement from the history. You need to manually
-				clear the statement history, if you want an empty editor the next time you
-				load the workspace.
-				</para>
-			</note>
-		</section>
-
-	</section>
+</section>
 
 	<section id="understand-alternate-delim">
 		<title>Using the alternate delimiter to execute DDL statements</title>
