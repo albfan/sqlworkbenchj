@@ -6,6 +6,13 @@ Enh: (103.1) A new option to control the use of uppercase keywords for the
      SQL formatter.
 Fix: (103.1) When refreshing the source for a table or a view, the column
      definition was not reloaded from the database.
+Fix: (103.1) When selecting a different View in the DbExplorer while the
+     view source was displayed, the wrong source code was displayed for
+     the newly selected view. 
+     definition was not reloaded from the database.
+Fix: (103.1) When MySQL was not set to ANSI mode, primary key columns that
+     needed quoting were not detected properly due to MySQL's non-standard
+     quoting character (in non-ANSI mode)
 
 Build 103, 31.01.2009
 --------------------
