@@ -115,9 +115,12 @@ public class WorkerPool
 			worker.stop();
 		}
 
-		for (Thread thread : threadPool)
+		if (threadPool != null)
 		{
-			thread.interrupt();
+			for (Thread thread : threadPool)
+			{
+				thread.interrupt();
+			}
 		}
 		
 		for (ImportWorker worker : workers)

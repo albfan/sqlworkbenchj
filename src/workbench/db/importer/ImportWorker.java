@@ -52,7 +52,7 @@ public class ImportWorker
 	implements Runnable
 {
 	private int threadId;
-	private BlockingQueue<ImportRow> dataQueue;
+	private ImportQueue dataQueue;
 	
 	private WbConnection dbConn;
 	
@@ -165,7 +165,7 @@ public class ImportWorker
 	public synchronized void flush()
 		throws SQLException
 	{
-//		if (this.hasErrors || cancel) return;
+		if (this.hasErrors || cancel) return;
 		
 		if (insertStatement != null)
 		{
@@ -228,8 +228,8 @@ public class ImportWorker
 						hasErrors = true;
 						if (!continueOnError) 
 						{
-							LogMgr.logWarning("ImportWorker.run()", "Terminating thread " + threadId + " due to exception", e);
 							controller.abort(row, e);
+							LogMgr.logInfo("ImportWorker.run()", "Terminating thread " + threadId + " due to an error", null);
 							break;
 						}
 					}

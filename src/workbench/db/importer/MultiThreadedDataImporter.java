@@ -32,11 +32,6 @@ import workbench.storage.RowActionMonitor;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
 import workbench.resource.Settings;
@@ -47,11 +42,11 @@ import workbench.util.WbThread;
 /**
  * Import data that is provided from a {@link RowDataProducer} into
  * a table in the database.
- * 
+ *
  * @see workbench.sql.wbcommands.WbImport
  * @see workbench.sql.wbcommands.WbCopy
  * @see workbench.db.datacopy.DataCopier
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class MultiThreadedDataImporter
@@ -80,9 +75,11 @@ public class MultiThreadedDataImporter
 	private int batchSize = -1;
 	private boolean canCommitInBatch = true;
 	private boolean commitBatch = false;
-	
+
 	private boolean hasErrors = false;
 	private boolean errorAbort = false;
+	private boolean cancel = false;
+
 	private boolean hasWarnings = false;
 	private int reportInterval = 10;
 	private MessageBuffer messages;
@@ -92,7 +89,7 @@ public class MultiThreadedDataImporter
 	private int totalTables = -1;
 	private int currentTable = -1;
 	private boolean transactionControl = true;
-	
+
 	private List<TableIdentifier> tablesToBeProcessed;
 	private TableDeleter tableDeleter;
 
@@ -107,11 +104,11 @@ public class MultiThreadedDataImporter
 
 	private List<ColumnIdentifier> targetColumns;
 	private List<ColumnIdentifier> keyColumns;
-	
-	// A map that stores constant values for the import. 
+
+	// A map that stores constant values for the import.
 	// e.g. for columns not part of the input file.
 	private ConstantColumnValues columnConstants;
-	
+
 	private RowActionMonitor progressMonitor;
 	private boolean isRunning = false;
 	private ImportFileParser parser;
@@ -120,24 +117,24 @@ public class MultiThreadedDataImporter
 	private long startRow = 0;
 	private long endRow = Long.MAX_VALUE;
 	private boolean partialImportEnded = false;
-	
+
 	// Additional WHERE clause for UPDATE statements
 	private String whereClauseForUpdate;
 	private BadfileWriter badWriter;
 	private String badfileName;
 
-	private BlockingQueue<ImportRow> importQueue;
-	
+	private ImportQueue importQueue;
+
 	private int errorCount = 0;
 	private boolean errorLimitAdded = false;
 	private int threadCount = 1;
-	
+
 	/**
 	 * Indicates multiple imports run with this instance oft DataImporter.
 	 * Set via {@link #beginMultiTable() }
-	 */ 
+	 */
 	private boolean multiTable = false;
-	
+
 	private TableStatements tableStatements;
 	private WorkerPool worker;
 
@@ -156,7 +153,22 @@ public class MultiThreadedDataImporter
 		// When using a LinkedBlockingQueue the synchronisation between the
 		// producer and the Worker threads does not work properly. It seems that
 		// the queue gets empty even if the producer is still sending rows.
-		importQueue = new ArrayBlockingQueue<ImportRow>(defaultSize, true);
+		importQueue = new ImportQueue(defaultSize, true);
+	}
+
+	/**
+	 * Set the number of worker threads.
+	 * <br/>
+	 * This call is ignored once setConnection() has been called.
+	 *
+	 * @param count
+	 */
+	public void setThreadCount(int count)
+	{
+		if (this.worker == null)
+		{
+			threadCount = count;
+		}
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -168,27 +180,27 @@ public class MultiThreadedDataImporter
 		worker.init(this);
 	}
 
-	public BlockingQueue getImportQueue()
+	public ImportQueue getImportQueue()
 	{
 		return this.importQueue;
 	}
-	
+
 	private boolean supportsBatch()
 	{
 		if (this.dbConn == null) return true;
 		return dbConn.getMetadata().supportsBatchUpdates();
 	}
-	
+
 	public void setTransactionControl(boolean flag)
 	{
 		this.transactionControl = flag;
 	}
-	
+
 	public RowActionMonitor getRowActionMonitor()
 	{
 		return this.progressMonitor;
 	}
-	
+
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
 		this.progressMonitor = rowMonitor;
@@ -212,7 +224,7 @@ public class MultiThreadedDataImporter
 	/**
 	 * Define statements that should be executed before an import
 	 * for a table starts and after the last record has been inserted.
-	 * 
+	 *
 	 * @param stmt the statement definitions. May be null
 	 */
 	public void setPerTableStatements(TableStatements stmt)
@@ -231,7 +243,7 @@ public class MultiThreadedDataImporter
 		throws SQLException
 	{
 		this.multiTable = true;
-		// If more than one table is imported and those tables need to 
+		// If more than one table is imported and those tables need to
 		// be deleted before the import starts (due to FK constraints) the producer
 		// has sent a list of tables that need to be deleted.
 		if (this.deleteTarget != DeleteType.none && this.tablesToBeProcessed != null)
@@ -239,22 +251,22 @@ public class MultiThreadedDataImporter
 			this.deleteTargetTables();
 		}
 	}
-	
+
 	public void endMultiTable()
 	{
 		this.multiTable = false;
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
-	
-	public void setStartRow(long row) 
-	{ 
-		if (row >= 0) this.startRow = row; 
+
+	public void setStartRow(long row)
+	{
+		if (row >= 0) this.startRow = row;
 		else this.startRow = 0;
 	}
-	
-	public void setEndRow(long row) 
-	{ 
-		if (row >= 0) this.endRow = row; 
+
+	public void setEndRow(long row)
+	{
+		if (row >= 0) this.endRow = row;
 		else this.endRow = Long.MAX_VALUE;
 	}
 
@@ -266,34 +278,34 @@ public class MultiThreadedDataImporter
 			this.commitEvery = 0;
 		}
 	}
-	
+
 	/**
 	 * Do not commit any changes after finishing the import
 	 */
 	public void commitNothing()
 	{
 		this.commitBatch = false;
-		this.commitEvery = Committer.NO_COMMIT_FLAG; 
+		this.commitEvery = Committer.NO_COMMIT_FLAG;
 	}
-	
+
 	public RowDataProducer getProducer()
 	{
 		return this.source;
 	}
-	
+
 	/**
 	 * Set the commit interval.
 	 * When this parameter is set, commitBatch is set to false.
-	 * 
+	 *
 	 * @param aCount the interval in which commits should be sent
 	 */
-	public void setCommitEvery(int aCount) 
-	{ 
+	public void setCommitEvery(int aCount)
+	{
 		if (aCount > 0 || aCount == Committer.NO_COMMIT_FLAG)
 		{
 			this.commitBatch = false;
 		}
-		this.commitEvery = aCount; 
+		this.commitEvery = aCount;
 	}
 
 	public List<ColumnIdentifier> getTargetColumns()
@@ -310,40 +322,40 @@ public class MultiThreadedDataImporter
 	{
 		return parser;
 	}
-	
+
 	public boolean getCommitBatch()
 	{
 		return commitBatch;
 	}
-	
+
 	public int getCommitEvery()
 	{
 		return this.commitEvery;
 	}
 
 	public boolean getContinueOnError() { return this.continueOnError; }
-	public void setContinueOnError(boolean flag) 
-	{ 
-		this.continueOnError = flag; 
+	public void setContinueOnError(boolean flag)
+	{
+		this.continueOnError = flag;
 	}
 
 	public DeleteType getDeleteTarget() { return deleteTarget; }
-	
+
 	public int getBatchSize()
 	{
 		return batchSize;
 	}
-	
-	public void setBatchSize(int size) 
-	{ 
-		this.batchSize = size; 
+
+	public void setBatchSize(int size)
+	{
+		this.batchSize = size;
 	}
 
 	public void setBadfileName(String fname)
 	{
 		this.badfileName = fname;
 	}
-	
+
 	public void setWhereClauseForUpdate(String clause)
 	{
 		if (StringUtil.isEmptyString(clause))
@@ -360,7 +372,7 @@ public class MultiThreadedDataImporter
 	{
 		this.tablesToBeProcessed = targetTables;
 	}
-	
+
 	public void deleteTargetTables()
 		throws SQLException
 	{
@@ -371,11 +383,11 @@ public class MultiThreadedDataImporter
 			this.messages.appendNewLine();
 			return;
 		}
-		
+
 		try
 		{
 			// The instance of the tableDeleter is stored in an instance
-			// variable in order to allow for cancel() during the initial 
+			// variable in order to allow for cancel() during the initial
 			// delete as well
 			tableDeleter = new TableDeleter(this.dbConn, true);
 			tableDeleter.setRowMonitor(this.progressMonitor);
@@ -387,18 +399,18 @@ public class MultiThreadedDataImporter
 			this.tableDeleter = null;
 		}
 	}
-	
+
 	/**
-	 * Controls creation of target table for imports where the 
+	 * Controls creation of target table for imports where the
 	 * producer can retrieve a full table definition (i.e. XML files
 	 * created with SQL Workbench)
-	 * 
+	 *
 	 * @see #createTarget()
 	 * @see #setTargetTable(workbench.db.TableIdentifier, workbench.db.ColumnIdentifier[])
 	 */
 	public void setCreateTarget(boolean flag) { this.createTarget = flag; }
 	public boolean getCreateTarget() { return createTarget; }
-	
+
 	/**
 	 *	Controls deletion of the target table.
 	 */
@@ -416,14 +428,14 @@ public class MultiThreadedDataImporter
 		this.useBatch = flag;
 	}
 
-	public void setModeInsert() 
-	{ 
-		this.mode = MODE_INSERT; 
+	public void setModeInsert()
+	{
+		this.mode = MODE_INSERT;
 	}
-	
-	public void setModeUpdate() 
-	{ 
-		this.mode = MODE_UPDATE; 
+
+	public void setModeUpdate()
+	{
+		this.mode = MODE_UPDATE;
 	}
 
 	public void setModeInsertUpdate()
@@ -431,7 +443,7 @@ public class MultiThreadedDataImporter
 		this.mode = MODE_INSERT_UPDATE;
 		this.useBatch = false;
 	}
-	
+
 	public void setModeUpdateInsert()
 	{
 		this.mode = MODE_UPDATE_INSERT;
@@ -486,7 +498,7 @@ public class MultiThreadedDataImporter
 
 	/**
 	 *	Return the numer mode value based on keywords.
-	 * 
+	 *
 	 *	Valid mode definitions are:
 	 *	<ul>
 	 *	<li>insert</li>
@@ -496,7 +508,7 @@ public class MultiThreadedDataImporter
 	 *  </ul>
 	 * The mode string is not case sensitive (INSERT is the same as insert)
 	 * @return -1 if the value is not valid
-	 * 
+	 *
 	 * @see #getModeValue(String)
 	 * @see #MODE_INSERT
 	 * @see #MODE_UPDATE
@@ -541,9 +553,9 @@ public class MultiThreadedDataImporter
 				return -1;
 			}
 		}
-		
+
 	}
-	
+
 	/**
 	 * Define the mode by supplying keywords.
 	 * A null value means "keep the current (default)" and is a valid mode
@@ -560,7 +572,7 @@ public class MultiThreadedDataImporter
 	}
 
 	/**
-	 * Define column constants for the import. 
+	 * Define column constants for the import.
 	 * It is expected that the value object is already converted to the correct
 	 * class. DataImporter will not convert the passed values in any way.
 	 */
@@ -572,7 +584,7 @@ public class MultiThreadedDataImporter
 			this.columnConstants = constantValues;
 		}
 	}
-	
+
 	/**
 	 *	Define the key columns by supplying a comma separated
 	 *	list of column names
@@ -603,7 +615,7 @@ public class MultiThreadedDataImporter
 	{
 		return (this.keyColumns != null && keyColumns.size() > 0);
 	}
-	
+
 	public void startBackgroundImport()
 	{
 		if (this.source == null) return;
@@ -635,7 +647,7 @@ public class MultiThreadedDataImporter
 		{
 			worker.start();
 		}
-		
+
 		if (this.useBatch)
 		{
 			if (!supportsBatch())
@@ -654,7 +666,7 @@ public class MultiThreadedDataImporter
 				this.messages.append(ResourceMgr.getString("ErrImportNoBatchMode"));
 			}
 		}
-		
+
 		try
 		{
 			this.source.start();
@@ -679,7 +691,7 @@ public class MultiThreadedDataImporter
 	{
 		return mode == MODE_INSERT;
 	}
-	
+
 	/**
 	 *	Deletes the target table by issuing a DELETE FROM ...
 	 */
@@ -697,7 +709,7 @@ public class MultiThreadedDataImporter
 			this.messages.appendNewLine();
 			return;
 		}
-		
+
 		if (this.deleteTarget == DeleteType.truncate)
 		{
 			deleteSql = "TRUNCATE TABLE " + this.targetTable.getTableExpression(this.dbConn);
@@ -720,7 +732,7 @@ public class MultiThreadedDataImporter
 			this.messages.append(rows + " " + ResourceMgr.getString("MsgImporterRowsDeleted") + " " + this.targetTable.getTableExpression(this.dbConn) + "\n");
 		}
 	}
-	
+
 	private void createTarget()
 		throws SQLException
 	{
@@ -753,33 +765,37 @@ public class MultiThreadedDataImporter
 		terminator.data = null;
 		for (int i=0; i < threadCount; i++)
 		{
-			importQueue.offer(terminator);
+			importQueue.add(terminator);
 		}
 	}
 
 	public void abort(ImportRow row, Exception e)
 	{
+		importQueue.stop();
+		
 		hasErrors = true;
 		errorAbort = true;
+		cancel = true;
 
 		addError(ResourceMgr.getString("ErrImportingRow") + " " + row.rowNumber + "\n");
 		ValueDisplay display = new ValueDisplay(row.data);
 		addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + e.getMessage() + "\n");
 		addError(ResourceMgr.getString("ErrImportValues") + " " + display.toString() + "\n\n");
-		cancelExecution();
+
+		source.cancel();
 	}
 
 	public void cancelExecution()
 	{
 		this.isRunning = false;
+		this.cancel = true;
+
 		if (this.tableDeleter != null)
 		{
 			this.tableDeleter.cancel();
 		}
-		System.out.println("cancelling producer...");
 		source.cancel();
-//		worker.cancel();
-		if (!errorAbort) this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
+		this.messages.append(ResourceMgr.getString("MsgImportCancelled") + "\n");
 	}
 
 	public void setTableCount(int total)
@@ -796,12 +812,12 @@ public class MultiThreadedDataImporter
 	{
 		return columnConstants;
 	}
-	
+
 	protected synchronized void clearMessages()
 	{
 		messages.clear();
 	}
-	
+
 	protected synchronized void addMessage(String msg, boolean withNewLine)
 	{
 		this.messages.append(msg);
@@ -827,7 +843,7 @@ public class MultiThreadedDataImporter
 			}
 		}
 	}
-	
+
 	public void recordRejected(String record, long importRow, Throwable error)
 	{
 		if (badWriter != null && record != null)
@@ -848,6 +864,8 @@ public class MultiThreadedDataImporter
 
 	public boolean shouldProcessNextRow()
 	{
+		if (errorAbort || cancel) return false;
+
 		if (currentImportRow + 1 < startRow) return false;
 		if (currentImportRow + 1 > endRow) return false;
 		return true;
@@ -857,7 +875,7 @@ public class MultiThreadedDataImporter
 	{
 		this.currentImportRow ++;
 	}
-	
+
 	/**
 	 *	Callback function for RowDataProducer. The order in the data array
 	 * 	has to be the same as initially passed in the setTargetTable() method.
@@ -866,14 +884,17 @@ public class MultiThreadedDataImporter
 		throws SQLException
 	{
 		if (row == null) return;
-		if (row.length != this.colCount) 
+		if (this.errorAbort || this.cancel) return;
+		if (importQueue.isStopped()) return;
+
+		if (row.length != this.colCount)
 		{
 			throw new SQLException("Invalid row data received. Size of row array does not match column count");
 		}
 
 		currentImportRow++;
 		if (currentImportRow < startRow) return;
-		if (currentImportRow > endRow) 
+		if (currentImportRow > endRow)
 		{
 			LogMgr.logInfo("DataImporter.processRow()", "Import limit (" + this.endRow + ") reached. Stopping import");
 			String msg = ResourceMgr.getString("MsgPartialImportEnded");
@@ -917,7 +938,7 @@ public class MultiThreadedDataImporter
 		}
 
 	}
-	
+
 	private void checkConstantValues()
 		throws SQLException
 	{
@@ -940,7 +961,7 @@ public class MultiThreadedDataImporter
 			}
 		}
 	}
-	
+
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
@@ -956,32 +977,32 @@ public class MultiThreadedDataImporter
 			}
 			catch (SQLException e)
 			{
-				if (!this.continueOnError) 
+				if (!this.continueOnError)
 				{
 					this.hasErrors = true;
 					throw e;
 				}
 			}
 		}
-		
+
 		this.currentImportRow = 0;
 		this.errorCount = 0;
 		this.errorLimitAdded = false;
-		
+
 		try
 		{
 			this.targetTable = table.createCopy();
 			this.targetColumns = Arrays.asList(columns);
-			
+
 			// Key columns might have been externally defined if
 			// a single table import is run which is not possible
-			// when using a multi-table import. So the keyColumns 
+			// when using a multi-table import. So the keyColumns
 			// should only be reset if a multi-table import is running!
-			if (this.multiTable) 
+			if (this.multiTable)
 			{
 				this.keyColumns = null;
 			}
-			
+
 			this.colCount = this.targetColumns.size();
 
 			if (this.parser != null)
@@ -990,7 +1011,7 @@ public class MultiThreadedDataImporter
 				this.messages.append(msg);
 				this.messages.appendNewLine();
 			}
-			
+
 			if (this.createTarget)
 			{
 				try
@@ -1009,7 +1030,7 @@ public class MultiThreadedDataImporter
 					throw e;
 				}
 			}
-			
+
 			try
 			{
 				this.checkTable();
@@ -1030,12 +1051,12 @@ public class MultiThreadedDataImporter
 			}
 
 			checkConstantValues();
-			
+
 			if (this.mode != MODE_UPDATE)
 			{
 				this.prepareInsertStatement();
 			}
-			
+
 			if (this.mode != MODE_INSERT)
 			{
 				this.prepareUpdateStatement();
@@ -1063,7 +1084,7 @@ public class MultiThreadedDataImporter
 					msg = msg.replace("%error%", ExceptionUtil.getDisplay(e));
 					this.messages.append(msg);
 					this.messages.appendNewLine();
-					
+
 					LogMgr.logError("DataImporter.setTargetTable()", "Could not delete contents of table " + this.targetTable, e);
 					if (!this.continueOnError)
 					{
@@ -1071,7 +1092,7 @@ public class MultiThreadedDataImporter
 					}
 				}
 			}
-				
+
 			this.currentImportRow = 0;
 
 			if (progressMonitor != null) this.progressMonitor.restoreType("importDelete");
@@ -1086,7 +1107,7 @@ public class MultiThreadedDataImporter
 			{
 				LogMgr.logInfo("DataImporter.setTargetTable()", "Starting import for table " + this.targetTable.getTableExpression());
 			}
-			
+
 			if (this.badfileName != null)
 			{
 				this.badWriter = new BadfileWriter(this.badfileName, this.targetTable, "UTF8");
@@ -1095,7 +1116,7 @@ public class MultiThreadedDataImporter
 			{
 				this.badWriter = null;
 			}
-			
+
 			if (this.tableStatements != null)
 			{
 				this.tableStatements.runPreTableStatement(dbConn, targetTable);
@@ -1114,7 +1135,7 @@ public class MultiThreadedDataImporter
 	{
 		return mode;
 	}
-	
+
 	private String getModeString()
 	{
 		if (this.isModeInsert()) return "insert";
@@ -1262,7 +1283,7 @@ public class MultiThreadedDataImporter
 				colIndex ++;
 			}
 		}
-		
+
 		if (!pkAdded)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "No primary key columns defined! Update mode not available\n", null);
@@ -1271,7 +1292,7 @@ public class MultiThreadedDataImporter
 			this.hasErrors = true;
 			throw new SQLException("No key columns defined for update mode");
 		}
-		
+
 		if (pkCount != this.keyColumns.size())
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "At least one of the supplied primary key columns was not found in the target table!", null);
@@ -1279,7 +1300,7 @@ public class MultiThreadedDataImporter
 			this.hasErrors = true;
 			throw new SQLException("Not enough key columns defined for update mode");
 		}
-		
+
 		if (colIndex == 0)
 		{
 			LogMgr.logError("DataImporter.prepareUpdateStatement()", "Only PK columns defined! Update mode is not available!", null);
@@ -1297,7 +1318,7 @@ public class MultiThreadedDataImporter
 			}
 			return;
 		}
-		
+
 		sql.append(where);
 		if (!StringUtil.isEmptyString(this.whereClauseForUpdate))
 		{
@@ -1364,6 +1385,12 @@ public class MultiThreadedDataImporter
 	{
 		if (this.targetTable == null) return;
 		
+		if (this.cancel || errorAbort || importQueue.isStopped() || hasErrors)
+		{
+			importCancelled();
+			return;
+		}
+
 		boolean commitNeeded = this.transactionControl && !dbConn.getAutoCommit() && (this.commitEvery != Committer.NO_COMMIT_FLAG);
 
 		// make sure all pending rows are processed before starting the next import
@@ -1374,20 +1401,21 @@ public class MultiThreadedDataImporter
 				try { Thread.sleep(100); } catch (Throwable th) {}
 			}
 		}
-		sendAbortMessage();
 		
+		sendAbortMessage();
+
 //		if (importQueue.peek() != null)
 //		{
 //			System.out.println("finishTable called but still rows to process!");
 //		}
-		
+
 		try
 		{
 			worker.finishTable();
-			
+
 			if (this.useBatch && commitBatch)
 			{
-				// If the batch is executed and committed, there is no 
+				// If the batch is executed and committed, there is no
 				// need to send another commit. In fact some DBMS don't like
 				// a commit or rollback if no transaction was started.
 				commitNeeded = false;
@@ -1403,7 +1431,7 @@ public class MultiThreadedDataImporter
 			{
 				this.tableStatements.runPostTableStatement(dbConn, targetTable);
 			}
-			
+
 			String msg = this.targetTable.getTableName() + ": " + inserted + " row(s) inserted. " + updated + " row(s) updated.";
 			if (!transactionControl)
 			{
@@ -1413,12 +1441,12 @@ public class MultiThreadedDataImporter
 			{
 				msg += " Committing changes.";
 			}
-			
+
 			if (commitNeeded)
 			{
 				 worker.commit();
 			}
-			
+
 			LogMgr.logInfo("DataImporter.finishTable()", msg);
 
 			this.messages.append(this.source.getMessages());
@@ -1437,7 +1465,7 @@ public class MultiThreadedDataImporter
 				this.messages.append(this.badWriter.getMessage());
 			}
 			this.messages.appendNewLine();
-			this.hasErrors = hasErrors || this.source.hasErrors();
+			this.hasErrors = hasErrors || this.source.hasErrors() || worker.hasErrors();
 			this.hasWarnings = hasWarnings || this.source.hasWarnings();
 		}
 		catch (SQLException e)
@@ -1454,7 +1482,7 @@ public class MultiThreadedDataImporter
 		}
 	}
 
-	/** 
+	/**
 	 * Return the messages generated during import.
 	 * Calling this, clears the message buffer
 	 * @return the message buffer.
@@ -1470,7 +1498,7 @@ public class MultiThreadedDataImporter
 		target.append(this.messages);
 		clearMessages();
 	}
-	
+
 
 	/**
 	 *	Callback from the RowDataProducer
@@ -1478,6 +1506,13 @@ public class MultiThreadedDataImporter
 	public void importFinished()
 	{
 		if (!isRunning) return;
+		
+		if (this.importQueue.isStopped() || worker.hasErrors())
+		{
+			importCancelled();
+			return;
+		}
+
 		try
 		{
 			this.finishTable();
@@ -1489,11 +1524,10 @@ public class MultiThreadedDataImporter
 		catch (Exception e)
 		{
 			// log all others...
-			LogMgr.logError("DataImporter.importFinished()", "Error when commiting changes", e);
+			LogMgr.logError("DataImporter.importFinished()", "Error when committing changes", e);
 			this.messages.append(ExceptionUtil.getDisplay(e));
 			this.hasErrors = true;
 		}
-		
 		finally
 		{
 			this.isRunning = false;
@@ -1503,8 +1537,8 @@ public class MultiThreadedDataImporter
 			}
 		}
 		sendAbortMessage();
-		
-		this.hasErrors = this.hasErrors || this.source.hasErrors();
+
+		this.hasErrors = this.hasErrors || this.source.hasErrors()  || worker.hasErrors();
 		this.hasWarnings = this.hasWarnings || this.source.hasWarnings();
 
 		worker.dispose();
@@ -1531,34 +1565,37 @@ public class MultiThreadedDataImporter
 		//this.messages.append(this.source.getMessages());
 		if (this.progressMonitor != null) this.progressMonitor.jobFinished();
 	}
-	
+
 	public void tableImportError()
 	{
 		cleanupRollback();
 	}
 
-	
 	public void importCancelled()
 	{
 		if (!isRunning) return;
-		
+
 		if (this.partialImportEnded)
 		{
 			this.importFinished();
 			return;
 		}
-		
+
+		this.isRunning = false;
+
 		cleanupRollback();
-		this.hasErrors = this.hasErrors || this.source.hasErrors();
+
+		this.hasErrors = this.hasErrors || this.source.hasErrors() || worker.hasErrors();
 		this.hasWarnings = this.hasWarnings || this.source.hasWarnings();
-		
+
+		worker.dispose();
 	}
 
 	public int getReportInterval()
 	{
 		return this.reportInterval;
 	}
-	
+
 	public void setReportInterval(int interval)
 	{
 		if (interval > 0)
