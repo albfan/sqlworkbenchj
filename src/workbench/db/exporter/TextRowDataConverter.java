@@ -115,11 +115,14 @@ public class TextRowDataConverter
 				result.append(this.delimiter);
 			}
 			int colType = this.metaData.getColumnType(c);
+			String dbmsType = this.metaData.getDbmsTypeName(c);
+			
 			String value = null;
 
 			boolean addQuote = quoteAlways;
+			boolean isConverted = row.typeIsConverted(colType, dbmsType);
 
-			if (writeBlobFiles && SqlUtil.isBlobType(colType))
+			if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
 			{
 				File blobFile = createBlobFile(row, c, rowIndex);
 
@@ -137,9 +140,8 @@ public class TextRowDataConverter
 					LogMgr.logError("TextRowDataConverter.convertRowData", "Error writing BLOB file", e);
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
-
 			}
-			else if (writeClobFiles && SqlUtil.isClobType(colType, this.originalConnection.getDbSettings()))
+			else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, this.originalConnection.getDbSettings()))
 			{
 				Object clobData = row.getValue(c);
 				if (clobData != null)

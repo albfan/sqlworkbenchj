@@ -105,6 +105,19 @@ public class RowData
 	{
 		this.converter = conv;
 	}
+
+	/**
+	 * Checks if the given datatype will be converted.
+	 *
+	 * @param jdbcType
+	 * @param dbmsType
+	 * @return
+	 */
+	public boolean typeIsConverted(int jdbcType, String dbmsType)
+	{
+		if (converter == null) return false;
+		return converter.convertsType(jdbcType, dbmsType);
+	}
 	
 	/**
 	 * Read the current row from the ResultSet into this RowData.

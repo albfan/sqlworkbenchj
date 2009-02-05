@@ -36,26 +36,26 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to retrieve meta-information from an Oracle database. 
- * 
+ * A class to retrieve meta-information from an Oracle database.
+ *
  * {@link #getColumns(java.lang.String, java.lang.String, java.lang.String, java.lang.String) }
- * is a drop-in replacement for the JDBC getColumns() method that works around the problem 
+ * is a drop-in replacement for the JDBC getColumns() method that works around the problem
  * that the Oracle driver runs an "ANALYZE TABLE" before returning index information.
- * 
+ *
  * It also fixes some problems with incorrectly returned data types.
- * 
- * We will use our own statement only if the Oracle version is 9i or later and 
+ *
+ * We will use our own statement only if the Oracle version is 9i or later and
  * if at least one of the following configuration properties are set:
  * <ul>
  *	<li>{@link workbench.resource.Settings#useOracleNVarcharFix()}</li>
  *	<li>{@link workbench.resource.Settings#useOracleCharSemanticsFix()}</li>
  * </ul>
- * 
+ *
  * Additionally if the config property <tt>workbench.db.oracle.fixdatetype</tt> is
- * set to true, DATE columns will always be mapped to Timestamp objects when 
- * retrieving data (see {@link #getMapDateToTimestamp()} and 
+ * set to true, DATE columns will always be mapped to Timestamp objects when
+ * retrieving data (see {@link #getMapDateToTimestamp()} and
  * {@link workbench.db.DbMetadata#fixColumnType(int)}
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class OracleMetadata
@@ -80,7 +80,7 @@ public class OracleMetadata
 		defaultLengthSemantics = defaultSemantics;
 		alwaysShowCharSemantics = alwaysShowSemantics;
 	}
-	
+
 	public OracleMetadata(WbConnection conn)
 	{
 		this.connection = conn;
@@ -96,7 +96,7 @@ public class OracleMetadata
 		}
 
 		alwaysShowCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.charsemantics.displayalways", true);
-		
+
 		if (!alwaysShowCharSemantics)
 		{
 			Statement stmt = null;
@@ -129,10 +129,10 @@ public class OracleMetadata
 				SqlUtil.closeAll(rs, stmt);
 			}
 		}
-		
+
 		boolean fixNVARCHAR = Settings.getInstance().useOracleNVarcharFix();
-		boolean checkCharSemantics = Settings.getInstance().useOracleCharSemanticsFix();		
-		
+		boolean checkCharSemantics = Settings.getInstance().useOracleCharSemanticsFix();
+
 		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
 		globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.db.oracle.fixdatetype");
@@ -145,12 +145,12 @@ public class OracleMetadata
 			globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
 		}
 	}
-	
+
 	public void done()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
-	
+
 	public boolean isOracle8()
 	{
 		return this.version == 8;
@@ -158,12 +158,12 @@ public class OracleMetadata
 
 	private boolean getRemarksReporting()
 	{
-		// The old "remarksReporting" property should not be taken from the 
+		// The old "remarksReporting" property should not be taken from the
 		// System properties as a fall-back
 		String value = getDriverProperty("remarksReporting", false);
 		if (value == null)
 		{
-			// Only the new oracle.jdbc.remarksReporting should also be 
+			// Only the new oracle.jdbc.remarksReporting should also be
 			// checked in the system properties
 			value = getDriverProperty("oracle.jdbc.remarksReporting", true);
 		}
@@ -174,9 +174,9 @@ public class OracleMetadata
 	{
 		if (globalMapDateToTimestamp) return true;
 		// if the mapping hasn't been enabled globally, then check the driver property
-		
-		// Newer Oracle drivers support a connection property to automatically 
-		// return DATE columns as Types.TIMESTAMP. We have to mimic that 
+
+		// Newer Oracle drivers support a connection property to automatically
+		// return DATE columns as Types.TIMESTAMP. We have to mimic that
 		// when using our own statement to retrieve column definitions
 		String value = getDriverProperty("oracle.jdbc.mapDateToTimestamp", true);
 		return "true".equalsIgnoreCase(value);
@@ -201,15 +201,15 @@ public class OracleMetadata
 	public ResultSet getColumns(String catalog, String schema, String table, String cols)
 		throws SQLException
 	{
-		// make sure the statement object is closed properly 
+		// make sure the statement object is closed properly
 		columnsProcessed();
-		
+
 		if (!useOwnSql)
 		{
 			this.columnStatement = null;
 			return this.connection.getSqlConnection().getMetaData().getColumns(catalog, schema, table, cols);
 		}
-		
+
 		boolean fixNVARCHAR = Settings.getInstance().useOracleNVarcharFix();
 
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
@@ -256,7 +256,7 @@ public class OracleMetadata
 			"     10 AS num_prec_radix,  \n" +
 			"     DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
 
-		final String sql2 = 
+		final String sql2 =
 			"     t.data_default AS column_def,  \n" +
 			"     decode(t.data_type, 'VARCHAR2', " +
 			"            decode(t.char_used, 'B', " + BYTE_SEMANTICS + ", 'C', " + CHAR_SEMANTICS + ", 0), " +
@@ -268,16 +268,16 @@ public class OracleMetadata
 			" FROM all_tab_columns t";
 
 		// I'm not using LIKE for the condition to select owner/table
-    // because internally we never call this with wildcards and leaving out the 
+		// because internally we never call this with wildcards and leaving out the
 		// like (which is used in the original statement from Oracle's driver)
-    // speeds up the statement
+		// speeds up the statement
 		final String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE '/'  \n";
 		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
 		final String order = "ORDER BY table_schem, table_name, ordinal_position";
-		
+
 		final String sql_comment = sql1 + "       c.comments AS remarks, \n" + sql2 + ", all_col_comments c  \n" + where + comment_join + order;
 		final String sql_no_comment = sql1 + "       null AS remarks, \n" + sql2 + where + order;
-		
+
 		String sql = null;
 
 		if (getRemarksReporting())
@@ -310,10 +310,10 @@ public class OracleMetadata
 		this.columnStatement.setString(1, schema);
 		this.columnStatement.setString(2, table);
 		this.columnStatement.setString(3, cols != null ? cols : "%");
-//		if (Settings.getInstance().getDebugMetadataSql())
-//		{
-//			LogMgr.logDebug("OracleMetadata.getColumns()", "Using: " + sql);
-//		}
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleMetadata.getColumns()", "Using: " + sql);
+		}
 		rs = this.columnStatement.executeQuery();
 		return rs;
 	}
@@ -367,7 +367,7 @@ public class OracleMetadata
 
 		return linkOwner;
 	}
-	
+
 	/**
 	 *	Return the errors reported in the all_errors table for Oracle.
 	 *	This method can be used to obtain error information after a CREATE PROCEDURE
@@ -377,12 +377,12 @@ public class OracleMetadata
 	 */
 	public String getErrorInfo(String schema, String objectName, String objectType)
 	{
-		final String ERROR_QUERY = 
-			"SELECT line, position, text " + 
-			" FROM all_errors   " + 
-			"WHERE owner = ? " + 
-			"  AND type = ? " + 
-			"  AND name = ? " + 
+		final String ERROR_QUERY =
+			"SELECT line, position, text " +
+			" FROM all_errors   " +
+			"WHERE owner = ? " +
+			"  AND type = ? " +
+			"  AND name = ? " +
 			" ORDER BY LINE ";
 
 		if (objectType == null || objectName == null)
@@ -404,7 +404,7 @@ public class OracleMetadata
 				schema = this.connection.getCurrentSchema();
 			}
 			DbMetadata meta = this.connection.getMetadata();
-			
+
 			stmt = this.connection.getSqlConnection().prepareStatement(ERROR_QUERY);
 			stmt.setString(1, meta.adjustSchemaNameCase(StringUtil.trimQuotes(schema)));
 			stmt.setString(2, objectType.toUpperCase().trim());
@@ -556,7 +556,7 @@ public class OracleMetadata
 		result.append(size);
 
 		// Only apply this logic vor VARCHAR columns
-		// NVARCHAR (which might have been reported as type == VARCHAR) does not 
+		// NVARCHAR (which might have been reported as type == VARCHAR) does not
 		// allow Byte/Char semantics
 		if (type.startsWith("VARCHAR"))
 		{
@@ -576,12 +576,12 @@ public class OracleMetadata
 		result.append(')');
 		return result.toString();
 	}
-	
+
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)
 	{
 		String display = null;
-		
-		if (sqlType == Types.VARCHAR) 
+
+		if (sqlType == Types.VARCHAR)
 		{
 			// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
 			// Our own statement to retrieve column information in OracleMetaData
@@ -601,11 +601,11 @@ public class OracleMetadata
 				return "NUMBER(" + size + "," + digits + ")";
 			}
 		}
-		else 
+		else
 		{
 			display = SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
 		}
 		return display;
 	}
-	
+
 }
