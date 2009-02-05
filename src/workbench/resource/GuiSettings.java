@@ -21,6 +21,16 @@ import workbench.util.StringUtil;
  */
 public class GuiSettings
 {
+	public static int getMultiLineThreshold()
+	{
+		return Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 250);
+	}
+
+	public static void setMultiLineThreshold(int value)
+	{
+		Settings.getInstance().setProperty("workbench.gui.display.multilinethreshold", value);
+	}
+	
 	public static int getDefaultFormFieldWidth()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldwidth", 50);

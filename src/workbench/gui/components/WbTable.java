@@ -1436,24 +1436,9 @@ public class WbTable
 		if (this.dwModel == null) return false;
 
 		int offset = (this.dwModel.getShowStatusColumn() ? 1 : 0);
-		int sqlType = this.dwModel.getColumnType(col);
-		int charLength = 0;
 
-		if (SqlUtil.isClobType(sqlType))
-		{
-			charLength = Integer.MAX_VALUE;
-		}
-		else if (SqlUtil.isCharacterType(sqlType))
-		{
-			charLength = this.dwModel.getDataStore().getResultInfo().getColumn(col - offset).getColumnSize();
-		}
-		else
-		{
-			return false;
-		}
-
-		int sizeThreshold = Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 250);
-		return charLength >= sizeThreshold;
+		ColumnIdentifier column = this.dwModel.getDataStore().getResultInfo().getColumn(col - offset);
+		return SqlUtil.isMultiLineColumn(column);
 	}
 
 	protected void initDefaultEditors()

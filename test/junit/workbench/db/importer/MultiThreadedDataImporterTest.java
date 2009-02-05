@@ -11,6 +11,9 @@
 package workbench.db.importer;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Random;
@@ -18,13 +21,10 @@ import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
-import workbench.db.ConnectionProfile;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
-import workbench.sql.BatchRunner;
-import workbench.util.ArgumentParser;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
@@ -144,34 +144,88 @@ public class MultiThreadedDataImporterTest
 		};
 	}
 
-	public void testImport()
+	public void testAbort()
+	{
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{
+			TestUtil util = new TestUtil("mt_textImport");
+
+			File importFile  = new File(util.getBaseDir(), "text_import.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			out.println("1\tArthur\tDent");
+			out.println("2\tFord\tPrefect");
+			out.println("3\tZaphod\tBeeblebrox");
+			out.close();
+
+			WbConnection con = util.getConnection(new File(util.getBaseDir(), "import_data"), "mtTest", true);
+			TestUtil.executeScript(con,
+				"CREATE TABLE junit_test_pk " +
+				"(nr integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+				"insert into junit_test_pk (nr, firstname, lastname) values (1, 'Mary', 'Moviestar');\n" +
+				"insert into junit_test_pk (nr, firstname, lastname) values (2, 'Harry', 'Handsome');\n" +
+				"commit;\n"
+				);
+
+			TextFileParser parser = new TextFileParser(importFile);
+			parser.setContainsHeader(true);
+			parser.setConnection(con);
+			parser.setTableName("junit_test_pk");
+			parser.setDelimiter("\t");
+			parser.setAbortOnError(false);
+
+			MultiThreadedDataImporter importer = new MultiThreadedDataImporter(1);
+
+			importer.setConnection(con);
+			importer.setContinueOnError(false);
+			importer.setBatchSize(1);
+			importer.setProducer(parser);
+			importer.startImport();
+
+			String msg = importer.getMessages().toString();
+			System.out.println("*********\n" + msg + "\n************");
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
+	public void _testImport()
 		throws Exception
 	{
 		try
 		{
 			TestUtil util = new TestUtil(this.getName());
 			util.emptyBaseDirectory();
-//			File db = new File(util.getBaseDir(), "importTest");
+			File db = new File(util.getBaseDir(), "importTest");
 
-//			WbConnection con = util.getConnection(db, "MultiThread", true);
-//			TestUtil.executeScript(con,
-//				"CREATE TABLE import_test (id integer, some_value varchar(20), check (id <> -1) );" +
-//				"commit;");
-
-			String cmdline = "-url=jdbc:postgresql://localhost/wbtest -driver=org.postgresql.Driver -username=thomas -password=welcome";
-			ArgumentParser parser = new ArgumentParser();
-			parser.addArgument("url");
-			parser.addArgument("username");
-			parser.addArgument("password");
-			parser.addArgument("driver");
-			parser.parse(cmdline);
-			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-			WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "multiTest");
+			WbConnection con = util.getConnection(db, "MultiThread", true);
 			TestUtil.executeScript(con,
-				"truncate TABLE import_test;" +
+				"CREATE TABLE import_test (id integer, some_value varchar(20), check (id <> 19) );" +
 				"commit;");
 
-			rowCount = 20000;
+//			String cmdline = "-url=jdbc:postgresql://localhost/wbtest -driver=org.postgresql.Driver -username=thomas -password=welcome";
+//			ArgumentParser parser = new ArgumentParser();
+//			parser.addArgument("url");
+//			parser.addArgument("username");
+//			parser.addArgument("password");
+//			parser.addArgument("driver");
+//			parser.parse(cmdline);
+//			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+//			WbConnection con = ConnectionMgr.getInstance().getConnection(prof, "multiTest");
+//			TestUtil.executeScript(con,
+//				"truncate TABLE import_test;" +
+//				"commit;");
+
+			rowCount = 100;
 
 			MultiThreadedDataImporter importer = new MultiThreadedDataImporter(2);
 
@@ -196,14 +250,14 @@ public class MultiThreadedDataImporterTest
 
 			String msg = importer.getMessages().toString();
 			System.out.println("***********************\n" + msg + "\n***************************");
-			assertTrue(importer.isSuccess());
+//			assertTrue(importer.isSuccess());
 
-			Statement stmt = con.createStatement();
-			ResultSet rs = stmt.executeQuery("select count(*) from import_test");
-			int count = 0;
-			if (rs.next()) count = rs.getInt(1);
-			SqlUtil.closeAll(rs, stmt);
-			assertEquals(rowCount, count);
+//			Statement stmt = con.createStatement();
+//			ResultSet rs = stmt.executeQuery("select count(*) from import_test");
+//			int count = 0;
+//			if (rs.next()) count = rs.getInt(1);
+//			SqlUtil.closeAll(rs, stmt);
+//			assertEquals(rowCount, count);
 		}
 		finally
 		{

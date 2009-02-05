@@ -70,6 +70,7 @@ public class SettingsPanel
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
 		pages.add(new OptionPanelPage("EditorColorsPanel", "LblEditorColors"));
+		pages.add(new OptionPanelPage("DataDisplayOptions", "LblSettingsDataDisplay"));
 		pages.add(new OptionPanelPage("DataFormattingOptionsPanel", "LblSettingsDataFormat"));
 		pages.add(new OptionPanelPage("DataEditOptionsPanel", "LblDataEdit"));
 		pages.add(new OptionPanelPage("DbExplorerOptionsPanel", "LblSettingsDbExplorer"));
@@ -216,7 +217,7 @@ public class SettingsPanel
 	private void closeWindow()
 	{
 		Settings.getInstance().setWindowSize(this.getClass().getName(), this.dialog.getWidth(), this.dialog.getHeight());
-		DataFormattingOptionsPanel.clearLocales();
+		DataDisplayOptions.clearLocales();
 		this.dialog.setVisible(false);
 		this.dialog.dispose();
 		this.dialog = null;
@@ -271,7 +272,7 @@ public class SettingsPanel
 		// to the DataFormattingOptionsPanel
 		// Reading the locales can take up to 2 seconds which is too
 		// long to be done when switching to the panel
-		DataFormattingOptionsPanel.readLocales();
+		DataDisplayOptions.readLocales();
 	}
 
 
