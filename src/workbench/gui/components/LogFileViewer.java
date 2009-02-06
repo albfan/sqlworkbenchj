@@ -89,7 +89,7 @@ public class LogFileViewer
 		Reader in = null;
 		try
 		{
-			in = EncodingUtil.createReader(sourceFile, System.getProperty("file.encoding"));
+			in = EncodingUtil.createReader(sourceFile, Settings.getInstance().getDefaultEncoding());
 			display.read(in, null);
 			scrollToEnd();
 			LogMgr.registerViewer(this);

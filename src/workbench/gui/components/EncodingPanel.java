@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 
@@ -21,6 +22,7 @@ import javax.swing.JPanel;
 import workbench.interfaces.EncodingSelector;
 
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 
 /**
@@ -36,7 +38,7 @@ public class EncodingPanel
 
 	public EncodingPanel()
 	{
-		this(System.getProperty("file.encoding"), true);
+		this(Settings.getInstance().getDefaultEncoding(), true);
 	}
 
 	public EncodingPanel(String encoding)
@@ -98,9 +100,15 @@ public class EncodingPanel
 		return this.label.isVisible();
 	}
 
-	public void setEncoding(String enc)
+	public void setEncoding(final String enc)
 	{
-		encodings.setSelectedItem(enc);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				encodings.setSelectedItem(enc);
+			}
+		});
 	}
 
 	public String getEncoding()

@@ -164,7 +164,7 @@
 				<meta http-equiv="Expires" content="-1"/>
 				<link rel="SHORTCUT ICON" href="favicon.ico"/>
 				<meta name="description" content="A free DBMS-independent SQL query tool and front-end"/>
-				<meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,h2database,h2,firebirdsql,hsql,hsqldb,sqlserver,sqlplus,replacement,import,export,unload,convert,insert,blob,clob,xml,etl,migrate,compare,diff,structure,table"/>
+				<meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,h2database,h2,firebirdsql,hsql,hsqldb,sqlplus,replacement,import,export,csv,unload,convert,insert,blob,clob,xml,etl,migrate,compare,diff,structure,table"/>
 				<meta name="date">
 					<xsl:attribute name="content">
 						<xsl:value-of select="$currentDate"/>

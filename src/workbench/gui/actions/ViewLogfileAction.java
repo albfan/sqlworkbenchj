@@ -15,8 +15,10 @@ import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import javax.swing.JFrame;
 import workbench.WbManager;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.LogFileViewer;
 import workbench.log.LogMgr;
+import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
 /**
@@ -48,11 +50,19 @@ public class ViewLogfileAction
 			{
 				if (viewer == null)
 				{
-					LogFileViewer lview = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
-					WbFile f = LogMgr.getLogfile();
-					lview.showFile(f);
-					viewer = lview;
-					viewer.setVisible(true);
+					try
+					{
+						LogFileViewer lview = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
+						WbFile f = LogMgr.getLogfile();
+						lview.showFile(f);
+						viewer = lview;
+						viewer.setVisible(true);
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("ViewLogFileAction.executeAction()", "Error displaying the log file", e);
+						WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+					}
 				}
 				else
 				{

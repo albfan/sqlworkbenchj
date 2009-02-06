@@ -1694,23 +1694,27 @@ public class Settings
 		setProperty("workbench.blob.text.encoding", enc);
 	}
 
-	public String getDefaultDataEncoding()
+	private String getSystemFileEncoding()
 	{
 		String def = System.getProperty("file.encoding");
+		// Replace the strange Windows encoding with something more standard
 		if ("Cp1252".equals(def)) def = "ISO-8859-15";
-		return getProperty("workbench.file.data.encoding", def);
+		return def;
+	}
+
+	public String getDefaultDataEncoding()
+	{
+		return getProperty("workbench.file.data.encoding", getSystemFileEncoding());
 	}
 
 	public String getDefaultEncoding()
 	{
-		String def = System.getProperty("file.encoding");
-		return getProperty("workbench.encoding", def);
+		return getProperty("workbench.encoding", getSystemFileEncoding());
 	}
 
 	public String getDefaultFileEncoding()
 	{
-		String def = System.getProperty("file.encoding");
-		return getProperty("workbench.file.encoding", def);
+		return getProperty("workbench.file.encoding", getSystemFileEncoding());
 	}
 
 	public void setDefaultFileEncoding(String enc)

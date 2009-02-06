@@ -19,6 +19,7 @@ import java.net.URL;
 import javax.swing.JTextArea;
 import workbench.gui.editor.SearchAndReplace;
 import workbench.interfaces.TextContainer;
+import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 
@@ -49,7 +50,7 @@ public class SearchableTextPane
 		InputStream in = url.openStream();
 		try
 		{
-			Reader r = EncodingUtil.createReader(in, System.getProperty("file.encoding"));
+			Reader r = EncodingUtil.createReader(in, Settings.getInstance().getDefaultEncoding());
 			read(r, null);
 		}
 		finally
