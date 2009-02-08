@@ -1437,6 +1437,9 @@ public class WbTable
 
 		int offset = (this.dwModel.getShowStatusColumn() ? 1 : 0);
 
+		// the first column is never a multiline if the status column is displayed.
+		if (col - offset < 0) return false; 
+
 		ColumnIdentifier column = this.dwModel.getDataStore().getResultInfo().getColumn(col - offset);
 		return SqlUtil.isMultiLineColumn(column);
 	}

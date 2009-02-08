@@ -15,6 +15,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 import junit.framework.TestCase;
+import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JComboBoxOperator;
@@ -98,7 +99,7 @@ public class MainWindowTest
 		final JListOperator pages = new JListOperator(dialog);
 
 		int count = pages.getModel().getSize();
-		assertEquals(11, count);
+		assertEquals(13, count);
 
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("pagetitle");
@@ -454,13 +455,13 @@ public class MainWindowTest
 		{
 			startApplication();
 			connect();
-			whatsNewTest();
-			aboutTest();
-			settingsTest();
-			runSql();
-			appendTest();
+//			whatsNewTest();
+//			aboutTest();
+//			settingsTest();
+//			runSql();
+//			appendTest();
 			pkWarningsTest();
-			definePKTest();
+//			definePKTest();
 			testUtil.stopApplication();
 		}
 		catch (Exception e)
