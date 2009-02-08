@@ -44,6 +44,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.profiles.ProfileKey;
+import workbench.gui.settings.ExternalFileHandling;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.FontChangedListener;
 import workbench.log.LogMgr;
@@ -1541,6 +1542,18 @@ public class Settings
 	public String getWorkspaceBackupDir()
 	{
 		return getProperty("workbench.workspace.backup.dir", null);
+	}
+
+
+	public void setFilesInWorkspaceHandling(ExternalFileHandling handling)
+	{
+		setProperty("workbench.workspace.store.filenames", handling.toString());
+	}
+
+	public ExternalFileHandling getFilesInWorkspaceHandling()
+	{
+		String v = getProperty("workbench.workspace.store.filenames", ExternalFileHandling.link.toString());
+		return ExternalFileHandling.getValue(v);
 	}
 
 	public String getFileVersionDelimiter()

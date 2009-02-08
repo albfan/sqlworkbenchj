@@ -36,9 +36,19 @@ public class GuiSettings
 		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldwidth", 50);
 	}
 
+	public static void setDefaultFormFieldWidth(int chars)
+	{
+		Settings.getInstance().setProperty("workbench.gui.form.fieldwidth", chars);
+	}
+
 	public static int getDefaultFormFieldLines()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldlines", 5);
+	}
+
+	public static void setDefaultFormFieldLines(int lines)
+	{
+		Settings.getInstance().setProperty("workbench.gui.form.fieldlines", lines);
 	}
 	
 	public static boolean getConfirmTabClose()

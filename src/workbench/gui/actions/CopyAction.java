@@ -21,7 +21,8 @@ import workbench.resource.ResourceMgr;
  * 
  *	@author  support@sql-workbench.net
  */
-public class CopyAction extends WbAction
+public class CopyAction
+	extends WbAction
 {
 	private ClipboardSupport client;
 

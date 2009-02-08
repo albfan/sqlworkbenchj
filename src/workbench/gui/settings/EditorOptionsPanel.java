@@ -198,8 +198,8 @@ public class EditorOptionsPanel
     setLayout(new GridBagLayout());
 
     autoAdvance.setSelected(Settings.getInstance().getAutoJumpNextStatement());
-    autoAdvance.setText(ResourceMgr.getString("LblAutoAdvance"));
-    autoAdvance.setToolTipText(ResourceMgr.getDescription("LblAutoAdvance"));
+    autoAdvance.setText(ResourceMgr.getString("LblAutoAdvance")); // NOI18N
+    autoAdvance.setToolTipText(ResourceMgr.getString("d_LblAutoAdvance")); // NOI18N
     autoAdvance.setHorizontalAlignment(SwingConstants.LEFT);
     autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
@@ -212,8 +212,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(8, 9, 0, 11);
     add(autoAdvance, gridBagConstraints);
 
-    editorTabSizeLabel.setText(ResourceMgr.getString("LblTabWidth"));
-    editorTabSizeLabel.setToolTipText(ResourceMgr.getDescription("LblTabWidth"));
+    editorTabSizeLabel.setText(ResourceMgr.getString("LblTabWidth")); // NOI18N
+    editorTabSizeLabel.setToolTipText(ResourceMgr.getString("d_LblTabWidth")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 10;
@@ -231,8 +231,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(tabSize, gridBagConstraints);
 
-    altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit"));
-    altDelimLabel.setToolTipText(ResourceMgr.getDescription("LblAltDelimit"));
+    altDelimLabel.setText(ResourceMgr.getString("LblAltDelimit")); // NOI18N
+    altDelimLabel.setToolTipText(ResourceMgr.getString("d_LblAltDelimit")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
@@ -240,8 +240,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(8, 12, 0, 0);
     add(altDelimLabel, gridBagConstraints);
 
-    historySizeLabel.setText(ResourceMgr.getString("LblHistorySize"));
-    historySizeLabel.setToolTipText(ResourceMgr.getDescription("LblHistorySize"));
+    historySizeLabel.setText(ResourceMgr.getString("LblHistorySize")); // NOI18N
+    historySizeLabel.setToolTipText(ResourceMgr.getString("d_LblHistorySize")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 8;
@@ -258,8 +258,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(4, 11, 0, 15);
     add(historySizeField, gridBagConstraints);
 
-    electricScrollLabel.setText(ResourceMgr.getString("LblSettingElectricScroll"));
-    electricScrollLabel.setToolTipText(ResourceMgr.getDescription("LblSettingElectricScroll"));
+    electricScrollLabel.setText(ResourceMgr.getString("LblSettingElectricScroll")); // NOI18N
+    electricScrollLabel.setToolTipText(ResourceMgr.getString("d_LblSettingElectricScroll")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 9;
@@ -277,8 +277,8 @@ public class EditorOptionsPanel
     add(electricScroll, gridBagConstraints);
 
     rightClickMovesCursor.setSelected(Settings.getInstance().getRightClickMovesCursor());
-    rightClickMovesCursor.setText(ResourceMgr.getString("LblRightClickMove"));
-    rightClickMovesCursor.setToolTipText(ResourceMgr.getDescription("LblRightClickMove"));
+    rightClickMovesCursor.setText(ResourceMgr.getString("LblRightClickMove")); // NOI18N
+    rightClickMovesCursor.setToolTipText(ResourceMgr.getString("d_LblRightClickMove")); // NOI18N
     rightClickMovesCursor.setBorder(null);
     rightClickMovesCursor.setMaximumSize(new Dimension(93, 15));
     rightClickMovesCursor.setMinimumSize(new Dimension(93, 15));
@@ -289,8 +289,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(8, 0, 0, 10);
     add(rightClickMovesCursor, gridBagConstraints);
 
-    editorFontLabel.setText(ResourceMgr.getString("LblEditorFont"));
-    editorFontLabel.setToolTipText(ResourceMgr.getDescription("LblEditorFont"));
+    editorFontLabel.setText(ResourceMgr.getString("LblEditorFont")); // NOI18N
+    editorFontLabel.setToolTipText(ResourceMgr.getString("d_LblEditorFont")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
@@ -332,8 +332,8 @@ public class EditorOptionsPanel
     add(completionPasteCase, gridBagConstraints);
 
     pasteLabel.setLabelFor(completionPasteCase);
-    pasteLabel.setText(ResourceMgr.getString("LblPasteCase"));
-    pasteLabel.setToolTipText(ResourceMgr.getDescription("LblPasteCase"));
+    pasteLabel.setText(ResourceMgr.getString("LblPasteCase")); // NOI18N
+    pasteLabel.setToolTipText(ResourceMgr.getString("d_LblPasteCase")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -342,8 +342,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(8, 12, 0, 0);
     add(pasteLabel, gridBagConstraints);
 
-    internalLineEndingLabel.setText(ResourceMgr.getString("LblIntLineEnding"));
-    internalLineEndingLabel.setToolTipText(ResourceMgr.getDescription("LblIntLineEnding"));
+    internalLineEndingLabel.setText(ResourceMgr.getString("LblIntLineEnding")); // NOI18N
+    internalLineEndingLabel.setToolTipText(ResourceMgr.getString("d_LblIntLineEnding")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -362,8 +362,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(4, 11, 0, 15);
     add(internalLineEnding, gridBagConstraints);
 
-    externalLineEndingLabel.setText(ResourceMgr.getString("LblExtLineEnding"));
-    externalLineEndingLabel.setToolTipText(ResourceMgr.getDescription("LblExtLineEnding"));
+    externalLineEndingLabel.setText(ResourceMgr.getString("LblExtLineEnding")); // NOI18N
+    externalLineEndingLabel.setToolTipText(ResourceMgr.getString("d_LblExtLineEnding")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
@@ -383,8 +383,8 @@ public class EditorOptionsPanel
     add(externalLineEnding, gridBagConstraints);
 
     includeFilesInHistory.setSelected(Settings.getInstance().getStoreFilesInHistory());
-    includeFilesInHistory.setText(ResourceMgr.getString("TxtHistoryIncFiles"));
-    includeFilesInHistory.setToolTipText(ResourceMgr.getDescription("TxtHistoryIncFiles"));
+    includeFilesInHistory.setText(ResourceMgr.getString("TxtHistoryIncFiles")); // NOI18N
+    includeFilesInHistory.setToolTipText(ResourceMgr.getString("d_TxtHistoryIncFiles")); // NOI18N
     includeFilesInHistory.setBorder(null);
     includeFilesInHistory.setHorizontalAlignment(SwingConstants.LEFT);
     includeFilesInHistory.setHorizontalTextPosition(SwingConstants.RIGHT);
@@ -405,8 +405,8 @@ public class EditorOptionsPanel
     add(alternateDelim, gridBagConstraints);
 
     pasterOrderLabel.setLabelFor(completionColumnSort);
-    pasterOrderLabel.setText(ResourceMgr.getString("LblPasteSort"));
-    pasterOrderLabel.setToolTipText(ResourceMgr.getDescription("LblPasteSort"));
+    pasterOrderLabel.setText(ResourceMgr.getString("LblPasteSort")); // NOI18N
+    pasterOrderLabel.setToolTipText(ResourceMgr.getString("d_LblPasteSort")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
@@ -425,8 +425,8 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(6, 11, 0, 15);
     add(completionColumnSort, gridBagConstraints);
 
-    noWordSepLabel.setText(ResourceMgr.getString("LblNoWordSep"));
-    noWordSepLabel.setToolTipText(ResourceMgr.getDescription("LblNoWordSep"));
+    noWordSepLabel.setText(ResourceMgr.getString("LblNoWordSep")); // NOI18N
+    noWordSepLabel.setToolTipText(ResourceMgr.getString("d_LblNoWordSep")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 11;

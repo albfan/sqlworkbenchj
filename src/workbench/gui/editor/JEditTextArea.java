@@ -211,7 +211,7 @@ public class JEditTextArea
 		addFocusListener(this);
 
 		// Load the defaults
-		setInputHandler(new DefaultInputHandler());
+		setInputHandler(new InputHandler());
 		this.inputHandler.addDefaultKeyBindings();
 		setDocument(new SyntaxDocument());
 
@@ -223,16 +223,16 @@ public class JEditTextArea
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.popup = new TextPopup(this);
 
-		this.addKeyBinding("C+C", this.popup.getCopyAction());
+		this.addKeyBinding(this.popup.getCopyAction());
 		this.addKeyBinding("C+INSERT", this.popup.getCopyAction());
 
-		this.addKeyBinding("C+V", this.popup.getPasteAction());
+		this.addKeyBinding(this.popup.getPasteAction());
 		this.addKeyBinding("SHIFT+INSERT", this.popup.getPasteAction());
 
-		this.addKeyBinding("C+X", this.popup.getCutAction());
+		this.addKeyBinding(this.popup.getCutAction());
 		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
 
-		this.addKeyBinding("C+a", this.popup.getSelectAllAction());
+		this.addKeyBinding(this.popup.getSelectAllAction());
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 	}
 

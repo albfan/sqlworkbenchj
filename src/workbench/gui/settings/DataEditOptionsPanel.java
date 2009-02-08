@@ -18,6 +18,7 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.FileDialogUtil;
+import workbench.util.StringUtil;
 
 /**
  * A panel to edit the options for data editing, such as the font to be
@@ -45,6 +46,8 @@ public class DataEditOptionsPanel
 		highlightRequired.setSelected(GuiSettings.getHighlightRequiredFields());
 		pkMapFile.setText(Settings.getInstance().getPKMappingFilename());
 		warnDiscard.setSelected(GuiSettings.getConfirmDiscardResultSetChanges());
+		fieldLength.setText(Integer.toString(GuiSettings.getDefaultFormFieldWidth()));
+		inputLines.setText(Integer.toString(GuiSettings.getDefaultFormFieldLines()));
 	}
 
 	public void saveSettings()
@@ -54,6 +57,17 @@ public class DataEditOptionsPanel
 		GuiSettings.setConfirmDiscardResultSetChanges(warnDiscard.isSelected());
 		Settings.getInstance().setPreviewDml(this.previewDml.isSelected());
 		Settings.getInstance().setPKMappingFilename(pkMapFile.getText());
+
+		int chars = StringUtil.getIntValue(fieldLength.getText(), -1);
+		if (chars > 0)
+		{
+			GuiSettings.setDefaultFormFieldWidth(chars);
+		}
+		int lines = StringUtil.getIntValue(inputLines.getText(), -1);
+		if (chars > 0)
+		{
+			GuiSettings.setDefaultFormFieldLines(lines);
+		}
 	}
 
 	/** This method is called from within the constructor to
@@ -68,13 +82,17 @@ public class DataEditOptionsPanel
     previewDml = new javax.swing.JCheckBox();
     requiredFieldColor = new workbench.gui.components.WbColorPicker();
     highlightRequired = new javax.swing.JCheckBox();
-    dummyPanel = new javax.swing.JPanel();
     warnDiscard = new javax.swing.JCheckBox();
     jPanel1 = new javax.swing.JPanel();
     pkMapFileLabel = new javax.swing.JLabel();
     pkMapFile = new javax.swing.JTextField();
     selectMapFile = new FlatButton();
     jPanel2 = new javax.swing.JPanel();
+    jPanel3 = new javax.swing.JPanel();
+    jLabel1 = new javax.swing.JLabel();
+    jLabel2 = new javax.swing.JLabel();
+    fieldLength = new javax.swing.JTextField();
+    inputLines = new javax.swing.JTextField();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -114,12 +132,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(13, 12, 0, 0);
     add(highlightRequired, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.weighty = 1.0;
-    add(dummyPanel, gridBagConstraints);
 
     warnDiscard.setText(ResourceMgr.getString("LblWarnChgResultSet")); // NOI18N
     warnDiscard.setToolTipText(ResourceMgr.getString("d_LblWarnChgResultSet")); // NOI18N
@@ -178,6 +190,52 @@ public class DataEditOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new java.awt.Insets(15, 12, 0, 15);
     add(jPanel1, gridBagConstraints);
+
+    jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblFreeFormSettings"))); // NOI18N
+    jPanel3.setLayout(new java.awt.GridBagLayout());
+
+    jLabel1.setText(ResourceMgr.getString("LblFreeFormFieldLen")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 5, 0, 0);
+    jPanel3.add(jLabel1, gridBagConstraints);
+
+    jLabel2.setText(ResourceMgr.getString("LblFreeFormLines")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 5, 6, 0);
+    jPanel3.add(jLabel2, gridBagConstraints);
+
+    fieldLength.setColumns(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 8);
+    jPanel3.add(fieldLength, gridBagConstraints);
+
+    inputLines.setColumns(5);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(9, 9, 6, 8);
+    jPanel3.add(inputLines, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(15, 6, 0, 9);
+    add(jPanel3, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -196,10 +254,14 @@ public class DataEditOptionsPanel
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JPanel dummyPanel;
+  private javax.swing.JTextField fieldLength;
   private javax.swing.JCheckBox highlightRequired;
+  private javax.swing.JTextField inputLines;
+  private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
+  private javax.swing.JPanel jPanel3;
   private javax.swing.JTextField pkMapFile;
   private javax.swing.JLabel pkMapFileLabel;
   private javax.swing.JCheckBox previewDml;

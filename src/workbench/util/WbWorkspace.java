@@ -17,8 +17,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -59,7 +60,8 @@ public class WbWorkspace
 			this.zout = null;
 			this.archive = new ZipFile(archiveName);
 			Enumeration e = this.archive.entries();
-			ArrayList<ZipEntry> tempEntries = new ArrayList<ZipEntry>(10);
+			Map<Integer, ZipEntry> tempEntries = new HashMap<Integer, ZipEntry>(10);
+
 			while (e.hasMoreElements())
 			{
 				ZipEntry entry = (ZipEntry)e.nextElement();
@@ -67,7 +69,9 @@ public class WbWorkspace
 
 				if (filename.endsWith("txt"))
 				{
-					tempEntries.add(entry);
+					int pos = filename.indexOf('.');
+					int index = StringUtil.getIntValue(filename.substring(12,pos));
+					tempEntries.put(index - 1, entry);
 				}
 				else if (filename.endsWith("properties"))
 				{
@@ -75,35 +79,43 @@ public class WbWorkspace
 				}
 			}
 
-			int count = tempEntries.size();
+			int count = calculateTabCount(); // tempEntries.size();
 			this.entries = new ZipEntry[count];
 
 			for (int i=0; i < count; i++)
 			{
-				int ind = -1;
-				int realIndex = -1;
 				try
 				{
 					ZipEntry entry = tempEntries.get(i);
-					String filename = entry.getName().toLowerCase();
-					int pos = filename.indexOf('.');
-					ind = StringUtil.getIntValue(filename.substring(12,pos), -1);
-					realIndex = ind - 1;
-					if (realIndex >= 0 && realIndex < count)
+					if (entry != null)
 					{
-						entries[realIndex] = entry;
-					}
-					else
-					{
-						LogMgr.logError("WbWorkspace.<init>", "Wrong index " + realIndex + " retrieved from workspace file (" + count + " entries)", null);
+						entries[i] = entry;
 					}
 				}
 				catch (Throwable ex)
 				{
-						LogMgr.logError("WbWorkspace.<init>", "Error reading history data for index " + realIndex + " (of " + count + " entries)", ex);
+						LogMgr.logError("WbWorkspace.<init>", "Error reading history data for index " + i + " (of " + count + " entries)", ex);
 				}
 			}
 		}
+	}
+
+	private int calculateTabCount()
+	{
+		boolean found = true;
+		int index = 0;
+		while (found)
+		{
+			if (tabInfo.containsKey("tab" + index + ".title") || tabInfo.containsKey("tab" + index + ".type"))
+			{
+				index ++;
+			}
+			else
+			{
+				found = false;
+			}
+		}
+		return index;
 	}
 
 	/**
@@ -151,10 +163,6 @@ public class WbWorkspace
 		{
 			InputStream in = this.archive.getInputStream(e);
 			history.readFromStream(in);
-		}
-		else
-		{
-			LogMgr.logError("WbWorkspace.readHistoryData()", "Requested ZipEntry for index " + anIndex + " was null!", null);
 		}
 	}
 

@@ -1801,27 +1801,15 @@ public class MainWindow
 	 */
 	public int findFirstExplorerTab()
 	{
-		int last = this.sqlTab.getTabCount() - 1;
-		if (last < 0) return -1;
-
-		boolean found = false;
-		while(true)
+		int count = this.sqlTab.getTabCount();
+		if (count <= 0) return -1;
+		
+		for (int i=0; i < count; i++)
 		{
-			Component c = this.sqlTab.getComponentAt(last);
-			if (!found && c instanceof DbExplorerPanel)
-			{
-				found = true;
-			}
-			if (c instanceof SqlPanel)
-			{
-				break;
-			}
-			last --;
-			c = this.sqlTab.getComponentAt(last);
+			Component c = this.sqlTab.getComponentAt(i);
+			if (c instanceof DbExplorerPanel) return i;
 		}
-
-		if (!found) return -1;
-		return last;
+		return -1;
 	}
 
 	public List<ToolWindow> getExplorerWindows()

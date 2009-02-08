@@ -48,7 +48,7 @@ import workbench.util.WbLocale;
  */
 public class GeneralOptionsPanel
 	extends JPanel
-	implements Restoreable, ActionListener
+	implements Restoreable
 {
 	public GeneralOptionsPanel()
 	{
@@ -72,7 +72,6 @@ public class GeneralOptionsPanel
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
 		pdfReaderPath.setFilename(Settings.getInstance().getPDFReaderPath());
 		logLevel.setSelectedItem(LogMgr.getLevel());
-		createBackup.setSelected(Settings.getInstance().getCreateWorkspaceBackup());
 		int days = Settings.getInstance().getUpdateCheckInterval();
 		if (days == 1)
 		{
@@ -117,9 +116,6 @@ public class GeneralOptionsPanel
 		String s = ResourceMgr.getFormattedString("LblSettingsLocation", configFile.getFullPath());
 		settingsfilename.setText(s);
 		settingsfilename.setBorder(new EmptyBorder(0,0,0,0));
-		backupCount.setEnabled(createBackup.isSelected());
-		backupCount.setText(Integer.toString(Settings.getInstance().getMaxWorkspaceBackup()));
-		backupDirPicker.setFilename(Settings.getInstance().getWorkspaceBackupDir());
 		singlePageHelp.setSelected(Settings.getInstance().useSinglePageHelp());
 		int tabPolicy = Settings.getInstance().getIntProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
 		scrollTabs.setSelected(tabPolicy == JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -143,8 +139,6 @@ public class GeneralOptionsPanel
 		set.setPDFReaderPath(pdfReaderPath.getFilename());
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
 		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
-		set.setAutoSaveWorkspace(autoSaveWorkspace.isSelected());
-		set.setCreateWorkspaceBackup(createBackup.isSelected());
 		int index = checkInterval.getSelectedIndex();
 		switch (index)
 		{
@@ -168,12 +162,6 @@ public class GeneralOptionsPanel
 		LogMgr.setLevel(level);
 		set.setProperty("workbench.log.level", level);
 		set.setLanguage(getSelectedLanguage());
-		int value = StringUtil.getIntValue(backupCount.getText(), -1);
-		if (value > -1)
-		{
-			set.setMaxWorkspaceBackup(value);
-		}
-		set.setWorkspaceBackupDir(backupDirPicker.getFilename());
 		set.setUseSinglePageHelp(singlePageHelp.isSelected());
 		if (scrollTabs.isSelected())
 		{
@@ -219,21 +207,15 @@ public class GeneralOptionsPanel
     jPanel2 = new JPanel();
     useEncryption = new JCheckBox();
     consolidateLog = new JCheckBox();
-    showTabIndex = new JCheckBox();
-    enableAnimatedIcon = new JCheckBox();
     exitOnConnectCancel = new JCheckBox();
     autoConnect = new JCheckBox();
     singlePageHelp = new JCheckBox();
-    scrollTabs = new JCheckBox();
-    confirmTabClose = new JCheckBox();
     settingsfilename = new WbLabelField();
     jPanel1 = new JPanel();
-    jLabel2 = new JLabel();
-    backupDirPicker = new WbFilePicker();
-    jLabel1 = new JLabel();
-    createBackup = new JCheckBox();
-    autoSaveWorkspace = new JCheckBox();
-    backupCount = new JTextField();
+    showTabIndex = new JCheckBox();
+    scrollTabs = new JCheckBox();
+    enableAnimatedIcon = new JCheckBox();
+    confirmTabClose = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -408,41 +390,12 @@ public class GeneralOptionsPanel
     consolidateLog.setHorizontalTextPosition(SwingConstants.RIGHT);
     consolidateLog.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
-    jPanel2.add(consolidateLog, gridBagConstraints);
-
-    showTabIndex.setSelected(GuiSettings.getShowTabIndex());
-    showTabIndex.setText(ResourceMgr.getString("LblShowTabIndex")); // NOI18N
-    showTabIndex.setToolTipText(ResourceMgr.getString("d_LblShowTabIndex")); // NOI18N
-    showTabIndex.setBorder(null);
-    showTabIndex.setHorizontalAlignment(SwingConstants.LEFT);
-    showTabIndex.setHorizontalTextPosition(SwingConstants.RIGHT);
-    showTabIndex.setIconTextGap(5);
-    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(6, 0, 1, 0);
-    jPanel2.add(showTabIndex, gridBagConstraints);
-
-    enableAnimatedIcon.setSelected(GuiSettings.getUseAnimatedIcon());
-    enableAnimatedIcon.setText(ResourceMgr.getString("LblEnableAnimatedIcon")); // NOI18N
-    enableAnimatedIcon.setToolTipText(ResourceMgr.getString("d_LblEnableAnimatedIcon")); // NOI18N
-    enableAnimatedIcon.setBorder(null);
-    enableAnimatedIcon.setHorizontalAlignment(SwingConstants.LEFT);
-    enableAnimatedIcon.setHorizontalTextPosition(SwingConstants.RIGHT);
-    enableAnimatedIcon.setIconTextGap(5);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
-    jPanel2.add(enableAnimatedIcon, gridBagConstraints);
+    jPanel2.add(consolidateLog, gridBagConstraints);
 
     exitOnConnectCancel.setSelected(Settings.getInstance().getExitOnFirstConnectCancel());
     exitOnConnectCancel.setText(ResourceMgr.getString("LblExitOnConnectCancel")); // NOI18N
@@ -454,7 +407,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 16, 1, 0);
     jPanel2.add(exitOnConnectCancel, gridBagConstraints);
@@ -479,30 +431,10 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(6, 16, 1, 0);
     jPanel2.add(singlePageHelp, gridBagConstraints);
-
-    scrollTabs.setText(ResourceMgr.getString("LblScrolTabs")); // NOI18N
-    scrollTabs.setToolTipText(ResourceMgr.getString("d_LblScrolTabs")); // NOI18N
-    scrollTabs.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
-    jPanel2.add(scrollTabs, gridBagConstraints);
-
-    confirmTabClose.setText(ResourceMgr.getString("LblConfirmTabClose")); // NOI18N
-    confirmTabClose.setToolTipText(ResourceMgr.getString("d_LblConfirmTabClose")); // NOI18N
-    confirmTabClose.setBorder(null);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(6, 0, 1, 0);
-    jPanel2.add(confirmTabClose, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -524,75 +456,57 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(5, 12, 2, 15);
     add(settingsfilename, gridBagConstraints);
 
-    jPanel1.setBorder(BorderFactory.createTitledBorder("Workspace"));
+    jPanel1.setBorder(BorderFactory.createTitledBorder("Tabs"));
     jPanel1.setLayout(new GridBagLayout());
 
-    jLabel2.setText(ResourceMgr.getString("LblBckDir")); // NOI18N
-    jLabel2.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(3, 3, 4, 0);
-    jPanel1.add(jLabel2, gridBagConstraints);
-
-    backupDirPicker.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
-    backupDirPicker.setSelectDirectoryOnly(true);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 5, 5, 3);
-    jPanel1.add(backupDirPicker, gridBagConstraints);
-
-    jLabel1.setLabelFor(backupCount);
-    jLabel1.setText(ResourceMgr.getString("LblMaxWkspBck")); // NOI18N
-    jLabel1.setToolTipText(ResourceMgr.getString("d_LblMaxWkspBck")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 8, 0, 0);
-    jPanel1.add(jLabel1, gridBagConstraints);
-
-    createBackup.setText(ResourceMgr.getString("LblBckWksp")); // NOI18N
-    createBackup.setToolTipText(ResourceMgr.getString("d_LblBckWksp")); // NOI18N
-    createBackup.setBorder(null);
-    createBackup.addActionListener(this);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 5, 1, 0);
-    jPanel1.add(createBackup, gridBagConstraints);
-
-    autoSaveWorkspace.setSelected(Settings.getInstance().getAutoSaveWorkspace());
-    autoSaveWorkspace.setText(ResourceMgr.getString("LblAutoSaveWksp")); // NOI18N
-    autoSaveWorkspace.setToolTipText(ResourceMgr.getString("d_LblAutoSaveWksp")); // NOI18N
-    autoSaveWorkspace.setBorder(null);
-    autoSaveWorkspace.setHorizontalAlignment(SwingConstants.LEFT);
-    autoSaveWorkspace.setHorizontalTextPosition(SwingConstants.RIGHT);
-    autoSaveWorkspace.setIconTextGap(5);
+    showTabIndex.setSelected(GuiSettings.getShowTabIndex());
+    showTabIndex.setText(ResourceMgr.getString("LblShowTabIndex")); // NOI18N
+    showTabIndex.setToolTipText(ResourceMgr.getString("d_LblShowTabIndex")); // NOI18N
+    showTabIndex.setBorder(null);
+    showTabIndex.setHorizontalAlignment(SwingConstants.LEFT);
+    showTabIndex.setHorizontalTextPosition(SwingConstants.RIGHT);
+    showTabIndex.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 3, 1, 0);
-    jPanel1.add(autoSaveWorkspace, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(2, 4, 1, 0);
+    jPanel1.add(showTabIndex, gridBagConstraints);
 
-    backupCount.setColumns(3);
-    backupCount.setHorizontalAlignment(JTextField.TRAILING);
-    backupCount.setToolTipText(ResourceMgr.getString("d_LblMaxWkspBck")); // NOI18N
-    backupCount.setMinimumSize(new Dimension(30, 20));
+    scrollTabs.setText(ResourceMgr.getString("LblScrolTabs")); // NOI18N
+    scrollTabs.setToolTipText(ResourceMgr.getString("d_LblScrolTabs")); // NOI18N
+    scrollTabs.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 16, 1, 0);
+    jPanel1.add(scrollTabs, gridBagConstraints);
+
+    enableAnimatedIcon.setSelected(GuiSettings.getUseAnimatedIcon());
+    enableAnimatedIcon.setText(ResourceMgr.getString("LblEnableAnimatedIcon")); // NOI18N
+    enableAnimatedIcon.setToolTipText(ResourceMgr.getString("d_LblEnableAnimatedIcon")); // NOI18N
+    enableAnimatedIcon.setBorder(null);
+    enableAnimatedIcon.setHorizontalAlignment(SwingConstants.LEFT);
+    enableAnimatedIcon.setHorizontalTextPosition(SwingConstants.RIGHT);
+    enableAnimatedIcon.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(5, 3, 0, 3);
-    jPanel1.add(backupCount, gridBagConstraints);
+    gridBagConstraints.insets = new Insets(6, 16, 5, 0);
+    jPanel1.add(enableAnimatedIcon, gridBagConstraints);
+
+    confirmTabClose.setText(ResourceMgr.getString("LblConfirmTabClose")); // NOI18N
+    confirmTabClose.setToolTipText(ResourceMgr.getString("d_LblConfirmTabClose")); // NOI18N
+    confirmTabClose.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(6, 4, 5, 0);
+    jPanel1.add(confirmTabClose, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -600,39 +514,19 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(7, 8, 0, 10);
+    gridBagConstraints.insets = new Insets(9, 7, 0, 10);
     add(jPanel1, gridBagConstraints);
-  }
-
-  // Code for dispatching events from components to event handlers.
-
-  public void actionPerformed(java.awt.event.ActionEvent evt) {
-    if (evt.getSource() == createBackup) {
-      GeneralOptionsPanel.this.createBackupActionPerformed(evt);
-    }
   }// </editor-fold>//GEN-END:initComponents
-
-	private void createBackupActionPerformed(ActionEvent evt)//GEN-FIRST:event_createBackupActionPerformed
-	{//GEN-HEADEREND:event_createBackupActionPerformed
-		backupCount.setEnabled(createBackup.isSelected());
-	}//GEN-LAST:event_createBackupActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox autoConnect;
-  private JCheckBox autoSaveWorkspace;
-  private JTextField backupCount;
-  private WbFilePicker backupDirPicker;
   private JComboBox checkInterval;
   private JLabel checkUpdatesLabel;
   private JCheckBox confirmTabClose;
   private JCheckBox consolidateLog;
-  private JCheckBox createBackup;
   private JCheckBox enableAnimatedIcon;
   private JCheckBox exitOnConnectCancel;
-  private JLabel jLabel1;
-  private JLabel jLabel2;
   private JPanel jPanel1;
   private JPanel jPanel2;
   private JLabel langLabel;

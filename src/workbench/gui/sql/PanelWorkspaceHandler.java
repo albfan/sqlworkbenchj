@@ -13,7 +13,10 @@ package workbench.gui.sql;
 
 import java.io.IOException;
 import java.util.Properties;
+import workbench.gui.settings.ExternalFileHandling;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.WbProperties;
 import workbench.util.WbWorkspace;
 
@@ -48,7 +51,6 @@ public class PanelWorkspaceHandler
 			client.clearSqlHistory(false);
 		}
 
-		String filename = w.getExternalFileName(index);
 		client.setTabName(w.getTabTitle(index));
 
 		int v = w.getMaxRows(index);
@@ -56,6 +58,7 @@ public class PanelWorkspaceHandler
 		v = w.getQueryTimeout(index);
 		client.statusBar.setQueryTimeout(v);
 
+		String filename = w.getExternalFileName(index);
 		boolean fileLoaded = false;
 		if (filename != null)
 		{
@@ -102,7 +105,11 @@ public class PanelWorkspaceHandler
 	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
-		client.saveHistory(w);
+		if (!client.hasFileLoaded() ||
+			  client.hasFileLoaded() && Settings.getInstance().getFilesInWorkspaceHandling() != ExternalFileHandling.none)
+		{
+			client.saveHistory(w);
+		}
 		Properties props = w.getSettings();
 
 		int location = client.contentPanel.getDividerLocation();
@@ -114,16 +121,19 @@ public class PanelWorkspaceHandler
 
 		w.setMaxRows(index, client.statusBar.getMaxRows());
 		w.setQueryTimeout(index, client.statusBar.getQueryTimeout());
-		if (client.hasFileLoaded())
+		if (client.hasFileLoaded() && Settings.getInstance().getFilesInWorkspaceHandling() == ExternalFileHandling.link)
 		{
 			w.setExternalFileName(index, client.getCurrentFileName());
 			w.setExternalFileCursorPos(index, client.editor.getCaretPosition());
 			w.setExternalFileEncoding(index, client.editor.getCurrentFileEncoding());
 		}
-		if (client.getTabName() != null)
+
+		String title = client.getTabName();
+		if (title == null)
 		{
-			w.setTabTitle(index, client.getTabName());
+			title = ResourceMgr.getDefaultTabLabel();
 		}
+		w.setTabTitle(index, title);
 		if (client.hasFileLoaded() && client.editor.isModified())
 		{
 			client.editor.saveCurrentFile();

@@ -22,11 +22,13 @@ import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	Make current selection upper case
+ * Make current selection upper case
+ * 
  * @see workbench.gui.sql.EditorPanel#toUpperCase()
- *	@author  support@sql-workbench.net
+ * @author  support@sql-workbench.net
  */
-public class MakeUpperCaseAction extends WbAction
+public class MakeUpperCaseAction
+	extends WbAction
 	implements TextSelectionListener
 {
 	private EditorPanel client;
