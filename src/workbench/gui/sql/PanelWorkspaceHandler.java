@@ -118,6 +118,7 @@ public class PanelWorkspaceHandler
 		props.setProperty("tab" + (index) + ".divider.lastlocation", Integer.toString(last));
 		props.setProperty("tab" + (index) + ".append.results", Boolean.toString(client.getAppendResults()));
 		props.setProperty("tab" + (index) + ".locked", Boolean.toString(client.isLocked()));
+		props.setProperty("tab" + index + ".type", PanelType.sqlPanel.toString());
 
 		w.setMaxRows(index, client.statusBar.getMaxRows());
 		w.setQueryTimeout(index, client.statusBar.getQueryTimeout());

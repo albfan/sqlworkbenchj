@@ -13,7 +13,6 @@ package workbench.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Point;
@@ -113,6 +112,7 @@ import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.macros.MacroMenuBuilder;
+import workbench.gui.sql.PanelType;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.GuiSettings;
@@ -689,6 +689,11 @@ public class MainWindow
 		return null;
 	}
 
+	public int getTabCount()
+	{
+		return this.sqlTab.getTabCount();
+	}
+	
 	public MainPanel getSqlPanel(int anIndex)
 	{
 		try
@@ -1276,7 +1281,6 @@ public class MainWindow
 
 		this.currentWorkspaceFile = null;
 		this.resultForWorkspaceClose = false;
-		closeWorkspace(false);
 
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -1285,20 +1289,23 @@ public class MainWindow
 				WbWorkspace w = null;
 				try
 				{
+					removeAllPanels(false);
+					
 					// Ignore all stateChanged() events from the SQL Tab during loading
 					tabRemovalInProgress = true;
 					
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
-					if (entryCount <= 0) entryCount = 1;
-					adjustTabCount(entryCount);
-
-					int explorerCount = w.getDbExplorerVisibleCount();
-					adjustDbExplorerCount(explorerCount);
-
-					int count = sqlTab.getTabCount();
-					for (int i = 0; i < count; i++)
+					for (int i = 0; i < entryCount; i++)
 					{
+						if (w.getPanelType(i) == PanelType.dbExplorer)
+						{
+							newDbExplorerPanel(false);
+						}
+						else
+						{
+							addTab(false, false, true, false);
+						}
 						MainPanel p = getSqlPanel(i);
 						p.readFromWorkspace(w, i);
 					}
@@ -1312,6 +1319,7 @@ public class MainWindow
 					updateAddMacroAction();
 
 					tabRemovalInProgress = false;
+
 					int newIndex = w.getSelectedTab();
 					if (newIndex < sqlTab.getTabCount())
 					{
@@ -1326,6 +1334,7 @@ public class MainWindow
 					LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
 					updateGuiForTab(sqlTab.getSelectedIndex());
 					handleWorkspaceLoadError(e, realFilename);
+					resultForWorkspaceClose = false;
 				}
 				finally
 				{
@@ -1574,8 +1583,9 @@ public class MainWindow
 		getSelector().showDisconnectInfo();
 	}
 
-	/** Display a little PopupWindow to tell the user that the
-	 *  workbench is currently connecting to the DB
+	/**
+	 * Display a little PopupWindow to tell the user that the
+	 * workbench is currently connecting to the DB
 	 */
 	protected void showConnectingInfo()
 	{
@@ -1784,34 +1794,6 @@ public class MainWindow
 		this.addToViewMenu(action);
 	}
 
-	/**
-	 * Returns the index of the las SQL Panel
-	 */
-	public int getLastSqlPanelIndex()
-	{
-		int explorer = findFirstExplorerTab();
-		if (explorer == -1)
-			return this.sqlTab.getTabCount() - 1;
-		else
-			return explorer - 1;
-	}
-
-	/**
-	 *	Returns the index of the first explorer tab
-	 */
-	public int findFirstExplorerTab()
-	{
-		int count = this.sqlTab.getTabCount();
-		if (count <= 0) return -1;
-		
-		for (int i=0; i < count; i++)
-		{
-			Component c = this.sqlTab.getComponentAt(i);
-			if (c instanceof DbExplorerPanel) return i;
-		}
-		return -1;
-	}
-
 	public List<ToolWindow> getExplorerWindows()
 	{
 		return Collections.unmodifiableList(explorerWindows);
@@ -1886,26 +1868,29 @@ public class MainWindow
 		}
 	}
 	
-	protected void removeAllPanels()
+	protected void removeAllPanels(boolean keepOne)
 	{
 		boolean inProgress = connectInProgress;
 		if (!inProgress) this.setConnectIsInProgress();
 		try
 		{
 			this.tabRemovalInProgress = true;
-			while (sqlTab.getTabCount() > 1)
+			int keep = (keepOne ? 1 : 0);
+			while (sqlTab.getTabCount() > keep)
 			{
 				// I'm not using removeTab() as that will also
 				// update the GUI and immediately check for a new
 				// connection which is not necessary when removing all tabs.
-				removeTab(1, false);
+				removeTab(keep, false);
 			}
 			// Reset the first panel, now we have a "clean" workspace
-			MainPanel p = getSqlPanel(0);
-			p.reset();
-
-			// make sure the toolbar and menus are updated correctly
-			updateCurrentTab(0);
+			if (keepOne)
+			{
+				MainPanel p = getSqlPanel(0);
+				p.reset();
+				// make sure the toolbar and menus are updated correctly
+				updateCurrentTab(0);
+			}
 		}
 		catch (Exception e)
 		{
@@ -2009,60 +1994,6 @@ public class MainWindow
 		return assigned;
 	}
 
-	private int getNumberOfExplorerPanels()
-	{
-		int count = 0;
-		int num = this.sqlTab.getTabCount();
-		for (int i=0; i < num; i++)
-		{
-			Component c = this.sqlTab.getComponentAt(i);
-			if (c instanceof DbExplorerPanel) count++;
-		}
-		return count;
-	}
-
-	private void adjustDbExplorerCount(int newCount)
-	{
-		int count = this.getNumberOfExplorerPanels();
-		if (count == newCount) return;
-		if (newCount > count)
-		{
-			for (int i=0; i < (newCount - count); i++)
-			{
-				newDbExplorerPanel(false);
-			}
-		}
-		else if (newCount < count)
-		{
-			for (int i=0; i < (count - newCount); i++)
-			{
-				this.removeLastTab(true);
-			}
-		}
-	}
-	/**
-	 *	Creates or removes SQL tabs until newCount tabs are displayed
-	 */
-	private void adjustTabCount(int newCount)
-	{
-		int tabCount = this.sqlTab.getTabCount() - getNumberOfExplorerPanels();
-
-		if (newCount > tabCount)
-		{
-			for (int i=0; i < (newCount - tabCount); i++)
-			{
-				this.addTab(false, false, true, false);
-			}
-		}
-		else if (newCount < tabCount)
-		{
-			for (int i=0; i < (tabCount - newCount); i++)
-			{
-				this.removeLastTab(newCount == 1);
-			}
-		}
-	}
-
 	/**
 	 *	Sets the default title for all tab titles
 	 */
@@ -2146,7 +2077,7 @@ public class MainWindow
 			{
         try
         {
-					removeAllPanels();
+					removeAllPanels(true);
         }
         catch (Exception e)
         {
@@ -2248,6 +2179,7 @@ public class MainWindow
 			w = new WbWorkspace(realFilename, true);
 			int selected = this.sqlTab.getSelectedIndex();
 			w.setSelectedTab(selected);
+			w.setEntryCount(count);
 			for (int i=0; i < count; i++)
 			{
 				MainPanel p = getSqlPanel(i);
@@ -2302,9 +2234,6 @@ public class MainWindow
 	}
 
 	/**
-	 *	Adds a new SQL tab to the main window. This will be inserted
-	 *	before the first DbExplorer tab
-	 *
 	 *  @param selectNew if true the new tab is automatically selected
 	 *  @param checkConnection if true, the panel will automatically be connected
 	 *  this is important if a Profile is used where each panel gets its own
@@ -2315,16 +2244,29 @@ public class MainWindow
 		return addTab(selectNew, checkConnection, true, true);
 	}
 
+	/**
+	 * @param selectNew if true the new tab is automatically selected
+	 * @param checkConnection if true, the panel will automatically be connected
+	 * this is important if a Profile is used where each panel gets its own
+	 * connection
+	 * @param append if true, the tab will be appended at the end (after all other tabs), if false will be
+	 * inserted before the current tab.
+	 * @param renumber should the tabs be renumbered after adding the new tab. If several tabs are added
+	 * in a loop renumber is only necessary at the end
+	 *
+	 * @see #renumberTabs()
+	 * @see #checkConnectionForPanel(workbench.interfaces.MainPanel) 
+	 */
 	public MainPanel addTab(boolean selectNew, boolean checkConnection, boolean append, boolean renumber)
 	{
 		int index = -1;
 		if (append)
 		{
-			index = this.findFirstExplorerTab();
+			index = sqlTab.getTabCount();
 		}
 		else
 		{
-			index = this.sqlTab.getSelectedIndex() + 1;
+			index = this.sqlTab.getSelectedIndex();
 		}
 
 		if (index == -1) index = sqlTab.getTabCount();
@@ -2421,13 +2363,11 @@ public class MainWindow
 	public boolean canCloseTab()
 	{
 		MainPanel panel = this.getCurrentPanel();
+		if (panel == null) return false;
 		if (panel.isLocked()) return false;
-		if (panel instanceof DbExplorerPanel) return true;
 
-		int numTabs = this.getLastSqlPanelIndex();
-		int currentIndex = this.sqlTab.getSelectedIndex();
-		if (currentIndex > numTabs) return true;
-		return numTabs > 0;
+		int numTabs = sqlTab.getTabCount();
+		return numTabs > 1;
 	}
 
 	public boolean canRenameTab()
@@ -2508,7 +2448,7 @@ public class MainWindow
 	public void moveTabRight()
 	{
 		int index = this.getCurrentPanelIndex();
-		int lastIndex = this.getLastSqlPanelIndex();
+		int lastIndex = sqlTab.getTabCount();
 		if (index >= lastIndex) return;
 		moveTab(index, index + 1);
 	}
@@ -2527,7 +2467,6 @@ public class MainWindow
 	public boolean moveTab(int oldIndex, int newIndex)
 	{
 		MainPanel p = this.getSqlPanel(newIndex);
-		if (p instanceof DbExplorerPanel) return false;
 
 		MainPanel panel = this.getSqlPanel(oldIndex);
 

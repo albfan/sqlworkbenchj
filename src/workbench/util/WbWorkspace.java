@@ -18,12 +18,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
+import workbench.gui.sql.PanelType;
 import workbench.gui.sql.SqlHistory;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -37,10 +36,10 @@ public class WbWorkspace
 {
 	private ZipOutputStream zout;
 	private ZipFile archive;
-	private ZipEntry[] entries;
 
 	private boolean isReadOnly;
 	private WbProperties tabInfo = new WbProperties(null, 0);
+	private int tabCount = -1;
 
 	public WbWorkspace(String archiveName, boolean createNew)
 		throws IOException
@@ -59,54 +58,47 @@ public class WbWorkspace
 			this.isReadOnly = true;
 			this.zout = null;
 			this.archive = new ZipFile(archiveName);
-			Enumeration e = this.archive.entries();
-			Map<Integer, ZipEntry> tempEntries = new HashMap<Integer, ZipEntry>(10);
 
-			while (e.hasMoreElements())
+			ZipEntry entry = archive.getEntry("tabs.properties");
+			if (entry == null)
 			{
-				ZipEntry entry = (ZipEntry)e.nextElement();
-				String filename = entry.getName().toLowerCase();
-
-				if (filename.endsWith("txt"))
-				{
-					int pos = filename.indexOf('.');
-					int index = StringUtil.getIntValue(filename.substring(12,pos));
-					tempEntries.put(index - 1, entry);
-				}
-				else if (filename.endsWith("properties"))
-				{
-					this.readTabInfo(entry);
-				}
+				// Old definition of tabs for builds before 103.2
+				entry = archive.getEntry("tabinfo.properties");
 			}
+			this.readTabInfo(entry);
 
-			int count = calculateTabCount(); // tempEntries.size();
-			this.entries = new ZipEntry[count];
-
-			for (int i=0; i < count; i++)
-			{
-				try
-				{
-					ZipEntry entry = tempEntries.get(i);
-					if (entry != null)
-					{
-						entries[i] = entry;
-					}
-				}
-				catch (Throwable ex)
-				{
-						LogMgr.logError("WbWorkspace.<init>", "Error reading history data for index " + i + " (of " + count + " entries)", ex);
-				}
-			}
+			tabCount = calculateTabCount(); 
 		}
+	}
+
+	/**
+	 * For testing purposes only
+	 * @param tabInfo
+	 */
+	WbWorkspace(WbProperties props)
+	{
+		this.tabInfo = props;
+		tabCount = calculateTabCount();
+		this.isReadOnly = true;
 	}
 
 	private int calculateTabCount()
 	{
+		// new property that store the total count of tabs
+		int count = tabInfo.getIntProperty("tab.total.count", -1);
+		if (count > 0) return count;
+
+		// Old tabinfo.properties format
 		boolean found = true;
 		int index = 0;
 		while (found)
 		{
-			if (tabInfo.containsKey("tab" + index + ".title") || tabInfo.containsKey("tab" + index + ".type"))
+			if (tabInfo.containsKey("tab" + index + ".title"))
+			{
+				tabInfo.setProperty("tab" + index + ".type", PanelType.sqlPanel.toString());
+				index ++;
+			}
+			else if (tabInfo.containsKey("tab" + index + ".type"))
 			{
 				index ++;
 			}
@@ -115,22 +107,21 @@ public class WbWorkspace
 				found = false;
 			}
 		}
+
+		int dbExplorer = this.tabInfo.getIntProperty("dbexplorer.visible", 0);
+
+		// now add the missing .type entries for the DbExplorer panels
+		for (int i=0; i < dbExplorer; i++)
+		{
+			tabInfo.setProperty("tab" + index + ".type", PanelType.dbExplorer.toString());
+			index ++;
+		}
 		return index;
 	}
 
-	/**
-	 * Increase the counter for visible DbExplorer panels
-	 */
-	public void dDbExplorerVisible()
+	public void setEntryCount(int count)
 	{
-		int count = this.tabInfo.getIntProperty("dbexplorer.visible", 0);
-		count ++;
-		this.tabInfo.setProperty("dbexplorer.visible", count);
-	}
-
-	public int getDbExplorerVisibleCount()
-	{
-		return this.tabInfo.getIntProperty("dbexplorer.visible", 0);
+		tabInfo.setProperty("tab.total.count", count);
 	}
 
 	public void addHistoryEntry(String aFilename, SqlHistory history)
@@ -149,16 +140,29 @@ public class WbWorkspace
 	public int getEntryCount()
 	{
 		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
-		if (this.entries == null) return 0;
-		return this.entries.length;
+		return tabCount;
+	}
+
+	public PanelType getPanelType(int index)
+	{
+		String type = tabInfo.getProperty("tab" + index + ".type", "sqlPanel");
+		try
+		{
+			return PanelType.valueOf(type);
+		}
+		catch (Exception e)
+		{
+			return PanelType.sqlPanel;
+		}
 	}
 
 	public void readHistoryData(int anIndex, SqlHistory history)
 		throws IOException
 	{
 		if (!this.isReadOnly) throw new IllegalStateException("Workspace is opened for writing. Entry count is not available");
-		if (anIndex > this.entries.length - 1) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.length - 1));
-		ZipEntry e = this.entries[anIndex];
+		//if (anIndex > this.entries.length - 1) throw new IndexOutOfBoundsException("Index " + anIndex + " is great then " + (this.entries.length - 1));
+
+		ZipEntry e = this.archive.getEntry("WbStatements" + (anIndex + 1) + ".txt");
 		if (e != null)
 		{
 			InputStream in = this.archive.getInputStream(e);
@@ -171,6 +175,13 @@ public class WbWorkspace
 		return this.tabInfo;
 	}
 
+	private WbProperties createOldTabInfo()
+	{
+		WbProperties props = new WbProperties(null, 0);
+		Enumeration keys = tabInfo.keys();
+		return null;
+	}
+	
 	public void close()
 		throws IOException
 	{
@@ -180,7 +191,7 @@ public class WbWorkspace
 			{
 				try
 				{
-					ZipEntry entry = new ZipEntry("tabinfo.properties");
+					ZipEntry entry = new ZipEntry("tabs.properties");
 					this.zout.putNextEntry(entry);
 					this.tabInfo.save(this.zout);
 					zout.closeEntry();
@@ -229,8 +240,7 @@ public class WbWorkspace
 	public boolean isSelectedTabExplorer()
 	{
 		int index = getSelectedTab();
-		String key = "dbexplorer" + index + ".currentschema";
-		return this.tabInfo.containsKey(key);
+		return PanelType.dbExplorer == this.getPanelType(index);
 	}
 
 	public void setTabTitle(int index, String name)

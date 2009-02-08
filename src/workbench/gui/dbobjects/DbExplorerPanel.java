@@ -57,6 +57,7 @@ import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbToolbar;
 import workbench.gui.components.WbToolbarButton;
 import workbench.gui.sql.PanelTitleSetter;
+import workbench.gui.sql.PanelType;
 import workbench.interfaces.Connectable;
 import workbench.interfaces.MainPanel;
 import workbench.interfaces.Reloadable;
@@ -940,7 +941,6 @@ public class DbExplorerPanel
 		throws IOException
 	{
 		// this will increase the visible count for DbExplorer Panels in the workspace
-		w.dDbExplorerVisible();
 		Object s = this.schemaSelector.getSelectedItem();
 		WbProperties p = w.getSettings();
 		String key = "dbexplorer" + index + ".currentschema";
@@ -966,7 +966,8 @@ public class DbExplorerPanel
 			p.setProperty(key, this.catalogFromWorkspace);
 		}
 		p.setProperty("dbexplorer" + index + ".locked", this.locked);
-		
+		p.setProperty("tab" + index + ".type", PanelType.dbExplorer.toString());
+		p.setProperty("tab" + index + ".title", getTabTitle());
 		tables.saveToWorkspace(w, index);
 		searchPanel.saveToWorkspace(w, index);
 		procs.saveToWorkspace(w, index);

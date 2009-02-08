@@ -455,13 +455,13 @@ public class MainWindowTest
 		{
 			startApplication();
 			connect();
-//			whatsNewTest();
-//			aboutTest();
-//			settingsTest();
-//			runSql();
-//			appendTest();
+			whatsNewTest();
+			aboutTest();
+			settingsTest();
+			runSql();
+			appendTest();
 			pkWarningsTest();
-//			definePKTest();
+			definePKTest();
 			testUtil.stopApplication();
 		}
 		catch (Exception e)

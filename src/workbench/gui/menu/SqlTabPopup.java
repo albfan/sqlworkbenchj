@@ -41,6 +41,10 @@ public class SqlTabPopup
 		this.add(add);
 		InsertTabAction insert = new InsertTabAction(aClient);
 		this.add(insert);
+		
+		NewDbExplorerPanelAction newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
+		newDbExp.removeIcon();
+		add(newDbExp);
 
 		addSeparator();
 		
@@ -50,19 +54,8 @@ public class SqlTabPopup
 
 		MainPanel panel = aClient.getCurrentPanel();
 
-		int tabCount = aClient.getLastSqlPanelIndex();
-		int lockedCount = 0;
-		for (int i=0; i < tabCount; i++)
-		{
-			MainPanel p = aClient.getSqlPanel(i);
-			if (p.isLocked()) lockedCount ++;
-		}
-
-		if (panel instanceof SqlPanel || lockedCount > 0)
-		{
-			CloseOtherTabsAction closeOthers = new CloseOtherTabsAction(aClient);
-			this.add(closeOthers);
-		}
+		CloseOtherTabsAction closeOthers = new CloseOtherTabsAction(aClient);
+		this.add(closeOthers);
 		
 		if (aClient.canRenameTab())
 		{
@@ -75,26 +68,16 @@ public class SqlTabPopup
 		this.add(lock.getMenuItem());
 		lock.setSwitchedOn(panel.isLocked());
 
-		if (panel instanceof SqlPanel)
-		{
-			this.addSeparator();
-
-			SqlPanel spanel = (SqlPanel)panel;
-			int currentIndex = aClient.getCurrentPanelIndex();
-			MoveSqlTabLeft moveLeft = new MoveSqlTabLeft(aClient);
-			moveLeft.setEnabled(currentIndex > 0);
-			this.add(moveLeft);
-			int lastIndex = aClient.getLastSqlPanelIndex();
-			MoveSqlTabRight moveRight = new MoveSqlTabRight(aClient);
-			moveRight.setEnabled(currentIndex < lastIndex);
-			this.add(moveRight);
-		}
-
 		this.addSeparator();
 
-		NewDbExplorerPanelAction newDbExp = new NewDbExplorerPanelAction(aClient, "MnuTxtAddExplorerPanel");
-		newDbExp.removeIcon();
-		add(newDbExp);
+		int currentIndex = aClient.getCurrentPanelIndex();
+		MoveSqlTabLeft moveLeft = new MoveSqlTabLeft(aClient);
+		moveLeft.setEnabled(currentIndex > 0);
+		this.add(moveLeft);
+		int lastIndex = aClient.getTabCount();
+		MoveSqlTabRight moveRight = new MoveSqlTabRight(aClient);
+		moveRight.setEnabled(currentIndex < lastIndex);
+		this.add(moveRight);
 
 		if (aClient.canUseSeparateConnection())
 		{
