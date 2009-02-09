@@ -13,6 +13,7 @@ package workbench.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.Point;
@@ -1786,6 +1787,7 @@ public class MainWindow
 		JMenuBar dbmenu = this.createMenuForPanel(explorer);
 
 		this.sqlTab.add(explorer);
+
 		explorer.setTabTitle(this.sqlTab, this.sqlTab.getTabCount() - 1);
 
 		SelectTabAction action = new SelectTabAction(this.sqlTab, this.sqlTab.getTabCount() - 1);
@@ -1901,6 +1903,22 @@ public class MainWindow
 			tabRemovalInProgress = false;
 			if (!inProgress) clearConnectIsInProgress();
 		}
+	}
+
+	/**
+	 *	Returns the index of the first explorer tab
+	 */
+	public int findFirstExplorerTab()
+	{
+		int count = this.sqlTab.getTabCount();
+		if (count <= 0) return -1;
+
+		for (int i=0; i < count; i++)
+		{
+			Component c = this.sqlTab.getComponentAt(i);
+			if (c instanceof DbExplorerPanel) return i;
+		}
+		return -1;
 	}
 
 	public void newDbExplorerWindow()
@@ -2266,7 +2284,7 @@ public class MainWindow
 		}
 		else
 		{
-			index = this.sqlTab.getSelectedIndex();
+			index = this.sqlTab.getSelectedIndex() + 1;
 		}
 
 		if (index == -1) index = sqlTab.getTabCount();

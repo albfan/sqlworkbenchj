@@ -1171,7 +1171,7 @@ public class SqlPanel
 		throws IOException
 	{
 		this.storeStatementInHistory();
-		w.addHistoryEntry("WbStatements" + this.internalId + ".txt", this.sqlHistory);
+		w.addHistoryEntry(this.internalId, this.sqlHistory);
 	}
 
 	public String getRealTabTitle()

@@ -18,8 +18,6 @@ import java.util.List;
 import javax.swing.KeyStroke;
 
 import workbench.gui.MainWindow;
-import workbench.gui.dbobjects.DbExplorerPanel;
-import workbench.interfaces.MainPanel;
 import workbench.interfaces.ToolWindow;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.Settings;
@@ -45,7 +43,7 @@ public class ShowDbExplorerAction
 		boolean useTab = Settings.getInstance().getShowDbExplorerInMainWindow();
 		if (useTab)
 		{
-			int index = findFirstExplorerTab();
+			int index = mainWin.findFirstExplorerTab();
 			if (index > -1)
 			{
 				mainWin.selectTab(index);
@@ -70,19 +68,4 @@ public class ShowDbExplorerAction
 		}
 	}
 
-	/**
-	 *	Returns the index of the first explorer tab
-	 */
-	protected int findFirstExplorerTab()
-	{
-		int count = mainWin.getTabCount();
-		if (count <= 0) return -1;
-
-		for (int i=0; i < count; i++)
-		{
-			MainPanel p = mainWin.getSqlPanel(i);
-			if (p instanceof DbExplorerPanel) return i;
-		}
-		return -1;
-	}
 }
