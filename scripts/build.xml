@@ -138,6 +138,7 @@
 			<fileset defaultexcludes="true" dir="${testsrc}/junit">
 				<include name="**/*.sql"/>
 				<include name="**/*.txt"/>
+				<include name="**/*.properties"/>
 			</fileset>
 			<fileset defaultexcludes="true" dir="${testsrc}/jemmy">
 				<include name="**/*.timeouts"/>
