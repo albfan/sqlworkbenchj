@@ -12,6 +12,7 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -21,6 +22,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -58,8 +61,30 @@ public class LnFOptionsPanel
 		lnfList = new JList();
 		lnfList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		lnfList.setBorder(new EmptyBorder(2,1,2,1));
-		FontMetrics fm = getFontMetrics(getFont());
-		int width= fm.stringWidth("MMMMMMMMMMMMMMM");
+
+		// With some L&F getFont() or getFontMetrics() returns
+		// null when called in the constructor...
+		int width = 150;
+		try
+		{
+			Font f = getFont();
+			if (f == null)
+			{
+				f = UIManager.getDefaults().getFont("List.font");
+			}
+			
+			if (f != null)
+			{
+				FontMetrics fm = getFontMetrics(f);
+				width = fm.stringWidth("MMMMMMMMMMMMMMM");
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("LnFOptionsPanel.<init>", "Could not calculate string width", e);
+			width = 150;
+		}
+		
 		lnfList.setFixedCellWidth(width);
 
 		JScrollPane scroll = new JScrollPane(lnfList);
