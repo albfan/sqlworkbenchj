@@ -62,6 +62,10 @@ import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoableEdit;
 
 import workbench.WbManager;
+import workbench.gui.actions.CopyAction;
+import workbench.gui.actions.CutAction;
+import workbench.gui.actions.PasteAction;
+import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 import workbench.interfaces.ClipboardSupport;
@@ -223,16 +227,24 @@ public class JEditTextArea
 		this.setTabSize(Settings.getInstance().getEditorTabWidth());
 		this.popup = new TextPopup(this);
 
-		this.addKeyBinding(this.popup.getCopyAction());
-		this.addKeyBinding("C+INSERT", this.popup.getCopyAction());
+		boolean extendedCutCopyPaste = Settings.getInstance().getBoolProperty("workbench.editor.extended.cutcopypaste", true);
+		
+		CopyAction copy = new CopyAction(this);
+		PasteAction paste = new PasteAction(this);
+		CutAction cut = new CutAction(this);
 
-		this.addKeyBinding(this.popup.getPasteAction());
-		this.addKeyBinding("SHIFT+INSERT", this.popup.getPasteAction());
+		this.addKeyBinding(copy);
+		this.addKeyBinding(paste);
+		this.addKeyBinding(cut);
+		this.addKeyBinding(new SelectAllAction(this));
 
-		this.addKeyBinding(this.popup.getCutAction());
-		this.addKeyBinding("SHIFT+DELETE", this.popup.getCutAction());
+		if (extendedCutCopyPaste)
+		{
+			this.addKeyBinding("C+INSERT", copy);
+			this.addKeyBinding("SHIFT+INSERT", paste);
+			this.addKeyBinding("SHIFT+DELETE", cut);
+		}
 
-		this.addKeyBinding(this.popup.getSelectAllAction());
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 	}
 

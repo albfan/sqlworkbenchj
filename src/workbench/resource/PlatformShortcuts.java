@@ -12,10 +12,8 @@
 package workbench.resource;
 
 import java.awt.Toolkit;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
-import workbench.util.MacOSHelper;
 
 /**
  *

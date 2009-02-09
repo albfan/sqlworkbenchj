@@ -83,8 +83,6 @@ public class InputHandler
 	public static final ActionListener SELECT_PREV_WORD = new prev_word(true);
 	public static final ActionListener REPEAT = new repeat();
 	public static final ActionListener TOGGLE_RECT = new toggle_rect();
-//	public static final ActionListener MAKE_UPPER_CASE = new make_upper();
-//	public static final ActionListener MAKE_LOWER_CASE = new make_lower();
 	public static final ActionListener UNDO = new undo();
 	public static final ActionListener REDO = new redo();
 

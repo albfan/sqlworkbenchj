@@ -18,6 +18,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
+import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -48,16 +49,26 @@ public class HelpManager
 				return;
 			}
 			
-			WbFile reader = new WbFile(readerPath);
-			if (!reader.exists() || !reader.canRead() || !reader.isFile())
+//			WbFile reader = new WbFile(readerPath);
+//			if (!reader.exists() || !reader.canRead() || !reader.isFile())
+//			{
+//				String msg = ResourceMgr.getFormattedString("ErrExeNotAvail", readerPath);
+//				WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
+//				return;
+//			}
+
+			if (MacOSHelper.isMacOS())
 			{
-				String msg = ResourceMgr.getFormattedString("ErrExeNotAvail", readerPath);
-				WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
-				return;
+				String cmd = readerPath +  " \"" + pdf.getFullPath() + "\"";
+				LogMgr.logDebug("HelpManager.showPdfHelp()", "Running PDF Reader using: [" + cmd + "]");
+				Runtime.getRuntime().exec(cmd);
 			}
-			
-			String[] cmd = new String[] { "\"" + reader.getFullPath() + "\"", "\"" + pdf.getFullPath() + "\"" };
-			Runtime.getRuntime().exec(cmd);
+			else
+			{
+				WbFile reader = new WbFile(readerPath);
+				String[] cmd = new String[] { reader.getFullPath(), "\"" + pdf.getFullPath() + "\"" };
+				Runtime.getRuntime().exec(cmd);
+			}
 		}
 		catch (Exception ex)
 		{

@@ -2553,15 +2553,15 @@ public class MainWindow
 
 			if (doDisconnect)
 			{
-				LogMgr.logDebug("MainWindow.removeTab()", "Closing physical connection: " + conn.getId() + " for tab: " + index);
+//				LogMgr.logDebug("MainWindow.removeTab()", "Closing physical connection: " + conn.getId() + " for tab: " + index);
 				showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
 				ConnectionMgr.getInstance().disconnect(conn);
 				showStatusMessage("");
 			}
-			else
-			{
-				LogMgr.logDebug("MainWindow.removeTab()", "Disconnect not necessary for tab " + index);
-			}
+//			else
+//			{
+//				LogMgr.logDebug("MainWindow.removeTab()", "Disconnect not necessary for tab " + index);
+//			}
 
 			this.panelMenus.remove(index);
 			this.sqlTab.remove(index);
