@@ -11,24 +11,17 @@
  */
 package workbench.gui.profiles;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.sql.Driver;
 import java.util.List;
-import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import workbench.db.DbDriver;
-import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ClassFinderGUI;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.TextComponentMouseListener;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.ClassFinder;
 import workbench.util.StringUtil;
-import workbench.util.WbThread;
 
 /**
  *
@@ -38,7 +31,7 @@ public class DriverEditorPanel
 	extends javax.swing.JPanel
 	implements PropertyChangeListener
 {
-
+	private boolean ignoreChange;
 	private DbDriver currentDriver;
 
 	public DriverEditorPanel()
@@ -57,81 +50,35 @@ public class DriverEditorPanel
 		libraryPath.addPropertyChangeListener("filename", this);
 	}
 
-	protected String selectEntry(List<String> entries)
-	{
-		JPanel p = new JPanel(new BorderLayout());
-		DefaultListModel model = new DefaultListModel();
-		for (String s : entries)
-		{
-			model.addElement(s);
-		}
-		JList list = new JList(model);
-		list.setVisibleRowCount(4);
-		JScrollPane scroll = new JScrollPane(list);
-		p.add(scroll, BorderLayout.CENTER);
-		boolean ok = WbSwingUtilities.getOKCancel(ResourceMgr.getString("TxtSelectDriver"), this.getParent(), p);
-		String cls = null;
-		if (ok)
-		{
-			cls = (String) list.getSelectedValue();
-		}
-		return cls;
-	}
-
-	protected void checkFinished(final List<String> drivers)
-	{
-		if (drivers == null) return;
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				statusLabel.setText("");
-				if (drivers.size() == 1)
-				{
-					tfClassName.setText(drivers.get(0));
-				}
-				else if (drivers.size() > 0)
-				{
-					String cls = selectEntry(drivers);
-					if (cls != null)
-					{
-						tfClassName.setText(cls);
-					}
-				}
-			}
-		});
-	}
-	
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		Thread t = new WbThread("CheckDriver")
-		{
-			public void run()
-			{
-				statusLabel.setText(ResourceMgr.getString("TxtSearchingDriver"));
-				ClassFinder finder = new ClassFinder();
-				List<String> libs = DbDriver.splitLibraryList(libraryPath.getFilename());
-				try
-				{
-					List<String> drivers = finder.findDriver(libs);
-					checkFinished(drivers);
-				}
-				catch (Exception e)
-				{
-					LogMgr.logError("DriverEditorPanel.propertyChange()", "Could not find JDBC driver class", e);
-				}
-			}
-		};
-		t.start();
+		if (ignoreChange) return;
+
+		ClassFinder finder = new ClassFinder(Driver.class);
+		List<String> libs = DbDriver.splitLibraryList(libraryPath.getFilename());
+
+		ClassFinderGUI gui = new ClassFinderGUI(finder, tfClassName, statusLabel);
+		gui.setStatusBarKey("TxtSearchingDriver");
+		gui.setWindowTitleKey("TxtSelectDriver");
+		gui.setClassPath(libs);
+		gui.startCheck();
 	}
 
 	public void setDriver(DbDriver aDriver)
 	{
-		this.currentDriver = aDriver;
-		this.tfName.setText(aDriver.getName());
-		this.tfClassName.setText(aDriver.getDriverClass());
-		this.libraryPath.setFilename(aDriver.getLibraryString());
-		this.tfSampleUrl.setText(aDriver.getSampleUrl());
+		try
+		{
+			ignoreChange = true;
+			this.currentDriver = aDriver;
+			this.tfName.setText(aDriver.getName());
+			this.tfClassName.setText(aDriver.getDriverClass());
+			this.libraryPath.setFilename(aDriver.getLibraryString());
+			this.tfSampleUrl.setText(aDriver.getSampleUrl());
+		}
+		finally
+		{
+			ignoreChange = false;
+		}
 	}
 
 	void updateDriver()

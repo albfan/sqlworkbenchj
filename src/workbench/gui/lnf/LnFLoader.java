@@ -36,26 +36,33 @@ public class LnFLoader
 		this.lnfDef = definition;
 		if (!lnfDef.isBuiltInLnF())
 		{
-			String libList = definition.getLibrary();
-			if (libList != null)
+			String libs = definition.getLibrary();
+			if (libs != null)
 			{
-				if (libList.indexOf(StringUtil.getPathSeparator()) > -1)
-				{
-					this.liblist = libList.split(StringUtil.getPathSeparator());
-				}
-				else if (libList.indexOf(LnFDefinition.LNF_PATH_SEPARATOR) > -1)
-				{
-					this.liblist = libList.split(StringUtil.getPathSeparator());
-				}
-				else
-				{
-					// Assuming a single library
-					this.liblist = new String[] { libList };
-				}
+				liblist = splitLibraries(libs);
 			}
 		}
 	}
-	
+
+	public static String[] splitLibraries(String libList)
+	{
+		String[] result = null;
+		if (libList.indexOf(StringUtil.getPathSeparator()) > -1)
+		{
+			result = libList.split(StringUtil.getPathSeparator());
+		}
+		else if (libList.indexOf(LnFDefinition.LNF_PATH_SEPARATOR) > -1)
+		{
+			result = libList.split(StringUtil.getPathSeparator());
+		}
+		else
+		{
+			// Assuming a single library
+			result = new String[] { libList };
+		}
+		return result;
+	}
+
 	public boolean isAvailable()
 	{
 		if (this.lnfDef.isBuiltInLnF()) return true;

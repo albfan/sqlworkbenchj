@@ -24,7 +24,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 
-import workbench.gui.settings.ExternalFileHandling;
 import workbench.gui.sql.PanelType;
 import workbench.gui.sql.SqlHistory;
 import workbench.log.LogMgr;
@@ -88,7 +87,7 @@ public class WbWorkspace
 
 	private int calculateTabCount()
 	{
-		// new property that store the total count of tabs
+		// new property that stores the total count of tabs
 		int count = tabInfo.getIntProperty("tab.total.count", -1);
 		if (count > 0) return count;
 
@@ -97,7 +96,9 @@ public class WbWorkspace
 		int index = 0;
 		while (found)
 		{
-			if (tabInfo.containsKey("tab" + index + ".title") || tabInfo.containsKey("tab" + index + ".append.results"))
+			if (tabInfo.containsKey("tab" + index + ".maxrows") ||
+					tabInfo.containsKey("tab" + index + ".title") ||
+					tabInfo.containsKey("tab" + index + ".append.results"))
 			{
 				tabInfo.setProperty("tab" + index + ".type", PanelType.sqlPanel.toString());
 				index ++;
@@ -277,20 +278,6 @@ public class WbWorkspace
 		return newProps;
 	}
 
-	/**
-	 * If the new option to discard external files completely is turned
-	 * on, previous versions will not be able to read the workspace
-	 * as they expect one WbStatements.txt for each tab to be present
-	 * So if the option is enabled we will add empty files for those
-	 * tabs.
-	 * 
-	 * @param oldProps
-	 */
-	private void ensureHistoryFiles(WbProperties oldProps)
-	{
-		if (Settings.getInstance().getFilesInWorkspaceHandling() != ExternalFileHandling.none) return;
-	}
-	
 	public void close()
 		throws IOException
 	{
@@ -312,7 +299,6 @@ public class WbWorkspace
 						zout.putNextEntry(oldinfo);
 						oldProps.save(zout);
 						zout.closeEntry();
-						ensureHistoryFiles(oldProps);
 					}
 				}
 				catch (Throwable e)

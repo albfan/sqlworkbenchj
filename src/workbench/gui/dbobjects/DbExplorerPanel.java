@@ -123,6 +123,7 @@ public class DbExplorerPanel
 	private Reloadable schemaReloader;
 	private FlatButton reloadButton;
 	private boolean locked;
+	protected String tabName;
 
 	public DbExplorerPanel()
 	{
@@ -823,10 +824,10 @@ public class DbExplorerPanel
 		t.start();
 	}
 
-	public String getName()
-	{
-		return getTabTitle();
-	}
+//	public String getName()
+//	{
+//		return getTabTitle();
+//	}
 
 	public void setTabName(String name)
 	{
@@ -855,12 +856,12 @@ public class DbExplorerPanel
 	
 	public String getTabTitle()
 	{
-		return ResourceMgr.getString("LblDbExplorer");
+		return (tabTitle == null ? ResourceMgr.getString("LblDbExplorer") : tabTitle);
 	}
 
 	public void setTabTitle(JTabbedPane tab, int index)
 	{
-		String plainTitle = (this.tabTitle == null ? getTabTitle() : this.tabTitle);
+		String plainTitle = getTabTitle();
 		PanelTitleSetter.setTabTitle(tab, this, index, plainTitle);
 	}
 
@@ -1004,6 +1005,7 @@ public class DbExplorerPanel
 			searchPanel.readFromWorkspace(w, index);
 			procs.readFromWorkspace(w, index);
 			if (triggers != null) triggers.readFromWorkspace(w, index);
+			setTabName(p.getProperty("tab" + index + ".title"));
 			this.locked = p.getBoolProperty("dbexplorer" + index + ".locked", false);
 		}
 		catch (Exception e)

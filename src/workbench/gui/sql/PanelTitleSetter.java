@@ -1,12 +1,12 @@
 /*
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 
 package workbench.gui.sql;
@@ -44,7 +44,7 @@ public class PanelTitleSetter
 			}
 		}
 	}
-	
+
 	public static void setTabTitle(final JTabbedPane tab, MainPanel panel, int index, String plainTitle)
 	{
 		String title = plainTitle;
@@ -58,7 +58,7 @@ public class PanelTitleSetter
 					title += "<u>";
 				}
 				title += NumberStringCache.getNumberString (index+1);
-				if (index < 9) 
+				if (index < 9)
 				{
 					title += "</u>";
 				}

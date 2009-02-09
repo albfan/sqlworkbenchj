@@ -133,7 +133,7 @@ import workbench.util.WbFile;
 public class MainWindow
 	extends JFrame
 	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
-						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener, 
+						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener,
 						Moveable, RenameableTab
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
@@ -213,7 +213,7 @@ public class MainWindow
 
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
-		Settings.getInstance().addPropertyChangeListener(this, 
+		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_SHOW_TOOLBAR, Settings.PROPERTY_SHOW_TAB_INDEX,
 			"workbench.gui.mainwindow.tabpolicy");
 	}
@@ -223,7 +223,7 @@ public class MainWindow
 		int tabPolicy = Settings.getInstance().getIntProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
 		this.sqlTab.setTabLayoutPolicy(tabPolicy);
 	}
-	
+
 	public void display()
 	{
 		this.restoreState();
@@ -694,7 +694,7 @@ public class MainWindow
 	{
 		return this.sqlTab.getTabCount();
 	}
-	
+
 	public MainPanel getSqlPanel(int anIndex)
 	{
 		try
@@ -1291,10 +1291,10 @@ public class MainWindow
 				try
 				{
 					removeAllPanels(false);
-					
+
 					// Ignore all stateChanged() events from the SQL Tab during loading
 					tabRemovalInProgress = true;
-					
+
 					w = new WbWorkspace(realFilename, false);
 					int entryCount = w.getEntryCount();
 					for (int i = 0; i < entryCount; i++)
@@ -1310,7 +1310,7 @@ public class MainWindow
 						MainPanel p = getSqlPanel(i);
 						p.readFromWorkspace(w, i);
 					}
-	
+
 					currentWorkspaceFile = realFilename;
 					resultForWorkspaceClose = true;
 
@@ -1781,7 +1781,7 @@ public class MainWindow
 			aPanel.appendToLog(warn);
 		}
 	}
-	
+
 	public void addDbExplorerTab(DbExplorerPanel explorer)
 	{
 		JMenuBar dbmenu = this.createMenuForPanel(explorer);
@@ -1800,7 +1800,7 @@ public class MainWindow
 	{
 		return Collections.unmodifiableList(explorerWindows);
 	}
-	
+
 	public void closeExplorerWindows()
 	{
 		for (ToolWindow w : explorerWindows)
@@ -1869,7 +1869,7 @@ public class MainWindow
 			if (!inProgress) clearConnectIsInProgress();
 		}
 	}
-	
+
 	protected void removeAllPanels(boolean keepOne)
 	{
 		boolean inProgress = connectInProgress;
@@ -2273,7 +2273,7 @@ public class MainWindow
 	 * in a loop renumber is only necessary at the end
 	 *
 	 * @see #renumberTabs()
-	 * @see #checkConnectionForPanel(workbench.interfaces.MainPanel) 
+	 * @see #checkConnectionForPanel(workbench.interfaces.MainPanel)
 	 */
 	public MainPanel addTab(boolean selectNew, boolean checkConnection, boolean append, boolean renumber)
 	{
@@ -2321,7 +2321,7 @@ public class MainWindow
 
 	/**
 	 * Returns the real title of a tab (without the index number or any formatting)
-	 * 
+	 *
 	 * @see MainPanel#getTabTitle()
 	 */
 	public String getTabTitle(int index)
@@ -2341,10 +2341,10 @@ public class MainWindow
 		int index = this.sqlTab.getSelectedIndex();
 		return this.getTabTitle(index);
 	}
-	
+
 	public void setCurrentTabTitle(String newName)
 	{
-		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
+//		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
 
 		int index = this.sqlTab.getSelectedIndex();
 
@@ -2390,10 +2390,7 @@ public class MainWindow
 
 	public boolean canRenameTab()
 	{
-		boolean canRename = (this.currentWorkspaceFile != null);
-		MainPanel p = this.getCurrentPanel();
-		canRename = canRename && (p instanceof SqlPanel);
-		return canRename;
+		return (this.currentWorkspaceFile != null);
 	}
 
 	public void removeTab()

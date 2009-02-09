@@ -1,12 +1,12 @@
 /*
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 package workbench.util;
 
@@ -28,11 +28,18 @@ import java.util.jar.JarFile;
  */
 public class ClassFinder
 {
+	private Class toFind;
+
 	public ClassFinder()
 	{
-
+		this(java.sql.Driver.class);
 	}
-	
+
+	public ClassFinder(Class clz)
+	{
+		toFind = clz;
+	}
+
 	/**
 	 * Search all files for an implementation of java.sql.Driver.
 	 * <br/>
@@ -42,7 +49,7 @@ public class ClassFinder
 	 * @return the first classname found to implement java.sql.Driver
 	 * @throws java.io.IOException
 	 */
-	public List<String> findDriver(List<String> jarFiles)
+	public List<String> findClass(List<String> jarFiles)
 		throws IOException
 	{
 		List<String> result = new ArrayList<String>();
@@ -78,11 +85,11 @@ public class ClassFinder
 				// because after all slashes have been replaced with a dot something like
 				// somepackage.classprefix.SomeClass could exist
 				String clsName = name.replace(".class", "").replace("/", ".");
-				
+
 				try
 				{
 					Class clz = loader.loadClass(clsName);
-					if (java.sql.Driver.class.isAssignableFrom(clz))
+					if (toFind.isAssignableFrom(clz))
 					{
 						result.add(clsName);
 					}
@@ -98,7 +105,7 @@ public class ClassFinder
 		{
 			jarFile.close();
 		}
-		
+
 		return result;
 	}
 

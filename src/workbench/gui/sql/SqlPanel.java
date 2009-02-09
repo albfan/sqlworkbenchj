@@ -280,7 +280,7 @@ public class SqlPanel
 	protected GenericRowMonitor rowMonitor;
 	protected IconHandler iconHandler;
 	private boolean locked = false;
-	
+
 //</editor-fold>
 
 	public SqlPanel(int anId)
@@ -347,7 +347,7 @@ public class SqlPanel
 	{
 		return locked;
 	}
-	
+
 	public String getId()
 	{
 		return NumberStringCache.getNumberString(this.internalId);
@@ -840,7 +840,7 @@ public class SqlPanel
 		}
 		return false;
 	}
-	
+
 	public boolean isModified()
 	{
 		if (isDataModified()) return true;
@@ -919,7 +919,7 @@ public class SqlPanel
 	{
 		return this;
 	}
-	
+
 	public String getStatementAtCursor()
 	{
 		ScriptParser parser = createScriptParser();
@@ -1197,6 +1197,12 @@ public class SqlPanel
 		return getTabTitle();
 	}
 
+	/**
+	 * Returns the title that is shown for the current tab.
+	 * This is not necessarily the same as the tabName because
+	 * e.g. a filename could be appended to the tabName
+	 * @return
+	 */
 	public String getTabTitle()
 	{
 		String defaultLabel = ResourceMgr.getDefaultTabLabel();
@@ -1248,7 +1254,7 @@ public class SqlPanel
 		}
 
 		PanelTitleSetter.setTabTitle(tab, this, index, getTabTitle());
-		
+
 		tab.setToolTipTextAt(index, tooltip);
 	}
 
@@ -1980,7 +1986,7 @@ public class SqlPanel
 		Window w = SwingUtilities.getWindowAncestor(this);
 		return WbSwingUtilities.getYesNo(w, prompt);
 	}
-	
+
 	/** Used for storing the result of the confirmExecution() callback */
 	private boolean executeAllStatements = true;
 	private boolean cancelAll = false;
@@ -2030,9 +2036,9 @@ public class SqlPanel
 	 *
 	 * If this happens, we need to update all actions in the menu that operate on the
 	 * result to use the new datastore.
-	 * 
+	 *
 	 * @param evt
-	 * @see #updateResultInfos() 
+	 * @see #updateResultInfos()
 	 */
 	public void stateChanged(ChangeEvent evt)
 	{
@@ -2074,7 +2080,7 @@ public class SqlPanel
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
 			panel.removePropertyChangeListener(SqlPanel.this);
 			panel.clearContent();
-			
+
 			resultTab.removeTabAt(index);
 			currentData = null;
 
@@ -2260,7 +2266,7 @@ public class SqlPanel
 			goOn = VariablesEditor.showVariablesDialog(ds);
 			iconHandler.showBusyIcon(true);
 		}
-		
+
 		if (goOn && this.checkPrepared)
 		{
 			PreparedStatementPool pool = this.dbConnection.getPreparedStatementPool();
