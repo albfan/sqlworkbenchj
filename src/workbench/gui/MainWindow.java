@@ -2280,7 +2280,7 @@ public class MainWindow
 		int index = -1;
 		if (append)
 		{
-			index = sqlTab.getTabCount();
+			index = findFirstExplorerTab();
 		}
 		else
 		{
