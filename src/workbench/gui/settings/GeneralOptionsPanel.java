@@ -38,6 +38,7 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.PlatformHelper;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbLocale;
@@ -70,7 +71,12 @@ public class GeneralOptionsPanel
 	{
 		msgLogFont.setSelectedFont(Settings.getInstance().getMsgLogFont());
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
-		pdfReaderPath.setFilename(Settings.getInstance().getPDFReaderPath());
+		String reader = Settings.getInstance().getPDFReaderPath();
+		if (StringUtil.isBlank(reader))
+		{
+			reader = PlatformHelper.getDefaultPDFReader();
+		}
+		pdfReaderPath.setFilename(reader);
 		logLevel.setSelectedItem(LogMgr.getLevel());
 		int days = Settings.getInstance().getUpdateCheckInterval();
 		if (days == 1)

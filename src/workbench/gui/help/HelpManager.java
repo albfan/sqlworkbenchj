@@ -18,7 +18,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
-import workbench.util.MacOSHelper;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -49,30 +49,30 @@ public class HelpManager
 				return;
 			}
 			
-//			WbFile reader = new WbFile(readerPath);
-//			if (!reader.exists() || !reader.canRead() || !reader.isFile())
-//			{
-//				String msg = ResourceMgr.getFormattedString("ErrExeNotAvail", readerPath);
-//				WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
-//				return;
-//			}
-
-			if (MacOSHelper.isMacOS())
+			WbFile reader = new WbFile(StringUtil.trimQuotes(readerPath));
+			if (reader.exists())
 			{
-				String cmd = readerPath +  " \"" + pdf.getFullPath() + "\"";
-				LogMgr.logDebug("HelpManager.showPdfHelp()", "Running PDF Reader using: [" + cmd + "]");
+				// For Windows and Linux it is assumed that the reader is an executable
+				// and in this case a string array is passed to exec() which is more robust
+				// than a single string
+				String[] cmd = new String[] { reader.getFullPath(), "\"" + pdf.getFullPath() + "\"" };
 				Runtime.getRuntime().exec(cmd);
 			}
 			else
 			{
-				WbFile reader = new WbFile(readerPath);
-				String[] cmd = new String[] { reader.getFullPath(), "\"" + pdf.getFullPath() + "\"" };
+				// if the "reader" does not exist as a file, it is assumed it is
+				// some kind of "internal" command, e.g for MacOS X:
+				// open /Applications/Preview.app SQLWorkbench-Manual.pdf
+				// "open /Applications/Preview.app" would be specified by the user
+				String cmd = readerPath +  " \"" + pdf.getFullPath() + "\"";
+				LogMgr.logDebug("HelpManager.showPdfHelp()", "Running PDF Reader using: [" + cmd + "]");
 				Runtime.getRuntime().exec(cmd);
 			}
 		}
 		catch (Exception ex)
 		{
 			LogMgr.logError("HelpManager.showPdf()", "Error when running PDF Viewer", ex);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
 		}
 	}
 	
