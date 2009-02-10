@@ -1333,7 +1333,6 @@ public class MainWindow
 				catch (Throwable e)
 				{
 					LogMgr.logWarning("MainWindow.loadWorkspace()", "Error loading workspace  " + realFilename, e);
-					updateGuiForTab(sqlTab.getSelectedIndex());
 					handleWorkspaceLoadError(e, realFilename);
 					resultForWorkspaceClose = false;
 				}
@@ -1341,6 +1340,7 @@ public class MainWindow
 				{
 					tabRemovalInProgress = false;
 					FileUtil.closeQuitely(w);
+					updateGuiForTab(sqlTab.getSelectedIndex());
 				}
 			}
 		});
