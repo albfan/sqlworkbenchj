@@ -24,8 +24,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import workbench.gui.components.DelimiterDefinitionPanel;
 import workbench.gui.components.NumberField;
-import workbench.gui.components.WbColorPicker;
-import workbench.gui.components.WbFontPicker;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ColumnSortType;
 import workbench.resource.ResourceMgr;
@@ -41,17 +39,14 @@ public class EditorOptionsPanel
 	implements Restoreable
 {
 
-	/** Creates new form EditorOptionsPanel */
 	public EditorOptionsPanel()
 	{
 		super();
 		initComponents();
-		editorFont.setListMonospacedOnly(true);
 	}
 
 	public void restoreSettings()
 	{
-		editorFont.setSelectedFont(Settings.getInstance().getEditorFont());
 
 		String[] items = new String[] {
 			ResourceMgr.getString("LblLTDefault"),
@@ -139,7 +134,6 @@ public class EditorOptionsPanel
 		}
 
 		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
-		set.setEditorFont(editorFont.getSelectedFont());
 		set.setAlternateDelimiter(alternateDelim.getDelimiter());
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
 		set.setAutoJumpNextStatement(this.autoAdvance.isSelected());
@@ -179,8 +173,6 @@ public class EditorOptionsPanel
     electricScrollLabel = new JLabel();
     electricScroll = new JTextField();
     rightClickMovesCursor = new JCheckBox();
-    editorFontLabel = new JLabel();
-    editorFont = new WbFontPicker();
     closePopup = new JCheckBox();
     completionPasteCase = new JComboBox();
     pasteLabel = new JLabel();
@@ -289,24 +281,6 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(8, 0, 0, 10);
     add(rightClickMovesCursor, gridBagConstraints);
 
-    editorFontLabel.setText(ResourceMgr.getString("LblEditorFont")); // NOI18N
-    editorFontLabel.setToolTipText(ResourceMgr.getString("d_LblEditorFont")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 12, 0, 0);
-    add(editorFontLabel, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(3, 10, 0, 15);
-    add(editorFont, gridBagConstraints);
-
     closePopup.setSelected(Settings.getInstance().getCloseAutoCompletionWithSearch());
     closePopup.setText(ResourceMgr.getString("TxtCloseCompletion"));
     closePopup.setToolTipText(ResourceMgr.getDescription("TxtCloseCompletion"));
@@ -318,7 +292,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 0, 0, 11);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 11);
     add(closePopup, gridBagConstraints);
 
     completionPasteCase.setModel(new DefaultComboBoxModel(new String[] { "Lowercase", "Uppercase", "As is" }));
@@ -328,7 +302,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(5, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(8, 11, 0, 15);
     add(completionPasteCase, gridBagConstraints);
 
     pasteLabel.setLabelFor(completionPasteCase);
@@ -339,7 +313,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
     add(pasteLabel, gridBagConstraints);
 
     internalLineEndingLabel.setText(ResourceMgr.getString("LblIntLineEnding")); // NOI18N
@@ -453,8 +427,6 @@ public class EditorOptionsPanel
   private JCheckBox closePopup;
   private JComboBox completionColumnSort;
   private JComboBox completionPasteCase;
-  private WbFontPicker editorFont;
-  private JLabel editorFontLabel;
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
   private JLabel electricScrollLabel;

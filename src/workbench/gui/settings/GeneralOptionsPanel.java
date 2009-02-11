@@ -15,8 +15,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Locale;
 import javax.swing.BorderFactory;
@@ -31,7 +29,6 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbFilePicker;
-import workbench.gui.components.WbFontPicker;
 import workbench.gui.components.WbLabelField;
 import workbench.interfaces.Restoreable;
 import workbench.log.LogMgr;
@@ -56,7 +53,6 @@ public class GeneralOptionsPanel
 		super();
 		initComponents();
 		pdfReaderPath.setAllowMultiple(false);
-		standardFont.setAllowFontReset(true);
 		String[] updTypes = new String[] {
 			ResourceMgr.getString("LblUpdCheckNever"),
 			ResourceMgr.getString("LblUpdCheckDaily"),
@@ -69,8 +65,6 @@ public class GeneralOptionsPanel
 
 	public void restoreSettings()
 	{
-		msgLogFont.setSelectedFont(Settings.getInstance().getMsgLogFont());
-		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
 		String reader = Settings.getInstance().getPDFReaderPath();
 		if (StringUtil.isBlank(reader))
 		{
@@ -133,11 +127,9 @@ public class GeneralOptionsPanel
 		Settings set = Settings.getInstance();
 
 		// General settings
-		set.setStandardFont(standardFont.getSelectedFont());
 		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
 		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
-		set.setMsgLogFont(msgLogFont.getSelectedFont());
 		GuiSettings.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
 		set.setQuoteChar(this.quoteCharField.getText().trim());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
@@ -198,10 +190,6 @@ public class GeneralOptionsPanel
     textDelimiterField = new JTextField();
     quoteCharLabel = new JLabel();
     quoteCharField = new JTextField();
-    msgFontLabel = new JLabel();
-    standardFontLabel = new JLabel();
-    msgLogFont = new WbFontPicker();
-    standardFont = new WbFontPicker();
     pdfReaderPathLabel = new JLabel();
     pdfReaderPath = new WbFilePicker();
     logLevelLabel = new JLabel();
@@ -265,44 +253,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(5, 7, 0, 15);
     add(quoteCharField, gridBagConstraints);
 
-    msgFontLabel.setText(ResourceMgr.getString("LblMsgLogFont")); // NOI18N
-    msgFontLabel.setToolTipText(ResourceMgr.getString("d_LblMsgLogFont")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 12, 0, 0);
-    add(msgFontLabel, gridBagConstraints);
-
-    standardFontLabel.setText(ResourceMgr.getString("LblStandardFont")); // NOI18N
-    standardFontLabel.setToolTipText(ResourceMgr.getString("d_LblStandardFont")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 12, 0, 0);
-    add(standardFontLabel, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 10, 0, 15);
-    add(msgLogFont, gridBagConstraints);
-
-    standardFont.setFont(standardFont.getFont());
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 10, 0, 15);
-    add(standardFont, gridBagConstraints);
-
     pdfReaderPathLabel.setText(ResourceMgr.getString("LblReaderPath")); // NOI18N
     pdfReaderPathLabel.setToolTipText(ResourceMgr.getString("d_LblReaderPath")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
@@ -343,7 +293,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 7, 0, 0);
+    gridBagConstraints.insets = new Insets(8, 7, 0, 0);
     add(checkUpdatesLabel, gridBagConstraints);
 
     checkInterval.setModel(new DefaultComboBoxModel(new String[] { "never", "daily", "7 days", "14 days", "30 days" }));
@@ -351,7 +301,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 7, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 7, 0, 0);
     add(checkInterval, gridBagConstraints);
 
     langLabel.setText(ResourceMgr.getString("LblLanguage")); // NOI18N
@@ -360,7 +310,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(3, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 12, 0, 0);
     add(langLabel, gridBagConstraints);
 
     languageDropDown.setModel(new DefaultComboBoxModel(new String[] { "English", "German" }));
@@ -369,7 +319,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 10, 0, 15);
+    gridBagConstraints.insets = new Insets(7, 10, 0, 15);
     add(languageDropDown, gridBagConstraints);
 
     jPanel2.setLayout(new GridBagLayout());
@@ -539,8 +489,6 @@ public class GeneralOptionsPanel
   private JComboBox languageDropDown;
   private JComboBox logLevel;
   private JLabel logLevelLabel;
-  private JLabel msgFontLabel;
-  private WbFontPicker msgLogFont;
   private WbFilePicker pdfReaderPath;
   private JLabel pdfReaderPathLabel;
   private JTextField quoteCharField;
@@ -549,8 +497,6 @@ public class GeneralOptionsPanel
   private JTextField settingsfilename;
   private JCheckBox showTabIndex;
   private JCheckBox singlePageHelp;
-  private WbFontPicker standardFont;
-  private JLabel standardFontLabel;
   private JTextField textDelimiterField;
   private JLabel textDelimiterLabel;
   private JCheckBox useEncryption;

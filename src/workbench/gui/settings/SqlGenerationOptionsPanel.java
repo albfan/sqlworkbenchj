@@ -11,10 +11,22 @@
  */
 package workbench.gui.settings;
 
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 import workbench.gui.components.WbCheckBoxLabel;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
@@ -27,7 +39,7 @@ import workbench.util.StringUtil;
  */
 public class SqlGenerationOptionsPanel
 	extends JPanel
-	implements Restoreable
+	implements Restoreable, ActionListener
 {
 
 	/** Creates new form FormatterOptionsPanel */
@@ -55,6 +67,7 @@ public class SqlGenerationOptionsPanel
 		this.exportLiteralTypes.setSelectedItem(Settings.getInstance().getDefaultExportDateLiteralType());
 		this.diffLiteralsType.setSelectedItem(Settings.getInstance().getDefaultDiffDateLiteralType());
 		this.includeEmptyComments.setSelected(Settings.getInstance().getIncludeEmptyComments());
+		checkThresholds();
 	}
 
 	public void saveSettings()
@@ -73,6 +86,13 @@ public class SqlGenerationOptionsPanel
 		set.setIncludeEmptyComments(includeEmptyComments.isSelected());
 		set.setFormatInsertIgnoreIdentity(ignoreIdentity.isSelected());
 	}
+
+	private void checkThresholds()
+	{
+		updateThreshold.setEnabled(formatUpdates.isSelected());
+		insertThreshold.setEnabled(formatInserts.isSelected());
+		insertColsPerLine.setEnabled(formatInserts.isSelected());
+	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -80,373 +100,373 @@ public class SqlGenerationOptionsPanel
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+		GridBagConstraints gridBagConstraints;
 
-    formatUpdates = new javax.swing.JCheckBox();
-    formatUpdatesLabel = new WbCheckBoxLabel();
-    formatInsertsLabel = new WbCheckBoxLabel();
-    formatInserts = new javax.swing.JCheckBox();
-    insertColThresholdLbl = new javax.swing.JLabel();
-    insertThreshold = new javax.swing.JTextField();
-    updateThreshold = new javax.swing.JTextField();
-    updateColThresholdLbl = new javax.swing.JLabel();
-    ignoreIdentityLabel = new WbCheckBoxLabel();
-    ignoreIdentity = new javax.swing.JCheckBox();
-    jSeparator1 = new javax.swing.JSeparator();
-    insertColsPerLine = new javax.swing.JTextField();
-    colsPerLineLabel = new javax.swing.JLabel();
-    jSeparator2 = new javax.swing.JSeparator();
-    includeOwner = new javax.swing.JCheckBox();
-    includeOwnerLabel = new WbCheckBoxLabel();
-    tableNameCaseLabel = new javax.swing.JLabel();
-    tableNameCase = new javax.swing.JComboBox();
-    jSeparator3 = new javax.swing.JSeparator();
-    copyLiteralLabel = new javax.swing.JLabel();
-    literalTypes = new javax.swing.JComboBox();
-    exportLiteralTypes = new javax.swing.JComboBox();
-    exportLiteralLabel = new javax.swing.JLabel();
-    includeEmptyCommentsLabel = new WbCheckBoxLabel();
-    includeEmptyComments = new javax.swing.JCheckBox();
-    jSeparator4 = new javax.swing.JSeparator();
-    diffLiteralsLabel = new javax.swing.JLabel();
-    diffLiteralsType = new javax.swing.JComboBox();
+    formatUpdates = new JCheckBox();
+    formatInserts = new JCheckBox();
+    insertColThresholdLbl = new JLabel();
+    insertThreshold = new JTextField();
+    ignoreIdentity = new JCheckBox();
+    jSeparator1 = new JSeparator();
+    insertColsPerLine = new JTextField();
+    colsPerLineLabel = new JLabel();
+    jSeparator2 = new JSeparator();
+    tableNameCaseLabel = new JLabel();
+    tableNameCase = new JComboBox();
+    jSeparator4 = new JSeparator();
+    jPanel1 = new JPanel();
+    includeEmptyComments = new JCheckBox();
+    includeOwner = new JCheckBox();
+    jPanel2 = new JPanel();
+    copyLiteralLabel = new JLabel();
+    exportLiteralLabel = new JLabel();
+    literalTypes = new JComboBox();
+    exportLiteralTypes = new JComboBox();
+    diffLiteralsLabel = new JLabel();
+    diffLiteralsType = new JComboBox();
+    jPanel3 = new JPanel();
+    jPanel4 = new JPanel();
+    updateThreshold = new JTextField();
+    updateColThresholdLbl = new JLabel();
+    jPanel5 = new JPanel();
 
-    setLayout(new java.awt.GridBagLayout());
+    setLayout(new GridBagLayout());
 
     formatUpdates.setFont(null);
     formatUpdates.setSelected(Settings.getInstance().getDoFormatUpdates());
-    formatUpdates.setText("");
+    formatUpdates.setText(ResourceMgr.getString("LblFmtUpd")); // NOI18N
+    formatUpdates.setToolTipText(ResourceMgr.getString("d_LblFmtUpd")); // NOI18N
     formatUpdates.setBorder(null);
-    formatUpdates.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    formatUpdates.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    formatUpdates.setHorizontalAlignment(SwingConstants.LEFT);
+    formatUpdates.setHorizontalTextPosition(SwingConstants.RIGHT);
     formatUpdates.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    formatUpdates.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 11);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(9, 10, 0, 11);
     add(formatUpdates, gridBagConstraints);
-
-    formatUpdatesLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    formatUpdatesLabel.setLabelFor(formatUpdates);
-    formatUpdatesLabel.setText(ResourceMgr.getString("LblFmtUpd"));
-    formatUpdatesLabel.setToolTipText(ResourceMgr.getDescription("LblFmtUpd"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
-    add(formatUpdatesLabel, gridBagConstraints);
-
-    formatInsertsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    formatInsertsLabel.setLabelFor(formatInserts);
-    formatInsertsLabel.setText(ResourceMgr.getString("LblFmtIns"));
-    formatInsertsLabel.setToolTipText(ResourceMgr.getDescription("LblFmtIns"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 0);
-    add(formatInsertsLabel, gridBagConstraints);
 
     formatInserts.setFont(null);
     formatInserts.setSelected(Settings.getInstance().getDoFormatInserts());
-    formatInserts.setText("");
+    formatInserts.setText(ResourceMgr.getString("LblFmtIns")); // NOI18N
+    formatInserts.setToolTipText(ResourceMgr.getString("d_LblFmtIns")); // NOI18N
     formatInserts.setBorder(null);
-    formatInserts.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    formatInserts.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    formatInserts.setHorizontalAlignment(SwingConstants.LEFT);
+    formatInserts.setHorizontalTextPosition(SwingConstants.RIGHT);
     formatInserts.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    formatInserts.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(5, 10, 0, 11);
     add(formatInserts, gridBagConstraints);
 
-    insertColThresholdLbl.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    insertColThresholdLbl.setText(ResourceMgr.getString("LblInsThres"));
-    insertColThresholdLbl.setToolTipText(ResourceMgr.getDescription("LblInsThres"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    insertColThresholdLbl.setHorizontalAlignment(SwingConstants.LEFT);
+    insertColThresholdLbl.setText(ResourceMgr.getString("LblInsThres")); // NOI18N
+    insertColThresholdLbl.setToolTipText(ResourceMgr.getString("d_LblInsThres")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 18, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 18, 0, 0);
     add(insertColThresholdLbl, gridBagConstraints);
 
+    insertThreshold.setColumns(5);
     insertThreshold.setText(Integer.toString(Settings.getInstance().getFormatInsertColumnThreshold()));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    insertThreshold.setMinimumSize(new Dimension(50, 20));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 15);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 10, 0, 15);
     add(insertThreshold, gridBagConstraints);
-
-    updateThreshold.setText(Integer.toString(Settings.getInstance().getFormatUpdateColumnThreshold()));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
-    add(updateThreshold, gridBagConstraints);
-
-    updateColThresholdLbl.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    updateColThresholdLbl.setText(ResourceMgr.getString("LblUpdThres"));
-    updateColThresholdLbl.setToolTipText(ResourceMgr.getDescription("LblUpdThres"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 18, 0, 0);
-    add(updateColThresholdLbl, gridBagConstraints);
-
-    ignoreIdentityLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    ignoreIdentityLabel.setLabelFor(ignoreIdentity);
-    ignoreIdentityLabel.setText(ResourceMgr.getString("LblInsIgnoreId"));
-    ignoreIdentityLabel.setToolTipText(ResourceMgr.getDescription("LblInsIgnoreId"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 18, 0, 0);
-    add(ignoreIdentityLabel, gridBagConstraints);
 
     ignoreIdentity.setFont(null);
     ignoreIdentity.setSelected(Settings.getInstance().getFormatInsertIgnoreIdentity());
-    ignoreIdentity.setText("");
+    ignoreIdentity.setText(ResourceMgr.getString("LblInsIgnoreId")); // NOI18N
+    ignoreIdentity.setToolTipText(ResourceMgr.getString("d_LblInsIgnoreId")); // NOI18N
     ignoreIdentity.setBorder(null);
-    ignoreIdentity.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    ignoreIdentity.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    ignoreIdentity.setHorizontalAlignment(SwingConstants.LEFT);
+    ignoreIdentity.setHorizontalTextPosition(SwingConstants.RIGHT);
     ignoreIdentity.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 11);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(8, 8, 0, 11);
     add(ignoreIdentity, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(10, 0, 0, 0);
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(6, 3, 3, 3);
     add(jSeparator1, gridBagConstraints);
 
+    insertColsPerLine.setColumns(5);
     insertColsPerLine.setText(Integer.toString(Settings.getInstance().getFormatInsertColsPerLine()));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 10, 0, 15);
+    insertColsPerLine.setMinimumSize(new Dimension(50, 20));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 10, 0, 15);
     add(insertColsPerLine, gridBagConstraints);
 
-    colsPerLineLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    colsPerLineLabel.setText(ResourceMgr.getString("LblInsColsPerLine"));
-    colsPerLineLabel.setToolTipText(ResourceMgr.getDescription("LblInsColsPerLine"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 18, 0, 0);
+    colsPerLineLabel.setHorizontalAlignment(SwingConstants.LEFT);
+    colsPerLineLabel.setText(ResourceMgr.getString("LblInsColsPerLine")); // NOI18N
+    colsPerLineLabel.setToolTipText(ResourceMgr.getString("d_LblInsColsPerLine")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(5, 1, 0, 0);
     add(colsPerLineLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(6, 0, 2, 0);
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(9, 3, 2, 3);
     add(jSeparator2, gridBagConstraints);
 
-    includeOwner.setFont(null);
-    includeOwner.setSelected(Settings.getInstance().getIncludeOwnerInSqlExport());
-    includeOwner.setText("");
-    includeOwner.setBorder(null);
-    includeOwner.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    includeOwner.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
-    includeOwner.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 10, 0, 11);
-    add(includeOwner, gridBagConstraints);
-
-    includeOwnerLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    includeOwnerLabel.setLabelFor(includeOwner);
-    includeOwnerLabel.setText(ResourceMgr.getString("LblGenInclOwn"));
-    includeOwnerLabel.setToolTipText(ResourceMgr.getDescription("LblGenInclOwn"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
-    add(includeOwnerLabel, gridBagConstraints);
-
     tableNameCaseLabel.setLabelFor(tableNameCase);
-    tableNameCaseLabel.setText(ResourceMgr.getString("LblGenTableNameCase"));
-    tableNameCaseLabel.setToolTipText(ResourceMgr.getDescription("LblGenTableNameCase"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    tableNameCaseLabel.setText(ResourceMgr.getString("LblGenTableNameCase")); // NOI18N
+    tableNameCaseLabel.setToolTipText(ResourceMgr.getString("d_LblGenTableNameCase")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(11, 12, 0, 0);
+    gridBagConstraints.gridy = 12;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(11, 8, 0, 0);
     add(tableNameCaseLabel, gridBagConstraints);
 
-    tableNameCase.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "As is", "Lowercase", "Uppercase" }));
+    tableNameCase.setModel(new DefaultComboBoxModel(new String[] { "As is", "Lowercase", "Uppercase" }));
     tableNameCase.setToolTipText(ResourceMgr.getDescription("LblGenTableNameCase"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 15);
+    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 10, 0, 15);
     add(tableNameCase, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(7, 0, 2, 0);
-    add(jSeparator3, gridBagConstraints);
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(7, 3, 2, 3);
+    add(jSeparator4, gridBagConstraints);
 
-    copyLiteralLabel.setText(ResourceMgr.getString("LblDefCopyLiteralType"));
-    copyLiteralLabel.setToolTipText(ResourceMgr.getDescription("LblDefCopyLiteralType"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
-    add(copyLiteralLabel, gridBagConstraints);
-
-    literalTypes.setToolTipText(ResourceMgr.getDescription("LblDefCopyLiteralType"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 11;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
-    add(literalTypes, gridBagConstraints);
-
-    exportLiteralTypes.setToolTipText(ResourceMgr.getDescription("LblDefExportLiteralType"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 12;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
-    add(exportLiteralTypes, gridBagConstraints);
-
-    exportLiteralLabel.setLabelFor(exportLiteralTypes);
-    exportLiteralLabel.setText(ResourceMgr.getString("LblDefExportLiteralType"));
-    exportLiteralLabel.setToolTipText(ResourceMgr.getDescription("LblDefExportLiteralType"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
-    add(exportLiteralLabel, gridBagConstraints);
-
-    includeEmptyCommentsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    includeEmptyCommentsLabel.setLabelFor(includeEmptyComments);
-    includeEmptyCommentsLabel.setText(ResourceMgr.getString("LblGenInclEmptyComments"));
-    includeEmptyCommentsLabel.setToolTipText(ResourceMgr.getDescription("LblGenInclEmptyComments"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 15;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
-    add(includeEmptyCommentsLabel, gridBagConstraints);
+    jPanel1.setLayout(new GridBagLayout());
 
     includeEmptyComments.setFont(null);
     includeEmptyComments.setSelected(Settings.getInstance().getIncludeOwnerInSqlExport());
-    includeEmptyComments.setText("");
+    includeEmptyComments.setText(ResourceMgr.getString("LblGenInclEmptyComments")); // NOI18N
+    includeEmptyComments.setToolTipText(ResourceMgr.getString("d_LblGenInclEmptyComments")); // NOI18N
     includeEmptyComments.setBorder(null);
-    includeEmptyComments.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
-    includeEmptyComments.setHorizontalTextPosition(javax.swing.SwingConstants.RIGHT);
+    includeEmptyComments.setHorizontalAlignment(SwingConstants.LEFT);
+    includeEmptyComments.setHorizontalTextPosition(SwingConstants.RIGHT);
     includeEmptyComments.setIconTextGap(5);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 15;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(9, 8, 0, 11);
-    add(includeEmptyComments, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.insets = new Insets(0, 5, 0, 0);
+    jPanel1.add(includeEmptyComments, gridBagConstraints);
+
+    includeOwner.setFont(null);
+    includeOwner.setSelected(Settings.getInstance().getIncludeOwnerInSqlExport());
+    includeOwner.setText(ResourceMgr.getString("LblGenInclOwn")); // NOI18N
+    includeOwner.setToolTipText(ResourceMgr.getString("d_LblGenInclOwn")); // NOI18N
+    includeOwner.setBorder(null);
+    includeOwner.setHorizontalAlignment(SwingConstants.LEFT);
+    includeOwner.setHorizontalTextPosition(SwingConstants.RIGHT);
+    includeOwner.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 14;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(7, 0, 2, 0);
-    add(jSeparator4, gridBagConstraints);
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(0, 0, 0, 11);
+    jPanel1.add(includeOwner, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(8, 8, 0, 0);
+    add(jPanel1, gridBagConstraints);
+
+    jPanel2.setLayout(new GridBagLayout());
+
+    copyLiteralLabel.setText(ResourceMgr.getString("LblDefCopyLiteralType")); // NOI18N
+    copyLiteralLabel.setToolTipText(ResourceMgr.getString("d_LblDefCopyLiteralType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 12, 0, 0);
+    jPanel2.add(copyLiteralLabel, gridBagConstraints);
+
+    exportLiteralLabel.setLabelFor(exportLiteralTypes);
+    exportLiteralLabel.setText(ResourceMgr.getString("LblDefExportLiteralType")); // NOI18N
+    exportLiteralLabel.setToolTipText(ResourceMgr.getString("d_LblDefExportLiteralType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    jPanel2.add(exportLiteralLabel, gridBagConstraints);
+
+    literalTypes.setToolTipText(ResourceMgr.getDescription("LblDefCopyLiteralType"));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 8, 0, 0);
+    jPanel2.add(literalTypes, gridBagConstraints);
+
+    exportLiteralTypes.setToolTipText(ResourceMgr.getDescription("LblDefExportLiteralType"));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 8, 0, 0);
+    jPanel2.add(exportLiteralTypes, gridBagConstraints);
 
     diffLiteralsLabel.setLabelFor(diffLiteralsType);
-    diffLiteralsLabel.setText(ResourceMgr.getString("LblDefDiffLiteralType"));
-    diffLiteralsLabel.setToolTipText(ResourceMgr.getDescription("LblDefDiffLiteralType"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
-    add(diffLiteralsLabel, gridBagConstraints);
+    diffLiteralsLabel.setText(ResourceMgr.getString("LblDefDiffLiteralType")); // NOI18N
+    diffLiteralsLabel.setToolTipText(ResourceMgr.getString("d_LblDefDiffLiteralType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 12, 0, 0);
+    jPanel2.add(diffLiteralsLabel, gridBagConstraints);
 
     diffLiteralsType.setToolTipText(ResourceMgr.getDescription("LblDefExportLiteralType"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 8, 0, 0);
+    jPanel2.add(diffLiteralsType, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    jPanel2.add(jPanel3, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 0, 1, 8);
+    add(jPanel2, gridBagConstraints);
+
+    jPanel4.setLayout(new GridBagLayout());
+
+    updateThreshold.setColumns(5);
+    updateThreshold.setText(Integer.toString(Settings.getInstance().getFormatUpdateColumnThreshold()));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 10, 0, 18);
+    jPanel4.add(updateThreshold, gridBagConstraints);
+
+    updateColThresholdLbl.setHorizontalAlignment(SwingConstants.LEFT);
+    updateColThresholdLbl.setText(ResourceMgr.getString("LblUpdThres")); // NOI18N
+    updateColThresholdLbl.setToolTipText(ResourceMgr.getString("d_LblUpdThres")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    jPanel4.add(updateColThresholdLbl, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(8, 0, 0, 0);
+    add(jPanel4, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 13;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 8, 0, 0);
-    add(diffLiteralsType, gridBagConstraints);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    add(jPanel5, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt) {
+    if (evt.getSource() == formatUpdates) {
+      SqlGenerationOptionsPanel.this.formatUpdatesActionPerformed(evt);
+    }
+    else if (evt.getSource() == formatInserts) {
+      SqlGenerationOptionsPanel.this.formatInsertsActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
+
+	private void formatUpdatesActionPerformed(ActionEvent evt)//GEN-FIRST:event_formatUpdatesActionPerformed
+	{//GEN-HEADEREND:event_formatUpdatesActionPerformed
+		checkThresholds();
+	}//GEN-LAST:event_formatUpdatesActionPerformed
+
+	private void formatInsertsActionPerformed(ActionEvent evt)//GEN-FIRST:event_formatInsertsActionPerformed
+	{//GEN-HEADEREND:event_formatInsertsActionPerformed
+		checkThresholds();
+	}//GEN-LAST:event_formatInsertsActionPerformed
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JLabel colsPerLineLabel;
-  private javax.swing.JLabel copyLiteralLabel;
-  private javax.swing.JLabel diffLiteralsLabel;
-  private javax.swing.JComboBox diffLiteralsType;
-  private javax.swing.JLabel exportLiteralLabel;
-  private javax.swing.JComboBox exportLiteralTypes;
-  private javax.swing.JCheckBox formatInserts;
-  private javax.swing.JLabel formatInsertsLabel;
-  private javax.swing.JCheckBox formatUpdates;
-  private javax.swing.JLabel formatUpdatesLabel;
-  private javax.swing.JCheckBox ignoreIdentity;
-  private javax.swing.JLabel ignoreIdentityLabel;
-  private javax.swing.JCheckBox includeEmptyComments;
-  private javax.swing.JLabel includeEmptyCommentsLabel;
-  private javax.swing.JCheckBox includeOwner;
-  private javax.swing.JLabel includeOwnerLabel;
-  private javax.swing.JLabel insertColThresholdLbl;
-  private javax.swing.JTextField insertColsPerLine;
-  private javax.swing.JTextField insertThreshold;
-  private javax.swing.JSeparator jSeparator1;
-  private javax.swing.JSeparator jSeparator2;
-  private javax.swing.JSeparator jSeparator3;
-  private javax.swing.JSeparator jSeparator4;
-  private javax.swing.JComboBox literalTypes;
-  private javax.swing.JComboBox tableNameCase;
-  private javax.swing.JLabel tableNameCaseLabel;
-  private javax.swing.JLabel updateColThresholdLbl;
-  private javax.swing.JTextField updateThreshold;
+  private JLabel colsPerLineLabel;
+  private JLabel copyLiteralLabel;
+  private JLabel diffLiteralsLabel;
+  private JComboBox diffLiteralsType;
+  private JLabel exportLiteralLabel;
+  private JComboBox exportLiteralTypes;
+  private JCheckBox formatInserts;
+  private JCheckBox formatUpdates;
+  private JCheckBox ignoreIdentity;
+  private JCheckBox includeEmptyComments;
+  private JCheckBox includeOwner;
+  private JLabel insertColThresholdLbl;
+  private JTextField insertColsPerLine;
+  private JTextField insertThreshold;
+  private JPanel jPanel1;
+  private JPanel jPanel2;
+  private JPanel jPanel3;
+  private JPanel jPanel4;
+  private JPanel jPanel5;
+  private JSeparator jSeparator1;
+  private JSeparator jSeparator2;
+  private JSeparator jSeparator4;
+  private JComboBox literalTypes;
+  private JComboBox tableNameCase;
+  private JLabel tableNameCaseLabel;
+  private JLabel updateColThresholdLbl;
+  private JTextField updateThreshold;
   // End of variables declaration//GEN-END:variables
 
 }
