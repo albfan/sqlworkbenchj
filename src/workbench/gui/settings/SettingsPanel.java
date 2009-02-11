@@ -68,7 +68,7 @@ public class SettingsPanel
 		super();
 		pages = new ArrayList<OptionPanelPage>();
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
-		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));
+//		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
 		pages.add(new OptionPanelPage("EditorColorsPanel", "LblEditorColors"));
 		pages.add(new OptionPanelPage("WorkspaceOptions", "LblSettingsWorkspace"));
@@ -197,7 +197,7 @@ public class SettingsPanel
 		}
 		else
 		{
-			this.dialog.setSize(750,520);
+			this.dialog.setSize(620,530);
 		}
 
 		this.dialog.getRootPane().setDefaultButton(this.okButton);

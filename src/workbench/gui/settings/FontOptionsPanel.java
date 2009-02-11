@@ -14,8 +14,6 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import javax.swing.GroupLayout;
-import javax.swing.GroupLayout.Alignment;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import workbench.gui.components.WbFontPicker;
@@ -149,18 +147,6 @@ public class FontOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(8, 12, 5, 0);
     add(editorFontLabel, gridBagConstraints);
-
-    GroupLayout jPanel1Layout = new GroupLayout(jPanel1);
-    jPanel1.setLayout(jPanel1Layout);
-    jPanel1Layout.setHorizontalGroup(
-      jPanel1Layout.createParallelGroup(Alignment.LEADING)
-      .addGap(0, 0, Short.MAX_VALUE)
-    );
-    jPanel1Layout.setVerticalGroup(
-      jPanel1Layout.createParallelGroup(Alignment.LEADING)
-      .addGap(0, 0, Short.MAX_VALUE)
-    );
-
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 8;

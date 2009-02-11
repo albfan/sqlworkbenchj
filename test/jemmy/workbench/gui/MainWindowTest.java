@@ -15,7 +15,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
 import junit.framework.TestCase;
-import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JComboBoxOperator;
@@ -118,16 +117,6 @@ public class MainWindowTest
 
 		new JButtonOperator(dialog, "Cancel").push();
 	}
-
-//	private void createDriver()
-//	{
-//		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
-//		new JMenuBarOperator(mainWindow).pushMenuNoBlock("File|Manage Drivers", "|");
-//		JDialogOperator dialog = new JDialogOperator(mainWindow, "Manage drivers");
-//		JListOperator list = new JListOperator(dialog);
-//		list.selectItem("H2 Database Engine");
-//		new JButtonOperator(dialog, "Cancel").push();
-//	}
 
 	private void definePKTest()
 	{
