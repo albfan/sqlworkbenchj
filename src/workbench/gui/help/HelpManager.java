@@ -12,6 +12,7 @@
 package workbench.gui.help;
 
 import java.io.File;
+import java.util.List;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -21,6 +22,7 @@ import workbench.util.BrowserLauncher;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbStringTokenizer;
 
 /**
  *
@@ -55,18 +57,22 @@ public class HelpManager
 				// For Windows and Linux it is assumed that the reader is an executable
 				// and in this case a string array is passed to exec() which is more robust
 				// than a single string
-				String[] cmd = new String[] { reader.getFullPath(), "\"" + pdf.getFullPath() + "\"" };
+				String[] cmd = new String[] { reader.getFullPath(), pdf.getFullPath() };
+				LogMgr.logDebug("HelpManager.showPdfHelp()", "Launching PDF Reader using exec(String[])");
 				Runtime.getRuntime().exec(cmd);
 			}
 			else
 			{
 				// if the "reader" does not exist as a file, it is assumed it is
 				// some kind of "internal" command, e.g for MacOS X:
-				// open /Applications/Preview.app SQLWorkbench-Manual.pdf
-				// "open /Applications/Preview.app" would be specified by the user
-				String cmd = readerPath +  " \"" + pdf.getFullPath() + "\"";
-				LogMgr.logDebug("HelpManager.showPdfHelp()", "Running PDF Reader using: [" + cmd + "]");
-				Runtime.getRuntime().exec(cmd);
+				// open /Applications/Preview.app
+				WbStringTokenizer tok = new WbStringTokenizer(readerPath, " ", true, "\"", false);
+				List<String> cmd = tok.getAllTokens();
+				cmd.add(pdf.getFullPath());
+
+				LogMgr.logDebug("HelpManager.showPdfHelp()", "Launching PDF Reader using ProcessBuilder");
+				ProcessBuilder builder = new ProcessBuilder(cmd);
+				builder.start();
 			}
 		}
 		catch (Exception ex)
