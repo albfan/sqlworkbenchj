@@ -196,7 +196,7 @@ public class SettingsPanel
 		}
 		else
 		{
-			this.dialog.setSize(640,480);
+			this.dialog.setSize(700,550);
 		}
 
 		this.dialog.getRootPane().setDefaultButton(this.okButton);

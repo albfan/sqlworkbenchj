@@ -156,7 +156,7 @@ public class MacroManagerGui
 
 	public void restoreSettings()
 	{
-		int location = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 140);
+		int location = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 190);
 		this.splitPane.setDividerLocation(location);
 		String macro = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacro", null);
 		String group = Settings.getInstance().getProperty(this.getClass().getName() + ".lastmacrogroup", null);

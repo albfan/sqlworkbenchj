@@ -36,7 +36,8 @@ import workbench.resource.Settings;
 /**
  * @author support@sql-workbench.net
  */
-public class DriverEditorDialog extends JDialog
+public class DriverEditorDialog
+	extends JDialog
 	implements ActionListener
 {
 	private JPanel dummyPanel;
@@ -57,7 +58,7 @@ public class DriverEditorDialog extends JDialog
 
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(600,400);
+			this.setSize(680,500);
 		}
 		driverListPanel.restoreSettings();
 
