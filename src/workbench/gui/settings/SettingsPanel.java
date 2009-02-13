@@ -68,9 +68,9 @@ public class SettingsPanel
 		super();
 		pages = new ArrayList<OptionPanelPage>();
 		pages.add(new OptionPanelPage("GeneralOptionsPanel", "LblSettingsGeneral"));
-//		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));
 		pages.add(new OptionPanelPage("EditorOptionsPanel", "LblSettingsEditor"));
 		pages.add(new OptionPanelPage("EditorColorsPanel", "LblEditorColors"));
+		pages.add(new OptionPanelPage("FontOptionsPanel", "LblSettingsFonts"));
 		pages.add(new OptionPanelPage("WorkspaceOptions", "LblSettingsWorkspace"));
 		pages.add(new OptionPanelPage("DataDisplayOptions", "LblSettingsDataDisplay"));
 		pages.add(new OptionPanelPage("DataFormattingOptionsPanel", "LblSettingsDataFormat"));
