@@ -11,7 +11,6 @@
  */
 package workbench.gui.settings;
 
-import java.util.Locale;
 import javax.swing.JPanel;
 import workbench.gui.components.NumberField;
 import workbench.interfaces.Restoreable;
@@ -26,9 +25,6 @@ public class DataFormattingOptionsPanel
 	extends JPanel
 	implements Restoreable
 {
-	private static Locale[] locales;
-	private static final Object localeLock = new Object();
-
 	public DataFormattingOptionsPanel()
 	{
 		super();

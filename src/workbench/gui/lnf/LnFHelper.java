@@ -139,46 +139,21 @@ public class LnFHelper
 			LookAndFeel lnf = loader.getLookAndFeel();
 
 			UIManager.setLookAndFeel(lnf);
-			try
-			{
-				String clsname = lnf.getClass().getName();
-				if (clsname.indexOf("com.sun.java.swing.plaf.windows") > -1)
-				{
-					String osVersion = System.getProperty("os.version", "1.0");
-					Float version = Float.valueOf(osVersion);
-					if (version.floatValue() <= 5.0)
-					{
-						isWindowsClassic = true;
-					}
-					else
-					{
-						isWindowsClassic = (clsname.indexOf("WindowsClassicLookAndFeel") > -1);
-						if (!isWindowsClassic)
-						{
-							Toolkit toolkit = Toolkit.getDefaultToolkit();
-							Boolean themeActive = (Boolean)toolkit.getDesktopProperty("win.xpstyle.themeActive");
-							if (themeActive != null)
-							{
-								isWindowsClassic = !themeActive.booleanValue();
-							}
-							else
-							{
-								isWindowsClassic = true;
-							}
-						}
-					}
-				}
-			}
-			catch (Throwable e)
-			{
-				isWindowsClassic = false;
-			}
+			checkWindowsClassic(lnf.getClass().getName());
 		}
-		catch (Exception e)
+		catch (Throwable e)
 		{
 			LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Could not set look and feel", e);
 			LogMgr.logWarning("LnFHelper.initializeLookAndFeel()", "Current look and feel class [" + className + "] will be ignored");
 			GuiSettings.setLookAndFeelClass(null);
+			try
+			{
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+			}
+			catch (Exception ex)
+			{
+				// should not ahppen
+			}
 		}
 
 		try
@@ -189,6 +164,44 @@ public class LnFHelper
 		{
 			LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Error setting dynamic layout property", e);
 		}
+	}
+
+	private void checkWindowsClassic(String clsname)
+	{
+		try
+		{
+			if (clsname.indexOf("com.sun.java.swing.plaf.windows") > -1)
+			{
+				String osVersion = System.getProperty("os.version", "1.0");
+				Float version = Float.valueOf(osVersion);
+				if (version.floatValue() <= 5.0)
+				{
+					isWindowsClassic = true;
+				}
+				else
+				{
+					isWindowsClassic = (clsname.indexOf("WindowsClassicLookAndFeel") > -1);
+					if (!isWindowsClassic)
+					{
+						Toolkit toolkit = Toolkit.getDefaultToolkit();
+						Boolean themeActive = (Boolean) toolkit.getDesktopProperty("win.xpstyle.themeActive");
+						if (themeActive != null)
+						{
+							isWindowsClassic = !themeActive.booleanValue();
+						}
+						else
+						{
+							isWindowsClassic = true;
+						}
+					}
+				}
+			}
+		}
+		catch (Throwable e)
+		{
+			isWindowsClassic = false;
+		}
+
 	}
 
 }

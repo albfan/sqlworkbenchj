@@ -17,6 +17,7 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -37,6 +38,7 @@ import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ClassFinderGUI;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbButton;
@@ -113,6 +115,7 @@ public class LnFDefinitionPanel
 		this.tfClassName.setEnabled(flag);
 		this.libraryPath.setEnabled(flag);
 		this.tfName.setEnabled(flag);
+		selectClass.setEnabled(flag);
 	}
 
 	private boolean testLnF(LnFDefinition lnf)
@@ -134,9 +137,8 @@ public class LnFDefinitionPanel
 		return Arrays.asList(files);
 	}
 
-	public void propertyChange(PropertyChangeEvent evt)
+	private void selectClass()
 	{
-		if (ignoreChange) return;
 		ClassFinder finder = new ClassFinder(LookAndFeel.class);
 		List<String> libs = splitLibraryList(libraryPath.getFilename());
 		ClassFinderGUI gui = new ClassFinderGUI(finder, tfClassName, statusLabel);
@@ -144,6 +146,12 @@ public class LnFDefinitionPanel
 		gui.setWindowTitleKey("TxtSelectLnF");
 		gui.setClassPath(libs);
 		gui.startCheck();
+	}
+	
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (ignoreChange) return;
+		selectClass();
 	}
 
 	/** This method is called from within the constructor to
@@ -166,6 +174,7 @@ public class LnFDefinitionPanel
     currentLabel = new HtmlLabel();
     libraryPath = new WbFilePicker();
     statusLabel = new JLabel();
+    selectClass = new FlatButton();
 
     setLayout(new GridBagLayout());
 
@@ -184,6 +193,7 @@ public class LnFDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.EAST;
     gridBagConstraints.weightx = 1.0;
@@ -196,7 +206,7 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 10, 0, 7);
+    gridBagConstraints.insets = new Insets(5, 10, 0, 7);
     add(lblClassName, gridBagConstraints);
 
     tfClassName.setColumns(10);
@@ -208,7 +218,8 @@ public class LnFDefinitionPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 3, 0, 3);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(5, 3, 0, 3);
     add(tfClassName, gridBagConstraints);
 
     lblLibrary.setLabelFor(lblLibrary);
@@ -228,7 +239,7 @@ public class LnFDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(11, 10, 0, 10);
@@ -236,7 +247,7 @@ public class LnFDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new Insets(10, 0, 0, 0);
     add(jSeparator1, gridBagConstraints);
@@ -250,7 +261,7 @@ public class LnFDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(10, 8, 0, 0);
     add(changeLnfButton, gridBagConstraints);
@@ -261,7 +272,7 @@ public class LnFDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.SOUTH;
     gridBagConstraints.weighty = 1.0;
@@ -270,6 +281,7 @@ public class LnFDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 3, 0, 3);
@@ -277,11 +289,21 @@ public class LnFDefinitionPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(2, 10, 0, 7);
     add(statusLabel, gridBagConstraints);
+
+    selectClass.setText("...");
+    selectClass.setMargin(new Insets(2, 2, 2, 2));
+    selectClass.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 0, 0, 3);
+    add(selectClass, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -289,6 +311,9 @@ public class LnFDefinitionPanel
   public void actionPerformed(java.awt.event.ActionEvent evt) {
     if (evt.getSource() == changeLnfButton) {
       LnFDefinitionPanel.this.changeLnfButtonActionPerformed(evt);
+    }
+    else if (evt.getSource() == selectClass) {
+      LnFDefinitionPanel.this.selectClassActionPerformed(evt);
     }
   }// </editor-fold>//GEN-END:initComponents
 
@@ -307,6 +332,11 @@ public class LnFDefinitionPanel
 			WbSwingUtilities.showErrorMessageKey(this, "MsgLnFNotLoaded");
 		}
 	}//GEN-LAST:event_changeLnfButtonActionPerformed
+
+	private void selectClassActionPerformed(ActionEvent evt)//GEN-FIRST:event_selectClassActionPerformed
+	{//GEN-HEADEREND:event_selectClassActionPerformed
+		selectClass();
+	}//GEN-LAST:event_selectClassActionPerformed
 
 	public void setCurrentLookAndFeeld(LnFDefinition lnf)
 	{
@@ -343,6 +373,7 @@ public class LnFDefinitionPanel
   public JLabel lblLibrary;
   public JLabel lblName;
   public WbFilePicker libraryPath;
+  public JButton selectClass;
   public JLabel statusLabel;
   public JTextField tfClassName;
   public JTextField tfName;
