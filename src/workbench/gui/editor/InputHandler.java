@@ -289,7 +289,7 @@ public class InputHandler
 		int keyCode = evt.getKeyCode();
 		int modifiers = evt.getModifiers();
 
-		if(keyCode == KeyEvent.VK_CONTROL ||
+		if (keyCode == KeyEvent.VK_CONTROL ||
 			keyCode == KeyEvent.VK_SHIFT ||
 			keyCode == KeyEvent.VK_ALT ||
 			keyCode == KeyEvent.VK_META)
@@ -303,7 +303,7 @@ public class InputHandler
 			|| keyCode == KeyEvent.VK_TAB
 			|| keyCode == KeyEvent.VK_ESCAPE)
 		{
-			if(grabAction != null)
+			if (grabAction != null)
 			{
 				handleGrabAction(evt);
 				return;
@@ -371,8 +371,7 @@ public class InputHandler
 
 	public void keyTyped(KeyEvent evt)
 	{
-		//
-		if (evt.isControlDown() || evt.isAltDown()) return;
+		if (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown() || evt.isActionKey()) return;
 
 		char c = evt.getKeyChar();
 
@@ -444,11 +443,9 @@ public class InputHandler
 					modifiers |= InputEvent.ALT_MASK;
 					break;
 				case 'C':
+				case 'M':
 					modifiers |= PlatformShortcuts.getDefaultModifier();
 					break;
-//				case 'M':
-//					modifiers |= InputEvent.META_MASK;
-//					break;
 				case 'S':
 					modifiers |= InputEvent.SHIFT_MASK;
 					break;
@@ -714,55 +711,6 @@ public class InputHandler
 			textArea.undo();
 		}
 	}
-
-//	public static class make_upper implements ActionListener
-//	{
-//		public void actionPerformed(ActionEvent evt)
-//		{
-//			JEditTextArea textArea = getTextArea(evt);
-//
-//			if(!textArea.isEditable())
-//			{
-//				textArea.getToolkit().beep();
-//				return;
-//			}
-//			else
-//			{
-//				String sel = textArea.getSelectedText();
-//				if (sel == null || sel.length() == 0) return;
-//				int start = textArea.getSelectionStart();
-//				int end = textArea.getSelectionEnd();
-//				sel = sel.toUpperCase();
-//				textArea.setSelectedText(sel);
-//				textArea.select(start, end);
-//			}
-//		}
-//	}
-//
-//
-//	public static class make_lower implements ActionListener
-//	{
-//		public void actionPerformed(ActionEvent evt)
-//		{
-//			JEditTextArea textArea = getTextArea(evt);
-//
-//			if(!textArea.isEditable())
-//			{
-//				textArea.getToolkit().beep();
-//				return;
-//			}
-//			else
-//			{
-//				String sel = textArea.getSelectedText();
-//				if (sel == null || sel.length() == 0) return;
-//				int start = textArea.getSelectionStart();
-//				int end = textArea.getSelectionEnd();
-//				sel = sel.toLowerCase();
-//				textArea.setSelectedText(sel);
-//				textArea.select(start, end);
-//			}
-//		}
-//	}
 
 	public static class backspace implements ActionListener
 	{
