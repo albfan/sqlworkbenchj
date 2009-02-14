@@ -1,5 +1,9 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh: (103.3) A manually changed column order in table data of the
+     DbExplorer can now be saved. Either manually through the
+     popup menu of the table header, or automatically through
+     an option for the DbExplorer.
 Enh: (103.2) When defining the jar library for a Look & Feel, the 
      application now scans the libraries for the approriate classes
 Enh: (103.2) Removed the limitations that DbExplorer panels must be 
@@ -10,6 +14,7 @@ Enh: (103.1) A single record dialog is now available to edit data in a
      result set (Data -> Single record dialog)
 Enh: (103.1) A new option to control the use of uppercase keywords for the
      SQL formatter is available (Tools -> Options -> SQL Formatter)
+Fix: (103.3) Fixed displaying the PDF manual on MacOS (Thanks Markus!)
 Fix: (103.2) Some workspaces were not loaded properly and editor tabs would 
      be removed upon loading.
 Fix: (103.1) When refreshing the source for a table or a view, the column

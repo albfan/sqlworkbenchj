@@ -578,6 +578,7 @@
 
 			<javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
 			<javaproperty name="apple.awt.showGrowBox" value="true"/>
+			<javaproperty name="apple.awt.brushMetalLook" value="true"/>
 		</jarbundler>
 
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
