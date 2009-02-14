@@ -600,13 +600,15 @@ public class TableListPanel
 	{
 		try
 		{
+			tableData.storeColumnOrder();
+			this.reset();
 			this.ignoreStateChanged = true;
 			this.dbConnection = null;
 			this.tableTypes.removeActionListener(this);
 			this.displayTab.removeChangeListener(this);
+			this.tableData.setConnection(null);
 			this.tableTypes.removeAllItems();
 			this.tableDefinition.setConnection(null);
-			this.reset();
 		}
 		finally
 		{

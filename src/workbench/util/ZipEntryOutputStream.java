@@ -1,0 +1,59 @@
+/*
+ * 
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * Copyright 2002-2008, Thomas Kellerer
+ * 
+ * No part of this code maybe reused without the permission of the author
+ * 
+ * To contact the author please send an email to: support@sql-workbench.net
+ * 
+ */
+package workbench.util;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.zip.ZipOutputStream;
+
+/**
+ *
+ * @author support@sql-workbench.net
+ */
+public class ZipEntryOutputStream
+	extends OutputStream
+{
+	private ZipOutputStream zout;
+	public ZipEntryOutputStream(ZipOutputStream out)
+	{
+		zout = out;
+	}
+
+	public void close()
+		throws IOException
+	{
+		zout.closeEntry();
+	}
+
+	public void flush()
+		throws IOException
+	{
+		zout.flush();
+	}
+
+	public void write(byte[] b, int off, int len)
+		throws IOException
+	{
+		zout.write(b, off, len);
+	}
+
+	public void write(byte[] b)
+		throws IOException
+	{
+		zout.write(b);
+	}
+
+	public void write(int b)
+		throws IOException
+	{
+		zout.write(b);
+	}
+}

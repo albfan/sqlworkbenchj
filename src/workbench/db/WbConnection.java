@@ -191,7 +191,7 @@ public class WbConnection
 
 	public boolean supportsQueryTimeout()
 	{
-		if (this.metaData == null) return true;
+		if (this.metaData == null) return false;
 		return this.metaData.getDbSettings().supportsQueryTimeout();
 	}
 	
@@ -626,14 +626,6 @@ public class WbConnection
 	public boolean isClosed()
 	{
 		return (this.sqlConnection == null);
-//		try
-//		{
-//			return this.sqlConnection.isClosed();
-//		}
-//		catch (Exception e)
-//		{
-//			return true;
-//		}
 	}
 
 	/**

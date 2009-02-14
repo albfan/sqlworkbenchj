@@ -97,7 +97,7 @@ public class OptionPanelPage
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("OptionPanelPage.restoreSettings()", "Could not restore panel settings", e);
+			LogMgr.logError("OptionPanelPage.restoreSettings()", "Could not save panel settings", e);
 		}
 	}
 

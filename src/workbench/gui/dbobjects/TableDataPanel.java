@@ -61,10 +61,13 @@ import java.beans.PropertyChangeListener;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.JTable;
 import workbench.WbManager;
 import workbench.db.TableSelectBuilder;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.FilterPickerAction;
+import workbench.gui.components.ColumnOrderMgr;
+import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
@@ -221,6 +224,7 @@ public class TableDataPanel
 		policy.setDefaultComponent(dataDisplay);
 		setFocusCycleRoot(false);
 		setFocusTraversalPolicy(policy);
+		dataDisplay.getTable().setColumnOrderSavingEnabled(true);
 	}
 
 	public boolean isModified()
@@ -283,6 +287,7 @@ public class TableDataPanel
 		{
 			this.lastSort = null;
 		}
+		storeColumnOrder();
 		this.dataDisplay.clearContent();
 		this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
 		this.clearLoadingImage();
@@ -448,6 +453,29 @@ public class TableDataPanel
 		}
 	}
 
+	public void resetColumnOrder()
+	{
+		ColumnOrderMgr.getInstance().resetColumnOrder(dataDisplay.getTable());
+	}
+
+	public void storeColumnOrder()
+	{
+		if (!Settings.getInstance().getRememberColumnOrder()) return;
+		saveColumnOrder();
+	}
+
+	public void saveColumnOrder()
+	{
+		if (dataDisplay == null) return;
+		WbTable tbl = dataDisplay.getTable();
+		if (tbl == null) return;
+
+		if (tbl.isColumnOrderChanged())
+		{
+			ColumnOrderMgr.getInstance().storeColumnOrder(tbl);
+		}
+	}
+
 	/**
 	 * Define the table for which the data should be displayed
 	 */
@@ -455,6 +483,7 @@ public class TableDataPanel
 	{
 		if (!this.isRetrieving()) reset();
 		this.table = aTable;
+
 		this.lastSort = null;
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -470,7 +499,7 @@ public class TableDataPanel
 	private String buildSqlForTable(boolean forRowCount)
 	{
 		if (this.table == null) return null;
-		
+
 		if (forRowCount)
 		{
 			StringBuilder sql = new StringBuilder(100);
@@ -620,6 +649,8 @@ public class TableDataPanel
 		this.reloadAction.setEnabled(false);
 		boolean error = false;
 
+		JTable t = dataDisplay.getTable();
+
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
@@ -655,6 +686,8 @@ public class TableDataPanel
 					{
 						dataDisplay.setSortDefinition(lastSort);
 					}
+
+					ColumnOrderMgr.getInstance().restoreColumnOrder(dataDisplay.getTable());
 				}
 			});
 		}
@@ -749,6 +782,7 @@ public class TableDataPanel
 	{
 		String prefix = getWorkspacePrefix(index);
 		saveSettings(prefix, wb.getSettings());
+		storeColumnOrder();
 	}
 
 	/**

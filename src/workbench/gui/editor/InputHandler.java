@@ -91,6 +91,9 @@ public class InputHandler
 
 	private static Map<String, ActionListener> actions;
 
+	protected boolean repeat;
+	protected int repeatCount;
+
 	static
 	{
 		actions = new HashMap<String, ActionListener>();
@@ -292,10 +295,11 @@ public class InputHandler
 		if (keyCode == KeyEvent.VK_CONTROL ||
 			keyCode == KeyEvent.VK_SHIFT ||
 			keyCode == KeyEvent.VK_ALT ||
-			keyCode == KeyEvent.VK_META)
+			keyCode == KeyEvent.VK_META ||
+			keyCode == KeyEvent.ALT_GRAPH_MASK)
 			return;
 
-		if((modifiers & ~KeyEvent.SHIFT_MASK) != 0
+		if ((modifiers & ~KeyEvent.SHIFT_MASK) != 0
 			|| evt.isActionKey()
 			|| keyCode == KeyEvent.VK_BACK_SPACE
 			|| keyCode == KeyEvent.VK_DELETE
@@ -303,11 +307,6 @@ public class InputHandler
 			|| keyCode == KeyEvent.VK_TAB
 			|| keyCode == KeyEvent.VK_ESCAPE)
 		{
-			if (grabAction != null)
-			{
-				handleGrabAction(evt);
-				return;
-			}
 
 			if (keyCode == KeyEvent.VK_TAB)
 			{
@@ -332,26 +331,12 @@ public class InputHandler
 			KeyStroke keyStroke = KeyStroke.getKeyStroke(keyCode,modifiers);
 			Object o = currentBindings.get(keyStroke);
 
-			if(o == null)
+			if (o == null)
 			{
-				// Don't beep if the user presses some
-				// key we don't know about unless a
-				// prefix is active. Otherwise it will
-				// beep when caps lock is pressed, etc.
-				/*
-				if(currentBindings != bindings)
-				{
-					Toolkit.getDefaultToolkit().beep();
-					// F10 should be passed on, but C+e F10
-					// shouldn't
-					repeatCount = 0;
-					repeat = false;
-					evt.consume();
-				}*/
 				currentBindings = bindings;
 				return;
 			}
-			else if(o instanceof ActionListener)
+			else if (o instanceof ActionListener)
 			{
 				currentBindings = bindings;
 
@@ -360,7 +345,7 @@ public class InputHandler
 				evt.consume();
 				return;
 			}
-			else if(o instanceof HashMap)
+			else if (o instanceof HashMap)
 			{
 				currentBindings = (HashMap)o;
 				evt.consume();
@@ -369,9 +354,14 @@ public class InputHandler
 		}
 	}
 
+	private boolean isModifierPressed(KeyEvent evt)
+	{
+		return (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown() || evt.isAltGraphDown());
+	}
+
 	public void keyTyped(KeyEvent evt)
 	{
-		if (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown() || evt.isActionKey()) return;
+		if (isModifierPressed(evt) || evt.isActionKey()) return;
 
 		char c = evt.getKeyChar();
 
@@ -396,14 +386,8 @@ public class InputHandler
 
 				currentBindings = bindings;
 
-				if(grabAction != null)
-				{
-					handleGrabAction(evt);
-					return;
-				}
-
 				// 0-9 adds another 'digit' to the repeat number
-				if(repeat && Character.isDigit(c))
+				if (repeat && Character.isDigit(c))
 				{
 					repeatCount *= 10;
 					repeatCount += (c - '0');
@@ -488,10 +472,10 @@ public class InputHandler
 	 * action with the key as a the action command.
 	 * @param listener The Listener
 	 */
-	public void grabNextKeyStroke(ActionListener listener)
-	{
-		grabAction = listener;
-	}
+//	public void grabNextKeyStroke(ActionListener listener)
+//	{
+//		grabAction = listener;
+//	}
 
 	/**
 	 * Returns if repeating is enabled. When repeating is enabled,
@@ -531,25 +515,6 @@ public class InputHandler
 	}
 
 	/**
-	 * Returns the macro recorder. If this is non-null, all executed
-	 * actions should be forwarded to the recorder.
-	 */
-	public InputHandler.MacroRecorder getMacroRecorder()
-	{
-		return recorder;
-	}
-
-	/**
-	 * Sets the macro recorder. If this is non-null, all executed
-	 * actions should be forwarded to the recorder.
-	 * @param recorder The macro recorder
-	 */
-	public void setMacroRecorder(InputHandler.MacroRecorder recorder)
-	{
-		this.recorder = recorder;
-	}
-	
-	/**
 	 * Executes the specified action, repeating and recording it as
 	 * necessary.
 	 * @param listener The action listener
@@ -586,29 +551,12 @@ public class InputHandler
 			}
 		}
 
-		// do recording. Notice that we do no recording whatsoever
-		// for actions that grab keys
-		if(grabAction == null)
+		// If repeat was true originally, clear it
+		// Otherwise it might have been set by the action, etc
+		if (_repeat)
 		{
-			if(recorder != null)
-			{
-				if(!(listener instanceof InputHandler.NonRecordable))
-				{
-					if(_repeatCount != 1)
-					{
-						recorder.actionPerformed(REPEAT,String.valueOf(_repeatCount));
-					}
-					recorder.actionPerformed(listener,actionCommand);
-				}
-			}
-
-			// If repeat was true originally, clear it
-			// Otherwise it might have been set by the action, etc
-			if(_repeat)
-			{
-				repeat = false;
-				repeatCount = 0;
-			}
+			repeat = false;
+			repeatCount = 0;
 		}
 	}
 
@@ -644,28 +592,6 @@ public class InputHandler
 		System.err.println("Report this to Slava Pestov <sp@gjt.org>");
 		return null;
 	}
-
-	// protected members
-
-	/**
-	 * If a key is being grabbed, this method should be called with
-	 * the appropriate key event. It executes the grab action with
-	 * the typed character as the parameter.
-	 */
-	protected void handleGrabAction(KeyEvent evt)
-	{
-		// Clear it *before* it is executed so that executeAction()
-		// resets the repeat count
-		ActionListener _grabAction = grabAction;
-		grabAction = null;
-		executeAction(_grabAction,evt.getSource(),String.valueOf(evt.getKeyChar()));
-	}
-
-	// protected members
-	protected ActionListener grabAction;
-	protected boolean repeat;
-	protected int repeatCount;
-	protected InputHandler.MacroRecorder recorder;
 
 	/**
 	 * If an action implements this interface, it should not be repeated.

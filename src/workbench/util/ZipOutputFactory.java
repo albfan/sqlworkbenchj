@@ -29,7 +29,6 @@ public class ZipOutputFactory
 	protected File archive;
 	protected OutputStream baseOut;
 	protected ZipOutputStream zout;
-	protected ZipEntry currentEntry;
 	
 	public ZipOutputFactory(File zip)
 	{
@@ -58,37 +57,9 @@ public class ZipOutputFactory
 	{
 		if (this.zout == null) initArchive();
 		
-		this.currentEntry = new ZipEntry(filename);
+		ZipEntry currentEntry = new ZipEntry(filename);
 		this.zout.putNextEntry(currentEntry);
-		OutputStream out = new OutputStream()
-		{
-			public void close() throws IOException
-			{
-				zout.closeEntry();
-				currentEntry = null;
-			}
-
-			public void flush() throws IOException
-			{
-				zout.flush();
-			}
-
-			public void write(byte[] b, int off, int len) throws IOException
-			{
-				zout.write(b, off, len);
-			}
-
-			public void write(byte[] b) throws IOException
-			{
-				zout.write(b);
-			}
-
-			public void write(int b) throws IOException
-			{
-				zout.write(b);
-			}
-		};
-		return out;
+		return new ZipEntryOutputStream(zout);
 	}
 
 	public Writer createWriter(String output, String encoding)

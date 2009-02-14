@@ -57,8 +57,12 @@ public class ClassFinder
 
 		for (String file : jarFiles)
 		{
-			List<String> drivers = processJarFile(file, loader);
-			result.addAll(drivers);
+			File f = new File(file);
+			if (f.isFile())
+			{
+				List<String> drivers = processJarFile(file, loader);
+				result.addAll(drivers);
+			}
 		}
 		return result;
 	}
@@ -67,6 +71,7 @@ public class ClassFinder
 		throws IOException
 	{
 		List<String> result = new ArrayList<String>();
+
 		JarFile jarFile = new JarFile(archive);
 		try
 		{

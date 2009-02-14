@@ -90,7 +90,9 @@ import workbench.gui.actions.OptimizeColumnWidthAction;
 import workbench.gui.actions.OptimizeRowHeightAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
+import workbench.gui.actions.ResetColOrderAction;
 import workbench.gui.actions.ResetHighlightAction;
+import workbench.gui.actions.SaveColOrderAction;
 import workbench.gui.actions.SaveDataAsAction;
 import workbench.gui.actions.ScrollToColumnAction;
 import workbench.gui.actions.SetColumnWidthAction;
@@ -161,6 +163,7 @@ public class WbTable
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
 
 	private ResetHighlightAction resetHighlightAction;
+	
 	private ColumnExpression highlightExpression;
 
 	private FilterDataAction filterAction;
@@ -188,7 +191,8 @@ public class WbTable
 	private boolean useMultilineTooltip = true;
 	private boolean rowHeightWasOptimized;
 	private Color requiredColor;
-
+	private boolean allowColumnOrderSaving;
+	
 	private boolean showFocusPending = false;
 	private FocusIndicator focusIndicator = null;
 	private ListSelectionControl selectionController;
@@ -322,6 +326,11 @@ public class WbTable
 		this.getActionMap().put("wbtable-stop-editing", a);
 	}
 
+	public void setColumnOrderSavingEnabled(boolean flag)
+	{
+		allowColumnOrderSaving = flag;
+	}
+	
 	public void showInputFormAction()
 	{
 		if (this.popup == null) return;
@@ -330,7 +339,7 @@ public class WbTable
 		popup.insert(this.formAction.getMenuItem(), 0);
 		formAction.addToInputMap(this);
 	}
-	
+
 	public void setListSelectionControl(ListSelectionControl controller)
 	{
 		this.selectionController = controller;
@@ -349,7 +358,6 @@ public class WbTable
 			super.changeSelection(rowIndex, columnIndex, toggle, extend);
 		}
 	}
-
 
 	public void showFocusBorder()
 	{
@@ -986,6 +994,16 @@ public class WbTable
 		updateSortRenderer();
 	}
 
+	public boolean isColumnOrderChanged()
+	{
+		TableColumnModel model = getColumnModel();
+		for (int i=0; i < model.getColumnCount(); i++)
+		{
+			if (i != model.getColumn(i).getModelIndex()) return true;
+		}
+		return false;
+	}
+
 	private FilterExpression lastFilter;
 	private FilterExpression currentFilter;
 
@@ -1438,7 +1456,7 @@ public class WbTable
 		int offset = (this.dwModel.getShowStatusColumn() ? 1 : 0);
 
 		// the first column is never a multiline if the status column is displayed.
-		if (col - offset < 0) return false; 
+		if (col - offset < 0) return false;
 
 		ColumnIdentifier column = this.dwModel.getDataStore().getResultInfo().getColumn(col - offset);
 		return SqlUtil.isMultiLineColumn(column);
@@ -1688,8 +1706,8 @@ public class WbTable
 			if (e.getSource() instanceof JTableHeader)
 			{
 				this.headerPopupX = e.getX();
-				EventQueue.invokeLater(new Runnable() {
-
+				EventQueue.invokeLater(new Runnable()
+				{
 					public void run()
 					{
 						JPopupMenu headerPopup = new JPopupMenu();
@@ -1703,6 +1721,12 @@ public class WbTable
 						headerPopup.add(new ScrollToColumnAction(WbTable.this));
 						headerPopup.addSeparator();
 						headerPopup.add(new OptimizeRowHeightAction(WbTable.this));
+						if (allowColumnOrderSaving)
+						{
+							headerPopup.addSeparator();
+							headerPopup.add(new ResetColOrderAction(WbTable.this));
+							headerPopup.add(new SaveColOrderAction(WbTable.this));
+						}
 						headerPopup.show(getTableHeader(), e.getX(), e.getY());
 					}
 				});

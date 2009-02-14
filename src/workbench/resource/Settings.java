@@ -415,6 +415,11 @@ public class Settings
 		return new WbFile(getConfigDir(), "WbDrivers.xml").getFullPath();
 	}
 
+	public File getColumnOrderStorage()
+	{
+		return new WbFile(getConfigDir(), "WbColumnOrder.xml");
+	}
+	
 	public File getConfigDir()
 	{
 		return this.configfile.getParentFile();
@@ -849,6 +854,16 @@ public class Settings
 	public boolean getRememberSortInDbExplorer()
 	{
 		return getBoolProperty(PROPERTY_DBEXP_REMEMBER_SORT, false);
+	}
+
+	public void setRememberColumnOrder(boolean flag)
+	{
+		setProperty("workbench.dbexplorer.remember.columnorder", flag);
+	}
+
+	public boolean getRememberColumnOrder()
+	{
+		return getBoolProperty("workbench.dbexplorer.remember.columnorder", false);
 	}
 
 	public void setStoreExplorerObjectType(boolean flag)

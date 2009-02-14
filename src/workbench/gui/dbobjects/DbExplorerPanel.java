@@ -716,12 +716,12 @@ public class DbExplorerPanel
 
 	public void disconnect()
 	{
-		this.reset();
 		this.tables.disconnect();
 		this.procs.disconnect();
 		if (this.triggers != null) this.triggers.disconnect();
 		this.searchPanel.disconnect();
 		this.dbConnection = null;
+		this.reset();
 	}
 
 	public void saveSettings()
@@ -941,7 +941,7 @@ public class DbExplorerPanel
 	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
-		// this will increase the visible count for DbExplorer Panels in the workspace
+
 		Object s = this.schemaSelector.getSelectedItem();
 		WbProperties p = w.getSettings();
 		String key = "dbexplorer" + index + ".currentschema";

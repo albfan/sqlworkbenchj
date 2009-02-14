@@ -1,0 +1,266 @@
+/*
+ *
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * Copyright 2002-2008, Thomas Kellerer
+ *
+ * No part of this code maybe reused without the permission of the author
+ *
+ * To contact the author please send an email to: support@sql-workbench.net
+ *
+ */
+
+package workbench.gui.components;
+
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.table.DefaultTableColumnModel;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.storage.DataStore;
+
+/**
+ * A class to save and restore the ordering of columns in a JTable
+ *
+ * @author support@sql-workbench.net
+ */
+public class ColumnOrderMgr
+{
+	private Map<String, List<String>> columnOrders;
+
+	protected static class LazyInstanceHolder
+	{
+		protected static final ColumnOrderMgr instance = new ColumnOrderMgr();
+	}
+
+	public static final ColumnOrderMgr getInstance()
+	{
+		return LazyInstanceHolder.instance;
+	}
+
+	private ColumnOrderMgr()
+	{
+		 columnOrders = new HashMap<String, List<String>>();
+		 load();
+	}
+
+	public int getSize()
+	{
+		return columnOrders.size();
+	}
+
+	/**
+	 * Restores a saved column order to the given JTable.
+	 * <br>
+	 * This table should be called on the EDT to make sure the
+	 * new column model is initialized correctly for the table.
+	 *
+	 * @param table
+	 * @param key
+	 */
+	public synchronized void restoreColumnOrder(WbTable table)
+	{
+		String key = getColumnOrderKey(table);
+		if (key == null) return;
+		List<String> cols = columnOrders.get(key);
+		if (cols != null)
+		{
+			applyColumnOrder(table, cols);
+		}
+	}
+
+	private String getColumnOrderKey(WbTable table)
+	{
+		if (table == null) return null;
+		DataStore ds = table.getDataStore();
+		if (ds == null) return null;
+
+		// The JDBC URL is part of the key, so without a connection
+		// the column order cannot be stored.
+		WbConnection con = ds.getOriginalConnection();
+		if (con == null) return null;
+
+		// As this is currently only used in the DbExplorer
+		// getUpdateTable() could potentially return null
+		// because setUpdateTableToBeUsed() is used in
+		// TableDataPanel, therefor if no update table is
+		// found, we should get one after calling checkUpdateTable()
+		TableIdentifier tbl = ds.getUpdateTable();
+		if (tbl == null) ds.checkUpdateTable();
+		tbl = ds.getUpdateTable();
+		if (tbl == null) return null;
+		
+		String url = con.getUrl();
+		return getColumnOrderKey(tbl, url);
+	}
+	
+	public String getColumnOrderKey(TableIdentifier tbl, String url)
+	{
+		String key = tbl.getTableExpression() + "@" + url;
+		return key;
+	}
+
+
+	/**
+	 * Check if the column order for the given key is already stored
+	 * @param key
+	 * @return
+	 */
+	public synchronized boolean isOrderSaved(WbTable tbl)
+	{
+		String key = getColumnOrderKey(tbl);
+		return columnOrders.containsKey(key);
+	}
+
+	public synchronized boolean isOrderSaved(TableIdentifier tbl, String url)
+	{
+		String key = getColumnOrderKey(tbl, url);
+		return columnOrders.containsKey(key);
+	}
+
+	public void resetColumnOrder(WbTable table)
+	{
+		String key = getColumnOrderKey(table);
+		removeColumnOrder(key);
+		
+		if (table == null) return;
+
+		TableColumnModel current = table.getColumnModel();
+		if (current == null) return;
+		if (current.getColumnCount() == 0) return;
+		
+		Comparator<TableColumn> comp = new Comparator<TableColumn>()
+		{
+			public int compare(TableColumn o1, TableColumn o2)
+			{
+				return o1.getModelIndex() - o2.getModelIndex();
+			}
+		};
+		List<TableColumn> old = new ArrayList<TableColumn>(current.getColumnCount());
+		for (int i=0; i < current.getColumnCount(); i++)
+		{
+			old.add(current.getColumn(i));
+		}
+		Collections.sort(old, comp);
+		TableColumnModel model = new DefaultTableColumnModel();
+		for (TableColumn col : old)
+		{
+			model.addColumn(col);
+		}
+		table.setColumnModel(model);
+	}
+	
+	protected void applyColumnOrder(WbTable table, List<String> newOrder)
+	{
+		if (newOrder == null || newOrder.size() == 0) return;
+
+		TableColumnModel model = new DefaultTableColumnModel();
+		TableColumnModel current = table.getColumnModel();
+
+		for (CharSequence colname : newOrder)
+		{
+			int c = current.getColumnIndex(colname);
+			if (c > -1)
+			{
+				TableColumn currentCol = current.getColumn(c);
+				model.addColumn(currentCol);
+			}
+		}
+
+		// Now check if all columns in the table are present in the saved set
+		// Those that are missing will simply be added to the end of the column model
+		for (int i=0; i < current.getColumnCount(); i++)
+		{
+			TableColumn col = current.getColumn(i);
+			String name = col.getIdentifier().toString();
+			if (!newOrder.contains(name))
+			{
+				newOrder.add(name);
+				model.addColumn(col);
+			}
+		}
+		
+		table.setColumnModel(model);
+	}
+
+	public synchronized void removeColumnOrder(String key)
+	{
+		if (key == null) return;
+		columnOrders.remove(key);
+	}
+
+	public synchronized void storeColumnOrder(WbTable table)
+	{
+		if (table == null) return;
+		String key = getColumnOrderKey(table);
+
+		TableColumnModel current = table.getColumnModel();
+		List<String> cols = new ArrayList<String>(current.getColumnCount());
+		for (int i=0; i < current.getColumnCount(); i++)
+		{
+			String name = current.getColumn(i).getIdentifier().toString();
+			cols.add(name);
+		}
+		columnOrders.put(key, cols);
+	}
+
+	public synchronized void saveSettings()
+		throws IOException
+	{
+		File f = Settings.getInstance().getColumnOrderStorage();
+		if (columnOrders.size() == 0 && f.exists())
+		{
+			f.delete();
+		}
+		else if (columnOrders.size() > 0)
+		{
+			FileOutputStream out = new FileOutputStream(f);
+			XMLEncoder e = new XMLEncoder(out);
+			try
+			{
+				e.writeObject(columnOrders);
+			}
+			finally
+			{
+				e.close();
+			}
+		}
+	}
+
+	public synchronized void load()
+	{
+		File f = Settings.getInstance().getColumnOrderStorage();
+		if (!f.exists()) return;
+
+		XMLDecoder e = null;
+		try
+		{
+			FileInputStream in = new FileInputStream(f);
+			e = new XMLDecoder(in);
+			Object result = e.readObject();
+			this.columnOrders = (Map)result;
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("TableColumnSorter.readFromStream()", "Could not read column order definition", ex);
+		}
+		finally
+		{
+			if (e != null) e.close();
+		}
+	}
+
+}

@@ -296,7 +296,9 @@ public class LnFDefinitionPanel
     add(statusLabel, gridBagConstraints);
 
     selectClass.setText("...");
-    selectClass.setMargin(new Insets(2, 2, 2, 2));
+    selectClass.setMaximumSize(new Dimension(22, 22));
+    selectClass.setMinimumSize(new Dimension(22, 22));
+    selectClass.setPreferredSize(new Dimension(22, 22));
     selectClass.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;

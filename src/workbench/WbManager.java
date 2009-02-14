@@ -39,6 +39,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.interfaces.FontChangedListener;
 import workbench.interfaces.ToolWindow;
@@ -480,6 +481,14 @@ public final class WbManager
 		{
 			Settings s = Settings.getInstance();
 			FilterDefinitionManager.getInstance().saveMRUList();
+			try
+			{
+				ColumnOrderMgr.getInstance().saveSettings();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("WbManager.saveSettings()", "Could not write column order storage", e);
+			}
 			if (s != null && overWriteGlobalSettingsFile) s.saveSettings(outOfMemoryOcurred);
 		}
 	}

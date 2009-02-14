@@ -12,7 +12,6 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
-import java.awt.FontMetrics;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Enumeration;
@@ -57,9 +56,7 @@ public class ExternalToolsPanel
 		toolList = new JList();
 		toolList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		toolList.setBorder(new EmptyBorder(2,1,2,1));
-		FontMetrics fm = getFontMetrics(getFont());
-		int width= fm.stringWidth("MMMMMMMMMMMMMMM");
-		toolList.setFixedCellWidth(width);
+
 		JScrollPane scroll = new JScrollPane(toolList);
 
 		this.toolbar = new WbToolbar();

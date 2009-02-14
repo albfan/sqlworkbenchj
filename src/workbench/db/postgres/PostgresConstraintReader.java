@@ -57,7 +57,7 @@ public class PostgresConstraintReader
 		Savepoint sp = null;
 		try
 		{
-			sp = dbConnection.setSavepoint();
+			sp = (dbConnection.getAutoCommit() ? null : dbConnection.setSavepoint());
 			stmt = dbConnection.prepareStatement(sql);
 			stmt.setString(1, aTable.getTableName());
 			rs = stmt.executeQuery();
@@ -85,7 +85,7 @@ public class PostgresConstraintReader
 					count++;
 				}
 			}
-			dbConnection.releaseSavepoint(sp);
+			if (sp != null) dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{

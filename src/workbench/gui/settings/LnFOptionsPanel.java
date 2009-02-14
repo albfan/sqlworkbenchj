@@ -12,8 +12,7 @@
 package workbench.gui.settings;
 
 import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.FontMetrics;
+import java.awt.Dimension;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.AbstractListModel;
@@ -22,7 +21,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
-import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -61,31 +59,7 @@ public class LnFOptionsPanel
 		lnfList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		lnfList.setBorder(new EmptyBorder(2,1,2,1));
 
-		// With some L&F getFont() or getFontMetrics() returns
-		// null when called in the constructor...
-		int width = 150;
-		try
-		{
-			Font f = getFont();
-			if (f == null)
-			{
-				f = UIManager.getDefaults().getFont("List.font");
-			}
-			
-			if (f != null)
-			{
-				FontMetrics fm = getFontMetrics(f);
-				width = fm.stringWidth("MMMMMMMMMMMMMMM");
-			}
-		}
-		catch (Exception e)
-		{
-			LogMgr.logWarning("LnFOptionsPanel.<init>", "Could not calculate string width", e);
-			width = 150;
-		}
-		
-		lnfList.setFixedCellWidth(width);
-
+		lnfList.setMinimumSize(new Dimension(100, 100));
 		JScrollPane scroll = new JScrollPane(lnfList);
 
 		deleteEntry = new DeleteListEntryAction(this);
