@@ -1,7 +1,7 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-Enh: (103.3) A manually changed column order in table data of the
-     DbExplorer can now be saved. Either manually through the
+Enh: (103.3) A manually changed column order in the table data of 
+     the DbExplorer can now be saved. Either manually through the
      popup menu of the table header, or automatically through
      an option for the DbExplorer.
 Enh: (103.2) When defining the jar library for a Look & Feel, the 
