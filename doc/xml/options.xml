@@ -38,20 +38,7 @@
 			</para>
 		</section>
 
-		<section id="options-standard-font">
-			<title>Standard font</title>
-			<para>
-				The standard font that is used for menus, lables, buttons etc.
-			</para>
-		</section>
-
-		<section id="options-message-font">
-			<title>Message font</title>
-			<para>
-				The font that is used in the message pane of the SQL window.
-			</para>
-		</section>
-
+    <!--
 		<section id="options-field-delimiter">
 			<title>Field delimiter</title>
 			<para>
@@ -69,6 +56,107 @@
 				character e.g. for the <link linkend="command-export"><literal>WbExport</literal></link>
 				command and when you use <menuchoice><guimenu>SQL</guimenu><guimenuitem>Save data as</guimenuitem></menuchoice>
 				to export a result set.
+			</para>
+		</section>
+    -->
+		
+		<section id="options-show-connect">
+			<title>Show connect dialog</title>
+			<para>
+				If this option is enabled, the connect dialog will be shown automatically when the
+				application is started.
+			</para>
+		</section>
+
+		<section id="options-exit-connect">
+			<title>Exit on first connect cancel</title>
+			<para>
+				If this option is enabled, then the application is closed completely if the
+				initial connect dialog is cancelled.
+			</para>
+			<para>
+				This option is only valid if "Show connect dialog" is selected.
+			</para>
+		</section>
+
+		<section id="options-single-page-help">
+			<title>Single page HTML help</title>
+			<para>
+				If this option is enabled, the HTML help will be shown as a single
+				page in the browser instead of one page per chapter.
+			</para>
+		</section>
+
+		<section id="options-encrypt-password">
+			<title>Encrypt passwords</title>
+			<para>If this option is enabled, the password stored within a connection
+				profile will be encrypted. Whether the password should be stored at all
+				can be selected in the profile itself.
+			</para>
+
+			<note><para>
+				Using this option only supplies very limited security. As the
+				source code for &wb-productname; is freely available, the algorithm
+				to decrypt the passwords stored in this way can easily be extracted
+				to retrieve the plain text passwords.
+			</para></note>
+		</section>
+
+		<section id="options-consolidate-log">
+			<title>Consolidate script log</title>
+			<para>
+				Usually &wb-productname; reports the success and timings
+				for each statement that is beeing executed in the message tab
+				of the current SQL panel. For large scripts this can slow down
+				script execution dramatically. If this option is enabled, only
+				a summary of the execution is printed once the script has finished.
+				You can turn off the log during script execution by using
+				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
+			</para>
+		</section>
+
+		<section id="options-show-tab-index">
+			<title>Show tab index</title>
+			<para>
+				If this option is enabled, each editor tab will be shown with its index. You can
+				then select the first 9 tabs by pressing Ctrl-1, Ctrl-2 and so on.
+			</para>
+		</section>
+
+		<section id="options-scroll-tabs">
+			<title>Scroll tabs</title>
+			<para>
+				This option controls the behaviour of the tab display, if more tabs
+				are opened than can be displayed in the current width of the window.
+			</para>
+			<para>
+				If this option is enabled, the tabs are always displayed in a single
+				row. If too many tabs are open, the row can be scrolled to the display
+				the tabs that are not visible.
+			</para>
+			<para>
+				If this option is disabled, the tabs are displayed in multiple rows,
+				so that all tabs are always visible.
+			</para>
+		</section>
+
+		<section id="options-confirm-tab-close">
+			<title>Confirm tab close</title>
+			<para>
+				If this option is enabled, closing a tab needs to be confirmed, to
+				prevent accidental closing.
+			</para>
+		</section>
+
+		<section id="option-animated-icon" xreflabel="Enable animated icons">
+			<title>Enable animated icons</title>
+			<para>Enable or disable the use of an animated icons in the SQL editor to
+				indicate a running SQL statement. It has been reported, that the animated
+				icon does have a severe (negativ) impact on the performance on some computers
+				(depending on JDK/OS/Graphics driver).
+				If you experience a high CPU usage during the execution of SQL statements, or
+				if you find your SQL statements are running very slow, try
+				to turn off the usage of the animated icons.
 			</para>
 		</section>
 
@@ -94,80 +182,6 @@
 			</para>
 		</section>
 
-		<section id="options-show-connect">
-			<title>Show connect dialog</title>
-			<para>
-				If this option is enabled, the connect dialog will be shown automatically when the
-				application is started.
-			</para>
-		</section>
-
-		<section id="options-exit-connect">
-			<title>Exit on first connect cancel</title>
-			<para>
-				If this option is enabled, then the application is closed completely if the
-				initial connect dialog is cancelled.
-			</para>
-			<para>
-				This option is only valid if "Show connect dialog" is selected.
-			</para>
-		</section>
-
-		<section id="options-encrypt-password">
-			<title>Encrypt passwords</title>
-			<para>If this option is enabled, the password stored within a connection
-				profile will be encrypted. Whether the password should be stored at all
-				can be selected in the profile itself.
-			</para>
-
-			<note><para>
-				Using this option only supplies very limited security. As the
-				source code for &wb-productname; is freely available, the algorithm
-				to decrypt the passwords stored in this way can easily be extracted
-				to retrieve the plain text passwords.
-			</para></note>
-		</section>
-
-		<section id="options-single-page-help">
-			<title>Single page HTML help</title>
-			<para>
-				If this option is enabled, the HTML help will be shown as a single
-				page in the browser instead of one page per chapter.
-			</para>
-		</section>
-
-		<section id="options-show-tab-index">
-			<title>Show tab index</title>
-			<para>
-				If this option is enabled, each editor tab will be shown with its index. You can
-				then select the first 9 tabs by pressing Ctrl-1, Ctrl-2 and so on.
-			</para>
-		</section>
-
-		<section id="option-animated-icon" xreflabel="Enable animated icons">
-			<title>Enable animated icons</title>
-			<para>Enable or disable the use of an animated icons in the SQL editor to
-				indicate a running SQL statement. It has been reported, that the animated
-				icon does have a severe (negativ) impact on the performance on some computers
-				(depending on JDK/OS/Graphics driver).
-				If you experience a high CPU usage during the execution of SQL statements, or
-				if you find your SQL statements are running very slow, try
-				to turn off the usage of the animated icons.
-			</para>
-		</section>
-
-		<section id="options-consolidate-log">
-			<title>Consolidate script log</title>
-			<para>
-				Usually &wb-productname; reports the success and timings
-				for each statement that is beeing executed in the message tab
-				of the current SQL panel. For large scripts this can slow down
-				script execution dramatically. If this option is enabled, only
-				a summary of the execution is printed once the script has finished.
-				You can turn off the log during script execution by using
-				the <link linkend="command-wbfeedback">WBFEEDBACK</link> command.
-			</para>
-		</section>
 
 		<section id="options-file-info">
 			<title>Configuration file information</title>
@@ -181,26 +195,15 @@
 	<section id="options-editor">
 		<title>Editor options</title>
 
-		<section id="options-autojump-statement">
-			<title>Auto jump next statement</title>
+		<section id="options-completion-paste-case">
+			<title>Paste completion in</title>
 			<para>
-				If this option is enabled, then the cursor will automatically jump
-				to the next statement in the script, when you execute a single statement
-				using <keycap>Ctrl-Enter</keycap> ("Run current statement"). This can also be
-				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
-			</para>
-			<para>For more information on how you can execute statements
-				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>
-			</para>
-		</section>
-
-		<section id="settings-right-clickmove">
-			<title>Right click behaviour in the editor</title>
-			<para>
-				Normally a right click in the SQL editor does not change the location
-				of the cursor (caret). If this option is checked, then a right
-				click will also change the caret's location (to where the mouse cursor
-				is located)
+				With this option you can select how the selected object name
+				from the code completion popup is pasted into the editor. <literal>As is</literal>
+				means, that the values will be inserted into the editor as it was
+				retrieved from the database. This option will also be used when SQL statements
+				are generated internally (e.g. for updating the result set or when you
+				export/copy data as SQL statements)
 			</para>
 		</section>
 
@@ -215,18 +218,6 @@
 			</para>
 		</section>
 
-		<section id="options-completion-paste-case">
-			<title>Paste completion in</title>
-			<para>
-				With this option you can select how the selected object name
-				from the code completion popup is pasted into the editor. <literal>As is</literal>
-				means, that the values will be inserted into the editor as it was
-				retrieved from the database. This option will also be used when SQL statements
-				are generated internally (e.g. for updating the result set or when you
-				export/copy data as SQL statements)
-			</para>
-		</section>
-
 		<section id="options-sort-completion-by">
 			<title>Sort pasted columns by</title>
 			<para>
@@ -235,6 +226,7 @@
         into the editor.
 			</para>
 		</section>
+
 
 		<section id="options-internal-lineending">
 			<title>Line ending for DBMS</title>
@@ -258,15 +250,6 @@
 			<para>
 				This property controls the line terminator used when a file is saved by the editor.
 				Changing this property affects the next save operation.
-			</para>
-		</section>
-
-		<section id="options-editor-font">
-			<title>Editor font</title>
-			<para>
-				The font that is used in the SQL editor. This font is also
-				used when displaying the SQL source for tables and other
-				database objects in the <link linkend="dbexplorer">DbExplorer</link>.
 			</para>
 		</section>
 
@@ -295,6 +278,16 @@
 			<para>
         If this option is enabled, the content of external files is also
         stored in the statement history.
+			</para>
+		</section>
+
+		<section id="settings-right-clickmove">
+			<title>Right click behaviour in the editor</title>
+			<para>
+				Normally a right click in the SQL editor does not change the location
+				of the cursor (caret). If this option is checked, then a right
+				click will also change the caret's location (to where the mouse cursor
+				is located)
 			</para>
 		</section>
 
@@ -329,6 +322,19 @@
 			<para>
 				By putting e.g. an underscore into this field, the text <literal>MY_TABLE</literal> is
 				recognized as a single word instead of two words (which is the default).
+			</para>
+		</section>
+
+		<section id="options-autojump-statement">
+			<title>Auto jump next statement</title>
+			<para>
+				If this option is enabled, then the cursor will automatically jump
+				to the next statement in the script, when you execute a single statement
+				using <keycap>Ctrl-Enter</keycap> ("Run current statement"). This can also be
+				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
+			</para>
+			<para>For more information on how you can execute statements
+				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>
 			</para>
 		</section>
 
@@ -371,6 +377,43 @@
 		</section>
 
 	</section>
+
+	<section id="options-fonts">
+		<title>Font settings</title>
+		
+		<section id="options-editor-font">
+			<title>Editor font</title>
+			<para>
+				The font that is used in the SQL editor. This font is also
+				used when displaying the SQL source for tables and other
+				database objects in the <link linkend="dbexplorer">DbExplorer</link>.
+			</para>
+		</section>
+
+		<section id="options-data-font">
+			<title>Data font</title>
+			<para>
+				The font that is used to display result sets. This includes
+				the object list and results in the <link linkend="dbexplorer">DbExplorer</link>.
+			</para>
+		</section>
+
+		<section id="options-message-font">
+			<title>Message font</title>
+			<para>
+				The font that is used in the message pane of the SQL window.
+			</para>
+		</section>
+
+		<section id="options-standard-font">
+			<title>Standard font</title>
+			<para>
+				The standard font that is used for menus, lables, buttons etc.
+			</para>
+		</section>
+
+	</section>
+
 
 	<section id="options-workspace">
 		<title>Workspace options</title>
@@ -468,15 +511,6 @@
 	<section id="options-data-display">
 		<title>Options for displaying data</title>
 
-
-		<section id="options-data-font">
-			<title>Data font</title>
-			<para>
-				The font that is used to display result sets. This includes
-				the object list and results in the <link linkend="dbexplorer">DbExplorer</link>.
-			</para>
-		</section>
-
 		<section id="option-sort-collator">
       <title>Sort Locale</title>
       <para>
@@ -488,6 +522,19 @@
       </para>
     </section>
 
+
+		<section id="option-selection-summary">
+      <title>Show selection summary in statusbar</title>
+      <para>
+				If this option is enabled the number of selected rows in the result will be displayed
+				in the status bar.
+      </para>
+			<para>
+				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
+				while selecting with the mouse), the statusbar will display the sum of the selected values.
+			</para>
+    </section>
+		
 		<section id="options-multiline">
 			<title>Displaying multi-line values</title>
 			<para>
@@ -616,18 +663,6 @@
 				If a color is defined, NULL values will be highlighted with the selected colors in the result set.
 			</para>
 		</section>
-
-		<section id="option-selection-summary">
-      <title>Show selection summary in statusbar</title>
-      <para>
-				If this option is enabled a summary of the current selection of the data is displayed.
-				If full rows are selected, the statusbar will display the number of rows selected
-      </para>
-			<para>
-				If you have a single numeric column selected (by holding down the <keycap>Alt</keycap> key
-				while selecting with the mouse), the statusbar will display the sum of the selected values.
-			</para>
-    </section>
 
 	</section>
 
@@ -775,6 +810,15 @@
 			</para>
 		</section>
 
+		<section id="options-single-record">
+			<title>Single record dialog</title>
+			<para>
+				When displaying data in the <link linkend="single-record-display">Single record dialog</link>
+				you can customize the width for the input fields, and the default height for
+				<link id="options-multiline">multiline</link> columns.
+			</para>
+		</section>
+
 	</section>
 
 	<section id="options-dbexplorer">
@@ -790,16 +834,6 @@
 			</para>
 		</section>
 
-		<section id="dbexp-options-show-trigger">
-			<title>Show trigger panel</title>
-			<para>
-				By default triggers are shown only in the details of a table. If the
-				option "Show trigger panel" is selected, an additional panel will
-				be displayed in the DbExplorer that displays all triggers in the
-				database independently of their table.
-			</para>
-		</section>
-
 		<section id="options-retrieve-explorer" xreflabel="Retrieve DB Explorer">
 			<title>Automatically retrieve objects</title>
 			<para>If this option is enabled, the contents of the database schema is
@@ -809,21 +843,14 @@
 			</para>
 		</section>
 
-		<section id="dbexp-options-remember-type">
-			<title>Remember object type</title>
-			<para>
-				The list of objects can be filtered with the dropdown. If the
-				option "Remember object type" is selected, the current object type
-				will be stored in the workspace of the current connection, and will
-				be restored the next time.
-			</para>
-		</section>
 
-		<section id="dbexp-options-remember-sort">
-			<title>Remember sort column</title>
+		<section id="dbexp-options-show-trigger">
+			<title>Show trigger panel</title>
 			<para>
-				When this option is selected, the sort column in the data display
-				of the DbExplorer will be restored after reloading the table data.
+				By default triggers are shown only in the details of a table. If the
+				option "Show trigger panel" is selected, an additional panel will
+				be displayed in the DbExplorer that displays all triggers in the
+				database independently of their table.
 			</para>
 		</section>
 
@@ -859,6 +886,43 @@
 			<para>
 				If this option is selected, the generated SQL will not reflect
 				the real statement that was used to create the table!
+			</para>
+		</section>
+
+		<section id="dbexp-options-remember-type">
+			<title>Remember object type</title>
+			<para>
+				The list of objects can be filtered with the dropdown. If the
+				option "Remember object type" is selected, the current object type
+				will be stored in the workspace of the current connection, and will
+				be restored the next time.
+			</para>
+		</section>
+
+		<section id="dbexp-options-remember-sort">
+			<title>Remember sort column</title>
+			<para>
+				When this option is selected, the sort column in the data display
+				of the DbExplorer will be restored after reloading the table data.
+			</para>
+		</section>
+
+		<section id="dbexp-options-remember-col-order">
+			<title>Remember column order</title>
+			<para>
+				When you <link linkend="dbexplorer-column-reorder">reorder</link> the column
+				in the data display of a table, enabling this option will automatically
+				store the new column order and apply it the next time the table data
+				is displayed.
+			</para>
+		</section>
+
+		<section id="dbexp-options-def-type">
+			<title>Default object type</title>
+			<para>
+				If "Remember object type" is not enabled, you can define a default object
+				type that is selected in the dropdown when the DbExplorer is displayed
+				initially.
 			</para>
 		</section>
 
@@ -1059,6 +1123,15 @@ WHERE id = 42;</programlisting>
 				<para>
 					If this option is selected, standard ANSI functions will converted to lowercase
 					when formatting a SQL statement.
+				</para>
+			</section>
+
+			<section id="opt-formatter-uppercase-keywords">
+				<title>Uppercase keywords</title>
+				<para>
+					If this option is selected, standard ANSI keywords (<literal>SELECT, UPDATE</literal>)
+					will converted to uppercase when formatting a SQL statement, otherwise they
+					will be converted to lowercase.
 				</para>
 			</section>
 

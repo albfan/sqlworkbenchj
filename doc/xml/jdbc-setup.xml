@@ -121,6 +121,7 @@
 						</simplelist>
 						</entry>
 					</row>
+					
 					<row>
 						<entry>Firebird SQL</entry>
 						<entry>org.firebirdsql.jdbc.FBDriver</entry>
@@ -131,16 +132,18 @@
 							</simplelist>
 						</entry>
 					</row>
+
 					<row>
-						<entry>Apache Derby</entry>
-						<entry>org.apache.derby.jdbc.EmbeddedDriver</entry>
+						<entry>Oracle</entry>
+						<entry>oracle.jdbc.OracleDriver</entry>
 						<entry>
 							<simplelist columns="1">
-								<member>derby.jar</member>
-								<member><ulink url="http://db.apache.org/derby/"/></member>
+								<member>ojdbc5.jar</member>
+								<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
 							</simplelist>
 						</entry>
 					</row>
+
 					<row>
 						<entry>h2 Database Engine</entry>
 						<entry>org.h2.Driver</entry>
@@ -151,6 +154,7 @@
 							</simplelist>
 						</entry>
 					</row>
+
 					<row>
 						<entry>HSQLDB</entry>
 						<entry>org.hsqldb.jdbcDriver</entry>
@@ -158,6 +162,39 @@
 							<simplelist columns="1">
 								<member>hsqldb.jar</member>
 								<member><ulink url="http://hsqldb.sourceforge.net"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
+						<entry>IBM DB2</entry>
+						<entry>com.ibm.db2.jcc.DB2Driver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>db2jcc.jar</member>
+								<member><ulink url="http://www-01.ibm.com/software/data/db2/java/"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
+						<entry>IBM DB2 for iSeries</entry>
+						<entry>com.ibm.as400.access.AS400JDBCDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>jt400.jar</member>
+								<member><ulink url="http://www-01.ibm.com/software/data/db2/java/"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
+						<entry>Apache Derby</entry>
+						<entry>org.apache.derby.jdbc.EmbeddedDriver</entry>
+						<entry>
+							<simplelist columns="1">
+								<member>derby.jar</member>
+								<member><ulink url="http://db.apache.org/derby/"/></member>
 							</simplelist>
 						</entry>
 					</row>
@@ -172,16 +209,6 @@
 						</entry>
 					</row>
 					<row>
-						<entry>Oracle</entry>
-						<entry>oracle.jdbc.OracleDriver</entry>
-						<entry>
-							<simplelist columns="1">
-								<member>ojdbc5.jar</member>
-								<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
-							</simplelist>
-						</entry>
-					</row>
-					<row>
 						<entry>SQL Server 2000/2005</entry>
 						<entry>com.microsoft.sqlserver.jdbc.SQLServerDriver</entry>
 						<entry>
@@ -192,7 +219,7 @@
 						</entry>
 					</row>
 					<row>
-						<entry>SQL Server </entry>
+						<entry>SQL Server (jTDS Driver)</entry>
 						<entry>net.sourceforge.jtds.jdbc.Driver</entry>
 						<entry>
 							<simplelist columns="1">

@@ -135,7 +135,7 @@ public class WorkspaceOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 9, 3, 0);
+    gridBagConstraints.insets = new Insets(10, 9, 3, 0);
     add(autoSaveWorkspace, gridBagConstraints);
 
     createBackup.setText(ResourceMgr.getString("LblBckWksp")); // NOI18N

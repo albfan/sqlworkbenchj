@@ -85,8 +85,11 @@ public class LnFDefinitionPanel
 		});
 
 		Font f = UIManager.getDefaults().getFont("Label.font");
-		f = f.deriveFont(Font.BOLD, (float)(f.getSize() * 1.2));
-		infoText.setFont(f);
+		if (f != null)
+		{
+			f = f.deriveFont(Font.BOLD, (float)(f.getSize() * 1.2));
+			infoText.setFont(f);
+		}
 		String button = changeLnfButton.getText();
 		String info = ResourceMgr.getString("TxtChangeLnFInfo").replace("%button%", button);
 		infoText.setText(info);

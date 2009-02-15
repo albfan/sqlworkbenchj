@@ -103,3 +103,7 @@ span.markup {
   font-family: courier;
   white-space: pre;
 }
+
+.nowrap {
+   white-space: nowrap;
+}

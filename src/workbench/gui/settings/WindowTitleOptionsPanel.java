@@ -130,13 +130,12 @@ public class WindowTitleOptionsPanel
     productAtEnd.setText(ResourceMgr.getString("LblShowProductAtEnd")); // NOI18N
     productAtEnd.setToolTipText(ResourceMgr.getString("d_LblShowProductAtEnd")); // NOI18N
     productAtEnd.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-    productAtEnd.setMargin(new java.awt.Insets(0, 0, 0, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 2, 11);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 11);
     add(productAtEnd, gridBagConstraints);
 
     showProfileGroup.setText(ResourceMgr.getString("LblShowProfileGroup")); // NOI18N
@@ -154,9 +153,8 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(13, 10, 0, 11);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 11);
     add(showProfileGroup, gridBagConstraints);
 
     showWorkspace.setText(ResourceMgr.getString("LblShowWorkspace")); // NOI18N
@@ -169,9 +167,8 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(9, 10, 0, 11);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 1);
     add(showWorkspace, gridBagConstraints);
 
     windowTitleLabel.setLabelFor(windowTitleComboBox);
@@ -181,7 +178,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(16, 9, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(16, 10, 0, 0);
     add(windowTitleLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -198,7 +195,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 9, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 0);
     add(encloseCharLabel, gridBagConstraints);
 
     encloseChar.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "( )", "{ }", "[ ]", "< >" }));
@@ -207,7 +204,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 4, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(10, 4, 0, 11);
     add(encloseChar, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
@@ -222,7 +219,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 2, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 2, 2, 0);
     add(titleGroupSepLabel, gridBagConstraints);
 
     titleGroupSep.setColumns(5);
@@ -231,7 +228,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 2, 2, 11);
+    gridBagConstraints.insets = new java.awt.Insets(10, 5, 2, 11);
     add(titleGroupSep, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

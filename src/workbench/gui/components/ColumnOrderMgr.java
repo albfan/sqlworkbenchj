@@ -172,11 +172,17 @@ public class ColumnOrderMgr
 
 		for (CharSequence colname : newOrder)
 		{
-			int c = current.getColumnIndex(colname);
-			if (c > -1)
+			try
 			{
+				int c = current.getColumnIndex(colname);
 				TableColumn currentCol = current.getColumn(c);
 				model.addColumn(currentCol);
+			}
+			catch (IllegalArgumentException e)
+			{
+				// getColumnIndex() throws an IllegalArgumentException rather than returning -1
+				// so we can safely ignore this here.
+				LogMgr.logDebug("ColumnOrderMgr.applyColumnOrder()", "Column '" + colname + "' not found.");
 			}
 		}
 

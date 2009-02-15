@@ -95,7 +95,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 10);
     add(showDbExplorer, gridBagConstraints);
 
     showTriggerPanel.setSelected(Settings.getInstance().getShowTriggerPanel());
@@ -108,7 +108,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
     add(showTriggerPanel, gridBagConstraints);
 
     retrieveDbExplorer.setSelected(Settings.getInstance().getRetrieveDbExplorer());
@@ -123,7 +123,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
     add(retrieveDbExplorer, gridBagConstraints);
 
     rememberObject.setSelected(Settings.getInstance().getStoreExplorerObjectType());
@@ -149,7 +149,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     add(rememberSort, gridBagConstraints);
 
     autoselectDataPanel.setSelected(Settings.getInstance().getSelectDataPanelAfterRetrieve());
@@ -162,7 +162,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
     add(autoselectDataPanel, gridBagConstraints);
 
     showFocus.setSelected(Settings.getInstance().showFocusInDbExplorer());
@@ -175,7 +175,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
     add(showFocus, gridBagConstraints);
 
     autogeneratePK.setSelected(Settings.getInstance().getStoreExplorerObjectType());
@@ -188,7 +188,7 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 10);
     add(autogeneratePK, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -252,8 +252,9 @@ public class DbExplorerOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     add(rememberColOrder, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

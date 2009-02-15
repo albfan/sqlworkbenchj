@@ -179,10 +179,10 @@ public class ConnectionSelector
 					connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
 					p.add(connectLabel, BorderLayout.CENTER);
 					connectingInfo = new JDialog(parent, false);
+					connectingInfo.setUndecorated(true);
 					connectingInfo.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 					connectingInfo.getContentPane().setLayout(new BorderLayout());
 					connectingInfo.getContentPane().add(p, BorderLayout.CENTER);
-					connectingInfo.setUndecorated(true);
 					connectingInfo.pack();
 					WbSwingUtilities.center(connectingInfo, parent);
 					connectingInfo.setVisible(true);

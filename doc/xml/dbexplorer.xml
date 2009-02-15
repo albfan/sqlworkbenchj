@@ -287,36 +287,65 @@
 			label. You can cancel the row count retrieval while it's running by clicking on the label again.
 		</para>
     
-		<para>The data tab is only available if the currently selected objects
+		<para>
+			The data tab is only available if the currently selected objects
 			is recognized as an object that can can be "SELECTED". Which object types
 			are included can be defined in the settings for &wb-productname;
 			See <link linkend="selectable-objects-setting">selectable object types</link> for details.
 		</para>
 
-		<para>You can define a maximum number of rows which should be
+		<para>
+			You can define a maximum number of rows which should be
 		retrieved. If you enter 0 (zero) then all rows are retrieved. Limiting
 		the number of rows is useful if you have tables with a lot of rows,
-		where the entire table would not fit into memory.</para>
+		where the entire table would not fit into memory.
+		</para>
 
 		<para>In addition to the max rows setting, a second limit can be
 		defined. If the total number of rows in the table exceeds this second
-		limit, a warning is displayed, whether the data should be loaded.</para>
+		limit, a warning is displayed, whether the data should be loaded.
+		</para>
 
 		<para>This is useful when the max rows parameter is set to zero and
-		you accidently display a table with a large number of rows.</para>
+		you accidently display a table with a large number of rows.
+		</para>
 
 		<para>If the automatic retrieval is activated, then the retrieve of
 		the data can be prevented by holding down the Shift key while
-		switching to the data tab.</para>
+		switching to the data tab.
+		</para>
 
-		<para>The data in the tab can be edited just like the data in the main
-		window. To add or delete rows, you can either use the buttons on the
-		toolbar in the upper part of the data display, or the popup menu. To
-		edit a value in a field, simply double click that field, start typing
-		while the field has focus (yellow border) or hit F2 while the field
-		has focus.</para>
+		<para>
+			The data in the tab can be edited just like the data in the main
+			window. To add or delete rows, you can either use the buttons on the
+			toolbar in the upper part of the data display, or the popup menu. To
+			edit a value in a field, simply double click that field, start typing
+			while the field has focus (yellow border) or hit F2 while the field
+			has focus.
+		</para>
+
 	</section>
 
+	<section id="dbexplorer-column-reorder">
+		<title>Changing the display order of table columns</title>
+		<para>
+			You can re-arrange the display order of the columns in the data tab using drag &amp; drop.
+			If you want to apply that column order whenever you display the table data, you can
+			save the column order by right-clicking in the table header and then using the
+			menu item <guimenuitem>Save column order</guimenuitem>. If the column order has not
+			been changed, the menu item is disabled.
+		</para>
+		<para>
+			The column order will be stored using the fully qualified table name and the
+			current connection's JDBC URL as the lookup key.
+		</para>
+		<para>
+			To reset the column order use the menu item <guimenuitem>Reset column order</guimenuitem>
+			from the popup menu. This will revert the column order to the order in which the
+			columns appear in the source table. The saved order will be deleted as well.
+		</para>
+	</section>
+	
 	<section id="customize-dbexplorer-retrieval">
 		<title>Customize data retrieval</title>
 		<para>

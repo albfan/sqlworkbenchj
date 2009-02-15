@@ -209,10 +209,10 @@
       </xmlcatalog>
       <param name="text-indent" expression="0.2cm"/>
       <param name="paper.type" expression="A4"/>
-      <param name="page.margin.bottom" expression="1.5cm"/>
+      <param name="page.margin.bottom" expression="2cm"/>
       <param name="page.margin.top" expression="1.5cm"/>
-      <param name="page.margin.outer" expression="1.5cm"/> 
-      <param name="page.margin.inner" expression="1.5cm"/> 
+      <param name="page.margin.outer" expression="2cm"/>
+      <param name="page.margin.inner" expression="2cm"/>
       <param name="generate.section.toc.level" expression="3"/>
 			<param name="default.image.width" expression="16"/>
 			<param name="ignore.image.scaling" expression="1"/>
@@ -221,6 +221,7 @@
 			<param name="admon.graphics.extension" expression=".gif"/>
 			<param name="admon.graphic.width" expression="16p"/>
 			<param name="admon.textlabel" expression="0"/>
+			<param name="body.font.master" expression="10"/>
       <param name="toc.indent.width" expression="24"/>
       <param name="toc.max.depth" expression="3"/>
       <param name="toc.section.depth" expression="2"/>

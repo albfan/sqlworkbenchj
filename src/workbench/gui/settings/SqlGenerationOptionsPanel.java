@@ -12,12 +12,14 @@
 package workbench.gui.settings;
 
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import javax.swing.BorderFactory;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
@@ -104,16 +106,9 @@ public class SqlGenerationOptionsPanel
 
     formatUpdates = new JCheckBox();
     formatInserts = new JCheckBox();
-    insertColThresholdLbl = new JLabel();
-    insertThreshold = new JTextField();
     ignoreIdentity = new JCheckBox();
-    jSeparator1 = new JSeparator();
-    insertColsPerLine = new JTextField();
-    colsPerLineLabel = new JLabel();
-    jSeparator2 = new JSeparator();
     tableNameCaseLabel = new JLabel();
     tableNameCase = new JComboBox();
-    jSeparator4 = new JSeparator();
     jPanel1 = new JPanel();
     includeEmptyComments = new JCheckBox();
     includeOwner = new JCheckBox();
@@ -126,9 +121,15 @@ public class SqlGenerationOptionsPanel
     diffLiteralsType = new JComboBox();
     jPanel3 = new JPanel();
     jPanel4 = new JPanel();
-    updateThreshold = new JTextField();
     updateColThresholdLbl = new JLabel();
+    updateThreshold = new JTextField();
     jPanel5 = new JPanel();
+    jPanel7 = new JPanel();
+    insertColThresholdLbl = new JLabel();
+    insertThreshold = new JTextField();
+    jPanel8 = new JPanel();
+    colsPerLineLabel = new JLabel();
+    insertColsPerLine = new JTextField();
 
     setLayout(new GridBagLayout());
 
@@ -146,7 +147,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 10, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 10, 0, 11);
     add(formatUpdates, gridBagConstraints);
 
     formatInserts.setFont(null);
@@ -161,31 +162,11 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(5, 10, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 10, 0, 11);
     add(formatInserts, gridBagConstraints);
-
-    insertColThresholdLbl.setHorizontalAlignment(SwingConstants.LEFT);
-    insertColThresholdLbl.setText(ResourceMgr.getString("LblInsThres")); // NOI18N
-    insertColThresholdLbl.setToolTipText(ResourceMgr.getString("d_LblInsThres")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 18, 0, 0);
-    add(insertColThresholdLbl, gridBagConstraints);
-
-    insertThreshold.setColumns(5);
-    insertThreshold.setText(Integer.toString(Settings.getInstance().getFormatInsertColumnThreshold()));
-    insertThreshold.setMinimumSize(new Dimension(50, 20));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 10, 0, 15);
-    add(insertThreshold, gridBagConstraints);
 
     ignoreIdentity.setFont(null);
     ignoreIdentity.setSelected(Settings.getInstance().getFormatInsertIgnoreIdentity());
@@ -201,42 +182,8 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 8, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 8, 0, 11);
     add(ignoreIdentity, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(6, 3, 3, 3);
-    add(jSeparator1, gridBagConstraints);
-
-    insertColsPerLine.setColumns(5);
-    insertColsPerLine.setText(Integer.toString(Settings.getInstance().getFormatInsertColsPerLine()));
-    insertColsPerLine.setMinimumSize(new Dimension(50, 20));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 10, 0, 15);
-    add(insertColsPerLine, gridBagConstraints);
-
-    colsPerLineLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    colsPerLineLabel.setText(ResourceMgr.getString("LblInsColsPerLine")); // NOI18N
-    colsPerLineLabel.setToolTipText(ResourceMgr.getString("d_LblInsColsPerLine")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 1, 0, 0);
-    add(colsPerLineLabel, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(9, 3, 2, 3);
-    add(jSeparator2, gridBagConstraints);
 
     tableNameCaseLabel.setLabelFor(tableNameCase);
     tableNameCaseLabel.setText(ResourceMgr.getString("LblGenTableNameCase")); // NOI18N
@@ -258,13 +205,6 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 10, 0, 15);
     add(tableNameCase, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.gridwidth = 4;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(7, 3, 2, 3);
-    add(jSeparator4, gridBagConstraints);
 
     jPanel1.setLayout(new GridBagLayout());
 
@@ -307,9 +247,10 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 8, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 8, 0, 0);
     add(jPanel1, gridBagConstraints);
 
+    jPanel2.setBorder(BorderFactory.createTitledBorder(ResourceMgr.getString("LblDefDateLiterals"))); // NOI18N
     jPanel2.setLayout(new GridBagLayout());
 
     copyLiteralLabel.setText(ResourceMgr.getString("LblDefCopyLiteralType")); // NOI18N
@@ -319,7 +260,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 8, 0, 0);
     jPanel2.add(copyLiteralLabel, gridBagConstraints);
 
     exportLiteralLabel.setLabelFor(exportLiteralTypes);
@@ -330,7 +271,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 8, 3, 0);
     jPanel2.add(exportLiteralLabel, gridBagConstraints);
 
     literalTypes.setToolTipText(ResourceMgr.getDescription("LblDefCopyLiteralType"));
@@ -346,7 +287,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 8, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 8, 3, 0);
     jPanel2.add(exportLiteralTypes, gridBagConstraints);
 
     diffLiteralsLabel.setLabelFor(diffLiteralsType);
@@ -379,35 +320,27 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 0, 1, 8);
+    gridBagConstraints.insets = new Insets(3, 3, 3, 8);
     add(jPanel2, gridBagConstraints);
 
-    jPanel4.setLayout(new GridBagLayout());
-
-    updateThreshold.setColumns(5);
-    updateThreshold.setText(Integer.toString(Settings.getInstance().getFormatUpdateColumnThreshold()));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 10, 0, 18);
-    jPanel4.add(updateThreshold, gridBagConstraints);
+    jPanel4.setLayout(new FlowLayout(FlowLayout.LEFT));
 
     updateColThresholdLbl.setHorizontalAlignment(SwingConstants.LEFT);
     updateColThresholdLbl.setText(ResourceMgr.getString("LblUpdThres")); // NOI18N
     updateColThresholdLbl.setToolTipText(ResourceMgr.getString("d_LblUpdThres")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    jPanel4.add(updateColThresholdLbl, gridBagConstraints);
+    jPanel4.add(updateColThresholdLbl);
+
+    updateThreshold.setColumns(5);
+    updateThreshold.setText(Integer.toString(Settings.getInstance().getFormatUpdateColumnThreshold()));
+    jPanel4.add(updateThreshold);
 
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 0, 0, 0);
+    gridBagConstraints.insets = new Insets(2, 15, 0, 0);
     add(jPanel4, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
@@ -415,6 +348,38 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     add(jPanel5, gridBagConstraints);
+
+    jPanel7.setLayout(new FlowLayout(FlowLayout.LEFT));
+
+    insertColThresholdLbl.setHorizontalAlignment(SwingConstants.LEFT);
+    insertColThresholdLbl.setText(ResourceMgr.getString("LblInsThres")); // NOI18N
+    insertColThresholdLbl.setToolTipText(ResourceMgr.getString("d_LblInsThres")); // NOI18N
+    jPanel7.add(insertColThresholdLbl);
+
+    insertThreshold.setColumns(5);
+    insertThreshold.setText(Integer.toString(Settings.getInstance().getFormatInsertColumnThreshold()));
+    jPanel7.add(insertThreshold);
+
+    jPanel8.setMaximumSize(new Dimension(10, 10));
+    jPanel7.add(jPanel8);
+
+    colsPerLineLabel.setHorizontalAlignment(SwingConstants.LEFT);
+    colsPerLineLabel.setText(ResourceMgr.getString("LblInsColsPerLine")); // NOI18N
+    colsPerLineLabel.setToolTipText(ResourceMgr.getString("d_LblInsColsPerLine")); // NOI18N
+    jPanel7.add(colsPerLineLabel);
+
+    insertColsPerLine.setColumns(5);
+    insertColsPerLine.setText(Integer.toString(Settings.getInstance().getFormatInsertColsPerLine()));
+    jPanel7.add(insertColsPerLine);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 15, 0, 0);
+    add(jPanel7, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -459,9 +424,8 @@ public class SqlGenerationOptionsPanel
   private JPanel jPanel3;
   private JPanel jPanel4;
   private JPanel jPanel5;
-  private JSeparator jSeparator1;
-  private JSeparator jSeparator2;
-  private JSeparator jSeparator4;
+  private JPanel jPanel7;
+  private JPanel jPanel8;
   private JComboBox literalTypes;
   private JComboBox tableNameCase;
   private JLabel tableNameCaseLabel;

@@ -81,14 +81,14 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(dateFormatLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 7, 0, 9);
+    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 9);
     add(dateFormatTextField, gridBagConstraints);
 
     decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol")); // NOI18N
@@ -97,7 +97,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(decimalLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -113,7 +113,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(9, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(maxDigitsLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -130,14 +130,14 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(timestampFormatLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 9);
+    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 9);
     add(timestampFormatTextField, gridBagConstraints);
 
     timeFormatLabel.setText(ResourceMgr.getString("LblTimeFormat")); // NOI18N
@@ -146,7 +146,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(timeFormatLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -154,7 +154,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 7, 0, 79);
+    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 79);
     add(timeFormat, gridBagConstraints);
 
     oraDateFix.setSelected(Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false));
@@ -171,7 +171,7 @@ public class DataFormattingOptionsPanel
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 0, 0, 10);
     add(oraDateFix, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

@@ -387,7 +387,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(jLabel1, gridBagConstraints);
 
     localeDropDown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -396,7 +396,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 10);
     add(localeDropDown, gridBagConstraints);
 
     selectSummary.setText(ResourceMgr.getString("LblSelectionSummary")); // NOI18N

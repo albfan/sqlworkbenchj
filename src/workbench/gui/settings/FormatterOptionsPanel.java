@@ -86,7 +86,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
     add(subselectMaxLabel, gridBagConstraints);
 
     subselectMaxLength.setText(Integer.toString(Settings.getInstance().getFormatterMaxSubselectLength()));
@@ -94,9 +94,9 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(10, 9, 0, 15);
     add(subselectMaxLength, gridBagConstraints);
 
     maxCharElementsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -106,8 +106,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(maxCharElementsLabel, gridBagConstraints);
 
     maxCharElements.setText(Integer.toString(Settings.getInstance().getMaxCharInListElements()));
@@ -115,8 +115,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 15);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     add(maxCharElements, gridBagConstraints);
 
     maxNumElementsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -126,8 +126,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(maxNumElementsLabel, gridBagConstraints);
 
     maxNumElements.setText(Integer.toString(Settings.getInstance().getMaxNumInListElements()));
@@ -135,8 +135,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 15);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     add(maxNumElements, gridBagConstraints);
 
     selectColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInSelect()));
@@ -144,8 +144,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 15);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     add(selectColumns, gridBagConstraints);
 
     selectColumnsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -155,8 +155,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(selectColumnsLabel, gridBagConstraints);
 
     funcsLower.setText(ResourceMgr.getString("LblFmtFuncLower")); // NOI18N
@@ -167,7 +167,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
     add(funcsLower, gridBagConstraints);
 
     insertColumnsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -177,22 +177,22 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(insertColumnsLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 15);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     add(insertColumns, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 9, 0, 15);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 15);
     add(updateColumns, gridBagConstraints);
 
     updateColumnsLabel.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -202,8 +202,8 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
     add(updateColumnsLabel, gridBagConstraints);
 
     keywordsUpper.setText(ResourceMgr.getString("LblFmtKeyWordUp")); // NOI18N
@@ -215,7 +215,7 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
     add(keywordsUpper, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

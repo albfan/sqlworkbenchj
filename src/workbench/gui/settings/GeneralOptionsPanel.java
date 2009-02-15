@@ -217,7 +217,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 7, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 7, 0, 0);
     add(checkUpdatesLabel, gridBagConstraints);
 
     checkInterval.setModel(new DefaultComboBoxModel(new String[] { "never", "daily", "7 days", "14 days", "30 days" }));
@@ -225,7 +225,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 7, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 7, 0, 0);
     add(checkInterval, gridBagConstraints);
 
     langLabel.setText(ResourceMgr.getString("LblLanguage")); // NOI18N
@@ -234,7 +234,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(5, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 12, 0, 0);
     add(langLabel, gridBagConstraints);
 
     languageDropDown.setModel(new DefaultComboBoxModel(new String[] { "English", "German" }));
@@ -243,7 +243,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 10, 0, 15);
+    gridBagConstraints.insets = new Insets(10, 10, 0, 8);
     add(languageDropDown, gridBagConstraints);
 
     jPanel2.setLayout(new GridBagLayout());
@@ -448,7 +448,7 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 7;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(8, 6, 0, 10);
