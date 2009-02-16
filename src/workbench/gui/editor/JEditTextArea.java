@@ -215,7 +215,7 @@ public class JEditTextArea
 		addFocusListener(this);
 
 		// Load the defaults
-		setInputHandler(new InputHandler());
+		this.inputHandler = new InputHandler();
 		this.inputHandler.addDefaultKeyBindings();
 		setDocument(new SyntaxDocument());
 
@@ -325,7 +325,7 @@ public class JEditTextArea
 
 	public void addKeyBinding(String aBinding, ActionListener aListener)
 	{
-		this.getInputHandler().addKeyBinding(aBinding, aListener);
+		this.inputHandler.addKeyBinding(aBinding, aListener);
 	}
 
 	public void addKeyBinding(WbAction anAction)
@@ -333,13 +333,13 @@ public class JEditTextArea
 		KeyStroke key = anAction.getAccelerator();
 		if (key != null)
 		{
-			this.getInputHandler().addKeyBinding(key, anAction);
+			this.inputHandler.addKeyBinding(key, anAction);
 		}
 	}
 
 	public void removeKeyBinding(KeyStroke key)
 	{
-		this.getInputHandler().removeKeyBinding(key);
+		this.inputHandler.removeKeyBinding(key);
 	}
 
 	/**
@@ -360,23 +360,6 @@ public class JEditTextArea
 	public final TextAreaPainter getPainter()
 	{
 		return painter;
-	}
-
-	/**
-	 * Returns the input handler.
-	 */
-	public final InputHandler getInputHandler()
-	{
-		return inputHandler;
-	}
-
-	/**
-	 * Sets the input handler.
-	 * @param inputHandler The new input handler
-	 */
-	public void setInputHandler(InputHandler inputHandler)
-	{
-		this.inputHandler = inputHandler;
 	}
 
 	/**

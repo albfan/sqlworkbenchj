@@ -17,13 +17,13 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.EventObject;
 import java.util.HashMap;
-import java.util.Iterator;
 
 import java.util.Map;
 import java.util.StringTokenizer;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.text.BadLocationException;
+import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
 
 /**
@@ -81,7 +81,6 @@ public class InputHandler
 	public static final ActionListener SELECT_PREV_LINE = new prev_line(true);
 	public static final ActionListener SELECT_PREV_PAGE = new prev_page(true);
 	public static final ActionListener SELECT_PREV_WORD = new prev_word(true);
-	public static final ActionListener REPEAT = new repeat();
 	public static final ActionListener TOGGLE_RECT = new toggle_rect();
 	public static final ActionListener UNDO = new undo();
 	public static final ActionListener REDO = new redo();
@@ -90,10 +89,9 @@ public class InputHandler
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
 	private static Map<String, ActionListener> actions;
-
-	protected boolean repeat;
-	protected int repeatCount;
-
+	private Map bindings;
+	private Map currentBindings;
+	
 	static
 	{
 		actions = new HashMap<String, ActionListener>();
@@ -128,51 +126,13 @@ public class InputHandler
 		actions.put("select-prev-line",SELECT_PREV_LINE);
 		actions.put("select-prev-page",SELECT_PREV_PAGE);
 		actions.put("select-prev-word",SELECT_PREV_WORD);
-		actions.put("repeat",REPEAT);
 		actions.put("toggle-rect",TOGGLE_RECT);
 		actions.put("insert-char",INSERT_CHAR);
 	}
 
-	// private members
-	private Map bindings;
-	private Map currentBindings;
-
 	public InputHandler()
 	{
 		bindings = currentBindings = new HashMap();
-	}
-	/**
-	 * Returns a named text area action.
-	 * @param name The action name
-	 */
-	public static ActionListener getAction(String name)
-	{
-		return actions.get(name);
-	}
-
-	/**
-	 * Returns the name of the specified text area action.
-	 * @param listener The action
-	 */
-	public static String getActionName(ActionListener listener)
-	{
-		Iterator itr = getActions();
-		while(itr.hasNext())
-		{
-			String name = (String)itr.next();
-			ActionListener _listener = getAction(name);
-			if(_listener == listener)
-				return name;
-		}
-		return null;
-	}
-
-	/**
-	 * Returns an enumeration of all available actions.
-	 */
-	public static Iterator getActions()
-	{
-		return actions.keySet().iterator();
 	}
 
 	/**
@@ -187,12 +147,9 @@ public class InputHandler
 		addKeyBinding("C+BACK_SPACE",BACKSPACE_WORD);
 		addKeyBinding("DELETE",DELETE);
 		addKeyBinding("C+DELETE",DELETE_WORD);
-
 		addKeyBinding("ENTER",INSERT_BREAK);
 		addKeyBinding("TAB",INSERT_TAB);
-
 		addKeyBinding("INSERT",OVERWRITE);
-
 		addKeyBinding("HOME",HOME);
 		addKeyBinding("END",END);
 		addKeyBinding("S+HOME",SELECT_HOME);
@@ -201,12 +158,10 @@ public class InputHandler
 		addKeyBinding("C+END",DOCUMENT_END);
 		addKeyBinding("CS+HOME",SELECT_DOC_HOME);
 		addKeyBinding("CS+END",SELECT_DOC_END);
-
 		addKeyBinding("PAGE_UP",PREV_PAGE);
 		addKeyBinding("PAGE_DOWN",NEXT_PAGE);
 		addKeyBinding("S+PAGE_UP",SELECT_PREV_PAGE);
 		addKeyBinding("S+PAGE_DOWN",SELECT_NEXT_PAGE);
-
 		addKeyBinding("LEFT",PREV_CHAR);
 		addKeyBinding("S+LEFT",SELECT_PREV_CHAR);
 		addKeyBinding("C+LEFT",PREV_WORD);
@@ -219,9 +174,6 @@ public class InputHandler
 		addKeyBinding("S+UP",SELECT_PREV_LINE);
 		addKeyBinding("DOWN",NEXT_LINE);
 		addKeyBinding("S+DOWN",SELECT_NEXT_LINE);
-
-//		addKeyBinding("C+U", MAKE_UPPER_CASE);
-//		addKeyBinding("C+L", MAKE_LOWER_CASE);
 		addKeyBinding("C+Z", UNDO);
 		addKeyBinding("C+Y", REDO);
 	}
@@ -238,13 +190,15 @@ public class InputHandler
 		Map current = bindings;
 
 		StringTokenizer st = new StringTokenizer(keyBinding);
-		while(st.hasMoreTokens())
+		while (st.hasMoreTokens())
 		{
 			KeyStroke keyStroke = parseKeyStroke(st.nextToken());
-			if(keyStroke == null)
+			if (keyStroke == null)
+			{
 				return;
+			}
 
-			if(st.hasMoreTokens())
+			if (st.hasMoreTokens())
 			{
 				Object o = current.get(keyStroke);
 				if (!(o instanceof HashMap))
@@ -252,11 +206,11 @@ public class InputHandler
 					o = new HashMap();
 					current.put(keyStroke, o);
 				}
-				current = (HashMap)o;
+				current = (HashMap) o;
 			}
 			else
 			{
-				current.put(keyStroke,action);
+				current.put(keyStroke, action);
 			}
 		}
 		this.currentBindings = bindings;
@@ -292,108 +246,86 @@ public class InputHandler
 		int keyCode = evt.getKeyCode();
 		int modifiers = evt.getModifiers();
 
-		if (keyCode == KeyEvent.VK_CONTROL ||
-			keyCode == KeyEvent.VK_SHIFT ||
-			keyCode == KeyEvent.VK_ALT ||
-			keyCode == KeyEvent.VK_META ||
-			keyCode == KeyEvent.ALT_GRAPH_MASK)
-			return;
-
-		if ((modifiers & ~KeyEvent.SHIFT_MASK) != 0
-			|| evt.isActionKey()
-			|| keyCode == KeyEvent.VK_BACK_SPACE
-			|| keyCode == KeyEvent.VK_DELETE
-			|| keyCode == KeyEvent.VK_ENTER
-			|| keyCode == KeyEvent.VK_TAB
-			|| keyCode == KeyEvent.VK_ESCAPE)
+		if (keyCode == KeyEvent.VK_TAB)
 		{
-
-			if (keyCode == KeyEvent.VK_TAB)
+			JEditTextArea area = getTextArea(evt);
+			int start = area.getSelectionStart();
+			int end = area.getSelectionEnd();
+			if (start < end)
 			{
-				JEditTextArea area = getTextArea(evt);
-				int start = area.getSelectionStart();
-				int end = area.getSelectionEnd();
-				if (start < end)
+				TextIndenter indenter = new TextIndenter(area);
+				if ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK)
 				{
-					TextIndenter indenter = new TextIndenter(area);
-					if ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK)
-					{
-						indenter.unIndentSelection();
-					}
-					else
-					{
-						indenter.indentSelection();
-					}
-					return;
+					indenter.unIndentSelection();
 				}
-			}
-
-			KeyStroke keyStroke = KeyStroke.getKeyStroke(keyCode,modifiers);
-			Object o = currentBindings.get(keyStroke);
-
-			if (o == null)
-			{
-				currentBindings = bindings;
+				else
+				{
+					indenter.indentSelection();
+				}
 				return;
 			}
-			else if (o instanceof ActionListener)
-			{
-				currentBindings = bindings;
+		}
 
-				executeAction(((ActionListener)o),evt.getSource(),null);
+		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
+		Object o = currentBindings.get(keyStroke);
 
-				evt.consume();
-				return;
-			}
-			else if (o instanceof HashMap)
-			{
-				currentBindings = (HashMap)o;
-				evt.consume();
-				return;
-			}
+		if (o == null)
+		{
+			currentBindings = bindings;
+			return;
+		}
+		else if (o instanceof ActionListener)
+		{
+			currentBindings = bindings;
+
+			executeAction(((ActionListener)o),evt.getSource(),null);
+
+			evt.consume();
+			return;
+		}
+		else if (o instanceof HashMap)
+		{
+			currentBindings = (HashMap)o;
+			evt.consume();
+			return;
 		}
 	}
 
 	public void keyTyped(KeyEvent evt)
 	{
-		if (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown() || evt.isActionKey()) return;
+		if (evt.isConsumed())
+		{
+			System.out.println("consumed!");
+			return;
+		}
+
+		// this is a hack to prevent the characters from shortcuts to appear
+		// in the editor. This might cause certain key-combinations that produce
+		// special character to not work, but I can't find a way around this.
+		if (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown()) return;
 
 		char c = evt.getKeyChar();
 
-		if(c != KeyEvent.CHAR_UNDEFINED)
+		if (c >= 0x20 && c != 0x7f)
 		{
-			if(c >= 0x20 && c != 0x7f)
+			KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
+			Object o = currentBindings.get(keyStroke);
+
+			if (o instanceof HashMap)
 			{
-				KeyStroke keyStroke = KeyStroke.getKeyStroke(Character.toUpperCase(c));
-				Object o = currentBindings.get(keyStroke);
-
-				if(o instanceof HashMap)
-				{
-					currentBindings = (HashMap)o;
-					return;
-				}
-				else if(o instanceof ActionListener)
-				{
-					currentBindings = bindings;
-					executeAction((ActionListener)o,evt.getSource(),String.valueOf(c));
-					return;
-				}
-
-				currentBindings = bindings;
-
-				// 0-9 adds another 'digit' to the repeat number
-				if (repeat && Character.isDigit(c))
-				{
-					repeatCount *= 10;
-					repeatCount += (c - '0');
-					return;
-				}
-
-				executeAction(INSERT_CHAR,evt.getSource(),String.valueOf(evt.getKeyChar()));
-
-				repeatCount = 0;
-				repeat = false;
+				currentBindings = (HashMap)o;
+				return;
 			}
+			else if (o instanceof ActionListener)
+			{
+				currentBindings = bindings;
+				executeAction((ActionListener)o, evt.getSource(), String.valueOf(c));
+				return;
+			}
+
+			currentBindings = bindings;
+
+			executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(c));
 		}
 	}
 
@@ -408,11 +340,11 @@ public class InputHandler
 	 */
 	public static KeyStroke parseKeyStroke(String keyStroke)
 	{
-		if(keyStroke == null)	return null;
+		if (keyStroke == null)	return null;
 		
 		int modifiers = 0;
 		int index = keyStroke.indexOf('+');
-		if(index != -1)
+		if (index != -1)
 		{
 			for(int i = 0; i < index; i++)
 			{
@@ -432,15 +364,19 @@ public class InputHandler
 			}
 		}
 		String key = keyStroke.substring(index + 1);
-		if(key.length() == 1)
+		if (key.length() == 1)
 		{
 			char ch = Character.toUpperCase(key.charAt(0));
-			if(modifiers == 0)
+			if (modifiers == 0)
+			{
 				return KeyStroke.getKeyStroke(ch);
+			}
 			else
-				return KeyStroke.getKeyStroke(ch,modifiers);
+			{
+				return KeyStroke.getKeyStroke(ch, modifiers);
+			}
 		}
-		else if(key.length() == 0)
+		else if (key.length() == 0)
 		{
 			return null;
 		}
@@ -452,66 +388,19 @@ public class InputHandler
 			{
 				ch = KeyEvent.class.getField("VK_".concat(key)).getInt(null);
 			}
-			catch(Exception e)
+			catch (Exception e)
 			{
-				System.err.println("Invalid key stroke: "	+ keyStroke);
+				System.err.println("Invalid key stroke: " + keyStroke);
 				return null;
 			}
 
-			return KeyStroke.getKeyStroke(ch,modifiers);
+			return KeyStroke.getKeyStroke(ch, modifiers);
 		}
 	}
 
 	/**
-	 * Grabs the next key typed event and invokes the specified
-	 * action with the key as a the action command.
-	 * @param listener The Listener
-	 */
-//	public void grabNextKeyStroke(ActionListener listener)
-//	{
-//		grabAction = listener;
-//	}
-
-	/**
-	 * Returns if repeating is enabled. When repeating is enabled,
-	 * actions will be executed multiple times. This is usually
-	 * invoked with a special key stroke in the input handler.
-	 */
-	public boolean isRepeatEnabled()
-	{
-		return repeat;
-	}
-
-	/**
-	 * Enables repeating. When repeating is enabled, actions will be
-	 * executed multiple times. Once repeating is enabled, the input
-	 * handler should read a number from the keyboard.
-	 */
-	public void setRepeatEnabled(boolean repeat)
-	{
-		this.repeat = repeat;
-	}
-
-	/**
-	 * Returns the number of times the next action will be repeated.
-	 */
-	public int getRepeatCount()
-	{
-		return (repeat ? Math.max(1,repeatCount) : 1);
-	}
-
-	/**
-	 * Sets the number of times the next action will be repeated.
-	 * @param repeatCount The repeat count
-	 */
-	public void setRepeatCount(int repeatCount)
-	{
-		this.repeatCount = repeatCount;
-	}
-
-	/**
-	 * Executes the specified action, repeating and recording it as
-	 * necessary.
+	 * Executes the specified action
+	 * 
 	 * @param listener The action listener
 	 * @param source The event source
 	 * @param actionCommand The action command
@@ -523,36 +412,13 @@ public class InputHandler
 
 		// don't do anything if the action is a wrapper
 		// (like EditAction.Wrapper)
-		if(listener instanceof Wrapper)
+		if (listener instanceof Wrapper)
 		{
 			listener.actionPerformed(evt);
 			return;
 		}
 
-		// remember old values, in case action changes them
-		boolean _repeat = repeat;
-		int _repeatCount = getRepeatCount();
-
-		// execute the action
-		if(listener instanceof InputHandler.NonRepeatable)
-		{
-			listener.actionPerformed(evt);
-		}
-		else
-		{
-			for(int i = 0; i < Math.max(1,repeatCount); i++)
-			{
-				listener.actionPerformed(evt);
-			}
-		}
-
-		// If repeat was true originally, clear it
-		// Otherwise it might have been set by the action, etc
-		if (_repeat)
-		{
-			repeat = false;
-			repeatCount = 0;
-		}
+		listener.actionPerformed(evt);
 	}
 
 	/**
@@ -561,38 +427,39 @@ public class InputHandler
 	 */
 	public static JEditTextArea getTextArea(EventObject evt)
 	{
-		if(evt != null)
+		if (evt != null)
 		{
 			Object o = evt.getSource();
-			if(o instanceof Component)
+			if (o instanceof Component)
 			{
 				// find the parent text area
-				Component c = (Component)o;
-				for(;;)
+				Component c = (Component) o;
+				for (;;)
 				{
-					if(c instanceof JEditTextArea)
-						return (JEditTextArea)c;
-					else if(c == null)
+					if (c instanceof JEditTextArea)
+					{
+						return (JEditTextArea) c;
+					}
+					else if (c == null)
+					{
 						break;
-					if(c instanceof JPopupMenu)
-						c = ((JPopupMenu)c).getInvoker();
+					}
+					if (c instanceof JPopupMenu)
+					{
+						c = ((JPopupMenu) c).getInvoker();
+					}
 					else
+					{
 						c = c.getParent();
+					}
 				}
 			}
 		}
 
 		// this shouldn't happen
-		System.err.println("BUG: getTextArea() returning null");
-		System.err.println("Report this to Slava Pestov <sp@gjt.org>");
+		LogMgr.logError("InputHandler.getTextArea()", "Could not find text area!", null);
 		return null;
 	}
-
-	/**
-	 * If an action implements this interface, it should not be repeated.
-	 * Instead, it will handle the repetition itself.
-	 */
-	public interface NonRepeatable {}
 
 	/**
 	 * If an action implements this interface, it should not be recorded
@@ -639,9 +506,8 @@ public class InputHandler
 		{
 			JEditTextArea textArea = getTextArea(evt);
 
-			if(!textArea.isEditable())
+			if (!textArea.isEditable())
 			{
-				textArea.getToolkit().beep();
 				return;
 			}
 
@@ -652,17 +518,14 @@ public class InputHandler
 			else
 			{
 				int caret = textArea.getCaretPosition();
-				if(caret == 0)
-				{
-					textArea.getToolkit().beep();
-					return;
-				}
+				if (caret == 0) return;
+				
 				SyntaxDocument doc = textArea.getDocument();
 				try
 				{
-					doc.remove(caret - 1,1);
+					doc.remove(caret - 1, 1);
 				}
-				catch(BadLocationException bl)
+				catch (BadLocationException bl)
 				{
 					bl.printStackTrace();
 				}
@@ -1253,20 +1116,20 @@ public class InputHandler
 		}
 	}
 
-	public static class repeat implements ActionListener,
-		InputHandler.NonRecordable
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			textArea.getInputHandler().setRepeatEnabled(true);
-			String actionCommand = evt.getActionCommand();
-			if(actionCommand != null)
-			{
-				textArea.getInputHandler().setRepeatCount(Integer.parseInt(actionCommand));
-			}
-		}
-	}
+//	public static class repeat implements ActionListener,
+//		InputHandler.NonRecordable
+//	{
+//		public void actionPerformed(ActionEvent evt)
+//		{
+//			JEditTextArea textArea = getTextArea(evt);
+//			textArea.getInputHandler().setRepeatEnabled(true);
+//			String actionCommand = evt.getActionCommand();
+//			if(actionCommand != null)
+//			{
+//				textArea.getInputHandler().setRepeatCount(Integer.parseInt(actionCommand));
+//			}
+//		}
+//	}
 
 	public static class toggle_rect implements ActionListener
 	{
@@ -1277,20 +1140,20 @@ public class InputHandler
 		}
 	}
 
-	public static class insert_char implements ActionListener,
-		InputHandler.NonRepeatable
+	public static class insert_char
+		implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
 			String str = evt.getActionCommand();
-			int repeatCount = textArea.getInputHandler().getRepeatCount();
+//			int repeatCount = textArea.getInputHandler().getRepeatCount();
 
-			if(textArea.isEditable())
+			if (textArea.isEditable())
 			{
 				StringBuilder buf = new StringBuilder();
-				for(int i = 0; i < repeatCount; i++) buf.append(str);
-				textArea.overwriteSetSelectedText(buf.toString());
+//				for(int i = 0; i < repeatCount; i++) buf.append(str);
+				textArea.overwriteSetSelectedText(str);
 			}
 			else
 			{
