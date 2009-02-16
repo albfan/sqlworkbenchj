@@ -354,14 +354,9 @@ public class InputHandler
 		}
 	}
 
-	private boolean isModifierPressed(KeyEvent evt)
-	{
-		return (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown() || evt.isAltGraphDown());
-	}
-
 	public void keyTyped(KeyEvent evt)
 	{
-		if (isModifierPressed(evt) || evt.isActionKey()) return;
+		if (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown() || evt.isActionKey()) return;
 
 		char c = evt.getKeyChar();
 
@@ -413,8 +408,8 @@ public class InputHandler
 	 */
 	public static KeyStroke parseKeyStroke(String keyStroke)
 	{
-		if(keyStroke == null)
-			return null;
+		if(keyStroke == null)	return null;
+		
 		int modifiers = 0;
 		int index = keyStroke.indexOf('+');
 		if(index != -1)
