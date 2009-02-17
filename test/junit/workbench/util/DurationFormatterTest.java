@@ -48,6 +48,14 @@ public class DurationFormatterTest
 		s = f.formatDuration(millis, true);
 		assertEquals("59m 59s", s);
 
+		millis += DurationFormatter.ONE_SECOND;
+		s = f.formatDuration(millis, true);
+		assertEquals("1h 0m 0s", s);
+
+		millis += 500;
+		s = f.formatDuration(millis, true);
+		assertEquals("1h 0m 0.5s", s);
+
 		millis = DurationFormatter.ONE_MINUTE * 60 + DurationFormatter.ONE_SECOND * 59;
 		s = f.formatDuration(millis, true);
 		assertEquals("1h 0m 59s", s);
@@ -56,5 +64,9 @@ public class DurationFormatterTest
 		s = f.formatDuration(millis, true);
 		assertEquals("59s", s);
 
+		millis += DurationFormatter.ONE_SECOND;
+		s = f.formatDuration(millis, true);
+		assertEquals("1m 0s", s);
 	}
+	
 }
