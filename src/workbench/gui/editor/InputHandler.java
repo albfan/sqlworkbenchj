@@ -10,18 +10,28 @@ package workbench.gui.editor;
  */
 
 import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EventObject;
 import java.util.HashMap;
 
+import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import javax.swing.InputMap;
+import javax.swing.JComponent;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import workbench.log.LogMgr;
 import workbench.resource.PlatformShortcuts;
@@ -35,8 +45,6 @@ import workbench.resource.PlatformShortcuts;
  * to the implementations of this class to do so.
  *
  * @author Slava Pestov
- * @version $Id: InputHandler.java,v 1.28 2008/10/04 13:03:01 thomas Exp $
- * @see DefaultInputHandler
  */
 public class InputHandler
 	extends KeyAdapter
@@ -91,6 +99,9 @@ public class InputHandler
 	private static Map<String, ActionListener> actions;
 	private Map bindings;
 	private Map currentBindings;
+
+	private boolean keySequence = false;
+	private boolean sequenceIsMapped = false;
 	
 	static
 	{
@@ -245,6 +256,18 @@ public class InputHandler
 	{
 		int keyCode = evt.getKeyCode();
 		int modifiers = evt.getModifiers();
+		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
+
+		if (!keySequence)
+		{
+			keySequence = true;
+		}
+		if (!sequenceIsMapped)
+		{
+			sequenceIsMapped = isMapped(evt);
+		}
+
+		//System.out.println("keyPressed: " + keyStroke.toString() + " isMapped: " + isMapped);
 
 		if (keyCode == KeyEvent.VK_TAB)
 		{
@@ -266,7 +289,6 @@ public class InputHandler
 			}
 		}
 
-		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
 		Object o = currentBindings.get(keyStroke);
 
 		if (o == null)
@@ -291,25 +313,102 @@ public class InputHandler
 		}
 	}
 
+	public List<KeyStroke> getKeys(JComponent c)
+	{
+		if (c == null) return Collections.emptyList();
+		int types[] = new int[] {
+			JComponent.WHEN_FOCUSED,
+			JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT,
+			JComponent.WHEN_IN_FOCUSED_WINDOW
+		};
+
+		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
+		for (int when : types)
+		{
+			InputMap map = c.getInputMap(when);
+			KeyStroke[] keys = (map != null ? map.allKeys() : null);
+
+			if (keys != null)
+			{
+				for (KeyStroke key : keys)
+				{
+					allKeys.add(key);
+				}
+			}
+		}
+		return allKeys;
+	}
+
+	public boolean isMapped(KeyEvent evt)
+	{
+		if (evt == null) return false;
+//		long start = System.currentTimeMillis();
+
+		KeyStroke toTest = KeyStroke.getKeyStrokeForEvent(evt);
+		JEditTextArea area = getTextArea(evt);
+
+		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
+		allKeys.addAll(getKeys(area));
+
+		Window w = SwingUtilities.getWindowAncestor(area);
+		if (w instanceof JFrame)
+		{
+			JFrame f = (JFrame)w;
+			JMenuBar bar = f.getJMenuBar();
+			for (Component c : bar.getComponents())
+			{
+				allKeys.addAll( getKeys((JComponent)c) );
+				if (c instanceof JMenu)
+				{
+					JMenu m = (JMenu)c;
+					for (int i=0; i < m.getItemCount(); i++)
+					{
+						allKeys.addAll( getKeys(m.getItem(i)));
+					}
+				}
+			}
+		}
+		
+//		long end = System.currentTimeMillis();
+//
+//		Collections.sort(allKeys, new Comparator<KeyStroke>()
+//		{
+//			public int compare(KeyStroke o1, KeyStroke o2)
+//			{
+//				return o1.toString().compareTo(o2.toString());
+//			}
+//		});
+//
+//		System.out.println("+++++++++++ mapped ");
+//		System.out.println("*** to test: " + toTest.toString());
+//		for (KeyStroke key : allKeys)
+//		{
+//			System.out.println(key.toString());
+//		}
+//		System.out.println("----------- mapped ");
+
+//		System.out.println("time: "  + (end - start));
+		return allKeys.contains(toTest);
+	}
+
 	public void keyTyped(KeyEvent evt)
 	{
-		if (evt.isConsumed())
+
+		boolean isMapped = sequenceIsMapped;
+		sequenceIsMapped = false;
+		keySequence = false;
+
+		if (isMapped)
 		{
-			System.out.println("consumed!");
 			return;
 		}
-
-		// this is a hack to prevent the characters from shortcuts to appear
-		// in the editor. This might cause certain key-combinations that produce
-		// special character to not work, but I can't find a way around this.
-		if (evt.isControlDown() || evt.isAltDown() || evt.isMetaDown()) return;
 
 		char c = evt.getKeyChar();
 
 		if (c >= 0x20 && c != 0x7f)
 		{
-			KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
-			Object o = currentBindings.get(keyStroke);
+			KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
+			Object o = currentBindings.get(key);
 
 			if (o instanceof HashMap)
 			{
@@ -341,7 +440,7 @@ public class InputHandler
 	public static KeyStroke parseKeyStroke(String keyStroke)
 	{
 		if (keyStroke == null)	return null;
-		
+
 		int modifiers = 0;
 		int index = keyStroke.indexOf('+');
 		if (index != -1)
@@ -400,7 +499,7 @@ public class InputHandler
 
 	/**
 	 * Executes the specified action
-	 * 
+	 *
 	 * @param listener The action listener
 	 * @param source The event source
 	 * @param actionCommand The action command
@@ -519,7 +618,7 @@ public class InputHandler
 			{
 				int caret = textArea.getCaretPosition();
 				if (caret == 0) return;
-				
+
 				SyntaxDocument doc = textArea.getDocument();
 				try
 				{

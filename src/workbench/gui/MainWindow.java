@@ -397,7 +397,6 @@ public class MainWindow
 		for (int i=0; i < tabCount; i ++)
 		{
 			action = new SelectTabAction(this.sqlTab, i);
-			//menu.add(action.getMenuItem());
 			menu.add(action);
 		}
 

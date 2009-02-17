@@ -24,7 +24,8 @@ import workbench.resource.ResourceMgr;
  *	Display the previous statement from the SQL History
  *	@author  support@sql-workbench.net
  */
-public class PrevStatementAction extends WbAction
+public class PrevStatementAction
+	extends WbAction
 {
 	private SqlHistory history;
 	public PrevStatementAction(SqlHistory aHistory)

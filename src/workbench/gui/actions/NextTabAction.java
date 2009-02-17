@@ -15,33 +15,45 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
-import workbench.interfaces.Commitable;
-import workbench.resource.ResourceMgr;
 
 /**
- *	Send a rollback() to the client
+ *	Select the next tab from a tabbed pane
  *	@author  support@sql-workbench.net
  */
-public class RollbackAction
+public class NextTabAction
 	extends WbAction
 {
-	private Commitable client;
+	private JTabbedPane client;
 
-	public RollbackAction(Commitable aClient)
+	public NextTabAction(JTabbedPane aClient)
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_R, InputEvent.ALT_MASK));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		this.setIcon("Rollback");
+		this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.CTRL_MASK));
+		this.removeIcon();
 		this.setEnabled(false);
 	}
 
+	@Override
+	public boolean isEnabled()
+	{
+		int index = client.getSelectedIndex();
+		int count = client.getTabCount();
+		return (index + 1 < count);
+	}
+
+
 	public void executeAction(ActionEvent e)
 	{
-		if (this.client != null) this.client.rollback();
+		int newIndex = client.getSelectedIndex() + 1;
+		if (newIndex < client.getTabCount())
+		{
+			System.out.println("next tab!");
+			client.setSelectedIndex(newIndex);
+		}
 	}
 
 }

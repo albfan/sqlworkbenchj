@@ -23,7 +23,8 @@ import workbench.gui.MainWindow;
  * Display the connect dialog
  * @author support@sql-workbench.net
  */
-public class FileConnectAction extends WbAction
+public class FileConnectAction
+	extends WbAction
 {
 	private MainWindow window;
 
