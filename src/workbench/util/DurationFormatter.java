@@ -23,23 +23,38 @@ import workbench.resource.Settings;
 public class DurationFormatter
 {
 	private final DecimalFormat numberFormatter;
-	private final long oneSecond = 1000;
-	private final long oneMinute = oneSecond * 60;
-	private final long oneHour = oneMinute * 60;
+	public static final long ONE_SECOND = 1000;
+	public static final long ONE_MINUTE = ONE_SECOND * 60;
+	public static final long ONE_HOUR = ONE_MINUTE * 60;
 
 	public DurationFormatter()
 	{
 		numberFormatter = createTimingFormatter();
 	}
 
-	public static final DecimalFormat createTimingFormatter()
+	public DurationFormatter(char decimalSep)
+	{
+		numberFormatter = createTimingFormatter(decimalSep);
+	}
+
+	public static final DecimalFormat createTimingFormatter(char decimalSep)
 	{
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
-		symb.setDecimalSeparator(sep.charAt(0));
+		symb.setDecimalSeparator(decimalSep);
 		DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
 		numberFormatter.setMaximumFractionDigits(2);
 		return numberFormatter;
+	}
+
+	/**
+	 * Create a timing formatter using the decimal separator defined
+	 * through the settings property <tt>workbench.gui.timining.decimal</tt>
+	 * @return
+	 */
+	public static final DecimalFormat createTimingFormatter()
+	{
+		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
+		return createTimingFormatter(sep.charAt(0));
 	}
 
 	public String getDurationAsSeconds(long millis)
@@ -53,10 +68,10 @@ public class DurationFormatter
 
 	public String formatDuration(long millis, boolean includeFractionalSeconds)
 	{
-		long hours = (millis / oneHour);
-		millis = millis - (hours * oneHour);
-		long minutes = millis / oneMinute;
-		millis = millis - (minutes * oneMinute);
+		long hours = (millis / ONE_HOUR);
+		millis = millis - (hours * ONE_HOUR);
+		long minutes = millis / ONE_MINUTE;
+		millis = millis - (minutes * ONE_MINUTE);
 
 		StringBuilder result = new StringBuilder(17);
 
@@ -66,12 +81,12 @@ public class DurationFormatter
 			result.append("h ");
 		}
 
-		if (minutes > 0)
+		if (minutes == 0 && hours > 0 || minutes > 0)
 		{
 			result.append(minutes);
 			result.append("m ");
 		}
-
+		
 		if (includeFractionalSeconds)
 		{
 			synchronized (numberFormatter)
