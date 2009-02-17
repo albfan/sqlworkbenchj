@@ -40,6 +40,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
 import workbench.resource.ColumnSortType;
@@ -104,12 +105,12 @@ public class CompletionPopup
 		{
 			scroll.setColumnHeaderView(headerComponent);
 			headerComponent.doLayout();
-			Dimension d = headerComponent.getPreferredSize();
+			final Dimension d = headerComponent.getPreferredSize();
 			d.height += 25;
 			elementList.setMinimumSize(d);
 			scroll.setMinimumSize(d);
 
-			Point p = editor.getCursorLocation();
+			final Point p = editor.getCursorLocation();
 			SwingUtilities.convertPointToScreen(p, editor);
 
 			if (selectCurrentWordInEditor)
@@ -153,23 +154,38 @@ public class CompletionPopup
 			editor.setKeyEventInterceptor(this);
 			
 			elementList.validate();
+
+			WbTraversalPolicy pol = new WbTraversalPolicy();
+			pol.addComponent(elementList);
+			pol.setDefaultComponent(elementList);
+
+			elementList.setFocusable(true);
+			elementList.setFocusTraversalKeysEnabled(false);
+			window.setFocusCycleRoot(true);
+			window.setFocusTraversalPolicy(pol);
 			
-			window.setLocation(p);
 			window.setContentPane(content);
 			window.addKeyListener(this);
-			window.pack();
 			window.addWindowListener(this);
-			if (window.getWidth() < d.width + 5)
+			
+			final int toSelect = index;
+
+			EventQueue.invokeLater(new Runnable()
 			{
-				window.setSize(d.width + 5, window.getHeight());
-			}
-			
-			elementList.setSelectedIndex(index);
-			elementList.ensureIndexIsVisible(index);
-			
-			WbSwingUtilities.requestFocus(window, elementList);
-			window.setVisible(true);
-			
+				public void run()
+				{
+					window.setLocation(p);
+					window.pack();
+					if (window.getWidth() < d.width + 5)
+					{
+						window.setSize(d.width + 5, window.getHeight());
+					}
+					window.setVisible(true);
+					elementList.requestFocus();
+					elementList.setSelectedIndex(toSelect);
+					elementList.ensureIndexIsVisible(toSelect);
+				}
+			});
 		}
 		catch (Exception e)
 		{
