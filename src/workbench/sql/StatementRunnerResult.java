@@ -12,16 +12,15 @@
 package workbench.sql;
 
 import java.sql.ResultSet;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import workbench.console.RowDisplay;
-import workbench.gui.sql.DwStatusBar;
 import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
 
 import workbench.storage.DataStore;
+import workbench.util.DurationFormatter;
 import workbench.util.MessageBuffer;
 
 /**
@@ -31,7 +30,7 @@ import workbench.util.MessageBuffer;
  * ResultSet (depending on the command).
  * <br/>
  * @see workbench.sql.SqlCommand#execute(java.lang.String)
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class StatementRunnerResult
@@ -41,7 +40,7 @@ public class StatementRunnerResult
 	private MessageBuffer messages;
 	private List<DataStore> datastores;
 	private String sourceCommand;
-	
+
 	private boolean success = true;
 	private boolean hasWarning = false;
 	private boolean wasCancelled = false;
@@ -59,16 +58,16 @@ public class StatementRunnerResult
 	 * If set, indicates a temporary change of the display just for this single Result
 	 */
 	private RowDisplay tempRowDisplay = null;
-	
+
 	private long executionTime = -1;
-	private DecimalFormat timingFormatter;
-	
+	private final DurationFormatter timingFormatter;
+
 	public StatementRunnerResult()
 	{
-		this.timingFormatter = DwStatusBar.createTimingFormatter();
+		this.timingFormatter = new DurationFormatter();
 		this.messages = new MessageBuffer();
 	}
-	
+
 	public StatementRunnerResult(String aCmd)
 	{
 		this();
@@ -77,10 +76,10 @@ public class StatementRunnerResult
 
 	public boolean stopScript() { return stopScriptExecution; }
 	public void setStopScript(boolean flag) { this.stopScriptExecution = flag; }
-	
+
 	public boolean promptingWasCancelled() { return wasCancelled; }
 	public void setPromptingWasCancelled() { this.wasCancelled = true; }
-	
+
 	public void setExecutionTime(long t) { this.executionTime = t; }
 	public long getExecutionTime() { return this.executionTime; }
 
@@ -120,15 +119,14 @@ public class StatementRunnerResult
 	{
 		rowDisplay = newDisplay;
 	}
-	
+
 	public String getTimingMessage()
 	{
 		if (executionTime == -1) return null;
 		StringBuilder msg = new StringBuilder(100);
 		msg.append(ResourceMgr.getString("MsgExecTime"));
 		msg.append(' ');
-		double time = ((double)executionTime) / 1000.0;
-		msg.append(timingFormatter.format(time));
+		msg.append(timingFormatter.getDurationAsSeconds(executionTime));
 		return msg.toString();
 	}
 
@@ -137,7 +135,7 @@ public class StatementRunnerResult
 		if (this.messages == null) return;
 		messages.appendTo(log);
 	}
-	
+
 	public void setSuccess() { this.success = true; }
 	public void setFailure() { this.success = false; }
 	public void setWarning(boolean flag) { this.hasWarning = flag; }
@@ -181,14 +179,14 @@ public class StatementRunnerResult
 	{
 		this.messages.appendNewLine();
 	}
-	
+
 	public void addMessage(CharSequence msgBuffer)
 	{
 		if (msgBuffer == null) return;
 		if (messages.getLength() > 0) messages.appendNewLine();
 		messages.append(msgBuffer);
 	}
-	
+
 	public boolean hasData()
 	{
 		return (this.hasResultSets() || this.hasDataStores());
@@ -214,7 +212,7 @@ public class StatementRunnerResult
 	{
 		return this.datastores;
 	}
-	
+
 	public List<ResultSet> getResultSets()
 	{
 		return this.results;
@@ -231,14 +229,14 @@ public class StatementRunnerResult
 		if (this.messages == null) return null;
 		return messages.getBuffer();
 	}
-	
+
 	public long getTotalUpdateCount()
 	{
 		return totalUpdateCount;
 	}
 
 	/**
-	 * Clears stored ResultSets and DataStores. The content of 
+	 * Clears stored ResultSets and DataStores. The content of
 	 * the datastores will be removed!
 	 * @see #clearResultSets()
 	 */
@@ -255,7 +253,7 @@ public class StatementRunnerResult
 		}
 		this.clearResultSets();
 	}
-	
+
 	/**
 	 * Closes all "stored" ResultSets
 	 */
@@ -279,14 +277,14 @@ public class StatementRunnerResult
 	{
 		this.messages.clear();
 	}
-	
+
 	public void clear()
 	{
 		// Do not call clearResultData() !!!
-		// otherwise the content of the retrieved DataStores will also 
+		// otherwise the content of the retrieved DataStores will also
 		// be removed and as they are re-used by DwPanel or TableDataPanel
 		// they might still be in use.
-		
+
 		// We only want to free the list itself.
 		if (this.datastores != null)
 		{
@@ -299,5 +297,5 @@ public class StatementRunnerResult
 		this.hasWarning = false;
 		this.executionTime = -1;
 	}
-	
+
 }

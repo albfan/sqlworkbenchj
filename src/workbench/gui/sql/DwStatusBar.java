@@ -25,9 +25,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -53,6 +50,7 @@ import workbench.interfaces.EventDisplay;
 import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.DurationFormatter;
 import workbench.util.EventNotifier;
 import workbench.util.NotifierEvent;
 import workbench.util.NumberStringCache;
@@ -81,11 +79,8 @@ public class DwStatusBar
 	
 	private static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
-	private DecimalFormat numberFormatter;
-	private SimpleDateFormat timeFormatter = new SimpleDateFormat("m'm' ss's'");
 
 	private int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
-	private int timerDelay = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
 	private final boolean showTimer = Settings.getInstance().getBoolProperty("workbench.gui.execution.timer.enabled", true);
 	private long timerStarted;
 	private Timer executionTimer;
@@ -95,6 +90,8 @@ public class DwStatusBar
 	private String editorLinePrefix;
   private String editorColPrefix;
 	private SelectionDisplay selectionDisplay;
+
+	private DurationFormatter durationFormatter = new DurationFormatter();
 
 	public DwStatusBar()
 	{
@@ -206,18 +203,7 @@ public class DwStatusBar
 		this.readyMsg = ResourceMgr.getString("MsgReady");
 		this.clearStatusMessage();
 
-		numberFormatter = DwStatusBar.createTimingFormatter();
 		EventNotifier.getInstance().addEventDisplay(this);
-	}
-
-	public static final DecimalFormat createTimingFormatter()
-	{
-		DecimalFormatSymbols symb = new DecimalFormatSymbols();
-		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
-		symb.setDecimalSeparator(sep.charAt(0));
-		DecimalFormat numberFormatter = new DecimalFormat("0.#s", symb);
-		numberFormatter.setMaximumFractionDigits(2);
-		return numberFormatter;
 	}
 
 	public void removeSelectionIndicator(JTable client)
@@ -270,7 +256,7 @@ public class DwStatusBar
 	{
 		if (!showTimer) return;
 		timerStarted = System.currentTimeMillis();
-		executionTimer.setInitialDelay(timerDelay);
+		executionTimer.setInitialDelay(timerInterval);
 		executionTimer.setDelay(timerInterval);
 		timerRunning = true;
 		executionTimer.start();
@@ -283,48 +269,17 @@ public class DwStatusBar
 		executionTimer.stop();
 	}
 
-	private String formatDuration(long millis)
-	{
-		if (millis < 1000)
-			return "0s";
-		else if (millis <= 60000)
-			return Long.toString((millis / 1000)) + "s";
-		else
-			return timeFormatter.format(new java.util.Date(millis));
-	}
-
 	public void actionPerformed(ActionEvent e)
 	{
 		if (!timerRunning) return;
 		long time = System.currentTimeMillis() - timerStarted;
-		this.execTime.setText(formatDuration(time));
+		this.execTime.setText(durationFormatter.formatDuration(time, false));
 	}
 
 	public void setExecutionTime(long millis)
 	{
-		final long oneMinute = (1000 * 60);
-		final long oneHour = oneMinute * 60;
-
 		if (timerRunning) executionEnd();
-
-		// Access to the formatters is not synchronized
-		// as they setExecutionTime() will not be called
-		// from multiple Threads
-		if (millis < oneMinute)
-		{
-			double time = (millis / 1000.0);
-			this.execTime.setText(numberFormatter.format(time));
-		}
-		else if (millis < oneHour)
-		{
-			this.execTime.setText(timeFormatter.format(new java.util.Date(millis)));
-		}
-		else
-		{
-			long hours = (millis / oneHour);
-			long rest = millis - (hours * oneHour);
-			this.execTime.setText(Long.toString(hours) + "h " + timeFormatter.format(new java.util.Date(rest)));
-		}
+		this.execTime.setText(durationFormatter.formatDuration(millis, true));
 		this.execTime.repaint();
 	}
 
