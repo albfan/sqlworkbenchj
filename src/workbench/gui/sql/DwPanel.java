@@ -143,6 +143,7 @@ public class DwPanel
 
 		this.updateAction = new UpdateDatabaseAction(this);
 		this.insertRow = new InsertRowAction(this);
+		this.insertRow.setEnabled(false);
 		this.deleteRow = new DeleteRowAction(this);
 		this.deleteDependentRow = new DeleteDependentRowsAction(this);
 		this.duplicateRow = new CopyRowAction(this);
@@ -1014,6 +1015,7 @@ public class DwPanel
 		this.statusBar.clearRowcount();
 		this.statusBar.clearExecutionTime();
 		this.selectKeys.setEnabled(false);
+		checkResultSetActions();
 	}
 
 	public int getActionOnError(int errorRow, String errorColumn, String data, String errorMessage)

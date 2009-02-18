@@ -24,6 +24,7 @@ import workbench.gui.actions.ReplaceDataAction;
 import workbench.interfaces.Replaceable;
 import workbench.interfaces.Searchable;
 import workbench.resource.ResourceMgr;
+import workbench.storage.DataStore;
 import workbench.storage.DataStoreReplacer;
 import workbench.storage.Position;
 import workbench.storage.filter.ColumnComparator;
@@ -266,8 +267,9 @@ public class TableReplacer
 		if (tableChanging) return;
 		
 		this.replacer.setDataStore(this.client.getDataStore());
-		
-		WbConnection con = client.getDataStore().getOriginalConnection();
+
+		DataStore ds = client.getDataStore();
+		WbConnection con = (ds != null ? ds.getOriginalConnection() : null);
 		final boolean readOnly = (con == null ? false : con.getProfile().isReadOnly());
 		final boolean hasData = (client.getRowCount() > 0);
 		EventQueue.invokeLater(new Runnable()

@@ -48,7 +48,7 @@ public class TextFormatter
 			String command = parser.getCommand(i);
 
 			// no need to format "empty" strings
-			if (StringUtil.isEmptyString(command) || StringUtil.isWhitespace(command))
+			if (StringUtil.isBlank(command))
 			{
 				newSql.append(command);
 				continue;

@@ -956,6 +956,9 @@ public class WbTable
 		if (this.dwModel != null)
 		{
 			this.dwModel.dispose();
+			
+			// Setting the dwModel to null is important
+			// because the new model might not be a DataStoreTableModel
 			this.dwModel = null;
 		}
 

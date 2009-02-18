@@ -33,7 +33,7 @@ public class TextUtilities
 	public static int findMatchingBracket(Document doc, int offset)
 		throws BadLocationException
 	{
-		if(doc.getLength() == 0) return -1;
+		if (doc.getLength() == 0) return -1;
 		
 		char c = doc.getText(offset,1).charAt(0);
 		char cprime; // corresponding character
@@ -85,7 +85,7 @@ public class TextUtilities
 			String text = doc.getText(0,offset);
 
 			// Scan backwards
-			for(int i = offset - 1; i >= 0; i--)
+			for (int i = offset - 1; i >= 0; i--)
 			{
 				// If text[i] == c, we have found another
 				// closing bracket, therefore we will need
@@ -121,7 +121,7 @@ public class TextUtilities
 			String text = doc.getText(offset,len);
 
 			// Scan forwards
-			for(int i = 0; i < len; i++)
+			for (int i = 0; i < len; i++)
 			{
 				// If text[i] == c, we have found another
 				// opening bracket, therefore we will need
@@ -161,7 +161,7 @@ public class TextUtilities
 		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) 	&& noWordSep.indexOf(ch) == -1);
 
 		int wordStart = 0;
-		for(int i = pos - 1; i >= 0; i--)
+		for (int i = pos - 1; i >= 0; i--)
 		{
 			ch = line.charAt(i);
 			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
@@ -187,10 +187,10 @@ public class TextUtilities
 		boolean selectNoLetter = (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1);
 
 		int wordEnd = line.length();
-		for(int i = pos; i < line.length(); i++)
+		for (int i = pos; i < line.length(); i++)
 		{
 			ch = line.charAt(i);
-			if(selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
+			if (selectNoLetter ^ (!Character.isLetterOrDigit(ch) && noWordSep.indexOf(ch) == -1))
 			{
 				wordEnd = i;
 				break;

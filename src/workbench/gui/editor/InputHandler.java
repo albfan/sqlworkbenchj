@@ -13,7 +13,6 @@ import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -23,7 +22,6 @@ import java.util.HashMap;
 
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -34,7 +32,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import workbench.log.LogMgr;
-import workbench.resource.PlatformShortcuts;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -96,54 +93,14 @@ public class InputHandler
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
 
-	private static Map<String, ActionListener> actions;
-	private Map bindings;
-	private Map currentBindings;
+	private Map<KeyStroke, ActionListener> bindings;
 
 	private boolean keySequence = false;
 	private boolean sequenceIsMapped = false;
-	
-	static
-	{
-		actions = new HashMap<String, ActionListener>();
-		actions.put("backspace",BACKSPACE);
-		actions.put("backspace-word",BACKSPACE_WORD);
-		actions.put("delete",DELETE);
-		actions.put("delete-word",DELETE_WORD);
-		actions.put("end",END);
-		actions.put("select-end",SELECT_END);
-		actions.put("document-end",DOCUMENT_END);
-		actions.put("select-doc-end",SELECT_DOC_END);
-		actions.put("insert-break",INSERT_BREAK);
-		actions.put("insert-tab",INSERT_TAB);
-		actions.put("home",HOME);
-		actions.put("select-home",SELECT_HOME);
-		actions.put("document-home",DOCUMENT_HOME);
-		actions.put("select-doc-home",SELECT_DOC_HOME);
-		actions.put("next-char",NEXT_CHAR);
-		actions.put("next-line",NEXT_LINE);
-		actions.put("next-page",NEXT_PAGE);
-		actions.put("next-word",NEXT_WORD);
-		actions.put("select-next-char",SELECT_NEXT_CHAR);
-		actions.put("select-next-line",SELECT_NEXT_LINE);
-		actions.put("select-next-page",SELECT_NEXT_PAGE);
-		actions.put("select-next-word",SELECT_NEXT_WORD);
-		actions.put("overwrite",OVERWRITE);
-		actions.put("prev-char",PREV_CHAR);
-		actions.put("prev-line",PREV_LINE);
-		actions.put("prev-page",PREV_PAGE);
-		actions.put("prev-word",PREV_WORD);
-		actions.put("select-prev-char",SELECT_PREV_CHAR);
-		actions.put("select-prev-line",SELECT_PREV_LINE);
-		actions.put("select-prev-page",SELECT_PREV_PAGE);
-		actions.put("select-prev-word",SELECT_PREV_WORD);
-		actions.put("toggle-rect",TOGGLE_RECT);
-		actions.put("insert-char",INSERT_CHAR);
-	}
 
 	public InputHandler()
 	{
-		bindings = currentBindings = new HashMap();
+		bindings = new HashMap();
 	}
 
 	/**
@@ -154,84 +111,57 @@ public class InputHandler
 	 */
 	public void addDefaultKeyBindings()
 	{
-		addKeyBinding("BACK_SPACE",BACKSPACE);
-		addKeyBinding("C+BACK_SPACE",BACKSPACE_WORD);
-		addKeyBinding("DELETE",DELETE);
-		addKeyBinding("C+DELETE",DELETE_WORD);
-		addKeyBinding("ENTER",INSERT_BREAK);
-		addKeyBinding("TAB",INSERT_TAB);
-		addKeyBinding("INSERT",OVERWRITE);
-		addKeyBinding("HOME",HOME);
-		addKeyBinding("END",END);
-		addKeyBinding("S+HOME",SELECT_HOME);
-		addKeyBinding("S+END",SELECT_END);
-		addKeyBinding("C+HOME",DOCUMENT_HOME);
-		addKeyBinding("C+END",DOCUMENT_END);
-		addKeyBinding("CS+HOME",SELECT_DOC_HOME);
-		addKeyBinding("CS+END",SELECT_DOC_END);
-		addKeyBinding("PAGE_UP",PREV_PAGE);
-		addKeyBinding("PAGE_DOWN",NEXT_PAGE);
-		addKeyBinding("S+PAGE_UP",SELECT_PREV_PAGE);
-		addKeyBinding("S+PAGE_DOWN",SELECT_NEXT_PAGE);
-		addKeyBinding("LEFT",PREV_CHAR);
-		addKeyBinding("S+LEFT",SELECT_PREV_CHAR);
-		addKeyBinding("C+LEFT",PREV_WORD);
-		addKeyBinding("CS+LEFT",SELECT_PREV_WORD);
-		addKeyBinding("RIGHT",NEXT_CHAR);
-		addKeyBinding("S+RIGHT",SELECT_NEXT_CHAR);
-		addKeyBinding("C+RIGHT",NEXT_WORD);
-		addKeyBinding("CS+RIGHT",SELECT_NEXT_WORD);
-		addKeyBinding("UP",PREV_LINE);
-		addKeyBinding("S+UP",SELECT_PREV_LINE);
-		addKeyBinding("DOWN",NEXT_LINE);
-		addKeyBinding("S+DOWN",SELECT_NEXT_LINE);
-		addKeyBinding("C+Z", UNDO);
-		addKeyBinding("C+Y", REDO);
-	}
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), BACKSPACE);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_MASK), BACKSPACE_WORD);
 
-	/**
-	 * Adds a key binding to this input handler.
-	 * @param keyBinding The key binding (the format of this is
-	 * input-handler specific)
-	 * @param action The action
-	 */
-	@SuppressWarnings("unchecked")
-	public void addKeyBinding(String keyBinding, ActionListener action)
-	{
-		Map current = bindings;
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), DELETE);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.CTRL_MASK), DELETE_WORD);
 
-		StringTokenizer st = new StringTokenizer(keyBinding);
-		while (st.hasMoreTokens())
-		{
-			KeyStroke keyStroke = parseKeyStroke(st.nextToken());
-			if (keyStroke == null)
-			{
-				return;
-			}
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), INSERT_BREAK);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), INSERT_TAB);
+		
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), OVERWRITE);
 
-			if (st.hasMoreTokens())
-			{
-				Object o = current.get(keyStroke);
-				if (!(o instanceof HashMap))
-				{
-					o = new HashMap();
-					current.put(keyStroke, o);
-				}
-				current = (HashMap) o;
-			}
-			else
-			{
-				current.put(keyStroke, action);
-			}
-		}
-		this.currentBindings = bindings;
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), HOME);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, KeyEvent.SHIFT_MASK), SELECT_HOME);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, KeyEvent.CTRL_MASK),DOCUMENT_HOME);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, KeyEvent.SHIFT_MASK | KeyEvent.CTRL_MASK), SELECT_DOC_HOME);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), END);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, KeyEvent.SHIFT_MASK), SELECT_END);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, KeyEvent.CTRL_MASK), DOCUMENT_END);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, KeyEvent.SHIFT_MASK | KeyEvent.CTRL_MASK), SELECT_DOC_END);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), PREV_PAGE);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, KeyEvent.SHIFT_MASK), SELECT_PREV_PAGE);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), NEXT_PAGE);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, KeyEvent.SHIFT_MASK), SELECT_NEXT_PAGE);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), PREV_CHAR);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.SHIFT_MASK), SELECT_PREV_CHAR);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.CTRL_MASK), PREV_WORD);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK), SELECT_PREV_WORD);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), NEXT_CHAR);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.SHIFT_MASK), SELECT_NEXT_CHAR);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK), NEXT_WORD);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK), SELECT_NEXT_WORD);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), PREV_LINE);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_UP, KeyEvent.SHIFT_MASK), SELECT_PREV_LINE);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NEXT_LINE);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.SHIFT_MASK), SELECT_NEXT_LINE);
+
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK ), UNDO);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK ), REDO);
 	}
 
 	@SuppressWarnings("unchecked")
 	public void addKeyBinding(KeyStroke key, ActionListener action)
 	{
 		this.bindings.put(key, action);
-		this.currentBindings = this.bindings;
 	}
 
 	/**
@@ -255,21 +185,21 @@ public class InputHandler
 	@Override
 	public void keyPressed(KeyEvent evt)
 	{
-//		System.out.println("keyPressed: " + evt.toString());
 		int keyCode = evt.getKeyCode();
 		int modifiers = evt.getModifiers();
-		
+
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
 
 		if (!keySequence)
 		{
 			keySequence = true;
 		}
-		
+
 		if (!evt.isActionKey() && !sequenceIsMapped)
 		{
 			sequenceIsMapped = isMapped(evt);
 		}
+//		System.out.println("keyPressed: " + evt.toString() + " isAction: " + evt.isActionKey());
 
 		if (keyCode == KeyEvent.VK_TAB)
 		{
@@ -291,27 +221,12 @@ public class InputHandler
 			}
 		}
 
-		Object o = currentBindings.get(keyStroke);
+		ActionListener l = bindings.get(keyStroke);
 
-		if (o == null)
+		if (l != null)
 		{
-			currentBindings = bindings;
-			return;
-		}
-		else if (o instanceof ActionListener)
-		{
-			currentBindings = bindings;
-
-			executeAction(((ActionListener)o),evt.getSource(),null);
-
+			executeAction(l, evt.getSource(), null);
 			evt.consume();
-			return;
-		}
-		else if (o instanceof HashMap)
-		{
-			currentBindings = (HashMap)o;
-			evt.consume();
-			return;
 		}
 	}
 
@@ -334,21 +249,13 @@ public class InputHandler
 		if (c >= 0x20 && c != 0x7f)
 		{
 			KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
-			Object o = currentBindings.get(key);
+			ActionListener l = bindings.get(key);
 
-			if (o instanceof HashMap)
+			if (l != null)
 			{
-				currentBindings = (HashMap)o;
+				executeAction(l, evt.getSource(), String.valueOf(c));
 				return;
 			}
-			else if (o instanceof ActionListener)
-			{
-				currentBindings = bindings;
-				executeAction((ActionListener)o, evt.getSource(), String.valueOf(c));
-				return;
-			}
-
-			currentBindings = bindings;
 
 			executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(c));
 		}
@@ -396,7 +303,6 @@ public class InputHandler
 	public boolean isMapped(KeyEvent evt)
 	{
 		if (evt == null) return false;
-//		long start = System.currentTimeMillis();
 
 		KeyStroke toTest = KeyStroke.getKeyStrokeForEvent(evt);
 		JEditTextArea area = getTextArea(evt);
@@ -428,75 +334,6 @@ public class InputHandler
 
 
 	/**
-	 * Converts a string to a keystroke. The string should be of the
-	 * form <i>modifiers</i>+<i>shortcut</i> where <i>modifiers</i>
-	 * is any combination of A for Alt, C for Control, S for Shift
-	 * or M for Meta, and <i>shortcut</i> is either a single character,
-	 * or a keycode name from the <code>KeyEvent</code> class, without
-	 * the <code>VK_</code> prefix.
-	 * @param keyStroke A string description of the key stroke
-	 */
-	public static KeyStroke parseKeyStroke(String keyStroke)
-	{
-		if (keyStroke == null)	return null;
-
-		int modifiers = 0;
-		int index = keyStroke.indexOf('+');
-		if (index != -1)
-		{
-			for(int i = 0; i < index; i++)
-			{
-				switch(Character.toUpperCase(keyStroke.charAt(i)))
-				{
-				case 'A':
-					modifiers |= InputEvent.ALT_MASK;
-					break;
-				case 'C':
-				case 'M':
-					modifiers |= PlatformShortcuts.getDefaultModifier();
-					break;
-				case 'S':
-					modifiers |= InputEvent.SHIFT_MASK;
-					break;
-				}
-			}
-		}
-		String key = keyStroke.substring(index + 1);
-		if (key.length() == 1)
-		{
-			char ch = Character.toUpperCase(key.charAt(0));
-			if (modifiers == 0)
-			{
-				return KeyStroke.getKeyStroke(ch);
-			}
-			else
-			{
-				return KeyStroke.getKeyStroke(ch, modifiers);
-			}
-		}
-		else if (key.length() == 0)
-		{
-			return null;
-		}
-		else
-		{
-			int ch;
-
-			try
-			{
-				ch = KeyEvent.class.getField("VK_".concat(key)).getInt(null);
-			}
-			catch (Exception e)
-			{
-				System.err.println("Invalid key stroke: " + keyStroke);
-				return null;
-			}
-
-			return KeyStroke.getKeyStroke(ch, modifiers);
-		}
-	}
-
-	/**
 	 * Executes the specified action
 	 *
 	 * @param listener The action listener
@@ -505,17 +342,7 @@ public class InputHandler
 	 */
 	public void executeAction(ActionListener listener, Object source, String actionCommand)
 	{
-		// create event
-		ActionEvent evt = new ActionEvent(source,ActionEvent.ACTION_PERFORMED,actionCommand);
-
-		// don't do anything if the action is a wrapper
-		// (like EditAction.Wrapper)
-		if (listener instanceof Wrapper)
-		{
-			listener.actionPerformed(evt);
-			return;
-		}
-
+		ActionEvent evt = new ActionEvent(source, ActionEvent.ACTION_PERFORMED, actionCommand);
 		listener.actionPerformed(evt);
 	}
 
@@ -558,18 +385,6 @@ public class InputHandler
 		LogMgr.logError("InputHandler.getTextArea()", "Could not find text area!", null);
 		return null;
 	}
-
-	/**
-	 * If an action implements this interface, it should not be recorded
-	 * by the macro recorder. Instead, it will do its own recording.
-	 */
-	public interface NonRecordable {}
-
-	/**
-	 * For use by EditAction.Wrapper only.
-	 * @since jEdit 2.2final
-	 */
-	public interface Wrapper {}
 
 	/**
 	 * Macro recorder.
@@ -1214,21 +1029,6 @@ public class InputHandler
 		}
 	}
 
-//	public static class repeat implements ActionListener,
-//		InputHandler.NonRecordable
-//	{
-//		public void actionPerformed(ActionEvent evt)
-//		{
-//			JEditTextArea textArea = getTextArea(evt);
-//			textArea.getInputHandler().setRepeatEnabled(true);
-//			String actionCommand = evt.getActionCommand();
-//			if(actionCommand != null)
-//			{
-//				textArea.getInputHandler().setRepeatCount(Integer.parseInt(actionCommand));
-//			}
-//		}
-//	}
-
 	public static class toggle_rect implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
@@ -1245,12 +1045,9 @@ public class InputHandler
 		{
 			JEditTextArea textArea = getTextArea(evt);
 			String str = evt.getActionCommand();
-//			int repeatCount = textArea.getInputHandler().getRepeatCount();
 
 			if (textArea.isEditable())
 			{
-				StringBuilder buf = new StringBuilder();
-//				for(int i = 0; i < repeatCount; i++) buf.append(str);
 				textArea.overwriteSetSelectedText(str);
 			}
 			else

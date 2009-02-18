@@ -616,6 +616,8 @@ public class TableListPanel
 
 	public void reset()
 	{
+		this.selectedTable = null;
+		this.realTable = null;
 		this.invalidateData();
 		if (this.isBusy())
 		{
@@ -758,6 +760,7 @@ public class TableListPanel
 	{
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
+
 		this.invalidateData();
 
 		if (this.isBusy())

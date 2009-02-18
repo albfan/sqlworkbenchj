@@ -291,6 +291,7 @@ public class TableDataPanel
 		this.dataDisplay.clearContent();
 		this.rowCountLabel.setText(ResourceMgr.getString("LblNotAvailable"));
 		this.clearLoadingImage();
+		reloadAction.setEnabled(false);
 	}
 
 	public void setConnection(WbConnection aConnection)

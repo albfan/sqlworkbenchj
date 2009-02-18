@@ -27,11 +27,11 @@ import javax.swing.text.Segment;
 public abstract class TokenMarker
 {
 	/**
-	 * Stores the first {@link Token} for each line that 
+	 * Stores the first {@link Token} for each line that
 	 * has been tokenized
 	 */
 	protected ArrayList<Token> lineStartTokens = new ArrayList<Token>(250);
-	
+
 	/**
 	 * The number of lines in the model being tokenized. This can be
 	 * less than the length of the <code>lineInfo</code> array.
@@ -50,9 +50,9 @@ public abstract class TokenMarker
 	public Token getLastTokenInLine(int lineIndex)
 	{
 		Token start = getFirstTokenInLine(lineIndex);
-		
+
 		if (start == null) return null;
-		
+
 		while (start != null)
 		{
 			if (start.next == null)
@@ -63,7 +63,7 @@ public abstract class TokenMarker
 		}
 		return null;
 	}
-	
+
 	public synchronized Token getFirstTokenInLine(int lineIndex)
 	{
 		if (lineIndex < 0 || lineIndex >= length) return null;
@@ -79,7 +79,7 @@ public abstract class TokenMarker
 		}
 		return token;
 	}
-	
+
 	protected Token getPreviousLineToken(int lineIndex)
 	{
 		if (lineIndex <= 0) return null;
@@ -99,24 +99,24 @@ public abstract class TokenMarker
 		if (lineIndex >= length) return null;
 
 		Token prev = getPreviousLineToken(lineIndex);
-		
+
 		lineStartTokens.set(lineIndex, null);
 		markTokensImpl(prev, line, lineIndex);
 
 		// tell the last token if it has a pending literal character (" or ')
 		Token t = getLastTokenInLine(lineIndex);
 		if (t != null) t.setPendingLiteralChar(getPendingLiteralChar());
-		
+
 		return lineStartTokens.get(lineIndex);
 	}
-	
+
 	/**
 	 * An abstract method that splits a line up into tokens. It
 	 * should parse the line, and call <code>addToken()</code> to
 	 * add syntax tokens to the token list. Then, it should return
 	 * the initial token type for the next line.<p>
 	 *
-	 * For example if the current line contains the start of a 
+	 * For example if the current line contains the start of a
 	 * multiline comment that doesn't end on that line, this method
 	 * should return the comment token type so that it continues on
 	 * the next line.
@@ -128,7 +128,7 @@ public abstract class TokenMarker
 	protected abstract void markTokensImpl(Token lastToken, Segment line, int lineIndex);
 
 	public abstract char getPendingLiteralChar();
-	
+
 	public void dispose()
 	{
 		this.lineStartTokens.clear();
@@ -140,24 +140,24 @@ public abstract class TokenMarker
 	 * the document. This inserts a gap in the <code>lineInfo</code>
 	 * array.
 	 * @param index The first line number
-	 * @param lines The number of lines 
+	 * @param lines The number of lines
 	 */
 	public void insertLines(int index, int lines)
 	{
 		if (lines <= 0)	return;
 		length += lines;
-		
+
 		// Expand the array, so that the subsequent for-next loop
 		// does not re-allocated the internal array each time
 		lineStartTokens.ensureCapacity(length);
-		
+
 		int len = index + lines;
 		for (int i = index; i < len; i++)
 		{
 			lineStartTokens.add(index, null);
 		}
 	}
-	
+
 	/**
 	 * Informs the token marker that line have been deleted from
 	 * the document. This removes the lines in question from the
@@ -186,7 +186,7 @@ public abstract class TokenMarker
 
 	/**
 	 * Adds a token to the token list.
-	 * 
+	 *
 	 * @param length The length of the token
 	 * @param id The id of the token
 	 */

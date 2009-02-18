@@ -240,9 +240,9 @@ public class JEditTextArea
 
 		if (extendedCutCopyPaste)
 		{
-			this.addKeyBinding("C+INSERT", copy);
-			this.addKeyBinding("SHIFT+INSERT", paste);
-			this.addKeyBinding("SHIFT+DELETE", cut);
+			this.inputHandler.addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.CTRL_MASK), copy);
+			this.inputHandler.addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.SHIFT_MASK), paste);
+			this.inputHandler.addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.SHIFT_MASK), paste);
 		}
 
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
@@ -321,11 +321,6 @@ public class JEditTextArea
 		{
 			// ignore
 		}
-	}
-
-	public void addKeyBinding(String aBinding, ActionListener aListener)
-	{
-		this.inputHandler.addKeyBinding(aBinding, aListener);
 	}
 
 	public void addKeyBinding(WbAction anAction)
