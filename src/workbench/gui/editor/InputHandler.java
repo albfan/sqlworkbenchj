@@ -252,22 +252,24 @@ public class InputHandler
 		bindings.clear();
 	}
 
+	@Override
 	public void keyPressed(KeyEvent evt)
 	{
+//		System.out.println("keyPressed: " + evt.toString());
 		int keyCode = evt.getKeyCode();
 		int modifiers = evt.getModifiers();
+		
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
 
 		if (!keySequence)
 		{
 			keySequence = true;
 		}
-		if (!sequenceIsMapped)
+		
+		if (!evt.isActionKey() && !sequenceIsMapped)
 		{
 			sequenceIsMapped = isMapped(evt);
 		}
-
-		//System.out.println("keyPressed: " + keyStroke.toString() + " isMapped: " + isMapped);
 
 		if (keyCode == KeyEvent.VK_TAB)
 		{
@@ -312,6 +314,58 @@ public class InputHandler
 			return;
 		}
 	}
+
+	@Override
+	public void keyTyped(KeyEvent evt)
+	{
+//		System.out.println("keyTyped: " + evt.toString());
+
+		boolean isMapped = sequenceIsMapped;
+		sequenceIsMapped = false;
+		keySequence = false;
+
+		if (isMapped)
+		{
+			return;
+		}
+
+		char c = evt.getKeyChar();
+
+		if (c >= 0x20 && c != 0x7f)
+		{
+			KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
+			Object o = currentBindings.get(key);
+
+			if (o instanceof HashMap)
+			{
+				currentBindings = (HashMap)o;
+				return;
+			}
+			else if (o instanceof ActionListener)
+			{
+				currentBindings = bindings;
+				executeAction((ActionListener)o, evt.getSource(), String.valueOf(c));
+				return;
+			}
+
+			currentBindings = bindings;
+
+			executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(c));
+		}
+	}
+
+	@Override
+	public void keyReleased(KeyEvent evt)
+	{
+		if (evt.getKeyCode() == KeyEvent.VK_ALT)
+		{
+			// we consume this to work around the bug
+			// where A+TAB window switching activates
+			// the menu bar on Windows.
+			evt.consume();
+		}
+	}
+
 
 	public List<KeyStroke> getKeys(JComponent c)
 	{
@@ -368,65 +422,10 @@ public class InputHandler
 				}
 			}
 		}
-		
-//		long end = System.currentTimeMillis();
-//
-//		Collections.sort(allKeys, new Comparator<KeyStroke>()
-//		{
-//			public int compare(KeyStroke o1, KeyStroke o2)
-//			{
-//				return o1.toString().compareTo(o2.toString());
-//			}
-//		});
-//
-//		System.out.println("+++++++++++ mapped ");
-//		System.out.println("*** to test: " + toTest.toString());
-//		for (KeyStroke key : allKeys)
-//		{
-//			System.out.println(key.toString());
-//		}
-//		System.out.println("----------- mapped ");
 
-//		System.out.println("time: "  + (end - start));
 		return allKeys.contains(toTest);
 	}
 
-	public void keyTyped(KeyEvent evt)
-	{
-
-		boolean isMapped = sequenceIsMapped;
-		sequenceIsMapped = false;
-		keySequence = false;
-
-		if (isMapped)
-		{
-			return;
-		}
-
-		char c = evt.getKeyChar();
-
-		if (c >= 0x20 && c != 0x7f)
-		{
-			KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
-			Object o = currentBindings.get(key);
-
-			if (o instanceof HashMap)
-			{
-				currentBindings = (HashMap)o;
-				return;
-			}
-			else if (o instanceof ActionListener)
-			{
-				currentBindings = bindings;
-				executeAction((ActionListener)o, evt.getSource(), String.valueOf(c));
-				return;
-			}
-
-			currentBindings = bindings;
-
-			executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(c));
-		}
-	}
 
 	/**
 	 * Converts a string to a keystroke. The string should be of the
