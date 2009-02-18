@@ -72,15 +72,20 @@ public class TriggerReader
 		tbl.adjustCase(this.dbConnection);
 		return getTriggers(tbl.getCatalog(), tbl.getSchema(), tbl.getTableName());
 	}
-	
+
+	public static final String TRIGGER_NAME_COLUMN = "TRIGGER";
+	public static final String TRIGGER_TYPE_COLUMN = "TYPE";
+	public static final String TRIGGER_EVENT_COLUMN = "EVENT";
+
+	public static final String[] LIST_COLUMNS = {TRIGGER_NAME_COLUMN, TRIGGER_TYPE_COLUMN, TRIGGER_EVENT_COLUMN};
+
 	protected DataStore getTriggers(String catalog, String schema, String tableName)
 		throws SQLException
 	{
-		final String[] cols = {"TRIGGER", "TYPE", "EVENT"};
 		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		final int[] sizes =   {30, 30, 20};
 
-		DataStore result = new DataStore(cols, types, sizes);
+		DataStore result = new DataStore(LIST_COLUMNS, types, sizes);
 		
 		GetMetaDataSql sql = dbMeta.metaSqlMgr.getListTriggerSql();
 		if (sql == null)

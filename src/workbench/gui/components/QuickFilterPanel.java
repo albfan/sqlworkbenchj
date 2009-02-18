@@ -10,8 +10,8 @@
  *
  */
 package workbench.gui.components;
+
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -50,8 +50,12 @@ import workbench.storage.filter.RegExComparator;
 import workbench.util.StringUtil;
 
 /**
- * A small panel with a find and find next button, and a criteria field
- * which provides a quick search facitiliy for a WbTable component
+ * A small panel which filters a table. Optionally a dropdown to select the filter
+ * column can be displayed. The context menu of the input field will always have
+ * the ability to select the filter column
+ *
+ * The available columns are retrieved from the table that should be filtered
+ *
  * @author  support@sql-workbench.net
  */
 public class QuickFilterPanel
@@ -71,21 +75,12 @@ public class QuickFilterPanel
 	private JCheckBoxMenuItem[] columnItems;
 	private TextComponentMouseListener textListener;
 
-	public QuickFilterPanel(WbTable table, String[] columns, boolean showDropDown, String historyProperty)
+	public QuickFilterPanel(WbTable table, boolean showDropDown, String historyProperty)
 	{
 		super();
 		this.searchTable = table;
 		this.searchTable.addPropertyChangeListener("model", this);
-		if (columns != null && columns.length == 1)
-		{
-			showColumnDropDown = false;
-		}
-		else
-		{
-			this.columnList = columns;
-			showColumnDropDown = showDropDown;
-		}
-		this.searchColumn = columns[0];
+		showColumnDropDown = showDropDown;
 		this.initGui(historyProperty);
 	}
 
@@ -98,6 +93,39 @@ public class QuickFilterPanel
 		this.initGui(historyProperty);
 	}
 
+	private void initDropDown()
+	{
+		if (this.columnList == null)
+		{
+			columnDropDown = new JComboBox(new String[] { "        " });
+		}
+		else
+		{
+			columnDropDown = new JComboBox(columnList);
+		}
+		columnDropDown.addActionListener(this);
+		columnDropDown.setSelectedIndex(0);
+		columnDropDown.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnSelector"));
+
+		GridBagConstraints gridBagConstraints = new GridBagConstraints();
+		gridBagConstraints.anchor = GridBagConstraints.WEST;
+		gridBagConstraints.gridx = 2;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.weightx = 0.0;
+		this.add(columnDropDown, gridBagConstraints);
+	}
+
+	private void setFilterTooltip()
+	{
+		String col = "";
+		if (searchColumn != null)
+		{
+			col = ResourceMgr.getFormattedString("TxtQuickFilterCurrCol", searchColumn);
+		}
+		String msg = ResourceMgr.getFormattedString("TxtQuickFilterColumnHint", col);
+		this.filterValue.setToolTipText(msg);
+	}
+
 	private void initGui(String historyProperty)
 	{
 		GridBagConstraints gridBagConstraints;
@@ -106,14 +134,8 @@ public class QuickFilterPanel
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.filterValue = new HistoryTextField(historyProperty);
-		this.filterValue.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnHint"));
-		if (this.columnList != null && this.showColumnDropDown)
-		{
-			columnDropDown = new JComboBox(columnList);
-			columnDropDown.addActionListener(this);
-			columnDropDown.setSelectedIndex(0);
-			columnDropDown.setToolTipText(ResourceMgr.getString("TxtQuickFilterColumnSelector"));
-		}
+		setFilterTooltip();
+		filterValue.setColumns(10);
 
 		initPopup();
 
@@ -126,37 +148,19 @@ public class QuickFilterPanel
 		this.toolbar.setMargin(new Insets(0,0,0,0));
 		toolbar.setBorderPainted(true);
 
-		Dimension d = new Dimension(32768, 20);
-		this.setMaximumSize(d);
-		this.filterValue.setMaximumSize(d);
-		//this.filterValue.setPreferredSize(new Dimension(25,20));
-		this.toolbar.setMaximumSize(d);
-
 		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.anchor = GridBagConstraints.WEST;
 		gridBagConstraints.gridx = 0;
 		this.add(toolbar, gridBagConstraints);
 
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.weightx = 1;
+		this.add(filterValue, gridBagConstraints);
+
 		if (showColumnDropDown)
 		{
-			gridBagConstraints.gridx ++;
-			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints.weightx = 0.8;
-			this.add(filterValue, gridBagConstraints);
-
-			gridBagConstraints.gridx ++;
-			//gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
-			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints.weightx = 0.2;
-			this.add(columnDropDown, gridBagConstraints);
-		}
-		else
-		{
-			gridBagConstraints.gridx ++;
-			gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
-			gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-			gridBagConstraints.weightx = 1.0;
-			this.add(filterValue, gridBagConstraints);
+			initDropDown();
 		}
 
 		InputMap im = new ComponentInputMap(this);
@@ -208,22 +212,28 @@ public class QuickFilterPanel
 			menu.add(columnItems[i]);
 		}
 		textListener.addMenuItem(menu);
+		setFilterTooltip();
 		ed.addMouseListener(textListener);
-	}
-
-	private void updateColumnDropDown()
-	{
-		if (this.columnList == null || this.columnDropDown == null) return;
-		columnDropDown = new JComboBox(columnList);
-		columnDropDown.setModel(new DefaultComboBoxModel(this.columnList));
 	}
 
 	public void setColumnList(String[] columns)
 	{
+		if (columns == null || columns.length == 0) return;
 		if (StringUtil.arraysEqual(columns, columnList)) return;
 		this.columnList = columns;
+		this.searchColumn = columns[0];
 		initPopup();
-		updateColumnDropDown();
+		if (showColumnDropDown)
+		{
+			if (columnDropDown == null)
+			{
+				initDropDown();
+			}
+			else
+			{
+				columnDropDown.setModel(new DefaultComboBoxModel(this.columnList));
+			}
+		}
 	}
 
 	private void setupActionMap(InputMap im, ActionMap am)
@@ -346,6 +356,7 @@ public class QuickFilterPanel
 				}
 			}
 		}
+		setFilterTooltip();
 	}
 
 	public void mouseClicked(MouseEvent e)

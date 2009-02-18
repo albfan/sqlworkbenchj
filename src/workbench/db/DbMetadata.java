@@ -1078,6 +1078,11 @@ public class DbMetadata
 		return getTables(aCatalog, aSchema, null, types);
 	}
 
+	public String[] getTableListColumns()
+	{
+		return new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
+	}
+
 	public DataStore getTables(String aCatalog, String aSchema, String tables, String[] types)
 		throws SQLException
 	{
@@ -1086,7 +1091,7 @@ public class DbMetadata
 
 		if (aSchema != null) aSchema = StringUtil.replace(aSchema, "*", "%");
 		if (tables != null) tables = StringUtil.replace(tables, "*", "%");
-		String[] cols = new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
+		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30,12,10,10,20};
 

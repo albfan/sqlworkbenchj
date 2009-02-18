@@ -138,8 +138,7 @@ public class ProcedureListPanel
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		String[] cols = new String[] {"PROCEDURE_NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
-		this.findPanel = new QuickFilterPanel(this.procList, cols, false, "procedurelist");
+		this.findPanel = new QuickFilterPanel(this.procList, false, "procedurelist");
 
 		ReloadAction a = new ReloadAction(this);
 

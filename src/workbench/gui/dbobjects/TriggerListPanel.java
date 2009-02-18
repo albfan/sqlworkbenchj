@@ -125,8 +125,7 @@ public class TriggerListPanel
 		this.triggerList.getSelectionModel().addListSelectionListener(this);
 		this.triggerList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-		String[] cols = new String[] {"NAME", "TYPE", "EVENT"};
-		this.findPanel = new QuickFilterPanel(this.triggerList, cols, false, "triggerlist");
+		this.findPanel = new QuickFilterPanel(this.triggerList, false, "triggerlist");
 
 		ReloadAction a = new ReloadAction(this);
 

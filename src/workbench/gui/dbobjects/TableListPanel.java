@@ -293,8 +293,7 @@ public class TableListPanel
 
 		this.extendPopupMenu();
 
-		String[] s = new String[] { "NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
-		this.findPanel = new QuickFilterPanel(this.tableList, s, false, "tablelist");
+		this.findPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
 
 		ReloadAction a = new ReloadAction(this);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
@@ -334,7 +333,6 @@ public class TableListPanel
 
 		this.listPanel.add(scroll, BorderLayout.CENTER);
 		this.listPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
-
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
 		this.splitPane.setDividerSize(5);
@@ -694,7 +692,7 @@ public class TableListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		
+
 		this.tableTypes.removeActionListener(this);
 		this.displayTab.removeChangeListener(this);
 
@@ -704,7 +702,12 @@ public class TableListPanel
 		this.tableDefinition.setConnection(aConnection);
 		this.triggers.setConnection(aConnection);
 		this.tableSource.setDatabaseConnection(aConnection);
-		
+
+		if (this.dbConnection != null)
+		{
+			this.findPanel.setColumnList(dbConnection.getMetadata().getTableListColumns());
+		}
+
 		this.reset();
 		try
 		{
@@ -1191,11 +1194,11 @@ public class TableListPanel
 //	{
 //		tableUsage.retrieve(selectedTable);
 //	}
-	
+
 	protected void retrieveTableSource()
 	{
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
-		
+
 		TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
 
 		try
@@ -1432,7 +1435,7 @@ public class TableListPanel
 	protected void retrieveCurrentPanel(final boolean withMessage)
 	{
 		if (this.dbConnection == null) return;
-		
+
 		if (this.isBusy() || this.dbConnection.isBusy())
 		{
 			this.invalidateData();
@@ -1732,7 +1735,7 @@ public class TableListPanel
 	public void actionPerformed(ActionEvent e)
 	{
 		if (ignoreStateChanged) return;
-		
+
 		if (e.getSource() == this.tableTypes)
 		{
 			try
@@ -1893,7 +1896,7 @@ public class TableListPanel
 			retrieve();
 		}
 		checkSelectedTypes(table);
-		
+
 		for (int row = 0; row < this.tableList.getRowCount(); row ++)
 		{
 			TableIdentifier tbl = createTableIdentifier(row);
@@ -1908,7 +1911,7 @@ public class TableListPanel
 		}
 		return false;
 	}
-	
+
 	public void exportData()
 	{
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;

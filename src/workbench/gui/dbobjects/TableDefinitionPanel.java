@@ -101,13 +101,16 @@ public class TableDefinitionPanel
 
 		toolbar = new JPanel(new GridBagLayout());
 
-		String[] cols = new String[] {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "JAVA_TYPE"};
-		columnFilter  = new QuickFilterPanel(this.tableDefinition, cols, true, "columnlist");
+		columnFilter  = new QuickFilterPanel(this.tableDefinition, true, "columnlist");
+		// Setting the column list now, ensures that the dropdown will be displayed
+		// properly in the QuickFilterPanel, although it wouldn't be necessary
+		// as the column list will be updated automatically when the model of the table changes
+		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
 		columnFilter.addToToolbar(reloadAction, 0);
 		GridBagConstraints cc = new GridBagConstraints();
 
 		cc.anchor = GridBagConstraints.WEST;
-		cc.fill = GridBagConstraints.HORIZONTAL;
+		cc.fill = GridBagConstraints.NONE;
 		cc.gridx = 0;
 		cc.weightx = 0.0;
 		cc.ipadx = 0;
@@ -123,16 +126,12 @@ public class TableDefinitionPanel
 		toolbar.add(l, cc);
 
 		tableNameLabel = new JLabel();
+		cc.fill = GridBagConstraints.HORIZONTAL;
 		cc.gridx ++;
-		cc.weightx = 0.0;
+		cc.weightx = 1.0;
 		cc.fill = GridBagConstraints.NONE;
 		cc.insets = new Insets(0, 0, 0, 0);
 		toolbar.add(tableNameLabel, cc);
-
-		cc.gridx ++;
-		cc.weightx = 1.0;
-		cc.fill = GridBagConstraints.HORIZONTAL;
-		toolbar.add(new JPanel(), cc);
 
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		this.setLayout(new BorderLayout());
