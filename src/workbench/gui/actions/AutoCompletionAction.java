@@ -18,7 +18,6 @@ import workbench.db.WbConnection;
 import workbench.gui.completion.CompletionHandler;
 import workbench.gui.editor.JEditTextArea;
 import workbench.interfaces.StatusBar;
-import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
