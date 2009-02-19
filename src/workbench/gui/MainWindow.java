@@ -524,13 +524,12 @@ public class MainWindow
 	 */
 	private void updateToolbarVisibility()
 	{
-		boolean needInvalidate = false;
 		final Container content = this.getContentPane();
+
 		if (this.currentToolbar != null)
 		{
 			content.remove(this.currentToolbar);
 			this.currentToolbar = null;
-			needInvalidate = true;
 		}
 
 		if (GuiSettings.getShowToolbar())
@@ -539,14 +538,18 @@ public class MainWindow
 			if (curPanel != null)
 			{
 				this.currentToolbar = curPanel.getToolbar();
-				content.add(this.currentToolbar, BorderLayout.NORTH);
-				needInvalidate = true;
+				content.add(currentToolbar, BorderLayout.NORTH);
 			}
 		}
-		if (needInvalidate)
+		content.validate();
+		
+		EventQueue.invokeLater(new Runnable() 
 		{
-			content.validate();
-		}
+			public void run()
+			{
+				content.doLayout();
+			}
+		});
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -911,6 +914,7 @@ public class MainWindow
 				updateGuiForTab(anIndex);
 			}
 		});
+		WbSwingUtilities.repaintLater(this);
 	}
 
 	protected void updateGuiForTab(int anIndex)
@@ -953,6 +957,8 @@ public class MainWindow
 				updateCurrentTab(index);
 			}
 		});
+		WbSwingUtilities.repaintLater(this);
+		WbSwingUtilities.repaintLater(this.getContentPane());
 	}
 
 	protected void updateCurrentTab(int index)
