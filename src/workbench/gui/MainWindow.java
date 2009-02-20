@@ -547,6 +547,7 @@ public class MainWindow
 		{
 			public void run()
 			{
+				content.validate();
 				content.doLayout();
 			}
 		});

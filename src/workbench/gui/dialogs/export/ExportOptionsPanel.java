@@ -207,7 +207,9 @@ public class ExportOptionsPanel
 			this.xlsOptions.restoreSettings();
 		}
 		String code = Settings.getInstance().getProperty("workbench.export.type", null);
-		this.setExportType(ExportType.getTypeFromCode(code));
+		ExportType type = ExportType.getTypeFromCode(code);
+		if (type == null) type = ExportType.TEXT;
+		this.setExportType(type);
 	}
 	
 	/**
@@ -216,6 +218,11 @@ public class ExportOptionsPanel
 	 */
 	public void setExportType(ExportType type)
 	{
+		if (type == null)
+		{
+			setTypeText();
+			return;
+		}
 		switch (type)
 		{
 			case HTML:

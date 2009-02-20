@@ -37,7 +37,6 @@ public class VersionCheckDialog
 {
 	private WbVersionReader versionReader;
 
-	/** Creates new form VersionCheckDialog */
 	public VersionCheckDialog(java.awt.Frame parent)
 	{
 		super(parent, true);
