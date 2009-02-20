@@ -114,8 +114,7 @@ public final class WbManager
 		JFrame parent = WbManager.getInstance().getCurrentWindow();
 		if (parent == null)
 		{
-			LogMgr.logError("WbManager.showDialog()", "Could not find the current MainWindow!", null);
-			return;
+			LogMgr.logWarning("WbManager.showDialog()", "Could not find the current MainWindow!", null);
 		}
 
 		JDialog dialog = null;
