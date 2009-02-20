@@ -191,15 +191,4 @@ public class DriverlistEditorPanel
 		conn.saveDrivers();
 	}
 
-	public void saveSettings()
-	{
-		//		int location = this.jSplitPane1.getDividerLocation();
-		//		Settings.getInstance().setProperty(this.getClass().getName() + ".divider", location);
-	}
-
-	public void restoreSettings()
-	{
-		//		int location = Settings.getInstance().getIntProperty(this.getClass().getName() + ".divider", 140);
-		//		this.jSplitPane1.setDividerLocation(location);
-	}
 }

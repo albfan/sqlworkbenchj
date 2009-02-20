@@ -128,7 +128,7 @@ public class ProfileEditorPanel
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getPropertyName().equals("driver"))
+		if (evt.getPropertyName().equals("drivers"))
 		{
 			EventQueue.invokeLater(new Runnable()
 			{

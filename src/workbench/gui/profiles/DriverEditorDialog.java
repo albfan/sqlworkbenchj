@@ -60,7 +60,6 @@ public class DriverEditorDialog
 		{
 			this.setSize(680,500);
 		}
-		driverListPanel.restoreSettings();
 
 		// when invoked from the connection dialog, it seems that under
 		// Linux the dialog is not visible (because it's behind the connection
@@ -160,7 +159,6 @@ public class DriverEditorDialog
 
   public boolean isCancelled() { return this.cancelled; }
 
-	/** Closes the dialog */
 	private void closeDialog(WindowEvent evt)
 	{
 		this.closeDialog();
@@ -169,7 +167,6 @@ public class DriverEditorDialog
 	public void closeDialog()
 	{
 		Settings.getInstance().storeWindowSize(this);
-		driverListPanel.saveSettings();
 		setVisible(false);
 		dispose();
 	}
