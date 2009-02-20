@@ -49,8 +49,15 @@ public class TableCreator
 		this.mapper = new TypeMapper(this.connection);
 	}
 
-	public void useDbmsDataType(boolean flag) { this.useDbmsDataType = flag; }
-	public TableIdentifier getTable() { return this.tablename; }
+	public void useDbmsDataType(boolean flag)
+	{
+		this.useDbmsDataType = flag;
+	}
+
+	public TableIdentifier getTable()
+	{
+		return this.tablename;
+	}
 	
 	public void createTable()
 		throws SQLException

@@ -1554,7 +1554,7 @@ public class DataImporter
 				text.append(',');
 				parms.append(',');
 			}
-			text.append(this.targetColumns.get(i).getColumnName());
+			text.append(this.dbConn.getMetadata().quoteObjectname(this.targetColumns.get(i).getColumnName()));
 			parms.append('?');
 		}
 		if (this.columnConstants != null)

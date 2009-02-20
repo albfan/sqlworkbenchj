@@ -262,10 +262,23 @@
 
 					<row>
 						<entry>-createTarget</entry>
-						<entry>If this parameter is set to <literal>true</literal> the target table
-						will be created, if it doesn't exist.
-						Valid values are <literal>true</literal> or <literal>false</literal>.
+						<entry>
+							<para>
+								If this parameter is set to <literal>true</literal> the target table
+								will be created, if it doesn't exist.
+								Valid values are <literal>true</literal> or <literal>false</literal>.
+							</para>
+							<para>
+								When using this option with different source and target DBMS, the information
+								about the datatypes to be used in the target database are retrieved from
+								the JDBC driver. In some cases this information might not be accurate
+								or complete. You can enhance the information from the driver by configuring
+								your own mappings in workbench.settings. Please see the section
+								<link linkend="db-custom-type-map">Customizing data type mapping</link>
+								for details.
+							</para>
 						</entry>
+
 					</row>
 
 					<row>

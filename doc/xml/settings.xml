@@ -613,6 +613,58 @@
 			</para>
 			<para>Default value: <literal>false</literal></para>
 		</simplesect>
+
+		<simplesect id="db-custom-type-map">
+			<title>Customizing data type mapping</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.typemap</literal></para>
+			<para>
+				When using the <literal>-createTarget</literal> parameter for
+				<link linkend="command-copy">WbCopy</link>, the type mapping from the JDBC driver might
+				not be sufficient or correct. With this setting you can define your own type mapping
+				for a specific dbms. The entry is a list of mappings that map the numeric value
+				of a JDBC datatype (as defined in <ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Types.html">java.sql.Types</ulink>)
+				to a real data type name for the DBMS. The numeric JDBC datatype value and the
+				DBMS specific datatype name are separated with a colon. Each pair is separated
+				by a semicolon.
+			</para>
+
+			<para>
+				The following entry maps the JDBC datatype with the value 3 (NUMERIC) to the target
+				datatype <literal>double</literal> and the value 2 (BIGINT) to the target
+				type NUMBER. The NUMBER datatypes needs uses two parameter placeholders
+				<literal>$size</literal> and <literal>$digits</literal>. The last mapping
+				maps the JDBC value -1 (LONGVARCHAR) to the DBMS type <literal>VARCHAR</literal>
+				using only the <literal>$size</literal> parameter
+			</para>
+			<programlisting>workbench.db.[some_db].typemap=3:DOUBLE;2:NUMBER($size,$digits);-1:VARCHAR($size)</programlisting>
+			<para>
+				JDBC 3.0 defines the following constants:
+				<itemizedlist>
+					<listitem>BIGINT = -5</listitem>
+					<listitem>BINARY = -2</listitem>
+					<listitem>BIT = -7</listitem>
+					<listitem>BLOB = 2004</listitem>
+					<listitem>BOOLEAN = 16</listitem>
+					<listitem>CHAR = 1</listitem>
+					<listitem>CLOB = 2005</listitem>
+					<listitem>DATE = 91</listitem>
+					<listitem>DECIMAL = 3</listitem>
+					<listitem>DOUBLE = 8</listitem>
+					<listitem>FLOAT = 6</listitem>
+					<listitem>INTEGER = 4</listitem>
+					<listitem>LONGVARBINARY = -4</listitem>
+					<listitem>LONGVARCHAR = -1</listitem>
+					<listitem>NUMERIC = 2</listitem>
+					<listitem>REAL = 7</listitem>
+					<listitem>SMALLINT = 5</listitem>
+					<listitem>TIME = 92</listitem>
+					<listitem>TIMESTAMP = 93</listitem>
+					<listitem>TINYINT = -6</listitem>
+					<listitem>VARBINARY = -3</listitem>
+					<listitem>VARCHAR = 12</listitem>
+				</itemizedlist>
+			</para>
+		</simplesect>
 		
   </section>
 			

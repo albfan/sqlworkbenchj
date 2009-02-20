@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.Types40;
 
 /**
@@ -32,7 +33,15 @@ public class TypeMapper
 {
 	private WbConnection targetDb;
 	private Map<Integer, String> typeInfo;
+	private Map<Integer, String> userMapping;
+	
+	/**
+	 * For testing purposes only!
+	 */
+	TypeMapper()
+	{
 
+	}
 	/**
 	 * Create a TypeMapper for the DBMS specified through the target connection.
 	 * @param targetConnection
@@ -91,9 +100,27 @@ public class TypeMapper
 		}
 		return null;
 	}
+
+	protected String getUserMapping(int type, int size, int digits)
+	{
+		if (userMapping == null) return null;
+		Integer key = Integer.valueOf(type);
+		String userType = userMapping.get(key);
+		if (userType == null) return null;
+
+		userType = userType.replace("$size", Integer.toString(size));
+		userType = userType.replace("$digits", Integer.toString(digits));
+
+		return userType;
+	}
 	
 	public String getTypeName(int type, int size, int digits)
 	{
+
+		
+		String userType = getUserMapping(type, size, digits);
+		if (userType != null) return userType;
+		
 		Integer key = Integer.valueOf(type);
 		String name = this.typeInfo.get(key);
 		
@@ -125,7 +152,41 @@ public class TypeMapper
 		return this.targetDb.getMetadata().getDataTypeResolver().getSqlTypeDisplay(name, type, size, digits, -1);
 	}
 
+	private void parseTypeMap()
+	{
+		String mapping = targetDb.getDbSettings().getJDBCTypeMapping();
+		parseTypeMap(mapping);
+	}
 
+	/**
+	 * Mad protected for testing purposes
+	 * 
+	 * @param mapping
+	 */
+	protected void parseTypeMap(String mapping)
+	{
+		if (StringUtil.isBlank(mapping)) return;
+		userMapping = new HashMap<Integer, String>();
+		List<String> types = StringUtil.stringToList(mapping, ";", true, true, false, false);
+		for (String type : types)
+		{
+			String[] def = type.split("\\:");
+			if (def != null && def.length == 2)
+			{
+				try
+				{
+					Integer typeValue = Integer.parseInt(def[0]);
+					LogMgr.logDebug("TypeMapp.parseTypeMap()", "Mapping JDBC Type " + SqlUtil.getTypeName(typeValue) + " to usertype: " + def[1]);
+					this.userMapping.put(typeValue, def[1]);
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("TypeMapp.parseTypeMap()", "Could not parse entry: " + type, e);
+				}
+			}
+		}
+	}
+	
 	private void createTypeMap()
 	{
 		ResultSet rs = null;
@@ -162,6 +223,7 @@ public class TypeMapper
 		{
 			SqlUtil.closeResult(rs);
 		}
+		parseTypeMap();
 	}
 }
 

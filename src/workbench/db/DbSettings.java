@@ -770,4 +770,14 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "selectexpression." + cleanType.toLowerCase(), null);
 	}
+
+	/**
+	 * Return a customized mapping of JDBC types to native datatypes.
+	 * @see TypeMapper
+	 * @return
+	 */
+	public String getJDBCTypeMapping()
+	{
+		return Settings.getInstance().getProperty(prefix + "typemap", null);
+	}
 }

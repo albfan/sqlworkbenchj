@@ -1,6 +1,10 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
-Enh: (103.3) A manually changed column order in the table data of 
+Enh: (103.4) When using WbCopy's -createTarget=true, data type mappings
+     can now be specified in workbench.settings that enhance or
+     overwrite the data type mapping returned by the driver.
+     Details can be found in the manual.
+Enh: (103.3) Manually changed column order in the table data of
      the DbExplorer can now be saved. Either manually through the
      popup menu of the table header, or automatically through
      an option for the DbExplorer.
@@ -14,10 +18,15 @@ Enh: (103.1) A single record dialog is now available to edit data in a
      result set (Data -> Single record dialog)
 Enh: (103.1) A new option to control the use of uppercase keywords for the
      SQL formatter is available (Tools -> Options -> SQL Formatter)
+Fix: (103.4) The driver dropdown in the connection dialog was not updated
+     when a new driver was added while the connection dialog was open.
+Fix: (103.4) The About Dialog was not displayed on MacOS when more than
+     one application window was open.
+Fix: (103.4) The quick filter in the Trigger panel was no longer working
+Fix: (103.4) Copy & Paste shortcuts were not working on MacOS
 Fix: (103.4) Fixed a repainting on Mac issue in the toolbar when 
      switching between DbExplorer tab and editor tabs
 Fix: (103.4) Save Data As was not working if it has never been called before
-Fix: (103.3) Copy & Paste shortcuts were not working on MacOS
 Fix: (103.3) Fixed displaying the PDF manual on MacOS (Thanks Markus!)
 Fix: (103.2) Some workspaces were not loaded properly and editor tabs would 
      be removed upon loading.
