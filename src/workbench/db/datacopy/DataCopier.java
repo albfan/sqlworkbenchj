@@ -13,6 +13,7 @@ package workbench.db.datacopy;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.GenericObjectDropper;
 import workbench.db.TableCreator;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
@@ -71,7 +73,7 @@ public class DataCopier
 	// the columnMap will contain elements of type ColumnIdentifier
 	private Map<ColumnIdentifier, ColumnIdentifier> columnMap;
 
-	private ColumnIdentifier[] targetColumnsForQuery;
+	private List<ColumnIdentifier> targetColumnsForQuery;
 	private MessageBuffer messages = null;
 	private MessageBuffer errors = null;
 	private boolean doSyncDelete = false;
@@ -245,6 +247,10 @@ public class DataCopier
 			creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 			creator.createTable();
 
+			TableDefinition newTable = targetConnection.getMetadata().getTableDefinition(targetTable);
+			targetTable = newTable.getTable();
+			updateTargetColumns(newTable.getColumns(), columnMap.values());
+			
 			// no need to delete rows from a newly created table
 			this.setDeleteTarget(DeleteType.none);
 			this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableCreated", this.targetTable.getTableExpression(this.targetConnection)) + "\n");
@@ -254,6 +260,29 @@ public class DataCopier
 			//LogMgr.logError("DataCopier.copyFromTable()", "Error when creating target table", e);
 			this.addError(ResourceMgr.getFormattedString("MsgCopyErrorCreatTable",targetTable.getTableExpression(this.targetConnection),ExceptionUtil.getDisplay(e)));
 			throw e;
+		}
+	}
+
+	/**
+	 * After creating the target table, the column definitions for the newly
+	 * create table are retrieved and we have to use those columns e.g.
+	 * because upper/lowercase can be different now if the column names
+	 * were specified by the user, and the DBMS folded them to upper or lowercase
+	 * @param realCols
+	 */
+	private void updateTargetColumns(List<ColumnIdentifier> realCols, Collection<ColumnIdentifier> toUpdate)
+	{
+		for (ColumnIdentifier targetCol : toUpdate)
+		{
+			ColumnIdentifier realCol = findColumn(realCols, targetCol.getColumnName());
+			if (realCol != null)
+			{
+				targetCol.setColumnName(realCol.getColumnName());
+				targetCol.setDbmsType(realCol.getDbmsType());
+				targetCol.setDataType(realCol.getDataType());
+				targetCol.setColumnSize(realCol.getColumnSize());
+				targetCol.setDecimalDigits(realCol.getDecimalDigits());
+			}
 		}
 	}
 
@@ -284,7 +313,7 @@ public class DataCopier
 			}
 			createTable(cols, dropTarget);
 		}
-		this.targetColumnsForQuery = queryColumns;
+		this.targetColumnsForQuery = Arrays.asList(queryColumns);
 		this.initImporterForQuery(aSourceQuery);
 	}
 
@@ -443,6 +472,8 @@ public class DataCopier
 		throws SQLException
 	{
 		if (this.targetColumnsForQuery == null) return;
+		List<ColumnIdentifier> realCols = targetConnection.getMetadata().getTableColumns(targetTable);
+		updateTargetColumns(realCols, targetColumnsForQuery);
 		this.importer.setTargetTable(this.targetTable, this.targetColumnsForQuery);
 		initQuerySource(query);
 	}
@@ -459,7 +490,7 @@ public class DataCopier
 			throw new SQLException("No columns defined");
 		}
 		int count = this.columnMap.size();
-		ColumnIdentifier[] cols = new ColumnIdentifier[count];
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(count);
 
 		int col = 0;
 
@@ -475,7 +506,7 @@ public class DataCopier
 				sql.append(", ");
 			}
 			sql.append(sourceConnection.getMetadata().quoteObjectname(sid.getColumnName()));
-			cols[col] = tid;
+			cols.add(tid);
 			col ++;
 		}
 
@@ -525,11 +556,7 @@ public class DataCopier
 		}
 		else if (this.targetColumnsForQuery != null)
 		{
-			sourceCols = new ArrayList<ColumnIdentifier>(this.targetColumnsForQuery.length);
-			for (ColumnIdentifier col : targetColumnsForQuery)
-			{
-				sourceCols.add(col);
-			}
+			sourceCols = new ArrayList<ColumnIdentifier>(this.targetColumnsForQuery);
 		}
 		return sourceCols;
 	}

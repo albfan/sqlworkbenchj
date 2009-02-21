@@ -48,7 +48,7 @@ public interface RowDataReceiver
 	void processRow(Object[] row) throws SQLException;
 	void setTableCount(int total);
 	void setCurrentTable(int current);
-	void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)	throws SQLException;
+	void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)	throws SQLException;
 	void importFinished();
 	void importCancelled();
 	void tableImportError();

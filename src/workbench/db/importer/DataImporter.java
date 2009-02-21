@@ -21,7 +21,6 @@ import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Arrays;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -42,6 +41,7 @@ import java.io.Reader;
 import java.sql.Clob;
 import java.sql.Savepoint;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import workbench.db.compare.BatchedStatement;
 import workbench.interfaces.BatchCommitter;
@@ -1332,7 +1332,7 @@ public class DataImporter
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
-	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)
+	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
 		throws SQLException
 	{
 		// be prepared to import more then one table...
@@ -1363,7 +1363,7 @@ public class DataImporter
 		try
 		{
 			this.targetTable = table.createCopy();
-			this.targetColumns = Arrays.asList(columns);
+			this.targetColumns = new ArrayList<ColumnIdentifier>(columns);
 
 			// Key columns might have been externally defined if
 			// a single table import is run which is not possible
@@ -1547,6 +1547,9 @@ public class DataImporter
 		}
 		text.append(targetTable.getTableExpression(this.dbConn));
 		text.append(" (");
+
+		DbMetadata meta = dbConn.getMetadata();
+
 		for (int i=0; i < this.colCount; i++)
 		{
 			if (i > 0)
@@ -1554,7 +1557,11 @@ public class DataImporter
 				text.append(',');
 				parms.append(',');
 			}
-			text.append(this.dbConn.getMetadata().quoteObjectname(this.targetColumns.get(i).getColumnName()));
+			ColumnIdentifier col = this.targetColumns.get(i);
+			String colname = col.getColumnName();
+			colname = meta.quoteObjectname(colname);
+			text.append(colname);
+
 			parms.append('?');
 		}
 		if (this.columnConstants != null)

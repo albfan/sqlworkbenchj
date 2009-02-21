@@ -166,10 +166,10 @@ public class DataStoreImporter
 	{
 	}
 
-	public void setTargetTable(TableIdentifier table, ColumnIdentifier[] columns)
+	public void setTargetTable(TableIdentifier table, List<ColumnIdentifier> columns)
 		throws SQLException
 	{
-		if (columns.length != this.target.getColumnCount())
+		if (columns.size() != this.target.getColumnCount())
 		{
 			if (errorHandler != null) errorHandler.fatalError(ResourceMgr.getString("ErrImportInvalidColumnStructure"));
 			throw new SQLException("Invalid column count");

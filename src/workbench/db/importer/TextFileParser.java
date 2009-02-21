@@ -23,6 +23,7 @@ import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.interfaces.JobErrorHandler;
@@ -71,7 +72,7 @@ public class TextFileParser
 	private int colCount = -1;
 	private int importColCount = -1;
 
-	private ColumnIdentifier[] columns;
+	private List<ColumnIdentifier> columns;
 
 	// When importing a file with fixed column widths
 	// each entry in this array defines the width of the corresponding
@@ -383,8 +384,6 @@ public class TextFileParser
 
 		for (int i=0; i < count; i++)
 		{
-			// We use toString() so that either ColumnIds or Strings
-			// can be put into the passed list
 			ColumnIdentifier col = colIds.get(i);
 			int index = this.getColumnIndex(col.getColumnName());
 			if (index > -1)
@@ -402,23 +401,32 @@ public class TextFileParser
 		}
 	}
 
-	private ColumnIdentifier[] getColumnsToImport()
+	private List<ColumnIdentifier> getColumnsToImport()
 	{
 		if (this.columnMap == null) return this.columns;
 		if (this.importColCount == this.colCount) return this.columns;
-		ColumnIdentifier[] result = new ColumnIdentifier[this.importColCount];
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(this.importColCount);
 		int col = 0;
 		for (int i=0; i < this.colCount; i++)
 		{
 			if (this.columnMap[i] != -1)
 			{
-				result[col] = this.columns[i];
+				result.add(this.columns.get(i));
 				col++;
 			}
 		}
 		return result;
 	}
 
+	private ColumnIdentifier getColumn(int index)
+	{
+		if (columns == null) return null;
+		if (index < columns.size())
+		{
+			return columns.get(index);
+		}
+		return null;
+	}
 	/**
 	 * Return the index of the specified column
 	 * in the import file.
@@ -433,7 +441,8 @@ public class TextFileParser
 		if (this.columns == null) return -1;
 		for (int i=0; i < this.colCount; i++)
 		{
-			if (this.columns[i] != null && colName.equalsIgnoreCase(this.columns[i].getColumnName())) return i;
+			ColumnIdentifier col = getColumn(i);
+			if (col != null && colName.equalsIgnoreCase(col.getColumnName())) return i;
 		}
 		return -1;
 	}
@@ -465,11 +474,7 @@ public class TextFileParser
 		else
 		{
 			this.colCount = columnList.size();
-			this.columns = new ColumnIdentifier[colCount];
-			for (int i = 0; i < columns.length; i++)
-			{
-				this.columns[i] = columnList.get(i);
-			}
+			this.columns = new ArrayList<ColumnIdentifier>(columnList);
 			this.importAllColumns();
 		}
 	}
@@ -490,10 +495,10 @@ public class TextFileParser
 		}
 
 		this.delimiter = null;
-		this.columnWidthMap = new int[this.columns.length];
-		for (int i = 0; i < columns.length; i++)
+		this.columnWidthMap = new int[this.columns.size()];
+		for (int i = 0; i < columns.size(); i++)
 		{
-			Integer width = widthMapping.get(columns[i]);
+			Integer width = widthMapping.get(getColumn(i));
 			if (width != null)
 			{
 				this.columnWidthMap[i] = width.intValue();
@@ -783,7 +788,7 @@ public class TextFileParser
 		}
 
 
-		ColumnIdentifier[] cols = this.getColumnsToImport();
+		List<ColumnIdentifier> cols = this.getColumnsToImport();
 		try
 		{
 			this.receiver.setTargetTable(getTargetTable(), cols);
@@ -903,11 +908,12 @@ public class TextFileParser
 						if (tok.hasNext())
 						{
 							value = tok.getNext();
-							if (this.columns[i] == null) continue;
+							ColumnIdentifier col = getColumn(i);
+							if (col == null) continue;
 							targetIndex = this.columnMap[i];
 							if (targetIndex == -1) continue;
 
-							int colType = this.columns[i].getDataType();
+							int colType = col.getDataType();
 
 							if (hasColumnFilter && this.columnFilter[i] != null)
 							{
@@ -926,7 +932,7 @@ public class TextFileParser
 
 							if (this.valueModifier != null)
 							{
-								value = valueModifier.modifyValue(columns[i], value);
+								value = valueModifier.modifyValue(col, value);
 							}
 
 							if (SqlUtil.isCharacterType(colType))
@@ -974,7 +980,7 @@ public class TextFileParser
 						if (targetIndex != -1) rowData[targetIndex] = null;
 						String msg = ResourceMgr.getString("ErrTextfileImport");
 						msg = msg.replace("%row%", Integer.toString(importRow));
-						msg = msg.replace("%col%", (this.columns[i] == null ? "n/a" : this.columns[i].getColumnName()));
+						msg = msg.replace("%col%", (getColumn(i) == null ? "n/a" : getColumn(i).getColumnName()));
 						msg = msg.replace("%value%", (value == null ? "(NULL)" : value));
 						msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						this.messages.append(msg);
@@ -989,7 +995,7 @@ public class TextFileParser
 						LogMgr.logWarning("TextFileParser.processOneFile()", msg, e);
 						if (this.errorHandler != null)
 						{
-							int choice = errorHandler.getActionOnError(importRow, this.columns[i].getColumnName(), (value == null ? "(NULL)" : value), ExceptionUtil.getDisplay(e, false));
+							int choice = errorHandler.getActionOnError(importRow, getColumn(i).getColumnName(), (value == null ? "(NULL)" : value), ExceptionUtil.getDisplay(e, false));
 							if (choice == JobErrorHandler.JOB_ABORT) throw e;
 							if (choice == JobErrorHandler.JOB_IGNORE_ALL)
 							{
@@ -1193,12 +1199,13 @@ public class TextFileParser
 		try
 		{
 			this.colCount = cols.size();
-			this.columns = new ColumnIdentifier[colCount];
+			this.columns = new ArrayList<ColumnIdentifier>(colCount);
 			ArrayList<ColumnIdentifier> realCols = new ArrayList<ColumnIdentifier>();
 			boolean partialImport = false;
 			DbMetadata meta = this.connection.getMetadata();
-			TableIdentifier targetTable = getTargetTable();
-			List tableCols = meta.getTableColumns(targetTable);
+			TableDefinition def = meta.getTableDefinition(getTargetTable());
+			TableIdentifier targetTable = def.getTable();
+			List<ColumnIdentifier> tableCols = def.getColumns();
 			int numTableCols = tableCols.size();
 
 			// Should not happen, but just to make sure ;)
@@ -1215,15 +1222,16 @@ public class TextFileParser
 				if (colname.toLowerCase().startsWith(RowDataProducer.SKIP_INDICATOR) )
 				{
 					partialImport = true;
-					this.columns[i] = null;
+					this.columns.add(null);
 				}
 				else
 				{
 					int index = tableCols.indexOf(col);
 					if (index > -1)
 					{
-						this.columns[i] = (ColumnIdentifier)tableCols.get(index);
-						realCols.add(this.columns[i]);
+						col = tableCols.get(index);
+						this.columns.add(col);
+						realCols.add(col);
 					}
 					else
 					{
@@ -1307,7 +1315,7 @@ public class TextFileParser
 			for (int i=0; i < this.colCount; i++)
 			{
 				if (i > 0) result.append(',');
-				result.append(this.columns[i].getColumnName());
+				result.append(getColumn(i).getColumnName());
 			}
 		}
 		else
@@ -1317,7 +1325,7 @@ public class TextFileParser
 				if (i > 0) result.append(',');
 				if (this.columnMap[i] != -1)
 				{
-					result.append(this.columns[i].getColumnName());
+					result.append(getColumn(i).getColumnName());
 				}
 				else
 				{

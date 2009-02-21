@@ -17,6 +17,7 @@ import java.io.Reader;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -964,18 +965,16 @@ public class XmlDataFileParser
 			checkTargetColumns();
 			if (this.columnsToImport == null)
 			{
-				this.receiver.setTargetTable(tbl, this.columns);
+				this.receiver.setTargetTable(tbl, Arrays.asList(this.columns));
 			}
 			else
 			{
-				ColumnIdentifier[] cols = new ColumnIdentifier[this.realColCount];
-				int index = 0;
+				List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(this.realColCount);
 				for (int i=0; i < this.colCount; i++)
 				{
 					if (this.columnsToImport.contains(this.columns[i]))
 					{
-						cols[index] = this.columns[i];
-						index ++;
+						cols.add(this.columns[i]);
 					}
 				}
 				this.receiver.setTargetTable(tbl, cols);

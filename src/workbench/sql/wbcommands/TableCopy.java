@@ -76,8 +76,16 @@ public class TableCopy
 
 		copier.setDeleteTarget(CommonArgs.getDeleteType(cmdLine));
 
-		TableIdentifier targetId = new TableIdentifier(targettable);
-		targetId.setNewTable(createTable);
+		TableIdentifier targetId = null;
+		if (createTable)
+		{
+			targetId = new TableIdentifier(targettable);
+			targetId.setNewTable(true);
+		}
+		else
+		{
+			targetId = targetConnection.getMetadata().findTable(new TableIdentifier(targettable));
+		}
 
 		if (sourcetable != null)
 		{
@@ -98,6 +106,7 @@ public class TableCopy
 					cols[i] = queryCols.get(i);
 				}
 			}
+
 			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable);
 		}
 
