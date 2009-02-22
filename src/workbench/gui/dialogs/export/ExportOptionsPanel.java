@@ -206,9 +206,8 @@ public class ExportOptionsPanel
 		{
 			this.xlsOptions.restoreSettings();
 		}
-		String code = Settings.getInstance().getProperty("workbench.export.type", null);
+		String code = Settings.getInstance().getProperty("workbench.export.type", ExportType.TEXT.getCode());
 		ExportType type = ExportType.getTypeFromCode(code);
-		if (type == null) type = ExportType.TEXT;
 		this.setExportType(type);
 	}
 	
