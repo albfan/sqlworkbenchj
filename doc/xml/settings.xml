@@ -639,7 +639,7 @@
 			<programlisting>workbench.db.[some_db].typemap=3:DOUBLE;2:NUMBER($size,$digits);-1:VARCHAR($size)</programlisting>
 			<para>
 				JDBC 3.0 defines the following constants:
-				<itemizedlist>
+				<itemizedlist spacing="compact">
 					<listitem>BIGINT = -5</listitem>
 					<listitem>BINARY = -2</listitem>
 					<listitem>BIT = -7</listitem>

@@ -100,15 +100,15 @@ VALUES
 		<ul>
 			<li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
+			<li><a target="_blank" href="http://www.h2database.com">H2 Database Engine</a></li>
 			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;sub=jdbc">(Download JDBC driver)</a></li>
-			<li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
 			<li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>
 			<li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
-			<li><a target="_blank" href="http://www.h2database.com">H2 Database Engine</a></li>
 			<li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a> <a target="_blank" href="http://www-01.ibm.com/software/data/db2/express/additional-downloads.html">(Download JDBC driver)</a></li>
-			<li><a target="_blank" href="http://www.mckoi.com/database/">McKoi SQL Database</a></li>
+			<!-- <li><a target="_blank" href="http://www.mckoi.com/database/">McKoi SQL Database</a></li> -->
 			<li><a target="_blank" href="http://opensource.ca.com/projects/ingres/">Ingres R3</a></li>
 			<li><a target="_blank" href="http://www.sqlite.org/">SQLite</a> (with <a href="http://www.zentus.com/sqlitejdbc/">SQLiteJDBC</a>)</li>
+			<li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
 			<li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> (<a target="_blank" href="http://msdn2.microsoft.com/en-us/data/aa937724.aspx">Download MS driver</a> <a target="_blank" href="http://jtds.sourceforge.net/">Download free jTDS driver</a>)</li>
 			<!-- <li><a target="_blank" href="http://www.thinksql.co.uk">ThinkSQL</a></li> -->
 			<!-- <li><a target="_blank" href="http://www.firstsql.com">FirstSQL/J</a></li> -->
