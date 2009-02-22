@@ -11,6 +11,8 @@
  */
 package workbench.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import junit.framework.TestCase;
 
 /**
@@ -30,7 +32,10 @@ public class FixedLengthLineParserTest
 	{
 		try
 		{
-			int[] cols = new int[]{5, 1, 10};
+			List<Integer> cols = new ArrayList<Integer>();
+			cols.add(new Integer(5));
+			cols.add(new Integer(1));
+			cols.add(new Integer(10));
 			FixedLengthLineParser parser = new FixedLengthLineParser(cols);
 			String line = "12345H1234567890";
 			parser.setLine(line);
@@ -40,7 +45,7 @@ public class FixedLengthLineParserTest
 			assertEquals("H", second);
 			String third = parser.getNext();
 			assertEquals("1234567890", third);
-			
+
 			line = "    1H        10";
 			parser.setLine(line);
 			parser.setTrimValues(true);
@@ -50,7 +55,7 @@ public class FixedLengthLineParserTest
 			assertEquals("H", second);
 			third = parser.getNext();
 			assertEquals("10", third);
-			
+
 			parser.setLine(line);
 			parser.setTrimValues(false);
 			first = parser.getNext();
@@ -59,7 +64,7 @@ public class FixedLengthLineParserTest
 			assertEquals("H", second);
 			third = parser.getNext();
 			assertEquals("        10", third);
-			
+
 		}
 		catch (Exception e)
 		{

@@ -11,6 +11,8 @@
  */
 package workbench.util;
 
+import java.util.List;
+
 /**
  *
  * @author support@sql-workbench.net
@@ -23,21 +25,25 @@ public class FixedLengthLineParser
 	private String line;
 	private int currentLineIndex;
   private boolean trimValues  = false;
-	
-	public FixedLengthLineParser(int[] colWidths)
+
+	public FixedLengthLineParser(List<Integer> colWidths)
 	{
 		if (colWidths == null)
 		{
 			throw new IllegalArgumentException("Column widths may not be null");
 		}
-		this.widths = colWidths;
+		this.widths = new int[colWidths.size()];
+		for (int i=0; i < colWidths.size(); i++)
+		{
+			this.widths[i] = colWidths.get(i).intValue();
+		}
 	}
 
 	public void setTrimValues(boolean flag)
 	{
 		this.trimValues = flag;
 	}
-	
+
 	public void setLine(String newLine)
 	{
 		this.line = newLine;

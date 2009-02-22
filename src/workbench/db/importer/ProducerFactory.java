@@ -27,8 +27,8 @@ import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
 
 /**
- *	A factory for RowDataProducer to import text or XML files. 
- * 
+ *	A factory for RowDataProducer to import text or XML files.
+ *
  * @author  support@sql-workbench.net
  */
 public class ProducerFactory
@@ -63,17 +63,17 @@ public class ProducerFactory
 	private ImportFileParser fileParser;
 	private WbConnection connection;
 	private int batchSize = -1;
-	
+
 	public ProducerFactory(File file)
 	{
 		this.setInputFile(file);
 	}
-	
-	public void setBatchSize(int size) 
+
+	public void setBatchSize(int size)
 	{
 		this.batchSize = (size > 0 ? size : -1);
 	}
-	
+
 	public void setConnection(WbConnection conn)
 	{
 		if (this.connection != conn)
@@ -82,12 +82,12 @@ public class ProducerFactory
 		}
 		this.connection = conn;
 	}
-	
+
 	public void setGeneralOptions(ImportOptions options)
 	{
 		this.generalOptions = options;
 	}
-	
+
 	public void setTextOptions(TextImportOptions options)
 	{
 		this.textOptions = options;
@@ -97,22 +97,22 @@ public class ProducerFactory
 	{
 		return this.textOptions;
 	}
-	
+
 	public XmlImportOptions getXmlOptions()
 	{
 		return this.xmlOptions;
 	}
-	
+
 	public void setXmlOptions(XmlImportOptions options)
 	{
 		this.xmlOptions = options;
 	}
-	
+
 	public void setImporterOptions(DataImporter importer)
 	{
 		importer.setMode(generalOptions.getMode());
 	}
-	
+
 	public void setType(ImportType type)
 	{
 		if (type == ImportType.Text)
@@ -129,19 +129,19 @@ public class ProducerFactory
 	{
 		return this.importType == ImportType.XML;
 	}
-	
+
 	public void setImportTypeText()
 	{
 		this.importType = ImportType.Text;
 		this.producer = null;
 	}
-	
+
 	public void setImportTypeXml()
 	{
 		this.importType = ImportType.XML;
 		this.producer = null;
 	}
-	
+
 	private void setInputFile(File inputFilename)
 	{
 		this.inputFile = inputFilename;
@@ -149,7 +149,7 @@ public class ProducerFactory
 		this.producer = null;
 		this.fileParser = null;
 	}
-	
+
 	public void setTargetTable(TableIdentifier tableId)
 	{
 		this.table = tableId;
@@ -157,7 +157,7 @@ public class ProducerFactory
 		if (this.producer == null) getProducer();
 		fileParser.setTableName(tableId.getTableExpression());
 	}
-	
+
 	public RowDataProducer getProducer()
 	{
 		if (this.producer == null)
@@ -189,7 +189,7 @@ public class ProducerFactory
 		if (this.producer == null) getProducer();
 		this.fileParser.setColumns(cols);
 	}
-	
+
 	private void createTextFileParser()
 	{
 		TextFileParser parser = new TextFileParser(inputFile);
@@ -199,14 +199,14 @@ public class ProducerFactory
 		parser.setDecodeUnicode(this.textOptions.getDecode());
 		parser.setDelimiter(this.textOptions.getTextDelimiter());
 		parser.setConnection(this.connection);
-		
+
 		ValueConverter converter = new ValueConverter();
 		converter.setDefaultDateFormat(this.generalOptions.getDateFormat());
 		converter.setDefaultTimestampFormat(this.generalOptions.getTimestampFormat());
 		String dec = this.textOptions.getDecimalChar();
 		if (dec != null) converter.setDecimalCharacter(dec.charAt(0));
 		parser.setValueConverter(converter);
-		
+
 		if (this.table != null)
 		{
 			parser.setTableName(this.table.getTableExpression());
@@ -215,12 +215,12 @@ public class ProducerFactory
 		this.producer = parser;
 		this.fileParser = parser;
 	}
-	
+
 	public File getSourceFile()
 	{
 		return this.inputFile;
 	}
-	
+
 	private void createXmlFileParser()
 	{
 		XmlDataFileParser parser = new XmlDataFileParser(inputFile);
@@ -230,7 +230,7 @@ public class ProducerFactory
 		this.producer = parser;
 		this.fileParser = parser;
 	}
-	
+
 	/**
 	 * Appends text import options to the passed sql command
 	 */
@@ -249,12 +249,12 @@ public class ProducerFactory
 		appendArgument(command, CommonArgs.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
 		appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
 	}
-	
+
 	private void appendArgument(StringBuilder result, String arg, boolean value, StringBuilder indent)
 	{
 		appendArgument(result, arg, Boolean.toString(value), indent);
 	}
-	
+
 	private void appendArgument(StringBuilder result, String arg, String value, StringBuilder indent)
 	{
 		if (!StringUtil.isEmptyString(value))
@@ -263,19 +263,19 @@ public class ProducerFactory
 			result.append('-');
 			result.append(arg);
 			result.append('=');
-			
+
 			if (value.indexOf('-') > -1 || value.indexOf(";") > -1) result.append('"');
 			else if ("\"".equals(value)) result.append('\'');
 			else if ("\'".equals(value)) result.append('\"');
-			
+
 			result.append(value);
-			
+
 			if (value.indexOf('-') > -1 || value.indexOf(";") > -1) result.append('"');
 			else if ("\"".equals(value)) result.append('\'');
 			else if ("\'".equals(value)) result.append('\"');
 		}
 	}
-	
+
 	/**
 	 *	Generates a WB SQL command from the current import
 	 *  settings
@@ -302,11 +302,11 @@ public class ProducerFactory
 		{
 			result.append("xml");
 		}
-		else 
+		else
 		{
 			result.append("text");
 		}
-		
+
 		appendArgument(result, WbImport.ARG_TARGETTABLE, this.table.getTableName(), indent);
 		appendArgument(result, CommonArgs.ARG_ENCODING, this.generalOptions.getEncoding(), indent);
 		appendArgument(result, WbImport.ARG_MODE, this.generalOptions.getMode(), indent);
@@ -315,11 +315,11 @@ public class ProducerFactory
 			appendArgument(result, CommonArgs.ARG_BATCHSIZE, Integer.toString(this.batchSize), indent);
 		}
 		appendTextOptions(result, indent);
-		
-		
+
+
 		result.append("\n;");
-		
+
 		return result.toString();
 	}
-	
+
 }

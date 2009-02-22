@@ -265,7 +265,7 @@ public class WbImport
 		}
 		else
 		{
-			WbFile d = evaluateFileArgument(dir);//)new File(dir);
+			WbFile d = evaluateFileArgument(dir);
 			if (!d.exists())
 			{
 				String msg = ResourceMgr.getString("ErrImportSourceDirNotFound");
@@ -331,27 +331,17 @@ public class WbImport
 
 			textParser.setEmptyStringIsNull(cmdLine.getBoolean(ARG_EMPTY_STRING_IS_NULL, true));
 
-			String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
-			if (filecolumns != null && table != null)
+			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
+			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
+
+			// The flag for a header lines must be specified before setting the columns
+			textParser.setContainsHeader(header);
+
+			if (StringUtil.isNonBlank(table))
 			{
-				List<String> cols = StringUtil.stringToList(filecolumns, ",", true, true);
 				try
 				{
-					List<ColumnIdentifier> colIds = new ArrayList<ColumnIdentifier>(cols.size());
-					for (String colname : cols)
-					{
-						ColumnIdentifier col = new ColumnIdentifier(colname);
-						if (!colname.equals(RowDataProducer.SKIP_INDICATOR) && colIds.contains(col))
-						{
-							String msg = ResourceMgr.getFormattedString("ErrImpDupColumn", colname);
-							LogMgr.logError("WbImport.execute()", msg, null);
-							result.addMessage(msg);
-							result.setFailure();
-							return result;
-						}
-						colIds.add(col);
-					}
-					textParser.setColumns(colIds, true);
+					textParser.checkTargetTable();
 				}
 				catch (Exception e)
 				{
@@ -359,49 +349,39 @@ public class WbImport
 					result.setFailure();
 					return result;
 				}
-			}
 
-			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
-			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
-			textParser.setContainsHeader(header);
+				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
 
-			if (dir == null)
-			{
-				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
-				if (importcolumns != null)
+				// read column definition from header line
+				// if no header was specified, the text parser
+				// will assume the columns in the text file
+				// map to the column in the target table
+				try
 				{
-					try
-					{
-						List<String> cols = StringUtil.stringToList(importcolumns, ",", true, true);
-						textParser.setImportColumnNames(cols);
-					}
-					catch (IllegalArgumentException e)
-					{
-						result.addMessage(textParser.getMessages());
-						result.setFailure();
-						return result;
-					}
-				}
-
-				if (filecolumns == null)
-				{
-					// read column definition from header line
-					// if no header was specified, the text parser
-					// will assume the columns in the text file
-					// map to the column in the target table
-					try
+					if (StringUtil.isBlank(filecolumns))
 					{
 						textParser.setupFileColumns();
 					}
-					catch (Exception e)
+					else
 					{
-						result.setFailure();
-						result.addMessage(textParser.getMessages());
-						LogMgr.logError("WbImport.execute()", ExceptionUtil.getDisplay(e),null);
-						return result;
+						List<ColumnIdentifier> fileCols = stringToCols(filecolumns);
+						textParser.setColumns(fileCols);
 					}
 				}
+				catch (Exception e)
+				{
+					result.setFailure();
+					result.addMessage(textParser.getMessages());
+					LogMgr.logError("WbImport.execute()", ExceptionUtil.getDisplay(e),null);
+					return result;
+				}
 
+				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
+				if (StringUtil.isNonBlank(importcolumns))
+				{
+					List<ColumnIdentifier> toImport = stringToCols(importcolumns);
+					textParser.retainColumns(toImport);
+				}
 			}
 
 			// The column filter has to bee applied after the
@@ -649,6 +629,17 @@ public class WbImport
 		result.addMessage(imp.getMessages());
 
 		return result;
+	}
+
+	private List<ColumnIdentifier> stringToCols(String columns)
+	{
+		List<String> names = StringUtil.stringToList(columns, ",", true, true);
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(names.size());
+		for (String name : names)
+		{
+			cols.add(new ColumnIdentifier(name));
+		}
+		return cols;
 	}
 
 	private ImportFileLister getFileNameSorter(ArgumentParser cmdLine, String defaultExt)

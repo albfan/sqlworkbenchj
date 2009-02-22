@@ -17,12 +17,10 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -56,37 +54,22 @@ public class TextFileParser
 {
 	private File inputFile;
 	private ImportFileLister sourceFiles;
-	
+
 	private File baseDir;
 	private String tableName;
+	private String targetSchema;
+	private TableDefinition targetTable;
 	private String encoding = null;
 	private String delimiter = "\t";
 	private String quoteChar = null;
 	private boolean decodeUnicode = false;
-	private boolean enableMultiLineMode = true;
-	
+	private boolean enableMultiLineMode;
+
 	// this indicates an import of several files from a single
 	// directory into one table
 	private boolean multiFileImport = false;
 
-	private int colCount = -1;
-	private int importColCount = -1;
-
-	private List<ColumnIdentifier> columns;
-
-	// When importing a file with fixed column widths
-	// each entry in this array defines the width of the corresponding
-	// column in the columns array
-	private int[] columnWidthMap;
-
-	// for each column from columns
-	// the value for the respective index
-	// defines its real index (in rowData)
-	// if the value is -1 then the column
-	// will not be imported
-	private int[] columnMap;
-
-	private Object[] rowData;
+	private List<ImportFileColumn> importColumns;
 
 	private boolean withHeader = true;
 	private boolean cancelImport = false;
@@ -99,20 +82,16 @@ public class TextFileParser
 	private WbConnection connection;
 
 	private JobErrorHandler errorHandler;
-	private List<ColumnIdentifier> pendingImportColumns;
+
 	private ValueConverter converter = new ValueConverter();
 	private MessageBuffer messages = new MessageBuffer();
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
 
-
-	// If a filter for the input file is defined
-	// this will hold the regular expressions per column
-	private Pattern[] columnFilter;
 	private Pattern lineFilter;
-	private String targetSchema;
 	private boolean blobsAreFilenames = true;
 	private boolean clobsAreFilenames = false;
+	private boolean fixedWidthImport = false;
 
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private String currentLine;
@@ -170,18 +149,18 @@ public class TextFileParser
 	 *
 	 * @param flag
 	 * @see #setSourceFiles(workbench.db.importer.ImportFileLister)
-	 * @see #setTableName(java.lang.String) 
+	 * @see #setTableName(java.lang.String)
 	 */
 	public void setMultiFileImport(boolean flag)
 	{
 		this.multiFileImport = flag;
 	}
 
-	public boolean isMultiFileImport() 
+	public boolean isMultiFileImport()
 	{
 		return this.multiFileImport;
 	}
-	
+
 	public void setSourceFiles(ImportFileLister source)
 	{
 		this.inputFile = null;
@@ -191,6 +170,8 @@ public class TextFileParser
 	public void setTableName(String aName)
 	{
 		this.tableName = aName;
+		this.targetTable = null;
+		this.importColumns = null;
 	}
 
 	public void setQuoteEscaping(QuoteEscapeType type)
@@ -203,15 +184,16 @@ public class TextFileParser
 		return this.quoteEscape;
 	}
 
-	public boolean hasErrors() { return this.hasErrors; }
-	public boolean hasWarnings() { return this.hasWarnings; }
-
-	public void importAllColumns()
+	public boolean hasErrors()
 	{
-		this.columnMap = new int[this.colCount];
-		for (int i=0; i < this.colCount; i++) this.columnMap[i] = i;
-		this.importColCount = this.colCount;
+		return this.hasErrors;
 	}
+
+	public boolean hasWarnings()
+	{
+		return this.hasWarnings;
+	}
+
 
 	public String getSourceFilename()
 	{
@@ -242,25 +224,15 @@ public class TextFileParser
 		return this.currentLine;
 	}
 
-	protected boolean hasColumnFilter()
-	{
-		if (this.columnFilter == null) return false;
-		for (int i=0; i < this.columnFilter.length; i++)
-		{
-			if (this.columnFilter[i] != null) return true;
-		}
-		return false;
-	}
-
 	public void addColumnFilter(String colname, String regex)
 	{
 		int index = this.getColumnIndex(colname);
 		if (index == -1) return;
-		if (this.columnFilter == null) this.columnFilter = new Pattern[this.colCount];
+
 		try
 		{
 			Pattern p = Pattern.compile(regex);
-			this.columnFilter[index] = p;
+			importColumns.get(index).setColumnFilter(p);
 		}
 		catch (Exception e)
 		{
@@ -270,7 +242,7 @@ public class TextFileParser
 			this.messages.append(msg);
 			this.messages.appendNewLine();
 			this.hasWarnings = true;
-			this.columnFilter[index] = null;
+			importColumns.get(index).setColumnFilter(null);
 		}
 	}
 
@@ -289,144 +261,35 @@ public class TextFileParser
 		this.converter = convert;
 	}
 
-	public void setImportColumnNames(List<String> columnList)
+	public void retainColumns(List<ColumnIdentifier> columnList)
 		throws IllegalArgumentException
 	{
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>(columnList.size());
-		for (String colname : columnList)
+		if (this.importColumns == null || importColumns.size() == 0)
 		{
-			ColumnIdentifier col = new ColumnIdentifier(colname);
-			if (!colname.equals(RowDataProducer.SKIP_INDICATOR) && cols.contains(col))
+			throw new IllegalStateException("Must set file columns first");
+		}
+		for (ImportFileColumn impCol : importColumns)
+		{
+			if (impCol == null) continue;
+			boolean keep = columnList.contains(impCol.getColumn());
+			if (!keep)
 			{
-				String msg = ResourceMgr.getFormattedString("ErrImpDupColumn", colname);
-				this.messages.append(msg);
-				throw new IllegalArgumentException("Duplicate column " + colname);
-			}
-			cols.add(col);
-		}
-		setImportColumns(cols);
-	}
-
-	/**
-	 * Define the columns that should be imported.
-	 * If the list is empty or null, then all columns will be imported
-	 * @param columnList the columns to be imported
-	 */
-	public void setImportColumns(List<ColumnIdentifier> columnList)
-	{
-		if (columnList == null)
-		{
-			this.importAllColumns();
-			return;
-		}
-
-		int count = columnList.size();
-		if (count == 0)
-		{
-			this.importAllColumns();
-			return;
-		}
-
-		if (this.columns == null)
-		{
-			// store the list so that when the columns
-			// are retrieved or defined later, the real columns to be imported
-			// can be defined
-			this.pendingImportColumns = columnList;
-		}
-		else
-		{
-			this.pendingImportColumns = null;
-			checkPendingImportColumns(columnList);
-		}
-	}
-
-	private void removeInvalidColumns(List cols)
-		throws IllegalArgumentException
-	{
-		Iterator itr = cols.iterator();
-		while (itr.hasNext())
-		{
-			Object o = itr.next();
-			String columnName = o.toString();
-			int index = this.getColumnIndex(columnName);
-			if (index == -1)
-			{
-				itr.remove();
-				String msg = ResourceMgr.getString("ErrImpColNotFound");
-				this.messages.append(StringUtil.replace(msg, "%colname%", columnName) + "\n");
-				throw new IllegalArgumentException("Column [" + columnName + "] not found");
+				impCol.setTargetIndex(-1);
 			}
 		}
-	}
-	/**
-	 * Retain only those columns in the defined source file columns
-	 * that are in the passed list
-	 */
-	private void checkPendingImportColumns(List<ColumnIdentifier> colIds)
-		throws IllegalArgumentException
-	{
-		if (colIds == null || colIds.size() == 0) return;
 
-		removeInvalidColumns(colIds);
-
-		int count = colIds.size();
-		if (count == 0)
+		// renumber the target index
+		int index = 0;
+		for (ImportFileColumn impCol : importColumns)
 		{
-			this.messages.append(ResourceMgr.getString("ErrImpInvalidColDef") + "\n");
-			this.hasErrors = true;
-			throw new IllegalArgumentException("At least one import column must be defined");
-		}
-
-		this.columnMap = new int[this.colCount];
-		for (int i=0; i < this.colCount; i++) this.columnMap[i] = -1;
-		this.importColCount = 0;
-
-		for (int i=0; i < count; i++)
-		{
-			ColumnIdentifier col = colIds.get(i);
-			int index = this.getColumnIndex(col.getColumnName());
-			if (index > -1)
+			if (impCol.getTargetIndex() != -1)
 			{
-				this.columnMap[index] = i;
-				this.importColCount ++;
-			}
-			else
-			{
-				String msg = ResourceMgr.getString("ErrImpColNotFound");
-				this.messages.append(StringUtil.replace(msg, "%colname%", col.getColumnName()) + "\n");
-				this.hasErrors = true;
-				throw new IllegalArgumentException("Column [" + col.getColumnName() + "] not found!");
+				impCol.setTargetIndex(index);
+				index++;
 			}
 		}
 	}
 
-	private List<ColumnIdentifier> getColumnsToImport()
-	{
-		if (this.columnMap == null) return this.columns;
-		if (this.importColCount == this.colCount) return this.columns;
-		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(this.importColCount);
-		int col = 0;
-		for (int i=0; i < this.colCount; i++)
-		{
-			if (this.columnMap[i] != -1)
-			{
-				result.add(this.columns.get(i));
-				col++;
-			}
-		}
-		return result;
-	}
-
-	private ColumnIdentifier getColumn(int index)
-	{
-		if (columns == null) return null;
-		if (index < columns.size())
-		{
-			return columns.get(index);
-		}
-		return null;
-	}
 	/**
 	 * Return the index of the specified column
 	 * in the import file.
@@ -437,18 +300,13 @@ public class TextFileParser
 	private int getColumnIndex(String colName)
 	{
 		if (colName == null) return -1;
-		if (this.colCount < 1) return -1;
-		if (this.columns == null) return -1;
-		for (int i=0; i < this.colCount; i++)
-		{
-			ColumnIdentifier col = getColumn(i);
-			if (col != null && colName.equalsIgnoreCase(col.getColumnName())) return i;
-		}
-		return -1;
+		return this.importColumns.indexOf(colName);
 	}
 
 	/**
 	 * Define the columns in the input file.
+	 * If a column name equals RowDataProducer.SKIP_INDICATOR
+	 * then the column will not be imported.
 	 * @param columnList the list of columns present in the input file
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
@@ -456,26 +314,82 @@ public class TextFileParser
 	public void setColumns(List<ColumnIdentifier> columnList)
 		throws SQLException
 	{
-		setColumns(columnList, false);
-	}
-
-	public void setColumns(List<ColumnIdentifier> columnList, boolean checkTargetTable)
-		throws SQLException
-	{
-		if (columnList == null || columnList.size()  == 0) return;
-
-		if (checkTargetTable) checkTargetTable();
-
-		if (this.connection != null && this.tableName != null)
+		// When using the TextFileParser to import into a DataStore
+		// no target table is defined, so this is an expected situation
+		TableDefinition target = getTargetTable();
+		List<ColumnIdentifier> tableCols = null;
+		if (target != null)
 		{
-			this.readColumnDefinition(columnList);
-			checkPendingImportColumns(this.pendingImportColumns);
+		 tableCols = target.getColumns();
 		}
-		else
+
+		importColumns = ImportFileColumn.createList();
+
+		int colCount = 0;
+
+		try
 		{
-			this.colCount = columnList.size();
-			this.columns = new ArrayList<ColumnIdentifier>(columnList);
-			this.importAllColumns();
+			for (ColumnIdentifier sourceCol : columnList)
+			{
+				if (sourceCol.getColumnName().equalsIgnoreCase(RowDataProducer.SKIP_INDICATOR))
+				{
+					importColumns.add(ImportFileColumn.SKIP_COLUMN);
+					continue;
+				}
+				int index = (tableCols != null ? tableCols.indexOf(sourceCol) : 0);
+				if (index < 0)
+				{
+					if (this.abortOnError)
+					{
+						String msg = ResourceMgr.getString("ErrImportColumnNotFound");
+						msg = StringUtil.replace(msg, "%column%", sourceCol.getColumnName());
+						msg = StringUtil.replace(msg, "%table%", this.tableName);
+						this.messages.append(msg);
+						this.messages.appendNewLine();
+						this.hasErrors = true;
+						throw new SQLException(msg);
+					}
+					else
+					{
+						String msg = ResourceMgr.getString("ErrImportColumnIgnored");
+						msg = StringUtil.replace(msg, "%column%", sourceCol.getColumnName());
+						msg = StringUtil.replace(msg, "%table%", this.tableName);
+						LogMgr.logWarning("TextFileParser.setColumns()", msg);
+						this.hasWarnings = true;
+						this.messages.append(msg);
+						this.messages.appendNewLine();
+					}
+				}
+				else
+				{
+					ColumnIdentifier col = (tableCols != null ? tableCols.get(index) : sourceCol);
+					ImportFileColumn importCol = new ImportFileColumn(col);
+					importCol.setTargetIndex(colCount);
+					importColumns.add(importCol);
+					colCount ++;
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			this.hasErrors = true;
+			throw e;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TextFileParser.setColumns()", "Error when setting column definition", e);
+			this.importColumns = null;
+		}
+
+		if (colCount == 0)
+		{
+			String msg = ResourceMgr.getString("ErrImportNoColumns");
+			msg = StringUtil.replace(msg, "%table%", this.tableName);
+			this.hasErrors = true;
+			this.messages.append(msg);
+			this.messages.appendNewLine();
+			this.importColumns = null;
+			throw new SQLException("No column matched in import file");
 		}
 	}
 
@@ -485,27 +399,45 @@ public class TextFileParser
 	 */
 	public void setColumnWidths(Map<ColumnIdentifier, Integer> widthMapping)
 	{
-		if (widthMapping == null)
-		{
-			return;
-		}
-		if (this.columns == null)
+		if (widthMapping == null) return;
+
+		if (this.importColumns == null)
 		{
 			throw new IllegalArgumentException("No columns defined!");
 		}
 
 		this.delimiter = null;
-		this.columnWidthMap = new int[this.columns.size()];
-		for (int i = 0; i < columns.size(); i++)
+		for (Map.Entry<ColumnIdentifier, Integer> entry : widthMapping.entrySet())
 		{
-			Integer width = widthMapping.get(getColumn(i));
-			if (width != null)
+			int index = this.importColumns.indexOf(entry.getKey());
+			if (index != -1)
 			{
-				this.columnWidthMap[i] = width.intValue();
+				ImportFileColumn col = importColumns.get(index);
+				if (col != null)
+				{
+					col.setDataWidth(entry.getValue().intValue());
+				}
 			}
 		}
+		fixedWidthImport = true;
 	}
 
+	protected List<Integer> getColumnWidths()
+	{
+		if (this.importColumns == null) return null;
+
+		if (!fixedWidthImport) return null;
+		List<Integer> result = new ArrayList<Integer>();
+		for (ImportFileColumn col : importColumns)
+		{
+			if (col.getDataWidth() > -1)
+			{
+				result.add(Integer.valueOf(col.getDataWidth()));
+			}
+		}
+		return result;
+
+	}
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -597,7 +529,7 @@ public class TextFileParser
 			{
 				this.receiver.endMultiTable();
 			}
-			
+
 			if (this.cancelImport && !regularStop)
 			{
 				this.receiver.importCancelled();
@@ -623,7 +555,7 @@ public class TextFileParser
 			this.hasErrors = true;
       throw new SQLException("No files with extension '" + sourceFiles.getExtension() + "' in directory " + sourceFiles.getDirectory());
     }
-		
+
 		List<WbFile> toProcess = null;
 		try
 		{
@@ -649,7 +581,7 @@ public class TextFileParser
 			this.hasErrors = true;
       throw new SQLException("No matching tables found for files in directory " + sourceFiles.getDirectory());
 		}
-    
+
 		this.receiver.setTableCount(count);
 		if (!multiFileImport)
 		{
@@ -675,11 +607,7 @@ public class TextFileParser
 					// are imported into multiple tables
 					// if multifileimport is true, then all files are imported into the same table!
 					TableIdentifier tbl = sourceFiles.getTableForFile(f);
-					this.tableName = tbl.getTableExpression();
-					
-					this.columns = null;
-					this.colCount = 0;
-					this.columnMap = null;
+					setTableName(tbl.getTableExpression());
 				}
 				this.inputFile = f;
 				this.processOneFile();
@@ -691,7 +619,20 @@ public class TextFileParser
 				if (this.abortOnError) throw e;
 			}
 		}
-		
+
+	}
+
+	protected List<ColumnIdentifier> getColumnsToImport()
+	{
+		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>();
+		for (ImportFileColumn col : importColumns)
+		{
+			if (col.getTargetIndex() >= 0)
+			{
+				result.add(col.getColumn());
+			}
+		}
+		return result;
 	}
 
 	private void setupFileHandler()
@@ -717,9 +658,9 @@ public class TextFileParser
 		// If no header is available in the file and no columns have been
 		// specified by the user (i.e. columns is not yet set up)
 		// then we assume all columns from the table are present in the input file
-		if (!this.withHeader && columns == null)
+		if (!this.withHeader && importColumns == null)
 		{
-			this.setColumns(this.getColumnsFromTargetTable(), true);
+			this.setColumns(getTargetTable().getColumns());
 		}
 
 		BufferedReader in = this.fileHandler.getMainFileReader();
@@ -761,7 +702,7 @@ public class TextFileParser
 			if (this.withHeader)
 			{
 				if (currentLine == null) throw new IOException("Could not read header line!");
-				if (this.columns == null) this.readColumns(currentLine);
+				if (this.importColumns == null) this.readColumns(currentLine);
 				currentLine = in.readLine();
 			}
 		}
@@ -782,16 +723,16 @@ public class TextFileParser
 			throw e;
 		}
 
-		if (this.colCount <= 0)
+		if (this.importColumns == null || importColumns.size() == 0)
 		{
 			throw new Exception("Cannot import file without a column definition");
 		}
 
-
-		List<ColumnIdentifier> cols = this.getColumnsToImport();
+		List<ColumnIdentifier> columnsToImport = getColumnsToImport();
 		try
 		{
-			this.receiver.setTargetTable(getTargetTable(), cols);
+			// The target table might be null if an import is done into a DataStore
+			this.receiver.setTargetTable((targetTable != null ? targetTable.getTable() : null), columnsToImport);
 		}
 		catch (Exception e)
 		{
@@ -799,15 +740,16 @@ public class TextFileParser
 			throw e;
 		}
 
-		this.rowData = new Object[this.importColCount];
+		Object[] rowData = new Object[columnsToImport.size()];
+
 		int importRow = 0;
 
 		char quoteCharToUse = (quoteChar == null ? 0 : quoteChar.charAt(0));
 		LineParser tok = null;
 
-		if (this.columnWidthMap != null)
+		if (fixedWidthImport)
 		{
-			tok = new FixedLengthLineParser(this.columnWidthMap);
+			tok = new FixedLengthLineParser(getColumnWidths());
 		}
 		else
 		{
@@ -818,11 +760,11 @@ public class TextFileParser
 		}
 
 		tok.setTrimValues(this.trimValues);
+		int sourceCount = importColumns.size();
 
 		try
 		{
 			boolean includeLine = true;
-			boolean hasColumnFilter = this.hasColumnFilter();
 			boolean hasLineFilter = this.lineFilter != null;
 
 			while (currentLine != null)
@@ -869,8 +811,6 @@ public class TextFileParser
 					}
 				}
 
-				this.clearRowData();
-
 				boolean processRow = receiver.shouldProcessNextRow();
 				if (!processRow) receiver.nextRowSkipped();
 
@@ -896,91 +836,89 @@ public class TextFileParser
 					continue;
 				}
 
-				tok.setLine(currentLine);
+				List<String> lineValues = getLineValues(tok, currentLine);
+
 				includeLine = true;
 				int targetIndex = -1;
 
-				for (int i=0; i < this.colCount; i++)
+				for (int sourceIndex=0; sourceIndex < sourceCount; sourceIndex++)
 				{
-					String value = null;
+					ImportFileColumn fileCol = importColumns.get(sourceIndex);
+					if (fileCol == null) continue;
+
+					targetIndex = fileCol.getTargetIndex();
+					if (targetIndex == -1) continue;
+
+					String value = lineValues.get(sourceIndex);
 					try
 					{
-						if (tok.hasNext())
+						ColumnIdentifier col = fileCol.getColumn();
+						int colType = col.getDataType();
+
+						if (fileCol.getColumnFilter() != null)
 						{
-							value = tok.getNext();
-							ColumnIdentifier col = getColumn(i);
-							if (col == null) continue;
-							targetIndex = this.columnMap[i];
-							if (targetIndex == -1) continue;
-
-							int colType = col.getDataType();
-
-							if (hasColumnFilter && this.columnFilter[i] != null)
+							if (value == null)
 							{
-								if (value == null)
-								{
-									includeLine = false;
-									break;
-								}
-								Matcher m = this.columnFilter[i].matcher(value);
-								if (!m.matches())
-								{
-									includeLine = false;
-									break;
-								}
+								includeLine = false;
+								break;
 							}
-
-							if (this.valueModifier != null)
+							Matcher m = fileCol.getColumnFilter().matcher(value);
+							if (!m.matches())
 							{
-								value = valueModifier.modifyValue(col, value);
-							}
-
-							if (SqlUtil.isCharacterType(colType))
-							{
-								if (clobsAreFilenames && value != null && SqlUtil.isClobType(colType))
-								{
-									File cfile = new File(value);
-									if (!cfile.isAbsolute())
-									{
-										cfile = new File(this.baseDir, value);
-									}
-									rowData[targetIndex] = cfile;
-								}
-								else
-								{
-									if (this.decodeUnicode)
-									{
-										value = StringUtil.decodeUnicode(value);
-									}
-									if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
-									{
-										value = null;
-									}
-									rowData[targetIndex] = value;
-								}
-							}
-							else if (blobsAreFilenames && !StringUtil.isEmptyString(value) && SqlUtil.isBlobType(colType) )
-							{
-								File bfile = new File(value.trim());
-								if (!bfile.isAbsolute())
-								{
-									bfile = new File(this.baseDir, value.trim());
-								}
-								rowData[targetIndex] = bfile;
-							}
-							else
-							{
-								rowData[targetIndex] = converter.convertValue(value, colType);
+								includeLine = false;
+								break;
 							}
 						}
 
+						if (this.valueModifier != null)
+						{
+							value = valueModifier.modifyValue(col, value);
+						}
+
+						if (SqlUtil.isCharacterType(colType))
+						{
+							if (clobsAreFilenames && value != null && SqlUtil.isClobType(colType))
+							{
+								File cfile = new File(value);
+								if (!cfile.isAbsolute())
+								{
+									cfile = new File(this.baseDir, value);
+								}
+								rowData[targetIndex] = cfile;
+							}
+							else
+							{
+								if (this.decodeUnicode)
+								{
+									value = StringUtil.decodeUnicode(value);
+								}
+								if (this.emptyStringIsNull && StringUtil.isEmptyString(value))
+								{
+									value = null;
+								}
+								rowData[targetIndex] = value;
+							}
+						}
+						else if (blobsAreFilenames && !StringUtil.isEmptyString(value) && SqlUtil.isBlobType(colType) )
+						{
+							File bfile = new File(value.trim());
+							if (!bfile.isAbsolute())
+							{
+								bfile = new File(this.baseDir, value.trim());
+							}
+							rowData[targetIndex] = bfile;
+						}
+						else
+						{
+							rowData[targetIndex] = converter.convertValue(value, colType);
+						}
 					}
 					catch (Exception e)
 					{
 						if (targetIndex != -1) rowData[targetIndex] = null;
 						String msg = ResourceMgr.getString("ErrTextfileImport");
 						msg = msg.replace("%row%", Integer.toString(importRow));
-						msg = msg.replace("%col%", (getColumn(i) == null ? "n/a" : getColumn(i).getColumnName()));
+						msg = msg.replace("%col%", (fileCol == null ? "n/a" : fileCol.getColumn().getColumnName()));
 						msg = msg.replace("%value%", (value == null ? "(NULL)" : value));
 						msg = msg.replace("%msg%", e.getClass().getName() + ": " + ExceptionUtil.getDisplay(e, false));
 						this.messages.append(msg);
@@ -995,7 +933,7 @@ public class TextFileParser
 						LogMgr.logWarning("TextFileParser.processOneFile()", msg, e);
 						if (this.errorHandler != null)
 						{
-							int choice = errorHandler.getActionOnError(importRow, getColumn(i).getColumnName(), (value == null ? "(NULL)" : value), ExceptionUtil.getDisplay(e, false));
+							int choice = errorHandler.getActionOnError(importRow, fileCol.getColumn().getColumnName(), (value == null ? "(NULL)" : value), ExceptionUtil.getDisplay(e, false));
 							if (choice == JobErrorHandler.JOB_ABORT) throw e;
 							if (choice == JobErrorHandler.JOB_IGNORE_ALL)
 							{
@@ -1045,12 +983,16 @@ public class TextFileParser
 
 	}
 
-	private void clearRowData()
+
+	protected List<String> getLineValues(LineParser parser, String line)
 	{
-		for (int i=0; i < this.importColCount; i++)
+		List<String> result = new ArrayList<String>();
+		parser.setLine(line);
+		while (parser.hasNext())
 		{
-			this.rowData[i] = null;
+			result.add(parser.getNext());
 		}
+		return result;
 	}
 
 	/**
@@ -1068,12 +1010,7 @@ public class TextFileParser
 			String column = tok.nextToken();
 			cols.add(new ColumnIdentifier(column));
 		}
-		this.readColumnDefinition(cols);
-		if (this.pendingImportColumns != null)
-		{
-			checkPendingImportColumns(this.pendingImportColumns);
-			this.pendingImportColumns = null;
-		}
+		this.setColumns(cols);
 	}
 
 	/**
@@ -1129,17 +1066,18 @@ public class TextFileParser
 		return cols;
 	}
 
-	protected void checkTargetTable()
+	public void checkTargetTable()
 		throws SQLException
 	{
-		TableIdentifier tbl = getTargetTable();
+		TableDefinition def = getTargetTable();
 
-		if (!this.connection.getMetadata().tableExists(tbl))
+		if (def == null || def.getColumns() == null || def.getColumns().size() == 0)
 		{
+			TableIdentifier tbl = createTargetTableId();
 			String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableExpression());
 			this.messages.append(msg);
 			this.messages.appendNewLine();
-			this.columns = null;
+			this.importColumns = null;
 			this.hasErrors = true;
 			throw new SQLException("Table " + tbl.getTableExpression() + " not found!");
 		}
@@ -1150,188 +1088,80 @@ public class TextFileParser
 	{
 		List<ColumnIdentifier> cols = null;
 
-		checkTargetTable();
-
 		if (this.withHeader)
 		{
 			cols = this.getColumnsFromFile();
 		}
 		else
 		{
-			cols = this.getColumnsFromTargetTable();
+			TableDefinition def = getTargetTable();
+			cols = def.getColumns();
 		}
-		this.setColumns(cols, false);
+		this.setColumns(cols);
 	}
 
-	private List<ColumnIdentifier> getColumnsFromTargetTable()
-		throws SQLException
+	private TableIdentifier createTargetTableId()
 	{
-		return this.connection.getMetadata().getTableColumns(getTargetTable());
-	}
-
-	private TableIdentifier getTargetTable()
-	{
-		if (this.tableName == null) return null;
-		TableIdentifier targetTable = new TableIdentifier(this.tableName);
-		targetTable.setPreserveQuotes(true);
+		TableIdentifier table = new TableIdentifier(this.tableName);
+		table.setPreserveQuotes(true);
 		if (this.targetSchema != null)
 		{
-			targetTable.setSchema(this.targetSchema);
+			table.setSchema(this.targetSchema);
 		}
 		if (this.connection != null)
 		{
-			targetTable.adjustCase(this.connection);
-			if (targetTable.getSchema() == null)
+			table.adjustCase(this.connection);
+			if (table.getSchema() == null)
 			{
-				targetTable.setSchema(this.connection.getCurrentSchema());
+				table.setSchema(this.connection.getCurrentSchema());
 			}
 		}
-		return targetTable;
+		return table;
 	}
 
-	/**
-	 * 	Read the column definitions from the database.
-	 * 	@param cols a List of column names (String)
-	 */
-	private void readColumnDefinition(List<ColumnIdentifier> cols)
+	protected TableDefinition getTargetTable()
 		throws SQLException
 	{
-		try
-		{
-			this.colCount = cols.size();
-			this.columns = new ArrayList<ColumnIdentifier>(colCount);
-			ArrayList<ColumnIdentifier> realCols = new ArrayList<ColumnIdentifier>();
-			boolean partialImport = false;
-			DbMetadata meta = this.connection.getMetadata();
-			TableDefinition def = meta.getTableDefinition(getTargetTable());
-			TableIdentifier targetTable = def.getTable();
-			List<ColumnIdentifier> tableCols = def.getColumns();
-			int numTableCols = tableCols.size();
+		if (this.tableName == null) return null;
+		if (this.targetTable != null) return targetTable;
+		TableIdentifier table = createTargetTableId();
 
-			// Should not happen, but just to make sure ;)
-			if (numTableCols == 0)
-			{
-				messages.append(ResourceMgr.getFormattedString("ErrImportTableNotFound", targetTable.getTableExpression()));
-				throw new SQLException("Table " + targetTable.getTableExpression() + " not found!");
-			}
+		targetTable = connection.getMetadata().getTableDefinition(table);
 
-			for (int i=0; i < cols.size(); i++)
-			{
-				ColumnIdentifier col = cols.get(i);
-				String colname = col.getColumnName();
-				if (colname.toLowerCase().startsWith(RowDataProducer.SKIP_INDICATOR) )
-				{
-					partialImport = true;
-					this.columns.add(null);
-				}
-				else
-				{
-					int index = tableCols.indexOf(col);
-					if (index > -1)
-					{
-						col = tableCols.get(index);
-						this.columns.add(col);
-						realCols.add(col);
-					}
-					else
-					{
-						if (this.pendingImportColumns == null || this.pendingImportColumns.contains(colname))
-						{
-							if (this.abortOnError)
-							{
-								String msg = ResourceMgr.getString("ErrImportColumnNotFound");
-								msg = StringUtil.replace(msg, "%column%", colname);
-								msg = StringUtil.replace(msg, "%table%", this.tableName);
-								this.messages.append(msg);
-								this.messages.appendNewLine();
-								this.hasErrors = true;
-								throw new SQLException(msg);
-							}
-							else
-							{
-								String msg = ResourceMgr.getString("ErrImportColumnIgnored");
-								msg = StringUtil.replace(msg, "%column%", colname);
-								msg = StringUtil.replace(msg, "%table%", this.tableName);
-								LogMgr.logWarning("TextFileParser.readColumns()", msg);
-								this.hasWarnings = true;
-								this.messages.append(msg);
-								this.messages.appendNewLine();
-							}
-						}
-						partialImport = true;
-					}
-				}
-			}
-
-			if (realCols.size() == 0)
-			{
-				String msg = ResourceMgr.getString("ErrImportNoColumns");
-				msg = StringUtil.replace(msg, "%table%", this.tableName);
-				this.hasErrors = true;
-				this.messages.append(msg);
-				this.messages.appendNewLine();
-				throw new SQLException("No column matched in import file");
-			}
-
-			// reset mapping
-			this.importAllColumns();
-
-			if (partialImport)
-			{
-				// only if we found at least one column to ignore, we
-				// need to set the real column list
-				this.setImportColumns(realCols);
-			}
-
-		}
-		catch (SQLException e)
-		{
-			this.hasErrors = true;
-			throw e;
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("TextFileParser.readColumnDefinition()", "Error when reading column definition", e);
-			this.colCount = -1;
-			this.columns = null;
-		}
+		return targetTable;
 	}
 
 	public int getColumnCount()
 	{
-		return this.colCount;
+		return importColumns.size();
 	}
 
+	List<ImportFileColumn> getImportColumns()
+	{
+		return importColumns;
+	}
+	
 	/**
 	 *	Returns the column list as a comma separated string
 	 *  that can be used for the WbImport command
 	 */
 	public String getColumns()
 	{
-		StringBuilder result = new StringBuilder(this.colCount * 10);
+		StringBuilder result = new StringBuilder();
 
-		if (this.columnMap == null || this.importColCount == this.colCount)
+		int colCount = 0;
+		for (ImportFileColumn col : importColumns)
 		{
-			for (int i=0; i < this.colCount; i++)
+			if (colCount > 0) result.append(',');
+			if (col != null && col.getTargetIndex() != -1)
 			{
-				if (i > 0) result.append(',');
-				result.append(getColumn(i).getColumnName());
+				result.append(col.getColumn().getColumnName());
 			}
-		}
-		else
-		{
-			for (int i=0; i < this.colCount; i++)
+			else
 			{
-				if (i > 0) result.append(',');
-				if (this.columnMap[i] != -1)
-				{
-					result.append(getColumn(i).getColumnName());
-				}
-				else
-				{
-					result.append(RowDataProducer.SKIP_INDICATOR);
-				}
+				result.append(RowDataProducer.SKIP_INDICATOR);
 			}
+			colCount ++;
 		}
 		return result.toString();
 	}

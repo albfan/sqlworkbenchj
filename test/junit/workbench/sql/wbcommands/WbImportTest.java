@@ -43,14 +43,14 @@ import workbench.util.ZipOutputFactory;
  *
  * @author support@sql-workbench.net
  */
-public class WbImportTest 
+public class WbImportTest
 	extends TestCase
 {
 	private TestUtil util;
 	private String basedir;
 	private WbImport importCmd = new WbImport();
 	private WbConnection connection;
-	
+
 	public WbImportTest(String testName)
 	{
 		super(testName);
@@ -65,20 +65,20 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	protected void setUp() throws Exception
 	{
 		super.setUp();
 		this.connection = prepareDatabase();
 		this.importCmd.setConnection(this.connection);
 	}
-	
+
 	protected void tearDown() throws Exception
 	{
 		this.connection.disconnect();
 		super.tearDown();
 	}
-	
+
 	public void testPreAndPostStatements()
 	{
 		ResultSet rs = null;
@@ -97,7 +97,7 @@ public class WbImportTest
 			stmt.executeUpdate("insert into junit_test_pk (nr, firstname, lastname) values (1, 'Mary', 'Moviestar')");
 			stmt.executeUpdate("insert into junit_test_pk (nr, firstname, lastname) values (2, 'Harry', 'Handsome')");
 			this.connection.commit();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport " +
 				"-encoding=utf8 " +
 				"-file='" + importFile.getAbsolutePath() + "' " +
@@ -107,9 +107,9 @@ public class WbImportTest
 				"-header=true " +
 				"-continueonerror=false " +
 				"-table=junit_test_pk");
-			
+
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			rs = stmt.executeQuery("select nr, firstname, lastname from junit_test_pk order by nr");
 			while (rs.next())
 			{
@@ -147,7 +147,7 @@ public class WbImportTest
 			SqlUtil.closeAll(rs, stmt);
 		}
 	}
-	
+
 	public void testFunctionConstant()
 	{
 		try
@@ -162,10 +162,10 @@ public class WbImportTest
 
 			Statement stmt = this.connection.createStatementForQuery();
 			stmt.executeUpdate("create sequence seq_junit start with 1");
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"nr=${next value for seq_junit}\" -type=text -header=true -continueonerror=false -table=junit_test_pk");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test_pk");
 			int count = -1;
 			if (rs.next())
@@ -173,9 +173,9 @@ public class WbImportTest
 				count = rs.getInt(1);
 			}
 			assertEquals("Not enough values imported", 3, count);
-			
+
 			rs.close();
-			
+
 			rs = stmt.executeQuery("select nr, lastname, firstname from junit_test_pk order by nr");
 			if (rs.next())
 			{
@@ -198,13 +198,13 @@ public class WbImportTest
 				fail("First row not imported");
 			}
 			rs.close();
-			
+
 			stmt.close();
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
@@ -212,8 +212,8 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
-	
+
+
 	public void testConstantValues()
 	{
 		try
@@ -228,7 +228,7 @@ public class WbImportTest
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -constantValues=\"firstname=Unknown\" -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
@@ -237,9 +237,9 @@ public class WbImportTest
 				count = rs.getInt(1);
 			}
 			assertEquals("Not enough values imported", 3, count);
-			
+
 			rs.close();
-			
+
 			rs = stmt.executeQuery("select lastname, firstname from junit_test where nr = 1");
 			if (rs.next())
 			{
@@ -253,13 +253,13 @@ public class WbImportTest
 				fail("First row not imported");
 			}
 			rs.close();
-			
+
 			stmt.close();
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
@@ -270,71 +270,71 @@ public class WbImportTest
 	public void testPartialColumnXmlImport()
 		throws Exception
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select id, lastname, firstname from person \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
-             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
-             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
-             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
-             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
-             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
-             " \n" + 
-             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
-             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
-             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
-             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
-             "         is provided in the <data-format> tag of the column definition \n" + 
-             "    --> \n" + 
-             " \n" + 
-             "    <table-name>junit_test</table-name> \n" + 
-             "    <column-count>3</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>LASTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>FIRSTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>OTHER</java-sql-type-name> \n" + 
-             "      <java-sql-type>1111</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
-             "<rd><cd>3</cd><cd>Prefect</cd><cd>Ford</cd></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select id, lastname, firstname from person \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" +
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" +
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" +
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" +
+             "    <database-product-version>1.8.0</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" +
+             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" +
+             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" +
+             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" +
+             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" +
+             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" +
+             " \n" +
+             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" +
+             "         is written as an attribute to the <column-data> tag. That value can be used \n" +
+             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" +
+             "         If Java is not used to parse this file, the date/time format used to write the data \n" +
+             "         is provided in the <data-format> tag of the column definition \n" +
+             "    --> \n" +
+             " \n" +
+             "    <table-name>junit_test</table-name> \n" +
+             "    <column-count>3</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>LASTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>FIRSTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>OTHER</java-sql-type-name> \n" +
+             "      <java-sql-type>1111</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" +
+             "<rd><cd>3</cd><cd>Prefect</cd><cd>Ford</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -342,15 +342,15 @@ public class WbImportTest
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
-			
+
 			String cmd = "wbimport -importcolumns=nr,lastname -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, lastname, firstname from junit_test");
 			int rowCount = 0;
-			
+
 			while (rs.next())
 			{
 				rowCount ++;
@@ -359,19 +359,19 @@ public class WbImportTest
 				String lastname = rs.getString(2);
 				switch (nr)
 				{
-					case 1: 
+					case 1:
 						assertEquals("Wrong data imported", "Dent", lastname);
 						break;
-					case 2: 
+					case 2:
 						assertEquals("Wrong data imported", "Beeblebrox", lastname);
 						break;
-					case 3: 
+					case 3:
 						assertEquals("Wrong data imported", "Prefect", lastname);
 						break;
 				}
 				String firstname = rs.getString(3);
 				assertNull("Omitted column imported", firstname);
-				
+
 			}
 			assertEquals("Wrong number of rows", rowCount, 3);
 			rs.close();
@@ -379,7 +379,7 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
@@ -390,16 +390,16 @@ public class WbImportTest
 
 	public void testEscapedQuotes()
 	{
-		String data = 
-			"nr\ttestvalue\n" + 
-			"1\tone\n" + 
+		String data =
+			"nr\ttestvalue\n" +
+			"1\tone\n" +
 			"2\twith\"quote";
 		try
 		{
-			
+
 			// Test with escape character
 			String content = StringUtil.replace(data, "\"", "\\\"");
-			
+
 			File datafile = new File(this.basedir, "escaped_quotes1.txt");
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
 			out.write(content);
@@ -407,7 +407,7 @@ public class WbImportTest
 
 			Statement stmt = this.connection.createStatement();
 			stmt.executeUpdate("create table imp_test (nr integer, testvalue varchar(100))");
-			
+
 			String cmd = "wbimport -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=escape";
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
@@ -421,11 +421,11 @@ public class WbImportTest
 			if (!datafile.delete())
 			{
 				fail("Could not delete input file: " + datafile.getCanonicalPath());
-			}	
-			
+			}
+
 			// test with duplicated quotes
 			content = StringUtil.replace(data, "\"", "\"\"");
-			
+
 			datafile = new File(this.basedir, "escaped_quotes2.txt");
 			out = new BufferedWriter(EncodingUtil.createWriter(datafile, "UTF-8", false));
 			out.write(content);
@@ -433,7 +433,7 @@ public class WbImportTest
 
 			stmt.executeUpdate("delete from imp_test");
 			this.connection.commit();
-			
+
 			cmd = "wbimport  -quoteChar='\"' -header=true -continueOnError=false -encoding='UTF-8' -file='" + datafile.getAbsolutePath() + "' -type=text -table=imp_test -quoteCharEscaping=duplicate";
 			result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed: " + result.getMessageBuffer(), result.isSuccess(), true);
@@ -448,8 +448,8 @@ public class WbImportTest
 			if (!datafile.delete())
 			{
 				fail("Could not delete input file: " + datafile.getCanonicalPath());
-			}	
-			
+			}
+
 		}
 		catch (Exception e)
 		{
@@ -457,38 +457,38 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testImportQuotedColumn()
 	{
-		String xml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             "    <created>2007-04-11 21:33:05.000 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:c:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>TEST1</table-name> \n" + 
-             "    <column-count>1</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>Pr\u00e4fix</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>one</cd></rd> \n" + 
-             "<rd><cd>two</cd></rd> \n" + 
-             "</data> \n" + 
+		String xml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             "    <created>2007-04-11 21:33:05.000 CEST</created> \n" +
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" +
+             "    <connection>User=SA, URL=jdbc:hsqldb:c:/daten/db/hsql18/test</connection> \n" +
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" +
+             "    <database-product-version>1.8.0</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>TEST1</table-name> \n" +
+             "    <column-count>1</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>Pr\u00e4fix</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>one</cd></rd> \n" +
+             "<rd><cd>two</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -499,7 +499,7 @@ public class WbImportTest
 
 			Statement stmt = this.connection.createStatement();
 			stmt.executeUpdate("create table qtest (\"Pr\u00e4fix\" varchar(100))");
-			
+
 			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=qtest";
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed", result.isSuccess(), true);
@@ -513,14 +513,14 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}					
-			
+			}
+
 			xmlFile = new File(this.basedir, "quoted_column_xml_import.xml");
 			out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			String xml2 = StringUtil.replace(xml1, "<column-name>Pr\u00e4fix</column-name>" , "<column-name>\"Pr\u00e4fix\"</column-name>");
 			out.write(xml2);
 			out.close();
-			
+
 			// Re-run with quoted column name
 			result = importCmd.execute(cmd);
 			assertEquals("Import did not succeed", result.isSuccess(), true);
@@ -530,11 +530,11 @@ public class WbImportTest
 			if (rs.next()) rows = rs.getInt(1);
 			assertEquals("Wrong number of rows imported", 4, rows);
 			SqlUtil.closeAll(rs, stmt);
-			
+
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
@@ -545,51 +545,51 @@ public class WbImportTest
 
 	public void testMissingXmlColumn()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>junit_test</table-name> \n" + 
-             "    <column-count>4</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>LASTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>FIRSTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"3\"> \n" + 
-             "      <column-name>EMAIL</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
-             "<rd><cd>3</cd><cd>Prefect</cd><cd>Ford</cd></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>junit_test</table-name> \n" +
+             "    <column-count>4</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>LASTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>FIRSTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"3\"> \n" +
+             "      <column-name>EMAIL</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" +
+             "<rd><cd>3</cd><cd>Prefect</cd><cd>Ford</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -597,7 +597,7 @@ public class WbImportTest
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
-			
+
 			String cmd = "wbimport -continueOnError=false -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import succeeded", false, result.isSuccess());
@@ -605,7 +605,7 @@ public class WbImportTest
 			cmd = "wbimport -encoding='UTF-8' -continueOnError=true -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			result = importCmd.execute(cmd);
 			assertEquals("Import failed", true, result.isSuccess());
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int rows = 0;
@@ -615,15 +615,15 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-	}	
-	
+	}
+
 	public void testBooleanLiterals()
 	{
 		try
@@ -637,26 +637,26 @@ public class WbImportTest
 			out.write("4,no\n");
 			out.write("5,no\n");
 			out.close();
-			
+
 			// Test importing correct true/false values
 			String cmd = "wbimport -literalsFalse='no,99' -literalsTrue='yes,5' -type=text -header=true  -table=bool_test -continueOnError=false -delimiter=',' -booleanToNumber=true -encoding='UTF-8' -file='" + importfile.getAbsolutePath() + "'";
 			StatementRunnerResult result = importCmd.execute(cmd);
 			String msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
-			
+
 			Statement stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from bool_test where flag = false");
 			int rows = 0;
 			if (rs.next()) rows = rs.getInt(1);
 			assertEquals("Wrong number of rows imported", 3, rows);
 			rs.close();
-			
+
 			rs = stmt.executeQuery("select count(*) from bool_test where flag = true");
 			rows = 0;
 			if (rs.next()) rows = rs.getInt(1);
 			assertEquals("Wrong number of rows imported", 2, rows);
 			rs.close();
-			
+
 			stmt.executeUpdate("delete from bool_test");
 			this.connection.commit();
 
@@ -666,7 +666,7 @@ public class WbImportTest
 			result = importCmd.execute(cmd);
 			msg = result.getMessageBuffer().toString();
 			assertEquals(msg, false, result.isSuccess());
-			
+
 			rs = stmt.executeQuery("select count(*) from bool_test");
 			rows = 0;
 			if (rs.next()) rows = rs.getInt(1);
@@ -683,13 +683,13 @@ public class WbImportTest
 			msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
 			assertEquals(msg, true, result.hasWarning());
-			
+
 			rs = stmt.executeQuery("select count(*) from bool_test");
 			rows = 0;
 			if (rs.next()) rows = rs.getInt(1);
 			assertEquals("Wrong number of rows imported", 3, rows);
 			rs.close();
-			
+
 			SqlUtil.closeAll(rs, stmt);
 
 			if (!importfile.delete())
@@ -703,40 +703,40 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testAutoConvertBooleanToNumber()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>junit_test</table-name> \n" + 
-             "    <column-count>2</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>INT_FLAG</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>int</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>true</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>false</cd></rd> \n" + 
-             "<rd><cd>3</cd><cd>gaga</cd></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>junit_test</table-name> \n" +
+             "    <column-count>2</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>INT_FLAG</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>int</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>true</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>false</cd></rd> \n" +
+             "<rd><cd>3</cd><cd>gaga</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -744,7 +744,7 @@ public class WbImportTest
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
-			
+
 			// Test importing only correct true/false values
 			String cmd = "wbimport -continueOnError=false -startRow=1 -endRow=2 -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
 			StatementRunnerResult result = importCmd.execute(cmd);
@@ -762,12 +762,12 @@ public class WbImportTest
 			stmt.executeUpdate("delete from bool_int_test");
 			this.connection.commit();
 			SqlUtil.closeStatement(stmt);
-			
+
 			cmd = "wbimport -continueOnError=false -booleanToNumber=true -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=bool_int_test";
 			result = importCmd.execute(cmd);
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Import did not fail", false, result.isSuccess());
-			
+
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
@@ -779,7 +779,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testTextClobImport()
 	{
 		try
@@ -792,17 +792,17 @@ public class WbImportTest
 			out.close();
 			String data1 = "This is a CLOB string to be put into row 1";
 			String data2 = "This is a CLOB string to be put into row 2";
-			
+
 			File datafile = new File(this.basedir, "text_data_r1_c2.data");
 			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(datafile), "UTF-8"));
 			out.print(data1);
 			out.close();
-			
+
 			datafile = new File(this.basedir, "text_data_r2_c2.data");
 			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(datafile), "UTF-8"));
 			out.print(data2);
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -clobIsFilename=true -type=text -header=true -continueonerror=false -table=clob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
@@ -834,7 +834,7 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
@@ -842,7 +842,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testRegularImport()
 		throws Exception
 	{
@@ -862,19 +862,19 @@ public class WbImportTest
 			// Make sure encoding is working
 			out.println("999\tUnifirst\t"+name);
 			rowCount ++;
-			
+
 			// test for empty values (should be stored as NULL)
 			out.println("  \tempty nr\tempty");
 			rowCount ++;
-			
+
 			// Check that quote characters are used if not specified
 			out.println("42\tarthur\"dent\tempty");
 			rowCount ++;
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
@@ -883,9 +883,9 @@ public class WbImportTest
 				count = rs.getInt(1);
 			}
 			assertEquals("Not enough values imported", rowCount, count);
-			
+
 			rs.close();
-			
+
 			rs = stmt.executeQuery("select lastname from junit_test where nr = 999");
 			if (rs.next())
 			{
@@ -897,7 +897,7 @@ public class WbImportTest
 				fail("Unicode row not imported");
 			}
 			rs.close();
-			
+
 			rs = stmt.executeQuery("select firstname from junit_test where nr = 42");
 			if (rs.next())
 			{
@@ -913,7 +913,7 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
@@ -932,10 +932,10 @@ public class WbImportTest
 			out.println("x1\tArthur\tDent");
 			out.println("x2\tZaphod\tBeeblebrox");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -colSubstring=nr=1:5 -maxLength='firstname=50,lastname=4' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
 			while (rs.next())
@@ -964,15 +964,15 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testSkipImport()
 		throws Exception
 	{
@@ -984,10 +984,10 @@ public class WbImportTest
 			out.println("1\tArthur\tDent");
 			out.println("2\tZaphod\tBeeblebrox");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,$wb_skip$,lastname -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
 			while (rs.next())
@@ -1015,8 +1015,8 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
@@ -1039,10 +1039,10 @@ public class WbImportTest
 				out.println(id + "\tFirstname" + id + "\tLastname" + id);
 			}
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -type=text -header=true -continueonerror=false -startrow=10 -endrow=20 -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test");
 			if (rs.next())
@@ -1063,19 +1063,18 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testPartialColumnTextImport()
 		throws Exception
 	{
-		int rowCount = 10;
 		try
 		{
 			File importFile  = new File(this.basedir, "partial2.txt");
@@ -1084,10 +1083,10 @@ public class WbImportTest
 			out.println("1\tArthur\tDent");
 			out.println("2\tZaphod\tBeeblebrox");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("-- this is the import test\nwbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -filecolumns=nr,firstname,lastname -importcolumns=nr,lastname -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
 			while (rs.next())
@@ -1115,32 +1114,32 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testMultiLineImport()
 	{
 		int rowCount = 10;
 		try
 		{
 			File importFile  = new File(this.basedir, "multi.txt");
-			String content = "firstname\tlastname\tnr\n" + 
-				"First\t\"Last\nname\"\t1\n" + 
-				"first2\tlast2\t2\n" + 
-				"first3\t\"last3\nlast3last3\"\t3\n" + 
+			String content = "firstname\tlastname\tnr\n" +
+				"First\t\"Last\nname\"\t1\n" +
+				"first2\tlast2\t2\n" +
+				"first3\t\"last3\nlast3last3\"\t3\n" +
 				"first4\t\"last4\tlast4\"\t4\n";
-			
+
 			TestUtil.writeFile(importFile, content);
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
 			int count = 0;
@@ -1178,34 +1177,34 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testZipMultiLineImport()
 	{
 		try
 		{
 			File importFile  = new File(this.basedir, "zipmulti.txt");
-			
+
 			File archive = new File(this.basedir, "zipmulti.zip");
 			ZipOutputFactory zout = new ZipOutputFactory(archive);
 			PrintWriter out = new PrintWriter(zout.createWriter(importFile, "UTF-8"));
-			
+
 			out.print("nr\tfirstname\tlastname\n");
 			out.print("1\tFirst\t\"Last\n");
 			out.print("name\"\n");
 			out.close();
 			zout.done();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -multiline=true -quotechar='\"' -type=text -header=true -continueonerror=false -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
 			int count = -1;
@@ -1213,10 +1212,10 @@ public class WbImportTest
 			{
 				int nr = rs.getInt(1);
 				assertEquals("Wrong nr imported", 1, nr);
-				
+
 				String first = rs.getString(2);
 				assertEquals("Wrong firstname imported", "First", first);
-				
+
 				String last = rs.getString(3);
 				assertEquals("Wrong firstname imported", "Last\nname", last);
 			}
@@ -1246,10 +1245,10 @@ public class WbImportTest
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			out.println("1\tFirstname\t");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=true -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
 			if (rs.next())
@@ -1258,15 +1257,15 @@ public class WbImportTest
 				assertEquals("Wrong values imported", nr, 1);
 				String first = rs.getString(2);
 				assertEquals("Wrong firstname", "Firstname", first);
-				
+
 				String last = rs.getString(3);
 				assertNull("Lastname not null", last);
 			}
 			rs.close();
-			
+
 			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -emptyStringIsNull=false -type=text -filecolumns=nr,firstname,lastname -deleteTarget=true -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			rs = stmt.executeQuery("select nr,firstname,lastname from junit_test order by nr");
 			if (rs.next())
 			{
@@ -1274,11 +1273,11 @@ public class WbImportTest
 				assertEquals("Wrong values imported", nr, 1);
 				String first = rs.getString(2);
 				assertEquals("Wrong firstname", "Firstname", first);
-				
+
 				String last = rs.getString(3);
 				assertNotNull("Lastname is null", last);
 			}
-			
+
 			if (rs.next())
 			{
 				fail("Too many rows");
@@ -1288,8 +1287,8 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
@@ -1309,10 +1308,10 @@ public class WbImportTest
 			out.println("2\t\tsecond");
 			out.println("3\t3.3\tthird");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -decimal=. -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -table=numeric_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, amount, prod_name from numeric_test order by nr");
 			while (rs.next())
@@ -1320,7 +1319,7 @@ public class WbImportTest
 				int nr = rs.getInt(1);
 				double amount = rs.getDouble(2);
 				if (rs.wasNull()) amount = -1;
-			
+
 				switch (nr)
 				{
 					case 1:
@@ -1340,7 +1339,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testMissingTarget()
 		throws Exception
 	{
@@ -1356,12 +1355,12 @@ public class WbImportTest
 				out.println("First" + i + "\tLastname" + i);
 			}
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -filecolumns=nr,firstname,lastname -header=false -table=not_there");
 			String msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
 			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
-			
+
 			result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -table=not_there");
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
@@ -1371,7 +1370,7 @@ public class WbImportTest
 			msg = result.getMessageBuffer().toString();
 			assertEquals("Export did not fail", false, result.isSuccess());
 			assertEquals("No proper message in result", true, msg.indexOf("NOT_THERE not found") > -1);
-			
+
 			importFile.delete();
 		}
 		catch (Exception e)
@@ -1379,7 +1378,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testNoHeader()
 		throws Exception
 	{
@@ -1395,10 +1394,10 @@ public class WbImportTest
 				out.println("First" + i + "\tLastname" + i);
 			}
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true  -type=text -filecolumns=nr,firstname,lastname -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
@@ -1419,7 +1418,7 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
@@ -1442,10 +1441,10 @@ public class WbImportTest
 				out.println("First" + i + "\tLastname" + i);
 			}
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -multiline=true -type=text -header=false -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
@@ -1466,15 +1465,15 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testDirImport()
 		throws Exception
 	{
@@ -1482,7 +1481,7 @@ public class WbImportTest
 		try
 		{
 			util.emptyBaseDirectory();
-			
+
 			File importFile  = new File(this.basedir, "junit_test.txt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			//out.println("nr\tfirstname\tlastname");
@@ -1493,15 +1492,15 @@ public class WbImportTest
 				out.println("First" + i + "\tLastname" + i);
 			}
 			out.close();
-			
+
 			out = new PrintWriter(new FileWriter(new File(this.basedir, "datatype_test.txt")));
 			//out.println("int_col\tdouble_col\tchar_col\tdate_col\ttime_col\tts_col");
 			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34:14\t");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -header=false -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
@@ -1510,7 +1509,7 @@ public class WbImportTest
 				count = rs.getInt(1);
 			}
 			assertEquals("Not enough values in table junit_test", rowCount, count);
-			
+
 			rs = stmt.executeQuery("select count(*) from datatype_test");
 			count = -1;
 			if (rs.next())
@@ -1518,20 +1517,20 @@ public class WbImportTest
 				count = rs.getInt(1);
 			}
 			assertEquals("Not enough values in table datatype_test", 1, count);
-			
+
 			rs.close();
 			stmt.close();
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
-			
+			}
+
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
-	}	
+	}
 
 	public void testMultiFileSingleTableImport()
 		throws Exception
@@ -1540,7 +1539,7 @@ public class WbImportTest
 		try
 		{
 			util.emptyBaseDirectory();
-			
+
 			File importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			for (int i = 0; i < 5; i++)
@@ -1562,7 +1561,7 @@ public class WbImportTest
 				out.println("First" + i + "\tLastname" + i);
 			}
 			out.close();
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			stmt.executeUpdate("DELETE FROM junit_test");
 			this.connection.commit();
@@ -1571,10 +1570,10 @@ public class WbImportTest
 			String msg = result.getMessageBuffer().toString();
 			assertFalse(result.isSuccess());
 			assertTrue(msg.indexOf("No files with extension gaga found in directory") > -1);
-			
+
 			result = importCmd.execute("wbimport -header=false -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
 			assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
-			
+
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
 			if (rs.next())
@@ -1582,25 +1581,25 @@ public class WbImportTest
 				count = rs.getInt(1);
 			}
 			assertEquals("Not enough values in table junit_test", rowCount, count);
-			
+
 			importFile  = new File(this.basedir, "multi_test1_nohead.mtxt");
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 
 			importFile  = new File(this.basedir, "multi_test2_nohead.mtxt");
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
-	}	
-	
+	}
+
 	public void testMultiFileSingleTableImportWithHeader()
 		throws Exception
 	{
@@ -1608,7 +1607,7 @@ public class WbImportTest
 		try
 		{
 			util.emptyBaseDirectory();
-			
+
 			File importFile  = new File(this.basedir, "multi_test1_head.mtxt");
 			PrintWriter out = new PrintWriter(new FileWriter(importFile));
 			out.println("gaga\tnr\tfirst_name\tlast_name");
@@ -1632,14 +1631,14 @@ public class WbImportTest
 				out.println("First" + i + "\tLastname" + i);
 			}
 			out.close();
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			stmt.executeUpdate("DELETE FROM junit_test");
 			this.connection.commit();
 
 			StatementRunnerResult result = importCmd.execute("wbimport -header=true -fileColumns=$wb_skip$,nr,firstname,lastname -continueonerror=false -sourcedir='" + importFile.getParent() + "' -type=text -extension=mtxt -table=junit_test");
 			assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
-			
+
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
 			if (rs.next())
@@ -1647,25 +1646,25 @@ public class WbImportTest
 				count = rs.getInt(1);
 			}
 			assertEquals("Not enough values in table junit_test", rowCount, count);
-			
+
 			importFile  = new File(this.basedir, "multi_test1_head.mtxt");
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 
 			importFile  = new File(this.basedir, "multi_test2_head.mtxt");
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
-	}	
-	
+	}
+
 	public void testMappedImport()
 		throws Exception
 	{
@@ -1678,14 +1677,13 @@ public class WbImportTest
 			for (int i = 0; i < rowCount; i++)
 			{
 				out.print(Integer.toString(i));
-				out.print('\t');
-				out.println("First" + i + "\tLastname" + i);
+				out.println("\t42\tFirst" + i + "\tLastname" + i);
 			}
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -type=text -continueonerror=true -header=true -table=junit_test");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select count(*) from junit_test");
 			int count = -1;
@@ -1699,18 +1697,17 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testDataTypes()
 		throws Exception
 	{
-		int rowCount = 10;
 		try
 		{
 			File importFile  = new File(this.basedir, "import_types.txt");
@@ -1718,10 +1715,10 @@ public class WbImportTest
 			out.println("int_col\tdouble_col\tchar_col\tdate_col\ttime_col\tts_col\tnchar_col");
 			out.println("42\t42.1234\tfortytwo\t2006-02-01\t22:30\t2006-04-01 22:34\tnvarchar");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=datatype_test -dateformat='yyyy-MM-dd' -timestampformat='yyyy-MM-dd HH:mm'");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select int_col, double_col, char_col, date_col, time_col, ts_col from datatype_test");
 			if (rs.next())
@@ -1738,12 +1735,12 @@ public class WbImportTest
 				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 				java.util.Date d2 = df.parse("2006-02-01");
 				assertEquals("Wrong date imported", d2, dt);
-				
+
 				df = new SimpleDateFormat("HH:mm");
 				d2 = df.parse("22:30");
 				java.sql.Time tm = new java.sql.Time(d2.getTime());
 				assertEquals("Wrong time imported", tm, tt);
-				
+
 				df = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 				d2 = df.parse("2006-04-01 22:34");
 				assertEquals("Wrong timestamp imported", d2, ts);
@@ -1757,7 +1754,7 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 		}
 		catch (Exception e)
 		{
@@ -1771,11 +1768,11 @@ public class WbImportTest
 		try
 		{
 			File importFile  = new File(this.basedir, "blob_test.txt");
-			
+
 			File archive = new File(this.basedir, "blob_test.zip");
 			ZipOutputFactory zout = new ZipOutputFactory(archive);
 			Writer w = zout.createWriter(importFile, "UTF-8");
-			
+
 			PrintWriter out = new PrintWriter(w);
 			out.println("nr\tbinary_data");
 			out.println("1\tblob_data_r1_c1.data");
@@ -1783,11 +1780,11 @@ public class WbImportTest
 
 			w.close();
 			zout.done();
-			
+
 			File blobarchive = new File(this.basedir, "blob_test" + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip");
 			zout = new ZipOutputFactory(blobarchive);
 			OutputStream binaryOut = zout.createOutputStream(new File("blob_data_r1_c1.data"));
-			
+
 			byte[] testData = new byte[1024];
 			for (int i = 0; i < testData.length; i++)
 			{
@@ -1800,14 +1797,14 @@ public class WbImportTest
 
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + archive.getAbsolutePath() + "' -decimal='.' -multiline=true -encoding='UTF-8' -type=text -header=true -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
 			if (rs.next())
 			{
 				int nr = rs.getInt(1);
 				assertEquals("Wrong data imported", 1, nr);
-				
+
 				Object blob = rs.getObject(2);
 				assertNotNull("No blob data imported", blob);
 				if (blob instanceof byte[])
@@ -1833,7 +1830,7 @@ public class WbImportTest
 			if (!archive.delete())
 			{
 				fail("Could not delete input file: " + archive.getCanonicalPath());
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -1843,58 +1840,58 @@ public class WbImportTest
 
 	public void testVerboseXmlImport()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select id, lastname, firstname from person \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <wb-tag-format>long</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>junit_test</table-name> \n" + 
-             "    <column-count>3</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>LASTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>FIRSTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select id, lastname, firstname from person \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <wb-tag-format>long</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>junit_test</table-name> \n" +
+             "    <column-count>3</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>LASTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>FIRSTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
              "<row-data row-num=\"1\">" +
 						 "  <column-data index=\"0\">1</column-data>" +
 						 "  <column-data index=\"1\">Dent</column-data>" +
 						 "  <column-data index=\"2\">Arthur</column-data>" +
-						 "</row-data> \n" + 
+						 "</row-data> \n" +
              "<row-data row-num=\"1\">" +
 						 "  <column-data index=\"0\">2</column-data>" +
 						 "  <column-data index=\"1\">Beeblebrox</column-data>" +
 						 "  <column-data index=\"2\">Zaphod</column-data>" +
-						 "</row-data> \n" + 
-             "</data> \n" + 
+						 "</row-data> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -1902,16 +1899,16 @@ public class WbImportTest
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
-			
+
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			//System.out.println("cmd=" + cmd);
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
 			int rowCount = 0;
-			
+
 			while (rs.next())
 			{
 				rowCount ++;
@@ -1924,7 +1921,7 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -1932,53 +1929,53 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testXmlImport()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select id, lastname, firstname from person \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>junit_test</table-name> \n" + 
-             "    <column-count>3</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>LASTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>FIRSTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select id, lastname, firstname from person \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>junit_test</table-name> \n" +
+             "    <column-count>3</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>LASTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>FIRSTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -1986,16 +1983,16 @@ public class WbImportTest
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
-			
+
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
 			//System.out.println("cmd=" + cmd);
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
 			int rowCount = 0;
-			
+
 			while (rs.next())
 			{
 				rowCount ++;
@@ -2008,7 +2005,7 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -2090,37 +2087,37 @@ public class WbImportTest
              "   Lastname varchar(50)  NULL, \n" +
              "   id        int4         NOT NULL, \n" +
              "   FIRSTNAME  varchar(50)  NULL \n" +
-             ")";		
+             ")";
 		try
 		{
 			File xmlFile = new File(this.basedir, "xml_import.xml");
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
-			
+
 			Statement stmt = this.connection.createStatement();
 			stmt.executeUpdate(sql);
-			
+
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=info";
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			ResultSet rs = stmt.executeQuery("select count(*) from info");
 			int rowCount = 0;
-			
+
 			if (rs.next())
 			{
 				rowCount = rs.getInt(1);
 			}
-			
+
 			assertEquals("Wrong number of rows", rowCount, 4);
 			rs.close();
 			stmt.close();
-			
-			
+
+
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -2128,53 +2125,53 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testXmlImportCreateTable()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select id, lastname, firstname from person \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>not_there_table</table-name> \n" + 
-             "    <column-count>3</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>LASTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>FIRSTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select id, lastname, firstname from person \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>not_there_table</table-name> \n" +
+             "    <column-count>3</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>LASTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>FIRSTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>Dent</cd><cd>Arthur</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>Beeblebrox</cd><cd>Zaphod</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -2182,16 +2179,16 @@ public class WbImportTest
 			BufferedWriter out = new BufferedWriter(EncodingUtil.createWriter(xmlFile, "UTF-8", false));
 			out.write(xml);
 			out.close();
-			
+
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -createTarget=true";
 			//System.out.println("cmd=" + cmd);
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from not_there_table");
 			int rowCount = 0;
-			
+
 			while (rs.next())
 			{
 				rowCount ++;
@@ -2204,7 +2201,7 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -2215,68 +2212,68 @@ public class WbImportTest
 
 	public void testPartialXmlImport()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select id, lastname, firstname from person \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
-             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
-             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
-             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
-             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
-             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
-             " \n" + 
-             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
-             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
-             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
-             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
-             "         is provided in the <data-format> tag of the column definition \n" + 
-             "    --> \n" + 
-             " \n" + 
-             "    <table-name>junit_test</table-name> \n" + 
-             "    <column-count>3</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>LASTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>FIRSTNAME</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select id, lastname, firstname from person \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <created>2006-07-29 23:31:40.366 CEST</created> \n" +
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" +
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" +
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" +
+             "    <database-product-version>1.8.0</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" +
+             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" +
+             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" +
+             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" +
+             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" +
+             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" +
+             " \n" +
+             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" +
+             "         is written as an attribute to the <column-data> tag. That value can be used \n" +
+             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" +
+             "         If Java is not used to parse this file, the date/time format used to write the data \n" +
+             "         is provided in the <data-format> tag of the column definition \n" +
+             "    --> \n" +
+             " \n" +
+             "    <table-name>junit_test</table-name> \n" +
+             "    <column-count>3</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>LASTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>FIRSTNAME</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(100)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
              "<data> \n";
-		String xmlEnd = "</data> \n" + 
+		String xmlEnd = "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -2290,12 +2287,12 @@ public class WbImportTest
 			}
 			out.write(xmlEnd);
 			out.close();
-			
+
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -startRow = 15 -endrow = 24 -table=junit_test";
 			//System.out.println("cmd=" + cmd);
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select min(nr), max(nr), count(*) from junit_test");
 			if (rs.next())
@@ -2316,7 +2313,7 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -2324,50 +2321,50 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testXmlBlobImport()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select * from blob_test \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <created>2006-07-30 00:05:59.316 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>blob_test</table-name> \n" + 
-             "    <column-count>2</column-count> \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>BINARY_DATA</column-name> \n" + 
-             "      <java-class>byte[]</java-class> \n" + 
-             "      <java-sql-type-name>BINARY</java-sql-type-name> \n" + 
-             "      <java-sql-type>-2</java-sql-type> \n" + 
-             "      <dbms-data-type>BINARY</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select * from blob_test \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <created>2006-07-30 00:05:59.316 CEST</created> \n" +
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" +
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" +
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" +
+             "    <database-product-version>1.8.0</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>blob_test</table-name> \n" +
+             "    <column-count>2</column-count> \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>BINARY_DATA</column-name> \n" +
+             "      <java-class>byte[]</java-class> \n" +
+             "      <java-sql-type-name>BINARY</java-sql-type-name> \n" +
+             "      <java-sql-type>-2</java-sql-type> \n" +
+             "      <dbms-data-type>BINARY</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -2385,20 +2382,20 @@ public class WbImportTest
 			}
 			binaryOut.write(testData);
 			binaryOut.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
 			int rowCount = 0;
-			
+
 			if (rs.next())
 			{
 				rowCount ++;
 				int nr = rs.getInt(1);
 				assertEquals("Wrong data imported", 1, nr);
-				
+
 				Object blob = rs.getObject(2);
 				assertNotNull("No blob data imported", blob);
 				if (blob instanceof byte[])
@@ -2424,7 +2421,7 @@ public class WbImportTest
 			if (!xmlFile.delete())
 			{
 				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
-			}			
+			}
 		}
 		catch (Exception e)
 		{
@@ -2435,47 +2432,47 @@ public class WbImportTest
 
 	public void testXmlClobImport()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select * from blob_test \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <created>2006-07-30 00:05:59.316 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>clob_test</table-name> \n" + 
-             "    <column-count>2</column-count> \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>TEXT_DATA</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>LONGVARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>-1</java-sql-type> \n" + 
-             "      <dbms-data-type>LONGVARCHAR</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select * from blob_test \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <created>2006-07-30 00:05:59.316 CEST</created> \n" +
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" +
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" +
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" +
+             "    <database-product-version>1.8.0</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>clob_test</table-name> \n" +
+             "    <column-count>2</column-count> \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>TEXT_DATA</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>LONGVARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>-1</java-sql-type> \n" +
+             "      <dbms-data-type>LONGVARCHAR</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
@@ -2486,24 +2483,24 @@ public class WbImportTest
 
 			File datafile = new File(this.basedir, "test_r1_c2.data");
 			String data1 = "This is a CLOB string to be put into row 1";
-			
-			Writer pw = EncodingUtil.createWriter(datafile, "UTF-8", false);			
+
+			Writer pw = EncodingUtil.createWriter(datafile, "UTF-8", false);
 			pw.write(data1);
 			pw.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=clob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, text_data from clob_test");
 			int rowCount = 0;
-			
+
 			if (rs.next())
 			{
 				rowCount ++;
 				int nr = rs.getInt(1);
 				assertEquals("Wrong data imported", 1, nr);
-				
+
 				String data = rs.getString(2);
 				assertEquals(data, data);
 			}
@@ -2533,23 +2530,23 @@ public class WbImportTest
 			File dbFile = new File(util.getBaseDir(), "commit_test");
 			WbConnection wb = util.getConnection(dbFile);
 			importCmd.setConnection(wb);
-			
+
 			Statement stmt = wb.createStatement();
 			stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 			wb.commit();
 			stmt.close();
-			
+
 			String data = "nr;firstname;lastname\n1;Arthur;Dent\n2;Zaphod;Beeblebrox\n";
 			File dataFile = new File(util.getBaseDir(), "commit_test_data.txt");
 			FileWriter w = new FileWriter(dataFile);
 			w.write(data);
 			w.close();
-			
+
 			String cmd = "wbimport -file='" + dataFile.getAbsolutePath() + "' -type=text -delimiter=';' -table=junit_test -header=true";
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			wb.disconnect();
-			
+
 			// Shutdown and restart the engine to make sure the data was committed
 			wb = util.getConnection(dbFile);
 			stmt = wb.createStatement();
@@ -2583,7 +2580,7 @@ public class WbImportTest
 			}
 			rs.close();
 			wb.disconnect();
-			
+
 			// Make sure the import command has released all file handles
 			if (!dataFile.delete())
 			{
@@ -2594,9 +2591,9 @@ public class WbImportTest
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
-		}		
+		}
 	}
-	
+
 	public void testNoCommit()
 	{
 		try
@@ -2605,12 +2602,12 @@ public class WbImportTest
 			File dbFile = new File(util.getBaseDir(), "no_commit_test");
 			WbConnection wb = util.getConnection(dbFile);
 			importCmd.setConnection(wb);
-			
+
 			Statement stmt = wb.createStatement();
 			stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 			wb.commit();
 			stmt.close();
-			
+
 			String data = "nr;firstname;lastname\n1;Arthur;Dent\n2;Zaphod;Beeblebrox\n";
 			File dataFile = new File(util.getBaseDir(), "no_commit_test_data.txt");
 			FileWriter w = new FileWriter(dataFile);
@@ -2621,7 +2618,7 @@ public class WbImportTest
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			wb.disconnect();
-			
+
 			// Shutdown and restart the engine to make sure the data was committed
 			wb = util.getConnection(dbFile);
 			stmt = wb.createStatement();
@@ -2631,7 +2628,7 @@ public class WbImportTest
 			rs.close();
 			assertEquals("Wrong number of rows in table", 0, count);
 			wb.disconnect();
-			
+
 			if (!dataFile.delete())
 			{
 				fail("Could not delete datafile: " + dataFile.getCanonicalPath());
@@ -2641,83 +2638,83 @@ public class WbImportTest
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
-		}		
+		}
 	}
-	
+
 	public void testZippedXmlBlobImport()
 	{
-		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             " \n" + 
-             "    <generating-sql> \n" + 
-             "    <![CDATA[ \n" + 
-             "    select * from blob_test \n" + 
-             "    ]]> \n" + 
-             "    </generating-sql> \n" + 
-             " \n" + 
-             "    <created>2006-07-30 00:05:59.316 CEST</created> \n" + 
-             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" + 
-             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" + 
-             "    <database-product-name>HSQL Database Engine</database-product-name> \n" + 
-             "    <database-product-version>1.8.0</database-product-version> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" + 
-             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" + 
-             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" + 
-             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" + 
-             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" + 
-             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" + 
-             " \n" + 
-             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" + 
-             "         is written as an attribute to the <column-data> tag. That value can be used \n" + 
-             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" + 
-             "         If Java is not used to parse this file, the date/time format used to write the data \n" + 
-             "         is provided in the <data-format> tag of the column definition \n" + 
-             "    --> \n" + 
-             " \n" + 
-             "    <table-name>blob_test</table-name> \n" + 
-             "    <column-count>2</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>NR</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>BINARY_DATA</column-name> \n" + 
-             "      <java-class>byte[]</java-class> \n" + 
-             "      <java-sql-type-name>BINARY</java-sql-type-name> \n" + 
-             "      <java-sql-type>-2</java-sql-type> \n" + 
-             "      <dbms-data-type>BINARY</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" + 
-             "</data> \n" + 
+		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             " \n" +
+             "    <generating-sql> \n" +
+             "    <![CDATA[ \n" +
+             "    select * from blob_test \n" +
+             "    ]]> \n" +
+             "    </generating-sql> \n" +
+             " \n" +
+             "    <created>2006-07-30 00:05:59.316 CEST</created> \n" +
+             "    <jdbc-driver>HSQL Database Engine Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>1.8.0</jdbc-driver-version> \n" +
+             "    <connection>User=SA, URL=jdbc:hsqldb:d:/daten/db/hsql18/test</connection> \n" +
+             "    <database-product-name>HSQL Database Engine</database-product-name> \n" +
+             "    <database-product-version>1.8.0</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <!-- The following information was retrieved from the JDBC driver's ResultSetMetaData --> \n" +
+             "    <!-- column-name is retrieved from ResultSetMetaData.getColumnName() --> \n" +
+             "    <!-- java-class is retrieved from ResultSetMetaData.getColumnClassName() --> \n" +
+             "    <!-- java-sql-type-name is the constant's name from java.sql.Types --> \n" +
+             "    <!-- java-sql-type is the constant's numeric value from java.sql.Types as returned from ResultSetMetaData.getColumnType() --> \n" +
+             "    <!-- dbms-data-type is retrieved from ResultSetMetaData.getColumnTypeName() --> \n" +
+             " \n" +
+             "    <!-- For date and timestamp types, the internal long value obtained from java.util.Date.getTime() \n" +
+             "         is written as an attribute to the <column-data> tag. That value can be used \n" +
+             "         to create a java.util.Date() object directly, without the need to parse the actual tag content. \n" +
+             "         If Java is not used to parse this file, the date/time format used to write the data \n" +
+             "         is provided in the <data-format> tag of the column definition \n" +
+             "    --> \n" +
+             " \n" +
+             "    <table-name>blob_test</table-name> \n" +
+             "    <column-count>2</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>NR</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>BINARY_DATA</column-name> \n" +
+             "      <java-class>byte[]</java-class> \n" +
+             "      <java-sql-type-name>BINARY</java-sql-type-name> \n" +
+             "      <java-sql-type>-2</java-sql-type> \n" +
+             "      <dbms-data-type>BINARY</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd dataFile=\"test_r1_c2.data\"/></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 		try
 		{
 			File xmlFile = new File(this.basedir, "xml_import.xml");
-			
+
 			File archive = new File(this.basedir, "blob_test.zip");
 			ZipOutputFactory zout = new ZipOutputFactory(archive);
 			Writer w = zout.createWriter(xmlFile, "UTF-8");
 			w.write(xml);
 			w.close();
 			zout.done();
-			
+
 			File blobarchive = new File(this.basedir, "blob_test" + RowDataConverter.BLOB_ARCHIVE_SUFFIX + ".zip");
 			zout = new ZipOutputFactory(blobarchive);
 			OutputStream binaryOut = zout.createOutputStream(new File("test_r1_c2.data"));
-		
+
 			byte[] testData = new byte[1024];
 			for (int i = 0; i < testData.length; i++)
 			{
@@ -2726,20 +2723,20 @@ public class WbImportTest
 			binaryOut.write(testData);
 			binaryOut.close();
 			zout.done();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='UTF-8' -file='" + archive.getAbsolutePath() + "' -type=xml -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
 			int rowCount = 0;
-			
+
 			if (rs.next())
 			{
 				rowCount ++;
 				int nr = rs.getInt(1);
 				assertEquals("Wrong data imported", 1, nr);
-				
+
 				Object data = rs.getObject(2);
 				Object blob = rs.getObject(2);
 				assertNotNull("No blob data imported", blob);
@@ -2781,7 +2778,7 @@ public class WbImportTest
 			out.println("nr\tbinary_data");
 			out.println("1\tblob_data_r1_c1.data");
 			out.close();
-			
+
 			FileOutputStream binaryOut = new FileOutputStream(new File(this.basedir, "blob_data_r1_c1.data"));
 			byte[] testData = new byte[1024];
 			for (int i = 0; i < testData.length; i++)
@@ -2790,17 +2787,17 @@ public class WbImportTest
 			}
 			binaryOut.write(testData);
 			binaryOut.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
 			if (rs.next())
 			{
 				int nr = rs.getInt(1);
 				assertEquals("Wrong data imported", 1, nr);
-				
+
 				Object blob = rs.getObject(2);
 				assertNotNull("No blob data imported", blob);
 				if (blob instanceof byte[])
@@ -2829,7 +2826,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testBadFile()
 	{
 		try
@@ -2842,17 +2839,17 @@ public class WbImportTest
 			out.println("2\tHarry\tHandsome");
 			out.println("1\tZaphod\tBeeblebrox");
 			out.close();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -multiline=false -type=text -header=true -continueonerror=true -table=junit_test_pk -badFile='" + badFile.getCanonicalPath() + "'");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			assertEquals("Bad file not created", true, badFile.exists());
-			
+
 			BufferedReader r = new BufferedReader(new FileReader(badFile));
 			String line = r.readLine();
 			r.close();
 			assertEquals("Wrong record rejected", "1\tZaphod\tBeeblebrox", line);
-			
+
 			Statement stmt = this.connection.createStatementForQuery();
 			ResultSet rs = stmt.executeQuery("select nr from junit_test_pk order by nr");
 			int row = 0;
@@ -2867,7 +2864,7 @@ public class WbImportTest
 				{
 					assertEquals("Wrong ID imported", 2, id);
 				}
-				else 
+				else
 				{
 					fail("Too many rows");
 				}
@@ -2878,7 +2875,7 @@ public class WbImportTest
 			if (!importFile.delete())
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
-			}					
+			}
 			if (!badFile.delete())
 			{
 				fail("Could not delete bad file: " + badFile.getCanonicalPath());
@@ -2922,10 +2919,10 @@ public class WbImportTest
 					assertNull("Firstname not null", firstname);
 					assertEquals("Wrong Lastname imported", "Handsome", firstname);
 				}
-				else if (id == 2)
+				else if (id == 3)
 				{
-					assertNull("Firstname not null", firstname);
-					assertEquals("Wrong Lastname imported", "Beeblebrox", firstname);
+					assertEquals("Wrong Firstname", "Zaphod", firstname);
+					assertEquals("Wrong Lastname imported", "Beeblebrox", lastname);
 				}
 				else
 				{
@@ -2945,7 +2942,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testFixedWidthImport()
 	{
 		try
@@ -3045,24 +3042,24 @@ public class WbImportTest
 			stmt.executeUpdate("insert into parent_table (id, some_val) values (1, 1)");
 			stmt.executeUpdate("insert into parent_table (id, some_val) values (2, 1)");
 			stmt.executeUpdate("insert into parent_table (id, some_val) values (3, 1)");
-			
+
 			stmt.executeUpdate("create table child (id integer primary key, parent_id integer, data integer, foreign key (parent_id) references parent_table(id))");
 			stmt.executeUpdate("insert into child (id, parent_id, data) values (1, 1, 1)");
 			stmt.executeUpdate("insert into child (id, parent_id, data) values (2, 1, 2)");
 			this.connection.commit();
-			
+
 			File importFile  = new File(this.basedir, "imp_delete_test.txt");
 			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
 			out.println("id\tsome_val");
 			out.println("1\t42");
-			out.close();	
+			out.close();
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=parent_table -deleteTarget=true");
 			assertEquals("Import did not fail", false, result.isSuccess());
 			String msg = result.getMessageBuffer().toString();
 			System.out.println(" ***** message=" + msg);
 			assertEquals("No error reported", true, msg.toLowerCase().indexOf("integrity constraint violation") > 0);
-			
+
 			ResultSet rs = stmt.executeQuery("select count(*) from parent_table");
 			int count = -1;
 			if (rs.next())
@@ -3089,7 +3086,7 @@ public class WbImportTest
 		{
 			File importFile  = new File(this.basedir, "bad_import.txt");
 			importFile.createNewFile();
-			
+
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=false -continueonerror=true -table=junit_test");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
@@ -3104,7 +3101,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testDependencyXmlImport()
 	{
 		try
@@ -3112,139 +3109,139 @@ public class WbImportTest
 			File f1 = new File(basedir, "file1.xml");
 			File f2 = new File(this.basedir, "file2.xml");
 			File f3 = new File(this.basedir, "file3.xml");
-			
-			String f1_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>A_CHILD1_CHILD</table-name> \n" + 
-             "    <column-count>3</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>ID</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>CHILD_ID</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>INFO</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>1</cd><cd>info_1</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>2</cd><cd>info_2</cd></rd> \n" + 
-             "<rd><cd>3</cd><cd>3</cd><cd>info_3</cd></rd> \n" + 
-             "<rd><cd>4</cd><cd>4</cd><cd>info_3</cd></rd> \n" + 
-             "</data> \n" + 
+
+			String f1_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>A_CHILD1_CHILD</table-name> \n" +
+             "    <column-count>3</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>ID</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>CHILD_ID</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>INFO</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>1</cd><cd>info_1</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>2</cd><cd>info_2</cd></rd> \n" +
+             "<rd><cd>3</cd><cd>3</cd><cd>info_3</cd></rd> \n" +
+             "<rd><cd>4</cd><cd>4</cd><cd>info_3</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 
-			String f2_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>CHILD1</table-name> \n" + 
-             "    <column-count>3</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>ID</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>BASE_ID</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"2\"> \n" + 
-             "      <column-name>INFO</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>1</cd><cd>info</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>2</cd><cd>info</cd></rd> \n" + 
-             "<rd><cd>3</cd><cd>1</cd><cd>info</cd></rd> \n" + 
-             "<rd><cd>4</cd><cd>2</cd><cd>info</cd></rd> \n" + 
-             "</data> \n" + 
-             "</wb-export>";			
-			
-			String f3_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" + 
-             "<wb-export> \n" + 
-             "  <meta-data> \n" + 
-             "    <created>2007-09-15 19:31:31.718 CEST</created> \n" + 
-             "    <jdbc-driver>H2 JDBC Driver</jdbc-driver> \n" + 
-             "    <jdbc-driver-version>1.0.57 (2007-08-25)</jdbc-driver-version> \n" + 
-             "    <connection>User=, Catalog=TESTDEPENDENCYTEXTIMPORT, URL=jdbc:h2:mem:testDependencyTextImport</connection> \n" + 
-             "    <database-product-name>H2</database-product-name> \n" + 
-             "    <database-product-version>1.0.57 (2007-08-25)</database-product-version> \n" + 
-             "    <wb-tag-format>short</wb-tag-format> \n" + 
-             "  </meta-data> \n" + 
-             " \n" + 
-             "  <table-def> \n" + 
-             "    <table-name>ZZBASE</table-name> \n" + 
-             "    <column-count>2</column-count> \n" + 
-             " \n" + 
-             "    <column-def index=\"0\"> \n" + 
-             "      <column-name>ID</column-name> \n" + 
-             "      <java-class>java.lang.Integer</java-class> \n" + 
-             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" + 
-             "      <java-sql-type>4</java-sql-type> \n" + 
-             "      <dbms-data-type>INTEGER</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "    <column-def index=\"1\"> \n" + 
-             "      <column-name>INFO</column-name> \n" + 
-             "      <java-class>java.lang.String</java-class> \n" + 
-             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" + 
-             "      <java-sql-type>12</java-sql-type> \n" + 
-             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" + 
-             "    </column-def> \n" + 
-             "  </table-def> \n" + 
-             " \n" + 
-             "<data> \n" + 
-             "<rd><cd>1</cd><cd>info</cd></rd> \n" + 
-             "<rd><cd>2</cd><cd>info</cd></rd> \n" + 
-             "</data> \n" + 
+			String f2_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>CHILD1</table-name> \n" +
+             "    <column-count>3</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>ID</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>BASE_ID</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"2\"> \n" +
+             "      <column-name>INFO</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>1</cd><cd>info</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>2</cd><cd>info</cd></rd> \n" +
+             "<rd><cd>3</cd><cd>1</cd><cd>info</cd></rd> \n" +
+             "<rd><cd>4</cd><cd>2</cd><cd>info</cd></rd> \n" +
+             "</data> \n" +
+             "</wb-export>";
+
+			String f3_content = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
+             "<wb-export> \n" +
+             "  <meta-data> \n" +
+             "    <created>2007-09-15 19:31:31.718 CEST</created> \n" +
+             "    <jdbc-driver>H2 JDBC Driver</jdbc-driver> \n" +
+             "    <jdbc-driver-version>1.0.57 (2007-08-25)</jdbc-driver-version> \n" +
+             "    <connection>User=, Catalog=TESTDEPENDENCYTEXTIMPORT, URL=jdbc:h2:mem:testDependencyTextImport</connection> \n" +
+             "    <database-product-name>H2</database-product-name> \n" +
+             "    <database-product-version>1.0.57 (2007-08-25)</database-product-version> \n" +
+             "    <wb-tag-format>short</wb-tag-format> \n" +
+             "  </meta-data> \n" +
+             " \n" +
+             "  <table-def> \n" +
+             "    <table-name>ZZBASE</table-name> \n" +
+             "    <column-count>2</column-count> \n" +
+             " \n" +
+             "    <column-def index=\"0\"> \n" +
+             "      <column-name>ID</column-name> \n" +
+             "      <java-class>java.lang.Integer</java-class> \n" +
+             "      <java-sql-type-name>INTEGER</java-sql-type-name> \n" +
+             "      <java-sql-type>4</java-sql-type> \n" +
+             "      <dbms-data-type>INTEGER</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "    <column-def index=\"1\"> \n" +
+             "      <column-name>INFO</column-name> \n" +
+             "      <java-class>java.lang.String</java-class> \n" +
+             "      <java-sql-type-name>VARCHAR</java-sql-type-name> \n" +
+             "      <java-sql-type>12</java-sql-type> \n" +
+             "      <dbms-data-type>VARCHAR(50)</dbms-data-type> \n" +
+             "    </column-def> \n" +
+             "  </table-def> \n" +
+             " \n" +
+             "<data> \n" +
+             "<rd><cd>1</cd><cd>info</cd></rd> \n" +
+             "<rd><cd>2</cd><cd>info</cd></rd> \n" +
+             "</data> \n" +
              "</wb-export>";
 
 			FileWriter out = new FileWriter(f1);
 			out.write(f1_content);
 			out.close();
-			
+
 			out = new FileWriter(f2);
 			out.write(f2_content);
 			out.close();
-				
+
 			out = new FileWriter(f3);
 			out.write(f3_content);
 			out.close();
-			
+
 			WbFile f = new WbFile(basedir);
 			StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' -type=xml -checkDependencies=true");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
@@ -3282,7 +3279,7 @@ public class WbImportTest
 			{
 				fail("No rows in zzbase");
 			}
-			
+
 			if (!f1.delete())
 			{
 				fail("Could not delete input file: " + f1.getCanonicalPath());
@@ -3302,7 +3299,7 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testDependencyTextImport()
 	{
 		try
@@ -3310,7 +3307,7 @@ public class WbImportTest
 			File f1 = new File(basedir, "a_child1_child.txt");
 			File f2 = new File(this.basedir, "child1.txt");
 			File f3 = new File(this.basedir, "zzbase.txt");
-			
+
 			FileWriter out = new FileWriter(f1);
 			out.write("id\tchild_id\tinfo\n");
 			out.write("1\t1\tinfo_1\n");
@@ -3318,7 +3315,7 @@ public class WbImportTest
 			out.write("3\t3\tinfo_3\n");
 			out.write("4\t4\tinfo_3\n");
 			out.close();
-			
+
 			out = new FileWriter(f2);
 			out.write("id\tbase_id\tinfo\n");
 			out.write("1\t1\tinfo\n");
@@ -3326,13 +3323,13 @@ public class WbImportTest
 			out.write("3\t1\tinfo\n");
 			out.write("4\t2\tinfo\n");
 			out.close();
-				
+
 			out = new FileWriter(f3);
 			out.write("id\tinfo\n");
 			out.write("1\tinfo\n");
 			out.write("2\tinfo\n");
 			out.close();
-			
+
 			// Fill the tables with some data
 			// to be able to test the -deleteTarget option
 			Statement stmt = this.connection.createStatement();
@@ -3349,7 +3346,7 @@ public class WbImportTest
 				stmt.executeUpdate("insert into a_child1_child (id, child_id, info) values (" + (i - 99) + ", " + i+ ", 'info" + i + "')");
 			}
 			this.connection.commit();
-			
+
 			WbFile f = new WbFile(basedir);
 			StatementRunnerResult result = importCmd.execute("wbimport -sourcedir='" + f.getFullPath() + "' " +
 				"-type=text " +
@@ -3357,7 +3354,7 @@ public class WbImportTest
 				"-deleteTarget=true " +
 				"-checkDependencies=true");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			
+
 			ResultSet rs = stmt.executeQuery("select count(*) from zzbase");
 			if (rs.next())
 			{
@@ -3390,7 +3387,7 @@ public class WbImportTest
 			{
 				fail("No rows in zzbase");
 			}
-			
+
 			if (!f1.delete())
 			{
 				fail("Could not delete input file: " + f1.getCanonicalPath());
@@ -3410,13 +3407,13 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{
 		util.emptyBaseDirectory();
 		WbConnection wb = util.getConnection();
-		
+
 		Statement stmt = wb.createStatement();
 		stmt.executeUpdate("CREATE TABLE junit_test (nr integer, firstname varchar(100), lastname varchar(100))");
 		stmt.executeUpdate("CREATE TABLE junit_test_pk (nr integer primary key, firstname varchar(100), lastname varchar(100))");
@@ -3426,17 +3423,17 @@ public class WbImportTest
 		stmt.executeUpdate("CREATE TABLE clob_test (nr integer, text_data CLOB)");
 		stmt.executeUpdate("CREATE TABLE bool_int_test (nr integer, int_flag INTEGER)");
 		stmt.executeUpdate("CREATE TABLE bool_test (nr integer, flag BOOLEAN)");
-		
+
 		stmt.executeUpdate("CREATE TABLE zzbase (id integer primary key, info varchar(50))");
 		stmt.executeUpdate("CREATE TABLE child1 (id integer primary key, base_id integer not null, info varchar(50))");
 		stmt.executeUpdate("CREATE TABLE a_child1_child (id integer primary key, child_id integer not null, info varchar(50))");
 		stmt.executeUpdate("alter table child1 add foreign key (base_id) references zzbase(id)");
 		stmt.executeUpdate("alter table a_child1_child add foreign key (child_id) references child1(id)");
-		
+
 		wb.commit();
 		stmt.close();
-		
+
 		return wb;
 	}
-	
+
 }

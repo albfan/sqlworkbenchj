@@ -282,7 +282,7 @@ public class ColumnIdentifier
 
 	/**
 	 * Compare two identifiers. 
-	 * The comparison is only done on the name column and is case-insesitive. 
+	 * The comparison is only done on the name column and is case-insensitive.
 	 * 
 	 * If the object is not a ColumnIdentifier it returns false
 	 * 
