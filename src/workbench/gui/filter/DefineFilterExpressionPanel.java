@@ -228,6 +228,12 @@ public class DefineFilterExpressionPanel
 		}
 	}
 
+	public void selectColumn(String col)
+	{
+		if (panels.size() == 0) return;
+		panels.get(0).expressionPanel.selectColumn(col);
+	}
+	
 	private void removeAllPanels()
 	{
 		this.panels.clear();
@@ -256,7 +262,6 @@ public class DefineFilterExpressionPanel
 		int count = expList.size();
 		for (int i=0; i < count; i++)
 		{
-
 			try
 			{
 				ExpressionValue exp = (ExpressionValue)expList.get(i);
@@ -423,8 +428,18 @@ public class DefineFilterExpressionPanel
 		if (info == null) return;
 
 		DefineFilterExpressionPanel panel = new DefineFilterExpressionPanel(info);
-
-		panel.setFilter(source.getLastFilter());
+		int col = source.getSelectedColumn();
+		
+		FilterExpression lastFilter = source.getLastFilter();
+		if (lastFilter != null)
+		{
+			panel.setFilter(lastFilter);
+		}
+		else if (col > -1)
+		{
+			String colname = info.getColumnName(col);
+			panel.selectColumn(colname);
+		}
 		String title = ResourceMgr.getString("MsgFilterWindowTitle");
 		boolean showDialog = true;
 		while (showDialog)

@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.filter;
+import com.sun.java.swing.SwingUtilities2;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -23,6 +24,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbTraversalPolicy;
@@ -141,6 +143,20 @@ public class ColumnExpressionPanel
 		this.setFocusTraversalPolicy(pol);
 	}
 
+	public void selectColumn(String col)
+	{
+		final int index = findColumnInDropDown(col);
+		if (index > -1)
+		{
+			SwingUtilities.invokeLater(new Runnable() {
+
+				public void run()
+				{
+					columnSelector.setSelectedIndex(index);
+				}
+			});
+		}
+	}
 
 	public void actionPerformed(ActionEvent evt)
 	{

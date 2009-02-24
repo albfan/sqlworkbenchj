@@ -1,5 +1,8 @@
 Build @BUILD_NUMBER@, @BUILD_DATE@
 --------------------
+Enh: (103.5) When defining a new filter for a result set, the currently
+     selected column is now pre-selected in the dropdown if no filter
+     is defined.
 Enh: (103.4) When using WbCopy's -createTarget=true, data type mappings
      can now be specified in workbench.settings that enhance or
      overwrite the data type mapping returned by the driver.
