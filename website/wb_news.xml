@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <?xml-stylesheet href="rss2.xsl" type="text/xsl"?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>SQL Workbench/J</title>
     <link>http://www.sql-workbench.net</link>
+    <atom:link href="http://www.sql-workbench.net/wb_news.xml" rel="self" type="application/rss+xml" />
     <description>News for SQL Workbench/J</description>
     <language>en</language>
     <copyright>Thomas Kellerer</copyright>
-    <webMaster>support@sql-workbench.net</webMaster>
+    <webMaster>support@sql-workbench.net (Thomas Kellerer)</webMaster>
     <category>Programming</category>
     <category>Database</category>
     <category>SQL</category>
@@ -16,267 +17,274 @@
       <title>New development build (103.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 22 Feb 2009</pubDate>
+      <guid isPermaLink="false">sql-workbench-build-103.4</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 22 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (103.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 15 Feb 2009</pubDate>
+      <guid isPermaLink="false">sql-workbench-build-103.3</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 15 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (103.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 09 Feb 2009</pubDate>
+      <guid isPermaLink="false">sql-workbench-build-103.2</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 09 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (103.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 08 Feb 2009</pubDate>
+      <guid isPermaLink="false">sql-workbench-build-103.1</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 08 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (103) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 31 Jan 2009</pubDate>
+      <guid isPermaLink="false">sql-workbench-build-103</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 31 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.11) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 25 Jan 2009</pubDate>
+      <guid isPermaLink="false">sql-workbench-build-102.11</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 25 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.10) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 07 Jan 2009</pubDate>
+      <guid isPermaLink="false">sql-workbench-build-101.10</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 07 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.9) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 04 Jan 2009</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 04 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.8) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 31 Dec 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 31 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.8) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 31 Dec 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 31 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.7) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 22 Dec 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 22 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.6) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 12 Dec 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 12 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.5) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 10 Dec 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 10 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 07 Dec 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 07 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 19 Nov 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 19 Nov 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 02 Nov 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 02 Nov 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (102.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 21 Sep 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 21 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (102) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 15 Sep 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 15 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (101) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 13 Sep 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 13 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.8) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 07 Sep 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 07 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.7) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Tue, 02 Sep 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Tue, 02 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.6) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 25 Aug 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 25 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.5) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 21 Aug 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 21 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 16 Aug 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 16 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 02 Aug 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 02 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 21 Jul 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 21 Jul 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (100.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Tue, 17 Jun 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Tue, 17 Jun 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (100) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 17 May 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 17 May 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.9) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 28 Apr 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 28 Apr 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.8) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 26 Apr 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 26 Apr 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.7) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 18 Apr 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 18 Apr 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.6) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 11 Apr 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 11 Apr 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.5) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 27 Mar 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 27 Mar 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 26 Mar 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 26 Mar 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 21 Mar 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 21 Mar 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 15 Mar 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 15 Mar 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 10 Mar 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 10 Mar 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (99.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 10 Mar 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 10 Mar 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (99) available</title>
@@ -285,295 +293,295 @@
       make sure to replace all local files with the distribution files and delete the obsolete files 
       Workbench.jar and JWorkbench.exe</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 01 Mar 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 01 Mar 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (98.5) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 27 Feb 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 27 Feb 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (98.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 21 Feb 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 21 Feb 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (98.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 18 Feb 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 18 Feb 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (98.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 07 Feb 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 07 Feb 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (98.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Tue, 22 Jan 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Tue, 22 Jan 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (98) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 13 Jan 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 13 Jan 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.9) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 04 Jan 2008</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 04 Jan 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.8) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 17 Dec 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 17 Dec 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.7) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 06 Dec 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 06 Dec 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.6) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 01 Dec 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 01 Dec 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.5) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 23 Nov 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 23 Nov 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 18 Nov 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 18 Nov 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 02 Nov 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 02 Nov 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 01 Nov 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 01 Nov 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (97.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 28 Oct 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 28 Oct 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (97) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 21 Oct 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 21 Oct 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.8) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mo, 15 Okt 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 15 Oct 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.7) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 12 Oct 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 12 Oct 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.6) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 05 Oct 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 05 Oct 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.6) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 05 Oct 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 05 Oct 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.5) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Tue, 25 Sep 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Tue, 25 Sep 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Tue, 11 Sep 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Tue, 11 Sep 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 09 Sep 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 09 Sep 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 30 Aug 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 30 Aug 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (96.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 26 Aug 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 26 Aug 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (96) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 05 Aug 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 05 Aug 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (95.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 23 Jul 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 23 Jul 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (95.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 04 Jul 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 04 Jul 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (95.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 29 Jun 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 29 Jun 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (95.1) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Mon, 18 Jun 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 18 Jun 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (95) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 09 Jun 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 09 Jun 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (94.6) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 23 May 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 23 May 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (94.5) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 17 May 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 17 May 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (94.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 11 May 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 11 May 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (94.4) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Fri, 11 May 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 11 May 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (94.3) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Thu, 26 Apr 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 26 Apr 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (94.2) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 15 Apr 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 15 Apr 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (94) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sat, 31 Mar 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 31 Mar 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (93.8) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Wed, 21 Mar 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 21 Mar 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New development build (93.7) available</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sun, 18 Mar 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 18 Mar 2007 14:00:00 +0100</pubDate>
     </item>
     <item>
       <title>New stable build (93) available</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <author>Thomas Kellerer</author>
-      <pubDate>Sa, 17 Mrz 2007</pubDate>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sat, 17 Mar 2007 14:00:00 +0100</pubDate>
     </item>
   </channel>
 </rss>

@@ -7,7 +7,7 @@
 
   <target name="updateRss">
     <tstamp>
-      <format pattern="EEE, dd MMM yyyy" property="pubDate"/>
+      <format pattern="EEE, dd MMM yyyy HH:mm:ss +0100" property="pubDate" locale="en"/>
     </tstamp>
 
     <xmltask source="wb_news.xml" dest="wb_news.xml" outputter="simple" encoding="UTF-8">
@@ -17,7 +17,8 @@
               <title>New ${pub.build.name} build (${pub.build.number}) available</title>
               <description>A new ${pub.build.name} build has been released. To download, please visit the homepage</description>
               <link>http://www.sql-workbench.net/downloads.html</link>
-              <author>Thomas Kellerer</author>
+              <guid>sql-workbench-build-${pub.build.number}</guid>
+              <author>support@sql-workbench.net (Thomas Kellerer)</author>
               <pubDate>${pubDate}</pubDate>
           </item>
         ]]>
