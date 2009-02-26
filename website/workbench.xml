@@ -168,8 +168,7 @@ VALUES
 		  <p>There are three ways how you can get support for SQL Workbench/J</p>
       <ul>
         <li>Read the <a href="manual/workbench-manual.html" target="_blank">manual</a></li>
-				<br/>
-        <li>Check out the <a href="http://groups.google.com/group/sql-workbench" target="_blank">forum</a> at Google groups</li>
+        <li style="padding-bottom:20px">Check out the SQL Workbench/J <a href="http://groups.google.com/group/sql-workbench" target="_blank">google group</a></li>
         <li>Send an email to <mail-to/></li>
       </ul>
 		</content>

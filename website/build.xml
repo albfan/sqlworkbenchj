@@ -32,7 +32,7 @@
 		<pathelement location="js.jar"/>
 	</path>
 
-  <scriptdef name="getfs" language="javascript">
+  <scriptdef name="getfs" language="javascript" classpathref="script.path">
     <attribute name="file"/>
     <![CDATA[
       fileName = attributes.get("file");
