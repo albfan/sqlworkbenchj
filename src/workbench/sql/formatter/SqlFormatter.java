@@ -288,6 +288,7 @@ public class SqlFormatter
 
 	private void appendTokenText(SQLToken t)
 	{
+		if (t == null) return;
 		String text = t.getContents();
 		if (this.lowerCaseFunctions && this.dbFunctions.contains(text))
 		{
@@ -344,6 +345,12 @@ public class SqlFormatter
 		this.result.append(text);
 	}
 
+	private boolean isDbFunction(SQLToken token)
+	{
+		if (token == null) return false;
+		return isDbFunction(token.getText());
+	}
+	
 	private boolean isDbFunction(String key)
 	{
 		if (dbFunctions == null)
@@ -423,22 +430,20 @@ public class SqlFormatter
 		throws Exception
 	{
 		StringBuilder b = new StringBuilder("     ");
-		StringBuilder oldIndent = this.indent;
-		//this.indent = null;
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
+		int bracketCount = 0;
 		while (t != null)
 		{
 			String text = t.getContents();
 
 			if (t.isReservedWord() && FROM_TERMINAL.contains(text.toUpperCase()))
 			{
-				this.indent = oldIndent;
 				return t;
 			}
-			else if (lastToken.isSeparator() && lastToken.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
+			else if (lastToken.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
 			{
-				t = this.processSubSelect(true);
+				t = this.processSubSelect(true, bracketCount);
 				continue;
 			}
 
@@ -446,14 +451,16 @@ public class SqlFormatter
 			{
 				this.appendComment(text);
 			}
-			else if (t.isSeparator() && text.equals("("))
+			else if (text.equals("("))
 			{
 				if ((!lastToken.isSeparator() || lastToken == t) && !this.lastCharIsWhitespace()) this.appendText(' ');
 				this.appendText(text);
+				bracketCount ++;
 			}
-			else if (t.isSeparator() && text.equals(")"))
+			else if (text.equals(")"))
 			{
 				this.appendText(text);
+				bracketCount --;
 			}
 			else if (t.isSeparator() && text.equals(","))
 			{
@@ -479,7 +486,6 @@ public class SqlFormatter
 			lastToken = t;
 			t = this.lexer.getNextToken(true, false);
 		}
-		this.indent = oldIndent;
 		return null;
 	}
 
@@ -590,8 +596,14 @@ public class SqlFormatter
 	private SQLToken processSubSelect(boolean addSelectKeyword)
 		throws Exception
 	{
+		return processSubSelect(addSelectKeyword, 1);
+	}
+	
+	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount)
+		throws Exception
+	{
 		SQLToken t = this.lexer.getNextToken();
-		int bracketCount = 1;
+		int bracketCount = currentBracketCount;
 		StringBuilder subSql = new StringBuilder(250);
 
 		// this method gets called when then "parser" hits an
@@ -1038,7 +1050,7 @@ public class SqlFormatter
 			{
 				if (lastToken.isComment() && !isStartOfLine()) this.appendNewline();
 
-				if (LINE_BREAK_BEFORE.contains(word))
+				if (LINE_BREAK_BEFORE.contains(word) && !lastToken.getContents().equals("("))
 				{
 					if (!isStartOfLine()) this.appendNewline();
 
@@ -1164,7 +1176,7 @@ public class SqlFormatter
 					if (!isStartOfLine()) this.appendNewline();
 				}
 
-				if (word.equals("("))
+				if (word.equals("(") && isDbFunction(lastToken))
 				{
 					if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
 					this.appendText('(');
@@ -1181,7 +1193,7 @@ public class SqlFormatter
 					else
 					{
 						if (this.needsWhitespace(lastToken, t)) this.appendText(' ');
-						this.appendText(t.getContents());
+						this.appendTokenText(t);
 					}
 				}
 			}

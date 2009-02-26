@@ -35,29 +35,122 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
-//	public void testUnion()
-//		throws Exception
-//	{
-//		String sql =
-//			"SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID,  \n" +
-//             "        0 AS Level \n" +
-//             "    FROM HumanResources.Employee AS e \n" +
-//             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
-//             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
-//             "    WHERE ManagerID IS NULL \n" +
-//             "    UNION ALL \n" +
-//             "    SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID, \n" +
-//             "        Level + 1 \n" +
-//             "    FROM HumanResources.Employee AS e \n" +
-//             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
-//             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
-//             "    INNER JOIN DirectReports AS d \n" +
-//             "        ON e.ManagerID = d.EmployeeID";
-//		SqlFormatter f = new SqlFormatter(sql);
-//		String formatted = f.getFormattedSql().toString();
-//		String expected = "";
-//		System.out.println("**************\n" + formatted + "\n**********");
-//	}
+	public void testSubSelect()
+		throws Exception
+	{
+		String sql = "SELECT state, SUM(numorders) as numorders, SUM(pop) as pop \n" +
+             "FROM ((SELECT o.state, COUNT(*) as numorders, 0 as pop \n" +
+             "FROM orders o \n" +
+             "GROUP BY o.state)) \n";
+		String expected = "SELECT state,\n" +
+             "       SUM(numorders) AS numorders,\n" +
+             "       SUM(pop) AS pop\n" +
+             "FROM ((SELECT o.state,\n" +
+             "              COUNT(*) AS numorders,\n" +
+             "              0 AS pop\n" +
+             "       FROM orders o\n" +
+             "       GROUP BY o.state))";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+		
+		sql = "SELECT state, SUM(numorders) as numorders, SUM(pop) as pop \n" +
+             "FROM ((SELECT o.state, COUNT(*) as numorders, 0 as pop \n" +
+             "FROM orders o \n" +
+             "GROUP BY o.state) \n" +
+             "UNION ALL \n" +
+             "(SELECT state, 0 as numorders, SUM(pop) as pop \n" +
+             "FROM zipcensus \n" +
+             "GROUP BY state)) summary \n" +
+             "GROUP BY state \n" +
+             "ORDER BY 2 DESC";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+		expected = "SELECT state,\n" +
+             "       SUM(numorders) AS numorders,\n" +
+             "       SUM(pop) AS pop\n" +
+             "FROM ((SELECT o.state,\n" +
+             "              COUNT(*) AS numorders,\n" +
+             "              0 AS pop\n" +
+             "       FROM orders o\n" +
+             "       GROUP BY o.state)\n" +
+             "       UNION ALL\n" +
+             "       (SELECT state,\n" +
+             "              0 AS numorders,\n" +
+             "              SUM(pop) AS pop\n" +
+             "       FROM zipcensus\n" +
+             "       GROUP BY state)) summary\n" +
+             "GROUP BY state\n" +
+             "ORDER BY 2 DESC";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+	}
+
+	public void testUnion()
+		throws Exception
+	{
+		String sql =
+			"SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID,  \n" +
+             "        0 AS Level \n" +
+             "    FROM HumanResources.Employee AS e \n" +
+             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
+             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+             "    WHERE ManagerID IS NULL \n" +
+             "    UNION ALL \n" +
+             "    SELECT e.ManagerID, e.EmployeeID, e.Title, edh.DepartmentID, \n" +
+             "        Level + 1 \n" +
+             "    FROM HumanResources.Employee AS e \n" +
+             "    INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh \n" +
+             "        ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+             "    INNER JOIN DirectReports AS d \n" +
+             "        ON e.ManagerID = d.EmployeeID";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+		String expected = "SELECT e.ManagerID,\n" +
+             "       e.EmployeeID,\n" +
+             "       e.Title,\n" +
+             "       edh.DepartmentID,\n" +
+             "       0 AS LEVEL\n" +
+             "FROM HumanResources.Employee AS e \n" +
+             "     INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL\n" +
+             "WHERE ManagerID IS NULL\n" +
+             "UNION ALL\n" +
+             "SELECT e.ManagerID,\n" +
+             "       e.EmployeeID,\n" +
+             "       e.Title,\n" +
+             "       edh.DepartmentID,\n" +
+             "       LEVEL+1\n" +
+             "FROM HumanResources.Employee AS e \n" +
+             "     INNER JOIN HumanResources.EmployeeDepartmentHistory AS edh ON e.EmployeeID = edh.EmployeeID AND edh.EndDate IS NULL \n" +
+             "     INNER JOIN DirectReports AS d ON e.ManagerID = d.EmployeeID";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		sql = "(SELECT o.state, COUNT(*) as numorders, 0 as pop \n" +
+             "FROM orders o \n" +
+             "GROUP BY o.state) \n" +
+             "UNION ALL \n" +
+             "(SELECT state, 0 as numorders, SUM(pop) as pop \n" +
+             "FROM zipcensus \n" +
+             "GROUP BY state)";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+		expected = "(SELECT o.state,\n" +
+             "       COUNT(*) AS numorders,\n" +
+             "       0 AS pop\n" +
+             "FROM orders o\n" +
+             "GROUP BY o.state)\n" +
+             "UNION ALL\n" +
+             "(SELECT state,\n" +
+             "       0 AS numorders,\n" +
+             "       SUM(pop) AS pop\n" +
+             "FROM zipcensus\n" +
+             "GROUP BY state)";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+	}
 
 	public void testWbVars()
 		throws Exception
