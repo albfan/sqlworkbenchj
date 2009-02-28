@@ -12,7 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import workbench.WbManager;
+import workbench.gui.help.HelpManager;
 
 /**
  * @author support@sql-workbench.net
@@ -35,7 +35,7 @@ public class WhatsNewAction
 
 	public void executeAction(ActionEvent e)
 	{
-		WbManager.getInstance().showDialog("workbench.gui.help.WhatsNewViewer");
+		HelpManager.showHistory();
 	}
 	
 }

@@ -81,7 +81,29 @@ public class HelpManager
 			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
 		}
 	}
-	
+
+	public static void showHistory()
+	{
+		File pdf = Settings.getInstance().getDefaultPdf();
+
+		WbFile history = new WbFile(pdf.getParent(), "history.html");
+		if (!history.exists())
+		{
+			String msg = ResourceMgr.getFormattedString("ErrHelpFileNotFound", "history.html", pdf.getParent());
+			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
+			return;
+		}
+		try
+		{
+			BrowserLauncher.openURL(history.toURL().toString());
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("ShowHelpAction.executeAction", "Error displaying manual", ex);
+		}
+		
+	}
+
 	public static void showHelpFile(String topic)
 	{
 		String basefile;
@@ -129,6 +151,7 @@ public class HelpManager
 			{
 				url = url + "#" + topic;
 			}
+			LogMgr.logDebug("HelpManager.showHelpFile()", "Using URL: " + url);
 			BrowserLauncher.openURL(url);
 		}
 		catch (Exception ex)

@@ -532,11 +532,12 @@ public class BrowserLauncher {
 			case WINDOWS_9x:
 		    	// Add quotes around the URL to allow ampersands and other special
 		    	// characters to work.
-				Process process = Runtime.getRuntime().exec(new String[] { (String) theBrowser,
+				String args[] = new String[] { (String) theBrowser,
 																FIRST_WINDOWS_PARAMETER,
 																SECOND_WINDOWS_PARAMETER,
 																THIRD_WINDOWS_PARAMETER,
-																'"' + url + '"' });
+																'"' + url + '"' };
+				Process process = Runtime.getRuntime().exec(args);
 				// This avoids a memory leak on some versions of Java on Windows.
 				// That's hinted at in <http://developer.java.sun.com/developer/qow/archive/68/>.
 				try {
