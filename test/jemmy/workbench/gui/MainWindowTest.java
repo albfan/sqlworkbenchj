@@ -78,18 +78,6 @@ public class MainWindowTest
 		close.push();
 	}
 
-	private void whatsNewTest()
-	{
-		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
-		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|What's new", "|");
-		QueueTool tool = new QueueTool();
-		tool.waitEmpty();
-
-		JDialogOperator dialog = new JDialogOperator(mainWindow, "What's new");
-		dialog.setVisible(false);
-		dialog.dispose();
-	}
-
 	private void settingsTest()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -444,7 +432,6 @@ public class MainWindowTest
 		{
 			startApplication();
 			connect();
-			whatsNewTest();
 			aboutTest();
 			settingsTest();
 			runSql();
