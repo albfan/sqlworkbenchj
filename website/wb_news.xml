@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 
 <?xml-stylesheet href="rss2.xsl" type="text/xsl"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0">
   <channel>
     <title>SQL Workbench/J</title>
     <link>http://www.sql-workbench.net</link>
-    <atom:link href="http://www.sql-workbench.net/wb_news.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="http://www.sql-workbench.net/rss.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom"></atom:link>
     <description>News for SQL Workbench/J</description>
     <language>en</language>
     <copyright>Thomas Kellerer</copyright>
@@ -14,7 +14,7 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
-      <title>New development build (103.4) available</title>
+      <title>New development build (103.4) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-103.4</guid>
@@ -22,7 +22,7 @@
       <pubDate>Sun, 22 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (103.3) available</title>
+      <title>New development build (103.3) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-103.3</guid>
@@ -30,7 +30,7 @@
       <pubDate>Sun, 15 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (103.2) available</title>
+      <title>New development build (103.2) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-103.2</guid>
@@ -38,7 +38,7 @@
       <pubDate>Mon, 09 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (103.1) available</title>
+      <title>New development build (103.1) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-103.1</guid>
@@ -46,7 +46,7 @@
       <pubDate>Sun, 08 Feb 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New stable build (103) available</title>
+      <title>New stable build (103) released</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-103</guid>
@@ -54,7 +54,7 @@
       <pubDate>Sat, 31 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.11) available</title>
+      <title>New development build (102.11) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.11</guid>
@@ -62,7 +62,7 @@
       <pubDate>Sun, 25 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.10) available</title>
+      <title>New development build (102.10) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-101.10</guid>
@@ -70,7 +70,7 @@
       <pubDate>Wed, 07 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.9) available</title>
+      <title>New development build (102.9) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.9</guid>
@@ -78,7 +78,7 @@
       <pubDate>Sun, 04 Jan 2009 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.8) available</title>
+      <title>New development build (102.8) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.8</guid>
@@ -86,15 +86,15 @@
       <pubDate>Wed, 31 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.7) available</title>
+      <title>New development build (102.7) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
-      <guid isPermaLink="false">sql-workbench-build-102.8</guid>
+      <guid isPermaLink="false">sql-workbench-build-102.7</guid>
       <author>support@sql-workbench.net (Thomas Kellerer)</author>
       <pubDate>Mon, 22 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.6) available</title>
+      <title>New development build (102.6) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.6</guid>
@@ -102,7 +102,7 @@
       <pubDate>Fri, 12 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.5) available</title>
+      <title>New development build (102.5) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.5</guid>
@@ -110,7 +110,7 @@
       <pubDate>Wed, 10 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.4) available</title>
+      <title>New development build (102.4) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.4</guid>
@@ -118,7 +118,7 @@
       <pubDate>Sun, 07 Dec 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.3) available</title>
+      <title>New development build (102.3) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.3</guid>
@@ -126,7 +126,7 @@
       <pubDate>Wed, 19 Nov 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.2) available</title>
+      <title>New development build (102.2) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.2</guid>
@@ -134,7 +134,7 @@
       <pubDate>Sun, 02 Nov 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (102.1) available</title>
+      <title>New development build (102.1) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102.1</guid>
@@ -142,7 +142,7 @@
       <pubDate>Sun, 21 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New stable build (102) available</title>
+      <title>New stable build (102) released</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-102</guid>
@@ -150,7 +150,7 @@
       <pubDate>Mon, 15 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New stable build (101) available</title>
+      <title>New stable build (101) released</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-101</guid>
@@ -158,7 +158,7 @@
       <pubDate>Sat, 13 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.8) available</title>
+      <title>New development build (100.8) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.8</guid>
@@ -166,7 +166,7 @@
       <pubDate>Sun, 07 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.7) available</title>
+      <title>New development build (100.7) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.7</guid>
@@ -174,7 +174,7 @@
       <pubDate>Tue, 02 Sep 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.6) available</title>
+      <title>New development build (100.6) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.6</guid>
@@ -182,7 +182,7 @@
       <pubDate>Mon, 25 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.5) available</title>
+      <title>New development build (100.5) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.5</guid>
@@ -190,7 +190,7 @@
       <pubDate>Thu, 21 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.4) available</title>
+      <title>New development build (100.4) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.4</guid>
@@ -198,7 +198,7 @@
       <pubDate>Sat, 16 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.3) available</title>
+      <title>New development build (100.3) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.3</guid>
@@ -206,7 +206,7 @@
       <pubDate>Sat, 02 Aug 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.2) available</title>
+      <title>New development build (100.2) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.2</guid>
@@ -214,7 +214,7 @@
       <pubDate>Mon, 21 Jul 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New development build (100.1) available</title>
+      <title>New development build (100.1) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100.1</guid>
@@ -222,7 +222,7 @@
       <pubDate>Tue, 17 Jun 2008 14:00:00 +0100</pubDate>
     </item>
     <item>
-      <title>New stable build (100) available</title>
+      <title>New stable build (100) released</title>
       <description>A new stable build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
       <guid isPermaLink="false">sql-workbench-build-100</guid>

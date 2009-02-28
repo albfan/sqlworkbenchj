@@ -20,8 +20,6 @@
           doctype-system="http://www.w3.org/TR/html4/loose.dtd"
           />
 
-
-
   <xsl:variable name="siteName" select="/site/@name"/>
   <xsl:param name="filedir"/>
   <xsl:param name="buildNumber"/>
@@ -35,7 +33,7 @@
   </xsl:variable>
 
 
-<!-- 
+<!--
   Generate the table of content which will be displayed for each
   page in the left hand navigation
 -->
@@ -55,7 +53,7 @@
           <a class="list" title="Display the online manual of the current stable release" href="manual/workbench-manual.html">Manual</a>
         </li>
       </ul>
-      
+
       <ul class="toc" id="google">
         <li class="toclist">
           <a class="list" href="http://groups.google.com/group/sql-workbench">Forum@Google
@@ -68,7 +66,7 @@
         <li class="toclist">
           <a class="list" href="wb_news.xml">RSS Feed</a>
         </li>
-        
+
         <xsl:for-each select="/site/page[@toc='small']">
           <xsl:call-template name="toc-entry"/>
         </xsl:for-each>
@@ -86,7 +84,7 @@
 
   <xsl:template name="toc-entry">
     <xsl:param name="currentPage"/>
-    
+
     <xsl:variable name="pageName" select="@name"/>
     <xsl:variable name="pageTitle" select="@title"/>
     <xsl:variable name="notoc" select="@notoc"/>
@@ -126,7 +124,7 @@
 
         <xsl:variable name="pageName" select="@name"/>
         <xsl:variable name="pageTitle" select="@title"/>
-    
+
         <xsl:variable name="fname">
           <xsl:value-of select="concat($pageName,'.html')"/>
         </xsl:variable>
@@ -145,6 +143,30 @@
       </xsl:if>
     </xsl:for-each>
 
+    <xsl:if test="$includeDev = 1">
+      <xsl:for-each select="/site/page[@id='dev-history']">
+  
+        <xsl:variable name="pageName" select="@id"/>
+        <xsl:variable name="pageTitle" select="@title"/>
+
+        <xsl:variable name="fname">
+          <xsl:value-of select="concat($pageName,'.html')"/>
+        </xsl:variable>
+
+        <xsl:variable name="filename">
+          <xsl:value-of select="concat($fdir, $fname)"/>
+        </xsl:variable>
+
+        <redirect:write file="{$filename}">
+          <xsl:call-template name="main">
+            <xsl:with-param name="pageTitle" select="$pageTitle"/>
+            <xsl:with-param name="pageName" select="@name"/>
+          </xsl:call-template>
+        </redirect:write>
+        
+      </xsl:for-each>
+    </xsl:if>
+    
   </xsl:template>
 
   <xsl:template name="main">
@@ -153,7 +175,7 @@
     <xsl:param name="imageName"/>
     <xsl:param name="imageTitle"/>
     <xsl:param name="subTitle"/>
-    
+
     <html>
       <head>
         <title>
@@ -175,7 +197,7 @@
         <link href="wb.css" rel="stylesheet" type="text/css"></link>
       </head>
       <body>
-    
+
         <a target="new" href="http://www.mgm-tp.com/home/index.html" title="mgm technology partners GmbH">
           <span id="mgm"></span>
         </a>
@@ -183,7 +205,7 @@
         <a href="index.html" title="home">
           <span id="head"></span>
         </a>
-    
+
         <div id="left">
           <xsl:call-template name="make-toc">
             <xsl:with-param name="currentPage" select="$pageName"/>
@@ -204,6 +226,69 @@
     </html>
   </xsl:template>
 
+  <xsl:template match="full-history">
+    <h1>Release History</h1>
+    <xsl:for-each select="document('../scripts/history.xml')/history/release[@build != '-1']">
+      <h1 class="build-nr">Build <xsl:value-of select="@build"/> (<xsl:value-of select="@date"/>)</h1>
+
+			<xsl:if test="count(entry[@type='enh']) &gt; 0">
+				<h3 class="history-entry">Enhancements</h3>
+				<ul>
+					<xsl:for-each select="entry[@type='enh']">
+						<xsl:sort select="@dev-build"/>
+						<li><xsl:copy-of select="description/text()"/></li>
+					</xsl:for-each>
+				</ul>
+			</xsl:if>
+
+			<xsl:if test="count(entry[@type='fix']) &gt; 0">
+				<h3 class="history-entry">Bug fixes</h3>
+				<ul>
+				<xsl:for-each select="entry[@type='fix']">
+					<xsl:sort select="@dev-build"/>
+					<li><xsl:copy-of select="description/text()"/></li>
+				</xsl:for-each>
+				</ul>
+			</xsl:if>
+    </xsl:for-each>
+    
+  </xsl:template>
+
+  <xsl:template match="dev-history">
+    <xsl:variable name="dev-build-nr" select="document('../scripts/history.xml')/history/release[2]/@build"/>
+
+		<xsl:variable name="dev-build-minor">
+			<xsl:for-each select="document('../scripts/history.xml')/history/release[1]/entry">
+					<xsl:sort select="@dev-build" order="descending" />
+					<xsl:if test="position()=1">
+							<xsl:value-of select="@dev-build" />
+					</xsl:if>
+			</xsl:for-each>
+		</xsl:variable>
+
+    <xsl:variable name="minor-build-nr" select="document('../scripts/history.xml')/history/release[1]/entry[1]/@dev-build"/>
+    <h1>Changelog for Build <xsl:value-of select="concat($dev-build-nr,'.',$dev-build-minor)"/></h1>
+    
+    <xsl:for-each select="document('../scripts/history.xml')/history/release[1]">
+      
+      <h2 class="history-entry">Enhancements</h2>
+      <ul>
+      <xsl:for-each select="entry[@type='enh']">
+				<xsl:sort select="@dev-build"/>
+        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="description"/></li>
+      </xsl:for-each>
+      </ul>
+      <h2 class="history-entry">Bug fixes</h2>
+      <ul>
+      <xsl:for-each select="entry[@type='fix']">
+				<xsl:sort select="@dev-build"/>
+        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="description"/></li>
+      </xsl:for-each>
+      </ul>
+			
+    </xsl:for-each>
+  </xsl:template>
+  
   <xsl:template match="@*">
     <xsl:copy-of select="."/>
   </xsl:template>
@@ -231,18 +316,17 @@
   <xsl:template match="dev-build">
     <xsl:if test="$includeDev = 1">
       <h3 style="margin-top:20px">Development build</h3>
-      <p>A development build is generated while testing and implementing new features for the next stable build.
-            In general these builds are pretty stable and I am using them on a daily basis myself. 
+      <p>
+        A development build is generated while testing and implementing new features for the next stable build.
+        In general these builds are pretty stable and I am using them on a daily basis myself.
         <br/>
+        Bugfixes will show up in these builds first.
         <br/>
-            Bugfixes will show up in these builds first.
-        <a href="dev-history.txt" target="_blank">Change history</a>
       </p>
+      <p>Current dev-build: <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/> (<a href="dev-history.html">Change Log</a>)</p>
       <ul>
         <li>
-          <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a> (
-          <xsl:value-of select="$devBuildNumber"/>,&nbsp;
-          <xsl:value-of select="$devBuildDate"/>)
+          <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a>
         </li>
         <li>
           <a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a>
@@ -250,7 +334,7 @@
       </ul>
     </xsl:if>
   </xsl:template>
-    
+
   <xsl:template match="dev-build-info">
     <xsl:if test="$includeDev = 1">
       <br/>Current development build:
@@ -286,7 +370,7 @@
     <xsl:text disable-output-escaping="yes"><![CDATA[<a href=mailto:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;>&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;</a>]]>
     </xsl:text>
   </xsl:template>
-    
+
 <!-- <xsl:template match="content"><xsl:value-of select="."/></xsl:template> -->
   <xsl:template match="img">
     <xsl:copy>

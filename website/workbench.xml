@@ -221,12 +221,9 @@ VALUES
 				<p style="font-size:100%;text-align:center;margin-top:10px;">
 					This application requires <b>Java 5</b> (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
 				</p>
-				<p style="margin-bottom:15px;margin-top:5px;padding:10px;border-style:solid;border-color:red;border-width:1px">
-				 Starting with build 99, filenames have changed.<br/> 
-				 Please delete the old files: <tt>jworkbench.exe</tt>, <tt>Workbench.jar</tt> and <tt>jworkbench.sh</tt>
-				</p>
         <h3>Stable release</h3>
-        <p>Current stable release: Build <build-number/>, <build-date/>, <a target="_blank" href="history.txt">Change History</a></p>
+        <p>Current stable release: Build <build-number/>, <build-date/> (<a href="history.html">Release History</a>)
+        </p>
         <ul>
             <li><zip-link/></li>
             <li><mac-link/></li>
@@ -235,13 +232,29 @@ VALUES
         <p>	The release archive contains the needed binaries, the manual in HTML and PDF format and some sample XSLT
 	    	scripts.
 				</p>
-				
 				<p>You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases</p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
         <p><a style="color:red" href="vista.html">A note to Windows Vista users</a>.</p>
         <dev-build/>
     </content>
   </page>
+
+  <page name="history" title="Release History" toc="main">
+    <title>SQL Workbench/J</title>
+		<subtitle>Release History</subtitle>
+		<content>
+		  <full-history/>
+		</content>
+  </page>
+
+  <page id="dev-history" title="Change Log" toc="false">
+    <title>SQL Workbench/J</title>
+		<content>
+		  <dev-history/>
+		</content>
+  </page>
+  
+  <page link="wb_news.xml" title="RSS Feed"/>
 
 	<page name="source-svn" title="Subversion Repository" toc="small">
 		<title>SQL Workbench/J</title>
@@ -263,7 +276,6 @@ VALUES
 			</p>
 		</content>
 	</page>
-
 
 	<page name="disclaimer" title="Disclaimer" toc="small">
 		<title>SQL Workbench/J</title>
@@ -287,35 +299,34 @@ VALUES
 	</page>
 
    <!-- ======================== About the author ========================== -->
-		<page name="author" title="About the author" toc="small">
-			<title>SQL Workbench/J</title>
-			<subtitle>About the author</subtitle>
-			<content>
-				<p>My name is Thomas Kellerer, I live in Munich, Germany.</p>
-				<p>SQL Workbench/J came into existance because I didn't want to learn a new SQL
-        tool for every DBMS I had to use. I use this tool on a regular (daily) basis
-        in my own work. I also wanted to have a tool that could do basic data migration between
-        different kinds of DBMS systems.
-				</p>
+	<page name="author" title="About the author" toc="small">
+		<title>SQL Workbench/J</title>
+		<subtitle>About the author</subtitle>
+		<content>
+			<p>My name is Thomas Kellerer, I live in Munich, Germany.</p>
+			<p>SQL Workbench/J came into existance because I didn't want to learn a new SQL
+      tool for every DBMS I had to use. I use this tool on a regular (daily) basis
+      in my own work. I also wanted to have a tool that could do basic data migration between
+      different kinds of DBMS systems.
+			</p>
 
-				<p>If you have any suggestions on how to enhance the application, if you find a bug or if you are missing
-        support for a DDBMS, feel free to write me an email.
-				</p>
+			<p>If you have any suggestions on how to enhance the application, if you find a bug or if you are missing
+      support for a DDBMS, feel free to write me an email.
+			</p>
 
-				<p>I will try to add support (beyond what JDBC offers) for any DBMS that I have free access to (e.g. a free
-        trial download).
-				</p>
+			<p>I will try to add support (beyond what JDBC offers) for any DBMS that I have free access to (e.g. a free
+      trial download).
+			</p>
 
-				<p>
-					Some of the DBMS specific support in the <a target="_blank" href="manual/dbexplorer.html">Database Explorer</a>
-				(e.g. display of stored procedure source, view source) can be configured without building a new
-				distribution. If you have questions regarding this, feel free to write me an email.
-				</p>
+			<p>
+				Some of the DBMS specific support in the <a target="_blank" href="manual/dbexplorer.html">Database Explorer</a>
+			(e.g. display of stored procedure source, view source) can be configured without building a new
+			distribution. If you have questions regarding this, feel free to write me an email.
+			</p>
 
-			</content>
-		</page>
+		</content>
+	</page>
     
-  <page link="wb_news.xml" title="RSS Feed"/>
   <page target="_blank" link="manual/workbench-manual.html" title="Manual"/>
 
   <!-- ======================== WinZip note ========================== -->

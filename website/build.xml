@@ -1,21 +1,23 @@
 <?xml version="1.0"?>
-<project name="MakeDoc" default="noDev" basedir=".">
+<project name="website" default="noDev" basedir=".">
 
   <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.15.jar"/>
 
   <property file="..\scripts\release.property"/>
 
-  <target name="updateRss">
+  <target name="updateRss" depends="create-rss-desc">
     <tstamp>
       <format pattern="EEE, dd MMM yyyy HH:mm:ss +0100" property="pubDate" locale="en"/>
     </tstamp>
+		
+		<loadfile property="rss.description" srcFile="history_rss.txt"/>
 
     <xmltask source="wb_news.xml" dest="wb_news.xml" outputter="simple" encoding="UTF-8">
       <insert path="/rss/channel/item[1]" position="before" expandProperties="true">
         <![CDATA[
           <item>
-              <title>New ${pub.build.name} build (${pub.build.number}) available</title>
-              <description>A new ${pub.build.name} build has been released. To download, please visit the homepage</description>
+              <title>New ${pub.build.name} build (${pub.build.number}) released</title>
+              <description>${rss.description}</description>
               <link>http://www.sql-workbench.net/downloads.html</link>
               <guid>sql-workbench-build-${pub.build.number}</guid>
               <author>support@sql-workbench.net (Thomas Kellerer)</author>
@@ -26,6 +28,13 @@
     </xmltask>
   </target>
 
+	<target name="create-rss-desc">
+		<xslt in="../scripts/history.xml"
+					out="history_rss.txt"
+          style="history2rss.xslt">
+		</xslt>
+	</target>
+	
 	<path id="script.path">
 		<pathelement location="bsf.jar"/>
 		<pathelement location="commons-logging-1.1.jar"/>
