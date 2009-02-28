@@ -1,15 +1,26 @@
 <?xml version="1.0"?>
 <project name="website" default="noDev" basedir=".">
 
-  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.15.jar"/>
+	<path id="script.path">
+		<pathelement location="bsf.jar"/>
+		<pathelement location="commons-logging-1.1.jar"/>
+		<pathelement location="js.jar"/>
+	</path>
+	
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="../scripts/xmltask-v1.15.jar"/>
 
   <property file="..\scripts\release.property"/>
 
-  <target name="updateRss" depends="create-rss-desc">
+  <target name="updateRss">
     <tstamp>
       <format pattern="EEE, dd MMM yyyy HH:mm:ss +0100" property="pubDate" locale="en"/>
     </tstamp>
-		
+
+		<xslt in="../scripts/history.xml"
+					out="history_rss.txt"
+          style="history2rss.xslt">
+		</xslt>
+
 		<loadfile property="rss.description" srcFile="history_rss.txt"/>
 
     <xmltask source="wb_news.xml" dest="wb_news.xml" outputter="simple" encoding="UTF-8">
@@ -26,20 +37,10 @@
         ]]>
       </insert>
     </xmltask>
+		
+		<delete file="history_rss.txt"/>
+		
   </target>
-
-	<target name="create-rss-desc">
-		<xslt in="../scripts/history.xml"
-					out="history_rss.txt"
-          style="history2rss.xslt">
-		</xslt>
-	</target>
-	
-	<path id="script.path">
-		<pathelement location="bsf.jar"/>
-		<pathelement location="commons-logging-1.1.jar"/>
-		<pathelement location="js.jar"/>
-	</path>
 
   <scriptdef name="getfs" language="javascript" classpathref="script.path">
     <attribute name="file"/>
@@ -63,6 +64,7 @@
   </scriptdef>
 
   <target name="updatePad">
+
     <tstamp>
       <format pattern="yyyy" property="pub.year"/>
     </tstamp>
@@ -75,7 +77,7 @@
 
     <property name="distfile" value="Workbench-Build${pub.build.number}.zip"/>
 
-    <getfs file="../release/${distfile}"/>
+    <getfs file="../release/build${pub.build.number}/${distfile}"/>
 
     <xmltask source="workbench_pad.xml" dest="workbench_pad.xml" encoding="UTF-8" outputter="simple">
       <replace path="/XML_DIZ_INFO/Program_Info/Program_Version/text()" withText="${release.build.number}"/>
@@ -94,23 +96,24 @@
     <delete>
       <fileset dir=".">
         <include name="*.html"/>
+				<include name="history_rss.txt"/>
       </fileset>
     </delete>
   </target>
 
-  <target name="release" depends="-noDev, makeHTML, updateRss, updatePad"/>
-  <target name="dev-release" depends="-withDev, makeHTML, updateRss"/>
+  <target name="release" depends="set-release-build, makeHTML, updateRss, updatePad"/>
+  <target name="dev-release" depends="set-dev-build, makeHTML, updateRss"/>
   
-  <target name="noDev" depends="-noDev, makeHTML"/>
-  <target name="withDev" depends="-withDev, makeHTML"/>
+  <target name="noDev" depends="set-release-build, makeHTML"/>
+  <target name="withDev" depends="set-dev-build, makeHTML"/>
 
-  <target name="-noDev">
+  <target name="set-release-build">
     <property name="pub.build.name" value="stable"/>
     <property name="pub.build.number" value="${release.build.number}"/>
     <property name="dev.build" value="0"/>
   </target>
 
-  <target name="-withDev">
+  <target name="set-dev-build">
     <property name="pub.build.name" value="development"/>
     <property name="pub.build.number" value="${dev.build.number}"/>
     <property name="dev.build" value="1"/>

@@ -2,8 +2,8 @@
 
 <XML_DIZ_INFO>
   <MASTER_PAD_VERSION_INFO>
-    <MASTER_PAD_EDITOR>DeuPAD 2.0.2.50 (http://www.deupad.org)</MASTER_PAD_EDITOR>
-    <MASTER_PAD_INFO>Portable Application Description, or PAD for short, is a data set that is used by shareware authors to dissemminate information to anyone interested in their software products.  To find out more go to http://www.asp-shareware.org/pad</MASTER_PAD_INFO>
+    <MASTER_PAD_EDITOR>manual</MASTER_PAD_EDITOR>
+    <MASTER_PAD_INFO>Portable Application Description</MASTER_PAD_INFO>
     <MASTER_PAD_VERSION>2.01</MASTER_PAD_VERSION>
   </MASTER_PAD_VERSION_INFO>
   <Company_Info>
@@ -41,7 +41,7 @@
     <Program_Category_Class>Business::Databases &amp; Tools</Program_Category_Class>
     <Program_Release_Year>2009</Program_Release_Year>
     <Program_Release_Month>02</Program_Release_Month>
-    <Program_Release_Day>26</Program_Release_Day>
+    <Program_Release_Day>28</Program_Release_Day>
     <Program_Cost_Other>0.00</Program_Cost_Other>
     <Program_Cost_Other_Code></Program_Cost_Other_Code>
     <Program_Cost_Dollars>0.00</Program_Cost_Dollars>
@@ -51,9 +51,9 @@
     <Program_Install_Support>No Install Support</Program_Install_Support>
     <Program_System_Requirements>Java Runtime 1.5 or higher</Program_System_Requirements>
     <File_Info>
-      <File_Size_Bytes>0</File_Size_Bytes>
-      <File_Size_K>0</File_Size_K>
-      <File_Size_MB>0</File_Size_MB>
+      <File_Size_Bytes>2674918</File_Size_Bytes>
+      <File_Size_K>2612</File_Size_K>
+      <File_Size_MB>2.55</File_Size_MB>
     </File_Info>
     <Expire_Info>
       <Has_Expire_Info>N</Has_Expire_Info>
@@ -89,11 +89,11 @@
       <Application_Info_URL>http://www.sql-workbench.net</Application_Info_URL>
       <Application_Order_URL></Application_Order_URL>
       <Application_Screenshot_URL>http://www.sql-workbench.net/MainWindow.png</Application_Screenshot_URL>
-      <Application_Icon_URL>http://www.sql-workbench.net/workbench_icon.png</Application_Icon_URL>
+      <Application_Icon_URL>http://www.sql-workbench.net/workbench_icon.gif</Application_Icon_URL>
       <Application_XML_File_URL>http://www.sql-workbench.net/workbench_pad.xml</Application_XML_File_URL>
     </Application_URLs>
     <Download_URLs>
-      <Primary_Download_URL>http://www.sql-workbench.net/Workbench-Build${pub.build.number}.zip</Primary_Download_URL>
+      <Primary_Download_URL>http://www.sql-workbench.net/downloads.html</Primary_Download_URL>
       <Secondary_Download_URL></Secondary_Download_URL>
       <Additional_Download_URL_1></Additional_Download_URL_1>
       <Additional_Download_URL_2></Additional_Download_URL_2>
@@ -103,114 +103,6 @@
     <Distribution_Permissions></Distribution_Permissions>
     <EULA></EULA>
   </Permissions>
-  <DeuPAD>
-    <DeuPAD_Extension_Version>2.00</DeuPAD_Extension_Version>
-    <DeuPAD_Extension_Info>For information on the DeuPAD Extensions please go to http://www.deupad.org</DeuPAD_Extension_Info>
-    <SAVE_Member>N</SAVE_Member>
-    <SAVE_Member_Number></SAVE_Member_Number>
-    <Company_Unique_ID></Company_Unique_ID>
-    <Save_Prog_Num></Save_Prog_Num>
-    <Program_Unique_ID>{5ED45F3A-3361-4C5E-B8C9-F7F3354AD07B}</Program_Unique_ID>
-    <Program_Cost_EUR>0.00</Program_Cost_EUR>
-  </DeuPAD>
-  <Affiliates>
-    <Affiliates_FORM>Y</Affiliates_FORM>
-    <Affiliates_VERSION>1.2</Affiliates_VERSION>
-    <Affiliates_URL></Affiliates_URL>
-    <Affiliates_Information_Page></Affiliates_Information_Page>
-    <Affiliates_Avangate_Order_Page></Affiliates_Avangate_Order_Page>
-    <Affiliates_Avangate_Vendor_ID></Affiliates_Avangate_Vendor_ID>
-    <Affiliates_Avangate_Product_ID></Affiliates_Avangate_Product_ID>
-    <Affiliates_Avangate_Maximum_Commission_Rate></Affiliates_Avangate_Maximum_Commission_Rate>
-    <Affiliates_BMTMicro_Order_Page></Affiliates_BMTMicro_Order_Page>
-    <Affiliates_BMTMicro_Vendor_ID></Affiliates_BMTMicro_Vendor_ID>
-    <Affiliates_BMTMicro_Product_ID></Affiliates_BMTMicro_Product_ID>
-    <Affiliates_BMTMicro_Maximum_Commission_Rate></Affiliates_BMTMicro_Maximum_Commission_Rate>
-    <Affiliates_clixGalore_Order_Page></Affiliates_clixGalore_Order_Page>
-    <Affiliates_clixGalore_Vendor_ID></Affiliates_clixGalore_Vendor_ID>
-    <Affiliates_clixGalore_Product_ID></Affiliates_clixGalore_Product_ID>
-    <Affiliates_clixGalore_Maximum_Commission_Rate></Affiliates_clixGalore_Maximum_Commission_Rate>
-    <Affiliates_CommissionJunction_Order_Page></Affiliates_CommissionJunction_Order_Page>
-    <Affiliates_CommissionJunction_Vendor_ID></Affiliates_CommissionJunction_Vendor_ID>
-    <Affiliates_CommissionJunction_Product_ID></Affiliates_CommissionJunction_Product_ID>
-    <Affiliates_CommissionJunction_Maximum_Commission_Rate></Affiliates_CommissionJunction_Maximum_Commission_Rate>
-    <Affiliates_DigiBuy_Order_Page></Affiliates_DigiBuy_Order_Page>
-    <Affiliates_DigiBuy_Vendor_ID></Affiliates_DigiBuy_Vendor_ID>
-    <Affiliates_DigiBuy_Product_ID></Affiliates_DigiBuy_Product_ID>
-    <Affiliates_DigiBuy_Maximum_Commission_Rate></Affiliates_DigiBuy_Maximum_Commission_Rate>
-    <Affiliates_DigitalCandle_Order_Page></Affiliates_DigitalCandle_Order_Page>
-    <Affiliates_DigitalCandle_Vendor_ID></Affiliates_DigitalCandle_Vendor_ID>
-    <Affiliates_DigitalCandle_Product_ID></Affiliates_DigitalCandle_Product_ID>
-    <Affiliates_DigitalCandle_Maximum_Commission_Rate></Affiliates_DigitalCandle_Maximum_Commission_Rate>
-    <Affiliates_Emetrix_Order_Page></Affiliates_Emetrix_Order_Page>
-    <Affiliates_Emetrix_Vendor_ID></Affiliates_Emetrix_Vendor_ID>
-    <Affiliates_Emetrix_Product_ID></Affiliates_Emetrix_Product_ID>
-    <Affiliates_Emetrix_Maximum_Commission_Rate></Affiliates_Emetrix_Maximum_Commission_Rate>
-    <Affiliates_eSellerate_Order_Page></Affiliates_eSellerate_Order_Page>
-    <Affiliates_eSellerate_Vendor_ID></Affiliates_eSellerate_Vendor_ID>
-    <Affiliates_eSellerate_Product_ID></Affiliates_eSellerate_Product_ID>
-    <Affiliates_eSellerate_Maximum_Commission_Rate></Affiliates_eSellerate_Maximum_Commission_Rate>
-    <Affiliates_Kagi_Order_Page></Affiliates_Kagi_Order_Page>
-    <Affiliates_Kagi_Vendor_ID></Affiliates_Kagi_Vendor_ID>
-    <Affiliates_Kagi_Product_ID></Affiliates_Kagi_Product_ID>
-    <Affiliates_Kagi_Maximum_Commission_Rate></Affiliates_Kagi_Maximum_Commission_Rate>
-    <Affiliates_LinkShare_Order_Page></Affiliates_LinkShare_Order_Page>
-    <Affiliates_LinkShare_Vendor_ID></Affiliates_LinkShare_Vendor_ID>
-    <Affiliates_LinkShare_Product_ID></Affiliates_LinkShare_Product_ID>
-    <Affiliates_LinkShare_Maximum_Commission_Rate></Affiliates_LinkShare_Maximum_Commission_Rate>
-    <Affiliates_NorthStarSol_Order_Page></Affiliates_NorthStarSol_Order_Page>
-    <Affiliates_NorthStarSol_Vendor_ID></Affiliates_NorthStarSol_Vendor_ID>
-    <Affiliates_NorthStarSol_Product_ID></Affiliates_NorthStarSol_Product_ID>
-    <Affiliates_NorthStarSol_Maximum_Commission_Rate></Affiliates_NorthStarSol_Maximum_Commission_Rate>
-    <Affiliates_Order1_Order_Page></Affiliates_Order1_Order_Page>
-    <Affiliates_Order1_Vendor_ID></Affiliates_Order1_Vendor_ID>
-    <Affiliates_Order1_Product_ID></Affiliates_Order1_Product_ID>
-    <Affiliates_Order1_Maximum_Commission_Rate></Affiliates_Order1_Maximum_Commission_Rate>
-    <Affiliates_Osolis_Order_Page></Affiliates_Osolis_Order_Page>
-    <Affiliates_Osolis_Vendor_ID></Affiliates_Osolis_Vendor_ID>
-    <Affiliates_Osolis_Product_ID></Affiliates_Osolis_Product_ID>
-    <Affiliates_Osolis_Maximum_Commission_Rate></Affiliates_Osolis_Maximum_Commission_Rate>
-    <Affiliates_Plimus_Order_Page></Affiliates_Plimus_Order_Page>
-    <Affiliates_Plimus_Vendor_ID></Affiliates_Plimus_Vendor_ID>
-    <Affiliates_Plimus_Product_ID></Affiliates_Plimus_Product_ID>
-    <Affiliates_Plimus_Maximum_Commission_Rate></Affiliates_Plimus_Maximum_Commission_Rate>
-    <Affiliates_Regnet_Order_Page></Affiliates_Regnet_Order_Page>
-    <Affiliates_Regnet_Vendor_ID></Affiliates_Regnet_Vendor_ID>
-    <Affiliates_Regnet_Product_ID></Affiliates_Regnet_Product_ID>
-    <Affiliates_Regnet_Maximum_Commission_Rate></Affiliates_Regnet_Maximum_Commission_Rate>
-    <Affiliates_Regnow_Order_Page></Affiliates_Regnow_Order_Page>
-    <Affiliates_Regnow_Vendor_ID></Affiliates_Regnow_Vendor_ID>
-    <Affiliates_Regnow_Product_ID></Affiliates_Regnow_Product_ID>
-    <Affiliates_Regnow_Maximum_Commission_Rate></Affiliates_Regnow_Maximum_Commission_Rate>
-    <Affiliates_Regsoft_Order_Page></Affiliates_Regsoft_Order_Page>
-    <Affiliates_Regsoft_Vendor_ID></Affiliates_Regsoft_Vendor_ID>
-    <Affiliates_Regsoft_Product_ID></Affiliates_Regsoft_Product_ID>
-    <Affiliates_Regsoft_Maximum_Commission_Rate></Affiliates_Regsoft_Maximum_Commission_Rate>
-    <Affiliates_ShareIt_Order_Page></Affiliates_ShareIt_Order_Page>
-    <Affiliates_ShareIt_Vendor_ID></Affiliates_ShareIt_Vendor_ID>
-    <Affiliates_ShareIt_Product_ID></Affiliates_ShareIt_Product_ID>
-    <Affiliates_ShareIt_Maximum_Commission_Rate></Affiliates_ShareIt_Maximum_Commission_Rate>
-    <Affiliates_Shareasale_Order_Page></Affiliates_Shareasale_Order_Page>
-    <Affiliates_Shareasale_Vendor_ID></Affiliates_Shareasale_Vendor_ID>
-    <Affiliates_Shareasale_Product_ID></Affiliates_Shareasale_Product_ID>
-    <Affiliates_Shareasale_Maximum_Commission_Rate></Affiliates_Shareasale_Maximum_Commission_Rate>
-    <Affiliates_SWReg_Order_Page></Affiliates_SWReg_Order_Page>
-    <Affiliates_SWReg_Vendor_ID></Affiliates_SWReg_Vendor_ID>
-    <Affiliates_SWReg_Product_ID></Affiliates_SWReg_Product_ID>
-    <Affiliates_SWReg_Maximum_Commission_Rate></Affiliates_SWReg_Maximum_Commission_Rate>
-    <Affiliates_V-Share_Order_Page></Affiliates_V-Share_Order_Page>
-    <Affiliates_V-Share_Vendor_ID></Affiliates_V-Share_Vendor_ID>
-    <Affiliates_V-Share_Product_ID></Affiliates_V-Share_Product_ID>
-    <Affiliates_V-Share_Maximum_Commission_Rate></Affiliates_V-Share_Maximum_Commission_Rate>
-    <Affiliates_VFree_Order_Page></Affiliates_VFree_Order_Page>
-    <Affiliates_VFree_Vendor_ID></Affiliates_VFree_Vendor_ID>
-    <Affiliates_VFree_Product_ID></Affiliates_VFree_Product_ID>
-    <Affiliates_VFree_Maximum_Commission_Rate></Affiliates_VFree_Maximum_Commission_Rate>
-    <Affiliates_Yaskifo_Order_Page></Affiliates_Yaskifo_Order_Page>
-    <Affiliates_Yaskifo_Vendor_ID></Affiliates_Yaskifo_Vendor_ID>
-    <Affiliates_Yaskifo_Product_ID></Affiliates_Yaskifo_Product_ID>
-    <Affiliates_Yaskifo_Maximum_Commission_Rate></Affiliates_Yaskifo_Maximum_Commission_Rate>
-  </Affiliates>
   <ASP>
     <ASP_FORM>Y</ASP_FORM>
     <ASP_Member>N</ASP_Member>

@@ -6,7 +6,7 @@
     <title>SQL Workbench/J</title>
     <link>http://www.sql-workbench.net</link>
     <atom:link href="http://www.sql-workbench.net/rss.xml" rel="self" type="application/rss+xml" xmlns:atom="http://www.w3.org/2005/Atom"></atom:link>
-    <description>News for SQL Workbench/J</description>
+    <description>Release information for SQL Workbench/J</description>
     <language>en</language>
     <copyright>Thomas Kellerer</copyright>
     <webMaster>support@sql-workbench.net (Thomas Kellerer)</webMaster>

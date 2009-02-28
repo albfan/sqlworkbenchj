@@ -376,22 +376,18 @@ VALUES
 			<p>
 				This directory will be referenced as <tt>${wbroot}</tt> in this description.
 			</p>
-	    <p>Before you can build SQL Workbench/J you will need to download additional libraries</p>
+	    <p>To prepare your environment to build SQL Workbench/J from source you will need to</p>
 	    <ul>
-	      <li>Install Ant 1.7 (<a href="http://ant.apache.org/">http://ant.apache.org/</a>)</li>
-        <!--
-	      <li>The JUnit task for ant. This also requires copying the libraries into your ant
-					directories. For details please see the <a href="http://ant.apache.org/manual/OptionalTasks/junit.html">Ant manual</a>
+	      <li>Download and install Ant 1.7 from <a href="http://ant.apache.org/">http://ant.apache.org</a></li>
+				<li>
+					Download the <a href="http://informagen.com/JarBundler/index.html">JarBundler Ant task</a>. As the jarbundler library is referenced from within <tt>build.xml</tt>,
+					the jar file is needed even when you don't want to build the Mac release. Then copy the
+					files <tt>jarbundler-1.9.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
 				</li>
-        -->
-				<li>The Jarbundler Ant task. As the jarbundler library is referenced from within build.xml,
-					 this library is needed even when you don't want to build the Mac release. Then copy the
-					 files <tt>jarbundler-1.9.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
-				</li>
-				<li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> and copy the main library (e.g. poi-2.5.1.jar) into the directory ${wbroot}/poi</li> 
+				<li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> and copy the main library (e.g. poi-2.5.1.jar) into the directory ${wbroot}/etc/poi</li>
 				<li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a></li>
 				<li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a></li>
-				<li>Download the Jemmy library from <a href="http://jemmy.netbeans.org/downloads.html">http://jemmy.netbeans.org/downloads.html</a> (Required to run the GUI tests)</li>
+				<li>Download the Jemmy library from <a href="http://jemmy.dev.java.net">http://jemmy.dev.java.net</a> (Required to run the GUI tests)</li>
 				<li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory</li>
 			</ul>
 			<p>
