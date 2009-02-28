@@ -29,14 +29,15 @@
   <property name="docbook.root" value="${doc}/docbook"/>
   <property name="fop.root" value="../etc/fop"/>
 
+  <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.15.jar"/>
   <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
 
   <target name="init">
     <tstamp>
-      <format pattern="yyyy-MM-dd HH:mm" property="build_date"/>
+      <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
     <tstamp>
-      <format pattern="dd.MM.yyyy" property="formatted_build_date"/>
+      <format pattern="yyyy-MM-dd HH:mm" property="build_timestamp"/>
     </tstamp>
   </target>
 
@@ -70,7 +71,7 @@
 
 	<target name="replace-build-number">
 		<replace dir="${build}/language" token="@BUILD_NUMBER@" value="${build.number}"/>
-		<replace dir="${build}/language" token="@BUILD_DATE@" value="${build_date}"/>
+		<replace dir="${build}/language" token="@BUILD_DATE@" value="${build_timestamp}"/>
 	</target>
 
 	<target name="set-dev-build" depends="prepare">
@@ -130,7 +131,7 @@
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<target name="prepare-test" depends="prepare,copy-resources">
 		<mkdir dir="${build.test}"/>
 		<copy overwrite="true"  todir="${build.test}">
@@ -190,13 +191,13 @@
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
       </fileset>
-			
+
 			<fileset dir=".">
 				<include name="docbook-history.xml"/>
 			</fileset>
 
       <filterset begintoken="@" endtoken="@">
-        <filter token="BUILD_DATE" value="${build_date}"/>
+        <filter token="build_timestamp" value="${build_timestamp}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
         <filter token="IMAGE_DIR" value="${imgdir}"/>
       </filterset>
@@ -295,13 +296,13 @@
 			<fileset dir="${doc}/xml">
 				<include name="*.xml"/>
 			</fileset>
-			
+
 			<fileset dir=".">
 				<include name="docbook-history.xml"/>
 			</fileset>
-			
+
 			<filterset begintoken="@" endtoken="@">
-				<filter token="BUILD_DATE" value="${build_date}"/>
+				<filter token="build_timestamp" value="${build_timestamp}"/>
 				<filter token="BUILD_NUMBER" value="${build.number}"/>
 				<filter token="IMAGE_DIR" value="${html-resource-dir}"/>
 			</filterset>
@@ -309,18 +310,16 @@
 
 	</target>
 
-  <target name="docbook-history">
-		<xslt classpathref="xalan.path"
-          in="history.xml"
+  <target name="docbook-history" depends="set-history-build-date">
+		<xslt in="history.xml"
 					out="docbook-history.xml"
           includes="history.xml"
           style="history2docbook.xslt">
 		</xslt>
 	</target>
 
-  <target name="html-history">
-		<xslt classpathref="xalan.path"
-          in="history.xml"
+  <target name="html-history" depends="set-history-build-date">
+		<xslt in="history.xml"
 					out="history.html"
           style="history2html.xslt">
 		</xslt>
@@ -388,7 +387,7 @@
 
 	<target name="single-html" depends="prepare-html">
 	  <antcall target="prepare-html"/>
-		
+
 		<xslt classpathref="xalan.path"
           in="${html-outdir}/Manual.xml"
 					out="${html-outdir}/workbench-manual-single.html"
@@ -451,7 +450,7 @@
 				<attribute name="Class-Path" value=". poi.jar"/>
 				<attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
 				<attribute name="WbBuild-Number" value="${build.number}"/>
-				<attribute name="WbBuild-Date" value="${build_date}"/>
+				<attribute name="WbBuild-Date" value="${build_timestamp}"/>
 			</manifest>
 			<fileset dir="${build}">
 				<exclude name="**/package.html"/>
@@ -517,7 +516,7 @@
   </target>
 
   <!-- build a full release -->
-  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, make-jar, pdf, publish, release-src-zip, release-package, mac-package">
+  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, set-history-release-number, set-history-build-date, make-jar, pdf, publish, release-src-zip, release-package, mac-package">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -547,7 +546,7 @@
   <target name="make-dev-jar" depends="clean, copy-resources, compile, test, get-dev-build, make-jar"/>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="clean, compile, test, set-dev-build, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
+  <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -558,6 +557,20 @@
     </propertyfile>
     <ant dir="../website" inheritall="false" target="dev-release"/>
   </target>
+
+	<target name="set-history-release-number" depends="set-build-number">
+    <xmltask source="history.xml" dest="history.xml">
+      <attr path="/history/release[1]" attr="build" value="${build.number}"/>
+    </xmltask>
+	</target>
+
+	<target name="set-history-build-date" depends="init">
+
+    <xmltask source="history.xml" dest="history.xml">
+      <attr path="/history/release[1]" attr="date" value="${today}"/>
+    </xmltask>
+
+	</target>
 
 	<target name="website">
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>

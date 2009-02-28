@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-  <release build="-1" date="2009-03-31">
+  <release build="-1" date="2009-02-28">
 
     <entry dev-build="5" type="enh">
       <description>
@@ -11,7 +11,7 @@
 
     <entry dev-build="4" type="enh">
       <description>
-         When using WbCopy&apos;s -createTarget=true, data type mappings can now be specified in workbench.settings that enhance or overwrite the data type mapping returned by the driver. Details can be found in the manual.
+         When using WbCopy's -createTarget=true, data type mappings can now be specified in workbench.settings that enhance or overwrite the data type mapping returned by the driver. Details can be found in the manual.
       </description>
     </entry>
 
@@ -53,7 +53,7 @@
 
     <entry dev-build="5" type="fix">
       <description>
-         Fixed a problem with the formatter with inline views,  unions and additional brackets
+         Fixed a problem when formatting inline views that contained unions and redundant brackets
       </description>
     </entry>
 
@@ -83,13 +83,13 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         Fixed a repainting on Mac issue in the toolbar when  switching between DbExplorer tab and editor tabs
+         Fixed a repainting issue on MacOS in the toolbar when switching between DbExplorer tab and editor tabs
       </description>
     </entry>
 
     <entry dev-build="4" type="fix">
       <description>
-         &quot;Save Data As&quot; was not working if it has never been called before
+         "Save Data As" was not working if it has never been called before
       </description>
     </entry>
 
@@ -119,7 +119,7 @@
 
     <entry dev-build="1" type="fix">
       <description>
-         When MySQL was not set to ANSI mode, primary key columns that needed quoting were not detected properly due to MySQL&apos;s non-standard quoting character (in non-ANSI mode)
+         When MySQL was not set to ANSI mode, primary key columns that needed quoting were not detected properly due to MySQL's non-standard quoting character (in non-ANSI mode)
       </description>
     </entry>
 
@@ -144,7 +144,7 @@
     <entry dev-build="11" type="enh">
       <description>
          The display strategy for the tabs in the main window can now  be changed between scrolling and stacked 
-         (&quot;Scroll tabs&quot; in the general options)
+         ("Scroll tabs" in the general options)
       </description>
     </entry>
 
@@ -174,13 +174,13 @@
 
     <entry dev-build="11" type="enh">
       <description>
-         The &quot;Manage Drivers&quot; dialog now searches the selected jar file for a JDBC driver if a new library is selected.
+         The "Manage Drivers" dialog now searches the selected jar file for a JDBC driver if a new library is selected.
       </description>
     </entry>
 
     <entry dev-build="10" type="enh">
       <description>
-         The placement of the details tabs in the DbExplorer&apos;s table list can now be configured through the options dialog, not only in the settings file.
+         The placement of the details tabs in the DbExplorer's table list can now be configured through the options dialog, not only in the settings file.
       </description>
     </entry>
 
@@ -192,15 +192,15 @@
 
     <entry dev-build="10" type="enh">
       <description>
-         The &quot;select expression&quot; replacement is now also used inside the &quot;Search table data&quot; tab.
+         The "select expression" replacement is now also used inside the "Search table data" tab.
       </description>
     </entry>
 
     <entry dev-build="9" type="enh">
       <description>
          For specific datatypes, data retrieval in the DbExplorer can now be done by applying expressions to the column when building the SQL to select the data. 
-				 The replacement is defined per database and datatype in workbench.settings. For details please refer to the manual 
-				 ("Customize Data Retrieval" in the chapter about the DbExplorer) 
+         The replacement is defined per database and datatype in workbench.settings. For details please refer to the manual 
+         ("Customize Data Retrieval" in the chapter about the DbExplorer) 
       </description>
     </entry>
 
@@ -212,7 +212,7 @@
 
     <entry dev-build="8" type="enh">
       <description>
-         The removal of comments when the &quot;remove comments&quot; option is  active has been moved to a later stage in the statement processing. This way the new feature to name result sets can be used with DBMS that do not support embedded comments in SQL statements.
+         The removal of comments when the "remove comments" option is  active has been moved to a later stage in the statement processing. This way the new feature to name result sets can be used with DBMS that do not support embedded comments in SQL statements.
       </description>
     </entry>
 
@@ -238,13 +238,13 @@
     <entry dev-build="4" type="enh">
       <description>
          Result sets can now be named by specifying a keyword in the comment prior to the statement to distinguish different result tabs. 
-				 Please refer to the manual for details ("Displaying Results" in the chapter "Using SQL Workbench/J")
+         Please refer to the manual for details ("Displaying Results" in the chapter "Using SQL Workbench/J")
       </description>
     </entry>
 
     <entry dev-build="4" type="enh">
       <description>
-         Added &apos;WbListTriggers&apos; commands to list all triggers in the database (showing the information from the &quot;Triggers&quot; panel in DbExplorer) and WbTriggerSource to display the source of a trigger. The DESCRIBE command now also returns the list of triggers for a table.
+         Added 'WbListTriggers' commands to list all triggers in the database (showing the information from the "Triggers" panel in DbExplorer) and WbTriggerSource to display the source of a trigger. The DESCRIBE command now also returns the list of triggers for a table.
       </description>
     </entry>
 
@@ -304,7 +304,7 @@
 
     <entry dev-build="2" type="enh">
       <description>
-         The status bar will now display the number of selected rows If numberic values from a single column are selected, the sum of the values will be displayed. This can be turned off in the Options dialog (&quot;Data Display&quot; section)
+         The status bar will now display the number of selected rows If numberic values from a single column are selected, the sum of the values will be displayed. This can be turned off in the Options dialog ("Data Display" section)
       </description>
     </entry>
 
@@ -340,7 +340,7 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         The collation to be used when sorting a result set can now be selected in the options panel (&quot;Data Display&quot; page)
+         The collation to be used when sorting a result set can now be selected in the options panel ("Data Display" page)
       </description>
     </entry>
 
@@ -370,7 +370,7 @@
 
     <entry dev-build="11" type="fix">
       <description>
-         When selecting data from another user&apos;s schema,  and updating the result set, the generated SQL to update the table did not contain the schema.
+         When selecting data from another user's schema,  and updating the result set, the generated SQL to update the table did not contain the schema.
       </description>
     </entry>
 
@@ -382,13 +382,13 @@
 
     <entry dev-build="10" type="fix">
       <description>
-         The &quot;Tab&quot; key was no longer working in the editor
+         The "Tab" key was no longer working in the editor
       </description>
     </entry>
 
     <entry dev-build="7" type="fix">
       <description>
-         &quot;SQL -&gt; Export Query result&quot; was not working
+         "SQL -&gt; Export Query result" was not working
       </description>
     </entry>
 
@@ -412,7 +412,7 @@
 
     <entry dev-build="6" type="fix">
       <description>
-         When a macro was invoked using a shortcut with &quot;Shift&quot; the current text in the editor was replaced.
+         When a macro was invoked using a shortcut with "Shift" the current text in the editor was replaced.
       </description>
     </entry>
 
@@ -430,13 +430,13 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         &quot;Remove comments&quot; was not working properly if the comments contained quote characters
+         "Remove comments" was not working properly if the comments contained quote characters
       </description>
     </entry>
 
     <entry dev-build="3" type="fix">
       <description>
-         When copying a connection profile, the property &quot;Remove comments&quot; was not copied.
+         When copying a connection profile, the property "Remove comments" was not copied.
       </description>
     </entry>
 
@@ -472,7 +472,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         When using multiple windows together with &quot;Separate Connection Per Tab&quot; the application could lock up.
+         When using multiple windows together with "Separate Connection Per Tab" the application could lock up.
       </description>
     </entry>
 
@@ -484,7 +484,7 @@
 
     <entry dev-build="2" type="fix">
       <description>
-         A hack has been implemented to display SQL Server&apos;s timestamp columns (which are returned as a byte array) as a hex string (the same way the Query Analyzer displays the timestamp column)
+         A hack has been implemented to display SQL Server's timestamp columns (which are returned as a byte array) as a hex string (the same way the Query Analyzer displays the timestamp column)
       </description>
     </entry>
 
@@ -544,13 +544,13 @@
 
     <entry dev-build="2" type="fix">
       <description>
-         When a profile is set to &quot;Read Only&quot;, in place editing of results is now disabled.
+         When a profile is set to "Read Only", in place editing of results is now disabled.
       </description>
     </entry>
 
     <entry dev-build="2" type="fix">
       <description>
-         When using a WbExport together with a SELECT statement, the &quot;Max. Rows&quot; option (lower right corner of the MainWindow) is not longer used for the SELECT.
+         When using a WbExport together with a SELECT statement, the "Max. Rows" option (lower right corner of the MainWindow) is not longer used for the SELECT.
       </description>
     </entry>
 
@@ -574,7 +574,7 @@
 
     <entry dev-build="1" type="fix">
       <description>
-         If the definition for a Look &amp; Feel was not complete (e.g. a missing classname) the &quot;Look &amp; Feel&quot; panel in the Options window could no longer be displayed.
+         If the definition for a Look &amp; Feel was not complete (e.g. a missing classname) the "Look &amp; Feel" panel in the Options window could no longer be displayed.
       </description>
     </entry>
 
@@ -585,7 +585,7 @@
 
     <entry dev-build="0" type="fix">
       <description>
-         The connection dialog showed a wrong label for the &quot;Remove comments&quot; property
+         The connection dialog showed a wrong label for the "Remove comments" property
       </description>
     </entry>
 
@@ -596,7 +596,7 @@
 
     <entry dev-build="9" type="enh">
       <description>
-         Made WbSchemaDiff a bit more &quot;robust&quot; when comparing schemas from different DBMS
+         Made WbSchemaDiff a bit more "robust" when comparing schemas from different DBMS
       </description>
     </entry>
 
@@ -680,7 +680,7 @@
 
     <entry dev-build="2" type="enh">
       <description>
-         WbConnect can now be used in GUI mode as well. It will only change the connection as long as the current script is running. The &quot;global&quot; connection will be restored, once the script has finished.
+         WbConnect can now be used in GUI mode as well. It will only change the connection as long as the current script is running. The "global" connection will be restored, once the script has finished.
       </description>
     </entry>
 
@@ -722,7 +722,7 @@
 
     <entry dev-build="9" type="fix">
       <description>
-         On Linux with the GTK Look and Feel the focus was not set to the &quot;Select connection&quot; window upon startup.
+         On Linux with the GTK Look and Feel the focus was not set to the "Select connection" window upon startup.
       </description>
     </entry>
 
@@ -746,13 +746,13 @@
 
     <entry dev-build="7" type="fix">
       <description>
-         WbExport did not escape the content of columns correctly. Previously the escaping was only done for character data, now it&apos;s done for all data types (unless -useCDATA is specified).
+         WbExport did not escape the content of columns correctly. Previously the escaping was only done for character data, now it's done for all data types (unless -useCDATA is specified).
       </description>
     </entry>
 
     <entry dev-build="7" type="fix">
       <description>
-         &quot;Check table dependencies&quot; did not always work correctly for deleting tables, when one of the selected tables was also a child of one of the tables that were added during FK checking and that table was a self-referencing table.
+         "Check table dependencies" did not always work correctly for deleting tables, when one of the selected tables was also a child of one of the tables that were added during FK checking and that table was a self-referencing table.
       </description>
     </entry>
 
@@ -788,7 +788,7 @@
 
     <entry dev-build="5" type="fix">
       <description>
-         When using -append=true and -createTable=true for SQL Exports the CREATE TABLE was not written (appended) to the output file (because WbExport would never write the &quot;header&quot; for an export that appends to an existing file, which does not make sense for SQL INSERT exports.
+         When using -append=true and -createTable=true for SQL Exports the CREATE TABLE was not written (appended) to the output file (because WbExport would never write the "header" for an export that appends to an existing file, which does not make sense for SQL INSERT exports.
       </description>
     </entry>
 
@@ -818,7 +818,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         When &quot;Autosave Workspace&quot; was enabled and the workspace contained an external file, the user was prompted if the file should be saved each time a statement was executed. Now the external file is automatically saved as well, when the workspace is saved.
+         When "Autosave Workspace" was enabled and the workspace contained an external file, the user was prompted if the file should be saved each time a statement was executed. Now the external file is automatically saved as well, when the workspace is saved.
       </description>
     </entry>
 
@@ -836,13 +836,13 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         &quot;Copy data to clipboard&quot; was not always enabled, even if a result set was available.
+         "Copy data to clipboard" was not always enabled, even if a result set was available.
       </description>
     </entry>
 
     <entry dev-build="2" type="fix">
       <description>
-         When using &quot;Search table data&quot; in the DbExplorer, the connection profile attribute &quot;Trim CHAR data&quot; were not used to retrieve the data.
+         When using "Search table data" in the DbExplorer, the connection profile attribute "Trim CHAR data" were not used to retrieve the data.
       </description>
     </entry>
 
@@ -872,13 +872,13 @@
 
     <entry dev-build="1" type="fix">
       <description>
-         The Option &quot;Map Oracle DATE to Timestamp&quot; was only applied when restarting the application
+         The Option "Map Oracle DATE to Timestamp" was only applied when restarting the application
       </description>
     </entry>
 
     <entry dev-build="1" type="fix">
       <description>
-         WbExport&apos;s XML format now defaults to XML 1.0 again. An option has been added for WbExport to select version 1.1 if that is needed in order to use the newly allowed characters. XML 1.1 support can be enabled using -xmlVersion=1.1 The default can be set with the property workbench.xml.default.version
+         WbExport's XML format now defaults to XML 1.0 again. An option has been added for WbExport to select version 1.1 if that is needed in order to use the newly allowed characters. XML 1.1 support can be enabled using -xmlVersion=1.1 The default can be set with the property workbench.xml.default.version
       </description>
     </entry>
 
@@ -913,7 +913,7 @@
 
     <entry dev-build="10" type="enh">
       <description>
-         A new tab can now be opened by double-clicking in the &quot;free&quot; are of the tab title display (as with Firefox)
+         A new tab can now be opened by double-clicking in the "free" are of the tab title display (as with Firefox)
       </description>
     </entry>
 
@@ -925,7 +925,7 @@
 
     <entry dev-build="8" type="enh">
       <description>
-         A new property to treat Oracle DATE columns as timestamp has been added to the options dialog. If that option is enabled, it will overwrite the setting for Oracle&apos;s JDBC driver.
+         A new property to treat Oracle DATE columns as timestamp has been added to the options dialog. If that option is enabled, it will overwrite the setting for Oracle's JDBC driver.
       </description>
     </entry>
 
@@ -961,13 +961,13 @@
 
     <entry dev-build="6" type="enh">
       <description>
-         The &quot;Drop Tables&quot; dialog in the DbExplorer can now sort the tables according to their FK references in order to allow dropping them with DBMS that do not support a cascading DROP
+         The "Drop Tables" dialog in the DbExplorer can now sort the tables according to their FK references in order to allow dropping them with DBMS that do not support a cascading DROP
       </description>
     </entry>
 
     <entry dev-build="6" type="enh">
       <description>
-         The &quot;Drop Tables&quot; and &quot;Drop Columns&quot; dialogs in the DbExplorer can now also display the generated script.
+         The "Drop Tables" and "Drop Columns" dialogs in the DbExplorer can now also display the generated script.
       </description>
     </entry>
 
@@ -979,7 +979,7 @@
 
     <entry dev-build="4" type="enh">
       <description>
-         A connection profile can now be set to &quot;read only&quot;. All statements that could possibly change the database are ignored.
+         A connection profile can now be set to "read only". All statements that could possibly change the database are ignored.
       </description>
     </entry>
 
@@ -1009,7 +1009,7 @@
 
     <entry dev-build="10" type="fix">
       <description>
-         When moving tabs while &quot;Use separate connection per tab&quot;, the moved tab was not always connected properly.
+         When moving tabs while "Use separate connection per tab", the moved tab was not always connected properly.
       </description>
     </entry>
 
@@ -1021,7 +1021,7 @@
 
     <entry dev-build="10" type="fix">
       <description>
-         When opening a new workspace for the current connection the old workspace was not automatically saved and the connections were not managed correctly if &quot;Separate Connection per Tab&quot; was used.
+         When opening a new workspace for the current connection the old workspace was not automatically saved and the connections were not managed correctly if "Separate Connection per Tab" was used.
       </description>
     </entry>
 
@@ -1123,7 +1123,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         Using a mode with &quot;update&quot; for WbCopy with multiple tables did not work.
+         Using a mode with "update" for WbCopy with multiple tables did not work.
       </description>
     </entry>
 
@@ -1200,7 +1200,7 @@
 
     <entry dev-build="6" type="enh">
       <description>
-         When running in batch mode, individual update counts can now be consolidated into a single message at the end (similar to the &quot;Consolidate script log&quot; in the GUI) using the new parameter -consolidateMessages=true
+         When running in batch mode, individual update counts can now be consolidated into a single message at the end (similar to the "Consolidate script log" in the GUI) using the new parameter -consolidateMessages=true
       </description>
     </entry>
 
@@ -1248,7 +1248,7 @@
 
     <entry dev-build="5" type="fix">
       <description>
-         When using &quot;Save Data as&quot; with a spreadsheet exports, writing the header row could not be turned on.
+         When using "Save Data as" with a spreadsheet exports, writing the header row could not be turned on.
       </description>
     </entry>
 
@@ -1260,7 +1260,7 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         &quot;Replace &amp; Next&quot; did not work if the replacement String contained characters that were relevant for regular expressions.
+         "Replace &amp; Next" did not work if the replacement String contained characters that were relevant for regular expressions.
       </description>
     </entry>
 
@@ -1278,7 +1278,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         The option &quot;Ignore Identity columns&quot; was not saved from the options dialog.
+         The option "Ignore Identity columns" was not saved from the options dialog.
       </description>
     </entry>
 
@@ -1290,19 +1290,19 @@
 
     <entry dev-build="2" type="fix">
       <description>
-         &quot;Match Bracket&quot; would not scroll the bracket line into view if the matching bracket was not visible in the editor.
+         "Match Bracket" would not scroll the bracket line into view if the matching bracket was not visible in the editor.
       </description>
     </entry>
 
     <entry dev-build="1" type="fix">
       <description>
-         When disabling &quot;Open DbExplorer as tab&quot;, the DbExplorer window would fail to display the db information when shown for the second time
+         When disabling "Open DbExplorer as tab", the DbExplorer window would fail to display the db information when shown for the second time
       </description>
     </entry>
 
     <entry dev-build="1" type="fix">
       <description>
-         The reload button did not work in the DbExplorer data panel, if &quot;Autoload table row count&quot; was disabled.
+         The reload button did not work in the DbExplorer data panel, if "Autoload table row count" was disabled.
       </description>
     </entry>
 
@@ -1343,13 +1343,13 @@
 
     <entry dev-build="9" type="enh">
       <description>
-         Columns can now be dropped from within the DbExplorer&apos;s table definition.
+         Columns can now be dropped from within the DbExplorer's table definition.
       </description>
     </entry>
 
     <entry dev-build="8" type="enh">
       <description>
-         The text in the &quot;What&apos;s new&quot; window content can now be searched
+         The text in the "What's new" window content can now be searched
       </description>
     </entry>
 
@@ -1361,7 +1361,7 @@
 
     <entry dev-build="7" type="enh">
       <description>
-         The &quot;Extended Properties&quot; button in the connection dialog will now display a little checkmark if properties are defined for the currently selected profile
+         The "Extended Properties" button in the connection dialog will now display a little checkmark if properties are defined for the currently selected profile
       </description>
     </entry>
 
@@ -1433,7 +1433,7 @@
 
     <entry dev-build="3" type="enh">
       <description>
-         If no config directory is supplied and no settings file is found in either the current directory or the directory where the jar file is located, the settings are now written to the user&apos;s home directory (in the sub-directory .sqlworkbench). For a new installation this means that the configuration settings are no longer stored in the program&apos;s directory.
+         If no config directory is supplied and no settings file is found in either the current directory or the directory where the jar file is located, the settings are now written to the user's home directory (in the sub-directory .sqlworkbench). For a new installation this means that the configuration settings are no longer stored in the program's directory.
       </description>
     </entry>
 
@@ -1487,7 +1487,7 @@
 
     <entry dev-build="9" type="fix">
       <description>
-         The label in the DbExplorer panels &quot;REFERENCES&quot; and &quot;REFERENCED BY&quot; were the wrong way round.
+         The label in the DbExplorer panels "REFERENCES" and "REFERENCED BY" were the wrong way round.
       </description>
     </entry>
 
@@ -1523,7 +1523,7 @@
 
     <entry dev-build="6" type="fix">
       <description>
-         When importing integer numbers using WbImport numbers with scientific notation could not be imported even if they were &quot;real&quot; integer values (e.g. 4.2E+1).
+         When importing integer numbers using WbImport numbers with scientific notation could not be imported even if they were "real" integer values (e.g. 4.2E+1).
       </description>
     </entry>
 
@@ -1559,7 +1559,7 @@
 
     <entry dev-build="2" type="fix">
       <description>
-         The &quot;What&apos;s New&quot; dialog was no longer displayed.
+         The "What's New" dialog was no longer displayed.
       </description>
     </entry>
 
@@ -1583,7 +1583,7 @@
 
     <entry dev-build="1" type="fix">
       <description>
-         The toolbar button for &quot;Append results&quot; did not reflect the current setting of this option. Only the menu item in the SQL menu did.
+         The toolbar button for "Append results" did not reflect the current setting of this option. Only the menu item in the SQL menu did.
       </description>
     </entry>
 
@@ -1600,25 +1600,25 @@
 
     <entry dev-build="9" type="enh">
       <description>
-         Added an option to reformat the view sourced when it&apos;s retrieved from the database. This is not enabled by default. To turn it on set the property: workbench.db.[dbid].source.view.doformat=true in workbench.settings.
+         Added an option to reformat the view sourced when it's retrieved from the database. This is not enabled by default. To turn it on set the property: workbench.db.[dbid].source.view.doformat=true in workbench.settings.
       </description>
     </entry>
 
     <entry dev-build="8" type="enh">
       <description>
-         The global option &quot;Enable dbms_output&quot; has been removed. If you want to enable support for the DBMS_OUTPUT package, please use a pre-connect script in the connection profile.
+         The global option "Enable dbms_output" has been removed. If you want to enable support for the DBMS_OUTPUT package, please use a pre-connect script in the connection profile.
       </description>
     </entry>
 
     <entry dev-build="7" type="enh">
       <description>
-         When creating a new physical connection for a tab using the new &quot;Connect tab&quot; feature, this connection can now be reset to the global connection. The tab&apos;s title is also displayed in a different color. The extra connection can now also be controlled through the popup menu for a tab
+         When creating a new physical connection for a tab using the new "Connect tab" feature, this connection can now be reset to the global connection. The tab's title is also displayed in a different color. The extra connection can now also be controlled through the popup menu for a tab
       </description>
     </entry>
 
     <entry dev-build="7" type="enh">
       <description>
-         When deleting rows from a result, the rows can now be deleted including all dependent rows using &quot;Delete With Dependencies&quot;
+         When deleting rows from a result, the rows can now be deleted including all dependent rows using "Delete With Dependencies"
       </description>
     </entry>
 
@@ -1630,13 +1630,13 @@
 
     <entry dev-build="6" type="enh">
       <description>
-         When not using &quot;Separate Connection per tab&quot;, a new physical connection for the current tab can now be created using &quot;File -&gt; New Connection&quot;
+         When not using "Separate Connection per tab", a new physical connection for the current tab can now be created using "File -&gt; New Connection"
       </description>
     </entry>
 
     <entry dev-build="6" type="enh">
       <description>
-         The definition for JDBC drivers are now stored without a path separator in WbDrivers.xml in order to make the configuration file work on different platforms. To save the driver definitions in the new format, the &quot;Manage Driver&quot; dialog needs to be opened and closed once.
+         The definition for JDBC drivers are now stored without a path separator in WbDrivers.xml in order to make the configuration file work on different platforms. To save the driver definitions in the new format, the "Manage Driver" dialog needs to be opened and closed once.
       </description>
     </entry>
 
@@ -1648,7 +1648,7 @@
 
     <entry dev-build="6" type="enh">
       <description>
-         When using &quot;Check foreign keys&quot; in the &quot;Delete data&quot; dialog, any dependent table that was not selected, can now optionally be added to the list.
+         When using "Check foreign keys" in the "Delete data" dialog, any dependent table that was not selected, can now optionally be added to the list.
       </description>
     </entry>
 
@@ -1660,13 +1660,13 @@
 
     <entry dev-build="5" type="enh">
       <description>
-         WbImport and WbCopy now support the -checkDependencies parameter. If set to true, SQL Workbench/J will analyze the foreign key dependencies of the tables and will import/copy them such that the parent tables are processed before and referencing child tables. The parameter is only checked if a multi-table mode is used in both commands (&quot;WbCopy -sourceTable=*&quot; or &quot;WbImport -sourceDir=somedir&quot;.
+         WbImport and WbCopy now support the -checkDependencies parameter. If set to true, SQL Workbench/J will analyze the foreign key dependencies of the tables and will import/copy them such that the parent tables are processed before and referencing child tables. The parameter is only checked if a multi-table mode is used in both commands ("WbCopy -sourceTable=*" or "WbImport -sourceDir=somedir".
       </description>
     </entry>
 
     <entry dev-build="5" type="enh">
       <description>
-         When using &quot;Delete data&quot; from within the DbExplorer, the list of tables can now be sorted according to their FK constraints.
+         When using "Delete data" from within the DbExplorer, the list of tables can now be sorted according to their FK constraints.
       </description>
     </entry>
 
@@ -1708,7 +1708,7 @@
 
     <entry dev-build="3" type="enh">
       <description>
-         A background color for the connection info display can now be defined on a per profile basis (to e.g. identify &quot;critical&quot; connections)
+         A background color for the connection info display can now be defined on a per profile basis (to e.g. identify "critical" connections)
       </description>
     </entry>
 
@@ -1738,13 +1738,13 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         WbExport can now also write a format file for SQL Server&apos;s bcp utility. The file is created by using the new switch -formatFile=sqlserver The switch can also be used to write an SQL*Loader file using &apos;-formatFile=oracle&apos;. Creating both files is possible using &apos;-formatFile=oracle,sqlserver&apos; The old parameter &apos;-writeOracleLoader=true&apos; is still supported
+         WbExport can now also write a format file for SQL Server's bcp utility. The file is created by using the new switch -formatFile=sqlserver The switch can also be used to write an SQL*Loader file using '-formatFile=oracle'. Creating both files is possible using '-formatFile=oracle,sqlserver' The old parameter '-writeOracleLoader=true' is still supported
       </description>
     </entry>
 
     <entry dev-build="1" type="enh">
       <description>
-         For DDL Statements a Savepoint can now be enabled so that DBMS which cannot continue the current transaction after a DDL error do not require a manual rollback (e.g. Postgres). This makes the option &quot;Ignore DROP Errors&quot; work for Postgres when not running in autocommit mode. This is controlled with the property workbench.db.[dbid].ddl.usesavepoint=true Running imports using the update/insert (or insert/update) mode will not work with Postgres as well. SQL Workbench/J can now use a savepoint to guard the first of the two statements so that the transaction can continue. This is controlled using workbench.db.[dbid].import.usesavepoint=true
+         For DDL Statements a Savepoint can now be enabled so that DBMS which cannot continue the current transaction after a DDL error do not require a manual rollback (e.g. Postgres). This makes the option "Ignore DROP Errors" work for Postgres when not running in autocommit mode. This is controlled with the property workbench.db.[dbid].ddl.usesavepoint=true Running imports using the update/insert (or insert/update) mode will not work with Postgres as well. SQL Workbench/J can now use a savepoint to guard the first of the two statements so that the transaction can continue. This is controlled using workbench.db.[dbid].import.usesavepoint=true
       </description>
     </entry>
 
@@ -1786,7 +1786,7 @@
 
     <entry dev-build="7" type="fix">
       <description>
-         Displaying the table&apos;s rowcount in the DbExplorer did not work with old MS SQL drivers when autocommit was turned off
+         Displaying the table's rowcount in the DbExplorer did not work with old MS SQL drivers when autocommit was turned off
       </description>
     </entry>
 
@@ -1905,13 +1905,13 @@
 
     <entry dev-build="5" type="enh">
       <description>
-         A new option &quot;Trim CHAR data&quot; has been added to the connection. profile. If this is enabled, values retrieved from columns with the CHAR datatype are trimmed (as the CHAR data is padded on most DBMS)
+         A new option "Trim CHAR data" has been added to the connection. profile. If this is enabled, values retrieved from columns with the CHAR datatype are trimmed (as the CHAR data is padded on most DBMS)
       </description>
     </entry>
 
     <entry dev-build="4" type="enh">
       <description>
-         A &quot;keep alive&quot; statement can now be defined in the &quot;Connect Scripts&quot; dialog, that will send a statement at defined intervals to the server to prevent the connection from beeing closed.
+         A "keep alive" statement can now be defined in the "Connect Scripts" dialog, that will send a statement at defined intervals to the server to prevent the connection from beeing closed.
       </description>
     </entry>
 
@@ -1947,7 +1947,7 @@
 
     <entry dev-build="5" type="fix">
       <description>
-         &quot;Create DDL Script&quot; in the DbExplorer was not working for sequences.
+         "Create DDL Script" in the DbExplorer was not working for sequences.
       </description>
     </entry>
 
@@ -1983,7 +1983,7 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         It was not possible to specify a blank as the delimiter when importing text files. This can now be done using -delimiter=&quot;&apos; &apos;&quot;
+         It was not possible to specify a blank as the delimiter when importing text files. This can now be done using -delimiter="' '"
       </description>
     </entry>
 
@@ -2036,7 +2036,7 @@
 
     <entry dev-build="8" type="enh">
       <description>
-         A special date and timestampformat &quot;millis&quot; can now be specified for WbImport (e.g. -timestampFormat=millis). This will treat the value as a numeric value representing the milliseconds since 1970-01-01 00:00:00 (and thus can be used to create a java.util.Date() object directly)
+         A special date and timestampformat "millis" can now be specified for WbImport (e.g. -timestampFormat=millis). This will treat the value as a numeric value representing the milliseconds since 1970-01-01 00:00:00 (and thus can be used to create a java.util.Date() object directly)
       </description>
     </entry>
 
@@ -2054,7 +2054,7 @@
 
     <entry dev-build="6" type="enh">
       <description>
-         You can now select the elements that should be shown in the main window&apos;s title bar. The name of profile group and the current workspace can be enabled/disabled. The display of the current editor&apos;s filename has been moved from the &quot;Editor&quot; page in the options dialog to the new &quot;Window Title&quot; page.
+         You can now select the elements that should be shown in the main window's title bar. The name of profile group and the current workspace can be enabled/disabled. The display of the current editor's filename has been moved from the "Editor" page in the options dialog to the new "Window Title" page.
       </description>
     </entry>
 
@@ -2072,7 +2072,7 @@
 
     <entry dev-build="5" type="enh">
       <description>
-         The literals that are accepted as true/false for converting boolean values can now be defined using two new parameters for the WbImport command: -literalsFalse -literalsTrue this also affects the parsing of values for the -booleanToNumber=true mode. The default literals for the number conversion has been limited to true/false. Literals that are not &quot;known&quot; (either through the default or by specifying them using the -literalsXXX switch) are now always rejected (before they were silently converted to false)
+         The literals that are accepted as true/false for converting boolean values can now be defined using two new parameters for the WbImport command: -literalsFalse -literalsTrue this also affects the parsing of values for the -booleanToNumber=true mode. The default literals for the number conversion has been limited to true/false. Literals that are not "known" (either through the default or by specifying them using the -literalsXXX switch) are now always rejected (before they were silently converted to false)
       </description>
     </entry>
 
@@ -2096,7 +2096,7 @@
 
     <entry dev-build="3" type="enh">
       <description>
-         Using mode=insert,update is no possible with PostgreSQL. Due to PG&apos;s error handling this required a savepoint around the INSERT statement that could be rolled back. Doing the INSERT in a sub-transaction with savepoints can be enabled for other DBMS using workbench.db.[dbid].import.usesavepoint=true
+         Using mode=insert,update is no possible with PostgreSQL. Due to PG's error handling this required a savepoint around the INSERT statement that could be rolled back. Doing the INSERT in a sub-transaction with savepoints can be enabled for other DBMS using workbench.db.[dbid].import.usesavepoint=true
       </description>
     </entry>
 
@@ -2132,7 +2132,7 @@
 
     <entry dev-build="2" type="enh">
       <description>
-         When using &quot;Put SELECT into&quot; from within the DbExplorer the statement can now be appended to the selected editor by holding down the CTRL-Key while selecting the menu item.
+         When using "Put SELECT into" from within the DbExplorer the statement can now be appended to the selected editor by holding down the CTRL-Key while selecting the menu item.
       </description>
     </entry>
 
@@ -2168,7 +2168,7 @@
 
     <entry dev-build="7" type="fix">
       <description>
-         &quot;Ignore Drop Errors&quot; was not working any longer (that included the commandline switch for running in batch mode)
+         "Ignore Drop Errors" was not working any longer (that included the commandline switch for running in batch mode)
       </description>
     </entry>
 
@@ -2210,7 +2210,7 @@
 
     <entry dev-build="6" type="fix">
       <description>
-         Fixed the processing of &quot;batches&quot; sent to SQL Server. If a multi-statement SQL is sent to SQL Server that also returned result sets, the result was not always shown.
+         Fixed the processing of "batches" sent to SQL Server. If a multi-statement SQL is sent to SQL Server that also returned result sets, the result was not always shown.
       </description>
     </entry>
 
@@ -2294,7 +2294,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         When using the &quot;Drop..&quot; dialog from the DbExplorer SQL Workbench/J was offering the CASCADE option for MySQL even though it is not supported by MySQL.
+         When using the "Drop.." dialog from the DbExplorer SQL Workbench/J was offering the CASCADE option for MySQL even though it is not supported by MySQL.
       </description>
     </entry>
 
@@ -2306,7 +2306,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         The history for the quickfilter in the DbExplorer&apos;s Object list was not saved when the DbExplorer was opened as a separate window.
+         The history for the quickfilter in the DbExplorer's Object list was not saved when the DbExplorer was opened as a separate window.
       </description>
     </entry>
 
@@ -2359,7 +2359,7 @@
 
     <entry dev-build="9" type="enh">
       <description>
-         When doing single-table imports with WbImport VARCHAR or CHAR columns that exceed a certain limit in the input file can now be truncated using the -maxLength parameter. The format is -maxLength=&apos;column1=size1,column2=size2&apos;
+         When doing single-table imports with WbImport VARCHAR or CHAR columns that exceed a certain limit in the input file can now be truncated using the -maxLength parameter. The format is -maxLength='column1=size1,column2=size2'
       </description>
     </entry>
 
@@ -2371,7 +2371,7 @@
 
     <entry dev-build="7" type="enh">
       <description>
-         WbImport can now write a file with records that could not be imported if run with continueOnError=true. The file is specified with -badFile=filename. If the filenanme indicates a directory, the actual file will be constructed by using the directory and the target table&apos;s name (needed for multi-table exports).
+         WbImport can now write a file with records that could not be imported if run with continueOnError=true. The file is specified with -badFile=filename. If the filenanme indicates a directory, the actual file will be constructed by using the directory and the target table's name (needed for multi-table exports).
       </description>
     </entry>
 
@@ -2383,7 +2383,7 @@
 
     <entry dev-build="5" type="enh">
       <description>
-         Individual result tabs (when using &quot;Append new results&quot;) can now be closed (Data- &gt; Close result)
+         Individual result tabs (when using "Append new results") can now be closed (Data- &gt; Close result)
       </description>
     </entry>
 
@@ -2419,7 +2419,7 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         A new command to prompt for a confirmation has been added. WbConfirm will display the provided message and will allow to stop the current execution or continue. This will only be evaluated in GUI mode (e.g. to prevent the accidental execution of &quot;dangerous&quot; scripts)
+         A new command to prompt for a confirmation has been added. WbConfirm will display the provided message and will allow to stop the current execution or continue. This will only be evaluated in GUI mode (e.g. to prevent the accidental execution of "dangerous" scripts)
       </description>
     </entry>
 
@@ -2473,13 +2473,13 @@
 
     <entry dev-build="6" type="fix">
       <description>
-         The &quot;internal&quot; handling for the line ending was changed (back) to always use the Unix format. SQL Statements can still be sent to the DBMS with DOS line endings, but the statements will now be converted before they are sent (rather than storing them with DOS line ending right away), which might have a performance impact when running large scripts.
+         The "internal" handling for the line ending was changed (back) to always use the Unix format. SQL Statements can still be sent to the DBMS with DOS line endings, but the statements will now be converted before they are sent (rather than storing them with DOS line ending right away), which might have a performance impact when running large scripts.
       </description>
     </entry>
 
     <entry dev-build="6" type="fix">
       <description>
-         Sometimes the application would ask to save changed profiles even if the profiles weren&apos;t changed.
+         Sometimes the application would ask to save changed profiles even if the profiles weren't changed.
       </description>
     </entry>
 
@@ -2491,7 +2491,7 @@
 
     <entry dev-build="5" type="fix">
       <description>
-         Quoting only the schema name for WbImport did not work (e.g. -table=&apos;&quot;123&quot;.table&apos;
+         Quoting only the schema name for WbImport did not work (e.g. -table='"123".table'
       </description>
     </entry>
 
@@ -2503,7 +2503,7 @@
 
     <entry dev-build="5" type="fix">
       <description>
-         For Oracle, columns with &apos;TIMESTAMP WITH [LOCAL] TIMEZONE&apos; data type are not retrieved using getTimestamp() instead of getObject() to be able to properly display the data for those columns.
+         For Oracle, columns with 'TIMESTAMP WITH [LOCAL] TIMEZONE' data type are not retrieved using getTimestamp() instead of getObject() to be able to properly display the data for those columns.
       </description>
     </entry>
 
@@ -2515,13 +2515,13 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         Quoted table names could not be passed to the WbImport command (e.g. -table=&apos;&quot;MYTABLE&quot;&apos;) which is necessary for case-sensitive servers
+         Quoted table names could not be passed to the WbImport command (e.g. -table='"MYTABLE"') which is necessary for case-sensitive servers
       </description>
     </entry>
 
     <entry dev-build="4" type="fix">
       <description>
-         Warnings that are reported by the JDBC driver after switching the current database are now ignored and do not set the &quot;warning&quot; state for the executed command.
+         Warnings that are reported by the JDBC driver after switching the current database are now ignored and do not set the "warning" state for the executed command.
       </description>
     </entry>
 
@@ -2628,7 +2628,7 @@
 
     <entry dev-build="6" type="fix">
       <description>
-         The option &quot;Single line&quot; for the default alternate delimiter (Tool -&gt; Options -&gt; Editor) was not saved.
+         The option "Single line" for the default alternate delimiter (Tool -&gt; Options -&gt; Editor) was not saved.
       </description>
     </entry>
 
@@ -2712,7 +2712,7 @@
 
     <entry dev-build="2" type="fix">
       <description>
-         WbExport -sourcetable=something did not work if &quot;something&quot; was not a table (e.g. a Synonym)
+         WbExport -sourcetable=something did not work if "something" was not a table (e.g. a Synonym)
       </description>
     </entry>
 
@@ -2742,7 +2742,7 @@
 
     <entry dev-build="1" type="fix">
       <description>
-         Escaping of the delimiter has been changed for the WbExport or the &quot;Save Data as&quot; commands. The following rules are now applied: if no character escaping is selected (-escapeText parameter) then neither the quote character nor the delimiter are ever escaped. If escaping is enabled, then the quote character will be escaped inside a quoted value and the delimiter will be escaped inside a non-quoted value regardless of the chosen escape range.
+         Escaping of the delimiter has been changed for the WbExport or the "Save Data as" commands. The following rules are now applied: if no character escaping is selected (-escapeText parameter) then neither the quote character nor the delimiter are ever escaped. If escaping is enabled, then the quote character will be escaped inside a quoted value and the delimiter will be escaped inside a non-quoted value regardless of the chosen escape range.
       </description>
     </entry>
 
@@ -2783,19 +2783,19 @@
 
     <entry dev-build="2" type="enh">
       <description>
-         Large text fields are now displayed in multi-line mode (to be able to see all lines &quot;Allow Row Height Resizing&quot; must be enabled. For performace reasons this mode is only enabled for character columns that can hold more than 500 characters. This threshold can be configured using the property: workbench.gui.display.multilinethreshold
+         Large text fields are now displayed in multi-line mode (to be able to see all lines "Allow Row Height Resizing" must be enabled. For performace reasons this mode is only enabled for character columns that can hold more than 500 characters. This threshold can be configured using the property: workbench.gui.display.multilinethreshold
       </description>
     </entry>
 
     <entry dev-build="1" type="enh">
       <description>
-         The alternate delimiter can now be defined for each profile. If one is defined in the profile, this will overwrite the globally defined alternate delimiter. Additionally an alternate delimiter can now be defined as &quot;single line&quot;, which means that it has to occur as the only text on a line in order to be recognized.
+         The alternate delimiter can now be defined for each profile. If one is defined in the profile, this will overwrite the globally defined alternate delimiter. Additionally an alternate delimiter can now be defined as "single line", which means that it has to occur as the only text on a line in order to be recognized.
       </description>
     </entry>
 
     <entry dev-build="1" type="enh">
       <description>
-         Delimiter and alternate Delimiter can now be specified in batch mode as well. The parameter -altDelimiter will only have an effect if a profile-less connection is used (basically defining the alternate delimiter for the temporary profile) The argument -delimiter overrides the default delimiter and will turn off the usage of an alternate delimiter. This can be used if the scripts are not processed in memory but still use a non-standard delimiter (Similar to the -delimiter argument of the WbInclude command). To define a single line delimiter append the ;nl to the delimiter definition. E.g. -delimter=/;nl will define the forward slash as the delimiter but only if it&apos;s the only character in a line. -delimiter=GO;nl will define a MS SQL Server compatible delimiter. The additional automatic detection of the GO delimiter has been removed. If you use GO as the delimiter, please change your profiles to use that as the delimiter.
+         Delimiter and alternate Delimiter can now be specified in batch mode as well. The parameter -altDelimiter will only have an effect if a profile-less connection is used (basically defining the alternate delimiter for the temporary profile) The argument -delimiter overrides the default delimiter and will turn off the usage of an alternate delimiter. This can be used if the scripts are not processed in memory but still use a non-standard delimiter (Similar to the -delimiter argument of the WbInclude command). To define a single line delimiter append the ;nl to the delimiter definition. E.g. -delimter=/;nl will define the forward slash as the delimiter but only if it's the only character in a line. -delimiter=GO;nl will define a MS SQL Server compatible delimiter. The additional automatic detection of the GO delimiter has been removed. If you use GO as the delimiter, please change your profiles to use that as the delimiter.
       </description>
     </entry>
 
@@ -2831,7 +2831,7 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         The shortcuts for &quot;Move tab left&quot; and &quot;Move tab right&quot; could not be configured
+         The shortcuts for "Move tab left" and "Move tab right" could not be configured
       </description>
     </entry>
 
@@ -2843,7 +2843,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         &quot;Create DDL Script&quot; in the DbExplorer did not create the DDL for materialized views in Oracle
+         "Create DDL Script" in the DbExplorer did not create the DDL for materialized views in Oracle
       </description>
     </entry>
 
@@ -3105,7 +3105,7 @@
 
     <entry dev-build="3" type="enh">
       <description>
-         The case (upper, lower, as is) for table names in generated SQL statements can now be set independently from the paste case in the editor. The new setting is available at Tools-&gt;Options-&gt;SQL formatting. It defaults to the &quot;Paste case&quot; value for the editor
+         The case (upper, lower, as is) for table names in generated SQL statements can now be set independently from the paste case in the editor. The new setting is available at Tools-&gt;Options-&gt;SQL formatting. It defaults to the "Paste case" value for the editor
       </description>
     </entry>
 
@@ -3141,7 +3141,7 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         Removed the &quot;Disable automatic update table check&quot; from the  connection profile. The PK information for the update table is now retrieved when needed.
+         Removed the "Disable automatic update table check" from the  connection profile. The PK information for the update table is now retrieved when needed.
       </description>
     </entry>
 
@@ -3231,7 +3231,7 @@
 
     <entry dev-build="1" type="fix">
       <description>
-         &quot;Generate DDL Script&quot; in the DbExplorer was not working for non-table objects.
+         "Generate DDL Script" in the DbExplorer was not working for non-table objects.
       </description>
     </entry>
 
@@ -3284,7 +3284,7 @@
 
     <entry dev-build="20" type="enh">
       <description>
-         Tables can now be filter out using a regular expression  in the DbExplorer. The default setting will remove tables from Oracle 10g&apos;s recylce bin. This is controlled by the property workbench.db.[dbid].exclude.tables=&lt;regex&gt;
+         Tables can now be filter out using a regular expression  in the DbExplorer. The default setting will remove tables from Oracle 10g's recylce bin. This is controlled by the property workbench.db.[dbid].exclude.tables=&lt;regex&gt;
       </description>
     </entry>
 
@@ -3344,7 +3344,7 @@
 
     <entry dev-build="15" type="enh">
       <description>
-         Individual cells can now be selected in a result set by holding down the Alt-Key while selecting rows/columns. When using &quot;Copy selected&quot; on such a selection, only the selected columns will be copied. Note that this will produce incorrect results when copying SQL statements and no primary key column is part of the selection. The modifier for rectangular selections in the editor has been switched to the Alt key as well, to be consistent.
+         Individual cells can now be selected in a result set by holding down the Alt-Key while selecting rows/columns. When using "Copy selected" on such a selection, only the selected columns will be copied. Note that this will produce incorrect results when copying SQL statements and no primary key column is part of the selection. The modifier for rectangular selections in the editor has been switched to the Alt key as well, to be consistent.
       </description>
     </entry>
 
@@ -3458,7 +3458,7 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         When saving a result set to a file &quot;Save Data as&quot;, nothing  was written, if no file extension was specified.
+         When saving a result set to a file "Save Data as", nothing  was written, if no file extension was specified.
       </description>
     </entry>
 
@@ -3470,7 +3470,7 @@
 
     <entry dev-build="11" type="fix">
       <description>
-         &quot;Save Workspace as...&quot; was not working when no extension was specified
+         "Save Workspace as..." was not working when no extension was specified
       </description>
     </entry>
 
@@ -3518,7 +3518,7 @@
 
     <entry dev-build="19" type="fix">
       <description>
-         WbImport always used a quote character (&quot;), even if no quote character was specified (so it was not possible to run an import without any tests on quotes)
+         WbImport always used a quote character ("), even if no quote character was specified (so it was not possible to run an import without any tests on quotes)
       </description>
     </entry>
 
@@ -3607,13 +3607,13 @@
 
     <entry dev-build="3" type="enh">
       <description>
-         &quot;Create empty INSERT&quot; in the DbExplorer now uses the formatting settings for internally generated statements.
+         "Create empty INSERT" in the DbExplorer now uses the formatting settings for internally generated statements.
       </description>
     </entry>
 
     <entry dev-build="3" type="enh">
       <description>
-         &quot;Create empty INSERT&quot; can now be configured to use ? for the  values to help make creating PreparedStatements in Java code. This is controlled through the property workbench.sql.generate.defaultinsert.prepared=true in workbench.settings
+         "Create empty INSERT" can now be configured to use ? for the  values to help make creating PreparedStatements in Java code. This is controlled through the property workbench.sql.generate.defaultinsert.prepared=true in workbench.settings
       </description>
     </entry>
 
@@ -3625,7 +3625,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         When the source table was not found for the WbCopy command it was incorrectly reported as &quot;Target table not found&quot;
+         When the source table was not found for the WbCopy command it was incorrectly reported as "Target table not found"
       </description>
     </entry>
 
@@ -3649,7 +3649,7 @@
 
     <entry dev-build="6" type="fix">
       <description>
-         When running in batch mode, WbInclude (and other commands)  were not working relativ to their script&apos;s directory but were always using the current directory.
+         When running in batch mode, WbInclude (and other commands)  were not working relativ to their script's directory but were always using the current directory.
       </description>
     </entry>
 
@@ -3661,7 +3661,7 @@
 
     <entry dev-build="8" type="fix">
       <description>
-         When a file is loaded in the editor, the file&apos;s directory  is used as the base directory for subsequent includes when running the Script. Thanks to Christian d&apos;Heureuse for this fix.
+         When a file is loaded in the editor, the file's directory  is used as the base directory for subsequent includes when running the Script. Thanks to Christian d'Heureuse for this fix.
       </description>
     </entry>
 
@@ -3685,7 +3685,7 @@
 
     <entry dev-build="9" type="fix">
       <description>
-         Statements using MS SQL Server&apos;s outer join syntax (using *=)  were not reformatted correctly.
+         Statements using MS SQL Server's outer join syntax (using *=)  were not reformatted correctly.
       </description>
     </entry>
 
@@ -3697,7 +3697,7 @@
 
     <entry dev-build="9" type="fix">
       <description>
-         The USE command was broken with SQL Server when using quoted DB Names (e.g. [otherdb] or &quot;otherdb&quot;) The usage of the setCatalog() function can be disabled using the property workbench.db.[dbid].usesetcatalog=false
+         The USE command was broken with SQL Server when using quoted DB Names (e.g. [otherdb] or "otherdb") The usage of the setCatalog() function can be disabled using the property workbench.db.[dbid].usesetcatalog=false
       </description>
     </entry>
 
@@ -3749,7 +3749,7 @@
 
     <entry dev-build="7" type="enh">
       <description>
-         &quot;Expand Editor&quot; and &quot;Expand Result&quot; now act as a toggle.  The first time they are invoked they will expand the editor (or the result area) the second time they will undo the expand. The &quot;Undo Expand&quot; will undo the last expand.
+         "Expand Editor" and "Expand Result" now act as a toggle.  The first time they are invoked they will expand the editor (or the result area) the second time they will undo the expand. The "Undo Expand" will undo the last expand.
       </description>
     </entry>
 
@@ -3761,7 +3761,7 @@
 
     <entry dev-build="9" type="enh">
       <description>
-         The connection profile has a new attribute &quot;Remove comments&quot; which  is disabled by default. If enbled, any comments will be removed from the SQL statement before sending it to the server
+         The connection profile has a new attribute "Remove comments" which  is disabled by default. If enbled, any comments will be removed from the SQL statement before sending it to the server
       </description>
     </entry>
 
@@ -3773,7 +3773,7 @@
 
     <entry dev-build="14" type="enh">
       <description>
-         Incremental search (&quot;Search as you type&quot;) in auto completion
+         Incremental search ("Search as you type") in auto completion
       </description>
     </entry>
 
@@ -3803,7 +3803,7 @@
 
     <entry dev-build="38" type="enh">
       <description>
-         BLOB columns are now displayed with a button that  will open a dialog to either save the blob or display it as text or an image. Files can also be &quot;uploaded&quot; from within that dialog.
+         BLOB columns are now displayed with a button that  will open a dialog to either save the blob or display it as text or an image. Files can also be "uploaded" from within that dialog.
       </description>
     </entry>
 
@@ -3815,7 +3815,7 @@
 
     <entry dev-build="43" type="enh">
       <description>
-         Moved the &quot;Remember DbExplorer Schema&quot; option from the  global options to the profile options.
+         Moved the "Remember DbExplorer Schema" option from the  global options to the profile options.
       </description>
     </entry>
 
@@ -3869,7 +3869,7 @@
 
     <entry dev-build="16" type="fix">
       <description>
-         When using &quot;Save Data as&quot; the options from the dialog where not correctly applied to the export file
+         When using "Save Data as" the options from the dialog where not correctly applied to the export file
       </description>
     </entry>
 
@@ -3887,13 +3887,13 @@
 
     <entry dev-build="24" type="fix">
       <description>
-         When using &quot;Autojump to next statement&quot; the result tab was  not selected when executing the last statement in the editor (using &quot;Execute Current&quot;).
+         When using "Autojump to next statement" the result tab was  not selected when executing the last statement in the editor (using "Execute Current").
       </description>
     </entry>
 
     <entry dev-build="25" type="fix">
       <description>
-         Code completion was not working properly for statements  using the &quot;new&quot; JOIN syntax
+         Code completion was not working properly for statements  using the "new" JOIN syntax
       </description>
     </entry>
 
@@ -3917,7 +3917,7 @@
 
     <entry dev-build="37" type="fix">
       <description>
-         The USE command did not work with MySQL. This is actually  a &quot;feature&quot; of the MySQL driver which does not allow to change the database with the USE command, only through Connection.setCatalog() which is now used internally by when a &quot;USE dbname&quot; is executed
+         The USE command did not work with MySQL. This is actually  a "feature" of the MySQL driver which does not allow to change the database with the USE command, only through Connection.setCatalog() which is now used internally by when a "USE dbname" is executed
       </description>
     </entry>
 
@@ -3971,13 +3971,13 @@
 
     <entry dev-build="46" type="fix">
       <description>
-         ALTER TABLE ... DROP CONSTRAINT was not considered for the &quot;Ignore DROP errors&quot; option. (Thanks, Janek for this)
+         ALTER TABLE ... DROP CONSTRAINT was not considered for the "Ignore DROP errors" option. (Thanks, Janek for this)
       </description>
     </entry>
 
     <entry dev-build="46" type="fix">
       <description>
-         Statements immediately following a combination of multi-line and  single line statements were not always detected correctly and thus not considered e.g. for the &quot;Ignore DROP errors&quot; option
+         Statements immediately following a combination of multi-line and  single line statements were not always detected correctly and thus not considered e.g. for the "Ignore DROP errors" option
       </description>
     </entry>
 
@@ -3988,7 +3988,7 @@
 
     <entry dev-build="2" type="enh">
       <description>
-         The automatic scroll area of the editor (&quot;electric scroll&quot;) can  now be configured with the property workbench.editor.electricscroll and defines the number of lines where the electric scrolling should be enabled. The current default is 3. This property can also be set through the options dialog (&quot;Editor&quot; tab)
+         The automatic scroll area of the editor ("electric scroll") can  now be configured with the property workbench.editor.electricscroll and defines the number of lines where the electric scrolling should be enabled. The current default is 3. This property can also be set through the options dialog ("Editor" tab)
           The color used to highlight statements that failed can now be configured with the setting workbench.editor.color.error
       </description>
     </entry>
@@ -4018,7 +4018,7 @@
 
     <entry dev-build="3" type="enh">
       <description>
-         The number of columns the formatter (&quot;Reformat SQL&quot; menu item) puts into one line of a SELECT list, can now be defined: workbench.sql.formatter.select.columnsperline=1
+         The number of columns the formatter ("Reformat SQL" menu item) puts into one line of a SELECT list, can now be defined: workbench.sql.formatter.select.columnsperline=1
       </description>
     </entry>
 
@@ -4030,7 +4030,7 @@
 
     <entry dev-build="7" type="enh">
       <description>
-         Added the ability to define primary key columns for tables and views.  This can either be done using the new &quot;WbDefinPk&quot; command, or by defining a mapping file that contains the definitions. The name of the mapping file (which has to be a standard Java properties file with table=col1,col2 entries) can be defined in workbench.settings using workbench.pkmapping.file=filename The new commands to control this additional PK settings are: WbDefinePk - Define a PK mapping for one table WbListPkDef - List the currently active PK mapping WbLoadPkMap - Load a PK mapping from an external file WbSavePKMap - Save the current mapping to an external file
+         Added the ability to define primary key columns for tables and views.  This can either be done using the new "WbDefinPk" command, or by defining a mapping file that contains the definitions. The name of the mapping file (which has to be a standard Java properties file with table=col1,col2 entries) can be defined in workbench.settings using workbench.pkmapping.file=filename The new commands to control this additional PK settings are: WbDefinePk - Define a PK mapping for one table WbListPkDef - List the currently active PK mapping WbLoadPkMap - Load a PK mapping from an external file WbSavePKMap - Save the current mapping to an external file
       </description>
     </entry>
 
@@ -4042,7 +4042,7 @@
 
     <entry dev-build="9" type="enh">
       <description>
-         Import progress (and other progress messages from the statusbar) can  now be enabled in the commandline (batch execution) with the parameter -showprogress=true As Java&apos;s support for the console is very limited this might not work properly in all situations
+         Import progress (and other progress messages from the statusbar) can  now be enabled in the commandline (batch execution) with the parameter -showprogress=true As Java's support for the console is very limited this might not work properly in all situations
       </description>
     </entry>
 
@@ -4054,7 +4054,7 @@
 
     <entry dev-build="14" type="enh">
       <description>
-         The column header&apos;s tooltip now contains the datatype
+         The column header's tooltip now contains the datatype
       </description>
     </entry>
 
@@ -4096,7 +4096,7 @@
 
     <entry dev-build="2" type="fix">
       <description>
-         Correct handling of MS SQL Server&apos;s BIT datatype when creating SQL statements.
+         Correct handling of MS SQL Server's BIT datatype when creating SQL statements.
       </description>
     </entry>
 
@@ -4174,7 +4174,7 @@
 
     <entry dev-build="25" type="fix">
       <description>
-         When &quot;Retrieve DbExplorer&quot; was not enabled in the options dialog,  the schema dropdown was never populated in the DbExplorer
+         When "Retrieve DbExplorer" was not enabled in the options dialog,  the schema dropdown was never populated in the DbExplorer
       </description>
     </entry>
 
@@ -4186,7 +4186,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         &quot;Replace all&quot; was not working with &quot;Ignore case&quot; in the editor
+         "Replace all" was not working with "Ignore case" in the editor
       </description>
     </entry>
 
@@ -4197,7 +4197,7 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         When running external files using WbInclude the directory of the  currently executed file is used as the &quot;current&quot; directory, so if the executed file is using WbInclude (@) files can be referenced with a relative path.
+         When running external files using WbInclude the directory of the  currently executed file is used as the "current" directory, so if the executed file is using WbInclude (@) files can be referenced with a relative path.
       </description>
     </entry>
 
@@ -4209,7 +4209,7 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         When &quot;confirming&quot; updates, there was no way to cancel the execution completely. WbInclude is now also considered as an &quot;updating&quot; command.
+         When "confirming" updates, there was no way to cancel the execution completely. WbInclude is now also considered as an "updating" command.
       </description>
     </entry>
 
@@ -4293,7 +4293,7 @@
 
     <entry dev-build="29" type="enh">
       <description>
-         The &quot;Create DDL Script&quot; is now also available in the Procedures tab of the DBExplorer, not only the Objects tab.
+         The "Create DDL Script" is now also available in the Procedures tab of the DBExplorer, not only the Objects tab.
       </description>
     </entry>
 
@@ -4365,7 +4365,7 @@
 
     <entry dev-build="14" type="fix">
       <description>
-         &quot;Replace all&quot; did not work any longer in the editor
+         "Replace all" did not work any longer in the editor
       </description>
     </entry>
 
@@ -4383,19 +4383,19 @@
 
     <entry dev-build="33" type="fix">
       <description>
-         Checking for the MS SQL &quot;GO&quot; delimiter did not work properly
+         Checking for the MS SQL "GO" delimiter did not work properly
       </description>
     </entry>
 
     <entry dev-build="34" type="fix">
       <description>
-         When &quot;Retrieve Explorer&quot; was disabled, nothing was retrieved at  all when the Explorer was opened in a separate window
+         When "Retrieve Explorer" was disabled, nothing was retrieved at  all when the Explorer was opened in a separate window
       </description>
     </entry>
 
     <entry dev-build="35" type="fix">
       <description>
-         When using &quot;Save Data as&quot; date and timestamp columns were not written into the export file if not format was specified.
+         When using "Save Data as" date and timestamp columns were not written into the export file if not format was specified.
       </description>
     </entry>
 
@@ -4435,7 +4435,7 @@
 
     <entry dev-build="30" type="enh">
       <description>
-         The SQL that is used for the UPDATE Statement in the WbImport command can now be &quot;enhanced&quot; with an additional WHERE clause. This can be specified with the parameter -updatewhere for the WbImport command. If this is specified e.g. -updatewhere=&quot;column=value&quot; then this expression will be appended to the generated UPDATE statement with an AND condition. e.g. UPDATE table SET col1=?, col2=? WHERE id=? AND (column=value) If the expression starts with the keyword AND or OR, then it will appended to the UPDATE staement as it is. If it does not start with either of the two keywords, it will be put into brackets and appended using AND. The expression -updatewhere=&quot;AND (col5=42 OR col5 = 43)&quot; will be append &quot;as is&quot; to the generated UPDATE statement.
+         The SQL that is used for the UPDATE Statement in the WbImport command can now be "enhanced" with an additional WHERE clause. This can be specified with the parameter -updatewhere for the WbImport command. If this is specified e.g. -updatewhere="column=value" then this expression will be appended to the generated UPDATE statement with an AND condition. e.g. UPDATE table SET col1=?, col2=? WHERE id=? AND (column=value) If the expression starts with the keyword AND or OR, then it will appended to the UPDATE staement as it is. If it does not start with either of the two keywords, it will be put into brackets and appended using AND. The expression -updatewhere="AND (col5=42 OR col5 = 43)" will be append "as is" to the generated UPDATE statement.
       </description>
     </entry>
 
@@ -4455,7 +4455,7 @@
 
     <entry dev-build="19" type="enh">
       <description>
-         If a editor tab is associated with a file, the filename can now be displayed in the window title. This can be configured in workbench.settings with the property workbench.gui.display.showfilename Possible values are none,name,path. If this property is set to &quot;name&quot;, then only the name of the current file (if any) is displayed in the window title. If it is set to &quot;path&quot;, the full path will be displayed in the window title. Otherwise (i.e. if the property is empty, or not present) the filename is not displayed at all.
+         If a editor tab is associated with a file, the filename can now be displayed in the window title. This can be configured in workbench.settings with the property workbench.gui.display.showfilename Possible values are none,name,path. If this property is set to "name", then only the name of the current file (if any) is displayed in the window title. If it is set to "path", the full path will be displayed in the window title. Otherwise (i.e. if the property is empty, or not present) the filename is not displayed at all.
       </description>
     </entry>
 
@@ -4473,19 +4473,19 @@
 
     <entry dev-build="18" type="enh">
       <description>
-         Editor Tabs that contain a file can now be renamed as well. The full filename is only available as the tooltip of the tab. To restore the title to the file&apos;s name, rename the tab to an &quot;empty&quot; name
+         Editor Tabs that contain a file can now be renamed as well. The full filename is only available as the tooltip of the tab. To restore the title to the file's name, rename the tab to an "empty" name
       </description>
     </entry>
 
     <entry dev-build="18" type="enh">
       <description>
-         The editor tabs can now be re-ordered (right click on the tab, choose &quot;Move left&quot; or &quot;Move right&quot;
+         The editor tabs can now be re-ordered (right click on the tab, choose "Move left" or "Move right"
       </description>
     </entry>
 
     <entry dev-build="18" type="enh">
       <description>
-         The retrieval of the row count can now be configured in the  data tab of the DbExplorer (using the &quot;Settings&quot; button)
+         The retrieval of the row count can now be configured in the  data tab of the DbExplorer (using the "Settings" button)
       </description>
     </entry>
 
@@ -4593,7 +4593,7 @@
 
     <entry dev-build="19" type="fix">
       <description>
-         The generated SQL for foreign key constraints in Oracle would  contain an &quot;ON DELETE&quot; rule which is not supported by Oracle
+         The generated SQL for foreign key constraints in Oracle would  contain an "ON DELETE" rule which is not supported by Oracle
       </description>
     </entry>
 
@@ -4670,7 +4670,7 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         Workbench commands are now formatted correctly when using &quot;Format SQL&quot;
+         Workbench commands are now formatted correctly when using "Format SQL"
       </description>
     </entry>
 
@@ -4694,13 +4694,13 @@
 
     <entry dev-build="3" type="enh">
       <description>
-         Multiple Database Explorer windows and/or tabs can now be opened. The existing &quot;Show Database Explorer&quot; menu works as before. Additionally there is &quot;New Db Explorer tab&quot; and &quot;New DbExplorer Window&quot; It is strongly recommended to use the option &quot;Separate connection for each tab&quot; in this case to avoid threading problems in the JDBC driver
+         Multiple Database Explorer windows and/or tabs can now be opened. The existing "Show Database Explorer" menu works as before. Additionally there is "New Db Explorer tab" and "New DbExplorer Window" It is strongly recommended to use the option "Separate connection for each tab" in this case to avoid threading problems in the JDBC driver
       </description>
     </entry>
 
     <entry dev-build="3" type="enh">
       <description>
-         Sorting inside the result has been changed slightly. For performace reasons Strings are now compared using Java&apos;s internal compare which might produce incorrect results for certain languages (http://java.sun.com/j2se/1.4.2/docs/api/java/lang/String.html#compareTo(java.lang.String)) To enable a language and country specific collation please use the following properties in workbench.setttings: workbench.sort.usecollator=true workbench.sort.language workbench.sort.country to specify the collation that should be used.
+         Sorting inside the result has been changed slightly. For performace reasons Strings are now compared using Java's internal compare which might produce incorrect results for certain languages (http://java.sun.com/j2se/1.4.2/docs/api/java/lang/String.html#compareTo(java.lang.String)) To enable a language and country specific collation please use the following properties in workbench.setttings: workbench.sort.usecollator=true workbench.sort.language workbench.sort.country to specify the collation that should be used.
       </description>
     </entry>
 
@@ -4712,7 +4712,7 @@
 
     <entry dev-build="5" type="enh">
       <description>
-         The usage of the schema name in DML statements generated by SQL Workbench can now be controlled. To do this, add the line workbench.sql.ignoreschema.&lt;dbid1&gt;=schema1,... You can use * to ignore omit all schemas in DML statements, or list each schema that should be ignored (e.g. PUBLIC) separately. The &lt;dbid&gt; that is generated for your DBMS is reported in the log file after a successful connection (the log level needs to be set to INFO). Look for the text &quot;Using DBID&quot;
+         The usage of the schema name in DML statements generated by SQL Workbench can now be controlled. To do this, add the line workbench.sql.ignoreschema.&lt;dbid1&gt;=schema1,... You can use * to ignore omit all schemas in DML statements, or list each schema that should be ignored (e.g. PUBLIC) separately. The &lt;dbid&gt; that is generated for your DBMS is reported in the log file after a successful connection (the log level needs to be set to INFO). Look for the text "Using DBID"
       </description>
     </entry>
 
@@ -4730,7 +4730,7 @@
 
     <entry dev-build="8" type="enh">
       <description>
-         Added a workaround for the PostgreSQL JDBC driver not understanding the &quot;dollar&quot; quoting when creating functions.
+         Added a workaround for the PostgreSQL JDBC driver not understanding the "dollar" quoting when creating functions.
       </description>
     </entry>
 
@@ -4766,7 +4766,7 @@
 
     <entry dev-build="3" type="fix">
       <description>
-         when running &quot;SET AUTOCOMMIT&quot; the commit and rollback toolbar buttons where not enabled/disabled accordingly
+         when running "SET AUTOCOMMIT" the commit and rollback toolbar buttons where not enabled/disabled accordingly
       </description>
     </entry>
 
@@ -4802,13 +4802,13 @@
 
     <entry dev-build="7" type="fix">
       <description>
-         Postgres&apos; JDBC driver does not understand the &quot;dollar quoting&quot;  when creating stored procedures. A workaround was implemented to be able to run the same scripts as with psql
+         Postgres' JDBC driver does not understand the "dollar quoting"  when creating stored procedures. A workaround was implemented to be able to run the same scripts as with psql
       </description>
     </entry>
 
     <entry dev-build="9" type="fix">
       <description>
-         Fixed a problem with detecting the &quot;current&quot; statement in the editor when using Ctrl-Enter
+         Fixed a problem with detecting the "current" statement in the editor when using Ctrl-Enter
       </description>
     </entry>
 
@@ -4842,7 +4842,7 @@
 
     <entry dev-build="1" type="enh">
       <description>
-         Prepared Statements (i.e. ? in a SELECT) are now supported This support relies on certain JDBC features which are not available e.g. in Oracle&apos;s or PostgreSQL&apos;s JDBC drivers. Currently this has been tested with Firebird and HSQLDB.
+         Prepared Statements (i.e. ? in a SELECT) are now supported This support relies on certain JDBC features which are not available e.g. in Oracle's or PostgreSQL's JDBC drivers. Currently this has been tested with Firebird and HSQLDB.
       </description>
     </entry>
 
@@ -4944,7 +4944,7 @@
 
     <entry dev-build="4" type="fix">
       <description>
-         &quot;Show table data&quot; in the DbExplorer did not always use the correct table definition.
+         "Show table data" in the DbExplorer did not always use the correct table definition.
       </description>
     </entry>
 
@@ -4968,7 +4968,7 @@
 
     <entry dev-build="11" type="fix">
       <description>
-         Sometimes connection errors where not displayed correctly (the application would display the &quot;Connecting to the database...&quot; message indefinitely)
+         Sometimes connection errors where not displayed correctly (the application would display the "Connecting to the database..." message indefinitely)
       </description>
     </entry>
 
@@ -4998,7 +4998,7 @@
 
     <entry dev-build="15" type="fix">
       <description>
-         When importing text files with quote characters, empty fields (&quot;&quot;) where not processed correctly (the import would fail with an error)
+         When importing text files with quote characters, empty fields ("") where not processed correctly (the import would fail with an error)
       </description>
     </entry>
 
@@ -5057,7 +5057,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         When saving a result set using &quot;Save as&quot;, the table to be used for INSERT statements can now be defined. (For UPDATE also, but that requires the retrieval of the PK columns prior to opening the dialog)
+         When saving a result set using "Save as", the table to be used for INSERT statements can now be defined. (For UPDATE also, but that requires the retrieval of the PK columns prior to opening the dialog)
       </description>
     </entry>
 
@@ -5093,7 +5093,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Added a &quot;Select all&quot; and &quot;Select none&quot; button to primary key select dialog (when updating a table without primary key definition)
+         Added a "Select all" and "Select none" button to primary key select dialog (when updating a table without primary key definition)
       </description>
     </entry>
 
@@ -5107,7 +5107,7 @@
       <description>
          The formatting of the generated INSERT statements can now be influenced by setting two properties in workbench.settings:
           workbench.sql.generate.insert.newlinethreshold defines the number of columns in the table before any reformatting of the column list or values list takes place
-          workbench.sql.generate.insert.colsperline if the INSERT statement affects more then &apos;newlinethreshold&apos; columns this value defines the number of columns to put into a single line.
+          workbench.sql.generate.insert.colsperline if the INSERT statement affects more then 'newlinethreshold' columns this value defines the number of columns to put into a single line.
           The default is newlinethreshold=5 and colsperline=1 which results in the same formatting used as before.
       </description>
     </entry>
@@ -5126,7 +5126,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         The usage of the user name for SQL Statements created for &quot;Export&quot; can now be disabled using the property: workbench.export.sql.includeowner=false
+         The usage of the user name for SQL Statements created for "Export" can now be disabled using the property: workbench.export.sql.includeowner=false
       </description>
     </entry>
 
@@ -5144,13 +5144,13 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When opening the Save as dialog, the application tried to check the update table even if &quot;Disable automatic update check&quot; was enabled
+         When opening the Save as dialog, the application tried to check the update table even if "Disable automatic update check" was enabled
       </description>
     </entry>
 
     <entry dev-build="28" type="fix">
       <description>
-         Tried to fix a problem where the &quot;Manage Driver&quot; dialog was not displayed correctly under Linux
+         Tried to fix a problem where the "Manage Driver" dialog was not displayed correctly under Linux
       </description>
     </entry>
 
@@ -5168,7 +5168,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When using a separate connection per tab, connection errors that occurred during a connection for a tab were not displayed to the user, and the &quot;Connecting...&quot; message would not be closed
+         When using a separate connection per tab, connection errors that occurred during a connection for a tab were not displayed to the user, and the "Connecting..." message would not be closed
       </description>
     </entry>
 
@@ -5233,7 +5233,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Files can now be executed using @&lt;filename&gt; or wbinclude &lt;filename&gt; (in contrast to Oracle, this &quot;command&quot; does require a statement delimiter if used together with other statements, e.g. @myfile.sql;
+         Files can now be executed using @&lt;filename&gt; or wbinclude &lt;filename&gt; (in contrast to Oracle, this "command" does require a statement delimiter if used together with other statements, e.g. @myfile.sql;
       </description>
     </entry>
 
@@ -5353,7 +5353,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Leaving out the -quotechar for WBIMPORT still used &quot; as the quote character.
+         Leaving out the -quotechar for WBIMPORT still used " as the quote character.
       </description>
     </entry>
 
@@ -5377,13 +5377,13 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Oracle&apos;s LONG columns were not handled properly for XML import/export
+         Oracle's LONG columns were not handled properly for XML import/export
       </description>
     </entry>
 
     <entry dev-build="28" type="fix">
       <description>
-         -concat and -charfunc did not work for WBEXPORT&apos;s SQL format
+         -concat and -charfunc did not work for WBEXPORT's SQL format
       </description>
     </entry>
 
@@ -5425,7 +5425,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         &quot;Jump to next Statement&quot; did not work if &quot;Highlight current statement&quot; was enabled
+         "Jump to next Statement" did not work if "Highlight current statement" was enabled
       </description>
     </entry>
 
@@ -5516,7 +5516,7 @@
          Several WBEXPORT enhancements: The command now supports the -keycolumns switch, to define the key columns to be used when generating UPDATE statements (to either override the definition from the database, or defined key columns if the table does not have any)
           The command now supports the -sourcetable switch, to directly export one or more tables without the need of an additional SELECT statement. Using the -sourcetable switch requires the -outputdir switch, to define the target directory of the generated files
           The command now supports the -concatfunc switch which allows to set a function that concatenates strings. This is needed for e.g. for MySQL which does not support any (standard) concatenation operator at all. The -concat switch and the -concatfunc switch are mutually exclusive.
-          The command now supports transforming the resulting XML file using XSLT. Two new parameters (-stylesheet and -xsltoutput) have been added to support this. The transformation will be executed after the XML file has been created. The transformation can also be executed &quot;standalone&quot; by using the new command XSLT (this could e.g. be used to transform the result of the WBREPORT command into a different format)
+          The command now supports transforming the resulting XML file using XSLT. Two new parameters (-stylesheet and -xsltoutput) have been added to support this. The transformation will be executed after the XML file has been created. The transformation can also be executed "standalone" by using the new command XSLT (this could e.g. be used to transform the result of the WBREPORT command into a different format)
       </description>
     </entry>
 
@@ -5552,7 +5552,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         A new option has been added to the connection profile &quot;Rollback before disconnect&quot;. Some DBMS (e.g. Cloudscape) require that all pending transactions are ended before disconnecting. Cloudscape already starts a transaction during a SELECT statement, and requires all transactions to be ended before disconnecting. If this option is enabled SQL Workbench/J will issue a rollback before doing the actual disconnect
+         A new option has been added to the connection profile "Rollback before disconnect". Some DBMS (e.g. Cloudscape) require that all pending transactions are ended before disconnecting. Cloudscape already starts a transaction during a SELECT statement, and requires all transactions to be ended before disconnecting. If this option is enabled SQL Workbench/J will issue a rollback before doing the actual disconnect
       </description>
     </entry>
 
@@ -5564,7 +5564,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         The batch runner now displays the messages returned from the individual commands to System.out and doesn&apos;t use the logging facility any more. Combined with workbench.log.console=false the output of a batch run is now very similar to the messages printed in the GUI. Additionally result sets (if available) can now be printed to the console using the commandline switch -displayresult=true
+         The batch runner now displays the messages returned from the individual commands to System.out and doesn't use the logging facility any more. Combined with workbench.log.console=false the output of a batch run is now very similar to the messages printed in the GUI. Additionally result sets (if available) can now be printed to the console using the commandline switch -displayresult=true
       </description>
     </entry>
 
@@ -5576,7 +5576,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Added the commandline switch -ignoredroperrors for batch mode. This sets the &quot;Ignore errors from DROP commands&quot; property for the connection (same effect as connecting with a profile where this behaviour is enabled)
+         Added the commandline switch -ignoredroperrors for batch mode. This sets the "Ignore errors from DROP commands" property for the connection (same effect as connecting with a profile where this behaviour is enabled)
       </description>
     </entry>
 
@@ -5588,7 +5588,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         When pressing Shift while selecting one of the &quot;Optimize Column Width&quot; menu items, the column label will be taken into account for the optimal size. Ctrl-Shift-W will optimize all columns with respecting to the column&apos;s name. This shortcut cannot be remapped currently.
+         When pressing Shift while selecting one of the "Optimize Column Width" menu items, the column label will be taken into account for the optimal size. Ctrl-Shift-W will optimize all columns with respecting to the column's name. This shortcut cannot be remapped currently.
       </description>
     </entry>
 
@@ -5636,7 +5636,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When an error occurred during an import into the current result set choosing &quot;Cancel&quot; or &quot;Ignore all&quot; had no effect, the import would continue in either case.
+         When an error occurred during an import into the current result set choosing "Cancel" or "Ignore all" had no effect, the import would continue in either case.
       </description>
     </entry>
 
@@ -5666,7 +5666,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Generate Delete Script wasn&apos;t working if &quot;Disable automatic update table check&quot; was turned on for the profile Fixed some minor problems during delete script generation.
+         Generate Delete Script wasn't working if "Disable automatic update table check" was turned on for the profile Fixed some minor problems during delete script generation.
       </description>
     </entry>
 
@@ -5839,7 +5839,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         The &quot;Include Constraints&quot; option wasn&apos;t working when dropping tables from within the DbExplorer
+         The "Include Constraints" option wasn't working when dropping tables from within the DbExplorer
       </description>
     </entry>
 
@@ -5880,7 +5880,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Rows in the result set can now be copied (&quot;cloned&quot;)
+         Rows in the result set can now be copied ("cloned")
       </description>
     </entry>
 
@@ -5898,7 +5898,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         The Table Search Panel now has a &quot;Select All&quot; and &quot;Select None&quot; button to ease the selection of tables.
+         The Table Search Panel now has a "Select All" and "Select None" button to ease the selection of tables.
       </description>
     </entry>
 
@@ -5964,7 +5964,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Updating the database from the DbExplorer is now done in the background so that the GUI doesn&apos;t lock up.
+         Updating the database from the DbExplorer is now done in the background so that the GUI doesn't lock up.
       </description>
     </entry>
 
@@ -5988,7 +5988,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         The procedure display for SQL Server was not correct (it would always show &quot;RESULT&quot; as the type even if it really was a procedure) therefor the generated DROP statements weren&apos;t correct.
+         The procedure display for SQL Server was not correct (it would always show "RESULT" as the type even if it really was a procedure) therefor the generated DROP statements weren't correct.
       </description>
     </entry>
 
@@ -6000,7 +6000,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When using &quot;New Window&quot; to open a new window with a different connection the connection from the first window was broken
+         When using "New Window" to open a new window with a different connection the connection from the first window was broken
       </description>
     </entry>
 
@@ -6083,7 +6083,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When using MS SQL Server with autocommit off, the update table was not retrieved correctly and thus &quot;Copy as INSERT&quot; was not working
+         When using MS SQL Server with autocommit off, the update table was not retrieved correctly and thus "Copy as INSERT" was not working
       </description>
     </entry>
 
@@ -6101,7 +6101,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When opening multiple windows, the DatabaseExplorer would not work properly if the Connection Profile was set to &quot;One Connection per Tab&quot;
+         When opening multiple windows, the DatabaseExplorer would not work properly if the Connection Profile was set to "One Connection per Tab"
       </description>
     </entry>
 
@@ -6130,7 +6130,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         When printing, the page now contains a header identifying the source of the data (e.g. the table&apos;s name when printing its definition or the beginning of the select statement)
+         When printing, the page now contains a header identifying the source of the data (e.g. the table's name when printing its definition or the beginning of the select statement)
       </description>
     </entry>
 
@@ -6142,7 +6142,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Errors reported from Oracle&apos;s SET command are now ignored. Thus scripts intended for SQL*Plus containing things like SET LINESIZE can be executed without an error message.
+         Errors reported from Oracle's SET command are now ignored. Thus scripts intended for SQL*Plus containing things like SET LINESIZE can be executed without an error message.
       </description>
     </entry>
 
@@ -6204,7 +6204,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         &quot;Match Bracket&quot; did not show up in the shortcut list (and on the menu)
+         "Match Bracket" did not show up in the shortcut list (and on the menu)
       </description>
     </entry>
 
@@ -6257,7 +6257,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When running scripts with a large number of CREATE statements, a &quot;Maximum number of open cursors exceeded&quot; could occur with Oracle
+         When running scripts with a large number of CREATE statements, a "Maximum number of open cursors exceeded" could occur with Oracle
       </description>
     </entry>
 
@@ -6329,7 +6329,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         When using &quot;Execute Current&quot; the editor now (optionally) jumps to the next statement.
+         When using "Execute Current" the editor now (optionally) jumps to the next statement.
       </description>
     </entry>
 
@@ -6512,7 +6512,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         With Oracle the DbExplorer would sometimes not display anything if something other then &quot;*&quot; was selected in the &quot;Type&quot; dropdown of the table list.
+         With Oracle the DbExplorer would sometimes not display anything if something other then "*" was selected in the "Type" dropdown of the table list.
       </description>
     </entry>
 
@@ -6536,7 +6536,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         The current &quot;MaxRows&quot; setting is now stored in the workspace
+         The current "MaxRows" setting is now stored in the workspace
       </description>
     </entry>
 
@@ -6564,7 +6564,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         A macro can now be executed by double-clicking in the &quot;Manage Macros&quot; window
+         A macro can now be executed by double-clicking in the "Manage Macros" window
       </description>
     </entry>
 
@@ -6660,7 +6660,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         As Ctrl-M is now opening the Manage Macro Dialog, F7 is the new shortcut to set the focus to the &quot;Max. Rows&quot; field
+         As Ctrl-M is now opening the Manage Macro Dialog, F7 is the new shortcut to set the focus to the "Max. Rows" field
       </description>
     </entry>
 
@@ -6695,7 +6695,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Disconnect did not work properly if &quot;One Connection per tab&quot; was enabled in the profile.
+         Disconnect did not work properly if "One Connection per tab" was enabled in the profile.
       </description>
     </entry>
 
@@ -6754,7 +6754,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When the connection failed, the DbExplorer was enabled although it wouldn&apos;t work anyway.
+         When the connection failed, the DbExplorer was enabled although it wouldn't work anyway.
       </description>
     </entry>
 
@@ -6766,7 +6766,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Fixed some problems in the editor, when the scrollbars weren&apos;t updated correctly after deleting the entire text, or pasting new text over the existing
+         Fixed some problems in the editor, when the scrollbars weren't updated correctly after deleting the entire text, or pasting new text over the existing
       </description>
     </entry>
 
@@ -6802,7 +6802,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Reworked SQL Macro handling. File-&gt;Manage Macros has been removed and merged with &quot;SQL-&gt;SQL Macros-&gt;Run macro...&quot;. The combined functionality is now available under &quot;SQL-&gt;Manage Macros...&quot; The new Dialog also offers the possibility to replace the current editor text with the SQL text from the macro. When executing a macro by typing its name in the editor the text will still not be replaced
+         Reworked SQL Macro handling. File-&gt;Manage Macros has been removed and merged with "SQL-&gt;SQL Macros-&gt;Run macro...". The combined functionality is now available under "SQL-&gt;Manage Macros..." The new Dialog also offers the possibility to replace the current editor text with the SQL text from the macro. When executing a macro by typing its name in the editor the text will still not be replaced
       </description>
     </entry>
 
@@ -6837,7 +6837,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Changed Ctrl-K as the shortcut for &quot;Close Tab&quot; as Ctrl-W is already bound to &quot;Optimize all column widths&quot;
+         Changed Ctrl-K as the shortcut for "Close Tab" as Ctrl-W is already bound to "Optimize all column widths"
       </description>
     </entry>
 
@@ -6849,7 +6849,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Option to consolidate (&quot;compress&quot;) log messages when executing a script
+         Option to consolidate ("compress") log messages when executing a script
       </description>
     </entry>
 
@@ -6879,7 +6879,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         &quot;Workspace-&gt;Save As&quot; now correctly assigns the workspace to the profile
+         "Workspace-&gt;Save As" now correctly assigns the workspace to the profile
       </description>
     </entry>
 
@@ -6903,7 +6903,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Disconnecting and connecting is now done in its own Thread, so that the gui doesn&apos;t lock up when the DBMS connection is slow
+         Disconnecting and connecting is now done in its own Thread, so that the gui doesn't lock up when the DBMS connection is slow
       </description>
     </entry>
 
@@ -6996,13 +6996,13 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Sometimes a wrong &quot;Statement cancelled&quot; would be printed in the message area
+         Sometimes a wrong "Statement cancelled" would be printed in the message area
       </description>
     </entry>
 
     <entry dev-build="28" type="fix">
       <description>
-         After importing a text file, the &quot;Save&quot; button was not enabled
+         After importing a text file, the "Save" button was not enabled
       </description>
     </entry>
 
@@ -7014,13 +7014,13 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         &quot;Clean Java Code&quot; now replaces single line comments // with --
+         "Clean Java Code" now replaces single line comments // with --
       </description>
     </entry>
 
     <entry dev-build="28" type="fix">
       <description>
-         Sometimes &quot;Execute current&quot; would fail with finding the &quot;current&quot; Statement and the whole text would be executed
+         Sometimes "Execute current" would fail with finding the "current" Statement and the whole text would be executed
       </description>
     </entry>
 
@@ -7056,7 +7056,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         When a profile is loaded with a link to an external file, and the file cannot be loaded the &quot;normal&quot; history is displayed.
+         When a profile is loaded with a link to an external file, and the file cannot be loaded the "normal" history is displayed.
       </description>
     </entry>
 
@@ -7115,13 +7115,13 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         Table sorting is now done based on the system&apos;s default locale
+         Table sorting is now done based on the system's default locale
       </description>
     </entry>
 
     <entry dev-build="28" type="fix">
       <description>
-         The editor selection wasn&apos;t restored, if the selection started at the very first character of the text
+         The editor selection wasn't restored, if the selection started at the very first character of the text
       </description>
     </entry>
 
@@ -7144,7 +7144,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         The help file is now included in Workbench.jar, thus the Help menu does not try to display the internet page any longer. Displaying the &quot;plain&quot; HTML file is a workaround, until the full JavaHelp is available
+         The help file is now included in Workbench.jar, thus the Help menu does not try to display the internet page any longer. Displaying the "plain" HTML file is a workaround, until the full JavaHelp is available
       </description>
     </entry>
 
@@ -7185,13 +7185,13 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         The &quot;Ignore DROP errors&quot; attribute for a connection was always (implicitly) stored as enabled. Unfortunately the fix means that this attribute needs to be re-enabled for old profiles.
+         The "Ignore DROP errors" attribute for a connection was always (implicitly) stored as enabled. Unfortunately the fix means that this attribute needs to be re-enabled for old profiles.
       </description>
     </entry>
 
     <entry dev-build="28" type="enh">
       <description>
-         It&apos;s now possible to define &quot;Macros&quot;. A simple alias for a lengthy SQL statement. The macros are available under SQL/SQL Macros
+         It's now possible to define "Macros". A simple alias for a lengthy SQL statement. The macros are available under SQL/SQL Macros
       </description>
     </entry>
 
@@ -7203,7 +7203,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         Changed the &quot;Stop&quot; icon in the toolbar (That&apos;s for you Felix!)
+         Changed the "Stop" icon in the toolbar (That's for you Felix!)
       </description>
     </entry>
 
@@ -7214,13 +7214,13 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         The &quot;Spool data&quot; menu item did not work, if SQL statement ended with a semicolon
+         The "Spool data" menu item did not work, if SQL statement ended with a semicolon
       </description>
     </entry>
 
     <entry dev-build="28" type="fix">
       <description>
-         When the rowcount for a table is retrieved in the DbExplorer, an hourglass is now displayed next to the &quot;Total:&quot; label, to indicate that the SQL query is running.
+         When the rowcount for a table is retrieved in the DbExplorer, an hourglass is now displayed next to the "Total:" label, to indicate that the SQL query is running.
       </description>
     </entry>
 
@@ -7268,7 +7268,7 @@
 
     <entry dev-build="28" type="fix">
       <description>
-         The &quot;Separate connection for each tab&quot; property was broken with the new Workspace features
+         The "Separate connection for each tab" property was broken with the new Workspace features
       </description>
     </entry>
 
@@ -7344,7 +7344,7 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         When searching table in the DbExplorer the expression used for the column&apos;s name, can now be defined
+         When searching table in the DbExplorer the expression used for the column's name, can now be defined
       </description>
     </entry>
 
@@ -7386,13 +7386,13 @@
       <description>
          The spool command now supports the following additional parameters for text export -dateformat -timestampformat -delimiter -quotechar -cleancr -decimal
           and the following additional parameters for SQL Export -charfunc -concat
-          See the User&apos;s Manual for a detailed explanation on how the parameters work
+          See the User's Manual for a detailed explanation on how the parameters work
       </description>
     </entry>
 
     <entry dev-build="28" type="fix">
       <description>
-         Fixed a bug in the SQL parser, when a quote character occurred inside quotes (e.g. &quot;&apos;&quot;)
+         Fixed a bug in the SQL parser, when a quote character occurred inside quotes (e.g. "'")
       </description>
     </entry>
 
@@ -7456,13 +7456,13 @@
 
     <entry dev-build="28" type="enh">
       <description>
-         When switching to the data tab in the DbExplorer, the retrieval of the data can be prevent if the shift button is hold down, when switching the tab. Even if &quot;Automatic retrieve&quot; is activated. The data display can also be configured to show a warning when retrieving more then a specific number of rows (independently of the max rows setting)
+         When switching to the data tab in the DbExplorer, the retrieval of the data can be prevent if the shift button is hold down, when switching the tab. Even if "Automatic retrieve" is activated. The data display can also be configured to show a warning when retrieving more then a specific number of rows (independently of the max rows setting)
       </description>
     </entry>
 
     <entry dev-build="28" type="enh">
       <description>
-         Documented the DbExplorer&apos;s data tab (and its settings)
+         Documented the DbExplorer's data tab (and its settings)
       </description>
     </entry>
 
