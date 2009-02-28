@@ -98,7 +98,6 @@
 	<target name="clean">
 		<delete dir="${html-outdir}" failonerror="false"/>
 		<delete dir="${build}" failonerror="false"/>
-		<delete file="${scriptsrc}/history.new" failonerror="false" />
 		<delete dir="${build.test}"/>
 		<delete dir="${pdfwork}" failonerror="false"/>
 		<delete failonerror="false">
@@ -181,7 +180,7 @@
 
   <!-- Create the FO file which will in turn be transformed
        into the PDF manual by the target "pdf" -->
-  <target name="fop" depends="init">
+  <target name="fop" depends="init,docbook-history">
 		<!-- fop seems to require absolute pathnames... -->
 		<dirname property="docdir" file="${docbook.root}/images/note.gif"/>
 		<dirname property="imgdir" file="${src}/workbench/resource/images/filter16.gif"/>
@@ -191,6 +190,10 @@
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
       </fileset>
+			
+			<fileset dir=".">
+				<include name="docbook-history.xml"/>
+			</fileset>
 
       <filterset begintoken="@" endtoken="@">
         <filter token="BUILD_DATE" value="${build_date}"/>
@@ -198,6 +201,12 @@
         <filter token="IMAGE_DIR" value="${imgdir}"/>
       </filterset>
     </copy>
+
+    <copy overwrite="true" todir="${pdfwork}">
+      <fileset dir="${doc}/xml">
+        <include name="*.xml"/>
+      </fileset>
+		</copy>
 
     <xslt classpathref="xalan.path"
 		      in="${pdfwork}/Manual.xml"
@@ -256,13 +265,13 @@
     </java>
   </target>
 
-	<target name="publish" depends="copy-history, build-html"/>
+	<target name="publish" depends="build-html"/>
 
-	<target name="publish-dev" depends="get-dev-build, copy-history, publish, clean-history"/>
+	<target name="publish-dev" depends="get-dev-build, publish"/>
 
-  <target name="publish-single" depends="get-dev-build, copy-history, single-html, clean-history, post-html"/>
+  <target name="publish-single" depends="get-dev-build, single-html, post-html"/>
 
-  <target name="prepare-html" depends="prepare">
+  <target name="prepare-html" depends="prepare, docbook-history">
 
 		<copy todir="${html-outdir}/${html-resource-dir}" flatten="true">
 			<fileset dir="${src}/workbench/resource/images">
@@ -281,11 +290,16 @@
 
 		<echo message="Generating HTML in ${html-outdir}"/>
 
+
 		<copy overwrite="true" todir="${html-outdir}">
 			<fileset dir="${doc}/xml">
 				<include name="*.xml"/>
 			</fileset>
-
+			
+			<fileset dir=".">
+				<include name="docbook-history.xml"/>
+			</fileset>
+			
 			<filterset begintoken="@" endtoken="@">
 				<filter token="BUILD_DATE" value="${build_date}"/>
 				<filter token="BUILD_NUMBER" value="${build.number}"/>
@@ -293,8 +307,23 @@
 			</filterset>
 		</copy>
 
-		<copy overwrite="true" tofile="${html-outdir}/history.txt" file="${scriptsrc}/history.new"/>
-		
+	</target>
+
+  <target name="docbook-history">
+		<xslt classpathref="xalan.path"
+          in="history.xml"
+					out="docbook-history.xml"
+          includes="history.xml"
+          style="history2docbook.xslt">
+		</xslt>
+	</target>
+
+  <target name="html-history">
+		<xslt classpathref="xalan.path"
+          in="history.xml"
+					out="history.html"
+          style="history2html.xslt">
+		</xslt>
 	</target>
 
 	<target name="build-html" depends="prepare-html">
@@ -415,8 +444,6 @@
 	</target>
 
 	<target name="make-jar" depends="prepare,compile">
-		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${build}/help/history.txt" />
-		<copy failonerror="false" overwrite="true" file="${scriptsrc}/history.new" tofile="${distdir}/history.txt" />
 
 		<jar compress="true" level="9" jarfile="${distdir}/${jarfile}">
 			<manifest>
@@ -490,7 +517,7 @@
   </target>
 
   <!-- build a full release -->
-  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, copy-history, make-jar, pdf, publish, release-src-zip, release-package, mac-package, restart-history, clean-history">
+  <target name="release" depends="generate-lexer, clean, compile, test, set-build-number, make-jar, pdf, publish, release-src-zip, release-package, mac-package">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -512,16 +539,15 @@
 				<include name="WorkbenchSrc-Build${build.number}.zip"/>
 				<include name="Workbench-Build${build.number}.zip"/>
 				<include name="Workbench-Build${build.number}-Mac.tgz"/>
-				<include name="history.txt"/>
 			</fileset>
 		</move>
 
   </target>
 
-  <target name="make-dev-jar" depends="clean, copy-resources, compile, test, get-dev-build, copy-history, make-jar"/>
+  <target name="make-dev-jar" depends="clean, copy-resources, compile, test, get-dev-build, make-jar"/>
 
   <!-- build a development release -->
-  <target name="dev-release" depends="clean, compile, test, set-dev-build, copy-history, make-jar, pdf, publish, publish-single, release-package, release-src-zip, clean-history">
+  <target name="dev-release" depends="clean, compile, test, set-dev-build, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
     <tstamp>
       <format pattern="yyyy-MM-dd" property="today"/>
     </tstamp>
@@ -537,26 +563,7 @@
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
 	</target>
 
-  <target name="copy-history">
-    <copy file="${scriptsrc}/history.txt" overwrite="true" tofile="${scriptsrc}/history.new">
-      <filterset begintoken="@" endtoken="@">
-        <filter token="BUILD_DATE" value="${formatted_build_date}"/>
-        <filter token="BUILD_NUMBER" value="${build.number}"/>
-      </filterset>
-    </copy>
-  </target>
-
-  <target name="restart-history">
-    <concat destfile="${scriptsrc}/history.txt">
-      <filelist dir="${scriptsrc}" files="history.header,history.new"/>
-    </concat>
-  </target>
-
-  <target name="clean-history">
-    <delete file="${scriptsrc}/history.new" failonerror="false"/>
-  </target>
-
-	<target name="mac-package" depends="init">
+	<target name="mac-package" depends="init,html-history">
 		<property name="bundledir" value="${distdir}/mac"/>
 		<delete dir="${bundledir}" failonerror="false"/>
 		<mkdir dir="${bundledir}"/>
@@ -584,7 +591,6 @@
 
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
       <tarfileset dir="${distdir}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
-        <include name="history.txt"/>
 				<include name="SQLWorkbench-Manual.pdf"/>
       </tarfileset>
 			<tarfileset dir="${bundledir}">
@@ -596,6 +602,9 @@
 			</tarfileset>
       <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
         <include name="**/*.*"/>
+      </tarfileset>
+      <tarfileset dir="${scriptsrc}" prefix="SQLWorkbenchJ.app/Contents/Resources/Java">
+        <include name="history.html"/>
       </tarfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
         <include name="wbdiff2derby.xslt"/>
@@ -610,11 +619,10 @@
     </tar>
 	</target>
 
-  <target name="release-package" depends="fixshellscripts">
+  <target name="release-package" depends="fixshellscripts,html-history">
     <zip zipfile="${distdir}/Workbench-Build${build.number}.zip">
       <zipfileset dir="${distdir}">
         <include name="${jarfile}"/>
-        <include name="history.txt"/>
 				<include name="SQLWorkbench-Manual.pdf"/>
         <include name="SQLWorkbench.exe"/>
         <include name="DataPumper.exe"/>
@@ -628,8 +636,8 @@
         <include name="datapumper.sh"/>
         <include name="dbexplorer.sh"/>
         <include name="sqlwbconsole.sh"/>
+        <include name="history.html"/>
         <include name="SQLWorkbench.desktop"/>
-				<include name="!! NEW FILE NAMES !!.txt"/>
       </zipfileset>
       <zipfileset dir="${distdir}/manual" prefix="manual">
         <include name="**/*.*"/>
@@ -669,11 +677,10 @@
 
 			<zipfileset dir="${scriptsrc}" prefix="scripts">
 				<include name="build.xml"/>
-				<include name="history.txt"/>
 				<include name="devbuild.number"/>
 				<include name="build.number"/>
 				<include name="release.property"/>
-				<include name="history.header"/>
+				<include name="history.xml"/>
 				<include name="sqlworkbench.cmd"/>
         <include name="sqlwb.cmd"/>
 				<include name="sqlworkbench.sh"/>

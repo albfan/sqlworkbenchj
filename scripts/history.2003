@@ -3,7 +3,6 @@ Build 65, 13.12.2003
 Fix:  Horizontal scrolling would overwrite the line numbers
       (Thanks Vano!)
 
-
 Build 64, 12.12.2003
 --------------------
 Enh:  When executing a macro through the menu, pressing shift will replace

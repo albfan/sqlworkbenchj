@@ -510,8 +510,7 @@ Enh:  (83.16) The path to the driver jar files can now contain the placeholder
 Enh:  (83.19) DbExplorers opened as a tab will store the selected schema in the 
       current workspace. This behavior can be disabled (old way) by setting
       workbench.dbexplorer.rememberSchema=false in workbench.settings
-Enh:  WbDiff has been renamed to WbSchemaDiff 
-
+Enh:  (83.19) WbDiff has been renamed to WbSchemaDiff 
 Fix:  (83.1) The shortcut @ for the WbInclude command is now only supported for 
       Oracle because e.g. SQL Server uses the @ sign to name procedure 
       parameters (and thus existing scripts do not work). 
