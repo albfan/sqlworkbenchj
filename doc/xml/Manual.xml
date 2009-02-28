@@ -2,6 +2,8 @@
 <!DOCTYPE article PUBLIC "-//OASIS//DTD DocBook XML V4.5//EN"
 					"http://www.oasis-open.org/docbook/xml/4.5/docbookx.dtd"
 [
+	<!ENTITY wb-productname	"SQL Workbench/J">
+	
 	<!ENTITY information SYSTEM "general-information.xml">
 	<!ENTITY install SYSTEM "installation.xml">
 	<!ENTITY jdbc-setup SYSTEM "jdbc-setup.xml">
@@ -22,15 +24,16 @@
 	<!ENTITY wbexport SYSTEM "wbexport.xml">
 	<!ENTITY wbimport SYSTEM "wbimport.xml">
 	<!ENTITY wbcopy SYSTEM "wbcopy.xml">
-	<!ENTITY wb-productname	"SQL Workbench/J">
 	<!ENTITY progress-parameter SYSTEM "progress.xml">
 	<!ENTITY common-connect-args SYSTEM "common-connect-args.xml">
+	<!ENTITY release-history SYSTEM "docbook-history.xml">
 ]>
 
 <?xml-stylesheet href="html.css" type="text/css"?>
 <article lang="en">
   <title>&wb-productname; User's Manual</title>
 &information;
+&release-history;
 &install;
 &jdbc-setup;
 &profiles;
