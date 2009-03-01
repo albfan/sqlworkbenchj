@@ -192,16 +192,14 @@
         <include name="*.xml"/>
       </fileset>
 
-			<fileset dir=".">
-				<include name="docbook-history.xml"/>
-			</fileset>
-
       <filterset begintoken="@" endtoken="@">
         <filter token="build_timestamp" value="${build_timestamp}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
         <filter token="IMAGE_DIR" value="${imgdir}"/>
       </filterset>
     </copy>
+
+		<move file="docbook-history.xml" todir="${pdfwork}"/>
 
     <copy overwrite="true" todir="${pdfwork}">
       <fileset dir="${doc}/xml">
@@ -291,14 +289,9 @@
 
 		<echo message="Generating HTML in ${html-outdir}"/>
 
-
 		<copy overwrite="true" todir="${html-outdir}">
 			<fileset dir="${doc}/xml">
 				<include name="*.xml"/>
-			</fileset>
-
-			<fileset dir=".">
-				<include name="docbook-history.xml"/>
 			</fileset>
 
 			<filterset begintoken="@" endtoken="@">
@@ -307,6 +300,8 @@
 				<filter token="IMAGE_DIR" value="${html-resource-dir}"/>
 			</filterset>
 		</copy>
+
+		<move file="docbook-history.xml" todir="${html-outdir}"/>
 
 	</target>
 
@@ -485,6 +480,7 @@
         <exclude name="**/.new"/>
         <exclude name="**/*test*"/>
         <exclude name="publish-dev.cmd"/>
+				<exclude name="docbook-history.xml"/>
       </zipfileset>
 
       <zipfileset dir="${testsrc}" prefix="test">
