@@ -10,7 +10,7 @@
  *
  */
 package workbench.gui.filter;
-import com.sun.java.swing.SwingUtilities2;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;

@@ -68,7 +68,8 @@ public class OracleSequenceReader
 			"INCREMENT_BY, \n       " +
 			"decode(CYCLE_FLAG,'Y','CYCLE','NOCYCLE') AS CYCLE_FLAG, \n       " +
 			"decode(ORDER_FLAG,'Y','ORDER','NOORDER') AS ORDER_FLAG, \n       " +
-			"CACHE_SIZE \n" +
+			"CACHE_SIZE, \n" +
+			"LAST_NUMBER \n" +
 			"FROM ALL_SEQUENCES \n" +
 			"WHERE sequence_owner = ?";
 		
