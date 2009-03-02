@@ -101,7 +101,7 @@ VALUES
 			<li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://www.h2database.com">H2 Database Engine</a></li>
-			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;sub=jdbc">(Download JDBC driver)</a></li>
+			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;amp;sub=jdbc">(Download JDBC driver)</a></li>
 			<li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>
 			<li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
 			<li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a> <a target="_blank" href="http://www-01.ibm.com/software/data/db2/express/additional-downloads.html">(Download JDBC driver)</a></li>
@@ -402,10 +402,12 @@ VALUES
 			<p>
 			  To build the manual you need to download <a href="http://sourceforge.net/projects/docbook/">Docbook XSL</a> package
 				(Version 1.72) and <a href="http://xmlgraphics.apache.org/fop/">FOP</a> (fop-0.94-bin-jdk1.4.zip).
-				<ul>
-				  <li>Copy the Docbook distribution to <tt>${wbroot}/doc/docbook</tt></li>
-				  <li>Copy the FOP distribution to <tt>${wbroot}/etc/fop</tt></li>
-				</ul>
+      </p>
+      <ul>
+        <li>Copy the Docbook distribution to <tt>${wbroot}/doc/docbook</tt></li>
+        <li>Copy the FOP distribution to <tt>${wbroot}/etc/fop</tt></li>
+      </ul>
+      <p>
 				Now you can build the PDF manual by typing <tt>ant pdf</tt> or HTML manual
 				by typing <tt>ant publish-dev</tt>.
 			</p>

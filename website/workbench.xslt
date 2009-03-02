@@ -56,8 +56,8 @@
 
       <ul class="toc" id="google">
         <li class="toclist">
-          <a class="list" href="http://groups.google.com/group/sql-workbench">Forum@Google
-            <img src="images/outlink.gif" title="out" border="0"/>
+          <a class="list" href="http://groups.google.com/group/sql-workbench" title="Jump to forum">Forum@Google
+            <img src="images/outlink.gif" alt="Link Arrow" title="Jump to forum" border="0"/>
           </a>
         </li>
       </ul>
@@ -74,7 +74,7 @@
 
       <div id="nblink">
         <a target="_blank" href="http://www.netbeans.org">
-          <img border="0" style="margin-top:50px;" src="created-with-nb-2.gif"/>
+          <img border="0" style="margin-top:50px;" src="created-with-nb-2.gif" alt="Created with NetBeans"/>
         </a>
       </div>
     </div>
@@ -145,7 +145,7 @@
 
     <xsl:if test="$includeDev = 1">
       <xsl:for-each select="/site/page[@id='dev-history']">
-  
+
         <xsl:variable name="pageName" select="@id"/>
         <xsl:variable name="pageTitle" select="@title"/>
 
@@ -163,10 +163,10 @@
             <xsl:with-param name="pageName" select="@name"/>
           </xsl:call-template>
         </redirect:write>
-        
+
       </xsl:for-each>
     </xsl:if>
-    
+
   </xsl:template>
 
   <xsl:template name="main">
@@ -231,64 +231,64 @@
     <xsl:for-each select="document('../scripts/history.xml')/history/release[@build != '-1']">
       <h1 class="build-nr">Build <xsl:value-of select="@build"/> (<xsl:value-of select="@date"/>)</h1>
 
-			<xsl:if test="count(entry[@type='enh']) &gt; 0">
-				<h3 class="history-entry">Enhancements</h3>
-				<ul>
-					<xsl:for-each select="entry[@type='enh']">
-						<xsl:sort select="@dev-build"/>
-						<li><xsl:copy-of select="description/text()"/></li>
-					</xsl:for-each>
-				</ul>
-			</xsl:if>
+      <xsl:if test="count(entry[@type='enh']) &gt; 0">
+        <h3 class="history-entry">Enhancements</h3>
+        <ul>
+          <xsl:for-each select="entry[@type='enh']">
+            <xsl:sort select="@dev-build"/>
+            <li><xsl:copy-of select="description/text()"/></li>
+          </xsl:for-each>
+        </ul>
+      </xsl:if>
 
-			<xsl:if test="count(entry[@type='fix']) &gt; 0">
-				<h3 class="history-entry">Bug fixes</h3>
-				<ul>
-				<xsl:for-each select="entry[@type='fix']">
-					<xsl:sort select="@dev-build"/>
-					<li><xsl:copy-of select="description/text()"/></li>
-				</xsl:for-each>
-				</ul>
-			</xsl:if>
+      <xsl:if test="count(entry[@type='fix']) &gt; 0">
+        <h3 class="history-entry">Bug fixes</h3>
+        <ul>
+        <xsl:for-each select="entry[@type='fix']">
+          <xsl:sort select="@dev-build"/>
+          <li><xsl:copy-of select="description/text()"/></li>
+        </xsl:for-each>
+        </ul>
+      </xsl:if>
     </xsl:for-each>
-    
+
   </xsl:template>
 
   <xsl:template match="dev-history">
     <xsl:variable name="dev-build-nr" select="document('../scripts/history.xml')/history/release[2]/@build"/>
 
-		<xsl:variable name="dev-build-minor">
-			<xsl:for-each select="document('../scripts/history.xml')/history/release[1]/entry">
-					<xsl:sort select="@dev-build" order="descending" />
-					<xsl:if test="position()=1">
-							<xsl:value-of select="@dev-build" />
-					</xsl:if>
-			</xsl:for-each>
-		</xsl:variable>
+    <xsl:variable name="dev-build-minor">
+      <xsl:for-each select="document('../scripts/history.xml')/history/release[1]/entry">
+        <xsl:sort select="@dev-build" order="descending" />
+        <xsl:if test="position()=1">
+          <xsl:value-of select="@dev-build" />
+        </xsl:if>
+      </xsl:for-each>
+    </xsl:variable>
 
     <xsl:variable name="minor-build-nr" select="document('../scripts/history.xml')/history/release[1]/entry[1]/@dev-build"/>
     <h1>Changelog for Build <xsl:value-of select="concat($dev-build-nr,'.',$dev-build-minor)"/></h1>
-    
+
     <xsl:for-each select="document('../scripts/history.xml')/history/release[1]">
-      
+
       <h2 class="history-entry">Enhancements</h2>
       <ul>
       <xsl:for-each select="entry[@type='enh']">
-				<xsl:sort select="@dev-build"/>
+        <xsl:sort select="@dev-build"/>
         <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="description"/></li>
       </xsl:for-each>
       </ul>
       <h2 class="history-entry">Bug fixes</h2>
       <ul>
       <xsl:for-each select="entry[@type='fix']">
-				<xsl:sort select="@dev-build"/>
+        <xsl:sort select="@dev-build"/>
         <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="description"/></li>
       </xsl:for-each>
       </ul>
-			
+
     </xsl:for-each>
   </xsl:template>
-  
+
   <xsl:template match="@*">
     <xsl:copy-of select="."/>
   </xsl:template>
@@ -433,7 +433,7 @@
       <xsl:apply-templates/>
     </xsl:copy>
     <xsl:if test="substring($ref,1,4) = 'http'">
-      <img src="images/outlink.gif" title="out" border="0"/>
+      <img src="images/outlink.gif" alt="Link Arrow" title="{$ref}" border="0"/>
     </xsl:if>
   </xsl:template>
   <xsl:template match="tt">
