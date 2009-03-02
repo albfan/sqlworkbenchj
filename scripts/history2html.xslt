@@ -33,7 +33,7 @@
 
       h1 {
         text-align:center;
-        font-size:18px;
+        font-size:20px;
         color: #666633;
         font-family: sans-serif;
         margin-top:0px;
@@ -44,7 +44,7 @@
         color: #666633;
         background-color:#F0F1E3;
         font-family: sans-serif;
-        font-size:15px;
+        font-size:16px;
         margin-top:0px;
         text-align:left;
         padding:5px;
@@ -93,8 +93,8 @@
           <h3 class="history-entry">Enhancements</h3>
           <ul>
           <xsl:for-each select="entry[@type='enh']">
-						<xsl:sort select="@dev-build" order="descending"/>
-            <li><xsl:copy-of select="description/text()"/></li>
+            <xsl:sort select="@dev-build" order="descending"/>
+            <li><xsl:copy-of select="normalize-space(description/text())"/></li>
           </xsl:for-each>
           </ul>
         </xsl:if>
@@ -103,8 +103,8 @@
           <h3 class="history-entry">Bug fixes</h3>
           <ul>
           <xsl:for-each select="entry[@type='fix']">
-						<xsl:sort select="@dev-build" order="descending"/>
-            <li><xsl:copy-of select="description/text()"/></li>
+            <xsl:sort select="@dev-build" order="descending"/>
+            <li><xsl:copy-of select="normalize-space(description/text())"/></li>
           </xsl:for-each>
           </ul>
         </xsl:if>
