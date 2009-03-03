@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <project name="website" default="noDev" basedir=".">
 
-	<path id="script.path">
-		<pathelement location="bsf.jar"/>
-		<pathelement location="commons-logging-1.1.jar"/>
-		<pathelement location="js.jar"/>
-	</path>
-	
+  <path id="script.path">
+    <pathelement location="bsf.jar"/>
+    <pathelement location="commons-logging-1.1.jar"/>
+    <pathelement location="js.jar"/>
+  </path>
+  
   <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="../scripts/xmltask-v1.15.jar"/>
 
   <property file="..\scripts\release.property"/>
@@ -16,12 +16,12 @@
       <format pattern="EEE, dd MMM yyyy HH:mm:ss +0100" property="pubDate" locale="en"/>
     </tstamp>
 
-		<xslt in="../scripts/history.xml"
-					out="history_rss.txt"
+    <xslt in="../scripts/history.xml"
+          out="history_rss.txt"
           style="history2rss.xslt">
-		</xslt>
+    </xslt>
 
-		<loadfile property="rss.description" srcFile="history_rss.txt"/>
+    <loadfile property="rss.description" srcFile="history_rss.txt"/>
 
     <xmltask source="wb_news.xml" dest="wb_news.xml" outputter="simple" encoding="UTF-8">
       <insert path="/rss/channel/item[1]" position="before" expandProperties="true">
@@ -29,7 +29,7 @@
           <item>
               <title>New ${pub.build.name} build (${pub.build.number}) released</title>
               <description>${rss.description}</description>
-              <link>http://www.sql-workbench.net/downloads.html</link>
+              <link>${rss.url}</link>
               <guid>sql-workbench-build-${pub.build.number}</guid>
               <author>support@sql-workbench.net (Thomas Kellerer)</author>
               <pubDate>${pubDate}</pubDate>
@@ -37,9 +37,9 @@
         ]]>
       </insert>
     </xmltask>
-		
-		<delete file="history_rss.txt"/>
-		
+    
+    <delete file="history_rss.txt"/>
+    
   </target>
 
   <scriptdef name="getfs" language="javascript" classpathref="script.path">
@@ -96,7 +96,7 @@
     <delete>
       <fileset dir=".">
         <include name="*.html"/>
-				<include name="history_rss.txt"/>
+        <include name="history_rss.txt"/>
       </fileset>
     </delete>
   </target>
@@ -111,12 +111,14 @@
     <property name="pub.build.name" value="stable"/>
     <property name="pub.build.number" value="${release.build.number}"/>
     <property name="dev.build" value="0"/>
+    <property name="rss.url" value="http://www.sql-workbench.net/history.html"/>
   </target>
 
   <target name="set-dev-build">
     <property name="pub.build.name" value="development"/>
     <property name="pub.build.number" value="${dev.build.number}"/>
     <property name="dev.build" value="1"/>
+    <property name="rss.url" value="http://www.sql-workbench.net/dev-history.html"/>
   </target>
 
   <target name="makeHTML" depends="clean">
@@ -125,7 +127,7 @@
     </tstamp>
     <dirname property="current.dir" file="build.xml"/>
     <xslt in="workbench.xml" out="${current.dir}/index.html" destdir="${current.dir}" style="workbench.xslt" force="true">
-     	<param name="filedir" expressioN="${current.dir}"/>
+      <param name="filedir" expressioN="${current.dir}"/>
       <param name="buildNumber" expression="${release.build.number}"/>
       <param name="devBuildDate" expression="${dev.build.date}"/>
       <param name="devBuildNumber" expression="${dev.build.number}"/>
