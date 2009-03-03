@@ -118,6 +118,15 @@ public class BatchedStatement
 	/**
 	 * Wrapped PreparedStatement method
 	 */
+	public void setObject(int index, Object value, int type)
+		throws SQLException
+	{
+		this.statement.setObject(index, value, type);
+	}
+
+	/**
+	 * Wrapped PreparedStatement method
+	 */
 	public void setDate(int index, java.sql.Date date)
 		throws SQLException
 	{

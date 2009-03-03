@@ -146,7 +146,8 @@ public class DataImporter
 
 	private boolean checkRealClobLength = false;
 	private boolean isOracle = false;
-
+	private boolean useSetObjectWithType = false;
+	
 	/**
 	 * Indicates multiple imports run with this instance oft DataImporter.
 	 * Set via {@link #beginMultiTable() }
@@ -175,6 +176,7 @@ public class DataImporter
 		this.checkRealClobLength = this.dbConn.getDbSettings().needsExactClobLength();
 		this.isOracle = this.dbConn.getMetadata().isOracle();
 		this.useSetNull = this.dbConn.getDbSettings().useSetNull();
+		this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
 	}
 
 	private boolean supportsBatch()
@@ -1279,6 +1281,10 @@ public class DataImporter
 				{
 					java.sql.Timestamp ts = new java.sql.Timestamp(((java.sql.Date)row[i]).getTime());
 					pstmt.setTimestamp(colIndex, ts);
+				}
+				else if (useSetObjectWithType)
+				{
+					pstmt.setObject(colIndex, row[i], targetSqlType);
 				}
 				else
 				{

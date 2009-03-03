@@ -780,4 +780,19 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "typemap", null);
 	}
+
+	/**
+	 * Returns if setObject() should be used with the target JDBC datatype or
+	 * without
+	 * <br/>e.g. <tt>setObject(1, "42", Types.OTHER)</tt> which will define
+	 * the datatype, or using <tt>setObject(1, "42")</tt> which will pass the
+	 * conversion and type detection to the driver.
+	 * <br/>
+	 * Some drivers to not work properly when dealing with non JDBC Types here
+	 * (e.g. Postgres and UUID columns)
+	 */
+	public boolean getUseTypeWithSetObject()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.setobject.usetype", false);
+	}
 }
