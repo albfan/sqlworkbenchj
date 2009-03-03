@@ -114,15 +114,15 @@
          when 28 then &apos;INSERT OR UPDATE OR DELETE&apos; 
          when 24 then &apos;UPDATE OR DELETE&apos; 
          when 12 then &apos;INSERT OR DELETE&apos; 
-       end || '\non ' || tbl.relname 
+       end || chr(10) || 'on ' || tbl.relname
        || ' for each row execute procedure '
        ||src.proname 
-       || '();\n\n--- Source for '
+       || '();'|| chr(10) || chr(10) || '--- Source for '
        || src.proname
-       || ' ---\n'
-       || 'CREATE OR REPLACE FUNCTION '||src.proname||'() RETURNS TRIGGER AS\n$$\n'
+       || ' ---' || chr(10)
+       || 'CREATE OR REPLACE FUNCTION '||src.proname||'() RETURNS TRIGGER AS'||chr(10)||'$$'||chr(10)
        || src.prosrc 
-       || '$$\nlanguage '''||l.lanname||''''
+       || '$$'||chr(10)||'language '''||l.lanname||''''
 from pg_trigger trg, pg_class tbl, pg_proc src, pg_language l
 where trg.tgrelid = tbl.oid 
  AND l.oid = src.prolang
