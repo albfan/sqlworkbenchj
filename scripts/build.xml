@@ -181,7 +181,7 @@
 
   <!-- Create the FO file which will in turn be transformed
        into the PDF manual by the target "pdf" -->
-  <target name="fop" depends="init,docbook-history">
+  <target name="fop" depends="init, docbook-history">
 		<!-- fop seems to require absolute pathnames... -->
 		<dirname property="docdir" file="${docbook.root}/images/note.gif"/>
 		<dirname property="imgdir" file="${src}/workbench/resource/images/filter16.gif"/>
@@ -199,7 +199,7 @@
       </filterset>
     </copy>
 
-		<move file="docbook-history.xml" todir="${pdfwork}"/>
+		<copy file="docbook-history.xml" todir="${pdfwork}"/>
 
     <copy overwrite="true" todir="${pdfwork}">
       <fileset dir="${doc}/xml">
@@ -301,7 +301,7 @@
 			</filterset>
 		</copy>
 
-		<move file="docbook-history.xml" todir="${html-outdir}"/>
+		<copy file="docbook-history.xml" todir="${html-outdir}"/>
 
 	</target>
 
@@ -663,6 +663,7 @@
         <include name="wbreport2wiki.xslt"/>
       </zipfileset>
     </zip>
+		<delete file="docbook-history.xml" failonerror="false"/>
   </target>
 
 	<target name="release-src-zip" depends="init,fixshellscripts">

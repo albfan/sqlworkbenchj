@@ -14,6 +14,22 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (103.5) released</title>
+      <description>        <![CDATA[<p>Changes from build 103.4 to build 103.5</p><p>Enhancements</p><ul>
+<li>When showing the sequence definition for an Oracle sequence the column LAST_NUMBER is now also displayed in the DbExplorer</li>
+<li>When defining a new filter for a result set, the currently selected column is now pre-selected in the dropdown if no filter is defined.</li>
+</ul><p>Bug Fixes</p><ul>
+<li>When running WbImport, errors where not shown any more.</li>
+<li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-103.5</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Tue, 03 Mar 2009 21:50:25 +0100</pubDate>
+    </item>
+    <item>
       <title>New development build (103.4) released</title>
       <description>A new development build has been released. To download, please visit the homepage</description>
       <link>http://www.sql-workbench.net/downloads.html</link>
