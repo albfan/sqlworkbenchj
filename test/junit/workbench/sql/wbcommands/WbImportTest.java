@@ -79,6 +79,39 @@ public class WbImportTest
 		super.tearDown();
 	}
 
+	public void testFailedInsert()
+		throws Exception
+	{
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{
+			File importFile  = new File(this.basedir, "insert_fail.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname");
+			out.println("1\tArthur\tDent");
+			out.println("nan\tFord\tPrefect");
+			out.println("3\tZaphod\tBeeblebrox");
+			out.close();
+
+			StatementRunnerResult result = importCmd.execute("wbimport " +
+				"-encoding=utf8 " +
+				"-file='" + importFile.getAbsolutePath() + "' " +
+				"-type=text " +
+				"-header=true " +
+				"-continueonerror=false " +
+				"-table=junit_test_pk");
+
+			assertEquals("Import did not fail", result.isSuccess(), false);
+			String msg = result.getMessageBuffer().toString();
+			assertTrue(msg.indexOf("Error importing row 2") > -1);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+
+	}
 	public void testPreAndPostStatements()
 	{
 		ResultSet rs = null;
@@ -750,7 +783,7 @@ public class WbImportTest
 			StatementRunnerResult result = importCmd.execute(cmd);
 			String msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
-			System.out.println("messages: " + msg);
+//			System.out.println("messages: " + msg);
 			Statement stmt = this.connection.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from bool_int_test");
 			int rows = 0;
@@ -1901,7 +1934,7 @@ public class WbImportTest
 			out.close();
 
 			String cmd = "wbimport -encoding='UTF-8' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=junit_test";
-			//System.out.println("cmd=" + cmd);
+//			System.out.println("cmd=" + cmd);
 			StatementRunnerResult result = importCmd.execute(cmd);
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
@@ -3057,7 +3090,7 @@ public class WbImportTest
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' -type=text -header=true -continueonerror=false -table=parent_table -deleteTarget=true");
 			assertEquals("Import did not fail", false, result.isSuccess());
 			String msg = result.getMessageBuffer().toString();
-			System.out.println(" ***** message=" + msg);
+//			System.out.println(" ***** message=" + msg);
 			assertEquals("No error reported", true, msg.toLowerCase().indexOf("integrity constraint violation") > 0);
 
 			ResultSet rs = stmt.executeQuery("select count(*) from parent_table");
