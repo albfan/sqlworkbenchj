@@ -954,7 +954,6 @@ public class DataImporter
 			this.hasErrors = true;
 			LogMgr.logError("DataImporter.processRow()", "Error importing row " + currentImportRow + ": " + ExceptionUtil.getDisplay(e), null);
 			errorCount ++;
-			if (!this.continueOnError) throw e;
 			String rec = this.source.getLastRecord();
 			if (rec == null)
 			{
@@ -962,6 +961,7 @@ public class DataImporter
 				rec = display.toString();
 			}
 			recordRejected(rec, currentImportRow, e);
+			if (!this.continueOnError) throw e;
 		}
 
 		if (MemoryWatcher.isMemoryLow())

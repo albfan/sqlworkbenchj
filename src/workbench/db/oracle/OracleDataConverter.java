@@ -9,7 +9,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.mssql;
+package workbench.db.oracle;
 
 import java.sql.Types;
 import workbench.log.LogMgr;
@@ -21,39 +21,38 @@ import workbench.util.NumberStringCache;
  * 
  * @author support@sql-workbench.net
  */
-public class SqlServerDataConverter
+public class OracleDataConverter
 	implements DataConverter
 {
 
 	protected static class LazyInstanceHolder
 	{
-		protected static final SqlServerDataConverter instance = new SqlServerDataConverter();
+		protected static final OracleDataConverter instance = new OracleDataConverter();
 	}
 
-	public static final SqlServerDataConverter getInstance()
+	public static final OracleDataConverter getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
 	
-	private SqlServerDataConverter()
+	private OracleDataConverter()
 	{
 	}
 	
 	/**
-	 * Checks if jdbcType == Types.BINARY and if dbmsType == "timestamp"
+	 * Checks if jdbcType == Types.VARBINARY and if dbmsType == "RAW"
 	 *
 	 * @param jdbcType the jdbcType as returned by the driver
 	 * @param dbmsType the name of the datatype for this value
 	 *
-	 * @return true if Microsoft's "timestamp" type
 	 */
 	public boolean convertsType(int jdbcType, String dbmsType)
 	{
-		return (jdbcType == Types.BINARY && dbmsType.equals("timestamp"));
+		return (jdbcType == Types.VARBINARY && dbmsType.equals("RAW"));
 	}
 
 	/**
-	 * If the type of the originalValue is Microsoft's "timestamp", then
+	 * If the type of the originalValue is RAW, then
 	 * the value is converted into a corresponding hex display, e.g. <br/>
 	 * <tt>0x000000000001dc91</tt>
 	 * 
@@ -72,8 +71,7 @@ public class SqlServerDataConverter
 		try
 		{
 			byte[] b = (byte[])originalValue;
-			StringBuilder buffer = new StringBuilder(b.length * 2 + 2);
-			buffer.append("0x");
+			StringBuilder buffer = new StringBuilder(b.length * 2);
 			for (byte v : b)
 			{
 				int c = (v < 0 ? 256 + v : v);
@@ -83,7 +81,7 @@ public class SqlServerDataConverter
 		}
 		catch (Throwable th)
 		{
-			LogMgr.logWarning("SqlServerDataConverter.convertValue()", "Error converting value " + originalValue, th);
+			LogMgr.logWarning("OracleDataConverter.convertValue()", "Error converting value " + originalValue, th);
 			newValue = originalValue;
 		}
 		return newValue;

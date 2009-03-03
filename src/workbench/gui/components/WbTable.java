@@ -111,9 +111,11 @@ import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataConverter;
 import workbench.storage.DataStore;
 import workbench.storage.PkMapping;
 import workbench.storage.ResultInfo;
+import workbench.storage.RowDataFactory;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.FileDialogUtil;
@@ -1352,14 +1354,24 @@ public class WbTable
 	{
 		if (this.dwModel == null) return false;
 		int type = this.dwModel.getColumnType(column);
+
 		if (SqlUtil.isBlobType(type))
 		{
-			if (Settings.getInstance().getFixSqlServerTimestampDisplay())
+			String dbmsType = dwModel.getDbmsType(column);
+			try
 			{
-				String tname = dwModel.getColumnTypeName(column);
-				if ("timestamp".equals(tname)) return false; // hack for SQL Server
+				DataConverter conv = RowDataFactory.getConverterInstance(this.getDataStore().getOriginalConnection());
+				if (conv != null)
+				{
+					if (conv.convertsType(type, dbmsType)) return false;
+				}
+				return true;
 			}
-			return true;
+			catch (Throwable th)
+			{
+				LogMgr.logWarning("WbTable.isBlobColumn()","Error checking for converted blob", th);
+				return true;
+			}
 		}
 		return false;
 	}

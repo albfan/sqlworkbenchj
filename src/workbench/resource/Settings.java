@@ -592,6 +592,11 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);
 	}
+
+	public boolean getConvertOracleRawData()
+	{
+		return getBoolProperty("workbench.db.oracle.raw.autoconvert", false);
+	}
 	
 	/**
 	 * Return a list of popular encodings to be used for the code-completion

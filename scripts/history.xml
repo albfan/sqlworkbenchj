@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-03-02">
+<release build="-1" date="2009-03-03">
 
   <entry dev-build="5" type="enh">
     <description>
@@ -55,6 +55,12 @@
   <entry dev-build="1" type="enh">
     <description>
        A new option to control the use of uppercase keywords for the SQL formatter is available (Tools -&gt; Options -&gt; SQL Formatter)
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
+       When running WbImport, errors where not shown any more.
     </description>
   </entry>
 

@@ -11,8 +11,10 @@
  */
 package workbench.storage;
 
+import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.db.mssql.SqlServerDataConverter;
+import workbench.db.oracle.OracleDataConverter;
 import workbench.resource.Settings;
 
 /**
@@ -29,23 +31,34 @@ public class RowDataFactory
 	public static RowData createRowData(int colCount, WbConnection conn)
 	{
 		RowData result = new RowData(colCount);
-		result.setConverter(createConverter(conn));
+		result.setConverter(getConverterInstance(conn));
 		return result;
 	}
 
 	public static RowData createRowData(ResultInfo info, WbConnection conn)
 	{
 		RowData result = new RowData(info);
-		result.setConverter(createConverter(conn));
+		result.setConverter(getConverterInstance(conn));
 		return result;
 	}
 
-	public static DataConverter createConverter(WbConnection conn)
+	public static DataConverter getConverterInstance(WbConnection conn)
 	{
-		if (conn != null && conn.getMetadata().isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay())
+		if (conn == null) return null;
+
+		DbMetadata meta = conn.getMetadata();
+		if (meta == null) return null;
+
+		if (meta.isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay())
 		{
 			return SqlServerDataConverter.getInstance();
 		}
+		if (meta.isOracle() && Settings.getInstance().getConvertOracleRawData())
+		{
+			return OracleDataConverter.getInstance();
+		}
 		return null;
 	}
+
+
 }
