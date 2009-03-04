@@ -795,4 +795,9 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.setobject.usetype", false);
 	}
+
+	public boolean getRetrieveProcParmsForAutoCompletion()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".completion.procs.showparms", true);
+	}
 }

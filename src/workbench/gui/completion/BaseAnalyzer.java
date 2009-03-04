@@ -180,7 +180,7 @@ public abstract class BaseAnalyzer
 	}
 	
 	@SuppressWarnings("unchecked")
-	private void buildResult()
+	protected void buildResult()
 	{
 		if (context == CONTEXT_TABLE_OR_COLUMN_LIST && tableForColumnList != null)
 		{

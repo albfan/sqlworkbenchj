@@ -13,7 +13,6 @@ package workbench.gui.completion;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import workbench.db.WbConnection;
@@ -22,6 +21,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbSelectBlob;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -32,6 +32,7 @@ public class StatementContext
 {
 	private BaseAnalyzer analyzer;
 	private CommandTester wbTester = new CommandTester();
+	private final Set<String> unionKeywords = CollectionUtil.createHashSet("UNION", "MINUS", "INTERSECT");
 	
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
@@ -67,6 +68,10 @@ public class StatementContext
 		else if ("CREATE".equalsIgnoreCase(verb) || "CREATE OR REPLACE".equalsIgnoreCase(verb))
 		{
 			verbAnalyzer = new CreateAnalyzer(conn, sql, pos);
+		}
+		else if ("EXEC".equalsIgnoreCase(verb) || "WBRUN".equalsIgnoreCase(verb) || "CALL".equalsIgnoreCase(verb))
+		{
+			verbAnalyzer = new ExecAnalyzer(conn, sql, pos);
 		}
 		else if (wbTester.isWbCommand(verb))
 		{
@@ -113,11 +118,6 @@ public class StatementContext
 			boolean checkForInsertSelect = verb.equals("INSERT") 
 				|| verb.equals("CREATE")
 				|| verb.equals("CREATE OR REPLACE");
-			
-			Set<String> unionKeywords = new HashSet<String>();
-			unionKeywords.add("UNION");
-			unionKeywords.add("MINUS");
-			unionKeywords.add("INTERSECT");
 			
 			while (t != null)
 			{

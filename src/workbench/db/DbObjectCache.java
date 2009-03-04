@@ -13,9 +13,12 @@ package workbench.db;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -37,6 +40,7 @@ public class DbObjectCache
 	
 	private Set<String> schemasInCache;
 	private SortedMap<TableIdentifier, List<ColumnIdentifier>> objects;
+	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
 	
 	DbObjectCache(WbConnection conn)
 	{
@@ -80,6 +84,7 @@ public class DbObjectCache
 		DbMetadata meta = this.dbConnection.getMetadata();
 		return meta.adjustSchemaNameCase(schema);
 	}
+
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
@@ -104,6 +109,35 @@ public class DbObjectCache
 			return filterTablesByType(schemaToUse, type);
 		else
 			return filterTablesBySchema(schemaToUse);
+	}
+
+	/**
+	 * Get the tables (and views) the are currently in the cache
+	 */
+	public List<ProcedureDefinition> getProcedures(String schema)
+	{
+		String schemaToUse = getSchemaToUse(schema);
+		List<ProcedureDefinition> procs = procedureCache.get(schemaToUse);
+		if (procs == null)
+		{
+			try
+			{
+				procs = this.dbConnection.getMetadata().getProcedureReader().getProcedureList(null, schemaToUse, "%");
+				if (dbConnection.getDbSettings().getRetrieveProcParmsForAutoCompletion())
+				{
+					for (ProcedureDefinition proc : procs)
+					{
+						proc.getParameterTypes(this.dbConnection);
+					}
+				}
+				procedureCache.put(schemaToUse, procs);
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("ExecAnalyzer.checkContext()", "Error retrieving procedures", e);
+			}
+		}
+		return procs;
 	}
 
 	private Set<TableIdentifier> filterTablesByType(String schema, String type)

@@ -221,6 +221,10 @@ public class ProcedureDefinition
 	
 	public String toString()
 	{
+		if (parameterTypes != null && parameterTypes.size() > 0)
+		{
+			return procName + "(" + StringUtil.listToString(parameterTypes, ',') + ")";
+		}
 		return procName;
 	}
 	

@@ -45,9 +45,14 @@ public class CollectionUtil
 		return result;
 	}
 
+	public static Set<String> caseInsensitiveSet()
+	{
+		return new TreeSet<String>(new CaseInsensitiveComparator());
+	}
+
 	public static Set<String> caseInsensitiveSet(String... a)
 	{
-		Set<String> result = new TreeSet<String>(new CaseInsensitiveComparator());
+		Set<String> result = caseInsensitiveSet();
 		for (String e : a)
 		{
 			result.add(e);
