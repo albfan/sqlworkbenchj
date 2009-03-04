@@ -730,7 +730,8 @@ public class DwPanel
 		if (this.readOnly)
 		{
 			this.disableUpdateActions();
-			dataTable.getDataStoreTableModel().setAllowEditing(false);
+			DataStoreTableModel model = dataTable.getDataStoreTableModel();
+			if (model != null) model.setAllowEditing(false);
 		}
 		else
 		{
