@@ -14,7 +14,6 @@ package workbench.sql.formatter;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -26,6 +25,7 @@ import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.ArgumentParser;
 import workbench.util.CharSequenceReader;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -33,105 +33,32 @@ import workbench.util.StringUtil;
  */
 public class SqlFormatter
 {
-	private final Set<String> LINE_BREAK_BEFORE = new HashSet<String>();
-	{
-		LINE_BREAK_BEFORE.add("SELECT");
-		LINE_BREAK_BEFORE.add("SET");
-		LINE_BREAK_BEFORE.add("FROM");
-		LINE_BREAK_BEFORE.add("WHERE");
-		LINE_BREAK_BEFORE.add("ORDER BY");
-		LINE_BREAK_BEFORE.add("GROUP BY");
-		LINE_BREAK_BEFORE.add("HAVING");
-		LINE_BREAK_BEFORE.add("VALUES");
-		LINE_BREAK_BEFORE.add("UNION");
-		LINE_BREAK_BEFORE.add("UNION ALL");
-		LINE_BREAK_BEFORE.add("MINUS");
-		LINE_BREAK_BEFORE.add("INTERSECT");
-		LINE_BREAK_BEFORE.add("REFRESH");
-		LINE_BREAK_BEFORE.add("AS");
-		LINE_BREAK_BEFORE.add("FOR");
-		LINE_BREAK_BEFORE.add("JOIN");
-		LINE_BREAK_BEFORE.add("INNER JOIN");
-		LINE_BREAK_BEFORE.add("RIGHT OUTER JOIN");
-		LINE_BREAK_BEFORE.add("LEFT OUTER JOIN");
-		LINE_BREAK_BEFORE.add("CROSS JOIN");
-		LINE_BREAK_BEFORE.add("LEFT JOIN");
-		LINE_BREAK_BEFORE.add("RIGHT JOIN");
-		LINE_BREAK_BEFORE.add("START WITH");
-		LINE_BREAK_BEFORE.add("CONNECT BY");
-	}
+	private final Set<String> LINE_BREAK_BEFORE = CollectionUtil.createHashSet(
+		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
+		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
+		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
+		"RIGHT JOIN", "START WITH", "CONNECT BY");
 
-	private final Set<String> LINE_BREAK_AFTER = new HashSet<String>();
-	{
-		LINE_BREAK_AFTER.add("UNION");
-		LINE_BREAK_AFTER.add("UNION ALL");
-		LINE_BREAK_AFTER.add("MINUS");
-		LINE_BREAK_AFTER.add("INTERSECT");
-		LINE_BREAK_AFTER.add("AS");
-		LINE_BREAK_AFTER.add("FOR");
-	}
+	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.createHashSet(
+		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
 
 	// keywords terminating a WHERE clause
-	public static final Set<String> WHERE_TERMINAL = new HashSet<String>();
-	static
-	{
-		WHERE_TERMINAL.add("ORDER BY");
-		WHERE_TERMINAL.add("GROUP BY");
-		WHERE_TERMINAL.add("HAVING");
-		WHERE_TERMINAL.add("UNION");
-		WHERE_TERMINAL.add("UNION ALL");
-		WHERE_TERMINAL.add("INTERSECT");
-		WHERE_TERMINAL.add("MINUS");
-		WHERE_TERMINAL.add(";");
-	}
+	public static final Set<String> WHERE_TERMINAL = CollectionUtil.createHashSet(
+	"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
+		"MINUS", ";");
 
 	// keywords terminating the FROM part
-	public static final Set<String> FROM_TERMINAL = new HashSet<String>();
-	static
-	{
-		FROM_TERMINAL.addAll(WHERE_TERMINAL);
-		FROM_TERMINAL.add("WHERE");
-		FROM_TERMINAL.add("START WITH");
-		FROM_TERMINAL.add("CONNECT BY");
-	}
-
+	public static final Set<String> FROM_TERMINAL = CollectionUtil.createHashSet(WHERE_TERMINAL,
+		"WHERE", "START WITH", "CONNECT BY");
 
 	// keywords terminating an GROUP BY clause
-	private final Set<String> GROUP_BY_TERMINAL = new HashSet<String>();
-	{
-		GROUP_BY_TERMINAL.addAll(WHERE_TERMINAL);
-		GROUP_BY_TERMINAL.add("SELECT");
-		GROUP_BY_TERMINAL.add("UPDATE");
-		GROUP_BY_TERMINAL.add("DELETE");
-		GROUP_BY_TERMINAL.add("INSERT");
-		GROUP_BY_TERMINAL.add("CREATE");
-		GROUP_BY_TERMINAL.add("CREATE OR REPLACE");
-	}
+	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.createHashSet(WHERE_TERMINAL,
+		"SELECT", "UPDATE", "DELETE", "INSERT", "CREATE", "CREATE OR REPLACE");
 
-	private final Set<String> ORDER_BY_TERMINAL = new HashSet<String>();
-	{
-		ORDER_BY_TERMINAL.remove("GROUP BY");
-		ORDER_BY_TERMINAL.add(";");
-	}
+	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.createHashSet(";");
 
-	public static final Set<String> SELECT_TERMINAL = new HashSet<String>(1);
-	static
-	{
-		SELECT_TERMINAL.add("FROM");
-	}
-
-	private final Set<String> SET_TERMINAL = new HashSet<String>();
-	{
-		SET_TERMINAL.add("FROM");
-		SET_TERMINAL.add("WHERE");
-	}
-
-	private static final Set<String> TABLE_CONSTRAINTS_KEYWORDS = new HashSet<String>();
-	{
-		TABLE_CONSTRAINTS_KEYWORDS .add("FOREIGN KEY");
-		TABLE_CONSTRAINTS_KEYWORDS .add("PRIMARY KEY");
-		TABLE_CONSTRAINTS_KEYWORDS .add("CONSTRAINT");
-	}
+	public static final Set<String> SELECT_TERMINAL = CollectionUtil.createHashSet("FROM");
+	private final Set<String> SET_TERMINAL = CollectionUtil.createHashSet("FROM", "WHERE");
 
 	private CharSequence sql;
 	private SQLLexer lexer;
