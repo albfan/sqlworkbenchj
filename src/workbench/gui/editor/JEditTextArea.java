@@ -669,6 +669,7 @@ public class JEditTextArea
 	/**
 	 * Ensures that the caret is visible by scrolling the text area if
 	 * necessary.
+	 * 
 	 * @return True if scrolling was actually performed, false if the
 	 * caret was already visible
 	 */
@@ -676,9 +677,12 @@ public class JEditTextArea
 	{
 		int line = getCaretLine();
 		int lineStart = getLineStartOffset(line);
-		int offset = Math.max(0,Math.min(getLineLength(line) - 1, getCaretPosition() - lineStart));
+		int offset = Math.max(0, Math.min(getLineLength(line) - 1, getCaretPosition() - lineStart));
 
-		return scrollTo(line, offset);
+		// try to center the caret line vertically
+		int newStartLine = (line - getVisibleLines() / 2) + 1;
+		if (newStartLine < 0) newStartLine = 0;
+		return scrollTo(newStartLine, offset);
 	}
 
 	/**
