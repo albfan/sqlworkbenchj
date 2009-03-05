@@ -65,6 +65,8 @@ import workbench.WbManager;
 import workbench.gui.actions.CopyAction;
 import workbench.gui.actions.CutAction;
 import workbench.gui.actions.PasteAction;
+import workbench.gui.actions.ScrollDownAction;
+import workbench.gui.actions.ScrollUpAction;
 import workbench.gui.actions.SelectAllAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
@@ -110,7 +112,7 @@ import workbench.util.StringUtil;
  */
 public class JEditTextArea
 	extends JComponent
-	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener
+	implements MouseWheelListener, Undoable, ClipboardSupport, FocusListener, LineScroller
 {
 	protected boolean rightClickMovesCursor = false;
 
@@ -228,7 +230,7 @@ public class JEditTextArea
 		this.popup = new TextPopup(this);
 
 		boolean extendedCutCopyPaste = Settings.getInstance().getBoolProperty("workbench.editor.extended.cutcopypaste", true);
-		
+
 		CopyAction copy = new CopyAction(this);
 		PasteAction paste = new PasteAction(this);
 		CutAction cut = new CutAction(this);
@@ -246,6 +248,8 @@ public class JEditTextArea
 		}
 
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
+		this.addKeyBinding(new ScrollDownAction(this));
+		this.addKeyBinding(new ScrollUpAction(this));
 	}
 
 	public int getHScrollBarHeight()
@@ -600,6 +604,34 @@ public class JEditTextArea
 		this.horizontalOffset = horizontalOffset;
 		if (horizontal != null && horizontalOffset != horizontal.getValue())	updateScrollBars();
 		painter.repaint();
+	}
+
+	public boolean canScrollDown()
+	{
+		int startLine = getFirstLine();
+		int lastLine = startLine + getVisibleLines();
+		return (lastLine < getLineCount());
+	}
+
+	public void scrollDown()
+	{
+		if (canScrollDown())
+		{
+			setOrigin(getFirstLine() + 1, getHorizontalOffset());
+		}
+	}
+
+	public boolean canScrollUp()
+	{
+		return (getFirstLine() > 0);
+	}
+
+	public void scrollUp()
+	{
+		if (canScrollUp())
+		{
+			setOrigin(getFirstLine() - 1, getHorizontalOffset());
+		}
 	}
 
 	/**
@@ -1134,7 +1166,7 @@ public class JEditTextArea
 			WbManager.getInstance().showLowMemoryError();
 			return;
 		}
-		
+
 		try
 		{
 			document.beginCompoundEdit();
@@ -2058,7 +2090,7 @@ public class JEditTextArea
 				WbManager.getInstance().showLowMemoryError();
 				return;
 			}
-			
+
 			Clipboard clipboard = getToolkit().getSystemClipboard();
 			try
 			{
