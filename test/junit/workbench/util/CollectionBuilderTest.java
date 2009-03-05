@@ -20,15 +20,15 @@ import junit.framework.TestCase;
  *
  * @author support@sql-workbench.net
  */
-public class CollectionUtilTest extends TestCase {
+public class CollectionBuilderTest extends TestCase {
     
-    public CollectionUtilTest(String testName) {
+    public CollectionBuilderTest(String testName) {
         super(testName);
     }
 
 	public void testCreateHashSet()
 	{
-		Set<String> set = CollectionUtil.createHashSet("one", "two");
+		Set<String> set = CollectionBuilder.hashSet("one", "two");
 		assertNotNull(set);
 		assertEquals(2, set.size());
 		set.add("three");
@@ -37,7 +37,7 @@ public class CollectionUtilTest extends TestCase {
 		assertTrue(set.contains("two"));
 		assertTrue(set.contains("three"));
 
-		Set<String> second = CollectionUtil.createHashSet(set, "four", "five");
+		Set<String> second = CollectionBuilder.hashSet(set, "four", "five");
 		assertEquals(5, second.size());
 		assertTrue(second.contains("one"));
 		assertTrue(second.contains("two"));
@@ -51,7 +51,7 @@ public class CollectionUtilTest extends TestCase {
 
 	public void testCaseInsensitiveSet()
 	{
-		Set<String> result = CollectionUtil.caseInsensitiveSet("one", "two", "THREE");
+		Set<String> result = CollectionBuilder.caseInsensitiveSet("one", "two", "THREE");
 		assertTrue(result.contains("ONE"));
 		assertTrue(result.contains("Two"));
 		assertTrue(result.contains("three"));
@@ -59,7 +59,7 @@ public class CollectionUtilTest extends TestCase {
 
 	public void testCreateList()
 	{
-		List<Integer> result = CollectionUtil.createList(1,2,3);
+		List<Integer> result = CollectionBuilder.arrayList(1,2,3);
 		assertNotNull(result);
 		assertEquals(3, result.size());
 		result.add(4);

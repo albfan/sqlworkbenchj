@@ -10,12 +10,8 @@
  *
  */
 package workbench.gui.completion;
-import java.sql.SQLException;
-import java.util.List;
-import workbench.db.ProcedureDefinition;
-import workbench.db.TableIdentifier;
+
 import workbench.db.WbConnection;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -77,6 +73,5 @@ public class ExecAnalyzer
 		}
 		elements = dbConnection.getObjectCache().getProcedures(schema);
 	}
-
 
 }

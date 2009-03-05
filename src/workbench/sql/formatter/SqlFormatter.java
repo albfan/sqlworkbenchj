@@ -25,7 +25,7 @@ import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.util.ArgumentParser;
 import workbench.util.CharSequenceReader;
-import workbench.util.CollectionUtil;
+import workbench.util.CollectionBuilder;
 import workbench.util.StringUtil;
 
 /**
@@ -33,32 +33,32 @@ import workbench.util.StringUtil;
  */
 public class SqlFormatter
 {
-	private final Set<String> LINE_BREAK_BEFORE = CollectionUtil.createHashSet(
+	private final Set<String> LINE_BREAK_BEFORE = CollectionBuilder.hashSet(
 		"SELECT", "SET", "FROM", "WHERE", "ORDER BY", "GROUP BY", "HAVING", "VALUES",
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "REFRESH", "AS", "FOR", "JOIN",
 		"INNER JOIN", "RIGHT OUTER JOIN", "LEFT OUTER JOIN", "CROSS JOIN", "LEFT JOIN",
 		"RIGHT JOIN", "START WITH", "CONNECT BY");
 
-	private final Set<String> LINE_BREAK_AFTER = CollectionUtil.createHashSet(
+	private final Set<String> LINE_BREAK_AFTER = CollectionBuilder.hashSet(
 		"UNION", "UNION ALL", "MINUS", "INTERSECT", "AS", "FOR");
 
 	// keywords terminating a WHERE clause
-	public static final Set<String> WHERE_TERMINAL = CollectionUtil.createHashSet(
+	public static final Set<String> WHERE_TERMINAL = CollectionBuilder.hashSet(
 	"ORDER BY", "GROUP BY", "HAVING", "UNION", "UNION ALL", "INTERSECT",
 		"MINUS", ";");
 
 	// keywords terminating the FROM part
-	public static final Set<String> FROM_TERMINAL = CollectionUtil.createHashSet(WHERE_TERMINAL,
+	public static final Set<String> FROM_TERMINAL = CollectionBuilder.hashSet(WHERE_TERMINAL,
 		"WHERE", "START WITH", "CONNECT BY");
 
 	// keywords terminating an GROUP BY clause
-	private final Set<String> GROUP_BY_TERMINAL = CollectionUtil.createHashSet(WHERE_TERMINAL,
+	private final Set<String> GROUP_BY_TERMINAL = CollectionBuilder.hashSet(WHERE_TERMINAL,
 		"SELECT", "UPDATE", "DELETE", "INSERT", "CREATE", "CREATE OR REPLACE");
 
-	private final Set<String> ORDER_BY_TERMINAL = CollectionUtil.createHashSet(";");
+	private final Set<String> ORDER_BY_TERMINAL = CollectionBuilder.hashSet(";");
 
-	public static final Set<String> SELECT_TERMINAL = CollectionUtil.createHashSet("FROM");
-	private final Set<String> SET_TERMINAL = CollectionUtil.createHashSet("FROM", "WHERE");
+	public static final Set<String> SELECT_TERMINAL = CollectionBuilder.hashSet("FROM");
+	private final Set<String> SET_TERMINAL = CollectionBuilder.hashSet("FROM", "WHERE");
 
 	private CharSequence sql;
 	private SQLLexer lexer;

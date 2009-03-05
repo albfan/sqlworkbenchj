@@ -21,7 +21,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbSelectBlob;
-import workbench.util.CollectionUtil;
+import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
 
 /**
@@ -32,7 +32,7 @@ public class StatementContext
 {
 	private BaseAnalyzer analyzer;
 	private CommandTester wbTester = new CommandTester();
-	private final Set<String> unionKeywords = CollectionUtil.createHashSet("UNION", "MINUS", "INTERSECT");
+	private final Set<String> unionKeywords = CollectionBuilder.hashSet("UNION", "MINUS", "INTERSECT");
 	
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
@@ -69,7 +69,7 @@ public class StatementContext
 		{
 			verbAnalyzer = new CreateAnalyzer(conn, sql, pos);
 		}
-		else if ("EXEC".equalsIgnoreCase(verb) || "WBRUN".equalsIgnoreCase(verb) || "CALL".equalsIgnoreCase(verb))
+		else if ("EXEC".equalsIgnoreCase(verb) || "WBCALL".equalsIgnoreCase(verb) || "CALL".equalsIgnoreCase(verb))
 		{
 			verbAnalyzer = new ExecAnalyzer(conn, sql, pos);
 		}

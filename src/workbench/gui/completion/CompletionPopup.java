@@ -408,10 +408,10 @@ public class CompletionPopup
 			}
 		}
 
-		if (!StringUtil.isEmptyString(value))
+		if (StringUtil.isNonBlank(value))
 		{
 			editor.setSelectedText(value);
-			if (value.charAt(0) == '<' && value.charAt(0) == '>')
+			if (value.charAt(0) == '<' || value.charAt(0) == '>')
 			{
 				editor.selectWordAtCursor(" =-\t\n");
 			}

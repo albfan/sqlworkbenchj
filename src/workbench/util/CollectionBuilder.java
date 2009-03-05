@@ -21,10 +21,10 @@ import java.util.TreeSet;
  *
  * @author support@sql-workbench.net
  */
-public class CollectionUtil
+public class CollectionBuilder
 {
 
-	public static <E> Set<E> createHashSet(E... add)
+	public static <E> Set<E> hashSet(E... add)
 	{
 		Set<E> result = new HashSet<E>(add.length);
 		for (E e : add)
@@ -34,7 +34,7 @@ public class CollectionUtil
 		return result;
 	}
 
-	public static <E> Set<E> createHashSet(Set<E> base, E... add)
+	public static <E> Set<E> hashSet(Set<E> base, E... add)
 	{
 		Set<E> result = new HashSet<E>(base.size() + add.length);
 		result.addAll(base);
@@ -65,7 +65,7 @@ public class CollectionUtil
 	 * can be changed (in constrast to Arrays.asList() where the returned
 	 * List does dot support the add() method)
 	 */
-	public static <E> List<E> createList(E... a)
+	public static <E> List<E> arrayList(E... a)
 	{
 		ArrayList<E> result = new ArrayList<E>(a.length);
 		for (E e : a)
