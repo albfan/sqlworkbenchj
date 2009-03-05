@@ -26,7 +26,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
-import workbench.util.ArrayUtil;
+import workbench.util.CollectionBuilder;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -217,8 +217,7 @@ public class SqlRowDataConverter
 			updateTable = alternateUpdateTable;
 		}
 
-		ColumnIdentifier[] colArray = this.metaData.getColumns();
-		List<ColumnIdentifier> cols = ArrayUtil.arrayToList(colArray);
+		List<ColumnIdentifier> cols = CollectionBuilder.arrayList(this.metaData.getColumns());
 		TableSourceBuilder builder = new TableSourceBuilder(originalConnection);
 		String source = builder.getTableSource(updateTable, cols, (alternateUpdateTable == null ? updateTable.getTableName() : alternateUpdateTable.getTableName()));
 		StrBuffer createSql = new StrBuffer(source);

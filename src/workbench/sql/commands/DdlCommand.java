@@ -13,8 +13,6 @@ package workbench.sql.commands;
 
 import java.sql.SQLException;
 import java.sql.Savepoint;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,12 +23,13 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
  * Run a DDL (CREATE, DROP, ALTER, GRANT, REVOKE) command.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class DdlCommand
@@ -44,19 +43,8 @@ public class DdlCommand
 
 	// Firebird RECREATE VIEW command
 	public static final DdlCommand RECREATE = new DdlCommand("RECREATE");
-	public static final List<DdlCommand> DDL_COMMANDS;
+	public static final List<DdlCommand> DDL_COMMANDS = CollectionBuilder.readOnlyList(DROP, CREATE, ALTER, GRANT, REVOKE);
 
-	static
-	{
-		List<DdlCommand> l = new ArrayList<DdlCommand>(5);
-		l.add(DROP);
-		l.add(CREATE);
-		l.add(ALTER);
-		l.add(GRANT);
-		l.add(REVOKE);
-		DDL_COMMANDS = Collections.unmodifiableList(l);
-	}
-	
 	private String verb;
 	private Savepoint ddlSavepoint;
 
@@ -82,7 +70,7 @@ public class DdlCommand
 		}
 
 		SqlUtil.DdlObjectInfo info = SqlUtil.getDDLObjectInfo(sql);
-		
+
 		try
 		{
 			this.currentStatement = currentConnection.createStatement();

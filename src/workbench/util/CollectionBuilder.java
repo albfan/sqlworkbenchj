@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -74,4 +75,10 @@ public class CollectionBuilder
 		}
 		return result;
 	}
+
+	public static <E> List<E> readOnlyList(E... a)
+	{
+		return Collections.unmodifiableList(arrayList(a));
+	}
+
 }

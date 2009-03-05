@@ -18,13 +18,13 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.gui.components.LogFileViewer;
+import workbench.util.CollectionBuilder;
 import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -44,15 +44,7 @@ public class LogMgr
 	private static final String WARNING_DISPLAY = "WARN ";
 	private static final String INFO_DISPLAY = "INFO ";
 
-	public static final List<String> LEVELS;
-	static
-	{
-		LEVELS = new ArrayList<String>(4);
-		LEVELS.add(ERROR);
-		LEVELS.add(WARNING);
-		LEVELS.add(INFO);
-		LEVELS.add(DEBUG);
-	}
+	public static final List<String> LEVELS = CollectionBuilder.arrayList(ERROR, WARNING, INFO, DEBUG);
 
 	private static PrintStream logOut = null;
 	private static LogFileViewer viewer;
@@ -89,7 +81,7 @@ public class LogMgr
 	{
 		viewer = null;
 	}
-	
+
 	public synchronized static void registerViewer(LogFileViewer v)
 	{
 		viewer = v;
@@ -156,7 +148,7 @@ public class LogMgr
 	{
 		logSystemErr = flag;
 	}
-	
+
 	public static String getLevel()
 	{
 		if (loglevel == levelDebug) return "DEBUG";
@@ -165,7 +157,7 @@ public class LogMgr
 		if (loglevel == levelInfo) return "INFO";
 		return "ERROR";
 	}
-	
+
 	public static void setLevel(String aType)
 	{
 		if (aType == null) aType = "INFO";
@@ -204,7 +196,7 @@ public class LogMgr
 	{
 		if (logfile == null) return;
 		if (logfile.equals(currentFile)) return;
-		
+
 		try
 		{
 			if (logOut != null)
@@ -257,7 +249,7 @@ public class LogMgr
 			logError(caller, "Error executing statement: " + sql, th);
 		}
 	}
-	
+
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
 		if (levelDebug > loglevel)  return;

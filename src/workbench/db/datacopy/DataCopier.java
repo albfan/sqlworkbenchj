@@ -250,7 +250,7 @@ public class DataCopier
 			TableDefinition newTable = targetConnection.getMetadata().getTableDefinition(targetTable);
 			targetTable = newTable.getTable();
 			updateTargetColumns(newTable.getColumns(), columnMap.values());
-			
+
 			// no need to delete rows from a newly created table
 			this.setDeleteTarget(DeleteType.none);
 			this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableCreated", this.targetTable.getTableExpression(this.targetConnection)) + "\n");

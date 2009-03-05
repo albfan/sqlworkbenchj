@@ -27,21 +27,21 @@ public class ExecAnalyzer
 	private String qualifier;
 
 	public ExecAnalyzer(WbConnection conn, String statement, int cursorPos)
-	{	
+	{
 		super(conn, statement, cursorPos);
 	}
-	
+
 	protected void checkContext()
 	{
 		SQLLexer lexer = new SQLLexer(this.sql);
 		SQLToken verbToken = lexer.getNextToken(false, false);
-		
-		if (verbToken == null) 
+
+		if (verbToken == null)
 		{
 			this.context = NO_CONTEXT;
 			return;
 		}
-		
+
 		context = CONTEXT_TABLE_LIST;
 		qualifier = getQualifierLeftOfCursor();
 	}
@@ -50,7 +50,7 @@ public class ExecAnalyzer
 	protected void buildResult()
 	{
 		if (context == NO_CONTEXT) return;
-		
+
 		title = ResourceMgr.getString("TxtDbExplorerProcs");
 		String schema = null;
 

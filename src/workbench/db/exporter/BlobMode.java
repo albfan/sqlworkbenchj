@@ -11,15 +11,15 @@
  */
 package workbench.db.exporter;
 
-import java.util.ArrayList;
 import java.util.List;
+import workbench.util.CollectionBuilder;
 
 /**
  * Define codes for the different ways how BLOBs can be handled by the export classes.
  *
  * @author support@sql-workbench.net
  */
-public enum BlobMode 
+public enum BlobMode
 {
 	/**
 	 * Use a DBMS specific literals for BLOBs in SQL statements.
@@ -27,20 +27,20 @@ public enum BlobMode
 	 * @see workbench.db.exporter.DataExporter#setBlobMode(String)
 	 */
 	DbmsLiteral,
-	
+
 	/**
 	 * Use ANSI literals for BLOBs in SQL statements.
 	 * @see workbench.storage.BlobFormatterFactory#createAnsiFormatter()
 	 * @see workbench.db.exporter.DataExporter#setBlobMode(String)
 	 */
 	AnsiLiteral,
-	
+
 	/**
 	 * Generate WB Specific {$blobfile=...} statements
 	 * @see workbench.db.exporter.DataExporter#setBlobMode(String)
 	 */
-	SaveToFile, 
-	
+	SaveToFile,
+
 	None;
 
 	/**
@@ -67,11 +67,7 @@ public enum BlobMode
 
 	public static List<String> getTypes()
 	{
-		ArrayList<String> l = new ArrayList<String>(3);
-		l.add("file");
-		l.add("ansi");
-		l.add("dbms");
-		return l;
+		return CollectionBuilder.arrayList("file", "ansi", "dbms");
 	}
-	
+
 }

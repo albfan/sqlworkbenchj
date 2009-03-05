@@ -119,7 +119,7 @@ public class InputHandler
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), INSERT_BREAK);
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), INSERT_TAB);
-		
+
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), OVERWRITE);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), HOME);

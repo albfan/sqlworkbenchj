@@ -10,35 +10,36 @@
  *
  */
 package workbench.storage.filter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import workbench.util.CollectionBuilder;
 
 /**
  * @author support@sql-workbench.net
  */
 public class ComparatorFactory
 {
-	private final List<ColumnComparator> comparatorList = new ArrayList<ColumnComparator>(17);
+	private final List<ColumnComparator> comparatorList;
 
 	public ComparatorFactory()
 	{
-		comparatorList.add(new ContainsComparator());
-		comparatorList.add(new StartsWithComparator());
-		comparatorList.add(new NotStartsWithComparator());
-		comparatorList.add(new ContainsNotComparator());
-		comparatorList.add(new StringEqualsComparator());
-		comparatorList.add(new StringNotEqualsComparator());
-		comparatorList.add(new NumberEqualsComparator());
-		comparatorList.add(new DateEqualsComparator());
-		comparatorList.add(new NumberNotEqualsComparator());
-		comparatorList.add(new LessThanComparator());
-		comparatorList.add(new LessOrEqualComparator());
-		comparatorList.add(new GreaterThanComparator());
-		comparatorList.add(new GreaterOrEqualComparator());
-		comparatorList.add(new IsNullComparator());
-		comparatorList.add(new IsNotNullComparator());
-		comparatorList.add(new RegExComparator());
+		comparatorList = CollectionBuilder.arrayList(
+			new ContainsComparator(),
+			new StartsWithComparator(),
+			new NotStartsWithComparator(),
+			new ContainsNotComparator(),
+			new StringEqualsComparator(),
+			new StringNotEqualsComparator(),
+			new NumberEqualsComparator(),
+			new DateEqualsComparator(),
+			new NumberNotEqualsComparator(),
+			new LessThanComparator(),
+			new LessOrEqualComparator(),
+			new GreaterThanComparator(),
+			new GreaterOrEqualComparator(),
+			new IsNullComparator(),
+			new IsNotNullComparator(),
+			new RegExComparator()
+		);
 	}
 
 	public List<ColumnComparator> getAvailableComparators()

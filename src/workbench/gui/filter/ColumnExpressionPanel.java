@@ -98,7 +98,7 @@ public class ColumnExpressionPanel
 		valueField = new JTextField(10);
 		TextComponentMouseListener ml = new TextComponentMouseListener();
 		valueField.addMouseListener(ml);
-		
+
 		valueField.setMinimumSize(new Dimension(15,24));
 
 		GridBagConstraints c = new GridBagConstraints();
@@ -124,7 +124,7 @@ public class ColumnExpressionPanel
 
 		columnSelector.addActionListener(this);
 		comparatorDropDown.addActionListener(this);
-		
+
 		if (filter == null)
 		{
 			columnSelector.setSelectedIndex(0);
@@ -193,7 +193,7 @@ public class ColumnExpressionPanel
 		try
 		{
 			ColumnComparator comp = this.getComparator();
-			
+
 			if (comp != null)
 			{
 				ignoreCase.setSelected(comp.supportsIgnoreCase());
@@ -226,7 +226,7 @@ public class ColumnExpressionPanel
 		ListComboBoxModel model = (ListComboBoxModel)this.columnSelector.getModel();
 		return model.findItemIgnoreCase(col);
 	}
-	
+
 	public void setExpressionValue(ExpressionValue expr)
 	{
 		String col = expr.getColumnName();
@@ -265,12 +265,12 @@ public class ColumnExpressionPanel
 		Object value = getFilterValue();
 		return comp.validateInput(value);
 	}
-	
+
 	public String getInputValue()
 	{
 		return valueField.getText();
 	}
-	
+
 	public ExpressionValue getExpressionValue()
 	{
 		String col = this.getColumnName();
@@ -311,7 +311,7 @@ public class ColumnExpressionPanel
 		String value = valueField.getText();
 		String col = getColumnName();
 		int colIndex = this.columnInfo.findColumn(col);
-		// If the any column ("*") entry is selected 
+		// If the any column ("*") entry is selected
 		// colIndex will be -1, and we simply return the value entered
 		// because we tried everything as a String
 		if (colIndex > -1)
@@ -348,14 +348,6 @@ public class ColumnExpressionPanel
 	{
 		try
 		{
-//			if (lastColumnClass != null && columnClass.equals(lastColumnClass))
-//			{
-//				if (comparatorDropDown.getSelectedItem() == null)
-//				{
-//					comparatorDropDown.setSelectedIndex(0);
-//				}
-//				return;
-//			}
 			int count = comparatorItems.size();
 			int added = 0;
 			final ArrayList<ComparatorListItem> l = new ArrayList<ComparatorListItem>(count);
@@ -368,11 +360,11 @@ public class ColumnExpressionPanel
 					added++;
 				}
 			}
-			
+
 			activeItems.setData(l);
 			comparatorDropDown.setSelectedItem(null);
 			comparatorDropDown.setModel(activeItems);
-			if (added > 0) 
+			if (added > 0)
 			{
 				comparatorDropDown.setSelectedIndex(0);
 			}
@@ -397,7 +389,7 @@ class ComparatorListItem
 
 	public String toString() { return comparator.getOperator(); }
 	public ColumnComparator getComparator() { return comparator; }
-	
+
 	public boolean equals(Object other)
 	{
 		if (other instanceof ComparatorListItem)
