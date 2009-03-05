@@ -3,6 +3,19 @@
 
 <release build="-1" date="2009-03-03">
 
+  <entry dev-build="6" type="enh">
+    <description>
+      The editor can now be scrolled without moving the caret by using Ctrl-Down and Ctrl-Up
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
+      Autocompletion is now supported for the SQL statement EXEC and will show a list
+      of stored procedures
+    </description>
+  </entry>
+
   <entry dev-build="5" type="enh">
     <description>
        When showing the sequence definition for an Oracle sequence the column LAST_NUMBER is now
