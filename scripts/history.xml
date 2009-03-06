@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-03-03">
+<release build="-1" date="2009-03-06">
+
+  <entry dev-build="6" type="fix">
+    <description>
+      User defined PK mappings were not remembered
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
+      The editor can now be configured to either uses spaces or real tab characters
+    </description>
+  </entry>
 
   <entry dev-build="6" type="enh">
     <description>
@@ -12,7 +24,7 @@
   <entry dev-build="6" type="enh">
     <description>
       Autocompletion is now supported for the SQL statement EXEC and will show a list
-      of stored procedures
+      of stored procedures. WbCall and CALL are also recognized.
     </description>
   </entry>
 
@@ -1931,7 +1943,7 @@
 
   <entry dev-build="5" type="enh">
     <description>
-       A new option "Trim CHAR data" has been added to the connection. profile. If this is enabled, values retrieved from columns with the CHAR datatype are trimmed (as the CHAR data is padded on most DBMS)
+       A new option "Trim CHAR data" has been added to the connection profile. If this is enabled, values retrieved from columns with the CHAR datatype are trimmed (as the CHAR data is padded on most DBMS)
     </description>
   </entry>
 
