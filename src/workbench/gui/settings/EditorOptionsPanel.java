@@ -93,6 +93,7 @@ public class EditorOptionsPanel
 			this.completionColumnSort.setSelectedIndex(0);
 		}
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
+		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -153,6 +154,7 @@ public class EditorOptionsPanel
 		{
 			set.setAutoCompletionColumnSort(ColumnSortType.name);
 		}
+		set.setEditorUseTabCharacter(useTabs.isSelected());
 	}
 
 	/** This method is called from within the constructor to
@@ -186,22 +188,24 @@ public class EditorOptionsPanel
     completionColumnSort = new JComboBox();
     noWordSepLabel = new JLabel();
     noWordSep = new JTextField();
+    useTabs = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
     autoAdvance.setSelected(Settings.getInstance().getAutoJumpNextStatement());
     autoAdvance.setText(ResourceMgr.getString("LblAutoAdvance")); // NOI18N
     autoAdvance.setToolTipText(ResourceMgr.getString("d_LblAutoAdvance")); // NOI18N
+    autoAdvance.setBorder(null);
     autoAdvance.setHorizontalAlignment(SwingConstants.LEFT);
     autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(8, 9, 0, 11);
+    gridBagConstraints.insets = new Insets(11, 12, 0, 11);
     add(autoAdvance, gridBagConstraints);
 
     editorTabSizeLabel.setText(ResourceMgr.getString("LblTabWidth")); // NOI18N
@@ -275,10 +279,11 @@ public class EditorOptionsPanel
     rightClickMovesCursor.setMaximumSize(new Dimension(93, 15));
     rightClickMovesCursor.setMinimumSize(new Dimension(93, 15));
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 0, 0, 10);
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(8, 12, 0, 11);
     add(rightClickMovesCursor, gridBagConstraints);
 
     closePopup.setSelected(Settings.getInstance().getCloseAutoCompletionWithSearch());
@@ -417,6 +422,16 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(3, 11, 0, 15);
     add(noWordSep, gridBagConstraints);
+
+    useTabs.setText(ResourceMgr.getString("LblEditorUseTabs")); // NOI18N
+    useTabs.setToolTipText(ResourceMgr.getString("d_LblEditorUseTabs")); // NOI18N
+    useTabs.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(8, 0, 0, 10);
+    add(useTabs, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -443,6 +458,7 @@ public class EditorOptionsPanel
   private JLabel pasterOrderLabel;
   private JCheckBox rightClickMovesCursor;
   private JTextField tabSize;
+  private JCheckBox useTabs;
   // End of variables declaration//GEN-END:variables
 
 }

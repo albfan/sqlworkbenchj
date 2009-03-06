@@ -13,6 +13,7 @@ package workbench.gui.editor;
 
 import javax.swing.text.BadLocationException;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
@@ -48,6 +49,8 @@ public class TextIndenter
 		for (int i=0; i < tabSize; i++) buff.append(' ');
 		String spacer = buff.toString();
 
+		boolean useTab = Settings.getInstance().getEditorUseTabCharacter();
+
 		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
 		if (pos == 0) endline --;
 		SyntaxDocument document = editor.getDocument();
@@ -62,7 +65,14 @@ public class TextIndenter
 				int lineStart = editor.getLineStartOffset(line);
 				if (indent)
 				{
-					document.insertString(lineStart, spacer, null);
+					if (useTab)
+					{
+						document.insertString(lineStart, "\t", null);
+					}
+					else
+					{
+						document.insertString(lineStart, spacer, null);
+					}
 				}
 				else
 				{

@@ -87,7 +87,6 @@ public class DataEditOptionsPanel
     pkMapFileLabel = new javax.swing.JLabel();
     pkMapFile = new javax.swing.JTextField();
     selectMapFile = new FlatButton();
-    jPanel2 = new javax.swing.JPanel();
     jPanel3 = new javax.swing.JPanel();
     jLabel1 = new javax.swing.JLabel();
     jLabel2 = new javax.swing.JLabel();
@@ -165,7 +164,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 0.5;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     jPanel1.add(pkMapFile, gridBagConstraints);
 
@@ -179,9 +178,6 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
     jPanel1.add(selectMapFile, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.weightx = 1.0;
-    jPanel1.add(jPanel2, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -260,7 +256,6 @@ public class DataEditOptionsPanel
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JPanel jPanel1;
-  private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JTextField pkMapFile;
   private javax.swing.JLabel pkMapFileLabel;

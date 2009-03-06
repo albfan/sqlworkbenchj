@@ -17,7 +17,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.InputStream;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -41,14 +40,14 @@ import workbench.util.StringUtil;
 public class PkMapping
 {
 	private final Map<String, String> columnMapping = new HashMap<String, String>();
-	
+
 	private static PkMapping instance;
-	
+
 	public static synchronized boolean isInitialized()
 	{
 		return instance != null;
 	}
-	
+
 	public static synchronized PkMapping getInstance()
 	{
 		if (instance == null)
@@ -57,7 +56,16 @@ public class PkMapping
 		}
 		return instance;
 	}
-	
+
+	/**
+	 * For testing purposes only
+	 * @param source
+	 */
+	PkMapping(String source)
+	{
+		loadMapping(source);
+	}
+
 	private PkMapping()
 	{
 		String filename = Settings.getInstance().getPKMappingFilename();
@@ -68,7 +76,7 @@ public class PkMapping
 	{
 		if (this.columnMapping == null) return null;
 		if (this.columnMapping.size() == 0) return null;
-		
+
 		StringBuilder result = new StringBuilder(this.columnMapping.size() * 50);
 		Iterator<Entry<String, String>> itr = this.columnMapping.entrySet().iterator();
 		while (itr.hasNext())
@@ -79,16 +87,16 @@ public class PkMapping
 		}
 		return result.toString();
 	}
-	
+
 	public synchronized void loadMapping(String filename)
 	{
 		if (filename == null) return;
 		Properties props = new Properties();
-		
+
 		File f = new File(filename);
 		if (!f.exists())
 		{
-			LogMgr.logError("PkConfig.readMappingFile()", "Mapping file '" + filename + "' not found! Please check workbench.settings", null);
+			LogMgr.logWarning("PkConfig.readMappingFile()", "Mapping file '" + filename + "' not found! Please check workbench.settings", null);
 			return;
 		}
 		InputStream in = null;
@@ -106,16 +114,16 @@ public class PkMapping
 		{
 			FileUtil.closeQuitely(in);
 		}
-		
+
 		LogMgr.logInfo("PkMapping.readMappingFile()", "Using PK mappings from " + f.getAbsolutePath());
-		
+
 		Iterator<Entry<Object, Object>> itr = props.entrySet().iterator();
 		while (itr.hasNext())
 		{
 			Entry<Object, Object> entry = itr.next();
 			String table = (String)entry.getKey();
 			String columns = (String)entry.getValue();
-			if (!StringUtil.isEmptyString(columns)) 
+			if (!StringUtil.isEmptyString(columns))
 			{
 				this.columnMapping.put(table, columns);
 			}
@@ -127,7 +135,7 @@ public class PkMapping
 		if (this.columnMapping == null) return;
 		this.columnMapping.remove(table);
 	}
-	
+
 	public synchronized void addMapping(TableIdentifier table, String columns)
 	{
 		addMapping(table.getTableExpression(), columns);
@@ -143,8 +151,8 @@ public class PkMapping
 			this.columnMapping.put(table.toLowerCase(), columns);
 		}
 	}
-	
-	public synchronized Collection<String> getPKColumns(TableIdentifier tbl)
+
+	public synchronized List<String> getPKColumns(TableIdentifier tbl)
 	{
 		if (this.columnMapping == null) return null;
 		String tname = tbl.getTableName().toLowerCase();
@@ -169,7 +177,7 @@ public class PkMapping
 		if (this.columnMapping == null) return Collections.emptyMap();
 		return Collections.unmodifiableMap(this.columnMapping);
 	}
-	
+
 	public synchronized void saveMapping(String filename)
 	{
 		if (this.columnMapping == null) return;
@@ -201,7 +209,7 @@ public class PkMapping
 			FileUtil.closeQuitely(out);
 		}
 	}
-	
+
 	public synchronized void addMapping(TableIdentifier table, ColumnIdentifier[] cols)
 	{
 		StringBuilder colNames = new StringBuilder(50);

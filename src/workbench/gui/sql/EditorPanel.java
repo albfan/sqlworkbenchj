@@ -239,12 +239,12 @@ public class EditorPanel
 		SqlKeywordHelper helper = new SqlKeywordHelper(dbId);
 		dbFunctions.addAll(helper.getSqlFunctions());
 		dbDatatypes.addAll(helper.getDataTypes());
-		
+
 		token.addSqlFunctions(dbFunctions);
 		token.addDatatypes(dbDatatypes);
 		token.addSqlKeyWords(helper.getKeywords());
 		token.addOperators(helper.getOperators());
-		
+
 	}
 
 	public void fontChanged(String aKey, Font aFont)
@@ -789,7 +789,7 @@ public class EditorPanel
 		if (this.currentFile == null) return null;
 		return this.fileEncoding;
 	}
-	
+
 	public String getCurrentFileName()
 	{
 		if (this.currentFile == null) return null;

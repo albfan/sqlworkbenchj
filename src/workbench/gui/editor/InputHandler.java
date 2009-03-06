@@ -32,6 +32,7 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -199,7 +200,6 @@ public class InputHandler
 		{
 			sequenceIsMapped = isMapped(evt);
 		}
-//		System.out.println("keyPressed: " + evt.toString() + " isAction: " + evt.isActionKey());
 
 		if (keyCode == KeyEvent.VK_TAB)
 		{
@@ -740,13 +740,24 @@ public class InputHandler
 				textArea.getToolkit().beep();
 				return;
 			}
-			textArea.overwriteSetSelectedText("\t");
-
-			// TODO: calculate distance to next tabstop
-//			boolean useTab = Settings.getInstance().getEditorUseTabCharacter();
-//			int tabcount = Settings.getInstance().getEditorTabWidth();
-//			int col = textArea.getCaretPosition();
-//			StringBuilder spaces = new StringBuilder(Settings.getInstance().getEditorTabWidth());
+			boolean useTab = Settings.getInstance().getEditorUseTabCharacter();
+			if (useTab)
+			{
+				textArea.overwriteSetSelectedText("\t");
+			}
+			else
+			{
+				int tabSize = Settings.getInstance().getEditorTabWidth();
+				int lineStart = textArea.getLineStartOffset(textArea.getCaretLine());
+				int posInLine = textArea.getCaretPosition() - lineStart;
+				int inc = (tabSize - (posInLine % tabSize));
+				StringBuilder spaces = new StringBuilder(inc);
+				for (int i=0; i < inc; i++)
+				{
+					spaces.append(' ');
+				}
+				textArea.overwriteSetSelectedText(spaces.toString());
+			}
 		}
 	}
 

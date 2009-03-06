@@ -17,8 +17,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import workbench.db.ColumnIdentifier;
@@ -242,12 +240,12 @@ public class ResultInfo
 	{
 		return useGetStringForClobs;
 	}
-	
+
 	public boolean useGetBytesForBlobs()
 	{
 		return useGetBytesForBlobs;
 	}
-	
+
 	public boolean treatLongVarcharAsClob()
 	{
 		return treatLongVarcharAsClob;
@@ -397,9 +395,20 @@ public class ResultInfo
 		return this.getColumnClass(i).getName();
 	}
 
-	public String getColumnName(int i) { return this.columns[i].getColumnName(); }
-	public String getDbmsTypeName(int i) { return this.columns[i].getDbmsType(); }
-	public int getColumnCount() { return this.colCount; }
+	public String getColumnName(int i)
+	{
+		return this.columns[i].getColumnName();
+	}
+
+	public String getDbmsTypeName(int i)
+	{
+		return this.columns[i].getDbmsType();
+	}
+
+	public int getColumnCount()
+	{
+		return this.colCount;
+	}
 
 	public Class getColumnClass(int aColumn)
 	{
@@ -435,10 +444,10 @@ public class ResultInfo
 
 		String plain = StringUtil.trimQuotes(name);
 
-		for (int i = 0; i < this.colCount; i++)
+		for (int i = 0; i < this.columns.length; i++)
 		{
-			String col = StringUtil.trimQuotes(this.getColumnName(i));
-			if (plain.equalsIgnoreCase(StringUtil.trimQuotes(col)))
+			String col = StringUtil.trimQuotes(columns[i].getColumnName());
+			if (plain.equalsIgnoreCase(col))
 			{
 				return i;
 			}
@@ -451,18 +460,16 @@ public class ResultInfo
 	{
 		return isUserDefinedPK;
 	}
-	
+
 	public boolean readPkColumnsFromMapping()
 	{
 		if (this.updateTable == null) return false;
-		Collection cols = PkMapping.getInstance().getPKColumns(this.updateTable.createCopy());
+		List<String> cols = PkMapping.getInstance().getPKColumns(this.updateTable.createCopy());
 		if (cols == null) return false;
-		Iterator itr = cols.iterator();
 		isUserDefinedPK = false;
 
-		while (itr.hasNext())
+		for (String col : cols)
 		{
-			String col = (String)itr.next();
 			int index = this.findColumn(col);
 			if (index > -1)
 			{
