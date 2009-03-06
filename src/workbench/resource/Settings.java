@@ -1449,6 +1449,16 @@ public class Settings
 		this.setProperty(PROPERTY_EDITOR_TAB_WIDTH, aWidth);
 	}
 
+	public boolean getEditorUseTabCharacter()
+	{
+		return getBoolProperty("workbench.editor.usetab", true);
+	}
+
+	public void setEditorUseTabCharacter(boolean flag)
+	{
+		this.setProperty("workbench.editor.usetab", flag);
+	}
+
 	public String getEditorNoWordSep()
 	{
 		return getProperty("workbench.editor.nowordsep", "");

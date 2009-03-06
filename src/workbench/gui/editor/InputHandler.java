@@ -740,8 +740,13 @@ public class InputHandler
 				textArea.getToolkit().beep();
 				return;
 			}
-
 			textArea.overwriteSetSelectedText("\t");
+
+			// TODO: calculate distance to next tabstop
+//			boolean useTab = Settings.getInstance().getEditorUseTabCharacter();
+//			int tabcount = Settings.getInstance().getEditorTabWidth();
+//			int col = textArea.getCaretPosition();
+//			StringBuilder spaces = new StringBuilder(Settings.getInstance().getEditorTabWidth());
 		}
 	}
 
