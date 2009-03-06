@@ -144,13 +144,16 @@ public class PkMapping
 		}
 	}
 	
-	public synchronized Collection<String> getPKColumns(WbConnection con, TableIdentifier tbl)
+	public synchronized Collection<String> getPKColumns(TableIdentifier tbl)
 	{
 		if (this.columnMapping == null) return null;
-		String columns = this.columnMapping.get(tbl.getTableName().toLowerCase());
+		String tname = tbl.getTableName().toLowerCase();
+
+		String columns = this.columnMapping.get(tname);
 		if (columns == null)
 		{
-			columns = this.columnMapping.get(tbl.getTableExpression(con).toLowerCase());
+			String fullname = tbl.getTableExpression().toLowerCase();
+			columns = this.columnMapping.get(fullname);
 		}
 		List<String> cols = null;
 		if (columns != null)

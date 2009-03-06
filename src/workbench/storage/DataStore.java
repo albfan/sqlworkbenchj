@@ -1317,7 +1317,7 @@ public class DataStore
 		throws SQLException
 	{
 		if (this.updateTable == null) throw new NullPointerException("No update table defined!");
-		this.updatePkInformation(aConnection);
+		this.updatePkInformation();
 
 		List<DmlStatement> stmtList = new LinkedList<DmlStatement>();
 		this.resetUpdateRowCounters();
@@ -1451,7 +1451,7 @@ public class DataStore
 		int rows = 0;
 		RowData row = null;
 		this.cancelUpdate = false;
-		this.updatePkInformation(aConnection);
+		this.updatePkInformation();
 		int totalRows = this.getModifiedCount();
 		this.updateHadErrors = false;
 		int currentRow = 0;
@@ -1736,7 +1736,7 @@ public class DataStore
 
 		try
 		{
-			this.updatePkInformation(this.originalConnection);
+			this.updatePkInformation();
 		}
 		catch (SQLException e)
 		{
@@ -1857,12 +1857,6 @@ public class DataStore
 	public void updatePkInformation()
 		throws SQLException
 	{
-		updatePkInformation(this.originalConnection);
-	}
-
-	private void updatePkInformation(WbConnection aConnection)
-		throws SQLException
-	{
 		if (this.resultInfo.hasPkColumns()) return;
 		if (this.updateTable == null)
 		{
@@ -1882,7 +1876,7 @@ public class DataStore
 		if (this.updateTable != null && !this.hasPkColumns())
 		{
 			LogMgr.logDebug("Datastore.updatePkInformation()", "Trying to retrieve PK information from user-defined PK mapping");
-			this.resultInfo.readPkColumnsFromMapping(aConnection);
+			this.resultInfo.readPkColumnsFromMapping();
 		}
 	}
 

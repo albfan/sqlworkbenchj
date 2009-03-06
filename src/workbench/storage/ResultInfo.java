@@ -423,7 +423,7 @@ public class ResultInfo
 
 		if (!found)
 		{
-			found = readPkColumnsFromMapping(aConnection);
+			found = readPkColumnsFromMapping();
 		}
 	}
 
@@ -445,10 +445,10 @@ public class ResultInfo
 		return -1;
 	}
 
-	public boolean readPkColumnsFromMapping(WbConnection con)
+	public boolean readPkColumnsFromMapping()
 	{
 		if (this.updateTable == null) return false;
-		Collection cols = PkMapping.getInstance().getPKColumns(con, this.updateTable.createCopy());
+		Collection cols = PkMapping.getInstance().getPKColumns(this.updateTable.createCopy());
 		if (cols == null) return false;
 		Iterator itr = cols.iterator();
 		boolean found = false;
