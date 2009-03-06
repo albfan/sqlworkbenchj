@@ -645,7 +645,7 @@ public class JEditTextArea
 	{
 		boolean changed = false;
 
-		if(horizontalOffset != this.horizontalOffset)
+		if (horizontalOffset != this.horizontalOffset)
 		{
 			this.horizontalOffset = horizontalOffset;
 			changed = true;
@@ -679,10 +679,7 @@ public class JEditTextArea
 		int lineStart = getLineStartOffset(line);
 		int offset = Math.max(0, Math.min(getLineLength(line) - 1, getCaretPosition() - lineStart));
 
-		// try to center the caret line vertically
-		int newStartLine = (line - getVisibleLines() / 2) + 1;
-		if (newStartLine < 0) newStartLine = 0;
-		return scrollTo(newStartLine, offset);
+		return scrollTo(line, offset);
 	}
 
 	/**
