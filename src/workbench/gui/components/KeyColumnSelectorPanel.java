@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.resource.ResourceMgr;
+import workbench.storage.ResultInfo;
 
 /**
  *
@@ -33,18 +34,24 @@ public class KeyColumnSelectorPanel
 	private String tableName;
 	private JCheckBox saveCheckBox;
 
-	public KeyColumnSelectorPanel(ColumnIdentifier[] cols, TableIdentifier table)
+	public KeyColumnSelectorPanel(ResultInfo info)
 	{
-		super(cols);
+		super(info.getColumns());
+		TableIdentifier table = info.getUpdateTable();
 		this.tableName = (table == null ? "" : table.getTableName());
 		this.setSelectionLabel(ResourceMgr.getString("LblHeaderKeyColumnPKFlag"));
 		configureInfoPanel();
 		this.doLayout();
-		this.columns = new ColumnIdentifier[cols.length];
+		ColumnIdentifier[] originalCols = info.getColumns();
+		this.columns = new ColumnIdentifier[originalCols.length];
 		for (int i=0; i < this.columns.length; i++)
 		{
-			this.columns[i] = cols[i].createCopy();
-			this.setColumnSelected(i, cols[i].isPkColumn());
+			this.columns[i] = originalCols[i].createCopy();
+			this.setColumnSelected(i, originalCols[i].isPkColumn());
+		}
+		if (info.isUserDefinedPK())
+		{
+			this.saveCheckBox.setSelected(true);
 		}
 	}
 

@@ -41,9 +41,10 @@ public class ResultInfo
 	final private int colCount;
 	private int realColumns;
 	private TableIdentifier updateTable;
-	private boolean treatLongVarcharAsClob = false;
-	private boolean useGetBytesForBlobs = false;
-	private boolean useGetStringForClobs = false;
+	private boolean treatLongVarcharAsClob;
+	private boolean useGetBytesForBlobs;
+	private boolean useGetStringForClobs;
+	private boolean isUserDefinedPK;
 
 	public ResultInfo(ColumnIdentifier[] cols)
 	{
@@ -269,6 +270,7 @@ public class ResultInfo
 
 	public void resetPkColumns()
 	{
+		isUserDefinedPK = false;
 		for (int i=0; i < this.colCount; i++)
 		{
 			this.columns[i].setIsPkColumn(false);
@@ -445,13 +447,19 @@ public class ResultInfo
 		return -1;
 	}
 
+	public boolean isUserDefinedPK()
+	{
+		return isUserDefinedPK;
+	}
+	
 	public boolean readPkColumnsFromMapping()
 	{
 		if (this.updateTable == null) return false;
 		Collection cols = PkMapping.getInstance().getPKColumns(this.updateTable.createCopy());
 		if (cols == null) return false;
 		Iterator itr = cols.iterator();
-		boolean found = false;
+		isUserDefinedPK = false;
+
 		while (itr.hasNext())
 		{
 			String col = (String)itr.next();
@@ -459,14 +467,14 @@ public class ResultInfo
 			if (index > -1)
 			{
 				this.setIsPkColumn(index, true);
-				found = true;
+				isUserDefinedPK = true;
 			}
 		}
-		if (found)
+		if (isUserDefinedPK)
 		{
 			LogMgr.logInfo("ResultInfo.readPkColumnsFromMapping()", "Using pk definition for " + updateTable.getTableName() + " from mapping file: " + StringUtil.listToString(cols, ',', false));
 		}
-		return found;
+		return isUserDefinedPK;
 	}
 
 	private boolean readPkColumns(ResultSet rs)

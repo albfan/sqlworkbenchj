@@ -215,7 +215,7 @@ public class SqlOptionsPanel
 
 		if (this.columnSelectorPanel == null)
 		{
-			this.columnSelectorPanel = new KeyColumnSelectorPanel(this.tableColumns.getColumns(), this.tableColumns.getUpdateTable());
+			this.columnSelectorPanel = new KeyColumnSelectorPanel(tableColumns);
 		}
 		else
 		{

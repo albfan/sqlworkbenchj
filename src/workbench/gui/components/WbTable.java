@@ -1900,9 +1900,8 @@ public class WbTable
 	public boolean selectKeyColumns()
 	{
 		DataStore ds = this.getDataStore();
-		ColumnIdentifier[] originalCols = ds.getColumns();
 		TableIdentifier table = ds.getUpdateTable();
-
+		
 		if (table == null)
 		{
 			table = selectUpdateTable();
@@ -1912,6 +1911,20 @@ public class WbTable
 			}
 		}
 
+		ResultInfo info = ds.getResultInfo();
+
+		if (!info.hasPkColumns())
+		{
+			try
+			{
+				info.readPkDefinition(ds.getOriginalConnection());
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("WbTable.selectKeyColumns()", "Error when retrieving key columns", e);
+			}
+		}
+		
 		if (table == null)
 		{
 			Window w = SwingUtilities.getWindowAncestor(this);
@@ -1919,7 +1932,7 @@ public class WbTable
 			return false;
 		}
 
-		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(originalCols, table);
+		KeyColumnSelectorPanel panel = new KeyColumnSelectorPanel(info);
 		Window parent = SwingUtilities.getWindowAncestor(this);
 		boolean selected = ValidatingDialog.showConfirmDialog(parent, panel, ResourceMgr.getString("MsgSelectKeyColumnsWindowTitle"), null, 0, true);
 
