@@ -176,7 +176,8 @@ public class SQLConsole
 					{
 						// As the BatchRunner will keep track of the desired output format
 						// we need to synchronize the output format to our printer
-						printer.setPrintRowsAsLine(runner.getPrintRowsAsLine());
+						boolean rowsAsLine = ConsoleSettings.getInstance().getNextRowDisplay() == RowDisplay.SingleLine;
+						printer.setPrintRowsAsLine(rowsAsLine);
 					}
 					
 				}

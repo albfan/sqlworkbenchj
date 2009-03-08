@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.db.TriggerReader;
 import workbench.resource.ResourceMgr;
@@ -38,7 +39,7 @@ public class WbListTriggers extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		result.setTemporaryDisplay(RowDisplay.SingleLine);
+		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		TriggerReader reader = new TriggerReader(this.currentConnection);
 

@@ -12,7 +12,6 @@
 package workbench.gui.settings;
 
 import javax.swing.JPanel;
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;

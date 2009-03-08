@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -40,7 +41,7 @@ public class WbListCatalogs extends SqlCommand
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		result.setTemporaryDisplay(RowDisplay.SingleLine);
+		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		DataStore ds = currentConnection.getMetadata().getCatalogInformation();
 		String catName = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());

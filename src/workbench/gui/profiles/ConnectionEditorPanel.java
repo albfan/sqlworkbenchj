@@ -49,7 +49,6 @@ import workbench.gui.components.IntegerPropertyEditor;
 import workbench.gui.components.PasswordPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbColorPicker;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.SimplePropertyEditor;

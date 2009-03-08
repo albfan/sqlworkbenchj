@@ -12,7 +12,6 @@
 package workbench.gui.settings;
 
 import javax.swing.JPanel;
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -75,7 +74,7 @@ public class DbExplorerOptionsPanel
     autogeneratePK = new javax.swing.JCheckBox();
     jPanel1 = new javax.swing.JPanel();
     jPanel2 = new javax.swing.JPanel();
-    defTableTypeLabel = new WbCheckBoxLabel();
+    defTableTypeLabel = new javax.swing.JLabel();
     defTableType = new javax.swing.JTextField();
     tabPlacement = new PlacementChooser();
     jLabel1 = new javax.swing.JLabel();

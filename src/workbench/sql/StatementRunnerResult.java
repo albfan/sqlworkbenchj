@@ -15,7 +15,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import workbench.console.RowDisplay;
 import workbench.interfaces.ResultLogger;
 import workbench.resource.ResourceMgr;
 
@@ -46,18 +45,6 @@ public class StatementRunnerResult
 	private boolean wasCancelled = false;
 	private boolean stopScriptExecution = false;
 	private boolean showRowCount = true;
-
-	/**
-	 * Controls the printing of the results in command line mode.
-	 * If printRowsPerLine == true, each row should be printed on a single console line
-	 * If printRowsPerLine == false, each row should be printed as a "form" (one row per column)
-	 */
-	private RowDisplay rowDisplay = RowDisplay.noChange;
-
-	/**
-	 * If set, indicates a temporary change of the display just for this single Result
-	 */
-	private RowDisplay tempRowDisplay = null;
 
 	private long executionTime = -1;
 	private final DurationFormatter timingFormatter;
@@ -91,33 +78,6 @@ public class StatementRunnerResult
 	public boolean getShowRowCount()
 	{
 		return showRowCount;
-	}
-
-	public RowDisplay getTemporaryDisplay()
-	{
-		RowDisplay result = tempRowDisplay;
-		tempRowDisplay = null;
-		return result;
-	}
-
-	public void setTemporaryDisplay(RowDisplay display)
-	{
-		tempRowDisplay = display;
-	}
-
-	/**
-	 * Controls the printing of the results in command line mode.
-	 * If RowDisplay.SingleLine, each row should be printed on a single console line
-	 * If RowDisplay.Form, each row should be printed as a "form" (one row per column)
-	 */
-	public RowDisplay getRowDisplay()
-	{
-		return rowDisplay;
-	}
-
-	public void setRowDisplay(RowDisplay newDisplay)
-	{
-		rowDisplay = newDisplay;
 	}
 
 	public String getTimingMessage()

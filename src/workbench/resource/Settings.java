@@ -105,7 +105,6 @@ public class Settings
 
 	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
 
-//	private ShortcutManager keyManager;
 	private long fileTime;
 
 	protected static class LazyInstanceHolder

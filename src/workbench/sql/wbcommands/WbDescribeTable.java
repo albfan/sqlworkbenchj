@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.db.DbSettings;
 import workbench.db.ProcedureDefinition;
@@ -74,7 +75,7 @@ public class WbDescribeTable
 	{
 		StatementRunnerResult result = new StatementRunnerResult(sql);
 		result.setShowRowCount(false);
-		result.setTemporaryDisplay(RowDisplay.SingleLine);
+		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 		
 		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
 

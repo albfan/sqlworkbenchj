@@ -26,10 +26,8 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.interfaces.Restoreable;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -44,7 +42,6 @@ public class SqlGenerationOptionsPanel
 	implements Restoreable, ActionListener
 {
 
-	/** Creates new form FormatterOptionsPanel */
 	public SqlGenerationOptionsPanel()
 	{
 		super();

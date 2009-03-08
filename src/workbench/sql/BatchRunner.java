@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.AppArguments;
 import workbench.console.ConsolePrompter;
+import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -86,7 +87,6 @@ public class BatchRunner
 	private boolean showSummary = verboseLogging;
 	private boolean optimizeCols = true;
 	private boolean showStatementTiming = true;
-	private boolean printRowsAsLine = true;
 	private String connectionId = "BatchRunner";
 	private String command;
 
@@ -149,11 +149,6 @@ public class BatchRunner
 		this.stmtRunner.setParameterPrompter(p);
 	}
 
-	public boolean getPrintRowsAsLine()
-	{
-		return printRowsAsLine;
-	}
-	
 	/**
 	 * For testing purposes to redirect the output to a file
 	 */
@@ -620,21 +615,6 @@ public class BatchRunner
 				{
 					error = !result.isSuccess();
 
-					RowDisplay display = result.getRowDisplay();
-					RowDisplay tempDisplay = result.getTemporaryDisplay();
-
-					if (display != null && display != RowDisplay.noChange)
-					{
-						printRowsAsLine = (display == RowDisplay.SingleLine);
-					}
-
-					boolean rowsDisplayToUse = printRowsAsLine;
-
-					if (tempDisplay != null)
-					{
-						rowsDisplayToUse = (tempDisplay == RowDisplay.SingleLine);
-					}
-					
 					// We have to store the result of hasMessages()
 					// as the getMessageBuffer() will clear the buffer
 					// and a subsequent call to hasMessages() will return false;
@@ -652,7 +632,7 @@ public class BatchRunner
 						totalRows += result.getTotalUpdateCount();
 					}
 
-					printResults(sql, result, rowsDisplayToUse);
+					printResults(sql, result);
 
 					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
 					{
@@ -744,7 +724,7 @@ public class BatchRunner
 		return error;
 	}
 
-	private void printResults(String sql, StatementRunnerResult result, boolean rowsAsLine)
+	private void printResults(String sql, StatementRunnerResult result)
 	{
 		if (!this.showResultSets) return;
 		if (console == null) return;
@@ -758,6 +738,9 @@ public class BatchRunner
 		{
 			console.println(sql);
 		}
+
+		RowDisplay current = ConsoleSettings.getInstance().getNextRowDisplay();
+		boolean rowsAsLine = (current != null && current == RowDisplay.SingleLine);
 
 		for (int i=0; i < data.size(); i++)
 		{

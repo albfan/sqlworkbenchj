@@ -19,5 +19,4 @@ public interface ResultLogger
 	void clearLog();
 	void appendToLog(String msg);
 	void showLogMessage(String msg);
-	
 }

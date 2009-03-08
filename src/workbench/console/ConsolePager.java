@@ -8,15 +8,22 @@
  * To contact the author please send an email to: support@sql-workbench.net
  * 
  */
-
 package workbench.console;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public enum RowDisplay
+public class ConsolePager
+	implements Pager
 {
-	SingleLine,
-	Form;
+
+	public ConsolePager()
+	{
+	}
+
+	public boolean canPrintLine(int lineNumber)
+	{
+		return true;
+	}
 }

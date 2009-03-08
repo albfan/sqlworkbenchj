@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 
 import java.util.List;
+import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.db.TableIdentifier;
 import workbench.resource.ResourceMgr;
@@ -51,7 +52,7 @@ public class WbListTables extends SqlCommand
 			};
 
 		StatementRunnerResult result = new StatementRunnerResult();
-		result.setTemporaryDisplay(RowDisplay.SingleLine);
+		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
 		cmdLine.parse(options);
 

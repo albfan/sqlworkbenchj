@@ -13,12 +13,15 @@ package workbench.sql.wbcommands.console;
 
 import java.sql.SQLException;
 
+import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
+import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.StringUtil;
 
 /**
- * A SQL command to control the output format in console mode. 
+ * A SQL command to control the output format in console mode.
  *
  * @author  support@sql-workbench.net
  */
@@ -35,18 +38,29 @@ public class WbDisplay extends SqlCommand
 		if ("tab".equalsIgnoreCase(param) || "row".equalsIgnoreCase(param))
 		{
 			result.setSuccess();
-			result.setRowDisplay(RowDisplay.SingleLine);
+			ConsoleSettings.getInstance().setRowDisplay(RowDisplay.SingleLine);
 			result.addMessageByKey("MsgDispChangeRow");
 		}
 		else if ("record".equalsIgnoreCase(param) || "form".equalsIgnoreCase(param) || "single".equalsIgnoreCase(param))
 		{
-			result.setRowDisplay(RowDisplay.Form);
+			ConsoleSettings.getInstance().setRowDisplay(RowDisplay.Form);
 			result.addMessageByKey("MsgDispChangeForm");
 		}
 		else
 		{
-			result.setFailure();
-			result.addMessageByKey("ErrDispWrongArgument");
+			RowDisplay current = ConsoleSettings.getInstance().getRowDisplay();
+			String currentDisp = "tab";
+
+			if (current == RowDisplay.Form)
+			{
+				currentDisp = "record";
+			}
+			
+			if (StringUtil.isBlank(param)) result.setSuccess();
+			else result.setFailure();
+			
+			String msg = ResourceMgr.getFormattedString("ErrDispWrongArgument", currentDisp);
+			result.addMessage(msg);
 		}
 
 		return result;

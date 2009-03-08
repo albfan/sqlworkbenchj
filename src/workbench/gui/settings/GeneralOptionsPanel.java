@@ -26,7 +26,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import workbench.gui.components.WbCheckBoxLabel;
 import workbench.gui.components.WbFilePicker;
 import workbench.gui.components.WbLabelField;
 import workbench.interfaces.Restoreable;
@@ -185,7 +184,7 @@ public class GeneralOptionsPanel
   private void initComponents() {
 		GridBagConstraints gridBagConstraints;
 
-    checkUpdatesLabel = new WbCheckBoxLabel();
+    checkUpdatesLabel = new JLabel();
     checkInterval = new JComboBox();
     langLabel = new JLabel();
     languageDropDown = new JComboBox();
