@@ -10,6 +10,7 @@ package workbench.gui.editor;
  */
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -184,13 +185,13 @@ public class InputHandler
 	}
 
 	@Override
-	public void keyPressed(KeyEvent evt)
+	public void keyPressed(final KeyEvent evt)
 	{
 		int keyCode = evt.getKeyCode();
 		int modifiers = evt.getModifiers();
 
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
-
+		
 		if (!keySequence)
 		{
 			keySequence = true;
@@ -204,23 +205,36 @@ public class InputHandler
 		if (keyCode == KeyEvent.VK_TAB)
 		{
 			JEditTextArea area = getTextArea(evt);
-			int start = area.getSelectionStart();
-			int end = area.getSelectionEnd();
-			if (start < end)
+			if (area.isEditable())
 			{
-				TextIndenter indenter = new TextIndenter(area);
-				if ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK)
+				int start = area.getSelectionStart();
+				int end = area.getSelectionEnd();
+				if (start < end)
 				{
-					indenter.unIndentSelection();
+					TextIndenter indenter = new TextIndenter(area);
+					if ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK)
+					{
+						indenter.unIndentSelection();
+					}
+					else
+					{
+						indenter.indentSelection();
+					}
+					return;
 				}
-				else
-				{
-					indenter.indentSelection();
-				}
-				return;
 			}
 		}
-
+		else if (keyCode == KeyEvent.VK_CONTEXT_MENU)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					JEditTextArea area = getTextArea(evt);
+					area.showContextMenu();
+				}
+			});
+		}
 		ActionListener l = bindings.get(keyStroke);
 
 		if (l != null)

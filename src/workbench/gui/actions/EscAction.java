@@ -33,7 +33,7 @@ public class EscAction
 		super();
 		this.client = aClient;
 		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0));
-		addToInputMap(d);
+		addToInputMap(d.getRootPane());
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -42,10 +42,6 @@ public class EscAction
 		this.client.actionPerformed(e);
 	}
 
-	public void addToInputMap(JDialog d)
-	{
-		addToInputMap(d.getRootPane());
-	}
 	public void addToInputMap(JComponent c)
 	{
 		super.addToInputMap(c, JComponent.WHEN_IN_FOCUSED_WINDOW);

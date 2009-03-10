@@ -23,9 +23,7 @@ import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
@@ -56,7 +54,6 @@ import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.OneLineTableModel;
-import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.interfaces.DbData;
@@ -127,15 +124,6 @@ public class DwPanel
 	public DwPanel(DwStatusBar statusBar)
 	{
 		super();
-		JTextField stringField = new JTextField();
-		stringField.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		stringField.addMouseListener(new TextComponentMouseListener());
-
-		JTextField numberField = new JTextField();
-		numberField.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		numberField.setHorizontalAlignment(SwingConstants.RIGHT);
-		numberField.addMouseListener(new TextComponentMouseListener());
-
 		this.initLayout(statusBar);
 
 		this.setDoubleBuffered(true);
@@ -845,7 +833,7 @@ public class DwPanel
 		if (rows == null || rows.length == 0) return false;
 		return rows[rows.length - 1] == dataTable.getRowCount() - 1;
 	}
-	
+
 	public void deleteRow()
 	{
 		if (this.readOnly) return;

@@ -2327,7 +2327,17 @@ public class JEditTextArea
 	}
 
 
-	public boolean isModified() { return this.modified; }
+	public void showContextMenu()
+	{
+		Point p = getCursorLocation();
+		popup.show(painter, p.x, p.y);
+	}
+
+	public boolean isModified() 
+	{
+		return this.modified;
+	}
+
 	public void resetModified()
 	{
 		boolean wasModified = this.modified;
@@ -2622,7 +2632,7 @@ public class JEditTextArea
 			int dot = getLineStartOffset(line) + offset;
 
 
-			if((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0 && popup != null)
+			if ((evt.getModifiers() & InputEvent.BUTTON3_MASK) != 0 && popup != null)
 			{
 				if (rightClickMovesCursor && !isTextSelected())
 				{

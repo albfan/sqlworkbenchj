@@ -118,7 +118,6 @@ public class ImportFileColumn
 	{
 		return new ArrayList<ImportFileColumn>()
 		{
-
 			public int indexOf(Object elem)
 			{
 				if (elem == null) return -1;

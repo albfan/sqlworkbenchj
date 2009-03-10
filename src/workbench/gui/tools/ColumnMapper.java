@@ -142,7 +142,7 @@ public class ColumnMapper
 			ColumnIdentifier targetCol = this.targetColumns.get(i);
 			row.setTarget(targetCol);
 
-			ColumnIdentifier sourceCol = this.findSourceColumnByName(targetCol.getColumnName());
+			ColumnIdentifier sourceCol = this.findSourceColumnByName(StringUtil.trimQuotes(targetCol.getColumnName()));
 			if (syncDataTypes && sourceCol != null)
 			{
 				sourceCol.setDataType(targetCol.getDataType());
@@ -185,7 +185,7 @@ public class ColumnMapper
 	{
 		for (ColumnIdentifier col : this.sourceColumns)
 		{
-			if (col.getColumnName().equalsIgnoreCase(aName)) return col;
+			if (StringUtil.trimQuotes(col.getColumnName()).equalsIgnoreCase(aName)) return col;
 		}
 		return null;
 	}

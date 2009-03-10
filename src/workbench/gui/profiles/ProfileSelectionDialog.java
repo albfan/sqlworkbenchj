@@ -38,7 +38,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
-
 /**
  *
  * @author  support@sql-workbench.net
@@ -47,12 +46,12 @@ public class ProfileSelectionDialog
 	extends JDialog
 	implements ActionListener, WindowListener, TreeSelectionListener, MouseListener
 {
+
 	private JPanel okCancelPanel;
 	private JButton okButton;
 	private JButton cancelButton;
 	private WbButton helpButton;
 	private WbButton manageDriversButton;
-
 	private ProfileEditorPanel profiles;
 	private ConnectionProfile selectedProfile;
 	private boolean cancelled = false;
@@ -85,12 +84,12 @@ public class ProfileSelectionDialog
 		toolsButtonPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
 
 		manageDriversButton = new WbButton();
-    manageDriversButton.setResourceKey("LblEditDrivers");
-    manageDriversButton.addActionListener(this);
+		manageDriversButton.setResourceKey("LblEditDrivers");
+		manageDriversButton.addActionListener(this);
 
 		helpButton = new WbButton();
-    helpButton.setResourceKey("LblHelp");
-    helpButton.addActionListener(this);
+		helpButton.setResourceKey("LblHelp");
+		helpButton.addActionListener(this);
 		toolsButtonPanel.add(manageDriversButton);
 		toolsButtonPanel.add(helpButton);
 
@@ -144,7 +143,7 @@ public class ProfileSelectionDialog
 	{
 		if (!Settings.getInstance().restoreWindowSize(this))
 		{
-			this.setSize(760,560);
+			this.setSize(760, 560);
 		}
 	}
 
@@ -182,10 +181,10 @@ public class ProfileSelectionDialog
 	{
 		if (evt.getButton() == MouseEvent.BUTTON1 && evt.getClickCount() == 2)
 		{
+			profiles.applyProfiles();
 			selectProfile();
 		}
 	}
-
 
 	public void actionPerformed(ActionEvent e)
 	{
@@ -195,7 +194,7 @@ public class ProfileSelectionDialog
 			selectProfile();
 		}
 		else if (e.getSource() == this.cancelButton ||
-						e.getActionCommand().equals(escActionCommand))
+			e.getActionCommand().equals(escActionCommand))
 		{
 			this.selectedProfile = null;
 			this.cancelled = true;
@@ -229,7 +228,7 @@ public class ProfileSelectionDialog
 	{
 		this.cancelled = true;
 		this.selectedProfile = null;
-    this.closeDialog();
+		this.closeDialog();
 	}
 
 	public void windowDeactivated(WindowEvent e)
@@ -282,5 +281,4 @@ public class ProfileSelectionDialog
 		final DbDriver drv = this.profiles.getCurrentDriver();
 		DriverEditorDialog.showDriverDialog(parent, drv);
 	}
-
 }
