@@ -266,7 +266,6 @@
       </xsl:for-each>
     </xsl:variable>
 
-    <xsl:variable name="minor-build-nr" select="document('../scripts/history.xml')/history/release[1]/entry[1]/@dev-build"/>
     <h1>Changelog for Build <xsl:value-of select="concat($dev-build-nr,'.',$dev-build-minor)"/></h1>
 
     <xsl:for-each select="document('../scripts/history.xml')/history/release[1]">
