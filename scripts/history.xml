@@ -11,7 +11,7 @@
 
   <entry dev-build="6" type="enh">
     <description>
-      The editor can now be configured to either uses spaces or real tab characters
+      The editor can now be configured to either uses spaces or real tab characters (as before)
     </description>
   </entry>
 
