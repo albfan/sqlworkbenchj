@@ -180,23 +180,11 @@ public class SelectAnalyzer
 			
 			if (table != null)
 			{
-//				for (String element : tables)
-//				{
-//					TableAlias tbl = new TableAlias(element);
-//
-//					if (tbl.isTableOrAlias(table))
-//					{
-//						tableForColumnList = tbl.getTable();
-//						currentAlias = tbl;
-//						break;
-//					}
-//				}				
-					
 				currentAlias = findAlias(table, tables);
 				
 				if (currentAlias != null)
 				{
-						tableForColumnList = currentAlias.getTable();
+					tableForColumnList = currentAlias.getTable();
 				}
 				else if (this.parentAnalyzer != null)
 				{
@@ -261,37 +249,21 @@ public class SelectAnalyzer
 		try
 		{
 			boolean afterFrom = false;
-			boolean inONPart = false;
 
 			SQLLexer lexer = new SQLLexer(this.sql);
 			SQLToken token = lexer.getNextToken(false, false);
-			int bracketCount = 0;
 			while (token != null)
 			{
 				String t = token.getContents();
 				if (afterFrom)
 				{
-					if ("(".equals(t))
+					if ("ON".equals(t))
 					{
-						bracketCount ++;
-						if (inONPart && cursorPos >= token.getCharBegin()) result = JOIN_ON_COLUMN_LIST;
+						if (cursorPos >= token.getCharEnd()) result = JOIN_ON_COLUMN_LIST;
 					}
-					else if (")".equals(t))
+					else if (SqlUtil.getJoinKeyWords().contains(t))
 					{
-						if (bracketCount > 0)
-						{
-							if (inONPart && cursorPos < token.getCharBegin()) return JOIN_ON_COLUMN_LIST;
-						}
-						bracketCount --;
-					}
-					else if ("ON".equals(t))
-					{
-						inONPart = (cursorPos >= token.getCharBegin());
-					}
-					else if (t.equals("JOIN") || SqlUtil.JOIN_KEYWORDS.contains(t))
-					{
-						inONPart = false;
-						if (t.equals("JOIN") && cursorPos > token.getCharEnd()) result = JOIN_ON_TABLE_LIST;
+						if (cursorPos > token.getCharEnd()) result = JOIN_ON_TABLE_LIST;
 						else result = NO_JOIN_ON;
 					}
 					else if (SqlFormatter.FROM_TERMINAL.contains(t))

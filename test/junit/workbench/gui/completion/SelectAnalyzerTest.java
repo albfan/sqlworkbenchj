@@ -12,6 +12,7 @@
 package workbench.gui.completion;
 
 import junit.framework.TestCase;
+import workbench.db.TableIdentifier;
 
 /**
  *
@@ -39,6 +40,31 @@ public class SelectAnalyzerTest extends TestCase
 		SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, 23);
 		String quali = analyzer.getQualifierLeftOfCursor();
 		assertEquals("Wrong qualifier detected", "a", quali);
+
+		sql = "SELECT a.att1 FROM t1 a JOIN t2 b ON a.id = b.id";
+		int pos = sql.indexOf("a.id") + 2;
+
+		analyzer = new SelectAnalyzer(null, sql, pos);
+		analyzer.checkContext();
+		TableIdentifier tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("t1", tbl.getTableName());
+
+		sql = "SELECT a.att1 FROM t1 a JOIN t2 b ON (a.id = b.id)";
+		pos = sql.indexOf("a.id") + 2;
+		analyzer = new SelectAnalyzer(null, sql, pos);
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertNotNull(tbl);
+		assertEquals("t1", tbl.getTableName());
+
+		sql = "SELECT a.att1 FROM t1 a JOIN t2 b ON (a.id = b.id)";
+		pos = sql.indexOf("FROM") + "FROM".length() + 1;
+		analyzer = new SelectAnalyzer(null, sql, pos);
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertNull(tbl);
+		assertEquals(BaseAnalyzer.CONTEXT_FROM_LIST, analyzer.context);
 	}
 
 }

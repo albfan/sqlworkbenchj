@@ -47,32 +47,27 @@ public class SqlUtil
 {
 	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
 
+
+	private static class JoinKeywordsHolder
+	{
+		protected static final Set<String> JOIN_KEYWORDS = Collections.unmodifiableSet(
+				CollectionBuilder.caseInsensitiveSet(
+					"JOIN", "INNER JOIN", "NATURAL JOIN", "LEFT JOIN", "LEFT OUTER JOIN", "RIGHT JOIN",
+					"RIGHT OUTER JOIN", "CROSS JOIN", "FULL JOIN", "FULL OUTER JOIN")
+				);
+	}
+	public static final Set<String> getJoinKeyWords()
+	{
+		return JoinKeywordsHolder.JOIN_KEYWORDS;
+	}
+	
 	private static class KnownTypesHolder
 	{
-		protected final static Set<String> KNOWN_TYPES;
-		static
-		{
-			Set<String> types = new HashSet<String>(19);
-			types.add("INDEX");
-			types.add("TABLE");
-			types.add("PROCEDURE");
-			types.add("FUNCTION");
-			types.add("VIEW");
-			types.add("PACKAGE");
-			types.add("PACKAGE BODY");
-			types.add("SYNONYM");
-			types.add("SEQUENCE");
-			types.add("ALIAS");
-			types.add("TRIGGER");
-			types.add("DOMAIN");
-			types.add("ROLE");
-			types.add("CAST");
-			types.add("AGGREGATE");
-			types.add("TABLESPACE");
-			types.add("TYPE");
-			types.add("USER");
-			KNOWN_TYPES = Collections.unmodifiableSet(types);
-		}
+		protected final static Set<String> KNOWN_TYPES =
+			Collections.unmodifiableSet(CollectionBuilder.hashSet(
+			"INDEX", "TABLE", "PROCEDURE", "FUNCTION", "VIEW", "PACKAGE", "PACKAGE BODY",
+			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
+			"TABLESPACE", "TYPE", "USER"));
 	}
 
 	public static final Set<String> getKnownTypes()
@@ -475,21 +470,6 @@ public class SqlUtil
 	{
 		return getTables(aSql, false);
 	}
-
-	public static final Set<String> JOIN_KEYWORDS = new HashSet<String>(6);
-	static
-	{
-		JOIN_KEYWORDS.add("JOIN");
-		JOIN_KEYWORDS.add("INNER JOIN");
-		JOIN_KEYWORDS.add("NATURAL JOIN");
-		JOIN_KEYWORDS.add("LEFT JOIN");
-		JOIN_KEYWORDS.add("LEFT OUTER JOIN");
-		JOIN_KEYWORDS.add("RIGHT JOIN");
-		JOIN_KEYWORDS.add("RIGHT OUTER JOIN");
-		JOIN_KEYWORDS.add("CROSS JOIN");
-		JOIN_KEYWORDS.add("FULL JOIN");
-		JOIN_KEYWORDS.add("FULL OUTER JOIN");
-	}
 	
 	/**
 	 * Returns a List of tables defined in the SQL query. If the 
@@ -538,7 +518,7 @@ public class SqlUtil
 					
 					if (!subSelect)
 					{
-						if (JOIN_KEYWORDS.contains(s))
+						if (getJoinKeyWords().contains(s))
 						{
 							collectTable = true;
 							if (currentTable.length() > 0)
