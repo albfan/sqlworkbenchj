@@ -28,6 +28,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -287,6 +288,22 @@ public class InputHandler
 		}
 	}
 
+	public List<KeyStroke> getKeys(JMenu menu)
+	{
+		if (menu == null) return Collections.emptyList();
+		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
+
+		for (int i=0; i < menu.getItemCount(); i++)
+		{
+			JMenuItem item = menu.getItem(i);
+			allKeys.addAll( getKeys(item));
+			if (item instanceof JMenu)
+			{
+				allKeys.addAll(getKeys((JMenu)item));
+			}
+		}
+		return allKeys;
+	}
 
 	public List<KeyStroke> getKeys(JComponent c)
 	{
@@ -319,6 +336,17 @@ public class InputHandler
 		if (evt == null) return false;
 
 		KeyStroke toTest = KeyStroke.getKeyStrokeForEvent(evt);
+		if (toTest.getModifiers() == 0) return false;
+
+		int code = toTest.getKeyCode();
+		// if the keycode indicates a modifier key, only that key was
+		// pressed, the modifier alone cannot be mapped...
+		if (code == KeyEvent.VK_ALT || code == KeyEvent.VK_CONTROL ||
+				code == KeyEvent.VK_META || code == KeyEvent.VK_CONTEXT_MENU)
+		{
+			return false;
+		}
+		
 		JEditTextArea area = getTextArea(evt);
 
 		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
@@ -335,10 +363,7 @@ public class InputHandler
 				if (c instanceof JMenu)
 				{
 					JMenu m = (JMenu)c;
-					for (int i=0; i < m.getItemCount(); i++)
-					{
-						allKeys.addAll( getKeys(m.getItem(i)));
-					}
+					allKeys.addAll(getKeys(m));
 				}
 			}
 		}
