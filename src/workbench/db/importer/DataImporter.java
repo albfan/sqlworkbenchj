@@ -1542,7 +1542,7 @@ public class DataImporter
 		StringBuilder parms = new StringBuilder(targetColumns.size() * 20);
 
 		String sql = dbConn.getDbSettings().getInsertForImport();
-		if (!StringUtil.isEmptyString(sql))
+		if (StringUtil.isNonBlank(sql))
 		{
 			text.append(sql);
 			text.append(' ');
