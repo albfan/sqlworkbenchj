@@ -482,77 +482,77 @@ public class SqlUtil
 		List<String> result = new LinkedList<String>();
 		try
 		{
-				SQLLexer lex = new SQLLexer(from);
-				SQLToken t = lex.getNextToken(false, false);
+			SQLLexer lex = new SQLLexer(from);
+			SQLToken t = lex.getNextToken(false, false);
 
-				boolean collectTable = true;
-				StringBuilder currentTable = new StringBuilder();
-				int bracketCount = 0;
-				boolean subSelect = false;
-				int subSelectBracketCount = -1;
-				
-				while (t != null)
+			boolean collectTable = true;
+			StringBuilder currentTable = new StringBuilder();
+			int bracketCount = 0;
+			boolean subSelect = false;
+			int subSelectBracketCount = -1;
+
+			while (t != null)
+			{
+				String s = t.getContents();
+
+				if (s.equals("SELECT") && bracketCount > 0)
 				{
-					String s = t.getContents();
-					
-					if (s.equals("SELECT") && bracketCount > 0)
+					subSelect = true;
+					subSelectBracketCount = bracketCount;
+				}
+
+				if ("(".equals(s))
+				{
+					bracketCount ++;
+				}
+				else if (")".equals(s))
+				{
+					if (subSelect && bracketCount == subSelectBracketCount)
 					{
-						subSelect = true;
-						subSelectBracketCount = bracketCount;
+						subSelect = false;
 					}
-					
-					if ("(".equals(s))
+					bracketCount --;
+					t = lex.getNextToken(false, false);
+					continue;
+				}
+
+				if (!subSelect)
+				{
+					if (getJoinKeyWords().contains(s))
 					{
-						bracketCount ++;
-					}
-					else if (")".equals(s))
-					{
-						if (subSelect && bracketCount == subSelectBracketCount)
+						collectTable = true;
+						if (currentTable.length() > 0)
 						{
-							subSelect = false;
-						}
-						bracketCount --;
-						t = lex.getNextToken(false, false);
-						continue;
-					}
-					
-					if (!subSelect)
-					{
-						if (getJoinKeyWords().contains(s))
-						{
-							collectTable = true;
-							if (currentTable.length() > 0)
-							{
-								result.add(getTableDefinition(currentTable.toString(), includeAlias));
-								currentTable = new StringBuilder();
-							}
-						}
-						else if (",".equals(s))
-						{
-								collectTable = true;
-								result.add(getTableDefinition(currentTable.toString(), includeAlias));
-								currentTable = new StringBuilder();
-						}
-						else if ("ON".equals(s))
-						{
-							collectTable = false;
 							result.add(getTableDefinition(currentTable.toString(), includeAlias));
 							currentTable = new StringBuilder();
 						}
-						else if (collectTable && !s.equals("("))
-						{
-							int size = currentTable.length();
-							if (size > 0 && !s.equals(".") && currentTable.charAt(size-1) != '.') currentTable.append(' ');
-							currentTable.append(s);
-						}
-					}					
-					t = lex.getNextToken(false, false);
+					}
+					else if (",".equals(s))
+					{
+							collectTable = true;
+							result.add(getTableDefinition(currentTable.toString(), includeAlias));
+							currentTable = new StringBuilder();
+					}
+					else if ("ON".equals(s))
+					{
+						collectTable = false;
+						result.add(getTableDefinition(currentTable.toString(), includeAlias));
+						currentTable = new StringBuilder();
+					}
+					else if (collectTable && !s.equals("("))
+					{
+						int size = currentTable.length();
+						if (size > 0 && !s.equals(".") && currentTable.charAt(size-1) != '.') currentTable.append(' ');
+						currentTable.append(s);
+					}
 				}
-				
-				if (currentTable.length() > 0)
-				{
-					result.add(getTableDefinition(currentTable.toString(), includeAlias));
-				}
+				t = lex.getNextToken(false, false);
+			}
+
+			if (currentTable.length() > 0)
+			{
+				result.add(getTableDefinition(currentTable.toString(), includeAlias));
+			}
 		}
 		catch (Exception e)
 		{

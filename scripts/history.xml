@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-03-06">
+<release build="-1" date="2009-03-11">
+
+  <entry dev-build="7" type="enh">
+    <description>
+      A result name (defined using @wbresult) is now used as the header when printing the result.
+    </description>
+  </entry>
 
   <entry dev-build="6" type="fix">
     <description>

@@ -2835,6 +2835,10 @@ public class SqlPanel
 		{
 			resultName = ResourceMgr.getString("LblTabResult");
 		}
+		else
+		{
+			tbl.setPrintHeader(resultName);
+		}
 		this.resultTab.insertTab(resultName, null, data, sql, newIndex);
 		data.setName("dwresult" + newIndex);
 		if (this.resultTab.getTabCount() == 2)
