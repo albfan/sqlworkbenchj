@@ -22,7 +22,6 @@ package workbench.console;
  */
 public class ConsoleSettings
 {
-	private boolean pageResults;
 	private RowDisplay rowDisplay = RowDisplay.SingleLine;
 	private RowDisplay nextRowDisplay;
 	
@@ -38,33 +37,6 @@ public class ConsoleSettings
 	public static final ConsoleSettings getInstance()
 	{
 		return LazyInstanceHolder.instance;
-	}
-
-	/**
-	 * Returns the pager that should be used to display results.
-	 *
-	 * @return the Pager to be used. Never null
-	 */
-	public Pager getPager()
-	{
-		if (pageResults)
-		{
-			return new ConsolePager();
-		}
-
-		// Dummy pager
-		return new Pager()
-		{
-			public boolean canPrintLine(int lineNumber)
-			{
-				return true;
-			}
-		};
-	}
-
-	public void setEnablePager(boolean flag)
-	{
-		pageResults = flag;
 	}
 
 	public RowDisplay getRowDisplay()
