@@ -330,7 +330,7 @@
 		<xslt classpathref="xalan.path"
           basedir="${html-outdir}"
           includes="Manual.xml"
-          style="${doc}/docbook/html/chunk.xsl"
+          style="${doc}/docbook/html/chunkfast.xsl"
           destdir="${html-outdir}">
 
       <xmlcatalog>
@@ -350,6 +350,7 @@
 			<param name="index.method" expression="'default'"/>
 			<param name="chunk.tocs.and.lots" expression="0"/>
 			<param name="chunk.tocs.and.lots.has.title" expression="1"/>
+			<param name="chunk.fast" expression="1"/>
 			<param name="generate.id.attributes" expression="1"/>
 			<param name="chunk.quietly" expression="1"/>
 			<param name="chunk.first.sections" expression="1"/>

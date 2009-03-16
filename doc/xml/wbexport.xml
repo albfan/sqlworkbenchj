@@ -265,7 +265,7 @@
 					</row>
 
 					<row>
-						<entry>-clobAsFile</entry>
+						<entry id="export-clobasfile">-clobAsFile</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
@@ -300,7 +300,7 @@
 					</row>
 
 					<row>
-						<entry>-lobIdCols</entry>
+						<entry id="export-lobidcol">-lobIdCols</entry>
 						<entry>
 							<para>
 								When exporting CLOB or BLOB columns as external files, the filename with the
@@ -318,7 +318,7 @@
 					</row>
 
 					<row>
-						<entry>-extensionColumn</entry>
+						<entry id="export-extensioncol">-extensionColumn</entry>
 						<entry>
 							<para>
 								When exporting CLOB or BLOB columns as external files, the extension of the generated
@@ -334,7 +334,7 @@
 					</row>
 
 					<row>
-						<entry>-filenameColumn</entry>
+						<entry id="export-lob-filename">-filenameColumn</entry>
 						<entry>
 							<para>
 								When exporting CLOB or BLOB columns as external files, the complete filename
@@ -890,66 +890,139 @@
 	<section id="export-examples">
 		<title>Examples</title>
 
-<programlisting>WbExport -type=text
-         -file='c:/data/data.txt'
-         -delimiter='|'
-         -decimal=',';
-SELECT * FROM data_table;</programlisting>
+		<section id="export-example-simple">
 
-	<para>
-		Will create a text file with the data from <literal>data_table</literal>.
-		Each column will be separated with the character | Each fractional number
-		will be written with a comma as the decimal separator. As the
-		SELECT statement retrieves all rows and columns from the table, this
-		could also be written as:
-	</para>
-
+			<title>Simple plain text export</title>
 <programlisting>WbExport -type=text
          -file='c:/data/data.txt'
          -delimiter='|'
          -decimal=','
          -sourcetable=data_table;</programlisting>
 
-	<para>
-		To export all tables from the current connection into tab-separated files
-		and compress the files, you can use the following statement:
-	</para>
+			<para>
+				Will create a text file with the data from <literal>data_table</literal>.
+				Each column will be separated with the character | Each fractional number
+				will be written with a comma as the decimal separator. 
+			</para>
+		</section>
+
+		<section id="export-example-select">
+			<title>Export based on a SELECT statement</title>
+<programlisting>WbExport -type=text
+         -file='c:/data/data.txt'
+         -delimiter=','
+         -decimal=','
+				 -dateFormat='yyyy-MM-dd';
+SELECT * FROM data_table;</programlisting>
+		</section>
+
+		<section id="export-schema-export">
+			<title>Export a complete schema</title>
+			
+			<para>
+				To export all tables from the current connection into tab-separated files
+				and compress the files, you can use the following statement:
+			</para>
 <programlisting>WbExport -type=text
          -outputDir=c:/data/export
-         -compress=true				 
+         -compress=true
          -sourcetable=*;</programlisting>
-	<para>
-		This will create one zip file for each table containing the exported data as a 
-		text file. If a table contains BLOB columns, the blob data will be written into 
-		a separate zip file.
-	</para>
+			<para>
+				This will create one zip file for each table containing the exported data as a
+				text file. If a table contains BLOB columns, the blob data will be written into
+				a separate zip file.
+			</para>
 	
-	<para>
-		The files created by the above statement can be imported into another database
-		using the following command:
-	</para>
+			<para>
+				The files created by the above statement can be imported into another database
+				using the following command:
+			</para>
 	
 <programlisting>WbImport -type=text
          -sourceDir=c:/data/export
          -checkDependencies=true;</programlisting>
-	
-	<para>
-		To generate a file that contains <literal>INSERT</literal> statements that can be
-		executed on the target system, the following command can be used:
-	</para>
+		</section>
 
-<programlisting>WbExport -type=sqlinsert
+		<section id="export-example-insert">
+			<title>Export as SQL INSERT script</title>
+			<para>
+				To generate a file that contains <literal>INSERT</literal> statements that can be
+				executed on the target system, the following command can be used:
+			</para>
+
+<programlisting>WbExport
+         -type=sqlinsert
          -file='c:/data/newtable.sql'
          -table=newtable;
 SELECT * FROM table1, table2
 WHERE table1.column1 = table2.column1;</programlisting>
 
-	<para>
-		will create a SQL scripts which inserts the data from table1
-		and table2 into a table called newtable. If the parameter -table is
-		omitted, the creation of SQL <literal>INSERT</literal> statements is only possible, 
-		if the SELECT is based on a single table (or view).
-	</para>
+			<para>
+				will create a SQL script which that contains statements like
+				<literal>INSERT INTO newtable (...) VALUES (...);</literal>. Where the
+				list of columns are all columns that are defined by the SELECT statement.
+			</para>
+			<para>
+				If the parameter -table is omitted, the creation of SQL
+				<literal>INSERT</literal> statements is only possible,
+				if the SELECT is based on a single table (or view).
+			</para>
+		</section>
+		<section id="export-example-lobs">
+			<title>Exporting LOB data</title>
+			<note>
+				<para>
+					To extract the contents of CLOB columns you have to specify
+					the parameter <link linkend="export-clobasfile"><literal>-clobAsFile=true</literal></link>,
+					otherwise the contents of the CLOB columns will be written directly into the export file.
+					BLOB columns will always be exported into separate tables.
+				</para>
+			</note>
+
+			<para>
+				When exporting tables that contain BLOB columns, one file for each blob column and row
+				will be created. By default the generated filenames will contain the row and column number
+				to make the names unique. You can however control the creation of filenames when exporting
+				LOB columns using several different approaches. If a unique name is stored within the table
+				you can use the <link linkend="export-lob-filename"><literal>-filenameColumn</literal></link>
+				parameter to generate the filenames based on the contents of that column:
+			</para>
+<programlisting>WbExport -file='c:/temp/blob_table.txt'
+         -type=text
+         -delimiter=','
+         -filenameColumn=file_name;</programlisting>
+		 <para>
+			 Will create the file <literal>blob_table.txt</literal> and for each blob a file
+			 where the name is retrieved from the column <literal>BLOB_TABLE.FILE_NAME</literal>.
+			 Note that if the filename column is not unique, blob files will be overwritten without
+			 an error message.
+		 </para>
+
+		 <para>
+			 You can also base the export on a SELECT statement and then generate the filename
+			 using several columns:
+		 </para>
+<programlisting>WbExport -file='c:/temp/blob_table.txt'
+         -type=text
+         -delimiter=','
+         -filenameColumn=fname;
+SELECT blob_column, 'data_'||id_column||'_'||some_name||'.'||type_column as fname
+FROM blob_table;
+				 </programlisting>
+
+			<para>
+				This examples assumes that the following columns are part of the table <literal>blob_table</literal>:
+				<literal>id_column</literal>, <literal>some_name</literal> and <literal>type_column</literal>.
+				The filenames for the blob of each row will be taken from the computed column
+				<literal>fname</literal>. To be able to reference the column in the <literal>WbExport</literal>
+				you must give it an alias.
+			</para>
+			<para>
+				This approach assumes that only a single blob column is exported. When exporting multiple
+				blob columns from a single table, it's only possible to create unique filenames
+				using the row and column number (the default behaviour).
+			</para>
+		</section>
 
 	</section>
 		

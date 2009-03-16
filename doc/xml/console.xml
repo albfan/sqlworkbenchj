@@ -51,9 +51,9 @@
 			a delimiter is identified the statement(s) are sent to the database.
 		</para>
 
-		<programlisting>SQL&gt; SELECT *<keycap>&lt;ENTER&gt;</keycap>
+		<screen>SQL&gt; SELECT *<keycap>&lt;ENTER&gt;</keycap>
 ..&gt;FROM person;
-</programlisting>
+</screen>
 
 		<para>
 			A delimiter is only recognized at the end of the input line, thus you can enter more than one
@@ -61,16 +61,12 @@
 			of the input lines:
 		</para>
 
-		<programlisting>SQL&gt; DELETE FROM person; rollback;</programlisting>
-
-		<para>
-			will produced the following output:
-		</para>
-
-		<programlisting>DELETE executed successfully
+		<screen>SQL&gt; DELETE FROM person; rollback;
+DELETE executed successfully
 4 row(s) affected.
 
-ROLLBACK executed successfully</programlisting>
+ROLLBACK executed successfully
+SQL&gt;</screen>
 
 
 	</section>
@@ -122,7 +118,7 @@ ROLLBACK executed successfully</programlisting>
 			The output in tabular format (if results are buffered) looks like this:
 		</para>
 
-		<programlisting>SQL> select id, firstname, lastname, comment from person;
+		<screen>SQL> select id, firstname, lastname, comment from person;
 id | firstname | lastname   | comment
 ---+-----------+------------+--------------------
 1  | Arthur    | Dent       | this is a comment
@@ -130,7 +126,8 @@ id | firstname | lastname   | comment
 4  | Mary      | Moviestar  | comment
 3  | Tricia    | McMillian  | test1
 
-(4 Rows)</programlisting>
+(4 Rows)
+SQL></screen>
 
 		<para>
 			If the size of the column values exceed the console's width the display will be wrapped, which
@@ -140,8 +137,7 @@ id | firstname | lastname   | comment
 		<para>
 			This is done by running the statement: <literal>WbDisplay record</literal>
 		</para>
-		<programlisting>
-SQL> <emphasis role="bold">WbDisplay record;</emphasis>
+		<screen>SQL> <emphasis role="bold">WbDisplay record;</emphasis>
 Display changed to single record format
 Execution time: 0.0s
 SQL> select id, firstname, lastname, comment from person;
@@ -166,17 +162,12 @@ firstname : Tricia
 lastname  : McMillian
 comment   :
 
-(4 Rows)</programlisting>
+(4 Rows)
+SQL> </screen>
 
 		<para>
 			To switch back to the "tabular" display, use: <literal>WbDisplay tab</literal>.
 		</para>
-		<programlisting>
-SQL> <emphasis role="bold">WbDisplay tab;</emphasis>
-Display changed to tabular format
-Execution time: 0.0s
-SQL></programlisting>
-
 	</section>
 
 	<section id="console-maxrows">
@@ -186,7 +177,11 @@ SQL></programlisting>
 			a value in the "Max. Rows" field. If you want to limit the number of rows in console mode
 			you can do this by running the statement
 		</para>
-		<programlisting>SET MAXROWS 42;</programlisting>
+		<screen>SQL> set maxrows 42;
+MAXROWS set to 42
+Execution time: 0.0s
+SQL>
+</screen>
 		<para>
 			This will limit the number of rows retrieved to 42.
 		</para>
@@ -200,7 +195,10 @@ SQL></programlisting>
 		<para>
 			To set the query timeout in console mode, you can run the following statement
 		</para>
-		<programlisting>SET TIMEOUT 42;</programlisting>
+		<screen>SQL> set timeout 42;
+TIMEOUT set to 42
+Execution time: 0.0s
+SQL></screen>
 		<para>
 			This will set a query timeout of 42 seconds. Note that not all JDBC
 			drivers support a query timout.
@@ -233,11 +231,17 @@ SQL></programlisting>
 					all profile groups you don't have to specify a group name. If the name is not unique, you
 					need to include the group name, e.g.
 				</para>
-				<programlisting>WbDeleteProfile {MyGroup}/SQL Server</programlisting>
+				<screen>SQL> WbDeleteProfile {MyGroup}/SQL Server
+Do you really want to delete the profile '{MyGroup}/SQL Server'? (Yes/No) yes
+Profile '{MyGroup}/SQL Server' deleted
+SQL></screen>
 				<para>
 					As the profile name is the only parameter to this command, no quoting is necessary.
 					Everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the
 					profile's name
+				</para>
+				<para>
+					All profiles are automatically saved after executing <literal>WbDeleteProfile</literal>.
 				</para>
 		</section>
 
@@ -249,7 +253,9 @@ SQL></programlisting>
 					(<literal>-url</literal>, <literal>-username</literal> and so on) either on the commandline
 					or through  <literal>WbConnect</literal>.
 				</para>
-				<programlisting>WbStoreProfile {MyGroup}/Postgres Production</programlisting>
+				<screen>SQL> WbStoreProfile {MyGroup}/Postgres Production
+Profile '{MyGroup}/Postgres Production' added
+SQL> </screen>
 				<para>
 					As the profile name is the only parameter to this command, no quoting is necessary.
 					Everything after the keyword <literal>WbDeleteProfile</literal> will be assumed to be the

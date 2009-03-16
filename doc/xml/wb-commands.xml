@@ -985,13 +985,17 @@ WHERE id=42;</programlisting>
       outputfile will be created for each row. Additional files will be created with 
       a counter indicating the row number from the result. In the above
       example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
-      If you want to export addtional columns together with the BLOB contents, please
-      use the <link linkend="command-export">WbExport</link> command.
     </para>
-    <note><para>
-			You can fully manipulate (save, view, upload) the contents of BLOB columns in a result set.
+		<para>
+			<literal>WbSelectBlob</literal> is intended for an ad-hoc retrieval of a single LOB column.
+			If you need to extract the contents of several LOB rows and columns it is recommended to
+			use the <link linkend="command-export">WbExport</link> command.
+		</para>
+    <para>
+			You can also manipulate (save, view, upload) the contents of BLOB columns in a result set.
 			Please refer to <xref linkend="blob-support"/> for details.
-    </para></note>
+    </para>
+
   </section>
 	
   <section id="command-wbfeedback">

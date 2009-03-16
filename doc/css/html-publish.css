@@ -102,6 +102,16 @@ pre.programlisting {
     white-space: pre;
 }
 
+
+pre.screen {
+    background: #5F5F5F;
+    /*border: 1px solid black;*/
+		color: white;
+    padding: 2px;
+    font-size: 10pt;
+    white-space: pre;
+}
+
 span.guisubmenu, span.guimenuitem, span.guimenu {
   font-variant:small-caps;
   font-stretch:extra-condensed;
