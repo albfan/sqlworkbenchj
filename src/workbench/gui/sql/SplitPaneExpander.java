@@ -11,7 +11,6 @@
  */
 package workbench.gui.sql;
 
-import java.awt.EventQueue;
 import javax.swing.JSplitPane;
 import workbench.gui.WbSwingUtilities;
 

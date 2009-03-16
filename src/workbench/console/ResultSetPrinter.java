@@ -20,7 +20,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import workbench.db.WbConnection;
 import workbench.interfaces.ResultSetConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -31,7 +30,7 @@ import workbench.resource.ResourceMgr;
  * columns of the ResultSet
  *
  * @see workbench.db.ColumnIdentifier#getDisplaySize()
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class ResultSetPrinter
@@ -41,17 +40,11 @@ public class ResultSetPrinter
 	private static final int MAX_WIDTH = 80;
 	private PrintWriter pw;
 	private ResultInfo info;
-	private WbConnection currentConnection;
-	
+
 	public ResultSetPrinter(PrintStream out)
 		throws SQLException
 	{
 		pw = new PrintWriter(out);
-	}
-
-	public void setCurrentConnection(WbConnection con)
-	{
-		this.currentConnection = con;
 	}
 
 	public void cancel()
@@ -112,7 +105,7 @@ public class ResultSetPrinter
 		{
 			info = new ResultInfo(data.getMetaData(), null);
 			printHeader(pw);
-			
+
 			//RowData row = new RowData(info);
 			RowData row = RowDataFactory.createRowData(info, null);
 			int count = 0;

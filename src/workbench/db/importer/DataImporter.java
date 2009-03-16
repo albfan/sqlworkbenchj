@@ -92,7 +92,6 @@ public class DataImporter
 	private int mode = MODE_INSERT;
 	private boolean useBatch = false;
 	private int batchSize = -1;
-	private boolean canCommitInBatch = true;
 	private boolean commitBatch = false;
 
 	private boolean hasErrors = false;
@@ -147,7 +146,7 @@ public class DataImporter
 	private boolean checkRealClobLength = false;
 	private boolean isOracle = false;
 	private boolean useSetObjectWithType = false;
-	
+
 	/**
 	 * Indicates multiple imports run with this instance oft DataImporter.
 	 * Set via {@link #beginMultiTable() }
@@ -609,7 +608,6 @@ public class DataImporter
 	{
 		if (this.source == null) return;
 		this.isRunning = true;
-		this.canCommitInBatch = true;
 		this.batchRunning = false;
 
 		if (this.useBatch)

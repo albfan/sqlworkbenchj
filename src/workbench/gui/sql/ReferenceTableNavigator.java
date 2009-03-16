@@ -49,10 +49,10 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- * A class to manage the popup menu for the reference table navigation. 
+ * A class to manage the popup menu for the reference table navigation.
  * This class populates the popup menu according to the passed in base table
  * to generate the SELECT statements for retrieving referenced database rows.
- * 
+ *
  * It uses several other classes to build the GUI and retrieve the necessary
  * database information
  * @see workbench.db.ReferenceTableNavigation
@@ -61,7 +61,7 @@ import workbench.util.WbThread;
  * @author support@sql-workbench.net
  */
 public class ReferenceTableNavigator
-	implements ListSelectionListener, ActionListener, PopupMenuListener, MenuListener, 
+	implements ListSelectionListener, ActionListener, PopupMenuListener, MenuListener,
 					   PropertyChangeListener
 {
 	private MainWindow container;
@@ -76,7 +76,7 @@ public class ReferenceTableNavigator
 	private final Object parentLock = new Object();
 	private final Object childLock = new Object();
 	private final Object connectionLock = new Object();
-	
+
 	public ReferenceTableNavigator(DwPanel data, MainWindow win)
 	{
 		this.setSourceTable(data.getTable());
@@ -84,7 +84,7 @@ public class ReferenceTableNavigator
 		this.container = win;
 		rebuildMenu();
 	}
-	
+
 	private void setSourceTable(WbTable data)
 	{
 		if (this.source != null)
@@ -99,24 +99,24 @@ public class ReferenceTableNavigator
 		selectParentTables.getPopupMenu().addPopupMenuListener(this);
 		selectParentTables.setEnabled(false);
 		parentMenuInitialized = false;
-		
+
 		selectChildTables = new WbMenu(ResourceMgr.getString("MnuTxtReferencingRows"));
 		selectChildTables.addMenuListener(this);
 		selectChildTables.getPopupMenu().addPopupMenuListener(this);
 		selectChildTables.setEnabled(false);
 		childMenuInitialized = false;
-		
+
 		this.source.addPopupMenu(selectParentTables, true);
 		this.source.addPopupMenu(selectChildTables, false);
 	}
-	
+
 	public void valueChanged(ListSelectionEvent evt)
 	{
 		boolean selected = this.source.getSelectedRowCount() > 0;
 		selectParentTables.setEnabled(selected);
 		selectChildTables.setEnabled(selected);
 	}
-	
+
 	private TableIdentifier getUpdateTable()
 	{
 		if (this.baseTable != null) return this.baseTable;
@@ -143,18 +143,18 @@ public class ReferenceTableNavigator
 	public void menuSelected(MenuEvent evt)
 	{
 	}
-	
+
 	public void menuDeselected(MenuEvent evt)
 	{
 		closePopup(evt);
 	}
-	
+
 	public void menuCanceled(MenuEvent evt)
 	{
 		selectParentTables.getPopupMenu().setVisible(false);
 		selectChildTables.getPopupMenu().setVisible(false);
 	}
-	
+
 	public void popupMenuWillBecomeVisible(PopupMenuEvent evt)
 	{
 		JPopupMenu pop = (JPopupMenu)evt.getSource();
@@ -167,17 +167,17 @@ public class ReferenceTableNavigator
 			buildChildTablesMenu();
 		}
 	}
-	
+
 	public void popupMenuWillBecomeInvisible(PopupMenuEvent evt)
 	{
-		
+
 	}
-	
+
 	public void popupMenuCanceled(PopupMenuEvent evt)
 	{
 		closePopup(evt);
 	}
-	
+
 	private void closePopup(EventObject evt)
 	{
 		if (evt.getSource() == this.selectParentTables.getPopupMenu())
@@ -194,7 +194,7 @@ public class ReferenceTableNavigator
 	{
 		return this.source.getDataStore().getOriginalConnection();
 	}
-	
+
 	private JMenuItem createLoadingItem()
 	{
 		JMenuItem item = new JMenuItem(ResourceMgr.getString("MsgLoadDependency"));
@@ -202,7 +202,7 @@ public class ReferenceTableNavigator
 		item.setEnabled(false);
 		return item;
 	}
-	
+
 	private void rebuildMenu()
 	{
 		synchronized (parentLock)
@@ -219,7 +219,7 @@ public class ReferenceTableNavigator
 			childMenuInitialized = false;
 		}
 	}
-	
+
 	private void buildChildTablesMenu()
 	{
 		WbThread init = new WbThread("InitChildren")
@@ -240,7 +240,7 @@ public class ReferenceTableNavigator
 		};
 		init.start();
 	}
-	
+
 	private void buildParentTablesMenu()
 	{
 		WbThread init = new WbThread("InitParents")
@@ -262,7 +262,7 @@ public class ReferenceTableNavigator
 		};
 		init.start();
 	}
-	
+
 	private void buildMenu(WbMenu menu, ReferenceTableNavigation navi, String cmd)
 	{
 		List<JMenuItem> itemsToAdd = new LinkedList<JMenuItem>();
@@ -272,7 +272,6 @@ public class ReferenceTableNavigator
 		{
 			TableDependency dep = navi.getTree();
 			List<DependencyNode> tables = dep.getLeafs();
-			WbConnection con = getConnection();
 
 			if (tables == null || tables.size() == 0)
 			{
@@ -289,7 +288,7 @@ public class ReferenceTableNavigator
 					Collection<String> cols = node.getColumns().values();
 					StringBuilder display = new StringBuilder(cols.size() * 10);
 					StringBuilder tooltip = new StringBuilder(cols.size() * 20);
-					
+
 					display.append(node.getTable().getTableName());
 					display.append(" (");
 					int index = 0;
@@ -337,7 +336,7 @@ public class ReferenceTableNavigator
 	}
 
 	/**
-	 * Check if our source DataStore has all necessary columns to 
+	 * Check if our source DataStore has all necessary columns to
 	 * be able to retrieve the table referenced by the given DependencyNode
 	 */
 	private boolean hasColumns(DependencyNode node)
@@ -350,7 +349,7 @@ public class ReferenceTableNavigator
 		}
 		return true;
 	}
-	
+
 	private void addMenuItems(final WbMenu menu, final List<JMenuItem> items)
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -378,13 +377,13 @@ public class ReferenceTableNavigator
 			}
 		});
 	}
-	
+
 	private List<List<ColumnData>> getColumnData(DependencyNode node)
 	{
 		List<List<ColumnData>> rows = new LinkedList<List<ColumnData>>();
 		int[] selectedRows = this.source.getSelectedRows();
 		int rowCount = selectedRows.length;
-		
+
 		Map<String, String> columns = node.getColumns();
 		DataStore ds = this.source.getDataStore();
 		for (int i = 0; i < rowCount; i++)
@@ -405,16 +404,16 @@ public class ReferenceTableNavigator
 				rows.add(rowData);
 			}
 		}
-		
+
 		return rows;
 	}
-	
+
 	public void actionPerformed(ActionEvent evt)
 	{
 		JMenuItem item = (JMenuItem)evt.getSource();
 		String cmd = item.getActionCommand();
 		int containerIndex = -42;
-		
+
 		if (cmd.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX))
 		{
 			containerIndex = StringUtil.getIntValue(cmd.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()), -1);
@@ -422,8 +421,7 @@ public class ReferenceTableNavigator
 			item = (JMenuItem)popup.getInvoker();
 			cmd = item.getActionCommand();
 		}
-		
-		WbConnection con = getConnection();
+
 		TableIdentifier tbl = null;
 		String fkName = null;
 		String error = null;
@@ -439,16 +437,16 @@ public class ReferenceTableNavigator
 			WbSwingUtilities.showErrorMessage(this.container, "Menu was incorrectly initialized!");
 			return;
 		}
-		
+
 		String sql = null;
-		
+
 		List<List<ColumnData>> rowData = null;
 		try
 		{
 			if ("select-child".equals(cmd))
 			{
 				DependencyNode node = this.childNavigation.getNodeForTable(tbl, fkName);
-				if (node == null) 
+				if (node == null)
 				{
 					error = "Could not find child table from menu item!";
 					LogMgr.logError("ReferenceTableNavigator.actionPerformed()", error, null);
@@ -462,7 +460,7 @@ public class ReferenceTableNavigator
 			else if ("select-parent".equals(cmd))
 			{
 				DependencyNode node = this.parentNavigation.getNodeForTable(tbl, fkName);
-				if (node == null) 
+				if (node == null)
 				{
 					error = "Could not find parent table from menu item!";
 					LogMgr.logError("ReferenceTableNavigator.actionPerformed()", error, null);
@@ -489,20 +487,20 @@ public class ReferenceTableNavigator
 		String comment = ResourceMgr.getFormattedString("MsgLoadRelatedComment", tbl.getTableName(), getUpdateTable().getTableName(), fkName);
 
 		boolean logText = WbAction.isCtrlPressed(evt);
-		
-		if (this.container != null) 
+
+		if (this.container != null)
 		{
 			PanelContentSender sender = new PanelContentSender(container);
 			// showLog will only be evaluated for existing tabs
 			// if the target tab is the current tab, show
 			sender.showResult(sql, comment, containerIndex, logText);
 		}
-	}	
-	
+	}
+
 	/**
 	 * Reset the internal dependency tree and popup menu.
-	 * The next time the menu should be displayed, the 
-	 * source table will then abe queried for the new 
+	 * The next time the menu should be displayed, the
+	 * source table will then abe queried for the new
 	 * update table.
 	 */
 	public void reset()
@@ -510,7 +508,7 @@ public class ReferenceTableNavigator
 		this.baseTable = null;
 		this.rebuildMenu();
 	}
-	
+
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (evt.getPropertyName().equals(DwPanel.PROP_UPDATE_TABLE))

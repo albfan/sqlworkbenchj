@@ -61,13 +61,12 @@ public class WbRun
 		if (StringUtil.isBlank(clean))
 		{
 			result.setFailure();
-			String msg = ResourceMgr.getString("ErrFileNameRqd");
 			result.addMessageByKey("ErrFileNameRqd");
 			return result;
 		}
-		
+
 		WbFile file = new WbFile(clean);
-		
+
 		if (StringUtil.isEmptyString(clean) || !file.exists())
 		{
 			result.setFailure();

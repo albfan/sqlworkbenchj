@@ -195,7 +195,7 @@ public class ProfileEditorPanel
 		ProfileListModel list = (ProfileListModel)profileTree.getModel();
 		list.applyProfiles();
 	}
-	
+
 	public void saveSettings()
 	{
 		GuiSettings.setProfileDividerLocation(this.jSplitPane.getDividerLocation());
@@ -516,8 +516,6 @@ public class ProfileEditorPanel
 				}
 				else
 				{
-					TreePath p = profileTree.getSelectionPath();
-					TreeNode n = (TreeNode)(p != null ? p.getLastPathComponent() : null);
 					this.connectionEditor.setVisible(false);
 					this.deleteItem.setEnabled(true);
 					this.copyItem.setEnabled(false);

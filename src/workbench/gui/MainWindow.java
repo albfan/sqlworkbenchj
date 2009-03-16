@@ -2487,8 +2487,6 @@ public class MainWindow
 
 	public boolean moveTab(int oldIndex, int newIndex)
 	{
-		MainPanel p = this.getSqlPanel(newIndex);
-
 		MainPanel panel = this.getSqlPanel(oldIndex);
 
 		JMenuBar oldMenu = this.panelMenus.get(oldIndex);

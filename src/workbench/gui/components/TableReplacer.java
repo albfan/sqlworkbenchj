@@ -211,18 +211,7 @@ public class TableReplacer
 		try
 		{
 			tableChanging = true;
-			
 			this.client.setShowStatusColumn(true);
-			
-			TableModelEvent event = null;
-			if (pos == null)
-			{
-				event = new TableModelEvent(this.client.getModel(), 0, this.client.getRowCount() -1);
-			}
-			else
-			{
-				event = new TableModelEvent(this.client.getModel(), pos.getRow(), pos.getRow());
-			}
 			this.client.getDataStoreTableModel().fireTableDataChanged();
 		}
 		finally

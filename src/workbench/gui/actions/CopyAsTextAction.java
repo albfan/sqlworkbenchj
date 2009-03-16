@@ -12,7 +12,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -27,12 +26,12 @@ import workbench.resource.ResourceMgr;
  * @see workbench.gui.components.ClipBoardCopier
  * @author  support@sql-workbench.net
  */
-public class CopyAsTextAction 
+public class CopyAsTextAction
 	extends WbAction
 {
 	private WbTable client;
 	protected boolean copySelected;
-	
+
 	public CopyAsTextAction(WbTable aClient)
 	{
 		super();
@@ -45,7 +44,7 @@ public class CopyAsTextAction
 
 	public boolean hasCtrlModifier() { return true; }
 	public boolean hasShiftModifier() { return true; }
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);

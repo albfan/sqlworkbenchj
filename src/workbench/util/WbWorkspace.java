@@ -70,7 +70,7 @@ public class WbWorkspace
 			}
 			this.readTabInfo(entry);
 
-			tabCount = calculateTabCount(); 
+			tabCount = calculateTabCount();
 		}
 	}
 
@@ -198,7 +198,7 @@ public class WbWorkspace
 		while (keys.hasMoreElements())
 		{
 			String key = (String)keys.nextElement();
-			
+
 			if (key.equals("tab.total.count")) continue;
 			if (key.endsWith(".type")) continue;
 
@@ -253,17 +253,16 @@ public class WbWorkspace
 			}
 			index ++;
 		}
-		
+
 		if (explorerProps.size() > 0)
 		{
 			newProps.setProperty("dbexplorer.visible", Integer.toString(explorerProps.size()));
-			
-			int dbindex = 0;
+
 			for (Map.Entry<Integer, WbProperties> entry : explorerProps.entrySet())
 			{
 				WbProperties tab = entry.getValue();
 				Integer currIndex = entry.getKey();
-				
+
 				Enumeration tabkeys = tab.keys();
 				while (tabkeys.hasMoreElements())
 				{
@@ -271,7 +270,6 @@ public class WbWorkspace
 					String newkey = "dbexplorer" + index + key.substring(key.indexOf('.'));
 					newProps.put(newkey, explorerProps.get(currIndex).get(key));
 				}
-				dbindex ++;
 			}
 		}
 

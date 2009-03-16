@@ -59,7 +59,7 @@ public class SQLConsole
 
 		boolean bufferResults = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_BUFFER_RESULTS, true);
 		boolean optimizeColWidths = cmdLine.getBoolean(AppArguments.ARG_CONSOLE_OPT_COLS, true);
-		
+
 		BatchRunner runner = BatchRunner.createBatchRunner(cmdLine, false);
 		runner.showResultSets(true);
 		runner.setShowStatementWithResult(false);
@@ -86,16 +86,16 @@ public class SQLConsole
 		}
 
 		LogMgr.logInfo("SQLConsole.main()", "SQL Workbench/J Console interface started");
-		
+
 		String currentPrompt = DEFAULT_PROMPT;
-		
+
 		try
 		{
 			System.out.println(ResourceMgr.getString("MsgConsoleStarted"));
 			WbFile f = new WbFile(Settings.getInstance().getConfigDir());
 			System.out.println(ResourceMgr.getFormattedString("MsgConfigDir", f.getFullPath()));
 			System.out.println("");
-			
+
 			// Enable console-specific commands for the batch runner
 			runner.addCommand(new WbDisconnect());
 			runner.addCommand(new WbStoreProfile());
@@ -113,9 +113,9 @@ public class SQLConsole
 				{
 					WbConnection conn = runner.getConnection();
 					System.out.println(ResourceMgr.getFormattedString("MsgBatchConnectOk", conn.getDisplayString()));
-					
+
 					String warn = conn.getWarnings();
-					if (!StringUtil.isEmptyString(warn))
+					if (StringUtil.isNonBlank(warn))
 					{
 						System.out.println(warn);
 					}
@@ -164,12 +164,11 @@ public class SQLConsole
 					buffer.clear();
 					currentPrompt = checkConnection(runner);
 					startOfStatement = true;
-					
+
 					// Restore the printing consumer in case a WbExport changed it
 					if (printer != null && runner.getResultSetConsumer() == null)
 					{
 						runner.setResultSetConsumer(printer);
-						printer.setCurrentConnection(runner.getConnection());
 					}
 
 					if (printer != null)
@@ -179,7 +178,7 @@ public class SQLConsole
 						boolean rowsAsLine = ConsoleSettings.getInstance().getNextRowDisplay() == RowDisplay.SingleLine;
 						printer.setPrintRowsAsLine(rowsAsLine);
 					}
-					
+
 				}
 				else
 				{

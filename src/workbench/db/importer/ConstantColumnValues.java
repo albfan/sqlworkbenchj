@@ -98,12 +98,10 @@ public class ConstantColumnValues
 						}
 						else
 						{
-							if (SqlUtil.isCharacterType(col.getDataType()))
+							if (SqlUtil.isCharacterType(col.getDataType()) &&
+									value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
 							{
-								if (value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
-								{
-									value = value.substring(1, value.length() - 1);
-								}
+								value = value.substring(1, value.length() - 1);
 							}
 							data = converter.convertValue(value, col.getDataType());
 						}

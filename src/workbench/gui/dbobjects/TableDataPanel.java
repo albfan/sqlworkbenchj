@@ -61,7 +61,6 @@ import java.beans.PropertyChangeListener;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
-import javax.swing.JTable;
 import workbench.WbManager;
 import workbench.db.TableSelectBuilder;
 import workbench.gui.MainWindow;
@@ -649,8 +648,6 @@ public class TableDataPanel
 		this.cancelRetrieve.setEnabled(true);
 		this.reloadAction.setEnabled(false);
 		boolean error = false;
-
-		JTable t = dataDisplay.getTable();
 
 		try
 		{

@@ -12,7 +12,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -26,7 +25,7 @@ import workbench.util.WbThread;
 /**
  *	@author  support@sql-workbench.net
  */
-public class OptimizeAllColumnsAction 
+public class OptimizeAllColumnsAction
 	extends WbAction
 {
 	protected ColumnWidthOptimizer optimizer;
@@ -48,10 +47,10 @@ public class OptimizeAllColumnsAction
 	{
 		if (optimizer == null) return;
 		final boolean shiftPressed = isShiftPressed(e);
-		Thread t = new WbThread("OptimizeAllCols Thread") 
-		{ 	
-			public void run()	
-			{ 
+		Thread t = new WbThread("OptimizeAllCols Thread")
+		{
+			public void run()
+			{
 				optimizer.optimizeAllColWidth(shiftPressed || GuiSettings.getIncludeHeaderInOptimalWidth());
 			}
 		};
@@ -59,7 +58,7 @@ public class OptimizeAllColumnsAction
 	}
 
 	public boolean hasShiftModifier() { return true; }
-	
+
 	public void setClient(WbTable client)
 	{
 		this.optimizer = (client != null ? new ColumnWidthOptimizer(client) : null);

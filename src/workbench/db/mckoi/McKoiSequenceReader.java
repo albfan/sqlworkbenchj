@@ -11,7 +11,6 @@
  */
 package workbench.db.mckoi;
 
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,12 +34,12 @@ public class McKoiSequenceReader
 	implements SequenceReader
 {
 	private Connection connection;
-	
+
 	public McKoiSequenceReader(Connection con)
 	{
 		this.connection = con;
 	}
-	
+
 	// This is a dirty hack, as McKoi does not store the real SQL
 	// but some kind of Object in the database. But for now this seems
 	// to work.
@@ -49,7 +48,7 @@ public class McKoiSequenceReader
 		String s = new String(content, 2, content.length - 6);
 		return s;
 	}
-	
+
 	public List<SequenceDefinition> getSequences(String owner)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, null);
@@ -62,7 +61,7 @@ public class McKoiSequenceReader
 		}
 		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, sequence);
@@ -73,28 +72,28 @@ public class McKoiSequenceReader
 
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
-		String sql = "SELECT si.name, " + 
-								 "       sd.minvalue, " + 
-								 "       sd.maxvalue, " + 
-								 "       sd.increment, " + 
-								 "       sd.cycle, " + 
-								 "       sd.start, " + 
-								 "       sd.cache " + 
-								 " FROM SYS_INFO.sUSRSequence sd, " + 
-								 "     SYS_INFO.sUSRSequenceInfo si " + 
-								 "WHERE sd.seq_id = si.id " + 
+		String sql = "SELECT si.name, " +
+								 "       sd.minvalue, " +
+								 "       sd.maxvalue, " +
+								 "       sd.increment, " +
+								 "       sd.cycle, " +
+								 "       sd.start, " +
+								 "       sd.cache " +
+								 " FROM SYS_INFO.sUSRSequence sd, " +
+								 "     SYS_INFO.sUSRSequenceInfo si " +
+								 "WHERE sd.seq_id = si.id " +
 								 "AND   si.schema = ? ";
-		
+
 		if (!StringUtil.isEmptyString(sequence))
 		{
-			sql += "AND   si.name = ? ";	
+			sql += "AND   si.name = ? ";
 		}
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("McKoiMetadata.getRawSequenceDefinition()", "Using query=" + sql);
 		}
-		
+
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
@@ -114,10 +113,10 @@ public class McKoiSequenceReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		
+
 		return result;
 	}
-	
+
 	private SequenceDefinition createDefinition(DataStore ds, int row)
 	{
 		if (ds == null || row >= ds.getRowCount()) return null;
@@ -132,7 +131,7 @@ public class McKoiSequenceReader
 		readSequenceSource(result);
 		return result;
 	}
-	
+
 	public List<String> getSequenceList(String owner)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, null);
@@ -144,18 +143,18 @@ public class McKoiSequenceReader
 		}
 		return result;
 	}
-	
+
 	public CharSequence getSequenceSource(String owner, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(owner, sequence);
 		if (def == null) return null;
 		return def.getSource();
 	}
-	
+
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		StringBuilder result = new StringBuilder(200);
-		
+
 		result.append("CREATE SEQUENCE ");
 		result.append(def.getSequenceName());
 
@@ -200,8 +199,8 @@ public class McKoiSequenceReader
 			result.append("\n      CYCLE");
 		}
 		result.append(";\n");
-		
+
 		def.setSource(result);
 	}
-	
+
 }

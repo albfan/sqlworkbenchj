@@ -14,7 +14,6 @@ package workbench.gui.actions;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.KeyStroke;
@@ -42,7 +41,7 @@ public class ManageMacroAction extends WbAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setIcon(null);
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		SqlPanel sql = this.client.getCurrentSqlPanel();

@@ -49,15 +49,15 @@ import workbench.util.StringUtil;
 /**
  * A Tree to display macro groups
  * It supports drag & drop from macaros into different groups
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class MacroTree
 	extends JTree
-	implements TreeModelListener, 
-	           MouseListener, 
-	           ClipboardSupport, 
-	           ActionListener, 
+	implements TreeModelListener,
+	           MouseListener,
+	           ClipboardSupport,
+	           ActionListener,
 	           TreeSelectionListener,
 						 GroupTree,
 						 ExpandableTree
@@ -69,9 +69,9 @@ public class MacroTree
 	private int clipboardType = 0;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
-	
+
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
-	
+
 	public MacroTree()
 	{
 		super();
@@ -88,15 +88,15 @@ public class MacroTree
 		addTreeSelectionListener(this);
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
-		
+
 		this.popup = new CutCopyPastePopup(this);
-		
+
 		WbAction a = popup.getPasteAction();
 		a.addToInputMap(im, am);
-		
+
 		a = popup.getCopyAction();
 		a.addToInputMap(im, am);
-		
+
 		a = popup.getCutAction();
 		a.addToInputMap(im, am);
 
@@ -112,7 +112,7 @@ public class MacroTree
 		setAutoscrolls(true);
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 	}
-	
+
 	public void setDeleteAction(DeleteListEntryAction delete)
 	{
 		this.popup.addSeparator();
@@ -126,12 +126,12 @@ public class MacroTree
 	{
 		Object[] changed = e.getChildren();
 		if (changed == null) return;
-		
+
 		MacroTreeNode node = (MacroTreeNode)changed[0];
 
 		Object data = node.getDataObject();
 		if (data == null) return;
-		
+
 		if (node.getAllowsChildren())
 		{
 			// If a node is edited in a JTree, the new value that has been
@@ -151,7 +151,7 @@ public class MacroTree
 			if (groups[i] != null) expandPath(groups[i]);
 		}
 	}
-	
+
 	public void collapseAll()
 	{
 		TreePath[] groups = this.macroModel.getGroupNodes();
@@ -174,7 +174,7 @@ public class MacroTree
 			{
 				expandPath(path);
 				selectNode(node);
-				
+
 				int elements = node.getChildCount();
 				for (int i=0; i < elements; i++)
 				{
@@ -198,11 +198,11 @@ public class MacroTree
 		MacroManager.getInstance().save();
 		current.resetModified();
 	}
-	
+
 	/**
-	 * Expand the groups that are contained in th list. 
+	 * Expand the groups that are contained in th list.
 	 * The list is expected to contain Sting objects that identify
-	 * the names of the groups. 
+	 * the names of the groups.
 	 */
 	public void expandGroups(List<String> groupList)
 	{
@@ -220,7 +220,7 @@ public class MacroTree
 			}
 		}
 	}
-	
+
 	/**
 	 * Return the names of the expaned groups.
 	 */
@@ -239,7 +239,7 @@ public class MacroTree
 		}
 		return result;
 	}
-	
+
 	public void treeNodesInserted(TreeModelEvent e)
 	{
 	}
@@ -269,7 +269,7 @@ public class MacroTree
 		boolean groupSelected = onlyGroupSelected();
 		boolean canPaste = this.clipboardNodes != null && groupSelected;
 		boolean canCopy = onlyMacrosSelected();
-		
+
 		pasteToFolderAction.setEnabled(canPaste);
 
 		WbAction a = popup.getPasteAction();
@@ -282,14 +282,14 @@ public class MacroTree
 		a.setEnabled(canCopy);
 
 	}
-	
+
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
 		{
 			TreePath p = this.getClosestPathForLocation(e.getX(), e.getY());
 			if (p == null) return;
-			
+
 			if (this.getSelectionCount() == 1 || isGroup(p))
 			{
 				setSelectionPath(p);
@@ -334,13 +334,13 @@ public class MacroTree
 		}
 		return true;
 	}
-	
+
 	protected MacroTreeNode getSelectedNode()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
 		if (selection.length != 1) return null;
-		
+
 		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
 		return node;
 	}
@@ -359,7 +359,7 @@ public class MacroTree
 		if (node == null) return null;
 
 		if (node.getAllowsChildren()) return node;
-		
+
 		MacroTreeNode parent = (MacroTreeNode)node.getParent();
 		return parent;
 	}
@@ -374,7 +374,7 @@ public class MacroTree
 		if (node == null) return null;
 
 		Object userData = node.getDataObject();
-		
+
 		if (userData instanceof MacroGroup)
 		{
 			return (MacroGroup)userData;
@@ -393,10 +393,10 @@ public class MacroTree
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
 		if (selection.length != 1) return null;
-		
+
 		MacroTreeNode node = (MacroTreeNode)getLastSelectedPathComponent();
 		if (node == null) return null;
-		
+
 		Object o = node.getDataObject();
 		if (o instanceof MacroDefinition)
 		{
@@ -404,7 +404,7 @@ public class MacroTree
 		}
 		return null;
 	}
-	
+
 	public void mousePressed(MouseEvent e)
 	{
 	}
@@ -427,14 +427,14 @@ public class MacroTree
 	private void storeSelectedNodes()
 	{
 		TreePath[] p = getSelectionPaths();
-		
+
 		this.clipboardNodes = new MacroTreeNode[p.length];
 		for (int i = 0; i < p.length; i++)
 		{
 			this.clipboardNodes[i] = (MacroTreeNode)p[i].getLastPathComponent();
 		}
 	}
-	
+
 	public void copy()
 	{
 		storeSelectedNodes();
@@ -463,7 +463,7 @@ public class MacroTree
 		MacroTreeNode group = (MacroTreeNode)getLastSelectedPathComponent();
 		if (group == null) return;
 		if (!group.getAllowsChildren()) return;
-		
+
 		try
 		{
 			if (clipboardType == CLIP_CUT)
@@ -486,18 +486,18 @@ public class MacroTree
 	{
 		if (nodes == null || nodes.length < 1) return;
 		if (newParent == null) return;
-		
+
 		if (action == DnDConstants.ACTION_MOVE)
 		{
 			macroModel.moveNodes(nodes, newParent);
 		}
 		else if (action == DnDConstants.ACTION_COPY)
 		{
-//			macroModel.copyMacrosToGroup(nodes, newParent);
+			macroModel.copyMacrosToGroup(nodes, newParent);
 		}
 		selectNode(nodes[0]);
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		// invoked from the "paste into new folder" action
@@ -518,7 +518,7 @@ public class MacroTree
 		}
 		selectPath(newSelection);
 	}
-	
+
 	public boolean addMacro(boolean copyCurrent)
 	{
 		MacroDefinition current = getSelectedMacro();
@@ -547,7 +547,7 @@ public class MacroTree
 	}
 
 	/**
-	 * Prompts the user for a group name and creates a new group 
+	 * Prompts the user for a group name and creates a new group
 	 * with the provided name. The new group node is automatically
 	 * selected after creation.
 	 * @return the name of the new group or null if the user cancelled the name input
@@ -556,7 +556,7 @@ public class MacroTree
 	{
 		String group = WbSwingUtilities.getUserInput(SwingUtilities.getWindowAncestor(this), ResourceMgr.getString("LblNewProfileGroup"), "");
 		if (StringUtil.isEmptyString(group)) return null;
-		
+
 		if (macroModel.getMacros().containsGroup(group))
 		{
 			WbSwingUtilities.showErrorMessageKey(SwingUtilities.getWindowAncestor(this), "ErrGroupNotUnique");
@@ -566,7 +566,7 @@ public class MacroTree
 		selectPath(path);
 		return group;
 	}
-	
+
 	public void selectPath(TreePath path)
 	{
 		if (path == null) return;
@@ -581,7 +581,7 @@ public class MacroTree
 		TreePath path = new TreePath(nodes);
 		this.selectPath(path);
 	}
-	
+
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		checkActions();
@@ -596,7 +596,7 @@ public class MacroTree
 						outer.width - (autoscrollInsets.left + autoscrollInsets.right),
 						outer.height - (autoscrollInsets.top+autoscrollInsets.bottom)
 					);
-		
+
 		if (!inner.contains(cursorLocation))
 		{
 			Rectangle scrollRect = new Rectangle(

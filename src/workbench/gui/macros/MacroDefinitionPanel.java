@@ -214,16 +214,16 @@ public class MacroDefinitionPanel
 
     shortcutLabel.setText(ResourceMgr.getString("LblKeyDefKeyCol")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 9, 0, 0);
+    gridBagConstraints.insets = new Insets(7, 9, 0, 5);
     add(shortcutLabel, gridBagConstraints);
 
     assignShortcutButton.setText(ResourceMgr.getString("LblAssignShortcut")); // NOI18N
     assignShortcutButton.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 7, 0, 0);
@@ -232,7 +232,7 @@ public class MacroDefinitionPanel
     clearShortcutButton.setText(ResourceMgr.getString("LblClearShortcut")); // NOI18N
     clearShortcutButton.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 10, 0, 0);

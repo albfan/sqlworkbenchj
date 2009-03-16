@@ -47,10 +47,10 @@ import workbench.util.WbFile;
 
 /**
  * The about box for SQL Workbench/J
- * 
+ *
  * @author  support@sql-workbench.net
  */
-public class WbAboutDialog 
+public class WbAboutDialog
 	extends JDialog
 	implements ActionListener
 {
@@ -64,7 +64,7 @@ public class WbAboutDialog
 		mailToLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		builtWithNbLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		jeditLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		
+
 		getRootPane().setDefaultButton(closeButton);
 		escAction = new EscAction(this, this);
 		WbFile f = Settings.getInstance().getConfigFile();

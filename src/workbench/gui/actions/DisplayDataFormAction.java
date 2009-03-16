@@ -23,7 +23,6 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.sql.RecordFormPanel;
-import workbench.interfaces.DbData;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -72,8 +71,8 @@ public class DisplayDataFormAction
 		{
 			d.height = screen.height - 150;
 			doLimit = true;
-			
-			// make the form wider, so that the vertical scrollbar does not 
+
+			// make the form wider, so that the vertical scrollbar does not
 			// force a horizontal scrollbar to appear because the vertical space is now smaller
 			UIDefaults def = UIManager.getDefaults();
 			int scrollwidth = def.getInt("ScrollBar.width");

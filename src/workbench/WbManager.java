@@ -79,7 +79,7 @@ public final class WbManager
 	private AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
 	public final boolean isJava15;
-	
+
 	private WbManager()
 	{
 		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
@@ -103,12 +103,12 @@ public final class WbManager
 	{
 		return cmdLine;
 	}
-	
+
 	public boolean getSettingsShouldBeSaved()
 	{
 		return this.writeSettings;
 	}
-	
+
 	public void showDialog(String clazz)
 	{
 		JFrame parent = WbManager.getInstance().getCurrentWindow();
@@ -174,12 +174,12 @@ public final class WbManager
 		{
 			return this.mainWindows.get(0);
 		}
-		
+
 		for (MainWindow w : mainWindows)
 		{
 			if (w != null && w.hasFocus()) return w;
 		}
-		
+
 		return null;
 	}
 
@@ -200,7 +200,7 @@ public final class WbManager
 				if (f.hasFocus()) return f;
 			}
 		}
-		
+
 		return null;
 
 	}
@@ -218,7 +218,7 @@ public final class WbManager
 		synchronized (toolWindows)
 		{
 			this.toolWindows.remove(aWindow);
-			
+
 			if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
 			{
 				this.exitWorkbench(aWindow.getWindow());
@@ -313,7 +313,7 @@ public final class WbManager
 			result = win.saveWorkspace(true);
 			if (!result) return false;
 		}
-		
+
 		if (!settingsSaved)
 		{
 			for (MainWindow win : mainWindows)
@@ -324,7 +324,7 @@ public final class WbManager
 				}
 			}
 		}
-		
+
 		return true;
 	}
 
@@ -346,7 +346,7 @@ public final class WbManager
 			}
 			return true;
 		}
-		else 
+		else
 		{
 			return false;
 		}
@@ -534,9 +534,9 @@ public final class WbManager
 
 	/**
 	 * Called whenever a MainWindow is closed.
-	 * 
-	 * @see workbench.gui.MainWindow#windowClosing(java.awt.event.WindowEvent) 
-	 * @see workbench.gui.MainWindow#connectCancelled() 
+	 *
+	 * @see workbench.gui.MainWindow#windowClosing(java.awt.event.WindowEvent)
+	 * @see workbench.gui.MainWindow#connectCancelled()
 	 */
 	public void windowClosing(final MainWindow win)
 	{
@@ -572,7 +572,7 @@ public final class WbManager
 	 *
 	 * This method will be called from the GUI
 	 * when the user requests a new window
-	 * 
+	 *
 	 * @see workbench.gui.actions.FileNewWindowAction
 	 */
 	public void openNewWindow()
@@ -741,7 +741,7 @@ public final class WbManager
 					System.err.println("Invalid parameter(s): " + unknown);
 				}
 			}
-			
+
 			LogMgr.logInfo("WbManager.init()", "Starting " + ResourceMgr.TXT_PRODUCT_NAME + ", " + ResourceMgr.getBuildInfo());
 			LogMgr.logInfo("WbManager.init()", "Java version=" + System.getProperty("java.version")  + ", java.home=" + System.getProperty("java.home") + ", vendor=" + System.getProperty("java.vendor") );
 			LogMgr.logInfo("WbManager.init()", "Operating System=" + System.getProperty("os.name")  + ", version=" + System.getProperty("os.version") + ", platform=" + System.getProperty("os.arch"));
@@ -762,7 +762,7 @@ public final class WbManager
 		else
 		{
 			warmUp();
-			
+
 			// This will install the application listener if running under MacOS
 			MacOSHelper m = new MacOSHelper();
 			m.installApplicationHandler();
@@ -791,7 +791,7 @@ public final class WbManager
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
-	
+
 	public void runGui()
 	{
 //		WbSplash splash = null;
@@ -801,10 +801,10 @@ public final class WbManager
 //			splash.setVisible(true);
 //		}
 
-		try
-		{
+//		try
+//		{
 			this.initUI();
-			
+
 			boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
 			boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
 
@@ -823,15 +823,15 @@ public final class WbManager
 
 			UpdateCheck upd = new UpdateCheck();
 			upd.startUpdateCheck();
-		}
-		finally
-		{
+//		}
+//		finally
+//		{
 //			if (splash != null)
 //			{
 //				splash.setVisible(false);
 //				splash.dispose();
 //			}
-		}
+//		}
 	}
 
 	// Package visible for testing purposes
@@ -932,10 +932,10 @@ public final class WbManager
 	{
 		return Boolean.getBoolean("workbench.gui.testmode");
 	}
-	
+
 	public static void prepareForTest(String[] args)
 	{
-		
+
 		wb = new WbManager();
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);

@@ -15,7 +15,6 @@ import java.awt.Point;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragGestureRecognizer;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DragSourceDropEvent;
@@ -36,9 +35,7 @@ import workbench.log.LogMgr;
 class MacroTreeDragHandler
 	implements DragSourceListener, DragGestureListener, DropTargetListener
 {
-	private DropTarget dropTarget;
 	private DragSource dragSource;
-	private DragGestureRecognizer recognizer;
 	private MacroTree macroTree;
 	private TreePath[] draggedEntries;
 
@@ -46,8 +43,8 @@ class MacroTreeDragHandler
 	{
 		macroTree = tree;
 		dragSource = new DragSource();
-		dropTarget = new DropTarget(macroTree, this);
-		recognizer = dragSource.createDefaultDragGestureRecognizer(macroTree, actions, this);
+		new DropTarget(macroTree, this);
+		dragSource.createDefaultDragGestureRecognizer(macroTree, actions, this);
 	}
 
 	public void dragGestureRecognized(DragGestureEvent dge)

@@ -16,7 +16,6 @@ import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;

@@ -29,7 +29,7 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  * @see workbench.db.DbSettings#getDropMultipleColumnSql()
  * @see workbench.db.DbSettings#getDropSingleColumnSql()
- * 
+ *
  */
 public class ColumnDropper
 	implements ObjectDropper
@@ -39,12 +39,11 @@ public class ColumnDropper
 	private TableIdentifier table;
 	private boolean cancelDrop = false;
 	private Statement currentStatement;
-	private RowActionMonitor monitor;
-	
+
 	public ColumnDropper()
 	{
 	}
-	
+
 	public ColumnDropper(WbConnection db, TableIdentifier tbl, List<ColumnIdentifier> toDrop)
 	{
 		this.conn = db;
@@ -54,9 +53,8 @@ public class ColumnDropper
 
 	public void setRowActionMonitor(RowActionMonitor mon)
 	{
-		this.monitor = mon;
 	}
-	
+
 	public boolean supportsCascade()
 	{
 		return false;
@@ -65,12 +63,12 @@ public class ColumnDropper
 	public void setCascade(boolean flag)
 	{
 	}
-	
+
 	public boolean supportsFKSorting()
 	{
 		return false;
 	}
-	
+
 	public void cancel()
 		throws SQLException
 	{
@@ -85,22 +83,22 @@ public class ColumnDropper
 	{
 		return this.conn;
 	}
-	
+
 	public void setConnection(WbConnection con)
 	{
 		this.conn = con;
 	}
-	
+
 	public void setObjectTable(TableIdentifier tbl)
 	{
 		this.table = tbl;
 	}
-	
+
 	public List<? extends DbObject> getObjects()
 	{
 		return columns;
 	}
-	
+
 	public void setObjects(List<? extends DbObject> toDrop)
 	{
 		this.columns = new ArrayList<ColumnIdentifier>();
@@ -119,7 +117,7 @@ public class ColumnDropper
 		List<String> statements = getSql();
 		StringBuffer result = new StringBuffer(statements.size() * 40);
 		boolean needCommit = (conn != null ? conn.shouldCommitDDL() : false);
-		
+
 		for (String sql : statements)
 		{
 			result.append(sql);
@@ -129,27 +127,27 @@ public class ColumnDropper
 		}
 		return result;
 	}
-	
+
 	public void dropObjects()
 		throws SQLException
 	{
 		if (this.conn == null) return;
 		if (this.table == null) return;
 		if (this.columns == null || this.columns.size() == 0) return;
-		
+
 		List<String> statements = getSql();
-		
+
 		try
 		{
 			this.currentStatement = this.conn.createStatement();
-			
+
 			for (String sql : statements)
 			{
 				if (cancelDrop) break;
 				LogMgr.logDebug("ColumnDropper.dropObjects()", "Using sql: " + sql);
 				this.currentStatement.executeUpdate(sql);
 			}
-			
+
 			if (conn.shouldCommitDDL())
 			{
 				if (cancelDrop)
@@ -186,7 +184,7 @@ public class ColumnDropper
 		if (this.columns.size() == 1 || StringUtil.isEmptyString(multiSql))
 		{
 			singleSql = StringUtil.replace(singleSql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn));
-			
+
 			for (ColumnIdentifier col : columns)
 			{
 				result.add(StringUtil.replace(singleSql, MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, col.getColumnName(this.conn)));
@@ -195,7 +193,7 @@ public class ColumnDropper
 		else
 		{
 			multiSql = StringUtil.replace(multiSql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn));
-			
+
 			StringBuilder cols = new StringBuilder(columns.size());
 			int nr = 0;
 			for (ColumnIdentifier col : columns)
@@ -206,7 +204,7 @@ public class ColumnDropper
 			}
 			result.add(StringUtil.replace(multiSql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, cols.toString()));
 		}
-		
+
 		return result;
 	}
 }

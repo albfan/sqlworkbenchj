@@ -15,7 +15,6 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.SQLException;
 import workbench.db.DbMetadata;
-import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -34,23 +33,23 @@ public class AlterSessionCommand
 	extends SqlCommand
 {
 	public static final String VERB = "ALTER SESSION";
-	
+
 	public String getVerb() { return VERB; }
-	
+
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
-		
+
 		String oldSchema = null;
 		SQLLexer lexer = new SQLLexer(sql);
-		
+
 		DbMetadata meta = currentConnection.getMetadata();
-		
+
 		// Skip the ALTER SESSION verb
 		SQLToken token = lexer.getNextToken(false, false);
-		
+
 		token = lexer.getNextToken(false, false);
 		if (token.getContents().equals("SET"))
 		{
@@ -65,7 +64,7 @@ public class AlterSessionCommand
 			{
 				// this should be the = sign, skip it
 				token = lexer.getNextToken(false, false);
-				
+
 				// this is the parameter for the new timezone
 				token = lexer.getNextToken(false, false);
 				if (token != null)
@@ -88,7 +87,7 @@ public class AlterSessionCommand
 				// current schema (user)
 				appendSuccessMessage(result);
 			}
-			else 
+			else
 			{
 				// if the current schema is changed, a schemaChanged should be fired
 				String schema = meta.getCurrentSchema();
@@ -98,7 +97,7 @@ public class AlterSessionCommand
 					result.addMessage(ResourceMgr.getFormattedString("MsgSchemaChanged", schema));
 				}
 			}
-			
+
 			result.setSuccess();
 		}
 		catch (Exception e)
@@ -106,15 +105,15 @@ public class AlterSessionCommand
 			addErrorInfo(result, sql, e);
 			LogMgr.logSqlError("AlterSessionCommand.execute()", sql, e);
 		}
-		
+
 		return result;
 	}
-	
+
 	private boolean changeOracleTimeZone(StatementRunnerResult result, String tz)
 	{
 		Connection sqlCon = currentConnection.getSqlConnection();
 		Method setTimezone = null;
-		
+
 		try
 		{
 			Class cls = currentConnection.getSqlConnection().getClass();
@@ -125,7 +124,7 @@ public class AlterSessionCommand
 			// Ignore
 			return false;
 		}
-		
+
 		if (setTimezone != null)
 		{
 			try
