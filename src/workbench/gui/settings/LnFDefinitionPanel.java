@@ -97,6 +97,13 @@ public class LnFDefinitionPanel
 		infoText.setLineWrap(true);
 		infoText.setBackground(this.getBackground());
 		libraryPath.addPropertyChangeListener("filename", this);
+		libraryPath.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				selectClass();
+			}
+		});
 	}
 
 	public void setPropertyListener(PropertyChangeListener l)

@@ -11,6 +11,8 @@
  */
 package workbench.gui.profiles;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Driver;
@@ -48,12 +50,23 @@ public class DriverEditorPanel
 		text = ResourceMgr.getDescription("SelectDriverLibrary");
 		libraryPath.setButtonTooltip(text);
 		libraryPath.addPropertyChangeListener("filename", this);
+		libraryPath.addActionListener(new ActionListener()
+		{
+			public void actionPerformed(ActionEvent e)
+			{
+				selectClass();
+			}
+		});
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (ignoreChange) return;
+		selectClass();
+	}
 
+	protected void selectClass()
+	{
 		ClassFinder finder = new ClassFinder(Driver.class);
 		List<String> libs = DbDriver.splitLibraryList(libraryPath.getFilename());
 
