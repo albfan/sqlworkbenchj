@@ -15,14 +15,20 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
 * A class to read table level constraints from the database.
@@ -33,15 +39,6 @@ public abstract class AbstractConstraintReader
 {
 	public abstract String getColumnConstraintSql();
 	public abstract String getTableConstraintSql();
-	public String getPrefixTableConstraintKeyword()
-	{
-		return "";
-	}
-	
-	public String getSuffixTableConstraintKeyword()
-	{
-		return "";
-	}
 
 	public boolean isColumnConstraintNameIncluded() { return false; }
 	public boolean isTableConstraintNameIncluded() { return false; }
@@ -59,6 +56,11 @@ public abstract class AbstractConstraintReader
 		return 1;
 	}
 
+	public boolean isSystemConstraintName(String name)
+	{
+		return false;
+	}
+	
 	/**
 	 *	Returns the column constraints for the given table. The key to the Map is
 	 *	the column name, the value is the full expression which can be appended
@@ -111,12 +113,34 @@ public abstract class AbstractConstraintReader
 		return result;
 	}
 
+	public String getConstraintSource(List<TableConstraint> constraints, String indent)
+	{
+		if (constraints == null) return null;
+		StringBuilder result = new StringBuilder();
+		
+		int count = 0;
+		for (int i=0; i < constraints.size(); i++)
+		{
+			TableConstraint cons = constraints.get(i);
+			if (cons == null) continue;
+			if (StringUtil.isBlank(cons.getExpression())) continue;
+			if (count > 0)
+			{
+				result.append("\n");
+				result.append(indent);
+				result.append(',');
+			}
+			result.append(cons.getSql());
+			count++;
+		}
+		return result.toString();
+	}
+	
 	/**
 	 * Returns the SQL Statement that should be appended to a CREATE table
 	 * in order to create the constraints defined on the table
 	 */
-	public String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent)
-		throws SQLException
+	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
@@ -126,18 +150,31 @@ public abstract class AbstractConstraintReader
 			LogMgr.logInfo(getClass().getName() + ".getTableConstraints()", "Using SQL: " + sql);
 		}
 
-		StringBuilder result = new StringBuilder(100);
-		String prefix = this.getPrefixTableConstraintKeyword();
-		String suffix = this.getSuffixTableConstraintKeyword();
+		List<TableConstraint> result = CollectionBuilder.arrayList();
 		PreparedStatement stmt = null;
-		
+
+		Savepoint sp = null;
+
 		ResultSet rs = null;
 		try
 		{
-			stmt = dbConnection.prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+			if (dbConnection.getDbSettings().useSavePointForDML())
+			{
+				sp = dbConnection.setSavepoint();
+			}
+			
+			stmt = dbConnection.getSqlConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 			
 			int index = this.getIndexForSchemaParameter();
-			if (index > 0) stmt.setString(index, aTable.getSchema());
+			if (index > 0) 
+			{
+				String schema = aTable.getSchema();
+				if (StringUtil.isBlank(schema))
+				{
+					schema = dbConnection.getCurrentSchema();
+				}
+				stmt.setString(index, schema);
+			}
 
 			index = this.getIndexForCatalogParameter();
 			if (index > 0) stmt.setString(index, aTable.getCatalog());
@@ -145,36 +182,38 @@ public abstract class AbstractConstraintReader
 			index = this.getIndexForTableNameParameter();
 			if (index > 0) stmt.setString(index, aTable.getTableName());
 
+			Pattern p = Pattern.compile("^check\\s+.*", Pattern.CASE_INSENSITIVE);
 			rs = stmt.executeQuery();
-			int count = 0;
 			while (rs.next())
 			{
-				String constraint = rs.getString(1);
+				String name = rs.getString(1);
+				String constraint = rs.getString(2);
 				if (constraint != null)
 				{
-					if (count > 0)
+					constraint = constraint.trim();
+
+					Matcher m = p.matcher(constraint);
+					if (constraint.charAt(0) != '(' && !m.matches())
 					{
-						result.append("\n");
-						result.append(indent);
-						result.append(',');
+						constraint = "(" + constraint + ")";
 					}
-					result.append(prefix);
-					result.append(constraint);
-					result.append(suffix);
-					count++;
+					TableConstraint c = new TableConstraint(name, constraint);
+					c.setIsSystemName(isSystemConstraintName(name));
+					result.add(c);
 				}
 			}
+			dbConnection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
-			LogMgr.logError("AbstractConstraintReader", "Error when reading column constraints " + ExceptionUtil.getDisplay(e), null);
-			throw e;
+			dbConnection.rollback(sp);
+			LogMgr.logError("AbstractConstraintReader", "Error when reading table constraints " + ExceptionUtil.getDisplay(e), null);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return result.toString();
+		return result;
 	}
 
 }

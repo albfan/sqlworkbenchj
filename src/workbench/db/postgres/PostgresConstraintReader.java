@@ -11,17 +11,7 @@
  */
 package workbench.db.postgres;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Savepoint;
 import workbench.db.AbstractConstraintReader;
-import workbench.db.TableIdentifier;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
-import workbench.resource.Settings;
-import workbench.util.SqlUtil;
 
 
 /**
@@ -33,7 +23,7 @@ public class PostgresConstraintReader
 	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL =
-					 "select rel.consrc, rel.conname \n" +
+					 "select rel.conname, rel.consrc \n" +
            "from pg_class t, pg_constraint rel \n" +
            "where t.relname = ? \n" +
            "and   t.oid = rel.conrelid " +
@@ -43,61 +33,10 @@ public class PostgresConstraintReader
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
 
-	public String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent)
-		throws SQLException
+	@Override
+	public int getIndexForTableNameParameter()
 	{
-		String sql = this.getTableConstraintSql();
-		if (sql == null) return null;
-		StringBuilder result = new StringBuilder(100);
-
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
-		Savepoint sp = null;
-		try
-		{
-			sp = (dbConnection.getAutoCommit() ? null : dbConnection.setSavepoint());
-			stmt = dbConnection.prepareStatement(sql);
-			stmt.setString(1, aTable.getTableName());
-			rs = stmt.executeQuery();
-			int count = 0;
-			while (rs.next())
-			{
-				String constraint = rs.getString(1);
-				String name = rs.getString(2);
-				if (constraint != null)
-				{
-					if (count > 0)
-					{
-						result.append(nl);
-						result.append(indent);
-						result.append(',');
-					}
-					if (name != null)
-					{
-						result.append("CONSTRAINT ");
-						result.append(name);
-						result.append(' ');
-					}
-					result.append("CHECK ");
-					result.append(constraint);
-					count++;
-				}
-			}
-			if (sp != null) dbConnection.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			try { dbConnection.rollback(sp); } catch (Throwable th) {}
-			LogMgr.logError("AbstractConstraintReader", "Error when reading column constraints " + ExceptionUtil.getDisplay(e), null);
-			throw e;
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
-		}
-		return result.toString();
+		return 1;
 	}
 
 }

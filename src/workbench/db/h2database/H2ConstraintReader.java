@@ -21,15 +21,16 @@ import workbench.db.AbstractConstraintReader;
 public class H2ConstraintReader 
 	extends AbstractConstraintReader
 {
-	private final String TABLE_SQL = "select column_name, 'CHECK '||check_constraint \n" + 
-           "from information_schema.columns \n" + 
-           "where table_name = ? \n" + 
-           "and table_schema = ? \n" +
-					 "and (check_constraint is not null and check_constraint <> '')";
-	
+	private final String TABLE_SQL =
+						"select constraint_name, check_expression \n" +
+            "from information_schema.constraints \n" +
+            "where constraint_type = 'CHECK'  \n" +
+            "and table_name = ? \n" +
+            "and table_schema = ?";
+
 	public int getIndexForSchemaParameter() { return 2; }
 	public int getIndexForTableNameParameter() { return 1; }
-	public String getColumnConstraintSql() { return this.TABLE_SQL; }
-	public String getTableConstraintSql() { return null; }
-	
+	public String getColumnConstraintSql() { return null; }
+	public String getTableConstraintSql() { return this.TABLE_SQL; }
+
 }

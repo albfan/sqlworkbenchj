@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.event.ActionListener;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
@@ -87,6 +88,14 @@ public class WbFilePicker
 		selectFileButton.setToolTipText(text);
 	}
 
+	/**
+	 * Adds an ActionListener for the text field.
+	 * @param l
+	 */
+	public void addActionListener(ActionListener l)
+	{
+		this.tfFilename.addActionListener(l);
+	}
 
 	/** This method is called from within the constructor to
 	 * initialize the form.

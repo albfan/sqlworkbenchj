@@ -220,7 +220,7 @@ public class TableSourceBuilder
 			result.append(lineEnding);
 		}
 
-		String cons = meta.getTableConstraints(table, "   ");
+		String cons = meta.getTableConstraintSource(table, "   ");
 		if (cons != null && cons.length() > 0)
 		{
 			result.append("   ,");

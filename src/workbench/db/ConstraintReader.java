@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -31,10 +32,15 @@ public interface ConstraintReader
 	
 	
 	/**
-	 * Returns the SQL Statement that should be appended to a CREATE table
-	 * in order to create the constraints defined on the table
+	 * Returns the (check) constraint definitions for the given table
 	 */
-	String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent)
-		throws SQLException;
-	
+	List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable);
+
+	/**
+	 * Rebuild the source of the given constraints
+	 * 
+	 * @param constraints
+	 * @param indent
+	 */
+	String getConstraintSource(List<TableConstraint> constraints, String indent);
 }

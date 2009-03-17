@@ -22,7 +22,8 @@ public class FirebirdConstraintReader
 	extends AbstractConstraintReader
 {
 
-	private static final String TABLE_SQL = "select rdb$trigger_source \n" + 
+	private static final String TABLE_SQL = 
+		       "select trim(cc.rdb$constraint_name), trg.rdb$trigger_source " +
            "from rdb$relation_constraints rc,  \n" + 
            "     rdb$check_constraints cc, \n" + 
            "     rdb$triggers trg \n" + 

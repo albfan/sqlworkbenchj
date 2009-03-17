@@ -16,11 +16,14 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import workbench.db.ConstraintReader;
+import workbench.db.AbstractConstraintReader;
+import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
 
 /**
@@ -29,7 +32,7 @@ import workbench.util.SqlUtil;
  * @author  support@sql-workbench.net
  */
 public class FirstSqlConstraintReader
-	implements ConstraintReader
+	extends AbstractConstraintReader
 {
 	private static final String SQL = "select ch.check_clause, ch.constraint_name \n" + 
              "from definition_schema.syschecks ch,  \n" + 
@@ -39,21 +42,24 @@ public class FirstSqlConstraintReader
              "  and cons.table_schema = ? \n" + 
              "  and cons.table_name = ? ";
 
+
 	public Map<String, String> getColumnConstraints(Connection dbConnection, TableIdentifier aTable)
 	{
 		return Collections.emptyMap();
 	}
 
-	public String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent) 
+	public List<TableConstraint> getTableConstraints(Connection dbConnection, TableIdentifier aTable)
 		throws SQLException
 	{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuilder result = new StringBuilder(200);
+		
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("FirstSqlConstraintReader.getTableConstraints()", "Using query=\n" + SQL);
 		}
+
+		List<TableConstraint> result = CollectionBuilder.arrayList();
 		
 		try
 		{
@@ -61,28 +67,11 @@ public class FirstSqlConstraintReader
 			pstmt.setString(1, aTable.getSchema());
 			pstmt.setString(2, aTable.getTableName());
 			rs = pstmt.executeQuery();
-			int count = 0;
 			while (rs.next())
 			{
 				String constraint = rs.getString(1);
 				String name = rs.getString(2);
-				
-				if (count > 0)
-				{
-					result.append('\n');
-					result.append(indent);
-					result.append(',');
-				}
-				if (name != null)
-				{
-					result.append("CONSTRAINT ");
-					result.append(name);
-					result.append(' ');
-				}
-				result.append("CHECK (");
-				result.append(constraint);
-				result.append(')');
-				count ++;
+				result.add(new TableConstraint(name, "(" + constraint + ")"));
 			}
 		}
 		catch (SQLException e)
@@ -94,6 +83,18 @@ public class FirstSqlConstraintReader
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
-		return result.toString();
+		return result;
+	}
+
+	@Override
+	public String getColumnConstraintSql()
+	{
+		return null;
+	}
+
+	@Override
+	public String getTableConstraintSql()
+	{
+		return SQL;
 	}
 }

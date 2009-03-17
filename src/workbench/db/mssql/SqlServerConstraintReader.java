@@ -22,7 +22,7 @@ public class SqlServerConstraintReader
 	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL =
-					 "select c.text \n" +
+					 "select cons.name, c.text \n" +
            "from sysobjects cons, \n" +
            "     syscomments c, \n" +
            "     sysobjects tab \n" +
@@ -31,7 +31,6 @@ public class SqlServerConstraintReader
            "and   cons.parent_obj = tab.id \n" +
            "and   tab.name = ? \n";
 
-	public String getPrefixTableConstraintKeyword() { return "check"; }
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
 

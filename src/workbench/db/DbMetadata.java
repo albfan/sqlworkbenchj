@@ -2514,30 +2514,35 @@ public class DbMetadata
 	 * @param tbl The table to check
 	 * @param indent A String defining the indention for the source code
 	 */
-	public String getTableConstraints(TableIdentifier tbl, String indent)
+	public String getTableConstraintSource(TableIdentifier tbl, String indent)
+	{
+		List<TableConstraint> cons = getTableConstraints(tbl);
+		return getTableConstraintSource(cons, indent);
+	}
+
+	public String getTableConstraintSource(List<TableConstraint> cons, String indent)
 	{
 		ConstraintReader reader = this.getConstraintReader();
 		if (reader == null) return null;
 
-		String cons = null;
-		Savepoint sp = null;
-		try
-		{
-			if (dbSettings.useSavePointForDML())
-			{
-				sp = this.dbConnection.setSavepoint();
-			}
-			cons = reader.getTableConstraints(dbConnection.getSqlConnection(), tbl, indent);
-			dbConnection.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			LogMgr.logError("DbMetadata.getTableConstraints()", "Error retrieving table constraints", e);
-			dbConnection.rollback(sp);
-			sp = null;
-			cons = null;
-		}
-		return cons;
+		return reader.getConstraintSource(cons, indent);
+	}
+
+
+	/**
+	 * Return the SQL source for check constraints defined for the table. This is
+	 * delegated to a {@link ConstraintReader}
+	 * @return A String with the table constraints. If no constrains exist, a null String is returned
+	 * @param tbl The table to check
+	 * @param indent A String defining the indention for the source code
+	 */
+	public List<TableConstraint> getTableConstraints(TableIdentifier tbl)
+	{
+		ConstraintReader reader = this.getConstraintReader();
+		if (reader == null) return null;
+
+		List<TableConstraint> result = reader.getTableConstraints(dbConnection, tbl);
+		return result;
 	}
 
 	/**

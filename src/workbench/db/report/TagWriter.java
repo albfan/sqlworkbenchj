@@ -79,6 +79,20 @@ public class TagWriter
 		target.append(value);
 		appendCloseTag(target, null, tag);
 	}
+
+	public void appendCDATATag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, String attr, String attValue)
+	{
+		appendOpenTag(target, indent, tag, attr, attValue);
+		target.append('\n');
+		target.append(indent);
+		target.append("  ");
+		target.append(CDATA_START);
+		target.append(value);
+		target.append(CDATA_END);
+		target.append('\n');
+		target.append(indent);
+		appendCloseTag(target, null, tag);
+	}
 	
 	/**
 	 * Appends the tag and the value in one line. There will be a new line
@@ -121,7 +135,14 @@ public class TagWriter
 	
 	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
 	{
-		appendOpenTag(target, indent, tag, true, new TagAttribute(attribute, attValue));
+		if (StringUtil.isNonBlank(attribute))
+		{
+			appendOpenTag(target, indent, tag, true, new TagAttribute(attribute, attValue));
+		}
+		else
+		{
+			appendOpenTag(target, indent, tag, true);
+		}
 	}
 	
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values)
@@ -178,10 +199,13 @@ public class TagWriter
 			target.append(':');
 		}
 		target.append(tag);
-		for (TagAttribute att : attributes)
+		if (attributes != null && attributes.length > 0)
 		{
-			target.append(' ');
-			target.append(att.getTagText());
+			for (TagAttribute att : attributes)
+			{
+				target.append(' ');
+				target.append(att.getTagText());
+			}
 		}
 		if (closeTag) target.append('>');
 	}

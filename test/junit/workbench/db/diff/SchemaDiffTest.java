@@ -11,6 +11,7 @@
  */
 package workbench.db.diff;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.TestUtil;
@@ -120,6 +121,7 @@ public class SchemaDiffTest
 			diff.setIncludeViews(false);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
+//			TestUtil.writeFile(new File("c:/temp/grantdiff.xml"), xml);
 
 			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/grantee");
 			assertEquals("Grantee not correct", "UNIT_TEST", value);
@@ -178,6 +180,61 @@ public class SchemaDiffTest
 		}
 	}
 
+	public void testCheckConstraint()
+	{
+		try
+		{
+			setupCheckTest();
+			SchemaDiff diff = new SchemaDiff(source, target);
+			diff.setIncludeForeignKeys(false);
+			diff.setIncludeIndex(false);
+			diff.setIncludePrimaryKeys(false);
+			diff.setIncludeProcedures(false);
+			diff.setIncludeTableGrants(false);
+			diff.setIncludeTableConstraints(true);
+			diff.setCompareConstraintsByName(true);
+			diff.setIncludeViews(false);
+			diff.compareAll();
+			String xml = diff.getMigrateTargetXml();
+			TestUtil.writeFile(new File("c:/temp/checkdiff.xml"), xml);
+
+			diff.setCompareConstraintsByName(false);
+			xml = diff.getMigrateTargetXml();
+			TestUtil.writeFile(new File("c:/temp/checkdiff2.xml"), xml);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+	}
+
+	private void setupCheckTest()
+		throws SQLException, ClassNotFoundException
+	{
+		TestUtil util = new TestUtil("schemaDiffTest");
+
+		this.source = util.getConnection("source");
+		this.target = util.getConnection("target");
+
+		TestUtil.executeScript(source,
+			"create table person (" +
+			"  person_id integer primary key, " +
+			"  firstname varchar(100), " +
+			"  lastname varchar(100), " +
+			"  constraint positive_id check (person_id > 0)," +
+			"  constraint lname_min_length check (length(lastname) > 5)" +
+			")");
+
+		TestUtil.executeScript(target,
+			"create table person (" +
+			"  person_id integer primary key, " +
+			"  firstname varchar(100), " +
+			"  lastname varchar(100), " +
+			"  constraint positive_id  check (person_id > 1) " +
+			")");
+		
+	}
 	private void setupGrantTestDb()
 		throws SQLException, ClassNotFoundException
 	{

@@ -20,12 +20,12 @@ import workbench.db.AbstractConstraintReader;
 public class Db2ConstraintReader 
 	extends AbstractConstraintReader
 {
-	private static final String HOST_TABLE_SQL = "select 'check ('||checkcondition||') ' \n" +
+	private static final String HOST_TABLE_SQL = "select '('||checkcondition||')' \n" +
 					 "from  sysibm.syschecks \n" +
 					 "where tbname = ? " +
 					 "and tbowner = ?";
 	
-	private static final String LUW_TABLE_SQL = "select 'check ('||text||') ' \n" +
+	private static final String LUW_TABLE_SQL = "select '('||text||')' \n" +
 					 "from syscat.checks cons \n" +
 					 "where tabname = ? " +
 					 "and tabschema = ?";

@@ -30,18 +30,19 @@ import java.util.HashMap;
 import java.util.Map;
 import workbench.db.IndexDefinition;
 import workbench.db.TableCommentReader;
+import workbench.db.TableConstraint;
 import workbench.util.StringUtil;
 
 /**
- * A class to hold information about a database table that 
- * will eventually be stored in an XML report. 
- * It uses a {@link workbench.db.TableIdentifier} to store the 
- * table's name, and {@link workbench.db.ColumnIdentifier} to 
+ * A class to hold information about a database table that
+ * will eventually be stored in an XML report.
+ * It uses a {@link workbench.db.TableIdentifier} to store the
+ * table's name, and {@link workbench.db.ColumnIdentifier} to
  * store the table's columns.
- * When initialized with a connection, it tries to find the primary 
+ * When initialized with a connection, it tries to find the primary
  * and foreign key constraints as well.
  *
- * Primary feature of this class is that it can create an XML 
+ * Primary feature of this class is that it can create an XML
  * representation of itself.
  * @author  support@sql-workbench.net
  */
@@ -52,7 +53,8 @@ public class ReportTable
 	public static final String TAG_TABLE_CATALOG = "table-catalog";
 	public static final String TAG_TABLE_SCHEMA = "table-schema";
 	public static final String TAG_TABLE_COMMENT = "table-comment";
-	public static final String TAG_TABLE_CONSTRAINT = "table-constraint";
+	public static final String TAG_TABLE_CONSTRAINTS = "table-constraints";
+	public static final String TAG_CONSTRAINT_DEF = "constraint-definition";
 
 	private TableIdentifier table;
 	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<String, ForeignKeyDefinition>();
@@ -63,24 +65,24 @@ public class ReportTable
 	private String schemaNameToUse = null;
 	private String namespace = null;
 	private boolean includePrimaryKey = true;
-	private String tableConstraints;
+	private List<TableConstraint> tableConstraints;
 	private ReportTableGrants grants;
-	
+
 	public ReportTable(TableIdentifier tbl)
 	{
 		this(tbl, (String)null);
 	}
-	
+
 	public ReportTable(TableIdentifier tbl, String nspace)
 	{
 		this.table = tbl;
 		this.namespace = nspace;
 		tagWriter.setNamespace(this.namespace);
 	}
-	
+
 	/**
 	 * Initialize this ReportTable.
-	 * This will read the following information for the table: 
+	 * This will read the following information for the table:
 	 * <ul>
 	 *	<li>columns for the table using {@link workbench.db.DbMetadata#getTableColumns(TableIdentifier)}</li>
 	 *  <li>the comments for the table using {@link workbench.db.TableCommentReader#getTableComment(WbConnection, TableIdentifier)}</li>
@@ -94,10 +96,10 @@ public class ReportTable
 	{
 		this.table = tbl.createCopy();
 		this.namespace = nspace;
-		this.includePrimaryKey = includePk; 
-		
+		this.includePrimaryKey = includePk;
+
 		this.table.checkQuotesNeeded(conn);
-		
+
 		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
 		Collections.sort(cols);
 
@@ -106,8 +108,8 @@ public class ReportTable
 		String schema = this.table.getSchema();
 		if (schema == null || schema.length() == 0)
 		{
-			// This is important for e.g. Oracle. Otherwise the table definition 
-			// will contain multiple columns if a table exists more then once in 
+			// This is important for e.g. Oracle. Otherwise the table definition
+			// will contain multiple columns if a table exists more then once in
 			// different schemas with the same name
 			schema = conn.getMetadata().getSchemaToUse();
 			if (schema != null) this.table.setSchema(schema);
@@ -115,23 +117,23 @@ public class ReportTable
 
 		this.setColumns(cols);
 		this.tagWriter.setNamespace(namespace);
-		
+
 		if (includeIndex)
 		{
 			this.reporter = new IndexReporter(tbl, conn);
 			this.reporter.setNamespace(namespace);
 		}
-		
-		if (includeFk) 
+
+		if (includeFk)
 		{
 			this.readForeignKeys(conn);
 		}
-		
+
 		if (includeConstraints)
 		{
-			this.tableConstraints = conn.getMetadata().getTableConstraints(tbl, "");
+			this.tableConstraints = conn.getMetadata().getTableConstraints(tbl);
 		}
-		
+
 		if (includeGrants)
 		{
 			grants = new ReportTableGrants(conn, this.table);
@@ -146,9 +148,9 @@ public class ReportTable
 	{
 		return grants;
 	}
-	
+
 	/**
-	 *	Return the list of column names (String) 
+	 *	Return the list of column names (String)
 	 *  that make up the primary key of this table
 	 *  If the table has no primary key, an empty list
 	 *  is returned.
@@ -168,7 +170,7 @@ public class ReportTable
 		Collections.sort(result);
 		return result;
 	}
-	
+
 	/**
 	 *	Return the name of the primary key
 	 */
@@ -188,7 +190,7 @@ public class ReportTable
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Define the columns that belong to this table
 	 */
@@ -204,7 +206,7 @@ public class ReportTable
 			this.columns[i].setNamespace(this.namespace);
 		}
 	}
-	
+
 	private void readForeignKeys(WbConnection conn)
 	{
 		DataStore ds = conn.getMetadata().getForeignKeys(this.table, true);
@@ -277,7 +279,7 @@ public class ReportTable
 		if (this.reporter == null) return null;
 		return this.reporter.getIndexList();
 	}
-	
+
 	public List<ReportColumn> getColumnsSorted()
 	{
 		Comparator<ReportColumn> comp = new Comparator<ReportColumn>()
@@ -297,22 +299,22 @@ public class ReportTable
 		Collections.sort(result, comp);
 		return result;
 	}
-	
+
 	public ReportColumn[] getColumns()
 	{
 		return this.columns;
 	}
-	
+
 	public TableIdentifier getTable()
 	{
 		return this.table;
 	}
-	
+
 	public void setSchemaNameToUse(String name)
 	{
 		this.schemaNameToUse = name;
 	}
-	
+
 	public void writeXml(Writer out)
 		throws IOException
 	{
@@ -324,15 +326,19 @@ public class ReportTable
 	{
 		return getXml(new StrBuffer("  "));
 	}
-	
+
 	public String toString()
 	{
 		return this.table.toString();
 	}
-	
+
 	public String getTableComment() { return this.tableComment; }
-	public String getTableConstraints() { return this.tableConstraints; }
-	
+
+	public List<TableConstraint> getTableConstraints()
+	{
+		return this.tableConstraints;
+	}
+
 	public void appendTableNameXml(StrBuffer toAppend, StrBuffer indent)
 	{
 		tagWriter.appendTag(toAppend, indent, TAG_TABLE_CATALOG, StringUtil.trimQuotes(this.table.getCatalog()));
@@ -357,7 +363,7 @@ public class ReportTable
 		{
 			String[] att = new String[2];
 			String[] val = new String[2];
-			
+
 			att[0] = "name";
 			val[0] = StringUtil.trimQuotes(this.table.getTableName());
 			att[1] = "type";
@@ -377,10 +383,9 @@ public class ReportTable
 			this.columns[i].appendXml(line, colindent);
 		}
 		if (this.reporter != null) this.reporter.appendXml(line, colindent);
-		if (this.tableConstraints != null && this.tableConstraints.length() > 0)
-		{
-			tagWriter.appendTag(line, colindent, TAG_TABLE_CONSTRAINT, this.tableConstraints, true);
-		}
+
+		writeConstraints(tableConstraints, tagWriter, line, colindent);
+
 		if (this.foreignKeys.size() > 0)
 		{
 			tagWriter.appendOpenTag(line, colindent, "foreign-keys");
@@ -399,6 +404,33 @@ public class ReportTable
 		}
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
 		return line;
+	}
+
+	public static void writeConstraints(List<TableConstraint> constraints, TagWriter tagWriter, StrBuffer line, StrBuffer indent)
+	{
+		if (constraints != null && constraints.size() > 0)
+		{
+			tagWriter.appendOpenTag(line, indent, TAG_TABLE_CONSTRAINTS);
+			line.append('\n');
+			StrBuffer consIndent = new StrBuffer(indent);
+			consIndent.append("  ");
+			for (TableConstraint cons : constraints)
+			{
+				writeConstraint(cons, tagWriter, line, consIndent);
+			}
+			tagWriter.appendCloseTag(line, indent, TAG_TABLE_CONSTRAINTS);
+		}
+	}
+
+	public static void writeConstraint(TableConstraint constraint, TagWriter tagWriter, StrBuffer line, StrBuffer indent)
+	{
+		if (constraint == null) return;
+		String name = constraint.getConstraintName();
+		String expr = constraint.getExpression();
+
+		tagWriter.appendCDATATag(line, indent, 
+			ReportTable.TAG_CONSTRAINT_DEF, expr,
+			(name != null ? "name" : null), constraint.getConstraintName());
 	}
 
 	/**
@@ -430,7 +462,7 @@ public class ReportTable
 		}
 		return false;
 	}
-	
+
 	public boolean equals(ReportTable other)
 	{
 		return this.table.getTableName().equalsIgnoreCase(other.table.getTableName());

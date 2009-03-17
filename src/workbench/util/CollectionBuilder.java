@@ -61,6 +61,11 @@ public class CollectionBuilder
 		return result;
 	}
 
+	public static <E> List<E> arrayList()
+	{
+		return new ArrayList<E>();
+	}
+
 	/**
 	 * Create an ArrayList from the given elements. The returned list
 	 * can be changed (in constrast to Arrays.asList() where the returned

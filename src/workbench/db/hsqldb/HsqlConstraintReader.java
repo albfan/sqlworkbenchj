@@ -13,7 +13,7 @@ package workbench.db.hsqldb;
 
 import java.sql.Connection;
 import workbench.db.AbstractConstraintReader;
-
+import workbench.util.StringUtil;
 
 /**
  * Constraint reader for HSQLDB
@@ -22,12 +22,13 @@ import workbench.db.AbstractConstraintReader;
 public class HsqlConstraintReader
 	extends AbstractConstraintReader
 {
-	private String TABLE_SQL = "select chk.check_clause \n" +
-           "from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" +
-           "where chk.constraint_name = cons.constraint_name  \n" +
-           "and cons.constraint_type = 'CHECK' \n" +
-           "and cons.table_name = ?; \n";
 
+	private String TABLE_SQL = "select chk.constraint_name, chk.check_clause \n" +
+		"from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" +
+		"where chk.constraint_name = cons.constraint_name  \n" +
+		"and cons.constraint_type = 'CHECK' \n" +
+		"and cons.table_name = ?; \n";
+	
 	private String sql;
 
 	public HsqlConstraintReader(Connection dbConnection)
@@ -39,13 +40,26 @@ public class HsqlConstraintReader
 		}
 		else
 		{
-			this.sql = TABLE_SQL.replaceAll("information_schema\\.","");
+			this.sql = TABLE_SQL.replaceAll("information_schema\\.", "");
 		}
 	}
 
-	public String getPrefixTableConstraintKeyword() { return "check("; }
-	public String getSuffixTableConstraintKeyword() { return ")"; }
-	public String getColumnConstraintSql() { return null; }
-	public String getTableConstraintSql() { return this.sql; }
+	@Override
+	public String getColumnConstraintSql()
+	{
+		return null;
+	}
 
+	@Override
+	public String getTableConstraintSql()
+	{
+		return this.sql;
+	}
+
+	@Override
+	public boolean isSystemConstraintName(String name)
+	{
+		if (StringUtil.isBlank(name))	return false;
+		return name.trim().startsWith("SYS_");
+	}
 }

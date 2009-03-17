@@ -80,8 +80,6 @@ public class GenericSchemaInfoReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return currentSchema;
-		
 	}
-	
 	
 }

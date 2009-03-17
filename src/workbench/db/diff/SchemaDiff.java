@@ -92,7 +92,8 @@ public class SchemaDiff
 	private boolean diffProcs = true;
 	private boolean diffSequences = true;
 	private boolean treatViewAsTable = false;
-
+	private boolean exactCheckConstraintMatch;
+	
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
@@ -127,6 +128,11 @@ public class SchemaDiff
 		this.namespace = xmlNameSpace;
 	}
 
+	public void setCompareConstraintsByName(boolean flag)
+	{
+		this.exactCheckConstraintMatch = flag;
+	}
+	
 	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
 	public boolean getIncludeSequences() { return this.diffSequences; }
 
@@ -736,6 +742,7 @@ public class SchemaDiff
 						//d.setCompareComments(this.diffComments);
 						d.setIndent(indent);
 						d.setTagWriter(tw);
+						d.setExactConstraintMatch(exactCheckConstraintMatch);
 						StrBuffer s = d.getMigrateTargetXml();
 						if (s.length() > 0)
 						{
@@ -954,10 +961,11 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_INDEX_INFO, this.diffIndex);
 		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
 		tw.appendTag(info, indent2, TAG_PK_INFO, this.diffPrimaryKeys);
-		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, this.diffConstraints);
+		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, Boolean.toString(this.diffConstraints), "compare-names", Boolean.toString(exactCheckConstraintMatch));
 		tw.appendTag(info, indent2, TAG_GRANT_INFO, this.diffGrants);
 		tw.appendTag(info, indent2, TAG_VIEW_INFO, this.diffViews);
 		tw.appendTag(info, indent2, TAG_VIEWS_AS_TABLE, this.treatViewAsTable);
+		
 
 		if (this.referenceSchema != null && this.targetSchema != null)
 		{

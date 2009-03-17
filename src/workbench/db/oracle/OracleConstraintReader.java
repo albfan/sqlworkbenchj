@@ -11,16 +11,18 @@
  */
 package workbench.db.oracle;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
+import java.util.List;
 import workbench.db.AbstractConstraintReader;
+import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
-import workbench.resource.Settings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
 
 /**
@@ -49,28 +51,25 @@ public class OracleConstraintReader
 	{
 		return 2;
 	}
-	public String getPrefixTableConstraintKeyword() { return "CHECK ("; }
-	public String getSuffixTableConstraintKeyword() { return ")"; }
 
 	public String getColumnConstraintSql() { return null; }
 	public String getTableConstraintSql() { return TABLE_SQL; }
 
-	public String getTableConstraints(Connection dbConnection, TableIdentifier aTable, String indent)
+	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
-		StringBuilder result = new StringBuilder(100);
+		List<TableConstraint> result = CollectionBuilder.arrayList();
+
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		try
 		{
-			stmt = dbConnection.prepareStatement(sql);
+			stmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, aTable.getSchema());
 			stmt.setString(2, aTable.getTableName());
 
 			rs = stmt.executeQuery();
-			int count = 0;
 			while (rs.next())
 			{
 				String name = rs.getString(1);
@@ -79,22 +78,9 @@ public class OracleConstraintReader
 				{
 					// NOT NULL constraints do not need to be taken into account
           if (isDefaultNNConstraint(constraint)) continue;
-					if (count > 0)
-					{
-						result.append(nl);
-						result.append(indent);
-						result.append(',');
-					}
-					if (!name.startsWith("SYS_"))
-					{
-						result.append("CONSTRAINT ");
-						result.append(name);
-						result.append(' ');
-					}
-					result.append("CHECK (");
-					result.append(constraint);
-					result.append(')');
-					count++;
+					TableConstraint c = new TableConstraint(name, "(" + constraint + ")");
+					c.setIsSystemName(name.startsWith("SYS_"));
+					result.add(c);
 				}
 			}
 		}
@@ -106,7 +92,7 @@ public class OracleConstraintReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return result.toString();
+		return result;
 	}
 
 	/**
