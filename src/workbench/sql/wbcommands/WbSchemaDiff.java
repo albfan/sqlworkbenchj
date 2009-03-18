@@ -50,6 +50,7 @@ public class WbSchemaDiff
 	public static final String ARG_INCLUDE_VIEWS = "includeViews";
 	public static final String ARG_DIFF_JDBC_TYPES = "useJdbcTypes";
 	public static final String ARG_VIEWS_AS_TABLES = "viewAsTable";
+	public static final String ARG_COMPARE_CHK_CONS_BY_NAME = "compareConstraintsByName";
 
 	private SchemaDiff diff;
 	private CommonDiffParameters params;
@@ -72,6 +73,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
+		cmdLine.addArgument(ARG_COMPARE_CHK_CONS_BY_NAME, ArgumentType.BoolArgument);
 	}
 
 	@Override
@@ -135,6 +137,7 @@ public class WbSchemaDiff
 		diff.setIncludeTableGrants(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_GRANTS, false));
 		diff.setIncludeSequences(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, false));
 		diff.setTreatViewAsTable(cmdLine.getBoolean(ARG_VIEWS_AS_TABLES, false));
+		diff.setCompareConstraintsByName(cmdLine.getBoolean(ARG_COMPARE_CHK_CONS_BY_NAME, true));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);

@@ -208,10 +208,9 @@ public class SchemaDiffTest
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='POSITIVE_ID'])");
 			assertEquals("1", count);
-			
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/drop-constraint/constraint-definition[@name='POSITIVE_ID'])");
 			assertEquals("1", count);
-			System.out.println("*\n" + xml);
 		}
 		catch (Exception e)
 		{
@@ -244,7 +243,7 @@ public class SchemaDiffTest
 			"  lastname varchar(100), " +
 			"  constraint positive_id  check (person_id > 1) " +
 			")");
-		
+
 	}
 	private void setupGrantTestDb()
 		throws SQLException, ClassNotFoundException

@@ -29,9 +29,15 @@ public class PostgresConstraintReader
            "and   t.oid = rel.conrelid " +
 		       "and   rel.contype = 'c'";
 
-	public String getPrefixTableConstraintKeyword() { return "check"; }
-	public String getColumnConstraintSql() { return null; }
-	public String getTableConstraintSql() { return TABLE_SQL; }
+	public String getColumnConstraintSql()
+	{
+		return null;
+	}
+
+	public String getTableConstraintSql()
+	{
+		return TABLE_SQL;
+	}
 
 	@Override
 	public int getIndexForTableNameParameter()

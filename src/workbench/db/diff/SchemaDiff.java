@@ -92,7 +92,7 @@ public class SchemaDiff
 	private boolean diffProcs = true;
 	private boolean diffSequences = true;
 	private boolean treatViewAsTable = false;
-	private boolean exactCheckConstraintMatch;
+	private boolean compareConstraintsByName;
 	
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
@@ -130,7 +130,7 @@ public class SchemaDiff
 
 	public void setCompareConstraintsByName(boolean flag)
 	{
-		this.exactCheckConstraintMatch = flag;
+		this.compareConstraintsByName = flag;
 	}
 	
 	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
@@ -222,20 +222,24 @@ public class SchemaDiff
 		ArrayList<TableIdentifier> reference = new ArrayList<TableIdentifier>(referenceList.size());
 		ArrayList<TableIdentifier> target = new ArrayList<TableIdentifier>(targetList.size());
 
-		String ttype = this.sourceDb.getMetadata().getTableTypeName();
-		for (String tname : referenceList)
-		{
-			TableIdentifier tbl = new TableIdentifier(tname);
-			tbl.setType(ttype);
-			reference.add(tbl);
-		}
+		if (referenceList.size() != targetList.size()) throw new IllegalArgumentException("Size of lists does not match");
 
-		ttype = this.targetDb.getMetadata().getTableTypeName();
-		for (String tname : targetList)
+		for (int i=0; i < referenceList.size(); i++)
 		{
-			TableIdentifier tbl = new TableIdentifier(tname);
-			tbl.setType(ttype);
-			target.add(tbl);
+			String rname = referenceList.get(i);
+			TableIdentifier rtbl = sourceDb.getMetadata().findTable(new TableIdentifier(rname));
+			String tname = targetList.get(i);
+			TableIdentifier ttbl = targetDb.getMetadata().findTable(new TableIdentifier(tname));
+			if (rtbl != null && ttbl != null)
+			{
+				reference.add(rtbl);
+				target.add(ttbl);
+			}
+			else
+			{
+				LogMgr.logWarning("SchemaDiff.setTableNames()", "Table combination not found: "
+					+ rname + " [" + rtbl + "] to " + tname + " [" + ttbl + "]");
+			}
 		}
 		setTables(reference, target);
 	}
@@ -742,7 +746,7 @@ public class SchemaDiff
 						//d.setCompareComments(this.diffComments);
 						d.setIndent(indent);
 						d.setTagWriter(tw);
-						d.setExactConstraintMatch(exactCheckConstraintMatch);
+						d.setExactConstraintMatch(compareConstraintsByName);
 						StrBuffer s = d.getMigrateTargetXml();
 						if (s.length() > 0)
 						{
@@ -961,7 +965,7 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_INDEX_INFO, this.diffIndex);
 		tw.appendTag(info, indent2, TAG_FK_INFO, this.diffForeignKeys);
 		tw.appendTag(info, indent2, TAG_PK_INFO, this.diffPrimaryKeys);
-		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, Boolean.toString(this.diffConstraints), "compare-names", Boolean.toString(exactCheckConstraintMatch));
+		tw.appendTag(info, indent2, TAG_CONSTRAINT_INFO, Boolean.toString(this.diffConstraints), "compare-names", Boolean.toString(compareConstraintsByName));
 		tw.appendTag(info, indent2, TAG_GRANT_INFO, this.diffGrants);
 		tw.appendTag(info, indent2, TAG_VIEW_INFO, this.diffViews);
 		tw.appendTag(info, indent2, TAG_VIEWS_AS_TABLE, this.treatViewAsTable);

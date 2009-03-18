@@ -228,11 +228,12 @@ public class SchemaReporter
 		
 		DbSettings dbs = dbConn.getMetadata().getDbSettings();
 		
-		for (TableIdentifier table : tables)
+		for (TableIdentifier tbl : tables)
 		{
 			try
 			{
 				if (this.cancel) break;
+				TableIdentifier table = dbConn.getMetadata().findTable(tbl);
 
 				String tableName = table.getTableExpression();
 				if (this.monitor != null)
@@ -265,7 +266,7 @@ public class SchemaReporter
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + table, e);
+				LogMgr.logError("SchemaReporter.writeXml()", "Error writing table: " + tbl, e);
 			}
 		}
 		count = this.procedures.size();
