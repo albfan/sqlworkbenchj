@@ -82,7 +82,12 @@ public class TagWriter
 
 	public void appendCDATATag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, String attr, String attValue)
 	{
-		appendOpenTag(target, indent, tag, attr, attValue);
+		TagAttribute ta = new TagAttribute(attr, attValue);
+		appendCDATATag(target, indent, tag, value, ta);
+	}
+		public void appendCDATATag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, TagAttribute... attrs)
+	{
+		appendOpenTag(target, indent, tag, true, attrs);
 		target.append('\n');
 		target.append(indent);
 		target.append("  ");

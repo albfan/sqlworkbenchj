@@ -115,11 +115,13 @@ public class WbSchemaReportTest
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='PERSON_ADDRESS']/column-def/references)");
 			assertEquals("Incorrect references count", "2", count);
-			
-			if (!output.delete())
-			{
-				fail("could not delete output file");
-			}
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='Person']/table-constraints/constraint-definition[@name='POSITIVE_ID'])");
+			assertEquals("Incorrect references count", "1", count);
+//			if (!output.delete())
+//			{
+//				fail("could not delete output file");
+//			}
 		}
 		catch (Exception e)
 		{
@@ -139,7 +141,7 @@ public class WbSchemaReportTest
 		try
 		{
 			stmt = source.createStatement();
-			stmt.executeUpdate("create table \"Person\" (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
+			stmt.executeUpdate("create table \"Person\" (person_id integer primary key, firstname varchar(100), lastname varchar(100), constraint positive_id check (person_id > 0))");
 			stmt.executeUpdate("create table \"Address\" (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("create table person_address_status (person_id integer, address_id integer, status_name varchar(10), primary key (person_id, address_id))");

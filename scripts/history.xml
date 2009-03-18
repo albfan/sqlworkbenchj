@@ -5,6 +5,12 @@
 
   <entry dev-build="7" type="enh">
     <description>
+      CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="enh">
+    <description>
       A result name (defined using @wbresult) is now used as the header when printing the result.
     </description>
   </entry>

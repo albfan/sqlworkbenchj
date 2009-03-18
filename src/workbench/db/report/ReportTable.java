@@ -428,9 +428,13 @@ public class ReportTable
 		String name = constraint.getConstraintName();
 		String expr = constraint.getExpression();
 
-		tagWriter.appendCDATATag(line, indent, 
-			ReportTable.TAG_CONSTRAINT_DEF, expr,
-			(name != null ? "name" : null), constraint.getConstraintName());
+		TagAttribute type = new TagAttribute("type", constraint.getType());
+		TagAttribute nameAttr = null;
+		if (name != null)
+		{
+			nameAttr = new TagAttribute("name", name);
+		}
+		tagWriter.appendCDATATag(line, indent, ReportTable.TAG_CONSTRAINT_DEF, expr, type, nameAttr);
 	}
 
 	/**

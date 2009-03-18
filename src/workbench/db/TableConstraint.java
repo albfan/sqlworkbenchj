@@ -89,6 +89,17 @@ public class TableConstraint
 		return false;
 	}
 
+	/**
+	 * Returns the type of this table constraint. 
+	 * Currently only check constraints are implemented.
+	 * 
+	 * @return "check"
+	 */
+	public String getType()
+	{
+		return "check";
+	}
+
 	public String toString()
 	{
 		return getSql();

@@ -255,7 +255,7 @@ public class TableDiff
 		for (TableConstraint c : constraints)
 		{
 			if (c == null) continue;
-			writer.appendCDATATag(result, consIndent, ReportTable.TAG_CONSTRAINT_DEF, c.getExpression(), "name", c.getConstraintName());
+			ReportTable.writeConstraint(c, writer, result, consIndent);
 		}
 		writer.appendCloseTag(result, indent, tag);
 	}

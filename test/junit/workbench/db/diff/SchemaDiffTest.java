@@ -11,7 +11,6 @@
  */
 package workbench.db.diff;
 
-import java.io.File;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.TestUtil;
@@ -196,11 +195,23 @@ public class SchemaDiffTest
 			diff.setIncludeViews(false);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
-			TestUtil.writeFile(new File("c:/temp/checkdiff.xml"), xml);
+			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='LNAME_MIN_LENGTH'])");
+			assertEquals("1", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/alter-constraint/constraint-definition[@name='POSITIVE_ID'])");
+			assertEquals("1", count);
 
 			diff.setCompareConstraintsByName(false);
 			xml = diff.getMigrateTargetXml();
-			TestUtil.writeFile(new File("c:/temp/checkdiff2.xml"), xml);
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='LNAME_MIN_LENGTH'])");
+			assertEquals("1", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='POSITIVE_ID'])");
+			assertEquals("1", count);
+			
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/drop-constraint/constraint-definition[@name='POSITIVE_ID'])");
+			assertEquals("1", count);
+			System.out.println("*\n" + xml);
 		}
 		catch (Exception e)
 		{
