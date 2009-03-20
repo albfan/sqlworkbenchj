@@ -50,7 +50,7 @@ public class WbSchemaDiff
 	public static final String ARG_INCLUDE_VIEWS = "includeViews";
 	public static final String ARG_DIFF_JDBC_TYPES = "useJdbcTypes";
 	public static final String ARG_VIEWS_AS_TABLES = "viewAsTable";
-	public static final String ARG_COMPARE_CHK_CONS_BY_NAME = "compareConstraintsByName";
+	public static final String ARG_COMPARE_CHK_CONS_BY_NAME = "useConstraintNames";
 
 	private SchemaDiff diff;
 	private CommonDiffParameters params;

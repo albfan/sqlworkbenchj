@@ -231,7 +231,7 @@ public class WbCall
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbOraExcecute.execute()", "Error calling stored procedure", e);
+			LogMgr.logError("WbCall.execute()", "Error calling stored procedure", e);
 			result.addMessage(ResourceMgr.getString("MsgExecuteError"));
 			result.addMessage(ExceptionUtil.getDisplay(e));
 			result.setFailure();
