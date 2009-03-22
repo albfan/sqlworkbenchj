@@ -14,6 +14,21 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (103.7) released</title>
+      <description>        <![CDATA[<p>Changes from build 103.6 to build 103.7</p><p>Enhancements</p><ul>
+<li>When using XSLT to transform output of e.g. WbReport or WbSchemaDiff, the name of the stylesheet can now be specified without a pathname if located in the xslt subdirectory or the config directory.</li>
+<li>When assigning a keyboard shortcut to a macro, the shortcut's character would be inserted into the editor when the macro was executed.</li>
+<li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
+<li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/dev-history.html</link>
+      <guid>sql-workbench-build-103.7</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 22 Mar 2009 23:05:12 +0100</pubDate>
+    </item>
+    <item>
       <title>New development build (103.6) released</title>
       <description>        <![CDATA[<p>Changes from build 103.5 to build 103.6</p><p>Enhancements</p><ul>
 <li>The editor can now be configured to either uses spaces or real tab characters (as before)</li>
@@ -22,6 +37,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>User defined PK mappings were not remembered</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -38,6 +54,7 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
 
 ]]>
 </description>

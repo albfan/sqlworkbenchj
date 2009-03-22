@@ -196,9 +196,9 @@ VALUES
 			command</p>
 			<ul>
 			  <li><a href="wbreport2html.xslt">HTML output</a></li>
-			  <li><a href="wbreport2ctl.xslt">Create an Oracle SQL*Loader skeleton</a></li>
-			  <li><a href="wbreport2proc15.xslt">Extract procedures</a></li>
+			  <li><a href="wbreport2pg.xslt">Create a script for PostgreSQL</a></li>
 			  <li><a href="wbreport2oracle.xslt">Create a script for Oracle</a></li>
+			  <li><a href="wbreport2proc15.xslt">Extract procedures</a></li>
 	 		</ul>
 
 			<h2 style="text-align:left;padding-top:5px">WbSchemaDiff transformations</h2>
