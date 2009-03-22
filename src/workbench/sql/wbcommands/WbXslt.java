@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.File;
 import java.sql.SQLException;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -98,6 +99,7 @@ public class WbXslt
 		try
 		{
 			XsltTransformer transformer = new XsltTransformer();
+			transformer.setXsltBaseDir(new File(runner.getBaseDir()));
 			transformer.transform(inputFile, outputFile, xsltFile);
 			result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", outputFile));
 			result.setSuccess();

@@ -1,11 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-03-16">
+<release build="-1" date="2009-03-22">
 
   <entry dev-build="7" type="enh">
     <description>
-      CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff
+      When using XSLT to transform output of e.g. WbReport or WbSchemaDiff, the name of the stylesheet
+      can now be specified without a pathname if located in the xslt subdirectory or the config directory.
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="enh">
+    <description>
+      When assigning a keyboard shortcut to a macro, the shortcut's character would be inserted into 
+      the editor when the macro was executed.
+    </description>
+  </entry>
+  
+  <entry dev-build="7" type="enh">
+    <description>
+      CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff
+			has a new parameter to match check constraints by name or by expression only.
     </description>
   </entry>
 

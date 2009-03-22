@@ -26,7 +26,8 @@
 	<property name="html-resource-dir" value="./images"/>
 
   <!-- location of the docbook installation and the FOP installation -->
-  <property name="docbook.root" value="${doc}/docbook"/>
+  <property name="docbook.root" value="../etc/docbook"/>
+  <property name="docbook.dtd" value="../etc/dtd"/>
   <property name="fop.root" value="../etc/fop"/>
 
   <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.15.jar"/>
@@ -213,7 +214,7 @@
 					style="${doc}/xsl/workbench-pdf.xsl">
       <xmlcatalog>
         <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
-             location="${doc}/dtd/docbookx.dtd"/>
+             location="${docbook.dtd}/docbookx.dtd"/>
       </xmlcatalog>
       <param name="text-indent" expression="0.2cm"/>
       <param name="paper.type" expression="A4"/>
@@ -330,11 +331,11 @@
 		<xslt classpathref="xalan.path"
           basedir="${html-outdir}"
           includes="Manual.xml"
-          style="${doc}/docbook/html/chunkfast.xsl"
+          style="${docbook.root}/html/chunkfast.xsl"
           destdir="${html-outdir}">
 
       <xmlcatalog>
-				<dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN" location="${doc}/dtd/docbookx.dtd"/>
+				<dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN" location="${docbook.dtd}/docbookx.dtd"/>
 			</xmlcatalog>
 
 			<param name="use.extensions" expression="0"/>
@@ -387,10 +388,10 @@
 		<xslt classpathref="xalan.path"
           in="${html-outdir}/Manual.xml"
 					out="${html-outdir}/workbench-manual-single.html"
-          style="${doc}/docbook/html/docbook.xsl">
+          style="${docbook.root}/html/docbook.xsl">
 
       <xmlcatalog>
-				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${doc}/dtd/docbookx.dtd"/>
+				<dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN" location="${docbook.dtd}/docbookx.dtd"/>
 			</xmlcatalog>
 			<param name="use.extensions" expression="0"/>
 			<param name="textinsert.extension" expression="1"/>
@@ -660,6 +661,7 @@
         <include name="wbreport2ctl.xslt"/>
         <include name="wbreport2html.xslt"/>
         <include name="wbreport2oracle.xslt"/>
+        <include name="wbreport2pg.xslt"/>
         <include name="wbreport2proc.xslt"/>
         <include name="wbreport2wiki.xslt"/>
       </zipfileset>

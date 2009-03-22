@@ -5,7 +5,7 @@
 >
 
   <!--  Original DocBook Stylesheet    -->
-  <xsl:import href="../docbook/fo/docbook.xsl"/>
+  <xsl:import href="../../etc/docbook/fo/docbook.xsl"/>
   <xsl:param name="paper.type" select="'A4'"/>
 
   <xsl:attribute-set name="section.title.level1.properties">

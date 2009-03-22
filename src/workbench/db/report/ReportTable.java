@@ -427,14 +427,17 @@ public class ReportTable
 		if (constraint == null) return;
 		String name = constraint.getConstraintName();
 		String expr = constraint.getExpression();
+		String systemName = Boolean.toString(constraint.isSystemName());
 
 		TagAttribute type = new TagAttribute("type", constraint.getType());
+		TagAttribute sysName = new TagAttribute("generated-name", systemName);
+
 		TagAttribute nameAttr = null;
 		if (name != null)
 		{
 			nameAttr = new TagAttribute("name", name);
 		}
-		tagWriter.appendCDATATag(line, indent, ReportTable.TAG_CONSTRAINT_DEF, expr, type, nameAttr);
+		tagWriter.appendCDATATag(line, indent, ReportTable.TAG_CONSTRAINT_DEF, expr, type, sysName, nameAttr);
 	}
 
 	/**

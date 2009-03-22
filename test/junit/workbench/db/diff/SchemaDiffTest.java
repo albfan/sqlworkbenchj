@@ -24,7 +24,6 @@ import workbench.util.SqlUtil;
 public class SchemaDiffTest
 	extends junit.framework.TestCase
 {
-
 	private WbConnection source;
 	private WbConnection target;
 
@@ -53,14 +52,15 @@ public class SchemaDiffTest
 		diff.setIncludeViews(true);
 		diff.compareAll();
 		String xml = diff.getMigrateTargetXml();
-//			TestUtil.writeFile(new File("c:/temp/basediff.xml"), xml);
+//		TestUtil util = new TestUtil("testBaseDiff");
+//		TestUtil.writeFile(new File(util.getBaseDir(), "basediff.xml"), xml);
 //			Thread.yield();
 //			System.out.println("---------------");
 //			System.out.println(xml);
 //			System.out.println("---------------");
 
 		String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
-		assertEquals("Incorrect number of tables listed", "3", count);
+		assertEquals("Incorrect number of tables listed", "4", count);
 
 		count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info[@compareTo='V_PERSON'])");
 		assertEquals("Incorrect number of views listed", "1", count);
@@ -72,6 +72,9 @@ public class SchemaDiffTest
 
 		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/add-column)");
 		assertEquals("Incorrect number of columns to add to ADDRESS", "1", count);
+
+		count = TestUtil.getXPathValue(xml, "count(/schema-diff/add-table[@name='NEW_TABLE'])");
+		assertEquals("New table not detected", "1", count);
 
 		count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/remove-column[@name='REMARK'])");
 		assertEquals("Remark column not removed", "1", count);
@@ -120,7 +123,8 @@ public class SchemaDiffTest
 			diff.setIncludeViews(false);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
-//			TestUtil.writeFile(new File("c:/temp/grantdiff.xml"), xml);
+//			TestUtil util = new TestUtil("testGrantDiff");
+//			TestUtil.writeFile(new File(util.getBaseDir(), "grantdiff.xml"), xml);
 
 			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-grants/grant[1]/grantee");
 			assertEquals("Grantee not correct", "UNIT_TEST", value);
@@ -156,12 +160,16 @@ public class SchemaDiffTest
 			diff.setIncludeViews(false);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
-//			TestUtil.writeFile(new File("c:/temp/indexdiff.xml"), xml);
+//			TestUtil util = new TestUtil("testIndexChangeOnly");
+//			TestUtil.writeFile(new File(util.getBaseDir(), "indexdiff.xml"), xml);
 			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 			assertEquals("Incorrect number of tables listed", "3", count);
 
 			String value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/add-index/index-def/index-expression");
 			assertEquals("Index for address_id not added", "LASTNAME ASC", value);
+
+			value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='ADDRESS']/drop-index");
+			assertEquals("Wrong index dropped", "INDEX_TO_BE_DELETED", value);
 
 			diff.setIncludeIndex(false);
 			xml = diff.getMigrateTargetXml();
@@ -169,7 +177,10 @@ public class SchemaDiffTest
 			count = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 			assertEquals("Incorrect number of tables listed", "3", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table/add-index)");
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/add-index)");
+			assertEquals("Add index present", "0", count);
+
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/drop-index)");
 			assertEquals("Add index present", "0", count);
 		}
 		catch (Exception e)
@@ -195,10 +206,11 @@ public class SchemaDiffTest
 			diff.setIncludeViews(false);
 			diff.compareAll();
 			String xml = diff.getMigrateTargetXml();
+//			System.out.println("**********\n" + xml + "\n*****************");
 			String count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/add-constraint/constraint-definition[@name='LNAME_MIN_LENGTH'])");
 			assertEquals("1", count);
 
-			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/alter-constraint/constraint-definition[@name='POSITIVE_ID'])");
+			count = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON']/table-constraints/modify-constraint/constraint-definition[@name='POSITIVE_ID'])");
 			assertEquals("1", count);
 
 			diff.setCompareConstraintsByName(false);
@@ -233,7 +245,8 @@ public class SchemaDiffTest
 			"  firstname varchar(100), " +
 			"  lastname varchar(100), " +
 			"  constraint positive_id check (person_id > 0)," +
-			"  constraint lname_min_length check (length(lastname) > 5)" +
+			"  constraint lname_min_length check (length(lastname) > 5), " +
+			"  check (length(firstname) > 5)" +
 			")");
 
 		TestUtil.executeScript(target,
@@ -298,6 +311,7 @@ public class SchemaDiffTest
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
+			stmt.executeUpdate("create index index_to_be_deleted on address (street);");
 
 		}
 		finally
@@ -321,6 +335,7 @@ public class SchemaDiffTest
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
 			stmt.executeUpdate("create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
+			stmt.executeUpdate("create table new_table (id integer primary key, some_data varchar(100))");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
 

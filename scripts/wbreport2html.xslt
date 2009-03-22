@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 
-<xsl:transform 
-     version="1.0" 
+<xsl:transform
+     version="1.0"
      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 >
-<xsl:output 
-  encoding="iso-8859-15" 
-  method="html" 
-  indent="yes" 
+<xsl:output
+  encoding="iso-8859-15"
+  method="html"
+  indent="yes"
   omit-xml-declaration="yes"
   doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
@@ -15,7 +15,15 @@
 <xsl:template match="/">
   <html>
   <head>
-    <style>
+    <style type="text/css">
+      h1 {
+        font-size:24px;
+      }
+
+      .ulToc {
+          list-style-type:none;
+      }
+
       .tableNameHeading {
            margin-top:2em;
            margin-bottom:1em;
@@ -24,8 +32,13 @@
            background-color:#F5F5FF;
        }
 
-      .tableComment{ background-color:#e4efff; margin-bottom:20px;}
-      .tableDefinition { padding:2px; border-collapse:collapse; margin-top:1em;}
+      .tableComment {
+        background-color:#e4efff; margin-bottom:20px;
+      }
+
+      .tableDefinition {
+        padding:2px; border-collapse:collapse; margin-top:1em;
+      }
 
       .tdTableDefinition {
         padding-right:10px;
@@ -33,17 +46,10 @@
         border-bottom:1px solid #C0C0C0;
       }
 
-      .tdTableHeading {
-        padding:2px;
-        font-weight:bold;
-        vertical-align:top;
-        border-bottom: 1px solid #C0C0C0;
-        background-color: rgb(240,240,240);
-      }
       .tdColName {
         width:20em;
       }
-      
+
       .tdDataType {
         width:10em;
       }
@@ -55,17 +61,37 @@
       .tdNullFlag {
         width:9em;
       }
-      
+
+      .tdTableHeading {
+        padding:2px;
+        font-weight:bold;
+        vertical-align:top;
+        border-bottom: 1px solid #C0C0C0;
+        background-color: rgb(240,240,240);
+      }
+
       .subTitle {
         font-size:110%;
-        font-variant:small-caps; 
+        font-variant:small-caps;
       }
     </style>
-  <title><xsl:call-template name="write-name"/></title>
+    <script type="text/javascript">
+       function jumpTable()
+       {
+          var dropdownIndex = document.getElementById('jumpTOC').selectedIndex;
+          var dropdownValue = document.getElementById('jumpTOC')[dropdownIndex].value;
+          location.href='#' + dropdownValue;
+       }
+    </script>
+    <title><xsl:call-template name="write-name"/></title>
   </head>
   <body>
-    <xsl:call-template name="create-toc"/>
-    <xsl:call-template name="table-definitions"/>
+    <div id="toc">
+      <xsl:call-template name="create-toc"/>
+    </div>
+    <div id="content">
+      <xsl:call-template name="table-definitions"/>
+    </div>
   </body>
   </html>
 </xsl:template>
@@ -83,105 +109,27 @@
 </xsl:template>
 
 <xsl:template name="create-toc">
-    <center><h2><xsl:call-template name="write-name"/></h2></center>
-    <h3><xsl:text>List of tables</xsl:text></h3>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'a'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'b'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'c'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'d'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'e'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'f'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'g'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'h'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'i'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'j'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'k'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'m'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'n'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'o'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'p'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'q'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'r'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'s'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'t'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'u'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'v'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'w'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'x'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'y'"/>
-    </xsl:call-template>
-    <xsl:call-template name="create-toc-single-letter">
-      <xsl:with-param name="letter" select="'z'"/>
-    </xsl:call-template>
+  <center>
+    <h2>
+      <xsl:call-template name="write-name"/>
+    </h2>
+  </center>
+  <form action="#">
+    <xsl:text>Tables: </xsl:text>
+    <select id="jumpTOC" size="1">
+      <xsl:for-each select="/schema-report/table-def">
+        <xsl:sort select="table-name"/>
+        <xsl:variable name="table-name" select="@name"/>
+        <option value="{$table-name}">
+          <xsl:value-of select="$table-name"/>
+        </option>
+      </xsl:for-each>
+    </select>
+    <xsl:text> </xsl:text>
+    <input type="button" value="Jump to" onClick="jumpTable()"/>
+  </form>
 </xsl:template>
 
-<xsl:template name="create-toc-single-letter">
-    <xsl:param name="letter"/>
-    <xsl:variable name="lower">abcdefghijklmnopqrstuvwxyz</xsl:variable>
-    <xsl:variable name="upper">ABCDEFGHIJKLMNOPQRSTUVWXYZ</xsl:variable>
-    <xsl:variable name="letterCount" select="count(/schema-report/table-def[translate(substring(table-name,1,1), $upper, $lower) = $letter])"/>
-    <xsl:if test="$letterCount &gt; 0">
-      <a style="font-size:150%;font-weight:bold" name="toc_{$letter}">
-        <xsl:value-of select="translate($letter, $lower, $upper)"/>
-      </a>
-      <ul>
-      <xsl:for-each select="/schema-report/table-def[translate(substring(table-name,1,1), $upper, $lower) = $letter]">
-        <xsl:sort select="table-name"/>
-        <li>
-          <xsl:variable name="table" select="table-name"/>
-          <a href="#{$table}"><xsl:value-of select="$table"/></a>
-        </li>
-      </xsl:for-each>
-      </ul>
-    </xsl:if>
-</xsl:template>
 
 <xsl:template name="table-definitions">
 
@@ -213,7 +161,13 @@
       <xsl:for-each select="column-def">
         <xsl:sort select="dbms-position"/>
         <tr>
-          <td class="tdTableDefinition"><xsl:value-of select="column-name"/></td>
+          <td class="tdTableDefinition">
+            <xsl:value-of select="column-name"/>
+            <xsl:if test="count(references) &gt; 0">
+              <xsl:variable name="targetTable" select="references/table-name"/>
+              &#160;(<a href="#{$targetTable}"><xsl:value-of select="'FK'"/></a>)
+            </xsl:if>
+          </td>
           <td class="tdTableDefinition">
             <xsl:value-of select="dbms-data-type"/>
           </td>
@@ -246,7 +200,7 @@
         </xsl:for-each>
         </ul>
 		</xsl:if>
-		
+
 		<xsl:if test="count(//references[table-name=$table]) &gt; 0">
 		    <p class="subTitle">Referenced by</p>
 		    <ul>
@@ -263,4 +217,4 @@
 
 </xsl:template>
 
-</xsl:transform>  
+</xsl:transform>

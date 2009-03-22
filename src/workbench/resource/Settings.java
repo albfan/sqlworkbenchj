@@ -325,12 +325,12 @@ public class Settings
 	{
 		setProperty("workbench.help.singlepage", flag);
 	}
-	
+
 	public boolean useSinglePageHelp()
 	{
 		return getBoolProperty("workbench.help.singlepage", false);
 	}
-	
+
 	/**
 	 * Returns the directory where the HTML manual is located.
 	 *
@@ -418,7 +418,7 @@ public class Settings
 	{
 		return new WbFile(getConfigDir(), "WbColumnOrder.xml");
 	}
-	
+
 	public File getConfigDir()
 	{
 		return this.configfile.getParentFile();
@@ -596,7 +596,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.oracle.raw.autoconvert", false);
 	}
-	
+
 	/**
 	 * Return a list of popular encodings to be used for the code-completion
 	 * of the -encoding parameter.
@@ -1813,6 +1813,21 @@ public class Settings
 	public String getLastImportDelimiter(boolean readable)
 	{
 		return getDelimiter("workbench.import.text.fielddelimiter", "\\t", readable);
+	}
+
+	public File getDefaultXsltDirectory()
+	{
+		String dir = getProperty("workbench.xslt.dir", null);
+		File result = null;
+		if (dir == null)
+		{
+			result = new File(WbManager.getInstance().getJarPath(), "xslt");
+		}
+		else
+		{
+			result = new File(dir);
+		}
+		return result;
 	}
 
 	public String getDefaultXmlVersion()

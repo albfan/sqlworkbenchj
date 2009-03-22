@@ -27,20 +27,37 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import workbench.WbManager;
+import workbench.resource.Settings;
 
 /**
- *  Xslt transformer using the JDK built-in XSLT stuff
+ *  Xslt transformer using the JDK built-in XSLT support
  *
  * @author support@sql-workbench.net
  */
 public class XsltTransformer
 {
+	private File xsltBasedir;
+
+	public XsltTransformer()
+	{
+	}
+
+	/**
+	 * Define a directory to be searched for when looking for an xstl file
+	 * @param dir
+	 */
+	public void setXsltBaseDir(File dir)
+	{
+		this.xsltBasedir = dir;
+	}
+	
 	public void transform(String inputFileName, String outputFileName, String xslFileName)
 		throws IOException, TransformerException
 	{
 		File inputFile = new File(inputFileName);
 		File outputFile = new File(outputFileName);
-		File xslFile = new File(xslFileName);
+		File xslFile = findStylesheet(xslFileName);
 		transform(inputFile, outputFile, xslFile);
 	}
 
@@ -49,7 +66,7 @@ public class XsltTransformer
 	{
 		if (!xslfile.exists())
 		{
-			throw new FileNotFoundException("File "+xslfile.getAbsolutePath()+" doesn't exist");
+			throw new FileNotFoundException("File " + xslfile.getAbsolutePath() + " doesn't exist");
 		}
 
 		InputStream in = null;
@@ -78,6 +95,39 @@ public class XsltTransformer
 			FileUtil.closeQuitely(in);
 			FileUtil.closeQuitely(out);
 		}
+	}
+
+	/**
+	 * Searches for a stylesheet. <br/>
+	 * If the filename is an absolute filename, no searching takes place.
+	 * <br/>
+	 * If the filename does not include a
+	 * directory then the xslt sub-directory of the installation directory
+	 * is checked first. <br/>
+	 * Then the supplied base directory is checked, if nothing is found
+	 * the confid directory is checked and finally the installation directory.
+	 */
+	public File findStylesheet(String file)
+	{
+		File f = new File(file);
+		if (f.isAbsolute()) return f;
+		if (f.getParentFile() == null)
+		{
+			// This is the default directory layout in the distribution archive
+			File xsltdir = Settings.getInstance().getDefaultXsltDirectory();
+			
+			File totest = new File(xsltdir, file);
+			if (totest.exists()) return totest;
+		}
+		if (this.xsltBasedir != null)
+		{
+			File totest = new File(xsltBasedir, file);
+			if (totest.exists()) return totest;
+		}
+		File configdir = Settings.getInstance().getConfigDir();
+		File totest = new File(configdir, file);
+		if (totest.exists()) return totest;
+		return new File(file);
 	}
 
 	public static void main(String[] args)

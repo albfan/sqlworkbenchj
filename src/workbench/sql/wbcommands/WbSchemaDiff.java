@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -272,12 +273,13 @@ public class WbSchemaDiff
 				String xslt = cmdLine.getValue(WbXslt.ARG_STYLESHEET);
 				String xsltOutput = cmdLine.getValue(WbXslt.ARG_OUTPUT);
 
-				if (!StringUtil.isEmptyString(xslt) && !StringUtil.isEmptyString(xsltOutput))
+				if (StringUtil.isNonBlank(xslt) && StringUtil.isNonBlank(xsltOutput))
 				{
 					try
 					{
-						XsltTransformer transfomer = new XsltTransformer();
-						transfomer.transform(output.getFullPath(), xsltOutput, xslt);
+						XsltTransformer transformer = new XsltTransformer();
+						transformer.setXsltBaseDir(new File(runner.getBaseDir()));
+						transformer.transform(output.getFullPath(), xsltOutput, xslt);
 						result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 						result.setSuccess();
 					}

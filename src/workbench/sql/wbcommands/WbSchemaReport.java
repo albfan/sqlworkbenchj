@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -174,8 +175,9 @@ public class WbSchemaReport
 		{
 			try
 			{
-				XsltTransformer transfomer = new XsltTransformer();
-				transfomer.transform(output.getFullPath(), xsltOutput, xslt);
+				XsltTransformer transformer = new XsltTransformer();
+				transformer.setXsltBaseDir(new File(runner.getBaseDir()));
+				transformer.transform(output.getFullPath(), xsltOutput, xslt);
 				result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 				result.setSuccess();
 			}

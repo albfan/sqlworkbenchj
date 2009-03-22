@@ -229,7 +229,7 @@ public class TableDiff
 			StrBuffer consIndent = new StrBuffer(myindent).append("  ");
 			writeConstraints(constraintsToDelete, result, "drop-constraint", consIndent);
 			writeConstraints(missingConstraints, result, "add-constraint", consIndent);
-			writeConstraints(modifiedConstraints, result, "alter-constraint", consIndent);
+			writeConstraints(modifiedConstraints, result, "modify-constraint", consIndent);
 			writer.appendCloseTag(result, myindent, ReportTable.TAG_TABLE_CONSTRAINTS);
 		}
 

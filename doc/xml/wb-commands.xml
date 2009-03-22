@@ -293,11 +293,26 @@
 						<para>
 							Select whether table and column (check) constraints
 							should be compared as well. &wb-productname; compares the constraint
-							definition (SQL) as stored in the database. When comparing schemas from
-							different DBMS systems this will not return the desired results.
+							definition (SQL) as stored in the database. 
 						</para>
 						<para>
-							The default is to not compare table constraints (<literal>false</literal>)
+							The default is to compare table constraints (<literal>true</literal>)
+							Valid values are <literal>true</literal> or <literal>false</literal>.
+						</para>
+					</entry>
+				</row>
+
+				<row>
+					<entry>-useConstraintNames</entry>
+					<entry>
+						<para>
+							When including check constraints this parameter controls whether constraints
+							should be matched by name, or only by their expression. If comparing by names
+							is enabled, the diff output will contain elements for constraint modification
+							otherwise only drop and add entries will be available.
+						</para>
+						<para>
+							The default is to compare by names(<literal>true</literal>)
 							Valid values are <literal>true</literal> or <literal>false</literal>.
 						</para>
 					</entry>

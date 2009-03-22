@@ -89,10 +89,22 @@
     <xsl:value-of select="$defaultvalue"/>
     <xsl:value-of select="$nullable"/>
     <xsl:if test="position() &lt; last()">
-      <xsl:text>,</xsl:text>
+      <xsl:text>,</xsl:text><xsl:value-of select="$newline"/>
     </xsl:if>
-    <xsl:value-of select="$newline"/>
   </xsl:for-each>
+
+	<xsl:for-each select="table-constraints/constraint-definition">
+		<xsl:text>,</xsl:text>
+		<xsl:value-of select="$newline"/>
+		<xsl:text>  </xsl:text>
+		<xsl:if test="@generated-name = 'false'">
+			<xsl:text>CONSTRAINT </xsl:text>
+			<xsl:value-of select="@name"/>
+			<xsl:text> </xsl:text>
+		</xsl:if>
+		<xsl:text>CHECK </xsl:text>
+		<xsl:copy-of select="normalize-space(.)"/>
+	</xsl:for-each>
   
   <xsl:value-of select="$newline"/>
   <xsl:text>);</xsl:text>

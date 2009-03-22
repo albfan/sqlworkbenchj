@@ -252,6 +252,10 @@ public final class WbManager
 		return isWindowsClassic;
 	}
 
+	/**
+	 * Returns the location of the application's jar file
+	 * @see #getJarPath()
+	 */
 	public File getJarFile()
 	{
 		URL url = this.getClass().getProtectionDomain().getCodeSource().getLocation();
@@ -273,6 +277,10 @@ public final class WbManager
 		return f;
 	}
 
+	/**
+	 * Returns the directory in which the application is installed
+	 * @see #getJarFile()
+	 */
 	public String getJarPath()
 	{
 		WbFile parent = new WbFile(getJarFile().getParentFile());
