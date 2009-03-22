@@ -118,10 +118,10 @@ public class WbSchemaReportTest
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='Person']/table-constraints/constraint-definition[@name='POSITIVE_ID'])");
 			assertEquals("Incorrect references count", "1", count);
-//			if (!output.delete())
-//			{
-//				fail("could not delete output file");
-//			}
+			if (!output.delete())
+			{
+				fail("could not delete output file");
+			}
 		}
 		catch (Exception e)
 		{
