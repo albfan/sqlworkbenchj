@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import workbench.db.ConnectionProfile;
@@ -104,7 +105,17 @@ public class WbSchemaReport
 		List<TableIdentifier> tables = tableArg.getTables();
 		if (tables != null)
 		{
-			this.reporter.setTableList(tables);
+			// The SchemaReporter needs fully initialized TableIdentifiers
+			List<TableIdentifier> dbTables = new ArrayList<TableIdentifier>(tables.size());
+			for (TableIdentifier tbl : tables)
+			{
+				TableIdentifier table = currentConnection.getMetadata().findSelectableObject(tbl);
+				if (table != null)
+				{
+					dbTables.add(table);
+				}
+			}
+			this.reporter.setTableList(dbTables);
 		}
 		else
 		{
