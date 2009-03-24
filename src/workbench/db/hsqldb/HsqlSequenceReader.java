@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.log.LogMgr;
@@ -37,19 +38,35 @@ public class HsqlSequenceReader
 	implements SequenceReader
 {
 	private Connection dbConn;
-	private String sequenceTable;
-	
+	private String baseQuery;
+
 	public HsqlSequenceReader(Connection conn)
 	{
 		this.dbConn = conn;
-		if (HsqlMetadata.supportsInformationSchema(conn))
+		String query = "SELECT sequence_schema, " +
+						"sequence_name, " +
+						"dtd_identifier as data_type, " +
+						"maximum_value, " +
+						"minimum_value, " +
+						"increment, " +
+						"cycle_option, " +
+						"start_with " +
+						"FROM ";
+
+		if (JdbcUtils.hasMinimumServerVersion(conn, "1.9"))
 		{
-			sequenceTable = "information_schema.system_sequences";
+			query += "information_schema.sequences";
+			query = query.replace("dtd_identifier as data_type", "data_type");
+		}
+		else if (HsqlMetadata.supportsInformationSchema(conn))
+		{
+			query += "information_schema.system_sequences";
 		}
 		else
 		{
-			sequenceTable = "system_sequences";
+			query += "system_sequences";
 		}
+		baseQuery = query;
 	}
 
 	public void readSequenceSource(SequenceDefinition def)
@@ -61,15 +78,7 @@ public class HsqlSequenceReader
 	
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
-		String query = "SELECT sequence_schema, " +
-						"sequence_name, " +
-						"dtd_identifier, " +
-						"maximum_value, " +
-						"minimum_value, " +
-						"increment, " +
-						"cycle_option, " +
-						"start_with " +
-						"FROM " + sequenceTable;
+		String query = baseQuery;
 		
 		if (!isEmptyString(sequence))
 		{
@@ -130,7 +139,7 @@ public class HsqlSequenceReader
 		
 		result.setSequenceProperty("START_WITH", ds.getValue(row, "START_WITH"));
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
-		result.setSequenceProperty("DTD_IDENTIFIER", ds.getValue(row, "DTD_IDENTIFIER"));
+		result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
 		
 		return result;		
 	}
@@ -165,7 +174,7 @@ public class HsqlSequenceReader
 		result.append("CREATE SEQUENCE ");
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append(def.getSequenceName());
-		String type = (String)def.getSequenceProperty("DTD_IDENTIFIER");
+		String type = (String)def.getSequenceProperty("DATA_TYPE");
 		
 		if (!"INTEGER".equals(type))
 		{

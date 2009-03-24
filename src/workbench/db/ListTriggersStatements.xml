@@ -307,7 +307,7 @@ and trg.tgname not like 'pg_sync_pg%'
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event from information_schema.system_triggers</string> 
+     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM information_schema.system_triggers</string>
     </void> 
     <void property="objectNameField"> 
      <string>table_name</string> 

@@ -386,7 +386,7 @@ public class SqlCommand
 					rs = this.currentStatement.getResultSet();
 				}
 
-				if (rs == null) continue;
+				if (rs == null) break;
 
 				ResultSetConsumer consumer = runner.getConsumer();
 				if (consumer != null)

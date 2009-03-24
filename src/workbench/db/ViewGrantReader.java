@@ -56,7 +56,7 @@ public abstract class ViewGrantReader
 		}
 		else if (meta.isHsql())
 		{
-			return new HsqlViewGrantReader();
+			return new HsqlViewGrantReader(conn);
 		}
 		else if (meta.isSqlServer() && JdbcUtils.hasMinimumServerVersion(conn, "8.0"))
 		{

@@ -13,6 +13,7 @@ package workbench.db.hsqldb;
 
 import java.sql.Connection;
 import workbench.db.AbstractConstraintReader;
+import workbench.db.JdbcUtils;
 import workbench.util.StringUtil;
 
 /**
@@ -41,6 +42,12 @@ public class HsqlConstraintReader
 		else
 		{
 			this.sql = TABLE_SQL.replaceAll("information_schema\\.", "");
+		}
+
+		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
+		{
+			this.sql = sql.replace("system_check_constraints", "check_constraints");
+			this.sql = sql.replace("system_table_constraints", "table_constraints");
 		}
 	}
 

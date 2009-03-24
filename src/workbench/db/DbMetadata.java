@@ -2579,8 +2579,27 @@ public class DbMetadata
 	String adjustHsqlQuery(String query)
 	{
 		if (!this.isHsql) return query;
-		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8")) return query;
+		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
+		{
+			// 1.9 change a lot of table names in the information schema
+			query = query.replaceAll("(?i)SYSTEM_VIEWS", "VIEWS");
+			query = query.replaceAll("(?i)SYSTEM_TRIGGERS", "TRIGGERS");
+			if (query.indexOf(".TRIGGERS") > -1)
+			{
+				// columns in the trigger table have changed as well.
 
+				query = query.replaceAll("(?i)trigger_type", "EVENT_MANIPULATION");
+				query = query.replaceAll("(?i)TRIGGERING_EVENT", "ACTION_STATEMENT");
+			}
+			return query;
+		}
+		else if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8"))
+		{
+			// nothing to do for 1.8
+			return query;
+		}
+
+		// 1.7 did not support the information schema.
 		Pattern p = Pattern.compile("\\sINFORMATION_SCHEMA\\.", Pattern.CASE_INSENSITIVE);
 		Matcher m = p.matcher(query);
 		return m.replaceAll(" ");
