@@ -3,6 +3,12 @@
 
 <release build="-1" date="2009-03-22">
 
+  <entry dev-build="8" type="fix">
+    <description>
+      Sequences were no longer displayed for DB2 on Windows/Linux
+    </description>
+  </entry>
+
   <entry dev-build="7" type="enh">
     <description>
       When using XSLT to transform output of e.g. WbReport or WbSchemaDiff, the name of the stylesheet
@@ -20,7 +26,7 @@
   <entry dev-build="7" type="enh">
     <description>
       CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff
-			has a new parameter to match check constraints by name or by expression only.
+      has a new parameter to match check constraints by name or by expression only.
     </description>
   </entry>
 
