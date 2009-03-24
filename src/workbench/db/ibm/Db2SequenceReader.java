@@ -113,7 +113,7 @@ public class Db2SequenceReader
 			"       ORDER, \n" +
 			"       CACHE, \n" +
 			"       DATATYPEID, \n" +
-		  "       '' as remarks  \n" +
+		  "       REMARKS  \n" +
 			"FROM   syscat.sequences \n" +
 			"WHERE seqschema = ?";
 			if (StringUtil.isNonBlank(sequence))
