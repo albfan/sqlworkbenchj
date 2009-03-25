@@ -285,8 +285,7 @@
 						<entry>-dropTarget</entry>
 						<entry>
 							If this parameter is set to <literal>true</literal> the target table
-							will be dropped before it is create. This parameter is ignored if
-							<literal>-createtarget=true</literal>	is specified.
+							will be dropped before it is created.
 						</entry>
 					</row>
 

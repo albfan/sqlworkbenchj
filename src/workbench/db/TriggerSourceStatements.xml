@@ -180,7 +180,19 @@ where trg.tgrelid = tbl.oid
     </void> 
    </object> 
   </void> 
-	
+
+  <void method="put">
+   <string>HSQL Database Engine</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT description FROM information_schema.triggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>trigger_name</string>
+    </void>
+   </object>
+  </void>
+
   <void method="put"> 
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 

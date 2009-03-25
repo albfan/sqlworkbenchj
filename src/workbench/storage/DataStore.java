@@ -609,14 +609,14 @@ public class DataStore
 
 			// Look up the table in the database to make sure
 			// we get the name correct (upper/lowercase etc)
-			this.updateTable = meta.findSelectableObject(tbl);//tbl.createCopy();
+			this.updateTable = meta.findSelectableObject(tbl);
 
 			// If the object that was used in the original SELECT is
 			// a Synonym we have to get the definition of the underlying
 			// table in order to find the primary key columns
-			TableIdentifier synCheck = updateTable.createCopy();
+			TableIdentifier synCheck = (updateTable != null ? updateTable.createCopy() : null);
 
-			if (synCheck.getSchema() == null)
+			if (synCheck != null && synCheck.getSchema() == null)
 			{
 				synCheck.setSchema(meta.getSchemaToUse());
 			}

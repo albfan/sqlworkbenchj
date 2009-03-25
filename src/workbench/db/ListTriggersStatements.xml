@@ -317,7 +317,22 @@ and trg.tgname not like 'pg_sync_pg%'
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="put">
+   <string>HSQL Database Engine 1.9</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT trigger_name, EVENT_MANIPULATION as trigger_type, ACTION_STATEMENT as trigger_event FROM information_schema.triggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>table_name</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trigger_name</string>
+    </void>
+   </object>
+  </void>
+
   <void method="put"> 
    <string>Firebird</string> 
    <object class="workbench.db.GetMetaDataSql"> 

@@ -27,7 +27,6 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
-import workbench.WbManager;
 import workbench.resource.Settings;
 
 /**

@@ -194,12 +194,24 @@ catalog_definition_schema.sysschema
     </void> 
    </object> 
   </void> 
+
+  <void method="put">
+   <string>HSQL Database Engine</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT view_definition FROM INFORMATION_SCHEMA.SYSTEM_VIEWS</string>
+    </void>
+    <void property="objectNameField">
+     <string>TABLE_NAME</string>
+    </void>
+   </object>
+  </void>
   
   <void method="put"> 
-   <string>HSQL Database Engine</string> 
+   <string>HSQL Database Engine 1.9</string>
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT view_definition FROM INFORMATION_SCHEMA.SYSTEM_VIEWS</string> 
+     <string>SELECT view_definition FROM INFORMATION_SCHEMA.VIEWS</string> 
     </void> 
     <void property="objectNameField"> 
      <string>TABLE_NAME</string> 

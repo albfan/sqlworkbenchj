@@ -185,6 +185,10 @@ public class DbMetadata
 		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
+			{
+				productName += " 1.9";
+			}
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("firebird") > -1)
@@ -483,6 +487,12 @@ public class DbMetadata
 					// Use the same dbid for DB2/LINUX, DB2/NT, DB2/NT64, DB2/AIX64
 					dbId = "db2";
 				}
+			}
+			else if (productName.startsWith("HSQLDB"))
+			{
+				// As the version number is appended to the productname
+				// we need to ignore that here. Because the 
+				dbId = "hsql_database_engine";
 			}
 			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
 		}
@@ -2579,21 +2589,7 @@ public class DbMetadata
 	String adjustHsqlQuery(String query)
 	{
 		if (!this.isHsql) return query;
-		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
-		{
-			// 1.9 change a lot of table names in the information schema
-			query = query.replaceAll("(?i)SYSTEM_VIEWS", "VIEWS");
-			query = query.replaceAll("(?i)SYSTEM_TRIGGERS", "TRIGGERS");
-			if (query.indexOf(".TRIGGERS") > -1)
-			{
-				// columns in the trigger table have changed as well.
-
-				query = query.replaceAll("(?i)trigger_type", "EVENT_MANIPULATION");
-				query = query.replaceAll("(?i)TRIGGERING_EVENT", "ACTION_STATEMENT");
-			}
-			return query;
-		}
-		else if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8"))
+		 if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8"))
 		{
 			// nothing to do for 1.8
 			return query;

@@ -9,6 +9,12 @@
     </description>
   </entry>
 
+  <entry dev-build="8" type="enh">
+    <description>
+      Added support for new HSQLDB v1.9
+    </description>
+  </entry>
+
   <entry dev-build="7" type="enh">
     <description>
       When using XSLT to transform output of e.g. WbReport or WbSchemaDiff, the name of the stylesheet
