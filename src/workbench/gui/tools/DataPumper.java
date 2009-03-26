@@ -43,6 +43,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
+import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -859,6 +860,7 @@ public class DataPumper
 
     ignoreDropError.setText(ResourceMgr.getString("LblIgnoreDropErrors")); // NOI18N
     ignoreDropError.setToolTipText(ResourceMgr.getString("d_LblIgnoreDropErrors")); // NOI18N
+    ignoreDropError.setEnabled(false);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 3;
@@ -1477,6 +1479,7 @@ public class DataPumper
 			this.showWbCommand.setEnabled(false);
 			this.columnMapper.resetData();
 			this.dropTargetCbx.setEnabled(false);
+			this.ignoreDropError.setEnabled(false);
 		}
 	}
 
@@ -1617,6 +1620,11 @@ public class DataPumper
 			{
 				result.append(indent);
 				result.append("-" + WbCopy.PARAM_DROPTARGET + "=true");
+			}
+			if (this.ignoreDropError.isSelected())
+			{
+				result.append(indent);
+				result.append("-" + AppArguments.ARG_IGNORE_DROP + "=true");
 			}
 		}
 
@@ -1785,11 +1793,9 @@ public class DataPumper
 			this.columnMapper.setAllowTargetEditing(newTable);
 			// Dropping the target table is only available if it should be created
 			// if the target exists, we do not support dropping and re-creating the table
-			if (!newTable)
-			{
-				this.dropTargetCbx.setSelected(false);
-			}
 			this.dropTargetCbx.setEnabled(newTable);
+			this.ignoreDropError.setEnabled(newTable);
+
 			if (newTable)
 			{
 				this.columnMapper.defineColumns(sourceCols, sourceCols, false);

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <history>
 
 <release build="-1" date="2009-03-26">
@@ -12,7 +12,7 @@
 
   <entry dev-build="8" type="fix">
     <description>
-      Workspace -> Assign Workspace was no longer working
+      Workspace -&gt; Assign Workspace was no longer working
     </description>
   </entry>
 

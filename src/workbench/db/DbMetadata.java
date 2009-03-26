@@ -187,6 +187,9 @@ public class DbMetadata
 			this.isHsql = true;
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
 			{
+				// HSQLDB 1.9 has a completely different set of system tables
+				// so the dynamically configured queries in the XML files need
+				// to be different.
 				productName += " 1.9";
 			}
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
