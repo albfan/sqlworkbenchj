@@ -108,4 +108,9 @@ public class ParameterDefinition
 		};
 		Collections.sort(parameters, comp);
 	}
+
+	public String toString()
+	{
+		return this.parameterName + "=" + this.value;
+	}
 }

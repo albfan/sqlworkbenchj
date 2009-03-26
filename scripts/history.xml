@@ -1,7 +1,27 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-03-22">
+<release build="-1" date="2009-03-26">
+
+  <entry dev-build="8" type="enh">
+    <description>
+      WbCopy (and the DataPumper) now optionally ignores any error that occurs when dropping the 
+      target table. For that, a new parameter is available -ignoreDropError which defaults to false
+    </description>
+  </entry>
+
+  <entry dev-build="8" type="fix">
+    <description>
+      Workspace -> Assign Workspace was no longer working
+    </description>
+  </entry>
+
+  <entry dev-build="8" type="fix">
+    <description>
+      When "Automatically optimize row height" was enabled, sorting a result set would not
+      redraw the table correctly.
+    </description>
+  </entry>
 
   <entry dev-build="8" type="fix">
     <description>
@@ -4400,7 +4420,7 @@
 
   <entry dev-build="5" type="fix">
     <description>
-       Since 82.3 the assigned workspace file was not shown any longer in  the connection dialog
+       Since 82.3 the assigned workspace file was not shown any longer in the connection dialog
     </description>
   </entry>
 

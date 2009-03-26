@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
+import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -71,6 +72,7 @@ public class WbCopy
 		CommonArgs.addTransactionControL(cmdLine);
 
 		cmdLine.addArgument(PARAM_SOURCETABLE);
+		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_SOURCEQUERY);
 		cmdLine.addArgument(PARAM_TARGETTABLE);
 		cmdLine.addArgument(PARAM_SOURCEPROFILE, ArgumentType.ProfileArgument);
@@ -83,6 +85,7 @@ public class WbCopy
 		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
+
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
 	}

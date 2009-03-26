@@ -174,38 +174,39 @@ public class DataCopier
 	 */
 	public void copyFromTable(WbConnection source,
 														WbConnection target,
-														TableIdentifier aSourceTable,
-														TableIdentifier aTargetTable,
+														TableIdentifier sourceTable,
+														TableIdentifier targetTable,
 														Map<String, String> columnMapping,
 														String additionalWhere,
 														boolean createTable,
-														boolean dropTable)
+														boolean dropTable,
+														boolean ignoreDropError)
 		throws SQLException
 	{
 		this.sourceConnection = source;
 		this.targetConnection = target;
 		this.importer.setConnection(target);
-		this.sourceTable = aSourceTable;
-		this.targetTable = aTargetTable;
+		this.sourceTable = sourceTable;
+		this.targetTable = targetTable;
 		this.targetColumnsForQuery = null;
 
-		if (!this.sourceConnection.getMetadata().objectExists(aSourceTable, (String)null))
+		if (!this.sourceConnection.getMetadata().objectExists(sourceTable, (String)null))
 		{
-			this.addError(ResourceMgr.getFormattedString("ErrCopySourceTableNotFound", aSourceTable.getQualifiedName()));
-			throw new SQLException("Table " + aTargetTable.getTableName() + " not found in source connection");
+			this.addError(ResourceMgr.getFormattedString("ErrCopySourceTableNotFound", sourceTable.getQualifiedName()));
+			throw new SQLException("Table " + targetTable.getTableName() + " not found in source connection");
 		}
 
 		this.initColumnMapping(columnMapping, createTable);
 
 		if (createTable)
 		{
-			createTable(this.columnMap.values(), dropTable);
+			createTable(this.columnMap.values(), dropTable, ignoreDropError);
 		}
 
 		this.initImporterForTable(additionalWhere);
 	}
 
-	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists)
+	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError)
 		throws SQLException
 	{
 		if (dropIfExists)
@@ -225,8 +226,16 @@ public class DataCopier
 				}
 				catch (SQLException e)
 				{
-					this.addError(ResourceMgr.getFormattedString("MsgCopyErrorCreatTable",toDrop.getTableExpression(this.targetConnection),ExceptionUtil.getDisplay(e)));
-					throw e;
+					String msg = ResourceMgr.getFormattedString("MsgCopyErrorCreatTable",toDrop.getTableExpression(this.targetConnection),ExceptionUtil.getDisplay(e));
+					if (ignoreError)
+					{
+						this.addMessage(msg);
+					}
+					else
+					{
+						this.addError(msg);
+						throw e;
+					}
 				}
 			}
 		}
@@ -295,7 +304,8 @@ public class DataCopier
 														TableIdentifier aTargetTable,
 														ColumnIdentifier[] queryColumns,
 														boolean createTarget,
-														boolean dropTarget)
+														boolean dropTarget,
+														boolean ignoreDropError)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -311,7 +321,7 @@ public class DataCopier
 			{
 				cols.add(col);
 			}
-			createTable(cols, dropTarget);
+			createTable(cols, dropTarget, ignoreDropError);
 		}
 		this.targetColumnsForQuery = Arrays.asList(queryColumns);
 		this.initImporterForQuery(aSourceQuery);

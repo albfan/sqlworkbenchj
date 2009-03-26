@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import workbench.AppArguments;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -54,6 +55,8 @@ public class TableCopy
 
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
+		boolean ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
+		
 		String keys = cmdLine.getValue(WbCopy.PARAM_KEYS);
 
 		this.copier = new DataCopier();
@@ -92,7 +95,7 @@ public class TableCopy
 			TableIdentifier srcTable = new TableIdentifier(sourcetable);
 			String where = cmdLine.getValue(WbCopy.PARAM_SOURCEWHERE);
 			Map<String, String> mapping = this.parseMapping(cmdLine);
-			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTable, dropTable);
+			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTable, dropTable, ignoreDropError);
 		}
 		else
 		{
@@ -107,7 +110,7 @@ public class TableCopy
 				}
 			}
 
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable);
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable, ignoreDropError);
 		}
 
 		boolean doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;

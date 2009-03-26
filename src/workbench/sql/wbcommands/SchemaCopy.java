@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import workbench.AppArguments;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
@@ -46,9 +47,10 @@ public class SchemaCopy
 	private MessageBuffer messages = new MessageBuffer();
 	private DataCopier copier;
 	private boolean success;
-	private boolean createTable = false;
-	private boolean dropTable = false;
-	private boolean checkDependencies = false;
+	private boolean createTable;
+	private boolean dropTable;
+	private boolean ignoreDropError;
+	private boolean checkDependencies;
 
 	private List<TableIdentifier> sourceTables;
 	private Map<String, TableIdentifier> tableMap;
@@ -102,7 +104,7 @@ public class SchemaCopy
 				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
 				this.messages.appendNewLine();
 
-				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTable, dropTable);
+				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTable, dropTable, ignoreDropError);
 				copier.startCopy();
 
 				this.messages.append(copier.getMessageBuffer());
@@ -275,6 +277,7 @@ public class SchemaCopy
 		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
 		createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
+		ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 
 		this.copier = new DataCopier();
 

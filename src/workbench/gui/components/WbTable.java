@@ -1238,11 +1238,11 @@ public class WbTable
 	public void sortingFinished()
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
-		adjustRowHeight();
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
+				adjustRowHeight();
 				updateSortRenderer();
 				WbSwingUtilities.showDefaultCursor(c.getParent());
 				// The sorting indicator is not properly displayed

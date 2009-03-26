@@ -114,16 +114,25 @@ public class VariablesEditor
 		return true;
 	}
 
-	public static boolean showVariablesDialog(DataStore vardata)
+	private static boolean dialogResult;
+
+	public static boolean showVariablesDialog(final DataStore vardata)
 	{
-		VariablesEditor editor = new VariablesEditor(vardata);
-		Dimension d = new Dimension(300,250);
-		editor.setMinimumSize(d);
-		editor.setPreferredSize(d);
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				VariablesEditor editor = new VariablesEditor(vardata);
+				Dimension d = new Dimension(300,250);
+				editor.setMinimumSize(d);
+				editor.setPreferredSize(d);
+				dialogResult = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"));
+			}
+		});
 
 		boolean result = false;
-		boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditVariablesWindowTitle"));
-		if (ok)
+		if (dialogResult)
 		{
 			try
 			{

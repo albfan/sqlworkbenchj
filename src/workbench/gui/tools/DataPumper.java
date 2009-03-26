@@ -526,6 +526,7 @@ public class DataPumper
     jLabel1 = new JLabel();
     batchSizeLabel = new JLabel();
     batchSize = new JTextField();
+    ignoreDropError = new JCheckBox();
     statusLabel = new JLabel();
     buttonPanel = new JPanel();
     jPanel3 = new JPanel();
@@ -686,7 +687,7 @@ public class DataPumper
 
     wherePanel.setLayout(new BorderLayout());
 
-    sqlEditorLabel.setText(ResourceMgr.getString("LblDPAdditionalWhere"));
+    sqlEditorLabel.setText(ResourceMgr.getString("LblDPAdditionalWhere")); // NOI18N
     wherePanel.add(sqlEditorLabel, BorderLayout.NORTH);
 
     gridBagConstraints = new GridBagConstraints();
@@ -701,8 +702,8 @@ public class DataPumper
     gridBagConstraints.insets = new Insets(5, 0, 4, 1);
     sqlPanel.add(wherePanel, gridBagConstraints);
 
-    useQueryCbx.setText(ResourceMgr.getString("LblDPUseSQLSource"));
-    useQueryCbx.setToolTipText(ResourceMgr.getDescription("LblDPUseSQLSource"));
+    useQueryCbx.setText(ResourceMgr.getString("LblDPUseSQLSource")); // NOI18N
+    useQueryCbx.setToolTipText(ResourceMgr.getString("d_LblDPUseSQLSource")); // NOI18N
     useQueryCbx.setHorizontalAlignment(SwingConstants.LEFT);
     useQueryCbx.setHorizontalTextPosition(SwingConstants.LEFT);
     gridBagConstraints = new GridBagConstraints();
@@ -714,8 +715,8 @@ public class DataPumper
     gridBagConstraints.insets = new Insets(2, 2, 0, 2);
     sqlPanel.add(useQueryCbx, gridBagConstraints);
 
-    checkQueryButton.setText(ResourceMgr.getString("LblDPCheckQuery"));
-    checkQueryButton.setToolTipText(ResourceMgr.getDescription("LblDPCheckQuery"));
+    checkQueryButton.setText(ResourceMgr.getString("LblDPCheckQuery")); // NOI18N
+    checkQueryButton.setToolTipText(ResourceMgr.getString("d_LblDPCheckQuery")); // NOI18N
     checkQueryButton.setEnabled(false);
     checkQueryButton.setMargin(new Insets(2, 5, 2, 5));
     checkQueryButton.setMaximumSize(new Dimension(200, 24));
@@ -743,13 +744,13 @@ public class DataPumper
     updateOptionPanel.setLayout(new GridBagLayout());
 
     commitLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    commitLabel.setText(ResourceMgr.getString("LblDPCommitEvery"));
-    commitLabel.setToolTipText(ResourceMgr.getDescription("LblDPCommitEvery"));
+    commitLabel.setText(ResourceMgr.getString("LblDPCommitEvery")); // NOI18N
+    commitLabel.setToolTipText(ResourceMgr.getString("d_LblDPCommitEvery")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(2, 8, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 8, 0, 0);
     updateOptionPanel.add(commitLabel, gridBagConstraints);
 
     commitEvery.setColumns(5);
@@ -757,36 +758,37 @@ public class DataPumper
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 0);
     updateOptionPanel.add(commitEvery, gridBagConstraints);
 
-    continueOnErrorCbx.setText(ResourceMgr.getString("MsgDPContinueOnError"));
-    continueOnErrorCbx.setToolTipText(ResourceMgr.getDescription("MsgDPContinueOnError"));
+    continueOnErrorCbx.setText(ResourceMgr.getString("MsgDPContinueOnError")); // NOI18N
+    continueOnErrorCbx.setToolTipText(ResourceMgr.getString("d_MsgDPContinueOnError")); // NOI18N
     continueOnErrorCbx.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(0, 5, 0, 0);
     updateOptionPanel.add(continueOnErrorCbx, gridBagConstraints);
 
-    deleteTargetCbx.setText(ResourceMgr.getString("LblDeleteTargetTable"));
-    deleteTargetCbx.setToolTipText(ResourceMgr.getDescription("LblDeleteTargetTable"));
+    deleteTargetCbx.setText(ResourceMgr.getString("LblDeleteTargetTable")); // NOI18N
+    deleteTargetCbx.setToolTipText(ResourceMgr.getString("d_LblDeleteTargetTable")); // NOI18N
     deleteTargetCbx.setHorizontalTextPosition(SwingConstants.RIGHT);
     deleteTargetCbx.setName("deleteTargetCbx"); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(6, 5, 0, 0);
     updateOptionPanel.add(deleteTargetCbx, gridBagConstraints);
 
-    dropTargetCbx.setText(ResourceMgr.getString("LblDPDropTable"));
-    dropTargetCbx.setToolTipText(ResourceMgr.getDescription("LblDPDropTable"));
+    dropTargetCbx.setText(ResourceMgr.getString("LblDPDropTable")); // NOI18N
+    dropTargetCbx.setToolTipText(ResourceMgr.getString("d_LblDPDropTable")); // NOI18N
     dropTargetCbx.setEnabled(false);
     dropTargetCbx.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
@@ -807,18 +809,19 @@ public class DataPumper
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.1;
-    gridBagConstraints.insets = new Insets(3, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(5, 4, 0, 0);
     updateOptionPanel.add(modeComboBox, gridBagConstraints);
 
-    modeLabel.setText(ResourceMgr.getString("LblDPMode"));
+    modeLabel.setText(ResourceMgr.getString("LblDPMode")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(2, 8, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 8, 0, 0);
     updateOptionPanel.add(modeLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -826,21 +829,21 @@ public class DataPumper
     gridBagConstraints.weighty = 1.0;
     updateOptionPanel.add(jPanel1, gridBagConstraints);
 
-    jLabel1.setText(ResourceMgr.getString("LblDPUpdateOptions"));
+    jLabel1.setText(ResourceMgr.getString("LblDPUpdateOptions")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new Insets(0, 7, 0, 5);
     updateOptionPanel.add(jLabel1, gridBagConstraints);
 
     batchSizeLabel.setHorizontalAlignment(SwingConstants.LEFT);
-    batchSizeLabel.setText(ResourceMgr.getString("LblBatchSize"));
-    batchSizeLabel.setToolTipText(ResourceMgr.getDescription("LblBatchSize"));
+    batchSizeLabel.setText(ResourceMgr.getString("LblBatchSize")); // NOI18N
+    batchSizeLabel.setToolTipText(ResourceMgr.getString("d_LblBatchSize")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(2, 8, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 8, 0, 0);
     updateOptionPanel.add(batchSizeLabel, gridBagConstraints);
 
     batchSize.setColumns(5);
@@ -848,10 +851,19 @@ public class DataPumper
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 0);
     updateOptionPanel.add(batchSize, gridBagConstraints);
+
+    ignoreDropError.setText(ResourceMgr.getString("LblIgnoreDropErrors")); // NOI18N
+    ignoreDropError.setToolTipText(ResourceMgr.getString("d_LblIgnoreDropErrors")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    updateOptionPanel.add(ignoreDropError, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -899,14 +911,14 @@ public class DataPumper
 
     jPanel3.setLayout(new GridBagLayout());
 
-    startButton.setText(ResourceMgr.getString("LblStartDataPumper"));
+    startButton.setText(ResourceMgr.getString("LblStartDataPumper")); // NOI18N
     startButton.setEnabled(false);
     startButton.setName("startButton"); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     jPanel3.add(startButton, gridBagConstraints);
 
-    cancelButton.setText(ResourceMgr.getString("LblCancelCopy"));
+    cancelButton.setText(ResourceMgr.getString("LblCancelCopy")); // NOI18N
     cancelButton.setEnabled(false);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.insets = new Insets(0, 5, 0, 0);
@@ -919,12 +931,12 @@ public class DataPumper
 
     jPanel4.setLayout(new GridBagLayout());
 
-    showLogButton.setText(ResourceMgr.getString("LblShowDataPumperLog"));
+    showLogButton.setText(ResourceMgr.getString("LblShowDataPumperLog")); // NOI18N
     showLogButton.setEnabled(false);
     jPanel4.add(showLogButton, new GridBagConstraints());
 
-    showWbCommand.setText(ResourceMgr.getString("LblShowScript"));
-    showWbCommand.setToolTipText(ResourceMgr.getDescription("LblShowScript"));
+    showWbCommand.setText(ResourceMgr.getString("LblShowScript")); // NOI18N
+    showWbCommand.setToolTipText(ResourceMgr.getString("d_LblShowScript")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.insets = new Insets(0, 5, 0, 0);
     jPanel4.add(showWbCommand, gridBagConstraints);
@@ -936,13 +948,12 @@ public class DataPumper
 
     jPanel5.setLayout(new GridBagLayout());
 
-    helpButton.setText(ResourceMgr.getString("LblHelp"));
-    helpButton.setToolTipText("");
+    helpButton.setText(ResourceMgr.getString("LblHelp")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.anchor = GridBagConstraints.EAST;
     jPanel5.add(helpButton, gridBagConstraints);
 
-    closeButton.setText(ResourceMgr.getString("LblClose"));
+    closeButton.setText(ResourceMgr.getString("LblClose")); // NOI18N
     closeButton.setName("closeButton"); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -996,6 +1007,7 @@ public class DataPumper
   protected JCheckBox deleteTargetCbx;
   protected JCheckBox dropTargetCbx;
   protected JButton helpButton;
+  protected JCheckBox ignoreDropError;
   protected JLabel jLabel1;
   protected JPanel jPanel1;
   protected JPanel jPanel2;
@@ -1853,6 +1865,9 @@ public class DataPumper
 
 		if (!this.createCopier()) return;
 
+		boolean dropTarget = dropTargetCbx.isSelected();
+		boolean ignoreDrop = ignoreDropError.isSelected();
+
 		try
 		{
 			this.copyRunning = true;
@@ -1866,7 +1881,7 @@ public class DataPumper
 			}
 			else if (this.useQueryCbx.isSelected())
 			{
-				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns, ttable.isNewTable(), dropTargetCbx.isSelected());
+				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns, ttable.isNewTable(), dropTarget, ignoreDrop);
 			}
 			else
 			{
@@ -1881,14 +1896,13 @@ public class DataPumper
 				if (!ignoreSelect) where = this.sqlEditor.getText();
 
 				boolean createTable = ttable.isNewTable();
-				boolean dropTable = this.dropTargetCbx.isSelected();
 				Map<String, String> mapping = new HashMap<String, String>();
 				int count = colMapping.sourceColumns.length;
 				for (int i=0; i < count; i++)
 				{
 					mapping.put(colMapping.sourceColumns[i].getColumnName(), colMapping.targetColumns[i].getColumnName());
 				}
-				this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, createTable, dropTable);
+				this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, createTable, dropTarget, ignoreDrop);
 			}
 
 			this.copier.startBackgroundCopy();

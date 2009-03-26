@@ -2123,6 +2123,14 @@ public class MainWindow
 		FileDialogUtil util = new FileDialogUtil();
 		String filename = util.putConfigDirKey(this.currentWorkspaceFile);
 		this.currentProfile.setWorkspaceFile(filename);
+
+		// The MainWindow gets a copy of the profile managed by the ConnectionMgr
+		// so we need to update that one as well.
+		ConnectionProfile realProfile = ConnectionMgr.getInstance().getProfile(currentProfile.getKey());
+		if (realProfile != null)
+		{
+			realProfile.setWorkspaceFile(filename);
+		}
 		this.updateWindowTitle();
 	}
 

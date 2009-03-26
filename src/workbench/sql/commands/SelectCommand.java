@@ -80,7 +80,7 @@ public class SelectCommand extends SqlCommand
 			}
 			catch (Exception th)
 			{
-				LogMgr.logWarning("SelectCommand.execute()", "Error when setting query timeout", th);
+				LogMgr.logWarning("SelectCommand.execute()", "Error when setting query timeout: " + th.getMessage(), null);
 			}
 
 			try
