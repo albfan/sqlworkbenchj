@@ -66,8 +66,10 @@ import workbench.gui.actions.FindAction;
 import workbench.gui.actions.FindAgainAction;
 import workbench.gui.actions.FormatSqlAction;
 import workbench.gui.actions.MatchBracketAction;
+import workbench.gui.actions.RedoAction;
 import workbench.gui.actions.ReplaceAction;
 import workbench.gui.actions.UnCommentAction;
+import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.WbMenuItem;
@@ -112,6 +114,8 @@ public class EditorPanel
 	private FormatSqlAction formatSql;
 	private SearchAndReplace replacer;
 
+	protected UndoAction undo;
+	protected RedoAction redo;
 	protected FileOpenAction fileOpen;
 	protected FileSaveAsAction fileSaveAs;
 
@@ -184,6 +188,11 @@ public class EditorPanel
 		this.unCommentAction = new UnCommentAction(this);
 		this.addKeyBinding(this.commentAction);
 		this.addKeyBinding(this.unCommentAction);
+
+		this.undo = new UndoAction(this);
+		this.redo = new RedoAction(this);
+		this.addKeyBinding(undo);
+		this.addKeyBinding(redo);
 
 		Settings.getInstance().addFontChangedListener(this);
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_EDITOR_TAB_WIDTH, Settings.PROPERTY_EDITOR_ELECTRIC_SCROLL);
@@ -282,6 +291,9 @@ public class EditorPanel
 		return this.columnSelection;
 	}
 
+	public UndoAction getUndoAction() { return this.undo; }
+	public RedoAction getRedoAction() { return this.redo; }
+	
 	protected FindAction getFindAction() { return this.replacer.getFindAction(); }
 	protected FindAgainAction getFindAgainAction() { return this.replacer.getFindAgainAction(); }
 	protected ReplaceAction getReplaceAction() { return this.replacer.getReplaceAction(); }

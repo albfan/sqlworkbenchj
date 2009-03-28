@@ -77,7 +77,7 @@ public class WbAction
 	 */
 	public WbAction(ActionListener l, String aName)
 	{
-		this();
+		super();
 		delegate = l;
 		actionName = aName;
 		putValue(ACTION_COMMAND_KEY, this.actionName);

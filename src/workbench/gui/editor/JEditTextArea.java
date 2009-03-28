@@ -199,13 +199,10 @@ public class JEditTextArea
 		bracketLine = bracketPosition = -1;
 		blink = true;
 
-		// Initialize the GUI
 		setLayout(new ScrollLayout());
 		add(CENTER, painter);
 		vertical = new JScrollBar(JScrollBar.VERTICAL);
 		horizontal = new JScrollBar(JScrollBar.HORIZONTAL);
-//		add(RIGHT, vertical);
-//		add(BOTTOM, horizontal);
 
 		// Add some event listeners
 		vertical.addAdjustmentListener(new AdjustHandler());
@@ -218,7 +215,6 @@ public class JEditTextArea
 
 		// Load the defaults
 		this.inputHandler = new InputHandler();
-		this.inputHandler.addDefaultKeyBindings();
 		setDocument(new SyntaxDocument());
 
 		// Let the focusGained() event display the caret
@@ -247,9 +243,10 @@ public class JEditTextArea
 			this.inputHandler.addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.SHIFT_MASK), cut);
 		}
 
-		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 		this.addKeyBinding(new ScrollDownAction(this));
 		this.addKeyBinding(new ScrollUpAction(this));
+		
+		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 	}
 
 	public int getHScrollBarHeight()
@@ -329,11 +326,7 @@ public class JEditTextArea
 
 	public void addKeyBinding(WbAction anAction)
 	{
-		KeyStroke key = anAction.getAccelerator();
-		if (key != null)
-		{
-			this.inputHandler.addKeyBinding(key, anAction);
-		}
+		this.inputHandler.addKeyBinding(anAction);
 	}
 
 	public void removeKeyBinding(KeyStroke key)

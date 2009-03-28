@@ -578,8 +578,8 @@ public class SqlPanel
 		this.actions.add(this.fileDiscardAction);
 		this.actions.add(this.editor.getReloadAction());
 
-		this.actions.add(new UndoAction(this.editor));
-		this.actions.add(new RedoAction(this.editor));
+		this.actions.add(editor.getUndoAction());
+		this.actions.add(editor.getRedoAction());
 
 		a = pop.getCutAction();
 		a.setCreateMenuSeparator(true);

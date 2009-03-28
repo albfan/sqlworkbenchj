@@ -62,12 +62,14 @@ public class ArgumentParserTest
 		arg = new ArgumentParser();
 		arg.addArgument("delimiter");
 		arg.addArgument("altdelimiter");
+		arg.addArgument("type");
 		
-		cmdline = "-delimiter='\" \"' -altdelimiter='/;nl'";
+		cmdline = "-delimiter='\" \"' -altdelimiter=\"/;nl\" -type=text";
 		arg.parse(cmdline);
 		
 		assertEquals("Blank as delimiter not retrieved", " ", StringUtil.trimQuotes(arg.getValue("delimiter")));
 		assertEquals("Wrong altDelimiter", "/;nl", arg.getValue("altDelimiter"));
+		assertEquals("Wrong type", "text", arg.getValue("type"));
 	}
 
 }

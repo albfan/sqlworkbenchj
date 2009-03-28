@@ -361,6 +361,7 @@ public class BatchRunner
 	public void setCommandToRun(String sql)
 	{
 		this.command = sql;
+		LogMgr.logDebug("BatchRunner.setCommandToRun()", "Using command: <" + sql + ">");
 	}
 
 	protected void runCommand()

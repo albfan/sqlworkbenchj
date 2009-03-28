@@ -233,7 +233,7 @@ public class WbExportTest
 			assertEquals("Wrong third line", "3\t\"with\ttab\"", lines.get(2));
 			
 			// Test escaping 
-			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar='\"' -header=false");
+			result = exportCmd.execute("wbexport -file=\"" + exportFile.getAbsolutePath() + "\" -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar='\"' -header=false");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			
@@ -242,7 +242,7 @@ public class WbExportTest
 			assertEquals("Wrong second line", "2\twith\"\"quote", lines.get(1));
 
 			// Test without quote character
-			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar=\"'\" -header=false");
+			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=\"text\" -sourcetable=quote_test -quoteCharEscaping=duplicate -quoteChar=\"'\" -header=false");
 			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 			assertEquals("Export file not created", true, exportFile.exists());
 			

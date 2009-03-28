@@ -33,6 +33,35 @@ import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
+import workbench.gui.actions.WbAction;
+import workbench.gui.editor.actions.DelPrevWord;
+import workbench.gui.editor.actions.DeleteChar;
+import workbench.gui.editor.actions.DeleteWord;
+import workbench.gui.editor.actions.DocumentEnd;
+import workbench.gui.editor.actions.DocumentHome;
+import workbench.gui.editor.actions.EditorAction;
+import workbench.gui.editor.actions.LineEnd;
+import workbench.gui.editor.actions.LineStart;
+import workbench.gui.editor.actions.NextChar;
+import workbench.gui.editor.actions.NextLine;
+import workbench.gui.editor.actions.NextPage;
+import workbench.gui.editor.actions.NextWord;
+import workbench.gui.editor.actions.PrevWord;
+import workbench.gui.editor.actions.PreviousChar;
+import workbench.gui.editor.actions.PreviousLine;
+import workbench.gui.editor.actions.PreviousPage;
+import workbench.gui.editor.actions.SelectDocumentEnd;
+import workbench.gui.editor.actions.SelectDocumentHome;
+import workbench.gui.editor.actions.SelectLineEnd;
+import workbench.gui.editor.actions.SelectLineStart;
+import workbench.gui.editor.actions.SelectNextChar;
+import workbench.gui.editor.actions.SelectNextLine;
+import workbench.gui.editor.actions.SelectNextPage;
+import workbench.gui.editor.actions.SelectNextWord;
+import workbench.gui.editor.actions.SelectPrevWord;
+import workbench.gui.editor.actions.SelectPreviousChar;
+import workbench.gui.editor.actions.SelectPreviousLine;
+import workbench.gui.editor.actions.SelectPreviousPage;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 
@@ -59,39 +88,48 @@ public class InputHandler
 	public static final String SMART_HOME_END_PROPERTY = "InputHandler.homeEnd";
 
 	public static final ActionListener BACKSPACE = new backspace();
-	public static final ActionListener BACKSPACE_WORD = new backspace_word();
-	public static final ActionListener DELETE = new delete();
-	public static final ActionListener DELETE_WORD = new delete_word();
-	public static final ActionListener END = new end(false);
-	public static final ActionListener DOCUMENT_END = new document_end(false);
-	public static final ActionListener SELECT_END = new end(true);
-	public static final ActionListener SELECT_DOC_END = new document_end(true);
+	public static final ActionListener OVERWRITE = new overwrite();
+
+	public static final EditorAction DELETE = new DeleteChar();
+
+	public static final EditorAction DELETE_WORD = new DeleteWord();
+	public static final EditorAction DEL_PREV_WORD = new DelPrevWord();
+
+	public static final EditorAction DOCUMENT_END = new DocumentEnd();
+	public static final EditorAction SELECT_DOC_END = new SelectDocumentEnd();
+
+	public static final EditorAction LINE_END = new LineEnd();
+	public static final EditorAction SELECT_LINE_END = new SelectLineEnd();
+
+	public static final EditorAction LINE_START = new LineStart();
+	public static final EditorAction SELECT_LINE_START = new SelectLineStart();
+
+	public static final EditorAction DOCUMENT_HOME = new DocumentHome();
+	public static final EditorAction SELECT_DOC_HOME = new SelectDocumentHome();
+
 	public static final ActionListener INSERT_BREAK = new insert_break();
 	public static final ActionListener INSERT_TAB = new insert_tab();
-	public static final ActionListener HOME = new home(false);
-	public static final ActionListener DOCUMENT_HOME = new document_home(false);
-	public static final ActionListener SELECT_HOME = new home(true);
-	public static final ActionListener SELECT_DOC_HOME = new document_home(true);
-	public static final ActionListener NEXT_CHAR = new next_char(false);
-	public static final ActionListener NEXT_LINE = new next_line(false);
-	public static final ActionListener NEXT_PAGE = new next_page(false);
-	public static final ActionListener NEXT_WORD = new next_word(false);
-	public static final ActionListener SELECT_NEXT_CHAR = new next_char(true);
-	public static final ActionListener SELECT_NEXT_LINE = new next_line(true);
-	public static final ActionListener SELECT_NEXT_PAGE = new next_page(true);
-	public static final ActionListener SELECT_NEXT_WORD = new next_word(true);
-	public static final ActionListener OVERWRITE = new overwrite();
-	public static final ActionListener PREV_CHAR = new prev_char(false);
-	public static final ActionListener PREV_LINE = new prev_line(false);
-	public static final ActionListener PREV_PAGE = new prev_page(false);
-	public static final ActionListener PREV_WORD = new prev_word(false);
-	public static final ActionListener SELECT_PREV_CHAR = new prev_char(true);
-	public static final ActionListener SELECT_PREV_LINE = new prev_line(true);
-	public static final ActionListener SELECT_PREV_PAGE = new prev_page(true);
-	public static final ActionListener SELECT_PREV_WORD = new prev_word(true);
-	public static final ActionListener TOGGLE_RECT = new toggle_rect();
-	public static final ActionListener UNDO = new undo();
-	public static final ActionListener REDO = new redo();
+
+
+	public static final EditorAction PREV_WORD = new PrevWord();
+	public static final EditorAction SELECT_PREV_WORD = new SelectPrevWord();
+	public static final EditorAction NEXT_WORD = new NextWord();
+	public static final EditorAction SELECT_NEXT_WORD = new SelectNextWord();
+
+	public static final EditorAction NEXT_CHAR = new NextChar();
+	public static final EditorAction SELECT_NEXT_CHAR = new SelectNextChar();
+	public static final EditorAction PREV_CHAR = new PreviousChar();
+	public static final EditorAction SELECT_PREV_CHAR = new SelectPreviousChar();
+
+	public static final EditorAction NEXT_PAGE = new NextPage();
+	public static final EditorAction PREV_PAGE = new PreviousPage();
+	public static final EditorAction SELECT_PREV_PAGE = new SelectPreviousPage();
+	public static final EditorAction SELECT_NEXT_PAGE = new SelectNextPage();
+
+	public static final EditorAction NEXT_LINE = new NextLine();
+	public static final EditorAction SELECT_NEXT_LINE = new SelectNextLine();
+	public static final EditorAction SELECT_PREV_LINE = new SelectPreviousLine();
+	public static final EditorAction PREV_LINE = new PreviousLine();
 
 	// Default action
 	public static final ActionListener INSERT_CHAR = new insert_char();
@@ -103,62 +141,73 @@ public class InputHandler
 
 	public InputHandler()
 	{
-		bindings = new HashMap();
+		initKeyBindings();
 	}
 
 	/**
 	 * Adds the default key bindings to this input handler.
-	 * This should not be called in the constructor of this
-	 * input handler, because applications might load the
-	 * key bindings from a file, etc.
 	 */
-	public void addDefaultKeyBindings()
+	public void initKeyBindings()
 	{
+		bindings = new HashMap();
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), BACKSPACE);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, KeyEvent.CTRL_MASK), BACKSPACE_WORD);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), DELETE);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, KeyEvent.CTRL_MASK), DELETE_WORD);
+
+		addKeyBinding(DEL_PREV_WORD);
+		addKeyBinding(DELETE_WORD);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), INSERT_BREAK);
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), INSERT_TAB);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), OVERWRITE);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, 0), HOME);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, KeyEvent.SHIFT_MASK), SELECT_HOME);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, KeyEvent.CTRL_MASK),DOCUMENT_HOME);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_HOME, KeyEvent.SHIFT_MASK | KeyEvent.CTRL_MASK), SELECT_DOC_HOME);
+		addKeyBinding(LINE_START);
+		addKeyBinding(SELECT_LINE_START);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), END);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, KeyEvent.SHIFT_MASK), SELECT_END);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, KeyEvent.CTRL_MASK), DOCUMENT_END);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_END, KeyEvent.SHIFT_MASK | KeyEvent.CTRL_MASK), SELECT_DOC_END);
+		addKeyBinding(LINE_END);
+		addKeyBinding(SELECT_LINE_END);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), PREV_PAGE);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, KeyEvent.SHIFT_MASK), SELECT_PREV_PAGE);
+		addKeyBinding(DOCUMENT_HOME);
+		addKeyBinding(SELECT_DOC_HOME);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), NEXT_PAGE);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, KeyEvent.SHIFT_MASK), SELECT_NEXT_PAGE);
+		addKeyBinding(DOCUMENT_END);
+		addKeyBinding(SELECT_DOC_END);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), PREV_CHAR);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.SHIFT_MASK), SELECT_PREV_CHAR);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.CTRL_MASK), PREV_WORD);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK), SELECT_PREV_WORD);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), NEXT_CHAR);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.SHIFT_MASK), SELECT_NEXT_CHAR);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK), NEXT_WORD);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK), SELECT_NEXT_WORD);
+		addKeyBinding(PREV_PAGE);
+		addKeyBinding(SELECT_PREV_PAGE);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), PREV_LINE);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_UP, KeyEvent.SHIFT_MASK), SELECT_PREV_LINE);
+		addKeyBinding(NEXT_PAGE);
+		addKeyBinding(SELECT_NEXT_PAGE);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), NEXT_LINE);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, KeyEvent.SHIFT_MASK), SELECT_NEXT_LINE);
+		addKeyBinding(PREV_CHAR);
+		addKeyBinding(SELECT_PREV_CHAR);
 
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_Z, KeyEvent.CTRL_MASK ), UNDO);
-		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_Y, KeyEvent.CTRL_MASK ), REDO);
+		addKeyBinding(PREV_WORD);
+		addKeyBinding(SELECT_PREV_WORD);
+
+		addKeyBinding(NEXT_CHAR);
+		addKeyBinding(SELECT_NEXT_CHAR);
+
+		addKeyBinding(NEXT_WORD);
+		addKeyBinding(SELECT_NEXT_WORD);
+
+		addKeyBinding(PREV_LINE);
+		addKeyBinding(SELECT_PREV_LINE);
+
+		addKeyBinding(NEXT_LINE);
+		addKeyBinding(SELECT_NEXT_LINE);
+	}
+
+	@SuppressWarnings("unchecked")
+	public void addKeyBinding(WbAction action)
+	{
+		KeyStroke key = action.getAccelerator();
+		if (key != null)
+		{
+			this.bindings.put(action.getAccelerator(), action);
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -192,7 +241,7 @@ public class InputHandler
 		int modifiers = evt.getModifiers();
 
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
-		
+
 		if (!keySequence)
 		{
 			keySequence = true;
@@ -346,7 +395,7 @@ public class InputHandler
 		{
 			return false;
 		}
-		
+
 		JEditTextArea area = getTextArea(evt);
 
 		List<KeyStroke> allKeys = new ArrayList<KeyStroke>();
@@ -434,24 +483,6 @@ public class InputHandler
 			String actionCommand);
 	}
 
-	public static class redo implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			textArea.redo();
-		}
-	}
-
-	public static class undo implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			textArea.undo();
-		}
-	}
-
 	public static class backspace implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
@@ -482,273 +513,6 @@ public class InputHandler
 					bl.printStackTrace();
 				}
 			}
-		}
-	}
-
-	public static class backspace_word implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int start = textArea.getSelectionStart();
-			if(start != textArea.getSelectionEnd())
-			{
-				textArea.setSelectedText("");
-			}
-
-			int line = textArea.getCaretLine();
-			int lineStart = textArea.getLineStartOffset(line);
-			int caret = start - lineStart;
-
-			String lineText = textArea.getLineText(textArea.getCaretLine());
-
-			if(caret == 0)
-			{
-				if(lineStart == 0)
-				{
-					textArea.getToolkit().beep();
-					return;
-				}
-				caret--;
-			}
-			else
-			{
-				caret = TextUtilities.findWordStart(lineText, caret);
-			}
-
-			try
-			{
-				textArea.getDocument().remove(caret + lineStart,start - (caret + lineStart));
-			}
-			catch(BadLocationException bl)
-			{
-				bl.printStackTrace();
-			}
-		}
-	}
-
-	public static class delete implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-
-			if(!textArea.isEditable())
-			{
-				textArea.getToolkit().beep();
-				return;
-			}
-
-			if(textArea.getSelectionStart() != textArea.getSelectionEnd())
-			{
-				textArea.setSelectedText("");
-			}
-			else
-			{
-				int caret = textArea.getCaretPosition();
-				if(caret == textArea.getDocumentLength())
-				{
-					textArea.getToolkit().beep();
-					return;
-				}
-				try
-				{
-					textArea.getDocument().remove(caret,1);
-				}
-				catch(BadLocationException bl)
-				{
-					bl.printStackTrace();
-				}
-			}
-		}
-	}
-
-	public static class delete_word implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int start = textArea.getSelectionStart();
-			if(start != textArea.getSelectionEnd())
-			{
-				textArea.setSelectedText("");
-			}
-
-			int line = textArea.getCaretLine();
-			int lineStart = textArea.getLineStartOffset(line);
-			int caret = start - lineStart;
-
-			String lineText = textArea.getLineText(textArea.getCaretLine());
-
-			if(caret == lineText.length())
-			{
-				if(lineStart + caret == textArea.getDocumentLength())
-				{
-					textArea.getToolkit().beep();
-					return;
-				}
-				caret++;
-			}
-			else
-			{
-				caret = TextUtilities.findWordEnd(lineText, caret);
-			}
-
-			try
-			{
-				textArea.getDocument().remove(start,
-					(caret + lineStart) - start);
-			}
-			catch(BadLocationException bl)
-			{
-				bl.printStackTrace();
-			}
-		}
-	}
-
-	public static class end implements ActionListener
-	{
-		private final boolean select;
-
-		public end(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-
-			int line = textArea.getCaretLine();
-			int caret = textArea.getCaretPosition();
-
-			int lastOfLine = textArea.getLineEndOffset(line) - 1;
-			int lastVisibleLine = textArea.getFirstLine()	+ textArea.getVisibleLines();
-			if(lastVisibleLine >= textArea.getLineCount())
-			{
-				lastVisibleLine = Math.min(textArea.getLineCount() - 1,lastVisibleLine);
-			}
-			else
-			{
-				lastVisibleLine -= (textArea.getElectricScroll() + 1);
-			}
-
-			int lastVisible = textArea.getLineEndOffset(lastVisibleLine) - 1;
-			int lastDocument = textArea.getDocumentLength();
-
-			if(caret == lastDocument)
-			{
-				textArea.getToolkit().beep();
-				if (!select)
-				{
-					textArea.selectNone();
-				}
-				return;
-			}
-			else if(!Boolean.TRUE.equals(textArea.getClientProperty(SMART_HOME_END_PROPERTY)))
-				caret = lastOfLine;
-			else if(caret == lastVisible)
-				caret = lastDocument;
-			else if(caret == lastOfLine)
-				caret = lastVisible;
-			else
-				caret = lastOfLine;
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),caret);
-			else
-				textArea.setCaretPosition(caret);
-		}
-	}
-
-	public static class document_end implements ActionListener
-	{
-		private boolean select;
-
-		public document_end(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			if(select)
-			{
-				textArea.select(textArea.getMarkPosition(),textArea.getDocumentLength());
-			}
-			else
-			{
-				textArea.selectNone();
-				textArea.setCaretPosition(textArea.getDocumentLength());
-			}
-		}
-	}
-
-	public static class home implements ActionListener
-	{
-		private boolean select;
-
-		public home(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-
-			int caret = textArea.getCaretPosition();
-
-			int firstLine = textArea.getFirstLine();
-
-			int firstOfLine = textArea.getLineStartOffset(textArea.getCaretLine());
-			int firstVisibleLine = (firstLine == 0 ? 0 : firstLine + textArea.getElectricScroll());
-			int firstVisible = textArea.getLineStartOffset(firstVisibleLine);
-
-			if(caret == 0)
-			{
-				textArea.getToolkit().beep();
-				if (!select) textArea.selectNone();
-				return;
-			}
-			else if(!Boolean.TRUE.equals(textArea.getClientProperty(SMART_HOME_END_PROPERTY)))
-				caret = firstOfLine;
-			else if(caret == firstVisible)
-				caret = 0;
-			else if(caret == firstOfLine)
-				caret = firstVisible;
-			else
-				caret = firstOfLine;
-
-			if(select)
-			{
-				textArea.select(textArea.getMarkPosition(),caret);
-			}
-			else
-			{
-				textArea.selectNone();
-				textArea.setCaretPosition(caret);
-			}
-		}
-	}
-
-	public static class document_home implements ActionListener
-	{
-		private boolean select;
-
-		public document_home(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			if(select)
-				textArea.select(textArea.getMarkPosition(),0);
-			else
-				textArea.setCaretPosition(0);
 		}
 	}
 
@@ -800,296 +564,12 @@ public class InputHandler
 		}
 	}
 
-	public static class next_char implements ActionListener
-	{
-		private boolean select;
-
-		public next_char(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int caret = textArea.getCaretPosition();
-			if(caret == textArea.getDocumentLength())
-			{
-				textArea.getToolkit().beep();
-				if (!select) textArea.selectNone();
-				return;
-			}
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),caret + 1);
-			else
-				textArea.setCaretPosition(caret + 1);
-		}
-	}
-
-	public static class next_line implements ActionListener
-	{
-		private boolean select;
-
-		public next_line(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int caret = textArea.getCaretPosition();
-			int line = textArea.getCaretLine();
-
-			if(line == textArea.getLineCount() - 1)
-			{
-				textArea.getToolkit().beep();
-				if (!select) textArea.selectNone();
-				return;
-			}
-
-			int magic = textArea.getMagicCaretPosition();
-			if(magic == -1)
-			{
-				magic = textArea.offsetToX(line,
-					caret - textArea.getLineStartOffset(line));
-			}
-
-			caret = textArea.getLineStartOffset(line + 1) + textArea.xToOffset(line + 1,magic);
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),caret);
-			else
-				textArea.setCaretPosition(caret);
-
-			textArea.setMagicCaretPosition(magic);
-		}
-	}
-
-	public static class next_page implements ActionListener
-	{
-		private boolean select;
-
-		public next_page(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int lineCount = textArea.getLineCount();
-			int firstLine = textArea.getFirstLine();
-			int visibleLines = textArea.getVisibleLines();
-			int line = textArea.getCaretLine();
-
-			firstLine += visibleLines;
-
-			if(firstLine + visibleLines >= lineCount - 1)
-				firstLine = lineCount - visibleLines;
-
-			textArea.setFirstLine(firstLine);
-
-			int caret = textArea.getLineStartOffset(Math.min(textArea.getLineCount() - 1,line + visibleLines));
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),caret);
-			else
-				textArea.setCaretPosition(caret);
-		}
-	}
-
-	public static class next_word implements ActionListener
-	{
-		private boolean select;
-
-		public next_word(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int caret = textArea.getCaretPosition();
-			int line = textArea.getCaretLine();
-			int lineStart = textArea.getLineStartOffset(line);
-			caret -= lineStart;
-
-			String lineText = textArea.getLineText(textArea.getCaretLine());
-
-			if(caret == lineText.length())
-			{
-				if(lineStart + caret == textArea.getDocumentLength())
-				{
-					textArea.getToolkit().beep();
-					return;
-				}
-				caret++;
-			}
-			else
-			{
-				caret = TextUtilities.findWordEnd(lineText,caret);
-			}
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),lineStart + caret);
-			else
-				textArea.setCaretPosition(lineStart + caret);
-		}
-	}
-
 	public static class overwrite implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
 			textArea.setOverwriteEnabled(!textArea.isOverwriteEnabled());
-		}
-	}
-
-	public static class prev_char implements ActionListener
-	{
-		private boolean select;
-
-		public prev_char(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int caret = textArea.getCaretPosition();
-			if(caret == 0)
-			{
-				textArea.getToolkit().beep();
-				if (!select) textArea.selectNone();
-				return;
-			}
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),caret - 1);
-			else
-				textArea.setCaretPosition(caret - 1);
-		}
-	}
-
-	public static class prev_line implements ActionListener
-	{
-		private boolean select;
-
-		public prev_line(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int caret = textArea.getCaretPosition();
-			int line = textArea.getCaretLine();
-
-			if(line == 0)
-			{
-				textArea.getToolkit().beep();
-				if (!select) textArea.selectNone();
-				return;
-			}
-
-			int magic = textArea.getMagicCaretPosition();
-			if(magic == -1)
-			{
-				magic = textArea.offsetToX(line,caret - textArea.getLineStartOffset(line));
-			}
-
-			caret = textArea.getLineStartOffset(line - 1) + textArea.xToOffset(line - 1,magic);
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),caret);
-			else
-				textArea.setCaretPosition(caret);
-
-			textArea.setMagicCaretPosition(magic);
-		}
-	}
-
-	public static class prev_page implements ActionListener
-	{
-		private boolean select;
-
-		public prev_page(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int firstLine = textArea.getFirstLine();
-			int visibleLines = textArea.getVisibleLines();
-			int line = textArea.getCaretLine();
-
-			if(firstLine < visibleLines) firstLine = visibleLines;
-
-			textArea.setFirstLine(firstLine - visibleLines);
-
-			int caret = textArea.getLineStartOffset(Math.max(0,line - visibleLines));
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),caret);
-			else
-				textArea.setCaretPosition(caret);
-		}
-	}
-
-	public static class prev_word implements ActionListener
-	{
-		private boolean select;
-
-		public prev_word(boolean select)
-		{
-			this.select = select;
-		}
-
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			int caret = textArea.getCaretPosition();
-			int line = textArea.getCaretLine();
-			int lineStart = textArea.getLineStartOffset(line);
-			caret -= lineStart;
-
-			String lineText = textArea.getLineText(textArea.getCaretLine());
-
-			if(caret == 0)
-			{
-				if(lineStart == 0)
-				{
-					textArea.getToolkit().beep();
-					return;
-				}
-				caret--;
-			}
-			else
-			{
-				caret = TextUtilities.findWordStart(lineText, caret);
-			}
-
-			if(select)
-				textArea.select(textArea.getMarkPosition(),lineStart + caret);
-			else
-				textArea.setCaretPosition(lineStart + caret);
-		}
-	}
-
-	public static class toggle_rect implements ActionListener
-	{
-		public void actionPerformed(ActionEvent evt)
-		{
-			JEditTextArea textArea = getTextArea(evt);
-			textArea.setSelectionRectangular(!textArea.isSelectionRectangular());
 		}
 	}
 
