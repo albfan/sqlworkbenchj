@@ -39,6 +39,7 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.CollectionBuilder;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -206,20 +207,35 @@ public class DataCopier
 		this.initImporterForTable(additionalWhere);
 	}
 
+	private TableIdentifier findTargetTable()
+	{
+		LogMgr.logDebug("DataCopier.findTargetTable()", "Looking for table " + targetTable.getQualifiedName() + " in target database");
+		TableIdentifier realTable = this.targetConnection.getMetadata().findTable(targetTable);
+		if (realTable == null)
+		{
+			TableIdentifier toFind = targetTable.createCopy();
+
+			toFind.setSchema(toFind.getSchemaToUse(targetConnection));
+			toFind.setCatalog(toFind.getCatalogToUse(targetConnection));
+			LogMgr.logDebug("DataCopier.findTargetTable()", "Table " + targetTable.getQualifiedName() + " not found. Trying " + toFind.getQualifiedName());
+			realTable = this.targetConnection.getMetadata().findTable(toFind);
+		}
+		return realTable;
+	}
+
 	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError)
 		throws SQLException
 	{
 		if (dropIfExists)
 		{
-			TableIdentifier toDrop = this.targetConnection.getMetadata().findTable(targetTable);
+			TableIdentifier toDrop = findTargetTable();
 			if (toDrop != null)
 			{
+				LogMgr.logInfo("DataCopier.createTable()", "About to drop table " + toDrop.getQualifiedName());
 				try
 				{
 					ObjectDropper dropper = new GenericObjectDropper();
-					List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
-					tables.add(toDrop);
-					dropper.setObjects(tables);
+					dropper.setObjects(CollectionBuilder.arrayList(toDrop));
 					dropper.setConnection(targetConnection);
 					dropper.dropObjects();
 					this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableDropped", toDrop.getQualifiedName()));
@@ -237,6 +253,10 @@ public class DataCopier
 						throw e;
 					}
 				}
+			}
+			else
+			{
+				LogMgr.logInfo("DataCopier.createTable()", "Table " + targetTable.getQualifiedName() + " not dropped because it was not found in the target database");
 			}
 		}
 

@@ -172,41 +172,6 @@ public class MetaDataSqlManager
 		return this.indexTemplate;
 	}
 	
-//	public String getColumnCommentSql()
-//	{
-//		if (this.columnCommentTemplate == NO_STRING)
-//		{
-//			synchronized (LOCK)
-//			{
-//				HashMap<String, String> sql = this.readStatementTemplates("ColumnCommentStatements.xml");
-//				this.columnCommentTemplate = sql.get(this.productName);
-//				if (columnCommentTemplate == null)
-//				{
-//					this.columnCommentTemplate = sql.get(GENERAL_SQL);
-//				}
-//			}
-//		}
-//		return this.columnCommentTemplate;
-//	}
-//
-//	public String getTableCommentSql()
-//	{
-//		if (this.tableCommentTemplate == NO_STRING)
-//		{
-//			synchronized (LOCK)
-//			{
-//				HashMap<String, String> sql = this.readStatementTemplates("TableCommentStatements.xml");
-//				if (sql == null) return null;
-//				this.tableCommentTemplate = sql.get(this.productName);
-//				if (tableCommentTemplate == null)
-//				{
-//					this.tableCommentTemplate = sql.get(GENERAL_SQL);
-//				}
-//			}
-//		}
-//		return this.tableCommentTemplate;
-//	}
-	
 	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
 	{
 		String s = null;

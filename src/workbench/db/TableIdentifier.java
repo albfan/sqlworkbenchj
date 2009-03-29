@@ -229,39 +229,62 @@ public class TableIdentifier
 		{
 			DbMetadata meta = conn.getMetadata();
 			this.adjustCase(conn);
-			if (meta.needCatalogInDML(this))
+			String catalogToUse = getCatalogToUse(conn);
+			if (StringUtil.isNonBlank(catalogToUse))
 			{
-				String catalogToUse = this.catalog;
-				if (catalogToUse == null)
-				{
-					catalogToUse = meta.getCurrentCatalog();
-				}
-				
-				if (catalogToUse != null && !meta.ignoreCatalog(catalogToUse))
-				{
-					result.append(meta.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
-					result.append('.');
-				}
+				result.append(meta.quoteObjectname(catalogToUse, preserveQuotes && catalogWasQuoted));
+				result.append('.');
 			}
 			
-			if (meta.needSchemaInDML(this))
+			String schemaToUse = getSchemaToUse(conn);
+			if (StringUtil.isNonBlank(schemaToUse))
 			{
-				String schemaToUse = this.schema;
-				if (schemaToUse == null)
-				{
-					schemaToUse = meta.getSchemaToUse();
-				}
-				
-				if (schemaToUse != null && !meta.ignoreSchema(schemaToUse))
-				{
-					result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
-					result.append('.');
-				}
+				result.append(meta.quoteObjectname(schemaToUse, preserveQuotes && schemaWasQuoted));
+				result.append('.');
 			}
-			
 			result.append(meta.quoteObjectname(this.tablename, preserveQuotes && tableWasQuoted));
 		}
 		return result.toString();
+	}
+
+	public String getSchemaToUse(WbConnection conn)
+	{
+		DbMetadata meta = conn.getMetadata();
+		if (meta.needSchemaInDML(this))
+		{
+			String schemaToUse = this.schema;
+			if (schemaToUse == null)
+			{
+				schemaToUse = meta.getSchemaToUse();
+			}
+
+			if (schemaToUse != null && !meta.ignoreSchema(schemaToUse))
+			{
+				return schemaToUse;
+			}
+			return this.schema;
+		}
+		return null;
+	}
+	
+	public String getCatalogToUse(WbConnection conn)
+	{
+		DbMetadata meta = conn.getMetadata();
+		if (meta.needCatalogInDML(this))
+		{
+			String catalogToUse = this.catalog;
+			if (catalogToUse == null)
+			{
+				catalogToUse = meta.getCurrentCatalog();
+			}
+
+			if (catalogToUse != null && !meta.ignoreCatalog(catalogToUse))
+			{
+				return catalogToUse;
+			}
+			return this.catalog;
+		}
+		return null;
 	}
 
 	public void adjustCase(WbConnection conn)

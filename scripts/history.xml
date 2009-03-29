@@ -3,6 +3,19 @@
 
 <release build="-1" date="2009-03-26">
 
+  <entry dev-build="9" type="enh">
+    <description>
+      The keyboard shortcuts for editor movements can now be configured.
+    </description>
+  </entry>
+
+  <entry dev-build="9" type="enh">
+    <description>
+      The generating SQL query of a result tab can now be displayed by double-clicking on the tab
+      or through the context menu of the result tab.
+    </description>
+  </entry>
+
   <entry dev-build="8" type="enh">
     <description>
       WbCopy (and the DataPumper) now optionally ignores any error that occurs when dropping the 
