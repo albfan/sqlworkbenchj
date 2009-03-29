@@ -18,6 +18,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 import workbench.gui.actions.CloseResultTabAction;
 import workbench.gui.actions.RenameTabAction;
+import workbench.gui.actions.ShowSourceQueryAction;
 import workbench.resource.ResourceMgr;
 import workbench.util.StringUtil;
 
@@ -29,9 +30,9 @@ public class ResultTabHandler
 	implements MouseListener, RenameableTab
 {
 	private JTabbedPane resultTab;
-	private ResultCloser client;
+	private ResultHandler client;
 
-	public ResultTabHandler(JTabbedPane tab, ResultCloser closer)
+	public ResultTabHandler(JTabbedPane tab, ResultHandler closer)
 	{
 		resultTab = tab;
 		resultTab.addMouseListener(this);
@@ -50,6 +51,11 @@ public class ResultTabHandler
 				JPopupMenu menu = createPopup();
 				menu.show(resultTab, e.getX(), e.getY());
 			}
+		}
+		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
+		{
+			ShowSourceQueryAction action = new ShowSourceQueryAction(client);
+			action.showQuery();
 		}
 	}
 
@@ -73,6 +79,7 @@ public class ResultTabHandler
 	{
 		JPopupMenu menu = new JPopupMenu();
 		menu.add(new RenameTabAction(this));
+		menu.add(new ShowSourceQueryAction(client));
 		menu.add(new CloseResultTabAction(resultTab, client));
 		return menu;
 	}

@@ -38,7 +38,7 @@ public class ColumnSelectionAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.enableColumnSelection();
+		this.client.setSelectionRectangular(true);
 	}
 
 

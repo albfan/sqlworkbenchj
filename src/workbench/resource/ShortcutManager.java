@@ -13,15 +13,19 @@ package workbench.resource;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import java.util.Set;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import workbench.gui.actions.WbAction;
 import workbench.log.LogMgr;
 import workbench.util.WbPersistence;
@@ -32,6 +36,7 @@ import workbench.util.WbPersistence;
  */
 public class ShortcutManager
 {
+	private Set<ChangeListener> changeListener = new HashSet<ChangeListener>(5);
 
 	private String filename;
 
@@ -89,6 +94,30 @@ public class ShortcutManager
 		this.assignKey(clazz, null);
 	}
 
+	public void addChangeListener(ChangeListener l)
+	{
+		this.changeListener.add(l);
+	}
+
+	public void removeChangeListener(ChangeListener l)
+	{
+		this.changeListener.remove(l);
+	}
+
+	public void fireShortcutsChanged()
+	{
+		if (this.changeListener.size() == 0) return;
+
+		ChangeEvent event = new ChangeEvent(this);
+		for (ChangeListener l : changeListener)
+		{
+			if (l != null)
+			{
+				l.stateChanged(event);
+			}
+		}
+	}
+	
 	public void registerAction(WbAction anAction)
 	{
 		String clazz = anAction.getClass().getName();
@@ -230,11 +259,8 @@ public class ShortcutManager
 			if (action == null) continue;
 			String actionClass = action.getClass().getName();
 			ShortcutDefinition def = this.getDefinition(actionClass);
-			if (def.isCustomized())
-			{
-				KeyStroke key = def.getActiveKeyStroke();
-				action.setAccelerator(key);
-			}
+			KeyStroke key = def.getActiveKeyStroke();
+			action.setAccelerator(key);
 		}
 	}
 

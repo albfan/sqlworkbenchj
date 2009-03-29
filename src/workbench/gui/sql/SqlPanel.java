@@ -108,7 +108,6 @@ import workbench.gui.actions.OptimizeAllColumnsAction;
 import workbench.gui.actions.OptimizeRowHeightAction;
 import workbench.gui.actions.PrintAction;
 import workbench.gui.actions.PrintPreviewAction;
-import workbench.gui.actions.RedoAction;
 import workbench.gui.actions.ResetHighlightAction;
 import workbench.gui.actions.RollbackAction;
 import workbench.gui.actions.SaveDataAsAction;
@@ -119,7 +118,6 @@ import workbench.gui.actions.SelectResultAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.StopAction;
 import workbench.gui.actions.ToggleAutoCommitAction;
-import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.UndoExpandAction;
 import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.actions.WbAction;
@@ -187,7 +185,7 @@ public class SqlPanel
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, ResultCloser
+		FilenameChangeListener, ResultReceiver, MacroClient, ResultHandler
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -2070,6 +2068,18 @@ public class SqlPanel
 		checkResultSetActions();
 	}
 
+	public String getSourceQuery()
+	{
+		Component c = resultTab.getSelectedComponent();
+		if (c instanceof DwPanel)
+		{
+			DwPanel dw = (DwPanel)c;
+			DataStore ds = dw.getTable().getDataStore();
+			if (ds != null) return ds.getGeneratingSql();
+		}
+		return null;
+	}
+
 	public void closeCurrentResult()
 	{
 		int index = resultTab.getSelectedIndex();
@@ -2109,7 +2119,6 @@ public class SqlPanel
 		{
 			LogMgr.logError("SqlPanel.closeCurrentResult()", "Error closing current result tab", e);
 		}
-
 	}
 
 	private void clearResultTabs()

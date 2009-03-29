@@ -282,12 +282,14 @@ public class ShortcutEditor
 	{
 		ShortcutManager mgr = ShortcutManager.getInstance();
 		int count = this.definitions.getRowCount();
+		boolean modified = false;
 		for (int row = 0; row < count; row++)
 		{
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
 			ShortcutDefinition def = d.getShortcut();
 			if (d.isModified())
 			{
+				modified = true;
 				if (d.isCleared())
 				{
 					mgr.removeShortcut(def.getActionClass());
@@ -302,7 +304,11 @@ public class ShortcutEditor
 				}
 			}
 		}
-		mgr.updateActions();
+		if (modified)
+		{
+			mgr.updateActions();
+			mgr.fireShortcutsChanged();
+		}
 	}
 
 	private void closeWindow()

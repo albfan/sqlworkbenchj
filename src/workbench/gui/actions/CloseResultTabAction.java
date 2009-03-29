@@ -16,9 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import workbench.gui.sql.ResultCloser;
+import workbench.gui.sql.ResultHandler;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
@@ -29,12 +27,11 @@ import workbench.resource.ResourceMgr;
  */
 public class CloseResultTabAction
 	extends WbAction
-	implements ChangeListener
 {
 	private JTabbedPane resultTab;
-	private ResultCloser client;
+	private ResultHandler client;
 
-	public CloseResultTabAction(JTabbedPane tabPane, ResultCloser closer)
+	public CloseResultTabAction(JTabbedPane tabPane, ResultHandler closer)
 	{
 		super();
 		this.resultTab = tabPane;
@@ -42,8 +39,6 @@ public class CloseResultTabAction
 		this.initMenuDefinition("MnuTxtCloseResultTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK ));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setIcon(null);
-		this.resultTab.addChangeListener(this);
-		checkEnabled();
 	}
 
 	public void executeAction(ActionEvent e)
@@ -51,15 +46,12 @@ public class CloseResultTabAction
 		client.closeCurrentResult();
 	}
 
-	private void checkEnabled()
+	@Override
+	public boolean isEnabled()
 	{
+		if (resultTab == null) return false;
 		int index = resultTab.getSelectedIndex();
-		this.setEnabled(index < resultTab.getTabCount() -1);
-	}
-
-	public void stateChanged(ChangeEvent evt)
-	{
-		checkEnabled();
+		return (index < resultTab.getTabCount() -1);
 	}
 
 }

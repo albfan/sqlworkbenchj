@@ -343,14 +343,6 @@ public class EditorPanel
 		f.formatSql(this, alternateDelimiter, dbFunctions, dbDatatypes, isMySQL ? "#" : "--");
 	}
 
-	/**
-	 * 	Enable column selection for the next selection.
-	 */
-	public void enableColumnSelection()
-	{
-		this.setSelectionRectangular(true);
-	}
-
 	public void addPopupMenuItem(WbAction anAction, boolean withSeparator)
 	{
 		if (withSeparator)
@@ -370,7 +362,9 @@ public class EditorPanel
 		this.popup = null;
 		this.stopBlinkTimer();
 		this.painter.dispose();
+		inputHandler.dispose();
 		this.setDocument(new SyntaxDocument());
+
 	}
 	/**
 	 * Return the selected statement of the editor. If no

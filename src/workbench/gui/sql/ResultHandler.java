@@ -1,5 +1,5 @@
 /*
- * ResultCloser.java
+ * ResultHandler.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -15,7 +15,8 @@ package workbench.gui.sql;
  *
  * @author support@sql-workbench.net
  */
-public interface ResultCloser
+public interface ResultHandler
 {
 	void closeCurrentResult();
+	String getSourceQuery();
 }

@@ -32,6 +32,8 @@ import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import workbench.gui.actions.WbAction;
 import workbench.gui.editor.actions.DelPrevWord;
@@ -64,6 +66,7 @@ import workbench.gui.editor.actions.SelectPreviousLine;
 import workbench.gui.editor.actions.SelectPreviousPage;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.resource.ShortcutManager;
 
 /**
  * An input handler converts the user's key strokes into concrete actions.
@@ -77,6 +80,7 @@ import workbench.resource.Settings;
  */
 public class InputHandler
 	extends KeyAdapter
+	implements ChangeListener
 {
 	/**
 	 * If this client property is set to Boolean.TRUE on the text area,
@@ -110,7 +114,6 @@ public class InputHandler
 	public static final ActionListener INSERT_BREAK = new insert_break();
 	public static final ActionListener INSERT_TAB = new insert_tab();
 
-
 	public static final EditorAction PREV_WORD = new PrevWord();
 	public static final EditorAction SELECT_PREV_WORD = new SelectPrevWord();
 	public static final EditorAction NEXT_WORD = new NextWord();
@@ -142,6 +145,7 @@ public class InputHandler
 	public InputHandler()
 	{
 		initKeyBindings();
+		ShortcutManager.getInstance().addChangeListener(this);
 	}
 
 	/**
@@ -149,7 +153,7 @@ public class InputHandler
 	 */
 	public void initKeyBindings()
 	{
-		bindings = new HashMap();
+		bindings = new HashMap<KeyStroke, ActionListener>();
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0), BACKSPACE);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), DELETE);
@@ -232,6 +236,20 @@ public class InputHandler
 	public void removeAllKeyBindings()
 	{
 		bindings.clear();
+	}
+
+	public void stateChanged(ChangeEvent e)
+	{
+		initKeyBindings();
+	}
+
+	/**
+	 * Clears all keybindings and un-registers the changelistener from the shortcutmanager
+	 */
+	public void dispose()
+	{
+		ShortcutManager.getInstance().removeChangeListener(this);
+		removeAllKeyBindings();
 	}
 
 	@Override

@@ -59,7 +59,8 @@ public class WbAction
 	private WbAction original;
 	private String iconKey;
 	private List<JMenuItem> createdItems = new LinkedList<JMenuItem>();
-
+	protected boolean isConfigurable = true;
+	
 	public WbAction()
 	{
 		super();
@@ -108,6 +109,11 @@ public class WbAction
 		return ctrlPressed;
 	}
 
+	public boolean isConfigurable()
+	{
+		return isConfigurable;
+	}
+	
 	public boolean allowDuplicate()
 	{
 		return false;
@@ -190,10 +196,13 @@ public class WbAction
 
 	protected void initializeShortcut()
 	{
-		ShortcutManager mgr = ShortcutManager.getInstance();
-		mgr.registerAction(this);
-		KeyStroke key = mgr.getCustomizedKeyStroke(this);
-		setAccelerator(key);
+		if (this.isConfigurable())
+		{
+			ShortcutManager mgr = ShortcutManager.getInstance();
+			mgr.registerAction(this);
+			KeyStroke key = mgr.getCustomizedKeyStroke(this);
+			setAccelerator(key);
+		}
 	}
 
 	/**
