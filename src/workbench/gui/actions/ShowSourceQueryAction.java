@@ -52,6 +52,7 @@ public class ShowSourceQueryAction
 		EditorPanel p = EditorPanel.createSqlEditor();
 		String sql = result.getSourceQuery();
 		p.setText(sql);
+		p.setCaretPosition(0);
 		p.setEditable(false);
 		Frame f = WbManager.getInstance().getCurrentWindow();
 

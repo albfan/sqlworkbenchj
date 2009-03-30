@@ -623,7 +623,11 @@ public class DbExplorerPanel
 				Object o = catalogSelector.getSelectedItem();
 				catalogToSelect = o == null ? null : o.toString();
 			}
-
+			else
+			{
+				catalogToSelect = dbConnection.getMetadata().getCurrentCatalog();
+			}
+			
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(cat);
 

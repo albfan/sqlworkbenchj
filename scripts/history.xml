@@ -23,6 +23,18 @@
     </description>
   </entry>
 
+  <entry dev-build="9" type="fix">
+    <description>
+      The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)
+    </description>
+  </entry>
+
+  <entry dev-build="9" type="fix">
+    <description>
+      Reformatting WbVarDef would incorrectly replace it with WbVarDefine
+    </description>
+  </entry>
+  
   <entry dev-build="8" type="fix">
     <description>
       Workspace -&gt; Assign Workspace was no longer working
