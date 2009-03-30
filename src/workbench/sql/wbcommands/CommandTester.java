@@ -87,7 +87,7 @@ public class CommandTester
 		formattedWords = new HashMap<String, String>();
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
 		formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);
-		formattedWords.put(WbDefineVar.VERB, "WbVarDefine");
+		formattedWords.put(WbDefineVar.VERB, "WbVarDef");
 		formattedWords.put(WbListPkDef.VERB, WbListPkDef.FORMATTED_VERB);
 		formattedWords.put(WbEndBatch.VERB, "WbEndBatch");
 		formattedWords.put(WbStartBatch.VERB, "WbStartBatch");
