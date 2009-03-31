@@ -29,12 +29,24 @@ public class EditorAction
 		init(resourceKey, key, modifier);
 	}
 
+	protected EditorAction(String resourceKey, KeyStroke keyStroke)
+	{
+		super();
+		init(resourceKey, keyStroke);
+	}
+
 	protected void init(String resourceKey, int key, int modifier)
 	{
 		setMenuText(ResourceMgr.getString(resourceKey));
 		setDefaultAccelerator(KeyStroke.getKeyStroke(key, modifier));
 		initializeShortcut();
+	}
 
+	protected void init(String resourceKey, KeyStroke key)
+	{
+		setMenuText(ResourceMgr.getString(resourceKey));
+		setDefaultAccelerator(key);
+		initializeShortcut();
 	}
 	
 }

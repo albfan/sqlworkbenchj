@@ -14,6 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -24,7 +25,7 @@ public class DocumentHome
 {
 	public DocumentHome()
 	{
-		super("TxtEdDocHome", KeyEvent.VK_HOME, KeyEvent.CTRL_MASK);
+		super("TxtEdDocHome", PlatformShortcuts.getDefaultStartOfDoc(false));
 	}
 
 	public void actionPerformed(ActionEvent evt)

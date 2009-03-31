@@ -10,7 +10,7 @@
  */
 package workbench.gui.editor.actions;
 
-import java.awt.event.KeyEvent;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -22,7 +22,7 @@ public class SelectLineEnd
 
 	public SelectLineEnd()
 	{
-		super("TxtEdLineEndSel", KeyEvent.VK_END, KeyEvent.SHIFT_MASK);
+		super("TxtEdLineEndSel", PlatformShortcuts.getDefaultEndOfLine(true));
 		select = true;
 	}
 }

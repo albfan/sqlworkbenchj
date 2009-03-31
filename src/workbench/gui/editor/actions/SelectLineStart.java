@@ -11,7 +11,7 @@
 
 package workbench.gui.editor.actions;
 
-import java.awt.event.KeyEvent;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -22,7 +22,7 @@ public class SelectLineStart
 {
 	public SelectLineStart()
 	{
-		super("TxtEdLineStartSel", KeyEvent.VK_HOME, KeyEvent.SHIFT_MASK);
+		super("TxtEdLineStartSel", PlatformShortcuts.getDefaultStartOfLine(true));
 		select = true;
 	}
 }

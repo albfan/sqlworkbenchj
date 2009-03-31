@@ -33,11 +33,12 @@ public class MacOSHelper
 	implements InvocationHandler
 {
 	private Object proxy;
-
+	
+	private static boolean isMacOS = System.getProperty("os.name").startsWith("Mac OS");
+	
 	public static boolean isMacOS()
 	{
-		String osName = System.getProperty("os.name");
-		return (osName.startsWith("Mac OS"));
+		return isMacOS;
 	}
 
 	public void installApplicationHandler()

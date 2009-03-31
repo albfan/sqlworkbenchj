@@ -11,9 +11,10 @@
 package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -26,13 +27,13 @@ public class LineEnd
 
 	public LineEnd()
 	{
-		super("TxtEdLineEnd", KeyEvent.VK_END, 0);
+		super("TxtEdLineEnd", PlatformShortcuts.getDefaultEndOfLine(false));
 		select = false;
 	}
 
-	protected LineEnd(String resourceKey, int key, int modifier)
+	protected LineEnd(String resourceKey, KeyStroke key)
 	{
-		super(resourceKey, key, modifier);
+		super(resourceKey, key);
 	}
 
 	@Override

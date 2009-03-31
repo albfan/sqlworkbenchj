@@ -11,9 +11,10 @@
 package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -26,13 +27,13 @@ public class LineStart
 	
 	public LineStart()
 	{
-		super("TxtEdLineStart", KeyEvent.VK_HOME, 0);
+		super("TxtEdLineStart", PlatformShortcuts.getDefaultStartOfLine(false));
 		select = false;
 	}
 
-	protected LineStart(String resourceKey, int key, int modifier)
+	protected LineStart(String resourceKey, KeyStroke key)
 	{
-		super(resourceKey, key, modifier);
+		super(resourceKey, key);
 	}
 
 	public void actionPerformed(ActionEvent evt)
