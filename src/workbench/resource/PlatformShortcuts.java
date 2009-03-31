@@ -52,7 +52,7 @@ public class PlatformShortcuts
 		{
 			return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.META_MASK | (select ? KeyEvent.SHIFT_MASK : 0) );
 		}
-		return KeyStroke.getKeyStroke(KeyEvent.VK_END, 0);
+		return KeyStroke.getKeyStroke(KeyEvent.VK_END, (select ? KeyEvent.SHIFT_MASK : 0));
 	}
 
 	public static KeyStroke getDefaultStartOfLine(boolean select)
