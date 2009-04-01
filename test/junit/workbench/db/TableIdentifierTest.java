@@ -29,6 +29,43 @@ public class TableIdentifierTest
 		super(testName);
 	}
 
+	public void testDropName()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("tableIdentifierTest");
+			WbConnection con = util.getConnection("dropExpressionTest");
+
+			TestUtil.executeScript(con, "create schema s1;\n " +
+				"set schema public;\n " +
+				"create table table1 (id integer);\n" +
+				"create table table2 (id integer);\n" +
+				"commit;\n " +
+				"set schema s1;" +
+				"create table table2 (id integer);\n " +
+				"create table table3 (id integer);\n " +
+				"set schema s1;\n " +
+				"commit; \n");
+			
+			TableIdentifier t1 = con.getMetadata().findTable(new TableIdentifier("TABLE1"));
+			TestUtil.executeScript(con, "set schema s1;");
+			assertEquals("PUBLIC.TABLE1", t1.getObjectNameForDrop(con));
+//			System.out.println("table: " + t1.getObjectNameForDrop(con));
+			TestUtil.executeScript(con, "set schema public;");
+			assertEquals("TABLE1", t1.getObjectNameForDrop(con));
+//			System.out.println("table: " + t1.getObjectNameForDrop(con));
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+		
+	}
 	public void testQuoteSpecialChars()
 	{
 		try
@@ -88,8 +125,7 @@ public class TableIdentifierTest
 			t = "dbo.company";
 			tbl = new TableIdentifier(t);
 			exp = tbl.getTableExpression(con);
-			System.out.println("****" + exp);
-
+//			System.out.println("****" + exp);
 		}
 		catch (Exception e)
 		{

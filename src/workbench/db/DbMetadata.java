@@ -595,16 +595,18 @@ public class DbMetadata
 
 	/**
 	 * Check if the given {@link TableIdentifier} requires
-	 * the usage of the schema for a DML (select, insert, update, delete)
+	 * the usage of the schema for a DML or DDL statement
 	 * statement.
 	 * <br/>
-	 * First the result of ignoreSchema() is tested. If that is true, then this method returns false.
+	 * If the current DBMS does not support schemas, it returns false.
 	 * <br/>
-	 * By default this is not required for an Oracle connetion where the schema is the current user.
+	 * If the current  schema is different to the table's schema, it returns true.
 	 * <br/>
-	 * For all other DBMS, the usage can be disabled by setting
-	 * a property in the configuration file
-	 * @see #ignoreSchema(java.lang.String) 
+	 * If either no current schema is available, or it is the same as the table's schema
+	 * the result of ignoreSchema() is checked to leave out e.g. the PUBLIC schema in Postgres or H2
+	 *
+	 * @see #ignoreSchema(java.lang.String)
+	 * @see #supportsSchemas() 
 	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
@@ -612,22 +614,20 @@ public class DbMetadata
 		try
 		{
 			String tblSchema = table.getSchema();
-			if (ignoreSchema(tblSchema)) return false;
+			String currentSchema = getCurrentSchema();
 
-			if (this.isOracle)
+			if (StringUtil.isBlank(currentSchema))
 			{
-				// The current schema can be changed in Oracle using ALTER SESSION
-				// in that case the current user is still the one used to log-in
-				// but the current schema is different, and we do need to qualify
-				// objects with the schema. 
-				return !getCurrentSchema().equalsIgnoreCase(tblSchema);
+				 if (ignoreSchema(tblSchema))	return false;
 			}
+			
+			// If the current schema is not the one of the table, the schema is needed in DML statements
+			return (!getCurrentSchema().equalsIgnoreCase(tblSchema));
 		}
 		catch (Throwable th)
 		{
 			return false;
 		}
-		return true;
 	}
 
 	/**
