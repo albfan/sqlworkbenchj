@@ -20,7 +20,8 @@ import workbench.util.PlatformHelper;
  * Centralize the definition of default keyboard shortcuts for MacOS and the rest of the world.
  *
  * KeyEvent.META_MASK is the "Command" (or "Apple") Key<br/>
- * KeyEvent.CTRL_MASK is the "Option" key<br/>
+ * KeyEvent.ALT_MASK is the "Option" key<br/>s
+ * KeyEvent.CTRL_MASK is the Control key<br/>
  * 
  * @author support@sql-workbench.net
  */
@@ -44,6 +45,24 @@ public class PlatformShortcuts
 	public static int getDefaultModifier()
 	{
 		return Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+	}
+
+	public static KeyStroke getDefaultPrevWord(boolean select)
+	{
+		if (PlatformHelper.isMacOS())
+		{
+			return KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0) );
+		}
+		return KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0));
+	}
+
+	public static KeyStroke getDefaultNextWord(boolean select)
+	{
+		if (PlatformHelper.isMacOS())
+		{
+			return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0) );
+		}
+		return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0));
 	}
 
 	public static KeyStroke getDefaultEndOfLine(boolean select)
