@@ -10,7 +10,7 @@
  */
 package workbench.gui.editor.actions;
 
-import java.awt.event.KeyEvent;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -21,7 +21,7 @@ public class SelectNextWord
 {
 	public SelectNextWord()
 	{
-		super("TxtEdNxtWordSel", KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
+		super("TxtEdNxtWordSel", PlatformShortcuts.getDefaultNextWord(true));
 		select = true;
 	}
 }

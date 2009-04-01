@@ -11,10 +11,11 @@
 package workbench.gui.editor.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import javax.swing.KeyStroke;
 import workbench.gui.editor.InputHandler;
 import workbench.gui.editor.JEditTextArea;
 import workbench.gui.editor.TextUtilities;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -27,13 +28,13 @@ public class PrevWord
 
 	public PrevWord()
 	{
-		super("TxtEdPrvWord", KeyEvent.VK_LEFT, KeyEvent.CTRL_MASK);
+		super("TxtEdPrvWord", PlatformShortcuts.getDefaultPrevWord(false));
 		select = false;
 	}
 
-	public PrevWord(String resourceKey, int key, int modifier)
+	public PrevWord(String resourceKey, KeyStroke key)
 	{
-		super(resourceKey, key, modifier);
+		super(resourceKey, key);
 	}
 
 	public void actionPerformed(ActionEvent evt)

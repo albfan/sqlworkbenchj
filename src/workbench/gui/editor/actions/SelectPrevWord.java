@@ -12,6 +12,7 @@
 package workbench.gui.editor.actions;
 
 import java.awt.event.KeyEvent;
+import workbench.resource.PlatformShortcuts;
 
 /**
  *
@@ -23,7 +24,7 @@ public class SelectPrevWord
 
 	public SelectPrevWord()
 	{
-		super("TxtEdPrvWordSel",KeyEvent.VK_LEFT, KeyEvent.CTRL_MASK | KeyEvent.SHIFT_MASK);
+		super("TxtEdPrvWordSel", PlatformShortcuts.getDefaultPrevWord(true));
 		select = true;
 	}
 
