@@ -103,7 +103,7 @@ public class TableIdentifier
 	
 	public String getObjectNameForDrop(WbConnection con)
 	{
-		return getObjectName(con);
+		return getTableExpression(con);
 	}
 
 	public String getObjectName(WbConnection conn)
