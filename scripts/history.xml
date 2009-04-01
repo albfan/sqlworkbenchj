@@ -5,7 +5,8 @@
 
   <entry dev-build="9" type="enh">
     <description>
-      The keyboard shortcuts for editor movements can now be configured.
+      The keyboard shortcuts for editor movements can now be configured. The defaults have been adjusted
+      to comply with the Apple guidelines on Mac OS
     </description>
   </entry>
 

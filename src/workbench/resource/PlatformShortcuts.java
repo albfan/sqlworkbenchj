@@ -53,7 +53,7 @@ public class PlatformShortcuts
 		{
 			return KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0) );
 		}
-		return KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0));
+		return KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.CTRL_MASK | (select ? KeyEvent.SHIFT_MASK : 0));
 	}
 
 	public static KeyStroke getDefaultNextWord(boolean select)
@@ -62,7 +62,7 @@ public class PlatformShortcuts
 		{
 			return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0) );
 		}
-		return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK | (select ? KeyEvent.SHIFT_MASK : 0));
+		return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.CTRL_MASK | (select ? KeyEvent.SHIFT_MASK : 0));
 	}
 
 	public static KeyStroke getDefaultEndOfLine(boolean select)
