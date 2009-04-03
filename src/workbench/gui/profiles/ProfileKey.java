@@ -51,7 +51,7 @@ public class ProfileKey
 	private void setName(String pname)
 	{
 		String tname = pname.trim();
-		if (tname.charAt(0) == '{')
+		if (tname.length() > 0 && tname.charAt(0) == '{')
 		{
 			int pos = tname.indexOf('}');
 			if (pos < 0) throw new IllegalArgumentException("Missing closing } to define group name");
