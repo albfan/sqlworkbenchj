@@ -27,6 +27,7 @@ public class TableDependency
 	private TableIdentifier theTable;
 	private DependencyNode tableRoot;
 	private DbMetadata wbMetadata;
+	private FKHandler fkHandler;
 	private List<DependencyNode> leafs;
 	private boolean directChildrenOnly = false;
 	private boolean readAborted = false;
@@ -35,6 +36,7 @@ public class TableDependency
 	{
 		this.connection = con;
 		this.wbMetadata = this.connection.getMetadata();
+		fkHandler = new FKHandler(connection);
 		this.theTable = this.wbMetadata.findTable(tbl);
 	}
 
@@ -123,7 +125,7 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 7;
 				parentcolumncol = 3;
-				ds = this.wbMetadata.getExportedKeys(ptbl);
+				ds = fkHandler.getExportedKeys(ptbl);
 			}
 			else
 			{
@@ -133,7 +135,7 @@ public class TableDependency
 				fknamecol = 11;
 				tablecolumncol = 3;
 				parentcolumncol = 7;
-				ds = this.wbMetadata.getImportedKeys(ptbl);
+				ds = fkHandler.getImportedKeys(ptbl);
 			}
 
 			int count = ds.getRowCount();

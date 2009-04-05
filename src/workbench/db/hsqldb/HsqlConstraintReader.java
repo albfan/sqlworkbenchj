@@ -35,14 +35,7 @@ public class HsqlConstraintReader
 	public HsqlConstraintReader(Connection dbConnection)
 	{
 		super();
-		if (HsqlMetadata.supportsInformationSchema(dbConnection))
-		{
-			this.sql = TABLE_SQL;
-		}
-		else
-		{
-			this.sql = TABLE_SQL.replaceAll("information_schema\\.", "");
-		}
+		this.sql = TABLE_SQL;
 
 		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
 		{

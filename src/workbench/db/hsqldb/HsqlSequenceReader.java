@@ -58,13 +58,9 @@ public class HsqlSequenceReader
 			query += "information_schema.sequences";
 			query = query.replace("dtd_identifier as data_type", "data_type");
 		}
-		else if (HsqlMetadata.supportsInformationSchema(conn))
-		{
-			query += "information_schema.system_sequences";
-		}
 		else
 		{
-			query += "system_sequences";
+			query += "information_schema.system_sequences";
 		}
 		baseQuery = query;
 	}

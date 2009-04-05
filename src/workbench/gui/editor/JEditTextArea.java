@@ -2131,8 +2131,10 @@ public class JEditTextArea
 	 */
 	public void processKeyEvent(KeyEvent evt)
 	{
-		if(inputHandler == null)
-			return;
+		if (evt.isConsumed()) return;
+		
+		if (inputHandler == null) return;
+		
 		if (keyEventInterceptor != null)
 		{
 			forwardKeyEvent(evt);
@@ -2140,7 +2142,7 @@ public class JEditTextArea
 		}
 
 		int oldcount = NumberStringCache.getNumberString(this.getLineCount()).length();
-		switch(evt.getID())
+		switch (evt.getID())
 		{
 			case KeyEvent.KEY_TYPED:
 				inputHandler.keyTyped(evt);
@@ -2152,14 +2154,16 @@ public class JEditTextArea
 				inputHandler.keyReleased(evt);
 				break;
 		}
+
 		if (!evt.isConsumed())
 		{
 			super.processKeyEvent(evt);
 		}
+
 		int newcount = NumberStringCache.getNumberString(this.getLineCount()).length();
 		boolean changed = false;
 
-		if(this.getFirstLine() < 0)
+		if (this.getFirstLine() < 0)
 		{
 			updateScrollBars();
 			changed = true;

@@ -79,7 +79,11 @@ public class TableSourceBuilder
 		List<ColumnIdentifier> cols = def.getColumns();
 		DataStore indexDef = meta.getIndexReader().getTableIndexInformation(tbl);
 		DataStore fkDef = null;
-		if (includeFk) fkDef = meta.getForeignKeys(tbl, false);
+		if (includeFk) 
+		{
+			FKHandler fk = new FKHandler(dbConnection);
+			fkDef = fk.getForeignKeys(tbl, false);
+		}
 
 		// getTableDefinition() has already retrieved the necessary PK information
 		// there is no need to retrieve the index definition to get the PK information
@@ -378,7 +382,8 @@ public class TableSourceBuilder
 
 	public StringBuilder getFkSource(TableIdentifier table)
 	{
-		DataStore fkDef = dbConnection.getMetadata().getForeignKeys(table, false);
+		FKHandler fk = new FKHandler(dbConnection);
+		DataStore fkDef = fk.getForeignKeys(table, false);
 		return getFkSource(table, fkDef, null, createInlineConstraints);
 	}
 
@@ -426,12 +431,12 @@ public class TableSourceBuilder
 		for (int i=0; i < count; i++)
 		{
 			//"FK_NAME", "COLUMN_NAME", "REFERENCES"};
-			fkname = aFkDef.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_FK_NAME);
-			col = aFkDef.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_COLUMN_NAME);
-			fkCol = aFkDef.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
-			updateRule = aFkDef.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE);
-			deleteRule = aFkDef.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE);
-			deferRule = aFkDef.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE);
+			fkname = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
+			col = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_COLUMN_NAME);
+			fkCol = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
+			updateRule = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_UPDATE_RULE);
+			deleteRule = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE);
+			deferRule = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DEFERRABLE);
 
 			List<String> colList = fkCols.get(fkname);
 			if (colList == null)

@@ -13,6 +13,8 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 
+import java.sql.Types;
+import java.util.List;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.sql.SqlCommand;
@@ -24,10 +26,11 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class WbListCatalogs extends SqlCommand
+public class WbListCatalogs
+	extends SqlCommand
 {
-	private final String VERB = "WBLISTDB";
-	private final String VERB_ALTERNATE = "WBLISTCAT";
+	public static final String VERB = "WBLISTDB";
+	public static final String VERB_ALTERNATE = "WBLISTCAT";
 
 	public WbListCatalogs()
 	{
@@ -43,8 +46,19 @@ public class WbListCatalogs extends SqlCommand
 		StatementRunnerResult result = new StatementRunnerResult();
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
-		DataStore ds = currentConnection.getMetadata().getCatalogInformation();
+		List<String> cats = currentConnection.getMetadata().getCatalogInformation();
 		String catName = StringUtil.capitalize(currentConnection.getMetadata().getCatalogTerm());
+		String[] cols = { catName };
+		int[] types = { Types.VARCHAR };
+		int[] sizes = { 10 };
+
+		DataStore ds = new DataStore(cols, types, sizes);
+		for (String cat : cats)
+		{
+			int row = ds.addRow();
+			ds.setValue(row, 0, cat);
+		}
+		ds.resetStatus();
 		ds.setResultName(catName);
 		result.addDataStore(ds);
 		result.setSuccess();

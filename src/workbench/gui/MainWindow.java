@@ -107,6 +107,8 @@ import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
+import workbench.gui.actions.NextTabAction;
+import workbench.gui.actions.PrevTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
@@ -162,7 +164,9 @@ public class MainWindow
 	private SaveAsNewWorkspaceAction saveAsWorkspaceAction;
 	private LoadWorkspaceAction loadWorkspaceAction;
 	private AssignWorkspaceAction assignWorkspaceAction;
-
+	private NextTabAction nextTab;
+	private PrevTabAction prevTab;
+	
 	private boolean tabRemovalInProgress;
 
 	// will indicate a connect or disconnect in progress
@@ -177,15 +181,14 @@ public class MainWindow
 
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
-
+	
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
 		this.windowId = ++instanceCount;
 
 		sqlTab = new WbTabbedPane();
-		sqlTab.setFocusable(false);
-
+		
 		String policy = Settings.getInstance().getProperty("workbench.gui.sqltab.policy", "wrap");
 		if ("wrap".equalsIgnoreCase(policy))
 		{
@@ -207,15 +210,24 @@ public class MainWindow
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
+		
 		updateTabPolicy();
 		this.addWindowListener(this);
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
+		
 		Settings.getInstance().addPropertyChangeListener(this,
-			Settings.PROPERTY_SHOW_TOOLBAR, Settings.PROPERTY_SHOW_TAB_INDEX,
-			"workbench.gui.mainwindow.tabpolicy");
+			Settings.PROPERTY_SHOW_TOOLBAR,
+			Settings.PROPERTY_SHOW_TAB_INDEX,
+			"workbench.gui.mainwindow.tabpolicy"
+		);
+
+		// There is no need to register the actions with the ActionMap
+		// as they will be handed over to the FocusManager in windowActivated()
+		nextTab = new NextTabAction(sqlTab);
+		prevTab = new PrevTabAction(sqlTab);
 	}
 
 	protected void updateTabPolicy()
@@ -399,7 +411,10 @@ public class MainWindow
 			action = new SelectTabAction(this.sqlTab, i);
 			menu.add(action);
 		}
-
+		menu.addSeparator();
+		menu.add(nextTab.getMenuItem());
+		menu.add(prevTab.getMenuItem());
+		
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
 		menu.setName(ResourceMgr.MNU_TXT_DATA);
 		menu.setVisible(false);
@@ -915,7 +930,6 @@ public class MainWindow
 				updateGuiForTab(anIndex);
 			}
 		});
-		WbSwingUtilities.repaintLater(this);
 	}
 
 	protected void updateGuiForTab(int anIndex)
@@ -958,8 +972,6 @@ public class MainWindow
 				updateCurrentTab(index);
 			}
 		});
-		WbSwingUtilities.repaintLater(this);
-		WbSwingUtilities.repaintLater(this.getContentPane());
 	}
 
 	protected void updateCurrentTab(int index)
@@ -1039,10 +1051,12 @@ public class MainWindow
 
 	public void windowDeactivated(WindowEvent windowEvent)
 	{
+		WbFocusManager.getInstance().grabActions(null, null);
 	}
 
 	public void windowActivated(WindowEvent windowEvent)
 	{
+		WbFocusManager.getInstance().grabActions(nextTab, prevTab);
 	}
 
 	public void windowIconified(WindowEvent windowEvent)

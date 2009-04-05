@@ -65,6 +65,8 @@ public class CommandTester
 		commands.add(WbListVars.VERB);
 		commands.add(WbListTables.VERB);
 		commands.add(WbListProcedures.VERB);
+		commands.add(WbListCatalogs.VERB);
+		commands.add(WbListCatalogs.VERB_ALTERNATE);
 		commands.add(WbLoadPkMapping.VERB);
 		commands.add(WbRemoveVar.VERB);
 		commands.add(WbSavePkMapping.VERB);
@@ -106,6 +108,8 @@ public class CommandTester
 		formattedWords.put(WbListProcedures.VERB, "WbListProcs");
 		formattedWords.put(WbListTriggers.VERB, WbListTriggers.FORMATTED_VERB);
 		formattedWords.put(WbTriggerSource.VERB, WbTriggerSource.FORMATTED_VERB);
+		formattedWords.put(WbListCatalogs.VERB, "WbListDB");
+		formattedWords.put(WbListCatalogs.VERB_ALTERNATE, "WbListCat");
 	}
 	
 	public Collection<String> getCommands()

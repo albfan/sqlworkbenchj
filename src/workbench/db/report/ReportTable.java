@@ -28,6 +28,7 @@ import workbench.util.StrBuffer;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import workbench.db.FKHandler;
 import workbench.db.IndexDefinition;
 import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
@@ -209,30 +210,31 @@ public class ReportTable
 
 	private void readForeignKeys(WbConnection conn)
 	{
-		DataStore ds = conn.getMetadata().getForeignKeys(this.table, true);
+		FKHandler	fk = new FKHandler(conn);
+		DataStore ds = fk.getForeignKeys(this.table, true);
 		int keys = ds.getRowCount();
 		if (keys == 0) return;
 
 		for (int i=0; i < keys; i++)
 		{
-			String col = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_COLUMN_NAME);
+			String col = ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_COLUMN_NAME);
 			ReportColumn rcol = this.findColumn(col);
 			if (rcol != null)
 			{
-				String fkname = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_FK_NAME);
+				String fkname = ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
 				ForeignKeyDefinition def = this.foreignKeys.get(fkname);
 				if (def == null)
 				{
 					def = new ForeignKeyDefinition(fkname);
-					def.setDeleteRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
-					def.setUpdateRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
-					def.setDeleteRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DELETE_RULE));
-					def.setUpdateRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_UPDATE_RULE));
-					def.setDeferrableRuleValue(ds.getValueAsInt(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, DatabaseMetaData.importedKeyNotDeferrable));
-					def.setDeferRule(ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_DEFERRABLE));
+					def.setDeleteRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
+					def.setUpdateRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
+					def.setDeleteRule(ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE));
+					def.setUpdateRule(ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_UPDATE_RULE));
+					def.setDeferrableRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, DatabaseMetaData.importedKeyNotDeferrable));
+					def.setDeferRule(ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DEFERRABLE));
 					foreignKeys.put(fkname, def);
 				}
-				String colExpr = ds.getValueAsString(i, DbMetadata.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
+				String colExpr = ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
 				String reftable = null;
 				String refcolumn = null;
 				int pos = colExpr.lastIndexOf(".");

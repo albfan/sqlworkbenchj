@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.db.DbSettings;
+import workbench.db.FKHandler;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableColumnsDatastore;
@@ -165,14 +166,15 @@ public class WbDescribeTable
 				result.addDataStore(triggers);
 			}
 
-			DataStore references = currentConnection.getMetadata().getForeignKeys(toDescribe, false);
+			FKHandler fk = new FKHandler(currentConnection);
+			DataStore references = fk.getForeignKeys(toDescribe, false);
 			if (references.getRowCount() > 0)
 			{
 				references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
 				result.addDataStore(references);
 			}
 
-			DataStore referencedBy = currentConnection.getMetadata().getReferencedBy(toDescribe);
+			DataStore referencedBy = fk.getReferencedBy(toDescribe);
 			if (referencedBy.getRowCount() > 0)
 			{
 				referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));

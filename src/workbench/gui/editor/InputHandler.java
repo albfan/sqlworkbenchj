@@ -113,6 +113,7 @@ public class InputHandler
 
 	public static final ActionListener INSERT_BREAK = new insert_break();
 	public static final ActionListener INSERT_TAB = new insert_tab();
+	public static final ActionListener SHIFT_TAB = new shift_tab();
 
 	public static final EditorAction PREV_WORD = new PrevWord();
 	public static final EditorAction SELECT_PREV_WORD = new SelectPrevWord();
@@ -163,6 +164,7 @@ public class InputHandler
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), INSERT_BREAK);
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0), INSERT_TAB);
+		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_TAB, KeyEvent.SHIFT_MASK), SHIFT_TAB);
 
 		addKeyBinding(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, 0), OVERWRITE);
 
@@ -256,7 +258,6 @@ public class InputHandler
 	public void keyPressed(final KeyEvent evt)
 	{
 		int keyCode = evt.getKeyCode();
-		int modifiers = evt.getModifiers();
 
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
 
@@ -270,29 +271,7 @@ public class InputHandler
 			sequenceIsMapped = isMapped(evt);
 		}
 
-		if (keyCode == KeyEvent.VK_TAB)
-		{
-			JEditTextArea area = getTextArea(evt);
-			if (area.isEditable())
-			{
-				int start = area.getSelectionStart();
-				int end = area.getSelectionEnd();
-				if (start < end)
-				{
-					TextIndenter indenter = new TextIndenter(area);
-					if ((modifiers & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK)
-					{
-						indenter.unIndentSelection();
-					}
-					else
-					{
-						indenter.indentSelection();
-					}
-					return;
-				}
-			}
-		}
-		else if (keyCode == KeyEvent.VK_CONTEXT_MENU)
+		if (keyCode == KeyEvent.VK_CONTEXT_MENU)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -302,6 +281,7 @@ public class InputHandler
 					area.showContextMenu();
 				}
 			});
+			return;
 		}
 		ActionListener l = bindings.get(keyStroke);
 
@@ -349,7 +329,7 @@ public class InputHandler
 		if (evt.getKeyCode() == KeyEvent.VK_ALT)
 		{
 			// we consume this to work around the bug
-			// where A+TAB window switching activates
+			// where Alt+TAB window switching activates
 			// the menu bar on Windows.
 			evt.consume();
 		}
@@ -549,35 +529,67 @@ public class InputHandler
 			textArea.setSelectedText("\n");
 		}
 	}
+	public static class shift_tab implements ActionListener
+	{
+		public void actionPerformed(ActionEvent evt)
+		{
+			JEditTextArea textArea = getTextArea(evt);
+			if (!textArea.isEditable())
+			{
+				textArea.getToolkit().beep();
+				return;
+			}
 
+			int start = textArea.getSelectionStart();
+			int end = textArea.getSelectionEnd();
+
+			if (start < end)
+			{
+				TextIndenter indenter = new TextIndenter(textArea);
+				indenter.unIndentSelection();
+			}
+		}
+	}
 	public static class insert_tab implements ActionListener
 	{
 		public void actionPerformed(ActionEvent evt)
 		{
 			JEditTextArea textArea = getTextArea(evt);
 
-			if(!textArea.isEditable())
+			if (!textArea.isEditable())
 			{
 				textArea.getToolkit().beep();
 				return;
 			}
-			boolean useTab = Settings.getInstance().getEditorUseTabCharacter();
-			if (useTab)
+
+			int start = textArea.getSelectionStart();
+			int end = textArea.getSelectionEnd();
+
+			if (start < end)
 			{
-				textArea.overwriteSetSelectedText("\t");
+				TextIndenter indenter = new TextIndenter(textArea);
+				indenter.indentSelection();
 			}
-			else
+			else 
 			{
-				int tabSize = Settings.getInstance().getEditorTabWidth();
-				int lineStart = textArea.getLineStartOffset(textArea.getCaretLine());
-				int posInLine = textArea.getCaretPosition() - lineStart;
-				int inc = (tabSize - (posInLine % tabSize));
-				StringBuilder spaces = new StringBuilder(inc);
-				for (int i=0; i < inc; i++)
+				boolean useTab = Settings.getInstance().getEditorUseTabCharacter();
+				if (useTab)
 				{
-					spaces.append(' ');
+					textArea.overwriteSetSelectedText("\t");
 				}
-				textArea.overwriteSetSelectedText(spaces.toString());
+				else
+				{
+					int tabSize = Settings.getInstance().getEditorTabWidth();
+					int lineStart = textArea.getLineStartOffset(textArea.getCaretLine());
+					int posInLine = textArea.getCaretPosition() - lineStart;
+					int inc = (tabSize - (posInLine % tabSize));
+					StringBuilder spaces = new StringBuilder(inc);
+					for (int i=0; i < inc; i++)
+					{
+						spaces.append(' ');
+					}
+					textArea.overwriteSetSelectedText(spaces.toString());
+				}
 			}
 		}
 	}

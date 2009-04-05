@@ -99,7 +99,7 @@ public class ConnectionMgr
 	}
 
 	public WbConnection getConnection(ConnectionProfile aProfile, String anId)
-		throws ClassNotFoundException, SQLException
+		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
 		this.disconnect(anId);
 		LogMgr.logInfo("ConnectionMgr.getConnection()", "Creating new connection for [" + aProfile.getKey() + "] for driver=" + aProfile.getDriverclass());
@@ -116,7 +116,7 @@ public class ConnectionMgr
 	}
 
 	public Class loadClassFromDriverLib(ConnectionProfile profile, String className)
-		throws ClassNotFoundException
+		throws ClassNotFoundException, UnsupportedClassVersionError
 	{
 		String drvClass = profile.getDriverclass();
 		String drvName = profile.getDriverName();
@@ -126,7 +126,7 @@ public class ConnectionMgr
 	}
 
 	WbConnection connect(ConnectionProfile aProfile, String anId)
-		throws ClassNotFoundException, SQLException
+		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
 
 		String drvClass = aProfile.getDriverclass();

@@ -65,7 +65,6 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.storage.DataStore;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 import workbench.util.WbProperties;
@@ -597,9 +596,9 @@ public class DbExplorerPanel
 
 	private void readCatalogs()
 	{
-		DataStore ds = this.dbConnection.getMetadata().getCatalogInformation();
+		List<String> catalogs = this.dbConnection.getMetadata().getCatalogInformation();
 		this.catalogSelector.removeActionListener(this);
-		if (ds.getRowCount() == 0)
+		if (catalogs.size() == 0)
 		{
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
@@ -631,9 +630,8 @@ public class DbExplorerPanel
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(cat);
 
-			for (int i = 0; i < ds.getRowCount(); i++)
+			for (String db : catalogs)
 			{
-				String db = ds.getValueAsString(i, 0);
 				if (db.equalsIgnoreCase(catalogToSelect)) selectLastCatalog = true;
 				catalogSelector.addItem(db);
 			}

@@ -11,7 +11,6 @@
  */
 package workbench.util;
 
-
 /**
  * This are constants for java.sql.Types for JDBC 4.0 copied from the Java 6 source code,
  * So I don't have to hardcode the actual values in several places, but still can check for
@@ -21,10 +20,10 @@ package workbench.util;
  */
 public class Types40
 {
-    public final static int ROWID = -8;
-    public static final int NCHAR = -15;
-    public static final int NVARCHAR = -9;
-    public static final int LONGNVARCHAR = -16;
-    public static final int NCLOB = 2011;
-    public static final int SQLXML = 2009;
+	public final static int ROWID = -8;
+	public static final int NCHAR = -15;
+	public static final int NVARCHAR = -9;
+	public static final int LONGNVARCHAR = -16;
+	public static final int NCLOB = 2011;
+	public static final int SQLXML = 2009;
 }

@@ -32,7 +32,7 @@ import workbench.log.LogMgr;
  *
  * Additionally it installs it's own UI to remove the unnecessary borders
  * that the standard Java Look & Feels create.
- * 
+ *
  * @author  support@sql-workbench.net
  */
 public class WbTabbedPane
@@ -45,6 +45,12 @@ public class WbTabbedPane
 	public WbTabbedPane()
 	{
 		super();
+		init();
+	}
+
+	public WbTabbedPane(int placement)
+	{
+		super(placement);
 		init();
 	}
 
@@ -61,12 +67,6 @@ public class WbTabbedPane
 			fontHeight += tabInsets.top + tabInsets.bottom + 2;
 		}
 		return fontHeight + 5;
-	}
-
-	public WbTabbedPane(int placement)
-	{
-		super(placement);
-		init();
 	}
 
 	public JToolTip createToolTip()

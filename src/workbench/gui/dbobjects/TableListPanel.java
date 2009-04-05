@@ -81,10 +81,12 @@ import workbench.util.WbThread;
 import workbench.util.ExceptionUtil;
 import workbench.WbManager;
 import workbench.db.DbObject;
+import workbench.db.FKHandler;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.SynonymDDLHandler;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableSourceBuilder;
@@ -1224,11 +1226,8 @@ public class TableListPanel
 			}
 			else if (dbs.isSynonymType(type))
 			{
-				sql = meta.getSynonymSource(this.selectedTable, true);
-				if (sql.length() == 0)
-				{
-					sql = ResourceMgr.getString("MsgSynonymSourceNotImplemented") + " " + meta.getProductName();
-				}
+				SynonymDDLHandler synHandler = new SynonymDDLHandler();
+				sql = synHandler.getSynonymSource(this.dbConnection, this.selectedTable, true);
 			}
 			else if ("sequence".equalsIgnoreCase(type))
 			{
@@ -1600,8 +1599,8 @@ public class TableListPanel
 	{
 		try
 		{
-			DbMetadata meta = this.dbConnection.getMetadata();
-			final DataStoreTableModel model = new DataStoreTableModel(meta.getReferencedBy(getObjectTable()));
+			FKHandler handler = new FKHandler(dbConnection);
+			final DataStoreTableModel model = new DataStoreTableModel(handler.getReferencedBy(getObjectTable()));
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
@@ -1626,8 +1625,8 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			DbMetadata meta = this.dbConnection.getMetadata();
-			final DataStoreTableModel model = new DataStoreTableModel(meta.getForeignKeys(getObjectTable(), false));
+			FKHandler handler = new FKHandler(dbConnection);
+			final DataStoreTableModel model = new DataStoreTableModel(handler.getForeignKeys(getObjectTable(), false));
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()

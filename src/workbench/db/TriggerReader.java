@@ -98,7 +98,7 @@ public class TriggerReader
 		sql.setObjectName(tableName);
 
 		Statement stmt = this.dbConnection.createStatementForQuery();
-		String query = dbMeta.adjustHsqlQuery(sql.getSql());
+		String query = sql.getSql();
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -153,7 +153,7 @@ public class TriggerReader
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
 		Statement stmt = this.dbConnection.createStatementForQuery();
-		String query = dbMeta.adjustHsqlQuery(sql.getSql());
+		String query = sql.getSql();
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

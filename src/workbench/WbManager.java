@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.swing.FocusManager;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -38,6 +39,7 @@ import javax.swing.UIManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.gui.MainWindow;
+import workbench.gui.WbFocusManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.dbobjects.DbExplorerWindow;
@@ -292,7 +294,7 @@ public final class WbManager
 		LnFHelper helper = new LnFHelper();
 		helper.initUI();
 		this.isWindowsClassic = helper.isWindowsClassic();
-
+		FocusManager.setCurrentManager(WbFocusManager.getInstance());
 		Settings.getInstance().addFontChangedListener(this);
 	}
 

@@ -98,14 +98,24 @@ public class WbAction
 
 	public static boolean isShiftPressed(ActionEvent e)
 	{
-		boolean shiftPressed = ((e.getModifiers() & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
+		return isShiftPressed(e.getModifiers());
+	}
+	
+	public static boolean isShiftPressed(int modifiers)
+	{
+		boolean shiftPressed = ((modifiers & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
 		return shiftPressed;
 	}
 
 	public static boolean isCtrlPressed(ActionEvent e)
 	{
+		return isCtrlPressed(e.getModifiers());
+	}
+
+	public static boolean isCtrlPressed(int modifiers)
+	{
 		int ctrl = PlatformShortcuts.getDefaultModifier();
-		boolean ctrlPressed = ((e.getModifiers() & ctrl) == ctrl);
+		boolean ctrlPressed = ((modifiers & ctrl) == ctrl);
 		return ctrlPressed;
 	}
 

@@ -207,7 +207,7 @@ public class DbDriver
 	}
 	
 	private void loadDriverClass()
-		throws ClassNotFoundException, Exception
+		throws ClassNotFoundException, Exception, UnsupportedClassVersionError
 	{
 		if (this.driverClassInstance != null) return;
 		
@@ -237,7 +237,7 @@ public class DbDriver
 			{
 				// New Firebird 2.0 driver needs this, and it does not seem to do any harm
 				// for other drivers
-				setContextClassLoader();
+				Thread.currentThread().setContextClassLoader(this.classLoader);
 				drvClass = this.classLoader.loadClass(this.driverClass);
 			}
 			else
@@ -276,6 +276,11 @@ public class DbDriver
 				}
 			}
 			
+		}
+		catch (UnsupportedClassVersionError e)
+		{
+			LogMgr.logError("DbDriver.loadDriverClass()", "Driver class could not be loaded ", e);
+			throw e;
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -337,6 +342,14 @@ public class DbDriver
 				LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
 				throw new SQLException("Driver did not return a connection for url=" + url);
 			}
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw e;
+		}
+		catch (UnsupportedClassVersionError e)
+		{
+			throw e;
 		}
 		catch (Throwable th)
 		{
@@ -448,14 +461,6 @@ public class DbDriver
 		else
 		{
 			return false;
-		}
-	}
-
-	private void setContextClassLoader()
-	{
-		if (this.classLoader != null)
-		{
-			Thread.currentThread().setContextClassLoader(this.classLoader);
 		}
 	}
 

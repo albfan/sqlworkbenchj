@@ -63,7 +63,8 @@ public class RowData
 	private List<String> dependencyDeletes;
 
 	private DataConverter converter;
-	
+	boolean ignoreReadErrors = false;
+
 	public RowData(ResultInfo info)
 	{
 		this(info.getColumnCount());
@@ -73,6 +74,7 @@ public class RowData
 	{
 		this.colData = new Object[aColCount];
 		this.setNew();
+		ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 	}
 
 	public void setTrimCharData(boolean flag)
@@ -144,13 +146,23 @@ public class RowData
 		boolean longVarcharAsClob = info.treatLongVarcharAsClob();
 		boolean useGetBytesForBlobs = info.useGetBytesForBlobs();
 		boolean useGetStringForClobs = info.useGetStringForClobs();
-		boolean ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 		
 		Object value = null;
 		
 		for (int i=0; i < colCount; i++)
 		{
 			int type = info.getColumnType(i);
+
+			if (converter != null)
+			{
+				String dbms = rs.getMetaData().getColumnTypeName(i+1);
+				if (converter.convertsType(type, dbms))
+				{
+					value = rs.getObject(i);
+					this.colData[i] = converter.convertValue(type, dbms, value);
+					continue;
+				}
+			}
 
 			try
 			{
@@ -256,15 +268,7 @@ public class RowData
 					throw e;
 				}
 			}
-			if (converter != null)
-			{
-				String dbms = rs.getMetaData().getColumnTypeName(i+1);
-				this.colData[i] = converter.convertValue(type, dbms, value);
-			}
-			else
-			{
-				this.colData[i] = value;
-			}
+			this.colData[i] = value;
 		}
 		this.resetStatus();
 	}

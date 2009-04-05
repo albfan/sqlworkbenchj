@@ -45,6 +45,7 @@ public class TextIndenter
 		int realEndline = editor.getSelectionEndLine();
 		int endline = realEndline;
 		int tabSize = editor.getTabSize();
+
 		StringBuilder buff = new StringBuilder(tabSize);
 		for (int i=0; i < tabSize; i++) buff.append(' ');
 		String spacer = buff.toString();

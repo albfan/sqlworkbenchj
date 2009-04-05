@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-04-01">
+<release build="-1" date="2009-04-03">
+
+  <entry dev-build="10" type="enh">
+    <description>
+      It is now possible to cycle through the tabs using Ctrl-Tab and Ctrl-Shift-Tab
+    </description>
+  </entry>
+
+  <entry dev-build="10" type="fix">
+    <description>
+      If a profile did not have a name, SQL Workbench failed to display the connection dialog.
+    </description>
+  </entry>
 
   <entry dev-build="9" type="enh">
     <description>

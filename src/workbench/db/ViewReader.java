@@ -211,7 +211,7 @@ public class ViewReader
 			sql.setObjectName(tbl.getTableName());
 			sql.setCatalog(tbl.getCatalog());
 			stmt = connection.createStatementForQuery();
-			String query = this.connection.getMetadata().adjustHsqlQuery(sql.getSql());
+			String query = sql.getSql();
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
 				LogMgr.logInfo("DbMetadata.getViewSource()", "Using query=\n" + query);

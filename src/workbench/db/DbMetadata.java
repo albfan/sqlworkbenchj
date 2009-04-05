@@ -54,6 +54,7 @@ import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionBuilder;
 
 /**
  * Retrieve meta data information from the database.
@@ -494,7 +495,9 @@ public class DbMetadata
 			else if (productName.startsWith("HSQLDB"))
 			{
 				// As the version number is appended to the productname
-				// we need to ignore that here. Because the 
+				// we need to ignore that here. The properties configured
+				// in workbench.settings using the DBID are (currently) identically
+				// for all HSQL versions.
 				dbId = "hsql_database_engine";
 			}
 			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
@@ -618,7 +621,7 @@ public class DbMetadata
 
 			if (StringUtil.isBlank(currentSchema))
 			{
-				 if (ignoreSchema(tblSchema))	return false;
+				 return (!ignoreSchema(tblSchema));
 			}
 			
 			// If the current schema is not the one of the table, the schema is needed in DML statements
@@ -1622,6 +1625,7 @@ public class DbMetadata
 	public TableDefinition getTableDefinition(TableIdentifier table)
 		throws SQLException
 	{
+		if (table == null) return null;
 		String catalog = adjustObjectnameCase(StringUtil.trimQuotes(table.getCatalog()));
 		String schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
 		String tablename = adjustObjectnameCase(StringUtil.trimQuotes(table.getTableName()));
@@ -1819,7 +1823,8 @@ public class DbMetadata
 	{
 		return getTableList(table, schema, types, false);
 	}
-		/**
+
+	/**
 	 * Return a list of tables for the given schema
 	 * if the schema is null, all tables will be returned
 	 */
@@ -1952,14 +1957,10 @@ public class DbMetadata
 	 *	Some DBMS's do not support catalogs, in this case the method
 	 *	will return an empty Datastore.
 	 */
-	public DataStore getCatalogInformation()
+	public List<String> getCatalogInformation()
 	{
+		List<String> result = CollectionBuilder.arrayList();
 
-		String[] cols = { this.getCatalogTerm().toUpperCase() };
-		int[] types = { Types.VARCHAR };
-		int[] sizes = { 10 };
-
-		DataStore result = new DataStore(cols, types, sizes);
 		ResultSet rs = null;
 		try
 		{
@@ -1969,8 +1970,7 @@ public class DbMetadata
 				String cat = rs.getString(1);
 				if (cat != null)
 				{
-					int row = result.addRow();
-					result.setValue(row, 0, cat);
+					result.add(cat);
 				}
 			}
 		}
@@ -1983,16 +1983,16 @@ public class DbMetadata
 			SqlUtil.closeResult(rs);
 		}
 
-		if (result.getRowCount() == 1)
+		// If only a single catalog is returned and that is the current one,
+		// is is assumed, that the system does not have catalogs.
+		if (result.size() == 1)
 		{
-			String cat = result.getValueAsString(0, 0);
-			if (cat.equals(this.getCurrentCatalog()))
+			if (result.get(0).equals(this.getCurrentCatalog()))
 			{
-				result.reset();
+				result.clear();
 			}
 		}
-		result.resetStatus();
-		
+		Collections.sort(result);
 		return result;
 	}
 
@@ -2020,6 +2020,11 @@ public class DbMetadata
 		{
 			SqlUtil.closeResult(rs);
 		}
+
+		// The Oracle driver does not return the "PUBLIC"
+		// schema (which is - strictly speaking - correct as
+		// there is no user PUBLIC in the database, but to view
+		// public synonyms we need the entry for the DbExplorer
 		if (this.isOracle)
 		{
 			result.add("PUBLIC");
@@ -2061,6 +2066,7 @@ public class DbMetadata
 				// it doesn't harm for other DBMS as well to
 				// trim the returned value...
 				type = type.trim();
+				
 				if (hideIndexes && isIndexType(type)) continue;
 				result.add(type);
 			}
@@ -2081,215 +2087,6 @@ public class DbMetadata
 
 	public String getSchemaTerm() { return this.schemaTerm; }
 	public String getCatalogTerm() { return this.catalogTerm; }
-
-	public static final int COLUMN_IDX_FK_DEF_FK_NAME = 0;
-	public static final int COLUMN_IDX_FK_DEF_COLUMN_NAME = 1;
-	public static final int COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME = 2;
-	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE = 3;
-	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE = 4;
-	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE = 5;
-	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
-	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 7;
-	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 8;
-
-	public DataStore getExportedKeys(TableIdentifier tbl)
-		throws SQLException
-	{
-		return getRawKeyList(tbl, true);
-	}
-
-	public DataStore getImportedKeys(TableIdentifier tbl)
-		throws SQLException
-	{
-		return getRawKeyList(tbl, false);
-	}
-
-	private DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
-		throws SQLException
-	{
-		TableIdentifier table = tbl.createCopy();
-		table.adjustCase(this.dbConnection);
-			
-		ResultSet rs;
-		if (exported)
-			rs = this.metaData.getExportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());
-		else
-			rs = this.metaData.getImportedKeys(table.getCatalog(), table.getSchema(), table.getTableName());
-
-		DataStore ds = new DataStore(rs, false);
-		try
-		{
-			while (rs.next())
-			{
-				int row = ds.addRow();
-				ds.setValue(row, 0, rs.getString(1));
-				ds.setValue(row, 1, rs.getString(2));
-				ds.setValue(row, 2, rs.getString(3));
-				ds.setValue(row, 3, rs.getString(4));
-				ds.setValue(row, 4, rs.getString(5));
-				ds.setValue(row, 5, rs.getString(6));
-				ds.setValue(row, 6, rs.getString(7));
-				ds.setValue(row, 7, rs.getString(8));
-				ds.setValue(row, 8, Integer.valueOf(rs.getInt(9)));
-				ds.setValue(row, 9, Integer.valueOf(rs.getInt(10)));
-				ds.setValue(row, 10, rs.getString(11));
-				String fk_name = this.fixFKName(rs.getString(12));
-				ds.setValue(row, 11, fk_name);
-				ds.setValue(row, 12, rs.getString(13));
-				ds.setValue(row, 13, Integer.valueOf(rs.getInt(14)));
-			}
-			ds.resetStatus();
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-		return ds;
-	}
-
-	/**
-	 * Works around a bug in Postgres' JDBC driver.
-	 * For Postgres this method strips everything after a \000
-	 * For any other DBMS the given name is returned without change
-	 */
-	private String fixFKName(String aName)
-	{
-		if (aName == null) return null;
-		if (!this.isPostgres) return aName;
-		int pos = aName.indexOf("\\000");
-		if (pos > -1)
-		{
-			// the Postgres JDBC driver seems to have a bug here,
-			// because it appends the whole FK information to the fk name!
-			// the actual FK name ends at the first \000
-			return aName.substring(0, pos);
-		}
-		return aName;
-	}
-
-	public DataStore getForeignKeys(TableIdentifier table, boolean includeNumericRuleValue)
-	{
-		DataStore ds = this.getKeyList(table, true, includeNumericRuleValue);
-		return ds;
-	}
-
-	public DataStore getReferencedBy(TableIdentifier table)
-	{
-		DataStore ds = this.getKeyList(table, false, false);
-		return ds;
-	}
-
-	private DataStore getKeyList(TableIdentifier tableId, boolean getOwnFk, boolean includeNumericRuleValue)
-	{
-		String cols[];
-		String refColName;
-
-		if (getOwnFk)
-		{
-			refColName = "REFERENCES";
-		}
-		else
-		{
-			refColName = "REFERENCED BY";
-		}
-		int types[];
-		int sizes[];
-
-		if (includeNumericRuleValue)
-		{
-			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE", "UPDATE_RULE_VALUE", "DELETE_RULE_VALUE", "DEFER_RULE_VALUE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER};
-			sizes = new int[] {25, 10, 30, 12, 12, 15, 1, 1, 1};
-		}
-		else
-		{
-			cols = new String[] { "FK_NAME", "COLUMN", refColName , "UPDATE_RULE", "DELETE_RULE", "DEFERRABLE"};
-			types = new int[] {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-			sizes = new int[] {25, 10, 30, 12, 12, 15};
-		}
-		DataStore ds = new DataStore(cols, types, sizes);
-		if (tableId == null) return ds;
-		
-		ResultSet rs = null;
-
-		try
-		{
-			TableIdentifier tbl = tableId.createCopy();
-			tbl.adjustCase(this.dbConnection);
-			
-			int tableCol;
-			int fkNameCol;
-			int colCol;
-			int fkColCol;
-			int deleteActionCol = 11;
-			int updateActionCol = 10;
-			int schemaCol;
-			
-			if (getOwnFk)
-			{
-				rs = this.metaData.getImportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
-				tableCol = 3;
-				schemaCol = 2;
-				fkNameCol = 12;
-				colCol = 8;
-				fkColCol = 4;
-			}
-			else
-			{
-				rs = this.metaData.getExportedKeys(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName());
-				tableCol = 7;
-				schemaCol = 6;
-				fkNameCol = 12;
-				colCol = 4;
-				fkColCol = 8;
-			}
-			
-			while (rs.next())
-			{
-				String table = rs.getString(tableCol);
-				String fk_col = rs.getString(fkColCol);
-				String col = rs.getString(colCol);
-				String fk_name = this.fixFKName(rs.getString(fkNameCol));
-				String schema = rs.getString(schemaCol);
-				if (!this.ignoreSchema(schema))
-				{
-					table = schema + "." + table;
-				}
-				int updateAction = rs.getInt(updateActionCol);
-				String updActionDesc = this.dbSettings.getRuleDisplay(updateAction);
-				int deleteAction = rs.getInt(deleteActionCol);
-				String delActionDesc = this.dbSettings.getRuleDisplay(deleteAction);
-				
-				int deferrableCode = rs.getInt(14);
-				String deferrable = this.dbSettings.getRuleDisplay(deferrableCode);
-				
-				int row = ds.addRow();
-				ds.setValue(row, COLUMN_IDX_FK_DEF_FK_NAME, fk_name);
-				ds.setValue(row, COLUMN_IDX_FK_DEF_COLUMN_NAME, col);
-				ds.setValue(row, COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME, table + "." + fk_col);
-				ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE, updActionDesc);
-				ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE, delActionDesc);
-				ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE, deferrable);
-				if (includeNumericRuleValue)
-				{
-					ds.setValue(row, COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, Integer.valueOf(deleteAction));
-					ds.setValue(row, COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, Integer.valueOf(updateAction));
-					ds.setValue(row, COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE, Integer.valueOf(deferrableCode));
-				}
-			}
-			ds.resetStatus();
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("DbMetadata.getKeyList()", "Error when retrieving foreign keys", e);
-			ds.reset();
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-		}
-		return ds;
-	}
 
 	public SequenceReader getSequenceReader()
 	{
@@ -2360,75 +2157,11 @@ public class DbMetadata
 		return id;
 	}
 
-	/**
-	 *	Return the SQL statement to recreate the given synonym.
-	 *	@return the SQL to create the synonym.
-	 */
-	public String getSynonymSource(TableIdentifier synonym, boolean includeTable)
+	public SynonymReader getSynonymReader()
 	{
-		if (this.synonymReader == null) return StringUtil.EMPTY_STRING;
-		String result = null;
-		TableIdentifier tbl = synonym.createCopy();
-		tbl.adjustCase(dbConnection);
-		try
-		{
-			result = this.synonymReader.getSynonymSource(this.dbConnection, tbl.getSchema(), tbl.getTableName());
-		}
-		catch (Exception e)
-		{
-			result = StringUtil.EMPTY_STRING;
-		}
-
-		if (StringUtil.isNonBlank(synonym.getComment()))
-		{
-			CommentSqlManager mgr = new CommentSqlManager(this.dbConnection);
-			String sql = mgr.getCommentSqlTemplate(synonym.getType());
-			if (StringUtil.isNonBlank(sql))
-			{
-				sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, synonym.getRawTableName());
-				sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, synonym.getComment().replace("'", "''"));
-				result += "\n";
-				result += sql;
-				result += "\n";
-			}
-		}
-
-		if (includeTable)
-		{
-			try
-			{
-				TableIdentifier syn = getSynonymTable(tbl.getSchema(), tbl.getTableName());
-				if (syn != null)
-				{
-					TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
-
-					String tableSql = builder.getTableSource(syn, false, true);
-					if (StringUtil.isNonBlank(tableSql))
-					{
-						StringBuilder sb = new StringBuilder(result.length() + tableSql.length() + 50);
-						String nl = Settings.getInstance().getInternalEditorLineEnding();
-						sb.append(result);
-						sb.append(nl);
-						sb.append(nl);
-						sb.append("-------------- ");
-						sb.append(syn.getTableExpression(dbConnection));
-						sb.append(" --------------");
-						sb.append(nl);
-						sb.append(nl);
-						sb.append(tableSql);
-						result = sb.toString();
-					}
-				}
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DbMetadata.getSynonymSource()", "Error when retrieving source for synonym table", e);
-			}
-		}
-		
-		return result;
+		return this.synonymReader;
 	}
-
+	
 	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, boolean includeDrop)
 	{
 		StringBuilder result = new StringBuilder(250);
@@ -2581,27 +2314,6 @@ public class DbMetadata
 	{
 		if (this.errorInfoReader == null) return StringUtil.EMPTY_STRING;
 		return this.errorInfoReader.getErrorInfo(schema, objectName, objectType);
-	}
-
-	/**
-	 * With v1.8 of HSQLDB the tables that list table and view
-	 * information, are stored in the INFORMATION_SCHEMA schema.
-	 * Although the table names are the same, prior to 1.8 you
-	 * cannot use the schema, so it needs to be removed
-	 */
-	String adjustHsqlQuery(String query)
-	{
-		if (!this.isHsql) return query;
-		 if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.8"))
-		{
-			// nothing to do for 1.8
-			return query;
-		}
-
-		// 1.7 did not support the information schema.
-		Pattern p = Pattern.compile("\\sINFORMATION_SCHEMA\\.", Pattern.CASE_INSENSITIVE);
-		Matcher m = p.matcher(query);
-		return m.replaceAll(" ");
 	}
 
 }

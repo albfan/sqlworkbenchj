@@ -46,7 +46,7 @@ public class ShortcutManager
 	private Map<String, String> actionNames;
 	
 	// we need the list of registered actions, in order to be able to
-	// display the label for the action for the customization dialog
+	// display the label for the action in the customization dialog
 	private List<WbAction> allActions = new LinkedList<WbAction>();
 	
 	private Map<KeyStroke, WbAction> keyDebugMap;

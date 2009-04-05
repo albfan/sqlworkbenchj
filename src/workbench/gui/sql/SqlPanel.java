@@ -133,6 +133,8 @@ import workbench.gui.components.WbToolbarSeparator;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.gui.dialogs.export.ExportFileDialog;
+import workbench.gui.editor.actions.IndentSelection;
+import workbench.gui.editor.actions.UnIndentSelection;
 import workbench.gui.macros.MacroClient;
 import workbench.gui.menu.TextPopup;
 import workbench.gui.preparedstatement.ParameterEditor;
@@ -597,12 +599,17 @@ public class SqlPanel
 		this.actions.add(this.editor.getFindAgainAction());
 		this.actions.add(this.editor.getReplaceAction());
 
-		makeLower.setCreateMenuSeparator(true);
+		IndentSelection indent = new IndentSelection(editor);
+		indent.setCreateMenuSeparator(true);
+		actions.add(indent);
+		actions.add(new UnIndentSelection(editor));
+
 		this.actions.add(makeLower);
 		this.actions.add(makeUpper);
 		this.actions.add(this.editor.getCommentAction());
 		this.actions.add(this.editor.getUnCommentAction());
 		this.actions.add(this.editor.getMatchBracketAction());
+
 
 		// The update actions are proxies for the real ones
 		// Once a result tab (DwPanel) has been displayed

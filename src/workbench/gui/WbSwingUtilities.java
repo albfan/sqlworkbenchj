@@ -25,6 +25,7 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -896,4 +897,35 @@ public class WbSwingUtilities
 		return true;
 	}
 
+	public static void dumpActionMap(JComponent comp)
+	{
+		System.out.println("InputMap for WHEN_ANCESTOR_OF_FOCUSED_COMPONENT");
+		System.out.println("-----------------------------------------------");
+		dumpInputMap(comp.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT));
+
+		System.out.println("\nInputMap for WHEN_FOCUSED");
+		System.out.println("-------------------------");
+		dumpInputMap(comp.getInputMap(JComponent.WHEN_FOCUSED));
+
+		System.out.println("\nInputMap for WHEN_IN_FOCUSED_WINDOW");
+		System.out.println("-----------------------------------");
+		dumpInputMap(comp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW));
+	}
+
+	private static void dumpInputMap(InputMap im)
+	{
+		if (im != null && im.allKeys() != null)
+		{
+			for (KeyStroke key : im.allKeys())
+			{
+				if (key == null) continue;
+				Object o = im.get(key);
+				System.out.println("key: " + key + " mapped to " + o.toString());
+			}
+		}
+		else
+		{
+			System.out.println("Nothing mapped");
+		}
+	}
 }

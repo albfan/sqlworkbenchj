@@ -75,8 +75,8 @@ public class EditorTest
 		
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 		JMenuOperator editMenu = new JMenuOperator(mainMenu.getMenu(1));
-		JMenuItem commentItem = (JMenuItem)editMenu.getMenuComponent(17);
-		JMenuItem uncommentItem = (JMenuItem)editMenu.getMenuComponent(18);
+		JMenuItem commentItem = (JMenuItem)editMenu.getMenuComponent(19);
+		JMenuItem uncommentItem = (JMenuItem)editMenu.getMenuComponent(20);
 		
 		JMenuItemOperator comment = new JMenuItemOperator(commentItem);
 		JMenuItemOperator unComment = new JMenuItemOperator(uncommentItem);

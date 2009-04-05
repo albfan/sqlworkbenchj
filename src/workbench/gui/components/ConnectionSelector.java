@@ -217,6 +217,11 @@ public class ConnectionSelector
 				Settings.getInstance().setProperty(this.propertyKey, aProfile.getName());
 			}
 		}
+		catch (UnsupportedClassVersionError ucv)
+		{
+			conn = null;
+			error = ResourceMgr.getString("ErrDrvClassVersion");
+		}
 		catch (ClassNotFoundException cnf)
 		{
 			conn = null;

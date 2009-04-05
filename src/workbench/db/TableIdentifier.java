@@ -598,7 +598,8 @@ public class TableIdentifier
 		}
 		else if ("SYNONYM".equalsIgnoreCase(type))
 		{
-			source = meta.getSynonymSource(this, false);
+			SynonymDDLHandler synHandler = new SynonymDDLHandler();
+			source = synHandler.getSynonymSource(con, this, false);
 		}
 		else if ("VIEW".equalsIgnoreCase(type))
 		{

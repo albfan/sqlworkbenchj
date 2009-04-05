@@ -32,28 +32,16 @@ public class NextTabAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtRollback", KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.CTRL_MASK));
+		this.initMenuDefinition("MnuTxtNextTab", KeyStroke.getKeyStroke(KeyEvent.VK_TAB, InputEvent.CTRL_MASK));
 		this.removeIcon();
-		this.setEnabled(false);
+		setEnabled(true);
 	}
-
-	@Override
-	public boolean isEnabled()
-	{
-		int index = client.getSelectedIndex();
-		int count = client.getTabCount();
-		return (index + 1 < count);
-	}
-
 
 	public void executeAction(ActionEvent e)
 	{
 		int newIndex = client.getSelectedIndex() + 1;
-		if (newIndex < client.getTabCount())
-		{
-			System.out.println("next tab!");
-			client.setSelectedIndex(newIndex);
-		}
+		if (newIndex >= client.getTabCount()) newIndex = 0;
+		client.setSelectedIndex(newIndex);
 	}
 
 }
