@@ -492,7 +492,7 @@ public class DbMetadata
 					dbId = "db2";
 				}
 			}
-			else if (productName.startsWith("HSQLDB"))
+			else if (productName.startsWith("HSQL"))
 			{
 				// As the version number is appended to the productname
 				// we need to ignore that here. The properties configured
