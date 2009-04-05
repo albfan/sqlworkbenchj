@@ -13,6 +13,8 @@ package workbench.gui.renderer;
 
 
 /**
+ * A renderer to display character data.
+ * <br/>
  * This is basically a ToolTipRenderer, but for performance
  * reasons we are assuming the values are all of type string.
  * So we can use a type cast in the getDisplay() method

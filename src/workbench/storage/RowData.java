@@ -113,7 +113,8 @@ public class RowData
 	 *
 	 * @param jdbcType
 	 * @param dbmsType
-	 * @return
+	 * 
+	 * @return true if the type is converted
 	 */
 	public boolean typeIsConverted(int jdbcType, String dbmsType)
 	{

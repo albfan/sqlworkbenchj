@@ -18,10 +18,10 @@ import workbench.util.StringUtil;
 
 /**
  * A list of macros combined into a group.
- *
+ * <br/>
  * A MacroGroup defines a sort order which is essentially maintained
  * through the GUI.
- * 
+ * <br/>
  * Groups can be hidden from the menu.
  * 
  * @author support@sql-workbench.net

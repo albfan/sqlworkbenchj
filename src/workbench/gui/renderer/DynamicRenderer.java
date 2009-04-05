@@ -17,6 +17,9 @@ import workbench.log.LogMgr;
 /**
  * A renderer that uses reflection to obtain the real data value
  * from the object retrieved from the database.
+ * <br/>
+ * Currently not used.
+ * 
  * @author support@sql-workbench.net
  */
 public class DynamicRenderer

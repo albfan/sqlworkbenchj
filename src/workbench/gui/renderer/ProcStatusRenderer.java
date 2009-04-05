@@ -18,7 +18,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 import workbench.db.JdbcProcedureReader;
 
 /**
- *
+ * Displays the return type of a stored procedure as a readable text.
+ * <br/>
+ * @see workbench.db.JdbcProcedureReader#convertProcType(int) 
  * @author  support@sql-workbench.net
  */
 public class ProcStatusRenderer

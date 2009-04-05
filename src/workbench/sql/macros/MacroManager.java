@@ -27,7 +27,10 @@ public class MacroManager
 {
 	private MacroStorage storage;
 
-	protected static class InstanceContainer
+	/**
+	 * Thread safe singleton instance.
+	 */
+	protected static class InstanceHolder
 	{
 		protected static MacroManager instance = new MacroManager();
 	}
@@ -46,7 +49,7 @@ public class MacroManager
 
 	public static MacroManager getInstance()
 	{
-		return InstanceContainer.instance;
+		return InstanceHolder.instance;
 	}
 
 	public synchronized String getMacroText(String key)

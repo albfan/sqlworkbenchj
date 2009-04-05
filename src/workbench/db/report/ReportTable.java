@@ -89,7 +89,7 @@ public class ReportTable
 	 *  <li>the comments for the table using {@link workbench.db.TableCommentReader#getTableComment(WbConnection, TableIdentifier)}</li>
 	 *  <li>The defined indexes for the table if includeIndex == true using an {@link IndexReporter}</li>
 	 *  <li>The defined foreign keys if includeFK == true</li>
-	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.DbMetadata#getTableConstraints(workbench.db.TableIdentifier, String)}</li>
+	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.ConstraintReader#getTableConstraints(workbench.db.WbConnection, workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
 	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints, boolean includeGrants)

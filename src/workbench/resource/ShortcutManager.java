@@ -31,8 +31,9 @@ import workbench.log.LogMgr;
 import workbench.util.WbPersistence;
 
 /**
- * @author support@sql-workbench.net
+ * A class to manage, store and retrieve customized shortcuts for actions.
  *
+ * @author support@sql-workbench.net
  */
 public class ShortcutManager
 {

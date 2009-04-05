@@ -12,7 +12,8 @@
 package workbench.console;
 
 /**
- * A singleton to control and manage the current display style in the console
+ * A singleton to control and manage the current display style in the console.
+ * <br>
  * It stores
  * <ul>
  *	<li>The current choice between row and page format</li>

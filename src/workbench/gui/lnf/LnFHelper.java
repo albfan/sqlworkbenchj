@@ -24,7 +24,8 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
- *
+ * Initialize some gui elements during startup.
+ * 
  * @author support@sql-workbench.net
  */
 public class LnFHelper

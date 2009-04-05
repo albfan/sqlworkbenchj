@@ -25,7 +25,8 @@ import workbench.util.WbFile;
 import workbench.util.WbStringTokenizer;
 
 /**
- *
+ * A class to display the HTML and PDF manual from within the application.
+ * 
  * @author support@sql-workbench.net
  */
 public class HelpManager

@@ -774,7 +774,6 @@ public class DbSettings
 	/**
 	 * Return a customized mapping of JDBC types to native datatypes.
 	 * @see TypeMapper
-	 * @return
 	 */
 	public String getJDBCTypeMapping()
 	{

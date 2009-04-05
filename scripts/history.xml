@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-04-03">
+<release build="-1" date="2009-04-05">
 
   <entry dev-build="10" type="enh">
     <description>
@@ -67,12 +67,14 @@
     </description>
   </entry>
 
+  <!--
   <entry dev-build="8" type="enh">
     <description>
       Added support for new HSQLDB v1.9
     </description>
   </entry>
-
+  -->
+  
   <entry dev-build="7" type="enh">
     <description>
       When using XSLT to transform output of e.g. WbReport or WbSchemaDiff, the name of the stylesheet

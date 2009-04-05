@@ -69,7 +69,6 @@ public class ColumnOrderMgr
 	 * new column model is initialized correctly for the table.
 	 *
 	 * @param table
-	 * @param key
 	 */
 	public synchronized void restoreColumnOrder(WbTable table)
 	{
@@ -115,9 +114,10 @@ public class ColumnOrderMgr
 
 
 	/**
-	 * Check if the column order for the given key is already stored
-	 * @param key
-	 * @return
+	 * Check if the column order for the given key is already stored.
+	 *
+	 * @param tbl the table to check
+	 * @return true, if the column order has been saved for the given table
 	 */
 	public synchronized boolean isOrderSaved(WbTable tbl)
 	{

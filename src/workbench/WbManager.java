@@ -294,8 +294,14 @@ public final class WbManager
 		LnFHelper helper = new LnFHelper();
 		helper.initUI();
 		this.isWindowsClassic = helper.isWindowsClassic();
-		FocusManager.setCurrentManager(WbFocusManager.getInstance());
 		Settings.getInstance().addFontChangedListener(this);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				FocusManager.setCurrentManager(WbFocusManager.getInstance());
+			}
+		});
 	}
 
 	protected JDialog closeMessage;

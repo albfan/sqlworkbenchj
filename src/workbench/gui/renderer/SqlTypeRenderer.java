@@ -24,6 +24,10 @@ import workbench.resource.GuiSettings;
 import workbench.util.SqlUtil;
 
 /**
+ * Displays the integer values from java.sql.Types as readable names.
+ *
+ * @see workbench.util.SqlUtil#getTypeName(int)
+ * 
  * @author  support@sql-workbench.net
  */
 public class SqlTypeRenderer

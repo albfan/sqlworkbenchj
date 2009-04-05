@@ -60,7 +60,9 @@ import workbench.util.WbLocale;
 import workbench.util.WbProperties;
 
 /**
- *	@author  support@sql-workbench.net
+ * The singleton to manage configuration settings for SQL Workbench/J
+ *
+ * @author  support@sql-workbench.net
  */
 public class Settings
 	implements PropertyStorage
@@ -107,6 +109,9 @@ public class Settings
 
 	private long fileTime;
 
+	/**
+	 * Thread safe singleton-instance
+	 */
 	protected static class LazyInstanceHolder
 	{
 		protected static final Settings instance = new Settings();

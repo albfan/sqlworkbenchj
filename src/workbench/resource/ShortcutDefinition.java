@@ -16,8 +16,10 @@ import javax.swing.KeyStroke;
 
 
 /**
+ * A class to store the assigned KeyStrokes for an Action in order to be serializable
+ * using the XMLEncode and XMLDecoder.
+ * 
  * @author support@sql-workbench.net
- *
  */
 public class ShortcutDefinition
 {

@@ -29,7 +29,7 @@ import workbench.util.WbPersistence;
 
 /**
  * Manages laoding and saving of macros to an external (XML) file.
- *
+ * <br/>
  * It also converts the old (HashMap based) implementation of the Macro storage
  * into the new format.
  *

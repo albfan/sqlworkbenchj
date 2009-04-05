@@ -27,6 +27,8 @@ import workbench.util.StringUtil;
 import workbench.util.VersionNumber;
 
 /**
+ * A class to manage the ResourceBundle for the localization.
+ * 
  * @author support@sql-workbench.net.kellerer
  */
 public class ResourceMgr

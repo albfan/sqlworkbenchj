@@ -18,8 +18,8 @@ import javax.swing.KeyStroke;
 /**
  * A class which wraps keyStroke and can be serialized 
  * using the XMLDecode/XMLEncoder classes
- * @author support@sql-workbench.net
  *
+ * @author support@sql-workbench.net
  */
 public class StoreableKeyStroke
 {
@@ -104,6 +104,15 @@ public class StoreableKeyStroke
 			return equals((KeyStroke)other);
 		}
 		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 17 * hash + this.keyCode;
+		hash = 17 * hash + this.modifier;
+		return hash;
 	}
 
 	public String toString()

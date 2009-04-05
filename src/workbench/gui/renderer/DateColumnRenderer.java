@@ -16,7 +16,10 @@ import javax.swing.SwingConstants;
 import workbench.log.LogMgr;
 
 /**
- *
+ * A class to render date and timestamp values.
+ * <br/>
+ * The values are formatted according to the global settings.
+ * 
  * @author  support@sql-workbench.net
  */
 public class DateColumnRenderer

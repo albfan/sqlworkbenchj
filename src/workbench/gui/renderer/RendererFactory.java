@@ -17,8 +17,9 @@ import javax.swing.table.TableCellRenderer;
 import workbench.log.LogMgr;
 
 /**
- * A factory for TableCellRenderers. Classes are created using
- * Class.forName() to avoid unnecessary class loading during startup.
+ * A factory for TableCellRenderers. 
+ * <br/> 
+ * Classes are created using  Class.forName() to avoid unnecessary class loading during startup.
  * This is used from within WbTable
  *
  * @see workbench.gui.components.WbTable#initDefaultRenderers()

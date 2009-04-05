@@ -22,6 +22,11 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
+ * A renderer to display multi-line character data.
+ * <br/>
+ * The renderer uses a JTextArea internally which is a lot slower than the own
+ * drawing of the text implemented in ToolTipRender.
+ * 
  * @author support@sql-workbench.net
  */
 public class TextAreaRenderer

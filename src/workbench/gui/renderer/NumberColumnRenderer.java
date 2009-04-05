@@ -22,6 +22,8 @@ import javax.swing.SwingConstants;
 import workbench.resource.Settings;
 
 /**
+ * Display numeric values according to the global formatting settings.
+ * 
  * @author  support@sql-workbench.net
  */
 public class NumberColumnRenderer

@@ -33,6 +33,15 @@ import workbench.gui.components.*;
 import workbench.resource.GuiSettings;
 
 /**
+ * A class to render and edit BLOB columns in a result set.
+ * <br/>
+ * It uses a BlobColumnPanel to display the information to the user. The renderer
+ * is registered with the BlobColumnPanel's button as an actionlistener and will then
+ * display a dialog with details about the blob.
+ * <br/>
+ *
+ * @see workbench.gui.components.BlobHandler#showBlobInfoDialog(java.awt.Frame, java.lang.Object)
+ * 
  * @author  support@sql-workbench.net
  */
 public class BlobColumnRenderer

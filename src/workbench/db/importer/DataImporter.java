@@ -376,10 +376,17 @@ public class DataImporter
 	 * created with SQL Workbench)
 	 *
 	 * @see #createTarget()
-	 * @see #setTargetTable(workbench.db.TableIdentifier, workbench.db.ColumnIdentifier[])
+	 * @see #setTargetTable(workbench.db.TableIdentifier, java.util.List)
 	 */
-	public void setCreateTarget(boolean flag) { this.createTarget = flag; }
-	public boolean getCreateTarget() { return createTarget; }
+	public void setCreateTarget(boolean flag)
+	{
+		this.createTarget = flag;
+	}
+	
+	public boolean getCreateTarget()
+	{
+		return createTarget;
+	}
 
 	/**
 	 *	Controls deletion of the target table.

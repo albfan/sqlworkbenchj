@@ -26,7 +26,11 @@ import workbench.gui.components.FlatButton;
 import workbench.resource.ResourceMgr;
 
 /**
- * Renderer for BLOB datatype...
+ * A panel with a button to open the BlobInfo dialog
+ * <br/>
+ * If blob data is available the panel will display (BLOB) if the data
+ * is null, nothing will be displayed.
+ * <br/>
  * @author  support@sql-workbench.net
  */
 public class BlobColumnPanel 

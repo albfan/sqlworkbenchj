@@ -49,7 +49,8 @@ public class DurationFormatter
 	/**
 	 * Create a timing formatter using the decimal separator defined
 	 * through the settings property <tt>workbench.gui.timining.decimal</tt>
-	 * @return
+	 *
+	 * @return a properly initialized DecimalFormat
 	 */
 	public static final DecimalFormat createTimingFormatter()
 	{

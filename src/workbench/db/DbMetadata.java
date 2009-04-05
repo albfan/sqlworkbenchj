@@ -2280,7 +2280,6 @@ public class DbMetadata
 	 * delegated to a {@link ConstraintReader}
 	 * @return A String with the table constraints. If no constrains exist, a null String is returned
 	 * @param tbl The table to check
-	 * @param indent A String defining the indention for the source code
 	 */
 	public List<TableConstraint> getTableConstraints(TableIdentifier tbl)
 	{

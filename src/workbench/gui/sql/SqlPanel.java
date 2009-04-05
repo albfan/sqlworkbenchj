@@ -1206,7 +1206,6 @@ public class SqlPanel
 	 * Returns the title that is shown for the current tab.
 	 * This is not necessarily the same as the tabName because
 	 * e.g. a filename could be appended to the tabName
-	 * @return
 	 */
 	public String getTabTitle()
 	{

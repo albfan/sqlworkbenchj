@@ -23,6 +23,10 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 
 /**
+ * A renderer to display the status of a row in the result set.
+ * <br/>
+ * It displays different icons for new and modified, depending on the status of the row.
+ * 
  * @author  support@sql-workbench.net
  */
 public class RowStatusRenderer
