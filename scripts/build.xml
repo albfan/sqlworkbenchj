@@ -267,7 +267,7 @@
 
 	<target name="publish" depends="build-html"/>
 
-	<target name="publish-dev" depends="get-dev-build, publish"/>
+	<target name="publish-dev" depends="get-dev-build, set-dev-prop, publish"/>
 
   <target name="publish-single" depends="get-dev-build, single-html, post-html"/>
 
@@ -541,7 +541,11 @@
 
   </target>
 
-  <target name="make-dev-jar" depends="clean, copy-resources, compile, test, get-dev-build, make-jar"/>
+  <target name="set-dev-prop">
+    <property name="dev-jar" value="1"/>
+  </target>
+
+  <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, make-jar"/>
 
   <!-- build a development release -->
   <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
@@ -562,7 +566,7 @@
     </xmltask>
 	</target>
 
-	<target name="set-history-build-date" depends="init">
+	<target name="set-history-build-date" depends="init" unless="dev-jar">
 
     <xmltask source="history.xml" dest="history.xml">
       <attr path="/history/release[1]" attr="date" value="${today}"/>
