@@ -552,7 +552,7 @@ public class WbAction
 	{
 		if (this.isEnabled() && this.delegate != null)
 		{
-			e.setSource(this);
+			if (e != null) e.setSource(this);
 			delegate.actionPerformed(e);
 		}
 	}

@@ -15,6 +15,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.DefaultFocusManager;
 import javax.swing.KeyStroke;
 import workbench.gui.actions.WbAction;
+import workbench.log.LogMgr;
 
 /**
  * A focus manager which can grab focus traversal keys before they
@@ -93,13 +94,15 @@ public class WbFocusManager
 		{
 			if (nextTab != null && nextTab.getAccelerator().equals(key))
 			{
+				LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing nextTab action...");
 				anEvent.consume();
-				nextTab.executeAction(null);
+				nextTab.actionPerformed(null);
 			}
 			else if (prevTab != null && prevTab.getAccelerator().equals(key))
 			{
+				LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing prevtTab action...");
 				anEvent.consume();
-				prevTab.executeAction(null);
+				prevTab.actionPerformed(null);
 			}
 			else
 			{
