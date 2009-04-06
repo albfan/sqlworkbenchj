@@ -219,7 +219,7 @@ public class ExportFileDialog
 		}
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
-			
+
 		chooser.setAccessory(this.exportOptions);
 		
 		Window parentWindow = SwingUtilities.getWindowAncestor(this.parentComponent);

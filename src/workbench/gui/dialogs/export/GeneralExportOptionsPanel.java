@@ -11,7 +11,15 @@
  */
 package workbench.gui.dialogs.export;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import workbench.gui.components.EncodingPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -103,81 +111,82 @@ public class GeneralExportOptionsPanel
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+		GridBagConstraints gridBagConstraints;
 
-    encodingPanel = new workbench.gui.components.EncodingPanel();
-    dateFormatLabel = new javax.swing.JLabel();
-    dateFormat = new javax.swing.JTextField();
-    timestampFormatLabel = new javax.swing.JLabel();
-    timestampFormat = new javax.swing.JTextField();
-    jPanel1 = new javax.swing.JPanel();
-    selectColumnsButton = new javax.swing.JButton();
+    encodingPanel = new EncodingPanel();
+    dateFormatLabel = new JLabel();
+    dateFormat = new JTextField();
+    timestampFormatLabel = new JLabel();
+    timestampFormat = new JTextField();
+    jPanel1 = new JPanel();
+    selectColumnsButton = new JButton();
 
-    setLayout(new java.awt.GridBagLayout());
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    setLayout(new GridBagLayout());
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(0, 5, 0, 4);
     add(encodingPanel, gridBagConstraints);
 
-    dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    dateFormatLabel.setText(ResourceMgr.getString("LblDateFormat")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(12, 6, 0, 0);
     add(dateFormatLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(8, 4, 0, 4);
     add(dateFormat, gridBagConstraints);
 
-    timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    timestampFormatLabel.setText(ResourceMgr.getString("LblTimestampFormat")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 6, 0, 0);
     add(timestampFormatLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(timestampFormat, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    selectColumnsButton.setText(ResourceMgr.getString("LblSelectColumns"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    selectColumnsButton.setText(ResourceMgr.getString("LblSelectColumns")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(8, 4, 0, 4);
     add(selectColumnsButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JTextField dateFormat;
-  private javax.swing.JLabel dateFormatLabel;
-  private workbench.gui.components.EncodingPanel encodingPanel;
-  private javax.swing.JPanel jPanel1;
-  private javax.swing.JButton selectColumnsButton;
-  private javax.swing.JTextField timestampFormat;
-  private javax.swing.JLabel timestampFormatLabel;
+  private JTextField dateFormat;
+  private JLabel dateFormatLabel;
+  private EncodingPanel encodingPanel;
+  private JPanel jPanel1;
+  private JButton selectColumnsButton;
+  private JTextField timestampFormat;
+  private JLabel timestampFormatLabel;
   // End of variables declaration//GEN-END:variables
 
 }

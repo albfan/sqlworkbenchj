@@ -11,7 +11,19 @@
  */
 package workbench.gui.dialogs.export;
 
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import workbench.gui.components.WbComboBox;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CharacterRange;
@@ -23,9 +35,10 @@ import workbench.util.StringUtil;
  */
 public class TextOptionsPanel
 	extends JPanel
-	implements TextOptions
+	implements TextOptions, PopupMenuListener
 {
-
+	private int preferredWidth;
+	
 	/** Creates new form TextoptionsPanel */
 	public TextOptionsPanel()
 	{
@@ -36,6 +49,13 @@ public class TextOptionsPanel
 		{
 			escapeRange.addItem(ranges[i]);
 		}
+		Dimension pref = escapeRange.getPreferredSize();
+		preferredWidth = (int)pref.getWidth();
+		Dimension max = new Dimension(75, (int)pref.getHeight());
+		escapeRange.setMaximumSize(max);
+		escapeRange.setPreferredSize(max);
+		escapeRange.addPopupMenuListener(this);
+		((WbComboBox)escapeRange).setPopupWidth(preferredWidth);
 	}
 
 	public void saveSettings()
@@ -160,6 +180,47 @@ public class TextOptionsPanel
 		}
 	}
 
+	public void popupMenuWillBecomeVisible(PopupMenuEvent e)
+	{
+//		JComboBox box = (JComboBox) e.getSource();
+//		Object comp = box.getUI().getAccessibleChild(box, 0);
+//		if (!(comp instanceof JPopupMenu))
+//		{
+//			return;
+//		}
+//		try
+//		{
+//			final JPopupMenu menu = (JPopupMenu) comp;
+//			final JScrollPane scrollPane = (JScrollPane)(menu.getComponent(0));
+//			final Dimension size = scrollPane.getPreferredSize();
+//			size.width = preferredWidth;
+//			EventQueue.invokeLater(new Runnable()
+//			{
+//				public void run()
+//				{
+////					menu.setMinimumSize(size);
+////					menu.setSize(size);
+////					menu.setPreferredSize(size);
+//					scrollPane.setPreferredSize(size);
+//					scrollPane.setSize(size);
+//					scrollPane.setMinimumSize(size);
+//				}
+//			});
+//		}
+//		catch (Throwable th)
+//		{
+//
+//		}
+	}
+
+	public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
+	{
+	}
+
+	public void popupMenuCanceled(PopupMenuEvent e)
+	{
+	}
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -167,145 +228,147 @@ public class TextOptionsPanel
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+		GridBagConstraints gridBagConstraints;
 
-    delimiterLabel = new javax.swing.JLabel();
-    delimiter = new javax.swing.JTextField();
-    exportHeaders = new javax.swing.JCheckBox();
-    quoteCharLabel = new javax.swing.JLabel();
-    quoteChar = new javax.swing.JTextField();
-    jPanel1 = new javax.swing.JPanel();
-    quoteAlways = new javax.swing.JCheckBox();
-    escapeRange = new javax.swing.JComboBox();
-    escapeLabel = new javax.swing.JLabel();
-    lineEndingLabel = new javax.swing.JLabel();
-    lineEnding = new javax.swing.JComboBox();
-    decimalLabel = new javax.swing.JLabel();
-    decimalChar = new javax.swing.JTextField();
+    delimiterLabel = new JLabel();
+    delimiter = new JTextField();
+    exportHeaders = new JCheckBox();
+    quoteCharLabel = new JLabel();
+    quoteChar = new JTextField();
+    jPanel1 = new JPanel();
+    quoteAlways = new JCheckBox();
+    escapeRange = new WbComboBox();
+    escapeLabel = new JLabel();
+    lineEndingLabel = new JLabel();
+    lineEnding = new JComboBox();
+    decimalLabel = new JLabel();
+    decimalChar = new JTextField();
 
-    setLayout(new java.awt.GridBagLayout());
+    setLayout(new GridBagLayout());
 
-    delimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    delimiterLabel.setText(ResourceMgr.getString("LblFieldDelimiter")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(delimiterLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(delimiter, gridBagConstraints);
 
-    exportHeaders.setText(ResourceMgr.getString("LblExportIncludeHeaders"));
+    exportHeaders.setText(ResourceMgr.getString("LblExportIncludeHeaders")); // NOI18N
     exportHeaders.setToolTipText("");
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    exportHeaders.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(5, 4, 0, 0);
     add(exportHeaders, gridBagConstraints);
 
-    quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    quoteCharLabel.setText(ResourceMgr.getString("LblQuoteChar")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
     add(quoteCharLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(quoteChar, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
-    quoteAlways.setText(ResourceMgr.getString("LblExportQuoteAlways"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    quoteAlways.setText(ResourceMgr.getString("LblExportQuoteAlways")); // NOI18N
+    quoteAlways.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(4, 4, 0, 0);
     add(quoteAlways, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(escapeRange, gridBagConstraints);
 
-    escapeLabel.setText(ResourceMgr.getString("LblExportEscapeType"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    escapeLabel.setText(ResourceMgr.getString("LblExportEscapeType")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(escapeLabel, gridBagConstraints);
 
-    lineEndingLabel.setText(ResourceMgr.getString("LblExportLineEnding"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    lineEndingLabel.setText(ResourceMgr.getString("LblExportLineEnding")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(lineEndingLabel, gridBagConstraints);
 
-    lineEnding.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "LF", "CRLF" }));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    lineEnding.setModel(new DefaultComboBoxModel(new String[] { "LF", "CRLF" }));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(lineEnding, gridBagConstraints);
 
-    decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol"));
+    decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol")); // NOI18N
     decimalLabel.setToolTipText(ResourceMgr.getDescription("LblDecimalSymbol"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
     add(decimalLabel, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
     add(decimalChar, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JTextField decimalChar;
-  private javax.swing.JLabel decimalLabel;
-  private javax.swing.JTextField delimiter;
-  private javax.swing.JLabel delimiterLabel;
-  private javax.swing.JLabel escapeLabel;
-  private javax.swing.JComboBox escapeRange;
-  private javax.swing.JCheckBox exportHeaders;
-  private javax.swing.JPanel jPanel1;
-  private javax.swing.JComboBox lineEnding;
-  private javax.swing.JLabel lineEndingLabel;
-  private javax.swing.JCheckBox quoteAlways;
-  private javax.swing.JTextField quoteChar;
-  private javax.swing.JLabel quoteCharLabel;
+  private JTextField decimalChar;
+  private JLabel decimalLabel;
+  private JTextField delimiter;
+  private JLabel delimiterLabel;
+  private JLabel escapeLabel;
+  private JComboBox escapeRange;
+  private JCheckBox exportHeaders;
+  private JPanel jPanel1;
+  private JComboBox lineEnding;
+  private JLabel lineEndingLabel;
+  private JCheckBox quoteAlways;
+  private JTextField quoteChar;
+  private JLabel quoteCharLabel;
   // End of variables declaration//GEN-END:variables
+
 
 }

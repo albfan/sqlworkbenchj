@@ -15,6 +15,9 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -22,7 +25,6 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.Types;
-import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -123,56 +125,46 @@ public class ShortcutEditor
 		buttonPanel.add(this.cancelButton);
 		this.add(buttonPanel, BorderLayout.SOUTH);
 
-		Box b = Box.createHorizontalBox();
-		Box editBox = Box.createVerticalBox();
-
-		Dimension min = new Dimension(90, 24);
-		Dimension max = new Dimension(160, 24);
-
+		JPanel editPanel = new JPanel();
+		editPanel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridwidth = 1;
+		c.anchor = GridBagConstraints.WEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(2,10,5,10);
 		this.assignButton = new WbButton(ResourceMgr.getString("LblAssignShortcut"));
 		this.assignButton.setToolTipText(ResourceMgr.getDescription("LblAssignShortcut"));
 		this.assignButton.addActionListener(this);
 		this.assignButton.setEnabled(false);
-		this.assignButton.setPreferredSize(min);
-		this.assignButton.setMinimumSize(min);
-		this.assignButton.setMaximumSize(max);
+		editPanel.add(assignButton, c);
 
+		c.gridy ++;
 		this.clearButton = new WbButton(ResourceMgr.getString("LblClearShortcut"));
 		this.clearButton.setToolTipText(ResourceMgr.getDescription("LblClearShortcut"));
 		this.clearButton.addActionListener(this);
 		this.clearButton.setEnabled(false);
-		this.clearButton.setPreferredSize(min);
-		this.clearButton.setMinimumSize(min);
-		this.clearButton.setMaximumSize(max);
+		editPanel.add(clearButton, c);
 
+		c.gridy ++;
+		c.insets = new Insets(15,10,5,10);
 		this.resetButton = new WbButton(ResourceMgr.getString("LblResetShortcut"));
 		this.resetButton.setToolTipText(ResourceMgr.getDescription("LblResetShortcut"));
 		this.resetButton.addActionListener(this);
 		this.resetButton.setEnabled(false);
-		this.resetButton.setPreferredSize(min);
-		this.resetButton.setMinimumSize(min);
-		this.resetButton.setMaximumSize(max);
+		editPanel.add(resetButton, c);
 
+		c.gridy ++;
+		c.insets = new Insets(2,10,5,10);
+		c.weighty = 1.0;
+		c.anchor = GridBagConstraints.NORTHWEST;
 		this.resetAllButton = new WbButton(ResourceMgr.getString("LblResetAllShortcuts"));
 		this.resetAllButton.setToolTipText(ResourceMgr.getDescription("LblResetAllShortcuts"));
 		this.resetAllButton.addActionListener(this);
-		this.resetAllButton.setPreferredSize(min);
-		this.resetAllButton.setMinimumSize(min);
-		this.resetAllButton.setMaximumSize(max);
+		editPanel.add(resetAllButton, c);
 
-		editBox.add(Box.createVerticalStrut(2));
-		editBox.add(this.assignButton);
-		editBox.add(Box.createVerticalStrut(2));
-		editBox.add(this.clearButton);
-		editBox.add(Box.createVerticalStrut(15));
-		editBox.add(this.resetButton);
-		editBox.add(Box.createVerticalStrut(2));
-		editBox.add(this.resetAllButton);
-		editBox.add(Box.createVerticalGlue());
-		b.add(Box.createHorizontalStrut(10));
-		b.add(editBox);
-		b.add(Box.createHorizontalStrut(5));
-		contentPanel.add(b, BorderLayout.EAST);
+		contentPanel.add(editPanel, BorderLayout.EAST);
 
 		JPanel p = new JPanel();
 		Dimension d = new Dimension(1,20);

@@ -119,43 +119,37 @@ public class LnFHelper
 			if (def == null)
 			{
 				LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Specified Look & Feel " + className + " not available!", null);
-				return;
+				setSystemLnF();
 			}
+			else
+			{
+				// JGoodies Looks settings
+				UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
+				UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
 
-			// JGoodies Looks settings
-			UIManager.put("jgoodies.useNarrowButtons", Boolean.FALSE);
-			UIManager.put("FileChooser.useSystemIcons", Boolean.TRUE);
+				// I hate the bold menu font in the Metal LnF
+				UIManager.put("swing.boldMetal", Boolean.FALSE);
 
-			// I hate the bold menu font in the Metal LnF
-			UIManager.put("swing.boldMetal", Boolean.FALSE);
+				// Remove Synthetica's own window decorations
+				UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
 
-			// Remove Synthetica's own window decorations
-			UIManager.put("Synthetica.window.decoration", Boolean.FALSE);
+				// Remove the extra icons for read only text fields and
+				// the "search bar" in the main menu for the Substance Look & Feel
+				System.setProperty("substancelaf.noExtraElements", "");
 
-			// Remove the extra icons for read only text fields and
-			// the "search bar" in the main menu for the Substance Look & Feel
-			System.setProperty("substancelaf.noExtraElements", "");
+				LnFLoader loader = new LnFLoader(def);
+				LookAndFeel lnf = loader.getLookAndFeel();
 
-			LnFLoader loader = new LnFLoader(def);
-			LookAndFeel lnf = loader.getLookAndFeel();
-
-			UIManager.setLookAndFeel(lnf);
-			checkWindowsClassic(lnf.getClass().getName());
+				UIManager.setLookAndFeel(lnf);
+			}
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Could not set look and feel", e);
-			LogMgr.logWarning("LnFHelper.initializeLookAndFeel()", "Current look and feel class [" + className + "] will be ignored");
-			GuiSettings.setLookAndFeelClass(null);
-			try
-			{
-				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			}
-			catch (Exception ex)
-			{
-				// should not ahppen
-			}
+			LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Could not set look and feel to [" + className + "]. Look and feel will be ignored", e);
+			setSystemLnF();
 		}
+
+		checkWindowsClassic(UIManager.getLookAndFeel().getClass().getName());
 
 		try
 		{
@@ -167,6 +161,17 @@ public class LnFHelper
 		}
 	}
 
+	private void setSystemLnF()
+	{
+		try
+		{
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		}
+		catch (Exception ex)
+		{
+			// should not ahppen
+		}
+	}
 	private void checkWindowsClassic(String clsname)
 	{
 		try

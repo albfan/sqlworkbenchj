@@ -11,6 +11,11 @@
  */
 package workbench.gui.dialogs.export;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JRadioButton;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -89,62 +94,62 @@ public class XmlOptionsPanel
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+		GridBagConstraints gridBagConstraints;
 
-    versionGroup = new javax.swing.ButtonGroup();
-    useCdata = new javax.swing.JCheckBox();
-    verboseXmlCheckBox = new javax.swing.JCheckBox();
-    xml10 = new javax.swing.JRadioButton();
-    xml11 = new javax.swing.JRadioButton();
+    versionGroup = new ButtonGroup();
+    useCdata = new JCheckBox();
+    verboseXmlCheckBox = new JCheckBox();
+    xml10 = new JRadioButton();
+    xml11 = new JRadioButton();
 
-    setLayout(new java.awt.GridBagLayout());
+    setLayout(new GridBagLayout());
 
-    useCdata.setText(ResourceMgr.getString("LblExportUseCDATA"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    useCdata.setText(ResourceMgr.getString("LblExportUseCDATA")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     add(useCdata, gridBagConstraints);
 
-    verboseXmlCheckBox.setText(ResourceMgr.getString("LblExportVerboseXml"));
-    verboseXmlCheckBox.setToolTipText(ResourceMgr.getDescription("LblExportVerboseXml"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    verboseXmlCheckBox.setText(ResourceMgr.getString("LblExportVerboseXml")); // NOI18N
+    verboseXmlCheckBox.setToolTipText(ResourceMgr.getString("d_LblExportVerboseXml")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     add(verboseXmlCheckBox, gridBagConstraints);
 
     versionGroup.add(xml10);
     xml10.setSelected(true);
     xml10.setText("XML 1.0");
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     add(xml10, gridBagConstraints);
 
     versionGroup.add(xml11);
     xml11.setText("XML 1.1");
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
     add(xml11, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JCheckBox useCdata;
-  private javax.swing.JCheckBox verboseXmlCheckBox;
-  private javax.swing.ButtonGroup versionGroup;
-  private javax.swing.JRadioButton xml10;
-  private javax.swing.JRadioButton xml11;
+  private JCheckBox useCdata;
+  private JCheckBox verboseXmlCheckBox;
+  private ButtonGroup versionGroup;
+  private JRadioButton xml10;
+  private JRadioButton xml11;
   // End of variables declaration//GEN-END:variables
 
 }
