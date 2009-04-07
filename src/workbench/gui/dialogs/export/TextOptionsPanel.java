@@ -12,6 +12,8 @@
 package workbench.gui.dialogs.export;
 
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -38,20 +40,47 @@ public class TextOptionsPanel
 	implements TextOptions, PopupMenuListener
 {
 	private int preferredWidth;
-	
+
 	/** Creates new form TextoptionsPanel */
 	public TextOptionsPanel()
 	{
 		super();
 		initComponents();
 		CharacterRange[] ranges = CharacterRange.getRanges();
+
+		Font f = escapeRange.getFont();
+
+		int width = 0;
+		int maxwidth = 0;
+
 		for (int i=0; i < ranges.length; i++)
 		{
 			escapeRange.addItem(ranges[i]);
+			if (f != null)
+			{
+				FontMetrics fm = escapeRange.getFontMetrics(f);
+				if (fm != null)
+				{
+					int w = fm.stringWidth(ranges[i].toString());
+					if (i == 0)
+					{
+						width = w;
+					}
+					if (w > maxwidth) maxwidth = w;
+				}
+			}
 		}
+
+		if (width == 0) width = 50;
+
 		Dimension pref = escapeRange.getPreferredSize();
 		preferredWidth = (int)pref.getWidth();
-		Dimension max = new Dimension(75, (int)pref.getHeight());
+
+		int add = preferredWidth - maxwidth;
+		System.out.println("add: " + add);
+		width += add;
+
+		Dimension max = new Dimension(width, (int)pref.getHeight());
 		escapeRange.setMaximumSize(max);
 		escapeRange.setPreferredSize(max);
 		escapeRange.addPopupMenuListener(this);
@@ -251,7 +280,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(delimiterLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
@@ -259,7 +288,7 @@ public class TextOptionsPanel
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(delimiter, gridBagConstraints);
 
     exportHeaders.setText(ResourceMgr.getString("LblExportIncludeHeaders")); // NOI18N
@@ -278,14 +307,14 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(6, 4, 0, 4);
     add(quoteCharLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(quoteChar, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -300,7 +329,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(4, 4, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 4, 0, 0);
     add(quoteAlways, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
@@ -308,7 +337,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
     add(escapeRange, gridBagConstraints);
 
     escapeLabel.setText(ResourceMgr.getString("LblExportEscapeType")); // NOI18N
@@ -316,7 +345,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
     add(escapeLabel, gridBagConstraints);
 
     lineEndingLabel.setText(ResourceMgr.getString("LblExportLineEnding")); // NOI18N
@@ -324,7 +353,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(lineEndingLabel, gridBagConstraints);
 
     lineEnding.setModel(new DefaultComboBoxModel(new String[] { "LF", "CRLF" }));
@@ -332,7 +361,7 @@ public class TextOptionsPanel
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(lineEnding, gridBagConstraints);
 
     decimalLabel.setText(ResourceMgr.getString("LblDecimalSymbol")); // NOI18N
@@ -342,14 +371,14 @@ public class TextOptionsPanel
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(4, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(6, 4, 0, 4);
     add(decimalLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(decimalChar, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

@@ -111,7 +111,7 @@ public class ExportOptionsPanel
 			typeSelector.addItem(XLS_ITEM);
 		}
 		
-		JLabel type = new JLabel("Type");
+		JLabel type = new JLabel(ResourceMgr.getString("LblExportType"));
 		s.add(type, BorderLayout.WEST);
 		s.add(typeSelector, BorderLayout.CENTER);
 		p.add(s, BorderLayout.SOUTH);
