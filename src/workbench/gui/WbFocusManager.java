@@ -15,7 +15,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.DefaultFocusManager;
 import javax.swing.KeyStroke;
 import workbench.gui.actions.WbAction;
-import workbench.log.LogMgr;
 
 /**
  * A focus manager which can grab focus traversal keys before they

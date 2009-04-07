@@ -583,24 +583,22 @@ public class DataStore
 	 */
 	public void setUpdateTable(TableIdentifier tbl, WbConnection conn)
 	{
-		if (tbl == null)
-		{
-			this.updateTable = null;
-			this.resultInfo.setUpdateTable(null);
-			return;
-		}
+		if ((tbl != null && tbl.equals(this.updateTable)) || conn == null) return;
 
-		if (tbl.equals(this.updateTable) || conn == null) return;
-
+		// Reset everything
 		this.updateTable = null;
 		this.resultInfo.setUpdateTable(null);
 		this.missingPkcolumns = null;
 
-		// check the columns which are in that table
-		// so that we can refuse any changes to columns
-		// which do not derive from that table
-		// note that this does not work, if the
-		// columns were renamed via an alias in the
+		if (tbl == null)
+		{
+			return;
+		}
+
+		// check the columns which are in the new table so that we can refuse any changes to columns
+		// which do not derive from that table.
+		
+		// Note that this does not work, if the columns were renamed via an alias in the
 		// select statement
 		try
 		{
@@ -611,10 +609,13 @@ public class DataStore
 			// we get the name correct (upper/lowercase etc)
 			this.updateTable = meta.findSelectableObject(tbl);
 
+			// No table found --> nothing to do.
+			if (updateTable == null) return;
+			
 			// If the object that was used in the original SELECT is
-			// a Synonym we have to get the definition of the underlying
+			// a synonym we have to get the definition of the underlying
 			// table in order to find the primary key columns
-			TableIdentifier synCheck = (updateTable != null ? updateTable.createCopy() : null);
+			TableIdentifier synCheck = updateTable.createCopy();
 
 			if (synCheck != null && synCheck.getSchema() == null)
 			{
@@ -648,7 +649,7 @@ public class DataStore
 					}
 				}
 			}
-			if (realColumns == 0)
+			if (realColumns == 0 && updateTable != null)
 			{
 				LogMgr.logWarning("DataStore.setUpdateTable()", "No columns from the table " + this.updateTable.getTableExpression() + " could be found in the current result set!");
 			}
