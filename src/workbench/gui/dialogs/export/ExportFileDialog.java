@@ -11,6 +11,7 @@
  */
 package workbench.gui.dialogs.export;
 
+import workbench.gui.components.WbFileChooser;
 import java.awt.Component;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
@@ -43,7 +44,7 @@ public class ExportFileDialog
 	private boolean isCancelled = false;
 	private Settings settings = Settings.getInstance();
 	private ExportOptionsPanel exportOptions;
-	private JFileChooser chooser;
+	private WbFileChooser chooser;
 	private boolean filterChange = false;
 	private boolean selectDirectory = false;
 	private boolean includeSqlUpdate = true;
@@ -204,7 +205,8 @@ public class ExportFileDialog
 		boolean result = false;
 		
 		String lastDir = settings.getProperty(lastDirConfigKey, null);
-		this.chooser = new JFileChooser(lastDir);
+		this.chooser = new WbFileChooser(lastDir);
+		chooser.setSettingsID("workbench.export.saveas");
 		if (title != null) this.chooser.setDialogTitle(title);
 		
 		if (this.selectDirectory)
@@ -219,7 +221,6 @@ public class ExportFileDialog
 		}
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
-
 		chooser.setAccessory(this.exportOptions);
 		
 		Window parentWindow = SwingUtilities.getWindowAncestor(this.parentComponent);

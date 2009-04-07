@@ -23,6 +23,7 @@ import javax.swing.filechooser.FileFilter;
 import workbench.db.importer.ProducerFactory;
 
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.WbFileChooser;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -38,7 +39,7 @@ public class ImportFileDialog
 	private boolean isCancelled = false;
 	private Settings settings = Settings.getInstance();
 	private ImportOptionsPanel importOptions;
-	private JFileChooser chooser;
+	private WbFileChooser chooser;
 	private boolean filterChange = false;
 	private String lastDirConfigKey = "workbench.import.lastdir";
 	private Component parentComponent;
@@ -115,7 +116,8 @@ public class ImportFileDialog
 		boolean result = false;
 		
 		String lastDir = settings.getProperty(lastDirConfigKey, null);
-		this.chooser = new JFileChooser(lastDir);
+		this.chooser = new WbFileChooser(lastDir);
+		chooser.setSettingsID("workbench.import.selectfile");
 		if (title != null) this.chooser.setDialogTitle(title);
 		
 		chooser.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
@@ -207,8 +209,7 @@ public class ImportFileDialog
 				// case we do not change the current filter.
 				if (!(ff instanceof ExtensionFileFilter)) return;
 
-				Integer newvalue = (Integer)evt.getNewValue();
-				ProducerFactory.ImportType type = ProducerFactory.ImportType.valueOf(newvalue);
+				ProducerFactory.ImportType type = (ProducerFactory.ImportType)evt.getNewValue();
 				this.filterChange = true;
 				
 				switch (type)

@@ -177,7 +177,8 @@ public class ImportOptionsPanel
 				this.currentType = ProducerFactory.ImportType.Text;
 			else if ("xml".equals(item))
 				this.currentType = ProducerFactory.ImportType.XML;
-			firePropertyChange("exportType", oldType, this.currentType);
+			
+			if (oldType != currentType) firePropertyChange("exportType", oldType, this.currentType);
 		}
 	}
 	
