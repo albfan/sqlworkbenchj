@@ -70,11 +70,8 @@ public class WbFocusManager
 	 */
 	public void grabActions(WbAction next, WbAction prev)
 	{
-		synchronized (LazyInstanceHolder.instance)
-		{
-			nextTab = next;
-			prevTab = prev;
-		}
+		nextTab = next;
+		prevTab = prev;
 	}
 
 	/**
@@ -90,24 +87,21 @@ public class WbFocusManager
 	{
 		KeyStroke key = KeyStroke.getKeyStrokeForEvent(anEvent);
 
-		synchronized (LazyInstanceHolder.instance)
+		if (nextTab != null && nextTab.getAccelerator().equals(key))
 		{
-			if (nextTab != null && nextTab.getAccelerator().equals(key))
-			{
-				LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing nextTab action...");
-				anEvent.consume();
-				nextTab.actionPerformed(null);
-			}
-			else if (prevTab != null && prevTab.getAccelerator().equals(key))
-			{
-				LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing prevtTab action...");
-				anEvent.consume();
-				prevTab.actionPerformed(null);
-			}
-			else
-			{
-				super.processKeyEvent(focusedComponent, anEvent);
-			}
+			LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing nextTab action...");
+			anEvent.consume();
+			nextTab.actionPerformed(null);
+		}
+		else if (prevTab != null && prevTab.getAccelerator().equals(key))
+		{
+			LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing prevtTab action...");
+			anEvent.consume();
+			prevTab.actionPerformed(null);
+		}
+		else
+		{
+			super.processKeyEvent(focusedComponent, anEvent);
 		}
 	}
 }

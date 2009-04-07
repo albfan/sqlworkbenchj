@@ -510,6 +510,18 @@ public abstract class RowDataConverter
 			this.columnsToExport = null;
 			return;
 		}
+		
+		if (metaData == null)
+		{
+			LogMgr.logError("RowDataConverter.setColumnsToExport()", "MetaData for result is NULL!", new Exception("TraceBack"));
+			this.columnsToExport = new boolean[exportColumns.size()];
+			for (int i=0; i < columnsToExport.length; i++)
+			{
+				columnsToExport[i] = true;
+			}
+			return;
+		}
+		
 		int colCount = this.metaData.getColumnCount();
 		if (this.columnsToExport == null)
 		{
