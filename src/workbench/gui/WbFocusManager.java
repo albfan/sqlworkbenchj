@@ -70,8 +70,11 @@ public class WbFocusManager
 	 */
 	public void grabActions(WbAction next, WbAction prev)
 	{
-		nextTab = next;
-		prevTab = prev;
+		synchronized (LazyInstanceHolder.instance)
+		{
+			nextTab = next;
+			prevTab = prev;
+		}
 	}
 
 	/**
@@ -87,21 +90,23 @@ public class WbFocusManager
 	{
 		KeyStroke key = KeyStroke.getKeyStrokeForEvent(anEvent);
 
-		if (nextTab != null && nextTab.getAccelerator().equals(key))
+		synchronized (LazyInstanceHolder.instance)
 		{
-			LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing nextTab action...");
-			anEvent.consume();
-			nextTab.actionPerformed(null);
+			if (nextTab != null && nextTab.getAccelerator().equals(key))
+			{
+				anEvent.consume();
+				nextTab.actionPerformed(null);
+				return;
+			}
+			else if (prevTab != null && prevTab.getAccelerator().equals(key))
+			{
+				anEvent.consume();
+				prevTab.actionPerformed(null);
+				return;
+			}
 		}
-		else if (prevTab != null && prevTab.getAccelerator().equals(key))
-		{
-			LogMgr.logDebug("WbFocusManager.processKeyEvent()", "Grabbing prevtTab action...");
-			anEvent.consume();
-			prevTab.actionPerformed(null);
-		}
-		else
-		{
-			super.processKeyEvent(focusedComponent, anEvent);
-		}
+		// the call to super may not be synchronized, otherwise I have seen
+		// deadlocks when tabbing through the controls of a dialog
+		super.processKeyEvent(focusedComponent, anEvent);
 	}
 }
