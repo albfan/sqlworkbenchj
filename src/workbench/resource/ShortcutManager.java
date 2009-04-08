@@ -149,16 +149,18 @@ public class ShortcutManager
 			}
 		}
 
+
 		if (LogMgr.isDebugEnabled())
 		{
-			KeyStroke key = anAction.getAccelerator();
+			KeyStroke key = anAction.getDefaultAccelerator();
 			if (key != null)
 			{
 				if (this.keyDebugMap == null) this.keyDebugMap = new HashMap<KeyStroke, WbAction>(100);
 				WbAction a = this.keyDebugMap.get(key);
-				if (a != null && !anAction.allowDuplicate())
+				if (a != null && !a.equals(anAction))
 				{
-					LogMgr.logWarning("ShortcutManager.registerAction", "Duplicate key assignment for keyStroke " + key + " from " + clazz + ", already registered for "+ a.getClass().getName());
+					Exception e = new Exception("Duplicate key mapping");
+					LogMgr.logError("ShortcutManager.registerAction", "Duplicate key assignment for keyStroke " + key + " from " + clazz + ", already registered for "+ a.getClass().getName(), e);
 				}
 				else
 				{

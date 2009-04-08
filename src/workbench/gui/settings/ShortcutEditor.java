@@ -326,7 +326,7 @@ public class ShortcutEditor
 		KeyStroke key = KeyboardMapper.getKeyStroke(this);
 		if (key != null)
 		{
-			
+
 			ShortcutDisplay d = (ShortcutDisplay)this.definitions.getValue(row, 1);
 
 			int oldrow = this.findKey(key);
@@ -336,7 +336,7 @@ public class ShortcutEditor
 				String msg = ResourceMgr.getFormattedString("MsgShortcutAlreadyAssigned", name);
 				boolean choice = WbSwingUtilities.getYesNo(this, msg);
 				if (!choice) return;
-				
+
 				ShortcutDisplay old = (ShortcutDisplay)this.definitions.getValue(oldrow, 1);
 				old.clearKey();
 				this.model.fireTableRowsUpdated(oldrow, oldrow);

@@ -12,12 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
-
 import workbench.interfaces.Undoable;
-import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -31,7 +26,7 @@ public class RedoAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtRedo", KeyStroke.getKeyStroke(KeyEvent.VK_Y, PlatformShortcuts.getDefaultModifier()));
+		this.initMenuDefinition("MnuTxtRedo");
 		this.setIcon("Redo");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 	}

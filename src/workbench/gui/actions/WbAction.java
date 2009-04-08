@@ -611,4 +611,23 @@ public class WbAction
 	{
 		this.proxy = p;
 	}
+
+	@Override
+	public boolean equals(Object other)
+	{
+		if (other instanceof WbAction)
+		{
+			return ((WbAction)other).actionName.equals(this.actionName);
+		}
+		return false;
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 59 * hash + (this.actionName != null ? this.actionName.hashCode() : 0);
+		return hash;
+	}
+
 }
