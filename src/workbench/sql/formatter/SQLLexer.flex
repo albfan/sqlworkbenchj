@@ -563,6 +563,7 @@ keyword=("ABORT"|
 "SIZE"|
 "SMALLINT"|
 "SNAPSHOT"|
+"SNAPSHOT[ \t\r\n]+LOG"|
 "SOURCE"|
 "SPACE"|
 "SQL"|
@@ -673,6 +674,7 @@ EXPLAIN[ \t\r\n]+PLAN|
 PACKAGE[ \t\r\n]+BODY|
 CREATE[ \t\r\n]+OR[ \t\r\n]+REPLACE|
 MATERIALIZED[ \t\r\n]+VIEW|
+MATERIALIZED[ \t\r\n]+VIEW[ \t\r\n]+LOG|
 START[ \t\r\n]+WITH|
 OUTER[ \t\r\n]+JOIN|
 CROSS[ \t\r\n]+JOIN|

@@ -67,9 +67,21 @@ public class SqlUtil
 			Collections.unmodifiableSet(CollectionBuilder.hashSet(
 			"INDEX", "TABLE", "PROCEDURE", "FUNCTION", "VIEW", "PACKAGE", "PACKAGE BODY",
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
-			"TABLESPACE", "TYPE", "USER"));
+			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT"));
 	}
 
+	private static class TypesWithoutNamesHolder
+	{
+		protected final static Set<String> TYPES =
+			Collections.unmodifiableSet(CollectionBuilder.hashSet(
+			"MATERIALIZED VIEW LOG", "SNAPSHOT LOG"));
+	}
+
+	public static final Set<String> getTypesWithoutNames()
+	{
+		return TypesWithoutNamesHolder.TYPES;
+	}
+	
 	public static final Set<String> getKnownTypes()
 	{
 		return KnownTypesHolder.KNOWN_TYPES;
@@ -166,10 +178,12 @@ public class SqlUtil
 			if (!typeFound) return null;
 
 			// if a type was found we assume the next keyword is the name
-			SQLToken name = lexer.getNextToken(false, false);
-			if (name == null) return null;
-			info.objectName = name.getContents();
-
+			if (!getTypesWithoutNames().contains(info.objectType))
+			{
+				SQLToken name = lexer.getNextToken(false, false);
+				if (name == null) return null;
+				info.objectName = name.getContents();
+			}
 			return info;
 		}
 		catch (Exception e)

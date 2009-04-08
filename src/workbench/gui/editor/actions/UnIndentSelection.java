@@ -31,7 +31,7 @@ public class UnIndentSelection
 	public UnIndentSelection(JEditTextArea edit)
 	{
 		super();
-		initMenuDefinition("MnuTxtUnIndent", KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier()));
+		initMenuDefinition("MnuTxtUnIndent");
 		setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		area = edit;
 	}

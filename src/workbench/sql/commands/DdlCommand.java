@@ -191,7 +191,14 @@ public class DdlCommand
 			{
 				return ResourceMgr.getString("MsgGenDropSuccess");
 			}
-			return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
+			if (StringUtil.isNonBlank(info.objectName))
+			{
+				return ResourceMgr.getFormattedString("MsgDropSuccess", info.getDisplayType(), info.objectName);
+			}
+			else
+			{
+				return ResourceMgr.getFormattedString("MsgDropTypeSuccess", info.objectType);
+			}
 		}
 		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
 		{
@@ -199,7 +206,14 @@ public class DdlCommand
 			{
 				return ResourceMgr.getString("MsgGenCreateSuccess");
 			}
-			return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
+			if (StringUtil.isNonBlank(info.objectName))
+			{
+				return ResourceMgr.getFormattedString("MsgCreateSuccess", info.getDisplayType(), info.objectName);
+			}
+			else
+			{
+				return ResourceMgr.getFormattedString("MsgCreateTypeSuccss", info.objectType);
+			}
 		}
 		return getDefaultSuccessMessage();
 	}

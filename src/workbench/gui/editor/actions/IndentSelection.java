@@ -31,7 +31,7 @@ public class IndentSelection
 	public IndentSelection(JEditTextArea edit)
 	{
 		super();
-		initMenuDefinition("MnuTxtIndent", KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier()));
+		initMenuDefinition("MnuTxtIndent");
 		setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
 		area = edit;
 	}
