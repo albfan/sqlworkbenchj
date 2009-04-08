@@ -1910,6 +1910,8 @@ public class MainWindow
 			{
 				MainPanel p = getSqlPanel(0);
 				p.reset();
+				resetTabTitles();
+				
 				// make sure the toolbar and menus are updated correctly
 				updateCurrentTab(0);
 			}

@@ -386,11 +386,9 @@ public class EditorPanel
 		if (clearText)
 		{
 			this.setCaretPosition(0);
-			this.setDocument(new SyntaxDocument());
-			this.clearUndoBuffer();
+			this.reset();
 		}
 		fireFilenameChanged(null);
-		this.resetModified();
 		return true;
 	}
 
@@ -560,14 +558,15 @@ public class EditorPanel
 		try
 		{
 			// try to free memory by releasing the current document
-			if(this.document != null)
+			// these is also done later when calling setDocument()
+			// but that would mean, that the old and the new document would
+			// be in memory at the same time.
+			if (this.document != null)
 			{
 				this.document.removeDocumentListener(documentHandler);
-				this.document.dispose();
+				this.document.reset();
 			}
-			System.gc();
-			System.runFinalization();
-
+			
 			String filename = aFile.getAbsolutePath();
 			File f = new File(filename);
 			try
@@ -592,7 +591,7 @@ public class EditorPanel
 			// Creating a SyntaxDocument with a filled GapContent
 			// does not seem to work, inserting the text has to
 			// go through the SyntaxDocument
-			// but we initiallize the GapContent in advance to avoid
+			// but we initialize the GapContent in advance to avoid
 			// too many re-allocations of the internal buffer
 			GapContent  content = new GapContent((int)aFile.length() + 1500);
 			doc = new SyntaxDocument(content);
@@ -609,6 +608,7 @@ public class EditorPanel
 			// when reading everything into a buffer, and then call insertString()
 			// only once, but that will double the memory usage during loading
 			int lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
+			
 			while (lines > 0)
 			{
 				doc.insertString(pos, lineBuffer.toString(), null);
@@ -624,7 +624,7 @@ public class EditorPanel
 
 			if (lowMemory)
 			{
-				doc.dispose();
+				doc.reset();
 				result = false;
 				WbManager.getInstance().showLowMemoryError();
 			}
@@ -648,7 +648,7 @@ public class EditorPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
-			doc.dispose();
+			doc.reset();
 			System.gc();
 			WbManager.getInstance().showOutOfMemoryError();
 			result = false;

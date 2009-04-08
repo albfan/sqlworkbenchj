@@ -953,17 +953,18 @@ public class JEditTextArea
 	 */
 	public void setDocument(SyntaxDocument document)
 	{
-		if(this.document == document)	return;
+		if (this.document == document) return;
 
-		if(this.document != null)
+		if (this.document != null)
 		{
 			this.document.removeDocumentListener(documentHandler);
-			this.document.dispose();
+			this.document.reset();
+			if (this.currentTokenMarker != null) currentTokenMarker.dispose();
 		}
 
 		this.document = document;
 
-		if(this.document != null)
+		if (this.document != null)
 		{
 			painter.calculateTabSize();
 
@@ -979,7 +980,6 @@ public class JEditTextArea
 				public void run()
 				{
 					painter.invalidateLineRange(0,getLineCount());
-					//setCaretPosition(0);
 					painter.repaint();
 					painter.validate();
 					repaint();
@@ -1178,7 +1178,7 @@ public class JEditTextArea
 
 	public void reset()
 	{
-		setText("");
+		setDocument(new SyntaxDocument());
 		resetModified();
 	}
 

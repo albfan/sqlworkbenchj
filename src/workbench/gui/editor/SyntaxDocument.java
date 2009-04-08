@@ -32,14 +32,14 @@ public class SyntaxDocument
 	private WbCompoundEdit compoundEditItem = null;
 	private boolean undoSuspended = false;
 	private int maxLineLength = 0;
-	
+
 	public SyntaxDocument()
 	{
 		super();
 		this.addUndoableEditListener(this);
 		this.initDefaultProperties();
 	}
-	
+
 	public SyntaxDocument(AbstractDocument.Content aContent)
 	{
 		super(aContent);
@@ -49,10 +49,10 @@ public class SyntaxDocument
 
 	public DocumentEvent createChangedEvent()
 	{
-		DefaultDocumentEvent evt = new DefaultDocumentEvent(0, this.getLength(), DocumentEvent.EventType.CHANGE); 		
+		DefaultDocumentEvent evt = new DefaultDocumentEvent(0, this.getLength(), DocumentEvent.EventType.CHANGE);
 		return evt;
 	}
-	
+
 	protected void initDefaultProperties()
 	{
 		this.putProperty("filterNewlines", Boolean.FALSE);
@@ -76,34 +76,47 @@ public class SyntaxDocument
 	 */
 	public void setTokenMarker(TokenMarker tm)
 	{
+		if (tokenMarker != null) tokenMarker.dispose();
 		tokenMarker = tm;
 		if (tm == null) return;
 		tokenMarker.insertLines(0,getDefaultRootElement().getElementCount());
 		tokenizeLines();
 	}
 
-	public void dispose()
+	public void reset()
 	{
-		this.clearUndoBuffer();
+		clearUndoBuffer();
+
 		if (this.compoundEditItem != null)
 		{
 			this.compoundEditItem.clear();
 			this.compoundEditItem = null;
 		}
+		try
+		{
+			suspendUndo();
+			this.remove(0, this.getLength());
+		}
+		catch (Throwable th)
+		{
+		}
+		finally
+		{
+			resumeUndo();
+		}
 		if (tokenMarker != null) tokenMarker.dispose();
-		try { this.remove(0, this.getLength()); } catch (Throwable th) {}
 	}
-	
+
 	public void suspendUndo()
 	{
 		this.undoSuspended = true;
 	}
-	
+
 	public void resumeUndo()
 	{
 		this.undoSuspended = false;
 	}
-	
+
 	public void clearUndoBuffer()
 	{
 		this.undoManager.discardAllEdits();
@@ -148,7 +161,7 @@ public class SyntaxDocument
 	 * Reparses the document, by passing the specified lines to the
 	 * token marker. This should be called after a large quantity of
 	 * text is first inserted.
-	 * 
+	 *
 	 * @param start The first line to parse
 	 * @param len The number of lines, after the first one to parse
 	 */
@@ -186,7 +199,7 @@ public class SyntaxDocument
 		int len = getDefaultRootElement().getElementCount();
 
 		this.maxLineLength = 0;
-		
+
 		try
 		{
 			for (int i = 0; i < len; i++)
@@ -202,16 +215,16 @@ public class SyntaxDocument
 			// Ignore
 		}
 	}
-	
+
 	public int getMaxLineLength()
 	{
 		return this.maxLineLength;
 	}
-	
+
 	public synchronized void undoableEditHappened(UndoableEditEvent e)
 	{
 		if (undoSuspended) return;
-		
+
 		if (this.compoundEditItem != null)
 		{
 			this.compoundEditItem.addEdit(e.getEdit());
@@ -221,14 +234,14 @@ public class SyntaxDocument
 			undoManager.addEdit(e.getEdit());
 		}
 	}
-	
+
 	/**
 	 * Starts a compound edit that can be undone in one operation.
 	 */
-	public synchronized void beginCompoundEdit() 
+	public synchronized void beginCompoundEdit()
 	{
 		if (undoSuspended) return;
-		if (compoundLevelCounter == 0) 
+		if (compoundLevelCounter == 0)
 		{
 			this.compoundEditItem = new WbCompoundEdit();
 		}
@@ -238,7 +251,7 @@ public class SyntaxDocument
 	/**
 	 * Ends a compound edit that can be undone in one operation.
 	 */
-	public synchronized void endCompoundEdit() 
+	public synchronized void endCompoundEdit()
 	{
 		this.calcMaxLineLength();
 		if (undoSuspended) return;
@@ -250,7 +263,7 @@ public class SyntaxDocument
 			// the single item added would be added to the compound rather
 			// than to the UndoManager's item list
 			compoundEditItem.finished();
-			
+
 			if (compoundEditItem.getSize() == 1)
 			{
 				UndoableEdit single = compoundEditItem.getLast();
@@ -261,7 +274,7 @@ public class SyntaxDocument
 			{
 				undoManager.addEdit(compoundEditItem);
 			}
-			compoundEditItem = null;		
+			compoundEditItem = null;
 			compoundLevelCounter = 0;
 		}
 		else if (compoundLevelCounter == 0)
@@ -269,7 +282,7 @@ public class SyntaxDocument
 			Exception e = new IllegalStateException();
 			LogMgr.logError("SyntaxDocument.endCompoundEdit", "Unbalanced endCompoundEdit()", e);
 		}
-		else 
+		else
 		{
 			this.compoundLevelCounter --;
 		}
@@ -280,9 +293,9 @@ public class SyntaxDocument
 	}
 
 	public int getPositionOfLastChange() { return lastChangePosition; }
-	
+
 	private int lastChangePosition = -1;
-	
+
 	/**
 	 * We overwrite this method to update the token marker
 	 * state immediately so that any event listeners get a
