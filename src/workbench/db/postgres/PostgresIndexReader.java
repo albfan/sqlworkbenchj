@@ -70,13 +70,12 @@ public class PostgresIndexReader
 		int indexCount = 0;
 		try
 		{
-			
 			for (int i = 0; i < count; i++)
 			{
 				String idxName = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_INDEX_NAME);
 				String pk = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_PK_FLAG);
 				if ("YES".equalsIgnoreCase(pk)) continue;
-				if (i > 0) sql.append(',');
+				if (indexCount > 0) sql.append(',');
 				sql.append('\'');
 				sql.append(idxName);
 				sql.append('\'');
