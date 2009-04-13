@@ -76,7 +76,7 @@ public class SyntaxDocument
 	 */
 	public void setTokenMarker(TokenMarker tm)
 	{
-		if (tokenMarker != null) tokenMarker.dispose();
+		if (tokenMarker != null) tokenMarker.reset();
 		tokenMarker = tm;
 		if (tm == null) return;
 		tokenMarker.insertLines(0,getDefaultRootElement().getElementCount());
@@ -104,7 +104,7 @@ public class SyntaxDocument
 		{
 			resumeUndo();
 		}
-		if (tokenMarker != null) tokenMarker.dispose();
+		if (tokenMarker != null) tokenMarker.reset();
 	}
 
 	public void suspendUndo()

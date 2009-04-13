@@ -1,5 +1,3 @@
-package workbench.gui.editor;
-
 /*
  * Token.java - Generic token
  * Copyright (C) 1998, 1999 Slava Pestov
@@ -8,6 +6,7 @@ package workbench.gui.editor;
  * permitted, in both source and binary form, provided that this notice
  * remains intact in all source distributions of this package.
  */
+package workbench.gui.editor;
 
 /**
  * A linked list of tokens. Each token has three fields - a token
@@ -17,7 +16,6 @@ package workbench.gui.editor;
  * token in the text, and a pointer to the next token in the list.
  *
  * @author Slava Pestov
- * @version $Id: Token.java,v 1.2 2007/12/17 20:41:20 thomas Exp $
  */
 public class Token
 {
@@ -106,12 +104,6 @@ public class Token
 	 * in a token marker.
 	 */
 	public static final byte INTERNAL_LAST = 126;
-
-	/**
-	 * The token type, that along with a length of 0
-	 * marks the end of the token list.
-	 */
-	//public static final byte END = 127;
 
 	private char pendingChar = 0;
 	
@@ -203,9 +195,6 @@ public class Token
 			case NULL:
 				type = "NL";
 				break;
-//			case END:
-//				type = "EN";
-//				break;
 			default:
 				type = "OT";
 				break;

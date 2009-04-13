@@ -959,7 +959,7 @@ public class JEditTextArea
 		{
 			this.document.removeDocumentListener(documentHandler);
 			this.document.reset();
-			if (this.currentTokenMarker != null) currentTokenMarker.dispose();
+			if (this.currentTokenMarker != null) currentTokenMarker.reset();
 		}
 
 		this.document = document;

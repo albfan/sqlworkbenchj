@@ -45,19 +45,18 @@ public class KeywordMap
 	 */
 	public byte lookup(Segment text, int offset, int length)
 	{
-		if(length == 0)	return Token.NULL;
+		if (length == 0)	return Token.NULL;
 		int i = getSegmentMapKey(text, offset, length);
 		if (i < 0) return Token.NULL;
 		Keyword k = map[i];
 		while(k != null)
 		{
-			if(length != k.keyword.length)
+			if (length != k.keyword.length)
 			{
 				k = k.next;
 				continue;
 			}
-			if(SyntaxUtilities.regionMatches(ignoreCase,text,offset,k.keyword))
-				return k.id;
+			if (SyntaxUtilities.regionMatches(ignoreCase,text,offset,k.keyword)) return k.id;
 			k = k.next;
 		}
 		return Token.NULL;

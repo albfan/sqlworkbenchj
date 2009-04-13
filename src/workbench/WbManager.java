@@ -295,13 +295,16 @@ public final class WbManager
 		helper.initUI();
 		this.isWindowsClassic = helper.isWindowsClassic();
 		Settings.getInstance().addFontChangedListener(this);
-		EventQueue.invokeLater(new Runnable()
+		if (Settings.getInstance().getBoolProperty("workbench.gui.install.focusmgr", true))
 		{
-			public void run()
+			EventQueue.invokeLater(new Runnable()
 			{
-				FocusManager.setCurrentManager(WbFocusManager.getInstance());
-			}
-		});
+				public void run()
+				{
+					FocusManager.setCurrentManager(WbFocusManager.getInstance());
+				}
+			});
+		}
 	}
 
 	protected JDialog closeMessage;

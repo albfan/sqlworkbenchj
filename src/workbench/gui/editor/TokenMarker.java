@@ -88,6 +88,26 @@ public abstract class TokenMarker
 		if (prev == null) return getPreviousLineToken(lineIndex);
 		else return prev;
 	}
+
+	/**
+	 * Clears the tokens for the specified line.
+	 * This is to try to give the GC a hint to quickly free up
+	 * the memory allocated by the Tokens.  When loading large
+	 * files, the Token instances are consuming the most memory
+	 */
+	protected synchronized void clearLine(int lineIndex)
+	{
+		Token first = getFirstTokenInLine(lineIndex);
+		if (first == null) return;
+
+		while (first.next != null)
+		{
+			first = first.next;
+			first.next = null;
+		}
+		lineStartTokens.set(lineIndex, null);
+	}
+	
 	/**
 	 * A wrapper for the lower-level <code>markTokensImpl</code> method
 	 * that is called to split a line up into tokens.
@@ -101,6 +121,7 @@ public abstract class TokenMarker
 		Token prev = getPreviousLineToken(lineIndex);
 
 		lineStartTokens.set(lineIndex, null);
+		
 		markTokensImpl(prev, line, lineIndex);
 
 		// tell the last token if it has a pending literal character (" or ')
@@ -129,16 +150,19 @@ public abstract class TokenMarker
 
 	public abstract char getPendingLiteralChar();
 
-	public void dispose()
+	public void reset()
 	{
-		this.lineStartTokens.clear();
-		this.lineStartTokens.trimToSize();
+		for (int i=0; i < lineStartTokens.size(); i++)
+		{
+			clearLine(i);
+		}
+		lineStartTokens = new ArrayList<Token>(250);
+		length = 0;
 	}
 
 	/**
 	 * Informs the token marker that lines have been inserted into
-	 * the document. This inserts a gap in the <code>lineInfo</code>
-	 * array.
+	 * the document. 
 	 * @param index The first line number
 	 * @param lines The number of lines
 	 */
@@ -151,6 +175,7 @@ public abstract class TokenMarker
 		// does not re-allocated the internal array each time
 		lineStartTokens.ensureCapacity(length);
 
+		// now make sure that every index is valid
 		int len = index + lines;
 		for (int i = index; i < len; i++)
 		{
@@ -172,6 +197,7 @@ public abstract class TokenMarker
 		length -= lines;
 		for (int i=index; i < end; i++)
 		{
+			clearLine(index);
 			lineStartTokens.remove(index);
 		}
 	}

@@ -544,7 +544,7 @@ public class EditorPanel
 	{
 		if (aFile == null) return false;
 		if (!aFile.exists()) return false;
-		if (aFile.length() >= Integer.MAX_VALUE / 2)
+		if (aFile.length() >= Integer.MAX_VALUE / 3)
 		{
 			WbSwingUtilities.showErrorMessageKey(this, "MsgFileTooBig");
 			return false;
