@@ -14,6 +14,21 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (103.10) released</title>
+      <description>        <![CDATA[<p>Changes from build 103.9 to build 103.10</p><p>Enhancements</p><ul>
+<li>It is now possible to cycle through the tabs using Ctrl-Tab and Ctrl-Shift-Tab</li>
+</ul><p>Bug Fixes</p><ul>
+<li>The source of the index definition was not displayed in Postgres, if a table had a primary key and one additional index.</li>
+<li>If a profile did not have a name, SQL Workbench failed to display the connection dialog.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/dev-history.html</link>
+      <guid>sql-workbench-build-103.10</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 13 Apr 2009 22:41:03 +0100</pubDate>
+    </item>
+    <item>
       <title>New development build (103.9) released</title>
       <description>        <![CDATA[<p>Changes from build 103.8 to build 103.9</p><p>Enhancements</p><ul>
 <li>The keyboard shortcuts for editor movements can now be configured. The defaults have been adjusted to comply with the Apple guidelines on Mac OS</li>
@@ -22,6 +37,9 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -40,6 +58,14 @@
 <li>Sequences were no longer displayed for DB2 on Windows/Linux</li>
 </ul>
 
+
+
+
+
+
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -55,6 +81,14 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
+
+
+
+
+
+
 
 
 ]]>
@@ -76,6 +110,14 @@
 
 
 
+
+
+
+
+
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -92,6 +134,14 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
+
+
+
+
+
+
+
 
 
 

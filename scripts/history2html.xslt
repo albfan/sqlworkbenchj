@@ -70,7 +70,7 @@
       </style>
     </html>
     <body>
-      <h1 style="font-size=18px">SQL Workbench/J Change Log</h1>
+      <h1 style="font-size:18px">SQL Workbench/J Change Log</h1>
 
       <p>
         This document only shows the release history for the last 10 releases.<br/>
@@ -93,7 +93,7 @@
           <h3 class="history-entry">Enhancements</h3>
           <ul>
           <xsl:for-each select="entry[@type='enh']">
-            <xsl:sort select="@dev-build" order="descending"/>
+            <xsl:sort select="@dev-build" order="descending" data-type="number"/>
             <li><xsl:copy-of select="normalize-space(description/text())"/></li>
           </xsl:for-each>
           </ul>
@@ -103,7 +103,7 @@
           <h3 class="history-entry">Bug fixes</h3>
           <ul>
           <xsl:for-each select="entry[@type='fix']">
-            <xsl:sort select="@dev-build" order="descending"/>
+            <xsl:sort select="@dev-build" order="descending" data-type="number"/>
             <li><xsl:copy-of select="normalize-space(description/text())"/></li>
           </xsl:for-each>
           </ul>

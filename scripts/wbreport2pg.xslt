@@ -62,14 +62,14 @@
           <xsl:text> NOT NULL</xsl:text>
         </xsl:if>
       </xsl:variable>
-		
+    
       <xsl:variable name="defaultvalue">
         <xsl:if test="string-length(default-value) &gt; 0">
           <xsl:text> DEFAULT </xsl:text>
           <xsl:value-of select="default-value"/>
         </xsl:if>
       </xsl:variable>
-		
+    
       <xsl:variable name="datatype">
         <xsl:choose>
           <xsl:when test="dbms-data-type = 'CLOB'">
@@ -88,7 +88,7 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
-		
+    
       <xsl:text>  </xsl:text>
       <xsl:copy-of select="$colname"/>
       <xsl:text> </xsl:text>
@@ -285,7 +285,7 @@
       <xsl:variable name="uppername">
         <xsl:value-of select="translate(column-name,
                                   'abcdefghijklmnopqrstuvwxyz`',
-                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/> 	
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>   
       </xsl:variable>
       <xsl:variable name="colname">
         <xsl:choose>

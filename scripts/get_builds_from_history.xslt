@@ -5,12 +5,14 @@
 
 <xsl:variable name="last-dev-build-nr">
 	<xsl:for-each select="/history/release[1]/entry">
-			<xsl:sort select="@dev-build" order="descending" />
+			<xsl:sort select="@dev-build" order="descending" data-type="number"/>
 			<xsl:if test="position()=1">
 					<xsl:value-of select="@dev-build" />
 			</xsl:if>
 	</xsl:for-each>
 </xsl:variable>
+
+<xsl:message><xsl:value-of select="$last-dev-build-nr"/></xsl:message>
 
 <xsl:variable name="prev-dev-build-nr" select="$last-dev-build-nr - 1"/>
 

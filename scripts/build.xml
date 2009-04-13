@@ -213,7 +213,7 @@
 					out="${pdfwork}/manual.fo"
 					style="${doc}/xsl/workbench-pdf.xsl">
       <xmlcatalog>
-        <dtd publicId="-//OASIS//DTD DocBook XML V4.2//EN"
+        <dtd publicId="-//OASIS//DTD DocBook XML V4.5//EN"
              location="${docbook.dtd}/docbookx.dtd"/>
       </xmlcatalog>
       <param name="text-indent" expression="0.2cm"/>

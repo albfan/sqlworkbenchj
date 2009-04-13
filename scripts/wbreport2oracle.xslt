@@ -18,9 +18,9 @@
 <xsl:variable name="newline"><xsl:text>&#10;</xsl:text></xsl:variable>
 
 <xsl:template match="/">
-		<xsl:apply-templates select="/schema-report/table-def"/>
-		<xsl:apply-templates select="/schema-report/view-def"/>
-		<xsl:call-template name="process-fk"/>
+    <xsl:apply-templates select="/schema-report/table-def"/>
+    <xsl:apply-templates select="/schema-report/view-def"/>
+    <xsl:call-template name="process-fk"/>
 </xsl:template>
 
 <xsl:template match="table-def">
@@ -49,40 +49,40 @@
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
-		<xsl:variable name="nullable">
-			<xsl:if test="nullable = 'false'"> NOT NULL</xsl:if>
-		</xsl:variable>
-		
-		<xsl:variable name="defaultvalue">
-			<xsl:if test="string-length(default-value) &gt; 0">
+    <xsl:variable name="nullable">
+      <xsl:if test="nullable = 'false'"> NOT NULL</xsl:if>
+    </xsl:variable>
+    
+    <xsl:variable name="defaultvalue">
+      <xsl:if test="string-length(default-value) &gt; 0">
         <xsl:text> </xsl:text>DEFAULT <xsl:value-of select="default-value"/>
       </xsl:if>
-		</xsl:variable>
-		
-		<xsl:variable name="datatype">
-		  <xsl:choose>
-		    <xsl:when test="dbms-data-type = 'datetime'">
-		      <xsl:value-of select="'TIMESTAMP'"/>
+    </xsl:variable>
+    
+    <xsl:variable name="datatype">
+      <xsl:choose>
+        <xsl:when test="dbms-data-type = 'datetime'">
+          <xsl:value-of select="'TIMESTAMP'"/>
         </xsl:when>
-		    <xsl:when test="dbms-data-type = 'text'">
-		      <xsl:value-of select="'VARCHAR2(4000)'"/>
+        <xsl:when test="dbms-data-type = 'text'">
+          <xsl:value-of select="'VARCHAR2(4000)'"/>
         </xsl:when>
-		    <xsl:when test="dbms-data-type = 'int'">
-		      <xsl:value-of select="'INTEGER'"/>
+        <xsl:when test="dbms-data-type = 'int'">
+          <xsl:value-of select="'INTEGER'"/>
         </xsl:when>
-		    <xsl:when test="java-sql-type-name = 'VARCHAR'">
-		      <xsl:value-of select="'VARCHAR2('"/><xsl:value-of select="dbms-data-size"/><xsl:value-of select="')'"/>
+        <xsl:when test="java-sql-type-name = 'VARCHAR'">
+          <xsl:value-of select="'VARCHAR2('"/><xsl:value-of select="dbms-data-size"/><xsl:value-of select="')'"/>
         </xsl:when>
-		    <xsl:when test="java-sql-type-name = 'BIGINT'">
-		      <xsl:value-of select="'INTEGER'"/>
+        <xsl:when test="java-sql-type-name = 'BIGINT'">
+          <xsl:value-of select="'INTEGER'"/>
         </xsl:when>
-		    <xsl:otherwise>
-		      <xsl:value-of select="dbms-data-type"/>
-		    </xsl:otherwise>
+        <xsl:otherwise>
+          <xsl:value-of select="dbms-data-type"/>
+        </xsl:otherwise>
       </xsl:choose>
-		</xsl:variable>
-		
-		<xsl:text>  </xsl:text>
+    </xsl:variable>
+    
+    <xsl:text>  </xsl:text>
     <xsl:copy-of select="$colname"/>
     <xsl:text> </xsl:text>
     <xsl:value-of select="$datatype"/>
@@ -93,25 +93,25 @@
     </xsl:if>
   </xsl:for-each>
 
-	<xsl:for-each select="table-constraints/constraint-definition">
-		<xsl:text>,</xsl:text>
-		<xsl:value-of select="$newline"/>
-		<xsl:text>  </xsl:text>
-		<xsl:if test="@generated-name = 'false'">
-			<xsl:text>CONSTRAINT </xsl:text>
-			<xsl:value-of select="@name"/>
-			<xsl:text> </xsl:text>
-		</xsl:if>
-		<xsl:text>CHECK </xsl:text>
-		<xsl:copy-of select="normalize-space(.)"/>
-	</xsl:for-each>
+  <xsl:for-each select="table-constraints/constraint-definition">
+    <xsl:text>,</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>  </xsl:text>
+    <xsl:if test="@generated-name = 'false'">
+      <xsl:text>CONSTRAINT </xsl:text>
+      <xsl:value-of select="@name"/>
+      <xsl:text> </xsl:text>
+    </xsl:if>
+    <xsl:text>CHECK </xsl:text>
+    <xsl:copy-of select="normalize-space(.)"/>
+  </xsl:for-each>
   
   <xsl:value-of select="$newline"/>
   <xsl:text>);</xsl:text>
   <xsl:value-of select="$newline"/>
 
   <xsl:variable name="pkcount">
-  	<xsl:value-of select="count(column-def[primary-key='true'])"/>
+    <xsl:value-of select="count(column-def[primary-key='true'])"/>
   </xsl:variable>
   
   <xsl:if test="$pkcount &gt; 0">
@@ -152,9 +152,9 @@
   </xsl:for-each>
 
   <xsl:for-each select="index-def">
-  	<xsl:call-template name="create-index">
-  		<xsl:with-param name="tablename" select="$tablename"/>
-  	</xsl:call-template>
+    <xsl:call-template name="create-index">
+      <xsl:with-param name="tablename" select="$tablename"/>
+    </xsl:call-template>
   </xsl:for-each>
   
   <xsl:text>-- END TABLE </xsl:text> <xsl:value-of select="table-name"/><xsl:text> --</xsl:text>
@@ -164,19 +164,19 @@
 </xsl:template>
 
 <xsl:template name="create-index">
-	<xsl:param name="tablename"/> 
-	<xsl:variable name="pk" select="primary-key"/>
-	<xsl:if test="$pk = 'false'">
-  	<xsl:variable name="unique">
-  		<xsl:if test="unique='true'">UNIQUE </xsl:if>
-  	</xsl:variable>
-  	<xsl:variable name="prefix">
-  	  <xsl:choose>
-  	    <xsl:when test="contains(name, 'IDX')">
-  	      <xsl:value-of select="''"/>
+  <xsl:param name="tablename"/> 
+  <xsl:variable name="pk" select="primary-key"/>
+  <xsl:if test="$pk = 'false'">
+    <xsl:variable name="unique">
+      <xsl:if test="unique='true'">UNIQUE </xsl:if>
+    </xsl:variable>
+    <xsl:variable name="prefix">
+      <xsl:choose>
+        <xsl:when test="contains(name, 'IDX')">
+          <xsl:value-of select="''"/>
         </xsl:when>
         <xsl:otherwise>
-  	      <xsl:value-of select="'IDX_'"/>
+          <xsl:value-of select="'IDX_'"/>
         </xsl:otherwise>
       </xsl:choose>
     </xsl:variable>
@@ -197,7 +197,7 @@
     <xsl:text>);</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:value-of select="$newline"/>
-	</xsl:if>	
+  </xsl:if>  
 </xsl:template>
 
 <xsl:template name="process-fk">
@@ -246,23 +246,23 @@
   <xsl:value-of select="$newline"/>
   
   <xsl:for-each select="column-def">
-  	<xsl:sort select="dbms-position"/>
-  	<xsl:variable name="orgname" select="column-name"/>
-  	<xsl:variable name="uppername">
-	  <xsl:value-of select="translate(column-name,
+    <xsl:sort select="dbms-position"/>
+    <xsl:variable name="orgname" select="column-name"/>
+    <xsl:variable name="uppername">
+    <xsl:value-of select="translate(column-name,
                                   'abcdefghijklmnopqrstuvwxyz`',
-                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/> 	
-  	</xsl:variable>
-  	<xsl:variable name="colname">
-  	  <xsl:choose>
-  		<xsl:when test="contains(column-name,' ')">
-  		  <xsl:value-of select="concat($quote,column-name,$quote)"/>
-  		</xsl:when>
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>   
+    </xsl:variable>
+    <xsl:variable name="colname">
+      <xsl:choose>
+      <xsl:when test="contains(column-name,' ')">
+        <xsl:value-of select="concat($quote,column-name,$quote)"/>
+      </xsl:when>
       <xsl:otherwise>
           <xsl:value-of select="$uppername"/>
       </xsl:otherwise>
-  	  </xsl:choose>
-  	</xsl:variable>
+      </xsl:choose>
+    </xsl:variable>
     <xsl:text>  </xsl:text><xsl:copy-of select="$colname"/>
     <xsl:if test="position() &lt; last()">
       <xsl:text>,</xsl:text>

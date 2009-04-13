@@ -29,7 +29,7 @@
   <xsl:call-template name="process-entries">
 		<xsl:with-param name="entries" select="release[1]/entry"/>
 	</xsl:call-template>
-	
+
 </xsl:if>
 
 <xsl:text disable-output-escaping="yes">]]&gt;</xsl:text>

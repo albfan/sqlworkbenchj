@@ -31,7 +31,7 @@ Thanks to Etienne for his addition and bugfixes
   <xsl:template match="/">
 
     <xsl:apply-templates select="/schema-diff/add-table"/>
-		
+    
     <xsl:for-each select="/schema-diff/modify-table">
       
       <xsl:variable name="table" select="@name"/>
@@ -72,7 +72,7 @@ Thanks to Etienne for his addition and bugfixes
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-			<xsl:value-of select="$newline"/>
+      <xsl:value-of select="$newline"/>
 
       <xsl:for-each select="table-constraints/modify-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
@@ -283,7 +283,7 @@ Thanks to Etienne for his addition and bugfixes
       <xsl:variable name="uppername">
         <xsl:value-of select="translate(column-name,
                                   'abcdefghijklmnopqrstuvwxyz',
-                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/> 	
+                                  'ABCDEFGHIJKLMNOPQRSTUVWXYZ')"/>   
       </xsl:variable>
       <xsl:variable name="colname">
         <xsl:choose>

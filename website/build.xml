@@ -38,7 +38,7 @@
       </insert>
     </xmltask>
     
-    <delete file="history_rss.txt"/>
+    <!-- <delete file="history_rss.txt"/> -->
     
   </target>
 

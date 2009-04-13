@@ -188,22 +188,22 @@
       </xsl:for-each>
     </table>
 
-		<xsl:if test="count(column-def/references) &gt; 0">
-		    <p class="subTitle">References</p>
+    <xsl:if test="count(column-def/references) &gt; 0">
+        <p class="subTitle">References</p>
         <ul>
         <xsl:for-each select="column-def">
           <xsl:variable name="column" select="column-name"/>
           <xsl:if test="references">
-          	<xsl:variable name="targetTable" select="references/table-name"/>
-          	<li><a href="#{$targetTable}"><xsl:value-of select="$targetTable"/></a> (<xsl:value-of select="references/column-name"/>) through <xsl:value-of select="$column"/></li>
-					</xsl:if>
+            <xsl:variable name="targetTable" select="references/table-name"/>
+            <li><a href="#{$targetTable}"><xsl:value-of select="$targetTable"/></a> (<xsl:value-of select="references/column-name"/>) through <xsl:value-of select="$column"/></li>
+          </xsl:if>
         </xsl:for-each>
         </ul>
-		</xsl:if>
+    </xsl:if>
 
-		<xsl:if test="count(//references[table-name=$table]) &gt; 0">
-		    <p class="subTitle">Referenced by</p>
-		    <ul>
+    <xsl:if test="count(//references[table-name=$table]) &gt; 0">
+        <p class="subTitle">Referenced by</p>
+        <ul>
         <xsl:for-each select="//references[table-name=$table]">
           <xsl:variable name="ftable" select="parent::*/parent::*/child::table-name"/>
           <xsl:if test="string-length($ftable) &gt; 0">
@@ -211,7 +211,7 @@
           </xsl:if>
         </xsl:for-each>
         </ul>
-		</xsl:if>
+    </xsl:if>
 
   </xsl:for-each>
 

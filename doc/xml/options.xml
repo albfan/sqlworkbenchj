@@ -813,9 +813,8 @@
 		<section id="options-single-record">
 			<title>Single record dialog</title>
 			<para>
-				When displaying data in the <link linkend="single-record-display">Single record dialog</link>
-				you can customize the width for the input fields, and the default height for
-				<link linkend="options-multiline">multiline</link> columns.
+				When displaying data in the Single record dialog you can customize the width for the
+        input fields, and the default height for <link linkend="options-multiline">multiline</link> columns.
 			</para>
 		</section>
 

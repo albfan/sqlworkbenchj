@@ -72,7 +72,7 @@ Author: support@sql-workbench.net
         <xsl:text>;</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-			<xsl:value-of select="$newline"/>
+      <xsl:value-of select="$newline"/>
 
       <xsl:for-each select="table-constraints/modify-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
