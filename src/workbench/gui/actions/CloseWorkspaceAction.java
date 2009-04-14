@@ -36,6 +36,6 @@ public class CloseWorkspaceAction extends WbAction
 
 	public void executeAction(ActionEvent e)
 	{
-		this.client.closeWorkspace();
+		this.client.closeWorkspace(true);
 	}
 }

@@ -2087,11 +2087,6 @@ public class MainWindow
 		}
 	}
 
-	public void closeWorkspace()
-	{
-		closeWorkspace(true);
-	}
-
 	/**
 	 *	Closes the current workspace.
 	 *  The tab count is reset to 1, the SQL history for the tab will be emptied
@@ -2107,7 +2102,7 @@ public class MainWindow
 			for (int i=0; i < count; i++)
 			{
 				MainPanel p = getSqlPanel(i);
-				if (p.canCloseTab()) return;
+				if (!p.canCloseTab()) return;
 			}
 		}
 
