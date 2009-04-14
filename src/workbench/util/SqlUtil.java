@@ -67,7 +67,8 @@ public class SqlUtil
 			Collections.unmodifiableSet(CollectionBuilder.hashSet(
 			"INDEX", "TABLE", "PROCEDURE", "FUNCTION", "VIEW", "PACKAGE", "PACKAGE BODY",
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
-			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT"));
+			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT",
+			"FLASHBACK ARCHIVE"));
 	}
 
 	private static class TypesWithoutNamesHolder
@@ -160,7 +161,7 @@ public class SqlUtil
 		try
 		{
 			DdlObjectInfo info = new DdlObjectInfo();
-
+			
 			boolean typeFound = false;
 			SQLToken token = lexer.getNextToken(false, false);
 			while (token != null)

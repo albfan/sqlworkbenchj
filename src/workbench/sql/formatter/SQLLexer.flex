@@ -161,7 +161,7 @@ keyword=("ABORT"|
 "ARE"|
 "ARRAY"|
 "AS"|
-"AS[ \t\r\n]+OF"|
+AS[ \t\r\n]+OF|
 "ASC"|
 "ASENSITIVE"|
 "ASSERTION"|
@@ -178,6 +178,7 @@ keyword=("ABORT"|
 "BIGINT"|
 "BINARY"|
 "BIT"|
+"BITMAP"|
 "BIT_LENGTH"|
 "BITVAR"|
 "BLOB"|
@@ -207,7 +208,6 @@ keyword=("ABORT"|
 "CHECKED"|
 "CHECKPOINT"|
 "CLASS"|
-"CLASS_ORIGIN"|
 "CLOB"|
 "CLOSE"|
 "CLUSTER"|
@@ -323,11 +323,10 @@ keyword=("ABORT"|
 "FETCH"|
 "FINAL"|
 "FIRST"|
-"FLOAT"|
 "FLASHBACK"|
+"FLOAT"|
 "FOR"|
 "FORCE"|
-"FOREIGN[ \t\r\n]+KEY"|
 "FORTRAN"|
 "FORWARD"|
 "FOUND"|
@@ -563,7 +562,7 @@ keyword=("ABORT"|
 "SIZE"|
 "SMALLINT"|
 "SNAPSHOT"|
-"SNAPSHOT[ \t\r\n]+LOG"|
+SNAPSHOT[ \t\r\n]+LOG|
 "SOURCE"|
 "SPACE"|
 "SQL"|
@@ -573,7 +572,7 @@ keyword=("ABORT"|
 "SQLSTATE"|
 "SQLWARNING"|
 "START"|
-"START[ \t\r\n]+WITH"|
+START[ \t\r\n]+WITH|
 "STATEMENT"|
 "STATIC"|
 "STATISTICS"|
@@ -659,6 +658,7 @@ keyword=("ABORT"|
 ALTER[ \t\r\n]+SESSION|
 CASCADE[ \t\r\n]+CONSTRAINTS|
 PRIMARY[ \t\r\n]+KEY|
+FLASHBACK[ \t\r\n]+ARCHIVE|
 FOREIGN[ \t\r\n]+KEY|
 IS[ \t\r\n]+NULL|
 NOT[ \t\r\n]+NULL|

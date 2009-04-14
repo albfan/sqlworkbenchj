@@ -225,6 +225,11 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("some_body", info.objectName);
 		assertEquals("PACKAGE BODY", info.objectType);
+
+		sql = "CREATE FLASHBACK ARCHIVE main_archive";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("main_archive", info.objectName);
+		assertEquals("FLASHBACK ARCHIVE", info.objectType);
 	}
 
 	
