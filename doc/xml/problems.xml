@@ -151,6 +151,30 @@
 			</para>
 		</section>
 
+		<section id="mssql-result-buffer">
+			<title>WbExport using a lot of memory</title>
+      <para>
+        The jTDS driver and the Microsoft JDBC driver read the complete result set into memory
+        before returning it to the calling application. This means that when retrieving
+        data, &wb-productname; uses (for a short amount of time) twice as much memory as really
+        needed. This also means that <link linkend="command-export">WbExport</link> will
+        effectively read the entire result into memory before writing it into the output file.
+        For large exports this us usually not wanted.
+      </para>
+      <para>
+        This behaviour of the drivers can be changed by adding an additional parameter to the
+        JDBC URL that is used to connect to the database. For the jTDS driver append
+        <literal>useCursors=true</literal> to the URL, e.g.
+        <literal>jdbc:jtds:sqlserver://localhost:2068;useCursors=true</literal>.
+      </para>
+      <para>
+        For the Microsoft driver, use the parameter <literal>selectMethod=cursor</literal> to
+        switch to a cursor based retrieval that does not buffer all rows within the driver, e.g.
+        <literal>jdbc:sqlserver://localhost:2068;selectMethod=cursor</literal>
+      </para>
+
+    </section>
+
 	</section>
 	
 	<section id="db2-problems">
@@ -178,6 +202,29 @@
 	<section id="pg-problems">
 		<title>Postgres Problems</title>
 
+		<section id="pg-result-buffer">
+			<title>WbExport using a lot of memory</title>
+      <para>
+        The Postgres JDBC driver defaults to buffer the results obtained from the database
+        in memory before returning them to the application. This means that when retrieving
+        data, &wb-productname; uses (for a short amount of time) twice as much memory as really
+        needed. This also means that <link linkend="command-export">WbExport</link> will
+        effectively read the entire result into memory before writing it into the output file.
+        For large exports this us usually not wanted.
+      </para>
+      <para>
+        This behaviour of the driver can be changed so that the driver uses cursor based retrieval.
+        To do this, the connection profile must disable the "Autocommit" option, and must define
+        a default fetch size that is greater than zero. A recommended value is e.g. 10, it might be
+        that higher numbers give a better performance. The number defined for the fetch size,
+        defines the number of rows the driver keeps in its internal buffer before requesting more
+        rows from the backend.
+      </para>
+      <para>
+        More details can be found in the driver's manual:  <ulink url="http://jdbc.postgresql.org/documentation/83/query.html#query-with-cursor"/>
+      </para>
+    </section>
+    
 		<section id="pg-statement-savepoint">
 			<title>Getting the error: Current transaction is aborted</title>
 			<para>
@@ -191,7 +238,7 @@ INSERT INTO person (id, firstname, lastname) VALUES (2, 'Ford', 'Prefect');
 COMMIT;</programlisting>
 			<para>
 				As the ID column is the primary key, the third insert will fail with a unique key violation.
-				In Postgres you cannot commit anyway and thus persist the first two INSERT's.
+				In Postgres you cannot commit anyway and thus persist the first two <literal>INSERT</literal>s.
 			</para>
 			<para>
 				This problem can only be solved by using a SAVEPOINT before and after each
@@ -206,13 +253,25 @@ COMMIT;</programlisting>
 workbench.db.postgresql.sql.usesavepoint=true
 </programlisting>
 			<para>
-				in the file <link linkend="settings">workbench.settings</link>. If you want to use
-				the modes <link linkend="import-update-mode"><literal>update/insert</literal></link> or
+				in the file <link linkend="settings">workbench.settings</link>. If this is enabled,
+        &wb-productname; will issue a <literal>SET SAVEPOINT</literal> before running each statement
+        and will release the savepoint after the statement. If the statement failed, a rollback to the
+        savepoint will be issued that will mark the transaction as "clean" again. So in the above
+        example (with <literal>sql.usesavepoint</literal> set to <literal>true</literal>), the last
+        statement would be rolled back automatically but the first two <literal>INSERT</literal>s
+        can be committed (this will also required to turn on the "Ignore errors" option is enabled).
+      </para>
+      
+      <para>
+        If you want to use the modes <link linkend="import-update-mode"><literal>update/insert</literal></link> or
 				<link linkend="import-update-mode"><literal>insert/update</literal></link>
 				for <link linkend="command-import">WbImport</link>, you should also add the
 				property:
 			</para>
 			<programlisting>workbench.db.postgresql.import.usesavepoint=true</programlisting>
+      <para>
+        to enable the usage of savepoints during imports.
+      </para>
 		</section>
 
 	</section>

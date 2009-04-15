@@ -8,8 +8,8 @@
 	
 	<para>
 		The <literal>WbExport</literal> command can be used like any other SQL command
-		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>), inlcuding scripts
-		that are run in <link linkend="using-scripting">batch mode</link>.
+		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>). This includes the 
+    usage in scripts that are run in <link linkend="using-scripting">batch mode</link>.
 	</para>
 	
 	<para>
@@ -71,6 +71,22 @@
 		If an export to an Excel spreadsheet is needed, it is recommended to use the Excel XML format 
 		(<literal>-type=xlsx</literal>), as that doesn't need an external library. 
 	</para>
+
+
+	<section id="wb-export-memory">
+		<title>Memory usage and WbExport</title>
+    <para>
+      WbExport is designed to directly write the rows that are retrieved from the database
+      to the export file without buffering them in memory.
+   </para>
+   <para>
+      However some JDBC drivers (e.g. Postgres, jTDS and the Microsoft Driver) buffer results obtained
+      from the database before the control is returned to the program running the SELECT. In that case
+      exporting large results to an external file might still required a lot of memory. Please refer to the
+      chapter <link linkend="troubleshooting">Common problems</link> for details on how to configure
+      the individual drivers.
+    </para>
+  </section>
 
 	<simplesect id="wb-export-max-rows">
 		<title>WbExport and the "Max. Rows" option</title>
