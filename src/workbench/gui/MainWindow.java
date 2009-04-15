@@ -2413,6 +2413,11 @@ public class MainWindow
 		return numTabs > 1;
 	}
 
+	public Component getComponent()
+	{
+		return this;
+	}
+	
 	public boolean canRenameTab()
 	{
 		return (this.currentWorkspaceFile != null);

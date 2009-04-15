@@ -15,7 +15,6 @@ import java.awt.event.ActionEvent;
 
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.sql.RenameableTab;
 import workbench.resource.ResourceMgr;
@@ -43,8 +42,7 @@ public class RenameTabAction
 	public void executeAction(ActionEvent e)
 	{
 		String oldName = client.getCurrentTabTitle();
-		String newName = WbSwingUtilities.getUserInput(WbManager.getInstance().getCurrentWindow(),
-			ResourceMgr.getString("MsgEnterNewTabName"), oldName);
+		String newName = WbSwingUtilities.getUserInput(client.getComponent(), ResourceMgr.getString("MsgEnterNewTabName"), oldName);
 		
 		if (newName != null)
 		{

@@ -11,6 +11,7 @@
  */
 package workbench.gui.sql;
 
+import java.awt.Component;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.JPopupMenu;
@@ -82,6 +83,11 @@ public class ResultTabHandler
 		menu.add(new ShowSourceQueryAction(client));
 		menu.add(new CloseResultTabAction(resultTab, client));
 		return menu;
+	}
+
+	public Component getComponent()
+	{
+		return resultTab;
 	}
 
 	public void setCurrentTabTitle(String newName)
