@@ -1,11 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-04-13">
+<release build="-1" date="2009-04-15">
 
   <entry dev-build="11" type="fix">
     <description>
       Tabs could not be renamed if more than one window was open.
+    </description>
+  </entry>
+
+  <entry dev-build="11" type="fix">
+    <description>
+      The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) 
+      when the DISTINCT keyword was used.
+    </description>
+  </entry>
+
+  <entry dev-build="11" type="fix">
+    <description>
+      Double clicking in the status bar would open a new SQL tab
     </description>
   </entry>
 

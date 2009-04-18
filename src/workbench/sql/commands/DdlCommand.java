@@ -187,7 +187,7 @@ public class DdlCommand
 	{
 		if ("DROP".equals(verb))
 		{
-			if (info == null)
+			if (info == null || info.objectType == null)
 			{
 				return ResourceMgr.getString("MsgGenDropSuccess");
 			}
@@ -202,7 +202,7 @@ public class DdlCommand
 		}
 		else if ("CREATE".equals(verb) || "RECREATE".equals(verb))
 		{
-			if (info == null)
+			if (info == null || info.objectType == null)
 			{
 				return ResourceMgr.getString("MsgGenCreateSuccess");
 			}
@@ -212,7 +212,7 @@ public class DdlCommand
 			}
 			else
 			{
-				return ResourceMgr.getFormattedString("MsgCreateTypeSuccss", info.objectType);
+				return ResourceMgr.getFormattedString("MsgCreateTypeSuccess", info.objectType);
 			}
 		}
 		return getDefaultSuccessMessage();

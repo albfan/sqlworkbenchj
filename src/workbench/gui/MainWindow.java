@@ -2621,7 +2621,12 @@ public class MainWindow
 		{
 			Point p = e.getPoint();
 			int index = sqlTab.indexAtLocation(p.x, p.y);
-			boolean overTab = index > -1; //tabRows > 1 || r.getX() + r.getWidth() > e.getPoint().getX() && e.getY() < r.height;
+			int realTabHeight = sqlTab.getTabHeight() * sqlTab.getTabRunCount() + 5;
+
+			// For some strange reason, clicks in the label of the status bar
+			// wind up here. Checking the tab height ensures that only
+			// mouse actions directly on the tab are processed.
+			boolean overTab = (index > -1) && (e.getY() <= realTabHeight);
 			if (e.getButton() == MouseEvent.BUTTON3 && overTab)
 			{
 				SqlTabPopup pop = new SqlTabPopup(this);

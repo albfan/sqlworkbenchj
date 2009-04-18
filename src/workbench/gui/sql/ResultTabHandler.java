@@ -44,14 +44,15 @@ public class ResultTabHandler
 	{
 		if (e.getSource() != this.resultTab) return;
 
+		int index = resultTab.getSelectedIndex();
+		boolean isResultTab = (index != resultTab.getTabCount() - 1);
+
+		if (!isResultTab) return;
+
 		if (e.getButton() == MouseEvent.BUTTON3)
 		{
-			int index = resultTab.getSelectedIndex();
-			if (index != resultTab.getTabCount() - 1)
-			{
-				JPopupMenu menu = createPopup();
-				menu.show(resultTab, e.getX(), e.getY());
-			}
+			JPopupMenu menu = createPopup();
+			menu.show(resultTab, e.getX(), e.getY());
 		}
 		else if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
 		{

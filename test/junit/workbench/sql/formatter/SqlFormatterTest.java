@@ -15,6 +15,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.resource.Settings;
+import workbench.util.CollectionBuilder;
 
 /**
  *
@@ -152,6 +153,19 @@ public class SqlFormatterTest
 
 	}
 
+	public void testKeywordsAsFunction()
+		throws Exception
+	{
+		String sql = "SELECT right(name,5) FROM person";
+		SqlFormatter f = new SqlFormatter(sql);
+		f.setUseLowerCaseFunctions(true);
+		f.setDBFunctions(CollectionBuilder.hashSet("RIGHT", "LEFT"));
+		String formatted = f.getFormattedSql().toString();
+		System.out.println("*******\n" + formatted + "\n**********");
+		String expected = "SELECT right(name,5)\nFROM person";
+		assertEquals(expected, formatted);
+	}
+	
 	public void testWbVars()
 		throws Exception
 	{

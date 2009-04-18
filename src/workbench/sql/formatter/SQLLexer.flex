@@ -290,6 +290,7 @@ AS[ \t\r\n]+OF|
 "DISCONNECT"|
 "DISPATCH"|
 "DISTINCT"|
+DISTINCT[ \t\r\n]+ON|
 "DO"|
 "DOMAIN"|
 "DOUBLE"|

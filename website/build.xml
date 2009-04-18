@@ -111,14 +111,14 @@
     <property name="pub.build.name" value="stable"/>
     <property name="pub.build.number" value="${release.build.number}"/>
     <property name="dev.build" value="0"/>
-    <property name="rss.url" value="http://www.sql-workbench.net/history.html"/>
+    <property name="rss.url" value="http://www.sql-workbench.net/downloads.html"/>
   </target>
 
   <target name="set-dev-build">
     <property name="pub.build.name" value="development"/>
     <property name="pub.build.number" value="${dev.build.number}"/>
     <property name="dev.build" value="1"/>
-    <property name="rss.url" value="http://www.sql-workbench.net/dev-history.html"/>
+    <property name="rss.url" value="http://www.sql-workbench.net/downloads.html"/>
   </target>
 
   <target name="makeHTML" depends="clean">

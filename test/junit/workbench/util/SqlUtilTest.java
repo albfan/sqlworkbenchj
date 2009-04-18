@@ -366,7 +366,21 @@ public class SqlUtilTest
 		l = SqlUtil.getSelectColumns(sql,true);		
 		assertEquals("Not enough columns", 1, l.size());
 		assertEquals("Wrong first column", "extract(year from rec_date) as rec_year", l.get(0));
+
+		sql = "SELECT distinct col1, col2 from mytable";
+		l = SqlUtil.getSelectColumns(sql, true);
+		assertEquals("Not enough columns", 2, l.size());
+		assertEquals("Wrong first column", "col1", l.get(0));
+
+		sql = "SELECT distinct on (col1, col2), col3 from mytable";
+		l = SqlUtil.getSelectColumns(sql, true);
+		assertEquals("Not enough columns", 3, l.size());
+		assertEquals("Wrong first column", "col1", l.get(0));
+		assertEquals("Wrong first column", "col2", l.get(1));
+		assertEquals("Wrong first column", "col3", l.get(2));
+
 	}
+
 	
 	public void testStripColumnAlias()
 	{

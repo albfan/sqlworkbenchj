@@ -409,9 +409,21 @@ public class SqlUtil
 			SQLToken t = lex.getNextToken(false, false);
 			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.emptyList();
 			t = lex.getNextToken(false, false);
+			
+			boolean ignoreFirstBracket = false;
+
+			// Skip a potential DISTINCT at the beginning 
+			if (t.getContents().equals("DISTINCT") || t.getContents().equals("DISTINCT ON"))
+			{
+				// Postgres DISTINCT ON extension...
+				ignoreFirstBracket = t.getContents().equals("DISTINCT ON");
+				t = lex.getNextToken(false, false);
+			}
+			
 			int lastColStart = t.getCharBegin();
 			int bracketCount = 0;
 			boolean nextIsCol = true;
+
 			while (t != null)
 			{
 				String v = t.getContents();
@@ -423,17 +435,28 @@ public class SqlUtil
 				{
 					bracketCount --;
 				}
-				else if (bracketCount == 0 && (",".equals(v) || SqlFormatter.SELECT_TERMINAL.contains(v)))
+				else if ( (bracketCount == 0 || (ignoreFirstBracket && bracketCount == 1))
+					&& (",".equals(v) || SqlFormatter.SELECT_TERMINAL.contains(v)))
 				{
 					String col = select.substring(lastColStart, t.getCharBegin());
+
+					if (ignoreFirstBracket && bracketCount == 0 && col.trim().endsWith(")"))
+					{
+						// When dealing with Postgres' DISTINCT ON the last column
+						// inside the brackets will be extracted including the bracket
+						col = col.substring(0, col.length() - 1);
+					}
+
 					if (includeAlias)
 					{
-						result.add(col.trim());
+						col = col.trim();
 					}
 					else
 					{
-						result.add(striptColumnAlias(col));
+						col = striptColumnAlias(col);
 					}
+					result.add(col);
+					
 					if (SqlFormatter.SELECT_TERMINAL.contains(v))
 					{
 						nextIsCol = false;
