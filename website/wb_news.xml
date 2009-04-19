@@ -14,6 +14,20 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (103.11) released</title>
+      <description>        <![CDATA[<p>Changes from build 103.10 to build 103.11</p><p>Bug Fixes</p><ul>
+<li>Tabs could not be renamed if more than one window was open.</li>
+<li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
+<li>Double clicking in the status bar would open a new SQL tab</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-103.11</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 19 Apr 2009 19:32:06 +0100</pubDate>
+    </item>
+    <item>
       <title>New development build (103.10) released</title>
       <description>        <![CDATA[<p>Changes from build 103.9 to build 103.10</p><p>Enhancements</p><ul>
 <li>It is now possible to cycle through the tabs using Ctrl-Tab and Ctrl-Shift-Tab</li>
@@ -21,6 +35,7 @@
 <li>The source of the index definition was not displayed in Postgres, if a table had a primary key and one additional index.</li>
 <li>If a profile did not have a name, SQL Workbench failed to display the connection dialog.</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -37,6 +52,7 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
 
 
 
@@ -66,6 +82,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -81,6 +98,7 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
 
 
 
@@ -118,6 +136,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -134,6 +153,7 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
 
 
 
