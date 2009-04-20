@@ -1036,6 +1036,7 @@ public class JEditTextArea
 	 */
 	public final int getDocumentLength()
 	{
+		if (document == null) return 0;
 		return document.getLength();
 	}
 
@@ -1044,6 +1045,8 @@ public class JEditTextArea
 	 */
 	public final int getLineCount()
 	{
+		if (document == null) return 0;
+		if (document.getDefaultRootElement() == null) return 0;
 		return document.getDefaultRootElement().getElementCount();
 	}
 
