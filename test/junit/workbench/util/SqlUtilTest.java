@@ -230,6 +230,17 @@ public class SqlUtilTest
 		info = SqlUtil.getDDLObjectInfo(sql);
 		assertEquals("main_archive", info.objectName);
 		assertEquals("FLASHBACK ARCHIVE", info.objectType);
+
+		sql = "CREATE TABLE IF NOT EXISTS some_table (id integer)";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("some_table", info.objectName);
+		assertEquals("TABLE", info.objectType);
+
+		sql = "DROP TABLE old_table IF EXISTS";
+		info = SqlUtil.getDDLObjectInfo(sql);
+		assertEquals("old_table", info.objectName);
+		assertEquals("TABLE", info.objectType);
+
 	}
 
 	

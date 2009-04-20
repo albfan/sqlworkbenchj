@@ -183,6 +183,11 @@ public class SqlUtil
 			{
 				SQLToken name = lexer.getNextToken(false, false);
 				if (name == null) return null;
+				if (name.getContents().equals("IF NOT EXISTS"))
+				{
+					name = lexer.getNextToken(false, false);
+					if (name == null) return null;
+				}
 				info.objectName = name.getContents();
 			}
 			return info;

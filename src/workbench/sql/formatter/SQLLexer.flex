@@ -686,7 +686,9 @@ LEFT[ \t\r\n]+JOIN|
 LEFT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
 RIGHT[ \t\r\n]+JOIN|
 RIGHT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
-NATURAL[ \t\r\n]+JOIN
+NATURAL[ \t\r\n]+JOIN|
+IF[ \t\r\n]+NOT[ \t\r\n]+EXISTS|
+IF[ \t\r\n]+EXISTS
 )
 
 /*[\w]+\])*/
