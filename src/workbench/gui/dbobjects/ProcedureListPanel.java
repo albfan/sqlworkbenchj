@@ -423,8 +423,8 @@ public class ProcedureListPanel
 			WbSwingUtilities.showDefaultCursor(parent);
 			dbConnection.setBusy(false);
 		}
-		// The package name is stored in the catalog field if this is an Oracle database
-		final int pos = findOracleProcedureInPackage(sql, def.getCatalog(), def.getProcedureName());
+		
+		final int pos = findOracleProcedureInPackage(sql, def.getPackageName(), def.getProcedureName());
 
 		EventQueue.invokeLater(new Runnable()
 		{

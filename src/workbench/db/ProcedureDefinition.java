@@ -163,7 +163,12 @@ public class ProcedureDefinition
 	
 	public String getObjectName()
 	{
-		return getProcedureName();
+		// the name of an oracle package is stored in the catalog field
+		// because that's how the JDBC driver returns the information
+		// to generate a proper DROP statement the package name is required
+		// not the procedure name
+		if (this.isOraclePackage) return catalog;
+		return procName;
 	}
 	
 	public void setSource(CharSequence s) 
@@ -178,6 +183,12 @@ public class ProcedureDefinition
 	
 	public void setOraclePackage(boolean flag) { this.isOraclePackage = true; }
 	public boolean isOraclePackage() { return this.isOraclePackage; }
+
+	public String getPackageName()
+	{
+		if (this.isOraclePackage) return catalog;
+		return null;
+	}
 	
 	public String getCatalog() 
 	{
@@ -192,7 +203,6 @@ public class ProcedureDefinition
 	
 	public String getProcedureName() 
 	{
-		if (this.isOraclePackage) return catalog;
 		return this.procName; 
 	}
 	
