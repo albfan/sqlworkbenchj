@@ -15,6 +15,8 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -29,6 +31,7 @@ import javax.swing.border.Border;
  */ 
 public class WbTextLabel
 	extends JComponent
+	implements MouseListener
 {
 	private final static int DEFAULT_TEXT_Y = 15;
 	private String text;
@@ -54,6 +57,9 @@ public class WbTextLabel
 			this.fm = this.getFontMetrics(f);
 			textY = (fm != null ? fm.getAscent() + 2 : DEFAULT_TEXT_Y);
 		}
+		// For some reason clicks into WbTextLabel wind up at the parent container
+		// unless we capture the events ourselves
+		addMouseListener(this);
 	}
 	
 	public void setBorder(Border b)
@@ -109,6 +115,26 @@ public class WbTextLabel
 			g.setColor(this.textColor);
 			g.drawString(this.text, textX, textY);
 		}
+	}
+
+	public void mouseClicked(MouseEvent e)
+	{
+	}
+
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+
+	public void mouseExited(MouseEvent e)
+	{
 	}
 
 }
