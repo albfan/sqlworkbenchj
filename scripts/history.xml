@@ -3,6 +3,30 @@
 
 <release build="-1" date="2009-04-19">
 
+  <entry dev-build="12" type="enh">
+    <description>
+      A result tab can now be reloaded (by re-running the original SQL) through the context menu of the result tab.
+    </description>
+  </entry>
+  
+  <entry dev-build="12" type="fix">
+    <description>
+      When displaying Oracle Packages the selected procedure/function was not highlighted in the source view of the package.
+    </description>
+  </entry>
+
+  <entry dev-build="12" type="fix">
+    <description>
+      Ctrl-C was no longer working in the source display of the DbExplorer if it was opened as a separate window
+    </description>
+  </entry>
+  
+  <entry dev-build="12" type="fix">
+    <description>
+      Double clicking in the status bar would open a new SQL tab
+    </description>
+  </entry>
+
   <entry dev-build="11" type="fix">
     <description>
       Tabs could not be renamed if more than one window was open.
@@ -13,12 +37,6 @@
     <description>
       The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) 
       when the DISTINCT keyword was used.
-    </description>
-  </entry>
-
-  <entry dev-build="11" type="fix">
-    <description>
-      Double clicking in the status bar would open a new SQL tab
     </description>
   </entry>
 
