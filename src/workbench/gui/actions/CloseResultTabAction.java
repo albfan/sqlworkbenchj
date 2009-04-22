@@ -16,7 +16,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
-import workbench.gui.sql.ResultHandler;
+import workbench.gui.sql.SqlPanel;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
@@ -28,14 +28,12 @@ import workbench.resource.ResourceMgr;
 public class CloseResultTabAction
 	extends WbAction
 {
-	private JTabbedPane resultTab;
-	private ResultHandler client;
+	private SqlPanel panel;
 
-	public CloseResultTabAction(JTabbedPane tabPane, ResultHandler closer)
+	public CloseResultTabAction(SqlPanel sqlPanel)
 	{
 		super();
-		this.resultTab = tabPane;
-		client = closer;
+		panel = sqlPanel;
 		this.initMenuDefinition("MnuTxtCloseResultTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK ));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setIcon(null);
@@ -43,15 +41,13 @@ public class CloseResultTabAction
 
 	public void executeAction(ActionEvent e)
 	{
-		client.closeCurrentResult();
+		panel.closeCurrentResult();
 	}
 
 	@Override
 	public boolean isEnabled()
 	{
-		if (resultTab == null) return false;
-		int index = resultTab.getSelectedIndex();
-		return (index < resultTab.getTabCount() -1);
+		return panel.getCurrentResult() != null;
 	}
 
 }

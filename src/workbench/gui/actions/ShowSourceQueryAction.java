@@ -17,7 +17,7 @@ import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.sql.EditorPanel;
-import workbench.gui.sql.ResultHandler;
+import workbench.gui.sql.SqlPanel;
 import workbench.resource.Settings;
 
 /**
@@ -27,18 +27,18 @@ import workbench.resource.Settings;
 public class ShowSourceQueryAction
 	extends WbAction
 {
-	private ResultHandler result;
+	private SqlPanel panel;
 	
-	public ShowSourceQueryAction(ResultHandler handler)
+	public ShowSourceQueryAction(SqlPanel handler)
 	{
-		result = handler;
+		panel = handler;
 		isConfigurable = false;
 		initMenuDefinition("MnuTxtShowQuery");
 	}
 
 	public boolean isEnabled()
 	{
-		return result.getSourceQuery() != null;
+		return panel.getSourceQuery() != null;
 	}
 	
 	@Override
@@ -50,7 +50,7 @@ public class ShowSourceQueryAction
 	public void showQuery()
 	{
 		EditorPanel p = EditorPanel.createSqlEditor();
-		String sql = result.getSourceQuery();
+		String sql = panel.getSourceQuery();
 		p.setText(sql);
 		p.setCaretPosition(0);
 		p.setEditable(false);

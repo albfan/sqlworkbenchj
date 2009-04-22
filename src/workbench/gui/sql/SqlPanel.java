@@ -187,7 +187,7 @@ public class SqlPanel
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, ResultHandler
+		FilenameChangeListener, ResultReceiver, MacroClient
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -814,7 +814,7 @@ public class SqlPanel
 		this.actions.add(filterAction);
 		this.actions.add(selectionFilterAction);
 		this.actions.add(this.resetFilterAction );
-		CloseResultTabAction closeResult = new CloseResultTabAction(this.resultTab, this);
+		CloseResultTabAction closeResult = new CloseResultTabAction(this);
 		closeResult.setCreateMenuSeparator(true);
 		this.actions.add(closeResult);
 
@@ -1700,6 +1700,63 @@ public class SqlPanel
 		}
 	}
 
+	/**
+	 * Re-run the SQL of the current result in the background.
+	 * @param sql
+	 */
+	public void reloadCurrent()
+	{
+		if (isBusy()) return;
+		
+		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
+		{
+			public void run()
+			{
+				runCurrentSql();
+			}
+		};
+		this.executionThread.start();
+	}
+
+	protected void runCurrentSql()
+	{
+		final DwPanel dw = getCurrentResult();
+		if (dw == null) return;
+		final String sql = dw.getDataStore().getGeneratingSql();
+		if (sql == null) return;
+
+		cancelExecution = false;
+		setBusy(true);
+
+		// the dbStart should be fired *after* updating the
+		// history, as the history might be saved ("AutoSaveHistory") if the MainWindow
+		// receives the execStart event
+		fireDbExecStart();
+		setCancelState(true);
+		try
+		{
+			dw.runQuery(sql, true);
+		}
+		catch (Exception e)
+		{
+			this.showLogMessage(e.getMessage());
+			LogMgr.logError("SqlPanel.runCurrentSql()", "Error reloading current result", e);
+		}
+		finally
+		{
+			clearStatusMessage();
+			setCancelState(false);
+			updateResultInfos();
+			this.fireDbExecEnd();
+
+			// setBusy(false) should be called after dbExecEnd()
+			// otherwise the panel would indicate it's not busy, but
+			// the connection would still be marked as busy
+			this.setBusy(false);
+			this.executionThread = null;
+		}
+	}
+	
 	private boolean macroExecution = false;
 
 	public void executeMacroSql(final String sql, final boolean replaceText)
@@ -2074,12 +2131,21 @@ public class SqlPanel
 		checkResultSetActions();
 	}
 
-	public String getSourceQuery()
+	public DwPanel getCurrentResult()
 	{
 		Component c = resultTab.getSelectedComponent();
 		if (c instanceof DwPanel)
 		{
-			DwPanel dw = (DwPanel)c;
+			return (DwPanel)c;
+		}
+		return null;
+
+	}
+	public String getSourceQuery()
+	{
+		DwPanel dw = getCurrentResult();
+		if (dw != null)
+		{
 			DataStore ds = dw.getTable().getDataStore();
 			if (ds != null) return ds.getGeneratingSql();
 		}

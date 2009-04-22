@@ -563,6 +563,12 @@ public class DwPanel
 		}
 	}
 
+	public DataStore getDataStore()
+	{
+		if (dataTable == null) return null;
+		return this.dataTable.getDataStore();
+	}
+
 	public NamedSortDefinition getCurrentSort()
 	{
 		NamedSortDefinition currentSort = null;
@@ -586,7 +592,13 @@ public class DwPanel
 
 		try
 		{
-			this.clearContent();
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					clearContent();
+				}
+			});
 
 			this.sql = aSql;
 			int max = (respectMaxRows ? this.statusBar.getMaxRows() : 0);
