@@ -386,6 +386,7 @@ public class InputHandler
 		if (toTest.getModifiers() == 0) return false;
 
 		int code = toTest.getKeyCode();
+		
 		// if the keycode indicates a modifier key, only that key was
 		// pressed, the modifier alone cannot be mapped...
 		if (code == KeyEvent.VK_ALT || code == KeyEvent.VK_CONTROL ||
@@ -402,15 +403,17 @@ public class InputHandler
 		Window w = SwingUtilities.getWindowAncestor(area);
 		if (w instanceof JFrame)
 		{
-			JFrame f = (JFrame)w;
-			JMenuBar bar = f.getJMenuBar();
-			for (Component c : bar.getComponents())
+			JMenuBar bar = ((JFrame)w).getJMenuBar();
+			if (bar != null && bar.getComponents() != null)
 			{
-				allKeys.addAll( getKeys((JComponent)c) );
-				if (c instanceof JMenu)
+				for (Component c : bar.getComponents())
 				{
-					JMenu m = (JMenu)c;
-					allKeys.addAll(getKeys(m));
+					allKeys.addAll( getKeys((JComponent)c) );
+					if (c instanceof JMenu)
+					{
+						JMenu m = (JMenu)c;
+						allKeys.addAll(getKeys(m));
+					}
 				}
 			}
 		}
