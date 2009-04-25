@@ -119,6 +119,11 @@ public class RowDataTest extends TestCase
 		row.setValue(1, new Integer(42));
 		assertTrue(row.isNew());
 		assertTrue(row.isModified());
+		assertEquals("123", row.getValue(0));
+		assertEquals(new Integer(42), row.getValue(1));
+
+		assertEquals("123", row.getOriginalValue(0));
+		assertEquals(new Integer(42), row.getOriginalValue(1));
 		
 		row.resetStatus();
 		assertFalse(row.isModified());

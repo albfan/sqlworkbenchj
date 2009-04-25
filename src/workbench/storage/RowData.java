@@ -346,12 +346,13 @@ public class RowData
 
 	/**
 	 * Returns the value from the specified column as it was retrieved from 
-	 * the database
+	 * the database. If the column was not modified or this row is new
+	 * then the current value is returned.
 	 */
-	public synchronized Object getOriginalValue(int aColumn)
+	public Object getOriginalValue(int aColumn)
 		throws IndexOutOfBoundsException
 	{
-		if (this.isColumnModified(aColumn))
+		if (!isNew() && this.isColumnModified(aColumn))
 		{
 			return this.originalData[aColumn];
 		}

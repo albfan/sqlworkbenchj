@@ -556,16 +556,29 @@ public class MainWindow
 				content.add(currentToolbar, BorderLayout.NORTH);
 			}
 		}
-		content.validate();
-		
-		EventQueue.invokeLater(new Runnable() 
+	}
+
+	protected void forceRedraw()
+	{
+		if (GuiSettings.getForceRedraw())
 		{
-			public void run()
+			WbSwingUtilities.invoke(new Runnable()
 			{
-				content.validate();
-				content.doLayout();
-			}
-		});
+				public void run()
+				{
+					Container content = getContentPane();
+					if (content instanceof JComponent)
+					{
+						content.invalidate();
+						((JComponent)content).revalidate();
+					}
+					invalidate();
+					doLayout();
+				}
+			});
+		}
+		
+		WbSwingUtilities.repaintLater(this);
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -573,6 +586,7 @@ public class MainWindow
 		if (Settings.PROPERTY_SHOW_TOOLBAR.equals(evt.getPropertyName()))
 		{
 			this.updateToolbarVisibility();
+			forceRedraw();
 		}
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
@@ -950,6 +964,8 @@ public class MainWindow
 		this.disconnectTab.checkState();
 
 		this.checkMacroMenuForPanel(anIndex);
+		forceRedraw();
+		
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()

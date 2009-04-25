@@ -199,16 +199,14 @@ public class VariablePool
 		return this.getVariablesDataStore(Collections.synchronizedSet(this.data.keySet()));
 	}
 
-	public DataStore getVariablesDataStore(Set varNames)
+	public DataStore getVariablesDataStore(Set<String> varNames)
 	{
 		DataStore vardata = new VariableDataStore();
 		
-		Iterator itr = varNames.iterator();
 		synchronized (this.data)
 		{
-			while (itr.hasNext())
+			for (String key : varNames)
 			{
-				String key = (String)itr.next();
 				if (!this.data.containsKey(key)) continue;
 				String value = this.data.get(key);
 				int row = vardata.addRow();

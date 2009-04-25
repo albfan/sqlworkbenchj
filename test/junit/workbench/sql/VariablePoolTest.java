@@ -18,6 +18,7 @@ import java.util.Set;
 import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
+import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
 
 /**
@@ -130,5 +131,20 @@ public class VariablePoolTest extends TestCase
 		assertEquals("Firstname not defined", "Arthur", value);
 		
 		f.delete();
+	}
+
+	public void testDataStore()
+		throws Exception
+	{
+		VariablePool pool = VariablePool.getInstance();
+		pool.clear();
+		DataStore ds = pool.getVariablesDataStore();
+		assertEquals(0, ds.getRowCount());
+		int row = ds.addRow();
+		ds.setValue(row, 0, "varname");
+		ds.setValue(row, 1, "value");
+		ds.updateDb(null, null);
+		assertEquals(1, pool.getParameterCount());
+		assertEquals("value", pool.getParameterValue("varname"));
 	}
 }

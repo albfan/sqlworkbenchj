@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 import java.util.StringTokenizer;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import workbench.WbManager;
 import workbench.db.ConnectionProfile;
@@ -973,7 +972,17 @@ public class Settings
 
 	public Font getEditorFont()
 	{
-		return this.getFont(PROPERTY_EDITOR_FONT, true);
+		return getEditorFont(true);
+	}
+	
+	public Font getEditorFont(boolean returnDefault)
+	{
+		Font f = this.getFont(PROPERTY_EDITOR_FONT);
+		if (f == null && returnDefault)
+		{
+			f = new Font("Monospaced", Font.PLAIN, 12);
+		}
+		return f;
 	}
 
 	public void setMsgLogFont(Font f)
@@ -983,7 +992,7 @@ public class Settings
 
 	public Font getMsgLogFont()
 	{
-		return this.getFont(PROPERTY_MSGLOG_FONT, true);
+		return this.getFont(PROPERTY_MSGLOG_FONT);
 	}
 
 	public void setDataFont(Font f)
@@ -991,30 +1000,34 @@ public class Settings
 		this.setFont(PROPERTY_DATA_FONT, f);
 	}
 
+	public Font getDataFont()
+	{
+		return getDataFont(false);
+	}
+
 	public Font getDataFont(boolean returnDefault)
 	{
-		Font f = this.getFont(PROPERTY_DATA_FONT, false);
-		if (f == null && returnDefault)
+		Font f = this.getFont(PROPERTY_DATA_FONT);
+		if (f != null && returnDefault)
 		{
-			UIDefaults def = UIManager.getLookAndFeelDefaults();
-			f = def.getFont("Table.font");
+			f = UIManager.getFont("Table.font");
 		}
 		return f;
 	}
 
 	public Font getPrinterFont()
 	{
-		Font f  = this.getFont(PROPERTY_PRINTER_FONT, false);
+		Font f  = this.getFont(PROPERTY_PRINTER_FONT);
 		if (f == null)
 		{
-			f = this.getDataFont(true);
+			f = this.getDataFont();
 		}
 		return f;
 	}
 
 	 public Font getStandardFont()
 	{
-		return this.getFont(PROPERTY_STANDARD_FONT, false);
+		return this.getFont(PROPERTY_STANDARD_FONT);
 	}
 
 	public void setStandardFont(Font f)
@@ -1025,17 +1038,16 @@ public class Settings
 	/**
 	 *	Returns the font configured for this keyword
 	 */
-	public Font getFont(String aFontName, boolean returnDefault)
+	public Font getFont(String aFontName)
 	{
 		Font result = null;
 
 		String baseKey = "workbench.font." + aFontName;
 		String name = this.props.getProperty(baseKey + ".name", null);
-		if (name == null && returnDefault) name = "Dialog";
 
 		if (name == null) return null;
 
-		String sizeS = this.props.getProperty(baseKey + ".size", "11");
+		String sizeS = this.props.getProperty(baseKey + ".size", "10");
 		String type = this.props.getProperty(baseKey + ".style", "Plain");
 		int style = Font.PLAIN;
 		int size = 12;
@@ -1053,7 +1065,7 @@ public class Settings
 		}
 		catch (NumberFormatException e)
 		{
-			size = 11;
+			size = 10;
 		}
 		result = new Font(name, style, size);
 		return result;

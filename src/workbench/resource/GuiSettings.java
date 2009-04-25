@@ -12,6 +12,7 @@
 package workbench.resource;
 
 import java.awt.Color;
+import workbench.util.MacOSHelper;
 import workbench.util.StringUtil;
 
 
@@ -376,5 +377,10 @@ public class GuiSettings
 	public static void setShowSelectionSummary(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.selection.summar", flag);
+	}
+
+	public static boolean getForceRedraw()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.forcedraw", MacOSHelper.isMacOS());
 	}
 }
