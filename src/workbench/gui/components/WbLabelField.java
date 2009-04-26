@@ -53,7 +53,7 @@ public class WbLabelField
 		Font f = UIManager.getFont("Label.font");
 		if (f == null)
 		{
-			f = Settings.getInstance().getFont(Settings.PROPERTY_STANDARD_FONT, true);
+			f = Settings.getInstance().getStandardFont();
 		}
 		setFont(f);
 		setBackground(UIManager.getColor("Label.background"));

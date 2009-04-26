@@ -171,7 +171,8 @@ public class ColumnMapper
 		col.setCellEditor(edit);
 
 		JTextField targetEditor = new JTextField();
-		targetEditor.setFont(Settings.getInstance().getDataFont(true));
+		Font f = Settings.getInstance().getDataFont();
+		if (f != null) targetEditor.setFont(f);
 		targetEditor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		edit = new DefaultCellEditor(targetEditor);
 		col = colMod.getColumn(1);
@@ -208,7 +209,8 @@ public class ColumnMapper
 	private JComboBox createDropDown(List cols, boolean allowEditing)
 	{
 		JComboBox result = new JComboBox();
-		result.setFont(Settings.getInstance().getDataFont(true));
+		Font f = Settings.getInstance().getDataFont();
+		if (f != null) result.setFont(f);
 		result.setEditable(allowEditing);
 		int count = cols.size();
 		if (allowEditing) result.addItem(SKIP_COLUMN);

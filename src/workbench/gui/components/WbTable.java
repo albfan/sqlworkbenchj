@@ -57,7 +57,6 @@ import javax.swing.JViewport;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 import javax.swing.JPopupMenu.Separator;
 import javax.swing.KeyStroke;
 import javax.swing.UIDefaults;
@@ -225,19 +224,20 @@ public class WbTable
 		this.setColWidth = new SetColumnWidthAction(this);
 		this.setAutoCreateColumnsFromModel(true);
 
-		Font dataFont = Settings.getInstance().getDataFont(true);
-		if (dataFont == null) dataFont = (Font)UIManager.get("Table.font");
-
 		this.defaultEditor = WbTextCellEditor.createInstance(this);
-		this.defaultEditor.setFont(dataFont);
-
-		super.setFont(dataFont);
 
 		// Create a separate editor for numbers that is right aligned
 		numberEditorTextField = new JTextField();
-		numberEditorTextField.setFont(dataFont);
 		numberEditorTextField.setHorizontalAlignment(SwingConstants.RIGHT);
 		this.defaultNumberEditor = new WbTextCellEditor(this, numberEditorTextField);
+
+		Font dataFont = Settings.getInstance().getDataFont();
+		if (dataFont != null)
+		{
+			defaultEditor.setFont(dataFont);
+			numberEditorTextField.setFont(dataFont);
+			super.setFont(dataFont);
+		}
 
 		this.multiLineEditor = new WbCellEditor(this);
 		this.multiLineRenderer = RendererFactory.getMultiLineRenderer();

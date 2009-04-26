@@ -35,12 +35,15 @@ public class FontOptionsPanel
 		initComponents();
 		standardFont.setAllowFontReset(true);
 		editorFont.setListMonospacedOnly(true);
+		editorFont.setAllowFontReset(true);
+		dataFont.setAllowFontReset(true);
+		msgLogFont.setAllowFontReset(true);
 	}
 
 	public void restoreSettings()
 	{
-		editorFont.setSelectedFont(Settings.getInstance().getEditorFont());
-		dataFont.setSelectedFont(Settings.getInstance().getDataFont(false));
+		editorFont.setSelectedFont(Settings.getInstance().getEditorFont(false));
+		dataFont.setSelectedFont(Settings.getInstance().getDataFont());
 		msgLogFont.setSelectedFont(Settings.getInstance().getMsgLogFont());
 		standardFont.setSelectedFont(Settings.getInstance().getStandardFont());
 	}

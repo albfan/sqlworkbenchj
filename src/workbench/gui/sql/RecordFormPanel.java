@@ -35,6 +35,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
@@ -135,10 +136,14 @@ public class RecordFormPanel
 		Insets fieldInsets = new Insets(0,10,5,5);
 
 		Font displayFont = Settings.getInstance().getDataFont(true);
+		if (displayFont == null)
+		{
+			displayFont = UIManager.getFont("TextField.font");
+		}
 		FontMetrics fm = getFontMetrics(displayFont);
 		int numChars = GuiSettings.getDefaultFormFieldWidth();
-		int charWidth = fm.getMaxAdvance();
-		int charHeight = fm.getHeight() + 5;
+		int charWidth = (fm != null ? fm.getMaxAdvance() : 12);
+		int charHeight = (fm != null ? fm.getHeight() + 5 : 16);
 		int fieldWidth = charWidth * numChars;
 		int areaHeight = charHeight * GuiSettings.getDefaultFormFieldLines();
 

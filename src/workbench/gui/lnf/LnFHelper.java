@@ -78,7 +78,7 @@ public class LnFHelper
 			def.put("ViewPort.font", stdFont);
 		}
 
-		Font dataFont = settings.getDataFont(false);
+		Font dataFont = settings.getDataFont();
 		if (dataFont != null)
 		{
 			def.put("Table.font", dataFont);

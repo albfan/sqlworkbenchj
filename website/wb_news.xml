@@ -14,12 +14,31 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (103.12) released</title>
+      <description>        <![CDATA[<p>Changes from build 103.11 to build 103.12</p><p>Enhancements</p><ul>
+<li>All fonts can now be reset to their defaults in the options dialog.</li>
+<li>A result tab can now be reloaded (by re-running the original SQL) through the context menu of the result tab.</li>
+</ul><p>Bug Fixes</p><ul>
+<li>Fixed a repainting issue on MacOS in the toolbar when switching between DbExplorer tab and editor tabs</li>
+<li>When displaying Oracle Packages the selected procedure/function was not highlighted in the source view of the package.</li>
+<li>Ctrl-C was no longer working in the source display of the DbExplorer if it was opened as a separate window</li>
+<li>Double clicking in the status bar would open a new SQL tab</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-103.12</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 26 Apr 2009 19:33:41 +0100</pubDate>
+    </item>
+    <item>
       <title>New development build (103.11) released</title>
       <description>        <![CDATA[<p>Changes from build 103.10 to build 103.11</p><p>Bug Fixes</p><ul>
 <li>Tabs could not be renamed if more than one window was open.</li>
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -35,6 +54,7 @@
 <li>The source of the index definition was not displayed in Postgres, if a table had a primary key and one additional index.</li>
 <li>If a profile did not have a name, SQL Workbench failed to display the connection dialog.</li>
 </ul>
+
 
 ]]>
 </description>
@@ -52,6 +72,7 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
 
 
 
@@ -83,6 +104,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -98,6 +120,7 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
 
 
 
@@ -137,6 +160,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -153,6 +177,7 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
 
 
 

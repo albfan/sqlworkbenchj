@@ -1,7 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-04-19">
+<release build="-1" date="2009-04-26">
+
+  <entry dev-build="12" type="fix">
+    <description>
+       Fixed a repainting issue on MacOS in the toolbar when switching between DbExplorer tab and editor tabs
+    </description>
+  </entry>
+
+  <entry dev-build="12" type="enh">
+    <description>
+      All fonts can now be reset to their defaults in the options dialog.
+    </description>
+  </entry>
 
   <entry dev-build="12" type="enh">
     <description>
@@ -110,14 +122,6 @@
     </description>
   </entry>
 
-  <!--
-  <entry dev-build="8" type="enh">
-    <description>
-      Added support for new HSQLDB v1.9
-    </description>
-  </entry>
-  -->
-  
   <entry dev-build="7" type="enh">
     <description>
       When using XSLT to transform output of e.g. WbReport or WbSchemaDiff, the name of the stylesheet
@@ -258,12 +262,6 @@
   <entry dev-build="4" type="fix">
     <description>
        Copy &amp; Paste shortcuts were not working on MacOS
-    </description>
-  </entry>
-
-  <entry dev-build="4" type="fix">
-    <description>
-       Fixed a repainting issue on MacOS in the toolbar when switching between DbExplorer tab and editor tabs
     </description>
   </entry>
 

@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,19 +24,19 @@ import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
-
 /**
  *
  * @author support@sql-workbench.net
  */
-public class TableDeleter 
+public class TableDeleter
 {
+
 	private WbConnection connection;
 	private boolean cancelExecution;
 	private Statement currentStatement;
 	private JobErrorHandler errorHandler;
 	private StatusBar statusDisplay;
-	
+
 	public TableDeleter(WbConnection con)
 	{
 		this.connection = con;
@@ -48,14 +49,14 @@ public class TableDeleter
 
 	/**
 	 * Define a status bar where the progress can be displayed.
-	 * 
+	 *
 	 * @param status
 	 */
 	public void setStatusBar(StatusBar status)
 	{
 		this.statusDisplay = status;
 	}
-	
+
 	/**
 	 * Define an error handler to ask the user for input if anyhting goes wrong.
 	 * If this is not set deleteTableData() will simply stop at the first exception
@@ -79,7 +80,7 @@ public class TableDeleter
 	 * If an error handler is defined and an error occurs, the user will be prompted
 	 * what to do. If the user aborts, deleteTableData() will re-throw the exception
 	 * otherwise the exception will only be logged
-	 * 
+	 *
 	 * @param objectNames the list of tables to be deleted
 	 * @param commitEach true = commit each table, false = one single commit at the end
 	 * @param useTruncate true = use TRUNCATE instead of DELETE (implies commitEach = false)
@@ -91,10 +92,10 @@ public class TableDeleter
 	 * chose to abort due to an error.
 	 *
 	 * @see TableDependencySorter#sortForDelete(java.util.List, boolean)
-	 * @see #setErrorHandler(workbench.interfaces.JobErrorHandler) 
+	 * @see #setErrorHandler(workbench.interfaces.JobErrorHandler)
 	 */
 	public List<TableIdentifier> deleteTableData(List<TableIdentifier> objectNames, boolean commitEach, boolean useTruncate)
-		throws SQLException
+			throws SQLException
 	{
 		this.cancelExecution = false;
 		boolean ignoreAll = false;
@@ -104,7 +105,7 @@ public class TableDeleter
 			useTruncate = false;
 			LogMgr.logWarning("TableDeleterUI.deleteTables()", "Use of TRUNCATE requested, but DBMS does not support truncate. Using DELETE instead.");
 		}
-		
+
 		if (useTruncate)
 		{
 			commitEach = false;
@@ -122,7 +123,7 @@ public class TableDeleter
 			LogMgr.logError("TableDeleterUI.deleteTables()", "Error creating statement", e);
 			throw e;
 		}
-		
+
 		try
 		{
 			this.connection.setBusy(true);
@@ -149,6 +150,7 @@ public class TableDeleter
 
 					if (errorHandler == null)
 					{
+						this.connection.rollback();
 						throw ex;
 					}
 					else if (!ignoreAll)
@@ -220,16 +222,24 @@ public class TableDeleter
 			SqlUtil.closeStatement(currentStatement);
 			this.connection.setBusy(false);
 		}
-		if (this.statusDisplay != null) this.statusDisplay.clearStatusMessage();
-		
+		if (this.statusDisplay != null)
+		{
+			this.statusDisplay.clearStatusMessage();
+		}
+
 		return deletedTables;
 	}
 
 	private void deleteTable(final TableIdentifier table, final boolean useTruncate, final boolean doCommit)
-		throws SQLException
+			throws SQLException
 	{
+		Savepoint sp = null;
 		try
 		{
+			if (connection.getDbSettings().useSavePointForDML())
+			{
+				sp = connection.setSavepoint();
+			}
 			String deleteSql = getDeleteStatement(table, useTruncate);
 			LogMgr.logInfo("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
 			currentStatement.executeUpdate(deleteSql);
@@ -237,14 +247,15 @@ public class TableDeleter
 			{
 				this.connection.commit();
 			}
+			connection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
+			connection.rollback(sp);
 			if (doCommit && !this.connection.getAutoCommit())
 			{
 				this.connection.rollback();
 			}
-			LogMgr.logError("TableDeleterUI.deleteTable()", "Error when deleting table!", e);
 			throw e;
 		}
 	}
@@ -288,5 +299,4 @@ public class TableDeleter
 		}
 		return script;
 	}
-	
 }
