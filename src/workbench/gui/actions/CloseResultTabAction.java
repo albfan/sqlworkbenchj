@@ -37,17 +37,12 @@ public class CloseResultTabAction
 		this.initMenuDefinition("MnuTxtCloseResultTab", KeyStroke.getKeyStroke(KeyEvent.VK_K, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK ));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_DATA);
 		this.setIcon(null);
+		this.setEnabled(panel.getCurrentResult() != null);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		panel.closeCurrentResult();
-	}
-
-	@Override
-	public boolean isEnabled()
-	{
-		return panel.getCurrentResult() != null;
 	}
 
 }

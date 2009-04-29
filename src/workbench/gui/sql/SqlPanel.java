@@ -237,7 +237,7 @@ public class SqlPanel
 	protected OptimizeAllColumnsAction optimizeAllCol;
 	protected OptimizeRowHeightAction optimizeRowHeights;
 	protected AppendResultsAction appendResultsAction;
-
+	protected CloseResultTabAction closeResultAction;
 	protected CheckPreparedStatementsAction checkPreparedAction;
 	protected ClearCompletionCacheAction clearCompletionCache;
 	protected AutoCompletionAction autoCompletion;
@@ -814,9 +814,9 @@ public class SqlPanel
 		this.actions.add(filterAction);
 		this.actions.add(selectionFilterAction);
 		this.actions.add(this.resetFilterAction );
-		CloseResultTabAction closeResult = new CloseResultTabAction(this);
-		closeResult.setCreateMenuSeparator(true);
-		this.actions.add(closeResult);
+		closeResultAction = new CloseResultTabAction(this);
+		closeResultAction.setCreateMenuSeparator(true);
+		this.actions.add(closeResultAction);
 
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
@@ -2127,6 +2127,7 @@ public class SqlPanel
 			this.currentData.updateStatusBar();
 			this.currentData.addPropertyChangeListener("updateTable", this);
 		}
+		this.closeResultAction.setEnabled(currentData != null);
 		updateProxiedActions();
 		checkResultSetActions();
 	}
