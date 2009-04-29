@@ -8,7 +8,67 @@
 		</para>
 	</section>
 	-->
-	
+    
+  <section id="out-of-memory-error">
+    <title>Out of memory errors</title>
+    <para>
+      The memory that is available to the application is limited by
+      the Java virtual machine to ensure that applications don't use all
+      available memory which could potentially make a system unusable.
+    </para>
+    <para>
+      If you retrieve large resultsets from the database, you may receive
+      an error message indicating that the application does not have
+      enough memory to store the data.
+    </para>
+    <para>
+      Please refer to <link linkend="install-increase-memory">Increasing the memory</link> for details
+      on how to increase the memory that is available to &wb-productname;
+    </para>
+  </section>
+  <section id="no-ddraw">
+    <title>Display problems when running under Windows&reg;</title>
+
+    <para>
+      If you experience problems when running &wb-productname; (or
+      other Java/Swing based applications) on the Windows&reg; platform, this
+      might be due to problems with the graphics driver and/or the
+      DirectDraw installation. If upgrading the graphics driver or the
+      DirectDraw/DirectX version is not an option (or does not solve the
+      problem), try to run SQL Workbench with the direct draw feature
+      turned off:
+    </para>
+
+    <programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar</programlisting>
+
+    <para>
+      When using the exe launcher, you can use the following syntax:
+    </para>
+
+    <programlisting>SQLWorkbench -noddraw</programlisting>
+
+    <para>
+      If you run &wb-productname; through a program that enables remote
+      access to a Windows&reg; workstations (PC-Duo, VNC, NetMeeting, etc),
+      you may need to disable the use of DirectDraw for Java as well.
+    </para>
+
+  </section>
+
+  <section id="hi-cpu-usage">
+    <title>High CPU usage when executing statements</title>
+
+    <para>
+      If you experience a high CPU usage when running a SQL statement,
+      this might be caused by a combination of the graphics driver, the JDK and
+      the Windows&reg; version you are using. This is usually caused by the animated
+      icon which indicates a running statement (the yellow smiley). This animation can
+      be turned off in <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
+      See <xref linkend="option-animated-icon"/> for details. A different
+      icon (not animated) will be used if that option is disabled.
+    </para>
+  </section>
+  
 	<section id="oracle-problems">
 		<title>Oracle Problems</title>
 
@@ -276,48 +336,5 @@ workbench.db.postgresql.sql.usesavepoint=true
 
 	</section>
 
-	<section id="no-ddraw">
-		<title>Display problems when running under Windows&reg;</title>
-
-		<para>
-			If you experience problems when running &wb-productname; (or
-			other Java/Swing based applications) on the Windows&reg; platform, this
-			might be due to problems with the graphics driver and/or the
-			DirectDraw installation. If upgrading the graphics driver or the
-			DirectDraw/DirectX version is not an option (or does not solve the
-			problem), try to run SQL Workbench with the direct draw feature
-			turned off:
-		</para>
-
-		<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar</programlisting>
-
-		<para>
-			When using the exe launcher, you can use the following syntax:
-		</para>
-
-		<programlisting>SQLWorkbench -noddraw</programlisting>
-
-		<para>
-			If you run &wb-productname; through a program that enables remote
-			access to a Windows&reg; workstations (PC-Duo, VNC, NetMeeting, etc),
-			you may need to disable the use of DirectDraw for Java as well.
-		</para>
-
-	</section>
-
-	<section id="hi-cpu-usage">
-		<title>High CPU usage when executing statements</title>
-
-		<para>
-			If you experience a high CPU usage when running a SQL statement,
-			this might be caused by a combination of the graphics driver, the JDK and
-			the Windows&reg; version you are using. This is usually caused by the animated
-			icon which indicates a running statement (the yellow smiley). This animation can
-			be turned off in <menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>
-			See <xref linkend="option-animated-icon"/> for details. A different
-			icon (not animated) will be used if that option is disabled.
-		</para>
-	</section>
-	
 </section>
 	

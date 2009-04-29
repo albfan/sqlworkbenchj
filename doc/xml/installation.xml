@@ -146,8 +146,10 @@
 		</para></note>
 
 		<para>
-			By default the launcher increases the maximum JVM heap size to 128 MB.
+			By default the launcher increases the maximum JVM heap size to 256MB.
 			If you need more heap memory, you	need to pass the appropriate JVM parameter to the launcher.
+      Please refer to <link linkend="install-increase-memory">Increasing the memory</link> for details
+      on how to increase the memory that is available to &wb-productname;
 		</para>
 
 		<section id="launcher-jdk-search">
@@ -378,10 +380,9 @@
 	<section id="install-increase-memory">
 		<title>Increasing the memory available to the application</title>
 		<para>
-			&wb-productname; is a Java application and thus runs inside a
-			so-called virtual machine (JVM). The virtual machine limits the memory
-			independently from the installed memory that is available to the operating
-			system.
+			&wb-productname; is a Java application and thus runs inside a virtual machine (JVM).
+      The virtual machine limits the memory of the application independently from the installed
+      memory that is available to the operating system.
 		</para>
 		<para>
 			&wb-productname; reads the data that is returned by a <literal>SELECT</literal>
@@ -404,10 +405,13 @@
 			want to use the launcher, then you need to pass this parameter directly to the JVM
 		</para>
 		<para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
+    <para>
+      If you are using the supplied shell scripts to start &wb-productname;, you can
+      edit the scripts to change the parameter that sets the maximum memory to 256MB.
+    </para>
 		<para>
 			The default heap size for your Java environment depends on your operating
-			system and your JDK implementation. Most JDKs use a default of 96MB as the
-			default maximum heap size.
+			system and your JDK implementation. Most JDKs use a default of 64MB.
 		</para>
 		<note><para>
 			The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
