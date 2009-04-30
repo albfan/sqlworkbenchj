@@ -86,6 +86,7 @@ import workbench.gui.actions.CopyAsTextAction;
 import workbench.gui.actions.DeleteDependentRowsAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.DisplayDataFormAction;
+import workbench.gui.actions.SqlPanelReloadAction;
 import workbench.gui.actions.ExecuteAllAction;
 import workbench.gui.actions.ExecuteCurrentAction;
 import workbench.gui.actions.ExecuteSelAction;
@@ -241,6 +242,7 @@ public class SqlPanel
 	protected CheckPreparedStatementsAction checkPreparedAction;
 	protected ClearCompletionCacheAction clearCompletionCache;
 	protected AutoCompletionAction autoCompletion;
+	protected SqlPanelReloadAction reloadAction;
 
 	protected WbMenu copySelectedMenu;
 	protected ToggleAutoCommitAction toggleAutoCommit;
@@ -621,12 +623,15 @@ public class SqlPanel
 		this.duplicateRow = new CopyRowAction(null);
 		this.selectKeys = new SelectKeyColumnsAction(null);
 		this.showFormAction = new DisplayDataFormAction(null);
+		reloadAction = new SqlPanelReloadAction(this);
 
 		this.actions.add(this.showFormAction);
 		this.actions.add(this.selectKeys);
 		this.actions.add(this.updateAction);
 		this.actions.add(this.insertRow);
 		this.actions.add(this.duplicateRow);
+		this.actions.add(this.reloadAction);
+		deleteRow.setCreateMenuSeparator(true);
 		this.actions.add(this.deleteRow);
 		this.actions.add(this.deleteDependentRow);
 
@@ -3059,6 +3064,7 @@ public class SqlPanel
 
 				findDataAgainAction.setEnabled(findNext);
 				copySelectedMenu.setEnabled(hasResult);
+				reloadAction.checkEnabled();
 			}
 		});
 	}

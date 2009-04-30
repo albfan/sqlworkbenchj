@@ -18,7 +18,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeListener;
 import workbench.gui.actions.CloseResultTabAction;
-import workbench.gui.actions.DwPanelReloadAction;
+import workbench.gui.actions.SqlPanelReloadAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ShowSourceQueryAction;
 import workbench.resource.ResourceMgr;
@@ -84,7 +84,7 @@ public class ResultTabHandler
 		menu.add(new RenameTabAction(this));
 		menu.add(new ShowSourceQueryAction(client));
 		menu.add(new CloseResultTabAction(client));
-		menu.add(new DwPanelReloadAction(client));
+		menu.add(new SqlPanelReloadAction(client));
 		return menu;
 	}
 

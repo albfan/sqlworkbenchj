@@ -1,12 +1,12 @@
 /*
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 
 package workbench.gui.actions;
@@ -14,36 +14,45 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 import workbench.gui.sql.DwPanel;
 import workbench.gui.sql.SqlPanel;
-import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class DwPanelReloadAction
+public class SqlPanelReloadAction
 	extends WbAction
 {
 	private SqlPanel client;
 
-	public DwPanelReloadAction(SqlPanel panel)
+	public SqlPanelReloadAction(SqlPanel panel)
 	{
-		client = panel;
-		initMenuDefinition("TxtReload");
+		initMenuDefinition("TxtReloadResult");
+		setMenuItemName(ResourceMgr.MNU_TXT_DATA);
+		setIcon("Refresh");
+		setClient(panel);
 	}
 
-	@Override
-	public boolean isEnabled()
+	public void setClient(SqlPanel panel)
 	{
+		client = panel;
+		checkEnabled();
+	}
+	
+	public void checkEnabled()
+	{
+		boolean enable = false;
 		if (getSql() != null)
 		{
 			DwPanel dw =  client.getCurrentResult();
-			if (dw == null) return false;
-			DataStore ds = dw.getDataStore();
-			if (ds == null) return false;
-			return ds.getOriginalConnection() != null;
+			if (dw != null)
+			{
+				DataStore ds = dw.getDataStore();
+				enable = (ds != null ? ds.getOriginalConnection() != null : false);
+			}
 		}
-		return false;
+		setEnabled(enable);
 	}
 
 	protected String getSql()
