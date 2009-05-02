@@ -34,7 +34,7 @@ public class GuiSettings
 	
 	public static int getDefaultFormFieldWidth()
 	{
-		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldwidth", 50);
+		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldwidth", 30);
 	}
 
 	public static void setDefaultFormFieldWidth(int chars)

@@ -25,7 +25,7 @@ public class ViewMessageLogAction
 	extends WbAction
 {
 	private SqlPanel panel;
-	
+
 	/**
 	 * Creates a new instance of ViewMessageLogAction
 	 */
@@ -33,13 +33,13 @@ public class ViewMessageLogAction
 	{
 		super();
 		this.panel = p;
-		this.initMenuDefinition("MnuTxtSelectMsgLog", KeyStroke.getKeyStroke(KeyEvent.VK_F8,0));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.initMenuDefinition("MnuTxtSelectMsgLog");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		panel.showLogPanel();
 	}
-	
+
 }

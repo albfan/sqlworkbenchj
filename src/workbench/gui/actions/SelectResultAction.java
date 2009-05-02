@@ -12,10 +12,6 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-
-import javax.swing.KeyStroke;
-
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 
@@ -23,7 +19,7 @@ import workbench.resource.ResourceMgr;
  *	Action to select the result display in the SqlPanel
  *	@author  support@sql-workbench.net
  */
-public class SelectResultAction 
+public class SelectResultAction
 	extends WbAction
 {
 	private SqlPanel client;
@@ -32,8 +28,8 @@ public class SelectResultAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtSelectResult", KeyStroke.getKeyStroke(KeyEvent.VK_F6,0));
-		this.setMenuItemName(ResourceMgr.MNU_TXT_EDIT);
+		this.initMenuDefinition("MnuTxtSelectResult");
+		this.setMenuItemName(ResourceMgr.MNU_TXT_VIEW);
 	}
 
 	public void executeAction(ActionEvent e)

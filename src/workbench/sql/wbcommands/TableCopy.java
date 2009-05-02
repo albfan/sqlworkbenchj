@@ -113,6 +113,9 @@ public class TableCopy
 			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable, ignoreDropError);
 		}
 
+		boolean useSp = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, targetConnection.getDbSettings().useSavepointForImport());
+		copier.setUseSavepoint(useSp);
+
 		boolean doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
 		copier.setDoDeleteSync(doSyncDelete);
 

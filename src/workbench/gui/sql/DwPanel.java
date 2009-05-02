@@ -580,6 +580,16 @@ public class DwPanel
 		return currentSort;
 	}
 
+	public void runCurrentSql(boolean respectMaxRows)
+		throws SQLException, Exception
+	{
+		DataStore ds = getDataStore();
+		if (ds == null) return;
+		String sql = ds.getGeneratingSql();
+		if (sql == null) return;
+		runQuery(sql, respectMaxRows);
+	}
+	
 	/**
 	 *	Execute the given SQL statement and display the result.
 	 */

@@ -80,6 +80,7 @@ public class WbImport
 	public static final String ARG_COL_WIDTHS = "columnWidths";
 	public static final String ARG_IGNORE_OWNER = "ignoreOwner";
 	public static final String ARG_EXCLUDE_FILES = "excludeFiles";
+	public static final String ARG_USE_SAVEPOINT = "useSavepoint";
 
 	private DataImporter imp;
 
@@ -99,6 +100,7 @@ public class WbImport
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addTableStatements(cmdLine);
 		CommonArgs.addTransactionControL(cmdLine);
+		CommonArgs.addImportModeParameter(cmdLine);
 
 		cmdLine.addArgument(ARG_TYPE, StringUtil.stringToList("text,xml"));
 		cmdLine.addArgument(ARG_UPDATE_WHERE);
@@ -107,7 +109,6 @@ public class WbImport
 		cmdLine.addArgument(ARG_QUOTE);
 		cmdLine.addArgument(ARG_CONTAINSHEADER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_FILECOLUMNS);
-		cmdLine.addArgument(ARG_MODE, StringUtil.stringToList("insert;update;insert,update;update,insert", ";"));
 		cmdLine.addArgument(ARG_KEYCOLUMNS);
 		cmdLine.addArgument(CommonArgs.ARG_DELETE_TARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
@@ -132,6 +133,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_COL_WIDTHS);
 		cmdLine.addArgument(ARG_EXCLUDE_FILES);
 		cmdLine.addArgument(ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		ModifierArguments.addArguments(cmdLine);
 	}
 
@@ -247,6 +249,8 @@ public class WbImport
 
 		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, getContinueDefault());
 		imp.setContinueOnError(continueOnError);
+
+		imp.setUseSavepoint(cmdLine.getBoolean(ARG_USE_SAVEPOINT, currentConnection.getDbSettings().useSavepointForImport()));
 
 		String table = cmdLine.getValue(ARG_TARGETTABLE);
 		String schema = cmdLine.getValue(ARG_TARGET_SCHEMA);

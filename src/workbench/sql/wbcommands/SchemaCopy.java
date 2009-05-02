@@ -36,10 +36,10 @@ import workbench.util.MessageBuffer;
 
 /**
  * Handles a WbCopy call for a whole schema.
- * 
+ *
  * @author support@sql-workbench.net
  */
-public class SchemaCopy 
+public class SchemaCopy
 	implements CopyTask
 {
 	private WbConnection sourceConnection;
@@ -51,20 +51,21 @@ public class SchemaCopy
 	private boolean dropTable;
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
+	private boolean useSavepoint;
 
 	private List<TableIdentifier> sourceTables;
 	private Map<String, TableIdentifier> tableMap;
-	
+
 	private RowActionMonitor rowMonitor;
 	private boolean cancel = false;
 	private boolean doSyncDelete = false;
 	private String cmdLineMode = null;
-	
+
 	public SchemaCopy(List<TableIdentifier> tables)
 	{
 		this.sourceTables = tables;
 	}
-	
+
 	public void copyData()
 		throws SQLException, Exception
 	{
@@ -74,13 +75,13 @@ public class SchemaCopy
 		{
 			this.sortTablesForInsert();
 		}
-		
+
 		int currentTable = 0;
 		int count = sourceTables.size();
-		
+
 		RowDataReceiver receiver = this.copier.getReceiver();
 		receiver.setTableCount(count);
-		
+
 		try
 		{
 			copier.beginMultiTableCopy(targetConnection);
@@ -105,6 +106,7 @@ public class SchemaCopy
 				this.messages.appendNewLine();
 
 				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTable, dropTable, ignoreDropError);
+				copier.setUseSavepoint(useSavepoint);
 				copier.startCopy();
 
 				this.messages.append(copier.getMessageBuffer());
@@ -121,7 +123,7 @@ public class SchemaCopy
 		{
 			copier.endMultiTableCopy();
 		}
-		
+
 		if (doSyncDelete)
 		{
 			try
@@ -137,7 +139,7 @@ public class SchemaCopy
 				throw e;
 			}
 		}
-		
+
 	}
 
 	private void mapTables()
@@ -164,7 +166,7 @@ public class SchemaCopy
 			tableMap.put(table.getTableName(), targetTable);
 		}
 	}
-	
+
 	private void deleteRows()
 		throws SQLException, IOException
 	{
@@ -172,7 +174,7 @@ public class SchemaCopy
 		{
 			sortTablesForDelete();
 		}
-		
+
 		for (TableIdentifier sourceTable : sourceTables)
 		{
 			if (this.cancel)
@@ -182,7 +184,7 @@ public class SchemaCopy
 
 			TableIdentifier targetTable = this.targetConnection.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()));
 			if (targetTable == null) continue;
-			
+
 			TableDeleteSync sync = new TableDeleteSync(targetConnection, sourceConnection);
 			sync.setTableName(sourceTable, targetTable);
 			sync.setBatchSize(copier.getBatchSize());
@@ -198,12 +200,12 @@ public class SchemaCopy
 	{
 		sortTables(false);
 	}
-	
+
 	private void sortTablesForInsert()
 	{
 		sortTables(true);
 	}
-	
+
 	private void sortTables(boolean forInsert)
 	{
 		try
@@ -213,16 +215,16 @@ public class SchemaCopy
 				this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 				this.rowMonitor.setCurrentObject(ResourceMgr.getString("MsgFkDeps"), -1, -1);
 			}
-	
-			// When copying between databases, the schema in which the 
+
+			// When copying between databases, the schema in which the
 			// tables reside can be different. The tables from the commandline
-			// are retrieved from the source database and will contain the schema 
-			// information from that one. 
+			// are retrieved from the source database and will contain the schema
+			// information from that one.
 			// when sorting the tables, it is necessary to retrieve the table information
 			// from the target database. So we need to replace schema information
 			String targetSchema = this.targetConnection.getMetadata().getSchemaToUse();
 			final String nullSchemaMarker = "-$NULL-SCHEMA$-";
-			
+
 			Map<String, String> tableSchemas = new HashMap<String, String>(this.sourceTables.size());
 			for (TableIdentifier tbl : sourceTables)
 			{
@@ -231,7 +233,7 @@ public class SchemaCopy
 				tableSchemas.put(tbl.getTableName(), schema);
 				tbl.setSchema(targetSchema);
 			}
-			
+
 			TableDependencySorter sorter = new TableDependencySorter(targetConnection);
 			List<TableIdentifier> sorted = null;
 			if (forInsert)
@@ -264,13 +266,13 @@ public class SchemaCopy
 			LogMgr.logError("SchemaCopy.sortTables()", "Error when checking FK dependencies", e);
 		}
 	}
-	
+
 	public boolean init(WbConnection source, WbConnection target, StatementRunnerResult result, ArgumentParser cmdLine, RowActionMonitor monitor)
 		throws SQLException
 	{
 		this.sourceConnection = source;
 		this.targetConnection = target;
-		
+
 		ArgumentParser arguments = cmdLine;
 
 		DeleteType deleteTarget = CommonArgs.getDeleteType(cmdLine);
@@ -282,7 +284,7 @@ public class SchemaCopy
 		this.copier = new DataCopier();
 
 		this.rowMonitor = monitor;
-		
+
 		cmdLineMode = cmdLine.getValue(CommonArgs.ARG_IMPORT_MODE);
 		if (!this.copier.setMode(cmdLineMode))
 		{
@@ -290,12 +292,12 @@ public class SchemaCopy
 			result.setFailure();
 			return false;
 		}
-		
+
 		copier.setPerTableStatements(new TableStatements(cmdLine));
 		copier.setTransactionControl(cmdLine.getBoolean(CommonArgs.ARG_TRANS_CONTROL, true));
-		
+
 		checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS);
-		
+
 		CommonArgs.setProgressInterval(copier, arguments);
 		CommonArgs.setCommitAndBatchParams(copier, arguments);
 		copier.setContinueOnError(continueOnError);
@@ -304,10 +306,12 @@ public class SchemaCopy
 		this.doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
 		mapTables();
 
+		useSavepoint = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, target.getDbSettings().useSavepointForImport());
+
 		if (checkDependencies && !doSyncDelete)
 		{
 			List<TableIdentifier> targetTables = new ArrayList<TableIdentifier>(tableMap.values());
-			
+
 			// The table list is needed if the -deleteTarget=true was specified
 			// and checkDependencies. In that case, all target tables must be deleted
 			// by the importer before starting the copy process.
@@ -334,5 +338,5 @@ public class SchemaCopy
 			this.copier.cancel();
 		}
 	}
-	
+
 }

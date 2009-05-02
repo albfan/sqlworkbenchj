@@ -22,7 +22,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class SelectEditorAction extends WbAction
+public class SelectEditorAction
+	extends WbAction
 {
 	private SqlPanel client;
 

@@ -111,6 +111,11 @@ public class DataCopier
 		this.importer.beginMultiTable();
 	}
 
+	public void setUseSavepoint(boolean flag)
+	{
+		if (importer != null) importer.setUseSavepoint(flag);
+	}
+	
 	public void endMultiTableCopy()
 	{
 		this.importer.endMultiTable();

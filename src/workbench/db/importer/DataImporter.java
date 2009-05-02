@@ -165,18 +165,33 @@ public class DataImporter
 	{
 		this.dbConn = aConn;
 		if (dbConn == null) return;
-		this.useSavepoint = this.dbConn.getDbSettings().useSavepointForImport();
-		this.useSavepoint = this.useSavepoint && !this.dbConn.getAutoCommit();
-		if (useSavepoint && !this.dbConn.supportsSavepoints())
-		{
-			LogMgr.logWarning("DataImporter.setConnection", "A savepoint should be used for each statement but the driver does not support savepoints!");
-			this.useSavepoint = false;
-		}
+		
 		this.checkRealClobLength = this.dbConn.getDbSettings().needsExactClobLength();
 		this.isOracle = this.dbConn.getMetadata().isOracle();
 		this.useSetNull = this.dbConn.getDbSettings().useSetNull();
 		this.useSetObjectWithType = this.dbConn.getDbSettings().getUseTypeWithSetObject();
 	}
+
+	public void setUseSavepoint(boolean flag)
+	{
+
+		this.useSavepoint = flag;
+		if (dbConn != null)
+		{
+			// no need to use a savepoint with autocommit
+			if (this.dbConn.getAutoCommit())
+			{
+				useSavepoint = false;
+			}
+			if (useSavepoint && !this.dbConn.supportsSavepoints())
+			{
+				LogMgr.logWarning("DataImporter.setConnection", "A savepoint should be used for each statement but the driver does not support savepoints!");
+				this.useSavepoint = false;
+			}
+		}
+		LogMgr.logInfo("DataImporter.setConnection()", "Using savepoints for DML: " + useSavepoint);
+	}
+
 
 	private boolean supportsBatch()
 	{

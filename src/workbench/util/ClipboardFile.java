@@ -20,20 +20,20 @@ import java.io.IOException;
 public class ClipboardFile
 	extends File
 {
-	
+
 	private String buffer;
-	
+
 	public ClipboardFile(String contents)
 	{
 		super("Clipboard");
 		buffer = contents;
 	}
 
-	public String getContents() 
+	public String getContents()
 	{
 		return this.buffer;
 	}
-	
+
 	public boolean canRead() { return true; }
 	public boolean canWrite() { return false; }
 	public boolean delete() { return false; }
@@ -47,19 +47,19 @@ public class ClipboardFile
 	public File getParentFile() { return null; }
 	public String getPath() { return getAbsolutePath(); }
 
-	public String getCanonicalPath() 
+	public String getCanonicalPath()
 		throws IOException
-	{ 
-		return getAbsolutePath(); 
+	{
+		return getAbsolutePath();
 	}
-	
-	public File getCanonicalFile() 
+
+	public File getCanonicalFile()
 		throws IOException
 	{
 		return this;
 	}
 
-	public boolean createNewFile() 
+	public boolean createNewFile()
 		throws IOException
 	{
 		return false;
@@ -68,28 +68,16 @@ public class ClipboardFile
 	public int compareTo(File pathname) { return -1; }
 	public boolean equals(Object obj) { return false; }
 
-	public long length() 
+	public long length()
 	{
 		if (this.buffer == null) return 0;
 		return this.buffer.length();
 	}
-	
+
 	public int hashCode()
 	{
 		if (buffer == null) return 0;
 		return buffer.hashCode();
 	}
 
-	public static void main(String[] args)
-	{
-		try
-		{
-			ClipboardFile f = new ClipboardFile("Bla");
-			ZipUtil.isZipFile(f);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
-	}
 }

@@ -190,14 +190,26 @@
 								even if one statement fails. If set to <literal>false</literal> the copy process
 								will be halted on the first error. The default value is <literal>false</literal>.
 							</para>
+              <para>
+                With PostgreSQL <literal>continueOnError</literal> will only work, if the use of
+                savepoints is enabled using <literal>-useSavepoint=true</literal>.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-useSavepoint</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
-								With PostgreSQL <literal>continueOnError</literal> will only work, if the use of
-								savepoints is enabled. This can be done using by setting the property
-								<literal>workbench.db.postgresql.import.usesavepoint=true</literal> in
-								in the configuration file <literal>workbench.settings</literal>.
-								If this is enabled, then each INSERT (or UPDATE) statement will be
-								"wrapped" between savepoints so that a statement error can be recovered.
+								Controls if &wb-productname; guards every insert or update statement
+                with a savepoint to recover from individual error during import,
+                when <literal>continueOnError</literal> is set to true.
 							</para>
+              <para>
+                Using a savepoint for each DML statement can drastically reduce the performance
+                of the import.
+              </para>
 						</entry>
 					</row>
 
@@ -379,7 +391,7 @@ Please check <link linkend="command-copy-query">Copying data based on a SQL quer
 								parameter is not necessary.
 							</para>
 							<para>
-								If you do specify this parameter, note that this 
+								If you do specify this parameter, note that this
 								is <emphasis role="bold">not</emphasis> a column mapping.
 								It only lists the columns in the correct order .
 							</para>

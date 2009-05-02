@@ -166,7 +166,7 @@ public class MainWindow
 	private AssignWorkspaceAction assignWorkspaceAction;
 	private NextTabAction nextTab;
 	private PrevTabAction prevTab;
-	
+
 	private boolean tabRemovalInProgress;
 
 	// will indicate a connect or disconnect in progress
@@ -181,14 +181,14 @@ public class MainWindow
 
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
-	
+
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
 		this.windowId = ++instanceCount;
 
 		sqlTab = new WbTabbedPane();
-		
+
 		String policy = Settings.getInstance().getProperty("workbench.gui.sqltab.policy", "wrap");
 		if ("wrap".equalsIgnoreCase(policy))
 		{
@@ -210,14 +210,14 @@ public class MainWindow
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
-		
+
 		updateTabPolicy();
 		this.addWindowListener(this);
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
 		sqlTab.enableDragDropReordering(this);
-		
+
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_SHOW_TOOLBAR,
 			Settings.PROPERTY_SHOW_TAB_INDEX,
@@ -414,7 +414,7 @@ public class MainWindow
 		menu.addSeparator();
 		menu.add(nextTab.getMenuItem());
 		menu.add(prevTab.getMenuItem());
-		
+
 		menu = new WbMenu(ResourceMgr.getString(ResourceMgr.MNU_TXT_DATA));
 		menu.setName(ResourceMgr.MNU_TXT_DATA);
 		menu.setVisible(false);
@@ -577,7 +577,7 @@ public class MainWindow
 				}
 			});
 		}
-		
+
 		WbSwingUtilities.repaintLater(this);
 	}
 
@@ -965,7 +965,7 @@ public class MainWindow
 
 		this.checkMacroMenuForPanel(anIndex);
 		forceRedraw();
-		
+
 		SwingUtilities.invokeLater(new Runnable()
 		{
 			public void run()
@@ -1927,7 +1927,7 @@ public class MainWindow
 				MainPanel p = getSqlPanel(0);
 				p.reset();
 				resetTabTitles();
-				
+
 				// make sure the toolbar and menus are updated correctly
 				updateCurrentTab(0);
 			}
@@ -2200,6 +2200,13 @@ public class MainWindow
 		String realFilename = FileDialogUtil.replaceConfigDir(filename);
 		WbFile f = new WbFile(realFilename);
 
+		// If the workspace is not defined with a directory, assume
+		// the config dir. Otherwise the versioned backup does not work.
+		if (f.getParent() == null || !f.isAbsolute())
+		{
+			f = new WbFile(Settings.getInstance().getConfigDir(), realFilename);
+		}
+
 		if (Settings.getInstance().getCreateWorkspaceBackup())
 		{
 			int maxVersions = Settings.getInstance().getMaxWorkspaceBackup();
@@ -2433,7 +2440,7 @@ public class MainWindow
 	{
 		return this;
 	}
-	
+
 	public boolean canRenameTab()
 	{
 		return (this.currentWorkspaceFile != null);

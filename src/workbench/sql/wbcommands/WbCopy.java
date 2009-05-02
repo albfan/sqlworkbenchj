@@ -88,6 +88,7 @@ public class WbCopy
 
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 	}
 
 	public String getVerb() { return VERB; }
@@ -209,7 +210,7 @@ public class WbCopy
 				result.setFailure();
 				return result;
 			}
-
+			
 			copier.copyData();
 			if (copier.isSuccess())
 			{

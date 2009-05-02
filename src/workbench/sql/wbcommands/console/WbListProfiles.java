@@ -14,8 +14,12 @@ package workbench.sql.wbcommands.console;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
+import workbench.db.ProfileGroupMap;
+import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.CollectionBuilder;
 
 /**
  *
@@ -48,10 +52,23 @@ public class WbListProfiles
 		throws SQLException, Exception
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		List<String> profiles = ConnectionMgr.getInstance().getProfileKeys();
-		for (String name : profiles)
+
+		List<ConnectionProfile> prof = CollectionBuilder.arrayList();
+
+		// getProfiles() returns an unmodifiable List, but ProfileGroupMap
+		// tries to sort the list...
+		prof.addAll(ConnectionMgr.getInstance().getProfiles());
+		ProfileGroupMap map = new ProfileGroupMap(prof);
+
+		String userTxt = ResourceMgr.getString("TxtUser");
+		for (String group : map.keySet())
 		{
-			result.addMessage(name);
+			List<ConnectionProfile> profiles = map.get(group);
+			result.addMessage(group);
+			for (ConnectionProfile profile : profiles)
+			{
+				result.addMessage("  " + profile.getName() + ", " + userTxt + "=" + profile.getUsername() + ", URL=" + profile.getUrl());
+			}
 		}
 		result.setSuccess();
 		return result;

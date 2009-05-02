@@ -921,7 +921,7 @@
 			</para>
 
 			<programlisting>v_person=person_id
-	v_data=id1,id2</programlisting>
+v_data=id1,id2</programlisting>
 
 			<para>
 				will define a primary key for the view <literal>v_person</literal> and one for

@@ -11,6 +11,7 @@
  */
 package workbench.gui;
 
+import javax.swing.Action;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
@@ -32,6 +33,7 @@ import org.netbeans.jemmy.operators.Operator.DefaultStringComparator;
 import org.netbeans.jemmy.operators.Operator.StringComparator;
 import workbench.db.ConnectionMgr;
 import workbench.gui.actions.AppendResultsAction;
+import workbench.gui.actions.SqlPanelReloadAction;
 import workbench.gui.sql.SqlPanel;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -255,7 +257,7 @@ public class MainWindowTest
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
 
 		// Copy as text menu item
-		for (int i=9; i < 14; i++)
+		for (int i=11; i < 16; i++)
 		{
 			JMenuItem item = (JMenuItem)dataMenu.getMenuComponent(i);
 			JMenuItemOperator op = new JMenuItemOperator(item);
@@ -295,6 +297,16 @@ public class MainWindowTest
 		testCopyActions(mainMenu);
 
 		JMenuOperator dataMenu = new JMenuOperator(mainMenu.getMenu(3));
+		JMenuItem reloadItem = (JMenuItem)dataMenu.getMenuComponent(5);
+		Action a = reloadItem.getAction();
+		assertTrue(a instanceof SqlPanelReloadAction);
+		assertTrue(a.isEnabled());
+
+		sqlPanel.showLogPanel();
+		assertFalse(a.isEnabled());
+
+		sqlPanel.showResultPanel(0);
+
 		JMenuItem saveItem = (JMenuItem)dataMenu.getMenuComponent(2);
 		JMenuItemOperator save = new JMenuItemOperator(saveItem);
 		assertFalse(save.isEnabled());

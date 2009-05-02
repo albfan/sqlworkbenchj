@@ -129,6 +129,15 @@ public class Settings
 		this.removeObsolete();
 	}
 
+	public static boolean isJava5()
+	{
+		String version = System.getProperty("java.version", System.getProperty("java.runtime.version"));
+		String[] vp = version.split("\\.");
+		
+		int minorVersion = StringUtil.getIntValue(vp[1], 5);
+		return minorVersion == 5;
+	}
+
 	/**
 	 * Only to be used in JUnit tests!
 	 */

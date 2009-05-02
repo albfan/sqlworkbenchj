@@ -51,10 +51,10 @@ public class WbListProfilesTest
 		assertTrue(result.isSuccess());
 
 		String msg = result.getMessageBuffer().toString();
-		//System.out.println("****\n" + msg);
+//		System.out.println("****\n" + msg);
 		String[] lines = msg.split(StringUtil.REGEX_CRLF);
-		assertEquals(1, lines.length);
-		//assertEquals("{Default group}/New profile", lines[0]);
-		assertEquals("{Default group}/TestProfile", lines[0]);
+		assertEquals(2, lines.length);
+		assertEquals("Default group", lines[0]);
+		assertEquals("  TestProfile, User=user, URL=jdbc:test", lines[1]);
 	}
 }

@@ -646,6 +646,11 @@ public final class WbManager
 		boolean autoSelect = Settings.getInstance().getShowConnectDialogOnStartup();
 		final boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
 
+		if (Settings.getInstance().getBoolProperty("workbench.warn.java5", false) && Settings.isJava5())
+		{
+			WbSwingUtilities.showErrorMessageKey(main, "ErrWrongJava");
+		}
+
 		// no connection? then display the connection dialog
 		if (!connected && autoSelect)
 		{
@@ -810,47 +815,29 @@ public final class WbManager
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
-
+	
 	public void runGui()
 	{
-//		WbSplash splash = null;
-//		if (GuiSettings.getShowSplash())
-//		{
-//			splash = new WbSplash();
-//			splash.setVisible(true);
-//		}
+		this.initUI();
 
-//		try
-//		{
-			this.initUI();
+		boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
+		boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
 
-			boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
-			boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
+		if (pumper)
+		{
+			new DataPumper().showWindow();
+		}
+		else if (explorer)
+		{
+			DbExplorerWindow.showWindow();
+		}
+		else
+		{
+			openNewWindow(true);
+		}
 
-			if (pumper)
-			{
-				new DataPumper().showWindow();
-			}
-			else if (explorer)
-			{
-				DbExplorerWindow.showWindow();
-			}
-			else
-			{
-				openNewWindow(true);
-			}
-
-			UpdateCheck upd = new UpdateCheck();
-			upd.startUpdateCheck();
-//		}
-//		finally
-//		{
-//			if (splash != null)
-//			{
-//				splash.setVisible(false);
-//				splash.dispose();
-//			}
-//		}
+		UpdateCheck upd = new UpdateCheck();
+		upd.startUpdateCheck();
 	}
 
 	// Package visible for testing purposes

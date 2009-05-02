@@ -5,6 +5,13 @@
 
   <entry dev-build="12" type="fix">
     <description>
+       Versioned backup of a profile's workspace did not work, if the workspace was not specified with a full
+       name in the connection profile.
+    </description>
+  </entry>
+
+  <entry dev-build="12" type="fix">
+    <description>
        Fixed a repainting issue on MacOS in the toolbar when switching between DbExplorer tab and editor tabs
     </description>
   </entry>

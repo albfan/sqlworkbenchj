@@ -91,8 +91,15 @@ public class FileVersioner
 	{
 		if (target == null) return;
 		if (!target.exists()) return;
+
 		int nextVersion = findNextIndex(target);
 		File dir = getTargetDir(target);
+		if (dir == null)
+		{
+			LogMgr.logWarning("FileVersioner.createBackup()", "Could not determine target directory. Using current directory");
+			dir = new File(".");
+		}
+		
 		if (!dir.exists())
 		{
 			if (!dir.mkdirs())
@@ -108,7 +115,7 @@ public class FileVersioner
 	private File getTargetDir(File target)
 	{
 		if (backupDir != null) return backupDir;
-		return target.getParentFile();
+		return target.getAbsoluteFile().getParentFile();
 	}
 
 	private int findNextIndex(File target)

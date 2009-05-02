@@ -330,7 +330,16 @@ workbench.db.postgresql.sql.usesavepoint=true
 			</para>
 			<programlisting>workbench.db.postgresql.import.usesavepoint=true</programlisting>
       <para>
-        to enable the usage of savepoints during imports.
+        to enable the usage of savepoints during imports. This setting also affects
+        the <literal>WbCopy</literal> command.
+      </para>
+      <para>
+        You can also use the parameter <literal>-useSavepoint</literal> for the
+        <literal>WbImport</literal> and <literal>WbCopy</literal> commands to control the use of
+        savepoints for each import.
+      </para>
+      <para>
+        Using savepoints can slow down the import substantially.
       </para>
 		</section>
 

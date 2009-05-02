@@ -20,7 +20,7 @@
 			external file will be loaded as well.
 		</para>
 		<note><para>
-			If you want to run very large SQL scripts (e.g. over 100MB) it is recommended
+			If you want to run very large SQL scripts (e.g. over 15MB) it is recommended
 			to execute them using <link linkend="command-wbinclude">WbInclude</link> rather
 			than loading them completely into the editor. <literal>WbInclude</literal>
 			will not load the script into memory, thus you can even run scripts that would not fit into memory.

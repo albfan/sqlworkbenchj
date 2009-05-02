@@ -645,10 +645,13 @@ public class SqlPanel
 		SelectEditorAction sea = new SelectEditorAction(this);
 		sea.setCreateMenuSeparator(true);
 		this.actions.add(sea);
-		this.actions.add(new SelectResultAction(this));
 		this.actions.add(new SelectMaxRowsAction(this.statusBar));
-		this.actions.add(new ViewMessageLogAction(this));
 		this.actions.add(new ClearMessagesAction(this));
+
+		SelectResultAction selectResult = new SelectResultAction(this);
+		selectResult.setCreateMenuSeparator(true);
+		this.actions.add(selectResult);
+		this.actions.add(new ViewMessageLogAction(this));
 
 		SplitPaneExpander expander = new SplitPaneExpander(this.contentPanel);
 		a = new ExpandEditorAction(expander);
@@ -959,12 +962,21 @@ public class SqlPanel
 		return (parentTab.getSelectedComponent() == this);
 	}
 
+	/**
+	 * Selects the first result table and tries to put the focus to that.
+	 */
 	public void selectResult()
 	{
-		if (this.isVisible() && this.isCurrentTab() && currentData != null)
+		if (this.isVisible() && this.isCurrentTab())
 		{
 			showResultPanel();
-			currentData.getTable().requestFocusInWindow();
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					currentData.getTable().requestFocusInWindow();
+				}
+			});
 		}
 	}
 
@@ -1712,7 +1724,13 @@ public class SqlPanel
 	public void reloadCurrent()
 	{
 		if (isBusy()) return;
-		
+		if (currentData == null) return;
+
+		if (GuiSettings.getConfirmDiscardResultSetChanges() && currentData != null && currentData.isModified())
+		{
+			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
+		}
+
 		this.executionThread = new WbThread("SQL Execution Thread " + this.getId())
 		{
 			public void run()
@@ -1725,10 +1743,8 @@ public class SqlPanel
 
 	protected void runCurrentSql()
 	{
-		final DwPanel dw = getCurrentResult();
-		if (dw == null) return;
-		final String sql = dw.getDataStore().getGeneratingSql();
-		if (sql == null) return;
+		if (isBusy()) return;
+		if (currentData == null) return;
 
 		cancelExecution = false;
 		setBusy(true);
@@ -1740,7 +1756,7 @@ public class SqlPanel
 		setCancelState(true);
 		try
 		{
-			dw.runQuery(sql, true);
+			currentData.runCurrentSql(true);
 		}
 		catch (Exception e)
 		{
@@ -1761,7 +1777,7 @@ public class SqlPanel
 			this.executionThread = null;
 		}
 	}
-	
+
 	private boolean macroExecution = false;
 
 	public void executeMacroSql(final String sql, final boolean replaceText)
@@ -2145,16 +2161,13 @@ public class SqlPanel
 			return (DwPanel)c;
 		}
 		return null;
-
 	}
+
 	public String getSourceQuery()
 	{
-		DwPanel dw = getCurrentResult();
-		if (dw != null)
-		{
-			DataStore ds = dw.getTable().getDataStore();
-			if (ds != null) return ds.getGeneratingSql();
-		}
+		if (currentData == null) return null;
+		DataStore ds = currentData.getDataStore();
+		if (ds != null) return ds.getGeneratingSql();
 		return null;
 	}
 

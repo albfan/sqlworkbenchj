@@ -80,11 +80,10 @@
       to the export file without buffering them in memory.
    </para>
    <para>
-      However some JDBC drivers (e.g. Postgres, jTDS and the Microsoft Driver) buffer results obtained
-      from the database before the control is returned to the program running the SELECT. In that case
-      exporting large results to an external file might still required a lot of memory. Please refer to the
-      chapter <link linkend="troubleshooting">Common problems</link> for details on how to configure
-      the individual drivers.
+      Some JDBC drivers (e.g. Postgres, jTDS and the Microsoft Driver) read the full result obtained
+      from the database into memory. In that case, exporting large results might still require a lot
+      of memory. Please refer to the chapter <link linkend="troubleshooting">Common problems</link>
+      for details on how to configure the individual drivers if this happens to you.
     </para>
   </section>
 

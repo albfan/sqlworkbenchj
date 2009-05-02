@@ -6,13 +6,13 @@
 	<para>&wb-productname; uses the concept of database profiles to store
 		connection information. A connection profile stores two different types
 		of settings:
-		
+
 		<itemizedlist>
 			<listitem><simpara>JDBC related properties such as the JDBC driver class, the connection URL, the username etc.</simpara></listitem>
 			<listitem><simpara>&wb-productname; related properties such as the profile name the associated workspace, etc.</simpara></listitem>
 		</itemizedlist>
 	</para>
-	
+
 	<para>
 		After the program is started, you are prompted to choose a
 		connection profile to connect to a database. The dialog will display a list
@@ -20,37 +20,37 @@
 		(JDBC and &wb-productname; settings) are displayed on the right side of the
 		window.
 	</para>
-	
+
 	<para>
 		To create a new profile click on the
 		<literal>New Profile</literal> button (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/NewProfile16.gif" format="GIF"/></guiicon>).
 		This will create a new profile with the name "New Profile". The new profile
 		will be created in the currently active group.
 		The other properties will be empty. To create a copy of the currently
-		selected profile click on the <literal>Copy Profile</literal> button 
+		selected profile click on the <literal>Copy Profile</literal> button
 		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/CopyProfile16.gif" format="GIF"/></guiicon>).
-		The copy will be created in the current group. If you want to place the copy 
+		The copy will be created in the current group. If you want to place the copy
 		into a different group, you can either choose to Copy &amp; Paste a copy of the profile
 		into that group, or move the copied profile, once it is created.
 	</para>
-	
+
 	<para>
 		To delete an existing profile, select the profile in the list and
 		click on the <literal>Delete Profile</literal> button
 		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
 	</para>
-	
+
 </section>
 
 <section id="profile-groups">
 	<title>Managing profile groups</title>
 	<para>
 		Profiles can be organized in groups, so you can group them by type (test, integration, production)
-		or customer or database system. When you start &wb-productname; for the first time, 
+		or customer or database system. When you start &wb-productname; for the first time,
 		no groups are created and the tree will only display the default group node.
-		To add a new group click on the <literal>Add profile group</literal> 
+		To add a new group click on the <literal>Add profile group</literal>
 		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/NewFolder16.gif" format="GIF"/></guiicon>)
-		button. The new group will be appended at the end of the tree. If you create a new profile, it will 
+		button. The new group will be appended at the end of the tree. If you create a new profile, it will
 		be created in the currently selected group. If a profile is selected in the tree and not a group
 		node, the new profile will be created in the group of the currently selected profile.
 	</para>
@@ -61,29 +61,29 @@
 
 	<para>
 		You can move profiles from one group to another but right clicking on the profile, then choose
-		<guimenuitem>Cut</guimenuitem>. Then right-click on the target group and select 
+		<guimenuitem>Cut</guimenuitem>. Then right-click on the target group and select
 		<guimenuitem>Paste</guimenuitem> from the popup menu. If you want to put the profile
 		into a new group that is not yet created, you can choose <guimenuitem>Paste to new folder</guimenuitem>.
-		You will be prompted to enter the new group name. 
+		You will be prompted to enter the new group name.
 	</para>
 	<para>
-		If you choose <guimenuitem>Copy</guimenuitem> instead of <guimenuitem>Cut</guimenuitem>, 
-		a copy of the selected profile will be pasted into the target group. This is similar to 
-		copying the currently selected profile. 
+		If you choose <guimenuitem>Copy</guimenuitem> instead of <guimenuitem>Cut</guimenuitem>,
+		a copy of the selected profile will be pasted into the target group. This is similar to
+		copying the currently selected profile.
 	</para>
 
 	<para>
-		To rename a group, select the node in the tree, then press the <guibutton>F2</guibutton> key. 
+		To rename a group, select the node in the tree, then press the <guibutton>F2</guibutton> key.
 		You can now edit the group name.
 	</para>
 
 	<para>
 		To delete a group, simply remove all profiles from that group. The group will then automatically
-		be removed. 
+		be removed.
 	</para>
-	
+
 </section>
-  
+
 <section id="profile-jdbc-properties">
 	<title>JDBC related profile settings</title>
 	<informaltable frame="all">
@@ -129,18 +129,18 @@
 				<row>
 					<entry><para>Fetch size</para></entry>
 					<entry>
-						<para>This setting controls the default fetch size 
+						<para>This setting controls the default fetch size
 							for data retrieval. This parameter will directly be passed to the
-							<ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink> 
+							<ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
 							method of the <literal>Statement</literal> object.
-							For some combinations of JDBC driver and DBMS, setting this parameter to a 
+							For some combinations of JDBC driver and DBMS, setting this parameter to a
 							rather large number can improve retrieval performance because it saves network traffic.
 						</para>
 						<para>
 							The JDBC driver for <ulink url="http://www.postgresql.org/">PostgreSQL</ulink> controls the <ulink url="http://jdbc.postgresql.org/documentation/80/query.html#query-with-cursor">caching</ulink>
-							of ResultSets through this parameter. As the results are cached by &wb-productname; 
+							of ResultSets through this parameter. As the results are cached by &wb-productname;
 							anyway, it is suggested to set this parameter to a value greater then zero to disable
-							the caching in the driver. Especially when exporting large results using 
+							the caching in the driver. Especially when exporting large results using
 							<link linkend="command-export">WbExport</link> or <link linkend="command-copy">WbCopy</link>
 							it is recommended to turn off the caching in the driver (e.g. by setting the value
 							for this property to 1).
@@ -165,30 +165,41 @@
 	</informaltable>
 
 </section>
-	
+
 <section id="profile-extended-properties">
 	<title>Extended properties for the JDBC driver</title>
 	<para>
-		Most JDBC drivers support additional connection properties where
+		JDBC drivers support additional connection properties where
 		you can fine tune the behaviour of the driver or enable special features
-		that are not switched on by default.
+		that are not switched on by default. Most drivers support passing properties
+    as part of the URL, but sometimes they need to be passed to driver using
+    a different method called "extended properties".
 	</para>
+
 	<para>
 		If you need to pass an additional paramter to your driver you can do that
 		with the <guibutton>Extended Properties</guibutton> button. After clicking that
 		button, a dialog will appear with a table that has two columns. The first column
-		is the name of the property, the second column the value that you want to pass to 
+		is the name of the property, the second column the value that you want to pass to
 		the driver.
 	</para>
+
 	<para>
-		To create a new property click on the new button. A new row will be inserted 
-		into the table, where you can define the property. To edit an existing property, 
+		To create a new property click on the new button. A new row will be inserted
+		into the table, where you can define the property. To edit an existing property,
 		simply doubleclick in the table cell that you want to edit. To delete an existing property
 		click on the <literal>Delete</literal> button
 		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>).
 	</para>
-</section>
+
+  <para>
+    Some driver require those properties to be so called "System properties" (see the manual
+    of your driver for details). If this is the case for your driver, check the option
+    <literal>Copy to system properties before connecting</literal>.
+  </para>
   
+</section>
+
 <section id="profile-workbench-settings">
 	<title>&wb-productname; specific settings</title>
 
@@ -207,7 +218,7 @@
 			time you connect using the profile.
 		</para>
 	</section>
-		
+
 	<section id="profile-separate-connection">
 		<title>Separate connection per tab</title>
 
@@ -242,15 +253,15 @@
 			the same connection
 		</para>
 		<para>
-			When you disable the use of separate connections per tab, you can still 
+			When you disable the use of separate connections per tab, you can still
 			create new a (physical) connection for the current tab later, by selecting
 			<menuchoice><guimenu>File</guimenu><guimenuitem>New Connection</guimenuitem></menuchoice>.
 			That menu item will be disabled if <literal>Separate connection per tab</literal> is
 			disabled or you have already created a new connection for that tab.
 		</para>
-			
+
 	</section>
-		
+
 	<section id="profile-ignore-drop-error">
 		<title>Ignore DROP errors</title>
 
@@ -268,13 +279,13 @@
 			using a separate command line parameter. See <xref linkend="using-scripting"/> for details.
 		</para>
 	</section>
-		
+
 	<section id="profile-rollback-before-disconnect">
 		<title>Rollback before disconnect</title>
 
 		<para>
 			Some DBMS require that all open transactions are closed before actually
-			closing the connection to the server. If this option is enabled, &wb-productname; 
+			closing the connection to the server. If this option is enabled, &wb-productname;
 			will send a <literal>ROLLBACK</literal> to the backend server before
 			closing the connection. This is e.g. required for Cloudscape/Derby because executing
 			a <literal>SELECT</literal> query already starts a transaction. If you see
@@ -288,10 +299,10 @@
 		<para>
 			If this option is enabled, then &wb-productname; will ask you to confirm
 			the execution of any SQL statement that is updating or changing the database in
-			any way (e.g. UPDATE, DELETE, INSERT, DROP, CREATE, COMMIT, ...). 
+			any way (e.g. UPDATE, DELETE, INSERT, DROP, CREATE, COMMIT, ...).
 		</para>
 		<para>
-			If you save changes from within the result list, you will be prompted even 
+			If you save changes from within the result list, you will be prompted even
 			if <link linkend="options-confirm-update">Confirm result set updates</link> is disabled.
 		</para>
 		<para>
@@ -304,29 +315,29 @@
 		<para>
 			If this option is enabled, then &wb-productname; will never run any statements
 			that might change the database. Changing of retrieved data is also disabled in this
-			case. This option can be used to prevent accidental changes to important 
+			case. This option can be used to prevent accidental changes to important
 			data (e.g. a production database)
 		</para>
 		<para>
 			&wb-productname; cannot detect all possible statements that may change the
 			database. Especially when calling stored procedures &wb-productname; cannot
-			know if they will change the database. But they might be needed to retrieve data, 
+			know if they will change the database. But they might be needed to retrieve data,
 			this cannot be disabled alltogether.
 		</para>
 		<para>
-			You can extend the list of keywords known to update the data in the 
+			You can extend the list of keywords known to update the data in the
 			<link linkend="db-settings-updatingcommands"><literal>workbench.settings</literal></link>
 			file.
 		</para>
 		<note>
 			<para>
-				&wb-productname; will not guarantee that there is no way (accidentally or intended) 
+				&wb-productname; will not guarantee that there is no way (accidentally or intended)
 				to change data when this option is enabled. Please do not rely on this option
-				when dealing with important data that must not be changed. 
+				when dealing with important data that must not be changed.
 			</para>
 			<para>
 				If you really need to guarantee that no data is changed, you have to do this
-				with the security mechanism of your DBMS, e.g. by creating a read-only user. 
+				with the security mechanism of your DBMS, e.g. by creating a read-only user.
 			</para>
 		</note>
 		<para>
@@ -337,7 +348,7 @@
 	<section id="profile-empty-string-is-null">
 		<title>Treat empty strings as NULL</title>
 		<para>
-			When entering data into the result set (grid) this setting controls, how 
+			When entering data into the result set (grid) this setting controls, how
 			empty values (for character columns) should be treated. If this option
 			is enabled, then a NULL value will be sent to the database for an empty
 			(zero length) string. Empty values for other datatypes (dates, numbers etc)
@@ -350,13 +361,13 @@
 			<title>Include NULL columns in INSERT</title>
 			<para>
 				This setting controls whether columns where the value from the result grid
-				is null are included in INSERT statements. If this setting is enabled, then 
-				columns for new rows that have a null value are listed in the column list 
+				is null are included in INSERT statements. If this setting is enabled, then
+				columns for new rows that have a null value are listed in the column list
 				for the <literal>INSERT</literal> statement (with the corresponding <literal>NULL</literal>
 				value passed in the <literal>VALUES</literal> list).
-				If this property is un-checked, then those columns will not be listed in 
+				If this property is un-checked, then those columns will not be listed in
 				<literal>INSERT</literal> statements. This is useful if you have e.g.
-				auto-increment columns that only work if the columns are not listed in the 
+				auto-increment columns that only work if the columns are not listed in the
 				DML statement.
 			</para>
 		</section>
@@ -364,8 +375,8 @@
 		<section id="profile-remove-comments">
 			<title>Remove comments</title>
 			<para>
-				If this option is checked, then comments will be removed from the SQL 
-				statement before it is sent to the database. This covers 
+				If this option is checked, then comments will be removed from the SQL
+				statement before it is sent to the database. This covers
 				single line comments using -- or multi-line comments using /* .. */
 			</para>
 			<para>
@@ -380,7 +391,7 @@
 			<para>
 				When a SQL statement returns warnings from the DBMS, these are usually displayed
 				after the SQL statement has finished. By enabling this option, warnings that are
-				returned from the DBMS are never displayed. 
+				returned from the DBMS are never displayed.
 			</para>
 			<para>
 				Note that for some DBMS (e.g. MS SQL Server) server messages
@@ -395,14 +406,14 @@
 
 		<section id="options-explorer-remember-schema" xreflabel="Remember DbExplorer Schema">
 			<title>Remember DbExplorer Schema</title>
-			
+
 			<para>
-				If this option is enabled, the currently selected schema in the 
+				If this option is enabled, the currently selected schema in the
 				DbExplorer will be stored in the workspace associated with the current
-				connection profile. If this option is not enabled, the DbExplorer 
+				connection profile. If this option is not enabled, the DbExplorer
 				tries to pre-select the current schema when it's opened.
 			</para>
-			
+
 		</section>
 
 		<section id="profile-trim-char-data">
@@ -422,11 +433,11 @@
 			<title>Info Background</title>
 			<para>
 				Once a connection has been established, information about the connection are display
-				in the toolbar of the main window. You can select a color for the background of this 
-				display to e.g. indicate "sensitive" connections. To use the default background, 
+				in the toolbar of the main window. You can select a color for the background of this
+				display to e.g. indicate "sensitive" connections. To use the default background,
 				click on the <literal>Reset</literal> (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
 				button. If no color is selected this is indicated with the text <literal>(None)</literal>
-				next to the selection button. If you have selected a color, a preview of the color is 
+				next to the selection button. If you have selected a color, a preview of the color is
 				displayed.
 			</para>
 		</section>
@@ -436,21 +447,21 @@
 			<para>
 				If an alternate delimiter is defined, and the statement that is executed ends with the
 				defined delimiter, this one will be used instead of the standard semicolon. The profile
-				setting will overwrite the global setting for this connection. This way you can 
+				setting will overwrite the global setting for this connection. This way you can
 				define the <literal>GO</literal> keyword for SQL Server connections, and use
-				the forward slash in Oracle connections. The delimiter can be defined as a "single line delimiter", 
-				which means that it will only be recognized if put on a single line. 
+				the forward slash in Oracle connections. The delimiter can be defined as a "single line delimiter",
+				which means that it will only be recognized if put on a single line.
 				Please refer to <link linkend="understand-alternate-delim">using the alternate delimiter</link>
 				for details on this property.
 			</para>
 		</section>
-		
+
 		<section id="profile-workspace-file">
 			<title>Workspace</title>
-			
+
 			<para>
 				For each connection profile, a workspace file can (and should) be assigned. When you
-				create a new connection, you can either leave this field empty or supply a name for a new profile. 
+				create a new connection, you can either leave this field empty or supply a name for a new profile.
 			</para>
 			<para>
 				If the profile that you specify does not exist, you will be prompted
@@ -464,24 +475,24 @@
 				you will be prompted if you want to assign the new workspace to the current
 				connection profile.
 			</para>
-			<para> 
+			<para>
 				To save you current workspace choose
 				<menuchoice><guimenu>Workspace</guimenu><guimenuitem>Save Workspace as</guimenuitem></menuchoice>
 				to create a new workspace file.
 			</para>
-			
+
 			<note><para>
 				When specifying the location of the workspace file, you can use the placeholder
 				<literal>%ConfigDir%</literal> as part of the filename. The file will then be stored
-				in the same directory as &wb-productname;'s <link linkend="cmdline-parameter-configdir">configuration files</link> 
+				in the same directory as &wb-productname;'s <link linkend="cmdline-parameter-configdir">configuration files</link>
 				e.g.: <literal>%ConfigDir%/oracle.wksp</literal>
 			</para></note>
-			
+
 			<para>
 				When you use the <literal>%ConfigDir%</literal> placeholder, you can move the profiles
 				and workspaces to a different computer, without changing the location of the workspace files.
 			</para>
-			
+
 			<para>
 				The placeholder will be put automatically into the filename
 				when you select the location of the profile using the file dialog. The file dialog
@@ -551,7 +562,7 @@
 			</section>
 
 		</section>
-	
+
   </section>
 
 	<section id="oracle-sysdba-connection">
@@ -572,7 +583,7 @@
 			as SYSDBA (e.g. SYS).
 		</para>
 	</section>
-	
+
   <section id="odbc">
 		<title>ODBC connections without a data source</title>
 		<para>
@@ -582,7 +593,7 @@
 			URLs can be used to connect to data files directly.
 		</para>
 		<para>The class name of the driver is <literal>sun.jdbc.odbc.JdbcOdbcDriver</literal></para>
-		
+
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
 				<colspec colname="c1" colwidth="2cm" />
@@ -608,7 +619,7 @@
 				</tbody>
 			</tgroup>
 		</informaltable>
-		
+
 	</section>
 
 </section>
