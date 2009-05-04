@@ -186,7 +186,7 @@ public class Settings
 			cfd = new WbFile(System.getProperty("user.home"), ".sqlworkbench");
 		}
 
-		if (!cfd.exists())
+		if (!cfd.exists() && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
 			cfd.mkdirs();
 		}

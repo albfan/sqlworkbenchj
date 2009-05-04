@@ -156,7 +156,7 @@ public class WbCall
 				}
 			}
 
-			if (!WbManager.getInstance().isBatchMode() && this.inputParameters.size() > 0)
+			if (hasParameters && !WbManager.getInstance().isBatchMode() && this.inputParameters.size() > 0)
 			{
 				StatementParameters input = new StatementParameters(this.inputParameters);
 				boolean ok = ParameterEditor.showParameterDialog(input);

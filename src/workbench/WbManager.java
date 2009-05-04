@@ -697,6 +697,11 @@ public final class WbManager
 				System.setProperty("workbench.log.filename", file.getFullPath());
 			}
 
+			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
+			{
+				this.writeSettings = false;
+			}
+
 			// Make sure the Settings object is (re)initialized properly now that
 			// some system properties have been read from the commandline
 			// this is especially necessary during JUnit tests to make
@@ -750,11 +755,6 @@ public final class WbManager
 			// the configuration stuff correctly!
 			value = cmdLine.getValue(AppArguments.ARG_PROFILE_STORAGE);
 			Settings.getInstance().setProfileStorage(value);
-
-			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
-			{
-				this.writeSettings = false;
-			}
 
 			if (cmdLine.hasUnknownArguments())
 			{

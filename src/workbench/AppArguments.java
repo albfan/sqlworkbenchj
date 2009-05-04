@@ -35,6 +35,7 @@ public class AppArguments
 	public static final String ARG_PROFILE_GROUP = "profilegroup";
 	public static final String ARG_CONN_URL = "url";
 	public static final String ARG_CONN_DRIVER = "driver";
+	public static final String ARG_CONN_DRIVER_CLASS = "driverclass";
 	public static final String ARG_CONN_JAR = "driverjar";
 	public static final String ARG_CONN_USER = "username";
 	public static final String ARG_CONN_PWD = "password";
@@ -93,6 +94,7 @@ public class AppArguments
 		addArgument(ARG_VARDEF);
 		addArgument(ARG_CONN_URL);
 		addArgument(ARG_CONN_DRIVER);
+		addArgument(ARG_CONN_DRIVER_CLASS);
 		addArgument(ARG_CONN_JAR);
 		addArgument(ARG_CONN_USER);
 		addArgument(ARG_CONN_PWD);

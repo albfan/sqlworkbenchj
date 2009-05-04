@@ -933,9 +933,9 @@ public class BatchRunner
 			profile = ConnectionMgr.getInstance().getProfile(def);
 			if (profile == null)
 			{
-				String msg = "Profile [" + def + "] not found!";
+				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
 				System.err.println(msg);
-				LogMgr.logError("BatchRunner.initFromCommandLine", msg, null);
+				LogMgr.logError("BatchRunner.createBatchRunner()", msg, null);
 				return null;
 			}
 			boolean readOnly = cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false);
@@ -945,6 +945,15 @@ public class BatchRunner
 				// Reset the changed flag to make sure the "modified" profile is not saved
 				profile.reset();
 			}
+		}
+
+		if (cmdLine.hasUnknownArguments())
+		{
+			StringBuilder err = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
+			err.append(' ');
+			err.append(cmdLine.getUnknownArguments());
+			System.err.println(err.toString());
+			LogMgr.logWarning("BatchRunner.createBatchRunner()", err.toString());
 		}
 
 

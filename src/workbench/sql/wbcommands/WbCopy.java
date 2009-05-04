@@ -306,7 +306,7 @@ public class WbCopy
 			ConnectionProfile tprof = ConnectionMgr.getInstance().getProfile(profileKey);
 			if (tprof == null)
 			{
-				String msg = ResourceMgr.getFormattedString("ErrCopyProfileNotFound", profileKey.toString());
+				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", profileKey.toString());
 				result.addMessage(msg);
 				result.setFailure();
 				return null;
