@@ -836,6 +836,11 @@ public class BatchRunner
 			String driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER);
 			if (driverclass == null)
 			{
+				driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER_CLASS);
+			}
+			
+			if (driverclass == null)
+			{
 				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a driver class!", null);
 				return null;
 			}

@@ -328,11 +328,13 @@ public class ArgumentParser
 	 * If no value was specified or the parameter was not 
 	 * passed on the commandline null will be returned.
 	 * Any leading or trailing quotes will be removed from the argument
-	 * before it is returned.
+	 * before it is returned. To check if the parameter was present
+	 * but without a value isArgPresent() should be used.
 	 * 
 	 * @param key the parameter to retrieve
 	 * @return the value as provided by the user or null if no value specified
-	 * 
+	 *
+	 * @see #isArgPresent(java.lang.String) 
 	 * @see StringUtil#trimQuotes(String)
 	 */
 	public String getValue(String key)
