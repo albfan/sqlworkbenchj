@@ -13,7 +13,7 @@
 
   <target name="updateRss">
     <tstamp>
-      <format pattern="EEE, dd MMM yyyy HH:mm:ss +0100" property="pubDate" locale="en"/>
+      <format pattern="EEE, dd MMM yyyy HH:mm:ss +0200" property="pubDate" locale="en"/>
     </tstamp>
 
     <xslt in="../scripts/history.xml"

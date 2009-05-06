@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <history>
 
-<release build="-1" date="2009-04-26">
+<release build="-1" date="2009-05-06">
+
+</release>
+
+<release build="104" date="2009-05-06">
 
   <entry dev-build="12" type="fix">
     <description>

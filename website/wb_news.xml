@@ -14,6 +14,67 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New stable build (104) released</title>
+      <description>        <![CDATA[<p>Changes from build 103 to build 104</p><p>Enhancements</p><ul>
+<li>All fonts can now be reset to their defaults in the options dialog.</li>
+<li>A result tab can now be reloaded (by re-running the original SQL) through the context menu of the result tab.</li>
+<li>It is now possible to cycle through the tabs using Ctrl-Tab and Ctrl-Shift-Tab</li>
+<li>The keyboard shortcuts for editor movements can now be configured. The defaults have been adjusted to comply with the Apple guidelines on Mac OS</li>
+<li>The generating SQL query of a result tab can now be displayed by double-clicking on the tab or through the context menu of the result tab.</li>
+<li>WbCopy (and the DataPumper) now optionally ignores any error that occurs when dropping the target table. For that, a new parameter is available -ignoreDropError which defaults to false</li>
+<li>When using XSLT to transform output of e.g. WbReport or WbSchemaDiff, the name of the stylesheet can now be specified without a pathname if located in the xslt subdirectory or the config directory.</li>
+<li>When assigning a keyboard shortcut to a macro, the shortcut's character would be inserted into the editor when the macro was executed.</li>
+<li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
+<li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
+<li>The editor can now be configured to either uses spaces or real tab characters (as before)</li>
+<li>The editor can now be scrolled without moving the caret by using Ctrl-Down and Ctrl-Up</li>
+<li>Autocompletion is now supported for the SQL statement EXEC and will show a list of stored procedures. WbCall and CALL are also recognized.</li>
+<li>When showing the sequence definition for an Oracle sequence the column LAST_NUMBER is now also displayed in the DbExplorer</li>
+<li>When defining a new filter for a result set, the currently selected column is now pre-selected in the dropdown if no filter is defined.</li>
+<li>When using WbCopy's -createTarget=true, data type mappings can now be specified in workbench.settings that enhance or overwrite the data type mapping returned by the driver. Details can be found in the manual.</li>
+<li>Manually changed column order in the table data of the DbExplorer can now be saved. Either manually through the popup menu of the table header, or automatically through an option for the DbExplorer.</li>
+<li>When defining the jar library for a Look &amp; Feel, the application now scans the libraries for the approriate classes</li>
+<li>Removed the limitations that DbExplorer panels must be the last tabs and cannot be the only tab.</li>
+<li>A new option is available to customize how external files that are loaded in an editor tab are remembered in the workspace.</li>
+<li>A single record dialog is now available to edit data in a result set (Data -&gt; Single record dialog)</li>
+<li>A new option to control the use of uppercase keywords for the SQL formatter is available (Tools -&gt; Options -&gt; SQL Formatter)</li>
+</ul><p>Bug Fixes</p><ul>
+<li>Versioned backup of a profile's workspace did not work, if the workspace was not specified with a full name in the connection profile.</li>
+<li>Fixed a repainting issue on MacOS in the toolbar when switching between DbExplorer tab and editor tabs</li>
+<li>When displaying Oracle Packages the selected procedure/function was not highlighted in the source view of the package.</li>
+<li>Ctrl-C was no longer working in the source display of the DbExplorer if it was opened as a separate window</li>
+<li>Double clicking in the status bar would open a new SQL tab</li>
+<li>Tabs could not be renamed if more than one window was open.</li>
+<li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
+<li>The source of the index definition was not displayed in Postgres, if a table had a primary key and one additional index.</li>
+<li>If a profile did not have a name, SQL Workbench failed to display the connection dialog.</li>
+<li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
+<li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
+<li>Workspace -&gt; Assign Workspace was no longer working</li>
+<li>When "Automatically optimize row height" was enabled, sorting a result set would not redraw the table correctly.</li>
+<li>Sequences were no longer displayed for DB2 on Windows/Linux</li>
+<li>User defined PK mappings were not remembered</li>
+<li>When running WbImport, errors where not shown any more.</li>
+<li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
+<li>The driver dropdown in the connection dialog was not updated when a new driver was added while the connection dialog was open.</li>
+<li>The About Dialog was not displayed on MacOS when more than one application window was open.</li>
+<li>The quick filter in the Trigger panel was no longer working</li>
+<li>Copy &amp; Paste shortcuts were not working on MacOS</li>
+<li>"Save Data As" was not working if it has never been called before</li>
+<li>Fixed displaying the PDF manual on MacOS (Thanks Markus!)</li>
+<li>Some workspaces were not loaded properly and editor tabs would be removed upon loading.</li>
+<li>When refreshing the source for a table or a view, the column definition was not reloaded from the database.</li>
+<li>When selecting a different view in the DbExplorer while the view source was displayed, the wrong source code was displayed for the newly selected view.</li>
+<li>When MySQL was not set to ANSI mode, primary key columns that needed quoting were not detected properly due to MySQL's non-standard quoting character (in non-ANSI mode)</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-104</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 06 May 2009 23:06:41 +0200</pubDate>
+    </item>
+    <item>
       <title>New development build (103.12) released</title>
       <description>        <![CDATA[<p>Changes from build 103.11 to build 103.12</p><p>Enhancements</p><ul>
 <li>All fonts can now be reset to their defaults in the options dialog.</li>
@@ -24,6 +85,11 @@
 <li>Ctrl-C was no longer working in the source display of the DbExplorer if it was opened as a separate window</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -38,6 +104,11 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
+
+
+
 
 ]]>
 </description>
@@ -56,6 +127,11 @@
 </ul>
 
 
+
+
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -72,6 +148,11 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
+
+
+
 
 
 
@@ -105,6 +186,11 @@
 
 
 
+
+
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -120,6 +206,11 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
+
+
+
 
 
 
@@ -161,6 +252,11 @@
 
 
 
+
+
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -177,6 +273,11 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
+
+
+
+
 
 
 

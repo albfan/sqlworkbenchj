@@ -12,8 +12,6 @@
 	</xsl:for-each>
 </xsl:variable>
 
-<xsl:message><xsl:value-of select="$last-dev-build-nr"/></xsl:message>
-
 <xsl:variable name="prev-dev-build-nr" select="$last-dev-build-nr - 1"/>
 
 <xsl:variable name="current-build">
@@ -21,7 +19,7 @@
 		<xsl:value-of select="concat($last-build,'.',$last-dev-build-nr)"/>
 	</xsl:if>
 	<xsl:if test="$active-build != -1">
-		<xsl:value-of select="release[1]/@build"/>
+		<xsl:value-of select="$active-build"/>
 	</xsl:if>
 </xsl:variable>
 
