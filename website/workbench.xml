@@ -222,8 +222,7 @@ VALUES
 					This application requires Java 5 (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
 				</p>
         <p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
-          The support for Java 5 will removed at the end of this year when Java 5 itself will be
-          be de-supported by Sun.
+          The support for Java 5 will be removed at the end of this year when Java 5 itself will be de-supported by Sun.
         </p>
         <h3>Stable release</h3>
         <p>Current stable release: Build <build-number/>, <build-date/> (<a href="history.html">Release History</a>)
