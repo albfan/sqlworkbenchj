@@ -29,7 +29,8 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class ManageMacroAction extends WbAction
+public class ManageMacroAction
+	extends WbAction
 {
 	private MainWindow client;
 

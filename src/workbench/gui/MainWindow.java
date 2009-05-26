@@ -110,6 +110,7 @@ import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.NextTabAction;
 import workbench.gui.actions.PrevTabAction;
 import workbench.gui.actions.RenameTabAction;
+import workbench.gui.actions.ShowMacroPopupAction;
 import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
@@ -176,6 +177,7 @@ public class MainWindow
 
 	private AddMacroAction createMacro;
 	private ManageMacroAction manageMacros;
+	private ShowMacroPopupAction showMacroPopup;
 
 	private List<ToolWindow> explorerWindows = new ArrayList<ToolWindow>();
 
@@ -345,6 +347,7 @@ public class MainWindow
 
 		this.createMacro = new AddMacroAction();
 		this.manageMacros = new ManageMacroAction(this);
+		showMacroPopup = new ShowMacroPopupAction(this);
 
 		this.dbExplorerAction = new ShowDbExplorerAction(this);
 		this.newDbExplorerPanel = new NewDbExplorerPanelAction(this);
@@ -655,6 +658,7 @@ public class MainWindow
 		macroMenu.removeAll();
 		this.createMacro.addToMenu(macroMenu);
 		this.manageMacros.addToMenu(macroMenu);
+		showMacroPopup.addToMenu(macroMenu);
 		MacroMenuBuilder builder = new MacroMenuBuilder();
 		builder.buildMacroMenu(this, macroMenu);
 	}

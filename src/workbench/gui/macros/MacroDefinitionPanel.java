@@ -92,8 +92,9 @@ public class MacroDefinitionPanel
 	 * Displays the passed macro.
 	 *
 	 * Updates to the macro properties are applied immediately to the
-	 * macro instance passed with the exception of the macro text (as
-	 * it uses the standard editor which.
+	 * macro instance with the exception of the macro text (as
+	 * it uses the standard editor which does not implement the SimplePropertyEditor
+	 * interface).
 	 *
 	 * To make sure the macro instance is up-to-date, applyChanges() must
 	 * be called.

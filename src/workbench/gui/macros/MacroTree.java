@@ -191,6 +191,12 @@ public class MacroTree
 		}
 	}
 
+	public boolean isModified()
+	{
+		MacroStorage current = this.macroModel.getMacros();
+		return current.isModified();
+	}
+	
 	public void saveChanges()
 	{
 		MacroStorage current = this.macroModel.getMacros();
