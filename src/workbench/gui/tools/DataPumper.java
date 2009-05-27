@@ -25,6 +25,7 @@ import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -1887,7 +1888,7 @@ public class DataPumper
 			}
 			else if (this.useQueryCbx.isSelected())
 			{
-				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, colMapping.targetColumns, ttable.isNewTable(), dropTarget, ignoreDrop);
+				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, Arrays.asList(colMapping.targetColumns), ttable.isNewTable(), dropTarget, ignoreDrop);
 			}
 			else
 			{

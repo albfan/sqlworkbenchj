@@ -12,6 +12,7 @@
 package workbench.db.datacopy;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -291,6 +292,10 @@ public class DataCopier
 			{
 				updateTargetColumns(newTable.getColumns(), columnMap.values());
 			}
+			else if (targetColumnsForQuery != null)
+			{
+				updateTargetColumns(newTable.getColumns(), targetColumnsForQuery);
+			}
 
 			// no need to delete rows from a newly created table
 			this.setDeleteTarget(DeleteType.none);
@@ -335,9 +340,9 @@ public class DataCopier
 	 */
 	public void copyFromQuery(WbConnection source,
 														WbConnection target,
-														String aSourceQuery,
+														String query,
 														TableIdentifier aTargetTable,
-														ColumnIdentifier[] queryColumns,
+														List<ColumnIdentifier> queryColumns,
 														boolean createTarget,
 														boolean dropTarget,
 														boolean ignoreDropError)
@@ -349,19 +354,14 @@ public class DataCopier
 		this.sourceTable = null;
 		this.targetTable = aTargetTable;
 
+		this.targetColumnsForQuery = new ArrayList<ColumnIdentifier>(queryColumns);
 		if (createTarget)
 		{
-			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
-			for (ColumnIdentifier col : queryColumns)
-			{
-				cols.add(col);
-			}
-			createTable(cols, dropTarget, ignoreDropError);
+			createTable(targetColumnsForQuery, dropTarget, ignoreDropError);
 		}
-		this.targetColumnsForQuery = Arrays.asList(queryColumns);
-		this.initImporterForQuery(aSourceQuery);
+		this.initImporterForQuery(query);
 	}
-
+	
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
 		if (rowMonitor != null)

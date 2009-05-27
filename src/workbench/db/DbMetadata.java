@@ -1766,6 +1766,7 @@ public class DbMetadata
 			}
 		}
 
+		resultTable.setNewTable(false);
 		TableDefinition result = new TableDefinition(resultTable, columns);
 		if (hasEnums)
 		{

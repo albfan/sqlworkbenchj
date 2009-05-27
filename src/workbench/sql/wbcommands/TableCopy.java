@@ -24,6 +24,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -99,18 +100,26 @@ public class TableCopy
 		}
 		else
 		{
-			ColumnIdentifier[] cols = this.parseColumns(cmdLine);
-			if (cols == null)
+			List<ColumnIdentifier> cols = this.parseColumns(cmdLine);
+			List<ColumnIdentifier> queryCols = SqlUtil.getResultSetColumns(sourcequery, sourceConnection);
+			if (cols != null)
 			{
-				List<ColumnIdentifier> queryCols = SqlUtil.getResultSetColumns(sourcequery, sourceConnection);
-				cols = new ColumnIdentifier[queryCols.size()];
-				for (int i=0; i < queryCols.size(); i++)
+				List<String> selectCols = SqlUtil.getSelectColumns(sourcequery, false);
+				if (selectCols.size() != cols.size())
 				{
-					cols[i] = queryCols.get(i);
+					result.addMessage("Columns in query does not match number of columns in -columns parameter");
+					result.setFailure();
+					return false;
+				}
+				// when -columns=... is specified this can be used to rename the columns from the query
+				// so we need to adjust the names that are passed to the DataCopier because it
+				// expects the names to match the target table, not the source
+				for (int i=0; i < cols.size(); i++)
+				{
+					queryCols.get(i).setColumnName(cols.get(i).getColumnName());
 				}
 			}
-
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, cols, createTable, dropTable, ignoreDropError);
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTable, dropTable, ignoreDropError);
 		}
 
 		boolean useSp = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, targetConnection.getDbSettings().useSavepointForImport());
@@ -142,7 +151,7 @@ public class TableCopy
 		}
 	}
 
-	private ColumnIdentifier[] parseColumns(ArgumentParser cmdLine)
+	private List<ColumnIdentifier> parseColumns(ArgumentParser cmdLine)
 	{
 		// First read the defined columns from the passed parameter
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
@@ -150,7 +159,7 @@ public class TableCopy
 
 		List<String> l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
-		ColumnIdentifier[] result = new ColumnIdentifier[count];
+		List<ColumnIdentifier> result = CollectionBuilder.arrayList();
 		for (int i=0; i < count; i++)
 		{
 			String c = l.get(i);
@@ -159,7 +168,7 @@ public class TableCopy
 				copier.addError(ResourceMgr.getString("MsgCopyErrIllegalMapping"));
 				return null;
 			}
-			result[i] = new ColumnIdentifier(c);
+			result.add(new ColumnIdentifier(c));
 		}
 		return result;
 	}
