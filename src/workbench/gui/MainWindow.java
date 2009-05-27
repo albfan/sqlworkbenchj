@@ -116,6 +116,7 @@ import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.macros.MacroMenuBuilder;
+import workbench.gui.macros.MacroPopup;
 import workbench.gui.sql.PanelType;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
@@ -1135,9 +1136,14 @@ public class MainWindow
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
 	}
 
+	public String getWindowId()
+	{
+		return NumberStringCache.getNumberString(windowId);
+	}
+	
 	private String getConnectionIdForPanel(MainPanel p)
 	{
-		return "Wb" + NumberStringCache.getNumberString(windowId) + "-" + p.getId();
+		return "Wb" + getWindowId() + "-" + p.getId();
 	}
 
 	/**
@@ -1154,7 +1160,7 @@ public class MainWindow
 		}
 		else
 		{
-			return "WbWin-" + NumberStringCache.getNumberString(windowId);
+			return "WbWin-" + getWindowId();
 		}
 	}
 

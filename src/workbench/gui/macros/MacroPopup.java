@@ -19,8 +19,12 @@ import java.awt.event.WindowListener;
 import java.util.List;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import workbench.gui.MainWindow;
+import workbench.gui.actions.RunMacroAction;
 import workbench.gui.actions.WbAction;
+import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.MainPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -31,15 +35,16 @@ import workbench.util.StringUtil;
  * Display a floating window with the MacroTree.
  * When double clicking a macro in the tree, the macro is executed in the
  * passed MainWindow
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class MacroPopup
 	extends JDialog
-	implements WindowListener, MouseListener
+	implements WindowListener, MouseListener, TreeSelectionListener
 {
 	private MacroTree tree;
 	private MainWindow mainWindow;
+	private RunMacroAction runAction;
 
 	public MacroPopup(MainWindow parent)
 	{
@@ -65,6 +70,9 @@ public class MacroPopup
 		tree.expandGroups(groups);
 		tree.addMouseListener(this);
 		mainWindow = parent;
+		runAction = new RunMacroAction(mainWindow, null, -1);
+		tree.addActionToPopup(runAction);
+		tree.addTreeSelectionListener(this);
 		addWindowListener(this);
 	}
 
@@ -109,13 +117,13 @@ public class MacroPopup
 		if (e.getButton() == MouseEvent.BUTTON1 && e.getClickCount() == 2)
 		{
 			MacroDefinition macro = tree.getSelectedMacro();
-			if (mainWindow != null)
+			if (mainWindow != null && macro != null)
 			{
-				MainPanel panel = mainWindow.getCurrentPanel();
-				if (panel instanceof MacroClient)
+				SqlPanel panel = mainWindow.getCurrentSqlPanel();
+				if (panel != null)
 				{
-					MacroClient c = (MacroClient)panel;
-					c.executeMacroSql(macro.getText(), WbAction.isShiftPressed(e.getModifiers()));
+					MacroRunner runner = new MacroRunner();
+					runner.runMacro(macro, panel, WbAction.isShiftPressed(e.getModifiers()));
 				}
 			}
 		}
@@ -135,6 +143,24 @@ public class MacroPopup
 
 	public void mouseExited(MouseEvent e)
 	{
+	}
+
+	public void valueChanged(TreeSelectionEvent e)
+	{
+		MacroDefinition macro = tree.getSelectedMacro();
+		if (mainWindow != null && macro != null)
+		{
+			MainPanel panel = mainWindow.getCurrentPanel();
+			if (panel instanceof MacroClient)
+			{
+				runAction.setEnabled(true);
+				runAction.setMacro(macro);
+			}
+		}
+		else
+		{
+			runAction.setEnabled(false);
+		}
 	}
 
 }

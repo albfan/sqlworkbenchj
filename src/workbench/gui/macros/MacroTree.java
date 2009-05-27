@@ -113,6 +113,11 @@ public class MacroTree
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 	}
 
+	public void addActionToPopup(WbAction a)
+	{
+		this.popup.insert(a, 0);
+	}
+	
 	public void setDeleteAction(DeleteListEntryAction delete)
 	{
 		this.popup.addSeparator();
@@ -289,22 +294,6 @@ public class MacroTree
 
 	}
 
-	public void mouseClicked(MouseEvent e)
-	{
-		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
-		{
-			TreePath p = this.getClosestPathForLocation(e.getX(), e.getY());
-			if (p == null) return;
-
-			if (this.getSelectionCount() == 1 || isGroup(p))
-			{
-				setSelectionPath(p);
-			}
-			checkActions();
-			popup.show(this, e.getX(), e.getY());
-		}
-	}
-
 	/**
 	 * Checks if the current selection contains only profiles
 	 */
@@ -409,6 +398,23 @@ public class MacroTree
 			return (MacroDefinition)o;
 		}
 		return null;
+	}
+
+
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
+		{
+			TreePath p = this.getClosestPathForLocation(e.getX(), e.getY());
+			if (p == null) return;
+
+			if (this.getSelectionCount() == 1 || isGroup(p))
+			{
+				setSelectionPath(p);
+			}
+			checkActions();
+			popup.show(this, e.getX(), e.getY());
+		}
 	}
 
 	public void mousePressed(MouseEvent e)

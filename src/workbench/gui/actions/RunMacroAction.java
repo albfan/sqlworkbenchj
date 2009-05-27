@@ -40,27 +40,42 @@ public class RunMacroAction
 		super();
 		this.macro = def;
 		this.client = aClient;
-		String menuTitle = def.getName();
-		
-		if (index < 10)
+		if (def == null)
 		{
-			menuTitle = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
+			String title = ResourceMgr.getPlainString("LblRunMacro");
+			setMenuText(title);
+			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
+			desc = StringUtil.replace(desc, "%macro% ", "");
+			this.putValue(Action.SHORT_DESCRIPTION, desc);
 		}
-		this.setMenuText(menuTitle);
+		else
+		{
+			String menuTitle = def.getName();
+			if (index < 10)
+			{
+				menuTitle = "&" + NumberStringCache.getNumberString(index) + " - " + def.getName();
+			}
+			this.setMenuText(menuTitle);
+			String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
+			desc = StringUtil.replace(desc, "%macro%", macro.getName());
+			this.putValue(Action.SHORT_DESCRIPTION, desc);
+			StoreableKeyStroke key = macro.getShortcut();
+			if (key != null)
+			{
+				KeyStroke stroke = key.getKeyStroke();
+				setAccelerator(stroke);
+			}
+		}
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
-		String desc = ResourceMgr.getDescription("MnuTxtRunMacro", true);
-		desc = StringUtil.replace(desc, "%macro%", def.getName());
-		this.putValue(Action.SHORT_DESCRIPTION, desc);
 		this.setIcon(null);
-		StoreableKeyStroke key = macro.getShortcut();
-		if (key != null)
-		{
-			KeyStroke stroke = key.getKeyStroke();
-			setAccelerator(stroke);
-		}
 		setEnabled(macro != null && client != null);
 	}
 
+	public void setMacro(MacroDefinition def)
+	{
+		this.macro = def;
+	}
+	
 	public void executeAction(ActionEvent e)
 	{
 		if (this.client != null && this.macro != null)
