@@ -343,6 +343,63 @@ public class WbCopyTest
 		}
 	}
 
+	public void testCreateTargetFromQuery()
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyTest_testCreateTargetFromQuery");
+			util.prepareEnvironment();
+
+			WbConnection con = util.getConnection("queryCopyTest");
+
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+
+			Statement stmt = con.createStatement();
+
+			stmt.executeUpdate("create table source_data (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
+
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (1,'Dent', 'Arthur', '01')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (2,'Beeblebrox', 'Zaphod','0202')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (3,'Moviestar', 'Mary', '030303')");
+			stmt.executeUpdate("insert into source_data (nr, lastname, firstname, binary_data) values (4,'Perfect', 'Ford', '04040404')");
+
+			con.commit();
+
+			String sql = "wbcopy -sourceQuery='select firstname, nr, lastname from source_data where nr < 3' " +
+				"-targetTable=target_data -createTarget=true -columns=tfirstname, tnr, tlastname";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals("Copy not successful", true, result.isSuccess());
+
+			ResultSet rs = stmt.executeQuery("select count(*) from target_data");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Incorrect number of rows copied", 2, count);
+			}
+			SqlUtil.closeResult(rs);
+
+			System.out.println("*****************");
+			rs = stmt.executeQuery("select tnr, tfirstname, tlastname from target_data");
+			while (rs.next())
+			{
+				System.out.println(rs.getInt(1) + ": " + rs.getString(2) + " " + rs.getString(3));
+			}
+			SqlUtil.closeResult(rs);
+			ConnectionMgr.getInstance().removeProfile(con.getProfile());
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 	public void testQueryCopy()
 	{
 		try

@@ -71,7 +71,7 @@ public class DataCopier
 
 	private DataImporter importer;
 
-	// the columnMap will contain elements of type ColumnIdentifier
+	// columnMap maps columns from the source (table or query) to the target table
 	private Map<ColumnIdentifier, ColumnIdentifier> columnMap;
 
 	private List<ColumnIdentifier> targetColumnsForQuery;
@@ -115,7 +115,7 @@ public class DataCopier
 	{
 		if (importer != null) importer.setUseSavepoint(flag);
 	}
-	
+
 	public void endMultiTableCopy()
 	{
 		this.importer.endMultiTable();
@@ -271,7 +271,7 @@ public class DataCopier
 			for (ColumnIdentifier col : columns)
 			{
 				// When copying a table from MySQL or SQL Server to a standard compliant DBMS we must ensure
-				// that wrong quoting characters used are replaced with the standard characters
+				// that wrong quoting characters are replaced with the standard characters
 				ColumnIdentifier copy = col.createCopy();
 				copy.adjustQuotes(sourceConnection.getMetadata(), targetConnection.getMetadata());
 				targetCols.add(col);
@@ -283,10 +283,18 @@ public class DataCopier
 
 			TableDefinition newTable = targetConnection.getMetadata().getTableDefinition(targetTable);
 			targetTable = newTable.getTable();
-			updateTargetColumns(newTable.getColumns(), columnMap.values());
+
+			// When the source of the copy is a table (defined by copyFromTable()) then a column mapping
+			// is present. In that case the definition of the columns stored in the columnMap's values
+			// must be updated to reflect the definitions of the just created table
+			if (columnMap != null)
+			{
+				updateTargetColumns(newTable.getColumns(), columnMap.values());
+			}
 
 			// no need to delete rows from a newly created table
 			this.setDeleteTarget(DeleteType.none);
+			
 			this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableCreated", this.targetTable.getTableExpression(this.targetConnection)) + "\n");
 		}
 		catch (SQLException e)
@@ -302,7 +310,9 @@ public class DataCopier
 	 * create table are retrieved and we have to use those columns e.g.
 	 * because upper/lowercase can be different now if the column names
 	 * were specified by the user, and the DBMS folded them to upper or lowercase
+	 * 
 	 * @param realCols
+	 * @param toUpdate to column definitions to be updated 
 	 */
 	private void updateTargetColumns(List<ColumnIdentifier> realCols, Collection<ColumnIdentifier> toUpdate)
 	{
