@@ -12,6 +12,7 @@
 package workbench.gui.macros;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
@@ -63,9 +64,9 @@ public class MacroPopup
 		{
 			setLocation((int)(parent.getX() + parent.getWidth() - getWidth()/2), parent.getY() + 25);
 		}
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-		String s = Settings.getInstance().getProperty("workbench.gui.macros.MacroPopup.groups", null);
+		String s = Settings.getInstance().getProperty(getClass().getName() + ".expandedgroups", null);
 		List<String> groups = StringUtil.stringToList(s, ",", true, true);
 		tree.expandGroups(groups);
 		tree.addMouseListener(this);
@@ -76,24 +77,39 @@ public class MacroPopup
 		addWindowListener(this);
 	}
 
+	private void closeWindow()
+	{
+		setVisible(false);
+		dispose();
+	}
+
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
 	public void windowClosing(WindowEvent e)
 	{
-	}
-
-	public void windowClosed(WindowEvent e)
-	{
+		removeWindowListener(this);
+		tree.removeTreeSelectionListener(this);
 		if (tree.isModified())
 		{
 			tree.saveChanges();
 		}
 		List<String> groups = tree.getExpandedGroupNames();
-		Settings.getInstance().setProperty("workbench.gui.macros.MacroPopup.groups", StringUtil.listToString(groups, ';', true));
+		Settings.getInstance().setProperty(getClass().getName() + ".expandedgroups", StringUtil.listToString(groups, ',', true));
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				closeWindow();
+			}
+		});
+	}
+
+	public void windowClosed(WindowEvent e)
+	{
 	}
 
 	public void windowIconified(WindowEvent e)
