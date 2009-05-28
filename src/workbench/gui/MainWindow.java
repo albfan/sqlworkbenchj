@@ -116,7 +116,6 @@ import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.macros.MacroMenuBuilder;
-import workbench.gui.macros.MacroPopup;
 import workbench.gui.sql.PanelType;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
@@ -608,7 +607,7 @@ public class MainWindow
 		try
 		{
 			JMenu macro = this.getMacroMenu(index);
-			setItemStates(macro, p.isConnected());
+			setMacroMenuItemStates(macro, p.isConnected());
 		}
 		catch (Exception e)
 		{
@@ -622,16 +621,19 @@ public class MainWindow
 		for (int i=0; i < count; i++)
 		{
 			JMenu macro = this.getMacroMenu(i);
-			setItemStates(macro, enabled);
+			setMacroMenuItemStates(macro, enabled);
 		}
 	}
 
-	private void setItemStates(JMenu menu, boolean enabled)
+	private void setMacroMenuItemStates(JMenu menu, boolean enabled)
 	{
 		if (menu != null)
 		{
 			int itemCount = menu.getItemCount();
-			for (int in=2; in < itemCount; in++)
+
+			// The actual macro entries start at index 3
+			// 0,1,2 are menu items,
+			for (int in=3; in < itemCount; in++)
 			{
 				JMenuItem item = menu.getItem(in);
 				if (item != null) item.setEnabled(enabled);
@@ -649,7 +651,7 @@ public class MainWindow
 			{
 				this.buildMacroMenu(macros);
 				MainPanel p = this.getSqlPanel(i);
-				this.setItemStates(macros, p.isConnected());
+				this.setMacroMenuItemStates(macros, p.isConnected());
 			}
 		}
 	}
@@ -657,9 +659,10 @@ public class MainWindow
 	private void buildMacroMenu(JMenu macroMenu)
 	{
 		macroMenu.removeAll();
-		this.createMacro.addToMenu(macroMenu);
-		this.manageMacros.addToMenu(macroMenu);
+		createMacro.addToMenu(macroMenu);
+		manageMacros.addToMenu(macroMenu);
 		showMacroPopup.addToMenu(macroMenu);
+
 		MacroMenuBuilder builder = new MacroMenuBuilder();
 		builder.buildMacroMenu(this, macroMenu);
 	}
@@ -1038,6 +1041,17 @@ public class MainWindow
 		{
 			WbSwingUtilities.center(this, null);
 		}
+		boolean macroVisible = s.getBoolProperty(this.getClass().getName() + ".macropopup.visible", false);
+		if (macroVisible)
+		{
+			EventQueue.invokeLater(new Runnable() {
+
+				public void run()
+				{
+					showMacroPopup.showPopup();
+				}
+			});
+		}
 	}
 
 	public void saveSettings()
@@ -1051,6 +1065,8 @@ public class MainWindow
 			sett.storeWindowPosition(this);
 			sett.storeWindowSize(this);
 		}
+		boolean macroVisible = (showMacroPopup != null && showMacroPopup.isPopupVisible());
+		sett.setProperty(this.getClass().getName() + ".macropopup.visible", macroVisible);
 	}
 
 	public void windowOpened(WindowEvent windowEvent)

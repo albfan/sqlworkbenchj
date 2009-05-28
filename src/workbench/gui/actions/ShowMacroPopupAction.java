@@ -18,7 +18,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
-import java.awt.event.WindowStateListener;
 import workbench.gui.MainWindow;
 import workbench.gui.macros.MacroPopup;
 import workbench.resource.ResourceMgr;
@@ -26,13 +25,13 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  support@sql-workbench.net
  */
-public class ShowMacroPopupAction 
-		extends WbAction
-		implements WindowFocusListener, WindowListener
+public class ShowMacroPopupAction
+	extends WbAction
+	implements WindowFocusListener, WindowListener
 {
 	private MainWindow client;
 	private MacroPopup macroWindow;
-	
+
 	public ShowMacroPopupAction(MainWindow aClient)
 	{
 		super();
@@ -40,8 +39,20 @@ public class ShowMacroPopupAction
 		this.initMenuDefinition("MnuTxtMacroPopup");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setIcon(null);
+		setEnabled(true);
 	}
 
+	public boolean isPopupVisible()
+	{
+		return (macroWindow != null && macroWindow.isVisible());
+	}
+
+	public void showPopup()
+	{
+		createPopup();
+		macroWindow.setVisible(true);
+	}
+	
 	private void createPopup()
 	{
 		if (this.macroWindow == null)
@@ -49,6 +60,7 @@ public class ShowMacroPopupAction
 			macroWindow = new MacroPopup(client);
 			EventQueue.invokeLater(new Runnable()
 			{
+
 				public void run()
 				{
 					client.addWindowFocusListener(ShowMacroPopupAction.this);
@@ -60,8 +72,7 @@ public class ShowMacroPopupAction
 
 	public void executeAction(ActionEvent e)
 	{
-		createPopup();
-		macroWindow.setVisible(true);
+		showPopup();
 	}
 
 	public void windowGainedFocus(WindowEvent e)
@@ -71,6 +82,7 @@ public class ShowMacroPopupAction
 			macroWindow.setVisible(true);
 			EventQueue.invokeLater(new Runnable()
 			{
+
 				public void run()
 				{
 					client.requestFocus();
@@ -135,5 +147,4 @@ public class ShowMacroPopupAction
 			macroWindow.setVisible(false);
 		}
 	}
-
 }
