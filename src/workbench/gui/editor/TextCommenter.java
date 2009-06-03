@@ -46,15 +46,13 @@ public class TextCommenter
 	private void doComment(String commentChar, boolean comment)
 	{
 		int startline = editor.getSelectionStartLine();
-		int realEndline = editor.getSelectionEndLine();
-		int endline = realEndline;
+		int endline = editor.getSelectionEndLine();
 
 		if (commentChar == null) commentChar = "--";
 
 		int cLength = commentChar.length();
 
 		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
-		if (pos == 0 && endline > 0) endline --;
 		SyntaxDocument document = editor.getDocument();
 
 		try
@@ -92,12 +90,8 @@ public class TextCommenter
 	protected boolean isSelectionCommented(String commentChar)
 	{
 		int startline = editor.getSelectionStartLine();
-		int realEndline = editor.getSelectionEndLine();
-		int endline = realEndline;
+		int endline = editor.getSelectionEndLine();
 		if (commentChar == null) commentChar = "--";
-
-		int pos = editor.getSelectionEnd(endline) - editor.getLineStartOffset(endline);
-		if (pos == 0 && endline > 0) endline --;
 
 		for (int line = startline; line <= endline; line ++)
 		{

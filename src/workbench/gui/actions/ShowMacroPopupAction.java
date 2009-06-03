@@ -82,7 +82,6 @@ public class ShowMacroPopupAction
 			macroWindow.setVisible(true);
 			EventQueue.invokeLater(new Runnable()
 			{
-
 				public void run()
 				{
 					client.requestFocus();
@@ -93,17 +92,12 @@ public class ShowMacroPopupAction
 
 	public void windowLostFocus(WindowEvent e)
 	{
-		if (macroWindow != null && e.getOppositeWindow() != macroWindow)
+		if (macroWindow != null
+				&& e.getOppositeWindow() != macroWindow
+				&& (e.getOppositeWindow() == null || e.getOppositeWindow() != null && e.getOppositeWindow().getOwner() != client)
+				&& !macroWindow.isClosing())
 		{
 			macroWindow.setVisible(false);
-		}
-	}
-
-	public void windowStateChanged(WindowEvent e)
-	{
-		if (e.getWindow() == macroWindow && e.getNewState() == WindowEvent.WINDOW_CLOSED)
-		{
-			macroWindow = null;
 		}
 	}
 
@@ -142,7 +136,8 @@ public class ShowMacroPopupAction
 
 	public void windowDeactivated(WindowEvent e)
 	{
-		if (e.getWindow() == macroWindow && e.getOppositeWindow() != client && macroWindow.isShowing())
+		if (e.getWindow() == macroWindow && e.getOppositeWindow() != client 
+				&& macroWindow.isShowing() && !macroWindow.isClosing())
 		{
 			macroWindow.setVisible(false);
 		}

@@ -465,7 +465,8 @@ class VariableDataStore
 				pool.removeValue(oldkey);
 			}
 			String value = this.getValueAsString(i, 1);
-			pool.setParameterValue(key, value);
+			// Treat null as an empty value
+			pool.setParameterValue(key, value == null ? "" : value);
 		}
 		
 		RowData row = this.getNextDeletedRow();
