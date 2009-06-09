@@ -6,41 +6,49 @@
 
     <para>Copyright (c) 2002-2008, Thomas Kellerer</para>
 
-    <para>Permission is hereby granted, free of charge, to any person
-    obtaining a copy of this software and associated documentation files (the
-    &#34;Software&#34;), to deal in the Software without restriction,
-    including without limitation the rights to use, copy, modify, merge,
-    publish, distribute, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:</para>
+    <para>
+      Permission is hereby granted, free of charge, to any person
+      obtaining a copy of this software and associated documentation files (the
+      &#34;Software&#34;), to deal in the Software without restriction,
+      including without limitation the rights to use, copy, publish, distribute, 
+      and to permit persons to whom the Software is furnished to do so, 
+      subject to the following conditions:
+    </para>
 
-    <para>The above copyright notice and this permission notice shall be
-    included in all copies or substantial portions of the Software.</para>
+    <para>
+      The above copyright notice and this permission notice shall be
+      included in all copies or substantial portions of the Software.
+    </para>
+
+    <para>
+      The source code or parts of the source-code may only be reused with the permission of the author
+    </para>
 
     <para>In order to ensure that this software stays free, selling, licensing
     or charging for the use of this software is prohibited. The right to
     include this software in a commercial product (bundling) is still granted
     as long as this software is not the major functionality delivered.</para>
 
-		<simplesect id="disclaimer">
-    <title>Disclaimer</title>
+    <simplesect id="disclaimer">
+      <title>Disclaimer</title>
 
-    <blockquote><para>
-			The software is provided &#34;as is&#34;, without warranty of any
-			kind, express or implied, including but not limited to the warranties of merchantability,
-			fitness for a particular purpose and noninfringement. In no event shall the author (Thomas Kellerer),
-			be liable for any direct, indirect, incidental, special, exemplary, or consequential
-			damages (including, but not limited to, procurement of substitute goods or services; loss
-			of use, data, or profits; or business interruption) however caused and on any theory of
-			liability, whether in contract, strict liability, or tort (including negligence or
-			otherwise) arising in any way out of the use of this software, even if advised of the
-			possibility of such damage.
-    </para></blockquote>
-				
-    <para>
-			In other words: use it at your own risk, and don't blame me if you accidently delete your database!
-		</para>
-		</simplesect>
-		
+      <blockquote><para>
+        The software is provided &#34;as is&#34;, without warranty of any
+        kind, express or implied, including but not limited to the warranties of merchantability,
+        fitness for a particular purpose and noninfringement. In no event shall the author (Thomas Kellerer),
+        be liable for any direct, indirect, incidental, special, exemplary, or consequential
+        damages (including, but not limited to, procurement of substitute goods or services; loss
+        of use, data, or profits; or business interruption) however caused and on any theory of
+        liability, whether in contract, strict liability, or tort (including negligence or
+        otherwise) arising in any way out of the use of this software, even if advised of the
+        possibility of such damage.
+      </para></blockquote>
+        
+      <para>
+        In other words: use it at your own risk, and don't blame me if you accidently delete your database!
+      </para>
+    </simplesect>
+    
   </section>
 
 
@@ -57,19 +65,19 @@
     </para>
     <para>&wb-productname; can be downloaded from <ulink url="http://www.sql-workbench.net">http://www.sql-workbench.net</ulink>
     </para>
-		<para>
-			If you want to contact other users of &wb-productname; you can do this using an online forum at Google Groups:
-			<ulink url="http://groups.google.com/group/sql-workbench">http://groups.google.com/group/sql-workbench</ulink>
-		</para>
+    <para>
+      If you want to contact other users of &wb-productname; you can do this using an online forum at Google Groups:
+      <ulink url="http://groups.google.com/group/sql-workbench">http://groups.google.com/group/sql-workbench</ulink>
+    </para>
   </section>
-	
-	<section id="credits">
-		<title>Credits and thanks</title>
-		<para>
-			Thanks to Christian (and his team) for his thorough testing, his patience and his continous
-			ideas to improve this tool. His input has influenced and driven a lot of 
-			features and has helped reduce the number of bugs drastically!
-		</para>
-	</section>
+  
+  <section id="credits">
+    <title>Credits and thanks</title>
+    <para>
+      Thanks to Christian (and his team) for his thorough testing, his patience and his continous
+      ideas to improve this tool. His input has influenced and driven a lot of 
+      features and has helped reduce the number of bugs drastically!
+    </para>
+  </section>
 
 </section>

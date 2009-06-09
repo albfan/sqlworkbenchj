@@ -2,6 +2,41 @@
 <history>
 
 <release build="-1" date="2009-05-06">
+  
+  <entry dev-build="1" type="enh">
+    <description>
+      The SQL Macros can now be displayed in a floating window. Double clicking a macro will
+      run the macro in the currently selected SQL tab.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      When using WbExport to generate HTML two new parameters can be used to
+      specify HTML code that is added before and after the actual export data
+      (-preDataHtml, -postDataHtml)
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      When prompting vor variables, entering an empty value would remove the variable
+      from the internal variables pool. It is now stored with an empty string as its value.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      (Un)Comment selection did not work if the cursor was in the very first column
+      and no lines where selected.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      For WbCopy -createTarget was not working if the source was a query. 
+    </description>
+  </entry>
 
 </release>
 

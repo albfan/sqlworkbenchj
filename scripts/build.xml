@@ -600,8 +600,9 @@
       stubfile="../etc/jarbundler/JavaApplicationStub">
 
       <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
+      <javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
       <javaproperty name="apple.awt.showGrowBox" value="true"/>
-      <javaproperty name="apple.awt.brushMetalLook" value="true"/>
+      <javaproperty name="apple.awt.rendering" value="speed"/>
     </jarbundler>
 
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
