@@ -187,6 +187,11 @@ public class MainWindow
 	public MainWindow()
 	{
 		super(ResourceMgr.TXT_PRODUCT_NAME);
+
+		// Control the brushed metal look for MacOS, this must be set as soon as possible on the
+		// root pane in order to have an effect
+		getRootPane().putClientProperty("apple.awt.brushMetalLook", GuiSettings.getUseBrushedMetal());
+		
 		this.windowId = ++instanceCount;
 
 		sqlTab = new WbTabbedPane();

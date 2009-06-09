@@ -192,6 +192,16 @@ public class GuiSettings
 		return Settings.getInstance().getProperty("workbench.gui.lookandfeelclass", "");
 	}
 
+	public static Boolean getUseBrushedMetal()
+	{
+		return Boolean.valueOf(Settings.getInstance().getBoolProperty("workbench.gui.macos.brushedmetal", false));
+	}
+
+	public static void setUseBrushedMetal(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.macos.brushedmetal", flag);
+	}
+	
 	public static int getMaxMacrosInMenu()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.macro.maxmenuitems", 9);

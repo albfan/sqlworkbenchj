@@ -33,7 +33,6 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.menu.CutCopyPastePopup;
 import workbench.interfaces.ClipboardSupport;
@@ -75,9 +74,7 @@ public class MacroTree
 	public MacroTree()
 	{
 		super();
-		macroModel = new MacroListModel(MacroManager.getInstance().getMacros());
-		setModel(macroModel);
-		macroModel.addTreeModelListener(this);
+		loadMacros();
 		setRootVisible(false);
 		putClientProperty("JTree.lineStyle", "Angled");
 		setShowsRootHandles(true);
@@ -113,18 +110,29 @@ public class MacroTree
 		new MacroTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 	}
 
-	public void addActionToPopup(WbAction a)
+	public void loadMacros()
+	{
+		if (macroModel != null)
+		{
+			macroModel.removeTreeModelListener(this);
+		}
+		macroModel = new MacroListModel(MacroManager.getInstance().getMacros());
+		setModel(macroModel);
+		macroModel.addTreeModelListener(this);
+	}
+	
+	public void addPopupActionAtTop(WbAction a)
 	{
 		this.popup.insert(a, 0);
 	}
 	
-	public void setDeleteAction(DeleteListEntryAction delete)
+	public void addPopupAction(WbAction action, boolean withSeparator)
 	{
-		this.popup.addSeparator();
-		this.popup.add(delete);
+		if (withSeparator) this.popup.addSeparator();
+		this.popup.add(action);
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
-		delete.addToInputMap(im, am);
+		action.addToInputMap(im, am);
 	}
 
 	public void treeNodesChanged(TreeModelEvent e)

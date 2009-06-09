@@ -74,7 +74,7 @@ public class MacroManagerGui
 		this.toolbar.add(new ExpandTreeAction(macroTree));
 		this.toolbar.add(new CollapseTreeAction(macroTree));
 
-		macroTree.setDeleteAction(deleteAction);
+		macroTree.addPopupAction(deleteAction, true);
 
 		JPanel treePanel = new JPanel();
 		treePanel.setLayout(new BorderLayout());

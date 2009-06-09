@@ -37,5 +37,8 @@ public class HtmlExportWriter
 		conv.setPageTitle(this.exporter.getPageTitle());
 		conv.setCreateFullPage(exporter.getCreateFullHtmlPage());
 		conv.setEscapeHtml(exporter.getEscapeHtml());
+		conv.setHeading(exporter.getHtmlHeading());
+		conv.setTrailer(exporter.getHtmlTrailer());
+		
 	}
 }

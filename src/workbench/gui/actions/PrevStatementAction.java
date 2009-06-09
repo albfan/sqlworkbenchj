@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 import workbench.gui.sql.SqlHistory;
 
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -32,12 +33,11 @@ public class PrevStatementAction
 	{
 		super();
 		this.history = aHistory;
-		this.initMenuDefinition("MnuTxtPrevStatement", KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, InputEvent.ALT_MASK));
+		this.initMenuDefinition("MnuTxtPrevStatement", PlatformShortcuts.getDefaultPrevStatement());
 		this.setIcon("Back");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setCreateMenuSeparator(false);
 		this.setCreateToolbarSeparator(false);
-		//this.putValue(ALTERNATE_ACCELERATOR, KeyStroke.getKeyStroke(KeyEvent.VK_P, InputEvent.CTRL_MASK));
 	}
 
 	public void executeAction(ActionEvent e)

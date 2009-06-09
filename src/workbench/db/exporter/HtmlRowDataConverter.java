@@ -15,6 +15,7 @@ import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
 import workbench.util.HtmlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Convert RowData into HTML.
@@ -28,14 +29,35 @@ public class HtmlRowDataConverter
 	private String pageTitle;
 	private boolean createFullPage = true;
 	private boolean escapeHtml = false;
+	private String heading;
+	private String trailer;
 
 	public StrBuffer getEnd(long totalRows)
 	{
 		StrBuffer html = new StrBuffer("</table>\n");
-		if (createFullPage) html.append("</body>\n</html>\n");
+		if (StringUtil.isNonBlank(trailer))
+		{
+			html.append(trailer);
+			html.append('\n');
+		}
+		
+		if (createFullPage) 
+		{
+			html.append("</body>\n</html>\n");
+		}
 		return html;
 	}
 
+	public void setHeading(String head)
+	{
+		heading = head;
+	}
+
+	public void setTrailer(String html)
+	{
+		trailer = html;
+	}
+	
 	public void setCreateFullPage(boolean flag)
 	{
 		this.createFullPage = flag;
@@ -123,6 +145,13 @@ public class HtmlRowDataConverter
 
 			result.append("</head>\n<body>\n");
 		}
+		
+		if (StringUtil.isNonBlank(heading))
+		{
+			result.append(heading);
+			result.append('\n');
+		}
+		
 		result.append("<table>\n");
 
 		// table header with column names

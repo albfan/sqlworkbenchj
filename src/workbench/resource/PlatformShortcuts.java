@@ -101,4 +101,32 @@ public class PlatformShortcuts
 		return KeyStroke.getKeyStroke(KeyEvent.VK_END, KeyEvent.CTRL_MASK | (select ? KeyEvent.SHIFT_MASK : 0));
 	}
 
+	/**
+	 * Return the shortcut to select the next statement in the statement history
+	 * 
+	 * @return
+	 */
+	public static KeyStroke getDefaultNextStatement()
+	{
+		if (PlatformHelper.isMacOS())
+		{
+			KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK | KeyEvent.META_MASK);
+		}
+		return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK);
+	}
+
+	/**
+	 * Return the shortcut to select the previous statement in the statement history
+	 *
+	 * @return
+	 */
+	public static KeyStroke getDefaultPrevStatement()
+	{
+		if (PlatformHelper.isMacOS())
+		{
+			KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK | KeyEvent.META_MASK);
+		}
+		return KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK);
+	}
+
 }

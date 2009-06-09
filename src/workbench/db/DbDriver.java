@@ -171,6 +171,8 @@ public class DbDriver
 
 	public boolean canReadLibrary()
 	{
+		// When running in testmode, all necessary libraries are added through
+		// the classpath already, so there is no need to check them here.
 		if (Settings.getInstance().getBoolProperty("workbench.gui.testmode", false)) return true;
 		
 		if (libraryList != null)

@@ -120,6 +120,8 @@ public class DataExporter
 
 	private boolean append = false;
 	private boolean escapeHtml = true;
+	private String htmlHeading;
+	private String htmlTrailer;
 	private boolean createFullHtmlPage = true;
 	private boolean verboseFormat = true;
 
@@ -475,11 +477,45 @@ public class DataExporter
 		return this.exportHeaders;
 	}
 
-	public void setCreateFullHtmlPage(boolean aFlag) { this.createFullHtmlPage = aFlag; }
-	public boolean getCreateFullHtmlPage() { return this.createFullHtmlPage; }
+	public void setHtmlHeading(String heading)
+	{
+		this.htmlHeading = heading;
+	}
 
-	public void setEscapeHtml(boolean aFlag) { this.escapeHtml = aFlag; }
-	public boolean getEscapeHtml() { return this.escapeHtml; }
+	public String getHtmlHeading()
+	{
+		return this.htmlHeading;
+	}
+
+	public void setHtmlTrailer(String html)
+	{
+		this.htmlTrailer = html;
+	}
+
+	public String getHtmlTrailer()
+	{
+		return this.htmlTrailer;
+	}
+
+	public void setCreateFullHtmlPage(boolean aFlag)
+	{
+		this.createFullHtmlPage = aFlag;
+	}
+
+	public boolean getCreateFullHtmlPage()
+	{
+		return this.createFullHtmlPage;
+	}
+
+	public void setEscapeHtml(boolean aFlag)
+	{
+		this.escapeHtml = aFlag;
+	}
+
+	public boolean getEscapeHtml()
+	{
+		return this.escapeHtml;
+	}
 
 	public void setTextDelimiter(String aDelimiter)
 	{

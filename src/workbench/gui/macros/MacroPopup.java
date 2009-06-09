@@ -19,17 +19,24 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.List;
 import javax.swing.JDialog;
+import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import workbench.gui.MainWindow;
+import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.DeleteListEntryAction;
 import workbench.gui.actions.RunMacroAction;
+import workbench.gui.actions.SaveListFileAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.FileActions;
+import workbench.interfaces.MacroChangeListener;
 import workbench.interfaces.MainPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.macros.MacroDefinition;
+import workbench.sql.macros.MacroManager;
 import workbench.util.StringUtil;
 
 /**
@@ -41,11 +48,12 @@ import workbench.util.StringUtil;
  */
 public class MacroPopup
 	extends JDialog
-	implements WindowListener, MouseListener, TreeSelectionListener
+	implements WindowListener, MouseListener, TreeSelectionListener, MacroChangeListener
 {
 	private MacroTree tree;
 	private MainWindow mainWindow;
 	private RunMacroAction runAction;
+	private boolean isClosing;
 
 	public MacroPopup(MainWindow parent)
 	{
@@ -72,9 +80,37 @@ public class MacroPopup
 		tree.addMouseListener(this);
 		mainWindow = parent;
 		runAction = new RunMacroAction(mainWindow, null, -1);
-		tree.addActionToPopup(runAction);
+		tree.addPopupActionAtTop(runAction);
 		tree.addTreeSelectionListener(this);
 		addWindowListener(this);
+
+				
+		FileActions actions = new FileActions()
+		{
+			public void saveItem()
+				throws Exception
+			{
+				saveMacros(false);
+			}
+
+			public void deleteItem()
+				throws Exception
+			{
+				tree.deleteSelection();
+			}
+
+			public void newItem(boolean copyCurrent)
+				throws Exception
+			{
+			}
+		};
+		
+		DeleteListEntryAction delete = new DeleteListEntryAction(actions);
+		tree.addPopupAction(delete, true);
+		SaveListFileAction save = new SaveListFileAction(actions, "LblSaveMacros");
+		tree.addPopupAction(save, false);
+		
+		MacroManager.getInstance().getMacros().addChangeListener(this);
 	}
 
 	private void closeWindow()
@@ -83,18 +119,47 @@ public class MacroPopup
 		dispose();
 	}
 
+	public boolean isClosing()
+	{
+		return isClosing;
+	}
+	
 	public void windowOpened(WindowEvent e)
 	{
 	}
 
-	public void windowClosing(WindowEvent e)
+	protected void saveMacros(boolean restoreListener)
 	{
-		removeWindowListener(this);
-		tree.removeTreeSelectionListener(this);
+		MacroManager.getInstance().getMacros().removeChangeListener(this);
 		if (tree.isModified())
 		{
 			tree.saveChanges();
 		}
+		if (restoreListener)
+		{
+			MacroManager.getInstance().getMacros().addChangeListener(this);
+		}
+	}
+	
+	public void windowClosing(WindowEvent e)
+	{
+		isClosing = true;
+		if (tree.isModified())
+		{
+			int result = WbSwingUtilities.getYesNoCancel(this, ResourceMgr.getString("MsgConfirmUnsavedMacros"));
+			if (result == JOptionPane.CANCEL_OPTION)
+			{
+				isClosing = false;
+				return;
+			}
+			if (result == JOptionPane.YES_OPTION)
+			{
+				saveMacros(false);
+			}
+		}
+		removeWindowListener(this);
+		tree.removeTreeSelectionListener(this);
+
 		List<String> groups = tree.getExpandedGroupNames();
 		Settings.getInstance().setProperty(getClass().getName() + ".expandedgroups", StringUtil.listToString(groups, ',', true));
 		Settings.getInstance().storeWindowPosition(this);
@@ -177,6 +242,13 @@ public class MacroPopup
 		{
 			runAction.setEnabled(false);
 		}
+	}
+
+	public void macroListChanged()
+	{
+		List<String> groups = tree.getExpandedGroupNames();
+		tree.loadMacros();
+		tree.expandGroups(groups);
 	}
 
 }

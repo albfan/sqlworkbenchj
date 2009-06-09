@@ -934,11 +934,6 @@ public final class WbManager
 		wb.readParameters(new String[] { args} );
 	}
 
-	public boolean isTestMode()
-	{
-		return Boolean.getBoolean("workbench.gui.testmode");
-	}
-
 	public static void prepareForTest(String[] args)
 	{
 

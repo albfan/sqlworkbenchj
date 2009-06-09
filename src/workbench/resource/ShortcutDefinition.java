@@ -33,17 +33,6 @@ public class ShortcutDefinition
 	{
 	}
 	
-	public boolean isMappedTo(KeyStroke key)
-	{
-		if (key == null) return false;
-		KeyStroke mykey = this.getActiveKeyStroke();
-		if (mykey != null)
-		{
-			return mykey.equals(key);
-		}
-		return false;
-	}
-	
 	public ShortcutDefinition(String aClass)
 	{
 		this.setActionClass(aClass);
@@ -58,6 +47,17 @@ public class ShortcutDefinition
 		}
 	}
 	
+	public boolean isMappedTo(KeyStroke key)
+	{
+		if (key == null) return false;
+		KeyStroke mykey = this.getActiveKeyStroke();
+		if (mykey != null)
+		{
+			return mykey.equals(key);
+		}
+		return false;
+	}
+
 	public boolean getShortcutRemoved() 
 	{
 		return this.shortcutRemoved;
@@ -189,7 +189,10 @@ public class ShortcutDefinition
 		return this.alternateKey;
 	}
 	
-	public boolean hasDefault() { return this.defaultKey != null; }
+	public boolean hasDefault()
+	{
+		return this.defaultKey != null;
+	}
 	
 	/**
 	 * Return if the this shortcut definition is customized.

@@ -33,6 +33,7 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.MacOSHelper;
 import workbench.util.PlatformHelper;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -50,6 +51,8 @@ public class GeneralOptionsPanel
 	{
 		super();
 		initComponents();
+		brushedMetal.setVisible(MacOSHelper.isMacOS());
+		brushedMetal.setEnabled(MacOSHelper.isMacOS());
 		pdfReaderPath.setAllowMultiple(false);
 		String[] updTypes = new String[] {
 			ResourceMgr.getString("LblUpdCheckNever"),
@@ -118,6 +121,7 @@ public class GeneralOptionsPanel
 		int tabPolicy = Settings.getInstance().getIntProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
 		scrollTabs.setSelected(tabPolicy == JTabbedPane.SCROLL_TAB_LAYOUT);
 		confirmTabClose.setSelected(GuiSettings.getConfirmTabClose());
+		brushedMetal.setSelected(GuiSettings.getUseBrushedMetal());
 	}
 
 	public void saveSettings()
@@ -167,6 +171,10 @@ public class GeneralOptionsPanel
 		{
 			set.setProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
 		}
+		if (brushedMetal.isVisible())
+		{
+			GuiSettings.setUseBrushedMetal(brushedMetal.isSelected());
+		}
 	}
 
 	private Locale getSelectedLanguage()
@@ -194,6 +202,7 @@ public class GeneralOptionsPanel
     exitOnConnectCancel = new JCheckBox();
     autoConnect = new JCheckBox();
     singlePageHelp = new JCheckBox();
+    brushedMetal = new JCheckBox();
     settingsfilename = new WbLabelField();
     jPanel1 = new JPanel();
     showTabIndex = new JCheckBox();
@@ -257,7 +266,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 15, 1, 0);
     jPanel2.add(useEncryption, gridBagConstraints);
@@ -272,7 +280,6 @@ public class GeneralOptionsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -316,6 +323,16 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 0, 1, 0);
     jPanel2.add(singlePageHelp, gridBagConstraints);
+
+    brushedMetal.setText(ResourceMgr.getString("LblBrushedMetal")); // NOI18N
+    brushedMetal.setToolTipText(ResourceMgr.getString("d_LblBrushedMetal")); // NOI18N
+    brushedMetal.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(10, 0, 1, 0);
+    jPanel2.add(brushedMetal, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -456,6 +473,7 @@ public class GeneralOptionsPanel
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JCheckBox autoConnect;
+  private JCheckBox brushedMetal;
   private JComboBox checkInterval;
   private JLabel checkUpdatesLabel;
   private JCheckBox confirmTabClose;

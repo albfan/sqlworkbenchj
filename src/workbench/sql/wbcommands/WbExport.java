@@ -106,6 +106,8 @@ public class WbExport
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 		cmdLine.addArgument("escapeHTML", ArgumentType.BoolArgument);
 		cmdLine.addArgument("createFullHTML", ArgumentType.BoolArgument);
+		cmdLine.addArgument("preDataHtml");
+		cmdLine.addArgument("postDataHtml");
 		cmdLine.addArgument("sourceTable", ArgumentType.TableArgument);
 		cmdLine.addArgument("outputDir");
 		cmdLine.addArgument("useCDATA", ArgumentType.BoolArgument);
@@ -401,6 +403,10 @@ public class WbExport
 			{
 				exporter.setCreateFullHtmlPage("true".equalsIgnoreCase(value));
 			}
+
+			exporter.setHtmlHeading(cmdLine.getValue("preDataHtml"));
+			exporter.setHtmlTrailer(cmdLine.getValue("postDataHtml"));
+			
 			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".html";
 		}

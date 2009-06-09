@@ -149,7 +149,6 @@ public class ShortcutManager
 			}
 		}
 
-
 		if (LogMgr.isDebugEnabled())
 		{
 			KeyStroke key = anAction.getDefaultAccelerator();
@@ -318,11 +317,10 @@ public class ShortcutManager
 	public ShortcutDefinition[] getDefinitions()
 	{
 		ShortcutDefinition[] list = new ShortcutDefinition[this.keyMap.size()];
-		Iterator itr = this.keyMap.values().iterator();
 		int i = 0;
-		while (itr.hasNext())
+		for (ShortcutDefinition def : keyMap.values())
 		{
-			list[i] = (ShortcutDefinition)itr.next();
+			list[i] = def;
 			i++;
 		}
 		return list;

@@ -32,15 +32,6 @@ public class WbStarter
 	 */
 	public static void main(String[] args)
 	{
-		// This property should be set as early as possible to 
-		// ensure that it is defined before any AWT class is loaded
-		// this will make the application menu appear at the correct
-		// location when running on with Aqua look and feel on a Mac
-		System.setProperty("apple.laf.useScreenMenuBar", "true");
-		System.setProperty("com.apple.mrj.application.growbox.intrudes", "false");
-		System.setProperty("apple.awt.showGrowBox", "true");
-		System.setProperty("apple.awt.rendering", "speed");
-		
 		String version = System.getProperty("java.version", null);
 		if (version == null)
 		{

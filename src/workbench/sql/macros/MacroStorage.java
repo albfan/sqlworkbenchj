@@ -42,7 +42,7 @@ public class MacroStorage
 
 	private boolean modified = false;
 	private List<MacroChangeListener> changeListeners = null;
-
+	
 	public MacroStorage()
 	{
 		allMacros = new TreeMap<String, MacroDefinition>(new CaseInsensitiveComparator());
@@ -70,13 +70,19 @@ public class MacroStorage
 		return size;
 	}
 
-	public synchronized void addChangeListener(MacroChangeListener aListener)
+	public void addChangeListener(MacroChangeListener aListener)
 	{
 		if (this.changeListeners == null)
 		{
 			this.changeListeners = new ArrayList<MacroChangeListener>();
 		}
 		this.changeListeners.add(aListener);
+	}
+
+	public void removeChangeListener(MacroChangeListener aListener)
+	{
+		if (this.changeListeners == null) return;
+		this.changeListeners.remove(aListener);
 	}
 
 	public synchronized void copyFrom(MacroStorage source)
