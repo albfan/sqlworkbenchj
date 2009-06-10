@@ -168,6 +168,7 @@ public class SqlKeywordHelper
 
 		if (f.exists())
 		{
+			LogMgr.logInfo("SqlKeywordHelper.readFile()", "Reading keywords from: " + f.getAbsolutePath());
 			try
 			{
 				BufferedReader customFile = new BufferedReader(new FileReader(f));
@@ -176,7 +177,7 @@ public class SqlKeywordHelper
 			}
 			catch (Exception e)
 			{
-				LogMgr.logError("SqlKeywordHelper.loadKeywordsFromfile()", "Error reading external file", e);
+				LogMgr.logError("SqlKeywordHelper.readFile()", "Error reading external file", e);
 			}
 		}
 

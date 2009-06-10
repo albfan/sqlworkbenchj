@@ -13,7 +13,6 @@ package workbench.sql.syntax;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.Set;
 import workbench.TestUtil;
@@ -54,6 +53,13 @@ public class SqlKeywordHelperTest
 		assertTrue(keywords.contains("ABORT"));
 		assertTrue(keywords.contains("IDENTIFIED"));
 		assertTrue(keywords.contains("EXCEPTION"));
+	}
+
+	public void testSqlServerKeywords()
+	{
+		SqlKeywordHelper helper = new SqlKeywordHelper("microsoft_sql_server");
+		Collection<String> keywords = helper.getKeywords();
+		assertTrue(keywords.contains("OPEN"));
 	}
 
 	public void testGetDataTypes()
