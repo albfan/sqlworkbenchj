@@ -1,12 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-05-06">
+<release build="-1" date="2009-06-12">
   
   <entry dev-build="1" type="enh">
     <description>
       The SQL Macros can now be displayed in a floating window. Double clicking a macro will
       run the macro in the currently selected SQL tab.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      The generation of the source SQL for a table can now be configured in order
+      to use the functions the DBMS supports (e.g. SHOW CREATE TABLE for MySQL), so
+      that incompatibilities of the DBMS with the ANSI SQL standard can be worked around.
+      A detailed description is in the manual in the section "Customize table source retrieval" of the
+      chapter "Properties in the .settings file"
     </description>
   </entry>
 

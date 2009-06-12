@@ -792,11 +792,57 @@ public class DbSettings
 	 */
 	public boolean getUseTypeWithSetObject()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".import.setobject.usetype", false);
+		return Settings.getInstance().getBoolProperty(prefix + "import.setobject.usetype", false);
 	}
 
 	public boolean getRetrieveProcParmsForAutoCompletion()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".completion.procs.showparms", true);
+		return Settings.getInstance().getBoolProperty(prefix + "completion.procs.showparms", true);
 	}
+
+	/**
+	 * Returns the SQL that retrieves the CREATE SQL for a given table directly from the DBMS.
+	 * In the returned SQL, the placeholders %tablename%, %schema% and %catalog% must be
+	 * replaced with the real values.
+	 *
+	 * If the table source is not returned in the first column of the result set,
+	 * getRetrieveTableSourceCol() will indicate the column index that contains the
+	 * actual source.
+	 *
+	 * @return null if not configured, a SQL to be run to retrieve a CREATE TABLE otherwise
+	 * @see #getRetrieveTableSourceCol()
+	 * @see #getRetrieveTableSourceNeedsQuotes()
+	 */
+	public String getRetrieveTableSourceSql()
+	{
+		boolean enabled = Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.enabled", true);
+		if (!enabled) return null;
+		return Settings.getInstance().getProperty(prefix + "retrieve.create.table.query", null);
+	}
+
+	/**
+	 * Returns the result set column in which the table source from getRetrieveTableSourceSql()
+	 * is returned (if configured)
+	 *
+	 * @return the approriate result set column index if configured, 1 otherwise
+	 * @see #getRetrieveTableSourceSql() 
+	 */
+	public int getRetrieveTableSourceCol()
+	{
+		return Settings.getInstance().getIntProperty(prefix + "retrieve.create.table.sourcecol", 1);
+	}
+
+	/**
+	 * Returns true if the placeholders for retrieving the table source need to be checked
+	 * for quoting. This is necessary if the SQL is a SELECT statement, but might not
+	 * be necessary if the SQL (defined by getRetrieveTableSourceSql()) is a procedure call
+	 *
+	 * @return true if quotes might be needed.
+	 * @see #getRetrieveTableSourceSql()
+	 */
+	public boolean getRetrieveTableSourceNeedsQuotes()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.checkquotes", true);
+	}
+
 }

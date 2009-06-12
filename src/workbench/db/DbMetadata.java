@@ -271,13 +271,16 @@ public class DbMetadata
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
+			LogMgr.logDebug("DbMetadata", "Identifier quote character obtained driver: " + quoteCharacter);
 		}
 		catch (Exception e)
 		{
 			this.quoteCharacter = null;
+			LogMgr.logError("DbMetadata", "Error when retrieving identifier quote character", e);
 		}
+		
 		if (StringUtil.isBlank(quoteCharacter)) this.quoteCharacter = "\"";
-
+		
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
 		
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
@@ -750,6 +753,36 @@ public class DbMetadata
 		return type;
 	}
 
+	public CharSequence generateDrop(String type, String objectName)
+	{
+		StringBuilder result = new StringBuilder(type.length() + objectName.length() + 15);
+
+		String prefix = "workbench.db.";
+		String suffix = "." + type.toLowerCase() + ".sql." + this.getDbId();
+
+		String drop = Settings.getInstance().getProperty(prefix + "drop" + suffix, null);
+		if (drop == null)
+		{
+			result.append("DROP ");
+			result.append(type.toUpperCase());
+			result.append(' ');
+			result.append(quoteObjectname(objectName));
+			String cascade = this.dbSettings.getCascadeConstraintsVerb(type);
+			if (cascade != null)
+			{
+				result.append(' ');
+				result.append(cascade);
+			}
+			result.append(";\n");
+		}
+		else
+		{
+			drop = StringUtil.replace(drop, "%name%", quoteObjectname(objectName));
+			result.append(drop);
+		}
+		return result;
+	}
+	
 	StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
 	{
 		StringBuilder result = new StringBuilder();
@@ -768,26 +801,7 @@ public class DbMetadata
 
 		if (includeDrop && !replaced)
 		{
-			String drop = Settings.getInstance().getProperty(prefix + "drop" + suffix, null);
-			if (drop == null)
-			{
-				result.append("DROP ");
-				result.append(type.toUpperCase());
-				result.append(' ');
-				result.append(quoteObjectname(name));
-				String cascade = this.dbSettings.getCascadeConstraintsVerb(type);
-				if (cascade != null)
-				{
-					result.append(' ');
-					result.append(cascade);
-				}
-				result.append(";\n");
-			}
-			else
-			{
-				drop = StringUtil.replace(drop, "%name%", quoteObjectname(name));
-				result.append(drop);
-			}
+			result.append(generateDrop(type, name));
 			result.append('\n');
 		}
 

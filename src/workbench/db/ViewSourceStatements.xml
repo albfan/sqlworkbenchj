@@ -169,16 +169,16 @@
    <string>ThinkSQL Relational Database Management System</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT view_definition FROM catalog_definition_schema.systable NATURAL JOIN
-catalog_definition_schema.sysschema
-    WHERE table_type='V'
+     <string>SELECT view_definition
+FROM catalog_definition_schema.systable NATURAL JOIN catalog_definition_schema.sysschema
+WHERE table_type='V'
      </string> 
     </void> 
     <void property="objectNameField"> 
      <string>TABLE_NAME</string> 
     </void> 
     <void property="schemaField"> 
-     <string>schema_name</string> 
+     <string>SCHEMA_NAME</string>
     </void> 
    </object> 
   </void> 
@@ -192,6 +192,9 @@ catalog_definition_schema.sysschema
     <void property="objectNameField"> 
      <string>TABLE_NAME</string> 
     </void> 
+    <void property="catalogField">
+     <string>TABLE_SCHEMA</string>
+    </void>
    </object> 
   </void> 
 

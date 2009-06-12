@@ -32,6 +32,31 @@ public class WbPropertiesTest
 		super(testName);
 	}
 
+	public void testMultiLine()
+		throws Exception
+	{
+		TestUtil util = new TestUtil(this.getName());
+
+		File file = new File(util.getBaseDir(), "multiline.properties");
+		TestUtil.writeFile(file,
+			"key1=value1 \\\n" +
+			"value2\n" +
+			"key2=value2\n" +
+			"key3=value3\n"
+		);
+		WbProperties props = new WbProperties();
+		props.loadTextFile(file.getAbsolutePath());
+
+		assertEquals("value1 \nvalue2", props.getProperty("key1"));
+
+		File newfile = new File(util.getBaseDir(), "multine_new.properties");
+		props.saveToFile(newfile);
+
+		WbProperties newprops = new WbProperties();
+		newprops.loadTextFile(newfile.getAbsolutePath());
+		assertEquals("value1 \nvalue2", newprops.getProperty("key1"));
+	}
+	
 	public void testComments()
 		throws Exception
 	{

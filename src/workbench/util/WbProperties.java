@@ -120,6 +120,11 @@ public class WbProperties
 			{
 				value = v.toString();
 				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT);
+
+				// Newlines will also be encoded, but we want them "visible" with
+				// line continuation in the written file
+				value = value.replace("\\n", "\\\n");
+				
 				if (value.length() > 0)
 				{
 					bw.write(key + "=" + value);
@@ -332,7 +337,7 @@ public class WbProperties
 	{
 		BufferedReader in = null;
 		File f = new File(filename);
-		if(encoding == null)
+		if (encoding == null)
 		{
 			encoding = Settings.getInstance().getDefaultEncoding();
 		}
@@ -359,6 +364,8 @@ public class WbProperties
 	{
 		String line = in.readLine();
 		String lastComment = null;
+		String lineFragment = null;
+
 		while (line != null)
 		{
 			if (StringUtil.isBlank(line))
@@ -377,9 +384,30 @@ public class WbProperties
 					lastComment += "\n" + line;
 				}
 			}
+			else if (line.trim().endsWith("\\"))
+			{
+				line = line.substring(0, line.lastIndexOf("\\"));
+				if (lineFragment == null)
+				{
+					lineFragment = line;
+				}
+				else
+				{
+					lineFragment += "\n" + line;
+				}
+			}
 			else
 			{
-				this.addPropertyDefinition(StringUtil.decodeUnicode(line), lastComment);
+				if (lineFragment != null)
+				{
+					lineFragment += "\n" + line;
+					this.addPropertyDefinition(StringUtil.decodeUnicode(lineFragment), lastComment);
+					lineFragment = null;
+				}
+				else
+				{
+					this.addPropertyDefinition(StringUtil.decodeUnicode(line), lastComment);
+				}
 				lastComment = null;
 			}
 			line = in.readLine();

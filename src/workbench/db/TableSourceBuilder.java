@@ -11,7 +11,9 @@
  */
 package workbench.db;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -20,6 +22,7 @@ import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -105,8 +108,12 @@ public class TableSourceBuilder
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
+		if (table == null) return StringUtil.EMPTY_STRING;
+
+		String nativeSql = getNativeTableSource(table, includeDrop);
+		if (nativeSql != null) return nativeSql;
+
 		if (columns == null || columns.size() == 0) return StringUtil.EMPTY_STRING;
-		if (table == null) return "";
 
 		if ("MVIEW_NAME".equals(table.getType()))
 		{
@@ -334,6 +341,89 @@ public class TableSourceBuilder
 		return name;
 	}
 
+	public String getNativeTableSource(TableIdentifier table, boolean includeDrop)
+	{
+		String sql = dbConnection.getDbSettings().getRetrieveTableSourceSql();
+		if (sql == null) return null;
+
+		StringBuilder result = new StringBuilder(100);
+
+		int colIndex = dbConnection.getDbSettings().getRetrieveTableSourceCol();
+
+		if (includeDrop)
+		{
+			CharSequence drop = dbConnection.getMetadata().generateDrop(table.getType(), table.getTableExpression(dbConnection));
+			result.append(drop);
+			result.append("\n\n");
+		}
+
+		boolean needQuotes = dbConnection.getDbSettings().getRetrieveTableSourceNeedsQuotes();
+
+		if (StringUtil.isBlank(table.getCatalog()))
+		{
+			sql = sql.replace("%catalog%.", ""); // in case the sql contains %catalog%.%tablename%
+			sql = sql.replace("%catalog%", ""); // in case no trailing dot is present (e.g. for a procedure call)
+		}
+		else
+		{
+			String cat = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getCatalog()) : table.getCatalog());
+			sql = sql.replace("%catalog%", cat);
+		}
+
+		if (StringUtil.isBlank(table.getSchema()))
+		{
+			sql = sql.replace("%schema%.", "");
+			sql = sql.replace("%schema%", "");
+		}
+		else
+		{
+			String schema = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getSchema()) : table.getSchema());
+			sql = sql.replace("%schema%", schema);
+		}
+
+
+		String tname = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getTableName()) : table.getTableName());
+		sql = sql.replace("%tablename%", tname);
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("TableSourceBuilder.getNativeTableSource()", "Using SQL=" + sql);
+		}
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			stmt = dbConnection.createStatement();
+			rs = stmt.executeQuery(sql);
+			while (rs.next())
+			{
+				result.append(rs.getString(colIndex));
+			}
+			result.append('\n');
+		}
+		catch (SQLException se)
+		{
+			LogMgr.logError("TableSourceBuilder.getNativeTableSource()", "Error retrieving table source", se);
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		StringUtil.trimTrailingWhitespace(result);
+		if (result.charAt(result.length() -1 ) != ';')
+		{
+			result.append(";\n");
+		}
+
+		if (dbConnection.getDbSettings().ddlNeedsCommit())
+		{
+			result.append("\n");
+			result.append("COMMIT;\n");
+		}
+
+		return result.toString();
+	}
 	/**
 	 * Builds an ALTER TABLE to add a primary key definition for the given tablename.
 	 *

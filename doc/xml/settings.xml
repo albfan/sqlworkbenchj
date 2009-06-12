@@ -929,7 +929,54 @@
     </simplesect>
 		
   </section>
-	
+
+  <section id="settings-table-source-retrieval">
+    <title>Customize table source retrieval</title>
+    <para>
+      &wb-productname; re-generates the source of a table based on the information
+      about the table's metadata returned by the driver. In some cases the driver might
+      not return the correct information, or not all the information that is necessary
+      to build the correct syntax for the DBMS. In those cases, a SQL query can be configured
+      that can use the built-in functionality of the DBMS to return a table's definition.
+    </para>
+    <para>
+      This DBMS specific retrieval of the table source is defined by two properties in
+      <literal>workbench.settings</literal>.
+    </para>
+
+    <simplesect id="settings-table-source-query">
+			<title>Defining the SQL statement</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.query</literal></para>
+			<para>
+        This property defines the SQL query that should be executed. It must be a statement that
+        returns a result set. The statement may contain three placeholders: <literal>%catalog%</literal>,
+        <literal>%schema%</literal> and <literal>%tablename%</literal> that are replaced with the values of
+        the actual table before running the statement.
+			</para>
+    </simplesect>
+
+    <simplesect id="settings-table-source-colindex">
+			<title>Defining the result column</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.retrieve.create.table.sourcecol</literal></para>
+			<para>
+        The source of the table might not be returned in the first column of the result set. If this
+        is the case this property can be used to define the column index in which the table's source
+        is available. The first column has the index 1.
+			</para>
+    </simplesect>
+
+    <para>
+      The following example configures a SQL statement to retrieve the table's source using MySQL's
+      "SHOW CREATE TABLE":
+    </para>
+    <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %catalog%.%tablename%
+workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
+
+    <para>
+      If an error occurs during retrieval, &wb-productname; will revert to the built-in table
+      source generation.
+    </para>
+  </section>
 	
 	<section id="filter-settings">
 		<title>Filter settings</title>

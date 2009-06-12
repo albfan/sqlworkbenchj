@@ -530,4 +530,21 @@ FROM geo_table
 		</para>
 
 	</section>
+  <section id="customize-table-source-generation">
+    <title>Customizing the generation of the table source</title>
+    <para>
+      &wb-productname; re-generates the source of a table based on the information
+      about the table's metadata returned by the driver. In some cases the driver might
+      not return the correct information, or not all the information that is necessary
+      to build the correct syntax for the DBMS. In those cases, a SQL query can be configured
+      that can use the built-in functionality of the DBMS to return a table's definition.
+    </para>
+    <para>
+      This DBMS specific retrieval of the table source is defined by three properties in
+      <literal>workbench.settings</literal>.
+      Please refer to <link linkend="settings-table-source-retrieval">Customize table source retrieval</link>
+      for details.
+    </para>
+  </section>
+  
 </section>

@@ -159,7 +159,16 @@
 				see <ulink url="http://dev.mysql.com/doc/refman/4.1/en/connector-j-installing-upgrading.html">the MySQL site</ulink>
 			</para>
 		</section>
-		
+
+		<section id="mysql-no-view-source">
+			<title>Source SQL for views is not displayed</title>
+			<para>
+				&wb-productname; retrieves the view definitioin from <literal>INFORMATION_SCHEMA.VIEWS</literal>.
+        In some cases the column <literal>VIEW_DEFINITION</literal> does not contain the view definition 
+        and thus the source cannot be displayed.
+			</para>
+		</section>
+
 	</section>
 	
 	<section id="mssql-problems">

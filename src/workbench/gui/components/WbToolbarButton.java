@@ -15,6 +15,7 @@ import java.awt.Insets;
 import javax.swing.Action;
 import javax.swing.Icon;
 import workbench.WbManager;
+import workbench.resource.Settings;
 
 /**
  *
@@ -65,7 +66,7 @@ public class WbToolbarButton
 		// The toolbar buttons in Java 1.5 are somewhat broken
 		// the distance between buttons is too small and the rollover
 		// effect does not work with the windows classic look and feel.
-		if (WbManager.getInstance().isJava15 && WbManager.getInstance().isWindowsClassic())
+		if (Settings.isJava5() && WbManager.getInstance().isWindowsClassic())
 		{
 			enableBasicRollover();
 		}

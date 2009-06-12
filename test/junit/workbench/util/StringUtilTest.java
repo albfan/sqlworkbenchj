@@ -344,6 +344,33 @@ public class StringUtilTest
 		String newline = StringUtil.makePlainLinefeed(line);
 		assertEquals("No LF", "line1\nline2", newline);
 	}
+
+	public void testTrimStringBuilder()
+	{
+		StringBuilder s = new StringBuilder();
+		s.append("hello   ");
+		StringUtil.trimTrailingWhitespace(s);
+		assertEquals("hello", s.toString());
+
+		s = new StringBuilder();
+		s.append("hello\n");
+		StringUtil.trimTrailingWhitespace(s);
+		assertEquals("hello", s.toString());
+
+		s = new StringBuilder();
+		s.append("hello\nnewline  ");
+		StringUtil.trimTrailingWhitespace(s);
+		assertEquals("hello\nnewline", s.toString());
+
+		s = new StringBuilder();
+		s.append(" hello");
+		StringUtil.trimTrailingWhitespace(s);
+		assertEquals(" hello", s.toString());
+
+		s = new StringBuilder();
+		StringUtil.trimTrailingWhitespace(s);
+		assertEquals("", s.toString());
+	}
 	
 	public void testRtrim()
 	{

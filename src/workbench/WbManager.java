@@ -80,15 +80,11 @@ public final class WbManager
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
-	public final boolean isJava15;
 
 	private WbManager()
 	{
 		Runtime.getRuntime().addShutdownHook(this.shutdownHook);
 		Thread.setDefaultUncaughtExceptionHandler(this);
-
-		String version = System.getProperty("java.version", System.getProperty("java.runtime.version"));
-		isJava15 = version.startsWith("1.5");
 	}
 
 	public static WbManager getInstance()
@@ -646,9 +642,14 @@ public final class WbManager
 		boolean autoSelect = Settings.getInstance().getShowConnectDialogOnStartup();
 		final boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
 
-		if (Settings.getInstance().getBoolProperty("workbench.warn.java5", false) && Settings.isJava5())
+		final int maxWarnings = 3;
+		int warn = Settings.getInstance().getIntProperty("workbench.warn.java5", 1);
+
+		if (warn <= maxWarnings && Settings.isJava5())
 		{
 			WbSwingUtilities.showErrorMessageKey(main, "ErrWrongJava");
+			warn ++;
+			Settings.getInstance().setProperty("workbench.warn.java5", warn);
 		}
 
 		// no connection? then display the connection dialog

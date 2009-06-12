@@ -70,7 +70,25 @@
 		</para>
 
 	</section>
-	
+
+  <section id="odbc-connection">
+    <title>Connecting through ODBC</title>
+    <para>
+      To connect to a database using an ODBC driver, you must first setup an
+      ODBC datasource with the tools of your operating system (e.g. the control
+      panel in Windows&reg;)
+    </para>
+    <para>
+      Once you have set up the ODBC datasource, select the ODBC Bridge as the driver
+      in the connection dialog. The JDBC URL for the datasource connection then is
+      <literal>jdbc:odbc:name_of_your_datasource</literal>.
+    </para>
+    <para>
+      If you named your ODBC datasource <literal>ProductDB</literal>, then the JDBC url for &wb-productname; would be
+      <literal>jdbc:odbc:ProductDB</literal>
+    </para>
+  </section>
+
 	<section id="jdbc-lib-dir">
 		<title>Specifying a library directory</title>
 		<para>
@@ -82,7 +100,7 @@
 			switch when starting the application.
 		</para>
 	</section>
-	
+
 	<section id="jdbc-drivers">
 		<title>Popular JDBC drivers</title>
 

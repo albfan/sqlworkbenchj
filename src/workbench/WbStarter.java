@@ -17,7 +17,7 @@ import javax.swing.JOptionPane;
 
 /**
  * This is a wrapper to kick-off the actual WbManager class. It should run 
- * with any JDK >= 1.3 as it does no reference any other classes. 
+ * with any JDK >= 1.3 as it does not reference any other classes.
  * This class is compiled separately in build.xml to allow for a different 
  * class file version between this class and the rest of the application.
  * Thus a check for the correct JDK version can be done inside the Java code.
@@ -83,8 +83,6 @@ public class WbStarter
 		{
 			e.printStackTrace();
 		}
-		
-		
 	}
 
 }
