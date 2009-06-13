@@ -14,6 +14,24 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (104.1) released</title>
+      <description>        <![CDATA[<p>Changes from build 104.0 to build 104.1</p><p>Enhancements</p><ul>
+<li>The SQL Macros can now be displayed in a floating window. Double clicking a macro will run the macro in the currently selected SQL tab.</li>
+<li>The generation of the source SQL for a table can now be configured in order to use the functions the DBMS supports (e.g. SHOW CREATE TABLE for MySQL), so that incompatibilities of the DBMS with the ANSI SQL standard can be worked around. A detailed description is in the manual in the section "Customize table source retrieval" of the chapter "Properties in the .settings file"</li>
+<li>When using WbExport to generate HTML two new parameters can be used to specify HTML code that is added before and after the actual export data (-preDataHtml, -postDataHtml)</li>
+</ul><p>Bug Fixes</p><ul>
+<li>When prompting vor variables, entering an empty value would remove the variable from the internal variables pool. It is now stored with an empty string as its value.</li>
+<li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
+<li>For WbCopy -createTarget was not working if the source was a query.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-104.1</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Fri, 12 Jun 2009 18:15:41 +0200</pubDate>
+    </item>
+    <item>
       <title>New stable build (104) released</title>
       <description>        <![CDATA[<p>Changes from build 103 to build 104</p><p>Enhancements</p><ul>
 <li>All fonts can now be reset to their defaults in the options dialog.</li>
@@ -67,6 +85,8 @@
 <li>When selecting a different view in the DbExplorer while the view source was displayed, the wrong source code was displayed for the newly selected view.</li>
 <li>When MySQL was not set to ANSI mode, primary key columns that needed quoting were not detected properly due to MySQL's non-standard quoting character (in non-ANSI mode)</li>
 </ul>
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -90,6 +110,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -104,6 +126,8 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
 
 
 
@@ -132,6 +156,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -148,6 +174,8 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
 
 
 
@@ -191,6 +219,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -206,6 +236,8 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
 
 
 
@@ -257,6 +289,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -273,6 +307,8 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
+
 
 
 

@@ -9,207 +9,207 @@
 
 <site name="SQL Workbench/J">
 
-	<page name="index" title="Home" toc="main">
-		<title>SQL Workbench/J Homepage</title>
-		<subtitle>The free DBMS-independent SQL Tool</subtitle>
-		<content>
-		<p>
-		SQL Workbench/J is a free, DBMS-independent, cross-platform SQL query tool. It is written in Java and
-		thus it should run on any operating system that provides a Java Runtime Environment.
-		</p>
-		
-		<p>
-		It's main focus is on running SQL scripts (either interactively or as a batch) and export/import features.
-		Graphical query building or more advanced DBA tasks are not the focus and are not planned</p>
-		
-		<p>
-			Current stable version: <span style="font-weight:bold"><a href="downloads.html">Build <build-number/> (<build-date/>)</a></span>
-			<dev-build-info/>
-		</p>
-		
-		<p>Features:</p>
-		<ul>
-			<li>Display result data from SQL queries (<image-link title="Main window" name="MainWindow.png">Screenshot</image-link>)</li>
-			<li>Edit, insert and delete data directly in the result table (<image-link title="Editing data in result set" name="EditData.png">Screenshot</image-link>)</li>
-			<li>Powerful <a href="manual/command-export.html">export command</a> to write text files (aka "CSV"), XML, HTML or SQL (including BLOB data).<br/>
-			    All user tables can be exported into a directory with a single command. Export files can be compress "on-the-fly".</li>
-			<li>Powerful text and XML file <a href="manual/command-import.html">import</a>. A set of files (including compressed files) can be imported from a directory with a single command. 
-			    Foreign key constraints are detected to insert the data in the correct order</li>
-			<!-- <li>Automatically detect and delete dependent rows when deleting rows from the result table</li> -->
-			<li>Reformatting (Pretty-Print) of SQL Statements (<image-link title="SQL Formatter" name="SqlFormat.png">Screenshot</image-link>)</li>
-			<li>Full support for BLOB data in query results, SQL statements, export and import. <a href="blob_example.html">Read more...</a></li>
-		  <li>Select rows from related tables according to their foreign key definitions (<image-link title="Select child rows" name="child_rows.png">Screenshot1</image-link> <image-link title="Select parent rows" name="parent_rows.png">Screenshot2</image-link>).<br/></li>
-			<li><a href="manual/wb-commands.html#command-schema-diff">Compare</a> two database schemas for differences. The XML output can be transformed into the approriate SQL ALTER statements using <a href="xslt.html">XSLT</a></li>
-			<li><a href="manual/wb-commands.html#command-data-diff">Compare the data</a> of two database and generate the necessary SQL statements to migrate one to the other.</li>
-			<li>Copy data directly between to database servers using a <a href="manual/wb-commands.html#command-copy">SQL command</a> or a GUI (<image-link title="Data Pumper" name="DataPumper.png">Screenshot</image-link>)</li>
-			<li>Makros (aka aliases) for frequently used SQL statements</li>
-			<li>Variable substitution in SQL statements including smart prompting for values (can be combined with Makros)</li>
-			<li>Auto completion for tables and columns in SQL statements (<image-link title="Auto-completion" name="completion.png">Screenshot</image-link>)</li>
-			<li>All SQL Scripts (including Workbench specific commands) can be run in <a href="manual/using-scripting.html">batch mode</a></li>
-			<li>A simple interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
-			<li>Support for pluggable Look &amp; Feels (e.g. <a href="http://www.jgoodies.com/freeware/looks/index.html">JGoodies Looks</a>)</li>
-			<li>SQLWorkbench/J is <b>free</b> (<a href="manual/workbench-manual.html#license">License agreement</a>)</li>
-		</ul>
-		<p>SQL Workbench/J also displays important information about the structure of a database schema</p>
-		<ul>
-			<li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
-			<li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
-			<li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
-			<li>Search for data across all (character) columns in several tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
-		</ul>
-		<p style="margin-top:10px"><a href="wb_news.xml">RSS Feed available</a></p>
-		<!--
-		<p style="margin-top:25px">Please report comments or bugs in the <a href="http://groups.google.com/group/sql-workbench">forum</a> <br/>
-		Your feedback is very much welcome!
-		</p>
-		-->
-		</content>
-	</page>
-	
-	<page name="blob_example" title="BLOB support" toc="false">
-	  <title>BLOB support inside SQL Workbench/J</title>
-	  <content>
-	    <p style="margin-top:10px">
-	      SQL Workbench/J fully suppports BLOB (and CLOB) columns. BLOB data can be displayed and updated
-	      from within the result of a <tt>SELECT</tt> query.<br/>
-				<image-link title="Displaying BLOBs" name="BlobDisplay.png">Screenshot showing info dialog</image-link><br/>
-				<image-link title="Displaying BLOBs" name="BlobDisplay2.png">Screenshot displaying an image</image-link>
-	    </p>
-	    <p style="padding-top:15px;padding-bottom:10px">
-	      SQL Workbench/J also supports direct uploading of BLOB files from the client to the server:
-	    </p>
-	    <p class="programlisting">INSERT INTO person (id,firstname,lastname,photo)
+  <page name="index" title="Home" toc="main">
+    <title>SQL Workbench/J Homepage</title>
+    <subtitle>The free DBMS-independent SQL Tool</subtitle>
+    <content>
+    <p>
+    SQL Workbench/J is a free, DBMS-independent, cross-platform SQL query tool. It is written in Java and
+    thus it should run on any operating system that provides a Java Runtime Environment.
+    </p>
+    
+    <p>
+    It's main focus is on running SQL scripts (either interactively or as a batch) and export/import features.
+    Graphical query building or more advanced DBA tasks are not the focus and are not planned</p>
+    
+    <p>
+      Current stable version: <span style="font-weight:bold"><a href="downloads.html">Build <build-number/> (<build-date/>)</a></span>
+      <dev-build-info/>
+    </p>
+    
+    <p>Features:</p>
+    <ul>
+      <li>Display result data from SQL queries (<image-link title="Main window" name="MainWindow.png">Screenshot</image-link>)</li>
+      <li>Edit, insert and delete data directly in the result table (<image-link title="Editing data in result set" name="EditData.png">Screenshot</image-link>)</li>
+      <li>Powerful <a href="manual/command-export.html">export command</a> to write text files (aka "CSV"), XML, HTML or SQL (including BLOB data).<br/>
+          All user tables can be exported into a directory with a single command. Export files can be compress "on-the-fly".</li>
+      <li>Powerful text and XML file <a href="manual/command-import.html">import</a>. A set of files (including compressed files) can be imported from a directory with a single command. 
+          Foreign key constraints are detected to insert the data in the correct order</li>
+      <!-- <li>Automatically detect and delete dependent rows when deleting rows from the result table</li> -->
+      <li>Reformatting (Pretty-Print) of SQL Statements (<image-link title="SQL Formatter" name="SqlFormat.png">Screenshot</image-link>)</li>
+      <li>Full support for BLOB data in query results, SQL statements, export and import. <a href="blob_example.html">Read more...</a></li>
+      <li>Select rows from related tables according to their foreign key definitions (<image-link title="Select child rows" name="child_rows.png">Screenshot1</image-link> <image-link title="Select parent rows" name="parent_rows.png">Screenshot2</image-link>).<br/></li>
+      <li><a href="manual/wb-commands.html#command-schema-diff">Compare</a> two database schemas for differences. The XML output can be transformed into the approriate SQL ALTER statements using <a href="xslt.html">XSLT</a></li>
+      <li><a href="manual/wb-commands.html#command-data-diff">Compare the data</a> of two database and generate the necessary SQL statements to migrate one to the other.</li>
+      <li>Copy data directly between to database servers using a <a href="manual/wb-commands.html#command-copy">SQL command</a> or a GUI (<image-link title="Data Pumper" name="DataPumper.png">Screenshot</image-link>)</li>
+      <li>Makros (aka aliases) for frequently used SQL statements</li>
+      <li>Variable substitution in SQL statements including smart prompting for values (can be combined with Makros)</li>
+      <li>Auto completion for tables and columns in SQL statements (<image-link title="Auto-completion" name="completion.png">Screenshot</image-link>)</li>
+      <li>All SQL Scripts (including Workbench specific commands) can be run in <a href="manual/using-scripting.html">batch mode</a></li>
+      <li>A simple interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
+      <li>Support for pluggable Look &amp; Feels (e.g. <a href="http://www.jgoodies.com/freeware/looks/index.html">JGoodies Looks</a>)</li>
+      <li>SQLWorkbench/J is <b>free</b> (<a href="manual/workbench-manual.html#license">License agreement</a>)</li>
+    </ul>
+    <p>SQL Workbench/J also displays important information about the structure of a database schema</p>
+    <ul>
+      <li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
+      <li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
+      <li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
+      <li>Search for data across all (character) columns in several tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
+    </ul>
+    <p style="margin-top:10px"><a href="wb_news.xml">RSS Feed available</a></p>
+    <!--
+    <p style="margin-top:25px">Please report comments or bugs in the <a href="http://groups.google.com/group/sql-workbench">forum</a> <br/>
+    Your feedback is very much welcome!
+    </p>
+    -->
+    </content>
+  </page>
+  
+  <page name="blob_example" title="BLOB support" toc="false">
+    <title>BLOB support inside SQL Workbench/J</title>
+    <content>
+      <p style="margin-top:10px">
+        SQL Workbench/J fully suppports BLOB (and CLOB) columns. BLOB data can be displayed and updated
+        from within the result of a <tt>SELECT</tt> query.<br/>
+        <image-link title="Displaying BLOBs" name="BlobDisplay.png">Screenshot showing info dialog</image-link><br/>
+        <image-link title="Displaying BLOBs" name="BlobDisplay2.png">Screenshot displaying an image</image-link>
+      </p>
+      <p style="padding-top:15px;padding-bottom:10px">
+        SQL Workbench/J also supports direct uploading of BLOB files from the client to the server:
+      </p>
+      <p class="programlisting">INSERT INTO person (id,firstname,lastname,photo)
 VALUES
 (1,'Arthur','Dent',{$blobfile=c:/temp/hitchguide.bmp});</p>
       <p style="padding-top:10px">
-				The extended syntax is also supported for <tt>UPDATE</tt> statements and is independent of
+        The extended syntax is also supported for <tt>UPDATE</tt> statements and is independent of
         the DBMS. It is only limited by the level of JDBC compliance of the driver.
-			</p>
-			<p>
-				<a href="manual/wb-commands.html#command-export"><tt>WbExport</tt></a> and
-				<a href="manual/wb-commands.html#command-import"><tt>WbImport</tt></a> fully support BLOB columns when
-				exporting to text ("flat files") or XML files. 
-	    </p>
-	    <p>For more details, please read the <a href="manual/using.html#blob-support">manual</a>.</p>
-	  </content>
-	</page>
-	<page name="databases" title="Supported DBMS"  toc="main">
+      </p>
+      <p>
+        <a href="manual/wb-commands.html#command-export"><tt>WbExport</tt></a> and
+        <a href="manual/wb-commands.html#command-import"><tt>WbImport</tt></a> fully support BLOB columns when
+        exporting to text ("flat files") or XML files. 
+      </p>
+      <p>For more details, please read the <a href="manual/using.html#blob-support">manual</a>.</p>
+    </content>
+  </page>
+  <page name="databases" title="Supported DBMS"  toc="main">
     <title>Supported database systems</title>
     <content>
-		<p style="margin-top:10px">SQL Workbench/J is known to work with the following database systems:</p>
-		<ul>
-			<li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
-			<li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
-			<li><a target="_blank" href="http://www.h2database.com">H2 Database Engine</a></li>
-			<li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;amp;sub=jdbc">(Download JDBC driver)</a></li>
-			<li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>
-			<li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
-			<li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a> <a target="_blank" href="http://www-01.ibm.com/software/data/db2/express/additional-downloads.html">(Download JDBC driver)</a></li>
-			<!-- <li><a target="_blank" href="http://www.mckoi.com/database/">McKoi SQL Database</a></li> -->
-			<li><a target="_blank" href="http://www.ingres.com/">Ingres</a></li>
-			<li><a target="_blank" href="http://www.sqlite.org/">SQLite</a> (with <a href="http://www.zentus.com/sqlitejdbc/">SQLiteJDBC</a>)</li>
-			<li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
-			<li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> (<a target="_blank" href="http://msdn2.microsoft.com/en-us/data/aa937724.aspx">Download MS driver</a> <a target="_blank" href="http://jtds.sourceforge.net/">Download free jTDS driver</a>)</li>
-			<!-- <li><a target="_blank" href="http://www.thinksql.co.uk">ThinkSQL</a></li> -->
-			<!-- <li><a target="_blank" href="http://www.firstsql.com">FirstSQL/J</a></li> -->
-		</ul>
-		<p>Displaying the source for trigger, views, stored procedures and functions is not part of the JDBC
-		API and thus is implemeted through customized SQL queries. If you find that support for this information
-		is missing for your DBMS, please feel free to contact me.
-		</p>
-		<p>SQL Workbench/J is using primarily standard JDBC API calls and therefore the basic
-		function should work with any DBMS that has a JDBC driver. It also works with ODBC
-		drivers through the JDBC/ODBC bridge, though this is not very performant. But basic
-		queries on e.g. Excel&reg; worksheets do work.
-		</p>
-		</content>
-	</page>
+    <p style="margin-top:10px">SQL Workbench/J is known to work with the following database systems:</p>
+    <ul>
+      <li><a target="_blank" href="http://www.postgresql.org/">PostgreSQL</a> <a target="_blank" href="http://jdbc.postgresql.org/download.html">(Download JDBC driver)</a></li>
+      <li><a target="_blank" href="http://www.oracle.com">Oracle</a> <a target="_blank" href="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html">(Download JDBC driver)</a></li>
+      <li><a target="_blank" href="http://www.h2database.com">H2 Database Engine</a></li>
+      <li><a target="_blank" href="http://www.firebirdsql.org">Firebird SQL</a> <a target="_blank" href="http://www.firebirdsql.org/index.php?op=devel&amp;amp;sub=jdbc">(Download JDBC driver)</a></li>
+      <li><a target="_blank" href="http://db.apache.org/derby/">Apache Derby</a></li>
+      <li><a target="_blank" href="http://hsqldb.sourceforge.net/">HSQLDB</a></li>
+      <li><a target="_blank" href="http://www.ibm.com/software/data/db2/">IBM DB2</a> <a target="_blank" href="http://www-01.ibm.com/software/data/db2/express/additional-downloads.html">(Download JDBC driver)</a></li>
+      <!-- <li><a target="_blank" href="http://www.mckoi.com/database/">McKoi SQL Database</a></li> -->
+      <li><a target="_blank" href="http://www.ingres.com/">Ingres</a></li>
+      <li><a target="_blank" href="http://www.sqlite.org/">SQLite</a> (with <a href="http://www.zentus.com/sqlitejdbc/">SQLiteJDBC</a>)</li>
+      <li><a target="_blank" href="http://www.mysql.com/">MySQL</a> <a target="_blank" href="http://www.mysql.com/products/connector/j">(Download JDBC Driver)</a></li>
+      <li><a target="_blank" href="http://www.microsoft.com/sql">Microsoft SQL Server</a> (<a target="_blank" href="http://msdn2.microsoft.com/en-us/data/aa937724.aspx">Download MS driver</a> <a target="_blank" href="http://jtds.sourceforge.net/">Download free jTDS driver</a>)</li>
+      <!-- <li><a target="_blank" href="http://www.thinksql.co.uk">ThinkSQL</a></li> -->
+      <!-- <li><a target="_blank" href="http://www.firstsql.com">FirstSQL/J</a></li> -->
+    </ul>
+    <p>Displaying the source for trigger, views, stored procedures and functions is not part of the JDBC
+    API and thus is implemeted through customized SQL queries. If you find that support for this information
+    is missing for your DBMS, please feel free to contact me.
+    </p>
+    <p>SQL Workbench/J is using primarily standard JDBC API calls and therefore the basic
+    function should work with any DBMS that has a JDBC driver. It also works with ODBC
+    drivers through the JDBC/ODBC bridge, though this is not very performant. But basic
+    queries on e.g. Excel&reg; worksheets do work.
+    </p>
+    </content>
+  </page>
 
-	<!-- ======================== Getting started ========================== -->
-	<page name="getting-started" title="Getting started" toc="main">
-		<title>SQL Workbench/J</title>
-		<subtitle>Getting started</subtitle>
-		<content>
-		  <p>SQL Workbench/J needs a <a target="_blank" href="http://java.sun.com/javase/downloads/index.jsp">Java 5 runtime</a> environment (Java 6 is recommended).
-			You have to install the JDK or JRE before you can run SQL Workbench/J.
-			</p>
-			<p>After <a href="downloads.html">downloading</a> SQL Workbench/J, unzip the archive into
-			a directory of your choice. The application is now ready to be run.</p>
-			
-			<p>If you are using Windows&reg; you can use the supplied
-			<tt>sqlworkbench.exe</tt> executable to start the application.</p>
-			
-			<p style="margin-top:15px;margin-bottom:15px;">Windows Vista users please <a href="vista.html">read this</a>.</p>
-			
-			<p>If you are running Linux (or another Unix&reg; like operating system) you can use
-			the supplied shell script <tt>sqlworkbench.sh</tt> to start the application.</p>
+  <!-- ======================== Getting started ========================== -->
+  <page name="getting-started" title="Getting started" toc="main">
+    <title>SQL Workbench/J</title>
+    <subtitle>Getting started</subtitle>
+    <content>
+      <p>SQL Workbench/J needs a <a target="_blank" href="http://java.sun.com/javase/downloads/index.jsp">Java 5 runtime</a> environment (Java 6 is recommended).
+      You have to install the JDK or JRE before you can run SQL Workbench/J.
+      </p>
+      <p>After <a href="downloads.html">downloading</a> SQL Workbench/J, unzip the archive into
+      a directory of your choice. The application is now ready to be run.</p>
+      
+      <p>If you are using Windows&reg; you can use the supplied
+      <tt>sqlworkbench.exe</tt> executable to start the application.</p>
+      
+      <p style="margin-top:15px;margin-bottom:15px;">Windows Vista users please <a href="vista.html">read this</a>.</p>
+      
+      <p>If you are running Linux (or another Unix&reg; like operating system) you can use
+      the supplied shell script <tt>sqlworkbench.sh</tt> to start the application.</p>
 
-			<p>SQL Workbench/J is a Java application that is contained in the file <tt>sqlworkbench.jar</tt>
-			This is a <a href="http://java.sun.com/j2se/1.5.0/docs/guide/jar/jarGuide.html">self executable JAR file</a>
-			that can also be started by double clicking on it, provided that the Java Runtime Environment (JRE/JDK)
-			is installed properly and the <tt>jar</tt> extension is registered within the system.</p>
-			
-			<p>After a first time installation, you will need to configure the JDBC drivers to be used
-			with the application. The location of the driver libraries can be specified using
-			the "File->Manage drivers" menu item. This dialog is also available from the connection
-			dialog. Once you have specified the location of the driver, select the driver from the
-			drop down in the connection dialog and provide the necessary login information.
-			</p>
-			
-			<p>For further details, please refer to the <a href="manual/workbench-manual.html">manual</a></p>
-		</content>
-	</page>
+      <p>SQL Workbench/J is a Java application that is contained in the file <tt>sqlworkbench.jar</tt>
+      This is a <a href="http://java.sun.com/j2se/1.5.0/docs/guide/jar/jarGuide.html">self executable JAR file</a>
+      that can also be started by double clicking on it, provided that the Java Runtime Environment (JRE/JDK)
+      is installed properly and the <tt>jar</tt> extension is registered within the system.</p>
+      
+      <p>After a first time installation, you will need to configure the JDBC drivers to be used
+      with the application. The location of the driver libraries can be specified using
+      the "File->Manage drivers" menu item. This dialog is also available from the connection
+      dialog. Once you have specified the location of the driver, select the driver from the
+      drop down in the connection dialog and provide the necessary login information.
+      </p>
+      
+      <p>For further details, please refer to the <a href="manual/workbench-manual.html">manual</a></p>
+    </content>
+  </page>
 
-	<!-- ======================== Support ========================== -->
-	<page name="support" title="Support" toc="main">
-		<title>SQL Workbench/J</title>
-		<subtitle>Support</subtitle>
-		<content>
-		  <p>There are three ways how you can get support for SQL Workbench/J</p>
+  <!-- ======================== Support ========================== -->
+  <page name="support" title="Support" toc="main">
+    <title>SQL Workbench/J</title>
+    <subtitle>Support</subtitle>
+    <content>
+      <p>There are three ways how you can get support for SQL Workbench/J</p>
       <ul>
         <li>Read the <a href="manual/workbench-manual.html" target="_blank">manual</a></li>
         <li style="padding-bottom:20px">Check out the SQL Workbench/J <a href="http://groups.google.com/group/sql-workbench" target="_blank">google group</a></li>
         <li>Send an email to <mail-to/></li>
       </ul>
-		</content>
-	</page>
+    </content>
+  </page>
 
   <!-- ======================== XSLT Files ========================== -->
   <page name="xslt" title="XSLT" toc="main">
     <title>Sample XSL transformations</title>
     <content>
-	    <p>Several SQL Workbench/J commands produce XML output (e.g. WbSchemaReport to
-			generate a report of the current schema, or the output of the WbSchemaDiff command).
-			</p>
-			<p>On this page you can find some sample XSLT files to transform these output
-			formats into SQL scripts or HTML documents. These scripts are meant to be a
-			starting point that can be enhanced to meet your own needs.
-			</p>
-			<p>They are far from beeing production-quality scripts and are meant
-			as a starting point for your own needs.
-			</p>
-			<p>If you have developed an XSLT file to support the various
-			XML outputs of SQL Workbench/J and would like to share it, please send
-			it to <mail-to/></p>
-			<h2 style="text-align:left;padding-top:25px">WbSchemaReport transformations</h2>
-  			<p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbSchemaReport</a>
-			command</p>
-			<ul>
-			  <li><a href="wbreport2html.xslt">HTML output</a></li>
-			  <li><a href="wbreport2pg.xslt">Create a script for PostgreSQL</a></li>
-			  <li><a href="wbreport2oracle.xslt">Create a script for Oracle</a></li>
-			  <li><a href="wbreport2proc.xslt">Extract procedures</a></li>
-	 		</ul>
+      <p>Several SQL Workbench/J commands produce XML output (e.g. WbSchemaReport to
+      generate a report of the current schema, or the output of the WbSchemaDiff command).
+      </p>
+      <p>On this page you can find some sample XSLT files to transform these output
+      formats into SQL scripts or HTML documents. These scripts are meant to be a
+      starting point that can be enhanced to meet your own needs.
+      </p>
+      <p>They are far from beeing production-quality scripts and are meant
+      as a starting point for your own needs.
+      </p>
+      <p>If you have developed an XSLT file to support the various
+      XML outputs of SQL Workbench/J and would like to share it, please send
+      it to <mail-to/></p>
+      <h2 style="text-align:left;padding-top:25px">WbSchemaReport transformations</h2>
+        <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbSchemaReport</a>
+      command</p>
+      <ul>
+        <li><a href="wbreport2html.xslt">HTML output</a></li>
+        <li><a href="wbreport2pg.xslt">Create a script for PostgreSQL</a></li>
+        <li><a href="wbreport2oracle.xslt">Create a script for Oracle</a></li>
+        <li><a href="wbreport2proc.xslt">Extract procedures</a></li>
+       </ul>
 
-			<h2 style="text-align:left;padding-top:5px">WbSchemaDiff transformations</h2>
-			<p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-diff">WbSchemaDiff</a>
-			command</p>
-			<ul>
-			  <li><a href="wbdiff2pg.xslt">Transform to a PostgreSQL script</a></li>
-			  <li><a href="wbdiff2oracle.xslt">Transform to an Oracle script</a></li>
-			  <li><a href="wbdiff2derby.xslt">Transform to an Apache Derby script</a></li>
-			  <li><a href="wbdiff2mssql.xslt">Transform to an Microsoft SQL Server script</a></li>
-	 		</ul>
+      <h2 style="text-align:left;padding-top:5px">WbSchemaDiff transformations</h2>
+      <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-diff">WbSchemaDiff</a>
+      command</p>
+      <ul>
+        <li><a href="wbdiff2pg.xslt">Transform to a PostgreSQL script</a></li>
+        <li><a href="wbdiff2oracle.xslt">Transform to an Oracle script</a></li>
+        <li><a href="wbdiff2derby.xslt">Transform to an Apache Derby script</a></li>
+        <li><a href="wbdiff2mssql.xslt">Transform to an Microsoft SQL Server script</a></li>
+       </ul>
     </content>
   </page>
   
@@ -218,9 +218,9 @@ VALUES
         <title>SQL Workbench/J</title>
         <subtitle>Available Downloads</subtitle>
         <content>
-				<p style="margin-top:10px;">
-					This application requires Java 5 (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
-				</p>
+            <p style="margin-top:10px;">
+                This application requires Java 5 (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
+            </p>
         <p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
           The support for Java 5 will be removed at the end of this year when Java 5 itself will be de-supported by Sun.
         </p>
@@ -232,10 +232,14 @@ VALUES
             <li><mac-link/></li>
             <li><source-link/></li>
         </ul>
-        <p>	The release archive contains the needed binaries, the manual in HTML and PDF format and some sample XSLT
-	    	scripts.
-				</p>
-				<p>You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases</p>
+        <p>
+          Looking for a free entity realationship modeling tool? Try <a href="http://www.sqlpower.ca/page/architect">Power*Architect</a>.
+        </p>
+        <p>
+          The release archive contains the needed binaries, the manual in HTML and PDF format and some sample XSLT
+          scripts.
+        </p>
+        <p>You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases</p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
         <p><a style="color:red" href="vista.html">A note to Windows Vista users</a>.</p>
         <dev-build/>
@@ -244,48 +248,48 @@ VALUES
 
   <page name="history" title="Release History" toc="main">
     <title>SQL Workbench/J</title>
-		<subtitle>Release History</subtitle>
-		<content>
-		  <full-history/>
-		</content>
+    <subtitle>Release History</subtitle>
+    <content>
+      <full-history/>
+    </content>
   </page>
 
   <page id="dev-history" title="Change Log" toc="false">
     <title>SQL Workbench/J</title>
-		<content>
-		  <dev-history/>
-		</content>
+    <content>
+      <dev-history/>
+    </content>
   </page>
   
   <page link="wb_news.xml" title="RSS Feed"/>
 
-	<page name="source-svn" title="Subversion Repository" toc="small">
-		<title>SQL Workbench/J</title>
-		<subtitle>Access to the source code</subtitle>
-		<content>
-			<p>
-				In addition to the source archive from a release, the source code is
-				hosted on a public subversion repository kindly sponsored	by <a href="http://www.mgm-tp.com">mgm technology partners</a>.
-			</p>
-			<p>
-				The repository is located at <a href="http://sqlworkbench.mgm-tp.com">http://sqlworkbench.mgm-tp.com</a> and
-				can be accessed through a web-browser or by checking it out with svn.
-			</p>
-			<p>
-				To read or checkout the sources you don't need a username.
-			</p>
-			<p>
-				To check out the source use the URL: <tt style="white-space:nowrap;">http://sqlworkbench.mgm-tp.com/sqlworkbench/trunk/sqlworkbench</tt>
-			</p>
-		</content>
-	</page>
+  <page name="source-svn" title="Subversion Repository" toc="small">
+    <title>SQL Workbench/J</title>
+    <subtitle>Access to the source code</subtitle>
+    <content>
+      <p>
+        In addition to the source archive from a release, the source code is
+        hosted on a public subversion repository kindly sponsored  by <a href="http://www.mgm-tp.com">mgm technology partners</a>.
+      </p>
+      <p>
+        The repository is located at <a href="http://sqlworkbench.mgm-tp.com">http://sqlworkbench.mgm-tp.com</a> and
+        can be accessed through a web-browser or by checking it out with svn.
+      </p>
+      <p>
+        To read or checkout the sources you don't need a username.
+      </p>
+      <p>
+        To check out the source use the URL: <tt style="white-space:nowrap;">http://sqlworkbench.mgm-tp.com/sqlworkbench/trunk/sqlworkbench</tt>
+      </p>
+    </content>
+  </page>
 
-	<page name="disclaimer" title="Disclaimer" toc="small">
-		<title>SQL Workbench/J</title>
-		<subtitle>Disclaimer</subtitle>
-		<content>
-			<h3>Disclaimer</h3>
-			<p class="disclaimer">The software is provided &#34;as is&#34;, without warranty of any
+  <page name="disclaimer" title="Disclaimer" toc="small">
+    <title>SQL Workbench/J</title>
+    <subtitle>Disclaimer</subtitle>
+    <content>
+      <h3>Disclaimer</h3>
+      <p class="disclaimer">The software is provided &#34;as is&#34;, without warranty of any
         kind, express or implied, including but not limited to the warranties of merchantability,
         fitness for a particular purpose and noninfringement. In no event shall the author (Thomas Kellerer),
         be liable for any direct, indirect, incidental, special, exemplary, or consequential
@@ -294,41 +298,41 @@ VALUES
         liability, whether in contract, strict liability, or tort (including negligence or
         otherwise) arising in any way out of the use of this software, even if advised of the
         possibility of such damage.
-			</p>
-			<p>In other words:
-				<span style="font-weight:bold">use it at your own risk, and don't blame me if you accidently delete your database!</span>
-			</p>
-		</content>
-	</page>
+      </p>
+      <p>In other words:
+        <span style="font-weight:bold">use it at your own risk, and don't blame me if you accidently delete your database!</span>
+      </p>
+    </content>
+  </page>
 
    <!-- ======================== About the author ========================== -->
-	<page name="author" title="About the author" toc="small">
-		<title>SQL Workbench/J</title>
-		<subtitle>About the author</subtitle>
-		<content>
-			<p>My name is Thomas Kellerer, I live in Munich, Germany.</p>
-			<p>SQL Workbench/J came into existance because I didn't want to learn a new SQL
+  <page name="author" title="About the author" toc="small">
+    <title>SQL Workbench/J</title>
+    <subtitle>About the author</subtitle>
+    <content>
+      <p>My name is Thomas Kellerer, I live in Munich, Germany.</p>
+      <p>SQL Workbench/J came into existance because I didn't want to learn a new SQL
       tool for every DBMS I had to use. I use this tool on a regular (daily) basis
       in my own work. I also wanted to have a tool that could do basic data migration between
       different kinds of DBMS systems.
-			</p>
+      </p>
 
-			<p>If you have any suggestions on how to enhance the application, if you find a bug or if you are missing
+      <p>If you have any suggestions on how to enhance the application, if you find a bug or if you are missing
       support for a DDBMS, feel free to write me an email.
-			</p>
+      </p>
 
-			<p>I will try to add support (beyond what JDBC offers) for any DBMS that I have free access to (e.g. a free
+      <p>I will try to add support (beyond what JDBC offers) for any DBMS that I have free access to (e.g. a free
       trial download).
-			</p>
+      </p>
 
-			<p>
-				Some of the DBMS specific support in the <a target="_blank" href="manual/dbexplorer.html">Database Explorer</a>
-			(e.g. display of stored procedure source, view source) can be configured without building a new
-			distribution. If you have questions regarding this, feel free to write me an email.
-			</p>
+      <p>
+        Some of the DBMS specific support in the <a target="_blank" href="manual/dbexplorer.html">Database Explorer</a>
+      (e.g. display of stored procedure source, view source) can be configured without building a new
+      distribution. If you have questions regarding this, feel free to write me an email.
+      </p>
 
-		</content>
-	</page>
+    </content>
+  </page>
     
   <page target="_blank" link="manual/workbench-manual.html" title="Manual"/>
 
@@ -340,10 +344,10 @@ VALUES
           <p>It has been reported to me, that WinZip 8.1 has a problem dealing with the distribution ZIP file. It seems that WinZip
           claims that the archive is empty, although it is not.</p>
           <p>
-						The distribution archive has been created with <a target="_blank" href="http://ant.apache.org/manual/CoreTasks/zip.html">Ant's ZIP task</a>,
-						and is - as far as I can tell - a valid zip archive.
+            The distribution archive has been created with <a target="_blank" href="http://ant.apache.org/manual/CoreTasks/zip.html">Ant's ZIP task</a>,
+            and is - as far as I can tell - a valid zip archive.
           </p>
-					<p>It has been tested successfully with the following tools:</p>
+          <p>It has been tested successfully with the following tools:</p>
           <ul>
           <li><a href="http://www.ghisler.com">TotalCommander</a></li>
           <li><a href="http://www.filzip.com/">FilZip</a></li>
@@ -357,63 +361,63 @@ VALUES
   <page name="vista" title="Windows Vista" toc="false">
     <title>Using SQL Workbench/J under Windows Vista</title>
     <content>
-				<p>With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
-				is loaded.</p>
-				<p>This affects the launcher for SQL Workbench/J launcher due to the (new?) Microsoft C runtime distribution model</p>
-				<p>If you want to run SQL Workbench/J under Windows Vista, please copy the file <tt>msvcr71.dll</tt>
-				into the directory where <tt>SQLWorkbench.exe</tt> is located.</p>
-				<p>This file can be found under <tt>%SystemRoot%\System32\msvcr71.dll</tt> (usually this is <tt>c:\Windows\System32\msvcr71.dll</tt>).</p>
-				<p style="margin-top:35px">Thanks to Jon for this tip!</p>
-	 </content>
-	</page>
-	
-	<page name="build-from-source" title="Building from Source" toc="main">
-	  <title>Building SQL Workbench/J from Source</title>
-	  <content>
-	    <h3>Building the jar file</h3>
-			<p>
-				Not all required libraries are included in the source distribution. To build <tt>sqlworkbench.jar</tt>
-		    from the source distribution, unpack the source archive into a directory. Alternatively you can also
-				checkout the sources from the <a href="source-svn.html">subversion repository</a>.
-			</p>
-			<p>
-				This directory will be referenced as <tt>${wbroot}</tt> in this description.
-			</p>
-	    <p>To prepare your environment to build SQL Workbench/J from source you will need to</p>
-	    <ul>
-	      <li>Download and install Ant 1.7 from <a href="http://ant.apache.org/">http://ant.apache.org</a></li>
-				<li>
-					Download the <a href="http://informagen.com/JarBundler/index.html">JarBundler Ant task</a>. As the jarbundler library is referenced from within <tt>build.xml</tt>,
-					the jar file is needed even when you don't want to build the Mac release. Then copy the
-					files <tt>jarbundler-1.9.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
-				</li>
-				<li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> and copy the main library (e.g. poi-2.5.1.jar) into the directory ${wbroot}/etc/poi</li>
-				<li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a></li>
-				<li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a></li>
-				<li>Download the Jemmy library from <a href="http://jemmy.dev.java.net">http://jemmy.dev.java.net</a> (Required to run the GUI tests)</li>
-				<li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory</li>
-			</ul>
-			<p>
-			  Now you can build the jar file by typing <tt>ant</tt> while the <tt>scripts</tt> directory
-			  is your current directory. If the build is successful, <tt>${wbroot}/dist/sqlworkbench.jar</tt>
-			  will be created.
-			</p>
-			<p>
-				The default Ant target <tt>make-dev-jar</tt> does not build the manual.
-			</p>
-			<h3>Building the manual</h3>
-			<p>
-			  To build the manual you need to download <a href="http://sourceforge.net/projects/docbook/">Docbook XSL</a> package
-				(Version 1.72) and <a href="http://xmlgraphics.apache.org/fop/">FOP</a> (fop-0.94-bin-jdk1.4.zip).
+        <p>With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
+        is loaded.</p>
+        <p>This affects the launcher for SQL Workbench/J launcher due to the (new?) Microsoft C runtime distribution model</p>
+        <p>If you want to run SQL Workbench/J under Windows Vista, please copy the file <tt>msvcr71.dll</tt>
+        into the directory where <tt>SQLWorkbench.exe</tt> is located.</p>
+        <p>This file can be found under <tt>%SystemRoot%\System32\msvcr71.dll</tt> (usually this is <tt>c:\Windows\System32\msvcr71.dll</tt>).</p>
+        <p style="margin-top:35px">Thanks to Jon for this tip!</p>
+   </content>
+  </page>
+  
+  <page name="build-from-source" title="Building from Source" toc="main">
+    <title>Building SQL Workbench/J from Source</title>
+    <content>
+      <h3>Building the jar file</h3>
+      <p>
+        Not all required libraries are included in the source distribution. To build <tt>sqlworkbench.jar</tt>
+        from the source distribution, unpack the source archive into a directory. Alternatively you can also
+        checkout the sources from the <a href="source-svn.html">subversion repository</a>.
+      </p>
+      <p>
+        This directory will be referenced as <tt>${wbroot}</tt> in this description.
+      </p>
+      <p>To prepare your environment to build SQL Workbench/J from source you will need to</p>
+      <ul>
+        <li>Download and install Ant 1.7 from <a href="http://ant.apache.org/">http://ant.apache.org</a></li>
+        <li>
+          Download the <a href="http://informagen.com/JarBundler/index.html">JarBundler Ant task</a>. As the jarbundler library is referenced from within <tt>build.xml</tt>,
+          the jar file is needed even when you don't want to build the Mac release. Then copy the
+          files <tt>jarbundler-1.9.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
+        </li>
+        <li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> and copy the main library (e.g. poi-2.5.1.jar) into the directory ${wbroot}/etc/poi</li>
+        <li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a></li>
+        <li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a></li>
+        <li>Download the Jemmy library from <a href="http://jemmy.dev.java.net">http://jemmy.dev.java.net</a> (Required to run the GUI tests)</li>
+        <li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory</li>
+      </ul>
+      <p>
+        Now you can build the jar file by typing <tt>ant</tt> while the <tt>scripts</tt> directory
+        is your current directory. If the build is successful, <tt>${wbroot}/dist/sqlworkbench.jar</tt>
+        will be created.
+      </p>
+      <p>
+        The default Ant target <tt>make-dev-jar</tt> does not build the manual.
+      </p>
+      <h3>Building the manual</h3>
+      <p>
+        To build the manual you need to download <a href="http://sourceforge.net/projects/docbook/">Docbook XSL</a> package
+        (Version 1.72) and <a href="http://xmlgraphics.apache.org/fop/">FOP</a> (fop-0.94-bin-jdk1.4.zip).
       </p>
       <ul>
         <li>Copy the Docbook distribution to <tt>${wbroot}/doc/docbook</tt></li>
         <li>Copy the FOP distribution to <tt>${wbroot}/etc/fop</tt></li>
       </ul>
       <p>
-				Now you can build the PDF manual by typing <tt>ant pdf</tt> or HTML manual
-				by typing <tt>ant publish-dev</tt>.
-			</p>
-	  </content>
-	</page>
+        Now you can build the PDF manual by typing <tt>ant pdf</tt> or HTML manual
+        by typing <tt>ant publish-dev</tt>.
+      </p>
+    </content>
+  </page>
 </site>
