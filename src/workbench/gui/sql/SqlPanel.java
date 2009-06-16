@@ -116,6 +116,7 @@ import workbench.gui.actions.SelectEditorAction;
 import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.SelectMaxRowsAction;
 import workbench.gui.actions.SelectResultAction;
+import workbench.gui.actions.ShowObjectInfoAction;
 import workbench.gui.actions.SpoolDataAction;
 import workbench.gui.actions.StopAction;
 import workbench.gui.actions.ToggleAutoCommitAction;
@@ -243,6 +244,7 @@ public class SqlPanel
 	protected ClearCompletionCacheAction clearCompletionCache;
 	protected AutoCompletionAction autoCompletion;
 	protected SqlPanelReloadAction reloadAction;
+	protected ShowObjectInfoAction showObjectInfoAction;
 
 	protected WbMenu copySelectedMenu;
 	protected ToggleAutoCommitAction toggleAutoCommit;
@@ -624,6 +626,7 @@ public class SqlPanel
 		this.selectKeys = new SelectKeyColumnsAction(null);
 		this.showFormAction = new DisplayDataFormAction(null);
 		reloadAction = new SqlPanelReloadAction(this);
+		showObjectInfoAction = new ShowObjectInfoAction(this);
 
 		this.actions.add(this.showFormAction);
 		this.actions.add(this.selectKeys);
@@ -797,6 +800,7 @@ public class SqlPanel
 		this.actions.add(this.autoCompletion);
 		this.clearCompletionCache = new ClearCompletionCacheAction();
 		this.actions.add(this.clearCompletionCache);
+		this.actions.add(showObjectInfoAction);
 
 		this.formatSql = this.editor.getFormatSqlAction();
 		this.formatSql.setCreateMenuSeparator(true);
@@ -1365,7 +1369,8 @@ public class SqlPanel
 
 		if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
 		if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
-
+		if (showObjectInfoAction != null) showObjectInfoAction.checkEnabled();
+		
 		if (this.stmtRunner == null)
 		{
 			this.stmtRunner = new StatementRunner();
@@ -2925,7 +2930,7 @@ public class SqlPanel
 		startExecution(comment + "\n" + sql, 0, -1, false, true);
 	}
 
-	private void addResultTab(DwPanel data, String sql)
+	private int addResultTab(DwPanel data, String sql)
 	{
 		int newIndex = this.resultTab.getTabCount() - 1;
 		WbTable tbl = data.getTable();
@@ -2945,8 +2950,25 @@ public class SqlPanel
 		{
 			this.resultTab.setSelectedIndex(0);
 		}
+		return newIndex;
 	}
 
+	public void setSelectedResultTab(int index)
+	{
+		resultTab.setSelectedIndex(index);
+	}
+	
+	/**
+	 * Returns the number of results tabs including the message tab
+	 * (so the return value is always >= 1)
+	 * 
+	 * @return
+	 */
+	public int getResultTabCount()
+	{
+		return resultTab.getTabCount();
+	}
+	
 	/**
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
@@ -2963,6 +2985,7 @@ public class SqlPanel
 		final String sql = result.getSourceCommand();
 
 		int count = 0;
+
 		if (result.hasDataStores())
 		{
 			final List<DataStore> results = result.getDataStores();

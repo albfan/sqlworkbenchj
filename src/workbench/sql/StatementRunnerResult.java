@@ -101,8 +101,30 @@ public class StatementRunnerResult
 	public void setWarning(boolean flag) { this.hasWarning = flag; }
 	public boolean hasWarning() { return this.hasWarning; }
 
-	public boolean isSuccess() { return this.success; }
-	public String getSourceCommand() { return this.sourceCommand; }
+	public boolean isSuccess()
+	{
+		return this.success;
+	}
+
+	/**
+	 * Define the SQL statement that generated this
+	 * result. This will only be set once. If the command
+	 * has already been set, the original command is not changed.
+	 *
+	 * @param sql
+	 */
+	public void setSourceCommand(String sql)
+	{
+		if (this.sourceCommand == null)
+		{
+			sourceCommand = sql;
+		}
+	}
+
+	public String getSourceCommand()
+	{
+		return this.sourceCommand;
+	}
 
 	public int addDataStore(DataStore ds)
 	{

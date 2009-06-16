@@ -11,26 +11,14 @@
  */
 package workbench.sql.wbcommands;
 
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
-import workbench.db.DbSettings;
-import workbench.db.FKHandler;
-import workbench.db.ProcedureDefinition;
-import workbench.db.ProcedureReader;
-import workbench.db.TableColumnsDatastore;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
 
 import workbench.db.TriggerReader;
-import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.storage.ColumnRemover;
-import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * Display the definition of a table.
@@ -74,114 +62,13 @@ public class WbDescribeTable
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		StatementRunnerResult result = new StatementRunnerResult(sql);
-		result.setShowRowCount(false);
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 		
 		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
-
-		TableIdentifier tbl = new TableIdentifier(table);
-
-		TableIdentifier toDescribe = this.currentConnection.getMetadata().findSelectableObject(tbl);
-
-		if (toDescribe == null)
-		{
-			// No table or something similar found, try to find a procedure with that name
-			ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
-			ProcedureDefinition def = new ProcedureDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), DatabaseMetaData.procedureResultUnknown);
-			if (reader.procedureExists(def))
-			{
-				CharSequence source = def.getSource(currentConnection);
-				result.addMessage(source);
-				result.setSuccess();
-				return result;
-			}
-
-			// No procedure found, try to find a trigger. 
-			TriggerReader trgReader = new TriggerReader(currentConnection);
-			String source = trgReader.getTriggerSource(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
-			if (StringUtil.isNonBlank(source))
-			{
-				result.addMessage(source);
-				result.setSuccess();
-				return result;
-			}
-		}
-
-		if (toDescribe == null)
-		{
-			// No table, view, procedure, trigger or something similar found
-			result.setFailure();
-			String msg = ResourceMgr.getString("ErrTableOrViewNotFound");
-			msg = msg.replace("%name%", table);
-			result.addMessage(msg);
-			return result;
-		}
-
-		TableDefinition def = currentConnection.getMetadata().getTableDefinition(toDescribe);
-		DataStore ds = new TableColumnsDatastore(def);
-
-		DbSettings dbs = currentConnection.getDbSettings();
-
-		if (dbs.isSynonymType(toDescribe.getType()))
-		{
-			TableIdentifier target = currentConnection.getMetadata().getSynonymTable(toDescribe);
-			if (target != null)
-			{
-				result.addMessage(toDescribe.getTableExpression(currentConnection) + " --> " + target.getTableExpression(currentConnection));
-			}
-		}
-
-		CharSequence viewSource = null;
-		if (dbs.isViewType(toDescribe.getType()))
-		{
-			viewSource = currentConnection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
-		}
-
-		ColumnRemover remover = new ColumnRemover(ds);
-		DataStore cols = remover.removeColumnsByName("java.sql.Types", "SCALE/SIZE", "PRECISION");
-		cols.setResultName(toDescribe.getTableName());
-		result.setSuccess();
-		result.addDataStore(cols);
-
-		if (viewSource != null)
-		{
-			result.addMessage("------------------ " + toDescribe.getType() + " SQL ------------------");
-			result.addMessage(viewSource);
-		}
-		else if (toDescribe.getType().indexOf("TABLE") > -1)
-		{
-			DataStore index = currentConnection.getMetadata().getIndexReader().getTableIndexInformation(toDescribe);
-			if (index.getRowCount() > 0)
-			{
-				index.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
-				result.addDataStore(index);
-			}
-
-			TriggerReader trgReader = new TriggerReader(currentConnection);
-			DataStore triggers = trgReader.getTableTriggers(toDescribe);
-			if (triggers != null && triggers.getRowCount() > 0)
-			{
-				triggers.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
-				result.addDataStore(triggers);
-			}
-
-			FKHandler fk = new FKHandler(currentConnection);
-			DataStore references = fk.getForeignKeys(toDescribe, false);
-			if (references.getRowCount() > 0)
-			{
-				references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
-				result.addDataStore(references);
-			}
-
-			DataStore referencedBy = fk.getReferencedBy(toDescribe);
-			if (referencedBy.getRowCount() > 0)
-			{
-				referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
-				result.addDataStore(referencedBy);
-			}
-		}
-
+		ObjectInfo info = new ObjectInfo();
+		StatementRunnerResult result = info.getObjectInfo(currentConnection, table, true);
+		result.setSourceCommand(sql);
+		result.setShowRowCount(false);
 		return result;
 	}
 

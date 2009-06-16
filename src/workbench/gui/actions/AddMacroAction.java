@@ -27,11 +27,12 @@ import workbench.util.StringUtil;
 
 /**
  * Action to add a new macro.
- * 
+ *
  * @see workbench.sql.macros.MacroManager
  * @author  support@sql-workbench.net
  */
-public class AddMacroAction extends WbAction
+public class AddMacroAction
+	extends WbAction
 	implements TextSelectionListener
 {
 	private EditorPanel client;
@@ -41,7 +42,7 @@ public class AddMacroAction extends WbAction
 		super();
 		this.setIcon(null);
 		this.setMenuItemName(ResourceMgr.MNU_TXT_MACRO);
-		this.initMenuDefinition("MnuTxtAddMacro", null);
+		this.initMenuDefinition("MnuTxtAddMacro");
 		setEnabled(false);
 	}
 
@@ -55,7 +56,7 @@ public class AddMacroAction extends WbAction
 		this.client.addSelectionListener(this);
 		this.setEnabled(client.isTextSelected());
 	}
-	
+
 	public void executeAction(ActionEvent e)
 	{
 		String text = client.getSelectedText();
@@ -74,7 +75,7 @@ public class AddMacroAction extends WbAction
 
 		dialog.addWindowListener(panel);
 		dialog.setVisible(true);
-		
+
 		if (!dialog.isCancelled())
 		{
 			MacroGroup group = panel.getSelectedGroup();

@@ -271,7 +271,7 @@ public class DbMetadata
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
-			LogMgr.logDebug("DbMetadata", "Identifier quote character obtained driver: " + quoteCharacter);
+			LogMgr.logDebug("DbMetadata", "Identifier quote character obtained from driver: " + quoteCharacter);
 		}
 		catch (Exception e)
 		{
