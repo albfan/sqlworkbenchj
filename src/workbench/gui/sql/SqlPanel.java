@@ -576,9 +576,9 @@ public class SqlPanel
 		this.actions.add(editor.getFileSaveAction());
 		this.actions.add(editor.getFileSaveAsAction());
 
+		this.actions.add(this.editor.getReloadAction());
 		this.fileDiscardAction = new FileDiscardAction(this);
 		this.actions.add(this.fileDiscardAction);
-		this.actions.add(this.editor.getReloadAction());
 
 		this.actions.add(editor.getUndoAction());
 		this.actions.add(editor.getRedoAction());

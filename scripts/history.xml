@@ -28,6 +28,13 @@
     </description>
   </entry>
 
+  <entry dev-build="2" type="fix">
+    <description>
+      When loading a new file into the editor while an error selection
+      was present, the selection was still shown after the new file was loaded.
+    </description>
+  </entry>
+
   <entry dev-build="1" type="fix">
     <description>
       When prompting vor variables, entering an empty value would remove the variable

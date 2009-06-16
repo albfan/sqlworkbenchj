@@ -93,10 +93,10 @@ public class SqlTabPopup
 
 			EditorPanel editor = spanel.getEditor();
 
-			this.add(editor.getFileSaveAction());
 			this.add(editor.getFileOpenAction());
+			this.add(editor.getFileSaveAction());
+			this.add(editor.getFileSaveAsAction());
 			this.add(editor.getReloadAction());
-			this.addSeparator();
 			FileDiscardAction discard = new FileDiscardAction(spanel);
 			discard.removeIcon();
 			this.add(discard);

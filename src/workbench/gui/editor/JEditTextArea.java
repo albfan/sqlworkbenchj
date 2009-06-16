@@ -964,6 +964,9 @@ public class JEditTextArea
 
 		this.document = document;
 
+		selectionStart = 0;
+		selectionEnd = 0;
+
 		if (this.document != null)
 		{
 			painter.calculateTabSize();
@@ -1494,7 +1497,7 @@ public class JEditTextArea
 	 */
 	public final void selectNone()
 	{
-		select(getCaretPosition(),getCaretPosition());
+		select(getCaretPosition(), getCaretPosition());
 	}
 
 	public void clearUndoBuffer()
@@ -1585,6 +1588,9 @@ public class JEditTextArea
 	 */
 	private void select(int start, int end, Color alternateColor)
 	{
+		if (document == null) return;
+		if (painter == null) return;
+		
 		int newStart, newEnd;
 		boolean newBias;
 
@@ -1601,7 +1607,7 @@ public class JEditTextArea
 			newBias = true;
 		}
 
-		if(newStart < 0 || newEnd > getDocumentLength())
+		if (newStart < 0 || newEnd > getDocumentLength())
 		{
 			throw new IllegalArgumentException("Bounds out of"+ " range: " + newStart + "," +	newEnd);
 		}
@@ -1618,7 +1624,7 @@ public class JEditTextArea
 			int newStartLine = getLineOfOffset(newStart);
 			int newEndLine = getLineOfOffset(newEnd);
 
-			if(painter.isBracketHighlightEnabled())
+			if (painter.isBracketHighlightEnabled())
 			{
 				if(bracketLine != -1)	painter.invalidateLine(bracketLine);
 				updateBracketHighlight(end);
