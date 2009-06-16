@@ -47,22 +47,32 @@ public class ShowObjectInfoAction
 	{
 		try
 		{
-			display.showStatusMessage("Retrieving definition");
 			ObjectInfo info = new ObjectInfo();
 			WbConnection conn = display.getConnection();
-			if (conn != null)
+			String text = display.getSelectedText();
+			if (conn != null && StringUtil.isNonBlank(text))
 			{
-				String text = display.getSelectedText();
+				display.showStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
 				StatementRunnerResult result = info.getObjectInfo(conn, text, false);
 				if (result != null)
 				{
 					int count = display.getResultTabCount();
-					display.addResult(result);
+
+					// Retrieving the messages will reset the hasMessages() flag...
+					boolean hasMessages = result.hasMessages();
+					
+					if (hasMessages)
+					{
+						display.appendToLog("\n");
+						display.appendToLog(result.getMessageBuffer().toString());
+					}
+
 					if (result.hasDataStores())
 					{
+						display.addResult(result);
 						display.setSelectedResultTab(count - 1);
 					}
-					else
+					else if (hasMessages)
 					{
 						display.showLogPanel();
 					}

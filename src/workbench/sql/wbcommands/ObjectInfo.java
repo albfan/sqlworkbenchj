@@ -77,7 +77,9 @@ public class ObjectInfo
 			if (reader.procedureExists(def))
 			{
 				CharSequence source = def.getSource(connection);
+				result.addMessage("--------[ " + def.getObjectType()  + ": " + def.getObjectExpression(connection) + " ]--------");
 				result.addMessage(source);
+				result.addMessage("--------");
 				result.setSuccess();
 				return result;
 			}
@@ -87,7 +89,9 @@ public class ObjectInfo
 			String source = trgReader.getTriggerSource(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
 			if (StringUtil.isNonBlank(source))
 			{
+				result.addMessage("--------[ TRIGGER: " + tbl.getObjectName() + " ]--------");
 				result.addMessage(source);
+				result.addMessage("--------");
 				result.setSuccess();
 				return result;
 			}
@@ -131,8 +135,9 @@ public class ObjectInfo
 
 		if (viewSource != null)
 		{
-			result.addMessage("------------------ " + toDescribe.getType() + " SQL ------------------");
+			result.addMessage("--------[ " + toDescribe.getObjectType()  + ": " + toDescribe.getObjectExpression(connection) + " ]--------");
 			result.addMessage(viewSource);
+			result.addMessage("--------");
 		}
 		else if (toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{
