@@ -41,6 +41,7 @@ public class ObjectInfoTest
 		TestUtil.executeScript(db,
 				"CREATE TABLE person (nr integer, person_name varchar(100));" +
 				"CREATE VIEW v_person AS SELECT * FROM PERSON;" +
+				"create sequence seq_id;" +
 				"commit;"
 		);
 	}
@@ -74,5 +75,9 @@ public class ObjectInfoTest
 		assertEquals("NR", viewDs.getValueAsString(0, 0));
 		assertEquals("PERSON_NAME", viewDs.getValueAsString(1, 0));
 
+		StatementRunnerResult seqInfo = info.getObjectInfo(db, "seq_id", false);
+		System.out.println(seqInfo.getSourceCommand());
+		assertTrue(seqInfo.hasDataStores());
+		assertEquals(1, seqInfo.getDataStores().get(0).getRowCount());
 	}
 }

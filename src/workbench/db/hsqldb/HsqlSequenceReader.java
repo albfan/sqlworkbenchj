@@ -133,15 +133,13 @@ public class HsqlSequenceReader
 		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
 		result = new SequenceDefinition(schema, name);
 		
-		result.setSequenceProperty("SEQUENCE_SCHEMA", schema);
-		result.setSequenceProperty("SEQUENCE_NAME", name);
 		result.setSequenceProperty("START_WITH", ds.getValue(row, "START_WITH"));
 		result.setSequenceProperty("MAXIMUM_VALUE", ds.getValue(row, "MAXIMUM_VALUE"));
 		result.setSequenceProperty("MINIMUM_VALUE", ds.getValue(row, "MINIMUM_VALUE"));
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
 		result.setSequenceProperty("CYCLE_OPTION", ds.getValue(row, "CYCLE_OPTION"));
 		result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
-		
+		result.setSource(buildSource(result));
 		return result;		
 	}
 	
@@ -169,6 +167,11 @@ public class HsqlSequenceReader
 	public CharSequence getSequenceSource(String owner, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(owner, sequence);
+		return buildSource(def);
+	}
+
+	protected CharSequence buildSource(SequenceDefinition def)
+	{
 		if (def == null) return StringUtil.EMPTY_STRING;
 		
 		StringBuilder result = new StringBuilder(100);

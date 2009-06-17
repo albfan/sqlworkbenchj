@@ -173,11 +173,12 @@ public class SequenceDefinition
 	 */
 	public DataStore getRawDefinition()
 	{
-		int count = this.properties.size();
+		int count = this.properties.size() + 1;
 		String[] colnames = new String[count];
 		int[] types = new int[count];
 
-		int i = 0;
+		colnames[0] = "SEQUENCE_NAME";
+		int i = 1;
 		for (String name : properties.keySet())
 		{
 			colnames[i] = name;
@@ -199,7 +200,8 @@ public class SequenceDefinition
 		DataStore ds = new DataStore(colnames, types);
 		ds.addRow();
 		
-		i = 0;
+		i = 1;
+		ds.setValue(0, 0, getSequenceName());
 		for (String name : properties.keySet())
 		{
 			Object value = properties.get(name);

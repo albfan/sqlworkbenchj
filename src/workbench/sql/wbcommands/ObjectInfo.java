@@ -80,7 +80,13 @@ public class ObjectInfo
 				if (seq != null)
 				{
 					result.addDataStore(seq.getRawDefinition());
-					CharSequence source = seq.getSource(connection);
+					CharSequence source = seq.getSource();
+					if (source == null)
+					{
+						// source was not build by the reader during initial retrieval
+						source = seq.getSource(connection);
+					}
+					
 					if (source != null) 
 					{
 						String src = source.toString();

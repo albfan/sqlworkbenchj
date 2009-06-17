@@ -43,17 +43,17 @@ public class SequenceDiff
 		
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
-		boolean createView = (target == null);
+		boolean createSequence = (target == null);
 		boolean different = (target == null || !reference.getSequence().equals(target.getSequence()));
 		if (!different) return result;
 		
-		writer.appendOpenTag(result, this.indent, (createView ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
+		writer.appendOpenTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
 		result.append('\n');
 		if (different)
 		{
 			result.append(reference.getXml(myindent));
 		}
-		writer.appendCloseTag(result, this.indent, (createView ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
+		writer.appendCloseTag(result, this.indent, (createSequence ? TAG_CREATE_SEQUENCE : TAG_UPDATE_SEQUENCE));
 
 		return result;
 	}	

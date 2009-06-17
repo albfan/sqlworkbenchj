@@ -136,8 +136,6 @@ public class OracleSequenceReader
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
 		String owner = ds.getValueAsString(row, "SEQUENCE_OWNER");
 		SequenceDefinition result = new SequenceDefinition(owner, name);
-		result.setSequenceProperty("SEQUENCE_NAME", name);
-		result.setSequenceProperty("SEQUENCE_OWNER", owner);
 		result.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
 		result.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
 		result.setSequenceProperty("MAX_VALUE", ds.getValue(row, "MAX_VALUE"));

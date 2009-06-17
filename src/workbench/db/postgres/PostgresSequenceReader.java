@@ -155,8 +155,6 @@ public class PostgresSequenceReader
 		String schema = rs.getString("TABLE_SCHEM");
 		String comment = rs.getString("REMARKS");
 		SequenceDefinition def = new SequenceDefinition(schema, seq_name);
-		def.setSequenceProperty("SEQUENCE_NAME", seq_name);
-		def.setSequenceProperty("SEQUENCE_SCHEMA", schema);
 		def.setSequenceProperty("INCREMENT", rs.getObject("increment_by"));
 		def.setSequenceProperty("MAXVALUE", rs.getObject("max_value"));
 		def.setSequenceProperty("MINVALUE", rs.getObject("min_value"));

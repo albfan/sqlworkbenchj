@@ -116,9 +116,6 @@ public class H2SequenceReader
 		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
 		result = new SequenceDefinition(schema, name);
 
-		result.setSequenceProperty("SEQUENCE_CATALOG", ds.getValue(row, "SEQUENCE_CATALOG"));
-		result.setSequenceProperty("SEQUENCE_SCHEMA", schema);
-		result.setSequenceProperty("SEQUENCE_NAME", name);
 		result.setSequenceProperty("CURRENT_VALUE", ds.getValue(row, "CURRENT_VALUE"));
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
 		result.setSequenceProperty("IS_GENERATED", ds.getValue(row, "IS_GENERATED"));

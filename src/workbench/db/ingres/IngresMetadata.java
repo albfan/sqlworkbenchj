@@ -11,7 +11,6 @@
  */
 package workbench.db.ingres;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -186,8 +185,6 @@ public class IngresMetadata
 	private SequenceDefinition getDefinition(DataStore ds, int row, String owner, String sequence)
 	{
 		SequenceDefinition def = new SequenceDefinition(owner, sequence);
-		def.setSequenceProperty("SEQUENCE_NAME", sequence);
-		def.setSequenceProperty("SEQUENCE_OWNER", owner);
 		def.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
 		def.setSequenceProperty("MAX_VALUE", ds.getValue(row, "MAX_VALUE"));
 		def.setSequenceProperty("INCREMENT_VALUE", ds.getValue(row, "INCREMENT_VALUE"));
