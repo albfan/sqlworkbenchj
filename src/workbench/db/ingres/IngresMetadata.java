@@ -11,11 +11,13 @@
  */
 package workbench.db.ingres;
 
+import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceDefinition;
@@ -37,7 +39,17 @@ public class IngresMetadata
 	implements SynonymReader, SequenceReader
 {
 	private Connection dbConn;
-	
+	private final String SELECT_SEQUENCE_DEF = 
+			       "SELECT SEQ_NAME,  \n" +
+			       "       SEQ_OWNER, \n" +
+             "       MIN_VALUE,  \n" +
+             "       MAX_VALUE,  \n" +
+             "       INCREMENT_VALUE,  \n" +
+             "       CYCLE_FLAG,  \n" +
+             "       ORDER_FLAG,  \n" +
+             "       CACHE_SIZE  \n" +
+             "FROM   iisequences \n";
+
 	public IngresMetadata(Connection conn)
 	{
 		dbConn = conn;
@@ -132,20 +144,66 @@ public class IngresMetadata
 	
 	public List<SequenceDefinition> getSequences(String owner)
 	{
-		return null;
+		StringBuilder sql = new StringBuilder(SELECT_SEQUENCE_DEF);
+		if (owner != null)
+		{
+			sql.append(" WHERE seq_owner = ?");
+		}
+
+		ResultSet rs = null;
+		PreparedStatement stmt = null;
+		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
+
+		try
+		{
+			stmt = this.dbConn.prepareStatement(sql.toString());
+			if (owner != null) stmt.setString(1, owner.trim());
+			rs = stmt.executeQuery();
+			DataStore ds = new DataStore(rs, true);
+			for (int i=0; i < ds.getRowCount(); i++)
+			{
+				result.add(getDefinition(ds, i, ds.getValueAsString(i, 1), ds.getValueAsString(i, 0)));
+			}
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logError("IngresMetaData.getSequenceList()", "Error when retrieving sequences",e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
 	}
 	
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
-		return null;
+		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		if (ds == null || ds.getRowCount() == 0) return null;
+		return getDefinition(ds, 0, owner, sequence);
+	}
+
+	private SequenceDefinition getDefinition(DataStore ds, int row, String owner, String sequence)
+	{
+		SequenceDefinition def = new SequenceDefinition(owner, sequence);
+		def.setSequenceProperty("SEQUENCE_NAME", sequence);
+		def.setSequenceProperty("SEQUENCE_OWNER", owner);
+		def.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
+		def.setSequenceProperty("MAX_VALUE", ds.getValue(row, "MAX_VALUE"));
+		def.setSequenceProperty("INCREMENT_VALUE", ds.getValue(row, "INCREMENT_VALUE"));
+		def.setSequenceProperty("CYCLE_FLAG", ds.getValue(row, "CYCLE_FLAG"));
+		def.setSequenceProperty("ORDER_FLAG", ds.getValue(row, "ORDER_FLAG"));
+		def.setSequenceProperty("CACHE_SIZE", ds.getValue(row, "CACHE_SIZE"));
+		def.setSource(buildSource(def));
+		return def;
 	}
 		
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
-		String sql = "SELECT * FROM iisequences WHERE seq_owner = ? AND seq_name = ? ";
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
+		String sql = SELECT_SEQUENCE_DEF + " WHERE seq_owner = ? AND seq_name = ?";
 		try
 		{
 			stmt = this.dbConn.prepareStatement(sql);
@@ -170,7 +228,7 @@ public class IngresMetadata
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		List<String> result = new LinkedList<String>();
+		List<String> result = new ArrayList<String>();
 
 		StringBuilder sql = new StringBuilder(200);
 		sql.append("SELECT seq_name FROM iisequences ");
@@ -207,26 +265,70 @@ public class IngresMetadata
 		CharSequence s = getSequenceSource(def.getSequenceOwner(), def.getSequenceName());
 		def.setSource(s);
 	}
-	
+
+	private String buildSource(SequenceDefinition def)
+	{
+		StringBuilder result = new StringBuilder(100);
+		Number minvalue = (Number)def.getSequenceProperty("MIN_VALUE");
+		Number maxvalue = (Number)def.getSequenceProperty("MAX_VALUE");
+		String increment = def.getSequenceProperty("INCREMENT_VALUE").toString();
+		String cycle = def.getSequenceProperty("CYCLE_FLAG").toString();
+		String order = def.getSequenceProperty("ORDER_FLAG").toString();
+		Number cache = (Number)def.getSequenceProperty("CACHE_SIZE");
+
+		result.append("CREATE SEQUENCE ");
+		result.append(def.getSequenceName());
+
+		result.append("\n       INCREMENT BY ");
+		result.append(increment);
+
+		if (minvalue.intValue() == 0)
+		{
+			result.append("\n       NO MINVALUE");
+		}
+		else
+		{
+			result.append("\n       MINVALUE ");
+			result.append(minvalue);
+		}
+
+		if (maxvalue.intValue() < Integer.MAX_VALUE)
+		{
+			result.append("\n       MAXVALUE ");
+			result.append(maxvalue);
+		}
+		else
+		{
+			result.append("\n       NO MAXVALUE");
+		}
+		if (cache.intValue() > 0)
+		{
+			result.append("\n       CACHE ");
+			result.append(cache);
+		}
+		else
+		{
+			result.append("\n       NO CACHE");
+		}
+		result.append("\n       ");
+		result.append(cycle.equals("Y") ? "CYCLE" : "NO CYCLE");
+
+		result.append("\n       ");
+		result.append(order.equals("Y") ? "ORDER" : "NO ORDER");
+
+		result.append(";\n");
+		return result.toString();
+	}
+
 	public String getSequenceSource(String owner, String sequence)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		StringBuilder result = new StringBuilder(100);
 
-		String sql = "SELECT trim(SEQ_NAME),  \n" + 
-             "       MIN_VALUE,  \n" + 
-             "       MAX_VALUE,  \n" + 
-             "       INCREMENT_value,  \n" + 
-             "       case CYCLE_FLAG when 'Y' then 'CYCLE' else 'NO CYCLE' end,  \n" + 
-             "       case ORDER_FLAG when 'Y' then 'ORDER' else 'NO ORDER' end,  \n" + 
-             "       CACHE_SIZE  \n" + 
-             "FROM   iisequences \n" +
-						 " WHERE seq_owner = ?" +
-		         "  AND seq_name = ?";
 		try
 		{
-			stmt = this.dbConn.prepareStatement(sql);
+			stmt = this.dbConn.prepareStatement(SELECT_SEQUENCE_DEF);
 			stmt.setString(1, owner.trim());
 			stmt.setString(2, sequence.trim());
 
@@ -277,10 +379,10 @@ public class IngresMetadata
 					result.append("\n      NO CACHE");
 				}
 				result.append("\n      ");
-				result.append(cycle);
+				result.append(cycle.equals("Y") ? "CYCLE" : "NO CYCLE");
 
 				result.append("\n      ");
-				result.append(order);
+				result.append(order.equals("Y") ? "ORDER" : "NO ORDER");
 
 				result.append(";\n");
 			}

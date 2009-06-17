@@ -12,6 +12,7 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.util.List;
 import workbench.db.WbConnection;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.TextSelectionListener;
@@ -19,6 +20,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ObjectInfo;
+import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
 /**
@@ -69,6 +71,11 @@ public class ShowObjectInfoAction
 
 					if (result.hasDataStores())
 					{
+						List<DataStore> data = result.getDataStores();
+						for (int i=0; i < data.size(); i++)
+						{
+							data.get(i).resetStatus();
+						}
 						display.addResult(result);
 						display.setSelectedResultTab(count - 1);
 					}

@@ -17,6 +17,8 @@ import workbench.db.DbSettings;
 import workbench.db.FKHandler;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.SequenceDefinition;
+import workbench.db.SequenceReader;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
@@ -67,12 +69,29 @@ public class ObjectInfo
 		TableIdentifier tbl = new TableIdentifier(objectName);
 
 		TableIdentifier toDescribe = connection.getMetadata().findSelectableObject(tbl);
+		tbl.adjustCase(connection);
 
 		if (toDescribe == null)
 		{
+			SequenceReader seqReader = connection.getMetadata().getSequenceReader();
+			if (seqReader != null)
+			{
+				SequenceDefinition seq = seqReader.getSequenceDefinition(tbl.getSchema(), tbl.getObjectName());
+				if (seq != null)
+				{
+					result.addDataStore(seq.getRawDefinition());
+					CharSequence source = seq.getSource(connection);
+					if (source != null) 
+					{
+						String src = source.toString();
+						result.addMessage(src);
+						result.setSourceCommand(StringUtil.getMaxSubstring(src, 300, "..."));
+					}
+					return result;
+				}
+			}
 			// No table or something similar found, try to find a procedure with that name
 			ProcedureReader reader = connection.getMetadata().getProcedureReader();
-			tbl.adjustCase(connection);
 			ProcedureDefinition def = new ProcedureDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), DatabaseMetaData.procedureResultUnknown);
 			if (reader.procedureExists(def))
 			{

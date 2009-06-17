@@ -66,8 +66,8 @@ public class OracleSequenceReader
 			"MIN_VALUE, \n       " +
 			"MAX_VALUE, \n       " +
 			"INCREMENT_BY, \n       " +
-			"decode(CYCLE_FLAG,'Y','CYCLE','NOCYCLE') AS CYCLE_FLAG, \n       " +
-			"decode(ORDER_FLAG,'Y','ORDER','NOORDER') AS ORDER_FLAG, \n       " +
+			"CASE WHEN CYCLE_FLAG = 'Y' then 'CYCLE' ELSE 'NOCYCLE' END AS CYCLE_FLAG, \n       " +
+			"CASE WHEN ORDER_FLAG = 'Y' then 'ORDER' ELSE 'NOORDER' END AS ORDER_FLAG, \n       " +
 			"CACHE_SIZE, \n" +
 			"LAST_NUMBER \n" +
 			"FROM ALL_SEQUENCES \n" +
@@ -136,6 +136,9 @@ public class OracleSequenceReader
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
 		String owner = ds.getValueAsString(row, "SEQUENCE_OWNER");
 		SequenceDefinition result = new SequenceDefinition(owner, name);
+		result.setSequenceProperty("SEQUENCE_NAME", name);
+		result.setSequenceProperty("SEQUENCE_OWNER", owner);
+		result.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
 		result.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
 		result.setSequenceProperty("MAX_VALUE", ds.getValue(row, "MAX_VALUE"));
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT_BY"));

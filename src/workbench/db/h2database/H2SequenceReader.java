@@ -115,8 +115,16 @@ public class H2SequenceReader
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
 		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
 		result = new SequenceDefinition(schema, name);
-		
+
+		result.setSequenceProperty("SEQUENCE_CATALOG", ds.getValue(row, "SEQUENCE_CATALOG"));
+		result.setSequenceProperty("SEQUENCE_SCHEMA", schema);
+		result.setSequenceProperty("SEQUENCE_NAME", name);
+		result.setSequenceProperty("CURRENT_VALUE", ds.getValue(row, "CURRENT_VALUE"));
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
+		result.setSequenceProperty("IS_GENERATED", ds.getValue(row, "IS_GENERATED"));
+		String comment = ds.getValueAsString(row, "REMARKS");
+		result.setComment(comment);
+		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
 		readSequenceSource(result);
 		
 		return result;		
@@ -135,11 +143,25 @@ public class H2SequenceReader
 		Long inc = (Long)def.getSequenceProperty("INCREMENT");
     if (inc != null && inc != 1)
     {
-      result.append(" INCREMENT BY ");
+      result.append("\n       INCREMENT BY ");
       result.append(inc);
     }
+
+    result.append("\n       CACHE ");
+		result.append(def.getSequenceProperty("CACHE").toString());
+		
 		result.append(';');
 		result.append(nl);
+
+		String comments = def.getComment();
+		if (StringUtil.isNonBlank(comments))
+		{
+			result.append("\nCOMMENT ON SEQUENCE ");
+			result.append(def.getSequenceName());
+			result.append(" IS '");
+			result.append(comments.replace("'", "''"));
+			result.append("';");
+		}
 		
 		def.setSource(result);
 		return;
@@ -153,12 +175,14 @@ public class H2SequenceReader
 		try
 		{
 			String sql = "SELECT SEQUENCE_CATALOG, " +
-				"SEQUENCE_SCHEMA, SEQUENCE_NAME, " +
+				"SEQUENCE_SCHEMA, " +
+				"SEQUENCE_NAME, " +
 				"CURRENT_VALUE, " +
 				"INCREMENT, " +
 				"IS_GENERATED, " +
 				"REMARKS, " +
-				"ID " +
+				"ID," +
+				"CACHE " +
 				"FROM information_schema.sequences ";
 			
 			boolean whereAdded = false;

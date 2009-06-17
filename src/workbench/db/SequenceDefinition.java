@@ -12,9 +12,11 @@
 package workbench.db;
 
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import workbench.storage.DataStore;
 
 
 /**
@@ -145,11 +147,9 @@ public class SequenceDefinition
 		{
 			SequenceDefinition od = (SequenceDefinition)other;
 			if (od.properties.size() != this.properties.size()) return false;
-			Iterator<Map.Entry<String, Object>> entries = this.properties.entrySet().iterator();
 			
-			while (entries.hasNext())
+			for (Map.Entry<String, Object> entry : properties.entrySet())
 			{
-				Map.Entry entry = entries.next();
 				Object ov = od.properties.get(entry.getKey());
 				if (ov == null) return false;
 				if (!ov.equals(entry.getValue())) return false; 
@@ -159,6 +159,58 @@ public class SequenceDefinition
 		return false;
 	}
 
+	/**
+	 * Converts the internally stored sequence properties into a
+	 * DataStore with a single row and one column per property, similar
+	 * to the display of a Sequence in the DbExplorer (obtained through
+	 * {@link SequenceReader#getRawSequenceDefinition(java.lang.String, java.lang.String) }
+	 * <br/>
+	 * Note that some sequence readers might not put all retrieved attributes
+	 * into the properties, so this is not necessarily the same as retrieving
+	 * the raw definition directly from the sequence reader.
+	 * 
+	 * @return a DataStore with the sequence properties
+	 */
+	public DataStore getRawDefinition()
+	{
+		int count = this.properties.size();
+		String[] colnames = new String[count];
+		int[] types = new int[count];
+
+		int i = 0;
+		for (String name : properties.keySet())
+		{
+			colnames[i] = name;
+			Object o = properties.get(name);
+			if (o instanceof String)
+			{
+				types[i] = Types.VARCHAR;
+			}
+			else if (o instanceof Integer || o instanceof Long)
+			{
+				types[i] = Types.INTEGER;
+			}
+			else if (o instanceof Number)
+			{
+				types[i] = Types.DECIMAL;
+			}
+			i++;
+		}
+		DataStore ds = new DataStore(colnames, types);
+		ds.addRow();
+		
+		i = 0;
+		for (String name : properties.keySet())
+		{
+			Object value = properties.get(name);
+			ds.setValue(0, i, value);
+			i++;
+		}
+		ds.resetStatus();
+		
+		return ds;
+	}
+	
 	@Override
 	public int hashCode()
 	{
