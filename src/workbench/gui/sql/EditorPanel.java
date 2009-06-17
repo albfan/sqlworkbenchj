@@ -552,6 +552,8 @@ public class EditorPanel
 
 		boolean result = false;
 
+		this.selectNone();
+
 		BufferedReader reader = null;
 		SyntaxDocument doc = null;
 

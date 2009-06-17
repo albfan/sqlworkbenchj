@@ -108,26 +108,36 @@ public class ObjectInfo
 		}
 
 		TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
-		DataStore ds = new TableColumnsDatastore(def);
+		DataStore tableColumns = new TableColumnsDatastore(def);
 
 		DbSettings dbs = connection.getDbSettings();
-
+		TableIdentifier synonymTarget = null;
 		if (dbs.isSynonymType(toDescribe.getType()))
 		{
-			TableIdentifier target = connection.getMetadata().getSynonymTable(toDescribe);
-			if (target != null)
+			synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
+			if (synonymTarget != null)
 			{
-				result.addMessage(toDescribe.getTableExpression(connection) + " --> " + target.getTableExpression(connection));
+				String msg = toDescribe.getTableExpression(connection) + " --> " + synonymTarget.getTableExpression(connection);
+				result.addMessage(msg);
+				result.setSourceCommand(msg);
 			}
 		}
 
 		CharSequence viewSource = null;
-		if (dbs.isViewType(toDescribe.getType()))
+		String viewname = null;
+		
+		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
+		{
+			viewSource = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
+			viewname = synonymTarget.getObjectExpression(connection);
+		}
+		else if (dbs.isViewType(toDescribe.getType()))
 		{
 			viewSource = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
+			viewname = def.getTable().getObjectExpression(connection);
 		}
 
-		ColumnRemover remover = new ColumnRemover(ds);
+		ColumnRemover remover = new ColumnRemover(tableColumns);
 		DataStore cols = remover.removeColumnsByName("java.sql.Types", "SCALE/SIZE", "PRECISION");
 		cols.setResultName(toDescribe.getTableName());
 		result.setSuccess();
@@ -135,9 +145,10 @@ public class ObjectInfo
 
 		if (viewSource != null)
 		{
-			result.addMessage("--------[ " + toDescribe.getObjectType()  + ": " + toDescribe.getObjectExpression(connection) + " ]--------");
+			result.addMessage("\n--------[ View: " +  viewname + " ]--------");
 			result.addMessage(viewSource);
 			result.addMessage("--------");
+			result.setSourceCommand(StringUtil.getMaxSubstring(viewSource.toString(), 300, " ... "));
 		}
 		else if (toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{

@@ -108,17 +108,14 @@ public class StatementRunnerResult
 
 	/**
 	 * Define the SQL statement that generated this
-	 * result. This will only be set once. If the command
-	 * has already been set, the original command is not changed.
+	 * result. This is mainly used in the GUI to display
+	 * a tooltip for the result-tab
 	 *
 	 * @param sql
 	 */
 	public void setSourceCommand(String sql)
 	{
-		if (this.sourceCommand == null)
-		{
-			sourceCommand = sql;
-		}
+		sourceCommand = sql;
 	}
 
 	public String getSourceCommand()
