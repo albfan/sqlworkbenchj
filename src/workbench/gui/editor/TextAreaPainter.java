@@ -45,7 +45,6 @@ public class TextAreaPainter
 	protected Color caretColor;
 	protected Color selectionColor;
 	protected Color bracketHighlightColor;
-	protected Color errorColor;
 	protected Color currentLineColor;
 
 	protected boolean bracketHighlight;
@@ -78,7 +77,6 @@ public class TextAreaPainter
 		setBackground(Color.WHITE);
 
 		caretColor = Color.BLACK;
-		errorColor = Settings.getInstance().getEditorErrorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 		bracketHighlightColor = Color.BLACK;
