@@ -845,4 +845,10 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "retrieve.create.table.checkquotes", true);
 	}
 
+	public boolean isSearchable(String dbmsType)
+	{
+		if (StringUtil.isBlank(dbmsType)) return false;
+		List<String> types = Settings.getInstance().getListProperty(prefix + "datatypes.searchable", true);
+		return types.contains(dbmsType.toLowerCase());
+	}
 }

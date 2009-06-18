@@ -25,6 +25,7 @@ import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.Types40;
 import workbench.util.WbThread;
 
 /**
@@ -193,6 +194,16 @@ public class TableSearcher
 		}
 	}
 
+	private boolean isSearchable(int sqlType, String dbmsType)
+	{
+		if (sqlType == Types.VARCHAR || sqlType == Types.CHAR ||
+			sqlType == Types40.NVARCHAR || sqlType == Types40.NCHAR)
+		{
+			return true;
+		}
+		return connection.getDbSettings().isSearchable(dbmsType);
+	}
+	
 	private String buildSqlForTable(TableIdentifier tbl)
 		throws SQLException
 	{
@@ -215,11 +226,12 @@ public class TableSearcher
 		for (int i=0; i < colCount; i++)
 		{
 			String colName = def.getColumns().get(i).getColumnName();
+			String dbmsType = def.getColumns().get(i).getDbmsType();
 			int sqlType = def.getColumns().get(i).getDataType();
 			String expr = builder.getColumnExpression(def.getColumns().get(i));
 			boolean isExpression = !colName.equalsIgnoreCase(expr);
 			
-			if (isExpression || sqlType == Types.VARCHAR || sqlType == Types.CHAR)
+			if (isExpression || isSearchable(sqlType, dbmsType))
 			{
 				if (!isExpression)
 				{

@@ -75,11 +75,13 @@ public class TableSelectBuilder
 		{
 			String expr = null;
 			int type  = columns.get(i).getDataType();
-			if (excludeLobColumns && !SqlUtil.isClobType(type) && !SqlUtil.isBlobType(type))
+			String dbmsType = columns.get(i).getDbmsType();
+
+			if (!excludeLobColumns || dbConnection.getDbSettings().isSearchable(dbmsType))
 			{
 				expr = getColumnExpression(columns.get(i));
 			}
-			else
+			else if (!SqlUtil.isBlobType(type) && !SqlUtil.isClobType(type))
 			{
 				expr = getColumnExpression(columns.get(i));
 			}
