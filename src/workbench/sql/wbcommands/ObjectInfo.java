@@ -71,15 +71,37 @@ public class ObjectInfo
 		TableIdentifier toDescribe = connection.getMetadata().findSelectableObject(tbl);
 		tbl.adjustCase(connection);
 
-		if (toDescribe == null)
+		DbSettings dbs = connection.getDbSettings();
+		TableIdentifier synonymTarget = null;
+		if (toDescribe != null && dbs.isSynonymType(toDescribe.getType()))
+		{
+			synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
+			if (synonymTarget != null)
+			{
+				String msg = toDescribe.getTableExpression(connection) + " --> " +
+					synonymTarget.getTableExpression(connection) + " (" +
+					synonymTarget.getObjectType() + ")";
+				
+				result.addMessage(msg + "\n");
+				result.setSourceCommand(msg);
+			}
+			toDescribe = synonymTarget;
+		}
+
+		if (toDescribe == null || !connection.getMetadata().isTableType(toDescribe.getType()))
 		{
 			SequenceReader seqReader = connection.getMetadata().getSequenceReader();
 			if (seqReader != null)
 			{
-				SequenceDefinition seq = seqReader.getSequenceDefinition(tbl.getSchema(), tbl.getObjectName());
+				String schema = (toDescribe == null ? tbl.getSchema() : toDescribe.getSchema());
+				String name = (toDescribe == null ? tbl.getObjectName() : toDescribe.getObjectName());
+				SequenceDefinition seq = seqReader.getSequenceDefinition(schema, name);
 				if (seq != null)
 				{
-					result.addDataStore(seq.getRawDefinition());
+					DataStore ds = seq.getRawDefinition();
+					ds.setResultName(seq.getObjectType() + ": " + seq.getObjectName());
+					result.addDataStore(ds);
+
 					CharSequence source = seq.getSource();
 					if (source == null)
 					{
@@ -90,8 +112,13 @@ public class ObjectInfo
 					if (source != null) 
 					{
 						String src = source.toString();
+						result.addMessage("--------[ " + seq.getObjectType() + ": " + seq.getObjectName() + " ]--------");
 						result.addMessage(src);
-						result.setSourceCommand(StringUtil.getMaxSubstring(src, 300, "..."));
+						result.addMessage("--------");
+						if (StringUtil.isBlank(result.getSourceCommand()))
+						{
+							result.setSourceCommand(StringUtil.getMaxSubstring(src, 300, "..."));
+						}
 					}
 					return result;
 				}
@@ -134,19 +161,6 @@ public class ObjectInfo
 
 		TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
 		DataStore tableColumns = new TableColumnsDatastore(def);
-
-		DbSettings dbs = connection.getDbSettings();
-		TableIdentifier synonymTarget = null;
-		if (dbs.isSynonymType(toDescribe.getType()))
-		{
-			synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
-			if (synonymTarget != null)
-			{
-				String msg = toDescribe.getTableExpression(connection) + " --> " + synonymTarget.getTableExpression(connection);
-				result.addMessage(msg);
-				result.setSourceCommand(msg);
-			}
-		}
 
 		CharSequence viewSource = null;
 		String viewname = null;

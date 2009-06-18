@@ -3105,31 +3105,31 @@ public class SqlPanel
 		});
 	}
 
-	private void setExecuteActionStates(final boolean aFlag)
+	private void setExecuteActionStates(final boolean flag)
 	{
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				executeAll.setEnabled(aFlag);
-				executeSelected.setEnabled(aFlag);
-				executeCurrent.setEnabled(aFlag);
-				if (aFlag)
+				executeAll.setEnabled(flag);
+				executeSelected.setEnabled(flag);
+				executeCurrent.setEnabled(flag);
+				if (flag)
 				{
 					checkCommitAction();
 				}
 				else
 				{
-					commitAction.setEnabled(aFlag);
-					rollbackAction.setEnabled(aFlag);
+					commitAction.setEnabled(flag);
+					rollbackAction.setEnabled(flag);
 				}
-				spoolData.canExport(aFlag);
-				appendResultsAction.setEnabled(aFlag);
+				spoolData.canExport(flag);
+				appendResultsAction.setEnabled(flag);
 			}
 		});
 	}
 
-	protected void setBusy(final boolean busy)
+	public void setBusy(final boolean busy)
 	{
 		synchronized (this)
 		{
@@ -3163,7 +3163,7 @@ public class SqlPanel
 		this.execListener.remove(l);
 	}
 
-	protected void fireDbExecStart()
+	public void fireDbExecStart()
 	{
 		synchronized (this)
 		{
@@ -3182,7 +3182,7 @@ public class SqlPanel
 		}
 	}
 
-	protected void fireDbExecEnd()
+	public void fireDbExecEnd()
 	{
 		synchronized (this)
 		{

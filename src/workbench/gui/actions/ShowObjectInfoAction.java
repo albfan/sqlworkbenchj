@@ -12,16 +12,20 @@
 package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.util.List;
+import javax.swing.KeyStroke;
 import workbench.db.WbConnection;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.TextSelectionListener;
 import workbench.log.LogMgr;
+import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.ObjectInfo;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 /**
  *
@@ -40,15 +44,33 @@ public class ShowObjectInfoAction
 		display.getEditor().addSelectionListener(this);
 		setIcon(null);
 		setMenuItemName(ResourceMgr.MNU_TXT_SQL);
-		initMenuDefinition("MnuTxtShowObjectDef");
+		initMenuDefinition("MnuTxtShowObjectDef", KeyStroke.getKeyStroke(KeyEvent.VK_I, PlatformShortcuts.getDefaultModifier()));
 		setEnabled(false);
 	}
 
 	@Override
 	public void executeAction(ActionEvent e)
 	{
+		if (display.isBusy()) return;
+		WbThread t = new WbThread(new Runnable()
+		{
+			public void run()
+			{
+				showInfo();
+			}
+		}, "ObjectInfoThread");
+		t.start();
+	}
+
+	protected void showInfo()
+	{
+		if (display.isBusy()) return;
 		try
 		{
+			display.setBusy(true);
+			display.fireDbExecStart();
+			setEnabled(false);
+			
 			ObjectInfo info = new ObjectInfo();
 			WbConnection conn = display.getConnection();
 			String text = display.getSelectedText();
@@ -62,7 +84,7 @@ public class ShowObjectInfoAction
 
 					// Retrieving the messages will reset the hasMessages() flag...
 					boolean hasMessages = result.hasMessages();
-					
+
 					if (hasMessages)
 					{
 						display.appendToLog("\n");
@@ -92,10 +114,13 @@ public class ShowObjectInfoAction
 		}
 		finally
 		{
+			display.fireDbExecEnd();
+			display.setBusy(false);
 			display.clearStatusMessage();
+			checkEnabled();
 		}
 	}
-
+	
 	public void checkEnabled()
 	{
 		setEnabled(display != null && display.isConnected() && StringUtil.isNonBlank(display.getSelectedText()));
