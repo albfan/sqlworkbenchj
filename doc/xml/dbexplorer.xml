@@ -529,6 +529,22 @@ FROM geo_table
 			in all the cases and for all DBMS.
 		</para>
 
+    <para>
+      The <literal>SELECT</literal> statement that is built to display the table's
+      data will list all columns from the table. If the table contains BLOB columns
+      this might lead to a substantial memory consumption. To avoid loading too
+      many data into memory, you can check the option "Do not retrieve LOB columns".
+      In that case columns of type CLOB or BLOB will not be retrieved.
+    </para>
+
+    <para>
+      &wb-productname; is building a <literal>SELECT</literal> that "searches" for
+      data using a <literal>LIKE</literal> expression. Only columns of type <literal>CHAR</literal>
+      <literal>VARCHAR</literal> are included in the LIKE search, because that is what
+      most DBMS support. If the DBMS you are using supports <literal>LIKE</literal> expressions
+      for other datatypes as well, you can <link linkend="dbexplorer-searchable-types">configure</link>
+      this datatypes to be included in the search feature of the DbExplorer.
+    </para>
 	</section>
   <section id="customize-table-source-generation">
     <title>Customizing the generation of the table source</title>

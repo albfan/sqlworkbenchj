@@ -282,6 +282,28 @@
 			</para>
 		</simplesect>
 
+		<simplesect id="dbexplorer-searchable-types">
+			<title>Customizing columns that can be searched</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.datatypes.searchable</literal></para>
+			<para>
+        <link linkend="search-tables">DbExplorer's "Search table data"</link> feature only includes
+        columns with the datatypes <literal>CHAR</literal> and <literal>VARCHAR</literal>
+        into the WHERE clause for searching.
+			</para>
+      <para>
+        Some database systems allow CLOB columns to be searched using a <literal>LIKE</literal> expression
+        as well. This property can be used to list all datatypes that can be used in a <literal>LIKE</literal>
+        condition.
+      </para>
+      <para>Default values:
+        <simplelist columns="1">
+          <member>For postgres: <literal>text</literal></member>
+          <member>For MySQL: <literal>longtext,tinytext,mediumtext</literal></member>
+        </simplelist>
+      </para>
+    </simplesect>
+
+
 	</section>
 
 	<!--
