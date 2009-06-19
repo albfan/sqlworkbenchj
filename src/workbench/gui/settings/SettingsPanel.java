@@ -30,6 +30,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -41,6 +42,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
 import workbench.gui.help.HelpManager;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -49,7 +51,8 @@ import workbench.resource.Settings;
  */
 public class SettingsPanel
 	extends JPanel
-	implements ActionListener, ListSelectionListener, WindowListener
+	implements ActionListener, ListSelectionListener, WindowListener,
+						ValidatingComponent
 {
 	private JButton cancelButton;
 	private JButton helpButton;
@@ -233,8 +236,11 @@ public class SettingsPanel
 		}
 		else if (e.getSource() == okButton)
 		{
-			this.saveSettings();
-			this.closeWindow();
+			if (validateInput())
+			{
+				this.saveSettings();
+				this.closeWindow();
+			}
 		}
 		else if (e.getSource() == helpButton)
 		{
@@ -275,6 +281,31 @@ public class SettingsPanel
 		// Reading the locales can take up to 2 seconds which is too
 		// long to be done when switching to the panel
 		DataDisplayOptions.readLocales();
+	}
+
+	public boolean validateInput()
+	{
+		for (int i=0; i < pages.size(); i++)
+		{
+			OptionPanelPage page = pages.get(i);
+			final int index = i;
+			if (!page.validateInput())
+			{
+				SwingUtilities.invokeLater(new Runnable() 
+				{
+					public void run()
+					{
+						pageList.setSelectedIndex(index);
+					}
+				});
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public void componentDisplayed()
+	{
 	}
 
 

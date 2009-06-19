@@ -12,10 +12,13 @@
 package workbench.gui.settings;
 
 import javax.swing.JPanel;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.NumberField;
 import workbench.interfaces.Restoreable;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -23,7 +26,7 @@ import workbench.resource.Settings;
  */
 public class DataFormattingOptionsPanel
 	extends JPanel
-	implements Restoreable
+	implements Restoreable, ValidatingComponent
 {
 	public DataFormattingOptionsPanel()
 	{
@@ -50,6 +53,53 @@ public class DataFormattingOptionsPanel
 		Settings.getInstance().setMaxFractionDigits(((NumberField)this.maxDigitsField).getValue());
 		Settings.getInstance().setDecimalSymbol(this.decimalField.getText());
 		Settings.getInstance().setProperty("workbench.db.oracle.fixdatetype", oraDateFix.isSelected());
+	}
+
+
+	public boolean validateInput()
+	{
+		String format = dateFormatTextField.getText();
+
+		if (StringUtil.isNonBlank(format))
+		{
+			String err = StringUtil.isDatePatternValid(format);
+			if (err != null)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", dateFormatLabel.getText(), err);
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
+				return false;
+			}
+		}
+
+		format = timestampFormatTextField.getText();
+		if (StringUtil.isNonBlank(format))
+		{
+			String err = StringUtil.isDatePatternValid(format);
+			if (err != null)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", timestampFormatLabel.getText(), err);
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
+				return false;
+			}
+		}
+
+		format = timeFormat.getText();
+		if (StringUtil.isNonBlank(format))
+		{
+			String err = StringUtil.isDatePatternValid(format);
+			if (err != null)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", timeFormatLabel.getText(), err);
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
+				return false;
+			}
+		}
+
+		return true;
+	}
+	
+	public void componentDisplayed()
+	{
 	}
 	
 	/** This method is called from within the constructor to

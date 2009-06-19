@@ -21,6 +21,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import workbench.gui.components.DividerBorder;
 import workbench.interfaces.Restoreable;
+import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
@@ -86,6 +87,16 @@ public class OptionPanelPage
 		return this.panel;
 	}
 
+	public boolean validateInput()
+	{
+		if (this.options instanceof ValidatingComponent)
+		{
+			ValidatingComponent vc = (ValidatingComponent)this.options;
+			return vc.validateInput();
+		}
+		return true;
+	}
+	
 	public void saveSettings()
 	{
 		try

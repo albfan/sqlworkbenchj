@@ -11,13 +11,11 @@
  */
 package workbench.gui.dialogs.dataimport;
 
-import java.text.SimpleDateFormat;
 import javax.swing.JPanel;
 import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -119,13 +117,10 @@ public class GeneralImportOptionsPanel
 		
 		if (StringUtil.isNonBlank(format))
 		{
-			try
+			String err = StringUtil.isDatePatternValid(format);
+			if (err != null)
 			{
-				SimpleDateFormat sdf = new SimpleDateFormat(format);
-			}
-			catch (Exception e)
-			{
-				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", dateFormatLabel.getText(), ExceptionUtil.getDisplay(e));
+				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", dateFormatLabel.getText(), err);
 				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
 				return false;
 			}
@@ -134,13 +129,10 @@ public class GeneralImportOptionsPanel
 		format = timestampFormat.getText();
 		if (StringUtil.isNonBlank(format))
 		{
-			try
+			String err = StringUtil.isDatePatternValid(format);
+			if (err != null)
 			{
-				SimpleDateFormat sdf = new SimpleDateFormat(format);
-			}
-			catch (Exception e)
-			{
-				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", timestampFormatLabel.getText(), ExceptionUtil.getDisplay(e));
+				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", timestampFormatLabel.getText(), err);
 				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
 				return false;
 			}

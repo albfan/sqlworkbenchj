@@ -16,9 +16,6 @@
   <SubComponents>
     <Component class="javax.swing.JCheckBox" name="formatUpdates">
       <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="null" type="code"/>
-        </Property>
         <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Settings.getInstance().getDoFormatUpdates()" type="code"/>
         </Property>
@@ -46,9 +43,6 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="formatInserts">
       <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="null" type="code"/>
-        </Property>
         <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Settings.getInstance().getDoFormatInserts()" type="code"/>
         </Property>
@@ -76,9 +70,6 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="ignoreIdentity">
       <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="null" type="code"/>
-        </Property>
         <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="Settings.getInstance().getFormatInsertIgnoreIdentity()" type="code"/>
         </Property>
@@ -149,9 +140,6 @@
       <SubComponents>
         <Component class="javax.swing.JCheckBox" name="includeEmptyComments">
           <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="null" type="code"/>
-            </Property>
             <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Settings.getInstance().getIncludeOwnerInSqlExport()" type="code"/>
             </Property>
@@ -176,9 +164,6 @@
         </Component>
         <Component class="javax.swing.JCheckBox" name="includeOwner">
           <Properties>
-            <Property name="font" type="java.awt.Font" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-              <Connection code="null" type="code"/>
-            </Property>
             <Property name="selected" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
               <Connection code="Settings.getInstance().getIncludeOwnerInSqlExport()" type="code"/>
             </Property>

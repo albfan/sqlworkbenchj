@@ -10,6 +10,13 @@
     </description>
   </entry>
 
+  <entry dev-build="2" type="enh">
+    <description>
+	  When specifying date/time format string (e.g. when importing a file or in the options dialog), 
+	  the input is now validated and an error message is shown. 
+    </description>
+  </entry>
+
   <entry dev-build="1" type="enh">
     <description>
       The generation of the source SQL for a table can now be configured in order
@@ -25,6 +32,13 @@
       When using WbExport to generate HTML two new parameters can be used to
       specify HTML code that is added before and after the actual export data
       (-preDataHtml, -postDataHtml)
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
+	  When using the DataPumper to import text files and an invalid date format was specified, no
+	  table columns could be selected.
     </description>
   </entry>
 

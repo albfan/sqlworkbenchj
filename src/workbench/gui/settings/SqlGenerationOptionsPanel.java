@@ -130,7 +130,6 @@ public class SqlGenerationOptionsPanel
 
     setLayout(new GridBagLayout());
 
-    formatUpdates.setFont(null);
     formatUpdates.setSelected(Settings.getInstance().getDoFormatUpdates());
     formatUpdates.setText(ResourceMgr.getString("LblFmtUpd")); // NOI18N
     formatUpdates.setToolTipText(ResourceMgr.getString("d_LblFmtUpd")); // NOI18N
@@ -147,7 +146,6 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.insets = new Insets(10, 10, 0, 11);
     add(formatUpdates, gridBagConstraints);
 
-    formatInserts.setFont(null);
     formatInserts.setSelected(Settings.getInstance().getDoFormatInserts());
     formatInserts.setText(ResourceMgr.getString("LblFmtIns")); // NOI18N
     formatInserts.setToolTipText(ResourceMgr.getString("d_LblFmtIns")); // NOI18N
@@ -165,7 +163,6 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.insets = new Insets(10, 10, 0, 11);
     add(formatInserts, gridBagConstraints);
 
-    ignoreIdentity.setFont(null);
     ignoreIdentity.setSelected(Settings.getInstance().getFormatInsertIgnoreIdentity());
     ignoreIdentity.setText(ResourceMgr.getString("LblInsIgnoreId")); // NOI18N
     ignoreIdentity.setToolTipText(ResourceMgr.getString("d_LblInsIgnoreId")); // NOI18N
@@ -205,7 +202,6 @@ public class SqlGenerationOptionsPanel
 
     jPanel1.setLayout(new GridBagLayout());
 
-    includeEmptyComments.setFont(null);
     includeEmptyComments.setSelected(Settings.getInstance().getIncludeOwnerInSqlExport());
     includeEmptyComments.setText(ResourceMgr.getString("LblGenInclEmptyComments")); // NOI18N
     includeEmptyComments.setToolTipText(ResourceMgr.getString("d_LblGenInclEmptyComments")); // NOI18N
@@ -223,7 +219,6 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.insets = new Insets(0, 5, 0, 0);
     jPanel1.add(includeEmptyComments, gridBagConstraints);
 
-    includeOwner.setFont(null);
     includeOwner.setSelected(Settings.getInstance().getIncludeOwnerInSqlExport());
     includeOwner.setText(ResourceMgr.getString("LblGenInclOwn")); // NOI18N
     includeOwner.setToolTipText(ResourceMgr.getString("d_LblGenInclOwn")); // NOI18N

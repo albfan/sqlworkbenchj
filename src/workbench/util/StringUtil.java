@@ -49,6 +49,26 @@ public class StringUtil
 		}
 	}
 
+	/**
+	 * Checks if the given string is a valid pattern for a SimpleDateFormat.
+	 *
+	 * @param pattern
+	 * @return the exception's message if an error occurs, null if everything is OK.
+	 */
+	public static final String isDatePatternValid(String pattern)
+	{
+		if (isBlank(pattern)) return null;
+		try
+		{
+			SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+		}
+		catch (Exception e)
+		{
+			return ExceptionUtil.getDisplay(e);
+		}
+		return null;
+	}
+
 	private static final java.util.Date now()
 	{
 		return new java.util.Date(System.currentTimeMillis());
