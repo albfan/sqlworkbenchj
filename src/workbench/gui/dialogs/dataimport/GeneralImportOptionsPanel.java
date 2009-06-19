@@ -125,7 +125,7 @@ public class GeneralImportOptionsPanel
 			}
 			catch (Exception e)
 			{
-				String msg = ResourceMgr.getFormattedString("ErrInvalidPattern", dateFormatLabel.getText(), ExceptionUtil.getDisplay(e));
+				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", dateFormatLabel.getText(), ExceptionUtil.getDisplay(e));
 				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
 				return false;
 			}
@@ -140,7 +140,7 @@ public class GeneralImportOptionsPanel
 			}
 			catch (Exception e)
 			{
-				String msg = ResourceMgr.getFormattedString("ErrInvalidPattern", timestampFormatLabel.getText(), ExceptionUtil.getDisplay(e));
+				String msg = ResourceMgr.getFormattedString("ErrInvalidInput", timestampFormatLabel.getText(), ExceptionUtil.getDisplay(e));
 				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
 				return false;
 			}
