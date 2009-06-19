@@ -24,6 +24,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.db.importer.ProducerFactory;
 import workbench.gui.components.DividerBorder;
 import workbench.interfaces.EncodingSelector;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.Settings;
 
 /**
@@ -33,7 +34,7 @@ import workbench.resource.Settings;
  */
 public class ImportOptionsPanel
 	extends JPanel
-	implements EncodingSelector, ActionListener
+	implements EncodingSelector, ActionListener, ValidatingComponent
 {
 	private JPanel typePanel;
 	private CardLayout card;
@@ -180,6 +181,19 @@ public class ImportOptionsPanel
 			
 			if (oldType != currentType) firePropertyChange("exportType", oldType, this.currentType);
 		}
+	}
+
+	public boolean validateInput()
+	{
+		if (this.textOptions != null)
+		{
+			return generalOptions.validateInput();
+		}
+		return true;
+	}
+
+	public void componentDisplayed()
+	{
 	}
 	
 }

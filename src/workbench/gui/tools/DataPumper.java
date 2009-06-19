@@ -1814,6 +1814,7 @@ public class DataPumper
 		}
 		catch (Exception e)
 		{
+			WbSwingUtilities.showErrorMessage(this, this.window.getTitle(), ExceptionUtil.getDisplay(e));
 			LogMgr.logError("DataPumper.initColumnMapper()", "Error when intializing column mapper", e);
 		}
 	}

@@ -1808,7 +1808,7 @@ public class Settings
 	public void setDelimiter(String prop, String delim)
 	{
 		if (delim.equals("\t")) delim = "\\t";
-		setProperty("workbench.import.clipboard.fielddelimiter", delim);
+		setProperty(prop, delim);
 	}
 
 	public String getDelimiter(String prop, String def, boolean readable)

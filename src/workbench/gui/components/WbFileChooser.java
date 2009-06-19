@@ -16,8 +16,10 @@ import java.awt.Component;
 import java.awt.HeadlessException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.Settings;
 
 /**
@@ -70,5 +72,24 @@ public class WbFileChooser
 		}
 	}
 
+	public boolean validateInput()
+	{
+		JComponent accessory = getAccessory();
+		if (accessory instanceof ValidatingComponent)
+		{
+			ValidatingComponent vc = (ValidatingComponent)accessory;
+			return vc.validateInput();
+		}
+		return true;
+	}
+
+	@Override
+	public void approveSelection()
+	{
+		if (validateInput())
+		{
+			super.approveSelection();
+		}
+	}
 
 }

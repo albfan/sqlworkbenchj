@@ -11,16 +11,22 @@
  */
 package workbench.gui.dialogs.dataimport;
 
+import java.text.SimpleDateFormat;
+import javax.swing.JPanel;
+import workbench.gui.WbSwingUtilities;
+import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author  support@sql-workbench.net
  */
 public class GeneralImportOptionsPanel
-	extends javax.swing.JPanel
-	implements ImportOptions
+	extends JPanel
+	implements ImportOptions, ValidatingComponent
 {
 	public GeneralImportOptionsPanel()
 	{
@@ -106,6 +112,48 @@ public class GeneralImportOptionsPanel
 	{
 		timestampFormat.setText(format);
 	}
+
+	public boolean validateInput()
+	{
+		String format = dateFormat.getText();
+		
+		if (StringUtil.isNonBlank(format))
+		{
+			try
+			{
+				SimpleDateFormat sdf = new SimpleDateFormat(format);
+			}
+			catch (Exception e)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrInvalidPattern", dateFormatLabel.getText(), ExceptionUtil.getDisplay(e));
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
+				return false;
+			}
+		}
+
+		format = timestampFormat.getText();
+		if (StringUtil.isNonBlank(format))
+		{
+			try
+			{
+				SimpleDateFormat sdf = new SimpleDateFormat(format);
+			}
+			catch (Exception e)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrInvalidPattern", timestampFormatLabel.getText(), ExceptionUtil.getDisplay(e));
+				WbSwingUtilities.showErrorMessage(this, ResourceMgr.getString("TxtError"), msg);
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public void componentDisplayed()
+	{
+
+	}
+
 
 	/** This method is called from within the constructor to
 	 * initialize the form.
