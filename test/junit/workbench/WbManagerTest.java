@@ -101,6 +101,7 @@ public class WbManagerTest extends TestCase
 
 
 	public void testCommandParameter()
+		throws Exception
 	{
 		TestUtil util = new TestUtil(getName());
 		util.emptyBaseDirectory();
@@ -120,7 +121,7 @@ public class WbManagerTest extends TestCase
 												"-logfile='" + logfile.getFullPath() + "'",
 												"-feedback=false -abortOnError=true ",
 												"-command='WbExport -type=\"text\" -file=\"" + export.getFullPath() + "\" "+
-												"-delimiter=\";\" -decimal=\",\"; select * from information_schema.tables;' "
+												"-delimiter=\";\" -decimal=\",\"; select TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE from information_schema.tables;' "
 												};
 
 			WbManager.main(args);
@@ -129,12 +130,7 @@ public class WbManagerTest extends TestCase
 
 			BufferedReader reader = EncodingUtil.createBufferedReader(export, "ISO-8859-1");
 			List<String> lines = FileUtil.getLines(reader);
-			assertEquals("Wrong header line", "TABLE_CATALOG;TABLE_SCHEMA;TABLE_NAME;TABLE_TYPE;STORAGE_TYPE;SQL;REMARKS;ID", lines.get(0));
-		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			assertEquals("Wrong header line", "TABLE_CATALOG;TABLE_SCHEMA;TABLE_NAME;TABLE_TYPE", lines.get(0));
 		}
 		finally
 		{

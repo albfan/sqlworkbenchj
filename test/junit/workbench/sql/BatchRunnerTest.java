@@ -176,7 +176,7 @@ public class BatchRunnerTest
 		}
 		finally
 		{
-			if (con != null) con.disconnect();
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
@@ -245,7 +245,7 @@ public class BatchRunnerTest
 		}
 		finally
 		{
-			if (con != null) con.disconnect();
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 	
@@ -434,7 +434,7 @@ public class BatchRunnerTest
 			writer2.println("commit;");
 			writer2.close();			
 			
-			parser.parse("-url='jdbc:h2:mem:testAltDelimiter' -altdelimiter='/;nl' -user=sa -driver=org.h2.Driver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
+			parser.parse("-url='jdbc:h2:mem:testAltDelimiter' -altdelimiter='/;nl' -username=sa -driver=org.h2.Driver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 			
 			assertNotNull(runner);

@@ -15,6 +15,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Types;
 import junit.framework.TestCase;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
@@ -28,6 +29,14 @@ public class DataStorePrinterTest
 	public DataStorePrinterTest(String testName)
 	{
 		super(testName);
+	}
+
+	@Override
+	protected void setUp()
+		throws Exception
+	{
+		super.setUp();
+		System.setProperty("workbench.gui.language", "en");
 	}
 
 	private DataStore createTestData()

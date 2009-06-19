@@ -949,6 +949,7 @@ public final class WbManager
 		// on the classpath.
 		System.setProperty("workbench.gui.testmode", "true");
 		System.setProperty("workbench.log.console", "false");
+		System.setProperty("workbench.gui.language", "en");
 		wb.readParameters(args);
 	}
 

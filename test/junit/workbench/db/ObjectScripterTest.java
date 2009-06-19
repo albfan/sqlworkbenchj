@@ -70,7 +70,7 @@ public class ObjectScripterTest
 			objects.add(new ViewDefinition("V_PERSON"));
 			ObjectScripter scripter = new ObjectScripter(objects, con);
 			String script = scripter.getScript();
-//			System.out.println(script);
+			System.out.println(script);
 			
 			int personPos = script.indexOf("CREATE TABLE PERSON");
 			assertTrue(personPos > -1);
