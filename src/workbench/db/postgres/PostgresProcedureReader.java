@@ -152,7 +152,7 @@ public class PostgresProcedureReader
 	}
 
 	@Override
-	public DataStore getProcedures(String catalog, String schemaPattern, String namePattern)
+	public DataStore getProcedures(String catalog, String schemaPattern, String procName)
 		throws SQLException
 	{
 		if ("*".equals(schemaPattern) || "%".equals(schemaPattern))
@@ -160,11 +160,12 @@ public class PostgresProcedureReader
 			schemaPattern = null;
 		}
 
-		if (StringUtil.isBlank(namePattern))
+		String namePattern = null;
+		if ("*".equals(namePattern) || "%".equals(procName))
 		{
-			namePattern = "%";
+			namePattern = null;
 		}
-		else
+		else if (StringUtil.isNonBlank(procName))
 		{
 			PGProcName pg = new PGProcName(namePattern, getTypeLookup());
 			namePattern = pg.getName();
@@ -191,11 +192,11 @@ public class PostgresProcedureReader
 						" LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog') " +
 						" WHERE p.pronamespace=n.oid ";
 
-			if (schemaPattern != null && !"".equals(schemaPattern))
+			if (StringUtil.isNonBlank(schemaPattern))
 			{
 					sql += " AND n.nspname LIKE '" + schemaPattern + "' ";
 			}
-			if (namePattern != null)
+			if (StringUtil.isNonBlank(namePattern))
 			{
 					sql += " AND p.proname LIKE '" + namePattern + "' ";
 			}
@@ -344,9 +345,9 @@ public class PostgresProcedureReader
 					paramCount ++;
 				}
 
-				source.append(") RETURNS ");
+				source.append(")\n  RETURNS ");
 				source.append(getRawTypeNameFromOID(retTypeOid));
-				source.append("\nAS $$\n");
+				source.append("\nAS\n$$\n");
 				src = src.trim();
 				source.append(StringUtil.makePlainLinefeed(src));
 				if (!src.endsWith(";")) source.append(';');

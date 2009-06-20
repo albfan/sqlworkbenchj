@@ -44,7 +44,7 @@ public class PGProcNameTest
 
 	public void testParse()
 	{
-		String procname = "my_func(int4, varchar)";
+		String procname = "my_func(integer, varchar)";
 		PGTypeLookup types = new PGTypeLookup(getTypes());
 		PGProcName proc = new PGProcName(procname, types);
 		assertEquals("my_func", proc.getName());
@@ -57,7 +57,6 @@ public class PGProcNameTest
 		assertEquals(23, proc2.getArguments().get(0).oid);
 		assertEquals(23, proc2.getArguments().get(1).oid);
 		assertEquals(1043, proc2.getArguments().get(2).oid);
-
 	}
 
 	private Map<Integer, PGType> getTypes()
@@ -65,9 +64,9 @@ public class PGProcNameTest
 		Map<Integer, PGType> result = new HashMap<Integer, PGType>();
 		result.put(16, new PGType("bool", "boolean", 16));
 		result.put(18, new PGType("char", "char", 18));
-		result.put(20, new PGType("int8", "bigint", 20));
-		result.put(23, new PGType("int4", "integer", 23));
-		result.put(21, new PGType("int2", "smalling", 21));
+		result.put(20, new PGType("bigint", "bigint", 20));
+		result.put(23, new PGType("integer", "integer", 23));
+		result.put(21, new PGType("smallint", "smalling", 21));
 		result.put(1043, new PGType("varchar", "character varying", 1043));
 		return result;
 	}

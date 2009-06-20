@@ -23,7 +23,26 @@ public class PGType
 
 	public PGType(String raw, String formatted, int id)
 	{
-		rawType = raw;
+		if (raw.equals("int2"))
+		{
+			rawType = "smallint";
+		}
+		else if (raw.equals("int4"))
+		{
+			rawType = "integer";
+		}
+		else if (raw.equals("int8"))
+		{
+			rawType = "bigint";
+		}
+		else if (raw.equals("bool"))
+		{
+			rawType = "boolean";
+		}
+		else
+		{
+			rawType = raw;
+		}
 		formattedType = formatted;
 		oid = id;
 	}
