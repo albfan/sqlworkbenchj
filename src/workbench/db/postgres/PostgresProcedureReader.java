@@ -23,11 +23,14 @@ import java.util.List;
 import java.util.Map;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
+import workbench.db.NoConfigException;
+import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -38,8 +41,8 @@ public class PostgresProcedureReader
 	extends JdbcProcedureReader
 {
 	// Maps PG type names to Java types.
-	private Map<String, Integer> pgTypeMap;
-	private Map<Integer, PGType> pgTypes;
+	private Map<String, Integer> pgType2Java;
+	private PGTypeLookup pgTypes;
 	private PGType voidType;
 
 	public PostgresProcedureReader(WbConnection conn)
@@ -57,35 +60,36 @@ public class PostgresProcedureReader
 
 	private Map<String, Integer> getJavaTypeMapping()
 	{
-		if (pgTypeMap == null)
+		if (pgType2Java == null)
 		{
 			// This mapping has been copied from the JDBC driver.
 			// This map is deeply hidden in the driver and even
 			// if I hard-coded references to the driver into the
 			// class I wouldn't know how to retrieve them.
-			pgTypeMap = new HashMap<String, Integer>();
-			pgTypeMap.put("int2", Integer.valueOf(Types.SMALLINT));
-			pgTypeMap.put("int4", Integer.valueOf(Types.INTEGER));
-			pgTypeMap.put("oid", Integer.valueOf(Types.INTEGER));
-			pgTypeMap.put("int8", Integer.valueOf(Types.BIGINT));
-			pgTypeMap.put("money", Integer.valueOf(Types.DOUBLE));
-			pgTypeMap.put("numeric", Integer.valueOf(Types.NUMERIC));
-			pgTypeMap.put("float4", Integer.valueOf(Types.REAL));
-			pgTypeMap.put("float8", Integer.valueOf(Types.DOUBLE));
-			pgTypeMap.put("bpchar", Integer.valueOf(Types.CHAR));
-			pgTypeMap.put("varchar", Integer.valueOf(Types.VARCHAR));
-			pgTypeMap.put("text", Integer.valueOf(Types.VARCHAR));
-			pgTypeMap.put("name", Integer.valueOf(Types.VARCHAR));
-			pgTypeMap.put("bytea", Integer.valueOf(Types.BINARY));
-			pgTypeMap.put("bool", Integer.valueOf(Types.BIT));
-			pgTypeMap.put("bit", Integer.valueOf(Types.BIT));
-			pgTypeMap.put("date", Integer.valueOf(Types.DATE));
-			pgTypeMap.put("time", Integer.valueOf(Types.TIME));
-			pgTypeMap.put("timetz", Integer.valueOf(Types.TIME));
-			pgTypeMap.put("timestamp", Integer.valueOf(Types.TIMESTAMP));
-			pgTypeMap.put("timestamptz", Integer.valueOf(Types.TIMESTAMP));
+			pgType2Java = new HashMap<String, Integer>();
+			pgType2Java.put("int2", Integer.valueOf(Types.SMALLINT));
+			pgType2Java.put("int4", Integer.valueOf(Types.INTEGER));
+			pgType2Java.put("oid", Integer.valueOf(Types.INTEGER));
+			pgType2Java.put("int8", Integer.valueOf(Types.BIGINT));
+			pgType2Java.put("money", Integer.valueOf(Types.DOUBLE));
+			pgType2Java.put("numeric", Integer.valueOf(Types.NUMERIC));
+			pgType2Java.put("float4", Integer.valueOf(Types.REAL));
+			pgType2Java.put("float8", Integer.valueOf(Types.DOUBLE));
+			pgType2Java.put("char", Integer.valueOf(Types.CHAR));
+			pgType2Java.put("bpchar", Integer.valueOf(Types.CHAR));
+			pgType2Java.put("varchar", Integer.valueOf(Types.VARCHAR));
+			pgType2Java.put("text", Integer.valueOf(Types.VARCHAR));
+			pgType2Java.put("name", Integer.valueOf(Types.VARCHAR));
+			pgType2Java.put("bytea", Integer.valueOf(Types.BINARY));
+			pgType2Java.put("bool", Integer.valueOf(Types.BIT));
+			pgType2Java.put("bit", Integer.valueOf(Types.BIT));
+			pgType2Java.put("date", Integer.valueOf(Types.DATE));
+			pgType2Java.put("time", Integer.valueOf(Types.TIME));
+			pgType2Java.put("timetz", Integer.valueOf(Types.TIME));
+			pgType2Java.put("timestamp", Integer.valueOf(Types.TIMESTAMP));
+			pgType2Java.put("timestamptz", Integer.valueOf(Types.TIMESTAMP));
     }
-		return pgTypeMap;
+		return pgType2Java;
 	}
 
 	private Integer getJavaType(String pgType)
@@ -95,11 +99,11 @@ public class PostgresProcedureReader
 		return i;
 	}
 
-	private Map<Integer, PGType> getPGTypes()
+	protected PGTypeLookup getTypeLookup()
 	{
 		if (pgTypes == null)
 		{
-			pgTypes = new HashMap<Integer, PGType>(300);
+			Map<Integer, PGType> typeMap = new HashMap<Integer, PGType>(300);
 			Statement stmt = null;
 			ResultSet rs = null;
 			Savepoint sp = null;
@@ -111,11 +115,8 @@ public class PostgresProcedureReader
 				while (rs.next())
 				{
 					Integer oid = Integer.valueOf(rs.getInt(1));
-					PGType typ = new PGType();
-					typ.rawType = rs.getString(2);
-					typ.formattedType = StringUtil.trimQuotes(rs.getString(3));
-					typ.oid = oid.intValue();
-					pgTypes.put(oid, typ);
+					PGType typ = new PGType(rs.getString(2), StringUtil.trimQuotes(rs.getString(3)), oid.intValue());
+					typeMap.put(typ.oid, typ);
 					if ("void".equals(typ.rawType))
 					{
 						voidType = typ;
@@ -127,100 +128,265 @@ public class PostgresProcedureReader
 			{
 				connection.rollback(sp);
 				LogMgr.logError("PostgresProcedureReqder.getPGTypes()", "Could not read postgres data types", e);
-				pgTypes = Collections.emptyMap();
+				typeMap = Collections.emptyMap();
 			}
 			finally
 			{
 				SqlUtil.closeAll(rs, stmt);
 			}
+			pgTypes = new PGTypeLookup(typeMap);
 		}
 		return pgTypes;
 	}
 
 	private String getRawTypeNameFromOID(int oid)
 	{
-		PGType typ = getPGTypes().get(Integer.valueOf(oid));
+		PGType typ = getTypeLookup().getTypeFromOID(Integer.valueOf(oid));
 		return typ.rawType;
 	}
 
 	private String getFormattedTypeFromOID(int oid)
 	{
-		PGType typ = getPGTypes().get(Integer.valueOf(oid));
+		PGType typ = getTypeLookup().getTypeFromOID(Integer.valueOf(oid));
 		return typ.formattedType;
 	}
 
-	public StringBuilder getProcedureHeader(String aCatalog, String aSchema, String aProcname, int procType)
+	@Override
+	public DataStore getProcedures(String catalog, String schemaPattern, String namePattern)
+		throws SQLException
 	{
-		StringBuilder source = new StringBuilder();
+		if ("*".equals(schemaPattern) || "%".equals(schemaPattern))
+		{
+			schemaPattern = null;
+		}
 
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
+		if (StringUtil.isBlank(namePattern))
+		{
+			namePattern = "%";
+		}
+		else
+		{
+			PGProcName pg = new PGProcName(namePattern, getTypeLookup());
+			namePattern = pg.getName();
+		}
+		
+		Statement stmt = null;
 		Savepoint sp = null;
+		ResultSet rs = null;
 		try
 		{
-			sp = this.connection.setSavepoint();
-			DataStore ds = this.getProcedureColumns(aCatalog, aSchema, aProcname);
-			source.append("CREATE OR REPLACE FUNCTION ");
+			if (useSavepoint)
+			{
+				sp = this.connection.setSavepoint();
+			}
 
-			source.append(aProcname);
-			source.append(" (");
-			String retType = null;
-			int count = ds.getRowCount();
-			int added = 0;
-			for (int i=0; i < count; i++)
+			String sql = "SELECT NULL AS PROCEDURE_CAT, " +
+						" n.nspname AS PROCEDURE_SCHEM, " +
+						" p.proname AS PROCEDURE_NAME, " +
+						"	d.description AS REMARKS, " +
+						" array_to_string(p.proargtypes, ';') as PG_ARGUMENTS " +
+						" FROM pg_catalog.pg_namespace n, pg_catalog.pg_proc p " +
+						" LEFT JOIN pg_catalog.pg_description d ON (p.oid=d.objoid) " +
+						" LEFT JOIN pg_catalog.pg_class c ON (d.classoid=c.oid AND c.relname='pg_proc') " +
+						" LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog') " +
+						" WHERE p.pronamespace=n.oid ";
+
+			if (schemaPattern != null && !"".equals(schemaPattern))
 			{
-				String varname = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-				String mode = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-				String vartype = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-				String ret = ds.getValueAsString(i,ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-				if ("RETURN".equals(ret))
-				{
-					retType = vartype;
-				}
-				else
-				{
-					if (added > 0) source.append(',');
-					source.append(mode);
-					source.append(' ');
-					if (varname != null)
-					{
-						source.append(varname);
-						source.append(' ');
-					}
-					source.append(vartype);
-					added ++;
-				}
+					sql += " AND n.nspname LIKE '" + schemaPattern + "' ";
 			}
-			source.append(')');
-			if (retType != null)
+			if (namePattern != null)
 			{
-				source.append(nl + "RETURNS ");
-				source.append(retType);
+					sql += " AND p.proname LIKE '" + namePattern + "' ";
 			}
-			source.append(nl + "AS" + nl);
+			sql += " ORDER BY PROCEDURE_SCHEM, PROCEDURE_NAME ";
+
+			stmt = connection.createStatementForQuery();
+
+			rs = stmt.executeQuery(sql);
+			DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
+
+			while (rs.next())
+			{
+				String cat = rs.getString("PROCEDURE_CAT");
+				String schema = rs.getString("PROCEDURE_SCHEM");
+				String name = rs.getString("PROCEDURE_NAME");
+				String remark = rs.getString("REMARKS");
+				String args = rs.getString("PG_ARGUMENTS");
+				int row = ds.addRow();
+
+				PGProcName pname = new PGProcName(name, args, getTypeLookup());
+
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, pname.getFormattedName());
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, java.sql.DatabaseMetaData.procedureReturnsResult);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
+			}
+
 			this.connection.releaseSavepoint(sp);
+			ds.resetStatus();
+			return ds;
 		}
-		catch (Exception e)
+		catch (SQLException sql)
 		{
 			this.connection.rollback(sp);
-			LogMgr.logError("PostgresProcedureReader.getProcedureHeader()", "Error retrieving header", e);
-			source = StringUtil.emptyBuffer();
+			throw sql;
 		}
-		return source;
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
 	}
 
 	public DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{
+		PGProcName pgName = new PGProcName(procname, getTypeLookup());
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
 			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{
-			return getColumns(catalog, schema, procname);
+			return getColumns(catalog, schema, pgName);
 		}
 		else
 		{
 			return super.getProcedureColumns(catalog, schema, procname);
 		}
 	}
+
+	@Override
+	public void readProcedureSource(ProcedureDefinition def)
+		throws NoConfigException
+	{
+		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
+		String sql = "SELECT p.prosrc, \n" +
+								"        l.lanname as lang_name, " +
+								"        p.prorettype as return_type_oid, \n" +
+								"        coalesce(array_to_string(p.proallargtypes, ';'), " +
+								"                 array_to_string(p.proargtypes, ';')) as argtypes, \n" +
+								"        array_to_string(p.proargnames, ';') as argnames, \n" +
+								"        array_to_string(p.proargmodes, ';') as argmodes, \n " +
+								"        p.prosecdef, \n" +
+								"        p.proretset, " +
+								"        p.provolatile, " +
+								"        p.proisstrict " +
+								"FROM pg_proc p, pg_language l, pg_namespace n \n" +
+								" where p.prolang = l.oid \n" +
+								" and p.pronamespace = n.oid ";
+
+		sql += " and p.proname = '" + name.getName() + "' ";
+		sql += " and n.nspname = '" + def.getSchema() + "' ";
+
+		String oids = name.getOIDs();
+		if (StringUtil.isNonBlank(oids))
+		{
+			sql += " AND p.proargtypes = cast('" + oids + "' as oidvector)";
+		}
+		StringBuilder source = new StringBuilder(500);
+		
+		ResultSet rs = null;
+		Savepoint sp = null;
+		Statement stmt = null;
+		try
+		{
+			if (useSavepoint)
+			{
+				sp = this.connection.setSavepoint();
+			}
+			stmt = connection.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+
+
+			if (rs.next())
+			{
+				source.append("CREATE OR REPLACE FUNCTION ");
+				source.append(name.getName());
+			
+				String src = rs.getString(1);
+				if (rs.wasNull() || src == null) src = "";
+				
+				String lang = rs.getString("lang_name");
+				int retTypeOid = rs.getInt("return_type_oid");
+
+				String types = rs.getString("argtypes");
+				String names = rs.getString("argnames");
+				String modes = rs.getString("argmodes");
+				boolean securityDefiner = rs.getBoolean("prosecdef");
+				boolean strict = rs.getBoolean("proisstrict");
+				String volat = rs.getString("provolatile");
+
+				List<String> argNames = StringUtil.stringToList(names, ";", true, true);
+				List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
+				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
+
+				source.append('(');
+				int paramCount = 0;
+				
+				for (int i=0; i < argTypes.size(); i++)
+				{
+					if (paramCount > 0) source.append(", ");
+
+					if (i < argModes.size())
+					{
+						String mode = argModes.get(i);
+						if ("o".equals(mode)) source.append("OUT ");
+						if ("b".equals(mode)) source.append("INOUT");
+					}
+					
+					if (i < argNames.size())
+					{
+						source.append(argNames.get(i));
+						source.append(' ');
+					}
+
+					int typeOid = StringUtil.getIntValue(argTypes.get(i), voidType.oid);
+					source.append(getRawTypeNameFromOID(typeOid));
+					paramCount ++;
+				}
+
+				source.append(") RETURNS ");
+				source.append(getRawTypeNameFromOID(retTypeOid));
+				source.append("\nAS $$\n");
+				src = src.trim();
+				source.append(StringUtil.makePlainLinefeed(src));
+				if (!src.endsWith(";")) source.append(';');
+				source.append("\n$$ LANGUAGE ");
+				source.append(lang);
+				if (volat.equals("i"))
+				{
+					source.append(" IMMUTABLE ");
+				}
+				if (volat.equals("s"))
+				{
+					source.append(" STABLE ");
+				}
+				if (strict)
+				{
+					source.append(" STRICT ");
+				}
+				if (securityDefiner)
+				{
+					source.append(" SECURITY DEFINER");
+				}
+				source.append('\n');
+				source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
+				source.append('\n');
+				def.setSource(source);
+			}
+		}
+		catch (SQLException e)
+		{
+			def.setSource(ExceptionUtil.getDisplay(e));
+			this.connection.rollback(sp);
+			LogMgr.logError("PostgresProcedureReader.readProcedureSource()", "Error retrieving source for " + name.getFormattedName(), e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+	}
+
+
 
 	/**
 	 * A workaround for pre 8.3 drivers so that argument names are retrieved properly
@@ -233,13 +399,12 @@ public class PostgresProcedureReader
 	 * @return a DataStore with the argumens of the procedure
 	 * @throws java.sql.SQLException
 	 */
-	private DataStore getColumns(String catalog, String schema, String procname)
+	private DataStore getColumns(String catalog, String schema, PGProcName procname)
 		throws SQLException
 	{
 		String sql = "SELECT format_type(p.prorettype, NULL) as formatted_type, \n" +
 			       "       t.typname as pg_type, \n" +
-						 "       array_to_string(p.proargtypes, ';') as argtypes, \n" +
-             "       array_to_string(p.proallargtypes, ';') as allargtypes, \n" +
+						 "       coalesce(array_to_string(proallargtypes, ';'), array_to_string(proargtypes, ';')) as argtypes, \n" +
              "       array_to_string(p.proargnames, ';') as argnames, \n" +
 						 "       array_to_string(p.proargmodes, ';') as modes, \n" +
 						 "       t.typtype " +
@@ -249,7 +414,7 @@ public class PostgresProcedureReader
              "WHERE p.pronamespace = n.oid \n" +
              "AND   n.nspname = ? \n " +
 						 "AND   p.prorettype = t.oid \n" +
-             "AND   p.proname = ?";
+             "AND   p.proname = ? ";
 
 		DataStore result = createProcColsDataStore();
 
@@ -260,9 +425,15 @@ public class PostgresProcedureReader
 		{
 			sp = this.connection.setSavepoint();
 
+			String oids = procname.getOIDs();
+			if (StringUtil.isNonBlank(oids))
+			{
+				sql += " AND p.proargtypes = cast('" + oids + "' as oidvector)";
+			}
+
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, schema);
-			stmt.setString(2, procname);
+			stmt.setString(2, procname.getName());
 
 			rs = stmt.executeQuery();
 			if (rs.next())
@@ -270,7 +441,6 @@ public class PostgresProcedureReader
 				String typeName = rs.getString("formatted_type");
 				String pgType = rs.getString("pg_type");
 				String types = rs.getString("argtypes");
-				String allTypes = rs.getString("allargtypes");
 				String names = rs.getString("argnames");
 				String modes = rs.getString("modes");
 				String returnTypeType = rs.getString("typtype");
@@ -288,32 +458,14 @@ public class PostgresProcedureReader
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, StringUtil.trimQuotes(typeName));
 				}
 
-				List<String> argNames = null;
-				List<String> argTypes = null;
+				List<String> argNames = StringUtil.stringToList(names, ";", true, true);
+				List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
 				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
-				if (allTypes != null)
-				{
-					argTypes = StringUtil.stringToList(allTypes, ";", true, true);
-					argNames = StringUtil.stringToList(names, ";", true, true);
-				}
-				else
-				{
-					argTypes = StringUtil.stringToList(types, ";", true, true);
-				}
 
 				for (int i=0; i < argTypes.size(); i++)
 				{
 					int row = result.addRow();
-					int typeOid = -1;
-					try
-					{
-						typeOid = Integer.valueOf(argTypes.get(i));
-					}
-					catch (Exception e)
-					{
-						// 2278 = void
-						typeOid = (voidType != null ? voidType.oid : 2278);
-					}
+					int typeOid = StringUtil.getIntValue(argTypes.get(i), -1);
 					String pgt = getRawTypeNameFromOID(typeOid);
 
 					String nm = "$" + (i + 1);
@@ -346,7 +498,7 @@ public class PostgresProcedureReader
 			else
 			{
 				LogMgr.logWarning("PostgreProcedureReader.getProcedureHeader()", "Could not retrieve columns", null);
-				return super.getProcedureColumns(catalog, schema, procname);
+				return super.getProcedureColumns(catalog, schema, procname.getName());
 			}
 
 			this.connection.releaseSavepoint(sp);
@@ -355,7 +507,7 @@ public class PostgresProcedureReader
 		{
 			this.connection.rollback(sp);
 			LogMgr.logError("PostgresProcedureReader.getProcedureHeader()", "Error retrieving header", e);
-			return super.getProcedureColumns(catalog, schema, procname);
+			return super.getProcedureColumns(catalog, schema, procname.getName());
 		}
 		finally
 		{
@@ -363,11 +515,4 @@ public class PostgresProcedureReader
 		}
 		return result;
 	}
-}
-
-class PGType
-{
-	String rawType;
-	String formattedType;
-	int oid;
 }

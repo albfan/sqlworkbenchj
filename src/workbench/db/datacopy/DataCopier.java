@@ -277,6 +277,7 @@ public class DataCopier
 			}
 
 			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, targetCols);
+			creator.setUseColumnAlias(true); // if an alias was specified in the original query, the new table should use that one
 			creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 			creator.createTable();
 
@@ -321,10 +322,10 @@ public class DataCopier
 	{
 		for (ColumnIdentifier targetCol : toUpdate)
 		{
-			ColumnIdentifier realCol = findColumn(realCols, targetCol.getColumnName());
+			ColumnIdentifier realCol = findColumn(realCols, targetCol.getDisplayName());
 			if (realCol != null)
 			{
-				targetCol.setColumnName(realCol.getColumnName());
+				targetCol.setColumnName(realCol.getDisplayName());
 				targetCol.setDbmsType(realCol.getDbmsType());
 				targetCol.setDataType(realCol.getDataType());
 				targetCol.setColumnSize(realCol.getColumnSize());

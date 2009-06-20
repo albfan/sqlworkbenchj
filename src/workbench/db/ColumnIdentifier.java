@@ -29,6 +29,7 @@ public class ColumnIdentifier
 	implements DbObject, Comparable<ColumnIdentifier>
 {
 	private String name;
+	private String alias;
 	private int type = Types.OTHER;
 	private boolean isPk;
 	private boolean isExpression;
@@ -62,7 +63,6 @@ public class ColumnIdentifier
 		this(aName, aType, false);
 	}
 
-
 	public ColumnIdentifier(String aName, int aType, boolean isPkColumn)
 	{
 		if (aName == null) throw new IllegalArgumentException("Column name may not be null!");
@@ -71,6 +71,22 @@ public class ColumnIdentifier
 		this.isPk = isPkColumn;
 	}
 
+	public String getColumnAlias()
+	{
+		return alias;
+	}
+
+	public void setColumnAlias(String label)
+	{
+		alias = label;
+	}
+
+	public String getDisplayName()
+	{
+		if (alias == null) return name;
+		return alias;
+	}
+	
 	public String getSchema()
 	{
 		return null;

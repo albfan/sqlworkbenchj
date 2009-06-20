@@ -49,7 +49,6 @@ public class TableCreatorTest extends TestCase
 	public void testCreateTable() 
 		throws Exception
 	{
-		
 		try
 		{
 			WbConnection con = util.getConnection();

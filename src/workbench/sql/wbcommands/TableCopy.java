@@ -117,6 +117,7 @@ public class TableCopy
 				for (int i=0; i < cols.size(); i++)
 				{
 					queryCols.get(i).setColumnName(cols.get(i).getColumnName());
+					queryCols.get(i).setColumnAlias(null);
 				}
 			}
 			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTable, dropTable, ignoreDropError);

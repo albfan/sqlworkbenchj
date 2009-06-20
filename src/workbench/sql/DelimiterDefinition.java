@@ -101,6 +101,11 @@ public class DelimiterDefinition
 		
 		return new DelimiterDefinition(delim, single);
 	}
+
+	public String toString()
+	{
+		return delimiter;
+	}
 	
 	public String getDelimiter() 
 	{ 

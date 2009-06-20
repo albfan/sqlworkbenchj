@@ -681,11 +681,26 @@ public class DataStore
 	 * Return the name of the given column
 	 * @param aColumn The index of the column in this DataStore. The first column index is 0
 	 * @return The name of the column
+	 * @see ResultInfo#getColumnName(int)
 	 */
 	public String getColumnName(int aColumn)
 		throws IndexOutOfBoundsException
 	{
 		return this.resultInfo.getColumnName(aColumn);
+	}
+
+	/**
+	 * Return the display name of the given column.
+	 * In some cases (and for some JDBC drivers) this might be different
+	 * than the column name, e.g. if a column alias has been specified with <tt>AS</tt>
+	 *
+	 * @param aColumn The index of the column in this DataStore. The first column index is 0
+	 * @return The display label of the column
+	 * @see ResultInfo#getColumnDisplayName(int) 
+	 */
+	public String getColumnDisplayName(int col)
+	{
+		return this.resultInfo.getColumnDisplayName(col);
 	}
 
 	/**

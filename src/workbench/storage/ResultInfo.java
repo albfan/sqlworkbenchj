@@ -110,6 +110,8 @@ public class ResultInfo
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = metaData.getColumnName(i + 1);
+			String alias = metaData.getColumnLabel(i + 1);
+			
 			boolean realColumn = true;
 			if (StringUtil.isNonBlank(name))
 			{
@@ -124,6 +126,12 @@ public class ResultInfo
 			int type = metaData.getColumnType(i + 1);
 			if (dbMeta != null) type = dbMeta.fixColumnType(type); // currently only for Oracle's DATE type
 			ColumnIdentifier col = new ColumnIdentifier(name);
+
+			if (!name.equals(alias))
+			{
+				col.setColumnAlias(alias);
+			}
+			
 			col.setDataType(type);
 			col.setUpdateable(realColumn);
 			try
@@ -395,6 +403,11 @@ public class ResultInfo
 		return this.getColumnClass(i).getName();
 	}
 
+	public String getColumnDisplayName(int i)
+	{
+		return this.columns[i].getDisplayName();
+	}
+	
 	public String getColumnName(int i)
 	{
 		return this.columns[i].getColumnName();

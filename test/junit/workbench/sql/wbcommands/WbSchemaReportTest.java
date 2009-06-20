@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.FileUtil;
@@ -72,10 +73,9 @@ public class WbSchemaReportTest
 				fail("could not delete output file");
 			}
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 	
@@ -123,13 +123,59 @@ public class WbSchemaReportTest
 				fail("could not delete output file");
 			}
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
+	public void testSchemaOnly()
+		throws Exception
+	{
+		try
+		{
+			TestUtil utl = new TestUtil("schemaReportTest2");
+			WbConnection con = utl.getConnection();
+			TestUtil.executeScript(con,
+				"create schema schema_1; \n" +
+				"set schema schema_1; \n" +
+				"create table s_test1 (id integer); \n" +
+				"create view s_view1 as select * from s_test1; \n" +
+				"create schema schema_2; \n" +
+				"set schema schema_2; \n" +
+				"create table s_test2 (id integer); \n" +
+				"create view s_view2 as select * from s_test2; \n" +
+				"commit;");
+
+			WbSchemaReport report = new WbSchemaReport();
+			report.setConnection(con);
+
+			for (int i=1; i <= 2; i++)
+			{
+				File output = new File(utl.getBaseDir(), "report_" + i + ".xml");
+				output.delete();
+				StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -schemas=schema_" + i);
+				assertTrue(result.isSuccess());
+				assertTrue("File not created", output.exists());
+
+				InputStreamReader r = new InputStreamReader(new FileInputStream(output), "UTF-8");
+				String xml = FileUtil.readCharacters(r);
+				r.close();
+
+				String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='S_TEST" + i + "'])");
+				assertEquals("Incorrect table count", "1", count);
+
+				count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='S_VIEW" + i + "'])");
+				assertEquals("Incorrect view count", "1", count);
+			}
+
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
 	private void setupDatabase()
 		throws SQLException, ClassNotFoundException
 	{

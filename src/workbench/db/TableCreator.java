@@ -31,7 +31,8 @@ public class TableCreator
 	private List<ColumnIdentifier> columnDefinition;
 	private TableIdentifier tablename;
 	private TypeMapper mapper;
-	private boolean useDbmsDataType = false;
+	private boolean useDbmsDataType;
+	private boolean useColumnAlias;
 
 	public TableCreator(WbConnection target, TableIdentifier newTable, Collection<ColumnIdentifier> columns)
 		throws SQLException
@@ -49,6 +50,11 @@ public class TableCreator
 		this.mapper = new TypeMapper(this.connection);
 	}
 
+	public void setUseColumnAlias(boolean flag)
+	{
+		this.useColumnAlias = flag;
+	}
+	
 	public void useDbmsDataType(boolean flag)
 	{
 		this.useDbmsDataType = flag;
@@ -122,7 +128,7 @@ public class TableCreator
 		int type = col.getDataType();
 		int size = col.getColumnSize();
 		int digits = col.getDecimalDigits();
-		String name = col.getColumnName();
+		String name = (useColumnAlias ? col.getDisplayName() : col.getColumnName());
 
 		StringBuilder result = new StringBuilder(30);
 		boolean isKeyword = connection.getMetadata().isKeyword(name);

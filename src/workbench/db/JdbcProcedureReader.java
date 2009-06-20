@@ -71,14 +71,11 @@ public class JdbcProcedureReader
 		Savepoint sp = null;
 		try
 		{
-			if (useSavepoint)
+			DataStore ds = getProcedures(catalog, schema, procName);
+			
+			if (ds.getRowCount() > 0)
 			{
-				sp = this.connection.setSavepoint();
-			}
-			rs = this.connection.getSqlConnection().getMetaData().getProcedures(catalog, schema, procName);
-			if (rs.next())
-			{
-				int type = rs.getInt(8);
+				int type = ds.getValueAsInt(0, 8, DatabaseMetaData.procedureResultUnknown);
 				if (type == DatabaseMetaData.procedureResultUnknown ||
 					  procType == DatabaseMetaData.procedureResultUnknown ||
 						type == procType)
@@ -86,16 +83,11 @@ public class JdbcProcedureReader
 					exists = true;
 				}
 			}
-			this.connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
 			this.connection.rollback(sp);
 			LogMgr.logError("JdbcProcedureReader.procedureExists()", "Error checking procedure", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
 		}
 		return exists;
 	}
@@ -229,7 +221,7 @@ public class JdbcProcedureReader
 		return ds;
 	}
 
-	private String stripVersionInfo(String procname)
+	protected String stripVersionInfo(String procname)
 	{
 		DbSettings dbS = this.connection.getMetadata().getDbSettings();
 		String versionDelimiter = dbS.getProcVersionDelimiter();

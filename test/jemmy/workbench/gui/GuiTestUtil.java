@@ -46,8 +46,10 @@ public class GuiTestUtil
 	public void startApplication(boolean useDebugTimeouts)
 		throws Exception
 	{
-		new ClassReference("workbench.WbManager").startApplication(getArgs(false));
 		System.setProperty("workbench.system.doexit", "false");
+		System.setProperty("workbench.warn.java5", "100");
+
+		new ClassReference("workbench.WbManager").startApplication(getArgs(false));
 
 		if (useDebugTimeouts)
 		{

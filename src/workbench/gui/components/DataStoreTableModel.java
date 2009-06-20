@@ -368,7 +368,7 @@ public class DataStoreTableModel
 
 		try
 		{
-			String name = this.dataCache.getColumnName(aColumn - this.columnStartIndex);
+			String name = this.dataCache.getColumnDisplayName(aColumn - this.columnStartIndex);
 			return name;
 		}
 		catch (Exception e)

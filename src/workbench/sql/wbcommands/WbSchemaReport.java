@@ -103,7 +103,7 @@ public class WbSchemaReport
 		SourceTableArgument tableArg = new SourceTableArgument(this.cmdLine.getValue("tables"), this.currentConnection);
 
 		List<TableIdentifier> tables = tableArg.getTables();
-		if (tables != null)
+		if (tables != null && tables.size() > 0)
 		{
 			// The SchemaReporter needs fully initialized TableIdentifiers
 			List<TableIdentifier> dbTables = new ArrayList<TableIdentifier>(tables.size());
