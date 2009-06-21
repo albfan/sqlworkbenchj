@@ -1,8 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-06-12">
-  
+<release build="-1" date="2009-06-21">
+
+  <entry dev-build="2" type="enh">
+    <description>
+      A new option to display information about database objects is available through
+      "SQL -&gt; Object Info". If text is selected in the editor, this action will try to 
+      find a DB object with the name that is indicated by the selected text. 
+      It will look for tables, views, synonyms, sequences, procedures/functions and triggers. 
+      If something is found the definition (e.g. the list of columns) is displayed as a result 
+      set in the current SQL tab (the result will be appended). For objects with only
+      a SQL source (e.g. a procedure) the source will be written into the messages tab.
+    </description>
+  </entry>
+
   <entry dev-build="1" type="enh">
     <description>
       The SQL Macros can now be displayed in a floating window. Double clicking a macro will
@@ -12,8 +24,8 @@
 
   <entry dev-build="2" type="enh">
     <description>
-	  When specifying date/time format string (e.g. when importing a file or in the options dialog), 
-	  the input is now validated and an error message is shown. 
+    When specifying date/time format string (e.g. when importing a file or in the options dialog), 
+    the input is now validated and an error message is shown. 
     </description>
   </entry>
 
@@ -37,8 +49,20 @@
 
   <entry dev-build="2" type="fix">
     <description>
-	  When using the DataPumper to import text files and an invalid date format was specified, no
-	  table columns could be selected.
+      The alternate delimiter was not always processed correctly.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
+      When using the DataPumper to import text files and an invalid date format was specified, no
+      table columns could be selected.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
+      The -schemas parameter for WbReport was ignored.
     </description>
   </entry>
 
@@ -1025,7 +1049,8 @@
 
   <entry dev-build="6" type="fix">
     <description>
-       Calling stored procedures with output parameters was not working properly, especially when regular parameters were needed as well.
+       Calling stored procedures with output parameters was not working properly, especially when regular parameters 
+       were needed as well.
     </description>
   </entry>
 
