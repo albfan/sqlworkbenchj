@@ -67,7 +67,7 @@ public class JdbcProcedureReader
 		int procType = def.getResultType();
 
 		boolean exists = false;
-		ResultSet rs = null;
+
 		Savepoint sp = null;
 		try
 		{
@@ -75,7 +75,8 @@ public class JdbcProcedureReader
 			
 			if (ds.getRowCount() > 0)
 			{
-				int type = ds.getValueAsInt(0, 8, DatabaseMetaData.procedureResultUnknown);
+				int type = ds.getValueAsInt(0, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+
 				if (type == DatabaseMetaData.procedureResultUnknown ||
 					  procType == DatabaseMetaData.procedureResultUnknown ||
 						type == procType)
@@ -95,7 +96,12 @@ public class JdbcProcedureReader
 	public DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException
 	{
-		if ("*".equals(schema) || "%".equals(schema))
+		if ("*".equals(catalog) || StringUtil.isBlank(catalog))
+		{
+			catalog = null;
+		}
+
+		if ("*".equals(schema) || "%".equals(schema) || StringUtil.isBlank(schema))
 		{
 			schema = null;
 		}

@@ -161,13 +161,13 @@ public class PostgresProcedureReader
 		}
 
 		String namePattern = null;
-		if ("*".equals(namePattern) || "%".equals(procName))
+		if ("*".equals(procName) || "%".equals(procName))
 		{
 			namePattern = null;
 		}
 		else if (StringUtil.isNonBlank(procName))
 		{
-			PGProcName pg = new PGProcName(namePattern, getTypeLookup());
+			PGProcName pg = new PGProcName(procName, getTypeLookup());
 			namePattern = pg.getName();
 		}
 		
@@ -276,7 +276,10 @@ public class PostgresProcedureReader
 								" and p.pronamespace = n.oid ";
 
 		sql += " and p.proname = '" + name.getName() + "' ";
-		sql += " and n.nspname = '" + def.getSchema() + "' ";
+		if (StringUtil.isNonBlank(def.getSchema()))
+		{
+			sql += " and n.nspname = '" + def.getSchema() + "' ";
+		}
 
 		String oids = name.getOIDs();
 		if (StringUtil.isNonBlank(oids))

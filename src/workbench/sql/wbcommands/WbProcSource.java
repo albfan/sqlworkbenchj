@@ -13,7 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
-import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
@@ -36,7 +35,6 @@ public class WbProcSource
 		super();
 	}
 
-
 	@Override
 	public String getVerb()
 	{
@@ -50,7 +48,8 @@ public class WbProcSource
 		StatementRunnerResult result = new StatementRunnerResult();
 		String args = getCommandLine(sql);
 
-		DbObject object = new TableIdentifier(args);
+		TableIdentifier object = new TableIdentifier(args);
+		object.adjustCase(currentConnection);
 
 		ProcedureReader reader = currentConnection.getMetadata().getProcedureReader();
 		ProcedureDefinition def = new ProcedureDefinition(object.getCatalog(), object.getSchema(), object.getObjectName(), DatabaseMetaData.procedureResultUnknown);
