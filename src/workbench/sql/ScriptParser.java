@@ -36,7 +36,6 @@ import workbench.util.WbFile;
 public class ScriptParser
 	implements Iterator
 {
-
 	private String originalScript = null;
 	private List<ScriptCommandDefinition> commands = null;
 	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;

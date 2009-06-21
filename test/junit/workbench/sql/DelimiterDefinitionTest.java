@@ -32,6 +32,14 @@ public class DelimiterDefinitionTest
 			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql));
 			sql = "delete from thetable\nGO";
 			assertTrue(DelimiterDefinition.DEFAULT_MS_DELIMITER.terminatesScript(sql));
+
+			sql = "create or replace procedure my_test \n" +
+					"as \n" +
+					"begin \n" +
+					"  null;" +
+					"end; \n" +
+					"/ ";
+			assertTrue(DelimiterDefinition.DEFAULT_ALTERNATE_DELIMITER.terminatesScript(sql));
 		}
 		catch (Exception e)
 		{

@@ -12,7 +12,6 @@
 package workbench.sql;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.File;
@@ -42,17 +41,11 @@ public class BatchRunnerTest
 	private TestUtil	util;
 	
 	public BatchRunnerTest(String testName)
+		throws Exception
 	{
 		super(testName);
-		try
-		{
-			util = new TestUtil(testName);
-			util.prepareEnvironment();
-		}
-		catch (IOException ex)
-		{
-			fail(ex.getMessage());
-		}
+		util = new TestUtil(testName);
+		util.prepareEnvironment();
 	}
 
 	public void testSingleCommand()
@@ -61,7 +54,6 @@ public class BatchRunnerTest
 		try
 		{
 			util.emptyBaseDirectory();
-			util.prepareEnvironment();
 
 			WbConnection con = util.getConnection("testSingleCommand");
 			Statement stmt = con.createStatement();
@@ -508,7 +500,7 @@ public class BatchRunnerTest
 			
 			BufferedReader in = new BufferedReader(new FileReader(out));
 			String content = FileUtil.readCharacters(in);
-			System.out.println("*************\n" + content + "\n*****************");
+			//System.out.println("*************\n" + content + "\n*****************");
 			int pos = content.indexOf("NR | FIRSTNAME | LASTNAME");
 			assertEquals("Header not found", (pos > -1), true);
 

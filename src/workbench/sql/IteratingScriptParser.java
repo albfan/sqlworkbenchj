@@ -449,15 +449,18 @@ public class IteratingScriptParser
 		} // end loop for next statement
 
 		ScriptCommandDefinition c = null;
-		if (lastPos < pos /*&& !blockComment && !quoteOn*/)
+		if (lastPos < pos)
 		{
-			String value = this.script.subSequence(lastCommandEnd, scriptLength).toString().trim();
-			if (!this.delimiter.equals(value.trim()))
+			String value = this.script.subSequence(lastCommandEnd, scriptLength).toString();
+			String tvalue = value.trim();
+			if (!this.delimiter.equals(tvalue))
 			{
 				int endpos = scriptLength;
-				if (value.endsWith(delim))
+				if (tvalue.endsWith(delim))
 				{
-					endpos = endpos - this.delimiterLength;
+					int dpos = value.lastIndexOf(delim);
+					endpos = lastCommandEnd + dpos;
+					//endpos = endpos - this.delimiterLength;
 				}
 				c = createCommand(lastCommandEnd, endpos);
 			}

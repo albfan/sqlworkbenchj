@@ -467,6 +467,7 @@ public class ScriptParserTest
 			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 1, size);
+			assertEquals(sql.substring(0, sql.lastIndexOf("/")).trim(), p.getCommand(0));
 
 			sql = "DECLARE \n" +
              "   Last_name    VARCHAR2(10) \n" +
@@ -485,6 +486,21 @@ public class ScriptParserTest
 			p.setScript(sql);
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 1, size);
+			assertEquals(sql.substring(0, sql.lastIndexOf("/")).trim(), p.getCommand(0));
+
+			sql = "DECLARE \n" +
+					   " result varchar2(100);\n" +
+             "BEGIN \n" +
+             "   some_proc(result); \n" +
+             "   dbms_output.put_line(result); \n" +
+             "END; \n" +
+             "/ ";
+			p.setScript(sql);
+			size = p.getSize();
+			String expected = sql.substring(0, sql.lastIndexOf('/') - 1).trim();
+			String cmd = p.getCommand(0);
+//			System.out.println("--- sql ---\n" + cmd + "\n----- expected -----\n" + expected + "\n-----------");
+			assertEquals(expected, cmd);
 		}
 		catch (Exception e)
 		{

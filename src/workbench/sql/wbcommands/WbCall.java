@@ -226,6 +226,7 @@ public class WbCall
 						resultData.setValue(row, 1, parmValue == null ? "NULL" : parmValue.toString());
 					}
 				}
+				resultData.resetStatus();
 				result.addDataStore(resultData);
 			}
 		}
@@ -333,10 +334,16 @@ public class WbCall
 				int dataType = params.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, -1);
 
 				ParameterDefinition def = new ParameterDefinition(i + 1, dataType);
-				inputParameters.add(def);
+
 
 				String typeName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 				String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+
+				// pure out parameters do not need to be added to the input parameters
+				if (resultType.startsWith("IN"))
+				{
+					inputParameters.add(def);
+				}
 
 				if (resultType != null && resultType.endsWith("OUT") || (needFuncCall && StringUtil.equalString(resultType, "RETURN")))
 				{
