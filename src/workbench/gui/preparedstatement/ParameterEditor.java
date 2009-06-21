@@ -124,31 +124,39 @@ public class ParameterEditor
 		return true;
 	}
 
-	public static boolean showParameterDialog(StatementParameters parms)
-	{
-		ParameterEditor editor = new ParameterEditor(parms);
-		Dimension d = new Dimension(300,250);
-		editor.setMinimumSize(d);
-		editor.setPreferredSize(d);
+	private static boolean dialogResult = false;
 
-		boolean result = false;
-		//boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
-		Frame parent = WbManager.getInstance().getCurrentWindow();
-		boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
-		if (ok)
+	public static synchronized boolean showParameterDialog(final StatementParameters parms)
+	{
+		WbSwingUtilities.invoke(new Runnable()
 		{
-			try
+			public void run()
 			{
-				editor.applyValues();
-				result = true;
+				ParameterEditor editor = new ParameterEditor(parms);
+				Dimension d = new Dimension(300,250);
+				editor.setMinimumSize(d);
+				editor.setPreferredSize(d);
+
+				dialogResult = false;
+				//boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
+				Frame parent = WbManager.getInstance().getCurrentWindow();
+				boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
+				if (ok)
+				{
+					try
+					{
+						editor.applyValues();
+						dialogResult = true;
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("VariablesEditor.showVariablesDialog()", "Error when saving values", e);
+						dialogResult = false;
+					}
+				}
 			}
-			catch (Exception e)
-			{
-				LogMgr.logError("VariablesEditor.showVariablesDialog()", "Error when saving values", e);
-				result = false;
-			}
-		}
-		return result;
+		});
+		return dialogResult;
 	}
 
 }

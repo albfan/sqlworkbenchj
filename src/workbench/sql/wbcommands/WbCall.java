@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
@@ -35,6 +34,7 @@ import workbench.sql.formatter.SQLToken;
 import workbench.sql.preparedstatement.ParameterDefinition;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
+import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -295,6 +295,8 @@ public class WbCall
 		String schema = null;
 		String procname = null;
 
+		List<String> sqlParams = CollectionBuilder.arrayList();
+
 		try
 		{
 			SQLToken n = l.getNextToken(false, false);
@@ -307,6 +309,28 @@ public class WbCall
 			else
 			{
 				procname = (t == null ? "" : t.getContents());
+			}
+
+			// Analyze the parameters given..
+			while (n != null && !n.getContents().equals("("))
+			{
+				n = l.getNextToken(false, false);
+			}
+			n = l.getNextToken(false, false);
+			while (n != null && !n.getContents().equals(")"))
+			{
+				if (!n.getContents().equals(","))
+				{
+					if (n.getContents().equals("?"))
+					{
+						sqlParams.add("?");
+					}
+					else
+					{
+						sqlParams.add("literal");
+					}
+				}
+				n = l.getNextToken(false, false);
 			}
 		}
 		catch (IOException e)
@@ -324,32 +348,54 @@ public class WbCall
 		CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(getSqlToPrepare(sql, needFuncCall));
 		this.currentStatement = cstmt;
 
-		int parameterCount = 0;
 
-		if (params.getRowCount() > 0)
+		int definedParamCount = params.getRowCount();
+		if (definedParamCount != sqlParams.size())
 		{
-			parameterNames = new ArrayList<ParameterDefinition>(params.getRowCount());
+			LogMgr.logWarning("WbCall.checkParametersFromDatabase", "Number of parameters reported for procedure (" + definedParamCount + ") is different than the number supplied in actual sql ("+ sqlParams.size() + ")");
+			sqlParams = null;
+		}
+
+		if (definedParamCount > 0)
+		{
+			int realParamIndex = 1;
+
+			parameterNames = new ArrayList<ParameterDefinition>(definedParamCount);
 			for (int i = 0; i < params.getRowCount(); i++)
 			{
 				int dataType = params.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, -1);
 
-				ParameterDefinition def = new ParameterDefinition(i + 1, dataType);
-
-
 				String typeName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
 				String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+				String paramName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+
+				ParameterDefinition def = new ParameterDefinition(realParamIndex, dataType);
+				def.setParameterName(paramName);
 
 				// pure out parameters do not need to be added to the input parameters
 				if (resultType.startsWith("IN"))
 				{
-					inputParameters.add(def);
+					if (sqlParams != null)
+					{
+						// only add the parameter as an input parameter
+						// if a place holder was specified
+						if (sqlParams.get(i).equals("?"))
+						{
+							inputParameters.add(def);
+							realParamIndex ++;
+						}
+					}
+					else
+					{
+						// for some reason parsing the argument list did
+						// not give the correct numbers. We cannot know if
+						// the parameter was supplied or not.
+						inputParameters.add(def);
+						realParamIndex ++;
+					}
 				}
-
-				if (resultType != null && resultType.endsWith("OUT") || (needFuncCall && StringUtil.equalString(resultType, "RETURN")))
+				else if (resultType != null && resultType.endsWith("OUT") || (needFuncCall && StringUtil.equalString(resultType, "RETURN")))
 				{
-					parameterCount++;
-					def.setParameterName(params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME));
-					parameterNames.add(def);
 					if (isRefCursor(typeName))
 					{
 						// these parameters should not be added to the regular parameter list
@@ -359,11 +405,16 @@ public class WbCall
 						if (newType != Integer.MIN_VALUE) dataType = newType;
 						if (refCursorIndex == null)
 						{
-							refCursorIndex = new LinkedList<Integer>();
+							refCursorIndex = CollectionBuilder.arrayList();
 						}
-						refCursorIndex.add(Integer.valueOf(parameterCount));
+						refCursorIndex.add(Integer.valueOf(realParamIndex));
 					}
-					cstmt.registerOutParameter(parameterCount, dataType);
+					else
+					{
+						parameterNames.add(def);
+					}
+					cstmt.registerOutParameter(realParamIndex, dataType);
+					realParamIndex++;
 				}
 			}
 		}
@@ -380,7 +431,7 @@ public class WbCall
 	private boolean returnsRefCursor(DataStore params)
 	{
 		// A function in Postgres that returns a refcursor
-		// mus be called using { ? = call('procname')} in order
+		// must be called using {? = call('procname')} in order
 		// to be able to retrieve the result set from the refcursor
 		for (int i=0; i < params.getRowCount(); i++)
 		{
