@@ -234,9 +234,9 @@ public class ScriptParserTest
 	public void testSingleLineDelimiter()
 	{
 		String sql = "DROP\n" +
-			           "/\n" +
+			           "/ \n" +
 			           "CREATE\n" +
-								 "/\n";
+								 "/ \n";
 		try
 		{
 			ScriptParser p = new ScriptParser();
@@ -251,14 +251,13 @@ public class ScriptParserTest
 			sql = "DROP\r\n" +
 						 "/\r\n" +
 						 "CREATE\r\n" +
-						 "/\r\n";
+						 " /";
 
 			p.setScript(sql);
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
 			assertEquals("Wrong statement returned", "DROP", p.getCommand(0));
 			assertEquals("Wrong statement returned", "CREATE", p.getCommand(1));
-
 		}
 		catch (Exception e)
 		{
@@ -488,17 +487,24 @@ public class ScriptParserTest
 			assertEquals("Wrong number of statements", 1, size);
 			assertEquals(sql.substring(0, sql.lastIndexOf("/")).trim(), p.getCommand(0));
 
-			sql = "DECLARE \n" +
-					   " result varchar2(100);\n" +
+			sql = "DECLARE\n" +
+					   "\tresult varchar (100) := 'Hello, world!';\n" +
              "BEGIN \n" +
-             "   some_proc(result); \n" +
-             "   dbms_output.put_line(result); \n" +
-             "END; \n" +
+             "\t\tdbms_output.put_line(result);\n" +
+             "END;\n" +
              "/ ";
 			p.setScript(sql);
+			p.setAlternateDelimiter(new DelimiterDefinition("/", false));
 			size = p.getSize();
 			String expected = sql.substring(0, sql.lastIndexOf('/') - 1).trim();
 			String cmd = p.getCommand(0);
+//			System.out.println("--- sql ---\n" + cmd + "\n----- expected -----\n" + expected + "\n-----------");
+			assertEquals(expected, cmd);
+
+			p.setScript(sql);
+			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
+			size = p.getSize();
+			cmd = p.getCommand(0);
 //			System.out.println("--- sql ---\n" + cmd + "\n----- expected -----\n" + expected + "\n-----------");
 			assertEquals(expected, cmd);
 		}

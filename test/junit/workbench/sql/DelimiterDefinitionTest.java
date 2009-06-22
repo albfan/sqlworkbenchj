@@ -38,8 +38,10 @@ public class DelimiterDefinitionTest
 					"begin \n" +
 					"  null;" +
 					"end; \n" +
-					"/ ";
+					" / ";
 			assertTrue(DelimiterDefinition.DEFAULT_ALTERNATE_DELIMITER.terminatesScript(sql));
+			DelimiterDefinition del = new DelimiterDefinition("/", false);
+			assertTrue(del.terminatesScript(sql));
 		}
 		catch (Exception e)
 		{
