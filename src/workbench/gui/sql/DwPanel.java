@@ -52,6 +52,7 @@ import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.SelectKeyColumnsAction;
 import workbench.gui.actions.UpdateDatabaseAction;
+import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.OneLineTableModel;
 import workbench.gui.components.WbScrollPane;
@@ -1167,8 +1168,26 @@ public class DwPanel
 
 		if (updateable)
 		{
+			// If the column order has been changed by the user using
+			// drag and drop, we need to restore that ordering after
+			// turning on the status column
+			List<String> colOrder = null;
+			if (dataTable.isColumnOrderChanged())
+			{
+				colOrder = ColumnOrderMgr.getInstance().getColumnOrder(dataTable);
+			}
+
 			this.dataTable.setShowStatusColumn(true);
 
+			if (colOrder != null)
+			{
+				// The saved order will not have the status column in the list,
+				// thus the status column would go to the end of the columns
+				// but we need it as the first column
+				String status = dataTable.getColumnModel().getColumn(0).getIdentifier().toString();
+				colOrder.add(0, status);
+			}
+			
 			// When changing the table model (which is happening
 			// when the status column is displayed) we need to restore
 			// the current editing column/row
@@ -1195,6 +1214,11 @@ public class DwPanel
 						model.addSelectionInterval(selectedRows[i], selectedRows[i]);
 					}
 					model.setValueIsAdjusting(false);
+				}
+
+				if (colOrder != null)
+				{
+					ColumnOrderMgr.getInstance().applyColumnOrder(dataTable, colOrder);
 				}
 				dataTable.requestFocusInWindow();
 			}

@@ -441,7 +441,9 @@ public class RecordFormPanel
 	private int getTableColumn(int dataColumn)
 	{
 		int offset = data.getShowStatusColumn() ? 1 : 0;
-		return dataColumn + offset;
+		int colIndex = dataColumn + offset;
+		int viewIndex = data.convertColumnIndexToView(colIndex);
+		return viewIndex;
 	}
 
 	private boolean startEdit()

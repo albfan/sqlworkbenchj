@@ -163,7 +163,7 @@ public class ColumnOrderMgr
 		table.setColumnModel(model);
 	}
 	
-	protected void applyColumnOrder(WbTable table, List<String> newOrder)
+	public void applyColumnOrder(WbTable table, List<String> newOrder)
 	{
 		if (newOrder == null || newOrder.size() == 0) return;
 
@@ -208,11 +208,8 @@ public class ColumnOrderMgr
 		columnOrders.remove(key);
 	}
 
-	public synchronized void storeColumnOrder(WbTable table)
+	public List<String> getColumnOrder(WbTable table)
 	{
-		if (table == null) return;
-		String key = getColumnOrderKey(table);
-
 		TableColumnModel current = table.getColumnModel();
 		List<String> cols = new ArrayList<String>(current.getColumnCount());
 		for (int i=0; i < current.getColumnCount(); i++)
@@ -220,7 +217,14 @@ public class ColumnOrderMgr
 			String name = current.getColumn(i).getIdentifier().toString();
 			cols.add(name);
 		}
-		columnOrders.put(key, cols);
+		return cols;
+	}
+	
+	public synchronized void storeColumnOrder(WbTable table)
+	{
+		if (table == null) return;
+		String key = getColumnOrderKey(table);
+		columnOrders.put(key, getColumnOrder(table));
 	}
 
 	public synchronized void saveSettings()
