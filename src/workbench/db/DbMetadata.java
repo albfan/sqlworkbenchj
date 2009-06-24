@@ -53,8 +53,9 @@ import workbench.db.h2database.H2SequenceReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.ColumnComparator;
-import workbench.storage.filter.ColumnExpression;
+import workbench.storage.filter.ComplexExpression;
 import workbench.storage.filter.StringEqualsComparator;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionBuilder;
@@ -1378,20 +1379,27 @@ public class DbMetadata
 					}
 				}
 
-				if (supportsSchemas())
+				if (table.getSchema() == null || table.getCatalog() == null)
 				{
-					// Prefer anything but a synonym
 					ColumnComparator comp = new StringEqualsComparator();
-					String schemaCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_SCHEMA);
-					ColumnExpression filter = new ColumnExpression(schemaCol, comp, getCurrentSchema());
-					filter.setIgnoreCase(true);
+					ComplexExpression filter = new AndExpression();
+					if (table.getSchema() == null && supportsSchemas())
+					{
+						String schemaCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_SCHEMA);
+						filter.addColumnExpression(schemaCol, comp, getCurrentSchema(), true);
+					}
+					if (table.getCatalog() == null && supportsCatalogs())
+					{
+						String catCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_CATALOG);
+						filter.addColumnExpression(catCol, comp, getCurrentCatalog(), true);
+					}
 					ds.applyFilter(filter);
 					if (ds.getRowCount() > 0)
 					{
 						result = buildTableIdentifierFromDs(ds, 0);
 					}
 				}
-
+				
 				if (result == null)
 				{
 					ds.clearFilter();
