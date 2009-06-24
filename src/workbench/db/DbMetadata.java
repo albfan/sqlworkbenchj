@@ -53,13 +53,16 @@ import workbench.db.h2database.H2SequenceReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.storage.filter.ColumnComparator;
+import workbench.storage.filter.ColumnExpression;
+import workbench.storage.filter.StringEqualsComparator;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionBuilder;
 
 /**
  * Retrieve meta data information from the database.
  * This class returns more information than the generic JDBC DatabaseMetadata.
- * 
+ *
  *  @author  support@sql-workbench.net
  */
 public class DbMetadata
@@ -97,22 +100,22 @@ public class DbMetadata
 	private boolean isSqlServer;
 	private boolean isMySql;
 	private boolean isApacheDerby;
-	private boolean isExcel; 
+	private boolean isExcel;
 	private boolean isAccess;
 	private boolean isH2;
-	
+
 	private String quoteCharacter;
 	private final Set<String> keywords = new TreeSet<String>(new CaseInsensitiveComparator());
-	
+
 	private Pattern selectIntoPattern = null;
 
 	private String tableTypeName;
 
-	private String[] tableTypesTable; 
+	private String[] tableTypesTable;
 	private String[] tableTypesSelectable;
 	private List schemasToIgnore;
 	private List catalogsToIgnore;
-	
+
 	private DbSettings dbSettings;
 	private ViewReader viewReader;
 
@@ -175,7 +178,7 @@ public class DbMetadata
 			this.isPostgres = true;
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
 			this.dataTypeResolver = new PostgresDataTypeResolver();
-			
+
 			// Starting with the version 8.2 the driver supports the dollar quoting
 			// out of the box, so there is no need to use our own workaround
 			if (!JdbcUtils.hasMiniumDriverVersion(dbConnection.getSqlConnection(), "8.2"))
@@ -198,9 +201,9 @@ public class DbMetadata
 		else if (productLower.indexOf("firebird") > -1)
 		{
 			this.isFirebird = true;
-			// Jaybird 2.0 reports the Firebird version in the 
+			// Jaybird 2.0 reports the Firebird version in the
 			// productname. To ease the DBMS handling we'll use the same
-			// product name that is reported with the 1.5 driver. 
+			// product name that is reported with the 1.5 driver.
 			// Otherwise the DBID would look something like:
 			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
 			this.productName = "Firebird";
@@ -262,12 +265,12 @@ public class DbMetadata
 		}
 
 		this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
-		
+
 		if (this.dataTypeResolver == null)
 		{
 			this.dataTypeResolver = new DefaultDataTypeResolver();
-		}		
-		
+		}
+
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -278,20 +281,20 @@ public class DbMetadata
 			this.quoteCharacter = null;
 			LogMgr.logError("DbMetadata", "Error when retrieving identifier quote character", e);
 		}
-		
+
 		if (StringUtil.isBlank(quoteCharacter)) this.quoteCharacter = "\"";
-		
+
 		this.dbSettings = new DbSettings(this.getDbId(), this.productName);
-		
+
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
 		tableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
 		tableTypesTable = new String[] { tableTypeName };
-		
+
 		// The tableTypesSelectable array will be used
-		// to fill the completion cache. In that case 
-		// we do not want system tables included (which 
-		// is done for the objectsWithData as that 
+		// to fill the completion cache. In that case
+		// we do not want system tables included (which
+		// is done for the objectsWithData as that
 		// drives the "Data" tab in the DbExplorer)
 		Set<String> types = getObjectsWithData();
 
@@ -307,9 +310,9 @@ public class DbMetadata
 				}
 			}
 		}
-		
+
 		tableTypesSelectable = StringUtil.toArray(types, true);
-		
+
 		String pattern = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".selectinto.pattern", null);
 		if (pattern != null)
 		{
@@ -353,30 +356,30 @@ public class DbMetadata
 	{
 		return this.quoteCharacter;
 	}
-	
+
 	public String getTableTypeName() { return tableTypeName; }
 	public String getMViewTypeName() { return MVIEW_NAME;	}
-	
-	public String getViewTypeName() 
-	{ 
-		return "VIEW"; 
+
+	public String getViewTypeName()
+	{
+		return "VIEW";
 	}
 
 	public DataTypeResolver getDataTypeResolver()
 	{
 		return this.dataTypeResolver;
 	}
-	
+
 	public DatabaseMetaData getJdbcMetaData()
 	{
 		return this.metaData;
 	}
-	
-	public WbConnection getWbConnection() 
-	{ 
-		return this.dbConnection; 
+
+	public WbConnection getWbConnection()
+	{
+		return this.dbConnection;
 	}
-	
+
 	public Connection getSqlConnection()
 	{
 		return this.dbConnection.getSqlConnection();
@@ -398,7 +401,7 @@ public class DbMetadata
 	{
 		return this.oracleMetaData;
 	}
-	
+
 	/**
 	 * Check if the given DB object type can contain data. i.e. if
 	 * a SELECT FROM can be run against this type.
@@ -453,16 +456,16 @@ public class DbMetadata
 		{
 			objectsWithData.add(MVIEW_NAME.toLowerCase());
 		}
-		
+
 		return objectsWithData;
 	}
-	
+
 	/**
 	 *	Return the name of the DBMS as reported by the JDBC driver.
 	 * <br/>
 	 * For configuration purposes the DBID should be used as that can be part of a key
 	 * in a properties file.
-	 * @see #getDbId() 
+	 * @see #getDbId()
 	 */
 	public String getProductName()
 	{
@@ -479,7 +482,7 @@ public class DbMetadata
 		if (this.dbId == null)
 		{
 			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]\\/$,.'=\"]", "_").toLowerCase();
-			
+
 			if (productName.startsWith("DB2"))
 			{
 				if (productName.startsWith("DB2 UDB") || productName.equals("DB2") )
@@ -508,18 +511,18 @@ public class DbMetadata
 		return this.dbId;
 	}
 
-	public DbSettings getDbSettings() 
-	{ 
-		return this.dbSettings; 
+	public DbSettings getDbSettings()
+	{
+		return this.dbSettings;
 	}
-	
+
 	/**
 	 * Returns true if the current DBMS supports a SELECT syntax
 	 * which creates a new table (e.g. SELECT .. INTO new_table FROM old_table)
-	 * 
-	 * It simply checks if a regular expression has been defined to 
+	 *
+	 * It simply checks if a regular expression has been defined to
 	 * detect this kind of statements
-	 * 
+	 *
 	 * @see #isSelectIntoNewTable(String)
 	 */
 	public boolean supportsSelectIntoNewTable()
@@ -529,12 +532,12 @@ public class DbMetadata
 
 	/**
 	 * Checks if the given SQL string is actually some kind of table
-	 * creation "disguised" as a SELECT. 
+	 * creation "disguised" as a SELECT.
 	 * Whether a statement is identified as a SELECT into a new table
 	 * is defined through the regular expression that can be set for
 	 * the DBMS using the property:
 	 * <tt>workbench.sql.[dbid].selectinto.pattern</tt>
-	 * 
+	 *
 	 * This method returns true if a Regex has been defined and matches the given SQL
 	 */
 	public boolean isSelectIntoNewTable(String sql)
@@ -555,15 +558,15 @@ public class DbMetadata
 
 	/**
 	 * If a DDLFilter is registered for the current DBMS, this
-	 * method will replace all "problematic" characters in the 
+	 * method will replace all "problematic" characters in the
 	 * SQL string, and will return a String that the DBMS will
-	 * understand. 
-	 * Currently this is only implemented for PostgreSQL to 
+	 * understand.
+	 * Currently this is only implemented for PostgreSQL to
 	 * mimic pgsql's $$ quoting for stored procedures
-	 * 
+	 *
 	 * @see workbench.db.postgres.PostgresDDLFilter
 	 * @see workbench.sql.commands.DdlCommand#execute(java.lang.String)
-	 * @see workbench.db.ProcedureCreator#recreate() 
+	 * @see workbench.db.ProcedureCreator#recreate()
 	 */
 	public String filterDDL(String sql)
 	{
@@ -577,7 +580,7 @@ public class DbMetadata
 	 * The information which schema names can be ignored for the current DBMS is
 	 * retrieved from the settings file through the property
 	 * <literal>workbench.sql.ignoreschema.[dbid]</literal>
-	 * 
+	 *
 	 * @param schema
 	 * @return true if the supplied schema name should not be used
 	 */
@@ -612,21 +615,26 @@ public class DbMetadata
 	 * the result of ignoreSchema() is checked to leave out e.g. the PUBLIC schema in Postgres or H2
 	 *
 	 * @see #ignoreSchema(java.lang.String)
-	 * @see #supportsSchemas() 
+	 * @see #supportsSchemas()
 	 */
 	public boolean needSchemaInDML(TableIdentifier table)
 	{
 		if (!supportsSchemas()) return false;
+
 		try
 		{
 			String tblSchema = table.getSchema();
+
+			// Object names may never be prefixed with PUBLIC
+			if (this.isOracle && "PUBLIC".equalsIgnoreCase(tblSchema)) return false;
+
 			String currentSchema = getCurrentSchema();
 
 			if (StringUtil.isBlank(currentSchema))
 			{
 				 return (!ignoreSchema(tblSchema));
 			}
-			
+
 			// If the current schema is not the one of the table, the schema is needed in DML statements
 			return (!currentSchema.equalsIgnoreCase(tblSchema));
 		}
@@ -651,7 +659,7 @@ public class DbMetadata
 	 * @see #ignoreCatalog(java.lang.String)
 	 * @see #supportsCatalogs()
 	 * @see DbSettings#needsCatalogIfNoCurrent()
-	 * @see #getCurrentCatalog() 
+	 * @see #getCurrentCatalog()
 	 */
 	public boolean needCatalogInDML(TableIdentifier table)
 	{
@@ -661,7 +669,7 @@ public class DbMetadata
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
 		String currentCat = getCurrentCatalog();
-		
+
 		if (this.isExcel)
 		{
 			// Excel puts the directory into the catalog
@@ -671,18 +679,18 @@ public class DbMetadata
 			if (c1.equals(c2)) return false;
 			return true;
 		}
-		
+
 		if (StringUtil.isEmptyString(currentCat))
 		{
 			return this.dbSettings.needsCatalogIfNoCurrent();
 		}
 		return !cat.equalsIgnoreCase(currentCat);
 	}
-	
+
 	/**
-	 * Checks if the given catalog name should be ignored 
+	 * Checks if the given catalog name should be ignored
 	 * in SQL statements.
-	 * 
+	 *
 	 * @param catalog the catalog name to check
 	 * @return true if the catalog is not needed in SQL statements
 	 */
@@ -723,12 +731,12 @@ public class DbMetadata
 	}
 
 	/**
-	 * Returns the type of the passed TableIdentifier. This could 
+	 * Returns the type of the passed TableIdentifier. This could
 	 * be VIEW, TABLE, SYNONYM, ...
 	 * If the JDBC driver does not return the object through the getTables()
 	 * method, null is returned, otherwise the value reported in TABLE_TYPE
 	 * If there is more than object with the same name but different types
-	 * (is there a DB that supports that???) than the first object found 
+	 * (is there a DB that supports that???) than the first object found
    * will be returned.
 	 * @see #getTables(String, String, String, String[])
 	 */
@@ -782,7 +790,7 @@ public class DbMetadata
 		}
 		return result;
 	}
-	
+
 	StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
 	{
 		StringBuilder result = new StringBuilder();
@@ -841,7 +849,7 @@ public class DbMetadata
 	/**
 	 * Checks if the given name is already quoted according to the SQL rules
 	 * for the current DBMS. This takes non-standard DBMS into account.
-	 * 
+	 *
 	 * @param name
 	 * @return true if the values is already quoted.
 	 */
@@ -893,16 +901,16 @@ public class DbMetadata
 	{
 		if (aName == null) return null;
 		if (aName.length() == 0) return aName;
-		
+
 		// already quoted?
 		if (isQuoted(aName)) return aName;
 
 		if (this.dbSettings.neverQuoteObjects()) return StringUtil.trimQuotes(aName);
 
 		boolean needQuote = quoteAlways;
-		
+
 		// Excel does not support the standard rules for SQL identifiers
-		// Basically anything that does not contain only characters needs to 
+		// Basically anything that does not contain only characters needs to
 		// be quoted.
 		if (this.isExcel)
 		{
@@ -910,7 +918,7 @@ public class DbMetadata
 			Matcher m = chars.matcher(aName);
 			needQuote = !m.matches();
 		}
-		
+
 		try
 		{
 			if (!needQuote && !this.storesMixedCaseIdentifiers())
@@ -924,7 +932,7 @@ public class DbMetadata
 					needQuote = true;
 				}
 			}
-			
+
 			if (needQuote || isKeyword(aName))
 			{
 				StringBuilder result = new StringBuilder(aName.length() + 4);
@@ -933,7 +941,7 @@ public class DbMetadata
 				result.append(this.quoteCharacter);
 				return result.toString();
 			}
-			
+
 		}
 		catch (Exception e)
 		{
@@ -948,11 +956,11 @@ public class DbMetadata
 	/**
 	 * Adjusts the case of the given schema name to the
 	 * case in which the server stores schema names.
-	 * 
+	 *
 	 * This is needed e.g. when the user types a
 	 * table name, and that value is used to retrieve
-	 * the table definition. 
-	 * 
+	 * the table definition.
+	 *
 	 * @param schema the schema name to adjust
 	 * @return the adjusted schema name
 	 */
@@ -978,26 +986,26 @@ public class DbMetadata
 	}
 
 	/**
-	 * Returns true if the given object name needs quoting due 
-	 * to mixed case writing or because the case of the name 
+	 * Returns true if the given object name needs quoting due
+	 * to mixed case writing or because the case of the name
 	 * does not match the case in which the database stores its objects
 	 */
 	public boolean isDefaultCase(String name)
 	{
 		if (name == null) return true;
-		
+
 		if (supportsMixedCaseIdentifiers()) return true;
-	
+
 		boolean isUpper = StringUtil.isUpperCase(name);
 		boolean isLower = StringUtil.isLowerCase(name);
-		
+
 		if (isUpper && storesUpperCaseIdentifiers())  return true;
 		if (isLower && storesLowerCaseIdentifiers()) return true;
-		
+
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Adjusts the case of the given object to the
 	 * case in which the server stores objects
@@ -1005,7 +1013,7 @@ public class DbMetadata
 	 * table name, and that value is used to retrieve
 	 * the table definition. Usually the getColumns()
 	 * method is case sensitiv.
-	 * 
+	 *
 	 * @param name the object name to adjust
 	 * @return the adjusted object name
 	 */
@@ -1014,7 +1022,7 @@ public class DbMetadata
 		if (name == null) return null;
 		// if we have quotes, keep them...
 		if (name.indexOf("\"") > -1) return name.trim();
-		
+
 		try
 		{
 			if (this.storesMixedCaseIdentifiers())
@@ -1037,7 +1045,7 @@ public class DbMetadata
 	}
 
 	/**
-	 * Returns the current schema. 
+	 * Returns the current schema.
 	 */
 	public String getCurrentSchema()
 	{
@@ -1050,9 +1058,9 @@ public class DbMetadata
 
 	/**
 	 * Returns the schema that should be used for the current user
-	 * This essential call {@link #getCurrentSchema()}. The method 
+	 * This essential call {@link #getCurrentSchema()}. The method
 	 * then checks if the schema should be ignored for the current
-	 * dbms by calling {@link #ignoreSchema(String)}. If the 
+	 * dbms by calling {@link #ignoreSchema(String)}. If the
 	 * Schema should not be ignored, the it's returned, otherwise
 	 * the method will return null
 	 */
@@ -1126,12 +1134,12 @@ public class DbMetadata
 		int sizes[] = {30,12,10,10,20};
 
 		DataStore result = new DataStore(cols, coltypes, sizes);
-		
+
 		boolean sequencesReturned = false;
 		boolean checkOracleSnapshots = (isOracle && Settings.getInstance().getBoolProperty("workbench.db.oracle.detectsnapshots", true) && typeIncluded("TABLE", types));
 		boolean synRetrieved = false;
 		boolean synonymsRequested = typeIncluded("SYNONYM", types);
-		
+
 		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".exclude.synonyms", null);
 		Pattern synPattern = null;
 		if (synonymsRequested && excludeSynsRegex != null)
@@ -1146,7 +1154,7 @@ public class DbMetadata
 				synPattern = null;
 			}
 		}
-		
+
 		String excludeTablesRegex = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".exclude.tables", null);
 		Pattern excludeTablePattern = null;
 		if (excludeTablesRegex != null && typeIncluded("TABLE", types))
@@ -1162,13 +1170,13 @@ public class DbMetadata
 			}
 			LogMgr.logInfo("DbMetadata.getTables()", "Excluding tables that match the following regex: " + excludeTablesRegex);
 		}
-		
+
 		Set snapshotList = Collections.EMPTY_SET;
 		if (checkOracleSnapshots)
 		{
 			snapshotList = this.oracleMetaData.getSnapshots(aSchema);
 		}
-		
+
 		boolean hideIndexes = hideIndexes();
 
 		ResultSet tableRs = null;
@@ -1180,7 +1188,7 @@ public class DbMetadata
 				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
 				return result;
 			}
-			
+
 			while (tableRs.next())
 			{
 				String cat = tableRs.getString(1);
@@ -1195,7 +1203,7 @@ public class DbMetadata
 					Matcher m = synPattern.matcher(name);
 					if (m.matches()) continue;
 				}
-			
+
 				// prevent duplicate retrieval of SYNONYMS if the driver
 				// returns them already, but the Settings have enabled
 				// Synonym retrieval as well
@@ -1204,15 +1212,15 @@ public class DbMetadata
 				{
 					synRetrieved = true;
 				}
-				
+
 				if (excludeTablePattern != null && ttype.equalsIgnoreCase("TABLE"))
 				{
 					Matcher m = excludeTablePattern.matcher(name);
 					if (m.matches()) continue;
 				}
-				
+
 				if (hideIndexes && isIndexType(ttype)) continue;
-				
+
 				if (checkOracleSnapshots)
 				{
 					StringBuilder t = new StringBuilder(30);
@@ -1303,7 +1311,7 @@ public class DbMetadata
 	{
 		return objectExists(aTable, tableTypesTable);
 	}
-	
+
 	public boolean objectExists(TableIdentifier aTable, String type)
 	{
 		String[] types = null;
@@ -1313,48 +1321,82 @@ public class DbMetadata
 		}
 		return objectExists(aTable, types);
 	}
-	
+
 	public boolean objectExists(TableIdentifier aTable, String[] types)
 	{
 		return findTable(aTable, types) != null;
 	}
-	
+
 	public TableIdentifier findSelectableObject(TableIdentifier tbl)
 	{
 		return findTable(tbl, tableTypesSelectable);
 	}
-	
+
 	public TableIdentifier findTable(TableIdentifier tbl)
 	{
 		return findTable(tbl, tableTypesTable);
 	}
-	
+
 	private TableIdentifier findTable(TableIdentifier tbl, String[] types)
 	{
 		if (tbl == null) return null;
-		
-		ResultSet rs = null;
+
 		TableIdentifier result = null;
 		TableIdentifier table = tbl.createCopy();
 		table.adjustCase(dbConnection);
 		try
 		{
-			rs = this.metaData.getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), types);
-			if (rs.next())
+			DataStore ds = getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), types);
+			if (ds.getRowCount() == 0)
 			{
-				result = new TableIdentifier(rs.getString(1), rs.getString(2), rs.getString(3));
-				result.setType(rs.getString("TABLE_TYPE"));
-				result.setComment(rs.getString("REMARKS"));
-				result.setNeverAdjustCase(true);
+				return null;
+			}
+
+			if (ds.getRowCount() == 1)
+			{
+				result = buildTableIdentifierFromDs(ds, 0);
+			}
+			else
+			{
+
+				for (int row = 0; row < ds.getRowCount(); row++)
+				{
+					String s = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_SCHEMA);
+					String c = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_CATALOG);
+					if (ignoreSchema(s))
+					{
+						ds.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, null);
+					}
+					if (ignoreCatalog(c))
+					{
+						ds.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
+					}
+				}
+
+				// Prefer anything but a synonym
+				ColumnComparator comp = new StringEqualsComparator();
+				String schemaCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_SCHEMA);
+				ColumnExpression filter = new ColumnExpression(schemaCol, comp, getCurrentSchema());
+				filter.setIgnoreCase(true);
+				ds.applyFilter(filter);
+				if (ds.getRowCount() > 0)
+				{
+					result = buildTableIdentifierFromDs(ds, 0);
+				}
+				else
+				{
+					ds.clearFilter();
+					// as any schema that should be ignored is now null
+					// sorting the datastore will put those objects at the end
+					// leaving the "more important" ones at the top
+					ds.sortByColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
+					result = buildTableIdentifierFromDs(ds, 0);
+				}
 			}
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("DbMetadata.tableExists()", "Error checking table existence", e);
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
 		}
 		return result;
 	}
@@ -1370,7 +1412,7 @@ public class DbMetadata
 			return false;
 		}
 	}
-	
+
 	protected boolean supportsMixedCaseQuotedIdentifiers()
 	{
 		try
@@ -1402,7 +1444,7 @@ public class DbMetadata
 			boolean upper = this.metaData.storesUpperCaseIdentifiers();
 			boolean lower = this.metaData.storesLowerCaseIdentifiers();
 			boolean mixed = this.metaData.storesMixedCaseIdentifiers();
-			
+
 			return mixed || (upper && lower);
 		}
 		catch (SQLException e)
@@ -1446,7 +1488,7 @@ public class DbMetadata
 			return false;
 		}
 	}
-	
+
 	/**
 	 * Returns true if the server stores identifiers in lower case.
 	 * Usually this is delegated to the JDBC driver, but as some drivers
@@ -1547,7 +1589,7 @@ public class DbMetadata
 	public void disableOutput()
 	{
     if (!this.isOracle) return;
-		
+
 		if (this.oraOutput != null)
 		{
 			try
@@ -1598,23 +1640,23 @@ public class DbMetadata
 
 	public int fixColumnType(int type)
 	{
-		if (this.isOracle) 
+		if (this.isOracle)
 		{
 			if (type == Types.DATE && this.oracleMetaData.getMapDateToTimestamp()) return Types.TIMESTAMP;
 
-			// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric 
+			// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric
 			// value -101 (which is not an official java.sql.Types value
 			// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
 			if (type == -101 || type == -102) return Types.TIMESTAMP;
 		}
-		
+
 		return type;
 	}
-	
+
 	/**
 	 * Return the column list for the given table.
 	 * @param table the table for which to retrieve the column definition
-	 * @see #getTableDefinition(workbench.db.TableIdentifier) 
+	 * @see #getTableDefinition(workbench.db.TableIdentifier)
 	 */
 	public List<ColumnIdentifier> getTableColumns(TableIdentifier table)
 		throws SQLException
@@ -1686,13 +1728,13 @@ public class DbMetadata
 			}
 		}
 		resultTable.setPrimaryKeyName(pkname);
-		
+
 		boolean hasEnums = false;
 
 		ResultSet rs = null;
 
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
-		
+
 		try
 		{
 			if (this.oracleMetaData != null)
@@ -1707,12 +1749,12 @@ public class DbMetadata
 			while (rs != null && rs.next())
 			{
 				// The columns should be retrieved (getXxx()) in the order
-				// as they appear in the result set as some drivers 
+				// as they appear in the result set as some drivers
 				// do not like an out-of-order processing of the columns
 				String colName = rs.getString("COLUMN_NAME"); // index 4
 				int sqlType = rs.getInt("DATA_TYPE"); // index 5
 				ColumnIdentifier col = new ColumnIdentifier(quoteObjectname(colName), fixColumnType(sqlType));
-				
+
 				String typeName = rs.getString("TYPE_NAME");
 				if (this.isMySql && !hasEnums)
 				{
@@ -1722,29 +1764,29 @@ public class DbMetadata
 				int size = rs.getInt("COLUMN_SIZE"); // index 7
 				int digits = rs.getInt("DECIMAL_DIGITS"); // index 9
 				if (rs.wasNull()) digits = -1;
-				
+
 				String remarks = rs.getString("REMARKS"); // index 12
 				String defaultValue = rs.getString("COLUMN_DEF"); // index 13
 				if (defaultValue != null && this.dbSettings.trimDefaults())
 				{
 					defaultValue = defaultValue.trim();
 				}
-				
+
 				int sqlDataType = -1;
 				try
 				{
-					// This column is used by our own OracleMetaData to 
+					// This column is used by our own OracleMetaData to
 					// return information about char/byte semantics
 					sqlDataType = rs.getInt("SQL_DATA_TYPE");  // index 14
 					if (rs.wasNull()) sqlDataType = -1;
 				}
 				catch (Throwable th)
 				{
-					// The specs says "unused" for this column, so maybe 
+					// The specs says "unused" for this column, so maybe
 					// there are drivers that do not return this column at all.
 					sqlDataType = -1;
 				}
-				
+
 				int position = -1;
 				try
 				{
@@ -1757,7 +1799,7 @@ public class DbMetadata
 				}
 
 				String nullable = rs.getString("IS_NULLABLE"); // index 18
-				
+
 				String display = this.dataTypeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits, sqlDataType);
 
 				col.setDbmsType(display);
@@ -1792,9 +1834,9 @@ public class DbMetadata
 
 	/**
 	 * If the passed TableIdentifier is a Synonym and the current
-	 * DBMS supports synonyms, a TableIdentifier for the "real" 
+	 * DBMS supports synonyms, a TableIdentifier for the "real"
 	 * table is returned.
-	 * 
+	 *
 	 * Otherwise the passed TableIdentifier is returned
 	 */
 	public TableIdentifier resolveSynonym(TableIdentifier tbl)
@@ -1813,14 +1855,14 @@ public class DbMetadata
 	{
 		return getTableList(null, getCurrentSchema(), tableTypesTable );
 	}
-	
+
 	public List<TableIdentifier> getTableList(String schema, String[] types)
 		throws SQLException
 	{
 		if (schema == null) schema = this.getCurrentSchema();
 		return getTableList(null, schema, types);
 	}
-	
+
 	public List<TableIdentifier> getTableList(String table, String schema)
 		throws SQLException
 	{
@@ -1830,20 +1872,14 @@ public class DbMetadata
 	public List<TableIdentifier> getSelectableObjectsList(String schema)
 		throws SQLException
 	{
-		return getTableList(null, schema, tableTypesSelectable, false);
-	}
-
-	public List<TableIdentifier> getTableList(String table, String schema, String[] types)
-		throws SQLException
-	{
-		return getTableList(table, schema, types, false);
+		return getTableList(null, schema, tableTypesSelectable);
 	}
 
 	/**
 	 * Return a list of tables for the given schema
 	 * if the schema is null, all tables will be returned
 	 */
-	public List<TableIdentifier> getTableList(String table, String schema, String[] types, boolean returnAllSchemas)
+	public List<TableIdentifier> getTableList(String table, String schema, String[] types)
 		throws SQLException
 	{
 		DataStore ds = getTables(null, schema, table, types);
@@ -1851,40 +1887,37 @@ public class DbMetadata
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
 		for (int i=0; i < count; i++)
 		{
-			String t = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_NAME);
-			String s = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_SCHEMA);
-			String c = ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_CATALOG);
-			if (!returnAllSchemas && this.ignoreSchema(s))
-			{
-				s = null;
-			}
-			if (this.ignoreCatalog(c))
-			{
-				c = null;
-			}
-			TableIdentifier tbl = new TableIdentifier(c, s, t);
-			tbl.setNeverAdjustCase(true);
-			tbl.setType(ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_TYPE));
-			tbl.setComment(ds.getValueAsString(i, COLUMN_IDX_TABLE_LIST_REMARKS));
+			TableIdentifier tbl = buildTableIdentifierFromDs(ds, i);
 			tables.add(tbl);
 		}
 		return tables;
 	}
 
-	/** 	
+	private TableIdentifier buildTableIdentifierFromDs(DataStore ds, int row)
+	{
+		String t = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_NAME);
+		String s = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_SCHEMA);
+		String c = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_CATALOG);
+		TableIdentifier tbl = new TableIdentifier(c, s, t);
+		tbl.setNeverAdjustCase(true);
+		tbl.setType(ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_TYPE));
+		tbl.setComment(ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_REMARKS));
+		return tbl;
+	}
+	/**
 	 * Return the current catalog for this connection. If no catalog is defined
 	 * or the DBMS does not support catalogs, an empty string is returned.
 	 *
 	 * This method works around a bug in Microsoft's JDBC driver which does
 	 * not return the correct database (=catalog) after the database has
 	 * been changed with the USE <db> command from within the Workbench.
-	 * 
+	 *
 	 * If no query has been configured for the current DBMS, DatabaseMetaData.getCatalog()
 	 * is used, otherwise the query that is configured with the property
 	 * workbench.db.[dbid].currentcatalog.query
-	 * 
+	 *
 	 * @see DbSettings#getQueryForCurrentCatalog()
-	 * 
+	 *
 	 * @return The name of the current catalog or an empty String if there is no current catalog
 	 */
 	public String getCurrentCatalog()
@@ -1966,7 +1999,7 @@ public class DbMetadata
 		}
 		return supportsCatalogs;
 	}
-	
+
 	/**
 	 *	Returns a list of all catalogs in the database.
 	 *	Some DBMS's do not support catalogs, in this case the method
@@ -2011,7 +2044,7 @@ public class DbMetadata
 		return result;
 	}
 
-	/** 
+	/**
 	 * Returns the list of schemas as returned by DatabaseMetadata.getSchemas()
 	 * @return a list of schema names
 	 */
@@ -2081,7 +2114,7 @@ public class DbMetadata
 				// it doesn't harm for other DBMS as well to
 				// trim the returned value...
 				type = type.trim();
-				
+
 				if (hideIndexes && isIndexType(type)) continue;
 				result.add(type);
 			}
@@ -2107,7 +2140,7 @@ public class DbMetadata
 	{
 		return this.sequenceReader;
 	}
-	
+
 	public boolean isTableType(String type)
 	{
 		for (String t : tableTypesTable)
@@ -2116,7 +2149,7 @@ public class DbMetadata
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Checks if the current DBMS supports synonyms.
 	 * @return true if the synonym support is available (basically if synonymReader != null)
@@ -2125,11 +2158,11 @@ public class DbMetadata
 	{
 		return this.synonymReader != null;
 	}
-	
+
 	/**
 	 *	Return the underlying table of a synonym.
 	 * @param synonym the synonym definition
-	 * 
+	 *
 	 * @return the table to which the synonym points or null if the passed
 	 *         name does not reference a synonym or if the DBMS does not support synonyms
 	 * @see #getSynonymTable(String, String)
@@ -2141,13 +2174,13 @@ public class DbMetadata
 		tbl.adjustCase(this.dbConnection);
 		return getSynonymTable(tbl.getSchema(), tbl.getTableName());
 	}
-	
+
 	/**
 	 * Return the underlying table of a synonym.
-	 * 
+	 *
 	 * @param schema the schema of the synonym
 	 * @param synonym the name of the synonym
-	 * 
+	 *
 	 * @return the table to which the synonym points or null if the passed
 	 *         name does not reference a synonym or if the DBMS does not support synonyms
 	 * @see #getSynonymTable(String, String)
@@ -2176,11 +2209,11 @@ public class DbMetadata
 	{
 		return this.synonymReader;
 	}
-	
+
 	protected String getMViewSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, boolean includeDrop)
 	{
 		StringBuilder result = new StringBuilder(250);
-	
+
 		try
 		{
 			TableDefinition def = new TableDefinition(table, columns);
@@ -2191,9 +2224,9 @@ public class DbMetadata
 			result.append(ExceptionUtil.getDisplay(e));
 		}
 		result.append("\n\n");
-		
+
 		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, table.getTableName());
-		
+
 		if (indexSource != null) result.append(indexSource);
 		if (this.dbSettings.ddlNeedsCommit())
 		{
@@ -2203,13 +2236,13 @@ public class DbMetadata
 		}
 		return result.toString();
 	}
-	
+
 	protected boolean isSystemConstraintName(String name)
 	{
 		if (name == null) return false;
 		String regex = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".constraints.systemname", null);
 		if (StringUtil.isEmptyString(regex)) return false;
-		
+
 		try
 		{
 			Pattern p = Pattern.compile(regex);
@@ -2247,7 +2280,7 @@ public class DbMetadata
 		Map<String, String> columnConstraints = Collections.emptyMap();
 		ConstraintReader reader = this.getConstraintReader();
 		if (reader == null) return columnConstraints;
-		
+
 		Savepoint sp = null;
 		try
 		{
