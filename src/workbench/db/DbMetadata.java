@@ -1378,23 +1378,29 @@ public class DbMetadata
 					}
 				}
 
-				// Prefer anything but a synonym
-				ColumnComparator comp = new StringEqualsComparator();
-				String schemaCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_SCHEMA);
-				ColumnExpression filter = new ColumnExpression(schemaCol, comp, getCurrentSchema());
-				filter.setIgnoreCase(true);
-				ds.applyFilter(filter);
-				if (ds.getRowCount() > 0)
+				if (supportsSchemas())
 				{
-					result = buildTableIdentifierFromDs(ds, 0);
+					// Prefer anything but a synonym
+					ColumnComparator comp = new StringEqualsComparator();
+					String schemaCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_SCHEMA);
+					ColumnExpression filter = new ColumnExpression(schemaCol, comp, getCurrentSchema());
+					filter.setIgnoreCase(true);
+					ds.applyFilter(filter);
+					if (ds.getRowCount() > 0)
+					{
+						result = buildTableIdentifierFromDs(ds, 0);
+					}
 				}
-				else
+
+				if (result == null)
 				{
 					ds.clearFilter();
-					// as any schema that should be ignored is now null
-					// sorting the datastore will put those objects at the end
-					// leaving the "more important" ones at the top
-					ds.sortByColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
+					// Restore the original sort and just take the first table
+					SortDefinition sort = new SortDefinition(
+						new int[] { COLUMN_IDX_TABLE_LIST_TYPE, COLUMN_IDX_TABLE_LIST_SCHEMA, COLUMN_IDX_TABLE_LIST_NAME},
+						new boolean[] { true, true, true }
+					);
+					ds.sort(sort);
 					result = buildTableIdentifierFromDs(ds, 0);
 				}
 			}
