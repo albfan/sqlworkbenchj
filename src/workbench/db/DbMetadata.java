@@ -628,7 +628,7 @@ public class DbMetadata
 			}
 			
 			// If the current schema is not the one of the table, the schema is needed in DML statements
-			return (!getCurrentSchema().equalsIgnoreCase(tblSchema));
+			return (!currentSchema.equalsIgnoreCase(tblSchema));
 		}
 		catch (Throwable th)
 		{
