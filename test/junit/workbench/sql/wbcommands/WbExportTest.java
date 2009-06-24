@@ -169,7 +169,7 @@ public class WbExportTest
 		
 		WbFile exportFile = new WbFile(util.getBaseDir(), "rownum_test.txt");
 		StatementRunnerResult result = exportCmd.execute("wbexport -header=true -file='" + exportFile.getFullPath() + "' -type=text -sourceTable=rownumtest -rowNumberColumn=rownum");
-		String msg = result.getMessageBuffer().toString();
+//		String msg = result.getMessageBuffer().toString();
 		assertTrue(result.isSuccess());
 		assertTrue(exportFile.exists());
 		BufferedReader in = new BufferedReader(new FileReader(exportFile));
@@ -202,11 +202,11 @@ public class WbExportTest
 		assertTrue("Export failed", result.isSuccess());
 		assertTrue("Export directory not created", exportDir.exists());
 		WbFile f = new WbFile(exportDir, "junit_test.txt");
-		assertTrue(f.exists());
+		assertTrue("Export file for table JUNIT_TEST not created", f.exists());
 		f = new WbFile(exportDir, "person.txt");
-		assertTrue(f.exists());
+		assertTrue("Export file for table PERSON not created", f.exists());
 		f = new WbFile(exportDir, "blob_test.txt");
-		assertTrue(f.exists());
+		assertTrue("Export file for table BLOB_TEST not created", f.exists());
 	}
 	
 	public void testQuoteEscaping()

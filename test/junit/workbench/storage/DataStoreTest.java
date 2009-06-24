@@ -25,7 +25,6 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.resource.Settings;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.ComplexExpression;
 import workbench.storage.filter.LessThanComparator;
@@ -132,7 +131,6 @@ public class DataStoreTest
 	
 	public void testQuotedKeyColumns()
 	{
-		
 		try
 		{
 			WbConnection con = prepareDatabase();
@@ -563,6 +561,29 @@ public class DataStoreTest
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
+	}
+
+	public void testSort()
+		throws Exception
+	{
+		int[] types = new int[] { Types.VARCHAR };
+		String[]  cols = new String[] { "NAME" };
+		DataStore ds = new DataStore(cols, types);
+
+		ds.addRow();
+		ds.setValue(0, 0, "ZZZ");
+
+		ds.addRow();
+		ds.setValue(1, 0, "AAA");
+
+		ds.addRow();
+		ds.setValue(2, 0, "WWW");
+
+		ds.addRow();
+		ds.setValue(3, 0, null);
+		ds.sortByColumn(0, true);
+
+		assertEquals("AAA", ds.getValueAsString(0, 0));
 	}
 	
 }

@@ -748,11 +748,16 @@ public class DbMetadata
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
 			tbl.checkIsQuoted(this);
-			DataStore ds = getTables(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), null);
-			if (ds.getRowCount() > 0)
+			TableIdentifier target = findTable(tbl, null);
+			if (target != null)
 			{
-				type = ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
+				type = target.getType();
 			}
+//			DataStore ds = getTables(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), null);
+//			if (ds.getRowCount() > 0)
+//			{
+//				type = ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
+//			}
 		}
 		catch (Exception e)
 		{
@@ -1888,6 +1893,15 @@ public class DbMetadata
 		for (int i=0; i < count; i++)
 		{
 			TableIdentifier tbl = buildTableIdentifierFromDs(ds, i);
+			if (ignoreSchema(tbl.getSchema()))
+			{
+				tbl.setSchema(null);
+			}
+
+			if (ignoreCatalog(tbl.getCatalog()))
+			{
+				tbl.setCatalog(null);
+			}
 			tables.add(tbl);
 		}
 		return tables;
