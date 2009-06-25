@@ -779,6 +779,13 @@ public class WbExportTest
 			writer.close();
 			
 			BatchRunner runner = new BatchRunner(script.getAbsolutePath());
+			// this is a workaround for a bug in NetBeans 6.7
+			// which gets confused when running JUnit tests that
+			// output a '\r' character to standard out.
+			runner.setVerboseLogging(false);
+			runner.setShowProgress(false);
+
+			
 			runner.setBaseDir(this.basedir);
 			runner.setConnection(this.connection);
 			runner.execute();

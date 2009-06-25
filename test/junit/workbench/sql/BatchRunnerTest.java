@@ -39,7 +39,7 @@ public class BatchRunnerTest
 	extends TestCase
 {
 	private TestUtil	util;
-	
+
 	public BatchRunnerTest(String testName)
 		throws Exception
 	{
@@ -57,7 +57,7 @@ public class BatchRunnerTest
 
 			WbConnection con = util.getConnection("testSingleCommand");
 			Statement stmt = con.createStatement();
-			
+
 			// prepare database
 			TestUtil.executeScript(con,
 				"CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));\n" +
@@ -72,7 +72,6 @@ public class BatchRunnerTest
 			assertEquals(2, count);
 			rs.close();
 
-
 			// Initialize the batch runner
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-url='jdbc:h2:mem:testSingleCommand' " +
@@ -82,6 +81,7 @@ public class BatchRunnerTest
 				" -command='delete from person; commit;' ");
 
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			initRunner4Test(runner);
 
 			assertNotNull(runner);
 
@@ -123,7 +123,7 @@ public class BatchRunnerTest
 			TestUtil.writeFile(importFile, data);
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "myscript.sql");
 			WbFile logfile = new WbFile(util.getBaseDir(), "junit_transaction_test.txt");
-			
+
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
 			writer.println("-- test script");
 			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100));");
@@ -134,24 +134,25 @@ public class BatchRunnerTest
 			writer.println("-- import data should fail!");
 			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false");
 			writer.close();
-			
+
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "errtest");
-			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
+			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() +
 				" -username=sa -driver=org.h2.Driver "  +
-				" -logfile='" + logfile.getFullPath() + "' " + 
+				" -logfile='" + logfile.getFullPath() + "' " +
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
 				" -autocommit=false " +
 				" -cleanupSuccess='" + successFile.getFullPath() + "' "
 			);
-			
+
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			initRunner4Test(runner);
 			assertNotNull(runner);
-			
+
 			runner.connect();
 			runner.execute();
-			
+
 			con = util.getConnection(dbFile);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from person");
@@ -186,8 +187,8 @@ public class BatchRunnerTest
 
 			WbFile importFile = new WbFile(util.getBaseDir(), "data_success.txt");
 			String data = "nr\tfirstname\tlastname\n" +
-				"5\tMary\tMoviestar\n" + 
-				"6\tMajor\tBug\n" + 
+				"5\tMary\tMoviestar\n" +
+				"6\tMajor\tBug\n" +
 				"7\tGeneral\tFailure\n";
 			TestUtil.writeFile(importFile, data);
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "myscript.sql");
@@ -201,10 +202,10 @@ public class BatchRunnerTest
 			writer.println("WbImport -file='" + importFile.getName() + "' -type=text -header=true -table=person -continueOnError=false -transactionControl=false;");
 			writer.println("insert into person (nr, firstname, lastname) values (8,'Tricia', 'McMillian');");
 			writer.close();
-			
+
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "successtest");
-			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() + 
+			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() +
 				" -username=sa -driver=org.h2.Driver "  +
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
@@ -212,15 +213,16 @@ public class BatchRunnerTest
 				" -autocommit=false " +
 				" -rollbackOnDisconnect=true "
 				);
-			
+
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			initRunner4Test(runner);
 			assertNotNull(runner);
-			
+
 			runner.connect();
 			assertTrue(runner.isConnected());
 			runner.execute();
 			assertTrue(runner.isSuccess());
-			
+
 			con = util.getConnection(dbFile);
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from person");
@@ -240,7 +242,7 @@ public class BatchRunnerTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	public void testCreateCommandLineProfile()
 		throws Exception
 	{
@@ -261,7 +263,7 @@ public class BatchRunnerTest
 		String dir = cmdline.getValue("configdir");
 		assertEquals(".", dir);
 	}
-	
+
 	public void testEmptyStatement()
 		throws Exception
 	{
@@ -277,6 +279,7 @@ public class BatchRunnerTest
 		String script = "-script='" + scriptFile.getAbsolutePath() + "'";
 		parser.parse("-url='jdbc:h2:mem:testEmptyStmt' -username=sa -driver=org.h2.Driver "  + script  + " -displayresult=true -ignoredroperrors=true -showprogress=true -showtiming=false");
 		BatchRunner runner = BatchRunner.createBatchRunner(parser);
+		initRunner4Test(runner);
 
 		assertNotNull(runner);
 
@@ -288,6 +291,16 @@ public class BatchRunnerTest
 		runner.execute();
 		assertEquals(true, runner.isSuccess());
 	}
+
+	private void initRunner4Test(BatchRunner runner)
+	{
+		if (runner == null) return;
+		// this is a workaround for a bug in NetBeans 6.7
+		// which gets confused when running JUnit tests that
+		// output a '\r' character to standard out.
+		runner.setVerboseLogging(false);
+		runner.setShowProgress(false);
+	}
 	
 	public void testBatchRunner()
 		throws Exception
@@ -296,7 +309,7 @@ public class BatchRunnerTest
 		{
 			util.emptyBaseDirectory();
 			util.prepareEnvironment(true);
-			
+
 			WbFile scriptFile = new WbFile(util.getBaseDir(), "preparedata.sql");
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
 			writer.println("-- test script");
@@ -310,32 +323,33 @@ public class BatchRunnerTest
 			writer.println("/* make everything permanent\nmore comments */");
 			writer.println("commit;");
 			writer.close();
-			
+
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:h2:mem:testBatchRunner' " + 
+			parser.parse("-url='jdbc:h2:mem:testBatchRunner' " +
 				" -username=sa " +
-				" -driver=org.h2.Driver "  + 
+				" -driver=org.h2.Driver "  +
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -rollbackOnDisconnect=true " +
-				" -showProgress=true " + 
+				" -showProgress=true " +
 				" -displayResult=true ");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
-	
+
 			assertNotNull(runner);
-			
+			initRunner4Test(runner);
+
 			runner.connect();
 			WbConnection con = runner.getConnection();
 			assertNotNull(con);
 			assertNotNull(con.getProfile());
-			
+
 			boolean rollback = con.getProfile().getRollbackBeforeDisconnect();
 			assertEquals("Rollback property not read from commandline", true, rollback);
-			
+
 			runner.execute();
-			
+
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from person");
-			
+
 			if (rs.next())
 			{
 				int count = rs.getInt(1);
@@ -348,7 +362,7 @@ public class BatchRunnerTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	public void testNoConnection()
 	{
 		Statement stmt = null;
@@ -370,6 +384,7 @@ public class BatchRunnerTest
 			parser.parse("-script='" + script.getFullPath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
 			assertNotNull(runner);
+			initRunner4Test(runner);
 			runner.connect();
 			runner.execute();
 			assertTrue(runner.isSuccess());
@@ -396,13 +411,13 @@ public class BatchRunnerTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-		
+
 	public void testAltDelimiter()
 	{
 		try
 		{
 			util.emptyBaseDirectory();
-			
+
 			ArgumentParser parser = new AppArguments();
 			File scriptFile = new File(util.getBaseDir(), "preparedata.sql");
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
@@ -417,17 +432,18 @@ public class BatchRunnerTest
 			writer.println("/");
 			writer.println("commit");
 			writer.println("/");
-			writer.close();			
-			
+			writer.close();
+
 			File scriptFile2 = new File(util.getBaseDir(), "insert.sql");
 			PrintWriter writer2 = new PrintWriter(new FileWriter(scriptFile2));
 			writer2.println("-- test script");
 			writer2.println("insert into person (nr, firstname, lastname) values (4,'Tricia', 'McMillian');");
 			writer2.println("commit;");
-			writer2.close();			
-			
+			writer2.close();
+
 			parser.parse("-url='jdbc:h2:mem:testAltDelimiter' -altdelimiter='/;nl' -username=sa -driver=org.h2.Driver -script='" + scriptFile.getAbsolutePath() + "','" + scriptFile2.getAbsolutePath() + "'");
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			initRunner4Test(runner);
 			
 			assertNotNull(runner);
 
@@ -435,18 +451,18 @@ public class BatchRunnerTest
 			WbConnection con = runner.getConnection();
 			assertNotNull(con);
 			assertNotNull(con.getProfile());
-			
+
 			DelimiterDefinition def = con.getProfile().getAlternateDelimiter();
 			assertNotNull("No alternate delimiter defined", def);
 			assertEquals("Wrong alternate delimiter parsed", "/", def.getDelimiter());
 			assertEquals("Wrong singleLine Property parsed", true, def.isSingleLine());
-			
+
 			runner.execute();
 			assertEquals("Runner not successful!", true, runner.isSuccess());
-			
+
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from person");
-			
+
 			if (rs.next())
 			{
 				int count = rs.getInt(1);
@@ -464,7 +480,7 @@ public class BatchRunnerTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	public void testConsoleOutput()
 	{
 		WbConnection con = null;
@@ -480,15 +496,16 @@ public class BatchRunnerTest
 			stmt.executeUpdate("INSERT INTO person (nr, firstname, lastname) values (1, 'Arthur', 'Dent')");
 			stmt.executeUpdate("INSERT INTO person (nr, firstname, lastname) values (2, 'Ford', 'Prefect')");
 			con.commit();
-			
+
 			File scriptFile = new File(util.getBaseDir(), "runselect.sql");
 			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
 			writer.println("select * from person;");
-			writer.close();			
+			writer.close();
 
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-displayresult=true -altdelimiter='/;nl' -script=" + scriptFile.getAbsolutePath());
 			BatchRunner runner = BatchRunner.createBatchRunner(parser);
+			initRunner4Test(runner);
 			runner.setConnection(con);
 
 			File out= new File(util.getBaseDir(), "console.txt");
@@ -497,7 +514,7 @@ public class BatchRunnerTest
 			runner.setConsole(console);
 			runner.execute();
 			console.close();
-			
+
 			BufferedReader in = new BufferedReader(new FileReader(out));
 			String content = FileUtil.readCharacters(in);
 			//System.out.println("*************\n" + content + "\n*****************");
@@ -509,7 +526,7 @@ public class BatchRunnerTest
 
 			pos = content.indexOf("2 | Ford | Prefect");
 			assertEquals("Record not found", (pos > -1), true);
-			
+
 		}
 		catch (Exception e)
 		{
