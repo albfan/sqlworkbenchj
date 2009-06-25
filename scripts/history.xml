@@ -47,6 +47,26 @@
     </description>
   </entry>
 
+  <entry dev-build="3" type="fix">
+    <description>
+        In Oracle running a SELECT using a table name that was also used as a global symbol, the generated
+        statements for changes in the result set referenced the schema PUBLIC instead of the current schema.
+    </description>
+  </entry>
+
+  <entry dev-build="3" type="fix">
+    <description>
+      When re-ordering the columns using drag-and-drop and then displaying the
+      single-record dialog, the content of the columns was mixed up.
+    </description>
+  </entry>
+
+  <entry dev-build="3" type="fix">
+    <description>
+      When re-ordering the columns using drag-and-drop, the order was reset when changing data in the result.
+    </description>
+  </entry>
+
   <entry dev-build="2" type="fix">
     <description>
       The alternate delimiter was not always processed correctly.
