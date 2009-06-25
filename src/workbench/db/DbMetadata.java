@@ -53,10 +53,6 @@ import workbench.db.h2database.H2SequenceReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.sql.syntax.SqlKeywordHelper;
-import workbench.storage.filter.AndExpression;
-import workbench.storage.filter.ColumnComparator;
-import workbench.storage.filter.ComplexExpression;
-import workbench.storage.filter.StringEqualsComparator;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionBuilder;
 
@@ -1055,6 +1051,7 @@ public class DbMetadata
 	 */
 	public String getCurrentSchema()
 	{
+		if (!supportsSchemas()) return null;
 		if (this.schemaInfoReader != null)
 		{
 			return this.schemaInfoReader.getCurrentSchema(this.dbConnection);
@@ -1352,66 +1349,41 @@ public class DbMetadata
 		table.adjustCase(dbConnection);
 		try
 		{
-			DataStore ds = getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), types);
-			if (ds.getRowCount() == 0)
+			String schema = table.getSchema();
+			if (schema == null)
 			{
-				return null;
+				schema = getSchemaToUse();
 			}
+
+			String catalog = table.getCatalog();
+			if (catalog == null)
+			{
+				catalog = getCurrentCatalog();
+			}
+
+			DataStore ds = getTables(catalog, schema, table.getRawTableName(), types);
 
 			if (ds.getRowCount() == 1)
 			{
 				result = buildTableIdentifierFromDs(ds, 0);
+				return result;
 			}
-			else
+
+			// Nothing found, try again with the original catalog and schema information
+			ds = getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), types);
+			if (ds.getRowCount() == 0)
 			{
-
-				for (int row = 0; row < ds.getRowCount(); row++)
-				{
-					String s = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_SCHEMA);
-					String c = ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_CATALOG);
-					if (ignoreSchema(s))
-					{
-						ds.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, null);
-					}
-					if (ignoreCatalog(c))
-					{
-						ds.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
-					}
-				}
-
-				if (table.getSchema() == null || table.getCatalog() == null)
-				{
-					ColumnComparator comp = new StringEqualsComparator();
-					ComplexExpression filter = new AndExpression();
-					if (table.getSchema() == null && supportsSchemas())
-					{
-						String schemaCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_SCHEMA);
-						filter.addColumnExpression(schemaCol, comp, getCurrentSchema(), true);
-					}
-					if (table.getCatalog() == null && supportsCatalogs())
-					{
-						String catCol = ds.getColumnName(COLUMN_IDX_TABLE_LIST_CATALOG);
-						filter.addColumnExpression(catCol, comp, getCurrentCatalog(), true);
-					}
-					ds.applyFilter(filter);
-					if (ds.getRowCount() > 0)
-					{
-						result = buildTableIdentifierFromDs(ds, 0);
-					}
-				}
-				
-				if (result == null)
-				{
-					ds.clearFilter();
-					// Restore the original sort and just take the first table
-					SortDefinition sort = new SortDefinition(
-						new int[] { COLUMN_IDX_TABLE_LIST_TYPE, COLUMN_IDX_TABLE_LIST_SCHEMA, COLUMN_IDX_TABLE_LIST_NAME},
-						new boolean[] { true, true, true }
-					);
-					ds.sort(sort);
-					result = buildTableIdentifierFromDs(ds, 0);
-				}
+				return null;
 			}
+			else if (ds.getRowCount() == 1)
+			{
+				result = buildTableIdentifierFromDs(ds, 0);
+				return result;
+			}
+
+			// if nothing was found there is nothing we can do to guess the correct
+			// "searching strategy" for the current DBMS
+
 		}
 		catch (Exception e)
 		{
@@ -1950,6 +1922,8 @@ public class DbMetadata
 	 */
 	public String getCurrentCatalog()
 	{
+		if (!this.supportsCatalogs()) return null;
+		
 		String catalog = null;
 
 		String query = this.dbSettings.getQueryForCurrentCatalog();

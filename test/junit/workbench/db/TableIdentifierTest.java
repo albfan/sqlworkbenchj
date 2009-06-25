@@ -47,9 +47,10 @@ public class TableIdentifierTest
 				"set schema s1;\n " +
 				"commit; \n");
 			
-			TableIdentifier t1 = con.getMetadata().findTable(new TableIdentifier("TABLE1"));
+			TableIdentifier t1 = con.getMetadata().findTable(new TableIdentifier("PUBLIC.TABLE1"));
 			TestUtil.executeScript(con, "set schema s1;");
 			assertEquals("PUBLIC.TABLE1", t1.getObjectNameForDrop(con));
+//			assertNull(t1);
 //			System.out.println("table: " + t1.getObjectNameForDrop(con));
 			TestUtil.executeScript(con, "set schema public;");
 			assertEquals("TABLE1", t1.getObjectNameForDrop(con));
