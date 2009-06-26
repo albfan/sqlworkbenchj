@@ -35,7 +35,8 @@ public class PostgresSequenceReader
 	implements SequenceReader
 {
 	private WbConnection dbConnection;
-
+	private final String baseSql = "SELECT min_value, max_value, increment_by, cache_value, is_cycled FROM ";
+	
 	public PostgresSequenceReader(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -54,7 +55,8 @@ public class PostgresSequenceReader
 			Long min = (Long) def.getSequenceProperty("MINVALUE");
 			Long inc = (Long) def.getSequenceProperty("INCREMENT");
 			Long cache = (Long) def.getSequenceProperty("CACHE");
-			String cycle = (String) def.getSequenceProperty("CYCLE");
+			Boolean cycle = (Boolean) def.getSequenceProperty("CYCLE");
+			if (cycle == null) cycle = Boolean.FALSE;
 
 			buf.append("CREATE SEQUENCE ");
 			buf.append(name);
@@ -71,7 +73,7 @@ public class PostgresSequenceReader
 			buf.append("\n       CACHE ");
 			buf.append(cache);
 			buf.append("\n       ");
-			if ("false".equalsIgnoreCase(cycle))
+			if (!cycle.booleanValue())
 			{
 				buf.append("NO");
 			}
@@ -126,7 +128,8 @@ public class PostgresSequenceReader
 			rs = meta.getTables(null, owner, "%", new String[] { "SEQUENCE"} );
 			while (rs.next())
 			{
-				result.add(createDefinition(rs));
+				String name = rs.getString("TABLE_NAME");
+				result.add(getSequenceDefinition(owner, name));
 			}
 			this.dbConnection.releaseSavepoint(sp);
 
@@ -148,20 +151,17 @@ public class PostgresSequenceReader
 		return result;
 	}
 
-	private SequenceDefinition createDefinition(ResultSet rs)
+	private SequenceDefinition createDefinition(String name, String schema, String comment, DataStore ds)
 		throws SQLException
 	{
-		String seq_name = rs.getString("TABLE_NAME");
-		String schema = rs.getString("TABLE_SCHEM");
-		String comment = rs.getString("REMARKS");
-		SequenceDefinition def = new SequenceDefinition(schema, seq_name);
-		def.setSequenceProperty("INCREMENT", rs.getObject("increment_by"));
-		def.setSequenceProperty("MAXVALUE", rs.getObject("max_value"));
-		def.setSequenceProperty("MINVALUE", rs.getObject("min_value"));
-		def.setSequenceProperty("CACHE", rs.getObject("cache_value"));
-		def.setSequenceProperty("CYCLE", rs.getObject("is_cycle"));
+		SequenceDefinition def = new SequenceDefinition(schema, name);
+		def.setSequenceProperty("INCREMENT", ds.getValue(0, "increment_by"));
+		def.setSequenceProperty("MAXVALUE", ds.getValue(0, "max_value"));
+		def.setSequenceProperty("MINVALUE", ds.getValue(0, "min_value"));
+		def.setSequenceProperty("CACHE", ds.getValue(0, "cache_value"));
+		def.setSequenceProperty("CYCLE", ds.getValue(0, "is_cycled"));
 		def.setSequenceProperty("REMARKS", comment);
-
+		readSequenceSource(def);
 		def.setComment(comment);
 		return def;
 	}
@@ -171,20 +171,26 @@ public class PostgresSequenceReader
 		SequenceDefinition result = null;
 
 		ResultSet rs = null;
-		PreparedStatement stmt = null;
 		Savepoint sp = null;
+
 		try
 		{
 			sp = this.dbConnection.setSavepoint();
 			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
 			rs = meta.getTables(null, owner, sequence, new String[] { "SEQUENCE"} );
+			boolean exists = false;
+			String comment = null;
 			if (rs.next())
 			{
-				result = createDefinition(rs);
+				comment = rs.getString("REMARKS");
+				exists = true;
 			}
 			this.dbConnection.releaseSavepoint(sp);
-
-			updateProperties(result);
+			if (exists)
+			{
+				DataStore ds = getRawSequenceDefinition(owner, sequence);
+				result = createDefinition(sequence, owner, comment, ds);
+			}
 		}
 		catch (SQLException e)
 		{
@@ -194,8 +200,9 @@ public class PostgresSequenceReader
 		}
 		finally
 		{
-			SqlUtil.closeAll(rs, stmt);
+			SqlUtil.closeResult(rs);
 		}
+		
 		return result;
 	}
 
@@ -242,7 +249,7 @@ public class PostgresSequenceReader
 		Savepoint sp = null;
 		try
 		{
-			String sql = "SELECT min_value, max_value, increment_by, cache_value, is_cycled FROM " + sequence;
+			String sql = baseSql + sequence;
 			sp = this.dbConnection.setSavepoint();
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);

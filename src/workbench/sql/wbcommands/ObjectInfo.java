@@ -81,14 +81,14 @@ public class ObjectInfo
 				String msg = toDescribe.getTableExpression(connection) + " --> " +
 					synonymTarget.getTableExpression(connection) + " (" +
 					synonymTarget.getObjectType() + ")";
-				
+
 				result.addMessage(msg + "\n");
 				result.setSourceCommand(msg);
 			}
 			toDescribe = synonymTarget;
 		}
 
-		if (toDescribe == null || !connection.getMetadata().isTableType(toDescribe.getType()))
+		if (toDescribe == null || "SEQUENCE".equals(toDescribe.getType()))
 		{
 			SequenceReader seqReader = connection.getMetadata().getSequenceReader();
 			if (seqReader != null)
@@ -108,8 +108,8 @@ public class ObjectInfo
 						// source was not build by the reader during initial retrieval
 						source = seq.getSource(connection);
 					}
-					
-					if (source != null) 
+
+					if (source != null)
 					{
 						String src = source.toString();
 						result.addMessage("--------[ " + seq.getObjectType() + ": " + seq.getObjectName() + " ]--------");
@@ -123,6 +123,7 @@ public class ObjectInfo
 					return result;
 				}
 			}
+
 			// No table or something similar found, try to find a procedure with that name
 			ProcedureReader reader = connection.getMetadata().getProcedureReader();
 			ProcedureDefinition def = new ProcedureDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), DatabaseMetaData.procedureResultUnknown);
@@ -164,7 +165,7 @@ public class ObjectInfo
 
 		CharSequence viewSource = null;
 		String viewname = null;
-		
+
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
 			viewSource = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
@@ -224,5 +225,5 @@ public class ObjectInfo
 
 		return result;
 	}
-	
+
 }
