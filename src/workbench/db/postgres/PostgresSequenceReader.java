@@ -178,7 +178,7 @@ public class PostgresSequenceReader
 			sp = this.dbConnection.setSavepoint();
 			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
 			rs = meta.getTables(null, owner, sequence, new String[] { "SEQUENCE"} );
-			while (rs.next())
+			if (rs.next())
 			{
 				result = createDefinition(rs);
 			}
@@ -201,6 +201,8 @@ public class PostgresSequenceReader
 
 	private void updateProperties(SequenceDefinition def)
 	{
+		if (def == null) return;
+		
 		DataStore ds = getRawSequenceDefinition(def.getSequenceOwner(), def.getSequenceName());
 		if (ds == null) return;
 		if (ds.getRowCount() == 0) return;
@@ -221,9 +223,7 @@ public class PostgresSequenceReader
 
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
-		SequenceDefinition result = getSequence(owner, sequence);
-		updateProperties(result);
-		return result;
+		return getSequence(owner, sequence);
 	}
 
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
