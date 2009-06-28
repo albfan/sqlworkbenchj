@@ -860,11 +860,11 @@ public class DbMetadata
 		if (StringUtil.isEmptyString(name)) return false;
 		if (name.startsWith(quoteCharacter)) return true;
 
-		// The MS SQL Server driver claims that a " is the quote
-		// character but still accepts the dreaded brackets as quoted characters...
+		// SQL Server driver claims that a " is the quote character but still
+		// accepts those iditotic brackets as quote characters...
 		if (this.isSqlServer)
 		{
-			if (name.charAt(0) == '[') return true;
+			if (name.charAt(0) == '[' && name.charAt(name.length() - 1) == ']') return true;
 		}
 		return false;
 	}

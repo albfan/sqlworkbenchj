@@ -117,26 +117,31 @@ public class SqlUtil
 		return quoteObjectname(object, false);
 	}
 	
-	public static String quoteObjectname(String aColname, boolean quoteAlways)
+	public static String quoteObjectname(String objectName, boolean quoteAlways)
 	{
-		if (aColname == null) return null;
-		if (aColname.length() == 0) return "";
-		if (aColname.charAt(0) == '"') return aColname;
+		if (objectName == null) return null;
+		if (objectName.length() == 0) return "";
+		if (objectName.charAt(0) == '"') return objectName;
 		
-		aColname = aColname.trim();
+		objectName = objectName.trim();
+		if (objectName.charAt(0) == '[' && objectName.charAt(objectName.length() - 1) == ']')
+		{
+			// assume this is already quoted using SQL Server's idiotic non-standard way of using "quotes"
+			return objectName;
+		}
 		
 		boolean doQuote = quoteAlways;
 		
 		if (!quoteAlways)
 		{
-			Matcher m = SQL_IDENTIFIER.matcher(aColname);
+			Matcher m = SQL_IDENTIFIER.matcher(objectName);
 			//doQuote = m.find() || Character.isDigit(aColname.charAt(0));;
 			doQuote = !m.matches();
 		}
-		if (!doQuote) return aColname;
-		StringBuilder col = new StringBuilder(aColname.length() + 2);
+		if (!doQuote) return objectName;
+		StringBuilder col = new StringBuilder(objectName.length() + 2);
 		col.append('"');
-		col.append(aColname);
+		col.append(objectName);
 		col.append('"');
 		return col.toString();
 	}

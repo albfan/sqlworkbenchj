@@ -29,6 +29,25 @@ public class TableIdentifierTest
 		super(testName);
 	}
 
+	public void testSQLServerNaming()
+	{
+		String name = "[linked_server].[some_catalog].dbo.some_table";
+		TableIdentifier tbl = new TableIdentifier(name);
+
+		assertEquals("some_table", tbl.getTableName());
+		assertEquals("dbo", tbl.getSchema());
+		assertEquals("[some_catalog]", tbl.getCatalog());
+		assertEquals("[linked_server]", tbl.getServerPart());
+
+		TableIdentifier copy = tbl.createCopy();
+		assertEquals("some_table", copy.getTableName());
+		assertEquals("dbo", copy.getSchema());
+		assertEquals("[some_catalog]", copy.getCatalog());
+		assertEquals("[linked_server]", copy.getServerPart());
+
+		assertEquals(tbl, copy);
+	}
+
 	public void testDropName()
 	{
 		try

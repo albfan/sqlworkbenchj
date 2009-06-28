@@ -341,9 +341,7 @@ public class TextFileParser
 				{
 					if (this.abortOnError)
 					{
-						String msg = ResourceMgr.getString("ErrImportColumnNotFound");
-						msg = StringUtil.replace(msg, "%column%", sourceCol.getColumnName());
-						msg = StringUtil.replace(msg, "%table%", this.tableName);
+						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", sourceCol.getColumnName(), this.tableName);
 						this.messages.append(msg);
 						this.messages.appendNewLine();
 						this.hasErrors = true;
@@ -351,9 +349,7 @@ public class TextFileParser
 					}
 					else
 					{
-						String msg = ResourceMgr.getString("ErrImportColumnIgnored");
-						msg = StringUtil.replace(msg, "%column%", sourceCol.getColumnName());
-						msg = StringUtil.replace(msg, "%table%", this.tableName);
+						String msg = ResourceMgr.getFormattedString("ErrImportColumnIgnored", sourceCol.getColumnName(), this.tableName);
 						LogMgr.logWarning("TextFileParser.setColumns()", msg);
 						this.hasWarnings = true;
 						this.messages.append(msg);

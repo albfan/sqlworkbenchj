@@ -295,9 +295,7 @@ public class XmlDataFileParser
 			else
 			{
 				String errorColumn = (this.columns[colIndex] != null ? this.columns[colIndex].getColumnName() : "n/a");
-				String msg = ResourceMgr.getString("ErrImportColumnNotFound");
-				msg = StringUtil.replace(msg, "%column%", errorColumn);
-				msg = StringUtil.replace(msg, "%table%", tbl.getTableExpression());
+				String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", errorColumn, tbl.getTableExpression());
 				this.messages.append(msg);
 				this.messages.appendNewLine();
 				if (this.abortOnError)

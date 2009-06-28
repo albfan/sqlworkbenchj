@@ -29,9 +29,11 @@ public class TableIdentifier
 	private String tablename;
 	private String schema;
 	private String catalog;
+	private String server; // for SQL Server syntax
 	private String expression;
 	private boolean isNewTable;
-	private boolean tableWasQuoted; 
+	private boolean tableWasQuoted;
+	private boolean serverWasQuoted;
 	private boolean catalogWasQuoted; 
 	private boolean schemaWasQuoted; 
 	private String pkName;
@@ -150,10 +152,6 @@ public class TableIdentifier
 		this.catalogWasQuoted = !meta.isDefaultCase(this.catalog);
 		this.tableWasQuoted = !meta.isDefaultCase(this.tablename);
 		this.preserveQuotes = (this.schemaWasQuoted || this.catalogWasQuoted || this.tableWasQuoted );
-//		if (!preserveQuotes)
-//		{
-//			this.setNeverAdjustCase(false);
-//		}
 	}
 	
 	public TableIdentifier createCopy()
@@ -164,8 +162,10 @@ public class TableIdentifier
 		copy.schema = this.schema;
 		copy.tablename = this.tablename;
 		copy.catalog = this.catalog;
+		copy.server = this.server;
 		copy.expression = null;
 		copy.neverAdjustCase = this.neverAdjustCase;
+		copy.serverWasQuoted = this.serverWasQuoted;
 		copy.tableWasQuoted = this.tableWasQuoted;
 		copy.catalogWasQuoted = this.catalogWasQuoted;
 		copy.schemaWasQuoted = this.schemaWasQuoted;
@@ -211,6 +211,11 @@ public class TableIdentifier
 		}
 
 		StringBuilder result = new StringBuilder(30);
+		if (this.server != null)
+		{
+			result.append(SqlUtil.quoteObjectname(this.server, false));
+			result.append('.');
+		}
 		if (conn == null)
 		{
 			if (this.catalog != null)
@@ -307,6 +312,11 @@ public class TableIdentifier
 	public String getQualifiedName()
 	{
 		StringBuilder result = new StringBuilder(32);
+		if (this.server != null)
+		{
+			result.append(server);
+			result.append('.');
+		}
 		if (catalog != null)
 		{
 			result.append(catalog);
@@ -348,7 +358,11 @@ public class TableIdentifier
 	 */
 	public void checkIsQuoted(DbMetadata meta)
 	{
-
+		if (meta.isQuoted(server))
+		{
+			this.serverWasQuoted = true;
+			this.server = server.substring(1, server.length() - 1);
+		}
 		if (meta.isQuoted(this.tablename))
 		{
 			this.tableWasQuoted = true;
@@ -405,10 +419,41 @@ public class TableIdentifier
 			setSchema(elements.get(1));
 			setTablename(elements.get(2));
 		}
-
+		else if (elements.size() == 4)
+		{
+			// support for SQL Server syntax with a linked server
+			setServerPart(elements.get(0));
+			setCatalog(elements.get(1));
+			setSchema(elements.get(2));
+			setTablename(elements.get(3));
+		}
 		this.expression = null;
 	}
 
+	/**
+	 * For a table specified using SQL Server's extended syntax
+	 * that allows 4 elements, return the first element. Usually this is the
+	 * name of the linked server.
+	 *
+	 * @return the name of the server part if specified, null otherwise
+	 */
+	public String getServerPart()
+	{
+		return server;
+	}
+	
+	public void setServerPart(String name)
+	{
+		if (StringUtil.isBlank(name))
+		{
+			server = null;
+		}
+		else
+		{
+			server = name.trim();
+		}
+	}
+	
 	private void setTablename(String name)
 	{
 		if (name == null) return;

@@ -841,7 +841,8 @@ public class DataExporter
 			this.addError(ResourceMgr.getString("ErrExportExecute"));
 			this.addError(ExceptionUtil.getDisplay(e));
 			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + job.getQuerySql() + ", Error: " + ExceptionUtil.getDisplay(e), e);
-			if (!this.dbConn.getAutoCommit())
+			
+			if (!this.dbConn.getAutoCommit() && dbConn.selectStartsTransaction())
 			{
 				// Postgres needs a rollback, but this doesn't (or shouldn't!)
 				// hurt with other DBMS either

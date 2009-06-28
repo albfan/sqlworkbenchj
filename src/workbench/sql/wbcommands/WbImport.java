@@ -156,6 +156,8 @@ public class WbImport
 		result = StringUtil.replace(result, "%header_default%", Boolean.toString(getHeaderDefault()));
 		result = StringUtil.replace(result, "%trim_default%", Boolean.toString(getTrimDefault()));
 		result = StringUtil.replace(result, "%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
+		boolean useSP = (currentConnection == null ? false : currentConnection.getDbSettings().useSavepointForImport());
+		result = result.replace("%savepoint_default%", Boolean.toString(useSP));
 		return result;
 	}
 
@@ -452,7 +454,7 @@ public class WbImport
 					{
 						result.setFailure();
 						String col = xmlParser.getMissingColumn();
-						String msg = ResourceMgr.getString("ErrImportColumnNotFound").replace("%name%", col);
+						String msg = ResourceMgr.getFormattedString("ErrImportColumnNotFound", col, table);
 						result.addMessage(msg);
 						LogMgr.logError("WbImport.execute()", msg, null);
 						return result;

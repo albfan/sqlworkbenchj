@@ -47,7 +47,7 @@ public class WbExportTest
 {
 	private String basedir;
 	private final int rowcount = 10;
-	private WbExport exportCmd = new WbExport();
+	private WbExport exportCmd;
 	private WbConnection connection;
 	private TestUtil util;
 	
@@ -60,6 +60,7 @@ public class WbExportTest
 			util = new TestUtil(testName);
 			util.prepareEnvironment();
 			this.basedir = util.getBaseDir();
+			exportCmd = new WbExport();
 		}
 		catch (Exception e)
 		{
@@ -91,12 +92,26 @@ public class WbExportTest
 		assertTrue(exp.isTypeValid("sqlUpdate"));
 		assertTrue(exp.isTypeValid("sqlInsert"));
 		assertTrue(exp.isTypeValid("SQLDeleteInsert"));
-//		assertTrue(exp.isTypeValid("xls"));
 		assertTrue(exp.isTypeValid("xlsx"));
 		assertTrue(exp.isTypeValid("ods"));
 		assertFalse(exp.isTypeValid("calc"));
 		assertFalse(exp.isTypeValid("excel"));
 		assertFalse(exp.isTypeValid("odt"));
+	}
+
+	public void testPrefix()
+		throws Exception
+	{
+		StatementRunnerResult result = exportCmd.execute(
+			"wbexport -sourceTable=person,junit_test " +
+			"-sourceTablePrefix=public. " +
+			"-outputDir='" +  util.getBaseDir() + "' " +
+			"-type=text");
+//		String msg = result.getMessageBuffer().toString();
+		File person = new File(util.getBaseDir(), "person.txt");
+		assertTrue(person.exists());
+		File test = new File(util.getBaseDir(), "junit_test.txt");
+		assertTrue(test.exists());
 	}
 
 	public void testAppendSQL()

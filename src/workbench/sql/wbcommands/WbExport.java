@@ -67,6 +67,7 @@ public class WbExport
 	public static final String ARG_XML_VERSION = "xmlVersion";
 	public static final String ARG_ROWNUM = "rowNumberColumn";
 	public static final String ARG_EMPTY_RESULTS = "writeEmptyResults";
+	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
 	private String exportTypes = null;
 	
 	public WbExport()
@@ -88,6 +89,7 @@ public class WbExport
 		}
 		cmdLine.addArgument("type", StringUtil.stringToList(exportTypes));
 		cmdLine.addArgument("file");
+		cmdLine.addArgument(ARG_TABLE_PREFIX);
 		cmdLine.addArgument("title");
 		cmdLine.addArgument("table");
 		cmdLine.addArgument("quotechar");
@@ -595,7 +597,7 @@ public class WbExport
 				exporter.setContinueOnError(this.continueOnError);
 				if (tablesToExport.size() > 1 || outputdir != null)
 				{
-					exportTableList(tablesToExport, result, outputdir);
+					exportTableList(tablesToExport, result, outputdir, cmdLine.getValue(ARG_TABLE_PREFIX));
 				}
 				else
 				{
@@ -646,7 +648,7 @@ public class WbExport
 		}
 	}
 
-	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir)
+	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, String prefix)
 		throws SQLException
 	{
 		result.setSuccess();
@@ -683,10 +685,18 @@ public class WbExport
 		for (TableIdentifier tbl : tableList)
 		{
 			String fname = StringUtil.makeFilename(tbl.getTableExpression());
-			File f = new File(outdir, fname + defaultExtension);
+			WbFile f = new WbFile(outdir, fname + defaultExtension);
 			try
 			{
-				exporter.addTableExportJob(f, tbl);
+				if (StringUtil.isBlank(prefix))
+				{
+					exporter.addTableExportJob(f, tbl);
+				}
+				else
+				{
+					String sql = "SELECT * FROM " + prefix + tbl.getTableExpression();
+					exporter.addQueryJob(sql, f);
+				}
 			}
 			catch (SQLException e)
 			{
