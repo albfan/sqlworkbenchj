@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-06-21">
+<release build="-1" date="2009-06-28">
 
+  <entry dev-build="3" type="enh">
+    <description>
+      A new parameter for WbExport is available: -sourceTablePrefix that defines
+      a common prefix for all tables defined through -sourceTable. The prefix will
+      be appended to all table names without any changes.
+    </description>
+  </entry>
   <entry dev-build="2" type="enh">
     <description>
       A new option to display information about database objects is available through
@@ -44,6 +51,13 @@
       When using WbExport to generate HTML two new parameters can be used to
       specify HTML code that is added before and after the actual export data
       (-preDataHtml, -postDataHtml)
+    </description>
+  </entry>
+
+
+  <entry dev-build="3" type="fix">
+    <description>
+        The "Object Info" feature did not work on Postgres if the selected object was a view.
     </description>
   </entry>
 

@@ -154,6 +154,14 @@
 					</row>
 
 					<row>
+						<entry>-file</entry>
+						<entry>
+              The output file to which the exported data is written. This parameter is ignored if
+              <literal>-outputDir</literal> is also specified.
+						</entry>
+					</row>
+
+					<row>
 						<entry>-createDir</entry>
 						<entry>
 							If this parameter is set to true, &wb-productname; will create any
@@ -162,7 +170,7 @@
 					</row>
 
 					<row>
-						<entry>-sourcetable</entry>
+						<entry>-sourceTable</entry>
 						<entry>
 							<para>Defines a list of tables to be exported. If this
 								switch is used, <literal>-outputdir</literal> is also required
@@ -176,7 +184,8 @@
 								name which will then export all tables accessible by the
 								current user.
 							</para>
-							<para>If you want to export tables from a different user
+							<para>
+                If you want to export tables from a different user
 								or schema you can use a schema name combined with a wildcard
 								e.g. <literal> -sourcetable=otheruser.*</literal>. In this case
 								the generated output files will contain the schema name as part of the
@@ -189,9 +198,27 @@
 							</para>
 						</entry>
 					</row>
+          
+					<row>
+						<entry>-sourceTablePrefix</entry>
+						<entry>
+              <para>
+                Define a common prefix for all tables listed with <literal>-sourceTable</literal>.
+                When this parameter is specified the existence of each table is not tested any longer
+                (as it is normally done).
+              </para>
+              <para>
+                When this paarameter is specified the generated statement for exporting the table is
+                changed to a <literal>SELECT * FROM ...</literal> instead of listing all columns individually.
+              </para>
+            </entry>
+					</row>
+
+
 					<row>
 						<entry>-outputDir</entry>
-						<entry>When using the <literal>-sourcetable</literal> switch
+						<entry>
+              When using the <literal>-sourceTable</literal> switch
 							with multiple tables, this parameter is mandatory and defines
 							the directory where the generated files should be stored.
 						</entry>

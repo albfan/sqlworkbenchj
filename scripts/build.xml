@@ -188,25 +188,19 @@
     <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.gif"/>
     <echo message="${docdir}"/>
     <echo message="${imgdir}"/>
+    
     <copy overwrite="true" todir="${pdfwork}">
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
       </fileset>
 
       <filterset begintoken="@" endtoken="@">
-        <filter token="build_timestamp" value="${build_timestamp}"/>
         <filter token="BUILD_NUMBER" value="${build.number}"/>
         <filter token="IMAGE_DIR" value="${imgdir}"/>
       </filterset>
     </copy>
 
     <copy file="docbook-history.xml" todir="${pdfwork}"/>
-
-    <copy overwrite="true" todir="${pdfwork}">
-      <fileset dir="${doc}/xml">
-        <include name="*.xml"/>
-      </fileset>
-    </copy>
 
     <xslt classpathref="xalan.path"
           in="${pdfwork}/Manual.xml"
