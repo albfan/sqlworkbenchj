@@ -18,6 +18,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbObject;
 import workbench.db.DummyInsert;
 import workbench.db.DummySelect;
@@ -62,7 +63,8 @@ public class CreateDummySqlAction
 	public void executeAction(ActionEvent e)
 	{
 		List<? extends DbObject> objects = source.getSelectedObjects();
-		List<DbObject> dummy = new ArrayList<DbObject>(objects.size());
+		List<DbObject> scriptObjects = new ArrayList<DbObject>(objects.size());
+		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
 		for (DbObject dbo : objects)
 		{
 			if (dbo instanceof TableIdentifier)
@@ -70,15 +72,34 @@ public class CreateDummySqlAction
 				TableIdentifier tbl = (TableIdentifier) dbo;
 				if (scriptType.equalsIgnoreCase("select"))
 				{
-					dummy.add(new DummySelect(tbl));
+					scriptObjects.add(new DummySelect(tbl));
 				}
 				else
 				{
-					dummy.add(new DummyInsert(tbl));
+					scriptObjects.add(new DummyInsert(tbl));
+				}
+			}
+			else if (dbo instanceof ColumnIdentifier)
+			{
+				cols.add((ColumnIdentifier)dbo);
+			}
+		}
+		if (cols.size() > 0)
+		{
+			TableIdentifier tbl = source.getObjectTable();
+			if (tbl != null)
+			{
+				if (scriptType.equalsIgnoreCase("select"))
+				{
+					scriptObjects.add(new DummySelect(tbl, cols));
+				}
+				else
+				{
+					scriptObjects.add(new DummyInsert(tbl, cols));
 				}
 			}
 		}
-		ObjectScripter s = new ObjectScripter(dummy, source.getConnection());
+		ObjectScripter s = new ObjectScripter(scriptObjects, source.getConnection());
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}

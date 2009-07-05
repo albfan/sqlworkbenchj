@@ -36,7 +36,7 @@
     <note><para>
       To see table and column comments with an Oracle database, you need to
       <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
-      driver in order to see the comments.
+      driver, otherwise the driver will not return comments.
     </para></note>
     
     <para>The command supports the following parameters:</para>

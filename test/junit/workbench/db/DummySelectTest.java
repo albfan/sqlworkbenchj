@@ -11,8 +11,11 @@
  */
 package workbench.db;
 
+import java.util.ArrayList;
+import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.resource.Settings;
 
 /**
  *
@@ -45,7 +48,6 @@ public class DummySelectTest
        "       FIRSTNAME,\n" +
        "       LASTNAME\n" +
 			 "FROM PERSON;";
-			System.out.println("+++++++++++++++++++\n" + selectSql + "\n**********\n" + expected + "\n-------------------");
 			assertEquals(expected, selectSql);
 		}
 		finally
@@ -53,4 +55,32 @@ public class DummySelectTest
 			con.disconnect();
 		}
 	}
+
+	public void testSelectedColumns()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("dummyInsertGen1");
+		util.prepareEnvironment();
+		WbConnection con = util.getConnection();
+
+		try
+		{
+			TestUtil.executeScript(con,
+				"create table person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
+				"commit;");
+			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			cols.add(new ColumnIdentifier("NR"));
+
+			DummySelect select = new DummySelect(person, cols);
+			String sql = select.getSource(con).toString();
+//			System.out.println("*********\n"+sql);
+			assertTrue(sql.trim().equals("SELECT NR\nFROM PERSON;"));
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 }

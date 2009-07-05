@@ -12,8 +12,11 @@
 package workbench.db;
 
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 
 /**
@@ -32,7 +35,7 @@ public class DummyInsertTest
 	public void testGetSource()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("dropColumn");
+		TestUtil util = new TestUtil("dummyInsertGen1");
 		WbConnection con = util.getConnection();
 		
 		try
@@ -43,7 +46,7 @@ public class DummyInsertTest
 			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
 			DummyInsert insert = new DummyInsert(person);
 			String sql = insert.getSource(con).toString();
-			System.out.println(sql);
+
 			String verb = SqlUtil.getSqlVerb(sql);
 			assertEquals("INSERT", verb);
 			assertTrue(sql.indexOf("(NR_value, 'FIRSTNAME_value', 'LASTNAME_value')") > -1);
@@ -59,4 +62,30 @@ public class DummyInsertTest
 		}
 	}
 
+	public void testSelectedColumns()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("dummyInsertGen1");
+		WbConnection con = util.getConnection();
+
+		try
+		{
+			Statement stmt = con.createStatement();
+			stmt.executeUpdate("create table person (nr integer, firstname varchar(20), lastname varchar(20))");
+			con.commit();
+			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			cols.add(new ColumnIdentifier("NR"));
+			
+			DummyInsert insert = new DummyInsert(person, cols);
+			String sql = insert.getSource(con).toString();
+//			System.out.println("*********\n"+sql);
+			String le = Settings.getInstance().getInternalEditorLineEnding();
+			assertTrue(sql.trim().equals("INSERT INTO PERSON" + le + "(NR)" + le + "VALUES" + le + "(NR_value);"));
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
 }

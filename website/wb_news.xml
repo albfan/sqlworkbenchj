@@ -14,7 +14,7 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
-      <title>New ${pub.build.name} build (${pub.build.number}) released</title>
+      <title>New development build (104.3) released</title>
       <description>        <![CDATA[<p>Changes from build 104.2 to build 104.3</p><p>Enhancements</p><ul>
 <li>A new parameter for WbExport is available: -sourceTablePrefix that defines a common prefix for all tables defined through -sourceTable. The prefix will be appended to all table names without any changes.</li>
 </ul><p>Bug Fixes</p><ul>
@@ -25,10 +25,10 @@
 </ul>
 ]]>
 </description>
-      <link>${rss.url}</link>
-      <guid>sql-workbench-build-${pub.build.number}</guid>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-104.3</guid>
       <author>support@sql-workbench.net (Thomas Kellerer)</author>
-      <pubDate>Sun, 28 Jun 2009 13:09:24 +0200</pubDate>
+      <pubDate>Sun, 28 Jun 2009 20:27:14 +0200</pubDate>
     </item>
     <item>
       <title>New development build (104.2) released</title>
@@ -41,6 +41,8 @@
 <li>The -schemas parameter for WbReport was ignored.</li>
 <li>When loading a new file into the editor while an error selection was present, the selection was still shown after the new file was loaded.</li>
 </ul>
+
+
 
 
 
@@ -62,6 +64,8 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
+
 
 
 
@@ -133,6 +137,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -162,6 +168,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -176,6 +184,8 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
 
 
 
@@ -216,6 +226,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -232,6 +244,8 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
 
 
 
@@ -287,6 +301,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -302,6 +318,8 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
 
 
 
@@ -365,6 +383,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -381,6 +401,8 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
+
 
 
 

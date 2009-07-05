@@ -41,6 +41,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
@@ -144,6 +145,9 @@ public class TableDefinitionPanel
 
 		this.tableDefinition.getSelectionModel().addListSelectionListener(this);
 		this.tableDefinition.addPopupAction(this.createIndexAction, true);
+
+		tableDefinition.addPopupAction(CreateDummySqlAction.createDummyInsertAction(this, tableDefinition.getSelectionModel()), false);
+		tableDefinition.addPopupAction(CreateDummySqlAction.createDummySelectAction(this, tableDefinition.getSelectionModel()), false);
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(tableDefinition);

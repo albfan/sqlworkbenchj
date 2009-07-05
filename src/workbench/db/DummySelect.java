@@ -12,6 +12,7 @@
 package workbench.db;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -22,12 +23,18 @@ import workbench.util.StringUtil;
 public class DummySelect
 	implements DbObject
 {
-
 	private TableIdentifier table;
+	private List<ColumnIdentifier> columns;
 
 	public DummySelect(TableIdentifier tbl)
 	{
 		this.table = tbl;
+	}
+
+	public DummySelect(TableIdentifier tbl, List<ColumnIdentifier> cols)
+	{
+		this.table = tbl;
+		this.columns = new ArrayList<ColumnIdentifier>(cols);
 	}
 
 	public String getComment()
@@ -81,20 +88,22 @@ public class DummySelect
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		TableDefinition tableDef = meta.getTableDefinition(table);
 
-		List<ColumnIdentifier> columns = tableDef.getColumns();
-		if (columns == null || columns.size() == 0)
+		List<ColumnIdentifier> cols = columns;
+		if (cols == null) cols = tableDef.getColumns();
+		
+		if (cols == null || cols.size() == 0)
 		{
 			return StringUtil.EMPTY_STRING;
 		}
 
-		int colCount = columns.size();
+		int colCount = cols.size();
 		
 		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		sql.append("SELECT ");
 		for (int i = 0; i < colCount; i++)
 		{
-			String column = columns.get(i).getColumnName();
+			String column = cols.get(i).getColumnName();
 			if (i > 0)
 			{
 				sql.append(',');

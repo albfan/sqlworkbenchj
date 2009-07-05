@@ -2227,7 +2227,7 @@ public class DbMetadata
 		}
 		result.append("\n\n");
 
-		StringBuilder indexSource = this.indexReader.getIndexSource(table, aIndexDef, table.getTableName());
+		StringBuilder indexSource = getIndexReader().getIndexSource(table, aIndexDef, table.getTableName());
 
 		if (indexSource != null) result.append(indexSource);
 		if (this.dbSettings.ddlNeedsCommit())
@@ -2349,7 +2349,7 @@ public class DbMetadata
 	 */
 	public String buildIndexSource(TableIdentifier aTable, String indexName, boolean unique, List<IndexColumn> columnList)
 	{
-		return this.indexReader.buildCreateIndexSql(aTable, indexName, unique, columnList);
+		return getIndexReader().buildCreateIndexSql(aTable, indexName, unique, columnList);
 	}
 
 

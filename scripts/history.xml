@@ -3,6 +3,14 @@
 
 <release build="-1" date="2009-06-28">
 
+  <entry dev-build="4" type="enh">
+    <description>
+      In the table definition display (columns) in the DbExplorer, a new
+      popup menu item is available to create a default INSERT or SELECT
+      statement for the selected columns.
+    </description>
+  </entry>
+
   <entry dev-build="3" type="enh">
     <description>
       A new parameter for WbExport is available: -sourceTablePrefix that defines
@@ -10,6 +18,7 @@
       be appended to all table names without any changes.
     </description>
   </entry>
+
   <entry dev-build="2" type="enh">
     <description>
       A new option to display information about database objects is available through
@@ -54,6 +63,12 @@
     </description>
   </entry>
 
+  <entry dev-build="3" type="fix">
+    <description>
+        "Create index" from within the table definition display in the DbExplorer
+        was no longer working.
+    </description>
+  </entry>
 
   <entry dev-build="3" type="fix">
     <description>

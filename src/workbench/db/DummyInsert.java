@@ -11,6 +11,9 @@
  */
 package workbench.db;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import workbench.resource.Settings;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
@@ -25,10 +28,17 @@ public class DummyInsert
 	implements DbObject
 {
 	private TableIdentifier table;
-	
+	private List<ColumnIdentifier> columns;
+
 	public DummyInsert(TableIdentifier tbl)
 	{
 		this.table = tbl;
+	}
+
+	public DummyInsert(TableIdentifier tbl, List<ColumnIdentifier> cols)
+	{
+		this.table = tbl;
+		this.columns = new ArrayList<ColumnIdentifier>(cols);
 	}
 
 	public String getComment()
@@ -79,7 +89,17 @@ public class DummyInsert
 		throws SQLException
 	{
     boolean makePrepared = Settings.getInstance().getBoolProperty("workbench.sql.generate.defaultinsert.prepared", false);
-		ResultInfo info = new ResultInfo(table, con);
+		ResultInfo info = null;
+		if (this.columns == null)
+		{
+			info = new ResultInfo(table, con);
+		}
+		else
+		{
+			ColumnIdentifier[] cols = new ColumnIdentifier[columns.size()];
+			columns.toArray(cols);
+			info = new ResultInfo(cols);
+		}
 		info.setUpdateTable(table);
 		StatementFactory factory = new StatementFactory(info, con);
 		

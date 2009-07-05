@@ -81,6 +81,7 @@ import workbench.gui.actions.CopySelectedAsSqlInsertAction;
 import workbench.gui.actions.CopySelectedAsSqlUpdateAction;
 import workbench.gui.actions.CopySelectedAsTextAction;
 import workbench.gui.actions.CopyAsTextAction;
+import workbench.gui.actions.CopyColumnNameAction;
 import workbench.gui.actions.DisplayDataFormAction;
 import workbench.gui.actions.FilterDataAction;
 import workbench.gui.actions.ResetFilterAction;
@@ -1732,6 +1733,7 @@ public class WbTable
 						headerPopup.add(optimizeCol.getMenuItem());
 						headerPopup.add(optimizeAllCol.getMenuItem());
 						headerPopup.add(setColWidth.getMenuItem());
+						headerPopup.add(new CopyColumnNameAction(WbTable.this));
 						headerPopup.addSeparator();
 						headerPopup.add(new ScrollToColumnAction(WbTable.this));
 						headerPopup.addSeparator();
