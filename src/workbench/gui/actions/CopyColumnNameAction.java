@@ -31,6 +31,7 @@ public class CopyColumnNameAction
 	{
 		super();
 		this.client = aClient;
+		isConfigurable = false;
 		initMenuDefinition("MnuTxtCopyColName");
 		removeIcon();
 	}

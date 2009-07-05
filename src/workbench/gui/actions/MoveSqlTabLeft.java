@@ -25,9 +25,10 @@ public class MoveSqlTabLeft
 	public MoveSqlTabLeft(MainWindow aClient)
 	{
 		super();
-		this.client = aClient;
-		this.initMenuDefinition("MnuTxtMoveTabLeft");
-		this.setIcon(null);
+		client = aClient;
+		isConfigurable = false;
+		initMenuDefinition("MnuTxtMoveTabLeft");
+		setIcon(null);
 	}
 
 	public void executeAction(ActionEvent e)

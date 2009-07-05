@@ -31,8 +31,9 @@ public class EscAction
 	public EscAction(JDialog d, ActionListener aClient)
 	{
 		super();
-		this.client = aClient;
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0));
+		client = aClient;
+		isConfigurable = false;
+		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE,0));
 		addToInputMap(d.getRootPane());
 	}
 

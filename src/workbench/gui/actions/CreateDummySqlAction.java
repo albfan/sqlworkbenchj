@@ -51,6 +51,7 @@ public class CreateDummySqlAction
 	private CreateDummySqlAction(String key, DbObjectList client, ListSelectionModel list, String type)
 	{
 		super();
+		isConfigurable = false;
 		this.initMenuDefinition(key);
 		this.source = client;
 		this.selection = list;

@@ -26,6 +26,7 @@ public class MoveSqlTabRight
 	{
 		super();
 		this.client = aClient;
+		isConfigurable = false;
 		this.initMenuDefinition("MnuTxtMoveTabRight");
 		this.setIcon(null);
 	}

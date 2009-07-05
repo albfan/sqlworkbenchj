@@ -34,17 +34,18 @@ public class DeleteListEntryAction extends WbAction
 	public DeleteListEntryAction(FileActions aClient, String aKey)
 	{
 		super();
-		this.client = aClient;
-		this.setMenuTextByKey(aKey);
-		this.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
-		this.setIcon("Delete");
+		client = aClient;
+		isConfigurable = false;
+		setMenuTextByKey(aKey);
+		setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE,0));
+		setIcon("Delete");
 	}
 
 	public void executeAction(ActionEvent e)
 	{
 		try
 		{
-			this.client.deleteItem();
+			client.deleteItem();
 		}
 		catch (Exception ex)
 		{

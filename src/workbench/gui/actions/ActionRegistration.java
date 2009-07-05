@@ -23,8 +23,6 @@ public class ActionRegistration
 	public static void registerActions()
 	{
 		new ToggleTableSourceAction(null);
-		new MoveSqlTabLeft(null);
-		new MoveSqlTabRight(null);
 		new ReloadAction(null);
 		new CopySelectedAsTextAction(null);
 		new CopySelectedAsSqlDeleteInsertAction(null);
