@@ -143,11 +143,11 @@ public class TableDefinitionPanel
 		this.createIndexAction.setEnabled(false);
 		this.createIndexAction.initMenuDefinition("MnuTxtCreateIndex");
 
-		this.tableDefinition.getSelectionModel().addListSelectionListener(this);
-		this.tableDefinition.addPopupAction(this.createIndexAction, true);
-
-		tableDefinition.addPopupAction(CreateDummySqlAction.createDummyInsertAction(this, tableDefinition.getSelectionModel()), false);
+		tableDefinition.addPopupAction(CreateDummySqlAction.createDummyInsertAction(this, tableDefinition.getSelectionModel()), true);
 		tableDefinition.addPopupAction(CreateDummySqlAction.createDummySelectAction(this, tableDefinition.getSelectionModel()), false);
+
+		tableDefinition.getSelectionModel().addListSelectionListener(this);
+		tableDefinition.addPopupAction(this.createIndexAction, true);
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(tableDefinition);
