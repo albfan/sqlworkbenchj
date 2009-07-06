@@ -340,6 +340,8 @@ public class WbImport
 			boolean headerDefault = Settings.getInstance().getBoolProperty("workbench.import.default.header", true);
 			boolean header = cmdLine.getBoolean(ARG_CONTAINSHEADER, headerDefault);
 
+			String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
+
 			// The flag for a header lines must be specified before setting the columns
 			textParser.setContainsHeader(header);
 
@@ -355,8 +357,6 @@ public class WbImport
 					result.setFailure();
 					return result;
 				}
-
-				String filecolumns = cmdLine.getValue(ARG_FILECOLUMNS);
 
 				// read column definition from header line
 				// if no header was specified, the text parser

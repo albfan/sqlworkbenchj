@@ -839,13 +839,30 @@ public class TextFileParser
 
 				for (int sourceIndex=0; sourceIndex < sourceCount; sourceIndex++)
 				{
+					if (sourceIndex >= importColumns.size())
+					{
+						if (importRow == 0)
+						{
+							LogMgr.logWarning("TextFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the table has fewer columns");
+						}
+						continue;
+					}
 					ImportFileColumn fileCol = importColumns.get(sourceIndex);
 					if (fileCol == null) continue;
 
 					targetIndex = fileCol.getTargetIndex();
 					if (targetIndex == -1) continue;
 
+					if (sourceIndex >= lineValues.size())
+					{
+						if (importRow == 0)
+						{
+							LogMgr.logWarning("TextFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the import file has fewer columns");
+						}
+						continue;
+					}
 					String value = lineValues.get(sourceIndex);
+
 					try
 					{
 						ColumnIdentifier col = fileCol.getColumn();

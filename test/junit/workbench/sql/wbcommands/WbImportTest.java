@@ -30,6 +30,7 @@ import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
@@ -48,7 +49,7 @@ public class WbImportTest
 {
 	private TestUtil util;
 	private String basedir;
-	private WbImport importCmd = new WbImport();
+	private WbImport importCmd;
 	private WbConnection connection;
 
 	public WbImportTest(String testName)
@@ -59,6 +60,7 @@ public class WbImportTest
 			util = new TestUtil(testName);
 			util.prepareEnvironment();
 			this.basedir = util.getBaseDir();
+			importCmd = new WbImport();
 		}
 		catch (Exception e)
 		{
@@ -1105,6 +1107,62 @@ public class WbImportTest
 		}
 	}
 
+	public void testUnmatchedFileColumn()
+		throws Exception
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "partial2.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("1\tArthur");
+			out.println("2\tZaphod");
+			out.close();
+
+			StatementRunnerResult result = importCmd.execute("" +
+				"wbimport -encoding=utf8 " +
+				"-file='" + importFile.getAbsolutePath() + "' " +
+				"-type=text " +
+				"-header=false " +
+				"-continueonerror=false " +
+				"-table=junit_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from junit_test");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String fname = rs.getString(2);
+				String lname = rs.getString(3);
+				assertNull("Lastname not null for nr=" + nr, lname);
+				if (nr == 1)
+				{
+					assertEquals("Wrong lastname", "Arthur", fname);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Wrong lastname", "Zaphod", fname);
+				}
+				else
+				{
+					fail("Wrong lines imported");
+				}
+			}
+
+			rs.close();
+			stmt.close();
+			if (!importFile.delete())
+			{
+				fail("Could not delete input file: " + importFile.getCanonicalPath());
+			}
+			
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
 	public void testPartialColumnTextImport()
 		throws Exception
 	{
@@ -1148,11 +1206,10 @@ public class WbImportTest
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
 			}
-
 		}
-		catch (Exception e)
+		finally
 		{
-			fail(e.getMessage());
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
