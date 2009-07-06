@@ -34,7 +34,7 @@ public class AnsiSQLTokenMarker
 	
 	public void addDatatypes(Collection<String> types)
 	{
-		this.addKeywordList(types, Token.KEYWORD1);
+		this.addKeywordList(types, Token.DATATYPE);
 	}
 
 	public void addSqlKeyWords(Collection<String> keywords)
@@ -89,7 +89,7 @@ public class AnsiSQLTokenMarker
 	private void addDataTypes()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
-		addKeywordList(helper.getDataTypes(), Token.KEYWORD1);
+		addKeywordList(helper.getDataTypes(), Token.DATATYPE);
 	}
 
 	private void addSystemFunctions()
@@ -101,6 +101,6 @@ public class AnsiSQLTokenMarker
 	private void addOperators()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
-		addKeywordList(helper.getOperators(), Token.KEYWORD1);
+		addKeywordList(helper.getOperators(), Token.OPERATOR);
 	}
 }

@@ -127,7 +127,7 @@ public class SyntaxUtilities
 		styles[Token.KEYWORD3] = new SyntaxStyle(sett.getColor("workbench.editor.color.keyword3", new Color(0x009600)),false,false);
 		styles[Token.LITERAL1] = new SyntaxStyle(sett.getColor("workbench.editor.color.literal1", new Color(0x650099)),false,false);
 		styles[Token.LITERAL2] = new SyntaxStyle(sett.getColor("workbench.editor.color.literal2", new Color(0x650099)),false,false);
-		styles[Token.LABEL] = new SyntaxStyle(sett.getColor("workbench.editor.color.label", new Color(0x990033)),false,true);
+		styles[Token.DATATYPE] = new SyntaxStyle(sett.getColor("workbench.editor.color.datatype", new Color(0x990033)),false,false);
 		styles[Token.OPERATOR] = new SyntaxStyle(sett.getColor("workbench.editor.color.operator", Color.BLACK),false,false);
 		styles[Token.INVALID] = new SyntaxStyle(sett.getColor("workbench.editor.color.invalid", Color.RED),false,true);
 		

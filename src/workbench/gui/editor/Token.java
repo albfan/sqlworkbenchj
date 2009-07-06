@@ -52,7 +52,7 @@ public class Token
 	 * Label token id. This can be used to mark labels
 	 * (eg, C mode uses this to mark ...: sequences)
 	 */
-	public static final byte LABEL = 5;
+	public static final byte DATATYPE = 5;
 
 	/**
 	 * Keyword 1 token id. This can be used to mark a
