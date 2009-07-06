@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
@@ -27,16 +28,16 @@ import workbench.util.SqlUtil;
  *
  * @author support@sql-workbench.net
  */
-public class WbSchemaDiffTest 
-	extends junit.framework.TestCase
+public class WbSchemaDiffTest
+	extends WbTestCase
 {
 	private TestUtil util;
-	
+
 	public WbSchemaDiffTest(String testName)
 	{
 		super(testName);
 	}
-	
+
 	public void testTreatViewAsTable()
 		throws Exception
 	{
@@ -68,12 +69,12 @@ public class WbSchemaDiffTest
 
 		FileReader in = new FileReader(output);
 		String xml = FileUtil.readCharacters(in);
-		
+
 		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='V_PERSON']/add-column/column-def[@name='LASTNAME'])");
 		assertEquals("Incorrect table count", "1", value);
 		assertEquals("Connections not closed", 0, ConnectionMgr.getInstance().getOpenCount());
 	}
-	
+
 	public void testBaseDiff()
 		throws Exception
 	{
@@ -133,12 +134,12 @@ public class WbSchemaDiffTest
 		throws SQLException, ClassNotFoundException
 	{
 		util = new TestUtil("schemaDiffTest");
-		
+
 		WbConnection source = util.getConnection(new File(util.getBaseDir(), "source"), "source", false);
 		WbConnection target = util.getConnection(new File(util.getBaseDir(), "target"), "target", false);
 
 		Statement stmt = null;
-		
+
 		try
 		{
 			stmt = source.createStatement();
@@ -153,13 +154,13 @@ public class WbSchemaDiffTest
 			stmt.executeUpdate("CREATE sequence seq_two  increment by 5");
 			stmt.executeUpdate("CREATE sequence seq_three");
 			SqlUtil.closeStatement(stmt);
-			
+
 			stmt = target.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(50), lastname varchar(100))");
 			stmt.executeUpdate("create table address (address_id integer primary key, street varchar(10), city varchar(100), pone varchar(50), remark varchar(500))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
-			
+
 			stmt.executeUpdate("CREATE VIEW something AS SELECT * FROM address");
 
 			stmt.executeUpdate("CREATE sequence seq_one");

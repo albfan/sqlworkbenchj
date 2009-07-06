@@ -839,14 +839,6 @@ public class TextFileParser
 
 				for (int sourceIndex=0; sourceIndex < sourceCount; sourceIndex++)
 				{
-					if (sourceIndex >= importColumns.size())
-					{
-						if (importRow == 0)
-						{
-							LogMgr.logWarning("TextFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the table has fewer columns");
-						}
-						continue;
-					}
 					ImportFileColumn fileCol = importColumns.get(sourceIndex);
 					if (fileCol == null) continue;
 
@@ -855,6 +847,7 @@ public class TextFileParser
 
 					if (sourceIndex >= lineValues.size())
 					{
+						// Log this warning only onec
 						if (importRow == 0)
 						{
 							LogMgr.logWarning("TextFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the import file has fewer columns");

@@ -11,16 +11,15 @@
  */
 package workbench.db;
 
-import junit.framework.TestCase;
 import workbench.TestUtil;
-import workbench.resource.Settings;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class TableSelectBuilderTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public TableSelectBuilderTest(String testName)
@@ -31,9 +30,7 @@ public class TableSelectBuilderTest
 	public void testBuildSelect()
 		throws Exception
 	{
-		Settings.getInstance();
-		
-		TestUtil util = new TestUtil("SelectBuilder");
+		TestUtil util = getTestUtil();
 		WbConnection con = util.getConnection();
 		TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20))");
 
@@ -49,7 +46,7 @@ public class TableSelectBuilderTest
 		assertEquals(expected, sql);
 
 		dbconfig.setDataTypeExpression("varchar", "upper(" + TableSelectBuilder.COLUMN_PLACEHOLDER + ")");
-		
+
 		sql = builder.getSelectForTable(tbl);
 		expected = "SELECT NR,\n" +
 			"       upper(FIRSTNAME),\n" +
@@ -68,7 +65,7 @@ public class TableSelectBuilderTest
 			"FROM PERSON";
 		assertEquals(expected, sql);
 	}
-	
+
 	public void testCleanDataType()
 	{
 		TableSelectBuilder builder = new TableSelectBuilder(null);

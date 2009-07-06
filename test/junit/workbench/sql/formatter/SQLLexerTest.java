@@ -13,13 +13,14 @@ package workbench.sql.formatter;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class SQLLexerTest extends TestCase
+public class SQLLexerTest 
+	extends WbTestCase
 {
 	
 	public SQLLexerTest(String testName)

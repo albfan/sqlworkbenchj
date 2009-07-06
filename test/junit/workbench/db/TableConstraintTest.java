@@ -1,23 +1,23 @@
 /*
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 package workbench.db;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class TableConstraintTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public TableConstraintTest(String testName)

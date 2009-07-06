@@ -10,14 +10,14 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class DurationFormatterTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public DurationFormatterTest(String testName)
@@ -32,7 +32,7 @@ public class DurationFormatterTest
 		String s = f.getDurationAsSeconds(millis);
 		assertEquals("1.5s", s);
 
-		millis = DurationFormatter.ONE_SECOND * 102 + (DurationFormatter.ONE_SECOND/2);
+		millis = DurationFormatter.ONE_SECOND * 102 + (DurationFormatter.ONE_SECOND / 2);
 		s = s = f.getDurationAsSeconds(millis);
 		assertEquals("102.5s", s);
 
@@ -68,5 +68,4 @@ public class DurationFormatterTest
 		s = f.formatDuration(millis, true);
 		assertEquals("1m 0s", s);
 	}
-	
 }

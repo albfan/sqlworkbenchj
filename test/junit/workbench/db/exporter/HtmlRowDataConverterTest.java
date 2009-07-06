@@ -12,8 +12,8 @@
 package workbench.db.exporter;
 
 import java.sql.Types;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
@@ -24,7 +24,7 @@ import workbench.util.ValueConverter;
  * @author support@sql-workbench.net
  */
 public class HtmlRowDataConverterTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public HtmlRowDataConverterTest(String testName)
@@ -47,12 +47,12 @@ public class HtmlRowDataConverterTest
 		converter.setResultInfo(info);
 		converter.setCreateFullPage(true);
 		converter.setPageTitle("Unit Test");
-		
+
 		StrBuffer header = converter.getStart();
 		assertNotNull(header);
 		StrBuffer end = converter.getEnd(1);
 		assertNotNull(end);
-		
+
 		RowData data = new RowData(info);
 		data.setValue(0, "char_column_data");
 		data.setValue(1, new Integer(42));
@@ -67,7 +67,7 @@ public class HtmlRowDataConverterTest
 
 		String title = TestUtil.getXPathValue(html, "/html/head/title");
 		assertEquals("Unit Test", title);
-		
+
 		String colValue = TestUtil.getXPathValue(html, "/html/body/table/tr[2]/td[1]/text()");
 		assertEquals(colValue, data.getValue(0));
 

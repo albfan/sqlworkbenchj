@@ -13,8 +13,8 @@ package workbench.storage;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
@@ -22,7 +22,8 @@ import workbench.util.SqlUtil;
  *
  * @author support@sql-workbench.net
  */
-public class RowDataTest extends TestCase
+public class RowDataTest 
+	extends WbTestCase
 {
 
 	public RowDataTest(String testName)
@@ -33,7 +34,7 @@ public class RowDataTest extends TestCase
 	public void testTrimCharData()
 		throws Exception
 	{
-		TestUtil util = new TestUtil(getName());
+		TestUtil util = getTestUtil();
 		WbConnection  con = util.getHSQLConnection("charTest");
 
 		// HSQLDB does not pad a CHAR column to the defined length as defined

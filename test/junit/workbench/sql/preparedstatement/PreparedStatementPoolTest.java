@@ -21,9 +21,10 @@ import workbench.db.WbConnection;
  *
  * @author support@sql-workbench.net
  */
-public class PreparedStatementPoolTest extends TestCase
+public class PreparedStatementPoolTest
+	extends TestCase
 {
-	
+
 	public PreparedStatementPoolTest(String testName)
 	{
 		super(testName);
@@ -46,22 +47,22 @@ public class PreparedStatementPoolTest extends TestCase
 
 			added = pool.addPreparedStatement("select * from prep_test where name = '?'");
 			assertEquals("Statement without parameters was added", false, added);
-			
+
 			String insert = "insert into prep_test (nr, name) values (?,?)";
 			added = pool.addPreparedStatement(insert);
 			assertEquals("INSERT statement was not added", true, added);
-			
+
 			String update = "update prep_test set name = 'test' where nr = ?";
 			added = pool.addPreparedStatement(update);
 			assertEquals("UPDATE statement was not added", true, added);
-			
+
 			StatementParameters p = pool.getParameters(insert);
 			assertEquals("Incorrect number of parameters", 2, p.getParameterCount());
 			assertEquals("Incorrect first parameter type", java.sql.Types.INTEGER, p.getParameterType(0));
 			assertEquals("Incorrect second parameter type", java.sql.Types.VARCHAR, p.getParameterType(1));
-			
+
 			p = pool.getParameters(update);
-			assertEquals("Incorrect number of parameters", 1, p.getParameterCount());			
+			assertEquals("Incorrect number of parameters", 1, p.getParameterCount());
 			assertEquals("Incorrect parameter type", java.sql.Types.INTEGER, p.getParameterType(0));
 		}
 		catch (Exception e)
@@ -75,5 +76,5 @@ public class PreparedStatementPoolTest extends TestCase
 		}
 	}
 
-	
+
 }

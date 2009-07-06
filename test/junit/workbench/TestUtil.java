@@ -67,6 +67,7 @@ public class TestUtil
 	public TestUtil(String name)
 	{
 		this(name, true);
+		System.setProperty("workbench.log.console", "false");
 	}
 
 	/**

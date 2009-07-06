@@ -13,14 +13,14 @@ package workbench.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.*;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class CsvLineParserTest 
-	extends TestCase
+	extends WbTestCase
 {
 	
 	public CsvLineParserTest(String testName)

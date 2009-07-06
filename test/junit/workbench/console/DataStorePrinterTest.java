@@ -14,8 +14,7 @@ package workbench.console;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Types;
-import junit.framework.TestCase;
-import workbench.resource.Settings;
+import workbench.WbTestCase;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
@@ -24,7 +23,7 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  */
 public class DataStorePrinterTest
-	extends TestCase
+	extends WbTestCase
 {
 	public DataStorePrinterTest(String testName)
 	{

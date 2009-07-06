@@ -28,9 +28,10 @@ import workbench.util.WbFile;
  *
  * @author support@sql-workbench.net
  */
-public class WbManagerTest extends TestCase
+public class WbManagerTest
+	extends TestCase
 {
-	
+
 	public WbManagerTest(String testName)
 	{
 		super(testName);
@@ -41,10 +42,10 @@ public class WbManagerTest extends TestCase
 		String umlauts = "\u00f6\u00e4\u00fc";
 		TestUtil util = new TestUtil(getName());
 		util.emptyBaseDirectory();
-		
+
 		WbFile logfile = new WbFile(util.getBaseDir(), "junit_wb_test.log");
 		System.setProperty("workbench.system.doexit", "false");
-		
+
 		try
 		{
 
@@ -53,9 +54,9 @@ public class WbManagerTest extends TestCase
 				"create table batch_test (nr integer, name varchar(100));\n"  +
 				"insert into batch_test (nr, name) values (1, '" + umlauts + "');\n" +
 				"commit;\n";
-			
+
 			TestUtil.writeFile(scriptFile, script, "UTF-8");
-			
+
 			File db = new File(util.getBaseDir(), getName());
 			String[] args = { "-" + AppArguments.ARG_NOSETTNGS,
 												"-configdir=" + util.getBaseDir(),
@@ -113,7 +114,7 @@ public class WbManagerTest extends TestCase
 		{
 			File db = new File(util.getBaseDir(), getName());
 			WbFile export = new WbFile(util.getBaseDir(), "export.txt");
-			
+
 			String[] args = { "-" + AppArguments.ARG_NOSETTNGS + " ",
 												"-driver='org.h2.Driver' -configdir='" + util.getBaseDir() + "' ",
 												"-url='jdbc:h2:" + db.getAbsolutePath() + "' ",

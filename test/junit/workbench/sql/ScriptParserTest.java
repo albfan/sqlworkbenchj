@@ -18,8 +18,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Iterator;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
@@ -30,7 +30,7 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  */
 public class ScriptParserTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public ScriptParserTest(String testName)
@@ -116,7 +116,7 @@ public class ScriptParserTest
 			f.delete();
 		}
 	}
-	
+
 	public void testEmptyStatement()
 	{
 		try
@@ -759,11 +759,11 @@ public class ScriptParserTest
 			assertEquals("select 42 from dummy", p.getCommand(0));
 			assertEquals("select 43 from dual", p.getCommand(2));
 			assertTrue(p.getCommand(1).startsWith("/* arthur's comment */\ncreate table test ( "));
-			
+
 			sql = "select 'a' from dual; -- comment'\nselect 'b' from dual;";
 			p = new ScriptParser(sql);
 			assertEquals(2, p.getSize());
-			
+
 			int pos = sql.indexOf('\n') + 1;
 			int index = p.getCommandIndexAtCursorPos(pos);
 			assertEquals(1, index);
@@ -818,7 +818,7 @@ public class ScriptParserTest
 									"select * from test;\n"+
 									"-- \u32A5\u0416\u32A5\u0416\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n"+
 									"select * from test2;\n";
-		
+
     ScriptParser parser = new ScriptParser(sql);
 
 		int count = parser.getSize();

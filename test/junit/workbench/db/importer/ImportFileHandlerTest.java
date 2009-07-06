@@ -15,13 +15,15 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.PrintWriter;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.util.ZipOutputFactory;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class ImportFileHandlerTest extends junit.framework.TestCase
+public class ImportFileHandlerTest
+	extends WbTestCase
 {
 
 	public ImportFileHandlerTest(String testName)

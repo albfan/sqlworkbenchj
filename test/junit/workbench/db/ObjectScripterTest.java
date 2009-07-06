@@ -13,14 +13,14 @@ package workbench.db;
 
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 
 /**
  * @author support@sql-workbench.net
  */
 public class ObjectScripterTest
-	extends TestCase
+	extends WbTestCase
 {
 	public ObjectScripterTest(String testName)
 	{
@@ -49,20 +49,19 @@ public class ObjectScripterTest
 
 	public void testGenerateScript()
 	{
-		
+
 		try
 		{
-			TestUtil util = new TestUtil("objectSripterTest");
-			
+			TestUtil util = getTestUtil();
 			WbConnection con = util.getConnection();
 			setupDatabase(con);
 			List<DbObject> objects = new ArrayList<DbObject>();
-			
+
 			objects.add(new SequenceDefinition(null, "TEST_SEQUENCE"));
 			TableIdentifier tbl = new TableIdentifier("PERSON");
 			tbl.setType("TABLE");
 			objects.add(tbl);
-			
+
 			tbl = new TableIdentifier("ADDRESS");
 			tbl.setType("TABLE");
 			objects.add(tbl);
@@ -71,19 +70,19 @@ public class ObjectScripterTest
 			ObjectScripter scripter = new ObjectScripter(objects, con);
 			String script = scripter.getScript();
 			System.out.println(script);
-			
+
 			int personPos = script.indexOf("CREATE TABLE PERSON");
 			assertTrue(personPos > -1);
-			
+
 			int addressPos = script.indexOf("CREATE TABLE ADDRESS");
 			assertTrue(addressPos > -1);
-			
+
 			int seqPos = script.indexOf("CREATE SEQUENCE TEST_");
 			assertTrue(seqPos > -1);
-			
+
 			assertTrue(personPos > seqPos);
 			assertTrue(addressPos > seqPos);
-			
+
 			int fkPos = script.indexOf("CONSTRAINT FK_ADR_PER");
 			assertTrue(fkPos > personPos);
 			assertTrue(fkPos > addressPos);

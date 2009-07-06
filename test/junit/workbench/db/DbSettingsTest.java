@@ -11,13 +11,13 @@
  */
 package workbench.db;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  * @author support@sql-workbench.net
  */
 public class DbSettingsTest
-	extends TestCase
+	extends WbTestCase
 {
 	public DbSettingsTest(String testName)
 	{

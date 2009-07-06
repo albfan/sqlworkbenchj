@@ -14,8 +14,8 @@ package workbench.db.importer;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
@@ -25,14 +25,15 @@ import workbench.util.ValueConverter;
  *
  * @author support@sql-workbench.net
  */
-public class ConstantColumnValuesTest extends TestCase
+public class ConstantColumnValuesTest
+	extends WbTestCase
 {
-	
+
 	public ConstantColumnValuesTest(String testName)
 	{
 		super(testName);
 	}
-	
+
 	public void testGetStaticValues()
 	{
 		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
@@ -54,7 +55,7 @@ public class ConstantColumnValuesTest extends TestCase
 			assertEquals("'bla'", values.getValue(4));
 			assertEquals("current_timestamp", values.getFunctionLiteral(5));
 			assertEquals("${ant.var}", values.getValue(6));
-			
+
 			assertEquals(true, values.removeColumn(new ColumnIdentifier("t2", java.sql.Types.VARCHAR)));
 			assertEquals(false, values.removeColumn(new ColumnIdentifier("kkk", java.sql.Types.VARCHAR)));
 		}
@@ -65,7 +66,7 @@ public class ConstantColumnValuesTest extends TestCase
 		}
 	}
 
-	
+
 	public void testInitFromDb()
 	{
 		TestUtil util = new TestUtil("testConstants");
@@ -94,5 +95,5 @@ public class ConstantColumnValuesTest extends TestCase
 			try { con.disconnect(); } catch (Throwable th) {}
 		}
 	}
-	
+
 }

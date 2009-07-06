@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -24,7 +25,8 @@ import workbench.util.StrBuffer;
  *
  * @author support@sql-workbench.net
  */
-public class TextRowDataConverterTest extends junit.framework.TestCase
+public class TextRowDataConverterTest 
+	extends WbTestCase
 {
 	
 	public TextRowDataConverterTest(String testName)

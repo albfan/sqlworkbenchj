@@ -12,13 +12,14 @@
 package workbench.util;
 
 import java.util.Date;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class UpdateCheckTest extends TestCase
+public class UpdateCheckTest 
+	extends WbTestCase
 {
 	
 	public UpdateCheckTest(String testName)

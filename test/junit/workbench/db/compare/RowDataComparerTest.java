@@ -11,7 +11,7 @@
  */
 package workbench.db.compare;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.SqlRowDataConverter;
@@ -24,7 +24,7 @@ import workbench.util.SqlUtil;
  * @author support@sql-workbench.net
  */
 public class RowDataComparerTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public RowDataComparerTest(String testName)
@@ -34,7 +34,6 @@ public class RowDataComparerTest
 
 	public void testGetMigrationSql()
 	{
-		System.out.println("getMigrationSql");
 		ColumnIdentifier[] cols = new ColumnIdentifier[3];
 		cols[0] = new ColumnIdentifier("ID");
 		cols[0].setIsPkColumn(true);

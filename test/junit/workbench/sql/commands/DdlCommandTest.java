@@ -11,8 +11,8 @@
  */
 package workbench.sql.commands;
 
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 
@@ -20,10 +20,10 @@ import workbench.sql.StatementRunnerResult;
  *
  * @author support@sql-workbench.net
  */
-public class DdlCommandTest 
-	extends TestCase
+public class DdlCommandTest
+	extends WbTestCase
 {
-	
+
 	public DdlCommandTest(String testName)
 	{
 		super(testName);
@@ -40,13 +40,13 @@ public class DdlCommandTest
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertTrue(result.isSuccess());
-			
+
 			runner.setIgnoreDropErrors(false);
 			runner.setUseSavepoint(true);
 			runner.runStatement(sql);
 			result = runner.getResult();
 			assertFalse(result.isSuccess());
-			
+
 		}
 		catch (Exception e)
 		{
@@ -55,5 +55,5 @@ public class DdlCommandTest
 		}
 	}
 
-	
+
 }

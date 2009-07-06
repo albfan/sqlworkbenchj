@@ -12,7 +12,7 @@
 package workbench.gui.sql;
 
 import java.sql.Types;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.storage.ResultInfo;
 
@@ -21,7 +21,7 @@ import workbench.storage.ResultInfo;
  * @author support@sql-workbench.net
  */
 public class ImportStringVerifierTest
-	extends TestCase
+	extends WbTestCase
 {
 	public ImportStringVerifierTest(String testName)
 	{
@@ -39,7 +39,7 @@ public class ImportStringVerifierTest
 			ResultInfo info = new ResultInfo(new ColumnIdentifier[]{id, lname, fname});
 			ImportStringVerifier v = new ImportStringVerifier(data, info);
 			assertTrue(v.checkData());
-			
+
 			data = "1\tArthur\tDent";
 			v = new ImportStringVerifier(data, info);
 			// If the number of columns matches, it is assumed the data is "OK"

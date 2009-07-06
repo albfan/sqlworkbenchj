@@ -14,8 +14,8 @@ package workbench.sql.wbcommands;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
@@ -29,7 +29,7 @@ import workbench.util.SqlUtil;
  * @author support@sql-workbench.net
  */
 public class WbCopyTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public WbCopyTest(String testName)
@@ -42,7 +42,7 @@ public class WbCopyTest
 		WbCopy copy = new WbCopy();
 		assertFalse(copy.isConnectionRequired());
 	}
-	
+
 	public void testCopyWithSyncDelete() throws Exception
 	{
 		try
@@ -660,7 +660,7 @@ public class WbCopyTest
 				System.out.println(msg);
 				System.out.println("***********");
 			}
-			
+
 			assertEquals("Copy not successful", true, result.isSuccess());
 
 			ResultSet rs = stmt.executeQuery("select tnr, tfirstname, tlastname from target_data");
@@ -671,7 +671,7 @@ public class WbCopyTest
 				int id = rs.getInt(1);
 				String fname = rs.getString(2);
 				String lname = rs.getString(3);
-				
+
 				if (id == 1)
 				{
 					assertEquals("Incorrect firstname", "Arthur", fname);
@@ -707,7 +707,7 @@ public class WbCopyTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	public void testCopySchema()
 	{
 		try
@@ -806,7 +806,7 @@ public class WbCopyTest
 			result = copyCmd.execute(sql);
 			msg = result.getMessageBuffer().toString();
 			assertEquals(msg, true, result.isSuccess());
-			
+
 			rs = tstmt.executeQuery("select nr, lastname, firstname from person");
 			while (rs.next())
 			{
@@ -842,7 +842,7 @@ public class WbCopyTest
 		int dummy = 5;
 	}
 
-	
+
 	public void testCreateTarget()
 	{
 		try

@@ -14,8 +14,8 @@ package workbench.db.exporter;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
@@ -26,7 +26,7 @@ import workbench.util.ValueConverter;
  * @author support@sql-workbench.net
  */
 public class XlsXMLRowDataConverterTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public XlsXMLRowDataConverterTest(String testName)
@@ -76,7 +76,7 @@ public class XlsXMLRowDataConverterTest
 		String xml = header.toString() + row + footer.toString();
 //		System.out.println(xml);
 //		System.out.println("-----------------------------------------");
-		
+
 		Map<String, String> nsMap = new HashMap<String, String>();
 		nsMap.put("mso", "urn:schemas-microsoft-com:office:spreadsheet");
 
@@ -89,7 +89,7 @@ public class XlsXMLRowDataConverterTest
 
 		colValue = TestUtil.getXPathValue(xml, "/mso:Workbook/mso:Worksheet/mso:Table/mso:Row[1]/mso:Cell[3]/mso:Data/text()", nsMap);
 		assertEquals("date_col", colValue);
-		
+
 		colValue = TestUtil.getXPathValue(xml, "/mso:Workbook/mso:Worksheet/mso:Table/mso:Row[1]/mso:Cell[4]/mso:Data/text()", nsMap);
 		assertEquals("ts_col", colValue);
 
@@ -99,7 +99,7 @@ public class XlsXMLRowDataConverterTest
 
 		colValue = TestUtil.getXPathValue(xml, "/mso:Workbook/mso:Worksheet/mso:Table/mso:Row[2]/mso:Cell[2]/mso:Data/text()", nsMap);
 		assertEquals(data.getValue(1).toString(), colValue);
-		
+
 		colValue = TestUtil.getXPathValue(xml, "/mso:Workbook/mso:Worksheet/mso:Table/mso:Row[2]/mso:Cell[3]/mso:Data/text()", nsMap);
 		assertEquals("2008-07-23T00:00:00", colValue);
 

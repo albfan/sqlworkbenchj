@@ -11,14 +11,15 @@
  */
 package workbench.gui.completion;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class SelectAnalyzerTest extends TestCase
+public class SelectAnalyzerTest
+	extends WbTestCase
 {
 
 	public SelectAnalyzerTest(String testName)

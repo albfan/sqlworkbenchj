@@ -12,8 +12,8 @@
 package workbench.db.exporter;
 
 import java.sql.Types;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
@@ -24,7 +24,7 @@ import workbench.util.ValueConverter;
  * @author support@sql-workbench.net
  */
 public class XmlRowDataConverterTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public XmlRowDataConverterTest(String testName)
@@ -47,7 +47,7 @@ public class XmlRowDataConverterTest
 		converter.setResultInfo(info);
 		StrBuffer header = converter.getStart();
 		assertNotNull(header);
-		
+
 		RowData data = new RowData(info);
 		data.setValue(0, "char_column_data");
 		data.setValue(1, new Integer(42));
@@ -61,22 +61,22 @@ public class XmlRowDataConverterTest
 //		System.out.println(xml);
 		String colValue = TestUtil.getXPathValue(xml, "/row-data[@row-num='1']/column-data[@index='0']/text()");
 		assertEquals(data.getValue(0), colValue);
-		
+
 		colValue = TestUtil.getXPathValue(xml, "/row-data[@row-num='1']/column-data[@index='1']/text()");
 		assertEquals(data.getValue(1).toString(), colValue);
-		
+
 		colValue = TestUtil.getXPathValue(xml, "/row-data[@row-num='1']/column-data[@index='2']/text()");
 		assertEquals("2008-07-23", colValue);
 
 		colValue = TestUtil.getXPathValue(xml, "/row-data[@row-num='1']/column-data[@index='2']/@longValue");
 		assertEquals("1216764000000", colValue);
-		
+
 		colValue = TestUtil.getXPathValue(xml, "/row-data[@row-num='1']/column-data[@index='3']/text()");
 		assertEquals("2008-07-23 13:42:01", colValue);
-		
+
 		colValue = TestUtil.getXPathValue(xml, "/row-data[@row-num='1']/column-data[@index='3']/@longValue");
 		assertEquals("1216813321000", colValue);
 	}
-	
+
 }
 

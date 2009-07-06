@@ -11,13 +11,14 @@
  */
 package workbench.util;
 
-import junit.framework.*;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class LobFileParameterParserTest extends TestCase
+public class LobFileParameterParserTest 
+	extends WbTestCase
 {
 	
 	public LobFileParameterParserTest(String testName)

@@ -11,6 +11,7 @@
  */
 package workbench;
 
+import java.io.IOException;
 import junit.framework.TestCase;
 
 /**
@@ -22,14 +23,23 @@ public class WbTestCase
 	public WbTestCase(String testName)
 	{
 		super(testName);
+		System.setProperty("workbench.log.console", "false");
 	}
 
 	protected TestUtil getTestUtil()
 	{
 		TestUtil util = new TestUtil(getName());
+		try
+		{
+			util.prepareEnvironment();
+		}
+		catch (IOException io)
+		{
+			io.printStackTrace();
+		}
 		return util;
 	}
-	
+
 	protected TestUtil getTestUtil(String method)
 	{
 		return new TestUtil(getName() + "_" + "method");

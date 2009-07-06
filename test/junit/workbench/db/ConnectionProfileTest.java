@@ -12,18 +12,17 @@
 package workbench.db;
 
 import java.awt.Color;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 import workbench.sql.DelimiterDefinition;
 
 /**
  * @author support@sql-workbench.net
  */
 public class ConnectionProfileTest
-	extends TestCase
+	extends WbTestCase
 {
 	public ConnectionProfileTest(String testName)
 	{
@@ -68,15 +67,15 @@ public class ConnectionProfileTest
 		assertTrue(copy.getTrimCharData());
 		assertTrue(copy.getIncludeNullInInsert());
 		assertTrue(copy.getRemoveComments());
-		
+
 		assertEquals(42, copy.getIdleTime());
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());
 		assertTrue(copy.isHideWarnings());
-		
+
 		assertEquals("drop database", old.getPostConnectScript());
 		assertEquals("shutdown abort", old.getPreDisconnectScript());
-		
+
 		DelimiterDefinition delim = copy.getAlternateDelimiter();
 		assertNotNull(delim);
 		assertEquals("/", delim.getDelimiter());
@@ -87,7 +86,7 @@ public class ConnectionProfileTest
 		copy = old.createCopy();
 		assertNull(copy.getAlternateDelimiter());
 	}
-	
+
 	public void testProps()
 		throws Exception
 	{
@@ -98,14 +97,14 @@ public class ConnectionProfileTest
 		profile.setConfirmUpdates(true);
 		profile.setDriverName("Postgres");
 		profile.reset();
-		
+
 		Properties props = new Properties();
 		props.setProperty("remarksReporting", "true");
 		profile.setConnectionProperties(props);
 		assertTrue(profile.isChanged());
 		profile.setCopyExtendedPropsToSystem(true);
 		assertTrue(profile.isChanged());
-		
+
 		profile.setAutocommit(true);
 		profile.setConfirmUpdates(false);
 		assertTrue(profile.isChanged());
@@ -113,7 +112,7 @@ public class ConnectionProfileTest
 		profile.setAutocommit(true);
 		profile.setConfirmUpdates(false);
 		assertTrue(profile.isChanged());
-		
+
 		profile.setUrl("jdbc:postgres:local");
 		assertTrue(profile.isChanged());
 
@@ -124,7 +123,7 @@ public class ConnectionProfileTest
 		profile.reset();
 		profile.setHideWarnings(true);
 		assertTrue(profile.isChanged());
-		
+
 		profile.reset();
 		// Changing to a new URL has to be reflected
 		profile.setUrl("jdbc:postgres:local;someProp=myValue");
@@ -158,7 +157,7 @@ public class ConnectionProfileTest
 		assertTrue(profile.isChanged());
 		profile.setUseSeparateConnectionPerTab(true);
 		assertTrue(profile.isChanged());
-		
+
 		profile.setStoreExplorerSchema(false);
 		profile.reset();
 		profile.setStoreExplorerSchema(true);

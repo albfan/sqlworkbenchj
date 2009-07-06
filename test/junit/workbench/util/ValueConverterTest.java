@@ -16,14 +16,14 @@ import java.sql.Date;
 
 import java.sql.Types;
 import java.util.Calendar;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class ValueConverterTest 
-	extends TestCase
+	extends WbTestCase
 {
 	
 	public ValueConverterTest(String testName)

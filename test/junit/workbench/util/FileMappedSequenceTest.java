@@ -13,19 +13,19 @@ package workbench.util;
 
 import java.io.File;
 import java.io.Writer;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
-public class FileMappedSequenceTest 
-	extends TestCase 
+public class FileMappedSequenceTest
+	extends WbTestCase
 {
   private TestUtil util;
-	
-	public FileMappedSequenceTest(String testName) 
+
+	public FileMappedSequenceTest(String testName)
 	{
 		super(testName);
 		util = new TestUtil("ScriptParserTest");
@@ -36,52 +36,52 @@ public class FileMappedSequenceTest
   {
 		File f = new File(util.getBaseDir(), "maxtest.txt");
 		String content = "this is a test";
-    
+
 		Writer w = EncodingUtil.createWriter(f, "UTF-8", false);
 		w.write(content);
-		FileUtil.closeQuitely(w);    
+		FileUtil.closeQuitely(w);
 		FileMappedSequence sequence = new FileMappedSequence(f, "UTF-8", 57);
 		int charLength = sequence.length();
     assertEquals(content.length(), charLength);
     assertEquals(content, sequence.subSequence(0, charLength));
   }
-  
+
 	public void testLength()
 		throws Exception
 	{
 		File f = new File(util.getBaseDir(), "test.txt");
-		String content = 
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		String content =
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00F6\u00E4\u00FC\u00D6\u00C4\u00DC\u00DF" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00F6\u00E4\u00FC\u00D6\u00C4\u00DC\u00DF" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00F6\u00E4\u00FC\u00D6\u00C4\u00DC\u00DF" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00F6\u00E4\u00FC\u00D6\u00C4\u00DC\u00DF" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00F6\u00E4\u00FC\u00D6\u00C4\u00DC\u00DF" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00c3\u00b6\u00c3\u00a4\u00c3\u00bc\u00c3\u2013\u00c3\u201e\u00c3\u0153" +
-		"abcdefghijkklmnopqrstuvwxyz" + 
+		"abcdefghijkklmnopqrstuvwxyz" +
 		"\u00F6\u00E4\u00FC\u00D6\u00C4\u00DC\u00DF";
-		
+
 		Writer w = EncodingUtil.createWriter(f, "UTF-8", false);
 		w.write(content);
 		FileUtil.closeQuitely(w);
 
 		int contentLength = content.length();
-		
+
 		FileMappedSequence sequence = new FileMappedSequence(f, "UTF-8", 57);
 		int charLength = sequence.length();
 		sequence.readFirstChunk();
@@ -99,26 +99,26 @@ public class FileMappedSequenceTest
 			char c = sequence.charAt(i);
 			assertEquals("Wrong character at index: " + i, content.charAt(i), c);
 		}
-		
+
 		sequence.readPreviousChunk();
 		String value = sequence.subSequence(1,40);
 		String expected = content.substring(1, 40);
 		assertEquals(expected, value);
 		sequence.readPreviousChunk();
-			
+
 		int len = sequence.getCurrentChunkLength();
-		
+
 		value = sequence.subSequence(0, len);
 		expected = content.subSequence(0, len).toString();
 		assertEquals(expected, value);
-		
+
 		for (int chunkSize =  contentLength / 3; chunkSize < contentLength * 2; chunkSize += contentLength / 4)
 		{
 //			System.out.println("Using chunk size: " + chunkSize);
 			sequence = new FileMappedSequence(f, "UTF-8", chunkSize);
 
 			len = sequence.getCurrentChunkLength();
-			
+
 			charLength = sequence.length();
 			assertEquals(content.length(), charLength);
 			for (int i=0; i < charLength; i++)
@@ -134,14 +134,14 @@ public class FileMappedSequenceTest
 			value = sequence.subSequence(0, 30);
 			expected = content.subSequence(0, 30).toString();
 			assertEquals(expected, value);
-			
+
 			if (len < contentLength - 2)
 			{
 				value = sequence.subSequence(0, len + 1);
 				expected = content.subSequence(0, len + 1).toString();
 				assertEquals(expected, value);
 			}
-			
+
 			value = sequence.subSequence(0, contentLength - 1);
 			expected = content.subSequence(0, contentLength - 1).toString();
 			assertEquals(expected, value);
@@ -155,7 +155,7 @@ public class FileMappedSequenceTest
 				value = sequence.subSequence(len - 2, len +  2);
 				expected = content.subSequence(len - 2, len + 2).toString();
 				assertEquals(expected, value);
-			}			
+			}
 		}
 	}
 
