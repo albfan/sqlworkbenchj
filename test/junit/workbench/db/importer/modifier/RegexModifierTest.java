@@ -42,7 +42,7 @@ public class RegexModifierTest
 		assertEquals("Zaphod Beeblebronx", modified);
 
 		modified = modifier.modifyValue(lname, "Test\" value");
-		System.out.println(modified);
+//		System.out.println(modified);
 		
 	}
 }

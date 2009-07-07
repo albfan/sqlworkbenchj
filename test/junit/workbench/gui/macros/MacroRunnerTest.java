@@ -12,7 +12,7 @@
 package workbench.gui.macros;
 
 import javax.swing.JComponent;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 import workbench.sql.macros.MacroDefinition;
 
 /**
@@ -20,7 +20,7 @@ import workbench.sql.macros.MacroDefinition;
  * @author support@sql-workbench.net
  */
 public class MacroRunnerTest
-	extends TestCase	
+	extends WbTestCase
 {
 
 	public MacroRunnerTest(String testName)

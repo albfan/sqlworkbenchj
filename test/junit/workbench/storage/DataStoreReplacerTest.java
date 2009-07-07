@@ -11,13 +11,16 @@
  */
 package workbench.storage;
 
+import workbench.WbTestCase;
+
 /**
  *
  * @author support@sql-workbench.net
  */
-public class DataStoreReplacerTest extends junit.framework.TestCase
+public class DataStoreReplacerTest
+	extends WbTestCase
 {
-	
+
 	public DataStoreReplacerTest(String testName)
 	{
 		super(testName);
@@ -29,7 +32,7 @@ public class DataStoreReplacerTest extends junit.framework.TestCase
 		{
 			String[] cols = new String[] { "firstname", "lastname", "numeric" };
 			int[] types = new int[] { java.sql.Types.VARCHAR, java.sql.Types.VARCHAR, java.sql.Types.INTEGER };
-			
+
 			DataStore ds = new DataStore(cols, types);
 			for (int i = 0; i < 20; i++)
 			{
@@ -43,16 +46,16 @@ public class DataStoreReplacerTest extends junit.framework.TestCase
 			replacer.setSelectedRows(selected);
 			Position pos = replacer.find("2", true, true, false);
 			assertEquals("Value not found", new Position(2,2), pos);
-			
+
 			pos = replacer.find("5", true, true, false);
-			assertEquals("Value outside selection found", Position.NO_POSITION, pos);			
-			
+			assertEquals("Value outside selection found", Position.NO_POSITION, pos);
+
 			int replaced = replacer.replaceAll("First", "Other", selected, true, false, false);
 			assertEquals("Wrong number of values replaced", 3, replaced);
-			
+
 			Object value = ds.getValue(0, 0);
 			assertEquals("Value not replaced", "Other0", value);
-			
+
 			value = ds.getValue(6, 0);
 			assertEquals("Wrong row value replaced", "First6", value);
 		}
@@ -62,43 +65,43 @@ public class DataStoreReplacerTest extends junit.framework.TestCase
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testReplace()
 	{
 		try
 		{
 			String[] cols = new String[] { "firstname", "lastname", "numeric" };
 			int[] types = new int[] { java.sql.Types.VARCHAR, java.sql.Types.VARCHAR, java.sql.Types.INTEGER };
-			
+
 			DataStore ds = new DataStore(cols, types);
-			
+
 			int row = ds.addRow();
 			ds.setValue(row, 0, "Arthur");
 			ds.setValue(row, 1, "Dent");
 			ds.setValue(row, 2, new Integer(5));
-			
+
 			row = ds.addRow();
 			ds.setValue(row, 0, "Zaphod");
-			ds.setValue(row, 1, "Beeblebrox");			
+			ds.setValue(row, 1, "Beeblebrox");
 			ds.setValue(row, 2, new Integer(12));
 
 			int mary1Row = ds.addRow();
 			ds.setValue(mary1Row, 0, "Mary");
-			ds.setValue(mary1Row, 1, "Moviestar");			
+			ds.setValue(mary1Row, 1, "Moviestar");
 			ds.setValue(mary1Row, 2, new Integer(23));
 
 			int mary2Row= ds.addRow();
 			ds.setValue(mary2Row, 0, "Mary");
-			ds.setValue(mary2Row, 1, "Poppins");			
+			ds.setValue(mary2Row, 1, "Poppins");
 			ds.setValue(mary2Row, 2, new Integer(42));
-			
+
 			DataStoreReplacer replacer = new DataStoreReplacer(ds);
 			int replaced = replacer.replaceAll("Mary", "Yram", null, true, false, false);
 			assertEquals("Wrong number of replacements", 2, replaced);
-			
+
 			String value = ds.getValueAsString(mary1Row, 0);
 			assertEquals("Wrong new value", "Yram", value);
-			
+
 			try
 			{
 				replacer.replaceAll("42", "gaga", null, false, true, false);
@@ -107,7 +110,7 @@ public class DataStoreReplacerTest extends junit.framework.TestCase
 			catch (Exception e)
 			{
 			}
-			
+
 			value = ds.getValueAsString(mary2Row, 2);
 			assertEquals("Value was replaced", "42", value);
 
@@ -121,63 +124,63 @@ public class DataStoreReplacerTest extends junit.framework.TestCase
 			{
 				fail("Replacement threw an exception");
 			}
-			
+
 		}
 		catch (Exception e)
 		{
 			fail(e.getMessage());
 		}
 	}
-	
+
 	public void testFind()
 	{
 		try
 		{
 			String[] cols = new String[] { "firstname", "lastname", "numeric" };
 			int[] types = new int[] { java.sql.Types.VARCHAR, java.sql.Types.VARCHAR, java.sql.Types.INTEGER };
-			
+
 			DataStore ds = new DataStore(cols, types);
-			
+
 			int row = ds.addRow();
 			ds.setValue(row, 0, "Arthur");
 			ds.setValue(row, 1, "Dent");
 			ds.setValue(row, 2, new Integer(5));
-			
+
 			row = ds.addRow();
 			ds.setValue(row, 0, "Zaphod");
-			ds.setValue(row, 1, "Beeblebrox");			
+			ds.setValue(row, 1, "Beeblebrox");
 			ds.setValue(row, 2, new Integer(12));
 
 			int mary1Row = ds.addRow();
 			ds.setValue(mary1Row, 0, "Mary");
-			ds.setValue(mary1Row, 1, "Moviestar");			
+			ds.setValue(mary1Row, 1, "Moviestar");
 			ds.setValue(mary1Row, 2, new Integer(23));
 
 			int mary2Row= ds.addRow();
 			ds.setValue(mary2Row, 0, "Mary");
-			ds.setValue(mary2Row, 1, "Poppins");			
+			ds.setValue(mary2Row, 1, "Poppins");
 			ds.setValue(mary2Row, 2, new Integer(42));
-			
+
 			DataStoreReplacer instance = new DataStoreReplacer(ds);
-			
+
 			Position expResult = new Position(0,1);
 			Position result = instance.find("dent", true, false, false);
 			assertEquals("Value not found", expResult, result);
-			
-			
+
+
 			result = instance.find("gaga", true, false, false);
 			assertEquals("Value found", Position.NO_POSITION, result);
 
-			
+
 			result = instance.find("Mary", false, false, false);
 			assertEquals("First value not found", new Position(mary1Row, 0), result);
-			
+
 			result = instance.findNext();
 			assertEquals("Second value not found", new Position(mary2Row, 0), result);
-			
+
 			result = instance.find("12", true, false, false);
 			assertEquals("Numeric value not found", new Position(1,2), result);
-			
+
 			result = instance.find("M[a|o]", true, false, true);
 			assertEquals("Regex not found", new Position(2,0), result);
 			result = instance.findNext();
@@ -186,14 +189,14 @@ public class DataStoreReplacerTest extends junit.framework.TestCase
 			assertEquals("Regex not found", new Position(3,0), result);
 			result = instance.findNext();
 			assertEquals("Regex found", Position.NO_POSITION, result);
-			
+
 			result = instance.find("[1|4]2", true, false, true);
 			assertEquals("Regex not found", new Position(1,2), result);
 			result = instance.findNext();
 			assertEquals("Regex not found", new Position(mary2Row,2), result);
 			result = instance.findNext();
 			assertEquals("Regex found", Position.NO_POSITION, result);
-			
+
 		}
 		catch (Exception e)
 		{
@@ -201,6 +204,6 @@ public class DataStoreReplacerTest extends junit.framework.TestCase
 			fail(e.getMessage());
 		}
 	}
-	
+
 
 }

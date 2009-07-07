@@ -12,14 +12,14 @@
 package workbench.storage;
 
 import java.sql.Types;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  *
  * @author support@sql-workbench.net
  */
 public class ColumnRemoverTest
-	extends TestCase
+	extends WbTestCase
 {
 	public ColumnRemoverTest(String testName)
 	{
@@ -31,7 +31,7 @@ public class ColumnRemoverTest
 		String[] cols = new String[] {"NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
 		int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30,12,10,10,20};
-		
+
 		DataStore ds = new DataStore(cols, types, sizes);
 		int row = ds.addRow();
 		ds.setValue(row, 0, "Name");
@@ -56,7 +56,7 @@ public class ColumnRemoverTest
 
 		assertEquals("my comment", newDs.getValue(0, "REMARKS"));
 		assertEquals("my comment", newDs.getValue(0, 2));
-		
+
 		assertEquals("Type", newDs.getValue(0, "TYPE"));
 		assertEquals("Type", newDs.getValue(0, 1));
 	}

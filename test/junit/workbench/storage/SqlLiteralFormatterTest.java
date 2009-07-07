@@ -13,6 +13,7 @@ package workbench.storage;
 
 import java.sql.Types;
 import java.util.Calendar;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 
 /**
@@ -20,7 +21,7 @@ import workbench.db.ColumnIdentifier;
  * @author support@sql-workbench.net
  */
 public class SqlLiteralFormatterTest
-	extends junit.framework.TestCase
+	extends WbTestCase
 {
 	public SqlLiteralFormatterTest(String testName)
 	{

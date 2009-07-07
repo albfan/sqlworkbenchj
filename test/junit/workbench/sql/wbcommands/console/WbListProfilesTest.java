@@ -11,7 +11,7 @@
  */
 package workbench.sql.wbcommands.console;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.sql.StatementRunnerResult;
@@ -22,7 +22,7 @@ import workbench.util.StringUtil;
  * @author support@sql-workbench.net
  */
 public class WbListProfilesTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public WbListProfilesTest(String testName)
@@ -35,7 +35,7 @@ public class WbListProfilesTest
 		WbListProfiles list = new WbListProfiles();
 		assertFalse(list.isConnectionRequired());
 	}
-	
+
 	public void testExecute()
 		throws Exception
 	{

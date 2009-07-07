@@ -155,12 +155,12 @@ public class TableDependencySorterTest
 		tables.add(address);
 		tables.add(new TableIdentifier("some_data"));
 		List<TableIdentifier> result = sorter.sortForInsert(tables);
-		System.out.println("********************");
-		for (TableIdentifier tbl : result)
-		{
-			System.out.println(tbl.getTableName());
-		}
-		System.out.println("********************");
+//		System.out.println("********************");
+//		for (TableIdentifier tbl : result)
+//		{
+//			System.out.println(tbl.getTableName());
+//		}
+//		System.out.println("********************");
 		assertEquals(2, result.size());
 		assertTrue(person.compareNames(result.get(0)));
 		assertTrue(address.compareNames(result.get(1)));

@@ -76,7 +76,7 @@ public class ObjectInfoTest
 		assertEquals("PERSON_NAME", viewDs.getValueAsString(1, 0));
 
 		StatementRunnerResult seqInfo = info.getObjectInfo(db, "seq_id", false);
-		System.out.println(seqInfo.getSourceCommand());
+//		System.out.println(seqInfo.getSourceCommand());
 		assertTrue(seqInfo.hasDataStores());
 		assertEquals(1, seqInfo.getDataStores().get(0).getRowCount());
 	}

@@ -63,6 +63,15 @@
     </description>
   </entry>
 
+
+  <entry dev-build="4" type="fix">
+    <description>
+      When using WbImport with -header=false but now column definitions, the import
+      would fail if the table had more columns than the import file. The additional columns
+      of the table are now "ignored" as in previous versions.
+    </description>
+  </entry>
+
   <entry dev-build="3" type="fix">
     <description>
         "Create index" from within the table definition display in the DbExplorer

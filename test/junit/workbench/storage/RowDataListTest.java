@@ -11,13 +11,13 @@
  */
 package workbench.storage;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  * @author Thomas Kellerer
  */
 public class RowDataListTest
-	extends TestCase
+	extends WbTestCase
 {
 	public RowDataListTest(String testName)
 	{
@@ -30,7 +30,7 @@ public class RowDataListTest
 		{
 			RowDataList list = new RowDataList();
 			list.reset();
-			
+
 			// Make sure add() still works properly after calling reset()
 			RowData row = new RowData(2);
 			row.setValue(0, "Test");

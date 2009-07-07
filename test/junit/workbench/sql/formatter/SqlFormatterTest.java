@@ -12,8 +12,8 @@
 package workbench.sql.formatter;
 
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.resource.Settings;
 import workbench.util.CollectionBuilder;
 
@@ -22,7 +22,7 @@ import workbench.util.CollectionBuilder;
  * @author support@sql-workbench.net
  */
 public class SqlFormatterTest
-	extends TestCase
+	extends WbTestCase
 {
 	public SqlFormatterTest(String testName)
 	{
@@ -161,7 +161,7 @@ public class SqlFormatterTest
 		f.setUseLowerCaseFunctions(true);
 		f.setDBFunctions(CollectionBuilder.hashSet("RIGHT", "LEFT"));
 		String formatted = f.getFormattedSql().toString();
-		System.out.println("*******\n" + formatted + "\n**********");
+//		System.out.println("*******\n" + formatted + "\n**********");
 		String expected = "SELECT right(name,5)\nFROM person";
 		assertEquals(expected, formatted);
 	}

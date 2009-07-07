@@ -14,13 +14,13 @@ package workbench.gui.editor;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.Segment;
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  * @author support@sql-workbench.net
  */
 public class SQLTokenMarkerTest
-	extends TestCase
+	extends WbTestCase
 {
 	public SQLTokenMarkerTest(String testName)
 	{
@@ -127,7 +127,7 @@ public class SQLTokenMarkerTest
 			{
 				getLineText(doc, lineIndex, lineContent);
 				Token token = marker.markTokens(lineContent, lineIndex);
-				printTokenLine(lineContent, token);
+//				printTokenLine(lineContent, token);
 				verifyLine(expectedTokens, token, lineIndex);
 			}
 

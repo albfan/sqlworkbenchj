@@ -84,7 +84,7 @@ public class WbDescribeTableTest extends TestCase
 		assertEquals("Not enough returned", 2, data.size());
 		DataStore indexDs = data.get(1);
 		DataStorePrinter p = new DataStorePrinter(indexDs);
-		p.printTo(System.out);
+//		p.printTo(System.out);
 
 		assertEquals(1, indexDs.getRowCount());
 		assertEquals("IDX_NR", indexDs.getValue(0, "INDEX_NAME"));

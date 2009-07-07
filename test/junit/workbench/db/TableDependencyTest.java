@@ -242,7 +242,7 @@ public class TableDependencyTest
 			dep.readTreeForChildren();
 			assertEquals(false, dep.wasAborted());
 			assertNotNull("No root returned", dep.getRootNode());
-			dep.getRootNode().printAll();
+//			dep.getRootNode().printAll();
 		}
 		catch (Exception e)
 		{
