@@ -78,7 +78,7 @@ public class CommandMapper
 	private DbMetadata metaData;
 	private boolean useExecuteForSelect = false;
 	private boolean allowAbbreviated = false;
-	
+
 	public CommandMapper()
 	{
 		cmdDispatch = new HashMap<String, SqlCommand>();
@@ -118,6 +118,7 @@ public class CommandMapper
 		addCommand(new WbProcSource());
 		addCommand(new WbListTriggers());
 		addCommand(new WbTriggerSource());
+		addCommand(new WbDescribeTable());
 
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);
@@ -126,7 +127,7 @@ public class CommandMapper
 		addCommand(UpdatingCommand.INSERT);
 		addCommand(UpdatingCommand.UPDATE);
 		addCommand(UpdatingCommand.TRUNCATE);
-		
+
 		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
 		{
 			addCommand(cmd);
@@ -152,7 +153,7 @@ public class CommandMapper
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Add a new command definition during runtime.
 	 */
@@ -165,11 +166,11 @@ public class CommandMapper
 			cmdDispatch.put(longVerb, command);
 		}
 	}
-	
+
 	/**
-	 * Initialize the CommandMapper with a database connection. 
+	 * Initialize the CommandMapper with a database connection.
 	 * This will add DBMS specific commands to the internal dispatch.
-	 * 
+	 *
 	 * This method can be called multiple times.
 	 */
 	public void setConnection(WbConnection aConn)
@@ -180,11 +181,11 @@ public class CommandMapper
 		}
 		this.dbSpecificCommands.clear();
 		this.supportsSelectInto = false;
-		
+
 		if (aConn == null) return;
-		
+
 		this.metaData = aConn.getMetadata();
-		
+
 		if (metaData == null)
 		{
 			LogMgr.logError("CommandMapper.setConnection()","Received connection without metaData!", null);
@@ -194,13 +195,13 @@ public class CommandMapper
 		if (metaData.isOracle())
 		{
 			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
-			
+
 			this.cmdDispatch.put(WbCall.EXEC_VERB_LONG, wbcall);
 			this.cmdDispatch.put(WbCall.EXEC_VERB_SHORT, wbcall);
-			
+
 			AlterSessionCommand alter = new AlterSessionCommand();
 			this.cmdDispatch.put(alter.getVerb(), alter);
-			
+
 			WbFeedback echo = new WbFeedback("ECHO");
 			this.cmdDispatch.put(echo.getVerb(), echo);
 
@@ -220,16 +221,16 @@ public class CommandMapper
 			this.cmdDispatch.put(DdlCommand.RECREATE.getVerb(), DdlCommand.RECREATE);
 			this.dbSpecificCommands.add(DdlCommand.RECREATE.getVerb());
 		}
-		else if (metaData.isMySql())
+
+		if (metaData.isMySql())
 		{
-			cmdDispatch.remove(WbDescribeTable.VERB);
+			// MySQL implements its own DESCRIBE command
 			cmdDispatch.remove(WbDescribeTable.VERB_LONG);
 		}
-
-		if (!metaData.isMySql())
+		else
 		{
-			WbDescribeTable cmd = new WbDescribeTable();
-			addCommand(cmd);
+			SqlCommand cmd = cmdDispatch.get(WbDescribeTable.VERB);
+			this.cmdDispatch.put(WbDescribeTable.VERB_LONG, cmd);
 		}
 
 		if (metaData.getDbSettings().useWbProcedureCall())
@@ -252,23 +253,23 @@ public class CommandMapper
 		}
 
 		// this is stored in an instance variable for performance
-		// reasons, so we can skip the call to isSelectIntoNewTable() in 
+		// reasons, so we can skip the call to isSelectIntoNewTable() in
 		// getCommandToUse()
-		// For a single call this doesn't matter, but when executing 
+		// For a single call this doesn't matter, but when executing
 		// huge scripts the repeated call to getCommandToUse should
 		// be as quick as possible
 		this.supportsSelectInto = metaData.supportsSelectIntoNewTable();
-	}	
-	
+	}
+
 	/**
 	 * Check for a SELECT ... INTO syntax for Informix which actually
 	 * creates a table. In that case we will simply pretend it's a
 	 * CREATE statement.
 	 * In all other casese, the approriate SqlCommand from commanDispatch will be used
 	 * This is made public in order to be accessible from a JUnit test
-	 * 
+	 *
 	 * @param sql the statement to be executed
-	 * @return the instance of SqlCommand to be used to run the sql, or null if the 
+	 * @return the instance of SqlCommand to be used to run the sql, or null if the
 	 * given sql is empty or contains comments only
 	 */
 	public SqlCommand getCommandToUse(String sql)
@@ -283,7 +284,7 @@ public class CommandMapper
 			// use the generic SqlCommand implementation for this and not the SelectCommand
 			cmd = this.cmdDispatch.get("*");
 		}
-		else 
+		else
 		{
 			cmd = this.cmdDispatch.get(verb);
 		}
@@ -312,12 +313,12 @@ public class CommandMapper
 				cmd = cmdDispatch.get(lastVerb);
 			}
 		}
-		
+
 		if (cmd == null)
 		{
 			cmd = this.cmdDispatch.get("*");
 		}
 		return cmd;
 	}
-	
+
 }
