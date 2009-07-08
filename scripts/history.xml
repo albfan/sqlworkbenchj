@@ -63,6 +63,11 @@
     </description>
   </entry>
 
+  <entry dev-build="4" type="fix">
+    <description>
+      DESCRIBE is no longer handled by SQL Workbench/J when connected to a MySQL database.
+    </description>
+  </entry>
 
   <entry dev-build="4" type="fix">
     <description>

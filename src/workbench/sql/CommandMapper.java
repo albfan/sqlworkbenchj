@@ -86,7 +86,6 @@ public class CommandMapper
 
 		addCommand(new WbListTables());
 		addCommand(new WbListProcedures());
-		addCommand(new WbDescribeTable());
 		addCommand(new WbDefineVar());
 		addCommand(new WbEnableOraOutput());
 		addCommand(new WbDisableOraOutput());
@@ -191,7 +190,7 @@ public class CommandMapper
 			LogMgr.logError("CommandMapper.setConnection()","Received connection without metaData!", null);
 			return;
 		}
-		
+
 		if (metaData.isOracle())
 		{
 			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
@@ -221,7 +220,18 @@ public class CommandMapper
 			this.cmdDispatch.put(DdlCommand.RECREATE.getVerb(), DdlCommand.RECREATE);
 			this.dbSpecificCommands.add(DdlCommand.RECREATE.getVerb());
 		}
-		
+		else if (metaData.isMySql())
+		{
+			cmdDispatch.remove(WbDescribeTable.VERB);
+			cmdDispatch.remove(WbDescribeTable.VERB_LONG);
+		}
+
+		if (!metaData.isMySql())
+		{
+			WbDescribeTable cmd = new WbDescribeTable();
+			addCommand(cmd);
+		}
+
 		if (metaData.getDbSettings().useWbProcedureCall())
 		{
 			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
