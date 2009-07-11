@@ -119,6 +119,8 @@ public class ProcedureDefinition
 		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
 		if (!needParameters) return getObjectName();
 
+		if (this.procName.indexOf('(') > -1) return procName;
+
 		List<String> params = getParameterTypes(con);
 		if (params.size() == 0) return procName + "()";
 		StringBuffer result = new StringBuffer(procName.length() + params.size() * 5 + 5);
