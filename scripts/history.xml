@@ -65,6 +65,19 @@
 
   <entry dev-build="4" type="fix">
     <description>
+      Formatting a statment that used "AS ofx" for a column alias would treat AS OF as a
+      keyword and the formatted created a wrong syntax (AS OF x)
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
+      Dropping a function from within the DbExplorer generated the wrong SQL for Postgres
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
       DESCRIBE is no longer handled by SQL Workbench/J when connected to a MySQL database.
     </description>
   </entry>

@@ -136,12 +136,42 @@ import workbench.util.CharSequenceReader;
 %}
 
 
-/*
-LineTerminator = \r|\n|\r\n
-\^[ \t]*@[a-zA-Z0-9~-_.;#�+|]+{LineTerminator}\$|
-*/
+wsp = [ \r\n\t\f]+
 
-keyword=("ABORT"|
+keyword=(
+(ALTER{wsp}SESSION)|
+(CONNECT{wsp}BY)|
+(PRIMARY{wsp}KEY)|
+(FOREIGN{wsp}KEY)|
+(UNION{wsp}ALL)|
+(PARTITION{wsp}BY)|
+(GROUP{wsp}BY)|
+(ORDER{wsp}BY)|
+(PACKAGE{wsp}BODY)|
+(CREATE{wsp}OR{wsp}REPLACE)|
+(IS{wsp}NOT{wsp}NULL)|
+(FLASHBACK{wsp}ARCHIVE)|
+(MATERIALIZED{wsp}VIEW)|
+(MATERIALIZED{wsp}VIEW{wsp}LOG)|
+(START{wsp}WITH)|
+(OUTER{wsp}JOIN)|
+(CROSS{wsp}JOIN)|
+(FULL{wsp}JOIN)|
+(FULL{wsp}OUTER{wsp}JOIN)|
+(INNER{wsp}JOIN)|
+(LEFT{wsp}JOIN)|
+(LEFT{wsp}OUTER{wsp}JOIN)|
+(RIGHT{wsp}JOIN)|
+(RIGHT{wsp}OUTER{wsp}JOIN)|
+(NATURAL{wsp}JOIN)|
+(IF{wsp}NOT{wsp}EXISTS)|
+(IF{wsp}EXISTS)|
+(CHARACTER{wsp}VARYING)|
+(DISTINCT{wsp}ON)|
+(PRIMARY{wsp}KEY)|
+(SNAPSHOT{wsp}LOG)|
+(START{wsp}WITH)|
+"ABORT"|
 "ABS"|
 "ABSOLUTE"|
 "ACCESS"|
@@ -161,9 +191,7 @@ keyword=("ABORT"|
 "ARE"|
 "ARRAY"|
 "AS"|
-AS[ \t\r\n]+OF|
 "ASC"|
-"ASENSITIVE"|
 "ASSERTION"|
 "ASSIGNMENT"|
 "ASYMMETRIC"|
@@ -198,7 +226,6 @@ AS[ \t\r\n]+OF|
 "CHAR"|
 "CHAR_LENGTH"|
 "CHARACTER"|
-"CHARACTER VARYING"|
 "CHARACTER_LENGTH"|
 "CHARACTER_SET_CATALOG"|
 "CHARACTER_SET_NAME"|
@@ -227,7 +254,6 @@ AS[ \t\r\n]+OF|
 "COMMITTED"|
 "COMPLETION"|
 "CONDITION_NUMBER"|
-"CONNECT[ \t\r\n]+BY"|
 "CONNECT"|
 "CONNECTION"|
 "CONNECTION_NAME"|
@@ -290,7 +316,6 @@ AS[ \t\r\n]+OF|
 "DISCONNECT"|
 "DISPATCH"|
 "DISTINCT"|
-DISTINCT[ \t\r\n]+ON|
 "DO"|
 "DOMAIN"|
 "DOUBLE"|
@@ -499,7 +524,6 @@ DISTINCT[ \t\r\n]+ON|
 "PREORDER"|
 "PREPARE"|
 "PRESERVE"|
-"PRIMARY[ \t\r\n]+KEY"|
 "PRIOR"|
 "PRIVILEGES"|
 "PROCEDURAL"|
@@ -563,7 +587,6 @@ DISTINCT[ \t\r\n]+ON|
 "SIZE"|
 "SMALLINT"|
 "SNAPSHOT"|
-SNAPSHOT[ \t\r\n]+LOG|
 "SOURCE"|
 "SPACE"|
 "SQL"|
@@ -573,7 +596,6 @@ SNAPSHOT[ \t\r\n]+LOG|
 "SQLSTATE"|
 "SQLWARNING"|
 "START"|
-START[ \t\r\n]+WITH|
 "STATEMENT"|
 "STATIC"|
 "STATISTICS"|
@@ -655,43 +677,8 @@ START[ \t\r\n]+WITH|
 "WORK"|
 "WRITE"|
 "YEAR"|
-"ZONE"|
-ALTER[ \t\r\n]+SESSION|
-CASCADE[ \t\r\n]+CONSTRAINTS|
-PRIMARY[ \t\r\n]+KEY|
-FLASHBACK[ \t\r\n]+ARCHIVE|
-FOREIGN[ \t\r\n]+KEY|
-IS[ \t\r\n]+NULL|
-NOT[ \t\r\n]+NULL|
-IS[ \t\r\n]+NOT[ \t\r\n]+NULL|
-UNION[ \t\r\n]+ALL|
-PARTITION[ \t\r\n]+BY|
-GROUP[ \t\r\n]+BY|
-ORDER[ \t\r\n]+BY|
-NOT[ \t\r\n]+DEFERRABLE|
-INITIALLY[ \t\r\n]+DEFERRED|
-INITIALLY[ \t\r\n]+IMMEDIATE|
-EXPLAIN[ \t\r\n]+PLAN|
-PACKAGE[ \t\r\n]+BODY|
-CREATE[ \t\r\n]+OR[ \t\r\n]+REPLACE|
-MATERIALIZED[ \t\r\n]+VIEW|
-MATERIALIZED[ \t\r\n]+VIEW[ \t\r\n]+LOG|
-START[ \t\r\n]+WITH|
-OUTER[ \t\r\n]+JOIN|
-CROSS[ \t\r\n]+JOIN|
-FULL[ \t\r\n]+JOIN|
-FULL[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
-INNER[ \t\r\n]+JOIN|
-LEFT[ \t\r\n]+JOIN|
-LEFT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
-RIGHT[ \t\r\n]+JOIN|
-RIGHT[ \t\r\n]+OUTER[ \t\r\n]+JOIN|
-NATURAL[ \t\r\n]+JOIN|
-IF[ \t\r\n]+NOT[ \t\r\n]+EXISTS|
-IF[ \t\r\n]+EXISTS
+"ZONE"
 )
-
-/*[\w]+\])*/
 
 whitespace=([ \r\n\t\f])
 wbvar=(\$\[)(\&|\?)?[a-zA-Z]+(\])|(\$\{)(\&|\?)?[a-zA-Z]+(\})

@@ -36,6 +36,17 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testAsOf()
+		throws Exception
+	{
+		String sql = "select x1 as ofx from the_table;";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+		String expected = "SELECT x1 AS ofx\n" +
+			"FROM the_table;";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+	}
 	public void testSubSelect()
 		throws Exception
 	{
@@ -55,7 +66,7 @@ public class SqlFormatterTest
 		String formatted = f.getFormattedSql().toString();
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
-		
+
 		sql = "SELECT state, SUM(numorders) as numorders, SUM(pop) as pop \n" +
              "FROM ((SELECT o.state, COUNT(*) as numorders, 0 as pop \n" +
              "FROM orders o \n" +
@@ -165,7 +176,7 @@ public class SqlFormatterTest
 		String expected = "SELECT right(name,5)\nFROM person";
 		assertEquals(expected, formatted);
 	}
-	
+
 	public void testWbVars()
 		throws Exception
 	{
@@ -175,14 +186,14 @@ public class SqlFormatterTest
 //		System.out.println("*******\n" + formatted + "\n**********");
 		String expected = "SELECT *\nFROM mytable\nWHERE id IN ($[somestuff])";
 		assertEquals(expected, formatted);
-		
+
 		sql = "SELECT * FROM mytable WHERE id in ($[&somestuff])";
 		f = new SqlFormatter(sql);
 		formatted = f.getFormattedSql().toString();
 		expected = "SELECT *\nFROM mytable\nWHERE id IN ($[&somestuff])";
 		assertEquals(expected, formatted);
 	}
-	
+
 	public void testCTE()
 		throws Exception
 	{
@@ -302,7 +313,7 @@ public class SqlFormatterTest
 				"WHERE rownum <= 1000";
 		SqlFormatter f = new SqlFormatter(sql);
 		String formatted = f.getFormattedSql().toString();
-//			System.out.println("**************\n" + formatted + "\n**********\n" + expected + "\n*************");
+//		System.out.println("**************\n" + formatted + "\n------------------\n" + expected + "\n*************");
 		assertEquals(expected, formatted);
 	}
 

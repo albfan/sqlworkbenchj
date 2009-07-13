@@ -27,8 +27,20 @@ import java.util.regex.Pattern;
  * similarly, the number of characters into the input at which it ended. <br>
  */
 public class SQLToken
-	extends Token
 {
+	/**
+	 * The state of the tokenizer is undefined.
+	 */
+	public static final int UNDEFINED_STATE = -1;
+
+	/**
+	 * The initial state of the tokenizer.
+	 * Anytime the tokenizer returns to this state,
+	 * the tokenizer could be restarted from that point
+	 * with side effects.
+	 */
+
+	public static final int INITIAL_STATE = 0;
 	/**
 	 * A reserved word (keyword)
 	 */
@@ -107,6 +119,7 @@ public class SQLToken
 	 */
 	public final static int ERROR_BAD_BIT_STRING = 0xF05;
 
+
 	private final int ID;
 	private String contents;
 	private int lineNumber;
@@ -127,7 +140,7 @@ public class SQLToken
 	 */
 	public SQLToken(int ID, String contents, int lineNumber, int charBegin, int charEnd)
 	{
-		this(ID, contents, lineNumber, charBegin, charEnd, Token.UNDEFINED_STATE);
+		this(ID, contents, lineNumber, charBegin, charEnd, UNDEFINED_STATE);
 	}
 
 	/**

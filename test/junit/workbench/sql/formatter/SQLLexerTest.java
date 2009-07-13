@@ -52,6 +52,7 @@ public class SQLLexerTest
 		sql = "select ${wbvar} from '$[table]'";
 		l = getTokenList(sql);
 		assertEquals(4, l.size());
+		assertTrue(l.get(0).isReservedWord());
 		assertTrue(l.get(1).isWbVar());
 		assertTrue(l.get(2).isReservedWord());
 		assertTrue(l.get(3).isLiteral());
@@ -110,9 +111,9 @@ public class SQLLexerTest
 		
 		SQLToken t = tokens.get(0);
 		
-		assertEquals("CREATE OR REPLACE", t.getContents());
 		assertEquals(true, t.isReservedWord());
-		
+		assertEquals("CREATE OR REPLACE", t.getContents());
+
 		sql = "SELECT * FROM bla INNER JOIN blub ON (x = y)";
 		
 		tokens = getTokenList(sql);
@@ -136,91 +137,86 @@ public class SQLLexerTest
 		t = tokens.get(12);
 		assertEquals("OUTER JOIN", t.getContents());
 		assertEquals(true, t.isReservedWord());
+	}
 
-		sql = "is null\nnot null\n--next\nunion\nall\n--next\n" +
-			    "group    by\n"+
-					"order\tby\n" + 
-					"create or replace package body \n" + 
-					"materialized view\n" + 
-					"start  with\n" + 
-				  "outer \t join\n" + 
-					"cross join  full join \t full\touter join\n" + 
-					"inner join\n"+ 
+	public void testKeywords()
+	{
+		String sql = "union\nall \ngroup    by something\n"+
+					"order\tby\n" +
+					"create or replace package body \n" +
+					"materialized view\n" +
+					"start  with \n" +
+				  "outer \t join \n" +
+					"cross join  full join \t full\touter join\n" +
+					"inner join\n"+
 					"left join\n"+
 					"left        outer join\n"+
-					"right join\n" + 
-					"right \nouter\n\n join\njoin\n" + 
-					"is not null";
-		tokens = getTokenList(sql);
+					"right join\n" +
+					"right \nouter\n\n join\njoin\n";
+		
+		List<SQLToken> tokens = getTokenList(sql);
 		for (int i = 0; i < tokens.size(); i++)
 		{
-			t = tokens.get(i);
+			SQLToken t = tokens.get(i);
+			if (i != 2) assertTrue(t.isReservedWord());
 			String v = t.getContents();
 			//System.out.println(i  + ": " + v);
 			switch (i)
 			{
 				case 0:
-					assertEquals("IS NULL",v);
-					break;
-				case 1:
-					assertEquals("NOT NULL",v);
-					break;
-				case 2:
 					assertEquals("UNION ALL",v);
 					break;
-				case 3:
+				case 1:
 					assertEquals("GROUP BY",v);
 					break;
-				case 4:
+				case 3:
 					assertEquals("ORDER BY",v);
 					break;
-				case 5:
+				case 4:
 					assertEquals("CREATE OR REPLACE",v);
 					break;
-				case 6:
+				case 5:
 					assertEquals("PACKAGE BODY",v);
 					break;
-				case 7:
+				case 6:
 					assertEquals("MATERIALIZED VIEW",v);
 					break;
-				case 8:
+				case 7:
 					assertEquals("START WITH",v);
 					break;
-				case 9:
+				case 8:
 					assertEquals("OUTER JOIN",v);
 					break;
-				case 10:
+				case 9:
 					assertEquals("CROSS JOIN",v);
 					break;
-				case 11:
+				case 10:
 					assertEquals("FULL JOIN",v);
 					break;
-				case 12:
+				case 11:
 					assertEquals("FULL OUTER JOIN",v);
 					break;
-				case 13:
+				case 12:
 					assertEquals("INNER JOIN",v);
 					break;
-				case 14:
+				case 13:
 					assertEquals("LEFT JOIN",v);
 					break;
-				case 15:
+				case 14:
 					assertEquals("LEFT OUTER JOIN",v);
 					break;
-				case 16:
+				case 15:
 					assertEquals("RIGHT JOIN",v);
 					break;
-				case 17:
+				case 16:
 					assertEquals("RIGHT OUTER JOIN",v);
 					break;
-				case 18:
+				case 17:
 					assertEquals("JOIN",v);
-					break;
-				case 19:
-					assertEquals("IS NOT NULL",v);
 					break;
 			}
 		}
+
 	}
 	
 }

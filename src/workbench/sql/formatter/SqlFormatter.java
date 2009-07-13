@@ -566,7 +566,7 @@ public class SqlFormatter
 				bracketCount ++;
 			}
 			subSql.append(text);
-			t = this.lexer.getNextToken();
+			t = this.lexer.getNextToken(true, true);
 		}
 		this.appendText(subSql);
 		return t;
