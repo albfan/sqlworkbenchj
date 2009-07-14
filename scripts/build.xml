@@ -745,7 +745,7 @@
       <fileset dir="${junitdir}" includes="*.txt"/>
     </delete>
 
-    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true">
+    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${build.test}"/>

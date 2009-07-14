@@ -65,6 +65,12 @@
 
   <entry dev-build="4" type="fix">
     <description>
+      Using PostgreSQL's DELETE ... RETURNING did not work.
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
       Formatting a statment that used "AS ofx" for a column alias would treat AS OF as a
       keyword and the formatted created a wrong syntax (AS OF x)
     </description>
