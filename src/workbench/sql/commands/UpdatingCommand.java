@@ -87,17 +87,18 @@ public class UpdatingCommand extends SqlCommand
 				this.currentStatement = currentConnection.createStatement();
 			}
 
+			boolean hasResult = false;
 			if (isPrepared)
 			{
-				((PreparedStatement)this.currentStatement).executeUpdate();
+				hasResult = ((PreparedStatement)this.currentStatement).execute();
 			}
 			else
 			{
-				this.currentStatement.executeUpdate(sql);
+				hasResult = this.currentStatement.execute(sql);
 			}
 			appendSuccessMessage(result);
 			result.setSuccess();
-			processResults(result, false);
+			processResults(result, hasResult);
 			runner.releaseSavepoint();
 		}
 		catch (Exception e)
