@@ -155,6 +155,13 @@ public class ScriptParser
 		this.readScriptFromFile(f, null);
 	}
 
+	/**
+	 * Reads the script from the given file using the provided encoding.
+	 *
+	 * @param f the file to be read
+	 * @param encoding the encoding to be use. May be null
+	 * @throws IOException
+	 */
 	public void readScriptFromFile(File f, String encoding)
 		throws IOException
 	{
@@ -174,7 +181,7 @@ public class ScriptParser
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ScriptParser.readFile()", "Error reading file " + f.getAbsolutePath(), e);
+			LogMgr.logError("ScriptParser.readScriptFromFile()", "Error reading file " + f.getAbsolutePath(), e);
 			content = null;
 		}
 		finally

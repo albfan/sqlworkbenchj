@@ -694,7 +694,7 @@ public class DataStore
 	 * In some cases (and for some JDBC drivers) this might be different
 	 * than the column name, e.g. if a column alias has been specified with <tt>AS</tt>
 	 *
-	 * @param aColumn The index of the column in this DataStore. The first column index is 0
+	 * @param col The index of the column in this DataStore. The first column index is 0
 	 * @return The display label of the column
 	 * @see ResultInfo#getColumnDisplayName(int) 
 	 */

@@ -18,7 +18,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Action to close the current workspace
- * @see workbench.gui.MainWindow#closeWorkspace()
+ * @see workbench.gui.MainWindow#closeWorkspace(boolean) 
  * @author  support@sql-workbench.net
  */
 public class CloseWorkspaceAction extends WbAction

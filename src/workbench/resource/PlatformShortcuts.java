@@ -103,8 +103,6 @@ public class PlatformShortcuts
 
 	/**
 	 * Return the shortcut to select the next statement in the statement history
-	 * 
-	 * @return
 	 */
 	public static KeyStroke getDefaultNextStatement()
 	{
@@ -118,7 +116,6 @@ public class PlatformShortcuts
 	/**
 	 * Return the shortcut to select the previous statement in the statement history
 	 *
-	 * @return
 	 */
 	public static KeyStroke getDefaultPrevStatement()
 	{

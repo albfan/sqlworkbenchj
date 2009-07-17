@@ -1724,7 +1724,6 @@ public class SqlPanel
 
 	/**
 	 * Re-run the SQL of the current result in the background.
-	 * @param sql
 	 */
 	public void reloadCurrent()
 	{
@@ -2961,8 +2960,6 @@ public class SqlPanel
 	/**
 	 * Returns the number of results tabs including the message tab
 	 * (so the return value is always >= 1)
-	 * 
-	 * @return
 	 */
 	public int getResultTabCount()
 	{
