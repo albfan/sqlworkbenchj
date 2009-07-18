@@ -368,10 +368,18 @@
 					<row>
 						<entry>-startRow</entry>
 						<entry>
-							A numeric value to define the first row to be imported. Any row before the
-							specified row will be ignored. The header row is not counted
-							to determine the row number. For a text file with a header
-							row, the pysical line 2 is row 1 (one) for this parameter.
+							<para>
+                A numeric value to define the first row to be imported. Any row before the
+                specified row will be ignored. The header row is not counted
+                to determine the row number. For a text file with a header
+                row, the pysical line 2 is row 1 (one) for this parameter.
+              </para>
+              <para>
+                When importing text files, empty lines in the input file are silently ignored
+                and do not add to the count of rows for this parameter. So if your input file
+                has two lines to be ignored, then one empty line and then another line to be ignored,
+                <literal>startRow</literal> must be set to 4.
+              </para>
 						</entry>
 					</row>
 
