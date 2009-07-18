@@ -1195,13 +1195,10 @@ public class TableListPanel
 		return meta.objectTypeCanContainData(type);
 	}
 
-//	protected void retrieveTableUsage()
-//	{
-//		tableUsage.retrieve(selectedTable);
-//	}
-
 	protected void retrieveTableSource()
 	{
+		if (selectedTable == null) return;
+		
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
 		TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
