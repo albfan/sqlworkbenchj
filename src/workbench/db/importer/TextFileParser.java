@@ -992,7 +992,7 @@ public class TextFileParser
 
 	protected List<String> getLineValues(LineParser parser, String line)
 	{
-		List<String> result = new ArrayList<String>();
+		List<String> result = new ArrayList<String>(this.getColumnCount());
 		parser.setLine(line);
 		while (parser.hasNext())
 		{

@@ -22,12 +22,19 @@
   <entry dev-build="2" type="enh">
     <description>
       A new option to display information about database objects is available through
-      "SQL -&gt; Object Info". If text is selected in the editor, this action will try to 
-      find a DB object with the name that is indicated by the selected text. 
-      It will look for tables, views, synonyms, sequences, procedures/functions and triggers. 
-      If something is found the definition (e.g. the list of columns) is displayed as a result 
+      "SQL -&gt; Object Info". If text is selected in the editor, this action will try to
+      find a DB object with the name that is indicated by the selected text.
+      It will look for tables, views, synonyms, sequences, procedures/functions and triggers.
+      If something is found the definition (e.g. the list of columns) is displayed as a result
       set in the current SQL tab (the result will be appended). For objects with only
       a SQL source (e.g. a procedure) the source will be written into the messages tab.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="enh">
+    <description>
+    When specifying date/time format string (e.g. when importing a file or in the options dialog),
+    the input is now validated and an error message is shown.
     </description>
   </entry>
 
@@ -35,13 +42,6 @@
     <description>
       The SQL Macros can now be displayed in a floating window. Double clicking a macro will
       run the macro in the currently selected SQL tab.
-    </description>
-  </entry>
-
-  <entry dev-build="2" type="enh">
-    <description>
-    When specifying date/time format string (e.g. when importing a file or in the options dialog), 
-    the input is now validated and an error message is shown. 
     </description>
   </entry>
 
@@ -71,7 +71,7 @@
 
   <entry dev-build="4" type="fix">
     <description>
-      Formatting a statment that used "AS ofx" for a column alias would treat AS OF as a
+      Formatting a statment that used "AS ofx" for a column alias, would treat AS OF as a
       keyword and the formatted created a wrong syntax (AS OF x)
     </description>
   </entry>
@@ -90,29 +90,29 @@
 
   <entry dev-build="4" type="fix">
     <description>
-      When using WbImport with -header=false but now column definitions, the import
+      When using WbImport with -header=false but no column definitions, the import
       would fail if the table had more columns than the import file. The additional columns
-      of the table are now "ignored" as in previous versions.
+      of the table are now ignored as in previous versions.
     </description>
   </entry>
 
   <entry dev-build="3" type="fix">
     <description>
-        "Create index" from within the table definition display in the DbExplorer
-        was no longer working.
+      "Create index" from within the table definition display in the DbExplorer
+      was no longer working.
     </description>
   </entry>
 
   <entry dev-build="3" type="fix">
     <description>
-        The "Object Info" feature did not work on Postgres if the selected object was a view.
+      The "Object Info" feature did not work on Postgres if the selected object was a view.
     </description>
   </entry>
 
   <entry dev-build="3" type="fix">
     <description>
-        In Oracle running a SELECT using a table name that was also used as a global symbol, the generated
-        statements for changes in the result set referenced the schema PUBLIC instead of the current schema.
+      In Oracle running a SELECT using a table name that was also used as a global symbol, the generated
+      statements for changes in the result set referenced the schema PUBLIC instead of the current schema.
     </description>
   </entry>
 
@@ -171,7 +171,7 @@
 
   <entry dev-build="1" type="fix">
     <description>
-      For WbCopy -createTarget was not working if the source was a query. 
+      For WbCopy -createTarget was not working if the source was a query.
     </description>
   </entry>
 
@@ -203,7 +203,7 @@
       A result tab can now be reloaded (by re-running the original SQL) through the context menu of the result tab.
     </description>
   </entry>
-  
+
   <entry dev-build="12" type="fix">
     <description>
       When displaying Oracle Packages the selected procedure/function was not highlighted in the source view of the package.
@@ -215,7 +215,7 @@
       Ctrl-C was no longer working in the source display of the DbExplorer if it was opened as a separate window
     </description>
   </entry>
-  
+
   <entry dev-build="12" type="fix">
     <description>
       Double clicking in the status bar would open a new SQL tab
@@ -230,7 +230,7 @@
 
   <entry dev-build="11" type="fix">
     <description>
-      The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) 
+      The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY)
       when the DISTINCT keyword was used.
     </description>
   </entry>
@@ -246,7 +246,7 @@
       The source of the index definition was not displayed in Postgres, if a table had a primary key and one additional index.
     </description>
   </entry>
-  
+
   <entry dev-build="10" type="fix">
     <description>
       If a profile did not have a name, SQL Workbench failed to display the connection dialog.
@@ -269,7 +269,7 @@
 
   <entry dev-build="9" type="enh">
     <description>
-      WbCopy (and the DataPumper) now optionally ignores any error that occurs when dropping the 
+      WbCopy (and the DataPumper) now optionally ignores any error that occurs when dropping the
       target table. For that, a new parameter is available -ignoreDropError which defaults to false
     </description>
   </entry>
@@ -285,7 +285,7 @@
       Reformatting WbVarDef would incorrectly replace it with WbVarDefine
     </description>
   </entry>
-  
+
   <entry dev-build="8" type="fix">
     <description>
       Workspace -&gt; Assign Workspace was no longer working
@@ -314,11 +314,11 @@
 
   <entry dev-build="7" type="enh">
     <description>
-      When assigning a keyboard shortcut to a macro, the shortcut's character would be inserted into 
+      When assigning a keyboard shortcut to a macro, the shortcut's character would be inserted into
       the editor when the macro was executed.
     </description>
   </entry>
-  
+
   <entry dev-build="7" type="enh">
     <description>
       CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff
@@ -1131,7 +1131,7 @@
 
   <entry dev-build="6" type="fix">
     <description>
-       Calling stored procedures with output parameters was not working properly, especially when regular parameters 
+       Calling stored procedures with output parameters was not working properly, especially when regular parameters
        were needed as well.
     </description>
   </entry>
