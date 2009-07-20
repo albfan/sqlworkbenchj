@@ -37,6 +37,7 @@ public class WbListTables extends SqlCommand
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("objects");
 		cmdLine.addArgument("types");
+		cmdLine.addArgument("schema");
 	}
 	public String getVerb() { return VERB; }
 
@@ -57,6 +58,8 @@ public class WbListTables extends SqlCommand
 		cmdLine.parse(options);
 
 		String objects = options;
+		String schema = null;
+		String catalog = null;
 
 		if (cmdLine.hasArguments())
 		{
@@ -75,7 +78,15 @@ public class WbListTables extends SqlCommand
 				types = new String[typeList.size()];
 				typeList.toArray(types);
 			}
+			schema = cmdLine.getValue("schema");
+			catalog = cmdLine.getValue("catalog");
 		}
+
+		if (StringUtil.isBlank(schema)) schema = currentConnection.getMetadata().getSchemaToUse();
+		schema = currentConnection.getMetadata().adjustSchemaNameCase(schema);
+
+		if (StringUtil.isBlank(catalog)) catalog = currentConnection.getMetadata().getCurrentCatalog();
+		catalog = currentConnection.getMetadata().adjustObjectnameCase(catalog);
 
 		DataStore resultList = null;
 
@@ -89,10 +100,18 @@ public class WbListTables extends SqlCommand
 		for (String filter : objectFilters)
 		{
 			TableIdentifier tbl = new TableIdentifier(filter);
-			String schema = tbl.getSchema();
-			String catalog = tbl.getCatalog();
+			String tschema = tbl.getSchema();
+			if (StringUtil.isBlank(tschema))
+			{
+				tschema = schema;
+			}
+			String tcatalog = tbl.getCatalog();
+			if (StringUtil.isBlank(tcatalog))
+			{
+				tcatalog = catalog;
+			}
 			String tname = tbl.getTableName();
-			DataStore ds = currentConnection.getMetadata().getTables(schema, catalog, tname, types);
+			DataStore ds = currentConnection.getMetadata().getTables(tcatalog, tschema, tname, types);
 			if (resultList == null)
 			{
 				resultList = ds;
