@@ -77,7 +77,6 @@ public class TextOptionsPanel
 		preferredWidth = (int)pref.getWidth();
 
 		int add = preferredWidth - maxwidth;
-		System.out.println("add: " + add);
 		width += add;
 
 		Dimension max = new Dimension(width, (int)pref.getHeight());

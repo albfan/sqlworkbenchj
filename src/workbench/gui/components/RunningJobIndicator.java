@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import javax.swing.JFrame;
+import workbench.log.LogMgr;
 
 /**
  * @author support@sql-workbench.net
@@ -53,15 +54,15 @@ public class RunningJobIndicator
 	
 	public synchronized void jobStarted()
 	{
-//		System.out.println("********** jobStarted() ************** \n" + ExceptionUtil.getStackTrace(new Exception()));
 		runningJobs ++;
+		LogMgr.logDebug("RunningJobIndicator.jobStarted()", "New runcount = " + runningJobs);
 		updateTitle();
 	}
 	
 	public synchronized void jobEnded()
 	{
-//		System.out.println("********** jobEnded() ************** \n" + ExceptionUtil.getStackTrace(new Exception()));
 		if (runningJobs > 0) runningJobs --;
+		LogMgr.logDebug("RunningJobIndicator.jobEnded()", "New runcount = " + runningJobs);
 		updateTitle();
 	}
 

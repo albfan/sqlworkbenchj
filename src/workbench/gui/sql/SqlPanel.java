@@ -1708,10 +1708,10 @@ public class SqlPanel
 		}
 		finally
 		{
+			fireDbExecEnd();
 			clearStatusMessage();
 			setCancelState(false);
 			updateResultInfos();
-			this.fireDbExecEnd();
 
 			// setBusy(false) should be called after dbExecEnd()
 			// otherwise the panel would indicate it's not busy, but
