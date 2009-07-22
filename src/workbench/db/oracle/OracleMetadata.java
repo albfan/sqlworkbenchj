@@ -34,6 +34,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import workbench.util.Types40;
 
 /**
  * A class to retrieve meta-information from an Oracle database.
@@ -222,8 +223,8 @@ public class OracleMetadata
 			"     t.column_name AS column_name,  \n   " +
 			"     DECODE(t.data_type, 'CHAR', " + Types.CHAR + ", " +
 			"                    'VARCHAR2', " + Types.VARCHAR + ", " +
-			"                    'NVARCHAR2', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " +
-			"                    'NCHAR', " + (fixNVARCHAR ? Types.VARCHAR : Types.OTHER) + ", " +
+			"                    'NVARCHAR2', " + (fixNVARCHAR ? Types40.NVARCHAR : Types.OTHER) + ", " +
+			"                    'NCHAR', " + (fixNVARCHAR ? Types40.NCHAR : Types.OTHER) + ", " +
 			"                    'NUMBER', " + Types.DECIMAL + ", " +
 			"                    'LONG', " + Types.LONGVARCHAR + ", " +
 			"                    'DATE', " + (getMapDateToTimestamp() ? Types.TIMESTAMP : Types.DATE) + ", " +
@@ -231,7 +232,7 @@ public class OracleMetadata
 			"                    'LONG RAW', " + Types.LONGVARBINARY + ", " +
 			"                    'BLOB', " + Types.BLOB + ", " +
 			"                    'CLOB', " + Types.CLOB + ", " +
-			"                    'NCLOB', " + (fixNVARCHAR ? Types.CLOB : Types.OTHER) + ", " +
+			"                    'NCLOB', " + (fixNVARCHAR ? Types40.NCLOB : Types.OTHER) + ", " +
 			"                    'BFILE', -13, " +
 			"                    'FLOAT', " + Types.FLOAT + ", " +
 			"                    'TIMESTAMP(6)', " + Types.TIMESTAMP + ", " +
