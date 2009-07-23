@@ -44,6 +44,7 @@ public class SqlKeywordHelperTest
 		assertTrue(result.contains("UPDATE"));
 		assertTrue(result.contains("INSERT"));
 		assertTrue(result.contains("CREATE"));
+		assertTrue(result.contains("KEY"));
 	}
 
 	public void testOracleKeywords()
