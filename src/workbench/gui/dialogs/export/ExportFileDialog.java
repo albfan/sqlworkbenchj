@@ -13,6 +13,7 @@ package workbench.gui.dialogs.export;
 
 import workbench.gui.components.WbFileChooser;
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -26,10 +27,14 @@ import workbench.db.WbConnection;
 import workbench.db.exporter.DataExporter;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.PoiHelper;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.FeedbackWindow;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.storage.ResultInfo;
+import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 
@@ -51,17 +56,20 @@ public class ExportFileDialog
 	private boolean includeSqlInsert = true;
 	private boolean includeSqlDeleteInsert = true;
 	private String lastDirConfigKey = "workbench.export.lastdir";
-	
+	private final DataStore source;
+	private boolean sqlChecked = false;
+
 	private Component parentComponent;
-	
+
 	public ExportFileDialog(Component caller)
 	{
 		this(caller, null);
 	}
-	
-	public ExportFileDialog(Component caller, ResultInfo columns)
+
+	public ExportFileDialog(Component caller, DataStore ds)
 	{
-		this.exportOptions = new ExportOptionsPanel(columns);
+		source = ds;
+		this.exportOptions = new ExportOptionsPanel(source.getResultInfo());
 		this.parentComponent = caller;
 	}
 
@@ -69,17 +77,17 @@ public class ExportFileDialog
 	{
 		this.exportOptions.setQuerySql(sql, con);
 	}
-	
+
 	public List<ColumnIdentifier> getColumnsToExport()
 	{
 		return this.exportOptions.getColumnsToExport();
 	}
-	
+
 	public void saveSettings()
 	{
 		exportOptions.saveSettings();
 	}
-	
+
 	public void restoreSettings()
 	{
 		exportOptions.restoreSettings();
@@ -99,37 +107,37 @@ public class ExportFileDialog
 	{
 		return exportOptions.getXlsXOptions();
 	}
-	
+
 	public SqlOptions getSqlOptions()
 	{
 		return exportOptions.getSqlOptions();
 	}
-	
+
 	public HtmlOptions getHtmlOptions()
 	{
 		return exportOptions.getHtmlOptions();
 	}
-	
+
 	public TextOptions getTextOptions()
 	{
 		return exportOptions.getTextOptions();
 	}
-	
+
 	public XmlOptions getXmlOptions()
 	{
 		return exportOptions.getXmlOptions();
 	}
-	
+
 	public ExportOptions getBasicExportOptions()
 	{
 		return exportOptions.getExportOptions();
 	}
-	
+
 	public String getSelectedFilename()
 	{
 		return this.selectedFilename;
 	}
-	
+
 	public ExportType getExportType()
 	{
 		return this.exportType;
@@ -139,22 +147,17 @@ public class ExportFileDialog
 	{
 		return this.isCancelled;
 	}
-	
+
 	public void setIncludeSqlUpdate(boolean flag)
 	{
 		this.includeSqlUpdate = flag;
 	}
-	
+
 	public void setIncludeSqlInsert(boolean flag)
 	{
 		this.includeSqlInsert = flag;
 	}
-	
-	public void setIncludeSqlDeleteInsert(boolean flag)
-	{
-		this.includeSqlDeleteInsert = flag;
-	}
-	
+
 	/**
 	 *	Set the config key for the Settings object
 	 *  where the selected directory should be stored
@@ -163,23 +166,27 @@ public class ExportFileDialog
 	{
 		this.lastDirConfigKey = key;
 	}
-	
+
 	private void setupFileFilters(JFileChooser fc)
 	{
 		fc.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
 		fc.addChoosableFileFilter(ExtensionFileFilter.getHtmlFileFilter());
+
 		if (includeSqlInsert)
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlFileFilter());
 		}
-		if (includeSqlUpdate) 
+
+		if (includeSqlUpdate)
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
 		}
+
 		if (includeSqlDeleteInsert)
 		{
 			fc.addChoosableFileFilter(ExtensionFileFilter.getSqlInsertDeleteFilter());
 		}
+
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
 		fc.addChoosableFileFilter(ExtensionFileFilter.getOdsFileFilter());
 		if (PoiHelper.isPoiAvailable())
@@ -192,23 +199,23 @@ public class ExportFileDialog
 	{
 		this.selectDirectory = flag;
 	}
-	
+
 	public boolean selectOutput()
 	{
 		return this.selectOutput(null);
 	}
-	
+
 	public boolean selectOutput(String title)
 	{
 		this.exportType = null;
 		this.selectedFilename = null;
 		boolean result = false;
-		
+
 		String lastDir = settings.getProperty(lastDirConfigKey, null);
 		this.chooser = new WbFileChooser(lastDir);
 		chooser.setSettingsID("workbench.export.saveas");
 		if (title != null) this.chooser.setDialogTitle(title);
-		
+
 		if (this.selectDirectory)
 		{
 			chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -219,19 +226,32 @@ public class ExportFileDialog
 			chooser.addPropertyChangeListener("fileFilterChanged", this);
 			chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
 		}
+		
 		this.exportOptions.addPropertyChangeListener("exportType", this);
 		this.restoreSettings();
+
 		chooser.setAccessory(this.exportOptions);
-		
+
 		Window parentWindow = SwingUtilities.getWindowAncestor(this.parentComponent);
 
+		if (exportOptions.getExportType().isSqlType())
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					checkSqlOptions();
+				}
+			});
+		}
 		int answer = chooser.showSaveDialog(parentWindow);
+		
 		if (answer == JFileChooser.APPROVE_OPTION)
 		{
 			String filename = null;
 			this.isCancelled = false;
 			File fl = chooser.getSelectedFile();
-			
+
 			if (this.selectDirectory)
 			{
 				filename = fl.getAbsolutePath();
@@ -277,7 +297,7 @@ public class ExportFileDialog
 	public void setExporterOptions(DataExporter exporter)
 	{
 		exporter.setOptions(this.getBasicExportOptions());
-		
+
 		switch (this.exportType)
 		{
 			case SQL_INSERT:
@@ -309,7 +329,7 @@ public class ExportFileDialog
 				break;
 		}
 	}
-	
+
 	private ExportType getExportType(ExtensionFileFilter ff)
 	{
 		if (ff.hasFilter(ExtensionFileFilter.SQL_EXT))
@@ -342,11 +362,82 @@ public class ExportFileDialog
 		}
 		return null;
 	}
-	
-	public void propertyChange(PropertyChangeEvent evt) 
+
+	private FeedbackWindow checkWindow;
+
+	protected void checkSqlOptions()
+	{
+		if (sqlChecked) return;
+		if (source.hasPkColumns()) return;
+
+		if (checkWindow != null) return;
+		if (chooser == null) return;
+
+		Runnable task = new Runnable()
+		{
+			public void run()
+			{
+				_checkSqlOptions();
+			}
+		};
+
+		checkWindow = new FeedbackWindow(chooser.getCurrentDialog(), ResourceMgr.getString("MsgRetrievingKeyColumns"));
+		WbSwingUtilities.center(checkWindow, chooser.getCurrentDialog());
+		checkWindow.showAndStart(task);
+	}
+
+	private void updateSqlFlags()
+	{
+		exportOptions.updateSqlOptions(source);
+		includeSqlInsert = (source != null && source.canSaveAsSqlInsert());
+		includeSqlUpdate = (source != null && source.hasPkColumns());
+		includeSqlDeleteInsert = (includeSqlInsert && includeSqlUpdate);
+
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (!includeSqlUpdate)
+				{
+					chooser.removeChoosableFileFilter(ExtensionFileFilter.getSqlUpdateFileFilter());
+				}
+
+				if (!includeSqlDeleteInsert)
+				{
+					chooser.removeChoosableFileFilter(ExtensionFileFilter.getSqlInsertDeleteFilter());
+				}
+			}
+		});
+	}
+
+	protected void _checkSqlOptions()
+	{
+		try
+		{
+			sqlChecked = true;
+			source.updatePkInformation();
+			updateSqlFlags();
+		}
+		catch (Exception sql)
+		{
+			LogMgr.logError("ExportFileDialog.checkSqlOptions()", "Error checking SQL Options", sql);
+			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(sql));
+		}
+		finally
+		{
+			if (checkWindow != null)
+			{
+				checkWindow.setVisible(false);
+				checkWindow.dispose();
+				checkWindow = null;
+			}
+		}
+	}
+
+	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (this.exportOptions == null) return;
-		
+
 		if (evt.getSource() instanceof JFileChooser && !filterChange && !this.selectDirectory)
 		{
 			JFileChooser fc = (JFileChooser)evt.getSource();
@@ -366,15 +457,16 @@ public class ExportFileDialog
 				// check for All file (*.*) filter. In that
 				// case we do not change the current filter.
 				if (!(ff instanceof ExtensionFileFilter)) return;
-				
+
 				ExportType type = (ExportType)evt.getNewValue();
 				this.filterChange = true;
-				
+
 				switch (type)
 				{
 					case SQL_INSERT:
 					case SQL_UPDATE:
 					case SQL_DELETE_INSERT:
+						checkSqlOptions();
 						this.chooser.setFileFilter(ExtensionFileFilter.getSqlFileFilter());
 						break;
 					case HTML:
@@ -401,7 +493,7 @@ public class ExportFileDialog
 			{
 				th.printStackTrace();
 			}
-			finally 
+			finally
 			{
 				this.filterChange = false;
 			}

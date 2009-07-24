@@ -83,10 +83,8 @@ public class WbListTables extends SqlCommand
 		}
 
 		if (StringUtil.isBlank(schema)) schema = currentConnection.getMetadata().getSchemaToUse();
-		schema = currentConnection.getMetadata().adjustSchemaNameCase(schema);
 
 		if (StringUtil.isBlank(catalog)) catalog = currentConnection.getMetadata().getCurrentCatalog();
-		catalog = currentConnection.getMetadata().adjustObjectnameCase(catalog);
 
 		DataStore resultList = null;
 
@@ -99,18 +97,24 @@ public class WbListTables extends SqlCommand
 
 		for (String filter : objectFilters)
 		{
+			// Create a tableidentifier for parsing e.g. parameters
+			// like -tables=public.*
 			TableIdentifier tbl = new TableIdentifier(filter);
 			String tschema = tbl.getSchema();
 			if (StringUtil.isBlank(tschema))
 			{
 				tschema = schema;
 			}
+			tschema = currentConnection.getMetadata().adjustSchemaNameCase(tschema);
 			String tcatalog = tbl.getCatalog();
 			if (StringUtil.isBlank(tcatalog))
 			{
 				tcatalog = catalog;
 			}
+			tcatalog = currentConnection.getMetadata().adjustObjectnameCase(tcatalog);
+
 			String tname = tbl.getTableName();
+
 			DataStore ds = currentConnection.getMetadata().getTables(tcatalog, tschema, tname, types);
 			if (resultList == null)
 			{

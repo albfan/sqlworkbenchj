@@ -70,6 +70,11 @@ public enum ExportType
 		return null;
 	}
 
+	public boolean isSqlType()
+	{
+		return this == SQL_INSERT || this == SQL_UPDATE || this == SQL_DELETE_INSERT;
+	}
+	
 	public String getDefaultFileExtension()
 	{
 		switch (this)

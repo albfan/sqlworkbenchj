@@ -32,7 +32,7 @@ import workbench.util.StringUtil;
  *
  * This class does not actually construct the CREATE INDEX based on the information
  * available from the JDBC API, but retrieves the CREATE INDEX directly from the database
- * as Postgres stores the full comannd in the table <tt>pg_indexes</tt>.
+ * as Postgres stores the full command in the table <tt>pg_indexes</tt>.
  * 
  * @author  support@sql-workbench.net
  */

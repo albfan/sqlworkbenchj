@@ -55,28 +55,13 @@ public class SaveDataAsAction
 		};
 		encodings.start();
 
-		// The detection of the updateTable should be done in a background thread
-		// as it can take some time which would block the AWT thread. Once finished
-		// the dialog must be displayed on the AWT thread.
-		WbThread init = new WbThread("SaveAs Dialog Init")
+		SwingUtilities.invokeLater(new Runnable()
 		{
-			@Override
 			public void run()
 			{
-				if (client.getDataStore().getUpdateTable() == null)
-				{
-					client.detectDefinedPkColumns();
-				}
-				SwingUtilities.invokeLater(new Runnable()
-				{
-					public void run()
-					{
-						DataStoreExporter exporter = new DataStoreExporter(client.getDataStore(), client);
-						exporter.saveAs();
-					}
-				});
+				DataStoreExporter exporter = new DataStoreExporter(client.getDataStore(), client);
+				exporter.saveAs();
 			}
-		};
-		init.start();
+		});
 	}
 }

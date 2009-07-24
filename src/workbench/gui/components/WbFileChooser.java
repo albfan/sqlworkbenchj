@@ -31,7 +31,8 @@ public class WbFileChooser
 		implements PropertyChangeListener
 {
 	private String windowSettingsId;
-	
+	private JDialog dialog;
+
 	public WbFileChooser(String currentDirectoryPath)
 	{
 		super(currentDirectoryPath);
@@ -42,17 +43,22 @@ public class WbFileChooser
 	{
 		this.windowSettingsId = id;
 	}
+
+	public JDialog getCurrentDialog()
+	{
+		return dialog;
+	}
 	
 	@Override
 	public JDialog createDialog(Component parent)
 		throws HeadlessException
 	{
-		JDialog d = super.createDialog(parent);
+		this.dialog = super.createDialog(parent);
 		if (windowSettingsId != null)
 		{
-			Settings.getInstance().restoreWindowSize(d, windowSettingsId);
+			Settings.getInstance().restoreWindowSize(dialog, windowSettingsId);
 		}
-		return d;
+		return dialog;
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)

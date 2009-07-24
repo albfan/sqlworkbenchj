@@ -57,7 +57,6 @@ public class TableExporter
 		if (tables.size() == 0) return;
 		
 		ExportFileDialog dialog = new ExportFileDialog(caller);
-		dialog.setIncludeSqlInsert(true);
 		dialog.setIncludeSqlUpdate(false);
 		dialog.setSelectDirectoryOnly(true);
 		dialog.restoreSettings();

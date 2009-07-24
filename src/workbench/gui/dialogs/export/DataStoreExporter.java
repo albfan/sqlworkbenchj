@@ -35,12 +35,7 @@ public class DataStoreExporter
 
 	public void saveAs()
 	{
-		boolean insert = (this.source != null && this.source.canSaveAsSqlInsert());
-		boolean update = (source != null && source.hasPkColumns());
-		this.dialog = new ExportFileDialog(this.caller, source.getResultInfo());
-		this.dialog.setIncludeSqlInsert(insert);
-		this.dialog.setIncludeSqlUpdate(update);
-		this.dialog.setIncludeSqlDeleteInsert(insert && update);
+		this.dialog = new ExportFileDialog(this.caller, source);
 		this.dialog.setSelectDirectoryOnly(false);
 		this.output = null;
 		boolean selected = dialog.selectOutput();

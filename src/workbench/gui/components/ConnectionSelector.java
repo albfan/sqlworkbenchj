@@ -11,18 +11,10 @@
  */
 package workbench.gui.components;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.sql.SQLException;
 
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -48,8 +40,7 @@ public class ConnectionSelector
 	protected Connectable client;
 	private boolean connectInProgress;
 	protected Frame parent;
-	protected JDialog connectingInfo;
-	protected JLabel connectLabel;
+	protected FeedbackWindow connectingInfo;
 	private String propertyKey;
 
 	public ConnectionSelector(Frame frame, Connectable conn)
@@ -164,26 +155,13 @@ public class ConnectionSelector
 			{
 				if (connectingInfo != null)
 				{
-					connectLabel.setText(msg);
+					connectingInfo.setMessage(msg);
 					connectingInfo.pack();
 					WbSwingUtilities.center(connectingInfo, parent);
 				}
 				else
 				{
-					JPanel p = new JPanel();
-					p.setBorder(new CompoundBorder(WbSwingUtilities.getBevelBorderRaised(), new EmptyBorder(15, 20, 15, 20)));
-					p.setLayout(new BorderLayout(0, 0));
-					p.setMinimumSize(new Dimension(250, 50));
-					connectLabel = new JLabel(msg);
-					connectLabel.setMinimumSize(new Dimension(200, 50));
-					connectLabel.setHorizontalAlignment(SwingConstants.CENTER);
-					p.add(connectLabel, BorderLayout.CENTER);
-					connectingInfo = new JDialog(parent, false);
-					connectingInfo.setUndecorated(true);
-					connectingInfo.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-					connectingInfo.getContentPane().setLayout(new BorderLayout());
-					connectingInfo.getContentPane().add(p, BorderLayout.CENTER);
-					connectingInfo.pack();
+					connectingInfo = new FeedbackWindow(parent, msg);
 					WbSwingUtilities.center(connectingInfo, parent);
 					connectingInfo.setVisible(true);
 				}
@@ -321,13 +299,13 @@ public class ConnectionSelector
 
 	public void repaint()
 	{
-		if (this.connectLabel != null) connectLabel.repaint();
+		if (this.connectingInfo != null) connectingInfo.forceRepaint();
 	}
 
 	public String getText()
 	{
-		if (this.connectLabel == null) return "";
-		return connectLabel.getText();
+		if (this.connectingInfo == null) return "";
+		return connectingInfo.getMessage();
 	}
 
 }

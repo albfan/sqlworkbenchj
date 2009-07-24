@@ -35,6 +35,7 @@ import workbench.interfaces.EncodingSelector;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.util.SqlUtil;
 
@@ -148,7 +149,16 @@ public class ExportOptionsPanel
 		this.add(typePanel, BorderLayout.CENTER);
 		typeSelector.addActionListener(this);
 	}
-	
+
+	public void updateSqlOptions(DataStore source)
+	{
+		dataStoreColumns = (source == null ? null : source.getResultInfo());
+		boolean insert = (source != null && source.canSaveAsSqlInsert());
+		boolean update = (source != null && source.hasPkColumns());
+		sqlOptions.setIncludeUpdate(update);
+		sqlOptions.setIncludeDeleteInsert(insert && update);
+	}
+
 	public void setQuerySql(String sql, WbConnection con)
 	{
 		this.query = sql;
