@@ -49,7 +49,7 @@ public class ShowSourceQueryAction
 
 	public void showQuery()
 	{
-		EditorPanel p = EditorPanel.createSqlEditor();
+		final EditorPanel p = EditorPanel.createSqlEditor();
 		String sql = panel.getSourceQuery();
 		p.setText(sql);
 		p.setCaretPosition(0);
@@ -62,6 +62,7 @@ public class ShowSourceQueryAction
 			d.setSize(500,350);
 		}
 		WbSwingUtilities.center(d, f);
+		WbSwingUtilities.repaintLater(p);
 		d.setVisible(true);
 		Settings.getInstance().storeWindowSize(d,"workbench.resultquery.display");
 	}
