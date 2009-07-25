@@ -75,6 +75,7 @@ import workbench.gui.actions.CheckPreparedStatementsAction;
 import workbench.gui.actions.CleanJavaCodeAction;
 import workbench.gui.actions.ClearCompletionCacheAction;
 import workbench.gui.actions.ClearMessagesAction;
+import workbench.gui.actions.CloseAllResultsAction;
 import workbench.gui.actions.CommitAction;
 import workbench.gui.actions.CopyAsSqlDeleteInsertAction;
 import workbench.gui.actions.CopyAsSqlInsertAction;
@@ -240,6 +241,7 @@ public class SqlPanel
 	protected OptimizeRowHeightAction optimizeRowHeights;
 	protected AppendResultsAction appendResultsAction;
 	protected CloseResultTabAction closeResultAction;
+	protected CloseAllResultsAction closeAllResultsAction;
 	protected CheckPreparedStatementsAction checkPreparedAction;
 	protected ClearCompletionCacheAction clearCompletionCache;
 	protected AutoCompletionAction autoCompletion;
@@ -829,6 +831,10 @@ public class SqlPanel
 		closeResultAction = new CloseResultTabAction(this);
 		closeResultAction.setCreateMenuSeparator(true);
 		this.actions.add(closeResultAction);
+
+		closeAllResultsAction = new CloseAllResultsAction(this);
+		closeAllResultsAction.setCreateMenuSeparator(false);
+		this.actions.add(closeAllResultsAction);
 
 		this.printDataAction.setCreateMenuSeparator(true);
 		this.actions.add(this.printDataAction);
@@ -2152,7 +2158,8 @@ public class SqlPanel
 			this.currentData.updateStatusBar();
 			this.currentData.addPropertyChangeListener("updateTable", this);
 		}
-		this.closeResultAction.setEnabled(currentData != null);
+		closeResultAction.setEnabled(currentData != null);
+		closeAllResultsAction.setEnabled(this.getResultTabCount() > 0);
 		updateProxiedActions();
 		checkResultSetActions();
 	}
@@ -2216,7 +2223,10 @@ public class SqlPanel
 		}
 	}
 
-	private void clearResultTabs()
+	/**
+	 * Close all result tabs.
+	 */
+	public void clearResultTabs()
 	{
 		try
 		{

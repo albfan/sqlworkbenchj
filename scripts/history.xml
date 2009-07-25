@@ -3,6 +3,12 @@
 
 <release build="-1" date="2009-07-19">
 
+  <entry dev-build="5" type="enh">
+    <description>
+      A new menu item to close all result tabs at once is available.
+    </description>
+  </entry>
+
   <entry dev-build="4" type="enh">
     <description>
       In the table definition display (columns) in the DbExplorer, a new
@@ -63,6 +69,13 @@
     </description>
   </entry>
 
+  <entry dev-build="5" type="fix">
+    <description>
+      The Save As dialog to save result data now only checks for the update table and 
+      primary keys if needed. 
+    </description>
+  </entry>
+  
   <entry dev-build="4" type="fix">
     <description>
       Using PostgreSQL's DELETE ... RETURNING did not work.
