@@ -383,6 +383,8 @@ public class ExportFileDialog
 
 		checkWindow = new FeedbackWindow(chooser.getCurrentDialog(), ResourceMgr.getString("MsgRetrievingKeyColumns"));
 		WbSwingUtilities.center(checkWindow, chooser.getCurrentDialog());
+		WbSwingUtilities.showWaitCursor(chooser.getCurrentDialog());
+		WbSwingUtilities.showWaitCursor(exportOptions);
 		checkWindow.showAndStart(task);
 	}
 
@@ -425,6 +427,8 @@ public class ExportFileDialog
 		}
 		finally
 		{
+			WbSwingUtilities.showDefaultCursor(exportOptions);
+			WbSwingUtilities.showDefaultCursor(chooser.getCurrentDialog());
 			if (checkWindow != null)
 			{
 				checkWindow.setVisible(false);

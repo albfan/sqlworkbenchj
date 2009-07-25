@@ -12,7 +12,9 @@
 package workbench.gui.actions;
 
 import java.awt.Frame;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
+import javax.swing.SwingUtilities;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
@@ -38,7 +40,7 @@ public class ShowSourceQueryAction
 
 	public boolean isEnabled()
 	{
-		return panel.getSourceQuery() != null;
+		return (panel != null && panel.getSourceQuery() != null);
 	}
 	
 	@Override
@@ -54,7 +56,16 @@ public class ShowSourceQueryAction
 		p.setText(sql);
 		p.setCaretPosition(0);
 		p.setEditable(false);
-		Frame f = WbManager.getInstance().getCurrentWindow();
+		Window w = SwingUtilities.getWindowAncestor(panel);
+		Frame f = null;
+		if (w instanceof Frame)
+		{
+			f = (Frame)w;
+		}
+		else
+		{
+			f = WbManager.getInstance().getCurrentWindow();
+		}
 
 		ValidatingDialog d = new ValidatingDialog(f, "SQL", p, false);
 		if (!Settings.getInstance().restoreWindowSize(d, "workbench.resultquery.display"))

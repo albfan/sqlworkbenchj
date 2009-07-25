@@ -137,7 +137,7 @@ public class JEditTextArea
 	protected TextPopup popup;
 
 	protected EventListenerList listeners;
-	protected MutableCaretEvent caretEvent;
+	private MutableCaretEvent caretEvent;
 
 	protected boolean caretBlinks;
 	protected boolean caretVisible;
@@ -245,7 +245,7 @@ public class JEditTextArea
 
 		this.addKeyBinding(new ScrollDownAction(this));
 		this.addKeyBinding(new ScrollUpAction(this));
-		
+
 		this.invalidationInterval = Settings.getInstance().getIntProperty("workbench.editor.update.lineinterval", 10);
 	}
 
@@ -662,7 +662,7 @@ public class JEditTextArea
 	/**
 	 * Ensures that the caret is visible by scrolling the text area if
 	 * necessary.
-	 * 
+	 *
 	 * @return True if scrolling was actually performed, false if the
 	 * caret was already visible
 	 */
@@ -1217,15 +1217,31 @@ public class JEditTextArea
 			document.tokenizeLines();
 		}
 
-		EventQueue.invokeLater(new Runnable()
+		if (isReallyVisible())
 		{
-			public void run()
+			EventQueue.invokeLater(new Runnable()
 			{
-				updateScrollBars();
-				painter.invalidateLineRange(0, getLineCount());
-				repaint();
-			}
-		});
+				public void run()
+				{
+					updateScrollBars();
+					painter.invalidateLineRange(0, getLineCount());
+					repaint();
+				}
+			});
+		}
+	}
+
+	public boolean isReallyVisible()
+	{
+		boolean result = isVisible();
+		Component p = getParent();
+		result = result && (p != null);
+		while (p != null)
+		{
+			result = result && p.isVisible();
+			p = p.getParent();
+		}
+		return result;
 	}
 
 	/**
@@ -1342,7 +1358,7 @@ public class JEditTextArea
 		{
 			return selectionStart;
 		}
-		else if(rectSelect)
+		else if (rectSelect)
 		{
 			Element map = document.getDefaultRootElement();
 			int start = selectionStart - map.getElement(selectionStartLine).getStartOffset();
@@ -1483,13 +1499,6 @@ public class JEditTextArea
 	public final void selectAll()
 	{
 		select(0,getDocumentLength());
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				requestFocusInWindow();
-			}
-		});
 	}
 
 	/**
@@ -1590,7 +1599,7 @@ public class JEditTextArea
 	{
 		if (document == null) return;
 		if (painter == null) return;
-		
+
 		int newStart, newEnd;
 		boolean newBias;
 
@@ -1776,11 +1785,11 @@ public class JEditTextArea
 			}
 			else
 			{
-				document.remove(selectionStart,selectionEnd - selectionStart);
+				document.remove(selectionStart, selectionEnd - selectionStart);
 
 				if(selectedText != null)
 				{
-					document.insertString(selectionStart,selectedText,null);
+					document.insertString(selectionStart, selectedText, null);
 				}
 				if (this.autoIndent)
 				{
@@ -1809,8 +1818,9 @@ public class JEditTextArea
 
 		updateScrollBars();
 		setCaretPosition(selectionEnd);
-//		this.invalidate();
-		this.repaint();
+		int startLine = getLineOfOffset(selectionStart);
+		int endLine = getLineOfOffset(selectionStart + selectedText.length());
+		painter.invalidateLineRange(startLine, endLine);
 	}
 
 	public void insertText(String text)
@@ -1841,8 +1851,15 @@ public class JEditTextArea
 		}
 	}
 
-	public void setAutoIndent(boolean aFlag)  { this.autoIndent = aFlag; }
-	public boolean getAutoIndent() 	{ return this.autoIndent; }
+	public void setAutoIndent(boolean aFlag)
+	{
+		this.autoIndent = aFlag;
+	}
+
+	public boolean getAutoIndent()
+	{
+		return this.autoIndent;
+	}
 
 	/**
 	 * Returns true if this text area is editable, false otherwise.
@@ -1914,7 +1931,7 @@ public class JEditTextArea
 	public void overwriteSetSelectedText(String str)
 	{
 		// Don't overstrike if there is a selection
-		if(!overwrite || selectionStart != selectionEnd)
+		if (!overwrite || selectionStart != selectionEnd)
 		{
 			setSelectedText(str);
 			return;
@@ -1923,7 +1940,7 @@ public class JEditTextArea
 		// Don't overstrike if we're on the end of the line
 		int caret = getCaretPosition();
 		int caretLineEnd = getLineEndOffset(getCaretLine());
-		if(caretLineEnd - caret <= str.length())
+		if (caretLineEnd - caret <= str.length())
 		{
 			setSelectedText(str);
 			return;
@@ -2048,7 +2065,7 @@ public class JEditTextArea
 	 */
 	public void cut()
 	{
-		if(editable)
+		if (editable)
 		{
 			copy();
 			setSelectedText("");
@@ -2071,7 +2088,7 @@ public class JEditTextArea
 	 */
 	public void copy()
 	{
-		if(selectionStart != selectionEnd)
+		if (selectionStart != selectionEnd)
 		{
 			Clipboard clipboard = getToolkit().getSystemClipboard();
 
@@ -2119,7 +2136,7 @@ public class JEditTextArea
 
 	private void forwardKeyEvent(KeyEvent evt)
 	{
-		switch(evt.getID())
+		switch (evt.getID())
 		{
 			case KeyEvent.KEY_TYPED:
 				keyEventInterceptor.keyTyped(evt);
@@ -2141,9 +2158,9 @@ public class JEditTextArea
 	public void processKeyEvent(KeyEvent evt)
 	{
 		if (evt.isConsumed()) return;
-		
+
 		if (inputHandler == null) return;
-		
+
 		if (keyEventInterceptor != null)
 		{
 			forwardKeyEvent(evt);
@@ -2190,7 +2207,7 @@ public class JEditTextArea
 	protected void fireTextStatusChanged(boolean isModified)
 	{
 		Object[] list = listeners.getListenerList();
-		for(int i = list.length - 2; i >= 0; i--)
+		for (int i = list.length - 2; i >= 0; i--)
 		{
 			if(list[i] == TextChangeListener.class)
 			{
@@ -2202,7 +2219,7 @@ public class JEditTextArea
 	protected void fireSelectionEvent()
 	{
 		Object[] list = listeners.getListenerList();
-		for(int i = list.length - 2; i >= 0; i--)
+		for (int i = list.length - 2; i >= 0; i--)
 		{
 			if(list[i] == TextSelectionListener.class)
 			{
@@ -2231,7 +2248,7 @@ public class JEditTextArea
 		Object[] list = listeners.getListenerList();
 		for(int i = list.length - 2; i >= 0; i--)
 		{
-			if(list[i] == CaretListener.class)
+			if (list[i] == CaretListener.class)
 			{
 				((CaretListener)list[i+1]).caretUpdate(caretEvent);
 			}
@@ -2241,7 +2258,7 @@ public class JEditTextArea
 
 	protected void updateBracketHighlight(int newCaretPosition)
 	{
-		if(newCaretPosition == 0)
+		if (newCaretPosition == 0)
 		{
 			bracketPosition = bracketLine = -1;
 			return;
@@ -2250,7 +2267,7 @@ public class JEditTextArea
 		try
 		{
 			int offset = TextUtilities.findMatchingBracket(document,newCaretPosition - 1);
-			if(offset != -1)
+			if (offset != -1)
 			{
 				bracketLine = getLineOfOffset(offset);
 				bracketPosition = offset - getLineStartOffset(bracketLine);
@@ -2339,7 +2356,7 @@ public class JEditTextArea
 		popup.show(painter, p.x, p.y);
 	}
 
-	public boolean isModified() 
+	public boolean isModified()
 	{
 		return this.modified;
 	}
@@ -2556,12 +2573,12 @@ public class JEditTextArea
 			int newStart;
 			int newEnd;
 
-			if(selectionStart > offset || (selectionStart == selectionEnd && selectionStart == offset))
+			if (selectionStart > offset || (selectionStart == selectionEnd && selectionStart == offset))
 				newStart = selectionStart + length;
 			else
 				newStart = selectionStart;
 
-			if(selectionEnd >= offset)
+			if (selectionEnd >= offset)
 				newEnd = selectionEnd + length;
 			else
 				newEnd = selectionEnd;

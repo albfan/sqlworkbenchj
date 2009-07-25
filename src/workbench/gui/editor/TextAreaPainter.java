@@ -111,11 +111,6 @@ public class TextAreaPainter
 		}
 	}
 
-//	public final boolean getShowLineNumbers()
-//	{
-//		return this.showLineNumbers;
-//	}
-
 	/**
 	 * Returns if this component can be traversed by pressing the
 	 * Tab key. This returns false.
@@ -272,6 +267,7 @@ public class TextAreaPainter
 			this.gutterWidth = 0;
 		}
 	}
+	
 	public void calculateTabSize()
 	{
 		this.tabSize = -1;
