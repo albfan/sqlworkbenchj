@@ -61,19 +61,19 @@ public class KeyboardMapper
 		int modifier = e.getModifiers();
 		int code = e.getKeyCode();
 
-		// only allow function keys without modifier!
-		if (modifier == 0)
-		{
-			if (code < KeyEvent.VK_F1 || code > KeyEvent.VK_F12) return;
-		}
+		// only allow action keys without modifier!
+		if (modifier == 0 && !e.isActionKey()) return;
 
 		// keyReleased is also called when the Ctrl or Shift keys are release
 		// in that case the keycode is 0 --> ignore it
-		if (code >= 32)
+		if (code >= 32
+			|| code == KeyEvent.VK_ENTER
+			|| code == KeyEvent.VK_BACK_SPACE
+			|| code == KeyEvent.VK_TAB
+			|| code == KeyEvent.VK_ESCAPE)
 		{
-			String key = "";
-			if (modifier > 0) key = KeyEvent.getKeyModifiersText(modifier) + "-";
-			key = key + KeyEvent.getKeyText(code);
+			String key = KeyEvent.getKeyText(code);
+			if (modifier > 0) key = KeyEvent.getKeyModifiersText(modifier) + "-" + key;
 			this.newkey = KeyStroke.getKeyStroke(code, modifier);
 			this.display.setText(key);
 		}
