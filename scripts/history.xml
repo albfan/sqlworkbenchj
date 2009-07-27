@@ -71,6 +71,12 @@
 
   <entry dev-build="5" type="fix">
     <description>
+      Shortcut keys which involved the Enter could not be defined.
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
       The Save As dialog to save result data now only checks for the update table and 
       primary keys if needed. 
     </description>
