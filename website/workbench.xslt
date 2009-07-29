@@ -187,7 +187,7 @@
         <link rel="SHORTCUT ICON" href="favicon.ico"/>
         <link rel="alternate" type="application/rss+xml" title="SQL Workbench/J" href="/wb_news.xml"/>
         <meta name="description" content="A free DBMS-independent SQL query tool and front-end"/>
-        <meta name="keywords" lang="en" content="sql,query,tool,analyzer,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,h2database,h2,firebirdsql,hsql,hsqldb,sqlplus,replacement,import,export,csv,unload,convert,insert,blob,clob,xml,etl,migrate,compare,diff,structure,table"/>
+        <meta name="keywords" lang="en" content="sql,query,tool,analyzer,gui,jdbc,database,isql,viewer,frontend,java,dbms,oracle,postgres,h2database,h2,firebirdsql,hsql,hsqldb,sqlplus,replacement,import,export,csv,unload,convert,insert,blob,clob,xml,etl,migrate,compare,diff,structure,table"/>
         <meta name="date">
           <xsl:attribute name="content">
             <xsl:value-of select="$currentDate"/>
