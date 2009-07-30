@@ -820,6 +820,13 @@ public class TableListPanel
 			return;
 		}
 
+		if (dbConnection.getMetadata() == null)
+		{
+			LogMgr.logDebug("TableListPanel.retrieve()", "Database Metadata object not accessible", new Exception());
+			WbSwingUtilities.showErrorMessageKey(this, "ErrConnectionMetaGone");
+			return;
+		}
+
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);

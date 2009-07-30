@@ -55,7 +55,14 @@ public class H2SequenceReader
 	
 	public List<String> getSequenceList(String owner)
 	{
-		String sql = "SELECT sequence_name FROM information_schema.sequences ORDER BY 1";
+		String sql = "SELECT sequence_name FROM information_schema.sequences";
+
+		if (StringUtil.isNonBlank(owner))
+		{
+			sql += " WHERE sequence_schema = '" + StringUtil.trimQuotes(owner) + "' ";
+		}
+		sql += " ORDER BY 1";
+		
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("H2SequenceReader.getSequenceList()", "Using query=\n" + sql);
