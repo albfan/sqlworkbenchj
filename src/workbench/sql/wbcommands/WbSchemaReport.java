@@ -95,9 +95,14 @@ public class WbSchemaReport
 			return result;
 		}
 
+
 		this.reporter = new SchemaReporter(currentConnection);
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
+
+		List<String> types = cmdLine.getListValue(PARAM_TYPES);
+		reporter.setObjectTypes(types);
+
 		this.reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		SourceTableArgument tableArg = new SourceTableArgument(this.cmdLine.getValue("tables"), this.currentConnection);
 
@@ -132,9 +137,6 @@ public class WbSchemaReport
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
-
-		List<String> types = cmdLine.getListValue(PARAM_TYPES);
-		reporter.setObjectTypes(types);
 
 		this.reporter.setIncludeTables(cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true));
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));

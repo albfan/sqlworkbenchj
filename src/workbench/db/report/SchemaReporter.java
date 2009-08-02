@@ -144,6 +144,7 @@ public class SchemaReporter
 
 	public void setObjectTypes(List<String> newTypeList)
 	{
+		if (newTypeList == null || newTypeList.size() == 0) return;
 		types.clear();
 		types.addAll(newTypeList);
 	}

@@ -124,7 +124,7 @@ public class SqlRowDataConverter
 		}
 
 		StrBuffer end = null;
-		if (writeCommit && totalRows > 0)
+		if (writeCommit && totalRows > 0 || this.createTable && this.originalConnection.getDbSettings().ddlNeedsCommit())
 		{
 			end = new StrBuffer();
 			end.append(lineTerminator);
