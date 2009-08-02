@@ -731,7 +731,13 @@ public class TableListPanel
 
 			for (String t : userFilter)
 			{
-				this.tableTypes.addItem(t);
+				List<String> l = StringUtil.stringToList(t, ",");
+				l.retainAll(types);
+				String newFilter = StringUtil.listToString(l, ',');
+				if (StringUtil.isNonBlank(newFilter) && !types.contains(newFilter) )
+				{
+					this.tableTypes.addItem(newFilter);
+				}
 			}
 
 			this.tableTypes.setSelectedIndex(0);

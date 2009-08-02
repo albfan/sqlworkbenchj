@@ -173,12 +173,12 @@ public class PostgresEnumReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionBuilder.arrayList("enum");
+		return CollectionBuilder.arrayList("ENUM");
 	}
 
 	public boolean handlesType(String type)
 	{
-		return StringUtil.equalStringIgnoreCase("enum", type) || "*".equals(type);
+		return StringUtil.isBlank(type) || "*".equals(type) || StringUtil.equalStringIgnoreCase("ENUM", type);
 	}
 
 	public boolean handlesType(String[] types)
