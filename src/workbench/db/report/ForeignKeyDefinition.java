@@ -56,11 +56,6 @@ public class ForeignKeyDefinition
 		compareFKRules = flag;
 	}
 	
-	public void setNamespace(String namespace)
-	{
-		this.tagWriter.setNamespace(namespace);
-	}
-	
 	public void addReferenceColumn(String myColumn, String foreignColumn)
 	{
 		this.columnMap.put(myColumn, foreignColumn);

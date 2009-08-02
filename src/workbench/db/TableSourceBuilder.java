@@ -87,7 +87,7 @@ public class TableSourceBuilder
 			return s.toString();
 		}
 		DbMetadata meta = dbConnection.getMetadata();
-		
+
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.dbConnection);
 
@@ -95,7 +95,7 @@ public class TableSourceBuilder
 		List<ColumnIdentifier> cols = def.getColumns();
 		DataStore indexDef = meta.getIndexReader().getTableIndexInformation(tbl);
 		DataStore fkDef = null;
-		if (includeFk) 
+		if (includeFk)
 		{
 			FKHandler fk = new FKHandler(dbConnection);
 			fkDef = fk.getForeignKeys(tbl, false);
@@ -106,7 +106,7 @@ public class TableSourceBuilder
 		String source = this.getTableSource(table, cols, indexDef, fkDef, includeDrop, null, includeFk);
 		return source;
 	}
-	
+
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, String tableNameToUse)
 	{
 		DataStore indexInfo = getIndexReader().getTableIndexInformation(table);
@@ -334,14 +334,6 @@ public class TableSourceBuilder
 			result.append(grants);
 		}
 
-		if (dbConnection.getDbSettings().ddlNeedsCommit())
-		{
-			result.append(lineEnding);
-			result.append("COMMIT;");
-		}
-
-		result.append(lineEnding);
-
 		return result.toString();
 	}
 
@@ -349,7 +341,7 @@ public class TableSourceBuilder
 	{
 		return null;
 	}
-	
+
 	private String getPKName(DataStore anIndexDef)
 	{
 		if (anIndexDef == null) return null;
@@ -441,12 +433,6 @@ public class TableSourceBuilder
 		if (result.charAt(result.length() -1 ) != ';')
 		{
 			result.append(";\n");
-		}
-
-		if (dbConnection.getDbSettings().ddlNeedsCommit())
-		{
-			result.append("\n");
-			result.append("COMMIT;\n");
 		}
 
 		return result.toString();
@@ -694,7 +680,7 @@ public class TableSourceBuilder
 
 		return fk;
 	}
-	
+
 	private String getDeferrableVerb(String type)
 	{
 		if (dbConnection.getDbSettings().isNotDeferrable(type)) return StringUtil.EMPTY_STRING;

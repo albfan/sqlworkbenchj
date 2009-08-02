@@ -118,8 +118,12 @@ public class DomainIdentifier
 		return domain;
 	}
 
-	public CharSequence getSource(WbConnection con)
-		throws SQLException
+	public String toString()
+	{
+		return getSummary();
+	}
+	
+	public String getSummary()
 	{
 		StringBuilder result = new StringBuilder(25);
 		result.append(this.dataType);
@@ -129,6 +133,12 @@ public class DomainIdentifier
 		result.append(constraintDefinition);
 		result.append(';');
 		return result.toString();
+	}
+
+	public CharSequence getSource(WbConnection con)
+		throws SQLException
+	{
+		return con.getMetadata().getObjectSource(this);
 	}
 
 	public String getObjectNameForDrop(WbConnection con)

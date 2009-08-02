@@ -105,7 +105,7 @@ public class PostgresDomainReader
 		return result;
 	}
 
-	public DomainIdentifier getDomain(WbConnection connection, DbObject object)
+	public DomainIdentifier getObjectDefinition(WbConnection connection, DbObject object)
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -118,8 +118,12 @@ public class PostgresDomainReader
 			String schema = connection.getMetadata().adjustSchemaNameCase(object.getSchema());
 			String name = connection.getMetadata().adjustObjectnameCase(object.getObjectName());
 			String sql = "SELECT * FROM ( " + baseSql + ") di \n" +
-				"WHERE domain_schema = '"  + connection.getMetadata().quoteObjectname(schema) + "' \n" +
-				" AND  domain_name = '" + connection.getMetadata().quoteObjectname(name) + "' ";
+				"WHERE domain_name = '" + connection.getMetadata().quoteObjectname(name) + "' ";
+
+			if (StringUtil.isNonBlank(schema))
+			{
+				sql += " AND domain_schema = '"  + connection.getMetadata().quoteObjectname(schema) + "'";
+			}
 			
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
@@ -180,11 +184,8 @@ public class PostgresDomainReader
 		{
 			result.append("\nCOMMENT ON DOMAIN " + domain.getObjectName() + " IS '");
 			result.append(SqlUtil.escapeQuotes(domain.getComment()));
-			result.append("';");
+			result.append("';\n");
 		}
-
-		result.append("\nCOMMIT;\n");
-		
 		return result.toString();
 	}
 
@@ -220,12 +221,12 @@ public class PostgresDomainReader
 		return false;
 	}
 
-	public DataStore getObjectDefinition(WbConnection con, DbObject object)
+	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
 		if (!handlesType(object.getObjectType())) return null;
 
-		DomainIdentifier domain = getDomain(con, object);
+		DomainIdentifier domain = getObjectDefinition(con, object);
 		if (domain == null) return null;
 		
 		String[] columns = new String[] { "DOMAIN", "DATA_TYPE", "NULLABLE", "CONSTRAINT", "REMARKS" };
@@ -249,6 +250,7 @@ public class PostgresDomainReader
 
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
-		return getDomainSource(getDomain(con, object));
+		return getDomainSource(getObjectDefinition(con, object));
 	}
+
 }

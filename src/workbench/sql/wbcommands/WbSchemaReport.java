@@ -45,6 +45,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
 	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
+	public static final String PARAM_TYPES = "types";
 
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
@@ -56,11 +57,11 @@ public class WbSchemaReport
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("types");
 		cmdLine.addArgument("file");
-		cmdLine.addArgument("namespace");
 		cmdLine.addArgument("tables", ArgumentType.TableArgument);
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("reportTitle");
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_TYPES);
 		cmdLine.addArgument(PARAM_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
@@ -94,11 +95,9 @@ public class WbSchemaReport
 			return result;
 		}
 
-		String namespace = cmdLine.getValue("namespace");
 		this.reporter = new SchemaReporter(currentConnection);
 		String title = cmdLine.getValue("reportTitle");
 		this.reporter.setReportTitle(title);
-		this.reporter.setNamespace(namespace);
 		this.reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		SourceTableArgument tableArg = new SourceTableArgument(this.cmdLine.getValue("tables"), this.currentConnection);
 
@@ -133,6 +132,9 @@ public class WbSchemaReport
 		{
 			this.rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
 		}
+
+		List<String> types = cmdLine.getListValue(PARAM_TYPES);
+		reporter.setObjectTypes(types);
 
 		this.reporter.setIncludeTables(cmdLine.getBoolean(PARAM_INCLUDE_TABLES, true));
 		this.reporter.setIncludeProcedures(cmdLine.getBoolean(PARAM_INCLUDE_PROCS, false));

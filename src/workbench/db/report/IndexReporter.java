@@ -96,11 +96,6 @@ public class IndexReporter
 		}
 	}
 
-	public void setNamespace(String name)
-	{
-		this.tagWriter.setNamespace(name);
-	}
-
 	public Collection<IndexDefinition> getIndexList()
 	{
 		return this.indexList;

@@ -373,7 +373,6 @@ public class TableDiff
 		while (itr.hasNext())
 		{
 			ReportColumn col = (ReportColumn)itr.next();
-			col.setNamespace(this.writer.getNamespace());
 			col.appendXml(result, myindent, false);
 		}
 		myindent.removeFromEnd(2);

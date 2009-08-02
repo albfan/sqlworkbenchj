@@ -38,10 +38,9 @@ public class ReportSequence
 	private TagWriter tagWriter = new TagWriter();
 	private String schemaNameToUse = null;
 	
-	public ReportSequence(SequenceDefinition def, String nspace)
+	public ReportSequence(SequenceDefinition def)
 	{
 		this.sequence = def;
-		this.tagWriter.setNamespace(nspace);
 	}
 
 	public SequenceDefinition getSequence()

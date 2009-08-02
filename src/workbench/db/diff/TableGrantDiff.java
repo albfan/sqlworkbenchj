@@ -74,7 +74,6 @@ public class TableGrantDiff
 		if (grantsToAdd.size() > 0)
 		{
 			ReportTableGrants report = new ReportTableGrants(grantsToAdd);
-			report.setNamespace(writer.getNamespace());
 			writer.appendOpenTag(result, indent2, TAG_ADD_GRANTS);
 			result.append('\n');
 			report.appendXml(result, indent3);
@@ -85,7 +84,6 @@ public class TableGrantDiff
 		if (grantsToRemove.size() > 0)
 		{
 			ReportTableGrants report = new ReportTableGrants(grantsToRemove);
-			report.setNamespace(writer.getNamespace());
 			writer.appendOpenTag(result, indent2, TAG_REVOKE_GRANTS);
 			result.append('\n');
 			report.appendXml(result, indent3);

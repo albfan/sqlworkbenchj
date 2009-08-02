@@ -24,6 +24,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CreateSnippetAction;
 import workbench.gui.sql.EditorPanel;
@@ -66,6 +67,11 @@ public class ObjectScripterUI
 		CreateSnippetAction create = new CreateSnippetAction(this.editor);
 		this.editor.addPopupMenuItem(create, true);
 		this.add(this.editor, BorderLayout.CENTER);
+	}
+
+	public void setDbConnection(WbConnection con)
+	{
+		editor.setDatabaseConnection(con);
 	}
 
 	private void setRunning(boolean flag) 

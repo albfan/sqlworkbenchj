@@ -32,7 +32,6 @@ public class ReportTableGrants
 	public static final String TAG_GRANT_PRIV = "privilege";
 	public static final String TAG_GRANT_GRANTABLE = "grantable";
 	private Collection<TableGrant> grants;
-	private String namespace;
 
 	public ReportTableGrants(WbConnection con, TableIdentifier tbl)
 	{
@@ -50,7 +49,6 @@ public class ReportTableGrants
 		if (grants.size() == 0) return;
 
 		TagWriter tagWriter = new TagWriter();
-		tagWriter.setNamespace(this.namespace);
 
 		StrBuffer indent1 = new StrBuffer(indent);
 		indent1.append("  ");
@@ -71,9 +69,5 @@ public class ReportTableGrants
 		return Collections.unmodifiableCollection(grants);
 	}
 
-	public void setNamespace(String nspace)
-	{
-		this.namespace = nspace;
-	}
 }
 

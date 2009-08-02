@@ -23,7 +23,7 @@ public class PostgresConstraintReader
 	extends AbstractConstraintReader
 {
 	private static final String TABLE_SQL =
-					 "select rel.conname, rel.consrc \n" +
+					 "select rel.conname, rel.consrc, obj_description(t.oid) as remarks \n" +
            "from pg_class t, pg_constraint rel \n" +
            "where t.relname = ? \n" +
            "and   t.oid = rel.conrelid " +

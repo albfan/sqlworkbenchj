@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.util.Collection;
 import java.util.List;
 import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
@@ -18,6 +19,7 @@ import workbench.util.ExceptionUtil;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.Settings;
+import workbench.util.CollectionBuilder;
 
 /**
  *
@@ -36,6 +38,8 @@ public class ObjectScripter
 	public static final String TYPE_PKG = "package";
 	public static final String TYPE_FUNC = "function";
 	public static final String TYPE_TRG = "trigger";
+	public static final String TYPE_DOMAIN = "domain";
+	public static final String TYPE_ENUM = "enum";
 	public static final String TYPE_MVIEW = DbMetadata.MVIEW_NAME.toLowerCase();
 
 	private List<? extends DbObject> objectList;
@@ -44,11 +48,16 @@ public class ObjectScripter
 	private WbConnection dbConnection;
 	private boolean cancel;
 	private String nl = Settings.getInstance().getInternalEditorLineEnding();
-	
+	private Collection<String> commitTypes;
+	private boolean appendCommit;
+
 	public ObjectScripter(List<? extends DbObject> objects, WbConnection aConnection)
 	{
 		this.objectList = objects;
 		this.dbConnection = aConnection;
+		commitTypes = CollectionBuilder.hashSet(TYPE_SEQUENCE,
+			TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG, 
+			TYPE_DOMAIN, TYPE_ENUM);
 	}
 
 	public void setProgressMonitor(ScriptGenerationMonitor aMonitor)
@@ -61,12 +70,12 @@ public class ObjectScripter
 		if (this.script == null) this.generateScript();
 		return this.script.toString();
 	}
-	
+
 	public boolean isCancelled()
 	{
 		return this.cancel;
 	}
-	
+
 	public void generateScript()
 	{
 		try
@@ -75,6 +84,8 @@ public class ObjectScripter
 			this.cancel = false;
 			this.script = new StringBuilder(this.objectList.size() * 500);
 			if (!cancel) this.appendObjectType(TYPE_SEQUENCE);
+			if (!cancel) this.appendObjectType(TYPE_ENUM);
+			if (!cancel) this.appendObjectType(TYPE_DOMAIN);
 			if (!cancel) this.appendObjectType(TYPE_TABLE);
 			if (!cancel) this.appendForeignKeys();
 			if (!cancel) this.appendObjectType(TYPE_VIEW);
@@ -87,9 +98,13 @@ public class ObjectScripter
 			if (!cancel) this.appendObjectType(TYPE_PKG);
 			if (!cancel) this.appendObjectType(TYPE_TRG);
 		}
-		finally 
+		finally
 		{
 			this.dbConnection.setBusy(false);
+		}
+		if (appendCommit && this.dbConnection.getDbSettings().ddlNeedsCommit())
+		{
+			script.append("\nCOMMIT;\n");
 		}
 	}
 
@@ -97,7 +112,7 @@ public class ObjectScripter
 	{
 		this.cancel = true;
 	}
-	
+
 	private void appendForeignKeys()
 	{
 		if (this.progressMonitor != null)
@@ -110,7 +125,7 @@ public class ObjectScripter
 			if (cancel) break;
 			String type = dbo.getObjectType();
 			if (!type.equalsIgnoreCase(TYPE_TABLE)) continue;
-			
+
 			TableIdentifier tbl = (TableIdentifier)dbo;
 			tbl.adjustCase(this.dbConnection);
 			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
@@ -124,33 +139,37 @@ public class ObjectScripter
 				}
 				script.append(source);
 			}
-		}	
+		}
 		if (!first)
 		{
 			// no table was found, so no FK was added --> do not add separator
 			this.script.append("-- END FOREIGN KEYS --" + nl + nl);
 		}
 	}
-	
+
 	private void appendObjectType(String typeFilter)
 	{
 		for (DbObject dbo : objectList)
 		{
 			if (cancel) break;
 			String type = dbo.getObjectType();
-			
+
 			if (!type.equalsIgnoreCase(typeFilter)) continue;
-			
+
 			CharSequence source = null;
-			
+
 			if (this.progressMonitor != null)
 			{
 				this.progressMonitor.setCurrentObject(dbo.getObjectName());
 			}
-			
+
 			try
 			{
 				source = dbo.getSource(dbConnection);
+				if (!appendCommit)
+				{
+					appendCommit = commitTypes.contains(type.toLowerCase());
+				}
 			}
 			catch (Exception e)
 			{

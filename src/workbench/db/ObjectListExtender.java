@@ -61,9 +61,19 @@ public interface ObjectListExtender
 	 * @param con the database connection to be used
 	 * @param object the object to be retrieved
 	 * @return a DataStore containing detailed information about the object
-	 * @see DbMetadata#getObjectDefinition(workbench.db.TableIdentifier) 
+	 * @see DbMetadata#getObjectDetails(workbench.db.TableIdentifier)
 	 */
-	DataStore getObjectDefinition(WbConnection con, DbObject object);
+	DataStore getObjectDetails(WbConnection con, DbObject object);
+
+	/**
+	 * Retrieves the "native" DbObject that is identified by
+	 * the object name and type passed.
+	 *
+	 * @param con
+	 * @param object
+	 * @return a concrete DbObject
+	 */
+	DbObject getObjectDefinition(WbConnection con, DbObject name);
 
 	String getObjectSource(WbConnection con, DbObject object);
 }

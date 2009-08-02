@@ -1258,6 +1258,12 @@ public class TableListPanel
 			{
 				sql = builder.getTableSource(selectedTable, true, true);
 			}
+
+			if (sql != null && dbConnection.getDbSettings().ddlNeedsCommit())
+			{
+				sql = sql.toString() + "\nCOMMIT;\n";
+			}
+			
 			final String s = (sql == null ? "" : sql.toString());
 			WbSwingUtilities.invoke(new Runnable()
 			{

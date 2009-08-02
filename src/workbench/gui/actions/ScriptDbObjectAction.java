@@ -54,6 +54,7 @@ public class ScriptDbObjectAction
 
 		ObjectScripter s = new ObjectScripter(objects, source.getConnection());
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);
+		scripterUI.setDbConnection(source.getConnection());
 		scripterUI.show(SwingUtilities.getWindowAncestor(source.getComponent()));
 	}
 

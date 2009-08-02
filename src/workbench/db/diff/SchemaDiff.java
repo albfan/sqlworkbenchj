@@ -80,7 +80,6 @@ public class SchemaDiff
 	private List<TableIdentifier> viewsToDelete;
 	private List<SequenceDefinition> sequencesToDelete;
 
-	private String namespace;
 	private String encoding = "UTF-8";
 	private boolean compareJdbcTypes = false;
 	private boolean diffIndex = true;
@@ -106,14 +105,6 @@ public class SchemaDiff
 	}
 
 	/**
-	 *	Create a new SchemaDiff for the given connections
-	 */
-	public SchemaDiff(WbConnection source, WbConnection target)
-	{
-		this(source, target, null);
-	}
-
-	/**
 	 * Create a new SchemaDiff for the given connections with the given
 	 * namespace to be used when writing the XML.
 	 *
@@ -121,11 +112,10 @@ public class SchemaDiff
 	 * @param target the connection to the target schema
 	 * @param xmlNameSpace the namespace to be used for the XML, may be null.
 	 */
-	public SchemaDiff(WbConnection source, WbConnection target, String xmlNameSpace)
+	public SchemaDiff(WbConnection source, WbConnection target)
 	{
 		sourceDb = source;
 		targetDb = target;
-		this.namespace = xmlNameSpace;
 	}
 
 	public void setCompareConstraintsByName(boolean flag)
@@ -292,7 +282,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		ReportView view = new ReportView(tbl, con, diffIndex, this.namespace);
+		ReportView view = new ReportView(tbl, con, diffIndex);
 		return view;
 	}
 
@@ -300,7 +290,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		return new ReportTable(tbl, con, this.namespace, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants);
+		return new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants);
 	}
 
 	/**
@@ -696,7 +686,7 @@ public class SchemaDiff
 
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer tblIndent = new StrBuffer("    ");
-		TagWriter tw = new TagWriter(this.namespace);
+		TagWriter tw = new TagWriter();
 		out.write("<?xml version=\"1.0\" encoding=\"");
 		out.write(this.encoding);
 		out.write("\"?>\n");
@@ -822,8 +812,8 @@ public class SchemaDiff
 			if (o instanceof ProcDiffEntry) continue;
 
 			SequenceDiffEntry entry = (SequenceDiffEntry)o;
-			ReportSequence rp = new ReportSequence(entry.reference, this.namespace);
-			ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target, this.namespace));
+			ReportSequence rp = new ReportSequence(entry.reference);
+			ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target));
 			SequenceDiff diff = new SequenceDiff(rp, tp);
 			diff.setIndent(indent);
 			diff.setTagWriter(tw);
@@ -944,7 +934,7 @@ public class SchemaDiff
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer indent2 = new StrBuffer("    ");
 		writeTag(out, indent, TAG_REF_CONN, true);
-		StrBuffer info = this.sourceDb.getDatabaseInfoAsXml(indent2, this.namespace);
+		StrBuffer info = this.sourceDb.getDatabaseInfoAsXml(indent2);
 		info.writeTo(out);
 		writeTag(out, indent, TAG_REF_CONN, false);
 		out.write("\n");
@@ -952,13 +942,13 @@ public class SchemaDiff
 		out.write("  <!-- defintions in this file, then its structure will be    -->\n");
 		out.write("  <!-- the same as the reference connection -->\n");
 		writeTag(out, indent, TAG_TARGET_CONN, true);
-		info = this.targetDb.getDatabaseInfoAsXml(indent2, this.namespace);
+		info = this.targetDb.getDatabaseInfoAsXml(indent2);
 		info.writeTo(out);
 		writeTag(out, indent, TAG_TARGET_CONN, false);
 		out.write("\n");
 
 		info = new StrBuffer();
-		TagWriter tw = new TagWriter(this.namespace);
+		TagWriter tw = new TagWriter();
 
 		tw.appendOpenTag(info, indent, TAG_COMPARE_INFO);
 		info.append('\n');
@@ -1041,11 +1031,6 @@ public class SchemaDiff
 		{
 			out.write("</");
 		}
-		if (this.namespace != null)
-		{
-			out.write(namespace);
-			out.write(":");
-		}
 		out.write(tag);
 		if (isOpeningTag && attr != null)
 		{
@@ -1063,20 +1048,10 @@ public class SchemaDiff
 	{
 		if (indent != null) indent.writeTo(out);
 		out.write("<");
-		if (this.namespace != null)
-		{
-			out.write(namespace);
-			out.write(":");
-		}
 		out.write(tag);
 		out.write(">");
 		out.write(value);
 		out.write("</");
-		if (this.namespace != null)
-		{
-			out.write(namespace);
-			out.write(":");
-		}
 		out.write(tag);
 		out.write(">\n");
 	}

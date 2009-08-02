@@ -637,7 +637,11 @@ public class TableIdentifier
 	{
 		CharSequence source = null;
 		DbMetadata meta = con.getMetadata();
-		if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(type))
+		if (meta.isExtendedObject(this))
+		{
+			return meta.getObjectSource(this);
+		}
+		else if (DbMetadata.MVIEW_NAME.equalsIgnoreCase(type))
 		{
 			source = meta.getViewReader().getExtendedViewSource(new TableDefinition(this, null), false, false);
 		}

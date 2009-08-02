@@ -53,19 +53,11 @@ public class ReportView
 	/** The schema name to be used in the generated XML */
 	private String schemaNameToUse = null;
 	
-	private String namespace = null;
 	private CharSequence viewSource;
 	
 	public ReportView(TableIdentifier tbl)
 	{
-		this(tbl, (String)null);
-	}
-	
-	public ReportView(TableIdentifier tbl, String nspace)
-	{
 		this.view = tbl;
-		this.namespace = nspace;
-		tagWriter.setNamespace(this.namespace);
 	}
 	
 	/**
@@ -77,11 +69,10 @@ public class ReportView
 	 *  <li>the source for the view using {@link workbench.db.ViewReader#getViewSource(workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex, String nspace)
+	public ReportView(TableIdentifier tbl, WbConnection conn, boolean includeIndex)
 		throws SQLException
 	{
 		this.view = tbl;
-		this.namespace = nspace;
 		
 		if (tbl.getSchema() == null)
 		{
@@ -104,11 +95,9 @@ public class ReportView
 		this.viewSource = conn.getMetadata().getViewReader().getViewSource(tbl);
 		if (viewSource == null) viewSource = StringUtil.EMPTY_STRING;
 		this.setColumns(cols);
-		this.tagWriter.setNamespace(namespace);
 		if (includeIndex)
 		{
 			this.index = new IndexReporter(tbl, conn);
-			this.index.setNamespace(namespace);
 		}
 	}
 
@@ -134,7 +123,6 @@ public class ReportView
 		for (ColumnIdentifier column : cols)
 		{
 			this.columns[i] = new ReportColumn(column);
-			this.columns[i].setNamespace(this.namespace);
 			this.columns[i].setRealColumn(false);
 			i++;
 		}
@@ -209,14 +197,6 @@ public class ReportView
 		target.append('\n');
 		tagWriter.appendCloseTag(target, indent, TAG_VIEW_SOURCE);
 		
-	}
-		
-	/**
-	 * The namespace to be used for the XML representation
-	 */
-	public void setNamespace(String namespace)
-	{
-		this.tagWriter.setNamespace(namespace);
 	}
 
 }

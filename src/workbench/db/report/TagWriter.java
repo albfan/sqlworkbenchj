@@ -27,15 +27,8 @@ public class TagWriter
 	public static final String CDATA_START = "<![CDATA[";
 	public static final String CDATA_END = "]]>";
 	
-	private String xmlNamespace = null;
-	
 	public TagWriter()
 	{
-	}
-	
-	public TagWriter(String ns)
-	{
-		this.xmlNamespace = ns;
 	}
 	
 	/**
@@ -177,11 +170,6 @@ public class TagWriter
 	{
 		if (indent != null) target.append(indent);
 		target.append('<');
-		if (this.xmlNamespace != null)
-		{
-			target.append(xmlNamespace);
-			target.append(':');
-		}
 		target.append(tag);
 		if (attributes != null && attributes.size() > 0)
 		{
@@ -198,18 +186,16 @@ public class TagWriter
 	{
 		if (indent != null) target.append(indent);
 		target.append('<');
-		if (this.xmlNamespace != null)
-		{
-			target.append(xmlNamespace);
-			target.append(':');
-		}
 		target.append(tag);
 		if (attributes != null && attributes.length > 0)
 		{
 			for (TagAttribute att : attributes)
 			{
-				target.append(' ');
-				target.append(att.getTagText());
+				if (att != null)
+				{
+					target.append(' ');
+					target.append(att.getTagText());
+				}
 			}
 		}
 		if (closeTag) target.append('>');
@@ -219,31 +205,8 @@ public class TagWriter
 	{
 		if (indent != null) target.append(indent);
 		target.append("</");
-		if (this.xmlNamespace != null)
-		{
-			target.append(xmlNamespace);
-			target.append(':');
-		}
 		target.append(tag);
 		target.append(">\n");
-	}
-
-	/**
-	 * Getter for property namespace.
-	 * @return Value of property namespace.
-	 */
-	public String getNamespace()
-	{
-		return xmlNamespace;
-	}
-	
-	/**
-	 * Setter for property namespace.
-	 * @param namespace New value of property namespace.
-	 */
-	public void setNamespace(String namespace)
-	{
-		this.xmlNamespace = namespace;
 	}
 
 	private static final char[] SPECIAL_CHARS = new char[] {'<', '>', '&', '\'', '\n', '\r' };

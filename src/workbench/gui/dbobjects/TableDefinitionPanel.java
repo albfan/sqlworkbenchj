@@ -220,7 +220,7 @@ public class TableDefinitionPanel
 					}
 				});
 				DbMetadata meta = this.dbConnection.getMetadata();
-				DataStore def = meta.getObjectDefinition(currentTable);
+				DataStore def = meta.getObjectDetails(currentTable);
 				
 				final DataStoreTableModel model = new DataStoreTableModel(def);
 				WbSwingUtilities.invoke(new Runnable()

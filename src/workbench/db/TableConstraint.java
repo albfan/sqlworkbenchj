@@ -24,7 +24,8 @@ public class TableConstraint
 	private String name;
 	private String expression;
 	private boolean isSystemName;
-
+	private String comment;
+	
 	public TableConstraint(String cName, String expr)
 	{
 		name = cName;
@@ -46,6 +47,16 @@ public class TableConstraint
 		return this.name;
 	}
 
+	public void setComment(String remark)
+	{
+		comment = remark;
+	}
+
+	public String getComment()
+	{
+		return comment;
+	}
+	
 	public String getExpression()
 	{
 		return expression;

@@ -33,6 +33,7 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
+import workbench.util.CollectionBuilder;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
@@ -51,8 +52,7 @@ public class SchemaReporter
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private List<ReportProcedure> procedures = new ArrayList<ReportProcedure>();
 	private List<ReportSequence> sequences = new ArrayList<ReportSequence>();
-	private String xmlNamespace;
-	private String[] types;
+	private List<String> types;
 	private List<String> schemas;
 
 	private TagWriter tagWriter = new TagWriter();
@@ -73,7 +73,7 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
-		// Initialize the types to retrieve
+		types = CollectionBuilder.arrayList(conn.getMetadata().getTableTypeName());
 		setIncludeViews(true);
 	}
 
@@ -132,15 +132,20 @@ public class SchemaReporter
 	{ 
 		if (flag)
 		{
-			types = new String[] { 
-				this.dbConn.getMetadata().getTableTypeName(), 
-				this.dbConn.getMetadata().getViewTypeName(),
-				DbMetadata.MVIEW_NAME};
+			types.add(this.dbConn.getMetadata().getViewTypeName());
+			types.add(DbMetadata.MVIEW_NAME);
 		}
 		else
 		{
-			types = new String[] { this.dbConn.getMetadata().getTableTypeName() };
+			types.remove(this.dbConn.getMetadata().getViewTypeName());
+			types.remove(DbMetadata.MVIEW_NAME);
 		}
+	}
+
+	public void setObjectTypes(List<String> newTypeList)
+	{
+		types.clear();
+		types.addAll(newTypeList);
 	}
 	
 	public void setIncludeSequences(boolean flag) { this.includeSequences = flag; }
@@ -213,11 +218,6 @@ public class SchemaReporter
 		
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		out.write("<");
-		if (this.xmlNamespace != null)
-		{
-			out.write(this.xmlNamespace);
-			out.write(':');
-		}
 		out.write("schema-report>\n\n");
 		writeReportInfo(out);
 		out.write("\n");
@@ -246,16 +246,22 @@ public class SchemaReporter
 					type = this.dbConn.getMetadata().getObjectType(table);
 					table.setType(type);
 				}
-				
-				if (dbs.isViewType(type))
+
+				if (this.dbConn.getMetadata().isExtendedObject(table))
 				{
-					ReportView rview = new ReportView(table, this.dbConn, true, this.xmlNamespace);
+					DbObject dbo = dbConn.getMetadata().getObjectDefinition(table);
+					GenericReportObject genObject = new GenericReportObject(dbConn, dbo);
+					genObject.writeXml(out);
+				}
+				else if (dbs.isViewType(type))
+				{
+					ReportView rview = new ReportView(table, this.dbConn, true);
 					rview.setSchemaNameToUse(this.schemaNameToUse);
 					rview.writeXml(out);
 				}
 				else
 				{
-					ReportTable rtable = new ReportTable(table, this.dbConn, this.xmlNamespace, true, true, true, true, this.includeGrants);
+					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, this.includeGrants);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();
@@ -299,11 +305,6 @@ public class SchemaReporter
 		}
 		
 		out.write("</");
-		if (this.xmlNamespace != null)
-		{
-			out.write(this.xmlNamespace);
-			out.write(':');
-		}
 		out.write("schema-report>");
 		out.flush();
 	}
@@ -320,29 +321,10 @@ public class SchemaReporter
 		{
 			this.tagWriter.appendTag(info, indent, "report-title", this.reportTitle);
 		}
-		info.append(this.dbConn.getDatabaseInfoAsXml(indent, this.xmlNamespace));
+		info.append(this.dbConn.getDatabaseInfoAsXml(indent));
 		info.writeTo(out);
 	}
 
-
-	/**
-	 * Define the namespace for the XML tags
-	 * @param name The namespace to be used for the XML tags
-	 */
-	public void setNamespace(String name)
-	{
-		this.xmlNamespace = name;
-		this.tagWriter.setNamespace(name);
-	}
-
-	/**
-	 * Get the currently defined namespace
-	 * @return The namespace that is used
-	 */
-	public String getNamespace()
-	{
-		return this.xmlNamespace;
-	}
 
 	/**
 	 * Cancel the current reporting process (this might leave a corrupted XML file)
@@ -420,7 +402,7 @@ public class SchemaReporter
 			
 			for (SequenceDefinition seq : seqs)
 			{
-				ReportSequence rseq = new ReportSequence(seq, this.xmlNamespace);
+				ReportSequence rseq = new ReportSequence(seq);
 				this.sequences.add(rseq);
 				if (this.cancel) return;
 			}
@@ -482,8 +464,9 @@ public class SchemaReporter
 		try
 		{
 			if (this.cancel) return;
-			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);	
-			this.setTableList(dbConn.getMetadata().getObjectList(schema, this.types));
+			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
+			String[] typesToUse = types.toArray(new String[0]);
+			this.setTableList(dbConn.getMetadata().getObjectList(schema, typesToUse));
 		}
 		catch (SQLException e)
 		{

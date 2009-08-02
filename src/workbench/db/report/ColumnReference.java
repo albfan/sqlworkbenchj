@@ -35,11 +35,6 @@ public class ColumnReference
 		this.fkDefinition = fk;
 	}
 	
-	public void setNamespace(String namespace)
-	{
-		this.tagWriter.setNamespace(namespace);
-	}
-	
 	public String getFkName()
 	{
 		return fkDefinition.getFkName();

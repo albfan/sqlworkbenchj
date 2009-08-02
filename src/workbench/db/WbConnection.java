@@ -817,11 +817,6 @@ public class WbConnection
 		return false;
 	}
 
-	public StrBuffer getDatabaseInfoAsXml(StrBuffer indent)
-	{
-		return this.getDatabaseInfoAsXml(indent, null);
-	}
-
 	public String getDriverVersion()
 	{
 		DatabaseMetaData db = null;
@@ -841,7 +836,7 @@ public class WbConnection
 	 *	Returns information about the DBMS and the JDBC driver
 	 *	in the XML format used for the XML export
 	 */
-	public StrBuffer getDatabaseInfoAsXml(StrBuffer indent, String namespace)
+	public StrBuffer getDatabaseInfoAsXml(StrBuffer indent)
 	{
 		StrBuffer dbInfo = new StrBuffer(200);
 		DatabaseMetaData db = null;
@@ -854,7 +849,7 @@ public class WbConnection
 			return new StrBuffer("");
 		}
 
-		TagWriter tagWriter = new TagWriter(namespace);
+		TagWriter tagWriter = new TagWriter();
 		String value = null;
 
 

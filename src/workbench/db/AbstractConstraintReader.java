@@ -184,10 +184,18 @@ public abstract class AbstractConstraintReader
 
 			Pattern p = Pattern.compile("^check\\s+.*", Pattern.CASE_INSENSITIVE);
 			rs = stmt.executeQuery();
+
+			boolean hasComment = rs.getMetaData().getColumnCount() > 2;
+
 			while (rs.next())
 			{
 				String name = rs.getString(1);
 				String constraint = rs.getString(2);
+				String comment = null;
+				if (hasComment)
+				{
+					comment = rs.getString(3);
+				}
 				if (constraint != null)
 				{
 					constraint = constraint.trim();
@@ -199,6 +207,7 @@ public abstract class AbstractConstraintReader
 					}
 					TableConstraint c = new TableConstraint(name, constraint);
 					c.setIsSystemName(isSystemConstraintName(name));
+					c.setComment(comment);
 					result.add(c);
 				}
 			}

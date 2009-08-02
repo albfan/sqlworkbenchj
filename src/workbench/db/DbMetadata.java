@@ -53,6 +53,7 @@ import workbench.db.h2database.H2SequenceReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
+import workbench.db.postgres.PostgresEnumReader;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionBuilder;
@@ -185,6 +186,7 @@ public class DbMetadata
 				this.ddlFilter = new PostgresDDLFilter();
 			}
 			extenders.add(new PostgresDomainReader());
+			extenders.add(new PostgresEnumReader());
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
@@ -1708,7 +1710,19 @@ public class DbMetadata
 		return def.getColumns();
 	}
 
-	public DataStore getObjectDefinition(TableIdentifier table)
+	public DbObject getObjectDefinition(TableIdentifier table)
+	{
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(table.getObjectType()))
+			{
+				return extender.getObjectDefinition(dbConnection, table);
+			}
+		}
+		return null;
+	}
+	
+	public DataStore getObjectDetails(TableIdentifier table)
 		throws SQLException
 	{
 		DataStore def = null;
@@ -1716,7 +1730,7 @@ public class DbMetadata
 		{
 			if (extender.handlesType(table.getObjectType()))
 			{
-				return extender.getObjectDefinition(dbConnection, table);
+				return extender.getObjectDetails(dbConnection, table);
 			}
 		}
 		

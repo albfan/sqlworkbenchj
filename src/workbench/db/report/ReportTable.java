@@ -56,6 +56,7 @@ public class ReportTable
 	public static final String TAG_TABLE_COMMENT = "table-comment";
 	public static final String TAG_TABLE_CONSTRAINTS = "table-constraints";
 	public static final String TAG_CONSTRAINT_DEF = "constraint-definition";
+	public static final String TAG_CONSTRAINT_COMMENT = "constraint-comment";
 
 	private TableIdentifier table;
 	private Map<String, ForeignKeyDefinition> foreignKeys = new HashMap<String, ForeignKeyDefinition>();
@@ -64,21 +65,13 @@ public class ReportTable
 	private String tableComment;
 	private TagWriter tagWriter = new TagWriter();
 	private String schemaNameToUse = null;
-	private String namespace = null;
 	private boolean includePrimaryKey = true;
 	private List<TableConstraint> tableConstraints;
 	private ReportTableGrants grants;
 
 	public ReportTable(TableIdentifier tbl)
 	{
-		this(tbl, (String)null);
-	}
-
-	public ReportTable(TableIdentifier tbl, String nspace)
-	{
 		this.table = tbl;
-		this.namespace = nspace;
-		tagWriter.setNamespace(this.namespace);
 	}
 
 	/**
@@ -92,11 +85,10 @@ public class ReportTable
 	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.ConstraintReader#getTableConstraints(workbench.db.WbConnection, workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportTable(TableIdentifier tbl, WbConnection conn, String nspace, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints, boolean includeGrants)
+	public ReportTable(TableIdentifier tbl, WbConnection conn, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints, boolean includeGrants)
 		throws SQLException
 	{
 		this.table = tbl.createCopy();
-		this.namespace = nspace;
 		this.includePrimaryKey = includePk;
 
 		this.table.checkQuotesNeeded(conn);
@@ -117,12 +109,10 @@ public class ReportTable
 		}
 
 		this.setColumns(cols);
-		this.tagWriter.setNamespace(namespace);
 
 		if (includeIndex)
 		{
 			this.reporter = new IndexReporter(tbl, conn);
-			this.reporter.setNamespace(namespace);
 		}
 
 		if (includeFk)
@@ -204,7 +194,6 @@ public class ReportTable
 		{
 			ColumnIdentifier col = cols.get(i);
 			this.columns[i] = new ReportColumn(col);
-			this.columns[i].setNamespace(this.namespace);
 		}
 	}
 
@@ -432,22 +421,15 @@ public class ReportTable
 		String systemName = Boolean.toString(constraint.isSystemName());
 
 		TagAttribute type = new TagAttribute("type", constraint.getType());
-		TagAttribute sysName = new TagAttribute("generated-name", systemName);
-
+		TagAttribute sysName = null;
 		TagAttribute nameAttr = null;
+		
 		if (name != null)
 		{
 			nameAttr = new TagAttribute("name", name);
+			sysName = new TagAttribute("generated-name", systemName);
 		}
 		tagWriter.appendCDATATag(line, indent, ReportTable.TAG_CONSTRAINT_DEF, expr, type, sysName, nameAttr);
-	}
-
-	/**
-	 * The namespace to be used for the XML representation
-	 */
-	public void setNamespace(String namespace)
-	{
-		this.tagWriter.setNamespace(namespace);
 	}
 
 	public void done()

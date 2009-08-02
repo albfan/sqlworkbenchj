@@ -70,10 +70,6 @@ public class ReportColumn
 	public void setForeignKeyReference(ColumnReference ref)
 	{
 		this.fk = ref;
-		if (this.fk != null)
-		{
-			this.fk.setNamespace(this.tagWriter.getNamespace());
-		}
 	}
 
 	public void appendXml(StrBuffer result, StrBuffer indent)
@@ -119,15 +115,6 @@ public class ReportColumn
 			result.append(fk.getXml(myindent));
 		}
 		tagWriter.appendCloseTag(result, indent, mainTagToUse);
-	}
-
-	public void setNamespace(String namespace)
-	{
-		this.tagWriter.setNamespace(namespace);
-		if (this.fk != null)
-		{
-			this.fk.setNamespace(namespace);
-		}
 	}
 
 	public void setRealColumn(boolean flag)

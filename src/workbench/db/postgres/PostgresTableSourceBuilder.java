@@ -10,12 +10,11 @@
  */
 package workbench.db.postgres;
 
-import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DomainIdentifier;
+import workbench.db.EnumIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
@@ -54,18 +53,18 @@ public class PostgresTableSourceBuilder
 	private CharSequence getEnumInformation(List<ColumnIdentifier> columns)
 	{
 		PostgresEnumReader reader = new PostgresEnumReader();
-		Collection<String> enums = reader.getDefinedEnums(dbConnection);
+		Map<String, EnumIdentifier> enums = reader.getEnumInfo(dbConnection);
 		if (enums == null || enums.size() == 0) return null;
 		StringBuilder result = new StringBuilder(50);
 		
 		for (ColumnIdentifier col : columns)
 		{
 			String dbType = col.getDbmsType();
-			if (enums.contains(dbType))
+			EnumIdentifier enumDef = enums.get(dbType);
+			if (enumDef != null)
 			{
 				result.append("\n-- enum '" + dbType + "': ");
-				List<String> values = reader.getEnumValues(dbConnection, dbType);
-				result.append(StringUtil.listToString(values, ",", true, '\''));
+				result.append(StringUtil.listToString(enumDef.getValues(), ",", true, '\''));
 			}
 		}
 		
@@ -86,14 +85,7 @@ public class PostgresTableSourceBuilder
 			if (domain != null)
 			{
 				result.append("\n-- domain '" + dbType + "': ");
-				try
-				{
-					result.append(domain.getSource(dbConnection));
-				}
-				catch (SQLException e)
-				{
-					// cannot happen
-				}
+				result.append(domain.getSummary());
 			}
 		}
 		
