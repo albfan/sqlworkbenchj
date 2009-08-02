@@ -76,13 +76,6 @@
 					</entry>
 				</row>
 				<row>
-					<entry>-namespace</entry>
-					<entry>The namespace to be used for the XML tags. By default no
-						namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
-						</literal> would be written as <literal>&lt;wb:schema-report&gt;</literal>
-					</entry>
-				</row>
-				<row>
 					<entry>-includeTables</entry>
 					<entry>Control the output of table information for the report. The default is
 						<literal>true</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
@@ -248,14 +241,6 @@
 					<entry>-targetSchema</entry>
 					<entry>
 						A schema in the target connection to be compared to the tables from the reference schema.
-					</entry>
-				</row>
-
-				<row>
-					<entry>-namespace</entry>
-					<entry>The namespace to be used for the XML tags. By default no
-						namespace is used. If you supply a value for this e.g. <literal>wb</literal> the tag <literal>&lt;schema-report&gt;
-						</literal> would be written as <literal>&lt;wb:modify-table&gt;</literal>
 					</entry>
 				</row>
 
