@@ -63,9 +63,9 @@ public class PostgresProcedureReader
 		if (pgType2Java == null)
 		{
 			// This mapping has been copied from the JDBC driver.
-			// This map is deeply hidden in the driver and even
-			// if I hard-coded references to the driver into the
-			// class I wouldn't know how to retrieve them.
+			// This map is a private attribute of the class org.postgresql.jdbc2.TypeInfoCache
+			// so, even if I hardcoded references to the Postgres driver I wouldn't be able
+			// to use the information.
 			pgType2Java = new HashMap<String, Integer>();
 			pgType2Java.put("int2", Integer.valueOf(Types.SMALLINT));
 			pgType2Java.put("int4", Integer.valueOf(Types.INTEGER));

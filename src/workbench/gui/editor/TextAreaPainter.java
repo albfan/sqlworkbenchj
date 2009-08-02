@@ -22,6 +22,7 @@ import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
 import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -73,8 +74,7 @@ public class TextAreaPainter
 
 		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 		setFont(Settings.getInstance().getEditorFont());
-		setForeground(Color.BLACK);
-		setBackground(Color.WHITE);
+		setColors();
 
 		caretColor = Color.BLACK;
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
@@ -84,6 +84,8 @@ public class TextAreaPainter
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_EDITOR_TAB_WIDTH,
+			Settings.PROPERTY_EDITOR_FG_COLOR,
+			Settings.PROPERTY_EDITOR_BG_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
 			Settings.PROPERTY_SHOW_LINE_NUMBERS);
 	}
@@ -109,8 +111,27 @@ public class TextAreaPainter
 			this.showLineNumbers = Settings.getInstance().getShowLineNumbers();
 			invalidate();
 		}
+		else if (Settings.PROPERTY_EDITOR_FG_COLOR.equals(evt.getPropertyName()) ||
+			Settings.PROPERTY_EDITOR_BG_COLOR.equals(evt.getPropertyName()))
+		{
+			setColors();
+			invalidate();
+			WbSwingUtilities.repaintLater(this);
+		}
 	}
 
+	private void setColors()
+	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				setForeground(Settings.getInstance().getEditorTextColor());
+				setBackground(Settings.getInstance().getEditorBackgroundColor());
+			}
+		});
+	}
+	
 	/**
 	 * Returns if this component can be traversed by pressing the
 	 * Tab key. This returns false.

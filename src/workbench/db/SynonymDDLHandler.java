@@ -69,7 +69,7 @@ public class SynonymDDLHandler
 				TableIdentifier syn = dbConnection.getMetadata().getSynonymTable(tbl.getSchema(), tbl.getTableName());
 				if (syn != null)
 				{
-					TableSourceBuilder builder = new TableSourceBuilder(dbConnection);
+					TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(dbConnection);
 
 					String tableSql = builder.getTableSource(syn, false, true);
 					if (StringUtil.isNonBlank(tableSql))

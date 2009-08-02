@@ -657,7 +657,7 @@ public class TableIdentifier
 		}
 		else
 		{
-			TableSourceBuilder builder = new TableSourceBuilder(con);
+			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
 			source = builder.getTableSource(this, false, false);
 		}
 		return source;

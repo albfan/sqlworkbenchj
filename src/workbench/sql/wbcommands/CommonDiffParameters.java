@@ -136,8 +136,8 @@ public class CommonDiffParameters
 			if (refSchema == null) refSchema = referenceConn.getMetadata().getSchemaToUse();
 			if (targetSchema == null) targetSchema = targetCon.getMetadata().getSchemaToUse();
 			
-			refTables = referenceConn.getMetadata().getTableList(refSchema, new String[] { referenceConn.getMetadata().getTableTypeName() });
-			targetTables = targetCon.getMetadata().getTableList(targetSchema, new String[] { targetCon.getMetadata().getTableTypeName() });
+			refTables = referenceConn.getMetadata().getObjectList(refSchema, new String[] { referenceConn.getMetadata().getTableTypeName() });
+			targetTables = targetCon.getMetadata().getObjectList(targetSchema, new String[] { targetCon.getMetadata().getTableTypeName() });
 		}
 		else
 		{

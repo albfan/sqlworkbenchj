@@ -123,17 +123,7 @@ public class SelectAnalyzer
 				context = CONTEXT_TABLE_LIST;
 			}
 		
-			// The schemaForTableList will be set anyway
-			// in order to allow BaseAnalyzer to retrieve 
-			// the table list
-			if (q != null)
-			{
-				this.schemaForTableList = q;
-			}
-			else
-			{
-				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
-			}
+			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
 		else
 		{

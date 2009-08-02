@@ -41,16 +41,7 @@ public class DeleteAnalyzer
 		{
 			
 			context = CONTEXT_TABLE_LIST;
-			String q = this.getQualifierLeftOfCursor();
-			if (q != null)
-			{
-				this.setOverwriteCurrentWord(false);
-				this.schemaForTableList = q;
-			}
-			else
-			{
-				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
-			}
+			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
 		else
 		{

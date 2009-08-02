@@ -135,6 +135,26 @@ public abstract class BaseAnalyzer
 	{ 
 		return this.overwriteCurrentWord; 
 	}
+
+	protected String getSchemaFromCurrentWord()
+	{
+		String word = getCurrentWord();
+		String q = this.getQualifierLeftOfCursor();
+		if (q != null)
+		{
+			return q;
+		}
+
+		TableIdentifier tbl = (StringUtil.isBlank(word) ? null : new TableIdentifier(word));
+
+		if (tbl == null || StringUtil.isBlank(tbl.getSchema()))
+		{
+			if (this.dbConnection != null) return this.dbConnection.getMetadata().getCurrentSchema();
+			return null;
+		}
+		
+		return tbl.getSchema();
+	}
 	
 	public void retrieveObjects()
 	{

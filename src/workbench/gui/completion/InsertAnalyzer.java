@@ -117,7 +117,7 @@ public class InsertAnalyzer
 
 			if (schemaForTableList == null)
 			{
-				schemaForTableList = this.dbConnection.getMetadata().getSchemaToUse();
+				schemaForTableList = getSchemaFromCurrentWord();
 			}
 
 			context = CONTEXT_TABLE_LIST;

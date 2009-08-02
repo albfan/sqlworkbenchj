@@ -95,7 +95,7 @@ public class TableCreator
 			
 			if (pkCols.size() > 0)
 			{
-				TableSourceBuilder builder = new TableSourceBuilder(connection);
+				TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
 				CharSequence pkSql = builder.getPkSource(this.tablename, pkCols, null);
 				if (pkSql.length() > 0)
 				{

@@ -123,7 +123,7 @@ public class TableCommentReader
 					String commentSql = StringUtil.replace(columnStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
 					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
 					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
-					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'" ,"''"));
+					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : SqlUtil.escapeQuotes(comment));
 					result.append(commentSql);
 					result.append("\n");
 				}

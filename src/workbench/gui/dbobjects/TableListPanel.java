@@ -90,6 +90,7 @@ import workbench.db.SynonymDDLHandler;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
@@ -715,7 +716,7 @@ public class TableListPanel
 		this.reset();
 		try
 		{
-			Collection<String> types = this.dbConnection.getMetadata().getTableTypes();
+			Collection<String> types = this.dbConnection.getMetadata().getObjectTypes();
 			this.tableTypes.removeAllItems();
 			this.tableTypes.addItem("*");
 
@@ -850,7 +851,7 @@ public class TableListPanel
 				}
 			}
 
-			DataStore ds = dbConnection.getMetadata().getTables(currentCatalog, currentSchema, types);
+			DataStore ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 			model.sortByColumn(0);
 
@@ -1208,7 +1209,7 @@ public class TableListPanel
 		
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
-		TableSourceBuilder builder = new TableSourceBuilder(this.dbConnection);
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(this.dbConnection);
 
 		try
 		{
@@ -1223,7 +1224,11 @@ public class TableListPanel
 
 			String type = selectedTable.getType();
 
-			if (dbs.isViewType(type))
+			if (meta.isExtendedObject(selectedTable))
+			{
+				sql = meta.getObjectSource(selectedTable);
+			}
+			else if (dbs.isViewType(type))
 			{
 				TableDefinition def = new TableDefinition(this.selectedTable, TableColumnsDatastore.createColumnIdentifiers(meta, tableDefinition.getDataStore()));
 				sql = meta.getViewReader().getExtendedViewSource(def, true, false);

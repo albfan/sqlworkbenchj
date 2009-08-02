@@ -115,7 +115,7 @@ public class WbListTables extends SqlCommand
 
 			String tname = tbl.getTableName();
 
-			DataStore ds = currentConnection.getMetadata().getTables(tcatalog, tschema, tname, types);
+			DataStore ds = currentConnection.getMetadata().getObjects(tcatalog, tschema, tname, types);
 			if (resultList == null)
 			{
 				resultList = ds;

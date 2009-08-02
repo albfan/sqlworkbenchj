@@ -26,16 +26,29 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * Re-Create the source SQL for a given TableIdentifier.
+ *
+ *
+ * This class should not be instantiated directly. Use
+ * TableSourceBuilderFactory.getBuilder() instead
  *
  * @author support@sql-workbench.net
  */
 public class TableSourceBuilder
 {
-	private WbConnection dbConnection;
+	protected WbConnection dbConnection;
 	private boolean createInlineConstraints;
 	private boolean useNullKeyword;
-	
-	public TableSourceBuilder(WbConnection con)
+
+	/**
+	 * This class should not be instantiated directly. Use
+   * TableSourceBuilderFactory.getBuilder() instead.
+	 *
+	 * @param con the connection to be used
+	 *
+	 * @see TableSourceBuilderFactory#getBuilder(workbench.db.WbConnection)
+	 */
+	protected TableSourceBuilder(WbConnection con)
 	{
 		dbConnection = con;
 		String productName = dbConnection.getMetadata().getProductName();
@@ -220,10 +233,10 @@ public class TableSourceBuilder
 				result.append(constraint);
 			}
 
-			if (includeCommentInTableSource && !StringUtil.isEmptyString(column.getComment()))
+			if (includeCommentInTableSource && StringUtil.isNonBlank(column.getComment()))
 			{
 				result.append(" COMMENT '");
-				result.append(column.getComment());
+				result.append(SqlUtil.escapeQuotes(column.getComment()));
 				result.append('\'');
 			}
 
@@ -265,6 +278,15 @@ public class TableSourceBuilder
 
 		result.append(");" + lineEnding);
 		// end of CREATE TABLE
+
+		// Add additional column information provided by any specialized descendant class
+		String colInfo = getAdditionalColumnInformation(table, columns, aIndexDef);
+		if (StringUtil.isNonBlank(colInfo))
+		{
+			result.append(colInfo);
+			result.append(lineEnding);
+			result.append(lineEnding);
+		}
 
 		if (!this.createInlineConstraints && pkCols.size() > 0)
 		{
@@ -323,6 +345,11 @@ public class TableSourceBuilder
 		return result.toString();
 	}
 
+	protected String getAdditionalColumnInformation(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	{
+		return null;
+	}
+	
 	private String getPKName(DataStore anIndexDef)
 	{
 		if (anIndexDef == null) return null;

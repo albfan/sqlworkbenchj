@@ -88,6 +88,12 @@ public class SqlUtil
 		return KnownTypesHolder.KNOWN_TYPES;
 	}
 
+	public static String escapeQuotes(String value)
+	{
+		if (value == null) return null;
+		return value.replace("'" ,"''");
+	}
+	
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.

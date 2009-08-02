@@ -90,8 +90,11 @@ public class Settings
 	 */
 	public static final String PROPERTY_PROFILE_STORAGE = "workbench.settings.profilestorage";
 	public static final String PROPERTY_EDITOR_TAB_WIDTH = "workbench.editor.tabwidth";
+
 	public static final String PROPERTY_EDITOR_CURRENT_LINE_COLOR = "workbench.editor.currentline.color";
 	public static final String PROPERTY_EDITOR_ELECTRIC_SCROLL = "workbench.editor.electricscroll";
+	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
+	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
 	// </editor-fold>
 
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
@@ -1422,6 +1425,30 @@ public class Settings
 	public boolean getHighlightCurrentStatement()
 	{
 		return getBoolProperty(PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, false);
+	}
+
+	public Color getEditorBackgroundColor()
+	{
+		Color std = UIManager.getColor("TextArea.background");
+		if (std == null) std = Color.WHITE;
+		return getColor(PROPERTY_EDITOR_BG_COLOR, std);
+	}
+
+	public void setEditorBackgroundColor(Color c)
+	{
+		setColor(PROPERTY_EDITOR_BG_COLOR, c);
+	}
+
+	public Color getEditorTextColor()
+	{
+		Color std = UIManager.getColor("TextArea.foreground");
+		if (std == null) std = Color.BLACK;
+		return getColor(PROPERTY_EDITOR_FG_COLOR, std);
+	}
+
+	public void setEditorTextColor(Color c)
+	{
+		setColor(PROPERTY_EDITOR_FG_COLOR, c);
 	}
 
 	public void setEditorSelectionColor(Color c)

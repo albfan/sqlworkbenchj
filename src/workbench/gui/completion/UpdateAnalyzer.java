@@ -18,6 +18,7 @@ import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
 /**
@@ -82,15 +83,7 @@ public class UpdateAnalyzer
 		if (state == IN_UPDATE)
 		{
 			context = CONTEXT_TABLE_LIST;
-			String q = this.getQualifierLeftOfCursor();
-			if (q != null)
-			{
-				this.schemaForTableList = q;
-			}
-			else
-			{
-				this.schemaForTableList = this.dbConnection.getMetadata().getCurrentSchema();
-			}
+			this.schemaForTableList = getSchemaFromCurrentWord();
 		}
 		else
 		{

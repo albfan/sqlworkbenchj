@@ -34,7 +34,7 @@ public class Db2SynonymReader
 	
 	/**
 	 * Returns an empty list, as the standard JDBC driver 
-	 * alread returns synonyms in the getTables() method.
+	 * alread returns synonyms in the getObjects() method.
 	 * 
 	 * @return an empty list
 	 */

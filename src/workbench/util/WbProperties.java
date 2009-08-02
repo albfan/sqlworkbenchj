@@ -268,10 +268,12 @@ public class WbProperties
 		{
 			if (value == null)
 			{
-				super.remove(name);
-				return null;
+				oldValue = (String) super.remove(name);
 			}
-			oldValue = (String) super.setProperty(name, value);
+			else
+			{
+				oldValue = (String) super.setProperty(name, value);
+			}
 		}
 
 		if (firePropChange && !StringUtil.equalString(oldValue, value))

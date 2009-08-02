@@ -701,6 +701,11 @@ public class StringUtil
 	 */
 	public static final String listToString(Collection aList, String aDelimiter, boolean quoteEntries)
 	{
+		return listToString(aList, aDelimiter, quoteEntries, '"');
+	}
+	
+	public static final String listToString(Collection aList, String aDelimiter, boolean quoteEntries, char quote)
+	{
 		if (aList == null || aList.size() == 0) return "";
 		int numElements = 0;
 		StringBuilder result = new StringBuilder(aList.size() * 50);
@@ -711,9 +716,9 @@ public class StringUtil
 			{
 				result.append(aDelimiter);
 			}
-			if (quoteEntries) result.append('"');
+			if (quoteEntries) result.append(quote);
 			result.append(o.toString());
-			if (quoteEntries) result.append('"');
+			if (quoteEntries) result.append(quote);
 			numElements ++;
 		}
 		return result.toString();

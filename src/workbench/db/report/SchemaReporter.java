@@ -483,7 +483,7 @@ public class SchemaReporter
 		{
 			if (this.cancel) return;
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);	
-			this.setTableList(dbConn.getMetadata().getTableList(schema, this.types));
+			this.setTableList(dbConn.getMetadata().getObjectList(schema, this.types));
 		}
 		catch (SQLException e)
 		{

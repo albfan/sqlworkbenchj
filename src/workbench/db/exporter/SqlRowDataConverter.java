@@ -16,6 +16,7 @@ import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
 import workbench.interfaces.Committer;
 import workbench.log.LogMgr;
@@ -218,7 +219,7 @@ public class SqlRowDataConverter
 		}
 
 		List<ColumnIdentifier> cols = CollectionBuilder.arrayList(this.metaData.getColumns());
-		TableSourceBuilder builder = new TableSourceBuilder(originalConnection);
+		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
 		String source = builder.getTableSource(updateTable, cols, (alternateUpdateTable == null ? updateTable.getTableName() : alternateUpdateTable.getTableName()));
 		StrBuffer createSql = new StrBuffer(source);
 		createSql.append(doubleLineTerminator);

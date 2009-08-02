@@ -220,18 +220,7 @@ public class TableDefinitionPanel
 					}
 				});
 				DbMetadata meta = this.dbConnection.getMetadata();
-				DataStore def = null;
-				if ("SEQUENCE".equalsIgnoreCase(currentTable.getType()))
-				{
-					String schema = meta.adjustSchemaNameCase(StringUtil.trimQuotes(currentTable.getSchema()));
-					String seqname = meta.adjustObjectnameCase(StringUtil.trimQuotes(currentTable.getTableName()));
-					def = meta.getSequenceReader().getRawSequenceDefinition(schema, seqname);
-				}
-				else
-				{
-					TableDefinition tdef = meta.getTableDefinition(this.currentTable);
-					def = new TableColumnsDatastore(tdef);
-				}
+				DataStore def = meta.getObjectDefinition(currentTable);
 				
 				final DataStoreTableModel model = new DataStoreTableModel(def);
 				WbSwingUtilities.invoke(new Runnable()

@@ -16,6 +16,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import junit.framework.*;
 import workbench.TestUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -187,6 +188,15 @@ public class TableIdentifierTest
 		assertEquals("mytable", tbl.getTableName());
 		assertEquals("\"123\"", tbl.getSchema());
 
+		sql = "information_schema.s";
+		tbl = new TableIdentifier(sql);
+		assertEquals("s", tbl.getTableName());
+		assertEquals("information_schema", tbl.getSchema());
+
+		sql = "information_schema.";
+		tbl = new TableIdentifier(sql);
+		assertTrue(StringUtil.isBlank(tbl.getTableName()));
+		assertEquals("information_schema", tbl.getSchema());
 	}
 
 	public void testCopy()

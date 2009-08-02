@@ -52,6 +52,7 @@ import workbench.util.StringUtil;
 import workbench.db.h2database.H2SequenceReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
+import workbench.db.postgres.PostgresDomainReader;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionBuilder;
@@ -85,6 +86,7 @@ public class DbMetadata
 	private ErrorInformationReader errorInfoReader;
 	private SchemaInformationReader schemaInfoReader;
 	private IndexReader indexReader;
+	private List<ObjectListExtender> extenders = new ArrayList<ObjectListExtender>();
 	private DDLFilter ddlFilter;
 
 	private DbmsOutput oraOutput;
@@ -110,8 +112,8 @@ public class DbMetadata
 
 	private String[] tableTypesTable;
 	private String[] tableTypesSelectable;
-	private List schemasToIgnore;
-	private List catalogsToIgnore;
+	private List<String> schemasToIgnore;
+	private List<String> catalogsToIgnore;
 
 	private DbSettings dbSettings;
 	private ViewReader viewReader;
@@ -182,6 +184,7 @@ public class DbMetadata
 			{
 				this.ddlFilter = new PostgresDDLFilter();
 			}
+			extenders.add(new PostgresDomainReader());
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
@@ -593,7 +596,7 @@ public class DbMetadata
 			}
 			else
 			{
-				 schemasToIgnore = Collections.EMPTY_LIST;
+				 schemasToIgnore = Collections.emptyList();
 			}
 		}
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
@@ -705,7 +708,7 @@ public class DbMetadata
 			}
 			else
 			{
-				 catalogsToIgnore = Collections.EMPTY_LIST;
+				 catalogsToIgnore = Collections.emptyList();
 			}
 		}
 		return catalogsToIgnore.contains("*") || catalogsToIgnore.contains(catalog);
@@ -730,12 +733,12 @@ public class DbMetadata
 	/**
 	 * Returns the type of the passed TableIdentifier. This could
 	 * be VIEW, TABLE, SYNONYM, ...
-	 * If the JDBC driver does not return the object through the getTables()
+	 * If the JDBC driver does not return the object through the getObjects()
 	 * method, null is returned, otherwise the value reported in TABLE_TYPE
 	 * If there is more than object with the same name but different types
 	 * (is there a DB that supports that???) than the first object found
    * will be returned.
-	 * @see #getTables(String, String, String, String[])
+	 * @see #getObjects(String, String, String, String[])
 	 */
 	public String getObjectType(TableIdentifier table)
 	{
@@ -750,7 +753,7 @@ public class DbMetadata
 			{
 				type = target.getType();
 			}
-//			DataStore ds = getTables(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), null);
+//			DataStore ds = getObjects(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), null);
 //			if (ds.getRowCount() > 0)
 //			{
 //				type = ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
@@ -1076,47 +1079,40 @@ public class DbMetadata
 	}
 
 	/**
-	 * The column index of the column in the DataStore returned by getTables()
+	 * The column index of the column in the DataStore returned by getObjects()
 	 * the stores the table's name
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_NAME = 0;
 
 	/**
-	 * The column index of the column in the DataStore returned by getTables()
+	 * The column index of the column in the DataStore returned by getObjects()
 	 * that stores the table's type. The available types can be retrieved
-	 * using {@link #getTableTypes()}
+	 * using {@link #getObjectTypes()}
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_TYPE = 1;
 
 	/**
-	 * The column index of the column in the DataStore returned by getTables()
+	 * The column index of the column in the DataStore returned by getObjects()
 	 * the stores the table's catalog
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_CATALOG = 2;
 
 	/**
-	 * The column index of the column in the DataStore returned by getTables()
+	 * The column index of the column in the DataStore returned by getObjects()
 	 * the stores the table's schema
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_SCHEMA = 3;
 
 	/**
-	 * The column index of the column in the DataStore returned by getTables()
+	 * The column index of the column in the DataStore returned by getObjects()
 	 * the stores the table's comment
 	 */
 	public final static int COLUMN_IDX_TABLE_LIST_REMARKS = 4;
 
-	public DataStore getTables()
+	public DataStore getObjects(String aCatalog, String aSchema, String[] types)
 		throws SQLException
 	{
-		String user = this.getCurrentSchema();
-		return this.getTables(null, user, (String[])null);
-	}
-
-	public DataStore getTables(String aCatalog, String aSchema, String[] types)
-		throws SQLException
-	{
-		return getTables(aCatalog, aSchema, null, types);
+		return getObjects(aCatalog, aSchema, null, types);
 	}
 
 	public String[] getTableListColumns()
@@ -1124,7 +1120,7 @@ public class DbMetadata
 		return new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 	}
 
-	public DataStore getTables(String aCatalog, String aSchema, String tables, String[] types)
+	public DataStore getObjects(String aCatalog, String aSchema, String tables, String[] types)
 		throws SQLException
 	{
 		if ("*".equals(aSchema) || "%".equals(aSchema)) aSchema = null;
@@ -1251,6 +1247,8 @@ public class DbMetadata
 			SqlUtil.closeResult(tableRs);
 		}
 
+		boolean sortNeeded = false;
+		
 		if (this.sequenceReader != null && typeIncluded("SEQUENCE", types) &&
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
@@ -1266,6 +1264,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
 			}
+			sortNeeded = true;
 		}
 
 		boolean retrieveSyns = (this.synonymReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
@@ -1283,17 +1282,40 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
 			}
+			sortNeeded = true;
+		}
+		
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(types))
+			{
+				extender.extendObjectList(dbConnection, result, types);
+				sortNeeded = true;
+			}
+		}
+
+		if (sortNeeded)
+		{
 			SortDefinition def = new SortDefinition();
 			def.addSortColumn(COLUMN_IDX_TABLE_LIST_TYPE, true);
 			def.addSortColumn(COLUMN_IDX_TABLE_LIST_SCHEMA, true);
 			def.addSortColumn(COLUMN_IDX_TABLE_LIST_NAME, true);
 			result.sort(def);
 		}
+
 		result.resetStatus();
 		return result;
 	}
 
-	private boolean typeIncluded(String type, String[] types)
+	/**
+	 * Checks if the given type is contained in the passed array.
+	 * If at least one entry in the types array is * then this
+	 * method will always return true
+	 * @param type the type to check for
+	 * @param types the list of types to be checked
+	 * @return true, if type is contained in types
+	 */
+	public static boolean typeIncluded(String type, String[] types)
 	{
 		if (types == null) return true;
 		if (type == null) return false;
@@ -1361,7 +1383,7 @@ public class DbMetadata
 				catalog = getCurrentCatalog();
 			}
 
-			DataStore ds = getTables(catalog, schema, table.getRawTableName(), types);
+			DataStore ds = getObjects(catalog, schema, table.getRawTableName(), types);
 
 			if (ds.getRowCount() == 1)
 			{
@@ -1370,7 +1392,7 @@ public class DbMetadata
 			}
 
 			// Nothing found, try again with the original catalog and schema information
-			ds = getTables(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), types);
+			ds = getObjects(table.getRawCatalog(), table.getRawSchema(), table.getRawTableName(), types);
 			if (ds.getRowCount() == 0)
 			{
 				return null;
@@ -1644,6 +1666,35 @@ public class DbMetadata
 		return type;
 	}
 
+	public boolean isExtendedObject(DbObject o)
+	{
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(o.getObjectType())) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Retrieves the object source for the given object
+	 * using a registered ObjectListExtender.
+	 *
+	 * @param o the object to retrieve
+	 * @return the source of the object or null, if this object is not handled by an extender
+	 * @see #isExtendedObject(workbench.db.DbObject) 
+	 */
+	public String getObjectSource(DbObject o)
+	{
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(o.getObjectType()))
+			{
+				return extender.getObjectSource(dbConnection, o);
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * Return the column list for the given table.
 	 * @param table the table for which to retrieve the column definition
@@ -1657,6 +1708,32 @@ public class DbMetadata
 		return def.getColumns();
 	}
 
+	public DataStore getObjectDefinition(TableIdentifier table)
+		throws SQLException
+	{
+		DataStore def = null;
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(table.getObjectType()))
+			{
+				return extender.getObjectDefinition(dbConnection, table);
+			}
+		}
+		
+		if ("SEQUENCE".equalsIgnoreCase(table.getObjectType()))
+		{
+			String schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
+			String seqname = adjustObjectnameCase(StringUtil.trimQuotes(table.getObjectName()));
+			def = getSequenceReader().getRawSequenceDefinition(schema, seqname);
+		}
+		else
+		{
+			TableDefinition tdef = getTableDefinition(table);
+			def = new TableColumnsDatastore(tdef);
+		}
+		return def;
+	}
+	
 	/**
 	 * Return the definition of the given table.
 	 * <br/>
@@ -1844,36 +1921,36 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList()
 		throws SQLException
 	{
-		return getTableList(null, getCurrentSchema(), tableTypesTable );
+		return getObjectList(null, getCurrentSchema(), tableTypesTable );
 	}
 
-	public List<TableIdentifier> getTableList(String schema, String[] types)
+	public List<TableIdentifier> getObjectList(String schema, String[] types)
 		throws SQLException
 	{
 		if (schema == null) schema = this.getCurrentSchema();
-		return getTableList(null, schema, types);
+		return getObjectList(null, schema, types);
 	}
 
 	public List<TableIdentifier> getTableList(String table, String schema)
 		throws SQLException
 	{
-		return getTableList(table, schema, tableTypesTable);
+		return getObjectList(table, schema, tableTypesTable);
 	}
 
 	public List<TableIdentifier> getSelectableObjectsList(String schema)
 		throws SQLException
 	{
-		return getTableList(null, schema, tableTypesSelectable);
+		return getObjectList(null, schema, tableTypesSelectable);
 	}
 
 	/**
 	 * Return a list of tables for the given schema
 	 * if the schema is null, all tables will be returned
 	 */
-	public List<TableIdentifier> getTableList(String table, String schema, String[] types)
+	public List<TableIdentifier> getObjectList(String table, String schema, String[] types)
 		throws SQLException
 	{
-		DataStore ds = getTables(null, schema, table, types);
+		DataStore ds = getObjects(null, schema, table, types);
 		int count = ds.getRowCount();
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>(count);
 		for (int i=0; i < count; i++)
@@ -2098,7 +2175,7 @@ public class DbMetadata
 	 * Return a list of types that identify tables in the target database.
 	 * e.g. TABLE, SYSTEM TABLE, ...
 	 */
-	public Collection<String> getTableTypes()
+	public Collection<String> getObjectTypes()
 	{
 		TreeSet<String> result = new TreeSet<String>();
 		ResultSet rs = null;
@@ -2123,6 +2200,11 @@ public class DbMetadata
 			String additional = Settings.getInstance().getProperty("workbench.db." + this.getDbId() + ".additional.tabletypes",null);
 			List<String> addTypes = StringUtil.stringToList(additional, ",", true, true);
 			result.addAll(addTypes);
+
+			for (ObjectListExtender extender : extenders)
+			{
+				result.addAll(extender.supportedTypes());
+			}
 		}
 		catch (Exception e)
 		{
@@ -2135,8 +2217,15 @@ public class DbMetadata
 		return result;
 	}
 
-	public String getSchemaTerm() { return this.schemaTerm; }
-	public String getCatalogTerm() { return this.catalogTerm; }
+	public String getSchemaTerm()
+	{
+		return this.schemaTerm;
+	}
+
+	public String getCatalogTerm()
+	{
+		return this.catalogTerm;
+	}
 
 	public SequenceReader getSequenceReader()
 	{
