@@ -697,9 +697,9 @@ public class WbTable
 		{
 			this.copySelectedAsDeleteInsertAction.setEnabled(selected);
 		}
-
 	}
 
+	@Override
 	protected void configureEnclosingScrollPane()
 	{
 		super.configureEnclosingScrollPane();
@@ -764,6 +764,34 @@ public class WbTable
 	public String getPrintHeader()
 	{
 		return this.defaultPrintHeader;
+	}
+
+	@Override
+	public Color getBackground()
+	{
+		Color c = Settings.getInstance().getColor("workbench.gui.table.background", null);
+		return (c == null ? super.getBackground() : c);
+	}
+
+	@Override
+	public Color getForeground()
+	{
+		Color c = Settings.getInstance().getColor("workbench.gui.table.foreground", null);
+		return (c == null ? super.getForeground() : c);
+	}
+
+	@Override
+	public Color getSelectionBackground()
+	{
+		Color c = Settings.getInstance().getColor("workbench.gui.table.selection.background", null);
+		return (c == null ? super.getSelectionBackground() : c);
+	}
+
+	@Override
+	public Color getSelectionForeground()
+	{
+		Color c = Settings.getInstance().getColor("workbench.gui.table.selection.foreground", null);
+		return (c == null ? super.getSelectionForeground() : c);
 	}
 
 	protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)

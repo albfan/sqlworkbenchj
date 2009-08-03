@@ -30,6 +30,23 @@
 		</para>
 	</section>
 
+	<section id="window-sizes">
+		<title>Resizing windows</title>
+		<para>
+      Every window that is opened by &wb-productname; for the first time is
+      displayed with a default size. In certain cases it can happen that not
+      all labels are readable or all controls are visible on the window. This can
+      happen, e.g. when a large default font is selected (or defined through the
+      look and feel).
+    </para>
+    <para>
+      Every window in &wb-productname; can be resized and will remember its
+      size. So in case no everything is readable on a dialog, just resize the
+      window so that the missing parts become visible, and that size will
+      be kept for the future.
+    </para>
+  </section>
+
 	<section id="executing-sql-statements">
 		<title>Executing SQL statements</title>
 

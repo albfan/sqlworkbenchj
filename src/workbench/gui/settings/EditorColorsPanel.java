@@ -41,6 +41,9 @@ public class EditorColorsPanel
 	{
 		Settings sett = Settings.getInstance();
 
+		textColor.setDefaultLabelKey("LblDefaultIndicator");
+		bgColor.setDefaultLabelKey("LblDefaultIndicator");
+
 		Color fg = sett.getColor(Settings.PROPERTY_EDITOR_FG_COLOR, null);
 		textColor.setSelectedColor(fg);
 

@@ -72,6 +72,16 @@ public class WbColorPicker
 		this.sampleBorder = new BevelBorder(BevelBorder.LOWERED);
 	}
 
+	/**
+	 * Define the displayed label when no color is selected by supplying
+	 * the resource key.
+	 * 
+	 * @param key
+	 */
+	public void setDefaultLabelKey(String key)
+	{
+		defaultLabel.setText(ResourceMgr.getString(key));
+	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -117,7 +127,7 @@ public class WbColorPicker
     });
     infoPanel.add(selectColor);
 
-    defaultLabel.setText(ResourceMgr.getString("LblNone"));
+    defaultLabel.setText(ResourceMgr.getString("LblNone")); // NOI18N
     infoPanel.add(defaultLabel);
 
     add(infoPanel);

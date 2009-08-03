@@ -11,7 +11,8 @@
 
   <entry dev-build="6" type="enh">
     <description>
-      The text and background color for the editor and the message area can now be configured
+      The text and background color for the editor, the message area and the
+      data tables can now be configured
     </description>
   </entry>
 
