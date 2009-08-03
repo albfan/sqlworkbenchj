@@ -135,16 +135,29 @@ public class CompletionPopup
 			elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
 			
 			int index = 0;
+			boolean showQuickSearch = false;
+			String initialSearchValue = null;
+
 			String s = editor.getSelectedText();
 			if (s != null)
 			{
 				index = findEntry(s);
+				initialSearchValue = s;
 			}
-			else if (valueToSelect != null)
+			else if (StringUtil.isNonBlank(valueToSelect))
 			{
 				index = findEntry(valueToSelect);
+				initialSearchValue = valueToSelect;
 			}
-			if (index == -1) index = 0;
+			
+			if (index == -1)
+			{
+				index = 0;
+			}
+			else
+			{
+				showQuickSearch = true;
+			}
 			
 			if (window == null)
 			{
@@ -186,6 +199,11 @@ public class CompletionPopup
 					elementList.ensureIndexIsVisible(toSelect);
 				}
 			});
+
+			if (showQuickSearch)
+			{
+				showQuickSearchValue(initialSearchValue);
+			}
 		}
 		catch (Exception e)
 		{
@@ -559,16 +577,56 @@ public class CompletionPopup
 			}
 		}
 	}
+
+	protected void showQuickSearchValue(final String text)
+	{
+		if (StringUtil.isBlank(text)) return;
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				openQuickSearch(text);
+				searchField.setText(text.trim());
+				searchField.requestFocusInWindow();
+			}
+		});
+		setSearchFieldCursor();
+	}
+	
+	protected void openQuickSearch(String initialValue)
+	{
+		if (this.searchField == null)
+		{
+			this.searchField = new CompletionSearchField(this, initialValue);
+			this.scroll.setColumnHeaderView(this.searchField);
+			this.scroll.doLayout();
+		}
+	}
+
+	protected void setSearchFieldCursor()
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				if (searchField != null)
+				{
+					int len = searchField.getText().length();
+					searchField.setCaretPosition(len);
+					searchField.select(len, len);
+				}
+			}
+		});
+	}
 	
 	public void keyTyped(KeyEvent evt)
 	{
 		if (this.searchField == null)
 		{
 			String text = String.valueOf(evt.getKeyChar());
-			this.searchField = new CompletionSearchField(this, text);
-			this.scroll.setColumnHeaderView(this.searchField);
-			this.scroll.doLayout();
+			openQuickSearch(text);
 		}
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -579,24 +637,12 @@ public class CompletionPopup
 				}
 			}
 		});
-		// The JGoodies look and feel automatically selects 
+		// The JGoodies look and feel automatically selects
 		// the content of the text field when a focusGained event
 		// occurs. The moving of the caret has to come later
 		// than the focusGained that's why the requestFocus()
 		// and the moving of the caret are done in two steps
-		EventQueue.invokeLater(new Runnable()
-		{
-			public void run()
-			{
-				if (searchField != null) 
-				{
-					int len = searchField.getText().length();
-					searchField.setCaretPosition(len);
-					searchField.select(len, len);
-				}
-			}
-		});
-		
+		setSearchFieldCursor();
 	}
 
 	public void keyReleased(KeyEvent keyEvent)
