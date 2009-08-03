@@ -340,7 +340,7 @@ public class GuiSettings
 
 	public static Color getAlternateRowColor()
 	{
-		Color defColor = (getUseAlternateRowColor() ? new Color(252,252,252) : null);
+		Color defColor = (getUseAlternateRowColor() ? new Color(245,245,245) : null);
 		return Settings.getInstance().getColor("workbench.gui.table.alternate.color", defColor);
 	}
 
