@@ -287,57 +287,59 @@ public class EditorColorsPanel
     currLineLabel.setText(ResourceMgr.getString("LblCurrLineColor")); // NOI18N
     currLineLabel.setToolTipText(ResourceMgr.getString("d_LblCurrLineColor")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(11, 5, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 10, 0, 0);
     editorColors.add(currLineLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = GridBagConstraints.REMAINDER;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(9, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
     editorColors.add(currLineColor, gridBagConstraints);
 
     selectionColorLabel.setText(ResourceMgr.getString("LblSelectionColor")); // NOI18N
     selectionColorLabel.setToolTipText(ResourceMgr.getString("d_LblSelectionColor")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 5, 5, 0);
+    gridBagConstraints.insets = new Insets(9, 5, 0, 0);
     editorColors.add(selectionColorLabel, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(7, 6, 5, 0);
+    gridBagConstraints.insets = new Insets(9, 3, 0, 0);
     editorColors.add(selectionColor, gridBagConstraints);
 
     errorColorLabel.setText(ResourceMgr.getString("LblSelectErrorColor")); // NOI18N
     errorColorLabel.setToolTipText(ResourceMgr.getString("d_LblSelectErrorColor")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 10, 5, 0);
+    gridBagConstraints.insets = new Insets(9, 5, 0, 0);
     editorColors.add(errorColorLabel, gridBagConstraints);
 
     errorColor.setToolTipText(ResourceMgr.getString("d_LblSelectErrorColor")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(7, 0, 5, 5);
+    gridBagConstraints.insets = new Insets(9, 3, 0, 0);
     editorColors.add(errorColor, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(1, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(1, 3, 0, 0);
     editorColors.add(textColor, gridBagConstraints);
 
     textColorLabel.setText(ResourceMgr.getString("LblEditorFgColor")); // NOI18N
@@ -345,6 +347,7 @@ public class EditorColorsPanel
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(5, 5, 0, 0);
     editorColors.add(textColorLabel, gridBagConstraints);
