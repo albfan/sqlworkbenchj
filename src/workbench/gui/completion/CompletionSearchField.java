@@ -29,7 +29,7 @@ public class CompletionSearchField
 	implements KeyListener, DocumentListener
 {
 	private CompletionPopup parent;
-	
+
 	public CompletionSearchField(CompletionPopup popup, String text)
 	{
 		super(text);

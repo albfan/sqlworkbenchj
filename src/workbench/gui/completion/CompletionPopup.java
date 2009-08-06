@@ -62,29 +62,29 @@ public class CompletionPopup
 	protected JList elementList;
 	private ListModel data;
 	private JComponent headerComponent;
-	
+
 	private StatementContext context;
 	private boolean selectCurrentWordInEditor;
 	protected CompletionSearchField searchField;
 	private boolean dbStoresMixedCase = false;
-	
+
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
 		this.data = listData;
 		this.editor = ed;
 		this.headerComponent = header;
-		
+
 		this.elementList = new JList();
 		this.elementList.setModel(this.data);
 		this.elementList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		Border b = new CompoundBorder(elementList.getBorder(), new EmptyBorder(0,2,0,2));
 		this.elementList.setBorder(b);
-		
+
 		elementList.addFocusListener(this);
 		elementList.addMouseListener(this);
-		
+
 		content = new DummyPanel();
-		
+
 		content.setLayout(new BorderLayout());
 		scroll = new JScrollPane(this.elementList);
 		scroll.setBorder(new EtchedBorder(EtchedBorder.LOWERED));
@@ -97,7 +97,7 @@ public class CompletionPopup
 	{
 		this.context = c;
 	}
-	
+
 	public void showPopup(String valueToSelect)
 	{
 		//if (window != null) closePopup(false);
@@ -133,7 +133,7 @@ public class CompletionPopup
 			}
 			int count = data.getSize();
 			elementList.setVisibleRowCount(count < 12 ? count + 1 : 12);
-			
+
 			int index = 0;
 			boolean showQuickSearch = false;
 			String initialSearchValue = null;
@@ -149,7 +149,7 @@ public class CompletionPopup
 				index = findEntry(valueToSelect);
 				initialSearchValue = valueToSelect;
 			}
-			
+
 			if (index == -1)
 			{
 				index = 0;
@@ -158,14 +158,14 @@ public class CompletionPopup
 			{
 				showQuickSearch = true;
 			}
-			
+
 			if (window == null)
 			{
 				window = new JWindow((Frame)SwingUtilities.getWindowAncestor(editor));
 			}
-			
+
 			editor.setKeyEventInterceptor(this);
-			
+
 			elementList.validate();
 
 			WbTraversalPolicy pol = new WbTraversalPolicy();
@@ -176,11 +176,11 @@ public class CompletionPopup
 			elementList.setFocusTraversalKeysEnabled(false);
 			window.setFocusCycleRoot(true);
 			window.setFocusTraversalPolicy(pol);
-			
+
 			window.setContentPane(content);
 			window.addKeyListener(this);
 			window.addWindowListener(this);
-			
+
 			final int toSelect = index;
 
 			EventQueue.invokeLater(new Runnable()
@@ -210,7 +210,7 @@ public class CompletionPopup
 			LogMgr.logWarning("CompletionPopup.showPopup()", "Error displaying popup window",e);
 		}
 	}
-	
+
 	private void cleanup()
 	{
 		this.searchField = null;
@@ -224,13 +224,13 @@ public class CompletionPopup
 		this.scroll.setColumnHeaderView(this.headerComponent);
 		this.headerComponent.doLayout();
 	}
-	
+
 	public void closeQuickSearch()
 	{
 		this.searchField = null;
 		this.scroll.setColumnHeaderView(this.headerComponent);
 		this.headerComponent.doLayout();
-		
+
 		if (Settings.getInstance().getCloseAutoCompletionWithSearch())
 		{
 			this.closePopup(false);
@@ -246,12 +246,12 @@ public class CompletionPopup
 			});
 		}
 	}
-	
+
 	public void setDbStoresMixedCase(boolean flag)
 	{
 		this.dbStoresMixedCase = flag;
 	}
-	
+
 	/**
 	 * Callback from the SearchField when enter has been pressed in the search field
 	 */
@@ -259,7 +259,7 @@ public class CompletionPopup
 	{
 		this.closePopup(true);
 	}
-	
+
 	private String getPasteValue(String value)
 	{
 		if (value == null) return value;
@@ -277,7 +277,7 @@ public class CompletionPopup
 		{
 			result = value.toUpperCase();
 		}
-		else 
+		else
 		{
 			result = value;
 		}
@@ -294,14 +294,14 @@ public class CompletionPopup
 		}
 		return result;
 	}
-	
+
 	public void cancelPopup()
 	{
 		if (this.window == null) return;
 		window.setVisible(false);
 		window.dispose();
 	}
-	
+
 	private void selectEditor()
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -313,18 +313,18 @@ public class CompletionPopup
 			}
 		});
 	}
-	
+
 	private List<ColumnIdentifier> getColumnsFromData()
 	{
 		int count = data.getSize();
 		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(count);
-		
-		// The first element is the SelectAllMarker, so we do not 
+
+		// The first element is the SelectAllMarker, so we do not
 		// need to include it
 		for (int i=1; i < count; i++)
 		{
 			Object c = this.data.getElementAt(i);
-			if (c instanceof ColumnIdentifier) 
+			if (c instanceof ColumnIdentifier)
 			{
 				result.add((ColumnIdentifier)c);
 			}
@@ -333,14 +333,14 @@ public class CompletionPopup
 				result.add(new ColumnIdentifier((String)c));
 			}
 		}
-		
+
 		if (Settings.getInstance().getAutoCompletionColumnSortType() == ColumnSortType.position)
 		{
 			ColumnIdentifier.sortByPosition(result);
 		}
 		return result;
 	}
-	
+
 	private void closePopup(boolean pasteEntry)
 	{
 		editor.removeKeyEventInterceptor();
@@ -368,7 +368,7 @@ public class CompletionPopup
 			selectEditor();
 		}
 	}
-	
+
 	private void doPaste()
 	{
 		Object[] selected = this.elementList.getSelectedValues();
@@ -377,7 +377,7 @@ public class CompletionPopup
 			return;
 		}
 		String value = "";
-		
+
 		for (Object o : selected)
 		{
 			if (o instanceof TableAlias)
@@ -435,12 +435,12 @@ public class CompletionPopup
 			}
 		}
 	}
-	
+
 	public void selectCurrentWordInEditor(boolean flag)
 	{
 		this.selectCurrentWordInEditor = flag;
 	}
-	
+
 	public void selectMatchingEntry(String s)
 	{
 		int index = this.findEntry(s);
@@ -466,7 +466,7 @@ public class CompletionPopup
 		}
 		return -1;
 	}
-	
+
 	protected int findEntry(char c)
 	{
 		int count = this.data.getSize();
@@ -476,19 +476,19 @@ public class CompletionPopup
 			String entry = this.data.getElementAt(i).toString();
 			if (entry.length() == 0) continue;
 			char ec = Character.toLowerCase(entry.charAt(0));
-			
+
 			if (ec == sc) return i;
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * Implementation of the FocusListener interface
 	 */
 	public void focusGained(FocusEvent focusEvent)
 	{
 	}
-	
+
 	/**
 	 * Implementation of the FocusListener interface
 	 */
@@ -496,7 +496,7 @@ public class CompletionPopup
 	{
 		if (this.searchField == null) closePopup(false);
 	}
-	
+
 	/**
 	 * Implementation of the MouseListener interface
 	 */
@@ -512,12 +512,12 @@ public class CompletionPopup
 			closeQuickSearch();
 		}
 	}
-	
+
 	public void mouseEntered(MouseEvent mouseEvent) {}
 	public void mouseExited(MouseEvent mouseEvent) {}
 	public void mousePressed(MouseEvent mouseEvent)	{}
 	public void mouseReleased(MouseEvent mouseEvent) {}
-	
+
 	public void keyPressed(KeyEvent evt)
 	{
 		int index = -1;
@@ -540,7 +540,7 @@ public class CompletionPopup
 			case KeyEvent.VK_UP:
 				// When the searchfield is displayed the list
 				// does not have the focus, und therefor the up and down
-				// keys only scroll the list, but do not move the selection 
+				// keys only scroll the list, but do not move the selection
 				if (this.searchField != null)
 				{
 					index = elementList.getSelectedIndex();
@@ -592,7 +592,7 @@ public class CompletionPopup
 		});
 		setSearchFieldCursor();
 	}
-	
+
 	protected void openQuickSearch(String initialValue)
 	{
 		if (this.searchField == null)
@@ -618,7 +618,7 @@ public class CompletionPopup
 			}
 		});
 	}
-	
+
 	public void keyTyped(KeyEvent evt)
 	{
 		if (this.searchField == null)
@@ -626,12 +626,12 @@ public class CompletionPopup
 			String text = String.valueOf(evt.getKeyChar());
 			openQuickSearch(text);
 		}
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				if (searchField != null) 
+				if (searchField != null)
 				{
 					searchField.requestFocusInWindow();
 				}
@@ -652,32 +652,32 @@ public class CompletionPopup
 	public void windowOpened(WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosing(WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosed(WindowEvent e)
 	{
 		this.cleanup();
 	}
-	
+
 	public void windowIconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowActivated(WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
-	
+
 	static class DummyPanel
 		extends JPanel
 	{

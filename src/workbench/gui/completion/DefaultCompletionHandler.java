@@ -45,24 +45,24 @@ public class DefaultCompletionHandler
 	private CompletionPopup window;
 	protected StatusBar statusBar;
 	private String currentWord;
-	
+
 	public DefaultCompletionHandler()
 	{
 		header = new JLabel("Tables");
 		header.setForeground(Color.BLUE);
 		header.setBorder(BorderFactory.createEmptyBorder(0,2,0,2));
 	}
-	
+
 	public void setStatusBar(StatusBar bar)
 	{
 		this.statusBar = bar;
 	}
-	
+
 	public void setEditor(JEditTextArea ed)
 	{
 		this.editor = ed;
 	}
-	
+
 	public void setConnection(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -71,7 +71,7 @@ public class DefaultCompletionHandler
 			this.window.setDbStoresMixedCase(dbConnection != null ? dbConnection.getMetadata().storesMixedCaseIdentifiers() : false);
 		}
 	}
-	
+
 	protected void showPopup()
 	{
 		try
@@ -88,12 +88,12 @@ public class DefaultCompletionHandler
 			statusBar.clearStatusMessage();
 		}
 	}
-	
+
 	public void cancelPopup()
 	{
 		if (this.window != null) this.window.cancelPopup();
 	}
-	
+
 	public void showCompletionPopup()
 	{
 		if (this.window == null)
@@ -101,7 +101,7 @@ public class DefaultCompletionHandler
 			this.window = new CompletionPopup(editor, header, this);
 			this.window.setDbStoresMixedCase(dbConnection != null ? dbConnection.getMetadata().storesMixedCaseIdentifiers() : false);
 		}
-		
+
 		// if this is not done in a separate thread
 		// the status bar will not be updated...
 		WbThread t = new WbThread("Completion")
@@ -113,7 +113,7 @@ public class DefaultCompletionHandler
 		};
 		t.start();
 	}
-	
+
 	private boolean updateSelectionList()
 	{
 		boolean result = false;
@@ -127,14 +127,14 @@ public class DefaultCompletionHandler
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
 		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
 		String sql = parser.getCommand(index, false);
-		if (sql == null) 
+		if (sql == null)
 		{
 			showNoObjectsFoundMessage();
 			return false;
 		}
-		
+
 		this.currentWord = editor.getWordAtCursor(BaseAnalyzer.SELECT_WORD_DELIM);
-		
+
 		try
 		{
 			StatementContext ctx = new StatementContext(this.dbConnection, sql, commandCursorPos);
@@ -150,14 +150,14 @@ public class DefaultCompletionHandler
 				this.elements = ctx.getData();
 				this.header.setText(ctx.getTitle());
 				this.window.setContext(ctx);
-				
+
 				result = (this.elements != null && this.elements.size() > 0);
-				if (result)	
+				if (result)
 				{
 					statusBar.clearStatusMessage();
 					fireDataChanged();
 				}
-				else 
+				else
 				{
 					showNoObjectsFoundMessage();
 				}
@@ -193,7 +193,7 @@ public class DefaultCompletionHandler
 		};
 		t.start();
 	}
-	
+
 	private void showFailedMessage(String sql)
 	{
 		final String verb = SqlUtil.getSqlVerb(sql);
@@ -210,7 +210,7 @@ public class DefaultCompletionHandler
 		};
 		t.start();
 	}
-	
+
 	private void fireDataChanged()
 	{
 		if (this.listeners == null) return;
@@ -221,7 +221,7 @@ public class DefaultCompletionHandler
 			l.contentsChanged(evt);
 		}
 	}
-	
+
 	/**
 	 * Implementation of the ListModel interface
 	 */
@@ -230,7 +230,7 @@ public class DefaultCompletionHandler
 		if (this.elements == null) return null;
 		return this.elements.get(index);
 	}
-	
+
 	/**
 	 * Implementation of the ListModel interface
 	 */
@@ -239,7 +239,7 @@ public class DefaultCompletionHandler
 		if (this.elements == null) return 0;
 		return this.elements.size();
 	}
-	
+
 	/**
 	 * Implementation of the ListModel interface
 	 */
@@ -248,7 +248,7 @@ public class DefaultCompletionHandler
 		if (this.listeners == null) this.listeners = new ArrayList<ListDataListener>();
 		this.listeners.add(listDataListener);
 	}
-	
+
 	/**
 	 * Implementation of the ListModel interface
 	 */

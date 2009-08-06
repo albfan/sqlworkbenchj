@@ -642,7 +642,7 @@ public final class WbManager
 		boolean autoSelect = Settings.getInstance().getShowConnectDialogOnStartup();
 		final boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
 
-		final int maxWarnings = 6;
+		final int maxWarnings = 9;
 		int warn = Settings.getInstance().getIntProperty("workbench.warn.java5", 1);
 
 		if (warn <= maxWarnings && Settings.isJava5())
