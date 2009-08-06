@@ -5,6 +5,13 @@
 
   <entry dev-build="6" type="enh">
     <description>
+      The default label used for new tabs can now be configured using the property workbench.gui.tabs.defaultlabel
+			in workbench.settings.
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
       Added support for Postgres DOMAINs and ENUMs in DbExplorer
     </description>
   </entry>

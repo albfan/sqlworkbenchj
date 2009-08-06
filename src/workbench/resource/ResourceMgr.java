@@ -104,7 +104,7 @@ public class ResourceMgr
 
 	public static String getDefaultTabLabel()
 	{
-		return getString("LblTabStatement");
+		return Settings.getInstance().getProperty("workbench.gui.tabs.defaultlabel", getString("LblTabStatement"));
 	}
 
 	public static String getFormattedString(String key, Object ... values)
