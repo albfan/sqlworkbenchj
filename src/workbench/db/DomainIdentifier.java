@@ -133,9 +133,8 @@ public class DomainIdentifier
 	{
 		StringBuilder result = new StringBuilder(25);
 		result.append(this.dataType);
-		result.append(' ');
-		if (!nullable) result.append("NOT NULL ");
-		if (StringUtil.isNonBlank(defaultValue)) result.append("DEFAULT " + defaultValue);
+		if (!nullable) result.append(" NOT NULL");
+		if (StringUtil.isNonBlank(defaultValue)) result.append(" DEFAULT " + defaultValue);
 		if (StringUtil.isNonBlank(constraintDefinition))
 		{
 			result.append(' ');
