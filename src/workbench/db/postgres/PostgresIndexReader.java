@@ -85,7 +85,7 @@ public class PostgresIndexReader
 			if (indexCount > 0)
 			{
 				sp = con.setSavepoint();
-				stmt = con.createStatement();
+				stmt = con.createStatementForQuery();
 
 				rs = stmt.executeQuery(sql.toString());
 				while (rs.next())

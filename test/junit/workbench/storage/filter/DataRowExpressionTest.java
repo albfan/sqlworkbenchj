@@ -29,7 +29,7 @@ public class DataRowExpressionTest extends TestCase {
 	public void testEvaluate()
 		throws Exception
 	{
-		DataRowExpression expr = new DataRowExpression(new ContainsComparator(), "Zaphod");
+		DataRowExpression expr = new DataRowExpression(new ContainsComparator(), "Zapho");
 		expr.setIgnoreCase(true);
 		assertTrue(expr.isIgnoreCase());
 		

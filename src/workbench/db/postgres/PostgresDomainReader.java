@@ -26,6 +26,7 @@ import workbench.db.DomainIdentifier;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
@@ -55,9 +56,9 @@ public class PostgresDomainReader
              "  AND n.nspname <> 'information_schema' \n" +
              "  AND pg_catalog.pg_type_is_visible(t.oid)";
 
-	public Map<String, DomainIdentifier> getDomainInfo(WbConnection connection)
+	public Map<String, DomainIdentifier> getDomainInfo(WbConnection connection, String schema)
 	{
-		List<DomainIdentifier> domains = getDomainList(connection);
+		List<DomainIdentifier> domains = getDomainList(connection, schema);
 		Map<String, DomainIdentifier> result = new HashMap<String, DomainIdentifier>(domains.size());
 		for (DomainIdentifier d : domains)
 		{
@@ -66,7 +67,42 @@ public class PostgresDomainReader
 		return result;
 	}
 
-	public List<DomainIdentifier> getDomainList(WbConnection connection)
+	private String getSql(WbConnection connection, String schema, String name)
+	{
+		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
+			
+		sql.append("SELECT * FROM ( ");
+		sql.append(baseSql);
+		sql.append(") di \n");
+
+		boolean whereAdded = false;
+		if (StringUtil.isNonBlank(name))
+		{
+			sql.append(" WHERE domain_name like '");
+			sql.append(connection.getMetadata().quoteObjectname(name));
+			sql.append("%' ");
+			whereAdded = true;
+		}
+
+		if (StringUtil.isNonBlank(schema))
+		{
+			sql.append(whereAdded ? " AND " : " WHERE ");
+
+			sql.append(" domain_schema = '");
+			sql.append(connection.getMetadata().quoteObjectname(schema));
+			sql.append("'");
+		}
+		sql.append(" ORDER BY 1, 2 ");
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresDomainReader.getSql()", "Using SQL=\n" + sql);
+		}
+		
+		return sql.toString();
+	}
+	
+	public List<DomainIdentifier> getDomainList(WbConnection connection, String schemaPattern)
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -75,8 +111,8 @@ public class PostgresDomainReader
 		try
 		{
 			sp = connection.setSavepoint();
-			stmt = connection.createStatement();
-			String sql = baseSql + " ORDER BY 1, 2";
+			stmt = connection.createStatementForQuery();
+			String sql = getSql(connection, schemaPattern, null);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
@@ -114,24 +150,16 @@ public class PostgresDomainReader
 		try
 		{
 			sp = connection.setSavepoint();
-			stmt = connection.createStatement();
-			String schema = connection.getMetadata().adjustSchemaNameCase(object.getSchema());
-			String name = connection.getMetadata().adjustObjectnameCase(object.getObjectName());
-			String sql = "SELECT * FROM ( " + baseSql + ") di \n" +
-				"WHERE domain_name = '" + connection.getMetadata().quoteObjectname(name) + "' ";
-
-			if (StringUtil.isNonBlank(schema))
-			{
-				sql += " AND domain_schema = '"  + connection.getMetadata().quoteObjectname(schema) + "'";
-			}
+			stmt = connection.createStatementForQuery();
+			String sql = getSql(connection, object.getSchema(), object.getObjectName());
 			
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
 			{
-				String dcat = rs.getString("domain_catalog");
-				String dschema = rs.getString("domain_schema");
-				String dname = rs.getString("domain_name");
-				result = new DomainIdentifier(dcat, dschema, dname);
+				String catalog = rs.getString("domain_catalog");
+				String schema = rs.getString("domain_schema");
+				String name = rs.getString("domain_name");
+				result = new DomainIdentifier(catalog, schema, name);
 				result.setCheckConstraint(rs.getString("constraint_definition"));
 				result.setDataType(rs.getString("data_type"));
 				result.setNullable(rs.getBoolean("nullable"));
@@ -189,11 +217,11 @@ public class PostgresDomainReader
 		return result.toString();
 	}
 
-	public void extendObjectList(WbConnection con, DataStore result, String[] requestedTypes)
+	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return;
 		
-		List<DomainIdentifier> domains = getDomainList(con);
+		List<DomainIdentifier> domains = getDomainList(con, schema);
 		if (domains.size() == 0) return;
 		for (DomainIdentifier domain : domains)
 		{

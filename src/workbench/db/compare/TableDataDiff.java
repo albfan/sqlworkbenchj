@@ -251,7 +251,7 @@ public class TableDataDiff
 
 		LogMgr.logDebug("TableDataDiff.doSync()", "Using " + retrieve + " to retrieve rows from reference database");
 
-		checkStatement = toSync.createStatement();
+		checkStatement = toSync.createStatementForQuery();
 
 		cancelExecution = false;
 

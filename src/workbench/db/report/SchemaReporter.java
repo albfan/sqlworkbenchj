@@ -207,7 +207,7 @@ public class SchemaReporter
 	{
 		this.cancel = false;
 
-		if (this.includeTables && this.tables.size() == 0) this.retrieveTables();
+		if (this.includeTables && this.tables.size() == 0) this.retrieveObjects();
 		if (this.cancel) return;
 
 		if (this.includeProcedures && this.procedures.size() == 0) this.retrieveProcedures();
@@ -340,7 +340,7 @@ public class SchemaReporter
 		return true;
 	}
 
-	private void retrieveTables()
+	private void retrieveObjects()
 	{
 		if (this.monitor != null)
 		{
@@ -348,14 +348,14 @@ public class SchemaReporter
 		}
 		if (this.schemas == null || this.schemas.size() == 0)
 		{
-			this.retrieveTables(null);
+			this.retrieveObjects(null);
 		}
 		else
 		{
 			int count = this.schemas.size();
 			for (int i=0; i < count; i++)
 			{
-				this.retrieveTables(schemas.get(i));
+				this.retrieveObjects(schemas.get(i));
 			}
 		}
 		if (this.monitor != null)
@@ -460,13 +460,14 @@ public class SchemaReporter
 	 *	Retrieve all tables for the current user.
 	 *	The "type" of table can be defined by #setTableTypes(String)
 	 */
-	private void retrieveTables(String targetSchema)
+	private void retrieveObjects(String targetSchema)
 	{
 		try
 		{
 			if (this.cancel) return;
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
-			String[] typesToUse = types.toArray(new String[0]);
+			String[] typesToUse = new String[types.size()];
+			types.toArray(typesToUse);
 			this.setTableList(dbConn.getMetadata().getObjectList(schema, typesToUse));
 		}
 		catch (SQLException e)

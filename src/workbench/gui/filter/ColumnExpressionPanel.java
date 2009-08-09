@@ -231,7 +231,10 @@ public class ColumnExpressionPanel
 	{
 		String col = expr.getColumnName();
 		int index = 0;
-		if (!"*".equals(col)) this.columnInfo.findColumn(col);
+		if (!"*".equals(col))
+		{
+			index = this.columnInfo.findColumn(col);
+		}
 		if (index > -1)
 		{
 			int ddIndex = findColumnInDropDown(col);
@@ -373,29 +376,5 @@ public class ColumnExpressionPanel
 		{
 			LogMgr.logError("ColumnExpressionPanel.buildColumnComparatorDropwDown()", "Error building dropdown", e);
 		}
-	}
-}
-
-/**
- * A wrapper class to display the operator for a comparator
- */
-class ComparatorListItem
-{
-	private ColumnComparator comparator;
-	public ComparatorListItem(ColumnComparator comp)
-	{
-		comparator = comp;
-	}
-
-	public String toString() { return comparator.getOperator(); }
-	public ColumnComparator getComparator() { return comparator; }
-
-	public boolean equals(Object other)
-	{
-		if (other instanceof ComparatorListItem)
-		{
-			return comparator.equals(((ComparatorListItem)other).comparator);
-		}
-		return false;
 	}
 }

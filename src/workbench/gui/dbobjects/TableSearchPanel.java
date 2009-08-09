@@ -11,6 +11,7 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.CardLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -24,6 +25,7 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -38,15 +40,15 @@ import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
-import workbench.db.TableSearcher;
 import workbench.db.WbConnection;
+import workbench.db.search.TableSearcher;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EmptyTableModel;
 import workbench.gui.components.FlatButton;
-import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTabbedPane;
@@ -62,16 +64,14 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.storage.filter.ColumnExpression;
-import workbench.storage.filter.ContainsComparator;
 import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
 
 /**
- * A display for the results of a {@link workbench.db.TableSearcher}
+ * A display for the results of a {@link workbench.db.ServerSideTableSearcher}
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableSearchPanel
 	extends JPanel
@@ -82,11 +82,12 @@ public class TableSearchPanel
 	private WbConnection connection;
 	private String fixedStatusText;
 	private ShareableDisplay tableListSource;
-	private ColumnExpression searchPattern;
 	private EditorPanel sqlDisplay;
-	private FlatButton startButton;
+	private JButton startButton;
 	private List<DbExecutionListener> execListener;
-
+	private ClientSideTableSearchPanel clientSearcherCriteria;
+	private ServerSideTableSearchPanel serverSearcherCriteria;
+	
 	public TableSearchPanel(ShareableDisplay aTableListSource)
 	{
 		super();
@@ -94,12 +95,10 @@ public class TableSearchPanel
 		this.tableListSource = aTableListSource;
 		initComponents();
 
+		
 		JScrollBar sb = this.resultScrollPane.getVerticalScrollBar();
 		sb.setUnitIncrement(25); // approx. one line
 		sb.setBlockIncrement(25 * 5); // approx. 5 lines
-
-		this.columnFunction.addMouseListener(new TextComponentMouseListener());
-		this.searchText.addMouseListener(new TextComponentMouseListener());
 
 		sqlDisplay = EditorPanel.createSqlEditor();
 		this.resultTabPane.addTab(ResourceMgr.getString("LblTableSearchSqlLog"), sqlDisplay);
@@ -108,12 +107,13 @@ public class TableSearchPanel
 		tables.setAdjustToColumnLabel(false);
 
 		WbToolbar toolbar = new WbToolbar();
+
 		WbAction reload = new ReloadAction(this.tableListSource);
 		reload.setTooltip(ResourceMgr.getString("TxtRefreshTableList"));
 		toolbar.add(reload);
 		buttonPanel.add(toolbar);
 
-		startButton = new FlatButton();
+		startButton = new JButton();
 		startButton.setText(ResourceMgr.getString("LblStartSearch"));
 		startButton.addActionListener(new java.awt.event.ActionListener()
 		{
@@ -123,22 +123,59 @@ public class TableSearchPanel
 			}
 		});
 		buttonPanel.add(startButton);
-		this.searcher = new TableSearcher();
-		this.searcher.setDisplay(this);
 
 		this.tableNames.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		this.fixedStatusText = ResourceMgr.getString("TxtSearchingTable") + " ";
 		tables.getSelectionModel().addListSelectionListener(this);
 		this.startButton.setEnabled(false);
-		this.searchText.addKeyListener(this);
+
 		Border eb = new EmptyBorder(0,2,0,0);
 		CompoundBorder b2 = new CompoundBorder(this.statusInfo.getBorder(), eb);
 		this.statusInfo.setBorder(b2);
+		initCriteriaPanel();
+		entryPanel.setBorder(new DividerBorder(DividerBorder.BOTTOM));
+
+	}
+
+	private TableSearchCriteriaGUI getCriteriaPanel()
+	{
+		if (serverSideSearch.isSelected())
+		{
+			return serverSearcherCriteria;
+		}
+		else
+		{
+			return clientSearcherCriteria;
+		}
+	}
+	
+	private void initCriteriaPanel()
+	{
+		serverSearcherCriteria = new ServerSideTableSearchPanel();
+		serverSearcherCriteria.addKeyListenerForCriteria(this);
+		clientSearcherCriteria = new ClientSideTableSearchPanel();
+		clientSearcherCriteria.addKeyListenerForCriteria(this);
+		criteriaContainer.add(serverSearcherCriteria, "server");
+		criteriaContainer.add(clientSearcherCriteria, "client");
+	}
+	private void showTableSearcherCriteria()
+	{
+		CardLayout layout = (CardLayout)criteriaContainer.getLayout();
+		if (serverSideSearch.isSelected())
+		{
+			layout.show(criteriaContainer, "server");
+		}
+		else
+		{
+			layout.show(criteriaContainer, "client");
+		}
+		criteriaContainer.doLayout();
+		WbSwingUtilities.repaintLater(criteriaContainer);
 	}
 
 	private void startSearch()
 	{
-		if (this.searcher.isRunning())
+		if (searcher != null && this.searcher.isRunning())
 		{
 			setStartButtonEnabled(false);
 			this.searcher.cancelSearch();
@@ -177,7 +214,8 @@ public class TableSearchPanel
 
 					DataStoreTableModel model = new DataStoreTableModel(result);
 					display.setModel(model, true);
-					display.applyHighlightExpression(searchPattern);
+					display.applyHighlightExpression(searcher.getSearchExpression());
+
 					display.checkCopyActions();
 
 					JScrollPane pane = new ParentWidthScrollPane(display);
@@ -249,7 +287,6 @@ public class TableSearchPanel
 	public void setConnection(WbConnection connection)
 	{
 		this.connection = connection;
-		this.searcher.setConnection(connection);
 		this.tableListSource.addTableListDisplayClient(this.tableNames);
 	}
 
@@ -271,13 +308,9 @@ public class TableSearchPanel
 
 	public void searchData()
 	{
+		if (searcher != null && searcher.isRunning()) return;
+		
 		if (!WbSwingUtilities.checkConnection(this, connection)) return;
-
-		if (!searcher.setColumnFunction(this.columnFunction.getText()))
-		{
-			WbSwingUtilities.showErrorMessageKey(this, "MsgErrorColFunction");
-			return;
-		}
 
 		if (this.tableNames.getSelectedRowCount() == 0) return;
 		if (this.connection.isBusy())
@@ -290,7 +323,7 @@ public class TableSearchPanel
 
 		int[] selectedTables = this.tableNames.getSelectedRows();
 
-		TableIdentifier[] searchTables = new TableIdentifier[this.tableNames.getSelectedRowCount()];
+		List<TableIdentifier> searchTables = new ArrayList<TableIdentifier>(this.tableNames.getSelectedRowCount());
 		DataStore tables = ((WbTable)(this.tableNames)).getDataStore();
 		for (int i=0; i < selectedTables.length; i++)
 		{
@@ -299,31 +332,22 @@ public class TableSearchPanel
 			String tablename = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_NAME);
 			String type = tables.getValueAsString(selectedTables[i], DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
 
-			searchTables[i] = new TableIdentifier(catalog, schema, tablename);
-			searchTables[i].setNeverAdjustCase(true);
-			searchTables[i].setType(type);
+			TableIdentifier tbl = new TableIdentifier(catalog, schema, tablename);
+			tbl.setNeverAdjustCase(true);
+			tbl.setType(type);
+			searchTables.add(tbl);
 		}
 
 		int maxRows = StringUtil.getIntValue(this.rowCount.getText(), 0);
 
-		String text = this.searchText.getText();
+		searcher = getCriteriaPanel().getSearcher();
+		searcher.setConnection(this.connection);
+		searcher.setDisplay(this);
 		searcher.setMaxRows(maxRows);
-		searcher.setCriteria(text);
 		searcher.setExcludeLobColumns(excludeLobs.isSelected());
-		boolean sensitive= this.connection.getDbSettings().isStringComparisonCaseSensitive();
-		boolean ignoreCase = !sensitive;
-		if (sensitive)
-		{
-			ignoreCase = searcher.getCriteriaMightBeCaseInsensitive();
-		}
-		// Remove SQL "syntax" from the criteria
-		fireDbExecStart();
-		String expressionPattern = StringUtil.trimQuotes(text.replaceAll("[%_]", ""));
-		searchPattern = new ColumnExpression("*", new ContainsComparator(), expressionPattern);
-		searchPattern.setIgnoreCase(ignoreCase);
-
 		searcher.setTableNames(searchTables);
-		searcher.search(); // starts the background thread
+		fireDbExecStart();
+		searcher.startBackgroundSearch(); // starts the background thread
 	}
 
 	private String getWorkspacePrefix(int index)
@@ -348,10 +372,18 @@ public class TableSearchPanel
 
 	private void saveSettings(String prefix, PropertyStorage props)
 	{
+		props.setProperty(prefix + ".serversearch", this.serverSideSearch.isSelected());
 		props.setProperty(prefix + ".divider", this.jSplitPane1.getDividerLocation());
-		props.setProperty(prefix + ".criteria", this.searchText.getText());
+		if (clientSearcherCriteria != null)
+		{
+			clientSearcherCriteria.saveSettings(prefix, props);
+		}
+		if (serverSearcherCriteria != null)
+		{
+			serverSearcherCriteria.saveSettings(prefix, props);
+		}
+
 		props.setProperty(prefix + ".maxrows", this.rowCount.getText());
-		props.setProperty(prefix + ".column-function", this.columnFunction.getText());
 		props.setProperty(prefix + ".excludelobs", excludeLobs.isSelected());
 	}
 
@@ -364,10 +396,19 @@ public class TableSearchPanel
 	{
 		int loc = props.getIntProperty(prefix + ".divider",200);
 		this.jSplitPane1.setDividerLocation(loc);
-		this.searchText.setText(props.getProperty(prefix + ".criteria", ""));
+		this.serverSideSearch.setSelected(props.getBoolProperty(prefix + ".serversearch", true));
+		if (clientSearcherCriteria != null)
+		{
+			clientSearcherCriteria.restoreSettings(prefix, props);
+		}
+		if (serverSearcherCriteria != null)
+		{
+			serverSearcherCriteria.restoreSettings(prefix, props);
+		}
+
 		this.rowCount.setText(props.getProperty(prefix + ".maxrows", "0"));
-		this.columnFunction.setText(props.getProperty(prefix + ".column-function", "$col$"));
 		this.excludeLobs.setSelected(props.getBoolProperty(prefix + ".excludelobs", true));
+		showTableSearcherCriteria();
 	}
 
 	public void searchEnded()
@@ -388,8 +429,8 @@ public class TableSearchPanel
 				resultPanel.add(new JPanel(), constraints);
 
 				resultPanel.doLayout();
-				searchText.setEnabled(true);
-				columnFunction.setEnabled(true);
+				getCriteriaPanel().enableControls();
+				serverSideSearch.setEnabled(true);
 				startButton.setText(ResourceMgr.getString("LblStartSearch"));
 				statusInfo.setText("");
 				startButton.setEnabled(tableNames.getSelectedRowCount() > 0);
@@ -399,8 +440,8 @@ public class TableSearchPanel
 
 	public void searchStarted()
 	{
-		this.searchText.setEnabled(false);
-		this.columnFunction.setEnabled(false);
+		getCriteriaPanel().disableControls();
+		serverSideSearch.setEnabled(false);
 		startButton.setText(ResourceMgr.getString("LblCancelSearch"));
 	}
 
@@ -489,11 +530,11 @@ public class TableSearchPanel
 	 * always regenerated by the Form Editor.
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-  private void initComponents()
-  {
+  private void initComponents() {
     java.awt.GridBagConstraints gridBagConstraints;
 
     buttonGroup1 = new javax.swing.ButtonGroup();
+    jPanel3 = new javax.swing.JPanel();
     jSplitPane1 = new WbSplitPane();
     resultTabPane = new WbTabbedPane();
     resultScrollPane = new WbScrollPane();
@@ -502,23 +543,25 @@ public class TableSearchPanel
     tableListScrollPane = new WbScrollPane();
     tableNames = new WbTable(true, false, false);
     selectButtonPanel = new javax.swing.JPanel();
-    selectAllButton = new javax.swing.JButton();
+    selectAllButton = new FlatButton();
     jPanel2 = new javax.swing.JPanel();
-    selectNoneButton = new javax.swing.JButton();
+    selectNoneButton = new FlatButton();
     statusInfo = new javax.swing.JLabel();
     entryPanel = new javax.swing.JPanel();
-    searchText = new javax.swing.JTextField();
-    likeLabel = new javax.swing.JLabel();
-    columnFunction = new javax.swing.JTextField();
+    buttonPanel = new javax.swing.JPanel();
+    criteriaContainer = new javax.swing.JPanel();
+    serverSideSearch = new javax.swing.JCheckBox();
     labelRowCount = new javax.swing.JLabel();
     rowCount = new javax.swing.JTextField();
-    buttonPanel = new javax.swing.JPanel();
     excludeLobs = new javax.swing.JCheckBox();
+    jSeparator1 = new javax.swing.JSeparator();
+    jSeparator2 = new javax.swing.JSeparator();
+    jSeparator3 = new javax.swing.JSeparator();
 
     setLayout(new java.awt.BorderLayout());
 
     jSplitPane1.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
-    jSplitPane1.setDividerLocation(150);
+    jSplitPane1.setDividerLocation(200);
 
     resultScrollPane.setBorder(javax.swing.BorderFactory.createEmptyBorder(1, 1, 1, 1));
     resultScrollPane.setHorizontalScrollBarPolicy(javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -538,13 +581,11 @@ public class TableSearchPanel
 
     tablePane.add(tableListScrollPane, java.awt.BorderLayout.CENTER);
 
-    selectButtonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 0, 3));
+    selectButtonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 3));
 
-    selectAllButton.setText(ResourceMgr.getString("LblSelectAll"));
-    selectAllButton.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
+    selectAllButton.setText(ResourceMgr.getString("LblSelectAll")); // NOI18N
+    selectAllButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
         selectAllButtonActionPerformed(evt);
       }
     });
@@ -556,10 +597,8 @@ public class TableSearchPanel
     selectButtonPanel.add(jPanel2);
 
     selectNoneButton.setText(ResourceMgr.getString("LblSelectNone"));
-    selectNoneButton.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
+    selectNoneButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
         selectNoneButtonActionPerformed(evt);
       }
     });
@@ -578,42 +617,44 @@ public class TableSearchPanel
 
     entryPanel.setLayout(new java.awt.GridBagLayout());
 
-    searchText.setColumns(20);
-    searchText.setText("% ... %");
-    searchText.setToolTipText(ResourceMgr.getDescription("LblSearchTableCriteria"));
-    searchText.setMinimumSize(new java.awt.Dimension(100, 20));
+    buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    entryPanel.add(buttonPanel, gridBagConstraints);
+
+    criteriaContainer.setLayout(new java.awt.CardLayout());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    entryPanel.add(searchText, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    entryPanel.add(criteriaContainer, gridBagConstraints);
 
-    likeLabel.setText("LIKE");
-    likeLabel.setToolTipText(ResourceMgr.getDescription("LblSearchTableCriteria"));
+    serverSideSearch.setText("Server side search");
+    serverSideSearch.setBorder(null);
+    serverSideSearch.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        serverSideSearchActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 2);
-    entryPanel.add(likeLabel, gridBagConstraints);
-
-    columnFunction.setColumns(8);
-    columnFunction.setText("$col$");
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
-    entryPanel.add(columnFunction, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    entryPanel.add(serverSideSearch, gridBagConstraints);
 
     labelRowCount.setLabelFor(rowCount);
-    labelRowCount.setText(ResourceMgr.getString("LblMaxRows"));
+    labelRowCount.setText(ResourceMgr.getString("LblMaxRows")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 20, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
     entryPanel.add(labelRowCount, gridBagConstraints);
 
     rowCount.setColumns(4);
@@ -621,26 +662,43 @@ public class TableSearchPanel
     rowCount.setText("0");
     rowCount.setMinimumSize(new java.awt.Dimension(30, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 6;
+    gridBagConstraints.gridx = 8;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(0, 3, 5, 0);
     entryPanel.add(rowCount, gridBagConstraints);
 
-    buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
+    excludeLobs.setText(ResourceMgr.getString("LblExclLobs")); // NOI18N
+    excludeLobs.setToolTipText(ResourceMgr.getString("d_LblExclLobs")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    entryPanel.add(buttonPanel, gridBagConstraints);
-
-    excludeLobs.setText(ResourceMgr.getString("LblExclLobs"));
-    excludeLobs.setToolTipText(ResourceMgr.getDescription("LblExclLobs"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 7;
-    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
     entryPanel.add(excludeLobs, gridBagConstraints);
+
+    jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 10);
+    entryPanel.add(jSeparator1, gridBagConstraints);
+
+    jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 10);
+    entryPanel.add(jSeparator2, gridBagConstraints);
+
+    jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 6;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 10);
+    entryPanel.add(jSeparator3, gridBagConstraints);
 
     add(entryPanel, java.awt.BorderLayout.NORTH);
   }// </editor-fold>//GEN-END:initComponents
@@ -655,24 +713,32 @@ public class TableSearchPanel
 		this.tableNames.getSelectionModel().setSelectionInterval(0, this.tableNames.getRowCount() - 1);
 	}//GEN-LAST:event_selectAllButtonActionPerformed
 
+	private void serverSideSearchActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_serverSideSearchActionPerformed
+	{//GEN-HEADEREND:event_serverSideSearchActionPerformed
+		showTableSearcherCriteria();
+	}//GEN-LAST:event_serverSideSearchActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.ButtonGroup buttonGroup1;
   protected javax.swing.JPanel buttonPanel;
-  protected javax.swing.JTextField columnFunction;
+  protected javax.swing.JPanel criteriaContainer;
   protected javax.swing.JPanel entryPanel;
   protected javax.swing.JCheckBox excludeLobs;
   protected javax.swing.JPanel jPanel2;
+  protected javax.swing.JPanel jPanel3;
+  protected javax.swing.JSeparator jSeparator1;
+  protected javax.swing.JSeparator jSeparator2;
+  protected javax.swing.JSeparator jSeparator3;
   protected javax.swing.JSplitPane jSplitPane1;
   protected javax.swing.JLabel labelRowCount;
-  protected javax.swing.JLabel likeLabel;
   protected javax.swing.JPanel resultPanel;
   protected javax.swing.JScrollPane resultScrollPane;
   protected javax.swing.JTabbedPane resultTabPane;
   protected javax.swing.JTextField rowCount;
-  protected javax.swing.JTextField searchText;
   protected javax.swing.JButton selectAllButton;
   protected javax.swing.JPanel selectButtonPanel;
   protected javax.swing.JButton selectNoneButton;
+  protected javax.swing.JCheckBox serverSideSearch;
   protected javax.swing.JLabel statusInfo;
   protected javax.swing.JScrollPane tableListScrollPane;
   protected javax.swing.JTable tableNames;

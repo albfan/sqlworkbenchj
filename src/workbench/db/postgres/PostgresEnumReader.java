@@ -26,6 +26,7 @@ import workbench.db.EnumIdentifier;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionBuilder;
 import workbench.util.SqlUtil;
@@ -105,15 +106,47 @@ public class PostgresEnumReader
 		return enumDef;
 	}
 
-	public Collection<EnumIdentifier> getDefinedEnums(WbConnection con)
+	private String getSql(WbConnection con, String schema, String namePattern)
 	{
-		Map<String, EnumIdentifier> enums = getEnumInfo(con);
+		StringBuilder sql = new StringBuilder(baseSql.length() + 50);
+		sql.append("SELECT * FROM (");
+		sql.append(baseSql);
+		sql.append(") ei ");
+
+		boolean whereAdded = false;
+
+		if (StringUtil.isNonBlank(namePattern))
+		{
+			sql.append(" WHERE enum_name like '");
+			sql.append(con.getMetadata().quoteObjectname(namePattern));
+			sql.append("%' ");
+			whereAdded = true;
+		}
+
+		if (StringUtil.isNonBlank(schema))
+		{
+			sql.append(whereAdded ? " AND " : " WHERE ");
+			sql.append(" enum_schema = '");
+			sql.append(con.getMetadata().quoteObjectname(schema));
+			sql.append("'");
+		}
+		sql.append(" ORDER BY 2");
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresEnumReader.getSql()", "Using SQL=\n" + sql);
+		}
+		return sql.toString();
+	}
+	
+	public Collection<EnumIdentifier> getDefinedEnums(WbConnection con, String schema, String namePattern)
+	{
+		Map<String, EnumIdentifier> enums = getEnumInfo(con, schema, namePattern);
 		return enums.values();
 	}
 
-	public Map<String, EnumIdentifier> getEnumInfo(WbConnection con)
+	public Map<String, EnumIdentifier> getEnumInfo(WbConnection con, String schemaName, String namePattern)
 	{
-		String sql = baseSql + " ORDER BY 2";
+		String sql = getSql(con, schemaName, namePattern);
 
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -155,10 +188,10 @@ public class PostgresEnumReader
 		return enums;
 	}
 
-	public void extendObjectList(WbConnection con, DataStore result, String[] requestedTypes)
+	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!handlesType(requestedTypes)) return;
-		Collection<EnumIdentifier> enums = getDefinedEnums(con);
+		Collection<EnumIdentifier> enums = getDefinedEnums(con, schema, objects);
 		if (enums == null || enums.size() == 0) return;
 		for (EnumIdentifier enumDef : enums)
 		{

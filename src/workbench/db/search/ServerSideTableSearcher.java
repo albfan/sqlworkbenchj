@@ -1,5 +1,5 @@
 /*
- * TableSearcher.java
+ * ServerSideTableSearcher.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -9,19 +9,24 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db;
+package workbench.db.search;
 
+import workbench.db.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.WbManager;
 import workbench.interfaces.TableSearchDisplay;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.storage.filter.ColumnExpression;
+import workbench.storage.filter.ContainsComparator;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -31,9 +36,9 @@ import workbench.util.WbThread;
 /**
  * @author  support@sql-workbench.net
  */
-public class TableSearcher
+public class ServerSideTableSearcher implements TableSearcher
 {
-	private TableIdentifier[] tablesToSearch;
+	private List<TableIdentifier> tablesToSearch;
 	private String columnFunction;
 	private TableSearchDisplay display;
 	private String criteria;
@@ -46,14 +51,14 @@ public class TableSearcher
 	private boolean excludeLobColumns = true;
 	private DataStore result = null;
 
-	public void search()
+	public void startBackgroundSearch()
 	{
 		this.cancelSearch = false;
 		this.searchThread = new WbThread("TableSearcher Thread")
 		{
 			public void run()
 			{
-				doSearch();
+				search();
 			}
 		};
 		this.searchThread.start();
@@ -82,10 +87,7 @@ public class TableSearcher
 
 	private void setRunning(boolean aFlag)
 	{
-		synchronized (this)
-		{
-			this.isRunning = aFlag;
-		}
+		this.isRunning = aFlag;
 		if (this.display != null)
 		{
 			if (aFlag) this.display.searchStarted();
@@ -94,19 +96,20 @@ public class TableSearcher
 		if (!aFlag) this.cancelSearch = false;
 	}
 
-	public synchronized boolean isRunning() { return this.isRunning; }
-
-
-	protected void doSearch()
+	public boolean isRunning()
 	{
-		if (this.tablesToSearch == null || this.tablesToSearch.length == 0) return;
+		return this.isRunning;
+	}
+
+	public void search()
+	{
+		if (this.tablesToSearch == null || this.tablesToSearch.size() == 0) return;
 		this.setRunning(true);
 		try
 		{
 			this.connection.setBusy(true);
-			for (int i=0; i < this.tablesToSearch.length; i++)
+			for (TableIdentifier tbl : tablesToSearch)
 			{
-				TableIdentifier tbl = tablesToSearch[i];
 				this.searchTable(tbl);
 				if (this.cancelSearch) break;
 			}
@@ -203,7 +206,7 @@ public class TableSearcher
 		}
 		return connection.getDbSettings().isSearchable(dbmsType);
 	}
-	
+
 	private String buildSqlForTable(TableIdentifier tbl)
 		throws SQLException
 	{
@@ -230,7 +233,7 @@ public class TableSearcher
 			int sqlType = def.getColumns().get(i).getDataType();
 			String expr = builder.getColumnExpression(def.getColumns().get(i));
 			boolean isExpression = !colName.equalsIgnoreCase(expr);
-			
+
 			if (isExpression || isSearchable(sqlType, dbmsType))
 			{
 				if (!isExpression)
@@ -283,10 +286,15 @@ public class TableSearcher
 		}
 	}
 
-	public boolean getCriteriaMightBeCaseInsensitive()
+	public boolean isCaseSensitive()
 	{
 		if (this.columnFunction == null) return false;
 		if (this.criteria == null) return false;
+
+		boolean sensitive = this.connection.getDbSettings().isStringComparisonCaseSensitive();
+
+		if (!sensitive) return true;
+
 		String func = this.columnFunction.toLowerCase();
 
 		// upper() lower() is for Oracle, Postgres, Firebird/Interbase and MS SQL Server
@@ -327,9 +335,9 @@ public class TableSearcher
 		return setResult;
 	}
 
-	public void setTableNames(TableIdentifier[] tables)
+	public void setTableNames(List<TableIdentifier> tables)
 	{
-		this.tablesToSearch = tables;
+		this.tablesToSearch = new ArrayList<TableIdentifier>(tables);
 	}
 
 	public TableSearchDisplay getDisplay()
@@ -362,6 +370,15 @@ public class TableSearcher
 	public void setMaxRows(int max)
 	{
 		this.maxRows = max;
+	}
+
+	public ColumnExpression getSearchExpression()
+	{
+		String expressionPattern = StringUtil.trimQuotes(criteria.replaceAll("[%_]", ""));
+		ColumnExpression searchPattern = new ColumnExpression("*", new ContainsComparator(), expressionPattern);
+		searchPattern.setIgnoreCase(isCaseSensitive());
+
+		return searchPattern;
 	}
 
 }

@@ -22,15 +22,15 @@ public interface ObjectListExtender
 {
 	/**
 	 * Adds the objects managed by this extender to the existing result
-	 * The DataStore's structure is the one created by DbMetadata.getTables()
+	 * The DataStore's structure is the one created by DbMetadata.getObjects()
 	 *
 	 * @param con the database connection to be used
 	 * @param result the DataStore containing the objects already returned by the driver
-	 * @param requestedTypes the object types as passed to getTables()
+	 * @param requestedTypes the object types as passed to DbMetadata.getObjects()
 	 * 
 	 * @see DbMetadata#getTables(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
 	 */
-	void extendObjectList(WbConnection con, DataStore result, String[] requestedTypes);
+	void extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes);
 
 	/**
 	 * Return a list of object types that this extender handles

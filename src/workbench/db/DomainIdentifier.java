@@ -24,6 +24,7 @@ public class DomainIdentifier
 	private String catalog;
 	private String schema;
 	private String domain;
+	private String objectType = "DOMAIN";
 	private String remarks;
 	private String dataType;
 	private boolean nullable;
@@ -98,9 +99,14 @@ public class DomainIdentifier
 		return schema;
 	}
 
+	public void setObjectType(String type)
+	{
+		objectType = type;
+	}
+	
 	public String getObjectType()
 	{
-		return "DOMAIN";
+		return objectType;
 	}
 
 	public String getObjectName()
@@ -129,8 +135,12 @@ public class DomainIdentifier
 		result.append(this.dataType);
 		result.append(' ');
 		if (!nullable) result.append("NOT NULL ");
-		if (StringUtil.isNonBlank(defaultValue)) result.append("DEFAULT " + defaultValue + " ");
-		result.append(constraintDefinition);
+		if (StringUtil.isNonBlank(defaultValue)) result.append("DEFAULT " + defaultValue);
+		if (StringUtil.isNonBlank(constraintDefinition))
+		{
+			result.append(' ');
+			result.append(constraintDefinition);
+		}
 		result.append(';');
 		return result.toString();
 	}

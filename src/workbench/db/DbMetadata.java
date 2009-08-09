@@ -50,6 +50,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
@@ -213,6 +214,10 @@ public class DbMetadata
 		else if (productLower.indexOf("sql server") > -1)
 		{
 			this.isSqlServer = true;
+			if (SqlServerTypeReader.versionSupportsTypes(dbConnection))
+			{
+				extenders.add(new SqlServerTypeReader());
+			}
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
@@ -1122,14 +1127,14 @@ public class DbMetadata
 		return new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 	}
 
-	public DataStore getObjects(String aCatalog, String aSchema, String tables, String[] types)
+	public DataStore getObjects(String aCatalog, String aSchema, String objects, String[] types)
 		throws SQLException
 	{
 		if ("*".equals(aSchema) || "%".equals(aSchema)) aSchema = null;
-		if ("*".equals(tables) || "%".equals(tables)) tables = null;
+		if ("*".equals(objects) || "%".equals(objects)) objects = null;
 
 		if (aSchema != null) aSchema = StringUtil.replace(aSchema, "*", "%");
-		if (tables != null) tables = StringUtil.replace(tables, "*", "%");
+		if (objects != null) objects = StringUtil.replace(objects, "*", "%");
 		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30,12,10,10,20};
@@ -1183,7 +1188,7 @@ public class DbMetadata
 		ResultSet tableRs = null;
 		try
 		{
-			tableRs = this.metaData.getTables(StringUtil.trimQuotes(aCatalog), StringUtil.trimQuotes(aSchema), StringUtil.trimQuotes(tables), types);
+			tableRs = this.metaData.getTables(StringUtil.trimQuotes(aCatalog), StringUtil.trimQuotes(aSchema), StringUtil.trimQuotes(objects), types);
 			if (tableRs == null)
 			{
 				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
@@ -1291,7 +1296,7 @@ public class DbMetadata
 		{
 			if (extender.handlesType(types))
 			{
-				extender.extendObjectList(dbConnection, result, types);
+				extender.extendObjectList(dbConnection, result, aCatalog, aSchema, objects, types);
 				sortNeeded = true;
 			}
 		}

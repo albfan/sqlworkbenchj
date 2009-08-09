@@ -60,7 +60,6 @@ public class XlsRowDataConverter
 		createFormatters();
 
 		wb = new HSSFWorkbook();
-		//wb = (HSSFWorkbook)DynamicPoi.createWorkbook();
 
 		excelFormat.setupWithWorkbook(wb);
 		sheet = wb.createSheet(getPageTitle("SQLExport"));

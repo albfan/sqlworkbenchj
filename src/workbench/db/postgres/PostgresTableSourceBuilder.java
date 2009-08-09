@@ -37,8 +37,9 @@ public class PostgresTableSourceBuilder
 	@Override
 	public String getAdditionalColumnInformation(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
-		CharSequence enums = getEnumInformation(columns);
-		CharSequence domains = getDomainInformation(columns);
+		String schema = table.getSchemaToUse(this.dbConnection);
+		CharSequence enums = getEnumInformation(columns, schema);
+		CharSequence domains = getDomainInformation(columns, schema);
 		if (enums == null && domains == null) return null;
 
 		int enumLen = (enums != null ? enums.length() : 0);
@@ -50,10 +51,10 @@ public class PostgresTableSourceBuilder
 		return result.toString();
 	}
 
-	private CharSequence getEnumInformation(List<ColumnIdentifier> columns)
+	private CharSequence getEnumInformation(List<ColumnIdentifier> columns, String schema)
 	{
 		PostgresEnumReader reader = new PostgresEnumReader();
-		Map<String, EnumIdentifier> enums = reader.getEnumInfo(dbConnection);
+		Map<String, EnumIdentifier> enums = reader.getEnumInfo(dbConnection, schema, null);
 		if (enums == null || enums.size() == 0) return null;
 		StringBuilder result = new StringBuilder(50);
 		
@@ -71,10 +72,10 @@ public class PostgresTableSourceBuilder
 		return result;
 	}
 
-	public CharSequence getDomainInformation(List<ColumnIdentifier> columns)
+	public CharSequence getDomainInformation(List<ColumnIdentifier> columns, String schema)
 	{
 		PostgresDomainReader reader = new PostgresDomainReader();
-		Map<String, DomainIdentifier> domains = reader.getDomainInfo(dbConnection);
+		Map<String, DomainIdentifier> domains = reader.getDomainInfo(dbConnection, schema);
 		if (domains == null || domains.size() == 0) return null;
 		StringBuilder result = new StringBuilder(50);
 

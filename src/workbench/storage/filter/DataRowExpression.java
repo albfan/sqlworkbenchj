@@ -11,7 +11,6 @@
  */
 package workbench.storage.filter;
 
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -19,7 +18,7 @@ import java.util.Map;
  * @author support@sql-workbench.net
  */
 public class DataRowExpression
-	implements FilterExpression,ExpressionValue
+	implements FilterExpression, ExpressionValue
 {
 	private Object filterValue;
 	private ColumnComparator comparator;
@@ -81,17 +80,22 @@ public class DataRowExpression
 
 	public boolean evaluate(Map<String, Object> columnValues)
 	{
-		Iterator itr = columnValues.values().iterator();
-		while (itr.hasNext())
+		for (Object value : columnValues.values())
 		{
-			Object value = itr.next();
-			if (value != null)
+			if (value != null && !isArray(value))
 			{
 				boolean result = comparator.evaluate(filterValue, value.toString(), this.ignoreCase);
 				if (result) return true;
 			}
 		}
 		return false;
+	}
+
+	private boolean isArray(Object value)
+	{
+		if (value == null) return false;
+		String cls = value.getClass().getName();
+		return cls.charAt(0) == '[';
 	}
 
 	public String toString()

@@ -345,7 +345,7 @@ public class JdbcProcedureReader
 				LogMgr.logInfo("DbMetadata.getProcedureSource()", "Using query=\n" + sql.getSql());
 			}
 
-			stmt = this.connection.createStatement();
+			stmt = this.connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql.getSql());
 			while (rs.next())
 			{

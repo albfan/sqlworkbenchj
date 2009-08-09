@@ -30,7 +30,7 @@ public class SqlServerDataConverter
 		protected static final SqlServerDataConverter instance = new SqlServerDataConverter();
 	}
 
-	public static final SqlServerDataConverter getInstance()
+	public static SqlServerDataConverter getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
@@ -68,7 +68,7 @@ public class SqlServerDataConverter
 	{
 		if (originalValue == null) return null;
 		if (!convertsType(jdbcType, dbmsType)) return originalValue;
-		Object newValue = null;
+		Object newValue;
 		try
 		{
 			byte[] b = (byte[])originalValue;

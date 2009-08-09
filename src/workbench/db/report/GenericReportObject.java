@@ -1,11 +1,11 @@
 /*
  * GenericReportObject.java
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  * Copyright 2002-2009, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.report;
@@ -42,7 +42,7 @@ public class GenericReportObject
 
 	public static final String TAG_ENUM_VALUES = "enum-values";
 	public static final String TAG_ENUM_VALUE = "enum-value";
-	
+
 	private DbObject object;
 	private String source;
 	private String schemaNameToUse;
@@ -57,7 +57,7 @@ public class GenericReportObject
 	{
 		this.schemaNameToUse = name;
 	}
-	
+
 	public void writeXml(Writer out)
 		throws IOException
 	{
@@ -75,15 +75,15 @@ public class GenericReportObject
 		StrBuffer line = new StrBuffer(500);
 		StrBuffer defIndent = new StrBuffer(indent);
 		defIndent.append("  ");
-		
+
 		String[] att = new String[2];
 		String[] val = new String[2];
 
 		TagWriter tagWriter = new TagWriter();
-		
+
 		att[0] = "name";
 		val[0] = StringUtil.trimQuotes(this.object.getObjectName());
-		att[1] = "type";
+		att[1] = "object-type";
 		val[1] = object.getObjectType();
 
 		tagWriter.appendOpenTag(line, indent, TAG_OBJECT_DEF, att, val);
@@ -102,13 +102,16 @@ public class GenericReportObject
 		if (object instanceof DomainIdentifier)
 		{
 			DomainIdentifier domain = (DomainIdentifier)object;
-			tagWriter.appendOpenTag(line, details, TAG_DOMAIN_CONSTRAINT);
-			line.append('\n');
-			TableConstraint con = new TableConstraint(domain.getConstraintName(), domain.getCheckConstraint());
-			StrBuffer in2 = new StrBuffer(details);
-			in2.append("  ");
-			ReportTable.writeConstraint(con, tagWriter, line, in2);
-			tagWriter.appendCloseTag(line, details, TAG_DOMAIN_CONSTRAINT);
+			if (StringUtil.isNonBlank(domain.getCheckConstraint()))
+			{
+				tagWriter.appendOpenTag(line, details, TAG_DOMAIN_CONSTRAINT);
+				line.append('\n');
+				TableConstraint con = new TableConstraint(domain.getConstraintName(), domain.getCheckConstraint());
+				StrBuffer in2 = new StrBuffer(details);
+				in2.append("  ");
+				ReportTable.writeConstraint(con, tagWriter, line, in2);
+				tagWriter.appendCloseTag(line, details, TAG_DOMAIN_CONSTRAINT);
+			}
 			tagWriter.appendTag(line, details, TAG_DOMAIN_TYPE, domain.getDataType());
 			tagWriter.appendTag(line, details, TAG_DOMAIN_NULLABLE, domain.isNullable());
 			tagWriter.appendTag(line, details, TAG_DOMAIN_DEFVALUE, domain.getDefaultValue());
@@ -127,8 +130,8 @@ public class GenericReportObject
 			tagWriter.appendCloseTag(line, details, TAG_ENUM_VALUES);
 		}
 		tagWriter.appendCloseTag(line, defIndent, TAG_OBJECT_DETAILS);
-		tagWriter.appendCloseTag(line, indent, TAG_OBJECT_DEF);
 		tagWriter.appendTag(line, defIndent, TAG_OBJECT_SOURCE, source, true);
+		tagWriter.appendCloseTag(line, indent, TAG_OBJECT_DEF);
 		return line;
 	}
 

@@ -61,6 +61,11 @@ public class CollectionBuilder
 		return result;
 	}
 
+	public static <E> List<E> arrayList(List<E> source)
+	{
+		return new ArrayList<E>(source);
+	}
+
 	public static <E> List<E> arrayList()
 	{
 		return new ArrayList<E>();

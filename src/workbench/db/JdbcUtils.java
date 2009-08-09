@@ -81,5 +81,53 @@ public class JdbcUtils
 		}
 		return -1;
 	}
-	
+
+	/**
+	 * Check if the driver of the given connection might buffer
+	 * results completely before returning from an executeQuery() call
+	 * <br/>
+	 * Currently only connections to Postgres and SQL Server are tested.
+	 * For all others, <tt>false</tt> is returned.
+	 *
+	 * @param con the connection to test
+	 * @return true, if the driver might buffer the results.
+	 */
+	public static boolean driverMightBufferResults(WbConnection con)
+	{
+		if (con == null) return false;
+		if (con.getMetadata().isPostgres())
+		{
+			return checkPostgresBuffering(con);
+		}
+		else if (con.getMetadata().isSqlServer())
+		{
+			return checkSqlServerBuffering(con);
+		}
+		return false;
+	}
+
+	private static boolean checkPostgresBuffering(WbConnection con)
+	{
+		// Postgres driver always buffers in Autocommit mode
+		if (con.getAutoCommit()) return true;
+		if (con.getProfile() == null) return true;
+		int fetchSize = con.getProfile().getFetchSize();
+		return fetchSize > 0;
+	}
+
+	public static boolean checkSqlServerBuffering(WbConnection con)
+	{
+		String url = con.getUrl();
+		if (url.startsWith("jdbc:jtds"))
+		{
+			// jTDS driver
+			return url.indexOf("useCursors=false") > -1;
+		}
+		else if (url.startsWith("jdbc:sqlserver"))
+		{
+			return url.indexOf("selectMethod=cursor") > -1;
+		}
+		return false;
+	}
+
 }

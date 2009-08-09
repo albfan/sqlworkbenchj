@@ -412,7 +412,7 @@ public class TableSourceBuilder
 		ResultSet rs = null;
 		try
 		{
-			stmt = dbConnection.createStatement();
+			stmt = dbConnection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
