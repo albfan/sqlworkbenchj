@@ -490,62 +490,110 @@ FROM geo_table
 			the entered value will be highlighted.
 		</para>
 
-		<para>
-			The value will be used to create a <literal>LIKE &apos;value&apos;</literal>
-			restriction for each text column on the selected tables. Therefore the
-			value should contain a wildcard, otherwise the exact expression will be
-			searched.
-		</para>
-
-		<para>
-			You can apply a function to each column as well. This is useful if
-			you want to to do a case insensitive search on Oracle (Oracles VARCHAR
-			comparison is case sensitive). In the entry field for the column the
-			placeholder $col$ is replaced with the actual column name during the
-			search. To do a case insensitive search in Oracle, you would enter
-			lower($col$) in the column field and &apos;%test%&apos; in the value
-			field.
-		</para>
-
-		<para>
-			The expression in the column field is sent to the DBMS without
-			changes, except the replacement of $col$ with the current column name.
-			The above example would yield a <literal>lower(&lt;column_name&gt;) like
-			&apos;%test%&apos;</literal> for each text column for the selected tables.
-		</para>
-
-		<para>
-			The generated SQL statements are logged in the second tab, labeled
-			<literal>SQL Statements</literal>.
-		</para>
-
-		<para>
-			In the resulting tables, &wb-productname; tries to highlight those columns
-			which match the criteria. This might not always work, if you apply a function to the
-			column itself such as <literal>to_upper()</literal> &wb-productname; does not know
-			that this will result in a case-insesitive search on the database. &wb-productname; tries to
-			guess if the given function/value combination might result in a case insensitive search (especially
-			on a DBMS which does a case sensitive search by default) but this might not work
-			in all the cases and for all DBMS.
-		</para>
-
     <para>
-      The <literal>SELECT</literal> statement that is built to display the table's
-      data will list all columns from the table. If the table contains BLOB columns
-      this might lead to a substantial memory consumption. To avoid loading too
-      many data into memory, you can check the option "Do not retrieve LOB columns".
-      In that case columns of type CLOB or BLOB will not be retrieved.
+      Two different implementations of the search are available: server side and client side.
     </para>
 
-    <para>
-      &wb-productname; is building a <literal>SELECT</literal> that "searches" for
-      data using a <literal>LIKE</literal> expression. Only columns of type <literal>CHAR</literal>
-      <literal>VARCHAR</literal> are included in the LIKE search, because that is what
-      most DBMS support. If the DBMS you are using supports <literal>LIKE</literal> expressions
-      for other datatypes as well, you can <link linkend="dbexplorer-searchable-types">configure</link>
-      this datatypes to be included in the search feature of the DbExplorer.
-    </para>
+    <section id="search-table-server">
+      <title>Server side search</title>
+
+      <para>
+        To server side search is enabled by selecting the checkbox labelled
+        "<literal>Server side search</literal>".
+      </para>
+      
+      <para>
+        The value will be used to create a <literal>LIKE &apos;value&apos;</literal>
+        restriction for each text column on the selected tables. Therefore the
+        value should contain a wildcard, otherwise the exact expression will be
+        searched.
+      </para>
+
+      <para>
+        You can apply a function to each column as well. This is useful if
+        you want to to do a case insensitive search on Oracle (Oracles VARCHAR
+        comparison is case sensitive). In the entry field for the column the
+        placeholder $col$ is replaced with the actual column name during the
+        search. To do a case insensitive search in Oracle, you would enter
+        lower($col$) in the column field and &apos;%test%&apos; in the value
+        field.
+      </para>
+
+      <para>
+        The expression in the column field is sent to the DBMS without
+        changes, except the replacement of $col$ with the current column name.
+        The above example would yield a <literal>lower(&lt;column_name&gt;) like
+        &apos;%test%&apos;</literal> for each text column for the selected tables.
+      </para>
+
+      <para>
+        The generated SQL statements are logged in the second tab, labeled
+        <literal>SQL Statements</literal>.
+      </para>
+
+      <para>
+        In the resulting tables, &wb-productname; tries to highlight those columns
+        which match the criteria. This might not always work, if you apply a function to the
+        column itself such as <literal>to_upper()</literal> &wb-productname; does not know
+        that this will result in a case-insesitive search on the database. &wb-productname; tries to
+        guess if the given function/value combination might result in a case insensitive search (especially
+        on a DBMS which does a case sensitive search by default) but this might not work
+        in all the cases and for all DBMS.
+      </para>
+
+      <para>
+        The <literal>SELECT</literal> statement that is built to display the table's
+        data will list all columns from the table. If the table contains BLOB columns
+        this might lead to a substantial memory consumption. To avoid loading too
+        many data into memory, you can check the option "Do not retrieve LOB columns".
+        In that case columns of type CLOB or BLOB will not be retrieved.
+      </para>
+
+      <para>
+        &wb-productname; is building a <literal>SELECT</literal> that "searches" for
+        data using a <literal>LIKE</literal> expression. Only columns of type <literal>CHAR</literal>
+        and <literal>VARCHAR</literal> are included in the LIKE search, because that is what
+        most DBMS support. If the DBMS you are using supports <literal>LIKE</literal> expressions
+        for other datatypes as well, you can <link linkend="dbexplorer-searchable-types">configure</link>
+        this datatypes to be included in the search feature of the DbExplorer.
+      </para>
+    </section>
+
+    <section id="table-search-client">
+      <title>Client side search</title>
+      <para>
+        To client side search is enabled by un-checking the checkbox labelled
+        "<literal>Server side search</literal>".
+      </para>
+      <para>
+        The client side search retrieves every row from the server,
+        compares the retrieved values for each row and keeps the rows where
+        at least one column matches the defined search criteria.
+      </para>
+      <para>
+        As opposed to the server side search, this means that <emphasis role="bold">every</emphasis>
+        row from the selected table(s) will be sent from the database server to the application.
+        For large tables were only a small number of the rows will match the search value this can
+        increase the processing time substantially.
+      </para>
+      <para>
+        The search criteria is defined similar to the definition of a <link linkend="filter-data">filter</link> for a
+        result set. For every column, its value will be converted to a character representation. The resulting
+        string value will then be compared according to the defined comparator and the entered
+        search value. If at least one column's value matches, the row will be displayed.
+        The comparison is always done in a case-insesitively.
+      </para>
+      
+      <para>
+        The character representation that is used is based on the default formatting
+        options from the <link linkend="">Options Window</link>. This means that e.g.
+        a DATE column will be compared according to the standard formatting options
+        before the comparison is done.
+      </para>
+    </section>
+    
 	</section>
+
   <section id="customize-table-source-generation">
     <title>Customizing the generation of the table source</title>
     <para>

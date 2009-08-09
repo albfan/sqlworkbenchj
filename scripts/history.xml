@@ -1,7 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-07-29">
+<release build="-1" date="2009-08-06">
+
+  <entry dev-build="7" type="enh">
+    <description>
+      The table search panel can now use search with more sophisticated conditions. This is
+      done by doing the search in the application rather than using a LIKE condition for
+      a SELECT query.
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="enh">
+    <description>
+      Added support for SQL Server TYPEs
+    </description>
+  </entry>
 
   <entry dev-build="6" type="enh">
     <description>

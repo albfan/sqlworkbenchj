@@ -58,8 +58,9 @@
 	<para>
 		To be able to generate the binary Microsoft Excel format, you need to download
 		the POI library from the Apache project's website: <ulink url="http://poi.apache.org/"/>.
-		Any version greater than 2.5 is fine. The distribution contains a jar file named 
-		e.g. <literal>poi-3.0.1-FINAL-20070705.jar</literal> (exact name depends on the version).
+		Any version greater than 3.0 should work. The distribution archive from the
+    POI project contains a jar file named e.g. <literal>poi-3.2-FINAL-20081019.jar</literal>
+    (exact name depends on the version).
 	</para>
 	
 	<note><para>

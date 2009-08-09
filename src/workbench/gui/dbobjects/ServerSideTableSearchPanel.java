@@ -76,6 +76,7 @@ public class ServerSideTableSearchPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weightx = 1.0;
+		gridBagConstraints.insets = new Insets(0, 2, 0, 5);
     add(searchText, gridBagConstraints);
 	}
 

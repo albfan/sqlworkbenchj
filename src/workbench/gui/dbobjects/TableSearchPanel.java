@@ -11,7 +11,7 @@
  */
 package workbench.gui.dbobjects;
 
-import java.awt.CardLayout;
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
@@ -87,15 +87,14 @@ public class TableSearchPanel
 	private List<DbExecutionListener> execListener;
 	private ClientSideTableSearchPanel clientSearcherCriteria;
 	private ServerSideTableSearchPanel serverSearcherCriteria;
-	
-	public TableSearchPanel(ShareableDisplay aTableListSource)
+
+	public TableSearchPanel(ShareableDisplay source)
 	{
 		super();
 		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
-		this.tableListSource = aTableListSource;
+		this.tableListSource = source;
 		initComponents();
 
-		
 		JScrollBar sb = this.resultScrollPane.getVerticalScrollBar();
 		sb.setUnitIncrement(25); // approx. one line
 		sb.setBlockIncrement(25 * 5); // approx. 5 lines
@@ -132,42 +131,34 @@ public class TableSearchPanel
 		Border eb = new EmptyBorder(0,2,0,0);
 		CompoundBorder b2 = new CompoundBorder(this.statusInfo.getBorder(), eb);
 		this.statusInfo.setBorder(b2);
+		CompoundBorder b = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(2,0,3,0));
+		entryPanel.setBorder(b);
 		initCriteriaPanel();
-		entryPanel.setBorder(new DividerBorder(DividerBorder.BOTTOM));
-
 	}
 
 	private TableSearchCriteriaGUI getCriteriaPanel()
 	{
-		if (serverSideSearch.isSelected())
-		{
-			return serverSearcherCriteria;
-		}
-		else
-		{
-			return clientSearcherCriteria;
-		}
+		return (TableSearchCriteriaGUI)criteriaContainer.getComponent(0);
 	}
-	
+
 	private void initCriteriaPanel()
 	{
 		serverSearcherCriteria = new ServerSideTableSearchPanel();
 		serverSearcherCriteria.addKeyListenerForCriteria(this);
 		clientSearcherCriteria = new ClientSideTableSearchPanel();
 		clientSearcherCriteria.addKeyListenerForCriteria(this);
-		criteriaContainer.add(serverSearcherCriteria, "server");
-		criteriaContainer.add(clientSearcherCriteria, "client");
 	}
+	
 	private void showTableSearcherCriteria()
 	{
-		CardLayout layout = (CardLayout)criteriaContainer.getLayout();
+		criteriaContainer.removeAll();
 		if (serverSideSearch.isSelected())
 		{
-			layout.show(criteriaContainer, "server");
+			criteriaContainer.add(serverSearcherCriteria, BorderLayout.CENTER, 0);
 		}
 		else
 		{
-			layout.show(criteriaContainer, "client");
+			criteriaContainer.add(clientSearcherCriteria, BorderLayout.CENTER, 0);
 		}
 		criteriaContainer.doLayout();
 		WbSwingUtilities.repaintLater(criteriaContainer);
@@ -309,7 +300,7 @@ public class TableSearchPanel
 	public void searchData()
 	{
 		if (searcher != null && searcher.isRunning()) return;
-		
+
 		if (!WbSwingUtilities.checkConnection(this, connection)) return;
 
 		if (this.tableNames.getSelectedRowCount() == 0) return;
@@ -551,12 +542,13 @@ public class TableSearchPanel
     buttonPanel = new javax.swing.JPanel();
     criteriaContainer = new javax.swing.JPanel();
     serverSideSearch = new javax.swing.JCheckBox();
+    excludeLobs = new javax.swing.JCheckBox();
     labelRowCount = new javax.swing.JLabel();
     rowCount = new javax.swing.JTextField();
-    excludeLobs = new javax.swing.JCheckBox();
     jSeparator1 = new javax.swing.JSeparator();
     jSeparator2 = new javax.swing.JSeparator();
     jSeparator3 = new javax.swing.JSeparator();
+    jSeparator4 = new javax.swing.JSeparator();
 
     setLayout(new java.awt.BorderLayout());
 
@@ -619,20 +611,20 @@ public class TableSearchPanel
 
     buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.CENTER, 2, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    entryPanel.add(buttonPanel, gridBagConstraints);
-
-    criteriaContainer.setLayout(new java.awt.CardLayout());
-    gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+    entryPanel.add(buttonPanel, gridBagConstraints);
+
+    criteriaContainer.setLayout(new java.awt.BorderLayout());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
     entryPanel.add(criteriaContainer, gridBagConstraints);
 
     serverSideSearch.setText("Server side search");
@@ -643,18 +635,26 @@ public class TableSearchPanel
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
     entryPanel.add(serverSideSearch, gridBagConstraints);
+
+    excludeLobs.setText(ResourceMgr.getString("LblExclLobs")); // NOI18N
+    excludeLobs.setToolTipText(ResourceMgr.getString("d_LblExclLobs")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
+    entryPanel.add(excludeLobs, gridBagConstraints);
 
     labelRowCount.setLabelFor(rowCount);
     labelRowCount.setText(ResourceMgr.getString("LblMaxRows")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridx = 9;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 0, 2, 0);
     entryPanel.add(labelRowCount, gridBagConstraints);
 
     rowCount.setColumns(4);
@@ -662,43 +662,43 @@ public class TableSearchPanel
     rowCount.setText("0");
     rowCount.setMinimumSize(new java.awt.Dimension(30, 20));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 8;
+    gridBagConstraints.gridx = 10;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 3, 5, 0);
+    gridBagConstraints.insets = new java.awt.Insets(2, 3, 2, 10);
     entryPanel.add(rowCount, gridBagConstraints);
 
-    excludeLobs.setText(ResourceMgr.getString("LblExclLobs")); // NOI18N
-    excludeLobs.setToolTipText(ResourceMgr.getString("d_LblExclLobs")); // NOI18N
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 5;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 5, 0);
-    entryPanel.add(excludeLobs, gridBagConstraints);
-
     jSeparator1.setOrientation(javax.swing.SwingConstants.VERTICAL);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 10);
-    entryPanel.add(jSeparator1, gridBagConstraints);
-
-    jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 10);
-    entryPanel.add(jSeparator2, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+    entryPanel.add(jSeparator1, gridBagConstraints);
 
-    jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
+    jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 6;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 5, 10);
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+    entryPanel.add(jSeparator2, gridBagConstraints);
+
+    jSeparator3.setOrientation(javax.swing.SwingConstants.VERTICAL);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 8;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
     entryPanel.add(jSeparator3, gridBagConstraints);
+
+    jSeparator4.setOrientation(javax.swing.SwingConstants.VERTICAL);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.VERTICAL;
+    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 10);
+    entryPanel.add(jSeparator4, gridBagConstraints);
 
     add(entryPanel, java.awt.BorderLayout.NORTH);
   }// </editor-fold>//GEN-END:initComponents
@@ -729,6 +729,7 @@ public class TableSearchPanel
   protected javax.swing.JSeparator jSeparator1;
   protected javax.swing.JSeparator jSeparator2;
   protected javax.swing.JSeparator jSeparator3;
+  protected javax.swing.JSeparator jSeparator4;
   protected javax.swing.JSplitPane jSplitPane1;
   protected javax.swing.JLabel labelRowCount;
   protected javax.swing.JPanel resultPanel;

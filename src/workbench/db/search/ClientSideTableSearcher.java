@@ -40,7 +40,7 @@ public class ClientSideTableSearcher
 	private String searchString;
 	private boolean isRunning;
 	private boolean excludeLobs;
-	private int maxRows;
+	private int maxRows = Integer.MAX_VALUE;
 	private List<TableIdentifier> tablesToSearch;
 	private WbConnection connection;
 	private boolean cancelSearch;
@@ -151,7 +151,6 @@ public class ClientSideTableSearcher
 				sp = connection.setSavepoint();
 			}
 
-			searchQuery.setMaxRows(maxRows);
 			rs = searchQuery.executeQuery(sql);
 
 			ResultInfo info = new ResultInfo(rs.getMetaData(), connection);
@@ -167,7 +166,9 @@ public class ClientSideTableSearcher
 					result.addRow(row);
 				}
 				if (cancelSearch) break;
+				if (result.getRowCount() > maxRows) break;
 			}
+			
 			if (consumer != null)
 			{
 				consumer.tableSearched(table, result);
@@ -228,7 +229,7 @@ public class ClientSideTableSearcher
 
 	public void setMaxRows(int max)
 	{
-		maxRows = max;
+		maxRows = max <= 0 ? Integer.MAX_VALUE : max;
 	}
 
 	public void setTableNames(List<TableIdentifier> tables)
