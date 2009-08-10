@@ -77,7 +77,12 @@ public class IndexDefinition
 	{
 		this.baseTable = table;
 	}
-	
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return getObjectExpression(conn);
+	}
+
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, null, getSchema(), indexName);

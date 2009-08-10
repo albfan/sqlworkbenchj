@@ -157,7 +157,12 @@ public class ProcedureDefinition
 	{
 		return conn.getMetadata().quoteObjectname(this.procName);
 	}
-	
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return getObjectExpression(conn);
+	}
+
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, procName);

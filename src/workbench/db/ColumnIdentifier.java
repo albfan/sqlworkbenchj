@@ -111,7 +111,12 @@ public class ColumnIdentifier
 	{
 		return getObjectName(conn);
 	}
-	
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return getObjectName(conn);
+	}
+
 	public String getObjectType()
 	{
 		return "COLUMN";

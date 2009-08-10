@@ -77,7 +77,12 @@ public class SequenceDefinition
 	{
 		return conn.getMetadata().quoteObjectname(this.sequenceName);
 	}
-	
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return getObjectExpression(conn);
+	}
+
 	public String getObjectExpression(WbConnection conn)
 	{
 		StringBuilder expr = new StringBuilder(30);

@@ -86,7 +86,7 @@ import workbench.util.WbThread;
  * A GUI frontend to the {@link workbench.db.datacopy.DataCopier}
  * and {@link workbench.db.importer.DataImporter} tools.
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DataPumper
 	extends JPanel
@@ -127,6 +127,8 @@ public class DataPumper
 		this.targetProfile = target;
 		initComponents();
 
+		commitEvery.setMinimumSize(commitEvery.getPreferredSize());
+		batchSize.setMinimumSize(batchSize.getPreferredSize());
 		this.selectSourceButton.addActionListener(this);
 		this.selectTargetButton.addActionListener(this);
 		this.openFileButton.addActionListener(this);
@@ -330,9 +332,13 @@ public class DataPumper
 			String title = ResourceMgr.getString("TxtWindowTitleDataPumper");
 			String sourceName = "";
 			if (this.sourceProfile != null)
+			{
 				sourceName = this.sourceProfile.getName();
+			}
 			else if (this.sourceFile != null)
+			{
 				sourceName = this.sourceFile.getName();
+			}
 			title = title + " [" + sourceName + " -> " + this.targetProfile.getName() + "]";
 			if (this.copier != null && this.copyRunning)
 			{
@@ -755,14 +761,12 @@ public class DataPumper
     gridBagConstraints.insets = new Insets(4, 8, 0, 0);
     updateOptionPanel.add(commitLabel, gridBagConstraints);
 
-    commitEvery.setColumns(5);
-    commitEvery.setText("\n");
+    commitEvery.setColumns(8);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(2, 4, 0, 0);
     updateOptionPanel.add(commitEvery, gridBagConstraints);
 
@@ -848,14 +852,12 @@ public class DataPumper
     gridBagConstraints.insets = new Insets(4, 8, 0, 0);
     updateOptionPanel.add(batchSizeLabel, gridBagConstraints);
 
-    batchSize.setColumns(5);
-    batchSize.setText("\n");
+    batchSize.setColumns(8);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 5;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(2, 4, 0, 0);
     updateOptionPanel.add(batchSize, gridBagConstraints);
 

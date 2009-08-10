@@ -698,33 +698,41 @@ public class StringUtilTest
 		String input = "So long and thanks for all the fish";
 		List<String> values = CollectionUtil.arrayList("thanks", "phish");
 
-		boolean found = StringUtil.containsWords(input, values, false, false);
+		boolean found = StringUtil.containsWords(input, values, false, true);
 		assertTrue(found);
 
-		found = StringUtil.containsWords(input, values, true, false);
+		found = StringUtil.containsWords(input, values, true, true);
 		assertFalse(found);
 
 		values = CollectionUtil.arrayList("thanks", "fish");
-		found = StringUtil.containsWords(input, values, true, true);
-		assertTrue(found);
-
-		found = StringUtil.containsWords(input, values, false, false);
-		assertTrue(found);
-
-		values = CollectionUtil.arrayList("thanks", "FISH");
-		found = StringUtil.containsWords(input, values, true, true);
-		assertFalse(found);
-
 		found = StringUtil.containsWords(input, values, true, false);
 		assertTrue(found);
 
-		values = CollectionUtil.arrayList("nothere", "also_not_there");
-		found = StringUtil.containsWords(input, values, true, true);
-		assertFalse(found);
-
-		values = CollectionUtil.arrayList("nothere", "also_not_there");
 		found = StringUtil.containsWords(input, values, false, true);
+		assertTrue(found);
+
+		values = CollectionUtil.arrayList("thanks", "FISH");
+		found = StringUtil.containsWords(input, values, true, false);
 		assertFalse(found);
 
+		found = StringUtil.containsWords(input, values, true, true);
+		assertTrue(found);
+
+		values = CollectionUtil.arrayList("nothere", "also_not_there");
+		found = StringUtil.containsWords(input, values, true, false);
+		assertFalse(found);
+
+		values = CollectionUtil.arrayList("nothere", "also_not_there");
+		found = StringUtil.containsWords(input, values, false, false);
+		assertFalse(found);
+
+		values = CollectionUtil.arrayList("a[ndl]{2}");
+		found = StringUtil.containsWords(input, values, false, false, true);
+		assertTrue(found);
+
+		input = "Special $com";
+		values = CollectionUtil.arrayList("$com");
+		found = StringUtil.containsWords(input, values, false, false, false);
+		assertTrue(found);
 	}
 }

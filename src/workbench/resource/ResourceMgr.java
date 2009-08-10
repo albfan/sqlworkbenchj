@@ -194,6 +194,10 @@ public class ResourceMgr
 	 */
 	public static ImageIcon getImage(String aKey)
 	{
+		if (aKey.endsWith("png"))
+		{
+			return retrieveImage(aKey);
+		}
 		return retrieveImage(aKey + "16", ".gif");
 	}
 

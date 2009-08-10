@@ -12,7 +12,6 @@
 package workbench.db;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import workbench.resource.Settings;
 import workbench.storage.DmlStatement;
@@ -21,10 +20,11 @@ import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
 import workbench.util.SqlUtil;
+
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
-public class DummyInsert 
+public class DummyInsert
 	implements DbObject
 {
 	private TableIdentifier table;
@@ -49,10 +49,15 @@ public class DummyInsert
 	public void setComment(String c)
 	{
 	}
-	
+
 	public String getCatalog()
 	{
 		return null;
+	}
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return getObjectExpression(conn);
 	}
 
 	public String getObjectExpression(WbConnection conn)
@@ -102,17 +107,17 @@ public class DummyInsert
 		}
 		info.setUpdateTable(table);
 		StatementFactory factory = new StatementFactory(info, con);
-		
+
 		SqlLiteralFormatter f = new SqlLiteralFormatter(con);
-		
+
 		RowData dummyData = new RowData(info.getColumnCount());
 
 		// This is a "trick" to fool the StatementFactory which will
-		// check the type of the Data. In case it does not "know" the 
+		// check the type of the Data. In case it does not "know" the
 		// class, it calls toString() to get the value of the column
 		// this way we get a question mark for each value
 		StringBuilder marker = new StringBuilder("?");
-		
+
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
 			if (makePrepared)
@@ -136,5 +141,5 @@ public class DummyInsert
 		String sql = stmt.getExecutableStatement(f) + ";" + nl;
 		return sql;
 	}
-	
+
 }

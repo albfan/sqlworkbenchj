@@ -968,7 +968,7 @@ public class WbTable
 		this.setModel(aModel, false);
 	}
 
-	public void setModel(TableModel aModel, boolean sortIt)
+	public void setModel(TableModel aModel, boolean allowSort)
 	{
 		if (!SwingUtilities.isEventDispatchThread())
 		{
@@ -1007,7 +1007,7 @@ public class WbTable
 		if (aModel instanceof DataStoreTableModel)
 		{
 			this.dwModel = (DataStoreTableModel)aModel;
-			if (sortIt && header != null)
+			if (allowSort && header != null)
 			{
 				header.addMouseListener(this);
 			}
@@ -1015,8 +1015,8 @@ public class WbTable
 
 		if (aModel != EmptyTableModel.EMPTY_MODEL)
 		{
-			if (this.sortAscending != null) this.sortAscending.setEnabled(sortIt);
-			if (this.sortDescending != null) this.sortDescending.setEnabled(sortIt);
+			if (this.sortAscending != null) this.sortAscending.setEnabled(allowSort);
+			if (this.sortDescending != null) this.sortDescending.setEnabled(allowSort);
 
 			// it seems that JTable.setModel() resets the default renderers and editors
 			// so we'll have to do it again...

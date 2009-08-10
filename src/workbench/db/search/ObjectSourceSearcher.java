@@ -41,6 +41,7 @@ public class ObjectSourceSearcher
 	private List<DbObject> searchResult;
 	private RowActionMonitor monitor;
 	private boolean cancelSearch;
+	private boolean isRunning;
 	
 	public ObjectSourceSearcher(WbConnection con)
 	{
@@ -59,6 +60,17 @@ public class ObjectSourceSearcher
 	{
 		cancelSearch = true;
 	}
+
+	public boolean isRunning()
+	{
+		return isRunning;
+	}
+
+	public int getSearchSchemaCount()
+	{
+		return schemas.size();
+	}
+	
 	/**
 	 * Sets the given types to the list of types to be searched
 	 * <br/>
@@ -76,14 +88,23 @@ public class ObjectSourceSearcher
 	{
 		if (CollectionUtil.isEmpty(searchSchemas)) return;
 		schemas.clear();
-		schemas.addAll(searchSchemas);
+		for (String schema : searchSchemas)
+		{
+			String s = connection.getMetadata().adjustSchemaNameCase(schema);
+			schemas.add(s);
+		}
 	}
 
 	public void setNamesToSearch(List<String> searchNames)
 	{
 		if (CollectionUtil.isEmpty(searchNames)) return;
 		names.clear();
-		names.addAll(searchNames);
+
+		for (String name : searchNames)
+		{
+			String n = connection.getMetadata().adjustObjectnameCase(name);
+			names.add(n);
+		}
 	}
 	
 	/**
@@ -96,9 +117,11 @@ public class ObjectSourceSearcher
 	 * @param caseSensitive  if true, the patterns must match exactly
 	 * @return
 	 */
-	public synchronized List<DbObject> searchObjects(List<String> searchValues, boolean matchAll, boolean caseSensitive)
+	public synchronized List<DbObject> searchObjects(List<String> searchValues, 
+		boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
 		cancelSearch = false;
+		isRunning = true;
 		try
 		{
 			searchResult = CollectionUtil.sizedArrayList(50);
@@ -120,7 +143,7 @@ public class ObjectSourceSearcher
 				List<DbObject> trigger = retrieveTriggers();
 				if (cancelSearch) return null;
 				typesToRetrieve.remove("trigger");
-				searchList(trigger, searchValues, matchAll, caseSensitive);
+				searchList(trigger, searchValues, matchAll, ignoreCase, useRegex);
 			}
 			
 			if (cancelSearch) return null;
@@ -131,7 +154,7 @@ public class ObjectSourceSearcher
 				if (cancelSearch) return null;
 				typesToRetrieve.remove("procedure");
 				typesToRetrieve.remove("function");
-				searchList(procs, searchValues, matchAll, caseSensitive);
+				searchList(procs, searchValues, matchAll, ignoreCase, useRegex);
 			}
 
 			if (cancelSearch) return null;
@@ -139,17 +162,22 @@ public class ObjectSourceSearcher
 			if (typesToRetrieve.size() > 0)
 			{
 				List<DbObject> objects = retrieveObjects(typesToRetrieve);
-				searchList(objects, searchValues, matchAll, caseSensitive);
+				searchList(objects, searchValues, matchAll, ignoreCase, useRegex);
 			}
 		}
 		catch (SQLException sql)
 		{
 			LogMgr.logError("ObjectSourceSearcher.searchObjects()", "Error retrieving objects", sql);
 		}
+		finally
+		{
+			isRunning = false;
+		}
 		return searchResult;
 	}
 
-	private void searchList(List<DbObject> toSearch, List<String> searchValues, boolean matchAll, boolean caseSensitive)
+	private void searchList(List<DbObject> toSearch, List<String> searchValues, 
+		boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
 		if (monitor != null)
 		{
@@ -173,7 +201,7 @@ public class ObjectSourceSearcher
 				{
 					LogMgr.logWarning("ObjectSourceSearcher.searchObjects()", "Empty source returned for " + object.toString());
 				}
-				if (StringUtil.containsWords(source, searchValues, matchAll, caseSensitive))
+				if (StringUtil.containsWords(source, searchValues, matchAll, ignoreCase, useRegex))
 				{
 					searchResult.add(object);
 				}

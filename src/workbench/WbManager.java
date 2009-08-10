@@ -57,6 +57,7 @@ import workbench.gui.filter.FilterDefinitionManager;
 import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
+import workbench.gui.tools.ObjectSourceSearchPanel;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -210,16 +211,16 @@ public final class WbManager
 		}
 	}
 
-	public void unregisterToolWindow(ToolWindow aWindow)
+	public void unregisterToolWindow(ToolWindow toolWindow)
 	{
-		if (aWindow == null) return;
+		if (toolWindow == null) return;
 		synchronized (toolWindows)
 		{
-			this.toolWindows.remove(aWindow);
+			this.toolWindows.remove(toolWindow);
 
 			if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
 			{
-				this.exitWorkbench(aWindow.getWindow());
+				this.exitWorkbench(toolWindow.getWindow());
 			}
 		}
 	}
@@ -823,6 +824,7 @@ public final class WbManager
 
 		boolean pumper = cmdLine.isArgPresent(AppArguments.ARG_SHOW_PUMPER);
 		boolean explorer = cmdLine.isArgPresent(AppArguments.ARG_SHOW_DBEXP);
+		boolean searcher = cmdLine.isArgPresent(AppArguments.ARG_SHOW_SEARCHER);
 
 		if (pumper)
 		{
@@ -831,6 +833,10 @@ public final class WbManager
 		else if (explorer)
 		{
 			DbExplorerWindow.showWindow();
+		}
+		else if (searcher)
+		{
+			new ObjectSourceSearchPanel().showWindow();
 		}
 		else
 		{

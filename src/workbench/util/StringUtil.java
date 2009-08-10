@@ -1223,6 +1223,11 @@ public class StringUtil
 		'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
 	};
 
+	public static boolean containsWords(CharSequence toSearch, List<String> searchValues, boolean matchAll, boolean ignoreCase)
+	{
+		return containsWords(toSearch, searchValues, matchAll, ignoreCase, false);
+	}
+	
 	/**
 	 * Searches for multiples words inside a string.
 	 *
@@ -1232,14 +1237,23 @@ public class StringUtil
 	 *
 	 * @return true if searchValues were found
 	 */
-	public static boolean containsWords(CharSequence toSearch, List<String> searchValues, boolean matchAll, boolean caseSensitive)
+	public static boolean containsWords(CharSequence toSearch, List<String> searchValues, boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
 		if (StringUtil.isBlank(toSearch)) return false;
 		if (CollectionUtil.isEmpty(searchValues)) return false;
 
 		for (String search : searchValues)
 		{
-			Pattern p = Pattern.compile(search, caseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+			String expression = null;
+			if (useRegex)
+			{
+				expression = search;
+			}
+			else
+			{
+				expression = "(" + StringUtil.quoteRegexMeta(search) + ")";
+			}
+			Pattern p = Pattern.compile(expression, ignoreCase ? Pattern.CASE_INSENSITIVE : 0);
 			Matcher m = p.matcher(toSearch);
 
 			boolean found = m.find();

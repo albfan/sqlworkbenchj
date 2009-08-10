@@ -2202,6 +2202,16 @@ public class Settings
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Connections">
+	public boolean getAutoConnectObjectSearcher()
+	{
+		return getBoolProperty("workbench.objectsearcher.autoconnect", true);
+	}
+
+	public void setAutoConnectObjectSearcer(boolean flag)
+	{
+		this.setProperty("workbench.objectsearcher.autoconnect", flag);
+	}
+
 	public boolean getAutoConnectDataPumper()
 	{
 		return getBoolProperty("workbench.datapumper.autoconnect", true);

@@ -46,12 +46,22 @@ public interface DbObject
 	String getObjectName(WbConnection conn);
 	
 	/**
-	 * Get a fully qualified name of the object. 
+	 * Get a fully qualified name of the object.
+	 * The name might not be fully qualified if it is not necessary for the current
+	 * schema or catalog.
+	 * To get an always fully qualified name use, getFullyQualifiedName()
 	 * 
 	 * @param conn The connection for which the qualified name should be createdd
 	 * @return the qualified name including catalog and schema if applicable
 	 */
 	String getObjectExpression(WbConnection conn);
+
+	/**
+	 * Return the fully qualified name of this object including
+	 * catalog and schema if available, even if the current user's
+	 * schema wouldn't need it.
+	 */
+	String getFullyQualifiedName(WbConnection conn);
 	
 	/**
 	 * Return the SQL source for this object. This is not necessariyl

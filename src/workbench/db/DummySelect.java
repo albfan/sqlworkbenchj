@@ -18,7 +18,8 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
- * @author support@sql-workbench.net
+ * 
+ * @author Thomas Kellerer
  */
 public class DummySelect
 	implements DbObject
@@ -49,6 +50,11 @@ public class DummySelect
 	public String getCatalog()
 	{
 		return null;
+	}
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return getObjectExpression(conn);
 	}
 
 	public String getObjectExpression(WbConnection conn)
@@ -90,14 +96,14 @@ public class DummySelect
 
 		List<ColumnIdentifier> cols = columns;
 		if (cols == null) cols = tableDef.getColumns();
-		
+
 		if (cols == null || cols.size() == 0)
 		{
 			return StringUtil.EMPTY_STRING;
 		}
 
 		int colCount = cols.size();
-		
+
 		StringBuilder sql = new StringBuilder(colCount * 80);
 
 		sql.append("SELECT ");

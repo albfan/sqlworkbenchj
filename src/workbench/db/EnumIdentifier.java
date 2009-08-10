@@ -13,6 +13,7 @@ package workbench.db;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -73,6 +74,11 @@ public class EnumIdentifier
 	public String getObjectName(WbConnection conn)
 	{
 		return enumName;
+	}
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return SqlUtil.buildExpression(conn, catalog, schema, enumName);
 	}
 
 	public String getObjectExpression(WbConnection conn)

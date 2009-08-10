@@ -12,11 +12,12 @@
 package workbench.db;
 
 import java.sql.SQLException;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DomainIdentifier
 	implements DbObject
@@ -117,6 +118,11 @@ public class DomainIdentifier
 	public String getObjectName(WbConnection conn)
 	{
 		return domain;
+	}
+
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return SqlUtil.buildExpression(conn, catalog, schema, domain);
 	}
 
 	public String getObjectExpression(WbConnection conn)

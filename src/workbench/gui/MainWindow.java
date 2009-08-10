@@ -108,6 +108,7 @@ import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.NextTabAction;
+import workbench.gui.actions.ObjectSearchAction;
 import workbench.gui.actions.PrevTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ShowMacroPopupAction;
@@ -2060,6 +2061,7 @@ public class MainWindow
 		result.addSeparator();
 
 		result.add(new DataPumperAction(this));
+		result.add(new ObjectSearchAction(this));
 
 		result.addSeparator();
 

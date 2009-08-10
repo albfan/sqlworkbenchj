@@ -130,15 +130,15 @@ public class ReplacePanel
     setFocusCycleRoot(true);
     setLayout(new java.awt.GridBagLayout());
 
-    criteriaLabel.setText(ResourceMgr.getString("LblSearchCriteria"));
+    criteriaLabel.setText(ResourceMgr.getString("LblSearchCriteria")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 0);
     add(criteriaLabel, gridBagConstraints);
 
-    ignoreCaseCheckBox.setText(ResourceMgr.getString("LblSearchIgnoreCase"));
-    ignoreCaseCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchIgnoreCase"));
+    ignoreCaseCheckBox.setText(ResourceMgr.getString("LblSearchIgnoreCase")); // NOI18N
+    ignoreCaseCheckBox.setToolTipText(ResourceMgr.getString("d_LblSearchIgnoreCase")); // NOI18N
     ignoreCaseCheckBox.setName("ignorecase"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -149,8 +149,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
     add(ignoreCaseCheckBox, gridBagConstraints);
 
-    wordsOnlyCheckBox.setText(ResourceMgr.getString("LblSearchWordsOnly"));
-    wordsOnlyCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchWordsOnly"));
+    wordsOnlyCheckBox.setText(ResourceMgr.getString("LblSearchWordsOnly")); // NOI18N
+    wordsOnlyCheckBox.setToolTipText(ResourceMgr.getString("d_LblSearchWordsOnly")); // NOI18N
     wordsOnlyCheckBox.setName("wordsonly"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -161,7 +161,7 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
     add(wordsOnlyCheckBox, gridBagConstraints);
 
-    replaceLabel.setText(ResourceMgr.getString("LblReplaceNewValue"));
+    replaceLabel.setText(ResourceMgr.getString("LblReplaceNewValue")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -229,8 +229,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 5);
     add(closeButton, gridBagConstraints);
 
-    selectedTextCheckBox.setText(ResourceMgr.getString("LblSelectedTextOnly"));
-    selectedTextCheckBox.setToolTipText(ResourceMgr.getDescription("LblSelectedTextOnly"));
+    selectedTextCheckBox.setText(ResourceMgr.getString("LblSelectedTextOnly")); // NOI18N
+    selectedTextCheckBox.setToolTipText(ResourceMgr.getString("d_LblSelectedTextOnly")); // NOI18N
     selectedTextCheckBox.setName("selectedtext"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -241,8 +241,8 @@ public class ReplacePanel
     gridBagConstraints.insets = new java.awt.Insets(2, 5, 0, 5);
     add(selectedTextCheckBox, gridBagConstraints);
 
-    useRegexCheckBox.setText(ResourceMgr.getString("LblSearchRegEx"));
-    useRegexCheckBox.setToolTipText(ResourceMgr.getDescription("LblSearchRegEx"));
+    useRegexCheckBox.setText(ResourceMgr.getString("LblSearchRegEx")); // NOI18N
+    useRegexCheckBox.setToolTipText(ResourceMgr.getString("d_LblSearchRegEx")); // NOI18N
     useRegexCheckBox.setName("regex"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;

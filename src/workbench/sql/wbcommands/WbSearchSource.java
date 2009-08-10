@@ -11,7 +11,6 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.List;
 import workbench.db.DbObject;
 import workbench.db.search.ObjectSourceSearcher;
@@ -37,8 +36,9 @@ public class WbSearchSource
 
 	public static final String PARAM_SEARCH_EXP = "searchValues";
 	public static final String PARAM_MATCHALL = "matchAll";
-	public static final String PARAM_CASE_SENSITIVE = "caseSensitive";
-
+	public static final String PARAM_CASE_SENSITIVE = "ignoreCase";
+	public static final String PARAM_USE_REGEX = "useRegex";
+	
 	private ObjectSourceSearcher searcher;
 	
 	public WbSearchSource()
@@ -85,22 +85,12 @@ public class WbSearchSource
 		}
 		
 		boolean matchAll = cmdLine.getBoolean(PARAM_MATCHALL, false);
-		boolean caseSensitive = cmdLine.getBoolean(PARAM_CASE_SENSITIVE, false);
-		
-		List<String> schemas = cmdLine.getListValue(PARAM_SCHEMAS);
-		for (int i=0; i < schemas.size(); i++)
-		{
-			String s = currentConnection.getMetadata().adjustSchemaNameCase(schemas.get(i));
-			schemas.set(i, s);
-		}
-		List<String> types = cmdLine.getListValue(PARAM_TYPES);
+		boolean ignoreCase = cmdLine.getBoolean(PARAM_CASE_SENSITIVE, true);
+		boolean regEx = cmdLine.getBoolean(PARAM_USE_REGEX, false);
 
+		List<String> schemas = cmdLine.getListValue(PARAM_SCHEMAS);
+		List<String> types = cmdLine.getListValue(PARAM_TYPES);
 		List<String> names = cmdLine.getListValue(PARAM_NAMES);
-		for (int i=0; i < names.size(); i++)
-		{
-			String n = currentConnection.getMetadata().adjustObjectnameCase(names.get(i));
-			names.set(i, n);
-		}
 
 		searcher = new ObjectSourceSearcher(this.currentConnection);
 		searcher.setRowMonitor(this.rowMonitor);
@@ -108,29 +98,8 @@ public class WbSearchSource
 		searcher.setTypesToSearch(types);
 		searcher.setNamesToSearch(names);
 
-		List<DbObject> found = searcher.searchObjects(values, matchAll, caseSensitive);
-		String[] cols = new String[] { "NAME", "TYPE", "SOURCE" };
-		int[] colTypes = new int[] { Types.VARCHAR, Types.VARCHAR, Types.CLOB };
-		int[] colSizes = new int[] { 30, 30, 50 };
-		DataStore ds = new DataStore(cols, colTypes, colSizes);
-		for (DbObject object : found)
-		{
-			int row = ds.addRow();
-			String name = null;
-			if (schemas.size() > 0)
-			{
-				name = object.getObjectExpression(currentConnection);
-			}
-			else
-			{
-				name = object.getObjectName();
-			}
-
-			ds.setValue(row, 0, name);
-			ds.setValue(row, 1, object.getObjectType());
-			ds.setValue(row, 2, object.getSource(currentConnection));
-		}
-		ds.resetStatus();
+		List<DbObject> found = searcher.searchObjects(values, matchAll, ignoreCase, regEx);
+		DataStore ds = new ObjectResultListDataStore(currentConnection, found, searcher.getSearchSchemaCount() > 1);
 		result.addDataStore(ds);
 		result.setSuccess();
 		

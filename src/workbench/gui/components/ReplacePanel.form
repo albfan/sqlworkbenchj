@@ -19,11 +19,8 @@
   <SubComponents>
     <Component class="javax.swing.JLabel" name="criteriaLabel">
       <Properties>
-        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-          <ComponentRef name="default"/>
-        </Property>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LblSearchCriteria&quot;)" type="code"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="LblSearchCriteria" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -34,11 +31,11 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="ignoreCaseCheckBox">
       <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LblSearchIgnoreCase&quot;)" type="code"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="LblSearchIgnoreCase" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
-        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LblSearchIgnoreCase&quot;)" type="code"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="d_LblSearchIgnoreCase" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="name" type="java.lang.String" value="ignorecase" noResource="true"/>
       </Properties>
@@ -50,11 +47,11 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="wordsOnlyCheckBox">
       <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LblSearchWordsOnly&quot;)" type="code"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="LblSearchWordsOnly" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
-        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LblSearchWordsOnly&quot;)" type="code"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="d_LblSearchWordsOnly" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="name" type="java.lang.String" value="wordsonly" noResource="true"/>
       </Properties>
@@ -66,11 +63,8 @@
     </Component>
     <Component class="javax.swing.JLabel" name="replaceLabel">
       <Properties>
-        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-          <ComponentRef name="default"/>
-        </Property>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LblReplaceNewValue&quot;)" type="code"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="LblReplaceNewValue" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
@@ -182,11 +176,11 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="selectedTextCheckBox">
       <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LblSelectedTextOnly&quot;)" type="code"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="LblSelectedTextOnly" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
-        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LblSelectedTextOnly&quot;)" type="code"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="d_LblSelectedTextOnly" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="name" type="java.lang.String" value="selectedtext" noResource="true"/>
       </Properties>
@@ -198,11 +192,11 @@
     </Component>
     <Component class="javax.swing.JCheckBox" name="useRegexCheckBox">
       <Properties>
-        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getString(&quot;LblSearchRegEx&quot;)" type="code"/>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="LblSearchRegEx" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
-        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="ResourceMgr.getDescription(&quot;LblSearchRegEx&quot;)" type="code"/>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="language/wbstrings.properties" key="d_LblSearchRegEx" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
         <Property name="name" type="java.lang.String" value="regex" noResource="true"/>
       </Properties>

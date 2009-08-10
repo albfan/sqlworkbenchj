@@ -112,7 +112,12 @@ public class TableIdentifier
 	{
 		return conn.getMetadata().quoteObjectname(this.tablename);
 	}
-	
+
+	public String getFullyQualifiedName(WbConnection con)
+	{
+		return SqlUtil.buildExpression(con, catalog, schema, tablename);
+	}
+
 	public String getObjectExpression(WbConnection conn)
 	{
 		return getTableExpression(conn);

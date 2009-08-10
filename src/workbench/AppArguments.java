@@ -60,6 +60,11 @@ public class AppArguments
 	public static final String ARG_DELIMITER = "delimiter";
 	public static final String ARG_CONSOLIDATE_LOG = "consolidateMessages";
 
+	// Initial tool parameters
+	public static final String ARG_SHOW_PUMPER = "dataPumper";
+	public static final String ARG_SHOW_DBEXP = "dbExplorer";
+	public static final String ARG_SHOW_SEARCHER = "objectSearcher";
+
 	// Other parameters
 	public static final String ARG_SHOWPROGRESS = "showProgress";
 	public static final String ARG_PROFILE_STORAGE = "profileStorage";
@@ -67,8 +72,6 @@ public class AppArguments
 	public static final String ARG_LIBDIR = "libdir";
 	public static final String ARG_LOGFILE = "logfile";
 	public static final String ARG_VARDEF = "varDef";
-	public static final String ARG_SHOW_PUMPER = "dataPumper";
-	public static final String ARG_SHOW_DBEXP = "dbExplorer";
 	public static final String ARG_LANG = "language";
 	public static final String ARG_NOSETTNGS = "noSettings";
 	public static final String ARG_NOTEMPLATES = "noTemplates";
@@ -107,6 +110,7 @@ public class AppArguments
 		addArgument(ARG_IGNORE_DROP, ArgumentType.BoolArgument);
 		addArgument(ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		addArgument(ARG_SHOW_DBEXP, ArgumentType.BoolArgument);
+		addArgument(ARG_SHOW_SEARCHER, ArgumentType.BoolArgument);
 		addArgument(ARG_SHOW_TIMING, ArgumentType.BoolArgument);
 		addArgument(ARG_SHOWPROGRESS, ArgumentType.BoolArgument);
 		addArgument(ARG_CONSOLE_OPT_COLS, ArgumentType.BoolArgument);

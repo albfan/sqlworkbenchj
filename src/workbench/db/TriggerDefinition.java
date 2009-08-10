@@ -105,6 +105,11 @@ public class TriggerDefinition
 		return conn.getMetadata().quoteObjectname(this.triggerName);
 	}
 
+	public String getFullyQualifiedName(WbConnection conn)
+	{
+		return getObjectExpression(conn);
+	}
+	
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, triggerName);
