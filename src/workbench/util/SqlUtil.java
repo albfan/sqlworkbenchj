@@ -41,8 +41,8 @@ import workbench.storage.ResultInfo;
 /**
  * Methods for manipulating and analyzing SQL statements.
  *
- * @author support@sql-workbench.net  
- */ 
+ * @author Thomas Kellerer
+ */
 public class SqlUtil
 {
 	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
@@ -51,7 +51,7 @@ public class SqlUtil
 	private static class JoinKeywordsHolder
 	{
 		protected static final Set<String> JOIN_KEYWORDS = Collections.unmodifiableSet(
-				CollectionBuilder.caseInsensitiveSet(
+				CollectionUtil.caseInsensitiveSet(
 					"JOIN", "INNER JOIN", "NATURAL JOIN", "LEFT JOIN", "LEFT OUTER JOIN", "RIGHT JOIN",
 					"RIGHT OUTER JOIN", "CROSS JOIN", "FULL JOIN", "FULL OUTER JOIN")
 				);
@@ -60,11 +60,11 @@ public class SqlUtil
 	{
 		return JoinKeywordsHolder.JOIN_KEYWORDS;
 	}
-	
+
 	private static class KnownTypesHolder
 	{
 		protected final static Set<String> KNOWN_TYPES =
-			Collections.unmodifiableSet(CollectionBuilder.hashSet(
+			Collections.unmodifiableSet(CollectionUtil.hashSet(
 			"INDEX", "TABLE", "PROCEDURE", "FUNCTION", "VIEW", "PACKAGE", "PACKAGE BODY",
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
 			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT",
@@ -74,7 +74,7 @@ public class SqlUtil
 	private static class TypesWithoutNamesHolder
 	{
 		protected final static Set<String> TYPES =
-			Collections.unmodifiableSet(CollectionBuilder.hashSet(
+			Collections.unmodifiableSet(CollectionUtil.hashSet(
 			"MATERIALIZED VIEW LOG", "SNAPSHOT LOG"));
 	}
 
@@ -82,7 +82,7 @@ public class SqlUtil
 	{
 		return TypesWithoutNamesHolder.TYPES;
 	}
-	
+
 	public static final Set<String> getKnownTypes()
 	{
 		return KnownTypesHolder.KNOWN_TYPES;
@@ -93,7 +93,7 @@ public class SqlUtil
 		if (value == null) return null;
 		return value.replace("'" ,"''");
 	}
-	
+
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
@@ -117,27 +117,27 @@ public class SqlUtil
 		return result;
 	}
 
-	
+
 	public static String quoteObjectname(String object)
 	{
 		return quoteObjectname(object, false);
 	}
-	
+
 	public static String quoteObjectname(String objectName, boolean quoteAlways)
 	{
 		if (objectName == null) return null;
 		if (objectName.length() == 0) return "";
 		if (objectName.charAt(0) == '"') return objectName;
-		
+
 		objectName = objectName.trim();
 		if (objectName.charAt(0) == '[' && objectName.charAt(objectName.length() - 1) == ']')
 		{
 			// assume this is already quoted using SQL Server's idiotic non-standard way of using "quotes"
 			return objectName;
 		}
-		
+
 		boolean doQuote = quoteAlways;
-		
+
 		if (!quoteAlways)
 		{
 			Matcher m = SQL_IDENTIFIER.matcher(objectName);
@@ -157,7 +157,7 @@ public class SqlUtil
 	 *
 	 * @return a structure that contains the type (e.g. TABLE, VIEW) and the name of the created object
 	 *         null, if the SQL statement is not a DDL CREATE statement
-	 * 
+	 *
 	 */
 	public static DdlObjectInfo getDDLObjectInfo(CharSequence sql)
 	{
@@ -166,13 +166,13 @@ public class SqlUtil
 
 		if (t == null) return null;
 		String verb = t.getContents();
-		
+
 		if (!verb.startsWith("CREATE") && !verb.equals("DROP") && !verb.equals("RECREATE")) return null;
 
 		try
 		{
 			DdlObjectInfo info = new DdlObjectInfo();
-			
+
 			boolean typeFound = false;
 			SQLToken token = lexer.getNextToken(false, false);
 			while (token != null)
@@ -214,12 +214,12 @@ public class SqlUtil
 	{
 		public String objectType;
 		public String objectName;
-		
+
 		public String toString()
 		{
 			return "Type: " + objectType + ", name: " + objectName;
 		}
-		
+
 		public String getDisplayType()
 		{
 			return StringUtil.capitalize(objectType);
@@ -237,7 +237,7 @@ public class SqlUtil
 	}
 
 	/**
-	 * If the given SQL is a DELETE [FROM] returns 
+	 * If the given SQL is a DELETE [FROM] returns
 	 * the table from which rows will be deleted
 	 */
 	public static String getDeleteTable(CharSequence sql)
@@ -248,10 +248,10 @@ public class SqlUtil
 			SQLToken t = lexer.getNextToken(false, false);
 			if (!t.getContents().equals("DELETE")) return null;
 			t = lexer.getNextToken(false, false);
-			// If the next token is not the FROM keyword (which is optional) 
+			// If the next token is not the FROM keyword (which is optional)
 			// then it must be the table name.
 			if (t == null) return null;
-			if (!t.getContents().equals("FROM")) return t.getContents(); 
+			if (!t.getContents().equals("FROM")) return t.getContents();
 			t = lexer.getNextToken(false, false);
 			if (t == null) return null;
 			return t.getContents();
@@ -260,10 +260,10 @@ public class SqlUtil
 		{
 			return null;
 		}
-	}	
+	}
 
 	/**
-	 * If the given SQL is an INSERT INTO... 
+	 * If the given SQL is an INSERT INTO...
 	 * returns the target table, otherwise null
 	 */
 	public static String getInsertTable(CharSequence sql)
@@ -286,7 +286,7 @@ public class SqlUtil
 	}
 
 	/**
-	 * If the given SQL command is an UPDATE command, return 
+	 * If the given SQL command is an UPDATE command, return
 	 * the table that is updated, otherwise return null;
 	 */
 	public static String getUpdateTable(CharSequence sql)
@@ -304,28 +304,28 @@ public class SqlUtil
 		{
 			return null;
 		}
-	}	
+	}
 
-	
+
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
 	 */
 	public static String getSqlVerb(CharSequence sql)
 	{
 		if (StringUtil.isEmptyString(sql)) return "";
-		
+
 		SQLLexer l = new SQLLexer(sql);
 		try
 		{
 			SQLToken t = l.getNextToken(false, false);
 			if (t == null) return "";
-			
+
 			// The SQLLexer does not recognize @ as a keyword (which is basically
 			// correct, but to support the Oracle style includes we'll treat it
 			// as a keyword here.
 			String v = t.getContents();
 			if (v.charAt(0) == '@') return "@";
-			
+
 			return t.getContents().toUpperCase();
 		}
 		catch (Exception e)
@@ -333,11 +333,11 @@ public class SqlUtil
 			return "";
 		}
 	}
-	
+
 	/**
 	 * Returns the columns for the result set defined by the passed
 	 * query.
-	 * This method will actually execute the given SQL query, but will 
+	 * This method will actually execute the given SQL query, but will
 	 * not retrieve any rows (using setMaxRows(1).
 	 */
 	public static List<ColumnIdentifier> getResultSetColumns(String sql, WbConnection conn)
@@ -398,7 +398,7 @@ public class SqlUtil
 		}
 		return result;
 	}
-	
+
 	private static String getTableDefinition(String table, boolean keepAlias)
 	{
 		if (keepAlias) return table;
@@ -406,7 +406,7 @@ public class SqlUtil
 		if (pos > -1) return table.substring(0, pos);
 		return table;
 	}
-	
+
 	/**
 	 * Parse the given SQL SELECT query and return the columns defined
 	 * in the column list. If the SQL string does not start with SELECT
@@ -414,7 +414,7 @@ public class SqlUtil
 	 * @param select the SQL String to parse
 	 * @param includeAlias if false, the "raw" column names will be returned, otherwise
 	 *       the column name including the alias (e.g. "p.name AS person_name"
-	 * @return a List of String objecs. 
+	 * @return a List of String objecs.
 	 */
 	public static List<String> getSelectColumns(String select, boolean includeAlias)
 	{
@@ -425,17 +425,17 @@ public class SqlUtil
 			SQLToken t = lex.getNextToken(false, false);
 			if (!"SELECT".equalsIgnoreCase(t.getContents())) return Collections.emptyList();
 			t = lex.getNextToken(false, false);
-			
+
 			boolean ignoreFirstBracket = false;
 
-			// Skip a potential DISTINCT at the beginning 
+			// Skip a potential DISTINCT at the beginning
 			if (t.getContents().equals("DISTINCT") || t.getContents().equals("DISTINCT ON"))
 			{
 				// Postgres DISTINCT ON extension...
 				ignoreFirstBracket = t.getContents().equals("DISTINCT ON");
 				t = lex.getNextToken(false, false);
 			}
-			
+
 			int lastColStart = t.getCharBegin();
 			int bracketCount = 0;
 			boolean nextIsCol = true;
@@ -472,7 +472,7 @@ public class SqlUtil
 						col = striptColumnAlias(col);
 					}
 					result.add(col);
-					
+
 					if (SqlFormatter.SELECT_TERMINAL.contains(v))
 					{
 						nextIsCol = false;
@@ -507,26 +507,26 @@ public class SqlUtil
 			LogMgr.logError("SqlUtil.getColumnsFromSelect()", "Error parsing SELECT statement", e);
 			return Collections.emptyList();
 		}
-		
+
 		return result;
 	}
-	
+
 	public static String striptColumnAlias(String expression)
 	{
 		if (expression == null) return null;
-		
+
 		List elements = StringUtil.stringToList(expression, " ", true, true, true);
-		
+
 		return (String)elements.get(0);
 	}
-	
+
 	public static List<String> getTables(String aSql)
 	{
 		return getTables(aSql, false);
 	}
-	
+
 	/**
-	 * Returns a List of tables defined in the SQL query. If the 
+	 * Returns a List of tables defined in the SQL query. If the
 	 * query is not a SELECT query the result is undefined
 	 */
 	public static List<String> getTables(String sql, boolean includeAlias)
@@ -615,7 +615,7 @@ public class SqlUtil
 		return result;
 	}
 
-	/**	
+	/**
 	 * Extract the FROM part of a SQL statement. That is anything after the FROM
 	 * up to (but not including) the WHERE, GROUP BY, ORDER BY, whichever comes first
 	 */
@@ -632,7 +632,7 @@ public class SqlUtil
 		}
 		return sql.substring(fromPos, fromEnd);
 	}
-	
+
 	/**
 	 * Return the position of the FROM keyword in the given SQL
 	 */
@@ -642,14 +642,14 @@ public class SqlUtil
 		s.add("FROM");
 		return getKeywordPosition(s, sql);
 	}
-	
+
 	public static int getWherePosition(String sql)
 	{
 		Set<String> s = new HashSet<String>();
 		s.add("WHERE");
 		return getKeywordPosition(s, sql);
 	}
-	
+
 	public static int getKeywordPosition(String keyword, CharSequence sql)
 	{
 		if (keyword == null) return -1;
@@ -657,7 +657,7 @@ public class SqlUtil
 		s.add(keyword.toUpperCase());
 		return getKeywordPosition(s, sql);
 	}
-	
+
 	public static int getKeywordPosition(Set<String> keywords, CharSequence sql)
 	{
 		int pos = -1;
@@ -670,7 +670,7 @@ public class SqlUtil
 			while (t != null)
 			{
 				String value = t.getContents();
-				if ("(".equals(value)) 
+				if ("(".equals(value))
 				{
 					bracketCount ++;
 				}
@@ -688,7 +688,7 @@ public class SqlUtil
 				}
 
 				t = lexer.getNextToken(false, false);
-			}		
+			}
 		}
 		catch (Exception e)
 		{
@@ -696,7 +696,7 @@ public class SqlUtil
 		}
 		return pos;
 	}
-	
+
 	public static String makeCleanSql(String aSql, boolean keepNewlines)
 	{
 		return makeCleanSql(aSql, keepNewlines, false, '\'');
@@ -738,7 +738,7 @@ public class SqlUtil
 			{
 				inQuotes = !inQuotes;
 			}
-			
+
 			if (inQuotes && (!inComment && !keepComments))
 			{
 				newSql.append(c);
@@ -814,7 +814,7 @@ public class SqlUtil
 			sql = sql.substring(pos);
 		}
 		Matcher m = testPattern.matcher(sql);
-		return m.find();		
+		return m.find();
 	}
 
 	/**
@@ -851,12 +851,12 @@ public class SqlUtil
 	}
 
 	/**
-	 * Returns true if the given JDBC type indicates some kind of 
+	 * Returns true if the given JDBC type indicates some kind of
 	 * character data (including CLOBs)
 	 */
 	public static final boolean isCharacterType(int aSqlType)
 	{
-		return (aSqlType == Types.VARCHAR || 
+		return (aSqlType == Types.VARCHAR ||
 		        aSqlType == Types.CHAR ||
 		        aSqlType == Types.CLOB ||
 		        aSqlType == Types.LONGVARCHAR ||
@@ -866,7 +866,7 @@ public class SqlUtil
 						aSqlType == Types40.NCLOB
 						);
 	}
-	
+
 	/**
 	 * 	Returns true if the passed datatype (from java.sql.Types)
 	 *  can hold a numeric value (either with or without decimals)
@@ -883,7 +883,7 @@ public class SqlUtil
 		        aSqlType == Types.SMALLINT ||
 		        aSqlType == Types.TINYINT);
 	}
-	
+
 	public static final boolean isDateType(int aSqlType)
 	{
 		return (aSqlType == Types.DATE || aSqlType == Types.TIMESTAMP);
@@ -893,27 +893,27 @@ public class SqlUtil
 	{
 		return (aSqlType == Types.CLOB || aSqlType == Types40.NCLOB);
 	}
-	
+
 	public static final boolean isClobType(int aSqlType, DbSettings dbInfo)
 	{
 		boolean treatLongVarcharAsClob = (dbInfo == null ? false : dbInfo.longVarcharIsClob());
 		return isClobType(aSqlType, treatLongVarcharAsClob);
 	}
-	
+
 	public static final boolean isClobType(int aSqlType, boolean treatLongVarcharAsClob)
 	{
 		if (!treatLongVarcharAsClob) return isClobType(aSqlType);
-		
-		return (aSqlType == Types.CLOB || 
+
+		return (aSqlType == Types.CLOB ||
 			      aSqlType == Types40.NCLOB ||
 			      aSqlType == Types.LONGVARCHAR ||
 						aSqlType == Types40.LONGNVARCHAR
 						);
 	}
-	
+
 	public static final boolean isBlobType(int aSqlType)
 	{
-		return (aSqlType == Types.BLOB || 
+		return (aSqlType == Types.BLOB ||
 		        aSqlType == Types.BINARY ||
 		        aSqlType == Types.LONGVARBINARY ||
 		        aSqlType == Types.VARBINARY);
@@ -955,7 +955,7 @@ public class SqlUtil
 		{
 			case Types.ARRAY:
 				return "ARRAY";
-				
+
 			case Types.BIGINT:
 				return "BIGINT";
 
@@ -1060,12 +1060,12 @@ public class SqlUtil
 
 			case Types40.ROWID:
 				return "ROWID";
-				
+
 			default:
 				return "UNKNOWN";
 		}
 	}
-	
+
 	/**
 	 * Construct the SQL display name for the given SQL datatype.
 	 * This is used when re-recreating the source for a table
@@ -1082,8 +1082,8 @@ public class SqlUtil
 			case Types40.NCHAR:
 				// Postgres' text datatype does not have a size parameter
 				if ("text".equals(typeName)) return "text";
-				
-				if (size > 0) 
+
+				if (size > 0)
 				{
 					display = typeName + "(" + size + ")";
 				}
@@ -1093,7 +1093,7 @@ public class SqlUtil
 			case Types.REAL:
 				display = typeName;
 				break;
-				
+
 			case Types.FLOAT:
 				if (size > 0)
 				{
@@ -1146,14 +1146,14 @@ public class SqlUtil
 					display = typeName + "(" + size + ")";
 				}
 				break;
-				
+
 			default:
 				display = typeName;
 				break;
 		}
 		return display;
 	}
-	
+
 	public static CharSequence getWarnings(WbConnection con, Statement stmt)
 	{
 		try
@@ -1167,12 +1167,12 @@ public class SqlUtil
 			// from the statement. They will not be added when the Warnings from
 			// the connection are retrieved
 			Set<String> added = new HashSet<String>();
-			StringBuilder msg = null; 
+			StringBuilder msg = null;
 			String s = null;
 			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());
 			boolean hasWarnings = warn != null;
 			int count = 0;
-			
+
 			while (warn != null)
 			{
 				count ++;
@@ -1186,14 +1186,14 @@ public class SqlUtil
 				if (count > 15) break; // prevent endless loop
 				warn = warn.getNextWarning();
 			}
-			
+
 			warn = (con == null ? null : con.getSqlConnection().getWarnings());
 			hasWarnings = hasWarnings || (warn != null);
 			count = 0;
 			while (warn != null)
 			{
 				s = warn.getMessage();
-				// Some JDBC drivers duplicate the warnings between 
+				// Some JDBC drivers duplicate the warnings between
 				// the statement and the connection.
 				// This is to prevent adding them twice
 				if (!added.contains(s))
@@ -1216,7 +1216,7 @@ public class SqlUtil
 			return null;
 		}
 	}
-	
+
 	private static StringBuilder append(StringBuilder msg, CharSequence s)
 	{
 		if (msg == null) msg = new StringBuilder(100);
@@ -1228,12 +1228,12 @@ public class SqlUtil
 	{
 		StringBuilder result = new StringBuilder(30);
 		DbMetadata meta = conn.getMetadata();
-		if (!StringUtil.isEmptyString(catalog))
+		if (!StringUtil.isEmptyString(catalog) && !conn.getMetadata().ignoreCatalog(catalog))
 		{
 			result.append(meta.quoteObjectname(catalog));
 			result.append('.');
 		}
-		if (!StringUtil.isEmptyString(schema))
+		if (!StringUtil.isEmptyString(schema) && !conn.getMetadata().ignoreSchema(schema))
 		{
 			result.append(meta.quoteObjectname(schema));
 			result.append('.');
@@ -1265,5 +1265,5 @@ public class SqlUtil
 		int sizeThreshold = GuiSettings.getMultiLineThreshold();
 		return charLength >= sizeThreshold;
 	}
-	
+
 }

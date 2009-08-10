@@ -36,7 +36,7 @@ import workbench.util.StringUtil;
  * Any setting returned from this class will be specific to the DBMS
  * that it was initialized for, identified by the DBID passed to the constructor
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  * @see DbMetadata#getDbId()
  */
 public class DbSettings
@@ -52,7 +52,7 @@ public class DbSettings
 	private boolean allowsMultipleGetUpdateCounts = true;
 	private boolean supportsBatchedStatements = false;
 	private boolean supportsCommentInSql = true;
-	
+
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
 	private Set<String> updatingCommands;
@@ -103,7 +103,7 @@ public class DbSettings
 	{
 		return this.supportsCommentInSql;
 	}
-	
+
 	/**
 	 * Checks if the given SQL verb updates the database.
 	 * In addition to the built-in detected (e.g. UPDATE, DELETE), the user
@@ -120,7 +120,7 @@ public class DbSettings
 	 *
 	 * @see workbench.sql.SqlCommand#isUpdatingCommand()
 	 * @see ConnectionProfile#getConfirmUpdates()
-	 * @see ConnectionProfile#isReadOnly() 
+	 * @see ConnectionProfile#isReadOnly()
 	 */
 	public boolean isUpdatingCommand(String verb)
 	{
@@ -187,7 +187,7 @@ public class DbSettings
 
 	/**
 	 * Returns true if object names should never be quoted.
-	 * 
+	 *
 	 */
 	public boolean neverQuoteObjects()
 	{
@@ -214,7 +214,7 @@ public class DbSettings
 	 * This is also used from within the DataStore when updating data.
 	 * <br/>
 	 * The related property is workbench.db.[dbid].import.use.setnull
-	 * 
+	 *
 	 * @see DmlStatement#execute(workbench.db.WbConnection)
 	 */
 	public boolean useSetNull()
@@ -240,7 +240,7 @@ public class DbSettings
 	 * The related property is: <tt>workbench.db.[dbid].casesensitive</tt>
 	 *
 	 * @return true if the current DBMS is case sensitive
-	 * @see TableSearchPanel#searchData() 
+	 * @see TableSearchPanel#searchData()
 	 */
 	public boolean isStringComparisonCaseSensitive()
 	{
@@ -400,6 +400,12 @@ public class DbSettings
 	public boolean supportsQueryTimeout()
 	{
 		boolean result = Settings.getInstance().getBoolProperty(prefix + "supportquerytimeout", true);
+		return result;
+	}
+
+	public boolean supportsIndexedViews()
+	{
+		boolean result = Settings.getInstance().getBoolProperty(prefix + "indexedviews", false);
 		return result;
 	}
 
@@ -647,7 +653,7 @@ public class DbSettings
 	 * Return the query to retrieve the current catalog
 	 * <br/>
 	 * The related property is: <tt>workbench.db.[dbid].currentcatalog.query
-	 * 
+	 *
 	 * @return null if no query is configured
 	 */
 	public String getQueryForCurrentCatalog()
@@ -682,9 +688,9 @@ public class DbSettings
 	 * it is retrieved from the server.
 	 *
 	 * The related property is: <tt>workbench.db.[dbid].source.view.doformat
-	 * 
+	 *
 	 * @return true if the source should be formatted (using the SQLFormatter)
-	 * 
+	 *
 	 * @see workbench.db.ViewReader#getViewSource(workbench.db.TableIdentifier)
 	 */
 	public boolean getFormatViewSource()
@@ -825,7 +831,7 @@ public class DbSettings
 	 * is returned (if configured)
 	 *
 	 * @return the approriate result set column index if configured, 1 otherwise
-	 * @see #getRetrieveTableSourceSql() 
+	 * @see #getRetrieveTableSourceSql()
 	 */
 	public int getRetrieveTableSourceCol()
 	{

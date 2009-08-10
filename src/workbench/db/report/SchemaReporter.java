@@ -33,7 +33,7 @@ import workbench.interfaces.Interruptable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
@@ -41,9 +41,9 @@ import workbench.util.StringUtil;
 
 
 /**
- * Generate an report from a selection of database tables
- * @author  support@sql-workbench.net
+ * Generate an report from a selection of database tables.
  *
+ * @author Thomas Kellerer
  */
 public class SchemaReporter
 	implements Interruptable
@@ -73,7 +73,7 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
-		types = CollectionBuilder.arrayList(conn.getMetadata().getTableTypeName());
+		types = CollectionUtil.arrayList(conn.getMetadata().getTableTypeName());
 		setIncludeViews(true);
 	}
 
@@ -86,11 +86,11 @@ public class SchemaReporter
 	{
 		this.reportTitle = title;
 	}
-	
+
 	public void setObjectList(List<? extends DbObject> objectList)
 	{
 		if (this.tables == null) this.tables = new ArrayList<TableIdentifier>();
-		
+
 		for (DbObject dbo : objectList)
 		{
 			for (String type : this.types)
@@ -128,8 +128,8 @@ public class SchemaReporter
 		}
 	}
 
-	public void setIncludeViews(boolean flag) 
-	{ 
+	public void setIncludeViews(boolean flag)
+	{
 		if (flag)
 		{
 			types.add(this.dbConn.getMetadata().getViewTypeName());
@@ -148,12 +148,12 @@ public class SchemaReporter
 		types.clear();
 		types.addAll(newTypeList);
 	}
-	
+
 	public void setIncludeSequences(boolean flag) { this.includeSequences = flag; }
 	public void setIncludeTables(boolean flag) { this.includeTables = flag; }
 	public void setIncludeProcedures(boolean flag) { this.includeProcedures = flag; }
 	public void setIncludeGrants(boolean flag) { this.includeGrants = flag; }
-	
+
 	public void setOutputFilename(String filename)
 	{
 		this.outputfile = filename;
@@ -216,7 +216,7 @@ public class SchemaReporter
 		if (this.includeSequences && this.sequences.size() == 0) this.retrieveSequences();
 		if (this.cancel) return;
 
-		
+
 		out.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
 		out.write("<");
 		out.write("schema-report>\n\n");
@@ -226,9 +226,9 @@ public class SchemaReporter
 		int count = this.tables.size();
 		int totalCount = count + this.procedures.size() + this.sequences.size();
 		int totalCurrent = 1;
-		
+
 		DbSettings dbs = dbConn.getMetadata().getDbSettings();
-		
+
 		for (TableIdentifier table : tables)
 		{
 			try
@@ -240,7 +240,7 @@ public class SchemaReporter
 				{
 					this.monitor.setCurrentObject(tableName, totalCurrent, totalCount);
 				}
-		
+
 				String type = table.getType();
 				if (type == null)
 				{
@@ -289,7 +289,7 @@ public class SchemaReporter
 			totalCurrent ++;
 			if (this.cancel) break;
 		}
-		
+
 		count = this.sequences.size();
 		if (count > 0) out.write("\n");
 		for (ReportSequence seq : sequences)
@@ -304,7 +304,7 @@ public class SchemaReporter
 			totalCurrent ++;
 			if (this.cancel) break;
 		}
-		
+
 		out.write("</");
 		out.write("schema-report>");
 		out.flush();
@@ -344,7 +344,7 @@ public class SchemaReporter
 	{
 		if (this.monitor != null)
 		{
-			this.monitor.setCurrentObject(ResourceMgr.getString("MsgSchemaReporterRetrievingTables"), -1, -1);
+			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTables"), -1, -1);
 		}
 		if (this.schemas == null || this.schemas.size() == 0)
 		{
@@ -368,7 +368,7 @@ public class SchemaReporter
 	{
 		if (this.monitor != null)
 		{
-			this.monitor.setCurrentObject(ResourceMgr.getString("MsgSchemaReporterRetrievingProcedures"), -1, -1);
+			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingSequences"), -1, -1);
 		}
 		if (this.schemas == null || this.schemas.size() == 0)
 		{
@@ -386,21 +386,21 @@ public class SchemaReporter
 			this.monitor.setCurrentObject(null, -1, -1);
 		}
 	}
-	
+
 	private void retrieveSequences(String targetSchema)
 	{
 		try
 		{
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
-			if (schema == null) 
+			if (schema == null)
 			{
 				schema = this.dbConn.getMetadata().getSchemaToUse();
 			}
 			SequenceReader reader = this.dbConn.getMetadata().getSequenceReader();
 			if (reader == null) return;
-			
+
 			List<SequenceDefinition> seqs = reader.getSequences(schema);
-			
+
 			for (SequenceDefinition seq : seqs)
 			{
 				ReportSequence rseq = new ReportSequence(seq);
@@ -413,12 +413,12 @@ public class SchemaReporter
 			LogMgr.logError("SchemaReporter.retrieveSequences()", "Error retrieving sequences", e);
 		}
 	}
-	
+
 	private void retrieveProcedures()
 	{
 		if (this.monitor != null)
 		{
-			this.monitor.setCurrentObject(ResourceMgr.getString("MsgSchemaReporterRetrievingProcedures"), -1, -1);
+			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingProcedures"), -1, -1);
 		}
 		if (this.schemas == null || this.schemas.size() == 0)
 		{
@@ -443,7 +443,7 @@ public class SchemaReporter
 		{
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
 			List<ProcedureDefinition> procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(null, schema, null);
-			
+
 			for (ProcedureDefinition def : procs)
 			{
 				ReportProcedure proc = new ReportProcedure(def, this.dbConn);

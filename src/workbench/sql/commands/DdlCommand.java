@@ -23,14 +23,14 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
  * Run a DDL (CREATE, DROP, ALTER, GRANT, REVOKE) command.
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DdlCommand
 	extends SqlCommand
@@ -43,7 +43,7 @@ public class DdlCommand
 
 	// Firebird RECREATE VIEW command
 	public static final DdlCommand RECREATE = new DdlCommand("RECREATE");
-	public static final List<DdlCommand> DDL_COMMANDS = CollectionBuilder.readOnlyList(DROP, CREATE, ALTER, GRANT, REVOKE);
+	public static final List<DdlCommand> DDL_COMMANDS = CollectionUtil.readOnlyList(DROP, CREATE, ALTER, GRANT, REVOKE);
 
 	private String verb;
 	private Savepoint ddlSavepoint;

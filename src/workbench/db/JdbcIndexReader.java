@@ -25,14 +25,14 @@ import workbench.util.StringUtil;
 /**
  * An implementation of the IndexReader interface that uses the standard JDBC API
  * to get the index information.
- * 
- * @author support@sql-workbench.net
+ *
+ * @author Thomas Kellerer
  */
 public class JdbcIndexReader
 	implements IndexReader
 {
 	protected DbMetadata metaData;
-	
+
 	public JdbcIndexReader(DbMetadata meta)
 	{
 		this.metaData = meta;
@@ -44,7 +44,7 @@ public class JdbcIndexReader
 	 * This is a hook for sub-classes that overwrite getIndexInfo() and need to close the
 	 * returned result set.
 	 *
-	 * @see #getIndexInfo(workbench.db.TableIdentifier, boolean) 
+	 * @see #getIndexInfo(workbench.db.TableIdentifier, boolean)
 	 */
 	public void indexInfoProcessed()
 	{
@@ -53,12 +53,27 @@ public class JdbcIndexReader
 
 	/**
 	 * Return information about the indexes defined for the given table.
-	 * 
-	 * @throws java.sql.SQLException 
+	 * If the TableIdentifier's type is VIEW null will be returned unless
+	 * the current DBMS supports indexed views.
+	 * <br/>
+	 * This is a performance optimization when retrieving a large number
+	 * of objects (such as for WbSchemaReport or WbSearchSource) in order
+	 * to minimized the roundtrips to the database.
+	 *
+	 * @throws java.sql.SQLException
+	 * @see DbSettings#supportsIndexedViews()
   */
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
+		if ("VIEW".equalsIgnoreCase(table.getType()))
+		{
+			if (!metaData.getDbSettings().supportsIndexedViews())
+			{
+				LogMgr.logDebug("JdbcIndexReader.getIndexInfo()", "Not retrieving index info for VIEW " + table.getTableName());
+				return null;
+			}
+		}
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, false);
 	}
 
@@ -68,8 +83,16 @@ public class JdbcIndexReader
 	 */
 	public String getPrimaryKeyIndex(TableIdentifier tbl)
 	{
+		// Views don't have primary keys...
+		if ("VIEW".equals(tbl.getType()))
+		{
+			LogMgr.logDebug("JdbcIndexReader.getPrimaryKeyIndex()", "Not retrieving PK index info for VIEW " + tbl.getTableName());
+			return "";
+		}
+
 		// Retrieve the name of the PK index
 		String pkName = "";
+
 		if (this.metaData.getDbSettings().supportsGetPrimaryKeys())
 		{
 			ResultSet keysRs = null;
@@ -92,13 +115,13 @@ public class JdbcIndexReader
 		}
 		return pkName;
 	}
-	
+
 	/**
 	 * Return the SQL to re-create the indexes defined for the table.
-	 * 
-	 * @param table 
-	 * @param indexDefinition 
-	 * @param tableNameToUse 
+	 *
+	 * @param table
+	 * @param indexDefinition
+	 * @param tableNameToUse
 	 * @return SQL Script to create indexes
 	 */
 	public StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse)
@@ -108,17 +131,17 @@ public class JdbcIndexReader
 		if (count == 0) return StringUtil.emptyBuffer();
 		StringBuilder idx = new StringBuilder();
 		String template = this.metaData.metaSqlMgr.getIndexTemplate();
-		
+
 		int idxCount = 0;
 		for (int i = 0; i < count; i++)
 		{
 			IndexDefinition definition = (IndexDefinition)indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
 
 			if (definition == null) continue;
-			
+
 			String type = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
 			if (type == null || type.startsWith("NORMAL")) type = "";
-			
+
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
 			// are usually auto-created when the PK is defined, so there is no need
 			// to re-create a CREATE INDEX statement for them.
@@ -135,7 +158,7 @@ public class JdbcIndexReader
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
 				}
-				
+
 				if (StringUtil.isEmptyString(type))
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER + " ", type);
@@ -144,7 +167,7 @@ public class JdbcIndexReader
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
 				}
-				
+
 				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, definition.getExpression());
 				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, definition.getName());
 				idx.append(sql);
@@ -157,12 +180,12 @@ public class JdbcIndexReader
 
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
-	 * 
+	 *
 	 * 	@param aTable - The table name for which the index should be constructed
 	 * 	@param indexName - The name of the Index
 	 * 	@param unique - Should the index be unique
 	 *  @param columnList - The columns that should build the index
-	 * 
+	 *
 	 *  @return the SQL statement to create the index
 	 */
 	public String buildCreateIndexSql(TableIdentifier aTable, String indexName, boolean unique, List<IndexColumn> columnList)
@@ -197,9 +220,9 @@ public class JdbcIndexReader
 	}
 
 	/**
-	 * 
-	 * @param table 
-	 * @param indexDefinitions 
+	 *
+	 * @param table
+	 * @param indexDefinitions
 	 */
 	public void processIndexList(TableIdentifier table, Collection<IndexDefinition> indexDefinitions)
 	{
@@ -258,7 +281,7 @@ public class JdbcIndexReader
 			idxRs = getIndexInfo(tbl, false);
 			boolean supportsDirection = metaData.getDbSettings().supportsSortedIndex();
 
-			while (idxRs.next())
+			while (idxRs != null && idxRs.next())
 			{
 				boolean unique = idxRs.getBoolean("NON_UNIQUE");
 				String indexName = idxRs.getString("INDEX_NAME");

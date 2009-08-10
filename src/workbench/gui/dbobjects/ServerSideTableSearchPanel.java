@@ -18,7 +18,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import workbench.db.search.ServerSideTableSearcher;
-import workbench.db.search.TableSearcher;
+import workbench.db.search.TableDataSearcher;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.ResourceMgr;
@@ -92,7 +92,7 @@ public class ServerSideTableSearchPanel
 		searchText.setEnabled(true);
 	}
 
-	public TableSearcher getSearcher()
+	public TableDataSearcher getSearcher()
 	{
 		searcher.setCriteria(searchText.getText());
 		searcher.setColumnFunction(columnFunction.getText());

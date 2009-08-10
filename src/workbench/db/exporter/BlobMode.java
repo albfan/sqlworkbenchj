@@ -12,12 +12,12 @@
 package workbench.db.exporter;
 
 import java.util.List;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 
 /**
  * Define codes for the different ways how BLOBs can be handled by the export classes.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public enum BlobMode
 {
@@ -67,7 +67,7 @@ public enum BlobMode
 
 	public static List<String> getTypes()
 	{
-		return CollectionBuilder.arrayList("file", "ansi", "dbms");
+		return CollectionUtil.arrayList("file", "ansi", "dbms");
 	}
 
 }

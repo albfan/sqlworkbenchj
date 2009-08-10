@@ -34,7 +34,7 @@ import workbench.sql.formatter.SQLToken;
 import workbench.sql.preparedstatement.ParameterDefinition;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
  * CallableStatement.getParameterMetaData() correctly, or return proper information
  * about the columns of a procedure using DatabaseMetaData.getProcedureColumns()
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbCall
 	extends SqlCommand
@@ -295,7 +295,7 @@ public class WbCall
 		String schema = null;
 		String procname = null;
 
-		List<String> sqlParams = CollectionBuilder.arrayList();
+		List<String> sqlParams = CollectionUtil.arrayList();
 
 		try
 		{
@@ -405,7 +405,7 @@ public class WbCall
 						if (newType != Integer.MIN_VALUE) dataType = newType;
 						if (refCursorIndex == null)
 						{
-							refCursorIndex = CollectionBuilder.arrayList();
+							refCursorIndex = CollectionUtil.arrayList();
 						}
 						refCursorIndex.add(Integer.valueOf(realParamIndex));
 					}

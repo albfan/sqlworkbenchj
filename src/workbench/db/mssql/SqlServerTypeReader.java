@@ -1,11 +1,11 @@
 /*
  * SqlServerTypeReader
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.mssql;
@@ -26,13 +26,13 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
  *
- * @author thomas
+ * @author Thomas Kellerer
  */
 public class SqlServerTypeReader
 	implements ObjectListExtender
@@ -50,16 +50,16 @@ public class SqlServerTypeReader
 									 "where t.is_user_defined = 1";
 
 		// the data types for which the max_length information are valid
-	private Set<String> maxLengthTypes = CollectionBuilder.hashSet("varchar", "nvarchar", "char", "text", "ntext", "varbinary");
+	private Set<String> maxLengthTypes = CollectionUtil.hashSet("varchar", "nvarchar", "char", "text", "ntext", "varbinary");
 
 		// the data types for which the scale and precision columns are valid
-	private Set<String> numericTypes = CollectionBuilder.hashSet("decimal", "numeric");
+	private Set<String> numericTypes = CollectionUtil.hashSet("decimal", "numeric");
 
 	public static boolean versionSupportsTypes(WbConnection con)
 	{
 		return JdbcUtils.hasMinimumServerVersion(con, "9.0");
 	}
-	
+
 	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return;
@@ -79,7 +79,7 @@ public class SqlServerTypeReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionBuilder.arrayList("TYPE");
+		return CollectionUtil.arrayList("TYPE");
 	}
 
 	public boolean handlesType(String type)
@@ -160,7 +160,7 @@ public class SqlServerTypeReader
 		domain.setNullable(nullable);
 		return domain;
 	}
-	
+
 	public DataStore getObjectDetails(WbConnection con, DbObject object)
 	{
 		if (object == null) return null;
@@ -200,7 +200,7 @@ public class SqlServerTypeReader
 		}
 		return sql;
 	}
-	
+
 	public DomainIdentifier getObjectDefinition(WbConnection con, DbObject name)
 	{
 		Statement stmt = null;
@@ -213,7 +213,7 @@ public class SqlServerTypeReader
 			String schema = con.getMetadata().adjustSchemaNameCase(name.getSchema());
 
 			String sql = getSql(schema, typename);
-			
+
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
 			{

@@ -60,6 +60,7 @@ import workbench.sql.wbcommands.WbRemoveVar;
 import workbench.sql.wbcommands.WbSavePkMapping;
 import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbSchemaReport;
+import workbench.sql.wbcommands.WbSearchSource;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
@@ -68,7 +69,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class CommandMapper
 {
@@ -119,6 +120,7 @@ public class CommandMapper
 		addCommand(new WbListTriggers());
 		addCommand(new WbTriggerSource());
 		addCommand(new WbDescribeTable());
+		addCommand(new WbSearchSource());
 
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);

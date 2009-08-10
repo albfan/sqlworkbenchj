@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -20,11 +21,15 @@ import java.util.TreeSet;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
-public class CollectionBuilder
+public class CollectionUtil
 {
-
+	public static boolean isEmpty(Collection c)
+	{
+		return (c == null || c.size() == 0);
+	}
+	
 	public static <E> Set<E> hashSet(E... add)
 	{
 		Set<E> result = new HashSet<E>(add.length);
@@ -54,6 +59,7 @@ public class CollectionBuilder
 	public static Set<String> caseInsensitiveSet(String... a)
 	{
 		Set<String> result = caseInsensitiveSet();
+
 		for (String e : a)
 		{
 			result.add(e);
@@ -66,6 +72,11 @@ public class CollectionBuilder
 		return new ArrayList<E>(source);
 	}
 
+	public static <E> List<E> sizedArrayList(int capacity)
+	{
+		return new ArrayList<E>(capacity);
+	}
+
 	public static <E> List<E> arrayList()
 	{
 		return new ArrayList<E>();
@@ -73,8 +84,8 @@ public class CollectionBuilder
 
 	/**
 	 * Create an ArrayList from the given elements. The returned list
-	 * can be changed (in constrast to Arrays.asList() where the returned
-	 * List does dot support the add() method)
+	 * can be changed (in constrast to Arrays.asList() where a non-modifieable list
+	 * is returned
 	 */
 	public static <E> List<E> arrayList(E... a)
 	{

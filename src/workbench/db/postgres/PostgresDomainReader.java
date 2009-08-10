@@ -28,13 +28,14 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to read information about defined DOMAINs in Postgres.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class PostgresDomainReader
 	implements ObjectListExtender
@@ -70,7 +71,7 @@ public class PostgresDomainReader
 	private String getSql(WbConnection connection, String schema, String name)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
-			
+
 		sql.append("SELECT * FROM ( ");
 		sql.append(baseSql);
 		sql.append(") di \n");
@@ -98,10 +99,10 @@ public class PostgresDomainReader
 		{
 			LogMgr.logDebug("PostgresDomainReader.getSql()", "Using SQL=\n" + sql);
 		}
-		
+
 		return sql.toString();
 	}
-	
+
 	public List<DomainIdentifier> getDomainList(WbConnection connection, String schemaPattern)
 	{
 		Statement stmt = null;
@@ -152,7 +153,7 @@ public class PostgresDomainReader
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
 			String sql = getSql(connection, object.getSchema(), object.getObjectName());
-			
+
 			rs = stmt.executeQuery(sql);
 			if (rs.next())
 			{
@@ -220,7 +221,7 @@ public class PostgresDomainReader
 	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return;
-		
+
 		List<DomainIdentifier> domains = getDomainList(con, schema);
 		if (domains.size() == 0) return;
 		for (DomainIdentifier domain : domains)
@@ -256,7 +257,7 @@ public class PostgresDomainReader
 
 		DomainIdentifier domain = getObjectDefinition(con, object);
 		if (domain == null) return null;
-		
+
 		String[] columns = new String[] { "DOMAIN", "DATA_TYPE", "NULLABLE", "CONSTRAINT", "REMARKS" };
 		int[] types = new int[] { Types.VARCHAR, Types.VARCHAR, Types.BOOLEAN, Types.VARCHAR, Types.VARCHAR };
 		int[] sizes = new int[] { 20, 10, 5, 30, 30 };
@@ -273,7 +274,7 @@ public class PostgresDomainReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionBuilder.arrayList("DOMAIN");
+		return CollectionUtil.arrayList("DOMAIN");
 	}
 
 	public String getObjectSource(WbConnection con, DbObject object)

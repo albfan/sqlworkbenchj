@@ -27,14 +27,14 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.storage.StatementFactory;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
  * Export data as SQL INSERT statements.
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SqlRowDataConverter
 	extends RowDataConverter
@@ -218,7 +218,7 @@ public class SqlRowDataConverter
 			updateTable = alternateUpdateTable;
 		}
 
-		List<ColumnIdentifier> cols = CollectionBuilder.arrayList(this.metaData.getColumns());
+		List<ColumnIdentifier> cols = CollectionUtil.arrayList(this.metaData.getColumns());
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(originalConnection);
 		String source = builder.getTableSource(updateTable, cols, (alternateUpdateTable == null ? updateTable.getTableName() : alternateUpdateTable.getTableName()));
 		StrBuffer createSql = new StrBuffer(source);

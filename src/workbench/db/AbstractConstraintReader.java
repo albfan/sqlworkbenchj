@@ -26,13 +26,14 @@ import workbench.util.ExceptionUtil;
 
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
-* A class to read table level constraints from the database.
- * @author  support@sql-workbench.net
+ * A class to read table level constraints from the database.
+ *
+ * @author Thomas Kellerer
  */
 public abstract class AbstractConstraintReader
 	implements ConstraintReader
@@ -42,7 +43,7 @@ public abstract class AbstractConstraintReader
 
 	public boolean isColumnConstraintNameIncluded() { return false; }
 	public boolean isTableConstraintNameIncluded() { return false; }
-	
+
 	public int getIndexForSchemaParameter()
 	{
 		return -1;
@@ -60,7 +61,7 @@ public abstract class AbstractConstraintReader
 	{
 		return false;
 	}
-	
+
 	/**
 	 *	Returns the column constraints for the given table. The key to the Map is
 	 *	the column name, the value is the full expression which can be appended
@@ -117,7 +118,7 @@ public abstract class AbstractConstraintReader
 	{
 		if (constraints == null) return null;
 		StringBuilder result = new StringBuilder();
-		
+
 		int count = 0;
 		for (int i=0; i < constraints.size(); i++)
 		{
@@ -135,7 +136,7 @@ public abstract class AbstractConstraintReader
 		}
 		return result.toString();
 	}
-	
+
 	/**
 	 * Returns the SQL Statement that should be appended to a CREATE table
 	 * in order to create the constraints defined on the table
@@ -150,7 +151,7 @@ public abstract class AbstractConstraintReader
 			LogMgr.logInfo(getClass().getName() + ".getTableConstraints()", "Using SQL: " + sql);
 		}
 
-		List<TableConstraint> result = CollectionBuilder.arrayList();
+		List<TableConstraint> result = CollectionUtil.arrayList();
 		PreparedStatement stmt = null;
 
 		Savepoint sp = null;
@@ -162,11 +163,11 @@ public abstract class AbstractConstraintReader
 			{
 				sp = dbConnection.setSavepoint();
 			}
-			
+
 			stmt = dbConnection.getSqlConnection().prepareStatement(sql, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-			
+
 			int index = this.getIndexForSchemaParameter();
-			if (index > 0) 
+			if (index > 0)
 			{
 				String schema = aTable.getSchema();
 				if (StringUtil.isBlank(schema))

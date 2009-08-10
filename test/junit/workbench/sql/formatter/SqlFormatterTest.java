@@ -15,11 +15,11 @@ import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SqlFormatterTest
 	extends WbTestCase
@@ -170,7 +170,7 @@ public class SqlFormatterTest
 		String sql = "SELECT right(name,5) FROM person";
 		SqlFormatter f = new SqlFormatter(sql);
 		f.setUseLowerCaseFunctions(true);
-		f.setDBFunctions(CollectionBuilder.hashSet("RIGHT", "LEFT"));
+		f.setDBFunctions(CollectionUtil.hashSet("RIGHT", "LEFT"));
 		String formatted = f.getFormattedSql().toString();
 //		System.out.println("*******\n" + formatted + "\n**********");
 		String expected = "SELECT right(name,5)\nFROM person";

@@ -21,26 +21,27 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.WbSelectBlob;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
- * A factory to generate a BaseAnalyzer based on a given SQL statement
- * @author support@sql-workbench.net
+ * A factory to generate a BaseAnalyzer based on a given SQL statement.
+ *
+ * @author Thomas Kellerer
  */
 public class StatementContext
 {
 	private BaseAnalyzer analyzer;
 	private CommandTester wbTester = new CommandTester();
-	private final Set<String> unionKeywords = CollectionBuilder.hashSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
-	
+	private final Set<String> unionKeywords = CollectionUtil.hashSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
+
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{
 		String verb = SqlUtil.getSqlVerb(sql);
 
 		BaseAnalyzer subSelectAnalyzer = checkSubselect(conn, sql, pos);
 		BaseAnalyzer verbAnalyzer = null;
-		
+
 		if ("SELECT".equalsIgnoreCase(verb) || WbSelectBlob.VERB.equalsIgnoreCase(verb))
 		{
 			verbAnalyzer = new SelectAnalyzer(conn, sql, pos);
@@ -77,7 +78,7 @@ public class StatementContext
 		{
 			verbAnalyzer = new WbCommandAnalyzer(conn, sql, pos);
 		}
-		
+
 		if (subSelectAnalyzer != null)
 		{
 			this.analyzer = subSelectAnalyzer;
@@ -88,7 +89,7 @@ public class StatementContext
 			this.analyzer = verbAnalyzer;
 			this.analyzer.setParent(null);
 		}
-		
+
 		if (analyzer != null)
 		{
 			analyzer.retrieveObjects();
@@ -96,7 +97,7 @@ public class StatementContext
 	}
 
 	public BaseAnalyzer getAnalyzer() { return this.analyzer; }
-	
+
 	private BaseAnalyzer checkSubselect(WbConnection conn, String sql, int pos)
 	{
 		try
@@ -105,25 +106,25 @@ public class StatementContext
 
 			SQLToken t = lexer.getNextToken(false, false);
 			SQLToken lastToken = null;
-			
+
 			int lastStart = 0;
 			int lastEnd = 0;
 			String verb = t.getContents();
-			
+
 			// Will contain the position of each SELECT verb
 			// if a UNION is encountered.
 			List<Integer> unionStarts = new ArrayList<Integer>();
 			int bracketCount = 0;
 			boolean inSubselect = false;
-			boolean checkForInsertSelect = verb.equals("INSERT") 
+			boolean checkForInsertSelect = verb.equals("INSERT")
 				|| verb.equals("CREATE")
 				|| verb.equals("CREATE OR REPLACE");
-			
+
 			while (t != null)
 			{
 				final String value = t.getContents();
-				
-				if ("(".equals(value)) 
+
+				if ("(".equals(value))
 				{
 					bracketCount ++;
 					if (bracketCount == 1) lastStart = t.getCharBegin();
@@ -134,7 +135,7 @@ public class StatementContext
 					if (inSubselect && bracketCount == 0)
 					{
 						lastEnd = t.getCharBegin();
-						if (lastStart <= pos && pos <= lastEnd) 
+						if (lastStart <= pos && pos <= lastEnd)
 						{
 							int newpos = pos - lastStart - 1;
 							String sub = sql.substring(lastStart + 1, lastEnd);
@@ -169,7 +170,7 @@ public class StatementContext
 						else
 						{
 							unionStarts.add(Integer.valueOf(t.getCharEnd()));
-							
+
 							// continue with the token just read
 							lastToken = t;
 							t = t2;
@@ -181,7 +182,7 @@ public class StatementContext
 						unionStarts.add(Integer.valueOf(t.getCharEnd()));
 					}
 				}
-				
+
 				if (bracketCount == 1 && lastToken.getContents().equals("(") && value.equals("SELECT"))
 				{
 					inSubselect = true;
@@ -190,7 +191,7 @@ public class StatementContext
 				lastToken = t;
 				t = lexer.getNextToken(false, false);
 			}
-			
+
 			if (unionStarts.size() > 0)
 			{
 				int index = 0;
@@ -219,16 +220,16 @@ public class StatementContext
 		{
 			LogMgr.logError("StatementContenxt.inSubSelect()", "Error when checking sub-select", e);
 		}
-		
+
 		return null;
 	}
-	
+
 
 	public boolean isStatementSupported()
 	{
 		return this.analyzer != null;
 	}
-	
+
 	public List getData()
 	{
 		if (analyzer == null) return Collections.EMPTY_LIST;
@@ -236,11 +237,11 @@ public class StatementContext
 		if (result == null) return Collections.EMPTY_LIST;
 		return result;
 	}
-	
+
 	public String getTitle()
 	{
 		if (analyzer == null) return "";
 		return analyzer.getTitle();
 	}
-	
+
 }

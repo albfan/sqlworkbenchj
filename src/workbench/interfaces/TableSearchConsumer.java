@@ -1,5 +1,5 @@
 /*
- * TableSearchDisplay.java
+ * TableSearchConsumer.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -17,11 +17,10 @@ import workbench.storage.DataStore;
 /**
  * @author support@sql-workbench.net  
  */ 
-public interface TableSearchDisplay
+public interface TableSearchConsumer
 {
 	void setCurrentTable(String aTablename, String aStatement);
 	void error(String msg);
-	//void addResultRow(TableIdentifier table, ResultSet aResult);
 	void tableSearched(TableIdentifier table, DataStore result);
 	void setStatusText(String aStatustext);
 	void searchStarted();

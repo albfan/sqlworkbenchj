@@ -19,11 +19,12 @@ import workbench.db.ProfileGroupMap;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 
 /**
+ * List all defined profiles
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbListProfiles
 	extends SqlCommand
@@ -53,7 +54,7 @@ public class WbListProfiles
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
 
-		List<ConnectionProfile> prof = CollectionBuilder.arrayList();
+		List<ConnectionProfile> prof = CollectionUtil.arrayList();
 
 		// getProfiles() returns an unmodifiable List, but ProfileGroupMap
 		// tries to sort the list...

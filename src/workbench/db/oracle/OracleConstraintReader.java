@@ -22,12 +22,13 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
+ * A class to read column and table constraints from Oracle.
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class OracleConstraintReader
 	extends AbstractConstraintReader
@@ -59,7 +60,7 @@ public class OracleConstraintReader
 	{
 		String sql = this.getTableConstraintSql();
 		if (sql == null) return null;
-		List<TableConstraint> result = CollectionBuilder.arrayList();
+		List<TableConstraint> result = CollectionUtil.arrayList();
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;

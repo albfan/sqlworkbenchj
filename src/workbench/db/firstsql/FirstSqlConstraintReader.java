@@ -23,23 +23,23 @@ import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
  * Constraint reader for <a href="http://www.firstsql.com/">FirstSQL</a>
- * 
- * @author  support@sql-workbench.net
+ *
+ * @author Thomas Kellerer
  */
 public class FirstSqlConstraintReader
 	extends AbstractConstraintReader
 {
-	private static final String SQL = "select ch.check_clause, ch.constraint_name \n" + 
-             "from definition_schema.syschecks ch,  \n" + 
-             "     definition_schema.sysconstraints cons \n" + 
-             "where cons.constraint_type = 'check' \n" + 
-             "  and cons.constraint_name = ch.constraint_name" + 
-             "  and cons.table_schema = ? \n" + 
+	private static final String SQL = "select ch.check_clause, ch.constraint_name \n" +
+             "from definition_schema.syschecks ch,  \n" +
+             "     definition_schema.sysconstraints cons \n" +
+             "where cons.constraint_type = 'check' \n" +
+             "  and cons.constraint_name = ch.constraint_name" +
+             "  and cons.table_schema = ? \n" +
              "  and cons.table_name = ? ";
 
 
@@ -53,14 +53,14 @@ public class FirstSqlConstraintReader
 	{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("FirstSqlConstraintReader.getTableConstraints()", "Using query=\n" + SQL);
 		}
 
-		List<TableConstraint> result = CollectionBuilder.arrayList();
-		
+		List<TableConstraint> result = CollectionUtil.arrayList();
+
 		try
 		{
 			pstmt = dbConnection.prepareStatement(SQL);

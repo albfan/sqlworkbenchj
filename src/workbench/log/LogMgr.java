@@ -24,7 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import workbench.gui.components.LogFileViewer;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -32,7 +32,9 @@ import workbench.util.WbFile;
 
 
 /**
- * @author  support@sql-workbench.net
+ * The logging class used by SQL Workbench/J
+ *
+ * @author Thomas Kellerer
  */
 public class LogMgr
 {
@@ -44,7 +46,7 @@ public class LogMgr
 	private static final String WARNING_DISPLAY = "WARN ";
 	private static final String INFO_DISPLAY = "INFO ";
 
-	public static final List<String> LEVELS = CollectionBuilder.arrayList(ERROR, WARNING, INFO, DEBUG);
+	public static final List<String> LEVELS = CollectionUtil.arrayList(ERROR, WARNING, INFO, DEBUG);
 
 	private static PrintStream logOut = null;
 	private static LogFileViewer viewer;

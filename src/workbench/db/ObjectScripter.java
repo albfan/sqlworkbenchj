@@ -19,11 +19,11 @@ import workbench.util.ExceptionUtil;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.interfaces.Scripter;
 import workbench.resource.Settings;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ObjectScripter
 	implements Scripter
@@ -55,8 +55,8 @@ public class ObjectScripter
 	{
 		this.objectList = objects;
 		this.dbConnection = aConnection;
-		commitTypes = CollectionBuilder.hashSet(TYPE_SEQUENCE,
-			TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG, 
+		commitTypes = CollectionUtil.hashSet(TYPE_SEQUENCE,
+			TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG,
 			TYPE_DOMAIN, TYPE_ENUM);
 	}
 

@@ -17,7 +17,7 @@ import workbench.WbTestCase;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class StringUtilTest
 	extends WbTestCase
@@ -691,6 +691,40 @@ public class StringUtilTest
 		result = StringUtil.formatNumber(100000, 5, false);
 		assertEquals(6, result.length());
 		assertEquals("100000", result);
+	}
+
+	public void testContainsWords()
+	{
+		String input = "So long and thanks for all the fish";
+		List<String> values = CollectionUtil.arrayList("thanks", "phish");
+
+		boolean found = StringUtil.containsWords(input, values, false, false);
+		assertTrue(found);
+
+		found = StringUtil.containsWords(input, values, true, false);
+		assertFalse(found);
+
+		values = CollectionUtil.arrayList("thanks", "fish");
+		found = StringUtil.containsWords(input, values, true, true);
+		assertTrue(found);
+
+		found = StringUtil.containsWords(input, values, false, false);
+		assertTrue(found);
+
+		values = CollectionUtil.arrayList("thanks", "FISH");
+		found = StringUtil.containsWords(input, values, true, true);
+		assertFalse(found);
+
+		found = StringUtil.containsWords(input, values, true, false);
+		assertTrue(found);
+
+		values = CollectionUtil.arrayList("nothere", "also_not_there");
+		found = StringUtil.containsWords(input, values, true, true);
+		assertFalse(found);
+
+		values = CollectionUtil.arrayList("nothere", "also_not_there");
+		found = StringUtil.containsWords(input, values, false, true);
+		assertFalse(found);
 
 	}
 }

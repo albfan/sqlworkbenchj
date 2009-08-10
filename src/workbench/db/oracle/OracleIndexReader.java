@@ -25,6 +25,7 @@ import workbench.db.JdbcIndexReader;
 import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -33,8 +34,8 @@ import workbench.util.StringUtil;
  *
  * This class uses its own SQL Statement to retrieve the index list from the database
  * as Oracle's JDBC driver runs an ANALYZE before actually returning the index information
- * 
- * @author  support@sql-workbench.net
+ *
+ * @author Thomas Kellerer
  */
 public class OracleIndexReader
 	extends JdbcIndexReader
@@ -76,6 +77,8 @@ public class OracleIndexReader
 			LogMgr.logWarning("OracleIndexReader.getIndexInfo()", "getIndexInfo() called with pending results!");
 			indexInfoProcessed();
 		}
+
+		if ("VIEW".equals(table.getType())) return null;
 
 		TableIdentifier tbl = table.createCopy();
 		tbl.adjustCase(this.metaData.getWbConnection());
@@ -131,7 +134,7 @@ public class OracleIndexReader
 	 */
 	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
 	{
-		if (indexDefs.size() == 0) return;
+		if (CollectionUtil.isEmpty(indexDefs)) return;
 
 		String base="SELECT i.index_name, e.column_expression, e.column_position \n" +
 			"FROM all_indexes i, all_ind_expressions e  \n" +

@@ -38,7 +38,7 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -55,7 +55,7 @@ import workbench.util.WbThread;
  *
  * The source data is always retrieved using a {@link QueryCopySource}
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DataCopier
 	implements BatchCommitter, ProgressReporter
@@ -239,7 +239,7 @@ public class DataCopier
 				try
 				{
 					ObjectDropper dropper = new GenericObjectDropper();
-					dropper.setObjects(CollectionBuilder.arrayList(toDrop));
+					dropper.setObjects(CollectionUtil.arrayList(toDrop));
 					dropper.setConnection(targetConnection);
 					dropper.dropObjects();
 					this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableDropped", toDrop.getQualifiedName()));
@@ -298,7 +298,7 @@ public class DataCopier
 
 			// no need to delete rows from a newly created table
 			this.setDeleteTarget(DeleteType.none);
-			
+
 			this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableCreated", this.targetTable.getTableExpression(this.targetConnection)) + "\n");
 		}
 		catch (SQLException e)
@@ -314,9 +314,9 @@ public class DataCopier
 	 * create table are retrieved and we have to use those columns e.g.
 	 * because upper/lowercase can be different now if the column names
 	 * were specified by the user, and the DBMS folded them to upper or lowercase
-	 * 
+	 *
 	 * @param realCols
-	 * @param toUpdate to column definitions to be updated 
+	 * @param toUpdate to column definitions to be updated
 	 */
 	private void updateTargetColumns(List<ColumnIdentifier> realCols, Collection<ColumnIdentifier> toUpdate)
 	{
@@ -360,7 +360,7 @@ public class DataCopier
 		}
 		this.initImporterForQuery(query);
 	}
-	
+
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
 	{
 		if (rowMonitor != null)

@@ -1,0 +1,267 @@
+/*
+ * ObjectSourceSearcher
+ * 
+ *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * 
+ *  Copyright 2002-2009, Thomas Kellerer
+ *  No part of this code maybe reused without the permission of the author
+ * 
+ *  To contact the author please send an email to: support@sql-workbench.net
+ */
+package workbench.db.search;
+
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Set;
+import workbench.db.DbMetadata;
+import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
+import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
+import workbench.db.TriggerReader;
+import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.storage.RowActionMonitor;
+import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
+
+/**
+ *
+ * @author Thomas Kellerer
+ */
+public class ObjectSourceSearcher
+{
+	private List<String> schemas;
+	private Set<String> types;
+	private List<String> names;
+	private WbConnection connection;
+	
+	private List<DbObject> searchResult;
+	private RowActionMonitor monitor;
+	private boolean cancelSearch;
+	
+	public ObjectSourceSearcher(WbConnection con)
+	{
+		connection = con;
+		schemas = CollectionUtil.arrayList();
+		names = CollectionUtil.arrayList();
+		types = CollectionUtil.caseInsensitiveSet("trigger", "procedure", "function", "view", DbMetadata.MVIEW_NAME);
+	}
+
+	public void setRowMonitor(RowActionMonitor mon)
+	{
+		monitor = mon;
+	}
+
+	public void cancelSearch()
+	{
+		cancelSearch = true;
+	}
+	/**
+	 * Sets the given types to the list of types to be searched
+	 * <br/>
+	 * This will override any previously defined search types.
+	 * @param types
+	 */
+	public void setTypesToSearch(List<String> searchTypes)
+	{
+		if (CollectionUtil.isEmpty(searchTypes)) return;
+		types.clear();
+		types.addAll(searchTypes);
+	}
+
+	public void setSchemasToSearch(List<String> searchSchemas)
+	{
+		if (CollectionUtil.isEmpty(searchSchemas)) return;
+		schemas.clear();
+		schemas.addAll(searchSchemas);
+	}
+
+	public void setNamesToSearch(List<String> searchNames)
+	{
+		if (CollectionUtil.isEmpty(searchNames)) return;
+		names.clear();
+		names.addAll(searchNames);
+	}
+	
+	/**
+	 * Searches all objects for the given search string(s)
+	 * If multiple search strings are given, the parameter matchAll
+	 * defines if they all of them have to match or at least one
+	 *
+	 * @param searchValues the patterns to be searched in all object sources. This can be a regular expression
+	 * @param matchAll if true all patterns must be found in a single source
+	 * @param caseSensitive  if true, the patterns must match exactly
+	 * @return
+	 */
+	public synchronized List<DbObject> searchObjects(List<String> searchValues, boolean matchAll, boolean caseSensitive)
+	{
+		cancelSearch = false;
+		try
+		{
+			searchResult = CollectionUtil.sizedArrayList(50);
+
+			if (CollectionUtil.isEmpty(schemas))
+			{
+				schemas = CollectionUtil.arrayList(connection.getCurrentSchema());
+			}
+
+			if (CollectionUtil.isEmpty(names))
+			{
+				names = CollectionUtil.arrayList("%");
+			}
+
+			Set<String> typesToRetrieve = CollectionUtil.caseInsensitiveSet();
+			typesToRetrieve.addAll(types);
+			if (typesToRetrieve.contains("trigger"))
+			{
+				List<DbObject> trigger = retrieveTriggers();
+				if (cancelSearch) return null;
+				typesToRetrieve.remove("trigger");
+				searchList(trigger, searchValues, matchAll, caseSensitive);
+			}
+			
+			if (cancelSearch) return null;
+
+			if (typesToRetrieve.contains("procedure") || typesToRetrieve.contains("function"))
+			{
+				List<DbObject> procs = retrieveProcedures();
+				if (cancelSearch) return null;
+				typesToRetrieve.remove("procedure");
+				typesToRetrieve.remove("function");
+				searchList(procs, searchValues, matchAll, caseSensitive);
+			}
+
+			if (cancelSearch) return null;
+
+			if (typesToRetrieve.size() > 0)
+			{
+				List<DbObject> objects = retrieveObjects(typesToRetrieve);
+				searchList(objects, searchValues, matchAll, caseSensitive);
+			}
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("ObjectSourceSearcher.searchObjects()", "Error retrieving objects", sql);
+		}
+		return searchResult;
+	}
+
+	private void searchList(List<DbObject> toSearch, List<String> searchValues, boolean matchAll, boolean caseSensitive)
+	{
+		if (monitor != null)
+		{
+			monitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
+		}
+		int total = toSearch.size();
+		int current = 1;
+
+		for (DbObject object : toSearch)
+		{
+			if (cancelSearch) return;
+
+			if (monitor != null)
+			{
+				monitor.setCurrentObject(object.getObjectName(), current, total);
+			}
+			try
+			{
+				CharSequence source = object.getSource(connection);
+				if (StringUtil.isBlank(source))
+				{
+					LogMgr.logWarning("ObjectSourceSearcher.searchObjects()", "Empty source returned for " + object.toString());
+				}
+				if (StringUtil.containsWords(source, searchValues, matchAll, caseSensitive))
+				{
+					searchResult.add(object);
+				}
+			}
+			catch (SQLException sql)
+			{
+				LogMgr.logError("ObjectSourceSearcher.searchObjects()", "Error retrieving object source", sql);
+			}
+			current ++;
+		}
+	}
+
+	private List<DbObject> retrieveProcedures()
+		throws SQLException
+	{
+		if (this.monitor != null)
+		{
+			monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+			monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingProcedures"), -1, -1);
+		}
+		List<DbObject> result = CollectionUtil.sizedArrayList(50);
+		ProcedureReader reader = connection.getMetadata().getProcedureReader();
+		if (reader == null) return result;
+
+		for (String schema : schemas)
+		{
+			for (String name : names)
+			{
+				if (cancelSearch) return null;
+				List<ProcedureDefinition> procs = reader.getProcedureList(null, schema, name);
+				result.addAll(procs);
+			}
+		}
+		return result;
+	}
+
+	private List<DbObject> retrieveTriggers()
+		throws SQLException
+	{
+		if (this.monitor != null)
+		{
+			monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+			monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTriggers"), -1, -1);
+		}
+		TriggerReader trgReader = new TriggerReader(connection);
+		List<DbObject> result = CollectionUtil.sizedArrayList(50);
+		for (String schema : schemas)
+		{
+			if (cancelSearch) return null;
+			List<TriggerDefinition> triggers = trgReader.getTriggerList(null, schema);
+			result.addAll(triggers);
+		}
+		return result;
+	}
+
+	private List<DbObject> retrieveObjects(Set<String> types)
+		throws SQLException
+	{
+		if (this.monitor != null)
+		{
+			monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+			monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTables"), -1, -1);
+		}
+		List<DbObject> result = CollectionUtil.sizedArrayList(50);
+
+		String[] typeNames = new String[types.size()];
+		int i=0;
+		for (String type : types)
+		{
+			if (type != null)
+			{
+				// the JDBC calls all use upper-case type names, even
+				// if the DBMS stores them lower case
+				typeNames[i] = type.toUpperCase();
+				i++;
+			}
+		}
+		
+		for (String schema : schemas)
+		{
+			for (String name : names)
+			{
+				if (cancelSearch) return null;
+				List<TableIdentifier> objects = connection.getMetadata().getObjectList(name, schema, typeNames);
+				result.addAll(objects);
+			}
+		}
+		return result;
+	}
+
+}

@@ -11,10 +11,10 @@
  */
 package workbench.storage.filter;
 import java.util.List;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ComparatorFactory
 {
@@ -22,7 +22,7 @@ public class ComparatorFactory
 
 	public ComparatorFactory()
 	{
-		comparatorList = CollectionBuilder.arrayList(
+		comparatorList = CollectionUtil.arrayList(
 			new ContainsComparator(),
 			new StartsWithComparator(),
 			new NotStartsWithComparator(),
@@ -58,7 +58,7 @@ public class ComparatorFactory
 		}
 		return null;
 	}
-	
+
 	public ColumnComparator findComparatorFor(Class clz)
 	{
 		for (ColumnComparator comp : comparatorList)

@@ -9,7 +9,6 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-
 package workbench.util;
 
 import java.util.List;
@@ -20,15 +19,18 @@ import junit.framework.TestCase;
  *
  * @author support@sql-workbench.net
  */
-public class CollectionBuilderTest extends TestCase {
-    
-    public CollectionBuilderTest(String testName) {
-        super(testName);
-    }
+public class CollectionUtilTest
+	extends TestCase
+{
+
+	public CollectionUtilTest(String testName)
+	{
+		super(testName);
+	}
 
 	public void testCreateHashSet()
 	{
-		Set<String> set = CollectionBuilder.hashSet("one", "two");
+		Set<String> set = CollectionUtil.hashSet("one", "two");
 		assertNotNull(set);
 		assertEquals(2, set.size());
 		set.add("three");
@@ -37,7 +39,7 @@ public class CollectionBuilderTest extends TestCase {
 		assertTrue(set.contains("two"));
 		assertTrue(set.contains("three"));
 
-		Set<String> second = CollectionBuilder.hashSet(set, "four", "five");
+		Set<String> second = CollectionUtil.hashSet(set, "four", "five");
 		assertEquals(5, second.size());
 		assertTrue(second.contains("one"));
 		assertTrue(second.contains("two"));
@@ -51,7 +53,7 @@ public class CollectionBuilderTest extends TestCase {
 
 	public void testCaseInsensitiveSet()
 	{
-		Set<String> result = CollectionBuilder.caseInsensitiveSet("one", "two", "THREE");
+		Set<String> result = CollectionUtil.caseInsensitiveSet("one", "two", "THREE");
 		assertTrue(result.contains("ONE"));
 		assertTrue(result.contains("Two"));
 		assertTrue(result.contains("three"));
@@ -59,11 +61,10 @@ public class CollectionBuilderTest extends TestCase {
 
 	public void testCreateList()
 	{
-		List<Integer> result = CollectionBuilder.arrayList(1,2,3);
+		List<Integer> result = CollectionUtil.arrayList(1, 2, 3);
 		assertNotNull(result);
 		assertEquals(3, result.size());
 		result.add(4);
 		assertEquals(4, result.size());
 	}
-
 }

@@ -20,7 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import workbench.db.search.ClientSideTableSearcher;
-import workbench.db.search.TableSearcher;
+import workbench.db.search.TableDataSearcher;
 import workbench.gui.filter.ComparatorListItem;
 import workbench.gui.filter.ListComboBoxModel;
 import workbench.interfaces.PropertyStorage;
@@ -30,7 +30,7 @@ import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.RegExComparator;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -71,7 +71,7 @@ public class ClientSideTableSearchPanel
 
 		comparatorDropDown = new JComboBox();
 
-		List<ComparatorListItem> items = CollectionBuilder.arrayList();
+		List<ComparatorListItem> items = CollectionUtil.arrayList();
 
 		items.add(new ComparatorListItem(new ContainsComparator()));
 		items.add(new ComparatorListItem(new StartsWithComparator()));
@@ -118,7 +118,7 @@ public class ClientSideTableSearchPanel
 		comparatorDropDown.setEnabled(true);
 	}
 
-	public TableSearcher getSearcher()
+	public TableDataSearcher getSearcher()
 	{
 		// Comparator must be defined before setting the criteria!
 		searcher.setComparator(getComparator());

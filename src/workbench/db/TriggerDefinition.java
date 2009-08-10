@@ -15,8 +15,9 @@ import java.sql.SQLException;
 import workbench.util.SqlUtil;
 
 /**
- *
- * @author support@sql-workbench.net
+ * The definition of a trigger in the database.
+ * 
+ * @author Thomas Kellerer
  */
 public class TriggerDefinition
 	implements DbObject
@@ -25,7 +26,10 @@ public class TriggerDefinition
 	private String catalog;
 	private String triggerName;
 	private String comment;
-	
+	private String type;
+	private String event;
+//	private TableIdentifier table;
+
 	public TriggerDefinition(String cat, String schem, String name)
 	{
 		schema = schem;
@@ -43,6 +47,36 @@ public class TriggerDefinition
 		comment = c;
 	}
 
+	public void setTriggerEvent(String evt)
+	{
+		event = evt;
+	}
+
+	public String getTriggerEvent()
+	{
+		return event;
+	}
+
+	public void setTriggerType(String typ)
+	{
+		type = typ;
+	}
+
+	public String getTriggerType()
+	{
+		return type;
+	}
+
+//	public void setRelatedTable(TableIdentifier tbl)
+//	{
+//		table = tbl;
+//	}
+//
+//	public TableIdentifier getRelatedTable()
+//	{
+//		return table;
+//	}
+
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -50,12 +84,12 @@ public class TriggerDefinition
 		TriggerReader reader = new TriggerReader(con);
 		return reader.getTriggerSource(catalog, schema, triggerName);
 	}
-	
-	public String getSchema() 
+
+	public String getSchema()
 	{
 		return schema;
 	}
-	
+
 	public String getCatalog()
 	{
 		return catalog;
@@ -70,25 +104,25 @@ public class TriggerDefinition
 	{
 		return conn.getMetadata().quoteObjectname(this.triggerName);
 	}
-	
+
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, triggerName);
 	}
-	
+
 	public String getObjectName()
 	{
 		return triggerName;
 	}
-	
+
 	public String getObjectType()
 	{
 		return "TRIGGER";
 	}
-	
+
 	public String toString()
 	{
 		return triggerName;
 	}
-	
+
 }

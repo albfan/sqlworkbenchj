@@ -28,13 +28,14 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to read the defined ENUM types from Postgres.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class PostgresEnumReader
 	implements ObjectListExtender
@@ -51,7 +52,7 @@ public class PostgresEnumReader
 	public EnumIdentifier getObjectDefinition(WbConnection con, DbObject obj)
 	{
 		if (obj == null) return null;
-		
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
@@ -91,7 +92,7 @@ public class PostgresEnumReader
 				String value = rs.getString("enum_value");
 				enumDef.addEnumValue(value);
 			}
-			
+
 			con.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
@@ -137,7 +138,7 @@ public class PostgresEnumReader
 		}
 		return sql.toString();
 	}
-	
+
 	public Collection<EnumIdentifier> getDefinedEnums(WbConnection con, String schema, String namePattern)
 	{
 		Map<String, EnumIdentifier> enums = getEnumInfo(con, schema, namePattern);
@@ -206,7 +207,7 @@ public class PostgresEnumReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionBuilder.arrayList("ENUM");
+		return CollectionUtil.arrayList("ENUM");
 	}
 
 	public boolean handlesType(String type)

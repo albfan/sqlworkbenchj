@@ -11,7 +11,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.event.KeyListener;
-import workbench.db.search.TableSearcher;
+import workbench.db.search.TableDataSearcher;
 import workbench.interfaces.PropertyStorage;
 
 /**
@@ -24,10 +24,10 @@ public interface TableSearchCriteriaGUI
 	void enableControls();
 
 	/**
-	 * Return a TableSearcher initialized
+	 * Return a TableDataSearcher initialized
 	 * according to the selection of the user in the panel
 	 */
-	TableSearcher getSearcher();
+	TableDataSearcher getSearcher();
 	
 	void saveSettings(String prefix, PropertyStorage props);
 	void restoreSettings(String prefix, PropertyStorage props);

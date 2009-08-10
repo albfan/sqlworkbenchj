@@ -24,14 +24,14 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
  * Handles a WbCopy call for a single table.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableCopy
 	implements CopyTask
@@ -160,7 +160,7 @@ public class TableCopy
 
 		List<String> l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
-		List<ColumnIdentifier> result = CollectionBuilder.arrayList();
+		List<ColumnIdentifier> result = CollectionUtil.arrayList();
 		for (int i=0; i < count; i++)
 		{
 			String c = l.get(i);

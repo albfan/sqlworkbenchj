@@ -25,22 +25,22 @@ import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
 
 /**
- * A class to test whether a given SQL Verb is an internal 
+ * A class to test whether a given SQL Verb is an internal
  * Workbench command. This is used by the SqlFormatter, because
  * the verbs for WbXXXX commands are not formatted in uppercase.
- * 
+ *
  * This is also used by the code completion to check for WB specific commands.
- * 
+ *
  * @see workbench.sql.formatter.SqlFormatter
  * @see workbench.gui.completion.StatementContext
- * 
- * @author support@sql-workbench.net
+ *
+ * @author Thomas Kellerer
  */
 public class CommandTester
 {
 	private final Set<String> commands;
 	private final Map<String, String> formattedWords;
-	
+
 	public CommandTester()
 	{
 		commands = new HashSet<String>();
@@ -85,8 +85,9 @@ public class CommandTester
 		commands.add(WbRun.VERB);
 		commands.add(WbListTriggers.VERB);
 		commands.add(WbTriggerSource.VERB);
-		
-		formattedWords = new HashMap<String, String>();
+		commands.add(WbSearchSource.VERB);
+
+		formattedWords = new HashMap<String, String>(20);
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
 		formattedWords.put(WbLoadPkMapping.VERB, WbLoadPkMapping.FORMATTED_VERB);
 		formattedWords.put(WbDefineVar.VERB, "WbVarDef");
@@ -110,19 +111,20 @@ public class CommandTester
 		formattedWords.put(WbTriggerSource.VERB, WbTriggerSource.FORMATTED_VERB);
 		formattedWords.put(WbListCatalogs.VERB, "WbListDB");
 		formattedWords.put(WbListCatalogs.VERB_ALTERNATE, "WbListCat");
+		formattedWords.put(WbSearchSource.VERB, "WbSearchSource");
 	}
-	
+
 	public Collection<String> getCommands()
 	{
 		return Collections.unmodifiableSet(commands);
 	}
-	
+
 	public boolean isWbCommand(String verb)
 	{
 		if (verb == null) return false;
 		return commands.contains(verb.trim().toUpperCase());
 	}
-	
+
 	public String formatVerb(String verb)
 	{
 		String f = formattedWords.get(verb.toUpperCase());
@@ -135,12 +137,12 @@ public class CommandTester
 			return fixCase(verb);
 		}
 	}
-	
+
 	private String fixCase(String verb)
 	{
 		if (!verb.toLowerCase().startsWith("wb")) return verb;
 		String s = "Wb" + Character.toUpperCase(verb.charAt(2)) + verb.substring(3).toLowerCase();
 		return s;
 	}
-	
+
 }

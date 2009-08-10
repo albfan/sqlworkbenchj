@@ -41,7 +41,7 @@ import javax.swing.table.TableModel;
 import workbench.db.DbMetadata;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.search.TableSearcher;
+import workbench.db.search.TableDataSearcher;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.WbAction;
@@ -59,7 +59,7 @@ import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.ShareableDisplay;
-import workbench.interfaces.TableSearchDisplay;
+import workbench.interfaces.TableSearchConsumer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -75,10 +75,10 @@ import workbench.util.WbWorkspace;
  */
 public class TableSearchPanel
 	extends JPanel
-	implements TableSearchDisplay, ListSelectionListener, KeyListener, DbExecutionNotifier
+	implements TableSearchConsumer, ListSelectionListener, KeyListener, DbExecutionNotifier
 {
 	private TableModel tableListModel;
-	private TableSearcher searcher;
+	private TableDataSearcher searcher;
 	private WbConnection connection;
 	private String fixedStatusText;
 	private ShareableDisplay tableListSource;
@@ -333,7 +333,7 @@ public class TableSearchPanel
 
 		searcher = getCriteriaPanel().getSearcher();
 		searcher.setConnection(this.connection);
-		searcher.setDisplay(this);
+		searcher.setConsumer(this);
 		searcher.setMaxRows(maxRows);
 		searcher.setExcludeLobColumns(excludeLobs.isSelected());
 		searcher.setTableNames(searchTables);

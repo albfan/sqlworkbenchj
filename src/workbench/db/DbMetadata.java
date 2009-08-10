@@ -57,13 +57,13 @@ import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CaseInsensitiveComparator;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 
 /**
  * Retrieve meta data information from the database.
  * This class returns more information than the generic JDBC DatabaseMetadata.
  *
- *  @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DbMetadata
 	implements QuoteHandler
@@ -1255,7 +1255,7 @@ public class DbMetadata
 		}
 
 		boolean sortNeeded = false;
-		
+
 		if (this.sequenceReader != null && typeIncluded("SEQUENCE", types) &&
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
@@ -1291,7 +1291,7 @@ public class DbMetadata
 			}
 			sortNeeded = true;
 		}
-		
+
 		for (ObjectListExtender extender : extenders)
 		{
 			if (extender.handlesType(types))
@@ -1688,7 +1688,7 @@ public class DbMetadata
 	 *
 	 * @param o the object to retrieve
 	 * @return the source of the object or null, if this object is not handled by an extender
-	 * @see #isExtendedObject(workbench.db.DbObject) 
+	 * @see #isExtendedObject(workbench.db.DbObject)
 	 */
 	public String getObjectSource(DbObject o)
 	{
@@ -1701,7 +1701,7 @@ public class DbMetadata
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Return the column list for the given table.
 	 * @param table the table for which to retrieve the column definition
@@ -1726,7 +1726,7 @@ public class DbMetadata
 		}
 		return null;
 	}
-	
+
 	public DataStore getObjectDetails(TableIdentifier table)
 		throws SQLException
 	{
@@ -1738,7 +1738,7 @@ public class DbMetadata
 				return extender.getObjectDetails(dbConnection, table);
 			}
 		}
-		
+
 		if ("SEQUENCE".equalsIgnoreCase(table.getObjectType()))
 		{
 			String schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
@@ -1752,7 +1752,7 @@ public class DbMetadata
 		}
 		return def;
 	}
-	
+
 	/**
 	 * Return the definition of the given table.
 	 * <br/>
@@ -1964,7 +1964,9 @@ public class DbMetadata
 
 	/**
 	 * Return a list of tables for the given schema
-	 * if the schema is null, all tables will be returned
+	 * if the table name is null, all tables will be returned
+	 *
+	 * @see #getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
 	 */
 	public List<TableIdentifier> getObjectList(String table, String schema, String[] types)
 		throws SQLException
@@ -2019,7 +2021,7 @@ public class DbMetadata
 	public String getCurrentCatalog()
 	{
 		if (!this.supportsCatalogs()) return null;
-		
+
 		String catalog = null;
 
 		String query = this.dbSettings.getQueryForCurrentCatalog();
@@ -2105,7 +2107,7 @@ public class DbMetadata
 	 */
 	public List<String> getCatalogInformation()
 	{
-		List<String> result = CollectionBuilder.arrayList();
+		List<String> result = CollectionUtil.arrayList();
 
 		ResultSet rs = null;
 		try

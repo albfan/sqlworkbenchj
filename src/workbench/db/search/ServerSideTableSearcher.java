@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.WbManager;
-import workbench.interfaces.TableSearchDisplay;
+import workbench.interfaces.TableSearchConsumer;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.storage.filter.ColumnExpression;
@@ -34,13 +34,17 @@ import workbench.util.Types40;
 import workbench.util.WbThread;
 
 /**
- * @author  support@sql-workbench.net
+ * An implementation of the TableSearcher interface that uses SELECT
+ * statements with a LIKE condition to search for data.
+ *
+ * @author Thomas Kellerer
  */
-public class ServerSideTableSearcher implements TableSearcher
+public class ServerSideTableSearcher
+	implements TableDataSearcher
 {
 	private List<TableIdentifier> tablesToSearch;
 	private String columnFunction;
-	private TableSearchDisplay display;
+	private TableSearchConsumer display;
 	private String criteria;
 	private WbConnection connection;
 	private boolean cancelSearch = false;
@@ -340,12 +344,12 @@ public class ServerSideTableSearcher implements TableSearcher
 		this.tablesToSearch = new ArrayList<TableIdentifier>(tables);
 	}
 
-	public TableSearchDisplay getDisplay()
+	public TableSearchConsumer getDisplay()
 	{
 		return display;
 	}
 
-	public void setDisplay(TableSearchDisplay searchDisplay)
+	public void setConsumer(TableSearchConsumer searchDisplay)
 	{
 		this.display = searchDisplay;
 	}

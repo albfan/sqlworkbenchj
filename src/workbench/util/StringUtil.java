@@ -20,8 +20,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
+ * A collection of utility methods around String handling.
  *
- *	@author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class StringUtil
 {
@@ -703,7 +704,7 @@ public class StringUtil
 	{
 		return listToString(aList, aDelimiter, quoteEntries, '"');
 	}
-	
+
 	public static final String listToString(Collection aList, String aDelimiter, boolean quoteEntries, char quote)
 	{
 		if (aList == null || aList.size() == 0) return "";
@@ -1221,5 +1222,32 @@ public class StringUtil
 	private static final char[] hexDigit = {
 		'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'
 	};
+
+	/**
+	 * Searches for multiples words inside a string.
+	 *
+	 * @param toSearch the string in which to search
+	 * @param searchValues the pattern(s) to search for
+	 * @param matchAll if true all patterns must be found
+	 *
+	 * @return true if searchValues were found
+	 */
+	public static boolean containsWords(CharSequence toSearch, List<String> searchValues, boolean matchAll, boolean caseSensitive)
+	{
+		if (StringUtil.isBlank(toSearch)) return false;
+		if (CollectionUtil.isEmpty(searchValues)) return false;
+
+		for (String search : searchValues)
+		{
+			Pattern p = Pattern.compile(search, caseSensitive ? 0 : Pattern.CASE_INSENSITIVE);
+			Matcher m = p.matcher(toSearch);
+
+			boolean found = m.find();
+
+			if (!matchAll && found) return true;
+			if (matchAll && !found) return false;
+		}
+		return matchAll;
+	}
 
 }

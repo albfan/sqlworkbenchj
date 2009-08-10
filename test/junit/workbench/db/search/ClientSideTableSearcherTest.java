@@ -1,11 +1,11 @@
 /*
  * ClientSideTableSearcherTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.search;
@@ -16,9 +16,9 @@ import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.interfaces.TableSearchDisplay;
+import workbench.interfaces.TableSearchConsumer;
 import workbench.storage.DataStore;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -76,14 +76,14 @@ public class ClientSideTableSearcherTest
 		ClientSideTableSearcher searcher = new ClientSideTableSearcher();
 		searcher.setConnection(con);
 		searcher.setCriteria("dent");
-		List<TableIdentifier> tables = CollectionBuilder.arrayList(
+		List<TableIdentifier> tables = CollectionUtil.arrayList(
 			new TableIdentifier("PERSON"),
 			new TableIdentifier("SHIP")
 		);
-		
+
 		searcher.setTableNames(tables);
 		SearchConsumer consumer = new SearchConsumer();
-		searcher.setDisplay(consumer);
+		searcher.setConsumer(consumer);
 		searcher.search();
 
 		List<DataStore> searchResult = consumer.getResults();
@@ -101,12 +101,12 @@ public class ClientSideTableSearcherTest
 		assertEquals(2, searchResult.get(1).getRowCount());
 
 		// Check exclusion of CLOB column
-		tables = CollectionBuilder.arrayList(new TableIdentifier("DOCUMENT"));
+		tables = CollectionUtil.arrayList(new TableIdentifier("DOCUMENT"));
 		searcher.setTableNames(tables);
 		searcher.setExcludeLobColumns(true);
 		searcher.setCriteria("stuff");
 		searcher.search();
-		
+
 		searchResult = consumer.getResults();
 		assertNotNull(searchResult);
 		assertEquals(1, searchResult.size());
@@ -122,15 +122,15 @@ public class ClientSideTableSearcherTest
 	}
 
 	private class SearchConsumer
-		implements TableSearchDisplay
+		implements TableSearchConsumer
 	{
-		private List<DataStore> results = CollectionBuilder.arrayList();
+		private List<DataStore> results = CollectionUtil.arrayList();
 
 		public List<DataStore> getResults()
 		{
 			return results;
 		}
-		
+
 		public void setCurrentTable(String aTablename, String aStatement)
 		{
 		}

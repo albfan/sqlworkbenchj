@@ -1,11 +1,11 @@
 /*
  * ClientSideTableSearcher
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.search;
@@ -18,14 +18,14 @@ import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
-import workbench.interfaces.TableSearchDisplay;
+import workbench.interfaces.TableSearchConsumer;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -35,7 +35,7 @@ import workbench.util.WbThread;
  * @author Thomas Kellerer
  */
 public class ClientSideTableSearcher
-	implements TableSearcher
+	implements TableDataSearcher
 {
 	private String searchString;
 	private boolean isRunning;
@@ -46,14 +46,14 @@ public class ClientSideTableSearcher
 	private boolean cancelSearch;
 	private Thread searchThread;
 	private Statement searchQuery;
-	private TableSearchDisplay consumer;
+	private TableSearchConsumer consumer;
 	private RowDataSearcher searcher;
 	private ColumnComparator comparator;
-	
+
 	public ClientSideTableSearcher()
 	{
 	}
-	
+
 	public String getCriteria()
 	{
 		return searchString;
@@ -81,7 +81,7 @@ public class ClientSideTableSearcher
 			{
 				this.searchThread.interrupt();
 			}
-			
+
 			if (this.searchQuery != null)
 			{
 				this.searchQuery.cancel();
@@ -144,7 +144,7 @@ public class ClientSideTableSearcher
 			searchQuery = connection.createStatementForQuery();
 
 			if (cancelSearch) return;
-			
+
 
 			if (connection.getDbSettings().useSavePointForDML())
 			{
@@ -155,7 +155,7 @@ public class ClientSideTableSearcher
 
 			ResultInfo info = new ResultInfo(rs.getMetaData(), connection);
 			DataStore result = new DataStore(rs.getMetaData(), connection);
-			
+
 			while (rs.next())
 			{
 				if (cancelSearch) break;
@@ -168,7 +168,7 @@ public class ClientSideTableSearcher
 				if (cancelSearch) break;
 				if (result.getRowCount() > maxRows) break;
 			}
-			
+
 			if (consumer != null)
 			{
 				consumer.tableSearched(table, result);
@@ -185,12 +185,12 @@ public class ClientSideTableSearcher
 			SqlUtil.closeAll(rs, this.searchQuery);
 		}
 	}
-	
+
 	public boolean isRunning()
 	{
 		return this.isRunning;
 	}
-	
+
 	public void setConnection(WbConnection conn)
 	{
 		connection = conn;
@@ -200,7 +200,7 @@ public class ClientSideTableSearcher
 	{
 		this.comparator = comp;
 	}
-	
+
 	public void setCriteria(String search)
 	{
 		if (StringUtil.isBlank(search)) return;
@@ -217,7 +217,7 @@ public class ClientSideTableSearcher
 		searcher = new RowDataSearcher(searchString, comparator);
 	}
 
-	public void setDisplay(TableSearchDisplay searchDisplay)
+	public void setConsumer(TableSearchConsumer searchDisplay)
 	{
 		consumer = searchDisplay;
 	}
@@ -234,7 +234,7 @@ public class ClientSideTableSearcher
 
 	public void setTableNames(List<TableIdentifier> tables)
 	{
-		tablesToSearch = CollectionBuilder.arrayList(tables);
+		tablesToSearch = CollectionUtil.arrayList(tables);
 	}
 
 	public ColumnExpression getSearchExpression()

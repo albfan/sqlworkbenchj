@@ -23,7 +23,7 @@ import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportTableGrants;
 import workbench.db.report.TagWriter;
-import workbench.util.CollectionBuilder;
+import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -32,7 +32,7 @@ import workbench.util.StringUtil;
  * and a target table.
  * Comparing the columns is delegated to {@link ColumnDiff}
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableDiff
 {
@@ -278,7 +278,7 @@ public class TableDiff
 	{
 		if (refConstraints == null) return Collections.emptyList();
 
-		List<TableConstraint> result = CollectionBuilder.arrayList();
+		List<TableConstraint> result = CollectionUtil.arrayList();
 
 		for (TableConstraint ref : refConstraints)
 		{
@@ -335,7 +335,7 @@ public class TableDiff
 		List<TableConstraint> refConstraints = referenceTable.getTableConstraints();
 		if (refConstraints == null) return Collections.emptyList();
 
-		List<TableConstraint> result = CollectionBuilder.arrayList();
+		List<TableConstraint> result = CollectionUtil.arrayList();
 
 		for (TableConstraint ref : refConstraints)
 		{
