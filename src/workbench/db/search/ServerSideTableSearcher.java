@@ -164,8 +164,10 @@ public class ServerSideTableSearcher
 			this.query.setMaxRows(this.maxRows);
 
 			rs = this.query.executeQuery(sql);
+
 			result = new DataStore(rs, this.connection, true);
 			result.setGeneratingSql(sql);
+			result.setResultName(table.getTableName());
 			result.setUpdateTableToBeUsed(table);
 
 			if (this.display != null) this.display.tableSearched(table, result);

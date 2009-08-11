@@ -12,16 +12,41 @@
 package workbench.storage.filter;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class IsNotNullComparator
 	implements ColumnComparator
 {
-	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
-	public String getOperator() { return "not null"; }
-	public boolean needsValue() { return false; }
-	public boolean validateInput(Object value) { return true; }
-	public boolean comparesEquality() { return false; }
+
+	public String getValueExpression(Object value)
+	{
+		return (value == null ? "" : value.toString());
+	}
+
+	public String getOperator()
+	{
+		return "not null";
+	}
+
+	public String getDescription()
+	{
+		return getOperator();
+	}
+
+	public boolean needsValue()
+	{
+		return false;
+	}
+
+	public boolean validateInput(Object value)
+	{
+		return true;
+	}
+
+	public boolean comparesEquality()
+	{
+		return false;
+	}
 
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{

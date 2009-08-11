@@ -11,14 +11,21 @@
  */
 package workbench.storage.filter;
 
+import workbench.resource.ResourceMgr;
+
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ContainsComparator
 	implements ColumnComparator
 {
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
-	public String getName() { return "Contains"; }
+
+	public String getDescription()
+	{
+		return ResourceMgr.getString("TxtOpContains");
+	}
+
 	public String getOperator() { return "contains"; }
 	
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)

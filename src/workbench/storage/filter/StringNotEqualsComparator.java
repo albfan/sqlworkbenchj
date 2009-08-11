@@ -12,27 +12,63 @@
 package workbench.storage.filter;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class StringNotEqualsComparator
 	implements ColumnComparator
 {
-	public boolean supportsIgnoreCase() { return true; }
-	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getOperator() { return "<>"; }
-	public boolean needsValue() { return true; }
-	public boolean validateInput(Object value) { return value instanceof String; }
-	public boolean comparesEquality() { return false; }
+
+	public boolean supportsIgnoreCase()
+	{
+		return true;
+	}
+
+	public String getValueExpression(Object value)
+	{
+		return "'" + value + "'";
+	}
+
+	public String getOperator()
+	{
+		return "<>";
+	}
+
+	public String getDescription()
+	{
+		return "not equal";
+	}
+
+	public boolean needsValue()
+	{
+		return true;
+	}
+
+	public boolean validateInput(Object value)
+	{
+		return value instanceof String;
+	}
+
+	public boolean comparesEquality()
+	{
+		return false;
+	}
 
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null || value == null) return false;
+		if (reference == null || value == null)
+		{
+			return false;
+		}
 		try
 		{
 			if (ignoreCase)
-				return !((String)reference).equalsIgnoreCase((String)value);
+			{
+				return !((String) reference).equalsIgnoreCase((String) value);
+			}
 			else
+			{
 				return !reference.equals(value);
+			}
 		}
 		catch (Exception e)
 		{
@@ -49,5 +85,4 @@ public class StringNotEqualsComparator
 	{
 		return (other instanceof StringNotEqualsComparator);
 	}
-
 }

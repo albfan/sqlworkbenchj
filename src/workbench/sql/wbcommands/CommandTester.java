@@ -85,7 +85,8 @@ public class CommandTester
 		commands.add(WbRun.VERB);
 		commands.add(WbListTriggers.VERB);
 		commands.add(WbTriggerSource.VERB);
-		commands.add(WbSearchSource.VERB);
+		commands.add(WbGrep.VERB);
+		commands.add(WbSearchData.VERB);
 
 		formattedWords = new HashMap<String, String>(20);
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
@@ -111,7 +112,7 @@ public class CommandTester
 		formattedWords.put(WbTriggerSource.VERB, WbTriggerSource.FORMATTED_VERB);
 		formattedWords.put(WbListCatalogs.VERB, "WbListDB");
 		formattedWords.put(WbListCatalogs.VERB_ALTERNATE, "WbListCat");
-		formattedWords.put(WbSearchSource.VERB, "WbSearchSource");
+		formattedWords.put(WbSearchData.VERB, "WbSearchData");
 	}
 
 	public Collection<String> getCommands()

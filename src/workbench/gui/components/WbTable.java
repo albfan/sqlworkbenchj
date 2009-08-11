@@ -123,7 +123,7 @@ import workbench.util.SqlUtil;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbTable
 	extends JTable
@@ -1469,9 +1469,13 @@ public class WbTable
 
 	public void applyHighlightExpression(ColumnExpression filter)
 	{
+		boolean changed = (filter != null && this.highlightExpression == null) ||
+			(filter == null && this.highlightExpression != null);
+		
 		this.highlightExpression = filter;
 		this.resetHighlightAction.setEnabled(filter != null);
-		WbSwingUtilities.repaintLater(this);
+
+		if (changed) WbSwingUtilities.repaintLater(this);
 	}
 
 	private void initMultiLineRenderer()

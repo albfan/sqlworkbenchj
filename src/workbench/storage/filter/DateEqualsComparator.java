@@ -14,7 +14,7 @@ package workbench.storage.filter;
 import workbench.util.ValueConverter;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DateEqualsComparator
 	implements ColumnComparator
@@ -35,6 +35,12 @@ public class DateEqualsComparator
 
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "="; }
+
+	public String getDescription()
+	{
+		return "equals";
+	}
+
 	public boolean needsValue() { return true; }
 	public boolean comparesEquality() { return true; }
 

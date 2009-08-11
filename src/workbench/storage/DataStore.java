@@ -35,6 +35,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ResultNameParser;
+import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
@@ -55,7 +56,7 @@ import workbench.util.ValueConverter;
  *
  * @see workbench.storage.ResultInfo
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DataStore
 {
@@ -76,6 +77,9 @@ public class DataStore
 	// The SQL statement that was used to generate this DataStore
 	private String sql;
 
+	// A ColumnExpression that was used while populating this datastore
+	private ColumnExpression generatingFilter;
+	
 	private ResultInfo resultInfo;
 	private TableIdentifier updateTable;
 	private TableIdentifier updateTableToBeUsed;
@@ -1177,6 +1181,16 @@ public class DataStore
 		setResultName(parser.getResultName(sql));
 	}
 
+	public void setGeneratingFilter(ColumnExpression filter)
+	{
+		this.generatingFilter = filter;
+	}
+
+	public ColumnExpression getGeneratingFilter()
+	{
+		return generatingFilter;
+	}
+	
 	public String getGeneratingSql() { return this.sql; }
 
 	public boolean checkUpdateTable()

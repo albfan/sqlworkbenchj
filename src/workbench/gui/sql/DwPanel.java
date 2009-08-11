@@ -76,10 +76,10 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- *	A Panel which displays the result of a SELECT statement and
- *  can save changes to the database
+ * A Panel which displays the result of a SELECT statement and
+ * can save changes to the database
  *
- *	@author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DwPanel
 	extends JPanel
@@ -723,6 +723,7 @@ public class DwPanel
 					setPrintHeader(sql);
 					dataTable.checkCopyActions();
 					checkResultSetActions();
+					dataTable.applyHighlightExpression(newData.getGeneratingFilter());
 				}
 			});
 

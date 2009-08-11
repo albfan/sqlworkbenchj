@@ -12,7 +12,7 @@
 package workbench.storage.filter;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class GreaterOrEqualComparator
 	implements ColumnComparator
@@ -21,6 +21,12 @@ public class GreaterOrEqualComparator
 
 	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
 	public String getOperator() { return "\u2265"; }
+
+	public String getDescription()
+	{
+		return "greater or equal";
+	}
+
 	public boolean needsValue() { return true; }
 	public boolean comparesEquality() { return false; }
 

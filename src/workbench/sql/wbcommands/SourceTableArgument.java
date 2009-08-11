@@ -23,25 +23,25 @@ import workbench.util.WbStringTokenizer;
 
 /**
  * Evaluate table arguments that may contain wildcards.
- * 
- * @author support@sql-workbench.net
+ *
+ * @author Thomas Kellerer
  */
 public class SourceTableArgument
 {
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private boolean wildcardsPresent = false;
-	
+
 	public SourceTableArgument(String argument, WbConnection dbConn)
 		throws SQLException
 	{
 		if (StringUtil.isEmptyString(argument)) return;
 		if (dbConn == null) return;
-		
+
 		List<String> args = getObjectNames(argument);
 		int argCount = args.size();
 
 		if (argCount <= 0) return;
-		
+
 		for (String t : args)
 		{
 			if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
@@ -66,13 +66,13 @@ public class SourceTableArgument
 
 	/**
 	 * Returns all DB Object names from the comma separated list.
-	 * This is different to stringToList() as it keeps any quotes that 
+	 * This is different to stringToList() as it keeps any quotes that
 	 * are present in the list.
-	 * 
+	 *
 	 * @param list a comma separated list of elements (optionally with quotes)
 	 * @return a List of Strings as defined by the input string
 	 */
-	public List<String> getObjectNames(String list)
+	List<String> getObjectNames(String list)
 	{
 		if (StringUtil.isEmptyString(list)) return Collections.emptyList();
 		WbStringTokenizer tok = new WbStringTokenizer(list, ",");
@@ -92,13 +92,13 @@ public class SourceTableArgument
 		}
 		return result;
 	}
-	
+
 	public List<TableIdentifier> getTables()
 	{
 		return this.tables;
 	}
 
-	public boolean wasWildCardArgument() 
+	public boolean wasWildCardArgument()
 	{
 		return this.wildcardsPresent;
 	}

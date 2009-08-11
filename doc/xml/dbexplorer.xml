@@ -423,7 +423,7 @@ FROM geo_table
 		</para>
 
 		<para>
-			The defined expression will also be used for the <link linkend="search-tables">Search table data</link> featre.
+			The defined expression will also be used for the <link linkend="search-table-data">Search table data</link> featre.
 			If you want to search
 			inside the data that is returned by the defined expression you have to make sure that you DBMS
 			supports the result of that expression as part of a <literal>LIKE</literal> expression. E.g. for the above
@@ -479,8 +479,8 @@ FROM geo_table
 		
 	</section>
 
-	<section id="search-tables">
-		<title>Search tables</title>
+	<section id="search-table-data">
+		<title>Search table data</title>
 
 		<para>
 			This tab offers the ability to search for a value in all text
@@ -570,11 +570,16 @@ FROM geo_table
         compares the retrieved values for each row and keeps the rows where
         at least one column matches the defined search criteria.
       </para>
+
       <para>
         As opposed to the server side search, this means that <emphasis role="bold">every</emphasis>
         row from the selected table(s) will be sent from the database server to the application.
         For large tables were only a small number of the rows will match the search value this can
         increase the processing time substantially.
+      </para>
+      <para>
+        As the searching is done on the client side, this means that it can also "search" data types
+        that cannot be using for a <literal>LIKE</literal> query such as <literal>CLOB, DATE, INTEGER</literal>.
       </para>
       <para>
         The search criteria is defined similar to the definition of a <link linkend="filter-data">filter</link> for a
@@ -590,6 +595,12 @@ FROM geo_table
         a DATE column will be compared according to the standard formatting options
         before the comparison is done.
       </para>
+
+      <para>
+        The client side search is also available as the &wb-productname; command
+        <link linkend="command-search-data">WbSearchData</link>
+      </para>
+      
     </section>
     
 	</section>

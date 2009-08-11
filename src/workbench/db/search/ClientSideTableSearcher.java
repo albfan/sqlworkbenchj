@@ -20,6 +20,7 @@ import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
 import workbench.interfaces.TableSearchConsumer;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -155,7 +156,11 @@ public class ClientSideTableSearcher
 
 			ResultInfo info = new ResultInfo(rs.getMetaData(), connection);
 			DataStore result = new DataStore(rs.getMetaData(), connection);
-
+			String explain = "-- " + ResourceMgr.getFormattedString("TxtSearchFilter", this.comparator.getDescription() + " '"  + this.searchString + "'\n\n");
+			result.setGeneratingSql(explain + sql);
+			result.setResultName(table.getTableName());
+			result.setUpdateTableToBeUsed(table);
+			
 			while (rs.next())
 			{
 				if (cancelSearch) break;
@@ -217,9 +222,9 @@ public class ClientSideTableSearcher
 		searcher = new RowDataSearcher(searchString, comparator);
 	}
 
-	public void setConsumer(TableSearchConsumer searchDisplay)
+	public void setConsumer(TableSearchConsumer searchConsumer)
 	{
-		consumer = searchDisplay;
+		consumer = searchConsumer;
 	}
 
 	public void setExcludeLobColumns(boolean flag)

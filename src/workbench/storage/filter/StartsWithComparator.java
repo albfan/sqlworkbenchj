@@ -11,31 +11,67 @@
  */
 package workbench.storage.filter;
 
+import workbench.resource.ResourceMgr;
+
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class StartsWithComparator
 	implements ColumnComparator
 {
-	public boolean supportsIgnoreCase() { return true; }
+	public boolean supportsIgnoreCase()
+	{
+		return true;
+	}
 
-	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getOperator() { return "starts with"; }
-	public boolean needsValue() { return true; }
-	public boolean validateInput(Object value) { return value instanceof String; }
-	public boolean comparesEquality() { return false; }
+	public String getValueExpression(Object value)
+	{
+		return "'" + value + "'";
+	}
+
+	public String getDescription()
+	{
+		return ResourceMgr.getString("TxtOpStartsWith");
+	}
+
+	public String getOperator()
+	{
+		return "starts with";
+	}
+
+	public boolean needsValue()
+	{
+		return true;
+	}
+
+	public boolean validateInput(Object value)
+	{
+		return value instanceof String;
+	}
+
+	public boolean comparesEquality()
+	{
+		return false;
+	}
 
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null || value == null) return false;
+		if (reference == null || value == null)
+		{
+			return false;
+		}
 		try
 		{
-			String v = (String)value;
-			String ref = (String)reference;
+			String v = (String) value;
+			String ref = (String) reference;
 			if (ignoreCase)
+			{
 				return v.toLowerCase().startsWith(ref.toLowerCase());
+			}
 			else
+			{
 				return v.startsWith(ref);
+			}
 		}
 		catch (Exception e)
 		{
@@ -52,5 +88,4 @@ public class StartsWithComparator
 	{
 		return other instanceof StartsWithComparator;
 	}
-
 }

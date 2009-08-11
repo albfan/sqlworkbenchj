@@ -179,10 +179,10 @@ import workbench.util.WbWorkspace;
 
 
 /**
- *	A panel with an SQL editor (EditorPanel), a log panel and
- *	a panel for displaying SQL results (DwPanel)
+ * A panel with an SQL editor (EditorPanel), a log panel and
+ * a panel for displaying SQL results (DwPanel)
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SqlPanel
 	extends JPanel
@@ -2984,7 +2984,7 @@ public class SqlPanel
 	 * @param result the result to be displayed (obtained from a {@link workbench.sql.StatementRunner})
 	 * @see workbench.gui.sql.DwPanel
 	 */
-	public int addResult(StatementRunnerResult result)
+	public int addResult(final StatementRunnerResult result)
 		throws SQLException
 	{
 		if (result == null) return 0;
@@ -3005,9 +3005,10 @@ public class SqlPanel
 					{
 						for (DataStore ds : results)
 						{
+							String gen = StringUtil.isNonBlank(sql) ? sql : ds.getGeneratingSql();
 							DwPanel p = createDwPanel();
-							p.showData(ds, sql);
-							addResultTab(p, sql);
+							p.showData(ds, gen);
+							addResultTab(p, gen);
 						}
 					}
 					catch (Exception e)

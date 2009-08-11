@@ -239,7 +239,7 @@ COMMIT;
 				<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off.
 			</para>
 		</note>
-		
+
 		<section id="display-multiline">
 			<title>Displaying values with embedded newlines</title>
 			<para>
@@ -920,12 +920,18 @@ Done.</programlisting>
 			the key columns based on the current result set.
 		</para>
 
-		<para>
-			The changes (modified rows, new rows or deleted rows) will not be saved to the database until
-			you choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save</guimenuitem></menuchoice>.
+    <note>
+      <para>
+        The changes (modified, new or deleted rows) will not be saved to the database until
+        you choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Changes to Database</guimenuitem></menuchoice>.
+      </para>
+    </note>
+
+    <para>
 			If the update is successful (no database errors) a <literal>COMMIT</literal> will be
-			sent to the database automatically (if needed).
-		</para>
+			sent to the database automatically.
+    </para>
+
 		<para>
 			If your <literal>SELECT</literal> was based
 			on more than one table, you will be prompted to specify which table should be
@@ -1309,7 +1315,7 @@ END;
         does not handle this correctly and you will not see the result set returned
         by the function.
       </para>
-      
+
       <para>
         To display the result set returned by such a function, you have to use <literal>WbCall</literal> as well
       </para>
@@ -1332,7 +1338,7 @@ $$ LANGUAGE plpgsql;</programlisting>
        This will then display the result from the SELECT inside the function.
       </para>
     </simplesect>
-    
+
   </section>
 
   &export-import;

@@ -286,7 +286,7 @@
 			<title>Customizing columns that can be searched</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.datatypes.searchable</literal></para>
 			<para>
-        <link linkend="search-tables">DbExplorer's "Search table data"</link> feature only includes
+        <link linkend="search-table-data">DbExplorer's "Search table data"</link> feature only includes
         columns with the datatypes <literal>CHAR</literal> and <literal>VARCHAR</literal>
         into the WHERE clause for searching.
 			</para>

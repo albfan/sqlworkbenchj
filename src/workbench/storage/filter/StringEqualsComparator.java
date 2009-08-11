@@ -11,29 +11,66 @@
  */
 package workbench.storage.filter;
 
+import workbench.resource.ResourceMgr;
+
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class StringEqualsComparator
 	implements ColumnComparator
 {
-	public boolean supportsIgnoreCase() { return true; }
 
-	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getOperator() { return "="; }
-	public boolean needsValue() { return true; }
-	public boolean validateInput(Object value) { return value instanceof String; }
-	public boolean comparesEquality() { return true; }
+	public boolean supportsIgnoreCase()
+	{
+		return true;
+	}
+
+	public String getValueExpression(Object value)
+	{
+		return "'" + value + "'";
+	}
+
+	public String getDescription()
+	{
+		return ResourceMgr.getString("TxtOpEquals");
+	}
+
+	public String getOperator()
+	{
+		return "=";
+	}
+
+	public boolean needsValue()
+	{
+		return true;
+	}
+
+	public boolean validateInput(Object value)
+	{
+		return value instanceof String;
+	}
+
+	public boolean comparesEquality()
+	{
+		return true;
+	}
 
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null || value == null) return false;
+		if (reference == null || value == null)
+		{
+			return false;
+		}
 		try
 		{
 			if (ignoreCase)
-				return ((String)reference).equalsIgnoreCase((String)value);
+			{
+				return ((String) reference).equalsIgnoreCase((String) value);
+			}
 			else
+			{
 				return reference.equals(value);
+			}
 		}
 		catch (Exception e)
 		{
@@ -50,5 +87,4 @@ public class StringEqualsComparator
 	{
 		return other instanceof StringEqualsComparator;
 	}
-
 }

@@ -12,7 +12,7 @@
 package workbench.storage.filter;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public interface ColumnComparator
 {
@@ -20,6 +20,12 @@ public interface ColumnComparator
 	 * Return a String representation to be displayed in the UI
 	 */
 	String getOperator();
+
+	/**
+	 * Return a human redeable (localized) name of this operator
+	 */
+	String getDescription();
+	
 	/**
 	 * Evaluate this ColumnComparator. 
 	 * reference is the value entered by the user in the filter definition.

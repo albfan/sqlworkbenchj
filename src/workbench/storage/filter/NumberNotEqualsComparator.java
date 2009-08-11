@@ -14,21 +14,48 @@ package workbench.storage.filter;
 import workbench.util.StringUtil;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class NumberNotEqualsComparator
 	implements ColumnComparator
 {
-	public boolean supportsIgnoreCase() { return false; }
 
-	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
-	public String getOperator() { return "<>"; }
-	public boolean needsValue() { return true; }
-	public boolean comparesEquality() { return false; }
+	public boolean supportsIgnoreCase()
+	{
+		return false;
+	}
+
+	public String getValueExpression(Object value)
+	{
+		return (value == null ? "" : value.toString());
+	}
+
+	public String getOperator()
+	{
+		return "<>";
+	}
+
+	public String getDescription()
+	{
+		return "not equal";
+	}
+
+	public boolean needsValue()
+	{
+		return true;
+	}
+
+	public boolean comparesEquality()
+	{
+		return false;
+	}
 
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null || value == null) return false;
+		if (reference == null || value == null)
+		{
+			return false;
+		}
 		try
 		{
 			return !reference.equals(value);
@@ -53,5 +80,4 @@ public class NumberNotEqualsComparator
 	{
 		return (value == null ? false : StringUtil.isNumber(value.toString()));
 	}
-
 }

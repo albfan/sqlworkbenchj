@@ -30,7 +30,7 @@ import workbench.util.MessageBuffer;
  * <br/>
  * @see workbench.sql.SqlCommand#execute(java.lang.String)
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class StatementRunnerResult
 {

@@ -12,22 +12,22 @@
 package workbench.storage.filter;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ContainsNotComparator
 	extends ContainsComparator
 {
-	public String getName() { return "Contains not"; }
+	public String getDescription() { return getOperator(); }
 	public String getOperator() { return "contains not"; }
-	
+
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
 		return !super.evaluate(reference, value, ignoreCase);
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		return (other instanceof ContainsNotComparator);
-	}	
+	}
 }
 

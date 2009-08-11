@@ -12,25 +12,52 @@
 package workbench.storage.filter;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class LessThanComparator
 	implements ColumnComparator
 {
 
-	public boolean supportsIgnoreCase() { return false; }
-	public String getValueExpression(Object value) { return (value == null ? "" : value.toString()); }
-	public String getOperator() { return "<"; }
-	public boolean needsValue() { return true; }
-	public boolean comparesEquality() { return false; }
+	public boolean supportsIgnoreCase()
+	{
+		return false;
+	}
+
+	public String getValueExpression(Object value)
+	{
+		return (value == null ? "" : value.toString());
+	}
+
+	public String getDescription()
+	{
+		return "less than";
+	}
+
+	public String getOperator()
+	{
+		return "<";
+	}
+
+	public boolean needsValue()
+	{
+		return true;
+	}
+
+	public boolean comparesEquality()
+	{
+		return false;
+	}
 
 	@SuppressWarnings("unchecked")
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null || value == null) return false;
+		if (reference == null || value == null)
+		{
+			return false;
+		}
 		try
 		{
-			return ((Comparable)reference).compareTo((Comparable)value) > 0;
+			return ((Comparable) reference).compareTo((Comparable) value) > 0;
 		}
 		catch (Exception e)
 		{
@@ -52,5 +79,4 @@ public class LessThanComparator
 	{
 		return (value instanceof Comparable);
 	}
-
 }

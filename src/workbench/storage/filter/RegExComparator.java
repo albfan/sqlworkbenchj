@@ -13,31 +13,58 @@ package workbench.storage.filter;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.resource.ResourceMgr;
 
 /**
  * Implementation of the ColumnComparator using regular expressions.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class RegExComparator
 	implements ColumnComparator
 {
-	public boolean supportsIgnoreCase() { return true; }
 
-	public String getValueExpression(Object value) { return "'" + value + "'";}
-	public String getOperator() { return "matches"; }
-	public boolean needsValue() { return true; }
-	public boolean comparesEquality() { return false; }
+	public boolean supportsIgnoreCase()
+	{
+		return true;
+	}
+
+	public String getValueExpression(Object value)
+	{
+		return "'" + value + "'";
+	}
+
+	public String getDescription()
+	{
+		return ResourceMgr.getString("TxtOpMatches");
+	}
+
+	public String getOperator()
+	{
+		return "matches";
+	}
+
+	public boolean needsValue()
+	{
+		return true;
+	}
+
+	public boolean comparesEquality()
+	{
+		return false;
+	}
 
 	public boolean supportsType(Class valueClass)
 	{
 		return (String.class.isAssignableFrom(valueClass));
 	}
 
-
 	public boolean evaluate(Object reference, Object value, boolean ignoreCase)
 	{
-		if (reference == null || value == null) return false;
+		if (reference == null || value == null)
+		{
+			return false;
+		}
 
 		Pattern p = null;
 		if (ignoreCase)
@@ -60,11 +87,14 @@ public class RegExComparator
 
 	public boolean validateInput(Object value)
 	{
-		if (!(value instanceof String)) return false;
+		if (!(value instanceof String))
+		{
+			return false;
+		}
 
 		try
 		{
-			Pattern.compile((String)value);
+			Pattern.compile((String) value);
 			return true;
 		}
 		catch (Exception e)
@@ -72,5 +102,4 @@ public class RegExComparator
 			return false;
 		}
 	}
-
 }

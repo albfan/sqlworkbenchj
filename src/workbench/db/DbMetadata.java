@@ -1937,10 +1937,17 @@ public class DbMetadata
 		return syn;
 	}
 
+	/**
+	 * Returns a list of all tables in the current schema.
+	 * <br/>
+	 * The types used are those returned by #getT
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<TableIdentifier> getTableList()
 		throws SQLException
 	{
-		return getObjectList(null, getCurrentSchema(), tableTypesTable );
+		return getObjectList(null, getCurrentSchema(), tableTypesTable);
 	}
 
 	public List<TableIdentifier> getObjectList(String schema, String[] types)
@@ -1956,6 +1963,15 @@ public class DbMetadata
 		return getObjectList(table, schema, tableTypesTable);
 	}
 
+	/**
+	 * Returns a list of objects from which a SELECT can be run.
+	 * <br/>
+	 * Typically these are tables, views and materialized views.
+	 *
+	 * @param schema
+	 * @return
+	 * @throws SQLException
+	 */
 	public List<TableIdentifier> getSelectableObjectsList(String schema)
 		throws SQLException
 	{
