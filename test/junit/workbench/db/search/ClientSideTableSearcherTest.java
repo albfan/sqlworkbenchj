@@ -18,6 +18,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.interfaces.TableSearchConsumer;
 import workbench.storage.DataStore;
+import workbench.storage.filter.ContainsComparator;
 import workbench.util.CollectionUtil;
 
 /**
@@ -84,6 +85,7 @@ public class ClientSideTableSearcherTest
 		searcher.setTableNames(tables);
 		SearchConsumer consumer = new SearchConsumer();
 		searcher.setConsumer(consumer);
+		searcher.setComparator(new ContainsComparator());
 		searcher.search();
 
 		List<DataStore> searchResult = consumer.getResults();

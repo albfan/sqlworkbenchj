@@ -112,20 +112,20 @@ public class JdbcUtils
 		if (con.getAutoCommit()) return true;
 		if (con.getProfile() == null) return true;
 		int fetchSize = con.getProfile().getFetchSize();
-		return fetchSize > 0;
+		return fetchSize <= 0;
 	}
 
-	public static boolean checkSqlServerBuffering(WbConnection con)
+	private static boolean checkSqlServerBuffering(WbConnection con)
 	{
 		String url = con.getUrl();
 		if (url.startsWith("jdbc:jtds"))
 		{
 			// jTDS driver
-			return url.indexOf("useCursors=false") > -1;
+			return url.indexOf("useCursors=false") == -1;
 		}
 		else if (url.startsWith("jdbc:sqlserver"))
 		{
-			return url.indexOf("selectMethod=cursor") > -1;
+			return url.indexOf("selectMethod=cursor") == -1;
 		}
 		return false;
 	}

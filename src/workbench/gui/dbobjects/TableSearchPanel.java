@@ -39,6 +39,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableModel;
 
 import workbench.db.DbMetadata;
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.search.TableDataSearcher;
@@ -309,6 +310,13 @@ public class TableSearchPanel
 			WbSwingUtilities.showMessageKey(this, "ErrConnectionBusy");
 			return;
 		}
+
+		if (!serverSideSearch.isSelected() && JdbcUtils.driverMightBufferResults(connection))
+		{
+			boolean goOn = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgTableSearchBuffered"));
+			if (!goOn) return;
+		}
+
 
 		this.reset();
 

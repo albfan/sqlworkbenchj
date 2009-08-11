@@ -95,6 +95,7 @@ public class Settings
 	public static final String PROPERTY_EDITOR_ELECTRIC_SCROLL = "workbench.editor.electricscroll";
 	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
+	public static final String PROPERTY_EDITOR_CURSOR_COLOR = "workbench.editor.color.cursor";
 	// </editor-fold>
 
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
@@ -136,7 +137,7 @@ public class Settings
 	{
 		String version = System.getProperty("java.version", System.getProperty("java.runtime.version"));
 		String[] vp = version.split("\\.");
-		
+
 		int minorVersion = StringUtil.getIntValue(vp[1], 5);
 		return minorVersion == 5;
 	}
@@ -986,7 +987,7 @@ public class Settings
 	{
 		return getEditorFont(true);
 	}
-	
+
 	public Font getEditorFont(boolean returnDefault)
 	{
 		Font f = this.getFont(PROPERTY_EDITOR_FONT);
@@ -1449,6 +1450,16 @@ public class Settings
 	public void setEditorTextColor(Color c)
 	{
 		setColor(PROPERTY_EDITOR_FG_COLOR, c);
+	}
+
+	public void setEditorCursorColor(Color c)
+	{
+		setColor(PROPERTY_EDITOR_CURSOR_COLOR, c);
+	}
+
+	public Color getEditorCursorColor()
+	{
+		return getColor(PROPERTY_EDITOR_CURSOR_COLOR, Color.BLACK);
 	}
 
 	public void setEditorSelectionColor(Color c)

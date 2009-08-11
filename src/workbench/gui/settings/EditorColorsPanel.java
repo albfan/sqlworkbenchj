@@ -77,6 +77,7 @@ public class EditorColorsPanel
 		errorColor.setSelectedColor(Settings.getInstance().getEditorErrorColor());
 		selectionColor.setSelectedColor(Settings.getInstance().getEditorSelectionColor());
 		currLineColor.setSelectedColor(Settings.getInstance().getEditorCurrentLineColor());
+		cursorColor.setSelectedColor(Settings.getInstance().getEditorCursorColor());
 	}
 
 	public void saveSettings()
@@ -95,6 +96,7 @@ public class EditorColorsPanel
 		sett.setEditorSelectionColor(selectionColor.getSelectedColor());
 		sett.setEditorBackgroundColor(bgColor.getSelectedColor());
 		sett.setEditorTextColor(textColor.getSelectedColor());
+		sett.setEditorCursorColor(cursorColor.getSelectedColor());
 	}
 
 	/** This method is called from within the constructor to
@@ -135,6 +137,8 @@ public class EditorColorsPanel
     textColorLabel = new JLabel();
     bgColorLabel = new JLabel();
     bgColor = new WbColorPicker(true);
+    cursorLabel = new JLabel();
+    cursorColor = new WbColorPicker(true);
 
     setLayout(new GridBagLayout());
 
@@ -368,6 +372,22 @@ public class EditorColorsPanel
     gridBagConstraints.insets = new Insets(1, 0, 0, 0);
     editorColors.add(bgColor, gridBagConstraints);
 
+    cursorLabel.setText(ResourceMgr.getString("LblEditorCursorColor")); // NOI18N
+    cursorLabel.setToolTipText(ResourceMgr.getString("d_LblEditorCursorColor")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(9, 10, 0, 0);
+    editorColors.add(cursorLabel, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(9, 0, 0, 0);
+    editorColors.add(cursorColor, gridBagConstraints);
+
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
@@ -382,6 +402,8 @@ public class EditorColorsPanel
   private JLabel blockCommentsLabel;
   private WbColorPicker currLineColor;
   private JLabel currLineLabel;
+  private WbColorPicker cursorColor;
+  private JLabel cursorLabel;
   private JLabel dataTypesLabel;
   private WbColorPicker datatypes;
   private JPanel editorColors;

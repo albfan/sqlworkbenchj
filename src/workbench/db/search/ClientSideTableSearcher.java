@@ -166,7 +166,7 @@ public class ClientSideTableSearcher
 				if (cancelSearch) break;
 				RowData row = new RowData(info.getColumnCount());
 				row.read(rs, info);
-				if (searcher.isSearchStringContained(row))
+				if (searcher.isSearchStringContained(row, info))
 				{
 					result.addRow(row);
 				}

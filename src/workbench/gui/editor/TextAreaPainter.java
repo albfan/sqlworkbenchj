@@ -17,6 +17,7 @@ import java.awt.Rectangle;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.text.PlainDocument;
 import javax.swing.text.Segment;
@@ -24,6 +25,7 @@ import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
@@ -45,7 +47,6 @@ public class TextAreaPainter
 	protected SyntaxStyle[] styles;
 	protected Color caretColor;
 	protected Color selectionColor;
-	protected Color bracketHighlightColor;
 	protected Color currentLineColor;
 
 	protected boolean bracketHighlight;
@@ -61,6 +62,13 @@ public class TextAreaPainter
 	private static final Color GUTTER_BACKGROUND = new Color(238,240,238);
 	private static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
+	private static final Set<String> COLOR_PROPS = CollectionUtil.hashSet(			
+		Settings.PROPERTY_EDITOR_FG_COLOR,
+		Settings.PROPERTY_EDITOR_BG_COLOR,
+		Settings.PROPERTY_EDITOR_CURSOR_COLOR,
+		Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR);
+
+
 	public TextAreaPainter(JEditTextArea textArea)
 	{
 		super();
@@ -74,18 +82,22 @@ public class TextAreaPainter
 
 		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 		setFont(Settings.getInstance().getEditorFont());
-		setColors();
 
-		caretColor = Color.BLACK;
+		setForeground(Settings.getInstance().getEditorTextColor());
+		setBackground(Settings.getInstance().getEditorBackgroundColor());
+
+		caretColor = Settings.getInstance().getEditorCursorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
-		bracketHighlightColor = Color.BLACK;
+		
 		bracketHighlight = true;
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
+
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_EDITOR_TAB_WIDTH,
 			Settings.PROPERTY_EDITOR_FG_COLOR,
 			Settings.PROPERTY_EDITOR_BG_COLOR,
+			Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
 			Settings.PROPERTY_SHOW_LINE_NUMBERS);
 	}
@@ -101,18 +113,12 @@ public class TextAreaPainter
 		{
 			this.calculateTabSize();
 		}
-		else if (Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR.equals(evt.getPropertyName()))
-		{
-			this.currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
-			invalidate();
-		}
 		else if (Settings.PROPERTY_SHOW_LINE_NUMBERS.equals(evt.getPropertyName()))
 		{
 			this.showLineNumbers = Settings.getInstance().getShowLineNumbers();
 			invalidate();
 		}
-		else if (Settings.PROPERTY_EDITOR_FG_COLOR.equals(evt.getPropertyName()) ||
-			Settings.PROPERTY_EDITOR_BG_COLOR.equals(evt.getPropertyName()))
+		else if (COLOR_PROPS.contains(evt.getPropertyName()))
 		{
 			setColors();
 			invalidate();
@@ -128,6 +134,8 @@ public class TextAreaPainter
 			{
 				setForeground(Settings.getInstance().getEditorTextColor());
 				setBackground(Settings.getInstance().getEditorBackgroundColor());
+				setCaretColor(Settings.getInstance().getEditorCursorColor());
+				currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 			}
 		});
 	}
@@ -201,27 +209,9 @@ public class TextAreaPainter
 	}
 
 	/**
-	 * Returns the bracket highlight color.
-	 */
-	public final Color getBracketHighlightColor()
-	{
-		return bracketHighlightColor;
-	}
-
-	/**
-	 * Sets the bracket highlight color.
-	 * @param bracketHighlightColor The bracket highlight color
-	 */
-	public final void setBracketHighlightColor(Color bracketHighlightColor)
-	{
-		this.bracketHighlightColor = bracketHighlightColor;
-		invalidateLine(textArea.getBracketLine());
-	}
-
-	/**
 	 * Returns true if bracket highlighting is enabled, false otherwise.
 	 * When bracket highlighting is enabled, the bracket matching the
-	 * one before the caret (if any) is highlighted.
+	 * one before the caret (if any) is highlighted using the caret color
 	 */
 	public final boolean isBracketHighlightEnabled()
 	{
@@ -590,7 +580,7 @@ public class TextAreaPainter
 
 		y += fm.getLeading() + fm.getMaxDescent();
 		int x = textArea._offsetToX(line,position);// + this.gutterWidth;
-		gfx.setColor(bracketHighlightColor);
+		gfx.setColor(caretColor);
 		// Hack!!! Since there is no fast way to get the character
 		// from the bracket matching routine, we use "(" since all
 		// brackets probably have the same width anyway

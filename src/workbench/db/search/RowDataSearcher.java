@@ -11,11 +11,13 @@
 package workbench.db.search;
 
 import workbench.db.exporter.TextRowDataConverter;
+import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.ContainsComparator;
 import workbench.storage.filter.DataRowExpression;
+import workbench.util.SqlUtil;
 
 /**
  * A class to search for a string value in all columns of a RowData.
@@ -50,11 +52,12 @@ public class RowDataSearcher
 		return expr;
 	}
 
-	public boolean isSearchStringContained(RowData row)
+	public boolean isSearchStringContained(RowData row, ResultInfo metaData)
 	{
 		// Build the value map required for the FilterExpression
 		for (int c = 0; c < row.getColumnCount(); c++)
 		{
+			if (SqlUtil.isBlobType(metaData.getColumnType(c))) continue;
 			String value = converter.getValueAsFormattedString(row, c);
 			if (filterExpression.evaluate(value)) return true;
 		}

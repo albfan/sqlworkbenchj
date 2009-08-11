@@ -40,12 +40,14 @@ public class WbSearchData
 {
 	public static final String VERB = "WBSEARCHDATA";
 	public static final String PARAM_TABLES = "tables";
-	public static final String PARAM_EXPRESSION = "search";
+	public static final String PARAM_EXPRESSION = "searchValue";
 
 	public static final String PARAM_COMPARATOR = "compareType";
 	
 	private ClientSideTableSearcher searcher;
 	private StatementRunnerResult searchResult;
+	private int totalTables;
+	private int foundTables;
 	
 	public WbSearchData()
 	{
@@ -74,15 +76,16 @@ public class WbSearchData
 
 		if (cmdLine.hasUnknownArguments())
 		{
-			setUnknownMessage(searchResult, cmdLine, ResourceMgr.getString("ErrSrcSearchWrongParameters"));
+			setUnknownMessage(searchResult, cmdLine, ResourceMgr.getString("ErrDataSearchWrongParms"));
+			searchResult.setFailure();
 			return searchResult;
 		}
 		
 		String searchValue = cmdLine.getValue(PARAM_EXPRESSION);
 		if (StringUtil.isBlank(searchValue))
 		{
-			searchResult.addMessage(ResourceMgr.getString("ErrScrSearchValueReq"));
-			searchResult.addMessage(ResourceMgr.getString("ErrSrcSearchWrongParameters"));
+			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchValueReq"));
+			searchResult.addMessage(ResourceMgr.getString("ErrDataSearchWrongParms"));
 			searchResult.setFailure();
 			return searchResult;
 		}
@@ -131,7 +134,10 @@ public class WbSearchData
 
 		searchResult.setSuccess();
 		searcher.search();
-		
+
+		String msg = ResourceMgr.getFormattedString("MsgSearchDataFinished", totalTables, foundTables);
+		searchResult.addMessage(msg);
+
 		return searchResult;
 	}
 
@@ -169,11 +175,13 @@ public class WbSearchData
 
 	public void tableSearched(TableIdentifier table, DataStore result)
 	{
+		totalTables ++;
 		if (result != null && result.getRowCount() > 0)
 		{
 			result.resetStatus();
 			result.setGeneratingFilter(searcher.getSearchExpression());
 			searchResult.addDataStore(result);
+			foundTables ++;
 		}
 	}
 
@@ -191,6 +199,8 @@ public class WbSearchData
 		{
 			rowMonitor.jobFinished();
 		}
+		totalTables = 0;
+		foundTables = 0;
 	}
 
 	public void searchEnded()

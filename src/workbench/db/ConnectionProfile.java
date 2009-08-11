@@ -789,10 +789,10 @@ public class ConnectionProfile
 	{
 		int currentValue = (defaultFetchSize == null ? Integer.MIN_VALUE : defaultFetchSize.intValue());
 		int newValue = (fetchSize == null ? Integer.MIN_VALUE : fetchSize.intValue());
-		
-		if (currentValue != newValue && newValue > -1)
+
+		if (currentValue != newValue)
 		{
-			this.defaultFetchSize = fetchSize;
+			this.defaultFetchSize = (newValue > 0 ? fetchSize : null);
 			this.changed = true;
 		}
 	}
