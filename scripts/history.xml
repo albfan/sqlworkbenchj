@@ -1,19 +1,30 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-08-06">
+<release build="-1" date="2009-08-11">
 
   <entry dev-build="7" type="enh">
     <description>
-      The table search panel can now use search with more sophisticated conditions. This is
-      done by doing the search in the application rather than using a LIKE condition for
-      a SELECT query.
+      A new command WbGrep is available to search the source code of
+      all database objects for specific values (patterns). A GUI for this is also
+      available at "Tools -&gt; Search in object source".
     </description>
   </entry>
 
   <entry dev-build="7" type="enh">
     <description>
-      Added support for SQL Server TYPEs
+      The table search panel can now search with more sophisticated conditions. This is
+      done by searching in the application rather than using a LIKE condition in
+      a SELECT query. Both search types are available in the "Search Table Data" tab
+      of the DbExplorer.
+      The functionality of the client side search is now also available through
+      the new Workbench command WbSearchData
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="enh">
+    <description>
+      Added support for SQL Server TYPEs in DbExplorer
     </description>
   </entry>
 
@@ -100,6 +111,12 @@
       When using WbExport to generate HTML two new parameters can be used to
       specify HTML code that is added before and after the actual export data
       (-preDataHtml, -postDataHtml)
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="fix">
+    <description>
+      The default fetch size of a connection profile could not be reset (empty).
     </description>
   </entry>
 

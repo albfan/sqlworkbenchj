@@ -235,7 +235,7 @@ public class TableSelectorPanel
 		try
 		{
 			this.tableSelector.removeItemListener(this);
-			List<TableIdentifier> tables = this.dbConnection.getMetadata().getSelectableObjectsList(this.currentSchema);
+			List<TableIdentifier> tables = this.dbConnection.getMetadata().getSelectableObjectsList(null, this.currentSchema);
 			Collections.sort(tables, new TableNameComparator());
 			this.tableSelector.removeAllItems();
 			if (this.allowNewTable)

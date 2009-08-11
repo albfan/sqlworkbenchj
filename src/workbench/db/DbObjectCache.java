@@ -96,7 +96,7 @@ public class DbObjectCache
 			try
 			{
 				DbMetadata meta = this.dbConnection.getMetadata();
-				List<TableIdentifier> tables = meta.getSelectableObjectsList(schemaToUse);
+				List<TableIdentifier> tables = meta.getSelectableObjectsList(null, schemaToUse);
 				this.setTables(tables);
 				this.schemasInCache.add(schema == null ? NULL_SCHEMA : schemaToUse);
 			}

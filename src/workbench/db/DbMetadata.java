@@ -1968,14 +1968,15 @@ public class DbMetadata
 	 * <br/>
 	 * Typically these are tables, views and materialized views.
 	 *
+	 * @param name a pattern to search for object names
 	 * @param schema
 	 * @return
 	 * @throws SQLException
 	 */
-	public List<TableIdentifier> getSelectableObjectsList(String schema)
+	public List<TableIdentifier> getSelectableObjectsList(String name, String schema)
 		throws SQLException
 	{
-		return getObjectList(null, schema, tableTypesSelectable);
+		return getObjectList(name, schema, tableTypesSelectable);
 	}
 
 	/**

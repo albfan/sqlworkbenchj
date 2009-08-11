@@ -3,7 +3,7 @@
 
   <property name="root" value=".."/>
   <property name="doc" value="../doc"/>
-  <property name="pdfwork" value="../doc/temp"/>
+  <property name="pdfwork" value="../build/pdfwork"/>
   <property name="src" value="../src"/>
   <property name="testsrc" value="../test"/>
   <property name="unittest" value="../test/junit"/>

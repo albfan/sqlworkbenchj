@@ -54,7 +54,6 @@ public class RowDataSearcher
 
 	public boolean isSearchStringContained(RowData row, ResultInfo metaData)
 	{
-		// Build the value map required for the FilterExpression
 		for (int c = 0; c < row.getColumnCount(); c++)
 		{
 			if (SqlUtil.isBlobType(metaData.getColumnType(c))) continue;

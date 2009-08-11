@@ -805,8 +805,8 @@
     <para>
       The command <literal>WbSearchData</literal> can be used to search
       for occurances of a certain value in all columns of multiple tables.
-      It is the commandline version of the (client side) <link linkend="search-table-data">Search Table Data</link> tab
-      in the DbExplorer.
+      It is the commandline version of the (client side) <link linkend="table-search-client">Search Table Data</link> tab
+      in the DbExplorer. A more detailed description on how the searching is performed is available that chapter.
     </para>
 
 		<para>
@@ -841,8 +841,11 @@
                 <literal>matches</literal>, <literal>startsWith</literal>
               </para>
               <para>
-                If this parameter is set to true, the values specified with <literal>-searchValues</literal> are
-                treated as regular expression
+                When specifying <literal>matches</literal>, the search value
+                is used as a regular expression. A column is included in the
+                search result if the regular expression is contained in the
+                column value (not when the column value matches the regular
+                expression entirely!).
               </para>
               <para>
                 The default for this parameter is <literal>contains</literal>.
@@ -861,6 +864,18 @@
             </entry>
           </row>
           <row>
+            <entry>-types</entry>
+            <entry>
+              <para>
+                By default <literal>WbSearchData</literal> will search all
+                tables and views (including materialized views). If you want
+                to search only one of those types, this can be specified with
+                the <literal>-types</literal> parameter. Using <literal>-types=table</literal>
+                will only search table data and skip views in the database.
+              </para>
+            </entry>
+          </row>
+          <row>
             <entry>-excludeTables</entry>
             <entry>
               <para>
@@ -873,6 +888,16 @@
                 <literal>-tables=p% -excludeTables=product_details,product_images</literal>
                 would process all tables starting with P but not the <literal>product_detail</literal>
                 and the <literal>product_images</literal> tables.
+              </para>
+            </entry>
+          </row>
+          <row>
+            <entry>-excludeLobs</entry>
+            <entry>
+              <para>
+                If this parameter is set to true CLOB and BLOB columns will
+                not be retrieved at all. This also means that the content of
+                CLOB columns will not be searched. 
               </para>
             </entry>
           </row>

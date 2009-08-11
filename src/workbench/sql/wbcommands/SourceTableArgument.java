@@ -30,7 +30,7 @@ import workbench.util.WbStringTokenizer;
 public class SourceTableArgument
 {
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
-	private boolean wildcardsPresent = false;
+	private boolean wildcardsPresent;
 
 	public SourceTableArgument(String includeTables, WbConnection dbConn)
 		throws SQLException
@@ -73,7 +73,7 @@ public class SourceTableArgument
 					tbl.setSchema(dbConn.getMetadata().getSchemaToUse());
 				}
 				tbl.adjustCase(dbConn);
-				List<TableIdentifier> l = dbConn.getMetadata().getTableList(tbl.getTableName(), tbl.getSchema());
+				List<TableIdentifier> l = dbConn.getMetadata().getSelectableObjectsList(tbl.getTableName(), tbl.getSchema());
 				result.addAll(l);
 			}
 			else

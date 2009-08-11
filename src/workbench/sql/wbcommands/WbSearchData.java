@@ -11,7 +11,9 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import workbench.db.TableIdentifier;
 import workbench.db.search.ClientSideTableSearcher;
 import workbench.interfaces.TableSearchConsumer;
@@ -26,6 +28,7 @@ import workbench.storage.filter.RegExComparator;
 import workbench.storage.filter.StartsWithComparator;
 import workbench.storage.filter.StringEqualsComparator;
 import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -40,8 +43,10 @@ public class WbSearchData
 {
 	public static final String VERB = "WBSEARCHDATA";
 	public static final String PARAM_TABLES = "tables";
+	public static final String PARAM_TYPES = "types";
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 	public static final String PARAM_EXPRESSION = "searchValue";
+	public static final String PARAM_EXCLUDE_LOBS = "excludeLobs";
 
 	public static final String PARAM_COMPARATOR = "compareType";
 	
@@ -57,7 +62,9 @@ public class WbSearchData
 
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_TABLES);
+		cmdLine.addArgument(PARAM_TYPES);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
+		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
 		cmdLine.addArgument(PARAM_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches"));
 	}
@@ -96,25 +103,31 @@ public class WbSearchData
 		String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
 		List<TableIdentifier> tables = null;
 
-		if (StringUtil.isNonBlank(tableNames))
+		if (StringUtil.isBlank(tableNames))
 		{
-			SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, currentConnection);
-			tables = parser.getTables();
+			tableNames = "%";
 		}
-		else
+		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, currentConnection);
+		tables = parser.getTables();
+
+		Set<String> types = CollectionUtil.caseInsensitiveSet();
+		types.addAll(cmdLine.getListValue(PARAM_TYPES));
+
+		Iterator<TableIdentifier> itr = tables.iterator();
+		while (itr.hasNext())
 		{
-			String schema = currentConnection.getCurrentSchema();
-			tables = currentConnection.getMetadata().getSelectableObjectsList(schema);
-			if (StringUtil.isNonBlank(excludeTables))
+			TableIdentifier tbl = itr.next();
+			if (!types.contains(tbl.getType()))
 			{
-				SourceTableArgument parser = new SourceTableArgument(excludeTables, currentConnection);
-				tables.removeAll(parser.getTables());
+				itr.remove();
 			}
 		}
-
+		
 		searcher = new ClientSideTableSearcher();
+		searcher.setExcludeLobColumns(cmdLine.getBoolean(PARAM_EXCLUDE_LOBS, false));
 		searcher.setConnection(currentConnection);
 		searcher.setTableNames(tables);
+
 		String comparatorType = cmdLine.getValue(PARAM_COMPARATOR);
 		if (StringUtil.isBlank(comparatorType))
 		{
