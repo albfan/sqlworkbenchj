@@ -40,14 +40,15 @@ public class WbSearchData
 {
 	public static final String VERB = "WBSEARCHDATA";
 	public static final String PARAM_TABLES = "tables";
+	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 	public static final String PARAM_EXPRESSION = "searchValue";
 
 	public static final String PARAM_COMPARATOR = "compareType";
 	
 	private ClientSideTableSearcher searcher;
 	private StatementRunnerResult searchResult;
-	private int totalTables;
 	private int foundTables;
+	private List<String> searchedTables;
 	
 	public WbSearchData()
 	{
@@ -56,6 +57,7 @@ public class WbSearchData
 
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_TABLES);
+		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_EXPRESSION);
 		cmdLine.addArgument(PARAM_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches"));
 	}
@@ -91,13 +93,25 @@ public class WbSearchData
 		}
 		
 		String tableNames = cmdLine.getValue(PARAM_TABLES);
-		SourceTableArgument parser = new SourceTableArgument(tableNames, currentConnection);
-		List<TableIdentifier> tables = parser.getTables();
-		if (tables.size() == 0)
+		String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+		List<TableIdentifier> tables = null;
+
+		if (StringUtil.isNonBlank(tableNames))
+		{
+			SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, currentConnection);
+			tables = parser.getTables();
+		}
+		else
 		{
 			String schema = currentConnection.getCurrentSchema();
 			tables = currentConnection.getMetadata().getSelectableObjectsList(schema);
+			if (StringUtil.isNonBlank(excludeTables))
+			{
+				SourceTableArgument parser = new SourceTableArgument(excludeTables, currentConnection);
+				tables.removeAll(parser.getTables());
+			}
 		}
+
 		searcher = new ClientSideTableSearcher();
 		searcher.setConnection(currentConnection);
 		searcher.setTableNames(tables);
@@ -135,7 +149,16 @@ public class WbSearchData
 		searchResult.setSuccess();
 		searcher.search();
 
-		String msg = ResourceMgr.getFormattedString("MsgSearchDataFinished", totalTables, foundTables);
+		StringBuilder summary = new StringBuilder(searchedTables.size() * 20);
+		summary.append(ResourceMgr.getString("MsgSearchedTables"));
+		for (String table : searchedTables)
+		{
+			summary.append("\n  ");
+			summary.append(table);
+		}
+		summary.append('\n');
+		searchResult.addMessage(summary.toString());
+		String msg = ResourceMgr.getFormattedString("MsgSearchDataFinished", searchedTables.size(), foundTables);
 		searchResult.addMessage(msg);
 
 		return searchResult;
@@ -175,7 +198,7 @@ public class WbSearchData
 
 	public void tableSearched(TableIdentifier table, DataStore result)
 	{
-		totalTables ++;
+		searchedTables.add(table.getTableName());
 		if (result != null && result.getRowCount() > 0)
 		{
 			result.resetStatus();
@@ -199,7 +222,7 @@ public class WbSearchData
 		{
 			rowMonitor.jobFinished();
 		}
-		totalTables = 0;
+		searchedTables = CollectionUtil.sizedArrayList(50);
 		foundTables = 0;
 	}
 

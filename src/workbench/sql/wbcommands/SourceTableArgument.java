@@ -18,6 +18,7 @@ import java.util.LinkedList;
 import java.util.List;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
@@ -31,22 +32,41 @@ public class SourceTableArgument
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private boolean wildcardsPresent = false;
 
-	public SourceTableArgument(String argument, WbConnection dbConn)
+	public SourceTableArgument(String includeTables, WbConnection dbConn)
 		throws SQLException
 	{
-		if (StringUtil.isEmptyString(argument)) return;
+		this(includeTables, null, dbConn);
+	}
+
+	public SourceTableArgument(String includeTables, String excludeTables, WbConnection dbConn)
+		throws SQLException
+	{
+		if (StringUtil.isEmptyString(includeTables)) return;
 		if (dbConn == null) return;
 
-		List<String> args = getObjectNames(argument);
+		tables.addAll(parseArgument(includeTables, true, dbConn));
+		
+		if (StringUtil.isNonBlank(excludeTables))
+		{
+			tables.removeAll(parseArgument(excludeTables, false, dbConn));
+		}
+	}
+
+	private List<TableIdentifier> parseArgument(String arg, boolean checkWildcard, WbConnection dbConn)
+		throws SQLException
+	{
+		List<String> args = getObjectNames(arg);
 		int argCount = args.size();
 
-		if (argCount <= 0) return;
+		List<TableIdentifier> result = CollectionUtil.arrayList();
+		
+		if (argCount <= 0) return result;
 
 		for (String t : args)
 		{
 			if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
 			{
-				this.wildcardsPresent = true;
+				if (checkWildcard) this.wildcardsPresent = true;
 				TableIdentifier tbl = new TableIdentifier(t);
 				if (tbl.getSchema() == null)
 				{
@@ -54,16 +74,16 @@ public class SourceTableArgument
 				}
 				tbl.adjustCase(dbConn);
 				List<TableIdentifier> l = dbConn.getMetadata().getTableList(tbl.getTableName(), tbl.getSchema());
-				this.tables.addAll(l);
+				result.addAll(l);
 			}
 			else
 			{
-				tables.add(new TableIdentifier(t));
+				result.add(new TableIdentifier(t));
 			}
 		}
+		return result;
 	}
-
-
+	
 	/**
 	 * Returns all DB Object names from the comma separated list.
 	 * This is different to stringToList() as it keeps any quotes that

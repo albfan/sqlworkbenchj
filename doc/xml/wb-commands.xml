@@ -860,6 +860,23 @@
               </para>
             </entry>
           </row>
+          <row>
+            <entry>-excludeTables</entry>
+            <entry>
+              <para>
+                A list of table names to be excluded from the search. If e.g.
+                the wildcard for -tables would select too many tables, you can
+                exclude individual tables with this parameter. The parameter values
+                may include SQL wildcards.
+              </para>
+              <para>
+                <literal>-tables=p% -excludeTables=product_details,product_images</literal>
+                would process all tables starting with P but not the <literal>product_detail</literal>
+                and the <literal>product_images</literal> tables.
+              </para>
+            </entry>
+          </row>
+
         </tbody>
       </tgroup>
     </informaltable>
