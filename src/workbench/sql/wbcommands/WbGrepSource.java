@@ -1,5 +1,5 @@
 /*
- * WbGrep
+ * WbGrepSource
  *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -26,10 +26,10 @@ import workbench.util.CollectionUtil;
  *
  * @author Thomas Kellerer
  */
-public class WbGrep
+public class WbGrepSource
 	extends SqlCommand
 {
-	public static final String VERB = "WBGREP";
+	public static final String VERB = "WBGREPSOURCE";
 	public static final String PARAM_TYPES = "types";
 	public static final String PARAM_SCHEMAS = "schemas";
 	public static final String PARAM_NAMES = "objects";
@@ -41,7 +41,7 @@ public class WbGrep
 	
 	private ObjectSourceSearcher searcher;
 	
-	public WbGrep()
+	public WbGrepSource()
 	{
 		super();
 		this.isUpdatingCommand = false;

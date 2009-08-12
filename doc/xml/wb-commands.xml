@@ -668,9 +668,9 @@
 	</section>
 
   <section id="command-search-source">
-    <title>Search source of database objects - WbGrep</title>
+    <title>Search source of database objects - WbGrepSource</title>
     <para>
-      The command <literal>WbGrep</literal> can be used to search
+      The command <literal>WbGrepSource</literal> can be used to search
       in the source code of the specified database objects.
     </para>
     <para>
@@ -794,16 +794,16 @@
       </tgroup>
     </informaltable>
     <para>
-      The functionality of the <literal>WbGrep</literal> command is also
+      The functionality of the <literal>WbGrepSource</literal> command is also
       available through a GUI at
       <menuchoice><guimenu>Tools</guimenu><guimenuitem>Search in object source</guimenuitem></menuchoice>
     </para>
   </section>
 
   <section id="command-search-data">
-    <title>Search data in multiple tables - WbSearchData</title>
+    <title>Search data in multiple tables - WbGrepSourceData</title>
     <para>
-      The command <literal>WbSearchData</literal> can be used to search
+      The command <literal>WbGrepSourceData</literal> can be used to search
       for occurances of a certain value in all columns of multiple tables.
       It is the commandline version of the (client side) <link linkend="table-search-client">Search Table Data</link> tab
       in the DbExplorer. A more detailed description on how the searching is performed is available that chapter.
@@ -867,7 +867,7 @@
             <entry>-types</entry>
             <entry>
               <para>
-                By default <literal>WbSearchData</literal> will search all
+                By default <literal>WbGrepSourceData</literal> will search all
                 tables and views (including materialized views). If you want
                 to search only one of those types, this can be specified with
                 the <literal>-types</literal> parameter. Using <literal>-types=table</literal>

@@ -60,8 +60,8 @@ import workbench.sql.wbcommands.WbRemoveVar;
 import workbench.sql.wbcommands.WbSavePkMapping;
 import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbSchemaReport;
-import workbench.sql.wbcommands.WbGrep;
-import workbench.sql.wbcommands.WbSearchData;
+import workbench.sql.wbcommands.WbGrepSource;
+import workbench.sql.wbcommands.WbGrepData;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
@@ -121,8 +121,8 @@ public class CommandMapper
 		addCommand(new WbListTriggers());
 		addCommand(new WbTriggerSource());
 		addCommand(new WbDescribeTable());
-		addCommand(new WbGrep());
-		addCommand(new WbSearchData());
+		addCommand(new WbGrepSource());
+		addCommand(new WbGrepData());
 		
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);

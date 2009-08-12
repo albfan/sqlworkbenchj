@@ -57,7 +57,7 @@ public class JdbcIndexReader
 	 * the current DBMS supports indexed views.
 	 * <br/>
 	 * This is a performance optimization when retrieving a large number
-	 * of objects (such as for WbSchemaReport or WbSearchSource) in order
+	 * of objects (such as for WbSchemaReport or WbGrepSource) in order
 	 * to minimized the roundtrips to the database.
 	 *
 	 * @throws java.sql.SQLException

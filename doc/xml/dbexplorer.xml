@@ -615,7 +615,7 @@ FROM geo_table
 
       <para>
         The client side search is also available through the
-        <link linkend="command-search-data">WbGrep</link> command
+        <link linkend="command-search-data">WbGrepSource</link> command
       </para>
       
     </section>

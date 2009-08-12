@@ -37,11 +37,11 @@ import workbench.util.StringUtil;
  * 
  * @author Thomas Kellerer
  */
-public class WbSearchData
+public class WbGrepData
 	extends SqlCommand
 	implements TableSearchConsumer
 {
-	public static final String VERB = "WBSEARCHDATA";
+	public static final String VERB = "WBGREPDATA";
 	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_TYPES = "types";
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
@@ -55,7 +55,7 @@ public class WbSearchData
 	private int foundTables;
 	private List<String> searchedTables;
 	
-	public WbSearchData()
+	public WbGrepData()
 	{
 		super();
 		this.isUpdatingCommand = false;
