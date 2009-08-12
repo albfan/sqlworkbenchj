@@ -10,7 +10,10 @@
  */
 package workbench.gui.tools;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
@@ -511,6 +514,8 @@ public class ObjectSourceSearchPanel
 	{
 		if (this.connection == null) return;
 		Collection<String> types = connection.getMetadata().getObjectTypes();
+		types.add(connection.getMetadata().getFunctionTerm().toUpperCase());
+		types.add(connection.getMetadata().getProcedureTerm().toUpperCase());
 		String result = selectFromList(types);
 		if (result != null)
 		{
@@ -527,6 +532,22 @@ public class ObjectSourceSearchPanel
 		}
 		JList l = new JList(model);
 		JScrollPane pane = new JScrollPane(l);
+		int height = 24;
+		try
+		{
+			Font f = l.getFont();
+			FontMetrics fm = l.getFontMetrics(f);
+			height = fm.getHeight() + 2;
+		}
+		catch (Exception e)
+		{
+			height = 24;
+		}
+		Dimension d = l.getPreferredSize();
+		d.height = height * 8;
+
+		pane.setPreferredSize(d);
+		pane.setMinimumSize(d);
 		if (WbSwingUtilities.getOKCancel("Select type", this, pane))
 		{
 			Object[] sel = l.getSelectedValues();

@@ -857,4 +857,15 @@ public class DbSettings
 		List<String> types = Settings.getInstance().getListProperty(prefix + "datatypes.searchable", true);
 		return types.contains(dbmsType.toLowerCase());
 	}
+
+	public String getFunctionTerm()
+	{
+		return Settings.getInstance().getProperty(prefix + "term.function", "FUNCTION");
+	}
+
+	public String getProcedureTerm()
+	{
+		return Settings.getInstance().getProperty(prefix + "term.procedure", "PROCEDURE");
+	}
+
 }

@@ -2215,7 +2215,7 @@ public class DbMetadata
 	 */
 	public Collection<String> getObjectTypes()
 	{
-		TreeSet<String> result = new TreeSet<String>();
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
 		ResultSet rs = null;
 		boolean hideIndexes = hideIndexes();
 
@@ -2253,6 +2253,23 @@ public class DbMetadata
 			try { rs.close(); }	 catch (Throwable e) {}
 		}
 		return result;
+	}
+
+	public String getProcedureTerm()
+	{
+		try
+		{
+			return metaData.getProcedureTerm();
+		}
+		catch (SQLException e)
+		{
+			return "PROCEDURE";
+		}
+	}
+
+	public String getFunctionTerm()
+	{
+		return dbSettings.getFunctionTerm();
 	}
 
 	public String getSchemaTerm()
