@@ -14,9 +14,13 @@ import java.awt.EventQueue;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
 import javax.swing.border.Border;
@@ -34,6 +38,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.RunningJobIndicator;
 import workbench.gui.components.WbScrollPane;
@@ -168,6 +173,8 @@ public class ObjectSourceSearchPanel
 			startButton.setEnabled(this.connection != null);
 			selectConnection.setEnabled(true);
 		}
+		selectTypesButton.setEnabled(this.connection != null);
+		selectSchemasButton.setEnabled(this.connection != null);
 	}
 
 	protected void showResult(List<DbObject> result)
@@ -489,6 +496,54 @@ public class ObjectSourceSearchPanel
 		}
 	}
 
+	private void selectSchemas()
+	{
+		if (this.connection == null) return;
+		Collection<String> schemas = connection.getMetadata().getSchemas();
+		String result = selectFromList(schemas);
+		if (result != null)
+		{
+			schemaNames.setText(result.toString());
+		}
+	}
+
+	private void selectObjectTypes()
+	{
+		if (this.connection == null) return;
+		Collection<String> types = connection.getMetadata().getObjectTypes();
+		String result = selectFromList(types);
+		if (result != null)
+		{
+			objectTypes.setText(result.toString());
+		}
+	}
+
+	private String selectFromList(Collection<String> elements)
+	{
+		DefaultListModel model = new DefaultListModel();
+		for (String type : elements)
+		{
+			model.addElement(type);
+		}
+		JList l = new JList(model);
+		JScrollPane pane = new JScrollPane(l);
+		if (WbSwingUtilities.getOKCancel("Select type", this, pane))
+		{
+			Object[] sel = l.getSelectedValues();
+			if (sel != null)
+			{
+				StringBuilder result = new StringBuilder(sel.length * 5);
+				for (int i=0; i < sel.length; i++ )
+				{
+					if (i > 0) result.append(',');
+					result.append(sel[i].toString());
+				}
+				return result.toString();
+			}
+		}
+		return null;
+	}
+	
 	public void valueChanged(ListSelectionEvent e)
 	{
 		int row = results.getSelectedRow();
@@ -548,6 +603,8 @@ public class ObjectSourceSearchPanel
     regex = new javax.swing.JCheckBox();
     typeLabel = new javax.swing.JLabel();
     objectTypes = new javax.swing.JTextField();
+    selectSchemasButton = new FlatButton();
+    selectTypesButton = new FlatButton();
     resultContainer = new javax.swing.JPanel();
     splitPane = new WbSplitPane();
     footerPanel = new javax.swing.JPanel();
@@ -583,16 +640,16 @@ public class ObjectSourceSearchPanel
     nameLabel.setText(ResourceMgr.getString("LblObjectNames")); // NOI18N
     nameLabel.setToolTipText(ResourceMgr.getString("d_LblObjectNames")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 13, 0, 0);
     topPanel.add(nameLabel, gridBagConstraints);
 
     objectNames.setToolTipText(ResourceMgr.getString("d_LblObjectNames")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -649,7 +706,7 @@ public class ObjectSourceSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.gridwidth = 6;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 5);
@@ -658,7 +715,7 @@ public class ObjectSourceSearchPanel
     typeLabel.setText(ResourceMgr.getString("LblTypes")); // NOI18N
     typeLabel.setToolTipText(ResourceMgr.getString("d_LblTypes")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridx = 5;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -667,12 +724,38 @@ public class ObjectSourceSearchPanel
 
     objectTypes.setToolTipText(ResourceMgr.getString("d_LblTypes")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridx = 6;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.weightx = 0.3;
-    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 5);
+    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
     topPanel.add(objectTypes, gridBagConstraints);
+
+    selectSchemasButton.setText("...");
+    selectSchemasButton.setToolTipText(ResourceMgr.getString("d_LblSchemaSelect")); // NOI18N
+    selectSchemasButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        selectSchemasButtonActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
+    topPanel.add(selectSchemasButton, gridBagConstraints);
+
+    selectTypesButton.setText("...");
+    selectTypesButton.setToolTipText(ResourceMgr.getString("d_LblTypeSelect")); // NOI18N
+    selectTypesButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        selectTypesButtonActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 5);
+    topPanel.add(selectTypesButton, gridBagConstraints);
 
     add(topPanel, java.awt.BorderLayout.NORTH);
 
@@ -775,6 +858,16 @@ public class ObjectSourceSearchPanel
 		}
 	}//GEN-LAST:event_startButtonActionPerformed
 
+	private void selectTypesButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectTypesButtonActionPerformed
+	{//GEN-HEADEREND:event_selectTypesButtonActionPerformed
+		selectObjectTypes();
+	}//GEN-LAST:event_selectTypesButtonActionPerformed
+
+	private void selectSchemasButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_selectSchemasButtonActionPerformed
+	{//GEN-HEADEREND:event_selectSchemasButtonActionPerformed
+		selectSchemas();
+	}//GEN-LAST:event_selectSchemasButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel buttonPanel;
   private javax.swing.JButton closeButton;
@@ -792,6 +885,8 @@ public class ObjectSourceSearchPanel
   private javax.swing.JTextField schemaNames;
   private javax.swing.JTextField searchValues;
   private javax.swing.JButton selectConnection;
+  private javax.swing.JButton selectSchemasButton;
+  private javax.swing.JButton selectTypesButton;
   private javax.swing.JSplitPane splitPane;
   private javax.swing.JButton startButton;
   private javax.swing.JLabel statusbar;
