@@ -858,14 +858,4 @@ public class DbSettings
 		return types.contains(dbmsType.toLowerCase());
 	}
 
-	public String getFunctionTerm()
-	{
-		return Settings.getInstance().getProperty(prefix + "term.function", "FUNCTION");
-	}
-
-	public String getProcedureTerm()
-	{
-		return Settings.getInstance().getProperty(prefix + "term.procedure", "PROCEDURE");
-	}
-
 }

@@ -1,11 +1,11 @@
 /*
  * ObjectSourceSearchPanel
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.gui.tools;
@@ -77,7 +77,7 @@ public class ObjectSourceSearchPanel
 	private DbObjectSourcePanel objectSource;
 	private DataStore emptyResult;
 	private WbThread searchThread;
-	
+
 	public ObjectSourceSearchPanel()
 	{
 		initComponents();
@@ -89,12 +89,12 @@ public class ObjectSourceSearchPanel
 		results.setModel(new DataStoreTableModel(emptyResult), true);
 		results.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		results.getSelectionModel().addListSelectionListener(this);
-		
+
 		((WbSplitPane)splitPane).setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		objectSource = new DbObjectSourcePanel(null, null);
 		objectSource.setEditable(false);
-		
+
 		splitPane.setRightComponent(objectSource);
 		splitPane.setLeftComponent(scroll);
 
@@ -115,7 +115,7 @@ public class ObjectSourceSearchPanel
 		searcher.setRowMonitor(rowMonitor);
 
 		startButton.setText(ResourceMgr.getString("LblCancelSearch"));
-		
+
 		List<String> schemas = StringUtil.stringToList(schemaNames.getText(), ",", true, true, false);
 		List<String> names = StringUtil.stringToList(objectNames.getText(), ",", true, true, false);
 		List<String> types = StringUtil.stringToList(objectTypes.getText(), ",", true, true, false);
@@ -125,7 +125,7 @@ public class ObjectSourceSearchPanel
 		searcher.setTypesToSearch(types);
 
 		final List<String> values = StringUtil.stringToList(searchValues.getText(), ",", true, true, false);
-		
+
 		searchThread = new WbThread("SourceSearch")
 		{
 			public void run()
@@ -162,7 +162,7 @@ public class ObjectSourceSearchPanel
 			}
 		});
 	}
-	
+
 	protected void checkButtons()
 	{
 		if (searcher != null && searcher.isRunning())
@@ -220,7 +220,7 @@ public class ObjectSourceSearchPanel
 	protected void selectConnection()
 	{
 		String profilekey = "workbench.objectsearcher.lastprofile";
-		
+
 		ConnectionProfile prof = null;
 		try
 		{
@@ -262,7 +262,7 @@ public class ObjectSourceSearchPanel
 		setStatusMessage(ResourceMgr.getString("MsgConnecting"));
 		//WbSwingUtilities.repaintNow(statusbar);
 		WbSwingUtilities.showWaitCursor(window);
-		
+
 		WbThread t = new WbThread("Connection")
 		{
 			public void run()
@@ -292,7 +292,7 @@ public class ObjectSourceSearchPanel
 			WbSwingUtilities.showErrorMessage(this, error);
 		}
 		objectSource.setDatabaseConnection(connection);
-		EventQueue.invokeLater(new Runnable()		
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
@@ -352,7 +352,7 @@ public class ObjectSourceSearchPanel
 	public void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
-		
+
 		ignoreCase.setSelected(s.getBoolProperty("workbench.objectsearcher.ignorecase", true));
 		matchAll.setSelected(s.getBoolProperty("workbench.objectsearcher.matchall", false));
 		regex.setSelected(s.getBoolProperty("workbench.objectsearcher.regex", false));
@@ -375,7 +375,7 @@ public class ObjectSourceSearchPanel
 	{
 		WbManager.getInstance().unregisterToolWindow(this);
 	}
-	
+
 	protected void done()
 	{
 		cancelSearch();
@@ -401,7 +401,7 @@ public class ObjectSourceSearchPanel
 			t.start();
 		}
 	}
-	
+
 	public void closeWindow()
 	{
 		this.done();
@@ -514,8 +514,14 @@ public class ObjectSourceSearchPanel
 	{
 		if (this.connection == null) return;
 		Collection<String> types = connection.getMetadata().getObjectTypes();
-		types.add(connection.getMetadata().getFunctionTerm().toUpperCase());
-		types.add(connection.getMetadata().getProcedureTerm().toUpperCase());
+
+		// These two type can be hardcoded as they are exactly
+		// what the searcher is checking as well.
+		// getObjectTypes() returns a sorted set, so the new
+		// values will automatically be sorted.
+		types.add("FUNCTION");
+		types.add("PROCEDURE");
+		
 		String result = selectFromList(types);
 		if (result != null)
 		{
@@ -564,7 +570,7 @@ public class ObjectSourceSearchPanel
 		}
 		return null;
 	}
-	
+
 	public void valueChanged(ListSelectionEvent e)
 	{
 		int row = results.getSelectedRow();
@@ -600,7 +606,7 @@ public class ObjectSourceSearchPanel
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

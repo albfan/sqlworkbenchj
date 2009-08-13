@@ -2267,10 +2267,6 @@ public class DbMetadata
 		}
 	}
 
-	public String getFunctionTerm()
-	{
-		return dbSettings.getFunctionTerm();
-	}
 
 	public String getSchemaTerm()
 	{
