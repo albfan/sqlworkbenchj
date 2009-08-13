@@ -240,7 +240,7 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 1, 0, 0);
     colWidthPanel.add(jPanel3, gridBagConstraints);
 
     jPanel4.setLayout(new java.awt.GridBagLayout());
@@ -279,7 +279,7 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 0.5;
-    gridBagConstraints.insets = new java.awt.Insets(6, 5, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 6, 2, 0);
     colWidthPanel.add(jPanel4, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -299,7 +299,7 @@ public class DataDisplayOptions
     autoRowHeight.setBorder(null);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 5, 0, 0);
     rowHeightPanel.add(autoRowHeight, gridBagConstraints);
 
     ignoreEmptyRows.setText(ResourceMgr.getString("LblIgnoreRowHeightEmptyLine")); // NOI18N
@@ -310,7 +310,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 5, 2, 0);
     rowHeightPanel.add(ignoreEmptyRows, gridBagConstraints);
 
     maxRowHeightLabel.setText(ResourceMgr.getString("LblRowHeightMax")); // NOI18N
@@ -341,7 +341,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(5, 11, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(5, 11, 2, 0);
     rowHeightPanel.add(rowHeightResize, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
