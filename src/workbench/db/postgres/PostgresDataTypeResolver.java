@@ -11,6 +11,7 @@
  */
 package workbench.db.postgres;
 
+import java.sql.Types;
 import workbench.db.DataTypeResolver;
 import workbench.util.SqlUtil;
 
@@ -24,7 +25,11 @@ public class PostgresDataTypeResolver
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int wbTypeInfo)
 	{
 		if ("text".equalsIgnoreCase(dbmsName)) return "text";
-		if (sqlType == java.sql.Types.NUMERIC || sqlType == java.sql.Types.DECIMAL)
+		if (sqlType == Types.CHAR && "bpchar".equalsIgnoreCase(dbmsName))
+		{
+			return "char(" + size + ")";
+		}
+		if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)
 		{
 			if (size == 65535 || size == 131089) size = 0;
 			if (digits == 65531) digits = 0;
