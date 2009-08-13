@@ -34,7 +34,8 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class SelectCommand extends SqlCommand
+public class SelectCommand
+	extends SqlCommand
 {
 	public static final String VERB = "SELECT";
 

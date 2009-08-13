@@ -170,6 +170,11 @@ public class WbExport
 		return Settings.getInstance().getBoolProperty("workbench.export." + type + ".default.header", false);
 	}
 
+	public boolean ignoreMaxRows()
+	{
+		return true;
+	}
+
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{

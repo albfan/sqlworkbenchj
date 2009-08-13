@@ -1218,13 +1218,17 @@ WHERE id=42;</programlisting>
   <section id="command-set">
     <title>Setting connection properties - SET</title>
     <para>
-      The <literal>SET</literal> command is available to enable you to run SQL scripts that are 
-      designed to run with Oracle's SQL*Plus utility inside &wb-productname; as well.
-      Most of the parameters of the <literal>SET</literal> are only valid inside 
-      SQL*Plus, and thus for Oracle any error message resulting from executing a <literal>SET</literal>
-      command will only be logged as a warning. For all other DBMS the command is passed
-      directly to the server, except for the parameters described in this chapter (because
-      they have an equivalent JDBC call that will be executed instead).
+      The <literal>SET</literal> command is passed on directly to the driver,
+      except for the parameters described in this chapter as they
+      have an equivalent JDBC call which will be executed instead.
+    </para>
+    <para>
+      Oracle does not have a SQL set command. The SET command that is available
+      in SQL*Plus is a specific SQL*Plus command and will not work with other client software.
+      Most of the SQL*Plus SET commands only make sense with SQL*Plus (e.g. formatting of the results).
+      To be able to run SQL scripts that are intended for Oracle SQL*PLus, any error reported
+      from the SET command when running against an Oracle database will silently be ignored and
+      only logged as a warning.
     </para>
 
     <section id="command-set-feedback">
@@ -1255,6 +1259,18 @@ WHERE id=42;</programlisting>
       </para>
     </section>
 
+    <section id="command-set-autocommit">
+      <title>MAXROWS</title>
+      <para>
+        Limits the number of rows returned by the next statement. The behaviour of this command
+        is a bit different between the console mode and the GUI mode. In console mode, the maxrows
+        stay in effect until you explicitely change it back using <literal>SET maxrows</literal> again.
+      </para>
+      <para>
+        In GUI mode, the maxrows setting is only in effect for the script currently being executed and
+        will temporarily overwrite any value entered in the "Max. Rows" field.
+      </para>
+    </section>
   </section>
   
   <section id="command-desc">

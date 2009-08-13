@@ -2571,6 +2571,8 @@ public class SqlPanel
 
 			long totalRows = 0;
 
+			this.stmtRunner.setMaxRows(maxRows);
+			
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
@@ -2590,7 +2592,6 @@ public class SqlPanel
 					highlightStatement(scriptParser, i, selectionOffset);
 				}
 
-				this.stmtRunner.setMaxRows(maxRows);
 				this.stmtRunner.setQueryTimeout(timeout);
 				this.stmtRunner.runStatement(currentSql);
 				statementResult = this.stmtRunner.getResult();

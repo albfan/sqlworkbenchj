@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="-1" date="2009-08-11">
+<release build="-1" date="2009-08-12">
 
   <entry dev-build="7" type="enh">
     <description>
-      A new command WbGrep is available to search the source code of
+      A new command WbGrepSource is available to search the source code of
       all database objects for specific values (patterns). A GUI for this is also
       available at "Tools -&gt; Search in object source".
     </description>
@@ -18,7 +18,7 @@
       a SELECT query. Both search types are available in the "Search Table Data" tab
       of the DbExplorer.
       The functionality of the client side search is now also available through
-      the new Workbench command WbSearchData
+      the new Workbench command WbGrepData
     </description>
   </entry>
 

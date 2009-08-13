@@ -59,13 +59,13 @@ public class StatementRunner
 	private ResultLogger resultLogger;
 	private boolean verboseLogging;
 	private boolean hideWarnings;
-	private boolean fullErrorReporting = false;
+	private boolean fullErrorReporting;
 	private ParameterPrompter prompter;
-	private boolean ignoreDropErrors = false;
+	private boolean ignoreDropErrors;
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
 	private Savepoint savepoint;
-	private boolean returnOnlyErrorMessages = false;
+	private boolean returnOnlyErrorMessages;
 	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
 	private int maxRows = -1;
 	private int queryTimeout = -1;
@@ -323,13 +323,13 @@ public class StatementRunner
 		this.currentCommand.setStatementRunner(this);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setResultLogger(this.resultLogger);
-		if (currentConsumer == null)
+		if (currentConsumer != null && currentConsumer.ignoreMaxRows())
 		{
-			this.currentCommand.setMaxRows(maxRows);
+			this.currentCommand.setMaxRows(0);
 		}
 		else
 		{
-			this.currentCommand.setMaxRows(0);
+			this.currentCommand.setMaxRows(maxRows);
 		}
 		this.currentCommand.setQueryTimeout(queryTimeout);
 		this.currentCommand.setConnection(this.currentConnection);

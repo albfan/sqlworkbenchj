@@ -23,4 +23,5 @@ public interface ResultSetConsumer
 	void cancel()
 		throws SQLException;
 	void done();
+	boolean ignoreMaxRows();
 }

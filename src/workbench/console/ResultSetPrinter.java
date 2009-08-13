@@ -47,6 +47,11 @@ public class ResultSetPrinter
 		pw = new PrintWriter(out);
 	}
 
+	public boolean ignoreMaxRows()
+	{
+		return false;
+	}
+
 	public void cancel()
 		throws SQLException
 	{
