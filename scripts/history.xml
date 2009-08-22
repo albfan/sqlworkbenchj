@@ -116,6 +116,13 @@
 
   <entry dev-build="7" type="fix">
     <description>
+      Exporting a table's data from within the table list in the DbExplorer was
+      no longer working.
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="fix">
+    <description>
       The default fetch size of a connection profile could not be reset (empty).
     </description>
   </entry>

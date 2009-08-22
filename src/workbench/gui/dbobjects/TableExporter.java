@@ -74,7 +74,6 @@ public class TableExporter
 			ExportType type = dialog.getExportType();
 			String ext = type.getDefaultFileExtension();
 
-			
 			for (DbObject dbo : tables)
 			{
 				String ttype = dbo.getObjectType();

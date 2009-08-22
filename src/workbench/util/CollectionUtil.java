@@ -20,11 +20,17 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- *
+ * Utility functions for Collection handling.
+ * 
  * @author Thomas Kellerer
  */
 public class CollectionUtil
 {
+	public static boolean isNonEmpty(Collection c)
+	{
+		return (c != null && c.size() > 0);
+	}
+	
 	public static boolean isEmpty(Collection c)
 	{
 		return (c == null || c.size() == 0);

@@ -69,7 +69,7 @@ public class ExportFileDialog
 	public ExportFileDialog(Component caller, DataStore ds)
 	{
 		source = ds;
-		this.exportOptions = new ExportOptionsPanel(source.getResultInfo());
+		this.exportOptions = new ExportOptionsPanel(source == null ? null : source.getResultInfo());
 		this.parentComponent = caller;
 	}
 
@@ -368,6 +368,7 @@ public class ExportFileDialog
 	protected void checkSqlOptions()
 	{
 		if (sqlChecked) return;
+		if (source == null) return;
 		if (source.hasPkColumns()) return;
 
 		if (checkWindow != null) return;
@@ -414,6 +415,8 @@ public class ExportFileDialog
 
 	protected void _checkSqlOptions()
 	{
+		if (source == null) return;
+		
 		try
 		{
 			sqlChecked = true;
