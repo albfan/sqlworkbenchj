@@ -36,7 +36,7 @@ public class WbGrepSource
 
 	public static final String PARAM_SEARCH_EXP = "searchValues";
 	public static final String PARAM_MATCHALL = "matchAll";
-	public static final String PARAM_CASE_SENSITIVE = "ignoreCase";
+	public static final String PARAM_IGNORE_CASE = "ignoreCase";
 	public static final String PARAM_USE_REGEX = "useRegex";
 	
 	private ObjectSourceSearcher searcher;
@@ -52,7 +52,7 @@ public class WbGrepSource
 		cmdLine.addArgument(PARAM_NAMES);
 		cmdLine.addArgument(PARAM_SEARCH_EXP);
 		cmdLine.addArgument(PARAM_MATCHALL, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_CASE_SENSITIVE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 	}
 
 	@Override
@@ -85,7 +85,7 @@ public class WbGrepSource
 		}
 		
 		boolean matchAll = cmdLine.getBoolean(PARAM_MATCHALL, false);
-		boolean ignoreCase = cmdLine.getBoolean(PARAM_CASE_SENSITIVE, true);
+		boolean ignoreCase = cmdLine.getBoolean(PARAM_IGNORE_CASE, true);
 		boolean regEx = cmdLine.getBoolean(PARAM_USE_REGEX, false);
 
 		List<String> schemas = cmdLine.getListValue(PARAM_SCHEMAS);

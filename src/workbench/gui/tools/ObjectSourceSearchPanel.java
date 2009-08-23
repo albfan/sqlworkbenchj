@@ -41,6 +41,7 @@ import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
+import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.RunningJobIndicator;
@@ -54,7 +55,9 @@ import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.wbcommands.CommandTester;
 import workbench.sql.wbcommands.ObjectResultListDataStore;
+import workbench.sql.wbcommands.WbGrepSource;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -578,6 +581,46 @@ public class ObjectSourceSearchPanel
 		objectSource.setText(source);
 	}
 
+	public void showWbCommand()
+	{
+		CommandTester t = new CommandTester();
+		StringBuilder result = new StringBuilder(150);
+		String indent = "\n             ";
+
+		result.append(t.formatVerb(WbGrepSource.VERB) + " -" + WbGrepSource.PARAM_SEARCH_EXP + "=");
+		result.append(StringUtil.quoteIfNeeded(searchValues.getText()));
+		result.append(indent);
+		result.append("-" + WbGrepSource.PARAM_IGNORE_CASE + "=" + Boolean.toString(ignoreCase.isSelected()));
+		result.append(indent);
+		result.append("-" + WbGrepSource.PARAM_MATCHALL + "=" + Boolean.toString(matchAll.isSelected()));
+		result.append(indent);
+		result.append("-" + WbGrepSource.PARAM_USE_REGEX + "=" + Boolean.toString(regex.isSelected()));
+
+		if (StringUtil.isNonBlank(objectTypes.getText()))
+		{
+			result.append(indent);
+			result.append("-" + WbGrepSource.PARAM_TYPES + "=" + StringUtil.quoteIfNeeded(objectTypes.getText()));
+		}
+		
+		if (StringUtil.isNonBlank(objectNames.getText()))
+		{
+			result.append(indent);
+			result.append("-" + WbGrepSource.PARAM_NAMES + "=" + StringUtil.quoteIfNeeded(objectNames.getText()));
+		}
+
+		if (StringUtil.isNonBlank(schemaNames.getText()))
+		{
+			result.append(indent);
+			result.append("-" + WbGrepSource.PARAM_SCHEMAS + "=" + StringUtil.quoteIfNeeded(schemaNames.getText()));
+		}
+		
+		result.append("\n;");
+
+		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("TxtWindowTitleGrepScript"), result.toString(), "workbench.objectsearcher.scriptwindow", true);
+		w.setVisible(true);
+		w.dispose();
+	}
+
 	public void windowOpened(WindowEvent e)
 	{
 	}
@@ -632,15 +675,15 @@ public class ObjectSourceSearchPanel
     objectTypes = new javax.swing.JTextField();
     selectSchemasButton = new FlatButton();
     selectTypesButton = new FlatButton();
+    selectConnection = new javax.swing.JButton();
     resultContainer = new javax.swing.JPanel();
     splitPane = new WbSplitPane();
     footerPanel = new javax.swing.JPanel();
     statusbar = new javax.swing.JLabel();
     buttonPanel = new javax.swing.JPanel();
     startButton = new javax.swing.JButton();
-    jButton1 = new javax.swing.JButton();
+    showScriptButton = new javax.swing.JButton();
     closeButton = new javax.swing.JButton();
-    selectConnection = new javax.swing.JButton();
 
     setLayout(new java.awt.BorderLayout());
 
@@ -733,7 +776,7 @@ public class ObjectSourceSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 6;
+    gridBagConstraints.gridwidth = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(11, 10, 0, 5);
@@ -781,8 +824,22 @@ public class ObjectSourceSearchPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 7;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 5);
     topPanel.add(selectTypesButton, gridBagConstraints);
+
+    selectConnection.setText(ResourceMgr.getString("LblSelectConnection")); // NOI18N
+    selectConnection.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        selectConnectionActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 3, 0, 5);
+    topPanel.add(selectConnection, gridBagConstraints);
 
     add(topPanel, java.awt.BorderLayout.NORTH);
 
@@ -814,20 +871,24 @@ public class ObjectSourceSearchPanel
       }
     });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
     buttonPanel.add(startButton, gridBagConstraints);
 
-    jButton1.setText(ResourceMgr.getString("LblShowScript")); // NOI18N
+    showScriptButton.setText(ResourceMgr.getString("LblShowScript")); // NOI18N
+    showScriptButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        showScriptButtonActionPerformed(evt);
+      }
+    });
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(0, 10, 0, 0);
-    buttonPanel.add(jButton1, gridBagConstraints);
+    buttonPanel.add(showScriptButton, gridBagConstraints);
 
     closeButton.setText(ResourceMgr.getString("LblClose")); // NOI18N
     closeButton.addActionListener(new java.awt.event.ActionListener() {
@@ -839,18 +900,6 @@ public class ObjectSourceSearchPanel
     gridBagConstraints.gridx = 4;
     gridBagConstraints.gridy = 0;
     buttonPanel.add(closeButton, gridBagConstraints);
-
-    selectConnection.setText(ResourceMgr.getString("LblSelectConnection")); // NOI18N
-    selectConnection.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
-        selectConnectionActionPerformed(evt);
-      }
-    });
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    buttonPanel.add(selectConnection, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -895,12 +944,16 @@ public class ObjectSourceSearchPanel
 		selectSchemas();
 	}//GEN-LAST:event_selectSchemasButtonActionPerformed
 
+	private void showScriptButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_showScriptButtonActionPerformed
+	{//GEN-HEADEREND:event_showScriptButtonActionPerformed
+		showWbCommand();
+	}//GEN-LAST:event_showScriptButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private javax.swing.JPanel buttonPanel;
   private javax.swing.JButton closeButton;
   private javax.swing.JPanel footerPanel;
   private javax.swing.JCheckBox ignoreCase;
-  private javax.swing.JButton jButton1;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JCheckBox matchAll;
   private javax.swing.JLabel nameLabel;
@@ -914,6 +967,7 @@ public class ObjectSourceSearchPanel
   private javax.swing.JButton selectConnection;
   private javax.swing.JButton selectSchemasButton;
   private javax.swing.JButton selectTypesButton;
+  private javax.swing.JButton showScriptButton;
   private javax.swing.JSplitPane splitPane;
   private javax.swing.JButton startButton;
   private javax.swing.JLabel statusbar;

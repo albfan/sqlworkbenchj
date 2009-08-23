@@ -1264,4 +1264,24 @@ public class StringUtil
 		return matchAll;
 	}
 
+	public static String quoteIfNeeded(String input)
+	{
+		if (isBlank(input)) return input;
+		String quote = "\'";
+		boolean needQuote = false;
+		if (input.indexOf("'") > -1)
+		{
+			quote = "\"";
+			needQuote = true;
+		}
+		if (input.indexOf(' ') > -1)
+		{
+			needQuote = true;
+		}
+		if (needQuote)
+		{
+			return quote + input + quote;
+		}
+		return input;
+	}
 }
