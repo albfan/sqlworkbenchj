@@ -15,8 +15,12 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.Map;
 import javax.swing.JComponent;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
@@ -41,7 +45,8 @@ public class WbTextLabel
 	private int alignment = SwingConstants.LEFT;
 	private FontMetrics fm;
 	private boolean hasBorder = false;
-	
+	private Map renderingHints;
+
 	public WbTextLabel()
 	{
 		super();
@@ -60,6 +65,8 @@ public class WbTextLabel
 		// For some reason clicks into WbTextLabel wind up at the parent container
 		// unless we capture the events ourselves
 		addMouseListener(this);
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		renderingHints = (Map)tk.getDesktopProperty("awt.font.desktophints");
 	}
 	
 	public void setBorder(Border b)
@@ -112,6 +119,11 @@ public class WbTextLabel
 		if (hasBorder) super.paint(g);
 		if (text != null) 
 		{
+			Graphics2D g2d = (Graphics2D) g;
+			if (renderingHints != null)
+			{
+				g2d.addRenderingHints(renderingHints);
+			}
 			g.setColor(this.textColor);
 			g.drawString(this.text, textX, textY);
 		}

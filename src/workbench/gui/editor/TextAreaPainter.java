@@ -13,10 +13,13 @@ import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import java.util.Map;
 import java.util.Set;
 import javax.swing.JComponent;
 import javax.swing.text.PlainDocument;
@@ -68,6 +71,7 @@ public class TextAreaPainter
 		Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 		Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR);
 
+	private Map renderingHints;
 
 	public TextAreaPainter(JEditTextArea textArea)
 	{
@@ -100,6 +104,9 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_CURSOR_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
 			Settings.PROPERTY_SHOW_LINE_NUMBERS);
+
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
 	}
 
 	public void dispose()
@@ -322,6 +329,11 @@ public class TextAreaPainter
 			}
 		}
 
+		Graphics2D g2d = (Graphics2D) gfx;
+		if (renderingHints != null)
+		{
+			g2d.addRenderingHints(renderingHints);
+		}
 
 		final int lastLine = textArea.getLineCount();
 		final int visibleCount = textArea.getVisibleLines();

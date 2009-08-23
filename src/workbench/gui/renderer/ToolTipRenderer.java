@@ -16,10 +16,13 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.Rectangle;
 
+import java.awt.Toolkit;
 import java.util.List;
+import java.util.Map;
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JTable;
@@ -44,7 +47,7 @@ import workbench.util.StringUtil;
  * <br/>
  * For performance reasons the displayValue is drawn directly using the graphics
  * object.
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class ToolTipRenderer
@@ -90,12 +93,16 @@ public class ToolTipRenderer
 
 	private boolean isAlternatingRow = false;
 
+	protected Map renderingHints;
+
 	public ToolTipRenderer()
 	{
 		super();
 		int thick = WbSwingUtilities.FOCUSED_CELL_BORDER.getThickness();
 		focusedInsets = new Insets(thick, thick, thick, thick);
 		regularInsets = getDefaultInsets();
+		Toolkit tk = Toolkit.getDefaultToolkit();
+		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
 	}
 
 	static Insets getDefaultInsets()
@@ -327,6 +334,12 @@ public class ToolTipRenderer
 		if (textX < 0) textX = 0;
 		int textY = paintTextR.y + fm.getAscent();
 		if (textY < 0) textY = 0;
+
+		Graphics2D g2d = (Graphics2D) g;
+		if (!isPrinting && renderingHints != null)
+		{
+			g2d.addRenderingHints(renderingHints);
+		}
 
 		g.setColor(getBackgroundColor());
 		g.fillRect(0,0,w,h);

@@ -34,6 +34,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.storage.ResultInfo;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
@@ -63,14 +64,23 @@ public class ExportFileDialog
 
 	public ExportFileDialog(Component caller)
 	{
-		this(caller, null);
+		source = null;
+		exportOptions = new ExportOptionsPanel(null);
+		parentComponent = caller;
 	}
 
 	public ExportFileDialog(Component caller, DataStore ds)
 	{
 		source = ds;
-		this.exportOptions = new ExportOptionsPanel(source == null ? null : source.getResultInfo());
-		this.parentComponent = caller;
+		exportOptions = new ExportOptionsPanel(source == null ? null : source.getResultInfo());
+		parentComponent = caller;
+	}
+
+	public ExportFileDialog(Component caller, ResultInfo info)
+	{
+		source = null;
+		exportOptions = new ExportOptionsPanel(info);
+		parentComponent = caller;
 	}
 
 	public void setQuerySql(String sql, WbConnection con)
