@@ -387,7 +387,7 @@ public class ObjectSourceSearchPanel
 		if (standalone)
 		{
 			// Unregister will actually close the application
-			// as this is the only (and thus last) window that is open#
+			// as this is the only (and thus last) window that is open
 			// WbManager will also take care of disconnecting everything
 			unregister();
 		}
@@ -473,14 +473,8 @@ public class ObjectSourceSearchPanel
 		this.window.addWindowListener(this);
 		WbManager.getInstance().registerToolWindow(this);
 
-		if (parent == null)
-		{
-			if (!Settings.getInstance().restoreWindowPosition(this.window, "workbench.objectsearcher.window"))
-			{
-				WbSwingUtilities.center(this.window, null);
-			}
-		}
-		else
+		// Window size has already been restored in restoreSettings()
+		if (!Settings.getInstance().restoreWindowPosition(this.window, "workbench.objectsearcher.window"))
 		{
 			WbSwingUtilities.center(this.window, parent);
 		}
@@ -577,8 +571,15 @@ public class ObjectSourceSearchPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		int row = results.getSelectedRow();
-		String source = results.getValueAsString(row, ObjectResultListDataStore.COL_IDX_SOURCE);
-		objectSource.setText(source);
+		final String source = results.getValueAsString(row, ObjectResultListDataStore.COL_IDX_SOURCE);
+		EventQueue.invokeLater(new Runnable()
+		{
+			public void run()
+			{
+				objectSource.setText(source);
+				objectSource.setCaretPosition(0, false);
+			}
+		});
 	}
 
 	public void showWbCommand()

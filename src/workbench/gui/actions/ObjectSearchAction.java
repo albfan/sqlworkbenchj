@@ -48,11 +48,6 @@ public class ObjectSearchAction
 		}
 		try
 		{
-			ConnectionProfile profile = null;
-			if (parent != null && Settings.getInstance().getAutoConnectDataPumper())
-			{
-				profile = parent.getCurrentProfile();
-			}
 			ObjectSourceSearchPanel panel = new ObjectSourceSearchPanel();
 			panel.showWindow(parent);
 		}
