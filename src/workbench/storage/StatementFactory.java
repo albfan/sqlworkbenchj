@@ -122,8 +122,16 @@ public class StatementFactory
 				}
 				else
 				{
-					sql.append(" = ?");
-					values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
+					String literal = getTemplateValue(resultInfo.getDbmsTypeName(col), value);
+					if (literal != null)
+					{
+						sql.append(literal);
+					}
+					else
+					{
+						sql.append(" = ?");
+						values.add(new ColumnData(value, this.resultInfo.getColumn(col)));
+					}
 				}
 			}
 		}
@@ -152,8 +160,17 @@ public class StatementFactory
 			}
 			else
 			{
-				sql.append(" = ?");
-				values.add(new ColumnData(value,this.resultInfo.getColumn(j)));
+				String literal = getTemplateValue(resultInfo.getDbmsTypeName(j), value);
+				if (literal != null)
+				{
+					sql.append(" = ");
+					sql.append(literal);
+				}
+				else
+				{
+					sql.append(" = ?");
+					values.add(new ColumnData(value, resultInfo.getColumn(j)));
+				}
 			}
 		}
 
@@ -161,6 +178,15 @@ public class StatementFactory
 		return dml;
 	}
 
+	protected String getTemplateValue(String dbmsType, Object value)
+	{
+		if (value == null) return null;
+		if (this.dbConnection == null) return null;
+		String template = dbConnection.getDbSettings().getValueTemplate(dbmsType);
+		if (template == null) return null;
+		return template.replace("%value%", value.toString());
+	}
+	
 	public DmlStatement createInsertStatement(RowData aRow, boolean ignoreStatus, String lineEnd)
 	{
 		return this.createInsertStatement(aRow, ignoreStatus, lineEnd, null);
@@ -278,9 +304,16 @@ public class StatementFactory
 				colName = adjustColumnName(this.resultInfo.getColumnName(col));
 
 				sql.append(colName);
-				valuePart.append('?');
-
-				values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
+				String literal = getTemplateValue(resultInfo.getDbmsTypeName(col), value);
+				if (literal != null)
+				{
+					valuePart.append(literal);
+				}
+				else
+				{
+					valuePart.append('?');
+					values.add(new ColumnData(value,this.resultInfo.getColumn(col)));
+				}
 			}
 			colsInThisLine ++;
 		}
@@ -360,8 +393,17 @@ public class StatementFactory
 			}
 			else
 			{
-				sql.append(" = ?");
-				values.add(new ColumnData(value, resultInfo.getColumn(j)));
+				String literal = getTemplateValue(resultInfo.getDbmsTypeName(j), value);
+				if (literal != null)
+				{
+					sql.append(" = ");
+					sql.append(literal);
+				}
+				else
+				{
+					sql.append(" = ?");
+					values.add(new ColumnData(value, resultInfo.getColumn(j)));
+				}
 			}
 		}
 

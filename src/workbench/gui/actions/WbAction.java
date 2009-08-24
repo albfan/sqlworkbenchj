@@ -60,7 +60,7 @@ public class WbAction
 	private String iconKey;
 	private List<JMenuItem> createdItems = new LinkedList<JMenuItem>();
 	protected boolean isConfigurable = true;
-	
+
 	public WbAction()
 	{
 		super();
@@ -89,7 +89,7 @@ public class WbAction
 		boolean mouse = ((e.getModifiers() & InputEvent.BUTTON1_MASK) != 0);
 		return mouse;
 	}
-	
+
 	public static boolean isAltPressed(ActionEvent e)
 	{
 		boolean altPressed = ((e.getModifiers() & ActionEvent.ALT_MASK) == ActionEvent.ALT_MASK);
@@ -100,7 +100,7 @@ public class WbAction
 	{
 		return isShiftPressed(e.getModifiers());
 	}
-	
+
 	public static boolean isShiftPressed(int modifiers)
 	{
 		boolean shiftPressed = ((modifiers & ActionEvent.SHIFT_MASK) == ActionEvent.SHIFT_MASK);
@@ -123,7 +123,7 @@ public class WbAction
 	{
 		return isConfigurable;
 	}
-	
+
 	public boolean allowDuplicate()
 	{
 		return false;

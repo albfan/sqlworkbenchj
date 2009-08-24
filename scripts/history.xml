@@ -3,6 +3,23 @@
 
 <release build="-1" date="2009-08-12">
 
+  <entry dev-build="8" type="enh">
+    <description>
+      Values for non-Standard datatypes can now be edited in the result set
+      provided the DBMS supports some kind of function of cast to convert a
+      string literal to that datatype. Default casts for the following PostgreSQL
+      datatypes have been added: inet, cidr, macaddr
+    </description>
+  </entry>
+
+  <entry dev-build="8" type="enh">
+    <description>
+      A new help menu is available to display the online manual for the current DBMS.
+      Default configurations (URLs) for PostgreSQL, Oracle, H2, HSQLDB, MySQL and 
+      Microsoft SQL Server have been added.
+    </description>
+  </entry>
+
   <entry dev-build="7" type="enh">
     <description>
       A new command WbGrepSource is available to search the source code of
@@ -114,7 +131,7 @@
     </description>
   </entry>
 
-  <entry dev-build="7" type="fix">
+  <entry dev-build="8" type="fix">
     <description>
       Exporting a table's data from within the table list in the DbExplorer was
       no longer working.

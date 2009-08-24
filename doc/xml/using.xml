@@ -28,6 +28,18 @@
 			The file <literal>SQLWorkbench-Manual.pdf</literal> must be available in the
 			directory where <literal>sqlworkbench.jar</literal> is located.
 		</para>
+
+    <para>
+      When connected to a database, the menu item
+      <menuchoice><guimenu>Help</guimenu><guimenuitem>DBMS Manual</guimenuitem></menuchoice> will display the
+      online manual for the current DBMS (if there is one). The default configuration includes the URLs
+      for PostgreSQL, Oracle 10g, H2, HSQLDB, MySQL 5.1 and Microsoft SQL Server 2005.
+    </para>
+    <para>
+      The URL that is used to display the manual can be <link linkend="db-settings-online-manual">changed</link> in the
+      configuration file <link linkend="settings"><literal>workbench.settings</literal></link>.
+    </para>
+    
 	</section>
 
 	<section id="window-sizes">

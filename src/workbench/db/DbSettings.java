@@ -355,6 +355,12 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "ddl.usesavepoint", false);
 	}
 
+	public String getValueTemplate(String dbmsType)
+	{
+		if (dbmsType == null) return null;
+		return Settings.getInstance().getProperty(prefix + "valuetemplate." + dbmsType.toLowerCase(), null);
+	}
+
 	/**
 	 * Returns the default type for the Blob formatter
 	 * @return hex, octal, char

@@ -111,6 +111,7 @@ import workbench.gui.actions.NextTabAction;
 import workbench.gui.actions.ObjectSearchAction;
 import workbench.gui.actions.PrevTabAction;
 import workbench.gui.actions.RenameTabAction;
+import workbench.gui.actions.ShowDbmsManualAction;
 import workbench.gui.actions.ShowMacroPopupAction;
 import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
@@ -1227,7 +1228,7 @@ public class MainWindow
 		this.disconnectTab.checkState();
 		this.getCurrentPanel().clearLog();
 		this.getCurrentPanel().showResultPanel();
-
+		ShowDbmsManualAction.getInstance().setDbms(conn.getMetadata().getDbId());
 		showConnectionWarnings(conn, this.getCurrentPanel());
 		selectCurrentEditor();
 	}
@@ -1559,6 +1560,7 @@ public class MainWindow
 		this.setMacroMenuEnabled(false);
 		this.updateWindowTitle();
 		this.disconnectAction.setEnabled(false);
+		ShowDbmsManualAction.getInstance().setDbms(null);
 		this.createNewConnection.checkState();
 		this.disconnectTab.checkState();
 		this.dbExplorerAction.setEnabled(false);
@@ -2035,6 +2037,7 @@ public class MainWindow
 		result.setName(ResourceMgr.MNU_TXT_HELP);
 		new ShowHelpAction().addToMenu(result);
 		new ShowManualAction().addToMenu(result);
+		result.add(ShowDbmsManualAction.getInstance());
 		result.add(WhatsNewAction.getInstance());
 		result.addSeparator();
 

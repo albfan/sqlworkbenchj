@@ -475,7 +475,18 @@
 			</para>
 			<para>Note that you need to use two backslashes in the RegeEx.</para>
 		</simplesect>
-		
+
+		<simplesect id="db-settings-online-manual">
+			<title>URL for online manual</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.manual</literal></para>
+			<para>
+        This defines the URL of the online manual for that DBMS. This URL is shown
+        in the browser when using the menu item:
+        <menuchoice><guimenu>Help</guimenu><guimenuitem>DBMS Manual</guimenuitem></menuchoice> will display the
+
+			</para>
+		</simplesect>
+
 		<simplesect id="db-oracle-filter-syns">
 			<title>Filtering synonyms</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.exclude.synonyms</literal></para>
