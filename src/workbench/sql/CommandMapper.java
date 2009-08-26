@@ -62,6 +62,7 @@ import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbGrepData;
+import workbench.sql.wbcommands.WbMode;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
@@ -123,6 +124,7 @@ public class CommandMapper
 		addCommand(new WbDescribeTable());
 		addCommand(new WbGrepSource());
 		addCommand(new WbGrepData());
+		addCommand(new WbMode());
 		
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);

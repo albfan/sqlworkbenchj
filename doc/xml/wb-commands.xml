@@ -1272,6 +1272,73 @@ WHERE id=42;</programlisting>
       </para>
     </section>
   </section>
+
+  <section id="command-wbmode">
+    <title>Changing read only mode - WbMode</title>
+    <para>
+      In the <link linkend="profile-confirm-updates">connection profile</link> two options can be specified
+      to define the behaviour when running commands that might change the update: a "read only" mode
+      that ignores such commands and a "confirm all" mode, where you need to confirm any statement
+      that might change the database.
+    </para>
+    <para>
+      These states can temporarily be changed without actually changing the profile
+      using the <literal>WbMode</literal> command.
+    </para>
+    <note>
+      <para>This changes the mode for all editor tabs, not only for the
+      one where you run the command.</para>
+    </note>
+
+    <variablelist>
+      <para>Parameters for the <literal>WbMode</literal> command are:</para>
+      <varlistentry>
+        <term><para>reset</para></term>
+        <listitem>
+          <para>Resets the flags to the profile's definition</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          <para>normal</para>
+        </term>
+        <listitem>
+          <para>Makes all changes possible (turns off read only and confirmations)</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          <para>confirm</para>
+        </term>
+        <listitem>
+          <para>Enables confirmation for all updating commands</para>
+        </listitem>
+      </varlistentry>
+
+      <varlistentry>
+        <term>
+          <para>readonly</para>
+        </term>
+        <listitem>
+          <para>Turns on the read only mode</para>
+        </listitem>
+      </varlistentry>
+
+    </variablelist>
+    <para>
+      The following example will turn on read only mode for the current connection, so that any
+      subsequent statement that updates the database will be ignored
+    </para>
+    <programlisting>WbMode readonly;</programlisting>
+
+    <para>
+      To change the current connection back to the settings from the profile use:
+    </para>
+    <programlisting>WbMode reset;</programlisting>
+
+  </section>
   
   <section id="command-desc">
     <title>Show table structure - DESCRIBE</title>

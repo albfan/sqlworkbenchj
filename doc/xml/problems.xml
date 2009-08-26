@@ -123,7 +123,26 @@
 				command, then you have to enable the remrks reporting, otherwise the comments will not show up in the report.
 			</para>
 		</section>
-		
+
+		<section id="oracle-comment-problems">
+			<title>Error: "missing mandatory parameter"</title>
+			<para>
+        When running statements that contain single line comments that are not followed by a space
+        the following Oracle error may occur:
+        <literal>ORA-01009: missing mandatory parameter [SQL State=72000, DB Errorcode=1009]</literal>.
+      </para>
+      <programlisting>--This is a comment
+SELECT 42 FROM dual;</programlisting>
+      <para>When adding a space after the two dashes the statement works:</para>
+      <programlisting>-- This is a comment
+SELECT 42 FROM dual;</programlisting>
+      <para>
+        This seems to be a problem with old Oracle JDBC drivers (such as the 8.x drivers). It is
+        highly recommend to upgrade the driver to a more recent version (10.x or 11.x) as they not
+        only fix this problems, but are in general much better than the old versions.
+      </para>
+		</section>
+
 	</section>
 	
 	<section id="mysql-problems">

@@ -87,6 +87,7 @@ public class CommandTester
 		commands.add(WbTriggerSource.VERB);
 		commands.add(WbGrepSource.VERB);
 		commands.add(WbGrepData.VERB);
+		commands.add(WbMode.VERB);
 
 		formattedWords = new HashMap<String, String>(20);
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);

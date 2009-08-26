@@ -562,7 +562,7 @@ public class SqlCommand
 		if (prof == null) return false;
 		if (isUpdatingCommand(con, sql))
 		{
-			return prof.getConfirmUpdates();
+			return prof.confirmUpdatesInSession();
 		}
 		return false;
 	}
@@ -628,7 +628,7 @@ public class SqlCommand
 		if (prof == null) return true;
 		if (isUpdatingCommand(con, sql))
 		{
-			if (prof.isReadOnly()) return false;
+			if (prof.readOnlySession()) return false;
 		}
 		return true;
 	}

@@ -308,6 +308,11 @@
 		<para>
 			This option cannot be selected together with the "Read only" option.
 		</para>
+    <para>
+      The read only state of the connection can temporarily be changed (without
+      modifying the profile) using the <link linkend="command-wbmode">WbMode</link>
+      command.
+    </para>
 	</section>
 
 	<section id="profile-readonly">
@@ -343,6 +348,13 @@
 		<para>
 			This option cannot be selected together with the "Confirm updates" option.
 		</para>
+
+    <para>
+      The read only state of the connection can temporarily be changed (without
+      modifying the profile) using the <link linkend="command-wbmode">WbMode</link>
+      command.
+    </para>
+    
 	</section>
 
 	<section id="profile-empty-string-is-null">

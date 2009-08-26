@@ -84,7 +84,7 @@ public class DeleteTablesAction
 	public void valueChanged(ListSelectionEvent e)
 	{
 		WbConnection conn = this.source.getConnection();
-		if (conn == null || conn.getProfile().isReadOnly())
+		if (conn == null || conn.getProfile().readOnlySession())
 		{
 			setEnabled(false);
 		}

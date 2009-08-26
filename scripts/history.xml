@@ -5,6 +5,14 @@
 
   <entry dev-build="8" type="enh">
     <description>
+      A new command WbMode is available which can change the "read only" and
+      "confirm updates" setting for the current connection without modifying
+      the underlying connection profile.
+    </description>
+  </entry>
+  
+  <entry dev-build="8" type="enh">
+    <description>
       Values for non-Standard datatypes can now be edited in the result set
       provided the DBMS supports some kind of function of cast to convert a
       string literal to that datatype. Default casts for the following PostgreSQL

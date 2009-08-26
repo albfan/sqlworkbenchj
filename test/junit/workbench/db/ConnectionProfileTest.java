@@ -87,6 +87,29 @@ public class ConnectionProfileTest
 		assertNull(copy.getAlternateDelimiter());
 	}
 
+	public void testSessionProps()
+	{
+		ConnectionProfile profile = new ConnectionProfile();
+		profile.setName("ProfileTest");
+		profile.setAlternateDelimiter(new DelimiterDefinition("/", true));
+		profile.setAutocommit(false);
+		profile.setDriverName("Postgres");
+		profile.reset();
+
+		assertFalse(profile.readOnlySession());
+		assertFalse(profile.confirmUpdatesInSession());
+
+		profile.setSessionReadOnly(true);
+		assertTrue(profile.readOnlySession());
+		assertFalse(profile.isReadOnly());
+
+		profile.setSessionConfirmUpdate(true);
+		assertFalse(profile.isReadOnly());
+		assertFalse(profile.readOnlySession());
+		assertTrue(profile.confirmUpdatesInSession());
+		assertFalse(profile.getConfirmUpdates());
+	}
+	
 	public void testProps()
 		throws Exception
 	{

@@ -3086,7 +3086,7 @@ public class SqlPanel
 
 	protected void checkResultSetActions()
 	{
-		final boolean readOnly = (dbConnection == null ? false : dbConnection.getProfile().isReadOnly());
+		final boolean readOnly = (dbConnection == null ? false : dbConnection.getProfile().readOnlySession());
 		final boolean hasResult = currentData != null ? currentData.hasResultSet() : false;
 		final boolean mayEdit = !readOnly && hasResult && currentData.hasUpdateableColumns();
 		final boolean findNext = hasResult && (currentData.getTable().canSearchAgain());

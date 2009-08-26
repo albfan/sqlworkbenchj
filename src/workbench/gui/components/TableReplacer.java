@@ -259,7 +259,7 @@ public class TableReplacer
 
 		DataStore ds = client.getDataStore();
 		WbConnection con = (ds != null ? ds.getOriginalConnection() : null);
-		final boolean readOnly = (con == null ? false : con.getProfile().isReadOnly());
+		final boolean readOnly = (con == null ? false : con.getProfile().readOnlySession());
 		final boolean hasData = (client.getRowCount() > 0);
 		EventQueue.invokeLater(new Runnable()
 		{

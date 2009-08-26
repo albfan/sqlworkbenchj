@@ -51,9 +51,13 @@ public class ConnectionProfile
 	private Properties connectionProperties;
 	private String workspaceFile;
 	private boolean ignoreDropErrors;
-	private boolean confirmUpdates;
 	private boolean trimCharData;
+
 	private boolean readOnly;
+	private Boolean sessionReadOnly;
+	private Boolean sessionConfirmUpdates;
+	private boolean confirmUpdates;
+	
 	private Integer defaultFetchSize;
 	
 	private boolean emptyStringIsNull = false;
@@ -161,6 +165,27 @@ public class ConnectionProfile
 		return readOnly;
 	}
 
+	public void resetSessionFlags()
+	{
+		sessionReadOnly = null;
+		sessionConfirmUpdates = null;
+	}
+	
+	public void setSessionReadOnly(boolean flag)
+	{
+		sessionReadOnly = Boolean.valueOf(flag);
+		if (flag)
+		{
+			sessionConfirmUpdates = null;
+		}
+	}
+
+	public boolean readOnlySession()
+	{
+		if (sessionReadOnly != null) return sessionReadOnly.booleanValue();
+		return isReadOnly();
+	}
+	
 	public void setReadOnly(boolean flag)
 	{
 		if (this.readOnly != flag) changed = true;
@@ -752,6 +777,21 @@ public class ConnectionProfile
 		}
 	}
 
+	public void setSessionConfirmUpdate(boolean flag)
+	{
+		sessionConfirmUpdates = Boolean.valueOf(flag);
+		if (flag)
+		{
+			sessionReadOnly = null;
+		}
+	}
+	
+	public boolean confirmUpdatesInSession()
+	{
+		if (sessionConfirmUpdates != null) return sessionConfirmUpdates.booleanValue();
+		return getConfirmUpdates();
+	}
+
 	public boolean getConfirmUpdates()
 	{
 		return confirmUpdates;
@@ -881,5 +921,5 @@ public class ConnectionProfile
 			this.changed = true;
 		}
 	}
-	
+
 }
