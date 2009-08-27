@@ -82,8 +82,16 @@ public class PostgresSequenceReader
 
 			if (StringUtil.isNonBlank(def.getComment()))
 			{
-				buf.append("\n");
+				buf.append('\n');
 				buf.append("COMMENT ON SEQUENCE " + def.getSequenceName() + " IS '" + def.getComment().replace("'", "''") + "';");
+			}
+
+			String ownedBy = getOwnedByClause(def);
+			if (StringUtil.isNonBlank(ownedBy))
+			{
+				buf.append('\n');
+				buf.append(ownedBy);
+				buf.append(';');
 			}
 		}
 		catch (Exception e)
@@ -94,6 +102,45 @@ public class PostgresSequenceReader
 		def.setSource(buf);
 	}
 
+	private String getOwnedByClause(SequenceDefinition def)
+	{
+		if (def == null) return null;
+		String basesql = "SELECT s.relname as sequence_name,  \n" +
+             "       n.nspname as sequence_schema,  \n" +
+             "       'ALTER SEQUENCE '||s.relname||' OWNED BY '||t.relname||'.'||a.attname as sequence_alter \n" +
+             "  FROM pg_class s, pg_depend d, pg_class t, pg_attribute a, pg_namespace n \n" +
+             "  WHERE s.relkind     = 'S' \n" +
+             "    AND n.oid         = s.relnamespace \n" +
+             "    AND d.objid       = s.oid \n" +
+             "    AND d.refobjid    = t.oid \n" +
+             "    AND (d.refobjid, d.refobjsubid) = (a.attrelid, a.attnum)";
+	  String sql = "SELECT * FROM ( " + basesql + ") t \n" +
+			"WHERE sequence_name = ? AND sequence_schema = ? " ;
+
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		Savepoint sp = null;
+
+		String result = null;
+		try
+		{
+			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, def.getObjectName());
+			pstmt.setString(2, def.getSchema());
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				result = rs.getString(3);
+			}
+			dbConnection.releaseSavepoint(sp);
+		}
+		catch (SQLException e)
+		{
+			dbConnection.rollback(sp);
+			LogMgr.logError("PostgresSequenceReader.getOwnedByClause()", "Error retrieving sequence column", e);
+		}
+		return result;
+	}
 	/**
 	 *	Return the source SQL for a PostgreSQL sequence definition.
 	 *

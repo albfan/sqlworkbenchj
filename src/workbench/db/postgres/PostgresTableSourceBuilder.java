@@ -10,15 +10,24 @@
  */
 package workbench.db.postgres;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DomainIdentifier;
 import workbench.db.EnumIdentifier;
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -40,7 +49,9 @@ public class PostgresTableSourceBuilder
 		String schema = table.getSchemaToUse(this.dbConnection);
 		CharSequence enums = getEnumInformation(columns, schema);
 		CharSequence domains = getDomainInformation(columns, schema);
-		if (enums == null && domains == null) return null;
+		CharSequence sequences = getColumnSequenceInformation(table, columns);
+
+		if (enums == null && domains == null && sequences == null) return null;
 
 		int enumLen = (enums != null ? enums.length() : 0);
 		int domainLen = (domains != null ? domains.length() : 0);
@@ -48,9 +59,58 @@ public class PostgresTableSourceBuilder
 		StringBuilder result = new StringBuilder(enumLen + domainLen);
 		if (enums != null) result.append(enums);
 		if (domains != null) result.append(domains);
+		if (sequences != null) result.append(sequences);
+		
 		return result.toString();
 	}
 
+	private CharSequence getColumnSequenceInformation(TableIdentifier table, List<ColumnIdentifier> columns)
+	{
+		if (!JdbcUtils.hasMinimumServerVersion(this.dbConnection, "8.4")) return null;
+		if (table == null) return null;
+		if (CollectionUtil.isEmpty(columns)) return null;
+		String tblname = table.getTableExpression(dbConnection);
+		ResultSet rs = null;
+		Statement stmt = null;
+		StringBuilder b = new StringBuilder(100);
+
+		Savepoint sp = null;
+
+		try
+		{
+			sp = dbConnection.setSavepoint();
+			stmt = dbConnection.createStatementForQuery();
+			for (ColumnIdentifier col : columns)
+			{
+				// for serial types the sequence is already shown in the default clause
+				if (col.getDbmsType().equals("serial")) continue;
+				String colname = StringUtil.trimQuotes(col.getColumnName());
+				rs = stmt.executeQuery("select pg_get_serial_sequence('" + tblname + "', '" + colname + "')");
+				if (rs.next())
+				{
+					String seq = rs.getString(1);
+					if (StringUtil.isNonBlank(seq))
+					{
+						String msg = ResourceMgr.getFormattedString("TxtSequenceCol", col.getColumnName(), seq);
+						b.append("\n-- " + msg);
+					}
+				}
+			}
+			dbConnection.releaseSavepoint(sp);
+		}
+		catch (SQLException e)
+		{
+			dbConnection.rollback(sp);
+			LogMgr.logWarning("PostgresTableSourceBuilder.getColumnSequenceInformation()", "Error reading sequence info", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		if (b.length() == 0) return null;
+		return b;
+	}
+	
 	private CharSequence getEnumInformation(List<ColumnIdentifier> columns, String schema)
 	{
 		PostgresEnumReader reader = new PostgresEnumReader();

@@ -55,6 +55,7 @@ import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
+import workbench.db.postgres.PostgresRuleReader;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
@@ -188,6 +189,7 @@ public class DbMetadata
 			}
 			extenders.add(new PostgresDomainReader());
 			extenders.add(new PostgresEnumReader());
+			extenders.add(new PostgresRuleReader());
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
