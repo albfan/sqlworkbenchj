@@ -3,6 +3,20 @@
 
 <release build="-1" date="2009-08-27">
 
+  <entry dev-build="9" type="enh">
+    <description>
+      For Postgres, if a SEQUENCE is tied to a column, this is now shown in the
+      sequence's source and a comment is added for non serial columns in the
+      table's source.
+    </description>
+  </entry>
+
+  <entry dev-build="9" type="enh">
+    <description>
+      Postgres RULEs are now displayed in the DbExplorer
+    </description>
+  </entry>
+
   <entry dev-build="8" type="enh">
     <description>
       A new command WbMode is available which can change the "read only" and

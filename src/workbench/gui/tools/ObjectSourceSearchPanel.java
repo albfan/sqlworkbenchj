@@ -161,7 +161,8 @@ public class ObjectSourceSearchPanel
 		{
 			public void run()
 			{
-				clearStatusMessage();
+				String msg = ResourceMgr.getFormattedString("MsgGrepSourceFinished", searcher.getNumberOfObjectsSearched(), results.getRowCount());
+				statusbar.setText(msg);
 				checkButtons();
 			}
 		});

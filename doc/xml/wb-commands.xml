@@ -766,6 +766,9 @@
               <para>
                 The default for this parameter is <literal>view, procedure, function, trigger, materialized view</literal>.
               </para>
+              <para>
+                To search in all available object types, use <literal>-types=*</literal>
+              </para>
             </entry>
           </row>
 

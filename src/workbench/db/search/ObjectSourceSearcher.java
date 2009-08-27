@@ -43,6 +43,7 @@ public class ObjectSourceSearcher
 	private RowActionMonitor monitor;
 	private boolean cancelSearch;
 	private boolean isRunning;
+	private int numSearched;
 	
 	public ObjectSourceSearcher(WbConnection con)
 	{
@@ -52,6 +53,11 @@ public class ObjectSourceSearcher
 		types = CollectionUtil.caseInsensitiveSet("trigger", "procedure", "function", "view", DbMetadata.MVIEW_NAME);
 	}
 
+	public int getNumberOfObjectsSearched()
+	{
+		return numSearched;
+	}
+	
 	public void setRowMonitor(RowActionMonitor mon)
 	{
 		monitor = mon;
@@ -130,6 +136,7 @@ public class ObjectSourceSearcher
 	{
 		cancelSearch = false;
 		isRunning = true;
+		numSearched = 0;
 		try
 		{
 			searchResult = CollectionUtil.sizedArrayList(50);
@@ -202,6 +209,7 @@ public class ObjectSourceSearcher
 
 		for (DbObject object : toSearch)
 		{
+			numSearched ++;
 			if (cancelSearch) return;
 
 			if (monitor != null)
