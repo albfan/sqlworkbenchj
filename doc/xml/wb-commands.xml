@@ -1259,7 +1259,7 @@ WHERE id=42;</programlisting>
       </para>
     </section>
 
-    <section id="command-set-autocommit">
+    <section id="command-set-maxrows">
       <title>MAXROWS</title>
       <para>
         Limits the number of rows returned by the next statement. The behaviour of this command
@@ -1268,7 +1268,7 @@ WHERE id=42;</programlisting>
       </para>
       <para>
         In GUI mode, the maxrows setting is only in effect for the script currently being executed and
-        will temporarily overwrite any value entered in the "Max. Rows" field.
+        will only temporarily overwrite any value entered in the "Max. Rows" field.
       </para>
     </section>
   </section>
