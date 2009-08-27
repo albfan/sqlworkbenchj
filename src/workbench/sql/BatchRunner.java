@@ -358,13 +358,13 @@ public class BatchRunner
 	 * Define a sql script that should be run instead of a list of files.
 	 * @param sql
 	 */
-	public void setCommandToRun(String sql)
+	public void setScriptToRun(String sql)
 	{
 		this.command = sql;
 		LogMgr.logDebug("BatchRunner.setCommandToRun()", "Using command: <" + sql + ">");
 	}
 
-	protected void runCommand()
+	protected void runScript()
 	{
 		try
 		{
@@ -389,7 +389,7 @@ public class BatchRunner
 		}
 		else
 		{
-			runCommand();
+			runScript();
 		}
 	}
 
@@ -982,7 +982,7 @@ public class BatchRunner
 		else
 		{
 			runner = new BatchRunner();
-			runner.setCommandToRun(sqlcmd);
+			runner.setScriptToRun(sqlcmd);
 		}
 
 		runner.showResultSets(showResult);

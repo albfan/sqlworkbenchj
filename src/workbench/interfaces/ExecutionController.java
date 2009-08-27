@@ -17,7 +17,22 @@ package workbench.interfaces;
  */
 public interface ExecutionController
 {
+
+	/**
+	 * Confirm the execution of passed SQL command.
+	 *
+	 * @return true if the user chose to continue
+	 */
 	boolean confirmStatementExecution(String command);
+
+	/**
+	 * Confirm the execution of the statements with a user visible prompt.
+	 * This is similar to the "pause" command in a Windows batch file.
+	 *
+	 * @param prompt the prompt to be displayed to the user
+	 * @return true if the user chose to continue
+	 */
 	boolean confirmExecution(String prompt);
+	
 	String getPassword(String prompt);
 }
