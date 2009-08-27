@@ -1333,6 +1333,7 @@ public class DbMetadata
 		{
 			if (types[i] == null) continue;
 			if (types[i].equals("*")) return true;
+			if (types[i].equals("%")) return true;
 			if (type.equalsIgnoreCase(types[i])) return true;
 		}
 		return false;

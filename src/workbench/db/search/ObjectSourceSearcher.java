@@ -11,6 +11,7 @@
 package workbench.db.search;
 
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import workbench.db.DbMetadata;
@@ -106,6 +107,13 @@ public class ObjectSourceSearcher
 			names.add(n);
 		}
 	}
+
+	private boolean typeIncluded(String toCheck, Collection<String> types)
+	{
+		if (types.contains("%")) return true;
+		if (types.contains("*")) return true;
+		return types.contains(toCheck);
+	}
 	
 	/**
 	 * Searches all objects for the given search string(s)
@@ -138,7 +146,8 @@ public class ObjectSourceSearcher
 
 			Set<String> typesToRetrieve = CollectionUtil.caseInsensitiveSet();
 			typesToRetrieve.addAll(types);
-			if (typesToRetrieve.contains("trigger"))
+
+			if (typeIncluded("trigger", typesToRetrieve))
 			{
 				List<DbObject> trigger = retrieveTriggers();
 				if (cancelSearch) return null;
@@ -148,7 +157,7 @@ public class ObjectSourceSearcher
 			
 			if (cancelSearch) return null;
 
-			if (typesToRetrieve.contains("procedure") || typesToRetrieve.contains("function"))
+			if (typeIncluded("procedure", typesToRetrieve) || typeIncluded("function", typesToRetrieve))
 			{
 				List<DbObject> procs = retrieveProcedures();
 				if (cancelSearch) return null;
@@ -161,6 +170,11 @@ public class ObjectSourceSearcher
 
 			if (typesToRetrieve.size() > 0)
 			{
+				if (typesToRetrieve.contains("*") || typesToRetrieve.contains("%"))
+				{
+					typesToRetrieve.clear();
+					typesToRetrieve.addAll(connection.getMetadata().getObjectTypes());
+				}
 				List<DbObject> objects = retrieveObjects(typesToRetrieve);
 				searchList(objects, searchValues, matchAll, ignoreCase, useRegex);
 			}

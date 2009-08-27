@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
@@ -86,11 +87,17 @@ public class PostgresSequenceReader
 				buf.append("COMMENT ON SEQUENCE " + def.getSequenceName() + " IS '" + def.getComment().replace("'", "''") + "';");
 			}
 
-			String ownedBy = getOwnedByClause(def);
-			if (StringUtil.isNonBlank(ownedBy))
+			String col = def.getRelatedColumn();
+			TableIdentifier tbl = def.getRelatedTable();
+			if (tbl != null && StringUtil.isNonBlank(col))
 			{
 				buf.append('\n');
-				buf.append(ownedBy);
+				buf.append("ALTER SEQUENCE ");
+				buf.append(def.getSequenceName());
+				buf.append(" OWNER TO ");
+				buf.append(tbl.getTableName());
+				buf.append('.');
+				buf.append(col);
 				buf.append(';');
 			}
 		}
@@ -102,12 +109,13 @@ public class PostgresSequenceReader
 		def.setSource(buf);
 	}
 
-	private String getOwnedByClause(SequenceDefinition def)
+	private void readRelatedTable(SequenceDefinition def)
 	{
-		if (def == null) return null;
+		if (def == null) return;
 		String basesql = "SELECT s.relname as sequence_name,  \n" +
              "       n.nspname as sequence_schema,  \n" +
-             "       'ALTER SEQUENCE '||s.relname||' OWNED BY '||t.relname||'.'||a.attname as sequence_alter \n" +
+             "       t.relname as related_table, " +
+						 "       a.attname as related_column \n" +
              "  FROM pg_class s, pg_depend d, pg_class t, pg_attribute a, pg_namespace n \n" +
              "  WHERE s.relkind     = 'S' \n" +
              "    AND n.oid         = s.relnamespace \n" +
@@ -115,22 +123,33 @@ public class PostgresSequenceReader
              "    AND d.refobjid    = t.oid \n" +
              "    AND (d.refobjid, d.refobjsubid) = (a.attrelid, a.attnum)";
 	  String sql = "SELECT * FROM ( " + basesql + ") t \n" +
-			"WHERE sequence_name = ? AND sequence_schema = ? " ;
+			"WHERE sequence_name = ?" ;
 
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		Savepoint sp = null;
 
-		String result = null;
 		try
 		{
+			if (def.getSchema() != null)
+			{
+				sql = sql + " AND sequence_schema = ?";
+			}
 			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			pstmt.setString(1, def.getObjectName());
-			pstmt.setString(2, def.getSchema());
+			if (def.getSchema() != null)
+			{
+				pstmt.setString(2, def.getSchema());
+			}
 			rs = pstmt.executeQuery();
 			if (rs.next())
 			{
-				result = rs.getString(3);
+				String tbl = rs.getString(3);
+				String col = rs.getString(4);
+				if (StringUtil.isNonBlank(tbl) && StringUtil.isNonBlank(col))
+				{
+					def.setRelatedTable(new TableIdentifier(def.getSchema(), tbl), col);
+				}
 			}
 			dbConnection.releaseSavepoint(sp);
 		}
@@ -139,7 +158,7 @@ public class PostgresSequenceReader
 			dbConnection.rollback(sp);
 			LogMgr.logError("PostgresSequenceReader.getOwnedByClause()", "Error retrieving sequence column", e);
 		}
-		return result;
+		return;
 	}
 	/**
 	 *	Return the source SQL for a PostgreSQL sequence definition.
@@ -176,7 +195,8 @@ public class PostgresSequenceReader
 			while (rs.next())
 			{
 				String name = rs.getString("TABLE_NAME");
-				result.add(getSequenceDefinition(owner, name));
+				String schema = rs.getString("TABLE_SCHEM");
+				result.add(getSequenceDefinition(schema, name));
 			}
 			this.dbConnection.releaseSavepoint(sp);
 
@@ -208,7 +228,7 @@ public class PostgresSequenceReader
 		def.setSequenceProperty("CACHE", ds.getValue(0, "cache_value"));
 		def.setSequenceProperty("CYCLE", ds.getValue(0, "is_cycled"));
 		def.setSequenceProperty("REMARKS", comment);
-		readSequenceSource(def);
+//		readSequenceSource(def);
 		def.setComment(comment);
 		return def;
 	}
@@ -237,6 +257,8 @@ public class PostgresSequenceReader
 			{
 				DataStore ds = getRawSequenceDefinition(owner, sequence);
 				result = createDefinition(sequence, owner, comment, ds);
+				readRelatedTable(result);
+				readSequenceSource(result); // should be called after readRelatedTable() !!
 			}
 		}
 		catch (SQLException e)

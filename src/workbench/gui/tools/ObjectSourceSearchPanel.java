@@ -23,6 +23,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.WindowConstants;
@@ -216,7 +217,6 @@ public class ObjectSourceSearchPanel
 		if (searcher != null)
 		{
 			searcher.cancelSearch();
-			searcher = null;
 		}
 	}
 
@@ -479,6 +479,9 @@ public class ObjectSourceSearchPanel
 			WbSwingUtilities.center(this.window, parent);
 		}
 
+		JRootPane rootPane = window.getRootPane();
+    rootPane.setDefaultButton(startButton);
+
 		this.window.setVisible(true);
 		if (Settings.getInstance().getAutoConnectObjectSearcher() && parent != null)
 		{
@@ -518,7 +521,7 @@ public class ObjectSourceSearchPanel
 		// values will automatically be sorted.
 		types.add("FUNCTION");
 		types.add("PROCEDURE");
-		
+
 		String result = selectFromList(types);
 		if (result != null)
 		{
@@ -602,7 +605,7 @@ public class ObjectSourceSearchPanel
 			result.append(indent);
 			result.append("-" + WbGrepSource.PARAM_TYPES + "=" + StringUtil.quoteIfNeeded(objectTypes.getText()));
 		}
-		
+
 		if (StringUtil.isNonBlank(objectNames.getText()))
 		{
 			result.append(indent);
@@ -614,7 +617,7 @@ public class ObjectSourceSearchPanel
 			result.append(indent);
 			result.append("-" + WbGrepSource.PARAM_SCHEMAS + "=" + StringUtil.quoteIfNeeded(schemaNames.getText()));
 		}
-		
+
 		result.append("\n;");
 
 		EditWindow w = new EditWindow(this.window, ResourceMgr.getString("TxtWindowTitleGrepScript"), result.toString(), "workbench.objectsearcher.scriptwindow", true);

@@ -30,6 +30,8 @@ public class SequenceDefinition
 	private String schema;
 	private CharSequence source;
 	private String comment;
+	private TableIdentifier relatedTable;
+	private String relatedColumn;
 	
 	private Map<String, Object> properties = new LinkedHashMap<String, Object>();
 	
@@ -39,6 +41,22 @@ public class SequenceDefinition
 		schema = seqSchema;
 	}
 
+	public void setRelatedTable(TableIdentifier table, String column)
+	{
+		relatedTable = table;
+		relatedColumn = column;
+	}
+
+	public TableIdentifier getRelatedTable()
+	{
+		return relatedTable;
+	}
+
+	public String getRelatedColumn()
+	{
+		return relatedColumn;
+	}
+	
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
