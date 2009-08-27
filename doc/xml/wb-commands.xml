@@ -804,9 +804,9 @@
   </section>
 
   <section id="command-search-data">
-    <title>Search data in multiple tables - WbGrepSourceData</title>
+    <title>Search data in multiple tables - WbGrepData</title>
     <para>
-      The command <literal>WbGrepSourceData</literal> can be used to search
+      The command <literal>WbGrepData</literal> can be used to search
       for occurances of a certain value in all columns of multiple tables.
       It is the commandline version of the (client side) <link linkend="table-search-client">Search Table Data</link> tab
       in the DbExplorer. A more detailed description on how the searching is performed is available that chapter.
@@ -870,7 +870,7 @@
             <entry>-types</entry>
             <entry>
               <para>
-                By default <literal>WbGrepSourceData</literal> will search all
+                By default <literal>WbGrepData</literal> will search all
                 tables and views (including materialized views). If you want
                 to search only one of those types, this can be specified with
                 the <literal>-types</literal> parameter. Using <literal>-types=table</literal>
