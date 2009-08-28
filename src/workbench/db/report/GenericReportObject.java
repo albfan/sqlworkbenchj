@@ -97,10 +97,10 @@ public class GenericReportObject
 
 		StrBuffer details = new StrBuffer(defIndent);
 		details.append("  ");
-		tagWriter.appendOpenTag(line, defIndent, TAG_OBJECT_DETAILS);
-		line.append('\n');
 		if (object instanceof DomainIdentifier)
 		{
+			tagWriter.appendOpenTag(line, defIndent, TAG_OBJECT_DETAILS);
+			line.append('\n');
 			DomainIdentifier domain = (DomainIdentifier)object;
 			if (StringUtil.isNonBlank(domain.getCheckConstraint()))
 			{
@@ -115,9 +115,12 @@ public class GenericReportObject
 			tagWriter.appendTag(line, details, TAG_DOMAIN_TYPE, domain.getDataType());
 			tagWriter.appendTag(line, details, TAG_DOMAIN_NULLABLE, domain.isNullable());
 			tagWriter.appendTag(line, details, TAG_DOMAIN_DEFVALUE, domain.getDefaultValue());
+			tagWriter.appendCloseTag(line, defIndent, TAG_OBJECT_DETAILS);
 		}
 		else if (object instanceof EnumIdentifier)
 		{
+			tagWriter.appendOpenTag(line, defIndent, TAG_OBJECT_DETAILS);
+			line.append('\n');
 			EnumIdentifier enumDef = (EnumIdentifier)object;
 			tagWriter.appendOpenTag(line, details, TAG_ENUM_VALUES);
 			line.append('\n');
@@ -128,8 +131,8 @@ public class GenericReportObject
 				tagWriter.appendTag(line, in2, TAG_ENUM_VALUE, value);
 			}
 			tagWriter.appendCloseTag(line, details, TAG_ENUM_VALUES);
+			tagWriter.appendCloseTag(line, defIndent, TAG_OBJECT_DETAILS);
 		}
-		tagWriter.appendCloseTag(line, defIndent, TAG_OBJECT_DETAILS);
 		tagWriter.appendTag(line, defIndent, TAG_OBJECT_SOURCE, source, true);
 		tagWriter.appendCloseTag(line, indent, TAG_OBJECT_DEF);
 		return line;
