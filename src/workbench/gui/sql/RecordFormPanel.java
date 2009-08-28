@@ -45,6 +45,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.BlobHandler;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.components.WbDocument;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
@@ -173,6 +174,7 @@ public class RecordFormPanel
 			if (SqlUtil.isMultiLineColumn(col))
 			{
 				JTextArea area = new JTextArea(new WbDocument());
+				new TextComponentMouseListener(area);
 				area.setLineWrap(false);
 
 				inputControls[i] = area;
@@ -196,7 +198,9 @@ public class RecordFormPanel
 			}
 			else
 			{
-				inputControls[i] = new JTextField(new WbDocument(), null, numChars);
+				JTextField f = new JTextField(new WbDocument(), null, numChars);
+				new TextComponentMouseListener(f);
+				inputControls[i] = f;
 				inputControls[i].setFont(displayFont);
 				c.fill = GridBagConstraints.HORIZONTAL;
 				c.weighty = 0.0;
