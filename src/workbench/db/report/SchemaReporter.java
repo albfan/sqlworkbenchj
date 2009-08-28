@@ -399,7 +399,7 @@ public class SchemaReporter
 			SequenceReader reader = this.dbConn.getMetadata().getSequenceReader();
 			if (reader == null) return;
 
-			List<SequenceDefinition> seqs = reader.getSequences(schema);
+			List<SequenceDefinition> seqs = reader.getSequences(schema, null);
 
 			for (SequenceDefinition seq : seqs)
 			{

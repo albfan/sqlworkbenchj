@@ -28,6 +28,7 @@ import workbench.util.ExceptionUtil;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Ingres related metadata information.
@@ -141,12 +142,34 @@ public class IngresMetadata
 	}
 
 	
-	public List<SequenceDefinition> getSequences(String owner)
+	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
 		StringBuilder sql = new StringBuilder(SELECT_SEQUENCE_DEF);
-		if (owner != null)
+
+		boolean whereAdded = false;
+		int ownerIndex = -1;
+		int nameIndex = -1;
+		
+		if (StringUtil.isNonBlank(owner))
 		{
+			whereAdded = true;
+			ownerIndex = 1;
 			sql.append(" WHERE seq_owner = ?");
+
+		}
+		if (StringUtil.isNonBlank(namePattern))
+		{
+			if (whereAdded)
+			{
+				sql.append(" AND ");
+				nameIndex = 2;
+			}
+			else
+			{
+				sql.append(" WHERE ");
+				nameIndex = 1;
+			}
+			sql.append(" seq_name LIKE ? ");
 		}
 
 		ResultSet rs = null;
@@ -156,7 +179,8 @@ public class IngresMetadata
 		try
 		{
 			stmt = this.dbConn.prepareStatement(sql.toString());
-			if (owner != null) stmt.setString(1, owner.trim());
+			if (ownerIndex != -1) stmt.setString(ownerIndex, owner.trim());
+			if (nameIndex != -1) stmt.setString(nameIndex, namePattern.trim());
 			rs = stmt.executeQuery();
 			DataStore ds = new DataStore(rs, true);
 			for (int i=0; i < ds.getRowCount(); i++)
@@ -221,37 +245,15 @@ public class IngresMetadata
 		return result;
 	}
 
-	public List<String> getSequenceList(String owner)
+	public List<String> getSequenceList(String owner, String namePattern)
 	{
-		ResultSet rs = null;
-		PreparedStatement stmt = null;
-		List<String> result = new ArrayList<String>();
+		List<SequenceDefinition> seq = getSequences(owner, namePattern);
+		if (seq == null) return null;
 
-		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT seq_name FROM iisequences ");
-		if (owner != null)
+		List<String> result = new ArrayList<String>(seq.size());
+		for (SequenceDefinition def : seq)
 		{
-			sql.append(" WHERE seq_owner = ?");
-		}
-
-		try
-		{
-			stmt = this.dbConn.prepareStatement(sql.toString());
-			if (owner != null) stmt.setString(1, owner.trim());
-			rs = stmt.executeQuery();
-			while (rs.next())
-			{
-				String seq = rs.getString(1);
-				if (seq != null) result.add(seq.trim());
-			}
-		}
-		catch (Throwable e)
-		{
-			LogMgr.logError("IngresMetaData.getSequenceList()", "Error when retrieving sequences",e);
-		}
-		finally
-		{
-			SqlUtil.closeAll(rs, stmt);
+			result.add(def.getSequenceName());
 		}
 		return result;
 	}

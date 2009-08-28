@@ -36,16 +36,19 @@ public class Db2SequenceReader
 	implements SequenceReader
 {
 	private WbConnection connection;
+	private boolean isHost;
+	private boolean quoteKeyword;
 	
 	public Db2SequenceReader(WbConnection conn)
 	{
 		this.connection = conn;
+		isHost = this.connection.getMetadata().getDbId().equals("db2h");
 	}
-	
-	public List<SequenceDefinition> getSequences(String owner)
+
+	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
-		if (ds == null || ds.getRowCount() != 1) return Collections.emptyList();
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
+		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>(ds.getRowCount());
 		for (int row = 0; row < ds.getRowCount(); row ++)
 		{
@@ -78,11 +81,11 @@ public class Db2SequenceReader
 		return result;
 	}
 	
-	public DataStore getRawSequenceDefinition(String schema, String sequence)
+	public DataStore getRawSequenceDefinition(String schema, String namePattern)
 	{
 		String sql = null;
 
-		if (this.connection.getMetadata().getDbId().equals("db2h"))
+		if (isHost)
 		{
 			// Host system
 			sql = "SELECT NAME, \n" +
@@ -97,9 +100,9 @@ public class Db2SequenceReader
 			"       REMARKS \n" +
 			"FROM   SYSIBM.SYSSEQUENCES \n" +
 			"WHERE schema = ?";
-			if (StringUtil.isNonBlank(sequence))
+			if (StringUtil.isNonBlank(namePattern))
 			{
-				sql += "  AND name = ? ";
+				sql += "  AND name LIKE ? ";
 			}
 		}
 		else
@@ -116,11 +119,16 @@ public class Db2SequenceReader
 		  "       REMARKS  \n" +
 			"FROM   syscat.sequences \n" +
 			"WHERE seqschema = ?";
-			if (StringUtil.isNonBlank(sequence))
+			if (StringUtil.isNonBlank(namePattern))
 			{
-				sql += "  AND seqname = ? ";
+				sql += "  AND seqname LIKE ? ";
 			}
+		}
 
+		// For testing purposes
+		if (quoteKeyword)
+		{
+			sql = sql.replace(" ORDER,", " \"ORDER\",");
 		}
 		
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -135,7 +143,7 @@ public class Db2SequenceReader
 		{
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, schema);
-			if (StringUtil.isNonBlank(sequence)) stmt.setString(2, sequence);
+			if (StringUtil.isNonBlank(namePattern)) stmt.setString(2, namePattern);
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, this.connection, true);
 		}
@@ -154,15 +162,17 @@ public class Db2SequenceReader
 	/**
 	 * 	Get a list of sequences for the given owner
 	 */
-	public List<String> getSequenceList(String schema)
+	public List<String> getSequenceList(String schema, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(schema, null);
+		DataStore ds = getRawSequenceDefinition(schema, namePattern);
 		if (ds == null || ds.getRowCount() == 0) return Collections.emptyList();
 		List<String> result = new LinkedList<String>();
 
 		for (int row=0; row < ds.getRowCount(); row ++)
 		{
-			result.add(ds.getValueAsString(row, "SEQNAME"));
+			// I can't use the column name here as the name column
+			// is different between host and "normal" DB2
+			result.add(ds.getValueAsString(row, 0));
 		}
 		return result;
 	}
@@ -278,5 +288,19 @@ public class Db2SequenceReader
 				return "DECIMAL";
 		}
 		return "INTEGER";
+	}
+
+	/**
+	 * For testing purposes only!!!
+	 * @param flag
+	 */
+	void setIsHost(boolean flag)
+	{
+		isHost = flag;
+	}
+
+	void setQuoteKeyword(boolean flag)
+	{
+		quoteKeyword = flag;
 	}
 }

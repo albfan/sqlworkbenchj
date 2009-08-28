@@ -40,9 +40,9 @@ public class OracleSequenceReader
     this.connection = conn;
   }
 		
-	public List<SequenceDefinition> getSequences(String owner)
+	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null || ds.getRowCount() == 0) return Collections.emptyList();
 		ArrayList<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 		for (int row = 0; row < ds.getRowCount(); row ++)
@@ -75,7 +75,7 @@ public class OracleSequenceReader
 		
 		if (!StringUtil.isEmptyString(sequence))
 		{
-			sql += "  AND sequence_name = ? ";
+			sql += "  AND sequence_name LIKE ? ";
 		}
 		
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -109,9 +109,9 @@ public class OracleSequenceReader
   /**
    * 	Get a list of sequences for the given owner
    */
-  public List<String> getSequenceList(String owner)
+  public List<String> getSequenceList(String owner, String namePattern)
   {
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 
     List<String> result = new LinkedList<String>();
 		if (ds == null || ds.getRowCount() == 0) return result;

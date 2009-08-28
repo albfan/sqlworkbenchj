@@ -36,7 +36,6 @@ import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.IndexColumn;
 import workbench.db.TableColumnsDatastore;
-import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
@@ -76,7 +75,7 @@ public class TableDefinitionPanel
 	public static final String DEFINITION_PROP = "tableDefinition";
 
 	private final Object connectionLock = new Object();
-	
+
 	private WbTable tableDefinition;
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
@@ -202,7 +201,7 @@ public class TableDefinitionPanel
 		throws SQLException
 	{
 		if (currentTable == null) return;
-		
+
 		if (this.isBusy()) return;
 
 		synchronized (connectionLock)
@@ -221,7 +220,7 @@ public class TableDefinitionPanel
 				});
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getObjectDetails(currentTable);
-				
+
 				final DataStoreTableModel model = new DataStoreTableModel(def);
 				WbSwingUtilities.invoke(new Runnable()
 				{
@@ -270,7 +269,7 @@ public class TableDefinitionPanel
 			// other columns will then not be there as well.
 			return;
 		}
-		
+
 		// hide the the columns "SCALE/SIZE", "PRECISION"
 		// they don't need to be displayed as this is "included" in the
 		// displayed (DBMS) data type already
@@ -297,7 +296,7 @@ public class TableDefinitionPanel
 			}
 		}
 	}
-	
+
 	public void reset()
 	{
 		currentTable = null;

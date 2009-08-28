@@ -53,14 +53,29 @@ public class H2SequenceReader
 		return def.getSource();
 	}
 	
-	public List<String> getSequenceList(String owner)
+	public List<String> getSequenceList(String owner, String namePattern)
 	{
 		String sql = "SELECT sequence_name FROM information_schema.sequences";
 
+		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(owner))
 		{
+			whereAdded = true;
 			sql += " WHERE sequence_schema = '" + StringUtil.trimQuotes(owner) + "' ";
 		}
+		if (StringUtil.isNonBlank(namePattern))
+		{
+			if (whereAdded)
+			{
+				sql += " AND ";
+			}
+			else
+			{
+				sql += " WHERE ";
+			}
+			sql += " sequence_name LIKE '" + StringUtil.trimQuotes(namePattern) + "%' ";
+		}
+		
 		sql += " ORDER BY 1";
 		
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -92,9 +107,9 @@ public class H2SequenceReader
 	}
 	
 	
-	public List<SequenceDefinition> getSequences(String owner)
+	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 		
@@ -191,7 +206,7 @@ public class H2SequenceReader
 			
 			boolean whereAdded = false;
 
-			if (!StringUtil.isEmptyString(owner)) 
+			if (StringUtil.isNonBlank(owner))
 			{
 				if (!whereAdded)
 				{
@@ -205,7 +220,7 @@ public class H2SequenceReader
 				sql += " sequence_schema = '" + owner + "'";
 			}
 		
-			if (!StringUtil.isEmptyString(sequence))
+			if (StringUtil.isNonBlank(sequence))
 			{
 				if (!whereAdded)
 				{
@@ -216,7 +231,7 @@ public class H2SequenceReader
 				{
 					sql += " AND ";
 				}
-				sql += " sequence_name = '" + sequence + "'";
+				sql += " sequence_name LIKE '" + sequence + "'";
 			}
 			if (Settings.getInstance().getDebugMetadataSql())
 			{

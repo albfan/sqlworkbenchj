@@ -73,7 +73,7 @@ public class OracleSequenceReaderTest
 		throws Exception
 	{
 		OracleSequenceReader instance = new OracleSequenceReader(db);
-		List<String> result = instance.getSequenceList("PUBLIC");
+		List<String> result = instance.getSequenceList("PUBLIC", null);
 		Collections.sort(result);
 		assertNotNull(result);
 		assertEquals(2, result.size());
@@ -84,7 +84,7 @@ public class OracleSequenceReaderTest
 	public void testGetSequences()
 	{
 		OracleSequenceReader instance = new OracleSequenceReader(db);
-		List<SequenceDefinition> result = instance.getSequences("PUBLIC");
+		List<SequenceDefinition> result = instance.getSequences("PUBLIC", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
 

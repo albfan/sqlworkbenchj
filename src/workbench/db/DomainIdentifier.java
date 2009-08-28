@@ -32,6 +32,7 @@ public class DomainIdentifier
 	private String constraintDefinition;
 	private String constraintName;
 	private String defaultValue;
+	private String source;
 
 	public DomainIdentifier(String dcatalog, String dschema, String name)
 	{
@@ -150,10 +151,24 @@ public class DomainIdentifier
 		return result.toString();
 	}
 
+	public String getSource()
+	{
+		return source;
+	}
+
+	public void setSource(String sql)
+	{
+		source = sql;
+	}
+	
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
-		return con.getMetadata().getObjectSource(this);
+		if (StringUtil.isBlank(source))
+		{
+			source = con.getMetadata().getObjectSource(this);
+		}
+		return source;
 	}
 
 	public String getObjectNameForDrop(WbConnection con)

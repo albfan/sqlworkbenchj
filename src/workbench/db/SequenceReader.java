@@ -31,9 +31,9 @@ public interface SequenceReader
 	 * 	Get a list of sequences for the given owner. The 
 	 *  contains objects of type String.
 	 */
-	List<String> getSequenceList(String schema);
+	List<String> getSequenceList(String schema, String namePattern);
 	
-	List<SequenceDefinition> getSequences(String schema)
+	List<SequenceDefinition> getSequences(String schema, String namePattern)
 		throws SQLException;
 	
 	SequenceDefinition getSequenceDefinition(String schema, String sequence);

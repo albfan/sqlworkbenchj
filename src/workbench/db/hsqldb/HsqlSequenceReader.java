@@ -26,7 +26,6 @@ import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import static workbench.util.StringUtil.isEmptyString;
 
 
 /**
@@ -72,13 +71,13 @@ public class HsqlSequenceReader
 		def.setSource(s);
 	}
 	
-	public DataStore getRawSequenceDefinition(String owner, String sequence)
+	public DataStore getRawSequenceDefinition(String owner, String namePattern)
 	{
 		String query = baseQuery;
-		
-		if (!isEmptyString(sequence))
+
+		if (StringUtil.isNonBlank(namePattern))
 		{
-			query += " WHERE sequence_name = ?";
+			query += " WHERE sequence_name LIKE '" + StringUtil.trimQuotes(namePattern) + "' ";
 		}
 		
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -92,7 +91,6 @@ public class HsqlSequenceReader
 		try
 		{
 			stmt = this.dbConn.prepareStatement(query);
-			if (!isEmptyString(sequence)) stmt.setString(1, sequence.trim());
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, true);
 		}
@@ -109,9 +107,9 @@ public class HsqlSequenceReader
 	}
 
 	
-	public List<SequenceDefinition> getSequences(String owner)
+	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
@@ -150,9 +148,9 @@ public class HsqlSequenceReader
 		return createSequenceDefinition(ds, 0);
 	}
 	
-	public List<String> getSequenceList(String owner)
+	public List<String> getSequenceList(String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		
 		List<String> result = new LinkedList<String>();

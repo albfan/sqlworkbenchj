@@ -424,11 +424,11 @@ public class SchemaDiff
 			SequenceReader tarReader = targetDb.getMetadata().getSequenceReader();
 			if (refReader != null)
 			{
-				refSeqs = refReader.getSequences(this.referenceSchema);
+				refSeqs = refReader.getSequences(this.referenceSchema, null);
 			}
 			if (tarReader != null)
 			{
-				tarSeqs = tarReader.getSequences(this.referenceSchema);
+				tarSeqs = tarReader.getSequences(this.referenceSchema, null);
 			}
 			processSequenceList(refSeqs, tarSeqs);
 		}

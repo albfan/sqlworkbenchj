@@ -40,18 +40,9 @@ public class McKoiSequenceReader
 		this.connection = con;
 	}
 
-	// This is a dirty hack, as McKoi does not store the real SQL
-	// but some kind of Object in the database. But for now this seems
-	// to work.
-	public String getViewSourceFromBlob(byte[] content)
+	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
-		String s = new String(content, 2, content.length - 6);
-		return s;
-	}
-
-	public List<SequenceDefinition> getSequences(String owner)
-	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 		for (int row=0; row < ds.getRowCount(); row++)
@@ -86,7 +77,7 @@ public class McKoiSequenceReader
 
 		if (!StringUtil.isEmptyString(sequence))
 		{
-			sql += "AND   si.name = ? ";
+			sql += "AND   si.name LIKE ? ";
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -132,9 +123,9 @@ public class McKoiSequenceReader
 		return result;
 	}
 
-	public List<String> getSequenceList(String owner)
+	public List<String> getSequenceList(String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, null);
+		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<String> result = new LinkedList<String>();
 		for (int row=0; row < ds.getRowCount(); row ++)

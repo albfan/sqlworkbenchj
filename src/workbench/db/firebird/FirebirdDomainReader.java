@@ -1,5 +1,5 @@
 /*
- * PostgresDomainReader.java
+ * FirebirdDomainReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -9,7 +9,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.postgres;
+package workbench.db.firebird;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,9 +17,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.DomainIdentifier;
@@ -33,71 +31,68 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to read information about defined DOMAINs in Postgres.
+ * A class to read information about defined DOMAINs in Firebird.
  *
  * @author Thomas Kellerer
  */
-public class PostgresDomainReader
+public class FirebirdDomainReader
 	implements ObjectListExtender
 {
-	final String baseSql = "SELECT current_catalog as domain_catalog,  \n" +
-             "       n.nspname as domain_schema, \n" +
-             "       t.typname as domain_name, \n" +
-             "       pg_catalog.format_type(t.typbasetype, t.typtypmod) as data_type, \n" +
-             "       t.typnotnull as nullable, \n" +
-             "       t.typdefault as default_value, \n" +
-             "       c.conname as constraint_name, \n" +
-             "       pg_catalog.pg_get_constraintdef(c.oid, true) as constraint_definition, \n" +
-						 "       obj_description(t.oid) as remarks \n" +
-             "FROM pg_catalog.pg_type t \n" +
-             "  LEFT JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace \n" +
-             "  LEFT JOIN pg_catalog.pg_constraint c ON t.oid = c.contypid \n" +
-             "WHERE t.typtype = 'd' \n" +
-             "  AND n.nspname <> 'pg_catalog' \n" +
-             "  AND n.nspname <> 'information_schema' \n" +
-             "  AND pg_catalog.pg_type_is_visible(t.oid)";
-
-	public Map<String, DomainIdentifier> getDomainInfo(WbConnection connection, String schema)
-	{
-		List<DomainIdentifier> domains = getDomainList(connection, schema, null);
-		Map<String, DomainIdentifier> result = new HashMap<String, DomainIdentifier>(domains.size());
-		for (DomainIdentifier d : domains)
-		{
-			result.put(d.getObjectName(), d);
-		}
-		return result;
-	}
+	final String baseSql = 
+		         "SELECT trim(rdb$field_name) AS domain_name, \n" +
+             "       rdb$validation_source as constraint_definition, \n" +
+             "       case rdb$field_type  \n" +
+             "         when 261 then 'BLOB' \n" +
+             "         when 14 then 'CHAR' \n" +
+             "         when 40 then 'CSTRING' \n" +
+             "         when 11 then 'D_FLOAT' \n" +
+             "         when 27 then 'DOUBLE' \n" +
+             "         when 10 then 'FLOAT' \n" +
+             "         when 16 then 'BIGINT' \n" +
+             "         when 8 then 'INTEGER' \n" +
+             "         when 9 then 'QUAD' \n" +
+             "         when 7 then 'SMALLINT' \n" +
+             "         when 12 then 'DATE' \n" +
+             "         when 35 then 'TIMESTAMP' \n" +
+             "         when 3 then 'DATE' \n" +
+             "         when 37 then 'VARCHAR' \n" +
+             "         else 'UNKNOWN' \n" +
+             "       end as data_type, \n" +
+             "       rdb$default_source as default_value, \n" +
+             "       case rdb$null_flag \n" +
+             "         when 1 then 1 \n" +
+             "         else 0 \n" +
+             "       end as nullable \n" +
+             "FROM rdb$fields \n" +
+             "WHERE rdb$field_name NOT LIKE 'RDB$%'";
 
 	private String getSql(WbConnection connection, String schema, String name)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
 
-		sql.append("SELECT * FROM ( ");
 		sql.append(baseSql);
-		sql.append(") di \n");
 
-		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(name))
 		{
-			sql.append(" WHERE domain_name like '");
+			sql.append(" AND trim(rdb$field_name) ");
+			if (name.indexOf('%') == -1)
+			{
+				sql.append('=');
+			}
+			else
+			{
+				sql.append("LIKE");
+			}
+			sql.append(" '");
 			sql.append(connection.getMetadata().quoteObjectname(name));
 			sql.append("' ");
-			whereAdded = true;
 		}
 
-		if (StringUtil.isNonBlank(schema))
-		{
-			sql.append(whereAdded ? " AND " : " WHERE ");
-
-			sql.append(" domain_schema = '");
-			sql.append(connection.getMetadata().quoteObjectname(schema));
-			sql.append("'");
-		}
-		sql.append(" ORDER BY 1, 2 ");
+		sql.append(" ORDER BY 1 ");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresDomainReader.getSql()", "Using SQL=\n" + sql);
+			LogMgr.logDebug("FirebirdDomainReader.getSql()", "Using SQL=\n" + sql);
 		}
 
 		return sql.toString();
@@ -117,15 +112,13 @@ public class PostgresDomainReader
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
-				String cat = rs.getString("domain_catalog");
-				String schema = rs.getString("domain_schema");
 				String name = rs.getString("domain_name");
-				DomainIdentifier domain = new DomainIdentifier(cat, schema, name);
+				DomainIdentifier domain = new DomainIdentifier(null, null, name);
 				domain.setCheckConstraint(rs.getString("constraint_definition"));
 				domain.setDataType(rs.getString("data_type"));
-				domain.setNullable(rs.getBoolean("nullable"));
+				int nullFlag = rs.getInt("nullable");
+				domain.setNullable(nullFlag == 0);
 				domain.setDefaultValue(rs.getString("default_value"));
-				domain.setComment(rs.getString("remarks"));
 				result.add(domain);
 			}
 			connection.releaseSavepoint(sp);
@@ -133,7 +126,7 @@ public class PostgresDomainReader
 		catch (SQLException e)
 		{
 			connection.rollback(sp);
-			LogMgr.logError("PostgresDomainReader.getDomainList()", "Could not read domains", e);
+			LogMgr.logError("FirebirdDomainReader.getDomainList()", "Could not read domains", e);
 		}
 		finally
 		{
@@ -159,16 +152,12 @@ public class PostgresDomainReader
 		result.append(domain.getDataType());
 		if (domain.getDefaultValue() != null)
 		{
-			result.append("\n   DEFAULT ");
+			result.append("\n   ");
 			result.append(domain.getDefaultValue());
 		}
 		if (StringUtil.isNonBlank(domain.getCheckConstraint()) || !domain.isNullable())
 		{
-			result.append("\n   CONSTRAINT ");
-			if (StringUtil.isNonBlank(domain.getConstraintName()))
-			{
-				result.append(domain.getConstraintName() + " ");
-			}
+			result.append("\n   ");
 			if (!domain.isNullable()) result.append("NOT NULL ");
 			if (StringUtil.isNonBlank(domain.getCheckConstraint()))
 			{
@@ -176,12 +165,6 @@ public class PostgresDomainReader
 			}
 		}
 		result.append(";\n");
-		if (StringUtil.isNonBlank(domain.getComment()))
-		{
-			result.append("\nCOMMENT ON DOMAIN " + domain.getObjectName() + " IS '");
-			result.append(SqlUtil.escapeQuotes(domain.getComment()));
-			result.append("';\n");
-		}
 		return result.toString();
 	}
 

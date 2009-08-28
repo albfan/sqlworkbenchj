@@ -19,7 +19,6 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
-import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerReader;
@@ -67,9 +66,9 @@ public class ObjectInfo
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		TableIdentifier tbl = new TableIdentifier(objectName);
-
-		TableIdentifier toDescribe = connection.getMetadata().findSelectableObject(tbl);
 		tbl.adjustCase(connection);
+
+		TableIdentifier toDescribe = connection.getMetadata().findObject(tbl);
 
 		DbSettings dbs = connection.getDbSettings();
 		TableIdentifier synonymTarget = null;
@@ -159,8 +158,8 @@ public class ObjectInfo
 			return result;
 		}
 
-		TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
-		DataStore tableColumns = new TableColumnsDatastore(def);
+//		DataStore tableColumns = new TableColumnsDatastore(def);
+		DataStore details = connection.getMetadata().getObjectDetails(toDescribe);
 
 		CharSequence viewSource = null;
 		String viewname = null;
@@ -172,11 +171,12 @@ public class ObjectInfo
 		}
 		else if (dbs.isViewType(toDescribe.getType()))
 		{
+			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
 			viewSource = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
 			viewname = def.getTable().getObjectExpression(connection);
 		}
 
-		ColumnRemover remover = new ColumnRemover(tableColumns);
+		ColumnRemover remover = new ColumnRemover(details);
 		DataStore cols = remover.removeColumnsByName("java.sql.Types", "SCALE/SIZE", "PRECISION");
 		cols.setResultName(toDescribe.getTableName());
 		result.setSuccess();

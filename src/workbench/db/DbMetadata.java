@@ -31,6 +31,9 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.derby.DerbySynonymReader;
+import workbench.db.firebird.FirebirdDomainReader;
+import workbench.db.h2database.H2ConstantReader;
+import workbench.db.h2database.H2DomainReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
 import workbench.db.ibm.Db2SequenceReader;
 import workbench.db.ibm.Db2SynonymReader;
@@ -57,6 +60,8 @@ import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
 import workbench.db.postgres.PostgresRuleReader;
 import workbench.sql.syntax.SqlKeywordHelper;
+import workbench.storage.filter.AndExpression;
+import workbench.storage.filter.StringEqualsComparator;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.CollectionUtil;
 
@@ -212,6 +217,7 @@ public class DbMetadata
 			// Otherwise the DBID would look something like:
 			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
 			this.productName = "Firebird";
+			extenders.add(new FirebirdDomainReader());
 		}
 		else if (productLower.indexOf("sql server") > -1)
 		{
@@ -271,6 +277,8 @@ public class DbMetadata
 		{
 			this.isH2 = true;
 			this.sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
+			extenders.add(new H2DomainReader());
+			extenders.add(new H2ConstantReader());
 		}
 
 		this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());
@@ -1262,7 +1270,7 @@ public class DbMetadata
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
-			List<String> seq = this.sequenceReader.getSequenceList(aSchema);
+			List<String> seq = this.sequenceReader.getSequenceList(aSchema, objects);
 			for (String seqName : seq)
 			{
 				int row = result.addRow();
@@ -1337,6 +1345,60 @@ public class DbMetadata
 			if (type.equalsIgnoreCase(types[i])) return true;
 		}
 		return false;
+	}
+
+	public TableIdentifier findObject(TableIdentifier tbl)
+	{
+		if (tbl == null) return null;
+		TableIdentifier result = null;
+		TableIdentifier table = tbl.createCopy();
+		table.adjustCase(dbConnection);
+		try
+		{
+			String schema = table.getSchema();
+			if (schema == null)
+			{
+				schema = getSchemaToUse();
+			}
+
+			String catalog = table.getCatalog();
+			if (catalog == null)
+			{
+				catalog = getCurrentCatalog();
+			}
+
+			DataStore ds = getObjects(catalog, schema, table.getRawTableName(), null);
+			String[] cols = getTableListColumns();
+
+			if (ds.getRowCount() == 1)
+			{
+				result = buildTableIdentifierFromDs(ds, 0);
+			}
+			else if (ds.getRowCount() > 1)
+			{
+				AndExpression filter = new AndExpression();
+				StringEqualsComparator comp = new StringEqualsComparator();
+				filter.addColumnExpression(cols[COLUMN_IDX_TABLE_LIST_NAME], comp, table.getRawTableName(), true);
+				if (StringUtil.isNonBlank(schema))
+				{
+					filter.addColumnExpression(cols[COLUMN_IDX_TABLE_LIST_SCHEMA], comp, schema, true);
+				}
+				if (StringUtil.isNonBlank(catalog))
+				{
+					filter.addColumnExpression(cols[COLUMN_IDX_TABLE_LIST_CATALOG], comp, catalog, true);
+				}
+				ds.applyFilter(filter);
+				if (ds.getRowCount() == 1)
+				{
+					result = buildTableIdentifierFromDs(ds, 0);
+				}
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DbMetadata.tableExists()", "Error checking table existence", e);
+		}
+		return result;
 	}
 
 	/**

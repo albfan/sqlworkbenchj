@@ -171,7 +171,7 @@ public class PostgresSequenceReader
 		return def.getSource();
 	}
 
-	public List<String> getSequenceList(String owner)
+	public List<String> getSequenceList(String owner, String namePattern)
 	{
 		// Already returned by JDBC driver
 		return Collections.emptyList();
@@ -180,18 +180,20 @@ public class PostgresSequenceReader
 	/**
 	 * Retrieve the list of full SequenceDefinitions from the database.
 	 */
-	public List<SequenceDefinition> getSequences(String owner)
+	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
 		Savepoint sp = null;
+		if (namePattern == null) namePattern = "%";
+		
 		try
 		{
 			sp = this.dbConnection.setSavepoint();
 			DatabaseMetaData meta = this.dbConnection.getSqlConnection().getMetaData();
-			rs = meta.getTables(null, owner, "%", new String[] { "SEQUENCE"} );
+			rs = meta.getTables(null, owner, namePattern, new String[] { "SEQUENCE"} );
 			while (rs.next())
 			{
 				String name = rs.getString("TABLE_NAME");
