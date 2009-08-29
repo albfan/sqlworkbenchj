@@ -35,7 +35,7 @@ public interface TableDataSearcher
 
 	void setConnection(WbConnection conn);
 
-	void setCriteria(String search);
+	void setCriteria(String search, boolean ignoreCase);
 
 	void setConsumer(TableSearchConsumer consumer);
 

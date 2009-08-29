@@ -361,7 +361,7 @@ public class ServerSideTableSearcher
 		return criteria;
 	}
 
-	public void setCriteria(String aText)
+	public void setCriteria(String aText, boolean ignoreCase)
 	{
 		if (aText == null) return;
 		this.criteria = StringUtil.trimQuotes(aText);

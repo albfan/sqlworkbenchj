@@ -60,7 +60,7 @@ public class ServerSideTableSearchPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.EAST;
-    gridBagConstraints.insets = new Insets(0, 5, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 0, 0, 2);
     add(columnFunction, gridBagConstraints);
 
     likeLabel.setText("LIKE");
@@ -94,7 +94,7 @@ public class ServerSideTableSearchPanel
 
 	public TableDataSearcher getSearcher()
 	{
-		searcher.setCriteria(searchText.getText());
+		searcher.setCriteria(searchText.getText(), false);
 		searcher.setColumnFunction(columnFunction.getText());
 		return searcher;
 	}

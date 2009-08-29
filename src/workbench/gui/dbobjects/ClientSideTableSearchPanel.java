@@ -15,6 +15,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.KeyListener;
 import java.util.List;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -42,6 +43,7 @@ public class ClientSideTableSearchPanel
 	implements TableSearchCriteriaGUI
 {
 	private JTextField searchText;
+	private JCheckBox ignoreCase;
 	private JComboBox comparatorDropDown;
 	private ClientSideTableSearcher searcher;
 
@@ -66,7 +68,7 @@ public class ClientSideTableSearchPanel
     constraints = new GridBagConstraints();
     constraints.gridx = 0;
     constraints.gridy = 0;
-    constraints.insets = new Insets(0, 2, 0, 2);
+    constraints.insets = new Insets(0, 0, 0, 2);
     add(lbl, constraints);
 
 		comparatorDropDown = new JComboBox();
@@ -98,6 +100,16 @@ public class ClientSideTableSearchPanel
     constraints.weightx = 1.0;
     constraints.insets = new Insets(0, 2, 0, 5);
     add(searchText, constraints);
+
+		ignoreCase = new JCheckBox(ResourceMgr.getString("LblFilterIgnoreCase"));
+    constraints = new GridBagConstraints();
+    constraints.gridx = 3;
+    constraints.gridy = 0;
+    constraints.fill = GridBagConstraints.NONE;
+    constraints.weightx = 0;
+    constraints.insets = new Insets(0, 4, 0, 2);
+    add(ignoreCase, constraints);
+
 	}
 
 	private ColumnComparator getComparator()
@@ -122,7 +134,7 @@ public class ClientSideTableSearchPanel
 	{
 		// Comparator must be defined before setting the criteria!
 		searcher.setComparator(getComparator());
-		searcher.setCriteria(searchText.getText());
+		searcher.setCriteria(searchText.getText(), ignoreCase.isSelected());
 		return searcher;
 	}
 
@@ -130,11 +142,13 @@ public class ClientSideTableSearchPanel
 	{
 		props.setProperty(prefix + ".clientsearch.criteria", this.searchText.getText());
 		props.setProperty(prefix + ".clientsearch.comparator", getComparator().getClass().getName());
+		props.setProperty(prefix + ".clientsearch.ignorecase", ignoreCase.isSelected());
 	}
 
 	public void restoreSettings(String prefix, PropertyStorage props)
 	{
 		searchText.setText(props.getProperty(prefix + ".clientsearch.criteria", ""));
+		ignoreCase.setSelected(props.getBoolProperty(prefix + ".clientsearch.ignorecase", true));
 		String compClass = props.getProperty(prefix + ".clientsearch.comparator", null);
 		if (StringUtil.isNonBlank(compClass))
 		{

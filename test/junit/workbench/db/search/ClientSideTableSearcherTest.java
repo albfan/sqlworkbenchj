@@ -76,7 +76,7 @@ public class ClientSideTableSearcherTest
 	{
 		ClientSideTableSearcher searcher = new ClientSideTableSearcher();
 		searcher.setConnection(con);
-		searcher.setCriteria("dent");
+		searcher.setCriteria("dent", true);
 		List<TableIdentifier> tables = CollectionUtil.arrayList(
 			new TableIdentifier("PERSON"),
 			new TableIdentifier("SHIP")
@@ -94,7 +94,7 @@ public class ClientSideTableSearcherTest
 		assertEquals(1, searchResult.get(0).getRowCount());
 		assertEquals(0, searchResult.get(1).getRowCount());
 
-		searcher.setCriteria("2");
+		searcher.setCriteria("2", true);
 		searcher.search();
 		searchResult = consumer.getResults();
 		assertNotNull(searchResult);
@@ -106,7 +106,7 @@ public class ClientSideTableSearcherTest
 		tables = CollectionUtil.arrayList(new TableIdentifier("DOCUMENT"));
 		searcher.setTableNames(tables);
 		searcher.setExcludeLobColumns(true);
-		searcher.setCriteria("stuff");
+		searcher.setCriteria("stuff", true);
 		searcher.search();
 
 		searchResult = consumer.getResults();

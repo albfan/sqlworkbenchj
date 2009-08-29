@@ -47,6 +47,7 @@ public class WbGrepData
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 	public static final String PARAM_EXPRESSION = "searchValue";
 	public static final String PARAM_EXCLUDE_LOBS = "excludeLobs";
+	public static final String PARAM_IGNORE_CASE = "ignoreCase";
 
 	public static final String PARAM_COMPARATOR = "compareType";
 	
@@ -65,6 +66,7 @@ public class WbGrepData
 		cmdLine.addArgument(PARAM_TYPES);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
 		cmdLine.addArgument(PARAM_COMPARATOR, CollectionUtil.arrayList("equals", "startsWith", "contains", "matches"));
 	}
@@ -128,6 +130,7 @@ public class WbGrepData
 		searcher.setConnection(currentConnection);
 		searcher.setTableNames(tables);
 
+		boolean ignoreCase = cmdLine.getBoolean(PARAM_IGNORE_CASE, true);
 		String comparatorType = cmdLine.getValue(PARAM_COMPARATOR);
 		if (StringUtil.isBlank(comparatorType))
 		{
@@ -152,7 +155,7 @@ public class WbGrepData
 		}
 		searcher.setComparator(comp);
 		searcher.setConsumer(this);
-		searcher.setCriteria(searchValue);
+		searcher.setCriteria(searchValue, ignoreCase);
 
 		if (rowMonitor != null)
 		{

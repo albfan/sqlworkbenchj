@@ -34,14 +34,14 @@ public class RowDataSearcher
 	private ColumnExpression filterExpression;
 	private TextRowDataConverter converter;
 	
-	public RowDataSearcher(String searchValue, ColumnComparator comp)
+	public RowDataSearcher(String searchValue, ColumnComparator comp, boolean ignoreCase)
 	{
 		if (comp == null)
 		{
 			comp = new ContainsComparator();
 		}
 		filterExpression = new ColumnExpression("*", comp, searchValue);
-		filterExpression.setIgnoreCase(true);
+		filterExpression.setIgnoreCase(ignoreCase);
 		converter = new TextRowDataConverter();
 	}
 

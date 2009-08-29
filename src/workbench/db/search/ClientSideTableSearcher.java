@@ -206,7 +206,7 @@ public class ClientSideTableSearcher
 		this.comparator = comp;
 	}
 
-	public void setCriteria(String search)
+	public void setCriteria(String search, boolean ignoreCase)
 	{
 		if (StringUtil.isBlank(search)) return;
 
@@ -219,7 +219,7 @@ public class ClientSideTableSearcher
 		{
 			searchString = searchString.substring(0, searchString.length() - 2);
 		}
-		searcher = new RowDataSearcher(searchString, comparator);
+		searcher = new RowDataSearcher(searchString, comparator, ignoreCase);
 	}
 
 	public void setConsumer(TableSearchConsumer searchConsumer)
