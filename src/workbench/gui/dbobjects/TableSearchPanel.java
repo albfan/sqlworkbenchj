@@ -395,7 +395,7 @@ public class TableSearchPanel
 	{
 		int loc = props.getIntProperty(prefix + ".divider",200);
 		this.jSplitPane1.setDividerLocation(loc);
-		this.serverSideSearch.setSelected(props.getBoolProperty(prefix + ".serversearch", true));
+		this.serverSideSearch.setSelected(props.getBoolProperty(prefix + ".serversearch", false));
 		if (clientSearcherCriteria != null)
 		{
 			clientSearcherCriteria.restoreSettings(prefix, props);
