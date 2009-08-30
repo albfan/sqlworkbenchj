@@ -121,6 +121,31 @@ public class ClientSideTableSearcherTest
 		assertNotNull(searchResult);
 		assertEquals(1, searchResult.size());
 		assertEquals(1, searchResult.get(0).getRowCount());
+
+
+		tables = CollectionUtil.arrayList(
+			new TableIdentifier("PERSON"),
+			new TableIdentifier("SHIP")
+		);
+		searcher.setCriteria("dent", false);
+		searcher.setTableNames(tables);
+		searcher.search();
+		searchResult = consumer.getResults();
+		assertNotNull(searchResult);
+		assertEquals(2, searchResult.size());
+		assertEquals(0, searchResult.get(0).getRowCount());
+		assertEquals(0, searchResult.get(1).getRowCount());
+
+		tables = CollectionUtil.arrayList(
+			new TableIdentifier("PERSON")
+		);
+		searcher.setTableNames(tables);
+		searcher.setCriteria("Dent", false);
+		searcher.search();
+		searchResult = consumer.getResults();
+		assertNotNull(searchResult);
+		assertEquals(1, searchResult.size());
+		assertEquals(1, searchResult.get(0).getRowCount());
 	}
 
 	private class SearchConsumer

@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
+import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
 import workbench.db.WbConnection;
@@ -160,11 +161,19 @@ public class ClientSideTableSearcher
 			result.setGeneratingSql(explain + sql);
 			result.setResultName(table.getTableName());
 			result.setUpdateTableToBeUsed(table);
-			
+
+			boolean trimCharData = false;
+			ConnectionProfile prof = this.connection.getProfile();
+			if (prof != null)
+			{
+				trimCharData = prof.getTrimCharData();
+			}
+
 			while (rs.next())
 			{
 				if (cancelSearch) break;
 				RowData row = new RowData(info.getColumnCount());
+				row.setTrimCharData(trimCharData);
 				row.read(rs, info);
 				if (searcher.isSearchStringContained(row, info))
 				{
