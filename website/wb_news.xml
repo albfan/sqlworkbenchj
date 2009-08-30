@@ -14,6 +14,57 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (104.8) released</title>
+      <description>        <![CDATA[<p>Changes from build 104.7 to build 104.8</p><p>Enhancements</p><ul>
+<li>A new command WbMode is available which can change the "read only" and "confirm updates" setting for the current connection without modifying the underlying connection profile.</li>
+<li>Values for non-Standard datatypes can now be edited in the result set provided the DBMS supports some kind of function of cast to convert a string literal to that datatype. Default casts for the following PostgreSQL datatypes have been added: inet, cidr, macaddr</li>
+<li>A new help menu is available to display the online manual for the current DBMS. Default configurations (URLs) for PostgreSQL, Oracle, H2, HSQLDB, MySQL and Microsoft SQL Server have been added.</li>
+</ul><p>Bug Fixes</p><ul>
+<li>Exporting a table's data from within the table list in the DbExplorer was no longer working.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-104.8</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 27 Aug 2009 19:58:56 +0200</pubDate>
+    </item>
+    <item>
+      <title>New development build (104.7) released</title>
+      <description>        <![CDATA[<p>Changes from build 104.6 to build 104.7</p><p>Enhancements</p><ul>
+<li>A new command WbGrepSource is available to search the source code of all database objects for specific values (patterns). A GUI for this is also available at "Tools -&gt; Search in object source".</li>
+<li>The table search panel can now search with more sophisticated conditions. This is done by searching in the application rather than using a LIKE condition in a SELECT query. Both search types are available in the "Search Table Data" tab of the DbExplorer. The functionality of the client side search is now also available through the new Workbench command WbGrepData</li>
+<li>Added support for SQL Server TYPEs in DbExplorer</li>
+</ul><p>Bug Fixes</p><ul>
+<li>The default fetch size of a connection profile could not be reset (empty).</li>
+</ul>
+
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-104.7</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 12 Aug 2009 21:59:31 +0200</pubDate>
+    </item>
+    <item>
+      <title>New development build (104.6) released</title>
+      <description>        <![CDATA[<p>Changes from build 104.5 to build 104.6</p><p>Enhancements</p><ul>
+<li>The default label used for new tabs can now be configured using the property workbench.gui.tabs.defaultlabel in workbench.settings.</li>
+<li>Added support for Postgres DOMAINs and ENUMs in DbExplorer</li>
+<li>The text and background color for the editor, the message area and the data tables can now be configured</li>
+</ul><p>Bug Fixes</p><ul>
+<li>Fixed the autocompletion if a table was specified using schema.something.</li>
+</ul>
+
+
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-104.6</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Thu, 06 Aug 2009 19:09:52 +0200</pubDate>
+    </item>
+    <item>
       <title>New development build (104.5) released</title>
       <description>        <![CDATA[<p>Changes from build 104.4 to build 104.5</p><p>Enhancements</p><ul>
 <li>A new menu item to close all result tabs at once is available.</li>
@@ -21,6 +72,9 @@
 <li>Shortcut keys which involved the Enter could not be defined.</li>
 <li>The Save As dialog to save result data now only checks for the update table and primary keys if needed.</li>
 </ul>
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -40,6 +94,9 @@
 <li>When using WbImport with -header=false but no column definitions, the import would fail if the table had more columns than the import file. The additional columns of the table are now ignored as in previous versions.</li>
 </ul>
 
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -57,6 +114,9 @@
 <li>When re-ordering the columns using drag-and-drop and then displaying the single-record dialog, the content of the columns was mixed up.</li>
 <li>When re-ordering the columns using drag-and-drop, the order was reset when changing data in the result.</li>
 </ul>
+
+
+
 
 
 ]]>
@@ -84,6 +144,9 @@
 
 
 
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -102,6 +165,9 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
+
+
 
 
 
@@ -181,6 +247,9 @@
 
 
 
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -214,6 +283,9 @@
 
 
 
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -228,6 +300,9 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
+
 
 
 
@@ -276,6 +351,9 @@
 
 
 
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -292,6 +370,9 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
+
 
 
 
@@ -355,6 +436,9 @@
 
 
 
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -370,6 +454,9 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
+
 
 
 
@@ -441,6 +528,9 @@
 
 
 
+
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -457,6 +547,9 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
+
+
 
 
 

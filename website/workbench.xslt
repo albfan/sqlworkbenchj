@@ -297,11 +297,11 @@
   </xsl:template>
 
   <xsl:template match="zip-link">
-    <a href="Workbench-Build{$buildNumber}.zip">Download stable release</a>
+    <a href="Workbench-Build{$buildNumber}.zip">Download generic package for all systems</a>
   </xsl:template>
 
   <xsl:template match="mac-link">
-    <a href="Workbench-Build{$buildNumber}-Mac.tgz">Download for Mac</a>
+    <a href="Workbench-Build{$buildNumber}-Mac.tgz">Download package for MacOS</a>
   </xsl:template>
 
   <xsl:template match="build-number">

@@ -39,6 +39,7 @@
       <li>Reformatting (Pretty-Print) of SQL Statements (<image-link title="SQL Formatter" name="SqlFormat.png">Screenshot</image-link>)</li>
       <li>Full support for BLOB data in query results, SQL statements, export and import. <a href="blob_example.html">Read more...</a></li>
       <li>Select rows from related tables according to their foreign key definitions (<image-link title="Select child rows" name="child_rows.png">Screenshot1</image-link> <image-link title="Select parent rows" name="parent_rows.png">Screenshot2</image-link>).<br/></li>
+      <li>Search text in procedure, view and other sources using a <a href="manual/wb-commands.html#command-search-source">SQL command</a> or a GUI (<image-link title="Search object source" name="objectsearcher.png">Screenshot</image-link>)</li>
       <li><a href="manual/wb-commands.html#command-schema-diff">Compare</a> two database schemas for differences. The XML output can be transformed into the approriate SQL ALTER statements using <a href="xslt.html">XSLT</a></li>
       <li><a href="manual/wb-commands.html#command-data-diff">Compare the data</a> of two database and generate the necessary SQL statements to migrate one to the other.</li>
       <li>Copy data directly between to database servers using a <a href="manual/wb-commands.html#command-copy">SQL command</a> or a GUI (<image-link title="Data Pumper" name="DataPumper.png">Screenshot</image-link>)</li>
@@ -46,7 +47,7 @@
       <li>Variable substitution in SQL statements including smart prompting for values (can be combined with Makros)</li>
       <li>Auto completion for tables and columns in SQL statements (<image-link title="Auto-completion" name="completion.png">Screenshot</image-link>)</li>
       <li>All SQL Scripts (including Workbench specific commands) can be run in <a href="manual/using-scripting.html">batch mode</a></li>
-      <li>A simple interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
+      <li>An interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
       <li>Support for pluggable Look &amp; Feels (e.g. <a href="http://www.jgoodies.com/freeware/looks/index.html">JGoodies Looks</a>)</li>
       <li>SQLWorkbench/J is <b>free</b> (<a href="manual/workbench-manual.html#license">License agreement</a>)</li>
     </ul>
@@ -222,25 +223,32 @@ VALUES
                 This application requires Java 5 (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
             </p>
         <p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
-          The support for Java 5 will be removed at the end of this year when Java 5 itself will be de-supported by Sun.
+          Build 105 is the last build to support Java 5. Starting with the next (dev) build, Java 6 will be required.
         </p>
-        <h3>Stable release</h3>
-        <p>Current stable release: Build <build-number/>, <build-date/> (<a href="history.html">Release History</a>)
+        <h3 style="margin-top:25px">Stable release</h3>
+        <p>
+          Current stable release: Build <build-number/>, <build-date/> (<a href="history.html">Release History</a>)
         </p>
+        <p>
+          The generic package contains the jar file, the manual (HTML and PDF) and the shell scripts for Linux
+          to start the application. It also contains the Windows<SUP>&reg;</SUP> <a href="manual/install.html#launcher-using">launcher</a>
+          and sample <a href="xslt.html">XSLT</a> scripts.
+        </p>
+        <p>
+          The Mac package is suitable to be extracted on the Mac desktop and contains the jar file, a launcher
+          for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package.
+        </p>
+        
         <ul>
             <li><zip-link/></li>
             <li><mac-link/></li>
             <li><source-link/></li>
         </ul>
-        <p>
-          Looking for a free entity realationship modeling tool? Try <a href="http://www.sqlpower.ca/page/architect">Power*Architect</a>.
-        </p>
-        <p>
-          The release archive contains the needed binaries, the manual in HTML and PDF format and some sample XSLT
-          scripts.
-        </p>
         <p>You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases</p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
+        <p>
+          Looking for a free entity relationship modeling tool? Try <a href="http://www.sqlpower.ca/page/architect">Power*Architect</a>.
+        </p>
         <p><a style="color:red" href="vista.html">A note to Windows Vista users</a>.</p>
         <dev-build/>
     </content>
