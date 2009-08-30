@@ -5,6 +5,12 @@
 
   <entry dev-build="9" type="enh">
     <description>
+      Added support for H2 domains and constants
+    </description>
+  </entry>
+
+  <entry dev-build="9" type="enh">
+    <description>
       For Postgres, if a SEQUENCE is tied to a column, this is now shown in the
       sequence's source and a comment is added for non serial columns in the
       table's source.
@@ -24,7 +30,7 @@
       the underlying connection profile.
     </description>
   </entry>
-  
+
   <entry dev-build="8" type="enh">
     <description>
       Values for non-Standard datatypes can now be edited in the result set
@@ -37,7 +43,7 @@
   <entry dev-build="8" type="enh">
     <description>
       A new help menu is available to display the online manual for the current DBMS.
-      Default configurations (URLs) for PostgreSQL, Oracle, H2, HSQLDB, MySQL and 
+      Default configurations (URLs) for PostgreSQL, Oracle, H2, HSQLDB, MySQL and
       Microsoft SQL Server have been added.
     </description>
   </entry>
@@ -180,11 +186,11 @@
 
   <entry dev-build="5" type="fix">
     <description>
-      The Save As dialog to save result data now only checks for the update table and 
-      primary keys if needed. 
+      The Save As dialog to save result data now only checks for the update table and
+      primary keys if needed.
     </description>
   </entry>
-  
+
   <entry dev-build="4" type="fix">
     <description>
       Using PostgreSQL's DELETE ... RETURNING did not work.

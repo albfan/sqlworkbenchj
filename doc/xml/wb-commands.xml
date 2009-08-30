@@ -1,46 +1,46 @@
 
 <section id="wb-commands">
   <title>Other &wb-productname; specific commands</title>
-  
+
 	<para>
-		In addtion to the <link linkend="command-export">WbExport</link>, 
+		In addtion to the <link linkend="command-export">WbExport</link>,
 		<link linkend="command-import">WbImport</link> and <link linkend="command-import">WbCopy</link>
 		commands, &wb-productname; implements a set of additional SQL commands that are not part
 		of the SQL standard. These commands can be used like any other SQL command
 		(such as <literal>UPDATE</literal> inside &wb-productname;, i.e. inside the editor
 		or as part of a SQL script that is run through &wb-productname; in <link linkend="using-scripting">batch mode</link>.
 	</para>
-	
+
 	<para>
-		As those commands are implemented by &wb-productname; you will not be able to 
-		use them when running your SQL scripts using a different client program 
+		As those commands are implemented by &wb-productname; you will not be able to
+		use them when running your SQL scripts using a different client program
 		(e.g. <literal>psql</literal>, SQL*Plus or <literal>phpmyadmin</literal>.
 	</para>
-	
+
   <section id="command-schema-report">
     <title>Create a report of the database objects - WbReport</title>
-    
+
     <para>
       Creates an XML report of selected tables. This report could be used
       to generate an HTML documentation of the database (e.g. using the <link linkend="command-xslt">XSLT</link>
       command). This report can also be generated from within the <link linkend="dbexplorer">Database Object Explorer</link>
     </para>
-		
+
     <para>
       The resulting XML file can  be transformed into a HTML documentation of your database schema.
       Sample stylesheets can be downloaded from   <ulink url="http://www.sql-workbench.net/xstl.html"/>.
       If you have XSLT stylsheets that you would like to share, please send them to
       <email>support@sql-workbench.net</email>.
     </para>
-    
+
     <note><para>
       To see table and column comments with an Oracle database, you need to
       <link linkend="oracle-enable-remarks">enable remarks reporting</link> for the JDBC
       driver, otherwise the driver will not return comments.
     </para></note>
-    
+
     <para>The command supports the following parameters:</para>
-    
+
     <informaltable frame="all">
       <tgroup cols="2" align="left">
 			<colspec colname="c1" colwidth="4cm" />
@@ -51,7 +51,7 @@
 					<entry>Description</entry>
 				</row>
 			</thead>
-	
+
 			<tbody valign="top">
 				<row>
 					<entry>-file</entry>
@@ -83,7 +83,7 @@
 				</row>
 				<row>
 					<entry>-includeTableGrants</entry>
-					<entry>If tables are included in the output, the grants for each table can also be included with 
+					<entry>If tables are included in the output, the grants for each table can also be included with
 						this parameter. The default value is <literal>false</literal>.
 					</entry>
 				</row>
@@ -102,8 +102,8 @@
 				<row>
 					<entry>-reportTitle</entry>
 					<entry>
-						Defines the title for the generated XML file. The specified title is written 
-						into the tag <literal>&lt;report-title&gt;</literal> and can be used when 
+						Defines the title for the generated XML file. The specified title is written
+						into the tag <literal>&lt;report-title&gt;</literal> and can be used when
 						transforming the XML e.g. into a HTML file.
 					</entry>
 				</row>
@@ -119,27 +119,27 @@
       </tgroup>
     </informaltable>
   </section>
-  
+
   <section id="command-schema-diff">
     <title>Compare two database schemas - WbSchemaDiff</title>
-		
+
     <para>The <literal>WbSchemaDiff</literal> analyzes two schemas (or a list of tables)
       and outputs the differences between those schemas as an XML file. The XML file
       describes the changes that need to be applied to the target schema to have
       the same structure as the reference schema, e.g. modify column definitions,
       remove or add tables, remove or add indexes.
     </para>
-		
+
     <para>
 			The output is intended to be transformed using XSLT (e.g. with the
       <link linkend="command-xslt">XSLT Command</link>).
-			
-      Sample XSLT transformations can be found on the 
+
+      Sample XSLT transformations can be found on the
 			<ulink url="http://www.sql-workbench.net/xslt.html">&wb-productname; homepage</ulink>
     </para>
-		
+
     <para>The command supports the following parameters:</para>
-    
+
     <informaltable frame="all">
       <tgroup cols="2" align="left">
 			<colspec colname="c1" colwidth="4cm" />
@@ -150,7 +150,7 @@
 					<entry>Description</entry>
 				</row>
 			</thead>
-	
+
 			<tbody valign="top">
 				<row>
 					<entry>-referenceProfile</entry>
@@ -160,8 +160,8 @@
 				</row>
 				<row>
 					<entry>-referenceGroup</entry>
-					<entry>If the name of your reference profile is not unique across 
-						all profiles, you will need to specify the group in which the profile 
+					<entry>If the name of your reference profile is not unique across
+						all profiles, you will need to specify the group in which the profile
 						is located with this parameter.
 					</entry>
 				</row>
@@ -185,8 +185,8 @@
 				<row>
 					<entry>-targetGroup</entry>
 					<entry>
-						If the name of your target profile is not unique across 
-						all profiles, you will need to specify the group in which the profile 
+						If the name of your target profile is not unique across
+						all profiles, you will need to specify the group in which the profile
 						is located with this parameter.
 					</entry>
 				</row>
@@ -278,7 +278,7 @@
 						<para>
 							Select whether table and column (check) constraints
 							should be compared as well. &wb-productname; compares the constraint
-							definition (SQL) as stored in the database. 
+							definition (SQL) as stored in the database.
 						</para>
 						<para>
 							The default is to compare table constraints (<literal>true</literal>)
@@ -348,7 +348,7 @@
 				<row>
 					<entry>-includeSequences</entry>
 					<entry>
-						Select whether sequences should be compared as well. The default is 
+						Select whether sequences should be compared as well. The default is
 						to not compare sequences. Valid values are <literal>true</literal>, <literal>false</literal>.
 					</entry>
 				</row>
@@ -357,15 +357,15 @@
 					<entry>-useJdbcTypes</entry>
 					<entry>
 						<para>
-							Define whether to compare the DBMS specific data types, or 
-							the JDBC data type returned by the driver. When comparing 
+							Define whether to compare the DBMS specific data types, or
+							the JDBC data type returned by the driver. When comparing
 							tables from two different DBMS it is recommended to use
-							<literal>-useJdbcType=true</literal> as this will make the 
-							comparison a bit more DBMS-independent. When comparing e.g. 
-							Oracle vs. PostgreSQL a column defined as 
+							<literal>-useJdbcType=true</literal> as this will make the
+							comparison a bit more DBMS-independent. When comparing e.g.
+							Oracle vs. PostgreSQL a column defined as
 							<literal>VARCHAR2(100)</literal> in Oracle would be reported as beeing different
 							to a <literal>VARCHAR(100)</literal> column in PostgreSQL which is not really true
-							As both drivers ropert the column as java.sql.Types.VARCHAR, 
+							As both drivers ropert the column as java.sql.Types.VARCHAR,
 							they would be considered as identical when using <literal>-useJdbcType=true</literal>.
 						</para>
 						<para>
@@ -382,62 +382,62 @@
 					<entry>-xsltOutput</entry>
 					<entry>The name of the generated output file when applying the XSLT transformation.</entry>
 				</row>
-				
+
 			</tbody>
       </tgroup>
     </informaltable>
   </section>
-  
+
 	<section id="command-data-diff">
 
 		<title>Compare data across databases - WbDataDiff</title>
-		
+
 		<para>
 			The <literal>WbDataDiff</literal> command can be used to generate SQL scripts
-			that update a target database such that the data is identical to a reference 
-			database. This is similar to the <literal>WbSchemaDiff</literal> but compares 
+			that update a target database such that the data is identical to a reference
+			database. This is similar to the <literal>WbSchemaDiff</literal> but compares
 			the actual data in the tables rather than the table structure.
 		</para>
 		<para>
-			For each table the command will create up to three script files, depending on 
-			the needed statements to migrate the data. One file for <literal>UPDATE</literal> statements, 
+			For each table the command will create up to three script files, depending on
+			the needed statements to migrate the data. One file for <literal>UPDATE</literal> statements,
 			one file for <literal>INSERT</literal> statements and one file for <literal>DELETE</literal>
 			statements (if <literal>-includeDelete=true</literal> is specified)
 		</para>
-		
+
 		<note><para>
-			As this command needs to read every row from the reference and the target 
+			As this command needs to read every row from the reference and the target
 			table, processing large tables can take quite some time, especially if <literal>DELETE</literal>
 			statements should also be generated.
 		</para></note>
-		
+
 		<para>
-			<literal>WbDataDiff</literal> requires that all involved tables have a primary key 
-			defined. If a table does not have a primary key, <literal>WbDataDiff</literal> will 
+			<literal>WbDataDiff</literal> requires that all involved tables have a primary key
+			defined. If a table does not have a primary key, <literal>WbDataDiff</literal> will
 			stop the processing.
 		</para>
-		
+
 		<para>
-			To improve performance (a bit), the rows are retrieved in chunks from the 
+			To improve performance (a bit), the rows are retrieved in chunks from the
 			target table by dynamically constructing a WHERE clause for the rows
-			that were retrieved from the reference table. The chunk size 
+			that were retrieved from the reference table. The chunk size
 			can be controlled using the property <literal>workbench.sql.sync.chunksize</literal>
 			The chunk size defaults to 25. This is a conservative setting to avoid
-			problems with long SQL statements when processing tables that have 
+			problems with long SQL statements when processing tables that have
 			a PK with multiple columns.	If you know that your primary keys
-			consist only of a single column and the values won't be too long, you 
-			can increase the chunk size, possibly increasing the performace when 
+			consist only of a single column and the values won't be too long, you
+			can increase the chunk size, possibly increasing the performace when
 			generating the SQL statements. As most DBMS have a limit on the length
 			of a single SQL statement, be careful when setting the chunksize too high.
-			The same chunk size is applied when generating <literal>DELETE</literal> 
-			statements by the <link linkend="command-copy"><literal>WbCopy</literal></link> command, 
+			The same chunk size is applied when generating <literal>DELETE</literal>
+			statements by the <link linkend="command-copy"><literal>WbCopy</literal></link> command,
 			when <link linkend="copy-sync-delete">syncDelete</link>	mode is enabled.
 		</para>
-		
+
 		<para>
 			The command supports the following parameters:
 		</para>
-		
+
     <informaltable frame="all">
       <tgroup cols="2" align="left">
 			<colspec colname="c1" colwidth="4cm" />
@@ -448,20 +448,20 @@
 					<entry>Description</entry>
 				</row>
 			</thead>
-	
+
 			<tbody valign="top">
 				<row>
 					<entry>-referenceProfile</entry>
 					<entry>
-						The name of the connection profile for the reference connection. 
+						The name of the connection profile for the reference connection.
 						If this is not specified, then the current connection is used.
 					</entry>
 				</row>
 				<row>
 					<entry>-referenceGroup</entry>
 					<entry>
-						If the name of your reference profile is not unique across 
-						all profiles, you will need to specify the group in which the profile 
+						If the name of your reference profile is not unique across
+						all profiles, you will need to specify the group in which the profile
 						is located with this parameter. If the profile's name is unique
 						you can omit this parameter
 					</entry>
@@ -486,8 +486,8 @@
 				<row>
 					<entry>-targetGroup</entry>
 					<entry>
-						If the name of your target profile is not unique across 
-						all profiles, you will need to specify the group in which the profile 
+						If the name of your target profile is not unique across
+						all profiles, you will need to specify the group in which the profile
 						is located with this parameter.
 					</entry>
 				</row>
@@ -495,7 +495,7 @@
 				<row>
 					<entry>-file</entry>
 					<entry>
-						The filename of the main script file. The command creates two 
+						The filename of the main script file. The command creates two
 						scripts per table. One script named <literal>update_&lt;tablename&gt;.sql</literal>
 						that contains all needed <literal>UPDATE</literal> or <literal>INSERT</literal>
 						statements. The second script is named <literal>delete_&lt;tablename&gt;.sql</literal>
@@ -509,7 +509,7 @@
 					<entry>-referenceTables</entry>
 					<entry>
 						A (comma separated) list of tables that are the reference
-						tables, to be checked. You can specify the table with wildcards, 
+						tables, to be checked. You can specify the table with wildcards,
 						e.g. <literal>-referenceTables=P%</literal> to compare all tables
 						that start with the letter <literal>P</literal>.
 					</entry>
@@ -557,12 +557,12 @@
 
 				<row>
 					<entry>-checkDependencies</entry>
-					
+
 					<entry>
 						<para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
 						<para>
 							Sorts the generated scripts in order to respect foreign key dependencies
-							for deleting and inserting rows. 
+							for deleting and inserting rows.
 						</para>
 						<para>
 							The default is <literal>true</literal>.
@@ -588,7 +588,7 @@
 					<entry>-encoding</entry>
 					<entry>
 						The encoding to be used for the SQL scripts. The default depends
-						on your operating system. It will be displayed when you run 
+						on your operating system. It will be displayed when you run
 						<literal>WbDataDiff</literal> without any parameters. You can overwrite
 						the platform default with the property <literal>workbench.encoding</literal>
 						in the file <literal>workbench.settings</literal>
@@ -601,8 +601,8 @@
 						<para>Valid values: <literal>jdbc</literal>, <literal>ansi</literal>, <literal>dbms</literal>, <literal>default</literal></para>
 						<para>
 							Controls the format in which the values of DATE, TIME and TIMESTAMP columns
-							are written into the generated SQL statements. 
-							For a detailed description of the possible values, please refer to the 
+							are written into the generated SQL statements.
+							For a detailed description of the possible values, please refer to the
 							<link linkend="export-sql-literal-formats">WbExport</link>
 							command.
 						</para>
@@ -613,26 +613,26 @@
 					<entry>-ignoreColumns</entry>
 					<entry>
 						<para>
-							With this parameter you can define a list of column names that should 
-							not be considered when comparing data. You can e.g. exclude 
-							columns that store the last access time of a row, or the 
-							last update time if that should not be taken into account 
+							With this parameter you can define a list of column names that should
+							not be considered when comparing data. You can e.g. exclude
+							columns that store the last access time of a row, or the
+							last update time if that should not be taken into account
 							when checking for changes.
 						</para>
 					</entry>
 				</row>
 
 				&progress-parameter;
-					
+
 			</tbody>
       </tgroup>
     </informaltable>
-		
+
 		<simplesect id="data-diff-examples">
 			<title>WbDataDiff Examples</title>
 			<para>
-				Compare all tables between two connections, and write the output to the 
-				file <literal>migrate_staging.sql</literal>, but do not generate 
+				Compare all tables between two connections, and write the output to the
+				file <literal>migrate_staging.sql</literal>, but do not generate
 				<literal>DELETE</literal> statements.
 			</para>
 <programlisting>WbDataDiff -referenceProfile="Production"
@@ -641,16 +641,16 @@
            -includeDelete=false</programlisting>
 
 			<para>
-				Compare a list of matching tables between two databases and write the output to the 
+				Compare a list of matching tables between two databases and write the output to the
 				file <literal>migrate_staging.sql</literal> including <literal>DELETE</literal> statements.
 			</para>
-			
+
 <programlisting>WbDataDiff -referenceProfile="Production"
            -targetProfile="Staging"
            -referenceTables=person,address,person_address
            -file=migrate_staging.sql
            -includeDelete=true</programlisting>
-		
+
 		<para>
 			Compare three tables that are differently named in the target database and
 			ignore all columns (regardless in which table they appear) that are named
@@ -664,7 +664,7 @@
            -file=migrate_staging.sql
            -includeDelete=true</programlisting>
 		</simplesect>
-		
+
 	</section>
 
   <section id="command-search-source">
@@ -741,8 +741,8 @@
             <entry>
 						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
               <para>
-                Specifies if the search should done in a case sensitive manner ("ARTHUR" would
-                be different from "Arthur") or not.
+                When set to true, the comparison is be done case-insesitive ("ARTHUR" will
+                match "Arthur" or "arthur").
               </para>
               <para>
                 The default for this parameter is <literal>true</literal>.
@@ -812,6 +812,15 @@
       in the DbExplorer. A more detailed description on how the searching is performed is available that chapter.
     </para>
 
+    <para>
+      <note>
+        To search the data of a table a <literal>SELECT * FROM the_table</literal> is executed and
+        processed on a row by row basis. Although &wb-productname; only keeps one row at a time in memory
+        it is possible that the JDBC drivers caches the full result set in memory. Please see the chapter
+        <link linkend="troubleshooting">Common problems</link> for your DBMS to check if the JDBC driver you are using
+    caches result sets.
+      </note>
+    </para>
 		<para>
 			The command supports the following parameters:
 		</para>
@@ -833,6 +842,19 @@
             <entry>
               <para>
                 The value to be searched for
+              </para>
+            </entry>
+          </row>
+          <row>
+            <entry>-ignoreCase</entry>
+            <entry>
+						  <para>Valid values are <literal>true</literal>, <literal>false</literal>.</para>
+              <para>
+                When set to true, the comparison is be done case-insesitive ("ARTHUR" will
+                match "Arthur" or "arthur").
+              </para>
+              <para>
+                The default for this parameter is <literal>true</literal>.
               </para>
             </entry>
           </row>
@@ -898,13 +920,16 @@
             <entry>-excludeLobs</entry>
             <entry>
               <para>
-                If this parameter is set to true CLOB and BLOB columns will
-                not be retrieved at all. This also means that the content of
-                CLOB columns will not be searched. 
+                If this parameter is set to true, CLOB and BLOB columns will
+                not be retrieved at all, which is useful if you retrieve a lot
+                of rows from tables with columns of those type to reduce the memory
+                that is needed.
+              </para>
+              <para>
+                If this switch is set to <literal>true</literal> the content of CLOB columns will not be searched.
               </para>
             </entry>
           </row>
-
         </tbody>
       </tgroup>
     </informaltable>
@@ -912,8 +937,9 @@
 
   <section id="command-vardef">
     <title>Define a script variable - WbVarDef</title>
-    
-    <para>This defines an internal variable which is used for variable substitution during
+
+    <para>
+      This defines an internal variable which is used for variable substitution during
       SQL execution. Details can be found in the chapter <xref linkend="using-variables"/>.
     </para>
     <para>The syntax for defining a variable is: <literal>WbVarDef variable=value</literal></para>
@@ -929,23 +955,23 @@
       For details see see <link linkend="cmdline-vardef">Reading variables from a file</link>.
     </para>
   </section>
-  
+
   <section id="command-vardelete">
     <title>Delete a script variable - WbVarDelete</title>
-    
+
     <para>This removes an internal variable from the variable list.
       Details can be found in the chapter <xref linkend="using-variables"/>.
     </para>
   </section>
-  
+
   <section id="command-varlist">
     <title>Show defined script variables - WbVarList</title>
-    
+
     <para>This list all defined variables from the variable list.
       Details can be found in the chapter <xref linkend="using-variables"/>.
     </para>
   </section>
-  
+
   <section id="command-wbconfirm">
     <title>Confirm script execution - WbConfirm</title>
     <para>
@@ -963,16 +989,16 @@
       This command has no effect in batch mode.
     </para>
   </section>
-  
+
   <!--
 		<section id="command-wbcall">
 			<title>Run a stored procedure with OUT parameters - WbCall</title>
 			<para>
-				
+
 			</para>
 		</section>
 		-->
-		
+
   <section id="command-wbinclude">
     <title>Execute a SQL script - WbInclude (@)</title>
     <para>
@@ -981,7 +1007,7 @@
       a script. The format of the command is <literal>WbInclude -file=filename;</literal>.
       For DBMS other then MS SQL, the command can be abbreviated using the @ sign: <literal>@filename;</literal>
       is equivalent to <literal>WbInclude -file=filename;</literal>.
-      The called script way may also include other scripts. Relative filens (e.g. as parameters 
+      The called script way may also include other scripts. Relative filens (e.g. as parameters
       for &wb-productname; commands) in the script are always resolved to the directory
       where the script is located, not the current directory of the application.
     </para>
@@ -1008,7 +1034,7 @@
       delimiter used in your script.
     </para>
     <para>The command supports the following parameters:</para>
-    
+
     <informaltable frame="all">
       <tgroup cols="2" align="left">
 	<colspec colname="c1" colwidth="4cm" />
@@ -1019,13 +1045,13 @@
 	    <entry>Description</entry>
 	  </row>
 	</thead>
-	
+
 	<tbody valign="top">
 	  <row>
 	    <entry>-file</entry>
 	    <entry>The filename of the file to be included.</entry>
 	  </row>
-	  
+
 	  <row>
 	    <entry>-continueOnError</entry>
 	    <entry>
@@ -1035,46 +1061,46 @@
 	      will be halted on the first error. The default value is <literal>false</literal>
 	    </entry>
 	  </row>
-	  
+
 	  <row>
 	    <entry>-delimiter</entry>
 	    <entry>
-	      Specify the delimiter that is used in the script. This defaults 
+	      Specify the delimiter that is used in the script. This defaults
 	      to <literal>;</literal>. If you want to define a delimiter that
 	      will only be recognized when it's the only text in a line, append <literal>:nl</literal>
 	      to the value, e.g.: <literal>-delimiter=/:nl</literal>
 	    </entry>
 	  </row>
-	  
+
 	  <row>
 	    <entry>-encoding</entry>
 	    <entry>
-				Specify the encoding of the input file. If no encoding is specified, 
+				Specify the encoding of the input file. If no encoding is specified,
 				the default encoding for the current platform (operating system) is used.
 			</entry>
 	  </row>
-	  
+
 	  <row>
 	    <entry>-verbose</entry>
 	    <entry>Controls the logging level of the executed commands. <literal>-verbose=true</literal>
 	      has the same effect as adding a <literal>WbFeedback on</literal> inside
-	      the called script. <literal>-verbose=false</literal> has the same effect as adding 
+	      the called script. <literal>-verbose=false</literal> has the same effect as adding
 	      the statement <literal>WbFeedback off</literal> to the called script.</entry>
 	  </row>
-	  
+
 	</tbody>
       </tgroup>
     </informaltable>
-    
+
     <para>Execute <literal>my_script.sql</literal></para>
     <programlisting>@my_script.sql;</programlisting>
     <para>Execute <literal>my_script.sql</literal> but abort on the first error</para>
     <programlisting>wbinclude -file="my_script.sql" -continueOnError=false;</programlisting>
   </section>
-  
+
 	<section id="pk-handling">
 		<title>Handling tables or updateable views without primary keys</title>
-		
+
 		<section id="command-define-pk">
 			<title>Define primary key columns - WbDefinePK</title>
 			<para>
@@ -1165,9 +1191,9 @@ v_data=id1,id2</programlisting>
 				using the <literal>-file</literal> parameter.
 			</para>
 		</section>
-		
+
 	</section>
-	
+
   <section id="command-selectblob">
     <title>Extracting BLOB content - WbSelectBlob</title>
     <para>
@@ -1187,8 +1213,8 @@ FROM theTable
 WHERE id=42;</programlisting>
     <para>
       Even if you specify more then one column in the column list, &wb-productname; will only
-      use the first column. If the SELECT returns more then one row, then one 
-      outputfile will be created for each row. Additional files will be created with 
+      use the first column. If the SELECT returns more then one row, then one
+      outputfile will be created for each row. Additional files will be created with
       a counter indicating the row number from the result. In the above
       example, image.bmp, image_1.bmp, image_3.bmp and so on, would be created.
     </para>
@@ -1203,7 +1229,7 @@ WHERE id=42;</programlisting>
     </para>
 
   </section>
-	
+
   <section id="command-wbfeedback">
     <title>Control feedback messages - WbFeedback</title>
     <para>
@@ -1217,7 +1243,7 @@ WHERE id=42;</programlisting>
       is temporary and does not affect the global setting.
     </para>
   </section>
-  
+
   <section id="command-set">
     <title>Setting connection properties - SET</title>
     <para>
@@ -1241,7 +1267,7 @@ WHERE id=42;</programlisting>
 				command, but mimics the syntax of Oracle's SQL*Plus utility.
       </para>
     </section>
-    
+
     <section id="command-set-serveroutput">
       <title>SERVEROUTPUT</title>
       <para>
@@ -1249,14 +1275,14 @@ WHERE id=42;</programlisting>
 				command and <literal>SET serveroutput off</literal> is equivalent to <link linkend="command-dbms-output">DISABLEOUT</link> command.
       </para>
     </section>
-    
+
     <section id="command-set-autocommit">
       <title>AUTOCOMMIT</title>
       <para>
-				With the command <literal>SET autocommit ON/OFF</literal> autocommit can be turned on or 
+				With the command <literal>SET autocommit ON/OFF</literal> autocommit can be turned on or
 				off for the current connection. This is equivalent to setting the autocommit property
-				in the <link linkend="profile-jdbc-properties">connection profile</link> or toggling 
-				the state of the 
+				in the <link linkend="profile-jdbc-properties">connection profile</link> or toggling
+				the state of the
 				<menuchoice><guimenu>SQL</guimenu><guimenuitem>Autocommit</guimenuitem></menuchoice>
 				menu item.
       </para>
@@ -1342,14 +1368,14 @@ WHERE id=42;</programlisting>
     <programlisting>WbMode reset;</programlisting>
 
   </section>
-  
+
   <section id="command-desc">
     <title>Show table structure - DESCRIBE</title>
-    
+
     <para>
 			Describe shows the definition of the given table. It can be
-			abbreviated with DESC. The command expects the table name as a parameter. 
-			The output of the command will be several result tabs to show the table 
+			abbreviated with DESC. The command expects the table name as a parameter.
+			The output of the command will be several result tabs to show the table
 			structure, indexes and triggers (if present).
 			If the "described" object is a view, the message tab will additionally contain
 			the view source (if available).
@@ -1366,10 +1392,10 @@ WHERE id=42;</programlisting>
 			any supported DBMS.
 		</para></note>
   </section>
-  
+
   <section id="command-list">
     <title>List tables - WbList</title>
-    
+
     <para>
 			This command lists all available tables (including views and
       synonyms). This output is equivalent to the left part of the Database
@@ -1421,10 +1447,10 @@ WHERE id=42;</programlisting>
 		</para>
 
   </section>
-  
+
   <section id="command-listprocs">
     <title>List stored procedures - WbListProcs</title>
-    
+
     <para>
 			This command will list all stored procedures available to the
       current user. The output of this command is equivalent to the Database
@@ -1459,12 +1485,12 @@ WHERE id=42;</programlisting>
 
   <section id="command-listcat">
     <title>List catalogs - WbListCat</title>
-    
+
     <para>Lists the available catalogs or databases. The output of this
       command depends on the underlying JDBC driver and DBMS. For MS SQL
       Server this lists the available databases (which then could be changed
     by USE &#60;dbname&#62;)</para>
-    
+
     <para>
 			For Oracle this command returns nothing (as Oracle does not
 			implement the concept of catalogs)
@@ -1484,13 +1510,13 @@ WHERE id=42;</programlisting>
 			With the <literal>WbConnect</literal> command, the connection for the script that is
 			currently be exected can be changed.
 		</para>
-		
+
 		<para>
 			When this command is run in GUI mode, the connection is <emphasis role="bold">only</emphasis>
 			changed for the remainder of the script execution. Therefor at least one other statement should be
 			executed together with the <literal>WbConnect</literal> command. Either by running
 			the complete script of the editor or selecting the <literal>WbConnect</literal> command
-			together with other statements. Once the script has finished, the connection is closed 
+			together with other statements. Once the script has finished, the connection is closed
 			and the "global" connection (selected in the connect dialog) is active again. This also applies
 			to scripts that are run in <link linkend="using-scripting">batch mode</link> or
 			scripts that are started from within the console using
@@ -1498,7 +1524,7 @@ WHERE id=42;</programlisting>
 		</para>
 
 		<para>
-			When this command is entered directly in the commandline of the 
+			When this command is entered directly in the commandline of the
 			<link linkend="console-mode">console mode</link>, the current connection is closed and the
 			new connection is kept open until the application ends, or a new connection is established
 			using <literal>WbConnect</literal> on the commandline again.
@@ -1520,7 +1546,7 @@ WHERE id=42;</programlisting>
 				</thead>
 
 				<tbody valign="top">
-					
+
 				<row>
 					<entry>-profile</entry>
 					<entry>
@@ -1560,7 +1586,7 @@ WHERE id=42;</programlisting>
 			will connect using the profile name <literal>production</literal>, and is equivalent to
 		</para>
 		<programlisting>WbConnect -profile=production</programlisting>
-		
+
   </section>
 
   <section id="command-xslt">
@@ -1572,7 +1598,7 @@ WHERE id=42;</programlisting>
       the output files that are generated by the various &wb-productname; commands.
     </para>
     <para>Parameters for the XSLT command:</para>
-    
+
     <informaltable frame="all">
       <tgroup cols="2"  align="left">
         <colspec colname="c1" colwidth="4cm" />
