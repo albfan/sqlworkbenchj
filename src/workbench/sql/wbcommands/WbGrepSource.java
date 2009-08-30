@@ -51,6 +51,7 @@ public class WbGrepSource
 		cmdLine.addArgument(PARAM_SCHEMAS);
 		cmdLine.addArgument(PARAM_NAMES);
 		cmdLine.addArgument(PARAM_SEARCH_EXP);
+		cmdLine.addArgument(PARAM_USE_REGEX);
 		cmdLine.addArgument(PARAM_MATCHALL, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 	}

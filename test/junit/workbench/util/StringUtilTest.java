@@ -734,5 +734,11 @@ public class StringUtilTest
 		values = CollectionUtil.arrayList("$com");
 		found = StringUtil.containsWords(input, values, false, false, false);
 		assertTrue(found);
+
+		found = StringUtil.containsWords(
+			"Life, Universe\nand everything",
+			CollectionUtil.arrayList("^and"), false, false, true
+		);
+		assertTrue(found);
 	}
 }

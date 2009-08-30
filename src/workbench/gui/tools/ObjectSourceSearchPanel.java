@@ -32,6 +32,9 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
@@ -79,7 +82,6 @@ public class ObjectSourceSearchPanel
 
 	private WbTable results;
 	private DbObjectSourcePanel objectSource;
-	private DataStore emptyResult;
 	private WbThread searchThread;
 
 	public ObjectSourceSearchPanel()
@@ -88,9 +90,7 @@ public class ObjectSourceSearchPanel
 		rowMonitor = new GenericRowMonitor(this);
 		checkButtons();
 		results = new WbTable(true, false, false);
-		emptyResult = new ObjectResultListDataStore();
 		WbScrollPane scroll = new WbScrollPane(results);
-		results.setModel(new DataStoreTableModel(emptyResult), true);
 		results.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		results.getSelectionModel().addListSelectionListener(this);
 
@@ -104,12 +104,12 @@ public class ObjectSourceSearchPanel
 
 		Border b = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(5,5,5,5));
 		topPanel.setBorder(b);
+		clearSearch();
 	}
 
 	protected void clearSearch()
 	{
-		DataStoreTableModel model = new DataStoreTableModel(emptyResult);
-		results.setModel(model, true);
+		setModel(new ObjectResultListDataStore());
 	}
 
 	protected void startSearch()
@@ -200,6 +200,13 @@ public class ObjectSourceSearchPanel
 		}
 	}
 
+	protected void removeSourceColumn()
+	{
+		TableColumnModel tmodel = results.getColumnModel();
+		TableColumn source = tmodel.getColumn(ObjectResultListDataStore.COL_IDX_SOURCE);
+		tmodel.removeColumn(source);
+	}
+	
 	protected void setModel(final DataStore data)
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -209,6 +216,7 @@ public class ObjectSourceSearchPanel
 				DataStoreTableModel model = new DataStoreTableModel(data);
 				results.setModel(model, true);
 				results.adjustRowsAndColumns();
+				removeSourceColumn();
 			}
 		});
 	}
@@ -575,12 +583,16 @@ public class ObjectSourceSearchPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		int row = results.getSelectedRow();
-		final String source = results.getValueAsString(row, ObjectResultListDataStore.COL_IDX_SOURCE);
+		TableModel model = results.getModel();
+		
+		// As the source column has been removed from the view, the source
+		// has to be retrieved directly from the underlying table model
+		final CharSequence source = (CharSequence)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_SOURCE);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				objectSource.setText(source);
+				objectSource.setText(source == null ? "" : source.toString());
 				objectSource.setCaretPosition(0, false);
 			}
 		});

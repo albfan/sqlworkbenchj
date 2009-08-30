@@ -1253,7 +1253,13 @@ public class StringUtil
 			{
 				expression = "(" + StringUtil.quoteRegexMeta(search) + ")";
 			}
-			Pattern p = Pattern.compile(expression, ignoreCase ? Pattern.CASE_INSENSITIVE : 0);
+			int flags = ignoreCase ? Pattern.CASE_INSENSITIVE : 0;
+			if (useRegex)
+			{
+				flags += Pattern.MULTILINE;
+			}
+			
+			Pattern p = Pattern.compile(expression, flags);
 			Matcher m = p.matcher(toSearch);
 
 			boolean found = m.find();
