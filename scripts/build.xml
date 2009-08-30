@@ -167,8 +167,8 @@
            destdir="${build}"
            optimize="off"
            srcdir="${src}"
-           target="1.5"
-           source="1.5"
+           target="1.6"
+           source="1.6"
            encoding="ISO-8859-1">
       <exclude name="workbench/WbStarter.java"/>
       <classpath>
