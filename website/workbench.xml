@@ -56,7 +56,7 @@
       <li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
       <li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
       <li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
-      <li>Search for data across all (character) columns in several tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
+      <li>Search for data across all columns in several tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
     </ul>
     <p style="margin-top:10px"><a href="wb_news.xml">RSS Feed available</a></p>
     <!--
