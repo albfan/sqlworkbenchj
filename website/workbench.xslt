@@ -325,7 +325,7 @@
       <p>Current dev-build: <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/> (<a href="dev-history.html">Change Log</a>)</p>
       <ul>
         <li>
-          <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a>
+          <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a>&nbsp;<b>Requires Java 6!</b>
         </li>
         <li>
           <a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a>

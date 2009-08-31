@@ -14,6 +14,18 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New stable build (106) released</title>
+      <description>        <![CDATA[<p>Changes from build 105 to build 106</p><p>Bug Fixes</p><ul>
+<li>Connections to DB2 were no longer working</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-106</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 31 Aug 2009 18:29:51 +0200</pubDate>
+    </item>
+    <item>
       <title>New stable build (105) released</title>
       <description>        <![CDATA[<p>Changes from build 104 to build 105</p><p>Enhancements</p><ul>
 <li>Added support for H2 domains and constants</li>
@@ -60,6 +72,7 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -79,6 +92,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -95,6 +109,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The default fetch size of a connection profile could not be reset (empty).</li>
 </ul>
+
 
 
 
@@ -120,6 +135,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -135,6 +151,7 @@
 <li>Shortcut keys which involved the Enter could not be defined.</li>
 <li>The Save As dialog to save result data now only checks for the update table and primary keys if needed.</li>
 </ul>
+
 
 
 
@@ -166,6 +183,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -183,6 +201,7 @@
 <li>When re-ordering the columns using drag-and-drop and then displaying the single-record dialog, the content of the columns was mixed up.</li>
 <li>When re-ordering the columns using drag-and-drop, the order was reset when changing data in the result.</li>
 </ul>
+
 
 
 
@@ -222,6 +241,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -240,6 +260,7 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
 
 
 
@@ -331,6 +352,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -370,6 +392,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -384,6 +407,7 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
 
 
 
@@ -444,6 +468,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -460,6 +485,7 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
 
 
 
@@ -535,6 +561,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -550,6 +577,7 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
 
 
 
@@ -633,6 +661,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -649,6 +678,7 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
 
 
 

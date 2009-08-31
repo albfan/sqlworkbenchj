@@ -223,7 +223,7 @@ VALUES
                 This application requires Java 5 (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
             </p>
         <p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
-          Build 105 is the last build to support Java 5. Starting with the next (dev) build, Java 6 will be required.
+          Build 106 is the last build to support Java 5. Starting with the next (dev) build, Java 6 will be required.
         </p>
         <h3 style="margin-top:25px">Stable release</h3>
         <p>
@@ -253,6 +253,26 @@ VALUES
         <dev-build/>
     </content>
   </page>
+
+  <page name="download-archive" title="Old Versions" toc="small">
+    <title>SQL Workbench/J</title>
+    <subtitle>Release Archive</subtitle>
+    <content>
+      <p>Download archive for SQL Workbench/J</p>
+      <a href="archive/Workbench-Build95.zip">Build 95</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build95.zip">Source Code for Build 95</a><br/>
+      <a href="archive/Workbench-Build96.zip">Build 96</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build96.zip">Source Code for Build 96</a><br/>
+      <a href="archive/Workbench-Build97.zip">Build 97</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build97.zip">Source Code for Build 97</a><br/>
+      <a href="archive/Workbench-Build98.zip">Build 98</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build98.zip">Source Code for Build 98</a><br/>
+      <a href="archive/Workbench-Build99.zip">Build 99</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build99.zip">Source Code for Build 99</a><br/>
+      <a href="archive/Workbench-Build100.zip">Build 100</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build100.zip">Source Code for Build 100</a><br/>
+      <a href="archive/Workbench-Build101.zip">Build 101</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build101.zip">Source Code for Build 101</a><br/>
+      <a href="archive/Workbench-Build102.zip">Build 102</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build102.zip">Source Code for Build 102</a><br/>
+      <a href="archive/Workbench-Build103.zip">Build 103</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build103.zip">Source Code for Build 103</a><br/>
+      <a href="archive/Workbench-Build104.zip">Build 104</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build104.zip">Source Code for Build 104</a><br/>
+      <a href="archive/Workbench-Build105.zip">Build 105</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build105.zip">Source Code for Build 105</a><br/>
+    </content>
+  </page>
+
 
   <page name="history" title="Release History" toc="main">
     <title>SQL Workbench/J</title>

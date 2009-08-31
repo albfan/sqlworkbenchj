@@ -35,7 +35,7 @@
   </Company_Info>
   <Program_Info>
     <Program_Name>SQL Workbench/J</Program_Name>
-    <Program_Version>105</Program_Version>
+    <Program_Version>106</Program_Version>
     <Program_Type>Freeware</Program_Type>
     <Program_Release_Status>New Release</Program_Release_Status>
     <Program_Category_Class>Business::Databases &amp; Tools</Program_Category_Class>
@@ -93,7 +93,7 @@
       <Application_XML_File_URL>http://www.sql-workbench.net/workbench_pad.xml</Application_XML_File_URL>
     </Application_URLs>
     <Download_URLs>
-      <Primary_Download_URL>http://www.sql-workbench.net/Workbench-Build105.zip</Primary_Download_URL>
+      <Primary_Download_URL>http://www.sql-workbench.net/Workbench-Build106.zip</Primary_Download_URL>
       <Secondary_Download_URL></Secondary_Download_URL>
       <Additional_Download_URL_1></Additional_Download_URL_1>
       <Additional_Download_URL_2></Additional_Download_URL_2>
