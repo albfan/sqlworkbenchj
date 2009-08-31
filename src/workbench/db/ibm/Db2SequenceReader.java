@@ -42,7 +42,6 @@ public class Db2SequenceReader
 	public Db2SequenceReader(WbConnection conn)
 	{
 		this.connection = conn;
-		isHost = this.connection.getMetadata().getDbId().equals("db2h");
 	}
 
 	public List<SequenceDefinition> getSequences(String owner, String namePattern)
@@ -85,7 +84,7 @@ public class Db2SequenceReader
 	{
 		String sql = null;
 
-		if (isHost)
+		if (this.connection.getMetadata().getDbId().equals("db2h") || isHost)
 		{
 			// Host system
 			sql = "SELECT NAME, \n" +
