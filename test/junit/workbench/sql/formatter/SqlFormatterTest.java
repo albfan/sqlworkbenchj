@@ -36,6 +36,27 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testUpdate()
+		throws Exception
+	{
+		String sql = "update tableA set completed_Date =  ( select min(disconnect_Date) from tableB ) ";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+		String expected = "UPDATE tableA\n" +
+							"   SET completed_Date = (SELECT MIN(disconnect_Date) FROM tableB)";
+
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		sql = "update tableA set completed_Date =  ( select id from tableB ) ";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+		expected = "UPDATE tableA\n" +
+							"   SET completed_Date = (SELECT id FROM tableB)";
+		assertEquals(expected, formatted);
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+
+	}
 	public void testAsOf()
 		throws Exception
 	{

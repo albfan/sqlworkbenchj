@@ -531,7 +531,7 @@ public class SqlFormatter
 	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount)
 		throws Exception
 	{
-		SQLToken t = this.lexer.getNextToken();
+		SQLToken t = skipComments();
 		int bracketCount = currentBracketCount;
 		StringBuilder subSql = new StringBuilder(250);
 
