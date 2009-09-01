@@ -53,6 +53,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
@@ -222,6 +223,11 @@ public class DbMetadata
 		else if (productLower.indexOf("sql server") > -1)
 		{
 			this.isSqlServer = true;
+			if (SqlServerSynonymReader.supportsSynonyms(dbConnection))
+			{
+				synonymReader = new SqlServerSynonymReader(this);
+			}
+
 			if (SqlServerTypeReader.versionSupportsTypes(dbConnection))
 			{
 				extenders.add(new SqlServerTypeReader());
@@ -765,7 +771,7 @@ public class DbMetadata
 			TableIdentifier tbl = table.createCopy();
 			tbl.adjustCase(this.dbConnection);
 			tbl.checkIsQuoted(this);
-			TableIdentifier target = findTable(tbl, null);
+			TableIdentifier target = findObject(tbl);
 			if (target != null)
 			{
 				type = target.getType();
@@ -2304,6 +2310,11 @@ public class DbMetadata
 			List<String> addTypes = StringUtil.stringToList(additional, ",", true, true);
 			result.addAll(addTypes);
 
+			if (this.synonymReader != null)
+			{
+				result.add("SYNONYM");
+			}
+			
 			for (ObjectListExtender extender : extenders)
 			{
 				result.addAll(extender.supportedTypes());
