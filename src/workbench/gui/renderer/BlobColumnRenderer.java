@@ -16,16 +16,13 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.EventObject;
 import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
@@ -131,29 +128,6 @@ public class BlobColumnRenderer
 		return displayPanel;
 	}
 	
-	public boolean isCellEditable(EventObject e)
-	{
-		if (e instanceof MouseEvent)
-		{
-			MouseEvent evt = (MouseEvent)e;
-			this.currentTable = (WbTable)e.getSource();
-			
-			int clickedColumn = this.currentTable.columnAtPoint(evt.getPoint());
-			TableColumnModel model = this.currentTable.getColumnModel();
-			int columnOffset = 0;
-			for (int i = 0; i < clickedColumn; i++)
-			{
-				columnOffset += model.getColumn(i).getWidth();
-			}
-			TableColumn col = model.getColumn(clickedColumn);
-			int posInCol = ((int)evt.getPoint().getX() - columnOffset);
-			int buttonStart = (col.getWidth() - displayPanel.getButtonWidth());
-			boolean buttonClicked = (posInCol >= buttonStart);
-			return buttonClicked;
-		}
-		return false;
-	}
-	
 	public void setBackground(Color c)
 	{
 		this.displayPanel.setBackground(c);
@@ -180,6 +154,14 @@ public class BlobColumnRenderer
 		boolean ctrlPressed = WbAction.isCtrlPressed(e);
 		boolean shiftPressed = WbAction.isShiftPressed(e);
 		BlobHandler handler = new BlobHandler();
+
+		boolean allowEditing = true;
+		TableModel model = currentTable.getModel();
+		if (model instanceof DataStoreTableModel)
+		{
+			allowEditing = ((DataStoreTableModel)model).getAllowEditing();
+		}
+
 		if (ctrlPressed)
 		{
 			handler.showBlobAsText(currentValue);
@@ -190,20 +172,24 @@ public class BlobColumnRenderer
 		}
 		else
 		{
-			handler.showBlobInfoDialog(WbManager.getInstance().getCurrentWindow(), currentValue);
+			handler.showBlobInfoDialog(WbManager.getInstance().getCurrentWindow(), currentValue, !allowEditing);
 		}
-		File f = handler.getUploadFile();
-		if (f != null) 
+
+		if (allowEditing)
 		{
-			currentTable.setValueAt(f, currentRow, currentColumn);
-		}
-		else if (handler.isChanged())
-		{
-			currentTable.setValueAt(handler.getNewValue(), currentRow, currentColumn);
-		}
-		else if (handler.setToNull())
-		{
-			currentTable.setValueAt(null, currentRow, currentColumn);
+			File f = handler.getUploadFile();
+			if (f != null)
+			{
+				currentTable.setValueAt(f, currentRow, currentColumn);
+			}
+			else if (handler.isChanged())
+			{
+				currentTable.setValueAt(handler.getNewValue(), currentRow, currentColumn);
+			}
+			else if (handler.setToNull())
+			{
+				currentTable.setValueAt(null, currentRow, currentColumn);
+			}
 		}
 	}
 

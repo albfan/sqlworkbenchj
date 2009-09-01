@@ -389,7 +389,12 @@ public class DataStoreTableModel
 		}
 		else
 		{
-			return this.allowEditing;
+			// For BLOB columns the BlobHandler and BlobInfoDialog will
+			// check if this model allows editing.
+			// otherwise the blob dialog cannot be opened. Apparently
+			// JTable does not even route the clicked event to the button
+			// in the BlobColumnRenderer if the column is not editable.
+			return this.allowEditing || SqlUtil.isBlobType(getColumnType(column));
 		}
 	}
 
@@ -420,6 +425,10 @@ public class DataStoreTableModel
 		this.allowEditing = aFlag;
 	}
 
+	public boolean getAllowEditing()
+	{
+		return allowEditing;
+	}
 
 	/**
 	 * Clears the filter that is currently defined on the underlying

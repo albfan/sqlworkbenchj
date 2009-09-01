@@ -360,9 +360,9 @@ public class BlobHandler
 		return this.newValue;
 	}
 
-	public void showBlobInfoDialog(Frame parent, Object blobValue)
+	public void showBlobInfoDialog(Frame parent, Object blobValue, boolean readOnly)
 	{
-		BlobInfoDialog d = new BlobInfoDialog(parent, true);
+		BlobInfoDialog d = new BlobInfoDialog(parent, true, readOnly);
 		d.setBlobValue(blobValue);
 		d.setVisible(true);
 		this.uploadFile = d.getUploadedFile();
