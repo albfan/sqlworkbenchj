@@ -39,6 +39,7 @@ import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
+import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import workbench.db.ColumnIdentifier;
 import workbench.gui.WbSwingUtilities;
@@ -107,6 +108,17 @@ public class RecordFormPanel
 		});
 	}
 
+	public boolean isEditingAllow()
+	{
+		boolean allowEditing = true;
+		TableModel model = data.getModel();
+		if (model instanceof DataStoreTableModel)
+		{
+			allowEditing = ((DataStoreTableModel)model).getAllowEditing();
+		}
+		return allowEditing;
+	}
+	
 	public int getCurrentRow()
 	{
 		return currentRow;
@@ -150,6 +162,7 @@ public class RecordFormPanel
 
 		Dimension areaSize = new Dimension(fieldWidth, areaHeight);
 
+		boolean editable = isEditingAllow();
 		boolean showRequired = GuiSettings.getHighlightRequiredFields() && requiredColor != null;
 
 		for (int i=0; i < fieldDef.getColumnCount(); i++)
@@ -174,6 +187,7 @@ public class RecordFormPanel
 			if (SqlUtil.isMultiLineColumn(col))
 			{
 				JTextArea area = new JTextArea(new WbDocument());
+				area.setEditable(editable);
 				new TextComponentMouseListener(area);
 				area.setLineWrap(false);
 
@@ -199,6 +213,7 @@ public class RecordFormPanel
 			else
 			{
 				JTextField f = new JTextField(new WbDocument(), null, numChars);
+				f.setEditable(editable);
 				new TextComponentMouseListener(f);
 				inputControls[i] = f;
 				inputControls[i].setFont(displayFont);
@@ -550,7 +565,7 @@ public class RecordFormPanel
 		}
 		else
 		{
-			blobHandlers[column].showBlobInfoDialog(null, currentValue);
+			blobHandlers[column].showBlobInfoDialog(null, currentValue, !isEditingAllow());
 		}
 
 		//Object newValue = blobHandlers[column].getValueToUse();
