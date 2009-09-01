@@ -514,7 +514,7 @@ public class WbCopyTest
 
 			con.commit();
 
-			String sql = "wbcopy -sourceQuery='select firstname, nr, lastname from source_data where nr < 3' " +
+			String sql = "wbcopy -sourceQuery='select firstname, nr, lastname from source_data where nr < 3;' " +
 				"-targetTable=target_data " +
 				"-columns=tfirstname, tnr, tlastname";
 
