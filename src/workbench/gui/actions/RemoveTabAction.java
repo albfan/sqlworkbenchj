@@ -44,7 +44,7 @@ public class RemoveTabAction
 
 	public void executeAction(ActionEvent e)
 	{
-		client.removeTab();
+		client.removeCurrentTab();
 	}
 
 	public void stateChanged(ChangeEvent e)

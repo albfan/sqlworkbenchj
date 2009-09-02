@@ -22,6 +22,16 @@ import workbench.util.StringUtil;
  */
 public class GuiSettings
 {
+	public static boolean getShowTabCloseButton()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.display.tab.closebutton", false);
+	}
+
+	public static void setShowTabCloseButton(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.display.tab.closebutton", flag);
+	}
+	
 	public static int getMultiLineThreshold()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 250);

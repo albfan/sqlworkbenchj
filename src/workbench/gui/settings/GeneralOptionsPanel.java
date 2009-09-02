@@ -122,6 +122,7 @@ public class GeneralOptionsPanel
 		scrollTabs.setSelected(tabPolicy == JTabbedPane.SCROLL_TAB_LAYOUT);
 		confirmTabClose.setSelected(GuiSettings.getConfirmTabClose());
 		brushedMetal.setSelected(GuiSettings.getUseBrushedMetal());
+		showTabCloseButton.setSelected(GuiSettings.getShowTabCloseButton());
 	}
 
 	public void saveSettings()
@@ -129,6 +130,7 @@ public class GeneralOptionsPanel
 		Settings set = Settings.getInstance();
 
 		// General settings
+		GuiSettings.setShowTabCloseButton(showTabCloseButton.isSelected());
 		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
 		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
@@ -209,6 +211,7 @@ public class GeneralOptionsPanel
     scrollTabs = new JCheckBox();
     enableAnimatedIcon = new JCheckBox();
     confirmTabClose = new JCheckBox();
+    showTabCloseButton = new JCheckBox();
     jSeparator2 = new JSeparator();
     jSeparator3 = new JSeparator();
     pdfReaderPathLabel = new JLabel();
@@ -328,10 +331,12 @@ public class GeneralOptionsPanel
     brushedMetal.setToolTipText(ResourceMgr.getString("d_LblBrushedMetal")); // NOI18N
     brushedMetal.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 0, 1, 0);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(6, 15, 1, 0);
     jPanel2.add(brushedMetal, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
@@ -404,6 +409,19 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(6, 4, 5, 0);
     jPanel1.add(confirmTabClose, gridBagConstraints);
+
+    showTabCloseButton.setText(ResourceMgr.getString("LblShowTabClose")); // NOI18N
+    showTabCloseButton.setToolTipText(ResourceMgr.getString("d_LblShowTabClose")); // NOI18N
+    showTabCloseButton.setBorder(null);
+    showTabCloseButton.setHorizontalAlignment(SwingConstants.LEFT);
+    showTabCloseButton.setHorizontalTextPosition(SwingConstants.RIGHT);
+    showTabCloseButton.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(3, 4, 5, 0);
+    jPanel1.add(showTabCloseButton, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -493,6 +511,7 @@ public class GeneralOptionsPanel
   private JLabel pdfReaderPathLabel;
   private JCheckBox scrollTabs;
   private JTextField settingsfilename;
+  private JCheckBox showTabCloseButton;
   private JCheckBox showTabIndex;
   private JCheckBox singlePageHelp;
   private JCheckBox useEncryption;

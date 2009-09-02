@@ -116,6 +116,7 @@ import workbench.gui.actions.ShowMacroPopupAction;
 import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
+import workbench.gui.components.TabCloser;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.sql.PanelType;
@@ -139,7 +140,7 @@ public class MainWindow
 	extends JFrame
 	implements MouseListener, WindowListener, ChangeListener, DropTargetListener,
 						MacroChangeListener, DbExecutionListener, Connectable, PropertyChangeListener,
-						Moveable, RenameableTab
+						Moveable, RenameableTab, TabCloser
 {
 	private static final String DEFAULT_WORKSPACE = "%ConfigDir%/Default.wksp";
 	private static int instanceCount;
@@ -219,6 +220,10 @@ public class MainWindow
 
 		this.sqlTab.addChangeListener(this);
 		this.sqlTab.addMouseListener(this);
+		if (GuiSettings.getShowTabCloseButton())
+		{
+			sqlTab.showCloseButton(this);
+		}
 
 		updateTabPolicy();
 		this.addWindowListener(this);
@@ -1950,7 +1955,7 @@ public class MainWindow
 			int keep = (keepOne ? 1 : 0);
 			while (sqlTab.getTabCount() > keep)
 			{
-				// I'm not using removeTab() as that will also
+				// I'm not using removeCurrentTab() as that will also
 				// update the GUI and immediately check for a new
 				// connection which is not necessary when removing all tabs.
 				removeTab(keep, false);
@@ -2400,6 +2405,11 @@ public class MainWindow
 			this.sqlTab.setSelectedIndex(index);
 		}
 
+		if (sqlTab.getTabCount() > 0)
+		{
+			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
+		}
+
 		return sql;
 	}
 
@@ -2428,8 +2438,6 @@ public class MainWindow
 
 	public void setCurrentTabTitle(String newName)
 	{
-//		if (this.getCurrentPanel() instanceof DbExplorerPanel) return;
-
 		int index = this.sqlTab.getSelectedIndex();
 
 		if (newName != null)
@@ -2462,9 +2470,25 @@ public class MainWindow
 		this.closeTab(index);
 	}
 
+	/**
+	 * Checks if the current tab is locked, or if it is the
+	 * last tab that is open.
+	 * <br/>
+	 * This does not check if the user actually wants to close
+	 * the tab!
+	 * 
+	 * @return boolean if the current tab could be closed
+	 */
 	public boolean canCloseTab()
 	{
-		MainPanel panel = this.getCurrentPanel();
+		int index = sqlTab.getSelectedIndex();
+		return canCloseTab(index);
+	}
+
+	public boolean canCloseTab(int index)
+	{
+		if (index < 0) return false;
+		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return false;
 		if (panel.isLocked()) return false;
 
@@ -2482,15 +2506,14 @@ public class MainWindow
 		return (this.currentWorkspaceFile != null);
 	}
 
-	public void removeTab()
+	/**
+	 * Closes the currently active tab.
+	 * 
+	 * @see #closeTab(int)
+	 */
+	public void removeCurrentTab()
 	{
-		boolean confirm = GuiSettings.getConfirmTabClose();
 		int index = this.sqlTab.getSelectedIndex();
-		if (confirm)
-		{
-			boolean doClose = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgConfirmCloseTab"));
-			if (!doClose) return;
-		}
 		this.closeTab(index);
 	}
 
@@ -2586,12 +2609,14 @@ public class MainWindow
 	}
 
 	/**
-	 * Removes the tab at the give location. If the current profile
+	 * Removes the tab at the given location. If the current profile
 	 * uses a separate connection per tab, then a disconnect will be
 	 * triggered as well. This disconnect will be started in a
 	 * background thread.
+	 * <br/>
+	 * The user will not be
 	 */
-	protected void closeTab(int index)
+	public void closeTab(int index)
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
@@ -2640,16 +2665,10 @@ public class MainWindow
 
 			if (doDisconnect)
 			{
-//				LogMgr.logDebug("MainWindow.removeTab()", "Closing physical connection: " + conn.getId() + " for tab: " + index);
 				showStatusMessage(ResourceMgr.getString("MsgDisconnecting"));
 				ConnectionMgr.getInstance().disconnect(conn);
 				showStatusMessage("");
 			}
-//			else
-//			{
-//				LogMgr.logDebug("MainWindow.removeTab()", "Disconnect not necessary for tab " + index);
-//			}
-
 			this.panelMenus.remove(index);
 			this.sqlTab.remove(index);
 
@@ -2671,6 +2690,11 @@ public class MainWindow
 		if (newTab >= 0 && updateGUI)
 		{
 			this.tabSelected(newTab);
+		}
+
+		if (sqlTab.getTabCount() > 0)
+		{
+			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
 		}
 	}
 

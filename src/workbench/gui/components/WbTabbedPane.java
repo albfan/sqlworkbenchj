@@ -20,6 +20,7 @@ import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
@@ -43,6 +44,8 @@ public class WbTabbedPane
 {
 	private Moveable tabMover;
 	private int draggedTabIndex;
+	private boolean showCloseButton;
+	private TabCloser tabCloser;
 
 	public WbTabbedPane()
 	{
@@ -54,6 +57,40 @@ public class WbTabbedPane
 	{
 		super(placement);
 		init();
+	}
+
+	public void setCloseButtonEnabled(Component panel, boolean flag)
+	{
+		if (tabCloser == null) return;
+
+		int index = indexOfComponent(panel);
+		if (index == -1) return;
+		setCloseButtonEnabled(index, flag);
+	}
+	
+	public void setCloseButtonEnabled(int index, boolean flag)
+	{
+		if (tabCloser == null) return;
+		
+		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(index);
+		if (comp != null)
+		{
+			comp.setEnabled(flag);
+		}
+	}
+
+	public void showCloseButton(TabCloser closer)
+	{
+		tabCloser = closer;
+		showCloseButton = (closer != null);
+	}
+
+	public void closeButtonClicked(int index)
+	{
+		if (tabCloser != null && tabCloser.canCloseTab(index))
+		{
+			tabCloser.closeTab(index);
+		}
 	}
 
 	public int getTabHeight()
@@ -108,12 +145,27 @@ public class WbTabbedPane
 		return new Insets(0, 0, 0, 0);
 	}
 
-//	@Override
-//	public void insertTab(String title, Icon icon, Component component, String tip, int index)
-//	{
-//		super.insertTab(title, icon, component, tip, index);
-//		setTabComponentAt(index, new ButtonTabComponent(this));
-//	}
+	@Override
+	public void setTitleAt(int index, String title)
+	{
+		super.setTitleAt(index, title);
+		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(index);
+		if (comp != null)
+		{
+			comp.setTitle(title);
+		}
+	}
+
+	@Override
+	public void insertTab(String title, Icon icon, Component component, String tip, int index)
+	{
+		super.insertTab(title, icon, component, tip, index);
+		if (showCloseButton)
+		{
+			setTabComponentAt(index, new ButtonTabComponent(title, this));
+		}
+	}
+
 	/**
 	 * The empty override is intended, to give public access to the method
 	 */

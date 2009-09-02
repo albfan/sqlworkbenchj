@@ -312,6 +312,7 @@ public class SqlPanel
 		this.resultTab.setFocusable(false);
 		// The name of the component is used for the Jemmy GUI Tests
 		this.resultTab.setName("resultspane");
+		resultTab.enableDragDropReordering();
 
 		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
@@ -347,6 +348,11 @@ public class SqlPanel
 	{
 		this.locked = flag;
 		updateTabTitle();
+		Component c = getParent();
+		if (c instanceof WbTabbedPane)
+		{
+			((WbTabbedPane)c).setCloseButtonEnabled(this, !flag);
+		}
 	}
 
 	public boolean isLocked()
