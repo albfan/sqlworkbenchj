@@ -56,7 +56,11 @@ public class WbStarter
 
 		if (!versionIsOk)
 		{
-			String error = "Java 6 is required to run SQL Workbench/J (Found: " + version + ")";
+			String error = "Sorry, SQL Workbench/J requires Java 6, but " + version + " was found\n" + 
+				"Please upgrade to a recent Java version\n\n" +
+				"If you have Java 6 installed, please use the -jdk switch of the Windows launcher\n" +
+				"to specify the correct base directory or point the shell scripts to the correct binaries";
+			
 			System.err.println("*** Cannot run this application ***");
 			System.err.println(error);
 			try
