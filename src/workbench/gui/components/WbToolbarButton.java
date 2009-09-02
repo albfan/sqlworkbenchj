@@ -62,14 +62,6 @@ public class WbToolbarButton
 	private void init()
 	{
 		this.setMargin(MARGIN);
-
-		// The toolbar buttons in Java 1.5 are somewhat broken
-		// the distance between buttons is too small and the rollover
-		// effect does not work with the windows classic look and feel.
-		if (Settings.isJava5() && WbManager.getInstance().isWindowsClassic())
-		{
-			enableBasicRollover();
-		}
 	}
 	
 }

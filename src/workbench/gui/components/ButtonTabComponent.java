@@ -11,22 +11,14 @@
  */
 package workbench.gui.components;
 
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -42,53 +34,32 @@ public class ButtonTabComponent
 {
 	private final WbTabbedPane pane;
 	private final JLabel label;
-	private final JButton closeButton;
+	private final WbButton closeButton;
 	
 	public ButtonTabComponent(String title, final WbTabbedPane pane)
 	{
 		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
-		if (pane == null)
-		{
-			throw new NullPointerException("TabbedPane is null");
-		}
 		this.pane = pane;
 		setOpaque(false);
 
-		label = new JLabel()
-		{
-			@Override
-			public Insets getInsets()
-			{
-				return WbSwingUtilities.EMPTY_INSETS;
-			}
-		};
+		label = new JLabel();
 		label.setText(title);
+		setBorder(new EmptyBorder(1, 0, 0, 0));
+		label.setBorder(new EmptyBorder(0,0,0,3));
+		closeButton = new WbButton(ResourceMgr.getPng("closePanel"));
+		Dimension d = new Dimension(14, 15);
+		closeButton.setPreferredSize(d);
+		closeButton.setFocusable(false);
+		closeButton.enableToolbarRollover();
+		closeButton.addActionListener(this);
 		
 		add(label);
-		label.setBorder(new EmptyBorder(0, 0, 0, 2));
-		closeButton = new TabButton();
-		closeButton.addActionListener(this);
-		closeButton.setToolTipText(ResourceMgr.getString("TxtCloseTab"));
 		add(closeButton);
-	}
-
-	@Override
-	public Insets getInsets()
-	{
-		return WbSwingUtilities.EMPTY_INSETS;
 	}
 
 	public void setEnabled(boolean flag)
 	{
 		closeButton.setEnabled(flag);
-		if (flag)
-		{
-			closeButton.setToolTipText(ResourceMgr.getString("TxtCloseTab"));
-		}
-		else
-		{
-			closeButton.setToolTipText(null);
-		}
 	}
 	
 	public void setTitle(String title)
@@ -96,6 +67,11 @@ public class ButtonTabComponent
 		label.setText(title);
 	}
 
+	public void setIcon(Icon icon)
+	{
+		label.setIcon(icon);
+	}
+	
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
@@ -105,52 +81,7 @@ public class ButtonTabComponent
 			pane.closeButtonClicked(i);
 		}
 	}
-	
-	private class TabButton
-		extends JButton
-	{
-		public TabButton()
-		{
-			super(ResourceMgr.getPng("closePanel"));
-			Dimension d = new Dimension(14, 15);
-			setPreferredSize(d);
-			setMaximumSize(d);
-			setMinimumSize(d);
-			setFocusable(false);
-			setBorder(BorderFactory.createEtchedBorder());
-			setBorderPainted(false);
-			addMouseListener(buttonMouseListener);
-		}
 
-		@Override
-		public Insets getInsets()
-		{
-			return new Insets(2, 3, 3, 3);
-		}
-	}
-
-	private final static MouseListener buttonMouseListener = new MouseAdapter()
-	{
-		public void mouseEntered(MouseEvent e)
-		{
-			Component component = e.getComponent();
-			if (component instanceof AbstractButton)
-			{
-				AbstractButton button = (AbstractButton) component;
-				button.setBorderPainted(button.isEnabled());
-			}
-		}
-
-		public void mouseExited(MouseEvent e)
-		{
-			Component component = e.getComponent();
-			if (component instanceof AbstractButton)
-			{
-				AbstractButton button = (AbstractButton) component;
-				button.setBorderPainted(false);
-			}
-		}
-	};
 }
 
 

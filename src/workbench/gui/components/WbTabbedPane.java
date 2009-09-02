@@ -79,6 +79,17 @@ public class WbTabbedPane
 		}
 	}
 
+	@Override
+	public void setIconAt(int index, Icon icon)
+	{
+		super.setIconAt(index, icon);
+		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(index);
+		if (comp != null)
+		{
+			comp.setIcon(icon);
+		}
+	}
+
 	public void showCloseButton(TabCloser closer)
 	{
 		tabCloser = closer;

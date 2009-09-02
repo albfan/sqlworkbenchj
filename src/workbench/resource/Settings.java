@@ -133,18 +133,6 @@ public class Settings
 		this.removeObsolete();
 	}
 
-	public static boolean isJava5()
-	{
-		String version = System.getProperty("java.version", System.getProperty("java.runtime.version"));
-		String[] vp = version.split("\\.");
-
-		int minorVersion = StringUtil.getIntValue(vp[1], 5);
-		return minorVersion == 5;
-	}
-
-	/**
-	 * Only to be used in JUnit tests!
-	 */
 	public final void initialize()
 	{
 		final String configFilename = "workbench.settings";
@@ -2734,6 +2722,7 @@ public class Settings
 			this.props.remove("workbench.ignoretypes.postgresql");
 			this.props.remove("workbench.ignoretypes.mysql");
 			this.props.remove("workbench.db.syntax.functions");
+			props.remove("workbench.warn.java5");
 		}
 		catch (Throwable e)
 		{

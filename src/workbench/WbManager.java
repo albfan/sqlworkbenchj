@@ -643,16 +643,6 @@ public final class WbManager
 		boolean autoSelect = Settings.getInstance().getShowConnectDialogOnStartup();
 		final boolean exitOnCancel = Settings.getInstance().getExitOnFirstConnectCancel();
 
-		final int maxWarnings = 9;
-		int warn = Settings.getInstance().getIntProperty("workbench.warn.java5", 1);
-
-		if (warn <= maxWarnings && Settings.isJava5())
-		{
-			WbSwingUtilities.showErrorMessageKey(main, "ErrWrongJava");
-			warn ++;
-			Settings.getInstance().setProperty("workbench.warn.java5", warn);
-		}
-
 		// no connection? then display the connection dialog
 		if (!connected && autoSelect)
 		{
