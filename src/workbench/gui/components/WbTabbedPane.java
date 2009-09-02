@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.Component;
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Insets;
@@ -96,11 +97,18 @@ public class WbTabbedPane
 		showCloseButton = (closer != null);
 	}
 
-	public void closeButtonClicked(int index)
+	public void closeButtonClicked(final int index)
 	{
 		if (tabCloser != null && tabCloser.canCloseTab(index))
 		{
-			tabCloser.closeTab(index);
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					tabCloser.closeTab(index);
+				}
+			});
 		}
 	}
 

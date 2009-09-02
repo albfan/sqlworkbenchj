@@ -2621,6 +2621,13 @@ public class MainWindow
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
 		if (!panel.canCloseTab()) return;
+	
+		if (GuiSettings.getConfirmTabClose())
+		{
+			boolean doClose = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgConfirmCloseTab"));
+			if (!doClose) return;
+		}
+
 		removeTab(index, true);
 	}
 
