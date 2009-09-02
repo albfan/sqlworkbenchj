@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -19,6 +20,7 @@ import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
 import javax.swing.UIManager;
@@ -57,9 +59,15 @@ public class WbTabbedPane
 	public int getTabHeight()
 	{
 		Font font = getFont();
-		if (font == null) return 0;
+		if (font == null)
+		{
+			return 0;
+		}
 		FontMetrics metrics = getFontMetrics(font);
-		if (metrics == null) return 0;
+		if (metrics == null)
+		{
+			return 0;
+		}
 		int fontHeight = metrics.getHeight();
 		Insets tabInsets = UIManager.getInsets("TabbedPane.tabInsets");
 		if (tabInsets != null)
@@ -83,18 +91,21 @@ public class WbTabbedPane
 		try
 		{
 			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
-			if (tui != null) this.setUI(tui);
+			if (tui != null)
+			{
+				this.setUI(tui);
+			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("WbTabbedPane.init()", "Error during init",e);
+			LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
 		}
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
 	public Insets getInsets()
 	{
-		return new Insets(0,0,0,0);
+		return new Insets(0, 0, 0, 0);
 	}
 
 //	@Override
@@ -103,7 +114,6 @@ public class WbTabbedPane
 //		super.insertTab(title, icon, component, tip, index);
 //		setTabComponentAt(index, new ButtonTabComponent(this));
 //	}
-
 	/**
 	 * The empty override is intended, to give public access to the method
 	 */
@@ -147,6 +157,31 @@ public class WbTabbedPane
 		draggedTabIndex = -1;
 	}
 
+	public void enableDragDropReordering()
+	{
+		Moveable mover = new Moveable()
+		{
+			public void endMove(int finalIndex)
+			{
+			}
+
+			public void startMove()
+			{
+			}
+
+			public boolean moveTab(int oldIndex, int newIndex)
+			{
+				Component panel = getComponent(oldIndex);
+				String label = getTitleAt(oldIndex);
+				remove(oldIndex);
+				add((JComponent) panel, newIndex);
+				setTitleAt(newIndex, label);
+				return true;
+			}
+		};
+		enableDragDropReordering(mover);
+	}
+
 	public void enableDragDropReordering(Moveable mover)
 	{
 		this.addMouseListener(this);
@@ -188,8 +223,14 @@ public class WbTabbedPane
 
 	public void mouseDragged(MouseEvent e)
 	{
-		if (tabMover == null) return;
-		if (draggedTabIndex == -1)	return;
+		if (tabMover == null)
+		{
+			return;
+		}
+		if (draggedTabIndex == -1)
+		{
+			return;
+		}
 
 		int newIndex = getUI().tabForCoordinate(this, e.getX(), e.getY());
 
@@ -206,5 +247,4 @@ public class WbTabbedPane
 	public void mouseMoved(MouseEvent e)
 	{
 	}
-
 }
