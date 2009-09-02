@@ -39,7 +39,7 @@ public class WbStarter
 		}
 		
 		boolean versionIsOk = false;
-		final int minMinorVersion = 5;
+		final int minMinorVersion = 6;
 		
 		int minorversion = -1;
 		
@@ -56,7 +56,7 @@ public class WbStarter
 
 		if (!versionIsOk)
 		{
-			String error = "A JVM version 1." + minMinorVersion + " or higher is needed to run SQL Workbench/J (Found: " + version + ")";
+			String error = "Java 6 is required to run SQL Workbench/J (Found: " + version + ")";
 			System.err.println("*** Cannot run this application ***");
 			System.err.println(error);
 			try
