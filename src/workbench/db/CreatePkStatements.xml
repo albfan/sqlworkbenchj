@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.5" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
+ 
   <void method="put">
    <string>All</string>
    <string>ALTER TABLE %tablename%
    ADD CONSTRAINT %pk_name% PRIMARY KEY (%columnlist%)</string>
   </void>
+
+  <void method="put">
+   <string>Informix Dynamic Server</string>
+   <string>ALTER TABLE %tablename%
+   ADD CONSTRAINT PRIMARY KEY (%columnlist%) CONSTRAINT %pk_name%</string>
+  </void>
+  
  </object>
 </java>
