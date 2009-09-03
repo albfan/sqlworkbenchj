@@ -104,7 +104,7 @@ public class OracleMetadata
 			ResultSet rs = null;
 			try
 			{
-				stmt = this.connection.createStatementForQuery();
+				stmt = this.connection.createStatement();
 				String sql = "select value from v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
 				rs = stmt.executeQuery(sql);
 				if (rs.next())

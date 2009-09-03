@@ -3094,6 +3094,7 @@ public class SqlPanel
 	{
 		final boolean readOnly = (dbConnection == null ? false : dbConnection.getProfile().readOnlySession());
 		final boolean hasResult = currentData != null ? currentData.hasResultSet() : false;
+		final boolean hasRows = (hasResult && currentData.getTable().getRowCount() > 0);
 		final boolean mayEdit = !readOnly && hasResult && currentData.hasUpdateableColumns();
 		final boolean findNext = hasResult && (currentData.getTable().canSearchAgain());
 		Action[] actionList = new Action[]
@@ -3116,6 +3117,7 @@ public class SqlPanel
 				findDataAgainAction.setEnabled(findNext);
 				copySelectedMenu.setEnabled(hasResult);
 				reloadAction.checkEnabled();
+				showFormAction.setEnabled(hasRows);
 			}
 		});
 	}

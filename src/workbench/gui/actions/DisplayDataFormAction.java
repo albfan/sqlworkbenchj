@@ -49,7 +49,7 @@ public class DisplayDataFormAction
 
 	public void executeAction(ActionEvent e)
 	{
-
+		if(client.getRowCount() == 0) return;
 		int row = client.getEditingRow();
 		if (row < 0) row = client.getSelectedRow();
 		if (row < 0) row = 0;
@@ -107,7 +107,7 @@ public class DisplayDataFormAction
 	public void setTable(WbTable table)
 	{
 		this.client = table;
-		setEnabled(client != null);
+		setEnabled(client != null && client.getRowCount() > 0);
 	}
 
 }
