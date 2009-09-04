@@ -98,10 +98,12 @@ public class WbMode
 		}
 		else if (command.equalsIgnoreCase("readonly"))
 		{
+			profile.setSessionConfirmUpdate(false);
 			profile.setSessionReadOnly(true);
 		}
 		else if (command.equalsIgnoreCase("confirm"))
 		{
+			profile.setSessionReadOnly(false);
 			profile.setSessionConfirmUpdate(true);
 		}
 		else
