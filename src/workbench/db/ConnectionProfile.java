@@ -176,7 +176,7 @@ public class ConnectionProfile
 		sessionReadOnly = Boolean.valueOf(flag);
 		if (flag)
 		{
-			sessionConfirmUpdates = null;
+			sessionConfirmUpdates = Boolean.valueOf(!flag);
 		}
 	}
 
@@ -782,7 +782,7 @@ public class ConnectionProfile
 		sessionConfirmUpdates = Boolean.valueOf(flag);
 		if (flag)
 		{
-			sessionReadOnly = null;
+			sessionReadOnly = Boolean.valueOf(!flag);
 		}
 	}
 	
