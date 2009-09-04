@@ -11,8 +11,9 @@
  */
 package workbench.gui.help;
 
+import java.awt.Desktop;
+import java.awt.Desktop.Action;
 import java.io.File;
-import java.util.List;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -20,9 +21,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
 import workbench.util.ExceptionUtil;
-import workbench.util.StringUtil;
 import workbench.util.WbFile;
-import workbench.util.WbStringTokenizer;
 
 /**
  * A class to display the HTML and PDF manual from within the application.
@@ -31,6 +30,7 @@ import workbench.util.WbStringTokenizer;
  */
 public class HelpManager
 {
+
 	public static void showPdfHelp()
 	{
 		try
@@ -43,37 +43,15 @@ public class HelpManager
 				WbSwingUtilities.showMessage(WbManager.getInstance().getCurrentWindow(), msg);
 				return;
 			}
-			
-			String readerPath = Settings.getInstance().getPDFReaderPath();
-			if (StringUtil.isEmptyString(readerPath))
+
+			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN))
 			{
-				String msg = ResourceMgr.getString("ErrNoReaderDefined");
-				WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
-				return;
-			}
-			
-			WbFile reader = new WbFile(StringUtil.trimQuotes(readerPath));
-			if (reader.exists())
-			{
-				// For Windows and Linux it is assumed that the reader is an executable
-				// and in this case a string array is passed to exec() which is more robust
-				// than a single string
-				String[] cmd = new String[] { reader.getFullPath(), pdf.getFullPath() };
-				LogMgr.logDebug("HelpManager.showPdfHelp()", "Launching PDF Reader using exec(String[])");
-				Runtime.getRuntime().exec(cmd);
+				Desktop.getDesktop().open(pdf);
 			}
 			else
 			{
-				// if the "reader" does not exist as a file, it is assumed it is
-				// some kind of "internal" command, e.g for MacOS X:
-				// open /Applications/Preview.app
-				WbStringTokenizer tok = new WbStringTokenizer(readerPath, " ", true, "\"", false);
-				List<String> cmd = tok.getAllTokens();
-				cmd.add(pdf.getFullPath());
-
-				LogMgr.logDebug("HelpManager.showPdfHelp()", "Launching PDF Reader using ProcessBuilder");
-				ProcessBuilder builder = new ProcessBuilder(cmd);
-				builder.start();
+				LogMgr.logError("HelpManager.showPdfHelp()", "Desktop not supported!", null);
+				WbSwingUtilities.showErrorMessage("Desktop not supported by your Java version");
 			}
 		}
 		catch (Exception ex)
@@ -102,13 +80,12 @@ public class HelpManager
 		{
 			LogMgr.logError("ShowHelpAction.executeAction", "Error displaying manual", ex);
 		}
-		
 	}
 
 	public static void showHelpFile(String topic)
 	{
 		String basefile;
-		
+
 		if (Settings.getInstance().useSinglePageHelp())
 		{
 			basefile = "workbench-manual-single.html";
@@ -121,7 +98,7 @@ public class HelpManager
 		{
 			basefile = "workbench-manual.html";
 		}
-		
+
 		File dir = Settings.getInstance().getHtmlManualDir();
 		if (dir == null)
 		{
@@ -131,20 +108,20 @@ public class HelpManager
 			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 			return;
 		}
-		
+
 		File manual = null;
 		if (dir != null)
 		{
 			manual = new File(dir, basefile);
 		}
-		
+
 		if (manual == null || !manual.exists())
 		{
 			String msg = ResourceMgr.getFormattedString("ErrHelpFileNotFound", basefile, dir);
 			WbSwingUtilities.showErrorMessage(WbManager.getInstance().getCurrentWindow(), msg);
 			return;
 		}
-		
+
 		try
 		{
 			String url = manual.toURL().toString();
@@ -158,27 +135,26 @@ public class HelpManager
 		catch (Exception ex)
 		{
 			LogMgr.logError("ShowHelpAction.executeAction", "Error displaying manual", ex);
-		}		
+		}
 	}
-	
+
 	public static void showHelpIndex()
 	{
 		showHelpFile("workbench-manual");
 	}
-	
+
 	public static void showDataPumperHelp()
 	{
 		showHelpFile("data-pumper");
 	}
-	
+
 	public static void showOptionsHelp()
 	{
 		showHelpFile("options");
 	}
-	
+
 	public static void showProfileHelp()
 	{
 		showHelpFile("profiles");
 	}
-	
 }

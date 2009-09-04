@@ -290,7 +290,7 @@ public class WbAboutDialog
 	{//GEN-HEADEREND:event_mailToLabelMouseClicked
 		try
 		{
-			if (evt.getClickCount() == 1) BrowserLauncher.openURL("mailto:support@sql-workbench.net");
+			if (evt.getClickCount() == 1) BrowserLauncher.openEmail("support@sql-workbench.net");
 		}
 		catch (Exception e)
 		{
