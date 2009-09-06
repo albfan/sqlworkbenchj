@@ -131,12 +131,17 @@ public class OracleMetadata
 			}
 		}
 
-		boolean fixNVARCHAR = Settings.getInstance().useOracleNVarcharFix();
-		boolean checkCharSemantics = Settings.getInstance().useOracleCharSemanticsFix();
+		boolean fixNVARCHAR = fixNVARCHARSemantics();
+		boolean checkCharSemantics = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
 
 		useOwnSql = (version > 8 && (checkCharSemantics || fixNVARCHAR));
 		globalMapDateToTimestamp = Settings.getInstance().getBoolProperty("workbench.db.oracle.fixdatetype", false);
 		Settings.getInstance().addPropertyChangeListener(this, "workbench.db.oracle.fixdatetype");
+	}
+
+	protected boolean fixNVARCHARSemantics()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
 	}
 
 	public void propertyChange(PropertyChangeEvent evt)
@@ -211,7 +216,7 @@ public class OracleMetadata
 			return this.connection.getSqlConnection().getMetaData().getColumns(catalog, schema, table, cols);
 		}
 
-		boolean fixNVARCHAR = Settings.getInstance().useOracleNVarcharFix();
+		boolean fixNVARCHAR = fixNVARCHARSemantics();
 
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
     // this statement fixes this problem and also removes the usage of LIKE

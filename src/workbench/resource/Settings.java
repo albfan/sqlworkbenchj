@@ -253,8 +253,6 @@ public class Settings
 		this.configfile = cfile;
 		this.props = new WbProperties(this);
 
-		// first read the built-in defaults
-		// this ensures that new defaults will be applied automatically.
 		fillDefaults();
 
 		if (cfile.exists() && cfile.length() > 0)
@@ -266,7 +264,7 @@ public class Settings
 		BufferedInputStream in = null;
 		try
 		{
-			in = new BufferedInputStream(new FileInputStream(this.configfile));
+			in = new BufferedInputStream(new FileInputStream(this.configfile), 32*1024);
 			this.props.loadFromStream(in);
 		}
 		catch (IOException e)
@@ -277,76 +275,8 @@ public class Settings
 		{
 			try { in.close(); } catch (Throwable th) {}
 		}
-		if (getBoolProperty("workbench.db.resetdefaults", false))
-		{
-			resetDbDefaults();
-		}
+
 		return true;
-	}
-
-	/**
-	 * Apply certain settings from the defaults, to overwrite
-	 * whatever is stored in the current config file
-	 */
-	private void resetDbDefaults()
-	{
-		WbProperties dbDefs = getDefaultProperties();
-		Set keys = dbDefs.keySet();
-		for (Object key : keys)
-		{
-			String k = (String)key;
-			if (k.startsWith("workbench.db."))
-			{
-				String value = dbDefs.getProperty(k);
-				setProperty(k, value);
-			}
-		}
-	}
-
-	// <editor-fold defaultstate="collapsed" desc="Manual">
-	public WbFile getDefaultPdf()
-	{
-		String pdfManual = getProperty("workbench.manual.pdf.file", "SQLWorkbench-Manual.pdf");
-
-		WbFile f = new WbFile(pdfManual);
-		if (f.isDirectory())
-		{
-			f = new WbFile(f, "SQLWorkbench-Manual.pdf");
-		}
-
-		if (f.exists()) return f;
-
-		String jarDir = WbManager.getInstance().getJarPath();
-		WbFile pdf = new WbFile(jarDir, pdfManual);
-
-		return pdf;
-	}
-
-	/**
-	 * Returns the full path to the PDF manual
-	 */
-	public WbFile getPDFManualPath()
-	{
-		WbFile pdf = getDefaultPdf();
-
-		if (pdf.exists() && pdf.canRead())
-		{
-			return pdf;
-		}
-
-		if (!pdf.exists())
-		{
-			pdf = new WbFile(getConfigDir(), pdf.getFileName());
-		}
-
-		if (pdf.exists() && pdf.canRead())
-		{
-			return pdf;
-		}
-		else
-		{
-			return null;
-		}
 	}
 
 	public void setUseSinglePageHelp(boolean flag)
@@ -358,42 +288,6 @@ public class Settings
 	{
 		return getBoolProperty("workbench.help.singlepage", false);
 	}
-
-	/**
-	 * Returns the directory where the HTML manual is located.
-	 *
-	 * @return the directory where the HTML manual is located or null if it cannot be found
-	 */
-	public File getHtmlManualDir()
-	{
-		// Allow overriding the default location of the HTML manual
-		String dir = getProperty("workbench.manual.html.dir", null);
-		File htmldir = null;
-
-		if (dir == null)
-		{
-			// First look in the directory of the jar file.
-			File jardir = WbManager.getInstance().getJarFile().getParentFile();
-			htmldir = new File(jardir, "manual");
-		}
-		else
-		{
-			htmldir = new File(dir);
-		}
-
-		if (!htmldir.exists())
-		{
-			htmldir = new File(getConfigDir(), "manual");
-		}
-
-		if (htmldir.exists())
-		{
-			return htmldir;
-		}
-
-		return null;
-	}
-	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Language settings">
 	public void setLanguage(Locale locale)
@@ -1698,70 +1592,16 @@ public class Settings
 		return getBoolProperty("workbench.dbmetadata.debugmetasql", false);
 	}
 
-	public List<String> getServersWhereDDLNeedsCommit()
-	{
-		String list = getProperty("workbench.db.ddlneedscommit", "");
-    return StringUtil.stringToList(list, ",");
-	}
-
-	public void removeDDLCommitServer(String product)
-	{
-		removeListEntry("workbench.db.ddlneedscommit", product);
-	}
-
 	public List<String> getServersWithInlineConstraints()
 	{
 		String list = getProperty("workbench.db.inlineconstraints", "");
 		return StringUtil.stringToList(list, ",");
 	}
 
-	public List<String> getServersWhichNeedJdbcCommit()
-	{
-		String list = getProperty("workbench.db.usejdbccommit", "");
-    return StringUtil.stringToList(list, ",");
-	}
-
-	public void removeJdbcCommitServer(String product)
-	{
-		removeListEntry("workbench.db.usejdbccommit", product);
-	}
-
 	public List<String> getServersWithNoNullKeywords()
 	{
 		String list = getProperty("workbench.db.nonullkeyword", "");
 		return StringUtil.stringToList(list, ",");
-	}
-
-	public List<String> getCaseSensitivServers()
-	{
-		String list = getProperty("workbench.db.casesensitive", "");
-		return StringUtil.stringToList(list, ",");
-	}
-
-	public void removeCaseSensitivServer(String product)
-	{
-		removeListEntry("workbench.db.casesensitive", product);
-	}
-
-	private void removeListEntry(String listProperty, String value)
-	{
-		String list = getProperty(listProperty, "");
-		if (!StringUtil.isEmptyString(list))
-		{
-			List<String> servers = StringUtil.stringToList(list, ",");
-			servers.remove(value);
-			setProperty(listProperty, StringUtil.listToString(servers, ',', false));
-		}
-	}
-
-	public boolean useOracleNVarcharFix()
-	{
-		return getBoolProperty("workbench.db.oracle.fixnvarchartype", true);
-	}
-
-	public boolean useOracleCharSemanticsFix()
-	{
-		return getBoolProperty("workbench.db.oracle.fixcharsemantics", true);
 	}
 
 	public boolean getCheckPreparedStatements()
@@ -2744,8 +2584,10 @@ public class Settings
 			this.props.remove("workbench.db.hxtt_dbf.dropindex.needstable");
 			this.props.remove("workbench.ignoretypes.postgresql");
 			this.props.remove("workbench.ignoretypes.mysql");
-			this.props.remove("workbench.db.syntax.functions");
+			props.remove("workbench.db.syntax.functions");
 			props.remove("workbench.warn.java5");
+			props.remove("workbench.db.microsoft_sql_server.drop.index.ddl");
+			props.remove("workbench.db.mysql.drop.index.ddl");
 		}
 		catch (Throwable e)
 		{
@@ -2813,7 +2655,8 @@ public class Settings
 
 		try
 		{
-			this.props.saveToFile(this.configfile);
+			WbProperties defaults = getDefaultProperties();
+			this.props.saveToFile(this.configfile, defaults);
 		}
 		catch (IOException e)
 		{

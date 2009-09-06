@@ -30,15 +30,91 @@ import workbench.util.WbFile;
  */
 public class HelpManager
 {
+	public static WbFile getDefaultPdf()
+	{
+		String pdfManual = Settings.getInstance().getProperty("workbench.manual.pdf.file", "SQLWorkbench-Manual.pdf");
+
+		WbFile f = new WbFile(pdfManual);
+		if (f.isDirectory())
+		{
+			f = new WbFile(f, "SQLWorkbench-Manual.pdf");
+		}
+
+		if (f.exists()) return f;
+
+		String jarDir = WbManager.getInstance().getJarPath();
+		WbFile pdf = new WbFile(jarDir, pdfManual);
+
+		return pdf;
+	}
+
+	public static WbFile getPDFManualPath()
+	{
+		WbFile pdf = getDefaultPdf();
+
+		if (pdf.exists() && pdf.canRead())
+		{
+			return pdf;
+		}
+
+		if (!pdf.exists())
+		{
+			pdf = new WbFile(Settings.getInstance().getConfigDir(), pdf.getFileName());
+		}
+
+		if (pdf.exists() && pdf.canRead())
+		{
+			return pdf;
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * Returns the directory where the HTML manual is located.
+	 *
+	 * @return the directory where the HTML manual is located or null if it cannot be found
+	 */
+	public static File getHtmlManualDir()
+	{
+		// Allow overriding the default location of the HTML manual
+		String dir = Settings.getInstance().getProperty("workbench.manual.html.dir", null);
+		File htmldir = null;
+
+		if (dir == null)
+		{
+			// First look in the directory of the jar file.
+			File jardir = WbManager.getInstance().getJarFile().getParentFile();
+			htmldir = new File(jardir, "manual");
+		}
+		else
+		{
+			htmldir = new File(dir);
+		}
+
+		if (!htmldir.exists())
+		{
+			htmldir = new File(Settings.getInstance().getConfigDir(), "manual");
+		}
+
+		if (htmldir.exists())
+		{
+			return htmldir;
+		}
+
+		return null;
+	}
 
 	public static void showPdfHelp()
 	{
 		try
 		{
-			WbFile pdf = Settings.getInstance().getPDFManualPath();
+			WbFile pdf = getPDFManualPath();
 			if (pdf == null)
 			{
-				String defaultPdf = Settings.getInstance().getDefaultPdf().getFullPath();
+				String defaultPdf = getDefaultPdf().getFullPath();
 				String msg = ResourceMgr.getFormattedString("ErrManualNotFound", defaultPdf, WbManager.getInstance().getJarPath());
 				WbSwingUtilities.showMessage(WbManager.getInstance().getCurrentWindow(), msg);
 				return;
@@ -63,7 +139,7 @@ public class HelpManager
 
 	public static void showHistory()
 	{
-		File pdf = Settings.getInstance().getDefaultPdf();
+		File pdf = getDefaultPdf();
 
 		WbFile history = new WbFile(pdf.getParent(), "history.html");
 		if (!history.exists())
@@ -99,7 +175,7 @@ public class HelpManager
 			basefile = "workbench-manual.html";
 		}
 
-		File dir = Settings.getInstance().getHtmlManualDir();
+		File dir = getHtmlManualDir();
 		if (dir == null)
 		{
 			File jardir = WbManager.getInstance().getJarFile().getParentFile();

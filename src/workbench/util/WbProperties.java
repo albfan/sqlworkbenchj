@@ -68,11 +68,17 @@ public class WbProperties
 	public synchronized void saveToFile(File filename)
 		throws IOException
 	{
+		saveToFile(filename, null);
+	}
+	
+	public synchronized void saveToFile(File filename, WbProperties reference)
+		throws IOException
+	{
 		FileOutputStream out = null;
 		try
 		{
 			out = new FileOutputStream(filename);
-			this.save(out);
+			this.save(out, reference);
 		}
 		finally
 		{
@@ -83,10 +89,15 @@ public class WbProperties
 	public synchronized void save(OutputStream out)
 		throws IOException
 	{
+		save(out, (WbProperties)null);
+	}
+
+	public synchronized void save(OutputStream out, WbProperties reference)
+		throws IOException
+	{
 		Object[] keys = this.keySet().toArray();
 		Arrays.sort(keys);
 		BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out));
-		String value = null;
 		String lastKey = null;
 		String key = null;
 		boolean hadComment = false;
@@ -94,6 +105,12 @@ public class WbProperties
 		for (int i=0; i < keys.length; i++)
 		{
 			key = (String)keys[i];
+			if (reference != null)
+			{
+				String currentValue = (String)getProperty(key);
+				String referenceValue = reference.getProperty(key);
+				if (StringUtil.equalStringOrEmpty(currentValue, referenceValue)) continue;
+			}
 
 			String comment = comments.get(key);
 			if (StringUtil.isNonBlank(comment))
@@ -115,10 +132,9 @@ public class WbProperties
 				}
 			}
 
-			Object v = this.get(key);
-			if (v != null)
+			String value = this.getProperty(key);
+			if (value != null)
 			{
-				value = v.toString();
 				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT);
 
 				// Newlines will also be encoded, but we want them "visible" with

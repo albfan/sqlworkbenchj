@@ -64,28 +64,10 @@ public class DbSettings
 		prefix = "workbench.db." + id + ".";
 		Settings settings = Settings.getInstance();
 
-		this.caseSensitive = settings.getBoolProperty(prefix + "casesensitive", false) || settings.getCaseSensitivServers().contains(productName);
-		this.useJdbcCommit = settings.getBoolProperty(prefix + "usejdbccommit", false) || settings.getServersWhichNeedJdbcCommit().contains(productName);
-		this.ddlNeedsCommit = settings.getBoolProperty(prefix + "ddlneedscommit", false) || settings.getServersWhereDDLNeedsCommit().contains(productName);
+		this.caseSensitive = settings.getBoolProperty(prefix + "casesensitive", false);
+		this.useJdbcCommit = settings.getBoolProperty(prefix + "usejdbccommit", false);
+		this.ddlNeedsCommit = settings.getBoolProperty(prefix + "ddlneedscommit", false);
 		this.supportsCommentInSql = settings.getBoolProperty(prefix + "sql.embeddedcomments", true);
-		// Migrate old list-based properties to new dbid based properties
-		// If the flags were already set with the new format, re-applying the
-		// value won't change anything
-		if (caseSensitive )
-		{
-			settings.removeCaseSensitivServer(productName);
-			settings.setProperty(prefix + "casesensitive", true);
-		}
-		if (ddlNeedsCommit)
-		{
-			settings.removeDDLCommitServer(productName);
-			settings.setProperty(prefix + "ddlneedscommit", true);
-		}
-		if (useJdbcCommit)
-		{
-			settings.removeJdbcCommitServer(productName);
-			settings.setProperty(prefix + "usejdbccommit", true);
-		}
 
 		List<String> quote = StringUtil.stringToList(settings.getProperty("workbench.db.neverquote",""));
 		this.neverQuoteObjects = quote.contains(this.getDbId());
