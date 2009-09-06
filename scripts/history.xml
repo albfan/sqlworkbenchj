@@ -18,7 +18,7 @@
 
   <entry dev-build="1" type="enh">
     <description>
-      The column definition (of tables) in the DbExplorer can now be edited and the
+      The column definition of tables in the DbExplorer can now be edited and the
       approriate ALTER statement can be generated for the changes.
     </description>
   </entry>
@@ -27,7 +27,9 @@
     <description>
       Tables can now be renamed from within the table list of the DbExplorer. For
       databases that support this, other types (e.g. VIEWs, SEQUENCEs) can also
-      be renamed. The comment for a table can also be changed
+      be renamed. The comment for a table can also be changed. To apply the
+      changes a new menu option in the context menu is available to generate
+      and run the necessary ALTER statements.
     </description>
   </entry>
 
