@@ -13,11 +13,11 @@ package workbench.interfaces;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public interface Moveable
 {
-	void startMove();
+	boolean startMove(int index);
 	void endMove(int finalIndex);
 	boolean moveTab(int oldIndex, int newIndex);
 }

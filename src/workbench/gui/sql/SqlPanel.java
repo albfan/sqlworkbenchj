@@ -64,6 +64,7 @@ import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.interfaces.DbExecutionNotifier;
+import workbench.interfaces.Moveable;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultReceiver;
 import workbench.sql.StatementRunnerResult;
@@ -190,7 +191,7 @@ public class SqlPanel
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -279,13 +280,14 @@ public class SqlPanel
 
 	private static final Border statusBarBorder = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
 
-	private boolean appendResults = false;
+	private boolean appendResults;
 
 	protected DwStatusBar statusBar;
 	protected StatementRunner stmtRunner;
 	protected GenericRowMonitor rowMonitor;
 	protected IconHandler iconHandler;
-	private boolean locked = false;
+	private boolean locked;
+	private boolean ignoreStateChange;
 
 //</editor-fold>
 
@@ -312,7 +314,7 @@ public class SqlPanel
 		this.resultTab.setFocusable(false);
 		// The name of the component is used for the Jemmy GUI Tests
 		this.resultTab.setName("resultspane");
-		resultTab.enableDragDropReordering();
+		resultTab.enableDragDropReordering(this);
 
 		JScrollPane scroll = new WbScrollPane(log);
 		this.resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
@@ -2126,8 +2128,6 @@ public class SqlPanel
 		return result;
 	}
 
-	private boolean ignoreStateChange = false;
-
 	/**
 	 * This is called when the user switches between the result tabs (if multiple
 	 * results are available)
@@ -3266,6 +3266,42 @@ public class SqlPanel
 		{
 			this.checkResultSetActions();
 		}
+	}
+
+	@Override
+	public boolean startMove(int index)
+	{
+		boolean canMove = (index != resultTab.getTabCount() - 1);
+		ignoreStateChange = canMove;
+		return canMove;
+	}
+
+	@Override
+	public void endMove(int finalIndex)
+	{
+		ignoreStateChange = false;
+		if (resultTab.getSelectedIndex() != finalIndex)
+		{
+			resultTab.setSelectedIndex(finalIndex);
+		}
+		else
+		{
+			updateResultInfos();
+		}
+	}
+
+	@Override
+	public boolean moveTab(int oldIndex, int newIndex)
+	{
+		Component c = resultTab.getComponentAt(oldIndex);
+		if (newIndex == resultTab.getTabCount() - 1) return false;
+
+		String title = resultTab.getTitleAt(oldIndex);
+		//System.out.println("moving " + (c == null ? "nothing" : c.toString()) + " from " + oldIndex + " to " + newIndex + ", with title=" + title);
+		resultTab.remove(c);
+		resultTab.add(c, newIndex);
+		resultTab.setTitleAt(newIndex, title);
+		return true;
 	}
 
 }

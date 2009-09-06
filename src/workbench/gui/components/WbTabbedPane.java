@@ -228,31 +228,6 @@ public class WbTabbedPane
 		draggedTabIndex = -1;
 	}
 
-	public void enableDragDropReordering()
-	{
-		Moveable mover = new Moveable()
-		{
-			public void endMove(int finalIndex)
-			{
-			}
-
-			public void startMove()
-			{
-			}
-
-			public boolean moveTab(int oldIndex, int newIndex)
-			{
-				Component panel = getComponent(oldIndex);
-				String label = getTitleAt(oldIndex);
-				remove(oldIndex);
-				add((JComponent) panel, newIndex);
-				setTitleAt(newIndex, label);
-				return true;
-			}
-		};
-		enableDragDropReordering(mover);
-	}
-
 	public void enableDragDropReordering(Moveable mover)
 	{
 		this.addMouseListener(this);
@@ -267,10 +242,13 @@ public class WbTabbedPane
 
 	public void mousePressed(MouseEvent e)
 	{
-		draggedTabIndex = getUI().tabForCoordinate(this, e.getX(), e.getY());
+		int index = getUI().tabForCoordinate(this, e.getX(), e.getY());
 		if (this.tabMover != null)
 		{
-			this.tabMover.startMove();
+			if (this.tabMover.startMove(index))
+			{
+				draggedTabIndex = index;
+			}
 		}
 	}
 

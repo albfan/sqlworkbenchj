@@ -2586,9 +2586,10 @@ public class MainWindow
 		this.tabSelected(finalIndex);
 	}
 
-	public void startMove()
+	public boolean startMove(int index)
 	{
 		this.tabRemovalInProgress = true;
+		return true;
 	}
 
 	public boolean moveTab(int oldIndex, int newIndex)
