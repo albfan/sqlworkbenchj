@@ -230,6 +230,29 @@
 				</para>
 			</blockquote>
 		</simplesect>
+
+    <simplesect id="dbexplorer-rename-table">
+      <title>Renaming tables</title>
+			<blockquote>
+        <para>
+          You can edit the name of a table in the list of objects. Once you have
+          changed a name (or several) you can use the option "ALTER script" in the
+          context menu of the object list to generate and run a SQL script to
+          apply the changes. Depending on the DBMS, you might be able to change the
+          name of other database objects as well (e.g. SEQUENCEs, VIEWs, ...).
+        </para>
+        <para>
+          For DBMS that support it, you can also edit the remarks column of the
+          table to change the documentation.
+        </para>
+        <para>
+          If the editing the name or comment is rejected, the necessary SQL statements
+          have not been configured for your DBMS. If your DBMS does support changing
+          the object type in question, please send a mail with the necessary
+          information to the support email address.
+        </para>
+      </blockquote>
+    </simplesect>
      
 	</section>
 
@@ -265,6 +288,23 @@
 			but will not show any information.
 		</para>
 
+		<simplesect id="dbexplorer-change-table-def">
+			<title>Changing the table definition</title>
+      <para>
+        You can change the column name, datatype, default value or the nullable
+        flag in the display of the table's details. If the necessary ALTER statements
+        have been configured for your DBMS, you can generate and run an ALTER
+        script to apply your changes. This is done by clicking on the <guibutton>ALTER table</guibutton>
+        button.
+      </para>
+
+      <para>
+        If your changes are rejected when editing, the necessary SQL statements
+        have not been configured for your DBMS. If your DBMS does support
+        changing table columns, please send a mail with the necessary
+        information to the support email address.
+      </para>
+    </simplesect>
 	</section>
 	
 	<section id="table-data">
