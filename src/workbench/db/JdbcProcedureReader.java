@@ -381,7 +381,7 @@ public class JdbcProcedureReader
 		String comment = def.getComment();
 		if (StringUtil.isNonBlank(comment))
 		{
-			CommentSqlManager mgr = new CommentSqlManager(connection);
+			CommentSqlManager mgr = new CommentSqlManager(connection.getDbSettings().getDbId());
 			String template = mgr.getCommentSqlTemplate(def.getObjectType());
 			if (StringUtil.isNonBlank(template))
 			{

@@ -36,7 +36,7 @@ public class TableCommentReader
 	 */
 	public String getTableCommentSql(WbConnection dbConnection, TableIdentifier table)
 	{
-		CommentSqlManager mgr = new CommentSqlManager(dbConnection);
+		CommentSqlManager mgr = new CommentSqlManager(dbConnection.getMetadata().getDbId());
 
 		String commentStatement = mgr.getCommentSqlTemplate(table.getType());
 
@@ -107,7 +107,7 @@ public class TableCommentReader
 	 */
 	public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
 	{
-		CommentSqlManager mgr = new CommentSqlManager(con);
+		CommentSqlManager mgr = new CommentSqlManager(con.getMetadata().getDbId());
 
 		String columnStatement = mgr.getCommentSqlTemplate("column");
 		if (StringUtil.isBlank(columnStatement)) return null;

@@ -27,7 +27,6 @@ import workbench.sql.formatter.SQLToken;
 public class WbMode
 	extends SqlCommand
 {
-
 	public static final String VERB = "WBMODE";
 
 	public WbMode()

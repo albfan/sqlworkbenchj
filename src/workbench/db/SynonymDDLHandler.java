@@ -50,7 +50,7 @@ public class SynonymDDLHandler
 
 		if (StringUtil.isNonBlank(synonym.getComment()))
 		{
-			CommentSqlManager mgr = new CommentSqlManager(dbConnection);
+			CommentSqlManager mgr = new CommentSqlManager(dbConnection.getMetadata().getDbId());
 			String sql = mgr.getCommentSqlTemplate(synonym.getType());
 			if (StringUtil.isNonBlank(sql))
 			{

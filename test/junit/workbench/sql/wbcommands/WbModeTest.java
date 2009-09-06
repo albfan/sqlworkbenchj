@@ -81,6 +81,27 @@ public class WbModeTest
 			assertEquals(count, 0);
 			SqlUtil.closeResult(rs);
 			SqlUtil.closeStatement(stmt);
+
+			con.getProfile().setReadOnly(true);
+			con.getProfile().setConfirmUpdates(false);
+
+			runner.executeScript(
+				"WbMode confirm;\n"
+			);
+			assertTrue(con.getProfile().confirmUpdatesInSession());
+			assertFalse(con.getProfile().readOnlySession());
+
+			runner.executeScript(
+				"WbMode normal;\n"
+			);
+			assertFalse(con.getProfile().confirmUpdatesInSession());
+			assertFalse(con.getProfile().readOnlySession());
+
+			runner.executeScript(
+				"WbMode reset;\n"
+			);
+			assertFalse(con.getProfile().confirmUpdatesInSession());
+			assertTrue(con.getProfile().readOnlySession());
 		}
 		finally
 		{

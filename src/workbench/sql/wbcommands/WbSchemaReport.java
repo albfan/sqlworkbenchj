@@ -16,9 +16,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import workbench.db.ConnectionProfile;
 import workbench.db.TableIdentifier;
+import workbench.db.oracle.OracleMetadata;
 import workbench.db.report.SchemaReporter;
 import workbench.interfaces.ScriptGenerationMonitor;
 import workbench.log.LogMgr;
@@ -145,15 +144,7 @@ public class WbSchemaReport
 
 		if (currentConnection != null && currentConnection.getMetadata().isOracle())
 		{
-			// check if remarksReporting is turned on for Oracle, if not issue a warning.
-			ConnectionProfile prof = currentConnection.getProfile();
-			Properties props = prof.getConnectionProperties();
-			String value = "false";
-			if (props != null)
-			{
-				value = props.getProperty("remarksReporting", "false");
-			}
-			if (!"true".equals(value))
+			if (!OracleMetadata.remarksEnabled(currentConnection))
 			{
 				result.addMessage(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));
 				result.addMessage("");

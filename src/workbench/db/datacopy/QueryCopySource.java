@@ -52,11 +52,7 @@ public class QueryCopySource
 	public QueryCopySource(WbConnection source, String sql)
 	{
 		this.sourceConnection = source;
-		this.retrieveSql = sql.trim();
-		if (retrieveSql.endsWith(";"))
-		{
-			retrieveSql = retrieveSql.substring(0, retrieveSql.length() - 1);
-		}
+		this.retrieveSql = SqlUtil.trimSemicolon(sql);
 	}
 
 	public boolean hasErrors() { return this.hasErrors; }

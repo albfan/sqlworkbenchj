@@ -106,6 +106,7 @@ public class Settings
 	private static final String LIB_DIR_KEY = "%LibDir%";
 
 	private WbProperties props;
+	private WbProperties dbProps;
 	private WbFile configfile;
 
 	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
@@ -251,6 +252,7 @@ public class Settings
 
 		this.configfile = cfile;
 		this.props = new WbProperties(this);
+
 		// first read the built-in defaults
 		// this ensures that new defaults will be applied automatically.
 		fillDefaults();
@@ -275,9 +277,30 @@ public class Settings
 		{
 			try { in.close(); } catch (Throwable th) {}
 		}
-
-		// Now load database configurations from the same directory
+		if (getBoolProperty("workbench.db.resetdefaults", false))
+		{
+			resetDbDefaults();
+		}
 		return true;
+	}
+
+	/**
+	 * Apply certain settings from the defaults, to overwrite
+	 * whatever is stored in the current config file
+	 */
+	private void resetDbDefaults()
+	{
+		WbProperties dbDefs = getDefaultProperties();
+		Set keys = dbDefs.keySet();
+		for (Object key : keys)
+		{
+			String k = (String)key;
+			if (k.startsWith("workbench.db."))
+			{
+				String value = dbDefs.getProperty(k);
+				setProperty(k, value);
+			}
+		}
 	}
 
 	// <editor-fold defaultstate="collapsed" desc="Manual">
@@ -2246,7 +2269,7 @@ public class Settings
 			this.props.setProperty(key + ".group", "");
 		}
 
-		// comparing with == is intended!!!!
+		// comparing with == is intended
 		if (prof.getName() == BatchRunner.CMD_LINE_PROFILE_NAME) return;
 
 		this.props.setProperty(key, prof.getName());

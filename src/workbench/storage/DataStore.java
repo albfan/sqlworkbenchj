@@ -61,7 +61,7 @@ import workbench.util.ValueConverter;
 public class DataStore
 {
 	// Needed for the status display in the table model
-	// as RowData is only package visible. Thus we need to provide the objects here
+	// as RowData is only package visible, we need to provide the objects here
 	public static final Integer ROW_MODIFIED = Integer.valueOf(RowData.MODIFIED);
 	public static final Integer ROW_NEW = Integer.valueOf(RowData.NEW);
 	public static final Integer ROW_ORIGINAL = Integer.valueOf(RowData.NOT_MODIFIED);
@@ -730,7 +730,7 @@ public class DataStore
 		return this.resultInfo.getColumn(col).getDisplaySize();
 	}
 	
-	protected Object getOriginalValue(int aRow, int aColumn)
+	public Object getOriginalValue(int aRow, int aColumn)
 	{
 		RowData row = this.getRow(aRow);
 		return row.getOriginalValue(aColumn);
@@ -933,6 +933,18 @@ public class DataStore
 	{
 		RowData row = this.getRow(aRow);
 		return row.isModified();
+	}
+
+	/**
+	 * Returns true if the given column in the given row has been modified.
+	 *
+	 * @param row The row to check
+	 * @param column the column to check
+	 */
+	public boolean isColumnModified(int row, int column)
+	{
+		RowData rowData = this.getRow(row);
+		return rowData.isColumnModified(column);
 	}
 
 	/**

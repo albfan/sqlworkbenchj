@@ -549,6 +549,19 @@ public class OracleMetadata
 		columnStatement = null;
 	}
 
+	public static boolean remarksEnabled(WbConnection con)
+	{
+		if (con == null) return false;
+		ConnectionProfile prof = con.getProfile();
+		Properties props = prof.getConnectionProperties();
+		String value = "false";
+		if (props != null)
+		{
+			value = props.getProperty("remarksReporting", "false");
+		}
+		return "true".equals(value);
+	}
+	
 	private String getVarcharType(String type, int size, int semantics)
 	{
 		StringBuilder result = new StringBuilder(25);

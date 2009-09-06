@@ -67,17 +67,6 @@ public class IngresMetadataTest
 		db.disconnect();
 	}
 
-	public void testGetSequenceList()
-	{
-		IngresMetadata instance = new IngresMetadata(db.getSqlConnection());
-		List<String> result = instance.getSequenceList("PUBLIC", null);
-		Collections.sort(result);
-		assertNotNull(result);
-		assertEquals(2, result.size());
-		assertEquals("SEQ_AAA", result.get(0));
-		assertEquals("SEQ_BBB", result.get(1));
-	}
-
 	public void testGetSequences()
 	{
 		IngresMetadata instance = new IngresMetadata(db.getSqlConnection());

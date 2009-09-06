@@ -32,6 +32,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdDomainReader;
+import workbench.db.firebird.FirebirdSequenceReader;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
@@ -218,7 +219,9 @@ public class DbMetadata
 			// Otherwise the DBID would look something like:
 			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
 			this.productName = "Firebird";
+			this.sequenceReader = new FirebirdSequenceReader(dbConnection);
 			extenders.add(new FirebirdDomainReader());
+
 		}
 		else if (productLower.indexOf("sql server") > -1)
 		{
@@ -1276,16 +1279,16 @@ public class DbMetadata
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
-			List<String> seq = this.sequenceReader.getSequenceList(aSchema, objects);
-			for (String seqName : seq)
+			List<SequenceDefinition> sequences = this.sequenceReader.getSequences(aSchema, objects);
+			for (SequenceDefinition sequence : sequences)
 			{
 				int row = result.addRow();
 
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, seqName);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, "SEQUENCE");
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, sequence.getSequenceName());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, sequence.getObjectType());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, sequence.getCatalog());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, sequence.getSchema());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, sequence.getComment());
 			}
 			sortNeeded = true;
 		}
@@ -1806,21 +1809,22 @@ public class DbMetadata
 		{
 			if (extender.handlesType(table.getObjectType()))
 			{
-				return extender.getObjectDetails(dbConnection, table);
+				def = extender.getObjectDetails(dbConnection, table);
+				break;
 			}
 		}
-
-		if ("SEQUENCE".equalsIgnoreCase(table.getObjectType()))
+		if (def == null && "SEQUENCE".equalsIgnoreCase(table.getObjectType()))
 		{
 			String schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
 			String seqname = adjustObjectnameCase(StringUtil.trimQuotes(table.getObjectName()));
 			def = getSequenceReader().getRawSequenceDefinition(schema, seqname);
 		}
-		else
+		else if (def == null)
 		{
 			TableDefinition tdef = getTableDefinition(table);
 			def = new TableColumnsDatastore(tdef);
 		}
+		if (def != null) def.resetStatus();
 		return def;
 	}
 
@@ -2313,6 +2317,11 @@ public class DbMetadata
 			if (this.synonymReader != null)
 			{
 				result.add("SYNONYM");
+			}
+
+			if (sequenceReader != null)
+			{
+				result.add("SEQUENCE");
 			}
 			
 			for (ObjectListExtender extender : extenders)

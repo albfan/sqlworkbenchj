@@ -158,24 +158,6 @@ public class Db2SequenceReader
 		return result;
 	}
 	
-	/**
-	 * 	Get a list of sequences for the given owner
-	 */
-	public List<String> getSequenceList(String schema, String namePattern)
-	{
-		DataStore ds = getRawSequenceDefinition(schema, namePattern);
-		if (ds == null || ds.getRowCount() == 0) return Collections.emptyList();
-		List<String> result = new LinkedList<String>();
-
-		for (int row=0; row < ds.getRowCount(); row ++)
-		{
-			// I can't use the column name here as the name column
-			// is different between host and "normal" DB2
-			result.add(ds.getValueAsString(row, 0));
-		}
-		return result;
-	}
-	
 	public CharSequence getSequenceSource(String schema, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(schema, sequence);

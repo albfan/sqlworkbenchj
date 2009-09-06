@@ -245,19 +245,6 @@ public class IngresMetadata
 		return result;
 	}
 
-	public List<String> getSequenceList(String owner, String namePattern)
-	{
-		List<SequenceDefinition> seq = getSequences(owner, namePattern);
-		if (seq == null) return null;
-
-		List<String> result = new ArrayList<String>(seq.size());
-		for (SequenceDefinition def : seq)
-		{
-			result.add(def.getSequenceName());
-		}
-		return result;
-	}
-
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;

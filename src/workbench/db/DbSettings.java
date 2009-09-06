@@ -94,7 +94,7 @@ public class DbSettings
 		this.supportsBatchedStatements = settings.getBoolProperty(prefix + "batchedstatements", false);
 	}
 
-	String getDbId()
+	public String getDbId()
 	{
 		return this.dbId;
 	}
@@ -862,6 +862,47 @@ public class DbSettings
 		if (StringUtil.isBlank(dbmsType)) return false;
 		List<String> types = Settings.getInstance().getListProperty(prefix + "datatypes.searchable", true);
 		return types.contains(dbmsType.toLowerCase());
+	}
+
+	public String getAlterColumnDataTypeSql()
+	{
+		return Settings.getInstance().getProperty(prefix + "alter.column.type", null);
+	}
+
+	public String getRenameColumnSql()
+	{
+		return Settings.getInstance().getProperty(prefix + "alter.column.rename", null);
+	}
+
+	public String getAlterColumnSetNotNull()
+	{
+		return Settings.getInstance().getProperty(prefix + "alter.column.notnull.set", null);
+	}
+
+	public String getAlterColumnDropNotNull()
+	{
+		return Settings.getInstance().getProperty(prefix + "alter.column.notnull.drop", null);
+	}
+
+	/**
+	 * The SQL to alter a column's default. If this returns null, getSetColumnDefault()
+	 * and getDropColumnDefaultSql() should also be checked because some DBMS only
+	 * allow setting or removing the column default
+	 * @return
+	 */
+	public String getAlterColumnDefaultSql()
+	{
+		return Settings.getInstance().getProperty(prefix + "alter.column.default", null);
+	}
+
+	public String getSetColumnDefaultSql()
+	{
+		return Settings.getInstance().getProperty(prefix + "alter.column.default.set", null);
+	}
+
+	public String getDropColumnDefaultSql()
+	{
+		return Settings.getInstance().getProperty(prefix + "alter.column.default.drop", null);
 	}
 
 }

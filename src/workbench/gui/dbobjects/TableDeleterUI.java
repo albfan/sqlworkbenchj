@@ -11,15 +11,35 @@
  */
 package workbench.gui.dbobjects;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import workbench.db.TableDeleter;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -27,6 +47,7 @@ import workbench.db.importer.TableDependencySorter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.NoSelectionModel;
+import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.components.WbButton;
 import workbench.interfaces.JobErrorHandler;
 import workbench.interfaces.StatusBar;
@@ -42,7 +63,7 @@ import workbench.util.WbThread;
  */
 public class TableDeleterUI
 	extends javax.swing.JPanel
-	implements WindowListener, StatusBar, JobErrorHandler
+	implements WindowListener, JobErrorHandler
 {
 	private JDialog dialog;
 	private List<TableIdentifier> objectNames;
@@ -66,174 +87,174 @@ public class TableDeleterUI
 	 */
   // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
   private void initComponents() {
-    java.awt.GridBagConstraints gridBagConstraints;
+		GridBagConstraints gridBagConstraints;
 
-    buttonGroup1 = new javax.swing.ButtonGroup();
-    buttonPanel = new javax.swing.JPanel();
+    buttonGroup1 = new ButtonGroup();
+    buttonPanel = new JPanel();
     deleteButton = new WbButton();
     cancelButton = new WbButton();
-    mainPanel = new javax.swing.JPanel();
-    jScrollPane1 = new javax.swing.JScrollPane();
-    objectList = new javax.swing.JList();
-    optionPanel = new javax.swing.JPanel();
-    statusLabel = new javax.swing.JLabel();
-    jPanel1 = new javax.swing.JPanel();
-    checkFKButton = new javax.swing.JButton();
-    jPanel2 = new javax.swing.JPanel();
-    commitEach = new javax.swing.JRadioButton();
-    commitAtEnd = new javax.swing.JRadioButton();
-    useTruncateCheckBox = new javax.swing.JCheckBox();
-    jPanel3 = new javax.swing.JPanel();
-    showScript = new javax.swing.JButton();
-    addMissingTables = new javax.swing.JCheckBox();
+    mainPanel = new JPanel();
+    jScrollPane1 = new JScrollPane();
+    objectList = new JList();
+    optionPanel = new JPanel();
+    statusLabel = new SimpleStatusBar();
+    jPanel1 = new JPanel();
+    checkFKButton = new JButton();
+    jPanel2 = new JPanel();
+    commitEach = new JRadioButton();
+    commitAtEnd = new JRadioButton();
+    useTruncateCheckBox = new JCheckBox();
+    jPanel3 = new JPanel();
+    showScript = new JButton();
+    addMissingTables = new JCheckBox();
 
-    setLayout(new java.awt.BorderLayout());
+    setLayout(new BorderLayout());
 
-    buttonPanel.setLayout(new java.awt.FlowLayout(java.awt.FlowLayout.RIGHT));
+    buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
 
     deleteButton.setText(ResourceMgr.getString("LblDeleteTableData"));
-    deleteButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    deleteButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
         deleteButtonActionPerformed(evt);
       }
     });
     buttonPanel.add(deleteButton);
 
     cancelButton.setText(ResourceMgr.getString("LblCancel"));
-    cancelButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    cancelButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
         cancelButtonActionPerformed(evt);
       }
     });
     buttonPanel.add(cancelButton);
 
-    add(buttonPanel, java.awt.BorderLayout.SOUTH);
+    add(buttonPanel, BorderLayout.SOUTH);
 
-    mainPanel.setLayout(new java.awt.BorderLayout(0, 5));
+    mainPanel.setLayout(new BorderLayout(0, 5));
 
-    objectList.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    objectList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     objectList.setSelectionModel(new NoSelectionModel());
     jScrollPane1.setViewportView(objectList);
 
-    mainPanel.add(jScrollPane1, java.awt.BorderLayout.CENTER);
+    mainPanel.add(jScrollPane1, BorderLayout.CENTER);
 
-    optionPanel.setLayout(new java.awt.BorderLayout(0, 5));
+    optionPanel.setLayout(new BorderLayout(0, 5));
 
-    statusLabel.setBorder(javax.swing.BorderFactory.createEtchedBorder());
-    statusLabel.setMaximumSize(new java.awt.Dimension(32768, 24));
-    statusLabel.setMinimumSize(new java.awt.Dimension(150, 24));
-    statusLabel.setPreferredSize(new java.awt.Dimension(150, 24));
-    optionPanel.add(statusLabel, java.awt.BorderLayout.SOUTH);
+    statusLabel.setBorder(BorderFactory.createEtchedBorder());
+    statusLabel.setMaximumSize(new Dimension(32768, 24));
+    statusLabel.setMinimumSize(new Dimension(150, 24));
+    statusLabel.setPreferredSize(new Dimension(150, 24));
+    optionPanel.add(statusLabel, BorderLayout.SOUTH);
 
-    jPanel1.setLayout(new java.awt.GridBagLayout());
+    jPanel1.setLayout(new GridBagLayout());
 
     checkFKButton.setText(ResourceMgr.getString("LblCheckFKDeps"));
     checkFKButton.setToolTipText(ResourceMgr.getDescription("LblCheckFKDeps"));
-    checkFKButton.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    checkFKButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
         checkFKButtonActionPerformed(evt);
       }
     });
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(3, 3, 0, 5);
+    gridBagConstraints.insets = new Insets(3, 3, 0, 5);
     jPanel1.add(checkFKButton, gridBagConstraints);
 
-    jPanel2.setLayout(new java.awt.GridBagLayout());
+    jPanel2.setLayout(new GridBagLayout());
 
     buttonGroup1.add(commitEach);
     commitEach.setSelected(true);
     commitEach.setText(ResourceMgr.getString("LblCommitEachTableDelete")
     );
     commitEach.setBorder(null);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 6, 0, 0);
     jPanel2.add(commitEach, gridBagConstraints);
 
     buttonGroup1.add(commitAtEnd);
     commitAtEnd.setText(ResourceMgr.getString("LblCommitTableDeleteAtEnd"));
     commitAtEnd.setBorder(null);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(4, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(4, 6, 0, 0);
     jPanel2.add(commitAtEnd, gridBagConstraints);
 
     useTruncateCheckBox.setText(ResourceMgr.getString("LblUseTruncate"));
     useTruncateCheckBox.setBorder(null);
-    useTruncateCheckBox.addItemListener(new java.awt.event.ItemListener() {
-      public void itemStateChanged(java.awt.event.ItemEvent evt) {
+    useTruncateCheckBox.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent evt) {
         useTruncateCheckBoxItemStateChanged(evt);
       }
     });
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(6, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 6, 0, 0);
     jPanel2.add(useTruncateCheckBox, gridBagConstraints);
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanel2.add(jPanel3, gridBagConstraints);
 
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridheight = 3;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.BOTH;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.fill = GridBagConstraints.BOTH;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 9);
+    gridBagConstraints.insets = new Insets(3, 4, 0, 9);
     jPanel1.add(jPanel2, gridBagConstraints);
 
     showScript.setText(ResourceMgr.getString("LblShowScript"));
-    showScript.addActionListener(new java.awt.event.ActionListener() {
-      public void actionPerformed(java.awt.event.ActionEvent evt) {
+    showScript.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
         showScriptActionPerformed(evt);
       }
     });
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(9, 3, 0, 5);
+    gridBagConstraints.insets = new Insets(9, 3, 0, 5);
     jPanel1.add(showScript, gridBagConstraints);
 
     addMissingTables.setSelected(true);
     addMissingTables.setText(ResourceMgr.getString("LblIncFkTables"));
     addMissingTables.setToolTipText(ResourceMgr.getDescription("LblIncFkTables"));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     jPanel1.add(addMissingTables, gridBagConstraints);
 
-    optionPanel.add(jPanel1, java.awt.BorderLayout.CENTER);
+    optionPanel.add(jPanel1, BorderLayout.CENTER);
 
-    mainPanel.add(optionPanel, java.awt.BorderLayout.SOUTH);
+    mainPanel.add(optionPanel, BorderLayout.SOUTH);
 
-    add(mainPanel, java.awt.BorderLayout.CENTER);
+    add(mainPanel, BorderLayout.CENTER);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void useTruncateCheckBoxItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_useTruncateCheckBoxItemStateChanged
@@ -347,33 +368,6 @@ public class TableDeleterUI
 		return JobErrorHandler.JOB_ABORT;
 	}
 
-	public void clearStatusMessage()
-	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				statusLabel.setText("");
-			}
-		});
-	}
-
-	public String getText()
-	{
-		return statusLabel.getText();
-	}
-
-	public void setStatusMessage(final String message)
-	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				statusLabel.setText(message);
-			}
-		});
-	}
-
 	protected void closeWindow()
 	{
 		try
@@ -463,7 +457,7 @@ public class TableDeleterUI
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
 
 		deleter = new TableDeleter(this.connection);
-		deleter.setStatusBar(this);
+		deleter.setStatusBar((StatusBar)statusLabel);
 
 		if (useTruncate)
 		{
@@ -607,23 +601,23 @@ public class TableDeleterUI
 	{
 	}
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  public javax.swing.JCheckBox addMissingTables;
-  public javax.swing.ButtonGroup buttonGroup1;
-  public javax.swing.JPanel buttonPanel;
-  public javax.swing.JButton cancelButton;
-  public javax.swing.JButton checkFKButton;
-  public javax.swing.JRadioButton commitAtEnd;
-  public javax.swing.JRadioButton commitEach;
-  public javax.swing.JButton deleteButton;
-  public javax.swing.JPanel jPanel1;
-  public javax.swing.JPanel jPanel2;
-  public javax.swing.JPanel jPanel3;
-  public javax.swing.JScrollPane jScrollPane1;
-  public javax.swing.JPanel mainPanel;
-  public javax.swing.JList objectList;
-  public javax.swing.JPanel optionPanel;
-  public javax.swing.JButton showScript;
-  public javax.swing.JLabel statusLabel;
-  public javax.swing.JCheckBox useTruncateCheckBox;
+  public JCheckBox addMissingTables;
+  public ButtonGroup buttonGroup1;
+  public JPanel buttonPanel;
+  public JButton cancelButton;
+  public JButton checkFKButton;
+  public JRadioButton commitAtEnd;
+  public JRadioButton commitEach;
+  public JButton deleteButton;
+  public JPanel jPanel1;
+  public JPanel jPanel2;
+  public JPanel jPanel3;
+  public JScrollPane jScrollPane1;
+  public JPanel mainPanel;
+  public JList objectList;
+  public JPanel optionPanel;
+  public JButton showScript;
+  public JLabel statusLabel;
+  public JCheckBox useTruncateCheckBox;
   // End of variables declaration//GEN-END:variables
 }

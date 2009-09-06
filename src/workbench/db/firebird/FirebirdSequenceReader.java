@@ -9,17 +9,16 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.h2database;
+package workbench.db.firebird;
 
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -31,16 +30,16 @@ import workbench.util.StringUtil;
  *
  * @author  support@sql-workbench.net
  */
-public class H2SequenceReader
+public class FirebirdSequenceReader
 	implements SequenceReader
 {
-	private Connection dbConnection;
-	
-	public H2SequenceReader(Connection conn)
+	private WbConnection dbConnection;
+
+	public FirebirdSequenceReader(WbConnection conn)
 	{
 		this.dbConnection = conn;
 	}
-	
+
 	/**
 	 *	Return the source SQL for a H2 sequence definition.
 	 *
@@ -52,20 +51,20 @@ public class H2SequenceReader
 		if (def == null) return "";
 		return def.getSource();
 	}
-	
+
 	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
-		
+
 		for (int row=0; row < ds.getRowCount(); row++)
 		{
 			result.add(createSequenceDefinition(ds, row));
 		}
 		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
     DataStore ds = getRawSequenceDefinition(owner, sequence);
@@ -77,46 +76,29 @@ public class H2SequenceReader
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
 		SequenceDefinition result = null;
-		
+
     if (ds == null || ds.getRowCount() == 0) return null;
 
-		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
-		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
-		result = new SequenceDefinition(schema, name);
+		String name = ds.getValueAsString(row, 0);
+		result = new SequenceDefinition(null, name);
 
-		result.setSequenceProperty("CURRENT_VALUE", ds.getValue(row, "CURRENT_VALUE"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
-		result.setSequenceProperty("IS_GENERATED", ds.getValue(row, "IS_GENERATED"));
-		String comment = ds.getValueAsString(row, "REMARKS");
+		String comment = ds.getValueAsString(row, 1);
 		result.setComment(comment);
-		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
 		readSequenceSource(result);
-		
-		return result;		
+
+		return result;
 	}
 
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
-		
+
 		StringBuilder result = new StringBuilder(100);
-		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
+
     result.append("CREATE SEQUENCE ");
     result.append(def.getSequenceName());
-		
-		Long inc = (Long)def.getSequenceProperty("INCREMENT");
-    if (inc != null && inc != 1)
-    {
-      result.append("\n       INCREMENT BY ");
-      result.append(inc);
-    }
 
-    result.append("\n       CACHE ");
-		result.append(def.getSequenceProperty("CACHE").toString());
-		
-		result.append(';');
-		result.append(nl);
+		result.append(";\n");
 
 		String comments = def.getComment();
 		if (StringUtil.isNonBlank(comments))
@@ -127,11 +109,10 @@ public class H2SequenceReader
 			result.append(comments.replace("'", "''"));
 			result.append("';");
 		}
-		
 		def.setSource(result);
 		return;
 	}
-	
+
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
 		Statement stmt = null;
@@ -139,49 +120,27 @@ public class H2SequenceReader
 		DataStore ds = null;
 		try
 		{
-			String sql = "SELECT SEQUENCE_CATALOG, " +
-				"SEQUENCE_SCHEMA, " +
-				"SEQUENCE_NAME, " +
-				"CURRENT_VALUE, " +
-				"INCREMENT, " +
-				"IS_GENERATED, " +
-				"REMARKS, " +
-				"ID," +
-				"CACHE " +
-				"FROM information_schema.sequences ";
-			
-			boolean whereAdded = false;
+			String sql = 
+				"SELECT trim(rdb$generator_name) AS SEQUENCE_NAME, \n" +
+				"       trim(rdb$description) AS REMARKS \n" +
+				"FROM rdb$generators \n" +
+				"WHERE rdb$system_flag = 0";
 
-			if (StringUtil.isNonBlank(owner))
-			{
-				if (!whereAdded)
-				{
-					sql += " WHERE ";
-					whereAdded = true;
-				}
-				else
-				{
-					sql += " AND ";
-				}
-				sql += " sequence_schema = '" + owner + "'";
-			}
-		
 			if (StringUtil.isNonBlank(sequence))
 			{
-				if (!whereAdded)
+				if (sequence.indexOf("%") > 0)
 				{
-					sql += " WHERE ";
-					whereAdded = true;
+					sql += " AND rdb$generator_name LIKE '" + sequence + "'";
 				}
 				else
 				{
-					sql += " AND ";
+					sql += " AND rdb$generator_name = '" + sequence + "'";
 				}
-				sql += " sequence_name LIKE '" + sequence + "'";
 			}
+			sql += " ORDER BY 1";
 			if (Settings.getInstance().getDebugMetadataSql())
 			{
-				LogMgr.logInfo("H2SequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
+				LogMgr.logInfo("FirebirdSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 			}
 			stmt = this.dbConnection.createStatement();
 			rs = stmt.executeQuery(sql);
@@ -189,7 +148,7 @@ public class H2SequenceReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("H2SequenceReader.getSequenceDefinition()", "Error reading sequence definition", e);
+			LogMgr.logError("FirebirdSequenceReader.getRawSequenceDefinition()", "Error reading sequence definition", e);
 			ds = null;
 		}
 		finally

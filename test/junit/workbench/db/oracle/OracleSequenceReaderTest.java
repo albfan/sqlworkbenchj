@@ -69,18 +69,6 @@ public class OracleSequenceReaderTest
 		db.disconnect();
 	}
 
-	public void testGetSequenceList()
-		throws Exception
-	{
-		OracleSequenceReader instance = new OracleSequenceReader(db);
-		List<String> result = instance.getSequenceList("PUBLIC", null);
-		Collections.sort(result);
-		assertNotNull(result);
-		assertEquals(2, result.size());
-		assertEquals("SEQ_AAA", result.get(0));
-		assertEquals("SEQ_BBB", result.get(1));
-	}
-
 	public void testGetSequences()
 	{
 		OracleSequenceReader instance = new OracleSequenceReader(db);

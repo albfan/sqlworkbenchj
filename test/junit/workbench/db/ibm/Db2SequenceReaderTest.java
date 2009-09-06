@@ -116,25 +116,4 @@ public class Db2SequenceReaderTest
 		assertTrue(source.indexOf("COMMENT ON SEQUENCE SEQ_AAA IS 'aaa comment'") > -1);
 	}
 
-	public void testGetSequenceList()
-	{
-		Db2SequenceReader reader = new Db2SequenceReader(db);
-		reader.setQuoteKeyword(true);
-		List<String> result = reader.getSequenceList("FAKE_DB2", null);
-		Collections.sort(result);
-		assertNotNull(result);
-		assertEquals(2, result.size());
-		assertEquals("SEQ_AAA", result.get(0));
-		assertEquals("SEQ_BBB", result.get(1));
-
-		reader.setIsHost(true);
-		result = reader.getSequenceList("FAKE_DB2", null);
-		Collections.sort(result);
-		assertNotNull(result);
-		assertEquals(2, result.size());
-		assertEquals("SEQ_AAA", result.get(0));
-		assertEquals("SEQ_BBB", result.get(1));
-
-	}
-
 }

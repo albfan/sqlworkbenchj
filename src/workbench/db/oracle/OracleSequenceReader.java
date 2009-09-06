@@ -106,23 +106,6 @@ public class OracleSequenceReader
     return result;
   }
 
-  /**
-   * 	Get a list of sequences for the given owner
-   */
-  public List<String> getSequenceList(String owner, String namePattern)
-  {
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
-
-    List<String> result = new LinkedList<String>();
-		if (ds == null || ds.getRowCount() == 0) return result;
-		
-		for (int row=0; row < ds.getRowCount(); row ++)
-		{
-			result.add(ds.getValueAsString(row, "SEQUENCE_NAME"));
-		}
-		return result;
-  }
-
   public CharSequence getSequenceSource(String owner, String sequence)
   {
 		SequenceDefinition def = getSequenceDefinition(owner, sequence);

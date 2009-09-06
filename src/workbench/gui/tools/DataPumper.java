@@ -66,6 +66,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
+import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.components.WbButton;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
@@ -90,8 +91,8 @@ import workbench.util.WbThread;
  */
 public class DataPumper
 	extends JPanel
-	implements ActionListener, WindowListener, PropertyChangeListener, RowActionMonitor,
-	           ToolWindow, StatusBar
+	implements ActionListener, WindowListener, PropertyChangeListener, 
+						 RowActionMonitor, ToolWindow
 {
 	private File sourceFile;
 	private ProducerFactory fileImporter;
@@ -148,7 +149,7 @@ public class DataPumper
 		this.useQueryCbx.addActionListener(this);
 		this.sqlEditor = EditorPanel.createSqlEditor();
 		this.sqlEditor.showFormatSql();
-		this.completionAction = new AutoCompletionAction(this.sqlEditor, this);
+		this.completionAction = new AutoCompletionAction(this.sqlEditor, (StatusBar)this.statusLabel);
 		this.wherePanel.add(this.sqlEditor);
 		this.showWbCommand.setEnabled(false);
 		this.batchSize.setEnabled(false);
@@ -535,7 +536,7 @@ public class DataPumper
     batchSizeLabel = new JLabel();
     batchSize = new JTextField();
     ignoreDropError = new JCheckBox();
-    statusLabel = new JLabel();
+    statusLabel = new SimpleStatusBar();
     buttonPanel = new JPanel();
     jPanel3 = new JPanel();
     startButton = new WbButton();
@@ -2110,21 +2111,4 @@ public class DataPumper
 		w.dispose();
 	}
 
-	/*
-	 * Implementation of the StatusBar interface
-	 */
-	public void setStatusMessage(String message)
-	{
-		this.statusLabel.setText(message);
-	}
-
-	public void clearStatusMessage()
-	{
-		this.statusLabel.setText("");
-	}
-
-	public String getText()
-	{
-		return this.statusLabel.getText();
-	}
 }

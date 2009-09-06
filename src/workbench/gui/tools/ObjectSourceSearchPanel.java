@@ -47,14 +47,13 @@ import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.DividerBorder;
 import workbench.gui.components.EditWindow;
 import workbench.gui.components.FlatButton;
-import workbench.gui.components.GenericRowMonitor;
 import workbench.gui.components.RunningJobIndicator;
+import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.DbObjectSourcePanel;
 import workbench.gui.profiles.ProfileSelectionDialog;
-import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -72,12 +71,11 @@ import workbench.util.WbThread;
  */
 public class ObjectSourceSearchPanel
 	extends JPanel
-	implements ListSelectionListener, WindowListener, StatusBar, ToolWindow
+	implements ListSelectionListener, WindowListener, ToolWindow
 {
 	private boolean standalone;
 	private WbConnection connection;
 	private ObjectSourceSearcher searcher;
-	private GenericRowMonitor rowMonitor;
 	private JFrame window;
 
 	private WbTable results;
@@ -87,7 +85,6 @@ public class ObjectSourceSearchPanel
 	public ObjectSourceSearchPanel()
 	{
 		initComponents();
-		rowMonitor = new GenericRowMonitor(this);
 		checkButtons();
 		results = new WbTable(true, false, false);
 		WbScrollPane scroll = new WbScrollPane(results);
@@ -116,9 +113,8 @@ public class ObjectSourceSearchPanel
 	{
 		clearSearch();
 		searcher = new ObjectSourceSearcher(connection);
-		searcher.setRowMonitor(rowMonitor);
-
-		startButton.setText(ResourceMgr.getString("LblCancelSearch"));
+		searcher.setRowMonitor(((SimpleStatusBar)statusbar).getMonitor());
+		startButton.setText(ResourceMgr.getString("LblCancelPlain"));
 
 		List<String> schemas = StringUtil.stringToList(schemaNames.getText(), ",", true, true, false);
 		List<String> names = StringUtil.stringToList(objectNames.getText(), ",", true, true, false);
@@ -172,7 +168,7 @@ public class ObjectSourceSearchPanel
 	{
 		if (searcher != null && searcher.isRunning())
 		{
-			startButton.setText(ResourceMgr.getString("LblCancelSearch"));
+			startButton.setText(ResourceMgr.getString("LblCancelPlain"));
 			selectConnection.setEnabled(false);
 		}
 		else
@@ -206,7 +202,7 @@ public class ObjectSourceSearchPanel
 		TableColumn source = tmodel.getColumn(ObjectResultListDataStore.COL_IDX_SOURCE);
 		tmodel.removeColumn(source);
 	}
-	
+
 	protected void setModel(final DataStore data)
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -271,7 +267,7 @@ public class ObjectSourceSearchPanel
 	protected void connect(final ConnectionProfile profile)
 	{
 		clearSearch();
-		setStatusMessage(ResourceMgr.getString("MsgConnecting"));
+		statusbar.setText(ResourceMgr.getString("MsgConnecting"));
 		//WbSwingUtilities.repaintNow(statusbar);
 		WbSwingUtilities.showWaitCursor(window);
 
@@ -308,7 +304,7 @@ public class ObjectSourceSearchPanel
 		{
 			public void run()
 			{
-				clearStatusMessage();
+				statusbar.setText("");
 				checkButtons();
 				updateWindowTitle();
 			}
@@ -329,21 +325,6 @@ public class ObjectSourceSearchPanel
 			title = RunningJobIndicator.TITLE_PREFIX + title;
 		}
 		window.setTitle(title);
-	}
-
-	public void setStatusMessage(String message)
-	{
-		statusbar.setText(message);
-	}
-
-	public void clearStatusMessage()
-	{
-		statusbar.setText("");
-	}
-
-	public String getText()
-	{
-		return statusbar.getText();
 	}
 
 	public void saveSettings()
@@ -584,7 +565,7 @@ public class ObjectSourceSearchPanel
 	{
 		int row = results.getSelectedRow();
 		TableModel model = results.getModel();
-		
+
 		// As the source column has been removed from the view, the source
 		// has to be retrieved directly from the underlying table model
 		final CharSequence source = (CharSequence)model.getValueAt(row, ObjectResultListDataStore.COL_IDX_SOURCE);
@@ -696,7 +677,7 @@ public class ObjectSourceSearchPanel
     resultContainer = new javax.swing.JPanel();
     splitPane = new WbSplitPane();
     footerPanel = new javax.swing.JPanel();
-    statusbar = new javax.swing.JLabel();
+    statusbar = new SimpleStatusBar();
     buttonPanel = new javax.swing.JPanel();
     startButton = new javax.swing.JButton();
     showScriptButton = new javax.swing.JButton();

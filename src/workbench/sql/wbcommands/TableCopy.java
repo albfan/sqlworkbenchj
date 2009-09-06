@@ -49,7 +49,7 @@ public class TableCopy
 	{
 
 		String sourcetable = cmdLine.getValue(WbCopy.PARAM_SOURCETABLE);
-		String sourcequery = cmdLine.getValue(WbCopy.PARAM_SOURCEQUERY);
+		String sourcequery = SqlUtil.trimSemicolon(cmdLine.getValue(WbCopy.PARAM_SOURCEQUERY));
 		String targettable = cmdLine.getValue(WbCopy.PARAM_TARGETTABLE);
 
 		boolean cont = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);

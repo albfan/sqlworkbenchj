@@ -14,6 +14,7 @@ package workbench.gui.components;
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Set;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
 import javax.swing.table.AbstractTableModel;
@@ -51,7 +52,8 @@ public class DataStoreTableModel
 	private boolean allowEditing = true;
 	private boolean showConverterError = true;
 	private final Object model_change_lock = new Object();
-
+	private Set<Integer> readOnlyColumns;
+	
 	public DataStoreTableModel(DataStore aDataStore)
 		throws IllegalArgumentException
 	{
@@ -134,7 +136,15 @@ public class DataStoreTableModel
 		this.fireTableStructureChanged();
 	}
 
-	public boolean getShowStatusColumn() { return this.showStatusColumn; }
+	public void setReadOnlyColumns(Set<Integer> cols)
+	{
+		this.readOnlyColumns = cols;
+	}
+	
+	public boolean getShowStatusColumn()
+	{
+		return this.showStatusColumn;
+	}
 
 	public boolean isUpdateable()
 	{
@@ -165,15 +175,19 @@ public class DataStoreTableModel
 		// Updates to the status column shouldn't happen anyway ....
 		if (this.showStatusColumn && column == 0) return;
 
-		if (isNull(aValue, column - this.columnStartIndex))
+		int realColumn = column - this.columnStartIndex;
+		
+		if (this.readOnlyColumns != null && readOnlyColumns.contains(realColumn)) return;
+
+		if (isNull(aValue, realColumn))
 		{
-			this.dataCache.setValue(row, column - this.columnStartIndex, null);
+			this.dataCache.setValue(row, realColumn, null);
 		}
 		else
 		{
 			try
 			{
-				this.dataCache.setInputValue(row, column - this.columnStartIndex, aValue);
+				this.dataCache.setInputValue(row, realColumn, aValue);
 			}
 			catch (ConverterException ce)
 			{

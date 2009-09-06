@@ -31,6 +31,8 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -47,6 +49,7 @@ import workbench.gui.components.ValidatingDialog;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
@@ -345,6 +348,36 @@ public class WbSwingUtilities
 		JOptionPane.showMessageDialog(caller, message, title, JOptionPane.ERROR_MESSAGE);
 	}
 
+	public static void showMultiLineError(final Component caller, final String message)
+	{
+		if (WbManager.getInstance().isBatchMode())
+		{
+			LogMgr.logError("showMultiLineError()", message, null);
+			return;
+		}
+		final Component realCaller;
+
+		if (caller == null)
+		{
+			realCaller = WbManager.getInstance().getCurrentWindow();
+		}
+		else if (!(caller instanceof Window))
+		{
+			realCaller = SwingUtilities.getWindowAncestor(caller);
+		}
+		else
+		{
+			realCaller = caller;
+		}
+
+		JTextArea msg = new JTextArea(message);
+		msg.setFont(Settings.getInstance().getEditorFont());
+		JScrollPane pane = new JScrollPane(msg);
+		pane.setMaximumSize(new Dimension(640, 480));
+		pane.setPreferredSize(new Dimension(400, 250));
+		JOptionPane.showMessageDialog(realCaller, pane, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.ERROR_MESSAGE);
+	}
+	
 	public static void showMessage(final Component aCaller, final Object aMessage)
 	{
 		invoke(new Runnable()

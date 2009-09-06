@@ -441,7 +441,7 @@ public class TableSearchPanel
 	{
 		getCriteriaPanel().disableControls();
 		serverSideSearch.setEnabled(false);
-		startButton.setText(ResourceMgr.getString("LblCancelSearch"));
+		startButton.setText(ResourceMgr.getString("LblCancelPlain"));
 	}
 
 	public void valueChanged(ListSelectionEvent e)

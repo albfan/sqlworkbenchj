@@ -27,9 +27,9 @@ public class CommentSqlManager
 
 	private String dbid;
 
-	public CommentSqlManager(WbConnection con)
+	public CommentSqlManager(String id)
 	{
-		this.dbid = con.getMetadata().getDbId();
+		this.dbid = id;
 	}
 
 	public String getCommentSqlTemplate(String objectType)

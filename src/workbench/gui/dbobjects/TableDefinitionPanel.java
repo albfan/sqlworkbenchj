@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -43,6 +44,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.RunAlterScriptAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.QuickFilterPanel;
@@ -56,6 +58,7 @@ import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -80,6 +83,7 @@ public class TableDefinitionPanel
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
 	private WbAction createIndexAction;
+	private RunAlterScriptAction alterColumnsAction;
 	private TableIdentifier currentTable;
 	private WbConnection dbConnection;
 	private WbAction reloadAction;
@@ -106,7 +110,11 @@ public class TableDefinitionPanel
 		// properly in the QuickFilterPanel, although it wouldn't be necessary
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
-		columnFilter.addToToolbar(reloadAction, 0);
+
+		alterColumnsAction = new RunAlterScriptAction(tableDefinition);
+		columnFilter.addToToolbar(alterColumnsAction, 0);
+		columnFilter.addToolbarSeparator(1);
+		columnFilter.addToToolbar(reloadAction, 2);
 		GridBagConstraints cc = new GridBagConstraints();
 
 		cc.anchor = GridBagConstraints.WEST;
@@ -222,6 +230,19 @@ public class TableDefinitionPanel
 				DataStore def = meta.getObjectDetails(currentTable);
 
 				final DataStoreTableModel model = new DataStoreTableModel(def);
+
+				if (def instanceof TableColumnsDatastore)
+				{
+					// Make sure some columns are not modified by the user
+					// to avoid the impression that e.g. the column's position
+					// can be changed by editing that column
+					Set<Integer> cols = CollectionUtil.hashSet(
+						TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE,
+						TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_PK_FLAG,
+						TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_POSITION);
+					model.setReadOnlyColumns(cols);
+				}
+
 				WbSwingUtilities.invoke(new Runnable()
 				{
 					public void run()
@@ -229,6 +250,8 @@ public class TableDefinitionPanel
 						applyTableModel(model);
 					}
 				});
+				alterColumnsAction.setSourceTable(dbConnection, currentTable);
+				alterColumnsAction.setEnabled(false);
 			}
 			catch (SQLException e)
 			{
@@ -276,11 +299,10 @@ public class TableDefinitionPanel
 
 		// Columns may not be removed from the underlying DataStore because
 		// that is also used to retrieve the table source and DbMetadata
-		// relies on all tables being present when that datastore is passed
+		// relies on all columns being present when that datastore is passed
 		// to getTableSource()
 
-		// So we can only remove those columns from the view
-
+		// So we need to remove those columns from the view
 		String[] columns = new String[] { "SCALE/SIZE", "PRECISION" };
 		for (String name : columns)
 		{

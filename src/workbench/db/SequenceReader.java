@@ -28,11 +28,8 @@ public interface SequenceReader
 	void readSequenceSource(SequenceDefinition def);
 	
 	/**
-	 * 	Get a list of sequences for the given owner. The 
-	 *  contains objects of type String.
+	 * 	Get a list of sequences for the given owner. 
 	 */
-	List<String> getSequenceList(String schema, String namePattern);
-	
 	List<SequenceDefinition> getSequences(String schema, String namePattern)
 		throws SQLException;
 	

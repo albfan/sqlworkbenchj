@@ -306,6 +306,17 @@ public class SqlUtil
 		}
 	}
 
+	public static String trimSemicolon(String sql)
+	{
+		if (sql == null) return null;
+		String newSql = sql.trim();
+		if (newSql.length() == 0) return sql;
+		if (newSql.endsWith(";"))
+		{
+			return newSql.substring(0, newSql.length() - 1);
+		}
+		return sql;
+	}
 
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
@@ -375,7 +386,7 @@ public class SqlUtil
 			}
 			stmt = conn.createStatementForQuery();
 			stmt.setMaxRows(1);
-			rs = stmt.executeQuery(sql);
+			rs = stmt.executeQuery(trimSemicolon(sql));
 			ResultSetMetaData meta = rs.getMetaData();
 			result = new ResultInfo(meta, conn);
 			List tables = getTables(sql, false);

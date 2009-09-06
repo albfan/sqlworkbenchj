@@ -56,17 +56,6 @@ public class H2SequenceReaderTest
 		db.disconnect();
 	}
 
-	public void testGetSequenceList()
-	{
-		H2SequenceReader instance = new H2SequenceReader(db.getSqlConnection());
-		List<String> result = instance.getSequenceList("PUBLIC", null);
-		Collections.sort(result);
-		assertNotNull(result);
-		assertEquals(2, result.size());
-		assertEquals("SEQ_AAA", result.get(0));
-		assertEquals("SEQ_BBB", result.get(1));
-	}
-
 	public void testGetSequences()
 	{
 		H2SequenceReader instance = new H2SequenceReader(db.getSqlConnection());

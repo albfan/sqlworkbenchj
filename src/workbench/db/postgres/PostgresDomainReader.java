@@ -235,7 +235,7 @@ public class PostgresDomainReader
 		result.setValue(0, 2, domain.isNullable());
 		result.setValue(0, 3, domain.getCheckConstraint());
 		result.setValue(0, 4, domain.getComment());
-
+		result.resetStatus();
 		return result;
 	}
 

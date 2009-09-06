@@ -45,6 +45,7 @@ import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -89,7 +90,9 @@ public class BatchRunner
 	private boolean showStatementTiming = true;
 	private String connectionId = "BatchRunner";
 	private String command;
-
+	private boolean storeErrorMessages;
+	private MessageBuffer errors;
+	
 	public BatchRunner()
 	{
 		this.stmtRunner = new StatementRunner();
@@ -101,6 +104,11 @@ public class BatchRunner
 	{
 		this();
 		this.filenames = StringUtil.stringToList(aFilelist, ",", true);
+	}
+
+	public void setStoreErrors(boolean flag)
+	{
+		this.storeErrorMessages = flag;
 	}
 
 	/**
@@ -490,6 +498,12 @@ public class BatchRunner
 		}
 	}
 
+	public String getMessages()
+	{
+		if (errors == null) return null;
+		return errors.getBuffer().toString();
+	}
+	
 	public void cancel()
 	{
 		this.cancelExecution = true;
@@ -524,6 +538,12 @@ public class BatchRunner
 		return executeScript(parser);
 	}
 
+	/**
+	 * Execute the given script
+	 * @param script
+	 * @return true if an error occurred
+	 * @throws IOException
+	 */
 	public boolean executeScript(String script)
 		throws IOException
 	{
@@ -537,6 +557,7 @@ public class BatchRunner
 	{
 		boolean error = false;
 		DelimiterDefinition altDelim = null;
+		errors = null;
 
 		// If no delimiter has been defined, than use the default fallback
 		if (this.delimiter == null)
@@ -626,13 +647,22 @@ public class BatchRunner
 					{
 						LogMgr.logError("BatchRunner.execute()", feedback, null);
 						errorCount ++;
+						if (storeErrorMessages)
+						{
+							if (errors == null)
+							{
+								errors = new MessageBuffer();
+							}
+							errors.appendNewLine();
+							errors.append(feedback);
+						}
 					}
 					else
 					{
 						if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
 						totalRows += result.getTotalUpdateCount();
 					}
-
+					
 					printResults(sql, result);
 
 					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
