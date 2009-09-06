@@ -243,6 +243,11 @@ public class Settings
 			LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
 		}
 
+		if (getBoolProperty("workbench.db.resetdefaults"))
+		{
+			LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
+			resetDefaults();
+		}
 	}
 
 	private boolean loadConfig(WbFile cfile)
@@ -275,10 +280,21 @@ public class Settings
 		{
 			try { in.close(); } catch (Throwable th) {}
 		}
-
 		return true;
 	}
 
+	private void resetDefaults()
+	{
+		WbProperties defaults = getDefaultProperties();
+		for (String key : defaults.stringPropertyNames())
+		{
+			if (key.startsWith("workbench.db"))
+			{
+				setProperty(key, defaults.getProperty(key));
+			}
+		}
+	}
+	
 	public void setUseSinglePageHelp(boolean flag)
 	{
 		setProperty("workbench.help.singlepage", flag);
@@ -509,6 +525,11 @@ public class Settings
 	}
 	// </editor-fold>
 
+	public boolean isPropertyDefined(String key)
+	{
+		return props.containsKey(key);
+	}
+	
 	public boolean getFixSqlServerTimestampDisplay()
 	{
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);

@@ -40,7 +40,24 @@ public class CommentSqlManager
 		objectType = objectType.toLowerCase().replace(" ", "_");
 		
 		String defaultValue = Settings.getInstance().getProperty("workbench.db.sql.comment." + objectType, null);
-		String sql = Settings.getInstance().getProperty("workbench.db." + dbid + ".sql.comment." + objectType, defaultValue);
+		String key = "workbench.db." + dbid + ".sql.comment." + objectType;
+		String sql = Settings.getInstance().getProperty(key, defaultValue);
+		if (StringUtil.isEmptyString(sql))
+		{
+			// If the DB specific property is present, but empty, this means
+			// the database does not support this type of comments.
+			// if I would not test for presence of the key, the default would
+			// always be returned, and thus it would not be possible to "delete"
+			// the default by overwriting it with an empty key
+			if (Settings.getInstance().isPropertyDefined(key))
+			{
+				return null;
+			}
+			else
+			{
+				sql = defaultValue;
+			}
+		}
 		return SqlUtil.trimSemicolon(sql);
 	}
 }

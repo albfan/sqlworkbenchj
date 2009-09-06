@@ -11,8 +11,18 @@
 
   <entry dev-build="1" type="enh">
     <description>
+      workbench.settings will now only retain those properties that differ
+      from the built-in (DB) defaults to make rolling out changes to the
+      defaults easier. Any property that has been customized will remain
+      in workbench.settings (but will not benefit from bugfixes made
+      to the default properties)
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
       When displaying multiple result tabs, they can now be re-orderd using
-      drag & drop.
+      drag and drop.
     </description>
   </entry>
 

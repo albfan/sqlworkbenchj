@@ -22,7 +22,6 @@ import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.Types40;
 
 /**
  * A class to map datatypes from one DBMS to another.
@@ -85,8 +84,8 @@ public class TypeMapper
 		// is a personal feeling which type should be preferred over others ;)
 		allClobTypes.add(Integer.valueOf(Types.CLOB));
 		allClobTypes.add(Integer.valueOf(Types.LONGVARCHAR));
-		allClobTypes.add(Integer.valueOf(Types40.NCLOB));
-		allClobTypes.add(Integer.valueOf(Types40.LONGNVARCHAR));
+		allClobTypes.add(Integer.valueOf(Types.NCLOB));
+		allClobTypes.add(Integer.valueOf(Types.LONGNVARCHAR));
 
 
 		for (Integer clobType : allClobTypes)

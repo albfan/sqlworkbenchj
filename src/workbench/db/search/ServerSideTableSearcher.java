@@ -30,7 +30,6 @@ import workbench.storage.filter.ContainsComparator;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
-import workbench.util.Types40;
 import workbench.util.WbThread;
 
 /**
@@ -206,7 +205,7 @@ public class ServerSideTableSearcher
 	private boolean isSearchable(int sqlType, String dbmsType)
 	{
 		if (sqlType == Types.VARCHAR || sqlType == Types.CHAR ||
-			sqlType == Types40.NVARCHAR || sqlType == Types40.NCHAR)
+			sqlType == Types.NVARCHAR || sqlType == Types.NCHAR)
 		{
 			return true;
 		}

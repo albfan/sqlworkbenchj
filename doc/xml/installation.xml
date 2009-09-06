@@ -5,13 +5,8 @@
 		<title>Pre-requisites</title>
 
 		<para>
-			To run &wb-productname; a <ulink url="http://java.sun.com/j2se/">Java 5 runtime environment</ulink>
+			To run &wb-productname; a <ulink url="http://java.sun.com/javase/downloads/index.jsp">Java 6 runtime environment</ulink>
 			is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
-		</para>
-
-		<para>
-			&wb-productname; requires Java 5 (aka "Java 1.5") but Java 6 (aka "Java 1.6) is highly recommended,
-			especially because Java 5 will reach "end-of-live" in October 2009.
 		</para>
 
 		<para>

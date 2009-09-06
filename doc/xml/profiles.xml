@@ -131,13 +131,13 @@
 					<entry>
 						<para>This setting controls the default fetch size
 							for data retrieval. This parameter will directly be passed to the
-							<ulink url="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
+							<ulink url="http://java.sun.com/javase/6/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
 							method of the <literal>Statement</literal> object.
 							For some combinations of JDBC driver and DBMS, setting this parameter to a
 							rather large number can improve retrieval performance because it saves network traffic.
 						</para>
 						<para>
-							The JDBC driver for <ulink url="http://www.postgresql.org/">PostgreSQL</ulink> controls the <ulink url="http://jdbc.postgresql.org/documentation/80/query.html#query-with-cursor">caching</ulink>
+							The <ulink url="http://jdbc.postgresql.org">JDBC driver</ulink> for <ulink url="http://www.postgresql.org/">PostgreSQL</ulink> controls the <ulink url="http://jdbc.postgresql.org/documentation/80/query.html#query-with-cursor">caching</ulink>
 							of ResultSets through this parameter. As the results are cached by &wb-productname;
 							anyway, it is suggested to set this parameter to a value greater then zero to disable
 							the caching in the driver. Especially when exporting large results using

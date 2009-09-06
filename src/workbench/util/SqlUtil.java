@@ -871,10 +871,10 @@ public class SqlUtil
 		        aSqlType == Types.CHAR ||
 		        aSqlType == Types.CLOB ||
 		        aSqlType == Types.LONGVARCHAR ||
-						aSqlType == Types40.NVARCHAR ||
-						aSqlType == Types40.NCHAR ||
-						aSqlType == Types40.LONGNVARCHAR ||
-						aSqlType == Types40.NCLOB
+						aSqlType == Types.NVARCHAR ||
+						aSqlType == Types.NCHAR ||
+						aSqlType == Types.LONGNVARCHAR ||
+						aSqlType == Types.NCLOB
 						);
 	}
 
@@ -902,7 +902,7 @@ public class SqlUtil
 
 	public static final boolean isClobType(int aSqlType)
 	{
-		return (aSqlType == Types.CLOB || aSqlType == Types40.NCLOB);
+		return (aSqlType == Types.CLOB || aSqlType == Types.NCLOB);
 	}
 
 	public static final boolean isClobType(int aSqlType, DbSettings dbInfo)
@@ -916,9 +916,9 @@ public class SqlUtil
 		if (!treatLongVarcharAsClob) return isClobType(aSqlType);
 
 		return (aSqlType == Types.CLOB ||
-			      aSqlType == Types40.NCLOB ||
+			      aSqlType == Types.NCLOB ||
 			      aSqlType == Types.LONGVARCHAR ||
-						aSqlType == Types40.LONGNVARCHAR
+						aSqlType == Types.LONGNVARCHAR
 						);
 	}
 
@@ -1054,22 +1054,22 @@ public class SqlUtil
 			case Types.VARCHAR:
 				return "VARCHAR";
 
-			case Types40.NCLOB:
+			case Types.NCLOB:
 				return "NCLOB";
 
-			case Types40.SQLXML:
+			case Types.SQLXML:
 				return "SQLXML";
 
-			case Types40.NCHAR:
+			case Types.NCHAR:
 				return "NCHAR";
 
-			case Types40.NVARCHAR:
+			case Types.NVARCHAR:
 				return "NVARCHAR";
 
-			case Types40.LONGNVARCHAR:
+			case Types.LONGNVARCHAR:
 				return "LONGNVARCHAR";
 
-			case Types40.ROWID:
+			case Types.ROWID:
 				return "ROWID";
 
 			default:
@@ -1089,8 +1089,8 @@ public class SqlUtil
 		{
 			case Types.VARCHAR:
 			case Types.CHAR:
-			case Types40.NVARCHAR:
-			case Types40.NCHAR:
+			case Types.NVARCHAR:
+			case Types.NCHAR:
 				// Postgres' text datatype does not have a size parameter
 				if ("text".equals(typeName)) return "text";
 

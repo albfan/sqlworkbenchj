@@ -35,35 +35,24 @@
           All user tables can be exported into a directory with a single command. Export files can be compress "on-the-fly".</li>
       <li>Powerful text and XML file <a href="manual/command-import.html">import</a>. A set of files (including compressed files) can be imported from a directory with a single command. 
           Foreign key constraints are detected to insert the data in the correct order</li>
-      <!-- <li>Automatically detect and delete dependent rows when deleting rows from the result table</li> -->
+      <li><a href="manual/wb-commands.html#command-schema-diff">Compare</a> two database schemas for differences. The XML output can be transformed into the approriate SQL ALTER statements using <a href="xslt.html">XSLT</a></li>
+      <li><a href="manual/wb-commands.html#command-data-diff">Compare the data</a> of two database and generate the necessary SQL statements to migrate one to the other.</li>
       <li>Reformatting (Pretty-Print) of SQL Statements (<image-link title="SQL Formatter" name="SqlFormat.png">Screenshot</image-link>)</li>
       <li>Full support for BLOB data in query results, SQL statements, export and import. <a href="blob_example.html">Read more...</a></li>
       <li>Select rows from related tables according to their foreign key definitions (<image-link title="Select child rows" name="child_rows.png">Screenshot1</image-link> <image-link title="Select parent rows" name="parent_rows.png">Screenshot2</image-link>).<br/></li>
       <li>Search text in procedure, view and other sources using a <a href="manual/wb-commands.html#command-search-source">SQL command</a> or a GUI (<image-link title="Search object source" name="objectsearcher.png">Screenshot</image-link>)</li>
-      <li><a href="manual/wb-commands.html#command-schema-diff">Compare</a> two database schemas for differences. The XML output can be transformed into the approriate SQL ALTER statements using <a href="xslt.html">XSLT</a></li>
-      <li><a href="manual/wb-commands.html#command-data-diff">Compare the data</a> of two database and generate the necessary SQL statements to migrate one to the other.</li>
+      <li>Search for data across all columns in all tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
       <li>Copy data directly between to database servers using a <a href="manual/wb-commands.html#command-copy">SQL command</a> or a GUI (<image-link title="Data Pumper" name="DataPumper.png">Screenshot</image-link>)</li>
       <li>Makros (aka aliases) for frequently used SQL statements</li>
       <li>Variable substitution in SQL statements including smart prompting for values (can be combined with Makros)</li>
       <li>Auto completion for tables and columns in SQL statements (<image-link title="Auto-completion" name="completion.png">Screenshot</image-link>)</li>
       <li>All SQL Scripts (including Workbench specific commands) can be run in <a href="manual/using-scripting.html">batch mode</a></li>
       <li>An interactive console mode (<image-link title="Console mode" name="console.png">Screenshot</image-link>)</li>
-      <li>Support for pluggable Look &amp; Feels (e.g. <a href="http://www.jgoodies.com/freeware/looks/index.html">JGoodies Looks</a>)</li>
-      <li>SQLWorkbench/J is <b>free</b> (<a href="manual/workbench-manual.html#license">License agreement</a>)</li>
-    </ul>
-    <p>SQL Workbench/J also displays important information about the structure of a database schema</p>
-    <ul>
       <li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
       <li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
       <li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
-      <li>Search for data across all columns in several tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
+      <li>SQLWorkbench/J is <b>free</b> (<a href="manual/workbench-manual.html#license">License agreement</a>)</li>
     </ul>
-    <p style="margin-top:10px"><a href="wb_news.xml">RSS Feed available</a></p>
-    <!--
-    <p style="margin-top:25px">Please report comments or bugs in the <a href="http://groups.google.com/group/sql-workbench">forum</a> <br/>
-    Your feedback is very much welcome!
-    </p>
-    -->
     </content>
   </page>
   
