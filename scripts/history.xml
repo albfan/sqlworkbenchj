@@ -11,6 +11,13 @@
 
   <entry dev-build="1" type="enh">
     <description>
+      When displaying multiple result tabs, they can now be re-orderd using
+      drag & drop.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
       The column definition (of tables) in the DbExplorer can now be edited and the
       approriate ALTER statement can be generated for the changes.
     </description>
