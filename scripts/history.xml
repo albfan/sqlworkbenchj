@@ -3,12 +3,64 @@
 
 <release build="107" date="2009-08-31">
 
+  <entry dev-build="1" type="enh">
+    <description>
+      SQL Workbench/J now requires Java 6.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      The column definition (of tables) in the DbExplorer can now be edited and the
+      approriate ALTER statement can be generated for the changes.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      Tables can now be renamed from within the table list of the DbExplorer. For
+      databases that support this, other types (e.g. VIEWs, SEQUENCEs) can also
+      be renamed. The comment for a table can also be changed
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      The SQL tabs now have their own close button
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      "WbMode confirm" was not working if the profile was set to read only.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      The BLOB dialog could not be opened if the connection profile was set to read only.
+    </description>
+  </entry>
+
   <entry dev-build="1" type="fix">
     <description>
       Formatting UPDATEs with Sub-Select was not working properly
     </description>
   </entry>
-  
+
+  <entry dev-build="1" type="fix">
+    <description>
+      WbCopy now removes any trailing semicolon from the SQL query when using
+      query based copying. 
+    </description>
+  </entry>
+
 </release>
 
 <release build="106" date="2009-08-31">
