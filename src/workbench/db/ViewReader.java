@@ -146,6 +146,7 @@ public class ViewReader
 		if (StringUtil.isNonBlank(tableComment))
 		{
 			result.append(tableComment);
+			if (!tableComment.endsWith(";")) result.append(';');
 		}
 
 		StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.connection, view.getTable(), view.getColumns());

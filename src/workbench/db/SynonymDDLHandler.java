@@ -58,7 +58,7 @@ public class SynonymDDLHandler
 				sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, synonym.getComment().replace("'", "''"));
 				result.append('\n');
 				result.append(sql);
-				result.append('\n');
+				result.append(";\n");
 			}
 		}
 

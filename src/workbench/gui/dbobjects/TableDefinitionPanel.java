@@ -23,7 +23,6 @@ import java.awt.event.ActionListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -31,6 +30,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -44,9 +44,11 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
-import workbench.gui.actions.RunAlterScriptAction;
+import workbench.gui.actions.ColumnAlterAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.EmptyTableModel;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
@@ -58,7 +60,6 @@ import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
-import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbThread;
@@ -83,13 +84,15 @@ public class TableDefinitionPanel
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
 	private WbAction createIndexAction;
-	private RunAlterScriptAction alterColumnsAction;
+	private ColumnAlterAction alterColumnsAction;
 	private TableIdentifier currentTable;
 	private WbConnection dbConnection;
 	private WbAction reloadAction;
 	private DropDbObjectAction dropColumnsAction;
 	private JPanel toolbar;
 	private boolean busy;
+	private FlatButton alterButton;
+	private ColumnChangeValidator validator = new ColumnChangeValidator();
 
 	public TableDefinitionPanel()
 	{
@@ -105,16 +108,16 @@ public class TableDefinitionPanel
 
 		toolbar = new JPanel(new GridBagLayout());
 
+		alterColumnsAction = new ColumnAlterAction(tableDefinition);
+		alterColumnsAction.setReloadableClient(this);
+
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, true, "columnlist");
 		// Setting the column list now, ensures that the dropdown will be displayed
 		// properly in the QuickFilterPanel, although it wouldn't be necessary
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
 
-		alterColumnsAction = new RunAlterScriptAction(tableDefinition);
-		columnFilter.addToToolbar(alterColumnsAction, 0);
-		columnFilter.addToolbarSeparator(1);
-		columnFilter.addToToolbar(reloadAction, 2);
+		columnFilter.addToToolbar(reloadAction, true, true);
 		GridBagConstraints cc = new GridBagConstraints();
 
 		cc.anchor = GridBagConstraints.WEST;
@@ -140,6 +143,16 @@ public class TableDefinitionPanel
 		cc.fill = GridBagConstraints.NONE;
 		cc.insets = new Insets(0, 0, 0, 0);
 		toolbar.add(tableNameLabel, cc);
+
+		cc.fill = GridBagConstraints.HORIZONTAL;
+		cc.gridx ++;
+		cc.weightx = 0;
+		cc.fill = GridBagConstraints.NONE;
+		cc.anchor = GridBagConstraints.EAST;
+		cc.insets = new Insets(0, 15, 0, 0);
+		alterButton = new FlatButton(alterColumnsAction);
+		alterButton.setIcon(null);
+		toolbar.add(alterButton, cc);
 
 		WbScrollPane scroll = new WbScrollPane(this.tableDefinition);
 		this.setLayout(new BorderLayout());
@@ -228,20 +241,16 @@ public class TableDefinitionPanel
 				});
 				DbMetadata meta = this.dbConnection.getMetadata();
 				DataStore def = meta.getObjectDetails(currentTable);
-
-				final DataStoreTableModel model = new DataStoreTableModel(def);
+				final TableModel model = def == null ? EmptyTableModel.EMPTY_MODEL : new DataStoreTableModel(def) ;
 
 				if (def instanceof TableColumnsDatastore)
 				{
 					// Make sure some columns are not modified by the user
 					// to avoid the impression that e.g. the column's position
 					// can be changed by editing that column
-					Set<Integer> cols = CollectionUtil.hashSet(
-						TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE,
-						TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_PK_FLAG,
-						TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_POSITION);
-					model.setReadOnlyColumns(cols);
+					((DataStoreTableModel)model).setValidator(validator);
 				}
+				alterButton.setVisible("TABLE".equalsIgnoreCase(currentTable.getType()));
 
 				WbSwingUtilities.invoke(new Runnable()
 				{
@@ -266,12 +275,19 @@ public class TableDefinitionPanel
 		}
 	}
 
-	protected void applyTableModel(DataStoreTableModel model)
+	protected void applyTableModel(TableModel model)
 	{
 		tableDefinition.setPrintHeader(this.currentTable.getTableName());
 		tableDefinition.setAutoCreateColumnsFromModel(true);
 		tableDefinition.setModel(model, true);
-		tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
+		if (model instanceof EmptyTableModel)
+		{
+			tableNameLabel.setText("");
+		}
+		else
+		{
+			tableNameLabel.setText("<html><b>" + currentTable.getTableName() + "</b></html>");
+		}
 
 		TableColumnModel colmod = tableDefinition.getColumnModel();
 
@@ -341,6 +357,8 @@ public class TableDefinitionPanel
 		this.dbConnection = conn;
 		this.createIndexAction.setEnabled(this.dbConnection != null);
 		this.reloadAction.setEnabled(this.dbConnection != null);
+		validator.setConnection(conn);
+		
 		if (dbConnection != null && dbConnection.getDbSettings().canDropType("column"))
 		{
 			DropDbObjectAction action = getDropColumnAction();

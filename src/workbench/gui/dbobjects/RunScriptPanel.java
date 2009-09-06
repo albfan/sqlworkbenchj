@@ -9,11 +9,6 @@
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 
-/*
- * RunScriptPanel.java
- *
- * Created on Sep 5, 2009, 6:15:05 PM
- */
 package workbench.gui.dbobjects;
 
 import java.awt.Dimension;
@@ -32,6 +27,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.EscAction;
 import workbench.gui.components.SimpleStatusBar;
 import workbench.gui.sql.SqlEditor;
 import workbench.log.LogMgr;
@@ -55,7 +51,8 @@ public class RunScriptPanel
 	private Thread runThread;
 	private String sqlScript;
 	private boolean success;
-
+	private EscAction escAction;
+	
 	public RunScriptPanel(WbConnection con, String script)
 	{
 		initComponents();
@@ -80,7 +77,7 @@ public class RunScriptPanel
 		{
 			startScript();
 		}
-		else if (e.getSource() == closeButton)
+		else if (e.getSource() == closeButton || e.getSource() == escAction)
 		{
 			closeWindow();
 		}
@@ -98,6 +95,8 @@ public class RunScriptPanel
 			public void run()
 			{
 				window = new JDialog(owner, title, true);
+				escAction = new EscAction(window, RunScriptPanel.this);
+
 				window.getContentPane().add(RunScriptPanel.this);
 				if (!Settings.getInstance().restoreWindowSize(window, "workbench.gui.runscript.window"))
 				{

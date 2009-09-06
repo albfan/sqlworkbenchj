@@ -10,19 +10,18 @@
  */
 package workbench.db;
 
-import java.sql.SQLException;
-import java.sql.Savepoint;
-import java.sql.Statement;
 import java.util.List;
 import workbench.db.oracle.OracleMetadata;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A class to generate ALTER statements for changes to column definitions
+ * of a table. The necessary DBMS specific SQL statements are retrieved
+ * through DbSettings
+ * 
  * @author Thomas Kellerer
  */
 public class ColumnChanger
@@ -43,11 +42,13 @@ public class ColumnChanger
 	// Unit test without a connection.
 	private WbConnection dbConn;
 	private DbSettings dbSettings;
+	private CommentSqlManager commentMgr;
 
 	public ColumnChanger(WbConnection con)
 	{
 		dbConn = con;
 		dbSettings = (con != null ? con.getDbSettings() : null);
+		commentMgr = new CommentSqlManager(dbSettings != null ? dbSettings.getDbId() : "");
 	}
 
 	/**
@@ -58,6 +59,7 @@ public class ColumnChanger
 	{
 		dbConn = null;
 		dbSettings = settings;
+		commentMgr = new CommentSqlManager(dbSettings != null ? dbSettings.getDbId() : "");
 	}
 
 	public String getAlterScript(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
@@ -67,7 +69,7 @@ public class ColumnChanger
 
 		StringBuilder result = new  StringBuilder(statements.size() * 50);
 
-		if (dbConn.getMetadata().isOracle())
+		if (dbConn != null && dbConn.getMetadata().isOracle())
 		{
 			String oldComment = oldDefinition.getComment();
 			String newComment = newDefinition.getComment();
@@ -87,47 +89,6 @@ public class ColumnChanger
 			result.append(";\n");
 		}
 		return result.toString();
-	}
-
-	public void alterColumns(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
-		throws SQLException
-	{
-		List<String> statements = getAlterStatements(table, oldDefinition, newDefinition);
-		if (statements.size() == 0) return;
-
-		Statement stmt = null;
-		Savepoint sp = null;
-		try
-		{
-			stmt = dbConn.createStatement();
-			if (dbSettings.useSavePointForDDL())
-			{
-				sp = dbConn.setSavepoint();
-			}
-
-			for (String sql : statements)
-			{
-				LogMgr.logDebug("ColumnChanger.alterColumns()", "Running SQL: " + sql);
-				stmt.execute(sql);
-			}
-			dbConn.releaseSavepoint(sp);
-		}
-		catch (SQLException e)
-		{
-			if (sp != null)
-			{
-				dbConn.rollback(sp);
-			}
-			else if (dbSettings.ddlNeedsCommit())
-			{
-				dbConn.rollback();
-			}
-			throw e;
-		}
-		finally
-		{
-			SqlUtil.closeStatement(stmt);
-		}
 	}
 
 	public List<String> getAlterStatements(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
@@ -172,6 +133,39 @@ public class ColumnChanger
 		return sql;
 	}
 
+	public boolean canAlterType()
+	{
+		String sql = dbSettings.getAlterColumnDataTypeSql();
+		return (sql != null);
+	}
+
+	public boolean canRenameColumn()
+	{
+		String sql = dbSettings.getRenameColumnSql();
+		return (sql != null);
+	}
+
+	public boolean canChangeNullable()
+	{
+		String dropNotNull = dbSettings.getAlterColumnDropNotNull();
+		String setNotNull = dbSettings.getAlterColumnSetNotNull();
+		return (dropNotNull != null && setNotNull != null);
+	}
+	
+	public boolean canChangeDefault()
+	{
+		String alterDefault = dbSettings.getAlterColumnDefaultSql();
+		String setDefault = dbSettings.getSetColumnDefaultSql();
+		String dropDefault = dbSettings.getDropColumnDefaultSql();
+		return (alterDefault != null || (setDefault != null && dropDefault != null));
+	}
+
+	public boolean canChangeComment()
+	{
+		String sql = commentMgr.getCommentSqlTemplate("column");
+		return (sql != null);
+	}
+	
 	protected String changeDataType(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
 		String sql = dbSettings.getAlterColumnDataTypeSql();
@@ -238,8 +232,7 @@ public class ColumnChanger
 
 	private String changeRemarks(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
-		CommentSqlManager mgr = new CommentSqlManager(this.dbSettings.getDbId());
-		String sql = mgr.getCommentSqlTemplate("column");
+		String sql = commentMgr.getCommentSqlTemplate("column");
 		if (StringUtil.isBlank(sql)) return null;
 
 		String oldRemarks = oldDefinition.getComment();

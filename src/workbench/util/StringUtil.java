@@ -574,6 +574,18 @@ public class StringUtil
 		return equalString(one, other);
 	}
 
+	/**
+	 * Checks if both Strings are equal considering null values.
+	 * A null String and an empty String (length==0 or all whitespace) are
+	 * considered equal as well (because both are "empty")
+	 * @see #isBlank(java.lang.CharSequence)
+	 */
+	public static final boolean equalStringOrEmpty(String one, String other, boolean ignoreCase)
+	{
+		if (isBlank(one) && isBlank(other)) return true;
+		return compareStrings(one, other, ignoreCase) == 0;
+	}
+
 	public static final boolean equalString(String one, String other)
 	{
 		return compareStrings(one, other, false) == 0;

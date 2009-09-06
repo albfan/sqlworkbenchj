@@ -24,6 +24,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.InputValidator;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultInfo;
 import workbench.storage.SortDefinition;
@@ -53,6 +54,7 @@ public class DataStoreTableModel
 	private boolean showConverterError = true;
 	private final Object model_change_lock = new Object();
 	private Set<Integer> readOnlyColumns;
+	private InputValidator inputValidator;
 	
 	public DataStoreTableModel(DataStore aDataStore)
 		throws IllegalArgumentException
@@ -170,12 +172,22 @@ public class DataStoreTableModel
 		return StringUtil.isEmptyString(s);
 	}
 
+	public void setValidator(InputValidator validator)
+	{
+		inputValidator = validator;
+	}
+	
 	public void setValueAt(Object aValue, int row, int column)
 	{
 		// Updates to the status column shouldn't happen anyway ....
 		if (this.showStatusColumn && column == 0) return;
 
 		int realColumn = column - this.columnStartIndex;
+		
+		if (inputValidator != null)
+		{
+			if (!inputValidator.isValid(aValue, row, column, this)) return;
+		}
 		
 		if (this.readOnlyColumns != null && readOnlyColumns.contains(realColumn)) return;
 

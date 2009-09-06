@@ -905,4 +905,16 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "alter.column.default.drop", null);
 	}
 
+	/**
+	 * Returns the ALTER ... template to rename the given object type 
+	 * (e.g. TABLE, VIEW)
+	 * 
+	 * @param type
+	 * @return null if no template was configured for this dbms
+	 */
+	public String getRenameObjectSql(String type)
+	{
+		if (StringUtil.isBlank(type)) return null;
+		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".rename", null);
+	}
 }

@@ -95,6 +95,7 @@ import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DeleteTablesAction;
 import workbench.gui.actions.DropDbObjectAction;
+import workbench.gui.actions.AlterObjectAction;
 import workbench.gui.actions.SchemaReportAction;
 import workbench.gui.actions.ScriptDbObjectAction;
 import workbench.gui.components.WbTabbedPane;
@@ -129,7 +130,8 @@ public class TableListPanel
 	protected WbTable indexes;
 	protected WbTable importedKeys;
 	protected WbTable exportedKeys;
-
+	protected ReloadAction reloadAction;
+	
 	protected TableDataPanel tableData;
 
 	private TableDependencyTreeDisplay importedTableTree;
@@ -150,7 +152,8 @@ public class TableListPanel
 	private SpoolDataAction spoolData;
 
 	private CompileDbObjectAction compileAction;
-
+	private AlterObjectAction renameAction;
+	
 	private MainWindow parentWindow;
 
 	private TableIdentifier selectedTable;
@@ -190,6 +193,8 @@ public class TableListPanel
 
 	private final Object connectionLock = new Object();
 	private final Object msgLock = new Object();
+
+	private TableChangeValidator validator = new TableChangeValidator();
 
 	// </editor-fold>
 
@@ -294,15 +299,17 @@ public class TableListPanel
 		this.spoolData = new SpoolDataAction(this);
 		this.tableList.addPopupAction(spoolData, true);
 
+		renameAction = new AlterObjectAction(tableList);
+
 		this.extendPopupMenu();
 
 		this.findPanel = new QuickFilterPanel(this.tableList, false, "tablelist");
 
-		ReloadAction a = new ReloadAction(this);
-		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
-		a.addToInputMap(tableList);
+		reloadAction = new ReloadAction(this);
+		reloadAction.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshTableList"));
+		reloadAction.addToInputMap(tableList);
 
-		this.findPanel.addToToolbar(a, true, false);
+		this.findPanel.addToToolbar(reloadAction, true, false);
 
 		JPanel selectPanel = new JPanel();
 		selectPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -458,6 +465,7 @@ public class TableListPanel
 		tableList.addPopupAction(dropAction, true);
 
 		tableList.addPopupAction(new DeleteTablesAction(this, tableList.getSelectionModel(), this.tableData), false);
+		tableList.addPopupAction(renameAction, true);
 	}
 
 	public void setDbExecutionListener(DbExecutionListener l)
@@ -707,7 +715,10 @@ public class TableListPanel
 		this.tableDefinition.setConnection(aConnection);
 		this.triggers.setConnection(aConnection);
 		this.tableSource.setDatabaseConnection(aConnection);
-
+		
+		renameAction.setConnection(dbConnection);
+		validator.setConnection(dbConnection);
+		
 		if (this.dbConnection != null)
 		{
 			this.findPanel.setColumnList(dbConnection.getMetadata().getTableListColumns());
@@ -859,7 +870,11 @@ public class TableListPanel
 
 			DataStore ds = dbConnection.getMetadata().getObjects(currentCatalog, currentSchema, types);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
-			model.sortByColumn(0);
+
+			// Make sure some columns are not modified by the user
+			// to avoid the impression that e.g. a table's catalog can be changed
+			// by editing this list
+			model.setValidator(validator);
 
 			WbSwingUtilities.invoke(new Runnable()
 			{

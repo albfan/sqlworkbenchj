@@ -12,6 +12,7 @@
 package workbench.db;
 
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -39,6 +40,7 @@ public class CommentSqlManager
 		objectType = objectType.toLowerCase().replace(" ", "_");
 		
 		String defaultValue = Settings.getInstance().getProperty("workbench.db.sql.comment." + objectType, null);
-		return Settings.getInstance().getProperty("workbench.db." + dbid + ".sql.comment." + objectType, defaultValue);
+		String sql = Settings.getInstance().getProperty("workbench.db." + dbid + ".sql.comment." + objectType, defaultValue);
+		return SqlUtil.trimSemicolon(sql);
 	}
 }

@@ -1,5 +1,5 @@
 /*
- * RunAlterScriptAction
+ * ColumnAlterAction
  *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -24,6 +24,7 @@ import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.WbTable;
 import workbench.gui.dbobjects.RunScriptPanel;
+import workbench.interfaces.Reloadable;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
@@ -32,23 +33,16 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class RunAlterScriptAction
+public class ColumnAlterAction
 	extends WbAction
 	implements TableModelListener
 {
 	private WbTable definition;
 	private TableIdentifier sourceTable;
 	private WbConnection dbConnection;
-	private int[] supportedColumns = new int[]
-	{
-		TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME,
-		TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE,
-		TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT,
-		TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE,
-		TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS
-	};
+	private Reloadable client;
 	
-	public RunAlterScriptAction(WbTable defTable)
+	public ColumnAlterAction(WbTable defTable)
 	{
 		super();
 		this.definition = defTable;
@@ -58,6 +52,11 @@ public class RunAlterScriptAction
 		definition.addTableModelListener(this);
 	}
 
+	public void setReloadableClient(Reloadable reload)
+	{
+		client = reload;
+	}
+	
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
@@ -105,10 +104,9 @@ public class RunAlterScriptAction
 		RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
 		panel.openWindow(parent, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.isSuccess())
+		if (panel.isSuccess() && client != null)
 		{
-			DataStore ds = definition.getDataStore();
-			ds.resetStatus();
+			client.reload();
 		}
 	}
 

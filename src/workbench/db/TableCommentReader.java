@@ -24,15 +24,13 @@ import workbench.util.StringUtil;
  */
 public class TableCommentReader
 {
-
 	public TableCommentReader()
 	{
-		
 	}
 	
 	/**
 	 * Return the SQL that is needed to re-create the comment on the given table.
-	 * The syntax to be used, can be configured in the TableCommentStatements.xml file.
+	 * The syntax to be used, can be configured in the workbench.settings file.
 	 */
 	public String getTableCommentSql(WbConnection dbConnection, TableIdentifier table)
 	{
@@ -62,7 +60,9 @@ public class TableCommentReader
 			result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
 			result = StringUtil.replace(result, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
 			result = StringUtil.replace(result, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
+			result += ";";
 		}
+
 		return result;
 	}
 
@@ -125,7 +125,7 @@ public class TableCommentReader
 					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
 					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : SqlUtil.escapeQuotes(comment));
 					result.append(commentSql);
-					result.append("\n");
+					result.append(";\n");
 				}
 				catch (Exception e)
 				{

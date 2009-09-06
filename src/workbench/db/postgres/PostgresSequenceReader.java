@@ -230,7 +230,6 @@ public class PostgresSequenceReader
 		def.setSequenceProperty("CACHE", ds.getValue(0, "cache_value"));
 		def.setSequenceProperty("CYCLE", ds.getValue(0, "is_cycled"));
 		def.setSequenceProperty("REMARKS", comment);
-//		readSequenceSource(def);
 		def.setComment(comment);
 		return def;
 	}
