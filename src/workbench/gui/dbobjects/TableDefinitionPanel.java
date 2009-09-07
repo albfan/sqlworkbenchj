@@ -109,7 +109,7 @@ public class TableDefinitionPanel
 		toolbar = new JPanel(new GridBagLayout());
 
 		alterColumnsAction = new ColumnAlterAction(tableDefinition);
-		alterColumnsAction.setReloadableClient(this);
+		alterColumnsAction.setReloader(this);
 
 		columnFilter  = new QuickFilterPanel(this.tableDefinition, true, "columnlist");
 		// Setting the column list now, ensures that the dropdown will be displayed

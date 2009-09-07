@@ -50,9 +50,9 @@ public class RunScriptPanel
 	private BatchRunner runner;
 	private Thread runThread;
 	private String sqlScript;
-	private boolean success;
 	private EscAction escAction;
-	
+	private boolean wasRun;
+
 	public RunScriptPanel(WbConnection con, String script)
 	{
 		initComponents();
@@ -65,9 +65,9 @@ public class RunScriptPanel
 		closeButton.addActionListener(this);
 	}
 
-	public boolean isSuccess()
+	public boolean wasRun()
 	{
-		return success;
+		return wasRun;
 	}
 	
 	@Override
@@ -170,7 +170,7 @@ public class RunScriptPanel
 			cancelButton.setEnabled(true);
 			closeButton.setEnabled(false);
 
-			success = !runner.executeScript(editor.getText());
+			boolean success = !runner.executeScript(editor.getText());
 
 			final String statusMsg;
 			if (success)
@@ -204,7 +204,6 @@ public class RunScriptPanel
 		{
 			LogMgr.logError("RunScriptPanel.runScript()", "Error when running script", e);
 			final String error = ExceptionUtil.getDisplay(e);
-			success = false;
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				@Override
@@ -217,6 +216,7 @@ public class RunScriptPanel
 		}
 		finally
 		{
+			wasRun = true;
 			startButton.setEnabled(true);
 			cancelButton.setEnabled(false);
 			closeButton.setEnabled(true);

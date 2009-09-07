@@ -10,6 +10,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -52,7 +53,7 @@ public class ColumnAlterAction
 		definition.addTableModelListener(this);
 	}
 
-	public void setReloadableClient(Reloadable reload)
+	public void setReloader(Reloadable reload)
 	{
 		client = reload;
 	}
@@ -104,9 +105,16 @@ public class ColumnAlterAction
 		RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
 		panel.openWindow(parent, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.isSuccess() && client != null)
+		if (panel.wasRun() && client != null)
 		{
-			client.reload();
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					client.reload();
+				}
+			});
 		}
 	}
 

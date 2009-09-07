@@ -10,6 +10,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -54,7 +55,7 @@ public class AlterObjectAction
 		checkEnabled();
 	}
 
-	public void setClient(Reloadable reload)
+	public void setReloader(Reloadable reload)
 	{
 		client = reload;
 	}
@@ -117,12 +118,16 @@ public class AlterObjectAction
 		RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
 		panel.openWindow(parent, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.isSuccess())
+		if (panel.wasRun() && client != null)
 		{
-			if (client != null)
+			EventQueue.invokeLater(new Runnable()
 			{
-				client.reload();
-			}
+				@Override
+				public void run()
+				{
+					client.reload();
+				}
+			});
 		}
 	}
 

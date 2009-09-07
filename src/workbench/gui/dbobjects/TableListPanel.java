@@ -300,6 +300,7 @@ public class TableListPanel
 		this.tableList.addPopupAction(spoolData, true);
 
 		renameAction = new AlterObjectAction(tableList);
+		renameAction.setReloader(this);
 
 		this.extendPopupMenu();
 
