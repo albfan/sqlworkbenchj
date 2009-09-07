@@ -106,7 +106,6 @@ public class Settings
 	private static final String LIB_DIR_KEY = "%LibDir%";
 
 	private WbProperties props;
-	private WbProperties dbProps;
 	private WbFile configfile;
 
 	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
@@ -1619,6 +1618,12 @@ public class Settings
 		return StringUtil.stringToList(list, ",");
 	}
 
+	/**
+	 * Returns a list of DBIDs of servers that do not accept the NULL keyword
+	 * in a column definition.
+	 * 
+	 * @return
+	 */
 	public List<String> getServersWithNoNullKeywords()
 	{
 		String list = getProperty("workbench.db.nonullkeyword", "");
@@ -2609,6 +2614,10 @@ public class Settings
 			props.remove("workbench.warn.java5");
 			props.remove("workbench.db.microsoft_sql_server.drop.index.ddl");
 			props.remove("workbench.db.mysql.drop.index.ddl");
+			props.remove("workbench.db.h2.drop.column.single");
+			props.remove("workbench.db.hsql_database_engine.drop.column.single");
+			props.remove("workbench.db.oracle.drop.column.single");
+			props.remove("workbench.db.postgresql.drop.column.single");
 		}
 		catch (Throwable e)
 		{

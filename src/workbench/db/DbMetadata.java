@@ -817,7 +817,7 @@ public class DbMetadata
 		else
 		{
 			drop = StringUtil.replace(drop, "%name%", quoteObjectname(objectName));
-			result.append(drop);
+			result.append(SqlUtil.addSemicolon(drop));
 		}
 		return result;
 	}
@@ -825,7 +825,7 @@ public class DbMetadata
 	StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
 	{
 		StringBuilder result = new StringBuilder();
-		boolean replaced = false;
+		boolean replaceAvailable = false;
 
 		String prefix = "workbench.db.";
 		String suffix = "." + type.toLowerCase() + ".sql." + this.getDbId();
@@ -834,17 +834,17 @@ public class DbMetadata
 		if (replace != null)
 		{
 			replace = StringUtil.replace(replace, "%name%", quoteObjectname(name));
-			result.append(replace);
-			replaced = true;
+			result.append(SqlUtil.addSemicolon(replace));
+			replaceAvailable = true;
 		}
 
-		if (includeDrop && !replaced)
+		if (includeDrop && !replaceAvailable)
 		{
 			result.append(generateDrop(type, name));
 			result.append('\n');
 		}
 
-		if (!replaced)
+		if (!replaceAvailable)
 		{
 			String create = Settings.getInstance().getProperty(prefix + "create" + suffix, null);
 			if (create == null)
@@ -857,7 +857,7 @@ public class DbMetadata
 			else
 			{
 				create = StringUtil.replace(create, "%name%", quoteObjectname(name));
-				result.append(create);
+				result.append(SqlUtil.addSemicolon(create));
 			}
 		}
 		return result;

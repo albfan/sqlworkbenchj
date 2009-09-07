@@ -306,6 +306,14 @@ public class SqlUtil
 		}
 	}
 
+	public static String addSemicolon(String sql)
+	{
+		if (sql == null) return null;
+		sql = sql.trim();
+		if (sql.endsWith(";")) return sql;
+		return sql + ";";
+	}
+	
 	public static String trimSemicolon(String sql)
 	{
 		if (sql == null) return null;
