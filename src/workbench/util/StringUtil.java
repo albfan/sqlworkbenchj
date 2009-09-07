@@ -1016,11 +1016,11 @@ public class StringUtil
 					// The character after the backslash was not a 'u'
 					// so we are not dealing with a uXXXX value
 					// This applies popular "encodings" for non-printable characters
-					if (aChar == 't') aChar = '\t';
+					if (aChar == '\\') aChar = '\\';
+					else if (aChar == 't') aChar = '\t';
 					else if (aChar == 'r') aChar = '\r';
 					else if (aChar == 'n') aChar = '\n';
 					else if (aChar == 'f') aChar = '\f';
-					else if (aChar == '\\') aChar = '\\';
 					else outBuffer.append('\\');
 					outBuffer.append(aChar);
 				}

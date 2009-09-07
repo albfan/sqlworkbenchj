@@ -305,6 +305,9 @@ public class StringUtilTest
 			decoded = StringUtil.decodeUnicode(value);
 			assertEquals("abc\\def", decoded);
 
+			value = "abc\\\\n";
+			decoded = StringUtil.decodeUnicode(value);
+			assertEquals("abc\\n", decoded);
 		}
 		catch (Exception e)
 		{

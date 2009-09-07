@@ -43,10 +43,13 @@ public class ButtonTabComponent
 		setOpaque(false);
 
 		label = new JLabel();
+		label.setOpaque(false);
 		label.setText(title);
 		setBorder(new EmptyBorder(1, 0, 0, 0));
+		//setBorder(new LineBorder(Color.RED, 1));
 		label.setBorder(new EmptyBorder(0,0,0,3));
 		closeButton = new WbButton(ResourceMgr.getPng("closePanel"));
+		closeButton.setOpaque(false);
 		Dimension d = new Dimension(14, 15);
 		closeButton.setPreferredSize(d);
 		closeButton.setFocusable(false);
@@ -57,6 +60,23 @@ public class ButtonTabComponent
 		add(closeButton);
 	}
 
+	public void setDisplayedMnemonicIndex(int index)
+		throws IllegalArgumentException
+	{
+		label.setDisplayedMnemonicIndex(index);
+	}
+
+	public void setDisplayedMnemonic(char aChar)
+	{
+		label.setDisplayedMnemonic(aChar);
+	}
+
+	public void setDisplayedMnemonic(int key)
+	{
+		label.setDisplayedMnemonic(key);
+	}
+
+	
 	public void setEnabled(boolean flag)
 	{
 		closeButton.setEnabled(flag);

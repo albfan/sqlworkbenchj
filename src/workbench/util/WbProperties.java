@@ -132,14 +132,17 @@ public class WbProperties
 				}
 			}
 
+			final String newlineEscape = "_$wb$nl$_";
 			String value = this.getProperty(key);
 			if (value != null)
 			{
+
+				value = value.replace("\n", newlineEscape);
 				value = StringUtil.escapeUnicode(value, CharacterRange.RANGE_7BIT);
 
 				// Newlines will also be encoded, but we want them "visible" with
 				// line continuation in the written file
-				value = value.replace("\\n", "\\\n");
+				value = value.replace(newlineEscape, "\\\n");
 				
 				if (value.length() > 0)
 				{

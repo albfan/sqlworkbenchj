@@ -80,6 +80,28 @@ public class WbTabbedPane
 	}
 
 	@Override
+	public void setDisplayedMnemonicIndexAt(int tabIndex, int mnemonicIndex)
+	{
+		super.setDisplayedMnemonicIndexAt(tabIndex, mnemonicIndex);
+		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(tabIndex);
+		if (comp != null)
+		{
+			comp.setDisplayedMnemonicIndex(mnemonicIndex);
+		}
+	}
+
+	@Override
+	public void setMnemonicAt(int tabIndex, int mnemonic)
+	{
+		super.setMnemonicAt(tabIndex, mnemonic);
+		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(tabIndex);
+		if (comp != null)
+		{
+			comp.setDisplayedMnemonic(mnemonic);
+		}
+	}
+
+	@Override
 	public void setIconAt(int index, Icon icon)
 	{
 		super.setIconAt(index, icon);
