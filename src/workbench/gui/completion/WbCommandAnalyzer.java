@@ -60,7 +60,23 @@ public class WbCommandAnalyzer
 	public void checkContext()
 	{
 		CommandMapper mapper = new CommandMapper();
+		if (sql.trim().toLowerCase().equals("wb"))
+		{
+			context = CONTEXT_WB_COMMANDS;
+			elements = new ArrayList();
+			elements.addAll(mapper.getAllWbCommands());
+			return;
+		}
+
 		SqlCommand cmd = mapper.getCommandToUse(this.sql);
+
+		if (cmd == null)
+		{
+			this.context = NO_CONTEXT;
+			this.elements = null;
+			return;
+		}
+		
 		ArgumentParser p = cmd.getArgumentParser();
 		if (p == null)
 		{
@@ -69,7 +85,7 @@ public class WbCommandAnalyzer
 			return;
 		}
 		
-		this.context = CONTEXT_WB_PARAMS;
+		context = CONTEXT_WB_PARAMS;
 		
 		String parameter = getCurrentParameter();
 		this.isParameter = false;

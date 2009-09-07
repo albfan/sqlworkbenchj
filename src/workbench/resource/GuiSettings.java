@@ -122,24 +122,9 @@ public class GuiSettings
 		Settings.getInstance().setProperty(Settings.PROPERTY_ANIMATED_ICONS, flag);
 	}
 
-	public static boolean getUseDynamicLayout()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.dynamiclayout", true);
-	}
-
 	public static void setUseDynamicLayout(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.dynamiclayout", flag);
-	}
-
-	public static boolean getShowMnemonics()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.showmnemonics", true);
-	}
-
-	public static boolean getShowSplash()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.showsplash", false);
 	}
 
 	public static int getProfileDividerLocation()

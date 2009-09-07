@@ -16,7 +16,6 @@ import java.awt.BorderLayout;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -36,7 +35,7 @@ import workbench.storage.DataStore;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TriggerDisplayPanel
 	extends JPanel
@@ -51,22 +50,22 @@ public class TriggerDisplayPanel
 
 	public TriggerDisplayPanel()
 	{
-		super();
-		this.triggers = new WbTable();
-		WbScrollPane scroll = new WbScrollPane(this.triggers);
-		scroll.setBorder(new EtchedBorder());
-		//scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		super(new BorderLayout());
+		triggers = new WbTable();
 
-		this.source = EditorPanel.createSqlEditor();
-		this.source.setEditable(false);
-		this.source.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		source = EditorPanel.createSqlEditor();
+		source.setEditable(false);
+		source.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
 
-		this.setLayout(new BorderLayout());
-		this.splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, scroll, this.source);
-		this.add(splitPane, BorderLayout.CENTER);
-		this.triggers.getSelectionModel().addListSelectionListener(this);
-		this.triggers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		JPanel list = new JPanel(new BorderLayout());
+		list.add(new WbScrollPane(this.triggers), BorderLayout.CENTER);
+		
+		splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, list, this.source);
+		splitPane.setDividerSize(8);
+		add(splitPane, BorderLayout.CENTER);
+		triggers.getSelectionModel().addListSelectionListener(this);
+		triggers.getSelectionModel().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	}
 
 	public void saveSettings()
@@ -124,10 +123,6 @@ public class TriggerDisplayPanel
 		}
 	}
 
-	/**
-	 * Called whenever the value of the selection changes.
-	 * @param e the event that characterizes the change.
-	 */
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (e.getValueIsAdjusting()) return;

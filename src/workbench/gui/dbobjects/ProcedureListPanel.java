@@ -46,6 +46,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import javax.swing.JLabel;
+import javax.swing.border.EtchedBorder;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
@@ -101,7 +102,6 @@ public class ProcedureListPanel
 
 		this.procColumns = new DbObjectTable();
 
-		JScrollPane scroll = new WbScrollPane(this.procColumns);
 
 		Reloadable sourceReload = new Reloadable()
 		{
@@ -122,9 +122,12 @@ public class ProcedureListPanel
 
 		source = new DbObjectSourcePanel(parent, sourceReload);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), source);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), scroll);
 
-		this.listPanel = new JPanel();
+		JPanel p = new JPanel(new BorderLayout());
+		p.add(new WbScrollPane(this.procColumns), BorderLayout.CENTER);
+		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), p);
+
+		this.listPanel = new JPanel(new BorderLayout());
 		this.statusRenderer = new ProcStatusRenderer();
 		this.procList = new DbObjectTable()
 		{
@@ -144,15 +147,13 @@ public class ProcedureListPanel
 
 		this.findPanel.addToToolbar(a, true, false);
 		a.getToolbarButton().setToolTipText(ResourceMgr.getString("TxtRefreshProcedureList"));
-		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add((JPanel)findPanel, BorderLayout.NORTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		this.splitPane.setOneTouchExpandable(true);
 		this.splitPane.setDividerSize(6);
-		scroll = new WbScrollPane(this.procList);
-
-		this.listPanel.add(scroll, BorderLayout.CENTER);
+		
+		this.listPanel.add(new WbScrollPane(this.procList), BorderLayout.CENTER);
 
 		this.infoLabel = new JLabel("");
 		EmptyBorder b = new EmptyBorder(1, 3, 0, 0);

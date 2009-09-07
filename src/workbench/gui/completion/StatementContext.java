@@ -74,7 +74,7 @@ public class StatementContext
 		{
 			verbAnalyzer = new ExecAnalyzer(conn, sql, pos);
 		}
-		else if (wbTester.isWbCommand(verb))
+		else if (wbTester.isWbCommand(verb) || verb.toLowerCase().startsWith("wb"))
 		{
 			verbAnalyzer = new WbCommandAnalyzer(conn, sql, pos);
 		}

@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
 import javax.swing.UIManager;
@@ -200,6 +201,10 @@ public class WbTabbedPane
 	public void insertTab(String title, Icon icon, Component component, String tip, int index)
 	{
 		super.insertTab(title, icon, component, tip, index);
+		if (component != null)
+		{
+			((JComponent)component).setBorder(WbSwingUtilities.EMPTY_BORDER);
+		}
 		if (showCloseButton)
 		{
 			setTabComponentAt(index, new ButtonTabComponent(title, this));

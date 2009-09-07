@@ -271,7 +271,7 @@ public class TableListPanel
 		WbScrollPane scroll = new WbScrollPane(this.importedKeys);
 		this.importedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.importedPanel.setDividerLocation(100);
-		this.importedPanel.setDividerSize(6);
+		this.importedPanel.setDividerSize(8);
 		this.importedPanel.setTopComponent(scroll);
 		this.importedTableTree = new TableDependencyTreeDisplay();
 		this.importedPanel.setBottomComponent(this.importedTableTree);
@@ -281,7 +281,7 @@ public class TableListPanel
 		scroll = new WbScrollPane(this.exportedKeys);
 		this.exportedPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT);
 		this.exportedPanel.setDividerLocation(100);
-		this.exportedPanel.setDividerSize(5);
+		this.exportedPanel.setDividerSize(8);
 		this.exportedPanel.setTopComponent(scroll);
 		this.exportedTableTree = new TableDependencyTreeDisplay();
 		this.exportedPanel.setBottomComponent(this.exportedTableTree);
@@ -346,7 +346,7 @@ public class TableListPanel
 		this.listPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);
-		this.splitPane.setDividerSize(5);
+		this.splitPane.setDividerSize(6);
 		this.splitPane.setDividerBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.splitPane.setOneTouchExpandable(true);
 		this.splitPane.setContinuousLayout(true);
@@ -366,7 +366,7 @@ public class TableListPanel
 
 		initIndexDropper(indexReload);
 
-		this.toggleTableSource = new ToggleTableSourceAction(this);
+		this.toggleTableSource = new ToggleTableSourceAction(this, "MnuTxtToggleDbExpSplit");
 		this.splitPane.setOneTouchTooltip(toggleTableSource.getTooltipTextWithKeys());
 		setupActionMap();
 

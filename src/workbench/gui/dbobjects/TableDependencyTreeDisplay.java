@@ -53,6 +53,7 @@ public class TableDependencyTreeDisplay
 	{
 		super();
 		this.setLayout(new BorderLayout());
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
 	public void setConnection(WbConnection aConn)

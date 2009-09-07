@@ -18,6 +18,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.ArgumentParser;
 
 /**
  * A SQL Statement to halt a script and confirm execution by the user
@@ -32,7 +33,14 @@ public class WbMode
 	public WbMode()
 	{
 		super();
-		this.isUpdatingCommand = false;
+		isUpdatingCommand = false;
+
+		// Support auto-completion of parameters
+		cmdLine = new ArgumentParser(false);
+		cmdLine.addArgument("status");
+		cmdLine.addArgument("readonly");
+		cmdLine.addArgument("normal");
+		cmdLine.addArgument("reset");
 	}
 
 	public String getVerb()
@@ -42,7 +50,7 @@ public class WbMode
 
 	protected boolean isConnectionRequired()
 	{
-		return false;
+		return true;
 	}
 
 	public StatementRunnerResult execute(String sql)
@@ -51,11 +59,11 @@ public class WbMode
 		StatementRunnerResult result = new StatementRunnerResult();
 		result.setSuccess();
 
-		ConnectionProfile profile = currentConnection.getProfile();
+		ConnectionProfile profile = (currentConnection != null ? currentConnection.getProfile() : null);
 		if (profile == null)
 		{
 			result.setFailure();
-			result.addMessage("No profile!"); // should not
+			result.addMessageByKey("TxtNotConnected"); // should not happen
 			return result;
 		}
 
@@ -75,6 +83,13 @@ public class WbMode
 			e.printStackTrace();
 		}
 
+		if (command == null)
+		{
+			result.addMessageByKey("ErrModeWrongArgs");
+			result.setFailure();
+			return result;
+		}
+		
 		if (command.equalsIgnoreCase("reset"))
 		{
 			profile.resetSessionFlags();

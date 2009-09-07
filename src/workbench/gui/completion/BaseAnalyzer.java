@@ -52,8 +52,11 @@ public abstract class BaseAnalyzer
 	// List keywords available at this point
 	protected static final int CONTEXT_KW_LIST = 5;
 
-	// List parameters for WB commands
+	// List parameters for WB command parameters
 	protected static final int CONTEXT_WB_PARAMS = 6;
+
+	// List parameters for WB commands
+	protected static final int CONTEXT_WB_COMMANDS = 7;
 	
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private String typeFilter;
@@ -238,6 +241,10 @@ public abstract class BaseAnalyzer
 			{
 				this.title = ResourceMgr.getString("LblCompletionListParmValues");
 			}
+		}
+		else if (context == CONTEXT_WB_COMMANDS)
+		{
+			this.title = ResourceMgr.getString("LblCompletionListWbCmd");
 		}
 //		else if (context == CONTEXT_INDEX_LIST)
 //		{

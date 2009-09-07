@@ -12,13 +12,16 @@
 package workbench.gui.components;
 
 import java.awt.Dimension;
-import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -38,25 +41,41 @@ public class ButtonTabComponent
 	
 	public ButtonTabComponent(String title, final WbTabbedPane pane)
 	{
-		super(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		super(new GridBagLayout());
 		this.pane = pane;
 		setOpaque(false);
 
 		label = new JLabel();
 		label.setOpaque(false);
 		label.setText(title);
-		setBorder(new EmptyBorder(1, 0, 0, 0));
-		//setBorder(new LineBorder(Color.RED, 1));
-		label.setBorder(new EmptyBorder(0,0,0,3));
-		closeButton = new WbButton(ResourceMgr.getPng("closePanel"));
+		closeButton = new WbButton(ResourceMgr.getPng("closePanel"))
+		{
+			public Insets getInsets()
+			{
+				return WbSwingUtilities.EMPTY_INSETS;
+			}
+		};
 		closeButton.setOpaque(false);
-		Dimension d = new Dimension(14, 15);
+		Dimension d = new Dimension(14, 14);
 		closeButton.setPreferredSize(d);
 		closeButton.setFocusable(false);
 		closeButton.enableToolbarRollover();
 		closeButton.addActionListener(this);
 		
-		add(label);
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 0;
+		c.gridheight = 0;
+		c.anchor = GridBagConstraints.SOUTHWEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = new Insets(0,0,0,4);
+		add(label, c);
+
+		c.gridx = 1;
+		c.anchor = GridBagConstraints.SOUTHWEST;
+		c.weightx = 1.0;
+		c.fill = GridBagConstraints.NONE;
+		c.insets = new Insets(0,0,0,0);
 		add(closeButton);
 	}
 

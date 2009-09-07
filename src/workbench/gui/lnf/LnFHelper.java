@@ -85,15 +85,12 @@ public class LnFHelper
 			def.put("TableHeader.font", dataFont);
 		}
 
-		def.put("Button.showMnemonics", Boolean.valueOf(GuiSettings.getShowMnemonics()));
-
-		// use our own classes for some GUI elements
-		if (!"Nimbus".equals(UIManager.getLookAndFeel().getName()))
-		{
-			def.put("ToolTipUI", "workbench.gui.components.WbToolTipUI");
-			def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
-		}
-		
+			// use our own classes for some GUI elements
+//		if (!"Nimbus".equals(UIManager.getLookAndFeel().getName()))
+//		{
+//			def.put("SplitPaneUI", "workbench.gui.components.WbSplitPaneUI");
+//		}
+//
 		String cls = TabbedPaneUIFactory.getTabbedPaneUIClass();
 		if (cls != null) def.put("TabbedPaneUI", cls);
 
@@ -150,15 +147,6 @@ public class LnFHelper
 		}
 
 		checkWindowsClassic(UIManager.getLookAndFeel().getClass().getName());
-
-		try
-		{
-			Toolkit.getDefaultToolkit().setDynamicLayout(GuiSettings.getUseDynamicLayout());
-		}
-		catch (Exception e)
-		{
-			LogMgr.logError("LnFHelper.initializeLookAndFeel()", "Error setting dynamic layout property", e);
-		}
 	}
 
 	private void setSystemLnF()

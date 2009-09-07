@@ -27,11 +27,15 @@ public class ToggleTableSourceAction extends WbAction
 {
 	private TableListPanel client;
 
-	public ToggleTableSourceAction(TableListPanel aClient)
+	public ToggleTableSourceAction(TableListPanel client)
+	{
+		this(client, "MnuTxtToggleTableSource");
+	}
+	public ToggleTableSourceAction(TableListPanel aClient, String resourceKey)
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtToggleTableSource", KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
+		this.initMenuDefinition(resourceKey, KeyStroke.getKeyStroke(KeyEvent.VK_T, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setIcon(null);
 	}
 

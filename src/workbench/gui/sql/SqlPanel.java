@@ -200,7 +200,7 @@ public class SqlPanel
 
 	protected JTextArea log;
 	protected WbTabbedPane resultTab;
-	protected JSplitPane contentPanel;
+	protected WbSplitPane contentPanel;
 	protected boolean threadBusy;
 	protected boolean cancelExecution;
 
@@ -302,6 +302,7 @@ public class SqlPanel
 		statusBar.setBorder(statusBarBorder);
 		editor.setStatusBar(statusBar);
 		editor.setBorder(new EtchedBorderTop());
+
 		// The name of the component is used for the Jemmy GUI Tests
 		editor.setName("sqleditor" + anId);
 
@@ -309,20 +310,22 @@ public class SqlPanel
 		// The name of the component is used for the Jemmy GUI Tests
 		log.setName("msg" + anId);
 
-		this.resultTab = new WbTabbedPane();
-		this.resultTab.setTabPlacement(JTabbedPane.TOP);
-		this.resultTab.setFocusable(false);
-		// The name of the component is used for the Jemmy GUI Tests
-		this.resultTab.setName("resultspane");
+		resultTab = new WbTabbedPane();
+		resultTab.setTabPlacement(JTabbedPane.TOP);
+		resultTab.setFocusable(false);
 		resultTab.enableDragDropReordering(this);
+		
+		// The name of the component is used for the Jemmy GUI Tests
+		resultTab.setName("resultspane");
 
 		JScrollPane scroll = new WbScrollPane(log);
-		this.resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
+		resultTab.addTab(ResourceMgr.getString("LblTabMessages"), scroll);
 
-		this.contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
-		this.contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.contentPanel.setOneTouchExpandable(true);
-		this.contentPanel.setContinuousLayout(true);
+		contentPanel = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, true, this.editor, this.resultTab);
+		contentPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		contentPanel.setDividerSize(8);
+		contentPanel.setOneTouchExpandable(true);
+		contentPanel.setContinuousLayout(true);
 
 		this.add(this.contentPanel, BorderLayout.CENTER);
 		this.add(statusBar, BorderLayout.SOUTH);
@@ -336,12 +339,12 @@ public class SqlPanel
 		Settings s = Settings.getInstance();
 		s.addFontChangedListener(this);
 
-		this.rowMonitor = new GenericRowMonitor(this.statusBar);
+		rowMonitor = new GenericRowMonitor(this.statusBar);
 
 		// The listeners have to be added as late as possible to ensure
 		// that everything is created properly in case an event is fired
-		this.resultTab.addChangeListener(this);
-		this.editor.addFilenameChangeListener(this);
+		resultTab.addChangeListener(this);
+		editor.addFilenameChangeListener(this);
 		new ResultTabHandler(this.resultTab, this);
 		iconHandler = new IconHandler(this);
 	}
@@ -395,14 +398,14 @@ public class SqlPanel
 
 	public void initDivider(int height)
 	{
-		height -= (this.statusBar.getPreferredSize().getHeight() * 3);
-		height -= this.editor.getHScrollBarHeight();
-		height -= this.resultTab.getTabHeight();
-		height -= this.contentPanel.getDividerSize();
+		height -= (statusBar.getPreferredSize().getHeight() * 3);
+		height -= editor.getHScrollBarHeight();
+		height -= resultTab.getTabHeight();
+		height -= contentPanel.getDividerSize();
 		height -= 8;
 		int loc = height / 2;
 		if (loc <= 50) loc = -1;
-		this.contentPanel.setDividerLocation(loc);
+		contentPanel.setDividerLocation(loc);
 	}
 
 	public WbToolbar getToolbar()
@@ -2146,13 +2149,17 @@ public class SqlPanel
 
 	private void updateResultInfos()
 	{
+		int newIndex = this.resultTab.getSelectedIndex();
+		if (newIndex == -1)
+		{
+			return;
+		}
+
 		if (currentData != null)
 		{
 			this.currentData.removePropertyChangeListener(this);
 			this.currentData.getTable().stopEditing();
 		}
-
-		int newIndex = this.resultTab.getSelectedIndex();
 
 		if (newIndex == this.resultTab.getTabCount() - 1)
 		{
@@ -2161,6 +2168,7 @@ public class SqlPanel
 		else
 		{
 			this.currentData = (DwPanel)this.resultTab.getSelectedComponent();
+			if (currentData != null)
 			this.currentData.updateStatusBar();
 			this.currentData.addPropertyChangeListener("updateTable", this);
 		}
@@ -3268,11 +3276,14 @@ public class SqlPanel
 		}
 	}
 
+	private boolean hasMoved;
+
 	@Override
 	public boolean startMove(int index)
 	{
 		boolean canMove = (index != resultTab.getTabCount() - 1);
 		ignoreStateChange = canMove;
+		hasMoved = false;
 		return canMove;
 	}
 
@@ -3280,6 +3291,7 @@ public class SqlPanel
 	public void endMove(int finalIndex)
 	{
 		ignoreStateChange = false;
+		if (!hasMoved) return;
 		if (resultTab.getSelectedIndex() != finalIndex)
 		{
 			resultTab.setSelectedIndex(finalIndex);
@@ -3301,6 +3313,7 @@ public class SqlPanel
 		resultTab.remove(c);
 		resultTab.add(c, newIndex);
 		resultTab.setTitleAt(newIndex, title);
+		hasMoved = true;
 		return true;
 	}
 

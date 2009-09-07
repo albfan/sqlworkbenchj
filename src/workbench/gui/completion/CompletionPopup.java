@@ -106,7 +106,8 @@ public class CompletionPopup
 			scroll.setColumnHeaderView(headerComponent);
 			headerComponent.doLayout();
 			final Dimension d = headerComponent.getPreferredSize();
-			d.height += 25;
+			d.height += 35;
+			d.width += 20;
 			elementList.setMinimumSize(d);
 			scroll.setMinimumSize(d);
 
