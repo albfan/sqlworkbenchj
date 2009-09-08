@@ -40,14 +40,12 @@ public class ButtonTabComponent
 	private final JLabel label;
 	private final WbButton closeButton;
 
-	public ButtonTabComponent(String title, final WbTabbedPane pane)
+	public ButtonTabComponent(String title, final WbTabbedPane tabPane)
 	{
 		super(new GridBagLayout());
-		this.pane = pane;
+		pane = tabPane;
 
 		String lnf = UIManager.getLookAndFeel().getClass().getName();
-		System.out.println("current lnf: " + lnf);
-
 		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", false);
 
 		if (lnf.startsWith("com.jgoodies.looks.plastic"))
@@ -61,8 +59,6 @@ public class ButtonTabComponent
 		setOpaque(opaque);
 
 		label = new JLabel(title);
-
-		label.setOpaque(false);
 		closeButton = new WbButton(ResourceMgr.getPng("closePanel"))
 		{
 			public Insets getInsets()
@@ -71,7 +67,6 @@ public class ButtonTabComponent
 			}
 		};
 
-		closeButton.setOpaque(false);
 		Dimension d = new Dimension(14, 16);
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
