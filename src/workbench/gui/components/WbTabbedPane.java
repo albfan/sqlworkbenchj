@@ -72,7 +72,7 @@ public class WbTabbedPane
 	{
 		if (tabCloser == null) return;
 		
-		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(index);
+		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
 		if (comp != null)
 		{
 			comp.setEnabled(flag);
@@ -83,7 +83,7 @@ public class WbTabbedPane
 	public void setDisplayedMnemonicIndexAt(int tabIndex, int mnemonicIndex)
 	{
 		super.setDisplayedMnemonicIndexAt(tabIndex, mnemonicIndex);
-		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(tabIndex);
+		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(tabIndex);
 		if (comp != null)
 		{
 			comp.setDisplayedMnemonicIndex(mnemonicIndex);
@@ -94,7 +94,7 @@ public class WbTabbedPane
 	public void setMnemonicAt(int tabIndex, int mnemonic)
 	{
 		super.setMnemonicAt(tabIndex, mnemonic);
-		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(tabIndex);
+		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(tabIndex);
 		if (comp != null)
 		{
 			comp.setDisplayedMnemonic(mnemonic);
@@ -105,7 +105,7 @@ public class WbTabbedPane
 	public void setIconAt(int index, Icon icon)
 	{
 		super.setIconAt(index, icon);
-		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(index);
+		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
 		if (comp != null)
 		{
 			comp.setIcon(icon);
@@ -141,7 +141,7 @@ public class WbTabbedPane
 		{
 			String title = getTitleAt(i);
 			Icon icon = getIconAt(i);
-			ButtonTabComponent comp = new ButtonTabComponent(title, this);
+			TabButtonComponent comp = new TabButtonComponent(title, this);
 			comp.setIcon(icon);
 			setTabComponentAt(i, comp);
 		}
@@ -226,7 +226,7 @@ public class WbTabbedPane
 	public void setTitleAt(int index, String title)
 	{
 		super.setTitleAt(index, title);
-		ButtonTabComponent comp = (ButtonTabComponent)getTabComponentAt(index);
+		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
 		if (comp != null)
 		{
 			comp.setTitle(title);
@@ -243,7 +243,7 @@ public class WbTabbedPane
 		}
 		if (tabCloser != null)
 		{
-			setTabComponentAt(index, new ButtonTabComponent(title, this));
+			setTabComponentAt(index, new TabButtonComponent(title, this));
 		}
 	}
 

@@ -1,5 +1,5 @@
 /*
- * ButtonTabComponent.java
+ * TabButtonComponent.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -32,7 +32,7 @@ import workbench.resource.Settings;
  *
  * @author support@sql-workbench.net
  */
-public class ButtonTabComponent
+public class TabButtonComponent
 	extends JPanel
 	implements ActionListener
 {
@@ -40,7 +40,7 @@ public class ButtonTabComponent
 	private final JLabel label;
 	private final WbButton closeButton;
 
-	public ButtonTabComponent(String title, final WbTabbedPane tabPane)
+	public TabButtonComponent(String title, final WbTabbedPane tabPane)
 	{
 		super(new GridBagLayout());
 		pane = tabPane;
