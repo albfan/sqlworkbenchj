@@ -235,6 +235,7 @@ public class MainWindow
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_SHOW_TOOLBAR,
 			Settings.PROPERTY_SHOW_TAB_INDEX,
+			GuiSettings.PROPERTY_TAB_CLOSE_BUTTON,
 			"workbench.gui.mainwindow.tabpolicy"
 		);
 
@@ -606,6 +607,17 @@ public class MainWindow
 		else if (Settings.PROPERTY_SHOW_TAB_INDEX.equals(evt.getPropertyName()))
 		{
 			this.renumberTabs();
+		}
+		else if (GuiSettings.PROPERTY_TAB_CLOSE_BUTTON.equals(evt.getPropertyName()))
+		{
+			if (GuiSettings.getShowTabCloseButton())
+			{
+				sqlTab.showCloseButton(this);
+			}
+			else
+			{
+				sqlTab.showCloseButton(null);
+			}
 		}
 		else if ("workbench.gui.mainwindow.tabpolicy".equals(evt.getPropertyName()))
 		{

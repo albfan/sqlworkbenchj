@@ -45,7 +45,6 @@ public class WbTabbedPane
 {
 	private Moveable tabMover;
 	private int draggedTabIndex;
-	private boolean showCloseButton;
 	private TabCloser tabCloser;
 
 	public WbTabbedPane()
@@ -113,12 +112,49 @@ public class WbTabbedPane
 		}
 	}
 
+	/**
+	 * Enable/Disable the close button.
+	 *
+	 * @param closer the TabCloser to handle the close event. If null the close button will be hidden
+	 */
 	public void showCloseButton(TabCloser closer)
 	{
+		boolean wasAdded = (closer != null && tabCloser == null);
+		boolean wasRemoved = (closer == null && tabCloser != null);
+
 		tabCloser = closer;
-		showCloseButton = (closer != null);
+		if (wasAdded)
+		{
+			addCloseButtons();
+		}
+		else if (wasRemoved)
+		{
+			removeCloseButtons();
+		}
 	}
 
+	protected void addCloseButtons()
+	{
+		if (tabCloser == null) return;
+
+		for (int i=0; i < getTabCount(); i++)
+		{
+			String title = getTitleAt(i);
+			Icon icon = getIconAt(i);
+			ButtonTabComponent comp = new ButtonTabComponent(title, this);
+			comp.setIcon(icon);
+			setTabComponentAt(i, comp);
+		}
+	}
+
+	protected void removeCloseButtons()
+	{
+		for (int i=0; i < getTabCount(); i++)
+		{
+			setTabComponentAt(i, null);
+		}
+	}
+	
 	public void closeButtonClicked(final int index)
 	{
 		if (tabCloser != null && tabCloser.canCloseTab(index))
@@ -205,7 +241,7 @@ public class WbTabbedPane
 		{
 			((JComponent)component).setBorder(WbSwingUtilities.EMPTY_BORDER);
 		}
-		if (showCloseButton)
+		if (tabCloser != null)
 		{
 			setTabComponentAt(index, new ButtonTabComponent(title, this));
 		}

@@ -20,8 +20,10 @@ import java.awt.event.ActionListener;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  * Component to be used as tabComponent;
@@ -42,11 +44,25 @@ public class ButtonTabComponent
 	{
 		super(new GridBagLayout());
 		this.pane = pane;
-		setOpaque(false);
 
-		label = new JLabel();
+		String lnf = UIManager.getLookAndFeel().getClass().getName();
+		System.out.println("current lnf: " + lnf);
+
+		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", false);
+
+		if (lnf.startsWith("com.jgoodies.looks.plastic"))
+		{
+			String tabStyle = System.getProperty("Plastic.tabStyle","Default");
+			if (!"Metal".equalsIgnoreCase(tabStyle))
+			{
+				opaque = true;
+			}
+		}
+		setOpaque(opaque);
+
+		label = new JLabel(title);
+
 		label.setOpaque(false);
-		label.setText(title);
 		closeButton = new WbButton(ResourceMgr.getPng("closePanel"))
 		{
 			public Insets getInsets()
@@ -66,7 +82,6 @@ public class ButtonTabComponent
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
-		c.gridheight = 0;
 		c.anchor = GridBagConstraints.SOUTHWEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
 		c.insets = new Insets(0,0,1,4);
@@ -74,8 +89,6 @@ public class ButtonTabComponent
 
 		c.gridx = 1;
 		c.anchor = GridBagConstraints.SOUTHWEST;
-		c.weightx = 0.0;
-		c.weighty = 0.0;
 		c.fill = GridBagConstraints.NONE;
 		c.insets = new Insets(0,0,0,0);
 		add(closeButton);
