@@ -72,7 +72,6 @@ public class Settings
 	public static final String PROPERTY_DATE_FORMAT = "workbench.gui.display.dateformat";
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
 	public static final String PROPERTY_TIME_FORMAT = "workbench.gui.display.timeformat";
-	public static final String PROPERTY_PDF_READER_PATH = "workbench.gui.pdfreader.path";
 	public static final String PROPERTY_SHOW_TOOLBAR = "workbench.gui.mainwindow.showtoolbar";
 	public static final String PROPERTY_SHOW_LINE_NUMBERS = "workbench.editor.showlinenumber";
 	public static final String PROPERTY_HIGHLIGHT_CURRENT_STATEMENT = "workbench.editor.highlightcurrent";
@@ -423,27 +422,12 @@ public class Settings
 		int numTools = getIntProperty("workbench.tools.count", 0);
 		List<ToolDefinition> result = new ArrayList<ToolDefinition>(numTools);
 
-		boolean pdfReaderPresent = false;
-		WbFile pdfReader = null;
-		if (addPdfReader)
-		{
-			String pdfpath = getPDFReaderPath();
-			if (pdfpath != null) pdfReader = new WbFile(pdfpath);
-		}
-
 		for (int i = 0; i < numTools; i++)
 		{
 			String path = getProperty("workbench.tools." + i + ".executable", "");
 			String name = getProperty("workbench.tools." + i + ".name", path);
 
 			ToolDefinition tool = new ToolDefinition(path, name);
-
-			if (addPdfReader && pdfReader != null && !pdfReaderPresent)
-			{
-				String tp = tool.getExecutable().getFullPath();
-				String pp = pdfReader.getFullPath();
-				pdfReaderPresent = StringUtil.equalString(tp, pp);
-			}
 
 			if (!checkExists)
 			{
@@ -455,11 +439,6 @@ public class Settings
 			}
 		}
 
-		if (addPdfReader && !pdfReaderPresent && pdfReader != null)
-		{
-			ToolDefinition tool = new ToolDefinition(pdfReader.getFullPath(), ResourceMgr.getString("LblReaderPath"));
-			result.add(tool);
-		}
 		return result;
 	}
 
@@ -1858,16 +1837,6 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Directories">
-	public String getPDFReaderPath()
-	{
-		return getProperty(PROPERTY_PDF_READER_PATH, null);
-	}
-
-	public void setPDFReaderPath(String path)
-	{
-		setProperty(PROPERTY_PDF_READER_PATH, path);
-	}
-
 	public String getLastLibraryDir()
 	{
 		return getProperty("workbench.drivers.lastlibdir", "");

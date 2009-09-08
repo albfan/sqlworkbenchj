@@ -50,7 +50,7 @@ public interface MainPanel
 	void panelSelected();
 	void readFromWorkspace(WbWorkspace w, int index) throws IOException;
 	void saveToWorkspace(WbWorkspace w, int index) throws IOException;
-	boolean canCloseTab();
+	boolean canClosePanel();
 	boolean isModified();
 	void reset();
 	boolean isLocked();

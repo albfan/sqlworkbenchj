@@ -26,6 +26,8 @@ import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
 import javax.swing.UIManager;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.TabbedPaneUI;
 import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.Moveable;
@@ -41,11 +43,12 @@ import workbench.log.LogMgr;
  */
 public class WbTabbedPane
 	extends JTabbedPane
-	implements MouseListener, MouseMotionListener
+	implements MouseListener, MouseMotionListener, ChangeListener
 {
 	private Moveable tabMover;
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
+	private boolean hideDisabledButtons = true;
 
 	public WbTabbedPane()
 	{
@@ -59,6 +62,11 @@ public class WbTabbedPane
 		init();
 	}
 
+	public void hideDisabledButtons(boolean flag)
+	{
+		hideDisabledButtons = flag;
+	}
+	
 	public void setCloseButtonEnabled(Component panel, boolean flag)
 	{
 		if (tabCloser == null) return;
@@ -72,18 +80,24 @@ public class WbTabbedPane
 	{
 		if (tabCloser == null) return;
 		
-		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
+		TabButtonComponent comp = getTabButton(index);
 		if (comp != null)
 		{
 			comp.setEnabled(flag);
 		}
 	}
 
+	protected TabButtonComponent getTabButton(int index)
+	{
+		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
+		return comp;
+	}
+	
 	@Override
 	public void setDisplayedMnemonicIndexAt(int tabIndex, int mnemonicIndex)
 	{
 		super.setDisplayedMnemonicIndexAt(tabIndex, mnemonicIndex);
-		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(tabIndex);
+		TabButtonComponent comp = getTabButton(tabIndex);
 		if (comp != null)
 		{
 			comp.setDisplayedMnemonicIndex(mnemonicIndex);
@@ -94,7 +108,7 @@ public class WbTabbedPane
 	public void setMnemonicAt(int tabIndex, int mnemonic)
 	{
 		super.setMnemonicAt(tabIndex, mnemonic);
-		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(tabIndex);
+		TabButtonComponent comp = getTabButton(tabIndex);
 		if (comp != null)
 		{
 			comp.setDisplayedMnemonic(mnemonic);
@@ -105,13 +119,13 @@ public class WbTabbedPane
 	public void setIconAt(int index, Icon icon)
 	{
 		super.setIconAt(index, icon);
-		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
+		TabButtonComponent comp = getTabButton(index);
 		if (comp != null)
 		{
 			comp.setIcon(icon);
 		}
 	}
-
+	
 	/**
 	 * Enable/Disable the close button.
 	 *
@@ -126,11 +140,15 @@ public class WbTabbedPane
 		if (wasAdded)
 		{
 			addCloseButtons();
+			updateButtons();
+			addChangeListener(this);
 		}
 		else if (wasRemoved)
 		{
 			removeCloseButtons();
+			removeChangeListener(this);
 		}
+		
 	}
 
 	protected void addCloseButtons()
@@ -157,17 +175,18 @@ public class WbTabbedPane
 	
 	public void closeButtonClicked(final int index)
 	{
-		if (tabCloser != null && tabCloser.canCloseTab(index))
+		if (tabCloser == null) return;
+		if (!tabCloser.canCloseTab(index)) return;
+
+		EventQueue.invokeLater(new Runnable()
 		{
-			EventQueue.invokeLater(new Runnable()
+			@Override
+			public void run()
 			{
-				@Override
-				public void run()
-				{
-					tabCloser.closeTab(index);
-				}
-			});
-		}
+				tabCloser.tabCloseButtonClicked(index);
+			}
+		});
+		
 	}
 
 	public int getTabHeight()
@@ -245,6 +264,7 @@ public class WbTabbedPane
 		{
 			setTabComponentAt(index, new TabButtonComponent(title, this));
 		}
+		updateButtons();
 	}
 
 	/**
@@ -357,5 +377,28 @@ public class WbTabbedPane
 
 	public void mouseMoved(MouseEvent e)
 	{
+	}
+
+	private void updateButtons()
+	{
+		if (tabCloser == null) return;
+		
+		int count = getTabCount();
+		for (int i=0; i < count; i++)
+		{
+			boolean canClose = tabCloser.canCloseTab(i);
+			setCloseButtonEnabled(i, canClose);
+			if (hideDisabledButtons)
+			{
+				TabButtonComponent tab = getTabButton(i);
+				if (tab != null) tab.setButtonVisible(canClose);
+			}
+		}
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		updateButtons();
 	}
 }

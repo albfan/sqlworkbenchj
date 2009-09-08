@@ -22,15 +22,27 @@ import workbench.util.StringUtil;
  */
 public class GuiSettings
 {
-	public static final String PROPERTY_TAB_CLOSE_BUTTON = "workbench.gui.display.tab.closebutton";
-	public static boolean getShowTabCloseButton()
+	public static final String PROPERTY_SQLTAB_CLOSE_BUTTON = "workbench.gui.display.sqltab.closebutton";
+	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
+
+	public static boolean getShowSqlTabCloseButton()
 	{
-		return Settings.getInstance().getBoolProperty(PROPERTY_TAB_CLOSE_BUTTON, false);
+		return Settings.getInstance().getBoolProperty(PROPERTY_SQLTAB_CLOSE_BUTTON, false);
 	}
 
 	public static void setShowTabCloseButton(boolean flag)
 	{
-		Settings.getInstance().setProperty(PROPERTY_TAB_CLOSE_BUTTON, flag);
+		Settings.getInstance().setProperty(PROPERTY_SQLTAB_CLOSE_BUTTON, flag);
+	}
+
+	public static boolean getShowResultTabCloseButton()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON, false);
+	}
+
+	public static void setShowResultTabCloseButton(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON, flag);
 	}
 	
 	public static int getMultiLineThreshold()

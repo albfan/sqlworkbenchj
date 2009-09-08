@@ -53,7 +53,6 @@ public class GeneralOptionsPanel
 		initComponents();
 		brushedMetal.setVisible(MacOSHelper.isMacOS());
 		brushedMetal.setEnabled(MacOSHelper.isMacOS());
-		pdfReaderPath.setAllowMultiple(false);
 		String[] updTypes = new String[] {
 			ResourceMgr.getString("LblUpdCheckNever"),
 			ResourceMgr.getString("LblUpdCheckDaily"),
@@ -66,12 +65,6 @@ public class GeneralOptionsPanel
 
 	public void restoreSettings()
 	{
-		String reader = Settings.getInstance().getPDFReaderPath();
-		if (StringUtil.isBlank(reader))
-		{
-			reader = PlatformHelper.getDefaultPDFReader();
-		}
-		pdfReaderPath.setFilename(reader);
 		logLevel.setSelectedItem(LogMgr.getLevel());
 		int days = Settings.getInstance().getUpdateCheckInterval();
 		if (days == 1)
@@ -122,7 +115,8 @@ public class GeneralOptionsPanel
 		scrollTabs.setSelected(tabPolicy == JTabbedPane.SCROLL_TAB_LAYOUT);
 		confirmTabClose.setSelected(GuiSettings.getConfirmTabClose());
 		brushedMetal.setSelected(GuiSettings.getUseBrushedMetal());
-		showTabCloseButton.setSelected(GuiSettings.getShowTabCloseButton());
+		showTabCloseButton.setSelected(GuiSettings.getShowSqlTabCloseButton());
+		showResultTabClose.setSelected(GuiSettings.getShowResultTabCloseButton());
 	}
 
 	public void saveSettings()
@@ -131,6 +125,7 @@ public class GeneralOptionsPanel
 
 		// General settings
 		GuiSettings.setShowTabCloseButton(showTabCloseButton.isSelected());
+		GuiSettings.setShowResultTabCloseButton(showResultTabClose.isSelected());
 		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
 		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
@@ -138,7 +133,6 @@ public class GeneralOptionsPanel
 //		set.setQuoteChar(this.quoteCharField.getText().trim());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
 //		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
-		set.setPDFReaderPath(pdfReaderPath.getFilename());
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
 		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
 		int index = checkInterval.getSelectedIndex();
@@ -212,10 +206,9 @@ public class GeneralOptionsPanel
     enableAnimatedIcon = new JCheckBox();
     confirmTabClose = new JCheckBox();
     showTabCloseButton = new JCheckBox();
+    showResultTabClose = new JCheckBox();
     jSeparator2 = new JSeparator();
     jSeparator3 = new JSeparator();
-    pdfReaderPathLabel = new JLabel();
-    pdfReaderPath = new WbFilePicker();
     jPanel3 = new JPanel();
     logLevelLabel = new JLabel();
     logLevel = new JComboBox();
@@ -228,7 +221,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 7, 0, 0);
+    gridBagConstraints.insets = new Insets(6, 7, 0, 0);
     add(checkUpdatesLabel, gridBagConstraints);
 
     checkInterval.setModel(new DefaultComboBoxModel(new String[] { "never", "daily", "7 days", "14 days", "30 days" }));
@@ -423,6 +416,19 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(3, 4, 5, 0);
     jPanel1.add(showTabCloseButton, gridBagConstraints);
 
+    showResultTabClose.setText(ResourceMgr.getString("LblShowResultClose")); // NOI18N
+    showResultTabClose.setToolTipText(ResourceMgr.getString("d_LblShowResultClose")); // NOI18N
+    showResultTabClose.setBorder(null);
+    showResultTabClose.setHorizontalAlignment(SwingConstants.LEFT);
+    showResultTabClose.setHorizontalTextPosition(SwingConstants.RIGHT);
+    showResultTabClose.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(3, 16, 5, 0);
+    jPanel1.add(showResultTabClose, gridBagConstraints);
+
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -445,23 +451,6 @@ public class GeneralOptionsPanel
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.insets = new Insets(7, 7, 2, 10);
     add(jSeparator3, gridBagConstraints);
-
-    pdfReaderPathLabel.setText(ResourceMgr.getString("LblReaderPath")); // NOI18N
-    pdfReaderPathLabel.setToolTipText(ResourceMgr.getString("d_LblReaderPath")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 7, 0, 0);
-    add(pdfReaderPathLabel, gridBagConstraints);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 6;
-    gridBagConstraints.gridwidth = 3;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 6, 0, 10);
-    add(pdfReaderPath, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 11;
@@ -475,7 +464,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 7;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(8, 7, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 7, 0, 0);
     add(logLevelLabel, gridBagConstraints);
 
     logLevel.setModel(new DefaultComboBoxModel(new String[] { "ERROR", "WARNING", "INFO", "DEBUG" }));
@@ -485,7 +474,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(8, 6, 0, 10);
+    gridBagConstraints.insets = new Insets(0, 6, 0, 10);
     add(logLevel, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
@@ -507,10 +496,9 @@ public class GeneralOptionsPanel
   private JComboBox languageDropDown;
   private JComboBox logLevel;
   private JLabel logLevelLabel;
-  private WbFilePicker pdfReaderPath;
-  private JLabel pdfReaderPathLabel;
   private JCheckBox scrollTabs;
   private JTextField settingsfilename;
+  private JCheckBox showResultTabClose;
   private JCheckBox showTabCloseButton;
   private JCheckBox showTabIndex;
   private JCheckBox singlePageHelp;

@@ -61,6 +61,7 @@ import workbench.gui.actions.ResetFilterAction;
 import workbench.gui.actions.SelectionFilterAction;
 import workbench.gui.actions.ViewMessageLogAction;
 import workbench.gui.components.GenericRowMonitor;
+import workbench.gui.components.TabCloser;
 import workbench.gui.components.WbTabbedPane;
 import workbench.gui.dialogs.dataimport.ImportFileDialog;
 import workbench.interfaces.DbExecutionNotifier;
@@ -191,7 +192,7 @@ public class SqlPanel
 		PropertyChangeListener, ChangeListener,
 		MainPanel, Exporter, DbUpdater, Interruptable, FormattableSql, Commitable,
 		JobErrorHandler, ExecutionController, ResultLogger, ParameterPrompter, DbExecutionNotifier,
-		FilenameChangeListener, ResultReceiver, MacroClient, Moveable
+		FilenameChangeListener, ResultReceiver, MacroClient, Moveable, TabCloser
 {
 	//<editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected EditorPanel editor;
@@ -314,6 +315,7 @@ public class SqlPanel
 		resultTab.setTabPlacement(JTabbedPane.TOP);
 		resultTab.setFocusable(false);
 		resultTab.enableDragDropReordering(this);
+		resultTab.hideDisabledButtons(true);
 		
 		// The name of the component is used for the Jemmy GUI Tests
 		resultTab.setName("resultspane");
@@ -347,6 +349,16 @@ public class SqlPanel
 		editor.addFilenameChangeListener(this);
 		new ResultTabHandler(this.resultTab, this);
 		iconHandler = new IconHandler(this);
+
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON);
+		if (GuiSettings.getShowResultTabCloseButton())
+		{
+			resultTab.showCloseButton(this);
+		}
+		else
+		{
+			resultTab.showCloseButton(null);
+		}
 	}
 
 	public void setDividerLocation(int location)
@@ -1194,20 +1206,27 @@ public class SqlPanel
 		handler.readFromWorkspace(w, index);
 	}
 
+	private boolean confirmDiscardChanges(int index)
+	{
+		if (!isModified()) return true;
+		String title = getRealTabTitle();
+		if (index != -1)
+		{
+			title = resultTab.getTitleAt(index);
+		}
+		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
+		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", title);
+	}
+	
 	/**
 	 *  Do any work which should be done during the process of saving the
 	 *  current workspace, but before the workspace file is actually opened!
 	 *  This is to prevent a corrupted workspace due to interrupting the saving
 	 *  because of the check for unsaved changes in the current editor file
 	 */
-	public boolean canCloseTab()
+	public boolean canClosePanel()
 	{
-		boolean fileOk = this.checkAndSaveFile();
-		if (fileOk && GuiSettings.getConfirmDiscardResultSetChanges())
-		{
-			if (!isModified()) return true;
-			return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", getRealTabTitle());
-		}
+		boolean fileOk = this.checkAndSaveFile() && confirmDiscardChanges(-1);
 		return fileOk;
 	}
 
@@ -2207,8 +2226,12 @@ public class SqlPanel
 	public void closeCurrentResult()
 	{
 		int index = resultTab.getSelectedIndex();
-		if (index == resultTab.getTabCount() - 1) return;
+		closeResult(index);
+	}
 
+	public void closeResult(int index)
+	{
+		if (index == resultTab.getTabCount() - 1) return;
 		try
 		{
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
@@ -3273,7 +3296,7 @@ public class SqlPanel
 	{
 		String prop = evt.getPropertyName();
 		if (prop == null) return;
-
+		
 		if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
 		{
 			this.checkCommitAction();
@@ -3281,6 +3304,17 @@ public class SqlPanel
 		else if (evt.getSource() == this.currentData && prop.equals("updateTable"))
 		{
 			this.checkResultSetActions();
+		}
+		else if (GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON.equals(prop))
+		{
+			if (GuiSettings.getShowResultTabCloseButton())
+			{
+				resultTab.showCloseButton(this);
+			}
+			else
+			{
+				resultTab.showCloseButton(null);
+			}
 		}
 	}
 
@@ -3323,6 +3357,23 @@ public class SqlPanel
 		resultTab.setTitleAt(newIndex, title);
 		hasMoved = true;
 		return true;
+	}
+
+	@Override
+	public boolean canCloseTab(int index)
+	{
+		return (index != resultTab.getTabCount() - 1);
+	}
+
+	@Override
+	public void tabCloseButtonClicked(int index)
+	{
+		if (!canCloseTab(index)) return;
+		
+		if (confirmDiscardChanges(index))
+		{
+			this.closeResult(index);
+		}
 	}
 
 }

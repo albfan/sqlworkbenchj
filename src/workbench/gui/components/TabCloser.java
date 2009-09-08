@@ -17,5 +17,5 @@ package workbench.gui.components;
 public interface TabCloser
 {
 	boolean canCloseTab(int index);
-	void closeTab(int index);
+	void tabCloseButtonClicked(int index);
 }

@@ -983,7 +983,7 @@ public class DbExplorerPanel
 		return tables.isModified();
 	}
 
-	public boolean canCloseTab()
+	public boolean canClosePanel()
 	{
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
 		if (!isModified()) return true;

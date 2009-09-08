@@ -106,6 +106,11 @@ public class TabButtonComponent
 	}
 
 
+	public void setButtonVisible(boolean flag)
+	{
+		closeButton.setVisible(flag);
+	}
+	
 	public void setEnabled(boolean flag)
 	{
 		closeButton.setEnabled(flag);

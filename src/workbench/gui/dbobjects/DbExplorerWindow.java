@@ -175,7 +175,7 @@ public class DbExplorerWindow
 
 	public void windowClosing(WindowEvent e)
 	{
-		if (panel.canCloseTab())
+		if (panel.canClosePanel())
 		{
 			closeWindow();
 		}

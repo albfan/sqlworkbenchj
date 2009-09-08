@@ -218,9 +218,10 @@ public class MainWindow
 
 		this.restoreSettings();
 
-		this.sqlTab.addChangeListener(this);
-		this.sqlTab.addMouseListener(this);
-		if (GuiSettings.getShowTabCloseButton())
+		sqlTab.addChangeListener(this);
+		sqlTab.addMouseListener(this);
+		sqlTab.hideDisabledButtons(false);
+		if (GuiSettings.getShowSqlTabCloseButton())
 		{
 			sqlTab.showCloseButton(this);
 		}
@@ -235,7 +236,7 @@ public class MainWindow
 		Settings.getInstance().addPropertyChangeListener(this,
 			Settings.PROPERTY_SHOW_TOOLBAR,
 			Settings.PROPERTY_SHOW_TAB_INDEX,
-			GuiSettings.PROPERTY_TAB_CLOSE_BUTTON,
+			GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON,
 			"workbench.gui.mainwindow.tabpolicy"
 		);
 
@@ -608,9 +609,9 @@ public class MainWindow
 		{
 			this.renumberTabs();
 		}
-		else if (GuiSettings.PROPERTY_TAB_CLOSE_BUTTON.equals(evt.getPropertyName()))
+		else if (GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON.equals(evt.getPropertyName()))
 		{
-			if (GuiSettings.getShowTabCloseButton())
+			if (GuiSettings.getShowSqlTabCloseButton())
 			{
 				sqlTab.showCloseButton(this);
 			}
@@ -1924,7 +1925,7 @@ public class MainWindow
 						// tabSelected will not be run because tabRemovalInProgress == true
 						tabSelected(index);
 					}
-					if (p.canCloseTab())
+					if (p.canClosePanel())
 					{
 						removeTab(index, false);
 					}
@@ -2171,7 +2172,7 @@ public class MainWindow
 			for (int i=0; i < count; i++)
 			{
 				MainPanel p = getSqlPanel(i);
-				if (!p.canCloseTab()) return;
+				if (!p.canClosePanel()) return;
 			}
 		}
 
@@ -2292,7 +2293,7 @@ public class MainWindow
 				for (int i=0; i < count; i++)
 				{
 					MainPanel p = (MainPanel)this.sqlTab.getComponentAt(i);
-					if (!p.canCloseTab()) return false;
+					if (!p.canClosePanel()) return false;
 				}
 			}
 			w = new WbWorkspace(realFilename, true);
@@ -2479,7 +2480,7 @@ public class MainWindow
 				index --;
 			}
 		}
-		this.closeTab(index);
+		this.tabCloseButtonClicked(index);
 	}
 
 	/**
@@ -2526,7 +2527,7 @@ public class MainWindow
 	public void removeCurrentTab()
 	{
 		int index = this.sqlTab.getSelectedIndex();
-		this.closeTab(index);
+		this.tabCloseButtonClicked(index);
 	}
 
 	private void renumberTabs()
@@ -2629,11 +2630,11 @@ public class MainWindow
 	 * <br/>
 	 * The user will not be
 	 */
-	public void closeTab(int index)
+	public void tabCloseButtonClicked(int index)
 	{
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
-		if (!panel.canCloseTab()) return;
+		if (!panel.canClosePanel()) return;
 	
 		if (GuiSettings.getConfirmTabClose())
 		{
