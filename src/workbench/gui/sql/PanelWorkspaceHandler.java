@@ -95,7 +95,6 @@ public class PanelWorkspaceHandler
 		client.setLocked(locked);
 		client.setAppendResults(appendResults);
 		client.updateAppendAction();
-		client.updateTabTitle();
 		client.editor.clearUndoBuffer();
 		client.editor.resetModified();
 

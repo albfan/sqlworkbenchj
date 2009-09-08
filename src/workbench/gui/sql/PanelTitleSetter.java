@@ -35,13 +35,6 @@ public class PanelTitleSetter
 			JTabbedPane tab = (JTabbedPane)parent;
 			int index = tab.indexOfComponent(p);
 			client.setTabTitle(tab, index);
-
-			ChangeListener[] listener = tab.getListeners(ChangeListener.class);
-			ChangeEvent evt = new ChangeEvent(tab);
-			for (ChangeListener l : listener)
-			{
-				l.stateChanged(evt);
-			}
 		}
 	}
 

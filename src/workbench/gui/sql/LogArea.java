@@ -16,6 +16,7 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JTextArea;
 import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.Settings;
 
@@ -26,12 +27,10 @@ public class LogArea
 	extends JTextArea
 	implements PropertyChangeListener
 {
-	private static final Border LOG_BORDER = new EtchedBorder();
-
 	public LogArea()
 	{
 		super();
-		setBorder(LOG_BORDER);
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		setFont(Settings.getInstance().getMsgLogFont());
 		setEditable(false);
 		setLineWrap(true);

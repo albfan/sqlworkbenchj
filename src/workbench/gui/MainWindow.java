@@ -214,9 +214,10 @@ public class MainWindow
 		initMenu();
 		setIconImage(ResourceMgr.getPicture("workbench16").getImage());
 
-		this.getContentPane().add(this.sqlTab, BorderLayout.CENTER);
+		getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 
-		this.restoreSettings();
+		restoreSettings();
+		updateTabPolicy();
 
 		sqlTab.addChangeListener(this);
 		sqlTab.addMouseListener(this);
@@ -226,7 +227,6 @@ public class MainWindow
 			sqlTab.showCloseButton(this);
 		}
 
-		updateTabPolicy();
 		this.addWindowListener(this);
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 
@@ -237,7 +237,7 @@ public class MainWindow
 			Settings.PROPERTY_SHOW_TOOLBAR,
 			Settings.PROPERTY_SHOW_TAB_INDEX,
 			GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON,
-			"workbench.gui.mainwindow.tabpolicy"
+			Settings.PROPERTY_TAB_POLICY
 		);
 
 		// There is no need to register the actions with the ActionMap
@@ -248,7 +248,7 @@ public class MainWindow
 
 	protected void updateTabPolicy()
 	{
-		int tabPolicy = Settings.getInstance().getIntProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
+		int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
 		this.sqlTab.setTabLayoutPolicy(tabPolicy);
 	}
 
@@ -256,7 +256,7 @@ public class MainWindow
 	{
 		this.restoreState();
 		this.setVisible(true);
-		this.addTab(true, false);
+		this.addTab(true, false, true, false);
 		this.updateGuiForTab(0);
 		this.updateWindowTitle();
 	}
@@ -620,7 +620,7 @@ public class MainWindow
 				sqlTab.showCloseButton(null);
 			}
 		}
-		else if ("workbench.gui.mainwindow.tabpolicy".equals(evt.getPropertyName()))
+		else if (Settings.PROPERTY_TAB_POLICY.equals(evt.getPropertyName()))
 		{
 			updateTabPolicy();
 		}
@@ -1344,7 +1344,6 @@ public class MainWindow
 	private void resetWorkspace()
 	{
 		this.closeWorkspace(false);
-		this.resetTabTitles();
 	}
 
 	private boolean resultForWorkspaceClose;
@@ -2392,23 +2391,33 @@ public class MainWindow
 		if (index == -1) index = sqlTab.getTabCount();
 
 		final SqlPanel sql = new SqlPanel(index+1);
-		sql.setConnectionClient(this);
-		sql.addDbExecutionListener(this);
+		
+		try
+		{
+			tabRemovalInProgress = true;
+			
+			sql.setConnectionClient(this);
+			sql.addDbExecutionListener(this);
+			this.sqlTab.add(sql, index);
+			sql.setTabTitle(sqlTab, index);
 
-		if (checkConnection) this.checkConnectionForPanel(sql);
+			JMenuBar menuBar = this.createMenuForPanel(sql);
+			this.panelMenus.add(index, menuBar);
 
-		JMenuBar menuBar = this.createMenuForPanel(sql);
-		this.panelMenus.add(index, menuBar);
-		this.sqlTab.add(sql, index);
+			if (checkConnection) this.checkConnectionForPanel(sql);
 
-		// setTabTitle needs to be called after adding the panel!
-		// this will set the correct title with Mnemonics
-		this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
+			// setTabTitle needs to be called after adding the panel!
+			// this will set the correct title with Mnemonics
+			// this.setTabTitle(index, ResourceMgr.getDefaultTabLabel());
 
-		this.setMacroMenuEnabled(sql.isConnected());
+			this.setMacroMenuEnabled(sql.isConnected());
 
-		if (renumber) this.renumberTabs();
-
+			if (renumber) this.renumberTabs();
+		}
+		finally
+		{
+			tabRemovalInProgress = false;
+		}
 		sql.initDivider(sqlTab.getHeight() - sqlTab.getTabHeight());
 
 		if (selectNew)
@@ -2422,7 +2431,7 @@ public class MainWindow
 		{
 			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
 		}
-
+		
 		return sql;
 	}
 

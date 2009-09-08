@@ -73,6 +73,7 @@ public class Settings
 	public static final String PROPERTY_DATETIME_FORMAT = "workbench.gui.display.datetimeformat";
 	public static final String PROPERTY_TIME_FORMAT = "workbench.gui.display.timeformat";
 	public static final String PROPERTY_SHOW_TOOLBAR = "workbench.gui.mainwindow.showtoolbar";
+	public static final String PROPERTY_TAB_POLICY = "workbench.gui.mainwindow.tabpolicy";
 	public static final String PROPERTY_SHOW_LINE_NUMBERS = "workbench.editor.showlinenumber";
 	public static final String PROPERTY_HIGHLIGHT_CURRENT_STATEMENT = "workbench.editor.highlightcurrent";
 	public static final String PROPERTY_AUTO_JUMP_STATEMENT = "workbench.editor.autojumpnext";

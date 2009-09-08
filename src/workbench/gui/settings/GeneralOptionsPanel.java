@@ -111,7 +111,7 @@ public class GeneralOptionsPanel
 		settingsfilename.setText(s);
 		settingsfilename.setBorder(new EmptyBorder(0,0,0,0));
 		singlePageHelp.setSelected(Settings.getInstance().useSinglePageHelp());
-		int tabPolicy = Settings.getInstance().getIntProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
+		int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
 		scrollTabs.setSelected(tabPolicy == JTabbedPane.SCROLL_TAB_LAYOUT);
 		confirmTabClose.setSelected(GuiSettings.getConfirmTabClose());
 		brushedMetal.setSelected(GuiSettings.getUseBrushedMetal());
@@ -161,11 +161,11 @@ public class GeneralOptionsPanel
 		set.setUseSinglePageHelp(singlePageHelp.isSelected());
 		if (scrollTabs.isSelected())
 		{
-			set.setProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.SCROLL_TAB_LAYOUT);
+			set.setProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.SCROLL_TAB_LAYOUT);
 		}
 		else
 		{
-			set.setProperty("workbench.gui.mainwindow.tabpolicy", JTabbedPane.WRAP_TAB_LAYOUT);
+			set.setProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
 		}
 		if (brushedMetal.isVisible())
 		{

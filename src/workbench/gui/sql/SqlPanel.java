@@ -359,6 +359,7 @@ public class SqlPanel
 		{
 			resultTab.showCloseButton(null);
 		}
+		tabName = ResourceMgr.getDefaultTabLabel();
 	}
 
 	public void setDividerLocation(int location)
@@ -369,15 +370,23 @@ public class SqlPanel
 		}
 	}
 
-	public void setLocked(boolean flag)
+	public void setLocked(final boolean flag)
 	{
+		if (flag == locked) return;
 		this.locked = flag;
-		updateTabTitle();
-		Component c = getParent();
-		if (c instanceof WbTabbedPane)
+		EventQueue.invokeLater(new Runnable()
 		{
-			((WbTabbedPane)c).setCloseButtonEnabled(this, !flag);
-		}
+			@Override
+			public void run()
+			{
+				updateTabTitle();
+				Component c = getParent();
+				if (c instanceof WbTabbedPane)
+				{
+					((WbTabbedPane)c).setCloseButtonEnabled(SqlPanel.this, !flag);
+				}
+			}
+		});
 	}
 
 	public boolean isLocked()
@@ -1321,9 +1330,7 @@ public class SqlPanel
 		{
 			iconHandler.removeIcon();
 		}
-
 		PanelTitleSetter.setTabTitle(tab, this, index, getTabTitle());
-
 		tab.setToolTipTextAt(index, tooltip);
 	}
 

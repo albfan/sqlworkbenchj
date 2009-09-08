@@ -35,10 +35,13 @@ import workbench.log.LogMgr;
 
 /**
  * A JTabbedPane that allows re-ordering of the tabs using drag & drop.
- *
+ * <br/>
  * Additionally it installs it's own UI to remove the unnecessary borders
  * that the standard Java Look & Feels create.
- *
+ * <br/>
+ * A close button can be displayed inside each tab that will trigger
+ * an event with the registered TabCloser.
+ * 
  * @author  support@sql-workbench.net
  */
 public class WbTabbedPane
@@ -48,7 +51,7 @@ public class WbTabbedPane
 	private Moveable tabMover;
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
-	private boolean hideDisabledButtons = true;
+	private boolean hideDisabledButtons;
 
 	public WbTabbedPane()
 	{
@@ -148,7 +151,6 @@ public class WbTabbedPane
 			removeCloseButtons();
 			removeChangeListener(this);
 		}
-		
 	}
 
 	protected void addCloseButtons()
@@ -159,7 +161,7 @@ public class WbTabbedPane
 		{
 			String title = getTitleAt(i);
 			Icon icon = getIconAt(i);
-			TabButtonComponent comp = new TabButtonComponent(title, this);
+			TabButtonComponent comp = new TabButtonComponent(title, this, true);
 			comp.setIcon(icon);
 			setTabComponentAt(i, comp);
 		}
@@ -169,7 +171,12 @@ public class WbTabbedPane
 	{
 		for (int i=0; i < getTabCount(); i++)
 		{
-			setTabComponentAt(i, null);
+			//setTabComponentAt(i, null);
+			TabButtonComponent comp = getTabButton(i);
+			if (comp != null)
+			{
+				comp.setButtonVisible(false);
+			}
 		}
 	}
 	
@@ -236,6 +243,7 @@ public class WbTabbedPane
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
+	@Override
 	public Insets getInsets()
 	{
 		return new Insets(0, 0, 0, 0);
@@ -245,7 +253,7 @@ public class WbTabbedPane
 	public void setTitleAt(int index, String title)
 	{
 		super.setTitleAt(index, title);
-		TabButtonComponent comp = (TabButtonComponent)getTabComponentAt(index);
+		TabButtonComponent comp = getTabButton(index);
 		if (comp != null)
 		{
 			comp.setTitle(title);
@@ -256,15 +264,14 @@ public class WbTabbedPane
 	public void insertTab(String title, Icon icon, Component component, String tip, int index)
 	{
 		super.insertTab(title, icon, component, tip, index);
-		if (component != null)
-		{
-			((JComponent)component).setBorder(WbSwingUtilities.EMPTY_BORDER);
-		}
+		// Always insert our own tab component to work around a bug with HTML rendering
+		// in newer JDKs
+		// see: http://bugs.sun.com/view_bug.do?bug_id=6670274
+		setTabComponentAt(index, new TabButtonComponent(title, this, tabCloser != null));
 		if (tabCloser != null)
 		{
-			setTabComponentAt(index, new TabButtonComponent(title, this));
+			updateButtons();
 		}
-		updateButtons();
 	}
 
 	/**

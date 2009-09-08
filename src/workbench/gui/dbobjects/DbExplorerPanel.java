@@ -826,11 +826,6 @@ public class DbExplorerPanel
 		t.start();
 	}
 
-//	public String getName()
-//	{
-//		return getTabTitle();
-//	}
-
 	public void setTabName(String name)
 	{
 		this.tabTitle = name;

@@ -40,7 +40,7 @@ public class TabButtonComponent
 	private final JLabel label;
 	private final WbButton closeButton;
 
-	public TabButtonComponent(String title, final WbTabbedPane tabPane)
+	public TabButtonComponent(String title, final WbTabbedPane tabPane, boolean showButton)
 	{
 		super(new GridBagLayout());
 		pane = tabPane;
@@ -87,6 +87,7 @@ public class TabButtonComponent
 		c.fill = GridBagConstraints.NONE;
 		c.insets = new Insets(0,0,0,0);
 		add(closeButton);
+		if (!showButton) closeButton.setVisible(showButton);
 	}
 
 	public void setDisplayedMnemonicIndex(int index)
