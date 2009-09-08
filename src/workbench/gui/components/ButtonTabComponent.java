@@ -20,7 +20,6 @@ import java.awt.event.ActionListener;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 
@@ -28,7 +27,7 @@ import workbench.resource.ResourceMgr;
  * Component to be used as tabComponent;
  * Contains a JLabel to show the text and
  * a JButton to close the tab it belongs to
- * 
+ *
  * @author support@sql-workbench.net
  */
 public class ButtonTabComponent
@@ -38,7 +37,7 @@ public class ButtonTabComponent
 	private final WbTabbedPane pane;
 	private final JLabel label;
 	private final WbButton closeButton;
-	
+
 	public ButtonTabComponent(String title, final WbTabbedPane pane)
 	{
 		super(new GridBagLayout());
@@ -55,7 +54,7 @@ public class ButtonTabComponent
 				return WbSwingUtilities.EMPTY_INSETS;
 			}
 		};
-		
+
 		closeButton.setOpaque(false);
 		Dimension d = new Dimension(14, 16);
 		closeButton.setPreferredSize(d);
@@ -63,7 +62,7 @@ public class ButtonTabComponent
 		closeButton.enableBasicRollover();
 		closeButton.setFocusable(false);
 		closeButton.addActionListener(this);
-		
+
 		GridBagConstraints c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 0;
@@ -98,12 +97,12 @@ public class ButtonTabComponent
 		label.setDisplayedMnemonic(key);
 	}
 
-	
+
 	public void setEnabled(boolean flag)
 	{
 		closeButton.setEnabled(flag);
 	}
-	
+
 	public void setTitle(String title)
 	{
 		label.setText(title);
@@ -113,7 +112,7 @@ public class ButtonTabComponent
 	{
 		label.setIcon(icon);
 	}
-	
+
 	@Override
 	public void actionPerformed(ActionEvent e)
 	{
