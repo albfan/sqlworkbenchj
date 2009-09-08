@@ -55,11 +55,13 @@ public class ButtonTabComponent
 				return WbSwingUtilities.EMPTY_INSETS;
 			}
 		};
+		
 		closeButton.setOpaque(false);
-		Dimension d = new Dimension(14, 14);
+		Dimension d = new Dimension(14, 16);
 		closeButton.setPreferredSize(d);
+		closeButton.setMinimumSize(d);
+		closeButton.enableBasicRollover();
 		closeButton.setFocusable(false);
-		closeButton.enableToolbarRollover();
 		closeButton.addActionListener(this);
 		
 		GridBagConstraints c = new GridBagConstraints();
@@ -68,12 +70,13 @@ public class ButtonTabComponent
 		c.gridheight = 0;
 		c.anchor = GridBagConstraints.SOUTHWEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(0,0,0,4);
+		c.insets = new Insets(0,0,1,4);
 		add(label, c);
 
 		c.gridx = 1;
 		c.anchor = GridBagConstraints.SOUTHWEST;
-		c.weightx = 1.0;
+		c.weightx = 0.0;
+		c.weighty = 0.0;
 		c.fill = GridBagConstraints.NONE;
 		c.insets = new Insets(0,0,0,0);
 		add(closeButton);

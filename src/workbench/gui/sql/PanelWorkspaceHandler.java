@@ -86,7 +86,7 @@ public class PanelWorkspaceHandler
 		WbProperties props = w.getSettings();
 
 		int loc = props.getIntProperty("tab" + (index) + ".divider.location", 200);
-		client.contentPanel.setDividerLocation(loc);
+		client.setDividerLocation(loc);
 		loc = props.getIntProperty("tab" + (index) + ".divider.lastlocation", 0);
 		if (loc > 0) client.contentPanel.setLastDividerLocation(loc);
 

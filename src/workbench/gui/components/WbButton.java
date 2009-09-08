@@ -32,6 +32,7 @@ public class WbButton
 	extends JButton
 	implements MouseListener
 {
+	private static final Border ICON_EMPTY_BORDER = new EmptyBorder(1,0,0,0);
 	private static final Border SMALL_EMPTY_BORDER = new EmptyBorder(2,2,2,2);
 	private static final Border LARGE_EMPTY_BORDER = new EmptyBorder(5,5,5,5);
 
@@ -100,7 +101,6 @@ public class WbButton
 	
 	public void enableBasicRollover()
 	{
-		this.setRolloverEnabled(true);
 		setBasicUI();
 		UIDefaults table = UIManager.getLookAndFeelDefaults();
 		Border out = new BasicBorders.RolloverButtonBorder(
@@ -111,7 +111,7 @@ public class WbButton
 
 		if (iconButton)
 		{
-			this.rolloverBorder = out;
+			this.rolloverBorder = new CompoundBorder(out, ICON_EMPTY_BORDER);
 			this.emptyBorder = SMALL_EMPTY_BORDER;
 		}
 		else

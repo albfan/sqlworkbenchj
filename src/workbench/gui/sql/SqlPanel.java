@@ -349,6 +349,14 @@ public class SqlPanel
 		iconHandler = new IconHandler(this);
 	}
 
+	public void setDividerLocation(int location)
+	{
+		if (contentPanel != null)
+		{
+			contentPanel.setDividerLocation(location);
+		}
+	}
+
 	public void setLocked(boolean flag)
 	{
 		this.locked = flag;
