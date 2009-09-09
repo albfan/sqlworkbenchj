@@ -113,7 +113,7 @@ public class MacOSHelper
 			}
 			else
 			{
-				LogMgr.logInfo("MacOSHelper.invoke()", "Ignoring unknown event.");
+				LogMgr.logInfo("MacOSHelper.invoke()", "Ignoring unknown event: " + method.getName());
 			}
 		}
 		catch (Throwable e)

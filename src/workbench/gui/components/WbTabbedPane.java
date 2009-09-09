@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -32,6 +33,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.LnFHelper;
 import workbench.interfaces.Moveable;
 import workbench.log.LogMgr;
+import workbench.util.MacOSHelper;
 
 /**
  * A JTabbedPane that allows re-ordering of the tabs using drag & drop.
@@ -52,7 +54,10 @@ public class WbTabbedPane
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
 	private boolean hideDisabledButtons;
-	private boolean jGoodies;
+	private boolean useNativeComponent;
+  private Color unselectedTabBackground;
+	private Color unselectedTabForeground;
+	private Color unselectedTabHighlight;
 	
 	public WbTabbedPane()
 	{
@@ -230,7 +235,7 @@ public class WbTabbedPane
 		// For use with the jGoodies Plastic look & feel
 		putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 		putClientProperty("jgoodies.embeddedTabs", Boolean.valueOf(System.getProperty("jgoodies.embeddedTabs", "false")));
-		jGoodies = LnFHelper.isJGoodies();
+		useNativeComponent = LnFHelper.isJGoodies() || MacOSHelper.isMacOS();
 		try
 		{
 			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
@@ -243,6 +248,9 @@ public class WbTabbedPane
 		{
 			LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
 		}
+		unselectedTabBackground = UIManager.getColor("TabbedPane.unselectedTabBackground");
+		unselectedTabForeground = UIManager.getColor("TabbedPane.unselectedTabForeground");
+		unselectedTabHighlight = UIManager.getColor("TabbedPane.unselectedTabHighlight");
 	}
 
 	@Override
@@ -266,14 +274,10 @@ public class WbTabbedPane
 	public void insertTab(String title, Icon icon, Component component, String tip, int index)
 	{
 		super.insertTab(title, icon, component, tip, index);
-		if (!jGoodies)
+		if (!useNativeComponent)
 		{
 			// Always insert our own tab component to work around a bug with HTML rendering
 			// in newer JDKs, see: http://bugs.sun.com/view_bug.do?bug_id=6670274
-			
-			// The JGoodies Look on the other hand has a problem when rendering a custom
-			// component for the tab. If the buttons are disabled, and the jgoodies look
-			// is active, it's better to not insert the custom component at all.
 			setTabComponentAt(index, new TabButtonComponent(title, this, tabCloser != null));
 		}
 		if (tabCloser != null)
@@ -399,14 +403,24 @@ public class WbTabbedPane
 		if (tabCloser == null) return;
 		
 		int count = getTabCount();
+		int index = getSelectedIndex();
+		
 		for (int i=0; i < count; i++)
 		{
 			boolean canClose = tabCloser.canCloseTab(i);
 			setCloseButtonEnabled(i, canClose);
-			if (hideDisabledButtons)
+			TabButtonComponent tab = getTabButton(i);
+			if (tab != null)
 			{
-				TabButtonComponent tab = getTabButton(i);
-				if (tab != null) tab.setButtonVisible(canClose);
+				if (hideDisabledButtons)
+				{
+					tab.setButtonVisible(canClose);
+				}
+				if (i == index)
+				{
+					tab.setBackground(unselectedTabBackground);
+					tab.setForeground(unselectedTabForeground);
+				}
 			}
 		}
 	}

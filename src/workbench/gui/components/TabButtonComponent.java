@@ -21,7 +21,7 @@ import java.awt.event.ActionListener;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.border.LineBorder;
+import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.LnFHelper;
 import workbench.resource.ResourceMgr;
@@ -47,7 +47,7 @@ public class TabButtonComponent
 		super(new GridBagLayout());
 		pane = tabPane;
 
-		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", false);
+		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", UIManager.getBoolean("TabbedPane.contentOpaque"));
 
 		boolean jGoodies = LnFHelper.isJGoodies();
 		if (jGoodies)
@@ -61,9 +61,13 @@ public class TabButtonComponent
 		setOpaque(opaque);
 
 		label = new JLabel(title);
-		label.setOpaque(true);
+		label.setOpaque(false);
+		label.setForeground(getForeground());
+		label.setBackground(getBackground());
+
 		closeButton = new WbButton(ResourceMgr.getPng("closePanel"));
 		closeButton.setOpaque(true);
+		closeButton.setBackground(getBackground());
 		Dimension d = new Dimension(14, 16);
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
@@ -84,7 +88,23 @@ public class TabButtonComponent
 		c.fill = GridBagConstraints.NONE;
 		c.insets = WbSwingUtilities.EMPTY_INSETS;
 		add(closeButton);
+		
 		if (!showButton) closeButton.setVisible(showButton);
+	}
+
+	@Override
+	public void setForeground(Color fg)
+	{
+		super.setForeground(fg);
+		if (label != null) label.setForeground(fg);
+	}
+
+	@Override
+	public void setBackground(Color bg)
+	{
+		super.setBackground(bg);
+		if (label != null) label.setBackground(bg);
+		if (closeButton != null) closeButton.setBackground(bg);
 	}
 
 	public void setDisplayedMnemonicIndex(int index)
