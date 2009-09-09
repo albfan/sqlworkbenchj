@@ -539,6 +539,8 @@
     <property name="dev-jar" value="1"/>
   </target>
 
+  <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, make-jar"/>
+  
   <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, make-jar"/>
 
   <!-- build a development release -->
