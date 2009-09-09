@@ -108,7 +108,7 @@ public class PlatformShortcuts
 	{
 		if (PlatformHelper.isMacOS())
 		{
-			KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK | KeyEvent.META_MASK);
+			return null;
 		}
 		return KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, KeyEvent.ALT_MASK);
 	}
@@ -121,7 +121,7 @@ public class PlatformShortcuts
 	{
 		if (PlatformHelper.isMacOS())
 		{
-			KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK | KeyEvent.META_MASK);
+			return null;
 		}
 		return KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, KeyEvent.ALT_MASK);
 	}
