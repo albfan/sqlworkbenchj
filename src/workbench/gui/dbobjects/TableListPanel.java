@@ -211,7 +211,6 @@ public class TableListPanel
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.DEFINITION_PROP, this);
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
 
 		Reloadable indexReload = new Reloadable()
 		{
@@ -262,7 +261,6 @@ public class TableListPanel
 
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 
-		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), this.tableSource);
 		this.tableData = new TableDataPanel();
 		this.tableData.setResultContainer(aParent);
 
@@ -384,6 +382,7 @@ public class TableListPanel
 			});
 		}
 		tableList.setListSelectionControl(this);
+		showObjectDefinitionPanels(false);
 	}
 
 	private void initIndexDropper(Reloadable indexReload)
@@ -492,22 +491,31 @@ public class TableListPanel
 		this.toggleTableSource.addToInputMap(im, am);
 	}
 
-	protected void addTablePanels()
+	/**
+	 * Displays the tabs necessary for a TABLE
+	 */
+	protected void showTablePanels()
 	{
+		if (displayTab.getTabCount() > 3) return; // nothing to do
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
 				try
 				{
-					if (displayTab.getComponentCount() > 3) return;
 					ignoreStateChanged = true;
-					if (displayTab.getComponentCount() == 2) addDataPanel();
+					int index = displayTab.getSelectedIndex();
+					displayTab.removeAll();
+					addBaseObjectPanels();
+					addDataPanel();
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerIndexes"), indexPanel);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedPanel);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedPanel);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
 //					displayTab.add("Used in", tableUsage);
+
+					restoreIndex(index);
 				}
 				finally
 				{
@@ -517,8 +525,31 @@ public class TableListPanel
 		});
 	}
 
-	private void removeTablePanels(final boolean includeDataPanel)
+	private void restoreIndex(int index)
 	{
+		if (index > 0 && index < displayTab.getTabCount())
+		{
+			displayTab.setSelectedIndex(index);
+		}
+		else
+		{
+			displayTab.setSelectedIndex(0);
+		}
+	}
+
+	/**
+	 * Displays the general tabs common to all DB objects
+	 * (essentially object definition and source).
+	 * 
+	 * @param includeDataPanel if true, the Data panel will also be displayed
+	 */
+	private void showObjectDefinitionPanels(final boolean includeDataPanel)
+	{
+		int count = displayTab.getTabCount();
+
+		if (includeDataPanel && count == 3) return; // nothing to do
+		if (!includeDataPanel && count == 2) return; // nothing to do
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -528,28 +559,19 @@ public class TableListPanel
 					int index = displayTab.getSelectedIndex();
 					ignoreStateChanged = true;
 
-					displayTab.setSelectedIndex(0);
+					ignoreStateChanged = true;
+					displayTab.removeAll();
 
-					int count = displayTab.getTabCount();
-
-					if (count < 3 && includeDataPanel) return;
-
-					if (count >= 3 && includeDataPanel) removeDataPanel();
-
-					displayTab.remove(indexPanel);
-					indexes.reset();
-					displayTab.remove(importedPanel);
-					importedKeys.reset();
-					displayTab.remove(exportedPanel);
+					addBaseObjectPanels();
+					if (includeDataPanel) addDataPanel();
+					
 					exportedKeys.reset();
-					displayTab.remove(triggers);
+					indexes.reset();
 					triggers.reset();
-//					displayTab.remove(tableUsage);
-//					tableUsage.reset();
-					if (index < displayTab.getTabCount())
-					{
-						displayTab.setSelectedIndex(index);
-					}
+					importedKeys.reset();
+
+					if (!includeDataPanel) tableData.reset();
+					restoreIndex(index);
 				}
 				finally
 				{
@@ -559,28 +581,15 @@ public class TableListPanel
 		});
 	}
 
-	protected void addDataPanel()
+	protected void addBaseObjectPanels()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				displayTab.add(ResourceMgr.getString("TxtDbExplorerData"), tableData);
-			}
-		});
+		displayTab.add(ResourceMgr.getString("TxtDbExplorerTableDefinition"), tableDefinition);
+		displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), tableSource);
 	}
 
-	protected void removeDataPanel()
+	protected void addDataPanel()
 	{
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				displayTab.remove(tableData);
-				tableData.reset();
-			}
-		});
-
+		displayTab.add(ResourceMgr.getString("TxtDbExplorerData"), tableData);
 	}
 
 	private boolean sourceExpanded = false;
@@ -640,7 +649,7 @@ public class TableListPanel
 		{
 			public void run()
 			{
-				displayTab.setSelectedIndex(0);
+				if (displayTab.getTabCount() > 0) displayTab.setSelectedIndex(0);
 				tableDefinition.reset();
 				importedKeys.reset();
 				exportedKeys.reset();
@@ -1145,25 +1154,11 @@ public class TableListPanel
 		}
 		if (isTable)
 		{
-			addTablePanels();
+			showTablePanels();
 		}
 		else
 		{
-			if (hasData)
-			{
-				if (this.displayTab.getTabCount() == 2)
-				{
-					this.addDataPanel();
-				}
-				else
-				{
-					this.removeTablePanels(false);
-				}
-			}
-			else
-			{
-				removeTablePanels(true);
-			}
+			this.showObjectDefinitionPanels(hasData);
 		}
 
 		this.tableData.reset();
@@ -1779,7 +1774,7 @@ public class TableListPanel
 		{
 			try
 			{
-				this.removeTablePanels(true);
+				this.showObjectDefinitionPanels(false);
 				this.startRetrieve(true);
 			}
 			catch (Exception ex)
