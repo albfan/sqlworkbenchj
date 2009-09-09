@@ -90,9 +90,15 @@ public class DbObjectChanger
 		String oldComment = oldTable.getComment();
 		String newComment = newTable.getComment();
 
+		String schema = oldTable.getSchema();
+		if (schema == null) schema = "";
+		
 		if (StringUtil.equalStringOrEmpty(oldComment, newComment, true)) return null; // no change
-		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, oldTable.getObjectName(dbConnection));
-		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, oldTable.getSchema());
+		String oldname = oldTable.getObjectName(dbConnection);
+		if (oldname == null) oldname = "";
+		
+		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, oldname);
+		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, schema);
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newComment.replace("'", "''"));
 		return sql;
 	}
