@@ -23,7 +23,7 @@ import workbench.gui.actions.WbAction;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class WbToolbar
 	extends JToolBar
@@ -69,15 +69,12 @@ public class WbToolbar
 
 	public void addSeparator()
 	{
-		this.addSeparator(this.getComponentCount());
+		this.addSeparator(-1);
 	}
 
 	public void addSeparator(int index)
 	{
-		if (isRollover())
-			this.add(new WbToolbarSeparator(), index);
-		else
-			super.addSeparator();
+		this.add(new WbToolbarSeparator(), index);
 	}
 
 	public void addDefaultBorder()

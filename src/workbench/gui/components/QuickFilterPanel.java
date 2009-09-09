@@ -187,10 +187,10 @@ public class QuickFilterPanel
 		this.toolbar.setBorder(b);
 	}
 
-	public void addToolbarSeparator(int index)
-	{
-		this.toolbar.addSeparator(index);
-	}
+//	public void addToolbarSeparator(int index)
+//	{
+//		this.toolbar.addSeparator(index);
+//	}
 
 	public void addToToolbar(WbAction action, int index)
 	{

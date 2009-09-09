@@ -14,14 +14,12 @@ package workbench.gui.components;
 import java.awt.Insets;
 import javax.swing.Action;
 import javax.swing.Icon;
-import workbench.WbManager;
-import workbench.resource.Settings;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
-public class WbToolbarButton 
+public class WbToolbarButton
 	extends WbButton
 {
 	public static final Insets MARGIN = new Insets(1,1,1,1);
@@ -29,6 +27,7 @@ public class WbToolbarButton
 	public WbToolbarButton()
 	{
 		super();
+		init();
 	}
 
 	public WbToolbarButton(String aText)
@@ -36,7 +35,7 @@ public class WbToolbarButton
 		super(aText);
 		init();
 	}
-	
+
 	public WbToolbarButton(Action a)
 	{
 		super(a);
@@ -51,17 +50,17 @@ public class WbToolbarButton
 		this.setText(null);
 		init();
 	}
-	
+
 	public void setAction(Action a)
 	{
 		super.setAction(a);
 		this.setText(null);
 		init();
 	}
-	
+
 	private void init()
 	{
 		this.setMargin(MARGIN);
 	}
-	
+
 }

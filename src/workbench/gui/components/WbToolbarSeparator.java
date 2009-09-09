@@ -27,6 +27,7 @@ public class WbToolbarSeparator
 	{
 		super();
 		Dimension d = new Dimension(7, 16);
+		setOpaque(false);
 		this.setPreferredSize(d);
 		this.setMinimumSize(d);
 		this.setMaximumSize(new Dimension(7, 24));
