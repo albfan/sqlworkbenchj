@@ -29,6 +29,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.plaf.TabbedPaneUI;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.lnf.LnFHelper;
 import workbench.interfaces.Moveable;
 import workbench.log.LogMgr;
 
@@ -51,6 +52,7 @@ public class WbTabbedPane
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
 	private boolean hideDisabledButtons;
+	private boolean jGoodies;
 	
 	public WbTabbedPane()
 	{
@@ -228,6 +230,7 @@ public class WbTabbedPane
 		// For use with the jGoodies Plastic look & feel
 		putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 		putClientProperty("jgoodies.embeddedTabs", Boolean.valueOf(System.getProperty("jgoodies.embeddedTabs", "false")));
+		jGoodies = LnFHelper.isJGoodies();
 		try
 		{
 			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
@@ -263,10 +266,16 @@ public class WbTabbedPane
 	public void insertTab(String title, Icon icon, Component component, String tip, int index)
 	{
 		super.insertTab(title, icon, component, tip, index);
-		// Always insert our own tab component to work around a bug with HTML rendering
-		// in newer JDKs
-		// see: http://bugs.sun.com/view_bug.do?bug_id=6670274
-		setTabComponentAt(index, new TabButtonComponent(title, this, tabCloser != null));
+		if (!jGoodies)
+		{
+			// Always insert our own tab component to work around a bug with HTML rendering
+			// in newer JDKs, see: http://bugs.sun.com/view_bug.do?bug_id=6670274
+			
+			// The JGoodies Look on the other hand has a problem when rendering a custom
+			// component for the tab. If the buttons are disabled, and the jgoodies look
+			// is active, it's better to not insert the custom component at all.
+			setTabComponentAt(index, new TabButtonComponent(title, this, tabCloser != null));
+		}
 		if (tabCloser != null)
 		{
 			updateButtons();
