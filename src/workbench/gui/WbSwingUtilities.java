@@ -275,7 +275,7 @@ public class WbSwingUtilities
 				caller.setCursor(cursor);
 				if (includeParent)
 				{
-					final Window w = SwingUtilities.getWindowAncestor(caller);
+					final Window w = getWindowAncestor(caller);
 					if (w != null)
 					{
 						w.setCursor(cursor);
@@ -336,13 +336,9 @@ public class WbSwingUtilities
 		{
 			caller = WbManager.getInstance().getCurrentWindow();
 		}
-		else if (!(aCaller instanceof Window))
-		{
-			caller = SwingUtilities.getWindowAncestor(aCaller);
-		}
 		else
 		{
-			caller = aCaller;
+			caller = getWindowAncestor(aCaller);
 		}
 
 		JOptionPane.showMessageDialog(caller, message, title, JOptionPane.ERROR_MESSAGE);
@@ -361,13 +357,9 @@ public class WbSwingUtilities
 		{
 			realCaller = WbManager.getInstance().getCurrentWindow();
 		}
-		else if (!(caller instanceof Window))
-		{
-			realCaller = SwingUtilities.getWindowAncestor(caller);
-		}
 		else
 		{
-			realCaller = caller;
+			realCaller = getWindowAncestor(caller);
 		}
 
 		JTextArea msg = new JTextArea(message);
@@ -413,7 +405,7 @@ public class WbSwingUtilities
 
 	public static boolean getYesNo(Component aCaller, String aMessage)
 	{
-		int result = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return (result == JOptionPane.YES_OPTION);
 	}
 
@@ -426,9 +418,10 @@ public class WbSwingUtilities
 	 */
 	public static int getYesNoCancel(Component aCaller, String aMessage)
 	{
-		int result = JOptionPane.showConfirmDialog(SwingUtilities.getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
+		int result = JOptionPane.showConfirmDialog(getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return result;
 	}
+	
 	public static final int IGNORE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 1;
 	public static final int EXECUTE_ALL = JOptionPane.YES_OPTION + JOptionPane.NO_OPTION + JOptionPane.CANCEL_OPTION + 2;
 
@@ -439,10 +432,9 @@ public class WbSwingUtilities
 			ResourceMgr.getPlainString("LblProceed"), ResourceMgr.getPlainString("LblCancel")
 		};
 
-
 		String msg = ResourceMgr.getFormattedString(resourceKey, params);
 		final JOptionPane ignorePane = new JOptionPane(msg, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
-		final JDialog dialog = ignorePane.createDialog(SwingUtilities.getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
+		final JDialog dialog = ignorePane.createDialog(getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
 		try
@@ -472,8 +464,9 @@ public class WbSwingUtilities
 		{
 			ResourceMgr.getString("LblYes"), ResourceMgr.getString("LblNo"), ResourceMgr.getString("LblIgnoreAll")
 		};
+		
 		JOptionPane ignorePane = new JOptionPane(aMessage, JOptionPane.QUESTION_MESSAGE, JOptionPane.YES_NO_CANCEL_OPTION, null, options);
-		JDialog dialog = ignorePane.createDialog(SwingUtilities.getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
+		JDialog dialog = ignorePane.createDialog(getWindowAncestor(aCaller), ResourceMgr.TXT_PRODUCT_NAME);
 		dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 		int rvalue = -1;
 		try
@@ -684,7 +677,7 @@ public class WbSwingUtilities
 			dialog.dispose();
 		}
 	}
-
+	
 	public static String getUserInput(Component caller, String aTitle, String initialValue)
 	{
 		return getUserInput(caller, aTitle, initialValue, false);
@@ -692,7 +685,7 @@ public class WbSwingUtilities
 
 	public static String getUserInput(Component caller, String aTitle, String initialValue, boolean hideInput)
 	{
-		Window parent = SwingUtilities.getWindowAncestor(caller);
+		Window parent = getWindowAncestor(caller);
 
 		final JTextField input;
 		if (hideInput)
