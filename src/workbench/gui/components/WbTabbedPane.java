@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -54,10 +53,7 @@ public class WbTabbedPane
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
 	private boolean hideDisabledButtons;
-	private boolean useNativeComponent;
-  private Color unselectedTabBackground;
-	private Color unselectedTabForeground;
-	private Color unselectedTabHighlight;
+	private boolean alwaysUseCustomComponent;
 	
 	public WbTabbedPane()
 	{
@@ -177,11 +173,17 @@ public class WbTabbedPane
 	{
 		for (int i=0; i < getTabCount(); i++)
 		{
-			//setTabComponentAt(i, null);
-			TabButtonComponent comp = getTabButton(i);
-			if (comp != null)
+			if (alwaysUseCustomComponent)
 			{
-				comp.setButtonVisible(false);
+				TabButtonComponent comp = getTabButton(i);
+				if (comp != null)
+				{
+					comp.setButtonVisible(false);
+				}
+			}
+			else
+			{
+				setTabComponentAt(i, null);
 			}
 		}
 	}
@@ -235,7 +237,7 @@ public class WbTabbedPane
 		// For use with the jGoodies Plastic look & feel
 		putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
 		putClientProperty("jgoodies.embeddedTabs", Boolean.valueOf(System.getProperty("jgoodies.embeddedTabs", "false")));
-		useNativeComponent = LnFHelper.isJGoodies() || MacOSHelper.isMacOS();
+		alwaysUseCustomComponent = !LnFHelper.isJGoodies() && !MacOSHelper.isMacOS();
 		try
 		{
 			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
@@ -248,9 +250,6 @@ public class WbTabbedPane
 		{
 			LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
 		}
-		unselectedTabBackground = UIManager.getColor("TabbedPane.unselectedTabBackground");
-		unselectedTabForeground = UIManager.getColor("TabbedPane.unselectedTabForeground");
-		unselectedTabHighlight = UIManager.getColor("TabbedPane.unselectedTabHighlight");
 	}
 
 	@Override
@@ -274,7 +273,7 @@ public class WbTabbedPane
 	public void insertTab(String title, Icon icon, Component component, String tip, int index)
 	{
 		super.insertTab(title, icon, component, tip, index);
-		if (!useNativeComponent)
+		if (alwaysUseCustomComponent || tabCloser != null)
 		{
 			// Always insert our own tab component to work around a bug with HTML rendering
 			// in newer JDKs, see: http://bugs.sun.com/view_bug.do?bug_id=6670274
@@ -403,7 +402,6 @@ public class WbTabbedPane
 		if (tabCloser == null) return;
 		
 		int count = getTabCount();
-		int index = getSelectedIndex();
 		
 		for (int i=0; i < count; i++)
 		{
@@ -415,11 +413,6 @@ public class WbTabbedPane
 				if (hideDisabledButtons)
 				{
 					tab.setButtonVisible(canClose);
-				}
-				if (i == index)
-				{
-					tab.setBackground(unselectedTabBackground);
-					tab.setForeground(unselectedTabForeground);
 				}
 			}
 		}

@@ -11,7 +11,6 @@
  */
 package workbench.gui.components;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -21,7 +20,6 @@ import java.awt.event.ActionListener;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.LnFHelper;
 import workbench.resource.ResourceMgr;
@@ -47,7 +45,7 @@ public class TabButtonComponent
 		super(new GridBagLayout());
 		pane = tabPane;
 
-		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", UIManager.getBoolean("TabbedPane.contentOpaque"));
+		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", false);
 
 		boolean jGoodies = LnFHelper.isJGoodies();
 		if (jGoodies)
@@ -58,15 +56,10 @@ public class TabButtonComponent
 				opaque = true;
 			}
 		}
-		setOpaque(opaque);
 
 		label = new JLabel(title);
-		label.setOpaque(false);
-		label.setForeground(getForeground());
-		label.setBackground(getBackground());
 
 		closeButton = new WbButton(ResourceMgr.getPng("closePanel"));
-		closeButton.setOpaque(true);
 		closeButton.setBackground(getBackground());
 		Dimension d = new Dimension(14, 16);
 		closeButton.setPreferredSize(d);
@@ -90,21 +83,15 @@ public class TabButtonComponent
 		add(closeButton);
 		
 		if (!showButton) closeButton.setVisible(showButton);
+		setOpaque(opaque);
 	}
 
 	@Override
-	public void setForeground(Color fg)
+	public void setOpaque(boolean isOpaque)
 	{
-		super.setForeground(fg);
-		if (label != null) label.setForeground(fg);
-	}
-
-	@Override
-	public void setBackground(Color bg)
-	{
-		super.setBackground(bg);
-		if (label != null) label.setBackground(bg);
-		if (closeButton != null) closeButton.setBackground(bg);
+		super.setOpaque(isOpaque);
+		if (label != null) label.setOpaque(isOpaque);
+		if (closeButton != null) closeButton.setOpaque(isOpaque);
 	}
 
 	public void setDisplayedMnemonicIndex(int index)
@@ -122,7 +109,6 @@ public class TabButtonComponent
 	{
 		label.setDisplayedMnemonic(key);
 	}
-
 
 	public void setButtonVisible(boolean flag)
 	{
