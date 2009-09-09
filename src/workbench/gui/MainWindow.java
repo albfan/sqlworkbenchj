@@ -1431,7 +1431,12 @@ public class MainWindow
 			}
 		});
 
-		WbSwingUtilities.repaintLater(this);
+		// Fix the repainting problems with the editor
+		final SqlPanel sql = getCurrentSqlPanel();
+		if (sql != null)
+		{
+			WbSwingUtilities.repaintLater(sql.getEditor());
+		}
 
 		return resultForWorkspaceClose;
 	}
