@@ -2647,7 +2647,7 @@ public class MainWindow
 	
 		if (GuiSettings.getConfirmTabClose())
 		{
-			boolean doClose = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgConfirmCloseTab"));
+			boolean doClose = WbSwingUtilities.getYesNo(sqlTab, ResourceMgr.getString("MsgConfirmCloseTab"));
 			if (!doClose) return;
 		}
 

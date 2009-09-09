@@ -100,6 +100,12 @@ public class LnFHelper
 			def.put("Table.gridColor", c);
 		}
 	}
+	
+	public static boolean isJGoodies()
+	{
+		String lnf = UIManager.getLookAndFeel().getClass().getName();
+		return lnf.startsWith("com.jgoodies.looks.plastic");
+	}
 
 	protected void initializeLookAndFeel()
 	{

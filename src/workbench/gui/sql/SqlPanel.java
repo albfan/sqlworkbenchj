@@ -350,7 +350,6 @@ public class SqlPanel
 		new ResultTabHandler(this.resultTab, this);
 		iconHandler = new IconHandler(this);
 
-		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON);
 		if (GuiSettings.getShowResultTabCloseButton())
 		{
 			resultTab.showCloseButton(this);
@@ -360,6 +359,7 @@ public class SqlPanel
 			resultTab.showCloseButton(null);
 		}
 		tabName = ResourceMgr.getDefaultTabLabel();
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON);
 	}
 
 	public void setDividerLocation(int location)

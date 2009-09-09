@@ -22,7 +22,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import javax.swing.Icon;
-import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
 import javax.swing.UIManager;
@@ -52,7 +51,7 @@ public class WbTabbedPane
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
 	private boolean hideDisabledButtons;
-
+	
 	public WbTabbedPane()
 	{
 		super();
@@ -227,7 +226,8 @@ public class WbTabbedPane
 	private void init()
 	{
 		// For use with the jGoodies Plastic look & feel
-		this.putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
+		putClientProperty("jgoodies.noContentBorder", Boolean.TRUE);
+		putClientProperty("jgoodies.embeddedTabs", Boolean.valueOf(System.getProperty("jgoodies.embeddedTabs", "false")));
 		try
 		{
 			TabbedPaneUI tui = TabbedPaneUIFactory.getBorderLessUI();
@@ -240,13 +240,12 @@ public class WbTabbedPane
 		{
 			LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
 		}
-		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
 	@Override
 	public Insets getInsets()
 	{
-		return new Insets(0, 0, 0, 0);
+		return WbSwingUtilities.EMPTY_INSETS;
 	}
 
 	@Override
