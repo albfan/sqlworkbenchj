@@ -13,7 +13,6 @@ package workbench.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.List;
 
 /**
  *
@@ -21,6 +20,21 @@ import java.util.List;
  */
 public class NumberUtil
 {
+
+	/**
+	 * Compare two Numbers regardless of their actual class because e.g. BigInteger
+	 * cannot be compared to a BigDecimal. The equals method would return false.
+	 * <br/>
+	 * When comparing data across different DBMS (and thus JDBC) drivers, values
+	 * that are "equal" might otherwise not be considered equal e.g. an ID=42 in Oracle
+	 * stored as NUMBER(38) would not be equal to an ID=42 stored in an integer column
+	 * in Postgres as both drivers use a different representation class.
+	 *
+	 * @param one
+	 * @param other
+	 * 
+	 * @return
+	 */
 	public static boolean valuesAreEquals(Number one, Number other)
 	{
 		if (one.getClass() == other.getClass())
@@ -33,7 +47,7 @@ public class NumberUtil
 		return first.equals(second);
 	}
 	
-	public static Number makeBigDecimal(Number value)
+	protected static Number makeBigDecimal(Number value)
 	{
 		if (value instanceof BigDecimal) return value;
 		
@@ -66,32 +80,6 @@ public class NumberUtil
 			return new BigDecimal(((Float)value).doubleValue());
 		}
 		return value;
-	}
-
-	private static List<? extends Class> numberClasses = CollectionUtil.arrayList(
-			BigDecimal.class,
-			Double.class,
-			Float.class,
-			BigInteger.class,
-			Long.class,
-			Integer.class,
-			Short.class
-		);
-
-	/**
-	 * Returns the "super" type of the given two numbers, i.e. the class
-	 * with the higher value range (e.g. If the input is BigInteger and Integer,
-	 * BigInteger will be returned)
-	 * @param one
-	 * @param other
-	 * @return
-	 */
-	protected static Class getUpperType(Number one, Number other)
-	{
-		int indexOne = numberClasses.indexOf(one.getClass());
-		int indexTwo = numberClasses.indexOf(other.getClass());
-		if (indexOne < indexTwo) return numberClasses.get(indexOne);
-		return numberClasses.get(indexTwo);
 	}
 
 }
