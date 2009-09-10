@@ -22,6 +22,7 @@ import java.util.List;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.FileUtil;
+import workbench.util.NumberUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -546,6 +547,10 @@ public class RowData
 		if (one instanceof byte[] && other instanceof byte[])
 		{
 			return compareArrays((byte[])one, (byte[])other);
+		}
+		if (one instanceof Number && other instanceof Number)
+		{
+			return NumberUtil.valuesAreEquals((Number)one, (Number)other);
 		}
 		return one.equals(other);
 	}
