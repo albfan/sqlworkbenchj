@@ -60,7 +60,9 @@ public class WbCommandAnalyzer
 	public void checkContext()
 	{
 		CommandMapper mapper = new CommandMapper();
-		if (sql.trim().toLowerCase().equals("wb"))
+		String word = StringUtil.getWordLeftOfCursor(this.sql, this.cursorPos, " \t");
+
+		if (word != null && word.trim().toLowerCase().equals("wb"))
 		{
 			context = CONTEXT_WB_COMMANDS;
 			elements = new ArrayList();

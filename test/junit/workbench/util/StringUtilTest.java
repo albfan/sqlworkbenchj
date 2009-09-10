@@ -57,7 +57,6 @@ public class StringUtilTest
 		name = "`test`";
 		trimmed = StringUtil.removeQuotes(name, "`");
 		assertEquals("test", trimmed);
-
 	}
 
 	public void testLongestLine()
@@ -87,10 +86,15 @@ public class StringUtilTest
 		s = "no line feeds";
 		line = StringUtil.getLongestLine(s, 10);
 		assertEquals(s, line);
-
 	}
 
-
+	public void testGetWordLefOfCursor()
+	{
+		String input = "ab test\nmore text";
+		String word = StringUtil.getWordLeftOfCursor(input, 2, " \t");
+		assertNotNull(word);
+		assertEquals("ab", word);
+	}
 	public void testLineStartsWith()
 	{
 		String s = "some stuff     -- this is a comment";

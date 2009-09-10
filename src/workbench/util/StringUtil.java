@@ -853,13 +853,14 @@ public class StringUtil
 		if (wordBoundaries == null) return findPreviousWhitespace(data, pos);
 		if (data == null) return -1;
 		int count = data.length();
-		if (pos > count || pos <= 1) return -1;
+		if (pos > count) return -1;
+		if (pos <= 1) return 0;
 		for (int i=pos; i > 0; i--)
 		{
 			char c = data.charAt(i);
 			if (wordBoundaries.indexOf(c) > -1 || Character.isWhitespace(c)) return i;
 		}
-		return -1;
+		return 0;
 	}
 
 	/**
@@ -909,7 +910,11 @@ public class StringUtil
 
 			String word = null;
 			int startOfWord = findWordBoundary(text, testPos, wordBoundaries);
-			if (startOfWord > 0)
+			if (startOfWord == 0)
+			{
+				word = text.substring(0, Math.min(pos,len));
+			}
+			else if (startOfWord > 0)
 			{
 				word = text.substring(startOfWord+1, Math.min(pos,len));
 			}
