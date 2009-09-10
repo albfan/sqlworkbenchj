@@ -18,6 +18,8 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
+import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 
 /**
  * A renderer for table headers to be able to display a sort indicator and customized
@@ -35,9 +37,11 @@ public class SortHeaderRenderer
 	implements TableCellRenderer
 {
 	private JLabel displayLabel = new JLabel();
-	
+	private boolean showFullTypeInfo;
+
 	public SortHeaderRenderer()
 	{
+		showFullTypeInfo = Settings.getInstance().getBoolProperty("workbench.gui.db.showfulltypeinfo", false);
 	}
 
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col)
@@ -71,6 +75,7 @@ public class SortHeaderRenderer
 		display.setHorizontalAlignment(SwingConstants.LEFT);
 		
 		String type = null;
+		String javaType = null;
 
 		if (table instanceof WbTable)
 		{
@@ -86,7 +91,9 @@ public class SortHeaderRenderer
 			if (model != null)
 			{
 				type = model.getDbmsType(col);
+				javaType = SqlUtil.getTypeName(model.getColumnType(col));
 			}
+
 		}
 
 		if (sorted)
@@ -112,11 +119,18 @@ public class SortHeaderRenderer
 		else
 		{
 			StringBuilder tip = new StringBuilder(text.length() + 20);
-			tip.append("<html>&nbsp;");
+			tip.append("<html><code>");
 			tip.append(text);
-			tip.append("&nbsp;<br>&nbsp;<code>");
+			tip.append("<br>");
 			tip.append(type);
-			tip.append("</code>&nbsp;</html>");
+			if (showFullTypeInfo)
+			{
+				tip.append("<br>");
+				tip.append(table.getColumnClass(col).getName());
+				tip.append("<br>");
+				tip.append(javaType);
+			}
+			tip.append("</code></html>");
 			display.setToolTipText(tip.toString());
 		}
 		return display;
