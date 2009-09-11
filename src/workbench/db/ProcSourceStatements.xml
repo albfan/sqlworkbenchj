@@ -116,7 +116,7 @@
 
   <void method="put">
    <string>HSQL Database Engine</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <object id="hsql_proc_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>select routine_definition from information_schema.routines</string>
     </void>
@@ -128,7 +128,12 @@
     </void>
    </object>
   </void>
-  
+
+  <void method="put">
+   <string>HSQL Database Engine 1.9</string>
+   <object idref="hsql_proc_source"/>
+  </void>
+
   <void method="put"> 
    <string>ThinkSQL Relational Database Management System</string> 
    <object class="workbench.db.GetMetaDataSql"> 

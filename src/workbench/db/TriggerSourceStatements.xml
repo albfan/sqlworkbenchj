@@ -182,7 +182,7 @@ where trg.tgrelid = tbl.oid
   </void> 
 
   <void method="put">
-   <string>HSQL Database Engine</string>
+   <string>HSQL Database Engine 1.9</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT description FROM information_schema.triggers</string>
@@ -194,7 +194,7 @@ where trg.tgrelid = tbl.oid
   </void>
 
   <void method="put"> 
-   <string>HSQL Database Engine</string> 
+   <string>HSQL Database Engine</string>
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
      <string>SELECT description FROM information_schema.system_triggers</string> 

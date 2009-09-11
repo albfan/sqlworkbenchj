@@ -318,7 +318,10 @@ public class TableListPanel
 		GridBagConstraints constr = new GridBagConstraints();
 		constr.anchor = GridBagConstraints.WEST;
 		constr.gridx = 0;
+		constr.fill = GridBagConstraints.HORIZONTAL;
 
+		Dimension d = new Dimension(150, 50);
+		tableTypes.setMaximumSize(d);
 		topPanel.add(this.tableTypes, constr);
 
 		constr = new GridBagConstraints();

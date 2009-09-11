@@ -204,13 +204,16 @@ public class DbExplorerPanel
 			this.selectorPanel.add(schemaLabel);
 			this.schemaSelector = new JComboBox();
 			Dimension d = new Dimension(80, 20);
+			Dimension max = new Dimension(150,40);
 			this.schemaSelector.setMinimumSize(d);
+			this.schemaSelector.setMaximumSize(max);
 			this.selectorPanel.add(this.schemaSelector);
 
 			this.catalogSelector  = new JComboBox();
 			this.catalogLabel = new JLabel("Catalog");
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
+			this.catalogSelector.setMaximumSize(max);
 			this.catalogLabel.setVisible(false);
 			this.selectorPanel.add(catalogLabel);
 			this.selectorPanel.add(catalogSelector);
