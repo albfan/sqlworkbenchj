@@ -11,18 +11,30 @@
  */
 package workbench;
 
+import java.awt.BorderLayout;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.lang.reflect.Method;
 
+import java.net.URL;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 
 /**
  * This is a wrapper to kick-off the actual WbManager class. It should run 
  * with any JDK >= 1.3 as it does not reference any other classes.
+ * <br/>
  * This class is compiled separately in build.xml to allow for a different 
  * class file version between this class and the rest of the application.
  * Thus a check for the correct JDK version can be done inside the Java code.
  * 
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbStarter
 {
@@ -56,19 +68,54 @@ public class WbStarter
 
 		if (!versionIsOk)
 		{
-			String error = "Sorry, SQL Workbench/J requires Java 6, but " + version + " was found\n" + 
-				"Please upgrade to a recent Java version\n\n" +
-				"If you have Java 6 installed, please use the -jdk switch of the Windows launcher\n" +
-				"to specify the correct base directory or point the shell scripts to the correct binaries";
+			String error = "SQL Workbench/J requires Java 6, but only " + version + " was found\n\n" +
+				"If you do have Java 6 installed, please point JAVA_HOME to the location of your Java 6 installation.\n" +
+				"When using Windows you can also use the -jdk switch.\n" +
+				"Please refer to the manual for details on how to specify the Java runtime to be used.";
 			
 			System.err.println("*** Cannot run this application ***");
 			System.err.println(error);
 			try
 			{
-				JOptionPane.showMessageDialog(null, error);
+				UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+				// The dummy Frame is needed for pre Java 5 because otherwise
+				// the dialog will not appear in the Windows task bar 
+				Frame dummy = new Frame("SQL Workbench/J - Wrong Java version");
+				dummy.setBounds(-2000, -2000, 0, 0);
+				dummy.setVisible(true);
+
+				try
+				{
+					URL iconUrl = WbStarter.class.getClassLoader().getResource("workbench/resource/images/workbench16.gif");
+					ImageIcon icon = new ImageIcon(iconUrl);
+					dummy.setIconImage(icon.getImage());
+				}
+				catch (Exception e)
+				{
+					e.printStackTrace();
+				}
+				final JDialog d = new JDialog(dummy, "SQL Workbench/J - Wrong Java version", true);
+				d.getContentPane().setLayout(new BorderLayout(5, 5));
+				JButton b = new JButton("Close");
+				b.addActionListener(new ActionListener()
+				{
+					public void actionPerformed(ActionEvent e)
+					{
+						d.setVisible(false);
+						d.dispose();
+					}
+				});
+				JOptionPane pane = new JOptionPane(error, JOptionPane.WARNING_MESSAGE, JOptionPane.DEFAULT_OPTION, (Icon)null, new Object[] { b } );
+				d.getContentPane().add(pane, BorderLayout.CENTER);
+				d.pack();
+				d.setLocationRelativeTo(null);
+				d.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+				d.setVisible(true);
 			}
 			catch (Throwable e)
 			{
+				e.printStackTrace();
 				// Ignore
 			}
 			System.exit(1);

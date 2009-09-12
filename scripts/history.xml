@@ -21,31 +21,31 @@
 
   <entry dev-build="1" type="enh">
     <description>
-      When displaying multiple result tabs, they can now be re-orderd using
-      drag and drop.
+      Result tabs, can now be re-orderd using drag and drop.
     </description>
   </entry>
 
   <entry dev-build="1" type="enh">
     <description>
       The column definition of tables in the DbExplorer can now be edited and the
-      approriate ALTER statement can be generated for the changes.
+      approriate ALTER statement can be generated for the changes. Primary keys can
+      be dropped and created from within the column definition.
     </description>
   </entry>
 
   <entry dev-build="1" type="enh">
     <description>
-      Tables can now be renamed from within the table list of the DbExplorer. For
-      databases that support this, other types (e.g. VIEWs, SEQUENCEs) can also
-      be renamed. The comment for a table can also be changed. To apply the
-      changes a new menu option in the context menu is available to generate
+      Tables (and other objects if the database supports this) can now be renamed from
+      within the table list of the DbExplorer. The comment for a table can also be changed.
+      To apply the changes a new menu option in the context menu is available to generate
       and run the necessary ALTER statements.
     </description>
   </entry>
 
   <entry dev-build="1" type="enh">
     <description>
-      The SQL tabs now have their own close button
+      The editor and resultset tabs can now have their own close button.
+      (Tools -> Options -> General)
     </description>
   </entry>
 
