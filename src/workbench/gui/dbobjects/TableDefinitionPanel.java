@@ -13,11 +13,9 @@ package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
-import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
@@ -25,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableColumn;
@@ -45,6 +42,8 @@ import workbench.gui.actions.CreateDummySqlAction;
 import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ColumnAlterAction;
+import workbench.gui.actions.CreatePKAction;
+import workbench.gui.actions.DropPKAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
@@ -54,8 +53,6 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
-import workbench.gui.sql.ExecuteSqlDialog;
-import workbench.interfaces.Reloadable;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -73,7 +70,7 @@ import workbench.util.WbThread;
  */
 public class TableDefinitionPanel
 	extends JPanel
-	implements Reloadable, ActionListener, ListSelectionListener, Resettable, DbObjectList
+	implements ActionListener, ListSelectionListener, Resettable, DbObjectList
 {
 	public static final String INDEX_PROP = "index";
 	public static final String DEFINITION_PROP = "tableDefinition";
@@ -84,6 +81,8 @@ public class TableDefinitionPanel
 	private JLabel tableNameLabel;
 	private QuickFilterPanel columnFilter;
 	private WbAction createIndexAction;
+	private CreatePKAction createPKAction;
+	private DropPKAction dropPKAction;
 	private ColumnAlterAction alterColumnsAction;
 	private TableIdentifier currentTable;
 	private WbConnection dbConnection;
@@ -163,11 +162,16 @@ public class TableDefinitionPanel
 		this.createIndexAction.setEnabled(false);
 		this.createIndexAction.initMenuDefinition("MnuTxtCreateIndex");
 
+		createPKAction = new CreatePKAction(this);
+		dropPKAction = new DropPKAction(this);
+
 		tableDefinition.addPopupAction(CreateDummySqlAction.createDummyInsertAction(this, tableDefinition.getSelectionModel()), true);
 		tableDefinition.addPopupAction(CreateDummySqlAction.createDummySelectAction(this, tableDefinition.getSelectionModel()), false);
 
 		tableDefinition.getSelectionModel().addListSelectionListener(this);
-		tableDefinition.addPopupAction(this.createIndexAction, true);
+		tableDefinition.addPopupAction(this.createPKAction, true);
+		tableDefinition.addPopupAction(this.dropPKAction, false);
+		tableDefinition.addPopupAction(this.createIndexAction, false);
 
 		WbTraversalPolicy policy = new WbTraversalPolicy();
 		policy.addComponent(tableDefinition);
@@ -208,6 +212,11 @@ public class TableDefinitionPanel
 		}
 	}
 
+	public void dispose()
+	{
+		if (tableDefinition != null) tableDefinition.dispose();
+	}
+	
 	/**
 	 * Retrieve the definition of the given table.
 	 */
@@ -453,20 +462,45 @@ public class TableDefinitionPanel
 			IndexColumn col = new IndexColumn(colName, null);
 			columns.add(col);
 		}
+		
 		String sql = this.dbConnection.getMetadata().buildIndexSource(this.currentTable, indexName, false, columns);
-		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
-		Window parent = SwingUtilities.getWindowAncestor(this);
-		Frame owner = null;
-		if (parent instanceof Frame)
+		if (!sql.trim().endsWith(";"))
 		{
-			owner = (Frame)parent;
+			sql += ";\n";
 		}
-		ExecuteSqlDialog dialog = new ExecuteSqlDialog(owner, title, sql, indexName, this.dbConnection);
-		dialog.setStartButtonText(ResourceMgr.getString("TxtCreateIndex"));
-		dialog.setVisible(true);
-		fireIndexChanged(indexName);
+		
+		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
+		
+		if (dbConnection.shouldCommitDDL())
+		{
+			sql += "\nCOMMIT;\n";
+		}
+		RunScriptPanel panel = new RunScriptPanel(dbConnection, sql);
+		panel.openWindow(this, title, indexName);
+		
+		if (panel.wasRun())
+		{
+			fireIndexChanged(indexName);
+		}
 	}
 
+	protected boolean isTable()
+	{
+		return (currentTable != null ? "TABLE".equalsIgnoreCase(currentTable.getType()) : false);
+	}
+	
+	protected boolean hasPkColumn()
+	{
+		if (!isTable()) return false;
+		for (int row = 0; row < this.tableDefinition.getRowCount(); row++)
+		{
+			String flag = tableDefinition.getValueAsString(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_PK_FLAG);
+			boolean isPk = StringUtil.stringToBool(flag);
+			if (isPk) return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Invoked when the selection in the table list has changed
 	 */
@@ -476,7 +510,12 @@ public class TableDefinitionPanel
 		if (e.getSource() == this.tableDefinition.getSelectionModel())
 		{
 			boolean rowsSelected = (this.tableDefinition.getSelectedRowCount() > 0);
-			this.createIndexAction.setEnabled(rowsSelected);
+			createIndexAction.setEnabled(rowsSelected);
+
+			boolean isTable = isTable();
+			boolean hasPk = hasPkColumn();
+			createPKAction.setEnabled(rowsSelected && isTable && !hasPk);
+			dropPKAction.setEnabled(isTable && hasPk);
 		}
 	}
 

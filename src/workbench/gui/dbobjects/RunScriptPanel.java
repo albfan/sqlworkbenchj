@@ -11,11 +11,14 @@
 
 package workbench.gui.dbobjects;
 
+import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
@@ -25,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
@@ -35,6 +39,7 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
 import workbench.util.ExceptionUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -63,6 +68,8 @@ public class RunScriptPanel
 		startButton.addActionListener(this);
 		cancelButton.addActionListener(this);
 		closeButton.addActionListener(this);
+		saveAsButton.setAction(editor.getFileSaveAsAction());
+		saveAsButton.setEnabled(true);
 	}
 
 	public boolean wasRun()
@@ -87,7 +94,23 @@ public class RunScriptPanel
 		}
 	}
 
-	public void openWindow(final Frame owner, final String title)
+	public void openWindow(Component comp, String title)
+	{
+		openWindow(comp, title, null);
+	}
+	
+	public void openWindow(Component comp, String title, String highlight)
+	{
+		Window w = SwingUtilities.getWindowAncestor(comp);
+		Frame parent = null;
+		if (w instanceof Frame)
+		{
+			parent = (Frame) w;
+		}
+		openWindow(parent, title, highlight);
+	}
+	
+	public void openWindow(final Frame owner, final String title, final String highlight)
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -105,11 +128,36 @@ public class RunScriptPanel
 				WbSwingUtilities.center(window, owner);
 				window.addWindowListener(RunScriptPanel.this);
 				editor.setText(sqlScript);
+				editor.setCaretPosition(0);
+
+				if (highlight != null)
+				{
+					EventQueue.invokeLater(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							highlightText(highlight);
+						}
+					});
+				}
 				window.setVisible(true);
 			}
 		});
 	}
 
+	private void highlightText(String text)
+	{
+		if (StringUtil.isBlank(text)) return;
+		int start = editor.getReplacer().findFirst(text, true, true, false);
+		int end = start + text.length();
+		if (start > -1)
+		{
+			editor.select(start, end);
+		}
+		editor.requestFocusInWindow();
+	}
+	
 	protected void closeWindow()
 	{
 		if (runner != null) return;
@@ -280,10 +328,11 @@ public class RunScriptPanel
     cancelButton = new JButton();
     closeButton = new JButton();
     statusbar = new SimpleStatusBar();
+    saveAsButton = new JButton();
 
     setLayout(new GridBagLayout());
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
@@ -292,7 +341,7 @@ public class RunScriptPanel
 
     startButton.setText(ResourceMgr.getString("LblStartSql")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 6, 5, 0);
@@ -301,7 +350,7 @@ public class RunScriptPanel
     cancelButton.setText(ResourceMgr.getString("LblCancelPlain")); // NOI18N
     cancelButton.setEnabled(false);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -310,28 +359,36 @@ public class RunScriptPanel
 
     closeButton.setText(ResourceMgr.getString("LblClose")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.insets = new Insets(0, 0, 5, 5);
     add(closeButton, gridBagConstraints);
 
     statusbar.setText("XXXX");
     statusbar.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createEtchedBorder(), BorderFactory.createEmptyBorder(1, 1, 1, 1)));
-    statusbar.setMinimumSize(new Dimension(30, 20));
     statusbar.setPreferredSize(new Dimension(30, 24));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.BOTH;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 6, 5, 6);
     add(statusbar, gridBagConstraints);
+
+    saveAsButton.setText(ResourceMgr.getString("MnuTxtFileSave")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 6, 5, 0);
+    add(saveAsButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JButton cancelButton;
   private JButton closeButton;
   private SqlEditor editor;
+  private JButton saveAsButton;
   private JButton startButton;
   private JLabel statusbar;
   // End of variables declaration//GEN-END:variables

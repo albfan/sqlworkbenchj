@@ -1367,7 +1367,7 @@ public class DbMetadata
 			String schema = table.getSchema();
 			if (schema == null)
 			{
-				schema = getSchemaToUse();
+				schema = getCurrentSchema();
 			}
 
 			String catalog = table.getCatalog();

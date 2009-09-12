@@ -392,6 +392,11 @@ public class TableListPanel
 	{
 		DbObjectList indexList = new DbObjectList()
 		{
+			public void reload()
+			{
+				reload();
+			}
+			
 			public Component getComponent()
 			{
 				return TableListPanel.this;
@@ -438,9 +443,10 @@ public class TableListPanel
 
 	public void dispose()
 	{
-		this.reset();
-		this.tableDefinition.removePropertyChangeListener(this);
-		this.tableData.dispose();
+		reset();
+		tableDefinition.removePropertyChangeListener(this);
+		tableDefinition.dispose();
+		tableData.dispose();
 	}
 
 	private void extendPopupMenu()

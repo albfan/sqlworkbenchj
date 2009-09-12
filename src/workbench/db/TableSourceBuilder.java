@@ -93,17 +93,17 @@ public class TableSourceBuilder
 
 		TableDefinition def = meta.getTableDefinition(tbl);
 		List<ColumnIdentifier> cols = def.getColumns();
-		DataStore indexDef = meta.getIndexReader().getTableIndexInformation(tbl);
+		DataStore indexDef = meta.getIndexReader().getTableIndexInformation(def.getTable());
 		DataStore fkDef = null;
 		if (includeFk)
 		{
 			FKHandler fk = new FKHandler(dbConnection);
-			fkDef = fk.getForeignKeys(tbl, false);
+			fkDef = fk.getForeignKeys(def.getTable(), false);
 		}
 
 		// getTableDefinition() has already retrieved the necessary PK information
 		// there is no need to retrieve the index definition to get the PK information
-		String source = this.getTableSource(table, cols, indexDef, fkDef, includeDrop, null, includeFk);
+		String source = this.getTableSource(def.getTable(), cols, indexDef, fkDef, includeDrop, null, includeFk);
 		return source;
 	}
 

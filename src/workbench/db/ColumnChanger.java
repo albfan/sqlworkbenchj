@@ -26,7 +26,7 @@ import workbench.util.StringUtil;
  */
 public class ColumnChanger
 {
-	public static final String PARAM_TABLE_NAME = "%table_name%";
+	public static final String PARAM_TABLE_NAME = DbObjectChanger.PARAM_TABLE_NAME;
 	
 	public static final String PARAM_COL_NAME = "%column_name%";
 	public static final String PARAM_NEW_COL_NAME = "%new_column_name%";

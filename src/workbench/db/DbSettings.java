@@ -899,4 +899,36 @@ public class DbSettings
 		if (StringUtil.isBlank(type)) return null;
 		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".rename", null);
 	}
+
+	/**
+	 * Returns the SQL to drop a primary key of a database object
+	 * @param type the type of the object. e.g. table, materialized view
+	 */
+	public String getDropPrimaryKeySql(String type)
+	{
+		if (StringUtil.isBlank(type)) return null;
+		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".drop.pk", null);
+	}
+
+	/**
+	 * Returns the SQL to drop a constriant from a data object
+	 * @param type the type of the object. e.g. table, materialized view
+	 */
+	public String getDropConstraint(String type)
+	{
+		if (StringUtil.isBlank(type)) return null;
+		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".drop.constraint", null);
+	}
+
+	/**
+	 * Returns the SQL to add a primary key to an object
+	 * 
+	 * @param type the type of the object. e.g. table, materialized view
+	 */
+	public String getAddPK(String type)
+	{
+		if (StringUtil.isBlank(type)) return null;
+		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".add.pk", null);
+	}
+
 }

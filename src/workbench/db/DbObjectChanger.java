@@ -10,7 +10,10 @@
  */
 package workbench.db;
 
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Map;
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -21,6 +24,8 @@ public class DbObjectChanger
 {
 	public static final String PARAM_OLD_OBJECT_NAME = "%object_name%";
 	public static final String PARAM_NEW_OBJECT_NAME = "%new_object_name%";
+	public static final String PARAM_CONSTRAINT_NAME = "%constraint_name%";
+	public static final String PARAM_TABLE_NAME = "%table_name%";
 
 	private WbConnection dbConnection;
 	private DbSettings settings;
@@ -114,4 +119,97 @@ public class DbObjectChanger
 		if (commentMgr == null || type == null) return null;
 		return commentMgr.getCommentSqlTemplate(type);
 	}
+
+	public String getDropPKScript(TableIdentifier table)
+	{
+		String sql = getDropPK(table);
+		if (StringUtil.isBlank(sql)) return null;
+		StringBuilder script = new StringBuilder(sql);
+		script.append(";\n");
+		if (settings.ddlNeedsCommit())
+		{
+			script.append("\nCOMMIT;\n");
+		}
+		return script.toString();
+	}
+
+	public String getDropPK(TableIdentifier table)
+	{
+		String type = table.getObjectType();
+		if (StringUtil.isBlank(type)) return null;
+		String sql = settings.getDropPrimaryKeySql(type);
+
+		String pkConstraint = table.getPrimaryKeyName();
+		if (StringUtil.isBlank(sql))
+		{
+			// The database doesn't support "DROP PRIMARY KEY", so we need to
+			// drop the corresponding constraint
+			if (StringUtil.isBlank(pkConstraint))
+			{
+				try
+				{
+					TableDefinition def = dbConnection.getMetadata().getTableDefinition(table);
+					pkConstraint = def.getTable().getPrimaryKeyName();
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("DbObjectChanger.generateDropPK()", "Error retrieving table definition", e);
+					return null;
+				}
+			}
+			sql = settings.getDropConstraint(type);
+		}
+
+		if (sql == null) return null;
+		
+		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConnection));
+		if (pkConstraint != null)
+		{
+			sql = sql.replace(PARAM_CONSTRAINT_NAME, pkConstraint);
+		}
+		return sql;
+	}
+
+	public String getAddPKScript(TableIdentifier table, List<ColumnIdentifier> pkCols)
+	{
+		String sql = getAddPK(table, pkCols);
+		if (StringUtil.isBlank(sql)) return null;
+		StringBuilder script = new StringBuilder(sql);
+		script.append(";\n");
+		if (settings.ddlNeedsCommit())
+		{
+			script.append("\nCOMMIT;\n");
+		}
+		return script.toString();
+	}
+
+	public String getAddPK(TableIdentifier table, List<ColumnIdentifier> pkCols)
+	{
+		String type = table.getObjectType();
+		if (StringUtil.isBlank(type)) return null;
+		String sql = settings.getAddPK(type);
+		if (StringUtil.isBlank(sql)) return null;
+
+		String pkName = "PK_" + table.getTableName().toUpperCase();
+		if (dbConnection.getMetadata().storesLowerCaseIdentifiers())
+		{
+			pkName = pkName.toLowerCase();
+		}
+		
+		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConnection));
+		if (pkName != null)
+		{
+			sql = sql.replace(PARAM_CONSTRAINT_NAME, pkName);
+		}
+
+		StringBuilder cols = new StringBuilder(pkCols.size() * 5);
+		for (int i=0; i < pkCols.size(); i++)
+		{
+			if (i > 0) cols.append(", ");
+			cols.append(pkCols.get(0).getColumnName(dbConnection));
+		}
+		sql = sql.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, cols);
+		return sql;
+	}
+
 }

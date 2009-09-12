@@ -15,12 +15,14 @@ import java.util.List;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.interfaces.Reloadable;
 
 /**
  * @author support@sql-workbench.net
  */
 
-public interface DbObjectList 
+public interface DbObjectList
+	extends Reloadable
 {
 	TableIdentifier getObjectTable();
 	List<? extends DbObject> getSelectedObjects();
