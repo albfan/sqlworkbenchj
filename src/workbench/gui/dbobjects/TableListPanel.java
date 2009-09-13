@@ -123,7 +123,6 @@ public class TableListPanel
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
 	protected JPanel listPanel;
-//	protected TableUsagePanel tableUsage;
 	protected CriteriaPanel findPanel;
 	protected WbTable tableList;
 	protected TableDefinitionPanel tableDefinition;
@@ -207,7 +206,6 @@ public class TableListPanel
 		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
 		this.displayTab = new WbTabbedPane(location);
 
-//		this.tableUsage = new TableUsagePanel();
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.DEFINITION_PROP, this);
@@ -377,10 +375,8 @@ public class TableListPanel
 			{
 				public void run()
 				{
-					tableDefinition.showFocusBorder();
 					indexes.showFocusBorder();
 					tableList.showFocusBorder();
-					tableData.showFocusBorder();
 				}
 			});
 		}
@@ -501,7 +497,7 @@ public class TableListPanel
 	}
 
 	/**
-	 * Displays the tabs necessary for a TABLE
+	 * Displays the tabs necessary for a TABLE like object
 	 */
 	protected void showTablePanels()
 	{
@@ -522,8 +518,6 @@ public class TableListPanel
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerFkColumns"), importedPanel);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerReferencedColumns"), exportedPanel);
 					displayTab.add(ResourceMgr.getString("TxtDbExplorerTriggers"), triggers);
-//					displayTab.add("Used in", tableUsage);
-
 					restoreIndex(index);
 				}
 				finally
@@ -547,7 +541,7 @@ public class TableListPanel
 	}
 
 	/**
-	 * Displays the general tabs common to all DB objects
+	 * Displays the tabs common to all DB objects
 	 * (essentially object definition and source).
 	 * 
 	 * @param includeDataPanel if true, the Data panel will also be displayed
@@ -723,17 +717,17 @@ public class TableListPanel
 
 	public void setConnection(WbConnection aConnection)
 	{
-		this.dbConnection = aConnection;
+		dbConnection = aConnection;
 
-		this.tableTypes.removeActionListener(this);
-		this.displayTab.removeChangeListener(this);
+		tableTypes.removeActionListener(this);
+		displayTab.removeChangeListener(this);
 
-		this.importedTableTree.setConnection(aConnection);
-		this.exportedTableTree.setConnection(aConnection);
-		this.tableData.setConnection(aConnection);
-		this.tableDefinition.setConnection(aConnection);
-		this.triggers.setConnection(aConnection);
-		this.tableSource.setDatabaseConnection(aConnection);
+		importedTableTree.setConnection(aConnection);
+		exportedTableTree.setConnection(aConnection);
+		tableData.setConnection(aConnection);
+		tableDefinition.setConnection(aConnection);
+		triggers.setConnection(aConnection);
+		tableSource.setDatabaseConnection(aConnection);
 		
 		renameAction.setConnection(dbConnection);
 		validator.setConnection(dbConnection);
@@ -1325,7 +1319,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			this.tableDefinition.retrieve(selectedTable);
+			tableDefinition.retrieve(selectedTable);
 			shouldRetrieveTable = false;
 		}
 		catch (SQLException e)
@@ -1525,8 +1519,6 @@ public class TableListPanel
 						break;
 					case 6:
 						if (this.shouldRetrieveTriggers) this.retrieveTriggers();
-//					case 7:
-//						retrieveTableUsage();
 				}
 			}
 		}
@@ -1573,14 +1565,9 @@ public class TableListPanel
 
 		if (realTable == null)
 		{
-			realTable = getRealTable(this.selectedTable);
+			realTable = dbConnection.getMetadata().resolveSynonym(selectedTable);
 		}
 		return realTable;
-	}
-
-	protected TableIdentifier getRealTable(TableIdentifier tbl)
-	{
-		return this.dbConnection.getMetadata().resolveSynonym(tbl);
 	}
 
 	protected void retrieveTriggers()
@@ -1852,6 +1839,10 @@ public class TableListPanel
 	{
 		if (this.tableListClients == null) this.tableListClients = new ArrayList<JTable>();
 		if (!this.tableListClients.contains(aClient)) this.tableListClients.add(aClient);
+		if (tableList != null && tableList.getRowCount() > 0)
+		{
+			updateDisplayClients();
+		}
 	}
 
 	public void removeTableListDisplayClient(JTable aClient)
@@ -1862,6 +1853,7 @@ public class TableListPanel
 
 	/**
 	 * Return a TableIdentifier for the given row number in the table list.
+	 * 
 	 * @param row the row from the tableList Table
 	 * @return a TableIdentifier for that row
 	 */

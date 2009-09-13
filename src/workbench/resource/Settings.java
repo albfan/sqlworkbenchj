@@ -133,6 +133,11 @@ public class Settings
 		this.removeObsolete();
 	}
 
+	public Set<String> getKeys()
+	{
+		return props.getKeys();
+	}
+	
 	public final void initialize()
 	{
 		final String configFilename = "workbench.settings";

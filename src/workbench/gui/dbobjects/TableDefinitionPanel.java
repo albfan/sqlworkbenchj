@@ -56,6 +56,7 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
@@ -92,10 +93,32 @@ public class TableDefinitionPanel
 	private boolean busy;
 	private FlatButton alterButton;
 	private ColumnChangeValidator validator = new ColumnChangeValidator();
-
+	private boolean doRestore;
+	private boolean initialized;
+	
 	public TableDefinitionPanel()
 	{
 		super();
+	}
+
+	private void initGui()
+	{
+		if (initialized) return;
+		
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_initGui();
+			}
+		});
+	}
+	
+	private void _initGui()
+	{
+		if (initialized) return;
+		
 		this.tableDefinition = new WbTable(true, false, false);
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		this.tableDefinition.setSelectOnRightButtonClick(true);
@@ -178,6 +201,17 @@ public class TableDefinitionPanel
 		policy.setDefaultComponent(tableDefinition);
 		setFocusCycleRoot(false);
 		setFocusTraversalPolicy(policy);
+
+		if (Settings.getInstance().showFocusInDbExplorer())
+		{
+			tableDefinition.showFocusBorder();
+		}
+
+		if (doRestore)
+		{
+			restoreSettings();
+		}
+		initialized = true;
 	}
 
 	protected void fireTableDefinitionChanged()
@@ -188,11 +222,6 @@ public class TableDefinitionPanel
 	protected void fireIndexChanged(String indexName)
 	{
 		firePropertyChange(INDEX_PROP, null, indexName);
-	}
-
-	public void showFocusBorder()
-	{
-		this.tableDefinition.showFocusBorder();
 	}
 
 	private final Object busyLock = new Object();
@@ -224,6 +253,7 @@ public class TableDefinitionPanel
 		throws SQLException
 	{
 		this.currentTable = table;
+		initGui();
 		retrieveTableDefinition();
 	}
 
@@ -346,6 +376,8 @@ public class TableDefinitionPanel
 
 	public void reset()
 	{
+		if (!initialized) return;
+		
 		currentTable = null;
 		tableDefinition.reset();
 		reloadAction.setEnabled(false);
@@ -363,6 +395,7 @@ public class TableDefinitionPanel
 
 	public void setConnection(WbConnection conn)
 	{
+		initGui();
 		this.dbConnection = conn;
 		this.createIndexAction.setEnabled(this.dbConnection != null);
 		this.reloadAction.setEnabled(this.dbConnection != null);
@@ -389,6 +422,8 @@ public class TableDefinitionPanel
 	{
 		if (this.currentTable == null) return;
 		if (this.dbConnection == null) return;
+
+		initGui();
 
 		WbThread t = new WbThread("TableDefinition Retrieve")
 		{
@@ -506,6 +541,8 @@ public class TableDefinitionPanel
 	 */
 	public void valueChanged(ListSelectionEvent e)
 	{
+		if (!initialized) return;
+		
 		if (e.getValueIsAdjusting()) return;
 		if (e.getSource() == this.tableDefinition.getSelectionModel())
 		{
@@ -528,21 +565,39 @@ public class TableDefinitionPanel
 
 	public int getRowCount()
 	{
+		if (tableDefinition == null) return 0;
 		return this.tableDefinition.getRowCount();
 	}
 
 	public DataStore getDataStore()
 	{
+		if (tableDefinition == null) return null;
 		return this.tableDefinition.getDataStore();
 	}
 
 	public void restoreSettings()
 	{
-		this.columnFilter.restoreSettings();
+		if (columnFilter != null)
+		{
+			this.columnFilter.restoreSettings();
+			doRestore = false;
+		}
+		else
+		{
+			doRestore = true;
+		}
 	}
 
 	public void saveSettings()
 	{
-		this.columnFilter.saveSettings();
+		if (columnFilter != null)
+		{
+			this.columnFilter.saveSettings();
+			doRestore = false;
+		}
+		else
+		{
+			doRestore = true;
+		}
 	}
 }

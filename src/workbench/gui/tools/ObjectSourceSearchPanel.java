@@ -505,12 +505,13 @@ public class ObjectSourceSearchPanel
 		if (this.connection == null) return;
 		Collection<String> types = connection.getMetadata().getObjectTypes();
 
-		// These two type can be hardcoded as they are exactly
+		// These types can be hardcoded as they are exactly
 		// what the searcher is checking as well.
 		// getObjectTypes() returns a sorted set, so the new
 		// values will automatically be sorted.
 		types.add("FUNCTION");
 		types.add("PROCEDURE");
+		types.add("TRIGGER");
 
 		String result = selectFromList(types);
 		if (result != null)

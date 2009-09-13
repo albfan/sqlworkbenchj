@@ -65,6 +65,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.FilteredProperties;
 import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
@@ -89,11 +90,34 @@ public class TableSearchPanel
 	private ClientSideTableSearchPanel clientSearcherCriteria;
 	private ServerSideTableSearchPanel serverSearcherCriteria;
 
+	private boolean initialized;
+	private FilteredProperties workspaceSettings;
+
 	public TableSearchPanel(ShareableDisplay source)
 	{
 		super();
-		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
 		this.tableListSource = source;
+	}
+	
+	private void initGui()
+	{
+		if (initialized) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_initGui();
+			}
+		});
+	}
+
+	private void _initGui()
+	{
+		if (initialized) return;
+
+		this.tableListModel = EmptyTableModel.EMPTY_MODEL;
 		initComponents();
 
 		JScrollBar sb = this.resultScrollPane.getVerticalScrollBar();
@@ -135,6 +159,12 @@ public class TableSearchPanel
 		CompoundBorder b = new CompoundBorder(new DividerBorder(DividerBorder.BOTTOM), new EmptyBorder(2,0,3,0));
 		entryPanel.setBorder(b);
 		initCriteriaPanel();
+		initialized = true;
+		if (workspaceSettings != null)
+		{
+			restoreSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
+		}
+		setConnection(connection);
 	}
 
 	private TableSearchCriteriaGUI getCriteriaPanel()
@@ -279,7 +309,10 @@ public class TableSearchPanel
 	public void setConnection(WbConnection connection)
 	{
 		this.connection = connection;
-		this.tableListSource.addTableListDisplayClient(this.tableNames);
+		if (tableNames != null) 
+		{
+			this.tableListSource.addTableListDisplayClient(this.tableNames);
+		}
 	}
 
 	public void disconnect()
@@ -288,8 +321,20 @@ public class TableSearchPanel
 		this.tableListSource.removeTableListDisplayClient(this.tableNames);
 	}
 
+	@Override
+	public void setVisible(boolean aFlag)
+	{
+		super.setVisible(aFlag);
+		if (aFlag)
+		{
+			initGui();
+		}
+	}
+
 	public void reset()
 	{
+		if (!initialized) return;
+		
     // resultPanel.removeAll() does not work properly for some reason
     // the old tables just stay in there
     // so I re-create the actual result panel
@@ -371,19 +416,25 @@ public class TableSearchPanel
 
 	private void saveSettings(String prefix, PropertyStorage props)
 	{
-		props.setProperty(prefix + ".serversearch", this.serverSideSearch.isSelected());
-		props.setProperty(prefix + ".divider", this.jSplitPane1.getDividerLocation());
-		if (clientSearcherCriteria != null)
+		if (initialized)
 		{
-			clientSearcherCriteria.saveSettings(prefix, props);
+			props.setProperty(prefix + ".serversearch", this.serverSideSearch.isSelected());
+			props.setProperty(prefix + ".divider", this.jSplitPane1.getDividerLocation());
+			if (clientSearcherCriteria != null)
+			{
+				clientSearcherCriteria.saveSettings(prefix, props);
+			}
+			if (serverSearcherCriteria != null)
+			{
+				serverSearcherCriteria.saveSettings(prefix, props);
+			}
+			props.setProperty(prefix + ".maxrows", this.rowCount.getText());
+			props.setProperty(prefix + ".excludelobs", excludeLobs.isSelected());
 		}
-		if (serverSearcherCriteria != null)
+		else if (workspaceSettings != null)
 		{
-			serverSearcherCriteria.saveSettings(prefix, props);
+			workspaceSettings.copyTo(props);
 		}
-
-		props.setProperty(prefix + ".maxrows", this.rowCount.getText());
-		props.setProperty(prefix + ".excludelobs", excludeLobs.isSelected());
 	}
 
 	public void restoreSettings()
@@ -393,21 +444,28 @@ public class TableSearchPanel
 
 	private void restoreSettings(String prefix, PropertyStorage props)
 	{
-		int loc = props.getIntProperty(prefix + ".divider",200);
-		this.jSplitPane1.setDividerLocation(loc);
-		this.serverSideSearch.setSelected(props.getBoolProperty(prefix + ".serversearch", false));
-		if (clientSearcherCriteria != null)
+		if (initialized)
 		{
-			clientSearcherCriteria.restoreSettings(prefix, props);
-		}
-		if (serverSearcherCriteria != null)
-		{
-			serverSearcherCriteria.restoreSettings(prefix, props);
-		}
+			int loc = props.getIntProperty(prefix + ".divider",200);
+			this.jSplitPane1.setDividerLocation(loc);
+			this.serverSideSearch.setSelected(props.getBoolProperty(prefix + ".serversearch", false));
+			if (clientSearcherCriteria != null)
+			{
+				clientSearcherCriteria.restoreSettings(prefix, props);
+			}
+			if (serverSearcherCriteria != null)
+			{
+				serverSearcherCriteria.restoreSettings(prefix, props);
+			}
 
-		this.rowCount.setText(props.getProperty(prefix + ".maxrows", "0"));
-		this.excludeLobs.setSelected(props.getBoolProperty(prefix + ".excludelobs", true));
-		showTableSearcherCriteria();
+			this.rowCount.setText(props.getProperty(prefix + ".maxrows", "0"));
+			this.excludeLobs.setSelected(props.getBoolProperty(prefix + ".excludelobs", true));
+			showTableSearcherCriteria();
+		}
+		else
+		{
+			workspaceSettings = new FilteredProperties(props, prefix);
+		}
 	}
 
 	public void searchEnded()
@@ -446,7 +504,10 @@ public class TableSearchPanel
 
 	public void valueChanged(ListSelectionEvent e)
 	{
-		this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
+		if (initialized)
+		{
+			this.startButton.setEnabled(this.tableNames.getSelectedRowCount() > 0);
+		}
 	}
 
 	public void keyPressed(java.awt.event.KeyEvent e)

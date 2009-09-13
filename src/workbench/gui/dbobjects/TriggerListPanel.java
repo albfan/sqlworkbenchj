@@ -56,6 +56,7 @@ import workbench.gui.components.QuickFilterPanel;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
 import workbench.util.ExceptionUtil;
+import workbench.util.FilteredProperties;
 import workbench.util.WbWorkspace;
 
 /**
@@ -83,10 +84,34 @@ public class TriggerListPanel
 	private CompileDbObjectAction compileAction;
 	private DropDbObjectAction dropAction;
 
-	public TriggerListPanel(MainWindow parent)
-		throws Exception
+	private MainWindow parentWindow;
+	private boolean initialized;
+	private FilteredProperties workspaceProperties;
+
+	public TriggerListPanel(MainWindow window)
 	{
 		super();
+		parentWindow = window;
+	}
+
+	private void initGui()
+	{
+		if (initialized) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_initGui();
+			}
+		});
+	}
+
+	private void _initGui()
+	{
+		if (initialized) return;
+
 		Reloadable sourceReload = new Reloadable()
 		{
 			public void reload()
@@ -105,7 +130,7 @@ public class TriggerListPanel
 			}
 		};
 
-		this.source = new DbObjectSourcePanel(parent, sourceReload);
+		this.source = new DbObjectSourcePanel(parentWindow, sourceReload);
 
 		JPanel listPanel = new JPanel();
 		this.statusRenderer = new ProcStatusRenderer();
@@ -163,6 +188,19 @@ public class TriggerListPanel
 		triggerList.addPopupAction(dropAction, true);
 		this.compileAction = new CompileDbObjectAction(this, this.triggerList.getSelectionModel());
 		triggerList.addPopupAction(compileAction, false);
+
+		if (dbConnection != null)
+		{
+			setConnection(dbConnection);
+		}
+
+		initialized = true;
+		
+		restoreSettings();
+		if (workspaceProperties != null)
+		{
+			readSettings(workspaceProperties, workspaceProperties.getFilterPrefix());
+		}
 	}
 
 	public void disconnect()
@@ -174,6 +212,8 @@ public class TriggerListPanel
 
 	public void reset()
 	{
+		if (!initialized) return;
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -188,9 +228,10 @@ public class TriggerListPanel
 	{
 		this.dbConnection = aConnection;
 		this.reader = new TriggerReader(dbConnection);
-		this.source.setDatabaseConnection(aConnection);
-		this.compileAction.setConnection(aConnection);
+		if (source != null) source.setDatabaseConnection(aConnection);
+		if (compileAction != null) compileAction.setConnection(aConnection);
 		this.reset();
+		shouldRetrieve = true;
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
@@ -198,7 +239,7 @@ public class TriggerListPanel
 	{
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
-		if (this.isVisible() && retrieve)
+		if (initialized && this.isVisible() && retrieve)
 		{
 			this.retrieve();
 		}
@@ -216,9 +257,12 @@ public class TriggerListPanel
 
 	public void retrieve()
 	{
+		initGui();
+
 		if (this.dbConnection == null) return;
 		if (this.reader == null) return;
 		if (this.isRetrieving) return;
+		
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 
 		try
@@ -274,15 +318,28 @@ public class TriggerListPanel
 
 	public void saveSettings()
 	{
-		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
-		findPanel.saveSettings();
+		if (initialized)
+		{
+			storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
+			findPanel.saveSettings();
+		}
 	}
 
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
-		String prefix = getWorkspacePrefix(index);
-		storeSettings(w.getSettings(), prefix);
-		findPanel.saveSettings(w.getSettings(), prefix);
+		if (initialized)
+		{
+			String prefix = getWorkspacePrefix(index);
+			storeSettings(w.getSettings(), prefix);
+			findPanel.saveSettings(w.getSettings(), prefix);
+		}
+		else if (workspaceProperties != null)
+		{
+			for (String key : workspaceProperties.getKeys())
+			{
+				w.getSettings().setProperty(key, workspaceProperties.getProperty(key));
+			}
+		}
 	}
 
 	private void storeSettings(PropertyStorage props, String prefix)
@@ -292,25 +349,40 @@ public class TriggerListPanel
 
 	public void restoreSettings()
 	{
-		readSettings(Settings.getInstance(), this.getClass().getName() + ".");
-		findPanel.restoreSettings();
+		if (initialized)
+		{
+			readSettings(Settings.getInstance(), this.getClass().getName() + ".");
+			findPanel.restoreSettings();
+		}
 	}
 
 	public void readFromWorkspace(WbWorkspace w, int index)
 	{
 		String prefix = getWorkspacePrefix(index);
-		readSettings(w.getSettings(), prefix);
-		this.findPanel.restoreSettings(w.getSettings(), prefix);
+		if (initialized)
+		{
+			readSettings(w.getSettings(), prefix);
+		}
+		else
+		{
+			workspaceProperties = new FilteredProperties(w.getSettings(), prefix);
+		}
 	}
 
 	private void readSettings(PropertyStorage props, String prefix)
 	{
-		int loc = props.getIntProperty(prefix + "divider", 200);
-		this.splitPane.setDividerLocation(loc);
+		if (initialized)
+		{
+			int loc = props.getIntProperty(prefix + "divider", 200);
+			splitPane.setDividerLocation(loc);
+			findPanel.restoreSettings(props, prefix);
+		}
 	}
 
 	public void valueChanged(ListSelectionEvent e)
 	{
+		if (!initialized) return;
+		
 		if (e.getSource() != this.triggerList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
 		retrieveCurrentTrigger();
@@ -388,6 +460,8 @@ public class TriggerListPanel
 
 	public List<DbObject> getSelectedObjects()
 	{
+		if (!initialized) return null;
+
 		if (this.triggerList.getSelectedRowCount() == 0) return null;
 		int[] rows = this.triggerList.getSelectedRows();
 		int count = rows.length;

@@ -224,7 +224,6 @@ public class DbExplorerPanel
 
 			this.add(this.selectorPanel, BorderLayout.NORTH);
 			this.add(tabPane, BorderLayout.CENTER);
-			this.searchPanel.restoreSettings();
 
 			this.toolbar = new WbToolbar();
 			this.toolbar.addDefaultBorder();

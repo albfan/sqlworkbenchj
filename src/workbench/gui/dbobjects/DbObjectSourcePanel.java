@@ -45,16 +45,36 @@ public class DbObjectSourcePanel
 	protected DropDownButton editButton;
 	private EditorTabSelectMenu selectTabMenu;
 	private MainWindow parentWindow;
+	private boolean initialized;
 
-	public DbObjectSourcePanel(MainWindow parent, Reloadable reloader)
+	public DbObjectSourcePanel(MainWindow window, Reloadable reloader)
 	{
 		super();
-		parentWindow = parent;
+		parentWindow = window;
 		if (reloader != null)
 		{
 			reloadSource = new ReloadAction(reloader);
 			reloadSource.setEnabled(false);
 		}
+	}
+
+	private void initGui()
+	{
+		if (initialized) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_initGui();
+			}
+		});
+	}
+
+	private void _initGui()
+	{
+		if (initialized) return;
 
 		this.sourceEditor = EditorPanel.createSqlEditor();
 		this.sourceEditor.showFindOnPopupMenu();
@@ -76,7 +96,7 @@ public class DbObjectSourcePanel
 		if (parentWindow != null)
 		{
 			editButton = new DropDownButton(ResourceMgr.getString("LblEditScriptSource"));
-			selectTabMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", parent);
+			selectTabMenu = new EditorTabSelectMenu(this, ResourceMgr.getString("LblEditScriptSource"), "LblEditInNewTab", "LblEditInTab", parentWindow);
 			editButton.setDropDownMenu(selectTabMenu.getPopupMenu());
 			toolbar.add(editButton);
 		}
@@ -84,6 +104,7 @@ public class DbObjectSourcePanel
 		{
 			new FocusIndicator(sourceEditor, sourceEditor);
 		}
+		initialized = true;
 	}
 
 	public void actionPerformed(ActionEvent e)
@@ -124,6 +145,7 @@ public class DbObjectSourcePanel
 
 	public void setPlainText(final String sql)
 	{
+		initGui();
 		setEditorText(sql, false);
 	}
 
@@ -135,6 +157,7 @@ public class DbObjectSourcePanel
 	 */
 	public void setText(final String sql)
 	{
+		initGui();
 		boolean hasText = !StringUtil.isEmptyString(sql);
 		if (reloadSource != null) reloadSource.setEnabled(hasText);
 
@@ -174,23 +197,33 @@ public class DbObjectSourcePanel
 		});
 
 	}
+
 	public String getText()
 	{
+		if (sourceEditor == null) return null;
 		return sourceEditor.getText();
 	}
 
 	public void requestFocus()
 	{
-		this.sourceEditor.requestFocus();
+		if (sourceEditor != null)
+		{
+			this.sourceEditor.requestFocus();
+		}
 	}
 
 	public boolean requestFocusInWindow()
 	{
-		return this.sourceEditor.requestFocusInWindow();
+		if (sourceEditor != null)
+		{
+			return this.sourceEditor.requestFocusInWindow();
+		}
+		return false;
 	}
 
 	public void setCaretPosition(int pos, boolean selectLine)
 	{
+		initGui();
 		sourceEditor.setCaretPosition(pos);
 		if (selectLine)
 		{
@@ -206,22 +239,32 @@ public class DbObjectSourcePanel
 
 	public void scrollToCaret()
 	{
-		sourceEditor.scrollToCaret();
+		if (sourceEditor != null)
+		{
+			sourceEditor.scrollToCaret();
+		}
 	}
 
 	public void setDatabaseConnection(WbConnection con)
 	{
+		initGui();
 		sourceEditor.setDatabaseConnection(con);
 	}
 
 	public void setEditable(boolean flag)
 	{
-		sourceEditor.setEditable(flag);
+		if (sourceEditor != null)
+		{
+			sourceEditor.setEditable(flag);
+		}
 	}
 
 	public void reset()
 	{
-		this.setText("");
+		if (sourceEditor != null)
+		{
+			this.setText("");
+		}
 	}
 
 }

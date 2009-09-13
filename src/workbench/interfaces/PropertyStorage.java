@@ -11,6 +11,8 @@
  */
 package workbench.interfaces;
 
+import java.util.Set;
+
 /**
  * @author support@sql-workbench.net
  */
@@ -22,4 +24,5 @@ public interface PropertyStorage
 	boolean getBoolProperty(String property, boolean defaultValue);
 	int getIntProperty(String property, int defaultValue);
 	String getProperty(String property, String defaultValue);
+	Set<String> getKeys();
 }

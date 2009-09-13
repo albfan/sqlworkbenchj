@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
@@ -46,7 +45,6 @@ import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import javax.swing.JLabel;
-import javax.swing.border.EtchedBorder;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
@@ -65,6 +63,7 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.gui.settings.PlacementChooser;
 import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
+import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
 import workbench.util.WbWorkspace;
 
@@ -92,16 +91,39 @@ public class ProcedureListPanel
 	private boolean isRetrieving;
 	protected ProcStatusRenderer statusRenderer;
 
-	public ProcedureListPanel(MainWindow parent)
-		throws Exception
+	private MainWindow parentWindow;
+	private boolean initialized;
+	private FilteredProperties workspaceSettings;
+
+	public ProcedureListPanel(MainWindow window)
 	{
 		super();
+		parentWindow = window;
+	}
+
+	private void initGui()
+	{
+		if (initialized) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_initGui();
+			}
+		});
+	}
+
+	private void _initGui()
+	{
+		if (initialized) return;
+
 		this.displayTab = new WbTabbedPane();
 		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
 		this.displayTab.setTabPlacement(location);
 
 		this.procColumns = new DbObjectTable();
-
 
 		Reloadable sourceReload = new Reloadable()
 		{
@@ -120,7 +142,7 @@ public class ProcedureListPanel
 			}
 		};
 
-		source = new DbObjectSourcePanel(parent, sourceReload);
+		source = new DbObjectSourcePanel(parentWindow, sourceReload);
 		this.displayTab.add(ResourceMgr.getString("TxtDbExplorerSource"), source);
 
 		JPanel p = new JPanel(new BorderLayout());
@@ -174,6 +196,16 @@ public class ProcedureListPanel
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
 		this.extendPopupMenu();
+
+		source.setDatabaseConnection(dbConnection);
+		compileAction.setConnection(dbConnection);
+
+		initialized = true;
+		restoreSettings();
+		if (workspaceSettings != null)
+		{
+			readSettings(workspaceSettings, workspaceSettings.getFilterPrefix());
+		}
 	}
 
 	private void extendPopupMenu()
@@ -196,6 +228,8 @@ public class ProcedureListPanel
 
 	public void reset()
 	{
+		if (!initialized) return;
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -210,9 +244,9 @@ public class ProcedureListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.source.setDatabaseConnection(aConnection);
+		if (source != null) this.source.setDatabaseConnection(aConnection);
 		this.reset();
-		this.compileAction.setConnection(aConnection);
+		if (compileAction != null) this.compileAction.setConnection(aConnection);
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
@@ -220,7 +254,7 @@ public class ProcedureListPanel
 	{
 		this.currentSchema = aSchema;
 		this.currentCatalog = aCatalog;
-		if (this.isVisible() && retrieve)
+		if (initialized && this.isVisible() && retrieve)
 		{
 			this.retrieve();
 		}
@@ -243,6 +277,8 @@ public class ProcedureListPanel
 
 	public void retrieve()
 	{
+		initGui();
+		
 		if (this.isRetrieving) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 
@@ -293,7 +329,6 @@ public class ProcedureListPanel
 			this.dbConnection.setBusy(false);
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
-
 	}
 
 	public void setVisible(boolean aFlag)
@@ -310,15 +345,25 @@ public class ProcedureListPanel
 
 	public void saveSettings()
 	{
-		storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
-		findPanel.saveSettings();
+		if (initialized)
+		{
+			storeSettings(Settings.getInstance(), this.getClass().getName() + ".");
+			findPanel.saveSettings();
+		}
 	}
 
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
-		String prefix = getWorkspacePrefix(index);
-		storeSettings(w.getSettings(), prefix);
-		findPanel.saveSettings(w.getSettings(), prefix);
+		if (initialized)
+		{
+			String prefix = getWorkspacePrefix(index);
+			storeSettings(w.getSettings(), prefix);
+			findPanel.saveSettings(w.getSettings(), prefix);
+		}
+		else if (workspaceSettings != null)
+		{
+			workspaceSettings.copyTo(w.getSettings());
+		}
 	}
 
 	private void storeSettings(PropertyStorage props, String prefix)
@@ -328,25 +373,37 @@ public class ProcedureListPanel
 
 	public void restoreSettings()
 	{
-		readSettings(Settings.getInstance(), this.getClass().getName() + ".");
-		findPanel.restoreSettings();
+		if (initialized)
+		{
+			readSettings(Settings.getInstance(), this.getClass().getName() + ".");
+			findPanel.restoreSettings();
+		}
 	}
 
 	public void readFromWorkspace(WbWorkspace w, int index)
 	{
 		String prefix = getWorkspacePrefix(index);
-		readSettings(w.getSettings(), prefix);
-		this.findPanel.restoreSettings(w.getSettings(), prefix);
+		if (!initialized)
+		{
+			workspaceSettings = new FilteredProperties(w.getSettings(), prefix);
+		}
+		else
+		{
+			readSettings(w.getSettings(), prefix);
+		}
 	}
 
 	private void readSettings(PropertyStorage props, String prefix)
 	{
 		int loc = props.getIntProperty(prefix + "divider", 200);
-		this.splitPane.setDividerLocation(loc);
+		splitPane.setDividerLocation(loc);
+		findPanel.restoreSettings(props, prefix);
 	}
 
 	public void valueChanged(ListSelectionEvent e)
 	{
+		if (!initialized) return;
+		
 		if (e.getSource() != this.procList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
 		retrieveCurrentProcedure();
@@ -466,6 +523,8 @@ public class ProcedureListPanel
 
 	public List<? extends DbObject> getSelectedObjects()
 	{
+		if (!initialized) return null;
+		
 		if (this.procList.getSelectedRowCount() == 0) return null;
 		int[] rows = this.procList.getSelectedRows();
 		int count = rows.length;

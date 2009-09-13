@@ -51,8 +51,8 @@ public class CommandTester
 		commands.add(WbDefinePk.VERB);
 		commands.add(WbDefineVar.VERB);
 		commands.add(WbDeleteProfile.VERB);
-		commands.add(WbDescribeTable.VERB);
-		commands.add(WbDescribeTable.VERB_LONG);
+		commands.add(WbDescribeObject.VERB);
+		commands.add(WbDescribeObject.VERB_LONG);
 		commands.add(WbDisableOraOutput.VERB);
 		commands.add(WbDisplay.VERB);
 		commands.add(WbEnableOraOutput.VERB);
@@ -98,8 +98,8 @@ public class CommandTester
 		formattedWords.put(WbStartBatch.VERB, "WbStartBatch");
 		formattedWords.put(WbSchemaDiff.VERB, "WbSchemaDiff");
 		formattedWords.put(WbDataDiff.VERB, "WbDataDiff");
-		formattedWords.put(WbDescribeTable.VERB, WbDescribeTable.VERB.toUpperCase());
-		formattedWords.put(WbDescribeTable.VERB_LONG, WbDescribeTable.VERB_LONG.toUpperCase());
+		formattedWords.put(WbDescribeObject.VERB, WbDescribeObject.VERB.toUpperCase());
+		formattedWords.put(WbDescribeObject.VERB_LONG, WbDescribeObject.VERB_LONG.toUpperCase());
 		formattedWords.put(WbHideWarnings.VERB, "WbEnableWarnings");
 		formattedWords.put(WbStoreProfile.VERB, "WbStoreProfile");
 		formattedWords.put(WbDeleteProfile.VERB, "WbDeleteProfile");

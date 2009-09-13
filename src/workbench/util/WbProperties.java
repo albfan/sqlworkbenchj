@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import workbench.interfaces.PropertyStorage;
 import workbench.resource.Settings;
 
@@ -270,6 +271,12 @@ public class WbProperties
 				l.propertyChange(evt);
 			}
 		}
+	}
+
+	@Override
+	public Set<String> getKeys()
+	{
+		return super.stringPropertyNames();
 	}
 
 	public Object setProperty(String name, String value)

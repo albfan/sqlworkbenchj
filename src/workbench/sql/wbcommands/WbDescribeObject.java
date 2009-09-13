@@ -21,7 +21,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 
 /**
- * Display the definition of a table.
+ * Display the definition of a database object
  *
  * This command will return multiple result sets:
  *
@@ -40,7 +40,7 @@ import workbench.util.SqlUtil;
  * @see workbench.db.TriggerReader#getTableTriggers(workbench.db.TableIdentifier)
  * @see workbench.db.ViewReader#getExtendedViewSource(workbench.db.TableIdentifier, boolean) 
  */
-public class WbDescribeTable
+public class WbDescribeObject
 	extends SqlCommand
 {
 	public static final String VERB = "DESC";

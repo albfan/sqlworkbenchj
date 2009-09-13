@@ -109,10 +109,34 @@ public class TableDataPanel
 	private boolean rememberSort;
 	private NamedSortDefinition lastSort;
 
+	private boolean initialized;
+	private Integer maxRowsFromSettings;
+	private Boolean autoRetrieveFromSettings;
+	
 	public TableDataPanel()
 		throws Exception
 	{
 		super();
+	}
+
+	private void initGui()
+	{
+		if (initialized) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_initGui();
+			}
+		});
+	}
+
+	private void _initGui()
+	{
+		if (initialized) return;
+		
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 
@@ -224,6 +248,24 @@ public class TableDataPanel
 		setFocusCycleRoot(false);
 		setFocusTraversalPolicy(policy);
 		dataDisplay.getTable().setColumnOrderSavingEnabled(true);
+
+		if (Settings.getInstance().showFocusInDbExplorer())
+		{
+			dataDisplay.getTable().showFocusBorder();
+		}
+
+		if (autoRetrieveFromSettings != null)
+		{
+			autoRetrieve.setSelected(autoRetrieveFromSettings.booleanValue());
+			autoRetrieveFromSettings = null;
+		}
+
+		if (maxRowsFromSettings != null)
+		{
+			dataDisplay.setMaxRows(maxRowsFromSettings.intValue());
+			maxRowsFromSettings = null;
+		}
+		initialized = true;
 	}
 
 	public boolean isModified()
@@ -235,11 +277,6 @@ public class TableDataPanel
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		this.rememberSort = Settings.getInstance().getRememberSortInDbExplorer();
-	}
-
-	public void showFocusBorder()
-	{
-		this.dataDisplay.getTable().showFocusBorder();
 	}
 
 	public void setResultContainer(MainWindow container)
@@ -262,6 +299,7 @@ public class TableDataPanel
 
 	public void dispose()
 	{
+		if (!initialized) return;
 		this.reset();
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
@@ -274,6 +312,8 @@ public class TableDataPanel
 
 	public void reset()
 	{
+		if (!initialized) return;
+		
 		if (this.isRetrieving()) return;
 		if (this.rememberSort)
 		{
@@ -301,6 +341,7 @@ public class TableDataPanel
 
 	public void setConnection(WbConnection aConnection)
 	{
+		initGui();
 		this.dbConnection = aConnection;
 		try
 		{
@@ -359,8 +400,8 @@ public class TableDataPanel
 	{
 		if (this.dbConnection == null) return -1;
 		if (this.isRetrieving()) return -1;
-
-		//EventQueue.invokeLater(new Runnable()
+		initGui();
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -459,11 +500,6 @@ public class TableDataPanel
 		}
 	}
 
-	public void resetColumnOrder()
-	{
-		ColumnOrderMgr.getInstance().resetColumnOrder(dataDisplay.getTable());
-	}
-
 	public void storeColumnOrder()
 	{
 		if (!Settings.getInstance().getRememberColumnOrder()) return;
@@ -487,10 +523,13 @@ public class TableDataPanel
 	 */
 	public void setTable(TableIdentifier aTable)
 	{
-		if (!this.isRetrieving()) reset();
-		this.table = aTable;
+		initGui();
 
+		if (!this.isRetrieving()) reset();
+	
+		this.table = aTable;
 		this.lastSort = null;
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -536,14 +575,20 @@ public class TableDataPanel
 		this.rowCountLabel.setIcon(null);
 	}
 
-	public boolean confirmCancel() { return true; }
+	public boolean confirmCancel()
+	{
+		return true;
+	}
 
 	/**
 	 * 	Directly cancel the retrieval (in the same thread)
 	 */
 	public void cancelRetrieve()
 	{
-		dataDisplay.cancelExecution();
+		if (dataDisplay != null)
+		{
+			dataDisplay.cancelExecution();
+		}
 	}
 
 	/**
@@ -552,6 +597,8 @@ public class TableDataPanel
 	 */
 	public void cancelExecution()
 	{
+		if (!initialized) return;
+		
 		Thread t = new WbThread("Cancel thread")
 		{
 			public void run()
@@ -753,7 +800,10 @@ public class TableDataPanel
 	public void setCursor(Cursor newCursor)
 	{
 		super.setCursor(newCursor);
-		this.dataDisplay.setCursor(null);
+		if (dataDisplay != null) 
+		{
+			this.dataDisplay.setCursor(newCursor);
+		}
 	}
 
 	/**
@@ -763,7 +813,7 @@ public class TableDataPanel
 	public void retrieve(final boolean respectMaxRows)
 	{
 		if (this.isRetrieving()) return;
-
+		initGui();
 		Thread t = new WbThread("TableDataPanel retrieve thread")
 		{
 			public void run()
@@ -827,22 +877,42 @@ public class TableDataPanel
 	private void readSettings(String prefix, PropertyStorage props)
 	{
 		int max = props.getIntProperty(prefix + "maxrows", 500);
-		if (max != -1) this.dataDisplay.setMaxRows(max);
+		if (max != -1)
+		{
+			if (dataDisplay != null)
+			{
+				this.dataDisplay.setMaxRows(max);
+				maxRowsFromSettings = null;
+			}
+			else
+			{
+				maxRowsFromSettings = Integer.valueOf(max);
+			}
+		}
 		boolean auto = props.getBoolProperty(prefix + "autoretrieve", true);
-		this.autoRetrieve.setSelected(auto);
+		if (autoRetrieve != null)
+		{
+			this.autoRetrieve.setSelected(auto);
+			autoRetrieveFromSettings = null;
+		}
+		else
+		{
+			autoRetrieveFromSettings = Boolean.valueOf(auto);
+		}
 		this.autoloadRowCount = props.getBoolProperty(prefix + "autoloadrowcount", true);
 		this.warningThreshold = props.getIntProperty(prefix + "warningthreshold", 1500);
 	}
 
 	public void showData()
 	{
+		initGui();
 		this.showData(true);
 	}
 
 	public void showData(boolean includeData)
 	{
 		if (this.isRetrieving()) return;
-
+		initGui();
 		this.reset();
 		long rows = -1;
 		if (this.autoloadRowCount)
@@ -874,7 +944,7 @@ public class TableDataPanel
 		{
 			if (!WbSwingUtilities.getProceedCancel(this, "MsgDiscardDataChanges")) return;
 		}
-
+		initGui();
 		this.reset();
 		long rows = -1;
 		boolean ctrlPressed = this.reloadAction.ctrlPressed();
@@ -918,7 +988,10 @@ public class TableDataPanel
 
 	public void setReadOnly(boolean aFlag)
 	{
-		this.dataDisplay.setReadOnly(aFlag);
+		if (dataDisplay != null)
+		{
+			this.dataDisplay.setReadOnly(aFlag);
+		}
 	}
 
 	public void tableDataDeleted(List tables)

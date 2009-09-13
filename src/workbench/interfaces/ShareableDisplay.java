@@ -15,7 +15,7 @@ import javax.swing.JTable;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public interface ShareableDisplay
 	extends Reloadable

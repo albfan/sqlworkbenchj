@@ -38,7 +38,7 @@ import workbench.sql.wbcommands.WbCopy;
 import workbench.sql.wbcommands.WbDataDiff;
 import workbench.sql.wbcommands.WbDefinePk;
 import workbench.sql.wbcommands.WbDefineVar;
-import workbench.sql.wbcommands.WbDescribeTable;
+import workbench.sql.wbcommands.WbDescribeObject;
 import workbench.sql.wbcommands.WbDisableOraOutput;
 import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.sql.wbcommands.WbEndBatch;
@@ -121,7 +121,7 @@ public class CommandMapper
 		addCommand(new WbProcSource());
 		addCommand(new WbListTriggers());
 		addCommand(new WbTriggerSource());
-		addCommand(new WbDescribeTable());
+		addCommand(new WbDescribeObject());
 		addCommand(new WbGrepSource());
 		addCommand(new WbGrepData());
 		addCommand(new WbMode());
@@ -231,12 +231,12 @@ public class CommandMapper
 		if (metaData.isMySql())
 		{
 			// MySQL implements its own DESCRIBE command
-			cmdDispatch.remove(WbDescribeTable.VERB_LONG);
+			cmdDispatch.remove(WbDescribeObject.VERB_LONG);
 		}
 		else
 		{
-			SqlCommand cmd = cmdDispatch.get(WbDescribeTable.VERB);
-			this.cmdDispatch.put(WbDescribeTable.VERB_LONG, cmd);
+			SqlCommand cmd = cmdDispatch.get(WbDescribeObject.VERB);
+			this.cmdDispatch.put(WbDescribeObject.VERB_LONG, cmd);
 		}
 
 		if (metaData.getDbSettings().useWbProcedureCall())
