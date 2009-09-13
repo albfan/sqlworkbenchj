@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="107" date="2009-08-31">
+<release build="107" date="2009-09-12">
 
   <entry dev-build="1" type="enh">
     <description>
@@ -45,7 +45,7 @@
   <entry dev-build="1" type="enh">
     <description>
       The editor and resultset tabs can now have their own close button.
-      (Tools -> Options -> General)
+      (Tools -&gt; Options -&gt; General)
     </description>
   </entry>
 
