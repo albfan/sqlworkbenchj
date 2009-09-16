@@ -553,6 +553,7 @@ public class MacroTree
 		if (current != null && copyCurrent)
 		{
 			newMacro = current.createCopy();
+			newMacro.setShortcut(null);
 			newMacro.setName(ResourceMgr.getString("TxtCopyOf") + " " + current.getName());
 		}
 		else

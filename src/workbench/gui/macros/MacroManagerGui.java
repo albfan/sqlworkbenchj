@@ -26,6 +26,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CollapseTreeAction;
 import workbench.gui.actions.DeleteListEntryAction;
@@ -98,6 +99,11 @@ public class MacroManagerGui
 		macroTree.addTreeSelectionListener(this);
 	}
 
+	public void setCurrentConnection(WbConnection conn)
+	{
+		macroPanel.setCurrentConnection(conn);
+	}
+	
 	public void addTreeSelectionListener(TreeSelectionListener l)
 	{
 		macroTree.addTreeSelectionListener(l);

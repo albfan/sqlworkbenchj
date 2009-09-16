@@ -35,6 +35,7 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreePath;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.gui.components.WbButton;
@@ -76,8 +77,10 @@ public class MacroManagerDialog
 
 		boolean connected = false;
 		boolean busy = false;
+		WbConnection conn = null;
 		if (client != null)
 		{
+			conn = client.getConnection();
 			connected = this.client.isConnected();
 			busy = this.client.isBusy();
 		}
@@ -91,6 +94,7 @@ public class MacroManagerDialog
 		this.initKeys();
 		this.addWindowListener(this);
 		macroPanel.addTreeSelectionListener(this);
+		macroPanel.setCurrentConnection(conn);
 	}
 
 	private void initWindow(Frame parent)

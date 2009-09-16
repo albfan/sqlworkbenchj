@@ -25,12 +25,15 @@ import javax.swing.JSeparator;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.AutoCompletionAction;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.settings.KeyboardMapper;
 import workbench.gui.sql.EditorPanel;
+import workbench.interfaces.StatusBar;
 import workbench.resource.ResourceMgr;
 import workbench.resource.ShortcutManager;
 import workbench.resource.StoreableKeyStroke;
@@ -54,7 +57,8 @@ public class MacroDefinitionPanel
 {
 	private EditorPanel macroEditor;
 	private MacroDefinition currentMacro;
-
+	private AutoCompletionAction completeAction;
+	
 	/**
 	 * Create a new macro panel
 	 * @param l the listener to be notified when the macro name changes
@@ -135,6 +139,47 @@ public class MacroDefinitionPanel
 		});
 	}
 
+	public void setCurrentConnection(WbConnection conn)
+	{
+		macroEditor.setDatabaseConnection(conn);
+		if (conn != null)
+		{
+			completeAction = new AutoCompletionAction(macroEditor, new StatusBar() {
+
+				@Override
+				public void setStatusMessage(String message)
+				{
+				}
+
+				@Override
+				public void clearStatusMessage()
+				{
+				}
+
+				@Override
+				public void repaint()
+				{
+				}
+
+				@Override
+				public String getText()
+				{
+					return "";
+				}
+			});
+			
+			completeAction.setConnection(conn);
+			completeAction.setEnabled(true);
+		}
+		else if (completeAction != null)
+		{
+			completeAction.setConnection(null);
+			completeAction.setEnabled(false);
+			macroEditor.removeKeyBinding(completeAction.getAccelerator());
+		}
+
+	}
+	
 	public void applyChanges()
 	{
 		if (currentMacro != null && macroEditor.isModified())
