@@ -163,7 +163,7 @@ public class DwPanel
 
 	public void checkAndSelectKeyColumns()
 	{
-		if (checkUpdateTable())
+		if (checkUpdateTable() == TableCheck.tableOk)
 		{
 			dataTable.selectKeyColumns();
 		}
@@ -469,44 +469,44 @@ public class DwPanel
 		return this.readOnly;
 	}
 
-	public boolean checkUpdateTable()
+	static enum TableCheck
 	{
-		if (this.readOnly) return false;
+		tableOk,
+		cancel,
+		noTable;
+	}
+
+	protected TableCheck checkUpdateTable()
+	{
+		if (this.readOnly || dbConnection == null || sql == null) return TableCheck.noTable;
 
 		setStatusMessage(ResourceMgr.getString("MsgCheckingUpdateTable"));
 		statusBar.forcePaint();
 
-		boolean result = false;
+		TableCheck checkResult = TableCheck.noTable;
 		try
 		{
 			DataStore ds = this.dataTable.getDataStore();
-			if (ds == null) return false;
-			if (this.dbConnection == null) return false;
-			if (this.sql == null) return false;
-			result = ds.checkUpdateTable(this.dbConnection);
+			if (ds == null) return TableCheck.noTable;
+			boolean result = ds.checkUpdateTable(this.dbConnection);
 
 			if (!result)
 			{
 				TableIdentifier tbl = dataTable.selectUpdateTable();
+				if (tbl == null) return TableCheck.cancel;
 				if (tbl != null)
 				{
 					this.setUpdateTable(tbl);
-					result = true;
+					checkResult = TableCheck.tableOk;
 				}
 			}
-
-			if (result)
-			{
-				this.fireUpdateTableChanged();
-			}
-
-			this.selectKeys.setEnabled(result);
+			this.selectKeys.setEnabled(checkResult == TableCheck.tableOk);
 		}
 		finally
 		{
 			this.clearStatusMessage();
 		}
-		return result;
+		return checkResult;
 	}
 
 	public boolean hasKeyColumns()
@@ -1150,16 +1150,17 @@ public class DwPanel
 		// if the result is not yet updateable (automagically)
 		// then try to find the table. If the table cannot be
 		// determined, then ask the user
-		boolean updateTablePresent = this.checkUpdateTable();
+		TableCheck checkResult = this.checkUpdateTable();
+		if (checkResult == TableCheck.cancel) return false;
+
 		boolean updateable = this.isUpdateable();
 
-		if (!updateable && !updateTablePresent)
+		if (!updateable && checkResult == TableCheck.noTable)
 		{
 			// checkUpdateTable() will have taken every attempt to find an update table
 			// including asking the user to select a table from a multi-table result set
 
-			// So if we wind up here, there is no way to update the
-			// underlying DataStore
+			// So if we wind up here, there is no way to update the underlying DataStore
 			WbSwingUtilities.showErrorMessageKey(w, "MsgNoTables");
 			this.setUpdateTable(null);
 			this.disableUpdateActions();
