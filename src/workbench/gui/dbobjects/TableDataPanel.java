@@ -71,6 +71,7 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.interfaces.DbExecutionListener;
 import workbench.interfaces.DbExecutionNotifier;
 import workbench.storage.NamedSortDefinition;
+import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
 import workbench.util.WbWorkspace;
 
@@ -110,8 +111,7 @@ public class TableDataPanel
 	private NamedSortDefinition lastSort;
 
 	private boolean initialized;
-	private Integer maxRowsFromSettings;
-	private Boolean autoRetrieveFromSettings;
+	private FilteredProperties workspaceSettings;
 	
 	public TableDataPanel()
 		throws Exception
@@ -254,16 +254,9 @@ public class TableDataPanel
 			dataDisplay.getTable().showFocusBorder();
 		}
 
-		if (autoRetrieveFromSettings != null)
+		if (workspaceSettings != null)
 		{
-			autoRetrieve.setSelected(autoRetrieveFromSettings.booleanValue());
-			autoRetrieveFromSettings = null;
-		}
-
-		if (maxRowsFromSettings != null)
-		{
-			dataDisplay.setMaxRows(maxRowsFromSettings.intValue());
-			maxRowsFromSettings = null;
+			readSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
 		}
 		initialized = true;
 	}
@@ -846,7 +839,14 @@ public class TableDataPanel
 	{
 		this.restoreSettings(); // load "global" settings first;
 		String prefix = getWorkspacePrefix(index);
-		this.readSettings(prefix, wb.getSettings());
+		if (!initialized)
+		{
+			workspaceSettings = new FilteredProperties(wb.getSettings(), prefix);
+		}
+		else
+		{
+			readSettings(prefix, wb.getSettings());
+		}
 	}
 
 	/**
@@ -860,10 +860,17 @@ public class TableDataPanel
 
 	private void saveSettings(String prefix, PropertyStorage props)
 	{
-		props.setProperty(prefix + "maxrows", this.dataDisplay.getMaxRows());
-		props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
-		props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
-		props.setProperty(prefix + "warningthreshold", this.warningThreshold);
+		if (initialized)
+		{
+			props.setProperty(prefix + "maxrows", this.dataDisplay.getMaxRows());
+			props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
+			props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
+			props.setProperty(prefix + "warningthreshold", this.warningThreshold);
+		}
+		else if (workspaceSettings != null)
+		{
+			workspaceSettings.copyTo(props);
+		}
 	}
 	/**
 	 *	Restore global settings for this DbExplorer
@@ -882,22 +889,12 @@ public class TableDataPanel
 			if (dataDisplay != null)
 			{
 				this.dataDisplay.setMaxRows(max);
-				maxRowsFromSettings = null;
-			}
-			else
-			{
-				maxRowsFromSettings = Integer.valueOf(max);
 			}
 		}
 		boolean auto = props.getBoolProperty(prefix + "autoretrieve", true);
 		if (autoRetrieve != null)
 		{
 			this.autoRetrieve.setSelected(auto);
-			autoRetrieveFromSettings = null;
-		}
-		else
-		{
-			autoRetrieveFromSettings = Boolean.valueOf(auto);
 		}
 		this.autoloadRowCount = props.getBoolProperty(prefix + "autoloadrowcount", true);
 		this.warningThreshold = props.getIntProperty(prefix + "warningthreshold", 1500);
