@@ -114,6 +114,10 @@ public class WbGrepData
 
 		Set<String> types = CollectionUtil.caseInsensitiveSet();
 		types.addAll(cmdLine.getListValue(PARAM_TYPES));
+		if (types.size() == 0)
+		{
+			types.add("TABLE");
+		}
 
 		Iterator<TableIdentifier> itr = tables.iterator();
 		while (itr.hasNext())
