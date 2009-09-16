@@ -140,7 +140,6 @@ public class InputHandler
 
 	private Map<KeyStroke, ActionListener> bindings;
 
-	private boolean keySequence = false;
 	private boolean sequenceIsMapped = false;
 
 	public InputHandler()
@@ -261,11 +260,6 @@ public class InputHandler
 
 		KeyStroke keyStroke = KeyStroke.getKeyStrokeForEvent(evt);
 
-		if (!keySequence)
-		{
-			keySequence = true;
-		}
-
 		if (!evt.isActionKey() && !sequenceIsMapped)
 		{
 			sequenceIsMapped = isMapped(evt);
@@ -283,6 +277,7 @@ public class InputHandler
 			});
 			return;
 		}
+		
 		ActionListener l = bindings.get(keyStroke);
 
 		if (l != null)
@@ -295,11 +290,10 @@ public class InputHandler
 	@Override
 	public void keyTyped(KeyEvent evt)
 	{
-//		System.out.println("keyTyped: " + evt.toString());
+		if (evt.isConsumed()) return;
 
 		boolean isMapped = sequenceIsMapped;
 		sequenceIsMapped = false;
-		keySequence = false;
 
 		if (isMapped)
 		{
@@ -308,6 +302,19 @@ public class InputHandler
 
 		char c = evt.getKeyChar();
 
+		// For some reason we still wind up here even if Ctrl-Space was
+		// already handled by keyPressed
+		if (c == 0x20 && evt.getModifiers() == KeyEvent.CTRL_MASK)
+		{
+			KeyStroke pressed = KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, KeyEvent.CTRL_MASK);
+			if (bindings.get(pressed) != null)
+			{
+				// already processed!
+				evt.consume();
+				return;
+			}
+		}
+		
 		if (c >= 0x20 && c != 0x7f)
 		{
 			KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
@@ -316,9 +323,9 @@ public class InputHandler
 			if (l != null)
 			{
 				executeAction(l, evt.getSource(), String.valueOf(c));
+				evt.consume();
 				return;
 			}
-
 			executeAction(INSERT_CHAR, evt.getSource(), String.valueOf(c));
 		}
 	}
@@ -473,15 +480,6 @@ public class InputHandler
 		// this shouldn't happen
 		LogMgr.logError("InputHandler.getTextArea()", "Could not find text area!", null);
 		return null;
-	}
-
-	/**
-	 * Macro recorder.
-	 */
-	public interface MacroRecorder
-	{
-		void actionPerformed(ActionListener listener,
-			String actionCommand);
 	}
 
 	public static class backspace implements ActionListener

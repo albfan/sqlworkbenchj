@@ -23,12 +23,12 @@ import workbench.interfaces.CharacterSequence;
 public class StringSequence
 	implements CharacterSequence
 {
-	private String source;
+	private CharSequence source;
 	
 	/**
 	 * Create a StringSequence based on the given String
 	 */
-	public StringSequence(String s)
+	public StringSequence(CharSequence s)
 	{
 		this.source = s;
 	}
@@ -50,7 +50,7 @@ public class StringSequence
 
 	public CharSequence subSequence(int start, int end)
 	{
-		return this.source.substring(start, end);
+		return this.source.subSequence(start, end);
 	}
 	
 }

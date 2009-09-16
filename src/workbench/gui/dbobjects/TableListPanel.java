@@ -1819,6 +1819,7 @@ public class TableListPanel
 	protected void updateDisplayClients()
 	{
 		if (this.tableListClients == null) return;
+		
 		TableModel model = this.tableList.getModel();
 		for (JTable table : tableListClients)
 		{

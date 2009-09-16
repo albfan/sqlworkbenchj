@@ -144,8 +144,8 @@ public class MacroDefinitionPanel
 		macroEditor.setDatabaseConnection(conn);
 		if (conn != null)
 		{
-			completeAction = new AutoCompletionAction(macroEditor, new StatusBar() {
-
+			completeAction = new AutoCompletionAction(macroEditor, new StatusBar()
+			{
 				@Override
 				public void setStatusMessage(String message)
 				{

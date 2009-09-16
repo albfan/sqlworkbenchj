@@ -47,11 +47,10 @@ public class StatementRunnerResult
 	private boolean showRowCount = true;
 
 	private long executionTime = -1;
-	private final DurationFormatter timingFormatter;
+	private static final DurationFormatter timingFormatter = new DurationFormatter();
 
 	public StatementRunnerResult()
 	{
-		this.timingFormatter = new DurationFormatter();
 		this.messages = new MessageBuffer();
 	}
 

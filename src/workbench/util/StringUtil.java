@@ -126,7 +126,9 @@ public class StringUtil
 
 	public static boolean lineStartsWith(CharSequence text, int lineStartPos, String compareTo)
 	{
-		if (isBlank(compareTo)) return false;
+		if (compareTo == null) return false;
+		if (text == null) return false;
+		
 		int textLength = text.length();
 
 		// skip whitespace at the beginning
@@ -137,17 +139,11 @@ public class StringUtil
 		}
 
 		int len = compareTo.length();
-		for (int i=0; i < len; i++)
-		{
-			char thisChar = 0;
-			char otherChar = compareTo.charAt(i);
-			if (lineStartPos + i < textLength)
-			{
-				thisChar = text.charAt(lineStartPos + i);
-			}
-			if (thisChar != otherChar) return false;
-		}
-		return true;
+
+		if (lineStartPos + len > textLength) return false;
+
+		CharSequence part = text.subSequence(lineStartPos, lineStartPos + len);
+		return part.equals(compareTo);
 	}
 
 	/**
