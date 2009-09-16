@@ -14,8 +14,8 @@ package workbench.gui.completion;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Frame;
 import java.awt.Point;
+import java.awt.Window;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -162,7 +162,7 @@ public class CompletionPopup
 
 			if (window == null)
 			{
-				window = new JWindow((Frame)SwingUtilities.getWindowAncestor(editor));
+				window = new JWindow((Window)SwingUtilities.getWindowAncestor(editor));
 			}
 
 			editor.setKeyEventInterceptor(this);
