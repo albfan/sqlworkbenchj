@@ -127,6 +127,11 @@ public class BatchRunner
 		this.stmtRunner.setBaseDir(dir);
 	}
 
+	public void setUseSavepoint(boolean flag)
+	{
+		stmtRunner.setUseSavepoint(flag);
+	}
+	
 	public void setConnectionId(String id)
 	{
 		this.connectionId = id;

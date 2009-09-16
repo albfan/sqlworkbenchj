@@ -196,6 +196,10 @@ public class DbObjectCache
 		
 		TableIdentifier toSearch = tbl.createCopy();
 		toSearch.adjustCase(dbConnection);
+		if (toSearch.getSchema() == null)
+		{
+			toSearch.setSchema(schema);
+		}
 		
 		List<ColumnIdentifier> cols = this.objects.get(toSearch);
 		

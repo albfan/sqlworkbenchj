@@ -48,6 +48,7 @@ public class WbInclude
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/','GO:nl'"));
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_IGNORE_DROP, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
 
@@ -162,6 +163,10 @@ public class WbInclude
 			boolean showResults = cmdLine.getBoolean(AppArguments.ARG_DISPLAY_RESULT, false);
 			batchRunner.showResultSets(showResults);
 			batchRunner.setOptimizeColWidths(showResults);
+			if (cmdLine.isArgPresent(WbImport.ARG_USE_SAVEPOINT))
+			{
+				batchRunner.setUseSavepoint(cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT));
+			}
 			if (showResults)
 			{
 				batchRunner.setShowProgress(false);
