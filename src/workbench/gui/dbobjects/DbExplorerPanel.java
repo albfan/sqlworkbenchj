@@ -519,9 +519,8 @@ public class DbExplorerPanel
 
 	private void readSchemaLabel()
 	{
-		StringBuilder s = new StringBuilder(this.dbConnection.getMetadata().getSchemaTerm());
-		s.setCharAt(0, Character.toUpperCase(s.charAt(0)));
-		this.schemaLabel.setText(s.toString());
+		String schemaName = this.dbConnection.getMetadata().getSchemaTerm();
+		this.schemaLabel.setText(StringUtil.capitalize(schemaName));
 	}
 
 	public void setConnection(WbConnection aConnection)
