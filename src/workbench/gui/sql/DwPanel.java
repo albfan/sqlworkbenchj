@@ -469,14 +469,14 @@ public class DwPanel
 		return this.readOnly;
 	}
 
-	static enum TableCheck
+	private static enum TableCheck
 	{
 		tableOk,
 		cancel,
 		noTable;
 	}
 
-	protected TableCheck checkUpdateTable()
+	private TableCheck checkUpdateTable()
 	{
 		if (this.readOnly || dbConnection == null || sql == null) return TableCheck.noTable;
 
@@ -499,6 +499,10 @@ public class DwPanel
 					this.setUpdateTable(tbl);
 					checkResult = TableCheck.tableOk;
 				}
+			}
+			else
+			{
+				checkResult = TableCheck.tableOk;
 			}
 			this.selectKeys.setEnabled(checkResult == TableCheck.tableOk);
 		}
@@ -586,9 +590,9 @@ public class DwPanel
 	{
 		DataStore ds = getDataStore();
 		if (ds == null) return;
-		String sql = ds.getGeneratingSql();
-		if (sql == null) return;
-		runQuery(sql, respectMaxRows);
+		String generatingSql = ds.getGeneratingSql();
+		if (generatingSql == null) return;
+		runQuery(generatingSql, respectMaxRows);
 	}
 	
 	/**
