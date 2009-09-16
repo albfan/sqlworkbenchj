@@ -785,7 +785,7 @@ public class TableListPanel
 		if (!this.isVisible()) return false;
 		Window w = SwingUtilities.getWindowAncestor(this);
 		if (w == null) return false;
-		return (w.isActive() && w.isFocused() && w.isVisible());
+		return (w.isVisible());
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)

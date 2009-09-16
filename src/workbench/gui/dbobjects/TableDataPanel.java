@@ -114,7 +114,6 @@ public class TableDataPanel
 	private FilteredProperties workspaceSettings;
 	
 	public TableDataPanel()
-		throws Exception
 	{
 		super();
 	}

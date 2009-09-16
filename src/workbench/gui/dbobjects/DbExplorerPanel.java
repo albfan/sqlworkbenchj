@@ -15,7 +15,9 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -196,18 +198,14 @@ public class DbExplorerPanel
 			reloadSchemasAction =new ReloadAction(schemaReloader);
 			reloadSchemasAction.setEnabled(false);
 			reloadSchemasAction.setTooltip(ResourceMgr.getString("TxtReload"));
-			
-			this.selectorPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 0));
 
-			this.schemaLabel = new JLabel(ResourceMgr.getString("LblSchema"));
+			schemaLabel = new JLabel(ResourceMgr.getString("LblSchema"));
 
-			this.selectorPanel.add(schemaLabel);
 			this.schemaSelector = new JComboBox();
 			Dimension d = new Dimension(80, 20);
 			Dimension max = new Dimension(150,40);
 			this.schemaSelector.setMinimumSize(d);
 			this.schemaSelector.setMaximumSize(max);
-			this.selectorPanel.add(this.schemaSelector);
 
 			this.catalogSelector  = new JComboBox();
 			this.catalogLabel = new JLabel("Catalog");
@@ -215,12 +213,32 @@ public class DbExplorerPanel
 			this.catalogSelector.setEnabled(false);
 			this.catalogSelector.setMaximumSize(max);
 			this.catalogLabel.setVisible(false);
-			this.selectorPanel.add(catalogLabel);
-			this.selectorPanel.add(catalogSelector);
 			reloadButton = new FlatButton(reloadSchemasAction);
 			reloadButton.setText(null);
 			reloadButton.setMargin(WbToolbarButton.MARGIN);
-			this.selectorPanel.add(reloadButton);
+
+			this.selectorPanel.setLayout(new GridBagLayout());
+			GridBagConstraints gc = new GridBagConstraints();
+			gc.gridx = 0;
+			gc.gridy = 0;
+			gc.anchor = GridBagConstraints.WEST;
+			gc.insets = new Insets(0, 5, 0, 0);
+			gc.fill = GridBagConstraints.NONE;
+			this.selectorPanel.add(schemaLabel, gc);
+
+			gc.gridx ++;
+			gc.insets = new Insets(0, 8, 0, 0);
+			this.selectorPanel.add(schemaSelector, gc);
+
+			gc.gridx ++;
+			this.selectorPanel.add(catalogLabel, gc);
+
+			gc.gridx ++;
+			this.selectorPanel.add(catalogSelector, gc);
+
+			gc.gridx ++;
+			gc.weightx = 1.0;
+			this.selectorPanel.add(reloadButton, gc);
 
 			this.add(this.selectorPanel, BorderLayout.NORTH);
 			this.add(tabPane, BorderLayout.CENTER);
