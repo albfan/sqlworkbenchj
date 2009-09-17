@@ -34,17 +34,10 @@ import workbench.util.SqlUtil;
 public class ConsolePrompter
 	implements ParameterPrompter, ExecutionController
 {
-	private InputReader input;
 	private boolean executeAll = false;
-
-	public ConsolePrompter(InputReader reader)
-	{
-		this.input = reader;
-	}
 
 	public ConsolePrompter()
 	{
-		this.input = new InputReader();
 	}
 
 	public void resetExecuteAll()
@@ -65,7 +58,7 @@ public class ConsolePrompter
 			String varName = ds.getValueAsString(row, 0);
 			String value = ds.getValueAsString(row, 1);
 
-			String newValue = input.readLine(varName + " [" + value + "]: ");
+			String newValue = readLine(varName + " [" + value + "]: ");
 			ds.setValue(row, 1, newValue);
 		}
 
@@ -80,9 +73,15 @@ public class ConsolePrompter
 		return true;
 	}
 
+	protected String readLine(String prompt)
+	{
+		return System.console().readLine(prompt);
+	}
+	
 	public String getPassword(String prompt)
 	{
-		return input.readPassword(prompt + " ");
+		char[] input = System.console().readPassword(prompt + " ");
+		return new String(input);
 	}
 
 	public boolean confirmExecution(String prompt)
@@ -90,7 +89,7 @@ public class ConsolePrompter
 		String yes = ResourceMgr.getString("MsgConfirmConsoleYes");
 		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmConsoleNo");
 		String msg = prompt + " (" + yesNo + ")";
-		String choice = input.readLine(msg + " ");
+		String choice = readLine(msg + " ");
 
 		// allow the localized version and the english yes
 		return yes.equalsIgnoreCase(choice) || "yes".equalsIgnoreCase(choice);
@@ -107,7 +106,7 @@ public class ConsolePrompter
 		String yesNo = yes + "/" + ResourceMgr.getString("MsgConfirmConsoleNo") + "/" + all;
 
 		String msg = ResourceMgr.getFormattedString("MsgConfirmConsoleExec", verb, yesNo);
-		String choice = input.readLine(msg + " ");
+		String choice = readLine(msg + " ");
 		
 		if (all.equalsIgnoreCase(choice))
 		{

@@ -36,15 +36,13 @@ import workbench.util.WbFile;
  */
 public class SQLConsole
 {
-	private InputReader input;
 	private ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
 
 	public SQLConsole()
 	{
-		input = new InputReader();
-		prompter = new ConsolePrompter(input);
+		prompter = new ConsolePrompter();
 	}
 
 	public void run()
@@ -140,7 +138,7 @@ public class SQLConsole
 
 			while (true)
 			{
-				String line = input.readLine(currentPrompt);
+				String line = System.console().readLine(currentPrompt);
 				if (line == null) continue;
 
 				if (startOfStatement && "exit".equalsIgnoreCase(line.trim()))
