@@ -198,17 +198,29 @@ public class WbTabbedPane
 		if (tabCloser == null) return;
 		if (!tabCloser.canCloseTab(index)) return;
 
-		if (onlyCloseActive && index != getSelectedIndex()) return;
-		
-		EventQueue.invokeLater(new Runnable()
+		if (onlyCloseActive && index != getSelectedIndex())
 		{
-			@Override
-			public void run()
+			EventQueue.invokeLater(new Runnable()
 			{
-				tabCloser.tabCloseButtonClicked(index);
-			}
-		});
-		
+				@Override
+				public void run()
+				{
+					setSelectedIndex(index);
+				}
+			});
+
+		}
+		else
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					tabCloser.tabCloseButtonClicked(index);
+				}
+			});
+		}
 	}
 
 	public int getTabHeight()
