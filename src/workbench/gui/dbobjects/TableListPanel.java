@@ -621,6 +621,7 @@ public class TableListPanel
 		try
 		{
 			tableData.storeColumnOrder();
+			// reset() sets and clears the ignoreStateChanged flag as well!
 			this.reset();
 			this.ignoreStateChanged = true;
 			this.dbConnection = null;
