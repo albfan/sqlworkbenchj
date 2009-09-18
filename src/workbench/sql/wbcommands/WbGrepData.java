@@ -14,10 +14,15 @@ import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import workbench.WbManager;
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.search.ClientSideTableSearcher;
+import workbench.gui.WbSwingUtilities;
 import workbench.interfaces.TableSearchConsumer;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
@@ -62,7 +67,7 @@ public class WbGrepData
 		this.isUpdatingCommand = false;
 
 		cmdLine = new ArgumentParser();
-		cmdLine.addArgument(PARAM_TABLES);
+		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_TYPES);
 		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
@@ -123,6 +128,11 @@ public class WbGrepData
 		while (itr.hasNext())
 		{
 			TableIdentifier tbl = itr.next();
+			
+			// if no type is present, this means the tables
+			// were directly specified on the commandline.
+			if (tbl.getType() == null) continue;
+
 			if (!types.contains(tbl.getType()))
 			{
 				itr.remove();
@@ -164,6 +174,25 @@ public class WbGrepData
 		if (rowMonitor != null)
 		{
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PROCESS);
+		}
+
+		if (Settings.getInstance().getBoolProperty("workbench.searchdata.warn.buffer", true) &&
+				JdbcUtils.driverMightBufferResults(currentConnection))
+		{
+			if (WbManager.getInstance().isBatchMode())
+			{
+				LogMgr.logWarning("WbGrepData.execute()", "The current driver seems to cache complete results! This may lead to memory problems");
+			}
+			else
+			{
+				boolean goOn = WbSwingUtilities.getYesNo(WbManager.getInstance().getCurrentWindow(), ResourceMgr.getString("MsgTableSearchBuffered"));
+				if (!goOn)
+				{
+					searchResult.setFailure();
+					searchResult.addMessageByKey("MsgStatementCancelled");
+					return searchResult;
+				}
+			}
 		}
 
 		searchResult.setSuccess();

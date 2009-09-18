@@ -28,6 +28,16 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testStartsWith()
+	{
+		String input = "this is a test";
+		assertTrue(StringUtil.lineStartsWith(input, 0, "this"));
+		assertFalse(StringUtil.lineStartsWith(input, 0, "thisx"));
+		assertTrue(StringUtil.lineStartsWith(input, 10, "test"));
+		assertTrue(StringUtil.lineStartsWith(input, 9, "test"));
+		assertFalse(StringUtil.lineStartsWith(input, 13, "test"));
+	}
+	
 	public void testRemoveQuotes()
 	{
 		String name = "test";

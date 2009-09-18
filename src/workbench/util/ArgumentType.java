@@ -18,11 +18,34 @@ package workbench.util;
  */
 public enum ArgumentType
 {
-	StringArgument, 
-	BoolArgument, 
-	IntegerArgument, 
-	TableArgument, 
+	StringArgument,
+	/**
+	 * Defines a boolean parameter. If this is set
+	 * the automcompletion for this parameter will
+	 * show true and false as possible values
+	 */
+	BoolArgument,
+
+	IntegerArgument,
+	/**
+	 * A parameter that selects tables. If this is set
+	 * the autocompletion for this parameter will
+	 * show a table list
+	 */
+	TableArgument,
+
+	/**
+	 * A parameter that accepts a fixed set of values. The
+	 * values can be registered using ArgumentParser.addArgument(String, List)
+	 * @see ArgumentParser#addArgument(java.lang.String, java.util.List) 
+	 */
 	ListArgument,
+
+	/**
+	 * A parameter that selects a connection profile. If this is defined
+	 * the autocompletion for this parameter will show all currently
+	 * defined connection profiles
+	 */
 	ProfileArgument,
 	Deprecated;
 }

@@ -356,12 +356,14 @@ public class TableSearchPanel
 			return;
 		}
 
-		if (!serverSideSearch.isSelected() && JdbcUtils.driverMightBufferResults(connection))
+		if (Settings.getInstance().getBoolProperty("workbench.searchdata.warn.buffer", true))
 		{
-			boolean goOn = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgTableSearchBuffered"));
-			if (!goOn) return;
+			if (!serverSideSearch.isSelected() && JdbcUtils.driverMightBufferResults(connection))
+			{
+				boolean goOn = WbSwingUtilities.getYesNo(this, ResourceMgr.getString("MsgTableSearchBuffered"));
+				if (!goOn) return;
+			}
 		}
-
 
 		this.reset();
 

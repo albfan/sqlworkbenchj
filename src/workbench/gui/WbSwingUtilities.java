@@ -168,6 +168,7 @@ public class WbSwingUtilities
 
 	public static Window getWindowAncestor(Component caller)
 	{
+		if (caller == null) return null;
 		if (caller instanceof Window)
 		{
 			return (Window) caller;
