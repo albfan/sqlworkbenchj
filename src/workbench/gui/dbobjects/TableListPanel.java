@@ -130,7 +130,7 @@ public class TableListPanel
 	protected WbTable importedKeys;
 	protected WbTable exportedKeys;
 	protected ReloadAction reloadAction;
-	
+
 	protected TableDataPanel tableData;
 
 	private TableDependencyTreeDisplay importedTableTree;
@@ -152,7 +152,7 @@ public class TableListPanel
 
 	private CompileDbObjectAction compileAction;
 	private AlterObjectAction renameAction;
-	
+
 	private MainWindow parentWindow;
 
 	private TableIdentifier selectedTable;
@@ -381,7 +381,7 @@ public class TableListPanel
 			});
 		}
 		tableList.setListSelectionControl(this);
-		showObjectDefinitionPanels(false);
+		showObjectDefinitionPanels(false, false);
 	}
 
 	private void initIndexDropper(Reloadable indexReload)
@@ -392,7 +392,7 @@ public class TableListPanel
 			{
 				reload();
 			}
-			
+
 			public Component getComponent()
 			{
 				return TableListPanel.this;
@@ -502,7 +502,7 @@ public class TableListPanel
 	protected void showTablePanels()
 	{
 		if (displayTab.getTabCount() > 3) return; // nothing to do
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -543,16 +543,16 @@ public class TableListPanel
 	/**
 	 * Displays the tabs common to all DB objects
 	 * (essentially object definition and source).
-	 * 
+	 *
 	 * @param includeDataPanel if true, the Data panel will also be displayed
 	 */
-	private void showObjectDefinitionPanels(final boolean includeDataPanel)
+	private void showObjectDefinitionPanels(final boolean includeDataPanel, boolean restoreIndex)
 	{
 		int count = displayTab.getTabCount();
 
 		if (includeDataPanel && count == 3) return; // nothing to do
 		if (!includeDataPanel && count == 2) return; // nothing to do
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -561,13 +561,11 @@ public class TableListPanel
 				{
 					int index = displayTab.getSelectedIndex();
 					ignoreStateChanged = true;
-
-					ignoreStateChanged = true;
 					displayTab.removeAll();
 
 					addBaseObjectPanels();
 					if (includeDataPanel) addDataPanel();
-					
+
 					exportedKeys.reset();
 					indexes.reset();
 					triggers.reset();
@@ -652,7 +650,18 @@ public class TableListPanel
 		{
 			public void run()
 			{
-				if (displayTab.getTabCount() > 0) displayTab.setSelectedIndex(0);
+				if (displayTab.getTabCount() > 0)
+				{
+					try
+					{
+						ignoreStateChanged = true;
+						displayTab.setSelectedIndex(0);
+					}
+					finally
+					{
+						ignoreStateChanged = false;
+					}
+				}
 				tableDefinition.reset();
 				importedKeys.reset();
 				exportedKeys.reset();
@@ -728,10 +737,10 @@ public class TableListPanel
 		tableDefinition.setConnection(aConnection);
 		triggers.setConnection(aConnection);
 		tableSource.setDatabaseConnection(aConnection);
-		
+
 		renameAction.setConnection(dbConnection);
 		validator.setConnection(dbConnection);
-		
+
 		if (this.dbConnection != null)
 		{
 			this.findPanel.setColumnList(dbConnection.getMetadata().getTableListColumns());
@@ -1161,7 +1170,7 @@ public class TableListPanel
 		}
 		else
 		{
-			this.showObjectDefinitionPanels(hasData);
+			this.showObjectDefinitionPanels(hasData, true);
 		}
 
 		this.tableData.reset();
@@ -1226,7 +1235,7 @@ public class TableListPanel
 	protected void retrieveTableSource()
 	{
 		if (selectedTable == null) return;
-		
+
 		tableSource.setPlainText(ResourceMgr.getString("TxtRetrievingSourceCode"));
 
 		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(this.dbConnection);
@@ -1283,7 +1292,7 @@ public class TableListPanel
 			{
 				sql = sql.toString() + "\nCOMMIT;\n";
 			}
-			
+
 			final String s = (sql == null ? "" : sql.toString());
 			WbSwingUtilities.invoke(new Runnable()
 			{
@@ -1483,7 +1492,10 @@ public class TableListPanel
 		if (this.tableList.getSelectedRowCount() <= 0) return;
 		int index = this.displayTab.getSelectedIndex();
 
-		if (withMessage) showRetrieveMessage();
+		if (withMessage)
+		{
+			showRetrieveMessage();
+		}
 
 		this.setBusy(true);
 
@@ -1770,7 +1782,7 @@ public class TableListPanel
 		{
 			try
 			{
-				this.showObjectDefinitionPanels(false);
+				this.showObjectDefinitionPanels(false, false);
 				this.startRetrieve(true);
 			}
 			catch (Exception ex)
@@ -1819,7 +1831,7 @@ public class TableListPanel
 	protected void updateDisplayClients()
 	{
 		if (this.tableListClients == null) return;
-		
+
 		TableModel model = this.tableList.getModel();
 		for (JTable table : tableListClients)
 		{
@@ -1854,7 +1866,7 @@ public class TableListPanel
 
 	/**
 	 * Return a TableIdentifier for the given row number in the table list.
-	 * 
+	 *
 	 * @param row the row from the tableList Table
 	 * @return a TableIdentifier for that row
 	 */
@@ -1967,6 +1979,7 @@ public class TableListPanel
 	public void stateChanged(ChangeEvent e)
 	{
 		if (this.ignoreStateChanged) return;
+
 		if (e.getSource() == this.displayTab)
 		{
 			EventQueue.invokeLater(new Runnable()
