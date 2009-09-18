@@ -21,6 +21,8 @@ import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.Icon;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolTip;
@@ -32,6 +34,8 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.LnFHelper;
 import workbench.interfaces.Moveable;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
 import workbench.util.MacOSHelper;
 
 /**
@@ -47,13 +51,14 @@ import workbench.util.MacOSHelper;
  */
 public class WbTabbedPane
 	extends JTabbedPane
-	implements MouseListener, MouseMotionListener, ChangeListener
+	implements MouseListener, MouseMotionListener, ChangeListener, PropertyChangeListener
 {
 	private Moveable tabMover;
 	private int draggedTabIndex;
 	private TabCloser tabCloser;
 	private boolean hideDisabledButtons;
 	private boolean alwaysUseCustomComponent;
+	private boolean onlyCloseActive;
 	
 	public WbTabbedPane()
 	{
@@ -193,6 +198,8 @@ public class WbTabbedPane
 		if (tabCloser == null) return;
 		if (!tabCloser.canCloseTab(index)) return;
 
+		if (onlyCloseActive && index != getSelectedIndex()) return;
+		
 		EventQueue.invokeLater(new Runnable()
 		{
 			@Override
@@ -250,6 +257,8 @@ public class WbTabbedPane
 		{
 			LogMgr.logError("WbTabbedPane.init()", "Error during init", e);
 		}
+		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_CLOSE_ACTIVE_TAB);
 	}
 
 	@Override
@@ -422,5 +431,11 @@ public class WbTabbedPane
 	public void stateChanged(ChangeEvent e)
 	{
 		updateButtons();
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
 	}
 }

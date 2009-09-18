@@ -26,7 +26,6 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
-import workbench.gui.components.WbFilePicker;
 import workbench.gui.components.WbLabelField;
 import workbench.interfaces.Restoreable;
 import workbench.log.LogMgr;
@@ -34,8 +33,6 @@ import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.MacOSHelper;
-import workbench.util.PlatformHelper;
-import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbLocale;
 
@@ -117,6 +114,7 @@ public class GeneralOptionsPanel
 		brushedMetal.setSelected(GuiSettings.getUseBrushedMetal());
 		showTabCloseButton.setSelected(GuiSettings.getShowSqlTabCloseButton());
 		showResultTabClose.setSelected(GuiSettings.getShowResultTabCloseButton());
+		onlyActiveTab.setSelected(GuiSettings.getCloseActiveTabOnly());
 	}
 
 	public void saveSettings()
@@ -124,15 +122,14 @@ public class GeneralOptionsPanel
 		Settings set = Settings.getInstance();
 
 		// General settings
+		GuiSettings.setCloseActiveTabOnly(onlyActiveTab.isSelected());
 		GuiSettings.setShowTabCloseButton(showTabCloseButton.isSelected());
 		GuiSettings.setShowResultTabCloseButton(showResultTabClose.isSelected());
 		GuiSettings.setShowTabIndex(showTabIndex.isSelected());
 		GuiSettings.setConfirmTabClose(confirmTabClose.isSelected());
 		set.setUseEncryption(this.useEncryption.isSelected());
 		GuiSettings.setUseAnimatedIcon(this.enableAnimatedIcon.isSelected());
-//		set.setQuoteChar(this.quoteCharField.getText().trim());
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
-//		set.setDefaultTextDelimiter(this.textDelimiterField.getText());
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
 		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
 		int index = checkInterval.getSelectedIndex();
@@ -177,8 +174,8 @@ public class GeneralOptionsPanel
 	{
 		WbLocale wl = (WbLocale)languageDropDown.getSelectedItem();
 		return wl.getLocale();
-
 	}
+	
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -207,6 +204,7 @@ public class GeneralOptionsPanel
     confirmTabClose = new JCheckBox();
     showTabCloseButton = new JCheckBox();
     showResultTabClose = new JCheckBox();
+    onlyActiveTab = new JCheckBox();
     jSeparator2 = new JSeparator();
     jSeparator3 = new JSeparator();
     jPanel3 = new JPanel();
@@ -429,6 +427,17 @@ public class GeneralOptionsPanel
     gridBagConstraints.insets = new Insets(3, 16, 5, 0);
     jPanel1.add(showResultTabClose, gridBagConstraints);
 
+    onlyActiveTab.setText(ResourceMgr.getString("LblCloseActive")); // NOI18N
+    onlyActiveTab.setToolTipText(ResourceMgr.getString("d_LblCloseActive")); // NOI18N
+    onlyActiveTab.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 24, 5, 0);
+    jPanel1.add(onlyActiveTab, gridBagConstraints);
+
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
@@ -496,6 +505,7 @@ public class GeneralOptionsPanel
   private JComboBox languageDropDown;
   private JComboBox logLevel;
   private JLabel logLevelLabel;
+  private JCheckBox onlyActiveTab;
   private JCheckBox scrollTabs;
   private JTextField settingsfilename;
   private JCheckBox showResultTabClose;
