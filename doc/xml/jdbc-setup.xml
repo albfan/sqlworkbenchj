@@ -106,8 +106,8 @@
 
 		<para>
 			Here is an overview of common JDBC drivers, and the classname that need 
-			to be used. &wb-productname; contains predefined JDBC drivers that 
-			also contain sample URLs for connecting to the database.
+			to be used. &wb-productname; contains predefined JDBC drivers with sample URLs
+      for connecting to the database.
 		</para>
 
 		<para>
@@ -134,7 +134,7 @@
 						<entry>PostgreSQL</entry>
 						<entry>org.postgresql.Driver</entry>
 						<entry> <simplelist columns="1">
-							<member>postgresql-8.3-603.jdbc3.jar (exact name depends on PostgreSQL version)</member>
+							<member>postgresql-8.4-701.jdbc4.jar (exact name depends on PostgreSQL version)</member>
 							<member><ulink url="http://jdbc.postgresql.org"/></member>
 						</simplelist>
 						</entry>
@@ -156,14 +156,14 @@
 						<entry>oracle.jdbc.OracleDriver</entry>
 						<entry>
 							<simplelist columns="1">
-								<member>ojdbc5.jar</member>
+								<member>ojdbc6.jar</member>
 								<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
 							</simplelist>
 						</entry>
 					</row>
 
 					<row>
-						<entry>h2 Database Engine</entry>
+						<entry>H2 Database Engine</entry>
 						<entry>org.h2.Driver</entry>
 						<entry>
 							<simplelist columns="1">
@@ -189,7 +189,7 @@
 						<entry>com.ibm.db2.jcc.DB2Driver</entry>
 						<entry>
 							<simplelist columns="1">
-								<member>db2jcc.jar</member>
+								<member>db2jcc.jar;db2jcc_javax.jar;db2jcc_license_cu.jar</member>
 								<member><ulink url="http://www-01.ibm.com/software/data/db2/java/"/></member>
 							</simplelist>
 						</entry>
@@ -216,6 +216,7 @@
 							</simplelist>
 						</entry>
 					</row>
+
 					<row>
 						<entry>MySQL</entry>
 						<entry>com.mysql.jdbc.Driver</entry>
@@ -226,8 +227,9 @@
 							</simplelist>
 						</entry>
 					</row>
+
 					<row>
-						<entry>SQL Server 2000/2005</entry>
+						<entry>SQL Server 2000/2005 (Microsoft driver)</entry>
 						<entry>com.microsoft.sqlserver.jdbc.SQLServerDriver</entry>
 						<entry>
 							<simplelist columns="1">
@@ -236,8 +238,9 @@
 							</simplelist>
 						</entry>
 					</row>
+
 					<row>
-						<entry>SQL Server (jTDS Driver)</entry>
+						<entry>SQL Server (jTDS driver)</entry>
 						<entry>net.sourceforge.jtds.jdbc.Driver</entry>
 						<entry>
 							<simplelist columns="1">
@@ -254,38 +257,6 @@
 						</simplelist>
 						</entry>
 					</row>
-					<!--
-					<row>
-						<entry>MaxDB</entry>
-						<entry>com.sap.dbtech.jdbc.DriverSapDB</entry>
-						<entry>
-							<simplelist columns="1">
-								<member>sapdbc.jar</member>
-								<member><ulink url="http://www.mysql.com/products/maxdb/"/></member>
-							</simplelist>
-						</entry>
-					</row>
-					<row>
-						<entry>FirstSQL/J</entry>
-						<entry>COM.FirstSQL.Dbcp.DbcpDriver</entry>
-						<entry>
-							<simplelist columns="1">
-								<member>fsjclient.jar</member>
-								<member><ulink url="http://www.firstsql.com"/></member>
-							</simplelist>
-						</entry>
-					</row>
-					<row>
-						<entry>ThinkSQL</entry>
-						<entry>uk.co.thinksql.ThinkSQLDriver</entry>
-						<entry>
-							<simplelist columns="1">
-								<member>ThinkSQLDriver.jar</member>
-								<member><ulink url="http://www.thinksql.co.uk"/></member>
-							</simplelist>
-						</entry>
-					</row>
-					-->
 				</tbody>
 			</tgroup>
 		</informaltable>

@@ -1,18 +1,24 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="107" date="2009-09-12">
+<release build="107" date="2009-09-19">
 
-  <entry dev-build="1" type="enh">
+  <entry dev-build="2" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
     </description>
   </entry>
 
+  <entry dev-build="2" type="enh">
+    <description>
+      In the macro editor auto completion is now enabled (if the main window is connected)
+    </description>
+  </entry>
+  
   <entry dev-build="1" type="enh">
     <description>
       workbench.settings will now only retain those properties that differ
-      from the built-in (DB) defaults to make rolling out changes to the
+      from the built-in defaults. This makes rolling out changes to the
       defaults easier. Any property that has been customized will remain
       in workbench.settings (but will not benefit from bugfixes made
       to the default properties)
@@ -55,6 +61,32 @@
     </description>
   </entry>
 
+  <entry dev-build="2" type="fix">
+    <description>
+      When copying a macro, the keyboard shortcut was copied as well.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
+      When cancelling the prompt to define an update table for a multi-table SELECT
+      statement, an error was displayed.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
+      WbGrepData did not work if tables were listed explicitely using the -tables parameter.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
+      Auto completion was not working properly with Postgres and tables that were stored
+      in the public schema.
+    </description>
+  </entry>
+  
   <entry dev-build="1" type="fix">
     <description>
       "WbMode confirm" was not working if the profile was set to read only.
@@ -63,7 +95,7 @@
 
   <entry dev-build="1" type="fix">
     <description>
-      The BLOB dialog could not be opened if the connection profile was set to read only.
+      The BLOB dialog could not be opened from within a result set if the connection profile was set to read only.
     </description>
   </entry>
 
@@ -75,13 +107,12 @@
 
   <entry dev-build="1" type="fix">
     <description>
-      WbCopy now removes any trailing semicolon from the SQL query when using
-      query based copying. 
+      WbCopy now removes any trailing semicolon from the SQL query when using query based copying. 
     </description>
   </entry>
-
 </release>
 
+<!--<editor-fold defaultstate="collapsed" desc=" Old versions ">-->
 <release build="106" date="2009-08-31">
 
   <entry dev-build="1" type="fix">
@@ -8046,6 +8077,7 @@
        Documented the DbExplorer's data tab (and its settings)
     </description>
   </entry>
-
 </release>
+<!--</editor-fold>-->
+
 </history>

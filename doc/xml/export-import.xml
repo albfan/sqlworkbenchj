@@ -201,8 +201,9 @@
 				</listitem>
 			</itemizedlist>
 			If &wb-productname; cannot identify the format of the clipboard a dialog will be opened
-			where you can specify the format of the clipboard contents. This is maily necessary
-			if the delimiter is not the tab character.
+			where you can specify the format of the clipboard contents. This is mainly necessary
+			if the delimiter is not the tab character. You can manually open that dialog, by holding
+      down the <keycap>Ctrl</keycap> key when clicking on the menu item.
 		</para>
 	</section>
 </section>

@@ -344,8 +344,7 @@ WHERE p.person_id = a.person_id;</programlisting>
 				Drivers known to <emphasis role="bold">not</emphasis> support this feature:
 				<itemizedlist>
 					<listitem><simpara>Oracle 10g driver (ojdbc14.jar)</simpara></listitem>
-					<listitem><simpara>Microsoft SQL Server 2000 driver (mssqlserver.jar;msbase.jar;msutil.jar)</simpara></listitem>
-					<listitem><simpara>Microsoft SQL Server 2005 driver (sqljdbc.jar)</simpara></listitem>
+					<listitem><simpara>Microsoft SQL Server 2000/2005 driver (sqljdbc.jar)</simpara></listitem>
 				</itemizedlist>
 			</para>
 		</section>

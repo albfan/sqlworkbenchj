@@ -547,6 +547,13 @@ FROM geo_table
 			the entered value will be highlighted.
 		</para>
 
+    <note>
+      <para>
+        The results displayed here are not editable. If you want to
+        modify the results after a search, you have to use the
+        <link linkend="command-search-data">WbGrepSource</link> command
+      </para>
+    </note>
     <para>
       Two different implementations of the search are available: server side and client side.
     </para>
