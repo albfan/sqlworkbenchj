@@ -63,6 +63,12 @@
 
   <entry dev-build="2" type="fix">
     <description>
+      The "Show Single Record Dialog" menu item in the table's popup menu was not always enabled.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
       When copying a macro, the keyboard shortcut was copied as well.
     </description>
   </entry>
