@@ -28,6 +28,8 @@ import workbench.util.FileUtil;
 public class LexerBasedParser
 	implements ScriptIterator
 {
+	private File originalFile;
+	private String fileEncoding;
 	private SQLLexer lexer;
 	private Reader input;
 	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
@@ -38,9 +40,15 @@ public class LexerBasedParser
 	private boolean emptyLineIsDelimiter;
 	private int scriptLength;
 	private boolean hasMoreCommands;
+	private boolean checkOracleInclude;
+	private boolean calledOnce;
 	
 	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("(\r\n|\n\r|\r|\n)+[ \t\f]*(\r\n|\n\r|\r|\n)+");
 
+	public LexerBasedParser()
+	{
+	}
+	
 	public LexerBasedParser(String script)
 		throws IOException
 	{
@@ -87,6 +95,8 @@ public class LexerBasedParser
 
 	public ScriptCommandDefinition getNextCommand()
 	{
+		calledOnce = true;
+		
 		String delimiterString = delimiter.getDelimiter();
 		try
 		{
@@ -100,12 +110,19 @@ public class LexerBasedParser
 			
 			SQLToken token = lexer.getNextToken();
 			boolean startOfLine = false;
+			boolean singleLineCommand = false;
+
 			while (token != null)
 			{
 				if (lastStart == -1) lastStart = token.getCharBegin();
 				String text = token.getText();
 
 				boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
+
+				if (startOfLine && !singleLineCommand && checkOracleInclude && text.charAt(0) == '@')
+				{
+					singleLineCommand = true;
+				}
 
 				if (startOfLine && !token.isWhiteSpace())
 				{
@@ -147,11 +164,12 @@ public class LexerBasedParser
 				}
 				else if (text.charAt(0) == '\n' || text.charAt(0) == '\r')
 				{
-					if (emptyLineIsDelimiter)
+					if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text)))
 					{
-						if (isMultiLine(text)) break;
+						break;
 					}
 					startOfLine = true;
+					singleLineCommand = false;
 				}
 				previousEnd = token.getCharEnd();
 				token = lexer.getNextToken();
@@ -210,7 +228,7 @@ public class LexerBasedParser
 	@Override
 	public boolean hasMoreCommands()
 	{
-		return true;
+		return hasMoreCommands;
 	}
 
 	@Override
@@ -231,6 +249,7 @@ public class LexerBasedParser
 	@Override
 	public void setSupportOracleInclude(boolean flag)
 	{
+		checkOracleInclude = flag;
 	}
 
 	@Override
@@ -240,6 +259,8 @@ public class LexerBasedParser
 		scriptLength = (int)FileUtil.getCharacterLength(f, encoding);
 		input = EncodingUtil.createBufferedReader(f, encoding);
 		lexer = new SQLLexer(input);
+		calledOnce = false;
+		hasMoreCommands = (scriptLength > 0);
 	}
 
 	@Override
@@ -254,10 +275,30 @@ public class LexerBasedParser
 		input = new StringReader(script);
 		lexer = new SQLLexer(input);
 		scriptLength = script.length();
+		calledOnce = false;
+		hasMoreCommands = (scriptLength > 0);
 	}
 
 	@Override
 	public void reset()
 	{
+		if (!calledOnce) return;
+		
+		try
+		{
+			if (originalFile != null)
+			{
+				FileUtil.closeQuitely(input);
+				input = EncodingUtil.createBufferedReader(originalFile, fileEncoding);
+			}
+			else
+			{
+				input.reset();
+			}
+		}
+		catch (IOException io2)
+		{
+			LogMgr.logError("LexerBasedParser.reset()", "Cannot re-open input stream", io2);
+		}
 	}
 }

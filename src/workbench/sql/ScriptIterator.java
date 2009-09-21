@@ -34,6 +34,15 @@ public interface ScriptIterator
 	void setEmptyLineIsDelimiter(boolean flag);
 
 	/**
+	 * Controls if the actual SQL for each command returned by
+	 * #getNextCommand() is stored in the ScriptCommandDefinition
+	 * or if only start and end in the script should be stored.
+	 *
+	 * @param flag if true, the actual SQL is returned otherwise only the start and end
+	 */
+	void setStoreStatementText(boolean flag);
+
+	/**
 	 * Return the next command from the script.
 	 * There are no more commands if this returns null
 	 */

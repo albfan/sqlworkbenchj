@@ -41,13 +41,13 @@ public class ScriptParser
 	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 	private DelimiterDefinition alternateDelimiter;
 	private int currentIteratorIndex = -42;
-	private boolean checkEscapedQuotes = true;
+	private boolean checkEscapedQuotes;
 	private ScriptIterator iteratingParser = null;
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
 	private boolean returnTrailingWhitesapce = false;
-	private String alternateLineComment = "--";
+	private String alternateLineComment;
 	private boolean useAlternateDelimiter = false;
 	private File source;
 	
@@ -120,8 +120,8 @@ public class ScriptParser
 		}
 		else
 		{
-			this.iteratingParser = new IteratingScriptParser(f, encoding);
-			configureParserInstance(this.iteratingParser);
+			iteratingParser = getParserInstance();
+			iteratingParser.setFile(f, encoding);
 		}
 		this.source = f;
 	}
@@ -198,7 +198,14 @@ public class ScriptParser
 
 	public void setAlternateLineComment(String comment)
 	{
-		this.alternateLineComment = comment;
+		if (comment != null && !comment.trim().equals("--"))
+		{
+			this.alternateLineComment = comment.trim();
+		}
+		else
+		{
+			this.alternateLineComment = null;
+		}
 	}
 
 	public void setReturnStartingWhitespace(boolean flag)
@@ -428,9 +435,7 @@ public class ScriptParser
 		}
 		else if (this.iteratingParser != null)
 		{
-			configureParserInstance(this.iteratingParser);
 			this.iteratingParser.reset();
-
 		}
 	}
 
@@ -463,8 +468,19 @@ public class ScriptParser
 		return this.delimiter.getDelimiter();
 	}
 
-	private void configureParserInstance(ScriptIterator p)
+	private ScriptIterator getParserInstance()
 	{
+		ScriptIterator p = null;
+		if (checkEscapedQuotes || StringUtil.isNonBlank(alternateLineComment))
+		{
+			p = new IteratingScriptParser();
+			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using IteratingScriptParser");
+		}
+		else
+		{
+			p = new LexerBasedParser();
+			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using LexerBasedParser");
+		}
 		p.setSupportOracleInclude(this.supportOracleInclude);
 		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
@@ -480,6 +496,7 @@ public class ScriptParser
 		{
 			p.setCheckForSingleLineCommands(this.checkSingleLineCommands);
 		}
+		return p;
 	}
 
 	/**
@@ -488,9 +505,9 @@ public class ScriptParser
 	private void parseCommands()
 	{
 		this.commands = new ArrayList<ScriptCommandDefinition>();
-		IteratingScriptParser p = new IteratingScriptParser();
-		configureParserInstance(p);
+		ScriptIterator p = getParserInstance();
 		p.setScript(this.originalScript);
+		p.setStoreStatementText(false); // no need to store the statements twice
 
 		ScriptCommandDefinition c = null;
 		int index = 0;

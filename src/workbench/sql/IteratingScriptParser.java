@@ -59,7 +59,7 @@ public class IteratingScriptParser
 	private boolean storeSqlInCommands = false;
 	private boolean returnStartingWhitespace = false;
 	//private boolean checkHashComment = false;
-	private String alternateLineComment = "--";
+	private String alternateLineComment;
 
 	// These patterns cover the statements that
 	// can be used in a single line without a delimiter
@@ -75,8 +75,6 @@ public class IteratingScriptParser
 
 	private Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
 
-	/** Create an InteratingScriptParser
-	 */
 	public IteratingScriptParser()
 	{
 	}
@@ -88,7 +86,6 @@ public class IteratingScriptParser
 	public IteratingScriptParser(File f, String encoding)
 		throws IOException
 	{
-		this();
 		this.setFile(f, encoding);
 	}
 
@@ -99,7 +96,6 @@ public class IteratingScriptParser
 	public IteratingScriptParser(String aScript)
 		throws IOException
 	{
-		this();
 		if (aScript == null) throw new IllegalArgumentException("Script may not be null");
 		this.setScript(aScript);
 	}
@@ -134,6 +130,11 @@ public class IteratingScriptParser
 		this.reset();
 	}
 
+	public void setStoreStatementText(boolean flag)
+	{
+		storeSqlInCommands = flag;
+	}
+	
 	/**
 	 * Should the parser check for MySQL hash comments?
 	 */

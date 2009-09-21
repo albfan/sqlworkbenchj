@@ -45,6 +45,7 @@ public class LexerBasedParserTest
 	{
 		String sql = "select * from test;\n" + "select * from person;";
 		LexerBasedParser parser = new LexerBasedParser(sql);
+		assertTrue(parser.hasMoreCommands());
 		ScriptCommandDefinition cmd = null;
 		while ((cmd = parser.getNextCommand()) != null)
 		{
@@ -185,5 +186,65 @@ public class LexerBasedParserTest
 				fail("Wrong command index: " + index);
 			}
 		}
+	}
+
+	public void testOraInclude()
+		throws Exception
+	{
+		String sql = "select \n@i = 1,id from test;\n" + "select * from person;delete from test2;commit;";
+		LexerBasedParser parser = new LexerBasedParser(sql);
+		parser.setSupportOracleInclude(false);
+		ScriptCommandDefinition cmd = null;
+		while ((cmd = parser.getNextCommand()) != null)
+		{
+//			System.out.println(cmd.getSQL() + "\n**************************");
+			int index = cmd.getIndexInScript();
+			if (index == 0)
+			{
+				assertEquals("select \n@i = 1,id from test", cmd.getSQL().trim());
+			}
+			else if (index == 1)
+			{
+				assertEquals("select * from person", cmd.getSQL().trim());
+			}
+			else if (index == 2)
+			{
+				assertEquals("delete from test2", cmd.getSQL().trim());
+			}
+			else if (index == 3)
+			{
+				assertEquals("commit", cmd.getSQL().trim());
+			}
+			else
+			{
+				fail("Wrong command index: " + index);
+			}
+		}
+
+		sql = "delete from person;\n  @insert_person.sql\ncommit;";
+		parser = new LexerBasedParser(sql);
+		parser.setSupportOracleInclude(true);
+		while ((cmd = parser.getNextCommand()) != null)
+		{
+//			System.out.println(cmd.getSQL() + "\n**************************");
+			int index = cmd.getIndexInScript();
+			if (index == 0)
+			{
+				assertEquals("delete from person", cmd.getSQL());
+			}
+			else if (index == 1)
+			{
+				assertEquals("@insert_person.sql", cmd.getSQL());
+			}
+			else if (index == 2)
+			{
+				assertEquals("commit", cmd.getSQL());
+			}
+			else
+			{
+				fail("Wrong command index: " + index);
+			}
+		}
+
 	}
 }

@@ -90,7 +90,7 @@ public class ViewReader
 		StringBuilder result = new StringBuilder(source.length() + 100);
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
-		String verb = SqlUtil.getSqlVerb(source);
+		String verb = SqlUtil.getSqlVerb(source.toString());
 
 		// ThinkSQL and DB2 return the full CREATE VIEW statement
 		if (verb.equalsIgnoreCase("CREATE"))

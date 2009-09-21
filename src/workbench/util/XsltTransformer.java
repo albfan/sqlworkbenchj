@@ -100,15 +100,22 @@ public class XsltTransformer
 	 * Searches for a stylesheet. <br/>
 	 * If the filename is an absolute filename, no searching takes place.
 	 * <br/>
-	 * If the filename does not include a
-	 * directory then the xslt sub-directory of the installation directory
-	 * is checked first. <br/>
+	 * If the filename does not include a directory then the xslt sub-directory
+	 * of the installation directory is checked first. <br/>
 	 * Then the supplied base directory is checked, if nothing is found
 	 * the confid directory is checked and finally the installation directory.
+	 * <br/>
+	 * If the supplied filename does not have the .xslt extension, it is added
+	 * before searching for the file.
 	 */
 	public File findStylesheet(String file)
 	{
-		File f = new File(file);
+		WbFile f = new WbFile(file);
+		if (StringUtil.isEmptyString(f.getExtension()))
+		{
+			f = new WbFile(file + ".xslt");
+		}
+
 		if (f.isAbsolute()) return f;
 		if (f.getParentFile() == null)
 		{

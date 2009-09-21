@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.io.StringReader;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -326,30 +327,35 @@ public class SqlUtil
 		return sql;
 	}
 
+	private static final SQLLexer verbLexer = new SQLLexer("");
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
 	 */
-	public static String getSqlVerb(CharSequence sql)
+	public static String getSqlVerb(String sql)
 	{
 		if (StringUtil.isEmptyString(sql)) return "";
 
-		SQLLexer l = new SQLLexer(sql);
-		try
+		//SQLLexer l = new SQLLexer(sql);
+		synchronized (verbLexer)
 		{
-			SQLToken t = l.getNextToken(false, false);
-			if (t == null) return "";
+			try
+			{
+				verbLexer.reset(new StringReader(sql),0,0,0);
+				SQLToken t = verbLexer.getNextToken(false, false);
+				if (t == null) return "";
 
-			// The SQLLexer does not recognize @ as a keyword (which is basically
-			// correct, but to support the Oracle style includes we'll treat it
-			// as a keyword here.
-			String v = t.getContents();
-			if (v.charAt(0) == '@') return "@";
+				// The SQLLexer does not recognize @ as a keyword (which is basically
+				// correct, but to support the Oracle style includes we'll treat it
+				// as a keyword here.
+				String v = t.getContents();
+				if (v.charAt(0) == '@') return "@";
 
-			return t.getContents().toUpperCase();
-		}
-		catch (Exception e)
-		{
-			return "";
+				return t.getContents().toUpperCase();
+			}
+			catch (Exception e)
+			{
+				return "";
+			}
 		}
 	}
 
