@@ -38,6 +38,7 @@ import workbench.util.StringUtil;
  */
 
 public class IteratingScriptParser
+	implements ScriptIterator
 {
 	private CharacterSequence script;
 	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
@@ -159,7 +160,7 @@ public class IteratingScriptParser
 		this.supportOracleInclude = flag;
 	}
 
-	public void allowEmptyLineAsSeparator(boolean flag)
+	public void setEmptyLineIsDelimiter(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
 	}

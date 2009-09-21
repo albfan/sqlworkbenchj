@@ -13,6 +13,7 @@ package workbench.gui.components;
 
 import java.awt.Component;
 
+import java.sql.Types;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
@@ -75,7 +76,8 @@ public class SortHeaderRenderer
 		display.setHorizontalAlignment(SwingConstants.LEFT);
 		
 		String type = null;
-		String javaType = null;
+		String javaTypeName = null;
+		int javaType = Types.OTHER;
 
 		if (table instanceof WbTable)
 		{
@@ -91,9 +93,9 @@ public class SortHeaderRenderer
 			if (model != null)
 			{
 				type = model.getDbmsType(col);
-				javaType = SqlUtil.getTypeName(model.getColumnType(col));
+				javaType = model.getColumnType(col);
+				javaTypeName = SqlUtil.getTypeName(javaType);
 			}
-
 		}
 
 		if (sorted)
@@ -128,7 +130,7 @@ public class SortHeaderRenderer
 				tip.append("<br>");
 				tip.append(table.getColumnClass(col).getName());
 				tip.append("<br>");
-				tip.append(javaType);
+				tip.append(javaTypeName + " (" + javaType + ")");
 			}
 			tip.append("</code></html>");
 			display.setToolTipText(tip.toString());

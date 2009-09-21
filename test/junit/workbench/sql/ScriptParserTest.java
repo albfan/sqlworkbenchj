@@ -124,7 +124,7 @@ public class ScriptParserTest
 			// Check if a cursorposition at the far end of the statement is detected properly
 			String sql = "select 42 from dual;\n\nselect * \nfrom table\n;;\n";
 			ScriptParser p = new ScriptParser();
-			p.allowEmptyLineAsSeparator(false);
+			p.setEmptyLineIsDelimiter(false);
 			p.setScript(sql);
 			assertEquals(2, p.getSize());
 		}
@@ -141,7 +141,7 @@ public class ScriptParserTest
 		{
 			String sql = "\nselect 42\nfrom dual;\nselect * \nfrom table\n;";
 			ScriptParser p = new ScriptParser();
-			p.allowEmptyLineAsSeparator(false);
+			p.setEmptyLineIsDelimiter(false);
 			p.setScript(sql);
 			int index = p.getCommandIndexAtCursorPos(0);
 			assertEquals("Wrong statement index", 0, index);
@@ -160,7 +160,7 @@ public class ScriptParserTest
 		{
 			String sql = "select 42 from dual;\n\nselect * \nfrom table\n;";
 			ScriptParser p = new ScriptParser();
-			p.allowEmptyLineAsSeparator(false);
+			p.setEmptyLineIsDelimiter(false);
 			p.setScript(sql);
 			int pos = sql.lastIndexOf(";");
 			int index = p.getCommandIndexAtCursorPos(pos);
@@ -181,7 +181,7 @@ public class ScriptParserTest
 			String script = "select 42 from dual;\n\nselect x\n        from y\n        \n        \n        ;";
 			int pos = script.length() - 3;
 			ScriptParser p = new ScriptParser();
-			p.allowEmptyLineAsSeparator(false);
+			p.setEmptyLineIsDelimiter(false);
 			p.setScript(script);
 			int index = p.getCommandIndexAtCursorPos(pos);
 			assertEquals(2, p.getSize());
@@ -202,7 +202,7 @@ public class ScriptParserTest
 		{
 			String sql = "select a,b,c\r\nfrom test\r\nwhere x = 1";
 			ScriptParser p = new ScriptParser();
-			p.allowEmptyLineAsSeparator(true);
+			p.setEmptyLineIsDelimiter(true);
 			p.setScript(sql);
 			int count = p.getSize();
 			assertEquals("Wrong number of statements", 1 ,count);

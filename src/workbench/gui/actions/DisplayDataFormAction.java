@@ -19,6 +19,8 @@ import java.awt.event.ActionEvent;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
@@ -33,13 +35,13 @@ import workbench.resource.ResourceMgr;
  */
 public class DisplayDataFormAction
 	extends WbAction
+	implements TableModelListener
 {
 	private WbTable client;
 
 	public DisplayDataFormAction(WbTable aClient)
 	{
 		super();
-		this.client = aClient;
 		this.setEnabled(false);
 		this.initMenuDefinition("MnuTxtShowRecord");
 		this.removeIcon();
@@ -106,7 +108,21 @@ public class DisplayDataFormAction
 
 	public void setTable(WbTable table)
 	{
+		if (client != null && client != table)
+		{
+			client.removeTableModelListener(this);
+		}
 		this.client = table;
+		setEnabled(client != null && client.getRowCount() > 0);
+		if (client != null)
+		{
+			client.addTableModelListener(this);
+		}
+	}
+
+	@Override
+	public void tableChanged(TableModelEvent e)
+	{
 		setEnabled(client != null && client.getRowCount() > 0);
 	}
 

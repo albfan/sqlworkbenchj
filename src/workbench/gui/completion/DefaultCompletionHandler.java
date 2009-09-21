@@ -120,7 +120,7 @@ public class DefaultCompletionHandler
 		String script = this.editor.getText();
 		ScriptParser parser = new ScriptParser(script);
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
-		parser.allowEmptyLineAsSeparator(Settings.getInstance().getAutoCompletionEmptyLineIsSeparator());
+		parser.setEmptyLineIsDelimiter(Settings.getInstance().getAutoCompletionEmptyLineIsSeparator());
 		parser.setAlternateLineComment(dbConnection == null ? null : dbConnection.getDbSettings().getLineComment());
 		int cursorPos = this.editor.getCaretPosition();
 

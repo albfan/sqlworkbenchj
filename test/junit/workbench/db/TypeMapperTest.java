@@ -28,12 +28,14 @@ public class TypeMapperTest
 	public void testGetTypeName()
 	{
 		TypeMapper mapper = new TypeMapper();
-		mapper.parseTypeMap("3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size)");
+		mapper.parseTypeMap("3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size);93:datetime year to second");
 		String type = mapper.getUserMapping(3, 1, 1);
 		assertEquals("DOUBLE", type);
 		type = mapper.getUserMapping(2, 11, 3);
 		assertEquals("NUMERIC(11, 3)", type);
 		type = mapper.getUserMapping(-1, 100, 0);
 		assertEquals("VARCHAR2(100)", type);
+		type = mapper.getUserMapping(93, 0, 0);
+		assertEquals("datetime year to second", type);
 	}
 }

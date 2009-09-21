@@ -117,9 +117,14 @@ public class TableCreator
 	}
 
 	/**
-	 *	Return the SQL string for the column definition of the
-	 *	given column index (index into the columnDefinition array)
-	 *	The method expects the typeInfo map to be filled!
+	 * Return the SQL string for the column definition.
+	 * If useDbmsDataType is set to true, then the data type
+	 * stored in the ColumnIdentifier is used. Otherwise
+	 * the TypeMapper is use to map the jdbc data type returned from
+	 * ColumnIdentifier.getDataType() to the target DBMS
+	 *
+	 * @see ColumnIdentifier#getDataType() 
+	 * @see TypeMapper#getTypeName(int, int, int)
 	 */
 	private String getColumnDefintionString(ColumnIdentifier col)
 	{

@@ -42,7 +42,7 @@ public class ScriptParser
 	private DelimiterDefinition alternateDelimiter;
 	private int currentIteratorIndex = -42;
 	private boolean checkEscapedQuotes = true;
-	private IteratingScriptParser iteratingParser = null;
+	private ScriptIterator iteratingParser = null;
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
@@ -191,7 +191,7 @@ public class ScriptParser
 		this.setScript(content == null ? "" : content.toString());
 	}
 
-	public void allowEmptyLineAsSeparator(boolean flag)
+	public void setEmptyLineIsDelimiter(boolean flag)
 	{
 		this.emptyLineIsSeparator = flag;
 	}
@@ -463,10 +463,10 @@ public class ScriptParser
 		return this.delimiter.getDelimiter();
 	}
 
-	private void configureParserInstance(IteratingScriptParser p)
+	private void configureParserInstance(ScriptIterator p)
 	{
 		p.setSupportOracleInclude(this.supportOracleInclude);
-		p.allowEmptyLineAsSeparator(this.emptyLineIsSeparator);
+		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator);
 		p.setCheckEscapedQuotes(this.checkEscapedQuotes);
 		p.setDelimiter(useAlternateDelimiter ? this.alternateDelimiter : this.delimiter);
 		p.setReturnStartingWhitespace(this.returnTrailingWhitesapce);

@@ -312,8 +312,7 @@ public class DataCopier
 	/**
 	 * After creating the target table, the column definitions for the newly
 	 * create table are retrieved and we have to use those columns e.g.
-	 * because upper/lowercase can be different now if the column names
-	 * were specified by the user, and the DBMS folded them to upper or lowercase
+	 * because upper/lowercase can be different now. 
 	 *
 	 * @param realCols
 	 * @param toUpdate to column definitions to be updated
