@@ -20,6 +20,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -100,11 +101,8 @@ public class LexerBasedParser
 		String delimiterString = delimiter.getDelimiter();
 		try
 		{
-			StringBuilder sql = null;
-			if (storeStatementText)
-			{
-				sql = new StringBuilder(150);
-			}
+			// The
+			StringBuilder sql = new StringBuilder(150);
 
 			int previousEnd = -1;
 			
@@ -174,14 +172,11 @@ public class LexerBasedParser
 				previousEnd = token.getCharEnd();
 				token = lexer.getNextToken();
 				
-				if (storeStatementText)
-				{
-					sql.append(text);
-				}
+				sql.append(text);
 			}
 			if (previousEnd > 0)
 			{
-				ScriptCommandDefinition cmd = createCommandDef((storeStatementText ? sql : null), lastStart, previousEnd);
+				ScriptCommandDefinition cmd = createCommandDef(sql, lastStart, previousEnd);
 				cmd.setIndexInScript(currentStatementIndex);
 				currentStatementIndex ++;
 				lastStart = -1;
@@ -201,9 +196,10 @@ public class LexerBasedParser
 
 	private ScriptCommandDefinition createCommandDef(StringBuilder sql, int start, int end)
 	{
-		if (returnLeadingWhitespace || sql == null || !Character.isWhitespace(sql.charAt(0)) || sql.length() == 0)
+		if (returnLeadingWhitespace || !Character.isWhitespace(sql.charAt(0)) || sql.length() == 0)
 		{
-			return new ScriptCommandDefinition((sql == null ? null : sql.toString()), start, end);
+			String toStore = storeStatementText ? sql.toString() : null;
+			return new ScriptCommandDefinition(toStore, start, end);
 		}
 
 		int i = 0;
@@ -272,7 +268,7 @@ public class LexerBasedParser
 	@Override
 	public void setScript(String script)
 	{
-		input = new StringReader(script);
+		input = new StringReader(StringUtil.rtrim(script));
 		lexer = new SQLLexer(input);
 		scriptLength = script.length();
 		calledOnce = false;
