@@ -43,6 +43,7 @@ public class LexerBasedParser
 	private boolean hasMoreCommands;
 	private boolean checkOracleInclude;
 	private boolean calledOnce;
+	private boolean checkEscapedQuotes;
 	
 	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("(\r\n|\n\r|\r|\n)+[ \t\f]*(\r\n|\n\r|\r|\n)+");
 	private static Pattern LINE_BREAK = Pattern.compile("[ \t\f]*(\r\n|\n\r|\r|\n)+[ \t\f]*");
@@ -181,7 +182,6 @@ public class LexerBasedParser
 				}
 				previousEnd = token.getCharEnd();
 				token = lexer.getNextToken();
-				
 				sql.append(text);
 			}
 			if (previousEnd > 0 && !startOfLine)
@@ -255,6 +255,7 @@ public class LexerBasedParser
 	@Override
 	public void setCheckEscapedQuotes(boolean flag)
 	{
+		checkEscapedQuotes = flag;
 	}
 
 	@Override

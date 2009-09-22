@@ -43,6 +43,15 @@ public class SQLLexerTest
 		return result;
 	}
 
+	public void testEscapedQuote()
+	{
+		String sql = "select 'test\\'value'";
+		List<SQLToken> tokens = getTokenList(sql);
+		for (SQLToken t : tokens)
+		{
+			System.out.println(t.toString());
+		}
+	}
 	public void testWbVar()
 	{
 		String sql = "select $[?wbvar] from table";
@@ -156,19 +165,6 @@ public class SQLLexerTest
 		assertTrue(tokens.get(1).isWhiteSpace());
 		assertEquals("'line 1 \n x \n   line2;\n'", tokens.get(4).getText());
 		assertTrue(tokens.get(4).isLiteral());
-
-		sql =    "  'select ' + @cols + ' from + @SrcTableName \n" +
-             "   exec (@sql); \n" +
-             " \n" +
-             "commit;";
-		l = new SQLLexer(sql);
-		System.out.println("*****************");
-		while ((t = l.getNextToken()) != null)
-		{
-			System.out.println("# " + t.toString());
-		}
-		System.out.println("*****************");
-		
 	}
 	
 	public void testKeywords()
