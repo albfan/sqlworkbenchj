@@ -16,6 +16,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.sql.ScriptParser;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -55,7 +56,9 @@ public class TableCommentReaderTest
 			
 			StringBuilder colComments = reader.getTableColumnCommentsSql(con, table, columns);
 			assertNotNull(colComments);
+			//System.out.println("*********\n" + colComments + "\n**********");
 			ScriptParser p = new ScriptParser(colComments.toString());
+			p.setReturnStartingWhitespace(false);
 			assertEquals(2, p.getSize());
 			assertEquals("COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column'", p.getCommand(0));
 			assertEquals("COMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname'", p.getCommand(1));

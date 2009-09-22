@@ -92,6 +92,58 @@ public class LexerBasedParserTest
 		}
 	}
 
+	public void testTrimLeadingWhiteSpace()
+		throws Exception
+	{
+		String sql = "select * from test;\nselect * from person;\n";
+		LexerBasedParser parser = new LexerBasedParser(sql);
+		parser.setReturnLeadingWhitespace(false);
+		ScriptCommandDefinition cmd = null;
+		while ((cmd = parser.getNextCommand()) != null)
+		{
+			int index = cmd.getIndexInScript();
+			if (index == 0)
+			{
+				assertEquals("select * from test", cmd.getSQL());
+			}
+			else if (index == 1)
+			{
+				assertEquals("select * from person", cmd.getSQL());
+			}
+			else
+			{
+				fail("Wrong command index: " + index);
+			}
+		}
+
+		sql = "COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column';\r\nCOMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname';\r\n";
+		parser = new LexerBasedParser(sql);
+		parser.setReturnLeadingWhitespace(false);
+		parser.setStoreStatementText(false);
+		while ((cmd = parser.getNextCommand()) != null)
+		{
+			int index = cmd.getIndexInScript();
+			if (index == 0)
+			{
+				int start = cmd.getStartPositionInScript();
+				int end = cmd.getEndPositionInScript();
+				String cmdSql = sql.substring(start, end);
+				assertEquals("COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column'", cmdSql);
+			}
+			else if (index == 1)
+			{
+				int start = cmd.getStartPositionInScript();
+				int end = cmd.getEndPositionInScript();
+				String cmdSql = sql.substring(start, end);
+				assertEquals("COMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname'", cmdSql);
+			}
+			else
+			{
+				fail("Wrong command index: " + index);
+			}
+		}
+	}
+
 	public void testReturnLeadingWhiteSpace()
 		throws Exception
 	{

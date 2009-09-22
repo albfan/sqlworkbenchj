@@ -50,13 +50,14 @@ public class ColumnDropperTest
 			String sql = dropper.getScript().toString();
 			
 			assertNotNull(sql);
-			ScriptParser p = new ScriptParser(sql);
+			ScriptParser p = new ScriptParser(sql.trim());
+			p.setReturnStartingWhitespace(false);
 			assertEquals(4, p.getSize());
 			
-			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY1", p.getCommand(0));
-			assertEquals("COMMIT", p.getCommand(1));
-			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY2", p.getCommand(2));
-			assertEquals("COMMIT", p.getCommand(3));
+			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY1", p.getCommand(0).trim());
+			assertEquals("COMMIT", p.getCommand(1).trim());
+			assertEquals("ALTER TABLE PERSON DROP COLUMN DUMMY2", p.getCommand(2).trim());
+			assertEquals("COMMIT", p.getCommand(3).trim());
 			
 			dropper.dropObjects();
 			
