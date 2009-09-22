@@ -18,6 +18,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.XsltTransformer;
 
@@ -96,18 +97,37 @@ public class WbXslt
 			return result;
 		}
 
+		XsltTransformer transformer = new XsltTransformer();
+		
 		try
 		{
-			XsltTransformer transformer = new XsltTransformer();
+			transformer.setSAveSystemOutMessages(true);
 			transformer.setXsltBaseDir(new File(runner.getBaseDir()));
 			transformer.transform(inputFile, outputFile, xsltFile);
+			String out = transformer.getSystemOut();
+			if (out != null)
+			{
+				result.addMessage(out);
+			}
+			out = transformer.getSystemErr();
+			if (out != null)
+			{
+				result.addMessage(out);
+			}
 			result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", outputFile));
 			result.setSuccess();
 		}
 		catch (Exception e)
 		{
 			LogMgr.logError("WbXslt.execute()", "Error when transforming '" + inputFile + "' to '" + outputFile + "' using " + xsltFile, e);
-			result.addMessage(e.getMessage());
+			if (transformer.getNestedError() != null)
+			{
+				result.addMessage(e.getMessage() + ": " + ExceptionUtil.getDisplay(transformer.getNestedError()));
+			}
+			else
+			{
+				result.addMessage(e.getMessage());
+			}
 		}
 		return result;
 	}

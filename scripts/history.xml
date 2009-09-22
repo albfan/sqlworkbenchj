@@ -3,12 +3,18 @@
 
 <release build="107" date="2009-09-21">
 
-  <entry dev-build="2" type="enh">
+  <entry dev-build="3" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
     </description>
   </entry>
 
+  <entry dev-build="2" type="enh">
+    <description>
+      The WbXslt command can now handle stylesheets that include other stylesheets.
+    </description>
+  </entry>
+  
   <entry dev-build="2" type="enh">
     <description>
       In the macro editor auto completion is now enabled (if the main window is connected)
