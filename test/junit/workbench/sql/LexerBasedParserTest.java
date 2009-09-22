@@ -11,7 +11,6 @@
 package workbench.sql;
 
 import junit.framework.TestCase;
-import workbench.sql.LexerBasedParser;
 
 /**
  *
@@ -97,7 +96,7 @@ public class LexerBasedParserTest
 	{
 		String sql = "select * from test;\nselect * from person;\n";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setReturnLeadingWhitespace(false);
+		parser.setReturnStartingWhitespace(false);
 		ScriptCommandDefinition cmd = null;
 		while ((cmd = parser.getNextCommand()) != null)
 		{
@@ -118,7 +117,7 @@ public class LexerBasedParserTest
 
 		sql = "COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column';\r\nCOMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname';\r\n";
 		parser = new LexerBasedParser(sql);
-		parser.setReturnLeadingWhitespace(false);
+		parser.setReturnStartingWhitespace(false);
 		parser.setStoreStatementText(false);
 		while ((cmd = parser.getNextCommand()) != null)
 		{
@@ -149,7 +148,7 @@ public class LexerBasedParserTest
 	{
 		String sql = " select * from test;\n" + " select * from person;";
 		LexerBasedParser parser = new LexerBasedParser(sql);
-		parser.setReturnLeadingWhitespace(true);
+		parser.setReturnStartingWhitespace(true);
 		ScriptCommandDefinition cmd = null;
 		while ((cmd = parser.getNextCommand()) != null)
 		{
@@ -193,7 +192,75 @@ public class LexerBasedParserTest
 			}
 		}
 	}
-	
+
+	public void testMsGO()
+		throws Exception
+	{
+		String sql = "select * from test\n GO \n" + "select * from person\nGO";
+		LexerBasedParser parser = new LexerBasedParser(sql);
+		parser.setDelimiter(new DelimiterDefinition("GO", true));
+		ScriptCommandDefinition cmd = null;
+		while ((cmd = parser.getNextCommand()) != null)
+		{
+			int index = cmd.getIndexInScript();
+			if (index == 0)
+			{
+				assertEquals("select * from test", cmd.getSQL());
+			}
+			else if (index == 1)
+			{
+				assertEquals("select * from person", cmd.getSQL());
+			}
+			else
+			{
+				fail("Wrong command index: " + index);
+			}
+		}
+	}
+
+	public void testQuotedDelimiter()
+		throws Exception
+	{
+		String sql = "select 'test\n;lines' from test;";
+		LexerBasedParser parser = new LexerBasedParser(sql);
+		ScriptCommandDefinition cmd = null;
+		int count = 0;
+		while ((cmd = parser.getNextCommand()) != null)
+		{
+			int index = cmd.getIndexInScript();
+			if (index == 0)
+			{
+				assertEquals("select 'test\n;lines' from test", cmd.getSQL());
+				count++;
+			}
+		}
+		assertEquals(1, count);
+
+//		sql = "wbfeedback off; \n" +
+//             " \n" +
+//             "create procedure dbo.CopyTable \n" +
+//             "      @SrcTableName varchar(max), \n" +
+//             "      @DestTableName varchar(max) \n" +
+//             "      as \n" +
+//             "   set nocount on \n" +
+//             "   set xact_abort on \n" +
+//             "   declare @cols varchar(max) \n" +
+//             "   select @cols = case when @cols is null then '' else @cols + ',' end + name from sys.columns where object_id=object_id(@DestTableName) order by column_id \n" +
+//             "   declare @sql varchar(max) \n" +
+//             "   set @sql = 'insert into ' + @DestTableName + ' (' + @cols + ') ' + \n" +
+//             "      'select ' + @cols + ' from + @SrcTableName \n" +
+//             "   exec (@sql); \n" +
+//             " \n" +
+//             "commit;";
+//		parser = new LexerBasedParser(sql);
+//		System.out.println("**************************");
+//		while ((cmd = parser.getNextCommand()) != null)
+//		{
+//			System.out.println("** " + cmd.getSQL());
+//		}
+
+	}
+
 	public void testAlternateDelimiter()
 		throws Exception
 	{
@@ -223,7 +290,6 @@ public class LexerBasedParserTest
 		parser.setDelimiter(new DelimiterDefinition("./", true));
 		while ((cmd = parser.getNextCommand()) != null)
 		{
-			//System.out.println(cmd.getSQL() + "\n******************\n");
 			int index = cmd.getIndexInScript();
 			if (index == 0)
 			{

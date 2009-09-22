@@ -11,6 +11,7 @@
  */
 package workbench.sql.formatter;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.WbTestCase;
@@ -139,6 +140,37 @@ public class SQLLexerTest
 		assertEquals(true, t.isReservedWord());
 	}
 
+	public void testMultilineLiterals()
+		throws IOException
+	{
+		String sql = "values (\n   'line 1 \n x \n   line2;\n');";
+		ArrayList<SQLToken> tokens = new ArrayList<SQLToken>();
+
+		SQLLexer l = new SQLLexer(sql);
+		SQLToken t = null;
+		while ((t = l.getNextToken()) != null)
+		{
+			tokens.add(t);
+		}
+		assertTrue(tokens.get(0).isReservedWord());
+		assertTrue(tokens.get(1).isWhiteSpace());
+		assertEquals("'line 1 \n x \n   line2;\n'", tokens.get(4).getText());
+		assertTrue(tokens.get(4).isLiteral());
+
+		sql =    "  'select ' + @cols + ' from + @SrcTableName \n" +
+             "   exec (@sql); \n" +
+             " \n" +
+             "commit;";
+		l = new SQLLexer(sql);
+		System.out.println("*****************");
+		while ((t = l.getNextToken()) != null)
+		{
+			System.out.println("# " + t.toString());
+		}
+		System.out.println("*****************");
+		
+	}
+	
 	public void testKeywords()
 	{
 		String sql = "union\nall \ngroup    by something\n"+

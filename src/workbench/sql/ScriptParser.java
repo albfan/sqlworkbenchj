@@ -471,7 +471,9 @@ public class ScriptParser
 	private ScriptIterator getParserInstance()
 	{
 		ScriptIterator p = null;
-		if (checkEscapedQuotes || StringUtil.isNonBlank(alternateLineComment))
+		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", false);
+
+		if (useOldParser || checkEscapedQuotes || StringUtil.isNonBlank(alternateLineComment) || checkSingleLineCommands)
 		{
 			p = new IteratingScriptParser();
 			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using IteratingScriptParser");

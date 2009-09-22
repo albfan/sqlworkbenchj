@@ -47,6 +47,7 @@ public class ScriptParserTest
 		ScriptParser p = new ScriptParser(sql);
 		p.setDelimiter(DelimiterDefinition.STANDARD_DELIMITER);
 		p.setCheckForSingleLineCommands(false);
+		p.setSupportOracleInclude(false);
 		p.setScript(sql);
 		// Make sure the remainder of the script (after the initial delete) is
 		// added as (an incorrect) statement to the list of statement. Otherwise
@@ -73,6 +74,7 @@ public class ScriptParserTest
              " \n" +
              "commit;";
 		p.setScript(sql);
+//		System.out.println("*****\n" + p.getCommand(1));
 		assertEquals(2, p.getSize());
 	}
 
@@ -96,6 +98,7 @@ public class ScriptParserTest
 			}
 			FileUtil.closeQuitely(w);
 			parser = new ScriptParser(500);
+			parser.setCheckForSingleLineCommands(true);
 			parser.setFile(f, "UTF-8");
 			assertEquals(scriptSize, parser.getScriptLength());
 			parser.startIterator();
@@ -302,12 +305,15 @@ public class ScriptParserTest
 			int size = 0;
 			while (p.hasNext())
 			{
-				size ++;
 				String sql = p.getNextCommand();
+				if (sql == null) break;
+				size ++;
+
 				if (size == 2)
 				{
 					assertEquals("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')", sql);
 				}
+				System.out.println("** "+ size + ": " + sql);
 			}
 			assertEquals("Wrong number of statements", 5, size);
 		}
@@ -357,7 +363,7 @@ public class ScriptParserTest
 			p.setCheckForSingleLineCommands(false);
 			int size = p.getSize();
 			assertEquals("Wrong number of statements", 2, size);
-			//System.out.println("sql=" + p.getCommand(0));
+			//System.out.println("***********\nsql=" + p.getCommand(0) + "\n***\n" + p.getCommand(1) + "\n********");
 			assertEquals("Wrong statement returned", "SELECT id \nFROM person GO", p.getCommand(0));
 			assertEquals("Wrong statement returned", "select * \nfrom country", p.getCommand(1));
 

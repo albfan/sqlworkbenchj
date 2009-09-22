@@ -407,6 +407,11 @@ public class SQLToken
 		}
 	}
 
+	public boolean isUnclosedString()
+	{
+		return ID == ERROR_UNCLOSED_STRING;
+	}
+	
 	/**
 	 * get a String that explains the error, if this token is an error.
 	 *

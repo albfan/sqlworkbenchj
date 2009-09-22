@@ -45,6 +45,7 @@ public class LexerBasedParser
 	private boolean calledOnce;
 	
 	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("(\r\n|\n\r|\r|\n)+[ \t\f]*(\r\n|\n\r|\r|\n)+");
+	private static Pattern LINE_BREAK = Pattern.compile("[ \t\f]*(\r\n|\n\r|\r|\n)+[ \t\f]*");
 
 	public LexerBasedParser()
 	{
@@ -84,11 +85,6 @@ public class LexerBasedParser
 		storeStatementText = flag;
 	}
 
-	public void setReturnLeadingWhitespace(boolean flag)
-	{
-		returnLeadingWhitespace = flag;
-	}
-	
 	public void done()
 	{
 		FileUtil.closeQuitely(input);
@@ -101,7 +97,6 @@ public class LexerBasedParser
 		String delimiterString = delimiter.getDelimiter();
 		try
 		{
-			// The
 			StringBuilder sql = new StringBuilder(150);
 
 			int previousEnd = -1;
@@ -109,6 +104,7 @@ public class LexerBasedParser
 			SQLToken token = lexer.getNextToken();
 			boolean startOfLine = false;
 			boolean singleLineCommand = false;
+			boolean danglingQuote = false;
 
 			while (token != null)
 			{
@@ -117,64 +113,78 @@ public class LexerBasedParser
 
 				boolean checkForDelimiter = !delimiter.isSingleLine() || (delimiter.isSingleLine() && startOfLine);
 
-				if (startOfLine && !singleLineCommand && checkOracleInclude && text.charAt(0) == '@')
+				if (token.isUnclosedString())
 				{
-					singleLineCommand = true;
+					danglingQuote = true;
 				}
-
-				if (startOfLine && !token.isWhiteSpace())
+				else if (danglingQuote)
 				{
-					startOfLine = false;
-				}
-
-				if (checkForDelimiter && delimiterString.equals(text))
-				{
-					break;
-				}
-				else if (checkForDelimiter && delimiterString.startsWith(text))
-				{
-					StringBuilder delim = new StringBuilder(delimiter.getDelimiter().length());
-					delim.append(text);
-					StringBuilder skippedText = null;
-					if (storeStatementText)
+					if (text.equals("'"))
 					{
-						skippedText = new StringBuilder();
-						skippedText.append(text);
+						danglingQuote = false;
+					}
+				}
+				else
+				{
+					if (startOfLine && !singleLineCommand && checkOracleInclude && text.charAt(0) == '@')
+					{
+						singleLineCommand = true;
 					}
 
-					while ((token = lexer.getNextToken()) != null)
+					if (startOfLine && !token.isWhiteSpace())
 					{
-						if (storeStatementText) skippedText.append(token.getText());
-						if (token.isComment() || token.isWhiteSpace() || token.isLiteral()) break;
-						delim.append(token.getText());
-						if (delim.length() > delimiterString.length()) break;
-						if (!delimiterString.startsWith(delim.toString())) break;
+						startOfLine = false;
 					}
-					boolean delimiterMatched = delimiterString.equals(delim.toString());
-					if (delimiterMatched)
+
+					if (checkForDelimiter && delimiterString.equals(text))
 					{
 						break;
 					}
-					if (storeStatementText)
+					else if (checkForDelimiter && delimiterString.startsWith(text))
 					{
-						text += skippedText.toString();
+						StringBuilder delim = new StringBuilder(delimiter.getDelimiter().length());
+						delim.append(text);
+						StringBuilder skippedText = null;
+						if (storeStatementText)
+						{
+							skippedText = new StringBuilder();
+							skippedText.append(text);
+						}
+
+						while ((token = lexer.getNextToken()) != null)
+						{
+							if (storeStatementText) skippedText.append(token.getText());
+							if (token.isComment() || token.isWhiteSpace() || token.isLiteral()) break;
+							delim.append(token.getText());
+							if (delim.length() > delimiterString.length()) break;
+							if (!delimiterString.startsWith(delim.toString())) break;
+						}
+						boolean delimiterMatched = delimiterString.equals(delim.toString());
+						if (delimiterMatched)
+						{
+							break;
+						}
+						if (storeStatementText)
+						{
+							text += skippedText.toString();
+						}
 					}
-				}
-				else if (text.charAt(0) == '\n' || text.charAt(0) == '\r')
-				{
-					if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text)))
+					else if (isLineBreak(text))
 					{
-						break;
+						if (singleLineCommand || (emptyLineIsDelimiter && isMultiLine(text)))
+						{
+							break;
+						}
+						startOfLine = true;
+						singleLineCommand = false;
 					}
-					startOfLine = true;
-					singleLineCommand = false;
 				}
 				previousEnd = token.getCharEnd();
 				token = lexer.getNextToken();
 				
 				sql.append(text);
 			}
-			if (previousEnd > 0)
+			if (previousEnd > 0 && !startOfLine)
 			{
 				ScriptCommandDefinition cmd = createCommandDef(sql, lastStart, previousEnd);
 				cmd.setIndexInScript(currentStatementIndex);
@@ -194,6 +204,16 @@ public class LexerBasedParser
 		}
 	}
 
+	private boolean isLineBreak(String text)
+	{
+		return LINE_BREAK.matcher(text).lookingAt();
+	}
+	
+	private boolean isMultiLine(String text)
+	{
+		return MULTI_LINE_PATTERN.matcher(text).lookingAt();
+	}
+
 	private ScriptCommandDefinition createCommandDef(StringBuilder sql, int start, int end)
 	{
 		if (returnLeadingWhitespace || !Character.isWhitespace(sql.charAt(0)) || sql.length() == 0)
@@ -208,11 +228,6 @@ public class LexerBasedParser
 			i ++;
 		}
 		return new ScriptCommandDefinition(sql.substring(i), start + i, end);
-	}
-
-	private boolean isMultiLine(String text)
-	{
-		return MULTI_LINE_PATTERN.matcher(text).lookingAt();
 	}
 
 	@Override
@@ -268,9 +283,10 @@ public class LexerBasedParser
 	@Override
 	public void setScript(String script)
 	{
-		input = new StringReader(StringUtil.rtrim(script));
+		String toUse = StringUtil.rtrim(script);
+		input = new StringReader(toUse);
 		lexer = new SQLLexer(input);
-		scriptLength = script.length();
+		scriptLength = toUse.length();
 		calledOnce = false;
 		hasMoreCommands = (scriptLength > 0);
 	}
