@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-
 <!-- 
   Convert a SQL Workbench/J schema report (http://www.sql-workbench.net) 
   to an initial LiquiBase (http://www.liquibase.org) changeset.
@@ -7,7 +6,6 @@
   The change set's author will be "sql-workbench" and the id will be 1
   Everything will be put into a single changeset
 -->
-
 <xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:output encoding="UTF-8" method="xml" indent="yes" standalone="no"/>

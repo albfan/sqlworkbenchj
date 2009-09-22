@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:stylesheet
-     version="1.0" 
-     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
->
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+<!-- 
+  Convert a SQL Workbench/J schema report (http://www.sql-workbench.net) 
+  into a SQL script for PostgreSQL (http://www.postgresql.org)
+  Author: Thomas Kellerer  
+-->
 
-  <xsl:output
+<xsl:output
   encoding="iso-8859-15" 
   method="text" 
   indent="no" 
   standalone="yes"  
   omit-xml-declaration="yes"
-  doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN"
 />
 
   <xsl:strip-space elements="*"/>

@@ -1,22 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
-<xsl:stylesheet
-     version="1.0" 
-     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
->
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-  <xsl:output
+<xsl:output
   encoding="iso-8859-15" 
   method="text" 
   indent="no" 
   standalone="yes"  
   omit-xml-declaration="yes"
 />
+
 <!-- 
-
-Convert the output of SQL Workbench's WbSchemaDiff command to SQL for Oracle
-Author: support@sql-workbench.net 
-
-Thanks to Etienne for his addition and bugfixes 
+  Convert the output of SQL Workbench's WbSchemaDiff command to SQL for Oracle
+  Author: Thomas Kellerer
+  Thanks to Etienne for his addition and bugfixes 
 -->
 
   <xsl:strip-space elements="*"/>
