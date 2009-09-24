@@ -151,6 +151,40 @@ public class WbDataDiffTest
 			{
 				fail("Could not delete " + main.getFullPath());
 			}
+			
+			sql = "WbDataDiff -type=xml -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.txt -encoding=UTF8";
+			runner.runStatement(sql);
+
+			main = new WbFile(util.getBaseDir(), "sync.txt");
+			assertTrue(main.exists());
+
+			expectedFiles = new String[]
+			{
+				"address_$delete.xml",
+				"address_$insert.xml",
+				"address_$update.xml",
+				"person_$delete.xml",
+				"person_$insert.xml",
+				"person_$update.xml",
+				"person_address_$delete.xml",
+				"person_address_$insert.xml"
+			};
+
+			for (String fname : expectedFiles)
+			{
+				WbFile f = new WbFile(util.getBaseDir(), fname);
+				assertTrue(f.exists());
+//				if (!f.delete())
+//				{
+//					fail("Could not delete " + f.getFullPath());
+//				}
+			}
+
+//			if (!main.delete())
+//			{
+//				fail("Could not delete " + main.getFullPath());
+//			}
+
 		}
 		finally
 		{

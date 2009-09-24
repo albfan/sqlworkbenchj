@@ -107,7 +107,7 @@ public class SqlRowDataConverter
 
 	}
 
-	public void setSqlLiteralType(String type)
+	public void setDateLiteralType(String type)
 	{
 		if (this.literalFormatter != null)
 		{

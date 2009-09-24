@@ -24,6 +24,7 @@ import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.exporter.XmlRowDataConverter;
 import workbench.interfaces.ProgressReporter;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -35,6 +36,7 @@ import workbench.storage.RowData;
 import workbench.storage.RowDataFactory;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
+import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
 /**
@@ -56,7 +58,7 @@ import workbench.util.StringUtil;
  * problems with long SQL statements when processing tables that have
  * a PK with multiple columns.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableDeleteSync
 	implements ProgressReporter
@@ -73,10 +75,11 @@ public class TableDeleteSync
 	private Map<ColumnIdentifier, Integer> columnMap = new HashMap<ColumnIdentifier, Integer>();
 	private RowActionMonitor monitor;
 	private Writer outputWriter;
+	private String lineEnding = "\n";
 	private SqlLiteralFormatter formatter;
 	private long deletedRows;
 	private boolean firstDelete;
-
+	private XmlRowDataConverter xmlConverter;
 	private boolean cancelExecution;
 	private int progressInterval = 10;
 
@@ -87,6 +90,22 @@ public class TableDeleteSync
 		reference = compareTo;
 		formatter = new SqlLiteralFormatter(toDelete);
 		chunkSize = Settings.getInstance().getSyncChunkSize();
+	}
+
+	public void setTypeSql()
+	{
+		xmlConverter = null;
+	}
+
+	public void setTypeXml()
+	{
+		xmlConverter = new XmlRowDataConverter();
+		xmlConverter.setUseDiffFormat(true);
+		xmlConverter.setUseVerboseFormat(false);
+		xmlConverter.setWriteClobToFile(false);
+		xmlConverter.setUseCDATA(true);
+		xmlConverter.setOriginalConnection(toDelete);
+		xmlConverter.setWriteBlobToFile(false);
 	}
 
 	public void setBatchSize(int size)
@@ -111,9 +130,17 @@ public class TableDeleteSync
 	 *
 	 * @param out
 	 */
-	public void setOutputWriter(Writer out)
+	public void setOutputWriter(Writer out, String lineEnd)
 	{
 		this.outputWriter = out;
+		if (lineEnd != null)
+		{
+			lineEnding = lineEnd;
+		}
+		else
+		{
+			lineEnding = "\n";
+		}
 	}
 
 	public void setReportInterval(int interval)
@@ -176,10 +203,13 @@ public class TableDeleteSync
 		{
 			throw new SQLException("No primary key found to delete rows from target table " + tableToDelete.getTableName());
 		}
-		String deleteSql = "DELETE FROM " + this.deleteTable.getTableExpression(this.toDelete) + where;
-		PreparedStatement deleteStmt = toDelete.getSqlConnection().prepareStatement(deleteSql);
-		this.deleteStatement = new BatchedStatement(deleteStmt, toDelete, batchSize);
-		LogMgr.logDebug("SyncDeleter.setTable()", "Using " + deleteSql + " to delete rows from target database");
+		if (outputWriter == null)
+		{
+			String deleteSql = "DELETE FROM " + this.deleteTable.getTableExpression(this.toDelete) + where;
+			PreparedStatement deleteStmt = toDelete.getSqlConnection().prepareStatement(deleteSql);
+			this.deleteStatement = new BatchedStatement(deleteStmt, toDelete, batchSize);
+			LogMgr.logDebug("SyncDeleter.setTable()", "Using " + deleteSql + " to delete rows from target database");
+		}
 	}
 
 	public void doSync()
@@ -217,6 +247,10 @@ public class TableDeleteSync
 			stmt = this.toDelete.createStatementForQuery();
 			rs = stmt.executeQuery(retrieve);
 			ResultInfo info = new ResultInfo(rs.getMetaData(), this.toDelete);
+			if (xmlConverter != null)
+			{
+				xmlConverter.setResultInfo(info);
+			}
 
 			long rowNumber = 0;
 			if (this.monitor != null)
@@ -262,11 +296,18 @@ public class TableDeleteSync
 				checkRows(packetRows, info);
 			}
 
-			this.deletedRows += this.deleteStatement.flush();
-
-			if (!toDelete.getAutoCommit())
+			if (outputWriter == null)
 			{
-				toDelete.commit();
+				this.deletedRows += this.deleteStatement.flush();
+
+				if (!toDelete.getAutoCommit())
+				{
+					toDelete.commit();
+				}
+			}
+			else
+			{
+				writeEnd(outputWriter);
 			}
 		}
 		catch (SQLException e)
@@ -280,7 +321,7 @@ public class TableDeleteSync
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-			this.deleteStatement.close();
+			if (deleteStatement != null) this.deleteStatement.close();
 			SqlUtil.closeStatement(this.checkStatement);
 		}
 	}
@@ -346,19 +387,33 @@ public class TableDeleteSync
 				if (firstDelete)
 				{
 					firstDelete = false;
-					writeGenerationInfo(outputWriter);
+					writeHeader(outputWriter);
 				}
-				this.outputWriter.write("DELETE FROM " + deleteTable.getTableName() + " WHERE ") ;
-				for (int i=0; i < row.getColumnCount(); i++)
+				if (xmlConverter == null)
 				{
-					Object value = row.getValue(i);
-					ColumnIdentifier col = info.getColumn(i);
-					if (i > 0) this.outputWriter.write(" AND ");
-					outputWriter.write(col.getColumnName());
-					outputWriter.write(" = ");
-					outputWriter.write(formatter.getDefaultLiteral(new ColumnData(value, col)).toString());
+					this.outputWriter.write("DELETE FROM " + deleteTable.getTableName() + " WHERE ") ;
+					for (int i=0; i < row.getColumnCount(); i++)
+					{
+						Object value = row.getValue(i);
+						ColumnIdentifier col = info.getColumn(i);
+						if (i > 0) this.outputWriter.write(" AND ");
+						outputWriter.write(col.getColumnName());
+						outputWriter.write(" = ");
+						outputWriter.write(formatter.getDefaultLiteral(new ColumnData(value, col)).toString());
+					}
+					outputWriter.write(';');
 				}
-				outputWriter.write(";\n");
+				else
+				{
+					StrBuffer rowData = xmlConverter.convertRowData(row, deletedRows);
+					if (rowData != null)
+					{
+						outputWriter.write("<delete>");
+						rowData.writeTo(outputWriter);
+						outputWriter.write("</delete>");
+					}
+				}
+				outputWriter.write(lineEnding);
 			}
 			catch (IOException e)
 			{
@@ -399,16 +454,35 @@ public class TableDeleteSync
 		return sql.toString();
 	}
 
-	private void writeGenerationInfo(Writer out)
+	private void writeEnd(Writer out)
 		throws IOException
 	{
-		String lineEnding = Settings.getInstance().getExternalEditorLineEnding();
-		out.write("------------------------------------------------------------------");
-		out.write(lineEnding);
-		out.write("-- Generated by " + ResourceMgr.TXT_PRODUCT_NAME + " at: " + StringUtil.getCurrentTimestampWithTZString());
-		out.write(lineEnding);
-		out.write("------------------------------------------------------------------");
-		out.write(lineEnding);
+		if (xmlConverter != null && !firstDelete)
+		{
+			out.write("</data-diff>");
+			out.write(lineEnding);
+		}
+	}
+
+	private void writeHeader(Writer out)
+		throws IOException
+	{
+		if (xmlConverter != null)
+		{
+			out.write("<?xml version=\"1.0\"?>");
+			out.write(lineEnding);
+			out.write("<data-diff>");
+			out.write(lineEnding);
+		}
+		else
+		{
+			out.write("------------------------------------------------------------------");
+			out.write(lineEnding);
+			out.write("-- Generated by " + ResourceMgr.TXT_PRODUCT_NAME + " at: " + StringUtil.getCurrentTimestampWithTZString());
+			out.write(lineEnding);
+			out.write("------------------------------------------------------------------");
+			out.write(lineEnding);
+		}
 	}
 
 }

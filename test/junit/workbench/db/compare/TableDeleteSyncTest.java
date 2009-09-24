@@ -124,7 +124,7 @@ public class TableDeleteSyncTest
 		{
 			TableDeleteSync sync = new TableDeleteSync(target, source);
 			StringWriter writer = new StringWriter();
-			sync.setOutputWriter(writer);
+			sync.setOutputWriter(writer, "\n");
 			sync.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"));
 			sync.doSync();
 			
@@ -138,7 +138,6 @@ public class TableDeleteSyncTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
 	}
 	
 }

@@ -47,7 +47,7 @@ public class SqlExportWriter
 		conv.setChrFunction(exporter.getChrFunction());
 		conv.setConcatString(exporter.getConcatString());
 		conv.setConcatFunction(exporter.getConcatFunction());
-		conv.setSqlLiteralType(exporter.getDateLiteralType());
+		conv.setDateLiteralType(exporter.getDateLiteralType());
 
 		conv.setBlobMode(exporter.getBlobMode());
 

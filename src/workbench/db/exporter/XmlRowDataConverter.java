@@ -53,7 +53,7 @@ public class XmlRowDataConverter
 	public static final String KEY_FORMAT_SHORT = "short";
 	public static final String TAG_TAG_FORMAT = "wb-tag-format";
 
-	private boolean useCData = false;
+	private boolean useCData;
 	private boolean verboseFormat = true;
 	private String lineEnding = "\n";
 	private String coltag = LONG_COLUMN_TAG;
@@ -62,11 +62,14 @@ public class XmlRowDataConverter
 	private String startColTag = "  <" + coltag + " index=\"";
 	private String closeColTag = "</" + coltag + ">";
 	private String closeRowTag = "</" + rowtag + ">";
-	private String tableToUse = null;
+	private String tableToUse;
 	private StrBuffer dbInfo;
-	private boolean writeClobFiles = false;
-	private boolean addColName = false;
+	private boolean writeClobFiles;
+	private boolean addColName;
 	private String xmlVersion = Settings.getInstance().getDefaultXmlVersion();
+	private boolean modifiedColumnsOnly;
+	private boolean useDiffFormat;
+	private boolean writeBlobFiles = true;
 	
 	public XmlRowDataConverter()
 	{
@@ -74,11 +77,39 @@ public class XmlRowDataConverter
 		this.addColName = Settings.getInstance().getBoolProperty("workbench.export.xml.verbose.includecolname", false);
 	}
 
+	public void setUseDiffFormat(boolean flag)
+	{
+		useDiffFormat = flag;
+		if (flag)
+		{
+			coltag = "column";
+			rowtag = "row";
+			startColTag = "<column";
+			closeColTag = "</column>";
+			closeRowTag = "</row>";
+		}
+		else
+		{
+			// re-initialize the tags
+			this.setUseVerboseFormat(this.verboseFormat);
+		}
+	}
+	
+	public void convertModifiedColumnsOnly(boolean flag)
+	{
+		modifiedColumnsOnly = flag;
+	}
+	
 	public void setTableNameToUse(String name)
 	{
 		this.tableToUse = name;
 	}
 
+	public void setWriteBlobToFile(boolean flag)
+	{
+		writeBlobFiles = flag;
+	}
+	
 	public void setWriteClobToFile(boolean flag)
 	{
 		this.writeClobFiles = flag;
@@ -171,20 +202,25 @@ public class XmlRowDataConverter
 		int colCount = this.metaData.getColumnCount();
 		StrBuffer xml = new StrBuffer(colCount * 100);
 
-		if (this.verboseFormat)
+		// No row tag for diff
+		if (!useDiffFormat)
 		{
-			tagWriter.appendOpenTag(xml, indent, rowtag, numAttrib, Long.toString(rowIndex + 1));
+			if (this.verboseFormat)
+			{
+				tagWriter.appendOpenTag(xml, indent, rowtag, numAttrib, Long.toString(rowIndex + 1));
+			}
+			else
+			{
+				tagWriter.appendOpenTag(xml, null, rowtag);
+			}
+			if (verboseFormat) xml.append(this.lineEnding);
 		}
-		else
-		{
-			tagWriter.appendOpenTag(xml, null, rowtag);
-		}
-
-		if (verboseFormat) xml.append(this.lineEnding);
 		
 		for (int c=0; c < colCount; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
+			if (modifiedColumnsOnly && row.isColumnModified(c)) continue;
+
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
 			boolean isNull = (data == null);
@@ -192,16 +228,22 @@ public class XmlRowDataConverter
 			
 			boolean externalFile = false;
 				
-			if (this.verboseFormat) xml.append(indent);
+			if (!useDiffFormat && this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
 			if (this.verboseFormat)
 			{
 				xml.append(c);
 				xml.append('"');
-				if (addColName) 
-				{
-					xml.append(" name=\"" + metaData.getColumnName(c) + "\"");
-				}
+			}
+			
+			if (useDiffFormat && metaData.getColumn(c).isPkColumn())
+			{
+				xml.append(" pk=\"true\"");
+			}
+			
+			if (addColName || useDiffFormat)
+			{
+				xml.append(" name=\"" + metaData.getColumnName(c) + "\"");
 			}
 			
 			if (isNull)
@@ -238,7 +280,7 @@ public class XmlRowDataConverter
 					xml.append("\"/");
 					writeCloseTag = false;
 				}
-				else if (SqlUtil.isBlobType(type))
+				else if (SqlUtil.isBlobType(type) && writeBlobFiles)
 				{
 					externalFile = true;
 					File blobFile = createBlobFile(row, c, rowIndex);
@@ -278,11 +320,15 @@ public class XmlRowDataConverter
 				}
 			}
 			if (writeCloseTag) xml.append(closeColTag);
-			if (this.verboseFormat) xml.append(this.lineEnding);
+			if (this.verboseFormat && !useDiffFormat) xml.append(this.lineEnding);
 		}
-		if (this.verboseFormat) xml.append(indent);
-		xml.append(closeRowTag);
-		xml.append(this.lineEnding);
+		
+		if (!useDiffFormat) 
+		{
+			if (this.verboseFormat) xml.append(indent);
+			xml.append(closeRowTag);
+			xml.append(this.lineEnding);
+		}
 		return xml;
 	}
 

@@ -29,6 +29,7 @@ import workbench.storage.RowActionMonitor;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.CollectionUtil;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileUtil;
@@ -53,12 +54,14 @@ public class WbDataDiff
 
 	public static final String PARAM_INCLUDE_DELETE = "includeDelete";
 	public static final String PARAM_IGNORE_COLS = "ignoreColumns";
+	public static final String PARAM_OUTPUT_TYPE = "type";
 
 	private WbFile outputDir;
 	private WbFile mainScript;
 	private TableDataDiff dataDiff;
 	private TableDeleteSync deleteSync;
-
+	private boolean xmlOutput;
+	
 	public WbDataDiff()
 	{
 		super();
@@ -66,6 +69,7 @@ public class WbDataDiff
 		cmdLine.addArgument(PARAM_INCLUDE_DELETE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbExport.ARG_CREATE_OUTPUTDIR);
 		cmdLine.addArgument(PARAM_IGNORE_COLS);
+		cmdLine.addArgument(PARAM_OUTPUT_TYPE, CollectionUtil.arrayList("sql", "xml"));
 		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, BlobMode.getTypes());
 
 		CommonArgs.addCheckDepsParameter(cmdLine);
@@ -188,6 +192,31 @@ public class WbDataDiff
 		dataDiff = new TableDataDiff(sourceCon, targetCon);
 		dataDiff.setSqlDateLiteralType(literalType);
 
+		String outputType = cmdLine.getValue(PARAM_OUTPUT_TYPE);
+		if (StringUtil.isBlank(outputType)) outputType = "sql";
+		xmlOutput = false;
+		if ("xml".equalsIgnoreCase(outputType))
+		{
+			dataDiff.setTypeXml();
+			xmlOutput = true;
+		}
+		else if ("sql".equalsIgnoreCase(outputType))
+		{
+			dataDiff.setTypeSql();
+		}
+		else
+		{
+			result.addMessage("Illegal output type: " + outputType);
+			result.setFailure();
+			return result;
+		}
+
+		String blobtype = cmdLine.getValue(WbExport.ARG_BLOB_TYPE);
+		if (StringUtil.isNonBlank(blobtype))
+		{
+			dataDiff.setBlobMode(blobtype);
+		}
+
 		dataDiff.setRowMonitor(rowMonitor);
 
 		if (rowMonitor != null)
@@ -214,6 +243,7 @@ public class WbDataDiff
 				try
 				{
 					dataDiff.setOutputWriters(updates, inserts, nl);
+					dataDiff.setBaseDir(outputDir);
 					dataDiff.setTableName(refTable, targetTable);
 					dataDiff.doSync();
 				}
@@ -233,8 +263,15 @@ public class WbDataDiff
 						CommonArgs.setProgressInterval(deleteSync, cmdLine);
 
 						deleteSync.setRowMonitor(rowMonitor);
-						deleteSync.setOutputWriter(deleteOut);
-
+						deleteSync.setOutputWriter(deleteOut, nl);
+						if ("xml".equalsIgnoreCase(outputType))
+						{
+							deleteSync.setTypeXml();
+						}
+						else if ("sql".equalsIgnoreCase(outputType))
+						{
+							deleteSync.setTypeSql();
+						}
 						deleteSync.setTableName(refTable, targetTable);
 						deleteSync.doSync();
 					}
@@ -269,7 +306,14 @@ public class WbDataDiff
 				for (int i=0; i < len; i++) line.append('*');
 				line.append(nl);
 				out.write(line.toString());
-				out.write("-- The following script will migrate the data in: " + nl);
+				if (xmlOutput)
+				{
+					out.write("-- The following XML files describe the diff result to migrate the data in: " + nl);
+				}
+				else
+				{
+					out.write("-- The following script will migrate the data in: " + nl);
+				}
 				out.write("-- " + targetInfo + nl);
 				out.write("--" + nl);
 				out.write("-- to match the data from: " + nl);
@@ -308,7 +352,14 @@ public class WbDataDiff
 					{
 						if (ins.length() > 0)
 						{
-							out.write("WbInclude -file='" + ins.getName() + "' " + encodingParm + ";"+ nl);
+							if (xmlOutput)
+							{
+								out.write(ins.getName() + nl);
+							}
+							else
+							{
+								out.write("WbInclude -file='" + ins.getName() + "' " + encodingParm + ";"+ nl);
+							}
 							count ++;
 						}
 						else
@@ -322,7 +373,14 @@ public class WbDataDiff
 					{
 						if (upd.length() > 0)
 						{
-							out.write("WbInclude -file='" + upd.getName() + "' " + encodingParm + ";" + nl);
+							if (xmlOutput)
+							{
+								out.write(upd.getName()  + nl);
+							}
+							else
+							{
+								out.write("WbInclude -file='" + upd.getName() + "' " + encodingParm + ";" + nl);
+							}
 							count ++;
 						}
 						else
@@ -333,7 +391,7 @@ public class WbDataDiff
 					}
 				}
 
-				if (count > 0) out.write(nl + "COMMIT;" + nl);
+				if (count > 0 && !xmlOutput) out.write(nl + "COMMIT;" + nl);
 				count = 0;
 
 				if (checkDependencies  && mapping.targetTables.size() > 1)
@@ -363,7 +421,14 @@ public class WbDataDiff
 								out.write("-- DELETE scripts" + nl);
 								out.write("-----------------" + nl);
 							}
-							out.write("WbInclude -file='" + f.getName() + "' " + encodingParm + ";" + nl);
+							if (xmlOutput)
+							{
+								out.write(f.getName() + nl);
+							}
+							else
+							{
+								out.write("WbInclude -file='" + f.getName() + "' " + encodingParm + ";" + nl);
+							}
 							count ++;
 						}
 						else
@@ -373,7 +438,7 @@ public class WbDataDiff
 						}
 					}
 				}
-				if (count > 0) out.write(nl + "COMMIT;" + nl);
+				if (count > 0 && !xmlOutput) out.write(nl + "COMMIT;" + nl);
 			}
 			finally
 			{
@@ -396,7 +461,10 @@ public class WbDataDiff
 
 	private WbFile createFilename(String type, TableIdentifier table)
 	{
-		WbFile f = new WbFile(outputDir, StringUtil.makeFilename(table.getTableName() + "_$" + type + ".sql"));
-		return f;
+		if (xmlOutput)
+		{
+			return new WbFile(outputDir, StringUtil.makeFilename(table.getTableName() + "_$" + type + ".xml"));
+		}
+		return new WbFile(outputDir, StringUtil.makeFilename(table.getTableName() + "_$" + type + ".sql"));
 	}
 }

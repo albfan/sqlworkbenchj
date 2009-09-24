@@ -123,7 +123,7 @@ public class SqlRowDataConverterTest
 			data.setValue(3, ts);
 			data.resetStatus();
 
-			converter.setSqlLiteralType(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE);
+			converter.setDateLiteralType(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE);
 			converter.setCreateInsert();
 			String line = converter.convertRowData(data, 0).toString().trim();
 			String verb = SqlUtil.getSqlVerb(line);
@@ -132,7 +132,7 @@ public class SqlRowDataConverterTest
 			assertEquals("JDBC date literal not found", true, line.indexOf("{d '2006-10-26'}") > -1);
 			assertEquals("JDBC timestamp literal not found", true, line.indexOf("{ts '2006-10-26 ") > -1);
 
-			converter.setSqlLiteralType(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
+			converter.setDateLiteralType(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 			line = converter.convertRowData(data, 0).toString().trim();
 			assertEquals("ANSI date literal not found", true, line.indexOf("DATE '2006-10-26'") > -1);
 			assertEquals("ANSI timestamp literal not found", true, line.indexOf("TIMESTAMP '2006-10-26") > -1);

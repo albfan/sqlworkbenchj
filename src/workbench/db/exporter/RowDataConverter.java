@@ -174,7 +174,7 @@ public abstract class RowDataConverter
 	public void setOutputFile(WbFile f)
 	{ 
 		this.outputFile = f; 
-		if (f != null) 
+		if (f != null && !f.isDirectory())
 		{
 			this.baseFilename = f.getFileName();
 		}
@@ -378,6 +378,7 @@ public abstract class RowDataConverter
 	public File getBaseDir()
 	{
 		if (this.outputFile == null) return new File(".");
+		if (this.outputFile.isDirectory()) return this.outputFile;
 		if (this.outputFile.isAbsolute()) return this.outputFile.getParentFile();
 		return new File(".");
 	}
