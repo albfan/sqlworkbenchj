@@ -71,7 +71,7 @@ public class EditorColorsPanel
 		Color op = sett.getColor("workbench.editor.color.operator", Color.BLACK);
 		operators.setSelectedColor(op);
 
-		Color dt = sett.getColor("workbench.editor.color.datatype", new Color(0x990033));
+		Color dt = sett.getEditorDatatypeColor();
 		datatypes.setSelectedColor(dt);
 
 		errorColor.setSelectedColor(Settings.getInstance().getEditorErrorColor());
@@ -97,6 +97,7 @@ public class EditorColorsPanel
 		sett.setEditorBackgroundColor(bgColor.getSelectedColor());
 		sett.setEditorTextColor(textColor.getSelectedColor());
 		sett.setEditorCursorColor(cursorColor.getSelectedColor());
+		sett.setEditorDatatypeColor(datatypes.getSelectedColor());
 	}
 
 	/** This method is called from within the constructor to

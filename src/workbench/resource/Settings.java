@@ -42,6 +42,8 @@ import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.editor.SyntaxUtilities;
+import workbench.gui.editor.Token;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
 import workbench.interfaces.PropertyStorage;
@@ -96,6 +98,7 @@ public class Settings
 	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
 	public static final String PROPERTY_EDITOR_CURSOR_COLOR = "workbench.editor.color.cursor";
+	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.cursor";
 	// </editor-fold>
 
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
@@ -1348,6 +1351,18 @@ public class Settings
 	public void setEditorBackgroundColor(Color c)
 	{
 		setColor(PROPERTY_EDITOR_BG_COLOR, c);
+	}
+
+	public Color getEditorDatatypeColor()
+	{
+		Color std = new Color(0x990033);
+		if (std == null) std = Color.BLACK;
+		return getColor(PROPERTY_EDITOR_DATATYPE_COLOR, std);
+	}
+
+	public void setEditorDatatypeColor(Color c)
+	{
+		setColor(PROPERTY_EDITOR_DATATYPE_COLOR, c);
 	}
 
 	public Color getEditorTextColor()

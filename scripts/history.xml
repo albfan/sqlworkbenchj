@@ -69,6 +69,12 @@
 
   <entry dev-build="2" type="fix">
     <description>
+      The editor color for datatypes selected in the options dialog was not used.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
       The "Show Single Record Dialog" menu item in the table's popup menu was not always enabled.
     </description>
   </entry>

@@ -102,7 +102,17 @@ public class TextAreaPainter
 			Settings.PROPERTY_EDITOR_FG_COLOR,
 			Settings.PROPERTY_EDITOR_BG_COLOR,
 			Settings.PROPERTY_EDITOR_CURSOR_COLOR,
+			Settings.PROPERTY_EDITOR_DATATYPE_COLOR,
 			Settings.PROPERTY_EDITOR_CURRENT_LINE_COLOR,
+			"workbench.editor.color.comment1",
+			"workbench.editor.color.comment2",
+			"workbench.editor.color.keyword1",
+			"workbench.editor.color.keyword2",
+			"workbench.editor.color.keyword3",
+			"workbench.editor.color.literal1",
+			"workbench.editor.color.literal2",
+			"workbench.editor.color.operator",
+			"workbench.editor.color.invalid",
 			Settings.PROPERTY_SHOW_LINE_NUMBERS);
 
 		Toolkit tk = Toolkit.getDefaultToolkit();
@@ -142,6 +152,7 @@ public class TextAreaPainter
 				setForeground(Settings.getInstance().getEditorTextColor());
 				setBackground(Settings.getInstance().getEditorBackgroundColor());
 				setCaretColor(Settings.getInstance().getEditorCursorColor());
+				setStyles(SyntaxUtilities.getDefaultSyntaxStyles());
 				currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
 			}
 		});
