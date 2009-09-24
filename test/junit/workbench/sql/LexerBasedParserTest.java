@@ -168,6 +168,36 @@ public class LexerBasedParserTest
 		}
 	}
 
+	public void testPatterns()
+	{
+		assertTrue(LexerBasedParser.isMultiLine("\n\n"));
+		assertTrue(LexerBasedParser.isMultiLine("\r\n\r\n"));
+		assertFalse(LexerBasedParser.isMultiLine(" \r\n "));
+		assertFalse(LexerBasedParser.isMultiLine("\r\n"));
+		assertTrue(LexerBasedParser.isMultiLine(" \r\n\t\r\n "));
+		assertTrue(LexerBasedParser.isMultiLine(" \r\n\t  \r\n\t"));
+
+		assertTrue(LexerBasedParser.isLineBreak("\n"));
+		assertTrue(LexerBasedParser.isLineBreak(" \n "));
+		assertTrue(LexerBasedParser.isLineBreak("\r\n"));
+		assertTrue(LexerBasedParser.isLineBreak(" \r\n "));
+		assertTrue(LexerBasedParser.isLineBreak("\r\n  "));
+		assertTrue(LexerBasedParser.isLineBreak("           \t\r\n\t"));
+	}
+
+
+	public void testCursorInEmptyLine()
+		throws Exception
+	{
+		String sql = "\nselect 42\nfrom dual;\nselect * \nfrom table\n;";
+		LexerBasedParser p = new LexerBasedParser();
+		p.setEmptyLineIsDelimiter(false);
+		p.setScript(sql);
+		ScriptCommandDefinition cmd = p.getNextCommand();
+		assertNotNull(cmd);
+		System.out.println("*** start: " + cmd.getWhitespaceStart());
+	}
+
 	public void testEmptyLineDelimiter()
 		throws Exception
 	{
@@ -190,6 +220,24 @@ public class LexerBasedParserTest
 			{
 				fail("Wrong command index: " + index);
 			}
+		}
+
+		sql = "select a,b,c\r\nfrom test\r\nwhere x = 1";
+		parser = new LexerBasedParser(sql);
+		parser.setEmptyLineIsDelimiter(true);
+
+		while ((cmd = parser.getNextCommand()) != null)
+		{
+			int index = cmd.getIndexInScript();
+			if (index == 0)
+			{
+				assertEquals("select a,b,c\r\nfrom test\r\nwhere x = 1", cmd.getSQL());
+			}
+			else
+			{
+				fail("Wrong command index: " + index);
+			}
+
 		}
 	}
 

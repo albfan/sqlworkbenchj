@@ -17,7 +17,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Writer;
-import java.util.Iterator;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.util.EncodingUtil;
@@ -313,7 +312,7 @@ public class ScriptParserTest
 				{
 					assertEquals("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')", sql);
 				}
-				System.out.println("** "+ size + ": " + sql);
+//				System.out.println("** "+ size + ": " + sql);
 			}
 			assertEquals("Wrong number of statements", 5, size);
 		}
@@ -490,6 +489,7 @@ public class ScriptParserTest
              "/";
 			p.setScript(sql);
 			size = p.getSize();
+
 			assertEquals("Wrong number of statements", 1, size);
 			assertEquals(sql.substring(0, sql.lastIndexOf("/")).trim(), p.getCommand(0));
 
@@ -555,6 +555,14 @@ public class ScriptParserTest
 			assertEquals("Wrong command at cursor pos", index, -1);
 
 
+			sql = "select 'One Value';\n\nselect 'Some other value';\n";
+			p = new ScriptParser(sql);
+			assertEquals("Not enough commands", 2, p.getSize());
+			assertEquals("select 'One Value'", p.getCommand(0));
+			assertEquals("select 'Some other value'", p.getCommand(1));
+			
+			assertEquals(0, p.getCommandIndexAtCursorPos(1));
+			assertEquals(1, p.getCommandIndexAtCursorPos(31));
 		}
 		catch (Exception e)
 		{
@@ -634,11 +642,11 @@ public class ScriptParserTest
 			File script = createScript(counter, "\n");
 			ScriptParser p = new ScriptParser(100);
 			p.setFile(script);
+			p.startIterator();
 			int count = 0;
-			Iterator itr = p.getIterator();
-			while (itr.hasNext())
+			String sql = null;
+			while ((sql = p.getNextCommand()) != null)
 			{
-				String sql = (String)itr.next();
 				assertNotNull("No SQL returned at " + count, sql);
 				String verb = SqlUtil.getSqlVerb(sql);
 				assertEquals("Wrong statement retrieved using LF", "insert", verb.toLowerCase());
@@ -650,11 +658,10 @@ public class ScriptParserTest
 
 			script = createScript(counter, "\r\n");
 			p.setFile(script);
+			p.startIterator();
 			count = 0;
-			itr = p.getIterator();
-			while (itr.hasNext())
+			while ((sql = p.getNextCommand()) != null)
 			{
-				String sql = (String)itr.next();
 				assertNotNull("No SQL returned at " + count, sql);
 				String verb = SqlUtil.getSqlVerb(sql);
 				assertEquals("Wrong statement retrieved using CRLF", "insert", verb.toLowerCase());
@@ -707,8 +714,8 @@ public class ScriptParserTest
 			     "\n" +
 			     "select * from bla;";
 
-		p.setScript(sql);
 		p.setSupportOracleInclude(true);
+		p.setScript(sql);
 		assertEquals(4, p.getSize());
 		String verb = SqlUtil.getSqlVerb(p.getCommand(1));
 		assertEquals("drop", verb.toLowerCase());
