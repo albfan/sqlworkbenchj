@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
  */
 public class StringUtil
 {
-	public static final String REGEX_CRLF = "(\r\n|\n\r|\r|\n)";
+	public static final String REGEX_CRLF = "((\r\n)|(\n\r)|\r|\n)";
 	public static final Pattern PATTERN_CRLF = Pattern.compile(REGEX_CRLF);
 	public static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n|\n\r|\r)");
 

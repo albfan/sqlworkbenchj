@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <history>
 
-<release build="107" date="2009-09-21">
+<!-- build number must be set to -1 until a release is built -->
+<release build="-1" date="2009-09-24">
 
   <entry dev-build="3" type="enh">
     <description>
@@ -9,7 +10,7 @@
     </description>
   </entry>
 
-  <entry dev-build="2" type="enh">
+  <entry dev-build="3" type="enh">
     <description>
       The WbXslt command can now handle stylesheets that include other stylesheets.
     </description>
@@ -67,7 +68,13 @@
     </description>
   </entry>
 
-  <entry dev-build="2" type="fix">
+  <entry dev-build="3" type="fix">
+    <description>
+      "Execute current" was not working any longer.
+    </description>
+  </entry>
+
+  <entry dev-build="3" type="fix">
     <description>
       The editor color for datatypes selected in the options dialog was not used.
     </description>

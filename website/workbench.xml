@@ -41,7 +41,7 @@
       <li>Full support for BLOB data in query results, SQL statements, export and import. <a href="blob_example.html">Read more...</a></li>
       <li>Select rows from related tables according to their foreign key definitions (<image-link title="Select child rows" name="child_rows.png">Screenshot1</image-link> <image-link title="Select parent rows" name="parent_rows.png">Screenshot2</image-link>).<br/></li>
       <li>Search text in procedure, view and other sources using a <a href="manual/wb-commands.html#command-search-source">SQL command</a> or a GUI (<image-link title="Search object source" name="objectsearcher.png">Screenshot</image-link>)</li>
-      <li>Search for data across all columns in all tables (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
+      <li>Search for data across all columns in all tables using a <a href="manual/wb-commands.html#command-search-data">SQL command</a> or a GUI (<image-link title="Search table data" name="SearchTables.png">Screenshot</image-link>)</li>
       <li>Copy data directly between to database servers using a <a href="manual/wb-commands.html#command-copy">SQL command</a> or a GUI (<image-link title="Data Pumper" name="DataPumper.png">Screenshot</image-link>)</li>
       <li>Makros (aka aliases) for frequently used SQL statements</li>
       <li>Variable substitution in SQL statements including smart prompting for values (can be combined with Makros)</li>

@@ -43,10 +43,9 @@ public class LexerBasedParser
 	private boolean hasMoreCommands;
 	private boolean checkOracleInclude;
 	private boolean calledOnce;
-	private boolean checkEscapedQuotes;
 	
-	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("(\r\n|\n\r|\r|\n)+[ \t\f]*(\r\n|\n\r|\r|\n)+");
-	private static Pattern LINE_BREAK = Pattern.compile("[ \t\f]*(\r\n|\n\r|\r|\n)+[ \t\f]*");
+	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
+	private static Pattern LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
 
 	public LexerBasedParser()
 	{
@@ -120,14 +119,14 @@ public class LexerBasedParser
 				}
 				else if (danglingQuote)
 				{
-					if (text.equals("'"))
+					if (text.charAt(0) == '\'')
 					{
 						danglingQuote = false;
 					}
 				}
 				else
 				{
-					if (startOfLine && !singleLineCommand && checkOracleInclude && text.charAt(0) == '@')
+					if (checkOracleInclude && startOfLine && !singleLineCommand && text.charAt(0) == '@')
 					{
 						singleLineCommand = true;
 					}
@@ -145,12 +144,8 @@ public class LexerBasedParser
 					{
 						StringBuilder delim = new StringBuilder(delimiter.getDelimiter().length());
 						delim.append(text);
-						StringBuilder skippedText = null;
-						if (storeStatementText)
-						{
-							skippedText = new StringBuilder();
-							skippedText.append(text);
-						}
+						StringBuilder skippedText = new StringBuilder(text.length() + 5);
+						skippedText.append(text);
 
 						while ((token = lexer.getNextToken()) != null)
 						{
@@ -165,10 +160,7 @@ public class LexerBasedParser
 						{
 							break;
 						}
-						if (storeStatementText)
-						{
-							text += skippedText.toString();
-						}
+						text += skippedText.toString();
 					}
 					else if (isLineBreak(text))
 					{
@@ -204,14 +196,14 @@ public class LexerBasedParser
 		}
 	}
 
-	private boolean isLineBreak(String text)
+	static boolean isLineBreak(String text)
 	{
-		return LINE_BREAK.matcher(text).lookingAt();
+		return LINE_BREAK.matcher(text).matches();
 	}
 	
-	private boolean isMultiLine(String text)
+	static boolean isMultiLine(String text)
 	{
-		return MULTI_LINE_PATTERN.matcher(text).lookingAt();
+		return MULTI_LINE_PATTERN.matcher(text).matches();
 	}
 
 	private ScriptCommandDefinition createCommandDef(StringBuilder sql, int start, int end)
@@ -227,7 +219,9 @@ public class LexerBasedParser
 		{
 			i ++;
 		}
-		return new ScriptCommandDefinition(sql.substring(i), start + i, end);
+		ScriptCommandDefinition cmd = new ScriptCommandDefinition(sql.substring(i), start + i, end);
+		cmd.setWhitespaceStart(start);
+		return cmd;
 	}
 
 	@Override
@@ -255,7 +249,6 @@ public class LexerBasedParser
 	@Override
 	public void setCheckEscapedQuotes(boolean flag)
 	{
-		checkEscapedQuotes = flag;
 	}
 
 	@Override

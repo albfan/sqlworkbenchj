@@ -58,7 +58,6 @@ public class IteratingScriptParser
 	private boolean checkSingleLineCommands = true;
 	private boolean storeSqlInCommands = false;
 	private boolean returnStartingWhitespace = false;
-	//private boolean checkHashComment = false;
 	private String alternateLineComment;
 
 	// These patterns cover the statements that
@@ -66,11 +65,11 @@ public class IteratingScriptParser
 	// This is basically to make the parser as Oracle compatible as possible
 	// while not breaking the SQL queries for other servers
 	private Pattern[] SLC_PATTERNS =
-         { Pattern.compile("(?mi)^\\s*SET\\s*\\w*\\s*(ON|OFF)\\s*;?\\s*$"),
-					 Pattern.compile("(?mi)^\\s*ECHO\\s*((ON)|(OFF))\\s*;?\\s*$"),
-					 Pattern.compile("(?mi)^\\s*DECLARE\\s*\\S*.*$"),
-					 Pattern.compile("(?mi)^\\s*WHENEVER\\s*ERROR\\s*$"),
-					 Pattern.compile("(?mi)^\\s*SET\\s*TRANSACTION\\s*READ\\s*((WRITE)|(ONLY))\\s*;?\\s*$")
+         { Pattern.compile("(?mi)^\\s*SET\\s+\\w+\\s+(ON|OFF)\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*ECHO\\s+((ON)|(OFF))\\s*;?\\s*$"),
+					 Pattern.compile("(?mi)^\\s*DECLARE\\s+\\S+.*$"),
+					 Pattern.compile("(?mi)^\\s*WHENEVER\\s+ERROR\\s*$"),
+					 Pattern.compile("(?mi)^\\s*SET\\s+TRANSACTION\\s+READ\\s+((WRITE)|(ONLY))\\s*;?\\s*$")
 	       };
 
 	private Pattern ORA_INCLUDE_PATTERN = Pattern.compile("(?m)^\\s*@.*$");
@@ -404,7 +403,7 @@ public class IteratingScriptParser
 							}
 						}
 
-						if (this.checkSingleLineCommands)
+						if (this.checkSingleLineCommands || supportOracleInclude)
 						{
 							boolean slcFound = false;
 
@@ -413,19 +412,9 @@ public class IteratingScriptParser
 
 							lastNewLineStart = pos;
 
-							if (clean.length() > 0 )
+							if (clean.length() > 0)
 							{
-								for (int pi=0; pi < SLC_PATTERNS.length; pi++)
-								{
-									Matcher m = SLC_PATTERNS[pi].matcher(clean);
-
-									if (m.matches())
-									{
-										slcFound = true;
-										break;
-									}
-								}
-								if (!slcFound && this.supportOracleInclude)
+								if (this.supportOracleInclude)
 								{
 									Matcher m = ORA_INCLUDE_PATTERN.matcher(clean);
 									if (m.matches())
@@ -433,8 +422,22 @@ public class IteratingScriptParser
 										slcFound = true;
 									}
 								}
-							}
 
+								if (!slcFound && checkSingleLineCommands)
+								{
+									for (int pi=0; pi < SLC_PATTERNS.length; pi++)
+									{
+										Matcher m = SLC_PATTERNS[pi].matcher(clean);
+
+										if (m.matches())
+										{
+											slcFound = true;
+											break;
+										}
+									}
+								}
+							}
+							
 							if (slcFound)
 							{
 								lastPos = pos;

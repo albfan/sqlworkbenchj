@@ -25,7 +25,6 @@ import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import workbench.db.report.TagWriter;
@@ -65,19 +64,19 @@ public class WbConnection
 	private PreparedStatementPool preparedStatementPool;
 	private List<PropertyChangeListener> listeners;
 	private DbObjectCache objectCache;
-	
+
 	private Method clearSettings = null;
 	private Object dbAccess = null;
 	private boolean doOracleClear = true;
 
-	private boolean busy; 
+	private boolean busy;
 	private KeepAliveDaemon keepAlive = null;
 	private String currentCatalog;
 	private String currentSchema;
 
 	private boolean removeComments;
 	private boolean removeNewLines;
-	
+
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -119,7 +118,7 @@ public class WbConnection
 	}
 	/**
 	 * Returns the internal ID of this connection.
-	 * 
+	 *
 	 * @return the internal id of this connection.
 	 */
 	public String getId()
@@ -154,7 +153,7 @@ public class WbConnection
 	/**
 	 * Returns a "cached" version of the current schema. It is safe
 	 * to call this method any time as it does not send any
-	 * statement to the database, but might not necessarily 
+	 * statement to the database, but might not necessarily
 	 * return the correct schema
 	 */
 	public String getDisplaySchema()
@@ -172,7 +171,7 @@ public class WbConnection
 	{
 		return this.metaData.getCurrentSchema();
 	}
-	
+
 	/**
 	 * Return the name of the current user.
 	 * Wrapper for DatabaseMetaData.getUserName() that throws no Exception
@@ -194,7 +193,7 @@ public class WbConnection
 		if (this.metaData == null) return false;
 		return this.metaData.getDbSettings().supportsQueryTimeout();
 	}
-	
+
 	/**
 	 * @return The profile associated with this connection
 	 */
@@ -214,45 +213,43 @@ public class WbConnection
 		String sql = profile.getPreDisconnectScript();
 		runConnectScript(sql, "disconnect");
 	}
-	
+
 	void runPostConnectScript()
 	{
 		if (this.profile == null) return;
 		if (this.sqlConnection == null) return;
 		String sql = profile.getPostConnectScript();
 		runConnectScript(sql, "connect");
-	}	
-	
+	}
+
 	private void runConnectScript(String sql, String type)
 	{
 		if (StringUtil.isBlank(sql)) return;
 		LogMgr.logInfo("WbConnection.runConnectScript()", "Executing " + type + " script...");
-		
+
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(this);
 		runner.setReturnOnlyErrorMessages(true);
-		
+
 		ScriptParser p = new ScriptParser(sql);
 		p.setAlternateLineComment(this.getDbSettings().getLineComment());
-		Iterator itr = p.getIterator();
-		String command = null;
 
-		// The statemenRunner will call clearMessages() when statementDone() 
-		// is called which in turn will call clearWarnings() on this instances.
+
+		// The statemenRunner will call clearMessages() when statementDone()
+		// is called which in turn will call clearWarnings() on this instance.
 		// This will also clear the scriptError and thus all messages
-		// that are collected here. So I have to store the messages locally 
+		// that are collected here. So I have to store the messages locally
 		// and cannot use the scriptError variable directly
 		StringBuilder messages = new StringBuilder(150);
 		String resKey = "MsgConnScript" + type;
-		
+
+		String command = null;
 		try
 		{
-			while (itr.hasNext())
+			while ((command = p.getNextCommand()) != null)
 			{
-				command = p.getNextCommand();
-				if (p == null) continue;
 				String stmtSql = StringUtil.getMaxSubstring(SqlUtil.makeCleanSql(command, false),250);
-				
+
 				try
 				{
 					runner.runStatement(command);
@@ -288,7 +285,7 @@ public class WbConnection
 		}
 		this.scriptError = messages;
 	}
-	
+
 	void setSqlConnection(Connection aConn)
 		throws SQLException
 	{
@@ -301,7 +298,7 @@ public class WbConnection
 	/**
 	 * Return any warnings that are stored in the underlying SQL Connection.
 	 * The warnings are then cleared from the connection object.
-	 * 
+	 *
 	 * @see #clearWarnings()
 	 * @return any warnings reported from the server, null if no warnings are available.
 	 */
@@ -309,9 +306,9 @@ public class WbConnection
 	{
 		try
 		{
-			
+
 			SQLWarning warn = this.getSqlConnection().getWarnings();
-			if (warn == null) 
+			if (warn == null)
 			{
 				if (this.scriptError != null)
 				{
@@ -321,7 +318,7 @@ public class WbConnection
 				}
 				return null;
 			}
-			
+
 			StringBuilder msg = new StringBuilder(200);
 			if (!StringUtil.isEmptyString(this.scriptError)) msg.append(this.scriptError);
 
@@ -363,13 +360,14 @@ public class WbConnection
 			{
 				// obviously the Oracle driver does NOT clear the warnings
 				// (as discovered when looking at the source code)
+				// this is not true for newer drivers (10.x)
+				
 				// luckily the instance variable on the driver which holds the
 				// warnings is defined as public and thus we can
 				// reset the warnings "manually"
 				// This is done via reflection so that the Oracle driver
 				// does not need to be present when compiling
-				// this is not true for newer drivers (10.x) 
-				
+
 				if (this.clearSettings == null || dbAccess == null)
 				{
 					Class ora = this.sqlConnection.getClass();
@@ -437,7 +435,7 @@ public class WbConnection
 			LogMgr.logError("WbConnection.rollback(Savepoint)", "Error releasing savepoint", e);
 		}
 	}
-	
+
 	/**
 	 * A non-exception throwing wrapper around Connection.releaseSavepoint(Savepoint)
 	 */
@@ -456,7 +454,7 @@ public class WbConnection
 			LogMgr.logError("WbConnection.releaseSavepoint", "Error releasing savepoint", e);
 		}
 	}
-	
+
 	/**
 	 * Execute a rollback on the connection.
 	 */
@@ -490,7 +488,7 @@ public class WbConnection
 			LogMgr.logWarning("WbConnection.toggleAutoCommit()", "Error when switching autocommit to " + !flag, e);
 		}
 	}
-	
+
 	public void setAutoCommit(boolean flag)
 		throws SQLException
 	{
@@ -503,7 +501,7 @@ public class WbConnection
 	}
 
 	/**
-	 * Some DBMS (e.g. MySQL) seem to start a new transaction in default 
+	 * Some DBMS (e.g. MySQL) seem to start a new transaction in default
 	 * isolation mode. Which means that if the SELECT is not committed,
 	 * no changes will be visible until a commit is issued.
 	 * In the DbExplorer this is a problem, as the user has no way
@@ -511,7 +509,7 @@ public class WbConnection
 	 * uses a separate connection.
 	 * The {@link workbench.gui.dbobjects.TableDataPanel} will issue
 	 * a commit after retrieving the data if this method returns true.
-	 * 
+	 *
 	 * @see workbench.gui.dbobjects.TableDataPanel#doRetrieve(boolean)
 	 * @see workbench.gui.dbobjects.TableDataPanel#showRowCount()
 	 */
@@ -521,7 +519,7 @@ public class WbConnection
 		boolean flag = Settings.getInstance().getBoolProperty(key, false);
 		return flag;
 	}
-	
+
 	public boolean getAutoCommit()
 	{
 		if (this.sqlConnection == null) return false;
@@ -561,7 +559,7 @@ public class WbConnection
 	 * package (basically for the shutdown hooks)
 	 *
 	 * This will <b>not</b> notify the ConnectionMgr that this connection has been closed.
-	 * 
+	 *
 	 */
 	public void shutdown()
 	{
@@ -570,7 +568,7 @@ public class WbConnection
 			this.keepAlive.shutdown();
 			this.keepAlive = null;
 		}
-		
+
 		if (this.preparedStatementPool != null)
 		{
 			this.preparedStatementPool.done();
@@ -613,7 +611,7 @@ public class WbConnection
 		{
 			this.sqlConnection = null;
 		}
-		
+
 		LogMgr.logDebug("WbConnection.close()", "Connection " + this.getId() + " closed.");
 
 		if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
@@ -631,11 +629,11 @@ public class WbConnection
 	/**
 	 * Create a statement that produces ResultSets that
 	 * are read only and forward only (for performance reasons)
-	 * 
+	 *
 	 * If the profile defined a default fetch size, this
 	 * will be set as well.
-	 * 
-	 * @throws java.sql.SQLException 
+	 *
+	 * @throws java.sql.SQLException
   */
 	public Statement createStatementForQuery()
 		throws SQLException
@@ -649,7 +647,7 @@ public class WbConnection
 		{
 			stmt = this.sqlConnection.createStatement();
 		}
-		
+
 		try
 		{
 			if (this.getProfile() != null)
@@ -694,7 +692,7 @@ public class WbConnection
 	{
 		return this.metaData.getDbSettings();
 	}
-	
+
 	public DbMetadata getMetadata()
 	{
 		return this.metaData;
@@ -716,10 +714,10 @@ public class WbConnection
 	{
 		return getId() + ", " + getCurrentUser() + "@" + getUrl();
 	}
-	
+
 	/**
-	 * Return a readable display of a connection. 
-	 * This might actually send a SELECT to the database to 
+	 * Return a readable display of a connection.
+	 * This might actually send a SELECT to the database to
 	 * retrieve the current user or schema.
 	 * @see #getCurrentUser()
 	 * @see DbMetadata#getSchemaToUse()
@@ -792,7 +790,7 @@ public class WbConnection
 			return "n/a";
 		}
 	}
-	
+
 	public String getDatabaseProductName()
 	{
 		return this.metaData.getProductName();
@@ -807,7 +805,7 @@ public class WbConnection
 	{
 		return this.id.hashCode();
 	}
-	
+
 	public boolean equals(Object o)
 	{
 		if (o instanceof WbConnection)
@@ -831,7 +829,7 @@ public class WbConnection
 			return "n/a";
 		}
 	}
-	
+
 	/**
 	 *	Returns information about the DBMS and the JDBC driver
 	 *	in the XML format used for the XML export
@@ -864,7 +862,7 @@ public class WbConnection
 		tagWriter.appendTag(dbInfo, indent, "connection", this.getDisplayString());
 		tagWriter.appendTag(dbInfo, indent, "schema", getCurrentSchema());
 		tagWriter.appendTag(dbInfo, indent, "catalog", metaData.getCurrentCatalog());
-		
+
 		try { value = db.getDatabaseProductName(); } catch (Throwable th) { value = "n/a"; }
 		tagWriter.appendTag(dbInfo, indent, "database-product-name", cleanValue(value));
 
@@ -910,8 +908,8 @@ public class WbConnection
 	}
 
 	/**
-	 * Checks if DDL statement need a commit for this connection. 
-	 * 
+	 * Checks if DDL statement need a commit for this connection.
+	 *
 	 * @return false if autocommit is on or the DBMS does not support DDL transactions
 	 * @see #getDDLNeedsCommit()
 	 */
@@ -920,8 +918,8 @@ public class WbConnection
 		if (this.getAutoCommit()) return false;
 		return this.getDDLNeedsCommit();
 	}
-	
-	
+
+
 	public synchronized void addChangeListener(PropertyChangeListener l)
 	{
 		if (this.listeners == null) this.listeners = new ArrayList<PropertyChangeListener>();
@@ -952,7 +950,7 @@ public class WbConnection
 	{
 		return currentCatalog;
 	}
-	
+
 	public void catalogChanged(String oldCatalog, String newCatalog)
 	{
 		this.currentCatalog = newCatalog;
@@ -967,12 +965,12 @@ public class WbConnection
 
 	private void initKeepAlive()
 	{
-		if (this.keepAlive != null) 
+		if (this.keepAlive != null)
 		{
 			this.keepAlive.shutdown();
 			this.keepAlive = null;
 		}
-		
+
 		if (this.profile == null) return;
 		String sql = this.profile.getIdleScript();
 		if (StringUtil.isBlank(sql)) return;
@@ -981,12 +979,12 @@ public class WbConnection
 		this.keepAlive = new KeepAliveDaemon(idleTime, this, sql);
 		this.keepAlive.startThread();
 	}
-	
+
 	public boolean isBusy()
 	{
 		return this.busy;
 	}
-	
+
 	public void setBusy(boolean flag)
 	{
 		this.busy = flag;
@@ -995,7 +993,7 @@ public class WbConnection
 			this.keepAlive.setLastDbAction(System.currentTimeMillis());
 		}
 	}
-	
+
 	public void executionStart(WbConnection conn, Object source)
 	{
 		if (conn == this)
@@ -1013,5 +1011,5 @@ public class WbConnection
 		{
 			setBusy(false);
 		}
-	}	
+	}
 }

@@ -535,39 +535,13 @@ public class BatchRunner
 		}
 	}
 
-	private boolean executeScript(WbFile scriptFile)
-		throws IOException
+	private ScriptParser createParser()
 	{
 		ScriptParser parser = new ScriptParser();
-		parser.setFile(scriptFile, this.encoding);
-		return executeScript(parser);
-	}
-
-	/**
-	 * Execute the given script
-	 * @param script
-	 * @return true if an error occurred
-	 * @throws IOException
-	 */
-	public boolean executeScript(String script)
-		throws IOException
-	{
-		ScriptParser parser = new ScriptParser();
-		parser.setScript(script);
-		return executeScript(parser);
-	}
-
-	private boolean executeScript(ScriptParser parser)
-		throws IOException
-	{
-		boolean error = false;
-		DelimiterDefinition altDelim = null;
-		errors = null;
-
 		// If no delimiter has been defined, than use the default fallback
 		if (this.delimiter == null)
 		{
-			altDelim = Settings.getInstance().getAlternateDelimiter(this.connection);
+			DelimiterDefinition altDelim = Settings.getInstance().getAlternateDelimiter(this.connection);
 			parser.setDelimiters(DelimiterDefinition.STANDARD_DELIMITER, altDelim);
 		}
 		else
@@ -589,8 +563,36 @@ public class BatchRunner
 		}
 
 		parser.setCheckEscapedQuotes(this.checkEscapedQuotes);
+		return parser;
+	}
+	private boolean executeScript(WbFile scriptFile)
+		throws IOException
+	{
+		ScriptParser parser = createParser();
+		parser.setFile(scriptFile, this.encoding);
+		return executeScript(parser);
+	}
 
-		String sql = null;
+	/**
+	 * Execute the given script
+	 * @param script
+	 * @return true if an error occurred
+	 * @throws IOException
+	 */
+	public boolean executeScript(String script)
+		throws IOException
+	{
+		ScriptParser parser = createParser();
+		parser.setScript(script);
+		return executeScript(parser);
+	}
+
+	private boolean executeScript(ScriptParser parser)
+		throws IOException
+	{
+		boolean error = false;
+		errors = null;
+
 		this.cancelExecution = false;
 
 		int executedCount = 0;
@@ -619,7 +621,7 @@ public class BatchRunner
 
 		while (parser.hasNext())
 		{
-			sql = parser.getNextCommand();
+			String sql = parser.getNextCommand();
 			if (sql == null) continue;
 
 			try

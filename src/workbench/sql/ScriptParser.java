@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import workbench.log.LogMgr;
@@ -34,7 +33,6 @@ import workbench.util.WbFile;
  * @author  support@sql-workbench.net
  */
 public class ScriptParser
-	implements Iterator
 {
 	private String originalScript = null;
 	private List<ScriptCommandDefinition> commands = null;
@@ -45,7 +43,7 @@ public class ScriptParser
 	private ScriptIterator iteratingParser = null;
 	private boolean emptyLineIsSeparator = false;
 	private boolean supportOracleInclude = true;
-	private boolean checkSingleLineCommands = true;
+	private boolean checkSingleLineCommands;
 	private boolean returnTrailingWhitesapce = false;
 	private String alternateLineComment;
 	private boolean useAlternateDelimiter = false;
@@ -231,11 +229,11 @@ public class ScriptParser
 	 *	If so, GO will be used (MS SQL Server script style)
 	 *	If none of the above is true, ; (semicolon) will be used
 	 */
-	public void setScript(String aScript)
+	public void setScript(String script)
 	{
-		if (aScript == null) throw new NullPointerException("SQL script may not be null");
-		if (aScript.equals(this.originalScript)) return;
-		this.originalScript = aScript;
+		if (script == null) throw new NullPointerException("SQL script may not be null");
+		if (script.equals(this.originalScript)) return;
+		this.originalScript = script;
 		this.findDelimiterToUse();
 		this.commands = null;
 		this.iteratingParser = null;
@@ -393,6 +391,9 @@ public class ScriptParser
 
 	/**
 	 * Return the command at the given index position.
+	 * <br/>
+	 * This will force a complete parsing of the script
+	 * and the script will be loaded into memory!
 	 */
 	public String getCommand(int index, boolean rightTrimCommand)
 	{
@@ -406,6 +407,7 @@ public class ScriptParser
 
 	/**
 	 * Returns the number of statements in this script.
+	 * <br/>
 	 * This will force a complete parsing of the script and the
 	 * script will be loaded into memory!
 	 */
@@ -413,17 +415,6 @@ public class ScriptParser
 	{
 		if (this.commands == null) this.parseCommands();
 		return this.commands.size();
-	}
-
-	/**
-	 * Return an Iterator which allows to iterate over
-	 * the commands from the script. The Iterator
-	 * will return objects of type {@link ScriptCommandDefinition}
-	 */
-	public Iterator getIterator()
-	{
-		startIterator();
-		return this;
 	}
 
 	public void startIterator()
@@ -445,7 +436,6 @@ public class ScriptParser
 		{
 			this.iteratingParser.done();
 		}
-		this.currentIteratorIndex = -42;
 	}
 
 	/**
@@ -471,7 +461,7 @@ public class ScriptParser
 	private ScriptIterator getParserInstance()
 	{
 		ScriptIterator p = null;
-		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", false);
+		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
 
 		if (useOldParser || checkEscapedQuotes || StringUtil.isNonBlank(alternateLineComment) || checkSingleLineCommands)
 		{
@@ -520,6 +510,7 @@ public class ScriptParser
 			index++;
 			this.commands.add(c);
 		}
+		currentIteratorIndex = 0;
 	}
 
 	/**
@@ -527,30 +518,15 @@ public class ScriptParser
 	 */
 	public boolean hasNext()
 	{
-		if (this.currentIteratorIndex == -42) throw new IllegalStateException("Iterator not initialized");
 		if (this.iteratingParser != null)
 		{
 			return this.iteratingParser.hasMoreCommands();
 		}
 		else
 		{
+			if (commands == null) parseCommands();
 			return this.currentIteratorIndex < this.commands.size();
 		}
-	}
-
-	/**
-	 * Return the next SQL command from the script.
-	 * This is delegated to {@link #getNextCommand()}
-	 * @return a String object representing the SQL command
-	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
-	 * @see IteratingScriptParser#getNextCommand()
-	 * @see #getNextCommand()
-	 */
-	public Object next()
-		throws NoSuchElementException
-	{
-		if (this.currentIteratorIndex == -42) throw new NoSuchElementException("Iterator not initialized");
-		return getNextCommand();
 	}
 
 	/**
@@ -563,7 +539,6 @@ public class ScriptParser
 	public String getNextCommand()
 		throws NoSuchElementException
 	{
-		if (this.currentIteratorIndex == -42) throw new NoSuchElementException("Iterator not initialized");
 		ScriptCommandDefinition command = null;
 		String result = null;
 		if (this.iteratingParser != null)
@@ -574,20 +549,12 @@ public class ScriptParser
 		}
 		else
 		{
+			if (commands == null) parseCommands();
 			command = this.commands.get(this.currentIteratorIndex);
 			result = this.originalScript.substring(command.getStartPositionInScript(), command.getEndPositionInScript());
 			this.currentIteratorIndex ++;
 		}
-
 		return result;
-	}
-
-	/**
-	 * Not implemented, as removing commands is not possible.
-	 * A call to this method simply does nothing.
-	 */
-	public void remove()
-	{
 	}
 
 }
