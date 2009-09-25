@@ -585,13 +585,25 @@
 				</row>
 
 				<row>
+					<entry>-type</entry>
+					<entry>
+						<para>Valid values are <literal>sql</literal>, <literal>xml</literal></para>
+            <para>Defines the type of the generated files.</para>
+          </entry>
+        </row>
+				<row>
 					<entry>-encoding</entry>
 					<entry>
+            <para>
 						The encoding to be used for the SQL scripts. The default depends
 						on your operating system. It will be displayed when you run
 						<literal>WbDataDiff</literal> without any parameters. You can overwrite
 						the platform default with the property <literal>workbench.encoding</literal>
 						in the file <literal>workbench.settings</literal>
+            </para>
+            <para>
+              XML files are always stored in UTF-8
+            </para>
 					</entry>
 				</row>
 

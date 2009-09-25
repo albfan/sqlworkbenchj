@@ -191,7 +191,7 @@ public class CommonDiffParameters
 		return mapping;
 	}
 
-	static class TableMapping
+	public static class TableMapping
 	{
 		public List<TableIdentifier> referenceTables = new ArrayList<TableIdentifier>();
 		public List<TableIdentifier> targetTables = new ArrayList<TableIdentifier>();

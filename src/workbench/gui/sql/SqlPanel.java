@@ -2831,7 +2831,7 @@ public class SqlPanel
 				});
 			}
 
-			if (highlightCurrent && !restoreSelection)
+			if (highlightCurrent && !restoreSelection && commandWithError == -1)
 			{
 				int startPos = scriptParser.getStartPosForCommand(endIndex - 1);
 				startPos = scriptParser.findNextLineStart(startPos);

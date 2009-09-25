@@ -4,9 +4,15 @@
 <!-- build number must be set to -1 until a release is built -->
 <release build="-1" date="2009-09-24">
 
-  <entry dev-build="3" type="enh">
+  <entry dev-build="4" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="enh">
+    <description>
+      WbDataDiff can now output the result as XML files. 
     </description>
   </entry>
 
@@ -65,6 +71,14 @@
   <entry dev-build="1" type="enh">
     <description>
       For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
+      When using "Highlight Current statement" and executing the statement
+      at the cursor (Execute Current), the statement was not highlighted
+      when an error occurred.
     </description>
   </entry>
 

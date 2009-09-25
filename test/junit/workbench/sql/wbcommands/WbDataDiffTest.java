@@ -155,10 +155,10 @@ public class WbDataDiffTest
 
 			TestUtil.executeScript(source, "update person set lastname = '<name>' where person_id = 10;commit;");
 			
-			sql = "WbDataDiff -type=xml -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.txt -encoding=UTF8";
+			sql = "WbDataDiff -type=xml -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.xml -encoding=UTF8";
 			runner.runStatement(sql);
 
-			main = new WbFile(util.getBaseDir(), "sync.txt");
+			main = new WbFile(util.getBaseDir(), "sync.xml");
 			assertTrue(main.exists());
 
 			expectedFiles = new String[]
