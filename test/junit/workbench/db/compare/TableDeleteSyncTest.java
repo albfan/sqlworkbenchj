@@ -124,7 +124,7 @@ public class TableDeleteSyncTest
 		{
 			TableDeleteSync sync = new TableDeleteSync(target, source);
 			StringWriter writer = new StringWriter();
-			sync.setOutputWriter(writer, "\n");
+			sync.setOutputWriter(writer, "\n", "UTF-8");
 			sync.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"));
 			sync.doSync();
 			

@@ -103,7 +103,7 @@ public class TableDataDiffTest
 		TableDataDiff diff = new TableDataDiff(source, target);
 		StringWriter updates = new StringWriter(2500);
 		StringWriter inserts = new StringWriter(2500);
-		diff.setOutputWriters(updates, inserts, "\n");
+		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
 		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person_t"));
 		diff.doSync();
 //		System.out.println("----- sync script start \n" + output.toString() + "----- sync script end");
@@ -112,7 +112,7 @@ public class TableDataDiffTest
 		target.commit();
 		updates = new StringWriter(2500);
 		inserts = new StringWriter(2500);
-		diff.setOutputWriters(updates, inserts, "\n");
+		diff.setOutputWriters(updates, inserts, "\n", "UTF-8");
 		diff.doSync();
 //		System.out.println("----- sync script start \n" + output.toString() + "----- sync script end");
 		assertTrue(updates.toString().length() == 0);

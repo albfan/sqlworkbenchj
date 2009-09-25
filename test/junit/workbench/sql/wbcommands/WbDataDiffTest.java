@@ -173,20 +173,40 @@ public class WbDataDiffTest
 				"person_address_$insert.xml"
 			};
 
+			String xml = FileUtil.readCharacters(EncodingUtil.createReader(main, "UTF-8"));
+			String result = TestUtil.getXPathValue(xml, "count(/data-diff/summary/mapping)");
+			assertEquals("3", result);
+
+			xml = FileUtil.readCharacters(EncodingUtil.createReader(new WbFile(util.getBaseDir(), "person_$update.xml"), "UTF-8"));
+			result = TestUtil.getXPathValue(xml, "count(/table-data-diff/update)");
+			assertEquals("2", result);
+
+			result = TestUtil.getXPathValue(xml, "/table-data-diff[@name='PERSON']/update[1]/col[2]/text()");
+			assertEquals("last2", result);
+
+			result = TestUtil.getXPathValue(xml, "/table-data-diff[@name='PERSON']/update[2]/col[2]/text()");
+			assertEquals("last17", result);
+
+			xml = FileUtil.readCharacters(EncodingUtil.createReader(new WbFile(util.getBaseDir(), "person_$insert.xml"), "UTF-8"));
+			result = TestUtil.getXPathValue(xml, "count(/table-data-diff/insert)");
+			assertEquals("2", result);
+
+			result = TestUtil.getXPathValue(xml, "/table-data-diff[@name='PERSON']/insert[1]/col[@name='LASTNAME']/text()");
+			assertEquals("<name>", result);
+
 			for (String fname : expectedFiles)
 			{
 				WbFile f = new WbFile(util.getBaseDir(), fname);
-				assertTrue(f.exists());
-//				if (!f.delete())
-//				{
-//					fail("Could not delete " + f.getFullPath());
-//				}
+				if (!f.delete())
+				{
+					fail("Could not delete " + f.getFullPath());
+				}
 			}
 
-//			if (!main.delete())
-//			{
-//				fail("Could not delete " + main.getFullPath());
-//			}
+			if (!main.delete())
+			{
+				fail("Could not delete " + main.getFullPath());
+			}
 
 		}
 		finally

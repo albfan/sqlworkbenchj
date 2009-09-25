@@ -55,14 +55,14 @@ public class RunningJobIndicator
 	public synchronized void jobStarted()
 	{
 		runningJobs ++;
-		LogMgr.logDebug("RunningJobIndicator.jobStarted()", "New runcount = " + runningJobs);
+//		LogMgr.logDebug("RunningJobIndicator.jobStarted()", "New runcount = " + runningJobs);
 		updateTitle();
 	}
 	
 	public synchronized void jobEnded()
 	{
 		if (runningJobs > 0) runningJobs --;
-		LogMgr.logDebug("RunningJobIndicator.jobEnded()", "New runcount = " + runningJobs);
+//		LogMgr.logDebug("RunningJobIndicator.jobEnded()", "New runcount = " + runningJobs);
 		updateTitle();
 	}
 
