@@ -82,10 +82,10 @@ public class XmlRowDataConverter
 		useDiffFormat = flag;
 		if (flag)
 		{
-			coltag = "column";
+			coltag = "col";
 			rowtag = "row";
-			startColTag = "<column";
-			closeColTag = "</column>";
+			startColTag = "<col";
+			closeColTag = "</col>";
 			closeRowTag = "</row>";
 		}
 		else
@@ -125,8 +125,11 @@ public class XmlRowDataConverter
 		// it retrieves user and schema information from the database
 		// This method is called during initialization of the DataExporter
 		// and before the actual export is started.
-		StrBuffer indent = new StrBuffer("    ");
-		this.dbInfo = con.getDatabaseInfoAsXml(indent);
+		if (con != null)
+		{
+			StrBuffer indent = new StrBuffer("    ");
+			this.dbInfo = con.getDatabaseInfoAsXml(indent);
+		}
 	}
 
 	public void setXMLVersion(String version)
@@ -236,14 +239,14 @@ public class XmlRowDataConverter
 				xml.append('"');
 			}
 			
-			if (useDiffFormat && metaData.getColumn(c).isPkColumn())
-			{
-				xml.append(" pk=\"true\"");
-			}
-			
 			if (addColName || useDiffFormat)
 			{
 				xml.append(" name=\"" + metaData.getColumnName(c) + "\"");
+			}
+
+			if (useDiffFormat && metaData.getColumn(c).isPkColumn())
+			{
+				xml.append(" pk=\"true\"");
 			}
 			
 			if (isNull)

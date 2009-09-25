@@ -68,6 +68,7 @@ public class WbExport
 	public static final String ARG_ROWNUM = "rowNumberColumn";
 	public static final String ARG_EMPTY_RESULTS = "writeEmptyResults";
 	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
+	public static final String ARG_USE_CDATA = "useCDATA";
 	private String exportTypes = null;
 	
 	public WbExport()
@@ -112,7 +113,7 @@ public class WbExport
 		cmdLine.addArgument("postDataHtml");
 		cmdLine.addArgument("sourceTable", ArgumentType.TableArgument);
 		cmdLine.addArgument("outputDir");
-		cmdLine.addArgument("useCDATA", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_USE_CDATA, ArgumentType.BoolArgument);
 		cmdLine.addArgument("escapeText", StringUtil.stringToList("control,7bit,8bit,extended,none"));
 		cmdLine.addArgument("escapeType", StringUtil.stringToList("unicode,hex"));
 		cmdLine.addArgument("quoteAlways", ArgumentType.BoolArgument);
@@ -389,7 +390,7 @@ public class WbExport
 					result.addMessage(msg);
 				}
 			}
-			this.exporter.setUseCDATA(cmdLine.getBoolean("usecdata"));
+			this.exporter.setUseCDATA(cmdLine.getBoolean(ARG_USE_CDATA));
 			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".xml";
 			if (encoding == null)

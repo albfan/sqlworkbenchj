@@ -151,6 +151,9 @@ public class WbDataDiffTest
 			{
 				fail("Could not delete " + main.getFullPath());
 			}
+
+
+			TestUtil.executeScript(source, "update person set lastname = '<name>' where person_id = 10;commit;");
 			
 			sql = "WbDataDiff -type=xml -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.txt -encoding=UTF8";
 			runner.runStatement(sql);

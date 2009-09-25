@@ -134,18 +134,18 @@ public class RowDataComparerTest
 		target.resetStatus();
 
 		RowDataComparer instance = new RowDataComparer();
-		instance.setTypeXml();
+		instance.setTypeXml(false);
 		instance.setRows(reference, target);
 		instance.setConnection(null);
 		instance.setResultInfo(info);
 
 		String xml = instance.getMigration(1);
-		System.out.println(xml);
+//		System.out.println(xml);
 		assertTrue(xml.startsWith("<update>"));
 
 		instance.setRows(reference, null);
 		xml = instance.getMigration(1);
-		System.out.println(xml);
+//		System.out.println(xml);
 		assertTrue(xml.startsWith("<insert>"));
 
 		reference = new RowData(info);

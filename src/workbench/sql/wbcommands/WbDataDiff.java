@@ -71,6 +71,7 @@ public class WbDataDiff
 		cmdLine.addArgument(PARAM_IGNORE_COLS);
 		cmdLine.addArgument(PARAM_OUTPUT_TYPE, CollectionUtil.arrayList("sql", "xml"));
 		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, BlobMode.getTypes());
+		cmdLine.addArgument(WbExport.ARG_USE_CDATA, ArgumentType.BoolArgument);
 
 		CommonArgs.addCheckDepsParameter(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
@@ -186,6 +187,7 @@ public class WbDataDiff
 		boolean includeDelete = cmdLine.getBoolean(PARAM_INCLUDE_DELETE, true);
 		boolean checkDependencies = cmdLine.getBoolean(CommonArgs.ARG_CHECK_FK_DEPS, true);
 		String nl = Settings.getInstance().getExternalEditorLineEnding();
+		boolean useCDATA = cmdLine.getBoolean(WbExport.ARG_USE_CDATA, false);
 
 		CommonDiffParameters.TableMapping mapping = params.getTables(sourceCon, targetCon);
 		int tableCount = mapping.referenceTables.size();
@@ -197,7 +199,7 @@ public class WbDataDiff
 		xmlOutput = false;
 		if ("xml".equalsIgnoreCase(outputType))
 		{
-			dataDiff.setTypeXml();
+			dataDiff.setTypeXml(useCDATA);
 			xmlOutput = true;
 		}
 		else if ("sql".equalsIgnoreCase(outputType))
@@ -211,6 +213,7 @@ public class WbDataDiff
 			return result;
 		}
 
+		
 		String blobtype = cmdLine.getValue(WbExport.ARG_BLOB_TYPE);
 		if (StringUtil.isNonBlank(blobtype))
 		{
@@ -266,7 +269,7 @@ public class WbDataDiff
 						deleteSync.setOutputWriter(deleteOut, nl);
 						if ("xml".equalsIgnoreCase(outputType))
 						{
-							deleteSync.setTypeXml();
+							deleteSync.setTypeXml(useCDATA);
 						}
 						else if ("sql".equalsIgnoreCase(outputType))
 						{

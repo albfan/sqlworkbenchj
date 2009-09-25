@@ -93,13 +93,13 @@ public class RowDataComparer
 		return xmlConverter != null;
 	}
 	
-	public void setTypeXml()
+	public void setTypeXml(boolean useCDATA)
 	{
 		xmlConverter = new XmlRowDataConverter();
 		xmlConverter.setUseVerboseFormat(false);
 		xmlConverter.setUseDiffFormat(true);
 		xmlConverter.setWriteClobToFile(false);
-		xmlConverter.setUseCDATA(false);
+		xmlConverter.setUseCDATA(useCDATA);
 		xmlConverter.setOriginalConnection(targetDb);
 		if (resultInfo != null) xmlConverter.setResultInfo(resultInfo);
 		sqlConverter = null;
