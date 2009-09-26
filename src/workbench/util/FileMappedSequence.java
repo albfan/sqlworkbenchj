@@ -63,7 +63,7 @@ public class FileMappedSequence
 	public FileMappedSequence(File f, String characterSet)
 		throws IOException
 	{
-		this(f, characterSet, 128 * 1024);
+		this(f, characterSet, 512 * 1024);
 	}
 	
 	public FileMappedSequence(File f, String characterSet, int size)

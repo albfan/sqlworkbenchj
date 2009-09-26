@@ -21,7 +21,7 @@ import workbench.util.SqlUtil;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableDataDiffTest
 	extends TestCase

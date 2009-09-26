@@ -122,7 +122,6 @@ public class SQLToken
 
 	private final int ID;
 	private String contents;
-	private int lineNumber;
 	private int charBegin;
 	private int charEnd;
 	private int state;
@@ -138,9 +137,9 @@ public class SQLToken
 	 * @param charBegin the offset into the input in characters at which this token started
 	 * @param charEnd the offset into the input in characters at which this token ended
 	 */
-	public SQLToken(int ID, String contents, int lineNumber, int charBegin, int charEnd)
+	public SQLToken(int ID, String contents, int charBegin, int charEnd)
 	{
-		this(ID, contents, lineNumber, charBegin, charEnd, UNDEFINED_STATE);
+		this(ID, contents, charBegin, charEnd, UNDEFINED_STATE);
 	}
 
 	/**
@@ -154,12 +153,10 @@ public class SQLToken
 	 * @param charEnd the offset into the input in characters at which this token ended
 	 * @param state the state the tokenizer is in after returning this token.
 	 */
-	public SQLToken(int ID, String text, int lineNumber, int charBegin, int charEnd, int state)
+	public SQLToken(int ID, String text, int charBegin, int charEnd, int state)
 	{
-		super();
 		this.ID = ID;
 		this.contents = text;
-		this.lineNumber = lineNumber;
 		this.charBegin = charBegin;
 		this.charEnd = charEnd;
 		this.state = state;
@@ -222,16 +219,6 @@ public class SQLToken
 		{
 			return this.contents;
 		}
-	}
-
-	/**
-	 * get the line number of the input on which this token started
-	 *
-	 * @return the line number of the input on which this token started
-	 */
-	public int getLineNumber()
-	{
-		return lineNumber;
 	}
 
 	/**
@@ -411,7 +398,7 @@ public class SQLToken
 	{
 		return ID == ERROR_UNCLOSED_STRING;
 	}
-	
+
 	/**
 	 * get a String that explains the error, if this token is an error.
 	 *
@@ -422,7 +409,7 @@ public class SQLToken
 		String s;
 		if (isError())
 		{
-			s = "Error on line " + lineNumber + ": ";
+			s = "Error at position " + charBegin + ": ";
 			switch (ID)
 			{
 				case ERROR:
@@ -459,8 +446,7 @@ public class SQLToken
 	 */
 	public String toString()
 	{
-		return ("Token #" + Integer.toHexString(ID) + ": " + getDescription() + " Line " +
-		lineNumber + " from " +charBegin + " to " + charEnd + " : " + contents);
+		return "Token #" + Integer.toHexString(ID) + ": " + getDescription() + " from " +charBegin + " to " + charEnd + " : " + contents;
 	}
 
 }

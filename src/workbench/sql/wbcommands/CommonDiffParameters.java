@@ -29,7 +29,7 @@ import workbench.util.StringUtil;
 /**
  * Arguments for diff-ing data that are used by several commands.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class CommonDiffParameters 
 {

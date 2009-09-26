@@ -30,7 +30,7 @@ import java.io.Writer;
  * For this, methods to write to a Stream and a Writer are provided that
  * write out the internal char array directly.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  * @see    java.lang.StringBuilder
  */
 public class StrBuffer
@@ -84,6 +84,16 @@ public class StrBuffer
 			this.charData = new char[source.length()];
 			this.append(source);
 		}
+	}
+
+	/**
+	 * Reset the length of this StrBuffer.
+	 * The internal array is not trimmed or changed, so this
+	 * is very efficient when the StrBuffer is re-used
+	 */
+	public void reset()
+	{
+		numchar = 0;
 	}
 	
 	/**

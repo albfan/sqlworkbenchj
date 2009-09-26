@@ -58,7 +58,7 @@ import workbench.util.WbFile;
  * @see workbench.console.SQLConsole
  * @see workbench.sql.wbcommands.WbInclude
  *
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class BatchRunner
 	implements PropertyChangeListener
@@ -901,7 +901,6 @@ public class BatchRunner
 			result.setName(CMD_LINE_PROFILE_NAME);
 			result.setDriverclass(driverclass);
 			result.setDriverName(null);
-			result.setUseSeparateConnectionPerTab(false);
 			result.setStoreExplorerSchema(false);
 			result.setUrl(url);
 			result.setUsername(user);

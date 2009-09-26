@@ -28,7 +28,7 @@ public class StringUtil
 {
 	public static final String REGEX_CRLF = "((\r\n)|(\n\r)|\r|\n)";
 	public static final Pattern PATTERN_CRLF = Pattern.compile(REGEX_CRLF);
-	public static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n|\n\r|\r)");
+	public static final Pattern PATTERN_NON_LF = Pattern.compile("(\r\n)|(\n\r)|(\r)");
 
 	public static final String LINE_TERMINATOR = System.getProperty("line.separator");
 	public static final String EMPTY_STRING = "";
@@ -130,6 +130,8 @@ public class StringUtil
 		if (text == null) return false;
 		
 		int textLength = text.length();
+		int len = compareTo.length();
+		if (len == 0) return false;
 
 		// skip whitespace at the beginning
 		int pos = findFirstNonWhitespace(text, lineStartPos);
@@ -138,12 +140,17 @@ public class StringUtil
 			lineStartPos = pos;
 		}
 
-		int len = compareTo.length();
-
-		if (lineStartPos + len > textLength) return false;
-
-		CharSequence part = text.subSequence(lineStartPos, lineStartPos + len);
-		return part.equals(compareTo);
+		for (int i=0; i < len; i++)
+		{
+			char thisChar = 0;
+			char otherChar = compareTo.charAt(i);
+			if (lineStartPos + i < textLength)
+			{
+				thisChar = text.charAt(lineStartPos + i);
+			}
+			if (thisChar != otherChar) return false;
+		}
+		return true;
 	}
 
 	/**
@@ -482,7 +489,6 @@ public class StringUtil
 
 	public static final int findFirstNonWhitespace(final CharSequence line, int startPos)
 	{
-		if (line == null) return -1;
 		int pos = startPos;
 		int len = line.length();
 		if (len == 0) return -1;

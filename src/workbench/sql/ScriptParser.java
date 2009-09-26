@@ -30,7 +30,7 @@ import workbench.util.WbFile;
  * in the script. The actual parsing is done by using an instance
  * of {@link IteratingScriptParser}
  *
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class ScriptParser
 {
@@ -461,7 +461,7 @@ public class ScriptParser
 	private ScriptIterator getParserInstance()
 	{
 		ScriptIterator p = null;
-		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
+		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", false);
 
 		if (useOldParser || checkEscapedQuotes || StringUtil.isNonBlank(alternateLineComment) || checkSingleLineCommands)
 		{

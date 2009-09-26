@@ -195,7 +195,7 @@ public class LexerBasedParserTest
 		p.setScript(sql);
 		ScriptCommandDefinition cmd = p.getNextCommand();
 		assertNotNull(cmd);
-		System.out.println("*** start: " + cmd.getWhitespaceStart());
+//		System.out.println("*** start: " + cmd.getWhitespaceStart());
 	}
 
 	public void testEmptyLineDelimiter()

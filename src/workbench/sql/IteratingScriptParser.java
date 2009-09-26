@@ -249,6 +249,8 @@ public class IteratingScriptParser
 		return start;
 	}
 
+	private Pattern lineComment = Pattern.compile("^\\s*(--){1}.*");
+	
 	private boolean isLineComment(int pos)
 	{
 		return StringUtil.lineStartsWith(this.script, pos, "--") || StringUtil.lineStartsWith(this.script, pos, alternateLineComment);

@@ -23,7 +23,7 @@ import workbench.util.SqlUtil;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableDeleteSyncTest
 	extends TestCase

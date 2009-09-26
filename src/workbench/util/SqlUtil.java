@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.io.IOException;
 import java.io.StringReader;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -48,6 +49,7 @@ public class SqlUtil
 {
 	private static final Pattern SQL_IDENTIFIER = Pattern.compile("[a-zA-Z_][\\w\\$#@]*");
 
+	private static final SQLLexer LEXER_INSTANCE = new SQLLexer("");
 
 	private static class JoinKeywordsHolder
 	{
@@ -95,6 +97,11 @@ public class SqlUtil
 		return value.replace("'" ,"''");
 	}
 
+	private static void resetLexerInstance(String sql)
+		throws IOException
+	{
+		LEXER_INSTANCE.reset(new StringReader(sql),0,0);
+	}
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
@@ -105,11 +112,14 @@ public class SqlUtil
 		String result = "";
 		try
 		{
-			SQLLexer l = new SQLLexer(sql);
-			SQLToken t = l.getNextToken(false, false);
-			int pos = -1;
-			if (t != null) pos = t.getCharEnd();
-			if (pos > -1) result = sql.substring(pos).trim();
+			synchronized (LEXER_INSTANCE)
+			{
+				resetLexerInstance(sql);
+				SQLToken t = LEXER_INSTANCE.getNextToken(false, false);
+				int pos = -1;
+				if (t != null) pos = t.getCharEnd();
+				if (pos > -1) result = sql.substring(pos).trim();
+			}
 		}
 		catch (Exception e)
 		{
@@ -327,7 +337,6 @@ public class SqlUtil
 		return sql;
 	}
 
-	private static final SQLLexer verbLexer = new SQLLexer("");
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
 	 */
@@ -335,13 +344,14 @@ public class SqlUtil
 	{
 		if (StringUtil.isEmptyString(sql)) return "";
 
-		//SQLLexer l = new SQLLexer(sql);
-		synchronized (verbLexer)
+		synchronized (LEXER_INSTANCE)
 		{
 			try
 			{
-				verbLexer.reset(new StringReader(sql),0,0,0);
-				SQLToken t = verbLexer.getNextToken(false, false);
+				// Re-using an instance of SQLLexer is a lot faster than
+				// creating a new one for each call of getSqlVerb
+				resetLexerInstance(sql);
+				SQLToken t = LEXER_INSTANCE.getNextToken(false, false);
 				if (t == null) return "";
 
 				// The SQLLexer does not recognize @ as a keyword (which is basically
@@ -556,7 +566,7 @@ public class SqlUtil
 	 */
 	public static List<String> getTables(String sql, boolean includeAlias)
 	{
-		String from = SqlUtil.getFromPart(sql);
+		String from = getFromPart(sql);
 		if (StringUtil.isBlank(from)) return Collections.emptyList();
 		List<String> result = new LinkedList<String>();
 		try

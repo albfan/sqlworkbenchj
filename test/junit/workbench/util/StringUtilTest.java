@@ -359,7 +359,19 @@ public class StringUtilTest
 	{
 		String line = "line1\r\nline2";
 		String newline = StringUtil.makePlainLinefeed(line);
-		assertEquals("No LF", "line1\nline2", newline);
+		assertEquals("line1\nline2", newline);
+
+		line = "line1\nline2";
+		newline = StringUtil.makePlainLinefeed(line);
+		assertEquals("Wrong replacement", "line1\nline2", newline);
+
+		line = "line1\rline2";
+		newline = StringUtil.makePlainLinefeed(line);
+		assertEquals("line1\nline2", newline);
+
+		line = "line1\n\rline2";
+		newline = StringUtil.makePlainLinefeed(line);
+		assertEquals("line1\nline2", newline);
 	}
 
 	public void testTrimStringBuilder()

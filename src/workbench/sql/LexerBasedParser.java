@@ -45,7 +45,7 @@ public class LexerBasedParser
 	private boolean calledOnce;
 	
 	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
-	private static Pattern LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
+	private static Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
 
 	public LexerBasedParser()
 	{
@@ -97,7 +97,7 @@ public class LexerBasedParser
 		String delimiterString = delimiter.getDelimiter();
 		try
 		{
-			StringBuilder sql = new StringBuilder(150);
+			StringBuilder sql = new StringBuilder(250);
 
 			int previousEnd = -1;
 			
@@ -198,7 +198,7 @@ public class LexerBasedParser
 
 	static boolean isLineBreak(String text)
 	{
-		return LINE_BREAK.matcher(text).matches();
+		return SIMPLE_LINE_BREAK.matcher(text).matches();
 	}
 	
 	static boolean isMultiLine(String text)
@@ -214,11 +214,7 @@ public class LexerBasedParser
 			return new ScriptCommandDefinition(toStore, start, end);
 		}
 
-		int i = 0;
-		while (i < sql.length() && Character.isWhitespace(sql.charAt(i)))
-		{
-			i ++;
-		}
+		int i = StringUtil.findFirstNonWhitespace(sql);
 		ScriptCommandDefinition cmd = new ScriptCommandDefinition(sql.substring(i), start + i, end);
 		cmd.setWhitespaceStart(start);
 		return cmd;

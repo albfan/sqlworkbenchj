@@ -24,9 +24,10 @@ import workbench.util.LobFileStatement;
 /**
  * Handles DML statements (UPDATE, DELETE, INSERT, TRUNCATE)
  * 
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
-public class UpdatingCommand extends SqlCommand
+public class UpdatingCommand
+	extends SqlCommand
 {
 	public static final SqlCommand UPDATE = new UpdatingCommand("UPDATE");
 	public static final SqlCommand DELETE = new UpdatingCommand("DELETE");

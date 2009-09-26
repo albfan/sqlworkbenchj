@@ -52,7 +52,6 @@ import workbench.util.CharSequenceReader;
 %class SQLLexer
 %function getNextToken
 %type SQLToken
-%line
 %column
 %char
 %unicode
@@ -64,7 +63,6 @@ import workbench.util.CharSequenceReader;
 	private int nextState=YYINITIAL;
 	private StringBuilder commentBuffer = new StringBuilder();
 	private int commentNestCount = 0;
-	private int commentStartLine = 0;
 	private int commentStartChar = 0;
 
 	/**
@@ -115,11 +113,10 @@ import workbench.util.CharSequenceReader;
 	 * @param yycolumn The position (relative to the line) of the first token.
 	 * @throws IOException if an IOExecption occurs while switching readers.
 	 */
-	public void reset(java.io.Reader reader, int yyline, int yychar, int yycolumn)
+	public void reset(java.io.Reader reader, int yychar, int yycolumn)
 		throws IOException
 	{
 		yyreset(reader);
-		this.yyline = yyline;
 		this.yychar = yychar;
 		this.yycolumn = yycolumn;
 	}
@@ -171,7 +168,6 @@ keyword=(
 (PRIMARY{wsp}KEY)|
 (SNAPSHOT{wsp}LOG)|
 (START{wsp}WITH)|
-"ABORT"|
 "ABS"|
 "ABSOLUTE"|
 "ACCESS"|
@@ -184,22 +180,15 @@ keyword=(
 "ALL"|
 "ALLOCATE"|
 "ALTER"|
-"ANALYSE"|
 "ANALYZE"|
 "AND"|
 "ANY"|
-"ARE"|
 "ARRAY"|
 "AS"|
 "ASC"|
-"ASSERTION"|
-"ASSIGNMENT"|
-"ASYMMETRIC"|
 "AT"|
-"ATOMIC"|
 "AUTHORIZATION"|
 "AVG"|
-"BACKWARD"|
 "BEFORE"|
 "BEGIN"|
 "BETWEEN"|
@@ -212,7 +201,6 @@ keyword=(
 "BLOB"|
 "BOOLEAN"|
 "BOTH"|
-"BREADTH"|
 "CACHE"|
 "CALL"|
 "CALLED"|
@@ -221,16 +209,9 @@ keyword=(
 "CASCADED"|
 "CASE"|
 "CAST"|
-"CATALOG"|
-"CATALOG_NAME"|
 "CHAR"|
 "CHAR_LENGTH"|
 "CHARACTER"|
-"CHARACTER_LENGTH"|
-"CHARACTER_SET_CATALOG"|
-"CHARACTER_SET_NAME"|
-"CHARACTER_SET_SCHEMA"|
-"CHARACTERISTICS"|
 "CHECK"|
 "CHECKED"|
 "CHECKPOINT"|
@@ -239,30 +220,17 @@ keyword=(
 "CLOSE"|
 "CLUSTER"|
 "COALESCE"|
-"COBOL"|
 "COLLATE"|
 "COLLATION"|
-"COLLATION_CATALOG"|
-"COLLATION_NAME"|
-"COLLATION_SCHEMA"|
 "COLUMN"|
-"COLUMN_NAME"|
-"COMMAND_FUNCTION"|
-"COMMAND_FUNCTION_CODE"|
 "COMMENT"|
 "COMMIT"|
 "COMMITTED"|
 "COMPLETION"|
-"CONDITION_NUMBER"|
 "CONNECT"|
 "CONNECTION"|
-"CONNECTION_NAME"|
 "CONSTRAINT"|
-"CONSTRAINT_CATALOG"|
-"CONSTRAINT_NAME"|
-"CONSTRAINT_SCHEMA"|
 "CONSTRAINTS"|
-"CONSTRUCTOR"|
 "CONTAINS"|
 "CONTINUE"|
 "CONVERT"|
@@ -272,11 +240,8 @@ keyword=(
 "CREATE"|
 "CREATEUSER"|
 "CROSS"|
-"CUBE"|
 "CURRENT"|
 "CURRENT_DATE"|
-"CURRENT_PATH"|
-"CURRENT_ROLE"|
 "CURRENT_TIME"|
 "CURRENT_TIMESTAMP"|
 "CURRENT_USER"|
@@ -286,11 +251,8 @@ keyword=(
 "DATA"|
 "DATABASE"|
 "DATE"|
-"DATETIME_INTERVAL_CODE"|
-"DATETIME_INTERVAL_PRECISION"|
 "DAY"|
 "DEALLOCATE"|
-"DEC"|
 "DECIMAL"|
 "DECLARE"|
 "DEFAULT"|
@@ -302,17 +264,13 @@ keyword=(
 "DELIMITER"|
 "DELIMITERS"|
 "DEPTH"|
-"DEREF"|
 "DENSE_RANK"|
-"DESC"|
 "DESCRIBE"|
 "DESCRIPTOR"|
 "DESTROY"|
 "DESTRUCTOR"|
 "DETERMINISTIC"|
 "DIAGNOSTICS"|
-"DICTIONARY"|
-"DISABLEOUT"|
 "DISCONNECT"|
 "DISPATCH"|
 "DISTINCT"|
@@ -320,18 +278,12 @@ keyword=(
 "DOMAIN"|
 "DOUBLE"|
 "DROP"|
-"DYNAMIC"|
-"DYNAMIC_FUNCTION"|
-"DYNAMIC_FUNCTION_CODE"|
 "EACH"|
 "ELSE"|
 "ELSIF"|
-"ENABLEOUT"|
 "ENCODING"|
 "ENCRYPTED"|
-"END CASE"|
 "END"|
-"END-EXEC"|
 "EQUALS"|
 "ESCAPE"|
 "EVERY"|
@@ -353,19 +305,13 @@ keyword=(
 "FLOAT"|
 "FOR"|
 "FORCE"|
-"FORTRAN"|
 "FORWARD"|
 "FOUND"|
-"FREE"|
-"FREEZE"|
 "FROM"|
 "FUNCTION"|
-"GENERAL"|
-"GENERATED"|
 "GET"|
 "GLOBAL"|
 "GO"|
-"GOTO"|
 "GRANT"|
 "GRANTED"|
 "GROUPING"|
@@ -375,10 +321,8 @@ keyword=(
 "HOLD"|
 "HOST"|
 "HOUR"|
-"IIF"|
 "IDENTITY"|
 "IGNORE"|
-"ILIKE"|
 "IMMEDIATE"|
 "IMPLEMENTATION"|
 "IN"|
@@ -394,7 +338,6 @@ keyword=(
 "INSENSITIVE"|
 "INSERT"|
 "INSTANCE"|
-"INSTANTIABLE"|
 "INSTEAD"|
 "INT"|
 "INT4"|
@@ -411,9 +354,6 @@ keyword=(
 "ITERATE"|
 "JOIN"|
 "KEY"|
-"KEY_MEMBER"|
-"KEY_TYPE"|
-"LANCOMPILER"|
 "LANGUAGE"|
 "LARGE"|
 "LAST"|
@@ -425,13 +365,10 @@ keyword=(
 "LEVEL"|
 "LIKE"|
 "LIMIT"|
-"LISTEN"|
 "LOAD"|
 "LOCAL"|
 "LOCALTIME"|
 "LOCALTIMESTAMP"|
-"LOCATION"|
-"LOCATOR"|
 "LOCK"|
 "LOWER"|
 "MAP"|
@@ -439,9 +376,6 @@ keyword=(
 "MAX"|
 "MAXVALUE"|
 "MERGE"|
-"MESSAGE_LENGTH"|
-"MESSAGE_OCTET_LENGTH"|
-"MESSAGE_TEXT"|
 "METHOD"|
 "MIN"|
 "MINUS"|
@@ -462,14 +396,9 @@ keyword=(
 "NEW"|
 "NEXT"|
 "NO"|
-"NO CYCLE"|
-"NOCREATEDB"|
-"NOCREATEUSER"|
 "NONE"|
 "NOT"|
 "NOTHING"|
-"NOTIFY"|
-"NOTNULL"|
 "NOW"|
 "NULL"|
 "NULLS"|
@@ -479,11 +408,9 @@ keyword=(
 "NUMERIC"|
 "NVARCHAR"|
 "OBJECT"|
-"OCTET_LENGTH"|
 "OF"|
 "OFF"|
 "OFFSET"|
-"OIDS"|
 "OLD"|
 "ON"|
 "ONLY"|
@@ -493,7 +420,6 @@ keyword=(
 "OPTION"|
 "OPTIONS"|
 "OR"|
-"ORDINALITY"|
 "ORGANIZATION"|
 "OUT"|
 "OUTPUT"|
@@ -503,25 +429,14 @@ keyword=(
 "OVERRIDING"|
 "OWNER"|
 "PACKAGE"|
-"PAD"|
 "PARAMETER"|
-"PARAMETER_MODE"|
-"PARAMETER_NAME"|
-"PARAMETER_ORDINAL_POSITION"|
-"PARAMETER_SPECIFIC_CATALOG"|
-"PARAMETER_SPECIFIC_NAME"|
-"PARAMETER_SPECIFIC_SCHEMA"|
 "PARAMETERS"|
 "PARTIAL"|
 "PASSWORD"|
 "PATH"|
-"PENDANT"|
-"PLI"|
 "POSITION"|
-"POSTFIX"|
 "PRECISION"|
 "PREFIX"|
-"PREORDER"|
 "PREPARE"|
 "PRESERVE"|
 "PRIOR"|
@@ -547,9 +462,6 @@ keyword=(
 "RESTRICT"|
 "RESULT"|
 "RETURN"|
-"RETURNED_LENGTH"|
-"RETURNED_OCTET_LENGTH"|
-"RETURNED_SQLSTATE"|
 "RETURNS"|
 "REVOKE"|
 "RIGHT"|
@@ -563,7 +475,6 @@ keyword=(
 "SAVEPOINT"|
 "SCALE"|
 "SCHEMA"|
-"SCHEMA_NAME"|
 "SCOPE"|
 "SCROLL"|
 "SEARCH"|
@@ -574,11 +485,9 @@ keyword=(
 "SENSITIVE"|
 "SEQUENCE"|
 "SERIALIZABLE"|
-"SERVER_NAME"|
 "SESSION"|
 "SESSION_USER"|
 "SET"|
-"SETOF"|
 "SETS"|
 "SHARE"|
 "SHOW"|
@@ -589,12 +498,6 @@ keyword=(
 "SNAPSHOT"|
 "SOURCE"|
 "SPACE"|
-"SQL"|
-"SQLCODE"|
-"SQLERROR"|
-"SQLEXCEPTION"|
-"SQLSTATE"|
-"SQLWARNING"|
 "START"|
 "STATEMENT"|
 "STATIC"|
@@ -604,7 +507,6 @@ keyword=(
 "SUM"|
 "SYMMETRIC"|
 "SYNONYM"|
-"SYSTEM_USER"|
 "SYSTIMESTAMP"|
 "SYSDATE"|
 "TABLE"|
@@ -612,8 +514,6 @@ keyword=(
 "THEN"|
 "TIME"|
 "TIMESTAMP"|
-"TIMEZONE_HOUR"|
-"TIMEZONE_MINUTE"|
 "TO"|
 "TODAY"|
 "TRAILING"|
@@ -625,7 +525,6 @@ keyword=(
 "TRUE"|
 "TRUSTED"|
 "TYPE"|
-"UNLISTEN"|
 "UNION"|
 "UNIQUE"|
 "UNTIL"|
@@ -634,7 +533,6 @@ keyword=(
 "USAGE"|
 "USER"|
 "USING"|
-"VACUUM"|
 "VALID"|
 "VALUES"|
 "VARCHAR"|
@@ -708,7 +606,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.COMMENT_END_OF_LINE;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -718,7 +616,6 @@ commentend=(([\*]*)"/")
     commentBuffer.setLength(0);
     commentBuffer.append(yytext());
     commentNestCount = 1;
-    commentStartLine = yyline;
     commentStartChar = yychar;
     yybegin(nextState);
 }
@@ -743,7 +640,7 @@ commentend=(([\*]*)"/")
     {
         nextState = YYINITIAL;
         lastToken = SQLToken.COMMENT_TRADITIONAL;
-        SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartLine,commentStartChar,commentStartChar+commentBuffer.length(),nextState));
+        SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartChar,commentStartChar+commentBuffer.length(),nextState));
         yybegin(nextState);
         return(t);
     }
@@ -752,7 +649,7 @@ commentend=(([\*]*)"/")
 <COMMENT> <<EOF>> {
     nextState = YYINITIAL;
     lastToken = SQLToken.ERROR_UNCLOSED_COMMENT;
-    SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartLine,commentStartChar,commentStartChar+commentBuffer.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,commentBuffer.toString(),commentStartChar,commentStartChar+commentBuffer.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -761,7 +658,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.RESERVED_WORD;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -770,7 +667,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.WB_VAR;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -779,7 +676,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.SEPARATOR;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -788,7 +685,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.OPERATOR;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -797,7 +694,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.LITERAL_BIT_STRING;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -806,7 +703,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.ERROR_UNCLOSED_BIT_STRING;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -815,7 +712,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.ERROR_BAD_BIT_STRING;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -824,7 +721,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.IDENTIFIER;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -833,7 +730,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.LITERAL_INTEGER;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -842,7 +739,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.LITERAL_STRING;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -852,7 +749,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.ERROR_UNCLOSED_STRING;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -861,7 +758,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.LITERAL_FLOAT;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -870,7 +767,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.WHITE_SPACE;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
@@ -879,7 +776,7 @@ commentend=(([\*]*)"/")
     nextState = YYINITIAL;
     lastToken = SQLToken.ERROR;
     String text = yytext();
-    SQLToken t = (new SQLToken(lastToken,text,yyline,yychar,yychar+text.length(),nextState));
+    SQLToken t = (new SQLToken(lastToken,text,yychar,yychar+text.length(),nextState));
     yybegin(nextState);
     return(t);
 }
