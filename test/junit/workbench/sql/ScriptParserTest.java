@@ -77,6 +77,27 @@ public class ScriptParserTest
 		assertEquals(2, p.getSize());
 	}
 
+	public void testArrayBasedGetNext()
+		throws Exception
+	{
+		String script = "select 1 from bla;\nselect 2 from blub;\n";
+		ScriptParser p = new ScriptParser(script);
+		String sql = null;
+		int count = 0;
+		try
+		{
+			while ((sql = p.getNextCommand()) != null)
+			{
+				count ++;
+			}
+		}
+		catch (Exception e)
+		{
+			fail("Error when iterating over commands");
+		}
+		assertEquals(2, count);
+	}
+	
 	public void testMultiByteEncoding()
 		throws Exception
 	{

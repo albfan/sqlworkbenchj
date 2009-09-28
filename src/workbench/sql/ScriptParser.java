@@ -550,9 +550,12 @@ public class ScriptParser
 		else
 		{
 			if (commands == null) parseCommands();
-			command = this.commands.get(this.currentIteratorIndex);
-			result = this.originalScript.substring(command.getStartPositionInScript(), command.getEndPositionInScript());
-			this.currentIteratorIndex ++;
+			if (currentIteratorIndex < commands.size())
+			{
+				command = this.commands.get(this.currentIteratorIndex);
+				result = this.originalScript.substring(command.getStartPositionInScript(), command.getEndPositionInScript());
+				this.currentIteratorIndex ++;
+			}
 		}
 		return result;
 	}
