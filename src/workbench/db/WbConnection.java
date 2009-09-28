@@ -246,8 +246,10 @@ public class WbConnection
 		String command = null;
 		try
 		{
-			while ((command = p.getNextCommand()) != null)
+			int count = p.getSize();
+			for (int i=0; i < count; i++)
 			{
+				command = p.getCommand(i);
 				String stmtSql = StringUtil.getMaxSubstring(SqlUtil.makeCleanSql(command, false),250);
 
 				try
