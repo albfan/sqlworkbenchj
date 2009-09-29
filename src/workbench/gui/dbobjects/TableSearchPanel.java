@@ -98,7 +98,7 @@ public class TableSearchPanel
 		super();
 		this.tableListSource = source;
 	}
-	
+
 	private void initGui()
 	{
 		if (initialized) return;
@@ -160,6 +160,9 @@ public class TableSearchPanel
 		entryPanel.setBorder(b);
 		initCriteriaPanel();
 		initialized = true;
+
+		restoreSettings();
+
 		if (workspaceSettings != null)
 		{
 			restoreSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
@@ -179,7 +182,7 @@ public class TableSearchPanel
 		clientSearcherCriteria = new ClientSideTableSearchPanel();
 		clientSearcherCriteria.addKeyListenerForCriteria(this);
 	}
-	
+
 	private void showTableSearcherCriteria()
 	{
 		criteriaContainer.removeAll();
@@ -309,7 +312,7 @@ public class TableSearchPanel
 	public void setConnection(WbConnection connection)
 	{
 		this.connection = connection;
-		if (tableNames != null) 
+		if (tableNames != null)
 		{
 			this.tableListSource.addTableListDisplayClient(this.tableNames);
 		}
@@ -334,7 +337,7 @@ public class TableSearchPanel
 	public void reset()
 	{
 		if (!initialized) return;
-		
+
     // resultPanel.removeAll() does not work properly for some reason
     // the old tables just stay in there
     // so I re-create the actual result panel

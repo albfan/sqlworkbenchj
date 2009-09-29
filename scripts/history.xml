@@ -76,6 +76,19 @@
 
   <entry dev-build="4" type="fix">
     <description>
+			If a connection script was defined in the connection profile, an error was displayed
+			during connect (even though the connection script was executed correctly)
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
+			The settings of the DbExplorer where not saved when the DbExplorer was opened as a separate window.
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
       When using "Highlight Current statement" and executing the statement
       at the cursor (Execute Current), the statement was not highlighted
       when an error occurred.

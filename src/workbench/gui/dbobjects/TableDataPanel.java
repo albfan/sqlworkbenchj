@@ -253,6 +253,8 @@ public class TableDataPanel
 			dataDisplay.getTable().showFocusBorder();
 		}
 
+		restoreSettings();
+		
 		if (workspaceSettings != null)
 		{
 			readSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
