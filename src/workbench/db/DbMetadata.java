@@ -1844,9 +1844,21 @@ public class DbMetadata
 		throws SQLException
 	{
 		if (table == null) return null;
-		String catalog = adjustObjectnameCase(StringUtil.trimQuotes(table.getCatalog()));
-		String schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
-		String tablename = adjustObjectnameCase(StringUtil.trimQuotes(table.getTableName()));
+		String catalog = null;
+		String schema = null;
+		String tablename = null;
+		if (table.getNeverAdjustCase())
+		{
+			catalog = StringUtil.trimQuotes(table.getCatalog());
+			schema = StringUtil.trimQuotes(table.getSchema());
+			tablename = StringUtil.trimQuotes(table.getTableName());
+		}
+		else
+		{
+			catalog = adjustObjectnameCase(StringUtil.trimQuotes(table.getCatalog()));
+			schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
+			tablename = adjustObjectnameCase(StringUtil.trimQuotes(table.getTableName()));
+		}
 
 		if (schema == null && this.isOracle())
 		{
