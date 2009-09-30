@@ -1358,10 +1358,16 @@ public class DbMetadata
 
 	public TableIdentifier findObject(TableIdentifier tbl)
 	{
+		return findObject(tbl, true);
+	}
+
+	public TableIdentifier findObject(TableIdentifier tbl, boolean adjustCase)
+	{
 		if (tbl == null) return null;
 		TableIdentifier result = null;
 		TableIdentifier table = tbl.createCopy();
-		table.adjustCase(dbConnection);
+		if (adjustCase) table.adjustCase(dbConnection);
+
 		try
 		{
 			String schema = table.getSchema();

@@ -69,6 +69,11 @@ public class ObjectInfo
 		tbl.adjustCase(connection);
 
 		TableIdentifier toDescribe = connection.getMetadata().findObject(tbl);
+		if (toDescribe == null)
+		{
+			// try again with the same case as entered by the user
+			toDescribe = connection.getMetadata().findObject(tbl, false);
+		}
 
 		DbSettings dbs = connection.getDbSettings();
 		TableIdentifier synonymTarget = null;

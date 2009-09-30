@@ -76,6 +76,13 @@
 
   <entry dev-build="4" type="fix">
     <description>
+			If tables were created using double quotes (e.g. CREATE TABLE "MyTable"), the table
+      details were no longer displayed in the DbExplorer
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
 			If a connection script was defined in the connection profile, an error was displayed
 			during connect (even though the connection script was executed correctly)
     </description>
