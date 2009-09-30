@@ -1815,8 +1815,10 @@ public class DbMetadata
 		}
 		if (def == null && "SEQUENCE".equalsIgnoreCase(table.getObjectType()))
 		{
-			String schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
-			String seqname = adjustObjectnameCase(StringUtil.trimQuotes(table.getObjectName()));
+			TableIdentifier tbl = table.createCopy();
+			tbl.adjustCase(this.dbConnection);
+			String schema = StringUtil.trimQuotes(table.getSchema());
+			String seqname = StringUtil.trimQuotes(table.getObjectName());
 			def = getSequenceReader().getRawSequenceDefinition(schema, seqname);
 		}
 		else if (def == null)
@@ -1840,25 +1842,17 @@ public class DbMetadata
 	 * @return the definition of the table.
 	 * @see TableColumnsDatastore
 	 */
-	public TableDefinition getTableDefinition(TableIdentifier table)
+	public TableDefinition getTableDefinition(TableIdentifier toRead)
 		throws SQLException
 	{
-		if (table == null) return null;
-		String catalog = null;
-		String schema = null;
-		String tablename = null;
-		if (table.getNeverAdjustCase())
-		{
-			catalog = StringUtil.trimQuotes(table.getCatalog());
-			schema = StringUtil.trimQuotes(table.getSchema());
-			tablename = StringUtil.trimQuotes(table.getTableName());
-		}
-		else
-		{
-			catalog = adjustObjectnameCase(StringUtil.trimQuotes(table.getCatalog()));
-			schema = adjustSchemaNameCase(StringUtil.trimQuotes(table.getSchema()));
-			tablename = adjustObjectnameCase(StringUtil.trimQuotes(table.getTableName()));
-		}
+		if (toRead == null) return null;
+
+		TableIdentifier table = toRead.createCopy();
+		table.adjustCase(this.dbConnection);
+		
+		String catalog = StringUtil.trimQuotes(table.getCatalog());
+		String schema = StringUtil.trimQuotes(table.getSchema());
+		String tablename = StringUtil.trimQuotes(table.getTableName());
 
 		if (schema == null && this.isOracle())
 		{
@@ -1878,7 +1872,6 @@ public class DbMetadata
 
 		ArrayList<String> keys = new ArrayList<String>();
 		String pkname = null;
-		TableIdentifier resultTable = table.createCopy();
 
 		if (this.dbSettings.supportsGetPrimaryKeys())
 		{
@@ -1901,7 +1894,7 @@ public class DbMetadata
 				SqlUtil.closeResult(keysRs);
 			}
 		}
-		resultTable.setPrimaryKeyName(pkname);
+		table.setPrimaryKeyName(pkname);
 
 		boolean hasEnums = false;
 
@@ -1996,8 +1989,8 @@ public class DbMetadata
 			}
 		}
 
-		resultTable.setNewTable(false);
-		TableDefinition result = new TableDefinition(resultTable, columns);
+		table.setNewTable(false);
+		TableDefinition result = new TableDefinition(table, columns);
 		if (hasEnums)
 		{
 			MySqlEnumReader.updateEnumDefinition(result, this.dbConnection);
