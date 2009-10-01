@@ -42,8 +42,6 @@ import workbench.WbManager;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
-import workbench.gui.editor.SyntaxUtilities;
-import workbench.gui.editor.Token;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.settings.ExternalFileHandling;
 import workbench.interfaces.PropertyStorage;

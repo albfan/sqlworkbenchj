@@ -339,11 +339,6 @@ public class WbProperties
 		if (pos == -1) return;
 		String key = line.substring(0, pos);
 		String value = line.substring(pos + 1);
-		pos = value.indexOf('#');
-		if (pos > -1)
-		{
-			value = value.substring(0, pos);
-		}
 		this.setProperty(key, value.trim());
 		comments.put(key, comment);
 	}

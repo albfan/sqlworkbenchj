@@ -76,6 +76,13 @@
 
   <entry dev-build="4" type="fix">
     <description>
+			Execute current was not working for MySQL connections.
+		</description>
+	</entry>
+
+	
+  <entry dev-build="4" type="fix">
+    <description>
 			If tables were created using double quotes (e.g. CREATE TABLE "MyTable"), the table
       details were no longer displayed in the DbExplorer
     </description>

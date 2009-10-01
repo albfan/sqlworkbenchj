@@ -73,7 +73,8 @@ public class WbPropertiesTest
 			"\n" +
 			"# no comment\n" +
 			"\n" +
-			"key5=value5\n"
+			"key5=value5\n" +
+			"key6=#\n"
 		);
 		WbProperties props = new WbProperties();
 		props.loadTextFile(file.getAbsolutePath());
@@ -107,8 +108,10 @@ public class WbPropertiesTest
 
 		assertEquals("value5", props.getProperty("key5"));
 		assertNull(props.getComment("key5"));
+
+		assertEquals("#", props.getProperty("key6"));
 	}
-	
+
 	public void testChangeNotification()
 	{
     WbProperties props = new WbProperties();

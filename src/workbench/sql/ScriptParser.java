@@ -196,7 +196,7 @@ public class ScriptParser
 
 	public void setAlternateLineComment(String comment)
 	{
-		if (comment != null && !comment.trim().equals("--"))
+		if (StringUtil.isNonBlank(comment) && !comment.trim().equals("--"))
 		{
 			this.alternateLineComment = comment.trim();
 		}
