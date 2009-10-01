@@ -77,6 +77,7 @@ public class ScriptParserTest
 		assertEquals(2, p.getSize());
 	}
 
+
 	public void testArrayBasedGetNext()
 		throws Exception
 	{
@@ -843,6 +844,17 @@ public class ScriptParserTest
     ScriptParser parser = new ScriptParser(sql);
 		parser.setAlternateLineComment("#");
 		int count = parser.getSize();
+		assertEquals("Wrong statement count", count, 3);
+
+		sql =  "-- this is a non-standard comment;\n" +
+									"select * from test1;\n"+
+									"-- another non-standard comment;\n"+
+									"select * from test2;\n" +
+									"-- standard comment;\n"+
+									"select * from test3;\n";
+    parser = new ScriptParser(sql);
+		parser.setAlternateLineComment("");
+		count = parser.getSize();
 		assertEquals("Wrong statement count", count, 3);
 	}
 

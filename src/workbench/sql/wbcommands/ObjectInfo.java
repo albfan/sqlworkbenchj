@@ -44,7 +44,7 @@ public class ObjectInfo
 	/**
 	 * Tries to find the definition of the object identified by the given name.
 	 *
-	 * If it's a TABLE (or something similar) the reuslt will contain several
+	 * If it's a TABLE (or something similar) the result will contain several
 	 * DataStores that show the definition of the object.
 	 *
 	 * If no "selectable" object with that name can be found, the method will first
