@@ -38,7 +38,8 @@ public class WbButton
 
 	private Border rolloverBorder;
 	private Border emptyBorder;
-	protected boolean iconButton = false;
+	protected boolean iconButton;
+	private boolean rolloverEnabled;
 	
 	public WbButton()
 	{
@@ -98,9 +99,17 @@ public class WbButton
 	{
 		this.setUI(new javax.swing.plaf.basic.BasicButtonUI());
 	}
+
+	public void disableBasicRollover()
+	{
+		removeMouseListener(this);
+		rolloverEnabled = false;
+	}
 	
 	public void enableBasicRollover()
 	{
+		if (rolloverEnabled) return;
+		
 		setBasicUI();
 		UIDefaults table = UIManager.getLookAndFeelDefaults();
 		Border out = new BasicBorders.RolloverButtonBorder(
@@ -122,6 +131,7 @@ public class WbButton
 		this.setBorderPainted(true);
 		this.setBorder(emptyBorder);
 		this.addMouseListener(this);
+		rolloverEnabled = true;
 	}
 	
 	public void enableToolbarRollover()

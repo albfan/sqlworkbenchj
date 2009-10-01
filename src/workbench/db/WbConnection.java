@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class WbConnection
 	implements DbExecutionListener

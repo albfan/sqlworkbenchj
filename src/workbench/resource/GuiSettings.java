@@ -25,6 +25,17 @@ public class GuiSettings
 	public static final String PROPERTY_CLOSE_ACTIVE_TAB = "workbench.gui.display.tab.closebutton.onlyactive";
 	public static final String PROPERTY_SQLTAB_CLOSE_BUTTON = "workbench.gui.display.sqltab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
+	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
+
+	public static boolean getShowCloseButtonOnRightSide()
+	{
+		return Settings.getInstance().getBoolProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT, true);
+	}
+
+	public static void setShowCloseButtonOnRightSide(boolean flag)
+	{
+		Settings.getInstance().setProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT, flag);
+	}
 
 	public static boolean getCloseActiveTabOnly()
 	{

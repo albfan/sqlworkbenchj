@@ -17,11 +17,14 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.lnf.LnFHelper;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -34,7 +37,7 @@ import workbench.resource.Settings;
  */
 public class TabButtonComponent
 	extends JPanel
-	implements ActionListener
+	implements ActionListener, PropertyChangeListener
 {
 	private final WbTabbedPane pane;
 	private final JLabel label;
@@ -46,6 +49,7 @@ public class TabButtonComponent
 		pane = tabPane;
 
 		boolean opaque = Settings.getInstance().getBoolProperty("workbench.gui.closebutton.opaque", false);
+		boolean buttonOnRight = GuiSettings.getShowCloseButtonOnRightSide();
 
 		boolean jGoodies = LnFHelper.isJGoodies();
 		if (jGoodies)
@@ -69,23 +73,37 @@ public class TabButtonComponent
 		closeButton.addActionListener(this);
 
 		GridBagConstraints c = new GridBagConstraints();
-		c.gridx = 0;
+		c.gridx = (buttonOnRight ? 0 : 1);
 		c.gridy = 0;
 		c.anchor = GridBagConstraints.SOUTHWEST;
 		c.fill = GridBagConstraints.HORIZONTAL;
-		c.insets = new Insets(0,0,1,4);
+		c.insets = (buttonOnRight ? new Insets(0,0,1,4) : new Insets(0,0,1,0));
 		add(label, c);
 
-		c.gridx = 1;
+		c.gridx = (buttonOnRight ? 1 : 0);
 		c.anchor = GridBagConstraints.SOUTHWEST;
 		c.fill = GridBagConstraints.NONE;
-		c.insets = WbSwingUtilities.EMPTY_INSETS;
-		add(closeButton);
+		c.insets = (buttonOnRight ? WbSwingUtilities.EMPTY_INSETS : new Insets(0,0,0,4));
+		add(closeButton, c);
 		
 		if (!showButton) closeButton.setVisible(showButton);
 		setOpaque(opaque);
+
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT);
 	}
 
+	public void setRolloverEnabled(boolean flag)
+	{
+		if (flag)
+		{
+			closeButton.enableBasicRollover();
+		}
+		else
+		{
+			closeButton.disableBasicRollover();
+		}
+	}
+	
 	@Override
 	public void setOpaque(boolean isOpaque)
 	{
@@ -138,6 +156,34 @@ public class TabButtonComponent
 		{
 			pane.closeButtonClicked(i);
 		}
+	}
+
+	private void setComponenentOrder()
+	{
+		boolean buttonOnRight = GuiSettings.getShowCloseButtonOnRightSide();
+		remove(label);
+		remove(closeButton);
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.gridx = (buttonOnRight ? 0 : 1);
+		c.gridy = 0;
+		c.anchor = GridBagConstraints.SOUTHWEST;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.insets = (buttonOnRight ? new Insets(0,0,1,4) : new Insets(0,0,1,0));
+		add(label, c);
+
+		c.gridx = (buttonOnRight ? 1 : 0);
+		c.anchor = GridBagConstraints.SOUTHWEST;
+		c.fill = GridBagConstraints.NONE;
+		c.insets = (buttonOnRight ? WbSwingUtilities.EMPTY_INSETS : new Insets(0,0,0,4));
+		add(closeButton, c);
+		validate();
+	}
+	
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		setComponenentOrder();
 	}
 
 }

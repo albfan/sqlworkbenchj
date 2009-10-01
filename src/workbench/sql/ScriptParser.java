@@ -28,8 +28,12 @@ import workbench.util.WbFile;
 /**
  * A class to parse a SQL script and return the individual commands
  * in the script. The actual parsing is done by using an instance
- * of {@link IteratingScriptParser}
+ * of {@link IteratingScriptParser} or {@link LexerBasedParser}
  *
+ * @see IteratingScriptParser
+ * @see LexerBasedParser
+ * @see ScriptIterator
+ * 
  * @author  Thomas Kellerer
  */
 public class ScriptParser

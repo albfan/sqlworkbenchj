@@ -115,6 +115,7 @@ public class GeneralOptionsPanel
 		showTabCloseButton.setSelected(GuiSettings.getShowSqlTabCloseButton());
 		showResultTabClose.setSelected(GuiSettings.getShowResultTabCloseButton());
 		onlyActiveTab.setSelected(GuiSettings.getCloseActiveTabOnly());
+		closeButtonRightSide.setSelected(GuiSettings.getShowCloseButtonOnRightSide());
 	}
 
 	public void saveSettings()
@@ -122,6 +123,7 @@ public class GeneralOptionsPanel
 		Settings set = Settings.getInstance();
 
 		// General settings
+		GuiSettings.setShowCloseButtonOnRightSide(closeButtonRightSide.isSelected());
 		GuiSettings.setCloseActiveTabOnly(onlyActiveTab.isSelected());
 		GuiSettings.setShowTabCloseButton(showTabCloseButton.isSelected());
 		GuiSettings.setShowResultTabCloseButton(showResultTabClose.isSelected());
@@ -205,6 +207,8 @@ public class GeneralOptionsPanel
     showTabCloseButton = new JCheckBox();
     showResultTabClose = new JCheckBox();
     onlyActiveTab = new JCheckBox();
+    closeButtonRightSide = new JCheckBox();
+    jSeparator1 = new JSeparator();
     jSeparator2 = new JSeparator();
     jSeparator3 = new JSeparator();
     jPanel3 = new JPanel();
@@ -409,9 +413,9 @@ public class GeneralOptionsPanel
     showTabCloseButton.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(3, 4, 5, 0);
+    gridBagConstraints.insets = new Insets(6, 4, 5, 0);
     jPanel1.add(showTabCloseButton, gridBagConstraints);
 
     showResultTabClose.setText(ResourceMgr.getString("LblShowResultClose")); // NOI18N
@@ -422,9 +426,9 @@ public class GeneralOptionsPanel
     showResultTabClose.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(3, 16, 5, 0);
+    gridBagConstraints.insets = new Insets(6, 16, 5, 0);
     jPanel1.add(showResultTabClose, gridBagConstraints);
 
     onlyActiveTab.setText(ResourceMgr.getString("LblCloseActive")); // NOI18N
@@ -432,11 +436,27 @@ public class GeneralOptionsPanel
     onlyActiveTab.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(3, 24, 5, 0);
+    gridBagConstraints.insets = new Insets(3, 4, 5, 0);
     jPanel1.add(onlyActiveTab, gridBagConstraints);
+
+    closeButtonRightSide.setText(ResourceMgr.getString("LblCloseOnRight")); // NOI18N
+    closeButtonRightSide.setToolTipText(ResourceMgr.getString("d_LblCloseOnRight")); // NOI18N
+    closeButtonRightSide.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 16, 5, 0);
+    jPanel1.add(closeButtonRightSide, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(4, 3, 2, 0);
+    jPanel1.add(jSeparator1, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -492,6 +512,7 @@ public class GeneralOptionsPanel
   private JCheckBox brushedMetal;
   private JComboBox checkInterval;
   private JLabel checkUpdatesLabel;
+  private JCheckBox closeButtonRightSide;
   private JCheckBox confirmTabClose;
   private JCheckBox consolidateLog;
   private JCheckBox enableAnimatedIcon;
@@ -499,6 +520,7 @@ public class GeneralOptionsPanel
   private JPanel jPanel1;
   private JPanel jPanel2;
   private JPanel jPanel3;
+  private JSeparator jSeparator1;
   private JSeparator jSeparator2;
   private JSeparator jSeparator3;
   private JLabel langLabel;

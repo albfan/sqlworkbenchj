@@ -59,7 +59,7 @@ public class WbTabbedPane
 	private boolean hideDisabledButtons;
 	private boolean alwaysUseCustomComponent;
 	private boolean onlyCloseActive;
-	
+
 	public WbTabbedPane()
 	{
 		super();
@@ -423,7 +423,8 @@ public class WbTabbedPane
 		if (tabCloser == null) return;
 		
 		int count = getTabCount();
-		
+		int index = getSelectedIndex();
+
 		for (int i=0; i < count; i++)
 		{
 			boolean canClose = tabCloser.canCloseTab(i);
@@ -434,6 +435,14 @@ public class WbTabbedPane
 				if (hideDisabledButtons)
 				{
 					tab.setButtonVisible(canClose);
+				}
+				if (onlyCloseActive)
+				{
+					tab.setRolloverEnabled(i == index);
+				}
+				else
+				{
+					tab.setRolloverEnabled(true);
 				}
 			}
 		}
@@ -449,5 +458,6 @@ public class WbTabbedPane
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		onlyCloseActive = GuiSettings.getCloseActiveTabOnly();
+		updateButtons(); 
 	}
 }
