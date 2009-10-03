@@ -126,12 +126,11 @@ public class StringUtil
 
 	public static boolean lineStartsWith(CharSequence text, int lineStartPos, String compareTo)
 	{
-		if (compareTo == null) return false;
-		if (text == null) return false;
+		if (isEmptyString(compareTo)) return false;
+		if (isEmptyString(text)) return false;
 		
 		int textLength = text.length();
 		int len = compareTo.length();
-		if (len == 0) return false;
 
 		// skip whitespace at the beginning
 		int pos = findFirstNonWhitespace(text, lineStartPos);

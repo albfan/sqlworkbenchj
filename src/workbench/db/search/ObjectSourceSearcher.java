@@ -19,6 +19,8 @@ import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
+import workbench.db.TableSourceBuilder;
+import workbench.db.TableSourceBuilderFactory;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
@@ -218,7 +220,13 @@ public class ObjectSourceSearcher
 			}
 			try
 			{
-				CharSequence source = object.getSource(connection);
+				CharSequence source = null;
+				if (connection.getMetadata().isTableType(object.getObjectType()))
+				{
+					((TableIdentifier)object).setRetrieveFkSource(true);
+				}
+				source = object.getSource(connection);
+
 				if (StringUtil.isBlank(source))
 				{
 					LogMgr.logWarning("ObjectSourceSearcher.searchObjects()", "Empty source returned for " + object.toString());

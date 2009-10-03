@@ -139,7 +139,7 @@ public class IteratingScriptParser
 	 */
 	public void setAlternateLineComment(String comment)
 	{
-		this.alternateLineComment = (comment == null ? null : comment.trim());
+		this.alternateLineComment = (StringUtil.isBlank(comment) ? null : comment.trim());
 	}
 
 	public void setCheckForSingleLineCommands(boolean flag)
@@ -249,8 +249,6 @@ public class IteratingScriptParser
 		return start;
 	}
 
-	private Pattern lineComment = Pattern.compile("^\\s*(--){1}.*");
-	
 	private boolean isLineComment(int pos)
 	{
 		return StringUtil.lineStartsWith(this.script, pos, "--") || StringUtil.lineStartsWith(this.script, pos, alternateLineComment);

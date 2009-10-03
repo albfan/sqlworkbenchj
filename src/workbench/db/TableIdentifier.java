@@ -43,6 +43,7 @@ public class TableIdentifier
 	private boolean showOnlyTableName;
 	private String tableComment;
 	private boolean commentWasInitialized;
+	private boolean retrieveFkSource;
 	
 	public TableIdentifier(String aName)
 	{
@@ -177,6 +178,7 @@ public class TableIdentifier
 		copy.showOnlyTableName = this.showOnlyTableName;
 		copy.preserveQuotes = this.preserveQuotes;
 		copy.type = this.type;
+		copy.retrieveFkSource = this.retrieveFkSource;
 		return copy;
 	}
 	
@@ -667,9 +669,19 @@ public class TableIdentifier
 		else
 		{
 			TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
-			source = builder.getTableSource(this, false, false);
+			source = builder.getTableSource(this, false, retrieveFkSource);
 		}
 		return source;
+	}
+
+	/**
+	 * Controls if getSource() will return the source for the FK constraints as well.
+	 * 
+	 * @param flag true, getSource() will include FK source, false: FK source will not be included
+	 */
+	public void setRetrieveFkSource(boolean flag)
+	{
+		retrieveFkSource = flag;
 	}
 
 	public static TableIdentifier findTableByName(List<TableIdentifier> tables, String toFind)
