@@ -809,7 +809,7 @@ public class DataImporter
 		else
 		{
 			this.addError(ResourceMgr.getString("ErrImportingRow") + " " + importRow + "\n");
-			this.addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + error.getMessage() + "\n");
+			this.addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + ExceptionUtil.getAllExceptions(error) + "\n");
 			this.addError(ResourceMgr.getString("ErrImportValues") + " " + record + "\n\n");
 			if (errorLimitAdded)
 			{

@@ -112,7 +112,7 @@ import workbench.util.WbProperties;
 
 
 /**
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableListPanel
 	extends JPanel

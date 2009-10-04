@@ -7,24 +7,32 @@ import workbench.log.LogMgr;
 
 /**
  * A Wrapper around Desktop.browse()
- * 
+ *
  * @author Thomas Kellerer
  */
 public class BrowserLauncher
 {
-	public static void openEmail(String email)
+	public static void openEmail(final String email)
 	{
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
 		{
-			try
+			WbThread t = new WbThread("OpenBrowser")
 			{
-				URI uri = new URI("mailto:" + email);
-				Desktop.getDesktop().mail(uri);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("BrowserLauncher.openEmail()", "Could not open email program", null);
-			}
+				public void run()
+				{
+					try
+					{
+						URI uri = new URI("mailto:" + email);
+						Desktop.getDesktop().mail(uri);
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("BrowserLauncher.openEmail()", "Could not open email program", e);
+						WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+					}
+				}
+			};
+			t.start();
 		}
 		else
 		{
@@ -33,13 +41,28 @@ public class BrowserLauncher
 		}
 	}
 
-	public static void openURL(String url)
+	public static void openURL(final String url)
 		throws Exception
 	{
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
 		{
-			URI target = new URI(url);
-			Desktop.getDesktop().browse(target);
+			WbThread t = new WbThread("OpenBrowser")
+			{
+				public void run()
+				{
+					try
+					{
+						URI target = new URI(url);
+						Desktop.getDesktop().browse(target);
+					}
+					catch (Exception e)
+					{
+						LogMgr.logError("BrowserLauncher.openURL()", "Error starting browser", e);
+						WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(e));
+					}
+				}
+			};
+			t.start();
 		}
 		else
 		{

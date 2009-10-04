@@ -47,6 +47,7 @@ public class TriggerDisplayPanel
 	private WbSplitPane splitPane;
 	private String triggerSchema;
 	private String triggerCatalog;
+	private TableIdentifier triggerTable;
 
 	public TriggerDisplayPanel()
 	{
@@ -99,6 +100,7 @@ public class TriggerDisplayPanel
 		try
 		{
 			if (table == null) return;
+			triggerTable = table;
 			DataStore trg = reader.getTableTriggers(table);
 			final DataStoreTableModel rs = new DataStoreTableModel(trg);
 			WbSwingUtilities.invoke(new Runnable()
@@ -110,9 +112,13 @@ public class TriggerDisplayPanel
 					triggerCatalog = table.getCatalog();
 					triggerSchema = table.getSchema();
 					if (triggers.getRowCount() > 0)
-						triggers.getSelectionModel().setSelectionInterval(0,0);
+					{
+						triggers.getSelectionModel().setSelectionInterval(0, 0);
+					}
 					else
+					{
 						source.setText("");
+					}
 				}
 			});
 		}
@@ -132,7 +138,7 @@ public class TriggerDisplayPanel
 		try
 		{
 			String triggerName = this.triggers.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
-			String sql = reader.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName);
+			String sql = reader.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName, triggerTable);
 			this.source.setText(sql);
 			this.source.setCaretPosition(0);
 		}

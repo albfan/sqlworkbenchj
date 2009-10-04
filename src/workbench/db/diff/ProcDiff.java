@@ -17,7 +17,7 @@ import workbench.util.StrBuffer;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ProcDiff
 {

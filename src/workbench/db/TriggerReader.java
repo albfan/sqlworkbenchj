@@ -60,6 +60,12 @@ public class TriggerReader
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT = 2;
 
 	/**
+	 *	The column index in the DataStore returned by getTableTriggers which identifies
+	 *  the table of the trigger.
+	 */
+	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE = 3;
+
+	/**
 	 * Return a list of triggers available in the given schema.
 	 */
 	public DataStore getTriggers(String catalog, String schema)
@@ -68,20 +74,26 @@ public class TriggerReader
 		return getTriggers(catalog, schema, null);
 	}
 
-	public List<TriggerDefinition> getTriggerList(String catalog, String schema)
+	public List<TriggerDefinition> getTriggerList(String catalog, String schema, String baseTable)
 		throws SQLException
 	{
-		DataStore triggers = getTriggers(catalog, schema);
+		DataStore triggers = getTriggers(catalog, schema, baseTable);
 		List<TriggerDefinition> result = new ArrayList<TriggerDefinition>(triggers.getRowCount());
 		for (int row = 0; row < triggers.getRowCount(); row ++)
 		{
 			String trgName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
 			String trgType = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE);
 			String trgEvent = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT);
-
+			String tableName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
 			TriggerDefinition trg = new TriggerDefinition(catalog, schema, trgName);
 			trg.setTriggerType(trgType);
 			trg.setTriggerEvent(trgEvent);
+
+			if (tableName != null)
+			{
+				TableIdentifier tbl = new TableIdentifier(tableName);
+				trg.setRelatedTable(tbl);
+			}
 			result.add(trg);
 		}
 		return result;
@@ -100,14 +112,15 @@ public class TriggerReader
 	public static final String TRIGGER_NAME_COLUMN = "TRIGGER";
 	public static final String TRIGGER_TYPE_COLUMN = "TYPE";
 	public static final String TRIGGER_EVENT_COLUMN = "EVENT";
+	public static final String TRIGGER_TABLE_COLUMN = "TABLE";
 
-	public static final String[] LIST_COLUMNS = {TRIGGER_NAME_COLUMN, TRIGGER_TYPE_COLUMN, TRIGGER_EVENT_COLUMN};
+	public static final String[] LIST_COLUMNS = {TRIGGER_NAME_COLUMN, TRIGGER_TYPE_COLUMN, TRIGGER_EVENT_COLUMN, TRIGGER_TABLE_COLUMN};
 
 	protected DataStore getTriggers(String catalog, String schema, String tableName)
 		throws SQLException
 	{
-		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int[] sizes =   {30, 30, 20};
+		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int[] sizes =   {30, 30, 20, 20};
 
 		DataStore result = new DataStore(LIST_COLUMNS, types, sizes);
 
@@ -132,6 +145,7 @@ public class TriggerReader
 		ResultSet rs = stmt.executeQuery(query);
 		try
 		{
+			boolean hasTriggerName = rs.getMetaData().getColumnCount() == 4;
 			while (rs.next())
 			{
 				int row = result.addRow();
@@ -140,10 +154,18 @@ public class TriggerReader
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME, value);
 
 				value = rs.getString(2);
+				if (!rs.wasNull() && value != null) value = value.trim();
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE, value);
 
 				value = rs.getString(3);
+				if (!rs.wasNull() && value != null) value = value.trim();
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, value);
+				if (hasTriggerName)
+				{
+					value = rs.getString(4);
+					if (!rs.wasNull() && value != null) value = value.trim();
+					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE, value);
+				}
 			}
 			result.resetStatus();
 		}
@@ -154,16 +176,23 @@ public class TriggerReader
 		return result;
 	}
 
+	public String getTriggerSource(TriggerDefinition trigger)
+		throws SQLException
+	{
+		return getTriggerSource(trigger.getCatalog(), trigger.getSchema(), trigger.getObjectName(), trigger.getRelatedTable());
+	}
+
 	/**
 	 * Retrieve the SQL Source of the given trigger.
 	 *
 	 * @param aCatalog The catalog in which the trigger is defined. This should be null if the DBMS does not support catalogs
 	 * @param aSchema The schema in which the trigger is defined. This should be null if the DBMS does not support schemas
 	 * @param aTriggername
+	 * @param triggerTable the table for which the trigger is defined
 	 * @throws SQLException
 	 * @return the trigger source
 	 */
-	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername)
+	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername, TableIdentifier triggerTable)
 		throws SQLException
 	{
 		StringBuilder result = new StringBuilder(500);
@@ -177,6 +206,11 @@ public class TriggerReader
 		sql.setSchema(aSchema);
 		sql.setCatalog(aCatalog);
 		sql.setObjectName(aTriggername);
+
+		if (triggerTable != null)
+		{
+			sql.setBaseObjectName(triggerTable.getTableName());
+		}
 		Statement stmt = this.dbConnection.createStatementForQuery();
 		String query = sql.getSql();
 

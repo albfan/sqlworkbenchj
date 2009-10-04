@@ -52,7 +52,7 @@ public class WbTriggerSource
 
 		TriggerReader reader = new TriggerReader(currentConnection);
 
-		String source = reader.getTriggerSource(object.getCatalog(), object.getSchema(), object.getObjectName());
+		String source = reader.getTriggerSource(object.getCatalog(), object.getSchema(), object.getObjectName(), null);
 
 		if (source != null)
 		{

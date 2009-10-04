@@ -276,7 +276,16 @@ public class TableSourceBuilder
 			}
 		}
 
-		result.append(");" + lineEnding);
+		result.append(")");
+		String options = getAdditionalTableOptions(table, columns, aIndexDef);
+		if (options != null)
+		{
+			result.append(lineEnding);
+			result.append(options);
+			result.append(lineEnding);
+		}
+		result.append(';');
+		result.append(lineEnding);
 		// end of CREATE TABLE
 
 		// Add additional column information provided by any specialized descendant class
@@ -337,6 +346,11 @@ public class TableSourceBuilder
 		return result.toString();
 	}
 
+	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	{
+		return null;
+	}
+	
 	protected String getAdditionalColumnInformation(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
 		return null;

@@ -19,6 +19,7 @@ import java.util.List;
 import workbench.db.IndexDefinition;
 import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportTableGrants;
@@ -237,14 +238,28 @@ public class TableDiff
 		{
 			result.append(indexDiff);
 		}
+
+		appendTriggerDiff(result, indent);
+		
 		if (grantDifferent)
 		{
 			result.append(grantDiff);
 		}
+
 		writer.appendCloseTag(result, this.indent, TAG_MODIFY_TABLE);
 		return result;
 	}
 
+	private void appendTriggerDiff(StrBuffer result, StrBuffer trgIndent)
+	{
+		List<TriggerDefinition> refTriggers = referenceTable.getTriggers();
+		List<TriggerDefinition> tarTriggers = targetTable.getTriggers();
+
+		if (CollectionUtil.isEmpty(refTriggers) && CollectionUtil.isEmpty(tarTriggers)) return;
+		TriggerListDiff trgDiff = new TriggerListDiff(refTriggers, tarTriggers);
+		trgDiff.writeXml(trgIndent, result);
+	}
+	
 	private void writeConstraints(List<TableConstraint> constraints, StrBuffer result, String tag, StrBuffer indent)
 	{
 		if (constraints.size() == 0) return;

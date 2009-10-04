@@ -22,14 +22,16 @@ import workbench.resource.Settings;
 import workbench.util.BrowserLauncher;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
+import workbench.util.WbThread;
 
 /**
  * A class to display the HTML and PDF manual from within the application.
- * 
- * @author support@sql-workbench.net
+ *
+ * @author Thomas Kellerer
  */
 public class HelpManager
 {
+
 	public static WbFile getDefaultPdf()
 	{
 		String pdfManual = Settings.getInstance().getProperty("workbench.manual.pdf.file", "SQLWorkbench-Manual.pdf");
@@ -40,7 +42,10 @@ public class HelpManager
 			f = new WbFile(f, "SQLWorkbench-Manual.pdf");
 		}
 
-		if (f.exists()) return f;
+		if (f.exists())
+		{
+			return f;
+		}
 
 		String jarDir = WbManager.getInstance().getJarPath();
 		WbFile pdf = new WbFile(jarDir, pdfManual);
@@ -109,31 +114,38 @@ public class HelpManager
 
 	public static void showPdfHelp()
 	{
-		try
+		final WbFile pdf = getPDFManualPath();
+		if (pdf == null)
 		{
-			WbFile pdf = getPDFManualPath();
-			if (pdf == null)
-			{
-				String defaultPdf = getDefaultPdf().getFullPath();
-				String msg = ResourceMgr.getFormattedString("ErrManualNotFound", defaultPdf, WbManager.getInstance().getJarPath());
-				WbSwingUtilities.showMessage(WbManager.getInstance().getCurrentWindow(), msg);
-				return;
-			}
-
-			if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN))
-			{
-				Desktop.getDesktop().open(pdf);
-			}
-			else
-			{
-				LogMgr.logError("HelpManager.showPdfHelp()", "Desktop not supported!", null);
-				WbSwingUtilities.showErrorMessage("Desktop not supported by your Java version");
-			}
+			String defaultPdf = getDefaultPdf().getFullPath();
+			String msg = ResourceMgr.getFormattedString("ErrManualNotFound", defaultPdf, WbManager.getInstance().getJarPath());
+			WbSwingUtilities.showMessage(WbManager.getInstance().getCurrentWindow(), msg);
+			return;
 		}
-		catch (Exception ex)
+
+		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN))
 		{
-			LogMgr.logError("HelpManager.showPdf()", "Error when running PDF Viewer", ex);
-			WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
+			WbThread t = new WbThread("OpenPDF")
+			{
+				public void run()
+				{
+					try
+					{
+						Desktop.getDesktop().open(pdf);
+					}
+					catch (Exception ex)
+					{
+						LogMgr.logError("HelpManager.showPdf()", "Error when running PDF Viewer", ex);
+						WbSwingUtilities.showErrorMessage(ExceptionUtil.getDisplay(ex));
+					}
+				}
+			};
+			t.start();
+		}
+		else
+		{
+			LogMgr.logError("HelpManager.showPdfHelp()", "Desktop not supported!", null);
+			WbSwingUtilities.showErrorMessage("Desktop not supported by your Java version");
 		}
 	}
 

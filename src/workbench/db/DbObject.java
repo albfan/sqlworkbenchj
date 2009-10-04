@@ -94,4 +94,6 @@ public interface DbObject
 	 * @param cmt
 	 */
 	void setComment(String cmt);
+
+	String getDropStatement(WbConnection con);
 }

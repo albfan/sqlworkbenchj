@@ -75,6 +75,12 @@ public class DummyInsert
 		return null;
 	}
 
+	@Override
+	public String getDropStatement(WbConnection con)
+	{
+		return null;
+	}
+
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return null;

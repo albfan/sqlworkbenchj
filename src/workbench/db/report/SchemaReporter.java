@@ -58,11 +58,12 @@ public class SchemaReporter
 	private TagWriter tagWriter = new TagWriter();
 	private RowActionMonitor monitor;
 	private String outputfile;
-	protected boolean cancel = false;
+	protected boolean cancel;
 	private boolean includeTables = true;
-	private boolean includeProcedures = false;
-	private boolean includeGrants = false;
-	private boolean includeSequences = false;
+	private boolean includeProcedures;
+	private boolean includeGrants;
+	private boolean includeTriggers;
+	private boolean includeSequences;
 	private String schemaNameToUse = null;
 	private String reportTitle = null;
 
@@ -153,6 +154,7 @@ public class SchemaReporter
 	public void setIncludeTables(boolean flag) { this.includeTables = flag; }
 	public void setIncludeProcedures(boolean flag) { this.includeProcedures = flag; }
 	public void setIncludeGrants(boolean flag) { this.includeGrants = flag; }
+	public void setIncludeTriggers(boolean flag) { includeTriggers = flag; }
 
 	public void setOutputFilename(String filename)
 	{
@@ -262,7 +264,7 @@ public class SchemaReporter
 				}
 				else
 				{
-					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, this.includeGrants);
+					ReportTable rtable = new ReportTable(table, this.dbConn, true, true, true, true, includeGrants, includeTriggers);
 					rtable.setSchemaNameToUse(this.schemaNameToUse);
 					rtable.writeXml(out);
 					rtable.done();

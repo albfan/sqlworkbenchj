@@ -103,7 +103,13 @@ public class TableIdentifier
 	{
 		return commentWasInitialized;
 	}
-	
+
+	@Override
+	public String getDropStatement(WbConnection con)
+	{
+		return null;
+	}
+
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getTableExpression(con);

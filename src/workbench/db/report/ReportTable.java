@@ -32,6 +32,9 @@ import workbench.db.FKHandler;
 import workbench.db.IndexDefinition;
 import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
+import workbench.db.TriggerDefinition;
+import workbench.db.TriggerReader;
+import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
 /**
@@ -45,7 +48,8 @@ import workbench.util.StringUtil;
  *
  * Primary feature of this class is that it can create an XML
  * representation of itself.
- * @author  support@sql-workbench.net
+ *
+ * @author  Thomas Kellerer
  */
 public class ReportTable
 {
@@ -67,6 +71,7 @@ public class ReportTable
 	private String schemaNameToUse = null;
 	private boolean includePrimaryKey = true;
 	private List<TableConstraint> tableConstraints;
+	private List<TriggerDefinition> triggers;
 	private ReportTableGrants grants;
 
 	public ReportTable(TableIdentifier tbl)
@@ -85,7 +90,13 @@ public class ReportTable
 	 *  <li>Table constraints if includeConstraints == true {@link workbench.db.ConstraintReader#getTableConstraints(workbench.db.WbConnection, workbench.db.TableIdentifier)}</li>
 	 *</ul>
 	 */
-	public ReportTable(TableIdentifier tbl, WbConnection conn, boolean includeIndex, boolean includeFk, boolean includePk, boolean includeConstraints, boolean includeGrants)
+	public ReportTable(TableIdentifier tbl, WbConnection conn,
+			boolean includeIndex,
+			boolean includeFk,
+			boolean includePk,
+			boolean includeConstraints,
+			boolean includeGrants,
+			boolean includeTriggers)
 		throws SQLException
 	{
 		this.table = tbl.createCopy();
@@ -129,6 +140,32 @@ public class ReportTable
 		{
 			grants = new ReportTableGrants(conn, this.table);
 		}
+
+		if (includeTriggers)
+		{
+			TriggerReader trgReader = new TriggerReader(conn);
+			try
+			{
+				triggers = trgReader.getTriggerList(table.getCatalog(), table.getSchema(), table.getTableName());
+				if (triggers != null)
+				{
+					for (TriggerDefinition trg : triggers)
+					{
+						trg.setSource(trgReader.getTriggerSource(trg));
+					}
+				}
+			}
+			catch (SQLException e)
+			{
+				LogMgr.logError("ReportTable.<init>", "Could not retrieve table triggers", e);
+				triggers = null;
+			}
+		}
+	}
+
+	public List<TriggerDefinition> getTriggers()
+	{
+		return triggers;
 	}
 
 	/**
@@ -346,7 +383,7 @@ public class ReportTable
 	{
 		StrBuffer line = new StrBuffer(500);
 		StrBuffer colindent = new StrBuffer(indent);
-		colindent.append(indent);
+		colindent.append("  ");
 
 		String type = this.table.getType();
 
@@ -393,6 +430,15 @@ public class ReportTable
 		{
 			this.grants.appendXml(line, colindent);
 		}
+		if (triggers != null)
+		{
+			for (TriggerDefinition trg : triggers)
+			{
+				ReportTrigger rtrig = new ReportTrigger(trg);
+				rtrig.setIndent(colindent);
+				line.append(rtrig.getXml());
+			}
+		}
 		tagWriter.appendCloseTag(line, indent, TAG_TABLE_DEF);
 		return line;
 	}
@@ -423,7 +469,7 @@ public class ReportTable
 		TagAttribute type = new TagAttribute("type", constraint.getType());
 		TagAttribute sysName = null;
 		TagAttribute nameAttr = null;
-		
+
 		if (name != null)
 		{
 			nameAttr = new TagAttribute("name", name);

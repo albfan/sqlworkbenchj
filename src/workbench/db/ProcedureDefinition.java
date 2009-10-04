@@ -114,6 +114,13 @@ public class ProcedureDefinition
 		return Collections.unmodifiableList(this.parameterTypes);
 	}
 
+	@Override
+	public String getDropStatement(WbConnection con)
+	{
+		return null;
+	}
+
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		boolean needParameters = con.getDbSettings().needParametersToDropFunction();

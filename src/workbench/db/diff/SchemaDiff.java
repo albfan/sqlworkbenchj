@@ -44,7 +44,7 @@ import workbench.util.StringUtil;
 /**
  * Compare two Schemas for differences in the definition of the tables
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SchemaDiff
 {
@@ -89,10 +89,11 @@ public class SchemaDiff
 	private boolean diffGrants = false;
 	private boolean diffViews = true;
 	private boolean diffProcs = true;
+	private boolean diffTriggers = true;
 	private boolean diffSequences = true;
 	private boolean treatViewAsTable = false;
 	private boolean compareConstraintsByName;
-	
+
 //	private boolean diffComments;
 	private RowActionMonitor monitor;
 	private boolean cancel = false;
@@ -122,7 +123,7 @@ public class SchemaDiff
 	{
 		this.compareConstraintsByName = flag;
 	}
-	
+
 	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
 	public boolean getIncludeSequences() { return this.diffSequences; }
 
@@ -290,7 +291,7 @@ public class SchemaDiff
 		throws SQLException
 	{
 		tbl.adjustCase(con);
-		return new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants);
+		return new ReportTable(tbl, con, diffIndex, diffForeignKeys, diffPrimaryKeys, diffConstraints, diffGrants, diffTriggers);
 	}
 
 	/**
@@ -808,20 +809,20 @@ public class SchemaDiff
 		for (int i=0; i < count; i++)
 		{
 			Object o = objectsToCompare.get(i);
-			if (o instanceof DiffEntry) continue;
-			if (o instanceof ProcDiffEntry) continue;
-
-			SequenceDiffEntry entry = (SequenceDiffEntry)o;
-			ReportSequence rp = new ReportSequence(entry.reference);
-			ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target));
-			SequenceDiff diff = new SequenceDiff(rp, tp);
-			diff.setIndent(indent);
-			diff.setTagWriter(tw);
-			StrBuffer xml = diff.getMigrateTargetXml();
-			if (xml.length() > 0)
+			if (o instanceof SequenceDiffEntry)
 			{
-				out.write("\n");
-				xml.writeTo(out);
+				SequenceDiffEntry entry = (SequenceDiffEntry)o;
+				ReportSequence rp = new ReportSequence(entry.reference);
+				ReportSequence tp = (entry.target == null ? null : new ReportSequence(entry.target));
+				SequenceDiff diff = new SequenceDiff(rp, tp);
+				diff.setIndent(indent);
+				diff.setTagWriter(tw);
+				StrBuffer xml = diff.getMigrateTargetXml();
+				if (xml.length() > 0)
+				{
+					out.write("\n");
+					xml.writeTo(out);
+				}
 			}
 		}
 
@@ -845,20 +846,20 @@ public class SchemaDiff
 		for (int i=0; i < count; i++)
 		{
 			Object o = objectsToCompare.get(i);
-			if (o instanceof DiffEntry) continue;
-			if (o instanceof SequenceDiffEntry) continue;
-
-			ProcDiffEntry entry = (ProcDiffEntry)o;
-			ReportProcedure rp = new ReportProcedure(entry.reference, this.sourceDb);
-			ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
-			ProcDiff diff = new ProcDiff(rp, tp);
-			diff.setIndent(indent);
-			diff.setTagWriter(tw);
-			StrBuffer xml = diff.getMigrateTargetXml();
-			if (xml.length() > 0)
+			if (o instanceof ProcDiffEntry)
 			{
-				out.write("\n");
-				xml.writeTo(out);
+				ProcDiffEntry entry = (ProcDiffEntry)o;
+				ReportProcedure rp = new ReportProcedure(entry.reference, this.sourceDb);
+				ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
+				ProcDiff diff = new ProcDiff(rp, tp);
+				diff.setIndent(indent);
+				diff.setTagWriter(tw);
+				StrBuffer xml = diff.getMigrateTargetXml();
+				if (xml.length() > 0)
+				{
+					out.write("\n");
+					xml.writeTo(out);
+				}
 			}
 		}
 
@@ -959,7 +960,7 @@ public class SchemaDiff
 		tw.appendTag(info, indent2, TAG_GRANT_INFO, this.diffGrants);
 		tw.appendTag(info, indent2, TAG_VIEW_INFO, this.diffViews);
 		tw.appendTag(info, indent2, TAG_VIEWS_AS_TABLE, this.treatViewAsTable);
-		
+
 
 		if (this.referenceSchema != null && this.targetSchema != null)
 		{

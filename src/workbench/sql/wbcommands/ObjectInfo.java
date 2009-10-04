@@ -143,7 +143,7 @@ public class ObjectInfo
 
 			// No procedure found, try to find a trigger.
 			TriggerReader trgReader = new TriggerReader(connection);
-			String source = trgReader.getTriggerSource(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+			String source = trgReader.getTriggerSource(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), null);
 			if (StringUtil.isNonBlank(source))
 			{
 				result.addMessage("--------[ TRIGGER: " + tbl.getObjectName() + " ]--------");

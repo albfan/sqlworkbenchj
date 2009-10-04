@@ -97,11 +97,19 @@ public class ColumnIdentifier
 		return null;
 	}
 
+	@Override
+	public String getDropStatement(WbConnection con)
+	{
+		return null;
+	}
+
+	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getObjectName(con);
 	}
 
+	@Override
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.name);

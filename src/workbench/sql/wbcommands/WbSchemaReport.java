@@ -43,6 +43,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
 	public static final String PARAM_INCLUDE_SEQUENCES = "includeSequences";
+	public static final String PARAM_INCLUDE_TRIGGERS = "includeTriggers";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
 	public static final String PARAM_TYPES = "types";
 
@@ -66,6 +67,7 @@ public class WbSchemaReport
 		cmdLine.addArgument(PARAM_INCLUDE_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_INCLUDE_SEQUENCES, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
 	}
@@ -102,7 +104,9 @@ public class WbSchemaReport
 		List<String> types = cmdLine.getListValue(PARAM_TYPES);
 		reporter.setObjectTypes(types);
 
-		this.reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
+		reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
+		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
+
 		SourceTableArgument tableArg = new SourceTableArgument(this.cmdLine.getValue("tables"), this.currentConnection);
 
 		List<TableIdentifier> tables = tableArg.getTables();

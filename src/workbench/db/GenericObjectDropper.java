@@ -24,8 +24,8 @@ import workbench.util.StringUtil;
 /**
  * A helper class to drop different types of objects.
  * To drop table columns, {@link ColumnDropper} should be used.
- * 
- * @author  support@sql-workbench.net
+ *
+ * @author  Thomas Kellerer
  */
 public class GenericObjectDropper
 	implements ObjectDropper
@@ -47,11 +47,11 @@ public class GenericObjectDropper
 	{
 		this.monitor = mon;
 	}
-	
+
 	public boolean supportsFKSorting()
 	{
 		if (objects == null) return false;
-		
+
 		int numTypes = this.objects.size();
 		for (int i=0; i < numTypes; i++)
 		{
@@ -63,7 +63,7 @@ public class GenericObjectDropper
 		}
 		return true;
 	}
-	
+
 	public boolean supportsCascade()
 	{
 		boolean canCascade = false;
@@ -91,7 +91,7 @@ public class GenericObjectDropper
 	{
 		this.objects = toDrop;
 	}
-	
+
 	public void setObjectTable(TableIdentifier tbl)
 	{
 		this.objectTable = tbl;
@@ -101,7 +101,7 @@ public class GenericObjectDropper
 	{
 		return this.connection;
 	}
-	
+
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
@@ -111,7 +111,7 @@ public class GenericObjectDropper
 	{
 		if (this.connection == null) throw new NullPointerException("No connection!");
 		if (this.objects == null || this.objects.size() == 0) return null;
-		
+
 		boolean needCommit = this.connection.shouldCommitDDL();
 		int count = this.objects.size();
 		StringBuffer result = new StringBuffer(count * 40);
@@ -128,6 +128,9 @@ public class GenericObjectDropper
 
 	private CharSequence getDropStatement(int index)
 	{
+		String drop = this.objects.get(index).getDropStatement(connection);
+		if (drop != null) return drop;
+
 		String name = this.objects.get(index).getObjectNameForDrop(this.connection);
 		String type = this.objects.get(index).getObjectType();
 
@@ -143,7 +146,7 @@ public class GenericObjectDropper
 
 		return sql;
 	}
-	
+
 	public void dropObjects()
 		throws SQLException
 	{
@@ -156,7 +159,7 @@ public class GenericObjectDropper
 			if (this.objects == null || this.objects.size() == 0) return;
 			int count = this.objects.size();
 			this.connection.setBusy(true);
-			
+
     	currentStatement = this.connection.createStatement();
 			for (int i=0; i < count; i++)
 			{
@@ -173,7 +176,7 @@ public class GenericObjectDropper
 
 			if (connection.shouldCommitDDL())
 			{
-				this.connection.commit(); 
+				this.connection.commit();
 			}
 		}
 		catch (SQLException e)
@@ -203,7 +206,7 @@ public class GenericObjectDropper
 			try { this.connection.rollback(); } catch (Throwable th) {}
 		}
 	}
-	
+
 	public void setCascade(boolean flag)
 	{
 		if (this.supportsCascade())

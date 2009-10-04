@@ -395,16 +395,17 @@ public class TriggerListPanel
 		if (row < 0) return;
 
 		final String trigger = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
+		final String table = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				retrieveTriggerSource(trigger);
+				retrieveTriggerSource(trigger, table);
 			}
 		});
 	}
 
-	protected void retrieveTriggerSource(String triggerName)
+	protected void retrieveTriggerSource(String triggerName, String tableName)
 	{
 		if (this.dbConnection == null || this.reader == null) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
@@ -418,7 +419,15 @@ public class TriggerListPanel
 
 			try
 			{
-				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName);
+				TableIdentifier tbl = null;
+				if (tableName != null)
+				{
+					tbl = new TableIdentifier(tableName);
+					if (tbl.getCatalog() == null) tbl.setCatalog(currentCatalog);
+					if (tbl.getSchema() == null) tbl.setSchema(currentSchema);
+				}
+
+				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl);
 				source.setText(sql == null ? "" : sql);
 			}
 			catch (Throwable ex)
@@ -485,6 +494,11 @@ public class TriggerListPanel
 			// name. So it should be save to apply the same algorithm to
 			// build a correctly qualified name
 			TriggerDefinition trg = new TriggerDefinition(currentCatalog, currentSchema, name);
+			String tableName = triggerList.getValueAsString(rows[i], TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
+			if (tableName != null)
+			{
+				trg.setRelatedTable(new TableIdentifier(tableName));
+			}
 			objects.add(trg);
 		}
 		return objects;

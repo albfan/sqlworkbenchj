@@ -10,6 +10,7 @@
  */
 package workbench.db.postgres;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
@@ -25,6 +26,7 @@ import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -42,6 +44,59 @@ public class PostgresTableSourceBuilder
 	{
 		super(con);
 	}
+
+	@Override
+	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	{
+		if (table == null) return null;
+
+		StringBuilder result = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = "select bt.relname as table_name, bns.nspname as table_schema \n" +
+             "from pg_class ct \n" +
+             "    join pg_namespace cns on ct.relnamespace = cns.oid and cns.nspname = ? \n" +
+             "    join pg_inherits i on i.inhrelid = ct.oid and ct.relname = ? \n" +
+             "    join pg_class bt on i.inhparent = bt.oid \n" +
+             "    join pg_namespace bns on bt.relnamespace = bns.oid";
+		try
+		{
+			pstmt = this.dbConnection.getSqlConnection().prepareStatement(sql);
+			pstmt.setString(1, table.getSchema());
+			pstmt.setString(2, table.getTableName());
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Using sql: " + pstmt.toString());
+			}
+			rs = pstmt.executeQuery();
+			if (rs.next())
+			{
+				result = new StringBuilder(50);
+				result.append("INHERITS (");
+
+				String tableName = rs.getString(1);
+				result.append(tableName);
+				while (rs.next())
+				{
+					tableName = rs.getString(1);
+					result.append(',');
+					result.append(tableName);
+				}
+				result.append(")");
+			}
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableOptioins()", "Error retrieving table options", e);
+			return null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, pstmt);
+		}
+		return (result == null ? null : result.toString());
+	}
+
 
 	@Override
 	public String getAdditionalColumnInformation(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)

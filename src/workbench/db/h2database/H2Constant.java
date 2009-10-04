@@ -104,6 +104,12 @@ public class H2Constant
 		return con.getMetadata().getObjectSource(this);
 	}
 
+	@Override
+	public String getDropStatement(WbConnection con)
+	{
+		return null;
+	}
+
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);

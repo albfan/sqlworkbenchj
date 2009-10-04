@@ -92,6 +92,12 @@ public class EnumIdentifier
 		return con.getMetadata().getObjectSource(this);
 	}
 
+	@Override
+	public String getDropStatement(WbConnection con)
+	{
+		return null;
+	}
+
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return enumName;

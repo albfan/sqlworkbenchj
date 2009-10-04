@@ -13,7 +13,7 @@ package workbench.db;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class GetMetaDataSql
 {
@@ -31,6 +31,14 @@ public class GetMetaDataSql
 	private int schemaArgumentPos;
 	private int catalogArgumentPos;
 	private int objectNameArgumentPos;
+
+	private String baseObjectName;
+	private String baseObjectCatalog;
+	private String baseObjectSchema;
+
+	private String baseObjectNameField;
+	private String baseObjectCatalogField;
+	private String baseObjectSchemaField;
 
 	public String getSql()
 	{
@@ -64,6 +72,7 @@ public class GetMetaDataSql
 			sql.append(schemaField + " = '" + getNameValue(schema) + "'");
 			needsAnd = true;
 		}
+
 		if (catalog != null && catalogField != null)
 		{
 			if (needsWhere)
@@ -75,6 +84,7 @@ public class GetMetaDataSql
 			sql.append(catalogField + " = '" + getNameValue(catalog) + "'");
 			needsAnd = true;
 		}
+
 		if (objectName != null && objectNameField != null)
 		{
 			if (needsWhere)
@@ -84,7 +94,27 @@ public class GetMetaDataSql
 			}
 			if (needsAnd) sql.append(" AND ");
 			sql.append(objectNameField + " = '" + getNameValue(objectName) + "'");
+			needsAnd = true;
 		}
+
+		if (baseObjectName != null && baseObjectNameField != null)
+		{
+			sql.append(" AND ");
+			sql.append(baseObjectNameField + " = '" + getNameValue(baseObjectName ) + "'");
+		}
+
+		if (baseObjectCatalog != null && baseObjectCatalogField != null)
+		{
+			sql.append(" AND ");
+			sql.append(baseObjectCatalogField + " = '" + getNameValue(baseObjectCatalog) + "'");
+		}
+
+		if (baseObjectSchema != null && baseObjectSchemaField != null)
+		{
+			sql.append(" AND ");
+			sql.append(baseObjectSchemaField + " = '" + getNameValue(baseObjectSchema) + "'");
+		}
+
 		if (this.orderBy != null)
 		{
 			sql.append(" " + this.orderBy);
@@ -269,4 +299,65 @@ public class GetMetaDataSql
 	{
 		this.objectNameArgumentPos = pos;
 	}
+
+	public String getBaseObjectCatalog()
+	{
+		return baseObjectCatalog;
+	}
+
+	public void setBaseObjectCatalog(String baseObjectCatalog)
+	{
+		this.baseObjectCatalog = baseObjectCatalog;
+	}
+
+	public String getBaseObjectCatalogField()
+	{
+		return baseObjectCatalogField;
+	}
+
+	public void setBaseObjectCatalogField(String baseObjectCatalogField)
+	{
+		this.baseObjectCatalogField = baseObjectCatalogField;
+	}
+
+	public String getBaseObjectName()
+	{
+		return baseObjectName;
+	}
+
+	public void setBaseObjectName(String baseObjectName)
+	{
+		this.baseObjectName = baseObjectName;
+	}
+
+	public String getBaseObjectNameField()
+	{
+		return baseObjectNameField;
+	}
+
+	public void setBaseObjectNameField(String baseObjectNameField)
+	{
+		this.baseObjectNameField = baseObjectNameField;
+	}
+
+	public String getBaseObjectSchema()
+	{
+		return baseObjectSchema;
+	}
+
+	public void setBaseObjectSchema(String baseObjectSchema)
+	{
+		this.baseObjectSchema = baseObjectSchema;
+	}
+
+	public String getBaseObjectSchemaField()
+	{
+		return baseObjectSchemaField;
+	}
+
+	public void setBaseObjectSchemaField(String baseObjectSchemaField)
+	{
+		this.baseObjectSchemaField = baseObjectSchemaField;
+	}
+
 }

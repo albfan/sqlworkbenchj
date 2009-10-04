@@ -16,7 +16,7 @@ import workbench.util.SqlUtil;
 
 /**
  * The definition of a trigger in the database.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class TriggerDefinition
@@ -28,7 +28,8 @@ public class TriggerDefinition
 	private String comment;
 	private String type;
 	private String event;
-//	private TableIdentifier table;
+	private TableIdentifier table;
+	private CharSequence source;
 
 	public TriggerDefinition(String cat, String schem, String name)
 	{
@@ -47,42 +48,89 @@ public class TriggerDefinition
 		comment = c;
 	}
 
+	/**
+	 * Define the event that makes this trigger fire (e.g. UPDATE, INSERT, DELETE)
+	 * @param evt
+	 */
 	public void setTriggerEvent(String evt)
 	{
 		event = evt;
 	}
 
+	/**
+	 * Returns the event that makes this trigger fire (e.g. UPDATE, INSERT, DELETE)
+	 * @param evt
+	 */
 	public String getTriggerEvent()
 	{
 		return event;
 	}
 
+	/**
+	 * Define the type of trigger (BEFORE/AFTER)
+	 * @param evt
+	 */
 	public void setTriggerType(String typ)
 	{
 		type = typ;
 	}
 
+	/**
+	 * Return the type of the trigger (BEFORE/AFTER)
+	 * @param evt
+	 */
 	public String getTriggerType()
 	{
 		return type;
 	}
 
-//	public void setRelatedTable(TableIdentifier tbl)
-//	{
-//		table = tbl;
-//	}
-//
-//	public TableIdentifier getRelatedTable()
-//	{
-//		return table;
-//	}
+	public void setRelatedTable(TableIdentifier tbl)
+	{
+		table = tbl;
+	}
+
+	public TableIdentifier getRelatedTable()
+	{
+		return table;
+	}
+
+	@Override
+	public String getDropStatement(WbConnection con)
+	{
+		String ddl = con.getDbSettings().getDropDDL(getObjectType(), false);
+		if (ddl == null) return null;
+
+		// getDropDDL can also return a generic DROP statement that only
+		// includes the %name% placeholder (because it's not based on a configured
+		// property, but is created dynamically)
+		ddl = ddl.replace("%name%", triggerName);
+
+		// specialized statements have different placeholders
+		ddl = ddl.replace("%trigger_name%", triggerName);
+		ddl = ddl.replace("%trigger_schema%", schema);
+		if (table != null)
+		{
+			ddl = ddl.replace("%trigger_table%", table.getTableExpression(con));
+		}
+		return ddl;
+	}
+
+	public void setSource(CharSequence src)
+	{
+		source = src;
+	}
+
+	public CharSequence getSource()
+	{
+		return source;
+	}
 
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
 		if (con == null) return null;
 		TriggerReader reader = new TriggerReader(con);
-		return reader.getTriggerSource(catalog, schema, triggerName);
+		return reader.getTriggerSource(catalog, schema, triggerName, table);
 	}
 
 	public String getSchema()
@@ -109,7 +157,7 @@ public class TriggerDefinition
 	{
 		return getObjectExpression(conn);
 	}
-	
+
 	public String getObjectExpression(WbConnection conn)
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, triggerName);

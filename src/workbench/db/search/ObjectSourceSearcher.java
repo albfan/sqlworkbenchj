@@ -1,11 +1,11 @@
 /*
  * ObjectSourceSearcher
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.search;
@@ -19,8 +19,6 @@ import workbench.db.DbObject;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
-import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceBuilderFactory;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
@@ -40,13 +38,13 @@ public class ObjectSourceSearcher
 	private Set<String> types;
 	private List<String> names;
 	private WbConnection connection;
-	
+
 	private List<DbObject> searchResult;
 	private RowActionMonitor monitor;
 	private boolean cancelSearch;
 	private boolean isRunning;
 	private int numSearched;
-	
+
 	public ObjectSourceSearcher(WbConnection con)
 	{
 		connection = con;
@@ -59,7 +57,7 @@ public class ObjectSourceSearcher
 	{
 		return numSearched;
 	}
-	
+
 	public void setRowMonitor(RowActionMonitor mon)
 	{
 		monitor = mon;
@@ -79,7 +77,7 @@ public class ObjectSourceSearcher
 	{
 		return schemas.size();
 	}
-	
+
 	/**
 	 * Sets the given types to the list of types to be searched
 	 * <br/>
@@ -122,7 +120,7 @@ public class ObjectSourceSearcher
 		if (types.contains("*")) return true;
 		return types.contains(toCheck);
 	}
-	
+
 	/**
 	 * Searches all objects for the given search string(s)
 	 * If multiple search strings are given, the parameter matchAll
@@ -133,7 +131,7 @@ public class ObjectSourceSearcher
 	 * @param caseSensitive  if true, the patterns must match exactly
 	 * @return
 	 */
-	public synchronized List<DbObject> searchObjects(List<String> searchValues, 
+	public synchronized List<DbObject> searchObjects(List<String> searchValues,
 		boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
 		cancelSearch = false;
@@ -163,7 +161,7 @@ public class ObjectSourceSearcher
 				typesToRetrieve.remove("trigger");
 				searchList(trigger, searchValues, matchAll, ignoreCase, useRegex);
 			}
-			
+
 			if (cancelSearch) return null;
 
 			if (typeIncluded("procedure", typesToRetrieve) || typeIncluded("function", typesToRetrieve))
@@ -199,7 +197,7 @@ public class ObjectSourceSearcher
 		return searchResult;
 	}
 
-	private void searchList(List<DbObject> toSearch, List<String> searchValues, 
+	private void searchList(List<DbObject> toSearch, List<String> searchValues,
 		boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
 		if (monitor != null)
@@ -281,7 +279,7 @@ public class ObjectSourceSearcher
 		for (String schema : schemas)
 		{
 			if (cancelSearch) return null;
-			List<TriggerDefinition> triggers = trgReader.getTriggerList(null, schema);
+			List<TriggerDefinition> triggers = trgReader.getTriggerList(null, schema, null);
 			result.addAll(triggers);
 		}
 		return result;
@@ -309,7 +307,7 @@ public class ObjectSourceSearcher
 				i++;
 			}
 		}
-		
+
 		for (String schema : schemas)
 		{
 			for (String name : names)

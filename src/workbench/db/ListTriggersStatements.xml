@@ -2,8 +2,8 @@
 <java version="1.5" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
   <void method="put">
-   <string>Cloudscape</string>
-   <object id="list_cloudscape_trg" class="workbench.db.GetMetaDataSql">
+   <string>Apache Derby</string>
+   <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
 SELECT trg.triggername as trigger_name,
@@ -13,7 +13,7 @@ SELECT trg.triggername as trigger_name,
             else case when trg.event = 'I' then 'INSERT'
                  else case when trg.event = 'U' THEN 'UPDATE' end
             end
-       end as trigger_event
+       end as trigger_event, t.tablename as trigger_table
 from sys.systriggers trg, sys.systables t, sys.sysschemas s
 where trg.tableid = t.tableid
 and   t.schemaid = s.schemaid
@@ -29,6 +29,11 @@ and   t.schemaid = s.schemaid
      <string>s.schemaname</string>
     </void>
    </object>
+  </void>
+
+  <void method="put">
+   <string>Cloudscape</string>
+   <object idref="list_derby_trg"/>
   </void>
 
   <!-- DB2 for z/OS identifies itself as DB2 -->
@@ -112,9 +117,9 @@ from syscat.triggers</string>
 	
   <void method="put">
    <string>Oracle</string>
-   <object class="workbench.db.GetMetaDataSql">
+   <object id="list_oracle_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers</string>
+     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event, table_name FROM all_triggers</string>
     </void>
     <void property="objectNameField">
      <string>table_name</string>
@@ -127,15 +132,15 @@ from syscat.triggers</string>
     </void>
    </object>
   </void>
-  
-  <void method="put"> 
-   <string>Apache Derby</string> 
-   <object idref="list_cloudscape_trg"/> 
-  </void> 
-  
+
+  <void method="put">
+   <string>Oracle8</string>
+   <object idref="list_oracle_trg"/>
+  </void>
+
   <void method="put"> 
    <string>Adaptive Server Enterprise</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+   <object id="list_asa_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql"> 
      <string>select trigname as trigger_name, trigtime as trigger_type, event from systriggers</string> 
     </void> 
@@ -150,17 +155,7 @@ from syscat.triggers</string>
 	
   <void method="put"> 
    <string>Adaptive Server Anywhere</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>select trigname as trigger_name, trigtime as trigger_type, event from systriggers</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>tname</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string>ORDER BY trigger_name</string> 
-    </void> 
-   </object> 
+   <object idref="list_asa_trg"/>
   </void> 
   
   <void method="put"> 
@@ -184,23 +179,6 @@ from syscat.triggers</string>
    </object> 
   </void> 
 
-  <void method="put">
-   <string>Oracle8</string>
-   <object class="workbench.db.GetMetaDataSql">
-    <void property="baseSql">
-     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM all_triggers</string>
-    </void>
-    <void property="objectNameField">
-     <string>table_name</string>
-    </void>
-    <void property="orderBy">
-     <string>ORDER BY trigger_name</string>
-    </void>
-    <void property="schemaField">
-     <string>owner</string>
-    </void>
-   </object>
-  </void>
 	
   <void method="put">
    <string>Microsoft SQL Server</string>
@@ -216,7 +194,7 @@ from syscat.triggers</string>
 	   when ObjectProperty( tr.id, 'ExecIsUpdateTrigger') then 'UPDATE'
 	   when ObjectProperty( tr.id, 'ExecIsDeleteTrigger') then 'DELETE'
      when ObjectProperty( tr.id, 'ExecIsInsertTrigger') then 'INSERT'
-  end as trigger_event
+  end as trigger_event, tab.name as table_name
 	from sysobjects tr, sysobjects tab
 	where tab.id = tr.parent_obj
 	 and  tr.xtype = 'TR'
@@ -233,7 +211,7 @@ from syscat.triggers</string>
 	
   <void method="put"> 
    <string>PostgreSQL</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+   <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql"> 
      <string>select trg.tgname,  
        case trg.tgtype &amp; cast(2 as int2) 
@@ -248,7 +226,8 @@ from syscat.triggers</string>
          when 28 then &apos;INSERT, UPDATE, DELETE&apos; 
          when 24 then &apos;UPDATE, DELETE&apos; 
          when 12 then &apos;INSERT, DELETE&apos; 
-       end as trigger_event 
+       end as trigger_event,
+       tbl.relname as table_name
 from pg_trigger trg, pg_class tbl 
 where trg.tgrelid = tbl.oid
 and trg.tgname not like 'RI_ConstraintTrigger%'
@@ -270,7 +249,8 @@ and trg.tgname not like 'pg_sync_pg%'
     <void property="baseSql"> 
      <string>SELECT trigger_name,
                     action_timing AS trigger_type,
-                    event_manipulation as trigger_event
+                    event_manipulation as trigger_event,
+                    event_object_table as trigger_table
              FROM information_schema.triggers
       </string> 
     </void> 
@@ -290,9 +270,12 @@ and trg.tgname not like 'pg_sync_pg%'
    <string>H2</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT trigger_name, trigger_type, 
-   case before when 'true' then 'BEFORE' else 'AFTER' end as trigger_event 
-   from information_schema.triggers</string> 
+     <string>
+        SELECT trigger_name,
+               trigger_type,
+               case before when 'true' then 'BEFORE' else 'AFTER' end as trigger_event,
+               table_name as trigger_table
+        FROM information_schema.triggers</string>
     </void> 
     <void property="objectNameField"> 
      <string>table_name</string> 
@@ -307,7 +290,11 @@ and trg.tgname not like 'pg_sync_pg%'
    <string>HSQL Database Engine</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT trigger_name, trigger_type, triggering_event as trigger_event FROM information_schema.system_triggers</string>
+     <string>
+       SELECT trigger_name,
+              trigger_type,
+              triggering_event as trigger_event, table_name as trigger_table
+      FROM information_schema.system_triggers</string>
     </void> 
     <void property="objectNameField"> 
      <string>table_name</string> 
@@ -322,7 +309,12 @@ and trg.tgname not like 'pg_sync_pg%'
    <string>HSQL Database Engine 1.9</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT trigger_name, EVENT_MANIPULATION as trigger_type, ACTION_STATEMENT as trigger_event FROM information_schema.triggers</string>
+     <string>
+       SELECT trigger_name,
+              action_timing as trigger_type,
+              event_manipulation as trigger_event,
+              event_object_table as trigger_table
+       FROM information_schema.triggers</string>
     </void>
     <void property="objectNameField">
      <string>table_name</string>
@@ -337,26 +329,30 @@ and trg.tgname not like 'pg_sync_pg%'
    <string>Firebird</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT rdb$trigger_name AS TRIGGER_NAME,
-       case rdb$trigger_type 
-          when 0 then 'UNKNOWN'
-          when 1 then 'BEFORE'
-          when 2 then 'AFTER'
-          when 3 then 'BEFORE'
-          when 4 then 'AFTER'
-          when 5 then 'BEFORE'
-          when 6 then 'AFTER'
-       END AS trigger_type,
-       case rdb$trigger_type 
-          when 0 then 'UNKNOWN'
-          when 1 then 'INSERT'
-          when 2 then 'INSERT'
-          when 3 then 'UPDATE'
-          when 4 then 'UPDATE'
-          when 5 then 'DELETE'
-          when 6 then 'DELETE'
-       END AS trigger_event
-FROM rdb$triggers
+     <string>
+       SELECT rdb$trigger_name AS TRIGGER_NAME,
+          case
+            when rdb$trigger_type = 0 then 'UNKNOWN'
+            when mod(rdb$trigger_type, 2) = 0 then 'AFTER'
+          else 'BEFORE'
+          END AS trigger_type,
+          case bin_and(rdb$trigger_type + 1, 254)
+             when  2 then 'INSERT'
+             when  4 THEN 'UPDATE'
+             when  6 then 'DELETE'
+             when  18 then 'INSERT OR UPDATE'
+             when  26 then 'INSERT OR DELETE'
+             when  12 then 'UPDATE OR INSERT'
+             when  28 then 'UPDATE OR DELETE'
+             when  14 then 'DELETE OR INSERT'
+             when  22 then 'DELETE OR UPDATE'
+             when  114 then 'INSERT OR UPDATE OR DELETE'
+             when  60 then 'UPDATE OR DELETE OR INSERT'
+             when  78 then 'DELETE OR INSERT OR UPDATE'
+          end as trigger_event,
+          trim(rdb$relation_name) as trigger_table
+    FROM rdb$triggers
+    WHERE rdb$system_flag = 0
 </string> 
     </void> 
     <void property="objectNameField"> 

@@ -100,6 +100,9 @@
   <void method="put">
    <string>PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
+    <void property="baseObjectNameField">
+     <string>tbl.relname</string>
+    </void>
     <void property="baseSql">
      <string>SELECT 'create trigger '|| trg.tgname || ' '||
        case trg.tgtype &amp; cast(2 as int2) 
@@ -117,9 +120,9 @@
        end || chr(10) || 'on ' || tbl.relname
        || ' for each row execute procedure '
        ||src.proname 
-       || '();'|| chr(10) || chr(10) || '--- Source for '
+       || '();'|| chr(10) || chr(10) || '---&lt; Source for '
        || src.proname
-       || ' ---' || chr(10)
+       || ' &gt;---' || chr(10)
        || 'CREATE OR REPLACE FUNCTION '||src.proname||'() RETURNS TRIGGER AS'||chr(10)||'$$'||chr(10)
        || src.prosrc 
        || '$$'||chr(10)||'language '''||l.lanname||''''
@@ -153,8 +156,12 @@ where trg.tgrelid = tbl.oid
   <void method="put"> 
    <string>MySQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 
+    <void property="baseObjectNameField">
+     <string>event_object_table</string>
+    </void>
     <void property="baseSql"> 
-     <string>SELECT concat('CREATE TRIGGER ',trigger_name, ' ', action_timing, ' ', event_manipulation, '\n  ON ', event_object_table, '\n  FOR EACH ROW', action_statement) FROM information_schema.triggers</string> 
+     <string>SELECT concat('CREATE TRIGGER ',trigger_name, ' ', action_timing, ' ', event_manipulation, '\n  ON ', event_object_table, '\n  FOR EACH ROW', action_statement)
+     FROM information_schema.triggers</string>
     </void> 
     <void property="objectNameField"> 
      <string>trigger_name</string> 
@@ -185,7 +192,23 @@ where trg.tgrelid = tbl.oid
    <string>HSQL Database Engine 1.9</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>SELECT description FROM information_schema.triggers</string>
+     <string>SELECT 'CREATE TRIGGER '||trigger_name||'\n'||
+       action_timing||' '||event_manipulation||' ON '||event_object_table||'\n'||
+       case
+          when action_reference_new_row is not null then
+          'REFERENCING NEW ROW AS '||action_reference_new_row
+          else ''
+       end||'\n'||
+       trim(case
+         when action_orientation = 'ROW' then 'FOR EACH ROW '
+         else 'FOR EACH STATEMENT '
+       end)||
+       case
+         when action_condition is not null then ' WHEN ('||action_condition||')'
+         else ''
+       end||'\n'||
+       trim(action_statement)
+FROM information_schema.triggers</string>
     </void>
     <void property="objectNameField">
      <string>trigger_name</string>
@@ -246,7 +269,26 @@ and  sysobjects.type = &apos;TR&apos;</string>
    <string>Firebird</string> 
    <object class="workbench.db.GetMetaDataSql"> 
     <void property="baseSql"> 
-     <string>SELECT rdb$trigger_source FROM rdb$triggers</string> 
+     <string>SELECT 'CREATE TRIGGER '||trim(rdb$trigger_name)||'\n'||
+          trim(case
+            when mod(rdb$trigger_type, 2) = 0 then 'AFTER'
+          else 'BEFORE'
+          END) ||' '||
+          trim(case bin_and(rdb$trigger_type + 1, 254)
+             when  2 then 'INSERT'
+             when  4 THEN 'UPDATE'
+             when  6 then 'DELETE'
+             when  18 then 'INSERT OR UPDATE'
+             when  26 then 'INSERT OR DELETE'
+             when  12 then 'UPDATE OR INSERT'
+             when  28 then 'UPDATE OR DELETE'
+             when  14 then 'DELETE OR INSERT'
+             when  22 then 'DELETE OR UPDATE'
+             when  114 then 'INSERT OR UPDATE OR DELETE'
+             when  60 then 'UPDATE OR DELETE OR INSERT'
+             when  78 then 'DELETE OR INSERT OR UPDATE'
+          end)||' \n'||rdb$trigger_source
+          FROM rdb$triggers</string>
     </void> 
     <void property="objectNameField"> 
      <string>rdb$trigger_name</string> 
