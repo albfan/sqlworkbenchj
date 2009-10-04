@@ -11,8 +11,8 @@
 package workbench.db.diff;
 
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.util.CollectionUtil;
@@ -23,26 +23,12 @@ import workbench.util.StrBuffer;
  * @author Thomas Kellerer
  */
 public class TriggerListDiffTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public TriggerListDiffTest(String testName)
 	{
 		super(testName);
-	}
-
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
 	}
 
 	public void testWriteXml()
@@ -87,6 +73,7 @@ public class TriggerListDiffTest
 		List<TriggerDefinition> toCompare = CollectionUtil.arrayList(oneC, twoC, threeC);
 
 		TriggerListDiff diff = new TriggerListDiff(reference, toCompare);
+		assertTrue(diff.hasChanges());
 		StrBuffer result = new StrBuffer(500);
 		result.append("<triggers>\n"); // make the result valid XML
 
@@ -104,6 +91,6 @@ public class TriggerListDiffTest
 
 		count = TestUtil.getXPathValue(xml, "count(/triggers/create-trigger/trigger-def[trigger-name='trg_to_add'])");
 		assertEquals("1", count);
-
 	}
+
 }

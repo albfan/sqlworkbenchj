@@ -70,6 +70,7 @@ public class WbSchemaDiff
 		cmdLine.addArgument(ARG_INCLUDE_VIEWS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_PROCS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_GRANTS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_DIFF_JDBC_TYPES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_VIEWS_AS_TABLES, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
@@ -139,6 +140,7 @@ public class WbSchemaDiff
 		diff.setIncludeSequences(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_SEQUENCES, false));
 		diff.setTreatViewAsTable(cmdLine.getBoolean(ARG_VIEWS_AS_TABLES, false));
 		diff.setCompareConstraintsByName(cmdLine.getBoolean(ARG_COMPARE_CHK_CONS_BY_NAME, true));
+		diff.setIncludeTriggers(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, true));
 		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);

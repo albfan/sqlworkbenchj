@@ -33,6 +33,26 @@ public class TriggerListDiff
 		this.targetTriggers = toCompare;
 	}
 
+	public boolean hasChanges()
+	{
+		for (TriggerDefinition cmp : targetTriggers)
+		{
+			TriggerDefinition ref = findTrigger(cmp.getObjectName(), referenceTriggers);
+			if (ref == null)
+			{
+				return true;
+			}
+		}
+		for (TriggerDefinition ref : referenceTriggers)
+		{
+			TriggerDefinition cmp = findTrigger(ref.getObjectName(), targetTriggers);
+			ReportTrigger rref = new ReportTrigger(ref);
+			ReportTrigger rcmp = (cmp == null ? null : new ReportTrigger(cmp));
+			TriggerDiff trgDiff = new TriggerDiff(rref, rcmp);
+			if (trgDiff.isDifferent()) return true;
+		}
+		return false;
+	}
 
 	private TriggerDefinition findTrigger(String name, List<TriggerDefinition> toSearch)
 	{

@@ -33,47 +33,51 @@ public class TriggerDiff
 		reference = ref;
 		target = tar;
 	}
+
+	public boolean isDifferent()
+	{
+		TriggerDefinition trgRef = reference.getTrigger();
+		TriggerDefinition trgTarget = (target != null ? target.getTrigger() : null);
+
+		boolean isDifferent = false;
+		boolean isNew = trgTarget == null;
+
+		if (isNew)
+		{
+			return true;
+		}
+		CharSequence refSource = trgRef.getSource();
+		CharSequence targetSource = trgTarget.getSource();
+
+		isDifferent = !(refSource != null ? refSource.equals(targetSource) : false);
+		isDifferent = isDifferent || !trgRef.getTriggerEvent().equals(trgTarget.getTriggerEvent());
+		isDifferent = isDifferent || !trgRef.getTriggerType().equals(trgTarget.getTriggerType());
+
+		return isDifferent;
+	}
 	
 	public StrBuffer getMigrateTargetXml(StrBuffer indent)
 	{
 		StrBuffer result = null;
 		TagWriter writer = new TagWriter();
 		
-		boolean isDifferent = true;
+		boolean isDifferent = isDifferent();
+		if (!isDifferent) return null;
 
-		TriggerDefinition trgRef = reference.getTrigger();
 		TriggerDefinition trgTarget = (target != null ? target.getTrigger() : null);
-
 		boolean isNew = trgTarget == null;
-		
-		String tagToUse = null;
 
-		if (isNew)
-		{
-			tagToUse = TAG_CREATE_TRIGGER;
-		}
-		else
-		{
-			tagToUse = TAG_UPDATE_TRIGGER;
-			CharSequence refSource = trgRef.getSource();
-			CharSequence targetSource = trgTarget.getSource();
-
-			isDifferent = !(refSource != null ? refSource.equals(targetSource) : false);
-			isDifferent = isDifferent || !trgRef.getTriggerEvent().equals(trgTarget.getTriggerEvent());
-			isDifferent = isDifferent || !trgRef.getTriggerType().equals(trgTarget.getTriggerType());
-		}
+		String tagToUse = (isNew ? TAG_CREATE_TRIGGER : TAG_UPDATE_TRIGGER);
 		
-		if (isDifferent)
-		{
-			StrBuffer myIndent = new StrBuffer(indent);
-			myIndent.append("  ");
-			result = new StrBuffer();
-			writer.appendOpenTag(result, indent, tagToUse);
-			result.append('\n');
-			reference.setIndent(myIndent);
-			result.append(reference.getXml());
-			writer.appendCloseTag(result, indent, tagToUse);
-		}
+		StrBuffer myIndent = new StrBuffer(indent);
+		myIndent.append("  ");
+		result = new StrBuffer();
+		writer.appendOpenTag(result, indent, tagToUse);
+		result.append('\n');
+		reference.setIndent(myIndent);
+		result.append(reference.getXml());
+		writer.appendCloseTag(result, indent, tagToUse);
+		
 		return result;
 	}	
 

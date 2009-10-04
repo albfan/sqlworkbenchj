@@ -143,6 +143,17 @@ public class TableDiff
 		List<TableConstraint> modifiedConstraints = getModifiedConstraints();
 		List<TableConstraint> constraintsToDelete = getConstraintsToDelete();
 
+		List<TriggerDefinition> refTriggers = referenceTable.getTriggers();
+		List<TriggerDefinition> tarTriggers = targetTable.getTriggers();
+
+		boolean triggersDifferent = false;
+		TriggerListDiff trgDiff = null;
+		if (!CollectionUtil.isEmpty(refTriggers) || !CollectionUtil.isEmpty(tarTriggers))
+		{
+			trgDiff = new TriggerListDiff(refTriggers, tarTriggers);
+			triggersDifferent = trgDiff.hasChanges();
+		}
+
 		boolean constraintsAreEqual =
 			(missingConstraints.size() == 0 &&
 			modifiedConstraints.size() == 0 &&
@@ -160,7 +171,7 @@ public class TableDiff
 
 		if (colDiff.length() == 0 && !rename && colsToBeAdded.size() == 0
 			  && colsToBeRemoved.size() == 0 && refPk.equals(tPk) && constraintsAreEqual
-				&& !indexDifferent && !grantDifferent)
+				&& !indexDifferent && !grantDifferent && !triggersDifferent)
 		{
 			return result;
 		}
@@ -239,7 +250,10 @@ public class TableDiff
 			result.append(indexDiff);
 		}
 
-		appendTriggerDiff(result, indent);
+		if (triggersDifferent && trgDiff != null)
+		{
+			trgDiff.writeXml(myindent, result);
+		}
 		
 		if (grantDifferent)
 		{
@@ -250,16 +264,7 @@ public class TableDiff
 		return result;
 	}
 
-	private void appendTriggerDiff(StrBuffer result, StrBuffer trgIndent)
-	{
-		List<TriggerDefinition> refTriggers = referenceTable.getTriggers();
-		List<TriggerDefinition> tarTriggers = targetTable.getTriggers();
 
-		if (CollectionUtil.isEmpty(refTriggers) && CollectionUtil.isEmpty(tarTriggers)) return;
-		TriggerListDiff trgDiff = new TriggerListDiff(refTriggers, tarTriggers);
-		trgDiff.writeXml(trgIndent, result);
-	}
-	
 	private void writeConstraints(List<TableConstraint> constraints, StrBuffer result, String tag, StrBuffer indent)
 	{
 		if (constraints.size() == 0) return;

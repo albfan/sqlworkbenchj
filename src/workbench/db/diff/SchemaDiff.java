@@ -124,6 +124,11 @@ public class SchemaDiff
 		this.compareConstraintsByName = flag;
 	}
 
+	public void setIncludeTriggers(boolean flag)
+	{
+		this.diffTriggers = flag;
+	}
+	
 	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
 	public boolean getIncludeSequences() { return this.diffSequences; }
 

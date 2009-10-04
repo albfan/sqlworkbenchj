@@ -94,6 +94,13 @@
 					</entry>
 				</row>
 				<row>
+					<entry>-includeTriggers</entry>
+					<entry>
+            This parameter controls if table triggers are added to the output.
+						The default value is <literal>true</literal>.
+					</entry>
+				</row>
+				<row>
 					<entry>-includeSequences</entry>
 					<entry>Control the output of sequence information for the report. The default is
 						<literal>false</literal>. Valid values are <literal>true</literal>, <literal>false</literal>.
@@ -123,7 +130,8 @@
   <section id="command-schema-diff">
     <title>Compare two database schemas - WbSchemaDiff</title>
 
-    <para>The <literal>WbSchemaDiff</literal> analyzes two schemas (or a list of tables)
+    <para>
+      <literal>WbSchemaDiff</literal> analyzes two schemas (or a list of tables)
       and outputs the differences between those schemas as an XML file. The XML file
       describes the changes that need to be applied to the target schema to have
       the same structure as the reference schema, e.g. modify column definitions,
@@ -267,8 +275,17 @@
 
 				<row>
 					<entry>-includeTableGrants</entry>
-					<entry>Select whether table grants should be compared as well.
+					<entry>
+            Select whether table grants should be compared as well.
 						The default is <literal>false</literal>.
+					</entry>
+				</row>
+
+				<row>
+					<entry>-includeTriggers</entry>
+					<entry>
+            Select whether table triggers are compared as well.
+						The default value is <literal>true</literal>.
 					</entry>
 				</row>
 
