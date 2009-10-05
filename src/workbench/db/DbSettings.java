@@ -241,6 +241,11 @@ public class DbSettings
 		return verb;
 	}
 
+	public boolean useCatalogInDML()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "catalog.dml", true);
+	}
+	
 	public boolean needsCatalogIfNoCurrent()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "catalog.neededwhenempty", false);

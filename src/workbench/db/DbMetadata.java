@@ -691,11 +691,14 @@ public class DbMetadata
 	{
 		if (this.isAccess) return true;
 		if (!this.supportsCatalogs()) return false;
+		if (!dbSettings.useCatalogInDML()) return false;
 
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
+		if (ignoreCatalog(cat)) return false;
+		
 		String currentCat = getCurrentCatalog();
-
+		
 		if (this.isExcel)
 		{
 			// Excel puts the directory into the catalog
