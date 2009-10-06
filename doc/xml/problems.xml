@@ -124,6 +124,16 @@
 			</para>
 		</section>
 
+    <section id="oracle-date-time">
+      <title>Time for DATE columns is not displayed</title>
+      <para>
+        A <literal>DATE</literal> column in Oracle always contains a time as well. If you are not seeing
+        the time (or just 00:00:00) for a date column but you know there is a different time stored, please enable the 
+        option "Oracle DATE as Timestamp" in the "Data formatting" section of the Options dialog 
+        (<menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>)
+      </para>
+    </section>
+    
 		<section id="oracle-comment-problems">
 			<title>Error: "missing mandatory parameter"</title>
 			<para>
