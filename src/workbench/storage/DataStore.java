@@ -1832,6 +1832,21 @@ public class DataStore
 		return null;
 	}
 
+	public int getDeletedRowCount()
+	{
+		if (this.deletedRows == null) return 0;
+		return deletedRows.size();
+	}
+	
+	public Object getDeletedValue(int row, int col)
+	{
+		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;
+		int count = this.deletedRows.size();
+		if (row > count) return null;
+		RowData data = this.deletedRows.get(row);
+		return data.getValue(col);
+	}
+	
 	protected RowData getNextDeletedRow()
 	{
 		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;

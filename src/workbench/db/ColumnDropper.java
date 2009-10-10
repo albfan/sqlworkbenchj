@@ -114,7 +114,7 @@ public class ColumnDropper
 
 	public CharSequence getScript()
 	{
-		List<String> statements = getSql();
+		List<String> statements = getSql(table, columns, conn);
 		StringBuffer result = new StringBuffer(statements.size() * 40);
 		boolean needCommit = (conn != null ? conn.shouldCommitDDL() : false);
 
@@ -135,7 +135,7 @@ public class ColumnDropper
 		if (this.table == null) return;
 		if (this.columns == null || this.columns.size() == 0) return;
 
-		List<String> statements = getSql();
+		List<String> statements = getSql(table, columns, conn);
 
 		try
 		{
@@ -175,19 +175,19 @@ public class ColumnDropper
 		}
 	}
 
-	private List<String> getSql()
+	public static List<String> getSql(TableIdentifier table, List<ColumnIdentifier> columns, WbConnection conn)
 	{
 		String multiSql = conn.getDbSettings().getDropMultipleColumnSql();
 		String singleSql = conn.getDbSettings().getDropSingleColumnSql();
 		List<String> result = new ArrayList<String>(columns.size());
 
-		if (this.columns.size() == 1 || StringUtil.isEmptyString(multiSql))
+		if (columns.size() == 1 || StringUtil.isEmptyString(multiSql))
 		{
 			singleSql = StringUtil.replace(singleSql, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, table.getTableExpression(conn));
 
 			for (ColumnIdentifier col : columns)
 			{
-				result.add(StringUtil.replace(singleSql, MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, col.getColumnName(this.conn)));
+				result.add(StringUtil.replace(singleSql, MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER, col.getColumnName(conn)));
 			}
 		}
 		else
@@ -199,7 +199,7 @@ public class ColumnDropper
 			for (ColumnIdentifier col : columns)
 			{
 				if (nr > 0) cols.append(", ");
-				cols.append(col.getColumnName(this.conn));
+				cols.append(col.getColumnName(conn));
 				nr ++;
 			}
 			result.add(StringUtil.replace(multiSql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, cols.toString()));

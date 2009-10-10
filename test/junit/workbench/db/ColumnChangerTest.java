@@ -74,6 +74,15 @@ public class ColumnChangerTest
 		sqls = changer.getAlterStatements(table, oldCol, newCol);
 		assertEquals(1, sqls.size());
 		assertEquals("ALTER TABLE PERSON ALTER COLUMN FIRST_NAME SET NOT NULL", sqls.get(0));
+
+		newCol = new ColumnIdentifier("PERSON_HOBBY", java.sql.Types.VARCHAR, false);
+		newCol.setDbmsType("VARCHAR(25)");
+		newCol.setDefaultValue("'Hitchhiking'");
+		newCol.setIsNullable(true);
+		sqls = changer.getAlterStatements(table, null, newCol);
+		assertEquals(1, sqls.size());
+		assertEquals("ALTER TABLE PERSON ADD COLUMN PERSON_HOBBY VARCHAR(25) DEFAULT 'Hitchhiking'", sqls.get(0).trim());
+
 	}
 
 

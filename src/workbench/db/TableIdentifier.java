@@ -296,11 +296,9 @@ public class TableIdentifier
 				catalogToUse = meta.getCurrentCatalog();
 			}
 
-			if (catalogToUse != null && !meta.ignoreCatalog(catalogToUse))
-			{
-				return catalogToUse;
-			}
-			return this.catalog;
+			if (meta.ignoreCatalog(catalogToUse)) return null;
+
+			return catalogToUse;
 		}
 		return null;
 	}

@@ -14,6 +14,8 @@ package workbench.gui.components;
 import java.awt.Toolkit;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import javax.swing.event.EventListenerList;
 import javax.swing.event.TableModelEvent;
@@ -46,7 +48,7 @@ public class DataStoreTableModel
 	private boolean showStatusColumn = false;
 	private int columnStartIndex = 0;
 
-	private int lockColumn = -1;
+	private List<Integer> noneditableColumns = new ArrayList<Integer>();
 
 	private SortDefinition sortColumns = new SortDefinition();
 
@@ -405,9 +407,9 @@ public class DataStoreTableModel
 
 	public boolean isCellEditable(int row, int column)
 	{
-		if (this.lockColumn > -1)
+		if (this.noneditableColumns.size() != 0)
 		{
-			return (column != lockColumn && this.allowEditing);
+			return (this.allowEditing && !noneditableColumns.contains(column));
 		}
 		else if (this.columnStartIndex > 0 && column < this.columnStartIndex)
 		{
@@ -432,7 +434,7 @@ public class DataStoreTableModel
 	 */
 	public void clearLockedColumn()
 	{
-		this.lockColumn = -1;
+		this.noneditableColumns.clear();
 	}
 
 	/**
@@ -443,7 +445,18 @@ public class DataStoreTableModel
 	 */
 	public void setLockedColumn(int column)
 	{
-		this.lockColumn = column;
+		clearLockedColumn();
+		this.noneditableColumns.add(column);
+	}
+
+	public void setNonEditableColums(int ... columns)
+	{
+		clearLockedColumn();
+		if (columns == null) return;
+		for (int col : columns)
+		{
+			if (col > -1) this.noneditableColumns.add(col);
+		}
 	}
 
 	public void setAllowEditing(boolean aFlag)

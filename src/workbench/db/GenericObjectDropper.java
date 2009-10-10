@@ -139,7 +139,7 @@ public class GenericObjectDropper
 
 		if (objectTable != null)
 		{
-			ddl = ddl.replace("%tablename%", objectTable.getTableExpression(this.connection));
+			ddl = ddl.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, objectTable.getTableExpression(this.connection));
 		}
 		ddl = ddl.replace("%name%", name);
 		sql.append(ddl);

@@ -43,7 +43,9 @@ import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
 import workbench.gui.actions.ColumnAlterAction;
 import workbench.gui.actions.CreatePKAction;
+import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.DropPKAction;
+import workbench.gui.actions.InsertRowAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.EmptyTableModel;
@@ -53,6 +55,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.RendererFactory;
+import workbench.interfaces.DbData;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -86,6 +89,9 @@ public class TableDefinitionPanel
 	private DropPKAction dropPKAction;
 	private ColumnAlterAction alterColumnsAction;
 	private TableIdentifier currentTable;
+	private InsertRowAction addColumn;
+	private DeleteRowAction deleteColumn;
+	
 	private WbConnection dbConnection;
 	private WbAction reloadAction;
 	private DropDbObjectAction dropColumnsAction;
@@ -139,7 +145,52 @@ public class TableDefinitionPanel
 		// as the column list will be updated automatically when the model of the table changes
 		columnFilter.setColumnList(TableColumnsDatastore.TABLE_DEFINITION_COLS);
 
-		columnFilter.addToToolbar(reloadAction, true, true);
+		DbData db = new DbData()
+		{
+			@Override
+			public long addRow()
+			{
+				return tableDefinition.addRow();
+			}
+
+			@Override
+			public void deleteRow()
+			{
+				tableDefinition.deleteRow();
+			}
+
+			@Override
+			public void deleteRowWithDependencies()
+			{
+			}
+
+			@Override
+			public boolean startEdit()
+			{
+				return true;
+			}
+
+			@Override
+			public int duplicateRow()
+			{
+				return -1;
+			}
+
+			@Override
+			public void endEdit()
+			{
+			}
+		};
+		addColumn = new InsertRowAction(db);
+		addColumn.initMenuDefinition("MnuTxtAddCol");
+		
+		deleteColumn = new DeleteRowAction(db);
+		deleteColumn.initMenuDefinition("MnuTxtDropColumn");
+
+		columnFilter.addToToolbar(addColumn, true, true);
+		columnFilter.addToToolbar(deleteColumn, 1);
+		columnFilter.addToToolbar(reloadAction, 0);
+		
 		GridBagConstraints cc = new GridBagConstraints();
 
 		cc.anchor = GridBagConstraints.WEST;
@@ -284,10 +335,16 @@ public class TableDefinitionPanel
 
 				if (def instanceof TableColumnsDatastore)
 				{
+					DataStoreTableModel dsModel = (DataStoreTableModel)model;
 					// Make sure some columns are not modified by the user
 					// to avoid the impression that e.g. the column's position
 					// can be changed by editing that column
-					((DataStoreTableModel)model).setValidator(validator);
+					dsModel.setValidator(validator);
+					
+					int typeIndex = dsModel.findColumn("java.sql.Types");
+					int posIndex = dsModel.findColumn("POSITION");
+					int pkIndex = dsModel.findColumn("PK");
+					dsModel.setNonEditableColums(typeIndex, posIndex, pkIndex);
 				}
 				alterButton.setVisible("TABLE".equalsIgnoreCase(currentTable.getType()));
 
@@ -300,6 +357,8 @@ public class TableDefinitionPanel
 				});
 				alterColumnsAction.setSourceTable(dbConnection, currentTable);
 				alterColumnsAction.setEnabled(false);
+				boolean canAddColumn = dbConnection.getDbSettings().getAddColumnSql() != null;
+				addColumn.setEnabled(canAddColumn && isTable());
 			}
 			catch (SQLException e)
 			{
@@ -411,6 +470,8 @@ public class TableDefinitionPanel
 		{
 			dropColumnsAction.setAvailable(false);
 		}
+
+		addColumn.setEnabled(false);
 	}
 
 	/**
@@ -547,12 +608,13 @@ public class TableDefinitionPanel
 		if (e.getSource() == this.tableDefinition.getSelectionModel())
 		{
 			boolean rowsSelected = (this.tableDefinition.getSelectedRowCount() > 0);
-			createIndexAction.setEnabled(rowsSelected);
 
 			boolean isTable = isTable();
 			boolean hasPk = hasPkColumn();
 			createPKAction.setEnabled(rowsSelected && isTable && !hasPk);
 			dropPKAction.setEnabled(isTable && hasPk);
+			createIndexAction.setEnabled(rowsSelected && isTable);
+			deleteColumn.setEnabled(rowsSelected && isTable);
 		}
 	}
 

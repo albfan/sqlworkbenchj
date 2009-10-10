@@ -130,7 +130,7 @@ public class JdbcIndexReader
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
 		StringBuilder idx = new StringBuilder();
-		String template = this.metaData.metaSqlMgr.getIndexTemplate();
+		String template = this.metaData.getDbSettings().getCreateIndexSQL();
 
 		int idxCount = 0;
 		for (int i = 0; i < count; i++)
@@ -193,7 +193,7 @@ public class JdbcIndexReader
 		if (columnList == null) return StringUtil.EMPTY_STRING;
 		int count = columnList.size();
 		if (count == 0) return StringUtil.EMPTY_STRING;
-		String template = this.metaData.metaSqlMgr.getIndexTemplate();
+		String template = this.metaData.getDbSettings().getCreateIndexSQL();
 		StringBuilder cols = new StringBuilder(count * 25);
 
 		for (int i=0; i < count; i++)

@@ -1,22 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <java version="1.5" class="java.beans.XMLDecoder">
  <object class="java.util.HashMap">
+   
   <void method="put">
    <string>Apache Derby</string>
    <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-SELECT trg.triggername as trigger_name,
-       case when trg.type ='A' then 'AFTER'
-       else 'BEFORE' end  as trigger_type ,
-       case when trg.event = 'D' then 'DELETE'
-            else case when trg.event = 'I' then 'INSERT'
-                 else case when trg.event = 'U' THEN 'UPDATE' end
-            end
-       end as trigger_event, t.tablename as trigger_table
-from sys.systriggers trg, sys.systables t, sys.sysschemas s
-where trg.tableid = t.tableid
-and   t.schemaid = s.schemaid
+       SELECT trg.triggername as trigger_name,
+             case
+                  when trg.type ='A' then 'AFTER'
+                  else 'BEFORE'
+             end  as trigger_type ,
+             case
+                when trg.event = 'D' then 'DELETE'
+                when trg.event = 'I' then 'INSERT'
+                when trg.event = 'U' THEN 'UPDATE'
+             end as trigger_event,
+             t.tablename as trigger_table
+       FROM sys.systriggers trg, sys.systables t, sys.sysschemas s
+       WHERE trg.tableid = t.tableid
+         AND t.schemaid = s.schemaid
      </string>
     </void>
     <void property="objectNameField">
@@ -36,6 +40,36 @@ and   t.schemaid = s.schemaid
    <object idref="list_derby_trg"/>
   </void>
 
+  <void method="put">
+   <string>Informix Dynamic Server</string>
+   <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+       SELECT trg.trigname as trigger_name,
+              case
+                 when trg.type ='A' then 'AFTER'
+                 else 'BEFORE'
+              end as trigger_type ,
+              case
+                when trg.event = 'D' then 'DELETE'
+                when trg.event = 'I' then 'INSERT'
+                when trg.event = 'U' THEN 'UPDATE'
+                else trg.event
+              end as trigger_event,
+              t.tabname as trigger_table
+       from informix.systriggers trg, informix.systables t
+       where trg.tabid = t.tabid
+     </string>
+    </void>
+    <void property="objectNameField">
+     <string>t.tabname</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY trg.trigname</string>
+    </void>
+   </object>
+  </void>
+
   <!-- DB2 for z/OS identifies itself as DB2 -->
   <void method="put">
    <string>DB2</string>
@@ -52,7 +86,7 @@ and   t.schemaid = s.schemaid
           when 'U' then 'UPDATE'
           when 'D' then 'DELETE'
         END AS trigger_event
-FROM sysibm.systriggers</string>
+        FROM sysibm.systriggers</string>
     </void>
     <void property="objectNameField">
      <string>tbname</string>

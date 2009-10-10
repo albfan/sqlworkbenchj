@@ -421,6 +421,7 @@ public class TableDataPanel
 			retrieveStart();
 			rowCountButton.setToolTipText(ResourceMgr.getDescription("LblTableDataRowCountCancel"));
 			rowCountRetrieveStmt = this.dbConnection.createStatementForQuery();
+			LogMgr.logDebug("TableDataPanel.showRowCount()", "Using query: " + sql);
 			rs = rowCountRetrieveStmt.executeQuery(sql);
 			if (rs.next())
 			{
@@ -710,7 +711,7 @@ public class TableDataPanel
 
 			setSavepoint();
 
-//			LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query=\n" + sql);
+			LogMgr.logDebug("TableDataPanel.doRetrieve()", "Using query: " + sql);
 
 			error = !dataDisplay.runQuery(sql, respectMaxRows);
 

@@ -121,6 +121,16 @@ public class DbSettings
 		return updatingCommands.contains(verb);
 	}
 
+	/**
+	 * Returns true if NULl should be used for a column definition that is nullable
+	 * (instead of not using NULL at all)
+	 *
+	 */
+	public boolean useNullKeyword()
+	{
+		return !Settings.getInstance().getServersWithNoNullKeywords().contains(dbId);
+	}
+	
 	public boolean useGetStringForClobs()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", false);
@@ -271,6 +281,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "procs.use.wbcall", false);
 	}
 
+	public String getCreateIndexSQL()
+	{
+		return Settings.getInstance().getProperty(prefix + "create.index", Settings.getInstance().getProperty("workbench.db.sql.create.index", null));
+	}
+	
 	/**
 	 * Return the complete DDL to drop the given type of DB-Object.
 	 * <br/>
@@ -721,6 +736,22 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "drop.column.multi", null);
 	}
 
+
+	/**
+	 * Return the DDL to add a single column to a table.
+	 *
+	 * The related property is: <tt>workbench.db.[dbid].add.column
+	 *
+	 * @return null if no statement is configured.
+	 * @see workbench.db.MetaDataSqlManager#TABLE_NAME_PLACEHOLDER
+	 * @see workbench.db.MetaDataSqlManager#COLUMN_NAME_PLACEHOLDER
+	 * @
+	 */
+	public String getAddColumnSql()
+	{
+		return Settings.getInstance().getProperty(prefix + "add.column", null);
+	}
+
 	public boolean supportsSortedIndex()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "index.sorted", true);
@@ -801,7 +832,7 @@ public class DbSettings
 
 	/**
 	 * Returns the SQL that retrieves the CREATE SQL for a given table directly from the DBMS.
-	 * In the returned SQL, the placeholders %tablename%, %schema% and %catalog% must be
+	 * In the returned SQL, the placeholders %table_name%, %schema% and %catalog% must be
 	 * replaced with the real values.
 	 *
 	 * If the table source is not returned in the first column of the result set,

@@ -52,9 +52,8 @@ public class TableSourceBuilder
 	{
 		dbConnection = con;
 		String productName = dbConnection.getMetadata().getProductName();
-		String dbId = dbConnection.getMetadata().getDbId();
 		this.createInlineConstraints = Settings.getInstance().getServersWithInlineConstraints().contains(productName);
-		this.useNullKeyword = !Settings.getInstance().getServersWithNoNullKeywords().contains(dbId);
+		this.useNullKeyword = dbConnection.getDbSettings().useNullKeyword();
 	}
 
 	private ViewReader getViewReader()
@@ -416,7 +415,7 @@ public class TableSourceBuilder
 
 
 		String tname = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getTableName()) : table.getTableName());
-		sql = sql.replace("%tablename%", tname);
+		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tname);
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{

@@ -28,12 +28,23 @@ public class ColumnChanger
 {
 	public static final String PARAM_TABLE_NAME = DbObjectChanger.PARAM_TABLE_NAME;
 	
-	public static final String PARAM_COL_NAME = "%column_name%";
+	public static final String PARAM_COL_NAME = MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER;
+	
 	public static final String PARAM_NEW_COL_NAME = "%new_column_name%";
 	public static final String PARAM_DATATYPE = "%datatype%";
 	public static final String PARAM_NEW_DATATYPE = "%new_datatype%";
 
+	/**
+	 * The placeholder for the complete DEFAULT xxx expression when adding a new column
+	 */
+	public static final String PARAM_DEFAULT_EXPR = "%default_expression%";
+
 	public static final String PARAM_NULLABLE = "%nullable%";
+
+	/**
+	 * The placeholder for the default <b>value</b> for generating ALTER column
+	 * statements (the DEFAULT keyword is already part of the template string)
+	 */
 	public static final String PARAM_DEFAULT_VALUE = "%default_value%";
 
 
@@ -69,7 +80,7 @@ public class ColumnChanger
 
 		StringBuilder result = new  StringBuilder(statements.size() * 50);
 
-		if (dbConn != null && dbConn.getMetadata().isOracle())
+		if (dbConn != null && dbConn.getMetadata().isOracle() && oldDefinition != null)
 		{
 			String oldComment = oldDefinition.getComment();
 			String newComment = newDefinition.getComment();
@@ -94,21 +105,28 @@ public class ColumnChanger
 	public List<String> getAlterStatements(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
 		List<String> result = CollectionUtil.arrayList();
-		String sql = changeDataType(table, oldDefinition, newDefinition);
-		if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
+		if (oldDefinition == null && canAddColumn())
+		{
+			String sql = addColumn(table, newDefinition);
+			if (sql != null) result.add(sql);
+		}
+		else if (oldDefinition != null)
+		{
+			String sql = changeDataType(table, oldDefinition, newDefinition);
+			if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
 
-		sql = changeDefault(table, oldDefinition, newDefinition);
-		if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
+			sql = changeDefault(table, oldDefinition, newDefinition);
+			if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
 
-		sql = changeNullable(table, oldDefinition, newDefinition);
-		if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
+			sql = changeNullable(table, oldDefinition, newDefinition);
+			if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
 
-		sql = changeRemarks(table, oldDefinition, newDefinition);
-		if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
-		
-		sql = renameColumn(table, oldDefinition, newDefinition);
-		if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
+			sql = changeRemarks(table, oldDefinition, newDefinition);
+			if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
 
+			sql = renameColumn(table, oldDefinition, newDefinition);
+			if (sql != null) result.add(SqlUtil.trimSemicolon(sql));
+		}
 		return result;
 	}
 
@@ -159,11 +177,52 @@ public class ColumnChanger
 		String dropDefault = dbSettings.getDropColumnDefaultSql();
 		return (alterDefault != null || (setDefault != null && dropDefault != null));
 	}
-
+	
+	public boolean canAddColumn()
+	{
+		String sql = dbSettings.getAddColumnSql();
+		return sql != null;
+	}
+	
 	public boolean canChangeComment()
 	{
 		String sql = commentMgr.getCommentSqlTemplate("column");
 		return (sql != null);
+	}
+
+	protected boolean useNullKeyword()
+	{
+		if (dbConn == null) return false;
+		if (dbConn.getDbSettings() == null) return false;
+		return dbConn.getDbSettings().useNullKeyword();
+	}
+
+	protected String addColumn(TableIdentifier table, ColumnIdentifier newDefinition)
+	{
+		if (newDefinition == null) return null;
+		String sql = dbSettings.getAddColumnSql();
+		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
+		sql = sql.replace(PARAM_COL_NAME, newDefinition.getColumnName(dbConn));
+		sql = sql.replace(PARAM_DATATYPE, newDefinition.getDbmsType());
+		if (StringUtil.isBlank(newDefinition.getDefaultValue()))
+		{
+			sql = sql.replace(PARAM_DEFAULT_EXPR, "");
+		}
+		else
+		{
+			sql = sql.replace(PARAM_DEFAULT_EXPR, "DEFAULT " + newDefinition.getDefaultValue());
+		}
+		
+		String nullable = nullableSql(newDefinition.isNullable());
+		if (!newDefinition.isNullable() || useNullKeyword())
+		{
+			sql = sql.replace(PARAM_NULLABLE, nullable);
+		}
+		else
+		{
+			sql = sql.replace(PARAM_NULLABLE, "");
+		}
+		return sql;
 	}
 	
 	protected String changeDataType(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)

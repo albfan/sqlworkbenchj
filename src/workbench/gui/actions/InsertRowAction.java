@@ -20,7 +20,8 @@ import workbench.resource.ResourceMgr;
  *	Insert a new row
  *	@author  support@sql-workbench.net
  */
-public class InsertRowAction extends WbAction
+public class InsertRowAction
+	extends WbAction
 {
 	private DbData client;
 

@@ -43,15 +43,15 @@ public class SQLLexerTest
 		return result;
 	}
 
-	public void testEscapedQuote()
-	{
-		String sql = "select 'test\\'value'";
-		List<SQLToken> tokens = getTokenList(sql);
-		for (SQLToken t : tokens)
-		{
-			System.out.println(t.toString());
-		}
-	}
+//	public void testEscapedQuote()
+//	{
+//		String sql = "select 'test\\'value'";
+//		List<SQLToken> tokens = getTokenList(sql);
+//		for (SQLToken t : tokens)
+//		{
+//			System.out.println(t.toString());
+//		}
+//	}
 	public void testWbVar()
 	{
 		String sql = "select $[?wbvar] from table";
@@ -66,6 +66,12 @@ public class SQLLexerTest
 		assertTrue(l.get(1).isWbVar());
 		assertTrue(l.get(2).isReservedWord());
 		assertTrue(l.get(3).isLiteral());
+
+		sql = "select * from mytable where id=$[var_id]";
+		l = getTokenList(sql);
+		assertEquals(8, l.size());
+		assertTrue(l.get(6).isOperator());
+		assertTrue(l.get(7).isWbVar());
 	}
 
 	public void testUnicode()

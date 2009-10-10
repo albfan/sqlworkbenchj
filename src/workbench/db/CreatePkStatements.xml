@@ -4,13 +4,13 @@
  
   <void method="put">
    <string>All</string>
-   <string>ALTER TABLE %tablename%
+   <string>ALTER TABLE %table_name%
    ADD CONSTRAINT %pk_name% PRIMARY KEY (%columnlist%)</string>
   </void>
 
   <void method="put">
    <string>Informix Dynamic Server</string>
-   <string>ALTER TABLE %tablename%
+   <string>ALTER TABLE %table_name%
    ADD CONSTRAINT PRIMARY KEY (%columnlist%) CONSTRAINT %pk_name%</string>
   </void>
   

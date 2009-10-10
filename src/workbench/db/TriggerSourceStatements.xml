@@ -43,9 +43,9 @@
     </void>
    </object>
   </void>
- 
-	<void method="put">  
-   <string>DB2/LINUX</string>  
+
+	<void method="put">
+   <string>DB2/LINUX</string>
    <object idref="db2_trg_source"/>
 	</void>
 
@@ -76,12 +76,12 @@
     </void>
    </object>
   </void>
-  
-  <void method="put"> 
-   <string>Oracle8</string> 
-   <object idref="ora_trg_source"/> 
-  </void> 
-  
+
+  <void method="put">
+   <string>Oracle8</string>
+   <object idref="ora_trg_source"/>
+  </void>
+
   <void method="put">
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -96,7 +96,7 @@
     </void>
    </object>
   </void>
-  
+
   <void method="put">
    <string>PostgreSQL</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -105,39 +105,39 @@
     </void>
     <void property="baseSql">
      <string>SELECT 'create trigger '|| trg.tgname || ' '||
-       case trg.tgtype &amp; cast(2 as int2) 
-         when 0 then &apos;AFTER&apos; 
-         else &apos;BEFORE&apos; 
+       case trg.tgtype &amp; cast(2 as int2)
+         when 0 then &apos;AFTER&apos;
+         else &apos;BEFORE&apos;
        end || ' ' ||
-       case trg.tgtype &amp; cast(28 as int2) 
-         when 16 then &apos;UPDATE&apos; 
-         when 8 then &apos;DELETE&apos; 
-         when 4 then &apos;INSERT&apos; 
-         when 20 then &apos;INSERT OR UPDATE&apos; 
-         when 28 then &apos;INSERT OR UPDATE OR DELETE&apos; 
-         when 24 then &apos;UPDATE OR DELETE&apos; 
-         when 12 then &apos;INSERT OR DELETE&apos; 
+       case trg.tgtype &amp; cast(28 as int2)
+         when 16 then &apos;UPDATE&apos;
+         when 8 then &apos;DELETE&apos;
+         when 4 then &apos;INSERT&apos;
+         when 20 then &apos;INSERT OR UPDATE&apos;
+         when 28 then &apos;INSERT OR UPDATE OR DELETE&apos;
+         when 24 then &apos;UPDATE OR DELETE&apos;
+         when 12 then &apos;INSERT OR DELETE&apos;
        end || chr(10) || 'on ' || tbl.relname
        || ' for each row execute procedure '
-       ||src.proname 
+       ||src.proname
        || '();'|| chr(10) || chr(10) || '---&lt; Source for '
        || src.proname
        || ' &gt;---' || chr(10)
        || 'CREATE OR REPLACE FUNCTION '||src.proname||'() RETURNS TRIGGER AS'||chr(10)||'$$'||chr(10)
-       || src.prosrc 
+       || src.prosrc
        || '$$'||chr(10)||'language '''||l.lanname||''''
 from pg_trigger trg, pg_class tbl, pg_proc src, pg_language l
-where trg.tgrelid = tbl.oid 
+where trg.tgrelid = tbl.oid
  AND l.oid = src.prolang
  AND trg.tgfoid = src.oid
-</string> 
+</string>
     </void>
     <void property="objectNameField">
      <string>trg.tgname</string>
     </void>
    </object>
   </void>
-  
+
   <void method="put">
    <string>Microsoft SQL Server</string>
    <object class="workbench.db.GetMetaDataSql">
@@ -152,41 +152,41 @@ where trg.tgrelid = tbl.oid
     </void>
    </object>
   </void>
-  
-  <void method="put"> 
-   <string>MySQL</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
+
+  <void method="put">
+   <string>MySQL</string>
+   <object class="workbench.db.GetMetaDataSql">
     <void property="baseObjectNameField">
      <string>event_object_table</string>
     </void>
-    <void property="baseSql"> 
+    <void property="baseSql">
      <string>SELECT concat('CREATE TRIGGER ',trigger_name, ' ', action_timing, ' ', event_manipulation, '\n  ON ', event_object_table, '\n  FOR EACH ROW', action_statement)
      FROM information_schema.triggers</string>
-    </void> 
-    <void property="objectNameField"> 
-     <string>trigger_name</string> 
-    </void> 
-    <void property="schemaField"> 
-     <string>trigger_schema</string> 
-    </void> 
-   </object> 
-  </void> 
+    </void>
+    <void property="objectNameField">
+     <string>trigger_name</string>
+    </void>
+    <void property="schemaField">
+     <string>trigger_schema</string>
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>H2</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+  <void method="put">
+   <string>H2</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>SELECT 'CREATE TRIGGER '||trigger_name||
         case before when 'true' then ' BEFORE ' else ' AFTER ' end||
         trigger_type||' ON '||table_name||char(10)||'  FOR EACH ROW CALL "'||java_class||'";'
 				from information_schema.triggers
-			</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>trigger_name</string> 
-    </void> 
-   </object> 
-  </void> 
+			</string>
+    </void>
+    <void property="objectNameField">
+     <string>trigger_name</string>
+    </void>
+   </object>
+  </void>
 
   <void method="put">
    <string>HSQL Database Engine 1.9</string>
@@ -208,7 +208,7 @@ where trg.tgrelid = tbl.oid
          else ''
        end||'\n'||
        trim(action_statement)
-FROM information_schema.triggers</string>
+       FROM information_schema.triggers</string>
     </void>
     <void property="objectNameField">
      <string>trigger_name</string>
@@ -216,59 +216,59 @@ FROM information_schema.triggers</string>
    </object>
   </void>
 
-  <void method="put"> 
+  <void method="put">
    <string>HSQL Database Engine</string>
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>SELECT description FROM information_schema.system_triggers</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>trigger_name</string> 
-    </void> 
-   </object> 
-  </void> 
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>SELECT description FROM information_schema.system_triggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>trigger_name</string>
+    </void>
+   </object>
+  </void>
 
-  <void method="put"> 
-   <string>FirstSQL/J</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+  <void method="put">
+   <string>FirstSQL/J</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>SELECT 'CREATE TRIGGER ON '||table_name||'\n'||mode||' '||command||'\nWITH '||class_name||'.'||class_method||';\n\n'
     from definition_schema.systriggers
-  </string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>class_name||'.'||class_method</string> 
-    </void> 
-   </object> 
-  </void> 
-    
-	<void method="put"> 
-		<string>Adaptive Server Enterprise</string> 
-   <object id="ase_trg_source" class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
-     <string>select syscomments.text  
- from sysobjects, syscomments  
- where sysobjects.id = syscomments.id  
-and  sysobjects.type = &apos;TR&apos;</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>sysobjects.name</string> 
-    </void> 
-    <void property="orderBy"> 
-     <string> order by syscomments.colid</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-	<void method="put"> 
-		<string>Adaptive Server Anywhere</string> 
+  </string>
+    </void>
+    <void property="objectNameField">
+     <string>class_name||'.'||class_method</string>
+    </void>
+   </object>
+  </void>
+
+	<void method="put">
+		<string>Adaptive Server Enterprise</string>
+   <object id="ase_trg_source" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>select syscomments.text
+ from sysobjects, syscomments
+ where sysobjects.id = syscomments.id
+and  sysobjects.type = &apos;TR&apos;</string>
+    </void>
+    <void property="objectNameField">
+     <string>sysobjects.name</string>
+    </void>
+    <void property="orderBy">
+     <string> order by syscomments.colid</string>
+    </void>
+   </object>
+  </void>
+
+	<void method="put">
+		<string>Adaptive Server Anywhere</string>
 		<object idref="ase_trg_source"/>
 	</void>
-	
-  <void method="put"> 
-   <string>Firebird</string> 
-   <object class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+
+  <void method="put">
+   <string>Firebird</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>SELECT 'CREATE TRIGGER '||trim(rdb$trigger_name)||'\n'||
           trim(case
             when mod(rdb$trigger_type, 2) = 0 then 'AFTER'
@@ -289,35 +289,35 @@ and  sysobjects.type = &apos;TR&apos;</string>
              when  78 then 'DELETE OR INSERT OR UPDATE'
           end)||' \n'||rdb$trigger_source
           FROM rdb$triggers</string>
-    </void> 
-    <void property="objectNameField"> 
-     <string>rdb$trigger_name</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
-    <void property="schemaField"> 
-     <string>RDB$OWNER_NAME</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string>Apache Derby</string> 
-   <object id="id_derby_trg" class="workbench.db.GetMetaDataSql"> 
-    <void property="baseSql"> 
+    </void>
+    <void property="objectNameField">
+     <string>rdb$trigger_name</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+    <void property="schemaField">
+     <string>RDB$OWNER_NAME</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Apache Derby</string>
+   <object id="id_derby_trg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
      <string>
 SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
        || case when trg.type ='A' then 'AFTER'
           else 'BEFORE' end
        || ' '
-       || case when trg.event = 'D' then 'DELETE' 
+       || case when trg.event = 'D' then 'DELETE'
             else case when trg.event = 'I' then 'INSERT'
                  else case when trg.event = 'U' THEN 'UPDATE' end
             end
           end
-       || case when trg.referencedcolumns is not null then ' OF ' || trg.referencedcolumns else '' end 
-       || ' ON ' || t.tablename || '\n' 
+       || case when trg.referencedcolumns is not null then ' OF ' || trg.referencedcolumns else '' end
+       || ' ON ' || t.tablename || '\n'
        || case when trg.referencingnew = 'true' then '  REFERENCING NEW AS ' || trg.newreferencingname
                when trg.referencingold = 'true' then '  REFERENCING OLD AS ' || trg.oldreferencingname
                when trg.referencingold = 'false' AND trg.referencingnew = 'false' THEN ''
@@ -330,45 +330,65 @@ SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
 from sys.systriggers trg, sys.systables t, sys.sysschemas s
 where trg.tableid = t.tableid
 and   t.schemaid = s.schemaid
-			</string> 
-    </void> 
-    <void property="objectNameField"> 
-     <string>trg.triggername</string> 
-    </void> 
-    <void property="useUpperCase"> 
-     <boolean>true</boolean> 
-    </void> 
-    <void property="schemaField"> 
-     <string>s.schemaname</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="put"> 
-   <string></string> 
-   <object idref="id_derby_trg"/> 
-  </void> 
-  
+			</string>
+    </void>
+    <void property="objectNameField">
+     <string>trg.triggername</string>
+    </void>
+    <void property="useUpperCase">
+     <boolean>true</boolean>
+    </void>
+    <void property="schemaField">
+     <string>s.schemaname</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="put">
+   <string>Cloudscape</string>
+   <object idref="id_derby_trg"/>
+  </void>
+
+  <void method="put">
+   <string>Informix Dynamic Server</string>
+   <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+        SELECT b.data, b.seqno
+        FROM informix.systriggers t, informix.systrigbody b
+        WHERE t.trigid=b.trigid
+          AND b.datakey IN ('A', 'D')
+      </string>
+    </void>
+    <void property="objectNameField">
+     <string>t.trigname</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY b.seqno</string>
+    </void>
+   </object>
+  </void>
+
   <void method="put">
    <string>INGRES</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
-     <string>select text_segment from iirules</string> 
+     <string>select text_segment from iirules</string>
     </void>
     <void property="objectNameField">
      <string>rule_name</string>
     </void>
-    <void property="schemaField"> 
-     <string>rule_owner</string> 
+    <void property="schemaField">
+     <string>rule_owner</string>
     </void>
     <void property="orderBy">
         <string>order by text_sequence</string>
     </void>
-    <void property="useUpperCase"> 
-     <boolean>false</boolean> 
-    </void> 
+    <void property="useUpperCase">
+     <boolean>false</boolean>
+    </void>
    </object>
   </void>
-    
+
  </object>
 </java>

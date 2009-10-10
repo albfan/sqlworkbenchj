@@ -107,10 +107,18 @@ public class SqlTypeRenderer
 
 	public void prepareDisplay(Object value)
 	{
-		int type = ((Integer)value).intValue();
-		String display = SqlUtil.getTypeName(type);
-		this.setText(display);
-		this.setToolTipText(display);
+		if (value != null)
+		{
+			int type = ((Integer)value).intValue();
+			String display = SqlUtil.getTypeName(type);
+			this.setText(display);
+			this.setToolTipText(display);
+		}
+		else
+		{
+			this.setText("");
+			this.setToolTipText(null);
+		}
 	}
 
 }

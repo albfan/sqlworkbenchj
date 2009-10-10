@@ -14,10 +14,12 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import workbench.db.ColumnChanger;
+import workbench.db.ColumnDropper;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableIdentifier;
@@ -28,6 +30,7 @@ import workbench.gui.dbobjects.RunScriptPanel;
 import workbench.interfaces.Reloadable;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -67,7 +70,7 @@ public class ColumnAlterAction
 			return;
 		}
 
-		if (e.getType() == TableModelEvent.UPDATE)
+		if (e.getType() == TableModelEvent.UPDATE || e.getType() == TableModelEvent.DELETE)
 		{
 			setEnabled(sourceTable != null);
 		}
@@ -135,11 +138,48 @@ public class ColumnAlterAction
 				result.append(script);
 			}
 		}
+		int count = ds.getDeletedRowCount();
+		if (count > 0)
+		{
+			List<ColumnIdentifier> deleted = CollectionUtil.arrayList();
+			for (int row = 0;  row < count; row ++)
+			{
+				deleted.add(getDeletedColumn(row));
+			}
+			List<String> statements = ColumnDropper.getSql(sourceTable, deleted, dbConnection);
+			for (String sql : statements)
+			{
+				result.append(sql);
+				if (!sql.endsWith(";"))
+				{
+					result.append(';');
+				}
+				result.append('\n');
+			}
+		}
 		if (dbConnection.getDbSettings().ddlNeedsCommit())
 		{
 			result.append("\nCOMMIT;\n");
 		}
 		return result.toString();
+	}
+
+	private ColumnIdentifier getDeletedColumn(int row)
+	{
+		if (definition == null) return null;
+		DataStore ds = definition.getDataStore();
+
+		String name = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
+		String type = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
+		String defaultValue = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);
+		String nullable = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_NULLABLE);
+		String comment = (String)ds.getDeletedValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_REMARKS);
+		ColumnIdentifier col = new ColumnIdentifier(name);
+		col.setDbmsType(type);
+		col.setDefaultValue(defaultValue);
+		col.setIsNullable(StringUtil.stringToBool(nullable));
+		col.setComment(comment);
+		return col;
 	}
 
 	private ColumnIdentifier getCurrentDefinition(int row)
@@ -163,6 +203,7 @@ public class ColumnAlterAction
 	private ColumnIdentifier getOldDefintion(int row)
 	{
 		DataStore ds = definition.getDataStore();
+		if (ds.getRowStatus(row) == DataStore.ROW_NEW) return null;
 		String name = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 		String type = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
 		String defaultValue = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);

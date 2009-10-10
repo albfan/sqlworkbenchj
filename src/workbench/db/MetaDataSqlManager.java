@@ -24,12 +24,12 @@ import workbench.util.WbPersistence;
  */
 public class MetaDataSqlManager
 {
-	public static final String TABLE_NAME_PLACEHOLDER = "%tablename%";
+	public static final String TABLE_NAME_PLACEHOLDER = "%table_name%";
 	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
 	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
-	public static final String COLUMN_NAME_PLACEHOLDER = "%column%";
+	public static final String COLUMN_NAME_PLACEHOLDER = "%column_name%";
 	public static final String COLUMN_LIST_PLACEHOLDER = "%columnlist%";
 	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";
 	public static final String FK_TARGET_TABLE_PLACEHOLDER = "%targettable%";
@@ -155,22 +155,22 @@ public class MetaDataSqlManager
 		return this.foreignKeyTemplate;
 	}
 	
-	public String getIndexTemplate()
-	{
-		if (this.indexTemplate == NO_STRING)
-		{
-			synchronized (LOCK)
-			{
-				HashMap<String, String> sql = this.readStatementTemplates("CreateIndexStatements.xml");
-				this.indexTemplate = sql.get(this.productName);
-				if (indexTemplate == null)
-				{
-					this.indexTemplate = sql.get(GENERAL_SQL);
-				}
-			}
-		}
-		return this.indexTemplate;
-	}
+//	public String getIndexTemplate()
+//	{
+//		if (this.indexTemplate == NO_STRING)
+//		{
+//			synchronized (LOCK)
+//			{
+//				HashMap<String, String> sql = this.readStatementTemplates("CreateIndexStatements.xml");
+//				this.indexTemplate = sql.get(this.productName);
+//				if (indexTemplate == null)
+//				{
+//					this.indexTemplate = sql.get(GENERAL_SQL);
+//				}
+//			}
+//		}
+//		return this.indexTemplate;
+//	}
 	
 	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
 	{
