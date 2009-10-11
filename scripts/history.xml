@@ -12,6 +12,12 @@
 
   <entry dev-build="4" type="enh">
     <description>
+      Columns can now be added from within the DbExplorer's table definition panel
+    </description>
+  </entry>
+
+  <entry dev-build="4" type="enh">
+    <description>
       The generated source for inherited tables in Postgres now shows the parent table
     </description>
   </entry>
@@ -85,6 +91,14 @@
       For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
     </description>
   </entry>
+
+  <entry dev-build="4" type="fix">
+    <description>
+			When reformatting statements, workbench variables that contained an underscore
+      (e.g. $[my_id]) where not detected correctly (and thus the statement was
+      not formatted correctly)
+		</description>
+	</entry>
 
   <entry dev-build="4" type="fix">
     <description>
