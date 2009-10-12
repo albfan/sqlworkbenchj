@@ -108,7 +108,7 @@ public class ColumnAlterAction
 		final RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
 		panel.openWindow(parent, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.wasRun() && !panel.hasErrors() && client != null)
+		if (panel.wasRun() && panel.isSuccess() && client != null)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
