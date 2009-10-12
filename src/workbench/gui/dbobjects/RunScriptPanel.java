@@ -57,6 +57,7 @@ public class RunScriptPanel
 	private String sqlScript;
 	private EscAction escAction;
 	private boolean wasRun;
+	private boolean hasErrors;
 
 	public RunScriptPanel(WbConnection con, String script)
 	{
@@ -208,6 +209,7 @@ public class RunScriptPanel
 
 		runner = new BatchRunner();
 		runner.setConnection(dbConn);
+		hasErrors = false;
 
 		try
 		{
@@ -250,6 +252,7 @@ public class RunScriptPanel
 		}
 		catch (Exception e)
 		{
+			hasErrors = true;
 			LogMgr.logError("RunScriptPanel.runScript()", "Error when running script", e);
 			final String error = ExceptionUtil.getDisplay(e);
 			WbSwingUtilities.invoke(new Runnable()
@@ -272,6 +275,11 @@ public class RunScriptPanel
 		}
 	}
 
+	public boolean hasErrors()
+	{
+		return hasErrors;
+	}
+	
 	@Override
 	public void windowOpened(WindowEvent e)
 	{

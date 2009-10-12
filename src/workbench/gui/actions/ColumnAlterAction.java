@@ -105,10 +105,10 @@ public class ColumnAlterAction
 			WbSwingUtilities.showMessage(parent, msg);
 		}
 
-		RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
+		final RunScriptPanel panel = new RunScriptPanel(dbConnection, alterScript);
 		panel.openWindow(parent, ResourceMgr.getString("TxtAlterTable"));
 
-		if (panel.wasRun() && client != null)
+		if (panel.wasRun() && !panel.hasErrors() && client != null)
 		{
 			EventQueue.invokeLater(new Runnable()
 			{
