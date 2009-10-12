@@ -104,7 +104,12 @@ public class WbCellEditor
 		return result;
 	}
 
-
+	public void setText(String newText)
+	{
+		editor.setText(newText);
+		editor.selectAll();
+	}
+	
 	public void setFont(Font aFont)
 	{
 		this.editor.setFont(aFont);
@@ -131,11 +136,12 @@ public class WbCellEditor
 		return result;
 	}
 
-	public Component getTableCellEditorComponent(JTable table, Object value,
-		boolean isSelected,
-		int row, int column)
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
 	{
-		editor.setText((value != null) ? value.toString() : "");
+		editor.setText(value != null ? value.toString() : "");
+		// this method is called when the user edits a cell
+		// in that case we want to select all text
+		editor.selectAll();
 		return scroll;
 	}
 

@@ -14,6 +14,30 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (106.4) released</title>
+      <description>        <![CDATA[<p>Changes from build 106.3 to build 106.4</p><p>Enhancements</p><ul>
+<li>SQL Workbench/J now requires Java 6.</li>
+<li>Columns can now be added from within the DbExplorer's table definition panel</li>
+<li>The generated source for inherited tables in Postgres now shows the parent table</li>
+<li>WbSchemaDiff and WbReport now include triggers.</li>
+<li>WbDataDiff can now output the result as XML files.</li>
+</ul><p>Bug Fixes</p><ul>
+<li>When reformatting statements, workbench variables that contained an underscore (e.g. $[my_id]) where not detected correctly (and thus the statement was not formatted correctly)</li>
+<li>The (table independent) trigger list panel in the DbExplorer did not show the trigger source correctly if multiple triggers had the same name.</li>
+<li>Execute current was not working for MySQL connections.</li>
+<li>If tables were created using double quotes (e.g. CREATE TABLE "MyTable"), the table details were no longer displayed in the DbExplorer</li>
+<li>If a connection script was defined in the connection profile, an error was displayed during connect (even though the connection script was executed correctly)</li>
+<li>The settings of the DbExplorer where not saved when the DbExplorer was opened as a separate window.</li>
+<li>When using "Highlight Current statement" and executing the statement at the cursor (Execute Current), the statement was not highlighted when an error occurred.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-106.4</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Mon, 12 Oct 2009 21:58:16 +0200</pubDate>
+    </item>
+    <item>
       <title>New development build (106.3) released</title>
       <description>        <![CDATA[<p>Changes from build 106.2 to build 106.3</p><p>Enhancements</p><ul>
 <li>SQL Workbench/J now requires Java 6.</li>
@@ -22,6 +46,7 @@
 <li>"Execute current" was not working any longer.</li>
 <li>The editor color for datatypes selected in the options dialog was not used.</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -51,6 +76,7 @@
 <li>Formatting UPDATEs with Sub-Select was not working properly</li>
 <li>WbCopy now removes any trailing semicolon from the SQL query when using query based copying.</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -74,6 +100,7 @@
 <li>Formatting UPDATEs with Sub-Select was not working properly</li>
 <li>WbCopy now removes any trailing semicolon from the SQL query when using query based copying.</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -86,6 +113,7 @@
       <description>        <![CDATA[<p>Changes from build 105 to build 106</p><p>Bug Fixes</p><ul>
 <li>Connections to DB2 were no longer working</li>
 </ul>
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -151,6 +179,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -181,6 +210,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -197,6 +227,7 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The default fetch size of a connection profile could not be reset (empty).</li>
 </ul>
+
 
 
 
@@ -244,6 +275,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -259,6 +291,7 @@
 <li>Shortcut keys which involved the Enter could not be defined.</li>
 <li>The Save As dialog to save result data now only checks for the update table and primary keys if needed.</li>
 </ul>
+
 
 
 
@@ -312,6 +345,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -329,6 +363,7 @@
 <li>When re-ordering the columns using drag-and-drop and then displaying the single-record dialog, the content of the columns was mixed up.</li>
 <li>When re-ordering the columns using drag-and-drop, the order was reset when changing data in the result.</li>
 </ul>
+
 
 
 
@@ -390,6 +425,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -408,6 +444,7 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
 
 
 
@@ -521,6 +558,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -571,6 +609,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -585,6 +624,7 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
 
 
 
@@ -667,6 +707,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -683,6 +724,7 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
 
 
 
@@ -780,6 +822,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -795,6 +838,7 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
 
 
 
@@ -900,6 +944,7 @@
 
 
 
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -916,6 +961,7 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
 
 
 

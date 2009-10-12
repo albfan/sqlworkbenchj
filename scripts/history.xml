@@ -2,9 +2,9 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-09-24">
+<release build="-1" date="2009-10-12">
 
-  <entry dev-build="4" type="enh">
+  <entry dev-build="5" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
     </description>
@@ -103,7 +103,7 @@
   <entry dev-build="4" type="fix">
     <description>
 			The (table independent) trigger list panel in the DbExplorer did not show
-      the trigger source correctly if multiple triggers were had the same name.
+      the trigger source correctly if multiple triggers had the same name.
 		</description>
 	</entry>
 
