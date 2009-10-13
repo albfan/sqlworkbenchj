@@ -197,12 +197,20 @@ public class ColumnChanger
 		return dbConn.getDbSettings().useNullKeyword();
 	}
 
+	protected String getColumnExpression(ColumnIdentifier column)
+	{
+		String colname = column.getColumnName();
+		if (dbConn == null) return colname;
+		if (dbConn.getMetadata().isKeyword(colname)) return "\"" + colname + "\"";
+		return colname;
+	}
+	
 	protected String addColumn(TableIdentifier table, ColumnIdentifier newDefinition)
 	{
 		if (newDefinition == null) return null;
 		String sql = dbSettings.getAddColumnSql();
 		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-		sql = sql.replace(PARAM_COL_NAME, newDefinition.getColumnName(dbConn));
+		sql = sql.replace(PARAM_COL_NAME, getColumnExpression(newDefinition));
 		sql = sql.replace(PARAM_DATATYPE, newDefinition.getDbmsType());
 		if (StringUtil.isBlank(newDefinition.getDefaultValue()))
 		{
@@ -233,7 +241,7 @@ public class ColumnChanger
 		String oldType = oldDefinition.getDbmsType();
 		String newType = newDefinition.getDbmsType();
 		if (oldType.trim().equalsIgnoreCase(newType.trim())) return null;
-		sql = sql.replace(PARAM_COL_NAME, oldDefinition.getColumnName(dbConn));
+		sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
 		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
 		sql = sql.replace(PARAM_NEW_DATATYPE, newDefinition.getDbmsType());
 
@@ -246,13 +254,13 @@ public class ColumnChanger
 		String sql = dbSettings.getRenameColumnSql();
 		if (StringUtil.isBlank(sql)) return null;
 
-		String oldName = oldDefinition.getColumnName();
-		String newName = newDefinition.getColumnName();
+		String oldName = getColumnExpression(oldDefinition);
+		String newName = getColumnExpression(newDefinition);
 		if (oldName.trim().equalsIgnoreCase(newName.trim())) return null;
 
-		sql = sql.replace(PARAM_COL_NAME, oldDefinition.getColumnName(dbConn));
+		sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
 		sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-		sql = sql.replace(PARAM_NEW_COL_NAME, newDefinition.getColumnName());
+		sql = sql.replace(PARAM_NEW_COL_NAME, getColumnExpression(newDefinition));
 
 		// Some stubid DBMS require the full data type definition of the column even if it should only be renamed...
 		sql = changeCommonPlaceholders(sql, newDefinition);
@@ -282,7 +290,7 @@ public class ColumnChanger
 		if (sql != null)
 		{
 			sql = sql.replace(PARAM_TABLE_NAME, table.getTableExpression(dbConn));
-			sql = sql.replace(PARAM_COL_NAME, oldDefinition.getColumnName(dbConn));
+			sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
 			sql = sql.replace(PARAM_DATATYPE, oldDefinition.getDbmsType());
 		}
 		sql = changeCommonPlaceholders(sql, newDefinition);
@@ -300,7 +308,7 @@ public class ColumnChanger
 		if (StringUtil.isBlank(newRemarks)) newRemarks = "";
 
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
-		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, oldDefinition.getColumnName(dbConn));
+		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newRemarks.replace("'", "''"));
 		return sql;
 	}
@@ -342,7 +350,7 @@ public class ColumnChanger
 		}
 		if (sql != null)
 		{
-			sql = sql.replace(PARAM_COL_NAME, oldDefinition.getColumnName(dbConn));
+			sql = sql.replace(PARAM_COL_NAME, getColumnExpression(oldDefinition));
 			sql = sql.replace(PARAM_DATATYPE, oldDefinition.getDbmsType());
 		}
 		return sql;

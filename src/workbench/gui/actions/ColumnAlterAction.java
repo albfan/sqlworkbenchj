@@ -177,7 +177,10 @@ public class ColumnAlterAction
 		ColumnIdentifier col = new ColumnIdentifier(name);
 		col.setDbmsType(type);
 		col.setDefaultValue(defaultValue);
-		col.setIsNullable(StringUtil.stringToBool(nullable));
+		if (StringUtil.isNonBlank(nullable))
+		{
+			col.setIsNullable(StringUtil.stringToBool(nullable));
+		}
 		col.setComment(comment);
 		return col;
 	}
@@ -195,7 +198,10 @@ public class ColumnAlterAction
 		ColumnIdentifier col = new ColumnIdentifier(name);
 		col.setDbmsType(type);
 		col.setDefaultValue(defaultValue);
-		col.setIsNullable(StringUtil.stringToBool(nullable));
+		if (StringUtil.isNonBlank(nullable))
+		{
+			col.setIsNullable(StringUtil.stringToBool(nullable));
+		}
 		col.setComment(comment);
 		return col;
 	}
@@ -212,7 +218,10 @@ public class ColumnAlterAction
 		ColumnIdentifier col = new ColumnIdentifier(name);
 		col.setDbmsType(type);
 		col.setDefaultValue(defaultValue);
-		col.setIsNullable(StringUtil.stringToBool(nullable));
+		if (StringUtil.isNonBlank(nullable))
+		{
+			col.setIsNullable(StringUtil.stringToBool(nullable));
+		}
 		col.setComment(comment);
 		return col;
 	}

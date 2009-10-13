@@ -92,6 +92,12 @@
     </description>
   </entry>
 
+  <entry dev-build="5" type="fix">
+    <description>
+      The new "Add column" feature was only configured for PostgreSQL
+		</description>
+	</entry>
+
   <entry dev-build="4" type="fix">
     <description>
 			When reformatting statements, workbench variables that contained an underscore
