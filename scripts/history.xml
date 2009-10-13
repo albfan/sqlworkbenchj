@@ -98,6 +98,12 @@
 		</description>
 	</entry>
 
+  <entry dev-build="5" type="fix">
+    <description>
+      When adding a new column in the DbExplorer, column comments were not included.
+		</description>
+	</entry>
+
   <entry dev-build="4" type="fix">
     <description>
 			When reformatting statements, workbench variables that contained an underscore

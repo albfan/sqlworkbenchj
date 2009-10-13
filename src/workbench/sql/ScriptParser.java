@@ -470,12 +470,12 @@ public class ScriptParser
 		if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands)
 		{
 			p = new IteratingScriptParser();
-			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using IteratingScriptParser");
+//			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using IteratingScriptParser");
 		}
 		else
 		{
 			p = new LexerBasedParser();
-			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using LexerBasedParser");
+//			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using LexerBasedParser");
 		}
 		p.setSupportOracleInclude(this.supportOracleInclude);
 		p.setEmptyLineIsDelimiter(this.emptyLineIsSeparator);

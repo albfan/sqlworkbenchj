@@ -78,11 +78,12 @@ public class ColumnChangerTest
 		newCol = new ColumnIdentifier("PERSON_HOBBY", java.sql.Types.VARCHAR, false);
 		newCol.setDbmsType("VARCHAR(25)");
 		newCol.setDefaultValue("'Hitchhiking'");
+		newCol.setComment("new comment");
 		newCol.setIsNullable(true);
 		sqls = changer.getAlterStatements(table, null, newCol);
-		assertEquals(1, sqls.size());
+		assertEquals(2, sqls.size());
 		assertEquals("ALTER TABLE PERSON ADD COLUMN PERSON_HOBBY VARCHAR(25) DEFAULT 'Hitchhiking'", sqls.get(0).trim());
-
+		assertEquals("COMMENT ON COLUMN PERSON.PERSON_HOBBY IS 'new comment'", sqls.get(1).trim());
 	}
 
 
@@ -134,6 +135,16 @@ public class ColumnChangerTest
 		sqls = changer.getAlterStatements(table, oldCol, newCol);
 		assertEquals(1, sqls.size());
 		assertEquals("ALTER TABLE PERSON MODIFY FIRST_NAME NOT NULL", sqls.get(0));
+
+		newCol = new ColumnIdentifier("PERSON_HOBBY", java.sql.Types.VARCHAR, false);
+		newCol.setDbmsType("VARCHAR(25)");
+		newCol.setDefaultValue("'Hitchhiking'");
+		newCol.setComment("new comment");
+		newCol.setIsNullable(true);
+		sqls = changer.getAlterStatements(table, null, newCol);
+		assertEquals(2, sqls.size());
+		assertEquals("ALTER TABLE PERSON ADD COLUMN PERSON_HOBBY VARCHAR(25) DEFAULT 'Hitchhiking'", sqls.get(0).trim());
+		assertEquals("COMMENT ON COLUMN PERSON.PERSON_HOBBY IS 'new comment'", sqls.get(1).trim());
 	}
 	
 }

@@ -109,6 +109,12 @@ public class ColumnChanger
 		{
 			String sql = addColumn(table, newDefinition);
 			if (sql != null) result.add(sql);
+
+			if (StringUtil.isNonBlank(newDefinition.getComment()))
+			{
+				String comment = changeRemarks(table, null, newDefinition);
+				if (comment != null) result.add(comment);
+			}
 		}
 		else if (oldDefinition != null)
 		{
@@ -302,13 +308,13 @@ public class ColumnChanger
 		String sql = commentMgr.getCommentSqlTemplate("column");
 		if (StringUtil.isBlank(sql)) return null;
 
-		String oldRemarks = oldDefinition.getComment();
+		String oldRemarks = (oldDefinition == null ? "" : oldDefinition.getComment());
 		String newRemarks = newDefinition.getComment();
 		if (StringUtil.equalStringOrEmpty(oldRemarks, newRemarks)) return null;
 		if (StringUtil.isBlank(newRemarks)) newRemarks = "";
 
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
-		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition));
+		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition == null ? newDefinition : oldDefinition));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newRemarks.replace("'", "''"));
 		return sql;
 	}
