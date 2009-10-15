@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.exporter.BlobMode;
@@ -68,6 +69,8 @@ public class TableDataDiff
 	private WbConnection reference;
 	private TableIdentifier referenceTable;
 	private TableIdentifier tableToSync;
+	private TableDefinition toSyncDef;
+	
 	private int chunkSize = 15;
 
 	private Statement checkStatement;
@@ -248,6 +251,10 @@ public class TableDataDiff
 		{
 			throw new SQLException("Target table " + tableToVerify.getTableName() + " not found!");
 		}
+		else
+		{
+			toSyncDef = this.toSync.getMetadata().getTableDefinition(tableToSync);
+		}
 	}
 
 	public void cancel()
@@ -394,7 +401,7 @@ public class TableDataDiff
 					}
 					else
 					{
-						writerToUse.write(";" + lineEnding + lineEnding);
+						writerToUse.write(lineEnding + lineEnding);
 					}
 				}
 			}
@@ -445,7 +452,8 @@ public class TableDataDiff
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
 			if (i > 0) sql.append(',');
-			sql.append(info.getColumnName(i));
+			ColumnIdentifier targetCol = findTargetColumn(info.getColumn(i));
+			sql.append(targetCol.getColumnName(toSync));
 		}
 		sql.append(" FROM ");
 		sql.append(this.tableToSync.getTableExpression(toSync));
@@ -462,7 +470,8 @@ public class TableDataDiff
 				if (pkColumns.contains(column))
 				{
 					if (pkCount > 0) sql.append(" AND ");
-					sql.append(SqlUtil.quoteObjectname(column.getColumnName()));
+					ColumnIdentifier targetCol = findTargetColumn(column);
+					sql.append(targetCol.getColumnName(toSync));
 					sql.append(" = ");
 					Object value = rows.get(row).getValue(c);
 					ColumnData data = new ColumnData(value, column);
@@ -475,6 +484,19 @@ public class TableDataDiff
 		return sql.toString();
 	}
 
+	private ColumnIdentifier findTargetColumn(ColumnIdentifier toFind)
+	{
+		String cname = StringUtil.trimQuotes(toFind.getColumnName());
+		for (ColumnIdentifier col : toSyncDef.getColumns())
+		{
+			if (StringUtil.trimQuotes(col.getColumnName()).equalsIgnoreCase(cname))
+			{
+				return col;
+			}
+		}
+		return null;
+	}
+	
 	private void writeHeader(Writer out)
 		throws IOException
 	{
