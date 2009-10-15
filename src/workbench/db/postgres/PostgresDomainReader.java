@@ -40,7 +40,7 @@ import workbench.util.StringUtil;
 public class PostgresDomainReader
 	implements ObjectListExtender
 {
-	final String baseSql = "SELECT current_catalog as domain_catalog,  \n" +
+	final String baseSql = "SELECT current_database() as domain_catalog,  \n" +
              "       n.nspname as domain_schema, \n" +
              "       t.typname as domain_name, \n" +
              "       pg_catalog.format_type(t.typbasetype, t.typtypmod) as data_type, \n" +

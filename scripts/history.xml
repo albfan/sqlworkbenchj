@@ -94,6 +94,20 @@
 
   <entry dev-build="5" type="fix">
     <description>
+      Domain and Enum information was not displayed in the DbExplorer for Postgres versions before 8.4
+		</description>
+	</entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
+      When using WbDataDiff with tables where the column names differed in their case "FirstName" vs. "firstname"
+      the generated UPDATE or INSERT statements were wrong. WbDataDiff now considers column names
+      that only differ in their case as identical.
+		</description>
+	</entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
       The new "Add column" feature was only configured for PostgreSQL
 		</description>
 	</entry>

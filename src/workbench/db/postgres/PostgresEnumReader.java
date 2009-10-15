@@ -40,7 +40,7 @@ import workbench.util.StringUtil;
 public class PostgresEnumReader
 	implements ObjectListExtender
 {
-	final	String baseSql = "select current_catalog as enum_catalog, \n" +
+	final	String baseSql = "select current_database() as enum_catalog, \n" +
              "       n.nspname as enum_schema,  \n" +
              "       t.typname as enum_name,  \n" +
              "       e.enumlabel as enum_value,  \n" +

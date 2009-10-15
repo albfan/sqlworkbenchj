@@ -39,7 +39,7 @@ public class PostgresRuleReader
 	implements ObjectListExtender
 {
 
-	private final String baseSql = "select current_catalog as rule_catalog,\n " +
+	private final String baseSql = "select current_database() as rule_catalog,\n " +
 		         "       n.nspname as rule_schema, \n" +
              "       r.rulename as rule_name, \n" +
              "       c.relname as rule_table, \n" +
