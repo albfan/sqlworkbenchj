@@ -157,10 +157,10 @@ public class RowData
 
 			if (converter != null)
 			{
-				String dbms = rs.getMetaData().getColumnTypeName(i+1);
+				String dbms = info.getDbmsTypeName(i); //rs.getMetaData().getColumnTypeName(i+1);
 				if (converter.convertsType(type, dbms))
 				{
-					value = rs.getObject(i);
+					value = rs.getObject(i + 1);
 					this.colData[i] = converter.convertValue(type, dbms, value);
 					continue;
 				}

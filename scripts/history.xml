@@ -114,6 +114,12 @@
 
   <entry dev-build="5" type="fix">
     <description>
+      Retrieving columns with type "timestamp" did not work for SQL Server.
+		</description>
+	</entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
       When adding a new column in the DbExplorer, column comments were not included.
 		</description>
 	</entry>
