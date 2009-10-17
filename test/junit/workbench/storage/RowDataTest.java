@@ -13,7 +13,6 @@ package workbench.storage;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.sql.Types;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
