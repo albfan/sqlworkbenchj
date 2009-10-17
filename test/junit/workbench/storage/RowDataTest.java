@@ -13,6 +13,7 @@ package workbench.storage;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Types;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
@@ -68,6 +69,66 @@ public class RowDataTest
 			row.read(rs, info);
 			v = (String)row.getValue(0);
 			assertEquals("12   ", v);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+			con.disconnect();
+		}
+		util.emptyBaseDirectory();
+	}
+
+	public void testConverter()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection  con = util.getHSQLConnection("charTest");
+
+		// HSQLDB does not pad a CHAR column to the defined length as defined
+		// by the ANSI standard. But it does not remove trailing spaces either
+		// so by storing trailing spaces, the trimCharData feature can be tested
+		TestUtil.executeScript(con,
+			"CREATE TABLE char_test (char_data char(5), vchar varchar(10));\n" +
+			"INSERT INTO char_test VALUES ('1    ', '1    ');\n" +
+			"INSERT INTO char_test VALUES ('12   ', '12   ');\n" +
+			"INSERT INTO char_test VALUES ('123  ', '123  ');\n" +
+			"COMMIT;\n" +
+			"");
+		Statement stmt = null;
+		ResultSet rs = null;
+		DataConverter trim = new DataConverter()
+		{
+
+			@Override
+			public Object convertValue(int jdbcType, String dbmsType, Object originalValue)
+			{
+				if (originalValue instanceof String)
+				{
+					return ((String)originalValue).trim();
+				}
+				return originalValue;
+			}
+
+			@Override
+			public boolean convertsType(int jdbcType, String dbmsType)
+			{
+				return SqlUtil.isCharacterType(jdbcType);
+			}
+		};
+		
+		try
+		{
+			stmt = con.createStatement();
+			rs = stmt.executeQuery("select char_data, vchar from char_test");
+			ResultInfo info = new ResultInfo(rs.getMetaData(), con);
+			RowData row = new RowData(info);
+			row.setConverter(trim);
+			rs.next();
+			row.read(rs, info);
+			String v = (String)row.getValue(0);
+			assertEquals("1", v);
+			v = (String)row.getValue(1);
+			assertEquals("1", v);
 		}
 		finally
 		{
