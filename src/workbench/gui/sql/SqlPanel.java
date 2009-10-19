@@ -616,7 +616,7 @@ public class SqlPanel
 
 		TextPopup pop = (TextPopup)this.editor.getRightClickPopup();
 
-		this.actions.add(editor.getFileOpenAction());
+//		this.actions.add(editor.getFileOpenAction());
 		this.actions.add(editor.getFileSaveAction());
 		this.actions.add(editor.getFileSaveAsAction());
 

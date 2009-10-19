@@ -32,7 +32,7 @@ public class FileOpenAction extends WbAction
 	{
 		super();
 		this.client = aClient;
-		this.initMenuDefinition("MnuTxtFileOpen", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier()));
+		this.initMenuDefinition("MnuTxtFileOpen");
 		this.setIcon("Open");
 		this.setMenuItemName(ResourceMgr.MNU_TXT_FILE);
 		setCreateMenuSeparator(true);

@@ -109,6 +109,7 @@ import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.NextTabAction;
 import workbench.gui.actions.ObjectSearchAction;
+import workbench.gui.actions.OpenFileAction;
 import workbench.gui.actions.PrevTabAction;
 import workbench.gui.actions.RenameTabAction;
 import workbench.gui.actions.ShowDbmsManualAction;
@@ -406,6 +407,10 @@ public class MainWindow
 		action = new FileNewWindowAction();
 		action.addToMenu(menu);
 
+		OpenFileAction open = new OpenFileAction(this);
+		menu.addSeparator();
+		open.addToMenu(menu);
+
 		// now create the menus for the current tab
 		List actions = aPanel.getActions();
 
@@ -505,6 +510,7 @@ public class MainWindow
 			{
 				menu.addSeparator();
 			}
+			
 			if (action != null)
 			{
 				action.addToMenu(menu);
@@ -2511,6 +2517,7 @@ public class MainWindow
 		int index = sqlTab.getSelectedIndex();
 		return canCloseTab(index);
 	}
+
 
 	public boolean canCloseTab(int index)
 	{
