@@ -26,6 +26,7 @@ import workbench.gui.actions.InsertTabAction;
 import workbench.gui.actions.LockPanelAction;
 import workbench.gui.actions.MoveSqlTabLeft;
 import workbench.gui.actions.MoveSqlTabRight;
+import workbench.gui.actions.OpenFileAction;
 import workbench.gui.actions.ToggleExtraConnection;
 
 /**
@@ -86,14 +87,15 @@ public class SqlTabPopup
 			this.add(toggle.getMenuItem());
 		}
 
+		this.addSeparator();
+		this.add(new OpenFileAction(aClient));
+		
 		if (panel instanceof SqlPanel)
 		{
-			this.addSeparator();
 			SqlPanel spanel = (SqlPanel)panel;
 
 			EditorPanel editor = spanel.getEditor();
 
-			this.add(editor.getFileOpenAction());
 			this.add(editor.getFileSaveAction());
 			this.add(editor.getFileSaveAsAction());
 			this.add(editor.getReloadAction());

@@ -24,7 +24,8 @@ import workbench.resource.ResourceMgr;
  *	Open a new file in the SQL Editor
  *	@author  support@sql-workbench.net
  */
-public class FileOpenAction extends WbAction
+public class FileOpenAction
+	extends WbAction
 {
 	private TextFileContainer client;
 
