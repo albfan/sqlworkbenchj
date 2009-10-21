@@ -18,7 +18,6 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.Box;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -44,9 +43,11 @@ import workbench.util.WbFile;
  * file in a new tab
  * @author  support@sql-workbench.net
  */
-public class OpenFileAction extends WbAction
+public class OpenFileAction
+	extends WbAction
 {
 	private MainWindow window;
+
 	public OpenFileAction(MainWindow mainWindow)
 	{
 		super();
@@ -89,12 +90,12 @@ public class OpenFileAction extends WbAction
 				newTab.setSelected(Settings.getInstance().getBoolProperty("workbench.file.newtab", false));
 			}
 
-			c.gridy ++;
+			c.gridy++;
 			c.insets = new Insets(5, 0, 0, 0);
 			c.weighty = 1.0;
 			acc.add(newTab, c);
 
-			EncodingSelector selector = (EncodingSelector)p;
+			EncodingSelector selector = (EncodingSelector) p;
 			selector.setEncoding(Settings.getInstance().getDefaultFileEncoding());
 
 			fc.setAccessory(acc);
@@ -109,7 +110,7 @@ public class OpenFileAction extends WbAction
 				final SqlPanel sql;
 				if (openInNewTab)
 				{
-					sql = (SqlPanel)window.addTab();
+					sql = (SqlPanel) window.addTab();
 				}
 				else
 				{
@@ -123,13 +124,14 @@ public class OpenFileAction extends WbAction
 				{
 					Settings.getInstance().setProperty("workbench.file.newtab", openInNewTab);
 				}
-				
+
 				if (sql != null)
 				{
 					WbFile f = new WbFile(fc.getSelectedFile());
 					final String fname = f.getFullPath();
 					EventQueue.invokeLater(new Runnable()
 					{
+
 						@Override
 						public void run()
 						{

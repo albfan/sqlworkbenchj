@@ -4,9 +4,16 @@
 <!-- build number must be set to -1 until a release is built -->
 <release build="-1" date="2009-10-18">
 
-  <entry dev-build="5" type="enh">
+  <entry dev-build="6" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
+      When opening a file from the the main menu (File -> Open), the file can now be opened in a new
+      editor tab. 
     </description>
   </entry>
 
@@ -91,6 +98,12 @@
       For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
     </description>
   </entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
+      The navigation for referencing/referenced rows was no longer available in the DbExplorer's data tab.
+		</description>
+	</entry>
 
   <entry dev-build="5" type="fix">
     <description>

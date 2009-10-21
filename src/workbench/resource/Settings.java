@@ -377,6 +377,7 @@ public class Settings
 	public WbFile getLibDir()
 	{
 		String dir = System.getProperty("workbench.libdir", getProperty("workbench.libdir", null));
+		dir = FileDialogUtil.replaceConfigDir(dir);
 		if (dir == null) return new WbFile(getConfigDir());
 		return new WbFile(dir);
 	}

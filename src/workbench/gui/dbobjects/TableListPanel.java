@@ -260,7 +260,7 @@ public class TableListPanel
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 
 		this.tableData = new TableDataPanel();
-		this.tableData.setResultContainer(aParent);
+//		this.tableData.setResultContainer(aParent);
 
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);

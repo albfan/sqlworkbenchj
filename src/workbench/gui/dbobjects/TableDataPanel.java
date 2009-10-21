@@ -122,6 +122,8 @@ public class TableDataPanel
 	{
 		if (initialized) return;
 
+		Thread.dumpStack();
+		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -259,6 +261,19 @@ public class TableDataPanel
 		{
 			readSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
 		}
+
+		try
+		{
+			MainWindow w = (MainWindow)SwingUtilities.getWindowAncestor(this);
+			setResultContainer(w);
+		}
+		catch (Exception e)
+		{
+			// ignore, will only happen if the DbExplorer was started
+			// as a standalone application
+		}
+		dataDisplay.setConnection(dbConnection);
+
 		initialized = true;
 	}
 
@@ -335,15 +350,18 @@ public class TableDataPanel
 
 	public void setConnection(WbConnection aConnection)
 	{
-		initGui();
 		this.dbConnection = aConnection;
-		try
+		
+		if (this.initialized)
 		{
-			this.dataDisplay.setConnection(aConnection);
-		}
-		catch (Throwable th)
-		{
-			LogMgr.logError("TableDataPanel.setConnection()", "Error when setting connection", th);
+			try
+			{
+				this.dataDisplay.setConnection(aConnection);
+			}
+			catch (Throwable th)
+			{
+				LogMgr.logError("TableDataPanel.setConnection()", "Error when setting connection", th);
+			}
 		}
 	}
 
