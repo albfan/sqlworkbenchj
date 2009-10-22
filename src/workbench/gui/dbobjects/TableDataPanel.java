@@ -122,8 +122,6 @@ public class TableDataPanel
 	{
 		if (initialized) return;
 
-		Thread.dumpStack();
-		
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override

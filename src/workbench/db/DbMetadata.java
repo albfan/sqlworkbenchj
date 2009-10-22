@@ -1938,7 +1938,15 @@ public class DbMetadata
 				}
 
 				int size = rs.getInt("COLUMN_SIZE"); // index 7
-				int digits = rs.getInt("DECIMAL_DIGITS"); // index 9
+				int digits = -1;
+				try 
+				{
+					digits = rs.getInt("DECIMAL_DIGITS"); // index 9
+				}
+				catch (Exception e)
+				{
+					digits = -1;
+				}
 				if (rs.wasNull()) digits = -1;
 
 				String remarks = rs.getString("REMARKS"); // index 12

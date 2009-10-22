@@ -323,5 +323,20 @@ WHERE table_type='V'
    </object>  
   </void>  
 
+  <void method="put">
+    <string>LucidDB</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>SELECT original_text FROM SYS_ROOT.DBA_VIEWS </string>
+      </void>
+      <void property="objectNameField">
+        <string>view_name</string>
+      </void>
+      <void property="schemaField">
+        <string>schema_name</string>
+      </void>
+    </object>
+  </void>
+
  </object> 
 </java> 

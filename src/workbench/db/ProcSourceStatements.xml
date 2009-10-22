@@ -262,7 +262,21 @@ and  sysobjects.type = &apos;P&apos;</string>
     </void> 
    </object> 
   </void> 
-  
+
+  <void method="put">
+    <string>LucidDB</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>SELECT external_name FROM SYS_ROOT.DBA_ROUTINES</string>
+      </void>
+      <void property="objectNameField">
+        <string>invocation_name</string>
+      </void>
+      <void property="schemaField">
+        <string>schema_name</string>
+      </void>
+    </object>
+  </void>
+
  </object> 
- 
 </java> 
