@@ -291,9 +291,14 @@
 	<section id="config-dir" xreflabel="Configuration files">
 		<title>Configuration directory</title>
 
+    <para>
+      The configuration directory is the directory where all config (<literal>workbench.settings</literal>,
+      <literal>WbProfiles.xml</literal>, <literal>WbDrivers.xml</literal>) files are stored.
+    </para>
+
 		<para>
 			If no configuration directory has been specified on the commandline,
-			&wb-productname; will use the following search order to find it's configuration directory:
+			&wb-productname; will identify the configuration directory by looking at the following places
 			<orderedlist>
 				<listitem><simpara>The current directory</simpara></listitem>
 				<listitem><simpara>The directory where <literal>sqlworkbench.jar</literal> is located</simpara></listitem>
@@ -304,8 +309,11 @@
 						or <literal>%HOMEPATH%\.sqlworkbench</literal> on Windows systems)
 					</simpara></listitem>
 			</orderedlist>
-			If the file <literal>workbench.settings</literal> is not found in any of those directories
-			it will be created in the user's home directory.
+			If the file <literal>workbench.settings</literal> is found in one of those directories, that
+      directory is considered the configuration directory.
+    </para>
+    <para>
+			If no configuration directory can be identified, it will be created in the user's home directory (as <literal>.sqlworkbench</literal>).
 		</para>
 		<para>
 			The above mentioned search can be overridden by supplying the configuration directory
@@ -369,6 +377,7 @@
 				as the full path to the driver's jar file(s) is stored in the file (unless you
 				define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
 			</para>
+      
 		</section>
 
 	</section>
