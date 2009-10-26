@@ -802,6 +802,12 @@
        eof="remove"
        includes="**/*.sh"
     />
+    <fixcrlf srcdir="${scriptsrc}"
+       eol="crlf"
+       eof="remove"
+       includes="**/*.cmd"
+    />
+    
   </target>
 
 </project>
