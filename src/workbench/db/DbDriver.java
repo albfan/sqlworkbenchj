@@ -367,7 +367,6 @@ public class DbDriver
 		String userPrgName = Settings.getInstance().getProperty("workbench.db.connection.info.programname", null);
 		if (userPrgName != null) return userPrgName;
 
-		// Since 11.1.0.7.0 Oracle does not allow regular brackets in the application name any longer.
 		return ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildNumber();
 	}
 	
@@ -418,6 +417,10 @@ public class DbDriver
 					props.put("workstationID", localName);
 				}
 			}
+		}
+		else if (url.startsWith("jdbc:db2:"))
+		{
+			appNameProperty = "clientApplicationInformation";
 		}
 
 		if (appNameProperty != null && !props.containsKey(appNameProperty))

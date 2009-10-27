@@ -62,9 +62,7 @@ public class AutoCompletionAction
 		{
 			try
 			{
-				// Use reflection to create the instance so
-				// that the classes are not loaded during startup
-				this.handler = (CompletionHandler)Class.forName("workbench.gui.completion.DefaultCompletionHandler").newInstance();
+				this.handler = new CompletionHandler();
 			}
 			catch (Exception e)
 			{
