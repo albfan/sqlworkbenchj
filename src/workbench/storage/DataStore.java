@@ -1843,8 +1843,8 @@ public class DataStore
 		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;
 		int count = this.deletedRows.size();
 		if (row > count) return null;
-		RowData data = this.deletedRows.get(row);
-		return data.getValue(col);
+		RowData rowData = this.deletedRows.get(row);
+		return rowData.getValue(col);
 	}
 	
 	protected RowData getNextDeletedRow()

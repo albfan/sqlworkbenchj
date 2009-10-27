@@ -191,6 +191,10 @@ public class DbObjectCache
 
 		if (this.objects.size() == 0 || !schemasInCache.contains(schema == null ? NULL_SCHEMA : schema))
 		{
+			if (Settings.getInstance().getDebugCompletionSearch())
+			{
+				LogMgr.logDebug("DbObjectCache.getColumns()", "Request for " + tbl.getTableExpression() + ". Reading schema: " + schema);
+			}
 			this.getTables(schema);
 		}
 		
@@ -198,6 +202,10 @@ public class DbObjectCache
 		toSearch.adjustCase(dbConnection);
 		if (toSearch.getSchema() == null)
 		{
+			if (Settings.getInstance().getDebugCompletionSearch())
+			{
+				LogMgr.logDebug("DbObjectCache.getColumns()", "Request for " + tbl.getTableExpression() + ". Adjusting schema to: " + schema);
+			}
 			toSearch.setSchema(schema);
 		}
 		
@@ -209,10 +217,18 @@ public class DbObjectCache
 		{
 			toSearch.setSchema(null);
 			toSearch.setType(null);
+			if (Settings.getInstance().getDebugCompletionSearch())
+			{
+				LogMgr.logDebug("DbObjectCache.getColumns()", "Checking for object without schema");
+			}
 			cols = this.objects.get(toSearch);
 			if (cols == null)
 			{
 				// retrieve Oracle PUBLIC synonyms
+				if (Settings.getInstance().getDebugCompletionSearch())
+				{
+					LogMgr.logDebug("DbObjectCache.getColumns()", "Retrieving PUBLIC synonyms");
+				}
 				this.getTables("PUBLIC");
 				cols = this.objects.get(toSearch);
 			}
@@ -221,6 +237,11 @@ public class DbObjectCache
 		if (cols == null || cols == Collections.EMPTY_LIST)
 		{
 			TableIdentifier tblToUse = null; 
+
+			if (Settings.getInstance().getDebugCompletionSearch())
+			{
+				LogMgr.logDebug("DbObjectCache.getColumns()", "Using key: " + toSearch.getTableExpression());
+			}
 			
 			// use the stored key because that might carry the correct type attribute
 			// TabelIdentifier.equals() doesn't compare the type, only the expression
@@ -236,10 +257,19 @@ public class DbObjectCache
 			}
 			else
 			{
+				if (Settings.getInstance().getDebugCompletionSearch())
+				{
+					LogMgr.logDebug("DbObjectCache.getColumns()", "Calling DbMetadata.findObject() using: " + toSearch.getTableExpression());
+				}
 				// retrieve the real table identifier based on the table name
-				tblToUse = this.dbConnection.getMetadata().findSelectableObject(toSearch);
+				tblToUse = this.dbConnection.getMetadata().findObject(toSearch);
 			}
-			
+
+			if (Settings.getInstance().getDebugCompletionSearch())
+			{
+				LogMgr.logDebug("DbObjectCache.getColumns()", "Found object: " + (tblToUse == null ? "(nothing)" : tblToUse.getTableExpression()));
+			}
+
 			try
 			{
 				cols = this.dbConnection.getMetadata().getTableColumns(tblToUse);

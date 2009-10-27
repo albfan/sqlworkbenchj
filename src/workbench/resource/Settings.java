@@ -515,6 +515,11 @@ public class Settings
 	{
 		return props.containsKey(key);
 	}
+
+	public boolean getDebugCompletionSearch()
+	{
+		return getBoolProperty("workbench.db.completion.debug", false);
+	}
 	
 	public boolean getFixSqlServerTimestampDisplay()
 	{
