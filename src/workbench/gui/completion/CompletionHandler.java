@@ -127,8 +127,10 @@ public class CompletionHandler
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);
 		int commandCursorPos = parser.getIndexInCommand(index, cursorPos);
 		String sql = parser.getCommand(index, false);
+
 		if (sql == null)
 		{
+			LogMgr.logWarning("CompletionHandler.updateSelectionList()", "No SQL found!");
 			showNoObjectsFoundMessage();
 			return false;
 		}
@@ -159,6 +161,10 @@ public class CompletionHandler
 				}
 				else
 				{
+					if (Settings.getInstance().getDebugCompletionSearch())
+					{
+						LogMgr.logDebug("CompletionHandler.updateSelectionList()", "Analyzer did not return any data");
+					}
 					showNoObjectsFoundMessage();
 				}
 			}

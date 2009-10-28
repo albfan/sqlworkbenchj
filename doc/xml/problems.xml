@@ -133,6 +133,15 @@
         (<menuchoice><guimenu>Tools</guimenu><guimenuitem>Options</guimenuitem></menuchoice>)
       </para>
     </section>
+
+		<section id="oracle-display-xml">
+			<title>XMLTYPE columns are not displayed properly in the DbExplorer</title>
+      <para>
+        The content of columns with the data type <literal>XMLTYPE</literal> are not displayed in the DbExplorer
+        (because the driver does not convert them to a character datatype). To customize the retrieval for those columns, please
+        refer to the chapter <link linkend="customize-dbexplorer-retrieval">Customize data retrieval in the DbExplorer</link>.
+      </para>
+    </section>
     
 		<section id="oracle-comment-problems">
 			<title>Error: "missing mandatory parameter"</title>
@@ -302,6 +311,16 @@ SELECT 42 FROM dual;</programlisting>
 				This file is usually installed in <literal>jre\lib\charsets.jar</literal>.
 			</para>
 		</section>
+
+		<section id="oracle-display-xml">
+			<title>XML columns are not displayed properly in the DbExplorer</title>
+      <para>
+        The content of columns with the data type <literal>XML </literal> are not displayed in the DbExplorer
+        (because the driver does not convert them to a character datatype). To customize the retrieval for those columns, please
+        refer to the chapter <link linkend="customize-dbexplorer-retrieval">Customize data retrieval in the DbExplorer</link>.
+      </para>
+    </section>
+
 
 	</section>
 

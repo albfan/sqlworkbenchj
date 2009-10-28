@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.wbcommands.CommandTester;
@@ -88,6 +89,18 @@ public class StatementContext
 		{
 			this.analyzer = verbAnalyzer;
 			this.analyzer.setParent(null);
+		}
+
+		if (Settings.getInstance().getDebugCompletionSearch())
+		{
+			if (analyzer == null)
+			{
+				LogMgr.logDebug("StatementContext.<init>", "No analyzer found for verb: " + verb);
+			}
+			else
+			{
+				LogMgr.logDebug("StatementContext.<init>", "Using analyzer: " + analyzer.getClass().getName() + " for verb: " + verb);
+			}
 		}
 
 		if (analyzer != null)
