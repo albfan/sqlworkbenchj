@@ -2,7 +2,7 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-10-18">
+<release build="-1" date="2009-10-27">
 
   <entry dev-build="6" type="enh">
     <description>
@@ -12,7 +12,7 @@
 
   <entry dev-build="6" type="enh">
     <description>
-      When opening a file from the the main menu (File -> Open), the file can now be opened in a new
+      When opening a file from the the main menu (File -&gt; Open), the file can now be opened in a new
       editor tab. 
     </description>
   </entry>

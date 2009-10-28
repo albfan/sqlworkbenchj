@@ -224,6 +224,10 @@ VALUES
           and sample <a href="xslt.html">XSLT</a> scripts.
         </p>
         <p>
+        The download includes the language files for English and German. The application's language can be changed
+        from within the options dialog (Tools -&gt; Options).
+        </p>
+        <p>
           The Mac package is suitable to be extracted on the Mac desktop and contains the jar file, a launcher
           for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package.
         </p>

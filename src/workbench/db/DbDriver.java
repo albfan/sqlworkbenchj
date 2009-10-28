@@ -421,6 +421,12 @@ public class DbDriver
 		else if (url.startsWith("jdbc:db2:"))
 		{
 			appNameProperty = "clientApplicationInformation";
+			if (!props.containsKey("clientProgramId"))
+			{
+				String clientId = StringUtil.getMaxSubstring(id, 80);
+				clientId = StringUtil.padRight(id, 80);
+				props.put("clientProgramId", clientId);
+			}
 		}
 
 		if (appNameProperty != null && !props.containsKey(appNameProperty))
