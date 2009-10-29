@@ -718,6 +718,7 @@ public class ConnectionEditorPanel
 		{
 			return;
 		}
+		
 		if (evt.getStateChange() == ItemEvent.SELECTED)
 		{
 			String oldDriver = null;
@@ -743,11 +744,20 @@ public class ConnectionEditorPanel
 
 			if (!newDriver.canReadLibrary())
 			{
-				if (WbSwingUtilities.getYesNo(ConnectionEditorPanel.this, ResourceMgr.getString("MsgDriverLibraryNotReadable")))
+				final Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this).getParent());
+				final DbDriver toSelect = newDriver;
+
+				EventQueue.invokeLater(new Runnable()
 				{
-					Frame parent = (Frame)(SwingUtilities.getWindowAncestor(this).getParent());
-					DriverEditorDialog.showDriverDialog(parent, null);
-				}
+					@Override
+					public void run()
+					{
+						if (WbSwingUtilities.getYesNo(ConnectionEditorPanel.this, ResourceMgr.getString("MsgDriverLibraryNotReadable")))
+						{
+							DriverEditorDialog.showDriverDialog(parent, toSelect);
+						}
+					}
+				});
 			}
 		}
 	}//GEN-LAST:event_cbDriversItemStateChanged

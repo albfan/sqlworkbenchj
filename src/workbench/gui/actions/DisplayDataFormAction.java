@@ -68,10 +68,18 @@ public class DisplayDataFormAction
 		Dimension d = dialog.getPreferredSize();
 		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
 
+		int maxWidth = (int)(screen.width * 0.6);
+		int maxHeight = (int)(screen.height * 0.6);
+
+		Dimension maxSize = new Dimension(maxWidth, maxHeight);
+		
+		panel.setMaximumSize(maxSize);
+		dialog.setMaximumSize(maxSize);
+
 		boolean doLimit = false;
-		if (d.height > screen.height)
+		
+		if (d.height > maxSize.height)
 		{
-			d.height = screen.height - 150;
 			doLimit = true;
 
 			// make the form wider, so that the vertical scrollbar does not
@@ -82,19 +90,19 @@ public class DisplayDataFormAction
 			d.width += scrollwidth + 2;
 		}
 
-		if (d.width > screen.width)
+		if (d.width > maxSize.width)
 		{
-			d.width = screen.width - 100;
 			doLimit = true;
 		}
 
 		if (doLimit)
 		{
-			dialog.setPreferredSize(d);
-			dialog.setMaximumSize(d);
+			dialog.setPreferredSize(maxSize);
 			dialog.pack();
 		}
 
+		dialog.pack();
+		
 		try
 		{
 			WbSwingUtilities.center(dialog, window);
