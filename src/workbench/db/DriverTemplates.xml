@@ -280,7 +280,7 @@
      <string>org.postgresql.Driver</string>
     </void>
     <void property="library">
-     <string>postgresql-8.2-504.jdbc3.jar</string>
+     <string>postgresql-8.4-701.jdbc4.jar</string>
     </void>
     <void property="name">
      <string>PostgreSQL</string>

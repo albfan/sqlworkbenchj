@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.util.List;
 import workbench.db.DbSettings;
 import workbench.db.FKHandler;
 import workbench.db.ProcedureDefinition;
@@ -116,7 +117,7 @@ public class ObjectInfo
 					if (source != null)
 					{
 						String src = source.toString();
-						result.addMessage("--------[ " + seq.getObjectType() + ": " + seq.getObjectName() + " ]--------");
+						result.addMessage("--------[ " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
 						result.addMessage(src);
 						result.addMessage("--------");
 						if (StringUtil.isBlank(result.getSourceCommand()))
@@ -130,11 +131,13 @@ public class ObjectInfo
 
 			// No table or something similar found, try to find a procedure with that name
 			ProcedureReader reader = connection.getMetadata().getProcedureReader();
-			ProcedureDefinition def = new ProcedureDefinition(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), DatabaseMetaData.procedureResultUnknown);
-			if (reader.procedureExists(def))
+			List<ProcedureDefinition> procs = reader.getProcedureList(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+			
+			if (procs.size() == 1)
 			{
+				ProcedureDefinition def = procs.get(0);
 				CharSequence source = def.getSource(connection);
-				result.addMessage("--------[ " + def.getObjectType()  + ": " + def.getObjectExpression(connection) + " ]--------");
+				result.addMessage("--------[ " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + " ]--------");
 				result.addMessage(source);
 				result.addMessage("--------");
 				result.setSuccess();
@@ -146,7 +149,7 @@ public class ObjectInfo
 			String source = trgReader.getTriggerSource(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), null);
 			if (StringUtil.isNonBlank(source))
 			{
-				result.addMessage("--------[ TRIGGER: " + tbl.getObjectName() + " ]--------");
+				result.addMessage("--------[ Trigger: " + tbl.getObjectName() + " ]--------");
 				result.addMessage(source);
 				result.addMessage("--------");
 				result.setSuccess();

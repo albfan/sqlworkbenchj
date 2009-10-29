@@ -120,33 +120,65 @@ VALUES
     <title>SQL Workbench/J</title>
     <subtitle>Getting started</subtitle>
     <content>
-      <p>SQL Workbench/J needs a <a target="_blank" href="http://java.sun.com/javase/downloads/index.jsp">Java 5 runtime</a> environment (Java 6 is recommended).
-      You have to install the JDK or JRE before you can run SQL Workbench/J.
+      <h3>Prerequisites</h3>
+      <p>
+        SQL Workbench/J needs a <a target="_blank" href="http://java.sun.com/javase/downloads/index.jsp">Java 5 runtime</a> environment (Java 6 is recommended).
+        You have to install Java before you can run SQL Workbench/J.
       </p>
-      <p>After <a href="downloads.html">downloading</a> SQL Workbench/J, unzip the archive into
-      a directory of your choice. The application is now ready to be run.</p>
-      
-      <p>If you are using Windows&reg; you can use the supplied
-      <tt>sqlworkbench.exe</tt> executable to start the application.</p>
-      
-      <p style="margin-top:15px;margin-bottom:15px;">Windows Vista users please <a href="vista.html">read this</a>.</p>
-      
-      <p>If you are running Linux (or another Unix&reg; like operating system) you can use
-      the supplied shell script <tt>sqlworkbench.sh</tt> to start the application.</p>
 
-      <p>SQL Workbench/J is a Java application that is contained in the file <tt>sqlworkbench.jar</tt>
-      This is a <a href="http://java.sun.com/j2se/1.5.0/docs/guide/jar/jarGuide.html">self executable JAR file</a>
-      that can also be started by double clicking on it, provided that the Java Runtime Environment (JRE/JDK)
-      is installed properly and the <tt>jar</tt> extension is registered within the system.</p>
-      
-      <p>After a first time installation, you will need to configure the JDBC drivers to be used
-      with the application. The location of the driver libraries can be specified using
-      the "File->Manage drivers" menu item. This dialog is also available from the connection
-      dialog. Once you have specified the location of the driver, select the driver from the
-      drop down in the connection dialog and provide the necessary login information.
+      <h3 style="padding-top:10px">Installation</h3>
+      <p>
+        After <a href="downloads.html">downloading</a> SQL Workbench/J, unzip the archive into
+        a directory of your choice.
+      </p>
+      <p>
+        The application is now ready to be run, no further installation steps are necessary.
       </p>
       
-      <p>For further details, please refer to the <a href="manual/workbench-manual.html">manual</a></p>
+      <h3 style="padding-top:10px">Starting the application</h3>
+
+      <p>If you are using Windows&reg; start the application by double-clicking the
+        <tt>SQLWorkbench.exe</tt> executable (Windows Vista users please <a href="vista.html">read this</a>).
+      </p>
+      
+      <p>
+        If you are running Linux (or another Unix&reg; like operating system) you can use
+        the supplied shell script <tt>sqlworkbench.sh</tt> to start the application.
+      </p>
+
+      <h3 style="padding-top:10px">Configuring the database (JDBC) drivers</h3>
+      <p>
+        When starting SQL Workbench/J for the first time, you will need to configure the JDBC drivers for your database system.
+      </p>
+      <p>
+        When the initial connection dialog is displayed ("Select Connection Profile"), click on the
+        <image-link title="Initial Connection dialog" name="startup_initial.png">"Manage Drivers" button</image-link> 
+        to specify the location of the driver's JAR file(s).
+      </p>
+      <p>
+        To define the driver, <image-link title="Select driver" name="startup_driver.png">select the JAR file(s)</image-link> that 
+        is supplied by your database system. The driver definition dialog has a list of pre-defined drivers and the name of their jar file.
+      </p>
+      <p>
+        To select the driver's JAR file, click on the "..." button next to the input field labelled "Library".
+        After you have selected the JAR file, SQL Workbench/J will search for the approriate driver class to be
+        used. If a JDBC driver implementation is found in the JAR file(s), it is automatically entered in the
+        input field labeled "Classname". If more than one class is found you will have to select one.
+      </p>
+
+      <h3 style="padding-top:10px">Specifying the database connection</h3>
+      <p>
+        If you have specified the driver's location, you can close the "Manage drivers" dialog. In the "Select Connection Profile"
+        dialog, you have to specify <image-link title="Define the connection" name="startup_connection.png">the details for your database connection</image-link>.
+        You can find more details on how to define the JDBC driver in the <a href="manual/jdbc-setup.html">manual</a>.
+      </p>
+      <p>
+        To setup the connection to your database, select the JDBC driver from the dropdown, then fill out the JDBC connection URL (a
+        sample URL has been inserted into the input field) and most importantly: the username and password. Click OK to
+        connect to the database.
+      </p>
+
+      <p>For further details, please refer to the <a href="manual/profiles.html">manual</a></p>
     </content>
   </page>
 

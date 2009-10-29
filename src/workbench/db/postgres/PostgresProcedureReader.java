@@ -267,11 +267,18 @@ public class PostgresProcedureReader
 								"                 array_to_string(p.proargtypes, ';')) as argtypes, \n" +
 								"        array_to_string(p.proargnames, ';') as argnames, \n" +
 								"        array_to_string(p.proargmodes, ';') as argmodes, \n " +
-								"        p.prosecdef, \n" +
+								"        p.prosecdef, " +
 								"        p.proretset, " +
 								"        p.provolatile, " +
-								"        p.proisstrict " +
-								"FROM pg_proc p, pg_language l, pg_namespace n \n" +
+								"        p.proisstrict, " +
+								"        p.proretset ";
+		
+		boolean hasCost = JdbcUtils.hasMinimumServerVersion(connection, "8.3");
+		if (hasCost) 
+		{
+			sql += ", p.procost, p.prorows ";
+		}
+		sql +=  "\nFROM pg_proc p, pg_language l, pg_namespace n \n" +
 								" where p.prolang = l.oid \n" +
 								" and p.pronamespace = n.oid ";
 
@@ -286,6 +293,12 @@ public class PostgresProcedureReader
 		{
 			sql += " AND p.proargtypes = cast('" + oids + "' as oidvector)";
 		}
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Using SQL=" + sql);
+		}
+		
 		StringBuilder source = new StringBuilder(500);
 		
 		ResultSet rs = null;
@@ -315,10 +328,19 @@ public class PostgresProcedureReader
 				String types = rs.getString("argtypes");
 				String names = rs.getString("argnames");
 				String modes = rs.getString("argmodes");
+				boolean returnSet = rs.getBoolean("proretset");
+				
 				boolean securityDefiner = rs.getBoolean("prosecdef");
 				boolean strict = rs.getBoolean("proisstrict");
 				String volat = rs.getString("provolatile");
 
+				Double cost = null;
+				Double rows = null;
+				if (hasCost)
+				{
+					cost = rs.getDouble("procost");
+					rows = rs.getDouble("prorows");
+				}
 				List<String> argNames = StringUtil.stringToList(names, ";", true, true);
 				List<String> argTypes = StringUtil.stringToList(types, ";", true, true);
 				List<String> argModes = StringUtil.stringToList(modes, ";", true, true);
@@ -350,28 +372,46 @@ public class PostgresProcedureReader
 
 				source.append(")\n  RETURNS ");
 				source.append(getRawTypeNameFromOID(retTypeOid));
-				source.append("\nAS\n$$\n");
+				source.append("\n  LANGUAGE ");
+				source.append(lang);
+				source.append("\nAS\n$body$\n");
 				src = src.trim();
 				source.append(StringUtil.makePlainLinefeed(src));
 				if (!src.endsWith(";")) source.append(';');
-				source.append("\n$$ LANGUAGE ");
-				source.append(lang);
+				source.append("\n$body$\n");
 				if (volat.equals("i"))
 				{
-					source.append(" IMMUTABLE ");
+					source.append(" IMMUTABLE");
 				}
-				if (volat.equals("s"))
+				else if (volat.equals("s"))
 				{
-					source.append(" STABLE ");
+					source.append(" STABLE");
+				}
+				else
+				{
+					source.append(" VOLATILE");
 				}
 				if (strict)
 				{
-					source.append(" STRICT ");
+					source.append(" STRICT");
 				}
 				if (securityDefiner)
 				{
-					source.append(" SECURITY DEFINER");
+					source.append("\n SECURITY DEFINER");
 				}
+
+				if (cost != null)
+				{
+					source.append("\n COST ");
+					source.append(cost.longValue());
+				}
+
+				if (rows != null && returnSet)
+				{
+					source.append("\n ROWS ");
+					source.append(rows.longValue());
+				}
+				
 				source.append('\n');
 				source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 				source.append('\n');
