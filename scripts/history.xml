@@ -4,7 +4,7 @@
 <!-- build number must be set to -1 until a release is built -->
 <release build="-1" date="2009-10-27">
 
-  <entry dev-build="6" type="enh">
+  <entry dev-build="7" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
     </description>
@@ -98,6 +98,12 @@
       For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
     </description>
   </entry>
+
+  <entry dev-build="7" type="fix">
+    <description>
+      Using WbCall with a fully qualified procedure that returned a REF CURSOR did not work.
+		</description>
+	</entry>
 
   <entry dev-build="5" type="fix">
     <description>

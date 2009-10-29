@@ -987,6 +987,11 @@ public class DbMetadata
 		return SqlUtil.quoteObjectname(aName);
 	}
 
+	public String adjustSchemaNameCase(String schema)
+	{
+		return adjustSchemaNameCase(schema, false);
+	}
+	
 	/**
 	 * Adjusts the case of the given schema name to the
 	 * case in which the server stores schema names.
@@ -998,9 +1003,11 @@ public class DbMetadata
 	 * @param schema the schema name to adjust
 	 * @return the adjusted schema name
 	 */
-	public String adjustSchemaNameCase(String schema)
+	public String adjustSchemaNameCase(String schema, boolean respectQuotes)
 	{
 		if (StringUtil.isBlank(schema)) return null;
+		if (respectQuotes && isQuoted(schema)) return schema;
+		
 		schema = StringUtil.trimQuotes(schema).trim();
 		try
 		{
@@ -1018,7 +1025,7 @@ public class DbMetadata
 		}
 		return schema;
 	}
-
+	
 	/**
 	 * Returns true if the given object name needs quoting due
 	 * to mixed case writing or because the case of the name
@@ -1055,7 +1062,7 @@ public class DbMetadata
 	{
 		if (name == null) return null;
 		// if we have quotes, keep them...
-		if (name.indexOf("\"") > -1) return name.trim();
+		if (isQuoted(name)) return name.trim();
 
 		try
 		{

@@ -250,7 +250,24 @@ public class SQLLexerTest
 					break;
 			}
 		}
+	}
 
+	public void testQuotes()
+		throws Exception
+	{
+		String sql = "call \"schema\".\"proc\"";
+		List<SQLToken> tokens = getTokenList(sql);
+
+		assertNotNull(tokens);
+		assertEquals(4, tokens.size());
+		assertEquals("\"schema\"", tokens.get(1).getText());
+		assertEquals("\"proc\"", tokens.get(3).getText());
+
+		sql = "call schema.proc";
+		tokens = getTokenList(sql);
+		assertNotNull(tokens);
+		assertEquals(2, tokens.size());
+		assertEquals("schema.proc", tokens.get(1).getText());
 	}
 	
 }

@@ -23,6 +23,7 @@ import java.util.List;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureReader;
+import workbench.db.TableIdentifier;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
@@ -342,7 +343,13 @@ public class WbCall
 		DbMetadata meta = this.currentConnection.getMetadata();
 		ArrayList<ParameterDefinition> parameterNames = null;
 
-		DataStore params = meta.getProcedureReader().getProcedureColumns(null, meta.adjustSchemaNameCase(schema), meta.adjustObjectnameCase(procname));
+		TableIdentifier name = new TableIdentifier(schema, procname);
+		name.setPreserveQuotes(true);
+
+		String schemaToUse = StringUtil.trimQuotes(meta.adjustSchemaNameCase(name.getSchema(), true));
+		String nameToUse = StringUtil.trimQuotes(meta.adjustObjectnameCase(name.getObjectName()));
+
+		DataStore params = meta.getProcedureReader().getProcedureColumns(null, schemaToUse, nameToUse);
 
 		boolean needFuncCall = meta.isPostgres() && returnsRefCursor(params);
 		CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(getSqlToPrepare(sql, needFuncCall));
