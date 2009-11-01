@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.util.List;
 import junit.framework.*;
 
 /**
@@ -19,7 +20,7 @@ import junit.framework.*;
  */
 public class FixedSizeListTest extends TestCase
 {
-	
+
 	public FixedSizeListTest(String testName)
 	{
 		super(testName);
@@ -35,21 +36,21 @@ public class FixedSizeListTest extends TestCase
 			list.addEntry("Three");
 			list.addEntry("Four");
 			list.addEntry("Five");
-			
+
 			assertEquals("Wrong size", 5, list.size());
-			
+
 			list.addEntry("Six");
 			assertEquals("Wrong size", 5, list.size());
-		
+
 			String firstEntry = list.getFirst();
 			assertEquals("Wrong entry", "Six", firstEntry);
-			
+
 			// Should put "Three" at the "top"
 			list.addEntry("Three");
 			firstEntry = list.getFirst();
 			assertEquals("Wrong entry", "Three", firstEntry);
 			assertEquals("Wrong size", 5, list.size());
-			
+
 			int index = 0;
 			for (String entry : list.getEntries())
 			{
@@ -75,7 +76,11 @@ public class FixedSizeListTest extends TestCase
 				}
 				index ++;
 			}
-			
+
+			List<String> t = CollectionUtil.arrayList("one", "two", "three");
+			list = new FixedSizeList<String>(5);
+			list.addAll(t);
+			assertEquals("one", list.get(0));
 		}
 		catch (Exception e)
 		{
@@ -84,5 +89,5 @@ public class FixedSizeListTest extends TestCase
 		}
 	}
 
-	
+
 }

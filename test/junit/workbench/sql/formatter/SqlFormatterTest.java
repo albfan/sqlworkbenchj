@@ -296,7 +296,7 @@ public class SqlFormatterTest
 			"ip_fromip and ip_endip),0) isNew\n"+
 			"from tmp ";
 
-		expected = "WITH tmpAS\n" +
+		expected = "WITH tmp AS\n" +
 							"(\n" +
 							"  SELECT * FROM users\n" +
 							")\n" +
@@ -324,6 +324,32 @@ public class SqlFormatterTest
 							"FROM foo\n" +
 							"WHERE id BETWEEN 1\n" +
 							"AND   10000 WITH CHECK OPTION";
+//		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+		// Test multiple CTEs in a single statement
+		sql = "with first_cte (col1, col2) AS " +
+			"( select col1, col2 from table_1), " +
+			"second_cte (col1, col2) as " +
+			"( select col4, col5 from table_2), third_cte as (select 1,2 from dual)" +
+			"select * from first_cte f join second_cte s on (f.col1 = s.col2)";
+		f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+		expected = "WITH first_cte (col1, col2) AS\n" +
+             "(\n" +
+             "  SELECT col1, col2 FROM table_1\n" +
+             "),\n" +
+             "second_cte (col1, col2) AS\n" +
+             "(\n" +
+             "  SELECT col4, col5 FROM table_2\n" +
+             "),\n" +
+             "third_cte AS\n" +
+             "(\n" +
+             "  SELECT 1, 2 FROM dual\n" +
+             ")\n" +
+             "SELECT *\n" +
+             "FROM first_cte f \n" +
+             "     JOIN second_cte s ON (f.col1 = s.col2)";
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 	}
@@ -395,6 +421,57 @@ public class SqlFormatterTest
 			Settings.getInstance().setFormatterUpperCaseKeywords(true);
 		}
 	}
+
+	public void testFormatMultiValueInsert()
+		throws Exception
+	{
+		try
+		{
+			String sql = "insert into my_table (col1, col2, col3) values (1,2,3), (4,5,6), (7,8,9)";
+			SqlFormatter f = new SqlFormatter(sql);
+			String formatted = f.getFormattedSql().toString();
+			String expected = "INSERT INTO my_table\n" +
+             "(\n" +
+             "  col1,\n" +
+             "  col2,\n" +
+             "  col3\n" +
+             ")\n" +
+             "VALUES\n" +
+             "(\n" +
+             "  1,\n" +
+             "  2,\n" +
+             "  3\n" +
+             "),\n" +
+             "(\n" +
+             "  4,\n" +
+             "  5,\n" +
+             "  6\n" +
+             "),\n" +
+             "(\n" +
+             "  7,\n" +
+             "  8,\n" +
+             "  9\n" +
+             ")";
+//				System.out.println("******************\n" + formatted + "\n-------------------------\n" + expected + "\n************************");
+			assertEquals(expected, formatted);
+			Settings.getInstance().setFormatterMaxColumnsInInsert(10);
+			f = new SqlFormatter(sql);
+			formatted = f.getFormattedSql().toString();
+			expected = "INSERT INTO my_table\n" +
+             "  (col1, col2, col3) \n" +
+             "VALUES \n" +
+             "  (1, 2, 3),\n" +
+             "  (4, 5, 6),\n" +
+             "  (7, 8, 9)";
+				System.out.println("******************\n" + formatted + "\n-------------------------\n" + expected + "\n************************");
+		}
+		finally
+		{
+			Settings.getInstance().setFormatterMaxColumnsInInsert(1);
+		}
+
+	}
+	
 	public void testFormatInsert()
 		throws Exception
 	{
@@ -402,7 +479,7 @@ public class SqlFormatterTest
 		{
 			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
 			String sql = "insert into x ( col1,col2,col3) values (1,2,3)";
-			String expected = "INSERT INTO x\n  (col1, col2, col3) \nVALUES\n  (1, 2, 3)";
+			String expected = "INSERT INTO x\n  (col1, col2, col3)\nVALUES\n  (1, 2, 3)";
 			SqlFormatter f = new SqlFormatter(sql, 100);
 			String formatted = (String) f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
@@ -410,11 +487,12 @@ public class SqlFormatterTest
 
 			Settings.getInstance().setFormatterMaxColumnsInInsert(3);
 			sql = "insert into x ( col1,col2,col3,col4,col5) values (1,2,3,4,5)";
-			expected = "INSERT INTO x\n  (col1, col2, col3,\n   col4, col5) \nVALUES\n  (1, 2, 3,\n   4, 5)";
+			expected = "INSERT INTO x\n  (col1, col2, col3,\n   col4, col5)\nVALUES\n  (1, 2, 3,\n   4, 5)";
 			f = new SqlFormatter(sql, 100);
 			formatted = (String) f.getFormattedSql();
 //			System.out.println("*********\n" + formatted + "\n---\n" + expected + "\n************");
 			assertEquals(expected, formatted);
+
 		}
 		finally
 		{
@@ -451,7 +529,7 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "insert into x(ss2,ss3,ss2) values('\u32A5\u0416','dsaffds',234)";
-		String expected = "INSERT INTO x\n(\n  ss2,\n  ss3,\n  ss2\n) \nVALUES\n(\n  '\u32A5\u0416',\n  'dsaffds',\n  234\n)";
+		String expected = "INSERT INTO x\n(\n  ss2,\n  ss3,\n  ss2\n)\nVALUES\n(\n  '\u32A5\u0416',\n  'dsaffds',\n  234\n)";
 		SqlFormatter f = new SqlFormatter(sql, 100);
 		String formatted = (String) f.getFormattedSql();
 		assertEquals(expected, formatted);
@@ -530,10 +608,10 @@ public class SqlFormatterTest
 		throws Exception
 	{
 		String sql = "insert into tble (a,b) values ( (select max(x) from y), 'bla')";
-		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ") \n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
+		String expected = "INSERT INTO tble\n" + "(\n" + "  a,\n" + "  b\n" + ")\n" + "VALUES\n" + "(\n" + "   (SELECT MAX(x) FROM y),\n" + "  'bla'\n" + ")";
 		SqlFormatter f = new SqlFormatter(sql, 100);
 		CharSequence formatted = f.getFormattedSql();
-//			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
+//		System.out.println("**************\n" + formatted + "\n----------------------\n" + expected + "\n************************");
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
@@ -782,4 +860,5 @@ public class SqlFormatterTest
 			fail(e.getMessage());
 		}
 	}
+
 }

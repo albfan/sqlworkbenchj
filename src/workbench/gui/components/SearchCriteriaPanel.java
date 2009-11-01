@@ -57,16 +57,16 @@ public class SearchCriteriaPanel
 
 	public SearchCriteriaPanel(String initialValue)
 	{
-		this(initialValue, "workbench.sql.search", false);
+		this(initialValue, "workbench.sql", false);
 	}
 
 	public SearchCriteriaPanel(String initialValue, String settingsKey, boolean showHighlight)
 	{
 		super();
 		baseProperty = settingsKey;
-		caseProperty = settingsKey + ".ignoreCase";
-		wordProperty = settingsKey + ".wholeWord";
-		regexProperty = settingsKey + ".useRegEx";
+		caseProperty = settingsKey + ".search.ignoreCase";
+		wordProperty = settingsKey + ".search.wholeWord";
+		regexProperty = settingsKey + ".search.useRegEx";
 
 		if (showHighlight)
 		{
@@ -96,7 +96,7 @@ public class SearchCriteriaPanel
 		}
 
 		this.label = new JLabel(ResourceMgr.getString("LblSearchCriteria"));
-		this.criteria = new HistoryTextField("search");
+		this.criteria = new HistoryTextField(".search");
 		this.criteria.setName("searchtext");
 
 		criteria.restoreSettings(Settings.getInstance(), baseProperty);

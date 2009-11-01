@@ -338,6 +338,15 @@
 			</para>
 		</section>
 
+    <section id="editor-follow-current-dir">
+      <title>Current directory follows active file</title>
+      <para>
+        If this option is enabled, the file open dialog will default to the
+        directory of the current file in the editor. If no file is
+        loaded in the editor, the directory that is defined  through the
+        "Default directory" option will be selected.
+      </para>
+    </section>
 	</section>
 
 	<section id="options-editor-colors">

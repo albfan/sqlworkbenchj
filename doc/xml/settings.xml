@@ -148,29 +148,6 @@
 			<para>Default value: <literal>false</literal></para>
 		</simplesect>
 
-		<!--
-    <simplesect id="editor-color-setting">
-      <title>Customizing the colors used for syntax highlighting</title>
-      <para>Property: <literal>workbench.editor.color.[type]</literal></para>
-      <para>
-				These properties control the various colors used for syntax highlighting in the editor. 
-				Each entry defines a color with the three RGB values that make up the color.
-      </para>
-			
-      <para>Available values for <literal>[type]</literal> and their defaults:
-        <simplelist columns="1">
-          <member><literal>comment1</literal> - The color used for multi-line comments (128,128,128)</member>
-          <member><literal>comment2</literal> - The color used for single-line comments (128,128,128)</member>
-          <member><literal>keyword1</literal> - The color standard SQL keywords (0,0,255)</member>
-          <member><literal>keyword2</literal> - The color used for WB specific commands (255,0,255)</member>
-          <member><literal>keyword3</literal> - The color used for SQL functions (0,150,0)</member>
-          <member><literal>literal1</literal> - The color used for literals (101,0,153)</member>
-          <member><literal>operator</literal> - The color used for operators (0,0,0)</member>
-        </simplelist>
-      </para>
-    </simplesect>
-		-->
-		
    <simplesect id="editor-rect-selection">
       <title>Set the modifier key for rectangular selections in the edior</title>
       <para>Property: <literal>workbench.editor.rectselection.modifier</literal></para>

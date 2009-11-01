@@ -19,25 +19,25 @@ import java.util.List;
 import java.util.ListIterator;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class FixedSizeList<T>
 	implements List<T>
 {
 	private LinkedList<T> entries;
 	private int maxSize;
-	
+
 	public FixedSizeList()
 	{
 		this(25);
 	}
-	
+
 	public FixedSizeList(int max)
 	{
 		this.maxSize = max;
 		this.entries = new LinkedList<T>();
 	}
-	
+
 	/**
 	 * Append an entry at the end of the list, without
 	 * checking for duplicates or removing entries
@@ -49,29 +49,29 @@ public class FixedSizeList<T>
 		if (entry == null) return;
 		entries.add(entry);
 	}
-	
+
 	public synchronized int addEntry(T entry)
 	{
 		if (entry == null) return -1;
-		
+
 		// Don't allow duplicates
 		if (entries.contains(entry))
 		{
 			entries.remove(entry);
 		}
 		entries.addFirst(entry);
-		while (entries.size() > maxSize) 
+		while (entries.size() > maxSize)
 		{
 			entries.removeLast();
 		}
 		return entries.size();
 	}
-	
+
 	public synchronized int size()
 	{
 		return entries.size();
 	}
-	
+
 	public synchronized T getFirst()
 	{
 		return entries.getFirst();
@@ -81,7 +81,7 @@ public class FixedSizeList<T>
 	{
 		return entries.iterator();
 	}
-	
+
 	public synchronized String toString()
 	{
 		StringBuilder result = new StringBuilder(entries.size() * 80);
@@ -139,7 +139,7 @@ public class FixedSizeList<T>
 	{
 		for (T e : c)
 		{
-			addEntry(e);
+			entries.add(e);
 		}
 		return true;
 	}
@@ -208,5 +208,5 @@ public class FixedSizeList<T>
 	{
 		return entries.subList(fromIndex, toIndex);
 	}
-	
+
 }

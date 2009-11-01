@@ -35,7 +35,7 @@ import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableReplacer
 	implements Searchable, Replaceable, TableModelListener
@@ -46,7 +46,7 @@ public class TableReplacer
 	private ReplaceDataAction replaceAction;
 	private DataStoreReplacer replacer;
 	private boolean tableChanging = false;
-	
+
 	public TableReplacer(WbTable table)
 	{
 		this.client = table;
@@ -60,16 +60,16 @@ public class TableReplacer
 		this.replaceAction = new ReplaceDataAction(this);
 		this.replaceAction.setEnabled(false);
 	}
-	
+
 	public FindDataAction getFindAction() { return this.findAction; }
 	public FindDataAgainAction getFindAgainAction() { return this.findAgainAction; }
 	public ReplaceDataAction getReplaceAction() { return this.replaceAction; }
-	
+
 	public int find()
 	{
 		boolean showDialog = true;
 		String crit = this.replacer.getLastCriteria();
-		SearchCriteriaPanel p = new SearchCriteriaPanel(crit, "workbench.data.search", true);
+		SearchCriteriaPanel p = new SearchCriteriaPanel(crit, "workbench.data", true);
 
 		Component parent = SwingUtilities.getWindowAncestor(this.client);
 		Position pos = Position.NO_POSITION;
@@ -103,12 +103,12 @@ public class TableReplacer
 				showDialog = true;
 			}
 		}
-		
+
 		highlightPosition(pos);
-		
+
 		return pos.getRow();
 	}
-	
+
 	protected void initTableHighlighter(String criteria, boolean ignoreCase, boolean useRegex)
 	{
 		ColumnComparator comp = null;
@@ -124,7 +124,7 @@ public class TableReplacer
 		filter.setIgnoreCase(ignoreCase);
 		client.applyHighlightExpression(filter);
 	}
-	
+
 	protected void highlightPosition(final Position pos)
 	{
 		final int row = pos.getRow();
@@ -142,18 +142,18 @@ public class TableReplacer
 			}
 		});
 	}
-	
+
 	public int findNext()
 	{
 		Position pos = this.replacer.findNext();
 		highlightPosition(pos);
 		return pos.getRow();
 	}
-	
+
 	public void replace()
 	{
 		if (this.client == null) return;
-		
+
 		if (!this.client.checkPkColumns(true))
 		{
 			return;
@@ -173,7 +173,7 @@ public class TableReplacer
 		highlightPosition(pos);
 		return pos.getRow();
 	}
-	
+
 	public boolean replaceCurrent(String aReplacement, boolean useRegex)
 	{
 		boolean replaced = false;
@@ -193,19 +193,19 @@ public class TableReplacer
 		}
 		return replaced;
 	}
-	
+
 	public boolean replaceNext(String aReplacement, boolean useRegex)
 	{
 		boolean replaced = false;
 		replaced = replaceCurrent(aReplacement, useRegex);
-		if (replaced) 
+		if (replaced)
 		{
 			Position pos = this.replacer.findNext();
 			highlightPosition(pos);
 		}
 		return replaced;
 	}
-	
+
 	private void fireTableChanged(Position pos)
 	{
 		try
@@ -219,13 +219,13 @@ public class TableReplacer
 			tableChanging = false;
 		}
 	}
-	
+
 	public int replaceAll(String value, String replacement, boolean selectedText,
 		boolean ignoreCase, boolean wholeWord,
 		boolean useRegex)
 	{
 		int[] rows = null;
-	
+
 		if (selectedText)
 		{
 			rows = this.client.getSelectedRows();
@@ -245,16 +245,16 @@ public class TableReplacer
 		}
 		return replaced;
 	}
-	
+
 	public boolean isTextSelected()
 	{
 		return (this.client.getSelectedColumnCount() > 0);
 	}
-	
+
 	public void tableChanged(TableModelEvent arg0)
 	{
 		if (tableChanging) return;
-		
+
 		this.replacer.setDataStore(this.client.getDataStore());
 
 		DataStore ds = client.getDataStore();
@@ -269,7 +269,7 @@ public class TableReplacer
 				replaceAction.setEnabled(hasData && !readOnly);
 			}
 		});
-		
+
 	}
-	
+
 }

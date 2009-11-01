@@ -2509,6 +2509,10 @@ public class Settings
 
 		this.renameProperty("workbench.db.procversiondelimiter.microsoft_sql_server", "workbench.db.microsoft_sql_server.procversiondelimiter");
 		this.renameProperty("workbench.db.procversiondelimiter.adaptive_server_enterprise", "workbench.db.adaptive_server_enterprise.procversiondelimiter");
+		renameProperty("workbench.sql.searchsearch.history", "workbench.sql.search.history");
+		renameProperty("workbench.sql.searchsearch.lastvalue", "workbench.sql.search.lastvalue");
+		renameProperty("workbench.datasearch.history", "workbench.data.search.history");
+		renameProperty("workbench.datasearch.lastvalue", "workbench.data.search.lastvalue");
 	}
 
 	private void renameProperty(String oldKey, String newKey)

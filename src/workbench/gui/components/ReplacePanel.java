@@ -19,6 +19,7 @@ import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 import javax.swing.JDialog;
+import javax.swing.JPanel;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.EscAction;
 import workbench.interfaces.Replaceable;
@@ -29,10 +30,10 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ReplacePanel
-	extends javax.swing.JPanel
+	extends JPanel
 	implements ActionListener, WindowListener
 {
 	private String settingsKey;

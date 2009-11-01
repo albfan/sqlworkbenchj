@@ -21,7 +21,7 @@ import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- *	@author  support@sql-workbench.net
+ *	@author Thomas Kellerer
  */
 public class FindAction extends WbAction
 {

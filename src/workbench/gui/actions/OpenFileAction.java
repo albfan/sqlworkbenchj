@@ -31,6 +31,7 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.EncodingSelector;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -62,7 +63,29 @@ public class OpenFileAction
 	{
 		try
 		{
-			String lastDir = Settings.getInstance().getLastSqlDir();
+			String lastDir = null;
+			
+			if (GuiSettings.getFollowFileDirectory())
+			{
+				SqlPanel currentPanel = window.getCurrentSqlPanel();
+				if  (currentPanel != null && currentPanel.hasFileLoaded())
+				{
+					WbFile f = new WbFile(currentPanel.getCurrentFileName());
+					if (f.getParent() != null)
+					{
+						lastDir = f.getParent();
+					}
+				}
+				if (lastDir == null)
+				{
+					lastDir = GuiSettings.getDefaultFileDir();
+				}
+			}
+			else
+			{
+				lastDir = Settings.getInstance().getLastSqlDir();
+			}
+			
 			JFileChooser fc = new JFileChooser(lastDir);
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
@@ -117,8 +140,12 @@ public class OpenFileAction
 					sql = window.getCurrentSqlPanel();
 				}
 
-				lastDir = fc.getCurrentDirectory().getAbsolutePath();
-				Settings.getInstance().setLastSqlDir(lastDir);
+				if (!GuiSettings.getFollowFileDirectory())
+				{
+					lastDir = fc.getCurrentDirectory().getAbsolutePath();
+					Settings.getInstance().setLastSqlDir(lastDir);
+				}
+
 				Settings.getInstance().setDefaultFileEncoding(encoding);
 				if (!forceNewTab)
 				{

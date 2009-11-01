@@ -118,6 +118,7 @@ import workbench.gui.actions.ViewLogfileAction;
 import workbench.gui.actions.ViewToolbarAction;
 import workbench.gui.actions.WhatsNewAction;
 import workbench.gui.components.TabCloser;
+import workbench.gui.components.TabbedPaneHistory;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.macros.MacroMenuBuilder;
 import workbench.gui.sql.PanelType;
@@ -159,6 +160,7 @@ public class MainWindow
 	private NewDbExplorerWindowAction newDbExplorerWindow;
 
 	private WbTabbedPane sqlTab;
+	private TabbedPaneHistory tabHistory;
 	private WbToolbar currentToolbar;
 	private List<JMenuBar> panelMenus = new ArrayList<JMenuBar>(13);
 
@@ -199,6 +201,7 @@ public class MainWindow
 		this.windowId = ++instanceCount;
 
 		sqlTab = new WbTabbedPane();
+		tabHistory = new TabbedPaneHistory(sqlTab);
 
 		String policy = Settings.getInstance().getProperty("workbench.gui.sqltab.policy", "wrap");
 		if ("wrap".equalsIgnoreCase(policy))
@@ -1956,6 +1959,7 @@ public class MainWindow
 			renumberTabs();
 			// make sure the toolbar and menus are updated correctly
 			updateCurrentTab(getCurrentPanelIndex());
+			tabHistory.clear();
 		}
 		catch (Exception e)
 		{
@@ -1993,6 +1997,7 @@ public class MainWindow
 				// make sure the toolbar and menus are updated correctly
 				updateCurrentTab(0);
 			}
+			tabHistory.clear();
 		}
 		catch (Exception e)
 		{
@@ -2663,6 +2668,10 @@ public class MainWindow
 			if (!doClose) return;
 		}
 
+		if (GuiSettings.getUseLRUForTabs())
+		{
+			tabHistory.restoreLastTab();
+		}
 		removeTab(index, true);
 	}
 

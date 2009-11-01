@@ -39,7 +39,7 @@
       The URL that is used to display the manual can be <link linkend="db-settings-online-manual">changed</link> in the
       configuration file <link linkend="settings"><literal>workbench.settings</literal></link>.
     </para>
-    
+
 	</section>
 
 	<section id="window-sizes">
@@ -831,8 +831,9 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 			When you load a SQL script and execute the statements, be aware that due to the history management
 			in &wb-productname; the content of the external file will be placed into the history buffer. If you load
 			large files, this might lead to massive memory consumption. Currently only the <emphasis>number</emphasis> of
-			statements put into the history can be controlled, but not the total size of the history itself. This might
-			change with a later version.
+			statements put into the history can be controlled, but not the total size of the history itself. You can prevent
+      files from being put into the history by unchecking the option "Files in history" in the Editor section
+      of the <link linkend="options-files-in-history">options dialog</link>.
 		</para>
 
 	</section>

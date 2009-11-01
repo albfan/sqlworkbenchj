@@ -10,6 +10,15 @@
     </description>
   </entry>
 
+  <entry dev-build="7" type="enh">
+    <description>
+      A new option to control the behaviour when closing a tab has been added.
+      If "Activate the last used tab" is enabled, closing a tab will no longer
+      select the "next" tab, but the previously used one. The new option is
+      enabled by default.
+    </description>
+  </entry>
+
   <entry dev-build="6" type="enh">
     <description>
       When opening a file from the the main menu (File -&gt; Open), the file can now be opened in a new
@@ -98,6 +107,20 @@
       For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
     </description>
   </entry>
+
+  <entry dev-build="7" type="fix">
+    <description>
+      Fixed wrong formatting of multiple common table expressions (WITH .. AS) and
+      multiple tuples for a VALUES expression
+		</description>
+	</entry>
+
+  <entry dev-build="7" type="fix">
+    <description>
+      The (search) history dropdowns were filled in the wrong order (the oldest entry
+      was the first entry)
+		</description>
+	</entry>
 
   <entry dev-build="7" type="fix">
     <description>

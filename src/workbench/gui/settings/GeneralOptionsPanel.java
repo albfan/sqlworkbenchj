@@ -116,6 +116,7 @@ public class GeneralOptionsPanel
 		showResultTabClose.setSelected(GuiSettings.getShowResultTabCloseButton());
 		onlyActiveTab.setSelected(GuiSettings.getCloseActiveTabOnly());
 		closeButtonRightSide.setSelected(GuiSettings.getShowCloseButtonOnRightSide());
+		tabLRUclose.setSelected(GuiSettings.getUseLRUForTabs());
 	}
 
 	public void saveSettings()
@@ -170,6 +171,7 @@ public class GeneralOptionsPanel
 		{
 			GuiSettings.setUseBrushedMetal(brushedMetal.isSelected());
 		}
+		GuiSettings.setUseLRUForTabs(tabLRUclose.isSelected());
 	}
 
 	private Locale getSelectedLanguage()
@@ -209,6 +211,7 @@ public class GeneralOptionsPanel
     onlyActiveTab = new JCheckBox();
     closeButtonRightSide = new JCheckBox();
     jSeparator1 = new JSeparator();
+    tabLRUclose = new JCheckBox();
     jSeparator2 = new JSeparator();
     jSeparator3 = new JSeparator();
     jPanel3 = new JPanel();
@@ -392,7 +395,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 16, 5, 0);
+    gridBagConstraints.insets = new Insets(6, 16, 1, 0);
     jPanel1.add(enableAnimatedIcon, gridBagConstraints);
 
     confirmTabClose.setText(ResourceMgr.getString("LblConfirmTabClose")); // NOI18N
@@ -402,7 +405,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(6, 4, 5, 0);
+    gridBagConstraints.insets = new Insets(6, 4, 1, 0);
     jPanel1.add(confirmTabClose, gridBagConstraints);
 
     showTabCloseButton.setText(ResourceMgr.getString("LblShowTabClose")); // NOI18N
@@ -413,9 +416,9 @@ public class GeneralOptionsPanel
     showTabCloseButton.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(6, 4, 5, 0);
+    gridBagConstraints.insets = new Insets(0, 4, 5, 0);
     jPanel1.add(showTabCloseButton, gridBagConstraints);
 
     showResultTabClose.setText(ResourceMgr.getString("LblShowResultClose")); // NOI18N
@@ -426,9 +429,9 @@ public class GeneralOptionsPanel
     showResultTabClose.setIconTextGap(5);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(6, 16, 5, 0);
+    gridBagConstraints.insets = new Insets(0, 16, 5, 0);
     jPanel1.add(showResultTabClose, gridBagConstraints);
 
     onlyActiveTab.setText(ResourceMgr.getString("LblCloseActive")); // NOI18N
@@ -436,7 +439,7 @@ public class GeneralOptionsPanel
     onlyActiveTab.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 4, 5, 0);
     jPanel1.add(onlyActiveTab, gridBagConstraints);
@@ -446,17 +449,28 @@ public class GeneralOptionsPanel
     closeButtonRightSide.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 16, 5, 0);
     jPanel1.add(closeButtonRightSide, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(4, 3, 2, 0);
+    gridBagConstraints.insets = new Insets(8, 3, 8, 0);
     jPanel1.add(jSeparator1, gridBagConstraints);
+
+    tabLRUclose.setText(ResourceMgr.getString("LblTabOrderLRU")); // NOI18N
+    tabLRUclose.setToolTipText(ResourceMgr.getString("d_LblTabOrderLRU")); // NOI18N
+    tabLRUclose.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 4, 0, 0);
+    jPanel1.add(tabLRUclose, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -534,6 +548,7 @@ public class GeneralOptionsPanel
   private JCheckBox showTabCloseButton;
   private JCheckBox showTabIndex;
   private JCheckBox singlePageHelp;
+  private JCheckBox tabLRUclose;
   private JCheckBox useEncryption;
   // End of variables declaration//GEN-END:variables
 

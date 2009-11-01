@@ -811,10 +811,10 @@ public class SqlFormatter
 			this.appendText("(");
 		}
 
-		SQLToken t = this.lexer.getNextToken(true,false);
+		SQLToken t = this.lexer.getNextToken(true, false);
 
 		int elementCount = 0;
-
+		int bracketCount = 1;
 		while (t != null)
 		{
 			final String text = t.getContents();
@@ -822,13 +822,39 @@ public class SqlFormatter
 			{
 				if (elementsPerLine == 1) this.appendNewline();
 				this.appendText(")");
-				return this.lexer.getNextToken();
+				SQLToken next = skipComments();
+				if (next == null || !next.getText().equals(","))
+				{
+					return next;
+				}
+				appendText(next.getText());
+				appendNewline();
+				elementCount = 0;
+				bracketCount --;
 			}
 			else if (text.equals("("))
 			{
-				this.appendText(" (");
-				t = this.processFunctionCall(t);
-				continue;
+				if (bracketCount == 0)
+				{
+					if (elementsPerLine > 1)
+					{
+						appendText("  ");
+					}
+					this.appendText('(');
+					if (elementsPerLine == 1)
+					{
+						appendNewline();
+						indent(b);
+					}
+					bracketCount ++;
+				}
+				else
+				{
+					this.appendText(" (");
+					bracketCount ++;
+					t = this.processFunctionCall(t);
+					continue;
+				}
 			}
 			else if (text.equals(","))
 			{
@@ -1082,8 +1108,8 @@ public class SqlFormatter
 				if (word.equalsIgnoreCase("VALUES"))
 				{
 					// the next (non-whitespace token has to be a (
-					t = this.lexer.getNextToken(false, false);
-					if (t.isSeparator() && t.getContents().equals("("))
+					t = skipComments();//this.lexer.getNextToken(false, false);
+					if (t.getContents().equals("("))
 					{
 						int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
 						t = this.processBracketList(2, colsPerLine);
@@ -1168,10 +1194,20 @@ public class SqlFormatter
 						t = processSubSelect(t.getContents().equals("SELECT"));
 						this.indent = oldIndent;
 						this.appendNewline();
-						// once the AS part is finished (which is treated as a sub-select)
-						// the actual SELECT should come, so we can simply return control
-						// to the main formatting loop
-						return t;
+						appendText(t.getContents());
+						
+						// check if multiple CTEs are defined
+						t = skipComments();
+						if (t == null) return t;
+
+						if (!t.getText().equals(","))
+						{
+							return t;
+						}
+						appendText(t.getContents());
+						appendNewline();
+						bracketCount --;
+						afterAs = false;
 					}
 					else
 					{
@@ -1184,6 +1220,7 @@ public class SqlFormatter
 			}
 			else if (verb.equals("AS"))
 			{
+				if (needsWhitespace(lastToken, t)) appendText(' ');
 				this.appendText(verb);
 				this.appendNewline();
 				afterAs = true;
@@ -1323,7 +1360,7 @@ public class SqlFormatter
 			else if (t.isSeparator() && t.getContents().equals("("))
 			{
 				int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
-				return this.processBracketList(2,colsPerLine);
+				return this.processBracketList(2, colsPerLine);
 			}
 		}
 		return t;

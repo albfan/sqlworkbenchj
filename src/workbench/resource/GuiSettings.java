@@ -27,6 +27,36 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 
+	public static boolean getUseLRUForTabs()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.tabs.lru", true);
+	}
+
+	public static void setUseLRUForTabs(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.tabs.lru", flag);
+	}
+	
+	public static boolean getFollowFileDirectory()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.editor.followfiledir", false);
+	}
+
+	public static void setFollowFileDirectory(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.editor.followfiledir", flag);
+	}
+
+	public static String getDefaultFileDir()
+	{
+		return Settings.getInstance().getProperty("workbench.gui.editor.defaultdir", null);
+	}
+
+	public static void setDefaultFileDir(String path)
+	{
+		Settings.getInstance().setProperty("workbench.gui.editor.defaultdir", path);
+	}
+	
 	public static boolean getShowCloseButtonOnRightSide()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT, true);

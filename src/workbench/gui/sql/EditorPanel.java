@@ -84,6 +84,7 @@ import workbench.interfaces.FormattableSql;
 import workbench.interfaces.TextContainer;
 import workbench.interfaces.TextFileContainer;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.syntax.SqlKeywordHelper;
@@ -437,7 +438,19 @@ public class EditorPanel
 
 		try
 		{
-			String lastDir = Settings.getInstance().getLastSqlDir();
+			File lastDir = new File(Settings.getInstance().getLastSqlDir());
+			if (GuiSettings.getFollowFileDirectory())
+			{
+				if (currentFile != null)
+				{
+					lastDir = currentFile.getParentFile();
+				}
+				else
+				{
+					String dir = GuiSettings.getDefaultFileDir();
+					lastDir = new File(dir);
+				}
+			}
 			JFileChooser fc = new JFileChooser(lastDir);
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));
@@ -455,8 +468,11 @@ public class EditorPanel
 
 				WbSwingUtilities.repaintLater(this.getParent());
 
-				lastDir = fc.getCurrentDirectory().getAbsolutePath();
-				Settings.getInstance().setLastSqlDir(lastDir);
+				if (!GuiSettings.getFollowFileDirectory() && currentFile != null)
+				{
+					String dir = fc.getCurrentDirectory().getAbsolutePath();
+					Settings.getInstance().setLastSqlDir(dir);
+				}
 				Settings.getInstance().setDefaultFileEncoding(encoding);
 			}
 			return result;

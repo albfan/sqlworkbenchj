@@ -87,7 +87,10 @@ public class HistoryTextField
 		List<String> l = StringUtil.stringToList(s, ";", true, true);
 		this.setText("");
 		this.historyValues.clear();
-		this.historyValues.addAll(l);
+		for (String value : l)
+		{
+			historyValues.append(value);
+		}
 		this.updateModel();
 		String lastValue = props.getProperty(prefix + propName + ".lastvalue", null);
 		
@@ -121,7 +124,11 @@ public class HistoryTextField
 	
 	private void updateModel()
 	{
-		DefaultComboBoxModel model = new DefaultComboBoxModel(this.historyValues.toArray());
+		DefaultComboBoxModel model = new DefaultComboBoxModel();
+		for (String entry : this.historyValues.getEntries())
+		{
+			model.addElement(entry);
+		}
 		setModel(model);
 	}
 }
