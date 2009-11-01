@@ -352,6 +352,23 @@ public class SqlFormatterTest
              "     JOIN second_cte s ON (f.col1 = s.col2)";
 //		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
+
+		sql = "WITH temp1 (c1,t1,t2) AS  \n" +
+             "( \n" +
+             "   VALUES (1,2,3)  \n" +
+             ") \n" +
+             "SELECT * \n" +
+             "FROM temp1";
+	  f = new SqlFormatter(sql);
+		formatted = f.getFormattedSql().toString();
+		expected = "WITH temp1 (c1, t1, t2) AS\n" +
+             "(\n" +
+             "  VALUES ( 1, 2, 3 )\n" +
+             ")\n" +
+             "SELECT *\n" +
+             "FROM temp1";
+//		System.out.println("++++++++++++++++++\n" + formatted + "\n**********\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
 	}
 
 	public void testCTAS()
@@ -463,7 +480,7 @@ public class SqlFormatterTest
              "  (1, 2, 3),\n" +
              "  (4, 5, 6),\n" +
              "  (7, 8, 9)";
-				System.out.println("******************\n" + formatted + "\n-------------------------\n" + expected + "\n************************");
+//				System.out.println("******************\n" + formatted + "\n-------------------------\n" + expected + "\n************************");
 		}
 		finally
 		{

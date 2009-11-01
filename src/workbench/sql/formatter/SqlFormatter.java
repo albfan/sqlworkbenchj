@@ -372,7 +372,7 @@ public class SqlFormatter
 			}
 			else if (lastToken.getContents().equals("(") && text.equalsIgnoreCase("SELECT") )
 			{
-				t = this.processSubSelect(true, bracketCount);
+				t = this.processSubSelect(true, bracketCount, true);
 				continue;
 			}
 
@@ -525,10 +525,10 @@ public class SqlFormatter
 	private SQLToken processSubSelect(boolean addSelectKeyword)
 		throws Exception
 	{
-		return processSubSelect(addSelectKeyword, 1);
+		return processSubSelect(addSelectKeyword, 1, true);
 	}
 
-	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount)
+	private SQLToken processSubSelect(boolean addSelectKeyword, int currentBracketCount, boolean checkForList)
 		throws Exception
 	{
 		SQLToken t = skipComments();
@@ -538,7 +538,7 @@ public class SqlFormatter
 		// this method gets called when then "parser" hits an
 		// IN ( situation. If no SELECT is coming, we assume
 		// its a list like IN ('x','Y')
-		if (!"SELECT".equalsIgnoreCase(t.getContents()) && !addSelectKeyword)
+		if (checkForList && !"SELECT".equalsIgnoreCase(t.getContents()) && !addSelectKeyword)
 		{
 			return this.processInList(t);
 		}
@@ -1190,10 +1190,10 @@ public class SqlFormatter
 						StringBuilder oldIndent = this.indent;
 						this.indent = new StringBuilder(indent == null ? "" : indent).append("  ");
 						this.appendNewline();
-						t = skipComments();
-						t = processSubSelect(t.getContents().equals("SELECT"));
+						t = processSubSelect(false, 1, false);
 						this.indent = oldIndent;
 						this.appendNewline();
+						if (t == null) return t;
 						appendText(t.getContents());
 						
 						// check if multiple CTEs are defined
