@@ -61,7 +61,7 @@ public class KeepAliveDaemon
 			}
 			catch (Exception e)
 			{
-				LogMgr.logWarning("KeepAliveThread.shutdown()", "Error when stopping thread", e);
+				LogMgr.logWarning("KeepAliveDaemon.shutdown()", "Error when stopping thread", e);
 			}
 		}
 	}
@@ -97,7 +97,7 @@ public class KeepAliveDaemon
 			{
 				if (!this.stopThread)
 				{
-					LogMgr.logError("KeepAliveThread.run()", Thread.currentThread().getName() + ": Thread was interrupted!", e);
+					LogMgr.logError("KeepAliveDaemon.run()", Thread.currentThread().getName() + ": Thread was interrupted!", e);
 				}
 			}
 
@@ -136,17 +136,18 @@ public class KeepAliveDaemon
 		{
 			try
 			{
+				if (this.dbConnection == null) return;
 				stmt = this.dbConnection.createStatement();
-				LogMgr.logInfo("KeepAliveThread.runSqlScript()", Thread.currentThread().getName() + " - executing SQL: " + this.sqlScript);
+				LogMgr.logInfo("KeepAliveDaemon.runSqlScript()", Thread.currentThread().getName() + " - executing SQL: " + this.sqlScript);
 				stmt.execute(sqlScript);
 			}
 			catch (SQLException sql)
 			{
-				LogMgr.logError("KeepAliveThread.runSqlScript()", Thread.currentThread().getName() + ": SQL Error when running keep alive script: " + ExceptionUtil.getDisplay(sql), null);
+				LogMgr.logError("KeepAliveDaemon.runSqlScript()", Thread.currentThread().getName() + ": SQL Error when running keep alive script: " + ExceptionUtil.getDisplay(sql), null);
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logError("KeepAliveThread.runSqlScript()", "Error when running keep alive script", e);
+				LogMgr.logError("KeepAliveDaemon.runSqlScript()", "Error when running keep alive script", e);
 			}
 			finally
 			{

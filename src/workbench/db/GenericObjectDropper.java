@@ -164,7 +164,7 @@ public class GenericObjectDropper
 			for (int i=0; i < count; i++)
 			{
 				String sql = getDropStatement(i).toString();
-				LogMgr.logDebug("ObjectDropper.execute()", "Using SQL: " + sql);
+				LogMgr.logDebug("GenericObjectDropper.execute()", "Using SQL: " + sql);
 				if (monitor != null)
 				{
 					String name = objects.get(i).getObjectName();

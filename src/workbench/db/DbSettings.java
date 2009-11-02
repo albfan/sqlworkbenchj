@@ -310,9 +310,16 @@ public class DbSettings
 				ddl += " " + cascade;
 			}
 		}
-		else if (includeCascade)
+		else 
 		{
-			ddl = ddl.replace("%cascade%", cascade == null ? "" : cascade);
+			if (includeCascade)
+			{
+				ddl = ddl.replace("%cascade%", cascade == null ? "" : cascade);
+			}
+			else
+			{
+				ddl = ddl.replace("%cascade%", "");
+			}
 		}
 		return ddl;
 	}
