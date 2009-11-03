@@ -14,6 +14,7 @@ package workbench.gui.actions;
 import java.awt.event.ActionEvent;
 
 import workbench.WbManager;
+import workbench.gui.MainWindow;
 
 /**
  * Exit and close the application
@@ -21,17 +22,20 @@ import workbench.WbManager;
  *
  * @author  Thomas Kellerer
  */
-public class FileExitAction
+public class FileCloseAction
 	extends WbAction
 {
-	public FileExitAction()
+	private MainWindow window;
+
+	public FileCloseAction(MainWindow toClose)
 	{
 		super();
-		this.initMenuDefinition("MnuTxtExit");
+		window = toClose;
+		this.initMenuDefinition("MnuTxtFileCloseWin");
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		WbManager.getInstance().exitWorkbench();
+		WbManager.getInstance().closeMainWindow(window);
 	}
 }

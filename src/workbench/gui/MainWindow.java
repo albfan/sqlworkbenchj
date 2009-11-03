@@ -107,6 +107,7 @@ import workbench.gui.actions.OptionsDialogAction;
 import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
+import workbench.gui.actions.FileCloseAction;
 import workbench.gui.actions.NextTabAction;
 import workbench.gui.actions.ObjectSearchAction;
 import workbench.gui.actions.OpenFileAction;
@@ -399,6 +400,8 @@ public class MainWindow
 		action = new FileConnectAction(this);
 		action.addToMenu(menu);
 		this.disconnectAction.addToMenu(menu);
+		FileCloseAction close = new FileCloseAction(this);
+		close.addToMenu(menu);
 		menu.addSeparator();
 		this.createNewConnection.addToMenu(menu);
 		this.disconnectTab.addToMenu(menu);
@@ -1117,7 +1120,7 @@ public class MainWindow
 
 	public void windowClosing(WindowEvent windowEvent)
 	{
-		WbManager.getInstance().windowClosing(this);
+		WbManager.getInstance().closeMainWindow(this);
 	}
 
 	public void windowDeactivated(WindowEvent windowEvent)
@@ -1281,7 +1284,7 @@ public class MainWindow
 	{
 		if (this.exitOnCancel)
 		{
-			WbManager.getInstance().windowClosing(this);
+			WbManager.getInstance().closeMainWindow(this);
 		}
 	}
 
