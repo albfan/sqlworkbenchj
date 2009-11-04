@@ -312,11 +312,12 @@ SELECT 42 FROM dual;</programlisting>
 			</para>
 		</section>
 
-		<section id="oracle-display-xml">
+		<section id="db2-display-xml">
 			<title>XML columns are not displayed properly in the DbExplorer</title>
       <para>
         The content of columns with the data type <literal>XML </literal> are not displayed in the DbExplorer
-        (because the driver does not convert them to a character datatype). To customize the retrieval for those columns, please
+        (but something like <literal>com.ibm.db2.jcc.am.ie@1cee792</literal> instead) because the driver does not convert 
+        them to a character datatype. To customize the retrieval for those columns, please
         refer to the chapter <link linkend="customize-dbexplorer-retrieval">Customize data retrieval in the DbExplorer</link>.
       </para>
     </section>
