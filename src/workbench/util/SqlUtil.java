@@ -935,6 +935,11 @@ public class SqlUtil
 		return isClobType(aSqlType, treatLongVarcharAsClob);
 	}
 
+	public static final boolean isXMLType(int type)
+	{
+		return (type == Types.SQLXML);
+	}
+	
 	public static final boolean isClobType(int aSqlType, boolean treatLongVarcharAsClob)
 	{
 		if (!treatLongVarcharAsClob) return isClobType(aSqlType);
@@ -1284,7 +1289,7 @@ public class SqlUtil
 		int charLength = 0;
 		int sqlType = column.getDataType();
 
-		if (isClobType(sqlType))
+		if (isClobType(sqlType) || isXMLType(sqlType))
 		{
 			charLength = Integer.MAX_VALUE;
 		}

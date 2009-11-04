@@ -12,6 +12,20 @@
 
   <entry dev-build="7" type="enh">
     <description>
+      A new menu item "File -> Close Window" is available to close the current window.
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="enh">
+    <description>
+      For JDBC 4 drivers that support the SQLXML type, XML columns are now displayed directly
+      (without the need to use casting or similar methods). Currently it seems that only
+      Postgres and DB2 have implemented this properly in their driver.
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="enh">
+    <description>
       A new option to control the behaviour when closing a tab has been added.
       If "Activate the last used tab" is enabled, closing a tab will no longer
       select the "next" tab, but the previously used one. The new option is
@@ -111,7 +125,7 @@
   <entry dev-build="7" type="fix">
     <description>
       Fixed wrong formatting of multiple common table expressions (WITH .. AS) and
-      multiple tuples for a VALUES expression
+      multiple tuples for a VALUES expression.
 		</description>
 	</entry>
 

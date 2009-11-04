@@ -189,7 +189,7 @@
 						<entry>com.ibm.db2.jcc.DB2Driver</entry>
 						<entry>
 							<simplelist columns="1">
-								<member>db2jcc.jar;db2jcc_javax.jar;db2jcc_license_cu.jar</member>
+								<member>db2jcc4.jar</member>
 								<member><ulink url="http://www-01.ibm.com/software/data/db2/java/"/></member>
 							</simplelist>
 						</entry>
@@ -233,7 +233,7 @@
 						<entry>com.microsoft.sqlserver.jdbc.SQLServerDriver</entry>
 						<entry>
 							<simplelist columns="1">
-							  <member>sqljdbc.jar</member>
+							  <member>sqljdbc4.jar</member>
 								<member><ulink url="http://www.microsoft.com/sql/technologies/jdbc/default.mspx"/></member>
 							</simplelist>
 						</entry>

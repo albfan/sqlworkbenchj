@@ -213,9 +213,9 @@ public class RowData
 						}
 					}
 				}
-				else if (SqlUtil.isClobType(type, longVarcharAsClob))
+				else if (SqlUtil.isClobType(type, longVarcharAsClob) || SqlUtil.isXMLType(type))
 				{
-					if (useGetStringForClobs)
+					if (useGetStringForClobs && !SqlUtil.isXMLType(type))
 					{
 						value = rs.getString(i + 1);
 					}
