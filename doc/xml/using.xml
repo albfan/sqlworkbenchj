@@ -225,6 +225,14 @@ COMMIT;
 			statement(s) did not produce any result, only the messages tab will be displayed.
 		</para>
 
+    <note>
+      <para>
+        &wb-productname; will read all rows returned by your statement into memory. When
+        retrieving large results you might run out of memory. To adjust the memory available
+        to &wb-productname; please refer to <link linkend="out-of-memory-error">this chapter</link>.
+      </para>
+    </note>
+
 		<para>
 			When you run a SQL statement, the current results will be cleared and
 			replaced by the new results. You can turn this off by selecting
@@ -242,6 +250,7 @@ COMMIT;
 			for each result returned.
 		</para>
 
+    <!--
 		<note>
 			<para>
 				Due to a bug in Oracle's JDBC driver, you cannot retrieve columns with
@@ -251,7 +260,8 @@ COMMIT;
 				<link linkend="oracle-long-problems"><literal>DBMS_OUTPUT</literal></link> has to be switched off.
 			</para>
 		</note>
-
+    -->
+    
 		<section id="display-multiline">
 			<title>Displaying values with embedded newlines</title>
 			<para>

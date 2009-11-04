@@ -194,7 +194,7 @@ SELECT 42 FROM dual;</programlisting>
 				such an invalid date. This behaviour can be controlled by adding an <link linkend="profile-extended-properties">extended property</link>
 				to the connection profile. The property should be named <literal>zeroDateTimeBehavior</literal>. You can
 				set this value to either <literal>convertToNull</literal> or to <literal>round</literal>. For details
-				see <ulink url="http://dev.mysql.com/doc/refman/4.1/en/connector-j-installing-upgrading.html">the MySQL site</ulink>
+				see <ulink url="http://dev.mysql.com/doc/refman/4.1/en/connector-j-installing-upgrading.html"/>
 			</para>
 		</section>
 
@@ -226,8 +226,8 @@ SELECT 42 FROM dual;</programlisting>
 		    in Microsoft's Knowledgebase gives more information regarding this problem.
 		  </para>
 		  <para>
-		    The possible parameters for the SQL Server 2005 driver are listed 
-        <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx">here</ulink>
+		    The possible parameters for the SQL Server 2005 driver are listed here:
+        <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx"/>
 		  </para>
 		</section>
 
@@ -275,8 +275,7 @@ SELECT 42 FROM dual;</programlisting>
         <literal>jdbc:jtds:sqlserver://localhost:2068;useCursors=true</literal>.
       </para>
       <para>
-        The URL parameters for the jTDS driver are listed
-        <ulink url="http://jtds.sourceforge.net/faq.html#urlFormat">here</ulink>
+        The URL parameters for the jTDS driver are listed here: <ulink url="http://jtds.sourceforge.net/faq.html#urlFormat"/>
       </para>
       <para>
         For the Microsoft driver, use the parameter <literal>selectMethod=cursor</literal> to
@@ -284,8 +283,8 @@ SELECT 42 FROM dual;</programlisting>
         <literal>jdbc:sqlserver://localhost:2068;selectMethod=cursor</literal>.
       </para>
       <para>
-        The URL parameters for the Microsoft driver are listed
-        <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx">here</ulink>
+        The URL parameters for the Microsoft driver are listed here:
+        <ulink url="http://msdn2.microsoft.com/en-us/library/ms378988.aspx"/>
       </para>
 
     </section>
@@ -320,8 +319,38 @@ SELECT 42 FROM dual;</programlisting>
         them to a character datatype. To customize the retrieval for those columns, please
         refer to the chapter <link linkend="customize-dbexplorer-retrieval">Customize data retrieval in the DbExplorer</link>.
       </para>
+      <para>
+        When using a driver that supports JDBC 4, &wb-productname; since build 107 will display the XML content directly
+        without the need to cast the result.
+      </para>
     </section>
 
+    <section id="db2-error-text">
+      <title>No error text is displayed</title>
+      <para>
+        When running SQL statements in &wb-productname; and an error occurs, DB2 does not show a proper error message.
+        To enable the retrieval of error messages by the driver you have to set the <link linkend="profile-extended-properties">extended
+        connection property</link> <literal>retrieveMessagesFromServerOnGetMessage</literal> to <literal>true</literal>.
+      </para>
+      <para>
+        The connection properties for the DB2 JDBC driver are documented here:
+        <simplelist>
+          <member><ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/index.jsp?topic=/com.ibm.db2.luw.apdv.java.doc/doc/r0052038.html"/></member>
+          <member><ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.apdv.java.doc/doc/r0052607.html"/></member>
+        </simplelist>
+        
+      </para>
+    </section>
+
+    <section id="db2-run-command">
+      <title>DB2 commands like REORG cannot be run</title>
+      <para>
+        REORG, RUNSTATS and other db2 command line commands cannot be be run directly through a JDBC interface because
+        those are not SQL statements, but DB2 commands. To run such a command from with &wb-productname; you have to use the
+        function <literal>sysproc.admin_cmd()</literal>. To run e.g. a REORG on a table you have to run the following statement:
+      </para>
+      <programlisting>call sysproc.admin_cmd('REORG TABLE my_table');</programlisting>
+    </section>
 
 	</section>
 
