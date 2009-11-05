@@ -77,17 +77,32 @@ public class ScriptParserTest
 		assertEquals(2, p.getSize());
 	}
 
+	public void testAtEnd()
+	{
+		String sql = "create table target_table (id integer);\n" +
+			"create table source_table (id varchar(20));\n\n\n" +
+			"insert into source_table values ('1'), ('two');\n\n" +
+			"wbcopy \n";
 
+		int cursorPos = sql.indexOf("wbcopy") + 7;
+		ScriptParser parser = new ScriptParser(sql);
+
+		parser.setCheckEscapedQuotes(false);
+		parser.setEmptyLineIsDelimiter(false);
+
+		int index = parser.getCommandIndexAtCursorPos(cursorPos);
+		assertTrue(index > 0);
+	}
+	
 	public void testArrayBasedGetNext()
 		throws Exception
 	{
 		String script = "select 1 from bla;\nselect 2 from blub;\n";
 		ScriptParser p = new ScriptParser(script);
-		String sql = null;
 		int count = 0;
 		try
 		{
-			while ((sql = p.getNextCommand()) != null)
+			while (p.getNextCommand() != null)
 			{
 				count ++;
 			}

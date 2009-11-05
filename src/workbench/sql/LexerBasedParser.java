@@ -208,15 +208,17 @@ public class LexerBasedParser
 
 	private ScriptCommandDefinition createCommandDef(StringBuilder sql, int start, int end)
 	{
-		if (returnLeadingWhitespace || !Character.isWhitespace(sql.charAt(0)) || sql.length() == 0)
+		if (returnLeadingWhitespace || sql == null || !Character.isWhitespace(sql.charAt(0)) || sql.length() == 0)
 		{
 			String toStore = storeStatementText ? sql.toString() : null;
 			return new ScriptCommandDefinition(toStore, start, end);
 		}
 
 		int i = StringUtil.findFirstNonWhitespace(sql);
-		ScriptCommandDefinition cmd = new ScriptCommandDefinition(sql.substring(i), start + i, end);
+		String toStore = storeStatementText ? sql.substring(i) : null;
+		ScriptCommandDefinition cmd = new ScriptCommandDefinition(toStore, start + i, end);
 		cmd.setWhitespaceStart(start);
+		
 		return cmd;
 	}
 

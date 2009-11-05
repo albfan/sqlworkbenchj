@@ -23,11 +23,12 @@ public class ValueDisplay
 	{
 		int count = row.length;
 		StringBuilder values = new StringBuilder(count * 20);
-		values.append('[');
+		values.append('{');
 
 		for (int i=0; i < count; i++)
 		{
 			if (i > 0) values.append(',');
+			values.append('[');
 			if (row[i] == null)
 			{
 				values.append("NULL");
@@ -36,8 +37,9 @@ public class ValueDisplay
 			{
 				values.append(row[i].toString());
 			}
+			values.append(']');
 		}
-		values.append(']');
+		values.append('}');
 		display = values.toString();
 	}
 

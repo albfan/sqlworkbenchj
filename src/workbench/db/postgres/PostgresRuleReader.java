@@ -139,7 +139,7 @@ public class PostgresRuleReader
 	{
 		if (!DbMetadata.typeIncluded("RULE", requestedTypes)) return;
 
-		List<PostgresRule> rules = getRuleList(con, schema, null);
+		List<PostgresRule> rules = getRuleList(con, schema, objects);
 		if (rules.size() == 0) return;
 		for (PostgresRule rule : rules)
 		{

@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.sql.Types;
 
 import java.util.List;
+import workbench.db.importer.ValueDisplay;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.FileUtil;
@@ -513,19 +514,8 @@ public class RowData
 	
 	public String toString()
 	{
-		int count = this.colData.length;
-		StringBuilder result = new StringBuilder(count * 20);
-
-		result.append('{');
-		for (int c=0; c < count; c++)
-		{
-			result.append('[');
-			result.append(this.getValue(c));
-			result.append(']');
-			if (c > 0) result.append(',');
-		}
-		result.append('}');
-		return result.toString();
+		ValueDisplay display = new ValueDisplay(colData);
+		return display.toString();
 	}
 
 	@Override

@@ -10,6 +10,7 @@
  */
 package workbench.sql;
 
+import java.io.IOException;
 import junit.framework.TestCase;
 
 /**
@@ -354,6 +355,25 @@ public class LexerBasedParserTest
 		}
 	}
 
+	public void testWhiteSpaceAtEnd()
+		throws IOException
+	{
+		String sql = "create table target_table (id integer);\n" +
+			"wbcopy \n";
+
+		LexerBasedParser parser = new LexerBasedParser(sql);
+		parser.setCheckEscapedQuotes(false);
+		parser.setEmptyLineIsDelimiter(false);
+		parser.setStoreStatementText(false);
+		ScriptCommandDefinition cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertNull(cmd.getSQL());
+
+		cmd = parser.getNextCommand();
+		assertNotNull(cmd);
+		assertNull(cmd.getSQL());
+	}
+	
 	public void testOraInclude()
 		throws Exception
 	{

@@ -198,7 +198,7 @@ public class DataCopier
 		if (!this.sourceConnection.getMetadata().objectExists(sourceTable, (String)null))
 		{
 			this.addError(ResourceMgr.getFormattedString("ErrCopySourceTableNotFound", sourceTable.getQualifiedName()));
-			throw new SQLException("Table " + targetTable.getTableName() + " not found in source connection");
+			throw new SQLException("Table " + sourceTable.getTableName() + " not found in source connection");
 		}
 
 		this.initColumnMapping(columnMapping, createTable);

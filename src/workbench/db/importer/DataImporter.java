@@ -810,7 +810,7 @@ public class DataImporter
 		{
 			this.addError(ResourceMgr.getString("ErrImportingRow") + " " + importRow + "\n");
 			this.addError(ResourceMgr.getString("ErrImportErrorMsg") + " " + ExceptionUtil.getAllExceptions(error) + "\n");
-			this.addError(ResourceMgr.getString("ErrImportValues") + " " + record + "\n\n");
+			this.addError(ResourceMgr.getString("ErrImportValues") + " " + record + "\n");
 			if (errorLimitAdded)
 			{
 				LogMgr.logError("DataImporter.recordRejected()", "Values: " + record, error);
