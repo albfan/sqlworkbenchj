@@ -18,8 +18,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.io.Writer;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.SQLXML;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -113,6 +115,13 @@ public class DmlStatement
 					Reader in = new StringReader(s);
 					stmt.setCharacterStream(i + 1, in, s.length());
 					streamsToClose.add(in);
+				}
+				else if (SqlUtil.isXMLType(type) && value instanceof String)
+				{
+					String s = value.toString();
+					SQLXML xml = aConnection.getSqlConnection().createSQLXML();
+					xml.setString(s);
+					stmt.setSQLXML(i+ 1, xml);
 				}
 				else if (value instanceof File)
 				{
