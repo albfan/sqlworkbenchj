@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
-import java.io.Writer;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLXML;
