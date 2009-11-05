@@ -418,11 +418,11 @@
 			The default heap size for your Java environment depends on your operating
 			system and your JDK implementation. Most JDKs use a default of 64MB.
 		</para>
-		<note><para>
+		<para>
 			The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
 			memory to the given value. This does not mean that the application will use
 			that much memory
-		</para></note>
+		</para>
 	</section>
 
 	<section id="commandline" xreflabel="command line parameters">

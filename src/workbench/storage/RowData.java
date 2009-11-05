@@ -157,7 +157,7 @@ public class RowData
 
 			if (converter != null)
 			{
-				String dbms = info.getDbmsTypeName(i); //rs.getMetaData().getColumnTypeName(i+1);
+				String dbms = info.getDbmsTypeName(i);
 				if (converter.convertsType(type, dbms))
 				{
 					value = rs.getObject(i + 1);
@@ -213,33 +213,19 @@ public class RowData
 						}
 					}
 				}
-				else if (SqlUtil.isClobType(type, longVarcharAsClob) || SqlUtil.isXMLType(type))
+				else if (SqlUtil.isXMLType(type))
 				{
-					if (useGetStringForClobs && !SqlUtil.isXMLType(type))
+					value = readCharacterStream(rs, i + 1);
+				}
+				else if (SqlUtil.isClobType(type, longVarcharAsClob))
+				{
+					if (useGetStringForClobs)
 					{
 						value = rs.getString(i + 1);
 					}
 					else
 					{
-						Reader in = null;
-						try
-						{
-							in = rs.getCharacterStream(i+1);
-							if (in != null && !rs.wasNull())
-							{
-								// readCharacters will close the Reader
-								value = FileUtil.readCharacters(in);
-							}
-							else
-							{
-								value = null;
-							}
-						}
-						catch (IOException e)
-						{
-							LogMgr.logWarning("RowData.read()", "Error retrieving clob data for column '" + info.getColumnName(i) + "'", e);
-							value = rs.getObject(i+1);
-						}
+						value = readCharacterStream(rs, i + 1);
 					}
 				}
 				else
@@ -275,6 +261,31 @@ public class RowData
 		this.resetStatus();
 	}
 
+	private Object readCharacterStream(ResultSet rs, int column)
+		throws SQLException
+	{
+		Object value = null;
+		Reader in = null;
+		try
+		{
+			in = rs.getCharacterStream(column);
+			if (in != null && !rs.wasNull())
+			{
+				// readCharacters will close the Reader
+				value = FileUtil.readCharacters(in);
+			}
+			else
+			{
+				value = null;
+			}
+		}
+		catch (IOException e)
+		{
+			LogMgr.logWarning("RowData.read()", "Error retrieving clob data for column '" + rs.getMetaData().getColumnName(column) + "'", e);
+			value = rs.getObject(column);
+		}
+		return value;
+	}
 	/**
 	 *	Create a deep copy of this object.
 	 *	The status of the new row will be <tt>NEW</tt>

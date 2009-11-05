@@ -25,6 +25,15 @@
     </xsl:attribute>
   </xsl:attribute-set>
 
+  <xsl:attribute-set name="graphical.admonition.properties">
+    <xsl:attribute name="space-before.optimum">0.3em</xsl:attribute>
+    <xsl:attribute name="space-before.minimum">0.1em</xsl:attribute>
+    <xsl:attribute name="space-before.maximum">0.5em</xsl:attribute>
+    <xsl:attribute name="space-after.optimum">0.3em</xsl:attribute>
+    <xsl:attribute name="space-after.minimum">0.1em</xsl:attribute>
+    <xsl:attribute name="space-after.maximum">0.5em</xsl:attribute>
+  </xsl:attribute-set>
+
   <xsl:attribute-set name="root.properties">
     <xsl:attribute name="widows">6</xsl:attribute>
     <xsl:attribute name="orphans">6</xsl:attribute>

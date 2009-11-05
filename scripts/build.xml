@@ -182,11 +182,12 @@
        into the PDF manual by the target "pdf" -->
   <target name="fop" depends="init, docbook-history">
     <!-- fop seems to require absolute pathnames... -->
-    <dirname property="docdir" file="${docbook.root}/images/note.gif"/>
+    <dirname property="docdir" file="${docbook.root}/images/note.png"/>
     <dirname property="imgdir" file="${src}/workbench/resource/images/filter16.gif"/>
+    <!--
     <echo message="${docdir}"/>
     <echo message="${imgdir}"/>
-    
+    -->
     <copy overwrite="true" todir="${pdfwork}">
       <fileset dir="${doc}/xml">
         <include name="*.xml"/>
@@ -216,10 +217,10 @@
       <param name="page.margin.inner" expression="2cm"/>
       <param name="generate.section.toc.level" expression="3"/>
       <param name="default.image.width" expression="16"/>
-      <param name="ignore.image.scaling" expression="1"/>
+      <param name="ignore.image.scaling" expression="0"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.graphics.path" expression="${docdir}/"/>
-      <param name="admon.graphics.extension" expression=".gif"/>
+      <param name="admon.graphics.extension" expression=".png"/>
       <param name="admon.graphic.width" expression="16p"/>
       <param name="admon.textlabel" expression="0"/>
       <param name="body.font.master" expression="10"/>
@@ -277,7 +278,11 @@
         <include name="Delete16.gif"/>
         <include name="CopyProfile16.gif"/>
         <include name="ExecuteSel16.gif"/>
-        <include name="note.gif"/>
+      </fileset>
+      <fileset dir="${docbook.root}/images">
+        <include name="note.png"/>
+        <include name="caution.png"/>
+        <include name="important.png"/>
       </fileset>
     </copy>
 
@@ -337,7 +342,7 @@
       <param name="html.stylesheet" expression="${html-stylesheet}"/>
       <param name="html.extra.head.links" expression="1"/>
       <param name="admon.graphics.path" expression="${html-resource-dir}/"/>
-      <param name="admon.graphics.extension" expression=".gif"/>
+      <param name="admon.graphics.extension" expression=".png"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.textlabel" expression="0"/>
       <param name="generate.index" expression="0"/>
@@ -378,6 +383,8 @@
   <target name="single-html" depends="prepare-html">
     <antcall target="prepare-html"/>
 
+    <dirname property="docdir" file="${docbook.root}/images/note.png"/>
+    
     <xslt classpathref="xalan.path"
           in="${html-outdir}/Manual.xml"
           out="${html-outdir}/workbench-manual-single.html"
@@ -389,7 +396,7 @@
       <param name="use.extensions" expression="0"/>
       <param name="textinsert.extension" expression="1"/>
       <param name="html.stylesheet" expression="${html-stylesheet}"/>
-      <param name="admon.graphics.path" expression="${html-resource-dir}/"/>
+      <param name="admon.graphics.path" expression="${docdir}/"/>
       <param name="admon.graphics.extension" expression=".gif"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.textlabel" expression="0"/>

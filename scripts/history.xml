@@ -2,7 +2,7 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-10-27">
+<release build="-1" date="2009-11-05">
 
   <entry dev-build="7" type="enh">
     <description>
@@ -12,7 +12,7 @@
 
   <entry dev-build="7" type="enh">
     <description>
-      A new menu item "File -> Close Window" is available to close the current window.
+      A new menu item "File -&gt; Close Window" is available to close the current window.
     </description>
   </entry>
 

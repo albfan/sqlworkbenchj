@@ -225,13 +225,13 @@ COMMIT;
 			statement(s) did not produce any result, only the messages tab will be displayed.
 		</para>
 
-    <note>
+    <caution>
       <para>
         &wb-productname; will read all rows returned by your statement into memory. When
         retrieving large results you might run out of memory. To adjust the memory available
-        to &wb-productname; please refer to <link linkend="out-of-memory-error">this chapter</link>.
+        to &wb-productname; please refer to <link linkend="install-increase-memory">this chapter</link>.
       </para>
-    </note>
+    </caution>
 
 		<para>
 			When you run a SQL statement, the current results will be cleared and
@@ -943,12 +943,12 @@ Done.</programlisting>
 			the key columns based on the current result set.
 		</para>
 
-    <note>
+    <important>
       <para>
         The changes (modified, new or deleted rows) will not be saved to the database until
         you choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Changes to Database</guimenuitem></menuchoice>.
       </para>
-    </note>
+    </important>
 
     <para>
 			If the update is successful (no database errors) a <literal>COMMIT</literal> will be

@@ -135,11 +135,22 @@
     </section>
 
 		<section id="oracle-display-xml">
-			<title>XMLTYPE columns are not displayed properly in the DbExplorer</title>
+			<title>Content of XMLTYPE columns is not displayed</title>
       <para>
-        The content of columns with the data type <literal>XMLTYPE</literal> are not displayed in the DbExplorer
-        (because the driver does not convert them to a character datatype). To customize the retrieval for those columns, please
-        refer to the chapter <link linkend="customize-dbexplorer-retrieval">Customize data retrieval in the DbExplorer</link>.
+        The content of columns with the data type <literal>XMLTYPE</literal> cannot be displayed by &wb-productname; because
+        the Oracle JDBC driver does not implement the necessary JDBC 4.0 XML API (as of 11.2.0.1.0).
+      </para>
+      <para>
+        The only way to retrieve and update XMLType columns using &wb-productname; is to cast the columns to a CLOB 
+        value e.g. <literal>CAST(xml_column AS CLOB)</literal>
+      </para>
+      <para>
+        In the DbExplorer you can customize the generated SQL statement to automatically convert the XMLType to a 
+        CLOB. Please refer to the chapter <link linkend="customize-dbexplorer-retrieval">Customize data retrieval in the DbExplorer</link>
+        for details.
+      </para>
+      <para>
+        Note 
       </para>
     </section>
     

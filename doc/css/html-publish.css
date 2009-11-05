@@ -134,8 +134,19 @@ span.guiicon {
   vertical-align:sub;
 }
 
-div.note {
+div.note, 
+div.important, 
+div.caution {
   border: 1px solid gray;
+}
+
+div.note img,
+div.caution img {
+  padding-top:3px;
+}
+
+div.important img {
+  padding-top:2px;
 }
 
 informaltable.table {
