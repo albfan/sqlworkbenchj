@@ -18,6 +18,8 @@ import workbench.console.RowDisplay;
 import workbench.db.TriggerReader;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.ArgumentParser;
+import workbench.util.ArgumentType;
 import workbench.util.SqlUtil;
 
 /**
@@ -45,6 +47,17 @@ public class WbDescribeObject
 {
 	public static final String VERB = "DESC";
 	public static final String VERB_LONG = "DESCRIBE";
+	public static final String ARG_DEPEND = "dependencies";
+	public static final String ARG_OBJECT = "object";
+	
+	public WbDescribeObject()
+	{
+		super();
+		this.isUpdatingCommand = true;
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument(ARG_DEPEND, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_OBJECT);
+	}
 
 	@Override
 	public String getVerb()
@@ -63,10 +76,30 @@ public class WbDescribeObject
 		throws SQLException
 	{
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
-		
-		String table = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
+
+		cmdLine.parse(getCommandLine(sql));
+		String object = null;
+		boolean includeDependencies = true;
+
+		if (cmdLine.hasArguments())
+		{
+			object = cmdLine.getValue(ARG_OBJECT);
+			includeDependencies = cmdLine.getBoolean(ARG_DEPEND, true);
+			if (object == null)
+			{
+				object = cmdLine.getUnknownArguments();
+				if (object.startsWith("-"))
+				{
+					object = object.substring(1);
+				}
+			}
+		}
+		else
+		{
+			object = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
+		}
 		ObjectInfo info = new ObjectInfo();
-		StatementRunnerResult result = info.getObjectInfo(currentConnection, table, true);
+		StatementRunnerResult result = info.getObjectInfo(currentConnection, object, includeDependencies);
 		result.setSourceCommand(sql);
 		result.setShowRowCount(false);
 		return result;
