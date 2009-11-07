@@ -40,6 +40,7 @@ public class LexerBasedParser
 	private boolean returnLeadingWhitespace;
 	private boolean emptyLineIsDelimiter;
 	private int scriptLength;
+	private int realScriptLength;
 	private boolean hasMoreCommands;
 	private boolean checkOracleInclude;
 	private boolean calledOnce;
@@ -176,13 +177,14 @@ public class LexerBasedParser
 				token = lexer.getNextToken();
 				sql.append(text);
 			}
-			if (previousEnd > 0 && !startOfLine)
+			if (previousEnd > 0)
 			{
+				if (token == null) previousEnd = realScriptLength;
 				ScriptCommandDefinition cmd = createCommandDef(sql, lastStart, previousEnd);
 				cmd.setIndexInScript(currentStatementIndex);
 				currentStatementIndex ++;
 				lastStart = -1;
-				hasMoreCommands = true;
+				hasMoreCommands = (token != null);
 				return cmd;
 			}
 			hasMoreCommands = false;
@@ -279,6 +281,7 @@ public class LexerBasedParser
 		input = new StringReader(toUse);
 		lexer = new SQLLexer(input);
 		scriptLength = toUse.length();
+		realScriptLength = script.length();
 		calledOnce = false;
 		hasMoreCommands = (scriptLength > 0);
 	}

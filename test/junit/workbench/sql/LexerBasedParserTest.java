@@ -74,6 +74,7 @@ public class LexerBasedParserTest
 		ScriptCommandDefinition cmd = null;
 		while ((cmd = parser.getNextCommand()) != null)
 		{
+			assertNull(cmd.getSQL());
 			int index = cmd.getIndexInScript();
 			if (index == 0)
 			{
@@ -110,10 +111,6 @@ public class LexerBasedParserTest
 			{
 				assertEquals("select * from person", cmd.getSQL());
 			}
-			else
-			{
-				fail("Wrong command index: " + index);
-			}
 		}
 
 		sql = "COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column';\r\nCOMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname';\r\n";
@@ -136,10 +133,6 @@ public class LexerBasedParserTest
 				int end = cmd.getEndPositionInScript();
 				String cmdSql = sql.substring(start, end);
 				assertEquals("COMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname'", cmdSql);
-			}
-			else
-			{
-				fail("Wrong command index: " + index);
 			}
 		}
 	}
@@ -372,6 +365,7 @@ public class LexerBasedParserTest
 		cmd = parser.getNextCommand();
 		assertNotNull(cmd);
 		assertNull(cmd.getSQL());
+		assertEquals(sql.length(), cmd.getEndPositionInScript());
 	}
 	
 	public void testOraInclude()

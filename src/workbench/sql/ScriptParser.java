@@ -465,7 +465,7 @@ public class ScriptParser
 	private ScriptIterator getParserInstance()
 	{
 		ScriptIterator p = null;
-		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", true);
+		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", false);
 
 		if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands)
 		{

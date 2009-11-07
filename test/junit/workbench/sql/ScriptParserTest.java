@@ -77,23 +77,6 @@ public class ScriptParserTest
 		assertEquals(2, p.getSize());
 	}
 
-	public void testAtEnd()
-	{
-		String sql = "create table target_table (id integer);\n" +
-			"create table source_table (id varchar(20));\n\n\n" +
-			"insert into source_table values ('1'), ('two');\n\n" +
-			"wbcopy \n";
-
-		int cursorPos = sql.indexOf("wbcopy") + 7;
-		ScriptParser parser = new ScriptParser(sql);
-
-		parser.setCheckEscapedQuotes(false);
-		parser.setEmptyLineIsDelimiter(false);
-
-		int index = parser.getCommandIndexAtCursorPos(cursorPos);
-		assertTrue(index > 0);
-	}
-	
 	public void testArrayBasedGetNext()
 		throws Exception
 	{
@@ -225,8 +208,6 @@ public class ScriptParserTest
 			int index = p.getCommandIndexAtCursorPos(pos);
 			assertEquals(2, p.getSize());
 			assertEquals(1, index);
-			int sqlPos = p.getIndexInCommand(index, pos);
-			String sql = p.getCommand(index);
 		}
 		catch (Exception e)
 		{
@@ -343,6 +324,7 @@ public class ScriptParserTest
 			{
 				String sql = p.getNextCommand();
 				if (sql == null) break;
+				if (StringUtil.isBlank(sql)) break;
 				size ++;
 
 				if (size == 2)
@@ -594,12 +576,26 @@ public class ScriptParserTest
 
 			sql = "select 'One Value';\n\nselect 'Some other value';\n";
 			p = new ScriptParser(sql);
-			assertEquals("Not enough commands", 2, p.getSize());
+			assertEquals(2, p.getSize());
 			assertEquals("select 'One Value'", p.getCommand(0));
 			assertEquals("select 'Some other value'", p.getCommand(1));
 			
 			assertEquals(0, p.getCommandIndexAtCursorPos(1));
 			assertEquals(1, p.getCommandIndexAtCursorPos(31));
+
+			sql = "create table target_table (id integer);\n" +
+				"create table source_table (id varchar(20));\n\n\n" +
+				"insert into source_table values ('1'), ('two');\n\n" +
+				"wbcopy \n";
+
+			int cursorPos = sql.length() - 1;
+
+			ScriptParser parser = new ScriptParser(sql);
+			parser.setCheckEscapedQuotes(false);
+			parser.setEmptyLineIsDelimiter(false);
+
+			index = parser.getCommandIndexAtCursorPos(cursorPos);
+			assertTrue(index > 0);
 		}
 		catch (Exception e)
 		{
@@ -684,6 +680,7 @@ public class ScriptParserTest
 			String sql = null;
 			while ((sql = p.getNextCommand()) != null)
 			{
+				if (StringUtil.isBlank(sql)) continue; // ignore empty lines at the end
 				assertNotNull("No SQL returned at " + count, sql);
 				String verb = SqlUtil.getSqlVerb(sql);
 				assertEquals("Wrong statement retrieved using LF", "insert", verb.toLowerCase());
@@ -699,6 +696,7 @@ public class ScriptParserTest
 			count = 0;
 			while ((sql = p.getNextCommand()) != null)
 			{
+				if (StringUtil.isBlank(sql)) continue; // ignore empty lines at the end
 				assertNotNull("No SQL returned at " + count, sql);
 				String verb = SqlUtil.getSqlVerb(sql);
 				assertEquals("Wrong statement retrieved using CRLF", "insert", verb.toLowerCase());
@@ -870,7 +868,7 @@ public class ScriptParserTest
     parser = new ScriptParser(sql);
 		parser.setAlternateLineComment("");
 		count = parser.getSize();
-		assertEquals("Wrong statement count", count, 3);
+		assertEquals("Wrong statement count.", 3, count);
 	}
 
 	public void testUnicodeComments()
