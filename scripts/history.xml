@@ -2,9 +2,9 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-11-05">
+<release build="-1" date="2009-11-08">
 
-  <entry dev-build="7" type="enh">
+  <entry dev-build="8" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
     </description>
@@ -121,6 +121,13 @@
       For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
     </description>
   </entry>
+
+  <entry dev-build="8" type="fix">
+    <description>
+      When copying a column name from the header's popup, the wrong name was
+      copied when the columns where re-arranged using drag&amp;drop.
+		</description>
+	</entry>
 
   <entry dev-build="7" type="fix">
     <description>

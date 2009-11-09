@@ -1890,10 +1890,15 @@ public class WbTable
 		}
 	}
 
-	public int getPopupColumnIndex()
+	public int getPopupViewColumnIndex()
 	{
 		TableColumnModel colMod = this.getColumnModel();
-		int viewColumn = colMod.getColumnIndexAtX(this.headerPopupX);
+		return colMod.getColumnIndexAtX(this.headerPopupX);
+	}
+	
+	public int getPopupColumnIndex()
+	{
+		int viewColumn = getPopupViewColumnIndex();
 		int column = this.convertColumnIndexToModel(viewColumn);
 		return column;
 	}

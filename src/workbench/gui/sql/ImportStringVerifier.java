@@ -91,13 +91,11 @@ public class ImportStringVerifier
 
 			parser.setDelimiter(textOptions.getTextDelimiter());
 		}
-		List cols = parser.getColumnsFromFile();
+		List<ColumnIdentifier> cols = parser.getColumnsFromFile();
 
 		int matchingColumns = 0;
-		Iterator itr = cols.iterator();
-		while (itr.hasNext())
+		for (ColumnIdentifier col : cols)
 		{
-			ColumnIdentifier col = (ColumnIdentifier)itr.next();
 			if (target.findColumn(col.getColumnName()) > -1)
 			{
 				matchingColumns ++;

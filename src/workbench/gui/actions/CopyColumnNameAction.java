@@ -38,7 +38,7 @@ public class CopyColumnNameAction
 
 	public void executeAction(ActionEvent e)
 	{
-		int col = client.getPopupColumnIndex();
+		int col = client.getPopupViewColumnIndex();
 		if (col > -1)
 		{
 			String name = client.getColumnName(col);
