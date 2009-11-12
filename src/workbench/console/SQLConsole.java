@@ -222,14 +222,21 @@ public class SQLConsole
 		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
 	}
 
-
-
 	public static void main(String[] args)
 	{
-		System.setProperty("workbench.log.console", "false");
-		WbManager.initConsoleMode(args);
-		SQLConsole console = new SQLConsole();
-		console.run();
+		AppArguments cmdLine = new AppArguments();
+		cmdLine.parse(args);
+		if (cmdLine.isArgPresent(AppArguments.ARG_SCRIPT))
+		{
+			WbManager.main(args);
+		}
+		else
+		{
+			System.setProperty("workbench.log.console", "false");
+			WbManager.initConsoleMode(args);
+			SQLConsole console = new SQLConsole();
+			console.run();
+		}
 	}
 
 }

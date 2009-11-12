@@ -249,15 +249,9 @@ public class DataExporter
 	 *        null means no special treatment (toString() will be called)
 	 * @see workbench.db.exporter.BlobMode#getMode(java.lang.String)
 	 */
-	public void setBlobMode(String type)
+	public void setBlobMode(BlobMode type)
 	{
-		this.blobMode = BlobMode.getMode(type);
-		if (this.blobMode == null)
-		{
-			String msg = ResourceMgr.getString("ErrExpInvalidBlobType");
-			msg = StringUtil.replace(msg, "%paramvalue%", type);
-			this.addWarning(msg);
-		}
+		this.blobMode = type;
 	}
 
 	/**

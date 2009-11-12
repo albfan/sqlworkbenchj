@@ -14,13 +14,12 @@ package workbench.db.exporter;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.storage.BlobFormatterFactory;
-import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.BlobLiteralType;
 
 /**
  * An ExportWriter to generate flat files.
  * 
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class TextExportWriter
 	extends ExportWriter
@@ -51,10 +50,12 @@ public class TextExportWriter
 		if (mode == BlobMode.AnsiLiteral)
 		{
 			conv.setBlobFormatter(BlobFormatterFactory.createAnsiFormatter());
+			conv.setWriteBlobToFile(false);
 		}
 		else if (mode == BlobMode.Base64)
 		{
 			conv.setBlobFormatter(BlobFormatterFactory.createInstance(BlobLiteralType.base64));
+			conv.setWriteBlobToFile(false);
 		}
 		else if (mode == BlobMode.DbmsLiteral)
 		{
@@ -62,6 +63,12 @@ public class TextExportWriter
 			WbConnection con = exporter.getConnection();
 			if (con != null) meta = con.getMetadata();
 			conv.setBlobFormatter(BlobFormatterFactory.createInstance(meta));
+			conv.setWriteBlobToFile(false);
+		}
+		else if (mode == BlobMode.SaveToFile)
+		{
+			conv.setBlobFormatter(null);
+			conv.setWriteBlobToFile(true);
 		}
 	}
 	

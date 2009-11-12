@@ -24,7 +24,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
-import workbench.util.StringUtil;
 
 /**
  * Arguments for diff-ing data that are used by several commands.
@@ -100,8 +99,7 @@ public class CommonDiffParameters
 		ConnectionProfile prof = ConnectionMgr.getInstance().getProfile(profileKey);
 		if (prof == null)
 		{
-			String msg = ResourceMgr.getString("ErrProfileNotFound");
-			msg = StringUtil.replace(msg, "%profile%", profileKey.toString());
+			String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", profileKey.toString());
 			result.addMessage(msg);
 			result.setFailure();
 		}

@@ -404,7 +404,7 @@ public class WbExportTest
 			p = new ScriptParser(script);
 			sql = p.getCommand(0);
 			verb = SqlUtil.getSqlVerb(script);
-			System.out.println("Statement=" + sql);
+//			System.out.println("Statement=" + sql);
 			assertEquals("Not an insert statement", "INSERT", verb);
 			assertEquals("Oracle Date literal not found", true, sql.indexOf("to_date('2006-01-01'") > -1);
 			assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_date('2007-02-02 14:15:16'") > -1);
@@ -455,7 +455,7 @@ public class WbExportTest
 			File exportFile = new File("/this/is/expected/to/fail/no_export.txt");
 			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
 			assertEquals("Export did not fail", result.isSuccess(), false);
-			System.out.println(result.getMessageBuffer().toString());
+//			System.out.println(result.getMessageBuffer().toString());
 		}
 		catch (Exception e)
 		{
@@ -530,6 +530,39 @@ public class WbExportTest
 			fail(e.getMessage());
 		}
 	}
+
+	public void testBlobEncoding()
+		throws Exception
+	{
+		File exportFile = new File(this.basedir, "blob_data.txt");
+		
+		StatementRunner runner = util.createConnectedStatementRunner(connection);
+		runner.runStatement("wbexport -sourceTable=blob_test -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobType=base64;");
+		StatementRunnerResult result = runner.getResult();
+//		System.out.println("**************\n" + result.getMessageBuffer().toString() + "\n**************");
+		assertTrue(result.isSuccess());
+		assertEquals("No export file created", true, exportFile.exists());
+		BufferedReader reader = new BufferedReader(new FileReader(exportFile));
+		List<String> lines = FileUtil.getLines(reader);
+		assertEquals(3, lines.size());
+		assertEquals("NR\tDATA", lines.get(0));
+		assertTrue(lines.get(1).startsWith("1\t/9j/4AAQSkZJRgABAQEBLAEsAAD/"));
+		assertTrue(lines.get(2).startsWith("2\tiVBORw0KGgoAAAANSUhEUgAAAaMAAAEeCAIAAACoo+0IAAAb+UlEQVR4Xu3dP5PkxnnH8cbVLgK69C7kSIFCpQoVOnDs8AKZAYMNmOk2U3ABA5oq72tQ4NDFiKHl4MqsMi84yy"));
+		runner.done();
+
+		runner.runStatement("wbexport -sourceTable=blob_test -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobType=ansi;");
+		result = runner.getResult();
+//		System.out.println("**************\n" + result.getMessageBuffer().toString() + "\n**************");
+		assertTrue(result.isSuccess());
+		assertEquals("No export file created", true, exportFile.exists());
+		reader = new BufferedReader(new FileReader(exportFile));
+		lines = FileUtil.getLines(reader);
+		assertEquals(3, lines.size());
+		assertEquals("NR\tDATA", lines.get(0));
+		assertTrue(lines.get(1).startsWith("1\t0xffd8ffe00010"));
+		assertTrue(lines.get(2).startsWith("2\t0x"));
+
+	}
 	
 	public void testBlobExtensionCol()
 	{
@@ -540,9 +573,7 @@ public class WbExportTest
 			StatementRunner runner = util.createConnectedStatementRunner(connection);
 			runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;");
 			StatementRunnerResult result = runner.getResult();
-			System.out.println("**************");
-			System.out.println(result.getMessageBuffer().toString());
-			System.out.println("**************");
+//			System.out.println("**************\n" + result.getMessageBuffer().toString() + "\n**************");
 			runner.runStatement("select  \n" + 
              "   case \n" + 
              "     when nr = 1 then 'first.jpg' \n" + 
@@ -667,7 +698,7 @@ public class WbExportTest
 			assertEquals("Control file not created", true, ctl.exists());
 			
 			List<String> lines = TestUtil.readLines(ctl);
-			System.out.println("first line: " + lines.get(0));
+//			System.out.println("first line: " + lines.get(0));
 			assertTrue(lines.get(0).startsWith("--"));
 			assertTrue(lines.get(1).indexOf("skip=1") > -1);
 			

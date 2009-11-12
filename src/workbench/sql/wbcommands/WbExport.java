@@ -69,7 +69,7 @@ public class WbExport
 	public static final String ARG_EMPTY_RESULTS = "writeEmptyResults";
 	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
 	public static final String ARG_USE_CDATA = "useCDATA";
-	private String exportTypes = null;
+	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,html,xls";
 	
 	public WbExport()
 	{
@@ -83,11 +83,6 @@ public class WbExport
 		CommonArgs.addQuoteEscaping(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
 
-		exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,html";
-		if (PoiHelper.isPoiAvailable())
-		{
-			exportTypes +=",xls";
-		}
 		cmdLine.addArgument("type", StringUtil.stringToList(exportTypes));
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(ARG_TABLE_PREFIX);
@@ -217,6 +212,13 @@ public class WbExport
 			return result;
 		}
 
+		if (type.equals("xls") && !PoiHelper.isPoiAvailable())
+		{
+			result.addMessage(ResourceMgr.getString("ErrExportNoXLS"));
+			result.setFailure();
+			return result;
+		}
+		
 		if (!isTypeValid(type))
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
@@ -284,6 +286,19 @@ public class WbExport
 		exporter.setPageTitle(cmdLine.getValue("title"));
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
 
+		String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
+		BlobMode btype = BlobMode.getMode(type);
+
+		if (bmode != null && btype == null)
+		{
+			String types = StringUtil.listToString(BlobMode.getTypes(), ',');
+			String msg = ResourceMgr.getFormattedString("ErrExportInvalidBlobType", bmode, types);
+			result.addMessage(msg);
+			result.setFailure();
+			return result;
+		}
+		exporter.setBlobMode(btype);
+
 		if ("text".equals(type))
 		{
 			// Support old parameter Syntax
@@ -330,9 +345,6 @@ public class WbExport
 					result.addMessage(msg);
 				}
 			}
-
-			String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
-			exporter.setBlobMode(bmode);
 			exporter.setQuoteAlways(cmdLine.getBoolean("quotealways"));
 			exporter.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
 			exporter.setRowIndexColumnName(cmdLine.getValue(ARG_ROWNUM));
@@ -354,8 +366,6 @@ public class WbExport
 				List cols = StringUtil.stringToList(c, ",");
 				exporter.setKeyColumnsToUse(cols);
 			}
-			String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
-			exporter.setBlobMode(bmode);
 			this.defaultExtension = ".sql";
 			String literal = cmdLine.getValue(CommonArgs.ARG_DATE_LITERAL_TYPE);
 			if (literal != null)

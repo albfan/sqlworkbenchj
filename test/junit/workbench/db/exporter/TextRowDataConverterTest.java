@@ -17,6 +17,8 @@ import java.util.Calendar;
 import java.util.List;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
+import workbench.storage.BlobFormatterFactory;
+import workbench.storage.BlobLiteralType;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
@@ -77,4 +79,41 @@ public class TextRowDataConverterTest
 
 
 	}
+
+	public void testBlobEncoding()
+		throws Exception
+	{
+		String[] cols = new String[] { "id", "blob_col"};
+		int[] types = new int[] { Types.INTEGER, Types.BLOB };
+		int[] sizes = new int[] { 10, 10 };
+
+		ResultInfo info = new ResultInfo(cols, types, sizes);
+		TextRowDataConverter converter = new TextRowDataConverter();
+		converter.setDefaultTimestampFormat("yyyy-MM-dd HH:mm:ss");
+		converter.setDefaultDateFormat("yyyy-MM-dd");
+		converter.setWriteHeader(true);
+		converter.setBlobFormatter(BlobFormatterFactory.createInstance(BlobLiteralType.base64));
+		converter.setResultInfo(info);
+		converter.setDelimiter(";");
+		converter.setWriteBlobToFile(false);
+		StrBuffer header = converter.getStart();
+		assertNotNull(header);
+		assertEquals("Wrong header", "id;blob_col", header.toString().trim());
+
+		RowData data = new RowData(info);
+		data.setValue(0, new Integer(42));
+		data.setValue(1, new byte[] {1,2,3,4} );
+
+		StrBuffer line = converter.convertRowData(data, 0);
+		assertEquals("42;AQIDBA==", line.toString().trim());
+
+		converter.setBlobFormatter(BlobFormatterFactory.createAnsiFormatter());
+		line = converter.convertRowData(data, 0);
+		assertEquals("42;0x01020304", line.toString().trim());
+
+		converter.setBlobFormatter(BlobFormatterFactory.createInstance(BlobLiteralType.octal));
+		line = converter.convertRowData(data, 0);
+		assertEquals("42;\\001\\002\\003\\004", line.toString().trim());
+	}
+
 }
