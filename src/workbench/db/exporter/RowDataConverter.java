@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Writer;
+import java.sql.Blob;
 import java.sql.Clob;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -27,6 +28,7 @@ import workbench.interfaces.DataFileWriter;
 import workbench.interfaces.ErrorReporter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
+import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.ColumnData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -78,6 +80,7 @@ public abstract class RowDataConverter
 	protected RowData currentRowData;
 	
 	protected boolean convertDateToTimestamp = false;
+	private BlobLiteralFormatter blobFormatter;
 	
 	public RowDataConverter()
 	{
@@ -451,7 +454,15 @@ public abstract class RowDataConverter
 	 */
 	public abstract StrBuffer getEnd(long totalRows);
 
-	public boolean needsUpdateTable() { return this.needsUpdateTable; }
+	public boolean needsUpdateTable()
+	{
+		return this.needsUpdateTable;
+	}
+
+	public void setBlobFormatter(BlobLiteralFormatter formatter)
+	{
+		this.blobFormatter = formatter;
+	}
 	
 	public void setDefaultTimestampFormatter(SimpleDateFormat formatter)
 	{
@@ -599,6 +610,18 @@ public abstract class RowDataConverter
 				catch (SQLException e)
 				{
 					return "";
+				}
+			}
+			else if (blobFormatter != null && (value instanceof Blob || value instanceof byte[]))
+			{
+				try
+				{
+					result = blobFormatter.getBlobLiteral(value).toString();
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("TextRowDataConverter.convertRowData", "Error creating blob literal", e);
+					throw new RuntimeException("Error creating blob literal", e);
 				}
 			}
 			else

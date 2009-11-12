@@ -330,6 +330,9 @@ public class WbExport
 					result.addMessage(msg);
 				}
 			}
+
+			String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
+			exporter.setBlobMode(bmode);
 			exporter.setQuoteAlways(cmdLine.getBoolean("quotealways"));
 			exporter.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
 			exporter.setRowIndexColumnName(cmdLine.getValue(ARG_ROWNUM));

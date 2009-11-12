@@ -41,6 +41,11 @@ public enum BlobMode
 	 */
 	SaveToFile,
 
+	/**
+	 * Encode the blob using a Base64 encoding (e.g. for Postgres COPY format)
+	 */
+	Base64,
+
 	None;
 
 	/**
@@ -51,6 +56,7 @@ public enum BlobMode
 	 * <li><tt>ansi</tt> - maps to {@link #AnsiLiteral}</li>
 	 * <li><tt>dbms</tt> - maps to {@link #DbmsLiteral}</li>
 	 * <li><tt>file</tt> - maps to {@link #SaveToFile}</li>
+	 * <li><tt>base64</tt> - maps  to {@link #Base64}</li>
 	 * </ul>
 	 * @param type the type as entered by the user
 	 * @return null if the type was invalid, the corresponding BlobMode otherwise
@@ -62,12 +68,13 @@ public enum BlobMode
 		if ("ansi".equalsIgnoreCase(type)) return BlobMode.AnsiLiteral;
 		if ("dbms".equalsIgnoreCase(type)) return BlobMode.DbmsLiteral;
 		if ("file".equalsIgnoreCase(type)) return BlobMode.SaveToFile;
+		if ("base64".equalsIgnoreCase(type)) return BlobMode.Base64;
 		return null;
 	}
 
 	public static List<String> getTypes()
 	{
-		return CollectionUtil.arrayList("file", "ansi", "dbms");
+		return CollectionUtil.arrayList("file", "ansi", "dbms", "base64");
 	}
 
 }

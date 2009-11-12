@@ -30,6 +30,13 @@ public class BlobFormatterFactory
 		
 		return f;
 	}
+
+	public static BlobLiteralFormatter createInstance(BlobLiteralType type)
+	{
+		DefaultBlobFormatter f = new DefaultBlobFormatter();
+		f.setLiteralType(type);
+		return f;
+	}
 	
 	public static BlobLiteralFormatter createInstance(DbMetadata meta)
 	{

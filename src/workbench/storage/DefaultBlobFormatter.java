@@ -13,6 +13,7 @@ package workbench.storage;
 
 import java.sql.Blob;
 import java.sql.SQLException;
+import workbench.util.Base64;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
 
@@ -89,6 +90,11 @@ public class DefaultBlobFormatter
 
 	private void appendArray(StringBuilder result, byte[] buffer)
 	{
+		if (literalType == BlobLiteralType.base64)
+		{
+			result.append(Base64.encodeBytes(buffer));
+			return;
+		}
 		for (int i = 0; i < buffer.length; i++)
 		{
 			int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);

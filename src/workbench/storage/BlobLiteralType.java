@@ -18,5 +18,6 @@ public enum BlobLiteralType
 {
 	hex,
 	octal,
-	unicode;
+	unicode,
+	base64;
 }
