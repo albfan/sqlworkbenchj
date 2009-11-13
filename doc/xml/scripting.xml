@@ -16,24 +16,25 @@
 		If neither of these parameters is present, &wb-productname; will run in GUI mode.
 	</para>
 	
-	<para>
-		When using &wb-productname; from a batch file (or the commandline) you  
-		<emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link>,
-		as it will immediately return to the commandline while starting the JVM (and thus &wb-productname;) 
-		in the background. 
-	</para>
+	<important><para>
+		When running &wb-productname; on Windows, you either need to use <literal>sqlwbconsole</literal> 
+    or start &wb-productname; using the Java command.
+		You <emphasis role="bold">cannot</emphasis> use the <link linkend="launcher-using">Windows launcher</link> 
+    <literal>SQLWorkbench.exe</literal>, as it will run in the background without a console window, and thus
+    you will not see any output from the batch run.
+	</para></important>
 	
 	<para>
 		Please refer to <link linkend="starting">Starting &wb-productname;</link> for details
 		on how to start &wb-productname; with the <literal>java</literal> command.
 	</para>
 
-	<note><para>
+	<para>
 		When you need to quote parameters inside batch or shell scripts, you have to use single quotes 
 		(<literal>&apos;test-script.sql&apos;</literal>) to quote these values. Most command line shells 
 		(including Windows&reg;) do not pass double quotes to the application and thus the parameters would not 
 		be evaluated correctly by &wb-productname;
-	</para></note>
+	</para>
 
 	<para>
 		If you want to start the application from within another program (e.g. an 

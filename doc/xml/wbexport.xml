@@ -422,6 +422,58 @@
 						</entry>
 					</row>
 
+					<row>
+						<entry>-blobType</entry>
+						<entry>
+							<para>Possible values: <literal>file</literal>, <literal>dbms</literal>, <literal>ansi</literal>, <literal>base64</literal>
+							</para>
+							<para>
+								This parameter controls how BLOB data will be put into the generated SQL statements.
+								By default no conversion will be done, so the actual value that is written
+								to the output file depends on the JDBC driver's implementation
+								of the Blob interface. It is only valid for Text, SQL and XML exports, although not
+                all parameter values make sense for all export types.
+							</para>
+              <para>
+                The type <literal>base64</literal> is primarily intended for Text exports (e.g. to be used with PostgreSQL's <literal>COPY</literal> command)
+              </para>
+              <para>
+                The types <literal>dbms</literal> and <literal>ansi</literal> are intended for SQL exports (for DBMS that support
+                "BLOB literals"
+              </para>
+              <para>
+                When using <literal>file</literal>, <literal>base64</literal> or <literal>ansi</literal> the file can imported using
+                <link linkend="command-import"><literal>WbImport</literal></link>
+              </para>
+							<para>
+								The parameter value <literal>file</literal>, will cause
+								&wb-productname; to write the contents of each blob column
+								into a separate file. The SQL statement will contain the
+								&wb-productname; specific extension to read the blob data
+								from the file. For details please refer to <xref linkend="blob-support"/>.
+								If you are planning to run the generated SQL scripts using
+								&wb-productname; this is the recommended format.
+							</para>
+							<para>
+								Note that SQL scripts generated with <literal>-blobType=file</literal>
+								can only be run with &wb-productname;
+							</para>
+							<para>
+								The parameter value <literal>ansi</literal>, will generate
+								"binary strings" that are compatible with the ANSI
+								definition for binary data. MySQL and Microsoft SQL Server support
+								these kind of literals.
+							</para>
+							<para>
+								The parameter value <literal>dbms</literal>, will create a DBMS
+								specific "binary string". MySQL, HSQLDB, H2 and PostgreSQL
+								are known to support literals for binary data. For other DBMS
+								using this option will still create an ansi literal but this
+								might result in an invalid SQL statement.
+							</para>
+						</entry>
+					</row>
+
 					&progress-parameter;
 
 				</tbody>
@@ -728,46 +780,6 @@
 							your DBMS does not support the ANSI standard (e.g. MS ACCESS)
 							you can specify the operator to be used: <literal>-concat=+</literal>
 						defines the plus sign as the concatenation operator.</entry>
-					</row>
-
-					<row>
-						<entry>-blobType</entry>
-						<entry>
-							<para>Possible values: <literal>file</literal>, <literal>dbms</literal>, <literal>ansi</literal>
-							</para>
-							<para>
-								This parameter controls how BLOB data will be put into the generated SQL statements. 
-								By default no conversion will be done, so the actual value that is written
-								to the output file depends on the JDBC driver's implementation
-								of the Blob interface.
-							</para>
-							<para>
-								The parameter value <literal>file</literal>, will cause
-								&wb-productname; to write the contents of each blob column
-								into a separate file. The SQL statement will contain the 
-								&wb-productname; specific extension to read the blob data
-								from the file. For details please refer to <xref linkend="blob-support"/>.
-								If you are planning to run the generated SQL scripts using 
-								&wb-productname; this is the recommended format.
-							</para>
-							<para>
-								Note that SQL scripts generated with <literal>-blobType=file</literal>
-								can only be run with &wb-productname;
-							</para>
-							<para>
-								The parameter value <literal>ansi</literal>, will generate
-								"binary strings" that are compatible with the ANSI 
-								definition for binary data. MySQL and Microsoft SQL Server support
-								these kind of literals.
-							</para>
-							<para>
-								The parameter value <literal>dbms</literal>, will create a DBMS
-								specific "binary string". MySQL, HSQLDB, H2 and PostgreSQL 
-								are known to support literals for binary data. For other DBMS
-								using this option will still create an ansi literal but this 
-								might result in an invalid SQL statement. 
-							</para>
-						</entry>
 					</row>
 
 					<row>

@@ -866,6 +866,9 @@
 						<entry>-blobIsFilename</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>
+                This is a deprecated parameter. Please use <literal>-blobType</literal> instead.
+              </para>
 							<para>
 								When exporting tables that have BLOB columns using <link linkend="command-export">WbExport</link>
 								into text files, each BLOB will be written into a separate file. The actual column
@@ -876,6 +879,28 @@
 								if the JDBC driver can handle the data that in the BLOB columns of the
 								text file. The default for this parameter is <literal>true</literal>
 							</para>
+              <para>
+                This parameter is ignored, if <literal>-blobType</literal> is also specified.
+              </para>
+						</entry>
+					</row>
+
+					<row>
+						<entry>-blobType</entry>
+						<entry>
+							<para>Possible values: <literal>file</literal>, <literal>ansi</literal>, <literal>base64</literal></para>
+							<para>
+                Specifies how BLOB data is stored in the input file. If <literal>file</literal> is specified,
+                it is assumed that the column value contains a filename that in turn contains the real blob data. This is
+                the default format when using <link linkend="command-export">WbExport</link>.
+              </para>
+              <para>
+                For the other two type, <literal>WbImport</literal> assumes that the blob data is stored as
+                encoded character data in the column. 
+							</para>
+              <para>
+                If this parameter is specified, <literal>-blobIsFilename</literal> is ignored.
+              </para>
 						</entry>
 					</row>
 

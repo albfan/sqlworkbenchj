@@ -10,6 +10,19 @@
     </description>
   </entry>
 
+  <entry dev-build="8" type="enh">
+    <description>
+      Blobs can now be exported and imported as text by encoding the binary values (hex or unicode).
+    </description>
+  </entry>
+
+  <entry dev-build="8" type="enh">
+    <description>
+      sqlwbconsole.exe can now also be used to run SQL Workbench in batch mode
+      (e.g. sqlwbconsole.exe -script=do_something.sql)
+    </description>
+  </entry>
+
   <entry dev-build="7" type="enh">
     <description>
       A new menu item "File -&gt; Close Window" is available to close the current window.
