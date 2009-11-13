@@ -64,11 +64,11 @@ public enum BlobMode
 	public static BlobMode getMode(String type)
 	{
 		if (type == null) return BlobMode.None;
-		if ("none".equalsIgnoreCase(type)) return BlobMode.None;
-		if ("ansi".equalsIgnoreCase(type)) return BlobMode.AnsiLiteral;
-		if ("dbms".equalsIgnoreCase(type)) return BlobMode.DbmsLiteral;
-		if ("file".equalsIgnoreCase(type)) return BlobMode.SaveToFile;
-		if ("base64".equalsIgnoreCase(type)) return BlobMode.Base64;
+		if ("none".equalsIgnoreCase(type.trim())) return BlobMode.None;
+		if ("ansi".equalsIgnoreCase(type.trim())) return BlobMode.AnsiLiteral;
+		if ("dbms".equalsIgnoreCase(type.trim())) return BlobMode.DbmsLiteral;
+		if ("file".equalsIgnoreCase(type.trim())) return BlobMode.SaveToFile;
+		if ("base64".equalsIgnoreCase(type.trim())) return BlobMode.Base64;
 		return null;
 	}
 

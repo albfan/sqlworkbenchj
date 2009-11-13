@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
+import workbench.db.exporter.BlobMode;
 import workbench.db.importer.ConstantColumnValues;
 import workbench.db.importer.CycleErrorException;
 import workbench.db.importer.DataImporter;
@@ -36,6 +37,7 @@ import workbench.resource.Settings;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
+import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.StringUtil;
 import workbench.util.ValueConverter;
@@ -124,6 +126,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_FILE_EXT);
 		cmdLine.addArgument(ARG_CREATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_BLOB_ISFILENAME, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbExport.ARG_BLOB_TYPE, CollectionUtil.arrayList("file", "ansi", "base64"));
 		cmdLine.addArgument(ARG_CLOB_ISFILENAME, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_MULTI_LINE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_START_ROW, ArgumentType.IntegerArgument);
@@ -398,7 +401,27 @@ public class WbImport
 				addColumnFilter(colFilter, textParser);
 			}
 
-			textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));
+			if (cmdLine.isArgPresent(ARG_BLOB_ISFILENAME))
+			{
+				textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));
+			}
+			else
+			{
+				String blobTypeValue = cmdLine.getValue(WbExport.ARG_BLOB_TYPE);
+				if (StringUtil.isNonBlank(blobTypeValue))
+				{
+					BlobMode blobMode = BlobMode.getMode(blobTypeValue);
+					if (blobMode == BlobMode.SaveToFile)
+					{
+						textParser.setTreatBlobsAsFilenames(true);
+					}
+					else
+					{
+						textParser.setTreatBlobsAsFilenames(false);
+						textParser.setBlobMode(blobMode);
+					}
+				}
+			}
 
 			String filter = cmdLine.getValue(ARG_LINE_FILTER);
 			if (filter != null)

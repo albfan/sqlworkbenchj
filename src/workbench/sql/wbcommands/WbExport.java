@@ -287,7 +287,7 @@ public class WbExport
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
 
 		String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
-		BlobMode btype = BlobMode.getMode(type);
+		BlobMode btype = BlobMode.getMode(bmode);
 
 		if (bmode != null && btype == null)
 		{

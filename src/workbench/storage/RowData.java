@@ -556,7 +556,7 @@ public class RowData
 		return one.equals(other);
 	}
 	
-	private static boolean compareArrays(byte[] one, byte[] other)
+	public static boolean compareArrays(byte[] one, byte[] other)
 	{
 		if (one.length != other.length) return false;
 		for (int i=0; i < one.length; i++)

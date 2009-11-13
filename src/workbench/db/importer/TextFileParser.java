@@ -39,7 +39,10 @@ import workbench.util.ValueConverter;
 import workbench.util.WbStringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import workbench.db.exporter.BlobMode;
 import workbench.db.importer.modifier.ImportValueModifier;
+import workbench.storage.BlobLiteralType;
+import workbench.util.DecodeUtil;
 import workbench.util.FixedLengthLineParser;
 import workbench.util.LineParser;
 import workbench.util.QuoteEscapeType;
@@ -89,7 +92,9 @@ public class TextFileParser
 	private boolean hasWarnings = false;
 
 	private Pattern lineFilter;
+	private BlobLiteralType blobType;
 	private boolean blobsAreFilenames = true;
+
 	private boolean clobsAreFilenames = false;
 	private boolean fixedWidthImport = false;
 
@@ -246,6 +251,23 @@ public class TextFileParser
 		}
 	}
 
+	public void setBlobMode(BlobMode mode)
+	{
+		blobType = null;
+		if (mode == BlobMode.SaveToFile)
+		{
+			blobsAreFilenames = true;
+		}
+		else if (mode == BlobMode.Base64)
+		{
+			blobType = BlobLiteralType.base64;
+		}
+		else if (mode == BlobMode.AnsiLiteral)
+		{
+			blobType = BlobLiteralType.hex;
+		}
+	}
+	
 	public void setTreatClobAsFilenames(boolean flag)
 	{
 		this.clobsAreFilenames = flag;
@@ -758,6 +780,12 @@ public class TextFileParser
 		tok.setTrimValues(this.trimValues);
 		int sourceCount = importColumns.size();
 
+		DecodeUtil blobDecoder = null;
+		if (blobType != null)
+		{
+			blobDecoder = new DecodeUtil();
+		}
+
 		try
 		{
 			boolean includeLine = true;
@@ -904,6 +932,10 @@ public class TextFileParser
 								}
 								rowData[targetIndex] = value;
 							}
+						}
+						else if (blobType != null && !StringUtil.isEmptyString(value) && SqlUtil.isBlobType(colType))
+						{
+							rowData[targetIndex] = blobDecoder.decodeString(value, blobType);
 						}
 						else if (blobsAreFilenames && !StringUtil.isEmptyString(value) && SqlUtil.isBlobType(colType) )
 						{

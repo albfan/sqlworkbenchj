@@ -34,6 +34,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
+import workbench.util.Base64;
 import workbench.util.EncodingUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -2860,7 +2861,6 @@ public class WbImportTest
 
 	public void testTextBlobImport()
 	{
-		int rowCount = 10;
 		try
 		{
 			File importFile  = new File(this.basedir, "blob_test.txt");
@@ -2879,6 +2879,62 @@ public class WbImportTest
 			binaryOut.close();
 
 			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
+			if (rs.next())
+			{
+				int nr = rs.getInt(1);
+				assertEquals("Wrong data imported", 1, nr);
+
+				Object blob = rs.getObject(2);
+				assertNotNull("No blob data imported", blob);
+				if (blob instanceof byte[])
+				{
+					byte[] retrievedData = (byte[])blob;
+					assertEquals("Wrong blob size imported", 1024, retrievedData.length);
+					assertEquals("Wrong content of blob data", retrievedData[0], 0);
+					assertEquals("Wrong content of blob data", retrievedData[1], 1);
+					assertEquals("Wrong content of blob data", retrievedData[2], 2);
+					assertEquals("Wrong content of blob data", retrievedData[3], 3);
+				}
+				else
+				{
+					fail("Wrong blob data returned");
+				}
+			}
+			else
+			{
+				fail("No rows imported");
+			}
+			rs.close();
+			stmt.close();
+		}
+		catch (Exception e)
+		{
+			fail(e.getMessage());
+		}
+	}
+
+	public void testEncodedBlob()
+	{
+		try
+		{
+			File importFile  = new File(this.basedir, "blob2_test.txt");
+			PrintWriter out = new PrintWriter(new FileWriter(importFile));
+			byte[] testData = new byte[1024];
+			for (int i = 0; i < testData.length; i++)
+			{
+				testData[i] = (byte)(i % 255);
+			}
+
+			out.println("nr\tbinary_data");
+			out.print("1\t");
+			out.println(Base64.encodeBytes(testData));
+			out.close();
+
+			StatementRunnerResult result = importCmd.execute("wbimport -file='" + importFile.getAbsolutePath() + "' -decimal='.' -type=text -header=true -table=blob_test -blobType=base64");
 			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 			Statement stmt = this.connection.createStatementForQuery();
