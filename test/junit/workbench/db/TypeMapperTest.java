@@ -10,23 +10,26 @@
  */
 package workbench.db;
 
-import junit.framework.TestCase;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TypeMapperTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	public TypeMapperTest(String testName)
 	{
 		super(testName);
+		// this is needed to make sure the LogMgr is initalized correctly
+		getTestUtil(); 
 	}
 
 	public void testGetTypeName()
 	{
+		
 		TypeMapper mapper = new TypeMapper();
 		mapper.parseTypeMap("3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size);93:datetime year to second");
 		String type = mapper.getUserMapping(3, 1, 1);

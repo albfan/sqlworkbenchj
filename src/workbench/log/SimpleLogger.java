@@ -48,7 +48,6 @@ public class SimpleLogger
 		messageFormat = messageFormat.replace("{message}", "%4$s");
 		messageFormat = messageFormat.replace("{error}", "%5$s");
 		showStackTrace = messageFormat.indexOf("{stacktrace}") > -1;
-		messageFormat = messageFormat.replace("{stacktrace}", "%6$s");
 	}
 
 	public void logToSystemError(boolean flag)
@@ -162,9 +161,13 @@ public class SimpleLogger
 	{
 		try
 		{
-			if (th != null && (showStackTrace || logLevel == LogLevel.debug))
+			if (th != null || logLevel == LogLevel.debug)
 			{
-				String trace = LogMgr.getStackTrace(th);
+				String trace = (th == null ? "" : th.getMessage());
+				if (showStackTrace)
+				{
+					trace = LogMgr.getStackTrace(th);
+				}
 				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, trace);
 			}
 			else

@@ -129,8 +129,6 @@ public class Settings
 	protected Settings()
 	{
 		initialize();
-		initLogging();
-		afterInit();
 		renameOldProps();
 		migrateProps();
 		removeObsolete();
@@ -141,19 +139,6 @@ public class Settings
 		return props.getKeys();
 	}
 
-	private void afterInit()
-	{
-		// This message should not be logged before LogMgr.setOutputFile() has
-		// been called with the correct value
-		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
-
-		if (getBoolProperty("workbench.db.resetdefaults"))
-		{
-			LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
-			resetDefaults();
-		}
-	}
-	
 	public final void initialize()
 	{
 		final String configFilename = "workbench.settings";
@@ -208,6 +193,18 @@ public class Settings
 		fileTime = settings.lastModified();
 
 		loadConfig(settings);
+
+		initLogging();
+		
+		// This message should not be logged before LogMgr.setOutputFile() has
+		// been called with the correct value
+		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
+
+		if (getBoolProperty("workbench.db.resetdefaults"))
+		{
+			LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
+			resetDefaults();
+		}
 	}
 
 	private void initLogging()
