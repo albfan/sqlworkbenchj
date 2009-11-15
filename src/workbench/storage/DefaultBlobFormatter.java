@@ -119,5 +119,11 @@ public class DefaultBlobFormatter
 			}
 		}
 	}
+
+	@Override
+	public BlobLiteralType getType()
+	{
+		return literalType;
+	}
 	
 }

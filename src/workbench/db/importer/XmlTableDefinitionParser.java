@@ -38,6 +38,7 @@ public class XmlTableDefinitionParser
 	private ImportFileHandler fileHandler;
 	private StringBuilder chars;
 	private String tagFormat;
+	private String blobEncoding;
 
 	public XmlTableDefinitionParser(ImportFileHandler handler)
 		throws IOException, SAXException
@@ -52,6 +53,11 @@ public class XmlTableDefinitionParser
 		return this.columnList;
 	}
 
+	public String getBlobEncoding()
+	{
+		return blobEncoding;
+	}
+	
 	public String getTagFormat()
 	{
 		return this.tagFormat;
@@ -116,6 +122,10 @@ public class XmlTableDefinitionParser
 		if (qName.equals(XmlRowDataConverter.TAG_TAG_FORMAT))
 		{
 			this.tagFormat = this.chars.toString();
+		}
+		else if (qName.equals(XmlRowDataConverter.TAG_BLOB_ENCODING))
+		{
+			this.blobEncoding = chars.toString();
 		}
 		else if (qName.equals(XmlRowDataConverter.COLUMN_COUNT_TAG))
 		{

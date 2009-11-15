@@ -20,4 +20,5 @@ public interface BlobLiteralFormatter
 {
 	CharSequence getBlobLiteral(Object value)
 		throws SQLException;
+	BlobLiteralType getType();
 }

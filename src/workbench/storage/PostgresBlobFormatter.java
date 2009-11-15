@@ -40,7 +40,6 @@ public class PostgresBlobFormatter
 			for (int i = 0; i < buffer.length; i++)
 			{
 				result.append('\\');
-				result.append('\\');
 				int c = (buffer[i] < 0 ? 256 + buffer[i] : buffer[i]);
 				String s = Integer.toOctalString(c);
 				int l = s.length();
@@ -59,5 +58,12 @@ public class PostgresBlobFormatter
 		}
 		return value.toString();
 	}
+
+	@Override
+	public BlobLiteralType getType()
+	{
+		return BlobLiteralType.octal;
+	}
+
 }
 

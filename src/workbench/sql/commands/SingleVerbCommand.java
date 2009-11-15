@@ -19,7 +19,7 @@ import workbench.sql.StatementRunnerResult;
 /**
  * Handles COMMIT and ROLLBACK
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SingleVerbCommand extends SqlCommand
 {
@@ -65,7 +65,7 @@ public class SingleVerbCommand extends SqlCommand
 		catch (Exception e)
 		{
 			addErrorInfo(result, aSql, e);
-			LogMgr.logSqlError("SingleVerbCommand.execute()", aSql, e);
+			LogMgr.logError("SingleVerbCommand.execute()", aSql, e);
 		}
 		finally
 		{

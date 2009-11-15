@@ -32,7 +32,7 @@ import workbench.util.StringUtil;
  * statement, the ResultSet will be returned directly, otherwise the
  * ResultSet will be completely read into a DataStore.
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SelectCommand
 	extends SqlCommand
@@ -153,7 +153,7 @@ public class SelectCommand
 			result.addMessage(StringUtil.getMaxSubstring(sql, 120));
 			result.addMessage(ExceptionUtil.getAllExceptions(e));
 			appendWarnings(result);
-			LogMgr.logSqlError("SelectCommand.execute()", sql, e);
+			LogMgr.logError("SelectCommand.execute()", sql, e);
 			result.setFailure();
 			this.runner.rollbackSavepoint();
 		}

@@ -80,7 +80,7 @@ public abstract class RowDataConverter
 	protected RowData currentRowData;
 	
 	protected boolean convertDateToTimestamp = false;
-	private BlobLiteralFormatter blobFormatter;
+	protected BlobLiteralFormatter blobFormatter;
 	
 	public RowDataConverter()
 	{

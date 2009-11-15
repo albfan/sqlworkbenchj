@@ -18,6 +18,8 @@ import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
@@ -46,6 +48,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
 import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -294,6 +297,15 @@ public class TestUtil
 	public String getBaseDir()
 	{
 		return this.basedir;
+	}
+
+	public void copyResourceFile(Object test, String filename)
+		throws IOException
+	{
+		InputStream in = test.getClass().getResourceAsStream(filename);
+		File target = new File(basedir, filename);
+		OutputStream out = new FileOutputStream(target);
+		FileUtil.copy(in, out);
 	}
 
 	public static List<String> getLines(String s)

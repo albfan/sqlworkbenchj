@@ -1,14 +1,21 @@
 <section id="troubleshooting">
 	<title>Common problems</title>
 
-  <!--
-	<section id="no-statement-cancel">
-		<title>Statements can not be cancelled</title>
-		<para>
-		</para>
-	</section>
-	-->
-    
+  <section id="driver-not-found">
+    <title>The driver class was not found</title>
+    <para>
+      If you get an error <literal>"Driver class not registered"</literal> or
+      <literal>"Driver not found"</literal> please check the following settings:
+      <itemizedlist>
+        <listitem><para>Make sure you have specified the correct location of the jar file. Some drivers (e.g. for IBM DB2)
+        may require more than one jar file.</para></listitem>
+        <listitem><para>Check the spelling of the driver's class name. Remember that it's case sensitive. If you don't know
+        the driver's class name, simply press the <keycap>Enter</keycap> key inside the input field of the jar file location.
+        &wb-productname; will then scan the jar file(s) to find the JDBC driver</para></listitem>
+      </itemizedlist>
+    </para>
+  </section>
+
   <section id="out-of-memory-error">
     <title>Out of memory errors</title>
     <para>

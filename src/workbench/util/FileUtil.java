@@ -251,6 +251,13 @@ public class FileUtil
 		return filesize;
 	}
 
+	public static String readFile(File f, String encoding)
+		throws IOException
+	{
+		Reader r = EncodingUtil.createReader(f, encoding);
+		return readCharacters(r);
+	}
+	
 	/**
 	 * Read the content of the Reader into a String.
 	 * The Reader is closed automatically.

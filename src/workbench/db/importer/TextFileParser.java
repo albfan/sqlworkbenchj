@@ -41,8 +41,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import workbench.db.exporter.BlobMode;
 import workbench.db.importer.modifier.ImportValueModifier;
-import workbench.storage.BlobLiteralType;
-import workbench.util.DecodeUtil;
+import workbench.util.BlobDecoder;
 import workbench.util.FixedLengthLineParser;
 import workbench.util.LineParser;
 import workbench.util.QuoteEscapeType;
@@ -92,13 +91,13 @@ public class TextFileParser
 	private boolean hasWarnings = false;
 
 	private Pattern lineFilter;
-	private BlobLiteralType blobType;
-	private boolean blobsAreFilenames = true;
 
 	private boolean clobsAreFilenames = false;
 	private boolean fixedWidthImport = false;
 
 	private ImportFileHandler fileHandler = new ImportFileHandler();
+	private BlobDecoder blobDecoder = new BlobDecoder();
+	
 	private String currentLine;
 	private QuoteEscapeType quoteEscape;
 	private ImportValueModifier valueModifier;
@@ -253,29 +252,12 @@ public class TextFileParser
 
 	public void setBlobMode(BlobMode mode)
 	{
-		blobType = null;
-		if (mode == BlobMode.SaveToFile)
-		{
-			blobsAreFilenames = true;
-		}
-		else if (mode == BlobMode.Base64)
-		{
-			blobType = BlobLiteralType.base64;
-		}
-		else if (mode == BlobMode.AnsiLiteral)
-		{
-			blobType = BlobLiteralType.hex;
-		}
+		blobDecoder.setBlobMode(mode);
 	}
 	
 	public void setTreatClobAsFilenames(boolean flag)
 	{
 		this.clobsAreFilenames = flag;
-	}
-
-	public void setTreatBlobsAsFilenames(boolean flag)
-	{
-		this.blobsAreFilenames = flag;
 	}
 
 	public void setValueConverter(ValueConverter convert)
@@ -671,6 +653,8 @@ public class TextFileParser
 		}
 		if (baseDir == null) this.baseDir = new File(".");
 
+		blobDecoder.setBaseDir(baseDir);
+		
 		setupFileHandler();
 
 		// If no header is available in the file and no columns have been
@@ -779,12 +763,6 @@ public class TextFileParser
 
 		tok.setTrimValues(this.trimValues);
 		int sourceCount = importColumns.size();
-
-		DecodeUtil blobDecoder = null;
-		if (blobType != null)
-		{
-			blobDecoder = new DecodeUtil();
-		}
 
 		try
 		{
@@ -933,18 +911,9 @@ public class TextFileParser
 								rowData[targetIndex] = value;
 							}
 						}
-						else if (blobType != null && !StringUtil.isEmptyString(value) && SqlUtil.isBlobType(colType))
+						else if (SqlUtil.isBlobType(colType) )
 						{
-							rowData[targetIndex] = blobDecoder.decodeString(value, blobType);
-						}
-						else if (blobsAreFilenames && !StringUtil.isEmptyString(value) && SqlUtil.isBlobType(colType) )
-						{
-							File bfile = new File(value.trim());
-							if (!bfile.isAbsolute())
-							{
-								bfile = new File(this.baseDir, value.trim());
-							}
-							rowData[targetIndex] = bfile;
+							rowData[targetIndex] = blobDecoder.decodeBlob(value);
 						}
 						else
 						{

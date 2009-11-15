@@ -129,14 +129,29 @@ public class Settings
 	protected Settings()
 	{
 		initialize();
-		this.renameOldProps();
-		this.migrateProps();
-		this.removeObsolete();
+		initLogging();
+		afterInit();
+		renameOldProps();
+		migrateProps();
+		removeObsolete();
 	}
 
 	public Set<String> getKeys()
 	{
 		return props.getKeys();
+	}
+
+	private void afterInit()
+	{
+		// This message should not be logged before LogMgr.setOutputFile() has
+		// been called with the correct value
+		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
+
+		if (getBoolProperty("workbench.db.resetdefaults"))
+		{
+			LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
+			resetDefaults();
+		}
 	}
 	
 	public final void initialize()
@@ -192,8 +207,14 @@ public class Settings
 		WbFile settings = new WbFile(cfd, configFilename);
 		fileTime = settings.lastModified();
 
-		boolean configLoaded = loadConfig(settings);
+		loadConfig(settings);
+	}
 
+	private void initLogging()
+	{
+		boolean useLog4j = getBoolProperty("workbench.log.log4j", false);
+		LogMgr.init(useLog4j);
+		
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
 		LogMgr.logToSystemError(logSysErr);
 
@@ -239,19 +260,6 @@ public class Settings
 		{
 			System.err.println("Error initializing log system!");
 			e.printStackTrace(System.err);
-		}
-
-		if (configLoaded)
-		{
-			// This message should not be logged before LogMgr.setOutputFile() has
-			// been called with the correct value
-			LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
-		}
-
-		if (getBoolProperty("workbench.db.resetdefaults"))
-		{
-			LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
-			resetDefaults();
 		}
 	}
 

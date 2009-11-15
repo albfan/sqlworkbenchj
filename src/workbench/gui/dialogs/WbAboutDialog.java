@@ -73,7 +73,7 @@ public class WbAboutDialog
 		settingsLabel.setCaretPosition(0);
 		settingsLabel.setBorder(new EmptyBorder(1, 0, 1, 0));
 		f = LogMgr.getLogfile();
-		logfileLabel.setText("Logfile: " + f.getFullPath());
+		logfileLabel.setText("Logfile: " + (f == null ? "": f.getFullPath()));
 		logfileLabel.setCaretPosition(0);
 		logfileLabel.setBorder(new EmptyBorder(1, 0, 1, 0));
 		long freeMem = (long)(MemoryWatcher.getFreeMemory() / (1024*1024) );

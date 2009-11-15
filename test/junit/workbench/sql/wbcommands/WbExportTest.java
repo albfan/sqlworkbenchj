@@ -1072,6 +1072,32 @@ public class WbExportTest
 			fail(e.getMessage());
 		}
 	}
+
+	public void testXmlBlobEncoding()
+		throws Exception
+	{
+		File exportFile = new File(this.basedir, "encoded_blob_export.xml");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -blobType=base64 -sourcetable=blob_test -encoding=utf8");
+		assertTrue("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess());
+		assertEquals("No export file created", true, exportFile.exists());
+
+		String file = FileUtil.readFile(exportFile, "UTF-8");
+		String count = TestUtil.getXPathValue(file, "count(/wb-export/data/row-data)");
+		assertEquals("2", count);
+
+		String encoding = TestUtil.getXPathValue(file, "/wb-export/meta-data/wb-blob-encoding/text()");
+		assertEquals("base64", encoding);
+		
+		String id = TestUtil.getXPathValue(file, "/wb-export/data/row-data[1]/column-data[1]/text()");
+		String blob = TestUtil.getXPathValue(file, "/wb-export/data/row-data[1]/column-data[2]/text()");
+
+		if ("1".equals(id))
+		{
+			assertTrue(blob.startsWith("/9j/4AAQSkZJRgABAQEBLAEsAAD/2"));
+		}
+
+
+	}
 	
 	public void testXmlExport()
 		throws Exception

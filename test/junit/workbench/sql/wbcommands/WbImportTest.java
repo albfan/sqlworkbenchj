@@ -36,6 +36,7 @@ import workbench.db.exporter.RowDataConverter;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.Base64;
 import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -303,6 +304,8 @@ public class WbImportTest
 			fail(e.getMessage());
 		}
 	}
+
+
 	public void testPartialColumnXmlImport()
 		throws Exception
 	{
@@ -2413,6 +2416,64 @@ public class WbImportTest
 		}
 	}
 
+	public void testEncodedBlobImport()
+		throws Exception
+	{
+		try
+		{
+			util.copyResourceFile(this, "encoded_blob_input.xml");
+			
+			File xmlFile = new File(this.basedir, "encoded_blob_input.xml");
+
+			StatementRunnerResult result = importCmd.execute("wbimport -encoding='ISO-8859-1' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
+			assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			Statement stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery("select nr, binary_data from blob_test");
+
+			String xmlContent = FileUtil.readFile(xmlFile, "ISO-8859-1");
+
+			int id1 = Integer.parseInt(TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[1]/column-data[1]"));
+			String blob1 = TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[1]/column-data[2]");
+			
+			int id2 = Integer.parseInt(TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[2]/column-data[1]"));
+			String blob2 = TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[2]/column-data[2]");
+
+			int rowCount = 0;
+			while (rs.next())
+			{
+				rowCount ++;
+				int nr = rs.getInt(1);
+
+				Object blob = rs.getObject(2);
+				assertNotNull("No blob data imported", blob);
+
+				String blobString = Base64.encodeBytes((byte[])blob);
+				if (nr == id1)
+				{
+					assertEquals(blob1, blobString);
+				}
+				else if (nr == id2)
+				{
+					assertEquals(blob2, blobString);
+				}
+			}
+			rs.close();
+			stmt.close();
+			assertEquals(2, rowCount);
+			if (!xmlFile.delete())
+			{
+				fail("Could not delete input file: " + xmlFile.getCanonicalPath());
+			}
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+
+	}
+	
 	public void testXmlBlobImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +

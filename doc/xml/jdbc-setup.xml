@@ -23,7 +23,15 @@
 			will be prompted to select one. In that case, please refer to the manual of your driver, to choose
 			the correct one.
 		</para>
-		
+
+		<caution>
+      <para>
+        If you enter the class name of the driver manually, remember that it's case-sensitive.
+        <literal>org.postgresql.driver</literal> is different to <literal>org.postgresql.Driver</literal>
+        (note the capital D for Driver)
+      </para>
+    </caution>
+    
 		<para>
 			The name of the library has to contain the full path to the driver&apos;s jar file, so that
 			&wb-productname; can find it. Some drivers are distributed in several jar files. In that case,
@@ -42,14 +50,14 @@
 			to add it manually to the library definition.
 		</para>
 
-		<important><para>
+		<note><para>
 			&wb-productname; is <emphasis role="bold">not</emphasis> using
 			the system CLASSPATH definition (i.e. environment variable) to load the
 			driver classes. Changing the CLASSPATH environment variable to include
 			your driver's library will not work. Using the <literal>-cp</literal> switch
 			to add a driver to the classpath when starting the application through a batch file
 			will also not work.
-		</para></important>
+		</para></note>
 
 		<para>
 			You do not need to specify a library for the JDBC-ODBC bridge, as

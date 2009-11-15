@@ -138,6 +138,7 @@
     <copy overwrite="true"  todir="${build.test}">
       <fileset defaultexcludes="true" dir="${testsrc}/junit">
         <include name="**/*.sql"/>
+        <include name="**/*.xml"/>
         <include name="**/*.txt"/>
         <include name="**/*.properties"/>
       </fileset>
@@ -171,6 +172,7 @@
       <exclude name="workbench/WbStarter.java"/>
       <classpath>
           <fileset dir="../etc/poi" includes="poi*.jar"/>
+          <fileset dir="../etc/log4j" includes="log4j*.jar"/>
       </classpath>
     </javac>
 
@@ -440,11 +442,11 @@
   </target>
 
   <target name="make-jar" depends="prepare,compile">
-
-    <jar compress="true" level="9" jarfile="${distdir}/${jarfile}">
+    
+    <jar compress="true" level="6" jarfile="${distdir}/${jarfile}">
       <manifest>
         <attribute name="Main-Class" value="workbench.WbStarter"/>
-        <attribute name="Class-Path" value=". poi.jar"/>
+        <attribute name="Class-Path" value=". log4j.jar poi.jar"/>
         <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
         <attribute name="WbBuild-Number" value="${build.number}"/>
         <attribute name="WbBuild-Date" value="${build_timestamp}"/>

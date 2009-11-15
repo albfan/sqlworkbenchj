@@ -2,7 +2,7 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-11-08">
+<release build="-1" date="2009-11-13">
 
   <entry dev-build="8" type="enh">
     <description>
@@ -12,7 +12,16 @@
 
   <entry dev-build="8" type="enh">
     <description>
-      Blobs can now be exported and imported as text by encoding the binary values (hex or unicode).
+      SQL Workbench/J can now optionally use Log4j for logging. In order to use Log4j, the library log4j.jar (without
+      a version number) must be present in the directory where sqlworkbench.jar is located. The log4j.xml must also
+      be placed into that directory. If log4j is used none of the logging properties from workbench.settings will
+      be applied. Log4j must be completely configured through log4j.xml (or log4j.properties).
+    </description>
+  </entry>
+
+  <entry dev-build="8" type="enh">
+    <description>
+      Blobs can now be exported and imported as "text values" by encoding the binary values (hex or unicode).
     </description>
   </entry>
 

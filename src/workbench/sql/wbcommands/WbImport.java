@@ -401,25 +401,22 @@ public class WbImport
 				addColumnFilter(colFilter, textParser);
 			}
 
-			if (cmdLine.isArgPresent(ARG_BLOB_ISFILENAME))
+			String btype = cmdLine.getValue(WbExport.ARG_BLOB_TYPE);
+			BlobMode mode = BlobMode.getMode(btype);
+			if (btype != null && mode != null)
 			{
-				textParser.setTreatBlobsAsFilenames(cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true));
+				textParser.setBlobMode(mode);
 			}
-			else
+			else if (cmdLine.isArgPresent(ARG_BLOB_ISFILENAME))
 			{
-				String blobTypeValue = cmdLine.getValue(WbExport.ARG_BLOB_TYPE);
-				if (StringUtil.isNonBlank(blobTypeValue))
+				boolean flag = cmdLine.getBoolean(ARG_BLOB_ISFILENAME, true);
+				if (flag)
 				{
-					BlobMode blobMode = BlobMode.getMode(blobTypeValue);
-					if (blobMode == BlobMode.SaveToFile)
-					{
-						textParser.setTreatBlobsAsFilenames(true);
-					}
-					else
-					{
-						textParser.setTreatBlobsAsFilenames(false);
-						textParser.setBlobMode(blobMode);
-					}
+					textParser.setBlobMode(BlobMode.SaveToFile);
+				}
+				else
+				{
+					textParser.setBlobMode(BlobMode.None);
 				}
 			}
 

@@ -106,7 +106,7 @@ public class UpdatingCommand
 		{
 			runner.rollbackSavepoint();
 			addErrorInfo(result, sql, e);
-			LogMgr.logSqlError("UpdatingCommnad.execute()", sql, e);
+			LogMgr.logError("UpdatingCommnad.execute()", sql, e);
 		}
 		finally
 		{

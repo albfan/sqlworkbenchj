@@ -37,6 +37,6 @@ public class PostgresBlobFormatterTest
 		byte[] blob = b.toByteArray();
 		String literal = formatter.getBlobLiteral(blob).toString();
 
-		assertEquals("Wrong literal created", "'\\\\377\\\\000\\\\020\\\\017'", literal);
+		assertEquals("Wrong literal created", "'\\377\\000\\020\\017'", literal);
 	}
 }

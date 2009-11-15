@@ -27,7 +27,7 @@ import workbench.util.StringUtil;
 /**
  * A wrapper for Orcle's AlterSessionCommand
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class AlterSessionCommand
 	extends SqlCommand
@@ -103,7 +103,7 @@ public class AlterSessionCommand
 		catch (Exception e)
 		{
 			addErrorInfo(result, sql, e);
-			LogMgr.logSqlError("AlterSessionCommand.execute()", sql, e);
+			LogMgr.logError("AlterSessionCommand.execute()", sql, e);
 		}
 
 		return result;

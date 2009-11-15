@@ -32,6 +32,7 @@ import org.xml.sax.helpers.DefaultHandler;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.XmlRowDataConverter;
 import workbench.db.importer.modifier.ImportValueModifier;
 import workbench.interfaces.JobErrorHandler;
@@ -39,6 +40,7 @@ import workbench.resource.ResourceMgr;
 import workbench.util.ExceptionUtil;
 import workbench.interfaces.ImportFileParser;
 import workbench.log.LogMgr;
+import workbench.util.BlobDecoder;
 import workbench.util.FileUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
@@ -104,7 +106,8 @@ public class XmlDataFileParser
 
 	private ValueConverter converter = new ValueConverter();
 	private ImportValueModifier valueModifier;
-
+	private BlobDecoder blobDecoder = new BlobDecoder();
+	
   public XmlDataFileParser()
   {
 		super();
@@ -398,6 +401,26 @@ public class XmlDataFileParser
 		return result;
 	}
 
+	private void detectBlobEncoding()
+	{
+		try
+		{
+			fileHandler.setMainFile(this.inputFile, this.encoding);
+			XmlTableDefinitionParser tableDef = new XmlTableDefinitionParser(this.fileHandler);
+			String mode = tableDef.getBlobEncoding();
+			if (StringUtil.isNonBlank(mode))
+			{
+				BlobMode bmode = BlobMode.getMode(mode);
+				blobDecoder.setBlobMode(bmode);
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("XmlDataFileParser", "Could not detect XML tag format. Assuming 'verbose'", e);
+			this.setUseVerboseFormat(true);
+		}
+	}
+
 	private void detectTagFormat()
 	{
 		try
@@ -477,7 +500,8 @@ public class XmlDataFileParser
 		{
 			detectTagFormat();
 		}
-
+		detectBlobEncoding();
+		
 		if (this.columnsToImport == null)
 		{
 			this.realColCount = this.colCount;
@@ -490,6 +514,8 @@ public class XmlDataFileParser
 		// Re-initialize the reader in case we are reading from a ZIP archive
 		// because readTableDefinition() can change the file handler
 		this.fileHandler.setMainFile(this.inputFile, this.encoding);
+
+		blobDecoder.setBaseDir(inputFile.getParentFile());
 
 		this.messages = new MessageBuffer();
 		this.sendTableDefinition();
@@ -857,8 +883,10 @@ public class XmlDataFileParser
 			return;
 		}
 
+		int type = this.columns[this.realColIndex].getDataType();
+		
 		String value = this.chars.toString();
-    if (trimValues)
+    if (trimValues && !SqlUtil.isBlobType(type))
     {
       value = value.trim();
     }
@@ -868,7 +896,6 @@ public class XmlDataFileParser
 			value = this.valueModifier.modifyValue(this.columns[this.realColIndex], value);
 		}
 
-		int type = this.columns[this.realColIndex].getDataType();
 		try
 		{
 			if (SqlUtil.isCharacterType(type))
@@ -887,8 +914,14 @@ public class XmlDataFileParser
 			}
 			else if (SqlUtil.isBlobType(type))
 			{
-				String fileDir = this.inputFile.getParent();
-				this.currentRow[this.realColIndex] = new File(fileDir, columnDataFile);
+				if (columnDataFile != null)
+				{
+					this.currentRow[this.realColIndex] = blobDecoder.decodeBlob(columnDataFile);
+				}
+				else
+				{
+					this.currentRow[this.realColIndex] = blobDecoder.decodeBlob(value);
+				}
 			}
 			else if (SqlUtil.isDateType(type))
 			{

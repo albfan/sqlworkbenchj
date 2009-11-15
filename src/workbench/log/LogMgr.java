@@ -12,21 +12,12 @@
 package workbench.log;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import workbench.gui.components.LogFileViewer;
-import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
-import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
@@ -38,351 +29,144 @@ import workbench.util.WbFile;
  */
 public class LogMgr
 {
-	public static final String ERROR = "ERROR";
-	public static final String WARNING = "WARN";
-	public static final String INFO = "INFO";
-	public static final String DEBUG = "DEBUG";
-
-	private static final String WARNING_DISPLAY = "WARN ";
-	private static final String INFO_DISPLAY = "INFO ";
-
-	public static final List<String> LEVELS = CollectionUtil.arrayList(ERROR, WARNING, INFO, DEBUG);
-
-	private static PrintStream logOut = null;
-	private static LogFileViewer viewer;
-	private static final Date theDate = new Date();
-	private static boolean logSystemErr = false;
-
-	private static int typeIndex = -1;
-	private static int timeIndex = -1;
-	private static int sourceIndex = -1;
-	private static int messageIndex = 0;
-	private static int exceptionMsgIndex = 1;
-	private static boolean showStackTrace = false;
-	private static final int NUM_ELEMENTS = 5;
-	private static String[] MSG_ELEMENTS = new String[NUM_ELEMENTS];
-
-	private final static SimpleDateFormat formatter = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss");
-
-	private static int loglevel = 3;
-
-	private static int levelDebug;
-	private static int levelWarning;
-	private static int levelInfo;
-	private static int levelError;
-	private static boolean debugEnabled;
-	private static boolean infoEnabled;
-	private static File currentFile;
+	private static WbLogger logger;
+	
+	public synchronized static void init(boolean useLog4j)
+	{
+		if (logger == null)
+		{
+			if (useLog4j && Log4JHelper.isLog4JAvailable())
+			{
+				try
+				{
+					Class log4j = Class.forName("workbench.log.Log4jLogger");
+					Object log = log4j.newInstance();
+					if (log != null && log instanceof WbLogger)
+					{
+						logger = (WbLogger)log;
+					}
+				}
+				catch (Throwable e)
+				{
+					System.err.println("Could not create Log4J logger. Using SimpleLogger!");
+					e.printStackTrace(System.err);
+					logger = new SimpleLogger();
+				}
+			}
+			else
+			{
+				logger = new SimpleLogger();
+			}
+		}
+	}
 
 	public static WbFile getLogfile()
 	{
-		return new WbFile(currentFile);
+		File f = logger.getCurrentFile();
+		if (f == null) return null;
+		return new WbFile(f);
 	}
 
 	public synchronized static void removeViewer()
 	{
-		viewer = null;
+		logger.setLogViewer(null);
 	}
 
 	public synchronized static void registerViewer(LogFileViewer v)
 	{
-		viewer = v;
+		logger.setLogViewer(v);
 	}
 
 	public static void setMessageFormat(String aFormat)
 	{
-		if (aFormat == null) return;
-		Pattern p = Pattern.compile("\\{[a-zA-Z]+\\}");
-		Matcher m = p.matcher(aFormat);
-
-		typeIndex = -1;
-		timeIndex = -1;
-		sourceIndex = -1;
-		messageIndex = -1;
-		exceptionMsgIndex = -1;
-		showStackTrace = false;
-
-		int currentIndex = 0;
-		while (m.find())
-		{
-			int start = m.start();
-			int end = m.end();
-			String key = aFormat.substring(start, end).toLowerCase();
-			if ("{type}".equals(key))
-			{
-				typeIndex = currentIndex;
-				currentIndex ++;
-			}
-			else if ("{timestamp}".equals(key))
-			{
-				timeIndex = currentIndex;
-				currentIndex++;
-			}
-			else if ("{source}".equals(key))
-			{
-				sourceIndex = currentIndex;
-				currentIndex ++;
-			}
-			else if ("{message}".equals(key))
-			{
-				messageIndex = currentIndex;
-				currentIndex ++;
-			}
-			else if ("{error}".equals(key))
-			{
-				exceptionMsgIndex = currentIndex;
-				currentIndex ++;
-			}
-			else if ("{stacktrace}".equals(key))
-			{
-				showStackTrace = true;
-			}
-		}
+		logger.setMessageFormat(aFormat);
 	}
-
-	public static void logErrors() { setLevel(ERROR); }
-	public static void logWarnings() { setLevel(WARNING); }
-	public static void logInfo() { setLevel(INFO); }
-	public static void logDebug() { setLevel(DEBUG); }
-	public static void logAll() { logDebug(); }
 
 	public static void logToSystemError(boolean flag)
 	{
-		logSystemErr = flag;
+		logger.logToSystemError(flag);
 	}
 
 	public static String getLevel()
 	{
-		if (loglevel == levelDebug) return "DEBUG";
-		if (loglevel == levelWarning) return "WARNING";
-		if (loglevel == levelError) return "ERROR";
-		if (loglevel == levelInfo) return "INFO";
-		return "ERROR";
+		return logger.getLevel().toString();
 	}
 
 	public static void setLevel(String aType)
 	{
-		if (aType == null) aType = "INFO";
-		if ("warning".equalsIgnoreCase(aType)) aType = "WARN";
-		else aType = aType.toUpperCase();
-
-		levelDebug = LEVELS.indexOf(DEBUG);
-		levelWarning = LEVELS.indexOf(WARNING);
-		levelInfo = LEVELS.indexOf(INFO);
-		levelError = LEVELS.indexOf(ERROR);
-
-		if (LEVELS.contains(aType))
-		{
-			loglevel = LEVELS.indexOf(aType);
-		}
-		else
-		{
-			logErrors();
-			logError("LogMgr.setLevel()", "Requested level " +  aType + " not found! Setting level " + ERROR, null);
-		}
-		debugEnabled = (loglevel == levelDebug);
-		infoEnabled = (loglevel == levelInfo || debugEnabled);
+		logger.setLevel(LogLevel.getLevel(aType));
 	}
 
 
 	public static void shutdown()
 	{
-		if (logOut != null)
-		{
-			logInfo(null, "=================== Log stopped ===================");
-			logOut.close();
-		}
+		logger.shutdown();
 	}
 
 	public static void setOutputFile(File logfile, int maxFilesize)
 	{
-		if (logfile == null) return;
-		if (logfile.equals(currentFile)) return;
-
-		try
-		{
-			if (logOut != null)
-			{
-				logOut.close();
-				logOut = null;
-			}
-
-			if (logfile.exists() && logfile.length() > maxFilesize)
-			{
-				File last = new File(logfile.getAbsolutePath() + ".last");
-				if (last.exists()) last.delete();
-				logfile.renameTo(last);
-			}
-			logOut = new PrintStream(new FileOutputStream(logfile,true));
-			currentFile = logfile;
-			logInfo(null, "=================== Log started ===================");
-		}
-		catch (Throwable th)
-		{
-			logOut = null;
-			logSystemErr = true;
-			logError("LogMgr.checkOutput()", "Error when opening logfile=" + logfile.getAbsolutePath(), th);
-		}
+		logger.setOutputFile(logfile, maxFilesize);
 	}
 
 	public static boolean isInfoEnabled()
 	{
-		return infoEnabled;
+		return logger.levelEnabled(LogLevel.info);
 	}
+
 	public static boolean isDebugEnabled()
 	{
-		return debugEnabled;
+		return logger.levelEnabled(LogLevel.debug);
 	}
 
 	public static void logDebug(Object aCaller, String aMsg)
 	{
-		if (levelDebug > loglevel)  return;
-		logMessage(DEBUG, aCaller, aMsg, null);
-	}
-
-	public static void logSqlError(Object caller, String sql, Throwable th)
-	{
-		if (th instanceof SQLException)
-		{
-			logDebug(caller, "Error executing statement: " + sql, th);
-		}
-		else
-		{
-			logError(caller, "Error executing statement: " + sql, th);
-		}
+		logger.logMessage(LogLevel.debug, aCaller, aMsg, null);
 	}
 
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
-		if (levelDebug > loglevel)  return;
-		logMessage(DEBUG, aCaller, aMsg, th);
+		logger.logMessage(LogLevel.debug, aCaller, aMsg, th);
 	}
 
 	public static void logInfo(Object aCaller, String aMsg)
 	{
-		if (levelInfo > loglevel)  return;
-		logMessage(INFO_DISPLAY, aCaller, aMsg, null);
+		logger.logMessage(LogLevel.info, aCaller, aMsg, null);
 	}
 
 	public static void logInfo(Object aCaller, String aMsg, Throwable th)
 	{
-		if (levelInfo > loglevel)  return;
-		logMessage(INFO_DISPLAY, aCaller, aMsg, th);
+		logger.logMessage(LogLevel.info, aCaller, aMsg, th);
 	}
 
 	public static void logWarning(Object aCaller, String aMsg)
 	{
-		if (levelWarning > loglevel)  return;
-		logMessage(WARNING_DISPLAY, aCaller, aMsg, null);
+		logger.logMessage(LogLevel.warning, aCaller, aMsg, null);
 	}
 
 	public static void logWarning(Object aCaller, String aMsg, Throwable th)
 	{
-		if (levelWarning > loglevel)  return;
-		logMessage(WARNING_DISPLAY, aCaller, aMsg, th);
+		logger.logMessage(LogLevel.warning, aCaller, aMsg, th);
 	}
 
 	public static void logError(Object aCaller, String aMsg, Throwable th)
 	{
-		if (levelError > loglevel) return;
-		logMessage(ERROR, aCaller, aMsg, th);
+		logger.logMessage(LogLevel.error, aCaller, aMsg, th);
 	}
 
 	public static void logError(Object aCaller, String aMsg, SQLException se)
 	{
-		if (levelError > loglevel) return;
+		if (!logger.levelEnabled(LogLevel.error)) return;
 
-		logMessage(ERROR, aCaller, aMsg, se);
+		logger.logMessage(LogLevel.error, aCaller, aMsg, se);
 		if (se != null)
 		{
 			SQLException next = se.getNextException();
 			while (next != null)
 			{
-				logMessage(ERROR, "Chained exception", ExceptionUtil.getDisplay(next), null);
+				logger.logMessage(LogLevel.error, "Chained exception", ExceptionUtil.getDisplay(next), null);
 				next = next.getNextException();
 			}
 		}
-	}
-
-	private synchronized static void logMessage(String aType, Object aCaller, String aMsg, Throwable th)
-	{
-		StrBuffer s = formatMessage(aType, aCaller, aMsg, th);
-		if (logOut != null)
-		{
-			s.writeTo(logOut);
-			logOut.flush();
-		}
-		if (logSystemErr)
-		{
-			s.writeTo(System.err);
-		}
-
-		if (viewer != null) viewer.append(s.toString());
-	}
-
-	private static StrBuffer formatMessage(String aType, Object aCaller, String aMsg, Throwable th)
-	{
-		StrBuffer buff = new StrBuffer(100);
-
-		for (int i=0; i < NUM_ELEMENTS; i++) MSG_ELEMENTS[i] = null;
-
-		if (timeIndex > -1)
-		{
-			MSG_ELEMENTS[timeIndex] = getTimeString();
-		}
-
-		if (typeIndex > -1)
-		{
-			MSG_ELEMENTS[typeIndex] = aType;
-		}
-
-		if (sourceIndex > -1)
-		{
-			if (aCaller != null)
-			{
-				if (aCaller instanceof String)
-					MSG_ELEMENTS[sourceIndex] = (String)aCaller;
-				else
-					MSG_ELEMENTS[sourceIndex] = aCaller.getClass().getName();
-			}
-		}
-
-		if (messageIndex > -1)
-		{
-			MSG_ELEMENTS[messageIndex] = aMsg;
-		}
-
-		boolean hasException = false;
-		if (exceptionMsgIndex > -1 && th != null)
-		{
-			MSG_ELEMENTS[exceptionMsgIndex] = ExceptionUtil.getDisplay(th);
-			hasException = true;
-		}
-
-		boolean first = true;
-
-		for (int i=0; i < NUM_ELEMENTS; i++)
-		{
-
-			if (MSG_ELEMENTS[i] != null)
-			{
-				if (!first) buff.append(" ");
-				else first = false;
-				buff.append(MSG_ELEMENTS[i]);
-				if (i == sourceIndex) buff.append(" -");
-				if (i == messageIndex && hasException) buff.append(":");
-			}
-		}
-		buff.append(StringUtil.LINE_TERMINATOR);
-
-		// always display the stacktrace in debug level
-		if (th != null && (showStackTrace || loglevel == levelDebug || th instanceof NullPointerException))
-		{
-			buff.append(getStackTrace(th));
-			buff.append(StringUtil.LINE_TERMINATOR);
-		}
-
-		return buff;
 	}
 
 	public static String getStackTrace(Throwable th)
@@ -401,15 +185,6 @@ public class LogMgr
 		{
 		}
 		return StringUtil.EMPTY_STRING;
-	}
-
-	private static String getTimeString()
-	{
-		synchronized (formatter)
-		{
-			theDate.setTime(System.currentTimeMillis());
-			return formatter.format(theDate);
-		}
 	}
 
 }

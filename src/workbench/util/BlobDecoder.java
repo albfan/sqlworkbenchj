@@ -10,20 +10,58 @@
  */
 package workbench.util;
 
+import java.io.File;
 import java.io.IOException;
+import workbench.db.exporter.BlobMode;
 import workbench.storage.BlobLiteralType;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class DecodeUtil
+public class BlobDecoder
 {
+	public File baseDir;
+	public BlobMode mode;
 
-	public DecodeUtil()
+	public BlobDecoder()
 	{
+		mode = BlobMode.SaveToFile;
 	}
 
+	public void setBlobMode(BlobMode bmode)
+	{
+		mode = bmode;
+	}
+	public void setBaseDir(File dir)
+	{
+		baseDir = dir;
+	}
+	
+	public Object decodeBlob(String value)
+		throws IOException
+	{
+		if (StringUtil.isEmptyString(value)) return null;
+
+		switch (mode)
+		{
+			case SaveToFile:
+			File bfile = new File(value.trim());
+			if (!bfile.isAbsolute() && baseDir != null)
+			{
+				bfile = new File(value.trim());
+			}
+			return bfile;
+
+			case Base64:
+				return Base64.decode(value);
+
+			case AnsiLiteral:
+				return decodeHex(value);
+		}
+		return value;
+	}
+	
 	public byte[] decodeString(String value, BlobLiteralType type)
 		throws IOException
 	{

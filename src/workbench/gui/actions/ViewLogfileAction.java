@@ -22,7 +22,7 @@ import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
 
 /**
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ViewLogfileAction
 	extends WbAction
@@ -40,10 +40,15 @@ public class ViewLogfileAction
 		super();
 		this.initMenuDefinition("MnuTxtViewLogfile");
 		this.removeIcon();
+		WbFile logFile = LogMgr.getLogfile();
+		this.setEnabled(logFile != null);
 	}
 
 	public void executeAction(ActionEvent e)
 	{
+		final WbFile logFile = LogMgr.getLogfile();
+		if (logFile == null) return;
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
@@ -53,8 +58,7 @@ public class ViewLogfileAction
 					try
 					{
 						LogFileViewer lview = new LogFileViewer(WbManager.getInstance().getCurrentWindow());
-						WbFile f = LogMgr.getLogfile();
-						lview.showFile(f);
+						lview.showFile(logFile);
 						viewer = lview;
 						viewer.setVisible(true);
 					}

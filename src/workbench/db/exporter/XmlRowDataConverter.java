@@ -20,6 +20,7 @@ import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
 import workbench.resource.Settings;
+import workbench.storage.BlobLiteralType;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -52,6 +53,7 @@ public class XmlRowDataConverter
 	public static final String KEY_FORMAT_LONG = "long";
 	public static final String KEY_FORMAT_SHORT = "short";
 	public static final String TAG_TAG_FORMAT = "wb-tag-format";
+	public static final String TAG_BLOB_ENCODING = "wb-blob-encoding";
 
 	private boolean useCData;
 	private boolean verboseFormat = true;
@@ -283,25 +285,32 @@ public class XmlRowDataConverter
 					xml.append("\"/");
 					writeCloseTag = false;
 				}
-				else if (SqlUtil.isBlobType(type) && writeBlobFiles)
+				else if (SqlUtil.isBlobType(type))
 				{
-					externalFile = true;
-					File blobFile = createBlobFile(row, c, rowIndex);
-					String dataFile = blobFile.getName();
-					try
+					if (writeBlobFiles)
 					{
-						writeBlobFile(data, blobFile);
+						externalFile = true;
+						File blobFile = createBlobFile(row, c, rowIndex);
+						String dataFile = blobFile.getName();
+						try
+						{
+							writeBlobFile(data, blobFile);
+						}
+						catch (Exception e)
+						{
+							throw new RuntimeException("Error writing BLOB file", e);
+						}
+						xml.append(' ');
+						xml.append(ATTR_DATA_FILE);
+						xml.append("=\"");
+						xml.append(dataFile);
+						xml.append("\"/");
+						writeCloseTag = false;
 					}
-					catch (Exception e)
+					else if (blobFormatter != null)
 					{
-						throw new RuntimeException("Error writing BLOB file", e);
+						externalFile = false;
 					}
-					xml.append(' ');
-					xml.append(ATTR_DATA_FILE);
-					xml.append("=\"");
-					xml.append(dataFile);
-					xml.append("\"/");
-					writeCloseTag = false;
 				}
 			}
 			xml.append('>');
@@ -376,10 +385,19 @@ public class XmlRowDataConverter
 
 		//result.append(this.lineEnding);
 		result.append(indent2);
-		result.append('<');result.append(TAG_TAG_FORMAT);result.append('>');
+		result.append("<" + TAG_TAG_FORMAT + ">");
 		result.append(this.verboseFormat ? KEY_FORMAT_LONG : KEY_FORMAT_SHORT);
-		result.append("</");result.append(TAG_TAG_FORMAT);result.append('>');
+		result.append("</" + TAG_TAG_FORMAT + ">");
 		result.append(this.lineEnding);
+		if (blobFormatter != null)
+		{
+			result.append(indent2);
+			result.append("<" + TAG_BLOB_ENCODING + ">");
+			result.append(blobFormatter.getType().toString());
+			result.append("</" + TAG_BLOB_ENCODING + ">");
+			result.append(this.lineEnding);
+		}
+
 		result.append(indent);
 		result.append("</meta-data>");
 		result.append(this.lineEnding);
