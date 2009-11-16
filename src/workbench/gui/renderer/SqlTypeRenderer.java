@@ -11,16 +11,9 @@
  */
 package workbench.gui.renderer;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Font;
-import java.awt.Graphics;
 
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
-import workbench.gui.WbSwingUtilities;
-import workbench.resource.GuiSettings;
+import javax.swing.JLabel;
 import workbench.util.SqlUtil;
 
 /**
@@ -28,81 +21,16 @@ import workbench.util.SqlUtil;
  *
  * @see workbench.util.SqlUtil#getTypeName(int)
  * 
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SqlTypeRenderer
-	extends DefaultTableCellRenderer
-	implements WbRenderer
+	extends ToolTipRenderer
 {
-	private Color alternateColor = GuiSettings.getAlternateRowColor();
-	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
-	private boolean isPrinting = false;
-	private Font printFont;
 
-	public void setUseAlternatingColors(boolean flag)
+	public SqlTypeRenderer()
 	{
-		this.useAlternatingColors = flag;
-	}
-
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-	{
-		try
-		{
-			prepareDisplay(value);
-			Font oldFont = null;
-			if (isPrinting && printFont != null)
-			{
-				oldFont = getFont();
-				this.setFont(printFont);
-			}
-			if (hasFocus)
-			{
-				this.setBorder(WbSwingUtilities.FOCUSED_CELL_BORDER);
-			}
-			else
-			{
-				this.setBorder(WbSwingUtilities.EMPTY_BORDER);
-			}
-
-			if (isSelected && !isPrinting)
-			{
-				setForeground(table.getSelectionForeground());
-				setBackground(table.getSelectionBackground());
-			}
-			else
-			{
-				setForeground(table.getForeground());
-				if (useAlternatingColors && ((row % 2) == 1) && !isPrinting)
-				{
-					setBackground(this.alternateColor);
-				}
-				else
-				{
-					setBackground(table.getBackground());
-				}
-			}
-			if (oldFont != null)
-			{
-				setFont(oldFont);
-			}
-		}
-		catch (Exception e)
-		{
-		}
-		return this;
-	}
-
-	public String getDisplayValue()
-	{
-		return getText();
-	}
-
-	public void print(Graphics g)
-	{
-		this.isPrinting = true;
-		printFont = g.getFont();
-		super.print(g);
-		this.isPrinting = false;
+		super();
+		this.setHorizontalAlignment(JLabel.LEFT);
 	}
 
 	public void prepareDisplay(Object value)
@@ -110,13 +38,12 @@ public class SqlTypeRenderer
 		if (value != null)
 		{
 			int type = ((Integer)value).intValue();
-			String display = SqlUtil.getTypeName(type);
-			this.setText(display);
-			this.setToolTipText(display);
+			displayValue = SqlUtil.getTypeName(type);
+			setToolTipText(displayValue);
 		}
 		else
 		{
-			this.setText("");
+			displayValue = "";
 			this.setToolTipText(null);
 		}
 	}

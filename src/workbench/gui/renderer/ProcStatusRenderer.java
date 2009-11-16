@@ -11,21 +11,18 @@
  */
 package workbench.gui.renderer;
 
-import java.awt.Component;
 import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import workbench.db.JdbcProcedureReader;
 
 /**
  * Displays the return type of a stored procedure as a readable text.
  * <br/>
- * @see workbench.db.JdbcProcedureReader#convertProcType(int) 
- * @author  support@sql-workbench.net
+ * @see workbench.db.JdbcProcedureReader#convertProcType(int)
+ * 
+ * * @author Thomas Kellerer
  */
 public class ProcStatusRenderer
-	extends DefaultTableCellRenderer
-	implements WbRenderer
+	extends ToolTipRenderer
 {
 	
 	public ProcStatusRenderer()
@@ -34,34 +31,10 @@ public class ProcStatusRenderer
 		this.setHorizontalAlignment(JLabel.LEFT);
 	}
 
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
-	{
-		try
-		{
-			Integer status = (Integer)value;
-			String display = JdbcProcedureReader.convertProcType(status.intValue());
-			return super.getTableCellRendererComponent(table, display, isSelected, hasFocus, row, column);
-		}
-		catch (Exception e)
-		{
-			return super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-		}
-
-	}
-
-	public void setUseAlternatingColors(boolean flag)
-	{
-		// not implemented
-	}
-
-	public String getDisplayValue()
-	{
-		return getText();
-	}
-
 	public void prepareDisplay(Object value)
 	{
-		// nothing to do
+		Integer status = (Integer)value;
+		this.displayValue = JdbcProcedureReader.convertProcType(status.intValue());
 	}
 
 }
