@@ -190,21 +190,23 @@ public class Settings
 		}
 
 		WbFile settings = new WbFile(cfd, configFilename);
-		fileTime = settings.lastModified();
 
-		loadConfig(settings);
+		boolean configLoaded = loadConfig(settings);
 
 		initLogging();
-		
-		// This message should not be logged before LogMgr.setOutputFile() has
-		// been called with the correct value
-		LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
 
-		if (getBoolProperty("workbench.db.resetdefaults"))
+		if (configLoaded)
 		{
-			LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
-			resetDefaults();
+			// This message should not be logged before initLogging() has been called!
+			LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
+
+			if (getBoolProperty("workbench.db.resetdefaults"))
+			{
+				LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
+				resetDefaults();
+			}
 		}
+		
 	}
 
 	private void initLogging()
@@ -263,10 +265,17 @@ public class Settings
 	private boolean loadConfig(WbFile cfile)
 	{
 		if (cfile == null) return false;
-		if (cfile.equals(this.configfile)) return false;
+		long time = cfile.lastModified();
+		
+		if (cfile.equals(this.configfile) && this.fileTime == time)
+		{
+			// same file, same modification time --> nothing to do
+			return false;
+		}
 
 		this.configfile = cfile;
 		this.props = new WbProperties(this);
+		this.fileTime = time;
 
 		fillDefaults();
 

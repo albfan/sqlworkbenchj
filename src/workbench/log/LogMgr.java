@@ -11,159 +11,145 @@
  */
 package workbench.log;
 
-import java.io.File;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.sql.SQLException;
+import java.io.*;
+import java.sql.*;
 
-import workbench.gui.components.LogFileViewer;
-import workbench.util.ExceptionUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbFile;
+import org.apache.log4j.*;
 
+import workbench.gui.components.*;
+import workbench.util.*;
 
 /**
  * The logging class used by SQL Workbench/J
- *
+ * 
  * @author Thomas Kellerer
  */
 public class LogMgr
 {
-	private static WbLogger logger;
-	
+
+	private static WbLogger logger = null;
+	private static boolean useLog4J;
+
 	public synchronized static void init(boolean useLog4j)
 	{
-		if (logger == null)
+		useLog4J = useLog4j;
+		if (useLog4j && Log4JHelper.isLog4JAvailable())
 		{
-			if (useLog4j && Log4JHelper.isLog4JAvailable())
-			{
-				try
-				{
-					Class log4j = Class.forName("workbench.log.Log4jLogger");
-					Object log = log4j.newInstance();
-					if (log != null && log instanceof WbLogger)
-					{
-						logger = (WbLogger)log;
-					}
-				}
-				catch (Throwable e)
-				{
-					System.err.println("Could not create Log4J logger. Using SimpleLogger!");
-					e.printStackTrace(System.err);
-					logger = new SimpleLogger();
-				}
-			}
-			else
-			{
-				logger = new SimpleLogger();
-			}
+			Log4JLoggerFactory.setLoggerFqcn(LogMgr.class);
 		}
 	}
 
 	public static WbFile getLogfile()
 	{
-		File f = logger.getCurrentFile();
-		if (f == null) return null;
+		File f = getLogger().getCurrentFile();
+		if (f == null)
+		{
+			return null;
+		}
 		return new WbFile(f);
 	}
 
 	public synchronized static void removeViewer()
 	{
-		logger.setLogViewer(null);
+		getLogger().setLogViewer(null);
 	}
 
 	public synchronized static void registerViewer(LogFileViewer v)
 	{
-		logger.setLogViewer(v);
+		getLogger().setLogViewer(v);
 	}
 
 	public static void setMessageFormat(String aFormat)
 	{
-		logger.setMessageFormat(aFormat);
+		getLogger().setMessageFormat(aFormat);
 	}
 
 	public static void logToSystemError(boolean flag)
 	{
-		logger.logToSystemError(flag);
+		getLogger().logToSystemError(flag);
 	}
 
 	public static String getLevel()
 	{
-		return logger.getLevel().toString();
+		return getLogger().getRootLevel().toString();
 	}
 
 	public static void setLevel(String aType)
 	{
-		logger.setLevel(LogLevel.getLevel(aType));
+		getLogger().setRootLevel(LogLevel.getLevel(aType));
+		// Demo for log-calls from within this LoggerController
+		// logInfo(null, "(LogMgr.setLevel()) Set level to " + getLogger().getRootLevel());
 	}
-
 
 	public static void shutdown()
 	{
-		logger.shutdown();
+		getLogger().shutdownWbLog();
 	}
 
 	public static void setOutputFile(File logfile, int maxFilesize)
 	{
-		logger.setOutputFile(logfile, maxFilesize);
+		getLogger().setOutputFile(logfile, maxFilesize);
 	}
 
 	public static boolean isInfoEnabled()
 	{
-		return logger.levelEnabled(LogLevel.info);
+		return getLogger().levelEnabled(LogLevel.info);
 	}
 
 	public static boolean isDebugEnabled()
 	{
-		return logger.levelEnabled(LogLevel.debug);
+		return getLogger().levelEnabled(LogLevel.debug);
 	}
 
 	public static void logDebug(Object aCaller, String aMsg)
 	{
-		logger.logMessage(LogLevel.debug, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, null);
 	}
 
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.debug, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, th);
 	}
 
 	public static void logInfo(Object aCaller, String aMsg)
 	{
-		logger.logMessage(LogLevel.info, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.info, aCaller, aMsg, null);
 	}
 
 	public static void logInfo(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.info, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.info, aCaller, aMsg, th);
 	}
 
 	public static void logWarning(Object aCaller, String aMsg)
 	{
-		logger.logMessage(LogLevel.warning, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.warning, aCaller, aMsg, null);
 	}
 
 	public static void logWarning(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.warning, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.warning, aCaller, aMsg, th);
 	}
 
 	public static void logError(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.error, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.error, aCaller, aMsg, th);
 	}
 
 	public static void logError(Object aCaller, String aMsg, SQLException se)
 	{
-		if (!logger.levelEnabled(LogLevel.error)) return;
+		if (!getLogger().levelEnabled(LogLevel.error))
+		{
+			return;
+		}
 
-		logger.logMessage(LogLevel.error, aCaller, aMsg, se);
+		getLogger().logMessage(LogLevel.error, aCaller, aMsg, se);
 		if (se != null)
 		{
 			SQLException next = se.getNextException();
 			while (next != null)
 			{
-				logger.logMessage(LogLevel.error, "Chained exception", ExceptionUtil.getDisplay(next), null);
+				getLogger().logMessage(LogLevel.error, "Chained exception", ExceptionUtil.getDisplay(next), null);
 				next = next.getNextException();
 			}
 		}
@@ -171,7 +157,10 @@ public class LogMgr
 
 	public static String getStackTrace(Throwable th)
 	{
-		if (th == null) return StringUtil.EMPTY_STRING;
+		if (th == null)
+		{
+			return StringUtil.EMPTY_STRING;
+		}
 		try
 		{
 			StringWriter sw = new StringWriter(2000);
@@ -187,4 +176,33 @@ public class LogMgr
 		return StringUtil.EMPTY_STRING;
 	}
 
+	public static WbLogger getLogger()
+	{
+		if (useLog4J && Log4JHelper.isLog4JAvailable())
+		{
+			try
+			{
+				logger = Log4JLogger.getLogger();
+			}
+			catch (Throwable e)
+			{
+				System.err.println("Could not create Log4J logger. Using SimpleLogger!");
+				e.printStackTrace(System.err);
+				if (logger == null)
+				{
+					logger = new SimpleLogger();
+				}
+			}
+		}
+		else
+		{
+			if (logger == null)
+			{
+				logger = new SimpleLogger();
+			}
+		}
+
+		return logger;
+
+	}
 }

@@ -10,27 +10,35 @@
  */
 package workbench.log;
 
-import java.io.File;
-import workbench.gui.components.LogFileViewer;
+import java.io.*;
+
+import workbench.gui.components.*;
 
 /**
- *
+ * 
  * @author Thomas Kellerer
  */
 public interface WbLogger
 {
-	void setLevel(LogLevel level);
-	LogLevel getLevel();
+	void setRootLevel(LogLevel level);
+
+	LogLevel getRootLevel();
 
 	void logMessage(LogLevel level, Object caller, String msg, Throwable th);
+
 	void logSqlError(Object caller, String sql, Throwable th);
+
 	void setMessageFormat(String newFormat);
+
 	void logToSystemError(boolean flag);
 
 	void setOutputFile(File logfile, int maxFilesize);
+
 	File getCurrentFile();
-	
-	void shutdown();
+
+	public void shutdownWbLog();
+
 	void setLogViewer(LogFileViewer logViewer);
+
 	boolean levelEnabled(LogLevel tolog);
 }

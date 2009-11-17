@@ -10,37 +10,38 @@
  */
 package workbench.log;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.PrintStream;
-import java.sql.SQLException;
-import java.util.MissingFormatArgumentException;
-import workbench.gui.components.LogFileViewer;
-import workbench.util.StringUtil;
+import java.io.*;
+import java.sql.*;
+import java.util.*;
+
+import workbench.gui.components.*;
+import workbench.util.*;
 
 /**
- *
+ * 
  * @author Thomas Kellerer
  */
 public class SimpleLogger
 	implements WbLogger
 {
 	private LogLevel level = LogLevel.warning;
-	
 	private PrintStream logOut = null;
 	private LogFileViewer viewer;
 	private boolean logSystemErr = false;
 	private boolean showStackTrace = false;
 	private String messageFormat;
 	private File currentFile;
-	
+
 	public SimpleLogger()
 	{
 	}
 
 	public void setMessageFormat(String newFormat)
 	{
-		if (newFormat == null) return;
+		if (newFormat == null)
+		{
+			return;
+		}
 
 		messageFormat = newFormat.replace("{type}", "%1$-5s");
 		messageFormat = messageFormat.replace("{timestamp}", "%2$tF %2$tR");
@@ -55,12 +56,12 @@ public class SimpleLogger
 		logSystemErr = flag;
 	}
 
-	public void setLevel(LogLevel lvl)
+	public void setRootLevel(LogLevel lvl)
 	{
 		level = lvl;
 	}
 
-	public LogLevel getLevel()
+	public LogLevel getRootLevel()
 	{
 		return level;
 	}
@@ -73,8 +74,14 @@ public class SimpleLogger
 
 	public void setOutputFile(File logfile, int maxFilesize)
 	{
-		if (logfile == null) return;
-		if (logfile.equals(currentFile)) return;
+		if (logfile == null)
+		{
+			return;
+		}
+		if (logfile.equals(currentFile))
+		{
+			return;
+		}
 
 		try
 		{
@@ -87,10 +94,13 @@ public class SimpleLogger
 			if (logfile.exists() && logfile.length() > maxFilesize)
 			{
 				File last = new File(logfile.getAbsolutePath() + ".last");
-				if (last.exists()) last.delete();
+				if (last.exists())
+				{
+					last.delete();
+				}
 				logfile.renameTo(last);
 			}
-			logOut = new PrintStream(new FileOutputStream(logfile,true));
+			logOut = new PrintStream(new FileOutputStream(logfile, true));
 			currentFile = logfile;
 			logMessage(LogLevel.info, null, "=================== Log started ===================", null);
 		}
@@ -103,7 +113,7 @@ public class SimpleLogger
 		}
 	}
 
-	public void shutdown()
+	public void shutdownWbLog()
 	{
 		if (logOut != null)
 		{
@@ -111,7 +121,7 @@ public class SimpleLogger
 			logOut.close();
 		}
 	}
-	
+
 	public void logDebug(Object aCaller, String aMsg)
 	{
 		if (levelEnabled(LogLevel.debug))
@@ -139,8 +149,11 @@ public class SimpleLogger
 
 	public synchronized void logMessage(LogLevel level, Object aCaller, String aMsg, Throwable th)
 	{
-		if (!levelEnabled(LogLevel.warning)) return;
-		
+		if (!levelEnabled(LogLevel.warning))
+		{
+			return;
+		}
+
 		CharSequence s = formatMessage(level, aCaller, aMsg, th);
 		if (logOut != null)
 		{
@@ -148,13 +161,16 @@ public class SimpleLogger
 			logOut.append(StringUtil.LINE_TERMINATOR);
 			logOut.flush();
 		}
-		
+
 		if (logSystemErr)
 		{
 			System.err.println(s);
 		}
 
-		if (viewer != null) viewer.append(s.toString());
+		if (viewer != null)
+		{
+			viewer.append(s.toString());
+		}
 	}
 
 	private CharSequence formatMessage(LogLevel logLevel, Object caller, String msg, Throwable th)
@@ -168,11 +184,13 @@ public class SimpleLogger
 				{
 					trace = LogMgr.getStackTrace(th);
 				}
-				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, trace);
+				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? ""
+					: caller, msg, trace);
 			}
 			else
 			{
-				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, "");
+				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? ""
+					: caller, msg, "");
 			}
 		}
 		catch (MissingFormatArgumentException e)
