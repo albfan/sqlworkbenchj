@@ -2804,7 +2804,7 @@ public class SqlPanel
 			ignoreStateChange = false;
 			if (resultSets > 0)
 			{
-				this.showResultPanel(firstResultIndex);
+				if (firstResultIndex > 0) this.showResultPanel(firstResultIndex);
 			}
 			else
 			{
