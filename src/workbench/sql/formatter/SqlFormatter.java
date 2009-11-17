@@ -490,6 +490,14 @@ public class SqlFormatter
 						this.appendText(' ');
 						this.appendTokenText(t);
 					}
+					else if (t.isReservedWord())
+					{
+						if (LINE_BREAK_BEFORE.contains(t.getContents()))
+						{
+							appendNewline();
+							appendTokenText(t);
+						}
+					}
 				}
 			}
 			else if (t.isSeparator() && text.equals(","))

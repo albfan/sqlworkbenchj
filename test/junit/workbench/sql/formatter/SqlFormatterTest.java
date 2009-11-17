@@ -36,6 +36,32 @@ public class SqlFormatterTest
 		util.prepareEnvironment();
 	}
 
+	public void testNestedSubselect()
+		throws Exception
+	{
+		String sql = "select id,  \n" +
+             "       (select sum(damage)  \n" +
+             "        from (select damage \n" +
+             "              from fact_eventplayerdamage f2 \n" +
+             "              where f2.damage >= f.damage \n" +
+             "              order by damage asc \n" +
+             "              limit 5) t \n" +
+             "       ) \n" +
+             "from fact_eventplayerdamage f \n";
+
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+		String expected = "SELECT id,\n" +
+             "       (SELECT SUM(damage)\n" +
+             "        FROM (SELECT damage\n" +
+             "              FROM fact_eventplayerdamage f2\n" +
+             "              WHERE f2.damage >= f.damage\n" +
+             "              ORDER BY damage ASC LIMIT 5) t)\n" +
+             "FROM fact_eventplayerdamage f";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+
+	}
 	public void testUpdate()
 		throws Exception
 	{
@@ -488,7 +514,7 @@ public class SqlFormatterTest
 		}
 
 	}
-	
+
 	public void testFormatInsert()
 		throws Exception
 	{
