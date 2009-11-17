@@ -10,14 +10,20 @@
  */
 package workbench.log;
 
-import java.io.*;
-import java.util.*;
-
-import org.apache.log4j.*;
-import org.apache.log4j.spi.*;
-
+import java.io.File;
+import java.util.Enumeration;
+import org.apache.log4j.Appender;
+import org.apache.log4j.Category;
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Level;
+import org.apache.log4j.Log4JLoggerFactory;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.apache.log4j.Priority;
+import org.apache.log4j.spi.LoggerFactory;
+import org.apache.log4j.spi.LoggingEvent;
 import sun.reflect.*;
-import workbench.gui.components.*;
+import workbench.gui.components.LogFileViewer;
 
 /**
  * 
@@ -29,8 +35,8 @@ public class Log4JLogger
 	implements WbLogger
 {
 	// Creates some debug-messages on system.out (without the use of Log4J to avoid confusion)
-
 	static boolean debug = false;
+	
 	private boolean logToSystemErr = false;
 
 	/**
@@ -159,8 +165,6 @@ public class Log4JLogger
 	public void setRootLevel(LogLevel level)
 	{
 		// ignored, set by configuration file
-		// This just leads to confusion:
-		// getRootLogger().setLevel(toLog4JLevel(level));
 	}
 
 	@Override
@@ -169,10 +173,10 @@ public class Log4JLogger
 		return toWbLevel(getRootLogger().getLevel());
 	}
 
-	static public Log4JLogger getLogger()
+	public static Log4JLogger getLogger()
 	{
-		// Do some reflections about the caller...
-		Class callerClass = Reflection.getCallerClass(4);
+		Class callerClass = getCallerClass();
+
 		if (debug)
 		{
 			System.out.println("callerClass in getLogger(): " + callerClass);
@@ -185,6 +189,7 @@ public class Log4JLogger
 			if (!(logger instanceof Log4JLogger))
 			{
 				System.err.println("Please don't define LoggerClasses without WildCards");
+				return null;
 			}
 			return (Log4JLogger) logger;
 		}
@@ -194,6 +199,23 @@ public class Log4JLogger
 		}
 	}
 
+	private static Class getCallerClass()
+	{
+		Class caller = null;
+		try
+		{
+			caller = Reflection.getCallerClass(5);
+		}
+		catch (Throwable th)
+		{
+			System.err.println("could not get caller class");
+			// In case the used JVM does not support Reflection.getCallerClass()
+			//
+			caller = Log4JLogger.class;
+		}
+		return caller;
+	}
+	
 	@Override
 	public void logMessage(LogLevel level, Object caller, String msg, Throwable th)
 	{

@@ -188,10 +188,7 @@ public class LogMgr
 			{
 				System.err.println("Could not create Log4J logger. Using SimpleLogger!");
 				e.printStackTrace(System.err);
-				if (logger == null)
-				{
-					logger = new SimpleLogger();
-				}
+				logger = new SimpleLogger();
 			}
 		}
 		else
@@ -201,8 +198,6 @@ public class LogMgr
 				logger = new SimpleLogger();
 			}
 		}
-
 		return logger;
-
 	}
 }
