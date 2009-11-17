@@ -938,11 +938,12 @@ public final class WbManager
 		// Avoid saving the settings
 		Runtime.getRuntime().removeShutdownHook(wb.shutdownHook);
 
-		// This will be used in isTestMode(). Basically the test
-		// mode is used by DbDriver to skip the test if a driver library
+		// The test mode is used by DbDriver to skip the test if a driver library
 		// is accessible because in test mode the drivers are not loaded
 		// through our own class loader because they are already present
 		// on the classpath.
+		// It is also used by Settings.initLogging() to allow a second
+		// initialization of the LogMgr
 		System.setProperty("workbench.gui.testmode", "true");
 		System.setProperty("workbench.log.console", "false");
 		System.setProperty("workbench.gui.language", "en");

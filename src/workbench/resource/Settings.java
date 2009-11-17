@@ -193,7 +193,7 @@ public class Settings
 
 		boolean configLoaded = loadConfig(settings);
 
-		if (configLoaded)
+		if (configLoaded || getBoolProperty("workbench.gui.testmode", false))
 		{
 			initLogging();
 
