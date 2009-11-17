@@ -193,10 +193,10 @@ public class Settings
 
 		boolean configLoaded = loadConfig(settings);
 
-		initLogging();
-
 		if (configLoaded)
 		{
+			initLogging();
+
 			// This message should not be logged before initLogging() has been called!
 			LogMgr.logInfo("Settings.<init>", "Using configdir: " + configfile.getParentFile().getAbsolutePath());
 
@@ -206,7 +206,6 @@ public class Settings
 				resetDefaults();
 			}
 		}
-		
 	}
 
 	private void initLogging()

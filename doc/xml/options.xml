@@ -160,18 +160,6 @@
 			</para>
 		</section>
 
-		<section id="options-pdf-reader">
-			<title>PDF Reader</title>
-			<para>
-				If you want to display the PDF manual from inside the application, you need to
-				specify the full path to your PDF reader application. If this is defined
-				and the file <literal>SQLWorkbench-Manual.pdf</literal> is available in the
-				directory where <literal>sqlworkbench.jar</literal> is located, you will be
-				able to display the PDF manual by selecting
-				<menuchoice><guimenu>Help</guimenu><guimenuitem>Manual</guimenuitem></menuchoice>.
-			</para>
-		</section>
-
 		<section id="options-log-level">
 			<title>Log Level</title>
 			<para>
@@ -180,8 +168,11 @@
 				<literal>ERROR</literal> only severe errors (either resulting from running
 				a user command or from an internal error) are written to the application log.
 			</para>
+      <para>
+        When using <link linkend="settings-log4j">Log4J</link> as the logger, this
+        will change the log level of the root logger.
+      </para>
 		</section>
-
 
 		<section id="options-file-info">
 			<title>Configuration file information</title>

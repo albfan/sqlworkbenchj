@@ -826,62 +826,95 @@
 	
   <section id="log-setting">
     <title>Controlling the log file</title>
-    <simplesect id="settings-log-level">
-      <title>Log level</title>
-      <para>Property: <literal>workbench.log.level</literal></para>
-      <para>Set the log level for the log file. Valid values are
-        <itemizedlist spacing="compact">
-          <listitem><para>DEBUG</para></listitem>
-          <listitem><para>INFO</para></listitem>
-          <listitem><para>WARN</para></listitem>
-          <listitem><para>ERROR</para></listitem>
-        </itemizedlist>
-      </para>
-      <para>Default: <literal>INFO</literal></para>
-    </simplesect>
+    
+    <section id="wb-log">
+      <title>Workbench logging</title>
+      <simplesect id="settings-log-level">
+        <title>Log level</title>
+        <para>Property: <literal>workbench.log.level</literal></para>
+        <para>Set the log level for the log file. Valid values are
+          <itemizedlist spacing="compact">
+            <listitem><para>DEBUG</para></listitem>
+            <listitem><para>INFO</para></listitem>
+            <listitem><para>WARN</para></listitem>
+            <listitem><para>ERROR</para></listitem>
+          </itemizedlist>
+        </para>
+        <para>Default: <literal>INFO</literal></para>
+      </simplesect>
 
-    <simplesect id="settings-log-format">
-      <title>Log format</title>
-      <para>Property: <literal>workbench.log.format</literal></para>
-      <para>Define the format of the log messages. The following placeholders are supported:
-        <itemizedlist spacing="compact">
-          <listitem><para>{type}</para></listitem>
-          <listitem><para>{timestamp}</para></listitem>
-          <listitem><para>{message}</para></listitem>
-          <listitem><para>{error}</para></listitem>
-          <listitem><para>{source}</para></listitem>
-          <listitem><para>{stacktrace}</para></listitem>
-        </itemizedlist>
-				The order of the placeholders defines the order in the log file, except
-				for the stacktrace which will always be printed after the message.
-				If the log level is set to debug, the stacktrace will always be displayed
-				even if it is not included in the format string.
-      </para>
-      <para>Default: <literal>{type} {timestamp} {message} {error}</literal></para>
-    </simplesect>
+      <simplesect id="settings-log-format">
+        <title>Log format</title>
+        <para>Property: <literal>workbench.log.format</literal></para>
+        <para>Define the format of the log messages. The following placeholders are supported:
+          <itemizedlist spacing="compact">
+            <listitem><para>{type}</para></listitem>
+            <listitem><para>{timestamp}</para></listitem>
+            <listitem><para>{message}</para></listitem>
+            <listitem><para>{error}</para></listitem>
+            <listitem><para>{source}</para></listitem>
+            <listitem><para>{stacktrace}</para></listitem>
+          </itemizedlist>
+          The order of the placeholders defines the order in the log file, except
+          for the stacktrace which will always be printed after the message.
+          If the log level is set to debug, the stacktrace will always be displayed
+          even if it is not included in the format string.
+        </para>
+        <para>Default: <literal>{type} {timestamp} {message} {error}</literal></para>
+      </simplesect>
 
-    <simplesect id="options-log-console">
-      <title>Logging to the console</title>
-      <para>Property: <literal>workbench.log.console</literal></para>
-      <para>Defines whether &wb-productname; logs messages additionally to the standard error output
+      <simplesect id="options-log-console">
+        <title>Logging to the console</title>
+        <para>Property: <literal>workbench.log.console</literal></para>
+        <para>Defines whether &wb-productname; logs messages additionally to the standard error output
+        </para>
+        <para>Default: <literal>false</literal></para>
+      </simplesect>
+
+      <simplesect id="settings-log-metadata">
+        <title>Logging SQL used for retrieving metadata</title>
+        <para>Property: <literal>workbench.dbmetadata.logsql</literal></para>
+        <para>
+          If this is set to <literal>true</literal> the SQL queries used to
+          retrieve DBMS specific meta data (such as view/procedure/trigger source,
+          defined triggers/views) will be logged with level INFO.
+        </para>
+        <para>
+          This can be used to debug customized SQL statements
+          for DBMS's which are not (yet) preconfigured.
+        </para>
+        <para>Default: <literal>false</literal></para>
+      </simplesect>
+    </section>
+
+    <section id="settings-log4j">
+      <title>Using Log4J for logging</title>
+      <para>Property: <literal>workbench.log.log4j</literal></para>
+      <para>
+        If you need more control over the logfile (e.g. for batch processing) you can delegate logging
+        to Log4J. In order to do this, you need to set the property <literal>workbench.log.log4j=true</literal>
+        to <literal>workbench.settings</literal> or pass this as a system property when starting &wb-productname;
       </para>
-      <para>Default: <literal>false</literal></para>
-    </simplesect>
-					
-    <simplesect id="settings-log-metadata">
-			<title>Logging SQL used for retrieving metadata</title>
-			<para>Property: <literal>workbench.dbmetadata.logsql</literal></para>
-			<para>
-				If this is set to <literal>true</literal> the SQL queries used to
-				retrieve DBMS specific meta data (such as view/procedure/trigger source,
-				defined triggers/views) will be logged with level INFO.
-			</para>
-			<para>
-				This can be used to debug customized SQL statements
-				for DBMS's which are not (yet) preconfigured.
-			</para>
-			<para>Default: <literal>false</literal></para>
-    </simplesect>
+      <para>
+        In order for this to work, you must copy the Logg4J library to the directory where <literal>sqlworbkench.jar</literal>
+        is located. The jar file must be name <emphasis role="bold">log4j.jar</emphasis>. Do not include the version number in the
+        filename.
+      </para>
+      <para>
+        In order to initialize Log4J properly a <literal>log4j.xml</literal> (or <literal>log4j.properties</literal>) must also
+        be available in the directory where <literal>sqlworbkench.jar</literal> is located.
+      </para>
+      <para>
+        When Log4J logging is enabled, none of the logging properties describe will be used. You have to configure
+        everything through <literal>log4j.xml</literal>.
+      </para>
+      <para>
+        When using <menuchoice><guimenu>Help</guimenu><guimenuitem>Show log file</guimenuitem></menuchoice> with Log4J enabled,
+        and you have configured Log4J to write to multiple files, only the first file will be shown. As the log window is not
+        registered with Log4J, no updates will be shown either. If you want to re-load the logfile in the window, you have to
+        close and re-open the log-window.
+      </para>
+    </section>
 
   </section>
 
@@ -1009,5 +1042,6 @@ workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
 		</simplesect>
 		
 	</section>
-			
+
+
 </section>
