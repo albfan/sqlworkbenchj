@@ -61,7 +61,7 @@ import workbench.util.WbProperties;
 /**
  * The singleton to manage configuration settings for SQL Workbench/J
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class Settings
 	implements PropertyStorage
@@ -216,7 +216,7 @@ public class Settings
 			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
 		}
 		LogMgr.init(useLog4j);
-		
+
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
 		LogMgr.logToSystemError(logSysErr);
 
@@ -269,7 +269,7 @@ public class Settings
 	{
 		if (cfile == null) return false;
 		long time = cfile.lastModified();
-		
+
 		if (cfile.equals(this.configfile) && this.fileTime == time)
 		{
 			// same file, same modification time --> nothing to do
@@ -316,7 +316,7 @@ public class Settings
 			}
 		}
 	}
-	
+
 	public void setUseSinglePageHelp(boolean flag)
 	{
 		setProperty("workbench.help.singlepage", flag);
@@ -537,7 +537,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.db.completion.debug", false);
 	}
-	
+
 	public boolean getFixSqlServerTimestampDisplay()
 	{
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);
@@ -1642,7 +1642,7 @@ public class Settings
 	/**
 	 * Returns a list of DBIDs of servers that do not accept the NULL keyword
 	 * in a column definition.
-	 * 
+	 *
 	 * @return
 	 */
 	public List<String> getServersWithNoNullKeywords()

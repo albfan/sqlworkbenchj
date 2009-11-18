@@ -66,7 +66,7 @@ import workbench.util.WbThread;
 /**
  * The main application "controller" for the SQL Workbench/J
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public final class WbManager
 	implements FontChangedListener, Runnable, Thread.UncaughtExceptionHandler
