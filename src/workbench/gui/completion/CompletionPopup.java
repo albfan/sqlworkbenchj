@@ -66,7 +66,8 @@ public class CompletionPopup
 	private StatementContext context;
 	private boolean selectCurrentWordInEditor;
 	protected CompletionSearchField searchField;
-	private boolean dbStoresMixedCase = false;
+	private boolean dbStoresMixedCase;
+	private boolean ignoreSearchChange;
 
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
@@ -444,6 +445,8 @@ public class CompletionPopup
 
 	public void selectMatchingEntry(String s)
 	{
+		if (ignoreSearchChange) return;
+		
 		int index = this.findEntry(s);
 		if (index >= 0)
 		{
@@ -570,11 +573,19 @@ public class CompletionPopup
 		}
 		if (syncEntry)
 		{
-			Object o = elementList.getSelectedValue();
-			if (o != null)
+			try
 			{
-				this.searchField.setText(o.toString());
-				this.searchField.selectAll();
+				ignoreSearchChange = true;
+				Object o = elementList.getSelectedValue();
+				if (o != null)
+				{
+					this.searchField.setText(o.toString());
+					this.searchField.selectAll();
+				}
+			}
+			finally
+			{
+				ignoreSearchChange = false;
 			}
 		}
 	}
