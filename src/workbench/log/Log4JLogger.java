@@ -188,7 +188,7 @@ public class Log4JLogger
 			// Log4jLogger
 			if (!(logger instanceof Log4JLogger))
 			{
-				System.err.println("Please don't define LoggerClasses without WildCards");
+				System.err.println("Please don't define LoggerClasses without the correct loggerFactory");
 				return null;
 			}
 			return (Log4JLogger) logger;
