@@ -36,7 +36,7 @@ public class Log4JLogger
 {
 	// Creates some debug-messages on system.out (without the use of Log4J to avoid confusion)
 	static boolean debug = false;
-	
+	static boolean useReflectionClass = true;
 	private boolean logToSystemErr = false;
 
 	/**
@@ -52,7 +52,7 @@ public class Log4JLogger
 	 * Settings.initLogging(Settings.java:222).
 	 * 
 	 * Example: Log-calll in LogMgr.setLevel() <code><br>
-	 *  at workbench.log.Log4jLogger.getLogger(Log4jLogger.java:223)<br>
+	 *  at workbench.log.Log4JLogger.getLogger(Log4JLogger.java:223)<br>
 	 * 	at workbench.log.LogMgr.getLogger(LogMgr.java:175)<br>
 	 * 	at workbench.log.LogMgr.logInfo(LogMgr.java:109)<br>
 	 * 	at workbench.log.LogMgr.setLevel(LogMgr.java:74)<br>
@@ -120,8 +120,8 @@ public class Log4JLogger
 	 * Always use our own factory
 	 * 
 	 * @param name The name of the logger to retrieve.
-	 * @return {@link Log4jLogger} instance according to {@link Log4jLoggerFactory}, which uses
-	 *         {@link Log4jLogger#Log4jLogger(String)}
+	 * @return {@link Log4JLogger} instance according to {@link Log4JLoggerFactory}, which uses
+	 *         {@link Log4JLogger#Log4JLogger(String)}
 	 */
 	static public Logger getLogger(String name)
 	{
@@ -132,8 +132,8 @@ public class Log4JLogger
 	 * Always use our own factory
 	 * 
 	 * @param clazz The name of the class for the logger to retrieve.
-	 * @return {@link Log4jLogger} instance according to {@link Log4jLoggerFactory}, which uses
-	 *         {@link Log4jLogger#Log4jLogger(String)}
+	 * @return {@link Log4JLogger} instance according to {@link Log4JLoggerFactory}, which uses
+	 *         {@link Log4JLogger#Log4JLogger(String)}
 	 */
 	static public Logger getLogger(Class clazz)
 	{
@@ -175,7 +175,7 @@ public class Log4JLogger
 
 	public static Log4JLogger getLogger()
 	{
-		Class callerClass = getCallerClass();
+		String callerClass = getCallerClassName();
 
 		if (debug)
 		{
@@ -185,7 +185,7 @@ public class Log4JLogger
 		{
 			Logger logger = getLogger(callerClass);
 			// If a specific class level is defined, but not correct, the Logger might not be a
-			// Log4jLogger
+			// Log4JLogger
 			if (!(logger instanceof Log4JLogger))
 			{
 				System.err.println("Please don't define LoggerClasses without the correct loggerFactory");
@@ -199,21 +199,26 @@ public class Log4JLogger
 		}
 	}
 
-	private static Class getCallerClass()
+	private static String getCallerClassName()
 	{
-		Class caller = null;
-		try
+		if (useReflectionClass)
 		{
-			caller = Reflection.getCallerClass(5);
+			try
+			{
+				return Reflection.getCallerClass(5).getName();
+			}
+			catch (Throwable th)
+			{
+				System.err.println("Could not get caller class using Reflection.getCallerClass(). Using getStackTrace() instead");
+				useReflectionClass = false;
+			}
 		}
-		catch (Throwable th)
+		StackTraceElement[] trace = Thread.currentThread().getStackTrace();
+		if (trace != null && trace.length > 4)
 		{
-			System.err.println("could not get caller class");
-			// In case the used JVM does not support Reflection.getCallerClass()
-			//
-			caller = Log4JLogger.class;
+			return trace[5].getClassName();
 		}
-		return caller;
+		return Log4JLogger.class.getName();
 	}
 	
 	@Override
