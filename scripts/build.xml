@@ -31,7 +31,6 @@
   <property name="fop.root" value="../etc/fop"/>
 
   <taskdef name="xmltask" classname="com.oopsconsultancy.xmltask.ant.XmlTask" classpath="xmltask-v1.15.jar"/>
-  <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
 
   <target name="init">
     <tstamp>
@@ -582,7 +581,9 @@
     <ant antfile="../website/build.xml" inheritall="false" target="release"/>
   </target>
 
-  <target name="mac-package" depends="init,html-history">
+  <target name="mac-package" depends="init">
+    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
+
     <property name="bundledir" value="${distdir}/mac"/>
     <delete dir="${bundledir}" failonerror="false"/>
     <mkdir dir="${bundledir}"/>

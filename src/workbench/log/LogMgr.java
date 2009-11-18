@@ -31,17 +31,17 @@ public class LogMgr
 
 	public synchronized static void init(boolean useLog4j)
 	{
-		useLog4J = useLog4j;
-		if (useLog4j && Log4JHelper.isLog4JAvailable())
+		useLog4J = useLog4j && Log4JHelper.isLog4JAvailable();
+		if (useLog4j)
 		{
 			Log4JLoggerFactory.setLoggerFqcn(LogMgr.class);
 		}
-		createLogger();
+		getLogger();
 	}
 
 	public static WbFile getLogfile()
 	{
-		File f = logger.getCurrentFile();
+		File f = getLogger().getCurrentFile();
 		if (f == null)
 		{
 			return null;
@@ -49,144 +49,121 @@ public class LogMgr
 		return new WbFile(f);
 	}
 
-	public synchronized static void removeViewer()
+	public static void removeViewer()
 	{
-		logger.setLogViewer(null);
+		getLogger().setLogViewer(null);
 	}
 
-	public synchronized static void registerViewer(LogFileViewer v)
+	public static void registerViewer(LogFileViewer v)
 	{
-		logger.setLogViewer(v);
+		getLogger().setLogViewer(v);
 	}
 
 	public static void setMessageFormat(String aFormat)
 	{
-		logger.setMessageFormat(aFormat);
+		getLogger().setMessageFormat(aFormat);
 	}
 
 	public static void logToSystemError(boolean flag)
 	{
-		logger.logToSystemError(flag);
+		getLogger().logToSystemError(flag);
 	}
 
 	public static String getLevel()
 	{
-		return logger.getRootLevel().toString();
+		return getLogger().getRootLevel().toString();
 	}
 
 	public static void setLevel(String aType)
 	{
-		logger.setRootLevel(LogLevel.getLevel(aType));
-		// Demo for log-calls from within this LoggerController
-		// logInfo(null, "(LogMgr.setLevel()) Set level to " + logger.getRootLevel());
+		getLogger().setRootLevel(LogLevel.getLevel(aType));
 	}
 
 	public static void shutdown()
 	{
-		logger.shutdownWbLog();
+		getLogger().shutdownWbLog();
 	}
 
 	public static void setOutputFile(File logfile, int maxFilesize)
 	{
-		logger.setOutputFile(logfile, maxFilesize);
+		getLogger().setOutputFile(logfile, maxFilesize);
 	}
 
 	public static boolean isInfoEnabled()
 	{
-		return logger.levelEnabled(LogLevel.info);
+		return getLogger().levelEnabled(LogLevel.info);
 	}
 
 	public static boolean isDebugEnabled()
 	{
-		return logger.levelEnabled(LogLevel.debug);
+		return getLogger().levelEnabled(LogLevel.debug);
 	}
 
 	public static void logDebug(Object aCaller, String aMsg)
 	{
-		logger.logMessage(LogLevel.debug, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, null);
 	}
 
 	public static void logDebug(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.debug, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.debug, aCaller, aMsg, th);
 	}
 
 	public static void logInfo(Object aCaller, String aMsg)
 	{
-		logger.logMessage(LogLevel.info, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.info, aCaller, aMsg, null);
 	}
 
 	public static void logInfo(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.info, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.info, aCaller, aMsg, th);
 	}
 
 	public static void logWarning(Object aCaller, String aMsg)
 	{
-		logger.logMessage(LogLevel.warning, aCaller, aMsg, null);
+		getLogger().logMessage(LogLevel.warning, aCaller, aMsg, null);
 	}
 
 	public static void logWarning(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.warning, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.warning, aCaller, aMsg, th);
 	}
 
 	public static void logError(Object aCaller, String aMsg, Throwable th)
 	{
-		logger.logMessage(LogLevel.error, aCaller, aMsg, th);
+		getLogger().logMessage(LogLevel.error, aCaller, aMsg, th);
 	}
 
 	public static void logError(Object aCaller, String aMsg, SQLException se)
 	{
-		if (!logger.levelEnabled(LogLevel.error))
+		if (!getLogger().levelEnabled(LogLevel.error))
 		{
 			return;
 		}
 
-		logger.logMessage(LogLevel.error, aCaller, aMsg, se);
+		getLogger().logMessage(LogLevel.error, aCaller, aMsg, se);
 		if (se != null)
 		{
 			SQLException next = se.getNextException();
 			while (next != null)
 			{
-				logger.logMessage(LogLevel.error, "Chained exception", ExceptionUtil.getDisplay(next), null);
+				getLogger().logMessage(LogLevel.error, "Chained exception", ExceptionUtil.getDisplay(next), null);
 				next = next.getNextException();
 			}
 		}
 	}
 
-	public static String getStackTrace(Throwable th)
+	private synchronized static WbLogger getLogger()
 	{
-		if (th == null)
-		{
-			return StringUtil.EMPTY_STRING;
-		}
-		try
-		{
-			StringWriter sw = new StringWriter(2000);
-			PrintWriter pw = new PrintWriter(sw);
-			pw.println();
-			th.printStackTrace(pw);
-			pw.close();
-			return sw.toString();
-		}
-		catch (Exception ex)
-		{
-		}
-		return StringUtil.EMPTY_STRING;
-	}
-
-	private static void createLogger()
-	{
-		if (useLog4J && Log4JHelper.isLog4JAvailable())
+		if (useLog4J)
 		{
 			try
 			{
-				logger = Log4JLogger.getLogger();
+				return Log4JLogger.getLogger();
 			}
 			catch (Throwable e)
 			{
-				System.err.println("Could not create Log4J logger. Using SimpleLogger!");
+				System.err.println("Could not create Log4J getLogger(). Using SimpleLogger!");
 				e.printStackTrace(System.err);
 				useLog4J = false;
 			}
@@ -195,5 +172,6 @@ public class LogMgr
 		{
 			logger = new SimpleLogger();
 		}
+		return logger;
 	}
 }

@@ -905,14 +905,21 @@
         be available in the directory where <literal>sqlworbkench.jar</literal> is located.
       </para>
       <para>
-        When Log4J logging is enabled, none of the logging properties describe will be used. You have to configure
+        When Log4J logging is enabled, none of the logging properties described will be used. You have to configure
         everything through <literal>log4j.xml</literal>.
       </para>
       <para>
         When using <menuchoice><guimenu>Help</guimenu><guimenuitem>Show log file</guimenuitem></menuchoice> with Log4J enabled,
-        and you have configured Log4J to write to multiple files, only the first file will be shown. As the log window is not
-        registered with Log4J, no updates will be shown either. If you want to re-load the logfile in the window, you have to
+        and you have configured Log4J to write to multiple files, only the first file will be shown.
+       </para>
+       <para>The will not update itself either when using Log4J. If you want to re-load the logfile in the window, you have to
         close and re-open the log-window.
+      </para>
+      <para>
+        When &wb-productname; initializes the Log4J system, it also adds a system property with the name
+        <literal>workbench.config.dir</literal> that contains the full path to the <link linkend="config-dir">configuration directory</link>.
+        This can be used to put the logfile into the configuration directory without the need to hardcode the directory name in
+        <literal>log4j.xml</literal>.
       </para>
     </section>
 

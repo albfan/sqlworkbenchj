@@ -211,6 +211,10 @@ public class Settings
 	private void initLogging()
 	{
 		boolean useLog4j = getBoolProperty("workbench.log.log4j", false);
+		if (useLog4j && configfile != null)
+		{
+			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
+		}
 		LogMgr.init(useLog4j);
 		
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);

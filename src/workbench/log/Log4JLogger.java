@@ -24,6 +24,7 @@ import org.apache.log4j.spi.LoggerFactory;
 import org.apache.log4j.spi.LoggingEvent;
 import sun.reflect.*;
 import workbench.gui.components.LogFileViewer;
+import workbench.resource.Settings;
 
 /**
  * 
@@ -37,7 +38,6 @@ public class Log4JLogger
 	// Creates some debug-messages on system.out (without the use of Log4J to avoid confusion)
 	static boolean debug = false;
 	static boolean useReflectionClass = true;
-	private boolean logToSystemErr = false;
 
 	/**
 	 * Create a Logger for name and geht the FQCN of the LoggerController-class from the
@@ -77,8 +77,8 @@ public class Log4JLogger
 		{
 			System.out.println("New logger for class " + name + " @(" + loggerFqcn + ")");
 		}
-
 	}
+	
 	protected static LoggerFactory loggerFactory = new Log4JLoggerFactory();
 	/**
 	 * Modifiable fully qualified name of the LoggerController Class (in opposite to the fix fqcn in
@@ -238,17 +238,6 @@ public class Log4JLogger
 			default:
 				error(msg, th);
 		}
-		if (logToSystemErr)
-		{
-			String format = "%1$-5s %2$tF %2$tR %3$s %4$s";
-			String out = String.format(format, level, new java.util.Date(), caller == null ? "" : caller,
-				msg == null ? "" : msg);
-			System.err.println(out);
-			if (th != null)
-			{
-				th.printStackTrace(System.err);
-			}
-		}
 	}
 
 	@Override
@@ -266,7 +255,7 @@ public class Log4JLogger
 	@Override
 	public void logToSystemError(boolean flag)
 	{
-		logToSystemErr = flag;
+		// ignored, should be done by log4j.xml
 	}
 
 	@Override

@@ -24,6 +24,7 @@ import workbench.util.*;
 public class SimpleLogger
 	implements WbLogger
 {
+
 	private LogLevel level = LogLevel.warning;
 	private PrintStream logOut = null;
 	private LogFileViewer viewer;
@@ -173,6 +174,11 @@ public class SimpleLogger
 		}
 	}
 
+	public synchronized void setLogViewer(LogFileViewer logViewer)
+	{
+		this.viewer = logViewer;
+	}
+
 	private CharSequence formatMessage(LogLevel logLevel, Object caller, String msg, Throwable th)
 	{
 		try
@@ -182,15 +188,13 @@ public class SimpleLogger
 				String trace = (th == null ? "" : th.getMessage());
 				if (showStackTrace)
 				{
-					trace = LogMgr.getStackTrace(th);
+					trace = getStackTrace(th);
 				}
-				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? ""
-					: caller, msg, trace);
+				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, trace);
 			}
 			else
 			{
-				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? ""
-					: caller, msg, "");
+				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, "");
 			}
 		}
 		catch (MissingFormatArgumentException e)
@@ -201,8 +205,22 @@ public class SimpleLogger
 		return msg;
 	}
 
-	public void setLogViewer(LogFileViewer logViewer)
+	private String getStackTrace(Throwable th)
 	{
-		this.viewer = logViewer;
+		if (th == null)
+		{
+			return StringUtil.EMPTY_STRING;
+		}
+		try
+		{
+			StringWriter sw = new StringWriter(2000);
+			PrintWriter pw = new PrintWriter(sw);
+			th.printStackTrace(pw);
+			return sw.toString();
+		}
+		catch (Exception ex)
+		{
+		}
+		return StringUtil.EMPTY_STRING;
 	}
 }
