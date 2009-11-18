@@ -2,7 +2,7 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-11-13">
+<release build="-1" date="2009-11-18">
 
   <entry dev-build="8" type="enh">
     <description>

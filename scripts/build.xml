@@ -93,7 +93,6 @@
 
     <property name="build.number" value="${release.build.number}.${dev-build.number}"/>
     <echo message="Build number is ${build.number}"/>
-    <antcall target="replace-build-number"/>
   </target>
 
   <target name="clean">
@@ -113,7 +112,6 @@
   <target name="prepare" depends="init">
     <mkdir dir="${pdfwork}"/>
     <mkdir dir="${build}"/>
-    <mkdir dir="${build}/help"/>
     <mkdir dir="${distdir}"/>
     <mkdir dir="${html-outdir}"/>
     <mkdir dir="${html-outdir}/images"/>
@@ -473,7 +471,6 @@
         <exclude name="**/.cvsignore"/>
         <exclude name="**/.nb*"/>
         <exclude name="**/tags"/>
-        <exclude name="help/*.*"/>
         <exclude name="**/Test/*"/>
         <exclude name="**/*.tws"/>
       </zipfileset>
@@ -498,7 +495,6 @@
         <exclude name="documentation.project"/>
         <exclude name="*docbook*/**"/>
         <exclude name="manual/**/*.*"/>
-        <exclude name="jhelp/**/*.*"/>
         <exclude name="**/*pdf*/*.*"/>
         <exclude name="dtd/**/*.*"/>
       </zipfileset>
@@ -546,9 +542,9 @@
     <property name="dev-jar" value="1"/>
   </target>
 
-  <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, make-jar"/>
+  <target name="jar-only" depends="set-dev-prop, copy-resources, compile, get-dev-build, replace-build-number, make-jar"/>
   
-  <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, make-jar"/>
+  <target name="make-dev-jar" depends="set-dev-prop, clean, copy-resources, compile, test, get-dev-build, replace-build-number, make-jar"/>
 
   <!-- build a development release -->
   <target name="dev-release" depends="clean, compile, test, set-dev-build, set-history-build-date, make-jar, pdf, publish, publish-single, release-package, release-src-zip">
@@ -690,7 +686,6 @@
         <exclude name="**/.nb*"/>
         <exclude name="**/*.dfPackage"/>
         <exclude name="**/tags"/>
-        <exclude name="help/*.*"/>
         <exclude name="**/*.tws"/>
       </zipfileset>
 
@@ -722,7 +717,6 @@
         <exclude name="**/.cvsignore"/>
         <exclude name="**/.nb*"/>
         <exclude name="**/tags"/>
-        <exclude name="help/*.*"/>
         <exclude name="**/*.tws"/>
       </zipfileset>
     </zip>
