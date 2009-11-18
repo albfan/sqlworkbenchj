@@ -75,7 +75,7 @@ public class ConnectionPropertiesEditor
 
 		this.propTable.setModel(new DataStoreTableModel(this.propData));
 		ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(this.propTable);
-		optimizer.optimizeAllColWidth(100, -1, true);
+		optimizer.optimizeAllColWidth(75, 200, true);
 
 		this.setLayout(new BorderLayout());
 		JScrollPane scroll = new JScrollPane(this.propTable);

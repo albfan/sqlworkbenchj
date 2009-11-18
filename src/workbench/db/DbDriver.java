@@ -420,7 +420,7 @@ public class DbDriver
 		}
 		else if (url.startsWith("jdbc:db2:"))
 		{
-			appNameProperty = "clientApplicationInformation";
+			appNameProperty = "clientProgramName";
 		}
 
 		if (appNameProperty != null && !props.containsKey(appNameProperty))

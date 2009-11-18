@@ -93,6 +93,7 @@ public class VersionNumber
 		if (minor == -1 && major == -1) return "n/a";
 		
 		if (minor == -1) return Integer.toString(major);
+		if (major == 999) return "999";
 		return Integer.toString(major) + "." + Integer.toString(minor);
 	}
 }
