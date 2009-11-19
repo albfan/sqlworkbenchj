@@ -172,7 +172,7 @@ public class Log4JLogger
 		return toWbLevel(getRootLogger().getLevel());
 	}
 
-	public static Log4JLogger getLogger()
+	public static WbLogger getLogger()
 	{
 		String callerClass = getCallerClassName();
 

@@ -84,6 +84,11 @@ public class Db2SequenceReader
 	{
 		String sql = null;
 
+		int schemaIndex = -1;
+		int nameIndex = -1;
+
+		String nameCol;
+		String schemaCol;
 		if (this.connection.getMetadata().getDbId().equals("db2h") || isHost)
 		{
 			// Host system
@@ -97,12 +102,10 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       DATATYPEID, \n" +
 			"       REMARKS \n" +
-			"FROM   SYSIBM.SYSSEQUENCES \n" +
-			"WHERE schema = ?";
-			if (StringUtil.isNonBlank(namePattern))
-			{
-				sql += "  AND name LIKE ? ";
-			}
+			"FROM   SYSIBM.SYSSEQUENCES \n";
+
+			nameCol = "name";
+			schemaCol = "schema";
 		}
 		else
 		{
@@ -116,15 +119,37 @@ public class Db2SequenceReader
 			"       CACHE, \n" +
 			"       DATATYPEID, \n" +
 		  "       REMARKS  \n" +
-			"FROM   syscat.sequences \n" +
-			"WHERE seqschema = ?";
-			if (StringUtil.isNonBlank(namePattern))
-			{
-				sql += "  AND seqname LIKE ? ";
-			}
+			"FROM   syscat.sequences \n";
+			
+			nameCol = "seqname";
+			schemaCol = "seqschema";
 		}
 
-		// For testing purposes
+		boolean whereAdded = false;
+
+		if (StringUtil.isNonBlank(schema))
+		{
+			sql += " WHERE " + schemaCol + " = ?";
+			schemaIndex = 1;
+			whereAdded = true;
+		}
+
+		if (StringUtil.isNonBlank(namePattern))
+		{
+			if (whereAdded)
+			{
+				sql += " AND ";
+				nameIndex = 2;
+			}
+			else
+			{
+				sql += " WHERE ";
+				nameIndex = 1;
+			}
+			sql += nameCol + " LIKE ? ";
+		}
+
+		// Needed for the unit test (because in H2 order is a reserved word)
 		if (quoteKeyword)
 		{
 			sql = sql.replace(" ORDER,", " \"ORDER\",");
@@ -141,8 +166,8 @@ public class Db2SequenceReader
 		try
 		{
 			stmt = this.connection.getSqlConnection().prepareStatement(sql);
-			stmt.setString(1, schema);
-			if (StringUtil.isNonBlank(namePattern)) stmt.setString(2, namePattern);
+			if (schemaIndex > -1)	stmt.setString(schemaIndex, schema);
+			if (nameIndex > -1) stmt.setString(nameIndex, namePattern);
 			rs = stmt.executeQuery();
 			result = new DataStore(rs, this.connection, true);
 		}

@@ -27,7 +27,7 @@ public class Log4JLoggerFactory
 	implements LoggerFactory
 {
 	private static Class loggerFqcn = Log4JLogger.class;
-
+	
 	public Log4JLoggerFactory()
 	{
 	}

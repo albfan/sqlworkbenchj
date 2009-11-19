@@ -14,8 +14,6 @@ package workbench.log;
 import java.io.*;
 import java.sql.*;
 
-import org.apache.log4j.*;
-
 import workbench.gui.components.*;
 import workbench.util.*;
 
@@ -32,11 +30,7 @@ public class LogMgr
 	public synchronized static void init(boolean useLog4j)
 	{
 		useLog4J = useLog4j && Log4JHelper.isLog4JAvailable();
-		if (useLog4j)
-		{
-			Log4JLoggerFactory.setLoggerFqcn(LogMgr.class);
-		}
-		else
+		if (!useLog4j)
 		{
 			// Initialize the Workbench logging right away
 			getLogger();
