@@ -36,7 +36,10 @@ public class LogMgr
 		{
 			Log4JLoggerFactory.setLoggerFqcn(LogMgr.class);
 		}
-		getLogger();
+		else
+		{
+			getLogger();
+		}
 	}
 
 	public static WbFile getLogfile()
