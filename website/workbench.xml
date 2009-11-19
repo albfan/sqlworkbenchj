@@ -122,9 +122,13 @@ VALUES
     <content>
       <h3>Prerequisites</h3>
       <p>
-        SQL Workbench/J needs a <a target="_blank" href="http://java.sun.com/javase/downloads/index.jsp">Java 5 runtime</a> environment (Java 6 is recommended).
+        SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
         You have to install Java before you can run SQL Workbench/J.
       </p>
+			<p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
+				The current build 106 is the last version that supports Java 5. <br/>
+				Please install a Java 6 runtime if you are downloading SQL Workbench/J for the first time.
+			</p>
 
       <h3 style="padding-top:10px">Installation</h3>
       <p>
@@ -244,7 +248,7 @@ VALUES
                 This application requires Java 5 (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
             </p>
         <p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
-          Build 106 is the last build to support Java 5. Starting with the next (dev) build, Java 6 will be required.
+          Build 106 is the last stable build to support Java 5. The development build already requires Java 6.
         </p>
         <h3 style="margin-top:25px">Stable release</h3>
         <p>

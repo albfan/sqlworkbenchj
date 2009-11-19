@@ -317,7 +317,6 @@
       <h3 style="margin-top:20px">Development build</h3>
       <p>
         A development build is generated while testing and implementing new features for the next stable build.
-        In general these builds are pretty stable and I am using them on a daily basis myself.
         <br/>
         Bugfixes will show up in these builds first.
         <br/>
@@ -329,6 +328,9 @@
         </li>
         <li>
           <a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a>
+        </li>
+        <li>
+          <a href="/devmanual">Online Manual for the current dev build</a>
         </li>
       </ul>
     </xsl:if>

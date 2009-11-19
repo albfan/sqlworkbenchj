@@ -38,6 +38,7 @@ public class LogMgr
 		}
 		else
 		{
+			// Initialize the Workbench logging right away
 			getLogger();
 		}
 	}
