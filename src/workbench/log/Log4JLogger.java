@@ -24,6 +24,7 @@ import org.apache.log4j.spi.LoggerFactory;
 import org.apache.log4j.spi.LoggingEvent;
 import sun.reflect.*;
 import workbench.gui.components.LogFileViewer;
+import workbench.util.StringUtil;
 
 /**
  * 
@@ -122,7 +123,7 @@ public class Log4JLogger
 	 * @return {@link Log4JLogger} instance according to {@link Log4JLoggerFactory}, which uses
 	 *         {@link Log4JLogger#Log4JLogger(String)}
 	 */
-	static public Logger getLogger(String name)
+	public static Logger getLogger(String name)
 	{
 		return LogManager.getLogger(name, loggerFactory);
 	}
@@ -134,7 +135,7 @@ public class Log4JLogger
 	 * @return {@link Log4JLogger} instance according to {@link Log4JLoggerFactory}, which uses
 	 *         {@link Log4JLogger#Log4JLogger(String)}
 	 */
-	static public Logger getLogger(Class clazz)
+	public static Logger getLogger(Class clazz)
 	{
 		return LogManager.getLogger(clazz.getCanonicalName(), loggerFactory);
 	}
@@ -281,7 +282,13 @@ public class Log4JLogger
 	@Override
 	public void setOutputFile(File logfile, int maxFilesize)
 	{
-		getLogger(getClass()).info("=================== Log started ===================");
+		Logger log = getLogger(getClass());
+		log.info("=================== Log started ===================");
+		String configFile = System.getProperty("log4j.configuration");
+		if (StringUtil.isNonBlank(configFile))
+		{
+			log.info("Log4J initialized from: " + configFile);
+		}
 	}
 
 	@Override

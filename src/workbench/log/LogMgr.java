@@ -11,9 +11,8 @@
  */
 package workbench.log;
 
-import java.io.*;
-import java.sql.*;
-
+import java.io.File;
+import java.sql.SQLException;
 import workbench.gui.components.*;
 import workbench.util.*;
 

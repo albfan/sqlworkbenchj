@@ -10,9 +10,8 @@
  */
 package workbench.log;
 
-import java.io.*;
-
-import workbench.gui.components.*;
+import java.io.File;
+import workbench.gui.components.LogFileViewer;
 
 /**
  * 
@@ -20,6 +19,7 @@ import workbench.gui.components.*;
  */
 public interface WbLogger
 {
+
 	void setRootLevel(LogLevel level);
 
 	LogLevel getRootLevel();

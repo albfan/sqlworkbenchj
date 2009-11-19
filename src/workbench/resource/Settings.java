@@ -214,7 +214,33 @@ public class Settings
 		if (useLog4j && configfile != null)
 		{
 			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
+
+			String log4JConfig = StringUtil.replaceProperties(getProperty("workbench.log.log4.config", null));
+			String sysConfig = System.getProperty("log4j.configuration", null);
+
+			if (StringUtil.isNonBlank(log4JConfig) && StringUtil.isNonBlank(sysConfig))
+			{
+				try
+				{
+					File f = new File(log4JConfig);
+					if (!f.isAbsolute())
+					{
+						f = new File(configfile.getParentFile(), log4JConfig);
+					}
+			
+					if (f.exists())
+					{
+						String fileUrl = f.toURI().toString();
+						System.setProperty("log4j.configuration", fileUrl);
+					}
+				}
+				catch (Throwable th)
+				{
+					// ignore
+				}
+			}
 		}
+		
 		LogMgr.init(useLog4j);
 
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);

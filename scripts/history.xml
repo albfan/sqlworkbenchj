@@ -16,7 +16,7 @@
       a version number) must be present in the directory where sqlworkbench.jar is located. The log4j.xml must also
       be placed into that directory. To turn on log4j logging, the property workbench.log.log4j must be set to true (either in workbench.settings
       or as a system property)
-      If log4j is used none of the logging properties from workbench.settings will
+      If log4j is used, none of the logging properties from workbench.settings will
       be applied. Log4j must be completely configured through log4j.xml.
     </description>
   </entry>

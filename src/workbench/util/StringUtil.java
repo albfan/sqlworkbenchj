@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1184,6 +1185,7 @@ public class StringUtil
 	}
 
 	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{[0-9a-zA-Z\\.\\-]*\\}");
+
 	/**
 	 * Replaces "variables" of the form ${some.thing} in the input string.
 	 * Any variable name is assumed to be a system property, this means
@@ -1194,10 +1196,13 @@ public class StringUtil
 	 */
 	public static String replaceProperties(String input)
 	{
-		if (input == null)
-		{
-			return null;
-		}
+		return replaceProperties(System.getProperties(), input);
+	}
+
+	public static String replaceProperties(Properties props, String input)
+	{
+		if (isEmptyString(input)) return input;
+		
 		Matcher m = VARIABLE_PATTERN.matcher(input);
 		if (m == null)
 		{
@@ -1210,7 +1215,7 @@ public class StringUtil
 			final int end = m.end();
 			final String var = input.substring(start, end);
 			final String propName = input.substring(start + 2, end - 1);
-			final String propValue = System.getProperty(propName, null);
+			final String propValue = props.getProperty(propName, null);
 			if (propValue != null)
 			{
 				input = input.replace(var, propValue);

@@ -1,5 +1,5 @@
 <section id="settings">
-  <title>Properties in the .settings file</title>
+  <title>Advanced configuration options</title>
 		 
   <para>
 		This section describes the additional options for &wb-productname; which
@@ -834,10 +834,10 @@
         <para>Property: <literal>workbench.log.level</literal></para>
         <para>Set the log level for the log file. Valid values are
           <itemizedlist spacing="compact">
-            <listitem><para>DEBUG</para></listitem>
-            <listitem><para>INFO</para></listitem>
-            <listitem><para>WARN</para></listitem>
-            <listitem><para>ERROR</para></listitem>
+            <listitem>DEBUG</listitem>
+            <listitem>INFO</listitem>
+            <listitem>WARN</listitem>
+            <listitem>ERROR</listitem>
           </itemizedlist>
         </para>
         <para>Default: <literal>INFO</literal></para>
@@ -848,12 +848,12 @@
         <para>Property: <literal>workbench.log.format</literal></para>
         <para>Define the format of the log messages. The following placeholders are supported:
           <itemizedlist spacing="compact">
-            <listitem><para>{type}</para></listitem>
-            <listitem><para>{timestamp}</para></listitem>
-            <listitem><para>{message}</para></listitem>
-            <listitem><para>{error}</para></listitem>
-            <listitem><para>{source}</para></listitem>
-            <listitem><para>{stacktrace}</para></listitem>
+            <listitem>{type}</listitem>
+            <listitem>{timestamp}</listitem>
+            <listitem>{message}</listitem>
+            <listitem>{error}</listitem>
+            <listitem>{source}</listitem>
+            <listitem>{stacktrace}</listitem>
           </itemizedlist>
           The order of the placeholders defines the order in the log file, except
           for the stacktrace which will always be printed after the message.
@@ -866,7 +866,8 @@
       <simplesect id="options-log-console">
         <title>Logging to the console</title>
         <para>Property: <literal>workbench.log.console</literal></para>
-        <para>Defines whether &wb-productname; logs messages additionally to the standard error output
+        <para>
+          Defines whether &wb-productname; logs messages additionally to the standard error output
         </para>
         <para>Default: <literal>false</literal></para>
       </simplesect>
@@ -886,33 +887,42 @@
         <para>Default: <literal>false</literal></para>
       </simplesect>
     </section>
+    
+  </section>
 
-    <section id="settings-log4j">
-      <title>Using Log4J for logging</title>
+  <section id="settings-log4j">
+    <title>Log4J logging</title>
+
+    <section id="settings-log4j-init">
+      <title>Turn on Log4J logging</title>
       <para>Property: <literal>workbench.log.log4j</literal></para>
       <para>
         If you need more control over the logfile (e.g. for batch processing) you can delegate logging
         to Log4J. In order to do this, you need to set the property <literal>workbench.log.log4j=true</literal>
-        to <literal>workbench.settings</literal> or pass this as a system property when starting &wb-productname;
+        in <literal>workbench.settings</literal> or pass this as a system property when starting &wb-productname;
       </para>
       <para>
-        In order for this to work, you must copy the Logg4J library to the directory where <literal>sqlworbkench.jar</literal>
-        is located. The jar file must be name <emphasis role="bold">log4j.jar</emphasis>. Do not include the version number in the
-        filename.
+        When you turn on Log4J logging, you must copy copy the Logg4J library as <literal>log4j.jar</literal> into the directory
+        where <literal>sqlworbkench.jar</literal> is located. Do not include the version number in the filename.
       </para>
+      <important><para>
+        The jar file must be named <emphasis role="bold">log4j.jar</emphasis>
+      </para></important>
       <para>
-        In order to initialize Log4J properly a <literal>log4j.xml</literal> (or <literal>log4j.properties</literal>) must also
-        be available in the directory where <literal>sqlworbkench.jar</literal> is located.
+        If the Log4J classes are not found, the built-in logging will be used (see above)
       </para>
+      
       <para>
-        When Log4J logging is enabled, none of the logging properties described will be used. You have to configure
-        everything through <literal>log4j.xml</literal>.
+        When Log4J logging is enabled, none of the logging properties described in the previous section will be used.
+        You have to configure everything through <literal>log4j.xml</literal>.
       </para>
+      
       <para>
         When using <menuchoice><guimenu>Help</guimenu><guimenuitem>Show log file</guimenuitem></menuchoice> with Log4J enabled,
         and you have configured Log4J to write to multiple files, only the first file will be shown.
        </para>
-       <para>The will not update itself either when using Log4J. If you want to re-load the logfile in the window, you have to
+       <para>
+         The window will not update itself either when using Log4J. If you want to re-load the logfile in the window, you have to
         close and re-open the log-window.
       </para>
       <para>
@@ -923,6 +933,30 @@
       </para>
     </section>
 
+    <section id="settings-log4j-config">
+      <title>Log4J configuration file</title>
+      <para>Property: <literal>workbench.log.log4j.config</literal></para>
+      <para>
+        Defines the configuration file for Log4J. If this property is set and points to an existing file,
+        the system property <literal>log4j.configuration</literal> will be set before the Log4J system is initialized.
+        Log4J uses this system property to look for the configuration file.
+      </para>
+      <para>
+        You can use a system property as part of the filename (e.g. <literal>${user.home}/sqlworkbench.log</literal>).
+        If the filename denotes a relative filename (e.g. <literal>log4j.xml</literal> without any path information),
+        then it is assumed to be relative to the <link linkend="config-dir">configuration directory</link> i.e. the same
+        directory where <literal>workbench.settings</literal> is located.
+      </para>
+      <para>
+        Using <literal>workbench.log.log4j.config=workbench.log</literal> will overwrite/use the same log file
+        as the default logging because the file will be created in the same directory as workbench.settings.
+      </para>
+      <para>
+        A sample <literal>log4j.xml</literal> can be found in the <literal>scripts</literal> directory of the
+        &wb-productname; distribution.
+      </para>
+    </section>
+    
   </section>
 
   <section id="setting-sql-generation">

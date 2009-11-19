@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration debug="false" xmlns:log4j='http://jakarta.apache.org/log4j/' >
+
+    <!-- 
+        enable this appender if you want to see log messages in the console 
+        This should not be enabled when running SQL Workbench/J in console mode!
+    -->
+    <!--
+    <appender name="STDOUT" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{ISO8601} %-5p %m%n" />
+        </layout>
+    </appender>
+    -->
+    
+    <!-- 
+        Output to file 
+        SQL Workbench/J will define the system property workbench.config.dir
+        So the output file can be specified relative to the config directorys
+    -->
+    <appender name="FILE" class="org.apache.log4j.FileAppender">
+        <param name="File" value="${workbench.config.dir}/log4j.log" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{ISO8601} %-5p %m%n" />
+        </layout>
+    </appender>
+    
+
+    <root>
+        <priority value="info"/>
+        <!-- <appender-ref ref="STDOUT" /> -->
+        <appender-ref ref="FILE" />
+    </root>
+    
+    <loggerFactory class="org.apache.log4j.Log4JLoggerFactory" />
+
+</log4j:configuration>
+
+
+
+

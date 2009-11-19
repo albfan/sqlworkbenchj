@@ -15,8 +15,15 @@ import java.lang.reflect.Method;
 
 /**
  * Test if Log4J classes are available on the classpath.
+ * <br>
+ * If Log4J is available, it will call
+ * org.apache.log4j.Log4JLoggerFactory.setLoggerFqcn() passing LogMgr.class
+ *
+ * All this is done using Reflection, so Log4J does not need to be available.
+ *
  * 
  * @author Peter Franken
+ * @author Thomas Kellerer
  */
 public class Log4JHelper
 {
@@ -29,9 +36,11 @@ public class Log4JHelper
 		try
 		{
 			tested = true;
-			Class c = Class.forName("org.apache.log4j.Logger");
-			available = (c != null);
+			Class logger = Class.forName("org.apache.log4j.Logger");
+			available = (logger != null);
 
+			// this is our own class, so testing for its presence
+			// is not really safe
 			Class factory = Class.forName("org.apache.log4j.Log4JLoggerFactory");
 			Method setLoggerFqcn = factory.getDeclaredMethod("setLoggerFqcn", new Class[] { Class.class });
 			setLoggerFqcn.invoke(null, new Object[] { LogMgr.class } );

@@ -10,10 +10,13 @@
  */
 package workbench.log;
 
-import java.io.*;
-import java.sql.*;
-import java.util.*;
-
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.sql.SQLException;
+import java.util.MissingFormatArgumentException;
 import workbench.gui.components.*;
 import workbench.util.*;
 
