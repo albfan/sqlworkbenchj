@@ -12,6 +12,13 @@
 
   <entry dev-build="8" type="enh">
     <description>
+			UTF and ISO encodings can now be entered (e.g. for WbExport or WbImport) without dashes: UTF8, UTF16, iso88591.
+			They will be converted internally to the correct names.
+		</description>
+	</entry>
+	
+  <entry dev-build="8" type="enh">
+    <description>
       Peter Franken contributed a Log4J integration for SQL Workbench/J. In order to use Log4j, the library log4j.jar (without
       a version number) must be present in the directory where sqlworkbench.jar is located. The log4j.xml must also
       be placed into that directory. To turn on log4j logging, the property workbench.log.log4j must be set to true (either in workbench.settings
