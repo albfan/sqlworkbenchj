@@ -26,6 +26,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.SortedMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.JComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -112,9 +114,24 @@ public class EncodingUtil
 	{
 		if (input == null) return null;
 		if ("utf".equalsIgnoreCase(input)) return "UTF-8";
-		if ("utf8".equalsIgnoreCase(input)) return "UTF-8";
-		if ("utf-8".equalsIgnoreCase(input)) return "UTF-8";
-		return input;
+
+		String upcase = input.toUpperCase();
+
+		Pattern utf = Pattern.compile("UTF[0-9]+.*");
+		Matcher um = utf.matcher(upcase);
+		if (um.matches())
+		{
+			return upcase.replace("UTF", "UTF-");
+		}
+
+		Pattern iso = Pattern.compile("ISO8859[0-9]+");
+		Matcher m = iso.matcher(upcase);
+
+		if (m.matches())
+		{
+			return upcase.replace("8859", "-8859-");
+		}
+		return upcase;
 	}
 
 	/**
