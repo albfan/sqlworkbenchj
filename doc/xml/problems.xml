@@ -338,7 +338,7 @@ SELECT 42 FROM dual;</programlisting>
         refer to the chapter <link linkend="customize-dbexplorer-retrieval">Customize data retrieval in the DbExplorer</link>.
       </para>
       <para>
-        When using a driver that supports JDBC 4, &wb-productname; since build 107 will display the XML content directly
+        When using a JDBC4 driver for DB2 (and Java 6), together with &wb-productname; build 107, XML content will be displayed directly
         without the need to cast the result.
       </para>
     </section>
@@ -356,8 +356,10 @@ SELECT 42 FROM dual;</programlisting>
           <member><ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/index.jsp?topic=/com.ibm.db2.luw.apdv.java.doc/doc/r0052038.html"/></member>
           <member><ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.apdv.java.doc/doc/r0052607.html"/></member>
         </simplelist>
-        
+        The <ulink url="http://publib.boulder.ibm.com/infocenter/db2luw/v9r7/topic/com.ibm.db2.luw.apdv.java.doc/doc/tjvjcerr.html">example</ulink>
+        claims that this property is only needed for z/OS, but it works as described for LUW as well.
       </para>
+
     </section>
 
     <section id="db2-run-command">
