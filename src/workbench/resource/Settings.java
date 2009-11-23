@@ -143,10 +143,15 @@ public class Settings
 	{
 		final String configFilename = "workbench.settings";
 
+		// Make the installation directory available as a system property as well.
+		// this can e.g. be used to defined the location of the logfile relative
+		// to the installation path
+		System.setProperty("workbench.install.dir", WbManager.getInstance().getJarPath());
+
 		WbFile cfd = null;
 		try
 		{
-			String configDir = System.getProperty("workbench.configdir", null);
+			String configDir = StringUtil.replaceProperties(System.getProperty("workbench.configdir", null));
 			if (StringUtil.isBlank(configDir))
 			{
 				// check the current directory for a configuration file
@@ -206,6 +211,13 @@ public class Settings
 				resetDefaults();
 			}
 		}
+
+		if (configfile != null)
+		{
+			// Make the configuration directory available through a system property
+			// So that e.g. a log4j.xml can reference the directory using ${workbench.config.dir}
+			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
+		}
 	}
 
 	private boolean initLog4j()
@@ -231,13 +243,6 @@ public class Settings
 
 		if (useLog4j)
 		{
-			if (configfile != null)
-			{
-				// Make the configuration directory available to the log4j configuration
-				// inside the log4j.xml it can be referenced as ${workbench.config.dir}
-				System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
-			}
-
 			if (StringUtil.isNonBlank(log4jConfig))
 			{
 				try
@@ -280,7 +285,7 @@ public class Settings
 
 		try
 		{
-			String logfilename = getProperty("workbench.log.filename", "workbench.log");
+			String logfilename = StringUtil.replaceProperties(getProperty("workbench.log.filename", "workbench.log"));
 
 			// Replace old System.out or System.err settings
 			if (logfilename.equalsIgnoreCase("System.out") || logfilename.equalsIgnoreCase("System.err"))

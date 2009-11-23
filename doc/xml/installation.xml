@@ -210,7 +210,11 @@
 
 						<row>
 							<entry>-J</entry>
-							<entry>Pass a parameter to the JVM e.g: -J-Xms128m</entry>
+							<entry>
+                Pass a parameter directly to the JVM e.g: -J-Xms128m or to set a JVM system property using <literal>-J-Dproperty=value</literal>
+                which can be used to overwrite a <link linkend="settings">configuration properties</link> from <literal>workbench.settings</literal> using e.g.
+                <literal>-J-Dworkbench.log.file=/mylogs/workbench.log</literal>
+              </entry>
 						</row>
 
 						<row>

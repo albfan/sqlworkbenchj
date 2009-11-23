@@ -10,13 +10,20 @@
     </description>
   </entry>
 
-  <entry dev-build="8" type="enh">
+  <entry dev-build="9" type="enh">
     <description>
 			UTF and ISO encodings can now be entered (e.g. for WbExport or WbImport) without dashes: UTF8, UTF16, iso88591.
 			They will be converted internally to the correct names.
 		</description>
 	</entry>
-	
+
+  <entry dev-build="9" type="enh">
+    <description>
+			Log4J logging can also be turned on by supplying a configuration file as a parameter for workbench.log.log4j so that
+      log4j.xml does not need to be in the directory where sqlworkbench.jar is located.
+		</description>
+	</entry>
+
   <entry dev-build="8" type="enh">
     <description>
       Peter Franken contributed a Log4J integration for SQL Workbench/J. In order to use Log4j, the library log4j.jar (without
@@ -1714,7 +1721,9 @@
 
   <entry dev-build="1" type="fix">
     <description>
-       WbExport's XML format now defaults to XML 1.0 again. An option has been added for WbExport to select version 1.1 if that is needed in order to use the newly allowed characters. XML 1.1 support can be enabled using -xmlVersion=1.1 The default can be set with the property workbench.xml.default.version
+       WbExport's XML format now defaults to XML 1.0 again. An option has been added for WbExport to select version 1.1 if that is needed 
+       in order to use the newly allowed characters.  XML 1.1 support can be enabled using -xmlVersion=1.1 The default can be set with the
+       property workbench.xml.default.version
     </description>
   </entry>
 

@@ -36,18 +36,14 @@ public class Log4JHelper
 		try
 		{
 			tested = true;
-			Class logger = Class.forName("org.apache.log4j.Logger");
-			available = (logger != null);
-
-			// this is our own class, so testing for its presence
-			// is not really safe
 			Class factory = Class.forName("org.apache.log4j.Log4JLoggerFactory");
 			Method setLoggerFqcn = factory.getDeclaredMethod("setLoggerFqcn", new Class[] { Class.class });
 			setLoggerFqcn.invoke(null, new Object[] { LogMgr.class } );
+			available = true;
 		}
 		catch (Throwable th)
 		{
-			th.printStackTrace();
+			th.printStackTrace(System.err);
 			available = false;
 		}
 		return available;

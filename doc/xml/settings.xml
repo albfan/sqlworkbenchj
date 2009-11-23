@@ -13,6 +13,15 @@
 		simply create a new line with the property name and the value as described here. 
 		The position where you add this entry does not matter.
 	</para>
+
+  <note>
+    <para>
+      Every property can also be specified on the commandline when starting &wb-productname; by setting a system
+      property with that name using the <literal>-Dworkbench.property=value</literal> switch. When using one of the Windows launchers (.exe)
+      you have to use <literal>-J-Dworkbench.property=value</literal>. See the section about 
+      <link linkend="launcher-parameters">Java options</link> in the description of the Windows launcher.
+    </para>
+  </note>
 	
   <section id="dbms-identifier">
     <title>Database Identifier</title>
@@ -829,6 +838,26 @@
     
     <section id="wb-log">
       <title>Workbench logging</title>
+
+      <simplesect id="settings-log-level">
+        <title>Log file location</title>
+        <para>Property: <literal>workbench.log.file</literal></para>
+        <para>
+          Defines the location of the logfile. By default, the file will be named <literal>workbench.log</literal> and will be written
+          into the <link linkend="config-dir">configuration directory</link>.
+        </para>
+        <para>
+          When &wb-productname; initializes the logging environment, it also adds two system property that can be used to
+          define the logfile relative to the configuration or the installation directory:
+          <itemizedlist spacing="compact">
+            <listitem><literal>workbench.config.dir</literal> contains the full path to the configuration directory</listitem>
+            <listitem><literal>workbench.install.dir</literal> contains the full path to the directory where sqlworkbench.jar is located</listitem>
+          </itemizedlist>
+          These properties can be used to put the logfile into the directory relative to the config or installation directory without the need to hardcode
+          the directory name in <literal>workbench.settings</literal>.
+        </para>
+      </simplesect>
+      
       <simplesect id="settings-log-level">
         <title>Log level</title>
         <para>Property: <literal>workbench.log.level</literal></para>
@@ -935,10 +964,14 @@
         close and re-open the log-window.
       </para>
       <para>
-        When &wb-productname; initializes the Log4J system, it also adds a system property with the name
-        <literal>workbench.config.dir</literal> that contains the full path to the <link linkend="config-dir">configuration directory</link>.
-        This can be used to put the logfile into the configuration directory without the need to hardcode the directory name in
-        <literal>log4j.xml</literal>.
+        When &wb-productname; initializes the logging environment, it also adds two system property that can be used to
+        define the logfile relative to the configuration or the installation directory:
+				<itemizedlist spacing="compact">
+					<listitem><literal>workbench.config.dir</literal> contains the full path to the <link linkend="config-dir">configuration directory</link></listitem>
+					<listitem><literal>workbench.install.dir</literal> contains the full path to the directory where sqlworkbench.jar is located</listitem>
+				</itemizedlist>
+        These properties can be used to put the logfile into the directory relative to the config or installation directory without the need to hardcode
+        the directory name in <literal>log4j.xml</literal>
       </para>
     </section>
 
