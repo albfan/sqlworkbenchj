@@ -449,11 +449,15 @@ VALUES
           files <tt>jarbundler-1.9.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
         </li>
         <li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> and copy the main library (e.g. poi-2.5.1.jar) into the directory ${wbroot}/etc/poi</li>
+        <li>Download Apache Log4J 1.2.x from <a href="http://logging.apache.org/log4j/">http://logging.apache.org/log4j/</a> (Only needed for compiling) and copy the jar file (e.g. Log4J-1.2.24.jar) into the directory ${wbroot}/etc/log4j</li>
         <li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a></li>
         <li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a></li>
         <li>Download the Jemmy library from <a href="http://jemmy.dev.java.net">http://jemmy.dev.java.net</a> (Required to run the GUI tests)</li>
         <li>Create the directory <tt>${wbroot}/junit</tt> and copy the files <tt>hsqldb.jar</tt>, <tt>h2.jar</tt> and <tt>jemmy.jar</tt> into that directory</li>
       </ul>
+      <p>
+        If you check out the subversion repository, the junit directory will be available automatically.
+      </p>
       <p>
         Now you can build the jar file by typing <tt>ant</tt> while the <tt>scripts</tt> directory
         is your current directory. If the build is successful, <tt>${wbroot}/dist/sqlworkbench.jar</tt>
