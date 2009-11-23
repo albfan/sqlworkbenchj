@@ -215,10 +215,10 @@ public class Settings
 		{
 			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
 
-			String log4JConfig = StringUtil.replaceProperties(getProperty("workbench.log.log4.config", null));
+			String log4JConfig = StringUtil.replaceProperties(getProperty("workbench.log.log4j.config", null));
 			String sysConfig = System.getProperty("log4j.configuration", null);
 
-			if (StringUtil.isNonBlank(log4JConfig) && StringUtil.isNonBlank(sysConfig))
+			if (StringUtil.isNonBlank(log4JConfig) && StringUtil.isBlank(sysConfig))
 			{
 				try
 				{
