@@ -898,9 +898,18 @@
       <para>Property: <literal>workbench.log.log4j</literal></para>
       <para>
         If you need more control over the logfile (e.g. for batch processing) you can delegate logging
-        to Log4J. In order to do this, you need to set the property <literal>workbench.log.log4j=true</literal>
-        in <literal>workbench.settings</literal> or pass this as a system property when starting &wb-productname;
-      </para>
+        to Log4j. You can turn on Log4j logging in two different ways:
+				<itemizedlist spacing="compact">
+					<listitem>The value of the property is <literal>true</literal></listitem>
+					<listitem>The value of the property points to an existing file</listitem>
+				</itemizedlist>
+			</para>
+			<para>
+				If you just pass <literal>true</literal> as the value for this property, the Log4j configuration file
+				must be accessible to Log4j through the usual ways (please refer to the Log4j manual for details).
+				If you specify a configuration file, this will be "passed" to Log4j by setting the system property
+				<literal>log4j.configuration</literal> to contain the correct "file URL" needed by Log4j.
+			</para>
       <para>
         When you turn on Log4J logging, you must copy copy the Logg4J library as <literal>log4j.jar</literal> into the directory
         where <literal>sqlworbkench.jar</literal> is located. Do not include the version number in the filename.

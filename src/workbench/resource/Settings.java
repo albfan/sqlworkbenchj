@@ -208,26 +208,46 @@ public class Settings
 		}
 	}
 
-	private void initLogging()
+	private boolean initLog4j()
 	{
-		boolean useLog4j = getBoolProperty("workbench.log.log4j", false);
-		if (useLog4j && configfile != null)
+		String log4jParameter = StringUtil.replaceProperties(getProperty("workbench.log.log4j", "false"));
+		String log4jConfig = null;
+
+		boolean useLog4j = false;
+		if ("true".equalsIgnoreCase(log4jParameter) || "false".equalsIgnoreCase(log4jParameter))
 		{
-			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
+			useLog4j = StringUtil.stringToBool(log4jParameter);
+		}
+		else
+		{
+			File f = new File(log4jParameter);
+			if (f.exists())
+			{
+				// Assume this is a log4j configuration file (.xml or .properties)
+				useLog4j = true;
+				log4jConfig = log4jParameter;
+			}
+		}
 
-			String log4JConfig = StringUtil.replaceProperties(getProperty("workbench.log.log4j.config", null));
-			String sysConfig = System.getProperty("log4j.configuration", null);
+		if (useLog4j)
+		{
+			if (configfile != null)
+			{
+				// Make the configuration directory available to the log4j configuration
+				// inside the log4j.xml it can be referenced as ${workbench.config.dir}
+				System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
+			}
 
-			if (StringUtil.isNonBlank(log4JConfig) && StringUtil.isBlank(sysConfig))
+			if (StringUtil.isNonBlank(log4jConfig))
 			{
 				try
 				{
-					File f = new File(log4JConfig);
-					if (!f.isAbsolute())
+					File f = new File(log4jConfig);
+					if (!f.isAbsolute() && configfile != null)
 					{
-						f = new File(configfile.getParentFile(), log4JConfig);
+						f = new File(configfile.getParentFile(), log4jConfig);
 					}
-			
+
 					if (f.exists())
 					{
 						String fileUrl = f.toURI().toString();
@@ -240,7 +260,13 @@ public class Settings
 				}
 			}
 		}
-		
+		return useLog4j;
+	}
+	
+	private void initLogging()
+	{
+		boolean useLog4j = initLog4j();
+
 		LogMgr.init(useLog4j);
 
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
