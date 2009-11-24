@@ -4,7 +4,7 @@
 
 	<para>
 		In addtion to the <link linkend="command-export">WbExport</link>,
-		<link linkend="command-import">WbImport</link> and <link linkend="command-import">WbCopy</link>
+		<link linkend="command-import">WbImport</link> and <link linkend="command-copy">WbCopy</link>
 		commands, &wb-productname; implements a set of additional SQL commands that are not part
 		of the SQL standard. These commands can be used like any other SQL command
 		(such as <literal>UPDATE</literal> inside &wb-productname;, i.e. inside the editor

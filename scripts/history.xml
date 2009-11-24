@@ -12,6 +12,18 @@
 
   <entry dev-build="9" type="enh">
     <description>
+			A new option to keep the highlight when using "Highlight current statement" has been added (Tools -> Options -> Editor)
+		</description>
+	</entry>
+
+  <entry dev-build="9" type="enh">
+    <description>
+			A new option to set the default value for the Max. Rows field when opening new tabs is available (Tools -> Options -> Data Display)
+		</description>
+	</entry>
+
+  <entry dev-build="9" type="enh">
+    <description>
 			UTF and ISO encodings can now be entered (e.g. for WbExport or WbImport) without dashes: UTF8, UTF16, iso88591.
 			They will be converted internally to the correct names.
 		</description>
