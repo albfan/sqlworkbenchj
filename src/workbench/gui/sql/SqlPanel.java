@@ -301,6 +301,11 @@ public class SqlPanel
 		editor = EditorPanel.createSqlEditor();
 		statusBar = new DwStatusBar(true, true);
 		statusBar.setBorder(statusBarBorder);
+		int defRows = GuiSettings.getDefaultMaxRows();
+		if (defRows > 0)
+		{
+			statusBar.setMaxRows(defRows);
+		}
 		editor.setStatusBar(statusBar);
 		editor.setBorder(new EtchedBorderTop());
 
@@ -2818,41 +2823,47 @@ public class SqlPanel
 				this.appendToLog(s);
 			}
 
-			if (!jumpToNext && restoreSelection && oldSelectionStart > -1 && oldSelectionEnd > -1)
+			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight();
+
+			
+			if (!(highlightCurrent && GuiSettings.getKeepCurrentSqlHighlight()))
 			{
-				final int selstart = oldSelectionStart;
-				final int selend = oldSelectionEnd;
-				EventQueue.invokeLater(new Runnable()
+				if (!jumpToNext && restoreSelection && oldSelectionStart > -1 && oldSelectionEnd > -1)
 				{
-					public void run()
+					final int selstart = oldSelectionStart;
+					final int selend = oldSelectionEnd;
+					EventQueue.invokeLater(new Runnable()
 					{
-						editor.select(selstart, selend);
+						public void run()
+						{
+							editor.select(selstart, selend);
+						}
+					});
+				}
+
+				if (highlightCurrent && !restoreSelection && commandWithError == -1)
+				{
+					int startPos = scriptParser.getStartPosForCommand(endIndex - 1);
+					startPos = scriptParser.findNextLineStart(startPos);
+					if (startPos > -1 && startPos < this.editor.getText().length())
+					{
+						this.editor.setCaretPosition(startPos);
 					}
-				});
-			}
-
-			if (highlightCurrent && !restoreSelection && commandWithError == -1)
-			{
-				int startPos = scriptParser.getStartPosForCommand(endIndex - 1);
-				startPos = scriptParser.findNextLineStart(startPos);
-				if (startPos > -1 && startPos < this.editor.getText().length())
-				{
-					this.editor.setCaretPosition(startPos);
 				}
-			}
 
-			if (commandWithError == -1 && jumpToNext)
-			{
-				int nextCommand = startIndex + 1;
-				int startPos = scriptParser.getStartPosForCommand(nextCommand);
-				startPos = scriptParser.findNextLineStart(startPos);
-				if (startPos > -1)
+				if (commandWithError == -1 && jumpToNext)
 				{
-					this.editor.setCaretPosition(startPos);
-				}
-				else if (oldSelectionStart > -1)
-				{
-					this.editor.setCaretPosition(oldSelectionStart);
+					int nextCommand = startIndex + 1;
+					int startPos = scriptParser.getStartPosForCommand(nextCommand);
+					startPos = scriptParser.findNextLineStart(startPos);
+					if (startPos > -1)
+					{
+						this.editor.setCaretPosition(startPos);
+					}
+					else if (oldSelectionStart > -1)
+					{
+						this.editor.setCaretPosition(oldSelectionStart);
+					}
 				}
 			}
 		}

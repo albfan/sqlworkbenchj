@@ -27,6 +27,26 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 
+	public static boolean getKeepCurrentSqlHighlight()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.keep.currentsql.selection", true);
+	}
+
+	public static void setKeepCurrentSqlHighlight(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.keep.currentsql.selection", flag);
+	}
+
+	public static int getDefaultMaxRows()
+	{
+		return Settings.getInstance().getIntProperty("workbench.gui.data.maxrows", 0);
+	}
+
+	public static void setDefaultMaxRows(int rows)
+	{
+		Settings.getInstance().setProperty("workbench.gui.data.maxrows", rows);
+	}
+
 	public static boolean getUseLRUForTabs()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.tabs.lru", true);

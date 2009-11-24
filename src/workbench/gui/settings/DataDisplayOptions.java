@@ -68,6 +68,7 @@ public class DataDisplayOptions
 		textColor.setSelectedColor(Settings.getInstance().getColor("workbench.gui.table.foreground", null));
 		selectionColor.setSelectedColor(Settings.getInstance().getColor("workbench.gui.table.selection.background", null));
 		selectedTextColor.setSelectedColor(Settings.getInstance().getColor("workbench.gui.table.selection.foreground", null));
+		defMaxRows.setText(Integer.toString(GuiSettings.getDefaultMaxRows()));
 		fillLanguageDropDown();
 	}
 
@@ -88,6 +89,7 @@ public class DataDisplayOptions
 		GuiSettings.setAutRowHeightMaxLines(((NumberField)this.maxRowHeight).getValue());
 		GuiSettings.setIgnoreWhitespaceForAutoRowHeight(ignoreEmptyRows.isSelected());
 		GuiSettings.setShowSelectionSummary(selectSummary.isSelected());
+		GuiSettings.setDefaultMaxRows(StringUtil.getIntValue(defMaxRows.getText(), 0));
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 
 		Settings.getInstance().setSortLocale(dl.getLocale());
@@ -215,6 +217,9 @@ public class DataDisplayOptions
     jLabel3 = new javax.swing.JLabel();
     multiLineThreshold = new javax.swing.JTextField();
     jPanel6 = new javax.swing.JPanel();
+    jPanel7 = new javax.swing.JPanel();
+    jLabel5 = new javax.swing.JLabel();
+    defMaxRows = new javax.swing.JTextField();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -284,7 +289,7 @@ public class DataDisplayOptions
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 4;
+    gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -346,7 +351,7 @@ public class DataDisplayOptions
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -471,7 +476,7 @@ public class DataDisplayOptions
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
@@ -539,6 +544,36 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 0);
     add(jPanel5, gridBagConstraints);
+
+    jPanel7.setLayout(new java.awt.GridBagLayout());
+
+    jLabel5.setLabelFor(defMaxRows);
+    jLabel5.setText(ResourceMgr.getString("LblDefMaxRows")); // NOI18N
+    jLabel5.setToolTipText(ResourceMgr.getString("d_LblDefMaxRows")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    jPanel7.add(jLabel5, gridBagConstraints);
+
+    defMaxRows.setColumns(6);
+    defMaxRows.setToolTipText(ResourceMgr.getString("d_LblDefMaxRows")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 16, 0, 0);
+    jPanel7.add(defMaxRows, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(6, 9, 0, 0);
+    add(jPanel7, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -548,17 +583,20 @@ public class DataDisplayOptions
   private javax.swing.JCheckBox autoColWidth;
   private javax.swing.JCheckBox autoRowHeight;
   private javax.swing.JPanel colWidthPanel;
+  private javax.swing.JTextField defMaxRows;
   private javax.swing.JCheckBox ignoreEmptyRows;
   private javax.swing.JCheckBox includeHeaderWidth;
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel5;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
   private javax.swing.JPanel jPanel4;
   private javax.swing.JPanel jPanel5;
   private javax.swing.JPanel jPanel6;
+  private javax.swing.JPanel jPanel7;
   private javax.swing.JComboBox localeDropDown;
   private javax.swing.JTextField maxColSizeField;
   private javax.swing.JLabel maxColSizeLabel1;

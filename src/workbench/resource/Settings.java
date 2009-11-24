@@ -143,10 +143,16 @@ public class Settings
 	{
 		final String configFilename = "workbench.settings";
 
-		// Make the installation directory available as a system property as well.
-		// this can e.g. be used to defined the location of the logfile relative
-		// to the installation path
-		System.setProperty("workbench.install.dir", WbManager.getInstance().getJarPath());
+		// The check for a null WbManager is necessary to allow design-time loading
+		// of some GUI forms in NetBeans. As they access the ResourceMgr and that in turn
+		// usess the Settings class, this class might be instantiated without a valid WbManager
+		if (WbManager.getInstance() != null)
+		{
+			// Make the installation directory available as a system property as well.
+			// this can e.g. be used to defined the location of the logfile relative
+			// to the installation path
+			System.setProperty("workbench.install.dir", WbManager.getInstance().getJarPath());
+		}
 
 		WbFile cfd = null;
 		try
@@ -189,7 +195,7 @@ public class Settings
 			cfd = new WbFile(System.getProperty("user.home"), ".sqlworkbench");
 		}
 
-		if (!cfd.exists() && WbManager.getInstance().getSettingsShouldBeSaved())
+		if (!cfd.exists() && WbManager.getInstance() != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
 			cfd.mkdirs();
 		}
