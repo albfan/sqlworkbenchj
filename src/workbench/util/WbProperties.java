@@ -35,7 +35,7 @@ import workbench.resource.Settings;
 /**
  * An enhanced Properties class
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbProperties
 	extends Properties
@@ -71,7 +71,7 @@ public class WbProperties
 	{
 		saveToFile(filename, null);
 	}
-	
+
 	public synchronized void saveToFile(File filename, WbProperties reference)
 		throws IOException
 	{
@@ -120,7 +120,7 @@ public class WbProperties
 				bw.write(comment);
 				bw.newLine();
 			}
-			
+
 			if (lastKey != null)
 			{
 				String k1 = null;
@@ -144,7 +144,7 @@ public class WbProperties
 				// Newlines will also be encoded, but we want them "visible" with
 				// line continuation in the written file
 				value = value.replace(newlineEscape, "\\\n");
-				
+
 				if (value.length() > 0)
 				{
 					bw.write(key + "=" + value);
@@ -313,17 +313,17 @@ public class WbProperties
 	{
 		this.comments.clear();
 	}
-	
+
 	public String getComment(String key)
 	{
 		return comments.get(key);
 	}
-	
+
 	public void addPropertyDefinition(String line)
 	{
 		addPropertyDefinition(line, null);
 	}
-	
+
 	/**
 	 *	Adds a property definition in the form key=value
 	 *	Lines starting with # are ignored
@@ -381,7 +381,7 @@ public class WbProperties
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 		loadFromReader(reader);
 	}
-	
+
 	public void loadFromReader(BufferedReader in)
 		throws IOException
 	{

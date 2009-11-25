@@ -12,6 +12,12 @@
 
   <entry dev-build="9" type="enh">
     <description>
+			The connection profile has a new option to filter schema and catalog names from the dropdown in the DbExplorer.
+		</description>
+	</entry>
+
+  <entry dev-build="9" type="enh">
+    <description>
 			A new option to keep the highlight when using "Highlight current statement" has been added (Tools -> Options -> Editor)
 		</description>
 	</entry>

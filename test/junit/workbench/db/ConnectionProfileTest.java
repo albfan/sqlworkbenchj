@@ -53,7 +53,10 @@ public class ConnectionProfileTest
 		old.setUrl("jdbc:some:database");
 		old.setHideWarnings(true);
 		old.setRemoveComments(true);
-
+		ObjectNameFilter filter = new ObjectNameFilter();
+		filter.addExpression("^pg_toast.*");
+		filter.resetModified();
+		old.setCatalogFilter(filter);
 
 		ConnectionProfile copy = old.createCopy();
 		assertFalse(copy.getAutocommit());
@@ -67,8 +70,12 @@ public class ConnectionProfileTest
 		assertTrue(copy.getTrimCharData());
 		assertTrue(copy.getIncludeNullInInsert());
 		assertTrue(copy.getRemoveComments());
-
+		assertNull(copy.getSchemaFilter());
+		assertNotNull(copy.getCatalogFilter());
+		assertEquals(1, copy.getCatalogFilter().getSize());
 		assertEquals(42, copy.getIdleTime());
+		assertEquals(filter, copy.getCatalogFilter());
+		
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());
 		assertTrue(copy.isHideWarnings());

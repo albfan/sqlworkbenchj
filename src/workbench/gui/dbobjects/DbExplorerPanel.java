@@ -44,6 +44,7 @@ import javax.swing.event.ChangeListener;
 import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.ObjectNameFilter;
 
 import workbench.db.WbConnection;
 import workbench.gui.components.FlatButton;
@@ -125,7 +126,7 @@ public class DbExplorerPanel
 	private FlatButton reloadButton;
 	private boolean locked;
 	protected String tabName;
-
+	
 	public DbExplorerPanel()
 	{
 		this(null);
@@ -380,11 +381,18 @@ public class DbExplorerPanel
 
 				this.schemaSelector.removeAllItems();
 				this.schemaSelector.addItem("*");
+
+				ObjectNameFilter filter = dbConnection.getSchemaFilter();
+
 				for (int i=0; i < schemas.size(); i++)
 				{
 					String schema = (String)schemas.get(i);
 					if (schema != null)
 					{
+						if (filter != null)
+						{
+							if (filter.isExcluded(schema)) continue;
+						}
 						this.schemaSelector.addItem(schema.trim());
 						if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
 					}
@@ -531,7 +539,7 @@ public class DbExplorerPanel
 		setSwitchCatalog(false);
 
 		reloadSchemasAction.setEnabled((dbConnection != null));
-		
+
 		if (aConnection == null)
 		{
 			this.reset();
@@ -610,7 +618,6 @@ public class DbExplorerPanel
 		{
 			WbSwingUtilities.showDefaultCursorOnWindow(this);
 		}
-
 	}
 
 	private void readCatalogs()
@@ -645,12 +652,17 @@ public class DbExplorerPanel
 			{
 				catalogToSelect = dbConnection.getMetadata().getCurrentCatalog();
 			}
-			
+
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(cat);
 
+			ObjectNameFilter filter = dbConnection.getCatalogFilter();
 			for (String db : catalogs)
 			{
+				if (filter != null)
+				{
+					if (filter.isExcluded(db)) continue;
+				}
 				if (db.equalsIgnoreCase(catalogToSelect)) selectLastCatalog = true;
 				catalogSelector.addItem(db);
 			}
@@ -664,7 +676,7 @@ public class DbExplorerPanel
 			{
 				this.catalogSelector.setSelectedItem(catalogToSelect);
 			}
-			
+
 			this.catalogSelector.addActionListener(this);
 			this.catalogSelector.setVisible(true);
 			this.catalogSelector.setEnabled(true);
@@ -869,7 +881,7 @@ public class DbExplorerPanel
 	{
 		PanelTitleSetter.updateTitle(this);
 	}
-	
+
 	public String getTabTitle()
 	{
 		return (tabTitle == null ? ResourceMgr.getString("LblDbExplorer") : tabTitle);
@@ -1001,7 +1013,7 @@ public class DbExplorerPanel
 	{
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
 		if (!isModified()) return true;
-		
+
 		boolean canClose = WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", getRealTabTitle());
 		return canClose;
 	}

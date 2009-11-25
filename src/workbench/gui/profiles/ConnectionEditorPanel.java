@@ -41,6 +41,7 @@ import javax.swing.border.LineBorder;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
+import workbench.db.ObjectNameFilter;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.BooleanPropertyEditor;
 import workbench.gui.components.DelimiterDefinitionPanel;
@@ -102,6 +103,9 @@ public class ConnectionEditorPanel
 		policy.addComponent(altDelimiter.getTextField());
 		policy.addComponent(altDelimiter.getCheckBox());
 		policy.addComponent(tfWorkspaceFile);
+		policy.addComponent(editConnectionScriptsButton);
+		policy.addComponent(editFilterButton);
+		
 		policy.setDefaultComponent(tfProfileName);
 
 		this.setFocusCycleRoot(false);
@@ -215,6 +219,9 @@ public class ConnectionEditorPanel
     tfWorkspaceFile = new StringPropertyEditor();
     selectWkspButton = new FlatButton();
     jSeparator3 = new javax.swing.JSeparator();
+    jPanel5 = new javax.swing.JPanel();
+    editFilterButton = new FlatButton();
+    filterLabel = new javax.swing.JLabel();
 
     FormListener formListener = new FormListener();
 
@@ -494,21 +501,25 @@ public class ConnectionEditorPanel
     editConnectionScriptsButton.setText(ResourceMgr.getString("LblConnScripts")); // NOI18N
     editConnectionScriptsButton.setToolTipText(ResourceMgr.getString("d_LblConnScripts")); // NOI18N
     editConnectionScriptsButton.addActionListener(formListener);
-    jPanel4.add(editConnectionScriptsButton, new java.awt.GridBagConstraints());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    jPanel4.add(editConnectionScriptsButton, gridBagConstraints);
 
     scriptLabel.setMaximumSize(new java.awt.Dimension(16, 16));
     scriptLabel.setMinimumSize(new java.awt.Dimension(16, 16));
     scriptLabel.setPreferredSize(new java.awt.Dimension(16, 16));
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 9);
     jPanel4.add(scriptLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 15;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 0);
     add(jPanel4, gridBagConstraints);
 
@@ -670,6 +681,35 @@ public class ConnectionEditorPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 7, 0);
     add(jSeparator3, gridBagConstraints);
+
+    jPanel5.setLayout(new java.awt.GridBagLayout());
+
+    editFilterButton.setText(ResourceMgr.getString("LblSchemaFilterBtn")); // NOI18N
+    editFilterButton.setToolTipText(ResourceMgr.getString("d_LblSchemaFilterBtn")); // NOI18N
+    editFilterButton.addActionListener(formListener);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    jPanel5.add(editFilterButton, gridBagConstraints);
+
+    filterLabel.setMaximumSize(new java.awt.Dimension(16, 16));
+    filterLabel.setMinimumSize(new java.awt.Dimension(16, 16));
+    filterLabel.setPreferredSize(new java.awt.Dimension(16, 16));
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    jPanel5.add(filterLabel, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 16;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 0);
+    add(jPanel5, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -679,6 +719,9 @@ public class ConnectionEditorPanel
     public void actionPerformed(java.awt.event.ActionEvent evt) {
       if (evt.getSource() == editConnectionScriptsButton) {
         ConnectionEditorPanel.this.editConnectionScriptsButtonActionPerformed(evt);
+      }
+      else if (evt.getSource() == editFilterButton) {
+        ConnectionEditorPanel.this.editFilterButtonActionPerformed(evt);
       }
     }
 
@@ -768,6 +811,13 @@ public class ConnectionEditorPanel
 		checkScripts();
 	}//GEN-LAST:event_editConnectionScriptsButtonActionPerformed
 
+	private void editFilterButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_editFilterButtonActionPerformed
+	{//GEN-HEADEREND:event_editFilterButtonActionPerformed
+		Dialog d = (Dialog)SwingUtilities.getWindowAncestor(this);
+		EditConnectionFiltersPanel.editFilter(d, this.getProfile());
+		checkFilters();
+	}//GEN-LAST:event_editFilterButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
   protected javax.swing.JLabel altDelimLabel;
   protected workbench.gui.components.DelimiterDefinitionPanel altDelimiter;
@@ -779,9 +829,11 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox confirmUpdates;
   protected javax.swing.JPanel controlUpdates;
   protected javax.swing.JButton editConnectionScriptsButton;
+  protected javax.swing.JButton editFilterButton;
   protected javax.swing.JCheckBox emptyStringIsNull;
   protected javax.swing.JButton extendedProps;
   protected javax.swing.JLabel fetchSizeLabel;
+  protected javax.swing.JLabel filterLabel;
   protected javax.swing.JCheckBox hideWarnings;
   protected javax.swing.JCheckBox includeNull;
   protected workbench.gui.components.WbColorPicker infoColor;
@@ -790,6 +842,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JPanel jPanel3;
   protected javax.swing.JPanel jPanel4;
+  protected javax.swing.JPanel jPanel5;
   protected javax.swing.JSeparator jSeparator2;
   protected javax.swing.JSeparator jSeparator3;
   protected javax.swing.JLabel lblDriver;
@@ -941,6 +994,27 @@ public class ConnectionEditorPanel
 		}
 	}
 
+	private int getFilterSize(ObjectNameFilter f)
+	{
+		if (f == null) return 0;
+		return f.getSize();
+	}
+
+	private void checkFilters()
+	{
+		int f1 = currentProfile == null ? 0 : getFilterSize(currentProfile.getSchemaFilter());
+		int f2 = currentProfile == null ? 0 : getFilterSize(currentProfile.getCatalogFilter());
+		boolean hasFilter = (f1 + f2) > 0;
+		if (hasFilter)
+		{
+			filterLabel.setIcon(ResourceMgr.getPicture("tick"));
+		}
+		else
+		{
+			filterLabel.setIcon(null);
+		}
+
+	}
 	private void checkScripts()
 	{
 		boolean hasScript = (currentProfile == null ? false : currentProfile.hasConnectScript());
@@ -953,6 +1027,7 @@ public class ConnectionEditorPanel
 			scriptLabel.setIcon(null);
 		}
 	}
+	
 	private void checkExtendedProps()
 	{
 		Properties props = (currentProfile == null ? null : currentProfile.getConnectionProperties());
@@ -996,6 +1071,7 @@ public class ConnectionEditorPanel
 			this.infoColor.setSelectedColor(c);
 			checkExtendedProps();
 			checkScripts();
+			checkFilters();
 		}
 		catch (Exception e)
 		{

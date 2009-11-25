@@ -129,7 +129,7 @@ public class StringUtil
 	{
 		if (isEmptyString(compareTo)) return false;
 		if (isEmptyString(text)) return false;
-		
+
 		int textLength = text.length();
 		int len = compareTo.length();
 
@@ -652,7 +652,7 @@ public class StringUtil
 	 */
 	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets, boolean keepQuotes)
 	{
-		if (isEmptyString(aString)) return new ArrayList<String>();
+		if (isEmptyString(aString)) return new ArrayList<String>(0);
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
 		tok.setDelimiterNeedsWhitspace(false);
 		tok.setKeepQuotes(keepQuotes);
@@ -1202,7 +1202,7 @@ public class StringUtil
 	public static String replaceProperties(Properties props, String input)
 	{
 		if (isEmptyString(input)) return input;
-		
+
 		Matcher m = VARIABLE_PATTERN.matcher(input);
 		if (m == null)
 		{
@@ -1250,7 +1250,7 @@ public class StringUtil
 	{
 		return containsWords(toSearch, searchValues, matchAll, ignoreCase, false);
 	}
-	
+
 	/**
 	 * Searches for multiples words inside a string.
 	 *
@@ -1281,7 +1281,7 @@ public class StringUtil
 			{
 				flags += Pattern.MULTILINE;
 			}
-			
+
 			Pattern p = Pattern.compile(expression, flags);
 			Matcher m = p.matcher(toSearch);
 

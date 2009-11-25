@@ -57,9 +57,9 @@ public class ConnectionProfile
 	private Boolean sessionReadOnly;
 	private Boolean sessionConfirmUpdates;
 	private boolean confirmUpdates;
-	
+
 	private Integer defaultFetchSize;
-	
+
 	private boolean emptyStringIsNull = false;
 	private boolean includeNullInInsert = true;
 	private boolean removeComments = false;
@@ -72,9 +72,11 @@ public class ConnectionProfile
 	private long idleTime = 0;
 	private Color infoColor;
 	private boolean copyPropsToSystem = false;
-	
+
 	private DelimiterDefinition alternateDelimiter;
-	
+	private ObjectNameFilter schemaFilter;
+	private ObjectNameFilter catalogFilter;
+
 	public ConnectionProfile()
 	{
 		this.isNew = true;
@@ -101,12 +103,50 @@ public class ConnectionProfile
 		cp.setName(ResourceMgr.getString("TxtEmptyProfileName"));
 		return cp;
 	}
-	
+
+	public ObjectNameFilter getCatalogFilter()
+	{
+		return catalogFilter;
+	}
+
+	public void setCatalogFilter(ObjectNameFilter filter)
+	{
+		if (catalogFilter == null && filter == null) return;
+		if (filter == null)
+		{
+			changed = true;
+		}
+		else
+		{
+			changed = filter.isModified();
+		}
+		catalogFilter = filter;
+	}
+
+	public ObjectNameFilter getSchemaFilter()
+	{
+		return schemaFilter;
+	}
+
+	public void setSchemaFilter(ObjectNameFilter filter)
+	{
+		if (schemaFilter == null && filter == null) return;
+		if (filter == null)
+		{
+			changed = true;
+		}
+		else
+		{
+			changed = filter.isModified();
+		}
+		schemaFilter = filter;
+	}
+
 	public Color getInfoDisplayColor()
 	{
 		return this.infoColor;
 	}
-	
+
 	public boolean isHideWarnings()
 	{
 		return hideWarnings;
@@ -131,14 +171,21 @@ public class ConnectionProfile
 		}
 		this.infoColor = c;
 	}
-	
+
+	public DelimiterDefinition getAlternateDelimiter()
+	{
+		if (this.alternateDelimiter == null) return null;
+		if (this.alternateDelimiter.isEmpty()) return null;
+		return this.alternateDelimiter;
+	}
+
 	public void setAlternateDelimiter(DelimiterDefinition def)
 	{
 		if (def == null && this.alternateDelimiter == null) return;
-		
+
 		// Do not accept a semicolon as the alternate delimiter
 		if (def != null && def.isStandard()) return;
-		
+
 		if ((def == null && this.alternateDelimiter != null) ||
 			  (def != null && this.alternateDelimiter == null) ||
 				(def != null && !def.equals(this.alternateDelimiter)) ||
@@ -148,12 +195,12 @@ public class ConnectionProfile
 			this.changed = true;
 		}
 	}
-	
+
 	public boolean getCopyExtendedPropsToSystem()
 	{
 		return this.copyPropsToSystem;
 	}
-	
+
 	public void setCopyExtendedPropsToSystem(boolean flag)
 	{
 		if (flag != this.copyPropsToSystem) changed = true;
@@ -170,7 +217,7 @@ public class ConnectionProfile
 		sessionReadOnly = null;
 		sessionConfirmUpdates = null;
 	}
-	
+
 	public void setSessionReadOnly(boolean flag)
 	{
 		sessionReadOnly = Boolean.valueOf(flag);
@@ -185,31 +232,24 @@ public class ConnectionProfile
 		if (sessionReadOnly != null) return sessionReadOnly.booleanValue();
 		return isReadOnly();
 	}
-	
+
 	public void setReadOnly(boolean flag)
 	{
 		if (this.readOnly != flag) changed = true;
 		this.readOnly = flag;
 	}
-	
-	public boolean getTrimCharData() 
-	{ 
-		return trimCharData; 
-	}
-	
-	public void setTrimCharData(boolean flag) 
-	{ 
-		if (flag != trimCharData) changed = true;
-		trimCharData = flag; 
-	}
-	
-	public DelimiterDefinition getAlternateDelimiter()
+
+	public boolean getTrimCharData()
 	{
-		if (this.alternateDelimiter == null) return null;
-		if (this.alternateDelimiter.isEmpty()) return null;
-		return this.alternateDelimiter;
+		return trimCharData;
 	}
-	
+
+	public void setTrimCharData(boolean flag)
+	{
+		if (flag != trimCharData) changed = true;
+		trimCharData = flag;
+	}
+
 	public boolean getStoreExplorerSchema()
 	{
 		return rememberExplorerSchema;
@@ -246,15 +286,15 @@ public class ConnectionProfile
 	}
 
 	/**
-	 * This method is used for backward compatibility. Old profiles 
-	 * had this property and to be able to load XML files with 
+	 * This method is used for backward compatibility. Old profiles
+	 * had this property and to be able to load XML files with
 	 * old profiles the setter must still be there.
-	 * 
+	 *
 	 * @deprecated
 	 * @param flag
 	 */
 	public void setDisableUpdateTableCheck(boolean flag) { }
-	
+
 	/**
 	 * Return true if the application should use a separate connection
 	 * per tab or if all SQL tabs including DbExplorer tabs and windows
@@ -276,7 +316,7 @@ public class ConnectionProfile
 		if (this.includeNullInInsert != flag) this.changed = true;
 		this.includeNullInInsert = flag;
 	}
-	
+
 	/**
 	 * Define how columns with a NULL value are treated when creating INSERT statements.
 	 * If this is set to false, then any column with an a NULL value
@@ -436,7 +476,7 @@ public class ConnectionProfile
 	 *	password. This is not put into the getPassword()
 	 *	method because the XMLEncode would write the
 	 *	password in plain text into the XML file.
-	 * 
+	 *
 	 *	A method beginning with decrypt is not
 	 *	regarded as a property and thus not written
 	 *	to the XML file.
@@ -467,12 +507,12 @@ public class ConnectionProfile
 		this.changed = true;
 		this.isNew = true;
 	}
-	
-	public boolean isNew() 
-	{ 
-		return this.isNew; 
+
+	public boolean isNew()
+	{
+		return this.isNew;
 	}
-  
+
 	public boolean isChanged()
 	{
 		return this.changed || this.isNew;
@@ -488,6 +528,8 @@ public class ConnectionProfile
 		this.changed = false;
 		this.isNew = false;
 		if (this.alternateDelimiter != null) this.alternateDelimiter.resetChanged();
+		if (this.schemaFilter != null) schemaFilter.resetModified();
+		if (this.catalogFilter != null) catalogFilter.resetModified();
 	}
 
 	private String encryptPassword(String aPwd)
@@ -506,14 +548,14 @@ public class ConnectionProfile
 	/**
 	 *	Returns the name of the Profile
 	 */
-	public String toString() 
-	{ 
-		return this.name; 
+	public String toString()
+	{
+		return this.name;
 	}
 
 	/**
 	 * The hashCode is based on the profile key's hash code.
-	 * 
+	 *
 	 * @see #getKey()
 	 * @see ProfileKey#hashCode()
 	 * @return the hashcode for the profile key
@@ -563,11 +605,11 @@ public class ConnectionProfile
 		this.driverclass = drvClass;
 	}
 
-	public String getUsername() 
-	{ 
-		return this.username; 
+	public String getUsername()
+	{
+		return this.username;
 	}
-	
+
 	public void setUsername(java.lang.String newName)
 	{
 		if (newName != null) newName = newName.trim();
@@ -575,11 +617,11 @@ public class ConnectionProfile
 		this.username = newName;
 	}
 
-	public boolean getAutocommit() 
-	{ 
-		return this.autocommit; 
+	public boolean getAutocommit()
+	{
+		return this.autocommit;
 	}
-	
+
 	public void setAutocommit(boolean aFlag)
 	{
 		if (aFlag != this.autocommit && !changed)
@@ -618,7 +660,7 @@ public class ConnectionProfile
 	/**
 	 * Returns a copy of this profile keeping it's modified state.
 	 * isNew() and isChanged() of the copy will return the same values as this instance
-	 * 
+	 *
 	 * @return a copy of this profile
 	 * @see #isNew()
 	 * @see #isChanged()
@@ -637,7 +679,7 @@ public class ConnectionProfile
 	 * will return true on the copy
 	 * @return a copy of this profile
 	 * @see #isNew()
-	 * @see #isChanged() 
+	 * @see #isChanged()
 	 */
 	public ConnectionProfile createCopy()
 	{
@@ -671,7 +713,8 @@ public class ConnectionProfile
 		result.setHideWarnings(hideWarnings);
 		result.setCopyExtendedPropsToSystem(copyPropsToSystem);
 		result.setRemoveComments(this.removeComments);
-		
+		result.setCatalogFilter(this.catalogFilter == null ? null : catalogFilter.createCopy());
+		result.setSchemaFilter(this.schemaFilter == null ? null : schemaFilter.createCopy());
 		if (connectionProperties != null)
 		{
 			Enumeration keys = connectionProperties.propertyNames();
@@ -684,7 +727,7 @@ public class ConnectionProfile
 				result.connectionProperties.put(key, value);
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -785,7 +828,7 @@ public class ConnectionProfile
 			sessionReadOnly = Boolean.valueOf(!flag);
 		}
 	}
-	
+
 	public boolean confirmUpdatesInSession()
 	{
 		if (sessionConfirmUpdates != null) return sessionConfirmUpdates.booleanValue();
@@ -843,7 +886,7 @@ public class ConnectionProfile
 			StringUtil.isNonBlank(preDisconnectScript) ||
 			(StringUtil.isNonBlank(idleScript) && idleTime > 0);
 	}
-	
+
 	public String getPostConnectScript()
 	{
 		return postConnectScript;
@@ -891,7 +934,7 @@ public class ConnectionProfile
 	{
 		return this.idleTime;
 	}
-	
+
 	public void setIdleTime(long time)
 	{
 		if (time != this.idleTime && !changed)
@@ -900,7 +943,7 @@ public class ConnectionProfile
 		}
 		this.idleTime = time;
 	}
-	
+
 	public String getIdleScript()
 	{
 		return idleScript;

@@ -107,6 +107,16 @@ public class WbConnection
 		}
 	}
 
+	public ObjectNameFilter getCatalogFilter()
+	{
+		return profile == null ? null : profile.getCatalogFilter();
+	}
+
+	public ObjectNameFilter getSchemaFilter()
+	{
+		return profile == null ? null : profile.getSchemaFilter();
+	}
+
 	public boolean getRemoveComments()
 	{
 		return removeComments;
