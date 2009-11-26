@@ -541,7 +541,7 @@
 				is made for a DbExplorer panel, the errors will only be visible in the log file.
 			</para>
 
-			<section id="profile-keep-alive">
+			<simplesect id="profile-keep-alive">
 				<title>Keep alive script</title>
 
 				<para>
@@ -571,9 +571,41 @@
 					SQL statement for the next time.
 				</para>
 
-			</section>
+			</simplesect>
 
 		</section>
+    <section id="profile-filters">
+      <title>Schema and Catalog filters</title>
+      <para>
+        If your database contains a lot of schema or catalogs that you don't want to be listed in the dropdown
+        of the <link linkend="dbexplorer">DbExplorer</link>, you can define filter expressions to hide certain entries.
+      </para>
+      <para>
+        The filters are defined by clicking on the <guibutton>Schema/Catalog Filter</guibutton> button.
+        The filter dialog contains two input fields, one to filter schema name and one to filter catalog names.
+      </para>
+      <para>
+        Each line of the filter definition defines a single expression of schema/catalog names to be <emphasis>excluded</emphasis>
+        from the dropdown, i.e. if a schema/catalog matches the defined name, it will not be listed in the dropdown.
+      </para>
+      <para>
+        The filter items are treated as regular expressions, so the standard SQL wildcards will not work here. The basic
+        expression is just a name (e.g. MDSYS). Comparison is always done case-insensitive. So <emphasis>mdsys</emphasis>
+        and <emphasis>MDSYS</emphasis> will achieve the same thing.
+      </para>
+      <para>
+        If you want to filter all schemas that start with a certain value, the regular expression would be:
+        <literal>^pg_toast.*</literal>. Note the dot followed by a * at the end. In a regular expression the dot matches
+        any character, and the * will allow any number of characters to follow. The ^ specifies that the whole string must
+        occur at the beginning of the value.
+      </para>
+      <para>
+        The regular expression must match completely in order to exlude the value from the dropdown.
+      </para>
+      <para>
+        If you want to learn more about regular expressions, please have a look at <ulink url="http://www.regular-expressions.info/"/>
+      </para>
+    </section>
 
   </section>
 

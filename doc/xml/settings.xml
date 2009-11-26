@@ -839,7 +839,7 @@
     <section id="wb-log">
       <title>Workbench logging</title>
 
-      <simplesect id="settings-log-level">
+      <simplesect id="settings-log-file">
         <title>Log file location</title>
         <para>Property: <literal>workbench.log.file</literal></para>
         <para>

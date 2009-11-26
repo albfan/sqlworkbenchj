@@ -851,28 +851,24 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 	<section id="server-messages">
 		<title>Viewing server messages</title>
 
-		<section id="server-msg-mssql">
-			<title>MS SQL Server</title>
+		<section id="server-msg-pg">
+			<title>PostgreSQL</title>
 			<para>
-				For MS SQL Server, any message written with the <literal>PRINT</literal>
-				command will be displayed in the <literal>Messages</literal> tab after the
-				SQL command has finished. The <literal>PRINT</literal> command is usually
-				used in stored procedures for logging purposes, but it can also be used
-				as a command on its own:
+				Postgres supports sending of messages to the client using the <literal>RAISE</literal> statement in PL/pgSQL.
+        The following function will display a result set (with the number 42) and the message area will contain the
+        message <emphasis>Thinking hard...</emphasis>
 			</para>
-
-			<programlisting>PRINT "Deleting records...";
-DELETE from my_table WHERE value = 42;
-PRINT "Done."</programlisting>
-
-			<para>
-				This will execute the <literal>DELETE</literal>. Once this script has
-				finished, the <literal>Messages</literal> tab will contain the text:
-			</para>
-
-			<programlisting>Deleting records...
-Done.</programlisting>
-
+      <programlisting>CREATE OR REPLACE FUNCTION the_answer()
+  RETURNS integer
+  LANGUAGE plpgsql
+AS
+$body$
+BEGIN
+  RAISE NOTICE 'Thinking hard...';
+  RETURN 42;
+END;
+$body$
+/</programlisting>
 		</section>
 
 		<section id="server-msg-ora">
@@ -905,12 +901,28 @@ Done.</programlisting>
 
 		</section>
 
-		<section id="server-msg-pg">
-			<title>PostgreSQL</title>
+		<section id="server-msg-mssql">
+			<title>MS SQL Server</title>
 			<para>
-				Postgres supports a similar mechanism. Any text returned by a function or
-				stored procedure with the <literal>RAISE</literal> keyword, will be displayed in the message tab as well
+				For MS SQL Server, any message written with the <literal>PRINT</literal>
+				command will be displayed in the <literal>Messages</literal> tab after the
+				SQL command has finished. The <literal>PRINT</literal> command is usually
+				used in stored procedures for logging purposes, but it can also be used
+				as a command on its own:
 			</para>
+
+			<programlisting>PRINT "Deleting records...";
+DELETE from my_table WHERE value = 42;
+PRINT "Done."</programlisting>
+
+			<para>
+				This will execute the <literal>DELETE</literal>. Once this script has
+				finished, the <literal>Messages</literal> tab will contain the text:
+			</para>
+
+			<programlisting>Deleting records...
+Done.</programlisting>
+
 		</section>
 
 		<section id="server-msg-other">
@@ -1308,7 +1320,7 @@ SQL></screen>
         will detect this, and retrieve the result of the ref cursors.
       </para>
       <para>
-        Consider the following stored procedure:
+        Consider the following (Oracle) stored procedure:
       </para>
 <programlisting>CREATE PROCEDURE ref_cursor_example(pid number, person_result out sys_refcursor, addr_result out sys_refcursor) is
 BEGIN
@@ -1352,7 +1364,8 @@ DECLARE
     OPEN mycurs FOR SELECT * FROM PERSON;
     RETURN mycurs;
  END;
-$$ LANGUAGE plpgsql;</programlisting>
+$$ LANGUAGE plpgsql;
+/</programlisting>
       <para>
         You can call this function using
       </para>
