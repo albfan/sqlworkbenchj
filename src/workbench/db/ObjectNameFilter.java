@@ -79,7 +79,7 @@ public class ObjectNameFilter
 		for (String expr : filterExpressions)
 		{
 			Pattern p = Pattern.compile(expr, Pattern.CASE_INSENSITIVE);
-			if (p.matcher(name).matches()) return true;
+			return p.matcher(name).matches();
 		}
 		return false;
 	}

@@ -113,9 +113,9 @@ public class EditConnectionFiltersPanel
 	{
 		int lines = catalogFilterEditor.getLineCount();
 		String text = catalogFilterEditor.getText().trim();
+		if (catalogFilter != null) catalogFilter.clear();
 		if (lines <= 0 || text.length() == 0)
 		{
-			if (catalogFilter != null) catalogFilter.clear();
 			return catalogFilter;
 		}
 		if (catalogFilter == null)
@@ -126,7 +126,7 @@ public class EditConnectionFiltersPanel
 		for (int i=0; i < lines; i++)
 		{
 			String l = catalogFilterEditor.getLineText(i);
-			catalogFilter.addExpression(l);
+			catalogFilter.addExpression(convertSQLExpression(l));
 		}
 		return catalogFilter;
 	}
@@ -135,9 +135,9 @@ public class EditConnectionFiltersPanel
 	{
 		int lines = schemaFilterEditor.getLineCount();
 		String text = schemaFilterEditor.getText().trim();
+		if (schemaFilter != null) schemaFilter.clear();
 		if (lines <= 0 || text.length() == 0)
 		{
-			if (schemaFilter != null) schemaFilter.clear();
 			return schemaFilter;
 		}
 
@@ -149,11 +149,20 @@ public class EditConnectionFiltersPanel
 		for (int i=0; i < lines; i++)
 		{
 			String l = schemaFilterEditor.getLineText(i);
-			schemaFilter.addExpression(l);
+			schemaFilter.addExpression(convertSQLExpression(l));
 		}
 		return schemaFilter;
 	}
 
+	private String convertSQLExpression(String input) {
+		if (input.endsWith("%")) {
+			input = input.substring(0, input.length() - 1) + ".*";
+			if (!input.startsWith("^")) {
+				input = "^" + input;
+			}
+		}
+		return input;
+	}
 	public static boolean editFilter(Dialog owner, ConnectionProfile profile)
 	{
 		EditConnectionFiltersPanel p = new EditConnectionFiltersPanel(profile);
