@@ -587,8 +587,9 @@ public class DbMetadata
 	 * method will replace all "problematic" characters in the
 	 * SQL string, and will return a String that the DBMS will
 	 * understand.
+	 * <br/>
 	 * Currently this is only implemented for PostgreSQL to
-	 * mimic pgsql's $$ quoting for stored procedures
+	 * fix the lack of $$ in older JDBC drivers
 	 *
 	 * @see workbench.db.postgres.PostgresDDLFilter
 	 * @see workbench.sql.commands.DdlCommand#execute(java.lang.String)
@@ -1175,36 +1176,7 @@ public class DbMetadata
 		boolean synRetrieved = false;
 		boolean synonymsRequested = typeIncluded("SYNONYM", types);
 
-		String excludeSynsRegex = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".exclude.synonyms", null);
-		Pattern synPattern = null;
-		if (synonymsRequested && excludeSynsRegex != null)
-		{
-			try
-			{
-				synPattern = Pattern.compile(excludeSynsRegex);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DbMetadata.getTables()", "Invalid RegEx for excluding public synonyms specified. RegEx ignored", e);
-				synPattern = null;
-			}
-		}
-
-		String excludeTablesRegex = Settings.getInstance().getProperty("workbench.db." + getDbId() + ".exclude.tables", null);
-		Pattern excludeTablePattern = null;
-		if (excludeTablesRegex != null && typeIncluded("TABLE", types))
-		{
-			try
-			{
-				excludeTablePattern = Pattern.compile(excludeTablesRegex);
-			}
-			catch (Exception e)
-			{
-				LogMgr.logError("DbMetadata.getTables()", "Invalid RegEx for excluding tables. RegEx '" + excludeTablesRegex + "' ignored", e);
-				excludeTablePattern = null;
-			}
-			LogMgr.logInfo("DbMetadata.getTables()", "Excluding tables that match the following regex: " + excludeTablesRegex);
-		}
+		ObjectListFilter filter = new ObjectListFilter(getDbId());
 
 		Set snapshotList = Collections.EMPTY_SET;
 		if (checkOracleSnapshots)
@@ -1232,26 +1204,17 @@ public class DbMetadata
 				String ttype = tableRs.getString(4);
 				if (name == null) continue;
 
-				// filter out synonyms as defined by the user setting
-				if (synPattern != null)
-				{
-					Matcher m = synPattern.matcher(name);
-					if (m.matches()) continue;
-				}
+				if (filter.isExcluded(ttype, name)) continue;
+
+				boolean isSynoym = "SYNONYM".equals(ttype);
 
 				// prevent duplicate retrieval of SYNONYMS if the driver
 				// returns them already, but the Settings have enabled
 				// Synonym retrieval as well
 				// (e.g. because an upgraded Driver now returns the synonyms)
-				if (!synRetrieved && "SYNONYM".equals(ttype))
+				if (!synRetrieved && isSynoym)
 				{
 					synRetrieved = true;
-				}
-
-				if (excludeTablePattern != null && ttype.equalsIgnoreCase("TABLE"))
-				{
-					Matcher m = excludeTablePattern.matcher(name);
-					if (m.matches()) continue;
 				}
 
 				if (hideIndexes && isIndexType(ttype)) continue;
@@ -2045,7 +2008,6 @@ public class DbMetadata
 	 * Returns a list of all tables in the current schema.
 	 * <br/>
 	 * The types used are those returned by #getT
-	 * @return
 	 * @throws SQLException
 	 */
 	public List<TableIdentifier> getTableList()
@@ -2074,7 +2036,6 @@ public class DbMetadata
 	 *
 	 * @param name a pattern to search for object names
 	 * @param schema
-	 * @return
 	 * @throws SQLException
 	 */
 	public List<TableIdentifier> getSelectableObjectsList(String name, String schema)

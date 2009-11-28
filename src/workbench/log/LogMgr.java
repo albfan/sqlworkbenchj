@@ -17,7 +17,19 @@ import workbench.gui.components.*;
 import workbench.util.*;
 
 /**
- * The logging class used by SQL Workbench/J
+ * A facade to the actual logging implementation used.
+ * <br>
+ * Depending on the flag passed to {@link #init(boolean)}
+ * either a {@link SimpleLogger} or a {@link Log4JLogger} will be created.
+ * <br>
+ * If Log4J is used as the logging sub-system, none of the SQL Workbench/J
+ * log settings will be applied. Everything needs to be configured through Log4J
+ * <br>
+ * {@link Log4JHelper} is used to check if the Log4J classes are available at
+ * runtime (using reflection).
+ * The Log4J classes are expected to be in a file called <tt>log4j.jar</tt>
+ * that resides in the same directory as <tt>sqlworkbench.jar</tt> (for details
+ * see the manifest that is created in build.xml)
  * 
  * @author Thomas Kellerer
  */

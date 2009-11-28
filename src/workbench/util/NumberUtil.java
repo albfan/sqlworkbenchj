@@ -33,7 +33,7 @@ public class NumberUtil
 	 * @param one
 	 * @param other
 	 * 
-	 * @return
+	 * @return true, if both numbers are equals
 	 */
 	public static boolean valuesAreEquals(Number one, Number other)
 	{

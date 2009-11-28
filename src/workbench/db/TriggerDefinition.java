@@ -59,7 +59,6 @@ public class TriggerDefinition
 
 	/**
 	 * Returns the event that makes this trigger fire (e.g. UPDATE, INSERT, DELETE)
-	 * @param evt
 	 */
 	public String getTriggerEvent()
 	{
@@ -68,16 +67,15 @@ public class TriggerDefinition
 
 	/**
 	 * Define the type of trigger (BEFORE/AFTER)
-	 * @param evt
+	 * @param trgType
 	 */
-	public void setTriggerType(String typ)
+	public void setTriggerType(String trgType)
 	{
-		type = typ;
+		type = trgType;
 	}
 
 	/**
 	 * Return the type of the trigger (BEFORE/AFTER)
-	 * @param evt
 	 */
 	public String getTriggerType()
 	{

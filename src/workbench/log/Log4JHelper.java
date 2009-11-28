@@ -36,7 +36,8 @@ public class Log4JHelper
 		try
 		{
 			tested = true;
-			Class factory = Class.forName("org.apache.log4j.Log4JLoggerFactory");
+			Class.forName("org.apache.log4j.Logger");
+			Class factory = Class.forName("workbench.log.Log4JLoggerFactory");
 			Method setLoggerFqcn = factory.getDeclaredMethod("setLoggerFqcn", new Class[] { Class.class });
 			setLoggerFqcn.invoke(null, new Object[] { LogMgr.class } );
 			available = true;

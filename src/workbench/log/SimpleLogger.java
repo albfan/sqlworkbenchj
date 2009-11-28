@@ -42,10 +42,7 @@ public class SimpleLogger
 
 	public void setMessageFormat(String newFormat)
 	{
-		if (newFormat == null)
-		{
-			return;
-		}
+		if (newFormat == null) return;
 
 		messageFormat = newFormat.replace("{type}", "%1$-5s");
 		messageFormat = messageFormat.replace("{timestamp}", "%2$tF %2$tR");

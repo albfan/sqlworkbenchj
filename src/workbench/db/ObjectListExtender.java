@@ -28,13 +28,12 @@ public interface ObjectListExtender
 	 * @param result the DataStore containing the objects already returned by the driver
 	 * @param requestedTypes the object types as passed to DbMetadata.getObjects()
 	 * 
-	 * @see DbMetadata#getTables(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+	 * @see DbMetadata#getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
 	 */
 	void extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes);
 
 	/**
 	 * Return a list of object types that this extender handles
-	 * @return
 	 */
 	List<String> supportedTypes();
 		
@@ -70,7 +69,7 @@ public interface ObjectListExtender
 	 * the object name and type passed.
 	 *
 	 * @param con
-	 * @param object
+	 * @param name
 	 * @return a concrete DbObject
 	 */
 	DbObject getObjectDefinition(WbConnection con, DbObject name);

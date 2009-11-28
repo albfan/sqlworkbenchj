@@ -203,6 +203,13 @@ public class Settings
 		WbFile settings = new WbFile(cfd, configFilename);
 
 		boolean configLoaded = loadConfig(settings);
+		
+		if (configfile != null)
+		{
+			// Make the configuration directory available through a system property
+			// So that e.g. a log4j.xml can reference the directory using ${workbench.config.dir}
+			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
+		}
 
 		if (configLoaded || getBoolProperty("workbench.gui.testmode", false))
 		{
@@ -216,13 +223,6 @@ public class Settings
 				LogMgr.logInfo("Settings.<init>", "Resetting database properties to built-in defaults");
 				resetDefaults();
 			}
-		}
-
-		if (configfile != null)
-		{
-			// Make the configuration directory available through a system property
-			// So that e.g. a log4j.xml can reference the directory using ${workbench.config.dir}
-			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
 		}
 	}
 
@@ -283,7 +283,7 @@ public class Settings
 		boolean logSysErr = getBoolProperty("workbench.log.console", false);
 		LogMgr.logToSystemError(logSysErr);
 
-		String format = getProperty("workbench.log.format", "{type} {timestamp} {message} {error}");
+		String format = getProperty("workbench.log.format", "{timestamp} {type} {message} {error}");
 		LogMgr.setMessageFormat(format);
 
 		String level = getProperty("workbench.log.level", "INFO");
@@ -1705,8 +1705,6 @@ public class Settings
 	/**
 	 * Returns a list of DBIDs of servers that do not accept the NULL keyword
 	 * in a column definition.
-	 *
-	 * @return
 	 */
 	public List<String> getServersWithNoNullKeywords()
 	{
@@ -2150,7 +2148,7 @@ public class Settings
 
 	public int getMaxLogfileSize()
 	{
-		return this.getIntProperty("workbench.log.maxfilesize", 30000);
+		return this.getIntProperty("workbench.log.maxfilesize", 150000);
 	}
 
 	public boolean getCheckEscapedQuotes()

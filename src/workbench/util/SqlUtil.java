@@ -105,7 +105,7 @@ public class SqlUtil
 	/**
 	 * Removes the SQL verb of this command. The verb is defined
 	 * as the first "word" in the SQL string that is not a comment.
-	 * @see #getSqlVerb(CharSequence)
+	 * @see #getSqlVerb(java.lang.String) 
 	 */
 	public static String stripVerb(String sql)
 	{

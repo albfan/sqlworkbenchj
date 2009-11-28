@@ -10,9 +10,13 @@
  */
 package workbench.db;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
-import workbench.interfaces.PropertyStorage;
+import java.util.regex.PatternSyntaxException;
+import workbench.log.LogMgr;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -22,23 +26,44 @@ import workbench.util.StringUtil;
  */
 public class ObjectNameFilter
 {
-	private Set<String> filterExpressions;
+	private Set<Pattern> filterExpressions;
 	private boolean modified;
 
 	public ObjectNameFilter()
 	{
 	}
 
-	public void setFilterExpressions(Set<String> expressions)
+	/**
+	 * Define the expressions to be used.
+	 * <br/>
+	 * This will replace any existing filter definitions and reset the modified flag
+	 * <br/>
+	 * If the list is empty the current filter definitions are not changed
+	 *
+	 * @param expressions
+	 * @see #setExpressionList(java.lang.String) 
+	 */
+	public void setFilterExpressions(Collection<String> expressions)
 	{
-		filterExpressions = CollectionUtil.caseInsensitiveSet();
-		filterExpressions.addAll(expressions);
+		if (CollectionUtil.isEmpty(expressions)) return;
+
+		filterExpressions = new HashSet<Pattern>(expressions.size());
+		for (String exp : expressions)
+		{
+			addExpression(exp);
+		}
 		modified = false;
 	}
 
-	public Set<String> getFilterExpressions()
+	public Collection<String> getFilterExpressions()
 	{
-		return filterExpressions;
+		if (CollectionUtil.isEmpty(filterExpressions)) return null;
+		Set<String> result = CollectionUtil.caseInsensitiveSet();
+		for (Pattern p : filterExpressions)
+		{
+			result.add(p.pattern());
+		}
+		return result;
 	}
 
 	public void resetModified()
@@ -55,16 +80,40 @@ public class ObjectNameFilter
 		}
 	}
 	
+	/**
+	 * Defines a list of expressions for this filter.
+	 * <br/>
+	 * The expressions can be separated by a semicolon, optionally enclosed with double quotes
+	 * This will replace any existing filter definitions.
+	 * <br/>
+	 * If the list is empty the current filter definitions are not changed
+	 *
+	 * @param list a semicolon separated list of expressions
+	 * @see #setFilterExpressions(java.util.Collection) 
+	 */
+	public void setExpressionList(String list)
+	{
+		List<String> items = StringUtil.stringToList(list, ";", true, true);
+		setFilterExpressions(items);
+	}
+	
 	public void addExpression(String exp)
 	{
 		if (StringUtil.isBlank(exp)) return;
 		
 		if (filterExpressions == null)
 		{
-			filterExpressions = CollectionUtil.caseInsensitiveSet();
+			filterExpressions = new HashSet<Pattern>();
 		}
-		if (filterExpressions.contains(exp)) return;
-		filterExpressions.add(exp);
+
+		try
+		{
+			filterExpressions.add(Pattern.compile(exp, Pattern.CASE_INSENSITIVE));
+		}
+		catch (PatternSyntaxException p)
+		{
+			LogMgr.logError("ObjectNameFilter.addExpression()", "Could not compile expression: " + exp , p);
+		}
 		modified = true;
 	}
 
@@ -76,9 +125,8 @@ public class ObjectNameFilter
 	public boolean isExcluded(String name)
 	{
 		if (CollectionUtil.isEmpty(filterExpressions)) return false;
-		for (String expr : filterExpressions)
+		for (Pattern p : filterExpressions)
 		{
-			Pattern p = Pattern.compile(expr, Pattern.CASE_INSENSITIVE);
 			if (p.matcher(name).matches()) return true;
 		}
 		return false;
@@ -95,8 +143,7 @@ public class ObjectNameFilter
 		copy.modified = this.modified;
 		if (this.filterExpressions != null)
 		{
-			copy.filterExpressions = CollectionUtil.caseInsensitiveSet();
-			copy.filterExpressions.addAll(this.filterExpressions);
+			copy.filterExpressions = new HashSet<Pattern>(this.filterExpressions);
 		}
 		return copy;
 	}
@@ -116,14 +163,16 @@ public class ObjectNameFilter
 		if (this.filterExpressions == null && other.filterExpressions != null) return false;
 		if (this.filterExpressions != null && other.filterExpressions == null) return false;
 
-		for (String s : filterExpressions)
+		Collection<String> myPatterns = getFilterExpressions();
+		Collection<String> otherPatterns = other.getFilterExpressions();
+		for (String s : myPatterns)
 		{
-			if (!other.filterExpressions.contains(s)) return false;
+			if (!otherPatterns.contains(s)) return false;
 		}
 
-		for (String s : other.filterExpressions)
+		for (String s : otherPatterns)
 		{
-			if (!filterExpressions.contains(s)) return false;
+			if (!myPatterns.contains(s)) return false;
 		}
 		return true;
 	}

@@ -16,7 +16,6 @@ import org.apache.log4j.Appender;
 import org.apache.log4j.Category;
 import org.apache.log4j.FileAppender;
 import org.apache.log4j.Level;
-import org.apache.log4j.Log4JLoggerFactory;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
@@ -27,6 +26,7 @@ import workbench.gui.components.LogFileViewer;
 import workbench.util.StringUtil;
 
 /**
+ * An implementation of WbLogger that uses Log4J for logging.
  * 
  * @author Thomas Kellerer
  * @author Peter Franken
@@ -50,6 +50,7 @@ public class Log4JLogger
 	 * returns the first StackTraceElement after the LoggerController-class. That is, for the
 	 * following example, with a log-call in LogMgr.setLevel(), the code position
 	 * Settings.initLogging(Settings.java:222).
+	 * <br>
 	 * 
 	 * Example: Log-calll in LogMgr.setLevel() <code><br>
 	 *  at workbench.log.Log4JLogger.getLogger(Log4JLogger.java:223)<br>
@@ -63,7 +64,7 @@ public class Log4JLogger
 	 * in the message part!</b>
 	 * 
 	 * @param name Caller
-	 * @todo make this constructor more private, as soon as <loggerFactory> works with factories from
+	 * TODO: make this constructor more private, as soon as <loggerFactory> works with factories from
 	 *       other packages as org.apache.log4j
 	 */
 	public Log4JLogger(String name)
@@ -92,7 +93,8 @@ public class Log4JLogger
 	 * 
 	 * This method creates a new logging event and logs the event without further checks.
 	 * 
-	 * @param fqcn is ignored and replaced by {@link #getFQCN()}
+	 * @param fqcn is ignored and replaced by the value defined through {@link #setFqcn(String)}
+	 *
 	 */
 	@Override
 	protected void forcedLog(String fqcn, Priority level, Object message, Throwable t)

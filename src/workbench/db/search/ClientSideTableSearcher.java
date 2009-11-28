@@ -33,7 +33,10 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- *
+ * An implementation fo the TableDataSearch interface that reads each row into memory
+ * and compares the data using the functionality of a {@link workbench.storage.filter.ColumnComparator}
+ * to retain only those rows that match the criteria.
+ * 
  * @author Thomas Kellerer
  */
 public class ClientSideTableSearcher

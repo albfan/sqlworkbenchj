@@ -29,7 +29,10 @@ import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
 /**
- *
+ * A class to search the source code of database objects for a specific string.
+ * <br/>
+ * Only the sourcecode that can be retrieved through {@link workbench.db.DbMetadata} is searched.
+ * 
  * @author Thomas Kellerer
  */
 public class ObjectSourceSearcher

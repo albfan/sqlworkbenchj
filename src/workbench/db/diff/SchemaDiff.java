@@ -111,7 +111,6 @@ public class SchemaDiff
 	 *
 	 * @param source The connection to the reference schema
 	 * @param target the connection to the target schema
-	 * @param xmlNameSpace the namespace to be used for the XML, may be null.
 	 */
 	public SchemaDiff(WbConnection source, WbConnection target)
 	{

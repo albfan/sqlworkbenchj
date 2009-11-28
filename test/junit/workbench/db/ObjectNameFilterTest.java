@@ -10,6 +10,7 @@
  */
 package workbench.db;
 
+import java.util.Collection;
 import java.util.Set;
 import junit.framework.TestCase;
 import workbench.util.CollectionUtil;
@@ -41,6 +42,20 @@ public class ObjectNameFilterTest
 		assertTrue(filter.isExcluded("something"));
 		filter.resetModified();
 		assertFalse(filter.isModified());
+
+		filter = new ObjectNameFilter();
+		filter.setExpressionList("ONE;^DEV[0-9]+");
+		assertTrue(filter.isExcluded("one"));
+		assertTrue(filter.isExcluded("dev1"));
+		assertFalse(filter.isExcluded("public"));
+		assertFalse(filter.isModified());
+		Collection<String> expr = filter.getFilterExpressions();
+		assertNotNull(expr);
+		assertEquals(2, expr.size());
+
+		filter = new ObjectNameFilter();
+		expr = filter.getFilterExpressions();
+		assertNull(expr);
 	}
 
 	public void testCopy()

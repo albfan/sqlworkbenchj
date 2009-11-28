@@ -1272,7 +1272,7 @@ public class DataStore
 	 * Checks if the underlying SQL statement references only one table.
 	 * @return true if only one table is found in the SELECT statement
 	 *
-	 * @see workbench.util.SqlUtil#getObjects(String)
+	 * @see workbench.util.SqlUtil#getTables(java.lang.String) 
 	 */
 	public boolean sqlHasUpdateTable()
 	{

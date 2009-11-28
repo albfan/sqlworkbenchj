@@ -752,7 +752,6 @@ public class DbSettings
 	 * @return null if no statement is configured.
 	 * @see workbench.db.MetaDataSqlManager#TABLE_NAME_PLACEHOLDER
 	 * @see workbench.db.MetaDataSqlManager#COLUMN_NAME_PLACEHOLDER
-	 * @
 	 */
 	public String getAddColumnSql()
 	{
@@ -913,7 +912,6 @@ public class DbSettings
 	 * The SQL to alter a column's default. If this returns null, getSetColumnDefault()
 	 * and getDropColumnDefaultSql() should also be checked because some DBMS only
 	 * allow setting or removing the column default
-	 * @return
 	 */
 	public String getAlterColumnDefaultSql()
 	{
