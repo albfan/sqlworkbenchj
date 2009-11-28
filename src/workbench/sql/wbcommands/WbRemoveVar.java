@@ -19,8 +19,9 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 
 /**
+ * Delete a variable defined through {@link WbDefineVar}.
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbRemoveVar extends SqlCommand
 {

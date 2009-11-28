@@ -30,8 +30,12 @@ import workbench.util.StringUtil;
 
 /**
  * Change the active connection for a SQL script or in Console mode.
+ * <br>
+ * When running in GUI mode, this will only change the connection as long
+ * as the script is being executed. In console mode, this will change the
+ * connection permanently.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbConnect
 	extends SqlCommand

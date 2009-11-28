@@ -39,7 +39,10 @@ import workbench.util.StringUtil;
 
 /**
  * A class to search for text in all columns of all tables.
- * 
+ * <br/>
+ * This SQL commands parses the input and then uses {@link workbench.db.search.ClientSideTableSearcher}
+ * to perform the search.
+ *
  * @author Thomas Kellerer
  */
 public class WbGrepData

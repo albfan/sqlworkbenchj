@@ -22,8 +22,10 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
+ * Display the source code for a procedure.
  *
- * @author  support@sql-workbench.net
+ * @see workbench.db.ProcedureDefinition#getSource(workbench.db.WbConnection)
+ * @author Thomas Kellerer
  */
 public class WbProcSource
 	extends SqlCommand

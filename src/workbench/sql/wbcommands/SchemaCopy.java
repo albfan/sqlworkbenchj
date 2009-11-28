@@ -37,7 +37,7 @@ import workbench.util.MessageBuffer;
 /**
  * Handles a WbCopy call for a whole schema.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SchemaCopy
 	implements CopyTask

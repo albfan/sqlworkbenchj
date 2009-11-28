@@ -25,8 +25,12 @@ import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
 /**
+ * List all tables available to the current user.
+ * <br>
+ * This is the same information as displayed in the DbExplorer's "Objects" tab.
  *
- * @author  support@sql-workbench.net
+ * @see workbench.db.DbMetadata#getObjects(String, String, String, String[])
+ * @author Thomas Kellerer
  */
 public class WbListTables extends SqlCommand
 {

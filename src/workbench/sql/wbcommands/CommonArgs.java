@@ -33,7 +33,7 @@ import workbench.util.ValueConverter;
  * with popular (or so I think) values is added, e.g. the -encoding 
  * parameter.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class CommonArgs
 {

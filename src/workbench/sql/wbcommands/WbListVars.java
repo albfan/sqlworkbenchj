@@ -22,8 +22,9 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 
 /**
+ * Display all variables defined through {@link WbDefineVar}
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbListVars extends SqlCommand
 {

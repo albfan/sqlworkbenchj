@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.List;
 import workbench.db.DbSettings;
@@ -32,8 +31,17 @@ import workbench.util.StringUtil;
 
 /**
  * Retrieves information about a database object.
+ * <br>
+ * Only the object name is necessary. This class will then search the database
+ * for a databse object in the following order:
+ * <ol>
+ *		<li>Tables and Views</li>
+ *		<li>Synonyms</li>
+ *		<li>Sequences</li>
+ *		<li>Procedures (and functions)</li>
+ * </ol>
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ObjectInfo
 {

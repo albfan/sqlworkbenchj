@@ -24,8 +24,12 @@ import workbench.util.StringUtil;
 
 
 /**
+ * List all procedures and functions available to the current user.
+ * <br>
+ * This is the same information as displayed in the DbExplorer's "Procedure" tab.
  *
- * @author  support@sql-workbench.net
+ * @see workbench.db.ProcedureReader
+ * @author Thomas Kellerer
  */
 public class WbListProcedures
 	extends SqlCommand

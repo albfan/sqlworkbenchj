@@ -20,7 +20,7 @@ import workbench.sql.StatementRunnerResult;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbHelp
 	extends SqlCommand

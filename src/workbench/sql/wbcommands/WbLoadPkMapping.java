@@ -26,7 +26,7 @@ import workbench.util.WbFile;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbLoadPkMapping
 	extends SqlCommand

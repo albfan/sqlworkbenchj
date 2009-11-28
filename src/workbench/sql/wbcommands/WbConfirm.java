@@ -19,9 +19,12 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.StringUtil;
 
 /**
- * A SQL Statement to halt a script and confirm execution by the user
- *
- * @author support@sql-workbench.net
+ * A SQL Statement to pause a script and confirm execution by the user.
+ * <br>
+ * When running in batch mode, this command has no effect. Technically this is
+ * caused because no {@link ExecutionController} is available in batch mode.
+ * 
+ * @author Thomas Kellerer
  */
 public class WbConfirm
 	extends SqlCommand

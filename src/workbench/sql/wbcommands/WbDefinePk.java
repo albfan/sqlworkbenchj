@@ -21,8 +21,11 @@ import workbench.util.StringUtil;
 import workbench.util.WbStringTokenizer;
 
 /**
- *
- * @author support@sql-workbench.net
+ * Defines a primary key for a table or view. This is stored in a
+ * workbench specific file in order allow updates on tables (or views) that
+ * have no defined primary key in the database.
+ * 
+ * @author Thomas Kellerer
  */
 public class WbDefinePk
 	extends SqlCommand

@@ -45,7 +45,7 @@ import workbench.util.WbFile;
  * over the generated filenames (e.g. by using a different column's content)
  * WbExport should be preferred over this command.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  * @see WbExport
  */
 public class WbSelectBlob

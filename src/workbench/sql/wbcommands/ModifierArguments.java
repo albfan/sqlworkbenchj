@@ -23,7 +23,7 @@ import workbench.util.StringUtil;
 /**
  * A class to evaluate arguments for import-modifiers.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  * @see workbench.interfaces.ImportFileParser#setValueModifier(workbench.db.importer.modifier.ImportValueModifier)
  * @see workbench.db.importer.TextFileParser#setValueModifier(workbench.db.importer.modifier.ImportValueModifier)
  */

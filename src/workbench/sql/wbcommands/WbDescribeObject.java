@@ -24,9 +24,9 @@ import workbench.util.SqlUtil;
 
 /**
  * Display the definition of a database object
- *
+ * <br>
  * This command will return multiple result sets:
- *
+ * <br>
  * For tables, the following DataStores are returned
  * <ol>
  *		<li>The table definition (columns)</li>

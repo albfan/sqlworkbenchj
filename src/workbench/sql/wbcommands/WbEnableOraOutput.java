@@ -20,8 +20,12 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 
 /**
- *
- * @author  support@sql-workbench.net
+ * A class to turn on support for Oracle's <tt>DBMS_OUTPUT</tt> package.
+ * <br/>
+ * If the support is enabled, messages from dbms_output.put_line() will
+ * be shown in the message tab of the GUI.
+ * 
+ * @author Thomas Kellerer
  */
 public class WbEnableOraOutput extends SqlCommand
 {

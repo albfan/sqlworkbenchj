@@ -20,8 +20,9 @@ import workbench.sql.formatter.SQLToken;
 import workbench.util.ArgumentParser;
 
 /**
- *
- * @author support@sql-workbench.net
+ * Control the level of feedback during script execution.
+ * 
+ * @author Thomas Kellerer
  */
 public class WbFeedback
 	extends SqlCommand

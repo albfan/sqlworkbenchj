@@ -23,7 +23,7 @@ import workbench.util.ArgumentParser;
 /**
  * A SQL Statement to halt a script and confirm execution by the user
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbMode
 	extends SqlCommand

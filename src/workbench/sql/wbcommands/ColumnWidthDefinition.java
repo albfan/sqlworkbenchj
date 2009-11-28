@@ -21,7 +21,7 @@ import workbench.util.StringUtil;
  * Parse the argument for defining column widths for a fixed-width
  * import file.
  * @see WbImport#ARG_COL_WIDTHS
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ColumnWidthDefinition
 {

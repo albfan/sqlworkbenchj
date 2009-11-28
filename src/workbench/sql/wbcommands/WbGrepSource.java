@@ -23,6 +23,10 @@ import workbench.util.ArgumentType;
 import workbench.util.CollectionUtil;
 
 /**
+ * A class to search for text in the source code of all database objects
+ * <br/>
+ * This SQL commands parses the input and then uses {@link workbench.db.search.ObjectSourceSearcher}
+ * to perform the search.
  *
  * @author Thomas Kellerer
  */

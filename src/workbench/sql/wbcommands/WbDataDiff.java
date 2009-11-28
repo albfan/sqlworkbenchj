@@ -45,7 +45,7 @@ import workbench.util.WbFile;
  * @see workbench.db.compare.TableDataDiff
  * @see workbench.db.compare.TableDeleteSync
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbDataDiff
 	extends SqlCommand

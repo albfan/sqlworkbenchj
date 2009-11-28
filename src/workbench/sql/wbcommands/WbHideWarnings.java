@@ -22,7 +22,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbHideWarnings
 	extends SqlCommand

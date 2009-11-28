@@ -21,8 +21,10 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 
 /**
+ * Display the source code of a trigger.
+ * @see workbench.db.TriggerReader#getTriggerSource(java.lang.String, java.lang.String, java.lang.String, workbench.db.TableIdentifier)
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbTriggerSource
 	extends SqlCommand
@@ -64,7 +66,7 @@ public class WbTriggerSource
 			result.addMessage(ResourceMgr.getFormattedString("ErrTrgNotFound", object.getObjectExpression(currentConnection)));
 			result.setFailure();
 		}
-		
+
 		return result;
 	}
 

@@ -13,7 +13,7 @@ package workbench.sql.wbcommands;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class MissingWidthDefinition
 	extends Exception

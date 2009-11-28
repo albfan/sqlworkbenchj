@@ -20,7 +20,7 @@ import workbench.util.ArgumentParser;
 /**
  * An interface to define a single copy task.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public interface CopyTask
 {

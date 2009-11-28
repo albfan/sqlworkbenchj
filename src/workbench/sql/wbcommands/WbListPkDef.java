@@ -19,7 +19,7 @@ import workbench.storage.PkMapping;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbListPkDef
 	extends SqlCommand

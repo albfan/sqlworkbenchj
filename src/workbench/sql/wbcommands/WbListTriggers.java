@@ -22,8 +22,12 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 
 /**
+ * List all triggers defined for the current schema.
+ * <br>
+ * This is the same information as displayed in the DbExplorer's "Triggers" tab.
  *
- * @author  support@sql-workbench.net
+ * @see workbench.db.TriggerReader#getTriggers(java.lang.String, java.lang.String) 
+ * @author Thomas Kellerer
  */
 public class WbListTriggers extends SqlCommand
 {
