@@ -33,7 +33,7 @@ import workbench.util.WbPersistence;
  * It also converts the old (HashMap based) implementation of the Macro storage
  * into the new format.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class MacroStorage
 {

@@ -43,7 +43,7 @@ import workbench.util.StringUtil;
  * corresponding dbid as a prefix (e.g. postgresql.functions.wb)
  * <br/>
  * The DBMS specific keywords will be added to the global ones.
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class SqlKeywordHelper 
 {

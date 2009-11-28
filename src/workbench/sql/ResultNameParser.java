@@ -20,7 +20,7 @@ import workbench.util.StringUtil;
  * A class to extract a "result name" from a statement's comment, similar
  * to Javadoc tags.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ResultNameParser
 {

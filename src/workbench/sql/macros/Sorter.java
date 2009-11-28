@@ -16,7 +16,7 @@ import java.util.Comparator;
 /**
  * A comparator to sort <tt>Sortable> objects.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  * @see Sortable
  */
 public class Sorter

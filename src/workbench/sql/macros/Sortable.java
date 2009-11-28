@@ -14,7 +14,7 @@ package workbench.sql.macros;
 /**
  * An interface for items that can have a sort order.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public interface Sortable
 {

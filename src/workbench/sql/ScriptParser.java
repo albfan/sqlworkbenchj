@@ -538,7 +538,6 @@ public class ScriptParser
 	 *
 	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
 	 * @see IteratingScriptParser#getNextCommand()
-	 * @see #next()
 	 */
 	public String getNextCommand()
 		throws NoSuchElementException

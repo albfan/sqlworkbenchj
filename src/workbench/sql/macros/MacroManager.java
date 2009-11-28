@@ -21,7 +21,7 @@ import workbench.resource.StoreableKeyStroke;
 /**
  * A singleton class to load and save SQL macros (aliases)
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class MacroManager
 {

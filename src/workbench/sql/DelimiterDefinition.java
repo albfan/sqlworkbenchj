@@ -16,7 +16,7 @@ import workbench.util.StringUtil;
 
 /**
  * Encapsulate the alternate delimiter
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DelimiterDefinition
 {

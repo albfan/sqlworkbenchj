@@ -24,7 +24,7 @@ import workbench.util.StringUtil;
  * <br/>
  * Groups can be hidden from the menu.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class MacroGroup
 	implements Sortable

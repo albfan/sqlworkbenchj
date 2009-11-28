@@ -21,7 +21,7 @@ import workbench.util.StringUtil;
  * A macro can have a keyboard shortcut assigned and can be hidden from the
  * menu.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class MacroDefinition
 	implements Sortable
