@@ -836,8 +836,19 @@
   <section id="log-setting">
     <title>Controlling the log file</title>
     
+    <para>
+      When &wb-productname; initializes the logging environment, it also adds two system property that can be used to
+      define the logfile relative to the configuration or the installation directory:
+      <itemizedlist spacing="compact">
+        <listitem><literal>workbench.config.dir</literal> contains the full path to the configuration directory</listitem>
+        <listitem><literal>workbench.install.dir</literal> contains the full path to the directory where sqlworkbench.jar is located</listitem>
+      </itemizedlist>
+      These properties can be used to put the logfile into the directory relative to the config or installation directory without the need to hardcode
+      the directory name.
+    </para>
+    
     <section id="wb-log">
-      <title>Workbench logging</title>
+      <title>Configure internal logging</title>
 
       <simplesect id="settings-log-file">
         <title>Log file location</title>
@@ -845,16 +856,6 @@
         <para>
           Defines the location of the logfile. By default, the file will be named <literal>workbench.log</literal> and will be written
           into the <link linkend="config-dir">configuration directory</link>.
-        </para>
-        <para>
-          When &wb-productname; initializes the logging environment, it also adds two system property that can be used to
-          define the logfile relative to the configuration or the installation directory:
-          <itemizedlist spacing="compact">
-            <listitem><literal>workbench.config.dir</literal> contains the full path to the configuration directory</listitem>
-            <listitem><literal>workbench.install.dir</literal> contains the full path to the directory where sqlworkbench.jar is located</listitem>
-          </itemizedlist>
-          These properties can be used to put the logfile into the directory relative to the config or installation directory without the need to hardcode
-          the directory name in <literal>workbench.settings</literal>.
         </para>
       </simplesect>
       
@@ -920,7 +921,7 @@
   </section>
 
   <section id="settings-log4j">
-    <title>Log4J logging</title>
+    <title>Configure Log4J logging</title>
 
     <section id="settings-log4j-init">
       <title>Turn on Log4J logging</title>
@@ -939,6 +940,14 @@
 				If you specify a configuration file, this will be "passed" to Log4j by setting the system property
 				<literal>log4j.configuration</literal> to contain the correct "file URL" needed by Log4j.
 			</para>
+      
+      <para>
+        When passing a configuration file through this property, you can use a system property as part of the filename
+        (e.g. <literal>${user.home}/sqlworkbench.log</literal>). If the filename denotes a relative filename
+        (e.g. <literal>log4j.xml</literal> without any path information), then it is assumed to be relative to the
+        <link linkend="config-dir">configuration directory</link>.
+      </para>
+
       <para>
         When you turn on Log4J logging, you must copy copy the Logg4J library as <literal>log4j.jar</literal> into the directory
         where <literal>sqlworbkench.jar</literal> is located. Do not include the version number in the filename.
@@ -959,10 +968,7 @@
         When using <menuchoice><guimenu>Help</guimenu><guimenuitem>Show log file</guimenuitem></menuchoice> with Log4J enabled,
         and you have configured Log4J to write to multiple files, only the first file will be shown.
        </para>
-       <para>
-         The window will not update itself either when using Log4J. If you want to re-load the logfile in the window, you have to
-        close and re-open the log-window.
-      </para>
+
       <para>
         When &wb-productname; initializes the logging environment, it also adds two system property that can be used to
         define the logfile relative to the configuration or the installation directory:
@@ -973,30 +979,17 @@
         These properties can be used to put the logfile into the directory relative to the config or installation directory without the need to hardcode
         the directory name in <literal>log4j.xml</literal>
       </para>
-    </section>
-
-    <section id="settings-log4j-config">
-      <title>Log4J configuration file</title>
-      <para>Property: <literal>workbench.log.log4j.config</literal></para>
-      <para>
-        Defines the configuration file for Log4J. If this property is set and points to an existing file,
-        the system property <literal>log4j.configuration</literal> will be set before the Log4J system is initialized.
-        Log4J uses this system property to look for the configuration file.
-      </para>
-      <para>
-        You can use a system property as part of the filename (e.g. <literal>${user.home}/sqlworkbench.log</literal>).
-        If the filename denotes a relative filename (e.g. <literal>log4j.xml</literal> without any path information),
-        then it is assumed to be relative to the <link linkend="config-dir">configuration directory</link> i.e. the same
-        directory where <literal>workbench.settings</literal> is located.
-      </para>
-      <para>
-        Using <literal>workbench.log.log4j.config=workbench.log</literal> will overwrite/use the same log file
-        as the default logging because the file will be created in the same directory as workbench.settings.
-      </para>
+      
       <para>
         A sample <literal>log4j.xml</literal> can be found in the <literal>scripts</literal> directory of the
         &wb-productname; distribution.
       </para>
+
+      <para>
+        The system properties that are set by &wb-productname; to point to the configuration and installation directory (see above) can also
+        be used in the <literal>log4j.xml</literal> file.
+      </para>
+
     </section>
     
   </section>

@@ -2,9 +2,9 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-11-18">
+<release build="-1" date="2009-11-26">
 
-  <entry dev-build="8" type="enh">
+  <entry dev-build="9" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
     </description>
@@ -18,13 +18,13 @@
 
   <entry dev-build="9" type="enh">
     <description>
-			A new option to keep the highlight when using "Highlight current statement" has been added (Tools -> Options -> Editor)
+			A new option to keep the highlight when using "Highlight current statement" has been added (Tools -&gt; Options -&gt; Editor)
 		</description>
 	</entry>
 
   <entry dev-build="9" type="enh">
     <description>
-			A new option to set the default value for the Max. Rows field when opening new tabs is available (Tools -> Options -> Data Display)
+			A new option to set the default value for the Max. Rows field when opening new tabs is available (Tools -&gt; Options -&gt; Data Display)
 		</description>
 	</entry>
 
