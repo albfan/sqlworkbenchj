@@ -263,8 +263,19 @@ public class Log4JLogger
 	@Override
 	public File getCurrentFile()
 	{
-		Logger root = Logger.getRootLogger();
-		Enumeration appenders = root.getAllAppenders();
+		Logger wb = getLogger("workbench.log.LogMgr");
+		File logfile = findLogFile(wb);
+		if (logfile == null)
+		{
+			// No specific logger found, try the root logger
+			logfile = findLogFile(Logger.getRootLogger());
+		}
+		return logfile;
+	}
+
+	private File findLogFile(Logger start)
+	{
+		Enumeration appenders = start.getAllAppenders();
 		while (appenders.hasMoreElements())
 		{
 			Appender app = (Appender) appenders.nextElement();
@@ -298,12 +309,6 @@ public class Log4JLogger
 	{
 		getLogger(getClass()).info("=================== Log stopped ===================");
 		LogManager.shutdown();
-	}
-
-	@Override
-	public void setLogViewer(LogFileViewer logViewer)
-	{
-		// not supported for Log4j
 	}
 
 	public boolean levelEnabled(LogLevel tolog)

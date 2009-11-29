@@ -38,7 +38,5 @@ public interface WbLogger
 
 	public void shutdownWbLog();
 
-	void setLogViewer(LogFileViewer logViewer);
-
 	boolean levelEnabled(LogLevel tolog);
 }

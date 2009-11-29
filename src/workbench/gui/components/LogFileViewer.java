@@ -17,14 +17,16 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 
 import java.io.Reader;
+import java.util.Timer;
+import java.util.TimerTask;
 import javax.swing.JFrame;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 
 import workbench.gui.WbSwingUtilities;
-import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
@@ -32,7 +34,7 @@ import workbench.util.FileUtil;
 import workbench.util.WbFile;
 
 /**
- * @author support@sql-workbench.net  
+ * @author Thomas Kellerer
  */
 public class LogFileViewer
 	extends JFrame
@@ -40,7 +42,10 @@ public class LogFileViewer
 	protected SearchableTextPane display;
 	protected JScrollPane scroll;
 	private WbFile sourceFile;
-	
+	private long lastFileTime;
+	private long lastSize;
+	private Timer watcher;
+
 	public LogFileViewer(Frame owner)
 	{
 		super();
@@ -70,7 +75,7 @@ public class LogFileViewer
 		{
 			public void windowClosing(WindowEvent evt)
 			{
-				LogMgr.removeViewer();
+				if (watcher != null) watcher.cancel();
 				saveSettings();
 				setVisible(false);
 				dispose();
@@ -78,21 +83,43 @@ public class LogFileViewer
 		});
 	}
 
+
+	private void initWatcher()
+	{
+		watcher = new Timer(true);
+		TimerTask task = new TimerTask()
+		{
+			@Override
+			public void run()
+			{
+				long currentTime = sourceFile.lastModified();
+				long currentSize = sourceFile.length();
+				if (currentTime != lastFileTime || currentSize != lastSize)
+				{
+					load();
+				}
+			}
+		};
+		int refreshTime = Settings.getInstance().getIntProperty("workbench.logviewer.refresh", 1000);
+		watcher.schedule(task, refreshTime, refreshTime);
+	}
+
 	public void append(String msg)
 	{
 		this.display.append(msg);
 		scrollToEnd();
 	}
-	
-	public void load()
+
+	public synchronized void load()
 	{
 		Reader in = null;
 		try
 		{
+			lastFileTime = sourceFile.lastModified();
+			lastSize = sourceFile.length();
 			in = EncodingUtil.createReader(sourceFile, Settings.getInstance().getDefaultEncoding());
 			display.read(in, null);
 			scrollToEnd();
-			LogMgr.registerViewer(this);
 		}
 		catch (Exception e)
 		{
@@ -133,6 +160,7 @@ public class LogFileViewer
 	{
 		sourceFile = new WbFile(f);
 		setTitle(sourceFile.getFullPath());
+		initWatcher();
 		// load() is not necessary because setVisible() will do that
 	}
 
@@ -141,4 +169,5 @@ public class LogFileViewer
 		Settings.getInstance().storeWindowPosition(this);
 		Settings.getInstance().storeWindowSize(this);
 	}
+
 }

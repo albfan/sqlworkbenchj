@@ -30,7 +30,6 @@ public class SimpleLogger
 
 	private LogLevel level = LogLevel.warning;
 	private PrintStream logOut = null;
-	private LogFileViewer viewer;
 	private boolean logSystemErr = false;
 	private boolean showStackTrace = false;
 	private String messageFormat;
@@ -167,16 +166,6 @@ public class SimpleLogger
 		{
 			System.err.println(s);
 		}
-
-		if (viewer != null)
-		{
-			viewer.append(s.toString());
-		}
-	}
-
-	public synchronized void setLogViewer(LogFileViewer logViewer)
-	{
-		this.viewer = logViewer;
 	}
 
 	private CharSequence formatMessage(LogLevel logLevel, Object caller, String msg, Throwable th)

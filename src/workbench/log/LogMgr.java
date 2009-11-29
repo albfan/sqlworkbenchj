@@ -58,16 +58,6 @@ public class LogMgr
 		return new WbFile(f);
 	}
 
-	public static void removeViewer()
-	{
-		getLogger().setLogViewer(null);
-	}
-
-	public static void registerViewer(LogFileViewer v)
-	{
-		getLogger().setLogViewer(v);
-	}
-
 	public static void setMessageFormat(String aFormat)
 	{
 		getLogger().setMessageFormat(aFormat);

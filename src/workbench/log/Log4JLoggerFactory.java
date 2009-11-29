@@ -11,7 +11,6 @@
 package workbench.log;
 
 import org.apache.log4j.spi.LoggerFactory;
-import workbench.log.Log4JLogger;
 
 /**
  * This is a specialized LoggerFactory that creates the Workbench specific
