@@ -60,12 +60,6 @@ import workbench.util.ValueConverter;
  */
 public class DataStore
 {
-	// Needed for the status display in the table model
-	// as RowData is only package visible, we need to provide the objects here
-	public static final Integer ROW_MODIFIED = Integer.valueOf(RowData.MODIFIED);
-	public static final Integer ROW_NEW = Integer.valueOf(RowData.NEW);
-	public static final Integer ROW_ORIGINAL = Integer.valueOf(RowData.NOT_MODIFIED);
-
 	private RowActionMonitor rowActionMonitor;
 
 	private boolean modified;
@@ -1719,37 +1713,33 @@ public class DataStore
 	}
 
 	/**
-	 * Return the status object for the given row.
+	 * Return the status value for the given row.
 	 * The status is one of
 	 * <ul>
-	 * <li>{@link #ROW_ORIGINAL}</li>
-	 * <li>{@link #ROW_MODIFIED}</li>
-	 * <li>{@link #ROW_NEW}</li>
+	 * <li>{@link RowData#NOT_MODIFIED}</li>
+	 * <li>{@link RowData#MODIFIED}</li>
+	 * <li>{@link RowData#NEW}</li>
 	 * </ul>
 	 * The status object is used by the {@link workbench.gui.renderer.RowStatusRenderer}
 	 * in the result table to display the approriate icon.
 	 * @param aRow the row for which the status should be returned
-	 * @return an Integer identifying the status
+	 * @return an int identifying the status
 	 */
-	public Integer getRowStatus(int aRow)
+	public int getRowStatus(int aRow)
 		throws IndexOutOfBoundsException
 	{
 		RowData row = this.getRow(aRow);
-		if (row.isOriginal())
+		if (row.isNew())
 		{
-			return ROW_ORIGINAL;
-		}
-		else if (row.isNew())
-		{
-			return ROW_NEW;
+			return RowData.NEW;
 		}
 		else if (row.isModified())
 		{
-			return ROW_MODIFIED;
+			return RowData.MODIFIED;
 		}
 		else
 		{
-			return ROW_ORIGINAL;
+			return RowData.NOT_MODIFIED;
 		}
 	}
 

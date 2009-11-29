@@ -17,8 +17,8 @@ import java.util.Comparator;
 /**
  * A class to store a dynamic array of {@link RowData} objects
  *
- * @author support@sql-workbench.net  
- */ 
+ * @author Thomas Kellerer
+ */
 
 public class RowDataList
 {
@@ -47,7 +47,7 @@ public class RowDataList
 		{
 			data = new RowData[(int)(minStorage * grow)];
 		}
-		else 
+		else
 		{
 			int newStorage = (int)(this.data.length * grow) + 1;
 			if (newStorage < minStorage) newStorage = minStorage;
@@ -69,8 +69,8 @@ public class RowDataList
 	/**
 	 * Free all objects stored in the internal array. This will
 	 * also call reset on all RowData objects, so if rows are shared
-	 * between to RowDataList instances (moved back and forth, e.g. 
-	 * when filtering) this will also remove the data from the original 
+	 * between to RowDataList instances (moved back and forth, e.g.
+	 * when filtering) this will also remove the data from the original
 	 * source.
 	 * @see #clear()
 	 * @see RowData#reset()
@@ -87,10 +87,10 @@ public class RowDataList
 		}
 		clear();
 	}
-	
+
 	/**
-	 * set the number of rows to zero. 
-	 * The RowData instances currently stored in this list 
+	 * set the number of rows to zero.
+	 * The RowData instances currently stored in this list
 	 * are not freed by calling RowData.reset()
 	 * @see #reset()
 	 */
@@ -141,7 +141,7 @@ public class RowDataList
 
 	/**
 	 * Add a row to this list.
-	 * @return the new size of this list 
+	 * @return the new size of this list
 	 */
 	public int add(RowData row)
 	{
@@ -149,9 +149,9 @@ public class RowDataList
 		{
 			grow(DEFAULT_SIZE);
 		}
-		
+
 		int newlen = this.size + 1;
-		
+
 		synchronized (this.dataLock)
 		{
 			if (newlen > this.data.length) grow(newlen);
@@ -200,5 +200,5 @@ public class RowDataList
 			Arrays.sort(this.data, 0, this.size, comp);
 		}
 	}
-	
+
 }

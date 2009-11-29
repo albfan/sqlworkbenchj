@@ -94,7 +94,7 @@ public class DataStoreTableModel
 	{
 		if (this.showStatusColumn && col == 0)
 		{
-			return this.dataCache.getRowStatus(row);
+			return Integer.valueOf(this.dataCache.getRowStatus(row));
 		}
 
 		try

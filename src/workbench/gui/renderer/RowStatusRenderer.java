@@ -21,6 +21,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.RowData;
 
 /**
  * A renderer to display the status of a row in the result set.
@@ -56,21 +57,20 @@ public class RowStatusRenderer
 	{
 		try
 		{
-			Integer status = (Integer)value;
-			if (status == DataStore.ROW_NEW)
+			int status = (value == null ? RowData.NOT_MODIFIED : ((Integer)value).intValue());
+			switch (status)
 			{
-				this.setIcon(STATUS_NEW_ICON);
-				this.setToolTipText(newTip);
-			}
-			else if (status == DataStore.ROW_MODIFIED)
-			{
-				this.setIcon(STATUS_MODIFIED_ICON);
-				this.setToolTipText(modifiedTip);
-			}
-			else
-			{
-				this.setIcon(STATUS_NOT_MODIFIED_ICON);
-				this.setToolTipText(notModifiedTip);
+				case RowData.NEW:
+					this.setIcon(STATUS_NEW_ICON);
+					this.setToolTipText(newTip);
+					break;
+				case RowData.MODIFIED:
+					this.setIcon(STATUS_MODIFIED_ICON);
+					this.setToolTipText(modifiedTip);
+					break;
+				default:
+					this.setIcon(STATUS_NOT_MODIFIED_ICON);
+					this.setToolTipText(notModifiedTip);
 			}
 		}
 		catch (Exception e)

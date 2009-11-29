@@ -30,6 +30,7 @@ import workbench.gui.dbobjects.RunScriptPanel;
 import workbench.interfaces.Reloadable;
 import workbench.resource.ResourceMgr;
 import workbench.storage.DataStore;
+import workbench.storage.RowData;
 import workbench.util.CollectionUtil;
 import workbench.util.StringUtil;
 
@@ -45,7 +46,7 @@ public class ColumnAlterAction
 	private TableIdentifier sourceTable;
 	private WbConnection dbConnection;
 	private Reloadable client;
-	
+
 	public ColumnAlterAction(WbTable defTable)
 	{
 		super();
@@ -60,7 +61,7 @@ public class ColumnAlterAction
 	{
 		client = reload;
 	}
-	
+
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
@@ -209,7 +210,7 @@ public class ColumnAlterAction
 	private ColumnIdentifier getOldDefintion(int row)
 	{
 		DataStore ds = definition.getDataStore();
-		if (ds.getRowStatus(row) == DataStore.ROW_NEW) return null;
+		if (ds.getRowStatus(row) == RowData.NEW) return null;
 		String name = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_COL_NAME);
 		String type = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE);
 		String defaultValue = (String)ds.getOriginalValue(row, TableColumnsDatastore.COLUMN_IDX_TABLE_DEFINITION_DEFAULT);

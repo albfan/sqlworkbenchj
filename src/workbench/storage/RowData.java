@@ -39,12 +39,23 @@ import workbench.util.StringUtil;
  *  MODIFIED     - the row has been retrieved but has been changed since then<br/>
  *  NOT_MODIFIED - The row has not been changed since it has been retrieved<br/>
  *
- * @author support@sql-workbench.net  
+ * @author Thomas Kellerer
  */ 
 public class RowData
 {
+	/**
+	 * The row has not been modified since retrieval
+	 */
 	public static final int NOT_MODIFIED = 0;
+
+	/**
+	 * The data has been modified since retrieval from the database
+	 */
 	public static final int MODIFIED = 1;
+
+	/**
+	 * The row has been inserted at the client (was not retrieved from the database)
+	 */
 	public static final int NEW = 2;
 
 	private Object NO_CHANGE_MARKER = new Object();
@@ -52,9 +63,10 @@ public class RowData
 	private int status = NOT_MODIFIED;
 
 	/**
-	 *	This flag will be used by the {@link DataStore}
-	 *	to store the information for which rows the SQL statements
-	 *  have been sent to the database during the update process
+	 * This flag will be used by the {@link DataStore}
+	 * to store the information for which rows the SQL statements
+	 * have been sent to the database during the update process
+	 * @see #setDmlSent(boolean)
 	 */
 	private boolean dmlSent = false;
 	
@@ -104,6 +116,7 @@ public class RowData
 	 * @param conv the converte to be used.
 	 *
 	 * @see workbench.db.mssql.SqlServerDataConverter
+	 * @see workbench.db.oracle.OracleDataConverter
 	 */
 	public void setConverter(DataConverter conv)
 	{

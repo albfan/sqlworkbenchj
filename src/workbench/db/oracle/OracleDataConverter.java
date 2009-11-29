@@ -17,9 +17,9 @@ import workbench.storage.DataConverter;
 import workbench.util.NumberStringCache;
 
 /**
- * A class to convert Microsofts strange binary "timestamp" to a readable display.
- * 
- * @author support@sql-workbench.net
+ * A class to convert Oracle's RAW datatype to something readable.
+ *
+ * @author Thomas Kellerer
  */
 public class OracleDataConverter
 	implements DataConverter
@@ -34,11 +34,11 @@ public class OracleDataConverter
 	{
 		return LazyInstanceHolder.instance;
 	}
-	
+
 	private OracleDataConverter()
 	{
 	}
-	
+
 	/**
 	 * Checks if jdbcType == Types.VARBINARY and if dbmsType == "RAW"
 	 *
@@ -55,13 +55,13 @@ public class OracleDataConverter
 	 * If the type of the originalValue is RAW, then
 	 * the value is converted into a corresponding hex display, e.g. <br/>
 	 * <tt>0x000000000001dc91</tt>
-	 * 
+	 *
 	 * @param jdbcType the jdbcType as returned by the driver
 	 * @param dbmsType the name of the datatype for this value
 	 * @param originalValue the value to be converted (or not)
 	 *
 	 * @return the originalValue or a converted value if approriate
-	 * @see #convertsType(int, java.lang.String) 
+	 * @see #convertsType(int, java.lang.String)
 	 */
 	public Object convertValue(int jdbcType, String dbmsType, Object originalValue)
 	{
