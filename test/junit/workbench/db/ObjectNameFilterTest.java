@@ -31,7 +31,7 @@ public class ObjectNameFilterTest
 	public void testIsExcluded()
 	{
 		ObjectNameFilter filter = new ObjectNameFilter();
-		Set<String> names = CollectionUtil.hashSet("ONE", "^DEV[0-9]+");
+		Set<String> names = CollectionUtil.hashSet("ONE ", "^DEV[0-9]+");
 		filter.setFilterExpressions(names);
 		assertTrue(filter.isExcluded("one"));
 		assertTrue(filter.isExcluded("dev1"));

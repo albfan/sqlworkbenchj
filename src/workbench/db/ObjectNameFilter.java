@@ -108,7 +108,7 @@ public class ObjectNameFilter
 
 		try
 		{
-			filterExpressions.add(Pattern.compile(exp, Pattern.CASE_INSENSITIVE));
+			filterExpressions.add(Pattern.compile(exp.trim(), Pattern.CASE_INSENSITIVE));
 		}
 		catch (PatternSyntaxException p)
 		{
