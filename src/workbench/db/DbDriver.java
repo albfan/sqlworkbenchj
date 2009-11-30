@@ -379,7 +379,8 @@ public class DbDriver
 		// identify the program name when connecting
 		// this is different for each DBMS.
 		String appNameProperty = null;
-		
+		String prgName = getProgramName();
+
 		if (url.startsWith("jdbc:oracle:thin"))
 		{
 			appNameProperty = "v$session.program";
@@ -420,12 +421,18 @@ public class DbDriver
 		}
 		else if (url.startsWith("jdbc:db2:"))
 		{
-			appNameProperty = "clientProgramName";
+			appNameProperty = "clientApplicationInformation";
+			prgName = ResourceMgr.TXT_PRODUCT_NAME + " (" + id + ")";
+			if (!props.containsKey("clientProgramName"))
+			{
+				// clientProgramName is limited to 12 bytes, so don't use the version here
+				props.put("clientProgramName", ResourceMgr.TXT_PRODUCT_NAME);
+			}
 		}
 
 		if (appNameProperty != null && !props.containsKey(appNameProperty))
 		{
-			props.put(appNameProperty, getProgramName());
+			props.put(appNameProperty, prgName);
 		}
 
 	}

@@ -21,8 +21,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.spi.LoggerFactory;
 import org.apache.log4j.spi.LoggingEvent;
-import sun.reflect.*;
-import workbench.gui.components.LogFileViewer;
+import sun.reflect.Reflection;
 import workbench.util.StringUtil;
 
 /**
