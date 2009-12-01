@@ -189,7 +189,7 @@ public class LnFDefinitionPanel
     setLayout(new GridBagLayout());
 
     lblName.setLabelFor(tfName);
-    lblName.setText(ResourceMgr.getString("LblLnFClass")); // NOI18N
+    lblName.setText(ResourceMgr.getString("LblLnFName")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;

@@ -20,7 +20,7 @@
           <ComponentRef name="tfName"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="language/wbstrings.properties" key="LblLnFClass" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
+          <ResourceString bundle="language/wbstrings.properties" key="LblLnFName" replaceFormat="ResourceMgr.getString(&quot;{key}&quot;)"/>
         </Property>
       </Properties>
       <Constraints>
