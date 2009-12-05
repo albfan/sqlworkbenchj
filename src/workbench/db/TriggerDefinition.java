@@ -128,7 +128,7 @@ public class TriggerDefinition
 	{
 		if (con == null) return null;
 		TriggerReader reader = new TriggerReader(con);
-		return reader.getTriggerSource(catalog, schema, triggerName, table);
+		return reader.getTriggerSource(catalog, schema, triggerName, table, comment);
 	}
 
 	public String getSchema()

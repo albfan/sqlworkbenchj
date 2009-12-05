@@ -14,6 +14,7 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
 
 import workbench.db.TriggerReader;
 import workbench.resource.ResourceMgr;
@@ -29,6 +30,7 @@ import workbench.sql.StatementRunnerResult;
 public class WbTriggerSource
 	extends SqlCommand
 {
+
 	public static final String VERB = "WBTRIGGERSOURCE";
 	public static final String FORMATTED_VERB = "WbTriggerSource";
 
@@ -53,8 +55,12 @@ public class WbTriggerSource
 		DbObject object = new TableIdentifier(args);
 
 		TriggerReader reader = new TriggerReader(currentConnection);
-
-		String source = reader.getTriggerSource(object.getCatalog(), object.getSchema(), object.getObjectName(), null);
+		TriggerDefinition trg = reader.findTrigger(object.getCatalog(), object.getSchema(), object.getObjectName());
+		String source = null;
+		if (trg != null)
+		{
+			source = reader.getTriggerSource(trg);
+		}
 
 		if (source != null)
 		{
@@ -69,5 +75,4 @@ public class WbTriggerSource
 
 		return result;
 	}
-
 }

@@ -26,9 +26,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import javax.swing.table.TableCellRenderer;
 
-import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.ReloadAction;
@@ -134,14 +132,7 @@ public class TriggerListPanel
 
 		JPanel listPanel = new JPanel();
 		this.statusRenderer = new ProcStatusRenderer();
-		this.triggerList = new WbTable(true, false, false)
-		{
-			public TableCellRenderer getCellRenderer(int row, int column)
-			{
-				if (column == ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE) return statusRenderer;
-				return super.getCellRenderer(row, column);
-			}
-		};
+		this.triggerList = new WbTable(true, false, false);
 
 		this.triggerList.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		this.triggerList.setCellSelectionEnabled(false);
@@ -195,7 +186,7 @@ public class TriggerListPanel
 		}
 
 		initialized = true;
-		
+
 		restoreSettings();
 		if (workspaceProperties != null)
 		{
@@ -213,7 +204,7 @@ public class TriggerListPanel
 	public void reset()
 	{
 		if (!initialized) return;
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -262,7 +253,7 @@ public class TriggerListPanel
 		if (this.dbConnection == null) return;
 		if (this.reader == null) return;
 		if (this.isRetrieving) return;
-		
+
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 
 		try
@@ -382,7 +373,7 @@ public class TriggerListPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (!initialized) return;
-		
+
 		if (e.getSource() != this.triggerList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
 		retrieveCurrentTrigger();
@@ -396,16 +387,17 @@ public class TriggerListPanel
 
 		final String trigger = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
 		final String table = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
+		final String comment = this.triggerList.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
-				retrieveTriggerSource(trigger, table);
+				retrieveTriggerSource(trigger, table, comment);
 			}
 		});
 	}
 
-	protected void retrieveTriggerSource(String triggerName, String tableName)
+	protected void retrieveTriggerSource(String triggerName, String tableName, String comment)
 	{
 		if (this.dbConnection == null || this.reader == null) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
@@ -427,7 +419,7 @@ public class TriggerListPanel
 					if (tbl.getSchema() == null) tbl.setSchema(currentSchema);
 				}
 
-				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl);
+				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl, comment);
 				source.setText(sql == null ? "" : sql);
 			}
 			catch (Throwable ex)

@@ -807,7 +807,7 @@ public final class WbManager
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
-	
+
 	public void runGui()
 	{
 		this.initUI();
@@ -945,7 +945,7 @@ public final class WbManager
 		// It is also used by Settings.initLogging() to allow a second
 		// initialization of the LogMgr
 		System.setProperty("workbench.gui.testmode", "true");
-		
+
 		System.setProperty("workbench.log.console", "false");
 		System.setProperty("workbench.log.log4j", "false");
 		System.setProperty("workbench.gui.language", "en");

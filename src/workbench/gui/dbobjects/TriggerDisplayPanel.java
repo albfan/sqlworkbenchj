@@ -138,7 +138,8 @@ public class TriggerDisplayPanel
 		try
 		{
 			String triggerName = this.triggers.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
-			String sql = reader.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName, triggerTable);
+			String comment = this.triggers.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
+			String sql = reader.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName, triggerTable, comment);
 			this.source.setText(sql);
 			this.source.setCaretPosition(0);
 		}

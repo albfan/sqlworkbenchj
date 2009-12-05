@@ -21,6 +21,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -66,6 +67,12 @@ public class TriggerReader
 	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE = 3;
 
 	/**
+	 *	The column index in the DataStore returned by getTableTriggers which identifies
+	 *  the comment of the trigger.
+	 */
+	public static final int COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT = 4;
+
+	/**
 	 * Return a list of triggers available in the given schema.
 	 */
 	public DataStore getTriggers(String catalog, String schema)
@@ -85,10 +92,11 @@ public class TriggerReader
 			String trgType = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TYPE);
 			String trgEvent = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT);
 			String tableName = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);
+			String comment = triggers.getValueAsString(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
 			TriggerDefinition trg = new TriggerDefinition(catalog, schema, trgName);
 			trg.setTriggerType(trgType);
 			trg.setTriggerEvent(trgEvent);
-
+			trg.setComment(comment);
 			if (tableName != null)
 			{
 				TableIdentifier tbl = new TableIdentifier(tableName);
@@ -113,14 +121,15 @@ public class TriggerReader
 	public static final String TRIGGER_TYPE_COLUMN = "TYPE";
 	public static final String TRIGGER_EVENT_COLUMN = "EVENT";
 	public static final String TRIGGER_TABLE_COLUMN = "TABLE";
+	public static final String TRIGGER_COMMENT_COLUMN = "REMARKS";
 
-	public static final String[] LIST_COLUMNS = {TRIGGER_NAME_COLUMN, TRIGGER_TYPE_COLUMN, TRIGGER_EVENT_COLUMN, TRIGGER_TABLE_COLUMN};
+	public static final String[] LIST_COLUMNS = {TRIGGER_NAME_COLUMN, TRIGGER_TYPE_COLUMN, TRIGGER_EVENT_COLUMN, TRIGGER_TABLE_COLUMN, TRIGGER_COMMENT_COLUMN};
 
 	protected DataStore getTriggers(String catalog, String schema, String tableName)
 		throws SQLException
 	{
-		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		final int[] sizes =   {30, 30, 20, 20};
+		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
+		final int[] sizes =   {30, 30, 20, 20, 20};
 
 		DataStore result = new DataStore(LIST_COLUMNS, types, sizes);
 
@@ -145,7 +154,9 @@ public class TriggerReader
 		ResultSet rs = stmt.executeQuery(query);
 		try
 		{
-			boolean hasTriggerName = rs.getMetaData().getColumnCount() == 4;
+			boolean hasTriggerName = rs.getMetaData().getColumnCount() >= 4;
+			boolean hasComment = rs.getMetaData().getColumnCount() >= 5;
+
 			while (rs.next())
 			{
 				int row = result.addRow();
@@ -160,11 +171,19 @@ public class TriggerReader
 				value = rs.getString(3);
 				if (!rs.wasNull() && value != null) value = value.trim();
 				result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_EVENT, value);
+
 				if (hasTriggerName)
 				{
 					value = rs.getString(4);
 					if (!rs.wasNull() && value != null) value = value.trim();
 					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE, value);
+				}
+
+				if (hasComment)
+				{
+					value = rs.getString(5);
+					if (!rs.wasNull() && value != null) value = value.trim();
+					result.setValue(row, COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT, value);
 				}
 			}
 			result.resetStatus();
@@ -176,10 +195,25 @@ public class TriggerReader
 		return result;
 	}
 
+	public TriggerDefinition findTrigger(String catalog, String schema, String name)
+		throws SQLException
+	{
+		List<TriggerDefinition> triggers = getTriggerList(catalog, schema, null);
+		if (CollectionUtil.isEmpty(triggers)) return null;
+		for (TriggerDefinition trg : triggers)
+		{
+			if (trg.getObjectName().equalsIgnoreCase(name))
+			{
+				return trg;
+			}
+		}
+		return null;
+	}
+	
 	public String getTriggerSource(TriggerDefinition trigger)
 		throws SQLException
 	{
-		return getTriggerSource(trigger.getCatalog(), trigger.getSchema(), trigger.getObjectName(), trigger.getRelatedTable());
+		return getTriggerSource(trigger.getCatalog(), trigger.getSchema(), trigger.getObjectName(), trigger.getRelatedTable(), trigger.getComment());
 	}
 
 	/**
@@ -192,7 +226,7 @@ public class TriggerReader
 	 * @throws SQLException
 	 * @return the trigger source
 	 */
-	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername, TableIdentifier triggerTable)
+	public String getTriggerSource(String aCatalog, String aSchema, String aTriggername, TableIdentifier triggerTable, String trgComment)
 		throws SQLException
 	{
 		StringBuilder result = new StringBuilder(500);
@@ -253,6 +287,22 @@ public class TriggerReader
 			{
 				result.append(nl);
 				result.append(delim.getDelimiter());
+			}
+			CommentSqlManager mgr = new CommentSqlManager(this.dbConnection.getMetadata().getDbId());
+			String ddl = mgr.getCommentSqlTemplate("trigger");
+			if (result.length() > 0 && StringUtil.isNonBlank(ddl) && StringUtil.isNonBlank(trgComment))
+			{
+				String commentSql = ddl.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, aTriggername);
+				commentSql = commentSql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, aSchema);
+				commentSql = commentSql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, triggerTable.getTableExpression(dbConnection));
+				commentSql = commentSql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, SqlUtil.escapeQuotes(trgComment));
+				result.append(nl);
+				result.append(commentSql);
+				result.append(nl);
+				if (!delim.isStandard())
+				{
+					result.append(delim.getDelimiter());
+				}
 			}
 		}
 		catch (SQLException e)

@@ -21,6 +21,7 @@ import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
+import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
@@ -154,7 +155,12 @@ public class ObjectInfo
 
 			// No procedure found, try to find a trigger.
 			TriggerReader trgReader = new TriggerReader(connection);
-			String source = trgReader.getTriggerSource(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName(), null);
+			TriggerDefinition trg = trgReader.findTrigger(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+			String source = null;
+			if (trg != null)
+			{
+				source = trgReader.getTriggerSource(trg);
+			}
 			if (StringUtil.isNonBlank(source))
 			{
 				result.addMessage("--------[ Trigger: " + tbl.getObjectName() + " ]--------");

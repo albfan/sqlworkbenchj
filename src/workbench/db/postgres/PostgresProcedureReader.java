@@ -415,6 +415,12 @@ public class PostgresProcedureReader
 				source.append('\n');
 				source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 				source.append('\n');
+				if (StringUtil.isNonBlank(def.getComment()))
+				{
+					source.append("\nCOMMENT ON " + name.getFormattedName() + " IS '" + SqlUtil.escapeQuotes(def.getComment()) + "'\n" );
+					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
+					source.append('\n');
+				}
 				def.setSource(source);
 			}
 		}

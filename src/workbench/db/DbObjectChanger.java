@@ -25,7 +25,7 @@ public class DbObjectChanger
 	public static final String PARAM_OLD_OBJECT_NAME = "%object_name%";
 	public static final String PARAM_NEW_OBJECT_NAME = "%new_object_name%";
 	public static final String PARAM_CONSTRAINT_NAME = "%constraint_name%";
-	public static final String PARAM_TABLE_NAME = "%table_name%";
+	public static final String PARAM_TABLE_NAME = MetaDataSqlManager.TABLE_NAME_PLACEHOLDER;
 
 	private WbConnection dbConnection;
 	private DbSettings settings;
