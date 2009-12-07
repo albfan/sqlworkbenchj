@@ -582,9 +582,9 @@ public class SqlCommand
 	 */
 	public boolean isUpdatingCommand(WbConnection con, String sql)
 	{
+		if (this.isUpdatingCommand) return true;
 		if (con == null) return isUpdatingCommand;
 		if (con.isClosed()) return isUpdatingCommand;
-		if (this.isUpdatingCommand) return true;
 		String verb = SqlUtil.getSqlVerb(sql);
 		boolean updating = con.getDbSettings().isUpdatingCommand(verb);
 		if (updating) return true;
