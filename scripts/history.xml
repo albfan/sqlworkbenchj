@@ -2,9 +2,9 @@
 <history>
 
 <!-- build number must be set to -1 until a release is built -->
-<release build="-1" date="2009-11-26">
+<release build="-1" date="2009-11-29">
 
-  <entry dev-build="9" type="enh">
+  <entry dev-build="10" type="enh">
     <description>
       SQL Workbench/J now requires Java 6.
     </description>
@@ -175,6 +175,12 @@
   <entry dev-build="1" type="enh">
     <description>
       For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.
+    </description>
+  </entry>
+
+  <entry dev-build="10" type="fix">
+    <description>
+      The trigger list panel (where all triggers where shown) was not working any longer.
     </description>
   </entry>
 
