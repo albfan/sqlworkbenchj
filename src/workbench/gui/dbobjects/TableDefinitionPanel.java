@@ -58,6 +58,7 @@ import workbench.gui.renderer.RendererFactory;
 import workbench.interfaces.DbData;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
@@ -458,7 +459,15 @@ public class TableDefinitionPanel
 		this.dbConnection = conn;
 		this.createIndexAction.setEnabled(this.dbConnection != null);
 		this.reloadAction.setEnabled(this.dbConnection != null);
-		validator.setConnection(conn);
+
+		if (GuiSettings.allowAlterInDbExplorer())
+		{
+			validator.setConnection(dbConnection);
+		}
+		else
+		{
+			validator.setConnection(null);
+		}
 		
 		if (dbConnection != null && dbConnection.getDbSettings().canDropType("column"))
 		{

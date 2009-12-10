@@ -13,6 +13,7 @@ package workbench.gui.settings;
 
 import javax.swing.JPanel;
 import workbench.interfaces.Restoreable;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
@@ -43,6 +44,7 @@ public class DbExplorerOptionsPanel
 		set.setRememberColumnOrder(rememberColOrder.isSelected());
 		set.setShowFocusInDbExplorer(showFocus.isSelected());
 		set.setDefaultExplorerObjectType(this.defTableType.getText());
+		GuiSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
 
@@ -50,6 +52,7 @@ public class DbExplorerOptionsPanel
 	{
 		Settings set = Settings.getInstance();
 		autogeneratePK.setSelected(set.getAutoGeneratePKName());
+		allowTableAlter.setSelected(GuiSettings.allowAlterInDbExplorer());
 		defTableType.setText(set.getDefaultExplorerObjectType());
 		rememberColOrder.setSelected(set.getRememberColumnOrder());
 		((PlacementChooser)tabPlacement).setProperty("workbench.gui.dbobjects.tabletabs");
@@ -79,6 +82,7 @@ public class DbExplorerOptionsPanel
     tabPlacement = new PlacementChooser();
     jLabel1 = new javax.swing.JLabel();
     rememberColOrder = new javax.swing.JCheckBox();
+    allowTableAlter = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -255,10 +259,22 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     add(rememberColOrder, gridBagConstraints);
+
+    allowTableAlter.setText(ResourceMgr.getString("LblAllowTblAlter")); // NOI18N
+    allowTableAlter.setToolTipText(ResourceMgr.getString("d_LblAllowTblAlter")); // NOI18N
+    allowTableAlter.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
+    add(allowTableAlter, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JCheckBox allowTableAlter;
   private javax.swing.JCheckBox autogeneratePK;
   private javax.swing.JCheckBox autoselectDataPanel;
   private javax.swing.JTextField defTableType;

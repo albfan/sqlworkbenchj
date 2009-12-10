@@ -27,6 +27,16 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 
+	public static boolean allowAlterInDbExplorer()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.allow.alter", false);
+	}
+
+	public static void setAllowAlterInDbExplorer(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.dbexplorer.allow.alter", flag);
+	}
+
 	public static boolean getKeepCurrentSqlHighlight()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.keep.currentsql.selection", true);

@@ -53,6 +53,13 @@ public class ColumnChangeValidator
 
 	public void setConnection(WbConnection con)
 	{
-		changer = new ColumnChanger(con);
+		if (con == null)
+		{
+			changer = null;
+		}
+		else
+		{
+			changer = new ColumnChanger(con);
+		}
 	}
 }

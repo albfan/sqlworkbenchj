@@ -740,7 +740,14 @@ public class TableListPanel
 		tableSource.setDatabaseConnection(aConnection);
 
 		renameAction.setConnection(dbConnection);
-		validator.setConnection(dbConnection);
+		if (GuiSettings.allowAlterInDbExplorer())
+		{
+			validator.setConnection(dbConnection);
+		}
+		else
+		{
+			validator.setConnection(null);
+		}
 
 		if (this.dbConnection != null)
 		{

@@ -48,6 +48,13 @@ public class TableChangeValidator
 
 	public void setConnection(WbConnection con)
 	{
-		changer = new DbObjectChanger(con);
+		if (con != null)
+		{
+			changer = new DbObjectChanger(con);
+		}
+		else
+		{
+			changer = null;
+		}
 	}
 }
