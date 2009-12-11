@@ -300,6 +300,8 @@ public class ProcedureListPanel
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
+			model.setIgnoreChanges(true);
+			
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()

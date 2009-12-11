@@ -346,7 +346,9 @@ public class TableDefinitionPanel
 					int posIndex = dsModel.findColumn("POSITION");
 					int pkIndex = dsModel.findColumn("PK");
 					dsModel.setNonEditableColums(typeIndex, posIndex, pkIndex);
+					dsModel.setIgnoreChanges(!GuiSettings.allowAlterInDbExplorer());
 				}
+
 				alterButton.setVisible("TABLE".equalsIgnoreCase(currentTable.getType()));
 
 				WbSwingUtilities.invoke(new Runnable()
@@ -460,14 +462,7 @@ public class TableDefinitionPanel
 		this.createIndexAction.setEnabled(this.dbConnection != null);
 		this.reloadAction.setEnabled(this.dbConnection != null);
 
-		if (GuiSettings.allowAlterInDbExplorer())
-		{
-			validator.setConnection(dbConnection);
-		}
-		else
-		{
-			validator.setConnection(null);
-		}
+		validator.setConnection(dbConnection);
 		
 		if (dbConnection != null && dbConnection.getDbSettings().canDropType("column"))
 		{

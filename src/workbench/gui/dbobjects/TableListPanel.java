@@ -740,14 +740,7 @@ public class TableListPanel
 		tableSource.setDatabaseConnection(aConnection);
 
 		renameAction.setConnection(dbConnection);
-		if (GuiSettings.allowAlterInDbExplorer())
-		{
-			validator.setConnection(dbConnection);
-		}
-		else
-		{
-			validator.setConnection(null);
-		}
+		validator.setConnection(dbConnection);
 
 		if (this.dbConnection != null)
 		{
@@ -905,6 +898,7 @@ public class TableListPanel
 			// to avoid the impression that e.g. a table's catalog can be changed
 			// by editing this list
 			model.setValidator(validator);
+			model.setIgnoreChanges(!GuiSettings.allowAlterInDbExplorer());
 
 			WbSwingUtilities.invoke(new Runnable()
 			{

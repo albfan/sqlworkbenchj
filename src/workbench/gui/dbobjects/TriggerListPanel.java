@@ -266,7 +266,8 @@ public class TriggerListPanel
 
 			DataStore ds = reader.getTriggers(currentCatalog, currentSchema);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
-
+			model.setIgnoreChanges(true);
+			
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
