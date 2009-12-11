@@ -842,13 +842,13 @@
     </para>
 
     <para>
-      <note>
+      <important>
         To search the data of a table a <literal>SELECT * FROM the_table</literal> is executed and
         processed on a row by row basis. Although &wb-productname; only keeps one row at a time in memory
         it is possible that the JDBC drivers caches the full result set in memory. Please see the chapter
         <link linkend="troubleshooting">Common problems</link> for your DBMS to check if the JDBC driver you are using
-    caches result sets.
-      </note>
+        caches result sets.
+      </important>
     </para>
 		<para>
 			The command supports the following parameters:

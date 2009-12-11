@@ -232,24 +232,14 @@
 		</simplesect>
 
     <simplesect id="dbexplorer-rename-table">
-      <title>Renaming tables</title>
+      <title>ALTER script</title>
 			<blockquote>
         <para>
-          You can edit the name of a table in the list of objects. Once you have
-          changed a name (or several) you can use the option "ALTER script" in the
-          context menu of the object list to generate and run a SQL script to
-          apply the changes. Depending on the DBMS, you might be able to change the
-          name of other database objects as well (e.g. SEQUENCEs, VIEWs, ...).
+          After you have changed the name of a table in the list of objects, you can
+          generate and run a SQL script that will apply that change to the database.
         </para>
         <para>
-          For DBMS that support it, you can also edit the remarks column of the
-          table to change the documentation.
-        </para>
-        <para>
-          If the editing the name or comment is rejected, the necessary SQL statements
-          have not been configured for your DBMS. If your DBMS does support changing
-          the object type in question, please send a mail with the necessary
-          information to the support email address.
+          For details please refer to the section <link linkend="dbexplorer-alter-table">Changing table definitions</link>
         </para>
       </blockquote>
     </simplesect>
@@ -291,6 +281,45 @@
 		<simplesect id="dbexplorer-change-table-def">
 			<title>Changing the table definition</title>
       <para>
+        You can edit the definition of the columns, add new columns or delete existing columns.
+        To apply the changes, click on the <guibutton>ALTER table</guibutton> button.
+      </para>
+        <para>
+          For details please refer to the section <link linkend="dbexplorer-alter-table">Changing table definitions</link>
+        </para>
+    </simplesect>
+	</section>
+
+  <section id="dbexplorer-alter">
+    <title>Modifying the definition of database objects</title>
+
+    <section id="dbexplorer-rename-table">
+      <title>Renaming objects</title>
+        <para>
+          You can edit the name of the objects in the object list. Depending on the DBMS, you might be able to change the
+          name of other database objects as well (e.g. SEQUENCEs, VIEWs, ...).
+        </para>
+        <para>
+          For DBMS that support it, you can also edit the remarks column of the
+          table to change the documentation.
+        </para>
+        <para>
+          If the editing the name or comment is rejected, the necessary SQL statements
+          have not been configured for your DBMS. If your DBMS does support changing
+          the object type in question, please send a mail with the necessary
+          information to the support email address.
+        </para>
+        <para>
+          Once you have changed a name (or several) the menu item "ALTER script" in the
+          context menu of the object list, will display a window with the necessary SQL statements
+          to apply your changes. You can save the generated script to a file or run the statements
+          directly from that window.
+        </para>
+    </section>
+
+    <section id="dbexplorer-change-column">
+      <title>Changing column definitions</title>
+      <para>
         You can change the column name, datatype, default value or the nullable
         flag in the display of the table's details. If the necessary ALTER statements
         have been configured for your DBMS, you can generate and run an ALTER
@@ -304,9 +333,11 @@
         changing table columns, please send a mail with the necessary
         information to the support email address.
       </para>
-    </simplesect>
-	</section>
-	
+
+    </section>
+
+  </section>
+
 	<section id="table-data">
 		<title>Table data</title>
 		
@@ -547,7 +578,7 @@ FROM geo_table
       <para>
         The results displayed here are not editable. If you want to
         modify the results after a search, you have to use the
-        <link linkend="command-search-data">WbGrepSource</link> command
+        <link linkend="command-search-data">WbGrepData</link> command
       </para>
     </note>
     <para>

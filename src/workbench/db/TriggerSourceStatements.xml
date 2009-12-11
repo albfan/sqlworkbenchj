@@ -186,8 +186,21 @@ where trg.tgrelid = tbl.oid
      <string>SELECT 'CREATE TRIGGER '||trigger_name||'\n'||
        action_timing||' '||event_manipulation||' ON '||event_object_table||'\n'||
        case
-          when action_reference_new_row is not null then
-          'REFERENCING NEW ROW AS '||action_reference_new_row
+          when action_reference_new_row is not null or action_reference_old_row is not null then
+          '\nREFERENCING ' ||
+            CASE when action_reference_old_row is not null then 'OLD ROW AS '|| action_reference_old_row || ' '
+            else '' END ||
+            CASE when action_reference_new_row is not null then 'NEW ROW AS '|| action_reference_new_row
+            else '' end
+          else ''
+       end||
+       case
+          when action_reference_new_table is not null or action_reference_old_table is not null then
+          '\nREFERENCING ' ||
+            CASE when action_reference_old_table is not null then 'OLD TABLE AS '|| action_reference_old_table || ' '
+            else '' END ||
+            CASE when action_reference_new_table is not null then 'NEW TABLE AS '|| action_reference_new_table
+            else '' end
           else ''
        end||'\n'||
        trim(case
@@ -199,7 +212,8 @@ where trg.tgrelid = tbl.oid
          else ''
        end||'\n'||
        trim(action_statement)
-       FROM information_schema.triggers</string>
+       FROM information_schema.triggers
+</string>
     </void>
     <void property="objectNameField">
      <string>trigger_name</string>
