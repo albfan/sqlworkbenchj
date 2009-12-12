@@ -35,6 +35,7 @@ import workbench.util.StringUtil;
 /**
  * The text area repaint manager. It performs double buffering and paints
  * lines of text.
+ *
  * @author Slava Pestov
  */
 public class TextAreaPainter
@@ -65,7 +66,7 @@ public class TextAreaPainter
 	private static final Color GUTTER_BACKGROUND = new Color(238,240,238);
 	private static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
-	private static final Set<String> COLOR_PROPS = CollectionUtil.hashSet(			
+	private static final Set<String> COLOR_PROPS = CollectionUtil.hashSet(
 		Settings.PROPERTY_EDITOR_FG_COLOR,
 		Settings.PROPERTY_EDITOR_BG_COLOR,
 		Settings.PROPERTY_EDITOR_CURSOR_COLOR,
@@ -93,7 +94,7 @@ public class TextAreaPainter
 		caretColor = Settings.getInstance().getEditorCursorColor();
 		selectionColor = Settings.getInstance().getEditorSelectionColor();
 		currentLineColor = Settings.getInstance().getEditorCurrentLineColor();
-		
+
 		bracketHighlight = true;
 		showLineNumbers = Settings.getInstance().getShowLineNumbers();
 
@@ -157,7 +158,7 @@ public class TextAreaPainter
 			}
 		});
 	}
-	
+
 	/**
 	 * Returns if this component can be traversed by pressing the
 	 * Tab key. This returns false.
@@ -296,7 +297,7 @@ public class TextAreaPainter
 			this.gutterWidth = 0;
 		}
 	}
-	
+
 	public void calculateTabSize()
 	{
 		this.tabSize = -1;

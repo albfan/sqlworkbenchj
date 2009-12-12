@@ -39,7 +39,7 @@ import workbench.util.WbThread;
 /**
  * TableModel for displaying the contents of a {@link workbench.storage.DataStore }
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class DataStoreTableModel
 	extends AbstractTableModel
@@ -53,10 +53,6 @@ public class DataStoreTableModel
 	private SortDefinition sortColumns = new SortDefinition();
 
 	private boolean allowEditing = true;
-	
-	// setting readonly will allow editing of the cells, but will not apply 
-	// any change made to the data
-	private boolean ignoreChanges;
 	
 	private boolean showConverterError = true;
 	private final Object model_change_lock = new Object();
@@ -186,8 +182,6 @@ public class DataStoreTableModel
 	
 	public void setValueAt(Object aValue, int row, int column)
 	{
-		if (this.ignoreChanges) return;
-		
 		// Updates to the status column shouldn't happen anyway ....
 		if (this.showStatusColumn && column == 0) return;
 
@@ -466,11 +460,6 @@ public class DataStoreTableModel
 		}
 	}
 
-	public void setIgnoreChanges(boolean flag)
-	{
-		this.ignoreChanges = flag;
-	}
-	
 	public void setAllowEditing(boolean aFlag)
 	{
 		this.allowEditing = aFlag;

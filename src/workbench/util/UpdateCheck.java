@@ -82,7 +82,7 @@ public class UpdateCheck
 	public void startRead()
 	{
 		LogMgr.logDebug("UpdateCheck.run()", "Checking versions...");
-		this.versionReader = new WbVersionReader("automatic ", this);
+		this.versionReader = new WbVersionReader("automatic", this);
 		versionReader.startCheckThread();
 	}
 

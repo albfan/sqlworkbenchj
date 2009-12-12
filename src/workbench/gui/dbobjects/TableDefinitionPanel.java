@@ -71,7 +71,7 @@ import workbench.util.WbThread;
  *
  * @see workbench.db.DbMetadata#getTableDefinition(TableIdentifier)
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableDefinitionPanel
 	extends JPanel
@@ -92,7 +92,7 @@ public class TableDefinitionPanel
 	private TableIdentifier currentTable;
 	private InsertRowAction addColumn;
 	private DeleteRowAction deleteColumn;
-	
+
 	private WbConnection dbConnection;
 	private WbAction reloadAction;
 	private DropDbObjectAction dropColumnsAction;
@@ -102,7 +102,7 @@ public class TableDefinitionPanel
 	private ColumnChangeValidator validator = new ColumnChangeValidator();
 	private boolean doRestore;
 	private boolean initialized;
-	
+
 	public TableDefinitionPanel()
 	{
 		super();
@@ -111,7 +111,7 @@ public class TableDefinitionPanel
 	private void initGui()
 	{
 		if (initialized) return;
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			@Override
@@ -121,16 +121,18 @@ public class TableDefinitionPanel
 			}
 		});
 	}
-	
+
 	private void _initGui()
 	{
 		if (initialized) return;
-		
+
 		this.tableDefinition = new WbTable(true, false, false);
 		this.tableDefinition.setAdjustToColumnLabel(false);
 		this.tableDefinition.setSelectOnRightButtonClick(true);
 		this.tableDefinition.getExportAction().setEnabled(true);
 
+		tableDefinition.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
+		
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
 		this.reloadAction.addToInputMap(this.tableDefinition);
@@ -184,14 +186,14 @@ public class TableDefinitionPanel
 		};
 		addColumn = new InsertRowAction(db);
 		addColumn.initMenuDefinition("MnuTxtAddCol");
-		
+
 		deleteColumn = new DeleteRowAction(db);
 		deleteColumn.initMenuDefinition("MnuTxtDropColumn");
 
 		columnFilter.addToToolbar(addColumn, true, true);
 		columnFilter.addToToolbar(deleteColumn, 1);
 		columnFilter.addToToolbar(reloadAction, 0);
-		
+
 		GridBagConstraints cc = new GridBagConstraints();
 
 		cc.anchor = GridBagConstraints.WEST;
@@ -297,7 +299,7 @@ public class TableDefinitionPanel
 	{
 		if (tableDefinition != null) tableDefinition.dispose();
 	}
-	
+
 	/**
 	 * Retrieve the definition of the given table.
 	 */
@@ -341,12 +343,11 @@ public class TableDefinitionPanel
 					// to avoid the impression that e.g. the column's position
 					// can be changed by editing that column
 					dsModel.setValidator(validator);
-					
+
 					int typeIndex = dsModel.findColumn("java.sql.Types");
 					int posIndex = dsModel.findColumn("POSITION");
 					int pkIndex = dsModel.findColumn("PK");
 					dsModel.setNonEditableColums(typeIndex, posIndex, pkIndex);
-					dsModel.setIgnoreChanges(!GuiSettings.allowAlterInDbExplorer());
 				}
 
 				alterButton.setVisible("TABLE".equalsIgnoreCase(currentTable.getType()));
@@ -439,7 +440,7 @@ public class TableDefinitionPanel
 	public void reset()
 	{
 		if (!initialized) return;
-		
+
 		currentTable = null;
 		tableDefinition.reset();
 		reloadAction.setEnabled(false);
@@ -463,7 +464,7 @@ public class TableDefinitionPanel
 		this.reloadAction.setEnabled(this.dbConnection != null);
 
 		validator.setConnection(dbConnection);
-		
+
 		if (dbConnection != null && dbConnection.getDbSettings().canDropType("column"))
 		{
 			DropDbObjectAction action = getDropColumnAction();
@@ -562,22 +563,22 @@ public class TableDefinitionPanel
 			IndexColumn col = new IndexColumn(colName, null);
 			columns.add(col);
 		}
-		
+
 		String sql = this.dbConnection.getMetadata().buildIndexSource(this.currentTable, indexName, false, columns);
 		if (!sql.trim().endsWith(";"))
 		{
 			sql += ";\n";
 		}
-		
+
 		String title = ResourceMgr.getString("TxtWindowTitleCreateIndex");
-		
+
 		if (dbConnection.shouldCommitDDL())
 		{
 			sql += "\nCOMMIT;\n";
 		}
 		RunScriptPanel panel = new RunScriptPanel(dbConnection, sql);
 		panel.openWindow(this, title, indexName);
-		
+
 		if (panel.wasRun())
 		{
 			fireIndexChanged(indexName);
@@ -588,7 +589,7 @@ public class TableDefinitionPanel
 	{
 		return (currentTable != null ? "TABLE".equalsIgnoreCase(currentTable.getType()) : false);
 	}
-	
+
 	protected boolean hasPkColumn()
 	{
 		if (!isTable()) return false;
@@ -600,14 +601,14 @@ public class TableDefinitionPanel
 		}
 		return false;
 	}
-	
+
 	/**
 	 * Invoked when the selection in the table list has changed
 	 */
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (!initialized) return;
-		
+
 		if (e.getValueIsAdjusting()) return;
 		if (e.getSource() == this.tableDefinition.getSelectionModel())
 		{

@@ -76,7 +76,8 @@ import workbench.resource.ShortcutManager;
  * handler, but doesn't actually do any key binding logic. It is up
  * to the implementations of this class to do so.
  *
- * @author Slava Pestov
+ * @author Slava Pestov (initial developer)
+ * @author Thomas Kellerer (enhancements and bugfixes)
  */
 public class InputHandler
 	extends KeyAdapter
@@ -277,7 +278,7 @@ public class InputHandler
 			});
 			return;
 		}
-		
+
 		ActionListener l = bindings.get(keyStroke);
 
 		if (l != null)
@@ -285,6 +286,11 @@ public class InputHandler
 			executeAction(l, evt.getSource(), null);
 			evt.consume();
 		}
+	}
+
+	void resetStatus()
+	{
+		sequenceIsMapped = false;
 	}
 
 	@Override
@@ -314,7 +320,7 @@ public class InputHandler
 				return;
 			}
 		}
-		
+
 		if (c >= 0x20 && c != 0x7f)
 		{
 			KeyStroke key = KeyStroke.getKeyStrokeForEvent(evt);
@@ -393,7 +399,7 @@ public class InputHandler
 		if (toTest.getModifiers() == 0) return false;
 
 		int code = toTest.getKeyCode();
-		
+
 		// if the keycode indicates a modifier key, only that key was
 		// pressed, the modifier alone cannot be mapped...
 		if (code == KeyEvent.VK_ALT || code == KeyEvent.VK_CONTROL ||
@@ -571,7 +577,7 @@ public class InputHandler
 				TextIndenter indenter = new TextIndenter(textArea);
 				indenter.indentSelection();
 			}
-			else 
+			else
 			{
 				boolean useTab = Settings.getInstance().getEditorUseTabCharacter();
 				if (useTab)

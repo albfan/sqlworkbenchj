@@ -165,7 +165,7 @@ public class WbTable
 	private CopySelectedAsSqlUpdateAction copySelectedAsUpdateAction;
 
 	private ResetHighlightAction resetHighlightAction;
-	
+
 	private ColumnExpression highlightExpression;
 
 	private FilterDataAction filterAction;
@@ -194,10 +194,11 @@ public class WbTable
 	private boolean rowHeightWasOptimized;
 	private Color requiredColor;
 	private boolean allowColumnOrderSaving;
-	
+
 	private boolean showFocusPending = false;
 	private FocusIndicator focusIndicator = null;
 	private ListSelectionControl selectionController;
+	private boolean readOnly;
 
 	// </editor-fold>
 
@@ -329,11 +330,21 @@ public class WbTable
 		this.getActionMap().put("wbtable-stop-editing", a);
 	}
 
+	public void setReadOnly(boolean flag)
+	{
+		readOnly = flag;
+	}
+
+	public boolean isReadOnly()
+	{
+		return readOnly;
+	}
+
 	public void setColumnOrderSavingEnabled(boolean flag)
 	{
 		allowColumnOrderSaving = flag;
 	}
-	
+
 	public void showInputFormAction()
 	{
 		if (this.popup == null) return;
@@ -859,7 +870,7 @@ public class WbTable
 	public boolean editCellAt(final int row, int column, final EventObject e)
 	{
 		boolean result = super.editCellAt(row, column, e);
-		
+
 		if (result)
 		{
 			if (this.highlightRequiredFields)
@@ -872,7 +883,7 @@ public class WbTable
 				public void run()
 				{
 					clearSelection();
-					
+
 					// for some reason the first keystroke (that starts the editing mode)
 					// is not passed on to the multiline editor, so I'm faking that here
 					if (e instanceof KeyEvent && getCellEditor() == multiLineEditor)
@@ -1001,7 +1012,7 @@ public class WbTable
 		if (this.dwModel != null)
 		{
 			this.dwModel.dispose();
-			
+
 			// Setting the dwModel to null is important
 			// because the new model might not be a DataStoreTableModel
 			this.dwModel = null;
@@ -1485,7 +1496,7 @@ public class WbTable
 	{
 		boolean changed = (filter != null && this.highlightExpression == null) ||
 			(filter == null && this.highlightExpression != null);
-		
+
 		this.highlightExpression = filter;
 		this.resetHighlightAction.setEnabled(filter != null);
 
@@ -1895,7 +1906,7 @@ public class WbTable
 		TableColumnModel colMod = this.getColumnModel();
 		return colMod.getColumnIndexAtX(this.headerPopupX);
 	}
-	
+
 	public int getPopupColumnIndex()
 	{
 		int viewColumn = getPopupViewColumnIndex();
@@ -1954,7 +1965,7 @@ public class WbTable
 	{
 		DataStore ds = this.getDataStore();
 		TableIdentifier table = ds.getUpdateTable();
-		
+
 		if (table == null)
 		{
 			table = selectUpdateTable();
@@ -1977,7 +1988,7 @@ public class WbTable
 				LogMgr.logError("WbTable.selectKeyColumns()", "Error when retrieving key columns", e);
 			}
 		}
-		
+
 		if (table == null)
 		{
 			Window w = SwingUtilities.getWindowAncestor(this);

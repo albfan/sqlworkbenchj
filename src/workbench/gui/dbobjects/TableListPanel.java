@@ -112,7 +112,11 @@ import workbench.util.WbProperties;
 
 
 /**
+ * A panel that displays a list of tables, views and other database objects.
+ * Essentially everything returned by DbMetadata.getObjects()
+ *
  * @author Thomas Kellerer
+ * @see workbench.db.DbMetadata#getObjects(java.lang.String, java.lang.String, java.lang.String[])
  */
 public class TableListPanel
 	extends JPanel
@@ -381,6 +385,7 @@ public class TableListPanel
 			});
 		}
 		tableList.setListSelectionControl(this);
+		tableList.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		showObjectDefinitionPanels(false, false);
 	}
 
@@ -898,7 +903,6 @@ public class TableListPanel
 			// to avoid the impression that e.g. a table's catalog can be changed
 			// by editing this list
 			model.setValidator(validator);
-			model.setIgnoreChanges(!GuiSettings.allowAlterInDbExplorer());
 
 			WbSwingUtilities.invoke(new Runnable()
 			{

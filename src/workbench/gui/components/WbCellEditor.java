@@ -11,6 +11,7 @@
  */
 package workbench.gui.components;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.InputEvent;
@@ -32,8 +33,9 @@ import workbench.gui.WbSwingUtilities;
 import workbench.resource.PlatformShortcuts;
 
 /**
+ * A TableCellEditor that displays multiple lines
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbCellEditor
 	extends AbstractCellEditor
@@ -42,12 +44,14 @@ public class WbCellEditor
 	private TextAreaEditor editor;
 	private WbTable parentTable;
 	private JScrollPane scroll;
+	private Color defaultBackground;
 
 	public WbCellEditor(WbTable parent)
 	{
 		super();
 		parentTable = parent;
 		editor = new TextAreaEditor();
+		defaultBackground = editor.getBackground();
 		setDefaultCopyPasteKeys(editor);
 		setFont(parent.getFont());
 		scroll = new TextAreaScrollPane(editor);
@@ -109,7 +113,7 @@ public class WbCellEditor
 		editor.setText(newText);
 		editor.selectAll();
 	}
-	
+
 	public void setFont(Font aFont)
 	{
 		this.editor.setFont(aFont);
@@ -142,6 +146,7 @@ public class WbCellEditor
 		// this method is called when the user edits a cell
 		// in that case we want to select all text
 		editor.selectAll();
+		setEditable(!parentTable.isReadOnly());
 		return scroll;
 	}
 
@@ -179,6 +184,20 @@ public class WbCellEditor
 	{
 	}
 
+	public void setEditable(boolean flag)
+	{
+		editor.setEditable(flag);
+		if (!flag)
+		{
+			editor.setBackground(defaultBackground);
+		}
+		editor.getCaret().setVisible(true);
+	}
+
+	public boolean isEditable()
+	{
+		return editor.isEditable();
+	}
 
 	static class TextAreaEditor
 		extends JTextArea

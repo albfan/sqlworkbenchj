@@ -439,11 +439,13 @@ public class JEditTextArea
 
 	public void focusGained(FocusEvent e)
 	{
+		inputHandler.resetStatus();
 		setCaretVisible(true);
 	}
 
 	public void focusLost(FocusEvent e)
 	{
+		inputHandler.resetStatus();
 		setCaretVisible(false);
 	}
 

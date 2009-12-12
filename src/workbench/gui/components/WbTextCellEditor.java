@@ -41,7 +41,7 @@ public class WbTextCellEditor
 	private WbTable parentTable;
 	private Color defaultBackground;
 	private boolean changed = false;
-	
+
 	public static final WbTextCellEditor createInstance()
 	{
 		return createInstance(null);
@@ -62,16 +62,16 @@ public class WbTextCellEditor
 		this.textField = field;
 		this.textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.textField.addMouseListener(this);
-		this.textField.addMouseListener(new TextComponentMouseListener());		
+		this.textField.addMouseListener(new TextComponentMouseListener());
 		this.textField.getDocument().addDocumentListener(this);
 		super.addCellEditorListener(parent);
 	}
-	
-	public String getText() 
+
+	public String getText()
 	{
 		return this.textField.getText();
 	}
-	
+
 	public void setFont(Font aFont)
 	{
 		this.textField.setFont(aFont);
@@ -81,22 +81,23 @@ public class WbTextCellEditor
 	{
 		return defaultBackground;
 	}
-	
+
 	public void requestFocus()
 	{
 		this.textField.requestFocusInWindow();
 	}
-	
+
 	public void selectAll()
 	{
 		this.textField.selectAll();
 	}
-	
+
 	public Component getTableCellEditorComponent(JTable table, Object value,
 							boolean isSelected,int row, int column)
 	{
 		Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
 		textField.selectAll();
+		setEditable(!parentTable.isReadOnly());
 		this.changed = false;
 		return result;
 	}
@@ -105,7 +106,7 @@ public class WbTextCellEditor
 	{
 		this.textField.setBackground(c);
 	}
-	
+
 	public boolean shouldSelectCell(EventObject anEvent)
 	{
 		boolean shouldSelect = super.shouldSelectCell(anEvent);
@@ -145,17 +146,17 @@ public class WbTextCellEditor
 		super.cancelCellEditing();
 		fireEditingCanceled();
 	}
-	
+
 	public boolean stopCellEditing()
 	{
 		boolean result = super.stopCellEditing();
-		if (result) 
+		if (result)
 		{
 			fireEditingStopped();
 		}
 		return result;
 	}
-	
+
 	public void openEditWindow()
 	{
 		if (this.parentTable == null)
@@ -184,23 +185,34 @@ public class WbTextCellEditor
 		}
 	}
 
-	public boolean isModified() 
+	public boolean isModified()
 	{
 		return this.changed;
 	}
-	
+
 	public void insertUpdate(DocumentEvent arg0)
 	{
 		this.changed = true;
 	}
-	
+
 	public void removeUpdate(DocumentEvent arg0)
 	{
 		this.changed = true;
 	}
-	
+
 	public void changedUpdate(DocumentEvent arg0)
 	{
 		this.changed = true;
 	}
+
+	public void setEditable(boolean flag)
+	{
+		textField.setEditable(flag);
+		if (!flag)
+		{
+			textField.setBackground(defaultBackground);
+		}
+		textField.getCaret().setVisible(true);
+	}
+
 }

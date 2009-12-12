@@ -582,7 +582,7 @@ public class Settings
 
 	public int getUpdateCheckInterval()
 	{
-		return getIntProperty("workbench.gui.updatecheck.interval", 7);
+		return getIntProperty("workbench.gui.updatecheck.interval", 30);
 	}
 
 	public void setUpdateCheckInterval(int days)

@@ -68,7 +68,11 @@ import workbench.util.LowMemoryException;
 import workbench.util.WbWorkspace;
 
 /**
- * @author  support@sql-workbench.net
+ * A panel that display the list of procedures/functions available in the database.
+ * Essentially this is the list returned by ProcedureReader.getProcedures()
+ *
+ * @author Thomas Kellerer
+ * @see workbench.db.ProcedureReader#getProcedures(java.lang.String, java.lang.String, java.lang.String)
  */
 public class ProcedureListPanel
 	extends JPanel
@@ -159,7 +163,7 @@ public class ProcedureListPanel
 				return super.getCellRenderer(row, column);
 			}
 		};
-
+		procList.setReadOnly(true);
 		this.procList.getSelectionModel().addListSelectionListener(this);
 		this.procList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
@@ -174,7 +178,7 @@ public class ProcedureListPanel
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		this.splitPane.setOneTouchExpandable(true);
 		this.splitPane.setDividerSize(6);
-		
+
 		this.listPanel.add(new WbScrollPane(this.procList), BorderLayout.CENTER);
 
 		this.infoLabel = new JLabel("");
@@ -278,7 +282,7 @@ public class ProcedureListPanel
 	public void retrieve()
 	{
 		initGui();
-		
+
 		if (this.isRetrieving) return;
 		if (!WbSwingUtilities.checkConnection(this, this.dbConnection)) return;
 
@@ -300,8 +304,6 @@ public class ProcedureListPanel
 			DataStore ds = meta.getProcedureReader().getProcedures(currentCatalog, currentSchema, null);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
 
-			model.setIgnoreChanges(true);
-			
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
@@ -405,7 +407,7 @@ public class ProcedureListPanel
 	public void valueChanged(ListSelectionEvent e)
 	{
 		if (!initialized) return;
-		
+
 		if (e.getSource() != this.procList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
 		retrieveCurrentProcedure();
@@ -483,7 +485,7 @@ public class ProcedureListPanel
 			WbSwingUtilities.showDefaultCursor(parent);
 			dbConnection.setBusy(false);
 		}
-		
+
 		final int pos = findOracleProcedureInPackage(sql, def.getPackageName(), def.getProcedureName());
 
 		EventQueue.invokeLater(new Runnable()
@@ -526,7 +528,7 @@ public class ProcedureListPanel
 	public List<? extends DbObject> getSelectedObjects()
 	{
 		if (!initialized) return null;
-		
+
 		if (this.procList.getSelectedRowCount() == 0) return null;
 		int[] rows = this.procList.getSelectedRows();
 		int count = rows.length;
