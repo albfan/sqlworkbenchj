@@ -42,9 +42,8 @@ public class TextAreaPainter
 	extends JComponent
 	implements TabExpander, PropertyChangeListener
 {
-	int currentLineIndex;
 	Token currentLineTokens;
-	Segment currentLine;
+	private Segment currentLine;
 
 	// protected members
 	protected JEditTextArea textArea;
@@ -83,7 +82,6 @@ public class TextAreaPainter
 		setOpaque(true);
 
 		currentLine = new Segment();
-		currentLineIndex = -1;
 
 		setCursor(Cursor.getPredefinedCursor(Cursor.TEXT_CURSOR));
 		setFont(Settings.getInstance().getEditorFont());
@@ -479,8 +477,6 @@ public class TextAreaPainter
 	{
 		Font defaultFont = getFont();
 		Color defaultColor = getForeground();
-
-		currentLineIndex = line;
 
 		if(tokenMarker == null)
 		{
