@@ -36,30 +36,19 @@
 				for updates using the menu
 				<menuchoice><guimenu>Help</guimenu><guimenuitem>Check for updates...</guimenuitem></menuchoice>.
 			</para>
+      <para>
+        When &wb-productname; performs an update check, it sends the following information as part of the request to the server:
+        <itemizedlist>
+          <listitem><simpara>The version of &wb-productname; you are using</simpara></listitem>
+          <listitem><simpara>Whether the check was an automatic check or a manual one</simpara></listitem>
+          <listitem><simpara>The interface language selected</simpara></listitem>
+          <listitem><simpara>The operating system as reported by your Java installation</simpara></listitem>
+          <listitem><simpara>The Java version you are using</simpara></listitem>
+        </itemizedlist>
+      </para>
 		</section>
 
-    <!--
-		<section id="options-field-delimiter">
-			<title>Field delimiter</title>
-			<para>
-				The default delimiter used when exporting data to a text file.
-				This can be overridden in the file selection dialog when actually
-				exporting the data.
-			</para>
-		</section>
-
-		<section id="options-quote-character">
-			<title>Quote character</title>
-			<para>
-				The default character to be used to quote column data when exporting to
-				a text file. This value will be used when you don't specify a quote
-				character e.g. for the <link linkend="command-export"><literal>WbExport</literal></link>
-				command and when you use <menuchoice><guimenu>SQL</guimenu><guimenuitem>Save data as</guimenuitem></menuchoice>
-				to export a result set.
-			</para>
-		</section>
-    -->
-		
+	
 		<section id="options-show-connect">
 			<title>Show connect dialog</title>
 			<para>
