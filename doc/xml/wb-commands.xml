@@ -1428,11 +1428,7 @@ WHERE id=42;</programlisting>
 			If you want to show the structure of a table from a different user, you need
 			to prefix the table name with the desired user <literal>DESCRIBE otheruser.person;</literal>
 		</para>
-		<note><para>
-			Although the name of this command is identical to Oracle SQL*Plus' <literal>DESC</literal>
-			command, this is a &wb-productname; specific implementation and works the same way on
-			any supported DBMS.
-		</para></note>
+
   </section>
 
   <section id="command-list">

@@ -135,9 +135,9 @@
 		</para>
 
 		<note><para>
-			The launcher only works with JDK&apos;s from Sun, as it directly calls the
-			JDK dll&apos;s to start the virtual machine. If you are using a different JDK,
-			you cannot use the launcher to start &wb-productname; (unless it uses the same
+			The launcher only works with a Sun JDK, as it directly calls the
+			JDK&apos; dll to start the virtual machine. If you are using a different JDK,
+			you cannot use the launcher to start &wb-productname; on Windows (unless it uses the same
 			directory layout and filenames as the Sun JDK).
 		</para></note>
 
@@ -162,7 +162,7 @@
 			If that is not defined, <literal>HKLM\Software\JavaSoft\Java Development Kit</literal>
 			is queried.</para>
 
-			<para>In the registry key, a subkey for the version 1.5 is retrieved, and
+			<para>In the registry key, a subkey for the version 1.6 is retrieved, and
 			the directory specified by that key is used as the base JDK
 			directory.</para>
 			<para>If your JDK/JRE installation cannot be found by the launcher, but you do have
@@ -202,7 +202,7 @@
 					<tbody valign="top">
 						<row>
 							<entry>-jdk</entry>
-							<entry>Specify the installation directory of the JDK e.g.: -jdk=c:\jdk1.5
+							<entry>Specify the installation directory of the JDK e.g.: -jdk=c:\Java\jdk1.6
 								When this parameter is specified the launcher will not look for a JDK
 								installation as described <link linkend="launcher-jdk-search">here</link>
 							</entry>

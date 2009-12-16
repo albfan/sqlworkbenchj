@@ -3,7 +3,7 @@
 
   <section id="profile-intro">
 	<title>Connection profiles</title>
-	<para>&wb-productname; uses the concept of database profiles to store
+	<para>&wb-productname; uses the concept of profiles to store
 		connection information. A connection profile stores two different types
 		of settings:
 
@@ -172,7 +172,7 @@
 		JDBC drivers support additional connection properties where
 		you can fine tune the behaviour of the driver or enable special features
 		that are not switched on by default. Most drivers support passing properties
-    as part of the URL, but sometimes they need to be passed to driver using
+    as part of the URL, but sometimes they need to be passed to the driver using
     a different method called "extended properties".
 	</para>
 
@@ -565,7 +565,7 @@
 					<literal>10m</literal> (10 minutes).
 				</para>
 				<para>
-					When only one of the fields contains a value, You can disable the keep alive
+					You can disable the keep alive
 					feature by deleting the entry for the interval but keeping the SQL statement.
 					Thus you can quickly turn off the keep alive feature but keep the
 					SQL statement for the next time.
@@ -585,7 +585,7 @@
         The filter dialog contains two input fields, one to filter schema name and one to filter catalog names.
       </para>
       <para>
-        Each line of the filter definition defines a single expression of schema/catalog names to be <emphasis>excluded</emphasis>
+        Each line of the filter definition defines a single regular expression of schema/catalog names to be <emphasis>excluded</emphasis>
         from the dropdown, i.e. if a schema/catalog matches the defined name, it will not be listed in the dropdown.
       </para>
       <para>

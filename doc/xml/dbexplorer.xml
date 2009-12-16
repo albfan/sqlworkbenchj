@@ -231,7 +231,7 @@
 			</blockquote>
 		</simplesect>
 
-    <simplesect id="dbexplorer-rename-table">
+    <simplesect id="dbexplorer-alter-script">
       <title>ALTER script</title>
 			<blockquote>
         <para>
@@ -239,7 +239,7 @@
           generate and run a SQL script that will apply that change to the database.
         </para>
         <para>
-          For details please refer to the section <link linkend="dbexplorer-alter-table">Changing table definitions</link>
+          For details please refer to the section <link linkend="dbexplorer-rename-objects">Changing table definitions</link>
         </para>
       </blockquote>
     </simplesect>
@@ -285,7 +285,7 @@
         To apply the changes, click on the <guibutton>ALTER table</guibutton> button.
       </para>
         <para>
-          For details please refer to the section <link linkend="dbexplorer-alter-table">Changing table definitions</link>
+          For details please refer to the section <link linkend="dbexplorer-change-column">Changing table definitions</link>
         </para>
     </simplesect>
 	</section>
@@ -293,7 +293,7 @@
   <section id="dbexplorer-alter">
     <title>Modifying the definition of database objects</title>
 
-    <section id="dbexplorer-rename-table">
+    <section id="dbexplorer-rename-objects">
       <title>Renaming objects</title>
         <para>
           You can edit the name of the objects in the object list. Depending on the DBMS, you might be able to change the
@@ -689,7 +689,7 @@ FROM geo_table
 
       <para>
         The client side search is also available through the
-        <link linkend="command-search-data">WbGrepSource</link> command
+        <link linkend="command-search-data">WbGrepData</link> command
       </para>
       
     </section>

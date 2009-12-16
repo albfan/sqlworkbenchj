@@ -1037,7 +1037,7 @@
          -file='c:/data/data.txt'
          -delimiter=','
          -decimal=','
-				 -dateFormat='yyyy-MM-dd';
+         -dateFormat='yyyy-MM-dd';
 SELECT * FROM data_table;</programlisting>
 		</section>
 
@@ -1075,8 +1075,7 @@ SELECT * FROM data_table;</programlisting>
 				executed on the target system, the following command can be used:
 			</para>
 
-<programlisting>WbExport
-         -type=sqlinsert
+<programlisting>WbExport -type=sqlinsert
          -file='c:/data/newtable.sql'
          -table=newtable;
 SELECT * FROM table1, table2
@@ -1084,7 +1083,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
 
 			<para>
 				will create a SQL script which that contains statements like
-				<literal>INSERT INTO newtable (...) VALUES (...);</literal>. Where the
+				<literal>INSERT INTO newtable (...) VALUES (...);</literal> and the
 				list of columns are all columns that are defined by the SELECT statement.
 			</para>
 			<para>

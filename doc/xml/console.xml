@@ -173,7 +173,7 @@ SQL> </screen>
 	<section id="console-maxrows">
 		<title>Controlling the number of rows displayed</title>
 		<para>
-			In the &wb-productname; GUI window, you can limit the reuslt of a query by entering
+			In the &wb-productname; GUI window, you can limit the reusult of a query by entering
 			a value in the "Max. Rows" field. If you want to limit the number of rows in console mode
 			you can do this by running the statement
 		</para>
