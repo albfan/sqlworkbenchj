@@ -14,6 +14,91 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New stable build (107) released</title>
+      <description>        <![CDATA[<p>Changes from build 106 to build 107</p><p>Enhancements</p><ul>
+<li>SQL Workbench/J now requires Java 6.</li>
+<li>Changing column definitions or renaming tables directly in the DbExplorer can be now disabled in the Options dialog.</li>
+<li>The connection profile has a new option to filter schema and catalog names from the dropdown in the DbExplorer.</li>
+<li>A new option to keep the highlight when using "Highlight current statement" has been added (Tools -&gt; Options -&gt; Editor)</li>
+<li>A new option to set the default value for the Max. Rows field when opening new tabs is available (Tools -&gt; Options -&gt; Data Display)</li>
+<li>UTF and ISO encodings can now be entered (e.g. for WbExport or WbImport) without dashes: UTF8, UTF16, iso88591. They will be converted internally to the correct names.</li>
+<li>Log4J logging can also be turned on by supplying a configuration file as a parameter for workbench.log.log4j so that log4j.xml does not need to be in the directory where sqlworkbench.jar is located.</li>
+<li>Peter Franken contributed a Log4J integration for SQL Workbench/J. In order to use Log4j, the library log4j.jar (without a version number) must be present in the directory where sqlworkbench.jar is located. The log4j.xml must also be placed into that directory. To turn on log4j logging, the property workbench.log.log4j must be set to true (either in workbench.settings or as a system property) If log4j is used, none of the logging properties from workbench.settings will be applied. Log4j must be completely configured through log4j.xml.</li>
+<li>Blobs can now be exported and imported as "text values" by encoding the binary values (hex or unicode).</li>
+<li>sqlwbconsole.exe can now also be used to run SQL Workbench in batch mode (e.g. sqlwbconsole.exe -script=do_something.sql)</li>
+<li>A new menu item "File -&gt; Close Window" is available to close the current window.</li>
+<li>For JDBC 4 drivers that support the SQLXML type, XML columns are now displayed directly (without the need to use casting or similar methods). Currently it seems that only Postgres and DB2 have implemented this properly in their driver.</li>
+<li>A new option to control the behaviour when closing a tab has been added. If "Activate the last used tab" is enabled, closing a tab will no longer select the "next" tab, but the previously used one. The new option is enabled by default.</li>
+<li>When opening a file from the the main menu (File -&gt; Open), the file can now be opened in a new editor tab.</li>
+<li>Columns can now be added from within the DbExplorer's table definition panel</li>
+<li>The generated source for inherited tables in Postgres now shows the parent table</li>
+<li>WbSchemaDiff and WbReport now include triggers.</li>
+<li>WbDataDiff can now output the result as XML files.</li>
+<li>The WbXslt command can now handle stylesheets that include other stylesheets.</li>
+<li>In the macro editor auto completion is now enabled (if the main window is connected)</li>
+<li>workbench.settings will now only retain those properties that differ from the built-in defaults. This makes rolling out changes to the defaults easier. Any property that has been customized will remain in workbench.settings (but will not benefit from bugfixes made to the default properties)</li>
+<li>Result tabs, can now be re-orderd using drag and drop.</li>
+<li>The column definition of tables in the DbExplorer can now be edited and the approriate ALTER statement can be generated for the changes. Primary keys can be dropped and created from within the column definition.</li>
+<li>Tables (and other objects if the database supports this) can now be renamed from within the table list of the DbExplorer. The comment for a table can also be changed. To apply the changes a new menu option in the context menu is available to generate and run the necessary ALTER statements.</li>
+<li>The editor and resultset tabs can now have their own close button. (Tools -&gt; Options -&gt; General)</li>
+<li>For SQL Server 2005 and above, synonyms are now retrieved in the DbExplorer.</li>
+</ul><p>Bug Fixes</p><ul>
+<li>The trigger list panel (where all triggers where shown) was not working any longer.</li>
+<li>When copying a column name from the header's popup, the wrong name was copied when the columns where re-arranged using drag&amp;drop.</li>
+<li>Fixed wrong formatting of multiple common table expressions (WITH .. AS) and multiple tuples for a VALUES expression.</li>
+<li>The (search) history dropdowns were filled in the wrong order (the oldest entry was the first entry)</li>
+<li>Using WbCall with a fully qualified procedure that returned a REF CURSOR did not work.</li>
+<li>The navigation for referencing/referenced rows was no longer available in the DbExplorer's data tab.</li>
+<li>Domain and Enum information was not displayed in the DbExplorer for Postgres versions before 8.4</li>
+<li>When using WbDataDiff with tables where the column names differed in their case "FirstName" vs. "firstname" the generated UPDATE or INSERT statements were wrong. WbDataDiff now considers column names that only differ in their case as identical.</li>
+<li>The new "Add column" feature was only configured for PostgreSQL</li>
+<li>Retrieving columns with type "timestamp" did not work for SQL Server.</li>
+<li>When adding a new column in the DbExplorer, column comments were not included.</li>
+<li>When reformatting statements, workbench variables that contained an underscore (e.g. $[my_id]) where not detected correctly (and thus the statement was not formatted correctly)</li>
+<li>The (table independent) trigger list panel in the DbExplorer did not show the trigger source correctly if multiple triggers had the same name.</li>
+<li>Execute current was not working for MySQL connections.</li>
+<li>If tables were created using double quotes (e.g. CREATE TABLE "MyTable"), the table details were no longer displayed in the DbExplorer</li>
+<li>If a connection script was defined in the connection profile, an error was displayed during connect (even though the connection script was executed correctly)</li>
+<li>The settings of the DbExplorer where not saved when the DbExplorer was opened as a separate window.</li>
+<li>When using "Highlight Current statement" and executing the statement at the cursor (Execute Current), the statement was not highlighted when an error occurred.</li>
+<li>"Execute current" was not working any longer.</li>
+<li>The editor color for datatypes selected in the options dialog was not used.</li>
+<li>The "Show Single Record Dialog" menu item in the table's popup menu was not always enabled.</li>
+<li>When copying a macro, the keyboard shortcut was copied as well.</li>
+<li>When cancelling the prompt to define an update table for a multi-table SELECT statement, an error was displayed.</li>
+<li>WbGrepData did not work if tables were listed explicitely using the -tables parameter.</li>
+<li>Auto completion was not working properly with Postgres and tables that were stored in the public schema.</li>
+<li>"WbMode confirm" was not working if the profile was set to read only.</li>
+<li>The BLOB dialog could not be opened from within a result set if the connection profile was set to read only.</li>
+<li>Formatting UPDATEs with Sub-Select was not working properly</li>
+<li>WbCopy now removes any trailing semicolon from the SQL query when using query based copying.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-107</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 16 Dec 2009 20:40:51 +0200</pubDate>
+    </item>
+    <item>
+      <title>New development build (106.9) released</title>
+      <description>        <![CDATA[<p>Changes from build 106.8 to build 106.9</p><p>Enhancements</p><ul>
+<li>SQL Workbench/J now requires Java 6.</li>
+<li>The connection profile has a new option to filter schema and catalog names from the dropdown in the DbExplorer.</li>
+<li>A new option to keep the highlight when using "Highlight current statement" has been added (Tools -&gt; Options -&gt; Editor)</li>
+<li>A new option to set the default value for the Max. Rows field when opening new tabs is available (Tools -&gt; Options -&gt; Data Display)</li>
+<li>UTF and ISO encodings can now be entered (e.g. for WbExport or WbImport) without dashes: UTF8, UTF16, iso88591. They will be converted internally to the correct names.</li>
+<li>Log4J logging can also be turned on by supplying a configuration file as a parameter for workbench.log.log4j so that log4j.xml does not need to be in the directory where sqlworkbench.jar is located.</li>
+</ul>
+
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-106.9</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Sun, 29 Nov 2009 23:05:20 +0200</pubDate>
+    </item>
+    <item>
       <title>New development build (106.8) released</title>
       <description>        <![CDATA[<p>Changes from build 106.7 to build 106.8</p><p>Enhancements</p><ul>
 <li>SQL Workbench/J now requires Java 6.</li>
@@ -23,6 +108,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>When copying a column name from the header's popup, the wrong name was copied when the columns where re-arranged using drag&amp;drop.</li>
 </ul>
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -44,6 +131,8 @@
 </ul>
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -57,6 +146,8 @@
 <li>SQL Workbench/J now requires Java 6.</li>
 <li>When opening a file from the the main menu (File -&gt; Open), the file can now be opened in a new editor tab.</li>
 </ul>
+
+
 
 
 
@@ -78,6 +169,8 @@
 <li>Retrieving columns with type "timestamp" did not work for SQL Server.</li>
 <li>When adding a new column in the DbExplorer, column comments were not included.</li>
 </ul>
+
+
 
 
 
@@ -111,6 +204,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -127,6 +222,8 @@
 <li>"Execute current" was not working any longer.</li>
 <li>The editor color for datatypes selected in the options dialog was not used.</li>
 </ul>
+
+
 
 
 
@@ -168,6 +265,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -197,6 +296,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -209,6 +310,8 @@
       <description>        <![CDATA[<p>Changes from build 105 to build 106</p><p>Bug Fixes</p><ul>
 <li>Connections to DB2 were no longer working</li>
 </ul>
+
+
 
 
 
@@ -286,6 +389,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -322,6 +427,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -338,6 +445,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The default fetch size of a connection profile could not be reset (empty).</li>
 </ul>
+
+
 
 
 
@@ -397,6 +506,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -412,6 +523,8 @@
 <li>Shortcut keys which involved the Enter could not be defined.</li>
 <li>The Save As dialog to save result data now only checks for the update table and primary keys if needed.</li>
 </ul>
+
+
 
 
 
@@ -477,6 +590,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -494,6 +609,8 @@
 <li>When re-ordering the columns using drag-and-drop and then displaying the single-record dialog, the content of the columns was mixed up.</li>
 <li>When re-ordering the columns using drag-and-drop, the order was reset when changing data in the result.</li>
 </ul>
+
+
 
 
 
@@ -567,6 +684,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -585,6 +704,8 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
+
 
 
 
@@ -710,6 +831,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -766,6 +889,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -780,6 +905,8 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
 
 
 
@@ -874,6 +1001,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -890,6 +1019,8 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
 
 
 
@@ -999,6 +1130,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -1014,6 +1147,8 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
 
 
 
@@ -1131,6 +1266,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -1147,6 +1284,8 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
+
 
 
 

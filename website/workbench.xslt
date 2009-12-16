@@ -72,11 +72,13 @@
         </xsl:for-each>
       </ul>
 
+      <!--
       <div id="nblink">
         <a target="_blank" href="http://www.netbeans.org">
           <img border="0" style="margin-top:50px;" src="created-with-nb-2.gif" alt="Created with NetBeans"/>
         </a>
       </div>
+      -->
     </div>
 
   </xsl:template>
@@ -324,7 +326,7 @@
       <p>Current dev-build: <xsl:value-of select="$devBuildNumber"/>,&nbsp;<xsl:value-of select="$devBuildDate"/> (<a href="dev-history.html">Change Log</a>)</p>
       <ul>
         <li>
-          <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a>&nbsp;<b>Requires Java 6!</b>
+          <a href="Workbench-Build{$devBuildNumber}.zip">Download development build</a>
         </li>
         <li>
           <a href="WorkbenchSrc-Build{$devBuildNumber}.zip">Source code</a>

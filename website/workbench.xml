@@ -123,12 +123,8 @@ VALUES
       <h3>Prerequisites</h3>
       <p>
         SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
-        You have to install Java before you can run SQL Workbench/J.
+        You have to install Java 6 before you can run SQL Workbench/J.
       </p>
-			<p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
-				The current build 106 is the last version that supports Java 5. <br/>
-				Please install a Java 6 runtime if you are downloading SQL Workbench/J for the first time.
-			</p>
 
       <h3 style="padding-top:10px">Installation</h3>
       <p>
@@ -244,12 +240,9 @@ VALUES
         <title>SQL Workbench/J</title>
         <subtitle>Available Downloads</subtitle>
         <content>
-            <p style="margin-top:10px;">
-                This application requires Java 5 (aka JDK 1.5) or later, but <b>Java 6</b> (JDK 1.6) is highly recommended
+            <p style="margin-top:15px;text-align:center;font-weight:bold">
+                SQL Workbench/J requires Java 6 (aka JDK 1.6) or later!
             </p>
-        <p style="font-size:100%;margin-top:15px;padding:5px;border-color:red;border-width:2px;border-style:solid">
-          Build 106 is the last stable build to support Java 5. The development build already requires Java 6.
-        </p>
         <h3 style="margin-top:25px">Stable release</h3>
         <p>
           Current stable release: Build <build-number/>, <build-date/> (<a href="history.html">Release History</a>)
@@ -299,6 +292,7 @@ VALUES
       <a href="archive/Workbench-Build103.zip">Build 103</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build103.zip">Source Code for Build 103</a><br/>
       <a href="archive/Workbench-Build104.zip">Build 104</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build104.zip">Source Code for Build 104</a><br/>
       <a href="archive/Workbench-Build105.zip">Build 105</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build105.zip">Source Code for Build 105</a><br/>
+      <a href="archive/Workbench-Build106.zip">Build 106</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build106.zip">Source Code for Build 106</a><br/>
     </content>
   </page>
 

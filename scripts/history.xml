@@ -2,7 +2,7 @@
 <history>
 
 <!-- build number must be set to -1 for development builds -->
-<release build="-1" date="2009-11-29">
+<release build="107" date="2009-12-16">
 
   <entry dev-build="10" type="enh">
     <description>
@@ -12,8 +12,7 @@
 
   <entry dev-build="10" type="enh">
     <description>
-			Changing column definitions or renaming tables directly in the DbExplorer can be disable
-      in the Options dialog.
+			Changing column definitions or renaming tables directly in the DbExplorer can be now disabled in the Options dialog.
 		</description>
 	</entry>
 
