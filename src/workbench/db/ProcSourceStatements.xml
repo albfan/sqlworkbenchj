@@ -278,5 +278,23 @@ and  sysobjects.type = &apos;P&apos;</string>
     </object>
   </void>
 
+  <void method="put">
+    <string>H2</string>
+    <object class="workbench.db.GetMetaDataSql">
+      <void property="baseSql">
+        <string>
+          SELECT 'CREATE ALIAS '||alias_name||' AS \n$$\n'|| source ||'\n$$;'
+          FROM information_schema.function_aliases
+        </string>
+      </void>
+      <void property="objectNameField">
+        <string>alias_name</string>
+      </void>
+      <void property="schemaField">
+        <string>alias_schema</string>
+      </void>
+    </object>
+  </void>
+
  </object> 
 </java> 
