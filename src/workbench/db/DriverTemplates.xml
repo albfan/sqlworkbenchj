@@ -52,7 +52,7 @@
     </void>
    </object>
   </void>
-	
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -69,7 +69,7 @@
     </void>
    </object>
   </void>
-	
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -137,7 +137,7 @@
     </void>
    </object>
   </void>
-  
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -172,22 +172,22 @@
    </object>
   </void>
 
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>com.microsoft.sqlserver.jdbc.SQLServerDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string>sqljdbc.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>SQL Server 2005</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:sqlserver://serverName;instanceName:portNumber;property=value[;property=value]</string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.microsoft.sqlserver.jdbc.SQLServerDriver</string>
+    </void>
+    <void property="library">
+     <string>sqljdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>SQL Server 2005</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:sqlserver://serverName;instanceName:portNumber;property=value[;property=value]</string>
+    </void>
+   </object>
+  </void>
 
   <void method="add">
    <object class="workbench.db.DbDriver">
@@ -205,7 +205,7 @@
     </void>
    </object>
   </void>
-  
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -229,7 +229,7 @@
      <string>oracle.jdbc.OracleDriver</string>
     </void>
     <void property="library">
-     <string>ojdbc15.jar</string>
+     <string>ojdbc6.jar</string>
     </void>
     <void property="name">
      <string>Oracle</string>
@@ -256,7 +256,7 @@
     </void>
    </object>
   </void>
-  
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -324,7 +324,7 @@
     </void>
    </object>
   </void>
-  
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -358,7 +358,7 @@
     </void>
    </object>
   </void>
-  
+
   <void method="add">
     <object class="workbench.db.DbDriver">
      <void property="driverClass">
@@ -374,9 +374,9 @@
       <string>jdbc:as400://server_name/database_name</string>
      </void>
     </object>
-   </void> 
-   
-  
+   </void>
+
+
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
@@ -394,73 +394,75 @@
    </object>
   </void>
 
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>com.mckoi.JDBCDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string>mkjdbc.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>McKoi (Server)</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:mckoi://servername/</string> 
-    </void> 
-   </object> 
-  </void> 
-  
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>com.mckoi.JDBCDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string>mkjdbc.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>McKoi (Embedded)</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:mckoi:local://path_to_db.conf</string> 
-    </void> 
-   </object> 
-  </void> 
+  <!--
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.mckoi.JDBCDriver</string>
+    </void>
+    <void property="library">
+     <string>mkjdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>McKoi (Server)</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:mckoi://servername/</string>
+    </void>
+   </object>
+  </void>
 
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>in.co.daffodil.db.jdbc.DaffodilDBDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string>DaffodilDB_Embedded.jar;DaffodilDB_Common.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>Daffodil DB Embedded Edition</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:daffodilDB_embedded:Databasename;path=Daffodil_Databases_Directory</string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>com.mckoi.JDBCDriver</string>
+    </void>
+    <void property="library">
+     <string>mkjdbc.jar</string>
+    </void>
+    <void property="name">
+     <string>McKoi (Embedded)</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:mckoi:local://path_to_db.conf</string>
+    </void>
+   </object>
+  </void>
+  -->
 
-  <void method="add"> 
-   <object class="workbench.db.DbDriver"> 
-    <void property="driverClass"> 
-     <string>in.co.daffodil.db.rmi.RmiDaffodilDBDriver</string> 
-    </void> 
-    <void property="library"> 
-     <string>DaffodilDB_Client.jar</string> 
-    </void> 
-    <void property="name"> 
-     <string>Daffodil DB Server Edition</string> 
-    </void> 
-    <void property="sampleUrl"> 
-     <string>jdbc:daffodilDB://&lt;hostname&gt;:&lt;port&gt;/Databasename;create=true</string> 
-    </void> 
-   </object> 
-  </void> 
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>in.co.daffodil.db.jdbc.DaffodilDBDriver</string>
+    </void>
+    <void property="library">
+     <string>DaffodilDB_Embedded.jar;DaffodilDB_Common.jar</string>
+    </void>
+    <void property="name">
+     <string>Daffodil DB Embedded Edition</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:daffodilDB_embedded:Databasename;path=Daffodil_Databases_Directory</string>
+    </void>
+   </object>
+  </void>
+
+  <void method="add">
+   <object class="workbench.db.DbDriver">
+    <void property="driverClass">
+     <string>in.co.daffodil.db.rmi.RmiDaffodilDBDriver</string>
+    </void>
+    <void property="library">
+     <string>DaffodilDB_Client.jar</string>
+    </void>
+    <void property="name">
+     <string>Daffodil DB Server Edition</string>
+    </void>
+    <void property="sampleUrl">
+     <string>jdbc:daffodilDB://&lt;hostname&gt;:&lt;port&gt;/Databasename;create=true</string>
+    </void>
+   </object>
+  </void>
 
  </object>
 </java>
