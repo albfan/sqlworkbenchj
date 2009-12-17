@@ -1358,6 +1358,12 @@ public class DbMetadata
 			DataStore ds = getObjects(catalog, schema, table.getRawTableName(), null);
 			String[] cols = getTableListColumns();
 
+			if (ds.getRowCount() == 0 && this.isOracle)
+			{
+				// try again with PUBLIC, maybe it's a public synonym
+				ds = getObjects(null, "PUBLIC", table.getRawTableName(), null);
+			}
+			
 			if (ds.getRowCount() == 1)
 			{
 				result = buildTableIdentifierFromDs(ds, 0);

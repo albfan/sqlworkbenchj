@@ -92,7 +92,9 @@ public class ObjectInfo
 			synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
 			if (synonymTarget != null)
 			{
-				String msg = toDescribe.getTableExpression(connection) + " --> " +
+				String msg = 
+					"--------[ " + StringUtil.capitalize(toDescribe.getType()) + ": " + toDescribe.getTableName() + " ]--------\n" +
+					toDescribe.getTableExpression(connection) + " --> " +
 					synonymTarget.getTableExpression(connection) + " (" +
 					synonymTarget.getObjectType() + ")";
 
@@ -131,7 +133,7 @@ public class ObjectInfo
 						result.addMessage("--------");
 						if (StringUtil.isBlank(result.getSourceCommand()))
 						{
-							result.setSourceCommand(StringUtil.getMaxSubstring(src, 300, "..."));
+							result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
 						}
 					}
 					return result;
@@ -207,9 +209,9 @@ public class ObjectInfo
 		if (viewSource != null)
 		{
 			result.addMessage("\n--------[ View: " +  viewname + " ]--------");
-			result.addMessage(viewSource);
+			result.addMessage(viewSource.toString().trim());
 			result.addMessage("--------");
-			result.setSourceCommand(StringUtil.getMaxSubstring(viewSource.toString(), 300, " ... "));
+			result.setSourceCommand(StringUtil.getMaxSubstring(viewSource.toString(), 350, " ... "));
 		}
 		else if (toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{
