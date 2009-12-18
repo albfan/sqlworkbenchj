@@ -2,6 +2,16 @@
 <history>
 
 <!-- build number must be set to -1 for development builds -->
+<release build="-1" date="2009-12-16">
+	
+  <entry dev-build="1" type="fix">
+    <description>
+      When changing inet, macaddr or cidr columns in the result set, wrong statements were generated for PostgreSQL
+    </description>
+  </entry>
+
+</release>
+
 <release build="107" date="2009-12-16">
 
   <entry dev-build="10" type="enh">
