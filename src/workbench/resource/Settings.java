@@ -99,6 +99,8 @@ public class Settings
 	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.cursor";
 	// </editor-fold>
 
+	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
+	
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
 	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";
 	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
@@ -211,7 +213,7 @@ public class Settings
 			System.setProperty("workbench.config.dir", configfile.getParentFile().getAbsolutePath());
 		}
 
-		if (configLoaded || getBoolProperty("workbench.gui.testmode", false))
+		if (configLoaded || isTestMode())
 		{
 			initLogging();
 
@@ -2738,6 +2740,11 @@ public class Settings
 	}
 	// </editor-fold>
 
+	public boolean isTestMode()
+	{
+		return getBoolProperty(TEST_MODE_PROPERTY, false);
+	}
+	
 	public boolean wasExternallyModified()
 	{
 		long time = this.configfile.lastModified();
@@ -2752,6 +2759,10 @@ public class Settings
 	public void saveSettings(boolean makeBackup)
 	{
 		if (this.props == null) return;
+		
+		// Never save settings in test mode
+		if (isTestMode()) return;
+
 		ShortcutManager.getInstance().saveSettings();
 
 		if (makeBackup)

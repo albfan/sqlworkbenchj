@@ -258,6 +258,7 @@ public class TableDataPanel
 		if (workspaceSettings != null)
 		{
 			readSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
+			workspaceSettings = null;
 		}
 
 		try
@@ -837,7 +838,7 @@ public class TableDataPanel
 
 	private String getWorkspacePrefix(int index)
 	{
-		return "dbexplorer" + index + ".tabledata.";
+		return "dbexplorer" + index;
 	}
 
 	/**
@@ -872,7 +873,7 @@ public class TableDataPanel
 	 */
 	public void saveSettings()
 	{
-		String prefix = TableDataPanel.class.getName() + ".";
+		String prefix = TableDataPanel.class.getName();
 		saveSettings(prefix, Settings.getInstance());
 	}
 
@@ -880,14 +881,14 @@ public class TableDataPanel
 	{
 		if (initialized)
 		{
-			props.setProperty(prefix + "maxrows", this.dataDisplay.getMaxRows());
-			props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
-			props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
-			props.setProperty(prefix + "warningthreshold", this.warningThreshold);
+			props.setProperty(prefix + ".tabledata.maxrows", this.dataDisplay.getMaxRows());
+			props.setProperty(prefix + ".tabledata.autoretrieve", this.autoRetrieve.isSelected());
+			props.setProperty(prefix + ".tabledata.autoloadrowcount", this.autoloadRowCount);
+			props.setProperty(prefix + ".tabledata.warningthreshold", this.warningThreshold);
 		}
 		else if (workspaceSettings != null)
 		{
-			workspaceSettings.copyTo(props);
+			workspaceSettings.copyTo(props, prefix);
 		}
 	}
 	/**
@@ -1021,6 +1022,7 @@ public class TableDataPanel
 
 	public synchronized void addDbExecutionListener(DbExecutionListener l)
 	{
+		if (l == null) return;
 		if (this.execListener == null) this.execListener = Collections.synchronizedList(new ArrayList<DbExecutionListener>());
 		this.execListener.add(l);
 	}

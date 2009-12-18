@@ -166,6 +166,7 @@ public class TableSearchPanel
 		if (workspaceSettings != null)
 		{
 			restoreSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
+			workspaceSettings = null;
 		}
 		setConnection(connection);
 	}
@@ -438,7 +439,7 @@ public class TableSearchPanel
 		}
 		else if (workspaceSettings != null)
 		{
-			workspaceSettings.copyTo(props);
+			workspaceSettings.copyTo(props, prefix);
 		}
 	}
 

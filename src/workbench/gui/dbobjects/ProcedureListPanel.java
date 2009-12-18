@@ -209,6 +209,7 @@ public class ProcedureListPanel
 		if (workspaceSettings != null)
 		{
 			readSettings(workspaceSettings, workspaceSettings.getFilterPrefix());
+			workspaceSettings = null;
 		}
 	}
 
@@ -358,15 +359,15 @@ public class ProcedureListPanel
 
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
+		String prefix = getWorkspacePrefix(index);
 		if (initialized)
 		{
-			String prefix = getWorkspacePrefix(index);
 			storeSettings(w.getSettings(), prefix);
 			findPanel.saveSettings(w.getSettings(), prefix);
 		}
 		else if (workspaceSettings != null)
 		{
-			workspaceSettings.copyTo(w.getSettings());
+			workspaceSettings.copyTo(w.getSettings(), prefix);
 		}
 	}
 

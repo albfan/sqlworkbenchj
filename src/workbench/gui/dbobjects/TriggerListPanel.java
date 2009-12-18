@@ -194,6 +194,7 @@ public class TriggerListPanel
 		if (workspaceProperties != null)
 		{
 			readSettings(workspaceProperties, workspaceProperties.getFilterPrefix());
+			workspaceProperties = null;
 		}
 	}
 
@@ -321,18 +322,15 @@ public class TriggerListPanel
 
 	public void saveToWorkspace(WbWorkspace w, int index)
 	{
+		String prefix = getWorkspacePrefix(index);
 		if (initialized)
 		{
-			String prefix = getWorkspacePrefix(index);
 			storeSettings(w.getSettings(), prefix);
 			findPanel.saveSettings(w.getSettings(), prefix);
 		}
 		else if (workspaceProperties != null)
 		{
-			for (String key : workspaceProperties.getKeys())
-			{
-				w.getSettings().setProperty(key, workspaceProperties.getProperty(key));
-			}
+			workspaceProperties.copyTo(w.getSettings(), prefix);
 		}
 	}
 

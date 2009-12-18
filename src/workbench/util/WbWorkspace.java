@@ -290,14 +290,14 @@ public class WbWorkspace
 					this.tabInfo.save(this.zout);
 					zout.closeEntry();
 
-					WbProperties oldProps = createOldTabInfo();
-					if (oldProps != null)
-					{
-						ZipEntry oldinfo = new ZipEntry("tabinfo.properties");
-						zout.putNextEntry(oldinfo);
-						oldProps.save(zout);
-						zout.closeEntry();
-					}
+//					WbProperties oldProps = createOldTabInfo();
+//					if (oldProps != null)
+//					{
+//						ZipEntry oldinfo = new ZipEntry("tabinfo.properties");
+//						zout.putNextEntry(oldinfo);
+//						oldProps.save(zout);
+//						zout.closeEntry();
+//					}
 				}
 				catch (Throwable e)
 				{

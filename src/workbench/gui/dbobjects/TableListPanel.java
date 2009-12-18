@@ -480,10 +480,7 @@ public class TableListPanel
 
 	public void setDbExecutionListener(DbExecutionListener l)
 	{
-		if (l != null)
-		{
-			tableData.addDbExecutionListener(l);
-		}
+		tableData.addDbExecutionListener(l);
 	}
 
 	private void setDirty(boolean flag)

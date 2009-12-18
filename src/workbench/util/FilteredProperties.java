@@ -39,11 +39,12 @@ public class FilteredProperties
 		return filterPrefix;
 	}
 
-	public void copyTo(PropertyStorage target)
+	public void copyTo(PropertyStorage target, String newPrefix)
 	{
 		for (String key : getKeys())
 		{
-			target.setProperty(key, getProperty(key));
+			String newKey = key.replace(filterPrefix, newPrefix);
+			target.setProperty(newKey, getProperty(key));
 		}
 	}
 }

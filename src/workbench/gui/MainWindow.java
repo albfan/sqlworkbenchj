@@ -1403,7 +1403,7 @@ public class MainWindow
 						}
 						else
 						{
-							addTab(false, false, true, false);
+							addTabAtIndex(false, false, false, -1);
 						}
 						MainPanel p = getSqlPanel(i);
 						p.readFromWorkspace(w, i);
@@ -2401,12 +2401,24 @@ public class MainWindow
 		if (append)
 		{
 			index = findFirstExplorerTab();
+
+			// If the DbExplorer has been moved to somewhere else, then
+			// add the tab really at the end.
+			// Only if the DbExplorer is the last tab, insert the new tab before it
+			if (index < sqlTab.getTabCount() - 1)
+			{
+				index = -1;
+			}
 		}
 		else
 		{
 			index = this.sqlTab.getSelectedIndex() + 1;
 		}
-
+		return addTabAtIndex(selectNew, checkConnection, renumber, index);
+	}
+	
+	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
+	{
 		if (index == -1) index = sqlTab.getTabCount();
 
 		final SqlPanel sql = new SqlPanel(index+1);

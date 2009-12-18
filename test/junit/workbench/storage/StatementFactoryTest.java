@@ -50,7 +50,9 @@ public class StatementFactoryTest
 	public void testValueExpression()
 		throws Exception
 	{
-		DbSettings forTest = new DbSettings("postgresql", "PostgreSQL");
+		// Make sure the datatype defines a valuetemplate
+		Settings.getInstance().setProperty("workbench.db.testmodedeb.valuetemplate.inet", "inet '%value%'");
+		DbSettings forTest = new DbSettings("testmodedeb", "TestMode");
 
 		ColumnIdentifier inetCol = new ColumnIdentifier("ip_address", java.sql.Types.OTHER);
 		inetCol.setDbmsType("inet");
@@ -76,6 +78,7 @@ public class StatementFactoryTest
 		try
 		{
 			Settings.getInstance().setDoFormatUpdates(false);
+
 			StatementFactory factory = new StatementFactory(info, null);
 			factory.setTestSettings(forTest);
 			DmlStatement dml = factory.createUpdateStatement(row, false, "\n");
