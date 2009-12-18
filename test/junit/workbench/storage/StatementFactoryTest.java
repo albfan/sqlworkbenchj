@@ -14,6 +14,8 @@ package workbench.storage;
 import java.sql.Types;
 import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.resource.Settings;
 
@@ -43,6 +45,46 @@ public class StatementFactoryTest
 	{
 		Settings.getInstance().setDoFormatInserts(false);
 		Settings.getInstance().setDoFormatUpdates(false);
+	}
+
+	public void testValueExpression()
+		throws Exception
+	{
+		DbSettings forTest = new DbSettings("postgresql", "PostgreSQL");
+
+		ColumnIdentifier inetCol = new ColumnIdentifier("ip_address", java.sql.Types.OTHER);
+		inetCol.setDbmsType("inet");
+		inetCol.setIsPkColumn(true);
+
+		ColumnIdentifier idCol = new ColumnIdentifier("id", java.sql.Types.INTEGER);
+		idCol.setDbmsType("int8");
+		
+		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { inetCol, idCol });
+		RowData row = new RowData(info);
+
+		// this is not the correct class for an inet column, but for testing purposed this is enough
+		row.setValue(0, "127.0.0.1");
+		row.setValue(1, Integer.valueOf(42));
+		row.resetStatus();
+
+		row.setValue(0, "127.0.0.2");
+		row.setValue(1, Integer.valueOf(43));
+		
+		TableIdentifier table = new TableIdentifier("inet_test");
+		info.setUpdateTable(table);
+		boolean oldFormat = Settings.getInstance().getDoFormatUpdates();
+		try
+		{
+			Settings.getInstance().setDoFormatUpdates(false);
+			StatementFactory factory = new StatementFactory(info, null);
+			factory.setTestSettings(forTest);
+			DmlStatement dml = factory.createUpdateStatement(row, false, "\n");
+			assertEquals("UPDATE inet_test SET ip_address = inet '127.0.0.2', id = ? WHERE ip_address = inet '127.0.0.1'", dml.getSql());
+		}
+		finally
+		{
+			Settings.getInstance().setDoFormatUpdates(oldFormat);
+		}
 	}
 	
 	public void testCreateUpdateStatement()

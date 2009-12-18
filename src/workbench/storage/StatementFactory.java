@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbSettings;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -40,6 +41,9 @@ public class StatementFactory
 	private static final int CASE_UPPER = 2;
 	private static final int CASE_LOWER = 4;
 	private int identifierCase = CASE_NO_CHANGE;
+
+	// DbSettings used by the Unit tests
+	private DbSettings testSettings;
 
 	/**
 	 * @param metaData the description of the resultSet for which the statements are generated
@@ -125,6 +129,7 @@ public class StatementFactory
 					String literal = getTemplateValue(resultInfo.getDbmsTypeName(col), value);
 					if (literal != null)
 					{
+						sql.append(" = ");
 						sql.append(literal);
 					}
 					else
@@ -160,15 +165,15 @@ public class StatementFactory
 			}
 			else
 			{
+				sql.append(" = ");
 				String literal = getTemplateValue(resultInfo.getDbmsTypeName(j), value);
 				if (literal != null)
 				{
-					sql.append(" = ");
 					sql.append(literal);
 				}
 				else
 				{
-					sql.append(" = ?");
+					sql.append("?");
 					values.add(new ColumnData(value, resultInfo.getColumn(j)));
 				}
 			}
@@ -178,11 +183,23 @@ public class StatementFactory
 		return dml;
 	}
 
+	void setTestSettings(DbSettings settings)
+	{
+		testSettings = settings;
+	}
+	
+	protected DbSettings getDbSettings()
+	{
+		if (testSettings != null) return testSettings;
+		if (dbConnection == null) return null;
+		return dbConnection.getDbSettings();
+	}
+
 	protected String getTemplateValue(String dbmsType, Object value)
 	{
 		if (value == null) return null;
-		if (this.dbConnection == null) return null;
-		String template = dbConnection.getDbSettings().getValueTemplate(dbmsType);
+		if (this.getDbSettings() == null) return null;
+		String template = getDbSettings().getValueTemplate(dbmsType);
 		if (template == null) return null;
 		return template.replace("%value%", value.toString());
 	}
