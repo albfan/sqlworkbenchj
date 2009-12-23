@@ -131,7 +131,7 @@ public class ResultInfo
 			{
 				col.setColumnAlias(alias);
 			}
-			
+
 			col.setDataType(type);
 			col.setUpdateable(realColumn);
 			try

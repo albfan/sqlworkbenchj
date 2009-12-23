@@ -31,7 +31,6 @@ import workbench.gui.sql.EditorPanel;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
 
 /**
  * @author support@sql-workbench.net
@@ -121,24 +120,7 @@ public class EditConnectScriptsPanel
 	private long getIdleTime()
 	{
 		String s = this.keepAliveInterval.getText().trim().toLowerCase();
-		if (s.length() == 0) return 0;
-		long result = 0;
-
-		if (s.endsWith("s"))
-		{
-			s = s.substring(0, s.length() - 1);
-			result = StringUtil.getLongValue(s, 0) * 1000;
-		}
-		else if (s.endsWith("m"))
-		{
-			s = s.substring(0, s.length() - 1);
-			result = StringUtil.getLongValue(s, 0) * 1000 * 60;
-		}
-		else
-		{
-			result = StringUtil.getLongValue(s, 0);
-		}
-		return result;
+		return KeepAliveDaemon.parseTimeInterval(s);
 	}
 
 	public String getPostConnectScript()

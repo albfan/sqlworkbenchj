@@ -19,8 +19,10 @@ import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
+import workbench.db.ColumnIdentifier;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A renderer for table headers to be able to display a sort indicator and customized
@@ -77,6 +79,8 @@ public class SortHeaderRenderer
 		
 		String type = null;
 		String javaTypeName = null;
+		String remarks = null;
+
 		int javaType = Types.OTHER;
 
 		if (table instanceof WbTable)
@@ -92,9 +96,11 @@ public class SortHeaderRenderer
 			DataStoreTableModel model = sortTable.getDataStoreTableModel();
 			if (model != null)
 			{
-				type = model.getDbmsType(col);
-				javaType = model.getColumnType(col);
+				ColumnIdentifier colId = model.getDataStore().getResultInfo().getColumn(col);
+				type = colId.getDbmsType();
+				javaType = colId.getDataType();
 				javaTypeName = SqlUtil.getTypeName(javaType);
+				remarks = colId.getComment();
 			}
 		}
 
@@ -125,6 +131,13 @@ public class SortHeaderRenderer
 			tip.append(text);
 			tip.append("<br>");
 			tip.append(type);
+			if (StringUtil.isNonBlank(remarks))
+			{
+				tip.append("<br>\"<i>");
+				tip.append(remarks);
+				tip.append("</i>\"");
+			}
+
 			if (showFullTypeInfo)
 			{
 				tip.append("<br>");

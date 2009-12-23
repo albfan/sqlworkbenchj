@@ -69,6 +69,7 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
+import workbench.storage.ResultColumnMetaData;
 import workbench.storage.RowActionMonitor;
 import workbench.util.LowMemoryException;
 import workbench.util.NumberStringCache;
@@ -594,7 +595,7 @@ public class DwPanel
 		if (generatingSql == null) return;
 		runQuery(generatingSql, respectMaxRows);
 	}
-	
+
 	/**
 	 *	Execute the given SQL statement and display the result.
 	 */
@@ -714,7 +715,8 @@ public class DwPanel
 
 			newData.setOriginalConnection(this.dbConnection);
 			newData.setProgressMonitor(null);
-			this.clearStatusMessage();
+
+			clearStatusMessage();
 
 			// Make sure this is executed on the EDT
 			WbSwingUtilities.invoke(new Runnable()
@@ -730,7 +732,6 @@ public class DwPanel
 					dataTable.applyHighlightExpression(newData.getGeneratingFilter());
 				}
 			});
-
 		}
 		finally
 		{
@@ -738,6 +739,26 @@ public class DwPanel
 		}
 	}
 
+	public void readColumnComments()
+	{
+		DataStore ds = getDataStore();
+		if (ds == null) return;
+		try
+		{
+			setStatusMessage(ResourceMgr.getString("MsgRetrievingColComments"));
+			ResultColumnMetaData meta = new ResultColumnMetaData(ds);
+			meta.retrieveColumnRemarks(ds.getResultInfo());
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("DwPanel.readColumnComments()", "Error reading comments", e);
+		}
+		finally
+		{
+			clearStatusMessage();
+		}
+	}
+	
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.hasResultSet();
@@ -1193,7 +1214,7 @@ public class DwPanel
 				String status = dataTable.getColumnModel().getColumn(0).getIdentifier().toString();
 				colOrder.add(0, status);
 			}
-			
+
 			// When changing the table model (which is happening
 			// when the status column is displayed) we need to restore
 			// the current editing column/row

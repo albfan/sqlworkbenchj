@@ -14,6 +14,8 @@ package workbench.gui.settings;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Locale;
 import javax.swing.DefaultComboBoxModel;
@@ -26,6 +28,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
+import workbench.db.KeepAliveDaemon;
 import workbench.gui.components.WbLabelField;
 import workbench.interfaces.Restoreable;
 import workbench.log.LogMgr;
@@ -42,7 +45,7 @@ import workbench.util.WbLocale;
  */
 public class GeneralOptionsPanel
 	extends JPanel
-	implements Restoreable
+	implements Restoreable, ActionListener
 {
 	public GeneralOptionsPanel()
 	{
@@ -117,6 +120,11 @@ public class GeneralOptionsPanel
 		onlyActiveTab.setSelected(GuiSettings.getCloseActiveTabOnly());
 		closeButtonRightSide.setSelected(GuiSettings.getShowCloseButtonOnRightSide());
 		tabLRUclose.setSelected(GuiSettings.getUseLRUForTabs());
+		showFinishAlert.setSelected(GuiSettings.showScriptFinishedAlert());
+		long duration = GuiSettings.getScriptFinishedAlertDuration();
+		String durationDisplay = KeepAliveDaemon.getTimeDisplay(duration);
+		alertDuration.setText(durationDisplay);
+		alertDuration.setEnabled(showFinishAlert.isSelected());
 	}
 
 	public void saveSettings()
@@ -172,6 +180,10 @@ public class GeneralOptionsPanel
 			GuiSettings.setUseBrushedMetal(brushedMetal.isSelected());
 		}
 		GuiSettings.setUseLRUForTabs(tabLRUclose.isSelected());
+		GuiSettings.setShowScriptFinishedAlert(showFinishAlert.isSelected());
+		String v = alertDuration.getText().trim();
+		long duration = KeepAliveDaemon.parseTimeInterval(v);
+		GuiSettings.setScriptFinishedAlertDuration(duration);
 	}
 
 	private Locale getSelectedLanguage()
@@ -189,10 +201,6 @@ public class GeneralOptionsPanel
   private void initComponents() {
 		GridBagConstraints gridBagConstraints;
 
-    checkUpdatesLabel = new JLabel();
-    checkInterval = new JComboBox();
-    langLabel = new JLabel();
-    languageDropDown = new JComboBox();
     jPanel2 = new JPanel();
     useEncryption = new JCheckBox();
     consolidateLog = new JCheckBox();
@@ -217,43 +225,18 @@ public class GeneralOptionsPanel
     jPanel3 = new JPanel();
     logLevelLabel = new JLabel();
     logLevel = new JComboBox();
+    jSeparator4 = new JSeparator();
+    jPanel4 = new JPanel();
+    showFinishAlert = new JCheckBox();
+    jLabel2 = new JLabel();
+    alertDuration = new JTextField();
+    jPanel5 = new JPanel();
+    langLabel = new JLabel();
+    languageDropDown = new JComboBox();
+    checkUpdatesLabel = new JLabel();
+    checkInterval = new JComboBox();
 
     setLayout(new GridBagLayout());
-
-    checkUpdatesLabel.setText(ResourceMgr.getString("LblCheckForUpdate")); // NOI18N
-    checkUpdatesLabel.setToolTipText(ResourceMgr.getString("d_LblCheckForUpdate")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 7, 0, 0);
-    add(checkUpdatesLabel, gridBagConstraints);
-
-    checkInterval.setModel(new DefaultComboBoxModel(new String[] { "never", "daily", "7 days", "14 days", "30 days" }));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 7, 0, 0);
-    add(checkInterval, gridBagConstraints);
-
-    langLabel.setText(ResourceMgr.getString("LblLanguage")); // NOI18N
-    langLabel.setToolTipText(ResourceMgr.getString("d_LblLanguage")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 12, 0, 0);
-    add(langLabel, gridBagConstraints);
-
-    languageDropDown.setModel(new DefaultComboBoxModel(new String[] { "English", "German" }));
-    languageDropDown.setToolTipText(ResourceMgr.getDescription("LblLanguage"));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 10, 0, 8);
-    add(languageDropDown, gridBagConstraints);
 
     jPanel2.setLayout(new GridBagLayout());
 
@@ -482,10 +465,10 @@ public class GeneralOptionsPanel
     add(jPanel1, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridy = 8;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new Insets(7, 7, 11, 10);
+    gridBagConstraints.insets = new Insets(6, 7, 7, 10);
     add(jSeparator2, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -505,23 +488,123 @@ public class GeneralOptionsPanel
     logLevelLabel.setToolTipText(ResourceMgr.getString("d_LblLogLevel")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(0, 7, 0, 0);
+    gridBagConstraints.insets = new Insets(0, 11, 0, 0);
     add(logLevelLabel, gridBagConstraints);
 
     logLevel.setModel(new DefaultComboBoxModel(new String[] { "ERROR", "WARNING", "INFO", "DEBUG" }));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 6, 0, 10);
+    gridBagConstraints.insets = new Insets(0, 10, 0, 10);
     add(logLevel, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(7, 7, 11, 10);
+    add(jSeparator4, gridBagConstraints);
+
+    jPanel4.setLayout(new GridBagLayout());
+
+    showFinishAlert.setText(ResourceMgr.getString("LblShowScriptEndAlert")); // NOI18N
+    showFinishAlert.setBorder(null);
+    showFinishAlert.addActionListener(this);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 10, 7, 0);
+    jPanel4.add(showFinishAlert, gridBagConstraints);
+
+    jLabel2.setText(ResourceMgr.getString("LblScriptEndAlertDuration")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 11, 0, 0);
+    jPanel4.add(jLabel2, gridBagConstraints);
+
+    alertDuration.setColumns(8);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 10, 0, 0);
+    jPanel4.add(alertDuration, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    add(jPanel4, gridBagConstraints);
+
+    jPanel5.setLayout(new GridBagLayout());
+
+    langLabel.setText(ResourceMgr.getString("LblLanguage")); // NOI18N
+    langLabel.setToolTipText(ResourceMgr.getString("d_LblLanguage")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(10, 12, 0, 0);
+    jPanel5.add(langLabel, gridBagConstraints);
+
+    languageDropDown.setModel(new DefaultComboBoxModel(new String[] { "English", "German" }));
+    languageDropDown.setToolTipText(ResourceMgr.getDescription("LblLanguage"));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(10, 10, 0, 8);
+    jPanel5.add(languageDropDown, gridBagConstraints);
+
+    checkUpdatesLabel.setText(ResourceMgr.getString("LblCheckForUpdate")); // NOI18N
+    checkUpdatesLabel.setToolTipText(ResourceMgr.getString("d_LblCheckForUpdate")); // NOI18N
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(6, 7, 0, 0);
+    jPanel5.add(checkUpdatesLabel, gridBagConstraints);
+
+    checkInterval.setModel(new DefaultComboBoxModel(new String[] { "never", "daily", "7 days", "14 days", "30 days" }));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 1;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(10, 7, 0, 0);
+    jPanel5.add(checkInterval, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    add(jPanel5, gridBagConstraints);
+  }
+
+  // Code for dispatching events from components to event handlers.
+
+  public void actionPerformed(java.awt.event.ActionEvent evt) {
+    if (evt.getSource() == showFinishAlert) {
+      GeneralOptionsPanel.this.showFinishAlertActionPerformed(evt);
+    }
   }// </editor-fold>//GEN-END:initComponents
 
+	private void showFinishAlertActionPerformed(ActionEvent evt)//GEN-FIRST:event_showFinishAlertActionPerformed
+	{//GEN-HEADEREND:event_showFinishAlertActionPerformed
+		this.alertDuration.setEnabled(showFinishAlert.isSelected());
+	}//GEN-LAST:event_showFinishAlertActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JTextField alertDuration;
   private JCheckBox autoConnect;
   private JCheckBox brushedMetal;
   private JComboBox checkInterval;
@@ -531,12 +614,16 @@ public class GeneralOptionsPanel
   private JCheckBox consolidateLog;
   private JCheckBox enableAnimatedIcon;
   private JCheckBox exitOnConnectCancel;
+  private JLabel jLabel2;
   private JPanel jPanel1;
   private JPanel jPanel2;
   private JPanel jPanel3;
+  private JPanel jPanel4;
+  private JPanel jPanel5;
   private JSeparator jSeparator1;
   private JSeparator jSeparator2;
   private JSeparator jSeparator3;
+  private JSeparator jSeparator4;
   private JLabel langLabel;
   private JComboBox languageDropDown;
   private JComboBox logLevel;
@@ -544,6 +631,7 @@ public class GeneralOptionsPanel
   private JCheckBox onlyActiveTab;
   private JCheckBox scrollTabs;
   private JTextField settingsfilename;
+  private JCheckBox showFinishAlert;
   private JCheckBox showResultTabClose;
   private JCheckBox showTabCloseButton;
   private JCheckBox showTabIndex;

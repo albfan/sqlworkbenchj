@@ -41,6 +41,7 @@ public class ColumnIdentifier
 	private String columnClassName;
 	private Class columnClass;
 	private String columnTypeName;
+	private String sourceTable;
 
 	private int displaySize = -1;
 	private int position;
@@ -48,7 +49,7 @@ public class ColumnIdentifier
 	private int size; // for VARCHAR etc
 	private int digits; // for DECIMAL types
 	private int hashCode;
-	
+
 	public ColumnIdentifier()
 	{
 	}
@@ -71,6 +72,27 @@ public class ColumnIdentifier
 		this.isPk = isPkColumn;
 	}
 
+	/**
+	 * Set the name of the source table if this column was used
+	 * in a query.
+	 * @param name
+	 */
+	public void setSourceTableName(String name)
+	{
+		sourceTable = name;
+	}
+
+	/**
+	 * Returns the name of the table if this ColumnIdentifier was created
+	 * from a query
+	 *
+	 * @return
+	 */
+	public String getSourceTableName()
+	{
+		return sourceTable;
+	}
+
 	public String getColumnAlias()
 	{
 		return alias;
@@ -86,12 +108,12 @@ public class ColumnIdentifier
 		if (alias == null) return name;
 		return alias;
 	}
-	
+
 	public String getSchema()
 	{
 		return null;
 	}
-	
+
 	public String getCatalog()
 	{
 		return null;
@@ -114,7 +136,7 @@ public class ColumnIdentifier
 	{
 		return conn.getMetadata().quoteObjectname(this.name);
 	}
-	
+
 	public String getObjectExpression(WbConnection conn)
 	{
 		return getObjectName(conn);
@@ -129,21 +151,21 @@ public class ColumnIdentifier
 	{
 		return "COLUMN";
 	}
-	
+
 	public String getObjectName()
 	{
 		return getColumnName();
 	}
-	
+
 	public CharSequence getSource(WbConnection con)
 	{
 		return this.name + " " + this.dbmsType;
 	}
-	
+
 	/**
 	 *	Define the size for this column (e.g. for VARCHAR columns)
 	 */
-	public void setColumnSize(int aSize) 
+	public void setColumnSize(int aSize)
 	{
 		this.size = aSize;
 	}
@@ -160,12 +182,12 @@ public class ColumnIdentifier
 	{
 		this.displaySize = size;
 	}
-	
+
 	/**
 	 * The display size of this column as reported by the JDBC driver.
-	 * 
+	 *
 	 * For some types (e.g Integer) some sensible sizes are used
-	 * instead of the JDBC driver supplied values, as this method is 
+	 * instead of the JDBC driver supplied values, as this method is
 	 * currently only used to "format" the output for the Console interface
 	 *
 	 * @return the recommended display size of the column
@@ -176,22 +198,22 @@ public class ColumnIdentifier
 		if (SqlUtil.isDecimalType(type, size, digits)) return 15;
 		if (SqlUtil.isCharacterType(type)) return size;
 		if (SqlUtil.isBlobType(type)) return 5;
-		
+
 		if (displaySize < 0) return size;
 		return this.displaySize;
 	}
-	
+
 	/**
 	 *	Define the decimal digits for this column (e.g. for DECIMAL columns)
 	 */
-	public void setDecimalDigits(int numDigits) 
-	{ 
-		this.digits = numDigits < 0 ? -1 : numDigits; 
+	public void setDecimalDigits(int numDigits)
+	{
+		this.digits = numDigits < 0 ? -1 : numDigits;
 	}
-	
-	public int getDecimalDigits() 
-	{ 
-		return this.digits; 
+
+	public int getDecimalDigits()
+	{
+		return this.digits;
 	}
 
 	public String getDigitsDisplay()
@@ -199,7 +221,7 @@ public class ColumnIdentifier
 		if (digits < 0) return "";
 		return NumberStringCache.getNumberString(digits);
 	}
-	
+
 	public void setIsPkColumn(boolean flag) { this.isPk = flag; }
 	public boolean isPkColumn() { return this.isPk; }
 
@@ -208,7 +230,7 @@ public class ColumnIdentifier
 
 	public void setDbmsType(String dbType) { this.dbmsType = dbType; }
 	public String getDbmsType() { return this.dbmsType; }
-	
+
 	public boolean isIdentityColumn()
 	{
 		if (this.dbmsType == null) return false;
@@ -259,18 +281,18 @@ public class ColumnIdentifier
 		if (con == null) return getColumnName();
 		return con.getMetadata().quoteObjectname(name);
 	}
-	
+
 	public String getColumnName()
 	{
 		return this.name;
 	}
 
 	/**
-	 * Define the name of this column. 
-	 * 
-	 * This will also reset the PK and Nullable attributes. isPkColumn() 
+	 * Define the name of this column.
+	 *
+	 * This will also reset the PK and Nullable attributes. isPkColumn()
 	 * and isNullable() will return false after setting the name.
-	 * 
+	 *
 	 * @param aName the (new) name for this identifier
 	 */
 	public void setColumnName(String aName)
@@ -296,7 +318,7 @@ public class ColumnIdentifier
 	 *	Returns the java.sql.Types data type as returned
 	 *  by the jdbc driver. If no type has been defined
 	 *  Types.OTHER will be returned
-	 * 
+	 *
 	 * @return the current datatype
 	 */
 	public int getDataType()
@@ -310,11 +332,11 @@ public class ColumnIdentifier
 	}
 
 	/**
-	 * Compare two identifiers. 
+	 * Compare two identifiers.
 	 * The comparison is only done on the name column and is case-insensitive.
-	 * 
+	 *
 	 * If the object is not a ColumnIdentifier it returns false
-	 * 
+	 *
 	 * @param other the object to compare
 	 * @return true if the other ColumnIdentifier has the same name
 	 */
@@ -335,7 +357,7 @@ public class ColumnIdentifier
 	{
 		return hashCode;
 	}
-	
+
 	public String getComment()
 	{
 		return comment;
@@ -375,7 +397,7 @@ public class ColumnIdentifier
 	{
 		if (colClass != null && colClass.endsWith("[]"))
 		{
-			// Workaround for long[] 
+			// Workaround for long[]
 			if (colClass.startsWith("long"))
 			{
 				this.columnClassName = "[J";
@@ -403,27 +425,27 @@ public class ColumnIdentifier
 			this.columnClass = null;
 		}
 	}
-	
+
 	public Class getColumnClass()
 	{
 		if (this.columnClass != null) return this.columnClass;
-		
+
 		switch (this.type)
 		{
 			case Types.BIGINT:
 			case Types.INTEGER:
 				return Long.class;
-				
+
 			case Types.SMALLINT:
 				return Integer.class;
-				
+
 			case Types.NUMERIC:
 			case Types.DECIMAL:
 				return BigDecimal.class;
-				
+
 			case Types.DOUBLE:
 				return Double.class;
-				
+
 			case Types.REAL:
 			case Types.FLOAT:
 				return Float.class;
@@ -435,10 +457,10 @@ public class ColumnIdentifier
 
 			case Types.DATE:
 				return java.sql.Date.class;
-				
+
 			case Types.TIMESTAMP:
 				return Timestamp.class;
-				
+
 			default:
 				return Object.class;
 		}
@@ -477,14 +499,14 @@ public class ColumnIdentifier
 			this.name = target.quoteObjectname(newName);
 		}
 	}
-	
+
 	public int compareTo(ColumnIdentifier other)
 	{
 		if (other == null) return 1;
 		if (this.name == null) return -1;
 		return StringUtil.trimQuotes(name).compareToIgnoreCase(StringUtil.trimQuotes(other.name));
 	}
-	
+
 	public static void sortByPosition(List<ColumnIdentifier> columnList)
 	{
 		Comparator<ColumnIdentifier> c = new Comparator<ColumnIdentifier>()

@@ -16,6 +16,7 @@ import java.sql.Statement;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -114,6 +115,28 @@ public class KeepAliveDaemon
 		}
   }
 
+	public static long parseTimeInterval(String interval)
+	{
+		if (StringUtil.isBlank(interval)) return 0;
+		long result = 0;
+
+		if (interval.endsWith("s"))
+		{
+			interval = interval.substring(0, interval.length() - 1);
+			result = StringUtil.getLongValue(interval, 0) * 1000;
+		}
+		else if (interval.endsWith("m"))
+		{
+			interval = interval.substring(0, interval.length() - 1);
+			result = StringUtil.getLongValue(interval, 0) * 1000 * 60;
+		}
+		else
+		{
+			result = StringUtil.getLongValue(interval, 0);
+		}
+		return result;
+	}
+	
 	public static String getTimeDisplay(long millis)
 	{
 		if (millis == 0) return "";

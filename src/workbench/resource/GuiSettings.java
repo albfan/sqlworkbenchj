@@ -18,7 +18,7 @@ import workbench.util.StringUtil;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class GuiSettings
 {
@@ -27,6 +27,38 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 
+	public static boolean getRetrieveQueryComments()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.query.retrieve.comments", false);
+	}
+
+	public static void setRetrieveQueryComments(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.query.retrieve.comments", flag);
+	}
+	
+	public static boolean showScriptFinishedAlert()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.script.alert", false);
+	}
+
+	public static void setShowScriptFinishedAlert(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.script.alert", flag);
+	}
+
+	public static long getScriptFinishedAlertDuration()
+	{
+		String s = Settings.getInstance().getProperty("workbench.gui.script.alert.minduration", null);
+		if (StringUtil.isBlank(s)) return 0;
+		return Long.parseLong(s);
+	}
+
+	public static void setScriptFinishedAlertDuration(long millis)
+	{
+		Settings.getInstance().setProperty("workbench.gui.script.alert.minduration", Long.toString(millis));
+	}
+	
 	public static boolean allowAlterInDbExplorer()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.allow.alter", false);

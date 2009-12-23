@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -3061,6 +3062,7 @@ public class SqlPanel
 		{
 			final List<DataStore> results = result.getDataStores();
 			count += results.size();
+			final List<DwPanel> newPanels = new ArrayList<DwPanel>(results.size());
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
@@ -3073,6 +3075,7 @@ public class SqlPanel
 							DwPanel p = createDwPanel();
 							p.showData(ds, gen);
 							addResultTab(p, gen);
+							newPanels.add(p);
 						}
 					}
 					catch (Exception e)
@@ -3081,6 +3084,15 @@ public class SqlPanel
 					}
 				}
 			});
+
+			// The retrieval of column comments should not be done on the AWT Thread
+			if (GuiSettings.getRetrieveQueryComments())
+			{
+				for (DwPanel p : newPanels)
+				{
+					p.readColumnComments();
+				}
+			}
 		}
 
 		if (result.hasResultSets())

@@ -96,7 +96,7 @@ public class Settings
 	public static final String PROPERTY_EDITOR_BG_COLOR = "workbench.editor.color.background";
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
 	public static final String PROPERTY_EDITOR_CURSOR_COLOR = "workbench.editor.color.cursor";
-	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.cursor";
+	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.datatype";
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -2523,17 +2523,19 @@ public class Settings
 		// Adjust the patterns for SELECT ... INTO
 		upgradeProp(def, "workbench.db.postgresql.selectinto.pattern", "(?s)^SELECT\\s+.*INTO\\s+\\p{Print}*\\s*FROM.*");
 		upgradeProp(def, "workbench.db.informix_dynamic_server.selectinto.pattern", "(?s)^SELECT.*FROM.*INTO\\s*\\p{Print}*");
+		upgradeProp(def, "workbench.db.sql.comment.column", "COMMENT ON COLUMN %object_name%.%column% IS '%comment%';");
+		upgradeListProp(def, "workbench.db.nonullkeyword");
 	}
 
 	private void upgradeProp(WbProperties defProps, String property, String originalvalue)
 	{
-		String p = getProperty(property, "");
+		String currentValue = getProperty(property, "");
 
 		// Make sure it has not been modified
-		if (originalvalue.equals(p))
+		if (originalvalue.equals(currentValue))
 		{
-			String newprop = defProps.getProperty("workbench.db.postgresql.selectinto.pattern", null);
-			setProperty("workbench.db.postgresql.selectinto.pattern", newprop);
+			String newvalue = defProps.getProperty(property, null);
+			setProperty(property, newvalue);
 		}
 	}
 

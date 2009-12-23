@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class TableDefinition
 {
@@ -26,7 +26,7 @@ public class TableDefinition
 	{
 		this(id, null);
 	}
-	
+
 	public TableDefinition(TableIdentifier id, List<ColumnIdentifier> cols)
 	{
 		table = id;
@@ -47,5 +47,15 @@ public class TableDefinition
 	{
 		if (columns == null) return 0;
 		return columns.size();
+	}
+
+	public ColumnIdentifier findColumn(String colName)
+	{
+		if (getColumnCount() == 0) return null;
+		for (ColumnIdentifier col : columns)
+		{
+			if (col.getColumnName().equalsIgnoreCase(colName)) return col;
+		}
+		return null;
 	}
 }

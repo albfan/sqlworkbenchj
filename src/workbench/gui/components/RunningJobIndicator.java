@@ -11,8 +11,11 @@
  */
 package workbench.gui.components;
 
+import java.awt.Frame;
 import javax.swing.JFrame;
-import workbench.log.LogMgr;
+import workbench.gui.WbSwingUtilities;
+import workbench.resource.GuiSettings;
+import workbench.resource.ResourceMgr;
 
 /**
  * @author support@sql-workbench.net
@@ -22,17 +25,18 @@ public class RunningJobIndicator
 	private JFrame clientWindow;
 	private int runningJobs = 0;
 	public static final String TITLE_PREFIX = "\u00bb ";
-	
+	private long startTime;
+
 	public RunningJobIndicator(JFrame client)
 	{
 		this.clientWindow = client;
 	}
-	
+
 	public synchronized void baseTitleChanged()
 	{
 		updateTitle();
 	}
-	
+
 	private synchronized void updateTitle()
 	{
 		String title = this.clientWindow.getTitle();
@@ -51,19 +55,45 @@ public class RunningJobIndicator
 			}
 		}
 	}
-	
+
 	public synchronized void jobStarted()
 	{
+		if (runningJobs == 0)
+		{
+			startTime = System.currentTimeMillis();
+		}
 		runningJobs ++;
-//		LogMgr.logDebug("RunningJobIndicator.jobStarted()", "New runcount = " + runningJobs);
 		updateTitle();
 	}
-	
+
 	public synchronized void jobEnded()
 	{
 		if (runningJobs > 0) runningJobs --;
-//		LogMgr.logDebug("RunningJobIndicator.jobEnded()", "New runcount = " + runningJobs);
 		updateTitle();
+		if (runningJobs == 0 && GuiSettings.showScriptFinishedAlert())
+		{
+			long minDuration = GuiSettings.getScriptFinishedAlertDuration();
+			long duration = System.currentTimeMillis() - startTime;
+			if (minDuration == 0 || duration > minDuration)
+			{
+				if (clientWindow != null)
+				{
+					WbSwingUtilities.invoke(new Runnable()
+					{
+						@Override
+						public void run()
+						{
+							if (clientWindow.getState() == Frame.ICONIFIED)
+							{
+								clientWindow.setState(Frame.NORMAL);
+							}
+							clientWindow.setVisible(true);
+						}
+					});
+				}
+				WbSwingUtilities.showMessage(clientWindow, ResourceMgr.getString("TxtScriptFinished"));
+			}
+		}
 	}
 
 }

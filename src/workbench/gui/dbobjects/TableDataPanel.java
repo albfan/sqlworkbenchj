@@ -732,6 +732,11 @@ public class TableDataPanel
 
 			error = !dataDisplay.runQuery(sql, respectMaxRows);
 
+			if (GuiSettings.getRetrieveQueryComments())
+			{
+				dataDisplay.readColumnComments();
+			}
+
 			// By directly setting the update table, we avoid
 			// another round-trip to the database to check the table from the
 			// passed SQL statement.
