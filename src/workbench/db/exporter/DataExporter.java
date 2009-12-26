@@ -681,6 +681,13 @@ public class DataExporter
 		return this.numberFormatter;
 	}
 
+	public char getDecimalSymbol()
+	{
+		if (numberFormatter == null) return '.';
+		DecimalFormatSymbols symb = numberFormatter.getDecimalFormatSymbols();
+		if (symb == null) return '.';
+		return symb.getDecimalSeparator();
+	}
 	
 	public void addQueryJob(String query, WbFile outputFile)
 	{

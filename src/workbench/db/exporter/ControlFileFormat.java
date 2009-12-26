@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import workbench.db.ibm.Db2FormatFileWriter;
 import workbench.util.StringUtil;
 
 /**
@@ -31,7 +32,8 @@ public enum ControlFileFormat
 	none,
 	oracle,
 	sqlserver,
-	postgres;
+	postgres,
+	db2;
 	
 	public static Set<ControlFileFormat> parseCommandLine(String args)
 	{
@@ -54,18 +56,18 @@ public enum ControlFileFormat
 	
 	public static FormatFileWriter createFormatWriter(ControlFileFormat format)
 	{
-		if (format == postgres)
+		switch (format)
 		{
-			return new PostgresCopyStatementWriter();
+			case postgres:
+				return new PostgresCopyStatementWriter();
+			case oracle:
+				return new OracleControlFileWriter();
+			case sqlserver:
+				return new SqlServerFormatFileWriter();
+			case db2:
+				return new Db2FormatFileWriter();
+			default:
+				return null;
 		}
-		else if (format == oracle)
-		{
-			return new OracleControlFileWriter();
-		}
-		else if (format == sqlserver)
-		{
-			return new SqlServerFormatFileWriter();
-		}
-		return null;
 	}
 }

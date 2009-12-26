@@ -20,6 +20,7 @@ import java.util.List;
 import workbench.db.DbDriver;
 import workbench.gui.components.ClassFinderGUI;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.FlatButton;
 import workbench.gui.components.TextComponentMouseListener;
 import workbench.resource.ResourceMgr;
 import workbench.util.ClassFinder;
@@ -87,6 +88,7 @@ public class DriverEditorPanel
 			this.tfClassName.setText(aDriver.getDriverClass());
 			this.libraryPath.setFilename(aDriver.getLibraryString());
 			this.tfSampleUrl.setText(aDriver.getSampleUrl());
+			this.detectDriverButton.setEnabled(StringUtil.isNonBlank(libraryPath.getFilename()));
 		}
 		finally
 		{
@@ -136,6 +138,7 @@ public class DriverEditorPanel
     tfSampleUrl = new javax.swing.JTextField();
     libraryPath = new workbench.gui.components.WbFilePicker();
     statusLabel = new javax.swing.JLabel();
+    detectDriverButton = new FlatButton();
 
     setFont(null);
     setLayout(new java.awt.GridBagLayout());
@@ -159,6 +162,7 @@ public class DriverEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.weightx = 1.0;
@@ -170,7 +174,7 @@ public class DriverEditorPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 7);
     add(lblClassName, gridBagConstraints);
 
     tfClassName.setColumns(10);
@@ -186,7 +190,8 @@ public class DriverEditorPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(6, 3, 0, 3);
     add(tfClassName, gridBagConstraints);
 
     lblLibrary.setText(ResourceMgr.getString("LblDriverLibrary")); // NOI18N
@@ -194,7 +199,7 @@ public class DriverEditorPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 7);
     add(lblLibrary, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -208,7 +213,7 @@ public class DriverEditorPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 10, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(6, 10, 0, 7);
     add(lblSample, gridBagConstraints);
 
     tfSampleUrl.setColumns(10);
@@ -217,32 +222,58 @@ public class DriverEditorPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(6, 3, 0, 3);
     add(tfSampleUrl, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 3, 0, 3);
+    gridBagConstraints.insets = new java.awt.Insets(6, 3, 0, 3);
     add(libraryPath, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
-    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(14, 10, 0, 7);
     add(statusLabel, gridBagConstraints);
+
+    detectDriverButton.setIcon(ResourceMgr.getImage("magnifier.png"));
+    detectDriverButton.setToolTipText(ResourceMgr.getString("MsgDetectDriver")); // NOI18N
+    detectDriverButton.setMargin(new java.awt.Insets(2, 2, 2, 2));
+    detectDriverButton.setMaximumSize(new java.awt.Dimension(22, 22));
+    detectDriverButton.setMinimumSize(new java.awt.Dimension(22, 22));
+    detectDriverButton.setPreferredSize(new java.awt.Dimension(22, 22));
+    detectDriverButton.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        detectDriverButtonActionPerformed(evt);
+      }
+    });
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.insets = new java.awt.Insets(6, 0, 0, 4);
+    add(detectDriverButton, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void focusLost(java.awt.event.FocusEvent evt)//GEN-FIRST:event_focusLost
 	{//GEN-HEADEREND:event_focusLost
 		this.updateDriver();
 	}//GEN-LAST:event_focusLost
+
+	private void detectDriverButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_detectDriverButtonActionPerformed
+	{//GEN-HEADEREND:event_detectDriverButtonActionPerformed
+		selectClass();
+	}//GEN-LAST:event_detectDriverButtonActionPerformed
+
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton detectDriverButton;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JLabel lblClassName;
   private javax.swing.JLabel lblLibrary;

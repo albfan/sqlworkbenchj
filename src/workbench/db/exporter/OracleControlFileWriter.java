@@ -65,7 +65,12 @@ public class OracleControlFileWriter
 			out.println("-- to replace the data in the table use TRUNCATE instead of APPEND");
 			out.println("APPEND");
 			out.print("INTO TABLE ");
-			out.println(resultInfo.getUpdateTable().getTableName());
+			String table = exporter.getTableName();
+			if (table == null)
+			{
+				table = resultInfo.getUpdateTable().getTableName();
+			}
+			out.println(table);
 			out.print("FIELDS TERMINATED BY '");
 			out.print(StringUtil.escapeUnicode(exporter.getTextDelimiter(), CharacterRange.RANGE_CONTROL));
 			out.println("' TRAILING NULLCOLS");

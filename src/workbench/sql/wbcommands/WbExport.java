@@ -115,7 +115,7 @@ public class WbExport
 		cmdLine.addArgument("lineEnding", StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument("showEncodings");
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.Deprecated);
-		cmdLine.addArgument("formatFile", StringUtil.stringToList("postgres,oracle,sqlserver"));
+		cmdLine.addArgument("formatFile", StringUtil.stringToList("postgres,oracle,sqlserver,db2"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_EMPTY_RESULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
@@ -298,6 +298,7 @@ public class WbExport
 			return result;
 		}
 		exporter.setBlobMode(btype);
+		if (updateTable != null) exporter.setTableName(updateTable);
 
 		if ("text".equals(type))
 		{
@@ -359,7 +360,6 @@ public class WbExport
 
 			CommonArgs.setCommitEvery(exporter, cmdLine);
 
-			if (updateTable != null) exporter.setTableName(updateTable);
 			String c = cmdLine.getValue("keycolumns");
 			if (c != null)
 			{
@@ -404,7 +404,6 @@ public class WbExport
 				}
 			}
 			this.exporter.setUseCDATA(cmdLine.getBoolean(ARG_USE_CDATA));
-			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".xml";
 			if (encoding == null)
 			{
@@ -428,7 +427,6 @@ public class WbExport
 			exporter.setHtmlHeading(cmdLine.getValue("preDataHtml"));
 			exporter.setHtmlTrailer(cmdLine.getValue("postDataHtml"));
 			
-			if (updateTable != null) exporter.setTableName(updateTable);
 			this.defaultExtension = ".html";
 		}
 		else if (type.equalsIgnoreCase("xls"))
