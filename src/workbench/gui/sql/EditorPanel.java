@@ -99,7 +99,7 @@ import workbench.util.StringUtil;
  *
  * @see workbench.gui.editor.JEditTextArea
  *
- * @author  support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class EditorPanel
 	extends JEditTextArea

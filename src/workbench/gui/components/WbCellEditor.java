@@ -14,6 +14,7 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
@@ -30,6 +31,7 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.table.TableCellEditor;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.renderer.TextAreaRenderer;
 import workbench.resource.PlatformShortcuts;
 
 /**
@@ -237,6 +239,12 @@ public class WbCellEditor
 		public boolean isManagingFocus()
 		{
 			return false;
+		}
+
+		@Override
+		public Insets getInsets()
+		{
+			return TextAreaRenderer.AREA_INSETS;
 		}
 	}
 

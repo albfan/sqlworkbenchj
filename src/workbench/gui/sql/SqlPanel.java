@@ -675,6 +675,7 @@ public class SqlPanel
 		this.showFormAction = new DisplayDataFormAction(null);
 		reloadAction = new SqlPanelReloadAction(this);
 		showObjectInfoAction = new ShowObjectInfoAction(this);
+		editor.addPopupMenuItem(showObjectInfoAction, true);
 
 		this.actions.add(this.showFormAction);
 		this.actions.add(this.selectKeys);

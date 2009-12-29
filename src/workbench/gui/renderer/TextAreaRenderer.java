@@ -33,6 +33,7 @@ public class TextAreaRenderer
 	extends ToolTipRenderer
 	implements TableCellRenderer, WbRenderer
 {
+	public static final Insets AREA_INSETS = new Insets(1,0,0,0);
 	protected JTextArea textDisplay;
 	
 	public TextAreaRenderer()
@@ -42,7 +43,7 @@ public class TextAreaRenderer
 		{
 			public Insets getInsets()
 			{
-				return WbSwingUtilities.EMPTY_INSETS;
+				return AREA_INSETS;
 			}
 		};
 		textDisplay.setWrapStyleWord(false);
