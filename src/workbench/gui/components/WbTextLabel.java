@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -31,7 +31,7 @@ import javax.swing.border.Border;
  *  (Faster then JLabel) this is used to in DwStatusBar to speed
  *  up processes that do give a lot of feedback (e.g. import)
  * 
- * @author support@sql-workbench.net  
+ * @author Thomas Kellerer  
  */ 
 public class WbTextLabel
 	extends JComponent

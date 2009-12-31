@@ -1,12 +1,13 @@
 /*
- * 
+ * WbComboBox.java
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
 package workbench.gui.components;
 
@@ -19,7 +20,7 @@ import javax.swing.JComboBox;
  * As this is not natively supported by Java, this is done using an ugly hack
  * that is floating around on the internet, and which I have found in various places.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class WbComboBox
 	extends JComboBox

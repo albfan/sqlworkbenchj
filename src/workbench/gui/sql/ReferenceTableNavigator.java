@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -58,7 +58,7 @@ import workbench.util.WbThread;
  * @see workbench.db.ReferenceTableNavigation
  * @see workbench.db.TableDependency
  * @see workbench.gui.dbobjects.EditorTabSelectMenu
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ReferenceTableNavigator
 	implements ListSelectionListener, ActionListener, PopupMenuListener, MenuListener,

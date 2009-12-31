@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -33,7 +33,7 @@ import workbench.resource.Settings;
  *
  * It uses a HexPanel to display the data.
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  * @see workbench.gui.components.HexPanel
  */
 public class HexViewer

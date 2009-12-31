@@ -1,9 +1,9 @@
 /*
- * RollbackAction.java
+ * NextTabAction.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
 
 /**
  *	Select the next tab from a tabbed pane
- *	@author  support@sql-workbench.net
+ *	@author  Thomas Kellerer
  */
 public class NextTabAction
 	extends WbAction

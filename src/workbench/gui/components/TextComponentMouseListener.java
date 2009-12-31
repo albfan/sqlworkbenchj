@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -24,7 +24,7 @@ import workbench.gui.menu.TextPopup;
 /**
  * Provide a Cut, Copy, Paste popup menu for Text components 
  * 
- * @author support@sql-workbench.net Kellerer
+ * @author Thomas Kellerer Kellerer
  */
 public class TextComponentMouseListener
 	implements MouseListener, CaretListener

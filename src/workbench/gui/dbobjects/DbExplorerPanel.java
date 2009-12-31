@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -86,7 +86,7 @@ import workbench.util.WbWorkspace;
  * </ul>
  * This panel can either be displayed inside the MainWindow as a tab, or as
  * a separate Window (@link workbench.gui.dbobjects.DbExplorerWindow}
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class DbExplorerPanel
 	extends JPanel

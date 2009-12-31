@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -74,7 +74,7 @@ import workbench.util.WbThread;
  * specifying a SQL query where the generated ResultSet should be exported
  * using {@link #addQueryJob(java.lang.String, workbench.util.WbFile) }
  * 
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class DataExporter
 	implements InterruptableJob, ErrorReporter, ProgressReporter, Committer

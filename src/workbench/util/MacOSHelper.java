@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -27,7 +27,7 @@ import workbench.log.LogMgr;
  * http://developer.apple.com/documentation/Java/Reference/1.4.2/appledoc/api/com/apple/eawt/Application.html
  * http://developer.apple.com/samplecode/OSXAdapter/index.html
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class MacOSHelper
 	implements InvocationHandler

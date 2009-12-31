@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -17,7 +17,7 @@ import java.util.Comparator;
  * A case-insensitive Comparator for String which 
  * can handle null values as well (as opposed to String.CASE_INSENSITIVE_ORDER)
  * 
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class CaseInsensitiveComparator
 	implements Comparator<String>

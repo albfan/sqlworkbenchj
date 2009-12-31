@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -23,7 +23,7 @@ package workbench.storage;
  * converter is passed to every RowData instance that is created in the factory. Therefor a Singleton is
  * is recommended to avoid too many instances of the implementing class.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  * @see RowData#setConverter(workbench.storage.DataConverter)
  * @see RowDataFactory#createRowData(workbench.storage.ResultInfo, workbench.db.WbConnection) 
  */

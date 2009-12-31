@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
  * used in the JTable, the PK Mapping file, colors used for required
  * fields and alternating row coloring.
  *
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class DataEditOptionsPanel
 	extends JPanel

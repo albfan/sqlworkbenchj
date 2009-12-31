@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -16,7 +16,7 @@ import workbench.db.AbstractConstraintReader;
 /**
  * An implementation of {@link AbstractConstraintReader} for the 
  * <a href="http://www.firebirdsql.org">Firebird</a> database server
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class FirebirdConstraintReader 
 	extends AbstractConstraintReader

@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -26,7 +26,7 @@ import workbench.util.SqlUtil;
  * <br/>
  * The method updateEnumDefinition() can be used to post-process a TableDefinition
  *
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  * @see workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
  */
 public class MySqlEnumReader

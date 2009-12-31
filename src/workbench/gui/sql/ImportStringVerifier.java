@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -43,7 +43,7 @@ import workbench.util.ClipboardFile;
  * This class checks the content of an input string and tries to match
  * it against a ResultInfo.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class ImportStringVerifier
 {

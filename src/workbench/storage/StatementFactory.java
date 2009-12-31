@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -26,7 +26,7 @@ import workbench.util.StringUtil;
  * A class to generate DELETE, INSERT or UPDATE statements based
  * on the data in a {@link workbench.storage.RowData} object.
  *
- * @author  support@sql-workbench.net
+ * @author  Thomas Kellerer
  */
 public class StatementFactory
 {

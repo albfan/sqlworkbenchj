@@ -1,14 +1,14 @@
 /*
- * 
+ * H2IndexReader.java
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * Copyright 2002-2008, Thomas Kellerer
- * 
+ *
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
- * 
+ *
  */
-
 package workbench.db.h2database;
 
 import java.sql.ResultSet;
@@ -33,7 +33,7 @@ import  workbench.util.StringUtil;
  * For versions before 1.106 this works as well. In this case the name of the primary
  * key is always identical to the index name.
  *
- * @author support@sql-workbench.net
+ * @author Thomas Kellerer
  */
 public class H2IndexReader
 	extends JdbcIndexReader

@@ -3,7 +3,7 @@
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- * Copyright 2002-2009, Thomas Kellerer
+ * Copyright 2002-2010, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
@@ -23,7 +23,7 @@ import workbench.util.WbThread;
 /**
  *	Save the content of the ResultSet as an external file
  * @see workbench.gui.dialogs.export.DataStoreExporter
- *	@author  support@sql-workbench.net
+ *	@author  Thomas Kellerer
  */
 public class SaveDataAsAction
 	extends WbAction
