@@ -66,6 +66,8 @@ public class ColumnAlterAction
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
+		if (definition.isReadOnly()) return;
+
 		if (!isTable())
 		{
 			setEnabled(false);

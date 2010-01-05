@@ -18,6 +18,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +77,7 @@ import workbench.util.WbThread;
  */
 public class TableDefinitionPanel
 	extends JPanel
-	implements ActionListener, ListSelectionListener, Resettable, DbObjectList
+	implements ActionListener, PropertyChangeListener, ListSelectionListener, Resettable, DbObjectList
 {
 	public static final String INDEX_PROP = "index";
 	public static final String DEFINITION_PROP = "tableDefinition";
@@ -132,6 +134,7 @@ public class TableDefinitionPanel
 		this.tableDefinition.getExportAction().setEnabled(true);
 
 		tableDefinition.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_ALLOW_ALTER_TABLE);
 		
 		this.reloadAction = new ReloadAction(this);
 		this.reloadAction.setEnabled(false);
@@ -298,6 +301,7 @@ public class TableDefinitionPanel
 	public void dispose()
 	{
 		if (tableDefinition != null) tableDefinition.dispose();
+		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
 	/**
@@ -623,6 +627,11 @@ public class TableDefinitionPanel
 		}
 	}
 
+	/**
+	 * Returns a SELECT statement for retrieve all rows and columns from the displayed table.
+	 * 
+	 * @see TableSelectBuilder#getSelectForTable(workbench.db.TableIdentifier)
+	 */
 	public String getSelectForTable()
 	{
 		List<ColumnIdentifier> cols = TableColumnsDatastore.createColumnIdentifiers(this.dbConnection.getMetadata(), this.tableDefinition.getDataStore());
@@ -665,6 +674,15 @@ public class TableDefinitionPanel
 		else
 		{
 			doRestore = true;
+		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getPropertyName().equals(GuiSettings.PROPERTY_ALLOW_ALTER_TABLE))
+		{
+			tableDefinition.setReadOnly(!GuiSettings.allowAlterInDbExplorer());
 		}
 	}
 }

@@ -26,7 +26,8 @@ public class GuiSettings
 	public static final String PROPERTY_SQLTAB_CLOSE_BUTTON = "workbench.gui.display.sqltab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
-
+	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
+	
 	public static boolean getRetrieveQueryComments()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.query.retrieve.comments", false);
@@ -61,12 +62,12 @@ public class GuiSettings
 	
 	public static boolean allowAlterInDbExplorer()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.dbexplorer.allow.alter", false);
+		return Settings.getInstance().getBoolProperty(PROPERTY_ALLOW_ALTER_TABLE, false);
 	}
 
 	public static void setAllowAlterInDbExplorer(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.dbexplorer.allow.alter", flag);
+		Settings.getInstance().setProperty(PROPERTY_ALLOW_ALTER_TABLE, flag);
 	}
 
 	public static boolean getKeepCurrentSqlHighlight()
