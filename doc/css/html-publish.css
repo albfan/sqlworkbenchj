@@ -17,7 +17,8 @@ td,th {
 body > div.section, 
 body > div.article,
 body > div.titlepage,
-body > div.toc {
+body > div.toc,
+body > div.index {
   background-color:white;
   padding-left:15px;
   padding-right:15px;

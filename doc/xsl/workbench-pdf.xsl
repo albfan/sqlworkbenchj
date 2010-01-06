@@ -8,6 +8,10 @@
   <xsl:import href="../../etc/docbook/fo/docbook.xsl"/>
   <xsl:param name="paper.type" select="'A4'"/>
 
+  <xsl:template match="processing-instruction('pagebreak')">
+     <fo:block break-after='page'/>
+   </xsl:template>
+ 
   <xsl:attribute-set name="xref.properties">
     <xsl:attribute name="color">
       <xsl:choose>
@@ -39,32 +43,32 @@
     <xsl:attribute name="orphans">6</xsl:attribute>
   </xsl:attribute-set>
   
-	<xsl:attribute-set name="section.title.level1.properties">
+  <xsl:attribute-set name="section.title.level1.properties">
     <xsl:attribute name="break-before">page</xsl:attribute>
-		<xsl:attribute name="font-size">
-			<xsl:value-of select="$body.font.master * 1.5"></xsl:value-of>
-			<xsl:text>pt</xsl:text>
-		</xsl:attribute>
-	</xsl:attribute-set>
-	
-	<xsl:attribute-set name="section.title.level2.properties">
+    <xsl:attribute name="font-size">
+      <xsl:value-of select="$body.font.master * 1.5"></xsl:value-of>
+      <xsl:text>pt</xsl:text>
+    </xsl:attribute>
+  </xsl:attribute-set>
+  
+  <xsl:attribute-set name="section.title.level2.properties">
     <xsl:attribute name="space-before.minimum">2em</xsl:attribute>
     <xsl:attribute name="space-before.optimum">2.5em</xsl:attribute>
-		<xsl:attribute name="font-size">
-			<xsl:value-of select="$body.font.master * 1.25"></xsl:value-of>
-			<xsl:text>pt</xsl:text>
-		</xsl:attribute>
-	</xsl:attribute-set>
+    <xsl:attribute name="font-size">
+      <xsl:value-of select="$body.font.master * 1.25"></xsl:value-of>
+      <xsl:text>pt</xsl:text>
+    </xsl:attribute>
+  </xsl:attribute-set>
 
-	<xsl:attribute-set name="section.title.level3.properties">
+  <xsl:attribute-set name="section.title.level3.properties">
     <xsl:attribute name="space-before.minimum">1.5em</xsl:attribute>
     <xsl:attribute name="space-before.optimum">2em</xsl:attribute>
-		<xsl:attribute name="font-size">
-			<xsl:value-of select="$body.font.master * 1.10"></xsl:value-of>
-			<xsl:text>pt</xsl:text>
-		</xsl:attribute>
-	</xsl:attribute-set>
-	
+    <xsl:attribute name="font-size">
+      <xsl:value-of select="$body.font.master * 1.10"></xsl:value-of>
+      <xsl:text>pt</xsl:text>
+    </xsl:attribute>
+  </xsl:attribute-set>
+  
   
   <!--
   <xsl:attribute-set name="toc.line.properties">

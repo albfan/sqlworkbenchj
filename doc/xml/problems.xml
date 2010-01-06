@@ -1,8 +1,10 @@
 <section id="troubleshooting">
 	<title>Common problems</title>
-
+  
   <section id="driver-not-found">
     <title>The driver class was not found</title>
+    <indexterm><primary>Problems</primary><secondary>driver not found</secondary></indexterm>
+    
     <para>
       If you get an error <literal>"Driver class not registered"</literal> or
       <literal>"Driver not found"</literal> please check the following settings:
@@ -18,6 +20,8 @@
 
   <section id="out-of-memory-error">
     <title>Out of memory errors</title>
+    <indexterm><primary>Problems</primary><secondary>out of memory</secondary></indexterm>
+    
     <para>
       The memory that is available to the application is limited by
       the Java virtual machine to ensure that applications don't use all
@@ -78,7 +82,8 @@
   
 	<section id="oracle-problems">
 		<title>Oracle Problems</title>
-
+    <indexterm><primary>Problems</primary><secondary>Oracle</secondary></indexterm>
+    
 		<section id="oracle-long-problems">
 			<title>Error: "Stream has already been closed"</title>
 			<para>
@@ -108,6 +113,7 @@
 		
 		<section id="oracle-enable-remarks">
 			<title>Table and column comments are not displayed</title>
+      <indexterm><primary>Oracle</primary><secondary>database comments</secondary></indexterm>
 			<para>
 				By default Oracle's JDBC driver does not return comments made on columns or tables 
 				(<literal>COMMENT ON ..</literal>). Thus your comments will not be shown in the database 
@@ -184,7 +190,8 @@ SELECT 42 FROM dual;</programlisting>
 	
 	<section id="mysql-problems">
 		<title>MySQL Problems</title>
-
+    <indexterm><primary>Problems</primary><secondary>MySQL</secondary></indexterm>
+    
 		<section id="mysql-no-info-schema">
 			<title>INFORMATION_SCHEMA tables not displayed in DbExplorer</title>
 			<para>
@@ -229,7 +236,8 @@ SELECT 42 FROM dual;</programlisting>
 	
 	<section id="mssql-problems">
 		<title>Microsoft SQL Server Problems</title>
-
+    <indexterm><primary>Problems</primary><secondary>Microsoft SQL Server</secondary></indexterm>
+    
 		<section id="mssql-cloned-connection">
 		  <title>Can't start a cloned connection while in manual transaction mode</title>
 		  <para>
@@ -311,6 +319,7 @@ SELECT 42 FROM dual;</programlisting>
 	
 	<section id="db2-problems">
 		<title>DB2 Problems</title>
+    <indexterm><primary>Problems</primary><secondary>IBM DB2</secondary></indexterm>
 
 		<section id="db2-charset">
 			<title>"Connection closed" errors</title>
@@ -375,7 +384,8 @@ SELECT 42 FROM dual;</programlisting>
 	</section>
 
 	<section id="pg-problems">
-		<title>Postgres Problems</title>
+		<title>PostgreSQL Problems</title>
+    <indexterm><primary>Problems</primary><secondary>PostgreSQL</secondary></indexterm>
 
 		<section id="pg-result-buffer">
 			<title>WbExport using a lot of memory</title>

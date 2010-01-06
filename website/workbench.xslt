@@ -230,8 +230,47 @@
 
   <xsl:template match="full-history">
     <h1>Release History</h1>
+
+    <script type="text/javascript">
+      <![CDATA[
+        function toggleTOC()
+        {
+          element = document.getElementById("toc-wrapper");
+          style = element.style.display;
+          var newstyle = "block";
+          if (style == "block")
+          {
+             newstyle = "none";
+          }
+          element.style.display=newstyle;
+
+          toggleElement = document.getElementById("toc-toggle");
+
+          if (newstyle == "none")
+          {
+            toggleElement.innerHTML = "Show list of all builds";
+          }
+          if (newstyle == "block")
+          {
+            toggleElement.innerHTML = "Hide list of all builds";
+          }
+        }
+      ]]>
+    </script>
+    <a id="toc-toggle" href="javascript:toggleTOC()">Show list of all builds</a>
+    <div id="toc-wrapper" style="display:none;margin-top:5px">
+      <xsl:for-each select="document('../scripts/history.xml')/history/release[@build != '-1']">
+        <xsl:variable name="build-nr" select="@build"/>
+          <a href="#build_{$build-nr}">Build <xsl:value-of select="@build"/></a>&nbsp;
+      </xsl:for-each>
+    </div>
+    <br/>
+    <br/>
     <xsl:for-each select="document('../scripts/history.xml')/history/release[@build != '-1']">
+      <xsl:variable name="build-nr" select="@build"/>
+      <a name="build_{$build-nr}">
       <h1 class="build-nr">Build <xsl:value-of select="@build"/> (<xsl:value-of select="@date"/>)</h1>
+      </a>
 
       <xsl:if test="count(entry[@type='enh']) &gt; 0">
         <h3 class="history-entry">Enhancements</h3>

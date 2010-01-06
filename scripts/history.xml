@@ -2,8 +2,56 @@
 <history>
 
 <!-- build number must be set to -1 for development builds -->
-<release build="-1" date="2009-12-16">
-	
+<release build="-1" date="2010-01-06">
+
+  <entry dev-build="1" type="enh">
+    <description>
+      When toggling the option "Allow table altering" for the DbExplorer, this is now
+      immediately reflected in any open DbExplorer (previously after changing the option
+      the DbExplorer had to be closed and re-opened)
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      For query results, the column comments can now also be retrieved. The column comments (if available)
+      are then displayed in the tooltip of the result's column header. The retrieval can be enabled in
+      Tools -&gt; Options -&gt; Data display -&gt; Retrieve column remarks for queries
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      WbExport can now also write a "control" file for DB2's IMPORT command (-formatFile=db2)
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="enh">
+    <description>
+      A message box can now be displayed when all running scripts have been finished. If the application
+      is minimized, displaying the message box will also restore the application's main window.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      When moving a DbExplorer away from the end, the tabs were not restored correctly when loading the
+      workspace later.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      Some properties for SQL generation were not migrated correctly from previous versions
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      Setting the editor color for datatypes changed the color for the cursor (and vice versa)
+    </description>
+  </entry>
+
   <entry dev-build="1" type="fix">
     <description>
       When changing inet, macaddr or cidr columns in the result set, wrong statements were generated for PostgreSQL
@@ -108,7 +156,7 @@
   <entry dev-build="6" type="enh">
     <description>
       When opening a file from the the main menu (File -&gt; Open), the file can now be opened in a new
-      editor tab. 
+      editor tab.
     </description>
   </entry>
 
@@ -132,7 +180,7 @@
 
   <entry dev-build="4" type="enh">
     <description>
-      WbDataDiff can now output the result as XML files. 
+      WbDataDiff can now output the result as XML files.
     </description>
   </entry>
 
@@ -141,13 +189,13 @@
       The WbXslt command can now handle stylesheets that include other stylesheets.
     </description>
   </entry>
-  
+
   <entry dev-build="2" type="enh">
     <description>
       In the macro editor auto completion is now enabled (if the main window is connected)
     </description>
   </entry>
-  
+
   <entry dev-build="1" type="enh">
     <description>
       workbench.settings will now only retain those properties that differ
@@ -285,7 +333,7 @@
 			Execute current was not working for MySQL connections.
 		</description>
 	</entry>
-	
+
   <entry dev-build="4" type="fix">
     <description>
 			If tables were created using double quotes (e.g. CREATE TABLE "MyTable"), the table
@@ -357,7 +405,7 @@
       in the public schema.
     </description>
   </entry>
-  
+
   <entry dev-build="1" type="fix">
     <description>
       "WbMode confirm" was not working if the profile was set to read only.
@@ -378,7 +426,7 @@
 
   <entry dev-build="1" type="fix">
     <description>
-      WbCopy now removes any trailing semicolon from the SQL query when using query based copying. 
+      WbCopy now removes any trailing semicolon from the SQL query when using query based copying.
     </description>
   </entry>
 </release>
@@ -391,7 +439,7 @@
       Connections to DB2 were no longer working
     </description>
   </entry>
-  
+
 </release>
 
 <release build="105" date="2009-08-31">
@@ -1761,7 +1809,7 @@
 
   <entry dev-build="1" type="fix">
     <description>
-       WbExport's XML format now defaults to XML 1.0 again. An option has been added for WbExport to select version 1.1 if that is needed 
+       WbExport's XML format now defaults to XML 1.0 again. An option has been added for WbExport to select version 1.1 if that is needed
        in order to use the newly allowed characters.  XML 1.1 support can be enabled using -xmlVersion=1.1 The default can be set with the
        property workbench.xml.default.version
     </description>

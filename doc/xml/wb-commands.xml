@@ -1668,7 +1668,8 @@ WHERE id=42;</programlisting>
 
   <section id="command-dbms-output" xreflabel="ENABLEOUT">
     <title>Using Oracle's DBMS_OUTPUT package</title>
-
+    <indexterm><primary>Oracle</primary><secondary>dbms_output</secondary></indexterm>
+    
     <para>
       To turn on support for Oracle's <literal>DBMS_OUTPUT</literal> package you have to use the
 			(&wb-productname; specific) command <literal>ENABLEOUT</literal>.

@@ -52,4 +52,13 @@
 &options;
 &shortcuts;
 &settings;
+
+<!--
+<indexterm class="endofrange" startref="ix.profile"/>
+<indexterm class="startofrange" id="ix.profile"><primary>connection profile</primary></indexterm>
+-->
+
+<?pagebreak?>
+<index/>
+
 </article>

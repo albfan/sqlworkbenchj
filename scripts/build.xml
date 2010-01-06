@@ -240,6 +240,12 @@
       <param name="ulink.footnotes" expression="0"/>
       <param name="insert.link.page.number" expression="no"/>
       <param name="insert.olink.page.number" expression="no"/>
+      
+      <param name="generate.index" expression="1"/>
+      <param name="index.prefer.titleabbrev" expression="1"/>
+      <param name="column.count.index" expression="2"/>
+
+      <!-- <param name="axf.extensions" expression="1"/> -->
     </xslt>
 
   </target>
@@ -344,7 +350,10 @@
       <param name="admon.graphics.extension" expression=".png"/>
       <param name="admon.graphics" expression="1"/>
       <param name="admon.textlabel" expression="0"/>
-      <param name="generate.index" expression="0"/>
+      
+      <param name="generate.index" expression="1"/>
+      <param name="index.prefer.titleabbrev" expression="1"/>
+
       <param name="index.method" expression="'default'"/>
       <param name="chunk.tocs.and.lots" expression="0"/>
       <param name="chunk.tocs.and.lots.has.title" expression="1"/>

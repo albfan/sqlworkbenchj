@@ -708,6 +708,7 @@
 
 		<section id="options-ora-data-timestamp">
 			<title>Oracle <literal>DATE</literal> as <literal>TIMESTAMP</literal></title>
+      <indexterm><primary>Oracle</primary><secondary>DATE datatype</secondary></indexterm>
 			<para>
 				The Oracle <literal>DATE</literal> datatype includes the time as well. But the
 				JDBC driver does not retrieve the time part of a DATE column, so when retrieving
@@ -834,6 +835,9 @@
 
 		<section id="dbexp-options-show-trigger">
 			<title>Show trigger panel</title>
+      <indexterm><primary>DbExplorer</primary><secondary>show all triggers</secondary></indexterm>
+      <indexterm><primary>Triggers</primary><secondary>show all triggers in DbExplorer</secondary></indexterm>
+
 			<para>
 				By default triggers are shown only in the details of a table. If the
 				option "Show trigger panel" is selected, an additional panel will

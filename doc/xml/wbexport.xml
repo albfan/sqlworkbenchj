@@ -11,11 +11,15 @@
 		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>). This includes the 
     usage in scripts that are run in <link linkend="using-scripting">batch mode</link>.
 	</para>
-	
+
+  <indexterm><primary>export</primary><secondary>SQL query result</secondary></indexterm>
+  <indexterm><primary>export</primary><secondary>table</secondary></indexterm>
+
 	<para>
 		The <literal>WbExport</literal> command exports either the result of the 
-		<emphasis role="bold">next</emphasis> SQL statement (which has to produce a result set) or
-		the content of the table(s) specified with the <literal>-sourceTable</literal> parameter. 
+    <emphasis role="bold">next</emphasis> SQL Statement
+    (which has to produce a result set) or the content of the table(s)
+    specified with the <literal>-sourceTable</literal> parameter.
 		The data is directly written to the output file and not loaded into memory. The export file(s)
 		can be compressed ("zipped") on the fly. <link linkend="command-import">WbImport</link> can
 		import the zipped (text or XML) files directly without the need to unzip them.
@@ -76,10 +80,14 @@
 
 	<section id="wb-export-memory">
 		<title>Memory usage and WbExport</title>
+    <indexterm><primary>Problems</primary><secondary>memory usage during export</secondary></indexterm>
+    <indexterm><primary>export</primary><secondary>memory problems</secondary></indexterm>
+
     <para>
       WbExport is designed to directly write the rows that are retrieved from the database
       to the export file without buffering them in memory.
    </para>
+   
    <para>
       Some JDBC drivers (e.g. Postgres, jTDS and the Microsoft Driver) read the full result obtained
       from the database into memory. In that case, exporting large results might still require a lot
@@ -99,6 +107,8 @@
 
 	<section id="export-parameters">
 		<title>General WbExport parameters</title>
+    <indexterm><primary>export</primary><secondary>parameters</secondary></indexterm>
+    
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
 				<colspec colname="c1" colwidth="4cm" />
@@ -482,7 +492,9 @@
 	</section>
     
 	<section id="export-text-parameters">
-		<title>Parameters for the type TEXT</title>
+    <title>Parameters for text export</title>
+
+    <indexterm><primary>export</primary><secondary>text files</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2"  align="left">
@@ -611,7 +623,7 @@
 					<row>
 						<entry>-formatFile</entry>
 						<entry>
-							<para>Possible values: <literal>postgres</literal>, <literal>oracle</literal>, <literal>sqlserver</literal></para>
+							<para>Possible values: <literal>postgres</literal>, <literal>oracle</literal>, <literal>sqlserver</literal>, <literal>db2</literal></para>
 							<para>
 								This parameter controls the creation of a control file for 
 								the bulk load utilities of Oracle and Microsoft SQL Server.
@@ -621,15 +633,16 @@
 								The format file has the same filename as the output file but with the ending <literal>.ctl</literal>
 								for Oracle and <literal>.fmt</literal> for SQL Server.
 								For Postgres, this will create the necessary <literal>COPY</literal>
-								syntax to import the generated text file.
+								syntax to import the generated text file. For DB2 this will create an IMPORT command
+                to import the exported data.
 							</para>
 							<para>
 								You can specify several formats at the same time. In that case one control file for each
 								format specified will be created.
 							</para>
 							<para>
-								Note that the generated control file will most probably
-								need some adjustments before you can actually use it. 
+                The generated format file(s) are intended as a starting point for your own adjustments. Don't expect
+                them to be complete specifying all possible options.
 							</para>
 						</entry>
 					</row>
@@ -640,7 +653,8 @@
 	</section>
 
 	<section id="export-xml-parameters">
-		<title>Parameters for type XML</title>
+    <title>Parameters for XML export</title>
+    <indexterm><primary>export</primary><secondary>XML files</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -725,7 +739,9 @@
 	</section>
 
 	<section id="export-sql-parameters">
-		<title>Parameters for type SQLUPDATE, SQLINSERT or SQLDELETEINSERT</title>
+    <title>Parameters for type SQLUPDATE, SQLINSERT or SQLDELETEINSERT</title>
+    <indexterm><primary>export</primary><secondary>SQL INSERT script</secondary></indexterm>
+    <indexterm><primary>export</primary><secondary>SQL UPDATE script</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -891,7 +907,10 @@
 	</section>
 		
 	<section id="export-ods-parameters">
-		<title>Parameters for Spreadsheet types (ods, xslx, xls)</title>
+    <title>Parameters for Spreadsheet types (ods, xslx, xls)</title>
+    <indexterm><primary>export</primary><secondary>Spreadsheet</secondary></indexterm>
+    <indexterm><primary>export</primary><secondary>OpenOffice</secondary></indexterm>
+    <indexterm><primary>export</primary><secondary>Excel</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -914,7 +933,8 @@
 	</section>
 
 	<section id="export-html-parameters">
-		<title>Parameters for HTML export</title>
+    <title>Parameters for HTML export</title>
+    <indexterm><primary>export</primary><secondary>HTML</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -985,6 +1005,8 @@
 
 	<section id="export-compress">
 		<title>Compressing export files</title>
+    <indexterm><primary>export</primary><secondary>compress</secondary></indexterm>
+
 		<para>
 			The <literal>WbExport</literal> command supports compressing of the generated output files.
 			This includes the "main" export file as well as any associated LOB files.

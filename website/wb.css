@@ -285,6 +285,20 @@ li
   padding-bottom:6px;
 }
 
+li > ul > li 
+{
+  list-style: disc;
+  margin-bottom: 1px;
+  padding-bottom:1px;
+  font-size: 95%;
+  font-weight: normal;
+}
+
+.archive-list > li
+{
+  font-weight: bold;
+}
+
 .disclaimer
 {
   line-height:175%;

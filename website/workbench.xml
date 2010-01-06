@@ -196,6 +196,31 @@ VALUES
     </content>
   </page>
 
+  <!-- ======================== Kwown bugs ========================== -->
+  <page name="issues" title="Known bugs" toc="main">
+    <title>Known issues</title>
+    <content>
+      <p>
+      Build 107 has the following known issues:
+      </p>
+      <ul>
+        <li>
+            When upgrading from an earlier build to 107, the internal properties for the DDL generation (in DbExplorer) 
+            are not always migrated properly. Please start SQL Workbench/J with the parameter -Dworkbench.db.resetdefaults=true to reset the 
+            properties and fix the problem. Use -J-Dworkbench.db.resetdefaults=true when using the Windows launcher (fixed in 107.1)
+        </li>
+        <li>
+            When moving the DbExplorer to a position other than the last, the tabs will not be 
+            restored correctly when the workspace is loaded the next time  (fixed in 107.1)
+        </li>
+        <li>
+            When editing the data of columns with the data type <tt>inet</tt>, <tt>macaddr</tt> or <tt>cidr</tt> in PostgreSQL, 
+            wrong update statements are generated when the changes are saved to the database  (fixed in 107.1)
+        </li>
+      </ul>
+    </content>
+  </page>
+  
   <!-- ======================== XSLT Files ========================== -->
   <page name="xslt" title="XSLT" toc="main">
     <title>Sample XSL transformations</title>
@@ -234,7 +259,7 @@ VALUES
        </ul>
     </content>
   </page>
-  
+
   <!-- ======================== Downloads ========================== -->
   <page name="downloads" title="Downloads" toc="main">
         <title>SQL Workbench/J</title>
@@ -281,18 +306,66 @@ VALUES
     <subtitle>Release Archive</subtitle>
     <content>
       <p>Download archive for SQL Workbench/J</p>
-      <a href="archive/Workbench-Build95.zip">Build 95</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build95.zip">Source Code for Build 95</a><br/>
-      <a href="archive/Workbench-Build96.zip">Build 96</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build96.zip">Source Code for Build 96</a><br/>
-      <a href="archive/Workbench-Build97.zip">Build 97</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build97.zip">Source Code for Build 97</a><br/>
-      <a href="archive/Workbench-Build98.zip">Build 98</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build98.zip">Source Code for Build 98</a><br/>
-      <a href="archive/Workbench-Build99.zip">Build 99</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build99.zip">Source Code for Build 99</a><br/>
-      <a href="archive/Workbench-Build100.zip">Build 100</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build100.zip">Source Code for Build 100</a><br/>
-      <a href="archive/Workbench-Build101.zip">Build 101</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build101.zip">Source Code for Build 101</a><br/>
-      <a href="archive/Workbench-Build102.zip">Build 102</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build102.zip">Source Code for Build 102</a><br/>
-      <a href="archive/Workbench-Build103.zip">Build 103</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build103.zip">Source Code for Build 103</a><br/>
-      <a href="archive/Workbench-Build104.zip">Build 104</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build104.zip">Source Code for Build 104</a><br/>
-      <a href="archive/Workbench-Build105.zip">Build 105</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build105.zip">Source Code for Build 105</a><br/>
-      <a href="archive/Workbench-Build106.zip">Build 106</a>&nbsp;&nbsp;<a href="archive/WorkbenchSrc-Build106.zip">Source Code for Build 106</a><br/>
+      <ul class="archive-list">
+        <li>Build 106<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build106.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build106-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build106.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 105<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build105.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build105-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build105.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 104<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build104.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build104-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build104.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 103<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build103.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build103-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build103.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 102<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build102.zip">All Platforms</a></li>
+            <li><a href="archive/WorkbenchSrc-Build102.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 101<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build101.zip">All Platforms</a></li>
+            <li><a href="archive/WorkbenchSrc-Build101.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 100<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build100.zip">All Platforms</a></li>
+            <li><a href="archive/WorkbenchSrc-Build100.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 99<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build99.zip">All Platforms</a></li>
+            <li><a href="archive/WorkbenchSrc-Build99.zip">Source Code</a></li>
+          </ul>
+        </li>
+        <li>Build 98<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build98.zip">All Platforms</a></li>
+            <li><a href="archive/WorkbenchSrc-Build98.zip">Source Code</a></li>
+          </ul>
+        </li>
+      </ul>
     </content>
   </page>
 

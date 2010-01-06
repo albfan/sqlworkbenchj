@@ -93,7 +93,7 @@
   </target>
 
   <target name="clean">
-    <delete>
+    <delete failonerror="false">
       <fileset dir=".">
         <include name="*.html"/>
         <include name="history_rss.txt"/>
