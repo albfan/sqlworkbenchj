@@ -345,16 +345,16 @@ public abstract class BaseAnalyzer
 		}
 		TableIdentifier toCheck = this.dbConnection.getMetadata().resolveSynonym(tableForColumnList);
 		List<ColumnIdentifier> cols = this.dbConnection.getObjectCache().getColumns(toCheck);
-		if (GuiSettings.getSortCompletionColumns())
-		{
-			Collections.sort(cols);
-		}
 		if (cols != null && cols.size() > 0)
 		{
 			this.title = tableForColumnList.getTableName() + ".*";
 			
 			this.elements = new ArrayList(cols.size() + 1);
 			this.elements.addAll(cols);
+			if (GuiSettings.getSortCompletionColumns())
+			{
+				Collections.sort(elements);
+			}
 		}
 		return (elements == null ? false : (elements.size() > 0));
 	}
