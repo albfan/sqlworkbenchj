@@ -62,41 +62,13 @@ public class EditorOptionsPanel
 		this.internalLineEnding.setModel(new DefaultComboBoxModel(items));
 		this.externalLineEnding.setModel(new DefaultComboBoxModel(items));
 
-		String[] pasteCase = new String[] {
-			ResourceMgr.getString("LblLowercase"),
-			ResourceMgr.getString("LblUppercase"),
-			ResourceMgr.getString("LblAsIs")
-		};
-		this.completionPasteCase.setModel(new DefaultComboBoxModel(pasteCase));
-
 		String value = Settings.getInstance().getInteralLineEndingValue();
 		internalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
 
 		value = Settings.getInstance().getExternalLineEndingValue();
 		externalLineEnding.setSelectedIndex(lineEndingValueToIndex(value));
-
-		String paste = Settings.getInstance().getAutoCompletionPasteCase();
-		if ("lower".equals(paste)) this.completionPasteCase.setSelectedIndex(0);
-		else if ("upper".equals(paste)) this.completionPasteCase.setSelectedIndex(1);
-		else this.completionPasteCase.setSelectedIndex(2);
-
 		alternateDelim.setDelimiter(Settings.getInstance().getAlternateDelimiter());
 
-		String[] sortItems = new String[] {
-			ResourceMgr.getString("LblSortPastColName"),
-			ResourceMgr.getString("LblSortPastColPos")
-		};
-		this.completionColumnSort.setModel(new DefaultComboBoxModel(sortItems));
-
-		ColumnSortType sort = Settings.getInstance().getAutoCompletionColumnSortType();
-		if (sort == ColumnSortType.position)
-		{
-			this.completionColumnSort.setSelectedIndex(1);
-		}
-		else
-		{
-			this.completionColumnSort.setSelectedIndex(0);
-		}
 		noWordSep.setText(Settings.getInstance().getEditorNoWordSep());
 		useTabs.setSelected(Settings.getInstance().getEditorUseTabCharacter());
 		followCurrentDir.setSelected(GuiSettings.getFollowFileDirectory());
@@ -129,21 +101,7 @@ public class EditorOptionsPanel
 	{
 		Settings set = Settings.getInstance();
 		set.setMaxHistorySize(((NumberField)this.historySizeField).getValue());
-		int index = this.completionPasteCase.getSelectedIndex();
-		if (index == 0)
-		{
-			set.setAutoCompletionPasteCase("lower");
-		}
-		else if (index == 1)
-		{
-			set.setAutoCompletionPasteCase("upper");
-		}
-		else
-		{
-			set.setAutoCompletionPasteCase(null);
-		}
 
-		set.setCloseAutoCompletionWithSearch(closePopup.isSelected());
 		set.setAlternateDelimiter(alternateDelim.getDelimiter());
 		set.setRightClickMovesCursor(rightClickMovesCursor.isSelected());
 		set.setAutoJumpNextStatement(this.autoAdvance.isSelected());
@@ -154,15 +112,6 @@ public class EditorOptionsPanel
 		set.setInternalEditorLineEnding(value);
 		value = indexToLineEndingValue(externalLineEnding.getSelectedIndex());
 		set.setExternalEditorLineEnding(value);
-		index = completionColumnSort.getSelectedIndex();
-		if (index == 1)
-		{
-			set.setAutoCompletionColumnSort(ColumnSortType.position);
-		}
-		else
-		{
-			set.setAutoCompletionColumnSort(ColumnSortType.name);
-		}
 		set.setEditorUseTabCharacter(useTabs.isSelected());
 		GuiSettings.setDefaultFileDir(defaultDir.getFilename());
 		GuiSettings.setFollowFileDirectory(followCurrentDir.isSelected());
@@ -186,17 +135,12 @@ public class EditorOptionsPanel
     electricScrollLabel = new JLabel();
     electricScroll = new JTextField();
     rightClickMovesCursor = new JCheckBox();
-    closePopup = new JCheckBox();
-    completionPasteCase = new JComboBox();
-    pasteLabel = new JLabel();
     internalLineEndingLabel = new JLabel();
     internalLineEnding = new JComboBox();
     externalLineEndingLabel = new JLabel();
     externalLineEnding = new JComboBox();
     includeFilesInHistory = new JCheckBox();
     alternateDelim = new DelimiterDefinitionPanel();
-    pasterOrderLabel = new JLabel();
-    completionColumnSort = new JComboBox();
     noWordSepLabel = new JLabel();
     noWordSep = new JTextField();
     useTabs = new JCheckBox();
@@ -288,41 +232,6 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(10, 12, 0, 11);
     add(rightClickMovesCursor, gridBagConstraints);
 
-    closePopup.setSelected(Settings.getInstance().getCloseAutoCompletionWithSearch());
-    closePopup.setText(ResourceMgr.getString("TxtCloseCompletion"));
-    closePopup.setToolTipText(ResourceMgr.getDescription("TxtCloseCompletion"));
-    closePopup.setBorder(null);
-    closePopup.setHorizontalAlignment(SwingConstants.LEFT);
-    closePopup.setHorizontalTextPosition(SwingConstants.RIGHT);
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 2;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(9, 0, 0, 11);
-    add(closePopup, gridBagConstraints);
-
-    completionPasteCase.setModel(new DefaultComboBoxModel(new String[] { "Lowercase", "Uppercase", "As is" }));
-    completionPasteCase.setToolTipText(ResourceMgr.getDescription("LblPasteCase"));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(8, 11, 0, 15);
-    add(completionPasteCase, gridBagConstraints);
-
-    pasteLabel.setLabelFor(completionPasteCase);
-    pasteLabel.setText(ResourceMgr.getString("LblPasteCase")); // NOI18N
-    pasteLabel.setToolTipText(ResourceMgr.getString("d_LblPasteCase")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
-    add(pasteLabel, gridBagConstraints);
-
     internalLineEndingLabel.setText(ResourceMgr.getString("LblIntLineEnding")); // NOI18N
     internalLineEndingLabel.setToolTipText(ResourceMgr.getString("d_LblIntLineEnding")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
@@ -330,7 +239,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(7, 12, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 12, 0, 0);
     add(internalLineEndingLabel, gridBagConstraints);
 
     internalLineEnding.setToolTipText(ResourceMgr.getDescription("LblIntLineEnding"));
@@ -340,7 +249,7 @@ public class EditorOptionsPanel
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(4, 11, 0, 15);
+    gridBagConstraints.insets = new Insets(7, 11, 0, 15);
     add(internalLineEnding, gridBagConstraints);
 
     externalLineEndingLabel.setText(ResourceMgr.getString("LblExtLineEnding")); // NOI18N
@@ -384,27 +293,6 @@ public class EditorOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(6, 10, 0, 15);
     add(alternateDelim, gridBagConstraints);
-
-    pasterOrderLabel.setLabelFor(completionColumnSort);
-    pasterOrderLabel.setText(ResourceMgr.getString("LblPasteSort")); // NOI18N
-    pasterOrderLabel.setToolTipText(ResourceMgr.getString("d_LblPasteSort")); // NOI18N
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(9, 12, 0, 0);
-    add(pasterOrderLabel, gridBagConstraints);
-
-    completionColumnSort.setToolTipText(ResourceMgr.getDescription("LblPasteSort"));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 1;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(6, 11, 0, 15);
-    add(completionColumnSort, gridBagConstraints);
 
     noWordSepLabel.setText(ResourceMgr.getString("LblNoWordSep")); // NOI18N
     noWordSepLabel.setToolTipText(ResourceMgr.getString("d_LblNoWordSep")); // NOI18N
@@ -530,9 +418,6 @@ public class EditorOptionsPanel
   private JLabel altDelimLabel;
   private DelimiterDefinitionPanel alternateDelim;
   private JCheckBox autoAdvance;
-  private JCheckBox closePopup;
-  private JComboBox completionColumnSort;
-  private JComboBox completionPasteCase;
   private WbFilePicker defaultDir;
   private JLabel editorTabSizeLabel;
   private JTextField electricScroll;
@@ -551,8 +436,6 @@ public class EditorOptionsPanel
   private JCheckBox keepHilite;
   private JTextField noWordSep;
   private JLabel noWordSepLabel;
-  private JLabel pasteLabel;
-  private JLabel pasterOrderLabel;
   private JCheckBox rightClickMovesCursor;
   private JTextField tabSize;
   private JCheckBox useTabs;

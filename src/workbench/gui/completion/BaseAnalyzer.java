@@ -21,6 +21,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
@@ -344,6 +345,10 @@ public abstract class BaseAnalyzer
 		}
 		TableIdentifier toCheck = this.dbConnection.getMetadata().resolveSynonym(tableForColumnList);
 		List<ColumnIdentifier> cols = this.dbConnection.getObjectCache().getColumns(toCheck);
+		if (GuiSettings.getSortCompletionColumns())
+		{
+			Collections.sort(cols);
+		}
 		if (cols != null && cols.size() > 0)
 		{
 			this.title = tableForColumnList.getTableName() + ".*";

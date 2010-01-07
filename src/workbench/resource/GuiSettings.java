@@ -28,14 +28,34 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 
+	public static boolean getSortCompletionColumns()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.sortcolumns", true);
+	}
+	
+	public static void setSortCompletionColumns(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.autocompletion.sortcolumns", flag);
+	}
+
 	public static boolean getPartialCompletionSearch()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.partialsearch", false);
 	}
 	
+	public static void setPartialCompletionSearch(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.autocompletion.partialsearch", flag);
+	}
+
 	public static boolean getFilterCompletionSearch()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.filtersearch", false);
+	}
+
+	public static void setFilterCompletionSearch(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.autocompletion.filtersearch", flag);
 	}
 
 	public static boolean getRetrieveQueryComments()

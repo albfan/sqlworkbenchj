@@ -25,6 +25,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
 /**
@@ -273,7 +274,6 @@ public class DbObjectCache
 			try
 			{
 				cols = this.dbConnection.getMetadata().getTableColumns(tblToUse);
-				Collections.sort(cols);
 			}
 			catch (Throwable e)
 			{
