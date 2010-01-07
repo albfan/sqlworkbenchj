@@ -44,6 +44,7 @@ import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.editor.JEditTextArea;
 import workbench.log.LogMgr;
 import workbench.resource.ColumnSortType;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
@@ -68,7 +69,9 @@ public class CompletionPopup
 	protected CompletionSearchField searchField;
 	private boolean dbStoresMixedCase;
 	private boolean ignoreSearchChange;
-
+	private boolean partialSearch;
+	private boolean filterSearch;
+	
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
 		this.data = listData;
@@ -92,6 +95,8 @@ public class CompletionPopup
 		elementList.setVisibleRowCount(10);
 		content.add(scroll);
 		elementList.addKeyListener(this);
+		partialSearch = GuiSettings.getPartialCompletionSearch();
+		filterSearch = GuiSettings.getFilterCompletionSearch();
 	}
 
 	public void setContext(StatementContext c)
@@ -458,30 +463,34 @@ public class CompletionPopup
 			elementList.clearSelection();
 		}
 	}
+	
 	private int findEntry(String s)
 	{
 		if (s == null) return -1;
 		int count = this.data.getSize();
-		String search = s.toLowerCase();
-		for (int i=0; i < count; i++)
+		if (count == 0) return -1;
+
+		if (filterSearch && data instanceof CompletionHandler)
 		{
-			String entry = StringUtil.trimQuotes(this.data.getElementAt(i).toString());
-			if (entry.toLowerCase().startsWith(search)) return i;
+			CompletionHandler handler = (CompletionHandler)data;
+			handler.filterElements(s);
+			return handler.getSize() == 0 ? -1 : 0;
 		}
-		return -1;
-	}
-
-	protected int findEntry(char c)
-	{
-		int count = this.data.getSize();
-		char sc = Character.toLowerCase(c);
-		for (int i=0; i < count; i++)
+		else
 		{
-			String entry = this.data.getElementAt(i).toString();
-			if (entry.length() == 0) continue;
-			char ec = Character.toLowerCase(entry.charAt(0));
-
-			if (ec == sc) return i;
+			String search = s.toLowerCase();
+			for (int i=0; i < count; i++)
+			{
+				String entry = StringUtil.trimQuotes(this.data.getElementAt(i).toString());
+				if (partialSearch)
+				{
+					if (entry.toLowerCase().contains(search)) return i;
+				}
+				else
+				{
+					if (entry.toLowerCase().startsWith(search)) return i;
+				}
+			}
 		}
 		return -1;
 	}

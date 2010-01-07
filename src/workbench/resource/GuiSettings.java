@@ -27,7 +27,17 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON = "workbench.gui.display.resulttab.closebutton";
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
+
+	public static boolean getPartialCompletionSearch()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.partialsearch", false);
+	}
 	
+	public static boolean getFilterCompletionSearch()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.filtersearch", false);
+	}
+
 	public static boolean getRetrieveQueryComments()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.query.retrieve.comments", false);

@@ -24,10 +24,12 @@ import workbench.db.WbConnection;
 import workbench.gui.editor.JEditTextArea;
 import workbench.interfaces.StatusBar;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
@@ -39,6 +41,8 @@ public class CompletionHandler
 {
 	private JEditTextArea editor;
 	protected List elements = Collections.EMPTY_LIST;
+	protected List filteredElements = null;
+	
 	protected WbConnection dbConnection;
 	private JLabel header;
 	private List<ListDataListener> listeners;
@@ -153,7 +157,7 @@ public class CompletionHandler
 				this.header.setText(ctx.getTitle());
 				this.window.setContext(ctx);
 
-				result = (this.elements != null && this.elements.size() > 0);
+				result = getSize() > 0;
 				if (result)
 				{
 					statusBar.clearStatusMessage();
@@ -184,6 +188,60 @@ public class CompletionHandler
 		return result;
 	}
 
+	public void resetFilter()
+	{
+		filteredElements =null;
+		fireDataChanged();
+	}
+	
+	public synchronized int filterElements(String value)
+	{
+		if (StringUtil.isBlank(value)) return 0;
+		filteredElements = null;
+		if (getSize() == 0) return 0;
+
+		try
+		{
+			boolean partialMatch = GuiSettings.getPartialCompletionSearch();
+			List filter = new ArrayList(getSize());
+			value = value.toLowerCase();
+			for (int i=0; i < getSize(); i++)
+			{
+				Object o = elements.get(i);
+				if (o == null) continue;
+				String element = o.toString().toLowerCase();
+				if (partialMatch)
+				{
+					if (element.contains(value)) filter.add(o);
+				}
+				else
+				{
+					if (element.startsWith(value)) filter.add(o);
+				}
+			}
+			if (filter.size() > 0)
+			{
+				filteredElements = filter;
+			}
+			fireDataChanged();
+			return getSize();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("CompletionHandler.filterElements()", "Error when applying filter", e);
+			return -1;
+		}
+	}
+
+	private synchronized List getElementList()
+	{
+		if (filteredElements != null)
+		{
+			return filteredElements;
+		}
+		return elements == null ? Collections.emptyList() : elements;
+	}
+	
 	private void showNoObjectsFoundMessage()
 	{
 		WbThread t = new WbThread("Notification")
@@ -220,7 +278,7 @@ public class CompletionHandler
 	private void fireDataChanged()
 	{
 		if (this.listeners == null) return;
-		ListDataEvent evt = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, this.elements.size() - 1);
+		ListDataEvent evt = new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize() - 1);
 		for (int i=0; i < this.listeners.size(); i++)
 		{
 			ListDataListener l = (ListDataListener)this.listeners.get(i);
@@ -233,8 +291,7 @@ public class CompletionHandler
 	 */
 	public Object getElementAt(int index)
 	{
-		if (this.elements == null) return null;
-		return this.elements.get(index);
+		return getElementList().get(index);
 	}
 
 	/**
@@ -242,8 +299,7 @@ public class CompletionHandler
 	 */
 	public int getSize()
 	{
-		if (this.elements == null) return 0;
-		return this.elements.size();
+		return getElementList().size();
 	}
 
 	/**
