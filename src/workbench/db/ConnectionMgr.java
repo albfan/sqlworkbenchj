@@ -327,14 +327,14 @@ public class ConnectionMgr
 		ConnectionProfile firstMatch = null;
 		for (ConnectionProfile prof : list)
 		{
-			if (name.equalsIgnoreCase(prof.getName()))
+			if (name.equalsIgnoreCase(prof.getName().trim()))
 			{
 				if (firstMatch == null) firstMatch = prof;
 				if (group == null)
 				{
 					return prof;
 				}
-				else if (group.equalsIgnoreCase(prof.getGroup()))
+				else if (group.equalsIgnoreCase(prof.getGroup().trim()))
 				{
 					return prof;
 				}
