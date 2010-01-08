@@ -78,6 +78,7 @@ public class CompletionHandler
 
 	protected void showPopup()
 	{
+		filteredElements = null;
 		try
 		{
 			statusBar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));

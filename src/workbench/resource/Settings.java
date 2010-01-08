@@ -2524,6 +2524,9 @@ public class Settings
 		upgradeProp(def, "workbench.db.postgresql.selectinto.pattern", "(?s)^SELECT\\s+.*INTO\\s+\\p{Print}*\\s*FROM.*");
 		upgradeProp(def, "workbench.db.informix_dynamic_server.selectinto.pattern", "(?s)^SELECT.*FROM.*INTO\\s*\\p{Print}*");
 		upgradeProp(def, "workbench.db.sql.comment.column", "COMMENT ON COLUMN %object_name%.%column% IS '%comment%';");
+
+		upgradeProp(def, "workbench.db.oracle.add.column", "ALTER TABLE %table_name% ADD COLUMN %column_name% %datatype% %default_expression% %nullable%");
+		
 		upgradeListProp(def, "workbench.db.nonullkeyword");
 	}
 
