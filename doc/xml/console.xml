@@ -170,6 +170,42 @@ SQL> </screen>
 		</para>
 	</section>
 
+  <section id="console-wbrun">
+    <title>Running SQL scripts that produce a result</title>
+    <para>
+      Normally when executing a SQL script using <link linkend="command-wbinclude">WbInclude</link>, the result of such a script (e.g. when it
+      contains a SELECT statement) is not displayed on the console.
+    </para>
+    <para>
+      To run such a script, use the command <literal>WbRun</literal> instead of <literal>WbInclude</literal>. If you
+      have the following SQL script (named select_person.sql):
+    </para>
+    <programlisting>SELECT *
+FROM person;</programlisting>
+    <para>
+      and execute that using the WbInclude command:
+    </para>
+		<screen>SQL> WbInclude -file=select_person.sql;
+SQL> Execution time: 0.063s</screen>
+    <para>
+      If you execute this script using <literal>WbRun</literal> the result of the script is displayed:
+    </para>
+    <screen>SQL> WbRun select_people.sql;
+select *
+from person;
+
+id | firstname | lastname
+---+-----------+------------
+1  | Arthur    | Dent
+4  | Mary      | Moviestar
+2  | Zaphod    | Beeblebrox
+3  | Tricia    | McMillian
+
+(4 Rows)
+Execution time: 0.078s
+SQL></screen>
+  </section>
+  
 	<section id="console-maxrows">
 		<title>Controlling the number of rows displayed</title>
 		<para>
