@@ -55,6 +55,7 @@ public class ImportFileHandler
 	 * return a Reader for the first file in the archive.
 	 * (DataExporter creates an archive with a single
 	 * file in it).
+	 * 
 	 * @param mainFile the basefile
 	 * @param enc the encoding for the basefile
 	 */
@@ -62,8 +63,6 @@ public class ImportFileHandler
 		throws IOException
 	{
 		this.done();
-		this.mainArchive = null;
-		this.attachments = null;
 		this.encoding = enc;
 
 		this.baseFile = mainFile;
@@ -73,12 +72,21 @@ public class ImportFileHandler
 		this.initAttachements();
 	}
 
-	boolean isZip() { return isZip; }
+	/**
+	 * Used for unit tests
+	 * 
+	 * @return true if the import file is a ZIP file
+	 */
+	boolean isZip()
+	{
+		return isZip;
+	}
 
 	/**
 	 * Return a Reader that is suitable for reading the contents
 	 * of the main file. The reader will be created with the
 	 * encoding that was specified in {@link #setMainFile(File, String)}
+	 * 
 	 * @return a BufferedReader for the main file
 	 * @see #setMainFile(File, String)
 	 */
@@ -241,13 +249,16 @@ public class ImportFileHandler
 		}
 	}
 
-	public String getEncoding() { return this.encoding; }
+	public String getEncoding()
+	{
+		return this.encoding;
+	}
 
 	public void done()
 	{
-		try { if (mainReader != null) mainReader.close(); } catch (Throwable th) {}
-		try { if (mainArchive != null) mainArchive.close(); } catch (Throwable th) {}
-		try { if (attachments != null) attachments.close(); } catch (Throwable th) {}
+		FileUtil.closeQuitely(mainReader);
+		ZipUtil.closeQuitely(mainArchive);
+		ZipUtil.closeQuitely(attachments);
 		mainReader = null;
 		mainArchive = null;
 		attachments = null;

@@ -93,4 +93,17 @@ public class ZipUtil
 		}
 		return result;
 	}
+
+	public static void closeQuitely(ZipFile file)
+	{
+		if (file == null) return;
+		try
+		{
+			file.close();
+		}
+		catch (Throwable th)
+		{
+			// ignore
+		}
+	}
 }

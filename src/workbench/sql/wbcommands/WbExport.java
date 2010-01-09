@@ -126,6 +126,7 @@ public class WbExport
 		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CREATE_OUTPUTDIR, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ROWNUM);
+		cmdLine.addArgument("tableWhere");
 	}
 
 	public String getVerb() { return VERB; }
@@ -607,6 +608,7 @@ public class WbExport
 		}
 		else
 		{
+			String where = cmdLine.getValue("tableWhere");
 			try
 			{
 				exporter.setRowMonitor(this);
@@ -614,11 +616,11 @@ public class WbExport
 				exporter.setContinueOnError(this.continueOnError);
 				if (tablesToExport.size() > 1 || outputdir != null)
 				{
-					exportTableList(tablesToExport, result, outputdir, cmdLine.getValue(ARG_TABLE_PREFIX));
+					exportTableList(tablesToExport, result, outputdir, cmdLine.getValue(ARG_TABLE_PREFIX), where);
 				}
 				else
 				{
-					exportSingleTable(tablesToExport.get(0), result, outputFile);
+					exportSingleTable(tablesToExport.get(0), result, outputFile, where);
 				}
 				addMessages(result);
 			}
@@ -645,7 +647,7 @@ public class WbExport
 		exporter.setOutputType(type);
 	}
 
-	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outfile)
+	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outfile, String where)
 		throws SQLException
 	{
 		exporter.addTableExportJob(outfile, table);
@@ -665,7 +667,7 @@ public class WbExport
 		}
 	}
 
-	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, String prefix)
+	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, String prefix, String where)
 		throws SQLException
 	{
 		result.setSuccess();

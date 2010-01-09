@@ -50,15 +50,28 @@ public class FileUtil
 		}
 	}
 	
+	/**
+	 * Read the lines of the given Reader into a Collection.
+	 * The Reader will be closed after all lines have been read.
+	 * Empty lines are ignored and not add to the collection.
+	 *
+	 * @param in the "file" to read
+	 * @return a Collection with all the lines in the file
+	 */
 	public static List<String> getLines(BufferedReader in)
 	{
 		return getLines(in, false);
 	}
+
 	/**
 	 * Read the lines of the given Reader into a Collection.
+	 * <br/>
 	 * The Reader will be closed after all lines have been read.
-	 * 
+	 * Empty lines are ignored and not add to the collection.
+	 *
 	 * @param in the "file" to read
+	 * @param trim if true, each line will be trimmed after reading
+	 * 
 	 * @return a Collection with all the lines in the file
 	 */
 	public static List<String> getLines(BufferedReader in, boolean trim)

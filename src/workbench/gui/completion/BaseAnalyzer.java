@@ -29,8 +29,9 @@ import workbench.util.TableAlias;
 import workbench.util.TextlistReader;
 
 /**
- * Base class to analyze a SQL statement to find out what kind and which 
+ * Base class to analyze a SQL statement to find out what kind and which
  * objects should be included in the auto-completion window
+ *
  * @author Thomas Kellerer
  */
 public abstract class BaseAnalyzer
@@ -38,29 +39,41 @@ public abstract class BaseAnalyzer
 	public static final String QUALIFIER_DELIM = "\\?*=<>!/{}\\#%[]'\"(),:;";
 	public static final String WORD_DELIM = QUALIFIER_DELIM + "@";
 	public static final String SELECT_WORD_DELIM = WORD_DELIM + ".";
-	
+
 	protected static final int NO_CONTEXT = -1;
-	
-	// List the available tables
+
+	/**
+	 *  Context value to list the available tables
+	 */
 	protected static final int CONTEXT_TABLE_LIST = 1;
 
-	// List the columns for a table
+	/**
+	 *  Context value to list the columns for a table
+	 */
 	protected static final int CONTEXT_COLUMN_LIST = 2;
 
-	// List the tables that are available in the FROM list
+	/**
+	 * Context value to list the tables that are available in the FROM list
+	 */
 	protected static final int CONTEXT_FROM_LIST = 3;
 
 	protected static final int CONTEXT_TABLE_OR_COLUMN_LIST = 4;
-	
-	// List keywords available at this point
+
+	/**
+	 * Context value to list keywords available at this point
+	 */
 	protected static final int CONTEXT_KW_LIST = 5;
 
-	// List parameters for WB command parameters
+	/**
+	 * Context value to list parameters for WB command parameters
+	 */
 	protected static final int CONTEXT_WB_PARAMS = 6;
 
-	// List parameters for WB commands
+	/**
+	 * Context value to list all workbench commands
+	 */
 	protected static final int CONTEXT_WB_COMMANDS = 7;
-	
+
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
 	private String typeFilter;
 	protected String keywordFile;
@@ -74,10 +87,10 @@ public abstract class BaseAnalyzer
 	protected List elements;
 	protected String title;
 	private boolean overwriteCurrentWord;
-	private boolean appendDot; 
+	private boolean appendDot;
 	private String columnPrefix;
 	protected BaseAnalyzer parentAnalyzer;
-	
+
 	public BaseAnalyzer(WbConnection conn, String statement, int cursorPos)
 	{
 		this.dbConnection = conn;
@@ -89,19 +102,19 @@ public abstract class BaseAnalyzer
 	{
 		return 0;
 	}
-	
+
 	public boolean isWbParam()
 	{
 		return false;
 	}
-	
+
 	public String getSelectionPrefix()
 	{
 		return this.columnPrefix;
 	}
-	
+
 	/**
-	 * Set a prefix for columns that are added. 
+	 * Set a prefix for columns that are added.
 	 * If this value is set, any column that the user
 	 * selects, will be prefixed with this string (plus a dot)
 	 * This is used when the FROM list in a SELECT statement
@@ -111,22 +124,22 @@ public abstract class BaseAnalyzer
 	{
 		this.columnPrefix = prefix;
 	}
-	
-	public String getColumnPrefix() 
+
+	public String getColumnPrefix()
 	{
 		return this.columnPrefix;
 	}
-	
+
 	protected void setOverwriteCurrentWord(boolean flag)
 	{
 		this.overwriteCurrentWord = flag;
 	}
-	
+
 	protected void setAppendDot(boolean flag)
 	{
 		this.appendDot = flag;
 	}
-	
+
 	public boolean appendDotToSelection()
 	{
 		return this.appendDot;
@@ -136,10 +149,10 @@ public abstract class BaseAnalyzer
 	{
 		return this.context == CONTEXT_KW_LIST;
 	}
-	
-	public boolean getOverwriteCurrentWord() 
-	{ 
-		return this.overwriteCurrentWord; 
+
+	public boolean getOverwriteCurrentWord()
+	{
+		return this.overwriteCurrentWord;
 	}
 
 	protected String getSchemaFromCurrentWord()
@@ -158,10 +171,10 @@ public abstract class BaseAnalyzer
 			if (this.dbConnection != null) return this.dbConnection.getMetadata().getCurrentSchema();
 			return null;
 		}
-		
+
 		return tbl.getSchema();
 	}
-	
+
 	public void retrieveObjects()
 	{
 		// reset current state
@@ -173,19 +186,19 @@ public abstract class BaseAnalyzer
 		checkOverwrite();
 		this.addAllMarker = false;
 
-		// this should not be done in the constructor as the 
+		// this should not be done in the constructor as the
 		// sub-classes might need to do important initializations durin initialization
 		// and before checkContext is called
 		this.checkContext();
 		this.buildResult();
 	}
-	
+
 	public String getTitle() { return this.title; }
 	public List getData() { return this.elements; }
-	
+
 	protected abstract void checkContext();
-	
-	// For use with hierarchical Analyzers (so that a child 
+
+	// For use with hierarchical Analyzers (so that a child
 	// analyzer can ask its parent directly for a table list
 	// This should be overwritten by any Analyzer supporting
 	// Sub-Selects
@@ -193,7 +206,7 @@ public abstract class BaseAnalyzer
 	{
 		return Collections.emptyList();
 	}
-	
+
 	public void setParent(BaseAnalyzer analyzer)
 	{
 		this.parentAnalyzer = analyzer;
@@ -226,11 +239,11 @@ public abstract class BaseAnalyzer
 		}
 		return Integer.toString(context);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	protected void buildResult()
 	{
-		
+
 		if (Settings.getInstance().getDebugCompletionSearch())
 		{
 			LogMgr.logDebug("BaseAnalyzer.buildResult()", "Context is: " + contextToString());
@@ -308,7 +321,7 @@ public abstract class BaseAnalyzer
 		List result = new ArrayList(reader.getValues());
 		return result;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void retrieveTables()
 	{
@@ -328,7 +341,7 @@ public abstract class BaseAnalyzer
 		this.elements = new ArrayList(tables.size());
 		this.elements.addAll(tables);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private boolean retrieveColumns()
 	{
@@ -348,7 +361,7 @@ public abstract class BaseAnalyzer
 		if (cols != null && cols.size() > 0)
 		{
 			this.title = tableForColumnList.getTableName() + ".*";
-			
+
 			this.elements = new ArrayList(cols.size() + 1);
 			this.elements.addAll(cols);
 			if (GuiSettings.getSortCompletionColumns())
@@ -358,7 +371,7 @@ public abstract class BaseAnalyzer
 		}
 		return (elements == null ? false : (elements.size() > 0));
 	}
-	
+
 	protected void setTableTypeFilter(String filter)
 	{
 		this.typeFilter = filter;
@@ -368,22 +381,22 @@ public abstract class BaseAnalyzer
 	{
 		int len = this.sql.length();
 		int start = this.cursorPos - 1;
-		
-		if (this.cursorPos > len) 
+
+		if (this.cursorPos > len)
 		{
 			start = len - 1;
 		}
-			
+
 		char c = this.sql.charAt(start);
 		//if (Character.isWhitespace(c)) return null;
-		
+
 		// if no dot is present, then the current word is not a qualifier (e.g. a table name or alias)
 		if (c != '.') return null;
-		
+
 		String word = StringUtil.getWordLeftOfCursor(this.sql, start, QUALIFIER_DELIM + ".");
 		if (word == null) return null;
 		int dotPos= word.indexOf('.');
-		
+
 		if (dotPos > -1)
 		{
 			return word.substring(0, dotPos);
@@ -395,12 +408,12 @@ public abstract class BaseAnalyzer
 	{
 		return this.context == CONTEXT_COLUMN_LIST;
 	}
-	
+
 	protected String getCurrentWord()
 	{
 		return StringUtil.getWordLeftOfCursor(this.sql, cursorPos, WORD_DELIM);
 	}
-	
+
 	protected void checkOverwrite()
 	{
 		String currentWord = getCurrentWord();
@@ -414,7 +427,7 @@ public abstract class BaseAnalyzer
 			setOverwriteCurrentWord(!keyWord);
 		}
 	}
-	
+
 	// Used by JUnit tests
 	TableIdentifier getTableForColumnList()
 	{

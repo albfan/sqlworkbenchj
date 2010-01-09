@@ -19,6 +19,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.ResultInfo;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.WbFile;
 
 /**
@@ -43,7 +44,7 @@ public class ExportJobEntry
 		}
 	}
 
-	public ExportJobEntry(File file, TableIdentifier table, WbConnection con)
+	public ExportJobEntry(File file, TableIdentifier table, String where, WbConnection con)
 		throws SQLException
 	{
 		resultInfo = new ResultInfo(table, con);
@@ -60,6 +61,15 @@ public class ExportJobEntry
 		sql.append(" FROM ");
 		baseTable = table;
 		sql.append(table.getTableExpression(con));
+		if (StringUtil.isNonBlank(where))
+		{
+			if (!where.trim().toLowerCase().startsWith("where"))
+			{
+				sql.append(" WHERE");
+			}
+			sql.append(" ");
+			sql.append(SqlUtil.trimSemicolon(where));
+		}
 		resultInfo.setUpdateTable(baseTable);
 		this.query = sql.toString();
 	}

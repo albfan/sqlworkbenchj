@@ -66,6 +66,14 @@ public class SelectAnalyzerTest
 		tbl = analyzer.getTableForColumnList();
 		assertNull(tbl);
 		assertEquals(BaseAnalyzer.CONTEXT_FROM_LIST, analyzer.context);
+
+		pos = sql.indexOf("JOIN") + "JOIN".length() + 1;
+		analyzer = new SelectAnalyzer(null, sql, pos);
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertNull(tbl);
+		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.context);
+
 	}
 
 }

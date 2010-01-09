@@ -683,6 +683,7 @@ public class WbExportTest
 			fail(e.getMessage());
 		}
 	}
+
 	public void testTextExport() 
 	{
 		try
@@ -718,6 +719,25 @@ public class WbExportTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+	}
+
+	public void testTableWhere()
+		throws Exception
+	{
+		StatementRunnerResult result = exportCmd.execute("wbexport -outputDir='" + basedir + "' -type=text -header=true -sourcetable=junit_test, person -tableWhere=\"where nr < 10\"");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		File person = new File(this.basedir, "person.txt");
+		assertTrue(person.exists());
+		BufferedReader in = EncodingUtil.createBufferedReader(person, null);
+		List<String> lines = FileUtil.getLines(in);
+		assertEquals(11, lines.size()); // 10 rows plus header line
+
+		File test = new File(basedir, "junit_test.txt");
+		assertTrue(test.exists());
+		in = EncodingUtil.createBufferedReader(test, null);
+		lines = FileUtil.getLines(in);
+		assertEquals(11, lines.size()); // 10 rows plus header line
 	}
 
 

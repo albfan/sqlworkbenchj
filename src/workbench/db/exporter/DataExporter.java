@@ -288,7 +288,13 @@ public class DataExporter
 	public void addTableExportJob(File anOutputfile, TableIdentifier table)
 		throws SQLException
 	{
-		ExportJobEntry job = new ExportJobEntry(anOutputfile, table, this.dbConn);
+		addTableExportJob(anOutputfile, table, null);
+	}
+	
+	public void addTableExportJob(File anOutputfile, TableIdentifier table, String where)
+		throws SQLException
+	{
+		ExportJobEntry job = new ExportJobEntry(anOutputfile, table, where, this.dbConn);
 		this.jobQueue.add(job);
 	}
 
