@@ -144,7 +144,7 @@ public class ColumnChangerTest
 		newCol.setIsNullable(true);
 		sqls = changer.getAlterStatements(table, null, newCol);
 		assertEquals(2, sqls.size());
-		assertEquals("ALTER TABLE PERSON ADD COLUMN PERSON_HOBBY VARCHAR(25) DEFAULT 'Hitchhiking'", sqls.get(0).trim());
+		assertEquals("ALTER TABLE PERSON ADD (PERSON_HOBBY VARCHAR(25) DEFAULT 'Hitchhiking' )", sqls.get(0).trim());
 		assertEquals("COMMENT ON COLUMN PERSON.PERSON_HOBBY IS 'new comment'", sqls.get(1).trim());
 	}
 	

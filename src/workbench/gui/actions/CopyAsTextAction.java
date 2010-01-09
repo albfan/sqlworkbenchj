@@ -48,7 +48,14 @@ public class CopyAsTextAction
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyDataToClipboard(!isShiftPressed(e) && invokedByMouse(e), copySelected, isCtrlPressed(e) && invokedByMouse(e));
+		boolean copyHeaders = true;
+		boolean selectColumns = false;
+		if (invokedByMouse(e))
+		{
+			copyHeaders = !isShiftPressed(e);
+			selectColumns = isCtrlPressed(e) ;
+		}
+		copier.copyDataToClipboard(copyHeaders, copySelected, selectColumns);
 	}
 
 }

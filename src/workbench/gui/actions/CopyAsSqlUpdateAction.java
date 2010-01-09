@@ -42,7 +42,12 @@ public class CopyAsSqlUpdateAction
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyAsSql(true, false, this.isCtrlPressed(e), false);
+		boolean selectColumns = false;
+		if (invokedByMouse(e))
+		{
+			selectColumns = isCtrlPressed(e) ;
+		}
+		copier.copyAsSql(true, false, selectColumns, false);
 	}
 
 }

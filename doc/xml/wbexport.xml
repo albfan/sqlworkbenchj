@@ -318,6 +318,18 @@
 					</row>
 
 					<row>
+						<entry>-tableWhere</entry>
+						<entry>
+							<para>
+                Defines an additional <literal>WHERE</literal> clause that is appended to
+                all SELECT queries to retrieve the rows from the database. No validation check
+                will be done for the syntax or the columns in the where clause. If the specified
+                condition is not valid for all exported tables, the export will fail.
+							</para>
+						</entry>
+					</row>
+
+					<row>
 						<entry id="export-clobasfile">-clobAsFile</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
@@ -1051,7 +1063,41 @@
 				Each column will be separated with the character | Each fractional number
 				will be written with a comma as the decimal separator. 
 			</para>
+
 		</section>
+
+    <section id="export-multi-table">
+      <title>Exporting multiple tables</title>
+<programlisting>WbExport -type=text
+         -outputDir='c:/data'
+         -delimiter=';'
+         -header=true
+         -sourcetable=table_1, table_2, table_3, table_4;</programlisting>
+
+      <para>
+        This will export each specified table into a text file in the specified directory. The files are named <literal>"table_1.txt"</literal>,
+        <literal>"table_2.txt"</literal> and so on.
+      </para>
+
+      <para>
+        Limiting the export data when using a table based export, can be done using the <literal>-tableWhere</literal> argument.
+        This requires that the specified <literal>WHERE</literal> condition is valid for all tables, e.g. when every table has a
+        column called <literal>MODIFIED_DATE</literal>
+      </para>
+
+<programlisting>WbExport -type=text
+         -outputDir='c:/data'
+         -delimiter=';'
+         -header=true
+         -tableWhere="WHERE modified_date > DATE '2009-04-02'"
+         -sourcetable=table_1, table_2, table_3, table_4;</programlisting>
+
+      <para>
+        This will add the specified where clause to <emphasis role="bold">each</emphasis> <literal>SELECT</literal>, so that only rows are
+        exported that were changed after April 2nd, 2009
+      </para>
+      
+    </section>
 
 		<section id="export-example-select">
 			<title>Export based on a SELECT statement</title>

@@ -4,6 +4,26 @@
 <!-- build number must be set to -1 for development builds -->
 <release build="-1" date="2010-01-06">
 
+
+  <entry dev-build="1" type="enh">
+    <description>
+      A new option is available for WbExport to append a WHERE clause to
+      all tables that are exported (e.g. WHERE modified_date > DATE '2010-01-01')
+    </description>
+  </entry>
+  
+  <entry dev-build="1" type="enh">
+    <description>
+      The behaviour of the quick search for the auto-completion can now be configured.
+      A new option "Partial match" will allow search anywhere in the listed objects (not
+      just at the start). Another option allows to filter the displayed items according
+      to the quick search value (instead of simply jumping to the first matching item).
+      Alphabetic sorting of table columns can now be disabled (in that case, the columns
+      are listed in the order as returned by the database).
+      The new options have been moved to a separate page in the options dialog
+    </description>
+  </entry>
+
   <entry dev-build="1" type="enh">
     <description>
       When toggling the option "Allow table altering" for the DbExplorer, this is now
@@ -30,6 +50,13 @@
     <description>
       A message box can now be displayed when all running scripts have been finished. If the application
       is minimized, displaying the message box will also restore the application's main window.
+    </description>
+  </entry>
+
+  <entry dev-build="1" type="fix">
+    <description>
+      When copying the data of a result set into the clipboard, the column headers were not copied
+      when the keyboard shortcut was used.
     </description>
   </entry>
 

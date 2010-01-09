@@ -42,7 +42,12 @@ public class CopySelectedAsSqlDeleteInsertAction extends WbAction
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyAsSqlDeleteInsert(true, isCtrlPressed(e));
+		boolean selectColumns = false;
+		if (invokedByMouse(e))
+		{
+			selectColumns = isCtrlPressed(e) ;
+		}
+		copier.copyAsSqlDeleteInsert(true, selectColumns);
 	}
 
 }

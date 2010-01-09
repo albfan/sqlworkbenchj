@@ -38,7 +38,7 @@ import workbench.util.StringUtil;
 import workbench.util.WbThread;
 
 /**
- * A class to copy the data of a {@link workbench.gui.components.WbTable} to 
+ * A class to copy the data of a {@link workbench.gui.components.WbTable} to
  * the clipboard. Either as tab-separated text or SQL Statements.
  *
  * @author Thomas Kellerer
@@ -47,37 +47,37 @@ public class ClipBoardCopier
 {
 	private DataStore data;
 	private WbTable client;
-	
+
 	public ClipBoardCopier(WbTable t)
 	{
 		this.client = t;
 		this.data = client.getDataStore();
 	}
-	
+
 	/**
 	 *	Copy data from the table as tab-delimited into the clipboard
-	 * 
+	 *
 	 *	@param includeHeaders if true, then a header line with the column names is copied as well
 	 *  @param selectedOnly if true, then only selected rows are copied, else all rows
 	 *  @param showSelectColumns if true, a dialog will be presented to the user to select the columns to be included
 	 */
 	public void copyDataToClipboard(boolean includeHeaders, boolean selectedOnly, final boolean showSelectColumns)
 	{
-		if (this.data == null) 
+		if (this.data == null)
 		{
 			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
-			LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot copy without a DataStore!", null);
+			LogMgr.logError("ClipBoardCopier.copyDataToClipboard()", "Cannot copy without a DataStore!", null);
 			return;
 		}
-		
+
 		if (this.data.getRowCount() <= 0) return;
-		
+
 		List<ColumnIdentifier> columnsToCopy = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
 		{
 			columnsToCopy = getColumnsFromSelection();
 		}
-		
+
 		if (showSelectColumns)
 		{
 			// Display column selection dialog
@@ -98,14 +98,14 @@ public class ClipBoardCopier
 				rows = this.client.getSelectedRows();
 				count = rows.length;
 			}
-			
+
 			// Do not use StringUtil.LINE_TERMINATOR for the line terminator
 			// because for some reason this creates additional empty lines
 			// under Windows
 			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
 			out = new StringWriter(count * 250);
 			printer.writeDataString(out, rows);
-			
+
 			Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
 			StringSelection sel = new StringSelection(out.toString());
@@ -127,7 +127,7 @@ public class ClipBoardCopier
 		}
 		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 	}
-	
+
 	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
 		this.copyAsSql(false, selectedOnly, showSelectColumns, false);
@@ -151,15 +151,22 @@ public class ClipBoardCopier
 	{
 		copyAsSql(true, selectedOnly, showSelectColumns, false);
 	}
-	
+
 
 	/**
 	 * 	Copy the data of the client table into the clipboard using SQL statements
 	 */
 	public void copyAsSql(final boolean useUpdate, final boolean selectedOnly, final boolean showSelectColumns, final boolean includeDelete)
 	{
-		// For some reason the statusbar will not be updated if 
-		// this is run in the AWT thread, so we have to 
+		if (this.data == null)
+		{
+			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
+			LogMgr.logError("ClipBoardCopier.copyAsSql()", "Cannot copy without a DataStore!", null);
+			return;
+		}
+
+		// For some reason the statusbar will not be updated if
+		// this is run in the AWT thread, so we have to
 		// create a new thread to run the actual copy
 		WbThread t = new WbThread("CopyThread")
 		{
@@ -170,18 +177,11 @@ public class ClipBoardCopier
 		};
 		t.start();
 	}
-	
+
 	protected void _copyAsSql(final boolean useUpdate, boolean selectedOnly, final boolean showSelectColumns, final boolean includeDelete)
 	{
-		if (this.data == null) 
-		{
-			WbSwingUtilities.showErrorMessage(client, "No DataStore available!");
-			LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot copy without a DataStore!", null);
-			return;
-		}
-		
 		if (this.data.getRowCount() <= 0) return;
-		
+
 		if (useUpdate || includeDelete)
 		{
 			boolean pkOK = this.data.hasPkColumns();
@@ -189,12 +189,12 @@ public class ClipBoardCopier
 			{
 				this.client.checkPkColumns(true);
 			}
-			
+
 			// re-check in case the user simply clicked OK during the PK prompt
 			pkOK = this.data.hasPkColumns();
-			
+
 			// Can't do anything if we don't have PK
-			if (!pkOK) 
+			if (!pkOK)
 			{
 				LogMgr.logError("ClipBoardCopier._copyAsSql()", "Cannot create UPDATE or DELETE statements without a primary key!", null);
 				String msg = ResourceMgr.getString("ErrCopyNotAvailable");
@@ -212,14 +212,14 @@ public class ClipBoardCopier
 				client.getDataStore().setUpdateTable(updateTable);
 			}
 		}
-		
-		
+
+
 		List<ColumnIdentifier> columnsToInclude = null;
 		if (selectedOnly  && !showSelectColumns && this.client.getColumnSelectionAllowed())
 		{
 			columnsToInclude = getColumnsFromSelection();
 		}
-		
+
 		if (showSelectColumns)
 		{
       ColumnSelectionResult result = this.selectColumns(false, selectedOnly, false, client.getSelectedRowCount() > 0);
@@ -227,13 +227,13 @@ public class ClipBoardCopier
 			columnsToInclude = result.columns;
       selectedOnly = result.selectedOnly;
 		}
-			
+
 		try
 		{
 			WbSwingUtilities.showWaitCursorOnWindow(this.client);
 			int[] rows = null;
 			if (selectedOnly) rows = this.client.getSelectedRows();
-			
+
 			SqlRowDataConverter converter = new SqlRowDataConverter(data.getOriginalConnection());
 			converter.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
 			converter.setResultInfo(data.getResultInfo());
@@ -246,7 +246,7 @@ public class ClipBoardCopier
 			{
 				converter.setCreateInsertDelete();
 			}
-			else 
+			else
 			{
 				converter.setCreateInsert();
 				if (data.getResultInfo().getUpdateTable() == null)
@@ -258,19 +258,19 @@ public class ClipBoardCopier
 			}
 			converter.setColumnsToExport(columnsToInclude);
 			converter.setBlobMode(BlobMode.DbmsLiteral);
-			
+
 			int count = 0;
 			if (rows != null) count = rows.length;
 			else count = data.getRowCount();
-			
+
 			StringBuilder result = new StringBuilder(count * 100);
 			RowData rowdata = null;
-			
+
 			for (int row = 0; row < count; row ++)
 			{
 				if (rows == null) rowdata = this.data.getRow(row);
 				else rowdata = data.getRow(rows[row]);
-				
+
 				StrBuffer sql = converter.convertRowData(rowdata, row);
 				sql.appendTo(result);
 			}
@@ -296,7 +296,7 @@ public class ClipBoardCopier
 		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 	}
 
-	
+
 	/**
 	 *	A general purpose method to select specific columns from the result set
 	 *  this is e.g. used for copying data to the clipboard
@@ -342,9 +342,3 @@ public class ClipBoardCopier
 	}
 }
 
-class ColumnSelectionResult
-{
-		public boolean includeHeaders;
-		public boolean selectedOnly;
-		public List<ColumnIdentifier> columns;
-}

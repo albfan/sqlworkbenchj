@@ -41,7 +41,12 @@ public class CopySelectedAsSqlInsertAction extends WbAction
 	public void executeAction(ActionEvent e)
 	{
 		ClipBoardCopier copier = new ClipBoardCopier(this.client);
-		copier.copyAsSqlInsert(true, isCtrlPressed(e));
+		boolean selectColumns = false;
+		if (invokedByMouse(e))
+		{
+			selectColumns = isCtrlPressed(e) ;
+		}
+		copier.copyAsSqlInsert(true, selectColumns);
 	}
 
 }

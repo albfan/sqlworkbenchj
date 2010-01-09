@@ -889,4 +889,90 @@ public class ScriptParserTest
 //		System.out.println("cmd=" + cmd);
 	}
 
+	public void testMerge()
+	{
+		String sql = "MERGE INTO T085_ITEMSALE_DAY itd \n" +
+             "USING \n" +
+             "( \n" +
+             "  select itm.c060_itemid, \n" +
+             "         sto.c015_storeid, \n" +
+             "         impd.receiptdate, \n" +
+             "         impd.sum_qty_piece, \n" +
+             "         impd.sum_turnover \n" +
+             "  from imp_itemsale_day impd \n" +
+             "    JOIN t060_items itm ON itm.c060_orig_item_nr = impd.itemid \n" +
+             "    JOIN t015_stores sto ON sto.c015_orig_store_nr = impd.storeid \n" +
+             ") i ON (i.c060_itemid = itd.C085_ITEMID AND i.c015_storeid = itd.C085_STOREID AND i.receiptdate = itd.C085_RECEIPTDATE) \n" +
+             "WHEN MATCHED THEN \n" +
+             "UPDATE \n" +
+             "  SET itd.C085_SUM_QTY_PIECE = i.sum_qty_piece, \n" +
+             "      itd.C085_SUM_TURNOVER = i.sum_turnover \n" +
+             "WHEN NOT MATCHED THEN \n" +
+             "INSERT \n" +
+             "( \n" +
+             "  C085_STOREID, \n" +
+             "  C085_ITEMID, \n" +
+             "  C085_RECEIPTDATE, \n" +
+             "  C085_SUM_QTY_PIECE, \n" +
+             "  C085_SUM_TURNOVER \n" +
+             ") \n" +
+             "VALUES \n" +
+             "( \n" +
+             "  i.c015_storeid, \n" +
+             "  i.c060_itemid, \n" +
+             "  i.receiptdate, \n" +
+             "  i.sum_qty_piece, \n" +
+             "  i.sum_turnover \n" +
+             ") \n" +
+             "; \n" +
+             " \n" +
+             "MERGE INTO T086_ITEMSALE_WEEK itw \n" +
+             "USING \n" +
+             "( \n" +
+             "  select sto.c015_storeid, \n" +
+             "         itm.c060_itemid, \n" +
+             "         to_number(substr(impw.CAL_WEEK,1,4)) as cal_year, \n" +
+             "         to_number(substr(impw.CAL_WEEK,5,2)) as cal_week, \n" +
+             "         impw.SUM_QTY_PIECE, \n" +
+             "         impw.SUM_TURNOVER \n" +
+             "  from imp_itemsale_week impw \n" +
+             "    JOIN t060_items itm ON itm.c060_orig_item_nr = impw.itemid \n" +
+             "    JOIN t015_stores sto ON sto.c015_orig_store_nr = impw.storeid \n" +
+             ") i ON (itw.C086_STOREID = i.c015_storeid \n" +
+             "        AND itw.C086_ITEMID = i.c060_itemid \n" +
+             "        AND itw.C086_CAL_WEEK = i.cal_week \n" +
+             "        AND itw.C086_CAL_YEAR = i.cal_year \n" +
+             "        ) \n" +
+             "WHEN MATCHED THEN \n" +
+             "UPDATE \n" +
+             "  set itw.C086_SUM_QTY_PIECE = i.SUM_QTY_PIECE, \n" +
+             "      itw.C086_SUM_TURNOVER = i.SUM_TURNOVER \n" +
+             "WHEN NOT MATCHED THEN \n" +
+             "INSERT \n" +
+             "( \n" +
+             "  C086_STOREID, \n" +
+             "  C086_ITEMID, \n" +
+             "  C086_CAL_WEEK, \n" +
+             "  C086_CAL_YEAR, \n" +
+             "  C086_SUM_QTY_PIECE, \n" +
+             "  C086_SUM_TURNOVER \n" +
+             ") \n" +
+             "VALUES \n" +
+             "( \n" +
+             "  i.c015_storeid, \n" +
+             "  i.c060_itemid, \n" +
+             "  i.cal_week, \n" +
+             "  i.cal_year, \n" +
+             "  i.SUM_QTY_PIECE, \n" +
+             "  i.SUM_TURNOVER \n" +
+             ") ";
+
+		int pos = sql.indexOf("MERGE INTO T086_ITEMSALE_WEEK");
+		ScriptParser p = new ScriptParser(sql);
+		int count = p.getSize();
+		assertEquals(2, count);
+		int index = p.getCommandIndexAtCursorPos(pos + 5);
+		assertEquals(1, index);
+
+	}
 }
