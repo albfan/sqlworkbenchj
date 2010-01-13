@@ -16,7 +16,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -30,9 +29,9 @@ import javax.swing.border.Border;
  *  Displays a Label left or right aligned with no further overhead in painting
  *  (Faster then JLabel) this is used to in DwStatusBar to speed
  *  up processes that do give a lot of feedback (e.g. import)
- * 
- * @author Thomas Kellerer  
- */ 
+ *
+ * @author Thomas Kellerer
+ */
 public class WbTextLabel
 	extends JComponent
 	implements MouseListener
@@ -51,7 +50,7 @@ public class WbTextLabel
 	{
 		super();
 		this.setDoubleBuffered(true);
-		this.setBackground(UIManager.getColor("Label.background")); 	
+		this.setBackground(UIManager.getColor("Label.background"));
 		this.textColor = UIManager.getColor("Label.foreground");
 		this.setForeground(textColor);
 		this.setOpaque(false);
@@ -68,18 +67,18 @@ public class WbTextLabel
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map)tk.getDesktopProperty("awt.font.desktophints");
 	}
-	
+
 	public void setBorder(Border b)
 	{
 		super.setBorder(b);
 		hasBorder = (b != null);
 	}
-	
+
 	public void setHorizontalAlignment(int align)
 	{
 		this.alignment = align;
 	}
-	
+
 	public void setFont(Font f)
 	{
 		super.setFont(f);
@@ -91,7 +90,7 @@ public class WbTextLabel
 	{
 		return this.text;
 	}
-	
+
 	public void setText(String label)
 	{
 		this.text = label;
@@ -103,7 +102,7 @@ public class WbTextLabel
 		invalidate();
 		repaint();
 	}
-	
+
 	public void forcePaint()
 	{
 		Graphics g = getGraphics();
@@ -112,12 +111,12 @@ public class WbTextLabel
 		g.clearRect(0, 0, this.getWidth() - 4, getHeight() - 1);
 		paint(g);
 	}
-	
+
 	public void paint(Graphics g)
 	{
 		if (g == null) return;
 		if (hasBorder) super.paint(g);
-		if (text != null) 
+		if (text != null)
 		{
 			Graphics2D g2d = (Graphics2D) g;
 			if (renderingHints != null)

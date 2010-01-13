@@ -2080,14 +2080,17 @@ public class WbTable
 
 		if (tables.size() > 1)
 		{
-			String s = (String)JOptionPane.showInputDialog(SwingUtilities.getWindowAncestor(this),
-				null, ResourceMgr.getString("MsgEnterUpdateTable"),
-				JOptionPane.QUESTION_MESSAGE,
-				null,tables.toArray(new String[tables.size()]),null);
+			SelectTablePanel p = new SelectTablePanel(tables);
 
-			if (s != null)
+			boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(this), p, ResourceMgr.getString("MsgSelectTableTitle"));
+			String selectedTable = null;
+			if (ok)
 			{
-				table = new TableIdentifier(s);
+				selectedTable = p.getSelectedTable();
+			}
+			if (selectedTable != null)
+			{
+				table = new TableIdentifier(selectedTable);
 			}
 		}
 		else if (tables.size() == 1)
