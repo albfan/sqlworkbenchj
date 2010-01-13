@@ -47,7 +47,6 @@ import javax.swing.ActionMap;
 import javax.swing.CellEditor;
 import javax.swing.InputMap;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;

@@ -169,16 +169,27 @@ public class MacroListModel
 		if (source == null) return;
 		if (target == null) return;
 
-		MacroTreeNode groupNode = (MacroTreeNode)target.getParent();
-		if (groupNode == null) return;
+		MacroTreeNode targetGroupNode = (MacroTreeNode)target.getParent();
+		if (targetGroupNode == null) return;
 
-		int targetIndex = groupNode.getIndex(target);
+		MacroTreeNode sourceGroupNode = (MacroTreeNode)source.getParent();
+		
+		if (!sourceGroupNode.equals(targetGroupNode))
+		{
+			MacroDefinition sourceMacro = (MacroDefinition)source.getDataObject();
+			MacroGroup targetGroup = (MacroGroup)targetGroupNode.getDataObject();
+			MacroGroup sourceGroup = (MacroGroup)sourceGroupNode.getDataObject();
+			sourceGroup.removeMacro(sourceMacro);
+			targetGroup.addMacro(sourceMacro);
+		}
+		
+		int targetIndex = targetGroupNode.getIndex(target);
 		removeNodeFromParent(source);
 		insertNodeInto(source, (MacroTreeNode)target.getParent(), targetIndex);
-		int nodes = groupNode.getChildCount();
+		int nodes = targetGroupNode.getChildCount();
 		for (int i=0; i < nodes; i++)
 		{
-			MacroTreeNode node = (MacroTreeNode)groupNode.getChildAt(i);
+			MacroTreeNode node = (MacroTreeNode)targetGroupNode.getChildAt(i);
 			Sortable macro = (Sortable)node.getDataObject();
 			macro.setSortOrder(i);
 		}
