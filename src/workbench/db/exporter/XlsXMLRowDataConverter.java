@@ -48,6 +48,7 @@ public class XlsXMLRowDataConverter
 		}
 		out.append("  <Style ss:ID=\"wbTS\"><NumberFormat ss:Format=\""  + getDateFormat() + "\"/></Style>\n");
 		out.append("  <Style ss:ID=\"wbML\"><Alignment ss:Vertical=\"Top\" ss:WrapText=\"1\"/></Style>\n");
+		out.append("  <Style ss:ID=\"wbNW\"><Alignment ss:Vertical=\"Top\" ss:WrapText=\"0\"/></Style>\n");
 		out.append("</Styles>\n");
 
 		int colCount = metaData.getColumnCount();
@@ -83,6 +84,18 @@ public class XlsXMLRowDataConverter
 		StrBuffer out = new StrBuffer(250);
 		out.append("</Table>\n");
 		out.append("</Worksheet>\n");
+		if (getAppendInfoSheet())
+		{
+			out.append("<Worksheet ss:Name=\"SQL\">\n");
+			out.append("  <Table ss:ExpandedColumnCount=\"1\">\n");
+			out.append("    <Row>\n");
+			out.append("      <Cell ss:StyleID=\"wbNW\"><Data ss:Type=\"String\">");
+			out.append(generatingSql);
+			out.append("      </Data></Cell>");
+			out.append("    </Row>\n");
+			out.append("  </Table>\n");
+			out.append("</Worksheet>\n");
+		}
 		out.append("</Workbook>\n");
 		return out;
 	}

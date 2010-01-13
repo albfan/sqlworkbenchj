@@ -77,6 +77,7 @@ public abstract class ExportWriter
 		converter.setFilenameColumn(exporter.getFilenameColumn());
 		converter.setPageTitle(exporter.getPageTitle());
 		converter.setWriteHeader(exporter.getExportHeaders());
+		converter.setAppendInfoSheet(exporter.getAppendInfoSheet());
     trimCharData = getTrimCharData();
 	}
 

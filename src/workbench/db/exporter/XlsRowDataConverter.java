@@ -44,7 +44,7 @@ public class XlsRowDataConverter
 	{
 		super();
 	}
-	
+
 	// This should not be called in the constructor as
 	// at that point in time the formatters are not initialized
 	public void createFormatters()
@@ -79,9 +79,24 @@ public class XlsRowDataConverter
 
 	public StrBuffer getEnd(long totalRows)
 	{
-		for (short i = 0; i <this.metaData.getColumnCount(); i++)
+		for (short i = 0; i < this.metaData.getColumnCount(); i++)
 		{
 			sheet.autoSizeColumn(i);
+		}
+
+		if (getAppendInfoSheet())
+		{
+			HSSFSheet info = wb.createSheet("SQL");
+			HSSFRow infoRow = info.createRow(0);
+			HSSFCell cell = infoRow.createCell(0);
+			
+			HSSFCellStyle style = wb.createCellStyle();
+			style.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+			style.setWrapText(false);
+
+			HSSFRichTextString s = new HSSFRichTextString(generatingSql);
+			cell.setCellValue(s);
+			cell.setCellStyle(style);
 		}
 
 		FileOutputStream fileOut = null;

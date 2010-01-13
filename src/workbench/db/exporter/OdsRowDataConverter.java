@@ -150,24 +150,6 @@ public class OdsRowDataConverter
 		}
 	}
 
-//	private void writeStyles()
-//	{
-//		Writer out = null;
-//		try
-//		{
-//			out = factory.createWriter("styles.xml", "UTF-8");
-//			out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
-//		}
-//		catch (Exception e)
-//		{
-//
-//		}
-//		finally
-//		{
-//			FileUtil.closeQuitely(out);
-//		}
-//	}
-
 	private void writeInlineStyles()
 		throws IOException
 	{
@@ -199,6 +181,24 @@ public class OdsRowDataConverter
 		try
 		{
 			content.write("</table:table>\n");
+			if (getAppendInfoSheet())
+			{
+				content.write("<table:table table:name=\"SQL\" table:style-name=\"ta1\">\n");
+				content.append("<table:table-row>\n");
+				content.append("<table:table-cell office:value-type=\"string\">");
+				String[] lines = generatingSql.split(StringUtil.REGEX_CRLF);
+				StrBuffer buff = new StrBuffer(generatingSql.length() + 50);
+				for (String line : lines)
+				{
+					buff.append("<text:p>");
+					writeEscapedXML(buff, line, true);
+					buff.append("</text:p>\n");
+				}
+				buff.writeTo(content);
+				content.append("</table:table-cell>");
+				content.append("</table:table-row>\n");
+				content.write("</table:table>");
+			}
 			content.write("</office:spreadsheet> \n");
 			content.write("</office:body>\n");
 			content.write("</office:document-content>\n");

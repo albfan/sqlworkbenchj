@@ -127,6 +127,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_CREATE_OUTPUTDIR, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ROWNUM);
 		cmdLine.addArgument("tableWhere");
+		cmdLine.addArgument("infoSheet", ArgumentType.BoolArgument);
 	}
 
 	public String getVerb() { return VERB; }
@@ -284,6 +285,7 @@ public class WbExport
 		format = cmdLine.getValue("decimal");
 		if (format != null) exporter.setDecimalSymbol(format);
 
+		exporter.setAppendInfoSheet(cmdLine.getBoolean("infoSheet", false));
 		exporter.setPageTitle(cmdLine.getValue("title"));
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
 

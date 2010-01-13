@@ -150,6 +150,11 @@ public class DataExporter
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
 
 	/**
+	 * Toggles an additional sheet for Spreedsheet exports
+	 */
+	private boolean appendInfoSheet;
+
+	/**
 	 * Should the ExportWriter create an output file, even if the result set
 	 * for the export is empty?
 	 */
@@ -171,6 +176,16 @@ public class DataExporter
 		this.dbConn = con;
 		this.jobQueue = new LinkedList<ExportJobEntry>();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
+	}
+
+	public boolean getAppendInfoSheet()
+	{
+		return appendInfoSheet;
+	}
+
+	public void setAppendInfoSheet(boolean flag)
+	{
+		this.appendInfoSheet = flag;
 	}
 
 	public String getRowIndexColumnName()

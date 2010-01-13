@@ -13,7 +13,7 @@ package workbench.db.exporter;
 
 /**
  * Export writer for the new MS XML Spreadsheet format
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class XlsXMLExportWriter
@@ -28,4 +28,5 @@ public class XlsXMLExportWriter
 	{
 		return new XlsXMLRowDataConverter();
 	}
+
 }

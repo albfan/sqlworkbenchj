@@ -939,6 +939,13 @@
 						<entry>-title</entry>
 						<entry>The name to be used for the worksheet</entry>
 					</row>
+					<row>
+						<entry>-infoSheet</entry>
+						<entry>
+              If set to true, a second worksheet will be created that contains the generating SQL of the export
+            </entry>
+					</row>
+
 				</tbody>
 			</tgroup>
 		</informaltable>

@@ -81,12 +81,23 @@ public abstract class RowDataConverter
 	
 	protected boolean convertDateToTimestamp = false;
 	protected BlobLiteralFormatter blobFormatter;
-	
+	protected boolean appendInfoSheet;
+
 	public RowDataConverter()
 	{
 		this.defaultDateFormatter = Settings.getInstance().getDefaultDateFormatter();
 		this.defaultTimestampFormatter = Settings.getInstance().getDefaultTimestampFormatter();
 		this.defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
+	}
+
+	public boolean getAppendInfoSheet()
+	{
+		return appendInfoSheet;
+	}
+
+	public void setAppendInfoSheet(boolean flag)
+	{
+		this.appendInfoSheet = flag;
 	}
 
 	public void setWriteHeader(boolean writeHeader)
