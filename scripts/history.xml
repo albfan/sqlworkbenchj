@@ -60,7 +60,7 @@
 
   <entry dev-build="2" type="fix">
     <description>
-      When moving a macro from one group to another using drag and drop (instead of Cut & Paste) the
+      When moving a macro from one group to another using drag and drop (instead of Cut &amp; Paste) the
       change was not applied.
     </description>
   </entry>
