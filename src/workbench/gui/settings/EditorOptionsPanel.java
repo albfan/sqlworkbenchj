@@ -24,12 +24,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import org.jdesktop.layout.GroupLayout;
 import workbench.gui.components.DelimiterDefinitionPanel;
 import workbench.gui.components.NumberField;
 import workbench.gui.components.WbFilePicker;
 import workbench.interfaces.Restoreable;
-import workbench.resource.ColumnSortType;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -331,30 +329,27 @@ public class EditorOptionsPanel
     gridBagConstraints.insets = new Insets(7, 13, 0, 0);
     add(autoAdvance, gridBagConstraints);
 
+    jPanel2.setLayout(new GridBagLayout());
+
     keepHilite.setText(ResourceMgr.getString("LblKeepHilite")); // NOI18N
     keepHilite.setToolTipText(ResourceMgr.getString("d_LblKeepHilite")); // NOI18N
     keepHilite.setBorder(null);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    jPanel2.add(keepHilite, gridBagConstraints);
 
     hiliteCurrent.setText(ResourceMgr.getString("MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setToolTipText(ResourceMgr.getString("d_MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setBorder(null);
-
-    GroupLayout jPanel2Layout = new GroupLayout(jPanel2);
-    jPanel2.setLayout(jPanel2Layout);
-    jPanel2Layout.setHorizontalGroup(
-      jPanel2Layout.createParallelGroup(GroupLayout.LEADING)
-      .add(jPanel2Layout.createSequentialGroup()
-        .add(hiliteCurrent)
-        .add(18, 18, 18)
-        .add(keepHilite)
-        .addContainerGap(210, Short.MAX_VALUE))
-    );
-    jPanel2Layout.setVerticalGroup(
-      jPanel2Layout.createParallelGroup(GroupLayout.LEADING)
-      .add(jPanel2Layout.createParallelGroup(GroupLayout.BASELINE)
-        .add(hiliteCurrent)
-        .add(keepHilite))
-    );
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 11, 0, 0);
+    jPanel2.add(hiliteCurrent, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
