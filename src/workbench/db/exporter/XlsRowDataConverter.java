@@ -88,7 +88,7 @@ public class XlsRowDataConverter
 		{
 			HSSFSheet info = wb.createSheet("SQL");
 			HSSFRow infoRow = info.createRow(0);
-			HSSFCell cell = infoRow.createCell(0);
+			HSSFCell cell = infoRow.createCell((short)0);
 			
 			HSSFCellStyle style = wb.createCellStyle();
 			style.setAlignment(HSSFCellStyle.ALIGN_LEFT);
