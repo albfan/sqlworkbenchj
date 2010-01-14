@@ -138,7 +138,7 @@ public class SQLConsole
 
 			while (true)
 			{
-				String line = System.console().readLine(currentPrompt);
+				String line = ConsoleWrapper.getInstance().readLine(currentPrompt);
 				if (line == null) continue;
 
 				if (startOfStatement && "exit".equalsIgnoreCase(line.trim()))
