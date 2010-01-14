@@ -335,20 +335,20 @@ public class EditorOptionsPanel
     keepHilite.setToolTipText(ResourceMgr.getString("d_LblKeepHilite")); // NOI18N
     keepHilite.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(0, 15, 0, 0);
     jPanel2.add(keepHilite, gridBagConstraints);
 
     hiliteCurrent.setText(ResourceMgr.getString("MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setToolTipText(ResourceMgr.getString("d_MnuTxtHighlightCurrent")); // NOI18N
     hiliteCurrent.setBorder(null);
     gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(0, 11, 0, 0);
     jPanel2.add(hiliteCurrent, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();

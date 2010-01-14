@@ -11,9 +11,15 @@
  */
 package workbench.gui.components;
 
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.BorderFactory;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import workbench.resource.ResourceMgr;
 import workbench.sql.DelimiterDefinition;
 
@@ -76,51 +82,60 @@ public class DelimiterDefinitionPanel
 		singleLineCheckBox.addPropertyChangeListener(PROP_SLD, this);
 	}
 
+	public void setColumns(int columns)
+	{
+		delimitTextField.setColumns(columns);
+	}
+
+	public int getColumns()
+	{
+		return delimitTextField.getColumns();
+	}
+
 	public DelimiterDefinition getDelimiter()
 	{
 		return this.delimiter;
 	}
 
-	public javax.swing.JTextField getTextField()
+	public JTextField getTextField()
 	{
 		return this.delimitTextField;
 	}
 
-	public javax.swing.JCheckBox getCheckBox()
+	public JCheckBox getCheckBox()
 	{
 		return this.singleLineCheckBox;
 	}
 
   private void initComponents()
   {
-		java.awt.GridBagConstraints gridBagConstraints;
+
 
 		delimitTextField = new StringPropertyEditor();
 		singleLineCheckBox = new BooleanPropertyEditor();
 
-		setLayout(new java.awt.GridBagLayout());
+		setLayout(new GridBagLayout());
 
-    //delimitTextField.setMinimumSize(new java.awt.Dimension(72, 20));
 		delimitTextField.setName("delimiter");
-		gridBagConstraints = new java.awt.GridBagConstraints();
+		GridBagConstraints gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 0;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 0.2;
 		add(delimitTextField, gridBagConstraints);
 
 		singleLineCheckBox.setText(ResourceMgr.getString("LblDelimSingleLine"));
 		singleLineCheckBox.setToolTipText(ResourceMgr.getDescription("LblDelimSingleLine"));
-		singleLineCheckBox.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 0));
-		singleLineCheckBox.setMargin(new java.awt.Insets(0, 0, 0, 0));
-		gridBagConstraints = new java.awt.GridBagConstraints();
+		singleLineCheckBox.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+		singleLineCheckBox.setMargin(new Insets(0, 0, 0, 0));
+		gridBagConstraints = new GridBagConstraints();
 		gridBagConstraints.gridx = 1;
 		gridBagConstraints.gridy = 0;
-		gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-		gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+		gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+		gridBagConstraints.anchor = GridBagConstraints.WEST;
 		gridBagConstraints.weightx = 0.5;
-		gridBagConstraints.insets = new java.awt.Insets(0, 6, 0, 0);
+		gridBagConstraints.insets = new Insets(0, 6, 0, 0);
 		add(singleLineCheckBox, gridBagConstraints);
 	}
 
