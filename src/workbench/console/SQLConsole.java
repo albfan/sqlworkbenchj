@@ -138,7 +138,7 @@ public class SQLConsole
 
 			while (true)
 			{
-				String line = ConsoleWrapper.getInstance().readLine(currentPrompt);
+				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
 				if (line == null) continue;
 
 				if (startOfStatement && "exit".equalsIgnoreCase(line.trim()))
@@ -147,7 +147,7 @@ public class SQLConsole
 				}
 
 				boolean isCompleteStatement = buffer.addLine(line);
-				if (isCompleteStatement)
+				if (isCompleteStatement || line.equalsIgnoreCase("WbHelp"))
 				{
 					try
 					{

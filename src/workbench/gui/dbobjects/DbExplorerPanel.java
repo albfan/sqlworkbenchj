@@ -356,7 +356,7 @@ public class DbExplorerPanel
 
 			setBusy(true);
 
-			List schemas = this.dbConnection.getMetadata().getSchemas();
+			List<String> schemas = this.dbConnection.getMetadata().getSchemas(dbConnection.getSchemaFilter());
 			String currentSchema = null;
 			boolean workspaceSchema = false;
 			if (checkWorkspace && this.dbConnection.getProfile().getStoreExplorerSchema())
@@ -382,22 +382,12 @@ public class DbExplorerPanel
 				this.schemaSelector.removeAllItems();
 				this.schemaSelector.addItem("*");
 
-				ObjectNameFilter filter = dbConnection.getSchemaFilter();
-
-				for (int i=0; i < schemas.size(); i++)
+				for (String schema : schemas)
 				{
-					String schema = (String)schemas.get(i);
-					if (schema != null)
-					{
-						if (filter != null)
-						{
-							if (filter.isExcluded(schema)) continue;
-						}
-						this.schemaSelector.addItem(schema.trim());
-						if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
-					}
+					this.schemaSelector.addItem(schema.trim());
+					if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
 				}
-
+				
 				if (workspaceSchema && schemaToSelect == null)
 				{
 					// when using the workspace for multiple connections
@@ -622,7 +612,7 @@ public class DbExplorerPanel
 
 	private void readCatalogs()
 	{
-		List<String> catalogs = this.dbConnection.getMetadata().getCatalogInformation();
+		List<String> catalogs = this.dbConnection.getMetadata().getCatalogInformation(dbConnection.getCatalogFilter());
 		this.catalogSelector.removeActionListener(this);
 		if (catalogs.size() == 0)
 		{
@@ -656,13 +646,8 @@ public class DbExplorerPanel
 			this.catalogSelector.removeAllItems();
 			this.catalogLabel.setText(cat);
 
-			ObjectNameFilter filter = dbConnection.getCatalogFilter();
 			for (String db : catalogs)
 			{
-				if (filter != null)
-				{
-					if (filter.isExcluded(db)) continue;
-				}
 				if (db.equalsIgnoreCase(catalogToSelect)) selectLastCatalog = true;
 				catalogSelector.addItem(db);
 			}

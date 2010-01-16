@@ -2191,9 +2191,30 @@ public class DbMetadata
 	/**
 	 *	Returns a list of all catalogs in the database.
 	 *	Some DBMS's do not support catalogs, in this case the method
-	 *	will return an empty Datastore.
+	 *	will return an empty List.
+	 * <br/>
+	 * The list of catalogs will not be filtered.
 	 */
 	public List<String> getCatalogInformation()
+	{
+		return getCatalogInformation(null);
+	}
+	
+	/**
+	 * Return a filtered list of catalogs in the database.
+	 * <br/>
+	 * Some DBMS's do not support catalogs, in this case the method
+	 * will return an empty List.
+	 * The list is obtained by calling DatabaseMetaData.getCatalogs().
+	 * <br/>
+	 * If the filter is not null, all entries that are matched by the
+	 * filter are removed from the result.
+	 * 
+	 * @param filter the ObjectNameFilter to apply
+	 * @return a list of available catalogs if supported by the database
+	 * @see ObjectNameFilter#isExcluded(java.lang.String)
+	 */
+	public List<String> getCatalogInformation(ObjectNameFilter filter)
 	{
 		List<String> result = CollectionUtil.arrayList();
 
@@ -2204,7 +2225,9 @@ public class DbMetadata
 			while (rs.next())
 			{
 				String cat = rs.getString(1);
-				if (cat != null)
+				if (cat == null) continue;
+
+				if (filter == null || !filter.isExcluded(cat))
 				{
 					result.add(cat);
 				}
@@ -2238,6 +2261,23 @@ public class DbMetadata
 	 */
 	public List<String> getSchemas()
 	{
+		return getSchemas(null);
+	}
+	
+	/**
+	 * Return a filtered list of schemas in the database.
+	 * <br/>
+	 * The list is obtained by calling DatabaseMetadata.getSchemas().
+	 * <br/>
+	 * If the filter is not null, all entries that are matched by the
+	 * filter are removed from the result.
+	 *
+	 * @param filter the ObjectNameFilter to apply
+	 * @return a list of available schemas if supported by the database
+	 * @see ObjectNameFilter#isExcluded(java.lang.String)
+	 */
+	public List<String> getSchemas(ObjectNameFilter filter)
+	{
 		ArrayList<String> result = new ArrayList<String>();
 		ResultSet rs = null;
 		try
@@ -2245,7 +2285,13 @@ public class DbMetadata
 			rs = this.metaData.getSchemas();
 			while (rs.next())
 			{
-				result.add(rs.getString(1));
+				String schema = rs.getString(1);
+				if (schema == null) continue;
+				if (filter == null || !filter.isExcluded(schema))
+				{
+					result.add(schema);
+				}
+				
 			}
 		}
 		catch (Exception e)

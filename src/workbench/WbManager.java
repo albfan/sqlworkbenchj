@@ -75,6 +75,7 @@ public final class WbManager
 	private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
 	private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
 	private boolean batchMode = false;
+	private boolean consoleMode = false;
 	private boolean writeSettings = true;
 	private boolean overWriteGlobalSettingsFile = true;
 	private boolean outOfMemoryOcurred = false;
@@ -344,6 +345,11 @@ public final class WbManager
 		return true;
 	}
 
+	public boolean isConsoleMode()
+	{
+		return consoleMode;
+	}
+	
 	public boolean isBatchMode()
 	{
 		return this.batchMode;
@@ -914,6 +920,7 @@ public final class WbManager
 		wb.readParameters(args);
 		ConnectionMgr.getInstance().setReadTemplates(false);
 		wb.writeSettings = false;
+		wb.consoleMode = true;
 	}
 
 	/**

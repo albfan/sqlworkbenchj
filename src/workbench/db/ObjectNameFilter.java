@@ -11,6 +11,7 @@
  */
 package workbench.db;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -122,10 +123,12 @@ public class ObjectNameFilter
 	{
 		return modified;
 	}
-	
+
 	public boolean isExcluded(String name)
 	{
+		if (name == null) return true;
 		if (CollectionUtil.isEmpty(filterExpressions)) return false;
+
 		for (Pattern p : filterExpressions)
 		{
 			if (p.matcher(name).matches()) return true;

@@ -62,6 +62,7 @@ import workbench.sql.wbcommands.WbSchemaDiff;
 import workbench.sql.wbcommands.WbSchemaReport;
 import workbench.sql.wbcommands.WbGrepSource;
 import workbench.sql.wbcommands.WbGrepData;
+import workbench.sql.wbcommands.WbListSchemas;
 import workbench.sql.wbcommands.WbMode;
 import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
@@ -115,6 +116,7 @@ public class CommandMapper
 		addCommand(new WbConnect());
 		addCommand(new WbInclude());
 		addCommand(new WbListCatalogs());
+		addCommand(new WbListSchemas());
 		addCommand(new WbHelp());
 		addCommand(new WbSelectBlob());
 		addCommand(new WbHideWarnings());
@@ -147,11 +149,12 @@ public class CommandMapper
 
 	public Collection<String> getAllWbCommands()
 	{
-		Set<String> verbs = cmdDispatch.keySet();
+		Collection<SqlCommand> commands = cmdDispatch.values();
 		TreeSet<String> result = new TreeSet<String>();
 		CommandTester tester = new CommandTester();
-		for (String verb : verbs)
+		for (SqlCommand cmd : commands)
 		{
+			String verb = cmd.getVerb();
 			if (tester.isWbCommand(verb))
 			{
 				result.add(tester.formatVerb(verb));

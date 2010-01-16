@@ -75,12 +75,12 @@ public class ConsolePrompter
 
 	protected String readLine(String prompt)
 	{
-		return ConsoleWrapper.getInstance().readLine(prompt);
+		return ConsoleReaderFactory.getConsoleReader().readLine(prompt);
 	}
 	
 	public String getPassword(String prompt)
 	{
-		return ConsoleWrapper.getInstance().readPassword(prompt + " ");
+		return ConsoleReaderFactory.getConsoleReader().readPassword(prompt + " ");
 	}
 
 	public boolean confirmExecution(String prompt)
