@@ -2090,6 +2090,7 @@ public class DbMetadata
 		tbl.setComment(ds.getValueAsString(row, COLUMN_IDX_TABLE_LIST_REMARKS));
 		return tbl;
 	}
+
 	/**
 	 * Return the current catalog for this connection. If no catalog is defined
 	 * or the DBMS does not support catalogs, an empty string is returned.

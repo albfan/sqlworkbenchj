@@ -11,7 +11,6 @@
  */
 package workbench.db;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -43,7 +42,7 @@ public class ObjectNameFilter
 	 * If the list is empty the current filter definitions are not changed
 	 *
 	 * @param expressions
-	 * @see #setExpressionList(java.lang.String) 
+	 * @see #setExpressionList(java.lang.String)
 	 */
 	public void setFilterExpressions(Collection<String> expressions)
 	{
@@ -72,7 +71,7 @@ public class ObjectNameFilter
 	{
 		modified = false;
 	}
-	
+
 	public void clear()
 	{
 		if (CollectionUtil.isNonEmpty(filterExpressions))
@@ -81,7 +80,7 @@ public class ObjectNameFilter
 			modified = true;
 		}
 	}
-	
+
 	/**
 	 * Defines a list of expressions for this filter.
 	 * <br/>
@@ -91,18 +90,18 @@ public class ObjectNameFilter
 	 * If the list is empty the current filter definitions are not changed
 	 *
 	 * @param list a semicolon separated list of expressions
-	 * @see #setFilterExpressions(java.util.Collection) 
+	 * @see #setFilterExpressions(java.util.Collection)
 	 */
 	public void setExpressionList(String list)
 	{
 		List<String> items = StringUtil.stringToList(list, ";", true, true);
 		setFilterExpressions(items);
 	}
-	
+
 	public void addExpression(String exp)
 	{
 		if (StringUtil.isBlank(exp)) return;
-		
+
 		if (filterExpressions == null)
 		{
 			filterExpressions = new HashSet<Pattern>();
@@ -140,7 +139,7 @@ public class ObjectNameFilter
 	{
 		return (filterExpressions == null ? 0 : filterExpressions.size());
 	}
-	
+
 	public ObjectNameFilter createCopy()
 	{
 		ObjectNameFilter copy = new ObjectNameFilter();
@@ -151,7 +150,7 @@ public class ObjectNameFilter
 		}
 		return copy;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj)
 	{
@@ -188,5 +187,5 @@ public class ObjectNameFilter
 		hash = 17 * hash + (this.filterExpressions != null ? this.filterExpressions.hashCode() : 0);
 		return hash;
 	}
-	
+
 }

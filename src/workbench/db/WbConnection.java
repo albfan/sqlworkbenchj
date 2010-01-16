@@ -958,6 +958,21 @@ public class WbConnection
 		}
 	}
 
+	/**
+	 * Return the current catalog as returned by the JDBC driver.
+	 */
+	public String getCurrentCatalog()
+	{
+		try
+		{
+			return this.sqlConnection.getCatalog();
+		}
+		catch (SQLException e)
+		{
+			return null;
+		}
+	}
+
 	public String getDisplayCatalog()
 	{
 		return currentCatalog;

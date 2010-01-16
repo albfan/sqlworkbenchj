@@ -191,6 +191,7 @@ public class SQLConsole
 		}
 		finally
 		{
+			ConsoleReaderFactory.getConsoleReader().shutdown();
 			ConnectionMgr.getInstance().disconnectAll();
 			WbManager.getInstance().doShutdown(0);
 		}
@@ -203,20 +204,24 @@ public class SQLConsole
 		WbConnection current = runner.getConnection();
 		if (current != null)
 		{
-			newprompt = current.getCurrentUser();
+			String user = current.getCurrentUser();
 			String catalog = current.getDisplayCatalog();
+			if (catalog == null) catalog = current.getCurrentCatalog();
+			
 			String schema = current.getDisplaySchema();
-			if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema))
+			if (schema == null) current.getCurrentSchema();
+			
+			if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema) && !schema.equals(user))
 			{
-				newprompt += "@" + schema;
+				newprompt = user + "@" + schema;
 			}
 			else if (StringUtil.isNonBlank(catalog) && StringUtil.isBlank(schema))
 			{
-				newprompt += "@" + catalog;
+				newprompt = user + "@" + catalog;
 			}
 			else if (StringUtil.isNonBlank(catalog) && StringUtil.isNonBlank(schema))
 			{
-				newprompt += "@" + schema + "/" + catalog;
+				newprompt = user + "@" + catalog + "/" + schema;
 			}
 		}
 		return (newprompt == null ? DEFAULT_PROMPT : newprompt + "> ");
@@ -228,6 +233,8 @@ public class SQLConsole
 		cmdLine.parse(args);
 		if (cmdLine.isArgPresent(AppArguments.ARG_SCRIPT))
 		{
+			// Allow batch mode through SQL Console
+			// This way sqlwbconsole.exe can be used to start batch mode as well.
 			WbManager.main(args);
 		}
 		else

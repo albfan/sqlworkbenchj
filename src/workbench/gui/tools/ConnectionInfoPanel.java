@@ -75,7 +75,7 @@ public class ConnectionInfoPanel
 			{
 				s += " (" +  ResourceMgr.getString("LblCatalog") + ")";
 			}
-			content.append("<b>" + s + ":</b> " + getDisplayValue(wbmeta.getCurrentCatalog()) + "<br>\n");
+			content.append("<b>" + s + ":</b> " + getDisplayValue(conn.getCurrentCatalog()) + "<br>\n");
 			content.append("<b>Workbench DBID:</b> " + wbmeta.getDbId() + " \n");
 			content.append("</html>");
 			infotext.setContentType("text/html");
