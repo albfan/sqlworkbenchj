@@ -80,4 +80,67 @@
     </para>
   </section>
 
+  <section id="third-party">
+    <title>Third party components</title>
+
+    <section id="jline-license">
+      <title>JLine</title>
+      <para>
+        &wb-productname; includes the <ulink url="http://jline.sourceforge.net/">JLine</ulink> library to support
+        command line editing for the <link linkend="console-mode">console mode</link> on Unix style operating systems.
+        The JDK on Windows supports full editing of the commandline including the usual Windows hotkeys to show the
+        list of commands, so JLine is not used when &wb-productname; is running under Windows.
+      </para>
+      <para>
+        The copyright notice for JLine follows:
+      </para>
+      <para>
+        Copyright (c) 2002-2006, Marc Prud'hommeaux &lt;mwp1@cornell.edu&gt;
+        All rights reserved.
+     </para>
+     <para>
+        Redistribution and use in source and binary forms, with or
+        without modification, are permitted provided that the following
+        conditions are met:
+     </para>
+        <itemizedlist>
+
+        <listitem><para>
+        Redistributions of source code must retain the above copyright
+        notice, this list of conditions and the following disclaimer.
+        </para></listitem>
+
+        <listitem><para>
+        Redistributions in binary form must reproduce the above copyright
+        notice, this list of conditions and the following disclaimer
+        in the documentation and/or other materials provided with
+        the distribution.
+        </para></listitem>
+
+        <listitem><para>
+        Neither the name of JLine nor the names of its contributors
+        may be used to endorse or promote products derived from this
+        software without specific prior written permission.
+        </para></listitem>
+
+      </itemizedlist>
+
+      <para>
+        THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+        "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+        BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY
+        AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
+        EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+        FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY,
+        OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+        PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+        DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+        AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+        LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+        IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+        OF THE POSSIBILITY OF SUCH DAMAGE.
+      </para>
+    </section>
+
+  </section>
 </section>

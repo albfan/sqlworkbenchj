@@ -1524,22 +1524,52 @@ WHERE id=42;</programlisting>
   <section id="command-listcat">
     <title>List catalogs - WbListCat</title>
 
-    <para>Lists the available catalogs or databases. The output of this
-      command depends on the underlying JDBC driver and DBMS. For MS SQL
-      Server this lists the available databases (which then could be changed
-    by USE &#60;dbname&#62;)</para>
+    <para>
+      Lists the available catalogs (or databases). It is the same information
+      that is shown in the DbExplorer's "Database" dropdown.
+    </para>
+    <para>
+      The output of this command depends on the underlying JDBC driver and DBMS. 
+      For MS SQL Server this lists the available databases (which then could be changed
+      with the command <literal>USE &#60;dbname&#62;</literal>)
+    </para>
 
     <para>
-			For Oracle this command returns nothing (as Oracle does not
-			implement the concept of catalogs)
+			For Oracle this command returns nothing as Oracle does not
+			implement the concept of catalogs.
 		</para>
+
     <para>
 			This command calls the JDBC driver&apos;s <literal>getCatalogs()</literal> method and will
       return its result. If on your database system this command does not display
       a list, it is most likely that your DBMS does not support catalogs (e.g. Oracle)
       or the driver does not implement this feature.
     </para>
+
+    <para>
+      This command ignores the filter defined for catalogs in the <link linkend="">connection profile</link>
+      and always returns all databases.
+    </para>
+
   </section>
+
+
+  <section id="command-listcat">
+    <title>List schemas - WbListSchemas</title>
+
+    <para>
+      Lists the available schemas from the current connection. The output of this
+      command depends on the underlying JDBC driver and DBMS. It is the same information
+      that is shown in the DbExplorer's "Schema" dropdown.
+    </para>
+
+    <para>
+      This command ignores the filter defined for schemas in the <link linkend="">connection profile</link>
+      and always returns all schemas.
+    </para>
+
+  </section>
+
 
   <section id="command-connect">
     <title>Change the connection for a script - WbConnect</title>

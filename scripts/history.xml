@@ -6,6 +6,19 @@
 
   <entry dev-build="2" type="enh">
     <description>
+      Integrated the JLine library to allow command line editing for console mode
+      on Linux (and other Unix like systems).
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="enh">
+    <description>
+      A new command WbListSchemas is available.
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="enh">
+    <description>
       A new option (-infoSheet=true) is available for spreadsheets exports (ods, xlsx, xls) to append an additional 
       worksheet that contains the SQL that generated the export.
     </description>

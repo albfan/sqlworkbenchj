@@ -18,7 +18,7 @@ JAVACMD="java"
 
 if [ -n "$JAVA_BIN" ]
 then
-  JAVACMD=${JAVA_BIN%/}/bin/java
+  JAVACMD=${JAVA_BIN}/bin/java
 fi
 
 $JAVACMD -Djava.awt.headless=true -Xmx256m \
