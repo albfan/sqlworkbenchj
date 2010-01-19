@@ -47,6 +47,8 @@ public class XsltTransformer
 	private String sysOut;
 	private String sysErr;
 	private boolean saveSystemOut;
+	private File xsltUsed;
+	
 
 	/**
 	 * The directory where the initially defined XSLT is stored.
@@ -78,6 +80,11 @@ public class XsltTransformer
 	{
 		transform(inputFileName, outputFileName, xslFileName, null);
 	}
+
+	public File getXsltUsed()
+	{
+		return xsltUsed;
+	}
 	
 	public void transform(String inputFileName, String outputFileName, String xslFileName, Map<String, String> parameters)
 		throws IOException, TransformerException
@@ -85,6 +92,7 @@ public class XsltTransformer
 		File inputFile = new File(inputFileName);
 		File outputFile = new File(outputFileName);
 		File xslFile = findStylesheet(xslFileName);
+		xsltUsed = xslFile;
 		transform(inputFile, outputFile, xslFile, parameters);
 	}
 

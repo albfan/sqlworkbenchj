@@ -20,6 +20,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.WbFile;
 import workbench.util.XsltTransformer;
 
 /**
@@ -113,6 +114,12 @@ public class WbXslt
 			if (out != null)
 			{
 				result.addMessage(out);
+			}
+			WbFile xsltUsed = new WbFile(transformer.getXsltUsed());
+			WbFile userXslt = new WbFile(xsltFile);
+			if (xsltUsed != null && !userXslt.equals(xsltUsed))
+			{
+				result.addMessage(ResourceMgr.getFormattedString("MsgXsltUsed", xsltUsed.getFullPath()));
 			}
 			result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", outputFile));
 			result.setSuccess();
