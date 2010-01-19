@@ -209,7 +209,7 @@ public class TagWriter
 		target.append(">\n");
 	}
 
-	private static final char[] SPECIAL_CHARS = new char[] {'<', '>', '&', '\'', '\n', '\r' };
+	private static final char[] SPECIAL_CHARS = new char[] {'<', '>', '&', '\n', '\r' };
 	
 	public static boolean needsCData(CharSequence value)
 	{
