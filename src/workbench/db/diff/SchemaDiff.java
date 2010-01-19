@@ -73,7 +73,7 @@ public class SchemaDiff
 	public static final String TAG_SEQUENCE_INFO = "include-sequences";
 	public static final String TAG_VIEWS_AS_TABLE = "views-as-tables";
 
-	private WbConnection sourceDb;
+	private WbConnection referenceDb;
 	private WbConnection targetDb;
 	private List<Object> objectsToCompare;
 	private List<TableIdentifier> tablesToDelete;
@@ -110,12 +110,12 @@ public class SchemaDiff
 	 * Create a new SchemaDiff for the given connections with the given
 	 * namespace to be used when writing the XML.
 	 *
-	 * @param source The connection to the reference schema
+	 * @param reference The connection to the reference schema
 	 * @param target the connection to the target schema
 	 */
-	public SchemaDiff(WbConnection source, WbConnection target)
+	public SchemaDiff(WbConnection reference, WbConnection target)
 	{
-		sourceDb = source;
+		referenceDb = reference;
 		targetDb = target;
 	}
 
@@ -223,7 +223,7 @@ public class SchemaDiff
 		for (int i=0; i < referenceList.size(); i++)
 		{
 			String rname = referenceList.get(i);
-			TableIdentifier rtbl = sourceDb.getMetadata().findTable(new TableIdentifier(rname));
+			TableIdentifier rtbl = referenceDb.getMetadata().findTable(new TableIdentifier(rname));
 			String tname = targetList.get(i);
 			TableIdentifier ttbl = targetDb.getMetadata().findTable(new TableIdentifier(tname));
 			if (rtbl != null && ttbl != null)
@@ -313,16 +313,18 @@ public class SchemaDiff
 		}
 		for (String tname : tables)
 		{
-			if (tname.indexOf("%") > -1)
+			if (tname.indexOf('%') > -1 || tname.indexOf('*') > -1)
 			{
 				try
 				{
-					List<TableIdentifier> tlist = this.sourceDb.getMetadata().getTableList(tname.trim(), (String)null);
+					String toSearch = this.referenceDb.getMetadata().adjustObjectnameCase(tname.trim());
+					List<TableIdentifier> tlist = this.referenceDb.getMetadata().getTableList(toSearch, (String)null);
 					for (TableIdentifier t : tlist)
 					{
 						tablesToIgnore.add(t.getTableName());
 					}
-					tlist = this.targetDb.getMetadata().getTableList(tname.trim(), (String)null);
+					toSearch = this.targetDb.getMetadata().adjustObjectnameCase(tname.trim());
+					tlist = this.targetDb.getMetadata().getTableList(toSearch, (String)null);
 					for (TableIdentifier t : tlist)
 					{
 						tablesToIgnore.add(t.getTableName());
@@ -384,26 +386,26 @@ public class SchemaDiff
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgDiffRetrieveDbInfo"), -1, -1);
 		}
 
-		this.referenceSchema = (rSchema == null ? this.sourceDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(rSchema));
-		this.targetSchema = (tSchema == null ? this.targetDb.getMetadata().getSchemaToUse() : this.sourceDb.getMetadata().adjustSchemaNameCase(tSchema));
+		this.referenceSchema = (rSchema == null ? this.referenceDb.getMetadata().getSchemaToUse() : this.referenceDb.getMetadata().adjustSchemaNameCase(rSchema));
+		this.targetSchema = (tSchema == null ? this.targetDb.getMetadata().getSchemaToUse() : this.referenceDb.getMetadata().adjustSchemaNameCase(tSchema));
 
 		String[] types;
 		if (diffViews || treatViewAsTable)
 		{
-			types = new String[] { this.sourceDb.getMetadata().getTableTypeName(), this.sourceDb.getMetadata().getViewTypeName() };
+			types = new String[] { this.referenceDb.getMetadata().getTableTypeName(), this.referenceDb.getMetadata().getViewTypeName() };
 		}
 		else
 		{
-			types = new String[] { this.sourceDb.getMetadata().getTableTypeName() };
+			types = new String[] { this.referenceDb.getMetadata().getTableTypeName() };
 		}
 
-		List<TableIdentifier> refTables = sourceDb.getMetadata().getObjectList(this.referenceSchema, types);
+		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(this.referenceSchema, types);
 		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(this.targetSchema, types);
 
 		if (treatViewAsTable)
 		{
-			String viewType = sourceDb.getMetadata().getViewTypeName();
-			String tblType = sourceDb.getMetadata().getTableTypeName();
+			String viewType = referenceDb.getMetadata().getViewTypeName();
+			String tblType = referenceDb.getMetadata().getTableTypeName();
 			for (TableIdentifier table : refTables)
 			{
 				if (table.getType().equals(viewType))
@@ -417,7 +419,7 @@ public class SchemaDiff
 
 		if (diffProcs)
 		{
-			List<ProcedureDefinition> refProcs = sourceDb.getMetadata().getProcedureReader().getProcedureList(null, this.referenceSchema, null);
+			List<ProcedureDefinition> refProcs = referenceDb.getMetadata().getProcedureReader().getProcedureList(null, this.referenceSchema, null);
 			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureReader().getProcedureList(null, this.targetSchema, null);
 			processProcedureList(refProcs, targetProcs);
 		}
@@ -426,7 +428,7 @@ public class SchemaDiff
 		{
 			List<SequenceDefinition> refSeqs = Collections.emptyList();
 			List<SequenceDefinition> tarSeqs = Collections.emptyList();
-			SequenceReader refReader = sourceDb.getMetadata().getSequenceReader();
+			SequenceReader refReader = referenceDb.getMetadata().getSequenceReader();
 			SequenceReader tarReader = targetDb.getMetadata().getSequenceReader();
 			if (refReader != null)
 			{
@@ -509,7 +511,7 @@ public class SchemaDiff
 
 				if (targetDb.getMetadata().isDefaultCase(tbl))
 				{
-					tbl = sourceDb.getMetadata().adjustObjectnameCase(tbl);
+					tbl = referenceDb.getMetadata().adjustObjectnameCase(tbl);
 				}
 				if (!refTableNames.contains(tbl))
 				{
@@ -706,7 +708,7 @@ public class SchemaDiff
 		writeDiffInfo(out);
 		int count = this.objectsToCompare.size();
 		List<ViewDiff> viewDiffs = new ArrayList<ViewDiff>();
-		String tableType = sourceDb.getMetadata().getTableTypeName();
+		String tableType = referenceDb.getMetadata().getTableTypeName();
 		// First we have to process the tables
 		for (int i=0; i < count; i++)
 		{
@@ -726,7 +728,7 @@ public class SchemaDiff
 			{
 				if (tableType.equalsIgnoreCase(entry.reference.getType()))
 				{
-					ReportTable source = createReportTableInstance(entry.reference, this.sourceDb);
+					ReportTable source = createReportTableInstance(entry.reference, this.referenceDb);
 					if (entry.target == null)
 					{
 						out.write("\n");
@@ -755,7 +757,7 @@ public class SchemaDiff
 				{
 					// We cannot write out the diff for the views immediately
 					// because they should be listed after the table diffs
-					ReportView source = createReportViewInstance(entry.reference, sourceDb);
+					ReportView source = createReportViewInstance(entry.reference, referenceDb);
 					ReportView target = null;
 					if (entry.target != null)
 					{
@@ -854,7 +856,7 @@ public class SchemaDiff
 			if (o instanceof ProcDiffEntry)
 			{
 				ProcDiffEntry entry = (ProcDiffEntry)o;
-				ReportProcedure rp = new ReportProcedure(entry.reference, this.sourceDb);
+				ReportProcedure rp = new ReportProcedure(entry.reference, this.referenceDb);
 				ReportProcedure tp = new ReportProcedure(entry.target, this.targetDb);
 				ProcDiff diff = new ProcDiff(rp, tp);
 				diff.setIndent(indent);
@@ -940,7 +942,7 @@ public class SchemaDiff
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer indent2 = new StrBuffer("    ");
 		writeTag(out, indent, TAG_REF_CONN, true);
-		StrBuffer info = this.sourceDb.getDatabaseInfoAsXml(indent2);
+		StrBuffer info = this.referenceDb.getDatabaseInfoAsXml(indent2);
 		info.writeTo(out);
 		writeTag(out, indent, TAG_REF_CONN, false);
 		out.write("\n");
@@ -977,7 +979,7 @@ public class SchemaDiff
 		String[] pattr = new String[] { "referenceProcedure", "compareTo" };
 		String[] sattr = new String[] { "referenceSequence", "compareTo" };
 		String[] tbls = new String[3];
-		DbSettings dbs = this.sourceDb.getMetadata().getDbSettings();
+		DbSettings dbs = this.referenceDb.getMetadata().getDbSettings();
 		for (int i=0; i < count; i++)
 		{
 			// check for ignored tables

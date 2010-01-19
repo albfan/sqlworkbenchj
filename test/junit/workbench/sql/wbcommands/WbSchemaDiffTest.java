@@ -83,7 +83,7 @@ public class WbSchemaDiffTest
 		WbSchemaDiff diff = new WbSchemaDiff();
 		File output = new File(util.getBaseDir(), "diffTest.xml");
 		output.delete();
-		StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -includeForeignKeys=false -includePrimaryKeys=false -includeIndex=false -includeSequences=true -referenceProfile=source -targetProfile=target");
+		StatementRunnerResult result = diff.execute("WbSchemaDiff -file='" + output.getAbsolutePath() + "' -excludeTables=TO_* -includeForeignKeys=false -includePrimaryKeys=false -includeIndex=false -includeSequences=true -referenceProfile=source -targetProfile=target");
 		assertTrue(result.isSuccess());
 		assertTrue("File not created", output.exists());
 
@@ -132,10 +132,16 @@ public class WbSchemaDiffTest
 		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-sequence/sequence-name/text()");
 		assertEquals("Incorrect sequence to delete", "SEQ_TO_BE_DELETED", value);
 
-		if (!output.delete())
-		{
-			fail("could not delete output file");
-		}
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/drop-table/table-name)");
+		assertEquals("Wrong drop table count", "1", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/drop-table/table-name/text()");
+		assertEquals("Incorrect sequence to delete", "DROP_ME", value);
+
+//		if (!output.delete())
+//		{
+//			fail("could not delete output file");
+//		}
 		assertEquals("Connections not closed", 0, ConnectionMgr.getInstance().getOpenCount());
 	}
 
@@ -155,6 +161,7 @@ public class WbSchemaDiffTest
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100))");
 			stmt.executeUpdate("create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
+			stmt.executeUpdate("create table to_ignore (some_id integer, another_id integer)");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
 
@@ -166,6 +173,8 @@ public class WbSchemaDiffTest
 
 			stmt = target.createStatement();
 			stmt.executeUpdate("create table person (person_id integer primary key, firstname varchar(50), lastname varchar(100))");
+			stmt.executeUpdate("create table to_ignore (some_id integer)");
+			stmt.executeUpdate("create table drop_me (some_id integer)");
 			stmt.executeUpdate("create table address (address_id integer primary key, street varchar(10), city varchar(100), pone varchar(50), remark varchar(500))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
