@@ -93,6 +93,15 @@ public class WbSchemaDiffTest
 		String value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table)");
 		assertEquals("Incorrect table count", "2", value);
 
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/sequence-info)");
+		assertEquals("Incorrect sequence info count", "3", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
+		assertEquals("Incorrect table info count", "3", value);
+		
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info)");
+		assertEquals("Incorrect view info count", "1", value);
+
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='ADDRESS']/add-column/column-def)");
 		assertEquals("Incorrect table count", "2", value);
 

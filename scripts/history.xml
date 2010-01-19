@@ -74,6 +74,12 @@
 
   <entry dev-build="2" type="fix">
     <description>
+      WbSchemaDiff reported the compared sequences as procedure-info in the diff summary
+    </description>
+  </entry>
+
+  <entry dev-build="2" type="fix">
+    <description>
       The dialog to choose the update table for a multi-join SELECT result can now be resized
     </description>
   </entry>

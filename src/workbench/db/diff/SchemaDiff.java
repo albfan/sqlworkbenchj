@@ -62,6 +62,7 @@ public class SchemaDiff
 	public static final String TAG_VIEW_PAIR = "view-info";
 	public static final String TAG_TABLE_PAIR = "table-info";
 	public static final String TAG_PROC_PAIR = "procedure-info";
+	public static final String TAG_SEQ_PAIR = "sequence-info";
 	public static final String TAG_INDEX_INFO = "include-index";
 	public static final String TAG_FK_INFO = "include-foreign-key";
 	public static final String TAG_PK_INFO = "include-primary-key";
@@ -974,6 +975,7 @@ public class SchemaDiff
 		int count = this.objectsToCompare.size();
 		String[] tattr = new String[] { "type", "reference", "compareTo"};
 		String[] pattr = new String[] { "referenceProcedure", "compareTo" };
+		String[] sattr = new String[] { "referenceSequence", "compareTo" };
 		String[] tbls = new String[3];
 		DbSettings dbs = this.sourceDb.getMetadata().getDbSettings();
 		for (int i=0; i < count; i++)
@@ -1009,7 +1011,7 @@ public class SchemaDiff
 				SequenceDiffEntry pe = (SequenceDiffEntry)o;
 				tbls[0] = pe.reference.getSequenceName();
 				tbls[1] = (pe.target == null ? "" : pe.target.getSequenceName());
-				tw.appendOpenTag(info, indent2, TAG_PROC_PAIR, pattr, tbls, false);
+				tw.appendOpenTag(info, indent2, TAG_SEQ_PAIR, sattr, tbls, false);
 			}
 			info.append("/>\n");
 

@@ -454,6 +454,8 @@
         <attribute name="Main-Class" value="workbench.WbStarter"/>
         <attribute name="Class-Path" value=". log4j.jar poi.jar mail.jar"/>
         <attribute name="Created-By" value="Thomas Kellerer (support@sql-workbench.net)"/>
+        <attribute name="Implementation-Title" value="SQL Workbench/J"/>
+        <attribute name="Implementation-URL" value="http://www.sql-workbench.net"/>
         <attribute name="WbBuild-Number" value="${build.number}"/>
         <attribute name="WbBuild-Date" value="${build_timestamp}"/>
       </manifest>
