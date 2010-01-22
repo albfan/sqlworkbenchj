@@ -13,13 +13,18 @@ package workbench.util;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Savepoint;
 import java.sql.Statement;
+import java.sql.Struct;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -39,6 +44,7 @@ import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.ResultInfo;
+import workbench.storage.SqlLiteralFormatter;
 
 /**
  * Methods for manipulating and analyzing SQL statements.
@@ -1304,6 +1310,72 @@ public class SqlUtil
 
 		int sizeThreshold = GuiSettings.getMultiLineThreshold();
 		return charLength >= sizeThreshold;
+	}
+
+	public static CharSequence getStructDisplay(Struct data)
+		throws SQLException
+	{
+		if (data == null) return null;
+
+		Object[] attr = data.getAttributes();
+		if (attr == null) return null;
+
+		StringBuilder buffer = new StringBuilder(attr.length * 20);
+
+		String name = data.getSQLTypeName();
+		if (name != null) buffer.append(name);
+
+		buffer.append('(');
+		boolean first = true;
+		for (Object a : attr)
+		{
+			if (!first) buffer.append(',');
+			else first = false;
+			if (a == null)
+			{
+				buffer.append("NULL");
+			}
+			else
+			{
+				if (a instanceof Struct)
+				{
+					buffer.append(getStructDisplay((Struct)a));
+				}
+				else
+				{
+					if (a instanceof CharSequence)
+					{
+						buffer.append('\'');
+						buffer.append(a.toString());
+						buffer.append('\'');
+					}
+					// TODO: maybe optimize the creation of the formatters
+					// The ANSI literals should be OK, as all databases that support structs also support
+					// ANSI compliant date literals.
+					else if (a instanceof Timestamp)
+					{
+						SimpleDateFormat formatter = SqlLiteralFormatter.createFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE, "timestamp", "''yyyy-MM-dd HH:mm:ss''");
+						buffer.append(formatter.format((Timestamp)a));
+					}
+					else if (a instanceof Time)
+					{
+						SimpleDateFormat formatter = SqlLiteralFormatter.createFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE, "time", "''HH:mm:ss''");
+						buffer.append(formatter.format((Time)a));
+					}
+					else if (a instanceof Date)
+					{
+						SimpleDateFormat formatter = SqlLiteralFormatter.createFormatter(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE, "date", "''yyyy-MM-dd''");
+						buffer.append(formatter.format((Date)a));
+					}
+					else
+					{
+						buffer.append(a.toString());
+					}
+				}
+			}
+		}
+		buffer.append(')');
+		return buffer.toString();
 	}
 
 }

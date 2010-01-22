@@ -16,7 +16,9 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Struct;
 import java.sql.Types;
+import java.util.Arrays;
 
 import java.util.List;
 import workbench.db.importer.ValueDisplay;
@@ -68,9 +70,9 @@ public class RowData
 	 * have been sent to the database during the update process
 	 * @see #setDmlSent(boolean)
 	 */
-	private boolean dmlSent = false;
+	private boolean dmlSent;
 	
-	private boolean trimCharData = false;
+	private boolean trimCharData;
 	
 	private Object[] colData;
 	private Object[] originalData;
@@ -84,9 +86,9 @@ public class RowData
 		this(info.getColumnCount());
 	}
 	
-	public RowData(int aColCount)
+	public RowData(int colCount)
 	{
-		this.colData = new Object[aColCount];
+		this.colData = new Object[colCount];
 		this.setNew();
 		ignoreReadErrors = Settings.getInstance().getBoolProperty("workbench.db.ignore.readerror", false);
 	}
@@ -195,6 +197,18 @@ public class RowData
 				else if (type == java.sql.Types.DATE)
 				{
 					value = rs.getDate(i+1);
+				}
+				else if (type == java.sql.Types.STRUCT)
+				{
+					Object o = rs.getObject(i+1);
+					if (o instanceof Struct)
+					{
+						value = SqlUtil.getStructDisplay((Struct)o);
+					}
+					else
+					{
+						value = o;
+					}
 				}
 				else if (SqlUtil.isBlobType(type))
 				{
@@ -560,23 +574,13 @@ public class RowData
 		// consider blobs
 		if (one instanceof byte[] && other instanceof byte[])
 		{
-			return compareArrays((byte[])one, (byte[])other);
+			return Arrays.equals((byte[])one, (byte[])other);
 		}
 		if (one instanceof Number && other instanceof Number)
 		{
 			return NumberUtil.valuesAreEquals((Number)one, (Number)other);
 		}
 		return one.equals(other);
-	}
-	
-	public static boolean compareArrays(byte[] one, byte[] other)
-	{
-		if (one.length != other.length) return false;
-		for (int i=0; i < one.length; i++)
-		{
-			if (one[i] != other[i]) return false;
-		}
-		return true;
 	}
 	
 }

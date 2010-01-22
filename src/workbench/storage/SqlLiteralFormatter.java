@@ -201,7 +201,7 @@ public class SqlLiteralFormatter
 		if (!StringUtil.isEmptyString(encoding)) this.clobEncoding = encoding;
 	}
 	
-	private SimpleDateFormat createFormatter(String format, String type, String defaultPattern)
+	public static SimpleDateFormat createFormatter(String format, String type, String defaultPattern)
 	{
 		String key = "workbench.sql.literals." + (format == null ? STANDARD_DATE_LITERAL_TYPE : format) + "." + type + ".pattern";
 		SimpleDateFormat f = null;

@@ -41,21 +41,21 @@ public class DecodeUtilTest
 
 		String base64 = Base64.encodeBytes(data);
 		byte[] result = instance.decodeString(base64, BlobLiteralType.base64);
-		assertTrue(RowData.compareArrays(data, result));
+		assertTrue(RowData.objectsAreEqual(data, result));
 
 		BlobLiteralFormatter octalFormat = BlobFormatterFactory.createInstance(BlobLiteralType.octal);
 		String octal = octalFormat.getBlobLiteral(data).toString();
 		result = instance.decodeString(octal, BlobLiteralType.octal);
-		assertTrue(RowData.compareArrays(data, result));
+		assertTrue(RowData.objectsAreEqual(data, result));
 
 		BlobLiteralFormatter hexFormat = BlobFormatterFactory.createInstance(BlobLiteralType.hex);
 		String hex = hexFormat.getBlobLiteral(data).toString();
 		result = instance.decodeString(hex, BlobLiteralType.hex);
-		assertTrue(RowData.compareArrays(data, result));
+		assertTrue(RowData.objectsAreEqual(data, result));
 
 		BlobLiteralFormatter ansiFormat = BlobFormatterFactory.createAnsiFormatter();
 		String ansi = ansiFormat.getBlobLiteral(data).toString();
 		result = instance.decodeString(ansi, BlobLiteralType.hex);
-		assertTrue(RowData.compareArrays(data, result));
+		assertTrue(RowData.objectsAreEqual(data, result));
 	}
 }
