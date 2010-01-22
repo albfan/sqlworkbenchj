@@ -13,6 +13,8 @@ package workbench.storage;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Random;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
@@ -212,5 +214,20 @@ public class RowDataTest
 		row.resetStatus();
 		row.setValue(1, null);
 		assertFalse(row.isModified());
+	}
+
+	public void testCopy()
+		throws Exception
+	{
+		Random r = new Random();
+		int colCount = 15;
+		RowData one = new RowData(colCount);
+		for (int i=0; i < colCount; i++)
+		{
+			one.setValue(i, r.nextLong());
+		}
+		RowData copy = one.createCopy();
+		assertTrue(copy.equals(one));
+		assertTrue(Arrays.equals(one.getData(), copy.getData()));
 	}
 }

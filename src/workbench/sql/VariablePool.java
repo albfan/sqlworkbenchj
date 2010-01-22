@@ -55,19 +55,23 @@ public class VariablePool
 {
 	public static final String PROP_PREFIX = "wbp.";
 	final private Map<String, String> data = new HashMap<String, String>();
-	private static final VariablePool POOL = new VariablePool();
 	private String prefix;
 	private String suffix;
 	private int prefixLen = 0;
 	private int suffixLen = 0;
 	private Pattern validNamePattern = Pattern.compile("[\\w]*");;
 	private Pattern promptPattern;
-	
-	public static VariablePool getInstance()
+
+	public static final VariablePool getInstance()
 	{
-		return POOL;
+		return InstanceHolder.INSTANCE;
 	}
-	
+
+	protected static class InstanceHolder
+	{
+		protected static final VariablePool INSTANCE = new VariablePool();
+	}
+
 	private VariablePool()
 	{
 		this.prefix = Settings.getInstance().getSqlParameterPrefix();

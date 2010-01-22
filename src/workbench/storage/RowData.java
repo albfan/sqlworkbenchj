@@ -42,7 +42,7 @@ import workbench.util.StringUtil;
  *  NOT_MODIFIED - The row has not been changed since it has been retrieved<br/>
  *
  * @author Thomas Kellerer
- */ 
+ */
 public class RowData
 {
 	/**
@@ -61,7 +61,7 @@ public class RowData
 	public static final int NEW = 2;
 
 	private Object NO_CHANGE_MARKER = new Object();
-	
+
 	private int status = NOT_MODIFIED;
 
 	/**
@@ -71,21 +71,21 @@ public class RowData
 	 * @see #setDmlSent(boolean)
 	 */
 	private boolean dmlSent;
-	
+
 	private boolean trimCharData;
-	
+
 	private Object[] colData;
 	private Object[] originalData;
 	private List<String> dependencyDeletes;
 
 	private DataConverter converter;
-	boolean ignoreReadErrors = false;
+	boolean ignoreReadErrors;
 
 	public RowData(ResultInfo info)
 	{
 		this(info.getColumnCount());
 	}
-	
+
 	public RowData(int colCount)
 	{
 		this.colData = new Object[colCount];
@@ -97,10 +97,10 @@ public class RowData
 	{
 		this.trimCharData = flag;
 	}
-	
-	public Object[] getData() 
-	{ 
-		return this.colData; 
+
+	public Object[] getData()
+	{
+		return this.colData;
 	}
 
 	/**
@@ -130,7 +130,7 @@ public class RowData
 	 *
 	 * @param jdbcType
 	 * @param dbmsType
-	 * 
+	 *
 	 * @return true if the type is converted
 	 */
 	public boolean typeIsConverted(int jdbcType, String dbmsType)
@@ -138,22 +138,26 @@ public class RowData
 		if (converter == null) return false;
 		return converter.convertsType(jdbcType, dbmsType);
 	}
-	
+
 	/**
 	 * Read the current row from the ResultSet into this RowData.
 	 * <br/>
 	 * It is assumed that ResultSet.next() has already been called on the ResultSet.
 	 * <br/>
-	 * 
+	 *
 	 * BLOBs (and similar datatypes) will be read into a byte array. CLOBs (and similar datatypes)
 	 * will be converted into a String object.
 	 * <br/>
 	 * All other types will be retrieved using getObject() from the result set, except for
 	 * timestamp and date to work around issues with the Oracle driver.
 	 * <br/>
-	 * After retrieving the value from the ResultSet it is passed to a registered DataConverter.
+	 * If the driver returns a java.sql.Struct, this will be converted into a String
+	 * using SqlUtil.getStructDisplay()
 	 * <br/>
-	 * The status of this RowData will be reset after the data has been retrieved.
+	 * After retrieving the value from the ResultSet it is passed to a registered DataConverter.
+	 * If a converter is registered, no further processing will be done with the column's value
+	 * <br/>
+	 * The status of this RowData will be reset (NOT_MODIFIED) after the data has been retrieved.
 	 *
 	 * @see #setConverter(workbench.storage.DataConverter)
 	 */
@@ -164,9 +168,9 @@ public class RowData
 		boolean longVarcharAsClob = info.treatLongVarcharAsClob();
 		boolean useGetBytesForBlobs = info.useGetBytesForBlobs();
 		boolean useGetStringForClobs = info.useGetStringForClobs();
-		
+
 		Object value = null;
-		
+
 		for (int i=0; i < colCount; i++)
 		{
 			int type = info.getColumnType(i);
@@ -203,7 +207,7 @@ public class RowData
 					Object o = rs.getObject(i+1);
 					if (o instanceof Struct)
 					{
-						value = SqlUtil.getStructDisplay((Struct)o);
+						value = StructConverter.getInstance().getStructDisplay((Struct)o);
 					}
 					else
 					{
@@ -259,7 +263,7 @@ public class RowData
 				else
 				{
 					value = rs.getObject(i + 1);
-					if (type == Types.CHAR && trimCharData && value != null)
+					if (trimCharData && type == Types.CHAR && value != null)
 					{
 						try
 						{
@@ -321,10 +325,7 @@ public class RowData
 	public RowData createCopy()
 	{
 		RowData result = new RowData(this.colData.length);
-		for (int i=0; i < this.colData.length; i++)
-		{
-			result.colData[i] = this.colData[i];
-		}
+		System.arraycopy(colData, 0, result.colData, 0, colData.length);
 		return result;
 	}
 
@@ -342,7 +343,7 @@ public class RowData
 			this.originalData[i] = NO_CHANGE_MARKER;
 		}
 	}
-	
+
 	/**
 	 * Sets the new data for the given column.
 	 * <br>
@@ -363,7 +364,7 @@ public class RowData
 			{
 				createOriginalData();
 			}
-			
+
 			if (this.originalData[aColIndex] == NO_CHANGE_MARKER)
 			{
 				this.originalData[aColIndex] = this.colData[aColIndex];
@@ -385,7 +386,7 @@ public class RowData
 	}
 
 	/**
-	 * Returns the value from the specified column as it was retrieved from 
+	 * Returns the value from the specified column as it was retrieved from
 	 * the database. If the column was not modified or this row is new
 	 * then the current value is returned.
 	 */
@@ -425,11 +426,11 @@ public class RowData
 			this.resetStatus();
 		}
 	}
-	
+
 	/**
-	 * Returns true if the indicated column has been modified since the 
+	 * Returns true if the indicated column has been modified since the
 	 * initial retrieve (i.e. since the last time resetStatus() was called
-	 * 
+	 *
 	 */
 	public boolean isColumnModified(int aColumn)
 	{
@@ -444,7 +445,7 @@ public class RowData
 			return (this.originalData[aColumn] != NO_CHANGE_MARKER);
 		}
 	}
-	
+
 	/**
 	 *	Resets the internal status. After a call to resetStatus()
 	 *	isModified() will return false, and isOriginal() will return true.
@@ -489,7 +490,7 @@ public class RowData
 	 * Check if the row has been modified.
 	 * <br/>
 	 * A row can be modified <b>and</b> new!
-	 * 
+	 *
 	 * @return true if the row has been modified since retrieval
 	 *
 	 */
@@ -524,21 +525,21 @@ public class RowData
 		this.dmlSent = aFlag;
 	}
 
-	public boolean isDmlSent() 
-	{ 
-		return this.dmlSent; 
+	public boolean isDmlSent()
+	{
+		return this.dmlSent;
 	}
 
 	public List<String> getDependencyDeletes()
 	{
 		return this.dependencyDeletes;
 	}
-	
+
 	public void setDependencyDeletes(List<String> statements)
 	{
 		this.dependencyDeletes = statements;
 	}
-	
+
 	public String toString()
 	{
 		ValueDisplay display = new ValueDisplay(colData);
@@ -570,7 +571,7 @@ public class RowData
 	{
 		if (one == null && other == null) return true;
 		if (one == null || other == null) return false;
-		
+
 		// consider blobs
 		if (one instanceof byte[] && other instanceof byte[])
 		{
@@ -582,5 +583,5 @@ public class RowData
 		}
 		return one.equals(other);
 	}
-	
+
 }

@@ -12,10 +12,7 @@
 package workbench.util;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
-import java.sql.Struct;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Pattern;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
@@ -619,60 +616,7 @@ public class SqlUtilTest
 		assertEquals("resource r", l.get(2));
 	}
 
-	public void testStructDisplay()
-		throws Exception
-	{
-		final Struct embedded = new Struct() {
-			@Override
-			public String getSQLTypeName()
-				throws SQLException
-			{
-				return "EMBEDDED";
-			}
-
-			@Override
-			public Object[] getAttributes()
-				throws SQLException
-			{
-				return new Object[] {new Integer(42), new String("Test") };
-			}
-
-			@Override
-			public Object[] getAttributes(Map<String, Class<?>> map)
-				throws SQLException
-			{
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-		};
-
-		Struct data = new Struct() {
-			@Override
-			public String getSQLTypeName()
-				throws SQLException
-			{
-				return "SOME_TYPE";
-			}
-
-			@Override
-			public Object[] getAttributes()
-				throws SQLException
-			{
-				return new Object[] {"Arthur", "Dent", embedded };
-			}
-
-			@Override
-			public Object[] getAttributes(Map<String, Class<?>> map)
-				throws SQLException
-			{
-				throw new UnsupportedOperationException("Not supported yet.");
-			}
-		};
-
-		CharSequence display = SqlUtil.getStructDisplay(data);
-		assertEquals("SOME_TYPE('Arthur','Dent',EMBEDDED(42,'Test'))", display);
-	}
-	
-	public static void testDataTypeNames()
+	public void testDataTypeNames()
 	{
 		try
 		{

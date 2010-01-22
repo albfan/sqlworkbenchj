@@ -494,7 +494,7 @@ public class DataStore
 	/**
 	 *	Inserts a row after the given row number.
 	 *	If the new Index is greater then the current
-	 *	row count or the new index is < 0 the new
+	 *	row count or the new index is &lt; 0 the new
 	 *	row will be added at the end.
 	 *	@return int - the new row number
 	 */
