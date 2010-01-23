@@ -28,11 +28,26 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 
+	public static boolean getUseButtonStyleRowNumbers()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.table.rownumber.buttonstyle", true);
+	}
+
+	public static boolean getShowTableRowNumbers()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.table.rownumber.show", false);
+	}
+
+	public static void setShowTableRowNumbers(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.table.rownumber", flag);
+	}
+
 	public static boolean getSortCompletionColumns()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.sortcolumns", true);
 	}
-	
+
 	public static void setSortCompletionColumns(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.autocompletion.sortcolumns", flag);
@@ -42,7 +57,7 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.autocompletion.partialsearch", false);
 	}
-	
+
 	public static void setPartialCompletionSearch(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.autocompletion.partialsearch", flag);
@@ -67,7 +82,7 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.query.retrieve.comments", flag);
 	}
-	
+
 	public static boolean showScriptFinishedAlert()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.script.alert", false);
@@ -89,7 +104,7 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.script.alert.minduration", Long.toString(millis));
 	}
-	
+
 	public static boolean allowAlterInDbExplorer()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_ALLOW_ALTER_TABLE, false);
@@ -129,7 +144,7 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.tabs.lru", flag);
 	}
-	
+
 	public static boolean getFollowFileDirectory()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.editor.followfiledir", false);
@@ -149,7 +164,7 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.editor.defaultdir", path);
 	}
-	
+
 	public static boolean getShowCloseButtonOnRightSide()
 	{
 		return Settings.getInstance().getBoolProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT, true);
@@ -189,7 +204,7 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty(PROPERTY_RESULTTAB_CLOSE_BUTTON, flag);
 	}
-	
+
 	public static int getMultiLineThreshold()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.display.multilinethreshold", 250);
@@ -199,7 +214,7 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.display.multilinethreshold", value);
 	}
-	
+
 	public static int getDefaultFormFieldWidth()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.form.fieldwidth", 30);
@@ -219,12 +234,12 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.form.fieldlines", lines);
 	}
-	
+
 	public static boolean getConfirmTabClose()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.closetab.confirm", false);
 	}
-	
+
 	public static void setConfirmTabClose(boolean flag)
 	{
 		Settings.getInstance().setProperty("workbench.gui.closetab.confirm", flag);
@@ -354,7 +369,7 @@ public class GuiSettings
 	{
 		Settings.getInstance().setProperty("workbench.gui.macos.brushedmetal", flag);
 	}
-	
+
 	public static int getMaxMacrosInMenu()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.macro.maxmenuitems", 9);

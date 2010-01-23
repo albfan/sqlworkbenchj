@@ -91,7 +91,7 @@ public class StructConverterTest
 			}
 		};
 
-		CharSequence display = StructConverter.getInstance().getStructDisplay(data);
+		String display = StructConverter.getInstance().getStructDisplay(data);
 		assertEquals("SOME_TYPE('Arthur', 'Dent', TIMESTAMP '1970-01-01 01:00:00', TIME '01:00:00', NESTED_TYPE(42, 'Test', DATE '1970-01-01'))", display);
 	}
 }

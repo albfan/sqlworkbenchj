@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.Cursor;
+import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -91,7 +92,19 @@ public class RowHeightResizer
 
 		int newHeight = startHeight + e.getY() - startY;
 		newHeight = Math.max(1, newHeight);
-		this.table.setRowHeight(row, newHeight);
+		table.setRowHeight(row, newHeight);
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				TableRowHeader header = TableRowHeader.getRowHeader(table);
+				if (header != null)
+				{
+					header.modelChanged(row);
+				}
+			}
+		});
 	}
 
 	public void mouseReleased(MouseEvent e)

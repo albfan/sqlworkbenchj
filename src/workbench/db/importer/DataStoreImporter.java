@@ -83,12 +83,27 @@ public class DataStoreImporter
 	public void beginMultiTable()
 		throws SQLException
 	{
+		// Nothing to do as only one table can be imported
 	}
-	public void endMultiTable() {}
 
-	public boolean getCreateTarget() { return false; }
-	public boolean shouldProcessNextRow() { return true; }
-	public void nextRowSkipped() {}
+	public void endMultiTable()
+	{
+		// Nothing to do as only one table can be imported
+	}
+
+	public boolean getCreateTarget()
+	{
+		return false;
+	}
+
+	public boolean shouldProcessNextRow()
+	{
+		return true;
+	}
+
+	public void nextRowSkipped()
+	{
+	}
 
 	public void importString(String contents)
 	{

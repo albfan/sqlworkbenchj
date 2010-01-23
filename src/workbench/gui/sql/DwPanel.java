@@ -55,6 +55,7 @@ import workbench.gui.actions.UpdateDatabaseAction;
 import workbench.gui.components.ColumnOrderMgr;
 import workbench.gui.components.DataStoreTableModel;
 import workbench.gui.components.OneLineTableModel;
+import workbench.gui.components.TableRowHeader;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbTable;
 import workbench.interfaces.DbData;
@@ -630,7 +631,7 @@ public class DwPanel
 				if (result.isSuccess())
 				{
 					success = true;
-					this.showData(result);
+					showData(result);
 				}
 				else
 				{
@@ -730,6 +731,10 @@ public class DwPanel
 					dataTable.checkCopyActions();
 					checkResultSetActions();
 					dataTable.applyHighlightExpression(newData.getGeneratingFilter());
+					if (GuiSettings.getShowTableRowNumbers())
+					{
+						TableRowHeader.showRowHeader(dataTable);
+					}
 				}
 			});
 		}
@@ -758,7 +763,7 @@ public class DwPanel
 			clearStatusMessage();
 		}
 	}
-	
+
 	private void checkResultSetActions()
 	{
 		boolean hasResult = this.hasResultSet();
@@ -791,7 +796,7 @@ public class DwPanel
 		int endRow = 0;
 		int count = 0;
 		startRow = this.dataTable.getFirstVisibleRow();
-		endRow = this.dataTable.getLastVisibleRow(startRow);
+		endRow = this.dataTable.getLastVisibleRow();
 		count = this.dataTable.getRowCount();
 		statusBar.setRowcount(startRow + 1, endRow + 1, count);
 	}
@@ -887,11 +892,23 @@ public class DwPanel
 	{
 		if (this.readOnly) return;
 		if (!this.startEdit(true)) return;
+
+		boolean rowHeader = TableRowHeader.isRowHeaderVisible(dataTable);
+
+		// For some reason, the row header is removed when adding or deleting a row.
+		// But as it gets removed anyway, I'm removing it manually
+		// in order to clean up properly the registered listeners
+		TableRowHeader.removeRowHeader(dataTable);
+
 		try
 		{
 			boolean needClear = isLastRowSelected();
 
 			dataTable.deleteRow(false);
+			if (rowHeader)
+			{
+				TableRowHeader.showRowHeader(dataTable);
+			}
 			rowCountChanged();
 			if (needClear)
 			{
@@ -920,7 +937,19 @@ public class DwPanel
 	{
 		if (this.readOnly) return -1;
 		if (!this.startEdit()) return -1;
+
+		boolean rowHeader = TableRowHeader.isRowHeaderVisible(dataTable);
+
+		// For some reason, the row header is removed when adding or deleting a row.
+		// But as it gets removed anyway, I'm removing it manually
+		// in order to clean up properly the registered listeners
+		TableRowHeader.removeRowHeader(dataTable);
+
 		long newRow = this.dataTable.addRow();
+		if (rowHeader)
+		{
+			TableRowHeader.showRowHeader(dataTable);
+		}
 		if (newRow > -1) this.rowCountChanged();
 		return newRow;
 	}

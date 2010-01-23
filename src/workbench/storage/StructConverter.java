@@ -18,8 +18,19 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- *
+ * A class to create a readable display for java.sql.Struct objects
+ * retrieved from the database.
+ * <br/>
+ * This is a singleton to avoid excessive object creation during data retrieval.
+ * <br/>
+ * Currently this will only be used when retrieving data from an Oracle database.
+ * The Postgres JDBC driver returns a String representation of "structured" types
+ * (and not a Struct).
+ * DB2 needs a conversion function that will be called by DB2 during retrieval
+ * and will thus return a String object as well.
+ * 
  * @author Thomas Kellerer
+ * @see RowData#read(java.sql.ResultSet, workbench.storage.ResultInfo) 
  */
 public class StructConverter
 {
@@ -47,7 +58,24 @@ public class StructConverter
 		dateFormatter = new SimpleDateFormat("'DATE '''yyyy-MM-dd''");
 	}
 
-	public CharSequence getStructDisplay(Struct data)
+	/**
+	 * Create a display for the given Struct.
+	 * <br>
+	 * The display closeley duplicates the way SQL*Plus shows object types.
+	 * If attributes of the Struct are itself a Struct, this method is called
+	 * recursively.
+	 * <br/>
+	 * The name of the Struct will be followed by all values in paranthesis, e.g.
+	 * <tt>MY_TYPE('Hello', 'World', 42)</tt> 
+	 * <br/>
+	 * Note that Oracle apparently always returns the owner as part of the type name,
+	 * so the actual display will be <tt>SCOTT.MY_TYPE('Hello', 'World', 42)</tt>
+	 *
+	 * @param data the Struct to convert
+	 * @return a String representation of the data
+	 * @throws SQLException
+	 */
+	public String getStructDisplay(Struct data)
 		throws SQLException
 	{
 		if (data == null) return null;
@@ -80,6 +108,7 @@ public class StructConverter
 				{
 					if (a instanceof CharSequence)
 					{
+						// String need to be enclosed in single quotes
 						buffer.append('\'');
 						buffer.append(a.toString());
 						buffer.append('\'');
@@ -107,6 +136,9 @@ public class StructConverter
 					}
 					else
 					{
+						// for anything else, rely on the driver
+						// as the JDBC type of this attribute is not known, we also
+						// cannot dispatch this to a DataConverter
 						buffer.append(a.toString());
 					}
 				}

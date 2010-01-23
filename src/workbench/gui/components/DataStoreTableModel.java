@@ -53,7 +53,7 @@ public class DataStoreTableModel
 	private SortDefinition sortColumns = new SortDefinition();
 
 	private boolean allowEditing = true;
-	
+
 	private boolean showConverterError = true;
 	private final Object model_change_lock = new Object();
 	private Set<Integer> readOnlyColumns;
@@ -118,6 +118,11 @@ public class DataStoreTableModel
 		return index + this.columnStartIndex;
 	}
 
+	public int getRealColumnStart()
+	{
+		return columnStartIndex;
+	}
+
 	/**
 	 *	Shows or hides the status column.
 	 *	The status column will display an indicator if the row has
@@ -145,7 +150,7 @@ public class DataStoreTableModel
 	{
 		this.readOnlyColumns = cols;
 	}
-	
+
 	public boolean getShowStatusColumn()
 	{
 		return this.showStatusColumn;
@@ -179,19 +184,19 @@ public class DataStoreTableModel
 	{
 		inputValidator = validator;
 	}
-	
+
 	public void setValueAt(Object aValue, int row, int column)
 	{
 		// Updates to the status column shouldn't happen anyway ....
 		if (this.showStatusColumn && column == 0) return;
 
 		int realColumn = column - this.columnStartIndex;
-		
+
 		if (inputValidator != null)
 		{
 			if (!inputValidator.isValid(aValue, row, column, this)) return;
 		}
-		
+
 		if (this.readOnlyColumns != null && readOnlyColumns.contains(realColumn)) return;
 
 		if (isNull(aValue, realColumn))
@@ -281,7 +286,7 @@ public class DataStoreTableModel
 		{
 			return SqlUtil.getTypeName(this.getColumnType(col));
 		}
-		
+
 	}
 
 	public String getDbmsType(int col)
@@ -299,7 +304,7 @@ public class DataStoreTableModel
 		}
 
 	}
-	
+
 	/**
 	 *	Returns the type (java.sql.Types) of the given column.
 	 */

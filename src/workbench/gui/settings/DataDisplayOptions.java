@@ -70,6 +70,7 @@ public class DataDisplayOptions
 		selectedTextColor.setSelectedColor(Settings.getInstance().getColor("workbench.gui.table.selection.foreground", null));
 		defMaxRows.setText(Integer.toString(GuiSettings.getDefaultMaxRows()));
 		retrieveComments.setSelected(GuiSettings.getRetrieveQueryComments());
+		showRowNumbers.setSelected(GuiSettings.getShowTableRowNumbers());
 		fillLanguageDropDown();
 	}
 
@@ -92,6 +93,7 @@ public class DataDisplayOptions
 		GuiSettings.setShowSelectionSummary(selectSummary.isSelected());
 		GuiSettings.setDefaultMaxRows(StringUtil.getIntValue(defMaxRows.getText(), 0));
 		GuiSettings.setRetrieveQueryComments(retrieveComments.isSelected());
+		GuiSettings.setShowTableRowNumbers(showRowNumbers.isSelected());
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 
 		Settings.getInstance().setSortLocale(dl.getLocale());
@@ -222,6 +224,7 @@ public class DataDisplayOptions
     retrieveComments = new javax.swing.JCheckBox();
     jLabel5 = new javax.swing.JLabel();
     defMaxRows = new javax.swing.JTextField();
+    showRowNumbers = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -570,6 +573,16 @@ public class DataDisplayOptions
     gridBagConstraints.insets = new java.awt.Insets(5, 0, 0, 0);
     jPanel5.add(defMaxRows, gridBagConstraints);
 
+    showRowNumbers.setText(ResourceMgr.getString("LblShowRowNumbers")); // NOI18N
+    showRowNumbers.setToolTipText(ResourceMgr.getString("d_LblShowRowNumbers")); // NOI18N
+    showRowNumbers.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
+    jPanel5.add(showRowNumbers, gridBagConstraints);
+
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -617,6 +630,7 @@ public class DataDisplayOptions
   private javax.swing.JLabel selectedTextColorLabel;
   private workbench.gui.components.WbColorPicker selectionColor;
   private javax.swing.JLabel selectionColorLabel;
+  private javax.swing.JCheckBox showRowNumbers;
   private workbench.gui.components.WbColorPicker stdBackground;
   private javax.swing.JLabel stdBackgroundLabel;
   private workbench.gui.components.WbColorPicker textColor;

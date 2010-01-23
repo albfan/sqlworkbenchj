@@ -14,7 +14,6 @@ package workbench.gui.components;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -615,6 +614,7 @@ public class WbTable
 	{
 		this.cancelEditing();
 		this.rowHeightWasOptimized = false;
+		TableRowHeader.removeRowHeader(this);
 		if (this.getModel() == EmptyTableModel.EMPTY_MODEL) return;
 		this.setModel(EmptyTableModel.EMPTY_MODEL, false);
 	}
@@ -1724,37 +1724,36 @@ public class WbTable
 	public int getFirstVisibleRow()
 	{
 		if (this.getRowCount() == 0) return -1;
-		Point p = this.scrollPane.getViewport().getViewPosition();
+		Rectangle rect = this.scrollPane.getViewport().getViewRect();
+		Point p = new Point(0, rect.y);
 		int row = this.rowAtPoint(p);
+		if (row < 0) row = 0;
 		return row;
 	}
 
-	public int getLastVisibleRow(int first)
+	/**
+	 * Return the row number of the last row that is completely visible
+	 *
+	 * @param first
+	 * @return
+	 */
+	public int getLastVisibleRow()
 	{
-		int count = this.getRowCount();
-		if (count == 0) return -1;
+		int count = getRowCount();
+		if (count <= 0) return -1;
 
-		JViewport view = this.scrollPane.getViewport();
-		Point p = view.getViewPosition();
-		Dimension d = view.getExtentSize();
-		int height = (int)d.getHeight();
-		int currentRowHeight = 0;
-		int spacing = this.getRowMargin();
-		int lastRow = 0;
-		for (int r = first; r < count; r ++)
+		Rectangle view = this.scrollPane.getViewport().getViewRect();
+		Point p = new Point(0, view.y + view.height - 1);
+		int lastRow = this.rowAtPoint(p);
+		Rectangle r = getCellRect(lastRow, 0, true);
+		if (!view.contains(r))
 		{
-			int h = this.getRowHeight(r) + spacing;
-			if (currentRowHeight + h > height) break;
-			currentRowHeight += h;
+			// if the lastRow determined by the viewPort() is not completely visible,
+			// then it's not considered visible
+			lastRow --;
 		}
-		p.move(0, currentRowHeight);
-		lastRow = this.rowAtPoint(p);
-
-		// if rowAtPoint() returns a negative number, then all
-		// rows fit into the current viewport
-		if (lastRow < 0 || lastRow > count) lastRow = count - 1;
-
-		return first + lastRow;
+		if (lastRow <= 0 || lastRow >= count) lastRow = count - 1;
+		return lastRow;
 	}
 
 

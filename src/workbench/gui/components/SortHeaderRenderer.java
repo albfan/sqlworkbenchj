@@ -94,13 +94,18 @@ public class SortHeaderRenderer
 				primary = sortTable.isPrimarySortColumn(col);
 			}
 			DataStoreTableModel model = sortTable.getDataStoreTableModel();
+
 			if (model != null)
 			{
-				ColumnIdentifier colId = model.getDataStore().getResultInfo().getColumn(col);
-				type = colId.getDbmsType();
-				javaType = colId.getDataType();
-				javaTypeName = SqlUtil.getTypeName(javaType);
-				remarks = colId.getComment();
+				int realCol = col - model.getRealColumnStart();
+				if (realCol >= 0)
+				{
+					ColumnIdentifier colId = model.getDataStore().getResultInfo().getColumn(realCol);
+					type = colId.getDbmsType();
+					javaType = colId.getDataType();
+					javaTypeName = SqlUtil.getTypeName(javaType);
+					remarks = colId.getComment();
+				}
 			}
 		}
 
