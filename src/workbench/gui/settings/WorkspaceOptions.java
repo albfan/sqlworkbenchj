@@ -135,7 +135,7 @@ public class WorkspaceOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 9, 3, 0);
+    gridBagConstraints.insets = new Insets(10, 12, 3, 0);
     add(autoSaveWorkspace, gridBagConstraints);
 
     createBackup.setText(ResourceMgr.getString("LblBckWksp")); // NOI18N
@@ -146,7 +146,7 @@ public class WorkspaceOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 9, 1, 0);
+    gridBagConstraints.insets = new Insets(6, 12, 1, 0);
     add(createBackup, gridBagConstraints);
 
     jLabel1.setLabelFor(backupCount);
@@ -177,7 +177,7 @@ public class WorkspaceOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(6, 9, 4, 0);
+    gridBagConstraints.insets = new Insets(6, 12, 4, 0);
     add(jLabel2, gridBagConstraints);
 
     backupDirPicker.setToolTipText(ResourceMgr.getString("d_LblBckDir")); // NOI18N
@@ -198,7 +198,7 @@ public class WorkspaceOptions
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new Insets(11, 9, 0, 0);
+    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
     add(jLabel3, gridBagConstraints);
 
     fileHandling.setModel(new DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));

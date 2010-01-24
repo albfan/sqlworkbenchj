@@ -298,7 +298,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 6, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(8, 8, 0, 7);
     add(colWidthPanel, gridBagConstraints);
 
     rowHeightPanel.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("TxtRowHeightSettings"))); // NOI18N
@@ -360,7 +360,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 6, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(4, 8, 0, 7);
     add(rowHeightPanel, gridBagConstraints);
 
     jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblColors"))); // NOI18N
@@ -487,7 +487,7 @@ public class DataDisplayOptions
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(7, 6, 0, 7);
+    gridBagConstraints.insets = new java.awt.Insets(7, 8, 0, 7);
     add(jPanel2, gridBagConstraints);
 
     jLabel1.setText(ResourceMgr.getString("LblSortLocale")); // NOI18N
@@ -496,7 +496,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 0);
     add(jLabel1, gridBagConstraints);
 
     localeDropDown.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
@@ -505,7 +505,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 7, 0, 10);
+    gridBagConstraints.insets = new java.awt.Insets(10, 7, 0, 10);
     add(localeDropDown, gridBagConstraints);
 
     jPanel5.setLayout(new java.awt.GridBagLayout());
@@ -589,7 +589,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(6, 9, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 2, 0);
     add(jPanel5, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 

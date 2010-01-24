@@ -143,7 +143,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(10, 10, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 12, 0, 11);
     add(formatUpdates, gridBagConstraints);
 
     formatInserts.setSelected(Settings.getInstance().getDoFormatInserts());
@@ -160,7 +160,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 10, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 12, 0, 11);
     add(formatInserts, gridBagConstraints);
 
     ignoreIdentity.setSelected(Settings.getInstance().getFormatInsertIgnoreIdentity());
@@ -176,7 +176,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 8, 0, 11);
+    gridBagConstraints.insets = new Insets(10, 12, 0, 11);
     add(ignoreIdentity, gridBagConstraints);
 
     tableNameCaseLabel.setLabelFor(tableNameCase);
@@ -187,7 +187,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 12;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(11, 8, 0, 0);
+    gridBagConstraints.insets = new Insets(11, 12, 0, 0);
     add(tableNameCaseLabel, gridBagConstraints);
 
     tableNameCase.setModel(new DefaultComboBoxModel(new String[] { "As is", "Lowercase", "Uppercase" }));
@@ -239,7 +239,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(10, 8, 0, 0);
+    gridBagConstraints.insets = new Insets(10, 12, 0, 0);
     add(jPanel1, gridBagConstraints);
 
     jPanel2.setBorder(BorderFactory.createTitledBorder(ResourceMgr.getString("LblDefDateLiterals"))); // NOI18N
@@ -312,7 +312,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(3, 3, 3, 8);
+    gridBagConstraints.insets = new Insets(3, 10, 3, 14);
     add(jPanel2, gridBagConstraints);
 
     jPanel4.setLayout(new FlowLayout(FlowLayout.LEFT));
@@ -332,7 +332,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 15, 0, 0);
+    gridBagConstraints.insets = new Insets(2, 20, 0, 0);
     add(jPanel4, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
@@ -370,7 +370,7 @@ public class SqlGenerationOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
-    gridBagConstraints.insets = new Insets(2, 15, 0, 0);
+    gridBagConstraints.insets = new Insets(2, 20, 0, 0);
     add(jPanel7, gridBagConstraints);
   }
 

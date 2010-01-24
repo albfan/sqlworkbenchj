@@ -135,7 +135,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 11);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 2, 11);
     add(productAtEnd, gridBagConstraints);
 
     showProfileGroup.setText(ResourceMgr.getString("LblShowProfileGroup")); // NOI18N
@@ -154,7 +154,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 11);
     add(showProfileGroup, gridBagConstraints);
 
     showWorkspace.setText(ResourceMgr.getString("LblShowWorkspace")); // NOI18N
@@ -168,7 +168,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 1);
+    gridBagConstraints.insets = new java.awt.Insets(6, 12, 0, 1);
     add(showWorkspace, gridBagConstraints);
 
     windowTitleLabel.setLabelFor(windowTitleComboBox);
@@ -178,7 +178,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 4;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(16, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(16, 12, 0, 0);
     add(windowTitleLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
@@ -195,7 +195,7 @@ public class WindowTitleOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 3;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 10, 2, 0);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 2, 0);
     add(encloseCharLabel, gridBagConstraints);
 
     encloseChar.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "( )", "{ }", "[ ]", "< >" }));
