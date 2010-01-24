@@ -40,7 +40,7 @@ public class GuiSettings
 
 	public static void setShowTableRowNumbers(boolean flag)
 	{
-		Settings.getInstance().setProperty("workbench.gui.table.rownumber", flag);
+		Settings.getInstance().setProperty("workbench.gui.table.rownumber.show", flag);
 	}
 
 	public static boolean getSortCompletionColumns()
