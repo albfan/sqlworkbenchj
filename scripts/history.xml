@@ -2,7 +2,20 @@
 <history>
 
 <!-- build number must be set to -1 for development builds -->
-<release build="-1" date="2010-01-13">
+<release build="-1" date="2010-01-24">
+
+  <entry dev-build="3" type="enh">
+    <description>
+      For results the row numbers can now also be displayed (similar to the line numbers in the editor)
+    </description>
+  </entry>
+
+  <entry dev-build="3" type="enh">
+    <description>
+      Oracle object type columns are now displayed correctly. As this is a generic solution to display JDBC "Struct" values,
+      it should work for any driver that returns the correct type.
+    </description>
+  </entry>
 
   <entry dev-build="2" type="enh">
     <description>

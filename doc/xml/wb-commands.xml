@@ -1554,7 +1554,7 @@ WHERE id=42;</programlisting>
   </section>
 
 
-  <section id="command-listcat">
+  <section id="command-listschema">
     <title>List schemas - WbListSchemas</title>
 
     <para>
