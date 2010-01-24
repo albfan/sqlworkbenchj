@@ -106,7 +106,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 11);
+    gridBagConstraints.insets = new java.awt.Insets(10, 12, 0, 11);
     add(previewDml, gridBagConstraints);
 
     requiredFieldColor.setToolTipText(ResourceMgr.getString("LblReqFldColor"));
@@ -129,7 +129,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(highlightRequired, gridBagConstraints);
 
     warnDiscard.setText(ResourceMgr.getString("LblWarnChgResultSet")); // NOI18N
@@ -141,7 +141,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 1;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(8, 10, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(8, 12, 0, 0);
     add(warnDiscard, gridBagConstraints);
 
     jPanel1.setLayout(new java.awt.GridBagLayout());
@@ -184,7 +184,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.gridy = 3;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.insets = new java.awt.Insets(12, 10, 0, 15);
+    gridBagConstraints.insets = new java.awt.Insets(12, 12, 0, 15);
     add(jPanel1, gridBagConstraints);
 
     jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder(ResourceMgr.getString("LblFreeFormSettings"))); // NOI18N
@@ -230,7 +230,7 @@ public class DataEditOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(15, 6, 0, 9);
+    gridBagConstraints.insets = new java.awt.Insets(15, 8, 0, 9);
     add(jPanel3, gridBagConstraints);
   }
 
