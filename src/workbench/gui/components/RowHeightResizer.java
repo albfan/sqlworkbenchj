@@ -101,7 +101,7 @@ public class RowHeightResizer
 				TableRowHeader header = TableRowHeader.getRowHeader(table);
 				if (header != null)
 				{
-					header.modelChanged(row);
+					header.tableChanged(row);
 				}
 			}
 		});

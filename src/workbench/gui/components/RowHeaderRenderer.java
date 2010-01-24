@@ -64,17 +64,19 @@ public class RowHeaderRenderer
 
 		if (GuiSettings.getUseButtonStyleRowNumbers())
 		{
-			Border b = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(0, 1, 0, 2));
+			Border b = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(1, 1, 0, 1));
 			label.setBorder(b);
 			label.setForeground(header.getForeground());
 			label.setBackground(header.getBackground());
 		}
 		else
 		{
-			label.setBorder(new SingleLineBorder(SingleLineBorder.RIGHT, Color.LIGHT_GRAY));
+			Color grid = UIManager.getColor("Table.gridColor");
+			label.setBorder(new SingleLineBorder(SingleLineBorder.BOTTOM, grid));
 			useAlternateColor = true;
 			baseColor = table.getBackground();
 			alternateColor = GuiSettings.getAlternateRowColor();
+			label.setForeground(Color.DARK_GRAY.brighter());
 		}
 	}
 
@@ -82,10 +84,17 @@ public class RowHeaderRenderer
 	{
 		FontMetrics fm = label.getFontMetrics(label.getFont());
 		int width = 8;
-		if (fm != null)
+		try
 		{
-			Rectangle2D r = fm.getStringBounds("9", label.getGraphics());
-			width = r.getBounds().width;
+			if (fm != null)
+			{
+				Rectangle2D r = fm.getStringBounds("9", label.getGraphics());
+				width = r.getBounds().width;
+			}
+		}
+		catch (Exception e)
+		{
+			width = 8;
 		}
 		String max = NumberStringCache.getNumberString(table.getRowCount());
 		colWidth = max.length() * width + (width * 2);
@@ -119,7 +128,7 @@ public class RowHeaderRenderer
 	@Override
 	public void tableChanged(TableModelEvent e)
 	{
-		rowHeader.modelChanged(e.getFirstRow());
+		rowHeader.tableChanged(e.getFirstRow());
 		calculateWidth();
 	}
 

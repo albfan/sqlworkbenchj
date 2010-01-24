@@ -12,6 +12,7 @@ package workbench.gui.components;
 
 import javax.swing.*;
 import java.awt.*;
+import javax.swing.border.EmptyBorder;
 
 /**
  *
@@ -35,9 +36,10 @@ public class TableRowHeader
 		setSelectionModel(client.getSelectionModel());
 		setBackground(client.getBackground());
 		setOpaque(false);
+		setBorder(new EmptyBorder(0, 0, 0, 2));
 	}
 
-	public void modelChanged(int row)
+	public void tableChanged(int row)
 	{
 		rowModel.fireModelChanged(row);
 	}
