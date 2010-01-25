@@ -291,7 +291,13 @@ public class DbSettings
 	 * <br/>
 	 * If includeCascade is true and the DBMS supports dropping this type cascaded,
 	 * then the returned DDL will include the necessary CASCADE keyword
-	 *
+	 * <br/>
+	 * The cascade keyword will only be used when the SQL template (defined in
+	 * default.properties or workbench.settings actually includes the %cascade%
+	 * placeholder. If that placeholder is not present in the SQL template,
+	 * passing true as includeCascade will not have an effect.
+	 * <br/>
+	 * 
 	 * @param type the database object type to drop (TABLE, VIEW etc)
 	 * @return the DDL Statement to drop an object of that type. The placeholder %name% must
 	 * be replaced with the correct object name
