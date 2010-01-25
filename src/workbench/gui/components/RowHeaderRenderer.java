@@ -45,6 +45,7 @@ public class RowHeaderRenderer
 	private Color baseColor;
 	private Color alternateColor;
 	private int colWidth = -1;
+	private boolean useButtonStyle;
 
 	public RowHeaderRenderer(TableRowHeader rowHead, JTable client)
 	{
@@ -62,21 +63,26 @@ public class RowHeaderRenderer
 			colWidth = 16;
 		}
 
-		if (GuiSettings.getUseButtonStyleRowNumbers())
+		label.setForeground(header.getForeground());
+		label.setBackground(header.getBackground());
+		
+		useButtonStyle = GuiSettings.getUseButtonStyleRowNumbers();
+		
+		if (useButtonStyle)
 		{
 			Border b = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(1, 1, 0, 1));
 			label.setBorder(b);
-			label.setForeground(header.getForeground());
-			label.setBackground(header.getBackground());
 		}
 		else
 		{
 			Color grid = UIManager.getColor("Table.gridColor");
-			label.setBorder(new SingleLineBorder(SingleLineBorder.BOTTOM, grid));
-			useAlternateColor = true;
-			baseColor = table.getBackground();
-			alternateColor = GuiSettings.getAlternateRowColor();
-			label.setForeground(Color.DARK_GRAY.brighter());
+			Border b = new CompoundBorder(new SingleLineBorder(SingleLineBorder.BOTTOM, grid), new EmptyBorder(0, 0, 1, 0));
+			label.setBorder(b);
+//			useAlternateColor = true;
+//			baseColor = table.getBackground();
+//			alternateColor = GuiSettings.getAlternateRowColor();
+//			label.setBackground(headerColor);
+//			label.setForeground(Color.DARK_GRAY.brighter());
 		}
 	}
 
@@ -97,7 +103,15 @@ public class RowHeaderRenderer
 			width = 8;
 		}
 		String max = NumberStringCache.getNumberString(table.getRowCount());
-		colWidth = max.length() * width + (width * 2);
+		colWidth = max.length() * width;
+		if (useButtonStyle) 
+		{
+			colWidth += (width * 2);
+		}
+		else
+		{
+			colWidth += width;
+		}
 	}
 
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus)
@@ -120,8 +134,12 @@ public class RowHeaderRenderer
 		}
 		label.setText(NumberStringCache.getNumberString(index + 1));
 		int height = table.getRowHeight(index);
+		//int margin = table.getRowMargin();
+		//height += margin;
 		Dimension size = new Dimension(colWidth, height);
 		label.setPreferredSize(size);
+		label.setMaximumSize(size);
+		label.setMinimumSize(size);
 		return label;
 	}
 
