@@ -33,6 +33,11 @@ public class GuiSettings
 		return Settings.getInstance().getBoolProperty("workbench.gui.table.rownumber.buttonstyle", true);
 	}
 
+	public static void setUseButtonStyleRowNumbers(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.table.rownumber.buttonstyle", flag);
+	}
+
 	public static boolean getShowTableRowNumbers()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.table.rownumber.show", false);
