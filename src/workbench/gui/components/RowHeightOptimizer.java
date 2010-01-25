@@ -12,6 +12,7 @@
 package workbench.gui.components;
 
 import java.awt.Component;
+import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import javax.swing.JTextArea;
@@ -36,6 +37,22 @@ public class RowHeightOptimizer
 		this.table = client;
 	}
 
+	protected void notifyRowHeader(final int row)
+	{
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				TableRowHeader header = TableRowHeader.getRowHeader(table);
+				if (header != null)
+				{
+					header.tableChanged(row);
+				}
+			}
+		});
+	}
+	
 	public void optimizeAllRows()
 	{
 		int count = this.table.getRowCount();
@@ -46,6 +63,7 @@ public class RowHeightOptimizer
 		{
 			optimizeRowHeight(row, maxLines, ignore);
 		}
+		notifyRowHeader(-1);
 	}
 
 	public void optimizeRowHeight(int row)
@@ -53,9 +71,10 @@ public class RowHeightOptimizer
 		int maxLines = GuiSettings.getAutRowHeightMaxLines();
 		boolean ignore = GuiSettings.getIgnoreWhitespaceForAutoRowHeight();
 		optimizeRowHeight(row, maxLines, ignore);
+		notifyRowHeader(row);
 	}
 	
-	public void optimizeRowHeight(int row, int maxLines, boolean ignoreEmptyLines)
+	private void optimizeRowHeight(int row, int maxLines, boolean ignoreEmptyLines)
 	{
 		int colCount = this.table.getColumnCount();
 

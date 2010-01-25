@@ -40,6 +40,13 @@ public class TableRowHeaderModel
 
 	public void fireModelChanged(int row)
 	{
-		fireContentsChanged(this, row, row);
+		if (row < 0)
+		{
+			fireContentsChanged(this, 0, getSize());
+		}
+		else
+		{
+			fireContentsChanged(this, row, row);
+		}
 	}
 }
