@@ -41,9 +41,6 @@ public class RowHeaderRenderer
 	private JLabel label;
 	private JTable table;
 	private TableRowHeader rowHeader;
-	private boolean useAlternateColor;
-	private Color baseColor;
-	private Color alternateColor;
 	private int colWidth = -1;
 	private boolean useButtonStyle;
 
@@ -76,13 +73,8 @@ public class RowHeaderRenderer
 		else
 		{
 			Color grid = UIManager.getColor("Table.gridColor");
-			Border b = new CompoundBorder(new SingleLineBorder(SingleLineBorder.BOTTOM, grid), new EmptyBorder(0, 0, 1, 0));
+			Border b = new CompoundBorder(new SingleLineBorder(SingleLineBorder.BOTTOM, grid), new EmptyBorder(1, 0, 0, 0));
 			label.setBorder(b);
-//			useAlternateColor = true;
-//			baseColor = table.getBackground();
-//			alternateColor = GuiSettings.getAlternateRowColor();
-//			label.setBackground(headerColor);
-//			label.setForeground(Color.DARK_GRAY.brighter());
 		}
 	}
 
@@ -94,7 +86,7 @@ public class RowHeaderRenderer
 		{
 			if (fm != null)
 			{
-				Rectangle2D r = fm.getStringBounds("9", label.getGraphics());
+				Rectangle2D r = fm.getStringBounds("0", label.getGraphics());
 				width = r.getBounds().width;
 			}
 		}
@@ -121,17 +113,6 @@ public class RowHeaderRenderer
 			calculateWidth();
 		}
 
-		if (useAlternateColor)
-		{
-			if ((index % 2) == 1)
-			{
-				label.setBackground(alternateColor);
-			}
-			else
-			{
-				label.setBackground(baseColor);
-			}
-		}
 		label.setText(NumberStringCache.getNumberString(index + 1));
 		int height = table.getRowHeight(index);
 		//int margin = table.getRowMargin();
