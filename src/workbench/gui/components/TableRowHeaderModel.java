@@ -11,42 +11,72 @@
 
 package workbench.gui.components;
 
-import javax.swing.AbstractListModel;
 import javax.swing.JTable;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableRowHeaderModel
-	extends AbstractListModel
+	implements TableModel
 {
 	private JTable table;
 
-	public TableRowHeaderModel(JTable table)
+	public TableRowHeaderModel(JTable client)
 	{
-		this.table = table;
+		this.table = client;
 	}
 
-	public int getSize()
+	@Override
+	public int getRowCount()
 	{
 		return table.getRowCount();
 	}
 
-	public Object getElementAt(int index)
+	@Override
+	public int getColumnCount()
+	{
+		return 1;
+	}
+
+	@Override
+	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		return null;
 	}
 
-	public void fireModelChanged(int row)
+	@Override
+	public String getColumnName(int columnIndex)
 	{
-		if (row < 0)
-		{
-			fireContentsChanged(this, 0, getSize());
-		}
-		else
-		{
-			fireContentsChanged(this, row, row);
-		}
+		return "";
+	}
+
+	@Override
+	public Class<?> getColumnClass(int columnIndex)
+	{
+		return Integer.class;
+	}
+
+	@Override
+	public boolean isCellEditable(int rowIndex, int columnIndex)
+	{
+		return false;
+	}
+
+	@Override
+	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
+	{
+	}
+
+	@Override
+	public void addTableModelListener(TableModelListener l)
+	{
+	}
+
+	@Override
+	public void removeTableModelListener(TableModelListener l)
+	{
 	}
 }

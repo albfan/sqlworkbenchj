@@ -47,7 +47,7 @@ public class RowHeightOptimizer
 				TableRowHeader header = TableRowHeader.getRowHeader(table);
 				if (header != null)
 				{
-					header.tableChanged(row);
+					header.rowHeightChanged(row);
 				}
 			}
 		});
@@ -62,8 +62,8 @@ public class RowHeightOptimizer
 		for (int row = 0; row < count; row ++)
 		{
 			optimizeRowHeight(row, maxLines, ignore);
+			notifyRowHeader(row);
 		}
-		notifyRowHeader(-1);
 	}
 
 	public void optimizeRowHeight(int row)

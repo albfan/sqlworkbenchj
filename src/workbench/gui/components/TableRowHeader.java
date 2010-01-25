@@ -13,35 +13,38 @@ package workbench.gui.components;
 import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.TableModelListener;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableRowHeader
-	extends JList
+	extends JTable
+	implements TableModelListener
 {
 	private TableRowHeaderModel rowModel;
+	private RowHeaderRenderer renderer;
+	private JTable clientTable;
 
 	public TableRowHeader(JTable client)
 	{
 		super();
 		rowModel = new TableRowHeaderModel(client);
 		setModel(rowModel);
-		setCellRenderer(new RowHeaderRenderer(this, client));
-		if (client.getRowCount() == 0)
-		{
-			setFixedCellWidth(8);
-		}
+		clientTable = client;
+		renderer = new RowHeaderRenderer(this, client);
+		getColumnModel().getColumn(0).setCellRenderer(renderer);
 		setSelectionModel(client.getSelectionModel());
 		setBackground(client.getBackground());
 		setOpaque(false);
-		setBorder(new EmptyBorder(0, 0, 0, 2));
+		setBorder(new EmptyBorder(0, 0, 0, 1));
+		setRowSelectionAllowed(false);
 	}
 
-	public void tableChanged(int row)
+	public void rowHeightChanged(int row)
 	{
-		rowModel.fireModelChanged(row);
+		setRowHeight(row, clientTable.getRowHeight(row));
 	}
 
 	public static void showRowHeader(JTable table)
@@ -95,18 +98,10 @@ public class TableRowHeader
 			if (gp instanceof JScrollPane)
 			{
 				JScrollPane scrollPane = (JScrollPane) gp;
-				JViewport rowHeaderViewPort = scrollPane.getRowHeader();
-				if (rowHeaderViewPort != null)
+				TableRowHeader header = getRowHeader(table);
+				if (header != null && header.clientTable != null)
 				{
-					Component c = rowHeaderViewPort.getView();
-					if (c instanceof TableRowHeader)
-					{
-						ListCellRenderer r = ((TableRowHeader)c).getCellRenderer();
-						if (r instanceof RowHeaderRenderer)
-						{
-							((RowHeaderRenderer)r).dispose();
-						}
-					}
+					header.clientTable.getModel().removeTableModelListener(header);
 				}
 				scrollPane.setRowHeader(null);
 			}

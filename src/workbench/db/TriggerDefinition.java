@@ -93,9 +93,9 @@ public class TriggerDefinition
 	}
 
 	@Override
-	public String getDropStatement(WbConnection con)
+	public String getDropStatement(WbConnection con, boolean cascade)
 	{
-		String ddl = con.getDbSettings().getDropDDL(getObjectType(), false);
+		String ddl = con.getDbSettings().getDropDDL(getObjectType(), cascade);
 		if (ddl == null) return null;
 
 		// getDropDDL can also return a generic DROP statement that only
@@ -110,6 +110,7 @@ public class TriggerDefinition
 		{
 			ddl = ddl.replace("%trigger_table%", table.getTableExpression(con));
 		}
+
 		return ddl;
 	}
 

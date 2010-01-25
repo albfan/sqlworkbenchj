@@ -95,5 +95,5 @@ public interface DbObject
 	 */
 	void setComment(String cmt);
 
-	String getDropStatement(WbConnection con);
+	String getDropStatement(WbConnection con, boolean cascade);
 }

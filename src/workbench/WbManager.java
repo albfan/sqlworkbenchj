@@ -96,6 +96,10 @@ public final class WbManager
 
 	public void uncaughtException(Thread thread, Throwable error)
 	{
+		if (LogMgr.isDebugEnabled())
+		{
+			error.printStackTrace();
+		}
 		LogMgr.logError("WbManager.uncaughtException()", "Thread + " + thread.getName() + " caused an exception!", error);
 	}
 

@@ -87,7 +87,7 @@ public class SequenceDefinition
 	}
 
 	@Override
-	public String getDropStatement(WbConnection con)
+	public String getDropStatement(WbConnection con, boolean cascade)
 	{
 		return null;
 	}

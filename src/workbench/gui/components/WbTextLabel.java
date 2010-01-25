@@ -38,7 +38,7 @@ public class WbTextLabel
 {
 	private final static int DEFAULT_TEXT_Y = 15;
 	private String text;
-	private final Color textColor;
+	private Color textColor;
 	private int textX = 2;
 	private int textY = DEFAULT_TEXT_Y;
 	private int alignment = SwingConstants.LEFT;
@@ -66,6 +66,12 @@ public class WbTextLabel
 		addMouseListener(this);
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map)tk.getDesktopProperty("awt.font.desktophints");
+	}
+
+	public void setForeground(Color c)
+	{
+		super.setForeground(c);
+		textColor = c;
 	}
 
 	public void setBorder(Border b)

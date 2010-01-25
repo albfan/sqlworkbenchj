@@ -128,7 +128,7 @@ public class GenericObjectDropper
 
 	private CharSequence getDropStatement(int index)
 	{
-		String drop = this.objects.get(index).getDropStatement(connection);
+		String drop = this.objects.get(index).getDropStatement(connection, cascadeConstraints);
 		if (drop != null) return drop;
 
 		String name = this.objects.get(index).getObjectNameForDrop(this.connection);
