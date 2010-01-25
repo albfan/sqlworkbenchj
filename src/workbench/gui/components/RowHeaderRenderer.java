@@ -46,12 +46,7 @@ public class RowHeaderRenderer
 		rowHeader = rowHead;
 		label = new JLabel();
 		useButtonStyle = GuiSettings.getUseButtonStyleRowNumbers();
-		init();
-		calculateWidth();
-	}
 
-	public void init()
-	{
 		JTableHeader header = table.getTableHeader();
 		label.setFont(header.getFont());
 		label.setOpaque(true);
@@ -59,13 +54,19 @@ public class RowHeaderRenderer
 
 		label.setForeground(header.getForeground());
 		label.setBackground(header.getBackground());
-		
+
 		if (useButtonStyle)
 		{
 			Border b = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(0, 1, 0, 2));
 			label.setBorder(b);
 		}
+		else
+		{
+			label.setBorder(new EmptyBorder(1, 0, 0, 1));
+		}
+		calculateWidth();
 	}
+
 	public synchronized void calculateWidth()
 	{
 		FontMetrics fm = label.getFontMetrics(label.getFont());
@@ -85,7 +86,7 @@ public class RowHeaderRenderer
 		String max = NumberStringCache.getNumberString(table.getRowCount());
 		colWidth = max.length() * width;
 
-		if (useButtonStyle) 
+		if (useButtonStyle)
 		{
 			colWidth += (width * 2);
 		}
@@ -120,25 +121,8 @@ public class RowHeaderRenderer
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
 	{
-		prepareLabel(row);
+		label.setText(NumberStringCache.getNumberString(row + 1));
 		return label;
-	}
-	
-	private void prepareLabel(int rowNumber)
-	{
-		if (colWidth == -1)
-		{
-			calculateWidth();
-		}
-
-		label.setText(NumberStringCache.getNumberString(rowNumber + 1));
-		int height = table.getRowHeight(rowNumber);
-		//int margin = table.getRowMargin();
-		//height += margin;
-		Dimension size = new Dimension(colWidth, height);
-		label.setPreferredSize(size);
-		label.setMaximumSize(size);
-		label.setMinimumSize(size);
 	}
 
 }

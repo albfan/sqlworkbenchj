@@ -4,6 +4,12 @@
 <!-- build number must be set to -1 for development builds -->
 <release build="-1" date="2010-01-24">
 
+  <entry dev-build="4" type="enh">
+    <description>
+      The display of the row numbers can now be switched between a button style display and a flat display
+    </description>
+  </entry>
+  
   <entry dev-build="3" type="enh">
     <description>
       For results the row numbers can now also be displayed (similar to the line numbers in the editor)
@@ -85,6 +91,12 @@
     </description>
   </entry>
 
+  <entry dev-build="4" type="fix">
+    <description>
+      The option to display row numbers for results was not saved from within the options dialog
+    </description>
+  </entry>
+  
   <entry dev-build="2" type="fix">
     <description>
       WbSchemaDiff reported the compared sequences as procedure-info in the diff summary
