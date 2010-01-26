@@ -14,6 +14,7 @@ package workbench.gui.components;
 import javax.swing.JTable;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import workbench.util.NumberStringCache;
 
 /**
  *
@@ -44,7 +45,7 @@ public class TableRowHeaderModel
 	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
-		return null;
+		return NumberStringCache.getNumberString(rowIndex + 1);
 	}
 
 	@Override

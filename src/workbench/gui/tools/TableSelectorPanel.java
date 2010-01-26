@@ -269,7 +269,10 @@ public class TableSelectorPanel
 		Object selected = this.tableSelector.getSelectedItem();
 		if (selected == null) return null;
 
-		return (TableIdentifier)selected;
+		TableIdentifier tbl = (TableIdentifier)selected;
+		String schema = (String)schemaSelector.getSelectedItem();
+		tbl.setSchema(schema);
+		return tbl;
 	}
 
 	public void findAndSelectTable(String aTable)

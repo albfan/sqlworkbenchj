@@ -28,16 +28,6 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 
-	public static boolean getUseButtonStyleRowNumbers()
-	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.table.rownumber.buttonstyle", true);
-	}
-
-	public static void setUseButtonStyleRowNumbers(boolean flag)
-	{
-		Settings.getInstance().setProperty("workbench.gui.table.rownumber.buttonstyle", flag);
-	}
-
 	public static boolean getShowTableRowNumbers()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.table.rownumber.show", false);

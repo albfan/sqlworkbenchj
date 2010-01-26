@@ -10,21 +10,16 @@
  */
 package workbench.gui.components;
 
-import java.awt.Component;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FontMetrics;
 import java.awt.geom.Rectangle2D;
-import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.JTableHeader;
-import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
-import workbench.resource.GuiSettings;
+import workbench.gui.renderer.ToolTipRenderer;
 import workbench.util.NumberStringCache;
 
 /**
@@ -32,50 +27,59 @@ import workbench.util.NumberStringCache;
  * @author Thomas Kellerer
  */
 public class RowHeaderRenderer
-	implements TableCellRenderer
+	extends ToolTipRenderer
 {
-	private JLabel label;
 	private JTable table;
 	private TableRowHeader rowHeader;
 	private int colWidth = -1;
-	private boolean useButtonStyle;
+	private Color backgroundColor;
+	private Color textColor;
 
 	public RowHeaderRenderer(TableRowHeader rowHead, JTable client)
 	{
 		table = client;
 		rowHeader = rowHead;
-		label = new JLabel();
-		useButtonStyle = GuiSettings.getUseButtonStyleRowNumbers();
 
 		JTableHeader header = table.getTableHeader();
-		label.setFont(header.getFont());
-		label.setOpaque(true);
-		label.setHorizontalAlignment(SwingConstants.RIGHT);
+		setFont(header.getFont());
+		setOpaque(true);
+		setHorizontalAlignment(SwingConstants.RIGHT);
 
-		label.setForeground(header.getForeground());
-		label.setBackground(header.getBackground());
+		textColor = header.getForeground();
+		backgroundColor = header.getBackground();
 
-		if (useButtonStyle)
-		{
-			Border b = new CompoundBorder(UIManager.getBorder("TableHeader.cellBorder"), new EmptyBorder(0, 1, 0, 2));
-			label.setBorder(b);
-		}
-		else
-		{
-			label.setBorder(new EmptyBorder(1, 0, 0, 1));
-		}
+		setBorder(new EmptyBorder(1, 0, 0, 1));
 		calculateWidth();
 	}
 
+	@Override
+	protected void initDisplay(JTable table, Object value, boolean selected, boolean focus, int row, int col)
+	{
+		// nothing to do...
+	}
+
+	@Override
+	protected Color getBackgroundColor()
+	{
+		return backgroundColor;
+	}
+
+	@Override
+	protected Color getForegroundColor()
+	{
+		return textColor;
+	}
+
+
 	public synchronized void calculateWidth()
 	{
-		FontMetrics fm = label.getFontMetrics(label.getFont());
+		FontMetrics fm = getFontMetrics(getFont());
 		int width = 8;
 		try
 		{
 			if (fm != null)
 			{
-				Rectangle2D r = fm.getStringBounds("0", label.getGraphics());
+				Rectangle2D r = fm.getStringBounds("0", getGraphics());
 				width = r.getBounds().width;
 			}
 		}
@@ -84,16 +88,7 @@ public class RowHeaderRenderer
 			width = 8;
 		}
 		String max = NumberStringCache.getNumberString(table.getRowCount());
-		colWidth = max.length() * width;
-
-		if (useButtonStyle)
-		{
-			colWidth += (width * 2);
-		}
-		else
-		{
-			colWidth += width;
-		}
+		colWidth = (max.length() * width) + width;
 
 		try
 		{
@@ -118,11 +113,17 @@ public class RowHeaderRenderer
 		}
 	}
 
-	@Override
-	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column)
+	public void prepareDisplay(Object aValue)
 	{
-		label.setText(NumberStringCache.getNumberString(row + 1));
-		return label;
+		try
+		{
+			this.displayValue = (String)aValue;
+		}
+		catch (Throwable e)
+		{
+			displayValue = (aValue == null ? null : aValue.toString());
+		}
+		setTooltip(null);
 	}
 
 }

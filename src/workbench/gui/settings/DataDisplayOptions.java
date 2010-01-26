@@ -71,7 +71,6 @@ public class DataDisplayOptions
 		defMaxRows.setText(Integer.toString(GuiSettings.getDefaultMaxRows()));
 		retrieveComments.setSelected(GuiSettings.getRetrieveQueryComments());
 		showRowNumbers.setSelected(GuiSettings.getShowTableRowNumbers());
-		rowHeaderAsButton.setSelected(GuiSettings.getUseButtonStyleRowNumbers());
 		fillLanguageDropDown();
 	}
 
@@ -95,7 +94,6 @@ public class DataDisplayOptions
 		GuiSettings.setDefaultMaxRows(StringUtil.getIntValue(defMaxRows.getText(), 0));
 		GuiSettings.setRetrieveQueryComments(retrieveComments.isSelected());
 		GuiSettings.setShowTableRowNumbers(showRowNumbers.isSelected());
-		GuiSettings.setUseButtonStyleRowNumbers(rowHeaderAsButton.isSelected());
 		DisplayLocale dl = (DisplayLocale)localeDropDown.getSelectedItem();
 
 		Settings.getInstance().setSortLocale(dl.getLocale());
@@ -227,7 +225,6 @@ public class DataDisplayOptions
     jLabel5 = new javax.swing.JLabel();
     defMaxRows = new javax.swing.JTextField();
     showRowNumbers = new javax.swing.JCheckBox();
-    rowHeaderAsButton = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -586,17 +583,6 @@ public class DataDisplayOptions
     gridBagConstraints.insets = new java.awt.Insets(7, 0, 0, 0);
     jPanel5.add(showRowNumbers, gridBagConstraints);
 
-    rowHeaderAsButton.setText(ResourceMgr.getString("LblShowRowNumberButton")); // NOI18N
-    rowHeaderAsButton.setToolTipText(ResourceMgr.getString("d_LblShowRowNumberButton")); // NOI18N
-    rowHeaderAsButton.setBorder(null);
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 2;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(7, 35, 0, 7);
-    jPanel5.add(rowHeaderAsButton, gridBagConstraints);
-
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 2;
@@ -637,7 +623,6 @@ public class DataDisplayOptions
   private javax.swing.JTextField multiLineThreshold;
   private workbench.gui.components.WbColorPicker nullColor;
   private javax.swing.JCheckBox retrieveComments;
-  private javax.swing.JCheckBox rowHeaderAsButton;
   private javax.swing.JPanel rowHeightPanel;
   private javax.swing.JCheckBox rowHeightResize;
   private javax.swing.JCheckBox selectSummary;
