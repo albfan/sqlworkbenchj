@@ -42,7 +42,7 @@ public class SqlExportWriter
 	{
 		super.configureConverter();
 		SqlRowDataConverter conv = (SqlRowDataConverter)this.converter;
-		conv.setIncludeTableOwner(Settings.getInstance().getIncludeOwnerInSqlExport());
+		conv.setIncludeTableOwner(exporter.getUseSchemaInSql());
 		conv.setCommitEvery(exporter.getCommitEvery());
 		conv.setChrFunction(exporter.getChrFunction());
 		conv.setConcatString(exporter.getConcatString());

@@ -69,6 +69,7 @@ public class WbExport
 	public static final String ARG_EMPTY_RESULTS = "writeEmptyResults";
 	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
 	public static final String ARG_USE_CDATA = "useCDATA";
+	public static final String ARG_USE_SCHEMA = "useSchema";
 	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,html,xls";
 	
 	public WbExport()
@@ -128,6 +129,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_ROWNUM);
 		cmdLine.addArgument("tableWhere");
 		cmdLine.addArgument("infoSheet", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
 	}
 
 	public String getVerb() { return VERB; }
@@ -154,6 +156,7 @@ public class WbExport
 		msg = msg.replace("%default_encoding%", Settings.getInstance().getDefaultDataEncoding());
 		msg = msg.replace("%xmlversion%", Settings.getInstance().getDefaultXmlVersion());
 		msg = msg.replace("%empty_results_default%", Boolean.toString(Settings.getInstance().getDefaultWriteEmptyExports()));
+		msg = msg.replace("%use_schema_default%", Boolean.toString(Settings.getInstance().getIncludeOwnerInSqlExport()));
 		msg = msg.replace("%types%", exportTypes);
 		return msg;
 	}
@@ -303,6 +306,10 @@ public class WbExport
 		exporter.setBlobMode(btype);
 		if (updateTable != null) exporter.setTableName(updateTable);
 
+		if (cmdLine.isArgPresent(ARG_USE_SCHEMA))
+		{
+			exporter.setUseSchemaInSql(cmdLine.getBoolean(ARG_USE_SCHEMA));
+		}
 		if ("text".equals(type))
 		{
 			// Support old parameter Syntax

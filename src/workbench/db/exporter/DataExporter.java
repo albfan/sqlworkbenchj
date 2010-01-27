@@ -113,6 +113,7 @@ public class DataExporter
 	private String concatFunction = null;
 	private String filenameColumn = null;
 	private int commitEvery = 0;
+	private boolean useSchemaInSql;
 
 	private SimpleDateFormat dateFormatter = null;
 	private	SimpleDateFormat dateTimeFormatter = null;
@@ -175,6 +176,7 @@ public class DataExporter
 	{
 		this.dbConn = con;
 		this.jobQueue = new LinkedList<ExportJobEntry>();
+		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
 	}
 
@@ -203,6 +205,15 @@ public class DataExporter
 		this.listener.add(l);
 	}
 
+	public boolean getUseSchemaInSql()
+	{
+		return useSchemaInSql;
+	}
+
+	public void setUseSchemaInSql(boolean flag)
+	{
+		this.useSchemaInSql = flag;
+	}
 
 	/**
 	 * Define the format for date and timestamp literals

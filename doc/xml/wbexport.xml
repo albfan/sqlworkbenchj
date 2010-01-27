@@ -896,6 +896,18 @@
 					</row>
 
 					<row>
+						<entry>-useSchema</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+							<para>
+                If this parameter is set to <literal>true</literal>, all table names
+                are prefixed with the approriate schema. The default is taken from
+                the global option <link linkend="opt-sql-export-include-owner">Include owner in export</link>
+							</para>
+						</entry>
+					</row>
+          
+					<row>
 						<entry>-keyColumns</entry>
 						<entry>
 							<para>
