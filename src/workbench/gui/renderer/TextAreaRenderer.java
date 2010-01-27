@@ -25,7 +25,8 @@ import workbench.util.StringUtil;
  * A renderer to display multi-line character data.
  * <br/>
  * The renderer uses a JTextArea internally which is a lot slower than the own
- * drawing of the text implemented in ToolTipRender.
+ * drawing of the text implemented in ToolTipRender. But ToolTipRenderer
+ * cannot cope with line breaks
  * 
  * @author Thomas Kellerer
  */
@@ -35,7 +36,7 @@ public class TextAreaRenderer
 {
 	public static final Insets AREA_INSETS = new Insets(1,0,0,0);
 	protected JTextArea textDisplay;
-	
+
 	public TextAreaRenderer()
 	{
 		super();
@@ -45,11 +46,20 @@ public class TextAreaRenderer
 			{
 				return AREA_INSETS;
 			}
+
+			@Override
+			public Insets getMargin()
+			{
+				return WbSwingUtilities.EMPTY_INSETS;
+			}
+
 		};
+
 		textDisplay.setWrapStyleWord(false);
 		textDisplay.setLineWrap(false);
 		textDisplay.setAutoscrolls(false);
 		textDisplay.setTabSize(Settings.getInstance().getEditorTabWidth());
+		textDisplay.setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
 
@@ -74,10 +84,10 @@ public class TextAreaRenderer
 		}
 
 		prepareDisplay(value);
-		
+
 		this.textDisplay.setBackground(getBackgroundColor());
 		this.textDisplay.setForeground(getForegroundColor());
-		
+
 		return textDisplay;
 	}
 
