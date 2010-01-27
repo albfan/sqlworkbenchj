@@ -14,6 +14,7 @@ import javax.swing.*;
 import java.awt.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.TableModelListener;
+import workbench.gui.WbSwingUtilities;
 
 /**
  *
@@ -38,7 +39,7 @@ public class TableRowHeader
 		setSelectionModel(client.getSelectionModel());
 		setBackground(client.getBackground());
 		setOpaque(false);
-		setBorder(new EmptyBorder(0, 0, 0, 1));
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		setRowSelectionAllowed(false);
 	}
 

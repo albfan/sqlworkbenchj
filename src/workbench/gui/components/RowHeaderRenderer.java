@@ -16,10 +16,10 @@ import java.awt.FontMetrics;
 import java.awt.geom.Rectangle2D;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.border.EmptyBorder;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import workbench.gui.renderer.ToolTipRenderer;
+import workbench.resource.GuiSettings;
 import workbench.util.NumberStringCache;
 
 /**
@@ -48,7 +48,7 @@ public class RowHeaderRenderer
 		textColor = header.getForeground();
 		backgroundColor = header.getBackground();
 
-		setBorder(new EmptyBorder(1, 0, 0, 1));
+		rightMargin = GuiSettings.getRowNumberMargin();
 		calculateWidth();
 	}
 
@@ -88,7 +88,7 @@ public class RowHeaderRenderer
 			width = 8;
 		}
 		String max = NumberStringCache.getNumberString(table.getRowCount());
-		colWidth = (max.length() * width) + width;
+		colWidth = (max.length() * width) + width + rightMargin + 1;
 
 		try
 		{

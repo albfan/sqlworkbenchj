@@ -57,6 +57,7 @@ public class ToolTipRenderer
 	protected String displayValue = StringUtil.EMPTY_STRING;
 	protected String tooltip = null;
 
+	protected int rightMargin;
 	protected Color selectedForeground;
 	protected Color selectedBackground;
 	protected Color unselectedForeground;
@@ -331,6 +332,7 @@ public class ToolTipRenderer
 		}
 
 		int textX = paintTextR.x;
+		textX -= rightMargin;
 		if (textX < 0) textX = 0;
 		int textY = paintTextR.y + fm.getAscent();
 		if (textY < 0) textY = 0;
