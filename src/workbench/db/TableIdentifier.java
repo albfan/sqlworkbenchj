@@ -703,5 +703,36 @@ public class TableIdentifier
 		}
 		return null;
 	}
-	
+
+	public static boolean tablesAreEqual(TableIdentifier one, TableIdentifier other, WbConnection con)
+	{
+		if (one == null || other == null) return false;
+		if (con == null)
+		{
+			return one.equals(other);
+		}
+		TableIdentifier tbl1 = one.createCopy();
+		if (tbl1.getSchema() == null)
+		{
+			tbl1.setSchema(con.getCurrentSchema());
+		}
+		if (tbl1.getCatalog() == null)
+		{
+			tbl1.setCatalog(con.getCurrentCatalog());
+		}
+		
+		TableIdentifier tbl2 = other.createCopy();
+		if (tbl2.getSchema() == null)
+		{
+			tbl2.setSchema(con.getCurrentSchema());
+		}
+		if (tbl2.getCatalog() == null)
+		{
+			tbl2.setCatalog(con.getCurrentCatalog());
+		}
+
+		String expr1 = tbl1.getTableExpression(con);
+		String expr2 = tbl2.getTableExpression(con);
+		return expr1.equalsIgnoreCase(expr2);
+	}
 }

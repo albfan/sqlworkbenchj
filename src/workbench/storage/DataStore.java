@@ -581,7 +581,7 @@ public class DataStore
 	 */
 	public void setUpdateTable(TableIdentifier tbl, WbConnection conn)
 	{
-		if ((tbl != null && tbl.equals(this.updateTable)) || conn == null) return;
+		if ( conn == null || (tbl != null && TableIdentifier.tablesAreEqual(tbl, this.updateTable, conn)) ) return;
 
 		// Reset everything
 		this.updateTable = null;
