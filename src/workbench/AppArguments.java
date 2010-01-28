@@ -39,6 +39,7 @@ public class AppArguments
 	public static final String ARG_CONN_JAR = "driverjar";
 	public static final String ARG_CONN_USER = "username";
 	public static final String ARG_CONN_PWD = "password";
+	public static final String ARG_CONN_PROPS = "connectionProperties";
 	public static final String ARG_CONN_AUTOCOMMIT = "autocommit";
 	public static final String ARG_CONN_SEPARATE = "separateConnection";
 	public static final String ARG_CONN_EMPTYNULL = "emptyStringIsNull";
@@ -96,6 +97,7 @@ public class AppArguments
 		addArgument(ARG_ERROR_SCRIPT);
 		addArgument(ARG_VARDEF);
 		addArgument(ARG_CONN_URL);
+		addArgument(ARG_CONN_PROPS);
 		addArgument(ARG_CONN_DRIVER);
 		addArgument(ARG_CONN_DRIVER_CLASS);
 		addArgument(ARG_CONN_JAR);

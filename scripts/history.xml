@@ -4,7 +4,15 @@
 <!-- build number must be set to -1 for development builds -->
 <release build="-1" date="2010-01-27">
 
-  <entry dev-build="4" type="enh">
+  <entry dev-build="5" type="enh">
+    <description>
+      A new commandline option for specifying the connection in batch mode has been added. Using -connectionProperties
+      extended properties for the JDBC driver can be passed on the commandline. As the properties need to be specified as key value pairs
+      the value has to be quoted, e.g. -connectionProperties='myprop=somevalue'
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="enh">
     <description>
       A new entry to control the usage of the table's schema in an SQL export (WbExport -type=sqlinsert) has been
       added. This overwrites the default setting from the options dialog (Tools -&gt; Options -&gt; SQL Generation)

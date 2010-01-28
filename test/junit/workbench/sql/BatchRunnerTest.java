@@ -19,6 +19,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Properties;
 import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
@@ -247,13 +248,17 @@ public class BatchRunnerTest
 		throws Exception
 	{
 		AppArguments cmdline = new AppArguments();
-		cmdline.parse("-readOnly=true -removeComments=true -emptyStringIsNull=true -autoCommit=true -separateConnection=true -url=jdbc:postgres://localhost/test -username=test -password=topsecret -configdir=. -driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
+		cmdline.parse("-readOnly=true -removeComments=true -connectionProperties='myprop=42' -emptyStringIsNull=true -autoCommit=true -separateConnection=true -url=jdbc:postgres://localhost/test -username=test -password=topsecret -configdir=. -driver=org.postgresql.Driver -driverjar=postgresql-8.3-603.jdbc3.jar");
 		ConnectionProfile p = BatchRunner.createCmdLineProfile(cmdline);
 		assertTrue(p.getAutocommit());
 		assertTrue(p.getUseSeparateConnectionPerTab());
 		assertTrue(p.getRemoveComments());
 		assertTrue(p.getEmptyStringIsNull());
 		assertTrue(p.isReadOnly());
+		Properties props = p.getConnectionProperties();
+		assertNotNull(props);
+		assertEquals(1, props.size());
+		assertEquals("42", props.get("myprop"));
 		assertEquals("org.postgresql.Driver", p.getDriverclass());
 		assertEquals("topsecret", p.getPassword());
 		assertEquals("test", p.getUsername());

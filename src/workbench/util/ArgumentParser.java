@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -349,6 +350,28 @@ public class ArgumentParser
 		String value = this.getValue(key);
 		if (value == null) return Collections.emptyList();
 		List<String> result = StringUtil.stringToList(value, ",", true, true, false);
+		return result;
+	}
+
+	public Map<String, String> getMapValue(String key)
+	{
+		String value = this.getValue(key);
+		if (value == null) return Collections.emptyMap();
+
+		List<String> entries = StringUtil.stringToList(value, ",", true, true, false, true);
+		Map<String, String> result = new HashMap<String, String>(entries.size());
+		for (String entry : entries)
+		{
+			String[] param = entry.split("=");
+			if (param == null || param.length != 2)
+			{
+				param = entry.split(":");
+			}
+			if (param != null && param.length == 2)
+			{
+				result.put(param[0], StringUtil.trimQuotes(param[1]));
+			}
+		}
 		return result;
 	}
 	

@@ -20,6 +20,8 @@ import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import workbench.AppArguments;
 import workbench.console.ConsolePrompter;
 import workbench.console.ConsoleSettings;
@@ -892,6 +894,8 @@ public class BatchRunner
 			boolean rollback = cmdLine.getBoolean(AppArguments.ARG_CONN_ROLLBACK, false);
 			boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
 
+			Map<String, String> props = cmdLine.getMapValue(AppArguments.ARG_CONN_PROPS);
+			
 			if (jar != null)
 			{
 				ConnectionMgr.getInstance().registerDriver(driverclass, jar);
@@ -913,7 +917,13 @@ public class BatchRunner
 			result.setRemoveComments(cmdLine.getBoolean(AppArguments.ARG_CONN_REMOVE_COMMENTS, false));
 			result.setReadOnly(cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false));
 			result.setHideWarnings(cmdLine.getBoolean(AppArguments.ARG_HIDE_WARNINGS, false));
-
+			if (props != null && props.size() > 0)
+			{
+				Properties p = new Properties();
+				p.putAll(props);
+				result.setConnectionProperties(p);
+			}
+			
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);

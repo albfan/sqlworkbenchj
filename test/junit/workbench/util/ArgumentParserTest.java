@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.util.Collection;
+import java.util.Map;
 import junit.framework.*;
 
 
@@ -36,7 +37,33 @@ public class ArgumentParserTest
 		assertTrue(c.contains("TEXT"));
 		assertTrue(c.contains("Text"));
 	}
-	
+
+	public void testMapValue()
+	{
+		ArgumentParser arg = new ArgumentParser();
+		arg.addArgument("props");
+		arg.parse("-props='some.thing=1,other.thing=\"4,2\"'");
+		Map<String, String> props = arg.getMapValue("props");
+		assertNotNull(props);
+		assertEquals(2, props.size());
+		assertEquals("1", props.get("some.thing"));
+		assertEquals("4,2", props.get("other.thing"));
+
+		arg.parse("-props=some.thing:1,other.thing:4");
+		props = arg.getMapValue("props");
+		assertNotNull(props);
+		assertEquals(2, props.size());
+		assertEquals("1", props.get("some.thing"));
+		assertEquals("4", props.get("other.thing"));
+
+		arg.parse("-props='some.thing:1,other.thing:\"4,2\"'");
+		props = arg.getMapValue("props");
+		assertNotNull(props);
+		assertEquals(2, props.size());
+		assertEquals("1", props.get("some.thing"));
+		assertEquals("4,2", props.get("other.thing"));
+
+	}
 	public void testParser()
 	{
 		String cmdline = "-delimiter=',' -otherbool=1 -nosettings -table='\"MIND\"' -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
