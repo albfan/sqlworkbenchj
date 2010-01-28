@@ -614,24 +614,27 @@ another_variable=24</programlisting>
 						<row>
 							<entry>-connectionProperties</entry>
 							<entry>
-                This parameter can be used to pass <link linkend="">extended connection properties</link> if
-                the driver does not support them e.g. in the JDBC URL. The values are passed as key=value pairs, 
-                e.g. <literal>-connectionProperties=someProp=42</literal>
-              <entry>
-              <entry>
-                If either a comma or an equal sign occurs in a parameter's value, it must be quoted.
-                This means, when passing multiple properties the whole expression needs to be quoted:
-                <literal>-connectionProperties='someProp=42,otherProp=24'</literal>. 
-              </entry>
-              <entry>
-                As an alternative, a colon can be used instead of the equals sign,
-                e.g <literal>-connectionProperties=someProp:42,otherProp:24</literal>. In this
-                case no quoting is needed (because no delimiter is part of the parameters value). 
-              <entry>
-                If any of the property values contain a comma or an equal sign, then the whole parameter value needs to be quoted again, even
-                when using a colon.
-                <literal>-connectionProperties='someProp:"answer=42",otherProp:"2,4"'</literal> will define the value <literal>answer=42</literal> for the
-                property <literal>someProp</literal> and the value 2,4 for the property <literal>otherProp</literal>.
+                <para>
+                  This parameter can be used to pass <link linkend="profile-extended-properties">extended connection properties</link> if
+                  the driver does not support them e.g. in the JDBC URL. The values are passed as key=value pairs,
+                  e.g. <literal>-connectionProperties=someProp=42</literal>
+                </para>
+                <para>
+                  If either a comma or an equal sign occurs in a parameter's value, it must be quoted.
+                  This means, when passing multiple properties the whole expression needs to be quoted:
+                  <literal>-connectionProperties='someProp=42,otherProp=24'</literal>.
+                </para>
+                <para>
+                  As an alternative, a colon can be used instead of the equals sign,
+                  e.g <literal>-connectionProperties=someProp:42,otherProp:24</literal>. In this
+                  case no quoting is needed (because no delimiter is part of the parameters value).
+                </para>
+                <para>
+                  If any of the property values contain a comma or an equal sign, then the whole parameter value needs to be quoted again, even
+                  when using a colon.
+                  <literal>-connectionProperties='someProp:"answer=42",otherProp:"2,4"'</literal> will define the value <literal>answer=42</literal> for the
+                  property <literal>someProp</literal> and the value 2,4 for the property <literal>otherProp</literal>.
+                 </para>
 							</entry>
 						</row>
 
