@@ -39,6 +39,21 @@ public class OdsRowDataConverterTest
 		super(testName);
 	}
 
+	public void testColumnToName()
+	{
+		OdsRowDataConverter converter = new OdsRowDataConverter();
+		assertEquals("A", converter.columnToName(1));
+		assertEquals("Z", converter.columnToName(26));
+		assertEquals("AA", converter.columnToName(27));
+		assertEquals("AP", converter.columnToName(42));
+		assertEquals("SR", converter.columnToName(512));
+		assertEquals("SR", converter.columnToName(512));
+		assertEquals("ZZ", converter.columnToName(702));
+		assertEquals("AAA", converter.columnToName(703));
+		assertEquals("AKI", converter.columnToName(971));
+		assertEquals("AMJ", converter.columnToName(1024));
+	}
+	
 	public void testConvert()
 		throws Exception
 	{

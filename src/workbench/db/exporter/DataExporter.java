@@ -156,6 +156,16 @@ public class DataExporter
 	private boolean appendInfoSheet;
 
 	/**
+	 * Enables an auto-filter for ODS and Excel XML exports
+	 */
+	private boolean enableAutoFilter;
+
+	/**
+	 * Enables the "freeze" of the header row for spreadsheet exports
+	 */
+	private boolean enableFixedHeader;
+
+	/**
 	 * Should the ExportWriter create an output file, even if the result set
 	 * for the export is empty?
 	 */
@@ -178,6 +188,26 @@ public class DataExporter
 		this.jobQueue = new LinkedList<ExportJobEntry>();
 		this.useSchemaInSql = Settings.getInstance().getIncludeOwnerInSqlExport();
 		this.setExportHeaders(Settings.getInstance().getBoolProperty("workbench.export.text.default.header", false));
+	}
+
+	public boolean getEnableFixedHeader()
+	{
+		return enableFixedHeader;
+	}
+
+	public void setEnableFixedHeader(boolean flag)
+	{
+		this.enableFixedHeader = flag;
+	}
+
+	public boolean getEnableAutoFilter()
+	{
+		return enableAutoFilter;
+	}
+
+	public void setEnableAutoFilter(boolean flag)
+	{
+		this.enableAutoFilter = flag;
 	}
 
 	public boolean getAppendInfoSheet()

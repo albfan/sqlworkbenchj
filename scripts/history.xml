@@ -6,6 +6,21 @@
 
   <entry dev-build="5" type="enh">
     <description>
+      Two new options for spreadsheet export have been added. An option to turn on the auto-filter for ODS and Excel XML
+      exports (-autoFilter). An option -fixedHeader to freeze header row which is available for all three formats. Both options
+      are turned on by default. 
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="enh">
+    <description>
+      A new option has been added to highlight the result tab when the number of rows defined in the "Max. Rows" setting
+      has been reached. (Tools -&gt; Options -&gt; Data display -&gt; Show Max Rows. warning)
+    </description>
+  </entry>
+  
+  <entry dev-build="5" type="enh">
+    <description>
       A new commandline option for specifying the connection in batch mode has been added. Using -connectionProperties
       extended properties for the JDBC driver can be passed on the commandline. As the properties need to be specified as key value pairs
       the value has to be quoted, e.g. -connectionProperties='myprop=somevalue'

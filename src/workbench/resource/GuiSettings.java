@@ -28,6 +28,26 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 
+	public static boolean getShowMaxRowsReached()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.warning.show");
+	}
+
+	public static void setShowMaxRowsReached(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.maxrows.warning.show", flag);
+	}
+
+	public static Color getMaxRowsWarningColor()
+	{
+		return Settings.getInstance().getColor("workbench.gui.maxrows.warning.color", Color.RED);
+	}
+
+	public static void setMaxRowsWarningColor(Color c)
+	{
+		Settings.getInstance().setColor("workbench.gui.maxrows.warning.color", c);
+	}
+
 	public static int getRowNumberMargin()
 	{
 		return Settings.getInstance().getIntProperty("workbench.gui.table.rownumber.margin", 1);

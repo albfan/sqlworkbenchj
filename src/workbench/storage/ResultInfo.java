@@ -71,17 +71,30 @@ public class ResultInfo
 		throws SQLException
 	{
 		DbMetadata meta = conn.getMetadata();
-		// If the TableIdentifier has no type, we need to find
-		// the type. getTableColumns() uses the type "TABLE" if no
-		// type is passed. This constructor is mainly used when
-		// exporting data, which might not come from a real
-		// table, but could also be a VIEW or a SYNONYM
-		if (table.getType() == null)
+
+		TableIdentifier toUse = meta.findObject(table);
+
+		if (toUse == null)
 		{
-			String type = meta.getObjectType(table);
-			table.setType(type);
+			toUse = table.createCopy();
+			if (toUse.getType() == null)
+			{
+				String type = meta.getObjectType(toUse);
+				toUse.setType(type);
+			}
+
+			if (toUse.getSchema() == null)
+			{
+				toUse.setSchema(meta.getCurrentSchema());
+			}
+
+			if (toUse.getCatalog() == null)
+			{
+				toUse.setCatalog(meta.getCurrentCatalog());
+			}
 		}
-		List<ColumnIdentifier> cols = meta.getTableColumns(table);
+	
+		List<ColumnIdentifier> cols = meta.getTableColumns(toUse);
 		this.columns = new ColumnIdentifier[cols.size()];
 		int i = 0;
 		for (ColumnIdentifier col : cols)

@@ -78,6 +78,8 @@ public abstract class ExportWriter
 		converter.setPageTitle(exporter.getPageTitle());
 		converter.setWriteHeader(exporter.getExportHeaders());
 		converter.setAppendInfoSheet(exporter.getAppendInfoSheet());
+		converter.setEnableAutoFilter(exporter.getEnableAutoFilter());
+		converter.setEnableFixedHeader(exporter.getEnableFixedHeader());
     trimCharData = getTrimCharData();
 	}
 

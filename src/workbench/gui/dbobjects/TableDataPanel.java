@@ -12,6 +12,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -61,6 +62,8 @@ import java.beans.PropertyChangeListener;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
+import javax.swing.JTabbedPane;
+import javax.swing.UIDefaults;
 import workbench.WbManager;
 import workbench.db.TableSelectBuilder;
 import workbench.gui.MainWindow;
@@ -756,6 +759,7 @@ public class TableDataPanel
 					}
 
 					ColumnOrderMgr.getInstance().restoreColumnOrder(dataDisplay.getTable());
+					dataDisplay.showLimitReached();
 				}
 			});
 		}

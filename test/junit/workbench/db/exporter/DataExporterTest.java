@@ -34,6 +34,52 @@ public class DataExporterTest
 		super(testName);
 	}
 
+	public void testDuplicateTable()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("DataExporterTest");
+		util.emptyBaseDirectory();
+		try
+		{
+			WbConnection con = util.getConnection();
+
+			String script =
+				"CREATE SCHEMA one;\n" +
+				"CREATE SCHEMA two;\n" +
+				"SET SCHEMA one;\n" +
+				"CREATE TABLE person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
+				"INSERT INTO person (nr, firstname, lastname) VALUES (1, 'Arthur', 'Dent');\n" +
+				"INSERT INTO person (nr, firstname, lastname) VALUES (2, 'Zaphod', 'Beeblebrox');\n" +
+				"INSERT INTO person (nr, firstname, lastname) VALUES (3, 'Ford', 'Prefect');\n" +
+				"INSERT INTO person (nr, firstname, lastname) VALUES (4, 'Tricia', 'McMillian');\n" +
+				"SET SCHEMA two;" +
+				"CREATE TABLE person (nr2 integer, firstname varchar(20), lastname varchar(20));\n" +
+				"INSERT INTO person (nr2, firstname, lastname) VALUES (12, 'Arthur2', 'Dent2');\n" +
+				"commit;\n" +
+				"SET SCHEMA one;\n";
+
+			TestUtil.executeScript(con, script);
+
+			DataExporter exporter = new DataExporter(con);
+			exporter.setOutputType(ExportType.TEXT);
+			exporter.setTextOptions(getOptions());
+
+			WbFile exportFile = new WbFile(util.getBaseDir(), "schema_table_export.txt");
+			exporter.addTableExportJob(exportFile, new TableIdentifier("person"));
+
+			long rowCount = exporter.startExport();
+			assertEquals(4, rowCount);
+			List<String> lines = TestUtil.readLines(exportFile);
+			assertEquals(5, lines.size());
+			assertEquals("NR\tFIRSTNAME\tLASTNAME", lines.get(0));
+			assertEquals("1\tArthur\tDent", lines.get(1));
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+	
 	public void testExporQueryResult()
 		throws Exception
 	{

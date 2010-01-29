@@ -129,6 +129,8 @@ public class WbExport
 		cmdLine.addArgument(ARG_ROWNUM);
 		cmdLine.addArgument("tableWhere");
 		cmdLine.addArgument("infoSheet", ArgumentType.BoolArgument);
+		cmdLine.addArgument("autoFilter", ArgumentType.BoolArgument);
+		cmdLine.addArgument("fixedHeader", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
 	}
 
@@ -148,7 +150,7 @@ public class WbExport
 		String header = "text=" + Boolean.toString(getHeaderDefault("text"));
 		header += ", ods="  + Boolean.toString(getHeaderDefault("ods"));
 		header += ", xls="  + Boolean.toString(getHeaderDefault("xls"));
-		header += ", xlsx="  + Boolean.toString(getHeaderDefault("xlsx"));
+		header += ", xlsm="  + Boolean.toString(getHeaderDefault("xlsx"));
 
 		msg = msg.replace("%header_flag_default%", header);
 		msg = msg.replace("%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
@@ -288,6 +290,8 @@ public class WbExport
 		format = cmdLine.getValue("decimal");
 		if (format != null) exporter.setDecimalSymbol(format);
 
+		exporter.setEnableAutoFilter(cmdLine.getBoolean("autoFilter", true));
+		exporter.setEnableFixedHeader(cmdLine.getBoolean("fixedHeader", true));
 		exporter.setAppendInfoSheet(cmdLine.getBoolean("infoSheet", false));
 		exporter.setPageTitle(cmdLine.getValue("title"));
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
@@ -886,6 +890,8 @@ public class WbExport
 		if (fname.endsWith(".html")) return "html";
 		if (fname.endsWith(".sql")) return "sqlinsert";
 		if (fname.endsWith(".xls")) return "xls";
+		if (fname.endsWith(".xlsm")) return "xlsm";
+		if (fname.endsWith(".xlsx")) return "xlsx";
 		if (fname.endsWith(".ods")) return "ods";
 		return null;
 	}

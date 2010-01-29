@@ -59,6 +59,10 @@ public class OdsRowDataConverter
 			out.close();
 
 			writeMeta();
+			if (getEnableFixedHeader())
+			{
+				writeSettings();
+			}
 
 			out = factory.createWriter("mimetype", "UTF-8");
 			out.write("application/vnd.oasis.opendocument.spreadsheet");
@@ -77,7 +81,10 @@ public class OdsRowDataConverter
 			int colCount = this.metaData.getColumnCount();
 			for (int i=0; i < colCount; i++)
 			{
-				content.write("<table:table-column table:style-name=\"co" + (i+1) + "\" table:default-cell-style-name=\"Default\"/>\n");
+				if (includeColumnInExport(i))
+				{
+					content.write("<table:table-column table:style-name=\"co" + (i+1) + "\" table:default-cell-style-name=\"Default\"/>\n");
+				}
 			}
 
 			if (writeHeader)
@@ -89,7 +96,7 @@ public class OdsRowDataConverter
 				{
 					if (!this.includeColumnInExport(i))	continue;
 
-					String colname = this.metaData.getColumnName(i);
+					String colname = StringUtil.trimQuotes(this.metaData.getColumnName(i));
 
 					content.write("  <table:table-cell table:style-name=\"ce1\" office:value-type=\"string\">\n");
 					content.write("    <text:p>");
@@ -109,6 +116,51 @@ public class OdsRowDataConverter
 		return null;
 	}
 
+	/**
+	 * Write a settings.xml that will create a vertical split that makes the table header fixed
+	 */
+	private void writeSettings()
+	{
+		Writer out = null;
+		try
+		{
+			out = factory.createWriter("settings.xml", "UTF-8");
+			out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
+			out.write("<office:document-settings xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" \n");
+			out.write("    xmlns:xlink=\"http://www.w3.org/1999/xlink\" " +
+				        "    xmlns:config=\"urn:oasis:names:tc:opendocument:xmlns:config:1.0\" " +
+				        "    xmlns:ooo=\"http://openoffice.org/2004/office\" office:version=\"1.2\">");
+			out.write("  <office:settings>\n");
+			out.write("    <config:config-item-set config:name=\"ooo:view-settings\">\n");
+			out.write("      <config:config-item-map-indexed config:name=\"Views\">\n");
+			out.write("        <config:config-item-map-entry>\n");
+			out.write("          <config:config-item config:name=\"ViewId\" config:type=\"string\">View1</config:config-item>\n");
+			out.write("          <config:config-item-map-named config:name=\"Tables\">\n");
+			out.write("            <config:config-item-map-entry config:name=\"" + getPageTitle("Export") + "\">\n");
+			out.write("              <config:config-item config:name=\"CursorPositionX\" config:type=\"int\">0</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"CursorPositionY\" config:type=\"int\">1</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"VerticalSplitMode\" config:type=\"short\">2</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"VerticalSplitPosition\" config:type=\"int\">1</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"ActiveSplitRange\" config:type=\"short\">2</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"PositionBottom\" config:type=\"int\">1</config:config-item>\n");
+			out.write("            </config:config-item-map-entry>\n");
+			out.write("          </config:config-item-map-named>\n");
+			out.write("        </config:config-item-map-entry>\n");
+			out.write("      </config:config-item-map-indexed>\n");
+			out.write("    </config:config-item-set>\n");
+			out.write("  </office:settings>\n");
+			out.write("</office:document-settings>\n");
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("OdsRowDataConverter.writeSettings()", "Error writing settings", e);
+		}
+		finally
+		{
+			FileUtil.closeQuitely(out);
+		}
+	}
+	
 	private void writeMeta()
 	{
 		Writer out = null;
@@ -142,7 +194,7 @@ public class OdsRowDataConverter
 		}
 		catch (Exception e)
 		{
-
+			LogMgr.logError("OdsRowDataConverter.writeMeta()", "Error writing meta data", e);
 		}
 		finally
 		{
@@ -199,6 +251,16 @@ public class OdsRowDataConverter
 				content.append("</table:table-row>\n");
 				content.write("</table:table>");
 			}
+
+			// Enable auto-filter for all columns
+			if (getEnableAutoFilter())
+			{
+				String colName = columnToName(getRealColumnCount());
+				content.append("<table:database-ranges>\n");
+				content.append("<table:database-range table:target-range-address=\"Export.A1:Export." + colName + Long.toString(totalRows)+ "\" table:display-filter-buttons=\"true\" />\n");
+				content.append("</table:database-ranges>\n");
+			}
+			
 			content.write("</office:spreadsheet> \n");
 			content.write("</office:body>\n");
 			content.write("</office:document-content>\n");
@@ -211,6 +273,21 @@ public class OdsRowDataConverter
 		// ignore
 		}
 		return null;
+	}
+
+	protected String columnToName(int col)
+	{
+		StringBuilder result = new StringBuilder(3);
+		int div = col;
+
+		while (div > 0)
+		{
+			int remain = (div - 1) % 26;
+			char c = (char)('A' + (char)remain);
+			result.insert(0, c);
+			div = (div - remain) / 26;
+		}
+		return result.toString();
 	}
 
 	public StrBuffer convertRowData(RowData row, long rowIndex)

@@ -12,6 +12,7 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -23,6 +24,7 @@ import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -744,6 +746,47 @@ public class DwPanel
 		}
 	}
 
+	private JTabbedPane getTabParent()
+	{
+		Component c = getParent();
+		while (c != null)
+		{
+			if (c instanceof JTabbedPane)
+			{
+				return (JTabbedPane)c;
+			}
+			c = c.getParent();
+		}
+		return null;
+	}
+
+	public void showLimitReached()
+	{
+		if (!GuiSettings.getShowMaxRowsReached()) return;
+		
+		JTabbedPane tab = getTabParent();
+		if (tab == null) return;
+
+		int index = tab.indexOfComponent(this);
+		if (index == -1)
+		{
+			index = tab.indexOfComponent(this.getParent());
+		}
+		
+		if (index > -1)
+		{
+			int maxRows = getMaxRows();
+			if (maxRows > 0 && maxRows == getTable().getRowCount())
+			{
+				tab.setBackgroundAt(index, GuiSettings.getMaxRowsWarningColor());
+			}
+			else
+			{
+				tab.setBackgroundAt(index, null);
+			}
+		}
+	}
+	
 	public void readColumnComments()
 	{
 		DataStore ds = getDataStore();

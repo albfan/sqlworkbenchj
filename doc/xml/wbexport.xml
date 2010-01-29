@@ -151,15 +151,15 @@
 							</para>
 							<para>
 								<literal>ods</literal> will generate a spreadsheet file in the OpenDocument
-								format that can e.g. be opened with OpenOffice.org.
-							</para>
-							<para>
-								<literal>xlsx</literal> will generate a spreadsheet file in the Microsoft Excel XML format and
-								is the recommended format for creating Excel spreadsheets.
+								format that can be opened e.g. with OpenOffice.org.
 							</para>
 							<para>
 								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
 								for Microsoft Excel.
+							</para>
+							<para>
+								<literal>xlsx</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("SpreadsheetML"). 
+                This is <emphasis role="bold">not</emphasis> the Office Open XML format introduced with Microsof Office 2007.
 							</para>
 						</entry>
 					</row>
@@ -954,10 +954,24 @@
 					<row>
 						<entry>-infoSheet</entry>
 						<entry>
-              If set to true, a second worksheet will be created that contains the generating SQL of the export
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>
+                If set to true, a second worksheet will be created that contains the generating SQL of the export
+              </para>
+              <para>Default value: <literal>false</literal></para>
             </entry>
 					</row>
-
+					<row>
+						<entry>-autoFilter</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>
+                If set to true, the "auto-filter" fetaure for the column headers will be turned on. This is only
+                valid for ODS and XLSX exports, not for XLS.
+              </para>
+              <para>Default value: <literal>true</literal></para>
+            </entry>
+					</row>
 				</tbody>
 			</tgroup>
 		</informaltable>

@@ -71,7 +71,7 @@ public class XlsRowDataConverter
 			for (int c = 0; c < this.metaData.getColumnCount(); c++)
 			{
 				HSSFCell cell = headRow.createCell((short)c);
-				setCellValueAndStyle(cell, this.metaData.getColumnName(c), true);
+				setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnName(c)), true);
 			}
 		}
 		return null;
@@ -99,10 +99,14 @@ public class XlsRowDataConverter
 			cell.setCellStyle(style);
 		}
 
+		if (getEnableFixedHeader())
+		{
+			sheet.createFreezePane(0, 1);
+		}
+		
 		FileOutputStream fileOut = null;
 		try
 		{
-			// Scrive il file
 			fileOut = new FileOutputStream(getOutputFile());
 			wb.write(fileOut);
 			fileOut.close();

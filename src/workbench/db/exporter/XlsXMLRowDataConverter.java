@@ -54,7 +54,7 @@ public class XlsXMLRowDataConverter
 		int colCount = metaData.getColumnCount();
 
 		out.append("<Worksheet ss:Name=\"" + getPageTitle("Export") + "\">\n");
-		out.append("<Table ss:ExpandedColumnCount=\"" + colCount + "\" x:FullColumns=\"1\" x:FullRows=\"1\">\n");
+		out.append("<Table ss:ExpandedColumnCount=\"" + getRealColumnCount() + "\" x:FullColumns=\"1\" x:FullRows=\"1\">\n");
 
 		for (int i = 0; i < colCount; i++)
 		{
@@ -69,7 +69,7 @@ public class XlsXMLRowDataConverter
 			{
 				if (!this.includeColumnInExport(i)) continue;
 				out.append("  <Cell ss:StyleID=\"wbHeader\"><Data ss:Type=\"String\">");
-				out.append(metaData.getColumnName(i));
+				out.append(StringUtil.trimQuotes(metaData.getColumnName(i)));
 				out.append("</Data></Cell>\n");
 			}
 			out.append("</Row>");
@@ -83,7 +83,21 @@ public class XlsXMLRowDataConverter
 	{
 		StrBuffer out = new StrBuffer(250);
 		out.append("</Table>\n");
+
+		if (getEnableFixedHeader())
+		{
+			out.append("<WorksheetOptions xmlns=\"urn:schemas-microsoft-com:office:excel\">\n");
+			out.append("  <Selected/>\n<FreezePanes/>\n<FrozenNoSplit/>\n");
+			out.append("  <SplitHorizontal>1</SplitHorizontal>\n<TopRowBottomPane>1</TopRowBottomPane>\n<ActivePane>2</ActivePane>\n");
+			out.append("</WorksheetOptions>\n");
+		}
+
+		if (getEnableAutoFilter())
+		{
+			out.append("<AutoFilter x:Range=\"R1C1:R1C" + getRealColumnCount() + "\" xmlns=\"urn:schemas-microsoft-com:office:excel\"></AutoFilter>\n");
+		}
 		out.append("</Worksheet>\n");
+		
 		if (getAppendInfoSheet())
 		{
 			out.append("<Worksheet ss:Name=\"SQL\">\n");

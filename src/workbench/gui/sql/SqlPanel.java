@@ -12,6 +12,7 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -3025,6 +3026,7 @@ public class SqlPanel
 		{
 			this.resultTab.setSelectedIndex(0);
 		}
+		data.showLimitReached();
 		return newIndex;
 	}
 

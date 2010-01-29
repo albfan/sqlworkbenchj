@@ -81,13 +81,46 @@ public abstract class RowDataConverter
 	
 	protected boolean convertDateToTimestamp = false;
 	protected BlobLiteralFormatter blobFormatter;
+
+	/**
+	 * Spreadsheet option to add an additional sheet with the generating SQL
+	 */
 	protected boolean appendInfoSheet;
+
+	/**
+	 * Spreadsheet option to turn on AutoFilter for the column data
+	 */
+	protected boolean enableAutoFilter;
+
+
+	protected boolean fixedHeader;
 
 	public RowDataConverter()
 	{
 		this.defaultDateFormatter = Settings.getInstance().getDefaultDateFormatter();
 		this.defaultTimestampFormatter = Settings.getInstance().getDefaultTimestampFormatter();
 		this.defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
+	}
+
+	public boolean getEnableFixedHeader()
+	{
+		return fixedHeader;
+	}
+
+	public void setEnableFixedHeader(boolean flag)
+	{
+		this.fixedHeader = flag;
+	}
+
+
+	public boolean getEnableAutoFilter()
+	{
+		return enableAutoFilter;
+	}
+
+	public void setEnableAutoFilter(boolean flag)
+	{
+		this.enableAutoFilter = flag;
 	}
 
 	public boolean getAppendInfoSheet()
@@ -554,6 +587,21 @@ public abstract class RowDataConverter
 		{
 			this.columnsToExport[i] = columns.contains(this.metaData.getColumn(i));
 		}
+	}
+
+	/**
+	 * Return the number of columns that have to be exported
+	 * @return the real column count
+	 * @see #includeColumnInExport(int) 
+	 */
+	protected int getRealColumnCount()
+	{
+		int count = 0;
+		for (int i = 0; i < this.metaData.getColumnCount(); i++)
+		{
+			if (this.includeColumnInExport(i))	count ++;
+		}
+		return count;
 	}
 	
 	/**

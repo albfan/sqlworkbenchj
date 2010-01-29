@@ -65,8 +65,8 @@ public enum ExportType
 		if (code.equals("3")) return XML;
 		if (code.equals("4")) return HTML;
 		if (code.equals("5")) return ODS;
-		if (code.equals("6")) return XLSX;
-		if (code.equals("7")) return XLS;
+		if (code.equals("6")) return XLS;
+		if (code.equals("7")) return XLSX;
 		return null;
 	}
 
@@ -126,11 +126,11 @@ public enum ExportType
 			case ODS:
 				return "5";
 
-			case XLSX:
-				return "7";
-
 			case XLS:
 				return "6";
+
+			case XLSX:
+				return "7";
 		}
 		return null;
 	}
