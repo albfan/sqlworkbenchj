@@ -10,10 +10,12 @@
  *
  */
 package workbench.db.exporter;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFDataFormat;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.DataFormat;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.Workbook;
 
 /**
  * @author Alessandro Palumbo
@@ -24,13 +26,13 @@ class ExcelDataFormat
 	protected String dateFormat;
 	protected String timestampFormat;
 	protected String integerFormat;
-	protected HSSFCellStyle headerCellStyle = null;
-	protected HSSFCellStyle dateCellStyle = null;
-	protected HSSFCellStyle tsCellStyle = null;
-	protected HSSFCellStyle decimalCellStyle = null;
-	protected HSSFCellStyle integerCellStyle = null;
-	protected HSSFCellStyle textCellStyle = null;
-	protected HSSFDataFormat dataFormat = null;
+	protected CellStyle headerCellStyle = null;
+	protected CellStyle dateCellStyle = null;
+	protected CellStyle tsCellStyle = null;
+	protected CellStyle decimalCellStyle = null;
+	protected CellStyle integerCellStyle = null;
+	protected CellStyle textCellStyle = null;
+	protected DataFormat dataFormat = null;
 	protected short gridDateFormat;
 	protected short gridDecimalFormat;
 	protected short gridIntegerFormat;
@@ -45,9 +47,10 @@ class ExcelDataFormat
 		this.timestampFormat = tsFormat;
 	}
 
-	protected void setupWithWorkbook(HSSFWorkbook wb)
+	protected void setupWithWorkbook(Workbook wb)
 	{
-		dataFormat = wb.createDataFormat();
+		CreationHelper helper = wb.getCreationHelper();
+		dataFormat = helper.createDataFormat();
 		setUpHeader(wb);
 		setUpText(wb);
 		setUpDate(wb);
@@ -56,62 +59,56 @@ class ExcelDataFormat
 		setUpTs(wb);
 	}
 
-	protected void setUpText(HSSFWorkbook wb)
+	protected void setUpText(Workbook wb)
 	{
 		textCellStyle = wb.createCellStyle();
-		textCellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+		textCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
 		textCellStyle.setWrapText(true);
 	}
 
-	protected void setUpDate(HSSFWorkbook wb)
+	protected void setUpDate(Workbook wb)
 	{
 		dateCellStyle = wb.createCellStyle();
-		dateCellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+		dateCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
 		gridDateFormat = safeGetFormat(dataFormat, dateFormat);
 		dateCellStyle.setDataFormat(gridDateFormat);
 	}
 
-	protected void setUpDecimal(HSSFWorkbook wb)
+	protected void setUpDecimal(Workbook wb)
 	{
 		decimalCellStyle = wb.createCellStyle();
-		decimalCellStyle.setAlignment(HSSFCellStyle.ALIGN_RIGHT);
+		decimalCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
 		gridDecimalFormat = safeGetFormat(dataFormat, decimalFormat);
 		decimalCellStyle.setDataFormat(gridDecimalFormat);
 	}
 
-	protected void setUpInteger(HSSFWorkbook wb)
+	protected void setUpInteger(Workbook wb)
 	{
 		integerCellStyle = wb.createCellStyle();
-		integerCellStyle.setAlignment(HSSFCellStyle.ALIGN_RIGHT);
+		integerCellStyle.setAlignment(CellStyle.ALIGN_RIGHT);
 		gridIntegerFormat = safeGetFormat(dataFormat, integerFormat);
 		integerCellStyle.setDataFormat(gridIntegerFormat);
 	}
 
-	protected void setUpHeader(HSSFWorkbook wb)
+	protected void setUpHeader(Workbook wb)
 	{
 		headerCellStyle = wb.createCellStyle();
-		HSSFFont font = wb.createFont();
-		font.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+		Font font = wb.createFont();
+		font.setBoldweight(Font.BOLDWEIGHT_BOLD);
 		headerCellStyle.setFont(font);
-		headerCellStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+		headerCellStyle.setAlignment(CellStyle.ALIGN_CENTER);
 	}
 
-	protected void setUpTs(HSSFWorkbook wb)
+	protected void setUpTs(Workbook wb)
 	{
 		tsCellStyle = wb.createCellStyle();
-		tsCellStyle.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+		tsCellStyle.setAlignment(CellStyle.ALIGN_LEFT);
 		gridTsFormat = safeGetFormat(dataFormat, timestampFormat);
 		tsCellStyle.setDataFormat(gridTsFormat);
 	}
 
-	protected static short safeGetFormat(HSSFDataFormat dataFormat, String formatString)
+	protected static short safeGetFormat(DataFormat dataFormat, String formatString)
 	{
-		short format = HSSFDataFormat.getBuiltinFormat(formatString);
-		if (format < 0)
-		{
-			// It's not a builtin format, need to create
-			format = dataFormat.getFormat(formatString);
-		}
-		return format;
+		return dataFormat.getFormat(formatString);
 	}
 }

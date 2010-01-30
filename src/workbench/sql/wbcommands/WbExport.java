@@ -70,7 +70,7 @@ public class WbExport
 	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
 	public static final String ARG_USE_CDATA = "useCDATA";
 	public static final String ARG_USE_SCHEMA = "useSchema";
-	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsx,html,xls";
+	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
 	
 	public WbExport()
 	{
@@ -150,7 +150,8 @@ public class WbExport
 		String header = "text=" + Boolean.toString(getHeaderDefault("text"));
 		header += ", ods="  + Boolean.toString(getHeaderDefault("ods"));
 		header += ", xls="  + Boolean.toString(getHeaderDefault("xls"));
-		header += ", xlsm="  + Boolean.toString(getHeaderDefault("xlsx"));
+		header += ", xlsx="  + Boolean.toString(getHeaderDefault("xlsx"));
+		header += ", xlsm="  + Boolean.toString(getHeaderDefault("xlsm"));
 
 		msg = msg.replace("%header_flag_default%", header);
 		msg = msg.replace("%verbose_default%", Boolean.toString(getVerboseXmlDefault()));
@@ -219,9 +220,20 @@ public class WbExport
 			return result;
 		}
 
-		if (type.equals("xls") && !PoiHelper.isPoiAvailable())
+		if ((type.equals("xls") || type.equals("xlsx")) && !PoiHelper.isPoiAvailable())
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportNoXLS"));
+			result.addMessage("");
+			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
+			result.setFailure();
+			return result;
+		}
+
+		if (type.equals("xlsx") && !PoiHelper.isXLSXAvailable())
+		{
+			result.addMessage(ResourceMgr.getString("ErrExportNoXLSX"));
+			result.addMessage("");
+			result.addMessage(ResourceMgr.getString("ErrExportUseXLSM"));
 			result.setFailure();
 			return result;
 		}
@@ -442,15 +454,6 @@ public class WbExport
 			exporter.setHtmlTrailer(cmdLine.getValue("postDataHtml"));
 			
 			this.defaultExtension = ".html";
-		}
-		else if (type.equalsIgnoreCase("xls"))
-		{
-			if (!PoiHelper.isPoiAvailable())
-			{
-				result.setFailure();
-				result.addMessage(ResourceMgr.getString("ErrExportNoPoi"));
-				return result;
-			}
 		}
 
 		exporter.setAppendToFile(appendToFile);

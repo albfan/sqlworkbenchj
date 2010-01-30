@@ -25,6 +25,7 @@ public enum ExportType
 	XML("XML"),
 	ODS("OpenDocument Spreadsheet"),
 	XLS("XLS"),
+	XLSM("XLSM"),
 	XLSX("XLSX");
 
 	private String display;
@@ -66,7 +67,8 @@ public enum ExportType
 		if (code.equals("4")) return HTML;
 		if (code.equals("5")) return ODS;
 		if (code.equals("6")) return XLS;
-		if (code.equals("7")) return XLSX;
+		if (code.equals("7")) return XLSM;
+		if (code.equals("8")) return XLSX;
 		return null;
 	}
 
@@ -99,6 +101,9 @@ public enum ExportType
 			case XLSX:
 				return ".xlsx";
 
+			case XLSM:
+				return ".xlsm";
+
 			case XLS:
 				return ".xls";
 		}
@@ -129,8 +134,11 @@ public enum ExportType
 			case XLS:
 				return "6";
 
-			case XLSX:
+			case XLSM:
 				return "7";
+
+			case XLSX:
+				return "8";
 		}
 		return null;
 	}

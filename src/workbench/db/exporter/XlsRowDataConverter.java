@@ -15,13 +15,15 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
-
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFRichTextString;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.RichTextString;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import workbench.log.LogMgr;
 import workbench.storage.RowData;
@@ -32,19 +34,29 @@ import workbench.util.StringUtil;
  * Export data into an Excel spreadsheet using Apache's POI
  *
  * @author Alessandro Palumbo
+ * @author Thomas Kellerer
  */
 public class XlsRowDataConverter
 	extends RowDataConverter
 {
-	private HSSFWorkbook wb = null;
-	private HSSFSheet sheet = null;
+	private Workbook wb = null;
+	private Sheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
+	private boolean useXLSX;
 
 	public XlsRowDataConverter()
 	{
 		super();
 	}
 
+	/**
+	 * Switch to the new OOXML Format
+	 */
+	public void setUseXLSX()
+	{
+		useXLSX = true;
+	}
+	
 	// This should not be called in the constructor as
 	// at that point in time the formatters are not initialized
 	public void createFormatters()
@@ -59,7 +71,14 @@ public class XlsRowDataConverter
 	{
 		createFormatters();
 
-		wb = new HSSFWorkbook();
+		if (useXLSX)
+		{
+			wb = new XSSFWorkbook();
+		}
+		else
+		{
+			wb = new HSSFWorkbook();
+		}
 
 		excelFormat.setupWithWorkbook(wb);
 		sheet = wb.createSheet(getPageTitle("SQLExport"));
@@ -67,10 +86,10 @@ public class XlsRowDataConverter
 		if (writeHeader)
 		{
 			// table header with column names
-			HSSFRow headRow = sheet.createRow(0);
+			Row headRow = sheet.createRow(0);
 			for (int c = 0; c < this.metaData.getColumnCount(); c++)
 			{
-				HSSFCell cell = headRow.createCell((short)c);
+				Cell cell = headRow.createCell(c);
 				setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnName(c)), true);
 			}
 		}
@@ -86,15 +105,15 @@ public class XlsRowDataConverter
 
 		if (getAppendInfoSheet())
 		{
-			HSSFSheet info = wb.createSheet("SQL");
-			HSSFRow infoRow = info.createRow(0);
-			HSSFCell cell = infoRow.createCell((short)0);
+			Sheet info = wb.createSheet("SQL");
+			Row infoRow = info.createRow(0);
+			Cell cell = infoRow.createCell(0);
 			
-			HSSFCellStyle style = wb.createCellStyle();
-			style.setAlignment(HSSFCellStyle.ALIGN_LEFT);
+			CellStyle style = wb.createCellStyle();
+			style.setAlignment(CellStyle.ALIGN_LEFT);
 			style.setWrapText(false);
 
-			HSSFRichTextString s = new HSSFRichTextString(generatingSql);
+			RichTextString s = wb.getCreationHelper().createRichTextString(generatingSql);
 			cell.setCellValue(s);
 			cell.setCellStyle(style);
 		}
@@ -143,10 +162,10 @@ public class XlsRowDataConverter
 		int count = this.metaData.getColumnCount();
 		int rowNum = (int)rowIndex;
 		if (writeHeader) rowNum ++;
-		HSSFRow myRow = sheet.createRow(rowNum);
+		Row myRow = sheet.createRow(rowNum);
 		for (int c = 0; c < count; c++)
 		{
-			HSSFCell cell = myRow.createCell((short)c);
+			Cell cell = myRow.createCell(c);
 
 			Object value = row.getValue(c);
 
@@ -155,9 +174,9 @@ public class XlsRowDataConverter
 		return ret;
 	}
 
-	private void setCellValueAndStyle(HSSFCell cell, Object value, boolean isHead)
+	private void setCellValueAndStyle(Cell cell, Object value, boolean isHead)
 	{
-		HSSFCellStyle cellStyle = null;
+		CellStyle cellStyle = null;
 
 		if (value instanceof BigDecimal)
 		{
@@ -186,7 +205,7 @@ public class XlsRowDataConverter
 		}
 		else
 		{
-			HSSFRichTextString s = new HSSFRichTextString(value != null ? value.toString() : "");
+			RichTextString s = wb.getCreationHelper().createRichTextString(value != null ? value.toString() : "");
 			cell.setCellValue(s);
 			cellStyle = excelFormat.textCellStyle;
 		}

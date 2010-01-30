@@ -25,7 +25,7 @@ import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -62,7 +62,6 @@ import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
 
-
 /**
  * A class to export data from the database into an external file.
  *
@@ -73,19 +72,18 @@ import workbench.util.WbThread;
  * {@link #addTableExportJob(java.io.File, workbench.db.TableIdentifier) } or by
  * specifying a SQL query where the generated ResultSet should be exported
  * using {@link #addQueryJob(java.lang.String, workbench.util.WbFile) }
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class DataExporter
 	implements InterruptableJob, ErrorReporter, ProgressReporter, Committer
 {
+
 	private WbConnection dbConn;
 	private String pageTitle = null;
-
 	// When compressing the output this holds the name of the archive.
 	private WbFile realOutputfile;
 	private WbFile outputfile;
-
 	private String xsltFile = null;
 	private String transformOutputFile = null;
 	private ExportType exportType = ExportType.TEXT;
@@ -93,7 +91,6 @@ public class DataExporter
 	private String rowIndexColumnName = null;
 	private boolean includeCreateTable = false;
 	private boolean continueOnError = true;
-
 	private boolean useCDATA = false;
 	private String xmlVersion;
 	private CharacterRange escapeRange = null;
@@ -101,7 +98,6 @@ public class DataExporter
 	private String tableName;
 	private String encoding;
 	private List<ColumnIdentifier> columnsToExport;
-
 	private boolean clobAsFile = false;
 	private String delimiter = "\t";
 	private String quoteChar = null;
@@ -114,66 +110,51 @@ public class DataExporter
 	private String filenameColumn = null;
 	private int commitEvery = 0;
 	private boolean useSchemaInSql;
-
 	private SimpleDateFormat dateFormatter = null;
-	private	SimpleDateFormat dateTimeFormatter = null;
+	private SimpleDateFormat dateTimeFormatter = null;
 	private DecimalFormat numberFormatter = null;
-
 	private boolean append = false;
 	private boolean escapeHtml = true;
 	private String htmlHeading;
 	private String htmlTrailer;
 	private boolean createFullHtmlPage = true;
 	private boolean verboseFormat = true;
-
 	private int progressInterval = ProgressReporter.DEFAULT_PROGRESS_INTERVAL;
-
 	private boolean cancelJobs = false;
 	private RowActionMonitor rowMonitor;
-
 	private List<String> keyColumnsToUse;
 	private String dateLiteralType = null;
-
 	// The columns to be used for generating blob file names
 	private List<String> blobIdCols;
-
 	private MessageBuffer warnings = new MessageBuffer();
 	private MessageBuffer errors = new MessageBuffer();
 	private List<ExportJobEntry> jobQueue;
 	private boolean jobsRunning;
 	private ExportWriter exportWriter;
-
 	private int tablesExported;
 	private long totalRows;
-
-	private Set<ControlFileFormat> controlFiles = new HashSet<ControlFileFormat>();
+	private Set<ControlFileFormat> controlFiles = EnumSet.noneOf(ControlFileFormat.class);
 	private boolean compressOutput = false;
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
-
 	/**
 	 * Toggles an additional sheet for Spreedsheet exports
 	 */
 	private boolean appendInfoSheet;
-
 	/**
 	 * Enables an auto-filter for ODS and Excel XML exports
 	 */
 	private boolean enableAutoFilter;
-
 	/**
 	 * Enables the "freeze" of the header row for spreadsheet exports
 	 */
 	private boolean enableFixedHeader;
-
 	/**
 	 * Should the ExportWriter create an output file, even if the result set
 	 * for the export is empty?
 	 */
 	private boolean writeEmptyResults = true;
-
 	private ZipOutputStream zipArchive;
 	private ZipEntry zipEntry;
-
 	private BlobMode blobMode = null;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 
@@ -278,7 +259,7 @@ public class DataExporter
 	{
 		if (StringUtil.isBlank(colname))
 		{
-			this.filenameColumn  = null;
+			this.filenameColumn = null;
 		}
 		else
 		{
@@ -329,15 +310,32 @@ public class DataExporter
 		return this.writeEmptyResults;
 	}
 
-	public void setWriteClobAsFile(boolean flag) { this.clobAsFile = flag; }
-	public boolean getWriteClobAsFile() { return clobAsFile; }
+	public void setWriteClobAsFile(boolean flag)
+	{
+		this.clobAsFile = flag;
+	}
 
-	public boolean getCompressOutput() { return this.compressOutput; }
-	public void setCompressOutput(boolean flag) { this.compressOutput = flag; }
+	public boolean getWriteClobAsFile()
+	{
+		return clobAsFile;
+	}
+
+	public boolean getCompressOutput()
+	{
+		return this.compressOutput;
+	}
+
+	public void setCompressOutput(boolean flag)
+	{
+		this.compressOutput = flag;
+	}
 
 	public void clearJobs()
 	{
-		if (this.jobsRunning) return;
+		if (this.jobsRunning)
+		{
+			return;
+		}
 		this.jobQueue.clear();
 	}
 
@@ -346,7 +344,7 @@ public class DataExporter
 	{
 		addTableExportJob(anOutputfile, table, null);
 	}
-	
+
 	public void addTableExportJob(File anOutputfile, TableIdentifier table, String where)
 		throws SQLException
 	{
@@ -389,11 +387,25 @@ public class DataExporter
 		this.addWarning(ResourceMgr.getString("MsgExportCancelled"));
 	}
 
-	public void setTableName(String aTablename) { this.tableName = aTablename; }
-	public String getTableName() { return this.tableName; }
+	public void setTableName(String aTablename)
+	{
+		this.tableName = aTablename;
+	}
 
-	public void setEncoding(String enc) { this.encoding = enc; }
-	public String getEncoding() { return this.encoding; }
+	public String getTableName()
+	{
+		return this.tableName;
+	}
+
+	public void setEncoding(String enc)
+	{
+		this.encoding = enc;
+	}
+
+	public String getEncoding()
+	{
+		return this.encoding;
+	}
 
 	public void setRowMonitor(RowActionMonitor monitor)
 	{
@@ -423,7 +435,7 @@ public class DataExporter
 	 * for exporting a ResultSet
 	 *
 	 * @param columns the columns to be exported
-	 * @see #startExport() 
+	 * @see #startExport()
 	 * @see #startExport(workbench.util.WbFile, workbench.storage.DataStore)
 	 */
 	public void setColumnsToExport(List<ColumnIdentifier> columns)
@@ -441,13 +453,30 @@ public class DataExporter
 		this.columnsToExport = null;
 	}
 
-	public void setUseCDATA(boolean flag) { this.useCDATA = flag; }
-	public boolean getUseCDATA() { return this.useCDATA; }
+	public void setUseCDATA(boolean flag)
+	{
+		this.useCDATA = flag;
+	}
 
-	public void setAppendToFile(boolean aFlag) { this.append = aFlag; }
-	public boolean getAppendToFile() { return this.append; }
+	public boolean getUseCDATA()
+	{
+		return this.useCDATA;
+	}
 
-	public void setContinueOnError(boolean aFlag) { this.continueOnError = aFlag; }
+	public void setAppendToFile(boolean aFlag)
+	{
+		this.append = aFlag;
+	}
+
+	public boolean getAppendToFile()
+	{
+		return this.append;
+	}
+
+	public void setContinueOnError(boolean aFlag)
+	{
+		this.continueOnError = aFlag;
+	}
 
 	/**
 	 * Do not write any COMMITs to generated SQL scripts
@@ -467,7 +496,10 @@ public class DataExporter
 		this.commitEvery = count;
 	}
 
-	public int getCommitEvery() { return this.commitEvery; }
+	public int getCommitEvery()
+	{
+		return this.commitEvery;
+	}
 
 	public ExportType getExportType()
 	{
@@ -476,7 +508,10 @@ public class DataExporter
 
 	public String getTypeDisplay()
 	{
-		if (exportType == null) return "";
+		if (exportType == null)
+		{
+			return "";
+		}
 		return exportType.toString();
 	}
 
@@ -491,9 +526,13 @@ public class DataExporter
 	public void setReportInterval(int interval)
 	{
 		if (interval <= 0)
+		{
 			this.progressInterval = 0;
+		}
 		else
+		{
 			this.progressInterval = interval;
+		}
 	}
 
 	public void setXsltTransformation(String xsltFileName)
@@ -575,12 +614,26 @@ public class DataExporter
 
 	public void setTextDelimiter(String aDelimiter)
 	{
-		if (StringUtil.isNonBlank(aDelimiter)) this.delimiter = aDelimiter;
+		if (StringUtil.isNonBlank(aDelimiter))
+		{
+			this.delimiter = aDelimiter;
+		}
 	}
-	public String getTextDelimiter() { return this.delimiter; }
 
-	public void setTextQuoteChar(String aQuote) { this.quoteChar = aQuote; }
-	public String getTextQuoteChar() { return this.quoteChar; }
+	public String getTextDelimiter()
+	{
+		return this.delimiter;
+	}
+
+	public void setTextQuoteChar(String aQuote)
+	{
+		this.quoteChar = aQuote;
+	}
+
+	public String getTextQuoteChar()
+	{
+		return this.quoteChar;
+	}
 
 	public void setDateFormat(String aFormat)
 	{
@@ -588,7 +641,10 @@ public class DataExporter
 		{
 			aFormat = Settings.getInstance().getDefaultDateFormat();
 		}
-		if (StringUtil.isEmptyString(aFormat)) return;
+		if (StringUtil.isEmptyString(aFormat))
+		{
+			return;
+		}
 		this.dateFormat = aFormat;
 		if (this.dateFormat != null)
 		{
@@ -620,7 +676,10 @@ public class DataExporter
 		{
 			aFormat = Settings.getInstance().getDefaultTimestampFormat();
 		}
-		if (StringUtil.isEmptyString(aFormat)) return;
+		if (StringUtil.isEmptyString(aFormat))
+		{
+			return;
+		}
 		this.dateTimeFormat = aFormat;
 		if (this.dateTimeFormat != null)
 		{
@@ -668,6 +727,9 @@ public class DataExporter
 				this.exportWriter = new XlsExportWriter(this);
 				break;
 			case XLSX:
+				this.exportWriter = new XlsxExportWriter(this);
+				break;
+			case XLSM:
 				this.exportWriter = new XlsXMLExportWriter(this);
 				break;
 			case ODS:
@@ -693,7 +755,10 @@ public class DataExporter
 
 	public String getFullOutputFilename()
 	{
-		if (this.realOutputfile == null) return null;
+		if (this.realOutputfile == null)
+		{
+			return null;
+		}
 		return this.realOutputfile.getFullPath();
 	}
 
@@ -745,12 +810,18 @@ public class DataExporter
 
 	public char getDecimalSymbol()
 	{
-		if (numberFormatter == null) return '.';
+		if (numberFormatter == null)
+		{
+			return '.';
+		}
 		DecimalFormatSymbols symb = numberFormatter.getDecimalFormatSymbols();
-		if (symb == null) return '.';
+		if (symb == null)
+		{
+			return '.';
+		}
 		return symb.getDecimalSeparator();
 	}
-	
+
 	public void addQueryJob(String query, WbFile outputFile)
 	{
 		ExportJobEntry entry = new ExportJobEntry(outputFile, query);
@@ -795,15 +866,21 @@ public class DataExporter
 	{
 		Thread t = new WbThread("Export Jobs")
 		{
+
 			public void run()
 			{
-				try { runJobs(); } catch (Throwable th) {}
+				try
+				{
+					runJobs();
+				}
+				catch (Throwable th)
+				{
+				}
 			}
 		};
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
-
 
 	/**
 	 * Start the export. This will execute all job definitions and
@@ -812,9 +889,9 @@ public class DataExporter
 	 * @return the number of rows exported
 	 * @throws java.io.IOException if the output file could not be written
 	 * @throws java.sql.SQLException if an error occurred during DB access
-	 * 
+	 *
 	 * @see #addQueryJob(java.lang.String, workbench.util.WbFile)
-	 * @see #addTableExportJob(java.io.File, workbench.db.TableIdentifier) 
+	 * @see #addTableExportJob(java.io.File, workbench.db.TableIdentifier)
 	 */
 	public long startExport()
 		throws IOException, SQLException
@@ -825,7 +902,10 @@ public class DataExporter
 
 	public void runJobs()
 	{
-		if (this.jobQueue == null) return;
+		if (this.jobQueue == null)
+		{
+			return;
+		}
 		int count = this.jobQueue.size();
 
 		this.cancelJobs = false;
@@ -843,19 +923,19 @@ public class DataExporter
 
 		try
 		{
-			for (int i=0; i < count; i++)
+			for (int i = 0; i < count; i++)
 			{
 				ExportJobEntry job = this.jobQueue.get(i);
 
 				if (this.rowMonitor != null && job.getTable() != null)
 				{
-					this.rowMonitor.setCurrentObject(job.getTable().getTableName(), i+1, count);
+					this.rowMonitor.setCurrentObject(job.getTable().getTableName(), i + 1, count);
 				}
 
 				try
 				{
 					totalRows += runJob(job);
-					this.tablesExported ++;
+					this.tablesExported++;
 				}
 				catch (Throwable th)
 				{
@@ -866,7 +946,10 @@ public class DataExporter
 						break;
 					}
 				}
-				if (this.cancelJobs) break;
+				if (this.cancelJobs)
+				{
+					break;
+				}
 			}
 		}
 		finally
@@ -904,25 +987,45 @@ public class DataExporter
 			this.addError(ResourceMgr.getString("ErrExportExecute"));
 			this.addError(ExceptionUtil.getDisplay(e));
 			LogMgr.logError("DataExporter.startExport()", "Could not execute SQL statement: " + job.getQuerySql() + ", Error: " + ExceptionUtil.getDisplay(e), e);
-			
+
 			if (!this.dbConn.getAutoCommit() && dbConn.selectStartsTransaction())
 			{
 				// Postgres needs a rollback, but this doesn't (or shouldn't!)
 				// hurt with other DBMS either
-				try { this.dbConn.rollback(); } catch (Throwable th) {}
+				try
+				{
+					this.dbConn.rollback();
+				}
+				catch (Throwable th)
+				{
+				}
 			}
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
-			if (busyControl) this.dbConn.setBusy(false);
+			if (busyControl)
+			{
+				this.dbConn.setBusy(false);
+			}
 		}
 		return rows;
 	}
 
-	public boolean isSuccess() { return this.errors.getLength() == 0; }
-	public boolean hasWarning() { return this.warnings.getLength() > 0; }
-	public boolean hasError() { return this.errors.getLength() > 0; }
+	public boolean isSuccess()
+	{
+		return this.errors.getLength() == 0;
+	}
+
+	public boolean hasWarning()
+	{
+		return this.warnings.getLength() > 0;
+	}
+
+	public boolean hasError()
+	{
+		return this.errors.getLength() > 0;
+	}
 
 	public CharSequence getErrors()
 	{
@@ -974,7 +1077,7 @@ public class DataExporter
 				// correctly through ResultSet.getMetaData(), so we are
 				// using the table information returned by DatabaseMetaData
 				// instead (if this is a table export)
-				for (int i=0; i < info.getColumnCount(); i++)
+				for (int i = 0; i < info.getColumnCount(); i++)
 				{
 					int colIndex = rsInfo.findColumn(info.getColumnName(i));
 					if (colIndex > -1)
@@ -996,8 +1099,20 @@ public class DataExporter
 		finally
 		{
 			exportFinished();
-			try { rs.clearWarnings(); } catch (Throwable th) {}
-			try { rs.close(); } catch (Throwable th) {}
+			try
+			{
+				rs.clearWarnings();
+			}
+			catch (Throwable th)
+			{
+			}
+			try
+			{
+				rs.close();
+			}
+			catch (Throwable th)
+			{
+			}
 		}
 		long numRows = this.exportWriter.getNumberOfRecords();
 		LogMgr.logInfo("DataExporter.startExport()", "Exported " + numRows + " rows to " + this.outputfile);
@@ -1066,7 +1181,10 @@ public class DataExporter
 	private void configureExportWriter()
 		throws IOException, SQLException, Exception
 	{
-		if (this.encoding == null) this.encoding = Settings.getInstance().getDefaultDataEncoding();
+		if (this.encoding == null)
+		{
+			this.encoding = Settings.getInstance().getDefaultDataEncoding();
+		}
 
 		if (this.tableName != null)
 		{
@@ -1133,7 +1251,10 @@ public class DataExporter
 		this.setDateFormat(options.getDateFormat());
 		this.setTimestampFormat(options.getTimestampFormat());
 		this.setEncoding(options.getEncoding());
-		if (this.exportWriter != null) this.exportWriter.configureConverter();
+		if (this.exportWriter != null)
+		{
+			this.exportWriter.configureConverter();
+		}
 	}
 
 	public void setSqlOptions(SqlOptions sqlOptions)
@@ -1288,7 +1409,10 @@ public class DataExporter
 
 	public void setLineEnding(String ending)
 	{
-		if (ending != null) this.lineEnding = ending;
+		if (ending != null)
+		{
+			this.lineEnding = ending;
+		}
 	}
 
 	public String getLineEnding()
@@ -1328,8 +1452,10 @@ public class DataExporter
 
 	public void addControlFileFormats(Set<ControlFileFormat> formats)
 	{
-		if (formats == null) return;
+		if (formats == null)
+		{
+			return;
+		}
 		this.controlFiles.addAll(formats);
 	}
-
 }

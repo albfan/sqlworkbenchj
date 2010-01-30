@@ -12,7 +12,7 @@
 package workbench.db.exporter;
 
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import workbench.db.ibm.Db2FormatFileWriter;
@@ -20,12 +20,13 @@ import workbench.util.StringUtil;
 
 /**
  * Type definitions for various control file formats.
- * Currently Oracle, SQL Server, Postgres (COPY command) are covered
- * 
+ * Currently Oracle, SQL Server, PostgreSQL (COPY command) and DB2 are covered
+ *
  * @author Thomas Kellerer
  * @see OracleControlFileWriter
  * @see SqlServerFormatFileWriter
  * @see PostgresCopyStatementWriter
+ * @see Db2FormatFileWriter
  */
 public enum ControlFileFormat
 {
@@ -34,15 +35,15 @@ public enum ControlFileFormat
 	sqlserver,
 	postgres,
 	db2;
-	
+
 	public static Set<ControlFileFormat> parseCommandLine(String args)
 	{
 		if (StringUtil.isEmptyString(args)) return Collections.emptySet();
-		Set<ControlFileFormat> result = new  HashSet<ControlFileFormat>();
+		Set<ControlFileFormat> result = EnumSet.noneOf(ControlFileFormat.class);
 		List<String> formats = StringUtil.stringToList(args);
 		for (String fs : formats)
 		{
-			try 
+			try
 			{
 				ControlFileFormat f = ControlFileFormat.valueOf(fs);
 				result.add(f);
@@ -53,7 +54,7 @@ public enum ControlFileFormat
 		}
 		return result;
 	}
-	
+
 	public static FormatFileWriter createFormatWriter(ControlFileFormat format)
 	{
 		switch (format)
