@@ -1,6 +1,7 @@
 <section id="using-scripting">
 	<title>Using &wb-productname; in batch files</title>
-	
+	<indexterm><primary>Batch files</primary><secondary>starting &wb-productname;</secondary></indexterm>
+
 	<para>
 		&wb-productname; can also be used from batch files to execute SQL scripts.
 		This can be used to e.g. automatically extract data from a database or run
@@ -59,6 +60,7 @@
 
 	<section id="scripting-connecting">
 		<title>Specifying the connection</title>
+    <indexterm><primary>Batch files</primary><secondary>connecting</secondary></indexterm>
 		
 		<para>
 			When running &wb-productname; in batch mode, you can define the connection 
@@ -70,7 +72,8 @@
 	
 	<section id="scripting-scriptfile">
 		<title>Specifying the script file(s)</title>
-		
+		<indexterm><primary>Batch files</primary><secondary>specify SQL script</secondary></indexterm>
+
 		<para>
 			The script that should be run is specified with the parameter <literal>-script=&#60;filename&#62;</literal>
 			Multiple scripts can be specified by separating them with a comma. The scripts will then be executed in the
@@ -316,6 +319,7 @@
 	</section>
 
 	<section id="script-properties">
+    <indexterm><primary>Batch files</primary><secondary>setting &wb-productname; configuration properties</secondary></indexterm>
 		<title>Setting configuration properties</title>
 		<para>
 			When running &wb-productname; in batch mode, with no <literal>workbench.settings</literal>

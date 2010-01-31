@@ -125,21 +125,30 @@
 
 	<section id="launcher-using">
 		<title>Starting the program using the Windows launcher</title>
-
+    <indexterm><primary>Windows</primary><secondary>32bit</secondary></indexterm>
+    <indexterm><primary>Windows</primary><secondary>64bit</secondary></indexterm>
+    <indexterm><primary>Windows</primary><secondary>using the launcher</secondary></indexterm>
+    
 		<para>
-			On the Windows&reg; platform the supplied SQLWorkbench.exe can be used to
+			On a 32bit Windows&reg; platform the supplied SQLWorkbench.exe can be used to
 			start the program when using a Sun JDK. The native launcher searches for an installed
 			JDK (querying the registry) and then starts &wb-productname;. The file
 			sqlworkbench.jar has to be located in the same directory as the
 			SQLWorkbench.exe, otherwise it doesn&#39;t work.
 		</para>
 
-		<note><para>
+    <important>
+      <para>
+        The launcher can only be used with a 32bit JDK. It will <emphasis role="bold">not</emphasis> work with a 64bit JDK
+      </para>
+    </important>
+    
+		<para>
 			The launcher only works with a Sun JDK, as it directly calls the
-			JDK&apos; dll to start the virtual machine. If you are using a different JDK,
+			JDK&apos; dll to start the virtual machine. If you are using a different JDK
 			you cannot use the launcher to start &wb-productname; on Windows (unless it uses the same
 			directory layout and filenames as the Sun JDK).
-		</para></note>
+		</para>
 
 		<para>
 			By default the launcher increases the maximum JVM heap size to 256MB.
@@ -431,6 +440,7 @@
 
 	<section id="commandline" xreflabel="command line parameters">
 		<title>Command line parameters</title>
+    <indexterm><primary>Command line</primary><secondary>parameters</secondary></indexterm>
 
 		<para>
 			Command line parameters are <emphasis role="bold">not</emphasis> case sensitive.
@@ -545,6 +555,8 @@ another_variable=24</programlisting>
 
 		<section id="commandline-connect-profile">
 			<title>Connect using a pre-defined connection profile</title>
+      <indexterm><primary>Command line</primary><secondary>connection profile</secondary></indexterm>
+
 			<para>
 				You can specify the name of an already created <link linkend="profiles">connection
 				profile</link> on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
@@ -578,6 +590,8 @@ another_variable=24</programlisting>
 
 		<section id="commandline-connect-noprofile">
 			<title>Connect without a profile</title>
+      <indexterm><primary>Command line</primary><secondary>JDBC connection</secondary></indexterm>
+
 			<para>
 				You can also specify the full connection parameters on the commandline, if
 				you don&apos;t want to create a profile only for executing a batch file.

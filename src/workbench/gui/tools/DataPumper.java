@@ -1727,7 +1727,7 @@ public class DataPumper
 		if (size > 0)
 		{
 			result.append(indent);
-			result.append("-" + CommonArgs.ARG_BATCHSIZE + "=" + batchSize);
+			result.append("-" + CommonArgs.ARG_BATCHSIZE + "=" + size);
 		}
 
 		if (size <= 0)

@@ -219,7 +219,7 @@ public class DataDisplayOptions
     selectedTextColorLabel = new javax.swing.JLabel();
     selectedTextColor = new WbColorPicker(true);
     maxRowsColorLabel = new javax.swing.JLabel();
-    maxRowsColor = new WbColorPicker(true);
+    maxRowsColor = new WbColorPicker(false);
     jLabel1 = new javax.swing.JLabel();
     localeDropDown = new javax.swing.JComboBox();
     jPanel5 = new javax.swing.JPanel();
@@ -413,7 +413,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 7, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(4, 13, 0, 0);
     jPanel2.add(jLabel2, gridBagConstraints);
 
     stdBackground.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -440,7 +440,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 7, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(0, 13, 0, 0);
     jPanel2.add(textColorLabel, gridBagConstraints);
 
     textColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -475,7 +475,7 @@ public class DataDisplayOptions
     gridBagConstraints.gridy = 1;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 7, 0, 0);
+    gridBagConstraints.insets = new java.awt.Insets(4, 13, 0, 0);
     jPanel2.add(selectedTextColorLabel, gridBagConstraints);
 
     selectedTextColor.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 0));

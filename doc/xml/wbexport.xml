@@ -58,25 +58,6 @@
 		parameter <literal>-writeoracleloader=true</literal> the control file will contain the 
 		approriate definitions to read the BLOB data from the external file.
 	</para>
-		
-	<para>
-		To be able to generate the binary Microsoft Excel format, you need to download
-		the POI library from the Apache project's website: <ulink url="http://poi.apache.org/"/>.
-		Any version greater than 3.0 should work. The distribution archive from the
-    POI project contains a jar file named e.g. <literal>poi-3.2-FINAL-20081019.jar</literal>
-    (exact name depends on the version).
-	</para>
-	
-	<note><para>
-		The poi jar file needs to be copied into the same directory as <literal>sqlworkbench.jar</literal> under
-		the name <emphasis role="bold"><literal>poi.jar</literal></emphasis>.
-	</para></note>
-
-	<para>
-		If an export to an Excel spreadsheet is needed, it is recommended to use the Excel XML format 
-		(<literal>-type=xlsx</literal>), as that doesn't need an external library. 
-	</para>
-
 
 	<section id="wb-export-memory">
 		<title>Memory usage and WbExport</title>
@@ -94,6 +75,82 @@
       of memory. Please refer to the chapter <link linkend="troubleshooting">Common problems</link>
       for details on how to configure the individual drivers if this happens to you.
     </para>
+  </section>
+
+  <section id="poi-installation">
+    <title>Exporting Excel files</title>
+
+    <para>
+      If you are forced to use Microsoft Office instead of the free alternative OpenOffice and need to create
+      an export for Excel, additional libraries are required to write the native Excel formats (xls and the
+      new xlsx introduced with Office 2007).
+    </para>
+
+    <para>
+      &wb-productname; supports three different file versions for Excel:
+        <simplelist columns="1">
+          <member>Office 2003 (xlsm) - this is a plain XML format that does not need additional libraries</member>
+          <member>The "old" binary format (xls) - only poi.jar is needed (see below)</member>
+          <member>Office 2007 (xlsx) - additional libraries from the POI project are needed</member>
+        </simplelist>
+    </para>
+
+    <section id="export-office-2003">
+      <indexterm><primary>export</primary><secondary>Office 2003</secondary></indexterm>
+      <title>Office 2003 ("SpreadsheetML")</title>
+      <para>
+        No additional libraries are needed to write the Office 2003 XML format ("SpreadsheetML").
+        To create this type, use <literal>-type=xlsm</literal>.
+      </para>
+    </section>
+
+    <section id="export-old-excel">
+      <title>Old binary Excel format</title>
+      <para>
+        To be able to generate the binary Microsoft Excel formats, you need to download
+        the POI library from the Apache project's website: <ulink url="http://poi.apache.org/download.html"/>.
+        You need version 3.5 or newer. The distribution archive from the
+        POI project contains a jar file named e.g. <literal>poi-3.5-FINAL-20090928.jar</literal>
+        (exact name depends on the version).
+      </para>
+
+      <para>
+        The POI library needs to be copied into the same directory as <literal>sqlworkbench.jar</literal> under
+        the name <emphasis role="bold"><literal>poi.jar</literal></emphasis> (note the changed filename).
+      </para>
+      <para>
+        <literal>poi.jar</literal> is also needed for the Office 2007 format.
+      </para>
+    </section>
+
+    <section id="export-excel-2007">
+      <indexterm><primary>export</primary><secondary>Office 2007</secondary></indexterm>
+      <title>Office 2007 (Office Open XML)</title>
+      <para>
+        If you want to create exports using the new Office 2007 file format (OOXML) using <literal>-type=xlsx</literal> you need additional
+        libraries from the POI 3.5 distribution (apart from poi.jar).
+      </para>
+      <para>
+        The following files need to be copied (using the exact filenames) into the directory
+        where <literal>sqlworkbench.jar</literal> is located:
+          <simplelist columns="1">
+            <member><literal>poi-ooxml.jar</literal> (this file originally includes version information in the distribution archive)</member>
+            <member><literal>dom4j-1.6.1.jar</literal></member>
+            <member><literal>geronimo-stax-api_1.0_spec-1.0.jar</literal></member>
+            <member><literal>ooxml-schemas-1.0.jar</literal></member>
+            <member><literal>xmlbeans-2.3.0.jar</literal></member>
+          </simplelist>
+      </para>
+
+      <important>
+        <para>
+          Before Build 108 <literal>-type=xlsx</literal> referred to the Office 2003 file format. To distinguish between the
+          two (XML based) formats from Microsoft, the naming has changed to reflect the default file extensions that are
+          used by Microsoft.
+        </para>
+      </important>
+    </section>
+    
   </section>
 
 	<simplesect id="wb-export-max-rows">
@@ -125,7 +182,7 @@
 						<entry>-type</entry>
 						<entry>
 							<para>
-								Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xls, xlsx, html</literal>
+								Possible values: <literal>text, sqlinsert, sqlupdate, sqldeleteinsert, xml, ods, xlsm, xls, xlsx, html</literal>
 							</para>
 							<para>
 								Defines the type of the output file. <literal>sqlinsert</literal>
@@ -154,12 +211,16 @@
 								format that can be opened e.g. with OpenOffice.org.
 							</para>
 							<para>
-								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
-								for Microsoft Excel.
-							</para>
+								<literal>xlsm</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("SpreadsheetML").
+              </para>
 							<para>
-								<literal>xlsx</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("SpreadsheetML"). 
-                This is <emphasis role="bold">not</emphasis> the Office Open XML format introduced with Microsof Office 2007.
+								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
+								for Microsoft Excel. The file <literal>poi.jar</literal> is required.
+							</para>
+              <para>
+                <literal>xlsx</literal> will generate a spreadsheet file in the Office Open XML format introduced with Microsof Office 2007.
+                Additional external libraries are required in order to be able to use this format. Please read the note at the beginning of
+                this section.
 							</para>
 						</entry>
 					</row>
@@ -931,7 +992,7 @@
 	</section>
 		
 	<section id="export-ods-parameters">
-    <title>Parameters for Spreadsheet types (ods, xslx, xls)</title>
+    <title>Parameters for Spreadsheet types (ods, xslm, xls, xlsx)</title>
     <indexterm><primary>export</primary><secondary>Spreadsheet</secondary></indexterm>
     <indexterm><primary>export</primary><secondary>OpenOffice</secondary></indexterm>
     <indexterm><primary>export</primary><secondary>Excel</secondary></indexterm>
@@ -947,10 +1008,12 @@
 					</row>
 				</thead>
 				<tbody valign="top">
+          
 					<row>
 						<entry>-title</entry>
 						<entry>The name to be used for the worksheet</entry>
 					</row>
+
 					<row>
 						<entry>-infoSheet</entry>
 						<entry>
@@ -961,17 +1024,33 @@
               <para>Default value: <literal>false</literal></para>
             </entry>
 					</row>
+
+					<row>
+						<entry>-fixedHeader</entry>
+						<entry>
+							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
+              <para>
+                If set to true, the header row will be "frozen" in the Worksheet so that
+                it will not scroll out of view. 
+              </para>
+              <para>Default value: <literal>true</literal></para>
+            </entry>
+					</row>
+
 					<row>
 						<entry>-autoFilter</entry>
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
               <para>
                 If set to true, the "auto-filter" fetaure for the column headers will be turned on. This is only
-                valid for ODS and XLSX exports, not for XLS.
+                valid for ODS and XLSM exports. It is not supported for XLS or XLSX.
               </para>
               <para>Default value: <literal>true</literal></para>
             </entry>
 					</row>
+
+
+
 				</tbody>
 			</tgroup>
 		</informaltable>
