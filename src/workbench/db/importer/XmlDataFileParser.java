@@ -107,7 +107,7 @@ public class XmlDataFileParser
 	private ValueConverter converter = new ValueConverter();
 	private ImportValueModifier valueModifier;
 	private BlobDecoder blobDecoder = new BlobDecoder();
-	
+
   public XmlDataFileParser()
   {
 		super();
@@ -501,7 +501,7 @@ public class XmlDataFileParser
 			detectTagFormat();
 		}
 		detectBlobEncoding();
-		
+
 		if (this.columnsToImport == null)
 		{
 			this.realColCount = this.colCount;
@@ -865,7 +865,7 @@ public class XmlDataFileParser
 	 *  {@link workbench.util.ValueConverter} is not used because
 	 *  for most of the datatypes we have some special processing here
 	 *  Date and time can be initialized through the long value in the XML file
-	 *  Numeric types contain the actual class to be used {@link #createNumericType(String, String)}
+	 *  Numeric types contain the actual class to be used
 	 */
 	private void buildColumnData()
 		throws ParsingConverterException
@@ -884,7 +884,7 @@ public class XmlDataFileParser
 		}
 
 		int type = this.columns[this.realColIndex].getDataType();
-		
+
 		String value = this.chars.toString();
     if (trimValues && !SqlUtil.isBlobType(type))
     {

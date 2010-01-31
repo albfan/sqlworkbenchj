@@ -226,21 +226,6 @@ public class SqlRowDataConverter
 		return createSql;
 	}
 
-	public boolean isCreateInsert()
-	{
-		return this.sqlTypeToUse == ExportType.SQL_INSERT;
-	}
-
-	public boolean isCreateUpdate()
-	{
-		return this.sqlTypeToUse == ExportType.SQL_UPDATE;
-	}
-
-	public boolean isCreateInsertDelete()
-	{
-		return this.sqlTypeToUse == ExportType.SQL_DELETE_INSERT;
-	}
-
 	public void setCreateInsert()
 	{
 		this.sqlType = ExportType.SQL_INSERT;
@@ -312,23 +297,9 @@ public class SqlRowDataConverter
 		this.concatString = null;
 	}
 
-	public String getChrFunction()
-	{
-		return chrFunction;
-	}
-
 	public void setChrFunction(String function)
 	{
 		this.chrFunction = function;
-	}
-
-	/**
-	 * Getter for property createTable.
-	 * @return Value of property createTable.
-	 */
-	public boolean isCreateTable()
-	{
-		return createTable;
 	}
 
 	/**
@@ -360,27 +331,12 @@ public class SqlRowDataConverter
 	}
 
 	/**
-	 * Getter for property keyColumnsToUse.
-	 * @return Value of property keyColumnsToUse.
-	 */
-	public List getKeyColumnsToUse()
-	{
-		return keyColumnsToUse;
-	}
-
-	/**
 	 * Setter for property keyColumnsToUse.
 	 * @param cols New value of property keyColumnsToUse.
 	 */
 	public void setKeyColumnsToUse(List<String> cols)
 	{
 		this.keyColumnsToUse = cols;
-	}
-
-	public void setLineTerminator(String lineEnd)
-	{
-		this.lineTerminator = lineEnd;
-		this.doubleLineTerminator = lineEnd + lineEnd;
 	}
 
 	public void setIncludeTableOwner(boolean flag)

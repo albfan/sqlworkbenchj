@@ -26,10 +26,10 @@ import workbench.util.WbFile;
  * Compare two {@link workbench.storage.RowData} objects to check for equality.
  * Used to generate the approriate SQL scripts when comparing the data from
  * two tables.
- * 
+ *
  * @author Thomas Kellerer
  */
-public class RowDataComparer 
+public class RowDataComparer
 {
 	private RowData migrationData;
 	private boolean targetWasNull;
@@ -43,10 +43,6 @@ public class RowDataComparer
 
 	/**
 	 * Compares two database rows.
-	 * If the targetRow is null, it is assumed that it needs to be created.
-	 * 
-	 * @param referenceRow
-	 * @param targetRow
 	 */
 	public RowDataComparer()
 	{
@@ -64,7 +60,7 @@ public class RowDataComparer
 			xmlConverter.setOutputFile(dir);
 		}
 	}
-	
+
 	public void setSqlDateLiteralType(String type)
 	{
 		sqlDateLiteral = type;
@@ -73,7 +69,7 @@ public class RowDataComparer
 			sqlConverter.setDateLiteralType(type);
 		}
 	}
-	
+
 	public void setTypeSql()
 	{
 		sqlConverter = new SqlRowDataConverter(targetDb);
@@ -92,7 +88,7 @@ public class RowDataComparer
 	{
 		return xmlConverter != null;
 	}
-	
+
 	public void setTypeXml(boolean useCDATA)
 	{
 		xmlConverter = new XmlRowDataConverter();
@@ -117,7 +113,7 @@ public class RowDataComparer
 			sqlConverter.setBlobMode(mode);
 		}
 	}
-	
+
 	public void setConnection(WbConnection target)
 	{
 		targetDb = target;
@@ -130,13 +126,13 @@ public class RowDataComparer
 		{
 			sqlConverter.setResultInfo(ri);
 		}
-		
+
 		if (xmlConverter != null)
 		{
 			xmlConverter.setResultInfo(ri);
 		}
 	}
-	
+
 	public void setRows(RowData referenceRow, RowData targetRow)
 	{
 		int cols = referenceRow.getColumnCount();
@@ -152,20 +148,20 @@ public class RowDataComparer
 			targetWasNull = false;
 			migrationData = targetRow.createCopy();
 			migrationData.resetStatus();
-			
+
 			int tcols = migrationData.getColumnCount();
 			if (cols != tcols) throw new IllegalArgumentException("Column counts must match!");
 
 			for (int i=0; i < cols; i++)
 			{
-				// if the value passed to the target row is 
+				// if the value passed to the target row is
 				// identical to the existing value, this will
 				// not change the state of the RowData
 				migrationData.setValue(i, referenceRow.getValue(i));
 			}
 		}
 	}
-	
+
 	public void ignoreColumns(Collection<String> columnNames, ResultInfo info)
 	{
 		if (columnNames == null || columnNames.size() == 0) return;
@@ -178,19 +174,13 @@ public class RowDataComparer
 		}
 	}
 
-	public RowData getRowData() 
-	{
-		return migrationData;
-	}
-
 	/**
 	 * Returns the representation for the changes between the rows
 	 * defined by setRows().
 	 * <br/>
 	 * Depending on the type this might be a SQL statement (INSERT, UPDATE)
 	 * or a XML fragment as returned by XmlRowDataConverter.
-	 * 
-	 * @param converter
+	 *
 	 * @param rowNumber
 	 * @return
 	 */
@@ -235,5 +225,5 @@ public class RowDataComparer
 		if (result == null) return null;
 		return result.toString();
 	}
-	
+
 }

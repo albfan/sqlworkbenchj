@@ -29,7 +29,7 @@ import workbench.util.StringUtil;
 
 /**
  * A class to read sequence definitions from a DB2 database.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class Db2SequenceReader
@@ -38,7 +38,7 @@ public class Db2SequenceReader
 	private WbConnection connection;
 	private boolean isHost;
 	private boolean quoteKeyword;
-	
+
 	public Db2SequenceReader(WbConnection conn)
 	{
 		this.connection = conn;
@@ -55,14 +55,14 @@ public class Db2SequenceReader
 		}
 		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, sequence);
 		if (ds == null || ds.getRowCount() != 1) return null;
 		return createSequenceDefinition(ds, 0);
 	}
-	
+
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
 		String name = ds.getValueAsString(row, "SEQNAME");
@@ -79,7 +79,7 @@ public class Db2SequenceReader
 		readSequenceSource(result);
 		return result;
 	}
-	
+
 	public DataStore getRawSequenceDefinition(String schema, String namePattern)
 	{
 		String sql = null;
@@ -120,7 +120,7 @@ public class Db2SequenceReader
 			"       DATATYPEID, \n" +
 		  "       REMARKS  \n" +
 			"FROM   syscat.sequences \n";
-			
+
 			nameCol = "seqname";
 			schemaCol = "seqschema";
 		}
@@ -154,12 +154,12 @@ public class Db2SequenceReader
 		{
 			sql = sql.replace(" ORDER,", " \"ORDER\",");
 		}
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("Db2SequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 		}
-		
+
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
@@ -179,17 +179,17 @@ public class Db2SequenceReader
 		{
 			SqlUtil.closeAll(rs,stmt);
 		}
-		
+
 		return result;
 	}
-	
+
 	public CharSequence getSequenceSource(String schema, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(schema, sequence);
 		if (def == null) return null;
 		return def.getSource();
 	}
-	
+
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		StringBuilder result = new StringBuilder(100);
@@ -249,7 +249,7 @@ public class Db2SequenceReader
 		{
 			result.append(nl + "      NO CACHE");
 		}
-		
+
 		result.append(nl + "      ");
 		if (cycle != null && cycle.equals("Y"))
 		{
@@ -294,15 +294,6 @@ public class Db2SequenceReader
 				return "DECIMAL";
 		}
 		return "INTEGER";
-	}
-
-	/**
-	 * For testing purposes only!!!
-	 * @param flag
-	 */
-	void setIsHost(boolean flag)
-	{
-		isHost = flag;
 	}
 
 	void setQuoteKeyword(boolean flag)

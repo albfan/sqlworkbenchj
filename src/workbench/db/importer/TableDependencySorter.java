@@ -24,14 +24,14 @@ import workbench.db.WbConnection;
 /**
  * A class to sort tables according to their foreign key constraints,
  * so that data can be imported or deleted without disabling FK constraints.
- * 
+ *
  * @author Thomas Kellerer
  */
-public class TableDependencySorter 
+public class TableDependencySorter
 {
 	private WbConnection dbConn;
 	private List<TableIdentifier> cycleErrors;
-	
+
 	public TableDependencySorter(WbConnection con)
 	{
 		this.dbConn = con;
@@ -41,31 +41,30 @@ public class TableDependencySorter
 	{
 		return getSortedTableList(tables, false, false);
 	}
-	
+
 	public List<TableIdentifier> sortForDelete(List<TableIdentifier> tables, boolean addMissing)
 	{
 		return getSortedTableList(tables, addMissing, true);
 	}
-	
+
 	public boolean hasErrors()
 	{
 		return cycleErrors != null;
 	}
-	
+
 	public List<TableIdentifier> getErrorTables()
 	{
 		if (cycleErrors == null) return null;
 		return Collections.unmodifiableList(cycleErrors);
 	}
-	
+
 	/**
-	 * Determines the FK dependencies for each table in the passed List, 
-	 * and sorts them so that data can be imported without violating 
+	 * Determines the FK dependencies for each table in the passed List,
+	 * and sorts them so that data can be imported without violating
 	 * foreign key constraints
-	 * 
+	 *
 	 * @param tables the list of tables to be sorted
 	 * @returns the tables sorted according to their FK dependencies
-	 * @throws DependencyCycleException if an endless loop in the dependencies was detected
 	 */
 	private List<TableIdentifier> getSortedTableList(List<TableIdentifier> tables, boolean addMissing, boolean bottomUp)
 	{
@@ -75,7 +74,7 @@ public class TableDependencySorter
 //		{
 //			dumpMapping(levelMapping);
 //		}
-		
+
 		ArrayList<TableIdentifier> result = new ArrayList<TableIdentifier>();
 		for (LevelNode lvl : levelMapping)
 		{
@@ -99,16 +98,16 @@ public class TableDependencySorter
 //			System.out.println(lvl.toString());
 //		}
 //	}
-	
+
 	private List<LevelNode> createLevelMapping(List<TableIdentifier> tables, boolean bottomUp)
 	{
 		List<LevelNode> levelMapping = new ArrayList<LevelNode>(tables.size());
 		List<DependencyNode> startNodes = new ArrayList<DependencyNode>(tables.size());
-		
+
 		for (TableIdentifier tbl : tables)
 		{
 			if (!dbConn.getMetadata().tableExists(tbl)) continue;
-			
+
 			TableDependency deps = new TableDependency(dbConn, tbl);
 			deps.readTreeForChildren();
 			if (deps.wasAborted())
@@ -116,7 +115,7 @@ public class TableDependencySorter
 				if (cycleErrors == null) cycleErrors = new LinkedList<TableIdentifier>();
 				cycleErrors.add(tbl);
 			}
-			
+
 			DependencyNode root = deps.getRootNode();
 			startNodes.add(root);
 			if (root != null)
@@ -137,9 +136,9 @@ public class TableDependencySorter
 				levelMapping.add(new LevelNode(node, node.getLevel()));
 			}
 		}
-		
+
 		Comparator<LevelNode> comp = null;
-			
+
 		if (bottomUp)
 		{
 			comp = new Comparator<LevelNode>()
@@ -160,14 +159,14 @@ public class TableDependencySorter
 				}
 			};
 		}
-		
+
 		Collections.sort(levelMapping, comp);
 		return levelMapping;
 	}
 
 	private int findTable(TableIdentifier tofind, List<TableIdentifier> toSearch)
 	{
-		
+
 		for (int i=0; i < toSearch.size(); i++)
 		{
 			TableIdentifier tbl = toSearch.get(i);
@@ -175,7 +174,7 @@ public class TableDependencySorter
 		}
 		return -1;
 	}
-	
+
 	protected void putNodes(List<LevelNode> levelMapping, List<DependencyNode> nodes)
 	{
 		if (nodes == null || nodes.size() == 0) return;
@@ -189,7 +188,7 @@ public class TableDependencySorter
 			// mapping, as this will create a wrong level for them and a potential
 			// parent of the self referencing table (e.g. through a different FK)
 //			if (!node.isRoot() && tbl.equals(root)) continue;
-			
+
 			int level = node.getLevel();
 			LevelNode lvl = findLevelNode(levelMapping, tbl);
 			if (lvl == null)
@@ -205,7 +204,7 @@ public class TableDependencySorter
 			}
 		}
 	}
-	
+
 	private LevelNode findLevelNode(List<LevelNode> levelMapping, TableIdentifier tbl)
 	{
 		for (LevelNode lvl : levelMapping)
@@ -214,7 +213,7 @@ public class TableDependencySorter
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Get all nodes of the passed dependency hierarchy as a "flat" list.
 	 * This is public mainly to be able to run a unit test agains it.
@@ -222,13 +221,13 @@ public class TableDependencySorter
 	public List<DependencyNode> getAllNodes(DependencyNode startWith)
 	{
 		if (startWith == null) return Collections.emptyList();
-		
+
 		List<DependencyNode> children = startWith.getChildren();
-		
+
 		if (children.size() == 0) return Collections.emptyList();
-		
+
 		ArrayList<DependencyNode> result = new ArrayList<DependencyNode>();
-		
+
 		for (DependencyNode node : children)
 		{
 			if (!(node.getTable().compareNames(startWith.getTable()))) result.add(node);
@@ -241,7 +240,7 @@ public class TableDependencySorter
 	 * DependencyNode's equals method compares the FK names as well, which is not something
 	 * we need in this context.
 	 * Additionally we want to manipulate the level of the node according to the max/min
-	 * level for that table. 
+	 * level for that table.
 	 */
 	static class LevelNode
 	{
@@ -274,6 +273,6 @@ public class TableDependencySorter
 			return node.getTable().getTableName() + ", Level=" + level;
 		}
 	}
-	
+
 }
 

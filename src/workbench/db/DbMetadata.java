@@ -697,9 +697,9 @@ public class DbMetadata
 		String cat = table.getCatalog();
 		if (StringUtil.isEmptyString(cat)) return false;
 		if (ignoreCatalog(cat)) return false;
-		
+
 		String currentCat = getCurrentCatalog();
-		
+
 		if (this.isExcel)
 		{
 			// Excel puts the directory into the catalog
@@ -992,7 +992,7 @@ public class DbMetadata
 	{
 		return adjustSchemaNameCase(schema, false);
 	}
-	
+
 	/**
 	 * Adjusts the case of the given schema name to the
 	 * case in which the server stores schema names.
@@ -1008,7 +1008,7 @@ public class DbMetadata
 	{
 		if (StringUtil.isBlank(schema)) return null;
 		if (respectQuotes && isQuoted(schema)) return schema;
-		
+
 		schema = StringUtil.trimQuotes(schema).trim();
 		try
 		{
@@ -1026,7 +1026,7 @@ public class DbMetadata
 		}
 		return schema;
 	}
-	
+
 	/**
 	 * Returns true if the given object name needs quoting due
 	 * to mixed case writing or because the case of the name
@@ -1363,7 +1363,7 @@ public class DbMetadata
 				// try again with PUBLIC, maybe it's a public synonym
 				ds = getObjects(null, "PUBLIC", table.getRawTableName(), null);
 			}
-			
+
 			if (ds.getRowCount() == 1)
 			{
 				result = buildTableIdentifierFromDs(ds, 0);
@@ -1485,18 +1485,6 @@ public class DbMetadata
 		try
 		{
 			return this.metaData.supportsMixedCaseIdentifiers();
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
-	}
-
-	protected boolean supportsMixedCaseQuotedIdentifiers()
-	{
-		try
-		{
-			return this.metaData.supportsMixedCaseQuotedIdentifiers();
 		}
 		catch (Exception e)
 		{
@@ -1714,7 +1702,11 @@ public class DbMetadata
 	public void close()
 	{
 		if (this.oraOutput != null) this.oraOutput.close();
-		if (this.oracleMetaData != null) this.oracleMetaData.columnsProcessed();
+		if (this.oracleMetaData != null)
+		{
+			this.oracleMetaData.columnsProcessed();
+			this.oracleMetaData.done();
+		}
 	}
 
 	public int fixColumnType(int type)
@@ -1821,7 +1813,7 @@ public class DbMetadata
 	 * To display the columns for a table in a DataStore create an
 	 * instance of {@link TableColumnsDatastore}.
 	 *
-	 * @param table The table for which the definition should be retrieved
+	 * @param toRead The table for which the definition should be retrieved
 	 *
 	 * @throws SQLException
 	 * @return the definition of the table.
@@ -1834,7 +1826,7 @@ public class DbMetadata
 
 		TableIdentifier table = toRead.createCopy();
 		table.adjustCase(this.dbConnection);
-		
+
 		String catalog = StringUtil.trimQuotes(table.getCatalog());
 		String schema = StringUtil.trimQuotes(table.getSchema());
 		String tablename = StringUtil.trimQuotes(table.getTableName());
@@ -1915,7 +1907,7 @@ public class DbMetadata
 
 				int size = rs.getInt("COLUMN_SIZE"); // index 7
 				int digits = -1;
-				try 
+				try
 				{
 					digits = rs.getInt("DECIMAL_DIGITS"); // index 9
 				}
@@ -2200,7 +2192,7 @@ public class DbMetadata
 	{
 		return getCatalogInformation(null);
 	}
-	
+
 	/**
 	 * Return a filtered list of catalogs in the database.
 	 * <br/>
@@ -2210,7 +2202,7 @@ public class DbMetadata
 	 * <br/>
 	 * If the filter is not null, all entries that are matched by the
 	 * filter are removed from the result.
-	 * 
+	 *
 	 * @param filter the ObjectNameFilter to apply
 	 * @return a list of available catalogs if supported by the database
 	 * @see ObjectNameFilter#isExcluded(java.lang.String)
@@ -2264,7 +2256,7 @@ public class DbMetadata
 	{
 		return getSchemas(null);
 	}
-	
+
 	/**
 	 * Return a filtered list of schemas in the database.
 	 * <br/>
@@ -2292,7 +2284,7 @@ public class DbMetadata
 				{
 					result.add(schema);
 				}
-				
+
 			}
 		}
 		catch (Exception e)
@@ -2366,7 +2358,7 @@ public class DbMetadata
 			{
 				result.add("SEQUENCE");
 			}
-			
+
 			for (ObjectListExtender extender : extenders)
 			{
 				result.addAll(extender.supportedTypes());
@@ -2381,18 +2373,6 @@ public class DbMetadata
 			try { rs.close(); }	 catch (Throwable e) {}
 		}
 		return result;
-	}
-
-	public String getProcedureTerm()
-	{
-		try
-		{
-			return metaData.getProcedureTerm();
-		}
-		catch (SQLException e)
-		{
-			return "PROCEDURE";
-		}
 	}
 
 

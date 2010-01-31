@@ -23,7 +23,7 @@ import workbench.sql.StatementRunnerResult;
 
 /**
  * Display the source code of a trigger.
- * @see workbench.db.TriggerReader#getTriggerSource(java.lang.String, java.lang.String, java.lang.String, workbench.db.TableIdentifier)
+ * @see workbench.db.TriggerReader#getTriggerSource(workbench.db.TriggerDefinition) 
  *
  * @author Thomas Kellerer
  */

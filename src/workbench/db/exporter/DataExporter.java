@@ -330,15 +330,6 @@ public class DataExporter
 		this.compressOutput = flag;
 	}
 
-	public void clearJobs()
-	{
-		if (this.jobsRunning)
-		{
-			return;
-		}
-		this.jobQueue.clear();
-	}
-
 	public void addTableExportJob(File anOutputfile, TableIdentifier table)
 		throws SQLException
 	{
@@ -446,11 +437,6 @@ public class DataExporter
 	public List<ColumnIdentifier> getColumnsToExport()
 	{
 		return this.columnsToExport;
-	}
-
-	public void setExportAllColumns()
-	{
-		this.columnsToExport = null;
 	}
 
 	public void setUseCDATA(boolean flag)
@@ -838,14 +824,6 @@ public class DataExporter
 		return this.totalRows;
 	}
 
-	public void setCurrentRow(int currentRow)
-	{
-		if (this.rowMonitor != null)
-		{
-			this.rowMonitor.setCurrentRow(currentRow, -1);
-		}
-	}
-
 	protected void fireExecutionStart()
 	{
 		for (DbExecutionListener l : listener)
@@ -1022,11 +1000,6 @@ public class DataExporter
 		return this.warnings.getLength() > 0;
 	}
 
-	public boolean hasError()
-	{
-		return this.errors.getLength() > 0;
-	}
-
 	public CharSequence getErrors()
 	{
 		// this will clear the internal buffer of the errors!
@@ -1056,12 +1029,6 @@ public class DataExporter
 	{
 		this.outputfile = output;
 		return startExport(rs, null, generatingSql);
-	}
-
-	protected long startExport(ResultSet rs, ExportJobEntry job)
-		throws IOException, SQLException, Exception
-	{
-		return startExport(rs, job.getResultInfo(), job.getQuerySql());
 	}
 
 	protected long startExport(ResultSet rs, ResultInfo info, String generatingSql)

@@ -250,8 +250,8 @@ public class SqlCommand
 	/**
 	 * Should be overridden by a specialised SqlCommand.
 	 * setConnection must be called before calling execute()
-	 * 
-	 * @see #setConnection(workbench.db.WbConnection) 
+	 *
+	 * @see #setConnection(workbench.db.WbConnection)
 	 */
 	public StatementRunnerResult execute(String sql)
 		throws SQLException, Exception
@@ -262,7 +262,7 @@ public class SqlCommand
 		this.isCancelled = false;
 
 		sql = getSqlToExecute(sql);
-		
+
 		runner.setSavepoint();
 		try
 		{
@@ -476,7 +476,7 @@ public class SqlCommand
 	}
 
 	/**
-	 * Remove comments from the SQL if the current connection profile has the 
+	 * Remove comments from the SQL if the current connection profile has the
 	 * corresponding option defined.
 	 *
 	 * Additionally the DB specific settings is checked whether the DBMS supports
@@ -484,7 +484,7 @@ public class SqlCommand
 	 *
 	 * @param originalSql
 	 * @return the sql with comments removed if necessary.
-	 * 
+	 *
 	 * @see workbench.db.ConnectionProfile#getRemoveComments()
 	 * @see workbench.db.DbSettings#supportsCommentInSql()
 	 * @see workbench.db.DbSettings#removeNewLinesInSQL()
@@ -514,9 +514,9 @@ public class SqlCommand
 	 * this must be called every time before execute() is called to make
 	 * sure the command is acting on the correct connection.
 	 * <br/>
-	 * 
+	 *
 	 * @param conn the new current connection
-	 * @see #execute(java.lang.String) 
+	 * @see #execute(java.lang.String)
 	 */
 	public void setConnection(WbConnection conn)
 	{
@@ -652,7 +652,7 @@ public class SqlCommand
 	 * @param sql the sql to "clean"
 	 * @return the sql with the verb, comments and newlines removed
 	 * @see workbench.util.SqlUtil#makeCleanSql(String, boolean, boolean, char)
-	 * @see workbench.util.SqlUtil#getSqlVerb(java.lang.CharSequence)
+	 * @see workbench.util.SqlUtil#getSqlVerb(String) 
 	 */
 	protected String getCommandLine(String sql)
 	{

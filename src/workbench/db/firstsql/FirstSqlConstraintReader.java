@@ -21,6 +21,7 @@ import java.util.Map;
 import workbench.db.AbstractConstraintReader;
 import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
@@ -48,8 +49,8 @@ public class FirstSqlConstraintReader
 		return Collections.emptyMap();
 	}
 
-	public List<TableConstraint> getTableConstraints(Connection dbConnection, TableIdentifier aTable)
-		throws SQLException
+	@Override
+	public List<TableConstraint> getTableConstraints(WbConnection dbConnection, TableIdentifier aTable)
 	{
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -63,7 +64,7 @@ public class FirstSqlConstraintReader
 
 		try
 		{
-			pstmt = dbConnection.prepareStatement(SQL);
+			pstmt = dbConnection.getSqlConnection().prepareStatement(SQL);
 			pstmt.setString(1, aTable.getSchema());
 			pstmt.setString(2, aTable.getTableName());
 			rs = pstmt.executeQuery();
@@ -77,7 +78,6 @@ public class FirstSqlConstraintReader
 		catch (SQLException e)
 		{
 			LogMgr.logError("FirstSqlMetadata.getTableConstraints()", "Could not retrieve table constraints for " + aTable.getTableExpression(), e);
-			throw e;
 		}
 		finally
 		{

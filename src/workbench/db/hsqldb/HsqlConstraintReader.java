@@ -24,18 +24,16 @@ public class HsqlConstraintReader
 	extends AbstractConstraintReader
 {
 
-	private String TABLE_SQL = "select chk.constraint_name, chk.check_clause \n" +
-		"from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" +
-		"where chk.constraint_name = cons.constraint_name  \n" +
-		"and cons.constraint_type = 'CHECK' \n" +
-		"and cons.table_name = ?; \n";
-	
 	private String sql;
 
 	public HsqlConstraintReader(Connection dbConnection)
 	{
 		super();
-		this.sql = TABLE_SQL;
+		this.sql = "select chk.constraint_name, chk.check_clause \n" +
+			"from information_schema.system_check_constraints chk, information_schema.system_table_constraints cons \n" +
+			"where chk.constraint_name = cons.constraint_name  \n" +
+			"and cons.constraint_type = 'CHECK' \n" +
+			"and cons.table_name = ?; \n";
 
 		if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
 		{

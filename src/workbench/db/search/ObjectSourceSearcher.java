@@ -33,7 +33,7 @@ import workbench.util.StringUtil;
  * A class to search the source code of database objects for a specific string.
  * <br/>
  * Only the sourcecode that can be retrieved through {@link workbench.db.DbMetadata} is searched.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ObjectSourceSearcher
@@ -86,7 +86,7 @@ public class ObjectSourceSearcher
 	 * Sets the given types to the list of types to be searched
 	 * <br/>
 	 * This will override any previously defined search types.
-	 * @param types
+	 * @param searchTypes
 	 */
 	public void setTypesToSearch(List<String> searchTypes)
 	{
@@ -132,7 +132,7 @@ public class ObjectSourceSearcher
 	 *
 	 * @param searchValues the patterns to be searched in all object sources. This can be a regular expression
 	 * @param matchAll if true all patterns must be found in a single source
-	 * @param caseSensitive  if true, the patterns must match exactly
+	 * @param ignoreCase  if false, the patterns must match exactly
 	 * @return
 	 */
 	public synchronized List<DbObject> searchObjects(List<String> searchValues,

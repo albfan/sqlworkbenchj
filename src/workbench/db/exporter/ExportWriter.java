@@ -185,7 +185,7 @@ public abstract class ExportWriter
 		while (rs.next())
 		{
 			if (this.cancel) break;
-			
+
 			if (first)
 			{
 				first = false;
@@ -219,7 +219,7 @@ public abstract class ExportWriter
 			this.rowMonitor.setCurrentRow((int)currentRow, -1);
 		}
 	}
-	
+
 	protected void writeRow(RowData row, long numRows)
 		throws IOException
 	{
@@ -246,7 +246,7 @@ public abstract class ExportWriter
 		}
 
 		if (!doWriteStart) return;
-		
+
 		writeFormatFile();
 		StrBuffer data = converter.getStart();
 		if (data != null && outputWriter != null)
@@ -289,15 +289,6 @@ public abstract class ExportWriter
 	public void cancel()
 	{
 		this.cancel = true;
-	}
-
-	/**
-	 * Getter for property tableToUse.
-	 * @return Value of property tableToUse.
-	 */
-	public String getTableToUse()
-	{
-		return tableToUse;
 	}
 
 	/**

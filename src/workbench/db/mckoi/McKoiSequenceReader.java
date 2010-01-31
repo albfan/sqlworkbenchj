@@ -123,18 +123,6 @@ public class McKoiSequenceReader
 		return result;
 	}
 
-	public List<String> getSequenceList(String owner, String namePattern)
-	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
-		if (ds == null) return Collections.emptyList();
-		List<String> result = new LinkedList<String>();
-		for (int row=0; row < ds.getRowCount(); row ++)
-		{
-			result.add(ds.getValueAsString(row, "NAME"));
-		}
-		return result;
-	}
-
 	public CharSequence getSequenceSource(String owner, String sequence)
 	{
 		SequenceDefinition def = getSequenceDefinition(owner, sequence);

@@ -22,15 +22,15 @@ import workbench.util.StringUtil;
  * A class to generate ALTER statements for changes to column definitions
  * of a table. The necessary DBMS specific SQL statements are retrieved
  * through DbSettings
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ColumnChanger
 {
 	public static final String PARAM_TABLE_NAME = DbObjectChanger.PARAM_TABLE_NAME;
-	
+
 	public static final String PARAM_COL_NAME = MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER;
-	
+
 	public static final String PARAM_NEW_COL_NAME = "%new_column_name%";
 	public static final String PARAM_DATATYPE = "%datatype%";
 	public static final String PARAM_NEW_DATATYPE = "%new_datatype%";
@@ -65,7 +65,7 @@ public class ColumnChanger
 
 	/**
 	 * For unit testing
-	 * @param con
+	 * @param settings the DB configuration to be used
 	 */
 	ColumnChanger(DbSettings settings)
 	{
@@ -176,7 +176,7 @@ public class ColumnChanger
 		String setNotNull = dbSettings.getAlterColumnSetNotNull();
 		return (dropNotNull != null && setNotNull != null);
 	}
-	
+
 	public boolean canChangeDefault()
 	{
 		String alterDefault = dbSettings.getAlterColumnDefaultSql();
@@ -184,13 +184,13 @@ public class ColumnChanger
 		String dropDefault = dbSettings.getDropColumnDefaultSql();
 		return (alterDefault != null || (setDefault != null && dropDefault != null));
 	}
-	
+
 	public boolean canAddColumn()
 	{
 		String sql = dbSettings.getAddColumnSql();
 		return sql != null;
 	}
-	
+
 	public boolean canChangeComment()
 	{
 		String sql = commentMgr.getCommentSqlTemplate("column");
@@ -211,7 +211,7 @@ public class ColumnChanger
 		if (dbConn.getMetadata().isKeyword(colname)) return "\"" + colname + "\"";
 		return colname;
 	}
-	
+
 	protected String addColumn(TableIdentifier table, ColumnIdentifier newDefinition)
 	{
 		if (newDefinition == null) return null;
@@ -227,7 +227,7 @@ public class ColumnChanger
 		{
 			sql = sql.replace(PARAM_DEFAULT_EXPR, "DEFAULT " + newDefinition.getDefaultValue());
 		}
-		
+
 		String nullable = nullableSql(newDefinition.isNullable());
 		if (!newDefinition.isNullable() || useNullKeyword())
 		{
@@ -239,7 +239,7 @@ public class ColumnChanger
 		}
 		return sql;
 	}
-	
+
 	protected String changeDataType(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
 		String sql = dbSettings.getAlterColumnDataTypeSql();
@@ -325,7 +325,7 @@ public class ColumnChanger
 		String alterDefault = dbSettings.getAlterColumnDefaultSql();
 		String setDefault = dbSettings.getSetColumnDefaultSql();
 		String dropDefault = dbSettings.getDropColumnDefaultSql();
-		
+
 		String oldDefault = oldDefinition.getDefaultValue();
 		String newDefault = newDefinition.getDefaultValue();
 

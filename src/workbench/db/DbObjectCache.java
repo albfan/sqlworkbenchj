@@ -38,11 +38,11 @@ public class DbObjectCache
 	private WbConnection dbConnection;
 	private static final String NULL_SCHEMA = "$$wb-null-schema$$";
 	private boolean retrieveOraclePublicSynonyms = false;
-	
+
 	private Set<String> schemasInCache;
 	private SortedMap<TableIdentifier, List<ColumnIdentifier>> objects;
 	private Map<String, List<ProcedureDefinition>> procedureCache = new HashMap<String, List<ProcedureDefinition>>();
-	
+
 	DbObjectCache(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -57,7 +57,7 @@ public class DbObjectCache
 		objects = new TreeMap<TableIdentifier, List<ColumnIdentifier>>();
 	}
 	/**
-	 * Add this list of tables to the current cache. 
+	 * Add this list of tables to the current cache.
 	 */
 	private void setTables(List<TableIdentifier> tables)
 	{
@@ -69,12 +69,7 @@ public class DbObjectCache
 			}
 		}
 	}
-	
-	public Set<TableIdentifier> getTables()
-	{
-		return getTables(null, null);
-	}
-	
+
 	public Set<TableIdentifier> getTables(String schema)
 	{
 		return getTables(schema, null);
@@ -92,7 +87,7 @@ public class DbObjectCache
 	public Set<TableIdentifier> getTables(String schema, String type)
 	{
 		String schemaToUse = getSchemaToUse(schema);
-		if (this.objects.size() == 0 || (!schemasInCache.contains(schemaToUse == null ? NULL_SCHEMA : schemaToUse))) 
+		if (this.objects.size() == 0 || (!schemasInCache.contains(schemaToUse == null ? NULL_SCHEMA : schemaToUse)))
 		{
 			try
 			{
@@ -161,7 +156,7 @@ public class DbObjectCache
 		}
 		return result;
 	}
-	
+
 	private Set<TableIdentifier> filterTablesBySchema(String schema)
 	{
 		SortedSet<TableIdentifier> result = new TreeSet<TableIdentifier>(new TableNameComparator());
@@ -181,7 +176,7 @@ public class DbObjectCache
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Return the columns for the given table
 	 * @return a List with {@link workbench.db.ColumnIdentifier} objects
@@ -198,7 +193,7 @@ public class DbObjectCache
 			}
 			this.getTables(schema);
 		}
-		
+
 		TableIdentifier toSearch = tbl.createCopy();
 		toSearch.adjustCase(dbConnection);
 		if (toSearch.getSchema() == null)
@@ -209,10 +204,10 @@ public class DbObjectCache
 			}
 			toSearch.setSchema(schema);
 		}
-		
+
 		List<ColumnIdentifier> cols = this.objects.get(toSearch);
-		
-		// To support Oracle public synonyms, try to find a table with that name 
+
+		// To support Oracle public synonyms, try to find a table with that name
 		// but without a schema
 		if (retrieveOraclePublicSynonyms && toSearch.getSchema() != null && cols == null)
 		{
@@ -234,20 +229,20 @@ public class DbObjectCache
 				cols = this.objects.get(toSearch);
 			}
 		}
-		
+
 		if (cols == null || cols == Collections.EMPTY_LIST)
 		{
-			TableIdentifier tblToUse = null; 
+			TableIdentifier tblToUse = null;
 
 			if (Settings.getInstance().getDebugCompletionSearch())
 			{
 				LogMgr.logDebug("DbObjectCache.getColumns()", "Using key: " + toSearch.getTableExpression());
 			}
-			
+
 			// use the stored key because that might carry the correct type attribute
 			// TabelIdentifier.equals() doesn't compare the type, only the expression
 			// so we'll get a containsKey() == true even if the type is different
-			// (which is necessary because the TableIdentifier passed to this 
+			// (which is necessary because the TableIdentifier passed to this
 			// method will never contain a type!)
 			if (objects.containsKey(toSearch))
 			{
@@ -284,15 +279,15 @@ public class DbObjectCache
 			{
 				this.objects.put(tblToUse, cols);
 			}
-				
+
 		}
 		return Collections.unmodifiableList(cols);
 	}
-	
+
 	/**
 	 * Return the stored key according to the passed
 	 * TableIdentifier. The stored key might carry additional
-	 * properties that the passed key does not have (even 
+	 * properties that the passed key does not have (even
 	 * though they are equal)
 	 */
 	private TableIdentifier findKey(TableIdentifier key)
@@ -304,7 +299,7 @@ public class DbObjectCache
 		}
 		return null;
 	}
-	
+
 	/**
 	 * Disposes any db objects held in the cache
 	 */

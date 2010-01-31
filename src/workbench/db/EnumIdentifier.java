@@ -41,17 +41,12 @@ public class EnumIdentifier
 		if (this.values == null) values = new ArrayList<String>();
 		values.add(value);
 	}
-	
-	public void setValues(List<String> enumValues)
-	{
-		values = new ArrayList<String>(enumValues);
-	}
 
 	public List<String> getValues()
 	{
 		return values;
 	}
-	
+
 	public String getCatalog()
 	{
 		return catalog;

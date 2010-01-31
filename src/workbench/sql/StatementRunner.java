@@ -52,7 +52,7 @@ public class StatementRunner
 	private SqlCommand currentCommand;
 	private ResultSetConsumer currentConsumer;
 	private String baseDir;
-	
+
 	private RowActionMonitor rowMonitor;
 	private ExecutionController controller;
 	private WbStartBatch batchCommand;
@@ -70,7 +70,7 @@ public class StatementRunner
 	private int maxRows = -1;
 	private int queryTimeout = -1;
 	private boolean showDataLoadingProgress = true;
-	
+
 	public StatementRunner()
 	{
 		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
@@ -101,7 +101,7 @@ public class StatementRunner
 			l.propertyChange(evt);
 		}
 	}
-	
+
 	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if ("workbench.gui.log.consolidate".equals(evt.getPropertyName()))
@@ -114,7 +114,7 @@ public class StatementRunner
 	{
 		this.showDataLoadingProgress = false;
 	}
-	
+
 	public void setFullErrorReporting(boolean flag)
 	{
 		this.fullErrorReporting = flag;
@@ -124,7 +124,7 @@ public class StatementRunner
 	{
 		return this.controller;
 	}
-	
+
 	public void setExecutionController(ExecutionController control)
 	{
 		this.controller = control;
@@ -134,24 +134,24 @@ public class StatementRunner
 	{
 		return this.hideWarnings;
 	}
-	
+
 	public void setHideWarnings(boolean flag)
 	{
 		this.hideWarnings = flag;
 	}
-	
+
 	public void setIgnoreDropErrors(boolean flag)
 	{
 		this.ignoreDropErrors = flag;
 	}
-	
+
 	public boolean getIgnoreDropErrors()
 	{
 		return this.ignoreDropErrors;
 	}
-	
+
 	/**
-	 * For testing purposes, to that non-default commands can be added 
+	 * For testing purposes, to that non-default commands can be added
 	 * during a JUnit test
 	 */
 	public void addCommand(SqlCommand command)
@@ -163,14 +163,14 @@ public class StatementRunner
 	{
 		return cmdMapper.getAllWbCommands();
 	}
-	
+
 	/**
-	 * Controls the type of error reporting. 
+	 * Controls the type of error reporting.
 	 * If this is set to true, no additional messages will be reported, only
-	 * the errors returned by the server. 
-	 * 
+	 * the errors returned by the server.
+	 *
 	 * @param flag
-	 * @see SqlCommand#setReturnOnlyErrorMessages(boolean) 
+	 * @see SqlCommand#setReturnOnlyErrorMessages(boolean)
 	 */
 	public void setReturnOnlyErrorMessages(boolean flag)
 	{
@@ -186,17 +186,17 @@ public class StatementRunner
 	{
 		this.queryTimeout = timeout;
 	}
-	
-	public void setParameterPrompter(ParameterPrompter filter) 
+
+	public void setParameterPrompter(ParameterPrompter filter)
 	{
 		this.prompter = filter;
 	}
-	
+
 	public void setBaseDir(String dir)
 	{
 		this.baseDir = dir;
 	}
-	
+
 	public String getBaseDir()
 	{
 		return this.baseDir;
@@ -216,7 +216,7 @@ public class StatementRunner
 			this.mainConnection = null;
 		}
 	}
-	
+
 	/**
 	 * Temporarily change the connection, but keep the old connection open.
 	 * If changeConnection() has already been called once, the current connection
@@ -227,7 +227,7 @@ public class StatementRunner
 	{
 		if (newConn == null) return;
 		if (newConn == currentConnection) return;
-		
+
 		if (mainConnection == null)
 		{
 			this.mainConnection = currentConnection;
@@ -239,31 +239,26 @@ public class StatementRunner
 		this.setConnection(newConn);
 	}
 
-	public void preCloseConnection()
-	{
-		
-	}
-	
 	public void setConnection(WbConnection aConn)
 	{
 		this.releaseSavepoint();
 		this.cmdMapper.setConnection(aConn);
 		this.currentConnection = aConn;
-		
+
 		fireConnectionChanged();
 
 		if (currentConnection == null) return;
-		
+
     ConnectionProfile profile = currentConnection.getProfile();
     if (profile != null)
     {
       this.ignoreDropErrors = profile.getIgnoreDropErrors();
       this.hideWarnings = profile.isHideWarnings();
     }
-    
+
 		DbMetadata meta = this.currentConnection.getMetadata();
 		DbSettings db = (meta != null ? meta.getDbSettings() : null);
-		
+
 		setUseSavepoint(db == null ? false : db.useSavePointForDML());
 	}
 
@@ -294,7 +289,7 @@ public class StatementRunner
 		{
 			this.result.clear();
 		}
-        
+
 		if (this.prompter != null)
 		{
 			boolean goOn = this.prompter.processParameterPrompts(aSql);
@@ -303,12 +298,12 @@ public class StatementRunner
 				this.result = new StatementRunnerResult(aSql);
 				this.result.setPromptingWasCancelled();
 				return;
-			}				
+			}
 		}
-		
+
 		this.currentCommand = this.cmdMapper.getCommandToUse(aSql);
-		
-		if (this.currentCommand == null) 
+
+		if (this.currentCommand == null)
 		{
 			this.result = null;
 			return;
@@ -319,7 +314,7 @@ public class StatementRunner
 			String verb = SqlUtil.getSqlVerb(aSql);
 			throw new SQLException("Cannot execute command '" + verb + "' without a connection!");
 		}
-		
+
 		this.currentCommand.setStatementRunner(this);
 		this.currentCommand.setRowMonitor(this.rowMonitor);
 		this.currentCommand.setResultLogger(this.resultLogger);
@@ -356,7 +351,7 @@ public class StatementRunner
 			this.result.setSuccess();
 			return;
 		}
-		
+
 		if (controller != null && currentCommand.needConfirmation(currentConnection, realSql))
 		{
 			boolean doExecute = this.controller.confirmStatementExecution(realSql);
@@ -370,15 +365,15 @@ public class StatementRunner
 				return;
 			}
 		}
-		
+
 		boolean oldReporting = this.currentCommand.getFullErrorReporting();
-		
+
 		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
-		
+
 		long sqlExecStart = System.currentTimeMillis();
-		
+
 		this.result = this.currentCommand.execute(realSql);
-		
+
 		this.currentCommand.setFullErrorReporting(oldReporting);
 
 		if (this.currentCommand instanceof WbStartBatch && result.isSuccess())
@@ -397,12 +392,12 @@ public class StatementRunner
 	{
 		return currentConsumer;
 	}
-	
+
 	public void setConsumer(ResultSetConsumer consumer)
 	{
 		this.currentConsumer = consumer;
 	}
-	
+
 	public void setVerboseLogging(boolean flag)
 	{
 		this.verboseLogging = flag;
@@ -456,7 +451,7 @@ public class StatementRunner
 	{
 		this.useSavepoint = flag;
 	}
-	
+
 	public void setSavepoint()
 	{
 		if (!useSavepoint) return;
@@ -477,7 +472,7 @@ public class StatementRunner
 			this.useSavepoint = false;
 		}
 	}
-	
+
 	public void releaseSavepoint()
 	{
 		if (this.savepoint == null || this.currentConnection == null) return;
@@ -490,7 +485,7 @@ public class StatementRunner
 			this.savepoint = null;
 		}
 	}
-	
+
 	public void rollbackSavepoint()
 	{
 		if (this.savepoint == null) return;
@@ -503,5 +498,5 @@ public class StatementRunner
 			this.savepoint = null;
 		}
 	}
-	
+
 }

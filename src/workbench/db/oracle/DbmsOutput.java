@@ -21,8 +21,8 @@ import workbench.util.SqlUtil;
 
 /**
  * A class to control the dbms_output package in Oracle through JDBC
- *  
- * @author Thomas Kellerer  
+ *
+ * @author Thomas Kellerer
  */
 public class DbmsOutput
 {
@@ -39,7 +39,7 @@ public class DbmsOutput
 	public void enable(long size) throws SQLException
 	{
 		if (this.enabled && size == this.lastSize) return;
-		
+
 		CallableStatement enableStatement = null;
 		try
 		{
@@ -55,12 +55,6 @@ public class DbmsOutput
 		{
 			SqlUtil.closeStatement(enableStatement);
 		}
-	}
-
-	public void enable()
-		throws SQLException
-	{
-		this.enable(-1);
 	}
 
 	/*

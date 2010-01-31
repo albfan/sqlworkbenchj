@@ -24,20 +24,20 @@ public enum BlobMode
 	/**
 	 * Use a DBMS specific literals for BLOBs in SQL statements.
 	 * @see workbench.storage.BlobFormatterFactory#createInstance(workbench.db.DbMetadata meta)
-	 * @see workbench.db.exporter.DataExporter#setBlobMode(String)
+	 * @see workbench.db.exporter.DataExporter#setBlobMode(BlobMode)
 	 */
 	DbmsLiteral,
 
 	/**
 	 * Use ANSI literals for BLOBs in SQL statements.
 	 * @see workbench.storage.BlobFormatterFactory#createAnsiFormatter()
-	 * @see workbench.db.exporter.DataExporter#setBlobMode(String)
+	 * @see workbench.db.exporter.DataExporter#setBlobMode(BlobMode)
 	 */
 	AnsiLiteral,
 
 	/**
 	 * Generate WB Specific {$blobfile=...} statements
-	 * @see workbench.db.exporter.DataExporter#setBlobMode(String)
+	 * @see workbench.db.exporter.DataExporter#setBlobMode(BlobMode) 
 	 */
 	SaveToFile,
 

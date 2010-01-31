@@ -32,14 +32,14 @@ import workbench.util.StringUtil;
 
 /**
  * Ingres related metadata information.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class IngresMetadata
 	implements SynonymReader, SequenceReader
 {
 	private Connection dbConn;
-	private final String SELECT_SEQUENCE_DEF = 
+	private final String SELECT_SEQUENCE_DEF =
 			       "SELECT SEQ_NAME,  \n" +
 			       "       SEQ_OWNER, \n" +
              "       MIN_VALUE,  \n" +
@@ -141,7 +141,7 @@ public class IngresMetadata
 		return result.toString();
 	}
 
-	
+
 	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
 		StringBuilder sql = new StringBuilder(SELECT_SEQUENCE_DEF);
@@ -149,7 +149,7 @@ public class IngresMetadata
 		boolean whereAdded = false;
 		int ownerIndex = -1;
 		int nameIndex = -1;
-		
+
 		if (StringUtil.isNonBlank(owner))
 		{
 			whereAdded = true;
@@ -190,7 +190,7 @@ public class IngresMetadata
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("IngresMetaData.getSequenceList()", "Error when retrieving sequences",e);
+			LogMgr.logError("IngresMetaData.getSequences()", "Error when retrieving sequences",e);
 		}
 		finally
 		{
@@ -198,7 +198,7 @@ public class IngresMetadata
 		}
 		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, sequence);
@@ -218,7 +218,7 @@ public class IngresMetadata
 		def.setSource(buildSource(def));
 		return def;
 	}
-		
+
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
 		PreparedStatement stmt = null;
@@ -384,6 +384,6 @@ public class IngresMetadata
 		}
 		return result.toString();
 	}
-	
+
 }
 

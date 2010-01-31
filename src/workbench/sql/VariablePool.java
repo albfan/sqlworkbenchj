@@ -40,15 +40,15 @@ import workbench.util.WbProperties;
 
 
 /**
- * A class to store workbench specific variables. 
+ * A class to store workbench specific variables.
  * This is a singleton which stores the variables inside a Map.
- * When the Pool is created it looks for any variable definition 
- * passed through the system properties. 
+ * When the Pool is created it looks for any variable definition
+ * passed through the system properties.
  * Any system property that starts with wbp. is used to define a variable.
  * The name of the variable is the part after the <tt>wbp.</tt> prefix.
- * 
+ *
  * @see workbench.sql.wbcommands.WbDefineVar
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class VariablePool
@@ -76,14 +76,14 @@ public class VariablePool
 	{
 		this.prefix = Settings.getInstance().getSqlParameterPrefix();
 		this.suffix = Settings.getInstance().getSqlParameterSuffix();
-		
+
 		if (this.suffix == null) this.suffix = StringUtil.EMPTY_STRING;
-		
-		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?\\&][\\w]+" + StringUtil.quoteRegexMeta(suffix);
+
+		String expr = StringUtil.quoteRegexMeta(prefix) + "[\\?&][\\w]+" + StringUtil.quoteRegexMeta(suffix);
 		this.promptPattern = Pattern.compile(expr);
 		this.initFromProperties(System.getProperties());
 	}
-	
+
 	void initFromProperties(Properties props)
 	{
 		synchronized (this.data)
@@ -121,20 +121,20 @@ public class VariablePool
 			this.data.clear();
 		}
 	}
-	
+
 	public String replacePrompts(String sql)
 	{
 		Set<String> vars = this.getPromptVariables(sql, false);
 		return this.replaceParameters(vars, sql, true);
 	}
-	
+
 	public String replacePrompts(Set<String> vars, String sql)
 	{
 		return this.replaceParameters(vars, sql, true);
 	}
-	
+
 	/**
-	 * Returns a set of prompt variables defined in the 
+	 * Returns a set of prompt variables defined in the
 	 * SQL string. If a variable is not yet defined it will
 	 * be created in the internal pool with an empty value.
 	 * and returned in the result set.
@@ -152,7 +152,7 @@ public class VariablePool
 		if (toPrompt.size() == 0) return null;
 		return getVariablesDataStore(toPrompt);
 	}
-	
+
 	public boolean hasPrompt(String sql)
 	{
 		if (sql == null) return false;
@@ -160,7 +160,7 @@ public class VariablePool
 		if (m == null) return false;
 		return m.find();
 	}
-	
+
 	private Set<String> getPromptVariables(String sql, boolean includeConditional)
 	{
 		if (sql == null) return Collections.emptySet();
@@ -192,12 +192,12 @@ public class VariablePool
 		}
 		return Collections.unmodifiableSet(variables);
 	}
-	
+
 	public Pattern getPromptPattern()
 	{
 		return this.promptPattern;
 	}
-	
+
 	public DataStore getVariablesDataStore()
 	{
 		return this.getVariablesDataStore(Collections.synchronizedSet(this.data.keySet()));
@@ -206,7 +206,7 @@ public class VariablePool
 	public DataStore getVariablesDataStore(Set<String> varNames)
 	{
 		DataStore vardata = new VariableDataStore();
-		
+
 		synchronized (this.data)
 		{
 			for (String key : varNames)
@@ -222,7 +222,7 @@ public class VariablePool
 		vardata.resetStatus();
 		return vardata;
 	}
-	
+
 	public String getParameterValue(String varName)
 	{
 		if (varName == null) return null;
@@ -243,7 +243,7 @@ public class VariablePool
 			return this.data.size();
 		}
 	}
-	
+
 	public String replaceAllParameters(String sql)
 	{
 		if (this.data == null || this.data.size() == 0) return sql;
@@ -252,7 +252,7 @@ public class VariablePool
 			return this.replaceParameters(this.data.keySet(), sql, false);
 		}
 	}
-	
+
 	private String replaceParameters(Set<String> varNames, String sql, boolean forPrompt)
 	{
 		if (sql == null) return null;
@@ -268,10 +268,10 @@ public class VariablePool
 		}
 		return newSql.toString();
 	}
-	
+
 	/**
 	 * Replaces the variable defined through pattern with the replacement string
-	 * inside the string original. 
+	 * inside the string original.
 	 * String.replaceAll() cannot be used, because it parses escape sequences
 	 */
 	private void replaceVarValue(StringBuilder original, String pattern, String replacement)
@@ -288,7 +288,7 @@ public class VariablePool
 		}
 		//return result.toString();
 	}
-		
+
 	public String buildVarName(String varName, boolean forPrompt)
 	{
 		StringBuilder result = new StringBuilder(varName.length() + this.prefixLen + this.suffixLen + 1);
@@ -298,11 +298,11 @@ public class VariablePool
 		result.append(this.suffix);
 		return result.toString();
 	}
-	
+
 	public String buildVarNamePattern(String varName, boolean forPrompt)
 	{
 		StringBuilder result = new StringBuilder(varName.length() + this.prefixLen + this.suffixLen + 1);
-		
+
 		result.append(StringUtil.quoteRegexMeta(prefix));
 		if (forPrompt)
 		{
@@ -316,12 +316,12 @@ public class VariablePool
 		result.append(StringUtil.quoteRegexMeta(suffix));
 		return result.toString();
 	}
-	
+
 	public boolean isVariableDefined(String varName)
 	{
 		return (getParameterValue(varName) != null);
 	}
-	
+
 	public boolean removeValue(String varName)
 	{
 		if (varName == null) return false;
@@ -331,7 +331,7 @@ public class VariablePool
 			return (old != null);
 		}
 	}
-	
+
 	public void setParameterValue(String varName, String value)
 		throws IllegalArgumentException
 	{
@@ -339,7 +339,7 @@ public class VariablePool
 		{
 			synchronized (this.data)
 			{
-				this.data.put(varName, value);	
+				this.data.put(varName, value);
 			}
 		}
 		else
@@ -349,18 +349,18 @@ public class VariablePool
 			msg = msg + "\n" + ResourceMgr.getString("ErrVarDefWrongName");
 			throw new IllegalArgumentException(msg);
 		}
-	}		
-	
+	}
+
 	public boolean isValidVariableName(String varName)
 	{
 		return this.validNamePattern.matcher(varName).matches();
 	}
-	
+
 	/**
 	 *	Initialize the variables from a commandline parameter.
 	 *	If the parameter starts with the # character
 	 *  assumed that the parameter contains a list of variable definitions
-	 *  enclosed in brackets. e.g. 
+	 *  enclosed in brackets. e.g.
 	 *  -vardef="#var1=value1,var2=value2"
 	 *  The list needs to be quoted on the commandline!
 	 */
@@ -377,7 +377,7 @@ public class VariablePool
 			readFromFile(parameter, null);
 		}
 	}
-	
+
 	private void readNameList(String list)
 	{
 		List<String> defs = StringUtil.stringToList(list, ",");
@@ -397,9 +397,9 @@ public class VariablePool
 			}
 		}
 	}
-	
+
 	/**
-	 * Read the variable defintions from an external file. 
+	 * Read the variable defintions from an external file.
 	 * The file has to be a regular Java properties file, but does not support
 	 * line continuation.
 	 */
@@ -409,7 +409,7 @@ public class VariablePool
 		WbProperties props = new WbProperties(this);
 		File f = new File(filename);
 		if (!f.exists()) return;
-		
+
 		props.loadTextFile(filename, encoding);
 		Iterator itr = props.entrySet().iterator();
 		while (itr.hasNext())
@@ -429,36 +429,36 @@ public class VariablePool
 
 }
 
-class VariableDataStore 
+class VariableDataStore
 	extends DataStore
 {
 	private static final String[] cols = {ResourceMgr.getString("LblVariableName"), ResourceMgr.getString("LblVariableValue") };
 	private static final int[] types =   {Types.VARCHAR, Types.VARCHAR};
 	private static final int[] sizes =   {20, 50};
 	private static final TableIdentifier TABLE_ID = new TableIdentifier("WB$VARIABLE_DEFINITION");
-	
+
 	public VariableDataStore()
 	{
 		super(cols, types, sizes);
 		this.setUpdateTable(TABLE_ID);
 	}
-	
+
 	public List<DmlStatement> getUpdateStatements(WbConnection aConn)
 	{
 		return Collections.emptyList();
 	}
-	
+
 	public boolean hasPkColumns() { return true; }
 	public boolean checkUpdateTable(String sql, WbConnection conn) { return true; }
 	public boolean isUpdateable() { return true; }
 	public boolean hasUpdateableColumns() { return true; }
-	
+
 	public int updateDb(WbConnection aConnection, JobErrorHandler errorHandler)
 		throws SQLException, IllegalArgumentException
 	{
 		int rowcount = this.getRowCount();
 		this.resetUpdateRowCounters();
-		
+
 		VariablePool pool = VariablePool.getInstance();
 		for (int i=0; i < rowcount; i++)
 		{
@@ -472,7 +472,7 @@ class VariableDataStore
 			// Treat null as an empty value
 			pool.setParameterValue(key, value == null ? "" : value);
 		}
-		
+
 		RowData row = this.getNextDeletedRow();
 		while (row != null)
 		{
@@ -483,5 +483,5 @@ class VariableDataStore
 		this.resetStatus();
 		return rowcount;
 	}
-	
+
 }

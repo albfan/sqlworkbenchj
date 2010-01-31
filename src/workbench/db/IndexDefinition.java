@@ -73,11 +73,6 @@ public class IndexDefinition
 		}
 	}
 
-	public void setBaseTable(TableIdentifier table)
-	{
-		this.baseTable = table;
-	}
-
 	public String getFullyQualifiedName(WbConnection conn)
 	{
 		return getObjectExpression(conn);
@@ -93,7 +88,7 @@ public class IndexDefinition
 	{
 		return null;
 	}
-	
+
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getObjectName(con);
@@ -108,24 +103,24 @@ public class IndexDefinition
 	{
 		return "INDEX";
 	}
-	
+
 	public String getObjectName()
 	{
 		return getName();
 	}
-	
+
 	public List<IndexColumn> getColumns()
 	{
 		return columns;
 	}
-	
+
 	public String getIndexType() { return this.indexType; }
 
 	public String toString()
 	{
 		return getExpression();
 	}
-	
+
 	public String getExpression()
 	{
 		StringBuilder result = new StringBuilder(this.columns.size() * 10);
@@ -136,11 +131,11 @@ public class IndexDefinition
 		}
 		return result.toString();
 	}
-	
+
 	public String getName() { return this.indexName; }
 	public void setPrimaryKeyIndex(boolean flag) { this.isPK = flag; }
 	public boolean isPrimaryKeyIndex() { return this.isPK; }
-	
+
 	public void setUnique(boolean flag) { this.isUnique = flag; }
 	public boolean isUnique() { return this.isUnique; }
 
@@ -149,7 +144,7 @@ public class IndexDefinition
     int hash = 71 * 7 + (this.indexName != null ? this.indexName.hashCode() : 0);
     return hash;
   }
-	
+
 	public boolean equals(Object o)
 	{
 		if (o instanceof IndexDefinition)
@@ -168,7 +163,7 @@ public class IndexDefinition
 		}
 		return false;
 	}
-	
+
 	public CharSequence getSource(WbConnection con)
 	{
 		if (con == null) return null;

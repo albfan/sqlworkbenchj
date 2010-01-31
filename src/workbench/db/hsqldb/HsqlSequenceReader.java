@@ -11,13 +11,6 @@
  */
 package workbench.db.hsqldb;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
 import workbench.db.JdbcUtils;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -27,10 +20,17 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 
 /**
  * SequenceReader for <a href="http://www.hsqldb.org">HSQLDB</a>
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class HsqlSequenceReader
@@ -70,7 +70,7 @@ public class HsqlSequenceReader
 		CharSequence s = getSequenceSource(def.getSequenceOwner(), def.getSequenceName());
 		def.setSource(s);
 	}
-	
+
 	public DataStore getRawSequenceDefinition(String owner, String namePattern)
 	{
 		String query = baseQuery;
@@ -79,12 +79,12 @@ public class HsqlSequenceReader
 		{
 			query += " WHERE sequence_name LIKE '" + StringUtil.trimQuotes(namePattern) + "' ";
 		}
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("HsqlSequenceReader.getRawSequenceDefinition()", "Using query=" + query);
 		}
-		
+
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		DataStore result = null;
@@ -103,34 +103,34 @@ public class HsqlSequenceReader
 			SqlUtil.closeAll(rs, stmt);
 		}
 
-		return result;	
+		return result;
 	}
 
-	
+
 	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
-		
+
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
 		for (int row = 0; row < ds.getRowCount(); row++)
 		{
 			result.add(createSequenceDefinition(ds, row));
 		}
-		return result;	
+		return result;
 	}
 
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
 		SequenceDefinition result = null;
-		
+
     if (ds == null || ds.getRowCount() == 0) return null;
 
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
 		String schema = ds.getValueAsString(row, "SEQUENCE_SCHEMA");
 		result = new SequenceDefinition(schema, name);
-		
+
 		result.setSequenceProperty("START_WITH", ds.getValue(row, "START_WITH"));
 		result.setSequenceProperty("MAXIMUM_VALUE", ds.getValue(row, "MAXIMUM_VALUE"));
 		result.setSequenceProperty("MINIMUM_VALUE", ds.getValue(row, "MINIMUM_VALUE"));
@@ -138,28 +138,14 @@ public class HsqlSequenceReader
 		result.setSequenceProperty("CYCLE_OPTION", ds.getValue(row, "CYCLE_OPTION"));
 		result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
 		result.setSource(buildSource(result));
-		return result;		
+		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, sequence);
 		if (ds == null) return null;
 		return createSequenceDefinition(ds, 0);
-	}
-	
-	public List<String> getSequenceList(String owner, String namePattern)
-	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
-		if (ds == null) return Collections.emptyList();
-		
-		List<String> result = new LinkedList<String>();
-
-		for (int row = 0; row < ds.getRowCount(); row++)
-		{
-			result.add(ds.getValueAsString(row, "SEQUENCE_NAME"));
-		}
-		return result;
 	}
 
 	public CharSequence getSequenceSource(String owner, String sequence)
@@ -171,29 +157,29 @@ public class HsqlSequenceReader
 	protected CharSequence buildSource(SequenceDefinition def)
 	{
 		if (def == null) return StringUtil.EMPTY_STRING;
-		
+
 		StringBuilder result = new StringBuilder(100);
 		result.append("CREATE SEQUENCE ");
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append(def.getSequenceName());
 		String type = (String)def.getSequenceProperty("DATA_TYPE");
-		
+
 		if (!"INTEGER".equals(type))
 		{
 			result.append(" AS " + type);
 		}
-		
+
 		// For some reason HSQLDB returns all properties as String objects, even the numeric ones!
 		String start = (String)def.getSequenceProperty("START_WITH");
 		result.append(nl + "       START WITH ");
 		result.append(start);
-		
-		String inc = (String)def.getSequenceProperty("INCREMENT"); 
+
+		String inc = (String)def.getSequenceProperty("INCREMENT");
 		result.append(nl + "       INCREMENT BY ");
 		result.append(inc);
 		result.append(';');
 		result.append(nl);
-		
+
 		return result;
 	}
 }

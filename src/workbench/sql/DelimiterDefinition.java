@@ -24,7 +24,7 @@ public class DelimiterDefinition
 	 * The default delimiter for ANSI SQL: a semicolon
 	 */
 	public static final DelimiterDefinition STANDARD_DELIMITER = new DelimiterDefinition(";", false);
-	
+
 	/**
 	 * A default alternate delimiter. This is Oracle's slash on a single line
 	 */
@@ -34,7 +34,7 @@ public class DelimiterDefinition
 	 * A default alternate delimiter that matches SQL Server's GO command
 	 */
 	public static final DelimiterDefinition DEFAULT_MS_DELIMITER = new DelimiterDefinition("GO", true);
-	
+
 	private String delimiter;
 	private boolean singleLineDelimiter;
 	private boolean changed = false;
@@ -59,12 +59,12 @@ public class DelimiterDefinition
 		copy.changed = false;
 		return copy;
 	}
-	
+
 	public boolean isEmpty()
 	{
 		return (this.delimiter == null || this.delimiter.trim().length() == 0);
 	}
-	
+
 	public boolean isStandard()
 	{
 		return this.delimiter.equals(";");
@@ -74,7 +74,7 @@ public class DelimiterDefinition
 	{
 		this.changed = false;
 	}
-	
+
 	public static DelimiterDefinition parseCmdLineArgument(String arg)
 	{
 		if (StringUtil.isEmptyString(arg)) return null;
@@ -98,7 +98,7 @@ public class DelimiterDefinition
 			delim = arg;
 			single = false;
 		}
-		
+
 		return new DelimiterDefinition(delim, single);
 	}
 
@@ -106,45 +106,46 @@ public class DelimiterDefinition
 	{
 		return delimiter;
 	}
-	
-	public String getDelimiter() 
-	{ 
-		return this.delimiter; 
+
+	public String getDelimiter()
+	{
+		return this.delimiter;
 	}
-	
-	public void setDelimiter(String d) 
-	{ 
+
+	public void setDelimiter(String d)
+	{
 		if (d == null) return;
-		if (!StringUtil.equalString(this.delimiter, d)) 
+		if (!StringUtil.equalString(this.delimiter, d))
 		{
 			this.delimiter = d.trim();
 			this.changed = true;
-		} 
+		}
 	}
-	
+
 	public boolean isChanged()
 	{
 		return this.changed;
 	}
-	
-	public boolean isSingleLine() 
-	{ 
-		return this.singleLineDelimiter; 
+
+	public boolean isSingleLine()
+	{
+		return this.singleLineDelimiter;
 	}
-	
+
+	@SuppressWarnings({"UnusedDeclaration"})
 	public void setSingleLine(boolean flag) 
-	{ 
+	{
 		if (flag != this.singleLineDelimiter)
 		{
-			this.singleLineDelimiter = flag; 
+			this.singleLineDelimiter = flag;
 			this.changed = true;
 		}
 	}
-	
+
 	/**
 	 * Return true if the given SQL script ends
 	 * with this delimiter
-	 * @param sql 
+	 * @param sql
 	 */
 	public boolean terminatesScript(String sql)
 	{
@@ -158,18 +159,18 @@ public class DelimiterDefinition
 		{
 			return sql.trim().endsWith(this.delimiter);
 		}
-		
+
 	}
 
 	public boolean equals(String other)
 	{
 		return StringUtil.equalStringIgnoreCase(this.delimiter, other);
 	}
-	
+
 	public boolean equals(Object other)
 	{
 		if (other == null) return false;
-		
+
 		if (other instanceof DelimiterDefinition)
 		{
 			DelimiterDefinition od = (DelimiterDefinition)other;
@@ -185,10 +186,10 @@ public class DelimiterDefinition
 		}
 		return false;
 	}
-	
+
 	public int hashCode()
 	{
 		return (this.delimiter + Boolean.toString(this.singleLineDelimiter)).hashCode();
 	}
-	
+
 }

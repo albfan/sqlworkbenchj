@@ -33,7 +33,7 @@ import workbench.util.WbFile;
  * @see IteratingScriptParser
  * @see LexerBasedParser
  * @see ScriptIterator
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class ScriptParser
@@ -52,7 +52,7 @@ public class ScriptParser
 	private String alternateLineComment;
 	private boolean useAlternateDelimiter = false;
 	private File source;
-	
+
 	private int maxFileSize;
 
 	public ScriptParser()
@@ -114,7 +114,7 @@ public class ScriptParser
 		throws IOException
 	{
 		if (!f.exists()) throw new FileNotFoundException(f.getName() + " not found");
-		
+
 		if (f.length() < this.maxFileSize)
 		{
 			this.readScriptFromFile(f, encoding);
@@ -129,7 +129,7 @@ public class ScriptParser
 	}
 
 	/**
-	 * Returns the file that was parsed if available. 
+	 * Returns the file that was parsed if available.
 	 * May be null (if the parser has been initialized from a String)
 	 */
 	public WbFile getScriptFile()
@@ -137,7 +137,7 @@ public class ScriptParser
 		if (this.iteratingParser == null || source == null) return null;
 		return new WbFile(this.source);
 	}
-	
+
 	public int getScriptLength()
 	{
 		if (this.iteratingParser != null)
@@ -537,7 +537,6 @@ public class ScriptParser
 	 * Return the next {@link ScriptCommandDefinition} from the script.
 	 *
 	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
-	 * @see IteratingScriptParser#getNextCommand()
 	 */
 	public String getNextCommand()
 		throws NoSuchElementException

@@ -62,7 +62,7 @@ public abstract class RowDataConverter
 	private boolean[] columnsToExport = null;
 	protected List exportColumns = null;
 	protected ErrorReporter errorReporter;
-	
+
 	protected SimpleDateFormat defaultDateFormatter;
 	protected DecimalFormat defaultNumberFormatter;
 	protected SimpleDateFormat defaultTimestampFormatter;
@@ -72,13 +72,13 @@ public abstract class RowDataConverter
 	protected boolean useRowNumForBlobFile = true;
 	protected int[] blobNameCols = null;
 	protected List<String> blobIdColumns = null;
-	
+
 	protected String filenameColumn = null;
 	protected int filenameColumnIndex = -1;
-	
+
 	protected long currentRow = -1;
 	protected RowData currentRowData;
-	
+
 	protected boolean convertDateToTimestamp = false;
 	protected BlobLiteralFormatter blobFormatter;
 
@@ -137,17 +137,12 @@ public abstract class RowDataConverter
 	{
 		this.writeHeader = writeHeader;
 	}
-	
+
 	public void setPageTitle(String title)
 	{
 		this.pageTitle = title;
 	}
-	
-	public String getPageTitle()
-	{
-		return getPageTitle(null);
-	}
-	
+
 	public String getPageTitle(String defaultTitle)
 	{
 		if (StringUtil.isEmptyString(pageTitle))
@@ -159,16 +154,16 @@ public abstract class RowDataConverter
 			return pageTitle;
 		}
 	}
-	
+
 	/**
 	 * Define the structure of the result to be exported.
 	 */
-	public void setResultInfo(ResultInfo meta) 
-	{ 
-		this.metaData = meta; 
+	public void setResultInfo(ResultInfo meta)
+	{
+		this.metaData = meta;
 		this.useRowNumForBlobFile = true;
-		
-		if (this.blobIdColumns != null) 
+
+		if (this.blobIdColumns != null)
 		{
 			int count = this.blobIdColumns.size();
 			int found = 0;
@@ -191,13 +186,13 @@ public abstract class RowDataConverter
 				this.useRowNumForBlobFile = false;
 			}
 		}
-		
+
 		if (this.filenameColumn != null)
 		{
 			this.filenameColumnIndex = meta.findColumn(filenameColumn);
 		}
 	}
-	
+
 	public void setFilenameColumn(String colname)
 	{
 		if (StringUtil.isBlank(colname))
@@ -210,28 +205,28 @@ public abstract class RowDataConverter
 		}
 		this.filenameColumnIndex = -1;
 	}
-	
+
 	public ResultInfo getResultInfo() { return this.metaData; }
-	
+
 	void setBlobIdColumns(List<String> cols)
 	{
 		blobIdColumns = cols;
 	}
-	
+
 	public void setOutputFile(WbFile f)
-	{ 
-		this.outputFile = f; 
+	{
+		this.outputFile = f;
 		if (f != null && !f.isDirectory())
 		{
 			this.baseFilename = f.getFileName();
 		}
 	}
-	
+
 	public void setCompressExternalFiles(boolean flag)
 	{
 		this.compressExternalFiles = flag;
 	}
-	
+
 	private void initOutputFactory()
 	{
 		if (this.compressExternalFiles)
@@ -246,7 +241,7 @@ public abstract class RowDataConverter
 			this.factory = new DefaultOutputFactory();
 		}
 	}
-	
+
 	public void exportFinished()
 		throws IOException
 	{
@@ -259,16 +254,16 @@ public abstract class RowDataConverter
 			this.factory = null;
 		}
 	}
-	
+
 	protected OutputStream createOutputStream(File output)
 		throws IOException
 	{
 		if (this.factory == null) initOutputFactory();
 		return this.factory.createOutputStream(output);
 	}
-	
+
 	/**
-	 * Needed for the SqlLiteralFormatter 
+	 * Needed for the SqlLiteralFormatter
 	 */
 	public File generateDataFileName(ColumnData data)
 	{
@@ -296,12 +291,12 @@ public abstract class RowDataConverter
 			return f;
 		}
 	}
-	
+
 	protected String getFileExtension()
 	{
 		return Settings.getInstance().getProperty("workbench.export.default.blob.extension", ".data");
 	}
-	
+
 	protected String createFilename(RowData row, int colIndex, long rowNum)
 	{
 		String filename = null;
@@ -316,7 +311,7 @@ public abstract class RowDataConverter
 		}
 		return filename;
 	}
-	
+
 	public File createBlobFile(RowData row, int colIndex, long rowNum)
 	{
 		String name = createFilename(row, colIndex, rowNum);
@@ -335,7 +330,7 @@ public abstract class RowDataConverter
 
 			if (this.factory == null) initOutputFactory();
 
-			if (!this.factory.isArchive()) 
+			if (!this.factory.isArchive())
 			{
 				fname.append(baseFilename);
 				fname.append('_');
@@ -377,7 +372,7 @@ public abstract class RowDataConverter
 			fname.append(getFileExtension());
 			f = new File(getBaseDir(), fname.toString());
 		}
-		
+
 		return f;
 	}
 
@@ -397,7 +392,7 @@ public abstract class RowDataConverter
 			FileUtil.closeQuitely(w);
 		}
 	}
-	
+
 	public long writeBlobFile(Object value, File f)
 		throws IOException
 	{
@@ -421,7 +416,7 @@ public abstract class RowDataConverter
 			throw new IOException(ExceptionUtil.getDisplay(e));
 		}
 	}
-	
+
 	public File getBaseDir()
 	{
 		if (this.outputFile == null) return new File(".");
@@ -429,17 +424,17 @@ public abstract class RowDataConverter
 		if (this.outputFile.isAbsolute()) return this.outputFile.getParentFile();
 		return new File(".");
 	}
-	
-	protected File getOutputFile() 
-	{ 
-		return this.outputFile; 
+
+	protected File getOutputFile()
+	{
+		return this.outputFile;
 	}
-	
+
 	public void setErrorReporter(ErrorReporter reporter)
 	{
 		this.errorReporter = reporter;
 	}
-	
+
 	public boolean includeColumnInExport(int col)
 	{
 		if (this.columnsToExport == null) return true;
@@ -457,7 +452,7 @@ public abstract class RowDataConverter
 			this.convertDateToTimestamp = this.originalConnection.getDbSettings().getConvertDateInExport();
 		}
 	}
-	
+
 	/**
 	 *	The SQL statement that was used to generate the data.
 	 */
@@ -465,7 +460,7 @@ public abstract class RowDataConverter
 	{
 		this.generatingSql = sql;
 	}
-	
+
 	/**
 	 *	Set the encoding for the output string.
 	 *	This might not be used by all implemented Converters
@@ -481,17 +476,17 @@ public abstract class RowDataConverter
 	}
 
 	/**
-	 *	Returns the data for one specific row as a String in the 
+	 *	Returns the data for one specific row as a String in the
 	 *  correct format
 	 */
 	public abstract StrBuffer convertRowData(RowData row, long rowIndex);
-	
+
 	/**
 	 *	Returns the String sequence needed in before the actual data part.
 	 *  (might be null)
 	 */
 	public abstract StrBuffer getStart();
-	
+
 	/**
 	 *	Returns the String sequence needed in before the actual data part.
 	 *  (might be an empty string)
@@ -507,13 +502,13 @@ public abstract class RowDataConverter
 	{
 		this.blobFormatter = formatter;
 	}
-	
+
 	public void setDefaultTimestampFormatter(SimpleDateFormat formatter)
 	{
 		if (formatter == null) return;
 		this.defaultTimestampFormatter = formatter;
 	}
-	
+
 	public void setDefaultDateFormatter(SimpleDateFormat formatter)
 	{
 		if (formatter == null) return;
@@ -531,7 +526,7 @@ public abstract class RowDataConverter
 		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		this.setDefaultDateFormatter(formatter);
 	}
-	
+
 	public void setDefaultTimestampFormat(String format)
 	{
 		if (StringUtil.isEmptyString(format)) return;
@@ -566,7 +561,7 @@ public abstract class RowDataConverter
 			this.columnsToExport = null;
 			return;
 		}
-		
+
 		if (metaData == null)
 		{
 			LogMgr.logError("RowDataConverter.setColumnsToExport()", "MetaData for result is NULL!", new Exception("TraceBack"));
@@ -577,7 +572,7 @@ public abstract class RowDataConverter
 			}
 			return;
 		}
-		
+
 		int colCount = this.metaData.getColumnCount();
 		if (this.columnsToExport == null)
 		{
@@ -592,7 +587,7 @@ public abstract class RowDataConverter
 	/**
 	 * Return the number of columns that have to be exported
 	 * @return the real column count
-	 * @see #includeColumnInExport(int) 
+	 * @see #includeColumnInExport(int)
 	 */
 	protected int getRealColumnCount()
 	{
@@ -603,7 +598,7 @@ public abstract class RowDataConverter
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Return the column's value as a formatted String.
 	 * Especially for Date objects this is different then getValueAsString()
@@ -638,9 +633,9 @@ public abstract class RowDataConverter
 				// sometimes the Oracle driver create a java.util.Date object, but
 				// DATE columns in Oracle do contain a time part and thus we need to
 				// format it correctly.
-				// Newer Oracle drivers (>= 10) support a property to treat 
+				// Newer Oracle drivers (>= 10) support a property to treat
 				// DATE columns as Timestamp but for backward compatibility I'll leave
-				// this fix in here. 
+				// this fix in here.
 				if (this.defaultTimestampFormatter == null)
 				{
 					result = StringUtil.ISO_TIMESTAMP_FORMATTER.format(value);
@@ -704,7 +699,7 @@ public abstract class RowDataConverter
 				out.append(Integer.toString(c));
 				out.append(';');
 			}
-			else 
+			else
 			{
 				switch (c)
 				{
@@ -722,5 +717,5 @@ public abstract class RowDataConverter
 				}
 			}
 		}
-	}	
+	}
 }

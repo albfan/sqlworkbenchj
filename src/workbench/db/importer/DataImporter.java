@@ -165,7 +165,7 @@ public class DataImporter
 	{
 		this.dbConn = aConn;
 		if (dbConn == null) return;
-		
+
 		this.checkRealClobLength = this.dbConn.getDbSettings().needsExactClobLength();
 		this.isOracle = this.dbConn.getMetadata().isOracle();
 		this.useSetNull = this.dbConn.getDbSettings().useSetNull();
@@ -316,15 +316,11 @@ public class DataImporter
 		this.commitEvery = aCount;
 	}
 
-	public int getCommitEvery() { return this.commitEvery; }
-
 	public boolean getContinueOnError() { return this.continueOnError; }
 	public void setContinueOnError(boolean flag)
 	{
 		this.continueOnError = flag;
 	}
-
-	public DeleteType getDeleteTarget() { return deleteTarget; }
 
 	public int getBatchSize()
 	{
@@ -397,7 +393,7 @@ public class DataImporter
 	{
 		this.createTarget = flag;
 	}
-	
+
 	public boolean getCreateTarget()
 	{
 		return createTarget;
@@ -606,20 +602,6 @@ public class DataImporter
 	private boolean hasKeyColumns()
 	{
 		return (this.keyColumns != null && keyColumns.size() > 0);
-	}
-
-	public void startBackgroundImport()
-	{
-		if (this.source == null) return;
-		Thread t = new WbThread("WbImport Thread")
-		{
-			public void run()
-			{
-				try { startImport(); } catch (Throwable th) {}
-			}
-		};
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
 	}
 
 	/**
@@ -2000,11 +1982,6 @@ public class DataImporter
 		{
 			this.reportInterval = 0;
 		}
-	}
-
-	public String getTargetSchema()
-	{
-		return targetSchema;
 	}
 
 	public void setTargetSchema(String targetSchema)

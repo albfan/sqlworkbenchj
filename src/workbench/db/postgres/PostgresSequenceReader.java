@@ -37,7 +37,7 @@ public class PostgresSequenceReader
 {
 	private WbConnection dbConnection;
 	private final String baseSql = "SELECT min_value, max_value, increment_by, cache_value, is_cycled FROM ";
-	
+
 	public PostgresSequenceReader(WbConnection conn)
 	{
 		this.dbConnection = conn;
@@ -171,12 +171,6 @@ public class PostgresSequenceReader
 		return def.getSource();
 	}
 
-	public List<String> getSequenceList(String owner, String namePattern)
-	{
-		// Already returned by JDBC driver
-		return Collections.emptyList();
-	}
-
 	/**
 	 * Retrieve the list of full SequenceDefinitions from the database.
 	 */
@@ -188,7 +182,7 @@ public class PostgresSequenceReader
 		PreparedStatement stmt = null;
 		Savepoint sp = null;
 		if (namePattern == null) namePattern = "%";
-		
+
 		try
 		{
 			sp = this.dbConnection.setSavepoint();
@@ -272,14 +266,14 @@ public class PostgresSequenceReader
 		{
 			SqlUtil.closeResult(rs);
 		}
-		
+
 		return result;
 	}
 
 	private void updateProperties(SequenceDefinition def)
 	{
 		if (def == null) return;
-		
+
 		DataStore ds = getRawSequenceDefinition(def.getSequenceOwner(), def.getSequenceName());
 		if (ds == null) return;
 		if (ds.getRowCount() == 0) return;

@@ -47,8 +47,8 @@ import workbench.util.StringUtil;
  * We will use our own statement only if the Oracle version is 9i or later and
  * if at least one of the following configuration properties are set:
  * <ul>
- *	<li>{@link workbench.resource.Settings#useOracleNVarcharFix()}</li>
- *	<li>{@link workbench.resource.Settings#useOracleCharSemanticsFix()}</li>
+ *	<li>workbench.db.oracle.fixcharsemantics</li>
+ *	<li>workbench.db.oracle.fixnvarchartype</li>
  * </ul>
  *
  * Additionally if the config property <tt>workbench.db.oracle.fixdatetype</tt> is
@@ -154,11 +154,6 @@ public class OracleMetadata
 	public void done()
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
-	}
-
-	public boolean isOracle8()
-	{
-		return this.version == 8;
 	}
 
 	private boolean getRemarksReporting()
@@ -565,7 +560,7 @@ public class OracleMetadata
 		}
 		return "true".equals(value);
 	}
-	
+
 	private String getVarcharType(String type, int size, int semantics)
 	{
 		StringBuilder result = new StringBuilder(25);

@@ -41,9 +41,6 @@ public abstract class AbstractConstraintReader
 	public abstract String getColumnConstraintSql();
 	public abstract String getTableConstraintSql();
 
-	public boolean isColumnConstraintNameIncluded() { return false; }
-	public boolean isTableConstraintNameIncluded() { return false; }
-
 	public int getIndexForSchemaParameter()
 	{
 		return -1;

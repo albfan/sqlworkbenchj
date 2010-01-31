@@ -128,9 +128,8 @@ public class SchemaDiff
 	{
 		this.diffTriggers = flag;
 	}
-	
+
 	public void setIncludeSequences(boolean flag) { this.diffSequences = flag; }
-	public boolean getIncludeSequences() { return this.diffSequences; }
 
 	/**
 	 * Control whether foreign keys should be compared as well.
@@ -151,14 +150,12 @@ public class SchemaDiff
 	 * The default is to compare primary keys.
 	 */
 	public void setIncludePrimaryKeys(boolean flag) { this.diffPrimaryKeys = flag; }
-	public boolean getIncludePrimaryKeys() { return this.diffPrimaryKeys; }
 
 	/**
 	 * Control whether table constraints should be compared as well.
 	 * The default is to not compare primary keys.
 	 */
 	public void setIncludeTableConstraints(boolean flag) { this.diffConstraints = flag; }
-	public boolean getIncludeTableConstraints() { return this.diffConstraints; }
 
 	public void setCompareJdbcTypes(boolean flag) { this.compareJdbcTypes = flag; }
 	public boolean getCompareJdbcTypes() { return this.compareJdbcTypes; }

@@ -11,38 +11,23 @@
  */
 package workbench.db.datacopy;
 
+import workbench.db.*;
+import workbench.db.compare.TableDeleteSync;
+import workbench.db.importer.*;
+import workbench.interfaces.BatchCommitter;
+import workbench.interfaces.ObjectDropper;
+import workbench.interfaces.ProgressReporter;
+import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
+import workbench.storage.RowActionMonitor;
+import workbench.util.*;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import workbench.db.ColumnIdentifier;
-import workbench.db.DbMetadata;
-import workbench.db.GenericObjectDropper;
-import workbench.db.TableCreator;
-import workbench.db.TableDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.WbConnection;
-import workbench.db.compare.TableDeleteSync;
-import workbench.db.importer.DataImporter;
-import workbench.db.importer.DeleteType;
-import workbench.db.importer.RowDataProducer;
-import workbench.db.importer.RowDataReceiver;
-import workbench.db.importer.TableStatements;
-import workbench.interfaces.BatchCommitter;
-import workbench.interfaces.JobErrorHandler;
-import workbench.interfaces.ObjectDropper;
-import workbench.interfaces.ProgressReporter;
-import workbench.util.ExceptionUtil;
-import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
-import workbench.storage.RowActionMonitor;
-import workbench.util.CollectionUtil;
-import workbench.util.MessageBuffer;
-import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
-import workbench.util.WbThread;
 
 /**
  * A class to copy data from one database to another.
@@ -312,7 +297,7 @@ public class DataCopier
 	/**
 	 * After creating the target table, the column definitions for the newly
 	 * create table are retrieved and we have to use those columns e.g.
-	 * because upper/lowercase can be different now. 
+	 * because upper/lowercase can be different now.
 	 *
 	 * @param realCols
 	 * @param toUpdate to column definitions to be updated
@@ -444,12 +429,6 @@ public class DataCopier
 	public boolean isSuccess()
 	{
 		return this.importer.isSuccess();
-	}
-
-	public String getErrorMessage()
-	{
-		if (this.errors == null) return null;
-		return this.errors.toString();
 	}
 
 	public void startCopy()
@@ -754,7 +733,4 @@ public class DataCopier
 		return log;
 	}
 
-	public void setErrorHandler(JobErrorHandler handler)
-	{
-	}
 }

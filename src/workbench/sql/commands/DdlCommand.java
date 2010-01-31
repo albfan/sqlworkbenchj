@@ -222,9 +222,6 @@ public class DdlCommand
 	 * Retrieve extended error information if the DBMS supports this.
 	 * Currently this is only implemented for Oracle to read errors
 	 * after creating a stored procedure from the ALL_ERRORS view.
-	 *
-	 * @see #getObjectName(String)
-	 * @see #getObjectType(String)
 	 */
 	private boolean addExtendErrorInfo(WbConnection aConnection, SqlUtil.DdlObjectInfo info , StatementRunnerResult result)
 	{

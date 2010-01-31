@@ -59,11 +59,6 @@ public class DeleteScriptGenerator
 		this.formatter = new SqlLiteralFormatter(this.connection);
 	}
 
-	public void useJdbcLiterals()
-	{
-		this.formatter.setDateLiteralType("jdbc");
-	}
-
 	public void setSource(WbTable aTable)
 	{
 		this.sourceTable = aTable;

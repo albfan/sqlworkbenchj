@@ -26,7 +26,7 @@ import workbench.util.StringUtil;
 
 /**
  * A ProcedureReader for Microsoft SQL Server.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class SqlServerProcedureReader
@@ -34,18 +34,18 @@ public class SqlServerProcedureReader
 {
 	private final String GET_PROC_SQL = "{call sp_stored_procedures ('%', ?) }";
 	private boolean useOwnSQL = true;
-	
+
 	public SqlServerProcedureReader(WbConnection db)
 	{
 		super(db);
 	}
-	
+
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procName, int procType)
 	{
 		return StringUtil.emptyBuffer();
 	}
 
-	
+
 	/**
 	 *The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
 	 * so we implement it ourselves (MS always returns RESULT which is
@@ -59,26 +59,27 @@ public class SqlServerProcedureReader
 	 * and error "Incorrect syntax near '{'." which is wrong as the syntax complies
 	 * with the JDBC standard.
 	 */
-	public DataStore getProcedures(String catalog, String owner)
+	@Override
+	public DataStore getProcedures(String catalog, String owner, String namePattern)
 		throws SQLException
 	{
 		if (!useOwnSQL)
 		{
-			return super.getProcedures(catalog, owner, null);
+			return super.getProcedures(catalog, owner, namePattern);
 		}
-		
+
 		CallableStatement cstmt = this.connection.getSqlConnection().prepareCall(GET_PROC_SQL);
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("SqlServerProcedureReader.getProcedures()", "Using query=\n" + GET_PROC_SQL);
 		}
-		
+
 		DataStore ds;
 		ResultSet rs = null;
-		try 
+		try
 		{
 			ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
-			
+
 			if (owner == null || "*".equals(owner))
 			{
 				cstmt.setString(1, "%");
@@ -87,7 +88,7 @@ public class SqlServerProcedureReader
 			{
 				cstmt.setString(1, owner);
 			}
-			
+
 			boolean hasResult = cstmt.execute();
 
 			if (hasResult)
@@ -100,7 +101,7 @@ public class SqlServerProcedureReader
 				LogMgr.logError("SqlServerProcedureReader.getProcedures()", "Could not retrieve procedures using a call to sp_stored_procedures", null);
 				return super.getProcedures(catalog, owner, null);
 			}
-			
+
 			while (rs.next())
 			{
 				String dbname = rs.getString("PROCEDURE_QUALIFIER");

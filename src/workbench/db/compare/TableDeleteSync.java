@@ -152,12 +152,6 @@ public class TableDeleteSync
 		this.progressInterval = interval;
 	}
 
-	public void setTableName(TableIdentifier table)
-		throws SQLException
-	{
-		setTableName(table, table.createCopy());
-	}
-
 	public long getDeletedRows()
 	{
 		return this.deletedRows;

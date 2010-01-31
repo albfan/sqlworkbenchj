@@ -94,7 +94,7 @@ public class BatchRunner
 	private String command;
 	private boolean storeErrorMessages;
 	private MessageBuffer errors;
-	
+
 	public BatchRunner()
 	{
 		this.stmtRunner = new StatementRunner();
@@ -133,7 +133,7 @@ public class BatchRunner
 	{
 		stmtRunner.setUseSavepoint(flag);
 	}
-	
+
 	public void setConnectionId(String id)
 	{
 		this.connectionId = id;
@@ -228,11 +228,6 @@ public class BatchRunner
 	public void setProfile(ConnectionProfile aProfile)
 	{
 		this.profile = aProfile;
-	}
-
-	public DelimiterDefinition getDelimiter()
-	{
-		return this.delimiter;
 	}
 
 	public void setDelimiter(DelimiterDefinition delim)
@@ -510,7 +505,7 @@ public class BatchRunner
 		if (errors == null) return null;
 		return errors.getBuffer().toString();
 	}
-	
+
 	public void cancel()
 	{
 		this.cancelExecution = true;
@@ -671,7 +666,7 @@ public class BatchRunner
 						if (result.hasWarning()) LogMgr.logWarning("BatchRunner.execute()", feedback);
 						totalRows += result.getTotalUpdateCount();
 					}
-					
+
 					printResults(sql, result);
 
 					if (hasMessage && (this.stmtRunner.getVerboseLogging() || error))
@@ -877,7 +872,7 @@ public class BatchRunner
 			{
 				driverclass = cmdLine.getValue(AppArguments.ARG_CONN_DRIVER_CLASS);
 			}
-			
+
 			if (driverclass == null)
 			{
 				LogMgr.logError("BatchRunner.createCmdLineProfile()", "Cannot connect using command line settings without a driver class!", null);
@@ -895,7 +890,7 @@ public class BatchRunner
 			boolean separate = cmdLine.getBoolean(AppArguments.ARG_CONN_SEPARATE, true);
 
 			Map<String, String> props = cmdLine.getMapValue(AppArguments.ARG_CONN_PROPS);
-			
+
 			if (jar != null)
 			{
 				ConnectionMgr.getInstance().registerDriver(driverclass, jar);
@@ -923,7 +918,7 @@ public class BatchRunner
 				p.putAll(props);
 				result.setConnectionProperties(p);
 			}
-			
+
 			if (!StringUtil.isEmptyString(wksp))
 			{
 				wksp = FileDialogUtil.replaceConfigDir(wksp);

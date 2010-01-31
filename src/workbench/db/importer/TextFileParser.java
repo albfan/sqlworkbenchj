@@ -97,7 +97,7 @@ public class TextFileParser
 
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private BlobDecoder blobDecoder = new BlobDecoder();
-	
+
 	private String currentLine;
 	private QuoteEscapeType quoteEscape;
 	private ImportValueModifier valueModifier;
@@ -183,11 +183,6 @@ public class TextFileParser
 		this.quoteEscape = type;
 	}
 
-	public QuoteEscapeType getQuoteEscaping()
-	{
-		return this.quoteEscape;
-	}
-
 	public boolean hasErrors()
 	{
 		return this.hasErrors;
@@ -254,7 +249,7 @@ public class TextFileParser
 	{
 		blobDecoder.setBlobMode(mode);
 	}
-	
+
 	public void setTreatClobAsFilenames(boolean flag)
 	{
 		this.clobsAreFilenames = flag;
@@ -654,7 +649,7 @@ public class TextFileParser
 		if (baseDir == null) this.baseDir = new File(".");
 
 		blobDecoder.setBaseDir(baseDir);
-		
+
 		setupFileHandler();
 
 		// If no header is available in the file and no columns have been
@@ -1147,7 +1142,7 @@ public class TextFileParser
 	{
 		return importColumns;
 	}
-	
+
 	/**
 	 *	Returns the column list as a comma separated string
 	 *  that can be used for the WbImport command
@@ -1174,15 +1169,6 @@ public class TextFileParser
 	}
 
 	/**
-	 * Getter for property emptyStringIsNull.
-	 * @return Value of property emptyStringIsNull.
-	 */
-	public boolean isEmptyStringIsNull()
-	{
-		return emptyStringIsNull;
-	}
-
-	/**
 	 * Setter for property emptyStringIsNull.
 	 * @param flag New value of property emptyStringIsNull.
 	 */
@@ -1194,16 +1180,6 @@ public class TextFileParser
 	public void setDecodeUnicode(boolean flag)
 	{
 		this.decodeUnicode = flag;
-	}
-
-	public boolean getDecodeUnicode()
-	{
-		return this.decodeUnicode;
-	}
-
-	public boolean isTrimValues()
-	{
-		return trimValues;
 	}
 
 	public void setTrimValues(boolean trim)

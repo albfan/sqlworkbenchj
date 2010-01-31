@@ -57,11 +57,10 @@ public class WbDataDiff
 	public static final String PARAM_OUTPUT_TYPE = "type";
 
 	private WbFile outputDir;
-	private WbFile mainScript;
 	private TableDataDiff dataDiff;
 	private TableDeleteSync deleteSync;
 	private boolean xmlOutput;
-	
+
 	public WbDataDiff()
 	{
 		super();
@@ -122,7 +121,7 @@ public class WbDataDiff
 			return result;
 		}
 
-		mainScript = evaluateFileArgument(cmdLine.getValue(CommonDiffParameters.PARAM_FILENAME));
+		WbFile mainScript = evaluateFileArgument(cmdLine.getValue(CommonDiffParameters.PARAM_FILENAME));
 		if (mainScript == null)
 		{
 			result.setFailure();
@@ -138,7 +137,7 @@ public class WbDataDiff
 			encoding = Settings.getInstance().getDefaultEncoding();
 		}
 		encoding = EncodingUtil.cleanupEncoding(encoding);
-		
+
 		boolean createDir = cmdLine.getBoolean(WbExport.ARG_CREATE_OUTPUTDIR, false);
 		String literalType = cmdLine.getValue(CommonArgs.ARG_DATE_LITERAL_TYPE);
 		if (literalType == null) literalType = SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE;
@@ -214,7 +213,7 @@ public class WbDataDiff
 			return result;
 		}
 
-		
+
 		String blobtype = cmdLine.getValue(WbExport.ARG_BLOB_TYPE);
 		if (StringUtil.isNonBlank(blobtype))
 		{
@@ -380,7 +379,7 @@ public class WbDataDiff
 				{
 					WbFile ins = createFilename("insert", table);
 					WbFile upd = createFilename("update", table);
-					
+
 					if (xmlOutput)
 					{
 						out.write("    <table name=\"" + table.getTableName() + "\">" + nl);
@@ -506,7 +505,7 @@ public class WbDataDiff
 
 		if (result.isSuccess() && !isCancelled)
 		{
-			result.addMessage(ResourceMgr.getFormattedString("MsgDataDiffSuccess", this.mainScript.getFullPath()));
+			result.addMessage(ResourceMgr.getFormattedString("MsgDataDiffSuccess", mainScript.getFullPath()));
 		}
 		return result;
 	}

@@ -38,28 +38,27 @@ public class MetaDataSqlManager
 	public static final String FK_DELETE_RULE = "%fk_delete_rule%";
 	public static final String DEFERRABLE = "%deferrable%";
 	public static final String GENERAL_SQL = "All";
-	
+
 	private String productName;
 	private static final GetMetaDataSql MARKER = new GetMetaDataSql();
 	private static final String NO_STRING = "";
-	
+
 	private GetMetaDataSql procedureSource = MARKER;
 	private GetMetaDataSql viewSource = MARKER;
 	private GetMetaDataSql listTrigger = MARKER;
 	private GetMetaDataSql triggerSource = MARKER;
-	
+
 	private String primaryKeyTemplate = NO_STRING;
-	private String indexTemplate = NO_STRING;
 	private String foreignKeyTemplate = NO_STRING;
 //	private String columnCommentTemplate = NO_STRING;
 //	private String tableCommentTemplate = NO_STRING;
 	private final Object LOCK = new Object();
-		
+
 	public MetaDataSqlManager(String product)
 	{
 		this.productName = product;
 	}
-	
+
 	public GetMetaDataSql getProcedureSourceSql()
 	{
 		if (this.procedureSource == MARKER)
@@ -85,8 +84,8 @@ public class MetaDataSqlManager
 		}
 		return this.viewSource;
 	}
-	
-	
+
+
 	public GetMetaDataSql getListTriggerSql()
 	{
 		if (this.listTrigger == MARKER)
@@ -99,7 +98,7 @@ public class MetaDataSqlManager
 		}
 		return this.listTrigger;
 	}
-	
+
 	public GetMetaDataSql getTriggerSourceSql()
 	{
 		if (this.triggerSource == MARKER)
@@ -112,7 +111,7 @@ public class MetaDataSqlManager
 		}
 		return this.triggerSource;
 	}
-	
+
 	public String getPrimaryKeyTemplate()
 	{
 		if (this.primaryKeyTemplate == NO_STRING)
@@ -129,7 +128,7 @@ public class MetaDataSqlManager
 		}
 		return this.primaryKeyTemplate;
 	}
-	
+
 	public String getForeignKeyTemplate(boolean createInline)
 	{
 		if (this.foreignKeyTemplate == NO_STRING)
@@ -154,24 +153,7 @@ public class MetaDataSqlManager
 		}
 		return this.foreignKeyTemplate;
 	}
-	
-//	public String getIndexTemplate()
-//	{
-//		if (this.indexTemplate == NO_STRING)
-//		{
-//			synchronized (LOCK)
-//			{
-//				HashMap<String, String> sql = this.readStatementTemplates("CreateIndexStatements.xml");
-//				this.indexTemplate = sql.get(this.productName);
-//				if (indexTemplate == null)
-//				{
-//					this.indexTemplate = sql.get(GENERAL_SQL);
-//				}
-//			}
-//		}
-//		return this.indexTemplate;
-//	}
-	
+
 	public static String removePlaceholder(String sql, String placeholder, boolean withNL)
 	{
 		String s = null;
@@ -189,7 +171,7 @@ public class MetaDataSqlManager
 		}
 		return sql.replaceAll(s, StringUtil.EMPTY_STRING);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private HashMap readStatementTemplates(String aFilename)
 	{
@@ -248,7 +230,7 @@ public class MetaDataSqlManager
 		}
 		else
 		{
-			LogMgr.logDebug("MetaDataSqlManager.readStatementTemplates()", "No user defined template file found for " + aFilename);		
+			LogMgr.logDebug("MetaDataSqlManager.readStatementTemplates()", "No user defined template file found for " + aFilename);
 		}
 		return result;
 	}

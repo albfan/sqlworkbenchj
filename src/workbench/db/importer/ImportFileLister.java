@@ -84,11 +84,6 @@ public class ImportFileLister
 		}
 	}
 
-	public boolean getCheckDependencies()
-	{
-		return checkDependencies;
-	}
-
 	public void setCheckDependencies(boolean flag)
 	{
 		this.checkDependencies = flag;
