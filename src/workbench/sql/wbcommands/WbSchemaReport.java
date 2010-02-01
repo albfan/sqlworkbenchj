@@ -39,6 +39,7 @@ public class WbSchemaReport
 	extends SqlCommand
 	implements RowActionMonitor
 {
+	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 	public static final String PARAM_INCLUDE_TABLES = "includeTables";
 	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";
@@ -46,6 +47,7 @@ public class WbSchemaReport
 	public static final String PARAM_INCLUDE_TRIGGERS = "includeTriggers";
 	public static final String PARAM_INCLUDE_VIEWS = "includeViews";
 	public static final String PARAM_TYPES = "types";
+	public static final String PARAM_TABLE_NAMES = "tables";
 
 	public static final String VERB = "WBREPORT";
 	private SchemaReporter reporter;
@@ -57,7 +59,8 @@ public class WbSchemaReport
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("types");
 		cmdLine.addArgument("file");
-		cmdLine.addArgument("tables", ArgumentType.TableArgument);
+		cmdLine.addArgument(PARAM_TABLE_NAMES, ArgumentType.TableArgument);
+		cmdLine.addArgument(PARAM_EXCLUDE_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument("schemas");
 		cmdLine.addArgument("reportTitle");
 		cmdLine.addArgument("useSchemaName", ArgumentType.BoolArgument);
@@ -107,7 +110,9 @@ public class WbSchemaReport
 		reporter.setIncludeViews(cmdLine.getBoolean(PARAM_INCLUDE_VIEWS, true));
 		reporter.setIncludeTriggers(cmdLine.getBoolean(PARAM_INCLUDE_TRIGGERS, true));
 
-		SourceTableArgument tableArg = new SourceTableArgument(this.cmdLine.getValue("tables"), this.currentConnection);
+		String tableNames = this.cmdLine.getValue(PARAM_TABLE_NAMES);
+		String exclude = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+		SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, this.currentConnection);
 
 		List<TableIdentifier> tables = tableArg.getTables();
 		if (tables != null && tables.size() > 0)
