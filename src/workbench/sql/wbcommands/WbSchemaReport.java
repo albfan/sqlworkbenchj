@@ -188,9 +188,9 @@ public class WbSchemaReport
 
 		if (!StringUtil.isEmptyString(xslt) && !StringUtil.isEmptyString(xsltOutput))
 		{
+			XsltTransformer transformer = new XsltTransformer();
 			try
 			{
-				XsltTransformer transformer = new XsltTransformer();
 				transformer.setXsltBaseDir(new File(runner.getBaseDir()));
 				transformer.transform(output.getFullPath(), xsltOutput, xslt);
 				result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
@@ -199,7 +199,8 @@ public class WbSchemaReport
 			catch (Exception e)
 			{
 				LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
-				result.addMessage(e.getMessage());
+				LogMgr.logError("WbSchemaReport.execute()", transformer.getAllOutputs(), null);
+				result.addMessage(transformer.getAllOutputs());
 			}
 		}
 
