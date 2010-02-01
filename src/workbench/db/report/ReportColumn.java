@@ -99,7 +99,7 @@ public class ReportColumn
 		result.append('\n');
 
 		if (includePosition) tagWriter.appendTag(result, myindent, TAG_COLUMN_POSITION, this.column.getPosition());
-		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_NAME, this.column.getColumnName());
+		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_NAME, StringUtil.trimQuotes(this.column.getColumnName()));
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DBMS_TYPE, this.column.getDbmsType());
 		if (isRealColumn && !shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_NULLABLE, this.column.isNullable());

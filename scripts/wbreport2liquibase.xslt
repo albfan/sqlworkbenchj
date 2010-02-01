@@ -3,15 +3,15 @@
   Convert a SQL Workbench/J schema report (http://www.sql-workbench.net) 
   to an initial LiquiBase (http://www.liquibase.org) changeset.
   
-  The change set's author will be "sql-workbench" and the id will be 1
+  The change set's author will be "sql-workbench" (but can be changed by setting 
+  the XSLT parameter "authorName" and the id will be 1
+  
   Everything will be put into a single changeset
 -->
 <xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:output encoding="UTF-8" method="xml" indent="yes" standalone="no"/>
-<xsl:preserve-space elements="*"/>
+<xsl:output encoding="UTF-8" method="xml" indent="yes"/>
 
-<xsl:param name="includeSequences">true</xsl:param>
 <xsl:param name="authorName">sql-workbench</xsl:param>
 <xsl:param name="useJdbcTypes">false</xsl:param>
 
@@ -19,15 +19,17 @@
 <xsl:variable name="tab"><xsl:text>&#x09;</xsl:text></xsl:variable>
 <xsl:variable name="squote"><xsl:text>&#39;</xsl:text></xsl:variable>
 <xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
+<xsl:variable name="schema-owner">${schema.owner}</xsl:variable>
 
 <xsl:import href="liquibase_createtable.xslt"/>
 
 <xsl:template match="/schema-report">
-  <databaseChangeLog 
+  
+  <databaseChangeLog
        xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9" 
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
-
+  
   <!-- create a single changeset for the initial setup -->
   <changeSet author="{$authorName}" id="1">
   

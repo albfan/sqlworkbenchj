@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
+import javax.xml.transform.ErrorListener;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
@@ -49,7 +50,6 @@ public class XsltTransformer
 	private boolean saveSystemOut;
 	private File xsltUsed;
 	
-
 	/**
 	 * The directory where the initially defined XSLT is stored.
 	 * Will be set by transform() in order to be able to
@@ -70,7 +70,7 @@ public class XsltTransformer
 		this.xsltBasedir = dir;
 	}
 
-	public void setSAveSystemOutMessages(boolean flag)
+	public void setSaveSystemOutMessages(boolean flag)
 	{
 		saveSystemOut = flag;
 	}
@@ -161,22 +161,28 @@ public class XsltTransformer
 			}
 		}
 	}
-
-	public String getSystemErr()
-	{
-		return sysErr;
-	}
-	
-	public String getSystemOut()
-	{
-		return sysOut;
-	}
 	
 	public Exception getNestedError()
 	{
 		return resolveError;
 	}
 
+	public String getAllOutputs()
+	{
+		StringBuilder result = new StringBuilder();
+		if (StringUtil.isNonBlank(sysErr))
+		{
+			result.append(sysErr.trim());
+		}
+		if (StringUtil.isNonBlank(sysOut))
+		{
+			if (result.length() > 0) result.append('\n');
+			result.append(sysOut.trim());
+		}
+		
+		return result.toString();
+	}
+	
 	@Override
 	public Source resolve(String href, String base)
 		throws TransformerException

@@ -64,9 +64,19 @@
 						If you want to generate the report on tables from different users/schemas you have
 						to use fully qualified names in the list (e.g. <literal>-tables=MY_USER.TABLE1,OTHER_USER.TABLE2</literal>)
 						You can also specify wildcards in the table name: <literal>-table=CONTRACT_%</literal> will create
-						an XML report for all tables that start with <literal>CONTRACT_</literal>
+						an XML report for all tables that start with <literal>CONTRACT_</literal>.
 					</entry>
 				</row>
+        
+				<row>
+					<entry>-excludeTableNames</entry>
+					<entry>
+            A (comma separated) list of tables to exclude from reporting. This is only used if
+            -tables is also specified. To create a report on all tables, but exclude those that start
+            with 'DEV', use <literal>-tables=* -excludeTableNames=DEV*</literal>
+					</entry>
+				</row>
+
 				<row>
 					<entry>-schemas</entry>
 					<entry>A (comma separated) list of schemas to generate the report from.
@@ -1679,18 +1689,30 @@ WHERE id=42;</programlisting>
         </thead>
 
         <tbody valign="top">
+          
           <row>
             <entry>-inputfile</entry>
             <entry>The name of the XML source file.</entry>
           </row>
+
           <row>
             <entry>-xsltoutput</entry>
             <entry>The name of the generated output file.</entry>
           </row>
+
           <row>
             <entry>-stylesheet</entry>
             <entry>The name of the XSLT stylesheet to be used.</entry>
           </row>
+
+          <row>
+            <entry>-xsltParameters</entry>
+            <entry>
+              A list of parameters (key/value pairs) that should be passed to the XSLT processor. When using e.g. the <literal>wbreport2liquibase.xslt</literal>
+              stylesheet, the value of the <literal>author</literal> attribute can be set using <literal>-xsltParameters="authorName=42"</literal>.
+            </entry>
+          </row>
+
         </tbody>
       </tgroup>
     </informaltable>

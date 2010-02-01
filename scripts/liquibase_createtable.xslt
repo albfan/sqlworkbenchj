@@ -2,8 +2,12 @@
 <xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:template name="create-table">
+
   <xsl:variable name="table-name" select="table-name"/>
-  <createTable tableName="{$table-name}">
+  <xsl:variable name="table-space">${tablespace.table}</xsl:variable>
+  <xsl:variable name="index-space">${tablespace.index}</xsl:variable>
+
+  <createTable tableName="{$table-name}" schemaName="{$schema-owner}" tablespace="{$table-space}">
   
     <xsl:if test="string-length(comment) &gt; 0">
       <xsl:attribute name="remarks">
@@ -26,7 +30,7 @@
     
     <xsl:for-each select="column-def">
       <xsl:sort select="dbms-position"/>
-      <xsl:variable name="column-name" select="column-name"/>
+      <xsl:variable name="column-name" select="@name"/>
       
       <xsl:variable name="data-type">
       
@@ -150,7 +154,7 @@
     </xsl:if>
             
     <xsl:if test="primary-key='false'">
-      <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}">
+      <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}" schemaName="{$schema-owner}" tablespace="{$index-space}">
       
         <xsl:for-each select="column-list/column">
           <column>

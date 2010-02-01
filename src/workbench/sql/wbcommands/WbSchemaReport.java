@@ -39,7 +39,7 @@ public class WbSchemaReport
 	extends SqlCommand
 	implements RowActionMonitor
 {
-	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
+	public static final String PARAM_EXCLUDE_TABLES = "excludeTableNames";
 	public static final String PARAM_INCLUDE_TABLES = "includeTables";
 	public static final String PARAM_INCLUDE_PROCS = "includeProcedures";
 	public static final String PARAM_INCLUDE_GRANTS = "includeTableGrants";

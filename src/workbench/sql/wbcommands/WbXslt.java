@@ -107,22 +107,17 @@ public class WbXslt
 		
 		try
 		{
-			transformer.setSAveSystemOutMessages(true);
+			transformer.setSaveSystemOutMessages(true);
 			transformer.setXsltBaseDir(new File(runner.getBaseDir()));
 
 			transformer.transform(inputFile, outputFile, xsltFile, params);
 
-			String out = transformer.getSystemOut();
+			String msg = transformer.getAllOutputs();
+			if (msg.length() != 0)
+			{
+				result.addMessage(msg);
+			}
 
-			if (out != null)
-			{
-				result.addMessage(out);
-			}
-			out = transformer.getSystemErr();
-			if (out != null)
-			{
-				result.addMessage(out);
-			}
 			WbFile xsltUsed = new WbFile(transformer.getXsltUsed());
 			WbFile userXslt = new WbFile(xsltFile);
 			if (xsltUsed != null && !userXslt.equals(xsltUsed))
@@ -135,14 +130,24 @@ public class WbXslt
 		catch (Exception e)
 		{
 			LogMgr.logError("WbXslt.execute()", "Error when transforming '" + inputFile + "' to '" + outputFile + "' using " + xsltFile, e);
-			if (transformer.getNestedError() != null)
+			String msg = transformer.getAllOutputs();
+			if (msg.length() != 0)
 			{
-				result.addMessage(e.getMessage() + ": " + ExceptionUtil.getDisplay(transformer.getNestedError()));
+				LogMgr.logError("WbXslt.execute()", msg, null);
+				result.addMessage(msg);
 			}
 			else
 			{
-				result.addMessage(e.getMessage());
+				if (transformer.getNestedError() != null)
+				{
+					result.addMessage(e.getMessage() + ": " + ExceptionUtil.getDisplay(transformer.getNestedError()));
+				}
+				else
+				{
+					result.addMessage(e.getMessage());
+				}
 			}
+
 		}
 		return result;
 	}

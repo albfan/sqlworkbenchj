@@ -6,6 +6,16 @@
 
   <entry dev-build="5" type="enh">
     <description>
+      The minimum version for POI (XLS export) has been raised to 3.5 in order to support Microsoft's new OfficeOpen XML Format.
+      Therefor the naming of export types has been changed: xls still writes the old (Pre 2003) binary format, xlsx now writes the 
+      new OOXML format (Office 2007) and the (new) type xlsm writes the Office 2003 XML format (xlsm is equivalent to the 
+      previous xlsx type). To be able to use the new xlsx format, additonal libraries (apart from poi.jar) are needed:
+      poi-ooxml.jar, dom4j-1.6.1.jar, geronimo-stax-api_1.0_spec-1.0.jar, ooxml-schemas-1.0.jar and xmlbeans-2.3.0.jar
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="enh">
+    <description>
       Two new options for spreadsheet export have been added. An option to turn on the auto-filter for ODS and Excel XML
       exports (-autoFilter). An option -fixedHeader to freeze header row which is available for all three formats. Both options
       are turned on by default. 
