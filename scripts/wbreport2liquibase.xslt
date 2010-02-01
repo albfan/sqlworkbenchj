@@ -9,11 +9,14 @@
 <xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:output encoding="UTF-8" method="xml" indent="yes" standalone="no"/>
+<xsl:preserve-space elements="*"/>
 
 <xsl:param name="includeSequences">true</xsl:param>
 
 <xsl:variable name="newline"><xsl:text>&#10;</xsl:text></xsl:variable>
 <xsl:variable name="tab"><xsl:text>&#x09;</xsl:text></xsl:variable>
+<xsl:variable name="squote"><xsl:text>&#39;</xsl:text></xsl:variable>
+<xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
 
 <xsl:import href="liquibase_createtable.xslt"/>
 

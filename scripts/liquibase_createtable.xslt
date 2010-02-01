@@ -7,7 +7,11 @@
   
     <xsl:if test="string-length(comment) &gt; 0">
       <xsl:attribute name="remarks">
-        <xsl:value-of select="comment"/>
+        <xsl:call-template name="_replace_text">
+            <xsl:with-param name="text" select="comment"/>
+            <xsl:with-param name="replace" select="$squote"/>
+            <xsl:with-param name="by" select="$dsquote"/>
+        </xsl:call-template>
       </xsl:attribute>
     </xsl:if>
 
@@ -76,7 +80,12 @@
         <!-- only write remarks if they are defined -->
         <xsl:if test="string-length(comment) &gt; 0">
           <xsl:attribute name="remarks">
-            <xsl:value-of select="comment"/>
+			<xsl:call-template name="_replace_text">
+               <xsl:with-param name="text" select="comment"/>
+               <xsl:with-param name="replace" select="$squote"/>
+               <xsl:with-param name="by" select="$dsquote"/>
+            </xsl:call-template>
+            <!--- <xsl:value-of select="comment"/> -->
           </xsl:attribute>
         </xsl:if>
         
@@ -125,7 +134,7 @@
        Primary keys with a single column are already defined in the table itself
        so we only need to take care of those with more than one column
     -->
-    <xsl:if test="primary-key='true' and count(column-list/column) &gt; 1">
+    <xsl:if test="primary-key='true' and count(column-list/column) &gt; 0">
       <xsl:variable name="pk-columns">
         <xsl:for-each select="column-list/column">
           <xsl:value-of select="@name"/>
@@ -247,6 +256,26 @@
         <xsl:text>[</xsl:text><xsl:value-of select="$type-id"/><xsl:text>]</xsl:text>
     </xsl:otherwise>  
   </xsl:choose>
+</xsl:template>
+  
+<xsl:template name="_replace_text">
+    <xsl:param name="text"/>
+    <xsl:param name="replace"/>
+    <xsl:param name="by"/>
+    <xsl:choose>
+        <xsl:when test="contains($text, $replace)">
+            <xsl:value-of select="substring-before($text, $replace)"/>
+            <xsl:copy-of select="$by"/>
+            <xsl:call-template name="_replace_text">
+                <xsl:with-param name="text" select="substring-after($text, $replace)"/>
+                <xsl:with-param name="replace" select="$replace"/>
+                <xsl:with-param name="by" select="$by"/>
+            </xsl:call-template>
+        </xsl:when>
+        <xsl:otherwise>
+            <xsl:value-of select="$text"/>
+        </xsl:otherwise>
+    </xsl:choose>
 </xsl:template>
   
 </xsl:transform>
