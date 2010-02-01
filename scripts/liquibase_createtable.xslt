@@ -21,19 +21,19 @@
 
     <!-- find PK name -->
     <xsl:variable name="pk-name">
-      <xsl:value-of select="index-def/name[primary-key='true']"/>
+      <xsl:value-of select="index-def[primary-key='true']/name"/>
     </xsl:variable>
 
     <xsl:variable name="pk-col-count">
-      <xsl:value-of select="count(index-def/name[primary-key='true']/column-list/column)"/>
+      <xsl:value-of select="count(column-def[primary-key='true'])"/>
     </xsl:variable>
     
     <xsl:for-each select="column-def">
       <xsl:sort select="dbms-position"/>
+      
       <xsl:variable name="column-name" select="@name"/>
       
       <xsl:variable name="data-type">
-      
         <xsl:if test="$useJdbcTypes = 'true'">
           <xsl:call-template name="write-data-type">
             <xsl:with-param name="type-id" select="java-sql-type"/>
@@ -43,9 +43,8 @@
         </xsl:if>
         
         <xsl:if test="$useJdbcTypes = 'false'">
-          <xsl:variable name="data-type" select="dbms-data-type"/>
+          <xsl:value-of select="dbms-data-type"/>
         </xsl:if>
-        
       </xsl:variable>
       
       <column name="{$column-name}" type="{$data-type}">
@@ -93,11 +92,9 @@
                <xsl:with-param name="replace" select="$squote"/>
                <xsl:with-param name="by" select="$dsquote"/>
             </xsl:call-template>
-            <!--- <xsl:value-of select="comment"/> -->
           </xsl:attribute>
         </xsl:if>
-        
-        <!-- only write pk flag if it's true -->
+
         <xsl:if test="($pk-flag = 'true' and $pk-col-count = 1) or $nullable = 'false'">
           <constraints>
           
@@ -142,7 +139,7 @@
        Primary keys with a single column are already defined in the table itself
        so we only need to take care of those with more than one column
     -->
-    <xsl:if test="primary-key='true' and count(column-list/column) &gt; 0">
+    <xsl:if test="primary-key='true' and count(column-list/column) &gt; 1">
       <xsl:variable name="pk-columns">
         <xsl:for-each select="column-list/column">
           <xsl:value-of select="@name"/>
@@ -219,7 +216,7 @@
       <xsl:text>CHAR(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
     </xsl:when>
     <xsl:when test="$type-id = -15">
-      <xsl:text>NCHAR</xsl:text>
+      <xsl:text>NCHAR(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
     </xsl:when>
     <xsl:when test="$type-id = 4">
       <xsl:text>INTEGER</xsl:text>
