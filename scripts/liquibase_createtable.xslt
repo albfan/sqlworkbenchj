@@ -17,7 +17,7 @@
     </xsl:variable>
 
     <xsl:variable name="pk-col-count">
-      <xsl:value-of select="count(ndex-def/name[primary-key='true']/olumn-list/column)"/>
+      <xsl:value-of select="count(index-def/name[primary-key='true']/column-list/column)"/>
     </xsl:variable>
     
     <xsl:for-each select="column-def">
@@ -151,6 +151,14 @@
    </xsl:if>
     
   </xsl:for-each> <!-- table index -->
+  
+  <xsl:for-each select="table-constraints/constraint-definition[@type='check']">
+    <xsl:variable name="condition">
+		<xsl:value-of select="normalize-space(.)"/>
+	</xsl:variable>
+	<sql>ALTER TABLE <xsl:value-of select="$table-name"/> ADD CONSTRAINT <xsl:value-of select="@name"/> CHECK <xsl:value-of select="normalize-space(.)"/></sql><xsl:text>&#10;</xsl:text>
+  </xsl:for-each>
+  
 </xsl:template>
   
 

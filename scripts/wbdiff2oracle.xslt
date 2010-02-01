@@ -231,7 +231,7 @@
       <xsl:value-of select="$table"/>
       <xsl:text>.</xsl:text>
       <xsl:value-of select="$column"/>
-      <xsl:text>IS '</xsl:text>
+      <xsl:text> IS '</xsl:text>
       <xsl:value-of select="comment"/>
       <xsl:text>';</xsl:text>
       <xsl:value-of select="$newline"/>
