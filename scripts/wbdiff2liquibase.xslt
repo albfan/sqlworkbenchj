@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!-- 
-  Convert a SQL Workbench/J schema report (http://www.sql-workbench.net) 
-  to an initial LiquiBase (http://www.liquibase.org) changeset.
-  
-  The change set's author will be "sql-workbench" and the id will be 1
-  Everything will be put into a single changeset
+  Convert a SQL Workbench/J schema diff (http://www.sql-workbench.net) 
+  to a LiquiBase (http://www.liquibase.org) changeset.
 -->
 <xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:output encoding="UTF-8" method="xml" indent="yes" standalone="no"/>
+
+<xsl:param name="authorName">sql-workbench</xsl:param>
+<xsl:param name="useJdbcTypes">false</xsl:param>
+
+<xsl:variable name="schema-owner">${schema.owner}</xsl:variable>
+
+<xsl:import href="liquibase_createtable.xslt"/>
 
 <xsl:template match="/schema-diff">
   <databaseChangeLog 
@@ -17,10 +21,8 @@
        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
       <!-- create a single changeset for the complete diff -->
-      <changeSet author="sql-workbench" id="[change_me]">
+      <changeSet author="{$authorName}" id="[change_me]">
 
-        <xsl:import href="liquibase_createtable.xslt"/>
-        
         <xsl:for-each select="add-table/table-def">
           <xsl:call-template name="create-table"/>
         </xsl:for-each>

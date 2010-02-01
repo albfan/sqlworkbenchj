@@ -4,7 +4,7 @@
   to an initial LiquiBase (http://www.liquibase.org) changeset.
   
   The change set's author will be "sql-workbench" (but can be changed by setting 
-  the XSLT parameter "authorName" and the id will be 1
+  the XSLT parameter "authorName" and the changeSet's id will be 1
   
   Everything will be put into a single changeset
 -->
@@ -15,10 +15,6 @@
 <xsl:param name="authorName">sql-workbench</xsl:param>
 <xsl:param name="useJdbcTypes">false</xsl:param>
 
-<xsl:variable name="newline"><xsl:text>&#10;</xsl:text></xsl:variable>
-<xsl:variable name="tab"><xsl:text>&#x09;</xsl:text></xsl:variable>
-<xsl:variable name="squote"><xsl:text>&#39;</xsl:text></xsl:variable>
-<xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
 <xsl:variable name="schema-owner">${schema.owner}</xsl:variable>
 
 <xsl:import href="liquibase_createtable.xslt"/>

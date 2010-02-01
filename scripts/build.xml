@@ -639,6 +639,9 @@
         <include name="wbdiff2mssql.xslt"/>
         <include name="wbdiff2oracle.xslt"/>
         <include name="wbdiff2pg.xslt"/>
+        <include name="liquibase_createtable.xslt.xslt"/>
+        <include name="wbdiff2liquibase.xslt"/>
+        <include name="wbreport2liquibase.xslt"/>
         <include name="wbreport2html.xslt"/>
         <include name="wbreport2oracle.xslt"/>
         <include name="wbreport2proc.xslt"/>

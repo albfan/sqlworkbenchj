@@ -2,6 +2,8 @@
 <xsl:transform version="2.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:template name="create-table">
+  <xsl:variable name="squote"><xsl:text>&#39;</xsl:text></xsl:variable>
+  <xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
 
   <xsl:variable name="table-name" select="table-name"/>
   <xsl:variable name="table-space">${tablespace.table}</xsl:variable>
