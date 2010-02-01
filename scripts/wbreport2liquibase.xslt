@@ -12,6 +12,8 @@
 <xsl:preserve-space elements="*"/>
 
 <xsl:param name="includeSequences">true</xsl:param>
+<xsl:param name="authorName">sql-workbench</xsl:param>
+<xsl:param name="useJdbcTypes">false</xsl:param>
 
 <xsl:variable name="newline"><xsl:text>&#10;</xsl:text></xsl:variable>
 <xsl:variable name="tab"><xsl:text>&#x09;</xsl:text></xsl:variable>
@@ -27,7 +29,7 @@
        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9 http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
   <!-- create a single changeset for the initial setup -->
-  <changeSet author="sql-workbench" id="1">
+  <changeSet author="{$authorName}" id="1">
   
     <xsl:for-each select="table-def">
       <xsl:sort select="table-name"/>

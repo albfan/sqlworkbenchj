@@ -28,17 +28,21 @@
       <xsl:sort select="dbms-position"/>
       <xsl:variable name="column-name" select="column-name"/>
       
-      
       <xsl:variable name="data-type">
-        <xsl:call-template name="write-data-type">
-          <xsl:with-param name="type-id" select="java-sql-type"/>
-          <xsl:with-param name="precision" select="dbms-data-size"/>
-          <xsl:with-param name="scale" select="dbms-data-digits"/>
-        </xsl:call-template>
+      
+        <xsl:if test="$useJdbcTypes = 'true'">
+          <xsl:call-template name="write-data-type">
+            <xsl:with-param name="type-id" select="java-sql-type"/>
+            <xsl:with-param name="precision" select="dbms-data-size"/>
+            <xsl:with-param name="scale" select="dbms-data-digits"/>
+          </xsl:call-template>
+        </xsl:if>
+        
+        <xsl:if test="$useJdbcTypes = 'false'">
+          <xsl:variable name="data-type" select="dbms-data-type"/>
+        </xsl:if>
+        
       </xsl:variable>
-
-      <!-- As an alternative use the "native" datatype as reported by the JDBC driver... -->
-      <!-- <xsl:variable name="data-type" select="dbms-data-type"/>-->
       
       <column name="{$column-name}" type="{$data-type}">
       
@@ -80,7 +84,7 @@
         <!-- only write remarks if they are defined -->
         <xsl:if test="string-length(comment) &gt; 0">
           <xsl:attribute name="remarks">
-			<xsl:call-template name="_replace_text">
+            <xsl:call-template name="_replace_text">
                <xsl:with-param name="text" select="comment"/>
                <xsl:with-param name="replace" select="$squote"/>
                <xsl:with-param name="by" select="$dsquote"/>
@@ -163,9 +167,9 @@
   
   <xsl:for-each select="table-constraints/constraint-definition[@type='check']">
     <xsl:variable name="condition">
-		<xsl:value-of select="normalize-space(.)"/>
-	</xsl:variable>
-	<sql>ALTER TABLE <xsl:value-of select="$table-name"/> ADD CONSTRAINT <xsl:value-of select="@name"/> CHECK <xsl:value-of select="normalize-space(.)"/></sql><xsl:text>&#10;</xsl:text>
+        <xsl:value-of select="normalize-space(.)"/>
+    </xsl:variable>
+    <sql>ALTER TABLE <xsl:value-of select="$table-name"/> ADD CONSTRAINT <xsl:value-of select="@name"/> CHECK <xsl:value-of select="normalize-space(.)"/></sql><xsl:text>&#10;</xsl:text>
   </xsl:for-each>
   
 </xsl:template>
@@ -208,7 +212,7 @@
       <xsl:text>DATE</xsl:text>
     </xsl:when>
     <xsl:when test="$type-id = 1">
-      <xsl:text>CHAR</xsl:text>
+      <xsl:text>CHAR(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
     </xsl:when>
     <xsl:when test="$type-id = -15">
       <xsl:text>NCHAR</xsl:text>
