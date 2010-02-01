@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.io.File;
 import java.sql.SQLException;
+import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
@@ -34,6 +35,7 @@ public class WbXslt
 	public static final String ARG_STYLESHEET = "stylesheet";
 	public static final String ARG_OUTPUT = "xsltOutput";
 	public static final String ARG_INPUT = "inputFile";
+	public static final String ARG_PARAMETERS = "xsltParameters";
 
 	public WbXslt()
 	{
@@ -42,6 +44,7 @@ public class WbXslt
 		cmdLine.addArgument(ARG_STYLESHEET);
 		cmdLine.addArgument(ARG_OUTPUT);
 		cmdLine.addArgument(ARG_INPUT);
+		cmdLine.addArgument(ARG_PARAMETERS);
 	}
 
 	public String getVerb()
@@ -98,14 +101,19 @@ public class WbXslt
 			return result;
 		}
 
+		Map<String, String> params = cmdLine.getMapValue(ARG_PARAMETERS);
+		
 		XsltTransformer transformer = new XsltTransformer();
 		
 		try
 		{
 			transformer.setSAveSystemOutMessages(true);
 			transformer.setXsltBaseDir(new File(runner.getBaseDir()));
-			transformer.transform(inputFile, outputFile, xsltFile);
+
+			transformer.transform(inputFile, outputFile, xsltFile, params);
+
 			String out = transformer.getSystemOut();
+
 			if (out != null)
 			{
 				result.addMessage(out);
