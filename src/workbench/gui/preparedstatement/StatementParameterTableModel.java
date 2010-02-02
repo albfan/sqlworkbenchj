@@ -22,14 +22,23 @@ import workbench.util.SqlUtil;
 public class StatementParameterTableModel
 	implements TableModel
 {
-	private String[] columns = { ResourceMgr.getString("TxtPSParameterIndex"), ResourceMgr.getString("TxtPSParameterType"), ResourceMgr.getString("TxtPSParameterValue") };
+	private final String[] columns;
 	private Integer[] parameterIndex;
 	private String[] types;
 	private String[] values;
+
 	private StatementParameters parms;
-	
-	public StatementParameterTableModel(StatementParameters parm)
+
+	public StatementParameterTableModel(StatementParameters parm, boolean showParameterNames)
 	{
+		if (showParameterNames)
+		{
+			columns = new String[] { ResourceMgr.getString("TxtPSParameterIndex"), ResourceMgr.getString("TxtPSParameterName"), ResourceMgr.getString("TxtPSParameterType"), ResourceMgr.getString("TxtPSParameterValue") };
+		}
+		else
+		{
+			columns = new String[] { ResourceMgr.getString("TxtPSParameterIndex"), ResourceMgr.getString("TxtPSParameterType"), ResourceMgr.getString("TxtPSParameterValue") };
+		}
 		this.parms = parm;
 		int count = parm.getParameterCount();
 		this.parameterIndex = new Integer[count];
@@ -44,32 +53,32 @@ public class StatementParameterTableModel
 		}
 	}
 
-	public void addTableModelListener(javax.swing.event.TableModelListener l)
-	{
-	}
-
+	@Override
 	public Class getColumnClass(int columnIndex)
 	{
 		if (columnIndex == 0)
 		{
 			return Integer.class;
 		}
-		else 
+		else
 		{
 			return String.class;
 		}
 	}
 
+	@Override
 	public int getColumnCount()
 	{
-		return 3;
+		return columns.length;
 	}
 
+	@Override
 	public String getColumnName(int columnIndex)
 	{
 		return columns[columnIndex];
 	}
 
+	@Override
 	public int getRowCount()
 	{
 		return this.parms.getParameterCount();
@@ -79,38 +88,64 @@ public class StatementParameterTableModel
 	{
 		return this.values[index];
 	}
-	
+
+	@Override
 	public Object getValueAt(int rowIndex, int columnIndex)
 	{
 		if (columnIndex == 0)
 		{
 			return parameterIndex[rowIndex];
 		}
-		else if (columnIndex == 1)
+
+		if (columns.length == 4)
 		{
-			return types[rowIndex];
+			switch (columnIndex)
+			{
+				case 1:
+					return parms.getParameterName(rowIndex);
+				case 2:
+					return types[rowIndex];
+				case 3:
+					return values[rowIndex];
+			}
 		}
-		else 
+		else
 		{
-			return values[rowIndex];
+			switch (columnIndex)
+			{
+				case 1:
+					return types[rowIndex];
+				case 2:
+					return values[rowIndex];
+			}
 		}
+		return null;
 	}
 
+	@Override
 	public boolean isCellEditable(int rowIndex, int columnIndex)
 	{
-		return (columnIndex == 2);
+		return (columnIndex == (columns.length - 1));
 	}
 
-	public void removeTableModelListener(javax.swing.event.TableModelListener l)
-	{
-	}
-
+	@Override
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
 	{
-		if (columnIndex == 2)
+		if (columnIndex == (columns.length -1))
 		{
 			this.values[rowIndex] = (aValue == null ? "" : aValue.toString());
 		}
 	}
-	
+
+	@Override
+	public void removeTableModelListener(javax.swing.event.TableModelListener l)
+	{
+	}
+
+	@Override
+	public void addTableModelListener(javax.swing.event.TableModelListener l)
+	{
+	}
+
+
 }

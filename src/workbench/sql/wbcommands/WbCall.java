@@ -19,7 +19,9 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureReader;
@@ -53,7 +55,7 @@ public class WbCall
 	public static final String EXEC_VERB_SHORT = "EXEC";
 	public static final String EXEC_VERB_LONG = "EXECUTE";
 	public static final String VERB = "WBCALL";
-	private List<Integer> refCursorIndex = null;
+	private Map<Integer, ParameterDefinition> refCursor = null;
 
 	// Stores all parameters that need an input
 	private List<ParameterDefinition> inputParameters = new ArrayList<ParameterDefinition>(5);
@@ -89,24 +91,32 @@ public class WbCall
 
 		try
 		{
-			refCursorIndex = null;
+			refCursor = null;
 
 			result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
 			CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(realSql);
 			this.currentStatement = cstmt;
 
 			boolean hasParameters = (realSql.indexOf('?') > -1);
+			boolean namesAvailable = false;
 
 			Savepoint sp = null;
 			if (hasParameters)
 			{
 				try
 				{
-					if (currentConnection.getDbSettings().useSavePointForDDL())
+					if (currentConnection.getDbSettings().useSavePointForDML())
 					{
 						sp = currentConnection.setSavepoint();
 					}
 					outParameters = checkParametersFromStatement(cstmt);
+
+					// The JDBC ParameterMetaData class does not expose parameter names
+					// so they cannot be displayed in the dialog
+
+					// TODO: another call to retrieve the parameter names through JDBC
+					// in order to be able to display them, even if ParameterMetaData is used.
+					namesAvailable = false;
 					currentConnection.releaseSavepoint(sp);
 				}
 				catch (Throwable e)
@@ -128,12 +138,16 @@ public class WbCall
 			{
 				try
 				{
-					if (currentConnection.getDbSettings().useSavePointForDDL())
+					if (currentConnection.getDbSettings().useSavePointForDML())
 					{
 						sp = currentConnection.setSavepoint();
 					}
 
 					outParameters = checkParametersFromDatabase(cleanSql);
+
+					// When retrieving the actual procedure parameters we do have
+					// the parameter names available, so we can show them in the dialog
+					namesAvailable = true;
 
 					// checkParametersFromDatabase will re-create the callable statement
 					// and assign it to currentStatement
@@ -160,7 +174,7 @@ public class WbCall
 			if (hasParameters && !WbManager.getInstance().isBatchMode() && this.inputParameters.size() > 0)
 			{
 				StatementParameters input = new StatementParameters(this.inputParameters);
-				boolean ok = ParameterEditor.showParameterDialog(input);
+				boolean ok = ParameterEditor.showParameterDialog(input, namesAvailable);
 				if (!ok)
 				{
 					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
@@ -179,16 +193,32 @@ public class WbCall
 			boolean hasResult = (cstmt != null ? cstmt.execute() : false);
 			result.setSuccess();
 
-			if (refCursorIndex != null)
+			if (refCursor != null)
 			{
-				for (Integer index : refCursorIndex)
+				int outIndex = 0;
+				for (Map.Entry<Integer, ParameterDefinition> refs : refCursor.entrySet())
 				{
 					try
 					{
-						ResultSet rs = (ResultSet)cstmt.getObject(index.intValue());
+						ResultSet rs = (ResultSet)cstmt.getObject(refs.getKey().intValue());
 
 						// processResults will close the result set
 						if (rs != null) processResults(result, true, rs);
+						List<DataStore> results = result.getDataStores();
+						if (CollectionUtil.isNonEmpty(results) && refs.getValue() != null)
+						{
+							DataStore ds = results.get(results.size() - 1);
+							ds.setGeneratingSql(aSql);
+							if (ds.getResultName() == null)
+							{
+								String name = refs.getValue().getParameterName();
+								if (StringUtil.isNonBlank(name))
+								{
+									ds.setResultName(name);
+								}
+							}
+						}
+						outIndex ++;
 					}
 					catch (Exception e)
 					{
@@ -213,7 +243,7 @@ public class WbCall
 
 				for (ParameterDefinition def : outParameters)
 				{
-					if (refCursorIndex != null && refCursorIndex.contains(Integer.valueOf(def.getIndex()))) continue;
+					if (refCursor != null && refCursor.containsKey(Integer.valueOf(def.getIndex()))) continue;
 
 					Object parmValue = cstmt.getObject(def.getIndex());
 					if (parmValue instanceof ResultSet)
@@ -250,8 +280,8 @@ public class WbCall
 	public void done()
 	{
 		super.done();
-		if (this.refCursorIndex != null) this.refCursorIndex.clear();
-		this.refCursorIndex = null;
+		if (this.refCursor != null) this.refCursor.clear();
+		this.refCursor = null;
 		this.inputParameters.clear();
 	}
 
@@ -271,13 +301,16 @@ public class WbCall
 				int type = parmData.getParameterType(i + 1);
 
 				ParameterDefinition def = new ParameterDefinition(i + 1, type);
-				inputParameters.add(def);
 
 				if (mode == ParameterMetaData.parameterModeOut ||
 						mode == ParameterMetaData.parameterModeInOut)
 				{
 					cstmt.registerOutParameter(i + 1, type);
 					parameterNames.add(def);
+				}
+				else
+				{
+					inputParameters.add(def);
 				}
 			}
 		}
@@ -347,6 +380,10 @@ public class WbCall
 		name.setPreserveQuotes(true);
 
 		String schemaToUse = StringUtil.trimQuotes(meta.adjustSchemaNameCase(name.getSchema(), true));
+		if (schemaToUse == null)
+		{
+			schemaToUse = meta.getCurrentSchema();
+		}
 		String nameToUse = StringUtil.trimQuotes(meta.adjustObjectnameCase(name.getObjectName()));
 
 		DataStore params = meta.getProcedureReader().getProcedureColumns(null, schemaToUse, nameToUse);
@@ -379,8 +416,14 @@ public class WbCall
 				ParameterDefinition def = new ParameterDefinition(realParamIndex, dataType);
 				def.setParameterName(paramName);
 
-				// pure out parameters do not need to be added to the input parameters
-				if (resultType.startsWith("IN"))
+				boolean needsInput = resultType.equals("IN");
+				if (resultType.equals("INOUT"))
+				{
+					needsInput = !isRefCursor(typeName);
+				}
+
+				// Only real input parameters need to be added to the dialog
+				if (needsInput)
 				{
 					if (sqlParams != null)
 					{
@@ -408,13 +451,13 @@ public class WbCall
 						// these parameters should not be added to the regular parameter list
 						// as they have to be retrieved in a different manner.
 						// type == -10 is Oracles CURSOR Datatype
-						int newType = currentConnection.getDbSettings().getRefCursorDataType();
-						if (newType != Integer.MIN_VALUE) dataType = newType;
-						if (refCursorIndex == null)
+						int dbmsTypeOverride = currentConnection.getDbSettings().getRefCursorDataType();
+						if (dbmsTypeOverride != Integer.MIN_VALUE) dataType = dbmsTypeOverride;
+						if (refCursor == null)
 						{
-							refCursorIndex = CollectionUtil.arrayList();
+							refCursor = new HashMap<Integer, ParameterDefinition>();
 						}
-						refCursorIndex.add(Integer.valueOf(realParamIndex));
+						refCursor.put(Integer.valueOf(realParamIndex), def);
 					}
 					else
 					{
@@ -431,8 +474,8 @@ public class WbCall
 
 	private boolean isRefCursor(String type)
 	{
-		String dbType = currentConnection.getDbSettings().getRefCursorTypeName();
-		return StringUtil.equalString(type, dbType);
+		List<String> refTypes = currentConnection.getDbSettings().getRefCursorTypeNames();
+		return refTypes.contains(type);
 	}
 
 	private boolean returnsRefCursor(DataStore params)

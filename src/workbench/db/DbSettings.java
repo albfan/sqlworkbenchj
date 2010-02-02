@@ -130,7 +130,7 @@ public class DbSettings
 	{
 		return !Settings.getInstance().getServersWithNoNullKeywords().contains(dbId);
 	}
-	
+
 	public boolean useGetStringForClobs()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", false);
@@ -255,7 +255,7 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "catalog.dml", true);
 	}
-	
+
 	public boolean needsCatalogIfNoCurrent()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "catalog.neededwhenempty", false);
@@ -266,9 +266,9 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "import.insert", null);
 	}
 
-	public String getRefCursorTypeName()
+	public List<String> getRefCursorTypeNames()
 	{
-		return Settings.getInstance().getProperty(prefix + "refcursor.typename", null);
+		return Settings.getInstance().getListProperty(prefix + "refcursor.typename", false, null);
 	}
 
 	public int getRefCursorDataType()
@@ -285,7 +285,7 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "create.index", Settings.getInstance().getProperty("workbench.db.sql.create.index", null));
 	}
-	
+
 	/**
 	 * Return the complete DDL to drop the given type of DB-Object.
 	 * <br/>
@@ -297,7 +297,7 @@ public class DbSettings
 	 * placeholder. If that placeholder is not present in the SQL template,
 	 * passing true as includeCascade will not have an effect.
 	 * <br/>
-	 * 
+	 *
 	 * @param type the database object type to drop (TABLE, VIEW etc)
 	 * @return the DDL Statement to drop an object of that type. The placeholder %name% must
 	 * be replaced with the correct object name
@@ -316,7 +316,7 @@ public class DbSettings
 				ddl += " " + cascade;
 			}
 		}
-		else 
+		else
 		{
 			if (includeCascade)
 			{
@@ -935,9 +935,9 @@ public class DbSettings
 	}
 
 	/**
-	 * Returns the ALTER ... template to rename the given object type 
+	 * Returns the ALTER ... template to rename the given object type
 	 * (e.g. TABLE, VIEW)
-	 * 
+	 *
 	 * @param type
 	 * @return null if no template was configured for this dbms
 	 */
@@ -969,7 +969,7 @@ public class DbSettings
 
 	/**
 	 * Returns the SQL to add a primary key to an object
-	 * 
+	 *
 	 * @param type the type of the object. e.g. table, materialized view
 	 */
 	public String getAddPK(String type)

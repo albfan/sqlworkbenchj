@@ -17,6 +17,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -25,9 +26,8 @@ import workbench.util.SqlUtil;
  */
 public class StatementParameters
 {
-	private int parameterCount;
-	private ParameterDefinition[] parameter;
-	
+	private List<ParameterDefinition> parameterList;
+
 	public StatementParameters(String sql, WbConnection conn)
 		throws SQLException
 	{
@@ -36,16 +36,16 @@ public class StatementParameters
 		{
 			pstmt = conn.getSqlConnection().prepareStatement(sql);
 			ParameterMetaData meta = pstmt.getParameterMetaData();
-			this.parameterCount = meta.getParameterCount();
-			if (this.parameterCount > 0)
+			int parameterCount = meta.getParameterCount();
+			if (parameterCount > 0)
 			{
-				this.parameter = new ParameterDefinition[this.parameterCount];
-				
-				for (int i=1; i <= this.parameterCount; i++)
+				parameterList = CollectionUtil.sizedArrayList(parameterCount);
+
+				for (int i=1; i <= parameterCount; i++)
 				{
 					int type = meta.getParameterType(i);
 					ParameterDefinition def = new ParameterDefinition(i, type);
-					this.parameter[i-1] = def;
+					parameterList.add(def);
 				}
 			}
 		}
@@ -63,48 +63,53 @@ public class StatementParameters
 
 	public StatementParameters(List<ParameterDefinition> params)
 	{
-		this.parameterCount = params.size();
-		this.parameter = new ParameterDefinition[parameterCount];
-		for (int i=0; i < params.size(); i++)
-		{
-			parameter[i] = params.get(i);
-		}
+		parameterList = CollectionUtil.sizedArrayList(params.size());
+		parameterList.addAll(params);
 	}
-	
+
+	public String getParameterName(int index)
+	{
+		return this.parameterList.get(index).getParameterName();
+	}
+
 	public int getParameterType(int index)
 	{
-		return this.parameter[index].getType();
+		return this.parameterList.get(index).getType();
 	}
-	
+
 	public Object getParameterValue(int index)
 	{
-		return this.parameter[index].getValue();
+		return this.parameterList.get(index).getValue();
 	}
-	
+
 	public void applyParameter(PreparedStatement pstmt)
 		throws SQLException
 	{
-		for (int i=0; i < this.parameterCount; i++)
+		for (ParameterDefinition param : parameterList)
 		{
-			this.parameter[i].setStatementValue(pstmt);
+			param.setStatementValue(pstmt);
 		}
 	}
-	
+
 	public boolean isValueValid(int index, String value)
 	{
-		return this.parameter[index].isValueValid(value);
+		return this.parameterList.get(index).isValueValid(value);
 	}
-	
+
 	public void setParameterValue(int index, String value)
 	{
-		this.parameter[index].setValue(value);
+		this.parameterList.get(index).setValue(value);
 	}
-	
-	public int getParameterCount() { return this.parameterCount; }
-	
+
+	public int getParameterCount()
+	{
+		if (parameterList == null) return 0;
+		return parameterList.size();
+	}
+
 	public boolean hasParameter()
 	{
-		return this.parameterCount > 0;
+		return getParameterCount() > 0;
 	}
 }
 

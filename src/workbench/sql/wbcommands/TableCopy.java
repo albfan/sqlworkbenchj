@@ -160,10 +160,9 @@ public class TableCopy
 
 		List<String> l = StringUtil.stringToList(cols, ",", true, true, false, true);
 		int count = l.size();
-		List<ColumnIdentifier> result = CollectionUtil.arrayList();
-		for (int i=0; i < count; i++)
+		List<ColumnIdentifier> result = CollectionUtil.sizedArrayList(count);
+		for (String c : l)
 		{
-			String c = l.get(i);
 			if (c.indexOf("/") > -1)
 			{
 				copier.addError(ResourceMgr.getString("MsgCopyErrIllegalMapping"));

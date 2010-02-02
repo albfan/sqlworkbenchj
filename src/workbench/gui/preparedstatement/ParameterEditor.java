@@ -51,11 +51,11 @@ public class ParameterEditor
 	private StatementParameters parameters;
 	private StatementParameterTableModel model;
 
-	public ParameterEditor(StatementParameters parms)
+	public ParameterEditor(StatementParameters parms, boolean showNames)
 	{
 		super();
 		this.parameters = parms;
-		this.model = new StatementParameterTableModel(this.parameters);
+		this.model = new StatementParameterTableModel(this.parameters, showNames);
 		this.parameterTable = new WbTable();
 		this.parameterTable.setRowSelectionAllowed(false);
 		this.parameterTable.setColumnSelectionAllowed(false);
@@ -95,8 +95,9 @@ public class ParameterEditor
 
 	public void componentDisplayed()
 	{
-		this.parameterTable.setColumnSelectionInterval(2,2);
-		this.parameterTable.editCellAt(0, 2);
+		int count = parameterTable.getColumnCount();
+		this.parameterTable.setColumnSelectionInterval(count - 1, count - 1);
+		this.parameterTable.editCellAt(0, count - 1);
 		TableCellEditor editor = this.parameterTable.getCellEditor();
 		if (editor instanceof WbTextCellEditor)
 		{
@@ -126,19 +127,18 @@ public class ParameterEditor
 
 	private static boolean dialogResult = false;
 
-	public static synchronized boolean showParameterDialog(final StatementParameters parms)
+	public static synchronized boolean showParameterDialog(final StatementParameters parms, final boolean showNames)
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
 			{
-				ParameterEditor editor = new ParameterEditor(parms);
+				ParameterEditor editor = new ParameterEditor(parms, showNames);
 				Dimension d = new Dimension(300,250);
 				editor.setMinimumSize(d);
 				editor.setPreferredSize(d);
 
 				dialogResult = false;
-				//boolean ok = ValidatingDialog.showConfirmDialog(WbManager.getInstance().getCurrentWindow(), editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
 				Frame parent = WbManager.getInstance().getCurrentWindow();
 				boolean ok = ValidatingDialog.showConfirmDialog(parent, editor, ResourceMgr.getString("TxtEditPSParameterWindowTitle"));
 				if (ok)

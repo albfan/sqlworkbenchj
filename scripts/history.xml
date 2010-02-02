@@ -6,6 +6,14 @@
 
   <entry dev-build="5" type="enh">
     <description>
+      When running stored procedures with parameters, the name of the parameters are now shown parameter input dialog if available.
+      If running stored procedures with out parameters, the result tabs will be named after the parameters now (if the parameter names
+      are available)
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="enh">
+    <description>
       The minimum version for POI (XLS export) has been raised to 3.5 in order to support Microsoft's new OfficeOpen XML Format.
       Therefor the naming of export types has been changed: xls still writes the old (Pre 2003) binary format, xlsx now writes the 
       new OOXML format (Office 2007) and the (new) type xlsm writes the Office 2003 XML format (xlsm is equivalent to the 
@@ -122,6 +130,12 @@
     <description>
       A message box can now be displayed when all running scripts have been finished. If the application
       is minimized, displaying the message box will also restore the application's main window.
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
+      Stored procedures that used a REF CURSOR as an INOUT parameter could not be executed using WbCall
     </description>
   </entry>
 

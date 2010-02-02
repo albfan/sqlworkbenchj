@@ -23,7 +23,7 @@ import workbench.util.ValueConverter;
 
 /**
  * The defintion for a single parameter in StatementParameters
- * 
+ *
  * @see StatementParameters
  * @author  Thomas Kellerer
  */
@@ -36,16 +36,23 @@ public class ParameterDefinition
 
 	private boolean valueValid = false;
 	private Object value = null;
-	
+
 	public ParameterDefinition(int index, int type)
 	{
 		this.parameterIndex = index;
 		this.dataType = type;
 	}
-	
-	public int getIndex() { return this.parameterIndex; }
-	public int getType() { return this.dataType; }
-	
+
+	public int getIndex()
+	{
+		return this.parameterIndex;
+	}
+
+	public int getType()
+	{
+		return this.dataType;
+	}
+
 	public boolean isValueValid(String v)
 	{
 		try
@@ -84,16 +91,16 @@ public class ParameterDefinition
 		}
 		return this.valueValid;
 	}
-	
-	public Object getValue() 
-	{ 
-		return this.value; 
+
+	public Object getValue()
+	{
+		return this.value;
 	}
-	
+
 	public void setStatementValue(PreparedStatement stmt)
 		throws IllegalStateException, SQLException
 	{
-		if (!this.valueValid) throw new IllegalStateException("No valid value defined for parameter " + this.parameterIndex);
+		if (!this.valueValid) throw new IllegalStateException("No valid value defined for parameter #" + this.parameterIndex);
 		stmt.setObject(this.parameterIndex, this.value);
 	}
 

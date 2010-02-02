@@ -64,3 +64,4 @@ TxtWindowTitleDataPumper
 TxtWindowTitleGeneratedScript
 TxtXlsName
 LblSettingsWorkspace
+TxtPSParameterName

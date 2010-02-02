@@ -2450,7 +2450,7 @@ public class SqlPanel
 				{
 					StatementParameters parms = pool.getParameters(sql);
 					iconHandler.showBusyIcon(false);
-					goOn = ParameterEditor.showParameterDialog(parms);
+					goOn = ParameterEditor.showParameterDialog(parms, false);
 					iconHandler.showBusyIcon(true);
 				}
 			}

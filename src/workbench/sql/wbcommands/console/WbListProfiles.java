@@ -57,7 +57,7 @@ public class WbListProfiles
 		List<ConnectionProfile> prof = CollectionUtil.arrayList();
 
 		// getProfiles() returns an unmodifiable List, but ProfileGroupMap
-		// tries to sort the list...
+		// will sort the list which is not possible with an unmodifieable List
 		prof.addAll(ConnectionMgr.getInstance().getProfiles());
 		ProfileGroupMap map = new ProfileGroupMap(prof);
 
