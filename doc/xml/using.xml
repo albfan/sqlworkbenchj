@@ -1285,102 +1285,13 @@ WHERE base_id = 1;</programlisting>
     <para>
       To run the stored procedure <literal>sp_who2</literal> and to display it's results.
     </para>
-    <simplesect>
-      <title>Stored procedures with OUT parameters</title>
-      <para>
-        If your procedure has out parameters, you have to use the <literal>WbCall</literal>
-        command because that implements the necessary steps to retrieve the results for
-        OUT parameters (including REF CURSORS).
-      </para>
-      <para>
-        Consider the following procedure:
-      </para>
-      <programlisting>CREATE OR REPLACE procedure return_answer(answer OUT integer)
-is
-begin
-  answer := 42;
-end;
-/</programlisting>
-      <para>
-        To call this procedure you need to supply a placeholder indicating that
-        a parameter is needed.
-      </para>
-      <screen>SQL> WbCall return_answer(?);
-PARAMETER | VALUE
-----------+------
-ANSWER    | 42
-
-(1 Row)
-Converted procedure call to JDBC syntax: {call return_answer(?)}
-Execution time: 0.453s
-SQL></screen>
-
-    </simplesect>
-
-    <simplesect>
-      <title>Stored procedures with REF CURSORS</title>
-      <para>
-        If the stored procedure has a REF CURSOR (as an output parameter), <literal>WbCall</literal>
-        will detect this, and retrieve the result of the ref cursors.
-      </para>
-      <para>
-        Consider the following (Oracle) stored procedure:
-      </para>
-<programlisting>CREATE PROCEDURE ref_cursor_example(pid number, person_result out sys_refcursor, addr_result out sys_refcursor) is
-BEGIN
-    OPEN person_result FOR
-      SELECT *
-      FROM person
-      WHERE person_id = pid;
-
-    OPEN addr_result FOR
-      SELECT a.*
-      FROM address a JOIN person p ON a.address_id = p.address_id
-      WHERE p.person_id = pid;
-END;
-/</programlisting>
-      <para>
-        To call this procedure you use the same syntax as with a regular OUT parameter:
-       </para>
-       <programlisting>WbCall ref_cursor_example(42, ?, ?);</programlisting>
-       <para>
-        &wb-productname; will display two result tabs, one for each cursor returned by the procedure. If you use
-        <literal>WbCall ref_cursor_example(?, ?, ?)</literal> you will be prompted to enter a
-        value for the first parameter (as that is an IN parameter).
-      </para>
-      <para>
-        When using ref cursors in PostgreSQL, normally such a function can simply be used inside a SELECT
-        statement, e.g. <literal>SELECT * FROM refcursorfunc();</literal>. Unfortunately the Postgres JDBC driver
-        does not handle this correctly and you will not see the result set returned
-        by the function.
-      </para>
-
-      <para>
-        To display the result set returned by such a function, you have to use <literal>WbCall</literal> as well
-      </para>
-      <programlisting>CREATE OR REPLACE FUNCTION refcursorfunc()
-  RETURNS refcursor
-AS
-$$
-DECLARE
-    mycurs refcursor;
- BEGIN
-    OPEN mycurs FOR SELECT * FROM PERSON;
-    RETURN mycurs;
- END;
-$$ LANGUAGE plpgsql;
-/</programlisting>
-      <para>
-        You can call this function using
-      </para>
-      <programlisting>WbCall refcursorfunc();</programlisting>
-     <para>
-       This will then display the result from the SELECT inside the function.
-      </para>
-    </simplesect>
-
+    <para>
+      For more details on running a stored procedure with <literal>OUT</literal> parameters or <literal>REF CURSORS</literal>
+      please refer to the description of the <link linkend="command-wbcall">WbCall</link> command.
+    </para>
+    
   </section>
-
+  
   &export-import;
 
 </section>
