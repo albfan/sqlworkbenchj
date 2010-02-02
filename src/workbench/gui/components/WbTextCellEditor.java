@@ -97,7 +97,7 @@ public class WbTextCellEditor
 	{
 		Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
 		textField.selectAll();
-		setEditable(!parentTable.isReadOnly());
+		setEditable(!(parentTable != null && parentTable.isReadOnly()));
 		this.changed = false;
 		return result;
 	}
