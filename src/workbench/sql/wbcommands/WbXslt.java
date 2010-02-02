@@ -116,12 +116,14 @@ public class WbXslt
 			if (msg.length() != 0)
 			{
 				result.addMessage(msg);
+				result.addMessage(""); // create newline
 			}
 
 			WbFile xsltUsed = new WbFile(transformer.getXsltUsed());
 			WbFile userXslt = new WbFile(xsltFile);
 			if (xsltUsed != null && !userXslt.equals(xsltUsed))
 			{
+				// If the xslt file has been "automatically" found, inform the user about this
 				result.addMessage(ResourceMgr.getFormattedString("MsgXsltUsed", xsltUsed.getFullPath()));
 			}
 			result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", outputFile));

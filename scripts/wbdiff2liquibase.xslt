@@ -61,18 +61,28 @@
         
         <xsl:for-each select="drop-table/table-name">
           <xsl:variable name="table-name" select="."/>
-          <dropTable tableName="{$table-name}"/>
+          <dropTable schemaName="{$schema-owner}" tableName="{$table-name}"/>
+        </xsl:for-each>
+
+        <xsl:for-each select="create-sequence/sequence-def">
+           <xsl:variable name="seq-name" select="@name"/>
+           <createSequence schemaName="{$schema-owner}" sequenceName="{$seq-name}"/>
+        </xsl:for-each>
+        
+        <xsl:for-each select="drop-sequence">
+           <xsl:variable name="seq-name" select="@name"/>
+           <dropSequence schemaName="{$schema-owner}" sequenceName="{$seq-name}"/>
         </xsl:for-each>
 
       </changeSet>
 
   </databaseChangeLog>
 
-  <xsl:message>
-    ***************************************************
-    *** Please don't forget to adjust changeset id! ***
-    ***************************************************
-  </xsl:message> 
+<xsl:message>
+***************************************************
+*** Please don't forget to adjust changeset id! ***
+***************************************************
+</xsl:message> 
   
 </xsl:template>
   

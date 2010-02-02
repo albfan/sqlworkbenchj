@@ -66,10 +66,21 @@
                                referencedColumnNames="{$fk-columns}"/>
         
     </xsl:for-each>  <!-- foreign keys -->
-    
+
+    <xsl:for-each select="sequence-def">
+	   <xsl:variable name="seq-name" select="@name"/>
+	   <createSequence schemaName="{$schema-owner}" sequenceName="{$seq-name}"/>
+	</xsl:for-each>
+	
   </changeSet>
   
   </databaseChangeLog>
+
+<xsl:message>
+**************************************************
+*** You might want to adjust the changeset id! ***
+**************************************************
+</xsl:message> 
 
 </xsl:template>
 
