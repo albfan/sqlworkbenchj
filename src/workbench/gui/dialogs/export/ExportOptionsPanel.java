@@ -58,6 +58,7 @@ public class ExportOptionsPanel
 	private XmlOptionsPanel xmlOptions;
 	private SpreadSheetOptionsPanel odsOptions;
 	private SpreadSheetOptionsPanel xlsOptions;
+	private SpreadSheetOptionsPanel xlsmOptions;
 	private SpreadSheetOptionsPanel xlsxOptions;
 	private ExportType currentType;
 	private List<ColumnIdentifier> selectedColumns;
@@ -67,10 +68,12 @@ public class ExportOptionsPanel
 	private String query;
 	private WbConnection dbConnection;
 	private boolean poiAvailable = false;
+	private boolean xlsxAvailable = false;
 	
 	private final String ODS_ITEM = ResourceMgr.getString("TxtOdsName");
 	private final String XLS_ITEM = ResourceMgr.getString("TxtXlsName");
-	private final String XLSX_ITEM = "XLS (XML)";
+	private final String XLSX_ITEM = "XLSM";
+	private final String XLSM_ITEM = "XLSX (OOXML)";
 	
 	public ExportOptionsPanel()
 	{
@@ -99,6 +102,7 @@ public class ExportOptionsPanel
 		s.setBorder(b);
 		
 		poiAvailable = PoiHelper.isPoiAvailable();
+		xlsxAvailable = PoiHelper.isXLSXAvailable();
 		
 		typeSelector = new JComboBox();
 		typeSelector.addItem("Text");
@@ -106,10 +110,15 @@ public class ExportOptionsPanel
 		typeSelector.addItem("XML");
 		typeSelector.addItem(ODS_ITEM);
 		typeSelector.addItem("HTML");
-		typeSelector.addItem(XLSX_ITEM);
+		typeSelector.addItem(XLSM_ITEM);
 		if (poiAvailable)
 		{
 			typeSelector.addItem(XLS_ITEM);
+		}
+		
+		if (xlsxAvailable)
+		{
+			typeSelector.addItem(XLSX_ITEM);
 		}
 		
 		JLabel type = new JLabel(ResourceMgr.getString("LblExportType"));
@@ -137,13 +146,19 @@ public class ExportOptionsPanel
 		htmlOptions = new HtmlOptionsPanel();
 		this.typePanel.add(htmlOptions, "html"); 
 		
-		xlsxOptions = new SpreadSheetOptionsPanel("xlsx");
-		this.typePanel.add(xlsxOptions, "xlsx"); 
+		xlsmOptions = new SpreadSheetOptionsPanel("xlsm");
+		this.typePanel.add(xlsmOptions, "xlsm");
 		
 		if (poiAvailable)
 		{
 			xlsOptions = new SpreadSheetOptionsPanel("xls");
 			this.typePanel.add(xlsOptions, "xls");
+		}
+
+		if (xlsxAvailable)
+		{
+			xlsxOptions = new SpreadSheetOptionsPanel("xlsx");
+			typePanel.add(xlsxOptions);
 		}
 		
 		this.add(typePanel, BorderLayout.CENTER);
@@ -195,10 +210,14 @@ public class ExportOptionsPanel
 		this.htmlOptions.saveSettings();
 		this.xmlOptions.saveSettings();
 		this.odsOptions.saveSettings();
-		this.xlsxOptions.saveSettings();
+		this.xlsmOptions.saveSettings();
 		if (this.xlsOptions != null)
 		{
 			this.xlsOptions.saveSettings();
+		}
+		if (this.xlsxOptions != null)
+		{
+			this.xlsxOptions.saveSettings();
 		}
 		Settings.getInstance().setProperty("workbench.export.type", this.currentType.getCode());
 	}
@@ -211,10 +230,14 @@ public class ExportOptionsPanel
 		this.htmlOptions.restoreSettings();
 		this.xmlOptions.restoreSettings();
 		this.odsOptions.restoreSettings();
-		this.xlsxOptions.restoreSettings();
+		this.xlsmOptions.restoreSettings();
 		if (this.xlsOptions != null)
 		{
 			this.xlsOptions.restoreSettings();
+		}
+		if (this.xlsxOptions != null)
+		{
+			this.xlsxOptions.restoreSettings();
 		}
 		String code = Settings.getInstance().getProperty("workbench.export.type", ExportType.TEXT.getCode());
 		ExportType type = ExportType.getTypeFromCode(code);
@@ -251,8 +274,11 @@ public class ExportOptionsPanel
 			case ODS:
 				setTypeOds();
 				break;
+			case XLSM:
+				setTypeXlsM();
+				break;
 			case XLSX:
-				setTypeXlsX();
+				if (xlsxAvailable) setTypeXlsX();
 				break;
 			case XLS:
 				if (poiAvailable) setTypeXls();
@@ -334,6 +360,11 @@ public class ExportOptionsPanel
 	{
 		this.card.show(this.typePanel, "xlsx");
 	}
+
+	private void showXlsMOptions()
+	{
+		this.card.show(this.typePanel, "xlsm");
+	}
 	
 	public void setTypeXls()
 	{
@@ -348,6 +379,18 @@ public class ExportOptionsPanel
 		this.currentType = ExportType.XLSX;
 		typeSelector.setSelectedItem(XLSX_ITEM);
 	}
+
+	public void setTypeXlsM()
+	{
+		showXlsMOptions();
+		this.currentType = ExportType.XLSM;
+		typeSelector.setSelectedItem(XLSM_ITEM);
+	}
+
+	public SpreadSheetOptions getXlsMOptions()
+	{
+		return xlsOptions;
+	}
 	
 	public SpreadSheetOptions getXlsOptions()
 	{
@@ -356,7 +399,7 @@ public class ExportOptionsPanel
 
 	public SpreadSheetOptions getXlsXOptions()
 	{
-		return xlsxOptions;
+		return xlsmOptions;
 	}
 	
 	public SpreadSheetOptions getOdsOptions()

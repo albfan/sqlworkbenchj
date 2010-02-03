@@ -55,6 +55,43 @@ public class SpreadSheetOptionsPanel
 		this.setExportHeaders(header);
 	}
 
+	@Override
+	public boolean getCreateInfoSheet()
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public void setCreateInfoSheet(boolean flag)
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public boolean getCreateFixedHeaders()
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public void setCreateFixedHeaders(boolean flag)
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public boolean getCreateAutoFilter()
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	@Override
+	public void setCreateAutoFilter(boolean flag)
+	{
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+
 	public boolean getExportHeaders()
 	{
 		return exportHeaders.isSelected();

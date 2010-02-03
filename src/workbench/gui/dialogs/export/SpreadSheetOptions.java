@@ -21,5 +21,10 @@ public interface SpreadSheetOptions
 	void setPageTitle(String title);
 	boolean getExportHeaders();
 	void setExportHeaders(boolean flag);
-	
+	boolean getCreateInfoSheet();
+	void setCreateInfoSheet(boolean flag);
+	boolean getCreateFixedHeaders();
+	void setCreateFixedHeaders(boolean flag);
+	boolean getCreateAutoFilter();
+	void setCreateAutoFilter(boolean flag);
 }
