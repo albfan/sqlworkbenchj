@@ -160,8 +160,19 @@ public class WbExport
 		msg = msg.replace("%xmlversion%", Settings.getInstance().getDefaultXmlVersion());
 		msg = msg.replace("%empty_results_default%", Boolean.toString(Settings.getInstance().getDefaultWriteEmptyExports()));
 		msg = msg.replace("%use_schema_default%", Boolean.toString(Settings.getInstance().getIncludeOwnerInSqlExport()));
+
+		String info = "ods="  + Boolean.toString(getInfoSheetDefault("ods"));
+		info += ", xls="  + Boolean.toString(getInfoSheetDefault("xls"));
+		info += ", xlsx="  + Boolean.toString(getInfoSheetDefault("xlsx"));
+		info += ", xlsm="  + Boolean.toString(getInfoSheetDefault("xlsm"));
+		msg = msg.replace("%infosheet_defaults%", info);
 		msg = msg.replace("%types%", exportTypes);
 		return msg;
+	}
+
+	private boolean getInfoSheetDefault(String type)
+	{
+		return Settings.getInstance().getDefaultExportInfoSheet(type);
 	}
 
 	private boolean getVerboseXmlDefault()
@@ -304,7 +315,7 @@ public class WbExport
 
 		exporter.setEnableAutoFilter(cmdLine.getBoolean("autoFilter", true));
 		exporter.setEnableFixedHeader(cmdLine.getBoolean("fixedHeader", true));
-		exporter.setAppendInfoSheet(cmdLine.getBoolean("infoSheet", false));
+		exporter.setAppendInfoSheet(cmdLine.getBoolean("infoSheet", Settings.getInstance().getDefaultExportInfoSheet(type)));
 		exporter.setPageTitle(cmdLine.getValue("title"));
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
 

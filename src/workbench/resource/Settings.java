@@ -1124,6 +1124,12 @@ public class Settings
 		return getProperty("workbench.export.sql.default.dateliterals", "dbms");
 	}
 
+	public boolean getDefaultExportInfoSheet(String type)
+	{
+		if (type == null) return false;
+		return getBoolProperty("workbench.export." + type.trim().toLowerCase() + ".default.infosheet", false);
+	}
+
 	public String getDefaultDiffDateLiteralType()
 	{
 		return getProperty("workbench.diff.sql.default.dateliterals", "jdbc");

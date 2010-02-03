@@ -1019,7 +1019,8 @@
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
               <para>
-                If set to true, a second worksheet will be created that contains the generating SQL of the export
+                If set to true, a second worksheet will be created that contains the generating SQL of the export.
+								For ods exports, additional export information is available in the document properties.
               </para>
               <para>Default value: <literal>false</literal></para>
             </entry>
