@@ -72,8 +72,8 @@ public class ExportOptionsPanel
 	
 	private final String ODS_ITEM = ResourceMgr.getString("TxtOdsName");
 	private final String XLS_ITEM = ResourceMgr.getString("TxtXlsName");
-	private final String XLSX_ITEM = "XLSM";
-	private final String XLSM_ITEM = "XLSX (OOXML)";
+	private final String XLSM_ITEM = "Excel 2003 (xlsm)";
+	private final String XLSX_ITEM = "Excel 2007 (xlsx)";
 	
 	public ExportOptionsPanel()
 	{
@@ -110,12 +110,11 @@ public class ExportOptionsPanel
 		typeSelector.addItem("XML");
 		typeSelector.addItem(ODS_ITEM);
 		typeSelector.addItem("HTML");
-		typeSelector.addItem(XLSM_ITEM);
 		if (poiAvailable)
 		{
 			typeSelector.addItem(XLS_ITEM);
 		}
-		
+		typeSelector.addItem(XLSM_ITEM);
 		if (xlsxAvailable)
 		{
 			typeSelector.addItem(XLSX_ITEM);
@@ -158,7 +157,7 @@ public class ExportOptionsPanel
 		if (xlsxAvailable)
 		{
 			xlsxOptions = new SpreadSheetOptionsPanel("xlsx");
-			typePanel.add(xlsxOptions);
+			typePanel.add(xlsxOptions, "xlsx");
 		}
 		
 		this.add(typePanel, BorderLayout.CENTER);
@@ -472,7 +471,7 @@ public class ExportOptionsPanel
 				type = ExportType.ODS;
 				showOdsOptions();
 			}
-			else if (item == XLSX_ITEM)
+			else if (item == XLSX_ITEM && xlsxAvailable)
 			{
 				type = ExportType.XLSX;
 				showXlsXOptions();
@@ -481,6 +480,11 @@ public class ExportOptionsPanel
 			{
 				type = ExportType.XLS;
 				showXlsOptions();
+			}
+			else if (item == XLSM_ITEM)
+			{
+				type = ExportType.XLSM;
+				showXlsMOptions();
 			}
 			else if ("html".equalsIgnoreCase(itemValue))
 			{

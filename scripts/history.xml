@@ -26,7 +26,7 @@
     <description>
       Two new options for spreadsheet export have been added. An option to turn on the auto-filter for ODS and Excel XML
       exports (-autoFilter). An option -fixedHeader to freeze header row which is available for all three formats. Both options
-      are turned on by default. 
+      are turned on by default.
     </description>
   </entry>
 
@@ -130,6 +130,12 @@
     <description>
       A message box can now be displayed when all running scripts have been finished. If the application
       is minimized, displaying the message box will also restore the application's main window.
+    </description>
+  </entry>
+
+  <entry dev-build="5" type="fix">
+    <description>
+      When using "Save Data As" to export a result set, the settings for an Excel export where not saved
     </description>
   </entry>
 

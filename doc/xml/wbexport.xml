@@ -88,11 +88,11 @@
 
     <para>
       &wb-productname; supports three different file versions for Excel:
-        <simplelist columns="1">
-          <member>Office 2003 (xlsm) - this is a plain XML format that does not need additional libraries</member>
-          <member>The "old" binary format (xls) - only poi.jar is needed (see below)</member>
-          <member>Office 2007 (xlsx) - additional libraries from the POI project are needed</member>
-        </simplelist>
+        <itemizedlist>
+          <listitem>Office 2003 (xlsm) - this is a plain XML format that does not need additional libraries</listitem>
+          <listitem>The "old" binary format (xls) - only poi.jar is needed (see below)</listitem>
+          <listitem>Office 2007 (xlsx) - additional libraries from the POI project are needed</listitem>
+        </itemizedlist>
     </para>
 
     <section id="export-office-2003">
@@ -118,9 +118,6 @@
         The POI library needs to be copied into the same directory as <literal>sqlworkbench.jar</literal> under
         the name <emphasis role="bold"><literal>poi.jar</literal></emphasis> (note the changed filename).
       </para>
-      <para>
-        <literal>poi.jar</literal> is also needed for the Office 2007 format.
-      </para>
     </section>
 
     <section id="export-excel-2007">
@@ -131,15 +128,16 @@
         libraries from the POI 3.5 distribution (apart from poi.jar).
       </para>
       <para>
-        The following files need to be copied (using the exact filenames) into the directory
+        The following files need to be copied (using the filenames exactly as shown below) into the directory
         where <literal>sqlworkbench.jar</literal> is located:
-          <simplelist columns="1">
-            <member><literal>poi-ooxml.jar</literal> (this file originally includes version information in the distribution archive)</member>
-            <member><literal>dom4j-1.6.1.jar</literal></member>
-            <member><literal>geronimo-stax-api_1.0_spec-1.0.jar</literal></member>
-            <member><literal>ooxml-schemas-1.0.jar</literal></member>
-            <member><literal>xmlbeans-2.3.0.jar</literal></member>
-          </simplelist>
+          <itemizedlist>
+            <listitem><literal>poi.jar</literal> (same as above)</listitem>
+            <listitem><literal>poi-ooxml.jar</literal> (this file originally includes version information in the distribution archive and needs to be renamed)</listitem>
+            <listitem><literal>dom4j-1.6.1.jar</literal></listitem>
+            <listitem><literal>geronimo-stax-api_1.0_spec-1.0.jar</literal></listitem>
+            <listitem><literal>ooxml-schemas-1.0.jar</literal></listitem>
+            <listitem><literal>xmlbeans-2.3.0.jar</literal></listitem>
+          </itemizedlist>
       </para>
 
       <important>

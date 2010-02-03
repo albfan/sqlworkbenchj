@@ -47,7 +47,15 @@ public class VersionNumber
 
 				if (numbers.length > 1)
 				{
-					minor = Integer.parseInt(numbers[1]);
+					if (numbers[1].indexOf('-') > -1)
+					{
+						String plain = numbers[1].substring(0, numbers[1].indexOf('-'));
+						minor = Integer.parseInt(plain);
+					}
+					else
+					{
+						minor = Integer.parseInt(numbers[1]);
+					}
 				}
 				else
 				{

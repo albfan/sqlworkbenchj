@@ -46,6 +46,7 @@ public class ExtensionFileFilter
 	public static final String HTML_EXT = "html";
 	public static final String XLS_EXT = "xls";
 	public static final String XLSX_EXT = "xlsx";
+	public static final String XLSM_EXT = "xlsm";
 	public static final String ODS_EXT = "ods";
 
 	private boolean ignoreCase = true;
@@ -208,7 +209,12 @@ public class ExtensionFileFilter
 
 	public static FileFilter getXlsXFileFilter()
 	{
-		return getFileFilter(XLSX_EXT, "TxtFileFilterXls");
+		return getFileFilter(XLSX_EXT, "TxtFileFilterXlsX");
+	}
+
+	public static FileFilter getXlsMFileFilter()
+	{
+		return getFileFilter(XLSM_EXT, "TxtFileFilterXlsM");
 	}
 
 	public static FileFilter getOdsFileFilter()

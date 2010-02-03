@@ -1285,6 +1285,15 @@ public class DataExporter
 		}
 	}
 
+	public void setXlsMOptions(SpreadSheetOptions xlsMOptions)
+	{
+		if (xlsMOptions != null)
+		{
+			setOutputType(ExportType.XLSM);
+			setSpreadsheetOptions(xlsMOptions);
+		}
+	}
+
 	public void setXlsOptions(SpreadSheetOptions xlsOptions)
 	{
 		if (xlsOptions != null)
@@ -1302,9 +1311,12 @@ public class DataExporter
 
 	public void setSpreadsheetOptions(SpreadSheetOptions odsOptions)
 	{
-		this.setPageTitle(odsOptions.getPageTitle());
-		this.setExportHeaders(odsOptions.getExportHeaders());
-		this.exportWriter.configureConverter();
+		setPageTitle(odsOptions.getPageTitle());
+		setExportHeaders(odsOptions.getExportHeaders());
+		setEnableAutoFilter(odsOptions.getCreateAutoFilter());
+		setEnableFixedHeader(odsOptions.getCreateFixedHeaders());
+		setAppendInfoSheet(odsOptions.getCreateInfoSheet());
+		exportWriter.configureConverter();
 	}
 
 	public boolean isIncludeCreateTable()

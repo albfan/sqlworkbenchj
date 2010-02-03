@@ -43,7 +43,7 @@ public class PoiHelper
 			int pos = v.indexOf('-');
 			if (pos > -1) v = v.substring(0, pos);
 			VersionNumber version = new VersionNumber(v);
-			VersionNumber needed = new VersionNumber(3, 6);
+			VersionNumber needed = new VersionNumber(3, 5);
 			available = version.isNewerOrEqual(needed);
 			if (!available)
 			{

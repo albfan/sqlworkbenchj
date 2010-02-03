@@ -182,11 +182,12 @@ public class WbCall
 					return result;
 				}
 
-				for (int i=0; i < inputParameters.size(); i++)
+				for (ParameterDefinition paramDefinition : this.inputParameters)
 				{
-					int type = inputParameters.get(i).getType();
-					Object value = inputParameters.get(i).getValue();
-					cstmt.setObject(i + 1, value, type);
+					int type = paramDefinition.getType();
+					int index = paramDefinition.getIndex();
+					Object value = paramDefinition.getValue();
+					cstmt.setObject(index, value, type);
 				}
 			}
 

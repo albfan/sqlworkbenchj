@@ -256,8 +256,9 @@ public class OdsRowDataConverter
 			if (getEnableAutoFilter())
 			{
 				String colName = columnToName(getRealColumnCount());
+				String title = "&apos;" + getPageTitle("Export") + "&apos;";
 				content.append("<table:database-ranges>\n");
-				content.append("<table:database-range table:target-range-address=\"Export.A1:Export." + colName + Long.toString(totalRows)+ "\" table:display-filter-buttons=\"true\" />\n");
+				content.append("<table:database-range table:target-range-address=\"" + title + ".A1:" + title + "." + colName + Long.toString(totalRows)+ "\" table:display-filter-buttons=\"true\" />\n");
 				content.append("</table:database-ranges>\n");
 			}
 			
