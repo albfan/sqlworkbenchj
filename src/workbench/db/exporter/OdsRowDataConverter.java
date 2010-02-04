@@ -59,7 +59,7 @@ public class OdsRowDataConverter
 			out.close();
 
 			writeMeta();
-			if (getEnableFixedHeader())
+			if (getEnableFixedHeader() && writeHeader)
 			{
 				writeSettings();
 			}
@@ -252,8 +252,7 @@ public class OdsRowDataConverter
 				content.write("</table:table>");
 			}
 
-			// Enable auto-filter for all columns
-			if (getEnableAutoFilter())
+			if (getEnableAutoFilter() && writeHeader)
 			{
 				String colName = columnToName(getRealColumnCount());
 				String title = "&apos;" + getPageTitle("Export") + "&apos;";
@@ -271,7 +270,7 @@ public class OdsRowDataConverter
 		}
 		catch (Exception e)
 		{
-		// ignore
+			LogMgr.logError("OdsRowDataConverter.getEnd()", "Error writing end of worksheet", e);
 		}
 		return null;
 	}

@@ -388,7 +388,7 @@ public class ExportOptionsPanel
 
 	public SpreadSheetOptions getXlsMOptions()
 	{
-		return xlsOptions;
+		return xlsmOptions;
 	}
 	
 	public SpreadSheetOptions getXlsOptions()
@@ -398,7 +398,7 @@ public class ExportOptionsPanel
 
 	public SpreadSheetOptions getXlsXOptions()
 	{
-		return xlsmOptions;
+		return xlsxOptions;
 	}
 	
 	public SpreadSheetOptions getOdsOptions()

@@ -118,7 +118,7 @@ public class XlsRowDataConverter
 			cell.setCellStyle(style);
 		}
 
-		if (getEnableFixedHeader())
+		if (getEnableFixedHeader() && writeHeader)
 		{
 			sheet.createFreezePane(0, 1);
 		}

@@ -335,6 +335,9 @@ public class ExportFileDialog
 			case XLSX:
 				exporter.setXlsXOptions(getXlsXOptions());
 				break;
+			case XLSM:
+				exporter.setXlsMOptions(getXlsMOptions());
+				break;
 			case XLS:
 				exporter.setXlsOptions(getXlsOptions());
 				break;
@@ -373,7 +376,7 @@ public class ExportFileDialog
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.XLSM_EXT))
 		{
-			return ExportType.XLSX;
+			return ExportType.XLSM;
 		}
 		else if (ff.hasFilter(ExtensionFileFilter.ODS_EXT))
 		{

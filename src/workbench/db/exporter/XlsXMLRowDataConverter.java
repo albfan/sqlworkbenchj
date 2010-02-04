@@ -84,7 +84,7 @@ public class XlsXMLRowDataConverter
 		StrBuffer out = new StrBuffer(250);
 		out.append("</Table>\n");
 
-		if (getEnableFixedHeader())
+		if (getEnableFixedHeader() && writeHeader)
 		{
 			out.append("<WorksheetOptions xmlns=\"urn:schemas-microsoft-com:office:excel\">\n");
 			out.append("  <Selected/>\n<FreezePanes/>\n<FrozenNoSplit/>\n");
@@ -92,7 +92,7 @@ public class XlsXMLRowDataConverter
 			out.append("</WorksheetOptions>\n");
 		}
 
-		if (getEnableAutoFilter())
+		if (getEnableAutoFilter() && writeHeader)
 		{
 			out.append("<AutoFilter x:Range=\"R1C1:R1C" + getRealColumnCount() + "\" xmlns=\"urn:schemas-microsoft-com:office:excel\"></AutoFilter>\n");
 		}

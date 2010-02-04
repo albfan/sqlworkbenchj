@@ -79,6 +79,7 @@ public class SpreadSheetOptionsPanel
 		}
 		setCreateInfoSheet(s.getBoolProperty("workbench.export." + exportType + ".infosheet", false));
 		setCreateFixedHeaders(s.getBoolProperty("workbench.export." + exportType + ".fixedheader", true));
+		checkHeaderSettings();
 	}
 
 	@Override
@@ -137,6 +138,14 @@ public class SpreadSheetOptionsPanel
 		pageTitle.setText(title);
 	}
 
+	private void checkHeaderSettings()
+	{
+		freezeHeaders.setEnabled(exportHeaders.isSelected());
+		if (isAutoFilterAvailable())
+		{
+			createAutoFilter.setEnabled(exportHeaders.isSelected());
+		}
+	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is
@@ -232,11 +241,7 @@ public class SpreadSheetOptionsPanel
 
 	private void exportHeadersActionPerformed(ActionEvent evt)//GEN-FIRST:event_exportHeadersActionPerformed
 	{//GEN-HEADEREND:event_exportHeadersActionPerformed
-		freezeHeaders.setEnabled(exportHeaders.isSelected());
-		if (isAutoFilterAvailable())
-		{
-			createAutoFilter.setEnabled(exportHeaders.isSelected());
-		}
+		checkHeaderSettings();
 	}//GEN-LAST:event_exportHeadersActionPerformed
 
 
