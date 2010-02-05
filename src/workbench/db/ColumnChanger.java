@@ -317,6 +317,14 @@ public class ColumnChanger
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition == null ? newDefinition : oldDefinition));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newRemarks.replace("'", "''"));
+		if (oldDefinition != null)
+		{
+			sql = sql.replace(PARAM_DATATYPE, oldDefinition.getDbmsType());
+		}
+		if (newDefinition != null)
+		{
+			sql = sql.replace(PARAM_NEW_DATATYPE, newDefinition.getDbmsType());
+		}
 		return sql;
 	}
 
