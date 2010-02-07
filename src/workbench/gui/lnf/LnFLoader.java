@@ -29,7 +29,7 @@ public class LnFLoader
 {
 	private LnFDefinition lnfDef;
 	private String[] liblist;
-	
+
 	public LnFLoader(LnFDefinition definition)
 		throws ClassNotFoundException, MalformedURLException, InstantiationException, IllegalAccessException
 	{
@@ -78,7 +78,7 @@ public class LnFLoader
 			return false;
 		}
 	}
-	
+
 	private ClassLoader createLoader()
 		throws MalformedURLException
 	{
@@ -93,8 +93,8 @@ public class LnFLoader
 				{
 					f = new File(WbManager.getInstance().getJarPath(), this.liblist[i]);
 				}
-				
-				url[i] = f.toURL();
+
+				url[i] = f.toURI().toURL();
 			}
 			ClassLoader loader = new URLClassLoader(url, this.getClass().getClassLoader());
 			return loader;
@@ -104,7 +104,7 @@ public class LnFLoader
 			return null;
 		}
 	}
-	
+
 	public Class loadClass()
 		throws ClassNotFoundException
 	{
@@ -145,7 +145,7 @@ public class LnFLoader
 		{
 			Class lnf = loadClass();
 			return (LookAndFeel)lnf.newInstance();
-		} 
+		}
 		catch (Exception e)
 		{
 			throw new ClassNotFoundException("Could not load class " + this.lnfDef.getClassName(),e);

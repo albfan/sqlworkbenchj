@@ -22,7 +22,7 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Action to display the code-completion for SQL statements.
- * @see workbench.gui.completion.DefaultCompletionHandler
+ * @see workbench.gui.completion.CompletionHandler
  *
  * @author  Thomas Kellerer
  */

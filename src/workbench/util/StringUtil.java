@@ -62,7 +62,7 @@ public class StringUtil
 		if (isBlank(pattern)) return null;
 		try
 		{
-			SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+			new SimpleDateFormat(pattern);
 		}
 		catch (Exception e)
 		{
@@ -319,7 +319,7 @@ public class StringUtil
 		if (input == null) return null;
 		if (input.equals("..")) return "__";
 		if (input.equals(".")) return "_";
-		return input.replaceAll("[\t\\:\\\\/\\?\\*\\|<>\"'%\u00A7\\^\\&\u0000]", "").toLowerCase();
+		return input.replaceAll("[\t:\\\\/\\?\\*\\|<>\"'%\u00A7\\^&\u0000]", "").toLowerCase();
 	}
 
 	/**
@@ -375,18 +375,6 @@ public class StringUtil
 			}
 		}
 		return limits.length + 1;
-	}
-
-	public static boolean isInteger(String value)
-	{
-		if (isEmptyString(value)) return false;
-		String s = value.trim();
-		int l = s.length();
-		for (int i=0; i < l; i++)
-		{
-			if (!Character.isDigit(s.charAt(i))) return false;
-		}
-		return true;
 	}
 
 	/**
@@ -1041,6 +1029,7 @@ public class StringUtil
 		return outBuffer.toString();
 	}
 
+	@SuppressWarnings({"UnusedDeclaration"})
 	public static void dump(String value)
 	{
 		int size = value.length();
@@ -1058,11 +1047,6 @@ public class StringUtil
 	public static String escapeUnicode(String value, CharacterRange range)
 	{
 		return escapeUnicode(value, range, null);
-	}
-
-	public static String escapePostgres(String value, CharacterRange range, String additionalCharsToEncode)
-	{
-		return escapeText(value, 'x', range, additionalCharsToEncode);
 	}
 
 	/**

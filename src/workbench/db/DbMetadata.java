@@ -507,7 +507,7 @@ public class DbMetadata
 	{
 		if (this.dbId == null)
 		{
-			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]\\/$,.'=\"]", "_").toLowerCase();
+			this.dbId = this.productName.replaceAll("[ \\(\\)\\[\\]/$,.'=\"]", "_").toLowerCase();
 
 			if (productName.startsWith("DB2"))
 			{

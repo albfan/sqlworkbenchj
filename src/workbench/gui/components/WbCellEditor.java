@@ -39,6 +39,7 @@ import workbench.resource.PlatformShortcuts;
  *
  * @author Thomas Kellerer
  */
+@SuppressWarnings({"deprecation"})
 public class WbCellEditor
 	extends AbstractCellEditor
 	implements TableCellEditor, MouseListener
@@ -157,11 +158,6 @@ public class WbCellEditor
 		return true;
 	}
 
-	public boolean isManagingFocus()
-	{
-		return false;
-	}
-
 	public void mouseClicked(MouseEvent evt)
 	{
 		if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1 && this.parentTable != null)
@@ -194,11 +190,6 @@ public class WbCellEditor
 			editor.setBackground(defaultBackground);
 		}
 		editor.getCaret().setVisible(true);
-	}
-
-	public boolean isEditable()
-	{
-		return editor.isEditable();
 	}
 
 	static class TextAreaEditor

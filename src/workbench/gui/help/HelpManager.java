@@ -162,7 +162,7 @@ public class HelpManager
 		}
 		try
 		{
-			BrowserLauncher.openURL(history.toURL().toString());
+			BrowserLauncher.openURL(history.toURI().toURL().toString());
 		}
 		catch (Exception ex)
 		{
@@ -212,7 +212,7 @@ public class HelpManager
 
 		try
 		{
-			String url = manual.toURL().toString();
+			String url = manual.toURI().toURL().toString();
 			if (Settings.getInstance().useSinglePageHelp() && topic != null)
 			{
 				url = url + "#" + topic;

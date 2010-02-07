@@ -167,10 +167,10 @@ public class ConnectionInfoPanel
 	{
 		String clean = content.replaceAll(StringUtil.REGEX_CRLF, " ");
 		clean = clean.replaceAll(" {2,}", "");
-		clean = clean.replaceAll("\\<br\\>", "\r\n");
-		clean = clean.replaceAll("\\<div[0-9 a-zA-Z;=\\-\\\":]*\\>", "");
-		clean = clean.replaceAll("\\</div\\>", "\r\n");
-		clean = clean.replaceAll("\\<[/a-z]*\\>", "").trim();
+		clean = clean.replaceAll("<br>", "\r\n");
+		clean = clean.replaceAll("<div[0-9 a-zA-Z;=\\-\":]*>", "");
+		clean = clean.replaceAll("</div>", "\r\n");
+		clean = clean.replaceAll("<[/a-z]*>", "").trim();
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(clean);
 		clp.setContents(sel, sel);

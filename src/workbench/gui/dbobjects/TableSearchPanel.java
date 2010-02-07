@@ -71,7 +71,7 @@ import workbench.util.WbWorkspace;
 
 
 /**
- * A display for the results of a {@link workbench.db.ServerSideTableSearcher}
+ * A display for the results of a {@link workbench.db.search.TableDataSearcher}
  *
  * @author Thomas Kellerer
  */

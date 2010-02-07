@@ -38,7 +38,7 @@ import java.util.List;
  *	The definition includes a (logical) name, a driver class
  *	and (optional) a library from which the driver is to
  *	be loaded.
- * 
+ *
  *	@author  Thomas Kellerer
  */
 public class DbDriver
@@ -87,20 +87,20 @@ public class DbDriver
 	{
 		isInternal = flag;
 	}
-	
-	public String getName() 
+
+	public String getName()
 	{
-		return this.name; 
+		return this.name;
 	}
-	
+
 	public void setName(String name)
 	{
 		this.name = name;
 	}
 
-	public String getDriverClass() 
+	public String getDriverClass()
 	{
-		return this.driverClass; 
+		return this.driverClass;
 	}
 
 	public void setDriverClass(String aClass)
@@ -126,12 +126,12 @@ public class DbDriver
 		}
 		return b.toString();
 	}
-	
-	public String getLibraryString() 
+
+	public String getLibraryString()
 	{
 		return createLibraryString(StringUtil.getPathSeparator());
 	}
-	
+
 	private String createLibraryString(String separator)
 	{
 		if (this.libraryList == null) return null;
@@ -141,9 +141,9 @@ public class DbDriver
 			if (i > 0) result.append(separator);
 			result.append(libraryList.get(i));
 		}
-		return result.toString(); 
+		return result.toString();
 	}
-	
+
 	public String getLibrary()
 	{
 		return createLibraryString("|");
@@ -161,7 +161,7 @@ public class DbDriver
 		}
 		return null;
 	}
-	
+
 	public void setLibrary(String libList)
 	{
 		this.libraryList = splitLibraryList(libList);
@@ -174,7 +174,7 @@ public class DbDriver
 		// When running in testmode, all necessary libraries are added through
 		// the classpath already, so there is no need to check them here.
 		if (Settings.getInstance().isTestMode()) return true;
-		
+
 		if (libraryList != null)
 		{
 			for (String lib : libraryList)
@@ -207,12 +207,12 @@ public class DbDriver
 		Class clz = this.classLoader.loadClass(className);
 		return clz;
 	}
-	
+
 	private void loadDriverClass()
 		throws ClassNotFoundException, Exception, UnsupportedClassVersionError
 	{
 		if (this.driverClassInstance != null) return;
-		
+
 		try
 		{
 			if (this.classLoader == null && this.libraryList != null)
@@ -227,7 +227,7 @@ public class DbDriver
 					{
 						f = new File(Settings.getInstance().getLibDir(), realFile);
 					}
-					url[index] = f.toURL();
+					url[index] = f.toURI().toURL();
 					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[index].toString());
 					index ++;
 				}
@@ -248,7 +248,7 @@ public class DbDriver
 				//LogMgr.logDebug("DbDriver.loadDriverClass()", "Assuming driver " + this.driverClass + " is in current classpath");
 				drvClass = Class.forName(this.driverClass);
 			}
-			
+
 			this.driverClassInstance = (Driver)drvClass.newInstance();
 			if (Settings.getInstance().getBoolProperty("workbench.db.registerdriver", false))
 			{
@@ -263,7 +263,7 @@ public class DbDriver
 					LogMgr.logError("DbDriver.loadDriverClass()", "Error registering driver instance with DriverManager", th);
 				}
 			}
-			
+
 			String dbLog = Settings.getInstance().getProperty("workbench.db.driver.log", null);
 			if (!StringUtil.isEmptyString(dbLog))
 			{
@@ -277,7 +277,7 @@ public class DbDriver
 					LogMgr.logError("DbDriver.loadDriverClass()", "Error setting driverManager logWriter", e);
 				}
 			}
-			
+
 		}
 		catch (UnsupportedClassVersionError e)
 		{
@@ -315,7 +315,7 @@ public class DbDriver
 		try
 		{
 			this.loadDriverClass();
-			
+
 			// as we are not using the DriverManager, we need to supply username
 			// and password in the connection properties!
 			Properties props = new Properties();
@@ -369,7 +369,7 @@ public class DbDriver
 
 		return ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildNumber();
 	}
-	
+
 	private void setAppInfo(Properties props, String url, String id, String user)
 		throws UnknownHostException
 	{
@@ -468,7 +468,7 @@ public class DbDriver
 		}
 		else if (other instanceof String)
 		{
-			return (this.driverClass != null && this.driverClass.equals((String)other));
+			return (this.driverClass != null && this.driverClass.equals(other));
 		}
 		else
 		{
@@ -484,9 +484,9 @@ public class DbDriver
 		b.append(name);
 		return b.toString();
 	}
-	
-	public int hashCode() 
-	{ 
+
+	public int hashCode()
+	{
 		return getId().hashCode();
 	}
 

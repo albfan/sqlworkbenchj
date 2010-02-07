@@ -59,7 +59,7 @@ public class ClassNameCompletor extends SimpleCompletor {
                 + systemClasses[i].getName() .replace('.', '/') + ".class");
 
             if (classURL != null) {
-                URLConnection uc = (URLConnection) classURL.openConnection();
+                URLConnection uc = classURL.openConnection();
 
                 if (uc instanceof JarURLConnection) {
                     urls.add(((JarURLConnection) uc).getJarFileURL());

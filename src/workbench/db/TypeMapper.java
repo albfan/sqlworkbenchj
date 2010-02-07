@@ -25,7 +25,7 @@ import workbench.util.StringUtil;
 
 /**
  * A class to map datatypes from one DBMS to another.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class TypeMapper
@@ -33,7 +33,7 @@ public class TypeMapper
 	private WbConnection targetDb;
 	private Map<Integer, String> typeInfo;
 	private Map<Integer, String> userMapping;
-	
+
 	/**
 	 * For testing purposes only!
 	 */
@@ -54,15 +54,15 @@ public class TypeMapper
 	private String findAlternateBlobType(int type)
 	{
 		List<Integer> allBlobTypes = new ArrayList<Integer>(4);
-		
-		// BLOBs are reported as BLOB, VARBINARY (Postgres), LONGVARBNARY (HSQL) and 
+
+		// BLOBs are reported as BLOB, VARBINARY (Postgres), LONGVARBNARY (HSQL) and
 		// possibly as BINARY. So we need to test each of them. The order here
 		// is a personal feeling which type should be preferred over others ;)
 		allBlobTypes.add(Integer.valueOf(Types.BLOB));
 		allBlobTypes.add(Integer.valueOf(Types.LONGVARBINARY));
 		allBlobTypes.add(Integer.valueOf(Types.VARBINARY));
 		allBlobTypes.add(Integer.valueOf(Types.BINARY));
-		
+
 		for (Integer blobType : allBlobTypes)
 		{
 			// we are looking for an alternative to the passed type
@@ -112,17 +112,17 @@ public class TypeMapper
 
 		return userType;
 	}
-	
+
 	public String getTypeName(int type, int size, int digits)
 	{
 
-		
+
 		String userType = getUserMapping(type, size, digits);
 		if (userType != null) return userType;
-		
+
 		Integer key = Integer.valueOf(type);
 		String name = this.typeInfo.get(key);
-		
+
 		// BLOBs and CLOBs are mapped to different types in different
 		// DBMS and not all are using the same java.sql.Types value
 		// this code tries to find a mapping even if the "desired" input
@@ -142,7 +142,7 @@ public class TypeMapper
 				LogMgr.logInfo("TypeMapper.getTypeName()", "Could not find a direct mapping for java.sql.Types." + SqlUtil.getTypeName(type) + ", using DBMS type: " + name);
 			}
 		}
-		
+
 		if (name == null)
 		{
 			return SqlUtil.getTypeName(type);
@@ -159,7 +159,7 @@ public class TypeMapper
 
 	/**
 	 * Mad protected for testing purposes
-	 * 
+	 *
 	 * @param mapping
 	 */
 	protected void parseTypeMap(String mapping)
@@ -169,7 +169,7 @@ public class TypeMapper
 		List<String> types = StringUtil.stringToList(mapping, ";", true, true, false, false);
 		for (String type : types)
 		{
-			String[] def = type.split("\\:");
+			String[] def = type.split(":");
 			if (def != null && def.length == 2)
 			{
 				try
@@ -185,7 +185,7 @@ public class TypeMapper
 			}
 		}
 	}
-	
+
 	private void createTypeMap()
 	{
 		ResultSet rs = null;

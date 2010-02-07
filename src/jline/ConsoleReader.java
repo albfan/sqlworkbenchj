@@ -153,25 +153,25 @@ public class ConsoleReader implements ConsoleOperations {
 	/**
 	 * Adding a triggered Action allows to give another curse of action
 	 * if a character passed the preprocessing.
-	 * 
+	 *
 	 * Say you want to close the application if the user enter q.
 	 * addTriggerAction('q', new ActionListener(){ System.exit(0); });
 	 * would do the trick.
-	 * 
+	 *
 	 * @param c
 	 * @param listener
 	 */
 	public void addTriggeredAction(char c, ActionListener listener){
 		triggeredActions.put(new Character(c), listener);
 	}
-	
+
     /**
      * Create a new reader using {@link FileDescriptor#in} for input and
      * {@link System#out} for output. {@link FileDescriptor#in} is used because
      * it has a better chance of being unbuffered.
      */
-    public ConsoleReader() throws IOException {	
-        this(new FileInputStream(FileDescriptor.in), 
+    public ConsoleReader() throws IOException {
+        this(new FileInputStream(FileDescriptor.in),
         		new PrintWriter(
         				new OutputStreamWriter(System.out,
         						System.getProperty("jline.WindowsTerminal.output.encoding",System.getProperty("file.encoding")))));
@@ -216,7 +216,7 @@ public class ConsoleReader implements ConsoleOperations {
 
                 if (new File(bindingFile).isFile()) {
                     bindings = new FileInputStream(new File(bindingFile));
-                } 
+                }
             } catch (Exception e) {
                 // swallow exceptions with option debugging
                 if (debugger != null) {
@@ -248,7 +248,7 @@ public class ConsoleReader implements ConsoleOperations {
 
                 try {
                     Short code = new Short(val);
-                    String op = (String) p.getProperty(val);
+                    String op = p.getProperty(val);
 
                     Short opval = (Short) KEYMAP_NAMES.get(op);
 
@@ -1197,7 +1197,7 @@ public class ConsoleReader implements ConsoleOperations {
             out.write(cbuf);
             return;
         }
-	    
+
         out.write(c);
     }
 
@@ -1213,7 +1213,7 @@ public class ConsoleReader implements ConsoleOperations {
             else
                 len++;
 
-        char cbuf[];        
+        char cbuf[];
         if (len == c.length)
             cbuf = c;
         else {
@@ -1229,7 +1229,7 @@ public class ConsoleReader implements ConsoleOperations {
                 }
 	    }
         }
-            
+
         out.write(cbuf);
     }
 
@@ -1425,7 +1425,7 @@ public class ConsoleReader implements ConsoleOperations {
 	    char cbuf[] = new char[len];
 	    Arrays.fill(cbuf, BACKSPACE);
 	    out.write(cbuf);
-		
+
 	    return;
         } else if (buf.cursor == 0) {
             return;
@@ -1475,7 +1475,7 @@ public class ConsoleReader implements ConsoleOperations {
         return c;
     }
 
-   
+
     /**
      *  Issue <em>num</em> deletes.
      *

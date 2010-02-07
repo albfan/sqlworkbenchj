@@ -71,7 +71,7 @@ public class CompletionPopup
 	private boolean ignoreSearchChange;
 	private boolean partialSearch;
 	private boolean filterSearch;
-	
+
 	public CompletionPopup(JEditTextArea ed, JComponent header, ListModel listData)
 	{
 		this.data = listData;
@@ -168,7 +168,7 @@ public class CompletionPopup
 
 			if (window == null)
 			{
-				window = new JWindow((Window)SwingUtilities.getWindowAncestor(editor));
+				window = new JWindow(SwingUtilities.getWindowAncestor(editor));
 			}
 
 			editor.setKeyEventInterceptor(this);
@@ -451,7 +451,7 @@ public class CompletionPopup
 	public void selectMatchingEntry(String s)
 	{
 		if (ignoreSearchChange) return;
-		
+
 		int index = this.findEntry(s);
 		if (index >= 0)
 		{
@@ -463,7 +463,7 @@ public class CompletionPopup
 			elementList.clearSelection();
 		}
 	}
-	
+
 	private int findEntry(String s)
 	{
 		if (s == null) return -1;

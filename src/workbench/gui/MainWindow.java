@@ -198,7 +198,7 @@ public class MainWindow
 		// Control the brushed metal look for MacOS, this must be set as soon as possible on the
 		// root pane in order to have an effect
 		getRootPane().putClientProperty("apple.awt.brushMetalLook", GuiSettings.getUseBrushedMetal());
-		
+
 		this.windowId = ++instanceCount;
 
 		sqlTab = new WbTabbedPane();
@@ -516,7 +516,7 @@ public class MainWindow
 			{
 				menu.addSeparator();
 			}
-			
+
 			if (action != null)
 			{
 				action.addToMenu(menu);
@@ -562,7 +562,7 @@ public class MainWindow
 
 	/**
 	 * Removes or makes the toolbar visible depending on
-	 * {@link Settings#getShowToolbar}. This method will
+	 * {@link GuiSettings#getShowToolbar}. This method will
 	 * <i>validate</i> this' {@link #getContentPane content pane}
 	 * in case a change on the toolbar's visibility is performed.
 	 */
@@ -1193,7 +1193,7 @@ public class MainWindow
 	{
 		return NumberStringCache.getNumberString(windowId);
 	}
-	
+
 	private String getConnectionIdForPanel(MainPanel p)
 	{
 		return "Wb" + getWindowId() + "-" + p.getId();
@@ -2416,17 +2416,17 @@ public class MainWindow
 		}
 		return addTabAtIndex(selectNew, checkConnection, renumber, index);
 	}
-	
+
 	private MainPanel addTabAtIndex(boolean selectNew, boolean checkConnection, boolean renumber, int index)
 	{
 		if (index == -1) index = sqlTab.getTabCount();
 
 		final SqlPanel sql = new SqlPanel(index+1);
-		
+
 		try
 		{
 			tabRemovalInProgress = true;
-			
+
 			sql.setConnectionClient(this);
 			sql.addDbExecutionListener(this);
 			this.sqlTab.add(sql, index);
@@ -2462,7 +2462,7 @@ public class MainWindow
 		{
 			sqlTab.setCloseButtonEnabled(0, this.sqlTab.getTabCount() > 1);
 		}
-		
+
 		return sql;
 	}
 
@@ -2529,7 +2529,7 @@ public class MainWindow
 	 * <br/>
 	 * This does not check if the user actually wants to close
 	 * the tab!
-	 * 
+	 *
 	 * @return boolean if the current tab could be closed
 	 */
 	public boolean canCloseTab()
@@ -2562,8 +2562,8 @@ public class MainWindow
 
 	/**
 	 * Closes the currently active tab.
-	 * 
-	 * @see #closeTab(int)
+	 *
+	 * @see #tabCloseButtonClicked(int)
 	 */
 	public void removeCurrentTab()
 	{
@@ -2676,7 +2676,7 @@ public class MainWindow
 		MainPanel panel = this.getSqlPanel(index);
 		if (panel == null) return;
 		if (!panel.canClosePanel()) return;
-	
+
 		if (GuiSettings.getConfirmTabClose())
 		{
 			boolean doClose = WbSwingUtilities.getYesNo(sqlTab, ResourceMgr.getString("MsgConfirmCloseTab"));

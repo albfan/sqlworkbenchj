@@ -122,17 +122,6 @@ public class VariablePool
 		}
 	}
 
-	public String replacePrompts(String sql)
-	{
-		Set<String> vars = this.getPromptVariables(sql, false);
-		return this.replaceParameters(vars, sql, true);
-	}
-
-	public String replacePrompts(Set<String> vars, String sql)
-	{
-		return this.replaceParameters(vars, sql, true);
-	}
-
 	/**
 	 * Returns a set of prompt variables defined in the
 	 * SQL string. If a variable is not yet defined it will
@@ -191,11 +180,6 @@ public class VariablePool
 			}
 		}
 		return Collections.unmodifiableSet(variables);
-	}
-
-	public Pattern getPromptPattern()
-	{
-		return this.promptPattern;
 	}
 
 	public DataStore getVariablesDataStore()
@@ -315,11 +299,6 @@ public class VariablePool
 		result.append(varName);
 		result.append(StringUtil.quoteRegexMeta(suffix));
 		return result.toString();
-	}
-
-	public boolean isVariableDefined(String varName)
-	{
-		return (getParameterValue(varName) != null);
 	}
 
 	public boolean removeValue(String varName)
@@ -449,7 +428,7 @@ class VariableDataStore
 	}
 
 	public boolean hasPkColumns() { return true; }
-	public boolean checkUpdateTable(String sql, WbConnection conn) { return true; }
+
 	public boolean isUpdateable() { return true; }
 	public boolean hasUpdateableColumns() { return true; }
 

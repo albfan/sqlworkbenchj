@@ -125,7 +125,7 @@ public class ClassFinder
 		for (int i=0; i < files.size(); i++)
 		{
 			File f = new File(files.get(i));
-			url[i] = f.toURL();
+			url[i] = f.toURI().toURL();
 		}
 
 		ClassLoader classLoader = new URLClassLoader(url, ClassLoader.getSystemClassLoader());

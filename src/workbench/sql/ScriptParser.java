@@ -10,19 +10,20 @@
  *
  */
 package workbench.sql;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -149,12 +150,6 @@ public class ScriptParser
 			return this.originalScript.length();
 		}
 		return 0;
-	}
-
-	public void readScriptFromFile(File f)
-		throws IOException
-	{
-		this.readScriptFromFile(f, null);
 	}
 
 	/**
@@ -536,10 +531,8 @@ public class ScriptParser
 	/**
 	 * Return the next {@link ScriptCommandDefinition} from the script.
 	 *
-	 * @throws IllegalStateException if the Iterator has not been initialized using {@link #getIterator()}
 	 */
 	public String getNextCommand()
-		throws NoSuchElementException
 	{
 		ScriptCommandDefinition command = null;
 		String result = null;

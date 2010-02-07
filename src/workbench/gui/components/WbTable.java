@@ -169,7 +169,6 @@ public class WbTable
 	private FilterDataAction filterAction;
 	private ResetFilterAction resetFilterAction;
 
-	private DisplayDataFormAction formAction;
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
 
@@ -347,8 +346,8 @@ public class WbTable
 	{
 		if (this.popup == null) return;
 
-		formAction = new DisplayDataFormAction(this);
-		popup.insert(this.formAction.getMenuItem(), 0);
+		DisplayDataFormAction formAction = new DisplayDataFormAction(this);
+		popup.insert(formAction.getMenuItem(), 0);
 		formAction.addToInputMap(this);
 	}
 
@@ -495,25 +494,25 @@ public class WbTable
 	public FilterDataAction getFilterAction() { return this.filterAction; }
 	public ResetFilterAction getResetFilterAction() { return this.resetFilterAction; }
 
-	public CopySelectedAsTextAction getCopySelectedAsTextAction()
-	{
-		return this.copySelectedAsTextAction;
-	}
-
-	public CopySelectedAsSqlDeleteInsertAction getCopySelectedAsSqlDeleteInsertAction()
-	{
-		return this.copySelectedAsDeleteInsertAction;
-	}
-
-	public CopySelectedAsSqlInsertAction getCopySelectedAsSqlInsertAction()
-	{
-		return this.copySelectedAsInsertAction;
-	}
-
-	public CopySelectedAsSqlUpdateAction getCopySelectedAsSqlUpdateAction()
-	{
-		return this.copySelectedAsUpdateAction;
-	}
+//	public CopySelectedAsTextAction getCopySelectedAsTextAction()
+//	{
+//		return this.copySelectedAsTextAction;
+//	}
+//
+//	public CopySelectedAsSqlDeleteInsertAction getCopySelectedAsSqlDeleteInsertAction()
+//	{
+//		return this.copySelectedAsDeleteInsertAction;
+//	}
+//
+//	public CopySelectedAsSqlInsertAction getCopySelectedAsSqlInsertAction()
+//	{
+//		return this.copySelectedAsInsertAction;
+//	}
+//
+//	public CopySelectedAsSqlUpdateAction getCopySelectedAsSqlUpdateAction()
+//	{
+//		return this.copySelectedAsUpdateAction;
+//	}
 
 	public void populateCopySelectedMenu(WbMenu copyMenu)
 	{
@@ -587,7 +586,6 @@ public class WbTable
 	public TableReplacer getReplacer() { return this.replacer; }
 
 	public void setSelectOnRightButtonClick(boolean flag) { this.selectOnRightButtonClick = flag; }
-	public boolean getSelectOnRightButtonClick() { return this.selectOnRightButtonClick; }
 
 	public void dispose()
 	{
@@ -619,11 +617,6 @@ public class WbTable
 		this.setModel(EmptyTableModel.EMPTY_MODEL, false);
 	}
 
-	public JPopupMenu getPopupMenu()
-	{
-		return this.popup;
-	}
-
 	private void addPopupSubMenu(final WbMenu submenu, final boolean withSep)
 	{
 		WbSwingUtilities.invoke(new Runnable()
@@ -643,18 +636,6 @@ public class WbTable
 	public void addPopupAction(final WbAction anAction, final boolean withSep)
 	{
 		addPopupMenu(anAction.getMenuItem(), withSep);
-	}
-
-	public void removePopupItem(final JMenuItem item)
-	{
-		if (this.popup == null) return;
-		WbSwingUtilities.invoke(new Runnable()
-		{
-			public void run()
-			{
-				popup.remove(item);
-			}
-		});
 	}
 
 	public void addPopupMenu(final JMenuItem item, final boolean withSep)
@@ -924,13 +905,6 @@ public class WbTable
 				highlighter.setHighlightColumns(highlightCols);
 			}
 		}
-	}
-
-	public boolean isUpdateable()
-	{
-		DataStore ds = this.getDataStore();
-		if (ds == null) return false;
-		return ds.isUpdateable();
 	}
 
 	public void removeEditor()
@@ -1343,13 +1317,6 @@ public class WbTable
 
 	private boolean useDefaultStringRenderer = true;
 
-	public void setUseDefaultStringRenderer(boolean aFlag)
-	{
-		this.useDefaultStringRenderer = aFlag;
-	}
-
-	public boolean getUseDefaultStringRenderer() { return this.useDefaultStringRenderer; }
-
 	private void initDateRenderers()
 	{
 		Settings sett = Settings.getInstance();
@@ -1595,11 +1562,6 @@ public class WbTable
 		adjustRowHeight();
 	}
 
-	public boolean rowHeightWasOptimized()
-	{
-		return rowHeightWasOptimized;
-	}
-
 	public void optimizeRowHeight()
 	{
 		RowHeightOptimizer optimizer = new RowHeightOptimizer(this);
@@ -1632,23 +1594,6 @@ public class WbTable
 			}
 		}
 		return result;
-	}
-
-	public void checkRowHeight()
-	{
-		int row = getEditingRow();
-		checkRowHeight(row);
-	}
-
-	public void checkRowHeight(int row)
-	{
-		if (getRowCount() == 0) return;
-		int rowheight = getRowHeight(row > -1 ? row : 0);
-		int defaultheight = getRowHeight();
-		if (defaultheight != rowheight)
-		{
-			optimizeRowHeight();
-		}
 	}
 
 	public void openEditWindow()
@@ -1734,8 +1679,7 @@ public class WbTable
 	/**
 	 * Return the row number of the last row that is completely visible
 	 *
-	 * @param first
-	 * @return
+	 * @return the last row that is completely visible
 	 */
 	public int getLastVisibleRow()
 	{
@@ -1889,16 +1833,6 @@ public class WbTable
 	{
 	}
 
-	public void setColumnWidth(int column, int width)
-	{
-		TableColumn col = this.getColumnModel().getColumn(column);
-		if (width > 0 && col != null)
-		{
-			col.setWidth(width);
-			col.setPreferredWidth(width);
-		}
-	}
-
 	public int getPopupViewColumnIndex()
 	{
 		TableColumnModel colMod = this.getColumnModel();
@@ -1944,13 +1878,6 @@ public class WbTable
 			{
 			}
 		}
-	}
-
-	public void resetPopup()
-	{
-		if (this.popup != null) this.popup.setVisible(false);
-		this.headerPopupX = -1;
-		this.popup = null;
 	}
 
 	/**
@@ -2257,11 +2184,6 @@ public class WbTable
 			}
 		}
 		return true;
-	}
-
-	public boolean isHighlightRequiredFields()
-	{
-		return highlightRequiredFields;
 	}
 
 	public void setHighlightRequiredFields(boolean flag)

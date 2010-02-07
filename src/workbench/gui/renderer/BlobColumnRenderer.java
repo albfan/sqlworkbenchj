@@ -37,8 +37,8 @@ import workbench.resource.GuiSettings;
  * display a dialog with details about the blob.
  * <br/>
  *
- * @see workbench.gui.components.BlobHandler#showBlobInfoDialog(java.awt.Frame, java.lang.Object)
- * 
+ * @see workbench.gui.components.BlobHandler#showBlobInfoDialog(java.awt.Frame, Object, boolean) 
+ *
  * @author  Thomas Kellerer
  */
 public class BlobColumnRenderer
@@ -52,9 +52,9 @@ public class BlobColumnRenderer
 	private int currentColumn;
 	private Color alternateColor = GuiSettings.getAlternateRowColor();
 	private Color nullColor = GuiSettings.getNullColor();
-	
+
 	private boolean useAlternatingColors = GuiSettings.getUseAlternateRowColor();
-	
+
 	public BlobColumnRenderer()
 	{
 		super();
@@ -76,14 +76,14 @@ public class BlobColumnRenderer
 	{
 		return SwingConstants.LEFT;
 	}
-	
-	public Component getTableCellRendererComponent(JTable table, Object value, 
-		                                             boolean isSelected, 
+
+	public Component getTableCellRendererComponent(JTable table, Object value,
+		                                             boolean isSelected,
 		                                             boolean hasFocus, int row, int column)
 	{
 		return getComponent(table, value, isSelected, hasFocus, row, column);
 	}
-	
+
 	private Component getComponent(JTable table, Object value,
 							boolean isSelected, boolean hasFocus, int row, int column)
 	{
@@ -119,7 +119,7 @@ public class BlobColumnRenderer
 		{
 			this.displayPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		}
-		
+
 		currentValue = value;
 		currentRow = row;
 		currentColumn = column;
@@ -127,7 +127,7 @@ public class BlobColumnRenderer
 		displayPanel.setValue(value);
 		return displayPanel;
 	}
-	
+
 	public void setBackground(Color c)
 	{
 		this.displayPanel.setBackground(c);
@@ -137,20 +137,20 @@ public class BlobColumnRenderer
 	{
 		return currentValue;
 	}
-	
-	public String getDisplayValue() 
-	{ 
-		return displayPanel.getLabel(); 
+
+	public String getDisplayValue()
+	{
+		return displayPanel.getLabel();
 	}
-	
+
 	public void setUseAlternatingColors(boolean flag)
 	{
 		this.useAlternatingColors = flag;
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
-		cancelCellEditing(); 
+		cancelCellEditing();
 		boolean ctrlPressed = WbAction.isCtrlPressed(e);
 		boolean shiftPressed = WbAction.isShiftPressed(e);
 		BlobHandler handler = new BlobHandler();
@@ -165,7 +165,7 @@ public class BlobColumnRenderer
 		if (ctrlPressed)
 		{
 			handler.showBlobAsText(currentValue);
-		}		
+		}
 		else if (shiftPressed)
 		{
 			handler.showBlobAsImage(currentValue);

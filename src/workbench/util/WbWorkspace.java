@@ -76,7 +76,7 @@ public class WbWorkspace
 
 	/**
 	 * For testing purposes only
-	 * @param tabInfo
+	 * @param props
 	 */
 	WbWorkspace(WbProperties props)
 	{

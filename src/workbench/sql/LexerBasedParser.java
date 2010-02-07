@@ -45,14 +45,14 @@ public class LexerBasedParser
 	private boolean hasMoreCommands;
 	private boolean checkOracleInclude;
 	private boolean calledOnce;
-	
+
 	private static Pattern MULTI_LINE_PATTERN = Pattern.compile("((\r\n)|(\n)){2,}|[ \t\f]*((\r\n)|(\n))+[ \t\f]*((\r\n)|(\n))+[ \t\f]*");
 	private static Pattern SIMPLE_LINE_BREAK = Pattern.compile("[ \t\f]*((\r\n)|(\n\r)|(\r|\n))+[ \t\f]*");
 
 	public LexerBasedParser()
 	{
 	}
-	
+
 	public LexerBasedParser(String script)
 		throws IOException
 	{
@@ -74,12 +74,12 @@ public class LexerBasedParser
 	{
 		emptyLineIsDelimiter = flag;
 	}
-	
+
 	/**
 	 * Controls if the actual SQL for each command returned by
 	 * #getNextCommand() is stored in the ScriptCommandDefinition
-	 * or if only start and end in the script should be stored. 
-	 * 
+	 * or if only start and end in the script should be stored.
+	 *
 	 * @param flag if true, the actual SQL is returned otherwise only the start and end
 	 */
 	public void setStoreStatementText(boolean flag)
@@ -95,14 +95,14 @@ public class LexerBasedParser
 	public ScriptCommandDefinition getNextCommand()
 	{
 		calledOnce = true;
-		
+
 		String delimiterString = delimiter.getDelimiter();
 		try
 		{
 			StringBuilder sql = new StringBuilder(250);
 
 			int previousEnd = -1;
-			
+
 			SQLToken token = lexer.getNextToken();
 			boolean startOfLine = false;
 			boolean singleLineCommand = false;
@@ -203,7 +203,7 @@ public class LexerBasedParser
 	{
 		return SIMPLE_LINE_BREAK.matcher(text).matches();
 	}
-	
+
 	static boolean isMultiLine(String text)
 	{
 		return MULTI_LINE_PATTERN.matcher(text).matches();
@@ -221,7 +221,7 @@ public class LexerBasedParser
 		String toStore = storeStatementText ? sql.substring(i) : null;
 		ScriptCommandDefinition cmd = new ScriptCommandDefinition(toStore, start + i, end);
 		cmd.setWhitespaceStart(start);
-		
+
 		return cmd;
 	}
 
@@ -267,6 +267,8 @@ public class LexerBasedParser
 		lexer = new SQLLexer(input);
 		calledOnce = false;
 		hasMoreCommands = (scriptLength > 0);
+		fileEncoding = encoding;
+		originalFile = f;
 	}
 
 	@Override
@@ -291,7 +293,7 @@ public class LexerBasedParser
 	public void reset()
 	{
 		if (!calledOnce) return;
-		
+
 		try
 		{
 			if (originalFile != null)

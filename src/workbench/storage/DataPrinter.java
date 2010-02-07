@@ -25,14 +25,14 @@ import workbench.util.StringUtil;
 
 /**
  * A class to print the contents of a {@link DataStore} to a PrintStream
- * 
+ *
  * @author Thomas Kellerer
  */
 public class DataPrinter
 {
 	private DataStore data;
 	private TextRowDataConverter converter;
-	
+
 	public DataPrinter(DataStore source)
 	{
 		this.data = source;
@@ -44,13 +44,13 @@ public class DataPrinter
 		this.data = source;
 		initConverter("\t", StringUtil.LINE_TERMINATOR, null, includeHeaders);
 	}
-	
+
 	public DataPrinter(DataStore source, String delimiter, String lineEnd, List<ColumnIdentifier> columns, boolean includeHeader)
 	{
 		this.data = source;
 		initConverter(delimiter, lineEnd, columns, includeHeader);
 	}
-	
+
 	private void initConverter(String delimiter, String lineEnd, List<ColumnIdentifier> columns, boolean includeHeader)
 	{
 		converter = new TextRowDataConverter();
@@ -62,28 +62,7 @@ public class DataPrinter
 		converter.setColumnsToExport(columns);
 		converter.setEscapeRange(CharacterRange.RANGE_CONTROL);
 	}
-	
-	public void printTo(PrintStream out)
-	{
-		PrintWriter pw = new PrintWriter(out);
-		try
-		{
-			writeDataString(pw, (int[])null);
-		}
-		catch (IOException e)
-		{
-			LogMgr.logError("DataPrinter.printTo", "Error when printing DataStore contents", e);
-		}
-	}
 
-	public String getRowDataAsString(int row)
-	{
-		RowData rowData = data.getRow(row);
-		StrBuffer line = converter.convertRowData(rowData, row);
-		if (line != null) return line.toString();
-		return null;
-	}
-	
 	/**
 	 *	Write the contents of the DataStore into the writer but only the rows
 	 *  that have been passed in the rows[] parameter
@@ -92,12 +71,12 @@ public class DataPrinter
 		throws IOException
 	{
 		StrBuffer header = converter.getStart();
-		if (header != null) 
+		if (header != null)
 		{
 			header.writeTo(out);
-			out.flush(); 
+			out.flush();
 		}
-		
+
 		int count = (rows == null ? data.getRowCount() : rows.length);
 
 		for (int i=0; i < count; i++)
@@ -106,7 +85,7 @@ public class DataPrinter
 			RowData rowData = data.getRow(row);
 			StrBuffer line = converter.convertRowData(rowData, row);
 			line.writeTo(out);
-			out.flush(); 
+			out.flush();
 		}
-	}	
+	}
 }
