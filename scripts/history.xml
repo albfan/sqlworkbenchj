@@ -2,11 +2,11 @@
 <history>
 
 <!-- build number must be set to -1 for development builds -->
-<release build="-1" date="2010-01-27">
+<release build="-1" date="2010-02-05">
 
   <entry dev-build="5" type="enh">
     <description>
-      When running stored procedures with parameters, the name of the parameters are now shown parameter input dialog if available.
+      When running stored procedures with parameters, the name of the parameters are now shown in the parameter input dialog if available.
       If running stored procedures with out parameters, the result tabs will be named after the parameters now (if the parameter names
       are available)
     </description>
