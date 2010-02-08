@@ -121,6 +121,12 @@ public class DbSettings
 		return updatingCommands.contains(verb);
 	}
 
+	public boolean getUseOracleDBMSMeta(String type)
+	{
+		if (type == null) return false;
+		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), false);
+	}
+	
 	/**
 	 * Returns true if NULl should be used for a column definition that is nullable
 	 * (instead of not using NULL at all)

@@ -44,6 +44,7 @@ public class PostgresProcedureReader
 	private Map<String, Integer> pgType2Java;
 	private PGTypeLookup pgTypes;
 	private PGType voidType;
+	private final String placeholder = "$wb$_aggregage_source_$wb";
 
 	public PostgresProcedureReader(WbConnection conn)
 	{
@@ -271,7 +272,8 @@ public class PostgresProcedureReader
 								"        p.proretset, " +
 								"        p.provolatile, " +
 								"        p.proisstrict, " +
-								"        p.proretset ";
+								"        p.proretset," +
+								"        p.proisagg ";
 		
 		boolean hasCost = JdbcUtils.hasMinimumServerVersion(connection, "8.3");
 		if (hasCost) 
@@ -304,6 +306,9 @@ public class PostgresProcedureReader
 		ResultSet rs = null;
 		Savepoint sp = null;
 		Statement stmt = null;
+
+		boolean isAggregate = false;
+
 		try
 		{
 			if (useSavepoint)
@@ -313,8 +318,12 @@ public class PostgresProcedureReader
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 
-
 			if (rs.next())
+			{
+				isAggregate = rs.getBoolean("proisagg");
+			}
+
+			if (!isAggregate)
 			{
 				source.append("CREATE OR REPLACE FUNCTION ");
 				source.append(name.getName());
@@ -329,6 +338,7 @@ public class PostgresProcedureReader
 				String names = rs.getString("argnames");
 				String modes = rs.getString("argmodes");
 				boolean returnSet = rs.getBoolean("proretset");
+
 				
 				boolean securityDefiner = rs.getBoolean("prosecdef");
 				boolean strict = rs.getBoolean("proisstrict");
@@ -411,7 +421,6 @@ public class PostgresProcedureReader
 					source.append("\n ROWS ");
 					source.append(rows.longValue());
 				}
-				
 				source.append('\n');
 				source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 				source.append('\n');
@@ -421,21 +430,115 @@ public class PostgresProcedureReader
 					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 					source.append('\n');
 				}
-				def.setSource(source);
 			}
+			connection.releaseSavepoint(sp);
 		}
 		catch (SQLException e)
 		{
-			def.setSource(ExceptionUtil.getDisplay(e));
-			this.connection.rollback(sp);
+			source = new StringBuilder(ExceptionUtil.getDisplay(e));
+			connection.rollback(sp);
 			LogMgr.logError("PostgresProcedureReader.readProcedureSource()", "Error retrieving source for " + name.getFormattedName(), e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
+		if (isAggregate)
+		{
+			source.append(getAggregateSource(name, def.getSchema()));
+			if (StringUtil.isNonBlank(def.getComment()))
+			{
+				source.append("\n\nCOMMENT ON AGGREGATE IS '" + SqlUtil.escapeQuotes(def.getComment()) + "';\n\n");
+			}
+		}
+		def.setSource(source);
 	}
 
+	protected StringBuilder getAggregateSource(PGProcName name, String schema)
+	{
+		String baseSelect = "SELECT a.aggtransfn, a.aggfinalfn, format_type(a.aggtranstype, null) as stype, a.agginitval, op.oprname";
+	  String from = "FROM pg_proc p \n" +
+             "  JOIN pg_namespace n ON p.pronamespace = n.oid \n" +
+             "  JOIN pg_aggregate a ON a.aggfnoid = p.oid \n" +
+             "  LEFT JOIN pg_operator op ON op.oid = a.aggsortop ";
+
+		boolean hasSort = JdbcUtils.hasMinimumServerVersion(connection, "8.1");
+		if (hasSort)
+		{
+			baseSelect += ", a.aggsortop ";
+		}
+
+		String sql = baseSelect + from;
+		sql += " WHERE p.proname = '" + name.getName() + "' ";
+		if (StringUtil.isNonBlank(schema))
+		{
+			sql += " and n.nspname = '" + schema + "' ";
+		}
+		
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Using SQL=" + sql);
+		}
+		StringBuilder source = new StringBuilder();
+		ResultSet rs = null;
+		Statement stmt = null;
+		Savepoint sp = null;
+
+		try
+		{
+			if (useSavepoint)
+			{
+				sp = this.connection.setSavepoint();
+			}
+			stmt = connection.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			if (rs.next())
+			{
+
+				source.append("CREATE AGGREGATE ");
+				source.append(name.getFormattedName());
+				source.append("\n(\n");
+				String sfunc = rs.getString("aggtransfn");
+				source.append("  sfunc = " + sfunc);
+
+				String stype = rs.getString("stype");
+				source.append(",\n  stype = " + stype);
+
+				String sortop = rs.getString("oprname");
+				if (StringUtil.isNonBlank(sortop))
+				{
+					source.append(",\n  sortop = " + SqlUtil.quoteObjectname(sortop));
+				}
+
+				String finalfunc = rs.getString("aggfinalfn");
+				if (StringUtil.isNonBlank(finalfunc) && !finalfunc.equals("-"))
+				{
+					source.append(",\n  finalfunc = " + finalfunc);
+				}
+
+				String initcond = rs.getString("agginitval");
+				if (StringUtil.isNonBlank(initcond))
+				{
+					source.append(",\n  initcond = '" + initcond + "'");
+				}
+				source.append("\n);");
+			}
+			connection.releaseSavepoint(sp);
+		}
+		catch (SQLException e)
+		{
+			source = null;
+			connection.rollback(sp);
+			LogMgr.logError("PostgresProcedureReader.readProcedureSource()", "Error retrieving aggregate source for " + name, e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return source;
+
+	}
 
 
 	/**

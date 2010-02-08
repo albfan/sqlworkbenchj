@@ -26,6 +26,7 @@ import workbench.db.TableIdentifier;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -125,6 +126,49 @@ public class OracleIndexReader
 		ResultSet rs = this.indexStatement.executeQuery();
 		return rs;
 	}
+
+	@Override
+	public String getIndexSourceForType(TableIdentifier table, IndexDefinition definition)
+	{
+		if (definition == null) return null;
+
+		boolean alwaysUseDbmsMeta = this.metaData.getDbSettings().getUseOracleDBMSMeta("index");
+
+		if (!alwaysUseDbmsMeta && !"DOMAIN".equals(definition.getIndexType())) return null;
+
+		PreparedStatement stmt = null;
+		ResultSet rs = null;
+		String source = null;
+
+		String sql = "select dbms_metadata.get_ddl('INDEX', ?, ?) from dual";
+
+		try
+		{
+			stmt = this.metaData.getSqlConnection().prepareStatement(sql);
+
+			stmt.setString(1, definition.getObjectName());
+			stmt.setString(2, definition.getSchema());
+			
+			rs = stmt.executeQuery();
+			if (rs.next())
+			{
+				source = rs.getString(1);
+				if (source != null) source = source.trim();
+				source += ";\n";
+			}
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("OracleIndexReader", "Error retrieving index via DBMS_DDL", e);
+			source = ExceptionUtil.getDisplay(e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return source;
+	}
+
 
 	/**
 	 * 	Read the definition for function based indexes into the Map provided.

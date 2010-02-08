@@ -99,4 +99,13 @@ public interface IndexReader
 	 * Returns the name of the index that supports the Primary Key
 	 */
 	String getPrimaryKeyIndex(TableIdentifier table);
+
+	/**
+	 * For non-standard index type, return the source for this index
+	 * 
+	 * @param table
+	 * @param indexName
+	 * @return
+	 */
+	String getIndexSourceForType(TableIdentifier table, IndexDefinition definition);
 }

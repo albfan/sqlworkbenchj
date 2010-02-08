@@ -116,6 +116,13 @@ public class JdbcIndexReader
 		return pkName;
 	}
 
+	@Override
+	public String getIndexSourceForType(TableIdentifier table, IndexDefinition definition)
+	{
+		return null;
+	}
+
+
 	/**
 	 * Return the SQL to re-create the indexes defined for the table.
 	 *
@@ -139,6 +146,14 @@ public class JdbcIndexReader
 
 			if (definition == null) continue;
 
+			String typeSource = getIndexSourceForType(table, definition);
+			if (typeSource != null)
+			{
+				idx.append(typeSource);
+				idx.append('\n');
+				continue;
+			}
+			
 			String type = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
 			if (type == null || type.startsWith("NORMAL")) type = "";
 
