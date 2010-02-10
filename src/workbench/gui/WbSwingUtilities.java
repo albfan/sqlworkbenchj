@@ -406,7 +406,12 @@ public class WbSwingUtilities
 
 	public static boolean getYesNo(Component aCaller, String aMessage)
 	{
-		int result = JOptionPane.showConfirmDialog(getWindowAncestor(aCaller), aMessage, ResourceMgr.TXT_PRODUCT_NAME, JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
+		return getYesNo(null, aCaller, aMessage);
+	}
+	
+	public static boolean getYesNo(String windowTitle, Component aCaller, String aMessage)
+	{
+		int result = JOptionPane.showConfirmDialog(getWindowAncestor(aCaller), aMessage, (windowTitle == null ? ResourceMgr.TXT_PRODUCT_NAME : windowTitle), JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE);
 		return (result == JOptionPane.YES_OPTION);
 	}
 

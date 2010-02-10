@@ -12,7 +12,6 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -2128,8 +2127,13 @@ public class SqlPanel
 
 	public boolean confirmExecution(String prompt)
 	{
+		String title = null;
+		if (dbConnection != null)
+		{
+			title = dbConnection.getProfile().getName();
+		}
 		Window w = SwingUtilities.getWindowAncestor(this);
-		return WbSwingUtilities.getYesNo(w, prompt);
+		return WbSwingUtilities.getYesNo(title, w, prompt);
 	}
 
 	/** Used for storing the result of the confirmExecution() callback */
