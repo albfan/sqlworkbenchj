@@ -172,10 +172,10 @@ public class SimpleLogger
 	{
 		try
 		{
-			if (th != null || logLevel == LogLevel.debug)
+			if (th != null)
 			{
 				String trace = (th == null ? "" : th.getMessage());
-				if (showStackTrace || th instanceof NullPointerException)
+				if (showStackTrace || this.level == LogLevel.debug)
 				{
 					trace = getStackTrace(th);
 				}
@@ -204,6 +204,7 @@ public class SimpleLogger
 		{
 			StringWriter sw = new StringWriter(2000);
 			PrintWriter pw = new PrintWriter(sw);
+			pw.println();
 			th.printStackTrace(pw);
 			return sw.toString();
 		}
