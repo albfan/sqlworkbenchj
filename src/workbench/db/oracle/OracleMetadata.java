@@ -26,6 +26,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
 import workbench.db.ErrorInformationReader;
+import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
@@ -256,7 +257,7 @@ public class OracleMetadata
 			"     10 AS num_prec_radix,  \n" +
 			"     DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
 
-		final String sql2 =
+		String sql2 = 
 			"     t.data_default AS column_def,  \n" +
 			"     decode(t.data_type, 'VARCHAR2', " +
 			"            decode(t.char_used, 'B', " + BYTE_SEMANTICS + ", 'C', " + CHAR_SEMANTICS + ", 0), " +
@@ -264,14 +265,27 @@ public class OracleMetadata
 			"       0 AS sql_datetime_sub,  \n" +
 			"       t.data_length AS char_octet_length,  \n" +
 			"       t.column_id AS ordinal_position,   \n" +
-			"       DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable  \n" +
-			" FROM all_tab_columns t";
+			"       DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
+
+		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(connection, "11.0");
+		if (includeVirtualColumns)
+		{
+			sql2 += ", t.virtual_column FROM all_tab_cols t ";
+		}
+		else
+		{
+			sql2 += "FROM all_tab_columns t ";
+		}
 
 		// I'm not using LIKE for the condition to select owner/table
 		// because internally we never call this with wildcards and leaving out the
 		// like (which is used in the original statement from Oracle's driver)
 		// speeds up the statement
-		final String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE '/'  \n";
+		String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE '/'  \n";
+		if (includeVirtualColumns)
+		{
+			where += " AND t.hidden_column = 'NO' ";
+		}
 		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
 		final String order = "ORDER BY table_schem, table_name, ordinal_position";
 
