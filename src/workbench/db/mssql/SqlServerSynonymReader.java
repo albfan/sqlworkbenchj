@@ -123,7 +123,8 @@ public class SqlServerSynonymReader
 		{
 			SqlUtil.closeAll(rs,stmt);
 		}
-
+		if (result == null) return null;
+		
 		result.setSchema(schema);
 		TableIdentifier tbl = meta.findObject(result);
 		return tbl;
@@ -133,6 +134,8 @@ public class SqlServerSynonymReader
 		throws SQLException
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
+		if (id == null) return "";
+		
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");

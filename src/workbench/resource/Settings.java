@@ -382,6 +382,11 @@ public class Settings
 		}
 	}
 
+	public String replaceProperties(String input)
+	{
+		return StringUtil.replaceProperties(props, input);
+	}
+	
 	public void setUseSinglePageHelp(boolean flag)
 	{
 		setProperty("workbench.help.singlepage", flag);

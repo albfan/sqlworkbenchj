@@ -1168,7 +1168,7 @@ public class StringUtil
 		return result.toString();
 	}
 
-	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{[0-9a-zA-Z\\.\\-]*\\}");
+	private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\$\\{[0-9a-zA-Z_\\.\\-]*\\}");
 
 	/**
 	 * Replaces "variables" of the form ${some.thing} in the input string.

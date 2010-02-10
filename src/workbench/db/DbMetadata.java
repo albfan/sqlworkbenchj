@@ -57,6 +57,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.h2database.H2SequenceReader;
 import workbench.db.mssql.SqlServerColumnEnhancer;
+import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.oracle.OracleSequenceReader;
@@ -92,6 +93,7 @@ public class DbMetadata
 	private OracleMetadata oracleMetaData;
 
 	private ColumnDefinitionEnhancer columnEnhancer;
+	private ObjectListEnhancer objectListEnhancer;
 	private TableDefinitionReader definitionReader;
 	private ConstraintReader constraintReader;
 	private DataTypeResolver dataTypeResolver;
@@ -241,10 +243,8 @@ public class DbMetadata
 			{
 				extenders.add(new SqlServerTypeReader());
 			}
-			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "9.0"))
-			{
-				columnEnhancer = new SqlServerColumnEnhancer();
-			}
+			columnEnhancer = new SqlServerColumnEnhancer();
+			objectListEnhancer = new SqlServerObjectListEnhancer();
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
@@ -1309,6 +1309,11 @@ public class DbMetadata
 			}
 		}
 
+		if (objectListEnhancer != null)
+		{
+			objectListEnhancer.updateObjectList(dbConnection, result, aCatalog, aSchema, objects, types);
+		}
+		
 		if (sortNeeded)
 		{
 			SortDefinition def = new SortDefinition();

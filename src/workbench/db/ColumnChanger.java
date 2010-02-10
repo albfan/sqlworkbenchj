@@ -27,8 +27,7 @@ import workbench.util.StringUtil;
  */
 public class ColumnChanger
 {
-	public static final String PARAM_TABLE_NAME = DbObjectChanger.PARAM_TABLE_NAME;
-
+	public static final String PARAM_TABLE_NAME = MetaDataSqlManager.TABLE_NAME_PLACEHOLDER;
 	public static final String PARAM_COL_NAME = MetaDataSqlManager.COLUMN_NAME_PLACEHOLDER;
 
 	public static final String PARAM_NEW_COL_NAME = "%new_column_name%";
@@ -315,6 +314,8 @@ public class ColumnChanger
 		if (StringUtil.isBlank(newRemarks)) newRemarks = "";
 
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConn));
+		sql = sql.replace(PARAM_TABLE_NAME, table.getTableName());
+		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
 		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(oldDefinition == null ? newDefinition : oldDefinition));
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newRemarks.replace("'", "''"));
 		if (oldDefinition != null)

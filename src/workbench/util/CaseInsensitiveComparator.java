@@ -22,6 +22,9 @@ import java.util.Comparator;
 public class CaseInsensitiveComparator
 	implements Comparator<String>
 {
+
+	public static final CaseInsensitiveComparator INSTANCE = new CaseInsensitiveComparator();
+
 	/**
 	 * Compares to two strings.
 	 * null values are "sorted" after non-null values.

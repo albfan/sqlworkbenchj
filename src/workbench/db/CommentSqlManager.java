@@ -58,6 +58,7 @@ public class CommentSqlManager
 				sql = defaultValue;
 			}
 		}
+		sql = Settings.getInstance().replaceProperties(sql);
 		return SqlUtil.trimSemicolon(sql);
 	}
 }
