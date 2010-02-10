@@ -58,6 +58,7 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
+import workbench.util.ExceptionUtil;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -96,11 +97,8 @@ public final class WbManager
 
 	public void uncaughtException(Thread thread, Throwable error)
 	{
-		if (LogMgr.isDebugEnabled())
-		{
-			error.printStackTrace();
-		}
-		LogMgr.logError("WbManager.uncaughtException()", "Thread + " + thread.getName() + " caused an exception!", error);
+		error.printStackTrace();
+		LogMgr.logError("WbManager.uncaughtException()", "Thread '" + thread.getName() + "' caused an exception!", error);
 	}
 
 	public AppArguments getCommandLine()

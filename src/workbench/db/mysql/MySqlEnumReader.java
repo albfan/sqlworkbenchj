@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.HashMap;
 import java.util.List;
+import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
@@ -30,10 +31,13 @@ import workbench.util.SqlUtil;
  * @see workbench.db.DbMetadata#getTableDefinition(workbench.db.TableIdentifier)
  */
 public class MySqlEnumReader
+	implements ColumnDefinitionEnhancer
 {
 
-	public static void updateEnumDefinition(TableDefinition tbl, WbConnection connection)
+	public void updateColumnDefinition(TableDefinition tbl, WbConnection connection)
 	{
+		if (!hasEnums(tbl)) return;
+		
 		Statement stmt = null;
 		ResultSet rs = null;
 		HashMap<String, String> defs = new HashMap<String, String>(17);
@@ -76,5 +80,18 @@ public class MySqlEnumReader
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+	}
+
+	private boolean hasEnums(TableDefinition tbl)
+	{
+		for (ColumnIdentifier col : tbl.getColumns())
+		{
+			String typeName = col.getDbmsType();
+			if (typeName.toLowerCase().startsWith("enum") || typeName.toLowerCase().startsWith("set"))
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 }

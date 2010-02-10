@@ -29,13 +29,13 @@ public class PostgresDataTypeResolverTest
 	{
 		PostgresDataTypeResolver resolver = new PostgresDataTypeResolver();
 		
-		String display = resolver.getSqlTypeDisplay("NUMERIC", Types.NUMERIC, 65535, 0, 0);
+		String display = resolver.getSqlTypeDisplay("NUMERIC", Types.NUMERIC, 65535, 0);
 		assertEquals("NUMERIC", display);
 		
-		display = resolver.getSqlTypeDisplay("NUMERIC", Types.NUMERIC, 131089, 0, 0);
+		display = resolver.getSqlTypeDisplay("NUMERIC", Types.NUMERIC, 131089, 0);
 		assertEquals("NUMERIC", display);
 
-		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 300, 0, 0);
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 300, 0);
 		assertEquals("VARCHAR(300)", display);
 	}
 	

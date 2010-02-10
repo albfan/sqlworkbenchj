@@ -112,12 +112,6 @@ public class TableSourceBuilder
 		return getTableSource(table, columns, indexInfo, null, false, tableNameToUse, true);
 	}
 
-	public String getTableSource(TableIdentifier table, DataStore columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse)
-	{
-		List<ColumnIdentifier> cols = TableColumnsDatastore.createColumnIdentifiers(dbConnection.getMetadata(), columns);
-		return getTableSource(table, cols, aIndexDef, aFkDef, includeDrop, tableNameToUse, true);
-	}
-
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
@@ -182,54 +176,58 @@ public class TableSourceBuilder
 			}
 
 			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
-			result.append(type);
-
-			// Check if any additional keywords are coming after
-			// the datatype. If yes, we fill the line with spaces
-			// to align the keywords properly
-			if ( StringUtil.isNonBlank(def) ||
-				   (!column.isNullable()) ||
-				   (column.isNullable() && this.useNullKeyword)
-					)
+			if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
 			{
-				for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
-			}
-
-			if (defaultBeforeNull && StringUtil.isNonBlank(def))
-			{
-				result.append(" DEFAULT ");
-				result.append(def.trim());
-			}
-
-			if (isFirstSql && "sequence".equals(type))
-			{
-				// with FirstSQL a column of type "sequence" is always the primary key
-				result.append(" PRIMARY KEY");
-			}
-			else if (column.isNullable())
-			{
-				if (this.useNullKeyword)
-				{
-					result.append(' ');
-					result.append(nullKeyword);
-				}
+				result.append(column.getComputedColumnExpression());
 			}
 			else
 			{
-				result.append(" NOT NULL");
-			}
+				result.append(type);
 
-			if (!defaultBeforeNull && !StringUtil.isEmptyString(def))
-			{
-				result.append(" DEFAULT ");
-				result.append(def.trim());
-			}
+				// Check if any additional keywords are coming after
+				// the datatype. If yes, we fill the line with spaces
+				// to align the keywords properly
+				if ( StringUtil.isNonBlank(def) || (!column.isNullable()) || (column.isNullable() && this.useNullKeyword))
+				{
+					for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
+				}
 
-			String constraint = columnConstraints.get(colName);
-			if (constraint != null && constraint.length() > 0)
-			{
-				result.append(' ');
-				result.append(constraint);
+				if (defaultBeforeNull && StringUtil.isNonBlank(def))
+				{
+					result.append(" DEFAULT ");
+					result.append(def.trim());
+				}
+
+				if (isFirstSql && "sequence".equals(type))
+				{
+					// with FirstSQL a column of type "sequence" is always the primary key
+					result.append(" PRIMARY KEY");
+				}
+				else if (column.isNullable())
+				{
+					if (this.useNullKeyword)
+					{
+						result.append(' ');
+						result.append(nullKeyword);
+					}
+				}
+				else
+				{
+					result.append(" NOT NULL");
+				}
+
+				if (!defaultBeforeNull && !StringUtil.isEmptyString(def))
+				{
+					result.append(" DEFAULT ");
+					result.append(def.trim());
+				}
+
+				String constraint = columnConstraints.get(colName);
+				if (constraint != null && constraint.length() > 0)
+				{
+					result.append(' ');
+					result.append(constraint);
+				}
 			}
 
 			if (includeCommentInTableSource && StringUtil.isNonBlank(column.getComment()))

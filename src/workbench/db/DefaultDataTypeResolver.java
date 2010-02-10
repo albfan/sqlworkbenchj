@@ -18,9 +18,16 @@ public class DefaultDataTypeResolver
 	implements DataTypeResolver
 {
 
-	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int wbTypeInfo)
+	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
 		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
+	}
+
+	@Override
+	public int fixColumnType(int type)
+	{
+		// Nothing to do
+		return type;
 	}
 	
 }

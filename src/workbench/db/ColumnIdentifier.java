@@ -42,6 +42,11 @@ public class ColumnIdentifier
 	private Class columnClass;
 	private String columnTypeName;
 	private String sourceTable;
+	
+	/**
+	 * Stores the definition of "computed" columns (e.g. Firebird, SQL Server, DB2)
+	 */
+	private String expression;
 
 	private int displaySize = -1;
 	private int position;
@@ -101,6 +106,16 @@ public class ColumnIdentifier
 	public void setColumnAlias(String label)
 	{
 		alias = label;
+	}
+
+	public String getComputedColumnExpression()
+	{
+		return expression;
+	}
+
+	public void setComputedColumnExpression(String expr)
+	{
+		this.expression = expr;
 	}
 
 	public String getDisplayName()
@@ -272,6 +287,7 @@ public class ColumnIdentifier
 		result.columnTypeName = this.columnTypeName;
 		result.position = this.position;
 		result.displaySize = this.displaySize;
+		result.expression = this.expression;
 
 		return result;
 	}

@@ -18,11 +18,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.SQLException;
 import java.util.MissingFormatArgumentException;
-import workbench.gui.components.*;
 import workbench.util.*;
 
 /**
- * 
+ *
  * @author Thomas Kellerer
  */
 public class SimpleLogger
@@ -176,7 +175,7 @@ public class SimpleLogger
 			if (th != null || logLevel == LogLevel.debug)
 			{
 				String trace = (th == null ? "" : th.getMessage());
-				if (showStackTrace)
+				if (showStackTrace || th instanceof NullPointerException)
 				{
 					trace = getStackTrace(th);
 				}

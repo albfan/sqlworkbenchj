@@ -115,8 +115,6 @@ public class TypeMapper
 
 	public String getTypeName(int type, int size, int digits)
 	{
-
-
 		String userType = getUserMapping(type, size, digits);
 		if (userType != null) return userType;
 
@@ -148,7 +146,7 @@ public class TypeMapper
 			return SqlUtil.getTypeName(type);
 		}
 
-		return this.targetDb.getMetadata().getDataTypeResolver().getSqlTypeDisplay(name, type, size, digits, -1);
+		return this.targetDb.getMetadata().getDataTypeResolver().getSqlTypeDisplay(name, type, size, digits);
 	}
 
 	private void parseTypeMap()

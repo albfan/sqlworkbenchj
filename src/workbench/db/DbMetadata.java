@@ -30,7 +30,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.JdbcTableDefinitionReader;
 import workbench.db.derby.DerbySynonymReader;
+import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.firebird.FirebirdDomainReader;
 import workbench.db.firebird.FirebirdSequenceReader;
 import workbench.db.h2database.H2ConstantReader;
@@ -54,6 +56,7 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.oracle.OracleSequenceReader;
@@ -88,6 +91,8 @@ public class DbMetadata
 
 	private OracleMetadata oracleMetaData;
 
+	private ColumnDefinitionEnhancer columnEnhancer;
+	private TableDefinitionReader definitionReader;
 	private ConstraintReader constraintReader;
 	private DataTypeResolver dataTypeResolver;
 	private SynonymReader synonymReader;
@@ -176,11 +181,12 @@ public class DbMetadata
 		if (productLower.indexOf("oracle") > -1)
 		{
 			this.isOracle = true;
-			this.oracleMetaData = new OracleMetadata(this.dbConnection);
+			oracleMetaData = new OracleMetadata(this.dbConnection);
 			this.synonymReader = new OracleSynonymReader();
 			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
-			this.errorInfoReader = this.oracleMetaData;
-			this.dataTypeResolver = this.oracleMetaData;
+			this.errorInfoReader = oracleMetaData;
+			this.dataTypeResolver = oracleMetaData;
+			this.definitionReader = oracleMetaData;
 		}
 		else if (productLower.indexOf("postgres") > - 1)
 		{
@@ -221,7 +227,7 @@ public class DbMetadata
 			this.productName = "Firebird";
 			this.sequenceReader = new FirebirdSequenceReader(dbConnection);
 			extenders.add(new FirebirdDomainReader());
-
+			columnEnhancer = new FirebirdColumnEnhancer();
 		}
 		else if (productLower.indexOf("sql server") > -1)
 		{
@@ -235,6 +241,10 @@ public class DbMetadata
 			{
 				extenders.add(new SqlServerTypeReader());
 			}
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "9.0"))
+			{
+				columnEnhancer = new SqlServerColumnEnhancer();
+			}
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
@@ -244,6 +254,7 @@ public class DbMetadata
 		else if (productLower.indexOf("mysql") > -1)
 		{
 			this.isMySql = true;
+			columnEnhancer = new MySqlEnumReader();
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
@@ -297,6 +308,11 @@ public class DbMetadata
 			this.dataTypeResolver = new DefaultDataTypeResolver();
 		}
 
+		if (definitionReader == null)
+		{
+			definitionReader = new JdbcTableDefinitionReader();
+		}
+		
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -1702,26 +1718,6 @@ public class DbMetadata
 	public void close()
 	{
 		if (this.oraOutput != null) this.oraOutput.close();
-		if (this.oracleMetaData != null)
-		{
-			this.oracleMetaData.columnsProcessed();
-			this.oracleMetaData.done();
-		}
-	}
-
-	public int fixColumnType(int type)
-	{
-		if (this.isOracle)
-		{
-			if (type == Types.DATE && this.oracleMetaData.getMapDateToTimestamp()) return Types.TIMESTAMP;
-
-			// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric
-			// value -101 (which is not an official java.sql.Types value
-			// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
-			if (type == -101 || type == -102) return Types.TIMESTAMP;
-		}
-
-		return type;
 	}
 
 	public boolean isExtendedObject(DbObject o)
@@ -1825,20 +1821,20 @@ public class DbMetadata
 		if (toRead == null) return null;
 
 		TableIdentifier table = toRead.createCopy();
-		table.adjustCase(this.dbConnection);
+		table.adjustCase(dbConnection);
 
 		String catalog = StringUtil.trimQuotes(table.getCatalog());
 		String schema = StringUtil.trimQuotes(table.getSchema());
 		String tablename = StringUtil.trimQuotes(table.getTableName());
 
-		if (schema == null && this.isOracle())
+		if (schema == null && isOracle())
 		{
-			schema = this.getSchemaToUse();
+			schema = getSchemaToUse();
 		}
 
 		if ("SYNONYM".equalsIgnoreCase(table.getType()))
 		{
-			TableIdentifier id = this.getSynonymTable(schema, tablename);
+			TableIdentifier id = getSynonymTable(schema, tablename);
 			if (id != null)
 			{
 				schema = id.getSchema();
@@ -1847,15 +1843,15 @@ public class DbMetadata
 			}
 		}
 
-		ArrayList<String> keys = new ArrayList<String>();
+		List<String> keys = new ArrayList<String>();
 		String pkname = null;
 
-		if (this.dbSettings.supportsGetPrimaryKeys())
+		if (dbSettings.supportsGetPrimaryKeys())
 		{
 			ResultSet keysRs = null;
 			try
 			{
-				keysRs = this.metaData.getPrimaryKeys(catalog, schema, tablename);
+				keysRs = metaData.getPrimaryKeys(catalog, schema, tablename);
 				while (keysRs.next())
 				{
 					keys.add(keysRs.getString("COLUMN_NAME").toLowerCase());
@@ -1864,7 +1860,7 @@ public class DbMetadata
 			}
 			catch (Throwable e)
 			{
-				LogMgr.logWarning("DbMetaData.getTableDefinition()", "Error retrieving key columns: " + e.getMessage());
+				LogMgr.logWarning("JdbcTableDefinitionReader.getTableDefinition()", "Error retrieving key columns: " + e.getMessage());
 			}
 			finally
 			{
@@ -1873,114 +1869,15 @@ public class DbMetadata
 		}
 		table.setPrimaryKeyName(pkname);
 
-		boolean hasEnums = false;
-
-		ResultSet rs = null;
-
-		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
-
-		try
-		{
-			if (this.oracleMetaData != null)
-			{
-				rs = this.oracleMetaData.getColumns(catalog, schema, tablename, "%");
-			}
-			else
-			{
-				rs = this.metaData.getColumns(catalog, schema, tablename, "%");
-			}
-
-			while (rs != null && rs.next())
-			{
-				// The columns should be retrieved (getXxx()) in the order
-				// as they appear in the result set as some drivers
-				// do not like an out-of-order processing of the columns
-				String colName = rs.getString("COLUMN_NAME"); // index 4
-				int sqlType = rs.getInt("DATA_TYPE"); // index 5
-				ColumnIdentifier col = new ColumnIdentifier(quoteObjectname(colName), fixColumnType(sqlType));
-
-				String typeName = rs.getString("TYPE_NAME");
-				if (this.isMySql && !hasEnums)
-				{
-					hasEnums = typeName.toLowerCase().startsWith("enum") || typeName.toLowerCase().startsWith("set");
-				}
-
-				int size = rs.getInt("COLUMN_SIZE"); // index 7
-				int digits = -1;
-				try
-				{
-					digits = rs.getInt("DECIMAL_DIGITS"); // index 9
-				}
-				catch (Exception e)
-				{
-					digits = -1;
-				}
-				if (rs.wasNull()) digits = -1;
-
-				String remarks = rs.getString("REMARKS"); // index 12
-				String defaultValue = rs.getString("COLUMN_DEF"); // index 13
-				if (defaultValue != null && this.dbSettings.trimDefaults())
-				{
-					defaultValue = defaultValue.trim();
-				}
-
-				int sqlDataType = -1;
-				try
-				{
-					// This column is used by our own OracleMetaData to
-					// return information about char/byte semantics
-					sqlDataType = rs.getInt("SQL_DATA_TYPE");  // index 14
-					if (rs.wasNull()) sqlDataType = -1;
-				}
-				catch (Throwable th)
-				{
-					// The specs says "unused" for this column, so maybe
-					// there are drivers that do not return this column at all.
-					sqlDataType = -1;
-				}
-
-				int position = -1;
-				try
-				{
-					position = rs.getInt("ORDINAL_POSITION"); // index 17
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logWarning("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
-					position = -1;
-				}
-
-				String nullable = rs.getString("IS_NULLABLE"); // index 18
-
-				String display = this.dataTypeResolver.getSqlTypeDisplay(typeName, sqlType, size, digits, sqlDataType);
-
-				col.setDbmsType(display);
-				col.setIsPkColumn(keys.contains(colName.toLowerCase()));
-				col.setIsNullable("YES".equalsIgnoreCase(nullable));
-				col.setDefaultValue(defaultValue);
-				col.setComment(remarks);
-				col.setColumnSize(size);
-				col.setDecimalDigits(digits);
-				col.setPosition(position);
-				columns.add(col);
-			}
-		}
-		finally
-		{
-			SqlUtil.closeResult(rs);
-			if (this.oracleMetaData != null)
-			{
-				this.oracleMetaData.columnsProcessed();
-			}
-		}
+		List<ColumnIdentifier> columns = definitionReader.getTableColumns(table, keys, dbConnection, dataTypeResolver);
 
 		table.setNewTable(false);
 		TableDefinition result = new TableDefinition(table, columns);
-		if (hasEnums)
+		if (columnEnhancer != null)
 		{
-			MySqlEnumReader.updateEnumDefinition(result, this.dbConnection);
+			columnEnhancer.updateColumnDefinition(result, dbConnection);
 		}
-
+		
 		return result;
 	}
 
@@ -2435,7 +2332,7 @@ public class DbMetadata
 	 *         name does not reference a synonym or if the DBMS does not support synonyms
 	 * @see #getSynonymTable(String, String)
 	 */
-	protected TableIdentifier getSynonymTable(String schema, String synonym)
+	public TableIdentifier getSynonymTable(String schema, String synonym)
 	{
 		if (this.synonymReader == null) return null;
 		TableIdentifier id = null;

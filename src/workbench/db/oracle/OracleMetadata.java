@@ -18,15 +18,21 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
+import workbench.JdbcTableDefinitionReader;
+import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DataTypeResolver;
 import workbench.db.DbMetadata;
+import workbench.db.DbSettings;
 import workbench.db.ErrorInformationReader;
 import workbench.db.JdbcUtils;
+import workbench.db.TableDefinitionReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
@@ -60,7 +66,7 @@ import workbench.util.StringUtil;
  * @author Thomas Kellerer
  */
 public class OracleMetadata
-	implements ErrorInformationReader, DataTypeResolver, PropertyChangeListener
+	implements ErrorInformationReader, DataTypeResolver, PropertyChangeListener, TableDefinitionReader
 {
 	private final WbConnection connection;
 	private PreparedStatement columnStatement;
@@ -199,28 +205,148 @@ public class OracleMetadata
 		return value;
 	}
 
-	public ResultSet getColumns(String catalog, String schema, String table, String cols)
+	public int fixColumnType(int type)
+	{
+		if (type == Types.DATE && getMapDateToTimestamp()) return Types.TIMESTAMP;
+
+		// Oracle reports TIMESTAMP WITH TIMEZONE with the numeric
+		// value -101 (which is not an official java.sql.Types value
+		// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
+		if (type == -101 || type == -102) return Types.TIMESTAMP;
+
+		return type;
+	}
+
+	public List<ColumnIdentifier> getTableColumns(TableIdentifier table, List<String> primaryKeyColumns, WbConnection dbConnection, DataTypeResolver typeResolver)
 		throws SQLException
 	{
-		// make sure the statement object is closed properly
-		columnsProcessed();
-
 		if (!useOwnSql)
 		{
-			this.columnStatement = null;
-			return this.connection.getSqlConnection().getMetaData().getColumns(catalog, schema, table, cols);
+			JdbcTableDefinitionReader reader = new JdbcTableDefinitionReader();
+			return reader.getTableColumns(table, primaryKeyColumns, dbConnection, typeResolver);
 		}
 
+		DbSettings dbSettings = dbConnection.getDbSettings();
+		DbMetadata dbmeta = dbConnection.getMetadata();
+		String schema = StringUtil.trimQuotes(table.getSchema());
+		String tablename = StringUtil.trimQuotes(table.getTableName());
+
+		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
+
+		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(connection, "11.0");
+
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+		
+		try
+		{
+			pstmt = prepareColumnsStatement(schema, tablename);
+			rs = pstmt.executeQuery();
+
+			while (rs != null && rs.next())
+			{
+				// The columns should be retrieved (getXxx()) in the order
+				// as they appear in the result set as some drivers
+				// do not like an out-of-order processing of the columns
+				String colName = rs.getString("COLUMN_NAME"); // index 4
+				int sqlType = rs.getInt("DATA_TYPE"); // index 5
+				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), fixColumnType(sqlType));
+
+				String typeName = rs.getString("TYPE_NAME");
+
+				int size = rs.getInt("COLUMN_SIZE"); // index 7
+				int digits = -1;
+				try
+				{
+					digits = rs.getInt("DECIMAL_DIGITS"); // index 9
+				}
+				catch (Exception e)
+				{
+					digits = -1;
+				}
+				if (rs.wasNull()) digits = -1;
+
+				String remarks = rs.getString("REMARKS"); // index 12
+				String defaultValue = rs.getString("COLUMN_DEF"); // index 13
+				if (defaultValue != null && dbSettings.trimDefaults())
+				{
+					defaultValue = defaultValue.trim();
+				}
+
+				int position = -1;
+				try
+				{
+					position = rs.getInt("ORDINAL_POSITION"); // index 17
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logWarning("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
+					position = -1;
+				}
+
+				String nullable = rs.getString("IS_NULLABLE"); // index 18
+				String byteOrChar = rs.getString("CHAR_USED");
+				int charSemantics = defaultLengthSemantics;
+
+				if (StringUtil.isEmptyString(byteOrChar))
+				{
+					charSemantics = defaultLengthSemantics;
+				}
+				else if ("B".equals(byteOrChar.trim()))
+				{
+					charSemantics = BYTE_SEMANTICS;
+				}
+				else if ("C".equals(byteOrChar.trim()))
+				{
+					charSemantics = CHAR_SEMANTICS;
+				}
+
+				boolean isVirtual = false;
+				if (includeVirtualColumns)
+				{
+					String virtual = rs.getString("VIRTUAL_COLUMN");
+					isVirtual = (virtual != null && virtual.equals("Y"));
+				}
+				String display = getSqlTypeDisplay(typeName, sqlType, size, digits, charSemantics);
+
+				col.setDbmsType(display);
+				col.setIsPkColumn(primaryKeyColumns.contains(colName.toLowerCase()));
+				col.setIsNullable("YES".equalsIgnoreCase(nullable));
+
+				if (isVirtual)
+				{
+					String exp = " GENERATED ALWAYS AS (" + defaultValue + ")";
+					col.setComputedColumnExpression(exp);
+				}
+				else
+				{
+					col.setDefaultValue(defaultValue);
+				}
+				col.setComment(remarks);
+				col.setColumnSize(size);
+				col.setDecimalDigits(digits);
+				col.setPosition(position);
+				columns.add(col);
+			}
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
+		return columns;
+	}
+
+	private PreparedStatement prepareColumnsStatement(String schema, String table)
+		throws SQLException
+	{
 		boolean fixNVARCHAR = fixNVARCHARSemantics();
+
 
 		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
     // this statement fixes this problem and also removes the usage of LIKE
     // to speed up the retrieval.
 		final String sql1 =
-			"SELECT NULL AS table_cat,  \n" +
-			"     t.owner AS table_schem,  \n" +
-			"     t.table_name AS table_name,  \n" +
-			"     t.column_name AS column_name,  \n   " +
+			"SELECT t.column_name AS column_name,  \n   " +
 			"     DECODE(t.data_type, 'CHAR', " + Types.CHAR + ", " +
 			"                    'VARCHAR2', " + Types.VARCHAR + ", " +
 			"                    'NVARCHAR2', " + (fixNVARCHAR ? Types.NVARCHAR : Types.OTHER) + ", " +
@@ -252,42 +378,32 @@ public class OracleMetadata
 			"                            'CHAR', t.char_length, " +
 			"                            'NCHAR', t.char_length, t.data_length), " +
 			"               t.data_precision) AS column_size,  \n" +
-			"     0 AS buffer_length,  \n" +
 			"     t.data_scale AS decimal_digits,  \n" +
-			"     10 AS num_prec_radix,  \n" +
 			"     DECODE (t.nullable, 'N', 0, 1) AS nullable,  \n";
 
-		String sql2 = 
+		String sql2 =
 			"     t.data_default AS column_def,  \n" +
-			"     decode(t.data_type, 'VARCHAR2', " +
-			"            decode(t.char_used, 'B', " + BYTE_SEMANTICS + ", 'C', " + CHAR_SEMANTICS + ", 0), " +
-			"            0) AS sql_data_type,  \n " +
-			"       0 AS sql_datetime_sub,  \n" +
-			"       t.data_length AS char_octet_length,  \n" +
+			"     t.char_used, \n " +
 			"       t.column_id AS ordinal_position,   \n" +
 			"       DECODE (t.nullable, 'N', 'NO', 'YES') AS is_nullable ";
 
 		boolean includeVirtualColumns = JdbcUtils.hasMinimumServerVersion(connection, "11.0");
 		if (includeVirtualColumns)
 		{
-			sql2 += ", t.virtual_column FROM all_tab_cols t ";
+			sql2 += ", t.virtual_column \n FROM all_tab_cols t \n";
 		}
 		else
 		{
-			sql2 += "FROM all_tab_columns t ";
+			sql2 += " \n FROM all_tab_columns t \n";
 		}
 
-		// I'm not using LIKE for the condition to select owner/table
-		// because internally we never call this with wildcards and leaving out the
-		// like (which is used in the original statement from Oracle's driver)
-		// speeds up the statement
-		String where = " WHERE t.owner = ? AND t.table_name = ? AND t.column_name LIKE ? ESCAPE '/'  \n";
+		String where = " WHERE t.owner = ? AND t.table_name = ? \n";
 		if (includeVirtualColumns)
 		{
 			where += " AND t.hidden_column = 'NO' ";
 		}
 		final String comment_join = "   AND t.owner = c.owner (+)  AND t.table_name = c.table_name (+)  AND t.column_name = c.column_name (+)  \n";
-		final String order = "ORDER BY table_schem, table_name, ordinal_position";
+		final String order = "ORDER BY t.column_id";
 
 		final String sql_comment = sql1 + "       c.comments AS remarks, \n" + sql2 + ", all_col_comments c  \n" + where + comment_join + order;
 		final String sql_no_comment = sql1 + "       null AS remarks, \n" + sql2 + where + order;
@@ -302,8 +418,6 @@ public class OracleMetadata
 		{
 			sql = sql_no_comment;
 		}
-
-		ResultSet rs = null;
 
 		int pos = table != null ? table.indexOf('@') : -1;
 
@@ -320,16 +434,14 @@ public class OracleMetadata
 			}
 		}
 
-		this.columnStatement = this.connection.getSqlConnection().prepareStatement(sql);
-		this.columnStatement.setString(1, schema);
-		this.columnStatement.setString(2, table);
-		this.columnStatement.setString(3, cols != null ? cols : "%");
+		PreparedStatement stmt = this.connection.getSqlConnection().prepareStatement(sql);
+		stmt.setString(1, schema);
+		stmt.setString(2, table);
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleMetadata.getColumns()", "Using: " + sql);
 		}
-		rs = this.columnStatement.executeQuery();
-		return rs;
+		return stmt;
 	}
 
 	private String getDbLinkTargetSchema(String dblink, String owner)
@@ -552,16 +664,6 @@ public class OracleMetadata
 		return result;
 	}
 
-	/**
-	 * Close the statement object that was used in {@link #getColumns(String, String, String, String)}.
-	 * This method should be called after closing the ResultSet obtained from that method.
-	 */
-	public void columnsProcessed()
-	{
-		SqlUtil.closeStatement(columnStatement);
-		columnStatement = null;
-	}
-
 	public static boolean remarksEnabled(WbConnection con)
 	{
 		if (con == null) return false;
@@ -602,6 +704,11 @@ public class OracleMetadata
 		}
 		result.append(')');
 		return result.toString();
+	}
+
+	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
+	{
+		return getSqlTypeDisplay(dbmsName, sqlType, size, digits, -1);
 	}
 
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int byteOrChar)

@@ -22,7 +22,7 @@ public class PostgresDataTypeResolver
 	implements DataTypeResolver
 {
 
-	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits, int wbTypeInfo)
+	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
 		if ("text".equalsIgnoreCase(dbmsName)) return "text";
 		if (sqlType == Types.CHAR && "bpchar".equalsIgnoreCase(dbmsName))
@@ -35,6 +35,12 @@ public class PostgresDataTypeResolver
 			if (digits == 65531) digits = 0;
 		}
 		return SqlUtil.getSqlTypeDisplay(dbmsName, sqlType, size, digits);
+	}
+
+	@Override
+	public int fixColumnType(int type)
+	{
+		return type;
 	}
 
 }
