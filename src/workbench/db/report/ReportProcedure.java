@@ -70,7 +70,10 @@ public class ReportProcedure
 		xml.writeTo(out);
 	}
 
-	public String getProcedureName() { return procDef.getProcedureName(); }
+	public String getProcedureName()
+	{
+		return procDef.getProcedureName();
+	}
 	
 	public void setIndent(StrBuffer ind)
 	{

@@ -44,7 +44,6 @@ public class PostgresProcedureReader
 	private Map<String, Integer> pgType2Java;
 	private PGTypeLookup pgTypes;
 	private PGType voidType;
-	private final String placeholder = "$wb$_aggregage_source_$wb";
 
 	public PostgresProcedureReader(WbConnection conn)
 	{

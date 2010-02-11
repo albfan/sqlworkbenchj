@@ -120,8 +120,10 @@ public class ColumnIdentifierTest
 	public void testCopy()
 	{
 		ColumnIdentifier col = new ColumnIdentifier("mycol", Types.VARCHAR, true);
+		col.setComputedColumnExpression("other_col * 2");
 		ColumnIdentifier copy = col.createCopy();
 		assertEquals("Copy not equals", true, col.equals(copy));
+		assertEquals("other_col * 2", copy.getComputedColumnExpression());
 	}
 	
 	public void testSort()

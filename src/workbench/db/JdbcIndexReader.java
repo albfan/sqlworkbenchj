@@ -66,11 +66,10 @@ public class JdbcIndexReader
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
-		if ("VIEW".equalsIgnoreCase(table.getType()))
+		if (metaData.getDbSettings().isViewType(table.getType()))
 		{
 			if (!metaData.getDbSettings().supportsIndexedViews())
 			{
-				LogMgr.logDebug("JdbcIndexReader.getIndexInfo()", "Not retrieving index info for VIEW " + table.getTableName());
 				return null;
 			}
 		}
@@ -84,11 +83,7 @@ public class JdbcIndexReader
 	public String getPrimaryKeyIndex(TableIdentifier tbl)
 	{
 		// Views don't have primary keys...
-		if ("VIEW".equals(tbl.getType()))
-		{
-			LogMgr.logDebug("JdbcIndexReader.getPrimaryKeyIndex()", "Not retrieving PK index info for VIEW " + tbl.getTableName());
-			return "";
-		}
+		if (metaData.getDbSettings().isViewType(tbl.getType())) return StringUtil.EMPTY_STRING;
 
 		// Retrieve the name of the PK index
 		String pkName = "";
@@ -311,7 +306,7 @@ public class JdbcIndexReader
 				{
 					def = new IndexDefinition(tbl, indexName);
 					def.setUnique(!unique);
-					def.setPrimaryKeyIndex(indexName.equals(pkName));
+					def.setPrimaryKeyIndex(pkName != null && indexName.equals(pkName));
 					defs.put(indexName, def);
 
 					// The ResultSet produced by getIndexInfo() might not be 100%

@@ -1833,11 +1833,17 @@ public class DbMetadata
 		String schema = StringUtil.trimQuotes(table.getSchema());
 		String tablename = StringUtil.trimQuotes(table.getTableName());
 
-		if (schema == null && isOracle())
+		if (schema == null)
 		{
-			schema = getSchemaToUse();
+			schema = getCurrentSchema();
+			table.setSchema(schema);
 		}
-		table.setSchema(schema);
+
+		if (catalog == null)
+		{
+			catalog = getCurrentCatalog();
+			table.setCatalog(catalog);
+		}
 
 		if ("SYNONYM".equalsIgnoreCase(table.getType()))
 		{

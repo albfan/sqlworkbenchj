@@ -217,7 +217,7 @@ public class ProcedureDefinition
 	
 	public String getProcedureName() 
 	{
-		return this.procName; 
+		return getObjectName();
 	}
 	
 	public int getResultType() 
