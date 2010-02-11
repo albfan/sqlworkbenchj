@@ -613,9 +613,9 @@ public class Settings
 		return getBoolProperty("workbench.db.microsoft_sql_server.fix.timestamp", true);
 	}
 
-	public boolean getConvertOracleRawData()
+	public boolean getConvertOracleTypes()
 	{
-		return getBoolProperty("workbench.db.oracle.raw.autoconvert", false);
+		return getBoolProperty("workbench.db.oracle.types.autoconvert", true);
 	}
 
 	/**

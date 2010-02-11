@@ -42,6 +42,21 @@ public class RowDataFactory
 		return result;
 	}
 
+	/**
+	 * Creates instances of necessary DataConverters
+	 *
+	 * The following datatypes are currently supported:
+	 * <ul>
+	 * <li>For SQL Server's timestamp type</li>
+	 * <li>For Oracle: RAW and ROWID types</li>
+	 * </ul>
+	 *
+	 * @see workbench.resource.Settings#getFixSqlServerTimestampDisplay()
+	 * @see workbench.resource.Settings#getConvertOracleTypes()
+	 * 
+	 * @param conn the connection for which to create the DataConverter
+	 * @return a suitable converter or null if nothing should be converted
+	 */
 	public static DataConverter getConverterInstance(WbConnection conn)
 	{
 		if (conn == null) return null;
@@ -53,7 +68,7 @@ public class RowDataFactory
 		{
 			return SqlServerDataConverter.getInstance();
 		}
-		if (meta.isOracle() && Settings.getInstance().getConvertOracleRawData())
+		if (meta.isOracle() && Settings.getInstance().getConvertOracleTypes())
 		{
 			return OracleDataConverter.getInstance();
 		}

@@ -11,6 +11,7 @@
  */
 package workbench.db.oracle;
 
+import java.lang.reflect.Method;
 import java.sql.Types;
 import workbench.log.LogMgr;
 import workbench.storage.DataConverter;
@@ -18,13 +19,19 @@ import workbench.util.NumberStringCache;
 
 /**
  * A class to convert Oracle's RAW datatype to something readable.
+ * <br/>
+ * This is only used if enabled.
  *
+ *
+ * @see workbench.resource.Settings#getConvertOracleTypes()
+ * 
  * @author Thomas Kellerer
  */
 public class OracleDataConverter
 	implements DataConverter
 {
-
+	private Method stringValueMethod;
+	
 	protected static class LazyInstanceHolder
 	{
 		protected static final OracleDataConverter instance = new OracleDataConverter();
@@ -40,33 +47,83 @@ public class OracleDataConverter
 	}
 
 	/**
-	 * Checks if jdbcType == Types.VARBINARY and if dbmsType == "RAW"
+	 * Two Oracle datatypes are supported 
+	 * <ul>
+	 * <li>RAW (jdbcType == Types.VARBINARY && dbmsType == "RAW")</li>
+	 * <li>ROWID (jdbcType = Types.ROWID)</li>
+	 * </ul>
 	 *
 	 * @param jdbcType the jdbcType as returned by the driver
 	 * @param dbmsType the name of the datatype for this value
-	 *
 	 */
 	public boolean convertsType(int jdbcType, String dbmsType)
 	{
-		return (jdbcType == Types.VARBINARY && dbmsType.equals("RAW"));
+		return (jdbcType == Types.VARBINARY && dbmsType.equals("RAW") ||
+			      jdbcType == Types.ROWID);
 	}
 
+	private synchronized Method stringValueMethod(Object value)
+	{
+		if (stringValueMethod == null)
+		{
+			try
+			{
+				stringValueMethod = value.getClass().getDeclaredMethod("stringValue");
+			}
+			catch (Throwable th)
+			{
+				// ignore
+			}
+		}
+		return stringValueMethod;
+	}
+
+
+	private Object convertRowId(Object value)
+	{
+		Method valueMethod = stringValueMethod(value);
+		if (valueMethod == null) return value.toString();
+		
+		try
+		{
+			Object result = valueMethod.invoke(value);
+			return result;
+		}
+		catch (Throwable th)
+		{
+			return value.toString();
+		}
+	}
+	
 	/**
 	 * If the type of the originalValue is RAW, then
 	 * the value is converted into a corresponding hex display, e.g. <br/>
 	 * <tt>0x000000000001dc91</tt>
 	 *
+	 * If the type of the originalValue is ROWID, Oracles stringValue() method
+	 * from the class oracle.sql.ROWID is used to convert the input value
+	 *
 	 * @param jdbcType the jdbcType as returned by the driver
 	 * @param dbmsType the name of the datatype for this value
-	 * @param originalValue the value to be converted (or not)
+	 * @param inputValue the value to be converted (or not)
 	 *
 	 * @return the originalValue or a converted value if approriate
 	 * @see #convertsType(int, java.lang.String)
 	 */
-	public Object convertValue(int jdbcType, String dbmsType, Object originalValue)
+	public Object convertValue(int jdbcType, String dbmsType, Object inputValue)
 	{
-		if (originalValue == null) return null;
-		if (!convertsType(jdbcType, dbmsType)) return originalValue;
+		if (inputValue == null) return null;
+		if (!convertsType(jdbcType, dbmsType)) return inputValue;
+
+		if (jdbcType == Types.ROWID)
+		{
+			return convertRowId(inputValue);
+		}
+		return convertRaw(inputValue);
+	}
+
+	private Object convertRaw(Object originalValue)
+	{
 		Object newValue = null;
 		try
 		{
@@ -86,5 +143,4 @@ public class OracleDataConverter
 		}
 		return newValue;
 	}
-
 }
