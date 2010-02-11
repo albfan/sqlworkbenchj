@@ -90,7 +90,7 @@ public class ColumnAlterAction
 	{
 		if (dbConnection == null) return false;
 		if (sourceTable == null) return false;
-		return this.sourceTable.getType().equalsIgnoreCase("TABLE");
+		return dbConnection.getDbSettings().columnCommentAllowed(this.sourceTable.getType());
 	}
 
 	@Override

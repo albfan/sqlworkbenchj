@@ -984,4 +984,11 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".add.pk", null);
 	}
 
+	public boolean columnCommentAllowed(String objectType)
+	{
+		if (StringUtil.isBlank(objectType)) return false;
+		String type = objectType.toLowerCase().trim().replace(' ', '_');
+		List<String> types = Settings.getInstance().getListProperty(prefix + "columncomment.types", true, "table");
+		return types.contains(type);
+	}
 }

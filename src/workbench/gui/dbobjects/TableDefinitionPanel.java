@@ -354,7 +354,7 @@ public class TableDefinitionPanel
 					dsModel.setNonEditableColums(typeIndex, posIndex, pkIndex);
 				}
 
-				alterButton.setVisible("TABLE".equalsIgnoreCase(currentTable.getType()));
+				alterButton.setVisible(dbConnection.getDbSettings().columnCommentAllowed(currentTable.getType()));
 
 				WbSwingUtilities.invoke(new Runnable()
 				{
