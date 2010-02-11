@@ -1723,6 +1723,7 @@ public class DbMetadata
 	public void close()
 	{
 		if (this.oraOutput != null) this.oraOutput.close();
+		if (this.oracleMetaData != null) this.oracleMetaData.done();
 	}
 
 	public boolean isExtendedObject(DbObject o)

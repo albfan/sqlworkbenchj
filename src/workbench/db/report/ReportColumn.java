@@ -36,6 +36,7 @@ public class ReportColumn
 	public static final String TAG_COLUMN_NULLABLE = "nullable";
 	public static final String TAG_COLUMN_PK = "primary-key";
 	public static final String TAG_COLUMN_COMMENT = "comment";
+	public static final String TAG_COLUMN_COMPUTED_COL = "computed-column-expression";
 
 	private ColumnReference fk;
 	private ColumnIdentifier column;
@@ -108,6 +109,10 @@ public class ReportColumn
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDigitsDisplay());
 		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
+		if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
+		{
+			tagWriter.appendTag(result, myindent, TAG_COLUMN_COMPUTED_COL, column.getComputedColumnExpression());
+		}
 		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_COMMENT, this.column.getComment(), true);
 
 		if (this.fk != null)

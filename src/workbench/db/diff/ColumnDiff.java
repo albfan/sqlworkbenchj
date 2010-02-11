@@ -147,6 +147,7 @@ public class ColumnDiff
 		String sdef = sId.getDefaultValue();
 		String tdef = tId.getDefaultValue();
 		boolean defaultDifferent = !StringUtil.equalString(sdef, tdef);
+		boolean computedColIsDifferent = !StringUtil.equalString(sId.getComputedColumnExpression(), tId.getComputedColumnExpression());
 		
 		ColumnReference refFk = this.referenceColumn.getForeignKey();
 		ColumnReference targetFk = this.targetColumn.getForeignKey();
@@ -182,16 +183,15 @@ public class ColumnDiff
 		
 		if (writer == null) this.writer = new TagWriter();
 		
-		if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent || fkDifferent)
+		if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent || fkDifferent || computedColIsDifferent)
 		{
 			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", tId.getColumnName());
 			result.append('\n');
 
-			// for some DBMS the full definition of the column must be present in order
-			// to be able to generate the proper ALTER TABLE statement to change the column
-			// e.g. in SQL Server the complete data type definition must be repeated when
-			// changing the column from NOT NULL to NULL
-			if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent)
+			// for some DBMS the full definition of the column must be used in order
+			// to be able to generate an ALTER TABLE statement that changes the column definition
+			// that's why the complete definition of the reference table is repeated in the output
+			if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent || computedColIsDifferent)
 			{
 				referenceColumn.appendXml(result, myindent, false, "reference-column-definition", true);
 			}
@@ -222,6 +222,10 @@ public class ColumnDiff
 			if (commentDifferent)
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMMENT, (scomm == null ? "" : scomm));
+			}
+			if (computedColIsDifferent)
+			{
+				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMPUTED_COL, sId.getComputedColumnExpression());
 			}
 			if (fkDifferent)
 			{

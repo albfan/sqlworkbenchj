@@ -69,7 +69,6 @@ public class OracleMetadata
 	implements ErrorInformationReader, DataTypeResolver, PropertyChangeListener, TableDefinitionReader
 {
 	private final WbConnection connection;
-	private PreparedStatement columnStatement;
 	private int version;
 	private boolean retrieveSnapshots = true;
 	static final int BYTE_SEMANTICS = 1;
@@ -78,6 +77,7 @@ public class OracleMetadata
 	private boolean alwaysShowCharSemantics = false;
 	private boolean useOwnSql = true;
 	private boolean globalMapDateToTimestamp = false;
+	
 	/**
 	 * Only for testing purposes
 	 */
@@ -237,7 +237,7 @@ public class OracleMetadata
 
 		ResultSet rs = null;
 		PreparedStatement pstmt = null;
-		
+
 		try
 		{
 			pstmt = prepareColumnsStatement(schema, tablename);
@@ -245,46 +245,26 @@ public class OracleMetadata
 
 			while (rs != null && rs.next())
 			{
-				// The columns should be retrieved (getXxx()) in the order
-				// as they appear in the result set as some drivers
-				// do not like an out-of-order processing of the columns
-				String colName = rs.getString("COLUMN_NAME"); // index 4
-				int sqlType = rs.getInt("DATA_TYPE"); // index 5
+				String colName = rs.getString("COLUMN_NAME");
+				int sqlType = rs.getInt("DATA_TYPE");
 				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), fixColumnType(sqlType));
 
 				String typeName = rs.getString("TYPE_NAME");
 
-				int size = rs.getInt("COLUMN_SIZE"); // index 7
-				int digits = -1;
-				try
-				{
-					digits = rs.getInt("DECIMAL_DIGITS"); // index 9
-				}
-				catch (Exception e)
-				{
-					digits = -1;
-				}
+				int size = rs.getInt("COLUMN_SIZE");
+				int digits = rs.getInt("DECIMAL_DIGITS");
 				if (rs.wasNull()) digits = -1;
 
-				String remarks = rs.getString("REMARKS"); // index 12
-				String defaultValue = rs.getString("COLUMN_DEF"); // index 13
+				String remarks = rs.getString("REMARKS");
+				String defaultValue = rs.getString("COLUMN_DEF");
 				if (defaultValue != null && dbSettings.trimDefaults())
 				{
 					defaultValue = defaultValue.trim();
 				}
 
-				int position = -1;
-				try
-				{
-					position = rs.getInt("ORDINAL_POSITION"); // index 17
-				}
-				catch (SQLException e)
-				{
-					LogMgr.logWarning("DbMetadata", "JDBC driver does not suport ORDINAL_POSITION column for getColumns()", e);
-					position = -1;
-				}
+				int position = rs.getInt("ORDINAL_POSITION");
 
-				String nullable = rs.getString("IS_NULLABLE"); // index 18
+				String nullable = rs.getString("IS_NULLABLE");
 				String byteOrChar = rs.getString("CHAR_USED");
 				int charSemantics = defaultLengthSemantics;
 
@@ -305,7 +285,7 @@ public class OracleMetadata
 				if (includeVirtualColumns)
 				{
 					String virtual = rs.getString("VIRTUAL_COLUMN");
-					isVirtual = (virtual != null && virtual.equals("Y"));
+					isVirtual = StringUtil.stringToBool(virtual);
 				}
 				String display = getSqlTypeDisplay(typeName, sqlType, size, digits, charSemantics);
 
@@ -315,7 +295,7 @@ public class OracleMetadata
 
 				if (isVirtual)
 				{
-					String exp = " GENERATED ALWAYS AS (" + defaultValue + ")";
+					String exp = "GENERATED ALWAYS AS (" + defaultValue + ")";
 					col.setComputedColumnExpression(exp);
 				}
 				else
