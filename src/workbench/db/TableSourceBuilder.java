@@ -178,6 +178,11 @@ public class TableSourceBuilder
 			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
 			if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
 			{
+				if (dbConnection.getDbSettings().computedColumnNeedsDataType())
+				{
+					result.append(type);
+					result.append(' ');
+				}
 				result.append(column.getComputedColumnExpression());
 			}
 			else

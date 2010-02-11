@@ -130,7 +130,7 @@
   </void>
 
   <void method="put">
-   <string>HSQL Database Engine 1.9</string>
+   <string>HSQL Database Engine 2.0</string>
    <object idref="hsql_proc_source"/>
   </void>
 

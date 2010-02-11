@@ -180,7 +180,7 @@ where trg.tgrelid = tbl.oid
   </void>
 
   <void method="put">
-   <string>HSQL Database Engine 1.9</string>
+   <string>HSQL Database Engine 2.0</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>SELECT 'CREATE TRIGGER '||trigger_name||'\n'||

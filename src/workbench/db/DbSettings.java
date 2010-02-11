@@ -991,4 +991,9 @@ public class DbSettings
 		List<String> types = Settings.getInstance().getListProperty(prefix + "columncomment.types", true, "table");
 		return types.contains(type);
 	}
+
+	public boolean computedColumnNeedsDataType()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "computedcol.datatype", false);
+	}
 }

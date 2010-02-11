@@ -30,11 +30,11 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import workbench.JdbcTableDefinitionReader;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.firebird.FirebirdDomainReader;
 import workbench.db.firebird.FirebirdSequenceReader;
+import workbench.db.h2database.H2ColumnEnhancer;
 import workbench.db.h2database.H2ConstantReader;
 import workbench.db.h2database.H2DomainReader;
 import workbench.db.hsqldb.HsqlSequenceReader;
@@ -56,6 +56,8 @@ import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.db.h2database.H2SequenceReader;
+import workbench.db.hsqldb.HsqlColumnEnhancer;
+import workbench.db.ibm.Db2ColumnEnhancer;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSynonymReader;
@@ -209,12 +211,13 @@ public class DbMetadata
 		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
-			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "1.9"))
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.0"))
 			{
 				// HSQLDB 1.9 has a completely different set of system tables
 				// so the dynamically configured queries in the XML files need
 				// to be different.
 				productName += " 1.9";
+				columnEnhancer = new HsqlColumnEnhancer();
 			}
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
 		}
@@ -250,6 +253,12 @@ public class DbMetadata
 		{
 			this.synonymReader = new Db2SynonymReader();
 			this.sequenceReader = new Db2SequenceReader(this.dbConnection);
+			
+			// Generated columns are not available on the host version...
+			if (getDbId().equals("db2"))
+			{
+				columnEnhancer = new Db2ColumnEnhancer();
+			}
 		}
 		else if (productLower.indexOf("mysql") > -1)
 		{
@@ -299,6 +308,7 @@ public class DbMetadata
 			this.sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
 			extenders.add(new H2DomainReader());
 			extenders.add(new H2ConstantReader());
+			columnEnhancer = new H2ColumnEnhancer();
 		}
 
 		this.schemaInfoReader = new GenericSchemaInfoReader(this.getDbId());

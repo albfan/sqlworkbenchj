@@ -112,7 +112,7 @@ public class ReportView
 	}
 	
 	/**
-	 * Define the columns that belong to this table
+	 * Define the columns that belong to this view
 	 */
 	public void setColumns(List<ColumnIdentifier> cols)
 	{
@@ -123,7 +123,7 @@ public class ReportView
 		for (ColumnIdentifier column : cols)
 		{
 			this.columns[i] = new ReportColumn(column);
-			this.columns[i].setRealColumn(false);
+			this.columns[i].setIsRealColumn(false);
 			i++;
 		}
 	}

@@ -42,7 +42,8 @@ public class ColumnIdentifier
 	private Class columnClass;
 	private String columnTypeName;
 	private String sourceTable;
-	
+	private boolean autoincrement;
+
 	/**
 	 * Stores the definition of "computed" columns (e.g. Firebird, SQL Server, DB2)
 	 */
@@ -75,6 +76,16 @@ public class ColumnIdentifier
 		setColumnName(aName.trim());
 		this.type = aType;
 		this.isPk = isPkColumn;
+	}
+
+	public boolean isAutoincrement()
+	{
+		return autoincrement;
+	}
+
+	public void setIsAutoincrement(boolean flag)
+	{
+		autoincrement = flag;
 	}
 
 	/**

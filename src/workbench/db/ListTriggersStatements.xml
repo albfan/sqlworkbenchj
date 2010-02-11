@@ -341,7 +341,7 @@ and trg.tgname not like 'pg_sync_pg%'
   </void> 
 
   <void method="put">
-   <string>HSQL Database Engine 1.9</string>
+   <string>HSQL Database Engine 2.0</string>
    <object class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>

@@ -29,7 +29,8 @@ public class Db2ConstraintReader
 	
 	private static final String LUW_TABLE_SQL = "select cons.constname, '('||cons.text||')' \n" +
 					 "from syscat.checks cons \n" +
-					 "where tabname = ? " +
+					 "where type <> 'S' " +
+					 "AND tabname = ? " +
 					 "and tabschema = ?";
 
 	private final boolean isHostDB2;

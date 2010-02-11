@@ -32,6 +32,7 @@ public class ReportColumn
 	public static final String TAG_COLUMN_SIZE = "dbms-data-size";
 	public static final String TAG_COLUMN_DIGITS = "dbms-data-digits";
 	public static final String TAG_COLUMN_POSITION = "dbms-position";
+	public static final String TAG_COLUMN_AUTO_INC = "auto-increment";
 	public static final String TAG_COLUMN_DEFAULT = "default-value";
 	public static final String TAG_COLUMN_NULLABLE = "nullable";
 	public static final String TAG_COLUMN_PK = "primary-key";
@@ -105,11 +106,12 @@ public class ReportColumn
 		if (isRealColumn && !shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_PK, this.column.isPkColumn());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_NULLABLE, this.column.isNullable());
 		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_DEFAULT, this.column.getDefaultValue(), true);
+		if (isRealColumn) tagWriter.appendTag(result, myindent, TAG_COLUMN_AUTO_INC, this.column.isAutoincrement());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_SIZE, this.column.getColumnSize());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_DIGITS, this.column.getDigitsDisplay());
 		if (!shortInfo) tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE, this.column.getDataType());
 		tagWriter.appendTag(result, myindent, TAG_COLUMN_JAVA_TYPE_NAME, SqlUtil.getTypeName(this.column.getDataType()));
-		if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
+		if (isRealColumn && StringUtil.isNonBlank(column.getComputedColumnExpression()))
 		{
 			tagWriter.appendTag(result, myindent, TAG_COLUMN_COMPUTED_COL, column.getComputedColumnExpression());
 		}
@@ -122,7 +124,14 @@ public class ReportColumn
 		tagWriter.appendCloseTag(result, indent, mainTagToUse);
 	}
 
-	public void setRealColumn(boolean flag)
+	/**
+	 * Marks this column as being a "real" column or not.
+	 * If this ReportColumn is used for a VIEW definition,
+	 * the columns should be marked as "not real" in order to
+	 * surpress certain column attributes that only make sense for
+	 * real table columns.
+	 */
+	public void setIsRealColumn(boolean flag)
 	{
 		this.isRealColumn = flag;
 	}

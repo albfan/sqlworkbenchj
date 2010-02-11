@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
-import workbench.JdbcTableDefinitionReader;
+import workbench.db.JdbcTableDefinitionReader;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.DataTypeResolver;

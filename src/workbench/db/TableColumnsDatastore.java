@@ -59,37 +59,43 @@ public class TableColumnsDatastore
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
 	 *  by {@link DbMetadata#getTableDefinition(TableIdentifier)} that holds
+	 *  the auto increment flag for this column
+	 */
+	public final static int COLUMN_IDX_TABLE_DEFINITION_AUTO_INC = 5;
+
+	/** The column index for a {@link workbench.storage.DataStore} returned
+	 *  by {@link DbMetadata#getTableDefinition(TableIdentifier)} that holds
 	 *  the remark for this column
 	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_REMARKS = 5;
+	public final static int COLUMN_IDX_TABLE_DEFINITION_REMARKS = 6;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
 	 *  by {@link DbMetadata#getTableDefinition(TableIdentifier)} that holds
 	 *  the integer value of the java datatype from {@link java.sql.Types}
 	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 6;
+	public final static int COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE = 7;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
 	 *  by {@link DbMetadata#getTableDefinition(TableIdentifier)} that holds
 	 *  the integer value of siez of the column
 	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_SIZE = 7;
+	public final static int COLUMN_IDX_TABLE_DEFINITION_SIZE = 8;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
 	 *  by {@link DbMetadata#getTableDefinition(TableIdentifier)} that holds
 	 *  the number of digits for the column
 	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_DIGITS = 8;
+	public final static int COLUMN_IDX_TABLE_DEFINITION_DIGITS = 9;
 
 	/** The column index for a {@link workbench.storage.DataStore} returned
 	 *  by {@link DbMetadata#getTableDefinition(TableIdentifier)} that holds
 	 *  the ordinal position of the column
 	 */
-	public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 9;
+	public final static int COLUMN_IDX_TABLE_DEFINITION_POSITION = 10;
 
-	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
-	private static final int[] TYPES = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
-	private static final int[] SIZES = {20, 18, 5, 8, 10, 25, 18, 2, 2, 2};
+	public static final String[] TABLE_DEFINITION_COLS = {"COLUMN_NAME", "DATA_TYPE", "PK", "NULLABLE", "DEFAULT", "AUTOINCREMENT", "REMARKS", "java.sql.Types", "SCALE/SIZE", "PRECISION", "POSITION"};
+	private static final int[] TYPES = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.INTEGER, Types.INTEGER, Types.INTEGER};
+	private static final int[] SIZES = {20, 18, 5, 8, 10, 10, 25, 18, 2, 2, 2};
 
 	public TableColumnsDatastore(TableDefinition table)
 	{
@@ -106,6 +112,7 @@ public class TableColumnsDatastore
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_SIZE, Integer.valueOf(col.getColumnSize()));
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_DIGITS, Integer.valueOf(col.getDecimalDigits()));
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_NULLABLE, col.isNullable() ? "YES" : "NO");
+				setValue(row, COLUMN_IDX_TABLE_DEFINITION_AUTO_INC, col.isAutoincrement() ? "YES" : "NO");
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_POSITION, Integer.valueOf(col.getPosition()));
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_DATA_TYPE, col.getDbmsType());
 				setValue(row, COLUMN_IDX_TABLE_DEFINITION_DEFAULT, col.getDefaultValue());
