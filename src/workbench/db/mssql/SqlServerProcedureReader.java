@@ -15,6 +15,7 @@ import java.sql.CallableStatement;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Map;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.ProcedureReader;
 import workbench.db.WbConnection;
@@ -65,7 +66,9 @@ public class SqlServerProcedureReader
 	{
 		if (!useOwnSQL)
 		{
-			return super.getProcedures(catalog, owner, namePattern);
+			DataStore ds = super.getProcedures(catalog, owner, namePattern);
+			updateRemarks(ds, owner);
+			return ds;
 		}
 
 		CallableStatement cstmt = this.connection.getSqlConnection().prepareCall(GET_PROC_SQL);
@@ -157,7 +160,33 @@ public class SqlServerProcedureReader
 		{
 			SqlUtil.closeAll(rs, cstmt);
 		}
+		updateRemarks(ds, owner);
 		return ds;
 	}
 
+	protected void updateRemarks(DataStore ds, String owner)
+	{
+		if (!Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.procedure.retrieve", true)) return;
+		if (ds == null || ds.getRowCount() == 0) return;
+
+		String object = null;
+		if (ds.getRowCount() == 1)
+		{
+			object = ds.getValueAsString(0, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+		}
+
+		SqlServerObjectListEnhancer reader = new SqlServerObjectListEnhancer();
+		Map<String, String> remarks = reader.readRemarks(connection, owner, object, new String[] { "procedure"});
+
+		for (int row = 0; row < ds.getRowCount(); row ++)
+		{
+			String name = ds.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			String remark = remarks.get(name);
+			if (remark != null)
+			{
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
+			}
+		}
+	}
+	
 }

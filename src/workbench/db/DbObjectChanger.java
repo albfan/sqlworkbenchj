@@ -102,9 +102,15 @@ public class DbObjectChanger
 		if (StringUtil.equalStringOrEmpty(oldComment, newComment, true)) return null; // no change
 		String oldname = oldTable.getObjectName(dbConnection);
 		if (oldname == null) oldname = "";
-		
+
+		// object_name placeholder is expected to be used where a fully qualified name is needed
 		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, oldname);
+
+		// schema and table name placeholders are intended where those names are individual parameters
+		// this is mainly used for the kludgy and non-standard way SQL Server "supports" comments
+		sql = sql.replace(ColumnChanger.PARAM_TABLE_NAME, oldTable.getObjectName());
 		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, schema);
+		
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newComment.replace("'", "''"));
 		return sql;
 	}

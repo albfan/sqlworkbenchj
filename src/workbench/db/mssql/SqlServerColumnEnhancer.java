@@ -58,10 +58,23 @@ public class SqlServerColumnEnhancer
 
 		String propName = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
 
-		String sql =
-			"SELECT objname, cast(value as varchar) as value \n" +
-      "FROM fn_listextendedproperty ('" + propName + "','schema', ?, 'table', ?, 'column', null)";
+		String sql = "SELECT objname, cast(value as varchar) as value \n FROM ";
 
+		if (JdbcUtils.hasMinimumServerVersion(conn, "9.0"))
+		{
+			sql += "fn_listextendedproperty ('" + propName + "','schema', ?, 'table', ?, 'column', null)";
+		}
+		else
+		{
+			// SQL Server 2000 (and probably before) uses a different function name and parameters
+			sql += "::fn_listextendedproperty ('" + propName + "','user', ?, 'table', ?, 'column', null)";
+		}
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()", "Using query=\n" + sql);
+		}
+		
 		Map<String, String> remarks = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
 		try
 		{
