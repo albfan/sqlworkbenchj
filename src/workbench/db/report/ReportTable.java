@@ -21,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.storage.DataStore;
@@ -58,6 +59,7 @@ public class ReportTable
 	public static final String TAG_TABLE_CATALOG = "table-catalog";
 	public static final String TAG_TABLE_SCHEMA = "table-schema";
 	public static final String TAG_TABLE_COMMENT = "table-comment";
+	public static final String TAG_TABLE_PK_NAME = "primary-key-name";
 	public static final String TAG_TABLE_CONSTRAINTS = "table-constraints";
 	public static final String TAG_CONSTRAINT_DEF = "constraint-definition";
 	public static final String TAG_CONSTRAINT_COMMENT = "constraint-comment";
@@ -99,12 +101,16 @@ public class ReportTable
 			boolean includeTriggers)
 		throws SQLException
 	{
-		this.table = tbl.createCopy();
 		this.includePrimaryKey = includePk;
 
+		// By using getTableDefinition() the TableIdentifier is completely initialized
+		// (mainly it will contain the primary key name, which it doesn't when the TableIdentifier
+		// was created using getTableList() 
+		TableDefinition def = conn.getMetadata().getTableDefinition(tbl);
+		this.table = def.getTable();
 		this.table.checkQuotesNeeded(conn);
 
-		List<ColumnIdentifier> cols = conn.getMetadata().getTableColumns(tbl);
+		List<ColumnIdentifier> cols = def.getColumns();
 		Collections.sort(cols);
 
 		TableCommentReader reader = new TableCommentReader();
@@ -404,6 +410,7 @@ public class ReportTable
 		}
 		line.append('\n');
 		appendTableNameXml(line, colindent);
+		tagWriter.appendTag(line, colindent, TAG_TABLE_PK_NAME, table.getPrimaryKeyName(), false);
 		tagWriter.appendTag(line, colindent, TAG_TABLE_COMMENT, this.tableComment, true);
 		int cols = this.columns.length;
 		for (int i=0; i < cols; i++)

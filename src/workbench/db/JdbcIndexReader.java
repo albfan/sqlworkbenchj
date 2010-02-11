@@ -108,7 +108,8 @@ public class JdbcIndexReader
 			{
 				LogMgr.logWarning("JdbcIndexReader.getTableIndexInformation()", "Error retrieving PK information", e);
 				pkName = "";
-			} finally
+			}
+			finally
 			{
 				SqlUtil.closeResult(keysRs);
 			}

@@ -1837,6 +1837,7 @@ public class DbMetadata
 		{
 			schema = getSchemaToUse();
 		}
+		table.setSchema(schema);
 
 		if ("SYNONYM".equalsIgnoreCase(table.getType()))
 		{

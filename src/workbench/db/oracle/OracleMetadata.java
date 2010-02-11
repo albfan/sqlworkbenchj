@@ -311,7 +311,7 @@ public class OracleMetadata
 		}
 		finally
 		{
-			SqlUtil.closeResult(rs);
+			SqlUtil.closeAll(rs, pstmt);
 		}
 		return columns;
 	}
