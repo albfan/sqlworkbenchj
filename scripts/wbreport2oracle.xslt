@@ -18,17 +18,19 @@
 <xsl:strip-space elements="*"/>
 <xsl:variable name="quote"><xsl:text>"</xsl:text></xsl:variable>
 <xsl:variable name="newline"><xsl:text>&#10;</xsl:text></xsl:variable>
+  <xsl:variable name="squote"><xsl:text>&#39;</xsl:text></xsl:variable>
+  <xsl:variable name="dsquote"><xsl:text>&#39;&#39;</xsl:text></xsl:variable>
 
 <xsl:template match="/">
-    <xsl:apply-templates select="/schema-report/table-def"/>
-    <xsl:apply-templates select="/schema-report/view-def"/>
-    <xsl:call-template name="process-fk"/>
+  <xsl:apply-templates select="/schema-report/table-def"/>
+  <xsl:apply-templates select="/schema-report/view-def"/>
+  <xsl:apply-templates select="/schema-report/sequence-def"/>
+  <xsl:call-template name="process-fk"/>
 </xsl:template>
 
 <xsl:template match="table-def">
 
   <xsl:variable name="tablename" select="table-name"/>
-  <xsl:text>-- BEGIN TABLE </xsl:text> <xsl:value-of select="table-name"/><xsl:text> --</xsl:text><xsl:value-of select="$newline"/>
   <xsl:text>DROP TABLE </xsl:text>
   <xsl:value-of select="table-name"/>
   <xsl:text> CASCADE CONSTRAINTS;</xsl:text>
@@ -119,16 +121,23 @@
   <xsl:if test="$pkcount &gt; 0">
     <xsl:text>ALTER TABLE </xsl:text><xsl:value-of select="$tablename"/> 
     <xsl:value-of select="$newline"/>
-    <xsl:text>ADD CONSTRAINT </xsl:text><xsl:value-of select="concat('pk_', $tablename)"/><xsl:text> PRIMARY KEY </xsl:text>
+	<xsl:variable name="constraintname">
+    <xsl:if test="string-length(primary-key-name) &gt; 0">
+      <xsl:value-of select="primary-key-name"/>
+    </xsl:if>
+    <xsl:if test="string-length(primary-key-name) = 0">
+      <xsl:value-of select="concat('pk_', $tablename)"/>
+    </xsl:if>
+	</xsl:variable>
+    <xsl:text>ADD CONSTRAINT </xsl:text><xsl:value-of select="$constraintname"/><xsl:text> PRIMARY KEY </xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:text>(</xsl:text>
     <xsl:value-of select="$newline"/>
     <xsl:for-each select="column-def[primary-key='true']">
       <xsl:text>  </xsl:text><xsl:value-of select="column-name"/>
       <xsl:if test="position() &lt; last()">
-        <xsl:text>,</xsl:text>
+        <xsl:text>,</xsl:text><xsl:value-of select="$newline"/>
       </xsl:if>
-      <xsl:value-of select="$newline"/>
     </xsl:for-each>
     <xsl:value-of select="$newline"/>
     <xsl:text>);</xsl:text>
@@ -136,18 +145,21 @@
   </xsl:if>
 
   <xsl:if test="string-length(table-comment) &gt; 0">
-    <xsl:text>COMMENT ON TABLE </xsl:text><xsl:value-of select="$tablename"/><xsl:text> IS '</xsl:text><xsl:value-of select="table-comment"/><xsl:text>';</xsl:text>
+    <xsl:text>COMMENT ON TABLE </xsl:text><xsl:value-of select="$tablename"/><xsl:text> IS '</xsl:text><xsl:value-of select="normalize-space(table-comment)"/><xsl:text>';</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:if>
 
-  <xsl:value-of select="$newline"/>
   <xsl:for-each select="column-def">
       <xsl:sort select="column-name"/>
       <xsl:if test="string-length(comment) &gt; 0">
         <xsl:text>COMMENT ON COLUMN </xsl:text>
         <xsl:value-of select="$tablename"/><xsl:text>.</xsl:text><xsl:value-of select="column-name"/>
         <xsl:text> IS '</xsl:text>
-        <xsl:value-of select="comment"/>
+        <xsl:call-template name="_replace_text">
+            <xsl:with-param name="text" select="normalize-space(comment)"/>
+            <xsl:with-param name="replace" select="$squote"/>
+            <xsl:with-param name="by" select="$dsquote"/>
+        </xsl:call-template>
         <xsl:text>';</xsl:text>
         <xsl:value-of select="$newline"/>
       </xsl:if>
@@ -159,7 +171,6 @@
     </xsl:call-template>
   </xsl:for-each>
   
-  <xsl:text>-- END TABLE </xsl:text> <xsl:value-of select="table-name"/><xsl:text> --</xsl:text>
   <xsl:value-of select="$newline"/>
   <xsl:value-of select="$newline"/>
   
@@ -172,19 +183,9 @@
     <xsl:variable name="unique">
       <xsl:if test="unique='true'">UNIQUE </xsl:if>
     </xsl:variable>
-    <xsl:variable name="prefix">
-      <xsl:choose>
-        <xsl:when test="contains(name, 'IDX')">
-          <xsl:value-of select="''"/>
-        </xsl:when>
-        <xsl:otherwise>
-          <xsl:value-of select="'IDX_'"/>
-        </xsl:otherwise>
-      </xsl:choose>
-    </xsl:variable>
     <xsl:value-of select="$newline"/>
     <xsl:text>CREATE </xsl:text><xsl:value-of select="$unique"/>
-    <xsl:text>INDEX </xsl:text><xsl:value-of select="$prefix"/><xsl:value-of select="name"/>
+    <xsl:text>INDEX </xsl:text><xsl:value-of select="name"/>
     <xsl:text> ON </xsl:text><xsl:value-of select="$tablename"/>
     <xsl:value-of select="$newline"/>
     <xsl:text>(</xsl:text>
@@ -192,12 +193,11 @@
     <xsl:for-each select="column-list/column">
         <xsl:text>  </xsl:text><xsl:value-of select="@name"/>
         <xsl:if test="position() &lt; last()">
-          <xsl:text>,</xsl:text>
+          <xsl:text>,</xsl:text><xsl:value-of select="$newline"/>
         </xsl:if>        
-        <xsl:value-of select="$newline"/>
-      </xsl:for-each>
+    </xsl:for-each>
+	<xsl:value-of select="$newline"/>
     <xsl:text>);</xsl:text>
-    <xsl:value-of select="$newline"/>
     <xsl:value-of select="$newline"/>
   </xsl:if>  
 </xsl:template>
@@ -235,6 +235,10 @@
       <xsl:value-of select="$newline"/>
     </xsl:if>
   </xsl:for-each>
+</xsl:template>
+
+<xsl:template match="sequence-def">
+  <xsl:value-of select="sequence-source"/>
 </xsl:template>
 
 <xsl:template match="view-def">
