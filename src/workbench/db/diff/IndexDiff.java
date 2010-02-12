@@ -65,7 +65,7 @@ public class IndexDiff
 
 		for (IndexDefinition refIndex : reference)
 		{
-			IndexDefinition ind = this.findIndexInTarget(refIndex.getExpression());
+			IndexDefinition ind = this.findIndexInTarget(refIndex);
 			if (ind == null)
 			{
 				indexToAdd.add(refIndex);
@@ -99,8 +99,7 @@ public class IndexDiff
 
 		for (IndexDefinition targetIndex : target)
 		{
-			String expr = targetIndex.getExpression();
-			IndexDefinition ind = this.findIndexInReference(expr);
+			IndexDefinition ind = this.findIndexInReference(targetIndex);
 			if (ind == null)
 			{
 				indexToDrop.add(targetIndex);
@@ -129,21 +128,21 @@ public class IndexDiff
 		return result;
 	}
 
-	private IndexDefinition findIndexInTarget(String expr)
+	private IndexDefinition findIndexInTarget(IndexDefinition toCheck)
 	{
-		return findIndex(target, expr);
+		return findIndex(target, toCheck);
 	}
 
-	private IndexDefinition findIndexInReference(String expr)
+	private IndexDefinition findIndexInReference(IndexDefinition toCheck)
 	{
-		return findIndex(reference, expr);
+		return findIndex(reference, toCheck);
 	}
 
-	private IndexDefinition findIndex(Collection<IndexDefinition> defs, String expr)
+	private IndexDefinition findIndex(Collection<IndexDefinition> defs, IndexDefinition toCheck)
 	{
 		for (IndexDefinition idx : defs)
 		{
-			if (idx.equals(expr)) return idx;
+			if (idx.equals(toCheck)) return idx;
 		}
 		return null;
 	}

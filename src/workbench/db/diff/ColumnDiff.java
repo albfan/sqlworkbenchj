@@ -217,12 +217,28 @@ public class ColumnDiff
 			}
 			if (defaultDifferent)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DEFAULT, (sdef == null ? "" : sdef));
+				if (StringUtil.isBlank(sdef))
+				{
+					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DEFAULT, "", "remove", "true");
+				}
+				else
+				{
+					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_DEFAULT, sdef);
+				}
 			}
 			if (commentDifferent)
 			{
-				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMMENT, (scomm == null ? "" : scomm));
+				if (StringUtil.isBlank(scomm))
+				{
+					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMMENT, "", "remove", "true");
+				}
+				else
+				{
+					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMMENT, scomm);
+				}
+				
 			}
+
 			if (computedColIsDifferent)
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMPUTED_COL, sId.getComputedColumnExpression());

@@ -145,17 +145,37 @@ public class IndexDefinition
     return hash;
   }
 
+
 	public boolean equals(Object o)
 	{
 		if (o instanceof IndexDefinition)
 		{
 			IndexDefinition other = (IndexDefinition)o;
-			boolean equal = this.getExpression().equals(other.getExpression());
-			if (equal)
+			boolean equals = false;
+			if (this.isPK && other.isPK || this.isUnique && other.isUnique)
 			{
-				equal = (this.isPK == other.isPK) && (this.isUnique == other.isUnique);
+				// for PK indexes the order of the columns in the index does not matter
+				// so we consider the same list of columns equals even if they have different order
+				for (IndexColumn col : columns)
+				{
+					if (!other.columns.contains(col))
+					{
+						equals = false;
+						break;
+					}
+				}
+				equals = true;
 			}
-			return equal;
+			else
+			{
+				equals = this.columns.equals(other.columns);
+			}
+			
+			if (equals)
+			{
+				equals = (this.isPK == other.isPK) && (this.isUnique == other.isUnique);
+			}
+			return equals;
 		}
 		else if (o instanceof String)
 		{

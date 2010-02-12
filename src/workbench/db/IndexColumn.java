@@ -60,4 +60,26 @@ public class IndexColumn
 			return this.column + " " + getDirection();
 		}
 	}
+
+	public boolean equals(Object other)
+	{
+		if (other instanceof IndexColumn)
+		{
+			IndexColumn otherCol = (IndexColumn)other;
+			return StringUtil.equalString(column, otherCol.column) && getDirection().equals(otherCol.getDirection());
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int hash = 7;
+		hash = 73 * hash + (this.column != null ? this.column.hashCode() : 0);
+		hash = 73 * hash + (this.direction != null ? this.direction.hashCode() : 0);
+		return hash;
+	}
 }
