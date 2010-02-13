@@ -21,14 +21,14 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class JdbcUtils 
+public class JdbcUtils
 {
 
 	public static boolean hasMinimumServerVersion(WbConnection con, String targetVersion)
 	{
 		return hasMinimumServerVersion(con.getSqlConnection(), targetVersion);
 	}
-	
+
 	public static boolean hasMinimumServerVersion(Connection con, String targetVersion)
 	{
 		VersionNumber target = new VersionNumber(targetVersion);
@@ -44,7 +44,7 @@ public class JdbcUtils
 			return false;
 		}
 	}
-	
+
 	public static boolean hasMiniumDriverVersion(Connection con, String targetVersion)
 	{
 		VersionNumber target = new VersionNumber(targetVersion);
@@ -60,7 +60,7 @@ public class JdbcUtils
 			return false;
 		}
 	}
-	
+
 	public static int getColumnIndex(ResultSet rs, String colname)
 	{
 		try

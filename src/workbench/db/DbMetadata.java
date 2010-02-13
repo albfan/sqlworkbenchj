@@ -58,6 +58,7 @@ import workbench.util.StringUtil;
 import workbench.db.h2database.H2SequenceReader;
 import workbench.db.hsqldb.HsqlColumnEnhancer;
 import workbench.db.ibm.Db2ColumnEnhancer;
+import workbench.db.ibm.Db2ProcedureReader;
 import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSynonymReader;
@@ -252,8 +253,8 @@ public class DbMetadata
 		else if (productLower.indexOf("db2") > -1)
 		{
 			this.synonymReader = new Db2SynonymReader();
-			this.sequenceReader = new Db2SequenceReader(this.dbConnection);
-			
+			this.sequenceReader = new Db2SequenceReader(dbConnection);
+			procedureReader = new Db2ProcedureReader(dbConnection);
 			// Generated columns are not available on the host version...
 			if (getDbId().equals("db2"))
 			{

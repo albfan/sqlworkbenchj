@@ -126,7 +126,7 @@ public class DbExplorerPanel
 	private FlatButton reloadButton;
 	private boolean locked;
 	protected String tabName;
-	
+
 	public DbExplorerPanel()
 	{
 		this(null);
@@ -387,7 +387,7 @@ public class DbExplorerPanel
 					this.schemaSelector.addItem(schema.trim());
 					if (schema.equalsIgnoreCase(currentSchema)) schemaToSelect = schema;
 				}
-				
+
 				if (workspaceSchema && schemaToSelect == null)
 				{
 					// when using the workspace for multiple connections
@@ -954,7 +954,6 @@ public class DbExplorerPanel
 	public void saveToWorkspace(WbWorkspace w, int index)
 		throws IOException
 	{
-
 		Object s = this.schemaSelector.getSelectedItem();
 		WbProperties p = w.getSettings();
 		String key = "dbexplorer" + index + ".currentschema";

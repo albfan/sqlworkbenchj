@@ -48,8 +48,8 @@ public class SqlServerProcedureReader
 
 
 	/**
-	 *The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
-	 * so we implement it ourselves (MS always returns RESULT which is
+	 * The MS JDBC driver does not return the PROCEDURE_TYPE column correctly
+	 * so we implement it ourselves. The driver always returns RESULT which is
 	 * - strictly speaking - true, but as MS still distinguished between
 	 * procedures and functions we need to return this correctly.
 	 * <br/>
@@ -188,5 +188,5 @@ public class SqlServerProcedureReader
 			}
 		}
 	}
-	
+
 }

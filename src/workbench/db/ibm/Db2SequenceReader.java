@@ -15,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -212,63 +211,8 @@ public class Db2SequenceReader
 		{
       result.append(" AS " + typeIdToName(typeid.intValue()));
 		}
-		result.append(nl + "      INCREMENT BY ");
-		result.append(increment);
 
-		if (start.longValue() > 0)
-		{
-			result.append(nl + "      START WITH ");
-			result.append(start);
-		}
-
-		if (minvalue == null || minvalue.longValue() == 0)
-		{
-			result.append(nl + "      NO MINVALUE");
-		}
-		else
-		{
-			result.append(nl + "      MINVALUE ");
-			result.append(minvalue);
-		}
-
-		if (maxvalue == null || maxvalue.longValue() == -1)
-		{
-			result.append(nl + "      MAXVALUE ");
-			result.append(maxvalue);
-		}
-		else
-		{
-			result.append(nl + "      NO MAXVALUE");
-		}
-		if (cache != null && cache.longValue() > 0)
-		{
-			result.append(nl + "      CACHE ");
-			result.append(cache);
-		}
-		else
-		{
-			result.append(nl + "      NO CACHE");
-		}
-
-		result.append(nl + "      ");
-		if (cycle != null && cycle.equals("Y"))
-		{
-			result.append("CYCLE");
-		}
-		else
-		{
-			result.append("NO CYCLE");
-		}
-
-		result.append(nl + "      ");
-		if (order != null && order.equals("Y"))
-		{
-			result.append("ORDER");
-		}
-		else
-		{
-			result.append("NO ORDER");
-		}
+		result.append(buildSequenceDetails(true, start, minvalue, maxvalue, increment, cycle, order, cache));
 
 		result.append(';');
 		result.append(nl);
@@ -280,6 +224,83 @@ public class Db2SequenceReader
 		}
 
 		def.setSource(result);
+	}
+
+	public static CharSequence buildSequenceDetails(boolean doFormat, Number start, Number minvalue, Number maxvalue, Number increment, String cycle, String order, Number cache)
+	{
+		StringBuilder result = new StringBuilder(30);
+		String nl = Settings.getInstance().getInternalEditorLineEnding();
+
+		if (start.longValue() > 0)
+		{
+			if (doFormat) result.append(nl + "       ");
+			result.append("START WITH ");
+			result.append(start);
+		}
+
+		if (doFormat) result.append(nl + "      ");
+		result.append(" INCREMENT BY ");
+		result.append(increment);
+
+		if (doFormat) result.append(nl + "      ");
+		if (minvalue == null || minvalue.longValue() == 0)
+		{
+			if (doFormat) result.append(" NO MINVALUE");
+		}
+		else
+		{
+			result.append(" MINVALUE ");
+			result.append(minvalue);
+		}
+
+		if (doFormat) result.append(nl + "      ");
+		if (maxvalue != null && maxvalue.longValue() == -1)
+		{
+			if (maxvalue.longValue() != Long.MAX_VALUE)
+			{
+				result.append(" MAXVALUE ");
+				result.append(maxvalue);
+			}
+		}
+		else if (doFormat) 
+		{
+			result.append(" NO MAXVALUE");
+		}
+
+		if (doFormat) result.append(nl + "      ");
+		if (cache != null && cache.longValue() > 0)
+		{
+			if (cache.longValue() != 20 || doFormat)
+			{
+				result.append(" CACHE ");
+				result.append(cache);
+			}
+		}
+		else if (doFormat)
+		{
+			result.append(" NO CACHE");
+		}
+
+		if (doFormat) result.append(nl + "      ");
+		if (cycle != null && cycle.equals("Y"))
+		{
+			result.append(" CYCLE");
+		}
+		else if (doFormat)
+		{
+			result.append(" NO CYCLE");
+		}
+
+		if (doFormat) result.append(nl + "      ");
+		if (order != null && order.equals("Y"))
+		{
+			result.append(" ORDER");
+		}
+		else if (doFormat)
+		{
+			result.append(" NO ORDER");
+		}
+		return result;
 	}
 
 	private String typeIdToName(int id)

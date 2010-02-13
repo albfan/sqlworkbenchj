@@ -12,7 +12,6 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -62,8 +61,6 @@ import java.beans.PropertyChangeListener;
 import java.sql.Savepoint;
 import java.util.ArrayList;
 import java.util.Collections;
-import javax.swing.JTabbedPane;
-import javax.swing.UIDefaults;
 import workbench.WbManager;
 import workbench.db.TableSelectBuilder;
 import workbench.gui.MainWindow;
@@ -115,7 +112,7 @@ public class TableDataPanel
 
 	private boolean initialized;
 	private FilteredProperties workspaceSettings;
-	
+
 	public TableDataPanel()
 	{
 		super();
@@ -138,7 +135,7 @@ public class TableDataPanel
 	private void _initGui()
 	{
 		if (initialized) return;
-		
+
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		this.setLayout(new BorderLayout());
 
@@ -257,7 +254,7 @@ public class TableDataPanel
 		}
 
 		restoreSettings();
-		
+
 		if (workspaceSettings != null)
 		{
 			readSettings(workspaceSettings.getFilterPrefix(), workspaceSettings);
@@ -324,7 +321,7 @@ public class TableDataPanel
 	public void reset()
 	{
 		if (!initialized) return;
-		
+
 		if (this.isRetrieving()) return;
 		if (this.rememberSort)
 		{
@@ -353,7 +350,7 @@ public class TableDataPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		
+
 		if (this.initialized)
 		{
 			try
@@ -415,7 +412,7 @@ public class TableDataPanel
 		if (this.dbConnection == null) return -1;
 		if (this.isRetrieving()) return -1;
 		initGui();
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -541,10 +538,10 @@ public class TableDataPanel
 		initGui();
 
 		if (!this.isRetrieving()) reset();
-	
+
 		this.table = aTable;
 		this.lastSort = null;
-		
+
 		WbSwingUtilities.invoke(new Runnable()
 		{
 			public void run()
@@ -613,7 +610,7 @@ public class TableDataPanel
 	public void cancelExecution()
 	{
 		if (!initialized) return;
-		
+
 		Thread t = new WbThread("Cancel thread")
 		{
 			public void run()
@@ -777,7 +774,6 @@ public class TableDataPanel
 			if (e instanceof OutOfMemoryError)
 			{
 				try { dataDisplay.getTable().reset(); } catch (Throwable th) {}
-				//msg = ResourceMgr.getString("MsgOutOfMemoryError");
 				WbManager.getInstance().showOutOfMemoryError();
 			}
 			else
@@ -821,7 +817,7 @@ public class TableDataPanel
 	public void setCursor(Cursor newCursor)
 	{
 		super.setCursor(newCursor);
-		if (dataDisplay != null) 
+		if (dataDisplay != null)
 		{
 			this.dataDisplay.setCursor(newCursor);
 		}
@@ -847,7 +843,7 @@ public class TableDataPanel
 
 	private String getWorkspacePrefix(int index)
 	{
-		return "dbexplorer" + index;
+		return "dbexplorer" + index + ".tabledata.";
 	}
 
 	/**
@@ -890,10 +886,10 @@ public class TableDataPanel
 	{
 		if (initialized)
 		{
-			props.setProperty(prefix + ".tabledata.maxrows", this.dataDisplay.getMaxRows());
-			props.setProperty(prefix + ".tabledata.autoretrieve", this.autoRetrieve.isSelected());
-			props.setProperty(prefix + ".tabledata.autoloadrowcount", this.autoloadRowCount);
-			props.setProperty(prefix + ".tabledata.warningthreshold", this.warningThreshold);
+			props.setProperty(prefix + "maxrows", this.dataDisplay.getMaxRows());
+			props.setProperty(prefix + "autoretrieve", this.autoRetrieve.isSelected());
+			props.setProperty(prefix + "autoloadrowcount", this.autoloadRowCount);
+			props.setProperty(prefix + "warningthreshold", this.warningThreshold);
 		}
 		else if (workspaceSettings != null)
 		{

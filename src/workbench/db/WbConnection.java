@@ -786,6 +786,23 @@ public class WbConnection
 		return displayString;
 	}
 
+	public String getJDBCVersion()
+	{
+		try
+		{
+			DatabaseMetaData jdbcmeta = getSqlConnection().getMetaData();
+			int major = jdbcmeta.getJDBCMajorVersion();
+			int minor = jdbcmeta.getJDBCMinorVersion();
+
+			return major + "." + minor;
+		}
+		catch (Throwable e)
+		{
+			LogMgr.logWarning("WbConnection.getJDBCVersion()", "Error retrieving DB version (" + ExceptionUtil.getDisplay(e) + ")");
+			return "n/a";
+		}
+	}
+
 	public String getDatabaseVersion()
 	{
 		try

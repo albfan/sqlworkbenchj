@@ -106,9 +106,15 @@ public class ConnectionMgr
 		WbConnection conn = this.connect(aProfile, anId);
 		conn.runPostConnectScript();
 		String driverVersion = conn.getDriverVersion();
+		String jdbcVersion = conn.getJDBCVersion();
 		String dbVersion = conn.getSqlConnection().getMetaData().getDatabaseProductVersion();
 
-		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" + conn.getMetadata().getProductName() + "], Database version: [" + dbVersion + "], Driver version: [" + driverVersion + "], ID: ["  + anId + "]");
+		LogMgr.logInfo("ConnectionMgr.getConnection()", "Connected to: [" +
+			conn.getMetadata().getProductName() + "], Database version: ["
+			+ dbVersion + "], Driver version: [" +
+			driverVersion + "], JDBC Version: [" +
+			jdbcVersion + "], ID: ["  + anId + "]"
+		);
 
 		this.activeConnections.put(anId, conn);
 
@@ -279,7 +285,7 @@ public class ConnectionMgr
 
 		DbDriver drv = new DbDriver("JdbcDriver", drvClassName, jarFile);
 		drv.setInternal(true);
-		
+
 		// this method is called from BatchRunner.createCmdLineProfile() when
 		// the user passed all driver information on the command line.
 		// as most likely this is the correct driver it has to be put
@@ -342,7 +348,7 @@ public class ConnectionMgr
 		}
 		return firstMatch;
 	}
-	
+
 	/**
 	 * Find a connection profile identified by the given key.
 	 *
@@ -367,7 +373,7 @@ public class ConnectionMgr
 		if (this.driverChangeListener == null) return;
 		this.driverChangeListener.remove(l);
 	}
-	
+
 	/**
 	 * Return a list with profile keys that can be displayed to the user.
 	 * The returned list is already sorted.
@@ -383,7 +389,7 @@ public class ConnectionMgr
 		Collections.sort(result, new CaseInsensitiveComparator());
 		return result;
 	}
-	
+
 	/**
 	 *	Returns a List with the current profiles.
 	 */
@@ -500,7 +506,7 @@ public class ConnectionMgr
 
 		// As drivers an profiles can be saved in console mode, we need to make
 		// sure, the "internal" drivers that are created "on-the-fly" when connecting
-		// from the commandline are not stored 
+		// from the commandline are not stored
 		List<DbDriver> allDrivers = new ArrayList<DbDriver>(this.drivers);
 		Iterator<DbDriver> itr = allDrivers.iterator();
 		while (itr.hasNext())
@@ -510,7 +516,7 @@ public class ConnectionMgr
 				itr.remove();
 			}
 		}
-		
+
 		try
 		{
 			writer.writeObject(allDrivers);
@@ -690,7 +696,7 @@ public class ConnectionMgr
 			WbPersistence.makeTransient(ConnectionProfile.class, "inputPassword");
 			WbPersistence.makeTransient(ConnectionProfile.class, "useSeperateConnectionPerTab");
 			WbPersistence.makeTransient(ConnectionProfile.class, "disableUpdateTableCheck");
-			
+
 			WbPersistence writer = new WbPersistence(Settings.getInstance().getProfileStorage());
 			try
 			{
@@ -725,23 +731,23 @@ public class ConnectionMgr
 	public synchronized void applyProfiles(List<ConnectionProfile> newProfiles)
 	{
 		if (newProfiles == null) return;
-		
+
 		this.profilesChanged = (profiles.size() != newProfiles.size());
-		
+
 		this.profiles.clear();
 		for (ConnectionProfile profile : newProfiles)
 		{
 			this.profiles.add(profile.createStatefulCopy());
 		}
 	}
-	
+
 	public synchronized void addProfile(ConnectionProfile aProfile)
 	{
 		if (this.profiles == null)
 		{
 			this.readProfiles();
 		}
-		
+
 		this.profiles.remove(aProfile);
 		this.profiles.add(aProfile);
 		this.profilesChanged = true;

@@ -178,7 +178,9 @@ public class TableSourceBuilder
 			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
 			if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
 			{
-				if (dbConnection.getDbSettings().computedColumnNeedsDataType())
+				boolean needType = dbConnection.getDbSettings().computedColumnNeedsDataType();
+				boolean auto = column.isAutoincrement();
+				if (needType || auto)
 				{
 					result.append(type);
 					result.append(' ');
@@ -524,11 +526,11 @@ public class TableSourceBuilder
 
 		String template = meta.metaSqlMgr.getForeignKeyTemplate(forInlineUse);
 
-		// collects all columns from the base table mapped to the
-		// defining foreign key constraing.
-		// The fk name is the key.
-		// to the hashtable. The entry will be a HashSet containing the column names
-		// this ensures that each column will only be used once per fk definition
+		// fkCols collects all columns from the base table mapped to the
+		// defining foreign key constraint.
+		// The fk name is the key to the hashtable.
+		// The entry will be a LinkedList containing the column names.
+		// This ensures that each column will only be used once per fk definition
 		// (the postgres driver returns some columns twice!)
 		HashMap<String, List<String>> fkCols = new HashMap<String, List<String>>();
 

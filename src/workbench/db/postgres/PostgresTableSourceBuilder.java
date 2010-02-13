@@ -95,6 +95,9 @@ public class PostgresTableSourceBuilder
 		{
 			SqlUtil.closeAll(rs, pstmt);
 		}
+
+		// TODO: Append tablespace information (pg_class.reltablespace), storage options (pg_class.reloptions)
+
 		return (result == null ? null : result.toString());
 	}
 
