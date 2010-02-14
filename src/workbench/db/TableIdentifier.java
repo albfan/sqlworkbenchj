@@ -185,6 +185,8 @@ public class TableIdentifier
 		copy.preserveQuotes = this.preserveQuotes;
 		copy.type = this.type;
 		copy.retrieveFkSource = this.retrieveFkSource;
+		copy.commentWasInitialized = this.commentWasInitialized;
+		copy.tableComment = this.tableComment;
 		return copy;
 	}
 	

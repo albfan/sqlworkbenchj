@@ -174,7 +174,7 @@ public class RowData
 		for (int i=0; i < colCount; i++)
 		{
 			int type = info.getColumnType(i);
-
+			
 			if (converter != null)
 			{
 				String dbms = info.getDbmsTypeName(i);
@@ -188,12 +188,6 @@ public class RowData
 
 			try
 			{
-				// Not using getObject() for timestamp columns
-				// is a workaround for Oracle, because
-				// it does not return the correct object class
-				// when using getObject() on a TIMESTAMP column
-				// I simply assume that this is working properly
-				// for other JDBC drivers as well.
 				if (type == java.sql.Types.TIMESTAMP)
 				{
 					value = rs.getTimestamp(i+1);

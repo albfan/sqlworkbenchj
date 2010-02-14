@@ -26,7 +26,9 @@ public interface TableDefinitionReader
 	 * instance of {@link TableColumnsDatastore}.
 	 *
 	 * @param toRead The table for which the definition should be retrieved
-	 * @param enhancer The ColumnDefinitionEnhancer to post-process the column list. May be null
+	 * @param primaryKeyColumns the primary key columns of the table
+	 * @param dbConnection the connection to use
+	 * @param typeResolver the data type resolver that should be used to "clean up" data types returned from the driver
 	 * 
 	 * @throws SQLException
 	 * @return the definition of the table. If toRead was null, null is returned

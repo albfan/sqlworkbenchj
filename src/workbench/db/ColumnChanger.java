@@ -84,13 +84,11 @@ public class ColumnChanger
 		{
 			String oldComment = oldDefinition.getComment();
 			String newComment = newDefinition.getComment();
-			if (!StringUtil.equalStringOrEmpty(oldComment, newComment))
+			if (!StringUtil.equalStringOrEmpty(oldComment, newComment) && !OracleMetadata.remarksEnabled(dbConn))
 			{
-				if (!OracleMetadata.remarksEnabled(dbConn))
-				{
-					result.append("-- ");
-					result.append(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));
-				}
+				result.append("-- ");
+				result.append(ResourceMgr.getString("MsgSchemaReporterOracleRemarksWarning"));
+				result.append('\n');
 			}
 		}
 

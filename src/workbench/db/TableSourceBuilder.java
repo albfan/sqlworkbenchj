@@ -79,7 +79,7 @@ public class TableSourceBuilder
 	public String getTableSource(TableIdentifier table, boolean includeDrop, boolean includeFk)
 		throws SQLException
 	{
-		if (dbConnection.getMetadata().getViewTypeName().equalsIgnoreCase(table.getType()))
+		if (dbConnection.getDbSettings().isViewType(table.getType()))
 		{
 			CharSequence s = getViewReader().getExtendedViewSource(table, includeDrop);
 			if (s == null) return null;
@@ -113,6 +113,65 @@ public class TableSourceBuilder
 	}
 
 	public String getTableSource(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	{
+		StringBuilder result = new StringBuilder(250);
+		result.append(getCreateTable(table, columns, aIndexDef, aFkDef, includeDrop, tableNameToUse, includeFk));
+
+		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
+
+		if (!this.createInlineConstraints && includeFk)
+		{
+			CharSequence fk = getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
+			if (StringUtil.isNonBlank(fk))
+			{
+				result.append(lineEnding);
+				result.append(fk);
+			}
+		}
+
+		if (dbConnection.getDbSettings().getGenerateTableIndexSource())
+		{
+			StringBuilder indexSource = getIndexReader().getIndexSource(table, aIndexDef, tableNameToUse);
+			if (StringUtil.isNonBlank(indexSource))
+			{
+				result.append(lineEnding);
+				result.append(indexSource);
+			}
+		}
+		
+		if (dbConnection.getDbSettings().getGenerateTableComments())
+		{
+			TableCommentReader commentReader = new TableCommentReader();
+			String tableComment = commentReader.getTableCommentSql(dbConnection, table);
+			if (StringUtil.isNonBlank(tableComment))
+			{
+				result.append(lineEnding);
+				result.append(tableComment);
+			}
+
+			StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
+			if (StringUtil.isNonBlank(colComments))
+			{
+				result.append(lineEnding);
+				result.append(colComments);
+			}
+		}
+
+		if (dbConnection.getDbSettings().getGenerateTableGrants())
+		{
+			TableGrantReader grantReader = new TableGrantReader();
+			StringBuilder grants = grantReader.getTableGrantSource(this.dbConnection, table);
+			if (grants.length() > 0)
+			{
+				result.append(lineEnding);
+				result.append(grants);
+			}
+		}
+
+		return result.toString();
+	}
+	
+	protected CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
@@ -183,7 +242,7 @@ public class TableSourceBuilder
 				if (needType || auto)
 				{
 					result.append(type);
-					result.append(' ');
+					for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
 				}
 				result.append(column.getComputedColumnExpression());
 			}
@@ -223,14 +282,14 @@ public class TableSourceBuilder
 					result.append(" NOT NULL");
 				}
 
-				if (!defaultBeforeNull && !StringUtil.isEmptyString(def))
+				if (!defaultBeforeNull && StringUtil.isNonBlank(def))
 				{
 					result.append(" DEFAULT ");
 					result.append(def.trim());
 				}
 
 				String constraint = columnConstraints.get(colName);
-				if (constraint != null && constraint.length() > 0)
+				if (StringUtil.isNonBlank(constraint))
 				{
 					result.append(' ');
 					result.append(constraint);
@@ -249,7 +308,7 @@ public class TableSourceBuilder
 		}
 
 		String cons = meta.getTableConstraintSource(table, "   ");
-		if (cons != null && cons.length() > 0)
+		if (StringUtil.isNonBlank(cons))
 		{
 			result.append("   ,");
 			result.append(cons);
@@ -307,54 +366,14 @@ public class TableSourceBuilder
 			result.append(pkSource);
 		}
 
-		StringBuilder indexSource = getIndexReader().getIndexSource(table, aIndexDef, tableNameToUse);
-		if (StringUtil.isNonBlank(indexSource))
-		{
-			result.append(lineEnding);
-			result.append(indexSource);
-		}
-
-		if (!this.createInlineConstraints && includeFk)
-		{
-			CharSequence fk = getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
-			if (StringUtil.isNonBlank(fk))
-			{
-				result.append(lineEnding);
-				result.append(fk);
-			}
-		}
-
-		TableCommentReader commentReader = new TableCommentReader();
-		String tableComment = commentReader.getTableCommentSql(dbConnection, table);
-		if (StringUtil.isNonBlank(tableComment))
-		{
-			result.append(lineEnding);
-			result.append(tableComment);
-		}
-
-		StringBuilder colComments = commentReader.getTableColumnCommentsSql(this.dbConnection, table, columns);
-		if (StringUtil.isNonBlank(colComments))
-		{
-			result.append(lineEnding);
-			result.append(colComments);
-		}
-
-		TableGrantReader grantReader = new TableGrantReader();
-		StringBuilder grants = grantReader.getTableGrantSource(this.dbConnection, table);
-		if (grants.length() > 0)
-		{
-			result.append(lineEnding);
-			result.append(grants);
-		}
-
-		return result.toString();
+		return result;
 	}
 
 	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
 		return null;
 	}
-	
+
 	protected String getAdditionalColumnInformation(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
 		return null;
@@ -383,7 +402,7 @@ public class TableSourceBuilder
 		String sql = dbConnection.getDbSettings().getRetrieveTableSourceSql();
 		if (sql == null) return null;
 
-		StringBuilder result = new StringBuilder(100);
+		StringBuilder result = new StringBuilder(250);
 
 		int colIndex = dbConnection.getDbSettings().getRetrieveTableSourceCol();
 
@@ -418,7 +437,6 @@ public class TableSourceBuilder
 			sql = sql.replace("%schema%", schema);
 		}
 
-
 		String tname = (needQuotes ? dbConnection.getMetadata().quoteObjectname(table.getTableName()) : table.getTableName());
 		sql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tname);
 
@@ -438,7 +456,7 @@ public class TableSourceBuilder
 			}
 			result.append('\n');
 		}
-		catch (SQLException se)
+		catch (Exception se)
 		{
 			LogMgr.logError("TableSourceBuilder.getNativeTableSource()", "Error retrieving table source", se);
 			return null;

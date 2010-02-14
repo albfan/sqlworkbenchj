@@ -15,8 +15,9 @@ package workbench.util;
  * A dynamic byte[] array which gives direct access to the underlying 
  * byte[] array which is more efficient than ByteArrayOutputStream which 
  * copies the array when calling toByteArray() (thus doubling memory usage) 
- * It is not as efficient as it does not pre-allocate bytes (in order to 
- * be able to give direct access to the underlying array. 
+ * It is not as efficient as ByteArrayOutputStream because it does not pre-allocate
+ * bytes (in order to be able to give direct access to the underlying array).
+ * 
  * {@link #getLength()} returns the physical length of the internal array
  * and is equivalent to getBuffer().length;
  *

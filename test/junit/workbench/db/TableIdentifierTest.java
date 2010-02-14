@@ -203,6 +203,7 @@ public class TableIdentifierTest
 	{
 		String sql = "\"catalog\".\"schema\".\"table\"";
 		TableIdentifier tbl = new TableIdentifier(sql);
+		tbl.setComment("this is a comment");
 		tbl.setPreserveQuotes(true);
 		assertEquals("\"catalog\"", tbl.getCatalog());
 		assertEquals("\"schema\"", tbl.getSchema());
@@ -216,6 +217,7 @@ public class TableIdentifierTest
 		assertEquals("\"table\"", t2.getTableName());
 		assertEquals(sql, t2.getTableExpression());
 		assertEquals(true, tbl.equals(t2));
+		assertEquals("this is a comment", t2.getComment());
 	}
 
 	public void testEqualsAndHashCode()
