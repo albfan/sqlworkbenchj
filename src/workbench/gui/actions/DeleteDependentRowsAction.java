@@ -18,11 +18,13 @@ import workbench.resource.ResourceMgr;
 
 /**
  * Delete the currently highlighted row(s) from a table
+ * 
  * @see workbench.interfaces.DbData
  * @see workbench.gui.sql.DwPanel
  * @author  Thomas Kellerer
  */
-public class DeleteDependentRowsAction extends WbAction
+public class DeleteDependentRowsAction
+	extends WbAction
 {
 	private DbData client;
 

@@ -157,6 +157,7 @@ public class TableDataPanel
 				return result;
 			}
 		};
+		dataDisplay.showCreateDeleteScript();
 
 		this.dataDisplay.setShowLoadProcess(true);
 		this.dataDisplay.setDefaultStatusMessage("");

@@ -49,6 +49,7 @@ import workbench.gui.components.WbTextCellEditor;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.CopyRowAction;
+import workbench.gui.actions.CreateDeleteScriptAction;
 import workbench.gui.actions.DeleteDependentRowsAction;
 import workbench.gui.actions.DeleteRowAction;
 import workbench.gui.actions.InsertRowAction;
@@ -112,6 +113,7 @@ public class DwPanel
 	protected CopyRowAction duplicateRow;
 	protected DeleteRowAction deleteRow;
 	protected DeleteDependentRowsAction deleteDependentRow;
+	protected CreateDeleteScriptAction createDeleteScript;
 	protected SelectKeyColumnsAction selectKeys;
 
 	private boolean batchUpdate;
@@ -155,6 +157,15 @@ public class DwPanel
 		this.genericRowMonitor = new GenericRowMonitor(this.statusBar);
 	}
 
+	public void showCreateDeleteScript()
+	{
+		if (createDeleteScript == null)
+		{
+			this.createDeleteScript = new CreateDeleteScriptAction(dataTable);
+			dataTable.addPopupActionAfter(createDeleteScript, deleteDependentRow);
+		}
+	}
+	
 	public void initTableNavigation(MainWindow container)
 	{
 		this.referenceNavigator = new ReferenceTableNavigator(this, container);

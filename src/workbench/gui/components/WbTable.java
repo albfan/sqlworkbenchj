@@ -633,6 +633,38 @@ public class WbTable
 		});
 	}
 
+	private int findPopupItem(WbAction reference)
+	{
+		if (reference == null) return -1;
+		
+		int count = popup.getComponentCount();
+		for (int i=0; i < count; i++)
+		{
+			Component item = popup.getComponent(i);
+			if (item instanceof JMenuItem)
+			{
+				JMenuItem menu = (JMenuItem)item;
+				if (menu.getAction() == reference) return i;
+			}
+		}
+		return -1;
+	}
+
+	public void addPopupActionAfter(final WbAction action, final WbAction reference)
+	{
+		if (popup == null) return;
+		final int index = findPopupItem(reference);
+		if (index == -1) return;
+
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			public void run()
+			{
+				popup.add(action.getMenuItem(), index + 1);
+			}
+		});
+	}
+	
 	public void addPopupAction(final WbAction anAction, final boolean withSep)
 	{
 		addPopupMenu(anAction.getMenuItem(), withSep);
