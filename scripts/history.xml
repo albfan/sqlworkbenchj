@@ -6,7 +6,33 @@
 
   <entry dev-build="6" type="enh">
     <description>
-      The DbExplorer will not show the correct source code for user defined AGGREGATEs in PostgreSQL
+      For DB2 the list of procedures is no long retrieved through the driver, so that functions will also be shown
+      in the DbExplorer.
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
+      When using a JDBC 4.0 compliant driver the table definition in the DbExplorer will now also display the IS_AUTOINCREMENT flag.
+      (with pre-JDBC 4.0 drivers the column will always display NO)
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
+      For SQL Server, column and table remarks that are defined through sp_addextendedproperty() are now retrieved and displayed in the DbExplorer.
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
+      Computed/Virtual columns are now shown in a table's SQL for Firebird, H2 Database, HSQLDB 2.0, Oracle 11g, DB2 (LUW) and SQL Server 2005
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="enh">
+    <description>
+      The DbExplorer will now show the (correct) source code for user defined AGGREGATEs in PostgreSQL
     </description>
   </entry>
 
@@ -142,6 +168,12 @@
   <entry dev-build="5" type="fix">
     <description>
       When using "Save Data As" to export a result set, the settings for an Excel export where not saved
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="fix">
+    <description>
+      The current schema and database of the DbExplorer were not always saved correctly in the workspace.
     </description>
   </entry>
 

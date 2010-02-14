@@ -1,7 +1,7 @@
 <section id="profiles">
   <title>Connecting to the database</title>
 
-  <indexterm><primary>connection profile</primary></indexterm>
+  <indexterm><primary>Connection profile</primary></indexterm>
 
   <section id="profile-intro">
 
@@ -25,7 +25,7 @@
 	</para>
 
 	<para>
-    <indexterm><primary>connection profile</primary><secondary>create</secondary></indexterm>
+    <indexterm><primary>Connection profile</primary><secondary>create</secondary></indexterm>
     To create a new profile click on the
 		<literal>New Profile</literal> button (<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/NewProfile16.gif" format="GIF"/></guiicon>).
 		This will create a new profile with the name "New Profile". The new profile
@@ -39,7 +39,7 @@
 	</para>
 
 	<para>
-    <indexterm><primary>connection profile</primary><secondary>delete</secondary></indexterm>
+    <indexterm><primary>Connection profile</primary><secondary>delete</secondary></indexterm>
 		To delete an existing profile, select the profile in the list and
 		click on the <literal>Delete Profile</literal> button
 		(<guiicon><inlinegraphic width="16" depth="16" fileref="@IMAGE_DIR@/Delete16.gif" format="GIF"/></guiicon>)
@@ -114,7 +114,7 @@
 				<row>
 					<entry><para>URL</para></entry>
           <entry><para>
-              <indexterm><primary>connection profile</primary><secondary>connection URL</secondary></indexterm>
+              <indexterm><primary>Connection profile</primary><secondary>connection URL</secondary></indexterm>
               The connection URL for your DBMS.
               This value is DBMS specific. The pre-configured drivers from &wb-productname; contain
 							a sample URL. If the sample URL (which gets filled into the text field
@@ -137,7 +137,7 @@
 					<entry><para>Fetch size</para></entry>
 					<entry>
             <para>
-              <indexterm><primary>connection profile</primary><secondary>default fetch size</secondary></indexterm>
+              <indexterm><primary>Connection profile</primary><secondary>default fetch size</secondary></indexterm>
               This setting controls the default fetch size for data retrieval. This parameter will directly be passed to the
 							<ulink url="http://java.sun.com/javase/6/docs/api/java/sql/Statement.html#setFetchSize(int)">setFetchSize()</ulink>
 							method of the <literal>Statement</literal> object.
@@ -158,7 +158,7 @@
 				<row>
 					<entry id="profile-autocommit"><para>Autocommit</para></entry>
 					<entry><para>
-              <indexterm><primary>connection profile</primary><secondary>autocommit</secondary></indexterm>
+              <indexterm><primary>Connection profile</primary><secondary>autocommit</secondary></indexterm>
               This checkbox enables/disables the property
 							for the connection. If autocommit is enabled, then each SQL statement
 							is automatically committed on the DBMS. If this is disabled, any DML
@@ -178,7 +178,7 @@
 
 <section id="profile-extended-properties">
 	<title>Extended properties for the JDBC driver</title>
-  <indexterm><primary>connection profile</primary><secondary>extended properties</secondary></indexterm>
+  <indexterm><primary>Connection profile</primary><secondary>extended properties</secondary></indexterm>
 	<para>
 		JDBC drivers support additional connection properties where
 		you can fine tune the behaviour of the driver or enable special features
@@ -232,8 +232,8 @@
 
 	<section id="profile-separate-connection">
 		<title>Separate connection per tab</title>
-    <indexterm><primary>connection profile</primary><secondary>separate connection</secondary></indexterm>
-    <indexterm><primary>connection profile</primary><secondary>separate session</secondary></indexterm>
+    <indexterm><primary>Connection profile</primary><secondary>separate connection</secondary></indexterm>
+    <indexterm><primary>Connection profile</primary><secondary>separate session</secondary></indexterm>
     
 		<para>
 			If this option is enabled, then each tab in the main window

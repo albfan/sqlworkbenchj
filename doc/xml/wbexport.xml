@@ -12,8 +12,8 @@
     usage in scripts that are run in <link linkend="using-scripting">batch mode</link>.
 	</para>
 
-  <indexterm><primary>export</primary><secondary>SQL query result</secondary></indexterm>
-  <indexterm><primary>export</primary><secondary>table</secondary></indexterm>
+  <indexterm><primary>Export</primary><secondary>SQL query result</secondary></indexterm>
+  <indexterm><primary>Export</primary><secondary>table</secondary></indexterm>
 
 	<para>
 		The <literal>WbExport</literal> command exports either the result of the 
@@ -62,7 +62,7 @@
 	<section id="wb-export-memory">
 		<title>Memory usage and WbExport</title>
     <indexterm><primary>Problems</primary><secondary>memory usage during export</secondary></indexterm>
-    <indexterm><primary>export</primary><secondary>memory problems</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>memory problems</secondary></indexterm>
 
     <para>
       WbExport is designed to directly write the rows that are retrieved from the database
@@ -79,75 +79,40 @@
 
   <section id="poi-installation">
     <title>Exporting Excel files</title>
+    <indexterm><primary>Excel export</primary><secondary>installation</secondary></indexterm>
 
     <para>
-      If you are forced to use Microsoft Office instead of the free alternative OpenOffice and need to create
-      an export for Excel, additional libraries are required to write the native Excel formats (xls and the
-      new xlsx introduced with Office 2007).
+      If you need to export data for Microsoft Excel, additional libraries are required to write the native Excel formats (xls and the
+      new xlsx introduced with Office 2007). Exporting the "SpreadsheetML" format introduced with Office 2003 does not require
+      additional libraries.
     </para>
 
+    <important>
+      <para>
+        Before Build 108 <literal>-type=xlsx</literal> referred to the Office 2003 file format. To distinguish between the
+        two (XML based) formats from Microsoft, the naming has been changed to reflect the default file extensions that are
+        used by Microsoft.
+      </para>
+    </important>
+
     <para>
-      &wb-productname; supports three different file versions for Excel:
+      &wb-productname; supports three different Excel file formats:
         <itemizedlist>
           <listitem>Office 2003 (xlsm) - this is a plain XML format that does not need additional libraries</listitem>
-          <listitem>The "old" binary format (xls) - only poi.jar is needed (see below)</listitem>
+          <listitem>The "old" binary format (xls) - only <literal>poi.jar</literal> is needed</listitem>
           <listitem>Office 2007 (xlsx) - additional libraries from the POI project are needed</listitem>
         </itemizedlist>
     </para>
 
-    <section id="export-office-2003">
-      <indexterm><primary>export</primary><secondary>Office 2003</secondary></indexterm>
-      <title>Office 2003 ("SpreadsheetML")</title>
-      <para>
-        No additional libraries are needed to write the Office 2003 XML format ("SpreadsheetML").
-        To create this type, use <literal>-type=xlsm</literal>.
-      </para>
-    </section>
+    <para>
+      Instead of downloading and renaming the POI libraries from the <ulink url="http://poi.apache.org/download.html">Apache website</ulink>,
+      you can download all of them as a single archive from the &wb-productname; homepage:
+      <ulink url="http://www.sql-workbench.net/poi-add-on.zip"/>
+    </para>
 
-    <section id="export-old-excel">
-      <title>Old binary Excel format</title>
-      <para>
-        To be able to generate the binary Microsoft Excel formats, you need to download
-        the POI library from the Apache project's website: <ulink url="http://poi.apache.org/download.html"/>.
-        You need version 3.5 or newer. The distribution archive from the
-        POI project contains a jar file named e.g. <literal>poi-3.5-FINAL-20090928.jar</literal>
-        (exact name depends on the version).
-      </para>
-
-      <para>
-        The POI library needs to be copied into the same directory as <literal>sqlworkbench.jar</literal> under
-        the name <emphasis role="bold"><literal>poi.jar</literal></emphasis> (note the changed filename).
-      </para>
-    </section>
-
-    <section id="export-excel-2007">
-      <indexterm><primary>export</primary><secondary>Office 2007</secondary></indexterm>
-      <title>Office 2007 (Office Open XML)</title>
-      <para>
-        If you want to create exports using the new Office 2007 file format (OOXML) using <literal>-type=xlsx</literal> you need additional
-        libraries from the POI 3.5 distribution (apart from poi.jar).
-      </para>
-      <para>
-        The following files need to be copied (using the filenames exactly as shown below) into the directory
-        where <literal>sqlworkbench.jar</literal> is located:
-          <itemizedlist>
-            <listitem><literal>poi.jar</literal> (same as above)</listitem>
-            <listitem><literal>poi-ooxml.jar</literal> (this file originally includes version information in the distribution archive and needs to be renamed)</listitem>
-            <listitem><literal>dom4j-1.6.1.jar</literal></listitem>
-            <listitem><literal>geronimo-stax-api_1.0_spec-1.0.jar</literal></listitem>
-            <listitem><literal>ooxml-schemas-1.0.jar</literal></listitem>
-            <listitem><literal>xmlbeans-2.3.0.jar</literal></listitem>
-          </itemizedlist>
-      </para>
-
-      <important>
-        <para>
-          Before Build 108 <literal>-type=xlsx</literal> referred to the Office 2003 file format. To distinguish between the
-          two (XML based) formats from Microsoft, the naming has changed to reflect the default file extensions that are
-          used by Microsoft.
-        </para>
-      </important>
-    </section>
+    <para>
+      Simply unzip the archive into the directory where <literal>sqlworkbench.jar</literal> is located.
+    </para>
     
   </section>
 
@@ -162,7 +127,7 @@
 
 	<section id="export-parameters">
 		<title>General WbExport parameters</title>
-    <indexterm><primary>export</primary><secondary>parameters</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>parameters</secondary></indexterm>
     
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -209,7 +174,8 @@
 								format that can be opened e.g. with OpenOffice.org.
 							</para>
 							<para>
-								<literal>xlsm</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("SpreadsheetML").
+								<literal>xlsm</literal> will generate a spreadsheet file in the Microsoft Excel 2003 XML format ("SpreadsheetML"). This format
+                has been introduced with build 108 as <literal>xlsx</literal> now selects the Office 2007 format.
               </para>
 							<para>
 								<literal>xls</literal> will generate a spreadsheet file in the propriatary (binary) format
@@ -220,6 +186,10 @@
                 Additional external libraries are required in order to be able to use this format. Please read the note at the beginning of
                 this section.
 							</para>
+              <para><blockquote>
+                Before build 108, <literal>xlsx</literal> selected the Office 2003 XML format not the new Office 2007 format!
+              </blockquote></para>
+
 						</entry>
 					</row>
 
@@ -565,7 +535,7 @@
 	<section id="export-text-parameters">
     <title>Parameters for text export</title>
 
-    <indexterm><primary>export</primary><secondary>text files</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>text files</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2"  align="left">
@@ -725,7 +695,7 @@
 
 	<section id="export-xml-parameters">
     <title>Parameters for XML export</title>
-    <indexterm><primary>export</primary><secondary>XML files</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>XML files</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -811,8 +781,8 @@
 
 	<section id="export-sql-parameters">
     <title>Parameters for type SQLUPDATE, SQLINSERT or SQLDELETEINSERT</title>
-    <indexterm><primary>export</primary><secondary>SQL INSERT script</secondary></indexterm>
-    <indexterm><primary>export</primary><secondary>SQL UPDATE script</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>SQL INSERT script</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>SQL UPDATE script</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -991,9 +961,9 @@
 		
 	<section id="export-ods-parameters">
     <title>Parameters for Spreadsheet types (ods, xslm, xls, xlsx)</title>
-    <indexterm><primary>export</primary><secondary>Spreadsheet</secondary></indexterm>
-    <indexterm><primary>export</primary><secondary>OpenOffice</secondary></indexterm>
-    <indexterm><primary>export</primary><secondary>Excel</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>Spreadsheet</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>OpenOffice</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>Excel</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -1057,7 +1027,7 @@
 
 	<section id="export-html-parameters">
     <title>Parameters for HTML export</title>
-    <indexterm><primary>export</primary><secondary>HTML</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>HTML</secondary></indexterm>
 
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
@@ -1128,7 +1098,7 @@
 
 	<section id="export-compress">
 		<title>Compressing export files</title>
-    <indexterm><primary>export</primary><secondary>compress</secondary></indexterm>
+    <indexterm><primary>Export</primary><secondary>compress</secondary></indexterm>
 
 		<para>
 			The <literal>WbExport</literal> command supports compressing of the generated output files.

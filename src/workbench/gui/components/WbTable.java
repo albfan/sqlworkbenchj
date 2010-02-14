@@ -494,26 +494,6 @@ public class WbTable
 	public FilterDataAction getFilterAction() { return this.filterAction; }
 	public ResetFilterAction getResetFilterAction() { return this.resetFilterAction; }
 
-//	public CopySelectedAsTextAction getCopySelectedAsTextAction()
-//	{
-//		return this.copySelectedAsTextAction;
-//	}
-//
-//	public CopySelectedAsSqlDeleteInsertAction getCopySelectedAsSqlDeleteInsertAction()
-//	{
-//		return this.copySelectedAsDeleteInsertAction;
-//	}
-//
-//	public CopySelectedAsSqlInsertAction getCopySelectedAsSqlInsertAction()
-//	{
-//		return this.copySelectedAsInsertAction;
-//	}
-//
-//	public CopySelectedAsSqlUpdateAction getCopySelectedAsSqlUpdateAction()
-//	{
-//		return this.copySelectedAsUpdateAction;
-//	}
-
 	public void populateCopySelectedMenu(WbMenu copyMenu)
 	{
 		if (copySelectedAsTextAction == null)

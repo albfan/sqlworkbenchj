@@ -2,7 +2,7 @@
 <section id="export">
 	<title>Export result data</title>
 	<para>
-    You can export the data of the <emphasis role="strong"><indexterm><primary>export</primary><secondary>result set</secondary></indexterm></emphasis>
+    You can export the data of the <emphasis role="strong"><indexterm><primary>Export</primary><secondary>result set</secondary></indexterm></emphasis>
 		into local files of the following formats:
 	</para>
 	
@@ -13,7 +13,12 @@
 		<listitem><simpara>Tab separated text file. Columns are separated with a tab, rows are separated with a newline character</simpara></listitem>
 		<listitem><simpara>Spreadsheet Format (OpenDocument, Microsoft Excel)</simpara></listitem>
 	</itemizedlist>
-	
+
+  <para>
+    In order to write the proprietary Microsoft Excel format, additional libraries are needed. Please
+    refer to <link linkend="poi-installation">Exporting Excel files</link> for details.
+  </para>
+
 	<para>
 		To save the data from the current result set into an external file, 
 		choose <menuchoice><guimenu>Data</guimenu><guimenuitem>Save Data as</guimenuitem></menuchoice>
@@ -53,7 +58,7 @@
 <section id="export-clipboard">
 	<title>Copy data to the clipboard</title>
 	<para>
-    You can also copy the data from the result into the system <indexterm><primary>export</primary><secondary>clipboard</secondary></indexterm>
+    You can also copy the data from the result into the system <indexterm><primary>Export</primary><secondary>clipboard</secondary></indexterm>
 		in four different formats. In any case default settings are used
 		for the various options of the respective format.
 		<itemizedlist>
@@ -182,7 +187,7 @@
 	<section id="import-clipboard">
 		<title>Import the clipboard into the current result</title>
 		<para>
-      You can import the contents of the <indexterm><primary>import</primary><secondary>clipboard</secondary></indexterm> into the current result, if the
+      You can import the contents of the <indexterm><primary>Import</primary><secondary>clipboard</secondary></indexterm> into the current result, if the
 			format matches the result set. When you select <menuchoice><guimenu>Data</guimenu><guimenuitem>Import from Clipboar</guimenuitem></menuchoice>
 			&wb-productname; will check if the current clipboard contents can be imported into the current
 			result. The data can automatically be imported if the first row of the data contains

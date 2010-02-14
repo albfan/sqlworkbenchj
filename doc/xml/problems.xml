@@ -18,6 +18,16 @@
     </para>
   </section>
 
+  <section id="excel-export">
+    <title>Excel export not available</title>
+    <indexterm><primary>Excel export</primary><secondary>installation</secondary></indexterm>
+    <indexterm><primary>Problems</primary><secondary>Excel export not possible</secondary></indexterm>
+    <para>
+      In order to write the proprietary Microsoft Excel format, additional libraries are needed. Please
+      refer to <link linkend="poi-installation">Exporting Excel files</link> for details.
+    </para>
+  </section>
+  
   <section id="out-of-memory-error">
     <title>Out of memory errors</title>
     <indexterm><primary>Problems</primary><secondary>out of memory</secondary></indexterm>
@@ -151,11 +161,12 @@
 			<title>Content of XMLTYPE columns is not displayed</title>
       <para>
         The content of columns with the data type <literal>XMLTYPE</literal> cannot be displayed by &wb-productname; because
-        the Oracle JDBC driver does not implement the necessary JDBC 4.0 XML API (as of 11.2.0.1.0).
+        the Oracle JDBC driver does not support JDBC's XMLType and returns a proprietary implementation that can only be
+        used with Oracle's XDB extension classes.
       </para>
       <para>
         The only way to retrieve and update XMLType columns using &wb-productname; is to cast the columns to a CLOB 
-        value e.g. <literal>CAST(xml_column AS CLOB)</literal>
+        value e.g. <literal>CAST(xml_column AS CLOB)</literal> or <literal>to_clob(xml_column)</literal>
       </para>
       <para>
         In the DbExplorer you can customize the generated SQL statement to automatically convert the XMLType to a 

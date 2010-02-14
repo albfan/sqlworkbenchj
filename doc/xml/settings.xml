@@ -289,7 +289,38 @@
       </para>
     </simplesect>
 
+		<simplesect id="dbexplorer-ms-remarks-prop">
+			<title>Microsoft SQL Server extended property for remarks</title>
+			<para>Property: <literal>workbench.db.microsoft_sql_server.remarks.propertyname</literal></para>
+      <para>
+        Defines the name of the extended property that is queried in order to retrieve table or column remarks
+        for SQL Server.
+      </para>
+      <para>
+        &wb-productname; will use the table function <ulink url="http://msdn.microsoft.com/en-us/library/ms179853%28SQL.90%29.aspx">fn_listextendedproperty </ulink>
+        to retrieve the extended property defined by this configuration setting to retrieve remarks.
+      </para>
+      <para>Default value: <literal>MS_DESCRIPTION</literal></para>
+    </simplesect>
 
+		<simplesect id="dbexplorer-ms-remarks">
+			<title>Retrieving remarks for Microsoft SQL Server</title>
+			<para>Property:
+        <simplelist columns="1">
+          <member><literal>workbench.db.microsoft_sql_server.remarks.object.retrieve</literal></member>
+          <member><literal>workbench.db.microsoft_sql_server.remarks.column.retrieve</literal></member>
+        </simplelist>
+      </para>
+      <para>
+        Enables/disables the retrieval of extended properties as a replacement for the standard SQL <literal>COMMENT ON ...</literal> capability.
+      </para>
+      <para>
+        &wb-productname; will use SQL Server's <ulink url="http://msdn.microsoft.com/en-us/library/ms179853%28SQL.90%29.aspx">fn_listextendedproperty </ulink>
+        table function to retrieve table or column remarks. As this can have a performance impact on the retrieval of tables or columns,
+        this retrieval can be disabled using this configuration setting.
+      </para>
+      <para>Default value: <literal>true</literal> for both properties</para>
+    </simplesect>
 	</section>
 
 	<!--
@@ -876,7 +907,7 @@
       <simplesect id="settings-log-format">
         <title>Log format</title>
         <para>Property: <literal>workbench.log.format</literal></para>
-        <para>Define the format of the log messages. The following placeholders are supported:
+        <para>Define the elements that are included in log messages. The following placeholders are supported:
           <itemizedlist spacing="compact">
             <listitem>{type}</listitem>
             <listitem>{timestamp}</listitem>
@@ -885,10 +916,16 @@
             <listitem>{source}</listitem>
             <listitem>{stacktrace}</listitem>
           </itemizedlist>
-          The order of the placeholders defines the order in the log file, except
-          for the stacktrace which will always be printed after the message.
-          If the log level is set to debug, the stacktrace will always be displayed
+          This property does not define the layout of the message, only the elements
+          that are logged.
+        </para>
+        <para>
+          If the log level is set to DEBUG, the stacktrace will always be displayed
           even if it is not included in the format string.
+        </para>
+        <para>
+          If you want more control over the log file and the format of the message, please
+          switch the logging to use <link linkend="settings-log4j">Log4J</link>.
         </para>
         <para>Default: <literal>{type} {timestamp} {message} {error}</literal></para>
       </simplesect>
@@ -1075,7 +1112,7 @@
 			<para>
         This property defines the SQL query that should be executed. It must be a statement that
         returns a result set. The statement may contain three placeholders: <literal>%catalog%</literal>,
-        <literal>%schema%</literal> and <literal>%tablename%</literal> that are replaced with the values of
+        <literal>%schema%</literal> and <literal>%table_name%</literal> that are replaced with the values of
         the actual table before running the statement.
 			</para>
     </simplesect>
@@ -1094,7 +1131,7 @@
       The following example configures a SQL statement to retrieve the table's source using MySQL's
       "SHOW CREATE TABLE":
     </para>
-    <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %catalog%.%tablename%
+    <programlisting>workbench.db.mysql.retrieve.create.table.query=show create table %catalog%.%table_name%
 workbench.db.mysql.retrieve.create.table.sourcecol=2</programlisting>
 
     <para>
