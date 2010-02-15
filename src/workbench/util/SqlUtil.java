@@ -895,11 +895,10 @@ public class SqlUtil
 		        aSqlType == Types.CHAR ||
 		        aSqlType == Types.CLOB ||
 		        aSqlType == Types.LONGVARCHAR ||
-						aSqlType == Types.NVARCHAR ||
-						aSqlType == Types.NCHAR ||
-						aSqlType == Types.LONGNVARCHAR ||
-						aSqlType == Types.NCLOB
-						);
+		        aSqlType == Types.NVARCHAR ||
+		        aSqlType == Types.NCHAR ||
+		        aSqlType == Types.LONGNVARCHAR ||
+		        aSqlType == Types.NCLOB);
 	}
 
 	/**

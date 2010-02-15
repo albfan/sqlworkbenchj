@@ -599,7 +599,7 @@
       name="SQLWorkbenchJ"
       mainclass="workbench.WbStarter"
       jar="${distdir}/${jarfile}"
-      jvmversion="1.5+"
+      jvmversion="1.6+"
       version="${build.number}"
       shortname="SQL Workbench"
       infostring="SQL Workbench/J"

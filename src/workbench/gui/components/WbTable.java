@@ -616,7 +616,7 @@ public class WbTable
 	private int findPopupItem(WbAction reference)
 	{
 		if (reference == null) return -1;
-		
+
 		int count = popup.getComponentCount();
 		for (int i=0; i < count; i++)
 		{
@@ -644,7 +644,7 @@ public class WbTable
 			}
 		});
 	}
-	
+
 	public void addPopupAction(final WbAction anAction, final boolean withSep)
 	{
 		addPopupMenu(anAction.getMenuItem(), withSep);

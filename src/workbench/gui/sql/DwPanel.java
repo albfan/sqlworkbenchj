@@ -12,7 +12,6 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -165,7 +164,7 @@ public class DwPanel
 			dataTable.addPopupActionAfter(createDeleteScript, deleteDependentRow);
 		}
 	}
-	
+
 	public void initTableNavigation(MainWindow container)
 	{
 		this.referenceNavigator = new ReferenceTableNavigator(this, container);
@@ -774,7 +773,7 @@ public class DwPanel
 	public void showLimitReached()
 	{
 		if (!GuiSettings.getShowMaxRowsReached()) return;
-		
+
 		JTabbedPane tab = getTabParent();
 		if (tab == null) return;
 
@@ -783,7 +782,7 @@ public class DwPanel
 		{
 			index = tab.indexOfComponent(this.getParent());
 		}
-		
+
 		if (index > -1)
 		{
 			int maxRows = getMaxRows();
@@ -797,7 +796,7 @@ public class DwPanel
 			}
 		}
 	}
-	
+
 	public void readColumnComments()
 	{
 		DataStore ds = getDataStore();
