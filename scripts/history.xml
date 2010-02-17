@@ -165,7 +165,19 @@
     </description>
   </entry>
 
-  <entry dev-build="5" type="fix">
+  <entry dev-build="7" type="fix">
+    <description>
+      Defined schema or catalog filters in the connection profile were not displayed correctly (even though they were stored correctly).
+    </description>
+  </entry>
+
+	<entry dev-build="7" type="fix">
+    <description>
+      Exporting only some of the columns of a result using "Save As" did not work.
+    </description>
+  </entry>
+
+  <entry dev-build="6" type="fix">
     <description>
       When using "Save Data As" to export a result set, the settings for an Excel export where not saved
     </description>

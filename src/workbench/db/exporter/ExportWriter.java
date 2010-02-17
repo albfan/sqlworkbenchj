@@ -15,7 +15,9 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.Set;
+import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -118,13 +120,14 @@ public abstract class ExportWriter
 		return trim;
 	}
 
-	public void writeExport(DataStore ds)
+	public void writeExport(DataStore ds, List<ColumnIdentifier> columnsToExport)
 		throws SQLException, IOException
 	{
 		ResultInfo info = ds.getResultInfo();
 		this.converter.setGeneratingSql(ds.getGeneratingSql());
 		this.converter.setResultInfo(info);
-
+		converter.setColumnsToExport(columnsToExport);
+		
 		if (this.converter.needsUpdateTable())
 		{
 			ds.checkUpdateTable();

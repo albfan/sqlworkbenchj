@@ -80,6 +80,8 @@ public class HtmlRowDataConverter
 		result.append("  <tr>\n      ");
 		for (int c=0; c < count; c ++)
 		{
+			if (!includeColumnInExport(c)) continue;
+
 			String value = this.getValueAsFormattedString(row, c);
 			if (createFullPage)
 			{
@@ -158,11 +160,12 @@ public class HtmlRowDataConverter
 		result.append("  <tr>\n      ");
 		for (int c=0; c < this.metaData.getColumnCount(); c ++)
 		{
-			result.append("<td>");
+			if (!includeColumnInExport(c)) continue;
+			result.append("<th>");
 			if (createFullPage) result.append("<b>");
 			result.append(this.metaData.getColumnName(c));
 			if (createFullPage) result.append("</b>");
-			result.append("</td>");
+			result.append("</th>");
 		}
 		result.append("\n  </tr>\n");
 

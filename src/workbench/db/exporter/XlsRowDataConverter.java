@@ -87,10 +87,15 @@ public class XlsRowDataConverter
 		{
 			// table header with column names
 			Row headRow = sheet.createRow(0);
+			int column = 0;
 			for (int c = 0; c < this.metaData.getColumnCount(); c++)
 			{
-				Cell cell = headRow.createCell(c);
-				setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnName(c)), true);
+				if (includeColumnInExport(c))
+				{
+					Cell cell = headRow.createCell(column);
+					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumnName(c)), true);
+					column ++;
+				}
 			}
 		}
 		return null;
@@ -163,13 +168,18 @@ public class XlsRowDataConverter
 		int rowNum = (int)rowIndex;
 		if (writeHeader) rowNum ++;
 		Row myRow = sheet.createRow(rowNum);
+		int column = 0;
 		for (int c = 0; c < count; c++)
 		{
-			Cell cell = myRow.createCell(c);
+			if (includeColumnInExport(c))
+			{
+				Cell cell = myRow.createCell(column);
 
-			Object value = row.getValue(c);
+				Object value = row.getValue(c);
 
-			setCellValueAndStyle(cell, value, false);
+				setCellValueAndStyle(cell, value, false);
+				column ++;
+			}
 		}
 		return ret;
 	}

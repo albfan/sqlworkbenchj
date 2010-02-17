@@ -420,20 +420,6 @@ public class DataExporter
 		return blobIdCols;
 	}
 
-	/**
-	 * Define the columns that should be exported
-	 * This is only respected for the export of a DataStore, not
-	 * for exporting a ResultSet
-	 *
-	 * @param columns the columns to be exported
-	 * @see #startExport()
-	 * @see #startExport(workbench.util.WbFile, workbench.storage.DataStore)
-	 */
-	public void setColumnsToExport(List<ColumnIdentifier> columns)
-	{
-		this.columnsToExport = columns;
-	}
-
 	public List<ColumnIdentifier> getColumnsToExport()
 	{
 		return this.columnsToExport;
@@ -1086,7 +1072,7 @@ public class DataExporter
 		return numRows;
 	}
 
-	public long startExport(WbFile output, DataStore ds)
+	public long startExport(WbFile output, DataStore ds, List<ColumnIdentifier> columnsToExport)
 		throws IOException, SQLException, Exception
 	{
 		try
@@ -1094,7 +1080,7 @@ public class DataExporter
 			this.outputfile = output;
 			configureExportWriter();
 			this.exportWriter.exportStarting();
-			this.exportWriter.writeExport(ds);
+			this.exportWriter.writeExport(ds, columnsToExport);
 		}
 		catch (SQLException e)
 		{

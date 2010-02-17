@@ -38,6 +38,7 @@ public class ObjectNameFilter
 	 * Define the expressions to be used.
 	 * <br/>
 	 * This will replace any existing filter definitions and reset the modified flag
+	 * Empy expressions (null, "") in the collection will be ignored.
 	 * <br/>
 	 * If the list is empty the current filter definitions are not changed
 	 *
@@ -51,11 +52,20 @@ public class ObjectNameFilter
 		filterExpressions = new HashSet<Pattern>(expressions.size());
 		for (String exp : expressions)
 		{
-			addExpression(exp);
+			if (StringUtil.isNonBlank(exp))
+			{
+				addExpression(exp);
+			}
 		}
 		modified = false;
 	}
 
+	/**
+	 * Returns the defined expression values.
+	 * <br/>
+	 * The values will be sorted alphabetically
+	 * @return
+	 */
 	public Collection<String> getFilterExpressions()
 	{
 		if (CollectionUtil.isEmpty(filterExpressions)) return null;

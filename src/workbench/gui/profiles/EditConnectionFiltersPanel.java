@@ -105,7 +105,7 @@ public class EditConnectionFiltersPanel
 		if (filter.getFilterExpressions() == null) return;
 		for (String s : filter.getFilterExpressions())
 		{
-			editor.appendLine(s);
+			editor.appendLine(s + "\n");
 		}
 	}
 

@@ -64,12 +64,11 @@ public class DataStoreExporter
 			throw new NullPointerException("No outputfile defined");
 		}
 		DataExporter exporter = new DataExporter(this.source.getOriginalConnection());
-		exporter.setColumnsToExport(this.dialog.getColumnsToExport());
 		dialog.setExporterOptions(exporter);
 		
 		try
 		{
-			exporter.startExport(output, this.source);
+			exporter.startExport(output, this.source, this.dialog.getColumnsToExport());
 		}
 		catch (Exception e)
 		{
