@@ -57,7 +57,7 @@ public class TableRowHeaderModel
 	@Override
 	public Class<?> getColumnClass(int columnIndex)
 	{
-		return Integer.class;
+		return String.class;
 	}
 
 	@Override

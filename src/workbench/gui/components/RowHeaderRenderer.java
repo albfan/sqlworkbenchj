@@ -50,6 +50,7 @@ public class RowHeaderRenderer
 
 		rightMargin = GuiSettings.getRowNumberMargin();
 		calculateWidth();
+		setTooltip(null);
 	}
 
 	@Override
@@ -74,7 +75,7 @@ public class RowHeaderRenderer
 	public synchronized void calculateWidth()
 	{
 		FontMetrics fm = getFontMetrics(getFont());
-		int width = 8;
+		int width = 12;
 		try
 		{
 			if (fm != null)
@@ -85,7 +86,7 @@ public class RowHeaderRenderer
 		}
 		catch (Exception e)
 		{
-			width = 8;
+			width = 12;
 		}
 		String max = NumberStringCache.getNumberString(table.getRowCount());
 		colWidth = (max.length() * width) + width + rightMargin + 1;
@@ -123,7 +124,6 @@ public class RowHeaderRenderer
 		{
 			displayValue = (aValue == null ? null : aValue.toString());
 		}
-		setTooltip(null);
 	}
 
 }
