@@ -73,6 +73,14 @@ public class SqlHistory
 		this.clearAction.setEnabled(false);
 	}
 
+	public synchronized void setEnabled(boolean flag)
+	{
+		nextStmtAction.setEnabled(flag);
+		prevStmtAction.setEnabled(flag);
+		firstStmtAction.setEnabled(flag);
+		lastStmtAction.setEnabled(flag);
+	}
+	
 	public WbAction getShowFirstStatementAction() { return this.firstStmtAction; }
 	public WbAction getShowLastStatementAction() { return this.lastStmtAction; }
 	public WbAction getShowNextStatementAction() { return this.nextStmtAction; }

@@ -405,7 +405,7 @@ public class SqlPanel
 		return NumberStringCache.getNumberString(this.internalId);
 	}
 
-	public void setId(int anId)
+	public final void setId(int anId)
 	{
 		this.setName("sqlpanel" + anId);
 		this.internalId = anId;
@@ -3207,6 +3207,7 @@ public class SqlPanel
 				executeAll.setEnabled(flag);
 				executeSelected.setEnabled(flag);
 				executeCurrent.setEnabled(flag);
+
 				if (flag)
 				{
 					checkCommitAction();
@@ -3226,10 +3227,11 @@ public class SqlPanel
 	{
 		synchronized (this)
 		{
-			this.threadBusy = busy;
+			threadBusy = busy;
 			iconHandler.showBusyIcon(busy);
-			this.setExecuteActionStates(!busy);
-			this.editor.setEditable(!busy);
+			setExecuteActionStates(!busy);
+			editor.setEditable(!busy);
+			sqlHistory.setEnabled(!busy);
 		}
 	}
 
