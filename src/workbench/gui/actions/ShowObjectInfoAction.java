@@ -52,17 +52,26 @@ public class ShowObjectInfoAction
 	public void executeAction(ActionEvent e)
 	{
 		if (display.isBusy()) return;
+		final boolean includeDependencies;
+		if (invokedByMouse(e))
+		{
+			includeDependencies = isCtrlPressed(e);
+		}
+		else
+		{
+			includeDependencies = false;
+		}
 		WbThread t = new WbThread(new Runnable()
 		{
 			public void run()
 			{
-				showInfo();
+				showInfo(includeDependencies);
 			}
 		}, "ObjectInfoThread");
 		t.start();
 	}
 
-	protected void showInfo()
+	protected void showInfo(boolean includeDependencies)
 	{
 		if (display.isBusy()) return;
 		try
@@ -77,7 +86,7 @@ public class ShowObjectInfoAction
 			if (conn != null && StringUtil.isNonBlank(text))
 			{
 				display.showStatusMessage(ResourceMgr.getString("TxtRetrieveTableDef") + " " + text);
-				StatementRunnerResult result = info.getObjectInfo(conn, text, false);
+				StatementRunnerResult result = info.getObjectInfo(conn, text, includeDependencies);
 				if (result != null)
 				{
 					int count = display.getResultTabCount();
