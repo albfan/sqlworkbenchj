@@ -12,7 +12,8 @@ package workbench.gui.components;
 
 import javax.swing.*;
 import java.awt.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelListener;
 import workbench.gui.WbSwingUtilities;
 
@@ -22,7 +23,7 @@ import workbench.gui.WbSwingUtilities;
  */
 public class TableRowHeader
 	extends JTable
-	implements TableModelListener
+	implements TableModelListener, ChangeListener
 {
 	private TableRowHeaderModel rowModel;
 	private RowHeaderRenderer renderer;
@@ -41,6 +42,21 @@ public class TableRowHeader
 		setOpaque(false);
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		setRowSelectionAllowed(false);
+	}
+
+	@Override
+	public void addNotify()
+	{
+		super.addNotify();
+
+		Component c = getParent();
+
+		//  Keep scrolling of the row table in sync with the main table.
+		if (c instanceof JViewport)
+		{
+			JViewport viewport = (JViewport)c;
+			viewport.addChangeListener( this );
+		}
 	}
 
 	public void rowHeightChanged(int row)
@@ -107,5 +123,19 @@ public class TableRowHeader
 				scrollPane.setRowHeader(null);
 			}
 		}
+	}
+
+	@Override
+	public void stateChanged(ChangeEvent e)
+	{
+		JViewport viewport = (JViewport) e.getSource();
+		if (viewport == null) return;
+
+		JScrollPane scrollPane = (JScrollPane)viewport.getParent();
+		if (scrollPane == null) return;
+
+		JScrollBar bar = scrollPane.getVerticalScrollBar();
+		if (bar == null) return;
+		bar.setValue(viewport.getViewPosition().y);
 	}
 }

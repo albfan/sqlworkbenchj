@@ -167,6 +167,12 @@
 
   <entry dev-build="7" type="fix">
     <description>
+      The new row number display was not always in sync with the result table.
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="fix">
+    <description>
       Defined schema or catalog filters in the connection profile were not displayed correctly (even though they were stored correctly).
     </description>
   </entry>
