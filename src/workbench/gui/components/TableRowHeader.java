@@ -42,6 +42,8 @@ public class TableRowHeader
 		setOpaque(false);
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
 		setRowSelectionAllowed(false);
+		setAutoscrolls(false);
+		setFocusable(false);
 	}
 
 	@Override
