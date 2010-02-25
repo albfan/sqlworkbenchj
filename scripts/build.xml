@@ -589,7 +589,7 @@
   </target>
 
   <target name="mac-package" depends="init">
-    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-1.9.jar"/>
+    <taskdef name="jarbundler" classname="net.sourceforge.jarbundler.JarBundler" classpath="../etc/jarbundler/jarbundler-2.1.0.jar"/>
 
     <property name="bundledir" value="${distdir}/mac"/>
     <delete dir="${bundledir}" failonerror="false"/>
@@ -603,18 +603,17 @@
       version="${build.number}"
       shortname="SQL Workbench"
       infostring="SQL Workbench/J"
-      antialiasedgraphics="true"
-      antialiasedtext="true"
-      liveresize="true"
       signature="sqwb"
       icon="Workbench.icns"
       vmoptions="-Xmx256m"
-      stubfile="../etc/jarbundler/JavaApplicationStub">
+      stubfile="../etc/jarbundler/SQLWorkbenchStub">
 
       <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
       <javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
       <javaproperty name="apple.awt.showGrowBox" value="true"/>
       <javaproperty name="apple.awt.rendering" value="speed"/>
+      <javaproperty name="apple.awt.antialiasing" value="true"/>
+      <javaproperty name="apple.awt.textantialiasing" value="true"/>
     </jarbundler>
 
     <tar compression="gzip" destfile="${distdir}/Workbench-Build${build.number}-Mac.tgz">
