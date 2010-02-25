@@ -214,8 +214,16 @@ VALUES
             restored correctly when the workspace is loaded the next time  (fixed in 107.1)
         </li>
         <li>
-            When editing the data of columns with the data type <tt>inet</tt>, <tt>macaddr</tt> or <tt>cidr</tt> in PostgreSQL, 
-            wrong update statements are generated when the changes are saved to the database  (fixed in 107.1)
+          When editing the data of columns with the data type <tt>inet</tt>, <tt>macaddr</tt> or <tt>cidr</tt> in PostgreSQL, 
+          wrong update statements are generated when the changes are saved to the database  (fixed in 107.1)
+        </li>
+        <li>
+          On MacOS starting SQL Workbench through the application icon does not work if Java 5 and Java 6 are installed together
+          The stub that starts the Java virtual machine seems to pick the wrong Java installation.
+          <br/><br/>
+          To fix this problem, copy the stub from the Java 6 application into the SQL Workbench/J directory using the following command (on a single line)
+          <br/>
+          <tt>cp /System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub /Applications/SQLWorkbench/SQLWorkbenchJ.app/Contents/MacOS/</tt>
         </li>
       </ul>
     </content>
@@ -245,6 +253,8 @@ VALUES
         <li><a href="wbreport2html.xslt">HTML output</a></li>
         <li><a href="wbreport2pg.xslt">Create a script for PostgreSQL</a></li>
         <li><a href="wbreport2oracle.xslt">Create a script for Oracle</a></li>
+        <li><a href="wbreport2liquibase.xslt">Generate a Liquibase Changeset</a><br/>
+            The script includes <a href="liquibase_createtable.xslt">liquibase_createtable.xslt</a>. Both files are needed</li>
         <li><a href="wbreport2proc.xslt">Extract procedures</a></li>
        </ul>
 
@@ -285,6 +295,13 @@ VALUES
           The Mac package is suitable to be extracted on the Mac desktop and contains the jar file, a launcher
           for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package.
         </p>
+        <!--
+        <p>
+          In order to be able to export data to the proprietary Microsoft Excel format you need additional libraries that have
+          to be copied into the installation directory. The needed files can be download from <a href="poi-add-on.zip">here</a>.<br/>
+          For details on how to configure native export, please refer to <a href="http://www.sql-workbench.net/manual/command-export.html#poi-installation">the manual </a>
+        </p>
+        -->
         
         <ul>
             <li><zip-link/></li>
@@ -297,10 +314,28 @@ VALUES
           Looking for a free entity relationship modeling tool? Try <a href="http://www.sqlpower.ca/page/architect">Power*Architect</a>.
         </p>
         <p><a style="color:red" href="vista.html">A note to Windows Vista users</a>.</p>
+        <p><a href="macos.html">A note to Mac OS X users</a></p>
         <dev-build/>
     </content>
   </page>
 
+  <page name="macos" title="Running SQL Workbench/J on MacOS" toc="false">
+    <title>Running SQL Workbench/J on MacOS</title>
+    <content>
+    <h3>Running SQL Workbench/J on MacOS</h3>
+    <p>
+      On MacOS starting SQL Workbench through the application icon does not work if Java 5 and Java 6 are installed together
+      The stub that starts the Java virtual machine seems to pick the wrong Java installation.
+    </p>
+    <p>
+      To fix this problem, copy the stub from the Java 6 application into the SQL Workbench/J directory using the following command (on a single line)
+    </p>
+    <p>
+    <tt>cp /System/Library/Frameworks/JavaVM.framework/Resources/MacOS/JavaApplicationStub /Applications/SQLWorkbench/SQLWorkbenchJ.app/Contents/MacOS/</tt>
+    </p>
+    </content>
+  </page>
+  
   <page name="download-archive" title="Old Versions" toc="small">
     <title>SQL Workbench/J</title>
     <subtitle>Release Archive</subtitle>
@@ -513,10 +548,10 @@ VALUES
         <li>
           Download the <a href="http://informagen.com/JarBundler/index.html">JarBundler Ant task</a>. As the jarbundler library is referenced from within <tt>build.xml</tt>,
           the jar file is needed even when you don't want to build the Mac release. Then copy the
-          files <tt>jarbundler-1.9.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
+          files <tt>jarbundler-2.1.0.jar</tt> and <tt>JavaApplicationStub</tt> to <tt>${wbroot}/etc/jarbundler</tt>.
         </li>
-        <li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> and copy the main library (e.g. poi-2.5.1.jar) into the directory ${wbroot}/etc/poi</li>
-        <li>Download Apache Log4J 1.2.x from <a href="http://logging.apache.org/log4j/">http://logging.apache.org/log4j/</a> (Only needed for compiling) and copy the jar file (e.g. Log4J-1.2.24.jar) into the directory ${wbroot}/etc/log4j</li>
+        <li>Download Apache POI from <a href="http://poi.apache.org">http://poi.apache.org</a> unzip the distribution to ${wbroot}/etc/poi</li>
+        <li>Download Apache Log4J 1.2.x from <a href="http://logging.apache.org/log4j/">http://logging.apache.org/log4j/</a> and copy the jar file (e.g. Log4J-1.2.24.jar) into the directory ${wbroot}/etc/log4j</li>
         <li>Download HSQLDB from <a href="http://www.hsqldb.org">http://www.hsqldb.org</a></li>
         <li>Download H2 Database from <a href="http://www.h2database.com">http://www.h2database.com</a></li>
         <li>Download the Jemmy library from <a href="http://jemmy.dev.java.net">http://jemmy.dev.java.net</a> (Required to run the GUI tests)</li>

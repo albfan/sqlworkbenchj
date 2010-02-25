@@ -16,6 +16,13 @@
 			environment variable.
 		</para>
 
+    <para>
+      If you cannot (or don't want to) do a regular installation of a Java 6 runtime, you can download
+      a ZIP distribution for Windows from the &wb-productname; homepage: <ulink url="http://www.sql-workbench.net/jre16.zip"/>.
+      You have to unzip the archive into a subdirectory named <literal>jre</literal> in the directory where <literal>sqlworkbench.jar</literal>
+      is located.
+    </para>
+
 	</section>
 
 	<section id="first-time-install">
