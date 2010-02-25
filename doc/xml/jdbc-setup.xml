@@ -250,7 +250,7 @@
 						<entry>
 							<simplelist columns="1">
 							  <member>sqljdbc4.jar</member>
-								<member><ulink url="http://www.microsoft.com/sql/technologies/jdbc/default.mspx"/></member>
+								<member><ulink url="http://www.microsoft.com/sqlserver/2005/en/us/java-database-connectivity.aspx"/></member>
 							</simplelist>
 						</entry>
 					</row>
