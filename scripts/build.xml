@@ -606,7 +606,7 @@
       signature="sqwb"
       icon="Workbench.icns"
       vmoptions="-Xmx256m"
-      stubfile="../etc/jarbundler/SQLWorkbenchStub">
+      stubfile="../etc/jarbundler/SQLWorkbench">
 
       <javaproperty name="apple.laf.useScreenMenuBar" value="true"/>
       <javaproperty name="com.apple.mrj.application.growbox.intrudes" value="false"/>
@@ -622,10 +622,10 @@
       </tarfileset>
       <tarfileset dir="${bundledir}">
         <include name="**/*"/>
-        <exclude name="**/JavaApplicationStub"/>
+        <exclude name="**/SQLWorkbench"/>
       </tarfileset>
       <tarfileset mode="555" dir="${bundledir}">
-        <include name="**/JavaApplicationStub"/>
+        <include name="**/SQLWorkbench"/>
       </tarfileset>
       <tarfileset dir="${distdir}/manual" prefix="SQLWorkbenchJ.app/Contents/Resources/Java/manual">
         <include name="**/*.*"/>
