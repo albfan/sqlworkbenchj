@@ -165,6 +165,20 @@
     </description>
   </entry>
 
+  <entry dev-build="8" type="fix">
+    <description>
+      The new "show max rows warning" option does not work for all Look &amp; Feels. Some ignore the setting
+      of a background color. A workaround was added to change the background color of the label itself
+      to get some visual feedback even for those Look &amp; Feels.
+    </description>
+  </entry>
+
+  <entry dev-build="7" type="fix">
+    <description>
+      Fixed some more corner cases where the new row number display was not in sync with the result.
+    </description>
+  </entry>
+
   <entry dev-build="7" type="fix">
     <description>
       The new row number display was not always in sync with the result table.

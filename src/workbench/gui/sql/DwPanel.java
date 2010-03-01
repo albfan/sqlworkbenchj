@@ -795,7 +795,7 @@ public class DwPanel
 				String color = HtmlUtil.getHtmlColor(c);
 				String title = tab.getTitleAt(index);
 				tab.putClientProperty("$wb$_title_" + index, title);
-				tab.setTitleAt(index, "<html><b style=\"background-color:" + color + "\">" + title + "</b></html>");
+				tab.setTitleAt(index, "<html><span style=\"background-color:#" + color + "\">" + title + "</span></html>");
 			}
 			else
 			{

@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.awt.Color;
 import junit.framework.TestCase;
 
 /**
@@ -25,24 +26,24 @@ public class HtmlUtilTest extends TestCase
 		super(testName);
 	}
 
+	public void testHtmlColor()
+	{
+		assertEquals("ff0000", HtmlUtil.getHtmlColor(Color.RED));
+		assertEquals("00ff00", HtmlUtil.getHtmlColor(Color.GREEN));
+		assertEquals("0000ff", HtmlUtil.getHtmlColor(Color.BLUE));
+		assertEquals("000000", HtmlUtil.getHtmlColor(Color.BLACK));
+		assertEquals("ffffff", HtmlUtil.getHtmlColor(Color.WHITE));
+	}
+
   public void testEscapeHTML()
 	{
-		try
-		{
-			String input = "<sometag> sometext";
-			String escaped = HtmlUtil.escapeHTML(input);
-			assertEquals("&lt;sometag&gt; sometext", escaped);
-			
-			input = "a &lt; b";
-			escaped = HtmlUtil.escapeHTML(input);
-			assertEquals("a &amp;lt; b", escaped);
-			
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String input = "<sometag> sometext";
+		String escaped = HtmlUtil.escapeHTML(input);
+		assertEquals("&lt;sometag&gt; sometext", escaped);
+
+		input = "a &lt; b";
+		escaped = HtmlUtil.escapeHTML(input);
+		assertEquals("a &amp;lt; b", escaped);
 	}
 	
 	
