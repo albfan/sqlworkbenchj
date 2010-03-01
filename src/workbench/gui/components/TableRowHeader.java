@@ -14,7 +14,6 @@ import javax.swing.*;
 import java.awt.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelListener;
 import workbench.gui.WbSwingUtilities;
 
 /**
@@ -23,7 +22,7 @@ import workbench.gui.WbSwingUtilities;
  */
 public class TableRowHeader
 	extends JTable
-	implements TableModelListener, ChangeListener
+	implements ChangeListener
 {
 	private TableRowHeaderModel rowModel;
 	private RowHeaderRenderer renderer;
@@ -57,13 +56,33 @@ public class TableRowHeader
 		if (c instanceof JViewport)
 		{
 			JViewport viewport = (JViewport)c;
-			viewport.addChangeListener( this );
+			viewport.addChangeListener(this);
 		}
+		setRowHeight(clientTable.getRowHeight());
 	}
 
+	/**
+	 * Adjust the height of the specified row according to the table's
+	 * height for that row
+	 */
 	public void rowHeightChanged(int row)
 	{
 		setRowHeight(row, clientTable.getRowHeight(row));
+	}
+
+	/**
+	 * Adjust the height of all rows according to the clientTable.
+	 */
+	public void rowHeightChanged()
+	{
+		if (clientTable == null) return;
+
+		int count = clientTable.getRowCount();
+
+		for (int row = 0; row < count; row++)
+		{
+			setRowHeight(row, clientTable.getRowHeight(row));
+		}
 	}
 
 	public static void showRowHeader(JTable table)

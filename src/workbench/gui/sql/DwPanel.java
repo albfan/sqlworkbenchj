@@ -12,6 +12,7 @@
 package workbench.gui.sql;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.EventQueue;
@@ -74,6 +75,7 @@ import workbench.storage.DataStore;
 import workbench.storage.NamedSortDefinition;
 import workbench.storage.ResultColumnMetaData;
 import workbench.storage.RowActionMonitor;
+import workbench.util.HtmlUtil;
 import workbench.util.LowMemoryException;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
@@ -788,10 +790,20 @@ public class DwPanel
 			int maxRows = getMaxRows();
 			if (maxRows > 0 && maxRows == getTable().getRowCount())
 			{
-				tab.setBackgroundAt(index, GuiSettings.getMaxRowsWarningColor());
+				Color c = GuiSettings.getMaxRowsWarningColor();
+				tab.setBackgroundAt(index, c);
+				String color = HtmlUtil.getHtmlColor(c);
+				String title = tab.getTitleAt(index);
+				tab.putClientProperty("$wb$_title_" + index, title);
+				tab.setTitleAt(index, "<html><b style=\"background-color:" + color + "\">" + title + "</b></html>");
 			}
 			else
 			{
+				String oldTitle = (String)tab.getClientProperty("$wb$_title_" + index);
+				if (oldTitle != null)
+				{
+					tab.setTitleAt(index, oldTitle);
+				}
 				tab.setBackgroundAt(index, null);
 			}
 		}
@@ -1215,10 +1227,16 @@ public class DwPanel
 		if (!this.isEditingStarted()) return;
 
 		dataTable.stopEditing();
-		this.dataTable.setShowStatusColumn(false);
+		dataTable.setShowStatusColumn(false);
 		this.checkResultSetActions();
 		updateAction.setEnabled(false);
 		dataTable.restoreOriginalValues();
+
+		TableRowHeader header = TableRowHeader.getRowHeader(dataTable);
+		if (header != null)
+		{
+			header.rowHeightChanged();
+		}
 	}
 
 	public boolean startEdit()

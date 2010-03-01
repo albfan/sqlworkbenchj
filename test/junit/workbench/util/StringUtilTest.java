@@ -28,6 +28,24 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testHexString()
+	{
+		String hex = StringUtil.hexString(4, 2);
+		assertEquals("04", hex);
+
+		hex = StringUtil.hexString(4, 3);
+		assertEquals("004", hex);
+
+		hex = StringUtil.hexString(16, 2);
+		assertEquals("10", hex);
+
+		hex = StringUtil.hexString(256, 2);
+		assertEquals("100", hex);
+
+		hex = StringUtil.hexString(256, 4);
+		assertEquals("0100", hex);
+	}
+	
 	public void testStartsWith()
 	{
 		String input = "this is a test";

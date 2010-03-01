@@ -1221,6 +1221,18 @@ public class StringUtil
 		buffer.append(hexDigit(c));
 	}
 
+	public static String hexString(int toConvert, int length)
+	{
+		String hex = Integer.toHexString(toConvert);
+		StringBuilder result = new StringBuilder(length);
+		for (int i= 0; i < length - hex.length(); i++)
+		{
+			result.append('0');
+		}
+		result.append(hex);
+		return result.toString();
+	}
+	
 	public static char hexDigit(int nibble)
 	{
 		return hexDigit[(nibble & 0xF)];

@@ -55,15 +55,26 @@ public class RowHeightOptimizer
 	
 	public void optimizeAllRows()
 	{
-		int count = this.table.getRowCount();
+		final int count = this.table.getRowCount();
 		int maxLines = GuiSettings.getAutRowHeightMaxLines();
 		if (count == 0) return;
 		boolean ignore = GuiSettings.getIgnoreWhitespaceForAutoRowHeight();
 		for (int row = 0; row < count; row ++)
 		{
 			optimizeRowHeight(row, maxLines, ignore);
-			notifyRowHeader(row);
 		}
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				TableRowHeader header = TableRowHeader.getRowHeader(table);
+				if (header != null)
+				{
+					header.rowHeightChanged();
+				}
+			}
+		});
 	}
 
 	public void optimizeRowHeight(int row)
