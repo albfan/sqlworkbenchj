@@ -22,6 +22,7 @@ import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -178,7 +179,7 @@ public class TableSourceBuilder
 		String nativeSql = getNativeTableSource(table, includeDrop);
 		if (nativeSql != null) return nativeSql;
 
-		if (columns == null || columns.size() == 0) return StringUtil.EMPTY_STRING;
+		if (CollectionUtil.isEmpty(columns)) return StringUtil.EMPTY_STRING;
 
 		if ("MVIEW_NAME".equals(table.getType()))
 		{

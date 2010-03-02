@@ -1009,4 +1009,41 @@ public class WbCopyTest
 		}
 	}
 
+	public void testQuotedColumns()
+		throws Exception
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyTest");
+			util.prepareEnvironment();
+
+			WbConnection con = util.getConnection("schemaCopyCreateSource");
+			TestUtil.executeScript(con,
+				"CREATE TABLE source_table (id integer, firstname varchar(20), lastname varchar(20));\n" +
+				"insert into source_table values (1, 'Arthur', 'Dent');\n" +
+				"commit;\n" +
+				"CREATE TABLE target_table (id integer, \"FirstName\" varchar(20), \"LastName\" varchar(20));\n" +
+				"commit;\n");
+
+			String sql = "wbcopy -sourceTable=source_table -targetTable=target_table -columns='id/id, firstname/\"FirstName\", lastname/\"LastName\" ";
+
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(con);
+			
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+			Statement stmt = con.createStatement();
+			ResultSet rs = stmt.executeQuery("SELECT count(*) from target_table");
+			assertTrue(rs.next());
+			int count = rs.getInt(1);
+			assertEquals(1, count);
+			rs.close();
+			stmt.close();
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 }

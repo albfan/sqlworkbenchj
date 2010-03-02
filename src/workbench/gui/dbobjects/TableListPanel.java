@@ -1245,8 +1245,6 @@ public class TableListPanel
 
 		try
 		{
-			if (shouldRetrieveTable) retrieveTableDefinition();
-			if (shouldRetrieveIndexes) retrieveIndexes();
 
 			WbSwingUtilities.showWaitCursor(this);
 			CharSequence sql = null;
@@ -1262,6 +1260,7 @@ public class TableListPanel
 			}
 			else if (dbs.isViewType(type))
 			{
+				if (shouldRetrieveTable) retrieveTableDefinition();
 				TableDefinition def = new TableDefinition(this.selectedTable, TableColumnsDatastore.createColumnIdentifiers(meta, tableDefinition.getDataStore()));
 				sql = meta.getViewReader().getExtendedViewSource(def, true, false);
 			}

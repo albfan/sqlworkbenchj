@@ -788,23 +788,36 @@ public class DwPanel
 		if (index > -1)
 		{
 			int maxRows = getMaxRows();
+			boolean isWindowsClassic = WbManager.getInstance().isWindowsClassic();
 			if (maxRows > 0 && maxRows == getTable().getRowCount())
 			{
 				Color c = GuiSettings.getMaxRowsWarningColor();
-				tab.setBackgroundAt(index, c);
-				String color = HtmlUtil.getHtmlColor(c);
-				String title = tab.getTitleAt(index);
-				tab.putClientProperty("$wb$_title_" + index, title);
-				tab.setTitleAt(index, "<html><span style=\"background-color:#" + color + "\">" + title + "</span></html>");
+				if (isWindowsClassic)
+				{
+					tab.setBackgroundAt(index, c);
+				}
+				else
+				{
+					String color = HtmlUtil.getHtmlColor(c);
+					String title = tab.getTitleAt(index);
+					tab.putClientProperty("$wb$_title_" + index, title);
+					tab.setTitleAt(index, "<html><b style=\"color:#" + color + "\">" + title + "</b></html>");
+				}
 			}
 			else
 			{
-				String oldTitle = (String)tab.getClientProperty("$wb$_title_" + index);
-				if (oldTitle != null)
+				if (isWindowsClassic)
 				{
-					tab.setTitleAt(index, oldTitle);
+					tab.setBackgroundAt(index, null);
 				}
-				tab.setBackgroundAt(index, null);
+				else
+				{
+					String oldTitle = (String)tab.getClientProperty("$wb$_title_" + index);
+					if (oldTitle != null)
+					{
+						tab.setTitleAt(index, oldTitle);
+					}
+				}
 			}
 		}
 	}

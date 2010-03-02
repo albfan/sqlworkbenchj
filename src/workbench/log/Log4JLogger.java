@@ -22,7 +22,6 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.Priority;
 import org.apache.log4j.spi.LoggerFactory;
 import org.apache.log4j.spi.LoggingEvent;
-import sun.reflect.Reflection;
 import workbench.util.StringUtil;
 
 /**
@@ -207,7 +206,7 @@ public class Log4JLogger
 		{
 			try
 			{
-				return Reflection.getCallerClass(5).getName();
+				return sun.reflect.Reflection.getCallerClass(5).getName();
 			}
 			catch (Throwable th)
 			{

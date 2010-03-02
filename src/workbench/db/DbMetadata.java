@@ -64,6 +64,7 @@ import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
 import workbench.db.oracle.OracleSequenceReader;
+import workbench.db.oracle.OracleTypeReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
@@ -192,6 +193,7 @@ public class DbMetadata
 			this.errorInfoReader = oracleMetaData;
 			this.dataTypeResolver = oracleMetaData;
 			this.definitionReader = oracleMetaData;
+			extenders.add(new OracleTypeReader());
 		}
 		else if (productLower.indexOf("postgres") > - 1)
 		{
@@ -793,7 +795,7 @@ public class DbMetadata
 	 * If the JDBC driver does not return the object through the getObjects()
 	 * method, null is returned, otherwise the value reported in TABLE_TYPE
 	 * If there is more than object with the same name but different types
-	 * (is there a DB that supports that???) than the first object found
+	 * (is there a DB that supports that???) than the type of the first object found
    * will be returned.
 	 * @see #getObjects(String, String, String, String[])
 	 */
@@ -810,11 +812,6 @@ public class DbMetadata
 			{
 				type = target.getType();
 			}
-//			DataStore ds = getObjects(tbl.getRawCatalog(), tbl.getRawSchema(), tbl.getRawTableName(), null);
-//			if (ds.getRowCount() > 0)
-//			{
-//				type = ds.getValueAsString(0, COLUMN_IDX_TABLE_LIST_TYPE);
-//			}
 		}
 		catch (Exception e)
 		{

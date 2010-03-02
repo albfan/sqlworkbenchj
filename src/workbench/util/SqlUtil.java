@@ -902,6 +902,18 @@ public class SqlUtil
 	}
 
 	/**
+	 * Returns true if the given JDBC type is a CHAR or VARCHAR type
+	 * @param aSqlType
+	 */
+	public static final boolean isCharacterTypeWithLength(int aSqlType)
+	{
+		return (aSqlType == Types.VARCHAR ||
+		        aSqlType == Types.CHAR ||
+		        aSqlType == Types.NVARCHAR ||
+		        aSqlType == Types.NCHAR);
+	}
+
+	/**
 	 * 	Returns true if the passed datatype (from java.sql.Types)
 	 *  can hold a numeric value (either with or without decimals)
 	 */

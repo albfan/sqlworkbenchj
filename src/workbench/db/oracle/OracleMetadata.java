@@ -163,16 +163,16 @@ public class OracleMetadata
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
 
-	private boolean getRemarksReporting()
+	static boolean getRemarksReporting(WbConnection conn)
 	{
 		// The old "remarksReporting" property should not be taken from the
 		// System properties as a fall-back
-		String value = getDriverProperty("remarksReporting", false);
+		String value = getDriverProperty(conn, "remarksReporting", false);
 		if (value == null)
 		{
 			// Only the new oracle.jdbc.remarksReporting should also be
 			// checked in the system properties
-			value = getDriverProperty("oracle.jdbc.remarksReporting", true);
+			value = getDriverProperty(conn, "oracle.jdbc.remarksReporting", true);
 		}
 		return "true".equalsIgnoreCase(value == null ? "false" : value.trim());
 	}
@@ -185,14 +185,14 @@ public class OracleMetadata
 		// Newer Oracle drivers support a connection property to automatically
 		// return DATE columns as Types.TIMESTAMP. We have to mimic that
 		// when using our own statement to retrieve column definitions
-		String value = getDriverProperty("oracle.jdbc.mapDateToTimestamp", true);
+		String value = getDriverProperty(connection, "oracle.jdbc.mapDateToTimestamp", true);
 		return "true".equalsIgnoreCase(value);
 	}
 
-	private String getDriverProperty(String property, boolean includeSystemProperty)
+	static String getDriverProperty(WbConnection con, String property, boolean includeSystemProperty)
 	{
 		String value = null;
-		ConnectionProfile profile = this.connection.getProfile();
+		ConnectionProfile profile = con.getProfile();
 		if (profile != null)
 		{
 			Properties props = profile.getConnectionProperties();
@@ -316,24 +316,16 @@ public class OracleMetadata
 		return columns;
 	}
 
-	private PreparedStatement prepareColumnsStatement(String schema, String table)
-		throws SQLException
+	public static String getDecodeForDataType(String colname, boolean fixNVARCHAR, boolean mapDateToTimestamp)
 	{
-		boolean fixNVARCHAR = fixNVARCHARSemantics();
-
-
-		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
-    // this statement fixes this problem and also removes the usage of LIKE
-    // to speed up the retrieval.
-		final String sql1 =
-			"SELECT t.column_name AS column_name,  \n   " +
-			"     DECODE(t.data_type, 'CHAR', " + Types.CHAR + ", " +
+			return
+			"     DECODE(" + colname + ", 'CHAR', " + Types.CHAR + ", " +
 			"                    'VARCHAR2', " + Types.VARCHAR + ", " +
 			"                    'NVARCHAR2', " + (fixNVARCHAR ? Types.NVARCHAR : Types.OTHER) + ", " +
 			"                    'NCHAR', " + (fixNVARCHAR ? Types.NCHAR : Types.OTHER) + ", " +
 			"                    'NUMBER', " + Types.DECIMAL + ", " +
 			"                    'LONG', " + Types.LONGVARCHAR + ", " +
-			"                    'DATE', " + (getMapDateToTimestamp() ? Types.TIMESTAMP : Types.DATE) + ", " +
+			"                    'DATE', " + (mapDateToTimestamp ? Types.TIMESTAMP : Types.DATE) + ", " +
 			"                    'RAW', " + Types.VARBINARY + ", " +
 			"                    'LONG RAW', " + Types.LONGVARBINARY + ", " +
 			"                    'BLOB', " + Types.BLOB + ", " +
@@ -347,8 +339,21 @@ public class OracleMetadata
 			"                    'INTERVAL YEAR(2) TO MONTH', -103, " +
 			"                    'INTERVAL DAY(2) TO SECOND(6)', -104, " +
 			"                    'BINARY_FLOAT', 100, " +
-			"                    'BINARY_DOUBLE', 101, " +
-			"                    " + Types.OTHER + ") AS data_type,  \n" +
+			"                    'BINARY_DOUBLE', 101, " + Types.OTHER + ")";
+	}
+	
+	private PreparedStatement prepareColumnsStatement(String schema, String table)
+		throws SQLException
+	{
+		boolean fixNVARCHAR = fixNVARCHARSemantics();
+
+
+		// Oracle 9 and above reports a wrong length if NLS_LENGTH_SEMANTICS is set to char
+    // this statement fixes this problem and also removes the usage of LIKE
+    // to speed up the retrieval.
+		final String sql1 =
+			"SELECT t.column_name AS column_name,  \n   " +
+			      getDecodeForDataType("t.data_type", fixNVARCHAR, getMapDateToTimestamp()) + " AS data_type, \n" +
 			"     t.data_type AS type_name,  \n" +
 			"     DECODE(t.data_precision, null, " +
 			"        decode(t.data_type, 'VARCHAR', t.char_length, " +
@@ -390,7 +395,7 @@ public class OracleMetadata
 
 		String sql = null;
 
-		if (getRemarksReporting())
+		if (getRemarksReporting(connection))
 		{
 			sql = sql_comment;
 		}

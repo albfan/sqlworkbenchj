@@ -167,7 +167,7 @@ public class WbCopy
 		{
 			sourceTables = new SourceTableArgument(sourcetable, sourceCon);
 			tablesToExport = sourceTables.getTables();
-			if (tablesToExport.size() == 0 && sourceTables.wasWildCardArgument())
+			if (tablesToExport.isEmpty() && sourceTables.wasWildCardArgument())
 			{
 				result.addMessage(ResourceMgr.getFormattedString("ErrExportNoTablesFound", sourcetable));
 				result.setFailure();

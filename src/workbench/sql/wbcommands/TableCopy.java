@@ -152,7 +152,7 @@ public class TableCopy
 		}
 	}
 
-	private List<ColumnIdentifier> parseColumns(ArgumentParser cmdLine)
+	protected List<ColumnIdentifier> parseColumns(ArgumentParser cmdLine)
 	{
 		// First read the defined columns from the passed parameter
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
@@ -173,7 +173,7 @@ public class TableCopy
 		return result;
 	}
 
-	private Map<String, String> parseMapping(ArgumentParser cmdLine)
+	protected Map<String, String> parseMapping(ArgumentParser cmdLine)
 	{
 		String cols = cmdLine.getValue(WbCopy.PARAM_COLUMNS);
 		if (cols == null || cols.length() == 0) return null;

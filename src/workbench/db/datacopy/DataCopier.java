@@ -588,10 +588,11 @@ public class DataCopier
 		if (columns == null) return null;
 		if (colname == null) return null;
 
+		String toTest = StringUtil.trimQuotes(colname);
 		for (ColumnIdentifier col : columns)
 		{
-			String name = col.getColumnName();
-			if (name.equalsIgnoreCase(colname)) return col;
+			String name = StringUtil.trimQuotes(col.getColumnName());
+			if (name.equalsIgnoreCase(toTest)) return col;
 		}
 		return null;
 	}
