@@ -4,6 +4,12 @@
 <!-- build number must be set to -1 for development builds -->
 <release build="-1" date="2010-02-25">
 
+  <entry dev-build="8" type="enh">
+    <description>
+      For Oracle the DbExplorer will now also show OBJECT TYPEs
+    </description>
+  </entry>
+
   <entry dev-build="6" type="enh">
     <description>
       For DB2 the list of procedures is no long retrieved through the driver, so that functions will also be shown
@@ -167,13 +173,20 @@
 
   <entry dev-build="8" type="fix">
     <description>
-      The new "show max rows warning" option does not work for all Look &amp; Feels. Some ignore the setting
-      of a background color. A workaround was added to change the background color of the label itself
-      to get some visual feedback even for those Look &amp; Feels.
+      When quoting column names for WbCopy's column mapping, the quoted columns where not detected properly
+      (e.g. -columns='name/"Name", id/"Id"')
     </description>
   </entry>
 
-  <entry dev-build="7" type="fix">
+  <entry dev-build="8" type="fix">
+    <description>
+      The new "show max rows warning" option does not work for all Look &amp; Feels. Some ignore the setting
+      of a background color. If changing the background color is not supported the text of the result
+      tab is now displayed in the chosen color.
+    </description>
+  </entry>
+
+  <entry dev-build="8" type="fix">
     <description>
       Fixed some more corner cases where the new row number display was not in sync with the result.
     </description>
