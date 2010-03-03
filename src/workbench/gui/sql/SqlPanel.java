@@ -3030,7 +3030,7 @@ public class SqlPanel
 		{
 			this.resultTab.setSelectedIndex(0);
 		}
-		data.showLimitReached();
+		data.checkLimitReachedDisplay();
 		return newIndex;
 	}
 

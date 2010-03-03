@@ -772,7 +772,7 @@ public class DwPanel
 		return null;
 	}
 
-	public void showLimitReached()
+	public void checkLimitReachedDisplay()
 	{
 		if (!GuiSettings.getShowMaxRowsReached()) return;
 
@@ -1153,6 +1153,7 @@ public class DwPanel
 	public void clearContent()
 	{
 		this.dataTable.reset();
+		checkLimitReachedDisplay();
 		statusBar.removeSelectionIndicator(dataTable);
 		this.hasResultSet = false;
 		this.lastMessage = null;

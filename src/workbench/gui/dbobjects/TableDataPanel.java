@@ -757,7 +757,7 @@ public class TableDataPanel
 					}
 
 					ColumnOrderMgr.getInstance().restoreColumnOrder(dataDisplay.getTable());
-					dataDisplay.showLimitReached();
+					dataDisplay.checkLimitReachedDisplay();
 				}
 			});
 		}
