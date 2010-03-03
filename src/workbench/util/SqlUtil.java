@@ -205,7 +205,7 @@ public class SqlUtil
 			{
 				SQLToken name = lexer.getNextToken(false, false);
 				if (name == null) return null;
-				if (name.getContents().equals("IF NOT EXISTS"))
+				if (name.getContents().equals("IF NOT EXISTS") || name.getContents().equals("IF EXISTS"))
 				{
 					name = lexer.getNextToken(false, false);
 					if (name == null) return null;
