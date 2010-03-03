@@ -59,7 +59,7 @@ public class SqlUtil
 					"RIGHT OUTER JOIN", "CROSS JOIN", "FULL JOIN", "FULL OUTER JOIN")
 				);
 	}
-	public static final Set<String> getJoinKeyWords()
+	public static Set<String> getJoinKeyWords()
 	{
 		return JoinKeywordsHolder.JOIN_KEYWORDS;
 	}
@@ -81,12 +81,12 @@ public class SqlUtil
 			"MATERIALIZED VIEW LOG", "SNAPSHOT LOG"));
 	}
 
-	public static final Set<String> getTypesWithoutNames()
+	public static Set<String> getTypesWithoutNames()
 	{
 		return TypesWithoutNamesHolder.TYPES;
 	}
 
-	public static final Set<String> getKnownTypes()
+	public static Set<String> getKnownTypes()
 	{
 		return KnownTypesHolder.KNOWN_TYPES;
 	}
@@ -857,7 +857,7 @@ public class SqlUtil
 	 * indicates a data type which can hold numeric values with
 	 * decimals
 	 */
-	public static final boolean isDecimalType(int aSqlType, int aScale, int aPrecision)
+	public static boolean isDecimalType(int aSqlType, int aScale, int aPrecision)
 	{
 		if (aSqlType == Types.DECIMAL ||
 		    aSqlType == Types.DOUBLE ||
@@ -877,7 +877,7 @@ public class SqlUtil
 	 * returns true if the passed JDBC data type (from java.sql.Types)
 	 * indicates a data type which maps to a integer type
 	 */
-	public static final boolean isIntegerType(int aSqlType)
+	public static boolean isIntegerType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
 		        aSqlType == Types.INTEGER ||
@@ -889,7 +889,7 @@ public class SqlUtil
 	 * Returns true if the given JDBC type indicates some kind of
 	 * character data (including CLOBs)
 	 */
-	public static final boolean isCharacterType(int aSqlType)
+	public static boolean isCharacterType(int aSqlType)
 	{
 		return (aSqlType == Types.VARCHAR ||
 		        aSqlType == Types.CHAR ||
@@ -905,7 +905,7 @@ public class SqlUtil
 	 * Returns true if the given JDBC type is a CHAR or VARCHAR type
 	 * @param aSqlType
 	 */
-	public static final boolean isCharacterTypeWithLength(int aSqlType)
+	public static boolean isCharacterTypeWithLength(int aSqlType)
 	{
 		return (aSqlType == Types.VARCHAR ||
 		        aSqlType == Types.CHAR ||
@@ -917,7 +917,7 @@ public class SqlUtil
 	 * 	Returns true if the passed datatype (from java.sql.Types)
 	 *  can hold a numeric value (either with or without decimals)
 	 */
-	public static final boolean isNumberType(int aSqlType)
+	public static boolean isNumberType(int aSqlType)
 	{
 		return (aSqlType == Types.BIGINT ||
 		        aSqlType == Types.INTEGER ||
@@ -930,28 +930,28 @@ public class SqlUtil
 		        aSqlType == Types.TINYINT);
 	}
 
-	public static final boolean isDateType(int aSqlType)
+	public static boolean isDateType(int aSqlType)
 	{
 		return (aSqlType == Types.DATE || aSqlType == Types.TIMESTAMP);
 	}
 
-	public static final boolean isClobType(int aSqlType)
+	public static boolean isClobType(int aSqlType)
 	{
 		return (aSqlType == Types.CLOB || aSqlType == Types.NCLOB);
 	}
 
-	public static final boolean isClobType(int aSqlType, DbSettings dbInfo)
+	public static boolean isClobType(int aSqlType, DbSettings dbInfo)
 	{
 		boolean treatLongVarcharAsClob = (dbInfo == null ? false : dbInfo.longVarcharIsClob());
 		return isClobType(aSqlType, treatLongVarcharAsClob);
 	}
 
-	public static final boolean isXMLType(int type)
+	public static boolean isXMLType(int type)
 	{
 		return (type == Types.SQLXML);
 	}
 	
-	public static final boolean isClobType(int aSqlType, boolean treatLongVarcharAsClob)
+	public static boolean isClobType(int aSqlType, boolean treatLongVarcharAsClob)
 	{
 		if (!treatLongVarcharAsClob) return isClobType(aSqlType);
 
@@ -962,7 +962,7 @@ public class SqlUtil
 						);
 	}
 
-	public static final boolean isBlobType(int aSqlType)
+	public static boolean isBlobType(int aSqlType)
 	{
 		return (aSqlType == Types.BLOB ||
 		        aSqlType == Types.BINARY ||
@@ -1000,7 +1000,7 @@ public class SqlUtil
 		closeStatement(stmt);
 	}
 
-	public static final String getTypeName(int sqlType)
+	public static String getTypeName(int sqlType)
 	{
 		switch (sqlType)
 		{
