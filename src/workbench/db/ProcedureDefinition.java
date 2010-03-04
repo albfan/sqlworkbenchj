@@ -117,20 +117,28 @@ public class ProcedureDefinition
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
+		if (isOraclePackage)
+		{
+			return "DROP PACKAGE " + con.getMetadata().quoteObjectname(schema) + "." + con.getMetadata().quoteObjectname(catalog);
+		}
 		return null;
 	}
 
 	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
+		if (isOraclePackage)
+		{
+			return catalog;
+		}
 		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
 		if (!needParameters) return getObjectName();
 
 		if (this.procName.indexOf('(') > -1) return procName;
 
 		List<String> params = getParameterTypes(con);
-		if (params.size() == 0) return procName + "()";
-		StringBuffer result = new StringBuffer(procName.length() + params.size() * 5 + 5);
+		if (params.isEmpty()) return procName + "()";
+		StringBuilder result = new StringBuilder(procName.length() + params.size() * 5 + 5);
 		result.append(procName);
 		result.append('(');
 		for (int i=0; i < params.size(); i++)
@@ -177,11 +185,6 @@ public class ProcedureDefinition
 	
 	public String getObjectName()
 	{
-		// the name of an oracle package is stored in the catalog field
-		// because that's how the JDBC driver returns the information
-		// to generate a proper DROP statement the package name is required
-		// not the procedure name
-		if (this.isOraclePackage) return catalog;
 		return procName;
 	}
 	

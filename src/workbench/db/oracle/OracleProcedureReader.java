@@ -13,12 +13,14 @@ package workbench.db.oracle;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
+import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
@@ -46,6 +48,25 @@ public class OracleProcedureReader
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procname, int procType)
 	{
 		return PROC_HEADER;
+	}
+
+	@Override
+	public DataStore fillProcedureListDataStore(ResultSet rs)
+		throws SQLException
+	{
+		DataStore result = super.fillProcedureListDataStore(rs);
+		int count = result.getRowCount();
+		for (int i=count-1; i >= 0; i --)
+		{
+			String type = result.getValueAsString(i, COLUMN_IDX_PROC_COLUMNS_REMARKS);
+			if (type == null) continue;
+			// Remove object types from the list as they are completely handled in the TableListPanel 
+			if (type.equals("Packaged function"))
+			{
+				result.deleteRow(i);
+			}
+		}
+		return result;
 	}
 
 

@@ -79,7 +79,7 @@ public class DropDbObjectAction
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
 
 		List<? extends DbObject> objects = source.getSelectedObjects();
-		if (objects == null || objects.size() == 0) return;
+		if (objects == null || objects.isEmpty()) return;
 
 		ObjectDropper dropperToUse = (this.dropper != null ? this.dropper : new GenericObjectDropper());
 		dropperToUse.setObjects(objects);

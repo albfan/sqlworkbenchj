@@ -119,7 +119,7 @@ public class ObjectDropperUI
 		String[] display = new String[numNames];
 		for (int i = 0; i < numNames; i++)
 		{
-			display[i] = objects.get(i).getObjectType() + " " + objects.get(i).getObjectName();
+			display[i] = objects.get(i).getObjectType() + " " + objects.get(i).getObjectNameForDrop(dropper.getConnection());
 		}
 		this.objectList.setListData(display);
 
