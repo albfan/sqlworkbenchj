@@ -41,9 +41,9 @@ public class StringUtil
 	public static final SimpleDateFormat ISO_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TIMESTAMP_FORMAT);
 	public static final SimpleDateFormat ISO_TZ_TIMESTAMP_FORMATTER = new SimpleDateFormat(ISO_TZ_TIMESTAMP_FORMAT);
 
-	public static final StringBuilder emptyBuffer() { return new StringBuilder(0); }
+	public static StringBuilder emptyBuffer() { return new StringBuilder(0); }
 
-	public static final String getCurrentTimestampWithTZString()
+	public static String getCurrentTimestampWithTZString()
 	{
 		synchronized (ISO_TZ_TIMESTAMP_FORMATTER)
 		{
@@ -57,7 +57,7 @@ public class StringUtil
 	 * @param pattern
 	 * @return the exception's message if an error occurs, null if everything is OK.
 	 */
-	public static final String isDatePatternValid(String pattern)
+	public static String isDatePatternValid(String pattern)
 	{
 		if (isBlank(pattern)) return null;
 		try
@@ -71,7 +71,7 @@ public class StringUtil
 		return null;
 	}
 
-	private static final java.util.Date now()
+	private static java.util.Date now()
 	{
 		return new java.util.Date(System.currentTimeMillis());
 	}
@@ -270,7 +270,7 @@ public class StringUtil
 		return true;
 	}
 
-	public static final boolean arraysEqual(String[] one, String[] other)
+	public static boolean arraysEqual(String[] one, String[] other)
 	{
 		if (one == null && other != null) return false;
 		if (one != null && other == null) return false;
@@ -282,7 +282,7 @@ public class StringUtil
 		return true;
 	}
 
-	public static final boolean hasOpenQuotes(String data, char quoteChar)
+	public static boolean hasOpenQuotes(String data, char quoteChar)
 	{
 		if (isEmptyString(data)) return false;
 		int chars = data.length();
@@ -299,7 +299,7 @@ public class StringUtil
 	 * (write the first character in uppercase, the rest in lower case)
 	 * This does not loop through the entire string to capitalize every word.
 	 */
-	public static final String capitalize(String word)
+	public static String capitalize(String word)
 	{
 		if (word == null) return null;
 		if (word.length() == 0) return word;
@@ -314,7 +314,7 @@ public class StringUtil
 	 * @param input the value to be used as a filename
 	 * @return input value without any characters that might not be allowed for a filename converted to lowercase
 	 */
-	public static final String makeFilename(String input)
+	public static String makeFilename(String input)
 	{
 		if (input == null) return null;
 		if (input.equals("..")) return "__";
@@ -333,7 +333,7 @@ public class StringUtil
 	 * @param c the character to look for
 	 * @return -1 if c was not found, the position of c in s otherwise
 	 */
-	public static final int lastIndexOf(CharSequence s, char c)
+	public static int lastIndexOf(CharSequence s, char c)
 	{
 		int len = s.length();
 		if (s == null || len == 0) return -1;
@@ -345,7 +345,7 @@ public class StringUtil
 		return -1;
 	}
 
-	public static final String replace(String haystack, String needle, String replacement)
+	public static String replace(String haystack, String needle, String replacement)
 	{
 		if (replacement == null) return haystack;
 		if (needle == null) return haystack;
@@ -441,7 +441,7 @@ public class StringUtil
 		}
 	}
 
-	public static final boolean isNonBlank(CharSequence value)
+	public static boolean isNonBlank(CharSequence value)
 	{
 		return !isBlank(value);
 	}
@@ -450,7 +450,7 @@ public class StringUtil
 	 * Checks if the given parameter is "empty",
 	 * i.e: either null, length == 0 or contains only whitespace
 	 */
-	public static final boolean isBlank(CharSequence value)
+	public static boolean isBlank(CharSequence value)
 	{
 		if (isEmptyString(value)) return true;
 		return isWhitespace(value);
@@ -463,19 +463,19 @@ public class StringUtil
 	 * @param value the String to test
 	 * @return true if the String is empty (or null)
 	 */
-	public static final boolean isEmptyString(CharSequence value)
+	public static boolean isEmptyString(CharSequence value)
 	{
 		if (value == null) return true;
 		if (value.length() == 0) return true;
 		return false;
 	}
 
-	public static final int findFirstNonWhitespace(final CharSequence line)
+	public static int findFirstNonWhitespace(final CharSequence line)
 	{
 		return findFirstNonWhitespace(line, 0);
 	}
 
-	public static final int findFirstNonWhitespace(final CharSequence line, int startPos)
+	public static int findFirstNonWhitespace(final CharSequence line, int startPos)
 	{
 		int pos = startPos;
 		int len = line.length();
@@ -490,7 +490,7 @@ public class StringUtil
 		return pos;
 	}
 
-	public static final String getStartingWhiteSpace(final String line)
+	public static String getStartingWhiteSpace(final String line)
 	{
 		if (line == null) return null;
 		int pos = findFirstNonWhitespace(line);
@@ -558,7 +558,7 @@ public class StringUtil
 	 * considered equal as well (because both are "empty")
 	 * @see #isBlank(java.lang.CharSequence)
 	 */
-	public static final boolean equalStringOrEmpty(String one, String other)
+	public static boolean equalStringOrEmpty(String one, String other)
 	{
 		if (isBlank(one) && isBlank(other)) return true;
 		return equalString(one, other);
@@ -570,13 +570,13 @@ public class StringUtil
 	 * considered equal as well (because both are "empty")
 	 * @see #isBlank(java.lang.CharSequence)
 	 */
-	public static final boolean equalStringOrEmpty(String one, String other, boolean ignoreCase)
+	public static boolean equalStringOrEmpty(String one, String other, boolean ignoreCase)
 	{
 		if (isBlank(one) && isBlank(other)) return true;
 		return compareStrings(one, other, ignoreCase) == 0;
 	}
 
-	public static final boolean equalString(String one, String other)
+	public static boolean equalString(String one, String other)
 	{
 		return compareStrings(one, other, false) == 0;
 	}
@@ -595,34 +595,34 @@ public class StringUtil
 		return value1.compareTo(value2);
 	}
 
-	public static final boolean equalStringIgnoreCase(String one, String other)
+	public static boolean equalStringIgnoreCase(String one, String other)
 	{
 		if (one == null && other == null) return true;
 		if (one == null || other == null) return false;
 		return one.equalsIgnoreCase(other);
 	}
 
-	public static final List<String> stringToList(String aString)
+	public static List<String> stringToList(String aString)
 	{
 		return stringToList(aString, ",");
 	}
 
-	public static final List<String> stringToList(String aString, String aDelimiter)
+	public static List<String> stringToList(String aString, String aDelimiter)
 	{
 		return stringToList(aString, aDelimiter, false, false);
 	}
 
-	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty)
+	public static List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty)
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, false);
 	}
 
-	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
+	public static List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries)
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, false, false);
 	}
 
-	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
+	public static List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets)
 	{
 		return stringToList(aString, aDelimiter, removeEmpty, trimEntries, checkBrackets, false);
 	}
@@ -638,7 +638,7 @@ public class StringUtil
    * @param checkBrackets flag to check for opening and closing brackets (delimiter inside brackets will not be taken into account)
 	 * @return A List of Strings
 	 */
-	public static final List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets, boolean keepQuotes)
+	public static List<String> stringToList(String aString, String aDelimiter, boolean removeEmpty, boolean trimEntries, boolean checkBrackets, boolean keepQuotes)
 	{
 		if (isEmptyString(aString)) return new ArrayList<String>(0);
 		WbStringTokenizer tok = new WbStringTokenizer(aString, aDelimiter);
@@ -657,15 +657,15 @@ public class StringUtil
 		return result;
 	}
 
-	public static final String[] toArray(Collection<String> strings)
+	public static String[] toArray(Collection<String> strings)
 	{
 		return toArray(strings, false);
 	}
 
-	public static final String[] toArray(Collection<String> strings, boolean toUpper)
+	public static String[] toArray(Collection<String> strings, boolean toUpper)
 	{
 		if (strings == null) return null;
-		if (strings.size() == 0) return new String[0];
+		if (strings.isEmpty()) return new String[0];
 
 		int i = 0;
 		String[] result = new String[strings.size()];
@@ -684,12 +684,12 @@ public class StringUtil
 	 * @param aList The list to process
 	 * @param aDelimiter The delimiter to use
 	 */
-	public static final String listToString(Collection aList, char aDelimiter)
+	public static String listToString(Collection aList, char aDelimiter)
 	{
 		return listToString(aList, String.valueOf(aDelimiter), false);
 	}
 
-	public static final String listToString(Collection aList, char aDelimiter, boolean quoteEntries)
+	public static String listToString(Collection aList, char aDelimiter, boolean quoteEntries)
 	{
 		return listToString(aList, String.valueOf(aDelimiter), quoteEntries);
 	}
@@ -702,14 +702,14 @@ public class StringUtil
 	 * @param aDelimiter The delimiter to use
 	 * @param quoteEntries if true, all entries are quoted with a double quote
 	 */
-	public static final String listToString(Collection aList, String aDelimiter, boolean quoteEntries)
+	public static String listToString(Collection aList, String aDelimiter, boolean quoteEntries)
 	{
 		return listToString(aList, aDelimiter, quoteEntries, '"');
 	}
 
-	public static final String listToString(Collection aList, String aDelimiter, boolean quoteEntries, char quote)
+	public static String listToString(Collection aList, String aDelimiter, boolean quoteEntries, char quote)
 	{
-		if (aList == null || aList.size() == 0) return "";
+		if (aList == null || aList.isEmpty()) return "";
 		int numElements = 0;
 		StringBuilder result = new StringBuilder(aList.size() * 50);
 		for (Object o : aList)
@@ -735,7 +735,7 @@ public class StringUtil
 	 * @param quote the quote character to be used
 	 * @return the input string with the quote character removed at the start and end
 	 */
-	public static final String removeQuotes(String input, String quote)
+	public static String removeQuotes(String input, String quote)
 	{
 		if (isEmptyString(input)) return input;
 		input = input.trim();
@@ -753,7 +753,7 @@ public class StringUtil
 	 * @param input the string from which the quotes should be removed
 	 * @return the input with quotes removed
 	 */
-	public static final String trimQuotes(String input)
+	public static String trimQuotes(String input)
 	{
 		if (isBlank(input)) return input;
 
@@ -779,7 +779,7 @@ public class StringUtil
 		return ("true".equalsIgnoreCase(aString) || "1".equals(aString) || "y".equalsIgnoreCase(aString) || "yes".equalsIgnoreCase(aString) || "on".equalsIgnoreCase(aString) );
 	}
 
-	public static final String getMaxSubstring(String s, int maxLen, String add)
+	public static String getMaxSubstring(String s, int maxLen, String add)
 	{
 		if (maxLen < 1) return s;
 		if (s == null) return null;
@@ -794,7 +794,7 @@ public class StringUtil
 		}
 	}
 
-	public static final String getMaxSubstring(String s, int maxLen)
+	public static String getMaxSubstring(String s, int maxLen)
 	{
 		return getMaxSubstring(s, maxLen, "...");
 	}
@@ -879,7 +879,7 @@ public class StringUtil
 		return -1;
 	}
 
-	public static final String getWordLeftOfCursor(String text, int pos, String wordBoundaries)
+	public static String getWordLeftOfCursor(String text, int pos, String wordBoundaries)
 	{
 		try
 		{
@@ -912,7 +912,6 @@ public class StringUtil
 		}
 		catch (Exception e)
 		{
-			e.printStackTrace();
 			return null;
 		}
 	}
