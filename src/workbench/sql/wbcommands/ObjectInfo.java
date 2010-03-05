@@ -19,6 +19,7 @@ import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
+import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
@@ -201,7 +202,7 @@ public class ObjectInfo
 		}
 
 		ColumnRemover remover = new ColumnRemover(details);
-		DataStore cols = remover.removeColumnsByName("java.sql.Types", "SCALE/SIZE", "PRECISION");
+		DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
 		cols.setResultName(toDescribe.getTableName());
 		result.setSuccess();
 		result.addDataStore(cols);

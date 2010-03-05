@@ -348,7 +348,7 @@ public class TableDefinitionPanel
 					// can be changed by editing that column
 					dsModel.setValidator(validator);
 
-					int typeIndex = dsModel.findColumn("java.sql.Types");
+					int typeIndex = dsModel.findColumn(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME);
 					int posIndex = dsModel.findColumn("POSITION");
 					int pkIndex = dsModel.findColumn("PK");
 					dsModel.setNonEditableColums(typeIndex, posIndex, pkIndex);
@@ -401,8 +401,8 @@ public class TableDefinitionPanel
 		// (should only appear for table definitions
 		try
 		{
-			int typeIndex = colmod.getColumnIndex("java.sql.Types");
-			TableColumn col = colmod.getColumn(typeIndex);//DbMetadata.COLUMN_IDX_TABLE_DEFINITION_JAVA_SQL_TYPE);
+			int typeIndex = colmod.getColumnIndex(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME);
+			TableColumn col = colmod.getColumn(typeIndex);
 			col.setCellRenderer(RendererFactory.getSqlTypeRenderer());
 		}
 		catch (IllegalArgumentException e)

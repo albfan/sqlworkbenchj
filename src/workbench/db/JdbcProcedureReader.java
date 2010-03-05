@@ -220,7 +220,7 @@ public class JdbcProcedureReader
 
 	protected DataStore createProcColsDataStore()
 	{
-		final String[] cols = {"COLUMN_NAME", "TYPE", "TYPE_NAME", "java.sql.Types", "REMARKS"};
+		final String[] cols = {"COLUMN_NAME", "TYPE", "TYPE_NAME", TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "REMARKS"};
 		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR};
 		final int[] sizes =   {20, 10, 18, 5, 30};
 		DataStore ds = new DataStore(cols, types, sizes);
