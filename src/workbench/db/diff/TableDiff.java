@@ -155,9 +155,9 @@ public class TableDiff
 		}
 
 		boolean constraintsAreEqual =
-			(missingConstraints.size() == 0 &&
-			modifiedConstraints.size() == 0 &&
-			constraintsToDelete.size() == 0);
+			(missingConstraints.isEmpty() &&
+			modifiedConstraints.isEmpty() &&
+			constraintsToDelete.isEmpty());
 
 		List<String> refPk = this.referenceTable.getPrimaryKeyColumns();
 		List<String> tPk = this.targetTable.getPrimaryKeyColumns();
@@ -169,8 +169,8 @@ public class TableDiff
 
 		boolean indexDifferent = indexDiff != null && indexDiff.length() > 0;
 
-		if (colDiff.length() == 0 && !rename && colsToBeAdded.size() == 0
-			  && colsToBeRemoved.size() == 0 && refPk.equals(tPk) && constraintsAreEqual
+		if (colDiff.length() == 0 && !rename && colsToBeAdded.isEmpty()
+			  && colsToBeRemoved.isEmpty() && refPk.equals(tPk) && constraintsAreEqual
 				&& !indexDifferent && !grantDifferent && !triggersDifferent)
 		{
 			return result;
@@ -196,13 +196,13 @@ public class TableDiff
 		String[] value = new String[1];
 		List pkcols = null;
 
-		if (refPk.size() == 0 && tPk.size() > 0)
+		if (refPk.isEmpty() && tPk.size() > 0)
 		{
 			value[0] = this.targetTable.getPrimaryKeyName();
 			pkTagToUse = TAG_REMOVE_PK;
 			pkcols = this.targetTable.getPrimaryKeyColumns();
 		}
-		else if (refPk.size() > 0 && tPk.size() == 0)
+		else if (refPk.size() > 0 && tPk.isEmpty())
 		{
 			value[0] = this.referenceTable.getPrimaryKeyName();
 			pkTagToUse = TAG_ADD_PK;
@@ -254,7 +254,7 @@ public class TableDiff
 		{
 			trgDiff.writeXml(myindent, result);
 		}
-		
+
 		if (grantDifferent)
 		{
 			result.append(grantDiff);
@@ -267,7 +267,7 @@ public class TableDiff
 
 	private void writeConstraints(List<TableConstraint> constraints, StrBuffer result, String tag, StrBuffer indent)
 	{
-		if (constraints.size() == 0) return;
+		if (constraints.isEmpty()) return;
 		StrBuffer consIndent = new StrBuffer(indent);
 		consIndent.append("  ");
 		writer.appendOpenTag(result, indent, tag);
@@ -348,7 +348,7 @@ public class TableDiff
 	private List<TableConstraint> getModifiedConstraints()
 	{
 		if (!checkConstraintNames) return Collections.emptyList();
-		
+
 		List<TableConstraint> targConstraints = targetTable.getTableConstraints();
 		if (targConstraints == null) return Collections.emptyList();
 

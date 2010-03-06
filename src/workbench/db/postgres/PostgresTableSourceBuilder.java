@@ -119,7 +119,7 @@ public class PostgresTableSourceBuilder
 		if (enums != null) result.append(enums);
 		if (domains != null) result.append(domains);
 		if (sequences != null) result.append(sequences);
-		
+
 		return result.toString();
 	}
 
@@ -169,14 +169,14 @@ public class PostgresTableSourceBuilder
 		if (b.length() == 0) return null;
 		return b;
 	}
-	
+
 	private CharSequence getEnumInformation(List<ColumnIdentifier> columns, String schema)
 	{
 		PostgresEnumReader reader = new PostgresEnumReader();
 		Map<String, EnumIdentifier> enums = reader.getEnumInfo(dbConnection, schema, null);
-		if (enums == null || enums.size() == 0) return null;
+		if (enums == null || enums.isEmpty()) return null;
 		StringBuilder result = new StringBuilder(50);
-		
+
 		for (ColumnIdentifier col : columns)
 		{
 			String dbType = col.getDbmsType();
@@ -187,7 +187,7 @@ public class PostgresTableSourceBuilder
 				result.append(StringUtil.listToString(enumDef.getValues(), ",", true, '\''));
 			}
 		}
-		
+
 		return result;
 	}
 
@@ -195,7 +195,7 @@ public class PostgresTableSourceBuilder
 	{
 		PostgresDomainReader reader = new PostgresDomainReader();
 		Map<String, DomainIdentifier> domains = reader.getDomainInfo(dbConnection, schema);
-		if (domains == null || domains.size() == 0) return null;
+		if (domains == null || domains.isEmpty()) return null;
 		StringBuilder result = new StringBuilder(50);
 
 		for (ColumnIdentifier col : columns)
@@ -208,7 +208,7 @@ public class PostgresTableSourceBuilder
 				result.append(domain.getSummary());
 			}
 		}
-		
+
 		return result;
 	}
 }

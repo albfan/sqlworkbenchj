@@ -129,7 +129,6 @@ public class DataExporter
 	private MessageBuffer warnings = new MessageBuffer();
 	private MessageBuffer errors = new MessageBuffer();
 	private List<ExportJobEntry> jobQueue;
-	private boolean jobsRunning;
 	private ExportWriter exportWriter;
 	private int tablesExported;
 	private long totalRows;
@@ -893,8 +892,6 @@ public class DataExporter
 			this.createExportWriter();
 		}
 
-		this.jobsRunning = true;
-
 		fireExecutionStart();
 
 		try
@@ -930,7 +927,6 @@ public class DataExporter
 		}
 		finally
 		{
-			jobsRunning = false;
 			fireExecutionEnd();
 		}
 	}

@@ -57,7 +57,7 @@ public class PostgresRuleReader
              "  left join pg_namespace n on n.oid = c.relnamespace \n" +
              "  left join pg_description d on r.oid = d.objoid\n" +
 						 "WHERE r.rulename <> '_RETURN'::name ";
-	
+
 	private String getSql(WbConnection connection, String schema, String name)
 	{
 		StringBuilder sql = new StringBuilder(150);
@@ -131,7 +131,7 @@ public class PostgresRuleReader
 	public PostgresRule getObjectDefinition(WbConnection connection, DbObject object)
 	{
 		List<PostgresRule> rules = getRuleList(connection, object.getSchema(), object.getObjectName());
-		if (rules == null || rules.size() == 0) return null;
+		if (rules == null || rules.isEmpty()) return null;
 		return rules.get(0);
 	}
 
@@ -140,7 +140,7 @@ public class PostgresRuleReader
 		if (!DbMetadata.typeIncluded("RULE", requestedTypes)) return;
 
 		List<PostgresRule> rules = getRuleList(con, schema, objects);
-		if (rules.size() == 0) return;
+		if (rules.isEmpty()) return;
 		for (PostgresRule rule : rules)
 		{
 			int row = result.addRow();

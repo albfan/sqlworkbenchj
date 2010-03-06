@@ -25,7 +25,7 @@ public class PostgresDDLFilter
 	/**
 	 * PG's documentation shows CREATE FUNCTION samples that use
 	 * a "dollar quoting" to avoid the nested single quotes
-	 * e.g. http://www.postgresql.org/docs/8.0/static/plpgsql-structure.html
+	 * e.g. http://www.postgresql.org/docs/8.4/static/plpgsql-structure.html
 	 *
 	 * But the JDBC driver does not (yet) understand this - this
 	 * seems to be only implemented in the psql command line tool.
@@ -37,6 +37,9 @@ public class PostgresDDLFilter
 	 * This does not mimic psql's quoting completely as basically
 	 * you can also use some descriptive words between the dollar signs, such
 	 * as $body$ which will not be detected by this method.
+	 *
+	 * This class is only used when the driver is version 8.2 or earlier.
+	 * Newer drivers can handle dollar quoting without problems.
 	 */
 	public String adjustDDL(String sql)
 	{

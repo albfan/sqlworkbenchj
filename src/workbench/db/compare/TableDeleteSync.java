@@ -178,7 +178,7 @@ public class TableDeleteSync
 		this.columnMap.clear();
 
 		List<ColumnIdentifier> columns = this.toDelete.getMetadata().getTableColumns(deleteTable);
-		if (columns == null || columns.size() == 0) throw new SQLException("Table " + deleteTable.getTableName() + " not found in target database");
+		if (columns == null || columns.isEmpty()) throw new SQLException("Table " + deleteTable.getTableName() + " not found in target database");
 		String where = " WHERE ";
 		int colIndex = 1;
 
@@ -197,7 +197,7 @@ public class TableDeleteSync
 			}
 		}
 
-		if (columnMap.size() == 0)
+		if (columnMap.isEmpty())
 		{
 			throw new SQLException("No primary key found to delete rows from target table " + tableToDelete.getTableName());
 		}
@@ -428,7 +428,7 @@ public class TableDeleteSync
 
 	private String buildCheckSql(List<RowData> rows, ResultInfo info)
 	{
-		StringBuffer sql = new StringBuffer(150);
+		StringBuilder sql = new StringBuilder(150);
 		sql.append("SELECT ");
 		for (int i=0; i < info.getColumnCount(); i++)
 		{

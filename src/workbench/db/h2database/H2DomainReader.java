@@ -177,7 +177,7 @@ public class H2DomainReader
 		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return;
 
 		List<DomainIdentifier> domains = getDomainList(con, schema, objects);
-		if (domains.size() == 0) return;
+		if (domains.isEmpty()) return;
 		for (DomainIdentifier domain : domains)
 		{
 			int row = result.addRow();

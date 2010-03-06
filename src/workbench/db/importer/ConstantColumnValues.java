@@ -48,7 +48,7 @@ public class ConstantColumnValues
 		throws SQLException, ConverterException
 	{
 		List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename));
-		if (tableColumns.size() == 0) throw new SQLException("Table '" + tablename + "' not found!");
+		if (tableColumns.isEmpty()) throw new SQLException("Table '" + tablename + "' not found!");
 		init(parameterValue, tableColumns, converter);
 	}
 
@@ -68,7 +68,7 @@ public class ConstantColumnValues
 		if (parameterValue == null) return;
 
 		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
-		if (entries.size() == 0) return;
+		if (entries.isEmpty()) return;
 
 		this.columnValues = new ArrayList<ColumnData>(entries.size());
 

@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -35,12 +34,12 @@ public class H2SequenceReader
 	implements SequenceReader
 {
 	private Connection dbConnection;
-	
+
 	public H2SequenceReader(Connection conn)
 	{
 		this.dbConnection = conn;
 	}
-	
+
 	/**
 	 *	Return the source SQL for a H2 sequence definition.
 	 *
@@ -52,20 +51,20 @@ public class H2SequenceReader
 		if (def == null) return "";
 		return def.getSource();
 	}
-	
+
 	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
-		
+
 		for (int row=0; row < ds.getRowCount(); row++)
 		{
 			result.add(createSequenceDefinition(ds, row));
 		}
 		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
     DataStore ds = getRawSequenceDefinition(owner, sequence);
@@ -77,7 +76,7 @@ public class H2SequenceReader
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
 		SequenceDefinition result = null;
-		
+
     if (ds == null || ds.getRowCount() == 0) return null;
 
 		String name = ds.getValueAsString(row, "SEQUENCE_NAME");
@@ -91,20 +90,20 @@ public class H2SequenceReader
 		result.setComment(comment);
 		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
 		readSequenceSource(result);
-		
-		return result;		
+
+		return result;
 	}
 
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
-		
+
 		StringBuilder result = new StringBuilder(100);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
-		
+
     result.append("CREATE SEQUENCE ");
     result.append(def.getSequenceName());
-		
+
 		Long inc = (Long)def.getSequenceProperty("INCREMENT");
     if (inc != null && inc != 1)
     {
@@ -114,7 +113,7 @@ public class H2SequenceReader
 
     result.append("\n       CACHE ");
 		result.append(def.getSequenceProperty("CACHE").toString());
-		
+
 		result.append(';');
 		result.append(nl);
 
@@ -127,11 +126,11 @@ public class H2SequenceReader
 			result.append(comments.replace("'", "''"));
 			result.append("';");
 		}
-		
+
 		def.setSource(result);
 		return;
 	}
-	
+
 	public DataStore getRawSequenceDefinition(String owner, String sequence)
 	{
 		Statement stmt = null;
@@ -149,7 +148,7 @@ public class H2SequenceReader
 				"ID," +
 				"CACHE " +
 				"FROM information_schema.sequences ";
-			
+
 			boolean whereAdded = false;
 
 			if (StringUtil.isNonBlank(owner))
@@ -165,7 +164,7 @@ public class H2SequenceReader
 				}
 				sql += " sequence_schema = '" + owner + "'";
 			}
-		
+
 			if (StringUtil.isNonBlank(sequence))
 			{
 				if (!whereAdded)

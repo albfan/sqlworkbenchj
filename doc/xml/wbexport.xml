@@ -5,10 +5,10 @@
 		The <literal>WbExport</literal> exports contents of the database into external files, e.g.
 		plain text ("CSV") or XML.
 	</para>
-	
+
 	<para>
 		The <literal>WbExport</literal> command can be used like any other SQL command
-		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>). This includes the 
+		(such as <literal>UPDATE</literal> or <literal>INSERT</literal>). This includes the
     usage in scripts that are run in <link linkend="using-scripting">batch mode</link>.
 	</para>
 
@@ -16,7 +16,7 @@
   <indexterm><primary>Export</primary><secondary>table</secondary></indexterm>
 
 	<para>
-		The <literal>WbExport</literal> command exports either the result of the 
+		The <literal>WbExport</literal> command exports either the result of the
     <emphasis role="bold">next</emphasis> SQL Statement
     (which has to produce a result set) or the content of the table(s)
     specified with the <literal>-sourceTable</literal> parameter.
@@ -34,28 +34,28 @@
 	</para>
 
 	<note><para>
-		When using a <literal>SELECT</literal> based export, you have to 
+		When using a <literal>SELECT</literal> based export, you have to
 		run both statements (<literal>WbExport</literal> and <literal>SELECT</literal>)
 		as one script. Either select both statements in the editor and choose
-		<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>, 
+		<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute selected</guimenuitem></menuchoice>,
 		or make the two statements the only statements in the editor and choose
 		<menuchoice><guimenu>SQL</guimenu><guimenuitem>Execute all</guimenuitem></menuchoice>.
 	</para></note>
-		
+
 	<para>
 		You can also export the result of a <literal>SELECT</literal> statement, by
 		selecting the statment in the editor, and then choose
 		<menuchoice><guimenu>SQL</guimenu><guimenuitem>Export query result</guimenuitem></menuchoice>.
 	</para>
-		
+
 	<para>
 		When exporting data into a Text or XML file, the content of BLOB columns
-		is written into separate files. One file for each column of each row. Text files 
-		that are created this way can most probably only be imported using &wb-productname; as 
+		is written into separate files. One file for each column of each row. Text files
+		that are created this way can most probably only be imported using &wb-productname; as
 		the main file will contain the filename of the BLOB data file instead of the actual BLOB data.
-		The only other application that I know of, that can handle this type of imports is Oracle's 
-		<literal>SQL*Loader</literal> utility. If you run the text export together with the 
-		parameter <literal>-writeoracleloader=true</literal> the control file will contain the 
+		The only other application that I know of, that can handle this type of imports is Oracle's
+		<literal>SQL*Loader</literal> utility. If you run the text export together with the
+		parameter <literal>-writeoracleloader=true</literal> the control file will contain the
 		approriate definitions to read the BLOB data from the external file.
 	</para>
 
@@ -68,7 +68,7 @@
       WbExport is designed to directly write the rows that are retrieved from the database
       to the export file without buffering them in memory.
    </para>
-   
+
    <para>
       Some JDBC drivers (e.g. Postgres, jTDS and the Microsoft Driver) read the full result obtained
       from the database into memory. In that case, exporting large results might still require a lot
@@ -113,7 +113,7 @@
     <para>
       Simply unzip the archive into the directory where <literal>sqlworkbench.jar</literal> is located.
     </para>
-    
+
   </section>
 
 	<simplesect id="wb-export-max-rows">
@@ -128,7 +128,7 @@
 	<section id="export-parameters">
 		<title>General WbExport parameters</title>
     <indexterm><primary>Export</primary><secondary>parameters</secondary></indexterm>
-    
+
 		<informaltable frame="all">
 			<tgroup cols="2" align="left">
 				<colspec colname="c1" colwidth="4cm" />
@@ -238,7 +238,7 @@
 							</para>
 						</entry>
 					</row>
-          
+
 					<row>
 						<entry>-sourceTablePrefix</entry>
 						<entry>
@@ -524,6 +524,26 @@
 							</para>
 						</entry>
 					</row>
+          <row>
+            <entry>-replaceExpression -replaceWith</entry>
+            <entry>
+              <para>
+                Using these parameters, arbitrary text can be replaced during the export. <literal>-replaceExpression</literal>
+                defines the regular expression that is to be replaced. <literal>-replaceWith</literal> defines the replacement value.
+                <literal>-replaceExpression='(\n|\r\n)' -replaceWith=' '</literal> will replace all newline characters with a blank.
+              </para>
+              <para>
+                The search and replace is done on the "raw" data retrieved from the database before the values
+                are converted to the corresponding output format. In particular this means replacing is done
+                before any <link linkend="text-escape-switch">character escaping</link> takes place.
+              </para>
+              <para>
+                Because the search and replace is done before the data is converted to the output format, it
+                can be used for all export types. Only character columns (<literal>CHAR</literal>, <literal>VARCHAR</literal>,
+                <literal>CLOB</literal>, <literal>LONGVARCHAR</literal>) are taken into account.
+              </para>
+            </entry>
+          </row>
 
 					&progress-parameter;
 
@@ -531,7 +551,7 @@
 			</tgroup>
 		</informaltable>
 	</section>
-    
+
 	<section id="export-text-parameters">
     <title>Parameters for text export</title>
 
@@ -590,17 +610,17 @@
 								Defines how quote characters that appear in the actual data are written to the output file.
 							</para>
 							<para>
-								If no quote character has been defined using the -quoteChar switch, 
+								If no quote character has been defined using the -quoteChar switch,
 								this option is ignored.
 							</para>
 							<para>
-								If <literal>escape</literal> is specified a quote character (defined through 
-								-quoteChar) that is embedded in the exported (character) data is written as 
+								If <literal>escape</literal> is specified a quote character (defined through
+								-quoteChar) that is embedded in the exported (character) data is written as
 								e.g. <literal>here is a \" quote character</literal>.
 							</para>
 							<para>
-								If <literal>duplicate</literal> is specified, a quote character (defined through 
-								-quoteChar) that is embedded in the exported (character) data is written as 
+								If <literal>duplicate</literal> is specified, a quote character (defined through
+								-quoteChar) that is embedded in the exported (character) data is written as
 								two quotes e.g. <literal>here is a "" quote character</literal>.
 							</para>
 						</entry>
@@ -617,9 +637,9 @@
 								if the delimiter is found inside the actual value that is
 								written to the output file. If <literal>-quoteAlways=true</literal> is
 								specified, character data will always be enclosed in the specified quote character.
-								This parameter is ignored if not quote character is specified. If you 
+								This parameter is ignored if not quote character is specified. If you
 								expect the quote character to be contained in the values, you should enable
-								character escaping, otherwise the quote character that is part of the 
+								character escaping, otherwise the quote character that is part of the
 								exported value will break the quote during import.
 							</para>
 						</entry>
@@ -638,11 +658,11 @@
 						<entry>
 							<para>
 								This parameter controls the escaping of non-printable
-								or non-ASCII characters. Valid options are 
-								<literal>ctrl</literal> which will escape everything below ASCII 32 (newline, tab, etc), 
-								<literal>7bit</literal> which will escape everything below ASCII 32 and above 126, 
-								<literal>8bit</literal> which will escape everything below ASCII 32 and above 255 
-								and <literal>extended</literal> which will escape everything outside the 
+								or non-ASCII characters. Valid options are
+								<literal>ctrl</literal> which will escape everything below ASCII 32 (newline, tab, etc),
+								<literal>7bit</literal> which will escape everything below ASCII 32 and above 126,
+								<literal>8bit</literal> which will escape everything below ASCII 32 and above 255
+								and <literal>extended</literal> which will escape everything outside the
 								range [32-126] and [161-255]
 							</para>
 							<para>
@@ -654,7 +674,7 @@
 							<para>
 								If character escaping is enabled, then the quote character will be escaped
 								inside quoted values and the delimiter will be escaped inside non-quoted
-								values. The delimiter could also be escaped inside a quoted value if the 
+								values. The delimiter could also be escaped inside a quoted value if the
 								delimiter falls into the selected escape range (e.g. a tab character).
 							</para>
 
@@ -666,9 +686,9 @@
 						<entry>
 							<para>Possible values: <literal>postgres</literal>, <literal>oracle</literal>, <literal>sqlserver</literal>, <literal>db2</literal></para>
 							<para>
-								This parameter controls the creation of a control file for 
+								This parameter controls the creation of a control file for
 								the bulk load utilities of Oracle and Microsoft SQL Server.
-								<literal>oracle</literal> will create a control file for Oracle's 
+								<literal>oracle</literal> will create a control file for Oracle's
 								SQL*Loader utility, <literal>sqlserver</literal> will create a format
 								file for Microsoft's <literal>bcp</literal> utility.
 								The format file has the same filename as the output file but with the ending <literal>.ctl</literal>
@@ -813,8 +833,8 @@
 								If this parameter is given, any
 								non-printable character in a text/character column will be
 								replaced with a call to the given function with the ASCII
-								value as the parameter. 
-							</para> 
+								value as the parameter.
+							</para>
 							<para>
 								If -charfunc=chr is
 								given (e.g. for an Oracle syntax), a CR (=13) inside a
@@ -846,23 +866,23 @@
 							<para>
 								This parameter controls the generation of date or timestamp
 								literals. By default literals that are specific for the current
-								DBMS are created. You can also choose to create literals that 
+								DBMS are created. You can also choose to create literals that
 								comply with the JDBC specification or ANSI SQL literals for dates
 								and timestamps.
 							</para>
 							<para>
-								<emphasis role="bold"><literal>jdbc</literal></emphasis> selects the creation of JDBC compliant literals. 
+								<emphasis role="bold"><literal>jdbc</literal></emphasis> selects the creation of JDBC compliant literals.
 								These should be usable with every JDBC based tool, including your own Java code:
-								<literal>{d '2004-04-28'}</literal> or 
-								<literal>{ts '2002-04-02 12:02:00.042'}</literal>. This is the 
-								recommended format if you plan to use &wb-productname; (or any 
+								<literal>{d '2004-04-28'}</literal> or
+								<literal>{ts '2002-04-02 12:02:00.042'}</literal>. This is the
+								recommended format if you plan to use &wb-productname; (or any
 								other JDBC based tool) to run the generated statements.
 							</para>
-							
+
 							<para>
-								<emphasis role="bold"><literal>ansi</literal></emphasis> selects the creation of ANSI SQL compliant 
-								date literals: <literal>DATE '2004-04-28'</literal> or 
-								<literal>TIMESTAMP '2002-04-02 12:04:00'</literal>. Please consult the 
+								<emphasis role="bold"><literal>ansi</literal></emphasis> selects the creation of ANSI SQL compliant
+								date literals: <literal>DATE '2004-04-28'</literal> or
+								<literal>TIMESTAMP '2002-04-02 12:04:00'</literal>. Please consult the
 								manual of the target DBMS, to find out whether it supports ANSI compliant
 								date literals.
 							</para>
@@ -872,13 +892,13 @@
 							</para>
 
 							<para>
-								<emphasis role="bold"><literal>dbms</literal></emphasis> selects the creation of specific 
+								<emphasis role="bold"><literal>dbms</literal></emphasis> selects the creation of specific
 								literals to be used with the current DBMS (using e.g. the <literal>to_date()</literal>
 								function for Oracle). The format of these literals can be customized if necessary
 								in <literal>workbench.settings</literal> using the keys
-								<literal>workbench.sql.literals.[type].[datatype].pattern</literal> where 
+								<literal>workbench.sql.literals.[type].[datatype].pattern</literal> where
 								[type] is the type specified with this parameter and [datatype] is one of
-								<literal>time, date, timestamp</literal>. If you add new literal types, 
+								<literal>time, date, timestamp</literal>. If you add new literal types,
 								please also adjust the key <literal>workbench.sql.literals.types</literal>
 								which is used to show the possible values in the GUI (auto-completion
 								"Save As" dialog, Options dialog).
@@ -904,7 +924,7 @@
 							<para>-commitevery=100</para>
 							<para>will create a <literal>COMMIT;</literal> after every 100th statement.</para>
 							<para>
-								If this is not specified one <literal>COMMIT;</literal> will be added at the 
+								If this is not specified one <literal>COMMIT;</literal> will be added at the
 								end of the script. To suppress the final COMMIT, you can use
 								<literal>-commitEvery=none</literal>. Passing <literal>-commitEvery=atEnd</literal>
 								is equivalent to <literal>-commitEvery=0</literal>
@@ -917,8 +937,8 @@
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
-								If this parameter is set to true, the necessary <literal>CREATE TABLE</literal> 
-								command is put into the output file. This parameter is ignored when creating 
+								If this parameter is set to true, the necessary <literal>CREATE TABLE</literal>
+								command is put into the output file. This parameter is ignored when creating
 								<literal>UPDATE</literal> statements.
 							</para>
 						</entry>
@@ -935,13 +955,13 @@
 							</para>
 						</entry>
 					</row>
-          
+
 					<row>
 						<entry>-keyColumns</entry>
 						<entry>
 							<para>
 								A comma separated list of column names that occur in the table
-								or result set that should be used as the key columns for <literal>UPDATE</literal> 
+								or result set that should be used as the key columns for <literal>UPDATE</literal>
 								or <literal>DELETE</literal>
 							</para>
 							<para>
@@ -958,7 +978,7 @@
 			</tgroup>
 		</informaltable>
 	</section>
-		
+
 	<section id="export-ods-parameters">
     <title>Parameters for Spreadsheet types (ods, xslm, xls, xlsx)</title>
     <indexterm><primary>Export</primary><secondary>Spreadsheet</secondary></indexterm>
@@ -976,7 +996,7 @@
 					</row>
 				</thead>
 				<tbody valign="top">
-          
+
 					<row>
 						<entry>-title</entry>
 						<entry>The name to be used for the worksheet</entry>
@@ -1000,7 +1020,7 @@
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
               <para>
                 If set to true, the header row will be "frozen" in the Worksheet so that
-                it will not scroll out of view. 
+                it will not scroll out of view.
               </para>
               <para>Default value: <literal>true</literal></para>
             </entry>
@@ -1087,7 +1107,7 @@
 						<entry>
               <para>
                 With this parameter you can specify a HTML chunk that will be added after the
-                data has been written to the output file. 
+                data has been written to the output file.
               </para>
             </entry>
 					</row>
@@ -1108,7 +1128,7 @@
 			When using <link linkend="command-import"><literal>WbImport</literal></link> you can import
 			the data stored in the archives without unpacking them. Simply specify the archive name
 			with the <literal>-file</literal> parameter. &wb-productname; will detect that the input file
-			is an archive and will extract the information "on the fly". Assume the following export 
+			is an archive and will extract the information "on the fly". Assume the following export
 			command:
 		</para>
 		<programlisting>WbExport -type=text -file=/home/data/person.txt -compress=true -sourcetable=person;</programlisting>
@@ -1121,12 +1141,12 @@
 
 		<para>
 			Assuming the <literal>PERSON</literal> table had a BLOB colum (e.g. a picture of the person),
-			the <literal>WbExport</literal> command would have created an additional file called 
+			the <literal>WbExport</literal> command would have created an additional file called
 			<literal>person_blobs.zip</literal> that would contain all BLOB data. The <literal>WbImport</literal>
 			command will automatically read the BLOB data from that archive.
 		</para>
 	</section>
-			
+
 	<section id="export-examples">
 		<title>Examples</title>
 
@@ -1142,7 +1162,7 @@
 			<para>
 				Will create a text file with the data from <literal>data_table</literal>.
 				Each column will be separated with the character | Each fractional number
-				will be written with a comma as the decimal separator. 
+				will be written with a comma as the decimal separator.
 			</para>
 
 		</section>
@@ -1177,7 +1197,7 @@
         This will add the specified where clause to <emphasis role="bold">each</emphasis> <literal>SELECT</literal>, so that only rows are
         exported that were changed after April 2nd, 2009
       </para>
-      
+
     </section>
 
 		<section id="export-example-select">
@@ -1192,7 +1212,7 @@ SELECT * FROM data_table;</programlisting>
 
 		<section id="export-schema-export">
 			<title>Export a complete schema</title>
-			
+
 			<para>
 				To export all tables from the current connection into tab-separated files
 				and compress the files, you can use the following statement:
@@ -1206,12 +1226,12 @@ SELECT * FROM data_table;</programlisting>
 				text file. If a table contains BLOB columns, the blob data will be written into
 				a separate zip file.
 			</para>
-	
+
 			<para>
 				The files created by the above statement can be imported into another database
 				using the following command:
 			</para>
-	
+
 <programlisting>WbImport -type=text
          -sourceDir=c:/data/export
          -checkDependencies=true;</programlisting>
@@ -1280,8 +1300,7 @@ WHERE table1.column1 = table2.column1;</programlisting>
          -delimiter=','
          -filenameColumn=fname;
 SELECT blob_column, 'data_'||id_column||'_'||some_name||'.'||type_column as fname
-FROM blob_table;
-				 </programlisting>
+FROM blob_table;</programlisting>
 
 			<para>
 				This examples assumes that the following columns are part of the table <literal>blob_table</literal>:
@@ -1297,6 +1316,26 @@ FROM blob_table;
 			</para>
 		</section>
 
+		<section id="export-replace-data">
+			<title>Replace data during export</title>
+			<para>
+        When writing the export data, values in character columns can be replaced using regular expressions.
+			</para>
+<programlisting>WbExport -file='/path/to/export.tx'
+         -type=text
+         -replaceExpression='(\n|\r\n)' -replaceWith='*'
+         -sourceTable=export_table;</programlisting>
+       <para>
+         This will replace each newline (either DOS CR/LF or Unix LF) with the character *.
+       </para>
+       <para>
+         The value for <literal>-replaceExpression</literal> defines a regular expression. In the example
+         above multiple new lines will be replace with multiple  * characters. To replace consecutive
+         new lines with a single * character, use the regular expression <literal>-replaceExpression='(\n|\r\n)+'</literal>.
+         (Note the + sign after the brackets)
+       </para>
+
+    </section>
 	</section>
-		
+
 </section>

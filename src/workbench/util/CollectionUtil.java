@@ -33,7 +33,7 @@ public class CollectionUtil
 	
 	public static boolean isEmpty(Collection c)
 	{
-		return (c == null || c.size() == 0);
+		return (c == null || c.isEmpty());
 	}
 	
 	public static <E> Set<E> hashSet(E... add)

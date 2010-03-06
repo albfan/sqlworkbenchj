@@ -174,7 +174,7 @@ public class RowData
 		for (int i=0; i < colCount; i++)
 		{
 			int type = info.getColumnType(i);
-			
+
 			if (converter != null)
 			{
 				String dbms = info.getDbmsTypeName(i);
@@ -332,10 +332,7 @@ public class RowData
 	private void createOriginalData()
 	{
 		this.originalData = new Object[this.colData.length];
-		for (int i = 0; i < this.originalData.length; i++)
-		{
-			this.originalData[i] = NO_CHANGE_MARKER;
-		}
+		Arrays.fill(originalData, NO_CHANGE_MARKER);
 	}
 
 	/**
@@ -415,8 +412,11 @@ public class RowData
 			this.originalData[column] = NO_CHANGE_MARKER;
 			for (int i=0; i < originalData.length; i++)
 			{
+				// if any other column has been modified, the status of the row
+				// should not change
 				if (this.originalData[i] != NO_CHANGE_MARKER) return;
 			}
+			// all columns are now NOT_MODIFIED, so reset the row status as well
 			this.resetStatus();
 		}
 	}
@@ -456,12 +456,10 @@ public class RowData
 	 */
 	public void reset()
 	{
-		for (int i=0; i < this.colData.length; i++)
-		{
-			colData[i] = null;
-		}
+		Arrays.fill(colData, null);
 		this.resetStatus();
 	}
+	
 	/**
 	 *	Sets the status of this row to new.
 	 */
@@ -507,7 +505,7 @@ public class RowData
 	}
 
 	/**
-	 *	Set the status to modified.
+	 * Set the status to modified.
 	 */
 	public void setModified()
 	{

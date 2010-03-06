@@ -25,23 +25,23 @@ public class TableGrantDiff
 {
 	public static final String TAG_ADD_GRANTS = "add-grants";
 	public static final String TAG_REVOKE_GRANTS = "revoke-grants";
-	
+
 	private Collection<TableGrant> referenceGrants;
 	private Collection<TableGrant> targetGrants;
-	
+
 	public TableGrantDiff(ReportTableGrants reference, ReportTableGrants target)
 	{
 		if (reference != null)
 		{
 			this.referenceGrants = reference.getGrants();
 		}
-		
+
 		if (target != null)
 		{
 			this.targetGrants = target.getGrants();
 		}
 	}
-	
+
 	public StrBuffer getMigrateTargetXml(TagWriter writer, StrBuffer indent)
 	{
 		Collection<TableGrant> grantsToAdd = new LinkedList<TableGrant>();
@@ -53,7 +53,7 @@ public class TableGrantDiff
 		{
 			grantsToAdd.removeAll(targetGrants);
 		}
-		
+
 		Collection<TableGrant> grantsToRemove = new LinkedList<TableGrant>();
 		if (this.targetGrants != null)
 		{
@@ -63,9 +63,9 @@ public class TableGrantDiff
 		{
 			grantsToRemove.removeAll(referenceGrants);
 		}
-		
-		if (grantsToAdd.size() == 0 && grantsToRemove.size() == 0) return null;
-		
+
+		if (grantsToAdd.isEmpty() && grantsToRemove.isEmpty()) return null;
+
 		StrBuffer result = new StrBuffer(grantsToAdd.size() * 50 + grantsToRemove.size() * 50);
 		StrBuffer indent2 = new StrBuffer(indent);
 		indent2.append("  ");
@@ -92,5 +92,5 @@ public class TableGrantDiff
 		}
 		return result;
 	}
-	
+
 }

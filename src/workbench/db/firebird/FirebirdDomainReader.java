@@ -38,7 +38,7 @@ import workbench.util.StringUtil;
 public class FirebirdDomainReader
 	implements ObjectListExtender
 {
-	final String baseSql = 
+	final String baseSql =
 		         "SELECT trim(rdb$field_name) AS domain_name, \n" +
              "       rdb$validation_source as constraint_definition, \n" +
              "       case rdb$field_type  \n" +
@@ -173,7 +173,7 @@ public class FirebirdDomainReader
 		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return;
 
 		List<DomainIdentifier> domains = getDomainList(con, schema, objects);
-		if (domains.size() == 0) return;
+		if (domains.isEmpty()) return;
 		for (DomainIdentifier domain : domains)
 		{
 			int row = result.addRow();

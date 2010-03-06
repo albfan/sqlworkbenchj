@@ -18,7 +18,6 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -133,7 +132,7 @@ public class PostgresSequenceReader
 		{
 			if (def.getSchema() != null)
 			{
-				sql = sql + " AND sequence_schema = ?";
+				sql += " AND sequence_schema = ?";
 			}
 			pstmt = dbConnection.getSqlConnection().prepareStatement(sql);
 			pstmt.setString(1, def.getObjectName());

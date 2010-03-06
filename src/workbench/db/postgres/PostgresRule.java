@@ -11,8 +11,10 @@
  */
 package workbench.db.postgres;
 
-import workbench.db.*;
 import java.sql.SQLException;
+import workbench.db.DbObject;
+import workbench.db.TableIdentifier;
+import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
 
 /**
@@ -47,7 +49,7 @@ public class PostgresRule
 	{
 		return event;
 	}
-	
+
 	/**
 	 * Set the table for which this rule is defined
 	 * @param tbl
@@ -61,7 +63,7 @@ public class PostgresRule
 	{
 		return ruleTable;
 	}
-	
+
 	public String getCatalog()
 	{
 		return catalog;
@@ -111,7 +113,7 @@ public class PostgresRule
 	{
 		return source;
 	}
-	
+
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -127,7 +129,7 @@ public class PostgresRule
 	{
 		return null;
 	}
-	
+
 	public String getObjectNameForDrop(WbConnection con)
 	{
 		return getFullyQualifiedName(con);

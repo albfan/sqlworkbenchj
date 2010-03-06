@@ -15,12 +15,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import workbench.db.DbMetadata;
-import  workbench.db.JdbcIndexReader;
-import  workbench.db.TableIdentifier;
-import  workbench.log.LogMgr;
+import workbench.db.JdbcIndexReader;
+import workbench.db.TableIdentifier;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import  workbench.util.SqlUtil;
-import  workbench.util.StringUtil;
+import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
+
 
 /**
  * The newer versions of H2 correctly return the defined name for a Primary key

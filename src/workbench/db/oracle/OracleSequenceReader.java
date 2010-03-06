@@ -15,7 +15,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -34,12 +33,12 @@ public class OracleSequenceReader
   implements SequenceReader
 {
   private WbConnection connection;
-	
+
   public OracleSequenceReader(WbConnection conn)
   {
     this.connection = conn;
   }
-		
+
 	public List<SequenceDefinition> getSequences(String owner, String namePattern)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, namePattern);
@@ -51,7 +50,7 @@ public class OracleSequenceReader
 		}
 		return result;
 	}
-	
+
 	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
 	{
 		DataStore ds = getRawSequenceDefinition(owner, sequence);
@@ -59,7 +58,7 @@ public class OracleSequenceReader
 		SequenceDefinition def = createDefinition(ds, 0);
 		return def;
 	}
-	
+
   public DataStore getRawSequenceDefinition(String owner, String sequence)
   {
     String sql = "SELECT SEQUENCE_OWNER, SEQUENCE_NAME, \n       " +
@@ -72,17 +71,17 @@ public class OracleSequenceReader
 			"LAST_NUMBER \n" +
 			"FROM ALL_SEQUENCES \n" +
 			"WHERE sequence_owner = ?";
-		
+
 		if (!StringUtil.isEmptyString(sequence))
 		{
 			sql += "  AND sequence_name LIKE ? ";
 		}
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo("OracleSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 		}
-		
+
     PreparedStatement stmt = null;
     ResultSet rs = null;
     DataStore result = null;
@@ -112,7 +111,7 @@ public class OracleSequenceReader
 		if (def == null) return null;
 		return def.getSource();
 	}
-	
+
 	private SequenceDefinition createDefinition(DataStore ds, int row)
 	{
 		if (ds == null || row >= ds.getRowCount()) return null;
@@ -135,7 +134,7 @@ public class OracleSequenceReader
 	{
 		if (def == null) return;
 		if (def.getSource() != null) return;
-		
+
 		StringBuilder result = new StringBuilder(100);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 

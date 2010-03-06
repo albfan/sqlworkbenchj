@@ -18,6 +18,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.formatter.SqlFormatter;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -30,7 +31,7 @@ import workbench.util.StringUtil;
  * <br/>
  *
  * @author Thomas Kellerer
- * @see MetaDataSqlManager#getViewSourceSql() 
+ * @see MetaDataSqlManager#getViewSourceSql()
  */
 public class ViewReader
 {
@@ -52,7 +53,7 @@ public class ViewReader
 	{
 		return getExtendedViewSource(new TableDefinition(tbl), includeDrop, false);
 	}
-	
+
 	/**
 	 * Returns a complete SQL statement to (re)create the given view.
 	 *
@@ -61,7 +62,7 @@ public class ViewReader
 	 * @param view The view for which thee source should be created
 	 * @param includeCommit if true, terminate the whole statement with a COMMIT
 	 * @param includeDrop if true, add a DROP statement before the CREATE statement
-	 * 
+	 *
 	 * @see #getViewSource(workbench.db.TableIdentifier)
 	 */
 	public CharSequence getExtendedViewSource(TableDefinition view, boolean includeDrop, boolean includeCommit)
@@ -77,12 +78,12 @@ public class ViewReader
 		List<ColumnIdentifier> columns = view.getColumns();
 		TableIdentifier viewTable = view.getTable();
 
-		if (columns == null || columns.size() == 0)
+		if (CollectionUtil.isEmpty(columns))
 		{
 			view = this.connection.getMetadata().getTableDefinition(view.getTable());
 			columns = view.getColumns();
 		}
-		
+
 		CharSequence source = this.getViewSource(viewTable);
 
 		if (StringUtil.isEmptyString(source)) return StringUtil.EMPTY_STRING;
@@ -156,7 +157,7 @@ public class ViewReader
 			result.append(colComments);
 			result.append(lineEnding);
 		}
-		
+
 		// Oracle and MS SQL Server support materialized views. For those
 		// the index definitions are of interest as well.
 		DataStore indexInfo = connection.getMetadata().getIndexReader().getTableIndexInformation(viewTable);

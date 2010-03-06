@@ -148,7 +148,7 @@ public class H2ConstantReader
 		if (!DbMetadata.typeIncluded("CONSTANT", requestedTypes)) return;
 
 		List<H2Constant> constants = getConstantsList(con, schema, objects);
-		if (constants.size() == 0) return;
+		if (constants.isEmpty()) return;
 		for (H2Constant constant : constants)
 		{
 			int row = result.addRow();

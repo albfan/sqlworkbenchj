@@ -895,7 +895,7 @@ public class DbMetadata
 	{
 		synchronized (keywords)
 		{
-			if (keywords.size() == 0)
+			if (keywords.isEmpty())
 			{
 				SqlKeywordHelper helper = new SqlKeywordHelper(this.getDbId());
 				keywords.addAll(helper.getKeywords());

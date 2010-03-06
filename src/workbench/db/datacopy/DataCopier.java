@@ -507,7 +507,7 @@ public class DataCopier
 	private void initImporterForTable(String addWhere)
 		throws SQLException
 	{
-		if (this.columnMap == null || this.columnMap.size() == 0)
+		if (this.columnMap == null || this.columnMap.isEmpty())
 		{
 			throw new SQLException("No columns defined");
 		}

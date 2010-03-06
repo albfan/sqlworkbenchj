@@ -2,7 +2,22 @@
 <history>
 
 <!-- build number must be set to -1 for development builds -->
-<release build="-1" date="2010-02-25">
+<release build="-1" date="2010-03-03">
+
+  <entry dev-build="9" type="enh">
+    <description>
+      The argument parser for Workbench specific commands has been changed in order to recognize empty values (e.g. -replaceWith=' ')
+      Existing scripts should work, but it could be that some combinations of parameter values are not covered by my tests.
+      So please verify that your scripts still work with the new version.
+    </description>
+  </entry>
+
+  <entry dev-build="9" type="enh">
+    <description>
+      A new option for WbExport (-replaceValues) is available to replace text (using regular expressions) in all character
+      columns during export.
+    </description>
+  </entry>
 
   <entry dev-build="8" type="enh">
     <description>

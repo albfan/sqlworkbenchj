@@ -77,7 +77,7 @@ public class OracleMetadata
 	private boolean alwaysShowCharSemantics = false;
 	private boolean useOwnSql = true;
 	private boolean globalMapDateToTimestamp = false;
-	
+
 	/**
 	 * Only for testing purposes
 	 */
@@ -341,7 +341,7 @@ public class OracleMetadata
 			"                    'BINARY_FLOAT', 100, " +
 			"                    'BINARY_DOUBLE', 101, " + Types.OTHER + ")";
 	}
-	
+
 	private PreparedStatement prepareColumnsStatement(String schema, String table)
 		throws SQLException
 	{
@@ -450,7 +450,7 @@ public class OracleMetadata
 			// hoping that there won't be two dblinks with the same name
 			// but different domains
 			sql = "SELECT username FROM all_db_links WHERE db_link like ? AND (owner = ? or owner = 'PUBLIC')";
-			dblink = dblink + ".%";
+			dblink += ".%";
 		}
 
 		try
@@ -632,7 +632,7 @@ public class OracleMetadata
 
 				if (!result.endsWith(";"))
 				{
-					result = result + ";";
+					result += ";";
 				}
 			}
 		}

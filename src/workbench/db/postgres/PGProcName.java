@@ -88,7 +88,7 @@ public class PGProcName
 
 	public String getOIDs()
 	{
-		if (arguments == null || arguments.size() == 0) return null;
+		if (arguments == null || arguments.isEmpty()) return null;
 
 		StringBuilder argTypes = new StringBuilder(arguments.size() * 4);
 		for (int i=0; i < arguments.size(); i++)
@@ -116,7 +116,7 @@ public class PGProcName
 	
 	public String getFormattedName()
 	{
-		if (arguments == null || arguments.size() == 0) return procName;
+		if (arguments == null || arguments.isEmpty()) return procName;
 		if (formattedName == null)
 		{
 			StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);

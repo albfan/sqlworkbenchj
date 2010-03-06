@@ -164,7 +164,7 @@ public class RowDataComparer
 
 	public void ignoreColumns(Collection<String> columnNames, ResultInfo info)
 	{
-		if (columnNames == null || columnNames.size() == 0) return;
+		if (columnNames == null || columnNames.isEmpty()) return;
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
 			if (columnNames.contains(info.getColumnName(i)))

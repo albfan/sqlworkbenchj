@@ -70,7 +70,7 @@ public class TableDataDiff
 	private TableIdentifier referenceTable;
 	private TableIdentifier tableToSync;
 	private TableDefinition toSyncDef;
-	
+
 	private int chunkSize = 15;
 
 	private Statement checkStatement;
@@ -91,11 +91,11 @@ public class TableDataDiff
 
 	private Set<String> columnsToIgnore;
 	private RowDataComparer comparer;
-	
+
 	private MessageBuffer warnings = new MessageBuffer();
 	private MessageBuffer errors = new MessageBuffer();
 	private long currentRowNumber;
-	
+
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
 		throws SQLException
 	{
@@ -118,7 +118,7 @@ public class TableDataDiff
 	{
 		comparer.setTypeSql();
 	}
-	
+
 	public void setRowMonitor(RowActionMonitor rowMonitor)
 	{
 		this.monitor = rowMonitor;
@@ -195,7 +195,7 @@ public class TableDataDiff
 	{
 		comparer.setBaseDir(dir);
 	}
-	
+
 	/**
 	 * Set the Writers to write the generated UPDATE and INSERT statements.
 	 *
@@ -447,7 +447,7 @@ public class TableDataDiff
 	 */
 	private String buildCheckSql(List<RowData> rows, ResultInfo info)
 	{
-		StringBuffer sql = new StringBuffer(150);
+		StringBuilder sql = new StringBuilder(150);
 		sql.append("SELECT ");
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
@@ -496,7 +496,7 @@ public class TableDataDiff
 		}
 		return null;
 	}
-	
+
 	private void writeHeader(Writer out)
 		throws IOException
 	{

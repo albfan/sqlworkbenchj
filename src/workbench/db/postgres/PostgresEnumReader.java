@@ -193,7 +193,7 @@ public class PostgresEnumReader
 	{
 		if (!handlesType(requestedTypes)) return;
 		Collection<EnumIdentifier> enums = getDefinedEnums(con, schema, objects);
-		if (enums == null || enums.size() == 0) return;
+		if (enums == null || enums.isEmpty()) return;
 		for (EnumIdentifier enumDef : enums)
 		{
 			int row = result.addRow();
