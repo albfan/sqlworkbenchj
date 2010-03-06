@@ -136,6 +136,8 @@ public class DataExporter
 	private Set<ControlFileFormat> controlFiles = EnumSet.noneOf(ControlFileFormat.class);
 	private boolean compressOutput = false;
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
+	private ExportDataModifier modifier;
+
 	/**
 	 * Toggles an additional sheet for Spreedsheet exports
 	 */
@@ -204,6 +206,16 @@ public class DataExporter
 	public String getRowIndexColumnName()
 	{
 		return rowIndexColumnName;
+	}
+
+	public ExportDataModifier getDataModifier()
+	{
+		return modifier;
+	}
+
+	public void setDataModifier(ExportDataModifier mod)
+	{
+		this.modifier = mod;
 	}
 
 	public void setRowIndexColumnName(String colnme)

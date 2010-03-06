@@ -58,7 +58,6 @@ import workbench.gui.lnf.LnFHelper;
 import workbench.gui.profiles.ProfileKey;
 import workbench.gui.tools.DataPumper;
 import workbench.gui.tools.ObjectSourceSearchPanel;
-import workbench.util.ExceptionUtil;
 import workbench.util.UpdateCheck;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -75,11 +74,11 @@ public final class WbManager
 	private static WbManager wb;
 	private final List<MainWindow> mainWindows = Collections.synchronizedList(new ArrayList<MainWindow>(5));
 	private final List<ToolWindow> toolWindows = Collections.synchronizedList(new ArrayList<ToolWindow>(5));
-	private boolean batchMode = false;
-	private boolean consoleMode = false;
+	private boolean batchMode;
+	private boolean consoleMode;
 	private boolean writeSettings = true;
 	private boolean overWriteGlobalSettingsFile = true;
-	private boolean outOfMemoryOcurred = false;
+	private boolean outOfMemoryOcurred;
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
@@ -221,7 +220,7 @@ public final class WbManager
 		{
 			this.toolWindows.remove(toolWindow);
 
-			if (this.toolWindows.size() == 0 && this.mainWindows.size() == 0)
+			if (this.toolWindows.isEmpty() && this.mainWindows.isEmpty())
 			{
 				this.exitWorkbench(toolWindow.getWindow());
 			}
@@ -614,7 +613,7 @@ public final class WbManager
 	protected void openNewWindow(boolean checkCmdLine)
 	{
 		final MainWindow main = new MainWindow();
-		this.mainWindows.add(main);
+		mainWindows.add(main);
 		main.display();
 		boolean connected = false;
 
@@ -803,17 +802,23 @@ public final class WbManager
 
 	protected void warmUp()
 	{
-		WbThread t = new WbThread("WarmUp")
+		WbThread t1 = new WbThread("WarmUp1")
 		{
 			public void run()
 			{
-				ResourceMgr.getResources();
 				MacroManager.getInstance().getMacros();
+			}
+		};
+		t1.start();
+
+		WbThread t2 = new WbThread("WarmUp2")
+		{
+			public void run()
+			{
 				ConnectionMgr.getInstance().readProfiles();
 			}
 		};
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
+		t2.start();
 	}
 
 	public void runGui()

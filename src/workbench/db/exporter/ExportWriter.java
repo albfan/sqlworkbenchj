@@ -82,6 +82,7 @@ public abstract class ExportWriter
 		converter.setAppendInfoSheet(exporter.getAppendInfoSheet());
 		converter.setEnableAutoFilter(exporter.getEnableAutoFilter());
 		converter.setEnableFixedHeader(exporter.getEnableFixedHeader());
+		converter.setDataModifier(exporter.getDataModifier());
     trimCharData = getTrimCharData();
 	}
 
@@ -226,6 +227,7 @@ public abstract class ExportWriter
 	protected void writeRow(RowData row, long numRows)
 		throws IOException
 	{
+		converter.applyDataModifier(row, numRows);
 		StrBuffer data = converter.convertRowData(row, numRows);
 		if (data != null && outputWriter != null)
 		{

@@ -42,6 +42,7 @@ public class ArgumentParser
 	private int argCount = 0;
 	private boolean needSwitch = true;
 
+	
 	public ArgumentParser()
 	{
 		Comparator<String> c = new CaseInsensitiveComparator();
@@ -71,7 +72,7 @@ public class ArgumentParser
 		String value = getValue(parameter);
 		if (value == null) return true;
 		Collection<String> allowed = this.getAllowedValues(parameter);
-		if (allowed == null || allowed.size() == 0) return true;
+		if (allowed == null || allowed.isEmpty()) return true;
 		return allowed.contains(value);
 	}
 	
@@ -115,7 +116,7 @@ public class ArgumentParser
 
 		try
 		{
-			WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
+			WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", true);
 			tok.setDelimiterNeedsWhitspace(true);
 			tok.setSourceString(aCmdLine.trim());
 
@@ -130,6 +131,16 @@ public class ArgumentParser
 				{
 					arg = word.substring(0, pos).trim();
 					value = word.substring(pos + 1).trim();
+					char first = value.charAt(0);
+					char last = value.charAt(value.length() - 1);
+					if ( (first == '"' && last == '"') || (first == '\'' && last == '\''))
+					{
+						int otherPos = value.indexOf(first, 1);
+						if (otherPos == -1 || otherPos == value.length() - 1)
+						{
+							value = StringUtil.trimQuotes(value);
+						}
+					}
 				}
 
 				if (value == null)

@@ -138,7 +138,7 @@ public class BatchRunnerTest
 
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "errtest");
-			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() +
+			parser.parse("-url=\"jdbc:h2:" + dbFile.getFullPath() + "\"" +
 				" -username=sa -driver=org.h2.Driver "  +
 				" -logfile='" + logfile.getFullPath() + "' " +
 				" -script='" + scriptFile.getFullPath() + "' " +
@@ -206,7 +206,7 @@ public class BatchRunnerTest
 
 			ArgumentParser parser = new AppArguments();
 			WbFile dbFile = new WbFile(util.getBaseDir(), "successtest");
-			parser.parse("-url='jdbc:h2:'" + dbFile.getFullPath() +
+			parser.parse("-url=jdbc:h2:" + dbFile.getFullPath() +
 				" -username=sa -driver=org.h2.Driver "  +
 				" -script='" + scriptFile.getFullPath() + "' " +
 				" -abortOnError=true -cleanupError='" + errorFile.getFullPath() + "' " +
@@ -463,7 +463,7 @@ public class BatchRunnerTest
 			assertEquals("Wrong singleLine Property parsed", true, def.isSingleLine());
 
 			runner.execute();
-			assertEquals("Runner not successful!", true, runner.isSuccess());
+			assertEquals(true, runner.isSuccess());
 
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select count(*) from person");

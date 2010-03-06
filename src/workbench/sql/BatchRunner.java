@@ -51,6 +51,7 @@ import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import workbench.util.WbStringTokenizer;
 
 /**
  * A class to run several statements from a script file.
@@ -105,7 +106,8 @@ public class BatchRunner
 	public BatchRunner(String aFilelist)
 	{
 		this();
-		this.filenames = StringUtil.stringToList(aFilelist, ",", true);
+		WbStringTokenizer tok = new WbStringTokenizer(aFilelist, ",", false, "\"'", false);
+		this.filenames = tok.getAllTokens();
 	}
 
 	public void setStoreErrors(boolean flag)

@@ -54,7 +54,7 @@ public class ProfileSelectionDialog
 	private WbButton manageDriversButton;
 	private ProfileEditorPanel profiles;
 	private ConnectionProfile selectedProfile;
-	private boolean cancelled = false;
+	private boolean cancelled;
 	private String escActionCommand;
 
 	public ProfileSelectionDialog(Frame parent, boolean modal)

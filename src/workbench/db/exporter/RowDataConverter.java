@@ -81,6 +81,7 @@ public abstract class RowDataConverter
 
 	protected boolean convertDateToTimestamp = false;
 	protected BlobLiteralFormatter blobFormatter;
+	protected ExportDataModifier columnModifier;
 
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
@@ -102,6 +103,11 @@ public abstract class RowDataConverter
 		this.defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
 	}
 
+	public void setDataModifier(ExportDataModifier modifier)
+	{
+		columnModifier = modifier;
+	}
+	
 	public boolean getEnableFixedHeader()
 	{
 		return fixedHeader;
@@ -475,6 +481,13 @@ public abstract class RowDataConverter
 		return this.encoding;
 	}
 
+	public void applyDataModifier(RowData row, long currentRow)
+	{
+		if (this.columnModifier != null)
+		{
+			columnModifier.modifyData(this, row, currentRow);
+		}
+	}
 	/**
 	 *	Returns the data for one specific row as a String in the
 	 *  correct format

@@ -60,18 +60,18 @@ public class ConnectionProfile
 
 	private Integer defaultFetchSize;
 
-	private boolean emptyStringIsNull = false;
+	private boolean emptyStringIsNull;
 	private boolean includeNullInInsert = true;
-	private boolean removeComments = false;
-	private boolean rememberExplorerSchema = false;
-	private boolean hideWarnings = false;
+	private boolean removeComments;
+	private boolean rememberExplorerSchema;
+	private boolean hideWarnings;
 
 	private String postConnectScript;
 	private String preDisconnectScript;
 	private String idleScript;
 	private long idleTime = 0;
 	private Color infoColor;
-	private boolean copyPropsToSystem = false;
+	private boolean copyPropsToSystem;
 
 	private DelimiterDefinition alternateDelimiter;
 	private ObjectNameFilter schemaFilter;
@@ -84,14 +84,14 @@ public class ConnectionProfile
 		Settings.getInstance().addPropertyChangeListener(this, Settings.PROPERTY_ENCRYPT_PWD);
 	}
 
-	public ConnectionProfile(String aName, String driverClass, String url, String userName, String pwd)
+	public ConnectionProfile(String profileName, String driverClass, String url, String userName, String pwd)
 	{
 		this();
 		this.setUrl(url);
 		this.setDriverclass(driverClass);
 		this.setUsername(userName);
 		this.setPassword(pwd);
-		this.setName(aName);
+		this.setName(profileName);
 		this.reset();
 	}
 

@@ -11,9 +11,6 @@
  */
 package workbench.util;
 
-import java.io.BufferedReader;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -35,7 +32,7 @@ public class WbStringTokenizer
 	private boolean endOfInput = false;
 	private boolean delimNeedWhitespace = false;
 	private boolean checkBrackets = false;
-	
+
 	public WbStringTokenizer()
 	{
 	}
@@ -53,7 +50,7 @@ public class WbStringTokenizer
 		this.quoteChars = quotingChars;
 		this.keepQuotes = keep;
 		this.endOfInput = true;
-		this.maxDelim = this.delimit.length() - 1;		
+		this.maxDelim = this.delimit.length() - 1;
 	}
 
 	/**
@@ -73,21 +70,24 @@ public class WbStringTokenizer
 		this.quoteChars = quotingChars;
 		this.keepQuotes = keep;
 		this.endOfInput = true;
-		this.maxDelim = this.delimit.length() - 1;		
+		this.maxDelim = this.delimit.length() - 1;
 	}
-	
-	public WbStringTokenizer(String input, String aDelim, boolean isSingleDelimiter, String quotingChars, boolean keep)
+
+	public WbStringTokenizer(String input, String aDelim, boolean isSingleDelimiter, String quotingChars, boolean keepQuotes)
 	{
 		this.delimit = aDelim;
 		this.singleWordDelimiter = isSingleDelimiter;
 		this.quoteChars = quotingChars;
-		this.keepQuotes = keep;
-		this.maxDelim = this.delimit.length() - 1;		
+		this.keepQuotes = keepQuotes;
+		this.maxDelim = this.delimit.length() - 1;
 		this.setSourceString(input);
 	}
 
-	public void setCheckBrackets(boolean flag) { this.checkBrackets = flag; }
-	
+	public void setCheckBrackets(boolean flag)
+	{
+		this.checkBrackets = flag;
+	}
+
 	public void setDelimiter(String aDelimiter, boolean isSingleWord)
 	{
 		this.delimit = aDelimiter;
@@ -98,7 +98,7 @@ public class WbStringTokenizer
 	{
 		this.delimNeedWhitespace = flag;
 	}
-	
+
 	public void setQuoteChars(String chars)
 	{
 		this.quoteChars = chars;
@@ -107,13 +107,6 @@ public class WbStringTokenizer
 	public void setKeepQuotes(boolean aFlag)
 	{
 		this.keepQuotes = aFlag;
-	}
-
-	public void setSourceFile(String aFilename)
-		throws IOException, FileNotFoundException
-	{
-		BufferedReader reader = new BufferedReader(new FileReader(aFilename));
-		this.setReader(reader);
 	}
 
 	public final void setSourceString(String aString)
@@ -141,9 +134,9 @@ public class WbStringTokenizer
 	{
 		return !this.endOfInput;
 	}
-	
+
 	private static final char[] buf = new char[1];
-	
+
 	public String nextToken()
 	{
 		boolean inQuotes = false;
@@ -155,29 +148,29 @@ public class WbStringTokenizer
 		// and delimNeedsWhitspace == true, setting lastToken to
 		// a whitespace prevents returning the delimiter for the
 		// first argument
-		char lastToken = 9; 
+		char lastToken = 9;
 		int bracketCount = 0;
-		
+
 		// the loop will be exited if a complete "word" is built
 		// or the Reader is at the end of the file
 		while (true)
 		{
 			try
 			{
-				// Reader.read() does not seem to throw an EOFException 
+				// Reader.read() does not seem to throw an EOFException
 				// when using a StringReader, but the method with checking
-				// the return value of read(char[]) seems to be reliable for 
+				// the return value of read(char[]) seems to be reliable for
 				// a StringReader as well.
 				int num = this.input.read(buf);
 				this.endOfInput = (num == -1);
-		
+
 				// EOF detected
-				if (endOfInput) 
+				if (endOfInput)
 				{
 					if (current != null) return current.toString();
 					else return null;
 				}
-				
+
 				char token = buf[0];
 
 				// Check for quote character
@@ -190,7 +183,7 @@ public class WbStringTokenizer
 						{
 							inQuotes = false;
 							lastQuote = 0;
-							if (keepQuotes) 
+							if (keepQuotes)
 							{
 								if (current == null) current = new StringBuilder();
 								current.append(token);
@@ -199,7 +192,7 @@ public class WbStringTokenizer
 						else
 						{
 							// quote character inside another quote character
-							// we need to add it 
+							// we need to add it
 							if (current == null) current = new StringBuilder();
 							current.append(token);
 						}
@@ -209,7 +202,7 @@ public class WbStringTokenizer
 						// start quote mode
 						lastQuote = token;
 						inQuotes = true;
-						if (keepQuotes) 
+						if (keepQuotes)
 						{
 							if (current == null) current = new StringBuilder();
 							current.append(token);
@@ -217,7 +210,7 @@ public class WbStringTokenizer
 					}
 					continue;
 				}
-				
+
 				if (inQuotes)
 				{
 					// inside quotes, anything has to be added.
@@ -225,8 +218,8 @@ public class WbStringTokenizer
 					current.append(token);
 					continue;
 				}
-				
-				if (this.checkBrackets) 
+
+				if (this.checkBrackets)
 				{
 					if (token == '(')
 					{
@@ -236,14 +229,14 @@ public class WbStringTokenizer
 					{
 						bracketCount --;
 					}
-					if (bracketCount > 0) 
+					if (bracketCount > 0)
 					{
 						if (current == null) current = new StringBuilder();
 						current.append(token);
 						continue;
 					}
 				}
-					
+
 				if (this.delimit.indexOf(token) > -1)
 				{
 					if (this.singleWordDelimiter)
@@ -267,11 +260,11 @@ public class WbStringTokenizer
 					}
 					else
 					{
-						if (!delimNeedWhitespace || 
+						if (!delimNeedWhitespace ||
 							   delimNeedWhitespace && Character.isWhitespace(lastToken) )
 						{
 							// found a new string to be split, return the current buffer
-							if (current != null) 
+							if (current != null)
 							{
 								value = current.toString();
 								return value;
@@ -300,5 +293,5 @@ public class WbStringTokenizer
 		if (current == null) return null;
 		return current.toString();
 	}
-	
+
 }

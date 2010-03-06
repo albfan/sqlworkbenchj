@@ -34,6 +34,7 @@ import workbench.util.StringUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.exporter.BlobMode;
 import workbench.db.exporter.ControlFileFormat;
+import workbench.db.exporter.ExportDataModifier;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.PoiHelper;
 import workbench.interfaces.ResultSetConsumer;
@@ -70,8 +71,9 @@ public class WbExport
 	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
 	public static final String ARG_USE_CDATA = "useCDATA";
 	public static final String ARG_USE_SCHEMA = "useSchema";
+
 	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
-	
+
 	public WbExport()
 	{
 		super();
@@ -132,6 +134,7 @@ public class WbExport
 		cmdLine.addArgument("autoFilter", ArgumentType.BoolArgument);
 		cmdLine.addArgument("fixedHeader", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
+		RegexModifierParameter.addArguments(cmdLine);
 	}
 
 	public String getVerb() { return VERB; }
@@ -248,7 +251,7 @@ public class WbExport
 			result.setFailure();
 			return result;
 		}
-		
+
 		if (!isTypeValid(type))
 		{
 			result.addMessage(ResourceMgr.getString("ErrExportWrongType"));
@@ -318,6 +321,9 @@ public class WbExport
 		exporter.setAppendInfoSheet(cmdLine.getBoolean("infoSheet", Settings.getInstance().getDefaultExportInfoSheet(type)));
 		exporter.setPageTitle(cmdLine.getValue("title"));
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
+
+		ExportDataModifier modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
+		exporter.setDataModifier(modifier);
 
 		String bmode = cmdLine.getValue(ARG_BLOB_TYPE);
 		BlobMode btype = BlobMode.getMode(bmode);
@@ -463,7 +469,7 @@ public class WbExport
 
 			exporter.setHtmlHeading(cmdLine.getValue("preDataHtml"));
 			exporter.setHtmlTrailer(cmdLine.getValue("postDataHtml"));
-			
+
 			this.defaultExtension = ".html";
 		}
 
@@ -513,7 +519,7 @@ public class WbExport
 		{
 			SourceTableArgument argParser = new SourceTableArgument(tables, this.currentConnection);
 			tablesToExport = argParser.getTables();
-			if (tablesToExport.size() == 0 && argParser.wasWildCardArgument())
+			if (tablesToExport.isEmpty() && argParser.wasWildCardArgument())
 			{
 				result.addMessage(ResourceMgr.getFormattedString("ErrExportNoTablesFound", tables));
 				result.setFailure();
@@ -528,7 +534,7 @@ public class WbExport
 			return result;
 		}
 
-		this.consumeQuery = (tablesToExport.size() == 0);
+		this.consumeQuery = tablesToExport.isEmpty();
 
 		CommonArgs.setProgressInterval(this, cmdLine);
 		this.showProgress = (this.progressInterval > 0);

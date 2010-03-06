@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.util.List;
 import junit.framework.TestCase;
 
 /**
@@ -22,6 +23,18 @@ public class WbStringTokenizerTest extends TestCase
 	public WbStringTokenizerTest(String testName)
 	{
 		super(testName);
+	}
+
+	public void testParameterTokens()
+	{
+		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
+		tok.setDelimiterNeedsWhitspace(true);
+		tok.setSourceString(" -other='stuff' -empty= -list='a','b' -one=' ' -nested='\"test\"'");
+		List<String> tokens = tok.getAllTokens();
+		for (String t : tokens)
+		{
+			System.out.println("[" + t + "]");
+		}
 	}
 
 	public void testTokenizer()

@@ -130,10 +130,15 @@ public class DataExporterTest
 
 	private TextOptions getTextOptions()
 	{
+		return getTextOptions(false, "\t");
+	}
+	
+	private TextOptions getTextOptions(final boolean useEscape, final String delimiter)
+	{
 		return new TextOptions()
 		{
 			@Override
-			public String getTextDelimiter() { return "\t"; }
+			public String getTextDelimiter() { return delimiter; }
 			@Override
 			public boolean getExportHeaders() { return true;	}
 			@Override
@@ -141,7 +146,14 @@ public class DataExporterTest
 			@Override
 			public boolean getQuoteAlways() { return false; }
 			@Override
-			public CharacterRange getEscapeRange() { return CharacterRange.RANGE_NONE; }
+			public CharacterRange getEscapeRange() 
+			{
+				if (useEscape)
+				{
+					return CharacterRange.RANGE_CONTROL;
+				}
+				return CharacterRange.RANGE_NONE;
+			}
 			@Override
 			public String getLineEnding() { return "\n"; }
 			@Override
@@ -203,6 +215,49 @@ public class DataExporterTest
 			}
 		};
 	}
+
+	public void testReplaceValues()
+		throws Exception
+	{
+		TestUtil util = new TestUtil("DataExporterTest");
+		util.emptyBaseDirectory();
+		try
+		{
+			WbConnection con = util.getConnection();
+
+			String script =
+				"CREATE TABLE person (nr integer, name varchar(20), description varchar(200));\n" +
+				"INSERT INTO person (nr, name, description) VALUES (1, 'Arthur Dent', 'this\nshould\r\n\r\nbe\none\n\nline\t');\n" +
+				"INSERT INTO person (nr, name, description) VALUES (2, 'Zaphod Beeblebrox', 'Some\tother stuff');\n" +
+				"commit;\n";
+
+			TestUtil.executeScript(con, script);
+
+			DataExporter exporter = new DataExporter(con);
+			exporter.setOutputType(ExportType.TEXT);
+			ExportDataModifier modifier = new RegexReplacingModifier("(\\n|\\r\\n)+", "*");
+			exporter.setDataModifier(modifier);
+			exporter.setTextOptions(getTextOptions(true, ","));
+
+			WbFile exportFile = new WbFile(util.getBaseDir(), "replaced.txt");
+			TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("PERSON"));
+			exporter.addTableExportJob(exportFile, tbl);
+			
+			long rowCount = exporter.startExport();
+			assertEquals(2, rowCount);
+			List<String> lines = TestUtil.readLines(exportFile);
+			assertEquals(3, lines.size());
+			assertEquals("NR,NAME,DESCRIPTION", lines.get(0));
+			assertEquals("1,Arthur Dent,this*should*be*one*line\\t", lines.get(1));
+			assertEquals("2,Zaphod Beeblebrox,Some\\tother stuff", lines.get(2));
+			
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 	public void testExportWhere()
 		throws Exception
 	{

@@ -151,7 +151,6 @@ public class MainWindow
 
 	private WbConnection currentConnection;
 	private ConnectionProfile currentProfile;
-	protected ConnectionSelector connectionSelector;
 
 	private FileDisconnectAction disconnectAction;
 	private CreateNewConnection createNewConnection;
@@ -204,17 +203,12 @@ public class MainWindow
 		sqlTab = new WbTabbedPane();
 		tabHistory = new TabbedPaneHistory(sqlTab);
 
-		String policy = Settings.getInstance().getProperty("workbench.gui.sqltab.policy", "wrap");
-		if ("wrap".equalsIgnoreCase(policy))
-		{
-			sqlTab.setTabLayoutPolicy(JTabbedPane.WRAP_TAB_LAYOUT);
-		}
-		else if ("scroll".equalsIgnoreCase(policy))
-		{
-			sqlTab.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		}
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
-		this.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		// There is no need to register the actions with the ActionMap
+		// as they will be handed over to the FocusManager in windowActivated()
+		nextTab = new NextTabAction(sqlTab);
+		prevTab = new PrevTabAction(sqlTab);
 
 		initMenu();
 		setIconImage(ResourceMgr.getPicture("workbench16").getImage());
@@ -222,6 +216,7 @@ public class MainWindow
 		getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 
 		restoreSettings();
+
 		updateTabPolicy();
 
 		sqlTab.addChangeListener(this);
@@ -232,7 +227,8 @@ public class MainWindow
 			sqlTab.showCloseButton(this);
 		}
 
-		this.addWindowListener(this);
+		addWindowListener(this);
+
 		MacroManager.getInstance().getMacros().addChangeListener(this);
 
 		new DropTarget(this.sqlTab, DnDConstants.ACTION_COPY, this);
@@ -244,11 +240,6 @@ public class MainWindow
 			GuiSettings.PROPERTY_SQLTAB_CLOSE_BUTTON,
 			Settings.PROPERTY_TAB_POLICY
 		);
-
-		// There is no need to register the actions with the ActionMap
-		// as they will be handed over to the FocusManager in windowActivated()
-		nextTab = new NextTabAction(sqlTab);
-		prevTab = new PrevTabAction(sqlTab);
 	}
 
 	protected void updateTabPolicy()
@@ -264,6 +255,18 @@ public class MainWindow
 		this.addTab(true, false, true, false);
 		this.updateGuiForTab(0);
 		this.updateWindowTitle();
+
+		boolean macroVisible = Settings.getInstance().getBoolProperty(this.getClass().getName() + ".macropopup.visible", false);
+		if (macroVisible)
+		{
+			EventQueue.invokeLater(new Runnable()
+			{
+				public void run()
+				{
+					showMacroPopup.showPopup();
+				}
+			});
+		}
 	}
 
 	/**
@@ -1078,17 +1081,6 @@ public class MainWindow
 		{
 			WbSwingUtilities.center(this, null);
 		}
-		boolean macroVisible = s.getBoolProperty(this.getClass().getName() + ".macropopup.visible", false);
-		if (macroVisible)
-		{
-			EventQueue.invokeLater(new Runnable() {
-
-				public void run()
-				{
-					showMacroPopup.showPopup();
-				}
-			});
-		}
 	}
 
 	public void saveSettings()
@@ -1171,8 +1163,8 @@ public class MainWindow
 		}
 		disconnect(false, false, false);
 
-		// it is important to set this flag, otherwise
-		// loading the workspace will already trigger a
+		// it is important to set the connectInProgress flag, 
+		// otherwise loading the workspace will already trigger a
 		// panel switch which might cause a connect
 		// to the current profile before the ConnectionSelector
 		// has actually finished.
@@ -1219,11 +1211,7 @@ public class MainWindow
 
 	private ConnectionSelector getSelector()
 	{
-		if (this.connectionSelector == null)
-		{
-			this.connectionSelector = new ConnectionSelector(this, this);
-		}
-		return this.connectionSelector;
+		return new ConnectionSelector(this, this);
 	}
 
 	public void connectTo(ConnectionProfile profile, boolean showDialog)

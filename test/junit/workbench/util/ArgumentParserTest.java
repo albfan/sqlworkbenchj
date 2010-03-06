@@ -66,7 +66,7 @@ public class ArgumentParserTest
 	}
 	public void testParser()
 	{
-		String cmdline = "-delimiter=',' -otherbool=1 -nosettings -table='\"MIND\"' -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
+		String cmdline = "-delimiter=',' -altdelimiter='/;nl' -emptyValue=\" \" -otherbool=1 -nosettings -table='\"MIND\"' -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
 		ArgumentParser arg = new ArgumentParser();
 		arg.addArgument("profile");
 		arg.addArgument("script");
@@ -76,6 +76,9 @@ public class ArgumentParserTest
 		arg.addArgument("otherbool");
 		arg.addArgument("table");
 		arg.addArgument("delimiter");
+		arg.addArgument("emptyValue");
+		arg.addArgument("altdelimiter");
+		
 		arg.parse(cmdline);
 		assertEquals("profile not retrieved", "test-prof", arg.getValue("profile"));
 		assertEquals("script not retrieved", "bla.sql", arg.getValue("script"));
@@ -85,6 +88,8 @@ public class ArgumentParserTest
 		assertEquals("numeric boolean argument not retrieved", true, arg.getBoolean("otherBool", false));
 		assertEquals("Embedded quotes were removed", "\"MIND\"", arg.getValue("TABLE"));
 		assertEquals("Delimiter not retrieved", ",", arg.getValue("delimiter"));
+		assertEquals("Single space not retrieved", " ", arg.getValue("emptyValue"));
+		assertEquals("/;nl", arg.getValue("altdelimiter"));
 		
 		arg = new ArgumentParser();
 		arg.addArgument("delimiter");
