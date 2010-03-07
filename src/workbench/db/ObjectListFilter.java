@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
-import workbench.storage.DataStore;
 import workbench.util.StringUtil;
 
 /**
@@ -53,6 +52,7 @@ public class ObjectListFilter
 			LogMgr.logDebug("ObjectListFilter.addFilter()", "Excluding type " +  type + " using the following regex: " + regex);
 		}
 	}
+
 	public boolean isExcluded(String objectType, String objectName)
 	{
 		ObjectNameFilter filter = filterMap.get(objectType);

@@ -189,11 +189,14 @@ public class PostgresEnumReader
 		return enums;
 	}
 
-	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
+	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
-		if (!handlesType(requestedTypes)) return;
+		if (!handlesType(requestedTypes)) return false;
+		if (!DbMetadata.typeIncluded("ENUM", requestedTypes)) return false;
+
 		Collection<EnumIdentifier> enums = getDefinedEnums(con, schema, objects);
-		if (enums == null || enums.isEmpty()) return;
+		if (CollectionUtil.isEmpty(enums)) return false;
+		
 		for (EnumIdentifier enumDef : enums)
 		{
 			int row = result.addRow();
@@ -203,6 +206,7 @@ public class PostgresEnumReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, enumDef.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, enumDef.getObjectType());
 		}
+		return true;
 	}
 
 	public List<String> supportedTypes()

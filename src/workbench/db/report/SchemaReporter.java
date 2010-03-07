@@ -116,7 +116,7 @@ public class SchemaReporter
 
 	public void setSchemas(List<String> list)
 	{
-		if (list == null || list.size() == 0) return;
+		if (list == null || list.isEmpty()) return;
 		this.schemas = list;
 		this.schemaNameToUse = null;
 	}
@@ -145,7 +145,7 @@ public class SchemaReporter
 
 	public void setObjectTypes(List<String> newTypeList)
 	{
-		if (newTypeList == null || newTypeList.size() == 0) return;
+		if (CollectionUtil.isEmpty(newTypeList)) return;
 		types.clear();
 		types.addAll(newTypeList);
 	}
@@ -209,13 +209,13 @@ public class SchemaReporter
 	{
 		this.cancel = false;
 
-		if (this.includeTables && this.tables.size() == 0) this.retrieveObjects();
+		if (this.includeTables && this.tables.isEmpty()) this.retrieveObjects();
 		if (this.cancel) return;
 
-		if (this.includeProcedures && this.procedures.size() == 0) this.retrieveProcedures();
+		if (this.includeProcedures && this.procedures.isEmpty()) this.retrieveProcedures();
 		if (this.cancel) return;
 
-		if (this.includeSequences && this.sequences.size() == 0) this.retrieveSequences();
+		if (this.includeSequences && this.sequences.isEmpty()) this.retrieveSequences();
 		if (this.cancel) return;
 
 
@@ -250,9 +250,14 @@ public class SchemaReporter
 					table.setType(type);
 				}
 
+				DbObject dbo = null;
 				if (this.dbConn.getMetadata().isExtendedObject(table))
 				{
-					DbObject dbo = dbConn.getMetadata().getObjectDefinition(table);
+					 dbo = dbConn.getMetadata().getObjectDefinition(table);
+				}
+
+				if (dbo != null)
+				{
 					GenericReportObject genObject = new GenericReportObject(dbConn, dbo);
 					genObject.writeXml(out);
 				}
@@ -348,7 +353,7 @@ public class SchemaReporter
 		{
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTables"), -1, -1);
 		}
-		if (this.schemas == null || this.schemas.size() == 0)
+		if (CollectionUtil.isEmpty(this.schemas))
 		{
 			this.retrieveObjects(null);
 		}
@@ -372,7 +377,7 @@ public class SchemaReporter
 		{
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingSequences"), -1, -1);
 		}
-		if (this.schemas == null || this.schemas.size() == 0)
+		if (CollectionUtil.isEmpty(schemas))
 		{
 			this.retrieveSequences(null);
 		}
@@ -422,7 +427,7 @@ public class SchemaReporter
 		{
 			this.monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingProcedures"), -1, -1);
 		}
-		if (this.schemas == null || this.schemas.size() == 0)
+		if (CollectionUtil.isEmpty(schemas))
 		{
 			this.retrieveProcedures(null);
 		}

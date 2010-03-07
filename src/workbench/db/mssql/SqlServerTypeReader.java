@@ -61,12 +61,13 @@ public class SqlServerTypeReader
 		return JdbcUtils.hasMinimumServerVersion(con, "9.0");
 	}
 
-	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
+	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
-		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return;
+		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
 
 		List<DomainIdentifier> types = getTypeList(con, schema, objects);
-		if (types.size() == 0) return;
+		if (types.size() == 0) return false;
+
 		for (DomainIdentifier type : types)
 		{
 			int row = result.addRow();
@@ -76,6 +77,7 @@ public class SqlServerTypeReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
 		}
+		return true;
 	}
 
 	public List<String> supportedTypes()

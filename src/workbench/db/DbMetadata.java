@@ -69,6 +69,7 @@ import workbench.db.postgres.PostgresDataTypeResolver;
 import workbench.db.postgres.PostgresDomainReader;
 import workbench.db.postgres.PostgresEnumReader;
 import workbench.db.postgres.PostgresRuleReader;
+import workbench.db.postgres.PostgresTypeReader;
 import workbench.sql.syntax.SqlKeywordHelper;
 import workbench.storage.filter.AndExpression;
 import workbench.storage.filter.StringEqualsComparator;
@@ -210,6 +211,7 @@ public class DbMetadata
 			extenders.add(new PostgresDomainReader());
 			extenders.add(new PostgresEnumReader());
 			extenders.add(new PostgresRuleReader());
+			extenders.add(new PostgresTypeReader());
 		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
@@ -850,7 +852,7 @@ public class DbMetadata
 		return result;
 	}
 
-	StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
+	public StringBuilder generateCreateObject(boolean includeDrop, String type, String name)
 	{
 		StringBuilder result = new StringBuilder();
 		boolean replaceAvailable = false;
@@ -1312,8 +1314,10 @@ public class DbMetadata
 		{
 			if (extender.handlesType(types))
 			{
-				extender.extendObjectList(dbConnection, result, aCatalog, aSchema, objects, types);
-				sortNeeded = true;
+				if (extender.extendObjectList(dbConnection, result, aCatalog, aSchema, objects, types))
+				{
+					sortNeeded = true;
+				}
 			}
 		}
 

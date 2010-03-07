@@ -191,7 +191,13 @@ public class TableSourceBuilder
 
 		Map<String, String> columnConstraints = meta.getColumnConstraints(table);
 
-		result.append(meta.generateCreateObject(includeDrop, "TABLE", (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
+		String typeToUse = "TABLE";
+		if (meta.isExtendedObject(table))
+		{
+			typeToUse = table.getType();
+		}
+
+		result.append(meta.generateCreateObject(includeDrop, typeToUse, (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
 		result.append("\n(\n");
 
 		List<String> pkCols = new LinkedList<String>();

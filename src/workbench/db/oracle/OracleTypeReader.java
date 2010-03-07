@@ -41,11 +41,11 @@ public class OracleTypeReader
 	{
 	}
 
-
 	@Override
-	public void extendObjectList(WbConnection con, DataStore result, String catalogPattern, String schemaPattern, String namePattern, String[] requestedTypes)
+	public boolean extendObjectList(WbConnection con, DataStore result, String catalogPattern, String schemaPattern, String namePattern, String[] requestedTypes)
 	{
 		// nothing to do, already returned by the driver
+		return false;
 	}
 
 	public List<OracleObjectType> getTypes(WbConnection con, String schema, String name)

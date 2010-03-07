@@ -143,12 +143,12 @@ public class H2ConstantReader
 		return result.toString();
 	}
 
-	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
+	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
-		if (!DbMetadata.typeIncluded("CONSTANT", requestedTypes)) return;
+		if (!DbMetadata.typeIncluded("CONSTANT", requestedTypes)) return false;
 
 		List<H2Constant> constants = getConstantsList(con, schema, objects);
-		if (constants.isEmpty()) return;
+		if (constants.isEmpty()) return false;
 		for (H2Constant constant : constants)
 		{
 			int row = result.addRow();
@@ -158,6 +158,7 @@ public class H2ConstantReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, constant.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, constant.getObjectType());
 		}
+		return true;
 	}
 
 	public boolean handlesType(String type)

@@ -172,12 +172,13 @@ public class H2DomainReader
 		return result.toString();
 	}
 
-	public void extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
+	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
-		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return;
+		if (!DbMetadata.typeIncluded("DOMAIN", requestedTypes)) return false;
 
 		List<DomainIdentifier> domains = getDomainList(con, schema, objects);
-		if (domains.isEmpty()) return;
+		if (domains.isEmpty()) return false;
+
 		for (DomainIdentifier domain : domains)
 		{
 			int row = result.addRow();
@@ -187,6 +188,7 @@ public class H2DomainReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, domain.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, domain.getObjectType());
 		}
+		return true;
 	}
 
 	public boolean handlesType(String type)

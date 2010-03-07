@@ -27,10 +27,11 @@ public interface ObjectListExtender
 	 * @param con the database connection to be used
 	 * @param result the DataStore containing the objects already returned by the driver
 	 * @param requestedTypes the object types as passed to DbMetadata.getObjects()
-	 * 
+	 * @return true if the list was changed
 	 * @see DbMetadata#getObjects(java.lang.String, java.lang.String, java.lang.String, java.lang.String[])
+	 *
 	 */
-	void extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes);
+	boolean extendObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes);
 
 	/**
 	 * Return a list of object types that this extender handles
