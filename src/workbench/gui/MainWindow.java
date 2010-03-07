@@ -151,7 +151,8 @@ public class MainWindow
 
 	private WbConnection currentConnection;
 	private ConnectionProfile currentProfile;
-
+	protected ConnectionSelector connectionSelector;
+	
 	private FileDisconnectAction disconnectAction;
 	private CreateNewConnection createNewConnection;
 	private DisconnectTabAction disconnectTab;
@@ -1211,7 +1212,11 @@ public class MainWindow
 
 	private ConnectionSelector getSelector()
 	{
-		return new ConnectionSelector(this, this);
+		if (connectionSelector == null)
+		{
+			connectionSelector = new ConnectionSelector(this, this);
+		}
+		return connectionSelector;
 	}
 
 	public void connectTo(ConnectionProfile profile, boolean showDialog)
