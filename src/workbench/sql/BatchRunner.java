@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -107,7 +108,12 @@ public class BatchRunner
 	{
 		this();
 		WbStringTokenizer tok = new WbStringTokenizer(aFilelist, ",", false, "\"'", false);
-		this.filenames = tok.getAllTokens();
+		List<String> names = tok.getAllTokens();
+		filenames = new ArrayList<String>(names.size());
+		for (String name : names)
+		{
+			filenames.add(name.trim());
+		}
 	}
 
 	public void setStoreErrors(boolean flag)
