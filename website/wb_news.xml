@@ -14,12 +14,44 @@
     <category>Database</category>
     <category>SQL</category>
     <item>
+      <title>New development build (107.9) released</title>
+      <description>        <![CDATA[<p>Changes from build 107.8 to build 107.9</p><p>Enhancements</p><ul>
+<li>The argument parser for Workbench specific commands has been changed in order to recognize empty values (e.g. -replaceWith=' ') Existing scripts should work, but it could be that some combinations of parameter values are not covered by my tests. So please verify that your scripts still work with the new version.</li>
+<li>A new option for WbExport (-replaceValues) is available to replace text (using regular expressions) in all character columns during export.</li>
+</ul>
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-107.9</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Tue, 09 Mar 2010 18:37:17 +0200</pubDate>
+    </item>
+    <item>
+      <title>New development build (107.8) released</title>
+      <description>        <![CDATA[<p>Changes from build 107.7 to build 107.8</p><p>Enhancements</p><ul>
+<li>For Oracle the DbExplorer will now also show OBJECT TYPEs</li>
+</ul><p>Bug Fixes</p><ul>
+<li>When quoting column names for WbCopy's column mapping, the quoted columns where not detected properly (e.g. -columns='name/"Name", id/"Id"')</li>
+<li>The new "show max rows warning" option does not work for all Look &amp; Feels. Some ignore the setting of a background color. If changing the background color is not supported the text of the result tab is now displayed in the chosen color.</li>
+<li>Fixed some more corner cases where the new row number display was not in sync with the result.</li>
+</ul>
+
+]]>
+</description>
+      <link>http://www.sql-workbench.net/downloads.html</link>
+      <guid>sql-workbench-build-107.8</guid>
+      <author>support@sql-workbench.net (Thomas Kellerer)</author>
+      <pubDate>Wed, 03 Mar 2010 22:06:18 +0200</pubDate>
+    </item>
+    <item>
       <title>New development build (107.7) released</title>
       <description>        <![CDATA[<p>Changes from build 107.6 to build 107.7</p><p>Bug Fixes</p><ul>
 <li>The new row number display was not always in sync with the result table.</li>
 <li>Defined schema or catalog filters in the connection profile were not displayed correctly (even though they were stored correctly).</li>
 <li>Exporting only some of the columns of a result using "Save As" did not work.</li>
 </ul>
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -38,6 +70,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The current schema and database of the DbExplorer were not always saved correctly in the workspace.</li>
 </ul>
+
+
 
 ]]>
 </description>
@@ -61,6 +95,8 @@
 </ul>
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -77,6 +113,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -90,6 +128,8 @@
 <li>For results the row numbers can now also be displayed (similar to the line numbers in the editor)</li>
 <li>Oracle object type columns are now displayed correctly. As this is a generic solution to display JDBC "Struct" values, it should work for any driver that returns the correct type.</li>
 </ul>
+
+
 
 
 
@@ -120,6 +160,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -140,6 +182,8 @@
 <li>Setting the editor color for datatypes changed the color for the cursor (and vice versa)</li>
 <li>When changing inet, macaddr or cidr columns in the result set, wrong statements were generated for PostgreSQL</li>
 </ul>
+
+
 
 
 
@@ -220,6 +264,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -245,6 +291,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -262,6 +310,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>When copying a column name from the header's popup, the wrong name was copied when the columns where re-arranged using drag&amp;drop.</li>
 </ul>
+
+
 
 
 
@@ -301,6 +351,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -314,6 +366,8 @@
 <li>SQL Workbench/J now requires Java 6.</li>
 <li>When opening a file from the the main menu (File -&gt; Open), the file can now be opened in a new editor tab.</li>
 </ul>
+
+
 
 
 
@@ -344,6 +398,8 @@
 <li>Retrieving columns with type "timestamp" did not work for SQL Server.</li>
 <li>When adding a new column in the DbExplorer, column comments were not included.</li>
 </ul>
+
+
 
 
 
@@ -395,6 +451,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -411,6 +469,8 @@
 <li>"Execute current" was not working any longer.</li>
 <li>The editor color for datatypes selected in the options dialog was not used.</li>
 </ul>
+
+
 
 
 
@@ -470,6 +530,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -508,6 +570,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -520,6 +584,8 @@
       <description>        <![CDATA[<p>Changes from build 105 to build 106</p><p>Bug Fixes</p><ul>
 <li>Connections to DB2 were no longer working</li>
 </ul>
+
+
 
 
 
@@ -615,6 +681,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -660,6 +728,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -676,6 +746,8 @@
 </ul><p>Bug Fixes</p><ul>
 <li>The default fetch size of a connection profile could not be reset (empty).</li>
 </ul>
+
+
 
 
 
@@ -753,6 +825,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -768,6 +842,8 @@
 <li>Shortcut keys which involved the Enter could not be defined.</li>
 <li>The Save As dialog to save result data now only checks for the update table and primary keys if needed.</li>
 </ul>
+
+
 
 
 
@@ -851,6 +927,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -868,6 +946,8 @@
 <li>When re-ordering the columns using drag-and-drop and then displaying the single-record dialog, the content of the columns was mixed up.</li>
 <li>When re-ordering the columns using drag-and-drop, the order was reset when changing data in the result.</li>
 </ul>
+
+
 
 
 
@@ -959,6 +1039,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -977,6 +1059,8 @@
 <li>(Un)Comment selection did not work if the cursor was in the very first column and no lines where selected.</li>
 <li>For WbCopy -createTarget was not working if the source was a query.</li>
 </ul>
+
+
 
 
 
@@ -1120,6 +1204,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1185,6 +1271,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/downloads.html</link>
@@ -1199,6 +1287,8 @@
 <li>The list of SELECT columns in the autcompletion popup was not displayed correctly (e.g. for GROUP BY) when the DISTINCT keyword was used.</li>
 <li>Double clicking in the status bar would open a new SQL tab</li>
 </ul>
+
+
 
 
 
@@ -1311,6 +1401,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -1327,6 +1419,8 @@
 <li>The current database was not selected in the DbExplorer for DBMS using Catalogs instead of Schemas (e.g. MySQL)</li>
 <li>Reformatting WbVarDef would incorrectly replace it with WbVarDefine</li>
 </ul>
+
+
 
 
 
@@ -1454,6 +1548,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -1469,6 +1565,8 @@
 <li>CHECK constraints are now reported individually in the output of WbReport and WbSchemaDiff. WbSchemaDiff has a new parameter to match check constraints by name or by expression only.</li>
 <li>A result name (defined using @wbresult) is now used as the header when printing the result.</li>
 </ul>
+
+
 
 
 
@@ -1604,6 +1702,8 @@
 
 
 
+
+
 ]]>
 </description>
       <link>http://www.sql-workbench.net/dev-history.html</link>
@@ -1620,6 +1720,8 @@
 <li>When running WbImport, errors where not shown any more.</li>
 <li>Fixed a problem when formatting inline views that contained unions and redundant brackets</li>
 </ul>
+
+
 
 
 
