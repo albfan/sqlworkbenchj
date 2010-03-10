@@ -186,6 +186,13 @@
     </description>
   </entry>
 
+  <entry dev-build="9" type="fix">
+    <description>
+      Activating the column filter in a table's column list in the DbExplorer did not work when hitting enter
+      in the input field.
+    </description>
+  </entry>
+  
   <entry dev-build="8" type="fix">
     <description>
       When quoting column names for WbCopy's column mapping, the quoted columns where not detected properly

@@ -398,7 +398,7 @@ public class TableDefinitionPanel
 		TableColumnModel colmod = tableDefinition.getColumnModel();
 
 		// Assign the correct renderer to display java.sql.Types values
-		// (should only appear for table definitions
+		// should only appear for table definitions
 		try
 		{
 			int typeIndex = colmod.getColumnIndex(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME);

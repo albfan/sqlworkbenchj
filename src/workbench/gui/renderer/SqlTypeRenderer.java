@@ -37,8 +37,15 @@ public class SqlTypeRenderer
 	{
 		if (value != null)
 		{
-			int type = ((Integer)value).intValue();
-			displayValue = SqlUtil.getTypeName(type);
+			try
+			{
+				int type = ((Integer)value).intValue();
+				displayValue = SqlUtil.getTypeName(type);
+			}
+			catch (Exception e)
+			{
+				displayValue = value.toString();
+			}
 			setToolTipText(displayValue);
 		}
 		else

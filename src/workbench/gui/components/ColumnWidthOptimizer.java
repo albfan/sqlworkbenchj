@@ -21,6 +21,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import workbench.gui.renderer.WbRenderer;
+import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.util.StringUtil;
 
@@ -86,7 +87,17 @@ public class ColumnWidthOptimizer
 		if (respectColumnName)
 		{
 			JTableHeader th = this.table.getTableHeader();
-			TableCellRenderer rend = col.getCellRenderer();
+			TableCellRenderer rend = null;
+			try
+			{
+				rend = th.getColumnModel().getColumn(aColumn).getCellRenderer();
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("ColumnWidthOptimizer.optimizeColWidth()", "Could not obtain header renderer!", e);
+				rend = null;
+			}
+
 			if (rend == null)
 			{
 				rend = th.getDefaultRenderer();
