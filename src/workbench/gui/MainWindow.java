@@ -1189,6 +1189,11 @@ public class MainWindow
 
 	private String getConnectionIdForPanel(MainPanel p)
 	{
+		if (p == null)
+		{
+			LogMgr.logWarning("MainWindow.getConnectionIdForPanel()", "Requested connection ID for NULL panel!", new Exception());
+			return "Wb" + getWindowId();
+		}
 		return "Wb" + getWindowId() + "-" + p.getId();
 	}
 
