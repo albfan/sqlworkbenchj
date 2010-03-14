@@ -141,7 +141,7 @@ public class SQLConsole
 				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
 				if (line == null) continue;
 
-				if (startOfStatement && "exit".equalsIgnoreCase(line.trim()))
+				if (startOfStatement && ("exit".equalsIgnoreCase(line.trim()) || "\\q".equals(line.trim())))
 				{
 					break;
 				}

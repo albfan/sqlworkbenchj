@@ -66,7 +66,7 @@ public class SqlServerTypeReader
 		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
 
 		List<DomainIdentifier> types = getTypeList(con, schema, objects);
-		if (types.size() == 0) return false;
+		if (types.isEmpty()) return false;
 
 		for (DomainIdentifier type : types)
 		{

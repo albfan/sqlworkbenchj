@@ -1,11 +1,11 @@
 /*
  * FirebirdColumnEnhancer
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  * Copyright 2002-2009, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.mssql;
@@ -41,7 +41,7 @@ public class SqlServerColumnEnhancer
 		{
 			updateComputedColumns(table, conn);
 		}
-		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.column.retrieve", true))
+		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.column.retrieve", false))
 		{
 			updateColumnRemarks(table, conn);
 		}
@@ -74,7 +74,7 @@ public class SqlServerColumnEnhancer
 		{
 			LogMgr.logInfo("SqlServerColumnEnhancer.updateColumnRemarks()", "Using query=\n" + sql);
 		}
-		
+
 		Map<String, String> remarks = new TreeMap<String, String>(CaseInsensitiveComparator.INSTANCE);
 		try
 		{
@@ -107,7 +107,7 @@ public class SqlServerColumnEnhancer
 			col.setComment(remark);
 		}
 	}
-	
+
 	private void updateComputedColumns(TableDefinition table, WbConnection conn)
 	{
 		PreparedStatement stmt = null;
@@ -157,7 +157,7 @@ public class SqlServerColumnEnhancer
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		
+
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			String expr = expressions.get(col.getColumnName());

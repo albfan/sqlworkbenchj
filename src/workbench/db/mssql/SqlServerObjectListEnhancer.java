@@ -1,11 +1,11 @@
 /*
  * SqlServerObjectListEnhancer
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  * Copyright 2002-2009, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.mssql;
@@ -35,12 +35,12 @@ public class SqlServerObjectListEnhancer
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.object.retrieve", true))
+		if (Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.object.retrieve", false))
 		{
 			updateObjectRemarks(con, result, aCatalog, aSchema, objects, requestedTypes);
 		}
 	}
-	
+
 	protected void updateObjectRemarks(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
 	{
 		if (result == null) return;
@@ -70,7 +70,7 @@ public class SqlServerObjectListEnhancer
 	{
 		String propName = Settings.getInstance().getProperty("workbench.db.microsoft_sql_server.remarks.propertyname", "MS_DESCRIPTION");
 		String sql = null;
-		
+
 		if (JdbcUtils.hasMinimumServerVersion(con, "9.0"))
 		{
 			sql = "SELECT objtype, objname, cast(value as varchar) as value \n" +

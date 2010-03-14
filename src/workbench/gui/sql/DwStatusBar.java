@@ -88,7 +88,7 @@ public class DwStatusBar
 	private ActionListener notificationHandler;
 	private JLabel notificationLabel;
 	private String editorLinePrefix;
-  private String editorColPrefix;
+	private String editorColPrefix;
 	private SelectionDisplay selectionDisplay;
 
 	private DurationFormatter durationFormatter = new DurationFormatter();

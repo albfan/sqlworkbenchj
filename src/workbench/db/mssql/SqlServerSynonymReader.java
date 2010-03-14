@@ -27,7 +27,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * Retrieve synonyms and their definition from a Derby database.
+ * Retrieve synonyms and their definition from SQL Server
  *
  * @author Thomas Kellerer
  */
@@ -64,7 +64,7 @@ public class SqlServerSynonymReader
 
 		if (StringUtil.isNonBlank(owner))
 		{
-			sql = sql + " where sc.name = ?";
+			sql += " where sc.name = ?";
 			schemaIndex = 1;
 		}
 
@@ -124,7 +124,7 @@ public class SqlServerSynonymReader
 			SqlUtil.closeAll(rs,stmt);
 		}
 		if (result == null) return null;
-		
+
 		result.setSchema(schema);
 		TableIdentifier tbl = meta.findObject(result);
 		return tbl;
@@ -135,7 +135,7 @@ public class SqlServerSynonymReader
 	{
 		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
 		if (id == null) return "";
-		
+
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
