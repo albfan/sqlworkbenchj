@@ -12,6 +12,7 @@ package workbench.db.mssql;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.Map;
 import java.util.TreeMap;
 import workbench.db.DbMetadata;
@@ -110,7 +111,14 @@ public class SqlServerObjectListEnhancer
 			for (String type : requestedTypes)
 			{
 				stmt = con.getSqlConnection().prepareStatement(sql);
-				stmt.setString(1, schema);
+				if (schema == null)
+				{
+					stmt.setNull(1, Types.VARCHAR);
+				}
+				else
+				{
+					stmt.setString(1, schema);
+				}
 				stmt.setString(2, type);
 				rs = stmt.executeQuery();
 				while (rs.next())
