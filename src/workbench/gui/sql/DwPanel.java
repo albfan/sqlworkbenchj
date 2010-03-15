@@ -887,6 +887,7 @@ public class DwPanel
 
 		if (this.readOnly) return -1;
 		if (!this.startEdit(false)) return -1;
+
 		final int newRow = this.dataTable.duplicateRow(row);
 
 		if (newRow >= 0)
@@ -933,6 +934,7 @@ public class DwPanel
 		// startEdit() is also changing the status message
 		// and would be executed after a local change here
 		// if I reused deleteRow()
+
 		Thread t = new WbThread("DeleteDependency")
 		{
 			public void run()
@@ -966,27 +968,17 @@ public class DwPanel
 		return rows[rows.length - 1] == dataTable.getRowCount() - 1;
 	}
 
+	
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
 		if (!this.startEdit(true)) return;
-
-		boolean rowHeader = TableRowHeader.isRowHeaderVisible(dataTable);
-
-		// For some reason, the row header is removed when adding or deleting a row.
-		// But as it gets removed anyway, I'm removing it manually
-		// in order to clean up properly the registered listeners
-		TableRowHeader.removeRowHeader(dataTable);
 
 		try
 		{
 			boolean needClear = isLastRowSelected();
 
 			dataTable.deleteRow(false);
-			if (rowHeader)
-			{
-				TableRowHeader.showRowHeader(dataTable);
-			}
 			rowCountChanged();
 			if (needClear)
 			{
@@ -1016,18 +1008,7 @@ public class DwPanel
 		if (this.readOnly) return -1;
 		if (!this.startEdit()) return -1;
 
-		boolean rowHeader = TableRowHeader.isRowHeaderVisible(dataTable);
-
-		// For some reason, the row header is removed when adding or deleting a row.
-		// But as it gets removed anyway, I'm removing it manually
-		// in order to clean up properly the registered listeners
-		TableRowHeader.removeRowHeader(dataTable);
-
 		long newRow = this.dataTable.addRow();
-		if (rowHeader)
-		{
-			TableRowHeader.showRowHeader(dataTable);
-		}
 		if (newRow > -1) this.rowCountChanged();
 		return newRow;
 	}

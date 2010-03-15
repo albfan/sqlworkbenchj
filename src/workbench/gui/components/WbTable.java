@@ -1057,12 +1057,46 @@ public class WbTable
 		this.lastFilter = null;
 	}
 
+	private Boolean lastRowHeaderState;
+
+	protected boolean saveRowHeaderState()
+	{
+		lastRowHeaderState = Boolean.valueOf(TableRowHeader.isRowHeaderVisible(this));
+
+		// For some reason, the row header is removed when adding or deleting a row.
+		// But as it gets removed anyway, I'm removing it manually
+		// in order to clean up properly the registered listeners
+		if (lastRowHeaderState.booleanValue())
+		{
+			TableRowHeader.removeRowHeader(this);
+		}
+		return lastRowHeaderState.booleanValue();
+	}
+
+	protected void restoreRowHeaderState()
+	{
+		if (lastRowHeaderState == null) return;
+		if (lastRowHeaderState.booleanValue())
+		{
+			TableRowHeader.showRowHeader(this);
+		}
+		lastRowHeaderState = null;
+	}
+
 	public void resetFilter()
 	{
 		this.currentFilter = null;
 		if (this.dwModel == null) return;
-		this.dwModel.resetFilter();
-		adjustRowsAndColumns();
+		try
+		{
+			saveRowHeaderState();
+			this.dwModel.resetFilter();
+			adjustRowsAndColumns();
+		}
+		finally
+		{
+			restoreRowHeaderState();
+		}
 	}
 
 	public FilterExpression getLastFilter()
@@ -2120,6 +2154,7 @@ public class WbTable
 		int selectedRow = this.getSelectedRow();
 		final int newRow;
 
+		saveRowHeaderState();
 		this.stopEditing();
 
 		if (selectedRow == -1)
@@ -2130,6 +2165,8 @@ public class WbTable
 		{
 			newRow = ds.insertRow(selectedRow);
 		}
+		restoreRowHeaderState();
+		
 		this.getSelectionModel().setSelectionInterval(newRow, newRow);
 		this.scrollToRow(newRow);
 		this.setEditingRow(newRow);
@@ -2162,7 +2199,17 @@ public class WbTable
 	{
 		DataStoreTableModel model = this.getDataStoreTableModel();
 		if (model == null) return -1;
-		int newRow = model.duplicateRow(row);
+		int newRow = -1;
+
+		try
+		{
+			saveRowHeaderState();
+			newRow = model.duplicateRow(row);
+		}
+		finally
+		{
+			restoreRowHeaderState();
+		}
 		return newRow;
 	}
 
@@ -2185,17 +2232,25 @@ public class WbTable
 		DataStoreTableModel ds = this.getDataStoreTableModel();
 		if (ds == null) return false;
 
-		int[] selectedRows = this.getSelectedRows();
-
-		int numRows = selectedRows.length;
-		if (numRows > 0)
+		try
 		{
-			for (int i = numRows - 1; i >= 0; i--)
+			saveRowHeaderState();
+			int[] selectedRows = this.getSelectedRows();
+
+			int numRows = selectedRows.length;
+			if (numRows > 0)
 			{
-				ds.deleteRow(selectedRows[i], withDependencies);
+				for (int i = numRows - 1; i >= 0; i--)
+				{
+					ds.deleteRow(selectedRows[i], withDependencies);
+				}
 			}
+			return true;
 		}
-		return true;
+		finally
+		{
+			restoreRowHeaderState();
+		}
 	}
 
 	public void setHighlightRequiredFields(boolean flag)
