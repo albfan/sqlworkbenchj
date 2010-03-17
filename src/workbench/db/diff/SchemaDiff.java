@@ -579,7 +579,10 @@ public class SchemaDiff
 
 		DbMetadata targetMeta = this.targetDb.getMetadata();
 
-		this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		if (this.monitor != null)
+		{
+			this.monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
+		}
 
 		if (refProcs == null) refProcs = Collections.emptyList();
 		if (targetProcs == null) targetProcs = Collections.emptyList();
