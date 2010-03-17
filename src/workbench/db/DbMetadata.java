@@ -863,7 +863,7 @@ public class DbMetadata
 		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
 		if (replace != null)
 		{
-			replace = StringUtil.replace(replace, "%name%", quoteObjectname(name));
+			replace = StringUtil.replace(replace, "%name%", name);
 			result.append(SqlUtil.addSemicolon(replace));
 			replaceAvailable = true;
 		}
@@ -882,11 +882,11 @@ public class DbMetadata
 				result.append("CREATE ");
 				result.append(type.toUpperCase());
 				result.append(' ');
-				result.append(quoteObjectname(name));
+				result.append(name);
 			}
 			else
 			{
-				create = StringUtil.replace(create, "%name%", quoteObjectname(name));
+				create = StringUtil.replace(create, "%name%", name);
 				result.append(SqlUtil.addSemicolon(create));
 			}
 		}
@@ -1857,6 +1857,8 @@ public class DbMetadata
 			table.setCatalog(catalog);
 		}
 
+		TableIdentifier retrieve = table;
+
 		if ("SYNONYM".equalsIgnoreCase(table.getType()))
 		{
 			TableIdentifier id = getSynonymTable(schema, tablename);
@@ -1865,6 +1867,10 @@ public class DbMetadata
 				schema = id.getSchema();
 				tablename = id.getTableName();
 				catalog = null;
+				retrieve = table.createCopy();
+				retrieve.setSchema(schema);
+				retrieve.setTable(tablename);
+				retrieve.setCatalog(null);
 			}
 		}
 
@@ -1894,7 +1900,7 @@ public class DbMetadata
 		}
 		table.setPrimaryKeyName(pkname);
 
-		List<ColumnIdentifier> columns = definitionReader.getTableColumns(table, keys, dbConnection, dataTypeResolver);
+		List<ColumnIdentifier> columns = definitionReader.getTableColumns(retrieve, keys, dbConnection, dataTypeResolver);
 
 		table.setNewTable(false);
 		TableDefinition result = new TableDefinition(table, columns);

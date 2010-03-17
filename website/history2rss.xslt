@@ -45,7 +45,7 @@
 		<ul>
 		<xsl:for-each select="$entries[@type='enh']">
 			<li>
-				<xsl:value-of select="normalize-space(description)"/>
+				<xsl:value-of select="normalize-space(.)"/>
 			</li>
 		</xsl:for-each>
 		</ul>
@@ -57,7 +57,7 @@
 		<ul>
 		<xsl:for-each select="$entries[@type='fix']">
 			<li>
-				<xsl:value-of select="normalize-space(description)"/>
+				<xsl:value-of select="normalize-space(.)"/>
 			</li>
 		</xsl:for-each>
 		</ul>

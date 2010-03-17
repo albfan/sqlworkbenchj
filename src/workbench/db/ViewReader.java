@@ -117,7 +117,7 @@ public class ViewReader
 			return result.toString();
 		}
 
-		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable.getType(), viewTable.getTableName()));
+		result.append(connection.getMetadata().generateCreateObject(includeDrop, viewTable.getType(), viewTable.getTableExpression(connection)));
 
 		if (!DbMetadata.MVIEW_NAME.equalsIgnoreCase(viewTable.getType()))
 		{

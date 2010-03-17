@@ -72,7 +72,7 @@ public class TableSourceBuilder
 	 * current DBMS)
    *
 	 * @return the SQL statement to create the given table.
-	 * @param table the table for which the source should be retrievedcatalog The catalog in which the table is defined. This should be null if the DBMS does not support catalogs
+	 * @param table the table for which the source should be retrieved 
 	 * @param includeDrop If true, a DROP TABLE statement will be included in the generated SQL script.
 	 * @param includeFk if true, the foreign key constraints will be added after the CREATE TABLE
 	 * @throws SQLException
@@ -197,7 +197,12 @@ public class TableSourceBuilder
 			typeToUse = table.getType();
 		}
 
-		result.append(meta.generateCreateObject(includeDrop, typeToUse, (tableNameToUse == null ? table.getTableName() : tableNameToUse)));
+		String name = table.getTableExpression(dbConnection);
+		if (tableNameToUse != null)
+		{
+			name = dbConnection.getMetadata().quoteObjectname(tableNameToUse);
+		}
+		result.append(meta.generateCreateObject(includeDrop, typeToUse, name));
 		result.append("\n(\n");
 
 		List<String> pkCols = new LinkedList<String>();

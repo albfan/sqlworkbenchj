@@ -25,7 +25,7 @@
         <itemizedlist spacing="normal">
           <xsl:for-each select="release[1]/entry[@type='enh']">
             <xsl:sort select="@dev-build" order="descending" data-type="number"/>
-            <listitem><xsl:copy-of select="description/text()"/></listitem>
+            <listitem><xsl:copy-of select="text()"/></listitem>
           </xsl:for-each>
         </itemizedlist>
       </xsl:if>
@@ -36,7 +36,7 @@
         <itemizedlist spacing="normal">
           <xsl:for-each select="release[1]/entry[@type='fix']">
             <xsl:sort select="@dev-build" order="descending" data-type="number"/>
-            <listitem><xsl:copy-of select="description/text()"/></listitem>
+            <listitem><xsl:copy-of select="text()"/></listitem>
           </xsl:for-each>
         </itemizedlist>
       </xsl:if>

@@ -93,7 +93,7 @@
           <ul>
           <xsl:for-each select="entry[@type='enh']">
             <xsl:sort select="@dev-build" order="descending" data-type="number"/>
-            <li><xsl:copy-of select="normalize-space(description/text())"/></li>
+            <li><xsl:copy-of select="normalize-space(text())"/></li>
           </xsl:for-each>
           </ul>
         </xsl:if>
@@ -103,7 +103,7 @@
           <ul>
           <xsl:for-each select="entry[@type='fix']">
             <xsl:sort select="@dev-build" order="descending" data-type="number"/>
-            <li><xsl:copy-of select="normalize-space(description/text())"/></li>
+            <li><xsl:copy-of select="normalize-space(text())"/></li>
           </xsl:for-each>
           </ul>
         </xsl:if>

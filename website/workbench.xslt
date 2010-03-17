@@ -277,7 +277,7 @@
         <ul>
           <xsl:for-each select="entry[@type='enh']">
             <xsl:sort select="@dev-build" order="descending" data-type="number"/>
-            <li><xsl:copy-of select="description/text()"/></li>
+            <li><xsl:copy-of select="text()"/></li>
           </xsl:for-each>
         </ul>
       </xsl:if>
@@ -287,7 +287,7 @@
         <ul>
         <xsl:for-each select="entry[@type='fix']">
           <xsl:sort select="@dev-build" order="descending"  data-type="number"/>
-          <li><xsl:copy-of select="description/text()"/></li>
+          <li><xsl:copy-of select="text()"/></li>
         </xsl:for-each>
         </ul>
       </xsl:if>
@@ -315,14 +315,14 @@
       <ul>
       <xsl:for-each select="entry[@type='enh']">
         <xsl:sort select="@dev-build" order="descending"  data-type="number"/>
-        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="description"/></li>
+        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="."/></li>
       </xsl:for-each>
       </ul>
       <h2 class="history-entry">Bug fixes</h2>
       <ul>
       <xsl:for-each select="entry[@type='fix']">
         <xsl:sort select="@dev-build" order="descending" data-type="number"/>
-        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="description"/></li>
+        <li>(<xsl:value-of select="$dev-build-nr"/>.<xsl:value-of select="@dev-build"/>)<xsl:copy-of select="."/></li>
       </xsl:for-each>
       </ul>
 

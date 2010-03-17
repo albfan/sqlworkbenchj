@@ -153,13 +153,18 @@ public class JdbcIndexReader
 			String type = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
 			if (type == null || type.startsWith("NORMAL")) type = "";
 
+			String tableName = tableNameToUse;
+			if (tableName == null)
+			{
+				tableName = table.getTableExpression(this.metaData.getWbConnection());
+			}
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
 			// are usually auto-created when the PK is defined, so there is no need
 			// to re-create a CREATE INDEX statement for them.
 			if (!definition.isPrimaryKeyIndex())
 			{
 				idxCount ++;
-				String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
+				String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 				if (definition.isUnique())
 				{
 					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
