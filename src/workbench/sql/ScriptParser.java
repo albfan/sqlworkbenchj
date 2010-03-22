@@ -183,7 +183,7 @@ public class ScriptParser
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 		this.setScript(content == null ? "" : content.toString());
 	}

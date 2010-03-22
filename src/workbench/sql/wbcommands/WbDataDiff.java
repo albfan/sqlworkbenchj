@@ -252,8 +252,8 @@ public class WbDataDiff
 				}
 				finally
 				{
-					FileUtil.closeQuitely(updates);
-					FileUtil.closeQuitely(inserts);
+					FileUtil.closeQuietely(updates);
+					FileUtil.closeQuietely(inserts);
 				}
 
 				if (includeDelete && !this.isCancelled)
@@ -280,7 +280,7 @@ public class WbDataDiff
 					}
 					finally
 					{
-						FileUtil.closeQuitely(deleteOut);
+						FileUtil.closeQuietely(deleteOut);
 					}
 				}
 			}
@@ -494,7 +494,7 @@ public class WbDataDiff
 			}
 			finally
 			{
-				FileUtil.closeQuitely(out);
+				FileUtil.closeQuietely(out);
 			}
 		}
 

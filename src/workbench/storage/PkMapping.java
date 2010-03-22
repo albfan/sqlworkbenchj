@@ -112,7 +112,7 @@ public class PkMapping
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 
 		LogMgr.logInfo("PkMapping.readMappingFile()", "Using PK mappings from " + f.getAbsolutePath());
@@ -206,7 +206,7 @@ public class PkMapping
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 	}
 

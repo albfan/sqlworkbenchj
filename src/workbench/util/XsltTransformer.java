@@ -148,9 +148,9 @@ public class XsltTransformer
 		}
 		finally
 		{
-			FileUtil.closeQuitely(xlsInput);
-			FileUtil.closeQuitely(in);
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(xlsInput);
+			FileUtil.closeQuietely(in);
+			FileUtil.closeQuietely(out);
 			if (saveSystemOut)
 			{
 				System.setOut(oldOut);

@@ -710,13 +710,13 @@ public class TextFileParser
 		catch (IOException e)
 		{
 			LogMgr.logWarning("TextFileParser.processOneFile()", "Error reading input file " + inputFile.getAbsolutePath(), e);
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 			throw e;
 		}
 		catch (SQLException e)
 		{
 			LogMgr.logError("TextFileParser.processOneFile()", "Column definition could not be read.", e);
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 			throw e;
 		}
 
@@ -976,7 +976,7 @@ public class TextFileParser
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 			// do not close the ImportFileHandler here, because the DataImporter
 			// might still need the references to the ZIP archives if running
 			// in batch mode. So the fileHandler is closed after sending the finishImport()

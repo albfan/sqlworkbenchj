@@ -600,7 +600,7 @@ public class ConnectionMgr
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 		this.templatesImported = true;
 	}

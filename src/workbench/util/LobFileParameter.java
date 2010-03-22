@@ -46,7 +46,7 @@ public class LobFileParameter
 
 	public void close()
 	{
-		FileUtil.closeQuitely(dataStream);
+		FileUtil.closeQuietely(dataStream);
 	}
 
 	public void setBinary(boolean flag) { binary = flag; }

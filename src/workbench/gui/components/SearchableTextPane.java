@@ -55,7 +55,7 @@ public class SearchableTextPane
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 	}
 	

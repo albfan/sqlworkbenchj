@@ -1435,7 +1435,7 @@ public class MainWindow
 				finally
 				{
 					tabRemovalInProgress = false;
-					FileUtil.closeQuitely(w);
+					FileUtil.closeQuietely(w);
 					updateGuiForTab(sqlTab.getSelectedIndex());
 				}
 			}
@@ -2329,7 +2329,7 @@ public class MainWindow
 		}
 		finally
 		{
-			FileUtil.closeQuitely(w);
+			FileUtil.closeQuietely(w);
 		}
 
 		this.currentWorkspaceFile = filename;

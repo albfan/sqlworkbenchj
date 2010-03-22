@@ -130,7 +130,7 @@ public class Db2FormatFileWriter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 		
 	}

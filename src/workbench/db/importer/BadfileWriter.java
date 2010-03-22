@@ -79,7 +79,7 @@ public class BadfileWriter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(w);
+			FileUtil.closeQuietely(w);
 		}
 	}
 	

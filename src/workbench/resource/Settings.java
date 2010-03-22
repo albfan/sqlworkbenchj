@@ -2733,7 +2733,7 @@ public class Settings
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 		return defProps;
 	}
@@ -2751,7 +2751,7 @@ public class Settings
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 	}
 	// </editor-fold>

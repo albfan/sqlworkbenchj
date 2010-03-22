@@ -395,7 +395,7 @@ public abstract class RowDataConverter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(w);
+			FileUtil.closeQuietely(w);
 		}
 	}
 

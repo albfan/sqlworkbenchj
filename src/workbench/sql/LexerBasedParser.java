@@ -89,7 +89,7 @@ public class LexerBasedParser
 
 	public void done()
 	{
-		FileUtil.closeQuitely(input);
+		FileUtil.closeQuietely(input);
 	}
 
 	public ScriptCommandDefinition getNextCommand()
@@ -298,7 +298,7 @@ public class LexerBasedParser
 		{
 			if (originalFile != null)
 			{
-				FileUtil.closeQuitely(input);
+				FileUtil.closeQuietely(input);
 				input = EncodingUtil.createBufferedReader(originalFile, fileEncoding);
 			}
 			else

@@ -149,7 +149,7 @@ public class WbFile
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 			this.delete();
 		}
 	}

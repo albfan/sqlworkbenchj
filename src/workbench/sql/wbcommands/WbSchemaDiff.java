@@ -246,7 +246,7 @@ public class WbSchemaDiff
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 			if (referenceConnection.getId().startsWith("Wb-Diff"))
 			{
 				referenceConnection.disconnect();

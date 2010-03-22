@@ -85,7 +85,7 @@ public class JLineWrapper
 		History h = reader.getHistory();
 		if (h != null)
 		{
-			FileUtil.closeQuitely(h.getOutput());
+			FileUtil.closeQuietely(h.getOutput());
 		}
 	}
 }

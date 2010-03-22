@@ -39,7 +39,7 @@ public class FileMappedSequenceTest
 
 		Writer w = EncodingUtil.createWriter(f, "UTF-8", false);
 		w.write(content);
-		FileUtil.closeQuitely(w);
+		FileUtil.closeQuietely(w);
 		FileMappedSequence sequence = new FileMappedSequence(f, "UTF-8", 57);
 		int charLength = sequence.length();
     assertEquals(content.length(), charLength);
@@ -78,7 +78,7 @@ public class FileMappedSequenceTest
 
 		Writer w = EncodingUtil.createWriter(f, "UTF-8", false);
 		w.write(content);
-		FileUtil.closeQuitely(w);
+		FileUtil.closeQuietely(w);
 
 		int contentLength = content.length();
 

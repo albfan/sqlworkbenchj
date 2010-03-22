@@ -46,7 +46,7 @@ public class FileUtil
 
 		for (Closeable str : streams)
 		{
-			closeQuitely(str);
+			closeQuietely(str);
 		}
 	}
 	
@@ -95,7 +95,7 @@ public class FileUtil
 		}
 		finally
 		{
-			closeQuitely(in);
+			closeQuietely(in);
 		}
 		return result;
 	}
@@ -211,7 +211,7 @@ public class FileUtil
 		}
 		finally
 		{
-			closeQuitely(in);
+			closeQuietely(in);
 		}
 		return (size / (lineSize / sampleLines));
 
@@ -258,8 +258,8 @@ public class FileUtil
 		}
 		finally
 		{
-			closeQuitely(out);
-			closeQuitely(in);
+			closeQuietely(out);
+			closeQuietely(in);
 		}
 		return filesize;
 	}
@@ -292,7 +292,7 @@ public class FileUtil
 		}
 		finally
 		{
-			closeQuitely(in);
+			closeQuietely(in);
 		}
 		return result.toString();
 	}
@@ -319,7 +319,7 @@ public class FileUtil
 		}
 		finally
 		{
-			closeQuitely(in);
+			closeQuietely(in);
 		}
 		return result.getBuffer();
 	}
@@ -349,7 +349,7 @@ public class FileUtil
 		}
 		finally
 		{
-			closeQuitely(r);
+			closeQuietely(r);
 		}
 
 		return result;
@@ -360,7 +360,7 @@ public class FileUtil
 	 * 
 	 * @param c the Closeable to close
 	 */
-	public static void closeQuitely(Closeable c)
+	public static void closeQuietely(Closeable c)
 	{
 		if (c == null) return;
 		

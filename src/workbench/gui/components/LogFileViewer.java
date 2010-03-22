@@ -127,7 +127,7 @@ public class LogFileViewer
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 	}
 

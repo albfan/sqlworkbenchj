@@ -675,7 +675,7 @@ public class EditorPanel
 		finally
 		{
 			this.resetModified();
-			FileUtil.closeQuitely(reader);
+			FileUtil.closeQuietely(reader);
 		}
 		return result;
 	}

@@ -115,7 +115,7 @@ public class ScriptParserTest
 				w.write(sql);
 				scriptSize += sql.length();
 			}
-			FileUtil.closeQuitely(w);
+			FileUtil.closeQuietely(w);
 			parser = new ScriptParser(500);
 			parser.setCheckForSingleLineCommands(true);
 			parser.setFile(f, "UTF-8");

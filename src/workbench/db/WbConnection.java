@@ -629,7 +629,7 @@ public class WbConnection
 		if (Settings.getInstance().getProperty("workbench.db.driver.log", null) != null)
 		{
 			PrintWriter pw = DriverManager.getLogWriter();
-			FileUtil.closeQuitely(pw);
+			FileUtil.closeQuietely(pw);
 		}
 	}
 

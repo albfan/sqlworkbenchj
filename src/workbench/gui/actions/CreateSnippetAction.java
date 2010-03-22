@@ -117,7 +117,7 @@ public class CreateSnippetAction extends WbAction
 		}
 		finally
 		{
-			FileUtil.closeQuitely(reader);
+			FileUtil.closeQuietely(reader);
 		}
 		return result.toString();
 	}

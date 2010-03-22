@@ -157,7 +157,7 @@ public class OracleControlFileWriter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 	}
 

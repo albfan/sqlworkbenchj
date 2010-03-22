@@ -278,7 +278,7 @@ public abstract class ExportWriter
 
 	public long exportFinished()
 	{
-		FileUtil.closeQuitely(outputWriter);
+		FileUtil.closeQuietely(outputWriter);
 		try
 		{
 			if (this.converter != null) this.converter.exportFinished();

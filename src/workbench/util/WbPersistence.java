@@ -90,7 +90,7 @@ public class WbPersistence
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 	}
 
@@ -109,7 +109,7 @@ public class WbPersistence
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 	}
 

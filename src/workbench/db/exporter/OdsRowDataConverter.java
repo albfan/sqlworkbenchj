@@ -157,7 +157,7 @@ public class OdsRowDataConverter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 	}
 	
@@ -198,7 +198,7 @@ public class OdsRowDataConverter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 	}
 

@@ -135,7 +135,7 @@ public class BlobHandler
 			}
 			finally
 			{
-				FileUtil.closeQuitely(in);
+				FileUtil.closeQuietely(in);
 			}
 
 		}

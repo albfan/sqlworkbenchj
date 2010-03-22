@@ -75,7 +75,7 @@ public class PostgresCopyStatementWriter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 	}
 

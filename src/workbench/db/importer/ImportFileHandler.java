@@ -256,7 +256,7 @@ public class ImportFileHandler
 
 	public void done()
 	{
-		FileUtil.closeQuitely(mainReader);
+		FileUtil.closeQuietely(mainReader);
 		ZipUtil.closeQuitely(mainArchive);
 		ZipUtil.closeQuitely(attachments);
 		mainReader = null;

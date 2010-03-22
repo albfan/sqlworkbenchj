@@ -87,7 +87,7 @@ public class SqlServerFormatFileWriter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(out);
+			FileUtil.closeQuietely(out);
 		}
 	}
 }

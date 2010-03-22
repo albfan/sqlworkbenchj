@@ -116,7 +116,7 @@ public class WbVersionReader
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 			if (timeout != null)
 			{
 				timeout.stop();

@@ -563,7 +563,7 @@ public class XmlDataFileParser
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 			if (!finished)
 			{
 				this.receiver.importFinished();

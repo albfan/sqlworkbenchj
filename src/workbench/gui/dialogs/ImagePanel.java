@@ -98,7 +98,7 @@ public class ImagePanel
 		}
 		finally
 		{
-			FileUtil.closeQuitely(in);
+			FileUtil.closeQuietely(in);
 		}
 
 		if (displayImage == null)

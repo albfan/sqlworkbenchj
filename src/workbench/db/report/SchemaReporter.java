@@ -197,7 +197,7 @@ public class SchemaReporter
 		}
 		finally
 		{
-			FileUtil.closeQuitely(bw);
+			FileUtil.closeQuietely(bw);
 		}
 	}
 
