@@ -27,6 +27,8 @@
     <entry dev-build="1" type="enh">For query results, the column comments can now also be retrieved. The column comments (if available) are then displayed in the tooltip of the result's column header. The retrieval can be enabled in Tools -&gt; Options -&gt; Data display -&gt; Retrieve column remarks for queries</entry>
     <entry dev-build="1" type="enh">WbExport can now also write a "control" file for DB2's IMPORT command (-formatFile=db2)</entry>
     <entry dev-build="1" type="enh">A message box can now be displayed when all running scripts have been finished. If the application is minimized, displaying the message box will also restore the application's main window.</entry>
+    
+    <entry dev-build="9" type="fix">Setting the loglevel for the built-in logger was no longer working</entry>
     <entry dev-build="9" type="fix">Displaying the definition for cross-schema synonyms was no longer working.</entry>
     <entry dev-build="9" type="fix">WbSchemaDiff did not run in batch mode when procedures where included. Thanks to Denis for finding this.</entry>
     <entry dev-build="9" type="fix">Activating the column filter in a table's column list in the DbExplorer did not work when hitting enter in the input field.</entry>

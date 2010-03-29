@@ -149,7 +149,7 @@ public class SimpleLogger
 
 	public synchronized void logMessage(LogLevel level, Object aCaller, String aMsg, Throwable th)
 	{
-		if (!levelEnabled(LogLevel.warning))
+		if (!levelEnabled(level))
 		{
 			return;
 		}
