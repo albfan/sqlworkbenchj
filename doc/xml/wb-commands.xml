@@ -1336,6 +1336,33 @@ v_data=id1,id2</programlisting>
 
 	</section>
 
+  <section id="command-run-batch">
+     <title>Run statements as a single batch - WbStartBatch, WbEndBatch</title>
+     <para>
+       To send several SQL Statements as a single "batch" to the database server, the two commands WbStartBatch and WbEndBatch can be used.
+       All statements between these two will be sent as a single statement (using <literal>executeBatch()</literal>) to the server.
+     </para>
+     <para>
+       Note that not all JDBC drivers support batched statements, and the flexibility what kind of statements can be batched varies between the
+       drivers as well. Most drivers will not accept different types of statements e.g. mixing DELETE and INSERT in the same batch.
+     </para>
+     <para>
+       To send a group of statements as a single batch, simply use the command <literal>WbStartBatch</literal> to mark the beginning and
+       <literal>WbEndBatch</literal> to mark the end. You have to run all statements together either by using "Execute all" or by selecting all
+       statements (including WbStartBatch and WbEndBatch) and then using "Execute selected". The following example sends all INSERT statements
+       as a single batch to the database server:
+     </para>
+     <programlisting>WbStartBatch;
+INSERT INTO person (id, firstname, lastname) VALUES (1, 'Arthur', 'Dent');
+INSERT INTO person (id, firstname, lastname) VALUES (2, 'Ford', 'Prefect');
+INSERT INTO person (id, firstname, lastname) VALUES (3, 'Zaphod', 'Beeblebrox');
+INSERT INTO person (id, firstname, lastname) VALUES (4, 'Tricia', 'McMillian');
+WbEndBatch;
+COMMIT;
+</programlisting>
+
+
+  </section>
   <section id="command-selectblob">
     <title>Extracting BLOB content - WbSelectBlob</title>
     <para>
