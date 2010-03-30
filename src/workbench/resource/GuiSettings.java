@@ -28,6 +28,11 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 
+	public static boolean getUseShellFolders()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.filechooser.useshellfolder", true);
+	}
+	
 	public static boolean getShowMaxRowsReached()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.warning.show");

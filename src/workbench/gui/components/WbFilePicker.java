@@ -145,7 +145,7 @@ public class WbFilePicker
 	{//GEN-HEADEREND:event_selectFileButtonActionPerformed
 		try
 		{
-			JFileChooser jf = new JFileChooser();
+			JFileChooser jf = new WbFileChooser();
 			if (selectDirectory)
 			{
 				jf.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

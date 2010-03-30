@@ -35,6 +35,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.ValidatingDialog;
+import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbToolbar;
 import workbench.interfaces.ValidatingComponent;
@@ -173,7 +174,7 @@ public class DefineFilterExpressionPanel
 
 		String lastDir = Settings.getInstance().getLastFilterDir();
 		FileFilter ff = ExtensionFileFilter.getXmlFileFilter();
-		JFileChooser fc = new JFileChooser(lastDir);
+		JFileChooser fc = new WbFileChooser(lastDir);
 		fc.addChoosableFileFilter(ff);
 		int answer = fc.showSaveDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)
@@ -203,7 +204,7 @@ public class DefineFilterExpressionPanel
 	{
 		String lastDir = Settings.getInstance().getLastFilterDir();
 		FileFilter ff = ExtensionFileFilter.getXmlFileFilter();
-		JFileChooser fc = new JFileChooser(lastDir);
+		JFileChooser fc = new WbFileChooser(lastDir);
 		fc.addChoosableFileFilter(ff);
 		int answer = fc.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 		if (answer == JFileChooser.APPROVE_OPTION)

@@ -25,6 +25,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.FlatButton;
 import workbench.gui.components.StringPropertyEditor;
 import workbench.gui.components.TextComponentMouseListener;
+import workbench.gui.components.WbFileChooser;
 import workbench.interfaces.SimplePropertyEditor;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -158,7 +159,7 @@ public class ToolDefinitionPanel
 		try
 		{
 			File current = new File(this.tfPath.getText());
-			JFileChooser jf = new JFileChooser();
+			JFileChooser jf = new WbFileChooser();
 			if (current.isAbsolute())
 			{
 				File p = current.getParentFile();

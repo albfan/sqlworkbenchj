@@ -15,10 +15,12 @@ import java.awt.Component;
 import java.awt.HeadlessException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import workbench.interfaces.ValidatingComponent;
+import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
 
 /**
@@ -32,12 +34,29 @@ public class WbFileChooser
 	private String windowSettingsId;
 	private JDialog dialog;
 
+	public WbFileChooser()
+	{
+		super();
+		init();
+	}
+	public WbFileChooser(File currentDirectoryPath)
+	{
+		super(currentDirectoryPath);
+		init();
+	}
+
 	public WbFileChooser(String currentDirectoryPath)
 	{
 		super(currentDirectoryPath);
-		addPropertyChangeListener("JFileChooserDialogIsClosingProperty", this);
+		init();
 	}
 
+	private void init()
+	{
+		addPropertyChangeListener("JFileChooserDialogIsClosingProperty", this);
+		putClientProperty("FileChooser.useShellFolder", GuiSettings.getUseShellFolders());
+	}
+	
 	public void setSettingsID(String id)
 	{
 		this.windowSettingsId = id;

@@ -24,6 +24,7 @@ import workbench.gui.components.ExtensionFileFilter;
 import workbench.resource.Settings;
 import javax.swing.border.EmptyBorder;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.WbFileChooser;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 
@@ -57,7 +58,7 @@ public class FileDialogUtil
 	public String getXmlReportFilename(Component caller)
 	{
 		String lastDir = Settings.getInstance().getProperty("workbench.xmlreport.lastdir", null);
-		JFileChooser fc = new JFileChooser(lastDir);
+		JFileChooser fc = new WbFileChooser(lastDir);
 		fc.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
 		fc.setFileFilter(ExtensionFileFilter.getXmlFileFilter());
 
@@ -142,7 +143,7 @@ public class FileDialogUtil
 		{
 			Window parent = SwingUtilities.getWindowAncestor(caller);
 			String lastDir = Settings.getInstance().getLastBlobDir();
-			JFileChooser fc = new JFileChooser(lastDir);
+			JFileChooser fc = new WbFileChooser(lastDir);
 			int answer = JFileChooser.CANCEL_OPTION;
 			if (showSaveDialog)
 			{
@@ -179,7 +180,7 @@ public class FileDialogUtil
 		try
 		{
 			String lastDir = Settings.getInstance().getLastWorkspaceDir();
-			JFileChooser fc = new JFileChooser(lastDir);
+			JFileChooser fc = new WbFileChooser(lastDir);
 			
 			FileFilter wksp = ExtensionFileFilter.getWorkspaceFileFilter();
 			fc.addChoosableFileFilter(wksp);
@@ -289,7 +290,7 @@ public class FileDialogUtil
 				
 		try
 		{
-			JFileChooser dialog = new JFileChooser(f);
+			JFileChooser dialog = new WbFileChooser(f);
 			dialog.setApproveButtonText(ResourceMgr.getString("LblOK"));
 			if (fileName != null) 
 			{

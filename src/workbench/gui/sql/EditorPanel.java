@@ -72,6 +72,7 @@ import workbench.gui.actions.UnCommentAction;
 import workbench.gui.actions.UndoAction;
 import workbench.gui.actions.WbAction;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.WbFileChooser;
 import workbench.gui.components.WbMenuItem;
 import workbench.gui.editor.AnsiSQLTokenMarker;
 import workbench.gui.editor.JEditTextArea;
@@ -451,7 +452,7 @@ public class EditorPanel
 					lastDir = new File(dir);
 				}
 			}
-			JFileChooser fc = new JFileChooser(lastDir);
+			JFileChooser fc = new WbFileChooser(lastDir);
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));
 			EncodingSelector selector = (EncodingSelector)p;
@@ -717,7 +718,7 @@ public class EditorPanel
 			lastDir = Settings.getInstance().getLastEditorDir();
 			ff = ExtensionFileFilter.getTextFileFilter();
 		}
-		JFileChooser fc = new JFileChooser(lastDir);
+		JFileChooser fc = new WbFileChooser(lastDir);
 		fc.setSelectedFile(this.currentFile);
 		fc.addChoosableFileFilter(ff);
 		JComponent p = EncodingUtil.createEncodingPanel();

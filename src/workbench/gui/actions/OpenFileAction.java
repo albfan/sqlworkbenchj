@@ -28,6 +28,7 @@ import javax.swing.border.EmptyBorder;
 import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ExtensionFileFilter;
+import workbench.gui.components.WbFileChooser;
 import workbench.gui.sql.SqlPanel;
 import workbench.interfaces.EncodingSelector;
 import workbench.log.LogMgr;
@@ -86,7 +87,7 @@ public class OpenFileAction
 				lastDir = Settings.getInstance().getLastSqlDir();
 			}
 			
-			JFileChooser fc = new JFileChooser(lastDir);
+			JFileChooser fc = new WbFileChooser(lastDir);
 			JPanel acc = new JPanel(new GridBagLayout());
 			JComponent p = EncodingUtil.createEncodingPanel();
 			p.setBorder(new EmptyBorder(0, 5, 0, 0));
