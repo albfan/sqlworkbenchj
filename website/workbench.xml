@@ -51,7 +51,7 @@
       <li>Display table, view and procedure definitions (<image-link name="TableSource.png" title="SQL source for table definition">Screenshot</image-link>)</li>
       <li>Display view, procedure and trigger source code (<image-link title="SQL Source Display" name="ViewSource.png">Screenshot</image-link>)</li>
       <li>Display foreign key constraints between tables (<image-link title="Foreign key display" name="FkDisplay.png">Screenshot</image-link>)</li>
-      <li>SQLWorkbench/J is <b>free</b> (<a href="manual/workbench-manual.html#license">License agreement</a>)</li>
+      <li>SQLWorkbench/J is <b>free</b> (<a href="manual/information.html#license">License agreement</a>)</li>
     </ul>
     </content>
   </page>
@@ -464,7 +464,9 @@ VALUES
     </content>
   </page>
 
-   <!-- ======================== About the author ========================== -->
+  <page link="manual/information.html#license" title="License" toc="small"/>
+  
+  <!-- ======================== About the author ========================== -->
   <page name="author" title="About the author" toc="small">
     <title>SQL Workbench/J</title>
     <subtitle>About the author</subtitle>
