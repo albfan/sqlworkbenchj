@@ -1757,6 +1757,7 @@ public class DbMetadata
 	 */
 	public String getObjectSource(DbObject o)
 	{
+		if (o == null) return null;
 		for (ObjectListExtender extender : extenders)
 		{
 			if (extender.handlesType(o.getObjectType()))
@@ -1792,6 +1793,21 @@ public class DbMetadata
 		return null;
 	}
 
+	public DataStore getExtendedObjectDetails(DbObject object)
+	{
+		if (object == null) return null;
+		DataStore def = null;
+		for (ObjectListExtender extender : extenders)
+		{
+			if (extender.handlesType(object.getObjectType()))
+			{
+				def = extender.getObjectDetails(dbConnection, object);
+				break;
+			}
+		}
+		return def;
+	}
+	
 	public DataStore getObjectDetails(TableIdentifier table)
 		throws SQLException
 	{

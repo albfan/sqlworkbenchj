@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
+import workbench.db.DbObject;
 import workbench.db.DbSettings;
 import workbench.db.FKHandler;
 import workbench.db.ProcedureDefinition;
@@ -95,7 +96,7 @@ public class ObjectInfo
 			{
 				String msg = 
 					"--------[ " + StringUtil.capitalize(toDescribe.getType()) + ": " + toDescribe.getTableName() + " ]--------\n" +
-					toDescribe.getTableExpression(connection) + " --> " +
+					toDescribe.getObjectExpression(connection) + " --> " +
 					synonymTarget.getTableExpression(connection) + " (" +
 					synonymTarget.getObjectType() + ")";
 
@@ -174,7 +175,13 @@ public class ObjectInfo
 			}
 		}
 
+		DbObject extendedObject = null;
 		if (toDescribe == null)
+		{
+			extendedObject = connection.getMetadata().getObjectDefinition(new TableIdentifier(objectName));
+		}
+
+		if (toDescribe == null && extendedObject == null)
 		{
 			// No table, view, procedure, trigger or something similar found
 			result.setFailure();
@@ -183,22 +190,38 @@ public class ObjectInfo
 			return result;
 		}
 
-//		DataStore tableColumns = new TableColumnsDatastore(def);
-		DataStore details = connection.getMetadata().getObjectDetails(toDescribe);
+		DataStore details = null;
+		boolean isExtended = false;
+		if (extendedObject != null || connection.getMetadata().isExtendedObject(toDescribe))
+		{
+			isExtended = true;
+			details = connection.getMetadata().getExtendedObjectDetails(extendedObject == null ? toDescribe : extendedObject);
+		}
+		else
+		{
+			details = connection.getMetadata().getObjectDetails(toDescribe);
+		}
 
-		CharSequence viewSource = null;
-		String viewname = null;
+		CharSequence source = null;
+		String displayName = null;
+		String displayType = "View";
 
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
-			viewSource = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
-			viewname = synonymTarget.getObjectExpression(connection);
+			source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
+			displayName = synonymTarget.getObjectExpression(connection);
 		}
-		else if (dbs.isViewType(toDescribe.getType()))
+		else if (toDescribe != null && dbs.isViewType(toDescribe.getType()))
 		{
 			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
-			viewSource = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
-			viewname = def.getTable().getObjectExpression(connection);
+			source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
+			displayName = def.getTable().getObjectExpression(connection);
+		}
+		else if (isExtended)
+		{
+			source = connection.getMetadata().getObjectSource(extendedObject == null ? toDescribe : extendedObject);
+			displayType = extendedObject == null ? toDescribe.getType() : extendedObject.getObjectType();
+			displayName = extendedObject == null ? toDescribe.getObjectName() : extendedObject.getObjectName();
 		}
 
 		ColumnRemover remover = new ColumnRemover(details);
@@ -207,14 +230,14 @@ public class ObjectInfo
 		result.setSuccess();
 		result.addDataStore(cols);
 
-		if (viewSource != null)
+		if (source != null)
 		{
-			result.addMessage("\n--------[ View: " +  viewname + " ]--------");
-			result.addMessage(viewSource.toString().trim());
+			result.addMessage("\n--------[ " + displayType + ": " +  displayName + " ]--------");
+			result.addMessage(source.toString().trim());
 			result.addMessage("--------");
-			result.setSourceCommand(StringUtil.getMaxSubstring(viewSource.toString(), 350, " ... "));
+			result.setSourceCommand(StringUtil.getMaxSubstring(source.toString(), 350, " ... "));
 		}
-		else if (toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
+		else if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{
 			DataStore index = connection.getMetadata().getIndexReader().getTableIndexInformation(toDescribe);
 			if (index.getRowCount() > 0)

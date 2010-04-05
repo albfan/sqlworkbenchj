@@ -307,7 +307,7 @@ SELECT * FROM company;</programlisting>
 </section>
 
 	<section id="understand-alternate-delim">
-		<title>Using the alternate delimiter to execute DDL statements</title>
+		<title>Creating stored procedures and triggers</title>
     <indexterm><primary>DDL</primary><secondary>Execute DDL statements</secondary></indexterm>
     <indexterm><primary>Stored procedures</primary><secondary>create stored procedure</secondary></indexterm>
     <indexterm><primary>Triggers</primary><secondary>create trigger</secondary></indexterm>

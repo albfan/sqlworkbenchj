@@ -1,5 +1,22 @@
 <section id="troubleshooting">
 	<title>Common problems</title>
+
+  <section id="error-create-procedure">
+    <title>Syntax error when creating stored procedures</title>
+    <indexterm><primary>Problems</primary><secondary>create stored procedure</secondary></indexterm>
+    <indexterm><primary>Problems</primary><secondary>create trigger</secondary></indexterm>
+
+    <para>
+      When creating a stored procedure (trigger, function) it is necessary to use a delimiter other than
+      the normal semicolon because &wb-productname; does not know if a semicolon inisde the stored procedure
+      ends the procedure or simply a single statement inside the procedure.
+    </para>
+    <para>
+      Therefor you must use an alternate delimiter when running a DDL statement that contains "embedded" semicolons.
+      For details please refer to <link linkend="understand-alternate-delim">using the alternate delimiter</link>.
+    </para>
+  </section>
+
   
   <section id="driver-not-found">
     <title>The driver class was not found</title>
