@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-03-17">
+  <release build="108" date="2010-04-05">
     <entry dev-build="9" type="enh">The argument parser for Workbench specific commands has been changed in order to recognize empty values (e.g. -replaceWith=' ') Existing scripts should work, but it could be that some combinations of parameter values are not covered by my tests. So please verify that your scripts still work with the new version.</entry>
     <entry dev-build="9" type="enh">A new option for WbExport (-replaceValues) is available to replace text (using regular expressions) in all character columns during export.</entry>
     <entry dev-build="8" type="enh">For Oracle the DbExplorer will now also show OBJECT TYPEs</entry>
