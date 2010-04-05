@@ -680,6 +680,7 @@
         <include name="wbreport2oracle.xslt"/>
         <include name="wbreport2pg.xslt"/>
         <include name="wbreport2proc.xslt"/>
+        <include name="wbreport2liquibase.xslt"/>
         <include name="wbreport2wiki.xslt"/>
       </zipfileset>
     </zip>
