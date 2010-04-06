@@ -217,7 +217,7 @@ public class ObjectInfo
 
 		if (source != null)
 		{
-			result.addMessage("\n--------[ " + toDescribe.getType() + ": " +  displayName + " ]--------");
+			result.addMessage("\n--------[ " + StringUtil.capitalize(toDescribe.getObjectType()) + ": " +  displayName + " ]--------");
 			result.addMessage(source.toString().trim());
 			result.addMessage("--------");
 			result.setSourceCommand(StringUtil.getMaxSubstring(source.toString(), 350, " ... "));
