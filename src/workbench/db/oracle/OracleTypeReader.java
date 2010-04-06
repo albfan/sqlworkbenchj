@@ -211,8 +211,8 @@ public class OracleTypeReader
 				String colname = rs.getString(1);
 				String dataType = rs.getString(2);
 				int length = rs.getInt(3);
-				int precision = rs.getInt(4);
-				int scale = rs.getInt(5);
+				int scale = rs.getInt(4);
+				int precision = rs.getInt(5);
 				int jdbcType = rs.getInt(6);
 				
 				ColumnIdentifier col = new ColumnIdentifier(colname, jdbcType);
