@@ -1045,9 +1045,4 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "computedcol.datatype", false);
 	}
 
-	public boolean getRetrieveExtendedType(String type)
-	{
-		if (type == null) return true;
-		return Settings.getInstance().getBoolProperty(prefix + type.trim().toLowerCase() + ".retrieve", true);
-	}
 }

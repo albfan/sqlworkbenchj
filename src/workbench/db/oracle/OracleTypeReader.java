@@ -45,21 +45,22 @@ public class OracleTypeReader
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalogPattern, String schemaPattern, String namePattern, String[] requestedTypes)
 	{
-		if (con.getDbSettings().getRetrieveExtendedType("TYPE"))
+		// if no type has been requested, the Oracle driver does not includes the object types
+		// if TYPE has specifically been requested, the objects are returned
+
+		if (requestedTypes != null) return false;
+
+		List<OracleObjectType> types = getTypes(con, schemaPattern, namePattern);
+		for (OracleObjectType type : types)
 		{
-			List<OracleObjectType> types = getTypes(con, schemaPattern, namePattern);
-			for (OracleObjectType type : types)
-			{
-				int row = result.addRow();
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
-			}
-			return types.size() > 0;
+			int row = result.addRow();
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
 		}
-		return false;
+		return types.size() > 0;
 	}
 
 	public List<OracleObjectType> getTypes(WbConnection con, String schema, String name)
