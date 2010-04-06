@@ -13,7 +13,6 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import java.util.List;
-import workbench.db.DbObject;
 import workbench.db.DbSettings;
 import workbench.db.FKHandler;
 import workbench.db.ProcedureDefinition;
@@ -175,13 +174,7 @@ public class ObjectInfo
 			}
 		}
 
-		DbObject extendedObject = null;
 		if (toDescribe == null)
-		{
-			extendedObject = connection.getMetadata().getObjectDefinition(new TableIdentifier(objectName));
-		}
-
-		if (toDescribe == null && extendedObject == null)
 		{
 			// No table, view, procedure, trigger or something similar found
 			result.setFailure();
@@ -190,28 +183,18 @@ public class ObjectInfo
 			return result;
 		}
 
-		DataStore details = null;
-		boolean isExtended = false;
-		if (extendedObject != null || connection.getMetadata().isExtendedObject(toDescribe))
-		{
-			isExtended = true;
-			details = connection.getMetadata().getExtendedObjectDetails(extendedObject == null ? toDescribe : extendedObject);
-		}
-		else
-		{
-			details = connection.getMetadata().getObjectDetails(toDescribe);
-		}
+		DataStore details = connection.getMetadata().getObjectDetails(toDescribe);
+		boolean isExtended = connection.getMetadata().isExtendedObject(toDescribe);
 
 		CharSequence source = null;
 		String displayName = null;
-		String displayType = "View";
 
 		if (synonymTarget != null && dbs.isViewType(synonymTarget.getType()))
 		{
 			source = connection.getMetadata().getViewReader().getExtendedViewSource(synonymTarget, false);
 			displayName = synonymTarget.getObjectExpression(connection);
 		}
-		else if (toDescribe != null && dbs.isViewType(toDescribe.getType()))
+		else if (dbs.isViewType(toDescribe.getType()))
 		{
 			TableDefinition def = connection.getMetadata().getTableDefinition(toDescribe);
 			source = connection.getMetadata().getViewReader().getExtendedViewSource(def, false, false);
@@ -219,9 +202,8 @@ public class ObjectInfo
 		}
 		else if (isExtended)
 		{
-			source = connection.getMetadata().getObjectSource(extendedObject == null ? toDescribe : extendedObject);
-			displayType = extendedObject == null ? toDescribe.getType() : extendedObject.getObjectType();
-			displayName = extendedObject == null ? toDescribe.getObjectName() : extendedObject.getObjectName();
+			source = connection.getMetadata().getObjectSource(toDescribe);
+			displayName = toDescribe.getObjectName();
 		}
 
 		ColumnRemover remover = new ColumnRemover(details);
@@ -232,7 +214,7 @@ public class ObjectInfo
 
 		if (source != null)
 		{
-			result.addMessage("\n--------[ " + displayType + ": " +  displayName + " ]--------");
+			result.addMessage("\n--------[ " + toDescribe.getType() + ": " +  displayName + " ]--------");
 			result.addMessage(source.toString().trim());
 			result.addMessage("--------");
 			result.setSourceCommand(StringUtil.getMaxSubstring(source.toString(), 350, " ... "));
