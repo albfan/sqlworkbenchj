@@ -242,6 +242,7 @@ public class SelectAnalyzer
 
 			SQLLexer lexer = new SQLLexer(this.sql);
 			SQLToken token = lexer.getNextToken(false, false);
+			SQLToken lastToken = null;
 			while (token != null)
 			{
 				String t = token.getContents();
@@ -253,8 +254,19 @@ public class SelectAnalyzer
 					}
 					else if (SqlUtil.getJoinKeyWords().contains(t))
 					{
-						if (cursorPos > token.getCharEnd()) result = JOIN_ON_TABLE_LIST;
-						else result = NO_JOIN_ON;
+						if (lastToken != null && cursorPos > lastToken.getCharEnd() && cursorPos <= token.getCharBegin() &&
+							SqlUtil.getJoinKeyWords().contains(lastToken.getContents()))
+						{
+							result = JOIN_ON_TABLE_LIST;
+						}
+						else if (cursorPos > token.getCharEnd())
+						{
+							result = JOIN_ON_TABLE_LIST;
+						}
+						else 
+						{
+							result = NO_JOIN_ON;
+						}
 					}
 					else if (SqlFormatter.FROM_TERMINAL.contains(t))
 					{
@@ -271,6 +283,7 @@ public class SelectAnalyzer
 						result = JOIN_ON_TABLE_LIST;
 					}
 				}
+				lastToken = token;
 				token = lexer.getNextToken(false, false);
 			}
 		}

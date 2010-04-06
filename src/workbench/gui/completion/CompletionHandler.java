@@ -27,6 +27,7 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -127,6 +128,7 @@ public class CompletionHandler
 		parser.setCheckEscapedQuotes(Settings.getInstance().getCheckEscapedQuotes());
 		parser.setEmptyLineIsDelimiter(Settings.getInstance().getAutoCompletionEmptyLineIsSeparator());
 		parser.setAlternateLineComment(dbConnection == null ? null : dbConnection.getDbSettings().getLineComment());
+		parser.setAlternateDelimiter(Settings.getInstance().getAlternateDelimiter(dbConnection));
 		int cursorPos = this.editor.getCaretPosition();
 
 		int index = parser.getCommandIndexAtCursorPos(cursorPos);

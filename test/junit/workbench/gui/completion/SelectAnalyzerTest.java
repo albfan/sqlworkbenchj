@@ -74,6 +74,18 @@ public class SelectAnalyzerTest
 		assertNull(tbl);
 		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.context);
 
+		sql = "SELECT * \n" +
+				 "  FROM person p \n" +
+				 "   JOIN address a on a.person_id = p.id \n" +
+				 "   JOIN \n" +
+				 "   JOIN author at on at.author_id = p.id";
+
+		pos = sql.indexOf("JOIN \n") + 5;
+		System.out.println("to test: " + sql.substring(pos));
+		analyzer = new SelectAnalyzer(null, sql, pos);
+		analyzer.checkContext();
+		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.context);
+
 	}
 
 }
