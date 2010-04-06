@@ -105,7 +105,7 @@ public class ObjectInfo
 			toDescribe = synonymTarget;
 		}
 
-		if (toDescribe != null || "SEQUENCE".equals(toDescribe.getType()))
+		if (toDescribe != null && "SEQUENCE".equals(toDescribe.getType()))
 		{
 			SequenceReader seqReader = connection.getMetadata().getSequenceReader();
 			if (seqReader != null)
@@ -140,7 +140,10 @@ public class ObjectInfo
 					return result;
 				}
 			}
-
+		}
+		
+		if (toDescribe == null)
+		{
 			// No table or something similar found, try to find a procedure with that name
 			ProcedureReader reader = connection.getMetadata().getProcedureReader();
 			List<ProcedureDefinition> procs = reader.getProcedureList(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
