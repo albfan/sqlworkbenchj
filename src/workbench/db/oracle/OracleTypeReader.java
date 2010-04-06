@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DataTypeResolver;
+import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
@@ -44,7 +45,20 @@ public class OracleTypeReader
 	@Override
 	public boolean extendObjectList(WbConnection con, DataStore result, String catalogPattern, String schemaPattern, String namePattern, String[] requestedTypes)
 	{
-		// nothing to do, already returned by the driver
+		if (con.getDbSettings().getRetrieveExtendedType("TYPE"))
+		{
+			List<OracleObjectType> types = getTypes(con, schemaPattern, namePattern);
+			for (OracleObjectType type : types)
+			{
+				int row = result.addRow();
+				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
+				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
+				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
+				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
+				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
+			}
+			return types.size() > 0;
+		}
 		return false;
 	}
 
@@ -55,23 +69,49 @@ public class OracleTypeReader
 			"       type_name, " +
 			"       methods, \n" +
 			"       attributes \n" +
-			"FROM all_types " +
-			"WHERE owner = ? " +
-			"  AND type_name = ?";
+			"FROM all_types ";
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleObjectTypeReader.getTypes", "Using SQL=\n" + select);
 		}
-		
+
+		int schemaIndex = -1;
+		int nameIndex = -1;
+
+		if (StringUtil.isNonBlank(schema)) 
+		{
+			select += " WHERE owner LIKE ? ";
+			schemaIndex = 1;
+		}
+
+		if (StringUtil.isNonBlank(name))
+		{
+			if (schemaIndex != -1)
+			{
+				select += " AND type_name LIKE ? ";
+				nameIndex = 2;
+			}
+			else
+			{
+				select += " WHERE type_name LIKE ? ";
+				nameIndex = 1;
+			}
+		}
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
 		List<OracleObjectType> result = new ArrayList<OracleObjectType>();
 		try
 		{
 			stmt = con.getSqlConnection().prepareStatement(select);
-			stmt.setString(1, schema);
-			stmt.setString(2, name);
+			if (schemaIndex > -1)
+			{
+				stmt.setString(schemaIndex, schema);
+			}
+			if (nameIndex > -1)
+			{
+				stmt.setString(nameIndex, name);
+			}
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{

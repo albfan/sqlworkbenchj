@@ -106,7 +106,7 @@ public class ObjectInfo
 			toDescribe = synonymTarget;
 		}
 
-		if (toDescribe == null || "SEQUENCE".equals(toDescribe.getType()))
+		if (toDescribe != null || "SEQUENCE".equals(toDescribe.getType()))
 		{
 			SequenceReader seqReader = connection.getMetadata().getSequenceReader();
 			if (seqReader != null)
