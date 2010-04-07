@@ -75,4 +75,6 @@ public interface ImportFileParser
 
 	void setSourceFiles(ImportFileLister source);
   void setTrimValues(boolean trimValues);
+
+	List<File> getProcessedFiles();
 }

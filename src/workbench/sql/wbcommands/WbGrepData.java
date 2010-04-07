@@ -53,7 +53,6 @@ public class WbGrepData
 	public static final String VERB = "WBGREPDATA";
 	public static final String PARAM_TABLES = "tables";
 	public static final String PARAM_TYPES = "types";
-	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
 	public static final String PARAM_EXPRESSION = "searchValue";
 	public static final String PARAM_EXCLUDE_LOBS = "excludeLobs";
 	public static final String PARAM_IGNORE_CASE = "ignoreCase";
@@ -73,7 +72,7 @@ public class WbGrepData
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
 		cmdLine.addArgument(PARAM_TYPES);
-		cmdLine.addArgument(PARAM_EXCLUDE_TABLES);
+		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
@@ -111,7 +110,7 @@ public class WbGrepData
 		}
 		
 		String tableNames = cmdLine.getValue(PARAM_TABLES);
-		String excludeTables = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
+		String excludeTables = cmdLine.getValue(SourceTableArgument.PARAM_EXCLUDE_TABLES);
 		List<TableIdentifier> tables = null;
 
 		if (StringUtil.isBlank(tableNames))

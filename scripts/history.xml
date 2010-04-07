@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-04-05">
+    <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
+    <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
     <entry dev-build="1" type="fix">The "Object Info" function did not display information about TYPEs (e.g. Oracle, Postgres)</entry>
     <entry dev-build="1" type="fix">For Oracle object TYPEs, member variables declared with the data type "NUMBER" where not displayed correctly</entry>
   </release>

@@ -71,6 +71,7 @@ public class WbExport
 	public static final String ARG_TABLE_PREFIX = "sourceTablePrefix";
 	public static final String ARG_USE_CDATA = "useCDATA";
 	public static final String ARG_USE_SCHEMA = "useSchema";
+	public static final String ARG_EXCLUDE_TABLES = "excludeTables";
 
 	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
 
@@ -134,6 +135,7 @@ public class WbExport
 		cmdLine.addArgument("autoFilter", ArgumentType.BoolArgument);
 		cmdLine.addArgument("fixedHeader", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
+		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -517,7 +519,8 @@ public class WbExport
 		List<TableIdentifier> tablesToExport = null;
 		try
 		{
-			SourceTableArgument argParser = new SourceTableArgument(tables, this.currentConnection);
+			String excluded = cmdLine.getValue(SourceTableArgument.PARAM_EXCLUDE_TABLES);
+			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, this.currentConnection);
 			tablesToExport = argParser.getTables();
 			if (tablesToExport.isEmpty() && argParser.wasWildCardArgument())
 			{

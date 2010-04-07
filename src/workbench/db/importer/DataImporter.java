@@ -50,7 +50,6 @@ import workbench.resource.Settings;
 import workbench.util.EncodingUtil;
 import workbench.util.MemoryWatcher;
 import workbench.util.MessageBuffer;
-import workbench.util.WbThread;
 
 
 /**
@@ -98,7 +97,6 @@ public class DataImporter
 	private boolean hasWarnings = false;
 	private int reportInterval = 10;
 	private MessageBuffer messages;
-	private String targetSchema;
 
 	private int colCount;
 	private int totalTables = -1;
@@ -1982,11 +1980,6 @@ public class DataImporter
 		{
 			this.reportInterval = 0;
 		}
-	}
-
-	public void setTargetSchema(String targetSchema)
-	{
-		this.targetSchema = targetSchema;
 	}
 
 }

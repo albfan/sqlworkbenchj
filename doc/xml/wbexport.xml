@@ -240,6 +240,21 @@
 					</row>
 
 					<row>
+						<entry>-excludeTables</entry>
+						<entry>
+              <para>
+                The tables listed in this parameter will not be exported. This can be used when all but a few tables
+                should be exported from a schema. First all tables specified through <literal>-sourceTable</literal> will
+                be evaluated. The tables specified by -excludeTables can include wildcards in the same way, <literal>-sourceTable</literal>
+                allows wildcards.
+              </para>
+              <para>
+                <literal>-sourceTable=* -excludeTables=TEMP*</literal> will export all tables, but not those starting with <literal>TEMP</literal>.
+              </para>
+            </entry>
+          </row>
+
+					<row>
 						<entry>-sourceTablePrefix</entry>
 						<entry>
               <para>
@@ -249,11 +264,15 @@
               </para>
               <para>
                 When this paarameter is specified the generated statement for exporting the table is
-                changed to a <literal>SELECT * FROM ...</literal> instead of listing all columns individually.
+                changed to a <literal>SELECT * FROM [prefix]tableName</literal> instead of listing all columns individually.
+              </para>
+              <para>
+                This can be used when exporting views on tables, when for each table e.g. a view with a certain prefix
+                exists (e.g. table <literal>PERSON</literal> has the view <literal>V_PERSON</literal> and the view does
+                some filtering of the data.
               </para>
             </entry>
 					</row>
-
 
 					<row>
 						<entry>-outputDir</entry>

@@ -1177,6 +1177,33 @@ public class WbExportTest
 		}
 	}
 
+	public void testExcludeTables()
+		throws Exception
+	{
+		WbFile dir = new WbFile(util.getBaseDir());
+
+		StatementRunnerResult result = exportCmd.execute("wbexport -header=true " +
+			"-outputDir='" + util.getBaseDir() + "' " +
+			"-type=text " +
+			"-excludeTables=junit*,blob* " +
+			"-sourceTable=* " +
+			"-writeEmptyResults=false");
+
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File[] files = dir.listFiles();
+		//List<String> filenames = new ArrayList<5>();
+		int count = 0;
+		for (File f : files)
+		{
+			if (f.getName().endsWith(".txt"))
+			{
+				count ++;
+			}
+		}
+		assertEquals(1, count);
+	}
+
+
 	public void testEmptyWithAppend()
 		throws Exception
 	{

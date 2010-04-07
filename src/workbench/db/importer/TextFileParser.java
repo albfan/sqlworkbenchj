@@ -102,6 +102,8 @@ public class TextFileParser
 	private QuoteEscapeType quoteEscape;
 	private ImportValueModifier valueModifier;
 
+	private List<File> filesProcessed = new ArrayList<File>(25);
+	
 	public TextFileParser()
 	{
 		// raise an error during import if the date or timestamps cannot be parsed
@@ -113,6 +115,12 @@ public class TextFileParser
 	{
 		this();
 		this.inputFile = aFile;
+	}
+
+	@Override
+	public List<File> getProcessedFiles()
+	{
+		return filesProcessed;
 	}
 
 	public ImportFileHandler getFileHandler()
@@ -973,6 +981,7 @@ public class TextFileParser
 					currentLine = null;
 				}
 			}
+			filesProcessed.add(inputFile);
 		}
 		finally
 		{
@@ -982,7 +991,7 @@ public class TextFileParser
 			// in batch mode. So the fileHandler is closed after sending the finishImport()
 			// to the DataImporter
 		}
-
+		
 	}
 
 

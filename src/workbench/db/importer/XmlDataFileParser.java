@@ -107,7 +107,8 @@ public class XmlDataFileParser
 	private ValueConverter converter = new ValueConverter();
 	private ImportValueModifier valueModifier;
 	private BlobDecoder blobDecoder = new BlobDecoder();
-
+	private List<File> filesProcessed = new ArrayList<File>();
+	
   public XmlDataFileParser()
   {
 		super();
@@ -147,6 +148,12 @@ public class XmlDataFileParser
 	public void setMultiFileImport(boolean flag)
 	{
 		this.multiFileImport = flag;
+	}
+
+	@Override
+	public List<File> getProcessedFiles()
+	{
+		return filesProcessed;
 	}
 
 	public boolean isMultiFileImport()
@@ -527,6 +534,7 @@ public class XmlDataFileParser
 			in = this.fileHandler.getMainFileReader();
 			InputSource source = new InputSource(in);
 			saxParser.parse(source, this);
+			filesProcessed.add(inputFile);
 		}
 		catch (ParsingInterruptedException e)
 		{

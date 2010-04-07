@@ -590,11 +590,6 @@ public class WbImport
 		String where = cmdLine.getValue(ARG_UPDATE_WHERE);
 		imp.setWhereClauseForUpdate(where);
 
-		if (schema != null)
-		{
-			imp.setTargetSchema(schema);
-		}
-
 		String keyColumns = cmdLine.getValue(ARG_KEYCOLUMNS);
 		imp.setKeyColumns(keyColumns);
 
@@ -654,9 +649,33 @@ public class WbImport
 		}
 		result.addMessage(imp.getMessages());
 
+		if (!result.isSuccess() && sorter != null)
+		{
+			appendRestartMessage(parser, result);
+		}
 		return result;
 	}
 
+	private void appendRestartMessage(ImportFileParser importer, StatementRunnerResult result)
+	{
+		List<File> files = importer.getProcessedFiles();
+		if (CollectionUtil.isEmpty(files)) return;
+		StringBuilder param = new StringBuilder(files.size() * 15);
+		param.append('-');
+		param.append(ARG_EXCLUDE_FILES);
+		param.append('=');
+		boolean first = true;
+		for (File f : files)
+		{
+			if (first) first = false;
+			else param.append(',');
+			param.append(f.getName());
+		}
+		result.addMessageNewLine();
+		result.addMessageByKey("ErrImportRestartWith");
+		result.addMessage(param);
+	}
+	
 	private List<ColumnIdentifier> stringToCols(String columns)
 	{
 		List<String> names = StringUtil.stringToList(columns, ",", true, true);

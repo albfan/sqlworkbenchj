@@ -29,6 +29,8 @@ import workbench.util.WbStringTokenizer;
  */
 public class SourceTableArgument
 {
+	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
+
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private boolean wildcardsPresent;
 
