@@ -441,7 +441,7 @@ public class ProcedureListPanel
 		ProcedureDefinition def = null;
 		if (this.dbConnection.getMetadata().isOracle())
 		{
-			def = ProcedureDefinition.createOracleDefinition(schema, catalog, type, comment);
+			def = ProcedureDefinition.createOracleDefinition(schema, proc, catalog, type, comment);
 		}
 		else
 		{

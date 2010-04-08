@@ -175,7 +175,6 @@ public class JdbcProcedureReader
 				Integer iType;
 				if (rs.wasNull())
 				{
-					//sType = "N/A";
 					iType = Integer.valueOf(DatabaseMetaData.procedureResultUnknown);
 				}
 				else
@@ -188,7 +187,6 @@ public class JdbcProcedureReader
 					String specname = rs.getString("SPECIFIC_NAME");
 					ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SPECIFIC_NAME, specname);
 				}
-
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, stripVersionInfo(name));
@@ -443,7 +441,7 @@ public class JdbcProcedureReader
 				// but we only want to create one ProcedureDefinition for the whole package
 				if (!oraPackages.contains(cat))
 				{
-					def = ProcedureDefinition.createOracleDefinition(schema, cat, type, remarks);
+					def = ProcedureDefinition.createOracleDefinition(schema, procName, cat, type, remarks);
 					oraPackages.add(cat);
 				}
 			}

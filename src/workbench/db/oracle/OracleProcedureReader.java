@@ -13,15 +13,14 @@ package workbench.db.oracle;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
-import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A ProcedureReader to read the source of an Oracle procedure. 
@@ -52,24 +51,24 @@ public class OracleProcedureReader
 		return PROC_HEADER;
 	}
 
-	@Override
-	public DataStore fillProcedureListDataStore(ResultSet rs)
-		throws SQLException
-	{
-		DataStore result = super.fillProcedureListDataStore(rs);
-		int count = result.getRowCount();
-		for (int i=count-1; i >= 0; i --)
-		{
-			String type = result.getValueAsString(i, COLUMN_IDX_PROC_COLUMNS_REMARKS);
-			if (type == null) continue;
-			// Remove object types from the list as they are completely handled in the TableListPanel 
-//			if (type.equals("Packaged function"))
-//			{
-//				result.deleteRow(i);
-//			}
-		}
-		return result;
-	}
+//	@Override
+//	public DataStore fillProcedureListDataStore(ResultSet rs)
+//		throws SQLException
+//	{
+//		DataStore result = super.fillProcedureListDataStore(rs);
+//		int count = result.getRowCount();
+//		for (int i=count-1; i >= 0; i --)
+//		{
+//			String type = result.getValueAsString(i, COLUMN_IDX_PROC_COLUMNS_REMARKS);
+//			if (type == null) continue;
+//			// Remove object types from the list as they are completely handled in the TableListPanel
+////			if (type.equals("Packaged function"))
+////			{
+////				result.deleteRow(i);
+////			}
+//		}
+//		return result;
+//	}
 
 
 	public CharSequence getPackageSource(String owner, String packageName)
@@ -112,10 +111,13 @@ public class OracleProcedureReader
 						result.append(line);
 					}
 				}
-				result.append(nl);
-				result.append(delimiter.getDelimiter());
-				result.append(nl);
-				result.append(nl);
+				if (lineCount > 0)
+				{
+					result.append(nl);
+					result.append(delimiter.getDelimiter());
+					result.append(nl);
+					result.append(nl);
+				}
 				lineCount = 0;
 
 				stmt.clearParameters();
@@ -156,13 +158,15 @@ public class OracleProcedureReader
 	{
 		if (def.isOraclePackage())
 		{
-			CharSequence source = getPackageSource(def.getSchema(), def.getProcedureName());
-			def.setSource(source);
-		}
-		else if (def.isOracleObjectType())
-		{
-			OracleObjectType type = new OracleObjectType(def.getSchema(), def.getOracleObjectTypeName());
-			CharSequence source = typeReader.getObjectSource(connection, type);
+			CharSequence source = getPackageSource(def.getSchema(), def.getPackageName());
+			if (StringUtil.isBlank(source))
+			{
+				// Member functions of objects are returned the same way, as functions from
+				// packages. If retrieving the source was not successful, then most likely
+				// this is a member function of an Oracle TYPE AS OBJECT
+				OracleObjectType type = new OracleObjectType(def.getSchema(), def.getPackageName());
+				source = typeReader.getObjectSource(connection, type);
+			}
 			def.setSource(source);
 		}
 		else if (def.getCatalog() != null)

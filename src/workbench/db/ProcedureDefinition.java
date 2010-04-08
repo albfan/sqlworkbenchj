@@ -41,19 +41,12 @@ public class ProcedureDefinition
 	private CharSequence source;
 	private List<String> parameterTypes;
 
-	public static ProcedureDefinition createOracleDefinition(String schem, String name, int type, String remark)
+	public static ProcedureDefinition createOracleDefinition(String schema, String name, String packageName, int type, String remark)
 	{
-		ProcedureDefinition def = new ProcedureDefinition(name, schem, null, type);
-		if (StringUtil.isNonBlank(remark))
+		ProcedureDefinition def = new ProcedureDefinition(packageName, schema, name, type);
+		if (StringUtil.isNonBlank(packageName))
 		{
-			if ("Packaged procedure".equalsIgnoreCase(remark))
-			{
-				def.oracleType = OracleType.packageType;
-			}
-			else if ("Packaged function".equalsIgnoreCase(remark))
-			{
-				def.oracleType = OracleType.objectType;
-			}
+			def.oracleType = OracleType.packageType;
 		}
 		def.setComment(remark);
 		return def;
@@ -221,16 +214,10 @@ public class ProcedureDefinition
 		if (this.isOraclePackage()) return catalog;
 		return null;
 	}
-
-	public String getOracleObjectTypeName()
-	{
-		if (this.isOracleObjectType()) return catalog;
-		return null;
-	}
 	
 	public String getCatalog() 
 	{
-		if (this.isOraclePackage()) return catalog;
+		if (!this.isOraclePackage()) return catalog;
 		return this.catalog; 
 	}
 	
