@@ -140,6 +140,11 @@ public class OracleProcedureReader
 				}
 			}
 			result.append(nl);
+			if (lineCount > 0)
+			{
+				result.append(delimiter.getDelimiter());
+				result.append(nl);
+			}
 		}
 		catch (Exception e)
 		{
