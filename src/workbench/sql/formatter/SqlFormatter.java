@@ -322,6 +322,9 @@ public class SqlFormatter
 		boolean isLastOpenBracket = "(".equals(lastV);
 		boolean isLastCloseBracket = ")".equals(lastV);
 
+		if (lastV.endsWith("'") && currentV.equals("''")) return false;
+		if (lastV.equals("''") && currentV.startsWith("'")) return false;
+		
 		if (isCurrentOpenBracket && last.isIdentifier()) return false;
 		if (isCurrentOpenBracket && isDbFunction(lastV)) return false;
 		if (isCurrentOpenBracket && isDatatype(lastV)) return false;

@@ -62,6 +62,18 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 
 	}
+
+	public void testQuotes()
+		throws Exception
+	{
+		String sql = "select ' test '''||firstname||''' test' from person";
+		SqlFormatter f = new SqlFormatter(sql);
+		String formatted = f.getFormattedSql().toString();
+		String expected = "SELECT ' test ''' ||firstname|| ''' test'\nFROM person";
+//		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
+		assertEquals(expected, formatted);
+	}
+	
 	public void testUpdate()
 		throws Exception
 	{
