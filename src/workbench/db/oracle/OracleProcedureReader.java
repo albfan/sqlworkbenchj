@@ -23,14 +23,14 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A ProcedureReader to read the source of an Oracle procedure. 
+ * A ProcedureReader to read the source of an Oracle procedure.
  * Packages are handled properly. The Oracle JDBC driver
- * reports the package name in the catalog column 
- * of the getProcedures() ResultSet. 
- * The method {@link #readProcedureSource(ProcedureDefinition)} the 
- * catalog definition of the ProcedureDefinition is checked. If it's not 
+ * reports the package name in the catalog column
+ * of the getProcedures() ResultSet.
+ * The method {@link #readProcedureSource(ProcedureDefinition)} the
+ * catalog definition of the ProcedureDefinition is checked. If it's not
  * null it is assumed that this the definition is actually a package.
- * 
+ *
  * @see workbench.db.JdbcProcedureReader
  * @author Thomas Kellerer
  */
@@ -38,38 +38,18 @@ public class OracleProcedureReader
 	extends JdbcProcedureReader
 {
 	private OracleTypeReader typeReader = new OracleTypeReader();
-	
+
 	public OracleProcedureReader(WbConnection conn)
 	{
 		super(conn);
 	}
 
 	private final StringBuilder PROC_HEADER = new StringBuilder("CREATE OR REPLACE ");
-	
+
 	public StringBuilder getProcedureHeader(String catalog, String schema, String procname, int procType)
 	{
 		return PROC_HEADER;
 	}
-
-//	@Override
-//	public DataStore fillProcedureListDataStore(ResultSet rs)
-//		throws SQLException
-//	{
-//		DataStore result = super.fillProcedureListDataStore(rs);
-//		int count = result.getRowCount();
-//		for (int i=count-1; i >= 0; i --)
-//		{
-//			String type = result.getValueAsString(i, COLUMN_IDX_PROC_COLUMNS_REMARKS);
-//			if (type == null) continue;
-//			// Remove object types from the list as they are completely handled in the TableListPanel
-////			if (type.equals("Packaged function"))
-////			{
-////				result.deleteRow(i);
-////			}
-//		}
-//		return result;
-//	}
-
 
 	public CharSequence getPackageSource(String owner, String packageName)
 	{
@@ -79,18 +59,18 @@ public class OracleProcedureReader
 			"AND   owner = ? \n" +
 			"AND   type = ? \n" +
 			"ORDER BY line";
-		
+
 		StringBuilder result = new StringBuilder(1000);
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
-		
+
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		DelimiterDefinition delimiter = Settings.getInstance().getAlternateDelimiter(connection);
-		
+
 		try
 		{
 			int lineCount = 0;
-			
+
 			synchronized (connection)
 			{
 				stmt = this.connection.getSqlConnection().prepareStatement(sql);
@@ -156,8 +136,8 @@ public class OracleProcedureReader
 		}
 		return result;
 	}
-	
-	
+
+
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
@@ -185,5 +165,5 @@ public class OracleProcedureReader
 		{
 			super.readProcedureSource(def);
 		}
-	}		
+	}
 }

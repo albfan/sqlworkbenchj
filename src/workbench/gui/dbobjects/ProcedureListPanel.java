@@ -439,13 +439,14 @@ public class ProcedureListPanel
 		String comment = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
 		int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
 		ProcedureDefinition def = null;
-		if (this.dbConnection.getMetadata().isOracle())
+		if (this.dbConnection.getMetadata().isOracle() && catalog != null)
 		{
-			def = ProcedureDefinition.createOracleDefinition(schema, proc, catalog, type, comment);
+			def = ProcedureDefinition.createOracleDefinition(schema, proc, catalog, type);
 		}
 		else
 		{
 			def = new ProcedureDefinition(catalog, schema, proc, type);
+			def.setComment(comment);
 		}
 		return def;
 	}

@@ -441,13 +441,14 @@ public class JdbcProcedureReader
 				// but we only want to create one ProcedureDefinition for the whole package
 				if (!oraPackages.contains(cat))
 				{
-					def = ProcedureDefinition.createOracleDefinition(schema, procName, cat, type, remarks);
+					def = ProcedureDefinition.createOracleDefinition(schema, procName, cat, type);
 					oraPackages.add(cat);
 				}
 			}
 			else
 			{
 				def = new ProcedureDefinition(cat, schema, procName, type);
+				def.setComment(remarks);
 			}
 			if (def != null) result.add(def);
 		}

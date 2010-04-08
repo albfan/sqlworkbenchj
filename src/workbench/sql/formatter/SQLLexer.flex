@@ -145,6 +145,7 @@ keyword=(
 (GROUP{wsp}BY)|
 (ORDER{wsp}BY)|
 (PACKAGE{wsp}BODY)|
+(TYPE{wsp}BODY)|
 (CREATE{wsp}OR{wsp}REPLACE)|
 (IS{wsp}NOT{wsp}NULL)|
 (FLASHBACK{wsp}ARCHIVE)|

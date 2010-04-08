@@ -41,14 +41,13 @@ public class ProcedureDefinition
 	private CharSequence source;
 	private List<String> parameterTypes;
 
-	public static ProcedureDefinition createOracleDefinition(String schema, String name, String packageName, int type, String remark)
+	public static ProcedureDefinition createOracleDefinition(String schema, String name, String packageName, int type)
 	{
 		ProcedureDefinition def = new ProcedureDefinition(packageName, schema, name, type);
 		if (StringUtil.isNonBlank(packageName))
 		{
 			def.oracleType = OracleType.packageType;
 		}
-		def.setComment(remark);
 		return def;
 	}
 

@@ -158,12 +158,13 @@ public class OraclePackageParser
 		while (t != null)
 		{
 			if (t.getContents().equals("PACKAGE BODY")) break;
+			if (t.getContents().equals("TYPE BODY")) break;
 			t = lexer.getNextToken(false, false);
 		}
 		
 		if (t == null) return -1;
 		
-		// Now we have reached the package body, let's find the the actual procedure or function
+		// Now we have reached the package or type body, let's find the the actual procedure or function
 		int lastKeywordPos = -1;
 		
 		while (t != null)
@@ -186,5 +187,5 @@ public class OraclePackageParser
 		}
 		return procPos;
 	}
-		
+
 }
