@@ -37,17 +37,28 @@ public class ProcedureDefinition
 	// DatabaseMetaData.procedureReturnsResult
 	private int resultType; 
 	
-	private boolean isOraclePackage = false;
+	private OracleType oracleType = null;;
 	private CharSequence source;
 	private List<String> parameterTypes;
 
-	public static ProcedureDefinition createOraclePackage(String schem, String name)
+	public static ProcedureDefinition createOracleDefinition(String schem, String name, int type, String remark)
 	{
-		ProcedureDefinition def = new ProcedureDefinition(name, schem, null, DatabaseMetaData.procedureResultUnknown);
-		def.setOraclePackage(true);
+		ProcedureDefinition def = new ProcedureDefinition(name, schem, null, type);
+		if (StringUtil.isNonBlank(remark))
+		{
+			if ("Packaged procedure".equalsIgnoreCase(remark))
+			{
+				def.oracleType = OracleType.packageType;
+			}
+			else if ("Packaged function".equalsIgnoreCase(remark))
+			{
+				def.oracleType = OracleType.objectType;
+			}
+		}
+		def.setComment(remark);
 		return def;
 	}
-	
+
 	public ProcedureDefinition(String name, int type)
 	{
 		procName = name;
@@ -62,18 +73,6 @@ public class ProcedureDefinition
 		resultType = type;
 	}
 	
-	public ProcedureDefinition(String cat, String schem, String name, int type, boolean isOracle)
-	{
-		schema = schem;
-		catalog = cat;
-		procName = name;
-		resultType = type;
-		if (isOracle)
-		{
-			this.isOraclePackage = !StringUtil.isEmptyString(catalog);
-		}
-	}
-
 	public String getComment()
 	{
 		return comment;
@@ -117,9 +116,13 @@ public class ProcedureDefinition
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
-		if (isOraclePackage)
+		if (isOraclePackage())
 		{
 			return "DROP PACKAGE " + con.getMetadata().quoteObjectname(schema) + "." + con.getMetadata().quoteObjectname(catalog);
+		}
+		if (isOraclePackage())
+		{
+			return "DROP TYPE " + con.getMetadata().quoteObjectname(schema) + "." + con.getMetadata().quoteObjectname(catalog);
 		}
 		return null;
 	}
@@ -127,7 +130,7 @@ public class ProcedureDefinition
 	@Override
 	public String getObjectNameForDrop(WbConnection con)
 	{
-		if (isOraclePackage)
+		if (isOraclePackage() || isOracleObjectType())
 		{
 			return catalog;
 		}
@@ -198,18 +201,36 @@ public class ProcedureDefinition
 		return this.source; 
 	}
 	
-	public void setOraclePackage(boolean flag) { this.isOraclePackage = true; }
-	public boolean isOraclePackage() { return this.isOraclePackage; }
+	public void setOraclePackage(boolean flag)
+	{
+		this.oracleType = OracleType.packageType;
+	}
+
+	public boolean isOraclePackage()
+	{
+		return oracleType == OracleType.packageType;
+	}
+
+	public boolean isOracleObjectType()
+	{
+		return oracleType == OracleType.objectType;
+	}
 
 	public String getPackageName()
 	{
-		if (this.isOraclePackage) return catalog;
+		if (this.isOraclePackage()) return catalog;
+		return null;
+	}
+
+	public String getOracleObjectTypeName()
+	{
+		if (this.isOracleObjectType()) return catalog;
 		return null;
 	}
 	
 	public String getCatalog() 
 	{
-		if (this.isOraclePackage) return null;
+		if (this.isOraclePackage()) return catalog;
 		return this.catalog; 
 	}
 	
@@ -230,10 +251,15 @@ public class ProcedureDefinition
 	
 	public String getObjectType()
 	{
-		if (this.isOraclePackage)
+		if (this.isOraclePackage())
 		{
 			return "PACKAGE";
 		}
+		if (this.isOracleObjectType())
+		{
+			return "TYPE";
+		}
+		
 		if (resultType == DatabaseMetaData.procedureReturnsResult)
 		{
 			return "FUNCTION";
@@ -254,5 +280,10 @@ public class ProcedureDefinition
 		}
 		return procName;
 	}
-	
+
+	private static enum OracleType
+	{
+		packageType,
+	  objectType;
+	}
 }

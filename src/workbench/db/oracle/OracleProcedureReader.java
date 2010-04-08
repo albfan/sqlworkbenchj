@@ -38,6 +38,8 @@ import workbench.util.SqlUtil;
 public class OracleProcedureReader
 	extends JdbcProcedureReader
 {
+	private OracleTypeReader typeReader = new OracleTypeReader();
+	
 	public OracleProcedureReader(WbConnection conn)
 	{
 		super(conn);
@@ -61,10 +63,10 @@ public class OracleProcedureReader
 			String type = result.getValueAsString(i, COLUMN_IDX_PROC_COLUMNS_REMARKS);
 			if (type == null) continue;
 			// Remove object types from the list as they are completely handled in the TableListPanel 
-			if (type.equals("Packaged function"))
-			{
-				result.deleteRow(i);
-			}
+//			if (type.equals("Packaged function"))
+//			{
+//				result.deleteRow(i);
+//			}
 		}
 		return result;
 	}
@@ -152,17 +154,23 @@ public class OracleProcedureReader
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		
-		if (def.getCatalog() != null)
-		{
-			CharSequence source = getPackageSource(def.getSchema(), def.getCatalog());
-			def.setSource(source);
-			def.setOraclePackage(true);			
-		}
-		else if (def.isOraclePackage())
+		if (def.isOraclePackage())
 		{
 			CharSequence source = getPackageSource(def.getSchema(), def.getProcedureName());
 			def.setSource(source);
+		}
+		else if (def.isOracleObjectType())
+		{
+			OracleObjectType type = new OracleObjectType(def.getSchema(), def.getOracleObjectTypeName());
+			CharSequence source = typeReader.getObjectSource(connection, type);
+			def.setSource(source);
+		}
+		else if (def.getCatalog() != null)
+		{
+			// Fallback in case the definition was not initialized correctly.
+			CharSequence source = getPackageSource(def.getSchema(), def.getCatalog());
+			def.setSource(source);
+			def.setOraclePackage(true);
 		}
 		else
 		{

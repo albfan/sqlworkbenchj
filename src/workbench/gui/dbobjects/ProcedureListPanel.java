@@ -420,13 +420,7 @@ public class ProcedureListPanel
 
 		if (row < 0) return;
 
-		final String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-		final String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-		final String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-		final int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-		String remarks = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
-		final ProcedureDefinition def = new ProcedureDefinition(catalog, schema, proc, type);
-		def.setComment(remarks);
+		final ProcedureDefinition def = getDefinition(row);
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -437,6 +431,25 @@ public class ProcedureListPanel
 		});
 	}
 
+	private ProcedureDefinition getDefinition(int row)
+	{
+		String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+		String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+		String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+		String comment = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
+		int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+		ProcedureDefinition def = null;
+		if (this.dbConnection.getMetadata().isOracle())
+		{
+			def = ProcedureDefinition.createOracleDefinition(schema, catalog, type, comment);
+		}
+		else
+		{
+			def = new ProcedureDefinition(catalog, schema, proc, type);
+		}
+		return def;
+	}
+	
 	private void retrieveProcDefinition(ProcedureDefinition def )
 	{
 		if (this.dbConnection == null) return;
@@ -545,12 +558,7 @@ public class ProcedureListPanel
 			{
 				name = name.substring(0, name.indexOf(';'));
 			}
-
-			String proc = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-			String schema = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-			String catalog = this.procList.getValueAsString(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-			int type = this.procList.getDataStore().getValueAsInt(rows[i], ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
-			ProcedureDefinition def = new ProcedureDefinition(catalog, schema, proc, type, this.dbConnection.getMetadata().isOracle());
+			ProcedureDefinition def = getDefinition(rows[i]);
 			result.add(def);
 		}
 		return result;
