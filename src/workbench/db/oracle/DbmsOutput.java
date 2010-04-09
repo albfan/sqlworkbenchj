@@ -36,15 +36,30 @@ public class DbmsOutput
 		this.conn = aConn;
 	}
 
-	public void enable(long size) throws SQLException
+	/**
+	 * Enable Oracle's dbms_output with the specified buffer size
+	 * This essentially calls dbms_output.enable().
+	 *
+	 * @param size the buffer size, if &lt; 0 no limit will be passed, otherwise the specified number
+	 * @throws SQLException
+	 */
+	public void enable(long size)
+		throws SQLException
 	{
 		if (this.enabled && size == this.lastSize) return;
 
 		CallableStatement enableStatement = null;
 		try
 		{
-			enableStatement = conn.prepareCall( "begin dbms_output.enable(:1); end;" );
-			enableStatement.setLong( 1, size );
+			if (size < 0)
+			{
+				enableStatement = conn.prepareCall( "begin dbms_output.enable; end;" );
+			}
+			else
+			{
+				enableStatement = conn.prepareCall( "begin dbms_output.enable(:1); end;" );
+				enableStatement.setLong(1, size);
+			}
 			enableStatement.executeUpdate();
 			enableStatement.close();
 			this.enabled = true;
@@ -57,10 +72,12 @@ public class DbmsOutput
 		}
 	}
 
-	/*
-	 * disable simply executes the dbms_output.disable
+	/**
+	 * Disable dbms_output.
+	 * This simply calls dbms_output.disable();
 	 */
-	public void disable() throws SQLException
+	public void disable()
+		throws SQLException
 	{
 		CallableStatement disableStatement = null;
 		try
@@ -76,9 +93,10 @@ public class DbmsOutput
 		}
 	}
 
-	/*
-	 * getResult() does most of the work.  It loops over
-	 * all of the dbms_output data.
+	/**
+	 * Retrieve all server messages written with dbms_output.
+	 * 
+	 * @return all messages written with dbms_output.put_line()
 	 */
 	public String getResult()
 		throws SQLException
@@ -88,7 +106,7 @@ public class DbmsOutput
 		"declare " +
 		"    l_line varchar2(255); " +
 		"    l_done number; " +
-		"    l_buffer long; " +
+		"    l_buffer clob; " +
 		"begin " +
 		"  loop " +
 		"    exit when length(l_buffer)+255 > :maxbytes OR l_done = 1; " +
@@ -104,7 +122,7 @@ public class DbmsOutput
 		{
 			showOutputStatement.registerOutParameter( 2, Types.INTEGER );
 			showOutputStatement.registerOutParameter( 3, Types.VARCHAR );
-			for(;;)
+			for (;;)
 			{
 				showOutputStatement.setInt( 1, 32000 );
 				showOutputStatement.executeUpdate();
@@ -121,7 +139,14 @@ public class DbmsOutput
 
 	public void close()
 	{
-		try { this.disable(); } catch (Throwable th) {}
+		try
+		{
+			this.disable();
+		}
+		catch (Throwable th)
+		{
+			LogMgr.logWarning("DbmsOutput", "Error when disabling dbms_output", th);
+		}
 	}
 
 	protected void finalize()
