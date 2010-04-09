@@ -36,6 +36,7 @@ import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 
 import workbench.WbManager;
@@ -93,6 +94,8 @@ public class DwStatusBar
 
 	private DurationFormatter durationFormatter = new DurationFormatter();
 
+	public static final Border DEFAULT_BORDER = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
+	
 	public DwStatusBar()
 	{
 		this(false, false);
@@ -142,7 +145,7 @@ public class DwStatusBar
 		infoPanel.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		infoPanel.setMaximumSize(new Dimension(300, FIELD_HEIGHT));
 
-		setBorder(WbSwingUtilities.EMPTY_BORDER);
+		setBorder(DEFAULT_BORDER);
 
 		this.execTime = new WbTextLabel();
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);

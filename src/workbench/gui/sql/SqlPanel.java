@@ -280,8 +280,6 @@ public class SqlPanel
 	protected Thread executionThread;
 	protected Interruptable worker;
 
-	private static final Border statusBarBorder = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
-
 	private boolean appendResults;
 
 	protected DwStatusBar statusBar;
@@ -301,7 +299,6 @@ public class SqlPanel
 
 		editor = EditorPanel.createSqlEditor();
 		statusBar = new DwStatusBar(true, true);
-		statusBar.setBorder(statusBarBorder);
 		int defRows = GuiSettings.getDefaultMaxRows();
 		if (defRows > 0)
 		{

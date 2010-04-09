@@ -1056,8 +1056,6 @@ public class DwPanel
 		else
 		{
 			this.statusBar = new DwStatusBar();
-			Border b = BorderFactory.createCompoundBorder(new EmptyBorder(2, 0, 0, 0), new EtchedBorder());
-			this.statusBar.setBorder(b);
 			this.add(this.statusBar, BorderLayout.SOUTH);
 		}
 

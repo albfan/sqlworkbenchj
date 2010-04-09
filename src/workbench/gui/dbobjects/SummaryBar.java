@@ -32,10 +32,11 @@ public class SummaryBar
 	public SummaryBar(JLabel infoLabel)
 	{
 		super(new BorderLayout());
-		setMinimumSize(new Dimension(80, DwStatusBar.BAR_HEIGHT));
-		Border b = new CompoundBorder(new EmptyBorder(1, 0, 1, 0), BorderFactory.createEtchedBorder());
-		setBorder(b);
-		infoLabel.setBorder(new EmptyBorder(2, 4, 2, 2));
+		Dimension d = new Dimension(80, DwStatusBar.BAR_HEIGHT + 1);
+		setMinimumSize(d);
+		setPreferredSize(d);
+		setBorder(DwStatusBar.DEFAULT_BORDER);
+		infoLabel.setBorder(new EmptyBorder(2, 1, 1, 0));
 		add(infoLabel, BorderLayout.CENTER);
 	}
 
