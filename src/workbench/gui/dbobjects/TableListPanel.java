@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
 import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
@@ -45,6 +46,8 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -337,10 +340,8 @@ public class TableListPanel
 		this.listPanel.add(topPanel, BorderLayout.NORTH);
 
 		this.tableInfoLabel = new JLabel("");
-
-		EmptyBorder b = new EmptyBorder(1, 3, 0, 0);
-		this.tableInfoLabel.setBorder(b);
-		this.listPanel.add(this.tableInfoLabel, BorderLayout.SOUTH);
+		SummaryBar bar = new SummaryBar(tableInfoLabel);
+		this.listPanel.add(bar, BorderLayout.SOUTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		scroll = new WbScrollPane(this.tableList);

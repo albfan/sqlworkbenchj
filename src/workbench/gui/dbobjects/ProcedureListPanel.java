@@ -182,9 +182,8 @@ public class ProcedureListPanel
 		this.listPanel.add(new WbScrollPane(this.procList), BorderLayout.CENTER);
 
 		this.infoLabel = new JLabel("");
-		EmptyBorder b = new EmptyBorder(1, 3, 0, 0);
-		this.infoLabel.setBorder(b);
-		this.listPanel.add(this.infoLabel, BorderLayout.SOUTH);
+		SummaryBar bar = new SummaryBar(infoLabel);
+		this.listPanel.add(bar, BorderLayout.SOUTH);
 
 		this.splitPane.setLeftComponent(this.listPanel);
 		this.splitPane.setRightComponent(displayTab);

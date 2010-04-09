@@ -77,7 +77,7 @@ public class DwStatusBar
 	private JPanel alertPanel;
 	private JPanel infoPanel;
 	
-	private static final int BAR_HEIGHT = 22;
+	public static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
 
 	private int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
