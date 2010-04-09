@@ -25,6 +25,7 @@ import workbench.sql.wbcommands.console.WbDisplay;
 import workbench.sql.wbcommands.console.WbListProfiles;
 import workbench.sql.wbcommands.console.WbRun;
 import workbench.sql.wbcommands.console.WbStoreProfile;
+import workbench.sql.wbcommands.console.WbToggleDisplay;
 import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -99,6 +100,7 @@ public class SQLConsole
 			runner.addCommand(new WbStoreProfile());
 			runner.addCommand(new WbDeleteProfile());
 			runner.addCommand(new WbDisplay());
+			runner.addCommand(new WbToggleDisplay());
 			runner.addCommand(new WbListProfiles());
 			runner.addCommand(new WbRun());
 
@@ -132,6 +134,7 @@ public class SQLConsole
 				printer.setFormatColumns(optimizeColWidths);
 				printer.setPrintRowCount(true);
 				runner.setResultSetConsumer(printer);
+				ConsoleSettings.getInstance().addChangeListener(printer);
 			}
 
 			boolean startOfStatement = true;
@@ -144,6 +147,14 @@ public class SQLConsole
 				if (startOfStatement && ("exit".equalsIgnoreCase(line.trim()) || "\\q".equals(line.trim())))
 				{
 					break;
+				}
+
+				if (startOfStatement && line.trim().equals("\\x"))
+				{
+					// WbToggleDisplay toggle = (WbToggleDisplay)runner.getCommand(WbToggleDisplay.VERB);
+					runner.executeScript(WbToggleDisplay.VERB);
+					startOfStatement = true;
+					continue;
 				}
 
 				boolean isCompleteStatement = buffer.addLine(line);
@@ -168,15 +179,6 @@ public class SQLConsole
 					{
 						runner.setResultSetConsumer(printer);
 					}
-
-					if (printer != null)
-					{
-						// As the BatchRunner will keep track of the desired output format
-						// we need to synchronize the output format to our printer
-						boolean rowsAsLine = ConsoleSettings.getInstance().getNextRowDisplay() == RowDisplay.SingleLine;
-						printer.setPrintRowsAsLine(rowsAsLine);
-					}
-
 				}
 				else
 				{
@@ -196,7 +198,6 @@ public class SQLConsole
 			WbManager.getInstance().doShutdown(0);
 		}
 	}
-
 
 	private String checkConnection(BatchRunner runner)
 	{

@@ -11,6 +11,8 @@
  */
 package workbench.console;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.sql.Types;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.*;
@@ -35,7 +37,7 @@ import workbench.resource.ResourceMgr;
  */
 public class ResultSetPrinter
 	extends ConsolePrinter
-	implements ResultSetConsumer
+	implements ResultSetConsumer, PropertyChangeListener
 {
 	private static final int MAX_WIDTH = 80;
 	private PrintWriter pw;
@@ -131,6 +133,15 @@ public class ResultSetPrinter
 		{
 			LogMgr.logError("ResultSetPrinter.consumeResult", "Error when printing ResultSet", e);
 		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (evt.getSource() != ConsoleSettings.getInstance()) return;
+
+		RowDisplay newDisplay = ConsoleSettings.getInstance().getNextRowDisplay();
+		setPrintRowsAsLine(newDisplay == RowDisplay.SingleLine);
 	}
 
 }

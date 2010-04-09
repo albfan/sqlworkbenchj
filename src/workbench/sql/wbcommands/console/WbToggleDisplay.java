@@ -25,45 +25,30 @@ import workbench.util.StringUtil;
  *
  * @author  Thomas Kellerer
  */
-public class WbDisplay
-	extends SqlCommand
+public class WbToggleDisplay extends SqlCommand
 {
-	public static final String VERB = "WBDISPLAY";
+	public static final String VERB = "WBTOGGLEDISPLAY";
+	public static final String ALTERNATE_VERB = "\\x";
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
 	{
 		StatementRunnerResult result = new StatementRunnerResult();
-		String param = getCommandLine(aSql);
 
-		if ("tab".equalsIgnoreCase(param) || "row".equalsIgnoreCase(param))
+		RowDisplay current = ConsoleSettings.getInstance().getRowDisplay();
+		RowDisplay newDisplay = null;
+		if (current == RowDisplay.Form)
 		{
-			result.setSuccess();
-			ConsoleSettings.getInstance().setRowDisplay(RowDisplay.SingleLine);
+			newDisplay = RowDisplay.SingleLine;
 			result.addMessageByKey("MsgDispChangeRow");
-		}
-		else if ("record".equalsIgnoreCase(param) || "form".equalsIgnoreCase(param) || "single".equalsIgnoreCase(param))
-		{
-			ConsoleSettings.getInstance().setRowDisplay(RowDisplay.Form);
-			result.addMessageByKey("MsgDispChangeForm");
 		}
 		else
 		{
-			RowDisplay current = ConsoleSettings.getInstance().getRowDisplay();
-			String currentDisp = "tab";
-
-			if (current == RowDisplay.Form)
-			{
-				currentDisp = "record";
-			}
-
-			if (StringUtil.isBlank(param)) result.setSuccess();
-			else result.setFailure();
-
-			String msg = ResourceMgr.getFormattedString("ErrDispWrongArgument", currentDisp);
-			result.addMessage(msg);
+			newDisplay = RowDisplay.Form;
+			result.addMessageByKey("MsgDispChangeForm");
 		}
-
+		ConsoleSettings.getInstance().setRowDisplay(newDisplay);
+		result.setSuccess();
 		return result;
 	}
 
@@ -77,5 +62,12 @@ public class WbDisplay
 	{
 		return VERB;
 	}
+
+	@Override
+	public String getAlternateVerb()
+	{
+		return ALTERNATE_VERB;
+	}
+
 
 }
