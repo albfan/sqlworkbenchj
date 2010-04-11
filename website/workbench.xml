@@ -200,8 +200,18 @@ VALUES
   <page name="issues" title="Known bugs" toc="main">
     <title>Known issues</title>
     <content>
+      
       <p>
-      Build 107 has the following known issues:
+      <a name="issues_108"></a><h3>Known issues in build 108</h3>
+      </p>
+      <ul>
+        <li>
+            In the DbExplorer's "Procedure" tab, functions defined in Oracle packages are no longer listed. (fixed in 108.1)
+        </li>
+      </ul>
+      
+      <p>
+      <a name="issues_107"></a><h3>Known issues in build 107</h3>
       </p>
       <ul>
         <li>
@@ -219,7 +229,7 @@ VALUES
         </li>
         <li>
           On MacOS starting SQL Workbench through the application icon does not work if Java 5 and Java 6 are installed together
-          The stub that starts the Java virtual machine seems to pick the wrong Java installation.
+          The stub that starts the Java virtual machine seems to pick the wrong Java installation (fixed in 108)
           <br/><br/>
           To fix this problem, copy the stub from the Java 6 application into the SQL Workbench/J directory using the following command (on a single line)
           <br/>
