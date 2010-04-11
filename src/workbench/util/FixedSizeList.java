@@ -50,6 +50,14 @@ public class FixedSizeList<T>
 		entries.add(entry);
 	}
 
+	/**
+	 * Add a new entry to "top" of the list.
+	 * <br/>
+	 * If the entry is already in the list it is "moved" to the top.
+	 * If the max size of the list is exceeded the last item is removed.
+	 * @param entry
+	 * @return
+	 */
 	public synchronized int addEntry(T entry)
 	{
 		if (entry == null) return -1;
@@ -77,7 +85,7 @@ public class FixedSizeList<T>
 		return entries.getFirst();
 	}
 
-	public Iterator iterator()
+	public Iterator<T> iterator()
 	{
 		return entries.iterator();
 	}

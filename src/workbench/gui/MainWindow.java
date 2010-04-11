@@ -122,6 +122,7 @@ import workbench.gui.components.TabCloser;
 import workbench.gui.components.TabbedPaneHistory;
 import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.macros.MacroMenuBuilder;
+import workbench.gui.menu.RecentWorkspaceManager;
 import workbench.gui.sql.PanelType;
 import workbench.interfaces.StatusBar;
 import workbench.interfaces.ToolWindow;
@@ -478,9 +479,13 @@ public class MainWindow
 		menu.add(this.loadWorkspaceAction);
 		menu.addSeparator();
 		menu.add(this.closeWorkspaceAction);
-		menu.addSeparator();
 		menu.add(this.assignWorkspaceAction);
-
+		menu.addSeparator();
+		JMenu recentWorkspace = new JMenu(ResourceMgr.getString("MnuTxtRecentWorkspace"));
+		recentWorkspace.setName("recent-workspace");
+		RecentWorkspaceManager.getInstance().populateMenu(recentWorkspace, this);
+		menu.add(recentWorkspace);
+		
 		WbMenu submenu = null;
 		String menuName = null;
 		for (int i=0; i < actions.size(); i++)
@@ -1344,7 +1349,7 @@ public class MainWindow
 
 	private void loadDefaultWorkspace()
 	{
-		if (!this.loadWorkspace(DEFAULT_WORKSPACE))
+		if (!this.loadWorkspace(DEFAULT_WORKSPACE, false))
 		{
 			resetWorkspace();
 			this.currentWorkspaceFile = DEFAULT_WORKSPACE;
@@ -1358,13 +1363,12 @@ public class MainWindow
 
 	private boolean resultForWorkspaceClose;
 
-
-	public boolean loadWorkspace(String filename)
+	public boolean loadWorkspace(String filename, boolean updateRecent)
 	{
 		if (filename == null) return false;
 		final String realFilename = FileDialogUtil.replaceConfigDir(filename);
 
-		File f = new File(realFilename);
+		WbFile f = new WbFile(realFilename);
 	 	if (!f.exists())
 		{
 			// if the file does not exist, set all variables as if it did
@@ -1447,7 +1451,19 @@ public class MainWindow
 		{
 			WbSwingUtilities.repaintLater(sql.getEditor());
 		}
-
+		if (updateRecent)
+		{
+			RecentWorkspaceManager.getInstance().workspaceLoaded(f);
+			EventQueue.invokeLater(new Runnable()
+			{
+				@Override
+				public void run()
+				{
+					updateRecentWorkspaces();
+				}
+			});
+		}
+		
 		return resultForWorkspaceClose;
 	}
 
@@ -1494,7 +1510,7 @@ public class MainWindow
 			{
 				// loadWorkspace will replace the %ConfigDir% placeholder,
 				// so we need to pass the original filename
-				this.loadWorkspace(workspaceFilename);
+				this.loadWorkspace(workspaceFilename, false);
 			}
 			else
 			{
@@ -1720,6 +1736,23 @@ public class MainWindow
 		getSelector().selectConnection();
 	}
 
+	public JMenu getRecentWorkspaceMenu(int panelIndex)
+	{
+		JMenu main = this.getMenu(ResourceMgr.MNU_TXT_WORKSPACE, panelIndex);
+		if (main == null) return null;
+		int count = main.getItemCount();
+		for (int i=0; i < count; i ++)
+		{
+			JMenuItem item = main.getItem(i);
+			if (item == null) continue;
+			if ("recent-workspace".equals(item.getName()))
+			{
+				return (JMenu)item;
+			}
+		}
+		return null;
+	}
+	
 	public JMenu getMacroMenu(int panelIndex)
 	{
 		JMenu menu = this.getMenu(ResourceMgr.MNU_TXT_MACRO, panelIndex);
@@ -1746,6 +1779,15 @@ public class MainWindow
 		return null;
 	}
 
+	protected void updateRecentWorkspaces()
+	{
+		for (int i=0; i < getTabCount(); i++)
+		{
+			JMenu menu = getRecentWorkspaceMenu(i);
+			RecentWorkspaceManager.getInstance().populateMenu(menu, this);
+		}
+	}
+	
 	protected void updateViewMenu(int sqlTabIndex, String aName)
 	{
 		int panelCount = this.panelMenus.size();
@@ -2167,10 +2209,11 @@ public class MainWindow
 		FileDialogUtil dialog = new FileDialogUtil();
 		String filename = dialog.getWorkspaceFilename(this, false, true);
 		if (filename == null) return;
-		if (this.loadWorkspace(filename) && Settings.getInstance().getBoolProperty("workbench.gui.workspace.load.askassign", true))
+		if (this.loadWorkspace(filename, true) && Settings.getInstance().getBoolProperty("workbench.gui.workspace.load.askassign", true))
 		{
 			checkMakeProfileWorkspace();
 		}
+		WbSwingUtilities.repaintLater(this);
 	}
 
 	/**

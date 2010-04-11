@@ -100,7 +100,7 @@ public class Settings
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
-	
+
 	public static final String PK_MAPPING_FILENAME_PROPERTY = "workbench.pkmapping.file";
 	public static final String UNIX_LINE_TERMINATOR_PROP_VALUE = "lf";
 	public static final String DOS_LINE_TERMINATOR_PROP_VALUE = "crlf";
@@ -112,6 +112,7 @@ public class Settings
 	private WbFile configfile;
 
 	private List<FontChangedListener> fontChangeListeners = new ArrayList<FontChangedListener>(5);
+	private List<SettingsListener> saveListener = new ArrayList<SettingsListener>(5);
 
 	private long fileTime;
 
@@ -205,7 +206,7 @@ public class Settings
 		WbFile settings = new WbFile(cfd, configFilename);
 
 		boolean configLoaded = loadConfig(settings);
-		
+
 		if (configfile != null)
 		{
 			// Make the configuration directory available through a system property
@@ -275,7 +276,7 @@ public class Settings
 		}
 		return useLog4j;
 	}
-	
+
 	private void initLogging()
 	{
 		boolean useLog4j = initLog4j();
@@ -382,11 +383,21 @@ public class Settings
 		}
 	}
 
+	public void addSaveListener(SettingsListener l)
+	{
+		saveListener.add(l);
+	}
+
+	public void removeSaveListener(SettingsListener l)
+	{
+		saveListener.remove(l);
+	}
+
 	public String replaceProperties(String input)
 	{
 		return StringUtil.replaceProperties(props, input);
 	}
-	
+
 	public void setUseSinglePageHelp(boolean flag)
 	{
 		setProperty("workbench.help.singlepage", flag);
@@ -2537,7 +2548,7 @@ public class Settings
 		upgradeProp(def, "workbench.db.sql.comment.column", "COMMENT ON COLUMN %object_name%.%column% IS '%comment%';");
 
 		upgradeProp(def, "workbench.db.oracle.add.column", "ALTER TABLE %table_name% ADD COLUMN %column_name% %datatype% %default_expression% %nullable%");
-		
+
 		upgradeListProp(def, "workbench.db.nonullkeyword");
 	}
 
@@ -2760,7 +2771,7 @@ public class Settings
 	{
 		return getBoolProperty(TEST_MODE_PROPERTY, false);
 	}
-	
+
 	public boolean wasExternallyModified()
 	{
 		long time = this.configfile.lastModified();
@@ -2775,9 +2786,14 @@ public class Settings
 	public void saveSettings(boolean makeBackup)
 	{
 		if (this.props == null) return;
-		
+
 		// Never save settings in test mode
 		if (isTestMode()) return;
+
+		for (SettingsListener l : saveListener)
+		{
+			if (l != null) l.beforeSettingsSave();
+		}
 
 		ShortcutManager.getInstance().saveSettings();
 

@@ -35,7 +35,6 @@ public class LoadWorkspaceAction extends WbAction
 		this.initMenuDefinition("MnuTxtLoadWorkspace", KeyStroke.getKeyStroke(KeyEvent.VK_O, PlatformShortcuts.getDefaultModifier() | InputEvent.SHIFT_MASK));
 		this.setMenuItemName(ResourceMgr.MNU_TXT_WORKSPACE);
 		this.setIcon(null);
-
 	}
 
 	public void executeAction(ActionEvent e)
