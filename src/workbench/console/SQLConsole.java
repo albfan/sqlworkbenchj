@@ -11,6 +11,8 @@
  */
 package workbench.console;
 
+import java.util.HashMap;
+import java.util.Map;
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
@@ -19,6 +21,12 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.sql.BatchRunner;
+import workbench.sql.wbcommands.WbDescribeObject;
+import workbench.sql.wbcommands.WbHelp;
+import workbench.sql.wbcommands.WbInclude;
+import workbench.sql.wbcommands.WbListProcedures;
+import workbench.sql.wbcommands.WbListSchemas;
+import workbench.sql.wbcommands.WbListTables;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisconnect;
 import workbench.sql.wbcommands.console.WbDisplay;
@@ -32,7 +40,13 @@ import workbench.util.WbFile;
 
 /**
  * A simple console interface for SQL Workbench/J
+ * <br>
+ * Commandline editing under Unix-style Operating systems is done using the
+ * JLine library.
  *
+ * @see jline.ConsoleReader
+ * @see workbench.console.ConsoleReaderFactory
+ * 
  * @author Thomas Kellerer
  */
 public class SQLConsole
@@ -40,6 +54,8 @@ public class SQLConsole
 	private ConsolePrompter prompter;
 	private static final String DEFAULT_PROMPT = "SQL> ";
 	private static final String CONTINUE_PROMPT = "..> ";
+
+	private Map<String, String> abbreviations = new HashMap<String, String>();
 
 	public SQLConsole()
 	{
@@ -139,6 +155,15 @@ public class SQLConsole
 
 			boolean startOfStatement = true;
 
+			// Some limited psql compatibility
+			abbreviations.put("\\x", WbToggleDisplay.VERB);
+			abbreviations.put("\\?", WbHelp.VERB);
+			abbreviations.put("\\i", WbInclude.VERB);
+			abbreviations.put("\\d", WbListTables.VERB);
+			abbreviations.put("\\dt", WbDescribeObject.VERB);
+			abbreviations.put("\\df", WbListProcedures.VERB);
+			abbreviations.put("\\dn", WbListSchemas.VERB);
+
 			while (true)
 			{
 				String line = ConsoleReaderFactory.getConsoleReader().readLine(currentPrompt);
@@ -149,21 +174,24 @@ public class SQLConsole
 					break;
 				}
 
-				if (startOfStatement && line.trim().equals("\\x"))
-				{
-					// WbToggleDisplay toggle = (WbToggleDisplay)runner.getCommand(WbToggleDisplay.VERB);
-					runner.executeScript(WbToggleDisplay.VERB);
-					startOfStatement = true;
-					continue;
-				}
-
 				boolean isCompleteStatement = buffer.addLine(line);
-				if (isCompleteStatement || line.equalsIgnoreCase("WbHelp"))
+
+				String firstWord = getFirstWord(line);
+				if (isCompleteStatement || (abbreviations.containsKey(firstWord) && startOfStatement)  )
 				{
 					try
 					{
 						prompter.resetExecuteAll();
-						runner.executeScript(buffer.getScript());
+						String longCommand = abbreviations.get(firstWord);
+						if (longCommand != null)
+						{
+							line = line.replace(firstWord, longCommand);
+							runner.executeScript(line);
+						}
+						else
+						{
+							runner.executeScript(buffer.getScript());
+						}
 					}
 					catch (Exception e)
 					{
@@ -199,6 +227,15 @@ public class SQLConsole
 		}
 	}
 
+	private String getFirstWord(String input)
+	{
+		if (StringUtil.isBlank(input)) return null;
+		input = input.trim();
+		int pos = input.indexOf(' ');
+		if (pos <= 0) return input;
+		return input.substring(0, pos);
+	}
+
 	private String checkConnection(BatchRunner runner)
 	{
 		String newprompt = null;
@@ -208,10 +245,10 @@ public class SQLConsole
 			String user = current.getCurrentUser();
 			String catalog = current.getDisplayCatalog();
 			if (catalog == null) catalog = current.getCurrentCatalog();
-			
+
 			String schema = current.getDisplaySchema();
 			if (schema == null) current.getCurrentSchema();
-			
+
 			if (StringUtil.isBlank(catalog) && StringUtil.isNonBlank(schema) && !schema.equals(user))
 			{
 				newprompt = user + "@" + schema;

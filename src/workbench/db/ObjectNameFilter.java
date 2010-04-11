@@ -64,7 +64,6 @@ public class ObjectNameFilter
 	 * Returns the defined expression values.
 	 * <br/>
 	 * The values will be sorted alphabetically
-	 * @return
 	 */
 	public Collection<String> getFilterExpressions()
 	{

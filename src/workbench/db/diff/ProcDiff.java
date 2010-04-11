@@ -23,7 +23,10 @@ public class ProcDiff
 {
 	public static final String TAG_CREATE_PROC = "create-proc";
 	public static final String TAG_UPDATE_PROC = "update-proc";
-	
+
+	public static final String TAG_CREATE_PKG = "create-package";
+	public static final String TAG_UPDATE_PKG = "update-package";
+
 	private ReportProcedure reference;
 	private ReportProcedure target;
 	private TagWriter writer;

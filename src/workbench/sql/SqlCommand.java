@@ -109,7 +109,6 @@ public class SqlCommand
 			}
 			result.addMessage(ResourceMgr.getString("TxtServerOutput"));
 			result.addMessage(s);
-			result.addMessageNewLine();
 		}
 	}
 
@@ -162,9 +161,9 @@ public class SqlCommand
 	}
 	/**
 	 * Cancels this statements execution. Cancelling is done by
-	 * calling <tt>cancel</tt> on the current JDBC Statement object. This requires
+	 * calling <tt>cancel()</tt> on the current JDBC Statement object. This requires
 	 * that the JDBC driver actually supports cancelling of statements <b>and</b>
-	 * that this method is called from a differen thread.
+	 * that this method is called from a different thread.
 	 *
 	 * It also sets the internal cancelled flag so that <tt>SqlCommand</tt>s
 	 * that process data in a loop can check this flag and exit the loop
@@ -652,7 +651,7 @@ public class SqlCommand
 	 * @param sql the sql to "clean"
 	 * @return the sql with the verb, comments and newlines removed
 	 * @see workbench.util.SqlUtil#makeCleanSql(String, boolean, boolean, char)
-	 * @see workbench.util.SqlUtil#getSqlVerb(String) 
+	 * @see workbench.util.SqlUtil#getSqlVerb(String)
 	 */
 	protected String getCommandLine(String sql)
 	{

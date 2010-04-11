@@ -133,10 +133,9 @@ public class ObjectSourceSearcher
 	 * @param searchValues the patterns to be searched in all object sources. This can be a regular expression
 	 * @param matchAll if true all patterns must be found in a single source
 	 * @param ignoreCase  if false, the patterns must match exactly
-	 * @return
+	 * @return a list of objects where the searchvalue has been found
 	 */
-	public synchronized List<DbObject> searchObjects(List<String> searchValues,
-		boolean matchAll, boolean ignoreCase, boolean useRegex)
+	public synchronized List<DbObject> searchObjects(List<String> searchValues, boolean matchAll, boolean ignoreCase, boolean useRegex)
 	{
 		cancelSearch = false;
 		isRunning = true;

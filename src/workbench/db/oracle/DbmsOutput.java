@@ -14,7 +14,6 @@ package workbench.db.oracle;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Types;
 
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
@@ -53,15 +52,14 @@ public class DbmsOutput
 		{
 			if (size < 0)
 			{
-				enableStatement = conn.prepareCall( "begin dbms_output.enable; end;" );
+				enableStatement = conn.prepareCall( "{call dbms_output.enable}" );
 			}
 			else
 			{
-				enableStatement = conn.prepareCall( "begin dbms_output.enable(:1); end;" );
+				enableStatement = conn.prepareCall( "{call dbms_output.enable(?) }" );
 				enableStatement.setLong(1, size);
 			}
 			enableStatement.executeUpdate();
-			enableStatement.close();
 			this.enabled = true;
 			this.lastSize = size;
 			LogMgr.logDebug("DbmsOutput.enable()", "Support for DBMS_OUTPUT package enabled (max size=" + size + ")");
@@ -82,9 +80,8 @@ public class DbmsOutput
 		CallableStatement disableStatement = null;
 		try
 		{
-			disableStatement = conn.prepareCall( "begin dbms_output.disable; end;" );
+			disableStatement = conn.prepareCall( "{call dbms_output.disable}" );
 			disableStatement.executeUpdate();
-			disableStatement.close();
 			this.enabled = false;
 		}
 		finally
@@ -95,46 +92,40 @@ public class DbmsOutput
 
 	/**
 	 * Retrieve all server messages written with dbms_output.
-	 * 
+	 *
 	 * @return all messages written with dbms_output.put_line()
 	 */
 	public String getResult()
 		throws SQLException
 	{
     if (!this.enabled) return "";
-		CallableStatement showOutputStatement = conn.prepareCall(
-		"declare " +
-		"    l_line varchar2(255); " +
-		"    l_done number; " +
-		"    l_buffer clob; " +
-		"begin " +
-		"  loop " +
-		"    exit when length(l_buffer)+255 > :maxbytes OR l_done = 1; " +
-		"    dbms_output.get_line( l_line, l_done ); " +
-		"    l_buffer := l_buffer || l_line || chr(10); " +
-		"  end loop; " +
-		" :done := l_done; " +
-		" :buffer := l_buffer; " +
-		"end;" );
 
+		CallableStatement stmt = null;
 		StringBuilder result = new StringBuilder(1024);
 		try
 		{
-			showOutputStatement.registerOutParameter( 2, Types.INTEGER );
-			showOutputStatement.registerOutParameter( 3, Types.VARCHAR );
-			for (;;)
+			stmt = conn.prepareCall("{call dbms_output.get_line(?,?)}");
+			stmt.registerOutParameter(1,java.sql.Types.VARCHAR);
+			stmt.registerOutParameter(2,java.sql.Types.NUMERIC);
+
+			int status = 0;
+			while (status == 0)
 			{
-				showOutputStatement.setInt( 1, 32000 );
-				showOutputStatement.executeUpdate();
-				result.append(showOutputStatement.getString(3).trim());
-				if (showOutputStatement.getInt(2) == 1 ) break;
+				stmt.execute();
+				String line = stmt.getString(1);
+				status = stmt.getInt(2);
+				if (line != null && status == 0)
+				{
+					result.append(line.trim());
+					result.append('\n');
+				}
 			}
 		}
 		finally
 		{
-			try { showOutputStatement.close(); } catch (Throwable th) {}
+			SqlUtil.closeStatement(stmt);
 		}
-		return result.toString().trim();
+		return result.toString();
 	}
 
 	public void close()
@@ -149,8 +140,4 @@ public class DbmsOutput
 		}
 	}
 
-	protected void finalize()
-	{
-		this.close();
-	}
 }

@@ -18,7 +18,9 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -450,9 +452,20 @@ public class SchemaReporter
 		{
 			String schema = this.dbConn.getMetadata().adjustSchemaNameCase(targetSchema);
 			List<ProcedureDefinition> procs = this.dbConn.getMetadata().getProcedureReader().getProcedureList(null, schema, null);
+			Set<String> oraPackages = new HashSet<String>();
 
 			for (ProcedureDefinition def : procs)
 			{
+				// Object types are reported with the "normal" objects
+				if (def.isOracleObjectType()) continue;
+
+				if (def.isOraclePackage())
+				{
+					// Make sure Oracle packages are only reported once
+					// getProcedureList() will return a procedure definition for each procedure/function of a package
+					if (oraPackages.contains(def.getPackageName())) continue;
+					oraPackages.add(def.getPackageName());
+				}
 				ReportProcedure proc = new ReportProcedure(def, this.dbConn);
 				this.procedures.add(proc);
 				if (this.cancel) return;

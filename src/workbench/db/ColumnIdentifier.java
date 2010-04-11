@@ -101,8 +101,6 @@ public class ColumnIdentifier
 	/**
 	 * Returns the name of the table if this ColumnIdentifier was created
 	 * from a query
-	 *
-	 * @return
 	 */
 	public String getSourceTableName()
 	{

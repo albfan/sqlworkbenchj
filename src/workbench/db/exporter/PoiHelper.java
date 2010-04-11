@@ -11,26 +11,28 @@
  */
 package workbench.db.exporter;
 
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import workbench.log.LogMgr;
 import workbench.util.VersionNumber;
 
 /**
  * Test if POI classes are available on the classpath.
- * 
- * @author Thomas Kellerer  
+ *
+ * @author Thomas Kellerer
  */
 public class PoiHelper
 {
+
 	private static boolean tested;
 	private static boolean available;
-
 	private static boolean xlsxTested;
 	private static boolean xlsxAvailable;
 
 	public static boolean isPoiAvailable()
 	{
-		if (tested) return available;
+		if (tested)
+		{
+			return available;
+		}
 
 		try
 		{
@@ -41,7 +43,10 @@ public class PoiHelper
 			Package poi = c.getPackage();
 			String v = poi.getImplementationVersion();
 			int pos = v.indexOf('-');
-			if (pos > -1) v = v.substring(0, pos);
+			if (pos > -1)
+			{
+				v = v.substring(0, pos);
+			}
 			VersionNumber version = new VersionNumber(v);
 			VersionNumber needed = new VersionNumber(3, 5);
 			available = version.isNewerOrEqual(needed);
@@ -59,9 +64,15 @@ public class PoiHelper
 
 	public static boolean isXLSXAvailable()
 	{
-		if (!isPoiAvailable()) return false;
+		if (!isPoiAvailable())
+		{
+			return false;
+		}
 
-		if (xlsxTested) return xlsxAvailable;
+		if (xlsxTested)
+		{
+			return xlsxAvailable;
+		}
 
 		try
 		{
@@ -74,17 +85,5 @@ public class PoiHelper
 			xlsxAvailable = false;
 		}
 		return xlsxAvailable;
-	}
-
-	public static void main(String[] args)
-	{
-		try
-		{
-			XSSFWorkbook wb = new XSSFWorkbook();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 	}
 }

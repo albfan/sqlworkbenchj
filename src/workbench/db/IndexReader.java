@@ -23,7 +23,7 @@ import workbench.storage.DataStore;
  * A default implementation uses the JDBC API to retrieve this information.
  *
  * Additional implementations are available to retrieve DBMS specific index information
- * 
+ *
  * @author Thomas Kellerer
  */
 public interface IndexReader
@@ -40,12 +40,12 @@ public interface IndexReader
 	 * The TYPE column may not be an integer value but a String value that indicates
 	 * the type of the index in plain text. So the column "TYPE" from the result set
 	 * should always be accessed using getObject("TYPE")
-	 * 
+	 *
 	 * @see #indexInfoProcessed()
 	 */
 	ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException;
-	
+
 	/**
 	 * This closes any resources opened by {@link #getIndexSource(workbench.db.TableIdentifier, workbench.storage.DataStore, String)}
 	 * and should be called after the ResultSet obtained from {@link #getIndexInfo(TableIdentifier, boolean)} has
@@ -57,22 +57,22 @@ public interface IndexReader
 
 	/**
 	 * Get the SQL source for all indexes defined in indexDefinition.
-	 * 
+	 *
 	 * If tableNameToUse is non-null then that name will be used instead
 	 * of the name of the TableIdentifier
 	 */
 	StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse);
-	
+
 	/**
 	 * 	Build a SQL statement (from scratch) to create a new index on the given table.
-	 * 
+	 *
 	 * 	@param table - The table for which the index should be constructed
 	 * 	@param indexName - The name of the Index
 	 * 	@param unique - Should the index be unique
 	 *  @param columnList - The columns that should build the index
 	 */
 	String buildCreateIndexSql(TableIdentifier table, String indexName, boolean unique, List<IndexColumn> columnList);
-	
+
 	/**
 	 * Post-Process the index definitions contained in the List
 	 * This can be used to e.g. retrieve additional index information
@@ -82,7 +82,7 @@ public interface IndexReader
 
 	/**
 	 * Return the index information for a table as a DataStore. This is
-	 * should return the same information as getTableIndexList() 
+	 * should return the same information as getTableIndexList()
 	 *
 	 * @param table the table to get the indexes for
 	 * @see #getTableIndexList(TableIdentifier)
@@ -102,10 +102,10 @@ public interface IndexReader
 
 	/**
 	 * For non-standard index type, return the source for this index
-	 * 
+	 *
 	 * @param table
-	 * @param indexName
-	 * @return
+	 * @param definition
+	 * @return the CREATE INDEX statement
 	 */
 	String getIndexSourceForType(TableIdentifier table, IndexDefinition definition);
 }

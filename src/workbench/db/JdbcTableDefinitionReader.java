@@ -1,11 +1,11 @@
 /*
  * JdbcTableDefinitionReader
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  * Copyright 2002-2009, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db;
@@ -32,7 +32,10 @@ public class JdbcTableDefinitionReader
 	 * To display the columns for a table in a DataStore create an
 	 * instance of {@link TableColumnsDatastore}.
 	 *
-	 * @param toRead The table for which the definition should be retrieved
+	 * @param table The table for which the definition should be retrieved
+	 * @param primaryKeyColumns the primary keys of <tt>table</tt>, may not be null
+	 * @param dbConnection the connection to be used
+	 * @param typeResolver the DataTypeResolver to be used. If null, it will be taken from the connection
 	 *
 	 * @throws SQLException
 	 * @return the definition of the table.
@@ -66,20 +69,20 @@ public class JdbcTableDefinitionReader
 				// HSQLDB 1.8 returns 23 columns, but is not JDBC4, so I need to check for the name as well.
 				jdbc4 = name.equals("IS_AUTOINCREMENT");
 			}
-			 
+
 			while (rs != null && rs.next())
 			{
-				String colName = rs.getString("COLUMN_NAME"); 
+				String colName = rs.getString("COLUMN_NAME");
 				int sqlType = rs.getInt("DATA_TYPE");
 				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), typeResolver.fixColumnType(sqlType));
 
 				String typeName = rs.getString("TYPE_NAME");
 
-				int size = rs.getInt("COLUMN_SIZE"); 
+				int size = rs.getInt("COLUMN_SIZE");
 				int digits = -1;
 				try
 				{
-					digits = rs.getInt("DECIMAL_DIGITS"); 
+					digits = rs.getInt("DECIMAL_DIGITS");
 				}
 				catch (Exception e)
 				{
@@ -87,8 +90,8 @@ public class JdbcTableDefinitionReader
 				}
 				if (rs.wasNull()) digits = -1;
 
-				String remarks = rs.getString("REMARKS"); 
-				String defaultValue = rs.getString("COLUMN_DEF"); 
+				String remarks = rs.getString("REMARKS");
+				String defaultValue = rs.getString("COLUMN_DEF");
 				if (defaultValue != null && dbSettings.trimDefaults())
 				{
 					defaultValue = defaultValue.trim();
@@ -97,7 +100,7 @@ public class JdbcTableDefinitionReader
 				int position = -1;
 				try
 				{
-					position = rs.getInt("ORDINAL_POSITION"); 
+					position = rs.getInt("ORDINAL_POSITION");
 				}
 				catch (SQLException e)
 				{
@@ -105,7 +108,7 @@ public class JdbcTableDefinitionReader
 					position = -1;
 				}
 
-				String nullable = rs.getString("IS_NULLABLE"); 
+				String nullable = rs.getString("IS_NULLABLE");
 				String increment = jdbc4 ? rs.getString("IS_AUTOINCREMENT") : "NO";
 				boolean autoincrement = StringUtil.stringToBool(increment);
 

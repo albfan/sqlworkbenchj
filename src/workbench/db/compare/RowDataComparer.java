@@ -182,7 +182,6 @@ public class RowDataComparer
 	 * or a XML fragment as returned by XmlRowDataConverter.
 	 *
 	 * @param rowNumber
-	 * @return
 	 */
 	public String getMigration(long rowNumber)
 	{

@@ -13,12 +13,17 @@ package workbench.db.oracle;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Types;
+import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
+import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -137,33 +142,136 @@ public class OracleProcedureReader
 		return result;
 	}
 
+	@Override
+	public DataStore buildProcedureListDataStore(DbMetadata meta, boolean addSpecificName)
+	{
+		DataStore ds = super.buildProcedureListDataStore(meta, addSpecificName);
+		ds.getResultInfo().getColumn(COLUMN_IDX_PROC_LIST_CATALOG).setColumnName("PACKAGE");
+		return ds;
+	}
+
+	@Override
+	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+		throws SQLException
+	{
+		DataStore result = super.getProcedureColumns(aCatalog, aSchema, aProcname);
+
+		// Remove the implicit parameter for Object type functions that passes
+		// the instance of that object to the function
+		for (int row = result.getRowCount() - 1; row >= 0; row --)
+		{
+			String colname = result.getValueAsString(row, COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+			int type = result.getValueAsInt(row, COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
+			if ("SELF".equals(colname) && type == Types.OTHER)
+			{
+				result.deleteRow(row);
+			}
+		}
+		return result;
+	}
+
+
+	@Override
+	public DataStore getProcedures(String catalog, String schema, String name)
+		throws SQLException
+	{
+		if (!Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true))
+		{
+			return super.getProcedures(catalog, schema, name);
+		}
+
+		String standardProcs = "select null as procedure_cat,  \n" +
+             "       ap.owner as procedure_schem,  \n" +
+             "       ap.object_name as procedure_name, \n" +
+						 "       null, \n" +
+						 "       null, \n" +
+						 "       null, \n" +
+             "       null as remarks, \n" +
+             "       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE \n" +
+             "from all_procedures ap \n" +
+             "  join all_objects ao on ao.object_name = ap.object_name and ao.owner = ap.owner  \n" +
+             "where ao.object_type in ('PROCEDURE', 'FUNCTION') ";
+
+		if (StringUtil.isNonBlank(schema))
+		{
+			standardProcs += " AND ao.owner = '" + schema + "' ";
+		}
+
+		if (StringUtil.isBlank(name))
+		{
+			name = "%";
+		}
+
+		standardProcs += " AND ao.object_name LIKE '" + name + "' ";
+
+		String pkgProcs = "select package_name as procedure_cat, \n" +
+             "       ao.owner as procedure_schem, \n" +
+             "       aa.object_name as procedure_name, \n" +
+             "       null, \n" +
+             "       null, \n" +
+             "       null, \n" +
+             "       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
+             "       decode(aa.in_out, 'IN', 1, 'OUT', 2, 0) as PROCEDURE_TYPE \n" +
+             "from all_arguments aa \n" +
+             "  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE', 'TYPE') \n" +
+             "where aa.owner = user \n" +
+             "and aa.package_name IS NOT NULL \n" +
+             "and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT') \n" +
+             "      OR (aa.position = 1 and aa.sequence = 1) \n" +
+             "      OR (aa.position = 1 and aa.sequence = 0) \n" +
+             "    )";
+
+		if (StringUtil.isNonBlank(schema))
+		{
+			pkgProcs += " AND ao.owner = '" + schema + "' ";
+		}
+
+		pkgProcs += " AND aa.object_name LIKE '" + name + "' ";
+
+		String sql = standardProcs + " UNION ALL " + pkgProcs + " ORDER BY 2,3";
+		Statement stmt = null;
+		try
+		{
+			stmt = this.connection.createStatementForQuery();
+			ResultSet rs = stmt.executeQuery(sql);
+
+			// the result set will be closed by fillProcedureListDataStore()
+			DataStore ds = fillProcedureListDataStore(rs);
+			ds.resetStatus();
+			return ds;
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
+	}
 
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		if (def.isOraclePackage())
+		if (def.getPackageName() == null)
+		{
+			super.readProcedureSource(def);
+			return;
+		}
+
+		if (def.isOracleObjectType())
+		{
+			OracleObjectType type = new OracleObjectType(def.getSchema(), def.getPackageName());
+			CharSequence source = typeReader.getObjectSource(connection, type);
+			def.setSource(source);
+		}
+		else
 		{
 			CharSequence source = getPackageSource(def.getSchema(), def.getPackageName());
 			if (StringUtil.isBlank(source))
 			{
-				// Member functions of objects are returned the same way, as functions from
-				// packages. If retrieving the source was not successful, then most likely
-				// this is a member function of an Oracle TYPE AS OBJECT
+				// Fallback if the ProcedureDefinition was not initialized correctly.
+				// This will happen if our custom SQL was not used.
 				OracleObjectType type = new OracleObjectType(def.getSchema(), def.getPackageName());
 				source = typeReader.getObjectSource(connection, type);
 			}
 			def.setSource(source);
-		}
-		else if (def.getCatalog() != null)
-		{
-			// Fallback in case the definition was not initialized correctly.
-			CharSequence source = getPackageSource(def.getSchema(), def.getCatalog());
-			def.setSource(source);
-			def.setOraclePackage(true);
-		}
-		else
-		{
-			super.readProcedureSource(def);
 		}
 	}
 }

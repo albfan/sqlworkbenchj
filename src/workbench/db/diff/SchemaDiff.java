@@ -37,6 +37,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.RowActionMonitor;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StrWriter;
 import workbench.util.StringUtil;
@@ -589,6 +590,8 @@ public class SchemaDiff
 
 		for (ProcedureDefinition refProc : refProcs)
 		{
+			if (refProc.isOracleObjectType()) continue;
+
 			if (this.cancel)
 			{
 				this.objectsToCompare = null;
@@ -618,6 +621,14 @@ public class SchemaDiff
 
 		for (ProcedureDefinition tProc : targetProcs)
 		{
+			if (tProc.isOracleObjectType()) continue;
+
+			if (this.cancel)
+			{
+				this.objectsToCompare = null;
+				break;
+			}
+
 			String procname = tProc.getProcedureName();
 			if (!refProcNames.contains(procname))
 			{
@@ -786,15 +797,12 @@ public class SchemaDiff
 			//out.write("\n");
 			this.appendDropViews(out, indent);
 		}
+
+		if (this.cancel) return;
+
 		if (this.diffSequences)
 		{
 			this.appendSequenceDiff(out, indent, tw);
-			out.write("\n");
-		}
-
-		if (this.diffProcs)
-		{
-			this.appendProcDiff(out, indent, tw);
 			out.write("\n");
 		}
 
@@ -805,6 +813,8 @@ public class SchemaDiff
 			this.appendProcDiff(out, indent, tw);
 			out.write("\n");
 		}
+
+		if (this.cancel) return;
 
 		writeTag(out, null, "schema-diff", false);
 	}
@@ -870,16 +880,14 @@ public class SchemaDiff
 			}
 		}
 
-		if (this.procsToDelete == null || procsToDelete.size() == 0) return;
+		if (CollectionUtil.isEmpty(procsToDelete)) return;
 
 		out.write('\n');
 		writeTag(out, indent, TAG_DROP_PROC, true);
 		StrBuffer myindent = new StrBuffer(indent);
 		myindent.append("  ");
-		Iterator itr = this.procsToDelete.iterator();
-		while (itr.hasNext())
+		for (ProcedureDefinition def : procsToDelete)
 		{
-			ProcedureDefinition def = (ProcedureDefinition)itr.next();
 			ReportProcedure rp = new ReportProcedure(def, targetDb);
 			rp.setIndent(myindent);
 			StrBuffer xml = rp.getXml(false);

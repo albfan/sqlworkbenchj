@@ -17,10 +17,8 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
@@ -72,7 +70,7 @@ public class JdbcProcedureReader
 		try
 		{
 			DataStore ds = getProcedures(catalog, schema, procName);
-			
+
 			if (ds.getRowCount() > 0)
 			{
 				int type = ds.getValueAsInt(0, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
@@ -110,7 +108,7 @@ public class JdbcProcedureReader
 		{
 			name = "%";
 		}
-		
+
 		Savepoint sp = null;
 		try
 		{
@@ -287,7 +285,7 @@ public class JdbcProcedureReader
 				int size = rs.getInt("LENGTH");
 				String rem = rs.getString("REMARKS");
 
-				String display = SqlUtil.getSqlTypeDisplay(typeName, sqlType, size, digits);
+				String display = connection.getMetadata().getDataTypeResolver().getSqlTypeDisplay(typeName, sqlType, size, digits);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, display);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);
@@ -412,9 +410,7 @@ public class JdbcProcedureReader
 	}
 
 	/**
-	 * Return a List of {@link workbench.db.ProcedureDefinition} objects
-	 * for Oracle packages only one ProcedureDefinition per package is returned (although
-	 * the DbExplorer will list each function of the packages).
+	 * Return a List of {@link workbench.db.ProcedureDefinition} objects.
 	 */
 	public List<ProcedureDefinition> getProcedureList(String aCatalog, String aSchema, String name)
 		throws SQLException
@@ -424,7 +420,6 @@ public class JdbcProcedureReader
 		if (procs == null || procs.getRowCount() == 0) return result;
 		procs.sortByColumn(ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, true);
 		int count = procs.getRowCount();
-		Set<String> oraPackages = new HashSet<String>();
 
 		for (int i = 0; i < count; i++)
 		{
@@ -436,14 +431,7 @@ public class JdbcProcedureReader
 			ProcedureDefinition def = null;
 			if (this.connection.getMetadata().isOracle() && cat != null)
 			{
-				// The package name for Oracle is reported in the catalog column.
-				// each function/procedure of the package is listed separately,
-				// but we only want to create one ProcedureDefinition for the whole package
-				if (!oraPackages.contains(cat))
-				{
-					def = ProcedureDefinition.createOracleDefinition(schema, procName, cat, type);
-					oraPackages.add(cat);
-				}
+				def = ProcedureDefinition.createOracleDefinition(schema, procName, cat, type, remarks);
 			}
 			else
 			{

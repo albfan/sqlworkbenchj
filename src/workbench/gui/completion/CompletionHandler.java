@@ -27,7 +27,6 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -43,7 +42,7 @@ public class CompletionHandler
 	private JEditTextArea editor;
 	protected List elements = Collections.EMPTY_LIST;
 	protected List filteredElements = null;
-	
+
 	protected WbConnection dbConnection;
 	private JLabel header;
 	private List<ListDataListener> listeners;
@@ -196,7 +195,7 @@ public class CompletionHandler
 		filteredElements =null;
 		fireDataChanged();
 	}
-	
+
 	public synchronized int filterElements(String value)
 	{
 		if (StringUtil.isBlank(value)) return 0;
@@ -244,7 +243,7 @@ public class CompletionHandler
 		}
 		return elements == null ? Collections.emptyList() : elements;
 	}
-	
+
 	private void showNoObjectsFoundMessage()
 	{
 		WbThread t = new WbThread("Notification")

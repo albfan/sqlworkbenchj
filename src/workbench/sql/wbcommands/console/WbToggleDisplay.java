@@ -15,10 +15,8 @@ import java.sql.SQLException;
 
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
-import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
-import workbench.util.StringUtil;
 
 /**
  * A SQL command to control the output format in console mode.
@@ -28,7 +26,6 @@ import workbench.util.StringUtil;
 public class WbToggleDisplay extends SqlCommand
 {
 	public static final String VERB = "WBTOGGLEDISPLAY";
-	public static final String ALTERNATE_VERB = "\\x";
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
@@ -61,12 +58,6 @@ public class WbToggleDisplay extends SqlCommand
 	public String getVerb()
 	{
 		return VERB;
-	}
-
-	@Override
-	public String getAlternateVerb()
-	{
-		return ALTERNATE_VERB;
 	}
 
 
