@@ -73,8 +73,7 @@ public class WbCall
 	}
 
 	/**
-	 * Converts the passed sql to an Oracle compliant JDBC call and
-	 * runs the statement.
+	 * Converts the passed sql to JDBC compliant call and runs the statement.
 	 */
 	@Override
 	public StatementRunnerResult execute(String aSql)
