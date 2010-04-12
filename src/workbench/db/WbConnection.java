@@ -179,6 +179,7 @@ public class WbConnection
 	 */
 	public String getCurrentSchema()
 	{
+		if (metaData == null) return null;
 		return this.metaData.getCurrentSchema();
 	}
 
@@ -822,17 +823,19 @@ public class WbConnection
 
 	public String getDatabaseProductName()
 	{
+		if (metaData == null) return "";
 		return this.metaData.getProductName();
 	}
 
 	public String getOutputMessages()
 	{
+		if (metaData == null) return "";
 		return this.metaData.getOutputMessages();
 	}
 
 	public int hashCode()
 	{
-		return this.id.hashCode();
+		return id.hashCode();
 	}
 
 	public boolean equals(Object o)
