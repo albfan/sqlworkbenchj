@@ -990,7 +990,7 @@ public final class WbManager
 	 */
 	public void run()
 	{
-		LogMgr.logDebug("WbManager.run()", "Shutdownhook called!");
+		LogMgr.logWarning("WbManager.run()", "Shutdownhook called. SQL Workbench/J process has been interrupted.");
 		ConnectionMgr.getInstance().disconnectAll();
 		saveSettings();
 	}
