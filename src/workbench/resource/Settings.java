@@ -161,6 +161,7 @@ public class Settings
 		try
 		{
 			String configDir = StringUtil.replaceProperties(System.getProperty("workbench.configdir", null));
+			configDir = StringUtil.trimQuotes(configDir);
 			if (StringUtil.isBlank(configDir))
 			{
 				// check the current directory for a configuration file
