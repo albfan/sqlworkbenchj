@@ -133,7 +133,6 @@ public class WbCall
 				}
 			}
 
-			// The called "procedure" could also be a function
 			if (outParameters == null || outParameters.size() == 0)
 			{
 				try
@@ -397,7 +396,6 @@ public class WbCall
 		int definedParamCount = params.getRowCount();
 		if (definedParamCount != sqlParams.size())
 		{
-			LogMgr.logWarning("WbCall.checkParametersFromDatabase", "Number of parameters reported for procedure (" + definedParamCount + ") is different than the number supplied in actual sql ("+ sqlParams.size() + ")");
 			sqlParams = null;
 		}
 
