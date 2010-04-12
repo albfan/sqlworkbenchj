@@ -546,6 +546,70 @@ public class SqlUtil
 		return result;
 	}
 
+	public static List<String> getFunctionParameters(String sql)
+	{
+		if (StringUtil.isBlank(sql)) return Collections.emptyList();
+		List<String> params = CollectionUtil.arrayList();
+		
+		try
+		{
+			SQLLexer lexer = new SQLLexer(sql);
+			// skip until the first opening bracket
+			SQLToken t = lexer.getNextToken(false, false);
+			while (t != null && !t.getContents().equals("("))
+			{
+				t = lexer.getNextToken(false, false);
+			}
+			if (t == null) return Collections.emptyList();
+
+			int bracketCount = 0;
+
+			int lastParamStart = (t.getCharEnd());
+			
+			while (t != null)
+			{
+				String text = t.getContents();
+				if (text.equals("(") )
+				{
+					bracketCount ++;
+				}
+				else if (text.equals(")"))
+				{
+					if (bracketCount == 1)
+					{
+						int end = t.getCharBegin();
+						if (end > lastParamStart)
+						{
+							String param = sql.substring(lastParamStart, end);
+							params.add(param.trim());
+						}
+						break;
+					}
+					bracketCount--;
+				}
+				else if (bracketCount == 1)
+				{
+					if (text.equals(","))
+					{
+						int end = t.getCharBegin();
+						if (end > lastParamStart)
+						{
+							String param = sql.substring(lastParamStart, end);
+							params.add(param.trim());
+						}
+						lastParamStart = t.getCharEnd();
+					}
+				}
+				t = lexer.getNextToken(true, false);
+			}
+		}
+		catch (Exception e)
+		{
+			return Collections.emptyList();
+		}
+		return params;
+	}
+	
 	public static String striptColumnAlias(String expression)
 	{
 		if (expression == null) return null;

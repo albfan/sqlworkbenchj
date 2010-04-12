@@ -321,7 +321,7 @@ public class WbCall
 	private List<ParameterDefinition> checkParametersFromDatabase(String sql)
 		throws SQLException
 	{
-		// Try to get the parameter information directly from the procedure definition
+		// Detect the name/schema of the called procedure
 		SQLLexer l = new SQLLexer(sql);
 		SQLToken t = l.getNextToken(false, false);
 
@@ -329,7 +329,7 @@ public class WbCall
 		String schema = null;
 		String procname = null;
 
-		List<String> sqlParams = CollectionUtil.arrayList();
+		List<String> sqlParams = SqlUtil.getFunctionParameters(sql);
 
 		try
 		{
@@ -343,28 +343,6 @@ public class WbCall
 			else
 			{
 				procname = (t == null ? "" : t.getContents());
-			}
-
-			// Analyze the parameters given..
-			while (n != null && !n.getContents().equals("("))
-			{
-				n = l.getNextToken(false, false);
-			}
-			n = l.getNextToken(false, false);
-			while (n != null && !n.getContents().equals(")"))
-			{
-				if (!n.getContents().equals(","))
-				{
-					if (n.getContents().equals("?"))
-					{
-						sqlParams.add("?");
-					}
-					else
-					{
-						sqlParams.add("literal");
-					}
-				}
-				n = l.getNextToken(false, false);
 			}
 		}
 		catch (IOException e)

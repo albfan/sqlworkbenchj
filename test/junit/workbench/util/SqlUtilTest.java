@@ -45,6 +45,33 @@ public class SqlUtilTest
 		assertEquals(quoted, name);
 
 	}
+
+	public void testGetFunctionParams()
+		throws Exception
+	{
+		List<String> params = SqlUtil.getFunctionParameters("execute myfunc(1,2,3)");
+		assertEquals(3, params.size());
+		params = SqlUtil.getFunctionParameters("exec some_func(  trunc(sysdate) - 1  )");
+		assertEquals(1, params.size());
+		assertEquals("trunc(sysdate) - 1", params.get(0));
+
+		params = SqlUtil.getFunctionParameters("exec some_func(  trunc(sysdate) - 1  ,  ?)");
+		assertEquals(2, params.size());
+		assertEquals("trunc(sysdate) - 1", params.get(0));
+		assertEquals("?", params.get(1));
+
+		params = SqlUtil.getFunctionParameters("some_func()");
+		assertEquals(0, params.size());
+
+		params = SqlUtil.getFunctionParameters("some_func('1,2')");
+		assertEquals(1, params.size());
+		assertEquals("'1,2'", params.get(0));
+
+		params = SqlUtil.getFunctionParameters("wbcall some_proc(\"1,2\")");
+		assertEquals(1, params.size());
+		assertEquals("\"1,2\"", params.get(0));
+	}
+
 	public void testIsSelectIntoNewTable()
 		throws Exception
 	{
