@@ -18,9 +18,11 @@ import java.sql.Statement;
 import java.sql.Types;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcProcedureReader;
+import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.sql.DelimiterDefinition;
 import workbench.storage.DataStore;
@@ -71,6 +73,11 @@ public class OracleProcedureReader
 
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		DelimiterDefinition delimiter = Settings.getInstance().getAlternateDelimiter(connection);
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleProcedureReader.getPackageSource()", "Using SQL to retrieve package source:\n" + sql.toString());
+		}
 
 		try
 		{
@@ -170,12 +177,17 @@ public class OracleProcedureReader
 		return result;
 	}
 
+	private boolean useCustomSql()
+	{
+		if (connection == null) return false;
+		return JdbcUtils.hasMinimumServerVersion(connection, "10.0") && Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true);
+	}
 
 	@Override
 	public DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException
 	{
-		if (!Settings.getInstance().getBoolProperty("workbench.db.oracle.procedures.custom_sql", true))
+		if (!useCustomSql())
 		{
 			return super.getProcedures(catalog, schema, name);
 		}
@@ -223,12 +235,18 @@ public class OracleProcedureReader
 
 		if (StringUtil.isNonBlank(schema))
 		{
-			pkgProcs += " AND ao.owner = '" + schema + "' ";
+			pkgProcs += "\n AND ao.owner = '" + schema + "' ";
 		}
 
-		pkgProcs += " AND aa.object_name LIKE '" + name + "' ";
+		pkgProcs += "\n AND aa.object_name LIKE '" + name + "' ";
 
-		String sql = standardProcs + " UNION ALL " + pkgProcs + " ORDER BY 2,3";
+		String sql = standardProcs + "\n UNION ALL \n" + pkgProcs + "\n ORDER BY 2,3";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleProcedureReader.getProcedures()", "Using SQL to retrieve procedures:\n" + sql.toString());
+		}
+
 		Statement stmt = null;
 		try
 		{
