@@ -56,6 +56,7 @@ public class WbConnect
 		cmdLine.addArgument(AppArguments.ARG_CONN_JAR);
 		cmdLine.addArgument(AppArguments.ARG_CONN_USER);
 		cmdLine.addArgument(AppArguments.ARG_CONN_PWD);
+		cmdLine.addArgument(AppArguments.ARG_CONN_FETCHSIZE);
 		cmdLine.addArgument(AppArguments.ARG_CONN_AUTOCOMMIT, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_CONN_ROLLBACK, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_CONN_TRIM_CHAR, ArgumentType.BoolArgument);

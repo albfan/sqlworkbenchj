@@ -134,7 +134,7 @@
 					choose not to store the password in the connection profile.</para></entry>
 				</row>
 				<row>
-					<entry><para>Fetch size</para></entry>
+					<entry id="profile-fetch-size"><para>Fetch size</para></entry>
 					<entry>
             <para>
               <indexterm><primary>Connection profile</primary><secondary>default fetch size</secondary></indexterm>
@@ -153,6 +153,10 @@
 							it is recommended to turn off the caching in the driver (e.g. by setting the value
 							for this property to 1).
 						</para>
+            <para>
+              You can change the fetch size for the current connection manually by running the &wb-productname; specific
+              command <link linkend="command-fetchsize">WbFetchSize</link>
+            </para>
 					</entry>
 				</row>
 				<row>

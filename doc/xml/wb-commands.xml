@@ -1336,6 +1336,24 @@ v_data=id1,id2</programlisting>
 
 	</section>
 
+  <section id="command-fetchsize">
+     <title>Change the default fetch size - WbFetchSize</title>
+     <para>
+       The default fetch size for a connection can be defined in the <link linkend="profile-fetch-size">connection profile</link>. Using the
+       command <literal>WbFetchSize</literal> you can change the fetch size without changing the connection profile.
+     </para>
+     <para>
+       The following script changes the default fetch size to 2500 rows and then runs a <literal>WbExport</literal> command.
+     </para>
+     <programlisting>WbFetchSize 2500;
+WbExport -sourceTable=person -type=text -file=/temp/person.txt;
+</programlisting>
+
+     <para>
+       <literal>WbFetchSize</literal> will not change the current connection profile.
+     </para>
+   </section>
+   
   <section id="command-run-batch">
      <title>Run statements as a single batch - WbStartBatch, WbEndBatch</title>
      <para>

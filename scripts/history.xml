@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-04-11">
+    <entry dev-build="2" type="enh">A new command WbFetchSize is available to change the default fetch size of the current connection without the need to change the connection profile</entry>
     <entry dev-build="1" type="enh">Workspaces loaded with "Workspace -&gt; Load Workspace" are now added to a "Recent Workspaces" menu</entry>
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
