@@ -208,6 +208,12 @@ VALUES
         <li>
             In the DbExplorer's "Procedure" tab, functions defined in Oracle packages are no longer listed. (fixed in 108.1)
         </li>
+        <li>
+            The display of triggers in PostgreSQL is no longer working if the trigger does not have a comment.<br/> 
+            As a quickfix, please download <a href="TriggerSourceStatements.xml">this XML file</a> and copy it to your 
+            <a href="http://www.sql-workbench.net/manual/install.html#config-dir">Configuration directory</a>.<br/>
+            (fixed in 108.2)
+        </li>
       </ul>
       
       <p>

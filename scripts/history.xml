@@ -6,6 +6,7 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="2" type="fix">The display of trigger functions in Postgres that did not have a comment was not working</entry>
     <entry dev-build="2" type="fix">Specifying a config directory using -configDir that needed quoting did not work</entry>
     <entry dev-build="1" type="fix">Statements with character literals and embedded single quotes (e.g. ' test ''') were not formatted correctly</entry>
     <entry dev-build="1" type="fix">Oracle Package functions were no longer displayed in the procedure tab of the DbExplorer</entry>
