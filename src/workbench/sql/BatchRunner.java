@@ -920,6 +920,12 @@ public class BatchRunner
 			result.setRemoveComments(cmdLine.getBoolean(AppArguments.ARG_CONN_REMOVE_COMMENTS, false));
 			result.setReadOnly(cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false));
 			result.setHideWarnings(cmdLine.getBoolean(AppArguments.ARG_HIDE_WARNINGS, false));
+			int fetchSize = cmdLine.getIntValue(AppArguments.ARG_CONN_FETCHSIZE, -1);
+			if (fetchSize > -1)
+			{
+				result.setDefaultFetchSize(fetchSize);
+			}
+
 			if (props != null && props.size() > 0)
 			{
 				Properties p = new Properties();

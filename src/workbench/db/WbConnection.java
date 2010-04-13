@@ -76,7 +76,8 @@ public class WbConnection
 
 	private boolean removeComments;
 	private boolean removeNewLines;
-
+	private Integer fetchSize;
+	
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -640,13 +641,51 @@ public class WbConnection
 	}
 
 	/**
+	 * Overwrite the fetch size defined in the connection profile
+	 * @param size
+	 */
+	public void setFetchSize(int size)
+	{
+		if (size <= 0)
+		{
+			fetchSize = null;
+		}
+		else
+		{
+			fetchSize = Integer.valueOf(size);
+		}
+	}
+
+	/**
+	 * Return the fetch size to be used.
+	 * <br/>
+	 * If a fetch size has been defined using {@link #setFetchSize(int)) that size
+	 * is used, otherwise the fetch size defined on the connection profile is used.
+	 * @return
+	 */
+	public int getFetchSize()
+	{
+		if (fetchSize != null)
+		{
+			return fetchSize.intValue();
+		}
+		if (getProfile() != null)
+		{
+			return getProfile().getFetchSize();
+		}
+		return -1;
+	}
+	
+	
+	/**
 	 * Create a statement that produces ResultSets that
 	 * are read only and forward only (for performance reasons)
-	 *
+	 * <br/>
 	 * If the profile defined a default fetch size, this
 	 * will be set as well.
 	 *
 	 * @throws java.sql.SQLException
+	 * @see #getFetchSize()
   */
 	public Statement createStatementForQuery()
 		throws SQLException
@@ -663,11 +702,8 @@ public class WbConnection
 
 		try
 		{
-			if (this.getProfile() != null)
-			{
-				int fetchSize = this.getProfile().getFetchSize();
-				if (fetchSize > -1) stmt.setFetchSize(fetchSize);
-			}
+			int size = getFetchSize();
+			if (size > -1) stmt.setFetchSize(size);
 		}
 		catch (Exception e)
 		{
@@ -676,6 +712,12 @@ public class WbConnection
 		return stmt;
 	}
 
+	/**
+	 * Create a new statement object.
+	 * <br/>
+	 * This is just a wrapper for java.sql.Connection.createStatement()
+	 * @return a Statement object
+  */
 	public Statement createStatement()
 		throws SQLException
 	{

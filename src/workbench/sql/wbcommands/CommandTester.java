@@ -89,6 +89,7 @@ public class CommandTester
 		commands.add(WbGrepSource.VERB);
 		commands.add(WbGrepData.VERB);
 		commands.add(WbMode.VERB);
+		commands.add(WbFetchSize.VERB);
 
 		formattedWords = new HashMap<String, String>(20);
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);
@@ -117,6 +118,7 @@ public class CommandTester
 		formattedWords.put(WbListSchemas.VERB, "WbListSchemas");
 		formattedWords.put(WbGrepData.VERB, "WbGrepData");
 		formattedWords.put(WbGrepSource.VERB, "WbGrepSource");
+		formattedWords.put(WbFetchSize.VERB, "WbFetchSize");
 	}
 
 	public Collection<String> getCommands()

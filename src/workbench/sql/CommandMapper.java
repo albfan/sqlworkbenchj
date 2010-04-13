@@ -44,6 +44,7 @@ import workbench.sql.wbcommands.WbEnableOraOutput;
 import workbench.sql.wbcommands.WbEndBatch;
 import workbench.sql.wbcommands.WbExport;
 import workbench.sql.wbcommands.WbFeedback;
+import workbench.sql.wbcommands.WbFetchSize;
 import workbench.sql.wbcommands.WbHelp;
 import workbench.sql.wbcommands.WbHideWarnings;
 import workbench.sql.wbcommands.WbImport;
@@ -127,6 +128,7 @@ public class CommandMapper
 		addCommand(new WbGrepSource());
 		addCommand(new WbGrepData());
 		addCommand(new WbMode());
+		addCommand(new WbFetchSize());
 		
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);

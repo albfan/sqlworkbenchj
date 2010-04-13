@@ -45,6 +45,7 @@ public class AppArguments
 	public static final String ARG_CONN_EMPTYNULL = "emptyStringIsNull";
 	public static final String ARG_CONN_ROLLBACK = "rollbackOnDisconnect";
 	public static final String ARG_CONN_TRIM_CHAR = "trimCharData";
+	public static final String ARG_CONN_FETCHSIZE = "fetchSize";
 	public static final String ARG_IGNORE_DROP = "ignoreDropErrors";
 	public static final String ARG_READ_ONLY = "readOnly";
 	public static final String ARG_CONN_REMOVE_COMMENTS = "removeComments";
@@ -101,6 +102,7 @@ public class AppArguments
 		addArgument(ARG_CONN_DRIVER);
 		addArgument(ARG_CONN_DRIVER_CLASS);
 		addArgument(ARG_CONN_JAR);
+		addArgument(ARG_CONN_FETCHSIZE);
 		addArgument(ARG_CONN_USER);
 		addArgument(ARG_CONN_PWD);
 		addArgument(ARG_CONN_SEPARATE, ArgumentType.BoolArgument);
