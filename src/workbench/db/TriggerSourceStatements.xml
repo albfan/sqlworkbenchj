@@ -3,7 +3,7 @@
  <object class="java.util.HashMap">
 
   <!-- DB2 for z/OS identifies itself as DB2 -->
-	<void method="put">
+  <void method="put">
    <string>DB2</string>
    <object id="db2_host_trg_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
@@ -23,8 +23,8 @@
 
   <void method="put">
     <string>DB2 UDB for AS/400</string>
-		<object idref="db2_host_trg_source"/>
-	</void>
+    <object idref="db2_host_trg_source"/>
+  </void>
 
   <void method="put">
    <string>DB2/NT</string>
@@ -44,20 +44,20 @@
    </object>
   </void>
 
-	<void method="put">
+  <void method="put">
    <string>DB2/LINUX</string>
    <object idref="db2_trg_source"/>
-	</void>
+  </void>
 
-	<void method="put">
+  <void method="put">
    <string>DB2/NT64</string>
    <object idref="db2_trg_source"/>
-	</void>
+  </void>
 
-	<void method="put">
+  <void method="put">
    <string>DB2/AIX64</string>
    <object idref="db2_trg_source"/>
-	</void>
+  </void>
 
   <void method="put">
    <string>Oracle</string>
@@ -108,12 +108,12 @@
        || ';' || chr(10)
        || chr(10) 
        || case
-            when obj_description(trg.oid)::text is distinct from '' then
+            when obj_description(trg.oid)::text is not null then
               'COMMENT ON '||trg.tgname||' ON '||tbl.relname||' IS '||quote_literal(obj_description(trg.oid))||';'||chr(10)
             else ''
           end
        || chr(10)
-       || '---&lt; ' || src.proname || ' &gt;---' || chr(10)
+       || '---[ ' || src.proname || ' ]---' || chr(10)
        || 'CREATE OR REPLACE FUNCTION '||src.proname||'() RETURNS TRIGGER AS'||chr(10)||'$$'||chr(10)
        || src.prosrc
        || '$$'||chr(10)||'language '''||l.lanname||''''
@@ -170,8 +170,8 @@ where trg.tgrelid = tbl.oid
      <string>SELECT 'CREATE TRIGGER '||trigger_name||
         case before when 'true' then ' BEFORE ' else ' AFTER ' end||
         trigger_type||' ON '||table_name||char(10)||'  FOR EACH ROW CALL "'||java_class||'";'
-				from information_schema.triggers
-			</string>
+        from information_schema.triggers
+      </string>
     </void>
     <void property="objectNameField">
      <string>trigger_name</string>
@@ -247,8 +247,8 @@ where trg.tgrelid = tbl.oid
    </object>
   </void>
 
-	<void method="put">
-		<string>Adaptive Server Enterprise</string>
+  <void method="put">
+    <string>Adaptive Server Enterprise</string>
    <object id="ase_trg_source" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>select syscomments.text
@@ -265,10 +265,10 @@ and  sysobjects.type = &apos;TR&apos;</string>
    </object>
   </void>
 
-	<void method="put">
-		<string>Adaptive Server Anywhere</string>
-		<object idref="ase_trg_source"/>
-	</void>
+  <void method="put">
+    <string>Adaptive Server Anywhere</string>
+    <object idref="ase_trg_source"/>
+  </void>
 
   <void method="put">
    <string>Firebird</string>
@@ -335,7 +335,7 @@ SELECT 'CREATE TRIGGER ' || trg.triggername || '\n  '
 from sys.systriggers trg, sys.systables t, sys.sysschemas s
 where trg.tableid = t.tableid
 and   t.schemaid = s.schemaid
-			</string>
+      </string>
     </void>
     <void property="objectNameField">
      <string>trg.triggername</string>
