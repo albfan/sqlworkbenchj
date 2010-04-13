@@ -52,18 +52,22 @@ public class WbFetchSize
 		StatementRunnerResult result = new StatementRunnerResult();
 
 		String value = super.getCommandLine(sql);
+		int size = -1;
+
 		try
 		{
-			int size = Integer.parseInt(value);
-			currentConnection.setFetchSize(size);
-			result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", currentConnection.getFetchSize()));
-			result.setSuccess();
+			size = Integer.parseInt(value);
 		}
 		catch (Exception e)
 		{
 			result.setFailure();
-			result.addMessage(e.getMessage());
+			result.addMessage(ResourceMgr.getFormattedString("ErrInvalidNumber", value));
+			return result;
 		}
+
+		currentConnection.setFetchSize(size);
+		result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", currentConnection.getFetchSize()));
+		result.setSuccess();
 
 		return result;
 	}
