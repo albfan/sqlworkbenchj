@@ -35,7 +35,7 @@ import java.util.Date;
 public class StructConverter
 {
 
-	public static final StructConverter getInstance()
+	public static StructConverter getInstance()
 	{
 		return InstanceHolder.INSTANCE;
 	}

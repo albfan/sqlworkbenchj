@@ -57,7 +57,7 @@ public class StructConverterTest
 			public Object[] getAttributes()
 				throws SQLException
 			{
-				return new Object[] {new Integer(42), new String("Test"), new java.sql.Date(1) };
+				return new Object[] {new Integer(42), "Test", new java.sql.Date(1) };
 			}
 
 			@Override
