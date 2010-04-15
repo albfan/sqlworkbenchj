@@ -144,6 +144,7 @@ public class DataImporter
 	private boolean checkRealClobLength = false;
 	private boolean isOracle = false;
 	private boolean useSetObjectWithType = false;
+	private int maxErrorCount = 1000;
 
 	/**
 	 * Indicates multiple imports run with this instance oft DataImporter.
@@ -157,6 +158,7 @@ public class DataImporter
 	public DataImporter()
 	{
 		this.messages = new MessageBuffer();
+		maxErrorCount = Settings.getInstance().getIntProperty("workbench.import.maxerrors", 1000);
 	}
 
 	public void setConnection(WbConnection aConn)
@@ -764,24 +766,24 @@ public class DataImporter
 
 	private void addError(String msg)
 	{
-		if (errorCount < 5000)
+		errorCount ++;
+		if (errorCount < maxErrorCount)
 		{
 			this.messages.append(msg);
 		}
-		else
+		else if (!errorLimitAdded)
 		{
-			if (!errorLimitAdded)
-			{
-				messages.appendNewLine();
-				messages.append(ResourceMgr.getString("MsgImpTooManyError"));
-				messages.appendNewLine();
-				errorLimitAdded = true;
-			}
+			messages.appendNewLine();
+			messages.append(ResourceMgr.getString("MsgImpTooManyError"));
+			messages.appendNewLine();
+			errorLimitAdded = true;
 		}
 	}
 
 	public void recordRejected(String record, long importRow, Throwable error)
 	{
+		if (record == null) return;
+
 		if (badWriter != null && record != null)
 		{
 			badWriter.recordRejected(record);
@@ -955,7 +957,6 @@ public class DataImporter
 		{
 			this.hasErrors = true;
 			LogMgr.logError("DataImporter.processRow()", "Error importing row " + currentImportRow + ": " + ExceptionUtil.getDisplay(e), null);
-			errorCount ++;
 			String rec = this.source.getLastRecord();
 			if (rec == null)
 			{

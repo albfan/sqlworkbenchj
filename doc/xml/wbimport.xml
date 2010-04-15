@@ -43,9 +43,18 @@
 		Archives created with the <link linkend="command-export"><literal>WbExport</literal></link> command
 		using the <literal>-compress=true</literal> parameter can be imported using <literal>WbImport</literal>
 		command. You simply need to specifiy the archive file created by <literal>WbExport</literal>, and
-		<literal>WbImport</literal> will automatically detect the archive. For an example on creating
-		and importing compressed exports, please refer to <link linkend="export-compress">compressing export files</link>
+		<literal>WbImport</literal> will automatically detect the archive. For an example to create
+		and import compressed exports, please refer to <link linkend="export-compress">compressing export files</link>
 	</para>
+
+	<note>
+		<para>
+			If you use <literal>continueOnError=true</literal> and expect a substantial number of rows to fail, 
+			it is highly recommended to also use a "bad file" to log all rejected records. Otherwise the rejected
+			records are "recorded" in memory which may lead to an out of memory error.
+		</para>
+	</note>
+	
 
 	<section id="import-general-parameters">
 		<title>General parameters</title>
