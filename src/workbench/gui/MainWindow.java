@@ -1960,8 +1960,15 @@ public class MainWindow
 
 	public void closeOtherPanels(MainPanel toKeep)
 	{
+		if (GuiSettings.getConfirmTabClose())
+		{
+			boolean doClose = WbSwingUtilities.getYesNo(sqlTab, ResourceMgr.getString("MsgConfirmCloseOtherTabs"));
+			if (!doClose) return;
+		}
+		
 		boolean inProgress = connectInProgress;
 		if (!inProgress) this.setConnectIsInProgress();
+
 		try
 		{
 			this.tabRemovalInProgress = true;
