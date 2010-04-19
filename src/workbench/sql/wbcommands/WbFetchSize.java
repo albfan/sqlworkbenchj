@@ -66,7 +66,7 @@ public class WbFetchSize
 		}
 
 		currentConnection.setFetchSize(size);
-		result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", currentConnection.getFetchSize()));
+		result.addMessage(ResourceMgr.getFormattedString("MsgFetchSizeChanged", Integer.toString(currentConnection.getFetchSize())));
 		result.setSuccess();
 
 		return result;
