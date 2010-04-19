@@ -164,7 +164,8 @@ public class OracleControlFileWriter
 	private String convertJavaCharsetToOracle(String encoding)
 	{
 		if (encoding == null) return Settings.getInstance().getDefaultFileEncoding();
-		if (encoding.equalsIgnoreCase("UTF8")) return "UTF-8";
+		if (encoding.equalsIgnoreCase("UTF8")) return "AL32UTF8";
+		if (encoding.equalsIgnoreCase("UTF-8")) return "AL32UTF8";
 		if (encoding.equalsIgnoreCase("ISO-8859-1")) return "WE8ISO8859P1";
 		if (encoding.equalsIgnoreCase("ISO-8859-15")) return "WE8ISO8859P15";
 		if (encoding.equalsIgnoreCase("ISO-8859-10")) return "NE8ISO8859P10";

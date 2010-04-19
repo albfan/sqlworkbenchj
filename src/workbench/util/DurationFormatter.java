@@ -36,7 +36,7 @@ public class DurationFormatter
 		numberFormatter = createTimingFormatter(decimalSep);
 	}
 
-	public static final DecimalFormat createTimingFormatter(char decimalSep)
+	public static DecimalFormat createTimingFormatter(char decimalSep)
 	{
 		DecimalFormatSymbols symb = new DecimalFormatSymbols();
 		symb.setDecimalSeparator(decimalSep);
@@ -51,7 +51,7 @@ public class DurationFormatter
 	 *
 	 * @return a properly initialized DecimalFormat
 	 */
-	public static final DecimalFormat createTimingFormatter()
+	public static DecimalFormat createTimingFormatter()
 	{
 		String sep = Settings.getInstance().getProperty("workbench.gui.timining.decimal", ".");
 		return createTimingFormatter(sep.charAt(0));
