@@ -80,7 +80,9 @@ public class DwStatusBar
 	
 	public static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
-
+	private static final Border MAX_ROWS_BORDER = new EmptyBorder(0, 0, 0, 1);
+	private static final Insets MAX_ROWS_INSETS = new Insets(0, 2, 0, 2);
+	
 	private int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
 	private final boolean showTimer = Settings.getInstance().getBoolProperty("workbench.gui.execution.timer.enabled", true);
 	private long timerStarted;
@@ -109,7 +111,7 @@ public class DwStatusBar
 		this.tfMaxRows = new JTextField(6);
 		this.tfMaxRows.setEditable(true);
 		this.tfMaxRows.setMaximumSize(d);
-		this.tfMaxRows.setMargin(new Insets(0, 2, 0, 2));
+		this.tfMaxRows.setMargin(MAX_ROWS_INSETS);
 		this.tfMaxRows.setText("0");
 		this.tfMaxRows.setName("maxrows");
 		this.tfMaxRows.setToolTipText(ResourceMgr.getDescription("TxtMaxRows"));
@@ -126,7 +128,7 @@ public class DwStatusBar
 		this.setPreferredSize(null);
 		tfRowCount.setEditable(false);
 		tfRowCount.setHorizontalAlignment(JTextField.RIGHT);
-		tfRowCount.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		tfRowCount.setBorder(MAX_ROWS_BORDER);
 		tfRowCount.setDisabledTextColor(Color.BLACK);
 		tfRowCount.setMargin(new Insets(0, 15, 0, 10));
 		tfRowCount.setMinimumSize(d);
