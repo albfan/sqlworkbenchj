@@ -43,7 +43,7 @@ public class OracleControlFileWriter
 	public void writeFormatFile(DataExporter exporter, RowDataConverter converter)
 	{
 		ResultInfo resultInfo = converter.getResultInfo();
-		WbFile baseFile = new WbFile(exporter.getFullOutputFilename());
+		WbFile baseFile = exporter.getOutputFile();
 		String dir = baseFile.getParent();
 		String baseName = baseFile.getFileName();
 		File ctl = new File(dir, baseName + ".ctl");
@@ -60,8 +60,7 @@ public class OracleControlFileWriter
 			out.println("-- The specified characterset might not be correct, please check the Oracle documentation");
 			out.print("LOAD DATA CHARACTERSET '");
 			out.println(convertJavaCharsetToOracle(exporter.getEncoding()) + "'");
-			File f = new File(exporter.getFullOutputFilename());
-			out.println("INFILE '" + f.getName() + "'");
+			out.println("INFILE '" + baseFile.getName() + "'");
 			out.println("-- to replace the data in the table use TRUNCATE instead of APPEND");
 			out.println("APPEND");
 			out.print("INTO TABLE ");

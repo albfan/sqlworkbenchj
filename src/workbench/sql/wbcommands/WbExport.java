@@ -17,6 +17,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import workbench.WbManager;
 import workbench.db.exporter.DataExporter;
 import workbench.interfaces.ProgressReporter;
@@ -37,6 +38,7 @@ import workbench.db.exporter.ControlFileFormat;
 import workbench.db.exporter.ExportDataModifier;
 import workbench.db.exporter.ExportType;
 import workbench.db.exporter.PoiHelper;
+import workbench.db.exporter.WrongFormatFileException;
 import workbench.interfaces.ResultSetConsumer;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
@@ -72,6 +74,7 @@ public class WbExport
 	public static final String ARG_USE_CDATA = "useCDATA";
 	public static final String ARG_USE_SCHEMA = "useSchema";
 	public static final String ARG_EXCLUDE_TABLES = "excludeTables";
+	public static final String ARG_FORMATFILE = "formatFile";
 
 	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
 
@@ -119,7 +122,7 @@ public class WbExport
 		cmdLine.addArgument("lineEnding", StringUtil.stringToList("crlf,lf"));
 		cmdLine.addArgument("showEncodings");
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.Deprecated);
-		cmdLine.addArgument("formatFile", StringUtil.stringToList("postgres,oracle,sqlserver,db2"));
+		cmdLine.addArgument(ARG_FORMATFILE, StringUtil.stringToList("postgres,oracle,sqlserver,db2"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_EMPTY_RESULTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument("blobIdCols", ArgumentType.Deprecated);
@@ -345,6 +348,7 @@ public class WbExport
 		{
 			exporter.setUseSchemaInSql(cmdLine.getBoolean(ARG_USE_SCHEMA));
 		}
+
 		if ("text".equals(type))
 		{
 			// Support old parameter Syntax
@@ -353,8 +357,18 @@ public class WbExport
 				exporter.addControlFileFormat(ControlFileFormat.oracle);
 			}
 
-			exporter.addControlFileFormats(ControlFileFormat.parseCommandLine(cmdLine.getValue("formatfile")));
-
+			try
+			{
+				Set<ControlFileFormat> formats =ControlFileFormat.parseCommandLine(cmdLine.getValue(ARG_FORMATFILE));
+				exporter.addControlFileFormats(formats);
+			}
+			catch (WrongFormatFileException wf)
+			{
+				result.addMessage(ResourceMgr.getFormattedString("ErrExpWrongCtl", wf.getFormat()));
+				result.setFailure();
+				return result;
+			}
+			
 			String delimiter = cmdLine.getValue("delimiter");
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);
 

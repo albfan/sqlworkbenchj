@@ -736,6 +736,15 @@ public class DataExporter
 		createExportWriter();
 	}
 
+	/**
+	 * Returns the name of "real" outputfile. If the output is compressed,
+	 * this is the name of the non-compressed file.
+	 */
+	public WbFile getOutputFile()
+	{
+		return outputfile;
+	}
+
 	public String getFullOutputFilename()
 	{
 		if (this.realOutputfile == null)

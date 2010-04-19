@@ -37,6 +37,7 @@ public enum ControlFileFormat
 	db2;
 
 	public static Set<ControlFileFormat> parseCommandLine(String args)
+		throws WrongFormatFileException
 	{
 		if (StringUtil.isEmptyString(args)) return Collections.emptySet();
 		Set<ControlFileFormat> result = EnumSet.noneOf(ControlFileFormat.class);
@@ -50,6 +51,7 @@ public enum ControlFileFormat
 			}
 			catch (Exception e)
 			{
+				throw new WrongFormatFileException(fs);
 			}
 		}
 		return result;
