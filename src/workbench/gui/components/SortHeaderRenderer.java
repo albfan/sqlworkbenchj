@@ -97,7 +97,7 @@ public class SortHeaderRenderer
 
 			if (model != null)
 			{
-				int realCol = col - model.getRealColumnStart();
+				int realCol = table.convertColumnIndexToModel(col) - model.getRealColumnStart();
 				if (realCol >= 0)
 				{
 					ColumnIdentifier colId = model.getDataStore().getResultInfo().getColumn(realCol);

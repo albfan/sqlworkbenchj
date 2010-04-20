@@ -20,6 +20,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.storage.ColumnData;
+import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -134,6 +135,22 @@ public class ConstantColumnValues
 		return value.substring(2, value.length() - 1);
 	}
 
+	public List<String> getInputFileColumnsForFunction(int index)
+	{
+		String func = getFunctionLiteral(index);
+		if (func == null) return null;
+		List<String> args = SqlUtil.getFunctionParameters(func);
+		List<String> result = CollectionUtil.arrayList();
+		for (String f : args)
+		{
+			if (f.startsWith("$"))
+			{
+				result.add(f.substring(1));
+			}
+		}
+		return result;
+	}
+	
 	public boolean isFunctionCall(int index)
 	{
 		Object value = this.getValue(index);

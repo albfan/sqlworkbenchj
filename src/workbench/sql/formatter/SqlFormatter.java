@@ -26,6 +26,7 @@ import workbench.sql.wbcommands.CommandTester;
 import workbench.util.ArgumentParser;
 import workbench.util.CharSequenceReader;
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -269,6 +270,14 @@ public class SqlFormatter
 		this.result.append(text);
 	}
 
+	private void indent(int spaces)
+	{
+		for (int i=0; i < spaces; i++)
+		{
+			result.append(' ');
+		}
+	}
+	
 	private void indent(StringBuilder text)
 	{
 		this.result.append(text);
@@ -361,7 +370,6 @@ public class SqlFormatter
 	private SQLToken processFrom(SQLToken last)
 		throws Exception
 	{
-		StringBuilder b = new StringBuilder("  ");
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
 		int bracketCount = 0;
@@ -398,7 +406,7 @@ public class SqlFormatter
 			{
 				this.appendText(",");
 				this.appendNewline();
-				this.indent(b);
+				this.indent(5);
 			}
 			else
 			{
@@ -406,13 +414,20 @@ public class SqlFormatter
 				if (LINE_BREAK_BEFORE.contains(text) && !text.equalsIgnoreCase("AS"))
 				{
 					this.appendNewline();
-					this.indent(b);
+					if (SqlUtil.getJoinKeyWords().contains(text))
+					{
+						indent(2);
+					}
+					else
+					{
+						indent(5);
+					}
 				}
 				this.appendText(text);
 				if (LINE_BREAK_AFTER.contains(text) && !text.equalsIgnoreCase("AS"))
 				{
 					this.appendNewline();
-					this.indent(b);
+					this.indent(5);
 				}
 			}
 			lastToken = t;
@@ -648,7 +663,7 @@ public class SqlFormatter
 				t = this.lexer.getNextToken(true, false);
 				return t;
 			}
-			else if (text.indexOf("\n") == -1 &&  text.indexOf("\r") == -1)
+			else if (text.indexOf('\n') == -1 &&  text.indexOf('\r') == -1)
 			{
 				this.appendTokenText(t);
 			}

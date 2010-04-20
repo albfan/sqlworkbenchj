@@ -59,6 +59,7 @@ public class WbCall
 
 	// Stores all parameters that need an input
 	private List<ParameterDefinition> inputParameters = new ArrayList<ParameterDefinition>(5);
+	private String sqlUsed = null;
 
 	@Override
 	public String getVerb()
@@ -68,7 +69,7 @@ public class WbCall
 
 	private String getSqlToPrepare(String cleanSql, boolean funcCall)
 	{
-		if (funcCall) return "{ ? =  call " + cleanSql + "}";
+		if (funcCall) return "{? =  call " + cleanSql + "}";
 		return "{call " + cleanSql + "}";
 	}
 
@@ -82,7 +83,7 @@ public class WbCall
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 
 		String cleanSql = SqlUtil.stripVerb(aSql);
-		String realSql = getSqlToPrepare(cleanSql, false);
+		sqlUsed = getSqlToPrepare(cleanSql, false);
 
 		this.inputParameters.clear();
 
@@ -92,11 +93,10 @@ public class WbCall
 		{
 			refCursor = null;
 
-			result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + realSql);
-			CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(realSql);
+			CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(sqlUsed);
 			this.currentStatement = cstmt;
 
-			boolean hasParameters = (realSql.indexOf('?') > -1);
+			boolean hasParameters = (sqlUsed.indexOf('?') > -1);
 			boolean namesAvailable = false;
 
 			Savepoint sp = null;
@@ -272,6 +272,11 @@ public class WbCall
 			done();
 		}
 
+		if (result.isSuccess())
+		{
+			result.addMessage(ResourceMgr.getString("MsgProcCallConverted") + " " + sqlUsed);
+		}
+
 		return result;
 	}
 
@@ -365,10 +370,16 @@ public class WbCall
 
 		DataStore params = meta.getProcedureReader().getProcedureColumns(null, schemaToUse, nameToUse);
 
-		boolean needFuncCall = meta.isPostgres() && returnsRefCursor(params);
-		CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(getSqlToPrepare(sql, needFuncCall));
+		boolean needFuncCall = returnsRefCursor(params);
+		sqlUsed = getSqlToPrepare(sql, needFuncCall);
+		
+		if (currentStatement != null)
+		{
+			SqlUtil.closeStatement(currentStatement);
+		}
+		
+		CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(sqlUsed);
 		this.currentStatement = cstmt;
-
 
 		int definedParamCount = params.getRowCount();
 		if (definedParamCount != sqlParams.size())
@@ -444,7 +455,6 @@ public class WbCall
 				}
 			}
 		}
-
 		return parameterNames;
 	}
 
