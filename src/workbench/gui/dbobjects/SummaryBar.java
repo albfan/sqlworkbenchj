@@ -28,6 +28,7 @@ import workbench.gui.sql.DwStatusBar;
 public class SummaryBar
 	extends JPanel
 {
+	private static final Border DEFAULT_BORDER = new CompoundBorder(BorderFactory.createEmptyBorder(2, 0, 0, 0), BorderFactory.createEtchedBorder());
 
 	public SummaryBar(JLabel infoLabel)
 	{
@@ -35,7 +36,7 @@ public class SummaryBar
 		Dimension d = new Dimension(80, DwStatusBar.BAR_HEIGHT + 1);
 		setMinimumSize(d);
 		setPreferredSize(d);
-		setBorder(DwStatusBar.DEFAULT_BORDER);
+		setBorder(DEFAULT_BORDER);
 		infoLabel.setBorder(new EmptyBorder(2, 1, 1, 0));
 		add(infoLabel, BorderLayout.CENTER);
 	}

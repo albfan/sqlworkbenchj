@@ -22,6 +22,7 @@ import java.awt.event.MouseListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import javax.swing.BorderFactory;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -30,7 +31,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -146,7 +146,7 @@ public class MacroManagerDialog
 			}
 		});
 
-		macroPanel.setBorder(new CompoundBorder(new EmptyBorder(1,1,1,1), new EtchedBorder()));
+		macroPanel.setBorder(new CompoundBorder(new EmptyBorder(1,1,1,1), BorderFactory.createEtchedBorder()));
 		getContentPane().add(macroPanel, BorderLayout.CENTER);
 
 		this.replaceEditorText = new WbCheckBox(ResourceMgr.getString("LblReplaceCurrentSql"));
@@ -261,10 +261,10 @@ public class MacroManagerDialog
 		TreePath[] paths = e.getPaths();
 		int selected = 0;
 		boolean selectedIsMacro = true;
-		
+
 		for (TreePath path : paths)
 		{
-			if (e.isAddedPath(path)) 
+			if (e.isAddedPath(path))
 			{
 				selected ++;
 				MacroTreeNode node = (MacroTreeNode)path.getLastPathComponent();

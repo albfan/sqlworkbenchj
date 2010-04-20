@@ -25,6 +25,7 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import javax.swing.BorderFactory;
 import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -63,8 +64,8 @@ public class WbSwingUtilities
 {
 	public static final Insets EMPTY_INSETS = new Insets(0, 0, 0, 0);
 	public static final LineBorder FOCUSED_CELL_BORDER = new LineBorder(Color.YELLOW);
-	public static final Border EMPTY_BORDER = new EmptyBorder(0, 0, 0, 0);
-	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(new EtchedBorder(), new EmptyBorder(1, 6, 1, 6));
+	public static final Border EMPTY_BORDER = BorderFactory.createEmptyBorder();
+	public static final Border FLAT_BUTTON_BORDER = new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(1, 6, 1, 6));
 	public static final KeyStroke CTRL_TAB = KeyStroke.getKeyStroke("control TAB");
 	public static final KeyStroke TAB = KeyStroke.getKeyStroke("TAB");
 	public static final KeyStroke ENTER = KeyStroke.getKeyStroke("ENTER");
@@ -81,7 +82,7 @@ public class WbSwingUtilities
 		return createBevelBorder(BevelBorder.RAISED);
 	}
 
-	private static final Border createBevelBorder(int type)
+	private static Border createBevelBorder(int type)
 	{
 		BevelBorder b = new BevelBorder(type);
 
@@ -93,7 +94,7 @@ public class WbSwingUtilities
 			b.getShadowInnerColor());
 	}
 
-	public static final void waitForEmptyQueue()
+	public static void waitForEmptyQueue()
 	{
 		if (EventQueue.isDispatchThread())
 		{
@@ -112,7 +113,7 @@ public class WbSwingUtilities
 		}
 	}
 
-	public static final void setLabel(final JLabel label, final String text, final String tooltip)
+	public static void setLabel(final JLabel label, final String text, final String tooltip)
 	{
 		invoke(new Runnable()
 		{
@@ -133,7 +134,7 @@ public class WbSwingUtilities
 	 * Exceptions that can be thrown by EventQueue.invokeAndWait() are
 	 * caught and logged.
 	 */
-	public static final void invoke(Runnable r)
+	public static void invoke(Runnable r)
 	{
 		if (EventQueue.isDispatchThread())
 		{

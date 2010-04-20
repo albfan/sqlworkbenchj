@@ -14,11 +14,11 @@ package workbench.gui.settings;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import workbench.gui.components.DividerBorder;
 import workbench.interfaces.Restoreable;
 import workbench.interfaces.ValidatingComponent;
@@ -35,23 +35,23 @@ public class OptionPanelPage
 	private String pageClass;
 	private JPanel panel;
 	private Restoreable options;
-	
+
 	public OptionPanelPage(String clz, String key)
 	{
 		this.label = ResourceMgr.getString(key);
 		this.pageClass = "workbench.gui.settings." + clz;
 	}
-	
+
 	public String toString()
 	{
 		return this.label;
 	}
-	
+
 	public String getLabel()
 	{
 		return label;
 	}
-	
+
 	public JPanel getPanel()
 	{
 		if (this.panel == null)
@@ -62,7 +62,7 @@ public class OptionPanelPage
 				JPanel optionPanel = (JPanel)clz.newInstance();
 				this.options = (Restoreable)optionPanel;
 				this.options.restoreSettings();
-				
+
 				JLabel title = new JLabel(this.label);
 				title.setName("pagetitle");
 				title.setOpaque(true);
@@ -73,7 +73,7 @@ public class OptionPanelPage
 				title.setBorder(new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(4,6,4,6)));
 				title.setFont(f2);
 				panel = new JPanel(new BorderLayout());
-				panel.setBorder(new EtchedBorder());
+				panel.setBorder(BorderFactory.createEtchedBorder());
 				panel.add(title, BorderLayout.NORTH);
 				panel.add(optionPanel, BorderLayout.CENTER);
 			}
@@ -96,7 +96,7 @@ public class OptionPanelPage
 		}
 		return true;
 	}
-	
+
 	public void saveSettings()
 	{
 		try

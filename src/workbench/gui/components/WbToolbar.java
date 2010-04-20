@@ -12,12 +12,12 @@
 package workbench.gui.components;
 
 import javax.swing.Action;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 
@@ -79,7 +79,7 @@ public class WbToolbar
 
 	public void addDefaultBorder()
 	{
-		Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), new EtchedBorder());
+		Border b = new CompoundBorder(new EmptyBorder(1,0,1,0), BorderFactory.createEtchedBorder());
 		this.setBorder(b);
 		this.setBorderPainted(true);
 		this.setRollover(true);

@@ -22,11 +22,11 @@ import java.io.InputStream;
 import java.sql.Blob;
 import java.sql.SQLException;
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
-import javax.swing.border.EtchedBorder;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.util.FileUtil;
@@ -36,7 +36,7 @@ import workbench.util.FileUtil;
  * A panel that display a BLOB as an image.
  *
  * To display the image the Java built-in image rendering features are used.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ImagePanel
@@ -51,7 +51,7 @@ public class ImagePanel
 		this.setLayout(new BorderLayout());
 		this.add(label, BorderLayout.CENTER);
 		label.setHorizontalAlignment(SwingConstants.CENTER);
-		label.setBorder(new EtchedBorder());
+		label.setBorder(BorderFactory.createEtchedBorder());
 	}
 
 	public void setImage(File imageData)

@@ -22,6 +22,7 @@ import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractListModel;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 
 import javax.swing.JDialog;
@@ -34,7 +35,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -133,7 +133,7 @@ public class SettingsPanel
 		};
 
 		pageList = new JList(model);
-		pageList.setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(2, 2, 2, 2)));
+		pageList.setBorder(new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(2, 2, 2, 2)));
 		pageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		pageList.addListSelectionListener(this);
 
@@ -292,7 +292,7 @@ public class SettingsPanel
 			final int index = i;
 			if (!page.validateInput())
 			{
-				SwingUtilities.invokeLater(new Runnable() 
+				SwingUtilities.invokeLater(new Runnable()
 				{
 					public void run()
 					{

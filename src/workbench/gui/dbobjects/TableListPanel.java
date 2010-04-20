@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
 import javax.swing.ComponentInputMap;
 import javax.swing.InputMap;
 import javax.swing.JComboBox;
@@ -46,9 +45,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -194,7 +190,7 @@ public class TableListPanel
 
 	protected JDialog infoWindow;
 	private JLabel infoLabel;
-	private JLabel tableInfoLabel;
+	private JLabel summaryStatusBarLabel;
 	private String tableTypeToSelect;
 
 	private final Object connectionLock = new Object();
@@ -339,8 +335,8 @@ public class TableListPanel
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(topPanel, BorderLayout.NORTH);
 
-		this.tableInfoLabel = new JLabel("");
-		SummaryBar bar = new SummaryBar(tableInfoLabel);
+		this.summaryStatusBarLabel = new JLabel("");
+		SummaryBar bar = new SummaryBar(summaryStatusBarLabel);
 		this.listPanel.add(bar, BorderLayout.SOUTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
@@ -834,7 +830,7 @@ public class TableListPanel
 	public void tableChanged(TableModelEvent e)
 	{
 		String info = tableList.getRowCount() + " " + ResourceMgr.getString("TxtTableListObjects");
-		this.tableInfoLabel.setText(info);
+		this.summaryStatusBarLabel.setText(info);
 	}
 
 	protected void setFocusToTableList()
@@ -874,7 +870,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			this.tableInfoLabel.setText(ResourceMgr.getString("MsgRetrieving"));
+			this.summaryStatusBarLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			reset();
 
 			// do not call setBusy() before reset() because

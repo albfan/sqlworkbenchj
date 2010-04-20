@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.BorderFactory;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -38,13 +39,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.db.CatalogChanger;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
-import workbench.db.ObjectNameFilter;
 
 import workbench.db.WbConnection;
 import workbench.gui.components.FlatButton;
@@ -312,7 +311,7 @@ public class DbExplorerPanel
 	{
 		this.connectionSelector = selector;
 		this.selectConnectionButton = new JButton(ResourceMgr.getString("LblSelectConnection"));
-		Border b = new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(1, 10, 1, 10));
+		Border b = new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(1, 10, 1, 10));
 		this.selectConnectionButton.setBorder(b);
 		this.selectConnectionButton.addActionListener(this);
 		this.selectorPanel.add(Box.createHorizontalStrut(15));
@@ -614,7 +613,7 @@ public class DbExplorerPanel
 	{
 		List<String> catalogs = this.dbConnection.getMetadata().getCatalogInformation(dbConnection.getCatalogFilter());
 		this.catalogSelector.removeActionListener(this);
-		if (catalogs.size() == 0)
+		if (catalogs.isEmpty())
 		{
 			this.catalogSelector.setVisible(false);
 			this.catalogSelector.setEnabled(false);
@@ -829,7 +828,7 @@ public class DbExplorerPanel
 				}
 				catch (Exception ex)
 				{
-					LogMgr.logError(this, "Could not set schema", ex);
+					LogMgr.logError(DbExplorerPanel.this, "Could not set schema", ex);
 				}
 				finally
 				{

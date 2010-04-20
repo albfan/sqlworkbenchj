@@ -36,7 +36,6 @@ import javax.swing.Timer;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.border.LineBorder;
 
 import workbench.WbManager;
@@ -77,12 +76,12 @@ public class DwStatusBar
 	private JLabel editorStatus;
 	private JPanel alertPanel;
 	private JPanel infoPanel;
-	
+
 	public static final int BAR_HEIGHT = 22;
 	private static final int FIELD_HEIGHT = 18;
 	private static final Border MAX_ROWS_BORDER = new EmptyBorder(0, 0, 0, 1);
 	private static final Insets MAX_ROWS_INSETS = new Insets(0, 2, 0, 2);
-	
+
 	private int timerInterval = Settings.getInstance().getIntProperty("workbench.gui.execution.timer.interval", 1000);
 	private final boolean showTimer = Settings.getInstance().getBoolProperty("workbench.gui.execution.timer.enabled", true);
 	private long timerStarted;
@@ -96,8 +95,8 @@ public class DwStatusBar
 
 	private DurationFormatter durationFormatter = new DurationFormatter();
 
-	public static final Border DEFAULT_BORDER = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), new EtchedBorder());
-	
+	public static final Border DEFAULT_BORDER = new CompoundBorder(new EmptyBorder(2, 1, 0, 1), BorderFactory.createEtchedBorder());
+
 	public DwStatusBar()
 	{
 		this(false, false);
@@ -216,7 +215,7 @@ public class DwStatusBar
 		if (this.selectionDisplay == null) return;
 		this.selectionDisplay.removeClient(client);
 	}
-	
+
 	public void showSelectionIndicator(JTable client)
 	{
 		if (this.selectionDisplay == null)
@@ -226,7 +225,7 @@ public class DwStatusBar
 		this.selectionDisplay.setClient(client);
 		this.infoPanel.add(this.selectionDisplay, 0);
 	}
-	
+
 	public void setReadyMsg(String aMsg)
 	{
 		if (aMsg == null)
@@ -406,7 +405,7 @@ public class DwStatusBar
 		{
 			alertPanel.removeAll();
 		}
-		
+
 		notificationHandler = evt.getHandler();
 		notificationLabel = new JLabel(ResourceMgr.getImageByName(evt.getIconKey()));
 		notificationLabel.setText(null);
@@ -414,9 +413,9 @@ public class DwStatusBar
 		notificationLabel.setIconTextGap(0);
 		notificationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		notificationLabel.addMouseListener(this);
-		
+
 		final Frame f = WbManager.getInstance().getCurrentWindow();
-		
+
 		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()

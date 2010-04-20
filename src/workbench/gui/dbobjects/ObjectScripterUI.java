@@ -16,13 +16,13 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.event.WindowListener;
+import javax.swing.BorderFactory;
 
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
@@ -57,7 +57,7 @@ public class ObjectScripterUI
 		this.scripter.setProgressMonitor(this);
 
 		this.statusMessage = new JLabel("");
-		this.statusMessage.setBorder(new CompoundBorder(new EtchedBorder(), new EmptyBorder(0, 2, 0, 0)));
+		this.statusMessage.setBorder(new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(0, 2, 0, 0)));
 		this.statusMessage.setMaximumSize(new Dimension(32768, 22));
 		this.statusMessage.setMinimumSize(new Dimension(10, 22));
 		this.statusMessage.setPreferredSize(new Dimension(60, 22));
@@ -74,14 +74,14 @@ public class ObjectScripterUI
 		editor.setDatabaseConnection(con);
 	}
 
-	private void setRunning(boolean flag) 
-	{ 
-		synchronized (runMonitor) 
+	private void setRunning(boolean flag)
+	{
+		synchronized (runMonitor)
 		{
-			this.isRunning = flag; 
+			this.isRunning = flag;
 		}
 	}
-	
+
 	private boolean isRunning()
 	{
 		synchronized (runMonitor)
@@ -89,7 +89,7 @@ public class ObjectScripterUI
 			return this.isRunning;
 		}
 	}
-	
+
 	private void startScripting()
 	{
 		if (this.isRunning()) return;
@@ -185,7 +185,7 @@ public class ObjectScripterUI
 		};
 		t.start();
 	}
-	
+
 	protected void closeWindow()
 	{
 		if (isRunning()) return;
@@ -194,7 +194,7 @@ public class ObjectScripterUI
 		this.window.setVisible(false);
 		this.window.dispose();
 	}
-	
+
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 		if (this.isRunning())

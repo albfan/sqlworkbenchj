@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.sql.Types;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -38,7 +39,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.UIManager;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.table.TableModel;
 import javax.swing.text.JTextComponent;
 import workbench.db.ColumnIdentifier;
@@ -118,7 +118,7 @@ public class RecordFormPanel
 		}
 		return allowEditing;
 	}
-	
+
 	public int getCurrentRow()
 	{
 		return currentRow;
@@ -251,7 +251,7 @@ public class RecordFormPanel
 			vscroll.setUnitIncrement(charHeight * 2); // clicking on the scrollbar arrows, scrolls by two "lines"
 			vscroll.setBlockIncrement(charHeight * 10); // clicking on the scrollbar "free area", scrolls by ten "lines"
 		}
-		formScroll.setBorder(new CompoundBorder(new EtchedBorder(EtchedBorder.LOWERED), new EmptyBorder(10,5,10,5)));
+		formScroll.setBorder(new CompoundBorder(BorderFactory.createEtchedBorder(), new EmptyBorder(10,5,10,5)));
 		this.add(formScroll, BorderLayout.CENTER);
 
 		// make the first input field the default component
