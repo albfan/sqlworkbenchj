@@ -1758,7 +1758,7 @@ public class TableListPanel
 				return null;
 			}
 		}
-		String sql = tableDefinition.getSelectForTable() + ";";
+		String sql = "-- @wbresult " + tableDefinition.getCurrentTableName() + "\n" + tableDefinition.getSelectForTable() + ";";
 		if (sql == null)
 		{
 			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replace("%table%", this.selectedTable.getTableName());
