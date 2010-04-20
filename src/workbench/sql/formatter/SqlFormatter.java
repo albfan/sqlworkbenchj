@@ -361,7 +361,7 @@ public class SqlFormatter
 	private SQLToken processFrom(SQLToken last)
 		throws Exception
 	{
-		StringBuilder b = new StringBuilder("     ");
+		StringBuilder b = new StringBuilder("  ");
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = last;
 		int bracketCount = 0;

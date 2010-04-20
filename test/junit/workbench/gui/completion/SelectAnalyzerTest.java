@@ -81,7 +81,16 @@ public class SelectAnalyzerTest
 				 "   JOIN author at on at.author_id = p.id";
 
 		pos = sql.indexOf("JOIN \n") + 5;
-		System.out.println("to test: " + sql.substring(pos));
+		analyzer = new SelectAnalyzer(null, sql, pos);
+		analyzer.checkContext();
+		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.context);
+
+		sql = "SELECT * \n" +
+				 "  FROM person p \n" +
+				 "   JOIN \n" +
+				 "  WHERE p.id = 42";
+
+		pos = sql.indexOf("JOIN \n") + 5;
 		analyzer = new SelectAnalyzer(null, sql, pos);
 		analyzer.checkContext();
 		assertEquals(BaseAnalyzer.CONTEXT_TABLE_LIST, analyzer.context);
