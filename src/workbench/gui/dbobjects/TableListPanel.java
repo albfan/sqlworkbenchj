@@ -1737,7 +1737,10 @@ public class TableListPanel
 	private void showTableData(final int panelIndex, final boolean appendText)
 	{
 		PanelContentSender sender = new PanelContentSender(this.parentWindow);
-		sender.sendContent(buildSqlForTable(), panelIndex, appendText);
+		String sql = buildSqlForTable();
+		if (sql == null) return;
+
+		sender.sendContent(sql, panelIndex, appendText);
 	}
 
 	private String buildSqlForTable()
@@ -1758,13 +1761,22 @@ public class TableListPanel
 				return null;
 			}
 		}
-		String sql = "-- @wbresult " + tableDefinition.getCurrentTableName() + "\n" + tableDefinition.getSelectForTable() + ";";
+
+		StringBuilder select = null;
+		String sql = tableDefinition.getSelectForTable();
 		if (sql == null)
 		{
 			String msg = ResourceMgr.getString("ErrNoColumnsRetrieved").replace("%table%", this.selectedTable.getTableName());
 			WbSwingUtilities.showErrorMessage(this, msg);
+			return null;
 		}
-		return sql;
+		select = new StringBuilder(sql.length() + 40);
+		select.append("-- @WbResult ");
+		select.append(selectedTable.getTableName());
+		select.append('\n');
+		select.append(sql);
+		select.append(';');
+		return select.toString();
 	}
 
 	/**

@@ -627,12 +627,6 @@ public class TableDefinitionPanel
 		}
 	}
 
-	public String getCurrentTableName()
-	{
-		if (currentTable == null) return null;
-		return currentTable.getTableName();
-	}
-	
 	/**
 	 * Returns a SELECT statement for retrieve all rows and columns from the displayed table.
 	 * 
