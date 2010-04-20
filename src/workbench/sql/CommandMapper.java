@@ -13,6 +13,7 @@ package workbench.sql;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +70,6 @@ import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbXslt;
-import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -80,7 +80,7 @@ public class CommandMapper
 {
 	private Map<String, SqlCommand> cmdDispatch;
 	private List<String> dbSpecificCommands;
-	private Set<String> passThrough = CollectionUtil.caseInsensitiveSet();
+	private Set<String> passThrough = new HashSet<String>();
 	private boolean supportsSelectInto = false;
 	private DbMetadata metaData;
 	private boolean useExecuteForSelect = false;
@@ -91,6 +91,7 @@ public class CommandMapper
 		cmdDispatch = new HashMap<String, SqlCommand>();
 		cmdDispatch.put("*", new SqlCommand());
 
+		// Workbench specific commands
 		addCommand(new WbListTables());
 		addCommand(new WbListProcedures());
 		addCommand(new WbDefineVar());
@@ -98,7 +99,6 @@ public class CommandMapper
 		addCommand(new WbDisableOraOutput());
 		addCommand(new WbStartBatch());
 		addCommand(new WbEndBatch());
-		addCommand(new SelectCommand());
 		addCommand(new WbXslt());
 		addCommand(new WbRemoveVar());
 		addCommand(new WbListVars());
@@ -108,7 +108,6 @@ public class CommandMapper
 		addCommand(new WbSchemaReport());
 		addCommand(new WbSchemaDiff());
 		addCommand(new WbDataDiff());
-		addCommand(new SetCommand());
 		addCommand(new WbFeedback());
 		addCommand(new WbDefinePk());
 		addCommand(new WbListPkDef());
@@ -131,7 +130,8 @@ public class CommandMapper
 		addCommand(new WbGrepData());
 		addCommand(new WbMode());
 		addCommand(new WbFetchSize());
-		
+
+		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.COMMIT);
 		addCommand(SingleVerbCommand.ROLLBACK);
 
@@ -139,6 +139,9 @@ public class CommandMapper
 		addCommand(UpdatingCommand.INSERT);
 		addCommand(UpdatingCommand.UPDATE);
 		addCommand(UpdatingCommand.TRUNCATE);
+
+		addCommand(new SetCommand());
+		addCommand(new SelectCommand());
 
 		for (DdlCommand cmd : DdlCommand.DDL_COMMANDS)
 		{
@@ -264,7 +267,11 @@ public class CommandMapper
 		passThrough.clear();
 		if (passVerbs != null)
 		{
-			passThrough.addAll(passVerbs);
+			for (String v : passVerbs)
+			{
+				passThrough.add(v.toUpperCase());
+			}
+			
 		}
 
 		// this is stored in an instance variable for performance
