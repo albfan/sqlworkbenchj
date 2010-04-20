@@ -335,9 +335,8 @@ public class TableListPanel
 		this.listPanel.setLayout(new BorderLayout());
 		this.listPanel.add(topPanel, BorderLayout.NORTH);
 
-		this.summaryStatusBarLabel = new JLabel("");
-		SummaryBar bar = new SummaryBar(summaryStatusBarLabel);
-		this.listPanel.add(bar, BorderLayout.SOUTH);
+		this.summaryStatusBarLabel = new SummaryLabel("");
+		this.listPanel.add(summaryStatusBarLabel, BorderLayout.SOUTH);
 
 		this.splitPane = new WbSplitPane(JSplitPane.HORIZONTAL_SPLIT);
 		scroll = new WbScrollPane(this.tableList);

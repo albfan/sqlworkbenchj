@@ -159,9 +159,8 @@ public class TriggerListPanel
 
 		listPanel.add(scroll, BorderLayout.CENTER);
 
-		infoLabel = new JLabel("");
-		SummaryBar bar = new SummaryBar(infoLabel);
-		listPanel.add(bar, BorderLayout.SOUTH);
+		infoLabel = new SummaryLabel("");
+		listPanel.add(infoLabel, BorderLayout.SOUTH);
 
 		this.splitPane.setLeftComponent(listPanel);
 		this.splitPane.setRightComponent(source);
