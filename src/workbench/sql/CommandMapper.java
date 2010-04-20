@@ -69,6 +69,7 @@ import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbXslt;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -79,6 +80,7 @@ public class CommandMapper
 {
 	private Map<String, SqlCommand> cmdDispatch;
 	private List<String> dbSpecificCommands;
+	private Set<String> passThrough = CollectionUtil.caseInsensitiveSet();
 	private boolean supportsSelectInto = false;
 	private DbMetadata metaData;
 	private boolean useExecuteForSelect = false;
@@ -186,10 +188,7 @@ public class CommandMapper
 	 */
 	public void setConnection(WbConnection aConn)
 	{
-		for (String cmd : dbSpecificCommands)
-		{
-			this.cmdDispatch.remove(cmd);
-		}
+		this.cmdDispatch.keySet().removeAll(dbSpecificCommands);
 		this.dbSpecificCommands.clear();
 		this.supportsSelectInto = false;
 
@@ -251,16 +250,21 @@ public class CommandMapper
 			this.dbSpecificCommands.add("CALL");
 		}
 
-		String verbs = Settings.getInstance().getProperty("workbench.db.ignore." + metaData.getDbId(), "");
-		List l = StringUtil.stringToList(verbs, ",", true, true);
-		for (int i=0; i < l.size(); i++)
+		List<String> verbs = Settings.getInstance().getListProperty("workbench.db.ignore." + metaData.getDbId(), false, "");
+		for (String verb : verbs)
 		{
-			String verb = (String)l.get(i);
 			if (verb == null) continue;
 			verb = verb.toUpperCase();
 			IgnoredCommand cmd = new IgnoredCommand(verb);
 			this.cmdDispatch.put(verb, cmd);
 			this.dbSpecificCommands.add(verb);
+		}
+
+		List<String> passVerbs = Settings.getInstance().getListProperty("workbench.db." + metaData.getDbId() + ".passthrough", false, "");
+		passThrough.clear();
+		if (passVerbs != null)
+		{
+			passThrough.addAll(passVerbs);
 		}
 
 		// this is stored in an instance variable for performance
@@ -295,6 +299,10 @@ public class CommandMapper
 			// use the generic SqlCommand implementation for this and not the SelectCommand
 			cmd = this.cmdDispatch.get("*");
 		}
+		else if (passThrough.size() > 0 && passThrough.contains(verb))
+		{
+			cmd = this.cmdDispatch.get("*");
+		}
 		else
 		{
 			cmd = this.cmdDispatch.get(verb);
@@ -320,7 +328,7 @@ public class CommandMapper
 			}
 			if (found == 1)
 			{
-				LogMgr.logInfo("CommandMapper.getCommandToUse()", "Found workbench command " + lastVerb + " for abbreviation " + verb);
+				LogMgr.logDebug("CommandMapper.getCommandToUse()", "Found workbench command " + lastVerb + " for abbreviation " + verb);
 				cmd = cmdDispatch.get(lastVerb);
 			}
 		}
