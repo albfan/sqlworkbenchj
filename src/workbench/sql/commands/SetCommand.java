@@ -12,6 +12,7 @@
 package workbench.sql.commands;
 
 import java.sql.SQLException;
+import java.util.Set;
 
 import workbench.db.WbConnection;
 import workbench.resource.ResourceMgr;
@@ -19,6 +20,7 @@ import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -57,7 +59,17 @@ public class SetCommand extends SqlCommand
 				t = l.getNextToken(false, false);
 				if (t != null) command = t.getContents();
 				t = l.getNextToken(false, false);
-				if (t != null) param = t.getContents();
+
+				// Ignore a possible equal sign
+				if (t != null && t.getContents().equals("="))
+				{
+					t = l.getNextToken(false, false);
+				}
+				
+				if (t != null)
+				{
+					param = t.getContents();
+				}
 			}
 			catch (Exception e)
 			{
@@ -202,15 +214,18 @@ public class SetCommand extends SqlCommand
 			return result;
 		}
 
+		Set<String> offValues = CollectionUtil.caseInsensitiveSet("off", "false", "0");
+		Set<String> onValues = CollectionUtil.caseInsensitiveSet("on", "true", "1");
+		
 		try
 		{
-			if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
+			if (offValues.contains(param))
 			{
 				aConnection.setAutoCommit(false);
 				result.addMessageByKey("MsgAutocommitDisabled");
 				result.setSuccess();
 			}
-			else if ("on".equalsIgnoreCase(param) || "true".equalsIgnoreCase(param))
+			else if (onValues.contains(param))
 			{
 				aConnection.setAutoCommit(true);
 				result.addMessageByKey("MsgAutocommitEnabled");
@@ -240,13 +255,16 @@ public class SetCommand extends SqlCommand
 			return result;
 		}
 
-		if ("off".equalsIgnoreCase(param) || "false".equalsIgnoreCase(param))
+		Set<String> offValues = CollectionUtil.caseInsensitiveSet("off", "false", "0");
+		Set<String> onValues = CollectionUtil.caseInsensitiveSet("on", "true", "1");
+
+		if (offValues.contains(param))
 		{
 			this.runner.setVerboseLogging(false);
 			result.addMessageByKey("MsgFeedbackDisabled");
 			result.setSuccess();
 		}
-		else if ("on".equalsIgnoreCase(param) || "true".equalsIgnoreCase(param))
+		else if (onValues.contains(param))
 		{
 			this.runner.setVerboseLogging(true);
 			result.addMessageByKey("MsgFeedbackEnabled");
