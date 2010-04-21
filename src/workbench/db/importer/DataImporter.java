@@ -1820,7 +1820,9 @@ public class DataImporter
 
 			LogMgr.logInfo("DataImporter.finishTable()", msg);
 
-			this.messages.append(this.source.getMessages());
+			messages.append(this.source.getMessages());
+			source.getMessages().clear();
+			
 			if (this.insertedRows > -1)
 			{
 				this.messages.append(this.insertedRows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted"));

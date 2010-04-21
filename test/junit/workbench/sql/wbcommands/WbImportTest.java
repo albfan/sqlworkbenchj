@@ -116,6 +116,7 @@ public class WbImportTest
 		}
 
 	}
+
 	public void testPreAndPostStatements()
 	{
 		ResultSet rs = null;
@@ -3612,6 +3613,47 @@ public class WbImportTest
 		{
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+	}
+
+	public void testMultiImportWithWarning()
+		throws Exception
+	{
+		ResultSet rs = null;
+		Statement stmt = null;
+		try
+		{
+			File importFile  = new File(this.basedir, "junit_test.txt");
+			PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("nr\tfirstname\tlastname\tnot_there");
+			out.println("1\tArthur\tDent\t1");
+			out.println("2\tFord\tPrefect\t1");
+			out.println("3\tZaphod\tBeeblebrox\t1");
+			out.close();
+
+			importFile  = new File(this.basedir, "zzbase.txt");
+			out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+			out.println("id\tinfo");
+			out.println("1\tArthur");
+			out.println("2\tFord");
+			out.println("3\tZaphod");
+			out.close();
+
+			StatementRunnerResult result = importCmd.execute("wbimport -header=true -continueonerror=true -sourcedir='" + importFile.getParent() + "' -type=text");
+			String msg = result.getMessageBuffer().toString();
+			System.out.println("**********\n" + msg);
+			assertTrue(result.isSuccess());
+
+			String toFind = "Column \"not_there\" ";
+			int pos = msg.indexOf(toFind);
+			assertTrue(pos > -1);
+			
+			int pos2 = msg.indexOf(toFind, pos + toFind.length());
+			assertTrue(pos2 == -1);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
 		}
 	}
 
