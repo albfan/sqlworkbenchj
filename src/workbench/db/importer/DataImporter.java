@@ -1820,8 +1820,12 @@ public class DataImporter
 
 			LogMgr.logInfo("DataImporter.finishTable()", msg);
 
-			messages.append(this.source.getMessages());
-			source.getMessages().clear();
+			MessageBuffer msgBuffer = this.source.getMessages();
+			if (msgBuffer != null)
+			{
+				messages.append(msgBuffer);
+				msgBuffer.clear();
+			}
 			
 			if (this.insertedRows > -1)
 			{
