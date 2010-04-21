@@ -27,6 +27,7 @@ public class CloseOtherResultsAction
 	{
 		client = panel;
 		initMenuDefinition("MnuTxtCloseOtherResults");
+		this.setEnabled(client.getResultTabCount() > 2);
 	}
 
 	@Override
