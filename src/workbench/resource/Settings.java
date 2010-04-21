@@ -124,7 +124,7 @@ public class Settings
 		protected static final Settings instance = new Settings();
 	}
 
-	public static final Settings getInstance()
+	public static Settings getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
