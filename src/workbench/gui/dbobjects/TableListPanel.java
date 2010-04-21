@@ -12,6 +12,7 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -45,6 +46,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -206,8 +208,10 @@ public class TableListPanel
 		super();
 		this.parentWindow = aParent;
 		this.setBorder(WbSwingUtilities.EMPTY_BORDER);
+
 		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
-		this.displayTab = new WbTabbedPane(location);
+		displayTab = new WbTabbedPane(location);
+		displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
 
 		this.tableDefinition = new TableDefinitionPanel();
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
@@ -263,7 +267,6 @@ public class TableListPanel
 		this.tableSource = new DbObjectSourcePanel(aParent, sourceReload);
 
 		this.tableData = new TableDataPanel();
-//		this.tableData.setResultContainer(aParent);
 
 		this.importedKeys = new WbTable();
 		this.importedKeys.setAdjustToColumnLabel(false);

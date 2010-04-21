@@ -789,7 +789,12 @@ public class DwPanel
 		{
 			int maxRows = getMaxRows();
 			boolean isWindowsClassic = WbManager.getInstance().isWindowsClassic();
-			if (maxRows > 0 && maxRows == getTable().getRowCount())
+			int rowCount = getTable().getRowCount();
+
+			// Some drivers return one more row than defined by maxRows...
+			boolean maxReached = maxRows > 0 && (maxRows == rowCount || maxRows == rowCount - 1);
+			
+			if (maxReached)
 			{
 				Color c = GuiSettings.getMaxRowsWarningColor();
 				if (isWindowsClassic)

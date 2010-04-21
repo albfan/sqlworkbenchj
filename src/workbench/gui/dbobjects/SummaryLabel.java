@@ -30,7 +30,7 @@ public class SummaryLabel
 	public SummaryLabel(String text)
 	{
 		super(text);
-		Dimension d = new Dimension(80, DwStatusBar.BAR_HEIGHT + 2);
+		Dimension d = new Dimension(80, DwStatusBar.BAR_HEIGHT);
 		setMinimumSize(d);
 		setPreferredSize(d);
 		setBorder(DEFAULT_BORDER);

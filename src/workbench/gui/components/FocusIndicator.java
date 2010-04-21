@@ -36,11 +36,11 @@ public class FocusIndicator
 	private JComponent borderClient;
 	private Color borderColor = null;
 	
-	public FocusIndicator(JComponent focusToCheck, JComponent border)
+	public FocusIndicator(JComponent focusToCheck, JComponent client)
 	{
 		focusClient = focusToCheck;
 		focusClient.addFocusListener(this);
-		borderClient = border;
+		borderClient = client;
 		borderColor = Settings.getInstance().getColor("workbench.gui.focusindicator.bordercolor", Color.YELLOW.brighter());
 		initBorder();
 	}
