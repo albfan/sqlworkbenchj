@@ -37,7 +37,7 @@ public class CloseAllResultsAction
 
 	public void executeAction(ActionEvent e)
 	{
-		panel.clearResultTabs();
+		panel.closeAllResults();
 	}
 
 }

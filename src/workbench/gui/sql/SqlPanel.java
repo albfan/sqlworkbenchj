@@ -40,10 +40,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import workbench.WbManager;
@@ -895,6 +891,12 @@ public class SqlPanel
 		}
 	}
 
+	protected boolean isPanelModified(int index)
+	{
+		DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
+		return panel.isModified();
+	}
+	
 	protected boolean isDataModified()
 	{
 		if (this.currentData == null) return false;
@@ -1221,7 +1223,10 @@ public class SqlPanel
 
 	private boolean confirmDiscardChanges(int index)
 	{
-		if (!isModified()) return true;
+		if (index >= resultTab.getTabCount() - 1) return false;
+		
+		boolean isModified = (index == -1 ? isModified() : isPanelModified(index));
+		if (!isModified) return true;
 		String title = getRealTabTitle();
 		if (index != -1)
 		{
@@ -2239,15 +2244,77 @@ public class SqlPanel
 		return null;
 	}
 
+	/**
+	 * Closes the currently selected result tab.
+	 *
+	 * @see #closeResult()
+	 */
 	public void closeCurrentResult()
 	{
 		int index = resultTab.getSelectedIndex();
 		closeResult(index);
 	}
 
+	/**
+	 * Closes the result tab with the given index. 
+	 * If confirmation for discarding changes is enabled, the user will be asked to proceed 
+	 * if the data has been edited
+	 *
+	 * @see #closeCurrentResult()
+	 */
 	public void closeResult(int index)
 	{
+		if (!confirmDiscardChanges(index)) return;
+		discardResult(index);
+	}
+
+	public void closeOtherResults()
+	{
+		try
+		{
+			ignoreStateChange = true;
+			WbSwingUtilities.invoke(new Runnable()
+			{
+				public void run()
+				{
+					Component keep = resultTab.getSelectedComponent();
+					int index = 0;
+					while (index < resultTab.getTabCount() - 1)
+					{
+						Component c = resultTab.getComponentAt(index);
+						if (c != keep && confirmDiscardChanges(index))
+						{
+							DwPanel panel = (DwPanel)c;
+							panel.removePropertyChangeListener(SqlPanel.this);
+							panel.clearContent();
+							resultTab.removeTabAt(index);
+						}
+						else
+						{
+							index ++;
+						}
+					}
+					resultTab.setSelectedIndex(0);
+					currentData = null;
+					updateProxiedActions();
+					checkResultSetActions();
+				}
+			});
+		}
+		finally
+		{
+			ignoreStateChange = false;
+		}
+	}
+
+	/**
+	 * Closes the result tab with the given index without further questions
+	 *
+	 */
+	private void discardResult(int index)
+	{
 		if (index == resultTab.getTabCount() - 1) return;
+		
 		try
 		{
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
@@ -2282,6 +2349,15 @@ public class SqlPanel
 		{
 			LogMgr.logError("SqlPanel.closeCurrentResult()", "Error closing current result tab", e);
 		}
+	}
+
+	public void closeAllResults()
+	{
+		for (int i=0; i < resultTab.getTabCount() - 1; i ++)
+		{
+			if (!confirmDiscardChanges(i)) return;
+		}
+		clearResultTabs();
 	}
 
 	/**
@@ -3408,7 +3484,7 @@ public class SqlPanel
 		
 		if (confirmDiscardChanges(index))
 		{
-			this.closeResult(index);
+			this.discardResult(index);
 		}
 	}
 

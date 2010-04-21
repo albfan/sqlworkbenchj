@@ -3641,7 +3641,7 @@ public class WbImportTest
 
 			StatementRunnerResult result = importCmd.execute("wbimport -header=true -continueonerror=true -sourcedir='" + importFile.getParent() + "' -type=text");
 			String msg = result.getMessageBuffer().toString();
-			System.out.println("**********\n" + msg);
+//			System.out.println("**********\n" + msg);
 			assertTrue(result.isSuccess());
 
 			String toFind = "Column \"not_there\" ";
