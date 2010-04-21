@@ -20,16 +20,12 @@ import java.awt.Window;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import javax.swing.BorderFactory;
 import javax.swing.CellEditor;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -793,7 +789,7 @@ public class DwPanel
 
 			// Some drivers return one more row than defined by maxRows...
 			boolean maxReached = maxRows > 0 && (maxRows == rowCount || maxRows == rowCount - 1);
-			
+
 			if (maxReached)
 			{
 				Color c = GuiSettings.getMaxRowsWarningColor();
@@ -973,7 +969,7 @@ public class DwPanel
 		return rows[rows.length - 1] == dataTable.getRowCount() - 1;
 	}
 
-	
+
 	public void deleteRow()
 	{
 		if (this.readOnly) return;
