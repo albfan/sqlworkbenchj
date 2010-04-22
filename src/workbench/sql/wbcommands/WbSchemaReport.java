@@ -49,7 +49,9 @@ public class WbSchemaReport
 	public static final String PARAM_TYPES = "types";
 	public static final String PARAM_TABLE_NAMES = "tables";
 
-	public static final String VERB = "WBREPORT";
+	public static final String ALTERNATE_VERB = "WBREPORT";
+	public static final String VERB = "WBSCHEMAREPORT";
+	
 	private SchemaReporter reporter;
 	private int currentTable = 0;
 
@@ -240,6 +242,12 @@ public class WbSchemaReport
 
 			}
 		}
+	}
+
+	@Override
+	public String getAlternateVerb()
+	{
+		return ALTERNATE_VERB;
 	}
 
 	public void setCurrentRow(long number, long total) {}

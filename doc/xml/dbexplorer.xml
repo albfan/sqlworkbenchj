@@ -173,7 +173,7 @@
 				<para>
 					This will create an XML report of the selected tables. You will be
 					prompted to specify the location of the generated XML file. This report can
-					also be generated using the <link linkend="command-schema-report">WbReport</link>
+					also be generated using the <link linkend="command-schema-report">WbSchemaReport</link>
 					command.
 				</para>
 			</blockquote>

@@ -99,6 +99,7 @@ public class CommandTester
 		formattedWords.put(WbEndBatch.VERB, "WbEndBatch");
 		formattedWords.put(WbStartBatch.VERB, "WbStartBatch");
 		formattedWords.put(WbSchemaDiff.VERB, "WbSchemaDiff");
+		formattedWords.put(WbSchemaReport.VERB, "WbSchemaReport");
 		formattedWords.put(WbDataDiff.VERB, "WbDataDiff");
 		formattedWords.put(WbDescribeObject.VERB, WbDescribeObject.VERB.toUpperCase());
 		formattedWords.put(WbDescribeObject.VERB_LONG, WbDescribeObject.VERB_LONG.toUpperCase());

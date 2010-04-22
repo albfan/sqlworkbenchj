@@ -249,7 +249,7 @@ VALUES
   <page name="xslt" title="XSLT" toc="main">
     <title>Sample XSL transformations</title>
     <content>
-      <p>Several SQL Workbench/J commands produce XML output (e.g. WbSchemaReport to
+      <p>Several SQL Workbench/J commands produce XML output (e.g. WbReport to
       generate a report of the current schema, or the output of the WbSchemaDiff command).
       </p>
       <p>On this page you can find some sample XSLT files to transform these output
@@ -262,8 +262,8 @@ VALUES
       <p>If you have developed an XSLT file to support the various
       XML outputs of SQL Workbench/J and would like to share it, please send
       it to <mail-to/></p>
-      <h2 style="text-align:left;padding-top:25px">WbSchemaReport transformations</h2>
-        <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbSchemaReport</a>
+      <h2 style="text-align:left;padding-top:25px">WbReport transformations</h2>
+        <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbReport</a>
       command</p>
       <ul>
         <li><a href="wbreport2html.xslt">HTML output</a></li>

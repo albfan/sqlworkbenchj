@@ -18,7 +18,7 @@
 	</para>
 
   <section id="command-schema-report">
-    <title>Create a report of the database objects - WbReport</title>
+    <title>Create a report of the database objects - WbSchemaReport</title>
 
     <para>
       Creates an XML report of selected tables. This report could be used
