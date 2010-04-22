@@ -216,8 +216,9 @@ public class DbExplorerWindow
 		});
 	}
 	
-	public void connectBegin(ConnectionProfile profile, StatusBar info)
+	public boolean connectBegin(ConnectionProfile profile, StatusBar info)
 	{
+		return true;
 	}
 	
 	public void connectCancelled()

@@ -177,9 +177,13 @@ public class ConnectionSelector
 		WbConnection conn = null;
 		String error = null;
 		
+		if (!client.connectBegin(aProfile, this))
+		{
+			closeConnectingInfo();
+			return;
+		}
 		setConnectIsInProgress();
-		
-		client.connectBegin(aProfile, this);
+
 		connectingInfo.repaint();
 		
 		showConnectingInfo();

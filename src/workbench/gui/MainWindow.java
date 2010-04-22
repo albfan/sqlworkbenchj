@@ -1161,11 +1161,14 @@ public class MainWindow
 		if (current != null) current.showLogMessage(aMsg);
 	}
 
-	public void connectBegin(final ConnectionProfile aProfile, final StatusBar info)
+	public boolean connectBegin(final ConnectionProfile aProfile, final StatusBar info)
 	{
 		if (this.currentWorkspaceFile != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
-			this.saveWorkspace(this.currentWorkspaceFile, true);
+			if (!this.saveWorkspace(this.currentWorkspaceFile, true))
+			{
+				return false;
+			}
 		}
 		disconnect(false, false, false);
 
@@ -1185,6 +1188,7 @@ public class MainWindow
 		loadWorkspaceForProfile(currentProfile);
 		Settings.getInstance().setLastConnection(currentProfile);
 		showStatusMessage(ResourceMgr.getString("MsgConnecting"));
+		return true;
 	}
 
 	public String getWindowId()

@@ -1897,11 +1897,12 @@ public class SqlPanel
 				setBusy(true);
 				setCancelState(true);
 				fireDbExecStart();
+				statusBar.executionStart();
+				long start = System.currentTimeMillis();
 				try
 				{
 					boolean newLineAppended = false;
 					StringBuilder messages = new StringBuilder();
-					long start = System.currentTimeMillis();
 					long rowCount = exporter.startExport();
 					long execTime = (System.currentTimeMillis() - start);
 					CharSequence errors = exporter.getErrors();
@@ -1942,6 +1943,9 @@ public class SqlPanel
 				{
 					setBusy(false);
 					fireDbExecEnd();
+					statusBar.executionEnd();
+					long execTime = (System.currentTimeMillis() - start);
+					statusBar.setExecutionTime(execTime);
 					clearStatusMessage();
 					setCancelState(false);
 					executionThread = null;
