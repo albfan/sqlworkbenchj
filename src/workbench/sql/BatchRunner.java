@@ -45,6 +45,7 @@ import workbench.sql.wbcommands.WbConnect;
 import workbench.storage.DataStore;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
+import workbench.util.DurationFormatter;
 import workbench.util.EncodingUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.FileDialogUtil;
@@ -696,7 +697,11 @@ public class BatchRunner
 
 				if (this.showTiming && showStatementTiming && !consolidateMessages)
 				{
-					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + (((double)(verbend - verbstart)) / 1000.0) + "s");
+					DurationFormatter f = new DurationFormatter();
+					long millis = (verbend - verbstart);
+					boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
+					String time = f.formatDuration(millis, includeFraction);
+					this.printMessage(ResourceMgr.getString("MsgSqlVerbTime") + " " + time);
 				}
 
 				if (this.rowMonitor != null && (executedCount % interval == 0))
@@ -759,8 +764,11 @@ public class BatchRunner
 
 		if (this.showTiming)
 		{
-			long execTime = (end - start);
-			String m = ResourceMgr.getString("MsgExecTime") + " " + (((double)execTime) / 1000.0) + "s";
+			long millis = (end - start);
+			DurationFormatter f = new DurationFormatter();
+			boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
+			String time = f.formatDuration(millis, includeFraction);
+			String m = ResourceMgr.getString("MsgExecTime") + " " + time;
 			this.printMessage(m);
 		}
 
