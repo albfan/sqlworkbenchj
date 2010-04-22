@@ -101,6 +101,7 @@ import workbench.gui.actions.HighlightCurrentStatement;
 import workbench.gui.actions.IgnoreErrorsAction;
 import workbench.gui.actions.ImportFileAction;
 import workbench.gui.actions.InsertRowAction;
+import workbench.gui.actions.JumpToStatement;
 import workbench.gui.actions.MakeInListAction;
 import workbench.gui.actions.MakeLowerCaseAction;
 import workbench.gui.actions.MakeNonCharInListAction;
@@ -776,6 +777,7 @@ public class SqlPanel
 		this.actions.add(this.sqlHistory.getShowNextStatementAction());
 		this.actions.add(this.sqlHistory.getShowLastStatementAction());
 		this.actions.add(this.sqlHistory.getClearHistoryAction());
+		actions.add(new JumpToStatement(this));
 
 		this.actions.add(new AutoJumpNextStatement());
 		this.appendResultsAction = new AppendResultsAction(this);

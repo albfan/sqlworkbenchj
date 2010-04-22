@@ -684,12 +684,17 @@ public class WbSwingUtilities
 		}
 	}
 	
-	public static String getUserInput(Component caller, String aTitle, String initialValue)
+	public static String getUserInput(Component caller, String title, String initialValue)
 	{
-		return getUserInput(caller, aTitle, initialValue, false);
+		return getUserInput(caller, title, initialValue, false, 40);
 	}
 
-	public static String getUserInput(Component caller, String aTitle, String initialValue, boolean hideInput)
+	public static String getUserInput(Component caller, String title, String initialValue, boolean hideInput)
+	{
+		return getUserInput(caller, title, initialValue, hideInput, 40);
+	}
+	
+	public static String getUserInput(Component caller, String title, String initialValue, boolean hideInput, int textSize)
 	{
 		Window parent = getWindowAncestor(caller);
 
@@ -702,7 +707,7 @@ public class WbSwingUtilities
 		{
 			input = new JTextField();
 		}
-		input.setColumns(40);
+		input.setColumns(textSize);
 		input.setText(initialValue);
 		if (initialValue != null)
 		{
@@ -710,7 +715,7 @@ public class WbSwingUtilities
 		}
 		input.addMouseListener(new TextComponentMouseListener());
 
-		boolean ok = ValidatingDialog.showConfirmDialog(parent, input, aTitle);
+		boolean ok = ValidatingDialog.showConfirmDialog(parent, input, title);
 		if (!ok)
 		{
 			return null;
