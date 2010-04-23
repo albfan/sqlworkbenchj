@@ -74,7 +74,7 @@ public class SelectionDisplay
 			{
 				colModel.removeListSelectionListener(columnListener);
 			}
-			setText("");
+			clear();
 		}
 	}
 
@@ -107,6 +107,12 @@ public class SelectionDisplay
 	protected void rowSelectionChanged(ListSelectionEvent e)
 	{
 		showSelection();
+	}
+
+	private void clear()
+	{
+		setText("");
+		setBorder(WbSwingUtilities.EMPTY_BORDER);
 	}
 
 	protected void showSelection()
@@ -153,8 +159,7 @@ public class SelectionDisplay
 		}
 		if (display.length() == 0)
 		{
-			setText("");
-			setBorder(WbSwingUtilities.EMPTY_BORDER);
+			clear();
 		}
 		else
 		{
