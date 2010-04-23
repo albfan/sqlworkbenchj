@@ -10,14 +10,18 @@
  */
 package workbench.gui.actions;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.JComboBox;
 import javax.swing.KeyStroke;
-import workbench.gui.WbSwingUtilities;
+import javax.swing.SwingUtilities;
+import workbench.gui.components.ValidatingDialog;
 import workbench.gui.sql.SqlPanel;
 import workbench.resource.ResourceMgr;
 import workbench.sql.ScriptParser;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -43,21 +47,35 @@ public class JumpToStatement
 	{
 		ScriptParser p = client.createScriptParser();
 		p.setScript(client.getText());
-		//int count = p.getSize();
-		String value = WbSwingUtilities.getUserInput(client, ResourceMgr.getString("TxtJumpTo"), "1", false, 10);
-		if (value != null)
+		int count = p.getSize();
+
+		JComboBox input = new JComboBox();
+		input.setEditable(true);
+		for (int i=0; i < count; i++)
 		{
-			int stmt = Integer.valueOf(value);
-			final int pos = p.getStartPosForCommand(stmt - 1);
-			EventQueue.invokeLater( new Runnable()
-			{
-				@Override
-				public void run()
-				{
-					client.getEditor().setCaretPosition(pos);
-				}
-			});
+			input.addItem(Integer.toString(i + 1));
 		}
+		input.setSelectedIndex(0);
+		input.setMinimumSize(new Dimension(50, 24));
+		boolean ok = ValidatingDialog.showConfirmDialog(SwingUtilities.getWindowAncestor(client), input, ResourceMgr.getString("TxtJumpTo"));
+		if (!ok)
+		{
+			return;
+		}
+		String value = input.getSelectedItem().toString();
+		if (StringUtil.isBlank(value)) return;
+
+		int stmt = Integer.valueOf(value);
+		final int pos = p.getStartPosForCommand(stmt - 1);
+		EventQueue.invokeLater( new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				client.getEditor().setCaretPosition(pos);
+			}
+		});
+
 	}
 
 }
