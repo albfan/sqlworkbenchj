@@ -24,6 +24,7 @@ import javax.swing.table.TableColumnModel;
 import workbench.gui.WbSwingUtilities;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -74,7 +75,7 @@ public class SelectionDisplay
 			{
 				colModel.removeListSelectionListener(columnListener);
 			}
-			clear();
+			setText("");
 		}
 	}
 
@@ -109,11 +110,20 @@ public class SelectionDisplay
 		showSelection();
 	}
 
-	private void clear()
+	@Override
+	public void setText(String text)
 	{
-		setText("");
-		setBorder(WbSwingUtilities.EMPTY_BORDER);
+		super.setText(text);
+		if (StringUtil.isEmptyString(text))
+		{
+			setBorder(WbSwingUtilities.EMPTY_BORDER);
+		}
+		else
+		{
+			setBorder(activeBorder);
+		}
 	}
+
 
 	protected void showSelection()
 	{
@@ -159,12 +169,11 @@ public class SelectionDisplay
 		}
 		if (display.length() == 0)
 		{
-			clear();
+			setText("");
 		}
 		else
 		{
 			setText(display.toString());
-			setBorder(activeBorder);
 		}
 	}
 }
