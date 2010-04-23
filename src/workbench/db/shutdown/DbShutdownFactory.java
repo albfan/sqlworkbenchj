@@ -28,6 +28,7 @@ public class DbShutdownFactory
 	public static DbShutdownHook getShutdownHook(WbConnection con)
 	{
 		if (con == null) return null;
+		if (con.getMetadata() == null) return null;
 		
 		if (con.getMetadata().isHsql())
 		{

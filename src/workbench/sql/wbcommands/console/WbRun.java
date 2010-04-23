@@ -78,7 +78,6 @@ public class WbRun
 
 		boolean checkEscape = Settings.getInstance().getCheckEscapedQuotes();
 		boolean defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());
-		DelimiterDefinition delim = Settings.getInstance().getAlternateDelimiter(currentConnection);
 		String encoding = Settings.getInstance().getDefaultEncoding();
 
 		try
@@ -87,7 +86,6 @@ public class WbRun
 			String dir = file.getCanonicalFile().getParent();
 			batchRunner.setBaseDir(dir);
 			batchRunner.setConnection(currentConnection);
-			batchRunner.setDelimiter(delim);
 			batchRunner.setResultLogger(this.resultLogger);
 			batchRunner.setRowMonitor(null);
 			batchRunner.setVerboseLogging(false);

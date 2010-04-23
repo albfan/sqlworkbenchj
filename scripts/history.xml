@@ -8,6 +8,7 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="3" type="fix">WbRun was always using the alternate delimiter to parse the file</entry>
     <entry dev-build="2" type="fix">The tooltip for a column heder was not displaying the correct information if the column order was changed using drag and drop</entry>
     <entry dev-build="2" type="fix">WbCall did not work with Oracle functions returning a REF CURSOR</entry>
     <entry dev-build="2" type="fix">When the option "Confirm tab close" was enabled, no confirmation was needed when using "Close other tabs"</entry>

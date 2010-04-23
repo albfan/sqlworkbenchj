@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
 import workbench.AppArguments;
+import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
@@ -137,7 +138,16 @@ public class WbConnect
 		try
 		{
 			connectionId ++;
-			String id = "batch-connect-" + connectionId;
+			String id = null;
+			if (WbManager.getInstance().isConsoleMode())
+			{
+				id = "Console-" + connectionId;
+			}
+			else
+			{
+
+				id = "batch-connect-" + connectionId;
+			}
 
 			// persistentChange will be activated by SQLConsole
 			// in that case we need to disconnect the current connection
