@@ -74,6 +74,7 @@ public class SelectionDisplay
 			{
 				colModel.removeListSelectionListener(columnListener);
 			}
+			setText("");
 		}
 	}
 
@@ -110,10 +111,15 @@ public class SelectionDisplay
 
 	protected void showSelection()
 	{
-		if (table == null) return;
+		if (table == null)
+		{
+			setText("");
+			return;
+		}
+		
 		int cols[] = table.getSelectedColumns();
 
-		StringBuffer display = new StringBuffer(30);
+		StringBuilder display = new StringBuilder(30);
 
 		double sum = 0;
 		boolean numbers = false;
