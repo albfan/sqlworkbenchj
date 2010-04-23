@@ -49,7 +49,6 @@ public class ObjectListFilter
 			ObjectNameFilter filter = new ObjectNameFilter();
 			filter.setExpressionList(regex);
 			filterMap.put(type, filter);
-			LogMgr.logDebug("ObjectListFilter.addFilter()", "Excluding type " +  type + " using the following regex: " + regex);
 		}
 	}
 
