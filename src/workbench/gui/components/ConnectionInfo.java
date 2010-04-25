@@ -17,8 +17,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.SwingUtilities;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.WbAction;
 import workbench.gui.tools.ConnectionInfoPanel;
 import workbench.resource.ResourceMgr;
@@ -136,6 +138,9 @@ public class ConnectionInfo
 
 	public void actionPerformed(ActionEvent e)
 	{
+		if (this.sourceConnection == null) return;
+		if (!WbSwingUtilities.checkConnection(this, sourceConnection)) return;
+
 		ConnectionInfoPanel.showConnectionInfo(sourceConnection);
 	}
 

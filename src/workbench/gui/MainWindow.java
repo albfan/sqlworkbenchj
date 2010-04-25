@@ -1275,6 +1275,8 @@ public class MainWindow
 		disconnected();
 		tabSelected(0);
 
+		if (error == null) return;
+		
 		try
 		{
 			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error);

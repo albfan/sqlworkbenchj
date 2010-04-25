@@ -929,7 +929,7 @@ public class WbSwingUtilities
 	{
 		if (dbConnection.isBusy())
 		{
-			showMessageKey(parent, "ErrConnectionBusy");
+			showMessageKey(SwingUtilities.getWindowAncestor(parent), "ErrConnectionBusy");
 			return false;
 		}
 		return true;

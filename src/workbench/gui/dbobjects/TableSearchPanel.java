@@ -354,11 +354,6 @@ public class TableSearchPanel
 		if (!WbSwingUtilities.checkConnection(this, connection)) return;
 
 		if (this.tableNames.getSelectedRowCount() == 0) return;
-		if (this.connection.isBusy())
-		{
-			WbSwingUtilities.showMessageKey(this, "ErrConnectionBusy");
-			return;
-		}
 
 		if (Settings.getInstance().getBoolProperty("workbench.searchdata.warn.buffer", true))
 		{
