@@ -280,7 +280,6 @@ public class ShortcutManager
 	{
 		if (!modified)
 		{
-			LogMgr.logDebug("ShortcutManager.saveSettings()", "Nothing modified. Definitions will not be saved");
 			return;
 		}
 		
