@@ -522,7 +522,7 @@ public final class WbManager
 	public void doShutdown(int errorCode)
 	{
 		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
-		this.closeAllWindows();
+		closeAllWindows();
 		saveSettings();
 		LogMgr.logInfo("WbManager.doShutdown()", "Stopping " + ResourceMgr.TXT_PRODUCT_NAME + ", Build " + ResourceMgr.getString("TxtBuildNumber"));
 		LogMgr.shutdown();
@@ -694,6 +694,12 @@ public final class WbManager
 			{
 				WbFile file = new WbFile(value);
 				System.setProperty("workbench.log.filename", file.getFullPath());
+			}
+
+			value = cmdLine.getValue(AppArguments.ARG_LOGLEVEL);
+			if (!StringUtil.isEmptyString(value))
+			{
+				System.setProperty("workbench.log.level", value);
 			}
 
 			if (cmdLine.isArgPresent(AppArguments.ARG_NOSETTNGS))
@@ -986,13 +992,23 @@ public final class WbManager
 	}
 
 	/**
-	 *  this is for the shutdownhook
+	 *  This is the callback method for the shutdownhook.
 	 */
 	public void run()
 	{
-		LogMgr.logWarning("WbManager.run()", "Shutdownhook called. SQL Workbench/J process has been interrupted.");
-		ConnectionMgr.getInstance().disconnectAll();
+		LogMgr.logWarning("WbManager.shutdownHook()", "SQL Workbench/J process has been interrupted. Aborting process...");
 		saveSettings();
+		boolean exitImmediately = Settings.getInstance().getBoolProperty("workbench.exitonbreak", true);
+		if (exitImmediately)
+		{
+			LogMgr.shutdown();
+			ConnectionMgr.getInstance().disconnectAll();
+			System.exit(15);
+		}
+		else
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
 	}
 
 }

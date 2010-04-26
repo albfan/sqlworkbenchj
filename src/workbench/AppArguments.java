@@ -72,6 +72,7 @@ public class AppArguments
 	public static final String ARG_PROFILE_STORAGE = "profileStorage";
 	public static final String ARG_CONFIGDIR = "configDir";
 	public static final String ARG_LIBDIR = "libdir";
+	public static final String ARG_LOGLEVEL = "logLevel";
 	public static final String ARG_LOGFILE = "logfile";
 	public static final String ARG_VARDEF = "varDef";
 	public static final String ARG_LANG = "language";
@@ -92,6 +93,7 @@ public class AppArguments
 		addArgument(ARG_SCRIPT);
 		addArgument(ARG_COMMAND);
 		addArgument(ARG_SCRIPT_ENCODING);
+		addArgument(ARG_LOGLEVEL);
 		addArgument(ARG_LOGFILE);
 		addArgument(ARG_ABORT, ArgumentType.BoolArgument);
 		addArgument(ARG_SUCCESS_SCRIPT);

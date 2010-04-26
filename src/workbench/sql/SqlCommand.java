@@ -321,7 +321,13 @@ public class SqlCommand
 		throws SQLException
 	{
 		if (result == null) return;
-
+		
+		if (currentConnection == null || currentConnection.isClosed())
+		{
+			LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
+			return;
+		}
+		
 		appendOutput(result);
 
 		// Postgres obviously clears the warnings if the getMoreResults() is called,
@@ -362,12 +368,25 @@ public class SqlCommand
 			moreResults = true;
 		}
 
+		if (currentConnection == null || currentConnection.isClosed())
+		{
+			LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
+			return;
+		}
+
 		ResultSet rs = null;
 		boolean multipleUpdateCounts = (this.currentConnection != null ? this.currentConnection.getDbSettings().allowsMultipleGetUpdateCounts() : false);
 
 		int counter = 0;
 		while (moreResults || updateCount > -1)
 		{
+			
+			if (currentConnection == null || currentConnection.isClosed())
+			{
+				LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
+				return;
+			}
+			
 			if (updateCount > -1)
 			{
 				result.addUpdateCountMsg(updateCount);
@@ -432,6 +451,12 @@ public class SqlCommand
 					}
 					result.addDataStore(this.currentRetrievalData);
 				}
+			}
+
+			if (currentConnection == null || currentConnection.isClosed())
+			{
+				LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
+				return;
 			}
 
 			try

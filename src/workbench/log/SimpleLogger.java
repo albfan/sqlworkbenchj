@@ -119,6 +119,8 @@ public class SimpleLogger
 		{
 			logMessage(LogLevel.info, null, "=================== Log stopped ===================", null);
 			logOut.close();
+			logOut = null;
+			logSystemErr = false;
 		}
 	}
 
