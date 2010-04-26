@@ -14,6 +14,7 @@ package workbench.gui.help;
 import java.awt.Desktop;
 import java.awt.Desktop.Action;
 import java.io.File;
+import java.net.URI;
 import workbench.WbManager;
 import workbench.gui.WbSwingUtilities;
 import workbench.log.LogMgr;
@@ -123,6 +124,8 @@ public class HelpManager
 			return;
 		}
 
+		LogMgr.logDebug("HelpManager.showPdfHelp()", "Using PDF: " + pdf.getFullPath());
+
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.OPEN))
 		{
 			WbThread t = new WbThread("OpenPDF")
@@ -162,7 +165,7 @@ public class HelpManager
 		}
 		try
 		{
-			BrowserLauncher.openURL(history.toURI().toURL().toString());
+			BrowserLauncher.openURL(history.toURI());
 		}
 		catch (Exception ex)
 		{
@@ -217,8 +220,7 @@ public class HelpManager
 			{
 				url = url + "#" + topic;
 			}
-			LogMgr.logDebug("HelpManager.showHelpFile()", "Using URL: " + url);
-			BrowserLauncher.openURL(url);
+			BrowserLauncher.openURL(new URI(url));
 		}
 		catch (Exception ex)
 		{

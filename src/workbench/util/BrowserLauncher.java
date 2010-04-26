@@ -52,7 +52,13 @@ public class BrowserLauncher
 		}
 	}
 
-	public static void openURL(final String url)
+	public static void openURL(String url)
+		throws Exception
+	{
+		openURL(new URI(url));
+	}
+	
+	public static void openURL(final URI url)
 		throws Exception
 	{
 		if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE))
@@ -63,8 +69,8 @@ public class BrowserLauncher
 				{
 					try
 					{
-						URI target = new URI(url);
-						Desktop.getDesktop().browse(target);
+						LogMgr.logDebug("BrowserLauncher.openURL", "Opening URL: " + url.toString());
+						Desktop.getDesktop().browse(url);
 					}
 					catch (Exception e)
 					{
