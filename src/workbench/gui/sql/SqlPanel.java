@@ -167,6 +167,7 @@ import workbench.sql.commands.SingleVerbCommand;
 import workbench.sql.preparedstatement.PreparedStatementPool;
 import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
+import workbench.util.DurationFormatter;
 import workbench.util.LowMemoryException;
 import workbench.util.MemoryWatcher;
 import workbench.util.MessageBuffer;
@@ -2586,6 +2587,8 @@ public class SqlPanel
 		this.stmtRunner.setExecutionController(this);
 		this.stmtRunner.setParameterPrompter(this);
 
+		DurationFormatter df = new DurationFormatter();
+
 		// If a file is loaded in the editor, make sure the StatementRunner
 		// is using the file's directory as the base directory
 		// Thanks to Christian d'Heureuse for this fix!
@@ -2905,7 +2908,8 @@ public class SqlPanel
 			if (count > 1)
 			{
 				this.appendToLog(ResourceMgr.getString("TxtScriptFinished")+ "\n");
-				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + (((double)execTime) / 1000.0) + "s\n";
+				String duration = df.formatDuration(execTime, (execTime < DurationFormatter.ONE_MINUTE));
+				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + duration + "\n";
 				this.appendToLog(s);
 			}
 

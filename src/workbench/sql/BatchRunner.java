@@ -380,7 +380,6 @@ public class BatchRunner
 	public void setScriptToRun(String sql)
 	{
 		this.command = sql;
-		LogMgr.logDebug("BatchRunner.setCommandToRun()", "Using command: <" + sql + ">");
 	}
 
 	protected void runScript()
