@@ -78,7 +78,8 @@ public class SimpleLogger
 		{
 			return;
 		}
-		if (logfile.equals(currentFile))
+
+		if (currentFile != null && logfile.equals(currentFile))
 		{
 			return;
 		}

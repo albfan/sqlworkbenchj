@@ -2171,9 +2171,16 @@ public class Settings
 		return getProperty("workbench.sql.parameter.suffix", "]");
 	}
 
+	/**
+	 * Return the maximum size of the log file (when using the built-in logging)
+	 * If this size is exceeded a new log file is created
+	 * <br/>
+	 * The default max. size is 5MB
+	 * @see workbench.log.SimpleLogger#setOutputFile(java.io.File, int)
+	 */
 	public int getMaxLogfileSize()
 	{
-		return this.getIntProperty("workbench.log.maxfilesize", 150000);
+		return this.getIntProperty("workbench.log.maxfilesize", 5 * 1024 * 1024);
 	}
 
 	public boolean getCheckEscapedQuotes()
