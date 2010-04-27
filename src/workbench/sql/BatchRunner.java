@@ -563,8 +563,8 @@ public class BatchRunner
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		if (this.connection != null && !this.connection.isClosed())
 		{
-			parser.setSupportOracleInclude(this.connection.getDbSettings().supportSingleLineCommands());
-			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportShortInclude());
+			parser.setSupportOracleInclude(this.connection.getDbSettings().supportShortInclude());
+			parser.setCheckForSingleLineCommands(this.connection.getDbSettings().supportSingleLineCommands());
 			parser.setAlternateLineComment(this.connection.getDbSettings().getLineComment());
 		}
 
