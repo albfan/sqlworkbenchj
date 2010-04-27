@@ -351,7 +351,9 @@ public class TextAreaPainter
 		final int firstVisible = textArea.getFirstLine();
 
 		int fheight = fm.getHeight();
-		int firstInvalid = firstVisible + clipRect.y / fheight;
+		int firstInvalid = firstVisible + (clipRect.y / fheight);
+		if (firstInvalid > 1) firstInvalid --;
+		
 		int lastInvalid = firstVisible + ((clipRect.y + clipRect.height) / fheight);
 		if (lastInvalid > lastLine) lastInvalid = lastLine;
 
