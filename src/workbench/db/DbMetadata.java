@@ -863,8 +863,7 @@ public class DbMetadata
 		String replace = Settings.getInstance().getProperty(prefix + "replace" + suffix, null);
 		if (replace != null)
 		{
-			replace = StringUtil.replace(replace, "%name%", name);
-			result.append(SqlUtil.addSemicolon(replace));
+			result.append(StringUtil.replace(replace, "%name%", name));
 			replaceAvailable = true;
 		}
 
@@ -887,7 +886,7 @@ public class DbMetadata
 			else
 			{
 				create = StringUtil.replace(create, "%name%", name);
-				result.append(SqlUtil.addSemicolon(create));
+				result.append(create);
 			}
 		}
 		return result;
