@@ -216,7 +216,7 @@ public class OracleProcedureReader
 
 		standardProcs += " AND ao.object_name LIKE '" + name + "' ";
 
-		String pkgProcs = "select package_name as procedure_cat, \n" +
+		String pkgProcs = "select aa.package_name as procedure_cat, \n" +
              "       ao.owner as procedure_schem, \n" +
              "       aa.object_name as procedure_name, \n" +
              "       null, \n" +
@@ -236,6 +236,11 @@ public class OracleProcedureReader
 		if (StringUtil.isNonBlank(schema))
 		{
 			pkgProcs += "\n AND ao.owner = '" + schema + "' ";
+		}
+
+		if (StringUtil.isNonBlank(catalog))
+		{
+			pkgProcs += "\n AND aa.package_name = '" + catalog + "' ";
 		}
 
 		pkgProcs += "\n AND aa.object_name LIKE '" + name + "' ";

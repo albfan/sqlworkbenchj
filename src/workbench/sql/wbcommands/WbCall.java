@@ -11,7 +11,6 @@
  */
 package workbench.sql.wbcommands;
 
-import java.io.IOException;
 import java.sql.CallableStatement;
 import java.sql.ParameterMetaData;
 import java.sql.ResultSet;
@@ -25,7 +24,6 @@ import java.util.Map;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureReader;
-import workbench.db.TableIdentifier;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
@@ -325,50 +323,71 @@ public class WbCall
 	private List<ParameterDefinition> checkParametersFromDatabase(String sql)
 		throws SQLException
 	{
-		// Detect the name/schema of the called procedure
-		SQLLexer l = new SQLLexer(sql);
-		SQLToken t = l.getNextToken(false, false);
-
-		// the first token could also be a schema/user name
-		String schema = null;
-		String procname = null;
 
 		List<String> sqlParams = SqlUtil.getFunctionParameters(sql);
 
-		try
+		// Detect the name/schema of the called procedure
+		SQLLexer l = new SQLLexer(sql);
+
+		// The WbCall verb has already been removed from the sql string
+		// so the first token is the actual procedure name (but could contain a package and/or schema name)
+		SQLToken t = l.getNextToken(false, false);
+
+		String schema = null;
+		String catalog = null;
+		String procname = (t == null ? "" : t.getContents());
+		if (procname == null) return null;
+
+		String[] items = procname.split("\\.");
+		if (this.currentConnection.getMetadata().isOracle())
 		{
-			SQLToken n = l.getNextToken(false, false);
-			if (n != null && n.getContents().equals("."))
+			if (items.length == 3)
 			{
-				n = l.getNextToken();
-				procname = (n == null ? "" : n.getContents());
-				schema = (t == null ? "" : t.getContents());
+				// Packaged procedure with a schema prefix
+				schema = items[0];
+				catalog = items[1].toUpperCase();
+				procname = items[2]; // package name
 			}
-			else
+			if (items.length == 2)
 			{
-				procname = (t == null ? "" : t.getContents());
+				procname = items[1];
+
+				// this can either be a packaged procedure or a standalone procedure with a schema prefix
+				// if the first item is a valid schema name, then it's not a packaged function
+				// this will not cover the situation where a package for the current user exists
+				// that has the same name as a schema
+				List<String> schemas = currentConnection.getMetadata().getSchemas();
+				if (schemas.contains(items[0].toUpperCase()))
+				{
+					schema = items[0];
+				}
+				else
+				{
+					schema = null;
+					catalog = items[0].toUpperCase(); // package name
+				}
 			}
 		}
-		catch (IOException e)
+		else
 		{
-			LogMgr.logError("WbCall.checkParametersFromDatabase", "Error checking SQL", e);
-			return null;
+			if (items.length == 2)
+			{
+				schema = items[0];
+				procname = items[1];
+			}
 		}
 
 		DbMetadata meta = this.currentConnection.getMetadata();
 		ArrayList<ParameterDefinition> parameterNames = null;
 
-		TableIdentifier name = new TableIdentifier(schema, procname);
-		name.setPreserveQuotes(true);
-
-		String schemaToUse = StringUtil.trimQuotes(meta.adjustSchemaNameCase(name.getSchema(), true));
+		String schemaToUse = StringUtil.trimQuotes(meta.adjustSchemaNameCase(schema, true));
 		if (schemaToUse == null)
 		{
 			schemaToUse = meta.getCurrentSchema();
 		}
-		String nameToUse = StringUtil.trimQuotes(meta.adjustObjectnameCase(name.getObjectName()));
+		String nameToUse = StringUtil.trimQuotes(meta.adjustObjectnameCase(procname));
 
-		DataStore params = meta.getProcedureReader().getProcedureColumns(null, schemaToUse, nameToUse);
+		DataStore params = meta.getProcedureReader().getProcedureColumns(catalog, schemaToUse, nameToUse);
 
 		boolean needFuncCall = returnsRefCursor(params);
 		sqlUsed = getSqlToPrepare(sql, needFuncCall);

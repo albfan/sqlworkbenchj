@@ -8,6 +8,7 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="3" type="fix">Tried to make detection of Oracle packaged procedures more robust in WbCall</entry>
     <entry dev-build="3" type="fix">The reverse engineered source code for views contained a wrongly placed semicolon</entry>
     <entry dev-build="3" type="fix">Cancelling a connect due to an unsaved file did not work</entry>
     <entry dev-build="3" type="fix">WbRun was always using the alternate delimiter to parse the file</entry>

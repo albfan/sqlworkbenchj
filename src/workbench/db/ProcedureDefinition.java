@@ -227,7 +227,7 @@ public class ProcedureDefinition
 	
 	public String getCatalog() 
 	{
-		if (oracleType != null) return null;
+//		if (oracleType != null) return null;
 		return this.catalog; 
 	}
 	
