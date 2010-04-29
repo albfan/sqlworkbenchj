@@ -154,15 +154,27 @@ public class OraclePackageParser
 		SQLLexer lexer = new SQLLexer(source);
 		SQLToken t = lexer.getNextToken(false, false);
 
+		boolean packageHeaderFound = false;
 		// Find the start of the package body
 		while (t != null)
 		{
+			if (t.getContents().equals("PACKAGE") || t.getContents().equals("TYPE"))
+			{
+				packageHeaderFound = true;
+			}
 			if (t.getContents().equals("PACKAGE BODY")) break;
 			if (t.getContents().equals("TYPE BODY")) break;
 			t = lexer.getNextToken(false, false);
 		}
 		
-		if (t == null) return -1;
+		if (t == null && !packageHeaderFound) return -1;
+		if (packageHeaderFound && t == null)
+		{
+			// apparently only the defintion but not the body is available
+			// so try to find the procedure in the header
+			lexer = new SQLLexer(source);
+			t = lexer.getNextToken(false, false);
+		}
 		
 		// Now we have reached the package or type body, let's find the the actual procedure or function
 		int lastKeywordPos = -1;

@@ -77,4 +77,16 @@ public class OraclePackageParserTest
 		int procPos = OraclePackageParser.findProcedurePosition(script, "hire_employee");
 		assertEquals(pos, procPos);
 	}
+
+	public void testfindProcInHeader()
+	{
+		String script = decl + "\n/\n";
+		int pos = script.indexOf("PROCEDURE hire_employee (");
+		int procPos = OraclePackageParser.findProcedurePosition(script, "hire_employee");
+		assertEquals(pos, procPos);
+
+		pos = script.indexOf("PROCEDURE fire_employee");
+		procPos = OraclePackageParser.findProcedurePosition(script, "fire_employee");
+		assertEquals(pos, procPos);
+	}
 }
