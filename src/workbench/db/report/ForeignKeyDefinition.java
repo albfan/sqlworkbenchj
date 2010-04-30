@@ -44,7 +44,8 @@ public class ForeignKeyDefinition
 	private int updateRuleValue;
 	private int deleteRuleValue;
 	private int deferrableRuleValue;
-	private boolean compareFKRules = false;
+	private boolean compareFKRules;
+
 	
 	public ForeignKeyDefinition(String name)
 	{
@@ -194,16 +195,27 @@ public class ForeignKeyDefinition
 		return true;
 	}
 
-	public boolean equals(ForeignKeyDefinition ref)
+	public boolean isNameEqual(ForeignKeyDefinition ref)
+	{
+		try
+		{
+			return this.fkName.equalsIgnoreCase(ref.fkName);
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+	
+	public boolean isDefinitionEquals(ForeignKeyDefinition ref)
 	{
 		try
 		{
 			boolean columnsAreEqual = compareColumns(ref);
-			boolean namesAreEqual = this.fkName.equalsIgnoreCase(ref.fkName);
 			boolean tablesAreEqual = this.foreignTable.equals(ref.foreignTable);
 
-			boolean baseEquals = columnsAreEqual && namesAreEqual && tablesAreEqual;
-			
+			boolean baseEquals = columnsAreEqual && tablesAreEqual;
+
 			if (baseEquals && compareFKRules)
 			{
 				baseEquals = baseEquals &&
@@ -212,6 +224,18 @@ public class ForeignKeyDefinition
 							(this.deferrableRuleValue == ref.deferrableRuleValue);
 			}
 			return baseEquals;
+		}
+		catch (Exception e)
+		{
+			return false;
+		}
+	}
+	
+	public boolean equals(ForeignKeyDefinition ref)
+	{
+		try
+		{
+			return isDefinitionEquals(ref) && isNameEqual(ref);
 		}
 		catch (Exception e)
 		{

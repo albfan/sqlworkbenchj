@@ -116,18 +116,20 @@ public class ColumnReference
 		if (o instanceof ColumnReference) return equals((ColumnReference)o);
 		return false;
 	}
-	
-	public boolean equals(ColumnReference ref)
+
+	public boolean isColumnEqual(ColumnReference ref)
 	{
-		try
-		{
-			return (this.foreignColumn.equalsIgnoreCase(ref.foreignColumn) &&
-			        this.fkDefinition.equals(ref.fkDefinition)
-			        );
-		}
-		catch (Exception e)
-		{
-			return false;
-		}
+		return this.foreignColumn.equalsIgnoreCase(ref.foreignColumn);
 	}
+	
+	public boolean isFkNameEqual(ColumnReference ref)
+	{
+		return this.fkDefinition.isNameEqual(ref.fkDefinition);
+	}
+	
+	public boolean isFkDefinitionEqual(ColumnReference ref)
+	{
+		return this.fkDefinition.isDefinitionEquals(ref.fkDefinition);
+	}
+
 }

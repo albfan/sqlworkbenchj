@@ -35,6 +35,7 @@ public class ColumnDiff
 	public static final String TAG_MODIFY_COLUMN = "modify-column";
 	public static final String TAG_DROP_FK = "drop-reference";
 	public static final String TAG_ADD_FK = "add-reference";
+	public static final String TAG_RENAME_FK = "rename-reference";
 	
 	// Use a ReportColumn for future FK reference diff...
 	private ReportColumn referenceColumn;
@@ -56,8 +57,15 @@ public class ColumnDiff
 		this.targetColumn = target;
 	}
 
-	public void setCompareForeignKeys(boolean flag) { this.compareFK = flag; }
-	public void setCompareComments(boolean flag) { this.compareComments = flag; }
+	public void setCompareForeignKeys(boolean flag) 
+	{
+		this.compareFK = flag;
+	}
+	
+	public void setCompareComments(boolean flag)
+	{
+		this.compareComments = flag;
+	}
 	
 	/**
 	 *	Set the {@link workbench.db.report.TagWriter} to 
@@ -152,16 +160,18 @@ public class ColumnDiff
 		ColumnReference refFk = this.referenceColumn.getForeignKey();
 		ColumnReference targetFk = this.targetColumn.getForeignKey();
 		
-		boolean fkDifferent = false;
+		boolean fkDefinitionDifferent = false;
+		boolean fkNameDifferent = false;
+
 		if (this.compareFK)
 		{
 			if (refFk == null && targetFk == null)
 			{
-				fkDifferent = false;
+				fkDefinitionDifferent = false;
 			}
 			else if ((refFk == null && targetFk != null) || (refFk != null && targetFk == null))
 			{
-				fkDifferent = true;
+				fkDefinitionDifferent = true;
 			}
 			else 
 			{
@@ -169,7 +179,9 @@ public class ColumnDiff
 				// differ extremely between DBMS
 				refFk.setCompareFKRule(!this.compareJdbcTypes);
 				targetFk.setCompareFKRule(!this.compareJdbcTypes);
-				fkDifferent = !(refFk.equals(targetFk));
+				
+				fkDefinitionDifferent = !(refFk.isFkDefinitionEqual(targetFk));
+				fkNameDifferent = !(refFk.isFkNameEqual(targetFk));
 			}
 		}
 		
@@ -183,7 +195,7 @@ public class ColumnDiff
 		
 		if (writer == null) this.writer = new TagWriter();
 		
-		if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent || fkDifferent || computedColIsDifferent)
+		if (typeDifferent || nullableDifferent || defaultDifferent || commentDifferent || fkNameDifferent || fkDefinitionDifferent || computedColIsDifferent)
 		{
 			writer.appendOpenTag(result, this.indent, TAG_MODIFY_COLUMN, "name", tId.getColumnName());
 			result.append('\n');
@@ -211,10 +223,12 @@ public class ColumnDiff
 					writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_JAVA_TYPE_NAME, sId.getColumnTypeName());
 				}
 			}
+			
 			if (nullableDifferent)
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_NULLABLE, sId.isNullable());
 			}
+
 			if (defaultDifferent)
 			{
 				if (StringUtil.isBlank(sdef))
@@ -243,7 +257,8 @@ public class ColumnDiff
 			{
 				writer.appendTag(result, myindent, ReportColumn.TAG_COLUMN_COMPUTED_COL, sId.getComputedColumnExpression());
 			}
-			if (fkDifferent)
+
+			if (fkDefinitionDifferent)
 			{
 				StrBuffer refIndent = new StrBuffer(myindent);
 				refIndent.append("  ");
@@ -261,6 +276,23 @@ public class ColumnDiff
 					result.append(refFk.getInnerXml(refIndent));
 					writer.appendCloseTag(result, myindent, TAG_ADD_FK);
 				}
+			}
+			else if (fkNameDifferent)
+			{
+				StrBuffer refIndent = new StrBuffer(myindent);
+				refIndent.append("  ");
+				writer.appendOpenTag(result, myindent, TAG_RENAME_FK);
+				result.append('\n');
+				result.append(myindent);
+				result.append("  <old-name>");
+				result.append(targetFk.getFkName());
+				result.append("</old-name>\n");
+				
+				result.append(myindent);
+				result.append("  <new-name>");
+				result.append(refFk.getFkName());
+				result.append("</new-name>\n");
+				writer.appendCloseTag(result, myindent, TAG_RENAME_FK);
 			}
 			writer.appendCloseTag(result, this.indent, TAG_MODIFY_COLUMN);
 		}
