@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-04-27">
+    <entry dev-build="3" type="enh">When using -continueOnError WbImport does not treat missing or empty files as an error, it only shows a warning.</entry>
     <entry dev-build="2" type="enh">MySQL's syntax for changing autocommit mode is now also supported (SET AUTOCOMMIT = 1 instead of SET AUTOCOMMIT ON)</entry>
     <entry dev-build="2" type="enh">A new command WbFetchSize is available to change the default fetch size of the current connection without the need to change the connection profile</entry>
     <entry dev-build="1" type="enh">Workspaces loaded with "Workspace -&gt; Load Workspace" are now added to a "Recent Workspaces" menu</entry>

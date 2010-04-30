@@ -63,7 +63,14 @@ public class ImportFileLister
 
 		for (File f : files)
 		{
-			toProcess.add(new WbFile(f));
+			if (f.length() > 0)
+			{
+				toProcess.add(new WbFile(f));
+			}
+			else
+			{
+				LogMgr.logWarning("ImportFileLister.<init>", "Ignoring empty file: " + f.getAbsolutePath());
+			}
 		}
 
 		// Cleanup possible _lob files
@@ -77,7 +84,7 @@ public class ImportFileLister
 				WbFile basefile = new WbFile(f.getParent(), f.getName().replace("_lobs", ""));
 				if (toProcess.contains(basefile))
 				{
-					LogMgr.logDebug("FileNameSorter.<init>", "Ignoring lob file: " + f.getFullPath());
+					LogMgr.logDebug("ImportFileLister.<init>", "Ignoring lob file: " + f.getFullPath());
 					itr.remove();
 				}
 			}
@@ -130,7 +137,7 @@ public class ImportFileLister
 			{
 				if (fname.indexOf(contained) > -1)
 				{
-					LogMgr.logDebug("FileNameSorter.<init>", "Ignoring file: " + f.getFullPath());
+					LogMgr.logDebug("ImportFileLister.<init>", "Ignoring file: " + f.getFullPath());
 					itr.remove();
 				}
 			}

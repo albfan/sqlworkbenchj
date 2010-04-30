@@ -264,11 +264,37 @@ public class WbImport
 		{
 			if (!inputFile.exists())
 			{
-				String msg = ResourceMgr.getString("ErrImportFileNotFound");
-				msg = StringUtil.replace(msg, "%filename%", inputFile.getFullPath());
-				LogMgr.logError("WbImport.execute()", msg, null);
+				String msg = ResourceMgr.getFormattedString("ErrImportFileNotFound", inputFile.getFullPath());
+				
 				result.addMessage(msg);
-				result.setFailure();
+				if (continueOnError)
+				{
+					LogMgr.logWarning("WbImport.execute()", msg, null);
+					result.setWarning(true);
+					result.setSuccess();
+				}
+				else
+				{
+					LogMgr.logError("WbImport.execute()", msg, null);
+					result.setFailure();
+				}
+				return result;
+			}
+			if (inputFile.length() == 0)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrImportFileEmpty", inputFile.getFullPath());
+				result.addMessage(msg);
+				if (continueOnError)
+				{
+					LogMgr.logWarning("WbImport.execute()", msg, null);
+					result.setWarning(true);
+					result.setSuccess();
+				}
+				else
+				{
+					LogMgr.logError("WbImport.execute()", msg, null);
+					result.setFailure();
+				}
 				return result;
 			}
 		}
