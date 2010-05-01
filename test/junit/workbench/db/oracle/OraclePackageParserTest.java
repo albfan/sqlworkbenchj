@@ -49,7 +49,7 @@ public class OraclePackageParserTest
              "   END hire_employee; \n" +
              " \n" +
 						 "   /** Procedure fire_employee **/ \n" +
-             "   PROCEDURE fire_employee (emp_id NUMBER) IS \n" +
+             "   PROCEDURE fire_employee( emp_id NUMBER) IS \n" +
              "   BEGIN \n" +
              "      DELETE FROM emp WHERE empno = emp_id; \n" +
              "   END fire_employee; \n" +
@@ -85,7 +85,7 @@ public class OraclePackageParserTest
 		int procPos = OraclePackageParser.findProcedurePosition(script, "hire_employee");
 		assertEquals(pos, procPos);
 
-		pos = script.indexOf("PROCEDURE fire_employee");
+		pos = script.indexOf("PROCEDURE fire_employee (emp_id");
 		procPos = OraclePackageParser.findProcedurePosition(script, "fire_employee");
 		assertEquals(pos, procPos);
 	}

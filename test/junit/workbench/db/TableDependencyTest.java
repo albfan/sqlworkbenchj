@@ -13,15 +13,15 @@ package workbench.db;
 
 import java.sql.Statement;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableDependencyTest
-	extends TestCase
+	extends WbTestCase
 {
 	public TableDependencyTest(String testName)
 	{
@@ -233,6 +233,7 @@ public class TableDependencyTest
 	}
 	
 	public void testDirectCycle()
+		throws Exception
 	{
 		try
 		{
@@ -242,16 +243,76 @@ public class TableDependencyTest
 			dep.readTreeForChildren();
 			assertEquals(false, dep.wasAborted());
 			assertNotNull("No root returned", dep.getRootNode());
-//			dep.getRootNode().printAll();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
-	}	
+	}
+
+	public void testIndirectCycle()
+		throws Exception
+	{
+		String sql = "CREATE TABLE user_account ( \n" +
+             "  id integer NOT NULL , \n" +
+             "  createdById integer DEFAULT NULL, \n" +
+             "  createdWorkstationId integer DEFAULT NULL, \n" +
+             "  lastChangedById integer DEFAULT NULL, \n" +
+             "  lastChangedWorkstationId integer DEFAULT NULL, \n" +
+             "  PRIMARY KEY (id) \n" +
+             "); \n" +
+             " \n" +
+             "CREATE TABLE workstation ( \n" +
+             "  id integer NOT NULL , \n" +
+             "  createdById integer DEFAULT NULL, \n" +
+             "  createdWorkstationId integer DEFAULT NULL, \n" +
+             "  lastChangedById integer DEFAULT NULL, \n" +
+             "  lastChangedWorkstationId integer DEFAULT NULL, \n" +
+             "  workstationGroupId integer DEFAULT NULL, \n" +
+             "  defaultInvoiceGroupId integer DEFAULT NULL, \n" +
+             "  PRIMARY KEY (id) \n" +
+             ");  \n" +
+             " \n" +
+             "CREATE TABLE invoicegroup ( \n" +
+             "  id integer NOT NULL , \n" +
+             "  createdById integer DEFAULT NULL, \n" +
+             "  createdWorkstationId integer DEFAULT NULL, \n" +
+             "  lastChangedById integer DEFAULT NULL, \n" +
+             "  lastChangedWorkstationId integer DEFAULT NULL, \n" +
+             "  PRIMARY KEY (id) \n" +
+             "); \n" +
+             " \n" +
+             "ALTER TABLE user_account ADD FOREIGN KEY (createdWorkstationId) REFERENCES workstation (id); \n" +
+             "ALTER TABLE user_account ADD FOREIGN KEY (lastChangedWorkstationId) REFERENCES workstation (id); \n" +
+             "ALTER TABLE user_account ADD FOREIGN KEY (lastChangedById) REFERENCES user_account (id); \n" +
+             "ALTER TABLE user_account ADD FOREIGN KEY (createdById) REFERENCES user_account (id); \n" +
+             " \n" +
+             "ALTER TABLE workstation ADD FOREIGN KEY (createdWorkstationId) REFERENCES workstation (id); \n" +
+             "ALTER TABLE workstation ADD FOREIGN KEY (lastChangedWorkstationId) REFERENCES workstation (id); \n" +
+             "ALTER TABLE workstation ADD FOREIGN KEY (lastChangedById) REFERENCES user_account (id); \n" +
+             "ALTER TABLE workstation ADD FOREIGN KEY (createdById) REFERENCES user_account (id); \n" +
+             "ALTER TABLE workstation ADD FOREIGN KEY (defaultInvoiceGroupId) REFERENCES invoicegroup (id); \n" +
+             " \n" +
+             "ALTER TABLE invoicegroup ADD FOREIGN KEY (createdWorkstationId) REFERENCES workstation (id); \n" +
+             "ALTER TABLE invoicegroup ADD FOREIGN KEY (lastChangedWorkstationId) REFERENCES workstation (id); \n" +
+             "ALTER TABLE invoicegroup ADD FOREIGN KEY (lastChangedById) REFERENCES user_account (id); \n" +
+             "ALTER TABLE invoicegroup ADD FOREIGN KEY (createdById) REFERENCES user_account (id); ";
+
+		WbConnection con = super.getTestUtil().getConnection();
+		TestUtil.executeScript(con, sql);
+
+		try
+		{
+			TableIdentifier tbl = new TableIdentifier("user_account");
+			TableDependency dep = new TableDependency(con, tbl);
+			dep.readTreeForChildren();
+			assertEquals(false, dep.wasAborted());
+			assertNotNull("No root returned", dep.getRootNode());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 }

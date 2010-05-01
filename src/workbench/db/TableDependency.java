@@ -12,7 +12,9 @@
 package workbench.db;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
@@ -31,6 +33,7 @@ public class TableDependency
 	private List<DependencyNode> leafs;
 	private boolean directChildrenOnly = false;
 	private boolean readAborted = false;
+	private Map<DependencyNode, DependencyNode> visitedRelations;
 	
 	public TableDependency(WbConnection con, TableIdentifier tbl)
 	{
@@ -79,8 +82,9 @@ public class TableDependency
 	
 	public void readDependencyTree(boolean exportedKeys)
 	{
-		if (this.theTable == null) return;
-		if (this.connection == null) return;
+		if (theTable == null) return;
+		if (connection == null) return;
+
 		this.readAborted = false;
 		this.leafs = new ArrayList<DependencyNode>();
 		
@@ -88,16 +92,34 @@ public class TableDependency
 		// if the TableIdentifier passed in the constructor was 
 		// created "on the commandline" e.g. by using a user-supplied
 		// table name, we might not correctly find or compare all nodes
-		// those identifiers will not have the flag "neverAdjustCase" set
+		// as those identifiers will not have the flag "neverAdjustCase" set
 		TableIdentifier tableToUse = this.theTable;
 		if (!this.theTable.getNeverAdjustCase())
 		{
 			tableToUse = this.wbMetadata.findTable(theTable);
 		}
 		if (tableToUse == null) return;
-		this.tableRoot = new DependencyNode(tableToUse);
-		//this.currentLevel = 0;
-		this.readTree(this.tableRoot, exportedKeys, 0);
+		
+		tableRoot = new DependencyNode(tableToUse);
+		visitedRelations = new HashMap<DependencyNode, DependencyNode>();
+		boolean resetBusy = false;
+		try
+		{
+			if (!connection.isBusy())
+			{
+				connection.setBusy(true);
+				resetBusy = true;
+			}
+			readTree(this.tableRoot, exportedKeys, 0);
+		}
+		finally
+		{
+			if (resetBusy)
+			{
+				connection.setBusy(false);
+			}
+		}
+		
 	}
 
 	/**
@@ -176,12 +198,14 @@ public class TableDependency
 			if (directChildrenOnly && level == 1) return count;
 			
 			List<DependencyNode> children = parent.getChildren();
+
 			for (DependencyNode child : children)
 			{
 				if (!isCycle(child, parent))
 				{
 					this.readTree(child, exportedKeys, level + 1);
 				}
+				visitedRelations.put(parent, child);
 				this.leafs.add(child);
 			}
       return count;
@@ -192,18 +216,23 @@ public class TableDependency
 		}
     return 0;
 	}
-
+	
 	private boolean isCycle(DependencyNode child, DependencyNode parent)
 	{
 		if (child.equals(parent)) return true;
 		if (child.getTable().equals(parent.getTable())) return true;
-		
+
+		DependencyNode cn = visitedRelations.get(parent);
+		if (cn != null && cn.equals(child)) return true;
+
 		DependencyNode nextParent = parent.getParent();
 		while (nextParent != null)
 		{
-			if (child.equals(nextParent)) return true;		
+			if (child.equals(nextParent)) return true;
+			if (nextParent.getChildren().contains(child)) return true;
 			nextParent = nextParent.getParent();
 		}
+
 		return false;
 	}
 	
