@@ -43,6 +43,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -1451,12 +1452,6 @@ public class MainWindow
 			}
 		});
 
-		// Fix the repainting problems with the editor
-		final SqlPanel sql = getCurrentSqlPanel();
-		if (sql != null)
-		{
-			WbSwingUtilities.repaintLater(sql.getEditor());
-		}
 		if (updateRecent)
 		{
 			RecentWorkspaceManager.getInstance().workspaceLoaded(f);
@@ -1470,6 +1465,13 @@ public class MainWindow
 			});
 		}
 		
+		// Fix the repainting problems with the editor
+		final SqlPanel sql = getCurrentSqlPanel();
+		if (sql != null)
+		{
+			WbSwingUtilities.repaintLater(sql.getEditor());
+		}
+
 		return resultForWorkspaceClose;
 	}
 

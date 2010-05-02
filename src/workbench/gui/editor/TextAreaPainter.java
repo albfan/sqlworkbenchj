@@ -190,6 +190,20 @@ public class TextAreaPainter
 		repaint();
 	}
 
+	@Override
+	public void invalidate()
+	{
+		super.invalidate();
+		invalidateLineRange(0, textArea.getLineCount());
+	}
+
+	@Override
+	public void validate()
+	{
+		super.validate();
+		invalidateLineRange(0, textArea.getLineCount());
+	}
+
 	/**
 	 * Returns the caret color.
 	 */
