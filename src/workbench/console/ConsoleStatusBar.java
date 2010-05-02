@@ -50,6 +50,7 @@ public class ConsoleStatusBar
 		{
 			output.print(createDeleteString(lastMessage));
 		}
+		output.print('\r');
 		output.print(message);
 		this.lastMessage = message;
 	}

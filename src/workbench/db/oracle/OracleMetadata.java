@@ -707,9 +707,13 @@ public class OracleMetadata
 		}
 		else if ("NUMBER".equalsIgnoreCase(dbmsName))
 		{
-			if (digits <= 0 || size == 22 || digits == 38)
+			if (digits < 0)
 			{
 				return "NUMBER";
+			}
+			else if (digits == 0)
+			{
+				return "NUMBER(" + size + ")";
 			}
 			else
 			{

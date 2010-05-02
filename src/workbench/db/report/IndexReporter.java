@@ -41,6 +41,7 @@ public class IndexReporter
 
 	private Collection<IndexDefinition> indexList;
 	private TagWriter tagWriter = new TagWriter();
+	private String mainTagToUse;
 
 	public IndexReporter(TableIdentifier tbl, WbConnection conn)
 	{
@@ -53,6 +54,11 @@ public class IndexReporter
 		indexList.add(index);
 	}
 
+	public void setMainTagToUse(String tag)
+	{
+		mainTagToUse = tag;
+	}
+	
 	public void appendXml(StrBuffer result, StrBuffer indent)
 	{
 		int numIndex = this.indexList.size();
@@ -63,7 +69,7 @@ public class IndexReporter
 		for (IndexDefinition index : indexList)
 		{
 			if (index == null) continue;
-			tagWriter.appendOpenTag(result, indent, TAG_INDEX);
+			tagWriter.appendOpenTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);
 			result.append('\n');
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_NAME, index.getName());
 			tagWriter.appendTag(result, defIndent, TAG_INDEX_EXPR, index.getExpression());
@@ -92,7 +98,7 @@ public class IndexReporter
 				}
 				tagWriter.appendCloseTag(result, defIndent, TAG_INDEX_COLUMN_LIST);
 			}
-			tagWriter.appendCloseTag(result, indent, TAG_INDEX);
+			tagWriter.appendCloseTag(result, indent, mainTagToUse == null ? TAG_INDEX : mainTagToUse);
 		}
 	}
 

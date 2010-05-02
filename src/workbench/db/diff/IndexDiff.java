@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import workbench.db.IndexDefinition;
 import workbench.db.report.IndexReporter;
+import workbench.db.report.TagAttribute;
 import workbench.db.report.TagWriter;
 import workbench.util.StrBuffer;
 
@@ -29,6 +30,7 @@ import workbench.util.StrBuffer;
 public class IndexDiff
 {
 	public static final String TAG_MODIFY_INDEX = "modify-index";
+	public static final String TAG_RENAME_INDEX = "rename-index";
 	public static final String TAG_ADD_INDEX = "add-index";
 	public static final String TAG_DROP_INDEX = "drop-index";
 
@@ -75,23 +77,55 @@ public class IndexDiff
 				boolean uniqueDiff = ind.isUnique() != refIndex.isUnique();
 				boolean pkDiff = ind.isPrimaryKeyIndex() != refIndex.isPrimaryKeyIndex();
 				boolean typeDiff = !(ind.getIndexType().equals(refIndex.getIndexType()));
+				boolean nameDiff = !(ind.getName().equalsIgnoreCase(refIndex.getName()));
 
-				if (uniqueDiff || pkDiff || typeDiff)
+				if (uniqueDiff || pkDiff || typeDiff || nameDiff)
 				{
 					writer.appendOpenTag(result, myindent, TAG_MODIFY_INDEX, "name", ind.getName());
 					result.append('\n');
+
+					// In order to completely create the correct SQL for the index change,
+					// the full definition of the reference index needs to be included in the XML
+					IndexReporter rep = new IndexReporter(refIndex);
+					rep.setMainTagToUse("reference-index");
+					rep.appendXml(result, idxIndent);
+
+					StrBuffer changedIndent = new StrBuffer(idxIndent);
+					changedIndent.append("  ");
+					writer.appendOpenTag(result, idxIndent, "modified");
+					result.append('\n');
+
+					if (nameDiff)
+					{
+						TagAttribute oldAtt = new TagAttribute("oldvalue", ind.getName());
+						TagAttribute newAtt = new TagAttribute("newvalue", refIndex.getName());
+						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_NAME, false, oldAtt, newAtt);
+						result.append("/>\n");
+					}
+
 					if (uniqueDiff)
 					{
-						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_UNIQUE, refIndex.isUnique());
+						TagAttribute oldAtt = new TagAttribute("oldvalue", Boolean.toString(ind.isUnique()));
+						TagAttribute newAtt = new TagAttribute("newvalue", Boolean.toString(refIndex.isUnique()));
+						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_UNIQUE, false, oldAtt, newAtt);
+						result.append("/>\n");
 					}
 					if (pkDiff)
 					{
-						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_PK, refIndex.isPrimaryKeyIndex());
+						TagAttribute oldAtt = new TagAttribute("oldvalue", Boolean.toString(ind.isPrimaryKeyIndex()));
+						TagAttribute newAtt = new TagAttribute("newvalue", Boolean.toString(refIndex.isPrimaryKeyIndex()));
+						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_PK, false, oldAtt, newAtt);
+						result.append("/>\n");
 					}
-					if (pkDiff)
+					if (typeDiff)
 					{
-						writer.appendTag(result, idxIndent, IndexReporter.TAG_INDEX_TYPE, refIndex.getIndexType());
+						TagAttribute oldAtt = new TagAttribute("oldvalue", ind.getIndexType());
+						TagAttribute newAtt = new TagAttribute("newvalue", refIndex.getIndexType());
+						writer.appendOpenTag(result, changedIndent, IndexReporter.TAG_INDEX_TYPE, false, oldAtt, newAtt);
+						result.append("/>\n");
 					}
+					
+					writer.appendCloseTag(result, idxIndent, "modified");
 					writer.appendCloseTag(result, myindent, TAG_MODIFY_INDEX);
 				}
 			}
