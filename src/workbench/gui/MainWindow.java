@@ -43,7 +43,6 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
@@ -1019,7 +1018,7 @@ public class MainWindow
 		this.disconnectTab.checkState();
 
 		this.checkMacroMenuForPanel(anIndex);
-		forceRedraw();
+//		forceRedraw();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -1436,6 +1435,7 @@ public class MainWindow
 
 					MainPanel p = getCurrentPanel();
 					checkConnectionForPanel(p);
+					setMacroMenuEnabled(true);
 				}
 				catch (Throwable e)
 				{
