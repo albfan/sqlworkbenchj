@@ -23,7 +23,9 @@ import java.util.List;
 import java.util.Map;
 import workbench.WbManager;
 import workbench.db.DbMetadata;
+import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.oracle.OracleProcedureReader;
 import workbench.gui.preparedstatement.ParameterEditor;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
@@ -366,6 +368,15 @@ public class WbCall
 					schema = null;
 					catalog = items[0].toUpperCase(); // package name
 				}
+			}
+
+			// Now resolve possible public Synonyms
+			OracleProcedureReader reader = (OracleProcedureReader)currentConnection.getMetadata().getProcedureReader();
+			ProcedureDefinition def = reader.resolveSynonym(catalog, schema, procname);
+			if (def != null)
+			{
+				schema = def.getSchema();
+				catalog = def.getCatalog();
 			}
 		}
 		else

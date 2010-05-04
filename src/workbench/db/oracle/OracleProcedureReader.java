@@ -158,8 +158,7 @@ public class OracleProcedureReader
 		return ds;
 	}
 
-	@Override
-	public DataStore getProcedureColumns(String catalog, String schema, String procname)
+	public ProcedureDefinition resolveSynonym(String catalog, String schema, String procname)
 		throws SQLException
 	{
 		TableIdentifier tbl = connection.getMetadata().getSynonymTable(new TableIdentifier(procname));
@@ -176,7 +175,15 @@ public class OracleProcedureReader
 				// This is a synonym for a package, in this case the "tablename" is the actual package name
 				catalog = tbl.getTableName();
 			}
+			return ProcedureDefinition.createOracleDefinition(schema, procname, catalog, 0, null);
 		}
+		return null;
+	}
+
+	@Override
+	public DataStore getProcedureColumns(String catalog, String schema, String procname)
+		throws SQLException
+	{
 		DataStore result = super.getProcedureColumns(catalog, schema, procname);
 
 		// Remove the implicit parameter for Object type functions that passes
