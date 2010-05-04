@@ -171,7 +171,11 @@ public class OracleProcedureReader
 		if (tbl != null)
 		{
 			schema = tbl.getSchema();
-			catalog = tbl.getCatalog();
+			if (catalog != null)
+			{
+				// This is a synonym for a package, in this case the "tablename" is the actual package name
+				catalog = tbl.getTableName();
+			}
 		}
 		DataStore result = super.getProcedureColumns(catalog, schema, procname);
 
