@@ -1293,7 +1293,7 @@ public class StringUtil
 		if (isBlank(input)) return input;
 		String quote = "\'";
 		boolean needQuote = false;
-		if (input.indexOf("'") > -1)
+		if (input.indexOf('\'') > -1)
 		{
 			quote = "\"";
 			needQuote = true;
