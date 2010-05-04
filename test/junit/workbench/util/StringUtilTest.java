@@ -139,6 +139,12 @@ public class StringUtilTest
 
 		isComment = StringUtil.lineStartsWith(s, 12, "--");
 		assertFalse(isComment);
+
+		isComment = StringUtil.lineStartsWith("\t# non-standard comment", 0, "#");
+		assertTrue(isComment);
+
+		isComment = StringUtil.lineStartsWith("update foo set bar = 24     \t # non-standard comment\n", 25, "#");
+		assertTrue(isComment);
 	}
 
 	public void testFindFirstNonWhitespace()
