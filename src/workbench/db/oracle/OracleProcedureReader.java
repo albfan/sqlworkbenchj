@@ -21,6 +21,7 @@ import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -158,10 +159,21 @@ public class OracleProcedureReader
 	}
 
 	@Override
-	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
+	public DataStore getProcedureColumns(String catalog, String schema, String procname)
 		throws SQLException
 	{
-		DataStore result = super.getProcedureColumns(aCatalog, aSchema, aProcname);
+		TableIdentifier tbl = connection.getMetadata().getSynonymTable(new TableIdentifier(procname));
+		if (tbl == null)
+		{
+			// maybe a public synonym on the package?
+			tbl = connection.getMetadata().getSynonymTable(new TableIdentifier(catalog));
+		}
+		if (tbl != null)
+		{
+			schema = tbl.getSchema();
+			catalog = tbl.getCatalog();
+		}
+		DataStore result = super.getProcedureColumns(catalog, schema, procname);
 
 		// Remove the implicit parameter for Object type functions that passes
 		// the instance of that object to the function
