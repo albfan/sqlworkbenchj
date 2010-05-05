@@ -996,6 +996,7 @@ public final class WbManager
 	 */
 	public void run()
 	{
+		Runtime.getRuntime().removeShutdownHook(this.shutdownHook);
 		LogMgr.logWarning("WbManager.shutdownHook()", "SQL Workbench/J process has been interrupted. Aborting process...");
 		saveSettings();
 		boolean exitImmediately = Settings.getInstance().getBoolProperty("workbench.exitonbreak", true);

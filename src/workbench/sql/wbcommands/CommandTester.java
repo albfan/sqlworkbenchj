@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import workbench.sql.wbcommands.console.WbAbout;
 import workbench.sql.wbcommands.console.WbDeleteProfile;
 import workbench.sql.wbcommands.console.WbDisplay;
 import workbench.sql.wbcommands.console.WbListProfiles;
@@ -90,6 +91,7 @@ public class CommandTester
 		commands.add(WbGrepData.VERB);
 		commands.add(WbMode.VERB);
 		commands.add(WbFetchSize.VERB);
+		commands.add(WbAbout.VERB);
 
 		formattedWords = new HashMap<String, String>(20);
 		formattedWords.put(WbSavePkMapping.VERB, WbSavePkMapping.FORMATTED_VERB);

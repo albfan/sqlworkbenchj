@@ -86,6 +86,12 @@ public class WbInclude
 		{
 			clean = clean.substring(1);
 			file = evaluateFileArgument(clean);
+			String ext = file.getExtension();
+			if (ext != null && !ext.toLowerCase().equals("sql"))
+			{
+				String fullname = file.getFullPath() + ".sql";
+				file = new WbFile(fullname);
+			}
 			checkParms = false;
 		}
 		else

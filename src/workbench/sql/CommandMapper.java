@@ -70,6 +70,7 @@ import workbench.sql.wbcommands.WbSelectBlob;
 import workbench.sql.wbcommands.WbStartBatch;
 import workbench.sql.wbcommands.WbTriggerSource;
 import workbench.sql.wbcommands.WbXslt;
+import workbench.sql.wbcommands.console.WbAbout;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -130,6 +131,7 @@ public class CommandMapper
 		addCommand(new WbGrepData());
 		addCommand(new WbMode());
 		addCommand(new WbFetchSize());
+		addCommand(new WbAbout());
 
 		// Wrappers for standard SQL statements
 		addCommand(SingleVerbCommand.COMMIT);
