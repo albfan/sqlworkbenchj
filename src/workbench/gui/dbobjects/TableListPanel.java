@@ -83,7 +83,6 @@ import workbench.db.DbObject;
 import workbench.db.FKHandler;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
-import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
 import workbench.db.SynonymDDLHandler;
 import workbench.db.TableColumnsDatastore;
@@ -1914,15 +1913,16 @@ public class TableListPanel
 		List<DbObject> result = new ArrayList<DbObject>(count);
 		for (int i=0; i < count; i++)
 		{
-			TableIdentifier table = createTableIdentifier(rows[i]);
-			table.checkQuotesNeeded(dbConnection);
-			if (table.getType().equalsIgnoreCase("SEQUENCE"))
+			DbObject db = (DbObject)tableList.getDataStore().getRow(i).getUserObject();
+			if (db == null)
 			{
-				result.add(new SequenceDefinition(table.getSchema(), table.getTableName()));
+				TableIdentifier table = createTableIdentifier(rows[i]);
+				table.checkQuotesNeeded(dbConnection);
+				result.add(table);
 			}
 			else
 			{
-				result.add(table);
+				result.add(db);
 			}
 		}
 		return result;

@@ -205,6 +205,7 @@ public class PostgresEnumReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, enumDef.getObjectName());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, enumDef.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, enumDef.getObjectType());
+			result.getRow(row).setUserObject(enumDef);
 		}
 		return true;
 	}

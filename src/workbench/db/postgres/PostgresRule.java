@@ -127,7 +127,16 @@ public class PostgresRule
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
-		return null;
+		StringBuilder sql = new StringBuilder(50);
+		sql.append("DROP RULE ");
+		sql.append(con.getMetadata().quoteObjectname(ruleName));
+		sql.append(" ON ");
+		sql.append(ruleTable.getObjectName(con));
+		if (cascade)
+		{
+			sql.append(" CASCADE");
+		}
+		return sql.toString();
 	}
 
 	public String getObjectNameForDrop(WbConnection con)

@@ -120,9 +120,9 @@ public class GenericObjectDropper
 			CharSequence sql = getDropStatement(i);
 			result.append(sql);
 			result.append(";\n");
-			if (needCommit) result.append("COMMIT;\n");
 			result.append('\n');
 		}
+		if (needCommit) result.append("COMMIT;\n");
 		return result;
 	}
 

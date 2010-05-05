@@ -15,12 +15,14 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.regex.Pattern;
 
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -48,7 +50,6 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.RegExComparator;
-import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -189,11 +190,6 @@ public class QuickFilterPanel
 		this.toolbar.setBorder(b);
 	}
 
-//	public void addToolbarSeparator(int index)
-//	{
-//		this.toolbar.addSeparator(index);
-//	}
-
 	public void addToToolbar(WbAction action, int index)
 	{
 		this.toolbar.add(action, index);
@@ -227,7 +223,9 @@ public class QuickFilterPanel
 	{
 		if (columns == null || columns.length == 0) return;
 		if (StringUtil.arraysEqual(columns, columnList)) return;
-		this.columnList = columns;
+
+		columnList = columns;
+		
 		this.searchColumn = columns[0];
 		initPopup();
 		if (showColumnDropDown)
@@ -283,30 +281,38 @@ public class QuickFilterPanel
 
 	public void applyQuickFilter()
 	{
-		String value = this.filterValue.getText();
-		if (StringUtil.isEmptyString(value) || value.trim().equals("*"))
+		try
 		{
-			this.searchTable.resetFilter();
-		}
-		else
-		{
-			try
+			filterValue.removeActionListener(this);
+			String value = this.filterValue.getText();
+			if (StringUtil.isEmptyString(value) || value.trim().equals("*") || value.trim().equals("%"))
 			{
-				ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, value);
-				col.setIgnoreCase(true);
-				searchTable.applyFilter(col);
-				filterValue.addToHistory(value);
+				this.searchTable.resetFilter();
 			}
-			catch (Exception e)
+			else
 			{
-				String msg = ResourceMgr.getFormattedString("ErrBadRegex", value);
-				if (LogMgr.isDebugEnabled())
+				try
 				{
-					msg += "\n(" + ExceptionUtil.getDisplay(e) + ")";
+					// verify the pattern, before trying to apply it
+					Pattern p = Pattern.compile(value);
+					
+					ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, value);
+					col.setIgnoreCase(true);
+					searchTable.applyFilter(col);
+					filterValue.addToHistory(value);
 				}
-				WbSwingUtilities.showErrorMessage(this, msg);
-				searchTable.resetFilter();
+				catch (Exception e)
+				{
+					searchTable.resetFilter();
+					LogMgr.logError("QuickFilterPanel.applyQuickFilter()", "Cannot apply filter expression", e);
+					String msg = ResourceMgr.getFormattedString("ErrBadRegex", value);
+					WbSwingUtilities.showErrorMessage(this, msg);
+				}
 			}
+		}
+		finally
+		{
+			filterValue.addActionListener(this);
 		}
 	}
 
@@ -341,11 +347,14 @@ public class QuickFilterPanel
 	}
 
 
-	public void actionPerformed(java.awt.event.ActionEvent e)
+	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == filterValue)
 		{
-			applyQuickFilter();
+			if (e.getActionCommand().equals("comboBoxEdited"))
+			{
+				applyQuickFilter();
+			}
 		}
 		else if (e.getSource() instanceof JMenuItem)
 		{
@@ -396,7 +405,7 @@ public class QuickFilterPanel
 		{
 			names[i] = this.searchTable.getColumnName(i);
 		}
-		this.setColumnList(names);
+		setColumnList(names);
 	}
 
 }

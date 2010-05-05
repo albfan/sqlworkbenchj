@@ -76,6 +76,7 @@ public class SqlServerTypeReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
+			result.getRow(row).setUserObject(type);
 		}
 		return true;
 	}

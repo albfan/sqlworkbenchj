@@ -59,6 +59,7 @@ public class OracleTypeReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
+			result.getRow(row).setUserObject(type);
 		}
 		return types.size() > 0;
 	}

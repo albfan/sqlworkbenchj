@@ -55,28 +55,44 @@ public class PostgresRuleReader
              "from pg_rewrite r  \n" +
              "  join pg_class c on r.ev_class = c.oid \n" +
              "  left join pg_namespace n on n.oid = c.relnamespace \n" +
-             "  left join pg_description d on r.oid = d.objoid\n" +
-						 "WHERE r.rulename <> '_RETURN'::name ";
+             "  left join pg_description d on r.oid = d.objoid ";
 
 	private String getSql(WbConnection connection, String schema, String name)
 	{
 		StringBuilder sql = new StringBuilder(150);
 
 		sql.append(baseSql);
-
+		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(name))
 		{
-			sql.append(" AND r.rulename like '");
-			sql.append(connection.getMetadata().quoteObjectname(name));
-			sql.append("%' ");
+			sql.append("\n WHERE r.rulename ");
+			if (name.indexOf('%') > -1)
+			{
+				sql.append(" LIKE ");
+			}
+			else
+			{
+				sql.append(" = ");
+			}
+			sql.append('\'');
+			whereAdded = true;
+			sql.append(name);
+			sql.append("' ");
 		}
 
 		if (StringUtil.isNonBlank(schema))
 		{
-			sql.append(" AND ");
-
+			if (!whereAdded) 
+			{
+				sql.append("\n WHERE ");
+				whereAdded = true;
+			}
+			else
+			{
+				sql.append("\n AND ");
+			}
 			sql.append(" n.nspname = '");
-			sql.append(connection.getMetadata().quoteObjectname(schema));
+			sql.append(schema);
 			sql.append("'");
 		}
 		sql.append(" ORDER BY 1, 2 ");
@@ -149,6 +165,7 @@ public class PostgresRuleReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, rule.getObjectName());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, rule.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, rule.getObjectType());
+			result.getRow(row).setUserObject(rule);
 		}
 		return true;
 	}

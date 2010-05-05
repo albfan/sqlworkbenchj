@@ -183,6 +183,7 @@ public class FirebirdDomainReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, domain.getObjectName());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, domain.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, domain.getObjectType());
+			result.getRow(row).setUserObject(domain);
 		}
 		return true;
 	}

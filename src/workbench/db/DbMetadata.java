@@ -1177,6 +1177,7 @@ public class DbMetadata
 		return getObjects(aCatalog, aSchema, null, types);
 	}
 
+
 	public String[] getTableListColumns()
 	{
 		return new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
@@ -1192,7 +1193,7 @@ public class DbMetadata
 		if (objects != null) objects = StringUtil.replace(objects, "*", "%");
 		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
-		int sizes[] = {30,12,10,10,20};
+		int sizes[] = {30, 12, 10, 10, 20};
 
 		DataStore result = new DataStore(cols, coltypes, sizes);
 
@@ -1287,6 +1288,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, sequence.getCatalog());
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, sequence.getSchema());
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, sequence.getComment());
+				result.getRow(row).setUserObject(sequence);
 			}
 			sortNeeded = true;
 		}

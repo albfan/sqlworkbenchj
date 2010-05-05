@@ -78,6 +78,8 @@ public class RowData
 	private Object[] originalData;
 	private List<String> dependencyDeletes;
 
+	private Object userObject;
+	
 	private DataConverter converter;
 	boolean ignoreReadErrors;
 
@@ -335,6 +337,16 @@ public class RowData
 		Arrays.fill(originalData, NO_CHANGE_MARKER);
 	}
 
+	public Object getUserObject()
+	{
+		return userObject;
+	}
+
+	public void setUserObject(Object value)
+	{
+		userObject = value;
+	}
+	
 	/**
 	 * Sets the new data for the given column.
 	 * <br>
