@@ -1,20 +1,20 @@
 <section id="install">
-	<title>Installing and starting &wb-productname;</title>
+  <title>Installing and starting &wb-productname;</title>
 
-	<section id="install-prereq">
-		<title>Pre-requisites</title>
+  <section id="install-prereq">
+    <title>Pre-requisites</title>
 
-		<para>
-			To run &wb-productname; a <ulink url="http://java.sun.com/javase/downloads/index.jsp">Java 6 runtime environment</ulink>
-			is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
-		</para>
+    <para>
+      To run &wb-productname; a <ulink url="http://java.sun.com/javase/downloads/index.jsp">Java 6 runtime environment</ulink>
+      is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
+    </para>
 
-		<para>
-			&wb-productname; does not need a "fully installed" runtime environment, you can also copy
-			the <literal>jre</literal> directory from an existing Java installation and specify the
-			JRE to be used on the commandline or by setting the <literal>WORKBENCH_JDK</literal>
-			environment variable.
-		</para>
+    <para>
+      &wb-productname; does not need a "fully installed" runtime environment, you can also copy
+      the <literal>jre</literal> directory from an existing Java installation and specify the
+      JRE to be used on the commandline or by setting the <literal>WORKBENCH_JDK</literal>
+      environment variable.
+    </para>
 
     <para>
       If you cannot (or don't want to) do a regular installation of a Java 6 runtime, you can download
@@ -23,126 +23,126 @@
       is located.
     </para>
 
-	</section>
+  </section>
 
-	<section id="first-time-install">
-		<title>First time installation</title>
+  <section id="first-time-install">
+    <title>First time installation</title>
 
-		<para>
-			Once you have downloaded the application's distribution package, unzip the archive into a directory
-			of your choice. Apart from that, no special installation procedure is needed.
-		</para>
+    <para>
+      Once you have downloaded the application's distribution package, unzip the archive into a directory
+      of your choice. Apart from that, no special installation procedure is needed.
+    </para>
 
-		<para>
-			You will need to configure the necessary JDBC driver(s) for your database before you
-			can connect to a database. Please refer to the chapter <link linkend="jdbc-setup">JDBC Drivers</link>
-			for details on how to make the JDBC driver available to &wb-productname;
-		</para>
+    <para>
+      You will need to configure the necessary JDBC driver(s) for your database before you
+      can connect to a database. Please refer to the chapter <link linkend="jdbc-setup">JDBC Drivers</link>
+      for details on how to make the JDBC driver available to &wb-productname;
+    </para>
 
-		<para>
-			When starting &wb-productname; for the first time, it will create a directory
-			called <literal>.sqlworkbench</literal> in the current user's home folder to
-			store all its configuration information.
-		</para>
+    <para>
+      When starting &wb-productname; for the first time, it will create a directory
+      called <literal>.sqlworkbench</literal> in the current user's home folder to
+      store all its configuration information.
+    </para>
 
-		<para>
-			The "user's home directory" is <literal>$HOME</literal> on a Linux or Unix based system,
-			and <literal>%HOMEPATH%</literal> on a Windows system. (Technically speaking
-			it is using the contents of Java system property <literal>user.home</literal> to
-			find the user's home directory)
-		</para>
+    <para>
+      The "user's home directory" is <literal>$HOME</literal> on a Linux or Unix based system,
+      and <literal>%HOMEPATH%</literal> on a Windows system. (Technically speaking
+      it is using the contents of Java system property <literal>user.home</literal> to
+      find the user's home directory)
+    </para>
 
-	</section>
+  </section>
 
-	<section id="upgrade-install">
-		<title>Upgrade installation</title>
-		<para>
-			When upgrading to a newer version of &wb-productname; simply overwrite the old
-			<literal>sqlworkbench.jar</literal> and the exe launcher and shell scripts that
-			start the application.
-		</para>
+  <section id="upgrade-install">
+    <title>Upgrade installation</title>
+    <para>
+      When upgrading to a newer version of &wb-productname; simply overwrite the old
+      <literal>sqlworkbench.jar</literal> and the exe launcher and shell scripts that
+      start the application.
+    </para>
 
-		<para>
-			Starting with build 99 the file names have changed. The jar file is now
-			named <literal>sqlworkbench.jar</literal> and the filename of the Windows
-			launcher is now <literal>sqlworkbench.exe</literal>.
-		</para>
-		<para>
-			If you are upgrading from build 98 or earlier, please delete the old files
-			<literal>Workbench.jar</literal> and <literal>JWorkbench.exe</literal>.
-		</para>
+    <para>
+      Starting with build 99 the file names have changed. The jar file is now
+      named <literal>sqlworkbench.jar</literal> and the filename of the Windows
+      launcher is now <literal>sqlworkbench.exe</literal>.
+    </para>
+    <para>
+      If you are upgrading from build 98 or earlier, please delete the old files
+      <literal>Workbench.jar</literal> and <literal>JWorkbench.exe</literal>.
+    </para>
 
-	</section>
+  </section>
 
-	<section id="starting">
-		<title>Starting the program from the commandline</title>
+  <section id="starting">
+    <title>Starting the program from the commandline</title>
 
-		<para>
-			sqlworkbench.jar is a self executing JAR file. This means, that if
-			your JDK is installed properly, a double click (on the Windows&reg; platform)
-			on sqlworkbench.jar will execute the application. To run the application
-			manually use the command:
-		</para>
+    <para>
+      sqlworkbench.jar is a self executing JAR file. This means, that if
+      your JDK is installed properly, a double click (on the Windows&reg; platform)
+      on sqlworkbench.jar will execute the application. To run the application
+      manually use the command:
+    </para>
 
-		<programlisting>java -jar sqlworkbench.jar</programlisting>
+    <programlisting>java -jar sqlworkbench.jar</programlisting>
 
-		<para>
-			Native executables for Windows and Mac OSX are supplied that start &wb-productname; by
-			using the default Java runtime installed on your system. Details on using
-			the <link linkend="launcher-using">Windows launcher</link> can be found
-			<link linkend="launcher-using">here</link>.
-		</para>
+    <para>
+      Native executables for Windows and Mac OSX are supplied that start &wb-productname; by
+      using the default Java runtime installed on your system. Details on using
+      the <link linkend="launcher-using">Windows launcher</link> can be found
+      <link linkend="launcher-using">here</link>.
+    </para>
 
-	</section>
+  </section>
 
-	<section id="shell-using">
-		<title>Starting the porgram using the shell script</title>
-		<para>
-			To run &wb-productname; under an Unix-type operating system, the supplied shell script
-			<literal>sqlworkbench.sh</literal> can be used. For Linux desktops a sample ".desktop"
-			file is available.
-		</para>
+  <section id="shell-using">
+    <title>Starting the program using the shell script</title>
+    <para>
+      To run &wb-productname; under an Unix-type operating system, the supplied shell script
+      <literal>sqlworkbench.sh</literal> can be used. For Linux desktops a sample ".desktop"
+      file is available.
+    </para>
 
-		<section id="jdk-shell">
-			<title>Specifying the Java runtime for the shell script</title>
+    <section id="jdk-shell">
+      <title>Specifying the Java runtime for the shell script</title>
 
-			<para>
-				The shell scripts (and the batch files) first check if the environment variable <literal>WORKBENCH_JDK</literal>
-				is defined. If that variable is defined, the shell script will use <literal>$WORKBENCH_JDK/bin/java</literal>
-				to run the application.
-			</para>
-			<para>
-				If <literal>WORKBENCH_JDK</literal> is not defined, the shell script will check
-				for the environment variable <literal>JAVA_HOME</literal>. If that is defined, the script
-				will use <literal>$JAVA_HOME/bin/java</literal> to run the application.
-			</para>
-			<para>
-				If neither <literal>WORKBENCH_JDK</literal> nor <literal>JAVA_HOME</literal> is defined,
-				the shell script will simply use <literal>java</literal> to start the application,
-				assuming that a valid Java runtime is available on the path.
-			</para>
-			<para>
-				All parameters that are passed to the shell scripts are passed to the application, not to the
+      <para>
+        The shell scripts (and the batch files) first check if the environment variable <literal>WORKBENCH_JDK</literal>
+        is defined. If that variable is defined, the shell script will use <literal>$WORKBENCH_JDK/bin/java</literal>
+        to run the application.
+      </para>
+      <para>
+        If <literal>WORKBENCH_JDK</literal> is not defined, the shell script will check
+        for the environment variable <literal>JAVA_HOME</literal>. If that is defined, the script
+        will use <literal>$JAVA_HOME/bin/java</literal> to run the application.
+      </para>
+      <para>
+        If neither <literal>WORKBENCH_JDK</literal> nor <literal>JAVA_HOME</literal> is defined,
+        the shell script will simply use <literal>java</literal> to start the application,
+        assuming that a valid Java runtime is available on the path.
+      </para>
+      <para>
+        All parameters that are passed to the shell scripts are passed to the application, not to the
         Java runtime. If you want to change the memory or other system settings for the JVM, you need to
         edit the shell script.
-			</para>
-		</section>
+      </para>
+    </section>
 
-	</section>
+  </section>
 
-	<section id="launcher-using">
-		<title>Starting the program using the Windows launcher</title>
+  <section id="launcher-using">
+    <title>Starting the program using the Windows launcher</title>
     <indexterm><primary>Windows</primary><secondary>32bit</secondary></indexterm>
     <indexterm><primary>Windows</primary><secondary>64bit</secondary></indexterm>
     <indexterm><primary>Windows</primary><secondary>using the launcher</secondary></indexterm>
     
-		<para>
-			On a 32bit Windows&reg; platform the supplied SQLWorkbench.exe can be used to
-			start the program when using a Sun JDK. The native launcher searches for an installed
-			JDK (querying the registry) and then starts &wb-productname;. The file
-			sqlworkbench.jar has to be located in the same directory as the
-			SQLWorkbench.exe, otherwise it doesn&#39;t work.
-		</para>
+    <para>
+      On a 32bit Windows&reg; platform the supplied SQLWorkbench.exe can be used to
+      start the program when using a Sun JDK. The native launcher searches for an installed
+      JDK (querying the registry) and then starts &wb-productname;. The file
+      sqlworkbench.jar has to be located in the same directory as the
+      SQLWorkbench.exe, otherwise it doesn&#39;t work.
+    </para>
 
     <important>
       <para>
@@ -150,491 +150,491 @@
       </para>
     </important>
     
-		<para>
-			The launcher only works with a Sun JDK, as it directly calls the
-			JDK&apos; dll to start the virtual machine. If you are using a different JDK
-			you cannot use the launcher to start &wb-productname; on Windows (unless it uses the same
-			directory layout and filenames as the Sun JDK).
-		</para>
+    <para>
+      The launcher only works with a Sun JDK, as it directly calls the
+      JDK&apos; dll to start the virtual machine. If you are using a different JDK
+      you cannot use the launcher to start &wb-productname; on Windows (unless it uses the same
+      directory layout and filenames as the Sun JDK).
+    </para>
 
-		<para>
-			By default the launcher increases the maximum JVM heap size to 256MB.
-			If you need more heap memory, you	need to pass the appropriate JVM parameter to the launcher.
+    <para>
+      By default the launcher increases the maximum JVM heap size to 256MB.
+      If you need more heap memory, you need to pass the appropriate JVM parameter to the launcher.
       Please refer to <link linkend="install-increase-memory">Increasing the memory</link> for details
       on how to increase the memory that is available to &wb-productname;
-		</para>
+    </para>
 
-		<section id="launcher-jdk-search">
-			<title>How the Windows launcher searches for a Sun JDK</title>
+    <section id="launcher-jdk-search">
+      <title>How the Windows launcher searches for a Sun JDK</title>
 
-			<para>First the launcher checks for a system variable <literal>WORKBENCH_JDK</literal>.
-			If that is defined, the JDK specified by that directory is used. If
-			<literal>WORKBENCH_JDK</literal> is not found, <literal>JAVA_HOME</literal> is used.
-			If <literal>JAVA_HOME</literal> is not defined, then the launcher checks if
-			a sub-directory JRE exists in the folder where SQLWorkbench.exe is located. If
-			that sub-directory exists, it is assumed that it contains a valid JRE. If the
-			sub-directory does not exist, or if it is not a JRE installation, then the registry key
-			<literal>HKLM\Software\JavaSoft\Java Runtime Environment</literal> is queried.
-			If that is not defined, <literal>HKLM\Software\JavaSoft\Java Development Kit</literal>
-			is queried.</para>
+      <para>First the launcher checks for a system variable <literal>WORKBENCH_JDK</literal>.
+      If that is defined, the JDK specified by that directory is used. If
+      <literal>WORKBENCH_JDK</literal> is not found, <literal>JAVA_HOME</literal> is used.
+      If <literal>JAVA_HOME</literal> is not defined, then the launcher checks if
+      a sub-directory JRE exists in the folder where SQLWorkbench.exe is located. If
+      that sub-directory exists, it is assumed that it contains a valid JRE. If the
+      sub-directory does not exist, or if it is not a JRE installation, then the registry key
+      <literal>HKLM\Software\JavaSoft\Java Runtime Environment</literal> is queried.
+      If that is not defined, <literal>HKLM\Software\JavaSoft\Java Development Kit</literal>
+      is queried.</para>
 
-			<para>In the registry key, a subkey for the version 1.6 is retrieved, and
-			the directory specified by that key is used as the base JDK
-			directory.</para>
-			<para>If your JDK/JRE installation cannot be found by the launcher, but you do have
-			a JDK available, you can specify the location of the JDK with the -jdk parameter</para>
-			<para>The launcher assumes the layout of the Sun jdk in the specified directory. If you
-			specify <literal>c:\jdk</literal> as the JDK directory, the launcher looks for the file
-			<literal>c:\jdk\bin\client\jvm.dll</literal> (the specified directory would actually be a
-			JRE then). If that is not found, it looks for <literal>c:\jdk\jre\bin\client\jvm.dll</literal>
-			(that would be a &quot;true&quot; JRE installation). If the <literal>-sever</literal> parameter
-			is specified, it will look for a sub-directory <literal>server</literal> instead of
-			<literal>client</literal>. If your non-Sun JDK/JRE follows the same directory layout
-			and filename conventions, you can use the launcher for that JDK as well.</para>
-		</section>
+      <para>In the registry key, a subkey for the version 1.6 is retrieved, and
+      the directory specified by that key is used as the base JDK
+      directory.</para>
+      <para>If your JDK/JRE installation cannot be found by the launcher, but you do have
+      a JDK available, you can specify the location of the JDK with the -jdk parameter</para>
+      <para>The launcher assumes the layout of the Sun jdk in the specified directory. If you
+      specify <literal>c:\jdk</literal> as the JDK directory, the launcher looks for the file
+      <literal>c:\jdk\bin\client\jvm.dll</literal> (the specified directory would actually be a
+      JRE then). If that is not found, it looks for <literal>c:\jdk\jre\bin\client\jvm.dll</literal>
+      (that would be a &quot;true&quot; JRE installation). If the <literal>-sever</literal> parameter
+      is specified, it will look for a sub-directory <literal>server</literal> instead of
+      <literal>client</literal>. If your non-Sun JDK/JRE follows the same directory layout
+      and filename conventions, you can use the launcher for that JDK as well.</para>
+    </section>
 
-		<section id="launcher-parameters">
-			<title>Parameters for the Windows launcher</title>
+    <section id="launcher-parameters">
+      <title>Parameters for the Windows launcher</title>
 
-			<para>To distinguish parameters for the launcher and parameters to the
-			JVM, JVM parameter need to be prefixed with -J.
-			If you want to pass the parameter <literal>-Xmx256m</literal> to the JVM,
-			pass the parameter <literal>-J-Xmx256m</literal> to the launcher.
-			To define a system property you need to pass the parameter
-			<literal>-J-Dproperty.name=property_value</literal>.</para>
+      <para>To distinguish parameters for the launcher and parameters to the
+      JVM, JVM parameter need to be prefixed with -J.
+      If you want to pass the parameter <literal>-Xmx256m</literal> to the JVM,
+      pass the parameter <literal>-J-Xmx256m</literal> to the launcher.
+      To define a system property you need to pass the parameter
+      <literal>-J-Dproperty.name=property_value</literal>.</para>
 
-			<para>The following parameters are recognized:</para>
+      <para>The following parameters are recognized:</para>
 
-			<informaltable frame="all">
-				<tgroup cols="2" align="left">
-					<colspec colname="c1" colwidth="3cm" />
-					<colspec colname="c2"  />
-					<thead>
-						<row>
-							<entry>Parameter</entry>
-							<entry>Description</entry>
-						</row>
-					</thead>
-					<tbody valign="top">
-						<row>
-							<entry>-jdk</entry>
-							<entry>Specify the installation directory of the JDK e.g.: -jdk=c:\Java\jdk1.6
-								When this parameter is specified the launcher will not look for a JDK
-								installation as described <link linkend="launcher-jdk-search">here</link>
-							</entry>
-						</row>
+      <informaltable frame="all">
+        <tgroup cols="2" align="left">
+          <colspec colname="c1" colwidth="3cm" />
+          <colspec colname="c2"  />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
+          <tbody valign="top">
+            <row>
+              <entry>-jdk</entry>
+              <entry>Specify the installation directory of the JDK e.g.: -jdk=c:\Java\jdk1.6
+                When this parameter is specified the launcher will not look for a JDK
+                installation as described <link linkend="launcher-jdk-search">here</link>
+              </entry>
+            </row>
 
-						<row>
-							<entry>-J</entry>
-							<entry>
+            <row>
+              <entry>-J</entry>
+              <entry>
                 Pass a parameter directly to the JVM e.g: -J-Xms128m or to set a JVM system property using <literal>-J-Dproperty=value</literal>
                 which can be used to overwrite a <link linkend="settings">configuration properties</link> from <literal>workbench.settings</literal> using e.g.
                 <literal>-J-Dworkbench.log.file=/mylogs/workbench.log</literal>
               </entry>
-						</row>
+            </row>
 
-						<row>
-							<entry>-server</entry>
-							<entry>Select the server JVM (instead of the default client JVM).
-							This switch only works with the Sun JVM.</entry>
-						</row>
+            <row>
+              <entry>-server</entry>
+              <entry>Select the server JVM (instead of the default client JVM).
+              This switch only works with the Sun JVM.</entry>
+            </row>
 
-						<row>
-							<entry>-client</entry>
-							<entry>Select the client JVM. This switch only works with the Sun JVM.</entry>
-						</row>
+            <row>
+              <entry>-client</entry>
+              <entry>Select the client JVM. This switch only works with the Sun JVM.</entry>
+            </row>
 
-						<row>
-							<entry>-jvmtype</entry>
-							<entry>Select the JVM type to be loaded. For the Sun JVM this
-								may be either <literal>client</literal> or <literal>server</literal> (equivalent
-								to the -server or -client switches). If the JDK identified with the
-								-jdk switch points to BEA's JRockit JVM, this should be
-								<literal>jrockit</literal> (i.e. -jvmtype=jrockit). Basically the value
-								of this switch is used to locate the <literal>jvm.dll</literal>
-								in the base directory specified with the -jdk switch.
-							</entry>
-						</row>
+            <row>
+              <entry>-jvmtype</entry>
+              <entry>Select the JVM type to be loaded. For the Sun JVM this
+                may be either <literal>client</literal> or <literal>server</literal> (equivalent
+                to the -server or -client switches). If the JDK identified with the
+                -jdk switch points to BEA's JRockit JVM, this should be
+                <literal>jrockit</literal> (i.e. -jvmtype=jrockit). Basically the value
+                of this switch is used to locate the <literal>jvm.dll</literal>
+                in the base directory specified with the -jdk switch.
+              </entry>
+            </row>
 
-						<row>
-							<entry>-noddraw</entry>
-							<entry>Disable the use of DirectDraw routines for the JVM. Use this
-								parameter when you are running &wb-productname; through PC-Duo or a similar
-								program, or if you are experiencing crashes when starting &wb-productname;
-							</entry>
-						</row>
+            <row>
+              <entry>-noddraw</entry>
+              <entry>Disable the use of DirectDraw routines for the JVM. Use this
+                parameter when you are running &wb-productname; through PC-Duo or a similar
+                program, or if you are experiencing crashes when starting &wb-productname;
+              </entry>
+            </row>
 
-						<row>
-							<entry>-debug</entry>
-							<entry>Write debug information to the file workbench.dbg to identify problems when using the launcher</entry>
-						</row>
+            <row>
+              <entry>-debug</entry>
+              <entry>Write debug information to the file workbench.dbg to identify problems when using the launcher</entry>
+            </row>
 
-						<row>
-							<entry>-help</entry>
-							<entry>Display a message with the list of parameters</entry>
-						</row>
-					</tbody>
-				</tgroup>
-			</informaltable>
+            <row>
+              <entry>-help</entry>
+              <entry>Display a message with the list of parameters</entry>
+            </row>
+          </tbody>
+        </tgroup>
+      </informaltable>
 
-			<para>All other parameters are passed unchanged to the program.
-			See <xref linkend="commandline"/> for details.</para>
+      <para>All other parameters are passed unchanged to the program.
+      See <xref linkend="commandline"/> for details.</para>
 
-			<para>The following call to the launcher:</para>
+      <para>The following call to the launcher:</para>
 
-			<programlisting>SQLWorkbench -noddraw -configDir=c:\MyConf</programlisting>
+      <programlisting>SQLWorkbench -noddraw -configDir=c:\MyConf</programlisting>
 
-			<para>is the same as directly starting sqlworkbench.jar with these
-			parameters:</para>
+      <para>is the same as directly starting sqlworkbench.jar with these
+      parameters:</para>
 
-			<programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar -configDir=c:\MyConf</programlisting>
-		</section>
+      <programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar -configDir=c:\MyConf</programlisting>
+    </section>
 
-		<section id="launcher-vista">
-			<title>Windows Vista</title>
-			<para>
-				With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
-				is loaded. This affects the &wb-productname; launcher due to the (new?) Microsoft C runtime distribution model.
-				If you want to run &wb-productname; under Windows Vista, please copy the file <literal>msvcr71.dll</literal>
-				into the directory where <literal>SQLWorkbench.exe</literal> is located.
-			</para>
-			<para>
-				This file can be found at <literal>%SystemRoot%\System32\msvcr71.dll</literal>
-				(usually this is <literal>c:\Windows\System32\msvcr71.dll</literal>)
-			</para>
-			<para>Thanks to Jon for this tip.</para>
-		</section>
+    <section id="launcher-vista">
+      <title>Windows Vista</title>
+      <para>
+        With Windows Vista, Microsoft changed the way needed DLLs are searched when an executable
+        is loaded. This affects the &wb-productname; launcher due to the (new?) Microsoft C runtime distribution model.
+        If you want to run &wb-productname; under Windows Vista, please copy the file <literal>msvcr71.dll</literal>
+        into the directory where <literal>SQLWorkbench.exe</literal> is located.
+      </para>
+      <para>
+        This file can be found at <literal>%SystemRoot%\System32\msvcr71.dll</literal>
+        (usually this is <literal>c:\Windows\System32\msvcr71.dll</literal>)
+      </para>
+      <para>Thanks to Jon for this tip.</para>
+    </section>
 
-	</section>
+  </section>
 
 
-	<section id="config-dir" xreflabel="Configuration files">
-		<title>Configuration directory</title>
+  <section id="config-dir" xreflabel="Configuration files">
+    <title>Configuration directory</title>
 
     <para>
       The configuration directory is the directory where all config (<literal>workbench.settings</literal>,
       <literal>WbProfiles.xml</literal>, <literal>WbDrivers.xml</literal>) files are stored.
     </para>
 
-		<para>
-			If no configuration directory has been specified on the commandline,
-			&wb-productname; will identify the configuration directory by looking at the following places
-			<orderedlist>
-				<listitem><simpara>The current directory</simpara></listitem>
-				<listitem><simpara>The directory where <literal>sqlworkbench.jar</literal> is located</simpara></listitem>
-				<listitem>
-					<simpara>
-						In the user's home direcotry
-						(e.g. <literal>$HOME/.sqlworkbench</literal> on Unix based systems
-						or <literal>%HOMEPATH%\.sqlworkbench</literal> on Windows systems)
-					</simpara></listitem>
-			</orderedlist>
-			If the file <literal>workbench.settings</literal> is found in one of those directories, that
+    <para>
+      If no configuration directory has been specified on the commandline,
+      &wb-productname; will identify the configuration directory by looking at the following places
+      <orderedlist>
+        <listitem><simpara>The current directory</simpara></listitem>
+        <listitem><simpara>The directory where <literal>sqlworkbench.jar</literal> is located</simpara></listitem>
+        <listitem>
+          <simpara>
+            In the user's home direcotry
+            (e.g. <literal>$HOME/.sqlworkbench</literal> on Unix based systems
+            or <literal>%HOMEPATH%\.sqlworkbench</literal> on Windows systems)
+          </simpara></listitem>
+      </orderedlist>
+      If the file <literal>workbench.settings</literal> is found in one of those directories, that
       directory is considered the configuration directory.
     </para>
     <para>
-			If no configuration directory can be identified, it will be created in the user's home directory (as <literal>.sqlworkbench</literal>).
-		</para>
-		<para>
-			The above mentioned search can be overridden by supplying the configuration directory
-			<link linkend="cmdline-parameter-configdir">on the commandline</link> when starting the application.
-		</para>
+      If no configuration directory can be identified, it will be created in the user's home directory (as <literal>.sqlworkbench</literal>).
+    </para>
+    <para>
+      The above mentioned search can be overridden by supplying the configuration directory
+      <link linkend="cmdline-parameter-configdir">on the commandline</link> when starting the application.
+    </para>
 
-		<para>
-			Note that, before Build 98 the default configuration directory was the program's directory
-			and not a directory in the user's home directory.
-		</para>
+    <para>
+      Note that, before Build 98 the default configuration directory was the program's directory
+      and not a directory in the user's home directory.
+    </para>
 
-		<para>The following files are stored in the configuration directory:
-			<itemizedlist>
-				<listitem><simpara>General configuration settings (<filename>workbench.settings</filename>)</simpara></listitem>
-				<listitem><simpara>Connection profiles (<filename>WbProfiles.xml</filename>)</simpara></listitem>
-				<listitem><simpara>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</simpara></listitem>
-				<listitem><simpara>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>).
-					If you did not customize any of the shortcuts, this file does not exist</simpara>
-				</listitem>
-				<listitem><simpara>Macro definitions (<filename>WbMacros.xml</filename>)</simpara></listitem>
-				<listitem><simpara>Log file (<filename>workbench.log</filename>)</simpara></listitem>
-				<listitem><simpara>Workspace files (<filename>*.wksp</filename>)</simpara></listitem>
-			</itemizedlist>
-		</para>
+    <para>The following files are stored in the configuration directory:
+      <itemizedlist>
+        <listitem><simpara>General configuration settings (<filename>workbench.settings</filename>)</simpara></listitem>
+        <listitem><simpara>Connection profiles (<filename>WbProfiles.xml</filename>)</simpara></listitem>
+        <listitem><simpara>JDBC Driver definitions (<filename>WbDrivers.xml</filename>)</simpara></listitem>
+        <listitem><simpara>Customized shortcut definitions (<filename>WbShortcuts.xml</filename>).
+          If you did not customize any of the shortcuts, this file does not exist</simpara>
+        </listitem>
+        <listitem><simpara>Macro definitions (<filename>WbMacros.xml</filename>)</simpara></listitem>
+        <listitem><simpara>Log file (<filename>workbench.log</filename>)</simpara></listitem>
+        <listitem><simpara>Workspace files (<filename>*.wksp</filename>)</simpara></listitem>
+      </itemizedlist>
+    </para>
 
-		<para>
-			If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
-			location of the profiles with the <literal>-profilestorage</literal> parameter on the commandline.
-			Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
-			The different shortcuts can still use the same main configuration file.
-		</para>
+    <para>
+      If you want to use a different file for the connection profile than WbProfiles.xml then you can specify the
+      location of the profiles with the <literal>-profilestorage</literal> parameter on the commandline.
+      Thus you can create different shortcuts on your desktop pointing to different sets of profiles.
+      The different shortcuts can still use the same main configuration file.
+    </para>
 
-		<section id="config-dir-adjust">
-			<title>Specifying the location of the configuration directory</title>
+    <section id="config-dir-adjust">
+      <title>Specifying the location of the configuration directory</title>
 
-			<?dbfo-need height="2cm" ?>
-			<para>
-				If you want to control the location where &wb-productname; stores the configuration
-				files, you have to start the application with the parameter -configDir to specify an
-				alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
-			</para>
+      <?dbfo-need height="2cm" ?>
+      <para>
+        If you want to control the location where &wb-productname; stores the configuration
+        files, you have to start the application with the parameter -configDir to specify an
+        alternate directory:<programlisting>java -jar sqlworkbench.jar -configDir=/export/configs/SQLWorkbench</programlisting>
+      </para>
 
-			<?dbfo-need height="2cm" ?>
-			<para>
-				or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
-				The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory
-				(as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
-				If the specified directory does not exist, it will be created.
-			</para>
+      <?dbfo-need height="2cm" ?>
+      <para>
+        or if you are using the Windows&reg; launcher:<programlisting>SQLWorkbench -configDir=c:\ConfigData\SQLWorkbench</programlisting>
+        The placeholder <literal>${user.home}</literal> will be replaced with the current user's home directory
+        (as returned by the Operating System), e.g.:<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/.sqlworkbench</programlisting>
+        If the specified directory does not exist, it will be created.
+      </para>
 
-			<para>
-				To copy an installation to a different computer, simply copy all the above
-				files to the other computer (the log file does not need to be copied).
-				When a profile is connected to a workspace, the filename
-				of the workspace file is usually stored with a placeholder for the configuration directory
-				(%configDir%) so that the profiles don't need to be adjusted.
-			</para>
+      <para>
+        To copy an installation to a different computer, simply copy all the above
+        files to the other computer (the log file does not need to be copied).
+        When a profile is connected to a workspace, the filename
+        of the workspace file is usually stored with a placeholder for the configuration directory
+        (%configDir%) so that the profiles don't need to be adjusted.
+      </para>
 
-			<para>
-				You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
-				as the full path to the driver's jar file(s) is stored in the file (unless you
-				define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
-			</para>
+      <para>
+        You will need to edit the driver definitions (stored in <filename>WbDrivers.xml</filename>)
+        as the full path to the driver's jar file(s) is stored in the file (unless you
+        define the location of the drivers using the <link linkend="settings-libdir">libdir variable</link>.
+      </para>
       
-		</section>
+    </section>
 
-	</section>
+  </section>
 
-	<section id="install-increase-memory">
-		<title>Increasing the memory available to the application</title>
-		<para>
-			&wb-productname; is a Java application and thus runs inside a virtual machine (JVM).
+  <section id="install-increase-memory">
+    <title>Increasing the memory available to the application</title>
+    <para>
+      &wb-productname; is a Java application and thus runs inside a virtual machine (JVM).
       The virtual machine limits the memory of the application independently from the installed
       memory that is available to the operating system.
-		</para>
-		<para>
-			&wb-productname; reads the data that is returned by a <literal>SELECT</literal>
-			statement into the main memory. When retrieving large result sets, you might
-			get an error message, indicating that not enough memory is available. In this
-			case you need to increase the memory that the JVM requests from the operating
-			system (or change your statement to return fewer rows).
-		</para>
-		<para>
-			When you use the Windows&reg; <link linkend="launcher-using">Launcher</link> to start &wb-productname;
-			you need to pass the parameter -J-Xmx512m to the executable:
-			<programlisting>SQLWorkbench.exe -J-Xmx512m</programlisting>This example
-			will increase the maximum memory to 512MB. The recommended way
-			is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
-			to the shortcut definition. The launcher sets the available heap size
-			for &wb-productname; to 256MB.
-		</para>
-		<para>
-			If you are running &wb-productname; on a non-Windows&reg; operating system or do not
-			want to use the launcher, then you need to pass this parameter directly to the JVM
-		</para>
-		<para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
+    </para>
+    <para>
+      &wb-productname; reads the data that is returned by a <literal>SELECT</literal>
+      statement into the main memory. When retrieving large result sets, you might
+      get an error message, indicating that not enough memory is available. In this
+      case you need to increase the memory that the JVM requests from the operating
+      system (or change your statement to return fewer rows).
+    </para>
+    <para>
+      When you use the Windows&reg; <link linkend="launcher-using">Launcher</link> to start &wb-productname;
+      you need to pass the parameter -J-Xmx512m to the executable:
+      <programlisting>SQLWorkbench.exe -J-Xmx512m</programlisting>This example
+      will increase the maximum memory to 512MB. The recommended way
+      is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
+      to the shortcut definition. The launcher sets the available heap size
+      for &wb-productname; to 256MB.
+    </para>
+    <para>
+      If you are running &wb-productname; on a non-Windows&reg; operating system or do not
+      want to use the launcher, then you need to pass this parameter directly to the JVM
+    </para>
+    <para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
     <para>
       If you are using the supplied shell scripts to start &wb-productname;, you can
       edit the scripts to change the parameter that sets the maximum memory to 256MB.
     </para>
-		<para>
-			The default heap size for your Java environment depends on your operating
-			system and your JDK implementation. Most JDKs use a default of 64MB.
-		</para>
-		<para>
-			The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
-			memory to the given value. This does not mean that the application will use
-			that much memory
-		</para>
-	</section>
+    <para>
+      The default heap size for your Java environment depends on your operating
+      system and your JDK implementation. Most JDKs use a default of 64MB.
+    </para>
+    <para>
+      The -Xmx parameter increases the <emphasis role="bold">maximum</emphasis>
+      memory to the given value. This does not mean that the application will use
+      that much memory
+    </para>
+  </section>
 
-	<section id="commandline" xreflabel="command line parameters">
-		<title>Command line parameters</title>
+  <section id="commandline" xreflabel="command line parameters">
+    <title>Command line parameters</title>
     <indexterm><primary>Command line</primary><secondary>parameters</secondary></indexterm>
 
-		<para>
-			Command line parameters are <emphasis role="bold">not</emphasis> case sensitive.
-			The parameters <literal>-PROFILE</literal> or <literal>-profile</literal> are
-			identical. The usage of the command line parameters is identical between
-			the launcher or starting &wb-productname; using the <literal>java</literal> command itself.
-		</para>
+    <para>
+      Command line parameters are <emphasis role="bold">not</emphasis> case sensitive.
+      The parameters <literal>-PROFILE</literal> or <literal>-profile</literal> are
+      identical. The usage of the command line parameters is identical between
+      the launcher or starting &wb-productname; using the <literal>java</literal> command itself.
+    </para>
 
-		<note>
-			<para>
-				When quoting parameters on the commandline (especially in a Windows environment) you have
-				to use single quotes, as the double quotes won't be passed to the application.
-			</para>
-		</note>
+    <note>
+      <para>
+        When quoting parameters on the commandline (especially in a Windows environment) you have
+        to use single quotes, as the double quotes won't be passed to the application.
+      </para>
+    </note>
 
-		<section id="cmdline-parameter-configdir">
-			<title>Specify the directory for configuration settings</title>
+    <section id="cmdline-parameter-configdir">
+      <title>Specify the directory for configuration settings</title>
 
-			<para>
-				The parameter <literal>-configDir</literal> specifies the directory where
-				&wb-productname; will store all its settings. If this parameter is not supplied,
-				the directory where the <link linkend="config-dir">default location</link> is used.
-				The placeholder <literal>${user.home}</literal> will be
-				replaced with the current user's home directory (as returned by the Operating System).
-				If the specified directory does not exist, it will be created.
-			</para>
+      <para>
+        The parameter <literal>-configDir</literal> specifies the directory where
+        &wb-productname; will store all its settings. If this parameter is not supplied,
+        the directory where the <link linkend="config-dir">default location</link> is used.
+        The placeholder <literal>${user.home}</literal> will be
+        replaced with the current user's home directory (as returned by the Operating System).
+        If the specified directory does not exist, it will be created.
+      </para>
 
-			<?dbfo-need height="1.5cm" ?>
-			<programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/wbconfig
+      <?dbfo-need height="1.5cm" ?>
+      <programlisting>java -jar sqlworkbench.jar -configDir=${user.home}/wbconfig
 SQLWorkbench -configDir='c:\Configurations\SQLWorkbench'</programlisting>
 
-			<para>
-				On the Windows platform you can use a forward slash to separate	directory names in the parameter.
-			</para>
-		</section>
+      <para>
+        On the Windows platform you can use a forward slash to separate directory names in the parameter.
+      </para>
+    </section>
 
-		<section id="cmdline-parameter-libdir">
-			<title>Specify a base directory for JDBC driver libraries</title>
-			<para>
-				The <literal>-libdir</literal> parameter defines the base directory for your JDBC drivers. The value of
-				this parameter can be referenced when <link linkend="jdbc-lib-dir">defining a driver library</link>
-				using the placholder <literal>%LibDir%</literal>
-				The value for this parameter can also be set in the file <link linkend="settings-libdir"><literal>workbench.settings</literal></link>.
-			</para>
-		</section>
+    <section id="cmdline-parameter-libdir">
+      <title>Specify a base directory for JDBC driver libraries</title>
+      <para>
+        The <literal>-libdir</literal> parameter defines the base directory for your JDBC drivers. The value of
+        this parameter can be referenced when <link linkend="jdbc-lib-dir">defining a driver library</link>
+        using the placholder <literal>%LibDir%</literal>
+        The value for this parameter can also be set in the file <link linkend="settings-libdir"><literal>workbench.settings</literal></link>.
+      </para>
+    </section>
 
-		<section id="cmdline-parameter-profilestorage">
-			<title>Specify the file containing connection profiles</title>
-			<para>
-				&wb-productname; stores the connection profiles in a file called <literal>WbProfiles.xml</literal>.
-				If you want to use a different filename, or use different set of profiles for different purposes
-				you can define the file where the profiles are stored with the <literal>-profilestorage</literal>
-				parameter.
-			</para>
+    <section id="cmdline-parameter-profilestorage">
+      <title>Specify the file containing connection profiles</title>
+      <para>
+        &wb-productname; stores the connection profiles in a file called <literal>WbProfiles.xml</literal>.
+        If you want to use a different filename, or use different set of profiles for different purposes
+        you can define the file where the profiles are stored with the <literal>-profilestorage</literal>
+        parameter.
+      </para>
 
-			<para>
-				If the value of the parameter does not contain a path, the file will be expected (and stored) in the
-				configuration directory.
-			</para>
-		</section>
+      <para>
+        If the value of the parameter does not contain a path, the file will be expected (and stored) in the
+        configuration directory.
+      </para>
+    </section>
 
-		<section id="cmdline-vardef">
-			<title>Defining variables</title>
+    <section id="cmdline-vardef">
+      <title>Defining variables</title>
 
-			<para>
-				With the <literal>-vardef</literal> parameter a definition file for
-				<link linkend="using-variables">internal variables</link> can be specified.
-				Each variable has to be listed on a single line in the format <literal>variable=value</literal>.
-				Lines starting with a <literal>#</literal> character are ignored (comments).
-				the file can contain unicode sequences (e.g. <literal>\u00fc</literal>. Values
-				spanning multiple lines are not supported. When reading a file during startup
-				the default encoding is used. If you need to read the file in a specific encoding
-				please use the <link linkend="command-vardef"><literal>WbVarDef</literal></link>
-				command with the <literal>-file</literal> and <literal>-encoding</literal> parameter.
-			</para>
-			<programlisting>#Define some values
+      <para>
+        With the <literal>-vardef</literal> parameter a definition file for
+        <link linkend="using-variables">internal variables</link> can be specified.
+        Each variable has to be listed on a single line in the format <literal>variable=value</literal>.
+        Lines starting with a <literal>#</literal> character are ignored (comments).
+        the file can contain unicode sequences (e.g. <literal>\u00fc</literal>. Values
+        spanning multiple lines are not supported. When reading a file during startup
+        the default encoding is used. If you need to read the file in a specific encoding
+        please use the <link linkend="command-vardef"><literal>WbVarDef</literal></link>
+        command with the <literal>-file</literal> and <literal>-encoding</literal> parameter.
+      </para>
+      <programlisting>#Define some values
 var_id=42
 person_name=Dent
 another_variable=24</programlisting>
 
       <para>
-				If the above file was saved under the name <literal>vars.txt</literal>, you can use those
-				variables by starting &wb-productname; using the following commandline:
-			</para>
-			<programlisting>java -jar sqlworkbench.jar -vardef=vars.txt</programlisting>
-
-			<para>
-				You can also define a list of variables with this parameter. In this case, the first
-				character after the = sign, has to be # (hash sign) to flag the value as a variable list:
-				<programlisting>java -jar sqlworkbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
-			</para>
+        If the above file was saved under the name <literal>vars.txt</literal>, you can use those
+        variables by starting &wb-productname; using the following commandline:
+      </para>
+      <programlisting>java -jar sqlworkbench.jar -vardef=vars.txt</programlisting>
 
       <para>
-				Defining variable values in this way can also be used when running in
-				<link linkend="using-scripting">batch mode</link>.
-			</para>
+        You can also define a list of variables with this parameter. In this case, the first
+        character after the = sign, has to be # (hash sign) to flag the value as a variable list:
+        <programlisting>java -jar sqlworkbench.jar -vardef=#var_id=42,person_name=Dent</programlisting>
+      </para>
+
+      <para>
+        Defining variable values in this way can also be used when running in
+        <link linkend="using-scripting">batch mode</link>.
+      </para>
 
 
-		</section>
+    </section>
 
-		<section id="nosettings-commandline">
-			<title>Prevent updating the .settings file</title>
-			<para>
-				If the <literal>-nosettings</literal> parameter is specified, &wb-productname; will not write
-				its settings to the file <literal>workbench.settings</literal> when it's beeing closed. Note
-				that in <link linkend="using-scripting">batch mode</link>, this file is never written.
-			</para>
-			<note><para>
-				If this parameter is supplied, the workspace will not be saved automatically as well!
-			</para></note>
-		</section>
+    <section id="nosettings-commandline">
+      <title>Prevent updating the .settings file</title>
+      <para>
+        If the <literal>-nosettings</literal> parameter is specified, &wb-productname; will not write
+        its settings to the file <literal>workbench.settings</literal> when it's beeing closed. Note
+        that in <link linkend="using-scripting">batch mode</link>, this file is never written.
+      </para>
+      <note><para>
+        If this parameter is supplied, the workspace will not be saved automatically as well!
+      </para></note>
+    </section>
 
-		<section id="commandline-connect-profile">
-			<title>Connect using a pre-defined connection profile</title>
+    <section id="commandline-connect-profile">
+      <title>Connect using a pre-defined connection profile</title>
       <indexterm><primary>Command line</primary><secondary>connection profile</secondary></indexterm>
 
-			<para>
-				You can specify the name of an already created <link linkend="profiles">connection
-				profile</link> on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
-				parameter. The name has to be passed exactly like it appears in the profile dialog
-				(case sensitiv!). If the name contains spaces or dashes, it has to be enclosed in
-				quotations marks. If you have more than one profile with the same name but in different
-				profile groups, you have to specify the desired profile group using the <literal>-profilegroup</literal>
-				parameter, otherwise the first profile matching the passed name will be selected.
-			</para>
+      <para>
+        You can specify the name of an already created <link linkend="profiles">connection
+        profile</link> on the commandline with the <literal>-profile=&#60;profile name&#62;</literal>
+        parameter. The name has to be passed exactly like it appears in the profile dialog
+        (case sensitiv!). If the name contains spaces or dashes, it has to be enclosed in
+        quotations marks. If you have more than one profile with the same name but in different
+        profile groups, you have to specify the desired profile group using the <literal>-profilegroup</literal>
+        parameter, otherwise the first profile matching the passed name will be selected.
+      </para>
 
-			<para>Example (on one line):</para>
+      <para>Example (on one line):</para>
 
-			<programlisting>java -jar sqlworkbench.jar
+      <programlisting>java -jar sqlworkbench.jar
      -profile='Postgres - Test'
      -script='test.sql'</programlisting>
-			<para>
-				In this case the file <literal>WbProfiles.xml</literal> must be in the current
-				(working) directory of the application. If this is not the case, please specify the
-				location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or
-				<link linkend="cmdline-parameter-configdir"><literal>-configDir</literal></link> parameter.
-			</para>
-			<para>
-				If you have two profiles with the names <literal>&quot;Oracle - Test&quot;</literal> you will
-				need to specify the profile group as well (in one line):
-			</para>
-			<programlisting>java -jar sqlworkbench.jar
+      <para>
+        In this case the file <literal>WbProfiles.xml</literal> must be in the current
+        (working) directory of the application. If this is not the case, please specify the
+        location of the profile using either the <link linkend="cmdline-parameter-profilestorage"><literal>-profilestorage</literal></link> or
+        <link linkend="cmdline-parameter-configdir"><literal>-configDir</literal></link> parameter.
+      </para>
+      <para>
+        If you have two profiles with the names <literal>&quot;Oracle - Test&quot;</literal> you will
+        need to specify the profile group as well (in one line):
+      </para>
+      <programlisting>java -jar sqlworkbench.jar
      -profile='Postgres - Test'
      -profilegroup='Local'
      -script='test.sql'</programlisting>
-		</section>
+    </section>
 
-		<section id="commandline-connect-noprofile">
-			<title>Connect without a profile</title>
+    <section id="commandline-connect-noprofile">
+      <title>Connect without a profile</title>
       <indexterm><primary>Command line</primary><secondary>JDBC connection</secondary></indexterm>
 
-			<para>
-				You can also specify the full connection parameters on the commandline, if
-				you don&apos;t want to create a profile only for executing a batch file.
-				The advantage of this method is, that &wb-productname; does not need the files
-				<filename>WbProfiles.xml</filename>, <filename>WbDrivers.xml</filename> to be
-				able to connect to the database.
-			</para>
+      <para>
+        You can also specify the full connection parameters on the commandline, if
+        you don&apos;t want to create a profile only for executing a batch file.
+        The advantage of this method is, that &wb-productname; does not need the files
+        <filename>WbProfiles.xml</filename>, <filename>WbDrivers.xml</filename> to be
+        able to connect to the database.
+      </para>
 
-			<para>The connection can be specified with the following parameters:</para>
+      <para>The connection can be specified with the following parameters:</para>
 
-			<informaltable frame="all">
-				<tgroup cols="2">
-					<colspec colname="c1" colwidth="3.5cm" />
-					<colspec colname="c2" />
-					<thead>
-						<row>
-							<entry>Parameter</entry>
-							<entry>Description</entry>
-						</row>
-					</thead>
+      <informaltable frame="all">
+        <tgroup cols="2">
+          <colspec colname="c1" colwidth="3.5cm" />
+          <colspec colname="c2" />
+          <thead>
+            <row>
+              <entry>Parameter</entry>
+              <entry>Description</entry>
+            </row>
+          </thead>
 
-					<tbody valign="top">
+          <tbody valign="top">
 
-						&common-connect-args;
+            &common-connect-args;
 
-						<row>
-							<entry>-emptyStringIsNull</entry>
-							<entry>This parameter corresponds to the
-							<link linkend="profile-empty-string-is-null">Empty String is NULL</link>
-							setting of the connection profile. This will only be needed when editing a result set in GUI mode.
-							</entry>
-						</row>
+            <row>
+              <entry>-emptyStringIsNull</entry>
+              <entry>This parameter corresponds to the
+              <link linkend="profile-empty-string-is-null">Empty String is NULL</link>
+              setting of the connection profile. This will only be needed when editing a result set in GUI mode.
+              </entry>
+            </row>
 
-						<row>
-							<entry>-connectionProperties</entry>
-							<entry>
+            <row>
+              <entry>-connectionProperties</entry>
+              <entry>
                 <para>
                   This parameter can be used to pass <link linkend="profile-extended-properties">extended connection properties</link> if
                   the driver does not support them e.g. in the JDBC URL. The values are passed as key=value pairs,
@@ -656,66 +656,66 @@ another_variable=24</programlisting>
                   <literal>-connectionProperties='someProp:"answer=42",otherProp:"2,4"'</literal> will define the value <literal>answer=42</literal> for the
                   property <literal>someProp</literal> and the value 2,4 for the property <literal>otherProp</literal>.
                  </para>
-							</entry>
-						</row>
+              </entry>
+            </row>
 
-						<row>
-							<entry>-altDelim</entry>
-							<entry>
-								The <link linkend="understand-alternate-delim">alternate delimiter</link> to be used for this connection.
-								To define a single line delimiter append the characters :nl to the parameter value:
-								e.g. <literal>-altDelimiter=GO:nl</literal> to define a SQL Server like GO as the
-								alternate delimiter. Note that when running in batchmode you can also override
-								the default delimiter by specifying the
-								<link linkend="scripting-delimiter"><literal>-delimiter</literal></link> parameter.
-							</entry>
-						</row>
+            <row>
+              <entry>-altDelim</entry>
+              <entry>
+                The <link linkend="understand-alternate-delim">alternate delimiter</link> to be used for this connection.
+                To define a single line delimiter append the characters :nl to the parameter value:
+                e.g. <literal>-altDelimiter=GO:nl</literal> to define a SQL Server like GO as the
+                alternate delimiter. Note that when running in batchmode you can also override
+                the default delimiter by specifying the
+                <link linkend="scripting-delimiter"><literal>-delimiter</literal></link> parameter.
+              </entry>
+            </row>
 
-						<row>
-							<entry>-separateConnection</entry>
-							<entry>If this parameter is set to true, and &wb-productname; is run in GUI mode,
-							each SQL tab will use it's own connection to the database server. This setting is
-							also available in the <link linkend="profile-separate-connection">connection profile</link>.
-							The default is <literal>true</literal>.
-							</entry>
-						</row>
+            <row>
+              <entry>-separateConnection</entry>
+              <entry>If this parameter is set to true, and &wb-productname; is run in GUI mode,
+              each SQL tab will use it's own connection to the database server. This setting is
+              also available in the <link linkend="profile-separate-connection">connection profile</link>.
+              The default is <literal>true</literal>.
+              </entry>
+            </row>
 
-						<row>
-							<entry>-workspace</entry>
-							<entry>The workspace file to be loaded. If the file specification does not
-							include a directory, the workspace will be loaded from the
-							<link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
-							is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
-							</entry>
-						</row>
+            <row>
+              <entry>-workspace</entry>
+              <entry>The workspace file to be loaded. If the file specification does not
+              include a directory, the workspace will be loaded from the
+              <link linkend="cmdline-parameter-configdir">configuration directory</link>. If this parameter
+              is not specified, the default workspace (<literal>Default.wksp</literal>) will be loaded.
+              </entry>
+            </row>
 
-						<row>
-							<entry>-readOnly</entry>
-							<entry>
-								Puts the connection into <link linkend="profile-readonly">read-only mode</link>.
-							</entry>
-						</row>
+            <row>
+              <entry>-readOnly</entry>
+              <entry>
+                Puts the connection into <link linkend="profile-readonly">read-only mode</link>.
+              </entry>
+            </row>
 
-					</tbody>
-				</tgroup>
+          </tbody>
+        </tgroup>
 
-			</informaltable>
+      </informaltable>
 
-			<para>
-				If a value for one of the parameters contains a dash or a space, you will
-				need to quote the parameter value.
-			</para>
+      <para>
+        If a value for one of the parameters contains a dash or a space, you will
+        need to quote the parameter value.
+      </para>
 
-			<para>
-				A disadvantage of this method is, that the password is displayed in plain text
-				on the command line. If this is used in a batch file, the password will be stored
-				in plain text in the batch file. If you don't want to expose the password,
-				you can use a connection profile and <link linkend="options-encrypt-password">enable password encryption</link>
-				for connection profiles.
-			</para>
+      <para>
+        A disadvantage of this method is, that the password is displayed in plain text
+        on the command line. If this is used in a batch file, the password will be stored
+        in plain text in the batch file. If you don't want to expose the password,
+        you can use a connection profile and <link linkend="options-encrypt-password">enable password encryption</link>
+        for connection profiles.
+      </para>
 
-		</section>
+    </section>
 
-		</section>
+    </section>
 
 </section>
