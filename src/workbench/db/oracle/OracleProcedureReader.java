@@ -162,7 +162,7 @@ public class OracleProcedureReader
 		throws SQLException
 	{
 		TableIdentifier tbl = connection.getMetadata().getSynonymTable(new TableIdentifier(procname));
-		if (tbl == null)
+		if (tbl == null && catalog != null)
 		{
 			// maybe a public synonym on the package?
 			tbl = connection.getMetadata().getSynonymTable(new TableIdentifier(catalog));
