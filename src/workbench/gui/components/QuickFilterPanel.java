@@ -43,6 +43,7 @@ import workbench.gui.actions.WbAction;
 import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.QuickFilter;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
@@ -298,7 +299,12 @@ public class QuickFilterPanel
 			}
 			catch (Exception e)
 			{
-				WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
+				String msg = ResourceMgr.getFormattedString("ErrBadRegex", value);
+				if (LogMgr.isDebugEnabled())
+				{
+					msg += "\n(" + ExceptionUtil.getDisplay(e) + ")";
+				}
+				WbSwingUtilities.showErrorMessage(this, msg);
 				searchTable.resetFilter();
 			}
 		}
