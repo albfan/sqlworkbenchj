@@ -47,6 +47,7 @@ import workbench.resource.ResourceMgr;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.RegExComparator;
+import workbench.util.ExceptionUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -282,16 +283,24 @@ public class QuickFilterPanel
 	public void applyQuickFilter()
 	{
 		String value = this.filterValue.getText();
-		if (StringUtil.isEmptyString(value))
+		if (StringUtil.isEmptyString(value) || value.trim().equals("*"))
 		{
 			this.searchTable.resetFilter();
 		}
 		else
 		{
-			ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, value);
-			col.setIgnoreCase(true);
-			searchTable.applyFilter(col);
-			filterValue.addToHistory(value);
+			try
+			{
+				ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, value);
+				col.setIgnoreCase(true);
+				searchTable.applyFilter(col);
+				filterValue.addToHistory(value);
+			}
+			catch (Exception e)
+			{
+				WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(e));
+				searchTable.resetFilter();
+			}
 		}
 	}
 
