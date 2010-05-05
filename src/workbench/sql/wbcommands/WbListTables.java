@@ -65,14 +65,15 @@ public class WbListTables extends SqlCommand
 		String schema = null;
 		String catalog = null;
 
+		if (cmdLine.hasUnknownArguments())
+		{
+			result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
+			result.setFailure();
+			return result;
+		}
+
 		if (cmdLine.hasArguments())
 		{
-			if (cmdLine.hasUnknownArguments())
-			{
-				result.addMessage(ResourceMgr.getString("ErrListWrongArgs"));
-				result.setFailure();
-				return result;
-			}
 
 			objects = cmdLine.getValue("objects");
 
