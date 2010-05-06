@@ -28,6 +28,16 @@ public class GuiSettings
 	public static final String PROPERTY_RESULTTAB_CLOSE_BUTTON_RIGHT = "workbench.gui.closebutton.right";
 	public static final String PROPERTY_ALLOW_ALTER_TABLE = "workbench.dbexplorer.allow.alter";
 
+	public static boolean getUseRegexInQuickFilter()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.quickfilter.useregex", true);
+	}
+
+	public static void setUseRegexInQuickFilter(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.quickfilter.useregex", flag);
+	}
+
 	public static boolean getUseShellFolders()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.filechooser.useshellfolder", true);

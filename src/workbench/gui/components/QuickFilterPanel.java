@@ -47,6 +47,7 @@ import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.QuickFilter;
 import workbench.log.LogMgr;
+import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.storage.filter.ColumnComparator;
 import workbench.storage.filter.ColumnExpression;
@@ -283,16 +284,11 @@ public class QuickFilterPanel
 	private String getPattern(String input)
 		throws PatternSyntaxException
 	{
-		try
+		if (GuiSettings.getUseRegexInQuickFilter())
 		{
 			Pattern.compile(input);
 			// no exception, so everything is OK
-			// just use the user's input
 			return input;
-		}
-		catch (Exception e)
-		{
-			// ignore
 		}
 		String regex = wildcardToRegex(input);
 

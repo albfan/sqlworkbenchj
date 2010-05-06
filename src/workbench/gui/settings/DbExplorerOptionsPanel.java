@@ -44,6 +44,7 @@ public class DbExplorerOptionsPanel
 		set.setRememberColumnOrder(rememberColOrder.isSelected());
 		set.setShowFocusInDbExplorer(showFocus.isSelected());
 		set.setDefaultExplorerObjectType(this.defTableType.getText());
+		GuiSettings.setUseRegexInQuickFilter(useQuickFilterRegex.isSelected());
 		GuiSettings.setAllowAlterInDbExplorer(allowTableAlter.isSelected());
 		((PlacementChooser)tabPlacement).saveSelection();
 	}
@@ -55,6 +56,7 @@ public class DbExplorerOptionsPanel
 		allowTableAlter.setSelected(GuiSettings.allowAlterInDbExplorer());
 		defTableType.setText(set.getDefaultExplorerObjectType());
 		rememberColOrder.setSelected(set.getRememberColumnOrder());
+		useQuickFilterRegex.setSelected(GuiSettings.getUseRegexInQuickFilter());
 		((PlacementChooser)tabPlacement).setProperty("workbench.gui.dbobjects.tabletabs");
 	}
 	
@@ -83,6 +85,7 @@ public class DbExplorerOptionsPanel
     jLabel1 = new javax.swing.JLabel();
     rememberColOrder = new javax.swing.JCheckBox();
     allowTableAlter = new javax.swing.JCheckBox();
+    useQuickFilterRegex = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -270,6 +273,17 @@ public class DbExplorerOptionsPanel
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
     add(allowTableAlter, gridBagConstraints);
+
+    useQuickFilterRegex.setText(ResourceMgr.getString("LblQuickFilterRegex")); // NOI18N
+    useQuickFilterRegex.setToolTipText(ResourceMgr.getString("d_LblQuickFilterRegex")); // NOI18N
+    useQuickFilterRegex.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(8, 9, 0, 10);
+    add(useQuickFilterRegex, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -290,6 +304,7 @@ public class DbExplorerOptionsPanel
   private javax.swing.JCheckBox showFocus;
   private javax.swing.JCheckBox showTriggerPanel;
   private javax.swing.JComboBox tabPlacement;
+  private javax.swing.JCheckBox useQuickFilterRegex;
   // End of variables declaration//GEN-END:variables
 
 }
