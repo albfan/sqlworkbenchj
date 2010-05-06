@@ -848,7 +848,6 @@ public class WbSwingUtilities
 	public static void callRepaint(final Component c)
 	{
 		c.invalidate();
-		c.validate();
 		c.repaint();
 	}
 

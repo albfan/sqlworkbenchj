@@ -1913,7 +1913,7 @@ public class TableListPanel
 		List<DbObject> result = new ArrayList<DbObject>(count);
 		for (int i=0; i < count; i++)
 		{
-			DbObject db = (DbObject)tableList.getDataStore().getRow(i).getUserObject();
+			DbObject db = (DbObject)tableList.getDataStore().getRow(rows[i]).getUserObject();
 			if (db == null)
 			{
 				TableIdentifier table = createTableIdentifier(rows[i]);
