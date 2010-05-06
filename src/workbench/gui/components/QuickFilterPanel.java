@@ -23,6 +23,7 @@ import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 import javax.swing.ActionMap;
 import javax.swing.ComponentInputMap;
@@ -279,6 +280,67 @@ public class QuickFilterPanel
 		this.filterValue.grabFocus();
 	}
 
+	private String getPattern(String input)
+		throws PatternSyntaxException
+	{
+		try
+		{
+			Pattern.compile(input);
+			// no exception, so everything is OK
+			// just use the user's input
+			return input;
+		}
+		catch (Exception e)
+		{
+			// ignore
+		}
+		String regex = wildcardToRegex(input);
+
+		// Test the "translated" pattern, if that throws an exception
+		// let the caller handle the exception
+		Pattern.compile(regex);
+		LogMgr.logInfo("QuickFilterPanel.getPattern()", "Using regex pattern [" + regex + "] instead of [" + input + "]");
+		
+		return regex;
+	}
+
+	/**
+	 * Convert a string that is expected to have standard "filename wildcards" to
+	 * a matching regular expression
+	 *
+	 * @param wildcard
+	 * @return a pattern that can be used as a regular expression
+	 */
+	public String wildcardToRegex(String wildcard)
+	{
+		StringBuilder s = new StringBuilder(wildcard.length() + 5);
+
+		s.append('^');
+
+		for (int i = 0, is = wildcard.length(); i < is; i++)
+		{
+			char c = wildcard.charAt(i);
+			if (c == '*' || c == '%')
+			{
+				s.append(".*");
+			}
+			else if (c == '?' )
+			{
+				s.append(".");
+			}
+			else
+			{
+				if (StringUtil.REGEX_SPECIAL_CHARS.indexOf(c) != -1)
+				{
+					s.append('\\');
+				}
+				s.append(c);
+			}
+		}
+		s.append('$');
+		return s.toString();
+	}
+	
 	public void applyQuickFilter()
 	{
 		try
@@ -293,10 +355,8 @@ public class QuickFilterPanel
 			{
 				try
 				{
-					// verify the pattern, before trying to apply it
-					Pattern p = Pattern.compile(value);
-					
-					ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, value);
+					String pattern = getPattern(value);
+					ColumnExpression col = new ColumnExpression(this.searchColumn, comparator, pattern);
 					col.setIgnoreCase(true);
 					searchTable.applyFilter(col);
 					filterValue.addToHistory(value);
