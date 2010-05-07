@@ -132,7 +132,7 @@ public class WbCall
 				}
 			}
 
-			if (outParameters == null || outParameters.size() == 0)
+			if (hasParameters && CollectionUtil.isEmpty(outParameters))
 			{
 				try
 				{
