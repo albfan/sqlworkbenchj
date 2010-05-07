@@ -422,9 +422,10 @@ public class WbCall
 
 		int definedParamCount = params.getRowCount();
 
-		if (meta.isOracle() && definedParamCount != sqlParams.size())
+		if (meta.isOracle() && definedParamCount != sqlParams.size() && !needFuncCall)
 		{
-			// if not all parameters are specified, there is no way to find the correct ones
+			// if not all parameters are specified, and this is not a function returning a refCursor
+			// there is no way to find the correct parameters or register them
 			return null;
 		}
 
