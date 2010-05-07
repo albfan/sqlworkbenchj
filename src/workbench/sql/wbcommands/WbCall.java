@@ -132,7 +132,7 @@ public class WbCall
 				}
 			}
 
-			if (hasParameters && CollectionUtil.isEmpty(outParameters))
+			if (CollectionUtil.isEmpty(outParameters))
 			{
 				try
 				{
@@ -328,6 +328,8 @@ public class WbCall
 
 		List<String> sqlParams = SqlUtil.getFunctionParameters(sql);
 
+		DbMetadata meta = this.currentConnection.getMetadata();
+		
 		// Detect the name/schema of the called procedure
 		SQLLexer l = new SQLLexer(sql);
 
@@ -341,7 +343,7 @@ public class WbCall
 		if (procname == null) return null;
 
 		String[] items = procname.split("\\.");
-		if (this.currentConnection.getMetadata().isOracle())
+		if (meta.isOracle())
 		{
 			if (items.length == 3)
 			{
@@ -388,7 +390,6 @@ public class WbCall
 			}
 		}
 
-		DbMetadata meta = this.currentConnection.getMetadata();
 		ArrayList<ParameterDefinition> parameterNames = null;
 
 		String schemaToUse = StringUtil.trimQuotes(meta.adjustSchemaNameCase(schema, true));
@@ -402,7 +403,15 @@ public class WbCall
 
 		boolean needFuncCall = returnsRefCursor(params);
 		sqlUsed = getSqlToPrepare(sql, needFuncCall);
-		
+
+		if (meta.isOracle() && !needFuncCall && !hasPlaceHolder(sqlParams))
+		{
+			// Workaround for Oracle packages that define optional OUT parameters
+			// if no ? is specified, and this is not a function call, there is no need
+			// to retrieve any possible OUT parameter.
+			return null;
+		}
+
 		if (currentStatement != null)
 		{
 			SqlUtil.closeStatement(currentStatement);
@@ -412,6 +421,13 @@ public class WbCall
 		this.currentStatement = cstmt;
 
 		int definedParamCount = params.getRowCount();
+
+		if (meta.isOracle() && definedParamCount != sqlParams.size())
+		{
+			// if not all parameters are specified, there is no way to find the correct ones
+			return null;
+		}
+
 		if (definedParamCount != sqlParams.size())
 		{
 			sqlParams = null;
@@ -486,6 +502,16 @@ public class WbCall
 			}
 		}
 		return parameterNames;
+	}
+
+	private boolean hasPlaceHolder(List<String> params)
+	{
+		if (CollectionUtil.isEmpty(params)) return false;
+		for (String p : params)
+		{
+			if (p.indexOf('?') > -1) return true;
+		}
+		return false;
 	}
 
 	private boolean isRefCursor(String type)
