@@ -403,7 +403,7 @@ public class DbMetadata
 		{
 			if (this.viewReader == null)
 			{
-				viewReader = new ViewReader(this.dbConnection);
+				viewReader = ViewReaderFactory.createViewReader(this.dbConnection);
 			}
 			return viewReader;
 		}

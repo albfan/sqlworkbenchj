@@ -103,7 +103,7 @@ public class PostgresTableSourceBuilder
 
 
 	@Override
-	public String getAdditionalColumnInformation(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	public String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
 		String schema = table.getSchemaToUse(this.dbConnection);
 		CharSequence enums = getEnumInformation(columns, schema);
@@ -121,6 +121,13 @@ public class PostgresTableSourceBuilder
 		if (sequences != null) result.append(sequences);
 
 		return result.toString();
+	}
+
+	@Override
+	public CharSequence getAdditionalTableSql(TableIdentifier table, List<ColumnIdentifier> columns)
+	{
+		PostgresRuleReader ruleReader = new PostgresRuleReader();
+		return ruleReader.getTableRuleSource(dbConnection, table);
 	}
 
 	private CharSequence getColumnSequenceInformation(TableIdentifier table, List<ColumnIdentifier> columns)

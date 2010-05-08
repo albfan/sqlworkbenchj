@@ -169,7 +169,18 @@ public class TableSourceBuilder
 			}
 		}
 
+		CharSequence extendedObjects = getAdditionalTableSql(table, columns);
+		if (extendedObjects != null)
+		{
+			result.append(lineEnding);
+			result.append(extendedObjects);
+		}
 		return result.toString();
+	}
+
+	public CharSequence getAdditionalTableSql(TableIdentifier table, List<ColumnIdentifier> columns)
+	{
+		return null;
 	}
 	
 	protected CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
@@ -364,7 +375,7 @@ public class TableSourceBuilder
 		// end of CREATE TABLE
 
 		// Add additional column information provided by any specialized descendant class
-		String colInfo = getAdditionalColumnInformation(table, columns, aIndexDef);
+		String colInfo = getAdditionalColumnSql(table, columns, aIndexDef);
 		if (StringUtil.isNonBlank(colInfo))
 		{
 			result.append(colInfo);
@@ -386,7 +397,7 @@ public class TableSourceBuilder
 		return null;
 	}
 
-	protected String getAdditionalColumnInformation(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
+	protected String getAdditionalColumnSql(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)
 	{
 		return null;
 	}

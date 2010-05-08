@@ -57,16 +57,16 @@ public class PostgresRuleReader
              "  left join pg_namespace n on n.oid = c.relnamespace \n" +
              "  left join pg_description d on r.oid = d.objoid ";
 
-	private String getSql(WbConnection connection, String schema, String name)
+	private String getSql(String ruleSchemaPattern, String ruleNamePattern, String ruleTable)
 	{
 		StringBuilder sql = new StringBuilder(150);
 
 		sql.append(baseSql);
 		boolean whereAdded = false;
-		if (StringUtil.isNonBlank(name))
+		if (StringUtil.isNonBlank(ruleNamePattern))
 		{
 			sql.append("\n WHERE r.rulename ");
-			if (name.indexOf('%') > -1)
+			if (ruleNamePattern.indexOf('%') > -1)
 			{
 				sql.append(" LIKE ");
 			}
@@ -76,11 +76,11 @@ public class PostgresRuleReader
 			}
 			sql.append('\'');
 			whereAdded = true;
-			sql.append(name);
+			sql.append(ruleNamePattern);
 			sql.append("' ");
 		}
 
-		if (StringUtil.isNonBlank(schema))
+		if (StringUtil.isNonBlank(ruleSchemaPattern))
 		{
 			if (!whereAdded) 
 			{
@@ -92,7 +92,23 @@ public class PostgresRuleReader
 				sql.append("\n AND ");
 			}
 			sql.append(" n.nspname = '");
-			sql.append(schema);
+			sql.append(ruleSchemaPattern);
+			sql.append("'");
+		}
+
+		if (StringUtil.isNonBlank(ruleTable))
+		{
+			if (!whereAdded)
+			{
+				sql.append("\n WHERE ");
+				whereAdded = true;
+			}
+			else
+			{
+				sql.append("\n AND ");
+			}
+			sql.append(" c.relname = '");
+			sql.append(ruleTable);
 			sql.append("'");
 		}
 		sql.append(" ORDER BY 1, 2 ");
@@ -105,7 +121,7 @@ public class PostgresRuleReader
 		return sql.toString();
 	}
 
-	public List<PostgresRule> getRuleList(WbConnection connection, String schemaPattern, String namePattern)
+	public List<PostgresRule> getRuleList(WbConnection connection, String schemaPattern, String namePattern, String ruleTable)
 	{
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -115,7 +131,7 @@ public class PostgresRuleReader
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(connection, schemaPattern, namePattern);
+			String sql = getSql(schemaPattern, namePattern, ruleTable);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
@@ -144,18 +160,48 @@ public class PostgresRuleReader
 		return result;
 	}
 
+	public List<PostgresRule> getTableRules(WbConnection connection, TableIdentifier table)
+	{
+		return getRuleList(connection, table.getSchema(), null, table.getTableName());
+	}
+
+	public CharSequence getTableRuleSource(WbConnection connection, TableIdentifier table)
+	{
+		List<PostgresRule> rules = getTableRules(connection, table);
+
+		if (CollectionUtil.isNonEmpty(rules))
+		{
+			StringBuilder result = new StringBuilder(rules.size() * 100);
+			for (PostgresRule rule : rules)
+			{
+				try
+				{
+					CharSequence src = rule.getSource(connection);
+					result.append(src);
+					result.append('\n');
+				}
+				catch (SQLException e)
+				{
+					LogMgr.logError("PostgresTableSourceBuilder.getAdditionalTableSql()", "Error retrieving rule source!", e);
+				}
+			}
+			return result.toString();
+		}
+		return null;
+	}
+	
 	public PostgresRule getObjectDefinition(WbConnection connection, DbObject object)
 	{
-		List<PostgresRule> rules = getRuleList(connection, object.getSchema(), object.getObjectName());
+		List<PostgresRule> rules = getRuleList(connection, object.getSchema(), object.getObjectName(), null);
 		if (rules == null || rules.isEmpty()) return null;
 		return rules.get(0);
 	}
 
-	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objects, String[] requestedTypes)
+	public boolean extendObjectList(WbConnection con, DataStore result, String catalog, String schema, String objectNamePattern, String[] requestedTypes)
 	{
 		if (!DbMetadata.typeIncluded("RULE", requestedTypes)) return false;
 
-		List<PostgresRule> rules = getRuleList(con, schema, objects);
+		List<PostgresRule> rules = getRuleList(con, schema, objectNamePattern, null);
 		if (rules.isEmpty()) return false;
 		for (PostgresRule rule : rules)
 		{
