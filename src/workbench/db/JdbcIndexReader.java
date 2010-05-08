@@ -151,7 +151,7 @@ public class JdbcIndexReader
 			}
 			
 			String type = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
-			if (type == null || type.startsWith("NORMAL")) type = "";
+			type = getSQLKeywordForType(type);
 
 			String tableName = tableNameToUse;
 			if (tableName == null)
@@ -187,6 +187,11 @@ public class JdbcIndexReader
 				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, definition.getExpression());
 				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, definition.getName());
 				idx.append(sql);
+				String options = getIndexOptions(definition);
+				if (options != null)
+				{
+					idx.append(options);
+				}
 				idx.append(";\n");
 			}
 		}
@@ -194,6 +199,18 @@ public class JdbcIndexReader
 		return idx;
 	}
 
+	public String getIndexOptions(IndexDefinition type)
+	{
+		return null;
+	}
+	
+	public String getSQLKeywordForType(String type)
+	{
+		if (type == null || type.startsWith("NORMAL")) return "";
+		return type;
+	}
+
+	
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
 	 *

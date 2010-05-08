@@ -169,6 +169,12 @@ public class OracleIndexReader
 		return source;
 	}
 
+	@Override
+	public String getIndexOptions(IndexDefinition index)
+	{
+		if ("NORMAL/REV".equals(index.getIndexType())) return "\n    REVERSE";
+		return null;
+	}
 
 	/**
 	 * 	Read the definition for function based indexes into the Map provided.
