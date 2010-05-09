@@ -211,8 +211,7 @@ VALUES
         <li>
             The display of triggers in PostgreSQL is no longer working if the trigger does not have a comment.<br/> 
             As a quickfix, please download <a href="TriggerSourceStatements.xml">this XML file</a> and copy it to your 
-            <a href="http://www.sql-workbench.net/manual/install.html#config-dir">Configuration directory</a>.<br/>
-            (fixed in 108.2)
+            <a href="http://www.sql-workbench.net/manual/install.html#config-dir">Configuration directory</a>. (fixed in 108.2)
         </li>
       </ul>
       
@@ -311,20 +310,18 @@ VALUES
           The Mac package is suitable to be extracted on the Mac desktop and contains the jar file, a launcher
           for MacOS, the manual and the sample XSLT scripts. No shell scripts are included in the Mac package.
         </p>
-        <!--
-        <p>
-          In order to be able to export data to the proprietary Microsoft Excel format you need additional libraries that have
-          to be copied into the installation directory. The needed files can be download from <a href="poi-add-on.zip">here</a>.<br/>
-          For details on how to configure native export, please refer to <a href="http://www.sql-workbench.net/manual/command-export.html#poi-installation">the manual </a>
-        </p>
-        -->
         
         <ul>
             <li><zip-link/></li>
             <li><mac-link/></li>
             <li><source-link/></li>
         </ul>
-        <p>You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases</p>
+        <p style="margin-top:25px">
+          Older versions can be downloaded from the <a href="download-archive.html">download archive</a>
+        </p>
+        <p style="margin-top:25px">
+            You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases
+        </p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
         <p>
           Looking for a free entity relationship modeling tool? Try <a href="http://www.sqlpower.ca/page/architect">Power*Architect</a>.
