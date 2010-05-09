@@ -2419,22 +2419,42 @@ public class Settings
 
 	public int getWindowPosX(String windowClass)
 	{
-		return getIntProperty(windowClass + ".x", Integer.MIN_VALUE);
+		int xPos = getIntProperty(getResolutionDependentKey(windowClass, "x"), Integer.MIN_VALUE);
+		if (xPos == Integer.MIN_VALUE)
+		{
+			xPos = getIntProperty(windowClass + ".x", Integer.MIN_VALUE);
+		}
+		return xPos;
 	}
 
 	public int getWindowPosY(String windowClass)
 	{
-		return getIntProperty(windowClass + ".y", Integer.MIN_VALUE);
+		int yPos = getIntProperty(getResolutionDependentKey(windowClass, "y"), Integer.MIN_VALUE);
+		if (yPos == Integer.MIN_VALUE)
+		{
+			yPos = getIntProperty(windowClass + ".y", Integer.MIN_VALUE);
+		}
+		return yPos;
 	}
 
 	public int getWindowWidth(String windowClass)
 	{
-		return getIntProperty(windowClass + ".width", Integer.MIN_VALUE);
+		int width = getIntProperty(getResolutionDependentKey(windowClass, "width"), Integer.MIN_VALUE);
+		if (width == Integer.MIN_VALUE)
+		{
+			width = getIntProperty(windowClass + ".width", Integer.MIN_VALUE);
+		}
+		return width;
 	}
 
 	public int getWindowHeight(String windowClass)
 	{
-		return getIntProperty(windowClass + ".height", Integer.MIN_VALUE);
+		int height = getIntProperty(getResolutionDependentKey(windowClass, "height"), Integer.MIN_VALUE);
+		if (height == Integer.MIN_VALUE)
+		{
+			height = getIntProperty(windowClass + ".height", Integer.MIN_VALUE);
+		}
+		return height;
 	}
 
 	public void storeWindowPosition(Component target)
@@ -2453,6 +2473,29 @@ public class Settings
 		this.storeWindowSize(target, null);
 	}
 
+	private String getScreenResolutionKey()
+	{
+		try
+		{
+			Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+			return Long.toString((long)screen.getWidth()) + "x" + Long.toString((long)screen.getHeight());
+		}
+		catch (Throwable th)
+		{
+			return "";
+		}
+	}
+
+	private String getResolutionDependentKey(String base, String attribute)
+	{
+		String resKey = getScreenResolutionKey();
+		if (resKey == null)
+		{
+			return base + "." + attribute;
+		}
+		return base + "." + resKey + "." + attribute;
+	}
+	
 	public void storeWindowSize(Component target, String id)
 	{
 		if (target == null) return;
@@ -2463,14 +2506,14 @@ public class Settings
 
 	public void setWindowPosition(String windowClass, int x, int y)
 	{
-		this.props.setProperty(windowClass + ".x", Integer.toString(x));
-		this.props.setProperty(windowClass + ".y", Integer.toString(y));
+		this.props.setProperty(getResolutionDependentKey(windowClass, "x"), Integer.toString(x));
+		this.props.setProperty(getResolutionDependentKey(windowClass, "y"), Integer.toString(y));
 	}
 
 	public void setWindowSize(String windowClass, int width, int height)
 	{
-		this.props.setProperty(windowClass + ".width", Integer.toString(width));
-		this.props.setProperty(windowClass + ".height", Integer.toString(height));
+		this.props.setProperty(getResolutionDependentKey(windowClass, "width"), Integer.toString(width));
+		this.props.setProperty(getResolutionDependentKey(windowClass, "height"), Integer.toString(height));
 	}
 
 	public boolean restoreWindowSize(Component target)

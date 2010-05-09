@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-05-02">
+    <entry dev-build="5" type="enh">Window sizes and position are now stored separately per screen resolution</entry>
     <entry dev-build="5" type="enh">When displaying the SQL for a view or table in PostgreSQL, associated RULEs are not included</entry>
     <entry dev-build="5" type="enh">The quickfilter in the DbExplorer can now be changed to accept "normal" wildcards instead of regular expressions</entry>
     <entry dev-build="4" type="enh">WbSchemaDiff now detects renamed foreign keys and indexes</entry>
