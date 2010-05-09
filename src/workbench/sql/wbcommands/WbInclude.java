@@ -42,7 +42,7 @@ public class WbInclude
 		super();
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
-		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
+		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(AppArguments.ARG_DISPLAY_RESULT, ArgumentType.BoolArgument);
 		cmdLine.addArgument("checkEscapedQuotes", ArgumentType.BoolArgument);
 		cmdLine.addArgument("delimiter",StringUtil.stringToList("';','/','GO:nl'"));
@@ -134,7 +134,7 @@ public class WbInclude
 
 		if (checkParms)
 		{
-			continueOnError = cmdLine.getBoolean("continueonerror", false);
+			continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false);
 			checkEscape = cmdLine.getBoolean("checkescapedquotes", Settings.getInstance().getCheckEscapedQuotes());
 			verbose = cmdLine.getBoolean("verbose", false);
 			defaultIgnore = (currentConnection == null ? false : currentConnection.getProfile().getIgnoreDropErrors());

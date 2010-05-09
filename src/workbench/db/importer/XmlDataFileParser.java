@@ -401,10 +401,7 @@ public class XmlDataFileParser
 			return Collections.emptyList();
 		}
 		ArrayList<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(this.columns.length);
-		for (int i=0; i < this.columns.length; i++)
-		{
-			result.add(this.columns[i]);
-		}
+		result.addAll(Arrays.asList(this.columns));
 		return result;
 	}
 
