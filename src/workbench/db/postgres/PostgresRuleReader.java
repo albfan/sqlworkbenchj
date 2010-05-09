@@ -178,7 +178,7 @@ public class PostgresRuleReader
 				{
 					CharSequence src = rule.getSource(connection);
 					result.append(src);
-					result.append('\n');
+					result.append(Settings.getInstance().getInternalEditorLineEnding());
 				}
 				catch (SQLException e)
 				{
