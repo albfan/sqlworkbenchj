@@ -447,7 +447,7 @@ public class ProcedureListPanel
 		}
 		return def;
 	}
-	
+
 	private void retrieveProcDefinition(ProcedureDefinition def )
 	{
 		if (this.dbConnection == null) return;
@@ -564,6 +564,7 @@ public class ProcedureListPanel
 
 	public void reload()
 	{
+		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
 		this.reset();
 		this.retrieve();
 	}

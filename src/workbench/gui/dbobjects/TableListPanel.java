@@ -1729,6 +1729,7 @@ public class TableListPanel
 
 	public void reload()
 	{
+		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
 		this.reset();
 		this.startRetrieve(false);
 	}

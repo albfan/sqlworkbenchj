@@ -58,9 +58,9 @@ import workbench.util.WbWorkspace;
 
 /**
  * A Panel that display a list of triggers defined in the database
- * 
+ *
  * @author Thomas Kellerer
- * @see workbench.db.TriggerReader#getTriggerList(java.lang.String, java.lang.String, java.lang.String) 
+ * @see workbench.db.TriggerReader#getTriggerList(java.lang.String, java.lang.String, java.lang.String)
  */
 public class TriggerListPanel
 	extends JPanel
@@ -142,7 +142,7 @@ public class TriggerListPanel
 		this.triggerList.getSelectionModel().addListSelectionListener(this);
 		this.triggerList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		triggerList.setReadOnly(true);
-		
+
 		this.findPanel = new QuickFilterPanel(this.triggerList, false, "triggerlist");
 
 		ReloadAction a = new ReloadAction(this);
@@ -267,7 +267,7 @@ public class TriggerListPanel
 
 			DataStore ds = reader.getTriggers(currentCatalog, currentSchema);
 			final DataStoreTableModel model = new DataStoreTableModel(ds);
-			
+
 			WbSwingUtilities.invoke(new Runnable()
 			{
 				public void run()
@@ -496,6 +496,7 @@ public class TriggerListPanel
 
 	public void reload()
 	{
+		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
 		this.reset();
 		this.retrieve();
 	}

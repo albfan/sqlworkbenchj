@@ -17,7 +17,6 @@ import workbench.liquibase.LiquibaseSupport;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
-import workbench.sql.BatchRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
@@ -34,8 +33,6 @@ public class WbRunLB
 	extends SqlCommand
 {
 	public static final String VERB = "WBRUNLB";
-
-	private BatchRunner batchRunner;
 
 	public WbRunLB()
 	{
@@ -143,10 +140,9 @@ public class WbRunLB
 	public void cancel()
 		throws SQLException
 	{
-		super.cancel();
-		if (batchRunner != null)
+		if (runner != null)
 		{
-			batchRunner.cancel();
+			runner.cancel();
 		}
 	}
 }

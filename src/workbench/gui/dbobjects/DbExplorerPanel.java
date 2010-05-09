@@ -185,6 +185,8 @@ public class DbExplorerPanel
 			{
 				public void reload()
 				{
+					if (!WbSwingUtilities.checkConnection(DbExplorerPanel.this, dbConnection)) return;
+
 					if (schemaSelector.isVisible())
 					{
 						readSchemas(false);
