@@ -63,3 +63,10 @@
 	setting of the connection profile.
 	</entry>
 </row>
+
+<row>
+	<entry>-ignoreDropError</entry>
+	<entry>This parameter corresponds to the <link linkend="profile-ignore-drop-error">Ignore DROP errors</link>
+	setting of the connection profile.
+	</entry>
+</row>

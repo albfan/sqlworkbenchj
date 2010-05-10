@@ -1230,6 +1230,13 @@ $$ LANGUAGE plpgsql;
             </entry>
           </row>
 
+          <row>
+            <entry>-ignoreDropErrors</entry>
+            <entry>
+							Controls if errors resulting from DROP statements should be treated as an error or as a warning.
+            </entry>
+          </row>
+
         </tbody>
       </tgroup>
     </informaltable>
