@@ -30,19 +30,19 @@ import workbench.log.LogMgr;
 public class ArgumentParser
 {
 	private static final String ARG_PRESENT = "$WB$__ARG_PRESENT__$WB$";
-	
+
 	// Maps the argument to the supplied value
 	private Map<String, String> arguments;
-	
+
 	// Maps a registered argument to the argument type
 	private Map<String, ArgumentType> argTypes;
-	
+
 	private List<String> unknownParameters = new ArrayList<String>();
 	private Map<String, Collection<String>> allowedValues;
 	private int argCount = 0;
 	private boolean needSwitch = true;
 
-	
+
 	public ArgumentParser()
 	{
 		Comparator<String> c = new CaseInsensitiveComparator();
@@ -50,7 +50,7 @@ public class ArgumentParser
 		argTypes = new TreeMap<String, ArgumentType>(c);
 		allowedValues = new TreeMap<String, Collection<String>>(c);
 	}
-	
+
 	public ArgumentParser(boolean parameterSwitchNeeded)
 	{
 		this();
@@ -61,12 +61,12 @@ public class ArgumentParser
 	{
 		return needSwitch;
 	}
-	
+
 	public Collection<String> getAllowedValues(String key)
 	{
 		return allowedValues.get(key);
 	}
-	
+
 	public boolean hasValidValue(String parameter)
 	{
 		String value = getValue(parameter);
@@ -75,7 +75,7 @@ public class ArgumentParser
 		if (allowed == null || allowed.isEmpty()) return true;
 		return allowed.contains(value);
 	}
-	
+
 	public void addArgument(String key, List<String> values)
 	{
 		addArgument(key, ArgumentType.ListArgument);
@@ -84,16 +84,16 @@ public class ArgumentParser
 		v.addAll(values);
 		allowedValues.put(key, v);
 	}
-	
+
 	public void addArgument(String key)
 	{
 		addArgument(key, ArgumentType.StringArgument);
 	}
-	
+
 	public void addArgument(String key, ArgumentType type)
 	{
 		if (key == null) throw new NullPointerException("Key may not be null");
-		
+
 		this.arguments.put(key, null);
 		this.argTypes.put(key, type);
 	}
@@ -177,7 +177,7 @@ public class ArgumentParser
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the list of known arguments for this ArgumentParser
 	 * @return the registered argument types
@@ -197,7 +197,7 @@ public class ArgumentParser
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns the type of an argument
 	 */
@@ -208,14 +208,14 @@ public class ArgumentParser
 
 	/**
 	 * Checks if any arguments have been defined.
-	 * 
+	 *
 	 * @return true if at least one argument was provided
 	 */
 	public boolean hasArguments()
 	{
 		return this.argCount > 0;
 	}
-	
+
 	public int getArgumentCount()
 	{
 		return this.argCount;
@@ -227,20 +227,20 @@ public class ArgumentParser
 	}
 
 	/**
-	 * Return a list of unknown arguments. 
+	 * Return a list of unknown arguments.
 	 * Each argument passed in the original command line
 	 * that has not been registered using addArgument()
-	 * will be listed in the result. For each argument 
+	 * will be listed in the result. For each argument
 	 * in this list, isRegistered() would return false.
-	 * 
+	 *
 	 * @return a comma separated string with unknown arguments
 	 */
 	public String getUnknownArguments()
 	{
 		StringBuilder msg = new StringBuilder();
-		
+
 		if (unknownParameters.size() > 0)
-		{	
+		{
 			for (int i=0; i < unknownParameters.size(); i++)
 			{
 				if (i > 0) msg.append(' ');
@@ -250,7 +250,7 @@ public class ArgumentParser
 		}
 		return msg.toString();
 	}
-	
+
 	/**
 	 * Check if the given argument is a valid argument for the current commandline
 	 * @return true if arg was registered with addArgument()
@@ -259,19 +259,19 @@ public class ArgumentParser
 	{
 		return this.arguments.containsKey(arg);
 	}
-	
+
 	/**
-	 * Check if the given argument was passed on the commandline. 
-	 * This does not check if a value has been supplied with the 
+	 * Check if the given argument was passed on the commandline.
+	 * This does not check if a value has been supplied with the
 	 * argument. This can be used for argument-less parameters
 	 * e.g. -showEncodings
-	 * 
+	 *
 	 * @return true if the given argument was part of the commandline
 	 */
 	public boolean isArgPresent(String arg)
 	{
 		if (arg == null) return false;
-		// Even arguments without a value will have something 
+		// Even arguments without a value will have something
 		// in the map (the ARG_PRESENT marker object), otherwise
 		// they could not be distinguished from arguments that
 		// are merely registered.
@@ -288,7 +288,7 @@ public class ArgumentParser
 		this.arguments.remove(arg);
 		this.argTypes.remove(arg);
 	}
-	
+
 	private void reset()
 	{
 		Iterator<String> keys = this.arguments.keySet().iterator();
@@ -300,29 +300,29 @@ public class ArgumentParser
 		this.argCount = 0;
 		this.unknownParameters.clear();
 	}
-	
+
 	/**
 	 * Return a parameter as a boolean.
 	 * @return the value as passed on the command line
 	 *         false if no value was specified
-	 * 
+	 *
 	 * @see #getBoolean(String, boolean)
 	 */
 	public boolean getBoolean(String key)
 	{
 		return getBoolean(key, false);
 	}
-	
+
 	/**
-	 * Return a parameter value as a boolean. 
+	 * Return a parameter value as a boolean.
 	 * If no value was specified the given default value will be returned
-	 * 
+	 *
 	 * @param key the parameter key
 	 * @param defaultValue the default to be returned if the parameter is not present
-	 * 
-	 * @return the value as passed on the commandline 
+	 *
+	 * @return the value as passed on the commandline
 	 *         the defaultValue if the parameter was not supplied by the user
-	 * 
+	 *
 	 * @see #getValue(String)
 	 * @see #getBoolean(String)
 	 * @see StringUtil#stringToBool(String)
@@ -335,24 +335,31 @@ public class ArgumentParser
 	}
 
 	/**
-	 * Return the parameter for the give argument. 
-	 * 
-	 * If no value was specified or the parameter was not 
+	 * Return the parameter for the give argument.
+	 *
+	 * If no value was specified or the parameter was not
 	 * passed on the commandline null will be returned.
 	 * Any leading or trailing quotes will be removed from the argument
 	 * before it is returned. To check if the parameter was present
 	 * but without a value isArgPresent() should be used.
-	 * 
+	 *
 	 * @param key the parameter to retrieve
 	 * @return the value as provided by the user or null if no value specified
 	 *
-	 * @see #isArgPresent(java.lang.String) 
+	 * @see #isArgPresent(java.lang.String)
 	 * @see StringUtil#trimQuotes(String)
 	 */
 	public String getValue(String key)
 	{
 		String value = this.arguments.get(key);
 		if (value == ARG_PRESENT) return null;
+		return value;
+	}
+
+	public String getValue(String key, String defaultValue)
+	{
+		String value = getValue(key);
+		if (value == null) return defaultValue;
 		return value;
 	}
 
@@ -385,7 +392,7 @@ public class ArgumentParser
 		}
 		return result;
 	}
-	
+
 	public int getIntValue(String key, int def)
 	{
 		return StringUtil.getIntValue(this.getValue(key),def);

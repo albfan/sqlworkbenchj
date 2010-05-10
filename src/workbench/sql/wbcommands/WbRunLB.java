@@ -64,8 +64,19 @@ public class WbRunLB
 		StatementRunnerResult result = new StatementRunnerResult(aSql);
 		result.setSuccess();
 
+		boolean checkParameters = true;
+
 		cmdLine.parse(getCommandLine(aSql));
-		WbFile file = evaluateFileArgument(cmdLine.getValue("file"));
+		WbFile file = null;
+		if (cmdLine.hasArguments())
+		{
+			file = evaluateFileArgument(cmdLine.getValue("file"));
+		}
+		else
+		{
+			file = evaluateFileArgument(getCommandLine(aSql));
+			checkParameters = false;
+		}
 
 		if (file == null)
 		{
@@ -84,15 +95,15 @@ public class WbRunLB
 			return result;
 		}
 
-		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false);
-		List<String> ids = StringUtil.stringToList(cmdLine.getValue("changeSet"));
+		boolean continueOnError = checkParameters ? cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false) : false;
+		List<String> ids = checkParameters ? StringUtil.stringToList(cmdLine.getValue("changeSet")) : null;
 
-		String encoding = cmdLine.getValue("encoding");
-		if (encoding == null)
+		String encoding = checkParameters ? cmdLine.getValue("encoding", "UTF-8") : "UTF-8";
+
+		if (checkParameters)
 		{
-			encoding = "UTF-8";
+			setUnknownMessage(result, cmdLine, null);
 		}
-		setUnknownMessage(result, cmdLine, null);
 
 		try
 		{
