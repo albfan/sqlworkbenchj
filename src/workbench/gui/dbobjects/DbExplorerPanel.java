@@ -1057,4 +1057,9 @@ public class DbExplorerPanel
 		}
 	}
 
+	public String toString()
+	{
+		return getId();
+	}
+
 }
