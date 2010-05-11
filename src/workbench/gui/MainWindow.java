@@ -1048,10 +1048,10 @@ public class MainWindow
 	{
 		MainPanel current = getSqlPanel(index);
 		if (current == null) return;
+		this.checkConnectionForPanel(current);
 		this.updateGuiForTab(index);
 		this.updateAddMacroAction();
 		this.updateWindowTitle();
-		this.checkConnectionForPanel(current);
 	}
 
 	protected void updateAddMacroAction()
