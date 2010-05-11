@@ -110,6 +110,7 @@ public class LiquibaseParser
 			if (tagName.equals("sql"))
 			{
 				String split = attrs.getValue("splitStatements");
+				if (StringUtil.isBlank(split)) split = "true";
 				currentSplitValue = StringUtil.stringToBool(split);
 			}
 			else
