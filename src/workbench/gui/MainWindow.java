@@ -153,7 +153,7 @@ public class MainWindow
 	private WbConnection currentConnection;
 	private ConnectionProfile currentProfile;
 	protected ConnectionSelector connectionSelector;
-	
+
 	private FileDisconnectAction disconnectAction;
 	private CreateNewConnection createNewConnection;
 	private DisconnectTabAction disconnectTab;
@@ -485,7 +485,7 @@ public class MainWindow
 		recentWorkspace.setName("recent-workspace");
 		RecentWorkspaceManager.getInstance().populateMenu(recentWorkspace, this);
 		menu.add(recentWorkspace);
-		
+
 		WbMenu submenu = null;
 		String menuName = null;
 		for (int i=0; i < actions.size(); i++)
@@ -816,6 +816,10 @@ public class MainWindow
 
 	private void checkConnectionForPanel(final MainPanel aPanel)
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.checkConnectionForPanel()", getWindowId() + ": checking connection for panel " + aPanel);
+		}
 		if (this.isConnectInProgress()) return;
 		if (aPanel.isConnected()) return;
 
@@ -827,6 +831,10 @@ public class MainWindow
 			}
 			else if (this.currentConnection != null)
 			{
+				if (Settings.getInstance().getLogConnectionDetails())
+				{
+					LogMgr.logDebug("MainWindow.checkConnectionForPanel()", getWindowId() + ": setting global connection");
+				}
 				aPanel.setConnection(this.currentConnection);
 			}
 		}
@@ -945,13 +953,28 @@ public class MainWindow
 	 */
 	protected void connectPanel(final MainPanel aPanel)
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.connectPanel()", getWindowId() + ": connectPanel()" + aPanel.getId());
+		}
+
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
 		this.showConnectingInfo();
+
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.connectPanel()", getWindowId() + ": creating new connection for panel " + aPanel.getId());
+		}
+
 		try
 		{
 			WbConnection conn = this.getConnectionForTab(aPanel, true);
 			int index = this.getIndexForPanel(aPanel);
+			if (Settings.getInstance().getLogConnectionDetails())
+			{
+				LogMgr.logDebug("MainWindow.connectPanel()", getWindowId() + ": calling tabConnected for index: " + index);
+			}
 			this.tabConnected(aPanel, conn, index);
 		}
 		catch (Throwable e)
@@ -995,6 +1018,10 @@ public class MainWindow
 		{
 			public void run()
 			{
+				if (Settings.getInstance().getLogConnectionDetails())
+				{
+					LogMgr.logDebug("MainWindow.tabConnected()", getWindowId() + ": updating GUI for tab: " + anIndex);
+				}
 				updateGuiForTab(anIndex);
 			}
 		});
@@ -1018,7 +1045,7 @@ public class MainWindow
 		this.disconnectTab.checkState();
 
 		this.checkMacroMenuForPanel(anIndex);
-//		forceRedraw();
+		forceRedraw();
 
 		SwingUtilities.invokeLater(new Runnable()
 		{
@@ -1163,6 +1190,11 @@ public class MainWindow
 
 	public boolean connectBegin(final ConnectionProfile aProfile, final StatusBar info)
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.connectBegin()", getWindowId() + ": connectBegin() for " + aProfile);
+		}
+
 		if (this.currentWorkspaceFile != null && WbManager.getInstance().getSettingsShouldBeSaved())
 		{
 			if (!this.saveWorkspace(this.currentWorkspaceFile, true))
@@ -1172,7 +1204,7 @@ public class MainWindow
 		}
 		disconnect(false, false, false);
 
-		// it is important to set the connectInProgress flag, 
+		// it is important to set the connectInProgress flag,
 		// otherwise loading the workspace will already trigger a
 		// panel switch which might cause a connect
 		// to the current profile before the ConnectionSelector
@@ -1200,7 +1232,7 @@ public class MainWindow
 	{
 		if (p == null)
 		{
-			LogMgr.logWarning("MainWindow.getConnectionIdForPanel()", "Requested connection ID for NULL panel!", new Exception());
+			LogMgr.logError("MainWindow.getConnectionIdForPanel()", "Requested connection ID for NULL panel!", new Exception());
 			return "Wb" + getWindowId();
 		}
 		return "Wb" + getWindowId() + "-" + p.getId();
@@ -1238,12 +1270,18 @@ public class MainWindow
 		getSelector().connectTo(profile, showDialog);
 	}
 
+
 	/**
 	 *	Call-back function which gets executed on the AWT thread after
 	 *  the initial connection has been completed
 	 */
 	public void connected(WbConnection conn)
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.connected()", getWindowId() + ": connected() with " + conn);
+		}
+
 		if (this.currentProfile.getUseSeparateConnectionPerTab())
 		{
 			this.getCurrentPanel().setConnection(conn);
@@ -1272,11 +1310,16 @@ public class MainWindow
 
 	public void connectFailed(String error)
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.connectFailed()", getWindowId() + ": connectFailed()");
+		}
+
 		disconnected();
 		tabSelected(0);
 
 		if (error == null) return;
-		
+
 		try
 		{
 			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error);
@@ -1464,7 +1507,7 @@ public class MainWindow
 				}
 			});
 		}
-		
+
 		// Fix the repainting problems with the editor
 		final SqlPanel sql = getCurrentSqlPanel();
 		if (sql != null)
@@ -1537,6 +1580,11 @@ public class MainWindow
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
 
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.disconnect()", getWindowId() + ": disconnect()");
+		}
+
 		Runnable run = new Runnable()
 		{
 			public void run()
@@ -1572,6 +1620,11 @@ public class MainWindow
 	 */
 	protected void doDisconnect()
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.doDisconnect()", getWindowId() + ": doDisconnect()");
+		}
+
 		try
 		{
 			ConnectionMgr mgr = ConnectionMgr.getInstance();
@@ -1610,6 +1663,10 @@ public class MainWindow
 
 	protected void disconnected()
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.disconnected()", getWindowId() + ": disconnected()");
+		}
 		this.currentProfile = null;
 		this.currentConnection = null;
 		this.closeWorkspace(false);
@@ -1760,7 +1817,7 @@ public class MainWindow
 		}
 		return null;
 	}
-	
+
 	public JMenu getMacroMenu(int panelIndex)
 	{
 		JMenu menu = this.getMenu(ResourceMgr.MNU_TXT_MACRO, panelIndex);
@@ -1795,7 +1852,7 @@ public class MainWindow
 			RecentWorkspaceManager.getInstance().populateMenu(menu, this);
 		}
 	}
-	
+
 	protected void updateViewMenu(int sqlTabIndex, String aName)
 	{
 		int panelCount = this.panelMenus.size();
@@ -1905,6 +1962,11 @@ public class MainWindow
 	private WbConnection getConnectionForTab(MainPanel aPanel, boolean returnNew)
 		throws Exception
 	{
+		if (Settings.getInstance().getLogConnectionDetails())
+		{
+			LogMgr.logDebug("MainWindow.getConnectionForTab()", getWindowId() + ": getConnectionFor " + aPanel + ", new=" + returnNew);
+		}
+
 		if (this.currentConnection != null && !returnNew) return this.currentConnection;
 		String id = this.getConnectionIdForPanel(aPanel);
 
@@ -1973,7 +2035,7 @@ public class MainWindow
 			boolean doClose = WbSwingUtilities.getYesNo(sqlTab, ResourceMgr.getString("MsgConfirmCloseOtherTabs"));
 			if (!doClose) return;
 		}
-		
+
 		boolean inProgress = connectInProgress;
 		if (!inProgress) this.setConnectIsInProgress();
 

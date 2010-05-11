@@ -615,6 +615,11 @@ public class Settings
 		return props.containsKey(key);
 	}
 
+	public boolean getLogConnectionDetails()
+	{
+		return getBoolProperty("workbench.connection.debug", false);
+	}
+
 	public boolean getDebugCompletionSearch()
 	{
 		return getBoolProperty("workbench.db.completion.debug", false);
