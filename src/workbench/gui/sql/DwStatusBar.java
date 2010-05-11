@@ -148,9 +148,9 @@ public class DwStatusBar
 
 		setBorder(DEFAULT_BORDER);
 
-		this.execTime = new WbTextLabel();
+		execTime = new WbTextLabel();
 		execTime.setHorizontalAlignment(SwingConstants.RIGHT);
-		this.execTime.setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
+		execTime.setToolTipText(ResourceMgr.getString("MsgTotalSqlTime"));
 
 		Font f = execTime.getFont();
 		FontMetrics fm = null;
@@ -240,8 +240,9 @@ public class DwStatusBar
 
 	public void clearExecutionTime()
 	{
-		this.execTime.setText("");
-		this.execTime.repaint();
+		execTime.setText("");
+		execTime.repaint();
+		Thread.dumpStack();
 	}
 
 	public void setEditorLocation(int line, int column)
@@ -277,15 +278,15 @@ public class DwStatusBar
 	{
 		if (!timerRunning) return;
 		long time = System.currentTimeMillis() - timerStarted;
-		this.execTime.setText(durationFormatter.formatDuration(time, false));
+		execTime.setText(durationFormatter.formatDuration(time, false));
 	}
 
 	public void setExecutionTime(long millis)
 	{
 		if (timerRunning) executionEnd();
 		boolean includeFraction = (millis < DurationFormatter.ONE_MINUTE);
-		this.execTime.setText(durationFormatter.formatDuration(millis, includeFraction));
-		this.execTime.repaint();
+		execTime.setText(durationFormatter.formatDuration(millis, includeFraction));
+		execTime.repaint();
 	}
 
 	public void setRowcount(int start, int end, int count)

@@ -115,6 +115,7 @@ public class DwPanel
 
 	private boolean batchUpdate;
 	private boolean readOnly;
+	private boolean sharedStatusBar;
 
 	private StatementRunner stmtRunner;
 	private GenericRowMonitor genericRowMonitor;
@@ -194,17 +195,17 @@ public class DwPanel
 	public void setCursor(Cursor newCursor)
 	{
 		super.setCursor(newCursor);
-		this.dataTable.setCursor(newCursor);
+		dataTable.setCursor(newCursor);
 	}
 
 	public void setShowLoadProcess(boolean aFlag)
 	{
-		this.showLoadProgress = aFlag;
+		showLoadProgress = aFlag;
 	}
 
 	public void setPrintHeader(String header)
 	{
-		this.dataTable.setPrintHeader(header);
+		dataTable.setPrintHeader(header);
 	}
 
 	/**
@@ -212,14 +213,14 @@ public class DwPanel
 	 */
 	public void setConnection(WbConnection aConn)
 	{
-		this.clearContent();
-		this.dbConnection = aConn;
-		if (this.stmtRunner != null)
+		clearContent();
+		dbConnection = aConn;
+		if (stmtRunner != null)
 		{
-			this.stmtRunner.done();
+			stmtRunner.done();
 		}
-		this.stmtRunner = null;
-		this.clearStatusMessage();
+		stmtRunner = null;
+		clearStatusMessage();
 
 		if (dbConnection != null)
 		{
@@ -563,6 +564,11 @@ public class DwPanel
 		this.statusBar.setMaxRows(aMax);
 	}
 
+	public long getLastExecutionTime()
+	{
+		return lastExecutionTime;
+	}
+	
 	/**
 	 * Displays the last execution time in the status bar
 	 */
@@ -653,8 +659,8 @@ public class DwPanel
 		}
 		finally
 		{
-			this.stmtRunner.done();
-			this.clearStatusMessage();
+			stmtRunner.done();
+			clearStatusMessage();
 		}
 		return success;
 	}
@@ -670,25 +676,23 @@ public class DwPanel
 	{
 		if (result == null || !result.isSuccess())
 		{
-			this.lastExecutionTime = 0;
-			this.hasResultSet = false;
+			lastExecutionTime = 0;
+			hasResultSet = false;
 		}
 		else
 		{
-			this.lastExecutionTime = result.getExecutionTime();
-
 			if (result.hasDataStores())
 			{
-				showData(result.getDataStores().get(0), result.getSourceCommand());
+				showData(result.getDataStores().get(0), result.getSourceCommand(), result.getExecutionTime());
 			}
 			else if (result.hasResultSets())
 			{
-				showData(result.getResultSets().get(0), result.getSourceCommand());
+				showData(result.getResultSets().get(0), result.getSourceCommand(), result.getExecutionTime());
 			}
 		}
 	}
 
-	public void showData(final ResultSet result, final String sql)
+	public void showData(final ResultSet result, final String sql, long executionTime)
 		throws SQLException
 	{
 		DataStore newData = null;
@@ -706,7 +710,7 @@ public class DwPanel
 			{
 				newData = new DataStore(result, true, null, this.getMaxRows(), this.dbConnection);
 			}
-			showData(newData, sql);
+			showData(newData, sql, executionTime);
 		}
 		catch (LowMemoryException mem)
 		{
@@ -715,7 +719,7 @@ public class DwPanel
 
 	}
 
-	public void showData(final DataStore newData, final String statement)
+	public void showData(final DataStore newData, final String statement, long executionTime)
 		throws SQLException
 	{
 		try
@@ -723,6 +727,7 @@ public class DwPanel
 			this.setBatchUpdate(true);
 			this.hasResultSet = true;
 			this.sql = statement;
+			this.lastExecutionTime = executionTime;
 
 			newData.setOriginalConnection(this.dbConnection);
 			newData.setProgressMonitor(null);
@@ -1052,12 +1057,14 @@ public class DwPanel
 		this.dataTable.setRowResizeAllowed(GuiSettings.getAllowRowHeightResizing());
 		if (status != null)
 		{
-			this.statusBar = status;
+			statusBar = status;
+			sharedStatusBar = true;
 		}
 		else
 		{
-			this.statusBar = new DwStatusBar();
-			this.add(this.statusBar, BorderLayout.SOUTH);
+			statusBar = new DwStatusBar();
+			sharedStatusBar = false;
+			add(this.statusBar, BorderLayout.SOUTH);
 		}
 
 		this.statusBar.setFocusable(false);
@@ -1072,12 +1079,13 @@ public class DwPanel
 
 	public void updateStatusBar()
 	{
-		this.rowCountChanged();
+		rowCountChanged();
 		if (GuiSettings.getShowSelectionSummary() && this.statusBar != null)
 		{
 			statusBar.showSelectionIndicator(this.dataTable);
 		}
 	}
+
 	/**
 	 *	Show a message in the status panel.
 	 *
@@ -1095,7 +1103,7 @@ public class DwPanel
 	 */
 	public void clearStatusMessage()
 	{
-		this.statusBar.clearStatusMessage();
+		statusBar.clearStatusMessage();
 	}
 
 	public void showError(String error)
@@ -1132,15 +1140,18 @@ public class DwPanel
 	 */
 	public void clearContent()
 	{
-		this.dataTable.reset();
+		dataTable.reset();
 		checkLimitReachedDisplay();
 		statusBar.removeSelectionIndicator(dataTable);
-		this.hasResultSet = false;
-		this.lastMessage = null;
-		this.sql = null;
-		this.statusBar.clearRowcount();
-		this.statusBar.clearExecutionTime();
-		this.selectKeys.setEnabled(false);
+		hasResultSet = false;
+		lastMessage = null;
+		sql = null;
+		if (!sharedStatusBar)
+		{
+			statusBar.clearRowcount();
+			statusBar.clearExecutionTime();
+		}
+		selectKeys.setEnabled(false);
 		checkResultSetActions();
 	}
 

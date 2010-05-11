@@ -317,7 +317,7 @@ public class SqlPanel
 		resultTab.setFocusable(false);
 		resultTab.enableDragDropReordering(this);
 		resultTab.hideDisabledButtons(true);
-		
+
 		// The name of the component is used for the Jemmy GUI Tests
 		resultTab.setName("resultspane");
 
@@ -899,7 +899,7 @@ public class SqlPanel
 		DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
 		return panel.isModified();
 	}
-	
+
 	protected boolean isDataModified()
 	{
 		if (this.currentData == null) return false;
@@ -1227,7 +1227,7 @@ public class SqlPanel
 	private boolean confirmDiscardChanges(int index)
 	{
 		if (index >= resultTab.getTabCount() - 1) return false;
-		
+
 		boolean isModified = (index == -1 ? isModified() : isPanelModified(index));
 		if (!isModified) return true;
 		String title = getRealTabTitle();
@@ -1238,7 +1238,7 @@ public class SqlPanel
 		if (!GuiSettings.getConfirmDiscardResultSetChanges()) return true;
 		return WbSwingUtilities.getProceedCancel(this, "MsgDiscardTabChanges", title);
 	}
-	
+
 	/**
 	 *  Do any work which should be done during the process of saving the
 	 *  current workspace, but before the workspace file is actually opened!
@@ -1433,7 +1433,7 @@ public class SqlPanel
 		if (this.clearCompletionCache != null) this.clearCompletionCache.setConnection(this.dbConnection);
 		if (this.autoCompletion != null) this.autoCompletion.setConnection(this.dbConnection);
 		if (showObjectInfoAction != null) showObjectInfoAction.checkEnabled();
-		
+
 		if (this.stmtRunner == null)
 		{
 			this.stmtRunner = new StatementRunner();
@@ -2200,6 +2200,25 @@ public class SqlPanel
 	{
 		if (this.ignoreStateChange) return;
 		updateResultInfos();
+		if (currentData != null)
+		{
+			currentData.showlastExecutionTime();
+		}
+		else
+		{
+			statusBar.setExecutionTime(getTotalResultExecutionTime());
+		}
+	}
+
+	private long getTotalResultExecutionTime()
+	{
+		long time = 0;
+		for (int i=0; i < resultTab.getTabCount() - 1; i++)
+		{
+			DwPanel data = (DwPanel)this.resultTab.getComponentAt(i);
+			time += data.getLastExecutionTime();
+		}
+		return time;
 	}
 
 	private void updateResultInfos()
@@ -2222,10 +2241,12 @@ public class SqlPanel
 		}
 		else
 		{
-			this.currentData = (DwPanel)this.resultTab.getSelectedComponent();
+			currentData = (DwPanel)this.resultTab.getSelectedComponent();
 			if (currentData != null)
-			this.currentData.updateStatusBar();
-			this.currentData.addPropertyChangeListener("updateTable", this);
+			{
+				currentData.updateStatusBar();
+				currentData.addPropertyChangeListener("updateTable", this);
+			}
 		}
 		closeResultAction.setEnabled(currentData != null);
 		closeAllResultsAction.setEnabled(this.getResultTabCount() > 0);
@@ -2263,8 +2284,8 @@ public class SqlPanel
 	}
 
 	/**
-	 * Closes the result tab with the given index. 
-	 * If confirmation for discarding changes is enabled, the user will be asked to proceed 
+	 * Closes the result tab with the given index.
+	 * If confirmation for discarding changes is enabled, the user will be asked to proceed
 	 * if the data has been edited
 	 *
 	 * @see #closeCurrentResult()
@@ -2321,7 +2342,7 @@ public class SqlPanel
 	private void discardResult(int index)
 	{
 		if (index == resultTab.getTabCount() - 1) return;
-		
+
 		try
 		{
 			DwPanel panel = (DwPanel)resultTab.getComponentAt(index);
@@ -2626,7 +2647,7 @@ public class SqlPanel
 			else
 			{
 				setLogText("");
-				this.clearResultTabs();
+				clearResultTabs();
 				firstResultIndex = 0;
 			}
 
@@ -2639,12 +2660,12 @@ public class SqlPanel
 				macroRun = true;
 			}
 
+			// executeMacro() will set this variable so that we can
+			// log the macro statement here. Otherwise we wouldn know at this point
+			// that a macro is beeing executed
 			if (this.macroExecution)
 			{
-				// executeMacro() will set this variable so that we can
-				// log the macro statement here. Otherwise we wouldn know at this point
-				// that a macro is beeing executed
-				this.macroExecution = false;
+				macroExecution = false;
 
 				macroRun = true;
 				appendToLog(ResourceMgr.getString("MsgExecutingMacro") + ":\n" + script + "\n");
@@ -2694,7 +2715,7 @@ public class SqlPanel
 
 			// Displays the first "result" tab. As no result is available
 			// at this point, it merely shows the message log
-			this.showResultPanel();
+			showResultPanel();
 
 			highlightCurrent = ((count > 1 || commandAtIndex > -1) && (!macroRun) && Settings.getInstance().getHighlightCurrentStatement());
 
@@ -2712,13 +2733,13 @@ public class SqlPanel
 			String currentSql = null;
 
 			int resultSets = 0;
-			this.ignoreStateChange = false;
-			this.macroExecution = false;
+			ignoreStateChange = true;
+			macroExecution = false;
 
 			long totalRows = 0;
 
 			this.stmtRunner.setMaxRows(maxRows);
-			
+
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
@@ -2738,8 +2759,8 @@ public class SqlPanel
 					highlightStatement(scriptParser, i, selectionOffset);
 				}
 
-				this.stmtRunner.setQueryTimeout(timeout);
-				this.stmtRunner.runStatement(currentSql);
+				stmtRunner.setQueryTimeout(timeout);
+				stmtRunner.runStatement(currentSql);
 				statementResult = this.stmtRunner.getResult();
 
 				if (statementResult == null) continue;
@@ -2810,7 +2831,7 @@ public class SqlPanel
 
 				// this will be set by confirmExecution() if
 				// Cancel was selected
-				if (this.cancelAll) break;
+				if (cancelAll) break;
 
 				if (statementResult.isSuccess())
 				{
@@ -2862,7 +2883,7 @@ public class SqlPanel
 
 			long execTime = (System.currentTimeMillis() - startTime);
 
-			// this will automatically stop the execution timer in the status bar
+			// this will also automatically stop the execution timer in the status bar
 			statusBar.setExecutionTime(stmtTotal);
 			statusBar.clearStatusMessage();
 
@@ -2915,7 +2936,7 @@ public class SqlPanel
 
 			restoreSelection = restoreSelection && !GuiSettings.getKeepCurrentSqlHighlight();
 
-			
+
 			if (!(highlightCurrent && GuiSettings.getKeepCurrentSqlHighlight()))
 			{
 				if (!jumpToNext && restoreSelection && oldSelectionStart > -1 && oldSelectionEnd > -1)
@@ -2985,7 +3006,7 @@ public class SqlPanel
 		}
 		finally
 		{
-			this.stmtRunner.done();
+			stmtRunner.done();
 			ignoreStateChange = false;
 		}
 	}
@@ -3034,7 +3055,7 @@ public class SqlPanel
 	{
 		DwPanel data = new DwPanel(statusBar);
 		data.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		data.setConnection(this.dbConnection);
+		data.setConnection(dbConnection);
 		data.setUpdateHandler(this);
 		MainWindow w = null;
 		try
@@ -3121,7 +3142,7 @@ public class SqlPanel
 	{
 		resultTab.setSelectedIndex(index);
 	}
-	
+
 	/**
 	 * Returns the number of results tabs including the message tab
 	 * (so the return value is always >= 1)
@@ -3130,7 +3151,7 @@ public class SqlPanel
 	{
 		return resultTab.getTabCount();
 	}
-	
+
 	/**
 	 * Display the data contained in the StatementRunnerResult.
 	 * For each DataStore or ResultSet in the result, an additional
@@ -3145,6 +3166,7 @@ public class SqlPanel
 		if (result == null) return 0;
 		if (!result.isSuccess()) return 0;
 		final String sql = result.getSourceCommand();
+		final long time = result.getExecutionTime();
 
 		int count = 0;
 
@@ -3163,7 +3185,7 @@ public class SqlPanel
 						{
 							String gen = StringUtil.isNonBlank(sql) ? sql : ds.getGeneratingSql();
 							DwPanel p = createDwPanel();
-							p.showData(ds, gen);
+							p.showData(ds, gen, time);
 							addResultTab(p, gen);
 							newPanels.add(p);
 						}
@@ -3198,7 +3220,7 @@ public class SqlPanel
 						for (ResultSet rs : results)
 						{
 							DwPanel p = createDwPanel();
-							p.showData(rs, sql);
+							p.showData(rs, sql, time);
 							addResultTab(p, sql);
 						}
 					}
@@ -3418,7 +3440,7 @@ public class SqlPanel
 	{
 		String prop = evt.getPropertyName();
 		if (prop == null) return;
-		
+
 		if (evt.getSource() == this.dbConnection && WbConnection.PROP_AUTOCOMMIT.equals(prop))
 		{
 			this.checkCommitAction();
@@ -3491,10 +3513,10 @@ public class SqlPanel
 	public void tabCloseButtonClicked(int index)
 	{
 		if (!canCloseTab(index)) return;
-		
+
 		if (confirmDiscardChanges(index))
 		{
-			this.discardResult(index);
+			discardResult(index);
 		}
 	}
 
