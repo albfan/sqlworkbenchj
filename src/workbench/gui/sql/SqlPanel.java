@@ -286,6 +286,7 @@ public class SqlPanel
 	protected IconHandler iconHandler;
 	private boolean locked;
 	private boolean ignoreStateChange;
+	private long lastScriptExecTime;
 
 //</editor-fold>
 
@@ -1199,8 +1200,8 @@ public class SqlPanel
 	 */
 	public void showStatusMessage(String aMsg)
 	{
-		this.statusBar.setStatusMessage(aMsg);
-		this.statusBar.forcePaint();
+		statusBar.setStatusMessage(aMsg);
+		statusBar.forcePaint();
 	}
 
 	/**
@@ -1603,16 +1604,17 @@ public class SqlPanel
 	{
 		if (!this.isBusy()) return;
 
-		this.showStatusMessage(ResourceMgr.getString("MsgCancellingStmt") + "\n");
+		showStatusMessage(ResourceMgr.getString("MsgCancellingStmt") + "\n");
+		iconHandler.showCancelIcon();
 		try
 		{
-			if (this.worker != null)
+			if (worker != null)
 			{
-				this.worker.cancelExecution();
+				worker.cancelExecution();
 			}
-			else if (this.updateRunning)
+			else if (updateRunning)
 			{
-				this.cancelUpdate();
+				cancelUpdate();
 			}
 			else
 			{
@@ -1636,10 +1638,9 @@ public class SqlPanel
 	{
 		try
 		{
-			iconHandler.showCancelIcon();
-			this.cancelExecution = true;
-			this.setCancelState(false);
-			this.stmtRunner.cancel();
+			cancelExecution = true;
+			setCancelState(false);
+			stmtRunner.cancel();
 		}
 		finally
 		{
@@ -2198,11 +2199,12 @@ public class SqlPanel
 	 */
 	public void stateChanged(ChangeEvent evt)
 	{
-		if (this.ignoreStateChange) return;
+		if (ignoreStateChange) return;
+
 		updateResultInfos();
 		if (currentData != null)
 		{
-			currentData.showlastExecutionTime();
+			statusBar.setExecutionTime(currentData.getLastExecutionTime());
 		}
 		else
 		{
@@ -2212,6 +2214,8 @@ public class SqlPanel
 
 	private long getTotalResultExecutionTime()
 	{
+		if (lastScriptExecTime > 0) return lastScriptExecTime;
+
 		long time = 0;
 		for (int i=0; i < resultTab.getTabCount() - 1; i++)
 		{
@@ -2596,24 +2600,24 @@ public class SqlPanel
 			fixNLPattern = Pattern.compile("\n");
 		}
 
-		this.checkPrepared = Settings.getInstance().getCheckPreparedStatements();
-		this.executeAllStatements = false;
-		this.cancelAll = false;
+		checkPrepared = Settings.getInstance().getCheckPreparedStatements();
+		executeAllStatements = false;
+		cancelAll = false;
 
 		ScriptParser scriptParser = createScriptParser();
 
 		int oldSelectionStart = -1;
 		int oldSelectionEnd = -1;
 
-		this.stmtRunner.setExecutionController(this);
-		this.stmtRunner.setParameterPrompter(this);
+		stmtRunner.setExecutionController(this);
+		stmtRunner.setParameterPrompter(this);
 
 		DurationFormatter df = new DurationFormatter();
 
 		// If a file is loaded in the editor, make sure the StatementRunner
 		// is using the file's directory as the base directory
 		// Thanks to Christian d'Heureuse for this fix!
-		if (this.editor.hasFileLoaded())
+		if (editor.hasFileLoaded())
 		{
 			try
 			{
@@ -2737,8 +2741,8 @@ public class SqlPanel
 			macroExecution = false;
 
 			long totalRows = 0;
-
-			this.stmtRunner.setMaxRows(maxRows);
+			lastScriptExecTime = 0;
+			stmtRunner.setMaxRows(maxRows);
 
 			for (int i=startIndex; i < endIndex; i++)
 			{
@@ -2881,7 +2885,7 @@ public class SqlPanel
 
 			} // end for loop over all statements
 
-			long execTime = (System.currentTimeMillis() - startTime);
+			lastScriptExecTime = (System.currentTimeMillis() - startTime);
 
 			// this will also automatically stop the execution timer in the status bar
 			statusBar.setExecutionTime(stmtTotal);
@@ -2929,7 +2933,7 @@ public class SqlPanel
 			if (count > 1)
 			{
 				this.appendToLog(ResourceMgr.getString("TxtScriptFinished")+ "\n");
-				String duration = df.formatDuration(execTime, (execTime < DurationFormatter.ONE_MINUTE));
+				String duration = df.formatDuration(lastScriptExecTime, (lastScriptExecTime < DurationFormatter.ONE_MINUTE));
 				String s = ResourceMgr.getString("MsgScriptExecTime") + " " + duration + "\n";
 				this.appendToLog(s);
 			}

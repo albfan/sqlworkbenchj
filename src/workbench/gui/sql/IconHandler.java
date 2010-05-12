@@ -73,8 +73,8 @@ public class IconHandler
 
 	public void showCancelIcon()
 	{
-		this.showIconForTab(this.getCancelIndicator());
-		if (this.loadingIcon != null) this.loadingIcon.getImage().flush();
+		showIconForTab(this.getCancelIndicator());
+		if (loadingIcon != null) loadingIcon.getImage().flush();
 	}
 
 	private ImageIcon getLoadingIndicator()
@@ -138,18 +138,27 @@ public class IconHandler
 		return icon;
 	}
 
-	protected void showIconForTab(ImageIcon icon)
+	protected void showIconForTab(final ImageIcon icon)
 	{
 		Container parent = client.getParent();
 		if (parent instanceof JTabbedPane)
 		{
-			JTabbedPane tab = (JTabbedPane)parent;
-			int index = tab.indexOfComponent(client);
-			Icon oldIcon = tab.getIconAt(index);
+			final JTabbedPane tab = (JTabbedPane)parent;
+			final int index = tab.indexOfComponent(client);
+			if (index < 0) return;
+			
+			final Icon oldIcon = tab.getIconAt(index);
 			if (icon == null && oldIcon == null) return;
 			if (icon != oldIcon)
 			{
-				tab.setIconAt(index, icon);
+				WbSwingUtilities.invoke(new Runnable()
+				{
+					@Override
+					public void run()
+					{
+						tab.setIconAt(index, icon);
+					}
+				});
 			}
 		}
 	}

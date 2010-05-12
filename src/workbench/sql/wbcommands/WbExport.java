@@ -175,9 +175,20 @@ public class WbExport
 		info += ", xlsm="  + Boolean.toString(getInfoSheetDefault("xlsm"));
 		msg = msg.replace("%infosheet_defaults%", info);
 		msg = msg.replace("%types%", exportTypes);
+		msg = msg.replace("%default_ts_format%", getTSFormatDefault());
+		msg = msg.replace("%default_dt_format%", getDTFormatDefault());
 		return msg;
 	}
 
+	private String getTSFormatDefault()
+	{
+		return Settings.getInstance().getDefaultTimestampFormat();
+	}
+
+	private String getDTFormatDefault()
+	{
+		return Settings.getInstance().getDefaultDateFormat();
+	}
 	private boolean getInfoSheetDefault(String type)
 	{
 		return Settings.getInstance().getDefaultExportInfoSheet(type);
@@ -311,7 +322,6 @@ public class WbExport
 
 		this.continueOnError = cmdLine.getBoolean("continueonerror", false);
 
-		// Some properties used by more than one export type
 		String format = cmdLine.getValue("dateformat");
 		if (format != null) exporter.setDateFormat(format);
 

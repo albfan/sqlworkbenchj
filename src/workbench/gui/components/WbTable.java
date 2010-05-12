@@ -1116,6 +1116,7 @@ public class WbTable
 		currentFilter = filter;
 		dwModel.applyFilter(filter);
 		adjustRowsAndColumns();
+		WbSwingUtilities.repaintLater(getParent());
 	}
 
 	public DataStoreTableModel getDataStoreTableModel()
@@ -1604,7 +1605,6 @@ public class WbTable
 		{
 			optimizer.adjustColumns(this.adjustToColumnLabel);
 		}
-
 		adjustRowHeight();
 	}
 
@@ -2166,7 +2166,7 @@ public class WbTable
 			newRow = ds.insertRow(selectedRow);
 		}
 		restoreRowHeaderState();
-		
+
 		this.getSelectionModel().setSelectionInterval(newRow, newRow);
 		this.scrollToRow(newRow);
 		this.setEditingRow(newRow);

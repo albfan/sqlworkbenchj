@@ -173,20 +173,20 @@ public class SqlCommand
 	public void cancel()
 		throws SQLException
 	{
-		this.isCancelled = true;
-		if (this.currentRetrievalData != null)
+		isCancelled = true;
+		if (currentRetrievalData != null)
 		{
-			this.currentRetrievalData.cancelRetrieve();
+			currentRetrievalData.cancelRetrieve();
 		}
-		else if (this.currentStatement != null)
+		else if (currentStatement != null)
 		{
 			try
 			{
-				LogMgr.logDebug("SqlCommand.cancel()", "Cancelling statement execution...");
-				this.currentStatement.cancel();
+				LogMgr.logDebug("SqlCommand.cancel()", "Cancelling statement execution (" + StringUtil.getMaxSubstring(currentStatement.toString(), 80) + ")");
+				currentStatement.cancel();
 				LogMgr.logDebug("SqlCommand.cancel()", "Cancelled.");
 			}
-			catch (Exception th)
+			catch (Throwable th)
 			{
 				LogMgr.logWarning("SqlCommand.cancel()", "Error when cancelling statement", th);
 			}
@@ -198,27 +198,28 @@ public class SqlCommand
 	 * the SQL command. This releases any database resources that were
 	 * obtained during the execution of the statement (especially it
 	 * closes the JDBC statement object that was used to run this command).
-	 *
-	 * If this statement has been cancelled a rollback() is sent to the server.
+	 * <br/>
+	 * Warnings are cleared for the current statement and the connection.
 	 */
 	public void done()
 	{
-		if (this.currentStatement != null)
+		if (currentStatement != null)
 		{
-			if (!this.isCancelled)
+			try { currentStatement.clearBatch(); } catch (Exception th) {}
+			try { currentStatement.clearWarnings(); } catch (Exception th) {}
+			try { currentConnection.clearWarnings(); } catch (Exception e) {}
+			
+			try
 			{
-				try { this.currentStatement.clearWarnings(); } catch (Exception th) {}
-				try { this.currentStatement.clearBatch(); } catch (Exception th) {}
+				currentStatement.close();
 			}
-			try { this.currentStatement.close(); } catch (Exception th) {}
+			catch (Exception th)
+			{
+				LogMgr.logError("SqlCommand.done()", "Error when closing the current statement", th);
+			}
 		}
-		if (this.isCancelled)
-		{
-			try { this.currentConnection.rollback(); } catch (Exception th) {}
-		}
-		try { currentConnection.clearWarnings(); } catch (Exception e) {}
-		this.currentStatement = null;
-		this.isCancelled = false;
+		currentStatement = null;
+		isCancelled = false;
 		currentRetrievalData = null;
 	}
 
@@ -321,13 +322,13 @@ public class SqlCommand
 		throws SQLException
 	{
 		if (result == null) return;
-		
+
 		if (currentConnection == null || currentConnection.isClosed())
 		{
 			LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
 			return;
 		}
-		
+
 		appendOutput(result);
 
 		// Postgres obviously clears the warnings if the getMoreResults() is called,
@@ -380,13 +381,13 @@ public class SqlCommand
 		int counter = 0;
 		while (moreResults || updateCount > -1)
 		{
-			
+
 			if (currentConnection == null || currentConnection.isClosed())
 			{
 				LogMgr.logError("SqlCommand.processResults()", "Current connection has been closed. Aborting...", null);
 				return;
 			}
-			
+
 			if (updateCount > -1)
 			{
 				result.addUpdateCountMsg(updateCount);

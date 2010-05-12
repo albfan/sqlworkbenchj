@@ -1135,7 +1135,7 @@ public class SqlFormatter
 				{
 					// the next (non-whitespace token has to be a (
 					t = skipComments();//this.lexer.getNextToken(false, false);
-					if (t.getContents().equals("("))
+					if (t != null && t.getContents().equals("("))
 					{
 						int colsPerLine = Settings.getInstance().getFormatterMaxColumnsInInsert();
 						t = this.processBracketList(2, colsPerLine);
