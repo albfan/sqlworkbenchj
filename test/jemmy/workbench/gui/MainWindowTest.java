@@ -369,7 +369,7 @@ public class MainWindowTest
 		JMenuBarOperator mainMenu = new JMenuBarOperator(mainWindow);
 		JMenuOperator sqlMenu = new JMenuOperator(mainMenu.getMenu(4));
 
-		JMenuItem appendItem = sqlMenu.getItem(18);
+		JMenuItem appendItem = sqlMenu.getItem(19);
 
 		AppendResultsAction action = (AppendResultsAction)appendItem.getAction();
 		assertFalse(appendItem.isSelected());
