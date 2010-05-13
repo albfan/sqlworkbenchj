@@ -65,14 +65,6 @@ public class ResultColumnMetaData
 
 		DbMetadata meta = connection.getMetadata();
 
-		try
-		{
-			Thread.sleep(1000);
-		}
-		catch (Throwable th)
-		{
-		}
-
 		Map<String, TableDefinition> tableDefs = new HashMap<String, TableDefinition>(tables.size());
 		for (String table : tables)
 		{
@@ -92,7 +84,7 @@ public class ResultColumnMetaData
 				table = tables.get(0);
 			}
 			if (table == null) continue;
-			
+
 			TableDefinition def = tableDefs.get(table.toLowerCase());
 			if (c.getObjectName().equals("*"))
 			{
@@ -118,7 +110,7 @@ public class ResultColumnMetaData
 	{
 		if (def == null) return;
 		if (col == null) return;
-		
+
 		int index = info.findColumn(col.getColumnName());
 		if (index > -1)
 		{

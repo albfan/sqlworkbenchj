@@ -14,6 +14,8 @@ package workbench.db.datacopy;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collection;
+import java.util.Map;
 import workbench.db.WbConnection;
 import workbench.db.importer.RowDataProducer;
 import workbench.db.importer.RowDataReceiver;
@@ -28,11 +30,11 @@ import workbench.util.ValueConverter;
 /**
  * Acts as a row data producer to copy the data from a SQL query
  * to another table (and database).
- * 
+ *
  * When copying a single table, {@link DataCopier} will create the approriate
  * <tt>SELECT</tt> statement to retrieve all rows (and columns) from the source
- * table. 
- * 
+ * table.
+ *
  * @author  Thomas Kellerer
  */
 public class QueryCopySource
@@ -48,7 +50,7 @@ public class QueryCopySource
 	private boolean hasErrors = false;
 	private boolean hasWarnings = false;
 	private RowData currentRow;
-	
+
 	public QueryCopySource(WbConnection source, String sql)
 	{
 		this.sourceConnection = source;
@@ -57,9 +59,9 @@ public class QueryCopySource
 
 	public boolean hasErrors() { return this.hasErrors; }
 	public boolean hasWarnings() { return this.hasWarnings; }
-	
+
 	public void setValueConverter(ValueConverter converter) {}
-	
+
 	public void setReceiver(RowDataReceiver rec)
 	{
 		this.receiver = rec;
@@ -69,7 +71,7 @@ public class QueryCopySource
 		throws Exception
 	{
 		LogMgr.logDebug("QueryCopySource.start()", "Using SQL: "+ this.retrieveSql);
-		
+
 		ResultSet rs = null;
 		this.keepRunning = true;
 		this.regularStop = false;
@@ -82,7 +84,7 @@ public class QueryCopySource
 			currentRow = new RowData(colCount);
 			while (this.keepRunning && rs.next())
 			{
-				// RowData will make some transformation 
+				// RowData will make some transformation
 				// on the data read from the database
 				// which works around some bugs in the Oracle
 				// JDBC driver. Especially it will supply
@@ -92,7 +94,7 @@ public class QueryCopySource
 				// That's why I'm reading the result set into a RowData object
 				currentRow.read(rs, info);
 				if (!keepRunning) break;
-				
+
 				try
 				{
 					this.receiver.processRow(currentRow.getData());
@@ -102,11 +104,11 @@ public class QueryCopySource
 					if (abortOnError) throw e;
 				}
 			}
-			
+
 			// if keepRunning == false, cancel() was
 			// called and we have to tell that the Importer
 			// in order to do a rollback
-			if (this.keepRunning || regularStop) 
+			if (this.keepRunning || regularStop)
 			{
 				// When copying a schema, we should not send an importFinished()
 				// so that the DataImporter reports the table counts correctly
@@ -128,13 +130,13 @@ public class QueryCopySource
 		if (currentRow == null) return null;
 		return currentRow.toString();
 	}
-	
+
 	public void stop()
 	{
 		this.regularStop = true;
 		cancel();
 	}
-	
+
 	public void cancel()
 	{
 		this.keepRunning = false;
@@ -146,14 +148,20 @@ public class QueryCopySource
 		{
 			LogMgr.logWarning("QueryCopySource.cancel()", "Error when cancelling retrieve", e);
 		}
-		
+
+	}
+
+	@Override
+	public Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes)
+	{
+		return null;
 	}
 
 	public boolean isCancelled()
 	{
 		return !keepRunning && !regularStop;
 	}
-	
+
 	public MessageBuffer getMessages()
 	{
 		return null;
@@ -168,7 +176,7 @@ public class QueryCopySource
 	{
 		// not supported
 	}
-	
+
 	public void setErrorHandler(JobErrorHandler handler)
 	{
 	}

@@ -95,35 +95,6 @@ public class TextFileParserTest
 		assertEquals("LASTNAME", toImport.get(0).getColumnName());
 	}
 
-	public void testRetainColumns()
-		throws Exception
-	{
-		TextFileParser parser = new TextFileParser();
-		parser.setConnection(connection);
-		List<ColumnIdentifier> fileCols =new ArrayList<ColumnIdentifier>();
-		fileCols.add(new ColumnIdentifier("nr"));
-		fileCols.add(new ColumnIdentifier("address_id"));
-		fileCols.add(new ColumnIdentifier("age"));
-		fileCols.add(new ColumnIdentifier("lastname"));
-		fileCols.add(new ColumnIdentifier("firstname"));
-		fileCols.add(new ColumnIdentifier("nickname"));
-		parser.setTableName("person");
-		parser.setColumns(fileCols);
-
-		List<ColumnIdentifier> importCols = new ArrayList<ColumnIdentifier>();
-		importCols.add(new ColumnIdentifier("firstname"));
-		importCols.add(new ColumnIdentifier("lastname"));
-		importCols.add(new ColumnIdentifier("nr"));
-		parser.retainColumns(importCols);
-		
-		List<ColumnIdentifier> toImport = parser.getColumnsToImport();
-		assertNotNull(toImport);
-		assertEquals(3, toImport.size());
-		assertEquals("NR", toImport.get(0).getColumnName());
-		assertEquals("LASTNAME", toImport.get(1).getColumnName());
-		assertEquals("FIRSTNAME", toImport.get(2).getColumnName());
-	}
-
 	public void setColumnWidths()
 		throws Exception
 	{

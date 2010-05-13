@@ -32,7 +32,7 @@ public class ArgumentParser
 	private static final String ARG_PRESENT = "$WB$__ARG_PRESENT__$WB$";
 
 	// Maps the argument to the supplied value
-	private Map<String, String> arguments;
+	private Map<String, Object> arguments;
 
 	// Maps a registered argument to the argument type
 	private Map<String, ArgumentType> argTypes;
@@ -46,7 +46,7 @@ public class ArgumentParser
 	public ArgumentParser()
 	{
 		Comparator<String> c = new CaseInsensitiveComparator();
-		arguments = new TreeMap<String, String>(c);
+		arguments = new TreeMap<String, Object>(c);
 		argTypes = new TreeMap<String, ArgumentType>(c);
 		allowedValues = new TreeMap<String, Collection<String>>(c);
 	}
@@ -107,7 +107,7 @@ public class ArgumentParser
 			line.append(args[i]);
 			line.append(' ');
 		}
-		this.parse(line.toString());
+		parse(line.toString());
 	}
 
 	public void parse(String aCmdLine)
@@ -150,7 +150,22 @@ public class ArgumentParser
 
 				if (arguments.containsKey(arg))
 				{
-					arguments.put(arg, value);
+					ArgumentType type = argTypes.get(arg);
+					if (type == ArgumentType.Repeatable)
+					{
+						List<String> list = (List<String>)arguments.get(arg);
+						if (list == null)
+						{
+							list = new ArrayList<String>();
+							arguments.put(arg, list);
+						}
+						List<String> result = StringUtil.stringToList(value, ",", true, true, false);
+						list.addAll(result);
+					}
+					else
+					{
+						arguments.put(arg, value);
+					}
 					this.argCount ++;
 				}
 				else
@@ -168,7 +183,7 @@ public class ArgumentParser
 	public List<String> getArgumentsOnCommandLine()
 	{
 		ArrayList<String> result = new ArrayList<String>(this.arguments.size());
-		for (Map.Entry<String, String> entry : arguments.entrySet())
+		for (Map.Entry<String, Object> entry : arguments.entrySet())
 		{
 			if (entry.getValue() != null)
 			{
@@ -351,11 +366,18 @@ public class ArgumentParser
 	 */
 	public String getValue(String key)
 	{
-		String value = this.arguments.get(key);
+		Object value = this.arguments.get(key);
 		if (value == ARG_PRESENT) return null;
-		return value;
+		return (String)value;
 	}
 
+	public List<String> getList(String key)
+	{
+		Object value = this.arguments.get(key);
+		if (value == ARG_PRESENT) return null;
+		return (List<String>)value;
+	}
+	
 	public String getValue(String key, String defaultValue)
 	{
 		String value = getValue(key);

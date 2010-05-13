@@ -30,6 +30,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.ColumnData;
+import workbench.storage.ResultColumnMetaData;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.DefaultOutputFactory;
@@ -82,6 +83,7 @@ public abstract class RowDataConverter
 	protected boolean convertDateToTimestamp = false;
 	protected BlobLiteralFormatter blobFormatter;
 	protected ExportDataModifier columnModifier;
+	protected boolean includeColumnComments = false;
 
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
@@ -107,7 +109,7 @@ public abstract class RowDataConverter
 	{
 		columnModifier = modifier;
 	}
-	
+
 	public boolean getEnableFixedHeader()
 	{
 		return fixedHeader;
@@ -117,7 +119,6 @@ public abstract class RowDataConverter
 	{
 		this.fixedHeader = flag;
 	}
-
 
 	public boolean getEnableAutoFilter()
 	{
@@ -149,6 +150,11 @@ public abstract class RowDataConverter
 		this.pageTitle = title;
 	}
 
+	public void setIncludeColumnComments(boolean flag)
+	{
+		this.includeColumnComments = flag;
+	}
+	
 	public String getPageTitle(String defaultTitle)
 	{
 		if (StringUtil.isEmptyString(pageTitle))
@@ -197,6 +203,10 @@ public abstract class RowDataConverter
 		{
 			this.filenameColumnIndex = meta.findColumn(filenameColumn);
 		}
+		if (this.includeColumnComments)
+		{
+			retrieveColumnComments();
+		}
 	}
 
 	public void setFilenameColumn(String colname)
@@ -212,7 +222,24 @@ public abstract class RowDataConverter
 		this.filenameColumnIndex = -1;
 	}
 
-	public ResultInfo getResultInfo() { return this.metaData; }
+	public void retrieveColumnComments()
+	{
+		if (StringUtil.isEmptyString(generatingSql)) return;
+		ResultColumnMetaData meta = new ResultColumnMetaData(generatingSql, this.originalConnection);
+		try
+		{
+			meta.retrieveColumnRemarks(getResultInfo());
+		}
+		catch (SQLException e)
+		{
+			LogMgr.logError("RowDataConverter.retrieveColumnComments()", "Error retrieving column comments", e);
+		}
+	}
+
+	public ResultInfo getResultInfo()
+	{
+		return this.metaData;
+	}
 
 	void setBlobIdColumns(List<String> cols)
 	{

@@ -136,7 +136,8 @@ public class DataExporter
 	private boolean compressOutput = false;
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
 	private ExportDataModifier modifier;
-
+	private boolean includeColumnComments;
+	
 	/**
 	 * Toggles an additional sheet for Spreedsheet exports
 	 */
@@ -202,6 +203,16 @@ public class DataExporter
 		this.appendInfoSheet = flag;
 	}
 
+	public void setIncludeColumnComments(boolean flag)
+	{
+		this.includeColumnComments = flag;
+	}
+
+	public boolean getIncludeColumnComments()
+	{
+		return includeColumnComments;
+	}
+	
 	public String getRowIndexColumnName()
 	{
 		return rowIndexColumnName;

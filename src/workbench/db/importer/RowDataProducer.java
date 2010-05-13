@@ -11,6 +11,8 @@
  */
 package workbench.db.importer;
 
+import java.util.Collection;
+import java.util.Map;
 import workbench.interfaces.JobErrorHandler;
 import workbench.util.MessageBuffer;
 import workbench.util.ValueConverter;
@@ -40,6 +42,14 @@ public interface RowDataProducer
 	 * This is used to log invalid records
 	 */
 	String getLastRecord();
-	
+
+	/**
+	 * Return the column value from the input file for each column 
+	 * passed in to the function.
+	 * @param inputFileIndexes the index of each column in the input file
+	 * @return for each column index the value in the inputfile
+	 */
+	Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes);
+
 	boolean isCancelled();
 }

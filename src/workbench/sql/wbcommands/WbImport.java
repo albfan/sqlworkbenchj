@@ -132,7 +132,7 @@ public class WbImport
 		cmdLine.addArgument(ARG_START_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_END_ROW, ArgumentType.IntegerArgument);
 		cmdLine.addArgument(ARG_BADFILE);
-		cmdLine.addArgument(ARG_CONSTANTS);
+		cmdLine.addArgument(ARG_CONSTANTS, ArgumentType.Repeatable);
 		cmdLine.addArgument(ARG_COL_WIDTHS);
 		cmdLine.addArgument(ARG_EXCLUDE_FILES);
 		cmdLine.addArgument(ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
@@ -265,7 +265,7 @@ public class WbImport
 			if (!inputFile.exists())
 			{
 				String msg = ResourceMgr.getFormattedString("ErrImportFileNotFound", inputFile.getFullPath());
-				
+
 				result.addMessage(msg);
 				if (continueOnError)
 				{
@@ -374,6 +374,13 @@ public class WbImport
 			// The flag for a header lines must be specified before setting the columns
 			textParser.setContainsHeader(header);
 
+			String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
+			List<ColumnIdentifier> toImport = null;
+			if (StringUtil.isNonBlank(importcolumns))
+			{
+				toImport = stringToCols(importcolumns);
+			}
+
 			if (StringUtil.isNonBlank(table))
 			{
 				try
@@ -395,12 +402,12 @@ public class WbImport
 				{
 					if (StringUtil.isBlank(filecolumns))
 					{
-						textParser.setupFileColumns();
+						textParser.setupFileColumns(toImport);
 					}
 					else
 					{
 						List<ColumnIdentifier> fileCols = stringToCols(filecolumns);
-						textParser.setColumns(fileCols);
+						textParser.setColumns(fileCols, toImport);
 					}
 				}
 				catch (Exception e)
@@ -411,12 +418,6 @@ public class WbImport
 					return result;
 				}
 
-				String importcolumns = cmdLine.getValue(ARG_IMPORTCOLUMNS);
-				if (StringUtil.isNonBlank(importcolumns))
-				{
-					List<ColumnIdentifier> toImport = stringToCols(importcolumns);
-					textParser.retainColumns(toImport);
-				}
 			}
 
 			// The column filter has to bee applied after the
@@ -587,8 +588,8 @@ public class WbImport
 			this.imp.setReportInterval(10);
 		}
 
-		String constants = cmdLine.getValue(ARG_CONSTANTS);
-		if (!StringUtil.isEmptyString(constants))
+		List<String> constants = cmdLine.getList(ARG_CONSTANTS);
+		if (CollectionUtil.isNonEmpty(constants))
 		{
 			try
 			{
@@ -701,7 +702,7 @@ public class WbImport
 		result.addMessageByKey("ErrImportRestartWith");
 		result.addMessage(param);
 	}
-	
+
 	private List<ColumnIdentifier> stringToCols(String columns)
 	{
 		List<String> names = StringUtil.stringToList(columns, ",", true, true);

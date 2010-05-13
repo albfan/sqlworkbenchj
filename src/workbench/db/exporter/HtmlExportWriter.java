@@ -33,12 +33,11 @@ public class HtmlExportWriter
 
 	public void configureConverter()
 	{
+		super.configureConverter();
 		HtmlRowDataConverter conv = (HtmlRowDataConverter)this.converter;
-		conv.setPageTitle(this.exporter.getPageTitle());
 		conv.setCreateFullPage(exporter.getCreateFullHtmlPage());
 		conv.setEscapeHtml(exporter.getEscapeHtml());
 		conv.setHeading(exporter.getHtmlHeading());
 		conv.setTrailer(exporter.getHtmlTrailer());
-		
 	}
 }

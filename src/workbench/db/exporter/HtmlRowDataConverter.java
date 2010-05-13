@@ -139,7 +139,7 @@ public class HtmlRowDataConverter
 			result.append("<style type=\"text/css\">\n");
 			result.append("<!--\n");
 			result.append("  table { border-spacing:0; border-collapse:collapse}\n");
-			result.append("  td { padding:2; border-style:solid;border-width:1px; vertical-align:top;}\n");
+			result.append("  td, th { font-weight:normal;padding:2; border-style:solid;border-width:1px; vertical-align:top;}\n");
 			result.append("  .number-cell { text-align:right; white-space:nowrap; } \n");
 			result.append("  .text-cell { text-align:left; } \n");
 			result.append("  .date-cell { text-align:left; white-space:nowrap;} \n");
@@ -157,15 +157,22 @@ public class HtmlRowDataConverter
 		result.append("<table>\n");
 
 		// table header with column names
-		result.append("  <tr>\n      ");
+		result.append("  <tr>\n");
 		for (int c=0; c < this.metaData.getColumnCount(); c ++)
 		{
 			if (!includeColumnInExport(c)) continue;
-			result.append("<th>");
-			if (createFullPage) result.append("<b>");
+			result.append("      <th>");
+			result.append("<b>");
 			result.append(this.metaData.getColumnName(c));
-			if (createFullPage) result.append("</b>");
-			result.append("</th>");
+			result.append("</b>");
+			String comment = metaData.getColumn(c).getComment();
+			if (includeColumnComments && StringUtil.isNonBlank(comment))
+			{
+				result.append("<br/>(");
+				result.append(comment);
+				result.append(")");
+			}
+			result.append("      </th>\n");
 		}
 		result.append("\n  </tr>\n");
 

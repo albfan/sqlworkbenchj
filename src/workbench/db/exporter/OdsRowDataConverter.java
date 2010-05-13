@@ -59,7 +59,7 @@ public class OdsRowDataConverter
 			out.close();
 
 			writeMeta();
-			if (getEnableFixedHeader() && writeHeader)
+			if (getEnableFixedHeader() && (writeHeader || includeColumnComments))
 			{
 				writeSettings();
 			}
@@ -85,6 +85,27 @@ public class OdsRowDataConverter
 				{
 					content.write("<table:table-column table:style-name=\"co" + (i+1) + "\" table:default-cell-style-name=\"Default\"/>\n");
 				}
+			}
+
+			if (includeColumnComments)
+			{
+				content.write("<table:table-header-rows>\n");
+				content.write("  <table:table-row table:style-name=\"ro1\">\n");
+
+				for (int i = 0; i < colCount; i++)
+				{
+					if (!this.includeColumnInExport(i))	continue;
+
+					String comment = this.metaData.getColumn(i).getComment();
+
+					content.write("  <table:table-cell table:style-name=\"ce1\" office:value-type=\"string\">\n");
+					content.write("    <text:p>");
+					content.write(comment);
+					content.write("</text:p>\n");
+					content.write("  </table:table-cell>\n");
+				}
+				content.write("  </table:table-row>\n");
+				content.write("</table:table-header-rows>\n\n");
 			}
 
 			if (writeHeader)
@@ -124,6 +145,7 @@ public class OdsRowDataConverter
 		Writer out = null;
 		try
 		{
+			String splitStart = (includeColumnComments ? "2" : "1");
 			out = factory.createWriter("settings.xml", "UTF-8");
 			out.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n");
 			out.write("<office:document-settings xmlns:office=\"urn:oasis:names:tc:opendocument:xmlns:office:1.0\" \n");
@@ -138,11 +160,11 @@ public class OdsRowDataConverter
 			out.write("          <config:config-item-map-named config:name=\"Tables\">\n");
 			out.write("            <config:config-item-map-entry config:name=\"" + getPageTitle("Export") + "\">\n");
 			out.write("              <config:config-item config:name=\"CursorPositionX\" config:type=\"int\">0</config:config-item>\n");
-			out.write("              <config:config-item config:name=\"CursorPositionY\" config:type=\"int\">1</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"CursorPositionY\" config:type=\"int\">" + splitStart + "</config:config-item>\n");
 			out.write("              <config:config-item config:name=\"VerticalSplitMode\" config:type=\"short\">2</config:config-item>\n");
-			out.write("              <config:config-item config:name=\"VerticalSplitPosition\" config:type=\"int\">1</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"VerticalSplitPosition\" config:type=\"int\">" + splitStart  + "</config:config-item>\n");
 			out.write("              <config:config-item config:name=\"ActiveSplitRange\" config:type=\"short\">2</config:config-item>\n");
-			out.write("              <config:config-item config:name=\"PositionBottom\" config:type=\"int\">1</config:config-item>\n");
+			out.write("              <config:config-item config:name=\"PositionBottom\" config:type=\"int\">" + splitStart + "</config:config-item>\n");
 			out.write("            </config:config-item-map-entry>\n");
 			out.write("          </config:config-item-map-named>\n");
 			out.write("        </config:config-item-map-entry>\n");
@@ -256,8 +278,13 @@ public class OdsRowDataConverter
 			{
 				String colName = columnToName(getRealColumnCount());
 				String title = "&apos;" + getPageTitle("Export") + "&apos;";
+				String start = "A1";
+				if (includeColumnComments)
+				{
+					start = "A2";
+				}
 				content.append("<table:database-ranges>\n");
-				content.append("<table:database-range table:target-range-address=\"" + title + ".A1:" + title + "." + colName + Long.toString(totalRows)+ "\" table:display-filter-buttons=\"true\" />\n");
+				content.append("<table:database-range table:target-range-address=\"" + title + "." + start + ":" + title + "." + colName + Long.toString(totalRows)+ "\" table:display-filter-buttons=\"true\" />\n");
 				content.append("</table:database-ranges>\n");
 			}
 			

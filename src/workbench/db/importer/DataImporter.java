@@ -42,7 +42,10 @@ import java.sql.Clob;
 import java.sql.Savepoint;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
 import workbench.db.compare.BatchedStatement;
 import workbench.interfaces.BatchCommitter;
 import workbench.interfaces.ImportFileParser;
@@ -1294,13 +1297,22 @@ public class DataImporter
 			}
 		}
 
-		if (this.columnConstants != null && pstmt == this.insertStatement)
+		if (columnConstants != null && pstmt == this.insertStatement)
 		{
 			int count = this.columnConstants.getColumnCount();
 			int colIndex = row.length + 1;
 			for (int i=0; i < count; i++)
 			{
-				if (!this.columnConstants.isFunctionCall(i))
+				if (columnConstants.isSelectStatement(i))
+				{
+					ValueStatement stmt = columnConstants.getStatement(i);
+
+					Map<Integer, Object> values = source.getInputColumnValues(stmt.getInputColumnIndexes());
+					Object data = stmt.getDatabaseValue(dbConn, values);
+					pstmt.getStatement().setObject(colIndex, data);
+					colIndex ++;
+				}
+				else if (!columnConstants.isFunctionCall(i))
 				{
 					columnConstants.setParameter(pstmt.getStatement(), colIndex, i);
 					colIndex ++;
@@ -1796,7 +1808,7 @@ public class DataImporter
 				if (commitBatch) commitNeeded = false;
 			}
 
-			this.closeStatements();
+			closeStatements();
 
 			if (this.tableStatements != null)
 			{
@@ -1826,7 +1838,7 @@ public class DataImporter
 				messages.append(msgBuffer);
 				msgBuffer.clear();
 			}
-			
+
 			if (this.insertedRows > -1)
 			{
 				this.messages.append(this.insertedRows + " " + ResourceMgr.getString("MsgCopyNumRowsInserted"));
@@ -1969,6 +1981,10 @@ public class DataImporter
 		if (this.updateStatement != null)
 		{
 			try { this.updateStatement.close();	} catch (Throwable th) {}
+		}
+		if (columnConstants != null)
+		{
+			columnConstants.done();
 		}
 	}
 

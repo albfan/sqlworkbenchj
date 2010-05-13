@@ -20,7 +20,6 @@ import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
 import workbench.resource.Settings;
-import workbench.storage.BlobLiteralType;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
@@ -28,7 +27,7 @@ import workbench.util.StringUtil;
 
 /**
  * Convert row data to our own XML format.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class XmlRowDataConverter
@@ -72,7 +71,7 @@ public class XmlRowDataConverter
 	private boolean modifiedColumnsOnly;
 	private boolean useDiffFormat;
 	private boolean writeBlobFiles = true;
-	
+
 	public XmlRowDataConverter()
 	{
 		super();
@@ -96,12 +95,12 @@ public class XmlRowDataConverter
 			this.setUseVerboseFormat(this.verboseFormat);
 		}
 	}
-	
+
 	public void convertModifiedColumnsOnly(boolean flag)
 	{
 		modifiedColumnsOnly = flag;
 	}
-	
+
 	public void setTableNameToUse(String name)
 	{
 		this.tableToUse = name;
@@ -111,18 +110,18 @@ public class XmlRowDataConverter
 	{
 		writeBlobFiles = flag;
 	}
-	
+
 	public void setWriteClobToFile(boolean flag)
 	{
 		this.writeClobFiles = flag;
 	}
-	
+
 	public void setOriginalConnection(WbConnection con)
 	{
 		super.setOriginalConnection(con);
 		// This should be done before running the actual export
 		// in order to avoid concurrent statement execution during export.
-		
+
 		// getDatabaseInfoAsXml() indirectly runs some statements because
 		// it retrieves user and schema information from the database
 		// This method is called during initialization of the DataExporter
@@ -141,7 +140,7 @@ public class XmlRowDataConverter
 			this.xmlVersion = version;
 		}
 	}
-	
+
 	public void setUseVerboseFormat(boolean flag)
 	{
 		this.verboseFormat = flag;
@@ -165,7 +164,7 @@ public class XmlRowDataConverter
 	{
 		StrBuffer xml = new StrBuffer(250);
 		String enc = this.getEncoding();
-		xml.append("<?xml version=\"" + xmlVersion + "\""); 
+		xml.append("<?xml version=\"" + xmlVersion + "\"");
 		if (enc != null) xml.append(" encoding=\"" + enc + "\"");
 		xml.append("?>");
 		xml.append(this.lineEnding);
@@ -220,7 +219,7 @@ public class XmlRowDataConverter
 			}
 			if (verboseFormat) xml.append(this.lineEnding);
 		}
-		
+
 		for (int c=0; c < colCount; c ++)
 		{
 			if (!this.includeColumnInExport(c)) continue;
@@ -230,9 +229,9 @@ public class XmlRowDataConverter
 			int type = this.metaData.getColumnType(c);
 			boolean isNull = (data == null);
 			boolean writeCloseTag = true;
-			
+
 			boolean externalFile = false;
-				
+
 			if (!useDiffFormat && this.verboseFormat) xml.append(indent);
 			xml.append(startColTag);
 			if (this.verboseFormat)
@@ -240,7 +239,7 @@ public class XmlRowDataConverter
 				xml.append(c);
 				xml.append('"');
 			}
-			
+
 			if (addColName || useDiffFormat)
 			{
 				xml.append(" name=\"" + metaData.getColumnName(c) + "\"");
@@ -250,13 +249,13 @@ public class XmlRowDataConverter
 			{
 				xml.append(" pk=\"true\"");
 			}
-			
+
 			if (isNull)
 			{
 				xml.append(" null=\"true\"/");
 				writeCloseTag = false;
 			}
-			else 
+			else
 			{
 				if (SqlUtil.isDateType(type))
 				{
@@ -334,8 +333,8 @@ public class XmlRowDataConverter
 			if (writeCloseTag) xml.append(closeColTag);
 			if (this.verboseFormat && !useDiffFormat) xml.append(this.lineEnding);
 		}
-		
-		if (!useDiffFormat) 
+
+		if (!useDiffFormat)
 		{
 			if (this.verboseFormat) xml.append(indent);
 			xml.append(closeRowTag);
@@ -496,6 +495,12 @@ public class XmlRowDataConverter
 			result.append(indent);
 			appendTag(result, "    ", COLUMN_NAME_TAG, StringUtil.trimQuotes(this.metaData.getColumnName(i)));
 
+			String comment = this.metaData.getColumn(i).getComment();
+			if (StringUtil.isNonBlank(comment))
+			{
+				result.append(indent);
+				appendTag(result, "    ", ReportColumn.TAG_COLUMN_COMMENT, comment);
+			}
 			result.append(indent);
 			appendTag(result, "    ", JAVA_CLASS_TAG, getReadableClassName(this.metaData.getColumnClassName(i)));
 
@@ -544,7 +549,7 @@ public class XmlRowDataConverter
 	private String getReadableClassName(String cls)
 	{
 		if (cls.charAt(0) != '[') return cls;
-		
+
 		String displayName = cls;
 		if (cls.charAt(0) == '[')
 		{
@@ -554,7 +559,7 @@ public class XmlRowDataConverter
 			else if (cls.charAt(1) == 'J') displayName = "long[]";
 			else if (cls.charAt(1) == 'L')
 			{
-				// a "class" starting with [L is a "real" Object not 
+				// a "class" starting with [L is a "real" Object not
 				// a native data type, so we'll extract the real class
 				// name, and make that array of that class
 				displayName = cls.substring(2, cls.length() - 1) + "[]";
@@ -562,7 +567,7 @@ public class XmlRowDataConverter
 		}
 		return displayName;
 	}
-	
+
 	private void appendOpenTag(StrBuffer target, String indent, String tag)
 	{
 		target.append(indent);
@@ -581,7 +586,15 @@ public class XmlRowDataConverter
 	private void appendTag(StrBuffer target, String indent, String tag, String value)
 	{
 		appendOpenTag(target, indent, tag);
+		if (TagWriter.needsCData(value))
+		{
+			target.append(TagWriter.CDATA_START);
+		}
 		target.append(value);
+		if (TagWriter.needsCData(value))
+		{
+			target.append(TagWriter.CDATA_END);
+		}
 		appendCloseTag(target, tag);
 		target.append(this.lineEnding);
 	}

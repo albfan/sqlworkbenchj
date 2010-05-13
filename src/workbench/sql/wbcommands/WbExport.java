@@ -75,6 +75,7 @@ public class WbExport
 	public static final String ARG_USE_SCHEMA = "useSchema";
 	public static final String ARG_EXCLUDE_TABLES = "excludeTables";
 	public static final String ARG_FORMATFILE = "formatFile";
+	public static final String ARG_COL_COMMENTS = "includeColumnComments";
 
 	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
 
@@ -138,6 +139,7 @@ public class WbExport
 		cmdLine.addArgument("autoFilter", ArgumentType.BoolArgument);
 		cmdLine.addArgument("fixedHeader", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_COL_COMMENTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
@@ -336,6 +338,7 @@ public class WbExport
 		exporter.setAppendInfoSheet(cmdLine.getBoolean("infoSheet", Settings.getInstance().getDefaultExportInfoSheet(type)));
 		exporter.setPageTitle(cmdLine.getValue("title"));
 		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
+		exporter.setIncludeColumnComments(cmdLine.getBoolean(ARG_COL_COMMENTS, false));
 
 		ExportDataModifier modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
 		exporter.setDataModifier(modifier);

@@ -47,5 +47,12 @@ public enum ArgumentType
 	 * defined connection profiles
 	 */
 	ProfileArgument,
+
+	/**
+	 * A parameter that may appear more than once. If it is specified several times,
+	 * the value for this parameter will be returned as a list
+	 */
+	Repeatable,
+	
 	Deprecated;
 }

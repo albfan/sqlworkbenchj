@@ -42,8 +42,15 @@ public class ColumnData
 		id = colid;
 	}
 
-	public Object getValue() { return data; }
-	public ColumnIdentifier getIdentifier() { return id; }
+	public Object getValue()
+	{
+		return data;
+	}
+
+	public ColumnIdentifier getIdentifier()
+	{
+		return id;
+	}
 
 	public boolean isNull()
 	{

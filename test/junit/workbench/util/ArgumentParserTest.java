@@ -12,6 +12,7 @@
 package workbench.util;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import junit.framework.*;
 
@@ -36,6 +37,23 @@ public class ArgumentParserTest
 		assertTrue(c.contains("text"));
 		assertTrue(c.contains("TEXT"));
 		assertTrue(c.contains("Text"));
+	}
+
+	public void testRepeatableArgs()
+	{
+		ArgumentParser parser = new ArgumentParser();
+		parser.addArgument("constant", ArgumentType.Repeatable);
+		String cmdLine = "-constant=1 -constant=2";
+		parser.parse(cmdLine);
+		List<String> constants = parser.getList("constant");
+		assertNotNull(constants);
+		assertEquals(2, constants.size());
+
+		cmdLine = "-constant=1,2";
+		parser.parse(cmdLine);
+		constants = parser.getList("constant");
+		assertNotNull(constants);
+		assertEquals(2, constants.size());
 	}
 
 	public void testMapValue()

@@ -187,6 +187,7 @@ public class WbImportTest
 	}
 
 	public void testFunctionConstant()
+		throws Exception
 	{
 		try
 		{
@@ -251,6 +252,74 @@ public class WbImportTest
 		}
 	}
 
+
+	public void testConstantWithSelect()
+		throws Exception
+	{
+		File importFile  = new File(this.basedir, "constant_func_import.txt");
+		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
+		out.println("id\tfirstname\tlastname\ttyp_nam");
+		out.println("1\tArthur\tDent\tone");
+		out.println("2\tFord\tPrefect\ttwo");
+		out.println("3\tZaphod\tBeeblebrox\tthree");
+		out.close();
+
+		String script = "CREATE TABLE person2 (id integer, firstname varchar(20), lastname varchar(20), type_id integer);\n"
+			+ "commit;";
+		TestUtil.executeScript(connection, script);
+
+		script = "CREATE TABLE type_lookup (id integer, type_name varchar(10));\n"
+			+ "insert into type_lookup values (1, 'one');\n"
+			+ "insert into type_lookup values (2, 'two');\n"
+			+ "insert into type_lookup values (3, 'three');\n"
+			+ "commit;";
+		TestUtil.executeScript(connection, script);
+
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "'  -importColumns=id,firstname,lastname -constantValues=\"type_id=$@{select id from type_lookup where type_name = $4}\" -type=text -header=true -continueonerror=false -table=person2");
+		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+		Statement stmt = connection.createStatement();
+		ResultSet rs = stmt.executeQuery("select count(*) from person2");
+		int count = -1;
+		if (rs.next())
+		{
+			count = rs.getInt(1);
+		}
+		assertEquals("Not enough values imported", 3, count);
+
+		rs.close();
+
+		rs = stmt.executeQuery("select id, lastname, firstname, type_id from person2 order by id");
+		if (rs.next())
+		{
+			int id = rs.getInt(1);
+			String lname = rs.getString(2);
+			String fname = rs.getString(3);
+			int typeId = rs.getInt(4);
+			if (id == 1)
+			{
+				assertEquals("Wrong lastname", "Dent", lname);
+				assertEquals("Wrong firstname", "Arthur", fname);
+				assertEquals("Wrong type_id", 1, typeId);
+			}
+			else if (id == 2)
+			{
+				assertEquals("Wrong lastname", "Prefect", lname);
+				assertEquals("Wrong firstname", "Ford", fname);
+				assertEquals("Wrong type_id", 2, typeId);
+			}
+		}
+		else
+		{
+			fail("Nothing imported!");
+		}
+		SqlUtil.closeAll(rs, stmt);
+
+		if (!importFile.delete())
+		{
+			fail("Could not delete input file: " + importFile.getCanonicalPath());
+		}
+	}
 
 	public void testConstantValues()
 	{

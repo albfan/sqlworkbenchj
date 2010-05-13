@@ -242,7 +242,6 @@ public class DwStatusBar
 	{
 		execTime.setText("");
 		execTime.repaint();
-		Thread.dumpStack();
 	}
 
 	public void setEditorLocation(int line, int column)

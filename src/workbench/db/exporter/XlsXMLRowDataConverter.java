@@ -62,6 +62,19 @@ public class XlsXMLRowDataConverter
 			out.append("<Column ss:AutoFitWidth=\"1\"/>\n");
 		}
 
+		if (includeColumnComments)
+		{
+			out.append("<Row>\n");
+			for (int i = 0; i < colCount; i++)
+			{
+				if (!this.includeColumnInExport(i)) continue;
+				out.append("  <Cell ss:StyleID=\"wbHeader\"><Data ss:Type=\"String\">");
+				out.append(metaData.getColumn(i).getComment());
+				out.append("</Data></Cell>\n");
+			}
+			out.append("</Row>");
+		}
+
 		if (writeHeader)
 		{
 			out.append("<Row>\n");

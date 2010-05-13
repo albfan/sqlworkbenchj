@@ -1397,8 +1397,8 @@ public class SqlPanel
 			{
 				this.setConnection(null);
 			}
-			this.clearResultTabs();
-			this.makeReadOnly();
+			clearResultTabs();
+			makeReadOnly();
 			setLogText("");
 		}
 	}
@@ -2199,7 +2199,7 @@ public class SqlPanel
 	 */
 	public void stateChanged(ChangeEvent evt)
 	{
-		if (ignoreStateChange) return;
+		if (ignoreStateChange || isBusy()) return;
 
 		updateResultInfos();
 		if (currentData != null)
@@ -2393,7 +2393,7 @@ public class SqlPanel
 	}
 
 	/**
-	 * Close all result tabs.
+	 * Close all result tabs without asking
 	 */
 	public void clearResultTabs()
 	{
@@ -2737,13 +2737,14 @@ public class SqlPanel
 			String currentSql = null;
 
 			int resultSets = 0;
-			ignoreStateChange = true;
+
 			macroExecution = false;
 
 			long totalRows = 0;
 			lastScriptExecTime = 0;
 			stmtRunner.setMaxRows(maxRows);
 
+			ignoreStateChange = true;
 			for (int i=startIndex; i < endIndex; i++)
 			{
 				currentSql = scriptParser.getCommand(i);
@@ -2885,7 +2886,7 @@ public class SqlPanel
 
 			} // end for loop over all statements
 
-			lastScriptExecTime = (System.currentTimeMillis() - startTime);
+			lastScriptExecTime = stmtTotal;//(System.currentTimeMillis() - startTime);
 
 			// this will also automatically stop the execution timer in the status bar
 			statusBar.setExecutionTime(stmtTotal);
@@ -3344,8 +3345,10 @@ public class SqlPanel
 		}
 	}
 
-	public boolean isBusy() { return this.threadBusy; }
-
+	public boolean isBusy()
+	{
+		return threadBusy;
+	}
 
 	public void fontChanged(String aFontId, Font newFont)
 	{
@@ -3408,14 +3411,14 @@ public class SqlPanel
 
 	public void reset()
 	{
-		this.editor.reset();
-		this.setLocked(false);
-		this.clearLog();
-		this.clearResultTabs();
+		editor.reset();
+		setLocked(false);
+		clearLog();
+		clearResultTabs();
 		if (this.currentData != null) this.currentData.clearContent();
-		this.currentData = null;
+		currentData = null;
 		iconHandler.flush();
-		if (this.sqlHistory != null) this.sqlHistory.clear();
+		if (sqlHistory != null) sqlHistory.clear();
 	}
 
 	public void dispose()

@@ -43,7 +43,8 @@ public class XlsRowDataConverter
 	private Sheet sheet = null;
 	private ExcelDataFormat excelFormat = null;
 	private boolean useXLSX;
-
+	private int firstRow = 0;
+	
 	public XlsRowDataConverter()
 	{
 		super();
@@ -83,10 +84,27 @@ public class XlsRowDataConverter
 		excelFormat.setupWithWorkbook(wb);
 		sheet = wb.createSheet(getPageTitle("SQLExport"));
 
+		if (includeColumnComments)
+		{
+			Row commentRow = sheet.createRow(0);
+			firstRow = 1;
+			int column = 0;
+			for (int c = 0; c < this.metaData.getColumnCount(); c++)
+			{
+				if (includeColumnInExport(c))
+				{
+					Cell cell = commentRow.createCell(column);
+					setCellValueAndStyle(cell, StringUtil.trimQuotes(this.metaData.getColumn(c).getComment()), true);
+					column ++;
+				}
+			}
+		}
+		
 		if (writeHeader)
 		{
 			// table header with column names
-			Row headRow = sheet.createRow(0);
+			Row headRow = sheet.createRow(firstRow);
+			firstRow ++;
 			int column = 0;
 			for (int c = 0; c < this.metaData.getColumnCount(); c++)
 			{
@@ -125,7 +143,7 @@ public class XlsRowDataConverter
 
 		if (getEnableFixedHeader() && writeHeader)
 		{
-			sheet.createFreezePane(0, 1);
+			sheet.createFreezePane(0, firstRow);
 		}
 		
 		FileOutputStream fileOut = null;
@@ -165,8 +183,7 @@ public class XlsRowDataConverter
 	{
 		StrBuffer ret = new StrBuffer();
 		int count = this.metaData.getColumnCount();
-		int rowNum = (int)rowIndex;
-		if (writeHeader) rowNum ++;
+		int rowNum = (int)rowIndex + firstRow;
 		Row myRow = sheet.createRow(rowNum);
 		int column = 0;
 		for (int c = 0; c < count; c++)

@@ -14,7 +14,9 @@ package workbench.db.importer;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -33,9 +35,8 @@ import workbench.util.ValueConverter;
  */
 public class ConstantColumnValues
 {
-	// I'm using two arraylists to ensure that the
-	// order of the columns is always maintained.
 	private List<ColumnData> columnValues;
+	private Map<Integer, ValueStatement> selectStatements;
 
 	/**
 	 * Parses a parameter value for column value definitions.
@@ -44,76 +45,72 @@ public class ConstantColumnValues
 	 * datatype in the targettable.
 	 * @throws SQLException if the target table was not found
 	 * @throws ConverterException if a value could not be converted to the target data type
+	 *
 	 */
-	public ConstantColumnValues(String parameterValue, WbConnection con, String tablename, ValueConverter converter)
+	public ConstantColumnValues(List<String> entries, WbConnection con, String tablename, ValueConverter converter)
 		throws SQLException, ConverterException
 	{
 		List<ColumnIdentifier> tableColumns = con.getMetadata().getTableColumns(new TableIdentifier(tablename));
 		if (tableColumns.isEmpty()) throw new SQLException("Table '" + tablename + "' not found!");
-		init(parameterValue, tableColumns, converter);
+		init(entries, tableColumns, converter);
 	}
 
 	/**
 	 * For Unit-Testing without a Database Connection
 	 */
-	ConstantColumnValues(String parameterValue, List<ColumnIdentifier> targetColumns)
+	ConstantColumnValues(List<String> entries, List<ColumnIdentifier> targetColumns)
 		throws SQLException, ConverterException
 	{
-		init(parameterValue, targetColumns, new ValueConverter());
+		init(entries, targetColumns, new ValueConverter());
 	}
 
-
-	protected void init(String parameterValue, List<ColumnIdentifier> tableColumns, ValueConverter converter)
+	protected void init(List<String> entries, List<ColumnIdentifier> tableColumns, ValueConverter converter)
 		throws SQLException, ConverterException
 	{
-		if (parameterValue == null) return;
 
-		List<String> entries = StringUtil.stringToList(parameterValue, ",", true, true, false);
-		if (entries.isEmpty()) return;
-
-		this.columnValues = new ArrayList<ColumnData>(entries.size());
+		columnValues = new ArrayList<ColumnData>(entries.size());
+		selectStatements = new HashMap<Integer, ValueStatement>();
 
 		for (String entry : entries)
 		{
-			String[] parts = entry.split("=");
+			int pos = entry.indexOf('=');
+			if (pos < 0) continue;
+			String colname = entry.substring(0, pos);
+			String value = entry.substring(pos + 1);
 
-			if (parts.length == 2 && parts[0] != null && parts[1] != null)
+			ColumnIdentifier col = findColumn(tableColumns, colname);
+
+			if (col != null)
 			{
-				String colname = parts[0];
-				ColumnIdentifier col = findColumn(tableColumns, colname);
-
-				if (col != null)
+				Object data = null;
+				if (StringUtil.isEmptyString(value))
 				{
-					String value = parts[1];
-					Object data = null;
-					if (StringUtil.isEmptyString(value))
-					{
-						LogMgr.logWarning("ConstanColumnValues.init()", "Empty value for column '" + col + "' assumed as NULL");
-					}
-					else
-					{
-						if (value.startsWith("${"))
-						{
-							// DBMS Function call
-							data = value.trim();
-						}
-						else
-						{
-							if (SqlUtil.isCharacterType(col.getDataType()) &&
-									value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
-							{
-								value = value.substring(1, value.length() - 1);
-							}
-							data = converter.convertValue(value, col.getDataType());
-						}
-					}
-					this.columnValues.add(new ColumnData(data, col));
+					LogMgr.logWarning("ConstanColumnValues.init()", "Empty value for column '" + col + "' assumed as NULL");
 				}
 				else
 				{
-					throw new SQLException("Column '" + colname + "' not found in target table!");
+					if (value.startsWith("${") || value.startsWith("$@{"))
+					{
+						// DBMS Function call
+						data = value.trim();
+					}
+					else
+					{
+						if (SqlUtil.isCharacterType(col.getDataType()) &&
+								value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
+						{
+							value = value.substring(1, value.length() - 1);
+						}
+						data = converter.convertValue(value, col.getDataType());
+					}
 				}
+				this.columnValues.add(new ColumnData(data, col));
 			}
+			else
+			{
+				throw new SQLException("Column '" + colname + "' not found in target table!");
+			}
+			
 		}
 	}
 
@@ -128,14 +125,14 @@ public class ConstantColumnValues
 
 	public String getFunctionLiteral(int index)
 	{
-		if (!this.isFunctionCall(index)) return null;
+		if (!isFunctionCall(index)) return null;
 		String value = (String)this.getValue(index);
 
 		// The function call is enclosed in ${...}
 		return value.substring(2, value.length() - 1);
 	}
 
-	public List<String> getInputFileColumnsForFunction(int index)
+	public List<String> getInputColumnsForFunction(int index)
 	{
 		String func = getFunctionLiteral(index);
 		if (func == null) return null;
@@ -143,6 +140,7 @@ public class ConstantColumnValues
 		List<String> result = CollectionUtil.arrayList();
 		for (String f : args)
 		{
+			f = StringUtil.trimQuotes(f);
 			if (f.startsWith("$"))
 			{
 				result.add(f.substring(1));
@@ -150,10 +148,37 @@ public class ConstantColumnValues
 		}
 		return result;
 	}
+
+	public ValueStatement getStatement(int index)
+	{
+		ValueStatement stmt = selectStatements.get(index);
+		if (stmt == null)
+		{
+			if (!isSelectStatement(index)) return null;
+			String value = (String)getValue(index);
+			String sql = value.substring(3, value.length() - 1);
+			stmt = new ValueStatement(sql);
+			selectStatements.put(index, stmt);
+		}
+		return stmt;
+	}
 	
+	public boolean isSelectStatement(int index)
+	{
+		Object value = getValue(index);
+		if (value == null) return false;
+
+		if (value instanceof String)
+		{
+			String f = (String)value;
+			return f.startsWith("$@{") && f.endsWith("}");
+		}
+		return false;
+	}
+
 	public boolean isFunctionCall(int index)
 	{
-		Object value = this.getValue(index);
+		Object value = getValue(index);
 		if (value == null) return false;
 
 		if (value instanceof String)
@@ -166,27 +191,27 @@ public class ConstantColumnValues
 
 	public int getColumnCount()
 	{
-		if (this.columnValues == null) return 0;
-		return this.columnValues.size();
+		if (columnValues == null) return 0;
+		return columnValues.size();
 	}
 
 	public ColumnIdentifier getColumn(int index)
 	{
-		return this.columnValues.get(index).getIdentifier();
+		return columnValues.get(index).getIdentifier();
 	}
 
 	public Object getValue(int index)
 	{
-		return this.columnValues.get(index).getValue();
+		return columnValues.get(index).getValue();
 	}
 
 	public boolean removeColumn(ColumnIdentifier col)
 	{
-		if (this.columnValues == null) return false;
+		if (columnValues == null) return false;
 		if (col == null) return false;
 
 		int index = -1;
-		for (int i=0; i < this.columnValues.size(); i++)
+		for (int i=0; i < columnValues.size(); i++)
 		{
 			if (columnValues.get(i).getIdentifier().equals(col))
 			{
@@ -214,6 +239,14 @@ public class ConstantColumnValues
 		if (!isFunctionCall(columnIndex))
 		{
 			pstmt.setObject(statementIndex, value);
+		}
+	}
+
+	public void done()
+	{
+		for (ValueStatement stmt : selectStatements.values())
+		{
+			if (stmt != null) stmt.done();
 		}
 	}
 }

@@ -83,6 +83,7 @@ public abstract class ExportWriter
 		converter.setEnableAutoFilter(exporter.getEnableAutoFilter());
 		converter.setEnableFixedHeader(exporter.getEnableFixedHeader());
 		converter.setDataModifier(exporter.getDataModifier());
+		converter.setIncludeColumnComments(exporter.getIncludeColumnComments());
     trimCharData = getTrimCharData();
 	}
 
@@ -128,7 +129,7 @@ public abstract class ExportWriter
 		this.converter.setGeneratingSql(ds.getGeneratingSql());
 		this.converter.setResultInfo(info);
 		converter.setColumnsToExport(columnsToExport);
-		
+
 		if (this.converter.needsUpdateTable())
 		{
 			ds.checkUpdateTable();

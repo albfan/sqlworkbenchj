@@ -18,10 +18,12 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import org.xml.sax.Attributes;
@@ -108,7 +110,7 @@ public class XmlDataFileParser
 	private ImportValueModifier valueModifier;
 	private BlobDecoder blobDecoder = new BlobDecoder();
 	private List<File> filesProcessed = new ArrayList<File>();
-	
+
   public XmlDataFileParser()
   {
 		super();
@@ -181,7 +183,17 @@ public class XmlDataFileParser
 		return null;
 	}
 
-	public boolean hasErrors() { return this.hasErrors; }
+	@Override
+	public Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes)
+	{
+		return null;
+	}
+
+	public boolean hasErrors()
+	{
+		return this.hasErrors;
+	}
+
 	public boolean hasWarnings()
 	{
 		if (this.hasWarnings) return true;

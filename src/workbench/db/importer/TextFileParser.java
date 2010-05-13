@@ -17,6 +17,9 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -99,11 +102,12 @@ public class TextFileParser
 	private BlobDecoder blobDecoder = new BlobDecoder();
 
 	private String currentLine;
+	private List<String> currentLineValues;
 	private QuoteEscapeType quoteEscape;
 	private ImportValueModifier valueModifier;
 
 	private List<File> filesProcessed = new ArrayList<File>(25);
-	
+
 	public TextFileParser()
 	{
 		// raise an error during import if the date or timestamps cannot be parsed
@@ -268,35 +272,6 @@ public class TextFileParser
 		this.converter = convert;
 	}
 
-	public void retainColumns(List<ColumnIdentifier> columnList)
-		throws IllegalArgumentException
-	{
-		if (this.importColumns == null || importColumns.size() == 0)
-		{
-			throw new IllegalStateException("Must set file columns first");
-		}
-		for (ImportFileColumn impCol : importColumns)
-		{
-			if (impCol == null) continue;
-			boolean keep = columnList.contains(impCol.getColumn());
-			if (!keep)
-			{
-				impCol.setTargetIndex(-1);
-			}
-		}
-
-		// renumber the target index
-		int index = 0;
-		for (ImportFileColumn impCol : importColumns)
-		{
-			if (impCol.getTargetIndex() != -1)
-			{
-				impCol.setTargetIndex(index);
-				index++;
-			}
-		}
-	}
-
 	/**
 	 * Return the index of the specified column
 	 * in the import file.
@@ -310,6 +285,13 @@ public class TextFileParser
 		return this.importColumns.indexOf(colName);
 	}
 
+	@Override
+	public void setColumns(List<ColumnIdentifier> columnList)
+		throws SQLException
+	{
+		setColumns(columnList, null);
+	}
+
 	/**
 	 * Define the columns in the input file.
 	 * If a column name equals RowDataProducer.SKIP_INDICATOR
@@ -318,7 +300,7 @@ public class TextFileParser
 	 * @throws SQLException if the columns could not be verified
 	 *         in the DB or the target table does not exist
 	 */
-	public void setColumns(List<ColumnIdentifier> columnList)
+	public void setColumns(List<ColumnIdentifier> columnList, List<ColumnIdentifier> toImport)
 		throws SQLException
 	{
 		// When using the TextFileParser to import into a DataStore
@@ -333,12 +315,22 @@ public class TextFileParser
 		importColumns = ImportFileColumn.createList();
 
 		int colCount = 0;
+		if (toImport == null)
+		{
+			toImport = Collections.emptyList();
+		}
 
 		try
 		{
 			for (ColumnIdentifier sourceCol : columnList)
 			{
-				if (sourceCol.getColumnName().equalsIgnoreCase(RowDataProducer.SKIP_INDICATOR))
+				boolean ignoreColumn = sourceCol.getColumnName().equalsIgnoreCase(RowDataProducer.SKIP_INDICATOR);
+				if (!ignoreColumn && !toImport.isEmpty())
+				{
+					ignoreColumn = !toImport.contains(sourceCol);
+				}
+
+				if (ignoreColumn)
 				{
 					importColumns.add(ImportFileColumn.SKIP_COLUMN);
 					continue;
@@ -665,7 +657,7 @@ public class TextFileParser
 		// then we assume all columns from the table are present in the input file
 		if (!this.withHeader && importColumns == null)
 		{
-			this.setColumns(getTargetTable().getColumns());
+			this.setColumns(getTargetTable().getColumns(), null);
 		}
 
 		BufferedReader in = this.fileHandler.getMainFileReader();
@@ -774,7 +766,7 @@ public class TextFileParser
 
 			while (currentLine != null)
 			{
-				if (this.cancelImport) break;
+				if (cancelImport) break;
 
 				// silently ignore empty lines...
 				if (StringUtil.isEmptyString(currentLine))
@@ -821,7 +813,7 @@ public class TextFileParser
 
 				if (hasLineFilter && processRow)
 				{
-					Matcher m = this.lineFilter.matcher(currentLine);
+					Matcher m = lineFilter.matcher(currentLine);
 					processRow = m.find();
 				}
 
@@ -841,7 +833,7 @@ public class TextFileParser
 					continue;
 				}
 
-				List<String> lineValues = getLineValues(tok, currentLine);
+				currentLineValues = getLineValues(tok, currentLine);
 
 				includeLine = true;
 				int targetIndex = -1;
@@ -854,16 +846,16 @@ public class TextFileParser
 					targetIndex = fileCol.getTargetIndex();
 					if (targetIndex == -1) continue;
 
-					if (sourceIndex >= lineValues.size())
+					if (sourceIndex >= currentLineValues.size())
 					{
-						// Log this warning only onec
+						// Log this warning only once
 						if (importRow == 0)
 						{
 							LogMgr.logWarning("TextFileParser.processOneFile()", "Ignoring column with index=" + (sourceIndex + 1) + " because the import file has fewer columns");
 						}
 						continue;
 					}
-					String value = lineValues.get(sourceIndex);
+					String value = currentLineValues.get(sourceIndex);
 
 					try
 					{
@@ -885,7 +877,7 @@ public class TextFileParser
 							}
 						}
 
-						if (this.valueModifier != null)
+						if (valueModifier != null)
 						{
 							value = valueModifier.modifyValue(col, value);
 						}
@@ -959,12 +951,12 @@ public class TextFileParser
 
 				try
 				{
-					if (includeLine) this.receiver.processRow(rowData);
+					if (includeLine) receiver.processRow(rowData);
 				}
 				catch (Exception e)
 				{
-					this.hasErrors = true;
-					this.cancelImport = true;
+					hasErrors = true;
+					cancelImport = true;
 					// processRow() will only throw an exception if abortOnError is true
 					// so we can always re-throw the exception here.
 					LogMgr.logError("TextFileParser.processOneFile()", "Error sending line " + importRow, e);
@@ -991,13 +983,36 @@ public class TextFileParser
 			// in batch mode. So the fileHandler is closed after sending the finishImport()
 			// to the DataImporter
 		}
-		
+
 	}
 
 
+	/**
+	 * Return the column value from the input file for each column
+	 * passed in to the function.
+	 * @param inputFileIndexes the index of each column in the input file
+	 * @return for each column index the value in the inputfile
+	 */
+	@Override
+	public Map<Integer, Object> getInputColumnValues(Collection<Integer> inputFileIndexes)
+	{
+		if (currentLineValues == null) return null;
+		if (inputFileIndexes == null) return null;
+
+		Map<Integer, Object> result = new HashMap<Integer, Object>(inputFileIndexes.size());
+		for (Integer index : inputFileIndexes)
+		{
+			if (index > 0 && index <= currentLineValues.size())
+			{
+				result.put(index, currentLineValues.get(index - 1));
+			}
+		}
+		return result;
+	}
+
 	protected List<String> getLineValues(LineParser parser, String line)
 	{
-		List<String> result = new ArrayList<String>(this.getColumnCount());
+		List<String> result = new ArrayList<String>(getColumnCount());
 		parser.setLine(line);
 		while (parser.hasNext())
 		{
@@ -1021,7 +1036,7 @@ public class TextFileParser
 			String column = tok.nextToken();
 			cols.add(new ColumnIdentifier(column));
 		}
-		this.setColumns(cols);
+		this.setColumns(cols, null);
 	}
 
 	/**
@@ -1094,21 +1109,21 @@ public class TextFileParser
 		}
 	}
 
-	public void setupFileColumns()
+	public void setupFileColumns(List<ColumnIdentifier> importColumns)
 		throws SQLException, IOException
 	{
 		List<ColumnIdentifier> cols = null;
 
 		if (this.withHeader)
 		{
-			cols = this.getColumnsFromFile();
+			cols = getColumnsFromFile();
 		}
 		else
 		{
 			TableDefinition def = getTargetTable();
 			cols = def.getColumns();
 		}
-		this.setColumns(cols);
+		setColumns(cols, importColumns);
 	}
 
 	private TableIdentifier createTargetTableId()
