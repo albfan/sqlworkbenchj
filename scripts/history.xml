@@ -2,6 +2,10 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-05-09">
+    <entry dev-build="6" type="enh">A new commandline option (-lbDefaults) is available to read connection information from an existing Liquibase defaults file</entry>
+    <entry dev-build="6" type="enh">Commandline options (e.g. for batch mode) can now also be stored in a properties file. A new option -arguments defines the file to be used</entry>
+    <entry dev-build="6" type="enh">For WbImport, select statements (referencing columns from the input file) can be defined in the -columnConstants argument. See the manual for details</entry>
+    <entry dev-build="6" type="enh">A new option (includeColumnComments) for WbExport is available to include column comments in the output (all formats except text files)</entry>
     <entry dev-build="5" type="enh">A new command WbRunLB to extract and run the SQL statements from a Liquibase changeSet (&lt;sql&gt; or &lt;createProcedure&gt; tags) is available</entry>
     <entry dev-build="5" type="enh">Window sizes and position are now stored separately per screen resolution</entry>
     <entry dev-build="5" type="enh">When displaying the SQL for a view or table in PostgreSQL, associated RULEs are not included</entry>
@@ -32,7 +36,7 @@
     <entry dev-build="1" type="fix">The "Object Info" function did not display information about TYPEs (e.g. Oracle, Postgres)</entry>
     <entry dev-build="1" type="fix">For Oracle object TYPEs, member variables declared with the data type "NUMBER" where not displayed correctly</entry>
   </release>
-  
+
   <release build="108" date="2010-04-05">
     <entry dev-build="9" type="enh">The argument parser for Workbench specific commands has been changed in order to recognize empty values (e.g. -replaceWith=' ') Existing scripts should work, but it could be that some combinations of parameter values are not covered by my tests. So please verify that your scripts still work with the new version.</entry>
     <entry dev-build="9" type="enh">A new option for WbExport (-replaceValues) is available to replace text (using regular expressions) in all character columns during export.</entry>
@@ -59,7 +63,7 @@
     <entry dev-build="1" type="enh">For query results, the column comments can now also be retrieved. The column comments (if available) are then displayed in the tooltip of the result's column header. The retrieval can be enabled in Tools -&gt; Options -&gt; Data display -&gt; Retrieve column remarks for queries</entry>
     <entry dev-build="1" type="enh">WbExport can now also write a "control" file for DB2's IMPORT command (-formatFile=db2)</entry>
     <entry dev-build="1" type="enh">A message box can now be displayed when all running scripts have been finished. If the application is minimized, displaying the message box will also restore the application's main window.</entry>
-    
+
     <entry dev-build="9" type="fix">Setting the loglevel for the built-in logger was no longer working</entry>
     <entry dev-build="9" type="fix">Displaying the definition for cross-schema synonyms was no longer working.</entry>
     <entry dev-build="9" type="fix">WbSchemaDiff did not run in batch mode when procedures where included. Thanks to Denis for finding this.</entry>
