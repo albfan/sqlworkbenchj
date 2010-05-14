@@ -58,7 +58,8 @@ public class IngresMetadata
 	/**
 	 * 	Get a list of synonyms for the given owner
 	 */
-	public List<String> getSynonymList(WbConnection conn, String owner)
+	@Override
+	public List<String> getSynonymList(WbConnection conn, String owner, String namePattern)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;

@@ -30,15 +30,16 @@ import workbench.util.SqlUtil;
 public class OracleSynonymReader
 	implements SynonymReader
 {
-	/**
-	 * The Oracle driver already returns the SYNONYMS in the getTables() call
-	 */
-	public List<String> getSynonymList(WbConnection con, String owner)
+
+	@Override
+	public List<String> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
+		// Nothing to do Oracle driver already returns the SYNONYMS in the getTables() call
 		return Collections.emptyList();
 	}
 
+	@Override
 	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{

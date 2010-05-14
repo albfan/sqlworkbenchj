@@ -258,24 +258,28 @@ public class WbImportTest
 	{
 		File importFile  = new File(this.basedir, "constant_func_import.txt");
 		PrintWriter out = new PrintWriter(new OutputStreamWriter(new FileOutputStream(importFile), "UTF-8"));
-		out.println("id\tfirstname\tlastname\ttyp_nam");
-		out.println("1\tArthur\tDent\tone");
-		out.println("2\tFord\tPrefect\ttwo");
-		out.println("3\tZaphod\tBeeblebrox\tthree");
+		out.println("id\tfirstname\ttyp_cod\tlastname\ttyp_nam");
+		out.println("1\tArthur\teno\tDent\tone");
+		out.println("2\tFord\towt\tPrefect\ttwo");
+		out.println("3\tZaphod\teerth\tBeeblebrox\tthree");
 		out.close();
 
 		String script = "CREATE TABLE person2 (id integer, firstname varchar(20), lastname varchar(20), type_id integer);\n"
 			+ "commit;";
 		TestUtil.executeScript(connection, script);
 
-		script = "CREATE TABLE type_lookup (id integer, type_name varchar(10));\n"
-			+ "insert into type_lookup values (1, 'one');\n"
-			+ "insert into type_lookup values (2, 'two');\n"
-			+ "insert into type_lookup values (3, 'three');\n"
+		script = "CREATE TABLE type_lookup (id integer, type_name varchar(10), type_code varchar(10));\n"
+			+ "insert into type_lookup values (1, 'one', 'eno');\n"
+			+ "insert into type_lookup values (2, 'two', 'owt');\n"
+			+ "insert into type_lookup values (3, 'three', 'eerth');\n"
 			+ "commit;";
 		TestUtil.executeScript(connection, script);
 
-		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "'  -importColumns=id,firstname,lastname -constantValues=\"type_id=$@{select id from type_lookup where type_name = $4}\" -type=text -header=true -continueonerror=false -table=person2");
+		StatementRunnerResult result = importCmd.execute("wbimport -encoding=utf8 -file='" + importFile.getAbsolutePath() + "' " +
+			" -importColumns=id,firstname,lastname " +
+			" -constantValues=\"type_id=$@{select id from type_lookup where type_name = $5 and type_code = $3}\" " +
+			" -type=text -header=true -continueonerror=false -table=person2"
+		);
 		assertEquals("Import failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
 		Statement stmt = connection.createStatement();

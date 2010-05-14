@@ -13,7 +13,6 @@ package workbench.log;
 
 import java.io.File;
 import java.sql.SQLException;
-import workbench.gui.components.*;
 import workbench.util.*;
 
 /**
@@ -30,7 +29,7 @@ import workbench.util.*;
  * The Log4J classes are expected to be in a file called <tt>log4j.jar</tt>
  * that resides in the same directory as <tt>sqlworkbench.jar</tt> (for details
  * see the manifest that is created in build.xml)
- * 
+ *
  * @author Thomas Kellerer
  */
 public class LogMgr

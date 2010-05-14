@@ -36,8 +36,9 @@ public class SqlServerSynonymReader
 {
 	private DbMetadata meta;
 
-	private final String baseSql = "select syn.name, syn.base_object_name \n" +
-             "from sys.synonyms syn join sys.schemas sc on syn.schema_id = sc.schema_id  ";
+	private final String baseSql =
+		"SELECT syn.name, syn.base_object_name \n" +
+    " FROM sys.synonyms syn JOIN sys.schemas sc ON syn.schema_id = sc.schema_id  ";
 
 	public SqlServerSynonymReader(DbMetadata dbMeta)
 	{
@@ -49,23 +50,50 @@ public class SqlServerSynonymReader
 		return JdbcUtils.hasMinimumServerVersion(con, "9.0");
 	}
 
-	public List<String> getSynonymList(WbConnection con, String owner)
+	@Override
+	public List<String> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
 		List<String> result = new LinkedList<String>();
 		String sql = baseSql;
 
-		if (Settings.getInstance().getDebugMetadataSql())
-		{
-			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL: " + sql);
-		}
-
 		int schemaIndex = -1;
+		int nameIndex = -1;
+
+		boolean whereAdded = false;
 
 		if (StringUtil.isNonBlank(owner))
 		{
 			sql += " where sc.name = ?";
+			whereAdded = true;
 			schemaIndex = 1;
+		}
+
+		if (StringUtil.isNonBlank(namePattern))
+		{
+			if (whereAdded)
+			{
+				sql += " AND ";
+			}
+			else
+			{
+				sql += " WHERE ";
+			}
+			if (namePattern.indexOf('%') > -1)
+			{
+				sql += " syn.name LIKE ?";
+			}
+			else
+			{
+				sql += " syn.name = ? ";
+			}
+			if (schemaIndex == 1) nameIndex = 2;
+			else nameIndex = 1;
+		}
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo(getClass().getName() + ".getSynonymList()", "Using SQL: " + sql);
 		}
 
 		PreparedStatement stmt = null;
@@ -73,7 +101,9 @@ public class SqlServerSynonymReader
 		try
 		{
 			stmt = con.getSqlConnection().prepareStatement(sql);
-			if (schemaIndex != -1) stmt.setString(1, owner);
+			if (schemaIndex != -1) stmt.setString(schemaIndex, owner);
+			if (nameIndex != -1) stmt.setString(nameIndex, namePattern);
+
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{

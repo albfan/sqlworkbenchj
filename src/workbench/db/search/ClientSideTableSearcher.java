@@ -37,7 +37,7 @@ import workbench.util.WbThread;
  * An implementation fo the TableDataSearch interface that reads each row into memory
  * and compares the data using the functionality of a {@link workbench.storage.filter.ColumnComparator}
  * to retain only those rows that match the criteria.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ClientSideTableSearcher
@@ -143,6 +143,12 @@ public class ClientSideTableSearcher
 			TableSelectBuilder builder = new TableSelectBuilder(connection);
 			builder.setExcludeLobColumns(excludeLobs);
 			String sql = builder.getSelectForTable(table);
+			if (StringUtil.isEmptyString(sql))
+			{
+				LogMgr.logWarning("CleintSideTableSearcher.searchTable()", "No SELECT generated for " + table.getTableExpression() + ". Most probably the table was not fund");
+				return;
+			}
+
 			if (consumer != null)
 			{
 				consumer.setCurrentTable(table.getTableName(), sql);

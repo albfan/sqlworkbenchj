@@ -11,10 +11,12 @@
  */
 package workbench.util;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import junit.framework.*;
+import workbench.TestUtil;
+import workbench.WbTestCase;
 
 
 /**
@@ -22,13 +24,28 @@ import junit.framework.*;
  * @author Thomas Kellerer
  */
 public class ArgumentParserTest
-	extends TestCase
+	extends WbTestCase
 {
 	public ArgumentParserTest(String testname)
 	{
 		super(testname);
 	}
-	
+
+	public void testPropFile()
+		throws Exception
+	{
+		ArgumentParser arg = new ArgumentParser();
+		arg.addArgument("prop1");
+		arg.addArgument("otherprop");
+		TestUtil util = getTestUtil();
+		File f = new File(util.getBaseDir(), "props.txt");
+		TestUtil.writeFile(f, "prop1 = value1\notherprop = 5", "ISO-8859-1");
+		arg.parseProperties(f);
+		assertEquals("value1", arg.getValue("prop1"));
+		assertEquals("5", arg.getValue("otherprop"));
+		f.delete();
+	}
+
 	public void testAllowedValues()
 	{
 		ArgumentParser arg = new ArgumentParser();
@@ -84,8 +101,9 @@ public class ArgumentParserTest
 	}
 	public void testParser()
 	{
-		String cmdline = "-delimiter=',' -altdelimiter='/;nl' -emptyValue=\" \" -otherbool=1 -nosettings -table='\"MIND\"' -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
+		String cmdline = "-delimiter=',' -autoCommit=true -altdelimiter='/;nl' -emptyValue=\" \" -otherbool=1 -nosettings -table='\"MIND\"' -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";
 		ArgumentParser arg = new ArgumentParser();
+		arg.addArgument("autocommit");
 		arg.addArgument("profile");
 		arg.addArgument("script");
 		arg.addArgument("arg2");
@@ -96,7 +114,7 @@ public class ArgumentParserTest
 		arg.addArgument("delimiter");
 		arg.addArgument("emptyValue");
 		arg.addArgument("altdelimiter");
-		
+
 		arg.parse(cmdline);
 		assertEquals("profile not retrieved", "test-prof", arg.getValue("profile"));
 		assertEquals("script not retrieved", "bla.sql", arg.getValue("script"));
@@ -108,15 +126,16 @@ public class ArgumentParserTest
 		assertEquals("Delimiter not retrieved", ",", arg.getValue("delimiter"));
 		assertEquals("Single space not retrieved", " ", arg.getValue("emptyValue"));
 		assertEquals("/;nl", arg.getValue("altdelimiter"));
-		
+		assertTrue(arg.getBoolean("autocommit"));
+
 		arg = new ArgumentParser();
 		arg.addArgument("delimiter");
 		arg.addArgument("altdelimiter");
 		arg.addArgument("type");
-		
+
 		cmdline = "-delimiter='\" \"' -altdelimiter=\"/;nl\" -type=text";
 		arg.parse(cmdline);
-		
+
 		assertEquals("Blank as delimiter not retrieved", " ", StringUtil.trimQuotes(arg.getValue("delimiter")));
 		assertEquals("Wrong altDelimiter", "/;nl", arg.getValue("altDelimiter"));
 		assertEquals("Wrong type", "text", arg.getValue("type"));

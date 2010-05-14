@@ -13,6 +13,7 @@ package workbench;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.PrintWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
@@ -38,6 +39,7 @@ public class WbManagerTest
 	}
 
 	public void testBatchMode()
+		throws Exception
 	{
 		String umlauts = "\u00f6\u00e4\u00fc";
 		TestUtil util = new TestUtil(getName());
@@ -86,11 +88,6 @@ public class WbManagerTest
 			assertTrue(logfile.exists());
 			assertTrue(scriptFile.delete());
 		}
-		catch (Throwable e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().clearProfiles();
@@ -104,11 +101,12 @@ public class WbManagerTest
 	public void testCommandParameter()
 		throws Exception
 	{
+		System.setProperty("workbench.system.doexit", "false");
+
 		TestUtil util = new TestUtil(getName());
 		util.emptyBaseDirectory();
 
 		WbFile logfile = new WbFile(util.getBaseDir(), "command.log");
-		System.setProperty("workbench.system.doexit", "false");
 
 		try
 		{
@@ -142,5 +140,55 @@ public class WbManagerTest
 		}
 	}
 
+	public void testPropfile()
+		throws Exception
+	{
+		TestUtil util = new TestUtil(getName());
+		util.emptyBaseDirectory();
+
+		WbFile logfile = new WbFile(util.getBaseDir(), "props.log");
+		System.setProperty("workbench.system.doexit", "false");
+
+		try
+		{
+			File db = new File(util.getBaseDir(), getName());
+			WbFile export = new WbFile(util.getBaseDir(), "export.txt");
+
+			WbFile propfile = new WbFile(util.getBaseDir(), "wbconnection.txt");
+			PrintWriter writer = new PrintWriter(EncodingUtil.createWriter(propfile, "ISO-8859-1", false));
+
+			WbFile script = new WbFile(util.getBaseDir(), "export.sql");
+			TestUtil.writeFile(script, "WbExport -type=text -file='" + export.getFullPath() + "'\n "+
+												          "         -delimiter=| -decimal=',';\n" +
+																	"select TABLE_CATALOG, TABLE_SCHEMA, TABLE_NAME, TABLE_TYPE from information_schema.tables;\n");
+
+			writer.println("driver=org.h2.Driver");
+			writer.println("configdir=" + util.getBaseDir());
+			writer.println("url=jdbc:h2:" + db.getAbsolutePath());
+			writer.println(AppArguments.ARG_CONN_USER + "=sa");
+			writer.println("logfile=" + logfile.getFullPath());
+			writer.println("feedback=false");
+			writer.println("abortOnError=true");
+			writer.println("script=" + script.getFullPath());
+			writer.close();
+
+			String[] args = { "-" + AppArguments.ARG_PROPFILE + "=" + propfile.getFullPath() };
+
+			WbManager.main(args);
+			assertEquals(0, WbManager.getInstance().exitCode);
+			assertTrue(export.exists());
+
+			BufferedReader reader = EncodingUtil.createBufferedReader(export, "ISO-8859-1");
+			List<String> lines = FileUtil.getLines(reader);
+			assertEquals("Wrong header line", "TABLE_CATALOG|TABLE_SCHEMA|TABLE_NAME|TABLE_TYPE", lines.get(0));
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().clearProfiles();
+			ConnectionMgr.getInstance().disconnectAll();
+			LogMgr.shutdown();
+			assertTrue("Could not delete logfile", logfile.delete());
+		}
+	}
 
 }

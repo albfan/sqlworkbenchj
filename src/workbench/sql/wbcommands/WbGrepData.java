@@ -58,12 +58,12 @@ public class WbGrepData
 	public static final String PARAM_IGNORE_CASE = "ignoreCase";
 
 	public static final String PARAM_COMPARATOR = "compareType";
-	
+
 	private ClientSideTableSearcher searcher;
 	private StatementRunnerResult searchResult;
 	private int foundTables;
 	private List<String> searchedTables;
-	
+
 	public WbGrepData()
 	{
 		super();
@@ -99,7 +99,7 @@ public class WbGrepData
 			searchResult.setFailure();
 			return searchResult;
 		}
-		
+
 		String searchValue = cmdLine.getValue(PARAM_EXPRESSION);
 		if (StringUtil.isBlank(searchValue))
 		{
@@ -108,7 +108,7 @@ public class WbGrepData
 			searchResult.setFailure();
 			return searchResult;
 		}
-		
+
 		String tableNames = cmdLine.getValue(PARAM_TABLES);
 		String excludeTables = cmdLine.getValue(SourceTableArgument.PARAM_EXCLUDE_TABLES);
 		List<TableIdentifier> tables = null;
@@ -131,7 +131,7 @@ public class WbGrepData
 		while (itr.hasNext())
 		{
 			TableIdentifier tbl = itr.next();
-			
+
 			// if no type is present, this means the tables
 			// were directly specified on the commandline.
 			if (tbl.getType() == null) continue;
@@ -141,7 +141,7 @@ public class WbGrepData
 				itr.remove();
 			}
 		}
-		
+
 		searcher = new ClientSideTableSearcher();
 		searcher.setExcludeLobColumns(cmdLine.getBoolean(PARAM_EXCLUDE_LOBS, false));
 		searcher.setConnection(currentConnection);

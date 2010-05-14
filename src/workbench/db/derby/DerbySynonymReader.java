@@ -16,42 +16,45 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.List;
-import workbench.db.DbMetadata;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * Retrieve synonyms and their definition from a Derby database.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class DerbySynonymReader
 	implements SynonymReader
 {
-	private DbMetadata meta;
-	
-	public DerbySynonymReader(DbMetadata dbMeta)
+	public DerbySynonymReader()
 	{
-		this.meta = dbMeta;
 	}
 
 	/**
-	 * The DB2 JDBC driver returns Alias' automatically, so there 
+	 * The DB2 JDBC driver returns Alias' automatically, so there
 	 * is no need to retrieve them here
 	 */
-	public List<String> getSynonymList(WbConnection con, String owner)
+	@Override
+	public List<String> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
 		List<String> result = new LinkedList<String>();
-		String sql = "select a.alias " + 
-             "from sys.sysaliases a, sys.sysschemas s \n" + 
-             "where a.schemaid = s.schemaid \n" + 
-			       " and a.aliastype = 'S' " +
-			       " and s.schemaname = ?";		
+		String sql = "SELECT a.alias \n" +
+             " FROM sys.sysaliases a, sys.sysschemas s \n" +
+             " WHERE a.schemaid = s.schemaid \n" +
+			       "  AND a.aliastype = 'S' \n" +
+			       "  AND s.schemaname = ? \n";
+
+		if (StringUtil.isNonBlank(namePattern))
+		{
+			sql += " AND a.alias LIKE ?";
+		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -64,6 +67,8 @@ public class DerbySynonymReader
 		{
 			stmt = con.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, owner);
+			if (StringUtil.isNonBlank(namePattern)) stmt.setString(2, namePattern);
+
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
@@ -85,11 +90,12 @@ public class DerbySynonymReader
 	public TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 		throws SQLException
 	{
-		String sql = "select a.aliasinfo \n" + 
-             "from sys.sysaliases a, sys.sysschemas s \n" + 
-             "where a.schemaid = s.schemaid \n" + 
+		String sql = "select a.aliasinfo \n" +
+             "from sys.sysaliases a, sys.sysschemas s \n" +
+             "where a.schemaid = s.schemaid \n" +
              " and a.alias = ?" +
-			       " and s.schemaname = ?";		
+			       " and s.schemaname = ?";
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logInfo(getClass().getName() + ".getSynonymTable()", "Using SQL: " + sql);
@@ -119,7 +125,7 @@ public class DerbySynonymReader
 
 		if (result != null)
 		{
-			String type = this.meta.getObjectType(result);
+			String type = con.getMetadata().getObjectType(result);
 			result.setType(type);
 		}
 
@@ -138,7 +144,7 @@ public class DerbySynonymReader
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);
-		
+
 		return result.toString();
 	}
 

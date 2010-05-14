@@ -11,6 +11,10 @@
  */
 package workbench.util;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -98,9 +102,17 @@ public class ArgumentParser
 		this.argTypes.put(key, type);
 	}
 
+	public void parseProperties(File propFile)
+		throws IOException
+	{
+		Reader in = EncodingUtil.createReader(propFile, null);
+		List<String> lines = FileUtil.getLines(new BufferedReader(in));
+		parse(lines);
+	}
+
 	public void parse(String[] args)
 	{
-		this.reset();
+		reset();
 		StringBuilder line = new StringBuilder(200);
 		for (int i=0; i<args.length; i++)
 		{
@@ -112,17 +124,20 @@ public class ArgumentParser
 
 	public void parse(String aCmdLine)
 	{
-		this.reset();
+		reset();
+		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", true);
+		tok.setDelimiterNeedsWhitspace(true);
+		tok.setSourceString(aCmdLine.trim());
+		List<String> entries = tok.getAllTokens();
+		parse(entries);
+	}
 
+	protected void parse(List<String> entries)
+	{
 		try
 		{
-			WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", true);
-			tok.setDelimiterNeedsWhitspace(true);
-			tok.setSourceString(aCmdLine.trim());
-
-			while (tok.hasMoreTokens())
+			for (String word : entries)
 			{
-				String word = tok.nextToken();
 				if (word == null || word.length() == 0) continue;
 				String arg = word.trim();
 				String value = null;
@@ -176,7 +191,7 @@ public class ArgumentParser
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("ArgumentParser.parse()", "Error when parsing input line: " + aCmdLine, e);
+			LogMgr.logError("ArgumentParser.parse()", "Error when parsing entries", e);
 		}
 	}
 
@@ -366,6 +381,17 @@ public class ArgumentParser
 	 */
 	public String getValue(String key)
 	{
+		if (getArgumentType(key) == ArgumentType.Repeatable)
+		{
+			List<String> list = getList(key);
+			if (list == null) return null;
+
+			if (list.size() == 1)
+			{
+				return list.get(0);
+			}
+			throw new IllegalStateException("Cannot return a single string from a List");
+		}
 		Object value = this.arguments.get(key);
 		if (value == ARG_PRESENT) return null;
 		return (String)value;
@@ -373,11 +399,16 @@ public class ArgumentParser
 
 	public List<String> getList(String key)
 	{
+		if (getArgumentType(key) != ArgumentType.Repeatable)
+		{
+			String value = getValue(key);
+			return CollectionUtil.arrayList(value);
+		}
 		Object value = this.arguments.get(key);
 		if (value == ARG_PRESENT) return null;
 		return (List<String>)value;
 	}
-	
+
 	public String getValue(String key, String defaultValue)
 	{
 		String value = getValue(key);
@@ -387,6 +418,10 @@ public class ArgumentParser
 
 	public List<String> getListValue(String key)
 	{
+		if (getArgumentType(key) == ArgumentType.Repeatable)
+		{
+			return getList(key);
+		}
 		String value = this.getValue(key);
 		if (value == null) return Collections.emptyList();
 		List<String> result = StringUtil.stringToList(value, ",", true, true, false);

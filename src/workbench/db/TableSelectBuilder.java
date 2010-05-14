@@ -23,7 +23,7 @@ import workbench.util.SqlUtil;
 public class TableSelectBuilder
 {
 	public static final String COLUMN_PLACEHOLDER = "${column}";
-	
+
 	private WbConnection dbConnection;
 	private boolean excludeLobColumns = false;
 	private boolean useColumnAlias = false;
@@ -42,32 +42,30 @@ public class TableSelectBuilder
 	{
 		this.useColumnAlias = flag;
 	}
-	
+
 	public String getSelectForTable(TableIdentifier table)
 		throws SQLException
 	{
-		List<ColumnIdentifier> cols = dbConnection.getMetadata().getTableColumns(table);
-		return getSelectForColumns(table, cols);
+		TableIdentifier tbl = null;
+
+		if (!table.getNeverAdjustCase() || table.getType() == null || table.getSchema() == null)
+		{
+			// if neverAdjustCase() has been set, the TableIdentifier was system generated
+			// if no type or schema is present, it is most probably a user supplied value
+			// thus we need to resolve synonyms
+			// This is not done by default because resolving the synonym is quite costly especially on Oracle!
+			tbl = dbConnection.getMetadata().getSynonymTable(table);
+		}
+		TableDefinition def = dbConnection.getMetadata().getTableDefinition(tbl == null ? table : tbl);
+		return getSelectForColumns(def.getTable(), def.getColumns());
 	}
 
 	public String getSelectForColumns(TableIdentifier table, List<ColumnIdentifier> columns)
 	{
 		int colCount = columns.size();
-		if (colCount == 0) 
-		{
-			try
-			{
-				columns = dbConnection.getMetadata().getTableColumns(table);
-			}
-			catch (SQLException e)
-			{
-				return "";
-			}
-		}
-		
-		colCount = columns.size();
-		
-		StringBuilder sql = new StringBuilder(colCount * 80);
+		if (colCount == 0) return null;
+
+		StringBuilder sql = new StringBuilder(colCount * 30 + 50);
 
 		sql.append("SELECT ");
 		int colsInList = 0;
@@ -104,14 +102,14 @@ public class TableSelectBuilder
 		String colname = dbConnection.getMetadata().quoteObjectname(col.getColumnName());
 		DbSettings db = dbConnection.getDbSettings();
 		if (db == null) return colname;
-		
+
 		String type = cleanDataType(col.getDbmsType());
 		String expr = db.getDataTypeExpression(type);
 		if (expr == null)
 		{
 			return colname;
 		}
-		
+
 		// If an expression without the placeholder was defined ignore the definition
 		if (expr.indexOf(COLUMN_PLACEHOLDER) == -1)
 		{

@@ -38,7 +38,7 @@ public class Db2SynonymReader
 	 * 
 	 * @return an empty list
 	 */
-	public List<String> getSynonymList(WbConnection con, String owner)
+	public List<String> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
 		return Collections.emptyList();

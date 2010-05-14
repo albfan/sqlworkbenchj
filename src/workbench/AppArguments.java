@@ -11,9 +11,14 @@
  */
 package workbench;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 
 /**
  * A class to define and parse the arguments that are available when 
@@ -51,6 +56,8 @@ public class AppArguments
 	public static final String ARG_CONN_REMOVE_COMMENTS = "removeComments";
 	public static final String ARG_HIDE_WARNINGS = "hideWarnings";
 	public static final String ARG_INTERACTIVE = "interactive";
+	public static final String ARG_PROPFILE = "arguments";
+	public static final String ARG_LB_CONN = "lbDefaults";
 	
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
@@ -84,6 +91,8 @@ public class AppArguments
 	public AppArguments()
 	{
 		super();
+		addArgument(ARG_PROPFILE);
+		addArgument(ARG_LB_CONN);
 		addArgument(ARG_PROFILE, ArgumentType.ProfileArgument);
 		addArgument(ARG_FEEDBACK);
 		addArgument(ARG_PROFILE_GROUP);
@@ -100,7 +109,7 @@ public class AppArguments
 		addArgument(ARG_ERROR_SCRIPT);
 		addArgument(ARG_VARDEF);
 		addArgument(ARG_CONN_URL);
-		addArgument(ARG_CONN_PROPS);
+		addArgument(ARG_CONN_PROPS, ArgumentType.Repeatable);
 		addArgument(ARG_CONN_DRIVER);
 		addArgument(ARG_CONN_DRIVER_CLASS);
 		addArgument(ARG_CONN_JAR);
@@ -133,6 +142,53 @@ public class AppArguments
 		addArgument(ARG_CONSOLIDATE_LOG, ArgumentType.BoolArgument);
 		addArgument(ARG_INTERACTIVE, ArgumentType.BoolArgument);
 		addArgument("help");
+	}
+
+	@Override
+	public void parse(String[] args)
+	{
+		super.parse(args);
+		String propfile = getValue(ARG_PROPFILE);
+		if (propfile != null)
+		{
+			try
+			{
+				File f = new File(propfile);
+				parseProperties(f);
+			}
+			catch (Exception e)
+			{
+				System.err.println("Could not read properties file: " + propfile);
+				e.printStackTrace();
+			}
+		}
+		String lb = getValue(ARG_LB_CONN);
+		if (lb != null)
+		{
+			try
+			{
+				File f = new File(lb);
+				BufferedReader in = EncodingUtil.createBufferedReader(f, null);
+				List<String> lines = FileUtil.getLines(in, true);
+				List<String> translated = new ArrayList<String>(lines.size());
+				for (String line : lines)
+				{
+					if (line.startsWith("#")) continue;
+					line = line.replace("driver:", ARG_CONN_DRIVER + "=");
+					line = line.replace("url:", ARG_CONN_URL + "=");
+					line = line.replace("classpath:", ARG_CONN_JAR + "=");
+					line = line.replace("username:", ARG_CONN_USER + "=");
+					line = line.replace("password:", ARG_CONN_PWD + "=");
+					translated.add(line);
+				}
+				parse(translated);
+			}
+			catch (Exception e)
+			{
+				System.err.println("Could not read liquibase properties!");
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	public String getHelp()

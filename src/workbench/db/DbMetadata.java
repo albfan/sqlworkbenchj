@@ -185,18 +185,7 @@ public class DbMetadata
 
 		String productLower = this.productName.toLowerCase();
 
-		if (productLower.indexOf("oracle") > -1)
-		{
-			this.isOracle = true;
-			oracleMetaData = new OracleMetadata(this.dbConnection);
-			this.synonymReader = new OracleSynonymReader();
-			this.sequenceReader = new OracleSequenceReader(this.dbConnection);
-			this.errorInfoReader = oracleMetaData;
-			this.dataTypeResolver = oracleMetaData;
-			this.definitionReader = oracleMetaData;
-			extenders.add(new OracleTypeReader());
-		}
-		else if (productLower.indexOf("postgres") > - 1)
+		if (productLower.indexOf("postgres") > - 1)
 		{
 			this.isPostgres = true;
 			this.sequenceReader = new PostgresSequenceReader(this.dbConnection);
@@ -213,15 +202,26 @@ public class DbMetadata
 			extenders.add(new PostgresRuleReader());
 			extenders.add(new PostgresTypeReader());
 		}
+		else if (productLower.indexOf("oracle") > -1)
+		{
+			isOracle = true;
+			oracleMetaData = new OracleMetadata(this.dbConnection);
+			synonymReader = new OracleSynonymReader();
+			sequenceReader = new OracleSequenceReader(this.dbConnection);
+			errorInfoReader = oracleMetaData;
+			dataTypeResolver = oracleMetaData;
+			definitionReader = oracleMetaData;
+			extenders.add(new OracleTypeReader());
+		}
 		else if (productLower.indexOf("hsql") > -1)
 		{
 			this.isHsql = true;
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "2.0"))
 			{
-				// HSQLDB 1.9 has a completely different set of system tables
+				// HSQLDB 2.0 has a completely different set of system tables
 				// so the dynamically configured queries in the XML files need
-				// to be different.
-				productName += " 1.9";
+				// to be different, therefor the product name is "patched" to include the version number
+				productName += " 2.0";
 				columnEnhancer = new HsqlColumnEnhancer();
 			}
 			this.sequenceReader = new HsqlSequenceReader(this.dbConnection.getSqlConnection());
@@ -234,14 +234,14 @@ public class DbMetadata
 			// product name that is reported with the 1.5 driver.
 			// Otherwise the DBID would look something like:
 			// firebird_2_0_wi-v2_0_1_12855_firebird_2_0_tcp__wallace__p10
-			this.productName = "Firebird";
-			this.sequenceReader = new FirebirdSequenceReader(dbConnection);
+			productName = "Firebird";
+			sequenceReader = new FirebirdSequenceReader(dbConnection);
 			extenders.add(new FirebirdDomainReader());
 			columnEnhancer = new FirebirdColumnEnhancer();
 		}
 		else if (productLower.indexOf("sql server") > -1)
 		{
-			this.isSqlServer = true;
+			isSqlServer = true;
 			if (SqlServerSynonymReader.supportsSynonyms(dbConnection))
 			{
 				synonymReader = new SqlServerSynonymReader(this);
@@ -256,8 +256,8 @@ public class DbMetadata
 		}
 		else if (productLower.indexOf("db2") > -1)
 		{
-			this.synonymReader = new Db2SynonymReader();
-			this.sequenceReader = new Db2SequenceReader(dbConnection);
+			synonymReader = new Db2SynonymReader();
+			sequenceReader = new Db2SequenceReader(dbConnection);
 			procedureReader = new Db2ProcedureReader(dbConnection);
 			// Generated columns are not available on the host version...
 			if (getDbId().equals("db2"))
@@ -277,13 +277,13 @@ public class DbMetadata
 		else if (productLower.indexOf("derby") > -1)
 		{
 			this.isApacheDerby = true;
-			this.synonymReader = new DerbySynonymReader(this);
+			this.synonymReader = new DerbySynonymReader();
 		}
 		else if (productLower.indexOf("ingres") > -1)
 		{
-			IngresMetadata imeta = new IngresMetadata(this.dbConnection.getSqlConnection());
-			this.synonymReader = imeta;
-			this.sequenceReader = imeta;
+			IngresMetadata imeta = new IngresMetadata(dbConnection.getSqlConnection());
+			synonymReader = imeta;
+			sequenceReader = imeta;
 		}
 		else if (productLower.indexOf("mckoi") > -1)
 		{
@@ -327,7 +327,7 @@ public class DbMetadata
 		{
 			definitionReader = new JdbcTableDefinitionReader();
 		}
-		
+
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
@@ -1297,7 +1297,7 @@ public class DbMetadata
 		if (retrieveSyns && !synRetrieved && synonymsRequested)
 		{
 			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
-			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection, aSchema);
+			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection, aSchema, objects);
 			for (String synName : syns)
 			{
 				int row = result.addRow();
@@ -1326,7 +1326,7 @@ public class DbMetadata
 		{
 			objectListEnhancer.updateObjectList(dbConnection, result, aCatalog, aSchema, objects, types);
 		}
-		
+
 		if (sortNeeded)
 		{
 			SortDefinition def = new SortDefinition();
@@ -1808,7 +1808,7 @@ public class DbMetadata
 		}
 		return def;
 	}
-	
+
 	public DataStore getObjectDetails(TableIdentifier table)
 		throws SQLException
 	{
@@ -1925,7 +1925,7 @@ public class DbMetadata
 		{
 			columnEnhancer.updateColumnDefinition(result, dbConnection);
 		}
-		
+
 		return result;
 	}
 

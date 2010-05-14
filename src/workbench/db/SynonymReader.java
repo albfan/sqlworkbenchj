@@ -27,6 +27,6 @@ public interface SynonymReader
 	TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 			throws SQLException;
 
-	List<String> getSynonymList(WbConnection con, String owner)
+	List<String> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException;
 }
