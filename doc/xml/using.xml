@@ -93,7 +93,7 @@ COMMIT;</programlisting>
 			<para>When pressing Ctrl-Enter the <literal>DELETE</literal> statement will be exectuted</para>
 			<para>
 				You can configure &wb-productname; to automatically jump to the next statement,
-				after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
+				after executing the current statement. Simply select <menuchoice><guimenu>SQL</guimenu><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
 				The check mark next to the menu item indicates if this option is enabled.
 				This option can also be changed through the <link linkend="options-autojump-statement">Options dialog</link>
 			</para>

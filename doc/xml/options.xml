@@ -306,12 +306,12 @@
 		</section>
 
 		<section id="options-autojump-statement">
-			<title>Auto jump next statement</title>
+			<title>Auto advance to next statement</title>
 			<para>
 				If this option is enabled, then the cursor will automatically jump
 				to the next statement in the script, when you execute a single statement
 				using <keycap>Ctrl-Enter</keycap> ("Run current statement"). This can also be
-				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Jump to next statement</guimenuitem></menuchoice>
+				toggled through the menu <menuchoice><guimenu>SQL</guimenu><guimenuitem>Auto advance to next</guimenuitem></menuchoice>
 			</para>
 			<para>For more information on how you can execute statements
 				in the editor, please refer to <link linkend="execute-sql-commands">Executing Statements</link>

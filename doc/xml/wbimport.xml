@@ -51,7 +51,7 @@
 		<para>
 			If you use <literal>continueOnError=true</literal> and expect a substantial number of rows to fail, 
 			it is highly recommended to also use a "bad file" to log all rejected records. Otherwise the rejected
-			records are "recorded" in memory which may lead to an out of memory error.
+			records are stored in memory (until the import finishes) which may lead to an out of memory error.
 		</para>
 	</note>
 	
@@ -512,10 +512,12 @@
 								that will be used when inserting new rows into the database.
 							</para>
 							<para>
-								The constant values will not be used when updating columns!
+								The constant values will only be used when inserting rows (e.g. using <literal>-mode=insert</literal>)
 							</para>
 							<para>
 								The format of the values is <literal>-constantValues="column1=value1,column2=value2"</literal>.
+                The parameter can be repeated multiple times, to make quoting easier:
+                <literal>-constantValues="column1=value1" -constantValues="column2=value2"</literal>
 								The values will be converted by the same rules as the input values from the input	file. If
 								the value for a character column is enclosed in single quotes, these will be removed from the
 								value before sending it to the database. To include single quotes at the start or end of
@@ -531,6 +533,23 @@
 								syntax is valid for your DBMS. If you do need to store a literal like <literal>${some.value}</literal>
 								into the database, you need to quote it: <literal>-constantValues="varname='${some.value}'"</literal>.
 							</para>
+							<para>
+                You can also specify a <literal>SELECT</literal> statement that retrieves information from the database
+                based on values from the input file. This is useful when the input file contains e.g. values from a lookup
+                table (but not the primary key from the lookup table).
+							</para>
+              <para>
+                The syntax to specify a SELECT statement is similar to a function call:
+                <literal>-constantValues="$@{SELECT type_id FROM type_definition WHERE type_name = $4"</literal> where <literal>$4</literal>
+                references the fourth column from the input file.
+              </para>
+              <para>
+                The parameter for the SELECT statement do not need to be quoted as internally a prepared statement is used. However
+                the values in the input file must be convertible by the JDBC driver.
+              </para>
+              <para>
+                Please refer to the examples for more details on the usage.
+              </para>
 						</entry>
 					</row>
 
@@ -944,119 +963,196 @@
 
 	<section id="text-import-examples">
 		<title>Text Import Examples</title>
-    <programlisting>WbImport -file=c:/temp/contacts.txt
+
+    <section id="wbimport-example-1">
+      <title>Importing date columns</title>
+        <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=lastname,firstname,birthday
          -dateformat="yyyy-MM-dd";</programlisting>
 
-	<para>
-		This imports a file with three columns into a table named person. The
-		first column in the file is <literal>lastname</literal>, the second column
-		is <literal>firstname</literal> and the third column is <literal>birhtday</literal>.
-		Values in date columns are formated as yyyy-MM-dd
-  </para>
+      <para>
+        This imports a file with three columns into a table named person. The
+        first column in the file is <literal>lastname</literal>, the second column
+        is <literal>firstname</literal> and the third column is <literal>birhtday</literal>.
+        Values in date columns are formated as yyyy-MM-dd
+      </para>
 
-	<note><para>
-		A special timestamp format <literal>millis</literal> is availalbe to identify times represented in
-		milliseconds (since January 1, 1970, 00:00:00 GMT).
-	</para></note>
+      <note><para>
+        A special timestamp format <literal>millis</literal> is availalbe to identify times represented in
+        milliseconds (since January 1, 1970, 00:00:00 GMT).
+      </para></note>
+   </section>
 
-
-	<programlisting>WbImport -file=c:/temp/contacts.txt
+  <section id="wbimport-example-2">
+    <title>Excluding input columns from the import</title>
+    <programlisting>WbImport -file=c:/temp/contacts.txt
        -table=person
        -filecolumns=lastname,firstname,$wb_skip$,birthday
        -dateformat="yyyy-MM-dd";</programlisting>
 
-	 <para>
-		 This will import a file with four columns. The third column in the file
-		 does not have a corresponding column in the table <literal>person</literal>
-		 so its specified as <literal>$wb_skip$</literal> and will not be imported.
-	 </para>
+     <para>
+       This will import a file with four columns. The third column in the file
+       does not have a corresponding column in the table <literal>person</literal>
+       so its specified as <literal>$wb_skip$</literal> and will not be imported.
+     </para>
 
-	<programlisting>WbImport -file=c:/temp/contacts.txt
+    <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=lastname,firstname,phone,birthday
          -importcolumns=lastname,firstname;</programlisting>
 
-	<para>
-		This will import a file with four columns where all columns
-		exist in the target table. Only <literal>lastname</literal> and
-		<literal>firstname</literal> will be imported. The same effect could
-		be achieved by specifying $wb_skip$ for the last two columns and leaving
-		out the -importcolumns switch. Using -importcolumns is a bit more readable
-		because you can still see the structure of the input file. The
-		version with <literal>$wb_skip$</literal> is mandatory if the input file
-		contains columns that do not exist in the target table.
-	</para>
+    <para>
+      This will import a file with four columns where all columns
+      exist in the target table. Only <literal>lastname</literal> and
+      <literal>firstname</literal> will be imported. The same effect could
+      be achieved by specifying $wb_skip$ for the last two columns and leaving
+      out the -importcolumns switch. Using -importcolumns is a bit more readable
+      because you can still see the structure of the input file. The
+      version with <literal>$wb_skip$</literal> is mandatory if the input file
+      contains columns that do not exist in the target table.
+    </para>
+   </section>
 
-	<para>
-		If you want to import certain rows from the input file, you can
-		use regular expressions:
-	</para>
+   <section id="wbimport-example-4">
 
-	<programlisting>WbImport -file=c:/temp/contacts.txt
+    <title>Filtering rows during import</title>
+    <para>
+      If you want to import certain rows from the input file, you can
+      use regular expressions:
+    </para>
+
+    <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=lastname,firstname,birthday
          -columnfilter=lastname="^Bee.*",firstname="^Za.*"
          -dateformat="yyyy-MM-dd";</programlisting>
 
-	<para>
-		The above statement will import only rows where the column <literal>lastname</literal>
-		contains values that start with <literal>Bee</literal> and the column <literal>firstname</literal>
-		contains values that start with <literal>Za</literal>. So <literal>Zaphod Beeblebrox</literal>
-		would be imported, <literal>Arthur Beeblebrox</literal> would not be imported.
-	</para>
+    <para>
+      The above statement will import only rows where the column <literal>lastname</literal>
+      contains values that start with <literal>Bee</literal> and the column <literal>firstname</literal>
+      contains values that start with <literal>Za</literal>. So <literal>Zaphod Beeblebrox</literal>
+      would be imported, <literal>Arthur Beeblebrox</literal> would not be imported.
+    </para>
 
-	<para>
-		If you want to learn more about regular expressions, please have a look
-		at <ulink url="http://www.regular-expressions.info/"/>
-	</para>
+    <para>
+      If you want to learn more about regular expressions, please have a look
+      at <ulink url="http://www.regular-expressions.info/"/>
+    </para>
 
-	<para>
-		If you want to limit the rows that are updated but cannot filter them
-		from the input file using <literal>-columnfilter</literal> or <literal>-linefilter</literal>,
-		use the <literal>-updatewhere</literal> parameter:
-	</para>
+    <para>
+      If you want to limit the rows that are updated but cannot filter them
+      from the input file using <literal>-columnfilter</literal> or <literal>-linefilter</literal>,
+      use the <literal>-updatewhere</literal> parameter:
+    </para>
 
-	<programlisting>WbImport -file=c:/temp/contacts.txt
+    <programlisting>WbImport -file=c:/temp/contacts.txt
          -table=person
          -filecolumns=id,lastname,firstname,birthday
          -keycolumns=id
          -mode=update
          -updatewhere="source &lt;&gt; 'manual'"</programlisting>
 
-	<para>
-		This will update the table <literal>PERSON</literal>. The generated <literal>UPDATE</literal>
-		statement would normally be: <literal>UPDATE person SET lastname=?, firstname=?, birthday=? WHERE id=?</literal>.
-		The table contains entries that are maintained manually (identified by the value 'manual' in
-		the column <literal>source</literal>) and should not be updated by &wb-productname;. By specifying
-		the <literal>-updatewhere</literal> parameter, the above <literal>UPDATE</literal> statement will
-		be extended to <literal>WHERE id=? AND (source &lt;&gt; 'manual')</literal>. Thus skipping
-		records that are flagged as manual even if they are contained in the input file.
-	</para>
+    <para>
+      This will update the table <literal>PERSON</literal>. The generated <literal>UPDATE</literal>
+      statement would normally be: <literal>UPDATE person SET lastname=?, firstname=?, birthday=? WHERE id=?</literal>.
+      The table contains entries that are maintained manually (identified by the value 'manual' in
+      the column <literal>source</literal>) and should not be updated by &wb-productname;. By specifying
+      the <literal>-updatewhere</literal> parameter, the above <literal>UPDATE</literal> statement will
+      be extended to <literal>WHERE id=? AND (source &lt;&gt; 'manual')</literal>. Thus skipping
+      records that are flagged as manual even if they are contained in the input file.
+    </para>
 
-	<programlisting>WbImport -sourceDir=c:/data/backup
+  </section>
+
+  <section id="wbimport-example-5">
+    <title>Importing several files</title>
+
+    <programlisting>WbImport -sourceDir=c:/data/backup
          -extension=txt
          -header=true</programlisting>
 
-	<para>
-		This will import all files with the extension <literal>txt</literal> located in the
-		directory <literal>c:/data/backup</literal> into the database. This assumes that
-		each filename indicates the name of the target table.
-	</para>
+    <para>
+      This will import all files with the extension <literal>txt</literal> located in the
+      directory <literal>c:/data/backup</literal> into the database. This assumes that
+      each filename indicates the name of the target table.
+    </para>
 
-	<programlisting>WbImport -sourceDir=c:/data/backup
+    <programlisting>WbImport -sourceDir=c:/data/backup
          -extension=txt
 				 -table=person
          -header=true</programlisting>
 
-	<para>
-		This will import all files with the extension <literal>txt</literal> located in the
-		directory <literal>c:/data/backup</literal> into the table <literal>person</literal> regardless
-		of the name of the input file. In this mode, the parameter <literal>-deleteTarget</literal>
-		will be ignored.
-	</para>
+    <para>
+      This will import all files with the extension <literal>txt</literal> located in the
+      directory <literal>c:/data/backup</literal> into the table <literal>person</literal> regardless
+      of the name of the input file. In this mode, the parameter <literal>-deleteTarget</literal>
+      will be ignored.
+    </para>
+  </section>
 
+  <section id="wbimport-lookup-select">
+    <title>Populating columns from the database</title>
+    <para>
+      When your input file does not contain the actual values to be stored in the target table, but e.g. lookup values, you
+      can specify a SELECT statement to retrieve the necessary primary key of the lookup table.
+    </para>
+    <para>
+      Consider the following tables:
+      <simplelist columns="1">
+        <member>
+          <literal>contact (contact_id, first_name, last_name, type_id)</literal>
+        </member>
+        <member><literal>contact_type (type_id, type_name)</literal></member>
+      </simplelist>
+    </para>
+    <para>
+      The table <literal>contact_type</literal> contains: (1, 'business'), (2, 'private'), (3, 'other').
+    </para>
+    <para>
+      Your input file only contains <literal>contact_id, first_name, last_name, type_name</literal>. Where <literal>type_name</literal>
+      references an entry from the <literal>contact_type</literal> table.
+    </para>
+    <para>
+      To import this file, the following statement can be used:
+    </para>
+    <programlisting>WbImport -file=contacts.txt
+         -type=text
+         -header=true
+         -table=contact
+         -importColumns=contact_id, first_name, last_name
+         -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $3}"
+         </programlisting>
+    <para>
+      For every row from the input file, &wb-productname; will run the specified SELECT statement. The value of the first column
+      of the first row that is returned by the SELECT, will then be used to populate the <literal>type_id</literal> column. The SELECT
+      statement will use the value of the third column of the row that is currently being inserted as the value for the WHERE condition.
+    </para>
+    <para>
+      You must use the -importColumns parameter as well to make sure the type_name column is not processed!
+    </para>
+    <note>
+      <para>The "placeholders" with the column index must not be quoted (e.g. '$1' for a character column will not work)!</para>
+    </note>
+    <para>
+      If the column <literal>contact_id</literal> should be populated by a sequence, the above statement can be extended to
+      include a function call to retrieve the sequence value (PostgreSQL syntax:)
+      
+    </para>
+    <programlisting>WbImport -file=contacts.txt
+         -type=text
+         -header=true
+         -table=contact
+         -importColumns=first_name, last_name
+         -constantValues="id=${nextval('contact_id_seq'::regclass)}"
+         -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $3}"
+         </programlisting>
+    <para>
+      As the ID column is now populated through a constant expression, it may not appear in the <literal>-importColumns</literal> list.
+    </para>
+    
+  </section>
+  
 </section>
 
 <section id="import-xml-parameters">
