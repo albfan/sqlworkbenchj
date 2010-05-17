@@ -180,6 +180,16 @@ public class GuiSettings
 		Settings.getInstance().setProperty("workbench.gui.tabs.lru", flag);
 	}
 
+	public static boolean getExecuteOnlySelected()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.gui.editor.execute.onlyselected", true);
+	}
+
+	public static void setExecuteOnlySelected(boolean flag)
+	{
+		Settings.getInstance().setProperty("workbench.gui.editor.execute.onlyselected", flag);
+	}
+
 	public static boolean getFollowFileDirectory()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.editor.followfiledir", false);

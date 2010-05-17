@@ -17,9 +17,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
@@ -181,101 +178,6 @@ public class WbWorkspace
 		return this.tabInfo;
 	}
 
-	private WbProperties createOldTabInfo()
-	{
-
-		Map<Integer, WbProperties> tabProps = new TreeMap<Integer, WbProperties>();
-		Map<Integer, WbProperties> explorerProps = new TreeMap<Integer, WbProperties>();
-
-//		System.out.println("**********************************");
-//		tabInfo.list(System.out);
-//		System.out.println("**********************************");
-
-		WbProperties newProps = new WbProperties(null, 0);
-		newProps.setProperty("tab.selected", tabInfo.getProperty("tab.selected"));
-
-		Enumeration keys = tabInfo.keys();
-		while (keys.hasMoreElements())
-		{
-			String key = (String)keys.nextElement();
-
-			if (key.equals("tab.total.count")) continue;
-			if (key.endsWith(".type")) continue;
-
-			if (key.startsWith("tab"))
-			{
-				int pos = key.indexOf('.');
-				int index = StringUtil.getIntValue(key.substring(3,pos), -1);
-				if (index > -1)
-				{
-					String type = tabInfo.getProperty("tab" + index + ".type");
-					if (type.equals(PanelType.sqlPanel.toString()))
-					{
-						WbProperties tab = tabProps.get(index);
-						if (tab == null)
-						{
-							tab = new WbProperties();
-							tabProps.put(index, tab);
-						}
-						tab.setProperty(key, tabInfo.getProperty(key));
-					}
-				}
-			}
-			else if (key.startsWith("dbexplorer"))
-			{
-				int pos = key.indexOf('.');
-				int index = StringUtil.getIntValue(key.substring(10,pos));
-				WbProperties db = explorerProps.get(index);
-				if (db == null)
-				{
-					db = new WbProperties();
-					explorerProps.put(index, db);
-				}
-				db.setProperty(key, tabInfo.getProperty(key));
-			}
-			else
-			{
-				newProps.setProperty(key, tabInfo.getProperty(key));
-			}
-		}
-
-		int index = 0;
-		for (Map.Entry<Integer, WbProperties> entry : tabProps.entrySet())
-		{
-			WbProperties tab = entry.getValue();
-			Integer currIndex = entry.getKey();
-			Enumeration tabkeys = tab.keys();
-			while (tabkeys.hasMoreElements())
-			{
-				String key = (String)tabkeys.nextElement();
-				String newkey = "tab" + index + key.substring(key.indexOf('.'));
-				newProps.put(newkey, tabProps.get(currIndex).get(key));
-			}
-			index ++;
-		}
-
-		if (explorerProps.size() > 0)
-		{
-			newProps.setProperty("dbexplorer.visible", Integer.toString(explorerProps.size()));
-
-			for (Map.Entry<Integer, WbProperties> entry : explorerProps.entrySet())
-			{
-				WbProperties tab = entry.getValue();
-				Integer currIndex = entry.getKey();
-
-				Enumeration tabkeys = tab.keys();
-				while (tabkeys.hasMoreElements())
-				{
-					String key = (String)tabkeys.nextElement();
-					String newkey = "dbexplorer" + index + key.substring(key.indexOf('.'));
-					newProps.put(newkey, explorerProps.get(currIndex).get(key));
-				}
-			}
-		}
-
-		return newProps;
-	}
-
 	public void close()
 		throws IOException
 	{
@@ -289,15 +191,6 @@ public class WbWorkspace
 					this.zout.putNextEntry(entry);
 					this.tabInfo.save(this.zout);
 					zout.closeEntry();
-
-//					WbProperties oldProps = createOldTabInfo();
-//					if (oldProps != null)
-//					{
-//						ZipEntry oldinfo = new ZipEntry("tabinfo.properties");
-//						zout.putNextEntry(oldinfo);
-//						oldProps.save(zout);
-//						zout.closeEntry();
-//					}
 				}
 				catch (Throwable e)
 				{

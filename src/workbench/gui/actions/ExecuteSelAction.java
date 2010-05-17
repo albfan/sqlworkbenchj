@@ -17,19 +17,25 @@ import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
 
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.TextSelectionListener;
+import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
 
 /**
- * Run all statements in the current SQL Panel
+ * Run the selected text as a script in the current SQL Panel
+ *
  * @see workbench.gui.sql.SqlPanel#runSelectedStatement()
- *	@author  Thomas Kellerer
+ * @author  Thomas Kellerer
  */
 public class ExecuteSelAction
 	extends WbAction
+	implements TextSelectionListener
 {
 	private SqlPanel target;
-
+	private boolean isEnabled;
+	private boolean checkSelection;
+	
 	public ExecuteSelAction(SqlPanel aPanel)
 	{
 		super();
@@ -39,11 +45,49 @@ public class ExecuteSelAction
 		this.setMenuItemName(ResourceMgr.MNU_TXT_SQL);
 		this.setAlternateAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0));
 		this.setEnabled(false);
+		if (GuiSettings.getExecuteOnlySelected())
+		{
+			checkSelection = true;
+			target.getEditor().addSelectionListener(this);
+			checkSelection();
+		}
 	}
 
 	public void executeAction(ActionEvent e)
 	{
-		this.target.runSelectedStatement();
+		if (this.isEnabled())
+		{
+			this.target.runSelectedStatement();
+		}
 	}
 
+	@Override
+	public void setEnabled(boolean flag)
+	{
+		super.setEnabled(flag);
+		isEnabled = flag;
+		checkSelection();
+	}
+
+	@Override
+	public void selectionChanged(int newStart, int newEnd)
+	{
+		if (isEnabled)
+		{
+			super.setEnabled(newStart < newEnd);
+		}
+	}
+
+	private void checkSelection()
+	{
+		if (checkSelection && isEnabled)
+		{
+			if (target == null) return;
+			if (target.getEditor() == null) return;
+
+			int start = target.getEditor().getSelectionStart();
+			int end = target.getEditor().getSelectionStart();
+			super.setEnabled(start < end);
+		}
+	}
 }
