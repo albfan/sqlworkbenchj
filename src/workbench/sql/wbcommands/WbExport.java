@@ -140,6 +140,7 @@ public class WbExport
 		cmdLine.addArgument("fixedHeader", ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_COL_COMMENTS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(WbImport.ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
@@ -671,6 +672,7 @@ public class WbExport
 		}
 		else
 		{
+			boolean ignoreOwner = cmdLine.getBoolean(WbImport.ARG_IGNORE_OWNER, false);
 			String where = cmdLine.getValue("tableWhere");
 			try
 			{
@@ -679,7 +681,7 @@ public class WbExport
 				exporter.setContinueOnError(this.continueOnError);
 				if (tablesToExport.size() > 1 || outputdir != null)
 				{
-					exportTableList(tablesToExport, result, outputdir, cmdLine.getValue(ARG_TABLE_PREFIX), where);
+					exportTableList(tablesToExport, result, outputdir, cmdLine.getValue(ARG_TABLE_PREFIX), where, ignoreOwner);
 				}
 				else
 				{
@@ -713,7 +715,7 @@ public class WbExport
 	private void exportSingleTable(TableIdentifier table, StatementRunnerResult result, File outfile, String where)
 		throws SQLException
 	{
-		exporter.addTableExportJob(outfile, table);
+		exporter.addTableExportJob(outfile, table, where);
 		exporter.runJobs();
 		if (exporter.isSuccess())
 		{
@@ -730,7 +732,7 @@ public class WbExport
 		}
 	}
 
-	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, String prefix, String where)
+	private void exportTableList(List<TableIdentifier> tableList, StatementRunnerResult result, File outdir, String prefix, String where, boolean ignoreOwner)
 		throws SQLException
 	{
 		result.setSuccess();
@@ -766,13 +768,13 @@ public class WbExport
 
 		for (TableIdentifier tbl : tableList)
 		{
-			String fname = StringUtil.makeFilename(tbl.getTableExpression());
+			String fname = StringUtil.makeFilename(ignoreOwner ? tbl.getTableName() : tbl.getTableExpression());
 			WbFile f = new WbFile(outdir, fname + defaultExtension);
 			try
 			{
 				if (StringUtil.isBlank(prefix))
 				{
-					exporter.addTableExportJob(f, tbl);
+					exporter.addTableExportJob(f, tbl, where);
 				}
 				else
 				{
