@@ -19,11 +19,12 @@ import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.StringUtil;
 
 /**
- * A class to define and parse the arguments that are available when 
- * the application is started. 
- * 
+ * A class to define and parse the arguments that are available when
+ * the application is started.
+ *
  * @author Thomas Kellerer
  */
 public class AppArguments
@@ -34,7 +35,7 @@ public class AppArguments
 	public static final String ARG_COMMAND = "command";
 	public static final String ARG_SCRIPT_ENCODING = "encoding";
 	public static final String ARG_ABORT = "abortOnError";
-	
+
 	// Connection related parameters
 	public static final String ARG_PROFILE = "profile";
 	public static final String ARG_PROFILE_GROUP = "profilegroup";
@@ -58,7 +59,7 @@ public class AppArguments
 	public static final String ARG_INTERACTIVE = "interactive";
 	public static final String ARG_PROPFILE = "arguments";
 	public static final String ARG_LB_CONN = "lbDefaults";
-	
+
 	public static final String ARG_DISPLAY_RESULT = "displayResult";
 	public static final String ARG_SUCCESS_SCRIPT = "cleanupSuccess";
 	public static final String ARG_ERROR_SCRIPT = "cleanupError";
@@ -173,12 +174,31 @@ public class AppArguments
 				List<String> translated = new ArrayList<String>(lines.size());
 				for (String line : lines)
 				{
+					if (StringUtil.isBlank(line)) continue;
+
+					line = line.trim();
 					if (line.startsWith("#")) continue;
-					line = line.replace("driver:", ARG_CONN_DRIVER + "=");
-					line = line.replace("url:", ARG_CONN_URL + "=");
-					line = line.replace("classpath:", ARG_CONN_JAR + "=");
-					line = line.replace("username:", ARG_CONN_USER + "=");
-					line = line.replace("password:", ARG_CONN_PWD + "=");
+
+					if (line.startsWith("classpath:"))
+					{
+						String filename = line.substring("classpath:".length()).trim();
+						File lib = new File(filename);
+						if (lib.getParent() == null)
+						{
+							// If not directory is given, Liquibase assumes the current directory
+							// WbDriver on the other hand will search the jar file in the config directory, if no directory
+							// is specified, which is most probably not correct.
+							filename = "./" + lib.getName();
+						}
+						line = ARG_CONN_JAR + "=" + filename;
+					}
+					else
+					{
+						line = line.replace("driver:", ARG_CONN_DRIVER + "=");
+						line = line.replace("url:", ARG_CONN_URL + "=");
+						line = line.replace("username:", ARG_CONN_USER + "=");
+						line = line.replace("password:", ARG_CONN_PWD + "=");
+					}
 					translated.add(line);
 				}
 				parse(translated);
@@ -190,7 +210,7 @@ public class AppArguments
 			}
 		}
 	}
-	
+
 	public String getHelp()
 	{
 		StringBuilder msg = new StringBuilder(100);
