@@ -13,6 +13,8 @@ package workbench.gui.actions;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.KeyStroke;
 
@@ -21,6 +23,7 @@ import workbench.interfaces.TextSelectionListener;
 import workbench.resource.GuiSettings;
 import workbench.resource.PlatformShortcuts;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 
 /**
  * Run the selected text as a script in the current SQL Panel
@@ -30,7 +33,7 @@ import workbench.resource.ResourceMgr;
  */
 public class ExecuteSelAction
 	extends WbAction
-	implements TextSelectionListener
+	implements TextSelectionListener, PropertyChangeListener
 {
 	private SqlPanel target;
 	private boolean isEnabled;
@@ -51,6 +54,7 @@ public class ExecuteSelAction
 			target.getEditor().addSelectionListener(this);
 			checkSelection();
 		}
+		Settings.getInstance().addPropertyChangeListener(this, GuiSettings.PROPERTY_EXEC_SEL_ONLY);
 	}
 
 	public void executeAction(ActionEvent e)
@@ -88,6 +92,29 @@ public class ExecuteSelAction
 			int start = target.getEditor().getSelectionStart();
 			int end = target.getEditor().getSelectionEnd();
 			super.setEnabled(start < end);
+		}
+	}
+
+	@Override
+	public void propertyChange(PropertyChangeEvent evt)
+	{
+		if (target == null) return;
+		if (target.getEditor() == null) return;
+		
+		if (GuiSettings.PROPERTY_EXEC_SEL_ONLY.equals(evt.getPropertyName()))
+		{
+			boolean wasChecking = checkSelection;
+			checkSelection = GuiSettings.getExecuteOnlySelected();
+			if (wasChecking)
+			{
+				super.setEnabled(isEnabled);
+				target.getEditor().removeSelectionListener(this);
+			}
+			else
+			{
+				target.getEditor().addSelectionListener(this);
+				checkSelection();
+			}
 		}
 	}
 }

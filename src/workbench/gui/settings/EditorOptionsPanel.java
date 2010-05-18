@@ -78,6 +78,7 @@ public class EditorOptionsPanel
 		electricScroll.setText(Integer.toString(Settings.getInstance().getElectricScroll()));
 		tabSize.setText(Settings.getInstance().getProperty("workbench.editor.tabwidth", "2"));
 		hiliteCurrent.setSelected(Settings.getInstance().getHighlightCurrentStatement());
+		alwaysAllowExecSel.setSelected(!GuiSettings.getExecuteOnlySelected());
 	}
 
 	private String indexToLineEndingValue(int index)
@@ -116,10 +117,11 @@ public class EditorOptionsPanel
 		value = indexToLineEndingValue(externalLineEnding.getSelectedIndex());
 		set.setExternalEditorLineEnding(value);
 		set.setEditorUseTabCharacter(useTabs.isSelected());
+		set.setProperty(Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, hiliteCurrent.isSelected());
 		GuiSettings.setDefaultFileDir(defaultDir.getFilename());
 		GuiSettings.setFollowFileDirectory(followCurrentDir.isSelected());
 		GuiSettings.setKeepCurrentSqlHighlight(keepHilite.isSelected());
-		set.setProperty(Settings.PROPERTY_HIGHLIGHT_CURRENT_STATEMENT, hiliteCurrent.isSelected());
+		GuiSettings.setExecuteOnlySelected(!alwaysAllowExecSel.isSelected());
 	}
 
 	/** This method is called from within the constructor to
@@ -156,6 +158,7 @@ public class EditorOptionsPanel
     followCurrentDir = new JCheckBox();
     jLabel1 = new JLabel();
     defaultDir = new WbFilePicker();
+    alwaysAllowExecSel = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -323,7 +326,7 @@ public class EditorOptionsPanel
     autoAdvance.setHorizontalTextPosition(SwingConstants.RIGHT);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new Insets(7, 13, 0, 0);
@@ -353,7 +356,7 @@ public class EditorOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -368,7 +371,7 @@ public class EditorOptionsPanel
     rightClickMovesCursor.setMinimumSize(new Dimension(93, 15));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(8, 12, 0, 11);
@@ -407,7 +410,7 @@ public class EditorOptionsPanel
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 13;
+    gridBagConstraints.gridy = 14;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
@@ -415,6 +418,19 @@ public class EditorOptionsPanel
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new Insets(13, 12, 0, 15);
     add(jPanel1, gridBagConstraints);
+
+    alwaysAllowExecSel.setText(ResourceMgr.getString("LblExecSelOnly")); // NOI18N
+    alwaysAllowExecSel.setToolTipText(ResourceMgr.getString("d_LblExecSelOnly")); // NOI18N
+    alwaysAllowExecSel.setBorder(null);
+    alwaysAllowExecSel.setHorizontalAlignment(SwingConstants.LEFT);
+    alwaysAllowExecSel.setHorizontalTextPosition(SwingConstants.RIGHT);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(7, 13, 0, 0);
+    add(alwaysAllowExecSel, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -434,6 +450,7 @@ public class EditorOptionsPanel
   // Variables declaration - do not modify//GEN-BEGIN:variables
   private JLabel altDelimLabel;
   private DelimiterDefinitionPanel alternateDelim;
+  private JCheckBox alwaysAllowExecSel;
   private JCheckBox autoAdvance;
   private WbFilePicker defaultDir;
   private JLabel editorTabSizeLabel;
