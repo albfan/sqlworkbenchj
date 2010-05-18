@@ -42,7 +42,7 @@ public class GuiSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.filechooser.useshellfolder", true);
 	}
-	
+
 	public static boolean getShowMaxRowsReached()
 	{
 		return Settings.getInstance().getBoolProperty("workbench.gui.maxrows.warning.show");
@@ -182,7 +182,7 @@ public class GuiSettings
 
 	public static boolean getExecuteOnlySelected()
 	{
-		return Settings.getInstance().getBoolProperty("workbench.gui.editor.execute.onlyselected", true);
+		return Settings.getInstance().getBoolProperty("workbench.gui.editor.execute.onlyselected", false);
 	}
 
 	public static void setExecuteOnlySelected(boolean flag)

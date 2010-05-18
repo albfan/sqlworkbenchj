@@ -64,6 +64,7 @@ public abstract class RowDataConverter
 	protected List exportColumns = null;
 	protected ErrorReporter errorReporter;
 
+	protected SimpleDateFormat defaultTimeFormatter;
 	protected SimpleDateFormat defaultDateFormatter;
 	protected DecimalFormat defaultNumberFormatter;
 	protected SimpleDateFormat defaultTimestampFormatter;
@@ -100,9 +101,10 @@ public abstract class RowDataConverter
 
 	public RowDataConverter()
 	{
-		this.defaultDateFormatter = Settings.getInstance().getDefaultDateFormatter();
-		this.defaultTimestampFormatter = Settings.getInstance().getDefaultTimestampFormatter();
-		this.defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
+		defaultDateFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultDateFormat());
+		defaultTimestampFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimestampFormat());
+		defaultNumberFormatter = Settings.getInstance().createDefaultDecimalFormatter();
+		defaultTimeFormatter = new SimpleDateFormat(Settings.getInstance().getDefaultTimeFormat());
 	}
 
 	public void setDataModifier(ExportDataModifier modifier)
@@ -154,7 +156,7 @@ public abstract class RowDataConverter
 	{
 		this.includeColumnComments = flag;
 	}
-	
+
 	public String getPageTitle(String defaultTitle)
 	{
 		if (StringUtil.isEmptyString(pageTitle))
@@ -549,6 +551,12 @@ public abstract class RowDataConverter
 		this.defaultTimestampFormatter = formatter;
 	}
 
+	public void setDefaultTimeFormatter(SimpleDateFormat formatter)
+	{
+		if (formatter == null) return;
+		defaultTimeFormatter = formatter;
+	}
+
 	public void setDefaultDateFormatter(SimpleDateFormat formatter)
 	{
 		if (formatter == null) return;
@@ -572,6 +580,13 @@ public abstract class RowDataConverter
 		if (StringUtil.isEmptyString(format)) return;
 		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		this.setDefaultTimestampFormatter(formatter);
+	}
+
+	public void setDefaultTimeFormat(String format)
+	{
+		if (StringUtil.isEmptyString(format)) return;
+		SimpleDateFormat formatter = new SimpleDateFormat(format);
+		setDefaultTimeFormatter(formatter);
 	}
 
 	public void setDefaultNumberFormat(String aFormat)
@@ -684,6 +699,10 @@ public abstract class RowDataConverter
 				{
 					result = this.defaultTimestampFormatter.format(value);
 				}
+			}
+			else if (value instanceof java.sql.Time && defaultTimeFormatter != null)
+			{
+				result = defaultTimeFormatter.format(value);
 			}
 			else if (value instanceof java.util.Date && this.defaultDateFormatter != null)
 			{

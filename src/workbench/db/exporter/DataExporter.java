@@ -80,52 +80,60 @@ public class DataExporter
 {
 
 	private WbConnection dbConn;
-	private String pageTitle = null;
+	private String pageTitle;
+
 	// When compressing the output this holds the name of the archive.
 	private WbFile realOutputfile;
+	
 	private WbFile outputfile;
-	private String xsltFile = null;
-	private String transformOutputFile = null;
+	private String xsltFile;
+	private String transformOutputFile;
 	private ExportType exportType = ExportType.TEXT;
 	private boolean exportHeaders;
-	private String rowIndexColumnName = null;
-	private boolean includeCreateTable = false;
-	private boolean continueOnError = true;
-	private boolean useCDATA = false;
+	private String rowIndexColumnName;
+	private boolean includeCreateTable;
+	private boolean continueOnError;
+	private boolean useCDATA;
 	private String xmlVersion;
-	private CharacterRange escapeRange = null;
+	private CharacterRange escapeRange;
 	private String lineEnding = "\n";
 	private String tableName;
 	private String encoding;
 	private List<ColumnIdentifier> columnsToExport;
-	private boolean clobAsFile = false;
+	private boolean clobAsFile;
 	private String delimiter = "\t";
-	private String quoteChar = null;
-	private boolean quoteAlways = false;
-	private String dateFormat = null;
-	private String dateTimeFormat = null;
-	private String chrFunc = null;
+	private String quoteChar;
+	private boolean quoteAlways;
+	private String chrFunc;
 	private String concatString = "||";
-	private String concatFunction = null;
-	private String filenameColumn = null;
+	private String concatFunction;
+	private String filenameColumn;
 	private int commitEvery = 0;
 	private boolean useSchemaInSql;
-	private SimpleDateFormat dateFormatter = null;
-	private SimpleDateFormat dateTimeFormatter = null;
-	private DecimalFormat numberFormatter = null;
-	private boolean append = false;
+
+	private String dateFormat;
+	private String timeFormat;
+	private String dateTimeFormat;
+	private SimpleDateFormat timeFormatter;
+	private SimpleDateFormat dateFormatter;
+	private SimpleDateFormat dateTimeFormatter;
+
+	private DecimalFormat numberFormatter;
+	private boolean append;
 	private boolean escapeHtml = true;
 	private String htmlHeading;
 	private String htmlTrailer;
 	private boolean createFullHtmlPage = true;
 	private boolean verboseFormat = true;
 	private int progressInterval = ProgressReporter.DEFAULT_PROGRESS_INTERVAL;
-	private boolean cancelJobs = false;
+	private boolean cancelJobs;
 	private RowActionMonitor rowMonitor;
 	private List<String> keyColumnsToUse;
-	private String dateLiteralType = null;
+	private String dateLiteralType;
+
 	// The columns to be used for generating blob file names
 	private List<String> blobIdCols;
+
 	private MessageBuffer warnings = new MessageBuffer();
 	private MessageBuffer errors = new MessageBuffer();
 	private List<ExportJobEntry> jobQueue;
@@ -133,31 +141,34 @@ public class DataExporter
 	private int tablesExported;
 	private long totalRows;
 	private Set<ControlFileFormat> controlFiles = EnumSet.noneOf(ControlFileFormat.class);
-	private boolean compressOutput = false;
+	private boolean compressOutput;
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
 	private ExportDataModifier modifier;
 	private boolean includeColumnComments;
-	
+
 	/**
 	 * Toggles an additional sheet for Spreedsheet exports
 	 */
 	private boolean appendInfoSheet;
+	
 	/**
 	 * Enables an auto-filter for ODS and Excel XML exports
 	 */
 	private boolean enableAutoFilter;
+
 	/**
 	 * Enables the "freeze" of the header row for spreadsheet exports
 	 */
 	private boolean enableFixedHeader;
+
 	/**
-	 * Should the ExportWriter create an output file, even if the result set
-	 * for the export is empty?
+	 * Should the ExportWriter create an output file, even if the result set for the export is empty?
 	 */
 	private boolean writeEmptyResults = true;
+	
 	private ZipOutputStream zipArchive;
 	private ZipEntry zipEntry;
-	private BlobMode blobMode = null;
+	private BlobMode blobMode;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
 
 	/**
@@ -212,7 +223,7 @@ public class DataExporter
 	{
 		return includeColumnComments;
 	}
-	
+
 	public String getRowIndexColumnName()
 	{
 		return rowIndexColumnName;
@@ -629,34 +640,43 @@ public class DataExporter
 		return this.quoteChar;
 	}
 
+
+	public void setTimeFormat(String aFormat)
+	{
+		timeFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultTimeFormat() : aFormat;
+		try
+		{
+			timeFormatter = new SimpleDateFormat(timeFormat);
+		}
+		catch (IllegalArgumentException i)
+		{
+			this.addWarning(ResourceMgr.getFormattedString("MsgIllegalDateFormatIgnored", timeFormat));
+			timeFormatter = null;
+		}
+	}
+
+	public SimpleDateFormat getTimeFormatter()
+	{
+		return timeFormatter;
+	}
+
 	public void setDateFormat(String aFormat)
 	{
-		if (StringUtil.isEmptyString(aFormat))
+		dateFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultDateFormat() : aFormat;
+		try
 		{
-			aFormat = Settings.getInstance().getDefaultDateFormat();
+			dateFormatter = new SimpleDateFormat(this.dateFormat);
 		}
-		if (StringUtil.isEmptyString(aFormat))
+		catch (IllegalArgumentException i)
 		{
-			return;
-		}
-		this.dateFormat = aFormat;
-		if (this.dateFormat != null)
-		{
-			try
-			{
-				dateFormatter = new SimpleDateFormat(this.dateFormat);
-			}
-			catch (IllegalArgumentException i)
-			{
-				this.addWarning(ResourceMgr.getFormattedString("MsgIllegalDateFormatIgnored", this.dateFormat));
-				dateFormatter = null;
-			}
+			this.addWarning(ResourceMgr.getFormattedString("MsgIllegalDateFormatIgnored", this.dateFormat));
+			dateFormatter = null;
 		}
 	}
 
 	public SimpleDateFormat getDateFormatter()
 	{
-		return this.dateFormatter;
+		return dateFormatter;
 	}
 
 	public String getDateFormat()
@@ -666,32 +686,21 @@ public class DataExporter
 
 	public void setTimestampFormat(String aFormat)
 	{
-		if (StringUtil.isEmptyString(aFormat))
+		dateTimeFormat = StringUtil.isBlank(aFormat) ? Settings.getInstance().getDefaultTimestampFormat() : aFormat;
+		try
 		{
-			aFormat = Settings.getInstance().getDefaultTimestampFormat();
+			dateTimeFormatter = new SimpleDateFormat(dateTimeFormat);
 		}
-		if (StringUtil.isEmptyString(aFormat))
+		catch (Exception e)
 		{
-			return;
-		}
-		this.dateTimeFormat = aFormat;
-		if (this.dateTimeFormat != null)
-		{
-			try
-			{
-				dateTimeFormatter = new SimpleDateFormat(this.dateTimeFormat);
-			}
-			catch (Exception e)
-			{
-				this.addWarning(ResourceMgr.getFormattedString("MsgIllegalDateFormatIgnored", this.dateTimeFormat));
-				dateTimeFormatter = null;
-			}
+			this.addWarning(ResourceMgr.getFormattedString("MsgIllegalDateFormatIgnored", this.dateTimeFormat));
+			dateTimeFormatter = null;
 		}
 	}
 
 	public String getTimestampFormat()
 	{
-		return this.dateTimeFormat;
+		return dateTimeFormat;
 	}
 
 	public SimpleDateFormat getTimestampFormatter()

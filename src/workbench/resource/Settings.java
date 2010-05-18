@@ -2061,21 +2061,9 @@ public class Settings
 	// </editor-fold>
 
 	// <editor-fold defaultstate="collapsed" desc="Date and Time Formatting">
-	private SimpleDateFormat defaultDateFormatter = null;
-	private SimpleDateFormat defaultTimestampFormatter = null;
-
-	public SimpleDateFormat getDefaultDateFormatter()
-	{
-		if (this.defaultDateFormatter == null)
-		{
-			this.defaultDateFormatter = new SimpleDateFormat(this.getDefaultDateFormat());
-		}
-		return this.defaultDateFormatter;
-	}
 
 	public void setDefaultDateFormat(String aFormat)
 	{
-		this.defaultDateFormatter = null;
 		this.props.setProperty(PROPERTY_DATE_FORMAT, aFormat);
 	}
 
@@ -2102,7 +2090,6 @@ public class Settings
 
 	public void setDefaultTimestampFormat(String aFormat)
 	{
-		this.defaultDateFormatter = null;
 		this.props.setProperty(PROPERTY_DATETIME_FORMAT, aFormat);
 	}
 
@@ -2114,15 +2101,6 @@ public class Settings
 	public String getDefaultTimeFormat()
 	{
 		return getProperty(PROPERTY_TIME_FORMAT, "HH:mm:ss");
-	}
-
-	public SimpleDateFormat getDefaultTimestampFormatter()
-	{
-		if (this.defaultTimestampFormatter == null)
-		{
-			this.defaultTimestampFormatter = new SimpleDateFormat(this.getDefaultTimestampFormat());
-		}
-		return this.defaultTimestampFormatter;
 	}
 
 	public int getMaxFractionDigits()
@@ -2500,7 +2478,7 @@ public class Settings
 		}
 		return base + "." + resKey + "." + attribute;
 	}
-	
+
 	public void storeWindowSize(Component target, String id)
 	{
 		if (target == null) return;

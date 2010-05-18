@@ -72,6 +72,7 @@ public abstract class ExportWriter
 		converter.setEncoding(exporter.getEncoding());
 		converter.setDefaultDateFormatter(exporter.getDateFormatter());
 		converter.setDefaultTimestampFormatter(exporter.getTimestampFormatter());
+		converter.setDefaultTimeFormatter(exporter.getTimeFormatter());
 		converter.setDefaultNumberFormatter(exporter.getDecimalFormatter());
 		converter.setColumnsToExport(this.exporter.getColumnsToExport());
 		converter.setCompressExternalFiles(exporter.getCompressOutput());

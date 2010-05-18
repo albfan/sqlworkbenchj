@@ -57,9 +57,8 @@ public class WbExport
 	private DataExporter exporter;
 	private WbFile pendingOutput;
 
-	//private boolean directExport = false;
-	private boolean consumeQuery = false;
-	private boolean continueOnError = false;
+	private boolean consumeQuery;
+	private boolean continueOnError;
 	private String currentTable;
 	private String defaultExtension;
 	private boolean showProgress = true;
@@ -99,6 +98,7 @@ public class WbExport
 		cmdLine.addArgument("quotechar");
 		cmdLine.addArgument("dateFormat");
 		cmdLine.addArgument("timestampFormat");
+		cmdLine.addArgument("timeFormat");
 		cmdLine.addArgument("decimal");
 		cmdLine.addArgument("charFunc");
 		cmdLine.addArgument("concat");
@@ -330,6 +330,9 @@ public class WbExport
 
 		format = cmdLine.getValue("timestampformat");
 		if (format != null) exporter.setTimestampFormat(format);
+
+		format = cmdLine.getValue("timeformat");
+		if (format != null) exporter.setTimeFormat(format);
 
 		format = cmdLine.getValue("decimal");
 		if (format != null) exporter.setDecimalSymbol(format);
