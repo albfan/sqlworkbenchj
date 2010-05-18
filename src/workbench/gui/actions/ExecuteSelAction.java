@@ -55,9 +55,9 @@ public class ExecuteSelAction
 
 	public void executeAction(ActionEvent e)
 	{
-		if (this.isEnabled())
+		if (isEnabled())
 		{
-			this.target.runSelectedStatement();
+			target.runSelectedStatement();
 		}
 	}
 
@@ -78,7 +78,7 @@ public class ExecuteSelAction
 		}
 	}
 
-	private void checkSelection()
+	public void checkSelection()
 	{
 		if (checkSelection && isEnabled)
 		{
@@ -86,7 +86,7 @@ public class ExecuteSelAction
 			if (target.getEditor() == null) return;
 
 			int start = target.getEditor().getSelectionStart();
-			int end = target.getEditor().getSelectionStart();
+			int end = target.getEditor().getSelectionEnd();
 			super.setEnabled(start < end);
 		}
 	}
