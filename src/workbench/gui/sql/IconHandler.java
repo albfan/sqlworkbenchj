@@ -32,10 +32,10 @@ public class IconHandler
 	implements PropertyChangeListener, TextChangeListener
 {
 	private SqlPanel client;
-	
-	private ImageIcon fileIcon = null;
-	private ImageIcon fileModifiedIcon = null;
-	private ImageIcon cancelIcon = null;
+
+	private ImageIcon fileIcon;
+	private ImageIcon fileModifiedIcon;
+	private ImageIcon cancelIcon;
 	private ImageIcon loadingIcon;
 	private boolean textModified;
 
@@ -50,7 +50,7 @@ public class IconHandler
 	{
 		Settings.getInstance().removePropertyChangeListener(this);
 	}
-	
+
 	protected void flush()
 	{
 		if (cancelIcon != null) cancelIcon.getImage().flush();
@@ -146,7 +146,7 @@ public class IconHandler
 			final JTabbedPane tab = (JTabbedPane)parent;
 			final int index = tab.indexOfComponent(client);
 			if (index < 0) return;
-			
+
 			final Icon oldIcon = tab.getIconAt(index);
 			if (icon == null && oldIcon == null) return;
 			if (icon != oldIcon)
@@ -258,7 +258,7 @@ public class IconHandler
 			}
 		}
 	}
-	
+
 	public void textStatusChanged(boolean modified)
 	{
 		this.textModified = modified;

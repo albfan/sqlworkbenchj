@@ -57,7 +57,7 @@ public class WbConnection
 	public static final String CONNECTION_OPEN = "open";
 
   private String id;
-	private StringBuilder scriptError = null;
+	private StringBuilder scriptError;
 	private Connection sqlConnection;
 	private DbMetadata metaData;
 	private ConnectionProfile profile;
@@ -65,19 +65,19 @@ public class WbConnection
 	private List<PropertyChangeListener> listeners;
 	private DbObjectCache objectCache;
 
-	private Method clearSettings = null;
-	private Object dbAccess = null;
+	private Method clearSettings;
+	private Object dbAccess;
 	private boolean doOracleClear = true;
 
 	private boolean busy;
-	private KeepAliveDaemon keepAlive = null;
+	private KeepAliveDaemon keepAlive;
 	private String currentCatalog;
 	private String currentSchema;
 
 	private boolean removeComments;
 	private boolean removeNewLines;
 	private Integer fetchSize;
-	
+
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -375,7 +375,7 @@ public class WbConnection
 				// obviously the Oracle driver does NOT clear the warnings
 				// (as discovered when looking at the source code)
 				// this is not true for newer drivers (10.x)
-				
+
 				// luckily the instance variable on the driver which holds the
 				// warnings is defined as public and thus we can
 				// reset the warnings "manually"
@@ -675,8 +675,8 @@ public class WbConnection
 		}
 		return -1;
 	}
-	
-	
+
+
 	/**
 	 * Create a statement that produces ResultSets that
 	 * are read only and forward only (for performance reasons)

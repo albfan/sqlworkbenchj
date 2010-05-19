@@ -40,7 +40,7 @@ public class WbTextCellEditor
 	private JTextField textField;
 	private WbTable parentTable;
 	private Color defaultBackground;
-	private boolean changed = false;
+	private boolean changed;
 
 	public static final WbTextCellEditor createInstance()
 	{

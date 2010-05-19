@@ -36,7 +36,7 @@ public class PasswordPropertyEditor
 	private Method getter;
 	private boolean changed;
 	private String propName;
-	private boolean immediateUpdate = false;
+	private boolean immediateUpdate;
 
 	public PasswordPropertyEditor()
 	{
@@ -81,7 +81,7 @@ public class PasswordPropertyEditor
 
 		// getPassword returns a char[] so this needs to be converted to a String
 		Object[] args = new Object[] { new String(getPassword()) };
-		
+
 		try
 		{
 			this.setter.invoke(this.source, args);

@@ -36,7 +36,7 @@ public class GenericObjectDropper
 	private boolean cascadeConstraints;
 	private TableIdentifier objectTable;
 	private RowActionMonitor monitor;
-	private boolean cancel = false;
+	private boolean cancel;
 
 	public List<? extends DbObject> getObjects()
 	{

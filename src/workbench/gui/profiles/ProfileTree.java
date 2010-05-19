@@ -48,15 +48,15 @@ import workbench.util.StringUtil;
 /**
  * A Tree to display connection profiles
  * It supports drag & drop from profiles into different groups
- * 
+ *
  * @author Thomas Kellerer
  */
 public class ProfileTree
 	extends JTree
-	implements TreeModelListener, 
-	           MouseListener, 
-	           ClipboardSupport, 
-	           ActionListener, 
+	implements TreeModelListener,
+	           MouseListener,
+	           ClipboardSupport,
+	           ActionListener,
 	           TreeSelectionListener,
 						 GroupTree,
 						 ExpandableTree
@@ -65,12 +65,12 @@ public class ProfileTree
 	private DefaultMutableTreeNode[] clipboardNodes;
 	private static final int CLIP_COPY = 1;
 	private static final int CLIP_CUT = 2;
-	private int clipboardType = 0;
+	private int clipboardType;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
-	
+
 	private Insets autoscrollInsets = new Insets(20, 20, 20, 20);
-	
+
 	public ProfileTree()
 	{
 		super();
@@ -85,15 +85,15 @@ public class ProfileTree
 
 		InputMap im = this.getInputMap(WHEN_FOCUSED);
 		ActionMap am = this.getActionMap();
-		
+
 		this.popup = new CutCopyPastePopup(this);
-		
+
 		WbAction a = popup.getPasteAction();
 		a.addToInputMap(im, am);
-		
+
 		a = popup.getCopyAction();
 		a.addToInputMap(im, am);
-		
+
 		a = popup.getCutAction();
 		a.addToInputMap(im, am);
 
@@ -101,15 +101,15 @@ public class ProfileTree
 		pasteToFolderAction.removeIcon();
 		pasteToFolderAction.initMenuDefinition("MnuTxtPasteNewFolder");
 		popup.addAction(pasteToFolderAction, true);
-		
+
 		RenameGroupAction renameGroup = new RenameGroupAction(this);
 		popup.addAction(renameGroup, false);
-		
+
 		setCellRenderer(new ProfileTreeCellRenderer());
     new ProfileTreeDragHandler(this, DnDConstants.ACTION_COPY_OR_MOVE);
 		setAutoscrolls(true);
 	}
-	
+
 	public void setDeleteAction(DeleteListEntryAction delete)
 	{
 		this.popup.addSeparator();
@@ -118,7 +118,7 @@ public class ProfileTree
 		ActionMap am = this.getActionMap();
 		delete.addToInputMap(im, am);
 	}
-	
+
 	public void setModel(TreeModel model)
 	{
 		super.setModel(model);
@@ -127,16 +127,16 @@ public class ProfileTree
 			this.profileModel = (ProfileListModel)model;
 		}
 		model.addTreeModelListener(this);
-	}	
+	}
 
 	public boolean isPathEditable(TreePath path)
 	{
 		if (path == null) return false;
 		// Only allow editing of groups
 		if (path.getPathCount() != 2) return false;
-		
+
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)path.getLastPathComponent();
-		
+
 		return node.getAllowsChildren();
 	}
 
@@ -145,7 +145,7 @@ public class ProfileTree
 		Object[] changed = e.getChildren();
 		DefaultMutableTreeNode group = (DefaultMutableTreeNode)changed[0];
 		Object data = group.getUserObject();
-		
+
 		if (group.getAllowsChildren())
 		{
 			String newGroupName = (String)data;
@@ -169,7 +169,7 @@ public class ProfileTree
 			if (groups[i] != null) expandPath(groups[i]);
 		}
 	}
-	
+
 	public void collapseAll()
 	{
 		TreePath[] groups = this.profileModel.getGroupNodes();
@@ -178,11 +178,11 @@ public class ProfileTree
 			if (groups[i] != null) collapsePath(groups[i]);
 		}
 	}
-	
+
 	/**
-	 * Expand the groups that are contained in th list. 
+	 * Expand the groups that are contained in th list.
 	 * The list is expected to contain Sting objects that identify
-	 * the names of the groups. 
+	 * the names of the groups.
 	 */
 	public void expandGroups(List groupList)
 	{
@@ -199,7 +199,7 @@ public class ProfileTree
 			}
 		}
 	}
-	
+
 	/**
 	 * Return the names of the expaned groups.
 	 */
@@ -218,7 +218,7 @@ public class ProfileTree
 		}
 		return result;
 	}
-	
+
 	public void treeNodesInserted(TreeModelEvent e)
 	{
 	}
@@ -248,7 +248,7 @@ public class ProfileTree
 		boolean groupSelected = onlyGroupSelected();
 		boolean canPaste = this.clipboardNodes != null && groupSelected;
 		boolean canCopy = onlyProfilesSelected();
-		
+
 		pasteToFolderAction.setEnabled(canPaste);
 
 		WbAction a = popup.getPasteAction();
@@ -259,16 +259,16 @@ public class ProfileTree
 
 		a = popup.getCutAction();
 		a.setEnabled(canCopy);
-		
+
 	}
-	
+
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
 		{
 			TreePath p = this.getClosestPathForLocation(e.getX(), e.getY());
 			if (p == null) return;
-			
+
 			if (this.getSelectionCount() == 1 || isGroup(p))
 			{
 				setSelectionPath(p);
@@ -278,8 +278,8 @@ public class ProfileTree
 		}
 	}
 
-	/** 
-	 * Finds and selects the connection profile with the given 
+	/**
+	 * Finds and selects the connection profile with the given
 	 * name. If the profile is not found, the first profile
 	 * will be selected (and expanded)
 	 */
@@ -293,7 +293,7 @@ public class ProfileTree
 		}
 		selectPath(path);
 	}
-	
+
 	/**
 	 * Checks if the current selection contains only profiles
 	 */
@@ -324,18 +324,18 @@ public class ProfileTree
 		}
 		return true;
 	}
-	
+
 	protected DefaultMutableTreeNode getSelectedGroupNode()
 	{
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
 		if (selection.length != 1) return null;
-		
+
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
 		if (node != null && node.getAllowsChildren()) return node;
 		return null;
 	}
-	
+
 	/**
 	 * Returns the currently selected Profile. If either more then one
 	 * entry is selected or a group is selected, null is returned
@@ -347,10 +347,10 @@ public class ProfileTree
 		TreePath[] selection = getSelectionPaths();
 		if (selection == null) return null;
 		if (selection.length != 1) return null;
-		
+
 		DefaultMutableTreeNode node = (DefaultMutableTreeNode)getLastSelectedPathComponent();
 		if (node == null) return null;
-		
+
 		Object o = node.getUserObject();
 		if (o instanceof ConnectionProfile)
 		{
@@ -359,7 +359,7 @@ public class ProfileTree
 		}
 		return null;
 	}
-	
+
 	public void mousePressed(MouseEvent e)
 	{
 	}
@@ -382,14 +382,14 @@ public class ProfileTree
 	private void storeSelectedNodes()
 	{
 		TreePath[] p = getSelectionPaths();
-		
+
 		this.clipboardNodes = new DefaultMutableTreeNode[p.length];
 		for (int i = 0; i < p.length; i++)
 		{
 			this.clipboardNodes[i] = (DefaultMutableTreeNode)p[i].getLastPathComponent();
 		}
 	}
-	
+
 	public void copy()
 	{
 		storeSelectedNodes();
@@ -418,7 +418,7 @@ public class ProfileTree
 		DefaultMutableTreeNode group = (DefaultMutableTreeNode)getLastSelectedPathComponent();
 		if (group == null) return;
 		if (!group.getAllowsChildren()) return;
-		
+
 		try
 		{
 			if (clipboardType == CLIP_CUT)
@@ -441,7 +441,7 @@ public class ProfileTree
 	{
 		if (nodes == null || nodes.length < 1) return;
 		if (newParent == null) return;
-		
+
 		if (action == DnDConstants.ACTION_MOVE)
 		{
 			profileModel.moveProfilesToGroup(nodes, newParent);
@@ -452,7 +452,7 @@ public class ProfileTree
 		}
 		selectNode(nodes[0]);
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		// invoked from the "paste into new folder" action
@@ -489,9 +489,9 @@ public class ProfileTree
 			prof.setGroup(newGroupName);
 		}
 	}
-	
+
 	/**
-	 * Prompts the user for a group name and creates a new group 
+	 * Prompts the user for a group name and creates a new group
 	 * with the provided name. The new group node is automatically
 	 * after creation.
 	 * @return the name of the new group or null if the user cancelled the name input
@@ -510,7 +510,7 @@ public class ProfileTree
 		selectPath(path);
 		return group;
 	}
-	
+
 	public void selectPath(TreePath path)
 	{
 		if (path == null) return;
@@ -525,7 +525,7 @@ public class ProfileTree
 		TreePath path = new TreePath(nodes);
 		this.selectPath(path);
 	}
-	
+
 	public void valueChanged(TreeSelectionEvent e)
 	{
 		checkActions();
@@ -540,7 +540,7 @@ public class ProfileTree
 						outer.width - (autoscrollInsets.left + autoscrollInsets.right),
 						outer.height - (autoscrollInsets.top+autoscrollInsets.bottom)
 					);
-		
+
 		if (!inner.contains(cursorLocation))
 		{
 			Rectangle scrollRect = new Rectangle(

@@ -172,7 +172,7 @@ public class WbTable
 	private PrintAction printDataAction;
 	private PrintPreviewAction printPreviewAction;
 
-	private boolean adjustToColumnLabel = false;
+	private boolean adjustToColumnLabel;
 
 	private int headerPopupX = -1;
 	private Map<String, Integer> savedColumnSizes;
@@ -183,17 +183,17 @@ public class WbTable
 
 	private DwStatusBar statusBar;
 
-	private String defaultPrintHeader = null;
+	private String defaultPrintHeader;
 	private boolean showPopup = true;
-	private boolean selectOnRightButtonClick = false;
-	private boolean highlightRequiredFields = false;
+	private boolean selectOnRightButtonClick;
+	private boolean highlightRequiredFields;
 	private boolean useMultilineTooltip = true;
 	private boolean rowHeightWasOptimized;
 	private Color requiredColor;
 	private boolean allowColumnOrderSaving;
 
-	private boolean showFocusPending = false;
-	private FocusIndicator focusIndicator = null;
+	private boolean showFocusPending;
+	private FocusIndicator focusIndicator;
 	private ListSelectionControl selectionController;
 	private boolean readOnly;
 

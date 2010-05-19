@@ -1,18 +1,13 @@
 /*
  * SelectTablePanel
  *
- *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
+ * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
- *  Copyright 2002-2009, Thomas Kellerer
- *  No part of this code maybe reused without the permission of the author
+ * Copyright 2002-2010, Thomas Kellerer
+ * No part of this code maybe reused without the permission of the author
  *
- *  To contact the author please send an email to: support@sql-workbench.net
- */
-
-/*
- * SelectTablePanel.java
+ * To contact the author please send an email to: support@sql-workbench.net
  *
- * Created on Jan 13, 2010, 8:14:19 PM
  */
 package workbench.gui.components;
 
@@ -39,7 +34,6 @@ public class SelectTablePanel
 	implements ValidatingComponent, ActionListener
 {
 
-	/** Creates new form SelectTablePanel */
 	public SelectTablePanel(List<String> tablenames)
 	{
 		initComponents();
@@ -61,7 +55,7 @@ public class SelectTablePanel
 	{
 		return (String)tables.getSelectedItem();
 	}
-	
+
 	/** This method is called from within the constructor to
 	 * initialize the form.
 	 * WARNING: Do NOT modify this code. The content of this method is

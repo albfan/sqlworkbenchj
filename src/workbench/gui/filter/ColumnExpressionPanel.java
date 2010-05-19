@@ -55,7 +55,7 @@ public class ColumnExpressionPanel
 	protected JTextField valueField;
 	private ValueConverter converter = new ValueConverter();
 	//private Class lastColumnClass;
-	private boolean ignoreComparatorChange = false;
+	private boolean ignoreComparatorChange;
 
 	public ColumnExpressionPanel(ResultInfo info, ExpressionValue filter)
 	{

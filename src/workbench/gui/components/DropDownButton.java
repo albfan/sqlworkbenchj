@@ -29,21 +29,21 @@ public class DropDownButton
 	implements ActionListener, PopupMenuListener
 {
 	private JPopupMenu popup;
-	private boolean popupVisible = false;
+	private boolean popupVisible;
 	private Border menuBorder = BorderFactory.createLineBorder(Color.GRAY, 1);
-	
+
 	public DropDownButton(String label)
 	{
 		super(label);
 		init();
 	}
-	
+
 	public DropDownButton(Icon i)
 	{
 		super(i);
 		init();
 	}
-	
+
 	private void init()
 	{
 		setFocusable(false);
@@ -67,7 +67,7 @@ public class DropDownButton
 	public void actionPerformed(ActionEvent evt)
 	{
 		if (this.popup == null) return;
-		
+
 		if (popupVisible)
 		{
 			popup.setVisible(false);

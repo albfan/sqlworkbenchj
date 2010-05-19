@@ -23,13 +23,14 @@ import workbench.gui.WbSwingUtilities;
 /**
  * A JSplitPane which restores the divider size after a UI Change
  * and an updateUI()
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class WbSplitPane
 	extends JSplitPane
 {
 	public int DEFAULT_DIVIDER_SIZE = 7;
+
 	public WbSplitPane()
 	{
 		super();

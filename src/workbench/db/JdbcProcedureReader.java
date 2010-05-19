@@ -41,7 +41,7 @@ public class JdbcProcedureReader
 	implements ProcedureReader
 {
 	final protected WbConnection connection;
-	protected boolean useSavepoint = false;
+	protected boolean useSavepoint;
 
 	public JdbcProcedureReader(WbConnection conn)
 	{

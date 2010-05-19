@@ -21,15 +21,15 @@ public class SplitPaneExpander
 {
 	private JSplitPane contentPanel;
 	private int lastDivider = -1;
-	private boolean upperPartExpanded = false;
-	private boolean lowerPartExpanded = false;
-	
-	
+	private boolean upperPartExpanded;
+	private boolean lowerPartExpanded;
+
+
 	public SplitPaneExpander(JSplitPane client)
 	{
 		this.contentPanel = client;
 	}
-	
+
 	public void undoExpand()
 	{
 		if (lastDivider != -1)

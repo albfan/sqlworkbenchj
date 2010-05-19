@@ -20,15 +20,15 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import workbench.resource.ResourceMgr;
 
 /**
- * A tree cell renderer that can indicate a drop target 
+ * A tree cell renderer that can indicate a drop target
  * @author Thomas Kellerer
  */
 public class ProfileTreeCellRenderer
 	extends DefaultTreeCellRenderer
 {
-	private Object dropTargetItem = null;
-	private Border dropBorder = null;
-	
+	private Object dropTargetItem;
+	private Border dropBorder;
+
 	public ProfileTreeCellRenderer()
 	{
 		super();
@@ -38,18 +38,18 @@ public class ProfileTreeCellRenderer
 		setOpenIcon(ResourceMgr.getImage("Tree"));
 		setClosedIcon(ResourceMgr.getImage("Tree"));
 	}
-	
+
 	public void setDropTargetItem(Object target)
 	{
 		this.dropTargetItem = target;
 	}
 
-	public Component getTreeCellRendererComponent(JTree tree, 
-	                                              Object value, 
-	                                              boolean sel, 
-	                                              boolean expanded, 
-	                                              boolean leaf, 
-	                                              int row, 
+	public Component getTreeCellRendererComponent(JTree tree,
+	                                              Object value,
+	                                              boolean sel,
+	                                              boolean expanded,
+	                                              boolean leaf,
+	                                              int row,
 	                                              boolean hasFocus)
 	{
 		if (this.dropTargetItem != null && dropTargetItem == value)

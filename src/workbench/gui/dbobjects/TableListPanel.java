@@ -162,7 +162,7 @@ public class TableListPanel
 	// For synonym resolution
 	private TableIdentifier realTable;
 
-	private boolean shiftDown = false;
+	private boolean shiftDown;
 	protected boolean shouldRetrieve;
 
 	protected boolean shouldRetrieveTable;
@@ -176,7 +176,7 @@ public class TableListPanel
 	protected boolean shouldRetrieveTableData;
 
 	protected boolean busy;
-	protected boolean ignoreStateChanged = false;
+	protected boolean ignoreStateChanged;
 
 	private EditorTabSelectMenu showDataMenu;
 

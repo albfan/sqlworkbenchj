@@ -27,30 +27,30 @@ import workbench.log.LogMgr;
  *
  * @author  Thomas Kellerer
  */
-public class IntegerPropertyEditor 
-	extends JTextField 
+public class IntegerPropertyEditor
+	extends JTextField
 	implements DocumentListener, SimplePropertyEditor, FocusListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	private boolean changed;
-	private boolean immediateUpdate = false;
-	
+	private boolean immediateUpdate;
+
 	private String propName;
-	
+
 	public IntegerPropertyEditor()
 	{
 		super();
 		this.addFocusListener(this);
-		this.addMouseListener(new TextComponentMouseListener());		
+		this.addMouseListener(new TextComponentMouseListener());
 	}
-	
+
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.setSourceObject(aSource, aProperty, null);
 	}
-	
+
 	/**
 	 *	Return the value that the user entered
 	 *  as an int. If the user did not enter anything
@@ -67,15 +67,15 @@ public class IntegerPropertyEditor
 			return Integer.MIN_VALUE;
 		}
 	}
-	
+
 	public void setSourceObject(Object aSource, String aProperty, String initialText)
 	{
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
-		
+
 		this.getDocument().removeDocumentListener(this);
-		
+
 		if (this.source == null)
 		{
 			this.setter = null;
@@ -83,14 +83,14 @@ public class IntegerPropertyEditor
 			this.setText("");
 			return;
 		}
-		
+
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
-		
+
 		if (initialText != null)
 		{
 			this.setText(initialText);
 		}
-		
+
 		try
 		{
 			String name = "get" + propertyName;
@@ -113,7 +113,7 @@ public class IntegerPropertyEditor
 		}
 		this.getDocument().addDocumentListener(this);
 	}
-	
+
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -131,9 +131,9 @@ public class IntegerPropertyEditor
 			LogMgr.logError("IntegerPropertyEditor.applyChanges()", "Error setting value", e);
 		}
 	}
-	
+
 	public boolean isChanged() { return this.changed; }
-	
+
 	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
 	public void insertUpdate(DocumentEvent e) { documentChanged(); }
 	public void removeUpdate(DocumentEvent e) { documentChanged(); }
@@ -147,25 +147,25 @@ public class IntegerPropertyEditor
 		}
 		firePropertyChange(this.propName, null, null);
 	}
-	
+
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
-	
+
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
 	}
-	
+
 	/** Invoked when a component gains the keyboard focus.
 	 *
 	 */
 	public void focusGained(FocusEvent e)
 	{
 	}
-	
+
 	/** Invoked when a component loses the keyboard focus.
 	 *
 	 */

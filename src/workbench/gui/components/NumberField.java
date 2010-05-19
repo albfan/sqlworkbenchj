@@ -24,22 +24,22 @@ import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
 /**
- * 
- * @author Thomas Kellerer  
- */ 
-public class NumberField 
+ *
+ * @author Thomas Kellerer
+ */
+public class NumberField
 	extends JTextField
 {
 	private NumberFormat integerFormatter;
-	protected boolean allowDecimals = false;
+	protected boolean allowDecimals;
 	protected char decimalSep = '.';
-	
+
 	public NumberField()
 	{
 		super();
 		this.init();
 	}
-	
+
 	public NumberField(int value, int columns)
 	{
 		super(columns);
@@ -59,23 +59,23 @@ public class NumberField
 	{
 		this.decimalSep = aDecChar;
 	}
-	
+
 	public char getDecimalChar() { return this.decimalSep; }
-	
+
 	public void setAllowDecimals(boolean allowDec)
 	{
 		this.allowDecimals = allowDec;
 	}
-	
+
 	public boolean getAllowDecimals() { return this.allowDecimals; }
-	
+
 	public int getValue()
 	{
 		int retVal = 0;
 		try
 		{
 			retVal = integerFormatter.parse(getText()).intValue();
-		} 
+		}
 		catch (ParseException e)
 		{
 			// This should never happen because insertString allows
@@ -84,17 +84,17 @@ public class NumberField
 		}
 		return retVal;
 	}
-	
+
 	public final void setValue(int value)
 	{
 		setText(integerFormatter.format(value));
 	}
-	
+
 	protected Document createDefaultModel()
 	{
 		return new WholeNumberDocument();
 	}
-	
+
 	protected class WholeNumberDocument extends PlainDocument
 	{
 		public void insertString(int offs,String str,AttributeSet a)
@@ -103,7 +103,7 @@ public class NumberField
 			char[] source = str.toCharArray();
 			char[] result = new char[source.length];
 			int j = 0;
-			
+
 			for (int i = 0; i < result.length; i++)
 			{
 				if (Character.isDigit(source[i]) || (allowDecimals && source[i] == decimalSep))

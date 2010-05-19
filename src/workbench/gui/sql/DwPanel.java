@@ -100,7 +100,7 @@ public class DwPanel
 	private boolean hasResultSet;
 
 	protected WbScrollPane scrollPane;
-	private long lastExecutionTime = 0;
+	private long lastExecutionTime;
 
 	private boolean showLoadProgress;
 	private boolean savingData = false;
@@ -568,7 +568,7 @@ public class DwPanel
 	{
 		return lastExecutionTime;
 	}
-	
+
 	/**
 	 * Displays the last execution time in the status bar
 	 */

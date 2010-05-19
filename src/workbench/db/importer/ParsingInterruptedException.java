@@ -20,11 +20,10 @@ import org.xml.sax.SAXException;
 public class ParsingInterruptedException
 	extends SAXException
 {
-	
-	/** Creates a new instance of ParsingInterruptedException */
+
 	public ParsingInterruptedException()
 	{
 		super("Parsing cancelled");
 	}
-	
+
 }

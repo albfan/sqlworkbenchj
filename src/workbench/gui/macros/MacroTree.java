@@ -65,7 +65,7 @@ public class MacroTree
 	private MacroTreeNode[] clipboardNodes;
 	private static final int CLIP_COPY = 1;
 	private static final int CLIP_CUT = 2;
-	private int clipboardType = 0;
+	private int clipboardType;
 	private CutCopyPastePopup popup;
 	private WbAction pasteToFolderAction;
 
@@ -120,12 +120,12 @@ public class MacroTree
 		setModel(macroModel);
 		macroModel.addTreeModelListener(this);
 	}
-	
+
 	public void addPopupActionAtTop(WbAction a)
 	{
 		this.popup.insert(a, 0);
 	}
-	
+
 	public void addPopupAction(WbAction action, boolean withSeparator)
 	{
 		if (withSeparator) this.popup.addSeparator();
@@ -209,7 +209,7 @@ public class MacroTree
 		MacroStorage current = this.macroModel.getMacros();
 		return current.isModified();
 	}
-	
+
 	public void saveChanges()
 	{
 		MacroStorage current = this.macroModel.getMacros();

@@ -36,7 +36,7 @@ public class DelimiterDefinitionPanel
 	private BooleanPropertyEditor singleLineCheckBox;
 	public static final String PROP_DELIM = "delimiter";
 	public static final String PROP_SLD = "singleLine";
-	private boolean updating = false;
+	private boolean updating;
 
 	public DelimiterDefinitionPanel()
 	{

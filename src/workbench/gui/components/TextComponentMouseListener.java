@@ -10,6 +10,7 @@
  *
  */
 package workbench.gui.components;
+
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.LinkedList;
@@ -22,8 +23,8 @@ import workbench.gui.actions.WbAction;
 import workbench.gui.menu.TextPopup;
 
 /**
- * Provide a Cut, Copy, Paste popup menu for Text components 
- * 
+ * Provide a Cut, Copy, Paste popup menu for Text components
+ *
  * @author Thomas Kellerer Kellerer
  */
 public class TextComponentMouseListener
@@ -33,18 +34,18 @@ public class TextComponentMouseListener
 	private TextPopup popup;
 	private JTextComponent text;
 	private int originalComponentCount = -1;
-	
+
 	/**
 	 * Create a listener to display a context menu with Cut, Copy and Paste
-	 * entries. 
+	 * entries.
 	 */
 	public TextComponentMouseListener()
 	{
 	}
-	
+
 	/**
 	 * Create a listener to display a context menu with Cut, Copy and Paste
-	 * entries. The shortcuts of the menu actions will be added to the input 
+	 * entries. The shortcuts of the menu actions will be added to the input
 	 * map of the text component.
 	 */
 	public TextComponentMouseListener(JTextComponent component)
@@ -59,9 +60,9 @@ public class TextComponentMouseListener
 		text.addCaretListener(this);
 		component.addMouseListener(this);
 	}
-	
+
 	/**
-	 * Add an action to the popup menu. The action's shortcut will 
+	 * Add an action to the popup menu. The action's shortcut will
 	 * also be added to the underlying text component's input map
 	 * (if one was supplied in the constructor)
 	 */
@@ -73,7 +74,7 @@ public class TextComponentMouseListener
 			action.addToInputMap(text);
 		}
 	}
-	
+
 	/**
 	 * Add additional menu items to the popup menu.
 	 */
@@ -92,7 +93,7 @@ public class TextComponentMouseListener
 			this.additionalItems.add(item);
 		}
 	}
-	
+
 	public void mouseClicked(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON3 && e.getSource() instanceof JTextComponent)
@@ -114,7 +115,7 @@ public class TextComponentMouseListener
 			}
 		}
 	}
-	
+
 	private TextPopup createPopup(JTextComponent component)
 	{
 		ClipboardWrapper wrapp = new ClipboardWrapper(component);
@@ -135,28 +136,28 @@ public class TextComponentMouseListener
 	public void mouseEntered(MouseEvent e)
 	{
 	}
-	
+
 	/** Invoked when the mouse exits a component.
 	 *
 	 */
 	public void mouseExited(MouseEvent e)
 	{
 	}
-	
+
 	/** Invoked when a mouse button has been pressed on a component.
 	 *
 	 */
 	public void mousePressed(MouseEvent e)
 	{
 	}
-	
+
 	/** Invoked when a mouse button has been released on a component.
 	 *
 	 */
 	public void mouseReleased(MouseEvent e)
 	{
 	}
-	
+
 	public void caretUpdate(CaretEvent evt)
 	{
 		if (this.text != null && this.popup != null)
@@ -164,11 +165,11 @@ public class TextComponentMouseListener
 			checkActions(this.text, this.popup);
 		}
 	}
-	
+
 	private void checkActions(JTextComponent component, TextPopup pop)
 	{
 		if (component == null || pop == null) return;
-		
+
 		boolean edit = component.isEditable();
 		boolean selected = component.getSelectionEnd() > component.getSelectionStart();
 		pop.getCutAction().setEnabled(edit && selected);

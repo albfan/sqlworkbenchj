@@ -132,9 +132,9 @@ public class EditorPanel
 	private List<FilenameChangeListener> filenameChangeListeners;
 	private File currentFile;
 	private String fileEncoding;
-	private Set<String> dbFunctions = null;
-	private Set<String> dbDatatypes = null;
-	private boolean isMySQL = false;
+	private Set<String> dbFunctions;
+	private Set<String> dbDatatypes;
+	private boolean isMySQL;
 	private DelimiterDefinition alternateDelimiter;
 
 	public static EditorPanel createSqlEditor()
@@ -295,7 +295,7 @@ public class EditorPanel
 
 	public UndoAction getUndoAction() { return this.undo; }
 	public RedoAction getRedoAction() { return this.redo; }
-	
+
 	protected FindAction getFindAction() { return this.replacer.getFindAction(); }
 	protected FindAgainAction getFindAgainAction() { return this.replacer.getFindAgainAction(); }
 	protected ReplaceAction getReplaceAction() { return this.replacer.getReplaceAction(); }
@@ -586,7 +586,7 @@ public class EditorPanel
 				this.document.removeDocumentListener(documentHandler);
 				this.document.reset();
 			}
-			
+
 			String filename = aFile.getAbsolutePath();
 			File f = new File(filename);
 			try
@@ -628,7 +628,7 @@ public class EditorPanel
 			// to read everything into one single buffer, and then call insertString()
 			// once, but that will double the memory usage during loading
 			int lines = FileUtil.readLines(reader, lineBuffer, numLines, "\n");
-			
+
 			while (lines > 0)
 			{
 				doc.insertString(pos, lineBuffer.toString(), null);

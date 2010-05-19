@@ -83,7 +83,7 @@ public abstract class BaseAnalyzer
 	protected int context;
 	protected TableIdentifier tableForColumnList;
 	protected String schemaForTableList;
-	protected boolean addAllMarker = false;
+	protected boolean addAllMarker;
 	protected List elements;
 	protected String title;
 	private boolean overwriteCurrentWord;

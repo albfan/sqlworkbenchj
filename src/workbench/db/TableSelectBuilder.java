@@ -25,8 +25,8 @@ public class TableSelectBuilder
 	public static final String COLUMN_PLACEHOLDER = "${column}";
 
 	private WbConnection dbConnection;
-	private boolean excludeLobColumns = false;
-	private boolean useColumnAlias = false;
+	private boolean excludeLobColumns;
+	private boolean useColumnAlias;
 
 	public TableSelectBuilder(WbConnection source)
 	{

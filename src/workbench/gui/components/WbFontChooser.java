@@ -32,13 +32,13 @@ public class WbFontChooser
 	extends javax.swing.JPanel
 {
 	private boolean updateing;
-	private boolean fontReset = false;
+	private boolean fontReset;
 
 	public WbFontChooser(boolean monospacedOnly)
 	{
 		this(monospacedOnly, false);
 	}
-	
+
 	public WbFontChooser(boolean monospacedOnly, boolean allowReset)
 	{
 		super();

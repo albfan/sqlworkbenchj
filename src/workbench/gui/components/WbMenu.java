@@ -22,14 +22,14 @@ import workbench.util.NumberStringCache;
 public class WbMenu
 	extends JMenu
 {
-	private String parentMenuId = null;
-	private boolean createSeparator = false;
-	
+	private String parentMenuId;
+	private boolean createSeparator;
+
 	public WbMenu()
 	{
 		super();
 	}
-	
+
 	public WbMenu(String aText)
 	{
 		super(aText);
@@ -50,7 +50,7 @@ public class WbMenu
 	{
 		super(aText, b);
 	}
-	
+
 	public WbMenu(Action anAction)
 	{
 		super(anAction);
@@ -61,11 +61,11 @@ public class WbMenu
 		this.parentMenuId = id;
 	}
 
-	public String getParentMenuId() 
+	public String getParentMenuId()
 	{
 		return this.parentMenuId;
 	}
-	
+
 	public void setCreateMenuSeparator(boolean aFlag)
 	{
 		this.createSeparator = aFlag;
@@ -74,7 +74,7 @@ public class WbMenu
 	{
 		return this.createSeparator;
 	}
-	
+
 	public void setText(String aText)
 	{
 		int pos = aText.indexOf('&');
@@ -85,6 +85,6 @@ public class WbMenu
 			this.setMnemonic(mnemonic);
 		}
 		super.setText(aText);
-	}	
-	
+	}
+
 }

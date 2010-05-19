@@ -36,7 +36,7 @@ public class DbObjectCache
 {
 	private WbConnection dbConnection;
 	private static final String NULL_SCHEMA = "$$wb-null-schema$$";
-	private boolean retrieveOraclePublicSynonyms = false;
+	private boolean retrieveOraclePublicSynonyms;
 
 	private Set<String> schemasInCache;
 	private SortedMap<TableIdentifier, List<ColumnIdentifier>> objects;

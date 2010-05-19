@@ -35,9 +35,9 @@ public class ImportFileLister
 	private List<TableIdentifier> tables;
 	private WbConnection dbConn;
 	private TablenameResolver resolver;
-	private boolean ignoreSchema = false;
-	private WbFile sourceDir = null;
-	private boolean checkDependencies = false;
+	private boolean ignoreSchema;
+	private WbFile sourceDir;
+	private boolean checkDependencies;
 	private String extension;
 
 	public ImportFileLister(WbConnection con, File dir, final String ext)

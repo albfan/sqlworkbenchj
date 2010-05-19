@@ -24,16 +24,16 @@ import workbench.util.StringUtil;
 
 
 /**
- * @author Thomas Kellerer  
- */ 
-public class MultiLineToolTipUI 
+ * @author Thomas Kellerer
+ */
+public class MultiLineToolTipUI
 	extends BasicToolTipUI
 {
 	private final String[] emptyLines = new String[] { StringUtil.EMPTY_STRING };
-	private int maxWidth = 0;
+	private int maxWidth;
 	private Dimension prefSize = new Dimension();
 	private String[] displayLines;
-	
+
 	public void paint(Graphics g, JComponent c)
 	{
 		FontMetrics metrics = g.getFontMetrics();
@@ -51,7 +51,7 @@ public class MultiLineToolTipUI
 			}
 		}
 	}
-	
+
 	public Dimension getPreferredSize(JComponent c)
 	{
 		FontMetrics metrics = c.getFontMetrics(c.getFont());
@@ -68,12 +68,12 @@ public class MultiLineToolTipUI
 			{
 				int width = SwingUtilities.computeStringWidth(metrics,displayLines[i]);
 				this.maxWidth = (this.maxWidth < width) ? width : this.maxWidth;
-			} 
+			}
 		}
 		int height = metrics.getHeight() * displayLines.length;
 		prefSize.setSize(maxWidth + 6, height + 2);
 		return prefSize;
 	}
-	
+
 }
 

@@ -50,7 +50,7 @@ public class DbDriver
 	protected String name;
 	private String driverClass;
 	private List<String> libraryList;
-	private boolean isInternal = false;
+	private boolean isInternal;
 
 	private String sampleUrl;
 

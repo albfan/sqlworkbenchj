@@ -43,7 +43,7 @@ public class WbTextLabel
 	private int textY = DEFAULT_TEXT_Y;
 	private int alignment = SwingConstants.LEFT;
 	private FontMetrics fm;
-	private boolean hasBorder = false;
+	private boolean hasBorder;
 	private Map renderingHints;
 
 	public WbTextLabel()

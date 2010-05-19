@@ -45,7 +45,7 @@ public class TableReplacer
 	private FindDataAgainAction findAgainAction;
 	private ReplaceDataAction replaceAction;
 	private DataStoreReplacer replacer;
-	private boolean tableChanging = false;
+	private boolean tableChanging;
 
 	public TableReplacer(WbTable table)
 	{

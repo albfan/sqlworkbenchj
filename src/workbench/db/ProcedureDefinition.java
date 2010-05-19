@@ -31,13 +31,13 @@ public class ProcedureDefinition
 	private String catalog;
 	private String procName;
 	private String comment;
-	
-	// as returned by the JDBC driver corresponds to 
+
+	// as returned by the JDBC driver corresponds to
 	// DatabaseMetaData.procedureNoResult
 	// DatabaseMetaData.procedureReturnsResult
-	private int resultType; 
-	
-	private OracleType oracleType = null;;
+	private int resultType;
+
+	private OracleType oracleType;;
 	private CharSequence source;
 	private List<String> parameterTypes;
 
@@ -63,7 +63,7 @@ public class ProcedureDefinition
 		procName = name;
 		resultType = type;
 	}
-	
+
 	public ProcedureDefinition(String cat, String schem, String name, int type)
 	{
 		schema = schem;
@@ -71,7 +71,7 @@ public class ProcedureDefinition
 		procName = name;
 		resultType = type;
 	}
-	
+
 	public String getComment()
 	{
 		return comment;
@@ -156,7 +156,7 @@ public class ProcedureDefinition
 		result.append(')');
 		return result.toString();
 	}
-	
+
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -174,7 +174,7 @@ public class ProcedureDefinition
 		}
 		return this.source;
 	}
-	
+
 	public String getObjectName(WbConnection conn)
 	{
 		return conn.getMetadata().quoteObjectname(this.procName);
@@ -189,22 +189,22 @@ public class ProcedureDefinition
 	{
 		return SqlUtil.buildExpression(conn, catalog, schema, procName);
 	}
-	
+
 	public String getObjectName()
 	{
 		return procName;
 	}
-	
-	public void setSource(CharSequence s) 
-	{ 
-		this.source = s; 
+
+	public void setSource(CharSequence s)
+	{
+		this.source = s;
 	}
-	
-	public CharSequence getSource() 
-	{ 
-		return this.source; 
+
+	public CharSequence getSource()
+	{
+		return this.source;
 	}
-	
+
 	public boolean isOraclePackage()
 	{
 		return oracleType == OracleType.packageType;
@@ -224,28 +224,28 @@ public class ProcedureDefinition
 		if (oracleType != null) return catalog;
 		return null;
 	}
-	
-	public String getCatalog() 
+
+	public String getCatalog()
 	{
 //		if (oracleType != null) return null;
-		return this.catalog; 
+		return this.catalog;
 	}
-	
-	public String getSchema() 
-	{ 
-		return this.schema; 
+
+	public String getSchema()
+	{
+		return this.schema;
 	}
-	
-	public String getProcedureName() 
+
+	public String getProcedureName()
 	{
 		return getObjectName();
 	}
-	
-	public int getResultType() 
-	{ 
-		return this.resultType; 
+
+	public int getResultType()
+	{
+		return this.resultType;
 	}
-	
+
 	public String getObjectType()
 	{
 		if (this.isOraclePackage())
@@ -256,7 +256,7 @@ public class ProcedureDefinition
 		{
 			return "TYPE";
 		}
-		
+
 		if (resultType == DatabaseMetaData.procedureReturnsResult)
 		{
 			return "FUNCTION";
@@ -265,10 +265,10 @@ public class ProcedureDefinition
 		{
 			return "PROCEDURE";
 		}
-		
+
 		return "";
 	}
-	
+
 	public String toString()
 	{
 		String name = oracleType != null ? catalog + "." + procName : procName;

@@ -128,7 +128,7 @@ public class DbMetadata
 	private String quoteCharacter;
 	private final Set<String> keywords = new TreeSet<String>(new CaseInsensitiveComparator());
 
-	private Pattern selectIntoPattern = null;
+	private Pattern selectIntoPattern;
 
 	private String tableTypeName;
 

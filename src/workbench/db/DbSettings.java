@@ -47,10 +47,10 @@ public class DbSettings
 	private boolean ddlNeedsCommit;
 
 	private boolean neverQuoteObjects;
-	private boolean reportsRealSizeAsDisplaySize = false;
+	private boolean reportsRealSizeAsDisplaySize;
 
 	private boolean allowsMultipleGetUpdateCounts = true;
-	private boolean supportsBatchedStatements = false;
+	private boolean supportsBatchedStatements;
 	private boolean supportsCommentInSql = true;
 
 	private Map<Integer, String> indexTypeMapping;
@@ -126,7 +126,7 @@ public class DbSettings
 		if (type == null) return false;
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), false);
 	}
-	
+
 	/**
 	 * Returns true if NULl should be used for a column definition that is nullable
 	 * (instead of not using NULL at all)
@@ -908,7 +908,7 @@ public class DbSettings
 	 * @see #getRetrieveTableSourceNeedsQuotes()
 	 * @see #getGenerateTableComments()
 	 * @see #getGenerateTableGrants()
-	 * @see #getGenerateTableIndexSource() 
+	 * @see #getGenerateTableIndexSource()
 	 */
 	public String getRetrieveTableSourceSql()
 	{

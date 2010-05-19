@@ -25,7 +25,6 @@ public class TableDataSettings
 	implements ActionListener
 {
 
-	/** Creates new form ConfigureWarningThreshold */
 	public TableDataSettings()
 	{
 		super();

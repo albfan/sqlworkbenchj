@@ -20,14 +20,13 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
 import workbench.resource.ResourceMgr;
-import workbench.storage.DataStore;
 import workbench.storage.RowData;
 
 /**
  * A renderer to display the status of a row in the result set.
  * <br/>
  * It displays different icons for new and modified, depending on the status of the row.
- * 
+ *
  * @author  Thomas Kellerer
  */
 public class RowStatusRenderer

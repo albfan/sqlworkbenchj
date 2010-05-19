@@ -118,8 +118,8 @@ public class DbExplorerPanel
 	private boolean busy;
 	private String schemaFromWorkspace;
 	private String catalogFromWorkspace;
-	private boolean switchCatalog = false;
-	private JComponent currentFocus = null;
+	private boolean switchCatalog;
+	private JComponent currentFocus;
 	private ReloadAction reloadSchemasAction;
 	private Reloadable schemaReloader;
 	private FlatButton reloadButton;

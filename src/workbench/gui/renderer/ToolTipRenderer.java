@@ -55,7 +55,7 @@ public class ToolTipRenderer
 	implements TableCellRenderer, WbRenderer, RequiredFieldHighlighter
 {
 	protected String displayValue = StringUtil.EMPTY_STRING;
-	protected String tooltip = null;
+	protected String tooltip;
 
 	protected int rightMargin;
 	protected Color selectedForeground;
@@ -71,7 +71,7 @@ public class ToolTipRenderer
 
 	protected int maxTooltipSize = Settings.getInstance().getIntProperty("workbench.gui.renderer.maxtooltipsize", 1000);
 	protected int editingRow = -1;
-	private boolean isEditing = false;
+	private boolean isEditing;
 	private boolean[] highlightCols;
 	private int currentColumn = -1;
 
@@ -79,7 +79,7 @@ public class ToolTipRenderer
 	private Rectangle paintTextR = new Rectangle();
 	private Rectangle paintViewR = new Rectangle();
 
-	private boolean isPrinting = false;
+	private boolean isPrinting ;
 
 	protected Insets focusedInsets;
 	protected Insets regularInsets;
@@ -92,7 +92,7 @@ public class ToolTipRenderer
 	private int valign = SwingConstants.TOP;
 	private int halign = SwingConstants.LEFT;
 
-	private boolean isAlternatingRow = false;
+	private boolean isAlternatingRow;
 
 	protected Map renderingHints;
 

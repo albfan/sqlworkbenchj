@@ -79,7 +79,7 @@ public class RecordFormPanel
 
 	private int currentRow;
 	private WbTable data;
-	private int toFocus = 0;
+	private int toFocus;
 
 	public RecordFormPanel(WbTable table, int displayRow)
 	{

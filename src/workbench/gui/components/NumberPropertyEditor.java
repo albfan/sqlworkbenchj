@@ -26,7 +26,7 @@ import workbench.log.LogMgr;
  *
  * @author  Thomas Kellerer
  */
-public class NumberPropertyEditor 
+public class NumberPropertyEditor
 	extends NumberField
 	implements DocumentListener, SimplePropertyEditor, FocusListener
 {
@@ -35,14 +35,14 @@ public class NumberPropertyEditor
 	private Method getter;
 	private String propName;
 	private boolean changed;
-	private boolean immediateUpdate = false;
-	
+	private boolean immediateUpdate;
+
 	public NumberPropertyEditor()
 	{
 		super();
 		this.addFocusListener(this);
 	}
-	
+
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
@@ -60,7 +60,7 @@ public class NumberPropertyEditor
 			name = "set" + propertyName;
 			Class[] parms = {int.class};
 			this.setter = cls.getMethod(name, parms);
-			
+
 			String value = this.getter.invoke(this.source, (Object[])null).toString();
 			super.setText(value);
 		}
@@ -71,12 +71,12 @@ public class NumberPropertyEditor
 		doc = this.getDocument();
 		if (doc != null) doc.addDocumentListener(this);
 	}
-	
+
 	public void applyChanges()
 	{
 		if (this.setter == null) return;
 		if (!this.changed) return;
-		
+
 		Object[] args = new Object[1];
 		args[0] = this.getText();
 		try
@@ -89,7 +89,7 @@ public class NumberPropertyEditor
 			LogMgr.logError("NumberPropertyEditor.applyChanges", "Error applying changes", e);
 		}
 	}
-	
+
 	public void changedUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -99,7 +99,7 @@ public class NumberPropertyEditor
 		}
 		firePropertyChange(this.propName, null, null);
 	}
-	
+
 	public void insertUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -109,7 +109,7 @@ public class NumberPropertyEditor
 		}
 		firePropertyChange(this.propName, null, null);
 	}
-	
+
 	public void removeUpdate(DocumentEvent e)
 	{
 		this.changed = true;
@@ -124,7 +124,7 @@ public class NumberPropertyEditor
 		}
 		firePropertyChange(this.propName, null, null);
 	}
-	
+
 	public boolean isChanged()
 	{
 		return this.changed;
@@ -135,12 +135,12 @@ public class NumberPropertyEditor
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
-	
+
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
 	}
-	
+
 	/** Invoked when a component gains the keyboard focus.
 	 *
 	 */
@@ -148,7 +148,7 @@ public class NumberPropertyEditor
 	{
 		this.selectAll();
 	}
-	
+
 	/** Invoked when a component loses the keyboard focus.
 	 *
 	 */

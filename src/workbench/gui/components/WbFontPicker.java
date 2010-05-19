@@ -31,8 +31,8 @@ public class WbFontPicker
 	implements Serializable
 {
 	private Font selectedFont;
-	private boolean monospacedOnly = false;
-	private boolean allowFontReset = false;
+	private boolean monospacedOnly;
+	private boolean allowFontReset;
 
 	public WbFontPicker()
 	{

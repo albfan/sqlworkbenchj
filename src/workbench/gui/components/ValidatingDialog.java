@@ -43,7 +43,7 @@ public class ValidatingDialog
 	extends JDialog
 	implements WindowListener, ActionListener
 {
-	protected ValidatingComponent validator = null;
+	protected ValidatingComponent validator;
 	protected JComponent editorComponent;
 	private JButton[] optionButtons;
 
@@ -52,18 +52,18 @@ public class ValidatingDialog
 	private int selectedOption = -1;
 	private EscAction esc;
 	private JPanel buttonPanel;
-	
+
 	public ValidatingDialog(Dialog owner, String title, JComponent editor)
 	{
 		super(owner, title, true);
 		init(editor, new String[] { ResourceMgr.getString("LblOK") }, true);
 	}
-	
+
 	public ValidatingDialog(Frame owner, String title, JComponent editor)
 	{
 		this(owner, title, editor, true);
 	}
-	
+
 	public ValidatingDialog(Frame owner, String title, JComponent editor, boolean addCancelButton)
 	{
 		super(owner, title, true);
@@ -74,26 +74,26 @@ public class ValidatingDialog
 	{
 		this(owner, title, editor, options, true);
 	}
-	
+
 	public ValidatingDialog(Dialog owner, String title, JComponent editor, String[] options, boolean addCancelButton)
 	{
 		super(owner, title, true);
 		init(editor, options, addCancelButton);
 	}
-	
+
 	public void setDefaultButton(int index)
 	{
 		JRootPane root = this.getRootPane();
-		if (index >= optionButtons.length && cancelButton != null)  
+		if (index >= optionButtons.length && cancelButton != null)
 		{
 			root.setDefaultButton(cancelButton);
 		}
 		else
 		{
-			root.setDefaultButton(optionButtons[index]);		
+			root.setDefaultButton(optionButtons[index]);
 		}
 	}
-	
+
 	private void init(JComponent editor, String[] options, boolean addCancelButton)
 	{
 		if (editor instanceof ValidatingComponent)
@@ -112,23 +112,23 @@ public class ValidatingDialog
 			}
 			this.optionButtons[i].addActionListener(this);
 		}
-		
+
 		if (addCancelButton)
 		{
 			this.cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 			this.cancelButton.setName("cancel");
 			this.cancelButton.addActionListener(this);
 		}
-		
+
 		JRootPane root = this.getRootPane();
-		root.setDefaultButton(optionButtons[0]);		
+		root.setDefaultButton(optionButtons[0]);
 
 		if (addCancelButton)
 		{
 			esc = new EscAction(this, this);
 			//esc.addToInputMap(editor);
 		}
-		
+
 		JPanel content = new JPanel();
 		content.setLayout(new BorderLayout());
 		Border b = BorderFactory.createEmptyBorder(10,10,10,10);
@@ -149,7 +149,7 @@ public class ValidatingDialog
 		this.pack();
 		this.addWindowListener(this);
 	}
-	
+
 	public int getSelectedOption()
 	{
 		return this.selectedOption;
@@ -158,17 +158,17 @@ public class ValidatingDialog
 	{
 		return this.isCancelled;
 	}
-	
+
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title)
 	{
 		return showConfirmDialog(parent, editor, title, null, 0, false);
 	}
-	
+
 	public static boolean showConfirmDialog(Window parent, JComponent editor, String title, int defaultButton)
 	{
 		return showConfirmDialog(parent, editor, title, null, defaultButton, false);
 	}
-	
+
 	public static ValidatingDialog createDialog(Window parent, JComponent editor, String title, Component reference, int defaultButton, boolean centeredButtons)
 	{
 		ValidatingDialog dialog = null;
@@ -206,42 +206,42 @@ public class ValidatingDialog
 	{
 		ValidatingDialog dialog = createDialog(parent, editor, title, reference, defaultButton, centeredButtons);
 		dialog.setVisible(true);
-		
+
 		return !dialog.isCancelled();
 	}
-	
+
 	private void close()
 	{
 		this.setVisible(false);
 		this.dispose();
 	}
-	
+
 	public void windowActivated(WindowEvent e)
 	{
 		if (validator == null) editorComponent.requestFocusInWindow();
 	}
-	
+
 	public void windowClosed(WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosing(WindowEvent e)
 	{
 		this.close();
 	}
-	
+
 	public void windowDeactivated(WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeiconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowIconified(WindowEvent e)
 	{
 	}
-	
+
 	public void windowOpened(WindowEvent e)
 	{
 		EventQueue.invokeLater(new Runnable()
@@ -260,7 +260,7 @@ public class ValidatingDialog
 		this.isCancelled = false;
 		this.close();
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.cancelButton || e.getSource() == this.esc)
@@ -269,7 +269,7 @@ public class ValidatingDialog
 			this.isCancelled = true;
 			this.close();
 		}
-		else 
+		else
 		{
 			for (int i = 0; i < optionButtons.length; i++)
 			{
@@ -286,5 +286,5 @@ public class ValidatingDialog
 			}
 		}
 	}
-	
+
 }

@@ -33,8 +33,8 @@ import workbench.resource.Settings;
 
 /**
  * Stores the SQL scripts entered in the {@link SqlPanel} and manages
- * a history of statements. 
- * 
+ * a history of statements.
+ *
  * @author  Thomas Kellerer
  */
 public class SqlHistory
@@ -44,7 +44,7 @@ public class SqlHistory
 	final private List<SqlHistoryEntry> history;
 	private int currentEntry;
 	private int maxSize;
-	private boolean changed = false;
+	private boolean changed;
 	private EditorPanel editor;
 	private NextStatementAction nextStmtAction;
 	private PrevStatementAction prevStmtAction;
@@ -68,7 +68,7 @@ public class SqlHistory
 
 		this.lastStmtAction = new LastStatementAction(this);
 		this.lastStmtAction.setEnabled(false);
-		
+
 		this.clearAction = new ClearStatementHistoryAction(this);
 		this.clearAction.setEnabled(false);
 	}
@@ -80,21 +80,21 @@ public class SqlHistory
 		firstStmtAction.setEnabled(flag);
 		lastStmtAction.setEnabled(flag);
 	}
-	
+
 	public WbAction getShowFirstStatementAction() { return this.firstStmtAction; }
 	public WbAction getShowLastStatementAction() { return this.lastStmtAction; }
 	public WbAction getShowNextStatementAction() { return this.nextStmtAction; }
 	public WbAction getShowPreviousStatementAction() { return this.prevStmtAction; }
 	public WbAction getClearHistoryAction() { return this.clearAction; }
-	
+
 	public synchronized void addContent(EditorPanel edit)
 	{
 		boolean includeFiles = Settings.getInstance().getStoreFilesInHistory();
 		if (!includeFiles && edit.hasFileLoaded()) return;
-		
+
 		int maxLength = Settings.getInstance().getIntProperty("workbench.sql.history.maxtextlength", 1024*1024*10);
 		if (edit.getDocumentLength() > maxLength) return;
-		
+
 		String text = edit.getText();
 		if (text == null || text.length() == 0) return;
 
@@ -221,12 +221,12 @@ public class SqlHistory
 
 	public void writeToStream(OutputStream out)
 	{
-		
+
 		String lineEnding = "\n";
 		try
 		{
 			Writer writer = EncodingUtil.createWriter(out, "UTF-8");
-			
+
 			int count = this.history.size();
 			for (int i=0; i < count; i++)
 			{
@@ -256,7 +256,7 @@ public class SqlHistory
 					writer.write(lineEnding);
 					line = reader.readLine();
 				}
-				
+
 				//writer.write(lineEnding);
 				writer.write(LIST_DELIMITER);
 				writer.write(lineEnding);
@@ -281,7 +281,7 @@ public class SqlHistory
 		int pos = 0;
 		int start = -1;
 		int end = -1;
-		
+
 		String lineEnding = "\n";
 		BufferedReader reader = null;
 		try
@@ -339,7 +339,7 @@ public class SqlHistory
 		{
 			try { reader.close(); } catch (Throwable th) {}
 		}
-		
+
 		if (content.length() > 0)
 		{
 			SqlHistoryEntry entry = new SqlHistoryEntry(content.toString(), pos, start, end);

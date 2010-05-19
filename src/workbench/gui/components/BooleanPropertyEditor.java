@@ -33,24 +33,24 @@ public class BooleanPropertyEditor
 	private Method getter;
 	private boolean changed;
 	private String propName;
-	private boolean immediateUpdate = false;
-	
+	private boolean immediateUpdate;
+
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
 		this.removeItemListener(this);
-		
+
 		if (aSource == null)
 		{
 			this.getter = null;
 			this.setter = null;
 			return;
-		}		
-		
+		}
+
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
-		
+
 		try
 		{
 			String name = "get" + propertyName;
@@ -68,11 +68,11 @@ public class BooleanPropertyEditor
 				name = "is" + propertyName;
 				this.getter = cls.getMethod(name, (Class[])null);
 			}
-			
+
 			name = "set" + propertyName;
 			Class[] parms = {boolean.class};
 			this.setter = cls.getMethod(name, parms);
-			
+
 			Boolean value = (Boolean)this.getter.invoke(this.source, (Object[])null);
 			this.setSelected(value.booleanValue());
 			this.addItemListener(this);
@@ -82,7 +82,7 @@ public class BooleanPropertyEditor
 			LogMgr.logError("BooleanPropertyEditor.setSourceObject()", "Error during init", e);
 		}
 	}
-	
+
 	public void itemStateChanged(ItemEvent evt)
 	{
 		this.changed = true;
@@ -98,7 +98,7 @@ public class BooleanPropertyEditor
 			}
 		});
 	}
-	
+
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -115,20 +115,20 @@ public class BooleanPropertyEditor
 			LogMgr.logError("BooleanPropertyEditor.setSourceObject()", "Error when applying changes", e);
 		}
 	}
-	
+
 	public boolean isChanged()
 	{
 		return this.changed;
 	}
-	
+
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 	}
-	
+
 	public boolean getImmediateUpdate()
-	{ 
-		return this.immediateUpdate; 
+	{
+		return this.immediateUpdate;
 	}
-	
+
 }

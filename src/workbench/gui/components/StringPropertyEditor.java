@@ -26,41 +26,41 @@ import workbench.log.LogMgr;
  *
  * @author  Thomas Kellerer
  */
-public class StringPropertyEditor 
-	extends JTextField 
+public class StringPropertyEditor
+	extends JTextField
 	implements DocumentListener, SimplePropertyEditor, FocusListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
-	
+
 	// "dirty" flag, if this is true, the target object
 	// has not been updated to reflect the state of this editor
 	private boolean changed;
-	
-	private boolean immediateUpdate = false;
+
+	private boolean immediateUpdate;
 	private String propName;
-	
+
 	public StringPropertyEditor()
 	{
 		super();
 		this.addFocusListener(this);
-		this.addMouseListener(new TextComponentMouseListener());		
+		this.addMouseListener(new TextComponentMouseListener());
 	}
-	
+
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.setSourceObject(aSource, aProperty, null);
 	}
-	
+
 	public void setSourceObject(Object aSource, String aProperty, String initialText)
 	{
 		this.source = aSource;
 		this.changed = false;
 		this.propName = aProperty;
-		
+
 		this.getDocument().removeDocumentListener(this);
-		
+
 		if (aSource == null)
 		{
 			this.setText("");
@@ -70,12 +70,12 @@ public class StringPropertyEditor
 		}
 
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
-		
+
 		if (initialText != null)
 		{
 			this.setText(initialText);
 		}
-		
+
 		try
 		{
 			String name = "get" + propertyName;
@@ -98,7 +98,7 @@ public class StringPropertyEditor
 		}
 		this.getDocument().addDocumentListener(this);
 	}
-	
+
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -116,9 +116,9 @@ public class StringPropertyEditor
 			LogMgr.logError("StringPropertyEditor.setSourceObject()", "Error when applying changes", e);
 		}
 	}
-	
+
 	public boolean isChanged() { return this.changed; }
-	
+
 	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
 	public void insertUpdate(DocumentEvent e) { documentChanged(); }
 	public void removeUpdate(DocumentEvent e) { documentChanged(); }
@@ -144,12 +144,12 @@ public class StringPropertyEditor
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
-	
+
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
 	}
-	
+
 	/** Invoked when a component gains the keyboard focus.
 	 *
 	 */
@@ -163,7 +163,7 @@ public class StringPropertyEditor
 			this.selectAll();
 		}
 	}
-	
+
 	/** Invoked when a component loses the keyboard focus.
 	 *
 	 */

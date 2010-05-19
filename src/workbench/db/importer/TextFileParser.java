@@ -64,39 +64,39 @@ public class TextFileParser
 	private String tableName;
 	private String targetSchema;
 	private TableDefinition targetTable;
-	private String encoding = null;
+	private String encoding;
 	private String delimiter = "\t";
-	private String quoteChar = null;
-	private boolean decodeUnicode = false;
+	private String quoteChar;
+	private boolean decodeUnicode;
 	private boolean enableMultiLineMode;
 
 	// this indicates an import of several files from a single
 	// directory into one table
-	private boolean multiFileImport = false;
+	private boolean multiFileImport;
 
 	private List<ImportFileColumn> importColumns;
 
 	private boolean withHeader = true;
-	private boolean cancelImport = false;
-	private boolean regularStop = false;
-	private boolean emptyStringIsNull = false;
-	private boolean trimValues = false;
+	private boolean cancelImport;
+	private boolean regularStop;
+	private boolean emptyStringIsNull;
+	private boolean trimValues;
 
 	private RowDataReceiver receiver;
-	private boolean abortOnError = false;
+	private boolean abortOnError;
 	private WbConnection connection;
 
 	private JobErrorHandler errorHandler;
 
 	private ValueConverter converter = new ValueConverter();
 	private MessageBuffer messages = new MessageBuffer();
-	private boolean hasErrors = false;
-	private boolean hasWarnings = false;
+	private boolean hasErrors;
+	private boolean hasWarnings;
 
 	private Pattern lineFilter;
 
-	private boolean clobsAreFilenames = false;
-	private boolean fixedWidthImport = false;
+	private boolean clobsAreFilenames;
+	private boolean fixedWidthImport;
 
 	private ImportFileHandler fileHandler = new ImportFileHandler();
 	private BlobDecoder blobDecoder = new BlobDecoder();

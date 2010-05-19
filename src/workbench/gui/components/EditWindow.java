@@ -46,33 +46,33 @@ public class EditWindow
 	private JButton okButton = new WbButton(ResourceMgr.getString("LblOK"));
 	private JButton cancelButton = new WbButton(ResourceMgr.getString("LblCancel"));
 	private boolean isCancelled = true;
-	private String settingsId = null;
-	
+	private String settingsId;
+
 	public EditWindow(Frame owner, String title, String text)
 	{
 		this(owner, title, text, "workbench.data.edit.window");
 	}
-	
+
 	public EditWindow(Frame owner, String title, String text, boolean createSqlEditor, boolean showCloseButtonOnly)
 	{
 		this(owner, title, text, "workbench.data.edit.window", createSqlEditor, true, showCloseButtonOnly);
 	}
-	
+
 	public EditWindow(Frame owner, String title, String text, String id)
 	{
 		this(owner, title, text, id, false);
 	}
-	
+
 	public EditWindow(Frame owner, String title, String text, String id, boolean createSqlEditor)
 	{
 		this(owner, title, text, id, createSqlEditor, true, false);
 	}
-	
+
 	public EditWindow(Frame owner, String title, String text, String id, boolean createSqlEditor, boolean modal)
 	{
 		this(owner, title, text, id, createSqlEditor, modal, false);
 	}
-	
+
 	public EditWindow(final Frame owner, final String title, final String text, final String id, final boolean createSqlEditor, final boolean modal, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, modal);
@@ -86,19 +86,19 @@ public class EditWindow
 		init(text, id, createSqlEditor, true);
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
-	
+
 	public EditWindow(final Dialog owner, final String title, final String text, final boolean createSqlEditor, final boolean showCloseButtonOnly)
 	{
 		super(owner, title, true);
 		init(text, "workbench.data.edit.window", createSqlEditor, showCloseButtonOnly);
 		WbSwingUtilities.center(this, WbManager.getInstance().getCurrentWindow());
 	}
-	
+
 	public void setReadOnly()
 	{
 		this.textContainer.setEditable(false);
 	}
-	
+
 	private void init(String text, String id, boolean createSqlEditor, boolean showCloseButtonOnly)
 	{
 		this.settingsId = id;
@@ -130,7 +130,7 @@ public class EditWindow
 				this.textContainer = panel;
 			}
 		}
-		
+
 		this.getContentPane().add(editor, BorderLayout.CENTER);
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
@@ -144,15 +144,15 @@ public class EditWindow
 		}
 		buttonPanel.add(this.cancelButton);
 		this.getContentPane().add(buttonPanel, BorderLayout.SOUTH);
-		
+
 		this.textContainer.setText(text);
 		this.editor.setMinimumSize(new Dimension(100,100));
 		this.editor.setPreferredSize(new Dimension(300,200));
 		this.textContainer.setCaretPosition(0);
-		
+
 		this.okButton.addActionListener(this);
 		this.cancelButton.addActionListener(this);
-		
+
 		WbTraversalPolicy pol = new WbTraversalPolicy();
 		pol.setDefaultComponent(editor);
 		pol.addComponent(editor);
@@ -164,7 +164,7 @@ public class EditWindow
 		// creating the action will add it to the input map of the dialog
 		// which will enable the key
 		new EscAction(this, this);
-		
+
 		if (!Settings.getInstance().restoreWindowSize(this, settingsId))
 		{
 			this.setSize(500,400);
@@ -186,7 +186,7 @@ public class EditWindow
 		this.cancelButton.removeActionListener(this);
 		this.cancelButton.setVisible(false);
 	}
-	
+
 	public void actionPerformed(ActionEvent e)
 	{
 		if (e.getSource() == this.okButton)
@@ -210,7 +210,7 @@ public class EditWindow
 		return this.isCancelled;
 	}
 
-	public String getText() 
+	public String getText()
 	{
 		return this.textContainer.getText();
 	}
@@ -218,29 +218,29 @@ public class EditWindow
 	public void windowActivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowClosed(java.awt.event.WindowEvent e)
 	{
 		Settings.getInstance().storeWindowSize(this, this.settingsId);
 		if (componentSettings != null) componentSettings.saveSettings();
 	}
-	
+
 	public void windowClosing(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeactivated(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowDeiconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowIconified(java.awt.event.WindowEvent e)
 	{
 	}
-	
+
 	public void windowOpened(java.awt.event.WindowEvent e)
 	{
 		validate();
@@ -248,5 +248,5 @@ public class EditWindow
 		editor.requestFocusInWindow();
 		WbSwingUtilities.repaintLater(this);
 	}
-	
+
 }

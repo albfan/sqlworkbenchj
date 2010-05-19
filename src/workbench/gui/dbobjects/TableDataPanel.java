@@ -97,8 +97,8 @@ public class TableDataPanel
 	private JPanel topPanel;
 
 	private int warningThreshold = -1;
-	private boolean retrieveRunning = false;
-	private boolean updateRunning = false;
+	private boolean retrieveRunning;
+	private boolean updateRunning;
 	private boolean autoloadRowCount = true;
 	private TableIdentifier table;
 	private ImageIcon loadingIcon;
@@ -106,7 +106,7 @@ public class TableDataPanel
 	protected StopAction cancelRetrieve;
 	private List<DbExecutionListener> execListener;
 	private Savepoint currentSavepoint;
-	private Statement rowCountRetrieveStmt = null;
+	private Statement rowCountRetrieveStmt;
 	private boolean rememberSort;
 	private NamedSortDefinition lastSort;
 

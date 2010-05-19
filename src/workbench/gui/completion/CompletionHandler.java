@@ -41,7 +41,7 @@ public class CompletionHandler
 {
 	private JEditTextArea editor;
 	protected List elements = Collections.EMPTY_LIST;
-	protected List filteredElements = null;
+	protected List filteredElements;
 
 	protected WbConnection dbConnection;
 	private JLabel header;

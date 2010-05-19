@@ -33,27 +33,27 @@ import workbench.log.LogMgr;
 /**
  *	A property editor for a String property, where the values
  *	for the field can also be selected by a dropdown
- * 
+ *
  * @author  Thomas Kellerer
  */
-public class ComboStringPropertyEditor 
-	extends JComboBox 
+public class ComboStringPropertyEditor
+	extends JComboBox
 	implements ItemListener, SimplePropertyEditor, FocusListener, DocumentListener
 {
 	private Object source;
 	private Method setter;
 	private Method getter;
 	protected boolean changed;
-	private boolean immediateUpdate = false;
+	private boolean immediateUpdate;
 	private ActionListener listener;
-	
+
 	public void setSourceObject(Object aSource, String aProperty)
 	{
 		this.source = aSource;
 		this.changed = false;
 		String propertyName = Character.toUpperCase(aProperty.charAt(0)) + aProperty.substring(1);
 		stopEvents();
-		
+
 		try
 		{
 			String name = "get" + propertyName;
@@ -64,7 +64,7 @@ public class ComboStringPropertyEditor
 			Class[] parms = { String.class };
 
 			this.setter = cls.getMethod(name, parms);
-			if (this.getModel() != null) 
+			if (this.getModel() != null)
 			{
 				this.initData();
 			}
@@ -75,7 +75,7 @@ public class ComboStringPropertyEditor
 		}
 		startEvents();
 	}
-	
+
 	private ActionListener getListener()
 	{
 		if (listener == null)
@@ -91,7 +91,7 @@ public class ComboStringPropertyEditor
 		}
 		return listener;
 	}
-	
+
 	private void stopEvents()
 	{
 		this.removeItemListener(this);
@@ -103,7 +103,7 @@ public class ComboStringPropertyEditor
 			text.getDocument().removeDocumentListener(this);
 		}
 	}
-	
+
 	private void startEvents()
 	{
 		this.addItemListener(this);
@@ -132,7 +132,7 @@ public class ComboStringPropertyEditor
 		if (this.getter == null || this.source == null) return;
 		try
 		{
-			
+
 			Object value = this.getter.invoke(this.source, (Object[])null);
 			this.setSelectedItem(value);
 		}
@@ -141,9 +141,9 @@ public class ComboStringPropertyEditor
 			LogMgr.logError("ComboStringPropertyEditor.intiData", "Error", e);
 		}
 	}
-	
+
 	public boolean isChanged() { return this.changed; }
-	
+
 	public void applyChanges()
 	{
 		if (!this.changed) return;
@@ -165,7 +165,7 @@ public class ComboStringPropertyEditor
 			LogMgr.logError("ComboStringPropertyEditor.setSourceObject()", "Error during init", e);
 		}
 	}
-	
+
 	/** Invoked when an item has been selected or deselected by the user.
 	 * The code written for this method performs the operations
 	 * that need to occur when an item is selected (or deselected).
@@ -182,31 +182,31 @@ public class ComboStringPropertyEditor
 			this.applyChanges();
 		}
 	}
-	
+
 	public void setImmediateUpdate(boolean aFlag)
 	{
 		this.immediateUpdate = aFlag;
 		if (aFlag) this.applyChanges();
 	}
-	
+
 	public boolean getImmediateUpdate()
 	{
 		return this.immediateUpdate;
 	}
-	
+
 	public void focusGained(FocusEvent e)
 	{
 	}
-	
+
 	public void focusLost(FocusEvent e)
 	{
 		this.applyChanges();
 	}
-	
+
 	public void changedUpdate(DocumentEvent e) { documentChanged(); 	}
 	public void insertUpdate(DocumentEvent e) { documentChanged(); }
 	public void removeUpdate(DocumentEvent e) { documentChanged(); }
-	
+
 	private void documentChanged()
 	{
 		this.changed = true;

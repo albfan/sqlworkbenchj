@@ -18,11 +18,11 @@ import workbench.util.WbFile;
  *
  * @author Thomas Kellerer
  */
-public class XmlTableNameResolver 
+public class XmlTableNameResolver
 	implements TablenameResolver
 {
-
 	private String encoding;
+
 	public XmlTableNameResolver(String enc)
 	{
 		this.encoding = enc;

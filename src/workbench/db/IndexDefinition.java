@@ -22,8 +22,8 @@ import workbench.util.SqlUtil;
 public class IndexDefinition
 	implements DbObject
 {
-	private boolean isPK = false;
-	private boolean isUnique = false;
+	private boolean isPK;
+	private boolean isUnique;
 	private String indexName;
 	private String indexType;
 	private TableIdentifier baseTable;
@@ -170,7 +170,7 @@ public class IndexDefinition
 			{
 				equals = this.columns.equals(other.columns);
 			}
-			
+
 			if (equals)
 			{
 				equals = (this.isPK == other.isPK) && (this.isUnique == other.isUnique);

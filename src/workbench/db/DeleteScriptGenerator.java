@@ -45,8 +45,8 @@ public class DeleteScriptGenerator
 	private List<ColumnData> columnValues;
 	private TableDependency dependency;
 	private DbMetadata meta;
-	private TableIdentifier rootTable = null;
-	private WbTable sourceTable = null;
+	private TableIdentifier rootTable;
+	private WbTable sourceTable;
 	private ScriptGenerationMonitor monitor;
 	private List<String> statements = new LinkedList<String>();
 	private SqlLiteralFormatter formatter;

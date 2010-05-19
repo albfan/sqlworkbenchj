@@ -23,19 +23,19 @@ import workbench.resource.Settings;
 
 /**
  * A class that draws a border around the currently focused component
- * 
+ *
  * @author Thomas Kellerer
  */
-public class FocusIndicator 
+public class FocusIndicator
 	implements FocusListener
 {
-	private Border focusBorder = null;
-	private Border noFocusBorder = null;
-	private Border originalBorder = null;
+	private Border focusBorder;
+	private Border noFocusBorder;
+	private Border originalBorder;
 	private JComponent focusClient;
 	private JComponent borderClient;
-	private Color borderColor = null;
-	
+	private Color borderColor;
+
 	public FocusIndicator(JComponent focusToCheck, JComponent client)
 	{
 		focusClient = focusToCheck;
@@ -55,20 +55,20 @@ public class FocusIndicator
 			focusBorder = new CompoundBorder(new LineBorder(borderColor, 1), originalBorder);
 		}
 	}
-	
+
 	public void dispose()
 	{
 		if (this.focusClient != null)
 		{
 			focusClient.removeFocusListener(this);
 		}
-		
+
 		if (this.borderClient != null && originalBorder != null)
 		{
 			this.borderClient.setBorder(originalBorder);
 		}
 	}
-	
+
 	public void focusGained(FocusEvent e)
 	{
 		if (this.borderClient != null)

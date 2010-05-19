@@ -34,6 +34,7 @@ public class WbLineBorder
 	protected int thickness;
 	protected Color color;
 	private Insets insets = new Insets(1, 1, 1, 1);
+
 	public WbLineBorder(int type)
 	{
 		this(type, Color.LIGHT_GRAY);

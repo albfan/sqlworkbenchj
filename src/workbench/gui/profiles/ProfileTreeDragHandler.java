@@ -15,7 +15,6 @@ import java.awt.Point;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragGestureRecognizer;
 import java.awt.dnd.DragSource;
 import java.awt.dnd.DragSourceDragEvent;
 import java.awt.dnd.DragSourceDropEvent;
@@ -38,9 +37,7 @@ import workbench.log.LogMgr;
 class ProfileTreeDragHandler
 	implements DragSourceListener, DragGestureListener, DropTargetListener
 {
-	private DropTarget dropTarget;
 	private DragSource dragSource;
-	private DragGestureRecognizer recognizer;
 	private ProfileTree profileTree;
 	private TreePath[] draggedProfiles;
 
@@ -48,8 +45,8 @@ class ProfileTreeDragHandler
 	{
 		profileTree = tree;
 		dragSource = new DragSource();
-		dropTarget = new DropTarget(profileTree, this);
-		recognizer = dragSource.createDefaultDragGestureRecognizer(profileTree, actions, this);
+		new DropTarget(profileTree, this);
+		dragSource.createDefaultDragGestureRecognizer(profileTree, actions, this);
 	}
 
 	public void dragGestureRecognized(DragGestureEvent dge)

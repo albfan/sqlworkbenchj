@@ -52,8 +52,8 @@ public class ImportStringVerifier
 	private JPanel optionsPanel;
 	private TextOptionsPanel textOptions;
 	private GeneralImportOptionsPanel generalOptions;
-	private boolean columnNamesMatched = false;
-	private boolean columnCountMatched = false;
+	private boolean columnNamesMatched;
+	private boolean columnCountMatched;
 
 	public ImportStringVerifier(String data, ResultInfo result)
 	{

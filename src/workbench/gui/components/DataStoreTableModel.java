@@ -45,8 +45,8 @@ public class DataStoreTableModel
 	extends AbstractTableModel
 {
 	private DataStore dataCache;
-	private boolean showStatusColumn = false;
-	private int columnStartIndex = 0;
+	private boolean showStatusColumn;
+	private int columnStartIndex;
 
 	private List<Integer> noneditableColumns = new ArrayList<Integer>();
 

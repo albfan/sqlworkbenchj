@@ -68,8 +68,8 @@ public class ReferenceTableNavigator
 	private WbTable source;
 	private WbMenu selectParentTables;
 	private WbMenu selectChildTables;
-	private boolean parentMenuInitialized = false;
-	private boolean childMenuInitialized = false;
+	private boolean parentMenuInitialized;
+	private boolean childMenuInitialized;
 	private TableIdentifier baseTable;
 	private ReferenceTableNavigation parentNavigation;
 	private ReferenceTableNavigation childNavigation;

@@ -33,8 +33,8 @@ public class WbFilePicker
 	private FileFilter fileFilter;
 	private boolean allowMultiple;
 	private File[] selectedFiles;
-	private String lastDirProperty = null;
-	private boolean selectDirectory = false;
+	private String lastDirProperty;
+	private boolean selectDirectory;
 
 	public WbFilePicker()
 	{
@@ -51,7 +51,7 @@ public class WbFilePicker
 	{
 		return selectDirectory;
 	}
-	
+
 	public void setTextFieldPropertyName(String name)
 	{
 		this.tfFilename.setName(name);
@@ -163,7 +163,7 @@ public class WbFilePicker
 					jf.setFileFilter(this.fileFilter);
 				}
 			}
-			
+
 			int answer = jf.showOpenDialog(SwingUtilities.getWindowAncestor(this));
 			if (answer == JFileChooser.APPROVE_OPTION)
 			{

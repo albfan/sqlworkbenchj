@@ -31,10 +31,10 @@ public class TableDependency
 	private DbMetadata wbMetadata;
 	private FKHandler fkHandler;
 	private List<DependencyNode> leafs;
-	private boolean directChildrenOnly = false;
-	private boolean readAborted = false;
+	private boolean directChildrenOnly;
+	private boolean readAborted;
 	private Map<DependencyNode, DependencyNode> visitedRelations;
-	
+
 	public TableDependency(WbConnection con, TableIdentifier tbl)
 	{
 		this.connection = con;
@@ -52,7 +52,7 @@ public class TableDependency
 	{
 		return findLeafNodeForTable(table, null);
 	}
-	
+
 	public DependencyNode findLeafNodeForTable(TableIdentifier table, String fkName)
 	{
 		String findExpr = table.getRawTableName();//table.getTableExpression(connection);
@@ -65,7 +65,7 @@ public class TableDependency
 				if (fkName == null) return node;
 				if (StringUtil.equalStringIgnoreCase(node.getFkName(), fkName)) return node;
 			}
-			
+
 		}
 		return null;
 	}
@@ -74,12 +74,12 @@ public class TableDependency
 	{
 		readDependencyTree(true);
 	}
-	
+
 	public void readTreeForParents()
 	{
 		readDependencyTree(false);
 	}
-	
+
 	public void readDependencyTree(boolean exportedKeys)
 	{
 		if (theTable == null) return;
@@ -87,9 +87,9 @@ public class TableDependency
 
 		this.readAborted = false;
 		this.leafs = new ArrayList<DependencyNode>();
-		
+
 		// Make sure we are using the "correct" TableIdentifier
-		// if the TableIdentifier passed in the constructor was 
+		// if the TableIdentifier passed in the constructor was
 		// created "on the commandline" e.g. by using a user-supplied
 		// table name, we might not correctly find or compare all nodes
 		// as those identifiers will not have the flag "neverAdjustCase" set
@@ -99,7 +99,7 @@ public class TableDependency
 			tableToUse = this.wbMetadata.findTable(theTable);
 		}
 		if (tableToUse == null) return;
-		
+
 		tableRoot = new DependencyNode(tableToUse);
 		visitedRelations = new HashMap<DependencyNode, DependencyNode>();
 		boolean resetBusy = false;
@@ -119,7 +119,7 @@ public class TableDependency
 				connection.setBusy(false);
 			}
 		}
-		
+
 	}
 
 	/**
@@ -138,7 +138,7 @@ public class TableDependency
 			int parentcolumncol;
 
 			TableIdentifier ptbl = this.wbMetadata.resolveSynonym(parent.getTable());
-			
+
 			if (exportedKeys)
 			{
 				catalogcol = 4;
@@ -183,11 +183,11 @@ public class TableDependency
 				child.addColumnDefinition(tablecolumn, parentcolumn);
 			}
 
-			if (level > 15) 
+			if (level > 15)
 			{
 				// this is a bit paranoid, as I am testing for cycles before recursing
 				// into the next child. This is a safetey net, just in case the cycle
-				// is not detected. Better display the user incorrect data, than 
+				// is not detected. Better display the user incorrect data, than
 				// ending up in an endless loop.
 				// A circular dependency with more than 10 levels is an ugly design anyway :)
 				LogMgr.logError("TableDependency.readTree()", "Endless reference cycle detected for root=" + this.tableRoot + ", parent=" + parent, null);
@@ -196,7 +196,7 @@ public class TableDependency
 			}
 
 			if (directChildrenOnly && level == 1) return count;
-			
+
 			List<DependencyNode> children = parent.getChildren();
 
 			for (DependencyNode child : children)
@@ -216,7 +216,7 @@ public class TableDependency
 		}
     return 0;
 	}
-	
+
 	private boolean isCycle(DependencyNode child, DependencyNode parent)
 	{
 		if (child.equals(parent)) return true;
@@ -235,12 +235,12 @@ public class TableDependency
 
 		return false;
 	}
-	
+
 	public boolean wasAborted()
 	{
 		return this.readAborted;
 	}
-	
+
 	public List<DependencyNode> getLeafs()
 	{
 		return this.leafs;
