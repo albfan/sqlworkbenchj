@@ -228,7 +228,7 @@ public class MetaDataSqlManager
 				}
 			}
 		}
-		else
+		else if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("MetaDataSqlManager.readStatementTemplates()", "No user defined template file found for " + aFilename);
 		}
