@@ -66,12 +66,9 @@ public class JdbcIndexReader
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
 	{
-		if (metaData.getDbSettings().isViewType(table.getType()))
+		if (metaData.getDbSettings().isViewType(table.getType()) && !metaData.getDbSettings().supportsIndexedViews())
 		{
-			if (!metaData.getDbSettings().supportsIndexedViews())
-			{
-				return null;
-			}
+			return null;
 		}
 		return this.metaData.getSqlConnection().getMetaData().getIndexInfo(table.getCatalog(), table.getSchema(), table.getTableName(), unique, false);
 	}

@@ -166,7 +166,8 @@ public class SqlServerProcedureReader
 
 	protected void updateRemarks(DataStore ds, String owner)
 	{
-		if (!Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.procedure.retrieve", true)) return;
+		if (!Settings.getInstance().getBoolProperty("workbench.db.microsoft_sql_server.remarks.procedure.retrieve", false)) return;
+
 		if (ds == null || ds.getRowCount() == 0) return;
 
 		String object = null;

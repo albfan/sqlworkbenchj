@@ -129,8 +129,16 @@ public final class WbManager
 			Object[] args = new Object[] { parent };
 			dialog = (JDialog)cons.newInstance(args);
 			dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-			if (dialog.isModal()) WbSwingUtilities.center(dialog, parent);
+			if (dialog.isResizable())
+			{
+				Settings.getInstance().restoreWindowSize(dialog);
+			}
+			WbSwingUtilities.center(dialog, parent);
 			dialog.setVisible(true);
+			if (dialog.isResizable())
+			{
+				Settings.getInstance().storeWindowSize(dialog);
+			}
 		}
 		catch (Exception ex)
 		{
@@ -350,7 +358,7 @@ public final class WbManager
 	{
 		return consoleMode;
 	}
-	
+
 	public boolean isBatchMode()
 	{
 		return this.batchMode;

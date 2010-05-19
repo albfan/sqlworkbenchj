@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import workbench.WbManager;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.components.ValidatingDialog;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -85,27 +86,18 @@ public class DwUpdatePreview
 				return false;
 			}
 
-			final String text = buffer.getBuffer().toString();
-			
-			WbSwingUtilities.invoke(new Runnable()
+			preview.setText(buffer.getBuffer().toString());
+			preview.setCaretPosition(0);
+			preview.repaint();
+
+			ValidatingDialog dialog = ValidatingDialog.createDialog(win, scroll, ResourceMgr.getString("MsgConfirmUpdates"), null, 0, false);
+			if (Settings.getInstance().restoreWindowSize(dialog, "workbench.gui.confirmupdate.dialog"))
 			{
-				public void run()
-				{
-					preview.setText(text);
-					preview.setCaretPosition(0);
-					preview.repaint();
-				}
-			});
-			
-			WbSwingUtilities.showDefaultCursor(caller);
-			Runnable painter = new Runnable()
-			{
-				public void run()
-				{
-					preview.repaint();
-				}
-			};
-			doSave = WbSwingUtilities.getOKCancel(ResourceMgr.getString("MsgConfirmUpdates"), win, scroll, painter);
+				WbSwingUtilities.center(dialog, win);
+			}
+			dialog.setVisible(true);
+			Settings.getInstance().storeWindowSize(dialog, "workbench.gui.confirmupdate.dialog");
+			doSave = !dialog.isCancelled();
 		}
 		catch (SQLException e)
 		{

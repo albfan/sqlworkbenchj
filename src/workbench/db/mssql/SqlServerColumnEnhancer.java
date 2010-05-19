@@ -151,7 +151,7 @@ public class SqlServerColumnEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("SqlServerColumnEnhancer.updateComputedColumns()", "Error retrieving remarks", e);
+			LogMgr.logError("SqlServerColumnEnhancer.updateComputedColumns()", "Error retrieving computed columns", e);
 		}
 		finally
 		{
