@@ -721,7 +721,20 @@ public class WbConnection
 	public Statement createStatement()
 		throws SQLException
 	{
-		return this.sqlConnection.createStatement();
+		Statement stmt = this.sqlConnection.createStatement();
+		if (Settings.getInstance().getBoolProperty("workbench.sql.fetchsize.always", true))
+		{
+			try
+			{
+				int size = getFetchSize();
+				if (size > -1) stmt.setFetchSize(size);
+			}
+			catch (Exception e)
+			{
+				LogMgr.logWarning("WbConnection.createStatement()", "Error when setting the fetchSize: " + ExceptionUtil.getDisplay(e));
+			}
+		}
+		return stmt;
 	}
 
 	public boolean supportsSavepoints()

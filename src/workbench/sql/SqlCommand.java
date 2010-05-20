@@ -45,18 +45,18 @@ public class SqlCommand
 {
 	protected Statement currentStatement;
 	protected WbConnection currentConnection;
-	protected boolean isCancelled = false;
+	protected boolean isCancelled;
 	protected RowActionMonitor rowMonitor;
-	protected boolean isUpdatingCommand = false;
-	protected boolean reportFullStatementOnError = false;
+	protected boolean isUpdatingCommand;
+	protected boolean reportFullStatementOnError;
 	protected ResultLogger resultLogger;
 	protected StatementRunner runner;
-	protected int queryTimeout = 0;
-	protected int maxRows = 0;
+	protected int queryTimeout;
+	protected int maxRows;
 	protected DataStore currentRetrievalData;
 	protected ParameterPrompter prompter;
 	protected ArgumentParser cmdLine;
-	protected boolean errorMessagesOnly = false;
+	protected boolean errorMessagesOnly;
 	protected boolean showDataLoading = true;
 
 	public void setRowMonitor(RowActionMonitor monitor)
