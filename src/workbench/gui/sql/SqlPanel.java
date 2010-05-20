@@ -2327,9 +2327,7 @@ public class SqlPanel
 						}
 					}
 					resultTab.setSelectedIndex(0);
-					currentData = null;
-					updateProxiedActions();
-					checkResultSetActions();
+					updateResultInfos();
 				}
 			});
 		}
