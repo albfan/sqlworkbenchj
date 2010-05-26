@@ -30,6 +30,8 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import workbench.db.derby.DerbyColumnEnhancer;
+import workbench.db.derby.DerbySequenceReader;
 import workbench.db.derby.DerbySynonymReader;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.firebird.FirebirdDomainReader;
@@ -278,6 +280,11 @@ public class DbMetadata
 		{
 			this.isApacheDerby = true;
 			this.synonymReader = new DerbySynonymReader();
+			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.6"))
+			{
+				sequenceReader = new DerbySequenceReader(dbConnection);
+			}
+			columnEnhancer = new DerbyColumnEnhancer();
 		}
 		else if (productLower.indexOf("ingres") > -1)
 		{

@@ -41,9 +41,9 @@ public class StatementRunnerResult
 	private String sourceCommand;
 
 	private boolean success = true;
-	private boolean hasWarning = false;
-	private boolean wasCancelled = false;
-	private boolean stopScriptExecution = false;
+	private boolean hasWarning;
+	private boolean wasCancelled;
+	private boolean stopScriptExecution;
 	private boolean showRowCount = true;
 
 	private long executionTime = -1;

@@ -11,25 +11,28 @@
  */
 package workbench.db;
 
+import workbench.db.derby.DerbyTableSourceBuilder;
 import workbench.db.postgres.PostgresTableSourceBuilder;
 
 /**
  * A factory to create a TableSourceBuilder.
  *
- * Currently this only distinguishes between Postgres and other
- * Databases in order to add enum and domain information to the
- * generated SQL for Postgres
- * 
  * @author Thomas Kellerer
  */
 public class TableSourceBuilderFactory
 {
+
 	public static TableSourceBuilder getBuilder(WbConnection con)
 	{
 		if (con.getMetadata().isPostgres())
 		{
 			return new PostgresTableSourceBuilder(con);
 		}
+		else if (con.getMetadata().isApacheDerby())
+		{
+			return new DerbyTableSourceBuilder(con);
+		}
 		return new TableSourceBuilder(con);
 	}
+
 }

@@ -37,7 +37,7 @@ public class DelimiterDefinition
 
 	private String delimiter;
 	private boolean singleLineDelimiter;
-	private boolean changed = false;
+	private boolean changed;
 
 	public DelimiterDefinition()
 	{

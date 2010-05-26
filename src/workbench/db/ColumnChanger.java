@@ -14,6 +14,7 @@ package workbench.db;
 import java.util.List;
 import workbench.db.oracle.OracleMetadata;
 import workbench.resource.ResourceMgr;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -194,13 +195,6 @@ public class ColumnChanger
 		return (sql != null);
 	}
 
-	protected boolean useNullKeyword()
-	{
-		if (dbConn == null) return false;
-		if (dbConn.getDbSettings() == null) return false;
-		return dbConn.getDbSettings().useNullKeyword();
-	}
-
 	protected String getColumnExpression(ColumnIdentifier column)
 	{
 		String colname = column.getColumnName();
@@ -225,15 +219,7 @@ public class ColumnChanger
 			sql = sql.replace(PARAM_DEFAULT_EXPR, "DEFAULT " + newDefinition.getDefaultValue());
 		}
 
-		String nullable = nullableSql(newDefinition.isNullable());
-		if (!newDefinition.isNullable() || useNullKeyword())
-		{
-			sql = sql.replace(PARAM_NULLABLE, nullable);
-		}
-		else
-		{
-			sql = sql.replace(PARAM_NULLABLE, "");
-		}
+		sql = ColumnDefinitionTemplate.replaceNullable(sql, dbSettings.getDbId(), newDefinition.isNullable());
 		return sql;
 	}
 
@@ -374,7 +360,7 @@ public class ColumnChanger
 	{
 		if (flag)
 		{
-			return "NULL";
+			return Settings.getInstance().getProperty("workbench.db." + dbSettings.getDbId() + ".nullkeyword", "NULL");
 		}
 		else
 		{

@@ -46,18 +46,18 @@ public class IteratingScriptParser
 	private int scriptLength = -1;
 	private int lastPos = 0;
 	private int lastCommandEnd = -1;
-	private boolean quoteOn = false;
-	private boolean commentOn = false;
-	private boolean blockComment = false;
-	private boolean singleLineComment = false;
+	private boolean quoteOn;
+	private boolean commentOn;
+	private boolean blockComment;
+	private boolean singleLineComment;
 	private int lastNewLineStart = 0;
 	private char lastQuote = 0;
 	private boolean checkEscapedQuotes = true;
-	private boolean emptyLineIsSeparator = false;
+	private boolean emptyLineIsSeparator;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands = true;
-	private boolean storeSqlInCommands = false;
-	private boolean returnStartingWhitespace = false;
+	private boolean storeSqlInCommands;
+	private boolean returnStartingWhitespace;
 	private String alternateLineComment;
 
 	// These patterns cover the statements that

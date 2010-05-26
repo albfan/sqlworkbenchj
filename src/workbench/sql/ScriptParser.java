@@ -39,19 +39,19 @@ import java.util.List;
  */
 public class ScriptParser
 {
-	private String originalScript = null;
-	private List<ScriptCommandDefinition> commands = null;
+	private String originalScript;
+	private List<ScriptCommandDefinition> commands;
 	private DelimiterDefinition delimiter = DelimiterDefinition.STANDARD_DELIMITER;
 	private DelimiterDefinition alternateDelimiter;
 	private int currentIteratorIndex = -42;
 	private boolean checkEscapedQuotes;
-	private ScriptIterator iteratingParser = null;
-	private boolean emptyLineIsSeparator = false;
+	private ScriptIterator iteratingParser;
+	private boolean emptyLineIsSeparator;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands;
-	private boolean returnTrailingWhitesapce = false;
+	private boolean returnTrailingWhitesapce;
 	private String alternateLineComment;
-	private boolean useAlternateDelimiter = false;
+	private boolean useAlternateDelimiter;
 	private File source;
 
 	private int maxFileSize;

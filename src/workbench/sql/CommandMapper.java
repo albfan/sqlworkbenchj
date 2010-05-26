@@ -83,10 +83,10 @@ public class CommandMapper
 	private Map<String, SqlCommand> cmdDispatch;
 	private List<String> dbSpecificCommands;
 	private Set<String> passThrough = new HashSet<String>();
-	private boolean supportsSelectInto = false;
+	private boolean supportsSelectInto;
 	private DbMetadata metaData;
-	private boolean useExecuteForSelect = false;
-	private boolean allowAbbreviated = false;
+	private boolean useExecuteForSelect;
+	private boolean allowAbbreviated;
 
 	public CommandMapper()
 	{

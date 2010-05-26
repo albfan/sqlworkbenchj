@@ -127,16 +127,6 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), false);
 	}
 
-	/**
-	 * Returns true if NULl should be used for a column definition that is nullable
-	 * (instead of not using NULL at all)
-	 *
-	 */
-	public boolean useNullKeyword()
-	{
-		return !Settings.getInstance().getServersWithNoNullKeywords().contains(dbId);
-	}
-
 	public boolean useGetStringForClobs()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", false);
@@ -1032,17 +1022,17 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "alter." + type.trim().toLowerCase() + ".add.pk", null);
 	}
 
+	/**
+	 * Checks if the current DBMS supports comments for the given DB object type
+	 * @param objectType the type to be checked (e.g. TABLE, COLUMN)
+	 * @return true if the DBMS supports comments for this type
+	 */
 	public boolean columnCommentAllowed(String objectType)
 	{
 		if (StringUtil.isBlank(objectType)) return false;
 		String type = objectType.toLowerCase().trim().replace(' ', '_');
 		List<String> types = Settings.getInstance().getListProperty(prefix + "columncomment.types", true, "table");
 		return types.contains(type);
-	}
-
-	public boolean computedColumnNeedsDataType()
-	{
-		return Settings.getInstance().getBoolProperty(prefix + "computedcol.datatype", false);
 	}
 
 }

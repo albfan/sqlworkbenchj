@@ -57,8 +57,8 @@ public class VariablePool
 	final private Map<String, String> data = new HashMap<String, String>();
 	private String prefix;
 	private String suffix;
-	private int prefixLen = 0;
-	private int suffixLen = 0;
+	private int prefixLen;
+	private int suffixLen;
 	private Pattern validNamePattern = Pattern.compile("[\\w]*");;
 	private Pattern promptPattern;
 

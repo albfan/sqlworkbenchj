@@ -47,34 +47,34 @@ public class TableSourceBuilderTest
 			assertTrue(sql.indexOf("PRIMARY KEY (ID)") > -1);
 
 			String dbid = con.getMetadata().getDbId();
-			Settings.getInstance().setProperty("workbench.db." + dbid + ".defaultbeforenull", true);
-			Settings.getInstance().setProperty("workbench.db.nonullkeyword", "");
+			Settings.getInstance().setProperty("workbench.db." + dbid + ".coldef", ColumnChanger.PARAM_DATATYPE + " " + ColumnChanger.PARAM_NULLABLE);
 
 			builder = new TableSourceBuilder(con);
 			sql = builder.getTableSource(tbl, false, false);
 //			System.out.println(sql);
-			assertTrue(sql.indexOf("FIRSTNAME VARCHAR(20)  NULL") > -1);
+			assertTrue(sql.indexOf("FIRSTNAME  VARCHAR(20)   NULL") > -1);
 
 			TestUtil.executeScript(con,
 				"ALTER TABLE person ALTER COLUMN firstname SET DEFAULT 'Arthur';" +
 				"COMMIT;\n");
 
 			builder = new TableSourceBuilder(con);
+			Settings.getInstance().setProperty("workbench.db." + dbid + ".coldef", ColumnChanger.PARAM_DATATYPE + " " + ColumnChanger.PARAM_DEFAULT_VALUE + " " + ColumnChanger.PARAM_NULLABLE);
 			sql = builder.getTableSource(tbl, false, false);
 //			System.out.println(sql);
 			assertTrue(sql.indexOf("DEFAULT 'Arthur' NULL") > -1);
-			Settings.getInstance().setProperty("workbench.db." + dbid + ".defaultbeforenull", false);
 
 			builder = new TableSourceBuilder(con);
+			Settings.getInstance().setProperty("workbench.db." + dbid + ".coldef", ColumnChanger.PARAM_DATATYPE + " " + ColumnChanger.PARAM_NULLABLE + " " + ColumnChanger.PARAM_DEFAULT_VALUE);
 			sql = builder.getTableSource(tbl, false, false);
 //			System.out.println(sql);
 			assertTrue(sql.indexOf("NULL DEFAULT 'Arthur'") > -1);
 
-			Settings.getInstance().setProperty("workbench.db.nonullkeyword", dbid);
 			builder = new TableSourceBuilder(con);
+			Settings.getInstance().setProperty("workbench.db." + dbid + ".coldef", ColumnChanger.PARAM_DATATYPE + " " + ColumnDefinitionTemplate.PARAM_NOT_NULL + " " + ColumnChanger.PARAM_DEFAULT_VALUE);
 			sql = builder.getTableSource(tbl, false, false);
 //			System.out.println(sql);
-			assertTrue(sql.indexOf("FIRSTNAME VARCHAR(20)  DEFAULT 'Arthur'") > -1);
+			assertTrue(sql.indexOf("FIRSTNAME  VARCHAR(20)   DEFAULT 'Arthur'") > -1);
 		}
 		finally
 		{

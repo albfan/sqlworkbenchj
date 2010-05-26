@@ -39,7 +39,6 @@ public class TableSourceBuilder
 {
 	protected WbConnection dbConnection;
 	private boolean createInlineConstraints;
-	private boolean useNullKeyword;
 
 	/**
 	 * This class should not be instantiated directly. Use
@@ -54,7 +53,6 @@ public class TableSourceBuilder
 		dbConnection = con;
 		String productName = dbConnection.getMetadata().getProductName();
 		this.createInlineConstraints = Settings.getInstance().getServersWithInlineConstraints().contains(productName);
-		this.useNullKeyword = dbConnection.getDbSettings().useNullKeyword();
 	}
 
 	private ViewReader getViewReader()
@@ -72,7 +70,7 @@ public class TableSourceBuilder
 	 * current DBMS)
    *
 	 * @return the SQL statement to create the given table.
-	 * @param table the table for which the source should be retrieved 
+	 * @param table the table for which the source should be retrieved
 	 * @param includeDrop If true, a DROP TABLE statement will be included in the generated SQL script.
 	 * @param includeFk if true, the foreign key constraints will be added after the CREATE TABLE
 	 * @throws SQLException
@@ -139,7 +137,7 @@ public class TableSourceBuilder
 				result.append(indexSource);
 			}
 		}
-		
+
 		if (dbConnection.getDbSettings().getGenerateTableComments())
 		{
 			TableCommentReader commentReader = new TableCommentReader();
@@ -182,7 +180,7 @@ public class TableSourceBuilder
 	{
 		return null;
 	}
-	
+
 	protected CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
@@ -228,13 +226,8 @@ public class TableSourceBuilder
 			maxColLength = Math.max(maxColLength, colName.length());
 			maxTypeLength = Math.max(maxTypeLength, (type != null ? type.length() : 0));
 		}
-		maxColLength++;
-		maxTypeLength++;
-
-		// Some RDBMS require the "DEFAULT" clause before the [NOT] NULL clause
-		boolean defaultBeforeNull = meta.getDbSettings().getDefaultBeforeNull();
-		String nullKeyword = Settings.getInstance().getProperty("workbench.db." + meta.getDbId() + ".nullkeyword", "NULL");
-		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + meta.getDbId(), false);
+		maxColLength += 2;
+		maxTypeLength += 2;
 
 		String lineEnding = Settings.getInstance().getInternalEditorLineEnding();
 
@@ -246,8 +239,7 @@ public class TableSourceBuilder
 			String quotedColName = meta.quoteObjectname(colName);
 			String type = column.getDbmsType();
 			if (type == null) type = "";
-			String def = column.getDefaultValue();
-			int typeLength = type.length();
+
 			result.append("   ");
 			result.append(quotedColName);
 
@@ -258,77 +250,13 @@ public class TableSourceBuilder
 			}
 
 			for (int k=0; k < maxColLength - quotedColName.length(); k++) result.append(' ');
-			if (StringUtil.isNonBlank(column.getComputedColumnExpression()))
-			{
-				boolean needType = dbConnection.getDbSettings().computedColumnNeedsDataType();
-				boolean auto = column.isAutoincrement();
-				if (needType || auto)
-				{
-					result.append(type);
-					for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
-				}
-				result.append(column.getComputedColumnExpression());
-			}
-			else
-			{
-				result.append(type);
+			String coldef = getColumnSQL(column, maxTypeLength, columnConstraints.get(column.getColumnName()));
 
-				// Check if any additional keywords are coming after
-				// the datatype. If yes, we fill the line with spaces
-				// to align the keywords properly
-				if ( StringUtil.isNonBlank(def) || (!column.isNullable()) || (column.isNullable() && this.useNullKeyword))
-				{
-					for (int k=0; k < maxTypeLength - typeLength; k++) result.append(' ');
-				}
-
-				if (defaultBeforeNull && StringUtil.isNonBlank(def))
-				{
-					result.append(" DEFAULT ");
-					result.append(def.trim());
-				}
-
-				if (isFirstSql && "sequence".equals(type))
-				{
-					// with FirstSQL a column of type "sequence" is always the primary key
-					result.append(" PRIMARY KEY");
-				}
-				else if (column.isNullable())
-				{
-					if (this.useNullKeyword)
-					{
-						result.append(' ');
-						result.append(nullKeyword);
-					}
-				}
-				else
-				{
-					result.append(" NOT NULL");
-				}
-
-				if (!defaultBeforeNull && StringUtil.isNonBlank(def))
-				{
-					result.append(" DEFAULT ");
-					result.append(def.trim());
-				}
-
-				String constraint = columnConstraints.get(colName);
-				if (StringUtil.isNonBlank(constraint))
-				{
-					result.append(' ');
-					result.append(constraint);
-				}
-			}
-
-			if (includeCommentInTableSource && StringUtil.isNonBlank(column.getComment()))
-			{
-				result.append(" COMMENT '");
-				result.append(SqlUtil.escapeQuotes(column.getComment()));
-				result.append('\'');
-			}
-
+			result.append(coldef);
 			if (itr.hasNext()) result.append(',');
 			result.append(lineEnding);
 		}
+
 
 		String cons = meta.getTableConstraintSource(table, "   ");
 		if (StringUtil.isNonBlank(cons))
@@ -390,6 +318,35 @@ public class TableSourceBuilder
 		}
 
 		return result;
+	}
+
+	protected String getColumnSQL(ColumnIdentifier column, int maxTypeLength, String columnConstraint)
+	{
+		DbMetadata meta = dbConnection.getMetadata();
+		boolean includeCommentInTableSource = Settings.getInstance().getBoolProperty("workbench.db.colcommentinline." + meta.getDbId(), false);
+
+		StringBuilder result = new StringBuilder(50);
+
+		ColumnIdentifier toUse = column;
+		String type = column.getDbmsType();
+
+		if (meta.isFirstSql() && "sequence".equals(type))
+		{
+			toUse = column.createCopy();
+			// with FirstSQL a column of type "sequence" is always the primary key
+			toUse.setDbmsType(type + " PRIMARY KEY");
+		}
+
+		ColumnDefinitionTemplate tmpl = new ColumnDefinitionTemplate(meta.getDbId());
+		result.append(tmpl.getColumnDefinitionSQL(toUse, columnConstraint, maxTypeLength));
+
+		if (includeCommentInTableSource && StringUtil.isNonBlank(column.getComment()))
+		{
+			result.append(" COMMENT '");
+			result.append(SqlUtil.escapeQuotes(column.getComment()));
+			result.append('\'');
+		}
+		return result.toString();
 	}
 
 	protected String getAdditionalTableOptions(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef)

@@ -21,14 +21,14 @@ import java.lang.reflect.Method;
  *
  * All this is done using Reflection, so Log4J does not need to be available.
  *
- * 
+ *
  * @author Peter Franken
  * @author Thomas Kellerer
  */
 public class Log4JHelper
 {
-	private static boolean tested = false;
-	private static boolean available = false;
+	private static boolean tested;
+	private static boolean available;
 
 	public static boolean isLog4JAvailable()
 	{
