@@ -1,11 +1,11 @@
 /*
- *  PostgresTableListEnhancer.java
- * 
+ *  PostgresTypeReader.java
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -22,15 +22,15 @@ import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
-import workbench.db.TableSourceBuilderFactory;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
+import workbench.util.SqlUtil;
 
 /**
  * An ObjectlistEnhancer to work around a bug in the Postgres JDBC driver, as that driver
- * does not return a value in the TABLE_TYPE column 
+ * does not return a value in the TABLE_TYPE column
  *
  * @author Thomas Kellerer
  */
@@ -62,7 +62,7 @@ public class PostgresTypeReader
 			// nothing to do, the 9.0 driver will correctly return the TYPE entries
 			return false;
 		}
-		
+
 		if (requestedTypes == null)
 		{
 			// if all objects were selected, the driver will already return the types
@@ -71,7 +71,7 @@ public class PostgresTypeReader
 			return true;
 		}
 
-    String select = 
+    String select =
 				" SELECT NULL AS TABLE_CAT, " +
 				" n.nspname AS TABLE_SCHEM, " +
 				" c.relname AS TABLE_NAME, " +
@@ -92,7 +92,7 @@ public class PostgresTypeReader
 		{
 				select += " AND c.relname LIKE '" + objectPattern + "' ";
 		}
-		
+
 		select += " ORDER BY TABLE_TYPE,TABLE_SCHEM,TABLE_NAME ";
 		Statement stmt = null;
 		ResultSet rs = null;
@@ -117,6 +117,10 @@ public class PostgresTypeReader
 		catch (Exception e)
 		{
 			LogMgr.logError("PostgresTypeReader.extendObjectList()", "Error retrieving object types", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return true;
 	}
@@ -164,7 +168,7 @@ public class PostgresTypeReader
 	public DbObject getObjectDefinition(WbConnection con, DbObject name)
 	{
 		// Only used in the SchemaReporter. If this method returns null
-		// the reporter will tread the object as a table
+		// the reporter will treat the object as a table
 		return null;
 	}
 
@@ -179,7 +183,7 @@ public class PostgresTypeReader
 	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
-		TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(con);
+		TableSourceBuilder builder = new PostgresTableSourceBuilder(con);
 		try
 		{
 			CharSequence sql = builder.getTableSource(createTableIdentifier(object), true, true);

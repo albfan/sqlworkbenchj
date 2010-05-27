@@ -33,6 +33,7 @@ import java.util.regex.Pattern;
 import workbench.db.derby.DerbyColumnEnhancer;
 import workbench.db.derby.DerbySequenceReader;
 import workbench.db.derby.DerbySynonymReader;
+import workbench.db.derby.DerbyTypeReader;
 import workbench.db.firebird.FirebirdColumnEnhancer;
 import workbench.db.firebird.FirebirdDomainReader;
 import workbench.db.firebird.FirebirdSequenceReader;
@@ -283,6 +284,7 @@ public class DbMetadata
 			if (JdbcUtils.hasMinimumServerVersion(dbConnection, "10.6"))
 			{
 				sequenceReader = new DerbySequenceReader(dbConnection);
+				extenders.add(new DerbyTypeReader());
 			}
 			columnEnhancer = new DerbyColumnEnhancer();
 		}
@@ -299,25 +301,25 @@ public class DbMetadata
 			// too complicated, so we'll strip the version info
 			int pos = this.productName.indexOf('(');
 			if (pos == -1) pos = this.productName.length() - 1;
-			this.productName = this.productName.substring(0, pos).trim();
-			this.sequenceReader = new McKoiSequenceReader(this.dbConnection.getSqlConnection());
+			productName = this.productName.substring(0, pos).trim();
+			sequenceReader = new McKoiSequenceReader(this.dbConnection.getSqlConnection());
 		}
 		else if (productLower.indexOf("firstsql") > -1)
 		{
-			this.isFirstSql = true;
+			isFirstSql = true;
 		}
 		else if (productLower.indexOf("excel") > -1)
 		{
-			this.isExcel = true;
+			isExcel = true;
 		}
 		else if (productLower.indexOf("access") > -1)
 		{
-			this.isAccess = true;
+			isAccess = true;
 		}
 		else if (productLower.equals("h2"))
 		{
-			this.isH2 = true;
-			this.sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
+			isH2 = true;
+			sequenceReader = new H2SequenceReader(this.dbConnection.getSqlConnection());
 			extenders.add(new H2DomainReader());
 			extenders.add(new H2ConstantReader());
 			columnEnhancer = new H2ColumnEnhancer();

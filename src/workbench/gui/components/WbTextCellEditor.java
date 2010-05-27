@@ -25,8 +25,11 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.text.JTextComponent;
 
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.SetNullAction;
+import workbench.interfaces.NullableEditor;
 import workbench.resource.ResourceMgr;
 
 /**
@@ -35,12 +38,13 @@ import workbench.resource.ResourceMgr;
  */
 public class WbTextCellEditor
 	extends DefaultCellEditor
-	implements MouseListener, DocumentListener
+	implements MouseListener, DocumentListener, NullableEditor
 {
 	private JTextField textField;
 	private WbTable parentTable;
 	private Color defaultBackground;
 	private boolean changed;
+	private boolean isNull;
 
 	public static final WbTextCellEditor createInstance()
 	{
@@ -58,23 +62,25 @@ public class WbTextCellEditor
 	{
 		super(field);
 		defaultBackground = field.getBackground();
-		this.parentTable = parent;
-		this.textField = field;
-		this.textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		this.textField.addMouseListener(this);
-		this.textField.addMouseListener(new TextComponentMouseListener());
-		this.textField.getDocument().addDocumentListener(this);
+		parentTable = parent;
+		textField = field;
+		textField.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		textField.addMouseListener(this);
+		TextComponentMouseListener menu = new TextComponentMouseListener();
+		menu.addAction(new SetNullAction(this));
+		textField.addMouseListener(menu);
+		textField.getDocument().addDocumentListener(this);
 		super.addCellEditorListener(parent);
 	}
 
 	public String getText()
 	{
-		return this.textField.getText();
+		return textField.getText();
 	}
 
 	public void setFont(Font aFont)
 	{
-		this.textField.setFont(aFont);
+		textField.setFont(aFont);
 	}
 
 	public Color getDefaultBackground()
@@ -84,27 +90,50 @@ public class WbTextCellEditor
 
 	public void requestFocus()
 	{
-		this.textField.requestFocusInWindow();
+		textField.requestFocusInWindow();
 	}
 
 	public void selectAll()
 	{
-		this.textField.selectAll();
+		textField.selectAll();
 	}
 
-	public Component getTableCellEditorComponent(JTable table, Object value,
-							boolean isSelected,int row, int column)
+	@Override
+	public Object getCellEditorValue()
+	{
+		if (isNull) return null;
+		return textField.getText();
+	}
+
+	@Override
+	public void setNull(boolean setToNull)
+	{
+		if (setToNull)
+		{
+			textField.setText("");
+		}
+		isNull = setToNull;
+	}
+
+	@Override
+	public JTextComponent getEditor()
+	{
+		return textField;
+	}
+
+	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,int row, int column)
 	{
 		Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
 		textField.selectAll();
 		setEditable(!(parentTable != null && parentTable.isReadOnly()));
-		this.changed = false;
+		changed = false;
+		isNull = false;
 		return result;
 	}
 
 	public void setBackground(Color c)
 	{
-		this.textField.setBackground(c);
+		textField.setBackground(c);
 	}
 
 	public boolean shouldSelectCell(EventObject anEvent)
@@ -112,7 +141,7 @@ public class WbTextCellEditor
 		boolean shouldSelect = super.shouldSelectCell(anEvent);
 		if (shouldSelect)
 		{
-			this.textField.selectAll();
+			textField.selectAll();
 		}
 		return shouldSelect;
 	}
@@ -163,7 +192,7 @@ public class WbTextCellEditor
 		{
 			Frame owner = (Frame) SwingUtilities.getWindowAncestor(this.textField);
 			String title = ResourceMgr.getString("TxtEditWindowTitle");
-			String value = this.textField.getText();
+			String value = textField.getText();
 			EditWindow w = new EditWindow(owner, title, value);
 
 			try
@@ -187,22 +216,25 @@ public class WbTextCellEditor
 
 	public boolean isModified()
 	{
-		return this.changed;
+		return changed;
 	}
 
 	public void insertUpdate(DocumentEvent arg0)
 	{
-		this.changed = true;
+		changed = true;
+		setNull(false);
 	}
 
 	public void removeUpdate(DocumentEvent arg0)
 	{
-		this.changed = true;
+		changed = true;
+		setNull(false);
 	}
 
 	public void changedUpdate(DocumentEvent arg0)
 	{
-		this.changed = true;
+		changed = true;
+		setNull(false);
 	}
 
 	public void setEditable(boolean flag)

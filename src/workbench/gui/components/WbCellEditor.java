@@ -15,24 +15,23 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Collections;
 import java.util.EventObject;
 import java.util.Set;
 import javax.swing.AbstractCellEditor;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.KeyStroke;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
+import javax.swing.text.JTextComponent;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.SetNullAction;
 import workbench.gui.renderer.TextAreaRenderer;
-import workbench.resource.PlatformShortcuts;
+import workbench.interfaces.NullableEditor;
 
 /**
  * A TableCellEditor that displays multiple lines
@@ -42,12 +41,13 @@ import workbench.resource.PlatformShortcuts;
 @SuppressWarnings({"deprecation"})
 public class WbCellEditor
 	extends AbstractCellEditor
-	implements TableCellEditor, MouseListener
+	implements TableCellEditor, MouseListener, NullableEditor, DocumentListener
 {
 	private TextAreaEditor editor;
 	private WbTable parentTable;
 	private JScrollPane scroll;
 	private Color defaultBackground;
+	private boolean isNull;
 
 	public WbCellEditor(WbTable parent)
 	{
@@ -55,7 +55,6 @@ public class WbCellEditor
 		parentTable = parent;
 		editor = new TextAreaEditor();
 		defaultBackground = editor.getBackground();
-		setDefaultCopyPasteKeys(editor);
 		setFont(parent.getFont());
 		scroll = new TextAreaScrollPane(editor);
 		scroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -64,31 +63,28 @@ public class WbCellEditor
 		editor.setWrapStyleWord(true);
 		editor.setBorder(WbSwingUtilities.EMPTY_BORDER);
 		scroll.setBorder(WbSwingUtilities.EMPTY_BORDER);
-		editor.addMouseListener(new TextComponentMouseListener());
+		TextComponentMouseListener l = new TextComponentMouseListener();
+		l.addAction(new SetNullAction(this));
+		editor.addMouseListener(l);
 		editor.addMouseListener(this);
 	}
 
-	protected void setDefaultCopyPasteKeys(JComponent edit)
+	@Override
+	public void setNull(boolean setToNull)
 	{
-		InputMap im = edit.getInputMap();
-		KeyStroke ks = KeyStroke.getKeyStroke(KeyEvent.VK_C, PlatformShortcuts.getDefaultModifier());
-		KeyStroke ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, PlatformShortcuts.getDefaultModifier());
-
-		Object cmd = im.get(ks);
-		im.put(ksnew, cmd);
-
-		ks = KeyStroke.getKeyStroke(KeyEvent.VK_V, PlatformShortcuts.getDefaultModifier());
-		ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, InputEvent.SHIFT_MASK);
-
-		cmd = im.get(ks);
-		im.put(ksnew, cmd);
-
-		ks = KeyStroke.getKeyStroke(KeyEvent.VK_X, PlatformShortcuts.getDefaultModifier());
-		ksnew = KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, InputEvent.SHIFT_MASK);
-
-		cmd = im.get(ks);
-		im.put(ksnew, cmd);
+		if (setToNull)
+		{
+			editor.setText("");
+		}
+		isNull = setToNull;
 	}
+
+	@Override
+	public JTextComponent getEditor()
+	{
+		return editor;
+	}
+
 
 	@Override
 	public void cancelCellEditing()
@@ -115,6 +111,7 @@ public class WbCellEditor
 	{
 		editor.setText(newText);
 		editor.selectAll();
+		isNull = false;
 	}
 
 	public void setFont(Font aFont)
@@ -127,8 +124,11 @@ public class WbCellEditor
 		return scroll;
 	}
 
+
+	@Override
 	public Object getCellEditorValue()
 	{
+		if (isNull) return null;
 		return editor.getText();
 	}
 
@@ -149,6 +149,7 @@ public class WbCellEditor
 		// this method is called when the user edits a cell
 		// in that case we want to select all text
 		editor.selectAll();
+		setNull(false);
 		setEditable(!parentTable.isReadOnly());
 		return scroll;
 	}
@@ -190,6 +191,24 @@ public class WbCellEditor
 			editor.setBackground(defaultBackground);
 		}
 		editor.getCaret().setVisible(true);
+	}
+
+	@Override
+	public void insertUpdate(DocumentEvent e)
+	{
+		setNull(false);
+	}
+
+	@Override
+	public void removeUpdate(DocumentEvent e)
+	{
+		setNull(false);
+	}
+
+	@Override
+	public void changedUpdate(DocumentEvent e)
+	{
+		setNull(false);
 	}
 
 	static class TextAreaEditor

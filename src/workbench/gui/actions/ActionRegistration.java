@@ -15,8 +15,8 @@ package workbench.gui.actions;
  * 	Register actions with the ShortcutManager that are not created upon startup.
  * 	For this, a dummy action is created (with no client) which will
  * 	kick off the registration with the ShortcutManager
- * 	 
- * @author Thomas Kellerer  
+ *
+ * @author Thomas Kellerer
  */
 public class ActionRegistration
 {
@@ -28,5 +28,6 @@ public class ActionRegistration
 		new CopySelectedAsSqlDeleteInsertAction(null);
 		new CopySelectedAsSqlInsertAction(null);
 		new CopySelectedAsSqlUpdateAction(null);
+		new SetNullAction(null);
 	}
 }
