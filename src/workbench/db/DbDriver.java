@@ -151,7 +151,7 @@ public class DbDriver
 
 	public static List<String> splitLibraryList(String libList)
 	{
-		if (libList.indexOf("|") > -1)
+		if (libList.indexOf('|') > -1)
 		{
 			return StringUtil.stringToList(libList, "|", true, true, false);
 		}
@@ -301,10 +301,10 @@ public class DbDriver
 	{
 		DbDriver copy = new DbDriver();
 		copy.driverClass = this.driverClass;
-		copy.libraryList = new ArrayList<String>();
-		copy.libraryList.addAll(this.libraryList);
+		copy.libraryList = new ArrayList<String>(libraryList);
 		copy.sampleUrl = this.sampleUrl;
 		copy.name = this.name;
+		copy.isInternal = this.isInternal;
 		return copy;
 	}
 
@@ -314,10 +314,8 @@ public class DbDriver
 		Connection c = null;
 		try
 		{
-			this.loadDriverClass();
+			loadDriverClass();
 
-			// as we are not using the DriverManager, we need to supply username
-			// and password in the connection properties!
 			Properties props = new Properties();
 			if (StringUtil.isNonBlank(user)) props.put("user", user);
 			if (StringUtil.isNonBlank(password)) props.put("password", password);
@@ -336,6 +334,7 @@ public class DbDriver
 					}
 				}
 			}
+
 			setAppInfo(props, url, id, user);
 
 			c = this.driverClassInstance.connect(url, props);
@@ -343,6 +342,13 @@ public class DbDriver
 			{
 				LogMgr.logError("DbDriver.connect()", "No connection returned by driver " + this.driverClass + " for URL=" + url, null);
 				throw new SQLException("Driver did not return a connection for url=" + url);
+			}
+
+			// The system property for the Firebird driver is only needed when the connection is created
+			// so after the connect is done, we can clean up the system properties
+			if (adjustProgramName() && url.startsWith("jdbc:firebirdsql:"))
+			{
+				System.clearProperty("org.firebirdsql.jdbc.processName");
 			}
 		}
 		catch (ClassNotFoundException e)
@@ -370,11 +376,14 @@ public class DbDriver
 		return ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildNumber();
 	}
 
+	private boolean adjustProgramName()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
+	}
 	private void setAppInfo(Properties props, String url, String id, String user)
 		throws UnknownHostException
 	{
-		boolean tweakAppName = Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
-		if (!tweakAppName) return;
+		if (!adjustProgramName()) return;
 
 		// identify the program name when connecting
 		// this is different for each DBMS.
@@ -425,9 +434,12 @@ public class DbDriver
 			prgName = ResourceMgr.TXT_PRODUCT_NAME + " (" + id + ")";
 			if (!props.containsKey("clientProgramName"))
 			{
-				// clientProgramName is limited to 12 bytes, so don't use the version here
 				props.put("clientProgramName", ResourceMgr.TXT_PRODUCT_NAME);
 			}
+		}
+		else if (url.startsWith("jdbc:firebirdsql:"))
+		{
+			System.setProperty("org.firebirdsql.jdbc.processName", StringUtil.getMaxSubstring(prgName, 253));
 		}
 
 		if (appNameProperty != null && !props.containsKey(appNameProperty))
