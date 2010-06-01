@@ -940,7 +940,7 @@ Done.</programlisting>
 	</section>
 
 	<section id="edit-data" xreflabel="Editing the data">
-		<title>Editing the data</title>
+		<title>Editing data</title>
 
 		<para>
 			Once the data has been retrieved from the database, it can be
@@ -1015,6 +1015,14 @@ Done.</programlisting>
 			or importing a text file into the result set. The exact keywords that are recognized can be
 			configure in the <link linkend="settings-date-keywords">settings file</link>
 		</para>
+
+    <para id="edit-set-null">
+      If the option <link linkend="profile-empty-string-is-null">Empty String is NULL</link> is disabled for the current connection profile, you can
+      still set a column's value to null when editing it. To do this, double click the current value, so that you can
+      edit it. In the context menu (right mouse button) the option "Set to NULL" is available. This will clear the
+      value and set it to <literal>NULL</literal>. You can assign a shortcut to this action, but the shortcut will only
+      be active when editing a value inside a column.
+    </para>
 
 	</section>
 

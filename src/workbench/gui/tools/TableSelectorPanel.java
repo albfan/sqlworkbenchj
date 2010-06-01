@@ -12,7 +12,12 @@
 package workbench.gui.tools;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -20,8 +25,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
 
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import workbench.db.TableIdentifier;
 import workbench.db.TableNameComparator;
 import workbench.db.WbConnection;
@@ -138,7 +147,7 @@ public class TableSelectorPanel
 		this.refreshButton.setEnabled(this.dbConnection != null);
 		if (this.dbConnection != null)
 		{
-			this.retrieveSchemas();
+			retrieveSchemas();
 		}
 		else
 		{
@@ -159,6 +168,18 @@ public class TableSelectorPanel
 
 	public void retrieveSchemas()
 	{
+		WbSwingUtilities.invoke(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				_retrieveSchemas();
+			}
+		});
+	}
+
+	private void _retrieveSchemas()
+	{
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
@@ -172,29 +193,29 @@ public class TableSelectorPanel
 			this.schemaSelector.removeAllItems();
 			this.tableSelector.removeAllItems();
 
-			this.schemaSelector.addItem("*");
-			this.currentSchema = null;
+			schemaSelector.addItem("*");
+			currentSchema = null;
 
-			List schemas = this.dbConnection.getMetadata().getSchemas();
+			List<String> schemas = this.dbConnection.getMetadata().getSchemas();
 			String current = this.dbConnection.getMetadata().getCurrentSchema();
 
-			for (int i=0; i < schemas.size(); i++)
+			for (String schema : schemas)
 			{
-				String schema = (String)schemas.get(i);
 				if (StringUtil.isEmptyString(schema)) continue;
-				this.schemaSelector.addItem(schema);
+				schemaSelector.addItem(schema);
 				if (current != null && schema.equalsIgnoreCase(current)) this.currentSchema = schema;
 			}
-			if (this.currentSchema != null)
+
+			if (currentSchema != null)
 			{
-				schemaSelector.setSelectedItem(this.currentSchema);
+				schemaSelector.setSelectedItem(currentSchema);
 			}
 			else
 			{
-				this.schemaSelector.setSelectedIndex(0);
+				schemaSelector.setSelectedIndex(0);
 			}
-			this.retrieveTables();
-			this.schemaSelector.addItemListener(this);
+			retrieveTables();
+			schemaSelector.addItemListener(this);
 		}
 		catch (Exception e)
 		{
@@ -234,24 +255,28 @@ public class TableSelectorPanel
 	{
 		try
 		{
-			this.tableSelector.removeItemListener(this);
-			List<TableIdentifier> tables = this.dbConnection.getMetadata().getSelectableObjectsList(null, this.currentSchema);
+			tableSelector.removeItemListener(this);
+			List<TableIdentifier> tables = dbConnection.getMetadata().getSelectableObjectsList(null, currentSchema);
+
 			Collections.sort(tables, new TableNameComparator());
-			this.tableSelector.removeAllItems();
-			if (this.allowNewTable)
+			tableSelector.removeAllItems();
+
+			if (allowNewTable)
 			{
-				this.tableSelector.addItem(this.newTableId);
+				tableSelector.addItem(newTableId);
 			}
+
 			for (TableIdentifier table : tables)
 			{
 				table.setShowTablenameOnly(true);
-				this.tableSelector.addItem(table);
+				tableSelector.addItem(table);
 			}
-			this.editNewTableNameButton.setEnabled(false);
+
+			editNewTableNameButton.setEnabled(false);
 			tableSelector.setSelectedItem(null);
-			TableIdentifier old = this.currentTable;
-			this.currentTable = null;
-			this.firePropertyChange(old, null);
+			TableIdentifier old = currentTable;
+			currentTable = null;
+			firePropertyChange(old, null);
 		}
 		catch (Exception e)
 		{
@@ -259,7 +284,7 @@ public class TableSelectorPanel
 		}
 		finally
 		{
-			this.tableSelector.addItemListener(this);
+			tableSelector.addItemListener(this);
 		}
 	}
 
@@ -269,10 +294,7 @@ public class TableSelectorPanel
 		Object selected = this.tableSelector.getSelectedItem();
 		if (selected == null) return null;
 
-		TableIdentifier tbl = (TableIdentifier)selected;
-		String schema = (String)schemaSelector.getSelectedItem();
-		tbl.setSchema(schema);
-		return tbl;
+		return (TableIdentifier)selected;
 	}
 
 	public void findAndSelectTable(String aTable)
@@ -307,21 +329,21 @@ public class TableSelectorPanel
 			this.currentSchema = (String)this.schemaSelector.getSelectedItem();
 			if (this.currentSchema != null)
 			{
-				this.retrieveTables();
+				retrieveTables();
 			}
-			this.newTableId.setSchema(this.currentSchema);
+			newTableId.setSchema(this.currentSchema);
 		}
 		else if (e.getSource() == this.tableSelector)
 		{
 			final TableIdentifier old = this.currentTable;
-			this.currentTable = this.getSelectedTable();
-			if (this.currentTable != null)
+			currentTable = this.getSelectedTable();
+			if (currentTable != null)
 			{
-				this.editNewTableNameButton.setEnabled(currentTable.isNewTable());
+				editNewTableNameButton.setEnabled(currentTable.isNewTable());
 			}
 			else
 			{
-				this.editNewTableNameButton.setEnabled(false);
+				editNewTableNameButton.setEnabled(false);
 			}
 			EventQueue.invokeLater(new Runnable()
 			{
@@ -367,106 +389,100 @@ public class TableSelectorPanel
 	 * WARNING: Do NOT modify this code. The content of this method is
 	 * always regenerated by the Form Editor.
 	 */
-  // <editor-fold defaultstate="collapsed" desc=" Generated Code ">//GEN-BEGIN:initComponents
-  private void initComponents()
-  {
-    java.awt.GridBagConstraints gridBagConstraints;
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+  private void initComponents() {
+		GridBagConstraints gridBagConstraints;
 
-    schemaSelector = new javax.swing.JComboBox();
-    tableSelector = new javax.swing.JComboBox();
-    schemaLabel = new javax.swing.JLabel();
-    tableLabel = new javax.swing.JLabel();
+    schemaSelector = new JComboBox();
+    tableSelector = new JComboBox();
+    schemaLabel = new JLabel();
+    tableLabel = new JLabel();
     editNewTableNameButton = new FlatButton();
     refreshButton = new FlatButton();
 
-    setLayout(new java.awt.GridBagLayout());
+    setMinimumSize(new Dimension(68, 65));
+    setPreferredSize(new Dimension(68, 65));
+    setLayout(new GridBagLayout());
 
-    setMinimumSize(new java.awt.Dimension(68, 65));
-    setPreferredSize(new java.awt.Dimension(68, 65));
-    schemaSelector.setMaximumRowCount(0);
     schemaSelector.setAlignmentX(0.0F);
     schemaSelector.setAlignmentY(0.0F);
-    schemaSelector.setMaximumSize(new java.awt.Dimension(200, 25));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    schemaSelector.setMaximumSize(new Dimension(200, 25));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.3;
     add(schemaSelector, gridBagConstraints);
 
     tableSelector.setMaximumRowCount(0);
     tableSelector.setAlignmentX(0.0F);
     tableSelector.setAlignmentY(0.0F);
-    tableSelector.setMaximumSize(new java.awt.Dimension(80, 25));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    tableSelector.setMaximumSize(new Dimension(80, 25));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 0.7;
     add(tableSelector, gridBagConstraints);
 
     schemaLabel.setText("jLabel1");
-    schemaLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-    schemaLabel.setMaximumSize(new java.awt.Dimension(32768, 21));
-    schemaLabel.setMinimumSize(new java.awt.Dimension(34, 21));
-    schemaLabel.setPreferredSize(new java.awt.Dimension(34, 21));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    schemaLabel.setVerticalAlignment(SwingConstants.TOP);
+    schemaLabel.setMaximumSize(new Dimension(32768, 21));
+    schemaLabel.setMinimumSize(new Dimension(34, 21));
+    schemaLabel.setPreferredSize(new Dimension(34, 21));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(0, 0, 2, 0);
     add(schemaLabel, gridBagConstraints);
 
     tableLabel.setText("jLabel1");
-    tableLabel.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-    tableLabel.setMaximumSize(new java.awt.Dimension(32768, 21));
-    tableLabel.setMinimumSize(new java.awt.Dimension(34, 21));
-    tableLabel.setPreferredSize(new java.awt.Dimension(34, 21));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    tableLabel.setVerticalAlignment(SwingConstants.TOP);
+    tableLabel.setMaximumSize(new Dimension(32768, 21));
+    tableLabel.setMinimumSize(new Dimension(34, 21));
+    tableLabel.setPreferredSize(new Dimension(34, 21));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 2, 0);
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new Insets(0, 0, 2, 0);
     add(tableLabel, gridBagConstraints);
 
     editNewTableNameButton.setIcon(ResourceMgr.getImage("Rename"));
     editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
     editNewTableNameButton.setEnabled(false);
-    editNewTableNameButton.setMaximumSize(new java.awt.Dimension(22, 22));
-    editNewTableNameButton.setMinimumSize(new java.awt.Dimension(22, 22));
-    editNewTableNameButton.setPreferredSize(new java.awt.Dimension(22, 22));
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    editNewTableNameButton.setMaximumSize(new Dimension(22, 22));
+    editNewTableNameButton.setMinimumSize(new Dimension(22, 22));
+    editNewTableNameButton.setPreferredSize(new Dimension(22, 22));
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     add(editNewTableNameButton, gridBagConstraints);
 
     refreshButton.setIcon(ResourceMgr.getImage("Refresh"));
     refreshButton.setToolTipText("");
     refreshButton.setEnabled(false);
-    refreshButton.setMaximumSize(new java.awt.Dimension(22, 22));
-    refreshButton.setMinimumSize(new java.awt.Dimension(22, 22));
-    refreshButton.setPreferredSize(new java.awt.Dimension(22, 22));
-    refreshButton.addActionListener(new java.awt.event.ActionListener()
-    {
-      public void actionPerformed(java.awt.event.ActionEvent evt)
-      {
+    refreshButton.setMaximumSize(new Dimension(22, 22));
+    refreshButton.setMinimumSize(new Dimension(22, 22));
+    refreshButton.setPreferredSize(new Dimension(22, 22));
+    refreshButton.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent evt) {
         refreshButtonActionPerformed(evt);
       }
     });
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 1;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     add(refreshButton, gridBagConstraints);
-
   }// </editor-fold>//GEN-END:initComponents
 
 	private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_refreshButtonActionPerformed
@@ -475,12 +491,12 @@ public class TableSelectorPanel
 	}//GEN-LAST:event_refreshButtonActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
-  private javax.swing.JButton editNewTableNameButton;
-  private javax.swing.JButton refreshButton;
-  private javax.swing.JLabel schemaLabel;
-  private javax.swing.JComboBox schemaSelector;
-  private javax.swing.JLabel tableLabel;
-  private javax.swing.JComboBox tableSelector;
+  private JButton editNewTableNameButton;
+  private JButton refreshButton;
+  private JLabel schemaLabel;
+  private JComboBox schemaSelector;
+  private JLabel tableLabel;
+  private JComboBox tableSelector;
   // End of variables declaration//GEN-END:variables
 
 }

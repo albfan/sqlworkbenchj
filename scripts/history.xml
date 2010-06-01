@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-05-09">
+  <release build="-1" date="2010-06-01">
+    <entry dev-build="6" type="enh">When editing a value in the result set, the value can now be set to NULL (either through the popup menu or a shortcut)</entry>
+    <entry dev-build="6" type="enh">Sequences and UDTs in Derby 10.6 are now supported</entry>
     <entry dev-build="6" type="enh">A new editor option to disable "Execute selected" when no text is selected is available.</entry>
     <entry dev-build="6" type="enh">A new commandline option (-lbDefaults) is available to read connection information from an existing Liquibase defaults file</entry>
     <entry dev-build="6" type="enh">Commandline options (e.g. for batch mode) can now also be stored in a properties file. A new option -arguments defines the file to be used</entry>
@@ -19,6 +21,7 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="6" type="fix">The generated WbCopy command in the DataPumper was wrong, if * was selected as the schema</entry>
     <entry dev-build="6" type="fix">Values of TIME columns were exported (incl. copy to clipboard) as dates</entry>
     <entry dev-build="5" type="fix">When entering an invalid expression in the quickfilter of the DbExplorer, the filter was no longer working</entry>
     <entry dev-build="5" type="fix">Postgres rules with the name _RETURN were not displayed in the DbExplorer</entry>

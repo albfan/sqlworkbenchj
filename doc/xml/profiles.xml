@@ -212,7 +212,7 @@
     of your driver for details). If this is the case for your driver, check the option
     <literal>Copy to system properties before connecting</literal>.
   </para>
-  
+
 </section>
 
 <section id="profile-workbench-settings">
@@ -238,7 +238,7 @@
 		<title>Separate connection per tab</title>
     <indexterm><primary>Connection profile</primary><secondary>separate connection</secondary></indexterm>
     <indexterm><primary>Connection profile</primary><secondary>separate session</secondary></indexterm>
-    
+
 		<para>
 			If this option is enabled, then each tab in the main window
       will open a separate (phyiscal) connection to the database server. This is
@@ -371,19 +371,25 @@
       modifying the profile) using the <link linkend="command-wbmode">WbMode</link>
       command.
     </para>
-    
+
 	</section>
 
 	<section id="profile-empty-string-is-null">
-		<title>Treat empty strings as NULL</title>
+		<title>Empty string is NULL</title>
 		<para>
-			When entering data into the result set (grid) this setting controls, how
-			empty values (for character columns) should be treated. If this option
-			is enabled, then a NULL value will be sent to the database for an empty
-			(zero length) string. Empty values for other datatypes (dates, numbers etc)
-			are always considered NULL. If this option is not enabled, then an empty
-			string ('') will be sent to the database.
+      If this option is enabled, then a NULL value will be sent to the database for an empty
+			(zero length) string. Everything else will be sent to the database as entered.
+    </para>
+
+    <para>
+      Empty values for non-character values (dates, numbers etc) are always treated as <literal>NULL</literal>.
 		</para>
+
+    <para>
+      If this option is disabled you can still set a column's value to <literal>NULL</literal> while
+      editing a result set. Please see <link linkend="edit-set-null">Editing data</link> for details
+    </para>
+
 	</section>
 
 		<section id="profile-insert-null-column">
@@ -683,5 +689,5 @@
 
 	</section>
 
-  
+
 </section>

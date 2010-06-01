@@ -1609,9 +1609,13 @@ public class DataPumper
 		if (targetProfile == null) return;
 
 		if (id.isNewTable())
+		{
 			s = id.getTableName();
+		}
 		else
-			s = id.getTableExpression();
+		{
+			s = id.getTableExpression(targetConnection);
+		}
 		result.append(indent);
 		result.append("-" + WbCopy.PARAM_TARGETTABLE + "=");
 		result.append(s);
@@ -1651,7 +1655,7 @@ public class DataPumper
 		{
 			id = this.sourceTable.getSelectedTable();
 			if (id == null) return;
-			s = id.getTableExpression();
+			s = id.getTableExpression(sourceConnection);
 			result.append(indent);
 			result.append("-" + WbCopy.PARAM_SOURCETABLE + "=");
 			if (s.indexOf(' ') > -1) result.append('"');
