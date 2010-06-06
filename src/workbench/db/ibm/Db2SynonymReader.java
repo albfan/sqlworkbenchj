@@ -38,7 +38,7 @@ public class Db2SynonymReader
 	 * 
 	 * @return an empty list
 	 */
-	public List<String> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
 		return Collections.emptyList();
@@ -103,7 +103,7 @@ public class Db2SynonymReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE ALIAS ");
 		result.append(aSynonym);
-		result.append(nl + "       FOR ");
+		result.append(nl + "   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);

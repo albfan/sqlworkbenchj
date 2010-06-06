@@ -712,15 +712,15 @@ public class TableListPanel
 
 	protected void invalidateData()
 	{
-		this.shouldRetrieveTable = true;
-		this.shouldRetrieveTableData = true;
-		this.shouldRetrieveTableSource = true;
-		this.shouldRetrieveTriggers = true;
-		this.shouldRetrieveIndexes = true;
-		this.shouldRetrieveExportedKeys = true;
-		this.shouldRetrieveImportedKeys = true;
-		this.shouldRetrieveExportedTree = true;
-		this.shouldRetrieveImportedTree = true;
+		shouldRetrieveTable = true;
+		shouldRetrieveTableData = true;
+		shouldRetrieveTableSource = true;
+		shouldRetrieveTriggers = true;
+		shouldRetrieveIndexes = true;
+		shouldRetrieveExportedKeys = true;
+		shouldRetrieveImportedKeys = true;
+		shouldRetrieveExportedTree = true;
+		shouldRetrieveImportedTree = true;
 	}
 
 	public void setConnection(WbConnection aConnection)
@@ -745,7 +745,8 @@ public class TableListPanel
 			this.findPanel.setColumnList(dbConnection.getMetadata().getTableListColumns());
 		}
 
-		this.reset();
+		reset();
+
 		try
 		{
 			Collection<String> types = this.dbConnection.getMetadata().getObjectTypes();
@@ -796,13 +797,21 @@ public class TableListPanel
 		return (w.isVisible());
 	}
 
-	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)
+	public void setCatalogAndSchema(String newCatalog, String newSchema, boolean retrieve)
 		throws Exception
 	{
-		this.currentSchema = aSchema;
-		this.currentCatalog = aCatalog;
+//		boolean sameCatalogAndSchema = StringUtil.equalString(currentSchema, newSchema) && StringUtil.equalString(currentCatalog, newCatalog);
+//
+//		if (!sameCatalogAndSchema)
+//		{
+//			LogMgr.logDebug("TableListPanel.setCatalogAndSchema()", "Selection has changed. Schema: " + currentSchema + " -> " + newSchema
+//				+ ", Catalog: " + currentCatalog + " -> " + newCatalog);
+//		}
 
-		this.invalidateData();
+		this.currentSchema = newSchema;
+		this.currentCatalog = newCatalog;
+
+		invalidateData();
 
 		if (this.isBusy())
 		{
@@ -810,12 +819,13 @@ public class TableListPanel
 			return;
 		}
 
-		this.reset();
+		reset();
 
 		if (!retrieve) return;
+
 		if (this.dbConnection == null) return;
 
-		if (this.isReallyVisible() || this.isClientVisible())
+		if (isReallyVisible() || isClientVisible())
 		{
 			retrieve();
 			setFocusToTableList();
@@ -848,7 +858,7 @@ public class TableListPanel
 	{
 		if (this.isBusy())
 		{
-			this.invalidateData();
+			invalidateData();
 			return;
 		}
 
@@ -869,7 +879,7 @@ public class TableListPanel
 		try
 		{
 			WbSwingUtilities.showWaitCursor(this);
-			this.summaryStatusBarLabel.setText(ResourceMgr.getString("MsgRetrieving"));
+			summaryStatusBarLabel.setText(ResourceMgr.getString("MsgRetrieving"));
 			reset();
 
 			// do not call setBusy() before reset() because
@@ -912,19 +922,28 @@ public class TableListPanel
 		}
 		catch (OutOfMemoryError mem)
 		{
+			setBusy(false);
 			reset();
 			setDirty(true);
 			WbManager.getInstance().showOutOfMemoryError();
 		}
 		catch (LowMemoryException mem)
 		{
+			setBusy(false);
 			reset();
 			setDirty(true);
 			WbManager.getInstance().showLowMemoryError();
 		}
 		catch (Throwable e)
 		{
-			LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
+			if (e instanceof SQLException)
+			{
+				LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", (SQLException)e);
+			}
+			else
+			{
+				LogMgr.logError("TableListPanel.retrieve()", "Error retrieving table list", e);
+			}
 			String msg = ExceptionUtil.getDisplay(e);
 			invalidateData();
 			setDirty(true);

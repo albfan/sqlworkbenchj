@@ -824,6 +824,11 @@ public class Settings
 
 	// <editor-fold defaultstate="collapsed" desc="DbExplorer">
 
+	public boolean getAlwaysUseSeparateConnForDbExpWindow()
+	{
+		return getBoolProperty("workbench.dbexplorer.connection.always.separate", false);
+	}
+	
 	public String getDefaultExplorerObjectType()
 	{
 		return getProperty("workbench.gui.dbobjects.TableListPanel.objecttype", null);

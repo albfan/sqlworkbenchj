@@ -17,7 +17,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -59,14 +58,14 @@ public class IngresMetadata
 	 * 	Get a list of synonyms for the given owner
 	 */
 	@Override
-	public List<String> getSynonymList(WbConnection conn, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection conn, String owner, String namePattern)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;
-		List<String> result = new LinkedList<String>();
+		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
 
 		StringBuilder sql = new StringBuilder(200);
-		sql.append("SELECT synonym_name FROM iisynonyms ");
+		sql.append("SELECT synonym_owner, synonym_name FROM iisynonyms ");
 		if (owner != null)
 		{
 			sql.append(" WHERE synonym_owner = ?");
@@ -79,8 +78,14 @@ public class IngresMetadata
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
-				String seq = rs.getString(1);
-				if (seq != null) result.add(seq.trim());
+				String schema = rs.getString(1);
+				String name = rs.getString(2);
+				if (name == null) continue;
+
+				TableIdentifier tbl = new TableIdentifier(schema.trim(), name.trim());
+				tbl.setNeverAdjustCase(true);
+				tbl.setType(SYN_TYPE_NAME);
+				result.add(tbl);
 			}
 		}
 		catch (Exception e)
@@ -136,7 +141,7 @@ public class IngresMetadata
 		StringBuilder result = new StringBuilder(200);
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
-		result.append("\n       FOR ");
+		result.append("\n   FOR ");
 		result.append(id.getTableExpression());
 		result.append(";\n");
 		return result.toString();

@@ -21,12 +21,14 @@ import java.util.List;
  */
 public interface SynonymReader
 {
+	public static final String SYN_TYPE_NAME = "SYNONYM";
+	
 	String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
 			throws SQLException;
 
 	TableIdentifier getSynonymTable(WbConnection con, String anOwner, String aSynonym)
 			throws SQLException;
 
-	List<String> getSynonymList(WbConnection con, String owner, String namePattern)
+	List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException;
 }

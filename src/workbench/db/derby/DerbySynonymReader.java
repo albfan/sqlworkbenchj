@@ -14,7 +14,7 @@ package workbench.db.derby;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import workbench.db.SynonymReader;
 import workbench.db.TableIdentifier;
@@ -41,11 +41,11 @@ public class DerbySynonymReader
 	 * is no need to retrieve them here
 	 */
 	@Override
-	public List<String> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
-		List<String> result = new LinkedList<String>();
-		String sql = "SELECT a.alias \n" +
+		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
+		String sql = "SELECT s.schemaname, a.alias \n" +
              " FROM sys.sysaliases a, sys.sysschemas s \n" +
              " WHERE a.schemaid = s.schemaid \n" +
 			       "  AND a.aliastype = 'S' \n" +
@@ -72,10 +72,14 @@ public class DerbySynonymReader
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
-				String alias = rs.getString(1);
+				String schema = rs.getString(1);
+				String alias = rs.getString(2);
 				if (!rs.wasNull())
 				{
-					result.add(alias);
+					TableIdentifier tbl = new TableIdentifier(schema, alias);
+					tbl.setType(SYN_TYPE_NAME);
+					tbl.setNeverAdjustCase(true);
+					result.add(tbl);
 				}
 			}
 		}
@@ -140,7 +144,7 @@ public class DerbySynonymReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
-		result.append(nl + "       FOR ");
+		result.append(nl + "   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);

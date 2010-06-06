@@ -456,11 +456,7 @@ public class DbExplorerPanel
 		{
 			WbSwingUtilities.showWaitCursor(this);
 			conn = mgr.getConnection(profile, this.getId());
-			this.setConnection(conn);
-			if (Settings.getInstance().getRetrieveDbExplorer())
-			{
-				this.retrieve();
-			}
+			setConnection(conn);
 		}
 		catch (Exception e)
 		{
@@ -576,7 +572,7 @@ public class DbExplorerPanel
 
 			// Try to avoid concurrent execution on the
 			// same connection object
-			if (!this.isConnectionBusy())
+			if (!isConnectionBusy())
 			{
 				WbThread t = new WbThread("DbExplorerInit")
 				{
@@ -587,7 +583,6 @@ public class DbExplorerPanel
 						if (isVisible())
 						{
 							readSchemas(true);
-
 							if (retrievePending)
 							{
 								// if we are visible start the retrieve immediately
@@ -771,7 +766,7 @@ public class DbExplorerPanel
 		}
 		else if (e.getSource() == this.catalogSelector)
 		{
-			if (this.switchCatalog)
+			if (switchCatalog)
 			{
 				try
 				{
@@ -780,6 +775,7 @@ public class DbExplorerPanel
 				}
 				catch (SQLException ex)
 				{
+					LogMgr.logError("DbExplorerPanel.actionPerformed()", "Could not switch catalog", ex);
 					WbSwingUtilities.showErrorMessage(this, ExceptionUtil.getDisplay(ex));
 				}
 			}
@@ -883,10 +879,10 @@ public class DbExplorerPanel
 	{
 		if (this.window == null)
 		{
-			this.window = new DbExplorerWindow(this, aProfileName);
+			window = new DbExplorerWindow(this, aProfileName);
 		}
-		this.window.setVisible(true);
-		return this.window;
+		window.setVisible(true);
+		return window;
 	}
 
 	public List getActions()
@@ -924,11 +920,11 @@ public class DbExplorerPanel
 		this.dispose();
 		this.disconnect();
 
-		if (this.mainWindow != null)
+		if (mainWindow != null)
 		{
-			this.mainWindow.explorerWindowClosed(this.window);
+			mainWindow.explorerWindowClosed(this.window);
 		}
-		this.window = null;
+		window = null;
 	}
 
 	public void stateChanged(ChangeEvent e)
@@ -1053,7 +1049,7 @@ public class DbExplorerPanel
 		}
 		if (this.isVisible() && this.retrievePending)
 		{
-			this.retrieve();
+			retrieve();
 		}
 	}
 

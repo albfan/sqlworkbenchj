@@ -20,6 +20,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -340,12 +341,12 @@ public class DbMetadata
 		try
 		{
 			this.quoteCharacter = this.metaData.getIdentifierQuoteString();
-			LogMgr.logDebug("DbMetadata", "Identifier quote character obtained from driver: " + quoteCharacter);
+			LogMgr.logDebug("DbMetadata.<init>", "Identifier quote character obtained from driver: " + quoteCharacter);
 		}
 		catch (Exception e)
 		{
 			this.quoteCharacter = null;
-			LogMgr.logError("DbMetadata", "Error when retrieving identifier quote character", e);
+			LogMgr.logError("DbMetadata.<init>", "Error when retrieving identifier quote character", e);
 		}
 
 		if (StringUtil.isBlank(quoteCharacter)) this.quoteCharacter = "\"";
@@ -572,7 +573,7 @@ public class DbMetadata
 				// for all HSQL versions.
 				dbId = "hsql_database_engine";
 			}
-			LogMgr.logInfo("DbMetadata", "Using DBID=" + this.dbId);
+			LogMgr.logInfo("DbMetadata.<init>", "Using DBID=" + this.dbId);
 		}
 		return this.dbId;
 	}
@@ -1192,14 +1193,14 @@ public class DbMetadata
 		return new String[] {"NAME", "TYPE", catalogTerm.toUpperCase(), schemaTerm.toUpperCase(), "REMARKS"};
 	}
 
-	public DataStore getObjects(String aCatalog, String aSchema, String objects, String[] types)
+	public DataStore getObjects(String catalogPattern, String schemaPattern, String namePattern, String[] types)
 		throws SQLException
 	{
-		if ("*".equals(aSchema) || "%".equals(aSchema)) aSchema = null;
-		if ("*".equals(objects) || "%".equals(objects)) objects = null;
+		if ("*".equals(schemaPattern) || "%".equals(schemaPattern)) schemaPattern = null;
+		if ("*".equals(namePattern) || "%".equals(namePattern)) namePattern = null;
 
-		if (aSchema != null) aSchema = StringUtil.replace(aSchema, "*", "%");
-		if (objects != null) objects = StringUtil.replace(objects, "*", "%");
+		if (schemaPattern != null) schemaPattern = StringUtil.replace(schemaPattern, "*", "%");
+		if (namePattern != null) namePattern = StringUtil.replace(namePattern, "*", "%");
 		String[] cols = getTableListColumns();
 		int coltypes[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30, 12, 10, 10, 20};
@@ -1213,10 +1214,10 @@ public class DbMetadata
 
 		ObjectListFilter filter = new ObjectListFilter(getDbId());
 
-		Set snapshotList = Collections.EMPTY_SET;
+		Set<String> snapshotList = Collections.emptySet();
 		if (checkOracleSnapshots)
 		{
-			snapshotList = this.oracleMetaData.getSnapshots(aSchema);
+			snapshotList = oracleMetaData.getSnapshots(schemaPattern);
 		}
 
 		boolean hideIndexes = hideIndexes();
@@ -1224,7 +1225,11 @@ public class DbMetadata
 		ResultSet tableRs = null;
 		try
 		{
-			tableRs = this.metaData.getTables(StringUtil.trimQuotes(aCatalog), StringUtil.trimQuotes(aSchema), StringUtil.trimQuotes(objects), types);
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("DbMetadata.getObjects()", "Calling getTables() using: catalog="+ catalogPattern + ", schema=" + schemaPattern + ", name=" + namePattern + ", types=" + (types == null ? "NULL" : Arrays.asList(types).toString()));
+			}
+			tableRs = metaData.getTables(StringUtil.trimQuotes(catalogPattern), StringUtil.trimQuotes(schemaPattern), StringUtil.trimQuotes(namePattern), types);
 			if (tableRs == null)
 			{
 				LogMgr.logError("DbMetadata.getTables()", "Driver returned a NULL ResultSet from getTables()",null);
@@ -1234,7 +1239,7 @@ public class DbMetadata
 			while (tableRs.next())
 			{
 				String cat = tableRs.getString(1);
-				String schem = tableRs.getString(2);
+				String schema = tableRs.getString(2);
 				String name = tableRs.getString(3);
 				String ttype = tableRs.getString(4);
 				if (name == null) continue;
@@ -1243,7 +1248,7 @@ public class DbMetadata
 
 				boolean isSynoym = "SYNONYM".equals(ttype);
 
-				// prevent duplicate retrieval of SYNONYMS if the driver
+				// prevent duplicate retrieval of SYNONYMs if the driver
 				// returns them already, but the Settings have enabled
 				// Synonym retrieval as well
 				// (e.g. because an upgraded Driver now returns the synonyms)
@@ -1257,7 +1262,7 @@ public class DbMetadata
 				if (checkOracleSnapshots)
 				{
 					StringBuilder t = new StringBuilder(30);
-					t.append(schem);
+					t.append(schema);
 					t.append('.');
 					t.append(name);
 					if (snapshotList.contains(t.toString()))
@@ -1271,7 +1276,7 @@ public class DbMetadata
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, name);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, ttype);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, cat);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schem);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, schema);
 				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, rem);
 				if (!sequencesReturned && "SEQUENCE".equals(ttype)) sequencesReturned = true;
 			}
@@ -1287,7 +1292,7 @@ public class DbMetadata
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
-			List<SequenceDefinition> sequences = this.sequenceReader.getSequences(aSchema, objects);
+			List<SequenceDefinition> sequences = sequenceReader.getSequences(schemaPattern, namePattern);
 			for (SequenceDefinition sequence : sequences)
 			{
 				int row = result.addRow();
@@ -1305,17 +1310,16 @@ public class DbMetadata
 		boolean retrieveSyns = (this.synonymReader != null && Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_synonyms", false));
 		if (retrieveSyns && !synRetrieved && synonymsRequested)
 		{
-			LogMgr.logDebug("DbMetadata.getTables()", "Retrieving synonyms...");
-			List<String> syns = this.synonymReader.getSynonymList(this.dbConnection, aSchema, objects);
-			for (String synName : syns)
+			List<TableIdentifier> syns = synonymReader.getSynonymList(dbConnection, schemaPattern, namePattern);
+			for (TableIdentifier synonym : syns)
 			{
 				int row = result.addRow();
 
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, synName);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, "SYNONYM");
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, null);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, aSchema);
-				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, null);
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_NAME, synonym.getTableName());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_TYPE, synonym.getType());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_CATALOG, synonym.getCatalog());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_SCHEMA, synonym.getSchema());
+				result.setValue(row, COLUMN_IDX_TABLE_LIST_REMARKS, synonym.getComment());
 			}
 			sortNeeded = true;
 		}
@@ -1324,7 +1328,7 @@ public class DbMetadata
 		{
 			if (extender.handlesType(types))
 			{
-				if (extender.extendObjectList(dbConnection, result, aCatalog, aSchema, objects, types))
+				if (extender.extendObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types))
 				{
 					sortNeeded = true;
 				}
@@ -1333,7 +1337,7 @@ public class DbMetadata
 
 		if (objectListEnhancer != null)
 		{
-			objectListEnhancer.updateObjectList(dbConnection, result, aCatalog, aSchema, objects, types);
+			objectListEnhancer.updateObjectList(dbConnection, result, catalogPattern, schemaPattern, namePattern, types);
 		}
 
 		if (sortNeeded)
@@ -2227,23 +2231,23 @@ public class DbMetadata
 	{
 		ArrayList<String> result = new ArrayList<String>();
 		ResultSet rs = null;
+
 		try
 		{
 			rs = this.metaData.getSchemas();
 			while (rs.next())
 			{
 				String schema = rs.getString(1);
-				if (schema == null) continue;
+				if (schema == null)	continue;
 				if (filter == null || !filter.isExcluded(schema))
 				{
 					result.add(schema);
 				}
-
 			}
 		}
 		catch (Exception e)
 		{
-        LogMgr.logWarning("DbMetadata.getSchemas()", "Error retrieving schemas: " + e.getMessage(), null);
+			LogMgr.logError("DbMetadata.getSchemas()", "Error retrieving schemas: " + e.getMessage(), null);
 		}
 		finally
 		{
@@ -2252,9 +2256,9 @@ public class DbMetadata
 
 		// The Oracle driver does not return the "PUBLIC"
 		// schema (which is - strictly speaking - correct as
-		// there is no user PUBLIC in the database, but to view
+		// there is no user PUBLIC in the database), but to view
 		// public synonyms we need the entry for the DbExplorer
-		if (this.isOracle)
+		if (isOracle)
 		{
 			result.add("PUBLIC");
 			Collections.sort(result);

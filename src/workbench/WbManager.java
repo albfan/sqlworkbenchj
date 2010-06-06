@@ -211,13 +211,13 @@ public final class WbManager
 		}
 
 		return null;
-
 	}
+
 	public void registerToolWindow(ToolWindow aWindow)
 	{
 		synchronized (toolWindows)
 		{
-			this.toolWindows.add(aWindow);
+			toolWindows.add(aWindow);
 		}
 	}
 
@@ -226,7 +226,7 @@ public final class WbManager
 		if (toolWindow == null) return;
 		synchronized (toolWindows)
 		{
-			this.toolWindows.remove(toolWindow);
+			toolWindows.remove(toolWindow);
 
 			if (this.toolWindows.isEmpty() && this.mainWindows.isEmpty())
 			{
@@ -243,7 +243,7 @@ public final class WbManager
 			{
 				w.closeWindow();
 			}
-			this.toolWindows.clear();
+			toolWindows.clear();
 		}
 	}
 
@@ -823,6 +823,7 @@ public final class WbManager
 				MacroManager.getInstance().getMacros();
 			}
 		};
+		t1.setPriority(Thread.MIN_PRIORITY);
 		t1.start();
 
 		WbThread t2 = new WbThread("WarmUp2")
@@ -832,6 +833,7 @@ public final class WbManager
 				ConnectionMgr.getInstance().readProfiles();
 			}
 		};
+		t2.setPriority(Thread.MIN_PRIORITY);
 		t2.start();
 	}
 

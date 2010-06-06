@@ -14,7 +14,7 @@ package workbench.db.mssql;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.JdbcUtils;
@@ -37,7 +37,7 @@ public class SqlServerSynonymReader
 	private DbMetadata meta;
 
 	private final String baseSql =
-		"SELECT syn.name, syn.base_object_name \n" +
+		"SELECT sc.name as schema_name, syn.name as synonym_name, syn.base_object_name \n" +
     " FROM sys.synonyms syn JOIN sys.schemas sc ON syn.schema_id = sc.schema_id  ";
 
 	public SqlServerSynonymReader(DbMetadata dbMeta)
@@ -51,10 +51,10 @@ public class SqlServerSynonymReader
 	}
 
 	@Override
-	public List<String> getSynonymList(WbConnection con, String owner, String namePattern)
+	public List<TableIdentifier> getSynonymList(WbConnection con, String owner, String namePattern)
 		throws SQLException
 	{
-		List<String> result = new LinkedList<String>();
+		List<TableIdentifier> result = new ArrayList<TableIdentifier>();
 		String sql = baseSql;
 
 		int schemaIndex = -1;
@@ -107,10 +107,14 @@ public class SqlServerSynonymReader
 			rs = stmt.executeQuery();
 			while (rs.next())
 			{
-				String syn = rs.getString(1);
+				String schema = rs.getString(1);
+				String syn = rs.getString(2);
 				if (!rs.wasNull())
 				{
-					result.add(syn);
+					TableIdentifier tbl = new TableIdentifier(schema, syn);
+					tbl.setType(SYN_TYPE_NAME);
+					tbl.setNeverAdjustCase(true);
+					result.add(tbl);
 				}
 			}
 		}
@@ -142,7 +146,7 @@ public class SqlServerSynonymReader
 		{
 			if (rs.next())
 			{
-				table = rs.getString(2);
+				table = rs.getString(3);
 				if (table != null)
 				{
 					result = new TableIdentifier(meta.removeQuotes(table));
@@ -170,7 +174,7 @@ public class SqlServerSynonymReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE SYNONYM ");
 		result.append(aSynonym);
-		result.append(nl + "       FOR ");
+		result.append(nl + "   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');
 		result.append(nl);

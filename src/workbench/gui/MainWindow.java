@@ -187,7 +187,7 @@ public class MainWindow
 	private ManageMacroAction manageMacros;
 	private ShowMacroPopupAction showMacroPopup;
 
-	private List<ToolWindow> explorerWindows = new ArrayList<ToolWindow>();
+	private final List<ToolWindow> explorerWindows = new ArrayList<ToolWindow>();
 
 	private RunningJobIndicator jobIndicator;
 	protected WbThread connectThread;
@@ -1578,7 +1578,8 @@ public class MainWindow
 	public void disconnect(final boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
 	{
 		if (this.isConnectInProgress()) return;
-		this.setConnectIsInProgress();
+		
+		setConnectIsInProgress();
 
 		if (Settings.getInstance().getLogConnectionDetails())
 		{
@@ -1645,7 +1646,7 @@ public class MainWindow
 					mgr.disconnect(conn);
 				}
 			}
-			this.closeExplorerWindows();
+			closeExplorerWindows();
 		}
 		finally
 		{
@@ -2151,20 +2152,27 @@ public class MainWindow
 		DbExplorerPanel explorer = new DbExplorerPanel(this);
 		explorer.restoreSettings();
 		DbExplorerWindow w = explorer.openWindow(this.currentProfile.getName());
-		if (this.currentProfile.getUseSeparateConnectionPerTab() || this.currentConnection == null)
+
+		boolean useNewConnection = Settings.getInstance().getAlwaysUseSeparateConnForDbExpWindow()
+			      || currentProfile.getUseSeparateConnectionPerTab()
+						|| this.currentConnection == null;
+		
+		if (useNewConnection)
 		{
 			explorer.connect(this.currentProfile);
 		}
 		else
 		{
+			LogMgr.logDebug("MainWindow.newDbExplorerWindow()", "Re-using current connection for DbExplorer Window");
 			explorer.setConnection(this.currentConnection);
 		}
-		this.explorerWindows.add(w);
+		explorerWindows.add(w);
 	}
 
 	public void explorerWindowClosed(DbExplorerWindow w)
 	{
-		this.explorerWindows.remove(w);
+		if (isConnectInProgress()) return;
+		explorerWindows.remove(w);
 	}
 
 	public void newDbExplorerPanel(boolean select)

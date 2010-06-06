@@ -231,16 +231,16 @@ public class DbDriver
 					LogMgr.logInfo("DbDriver.loadDriverClass()", "Adding ClassLoader URL=" + url[index].toString());
 					index ++;
 				}
-				this.classLoader = new URLClassLoader(url, ClassLoader.getSystemClassLoader());
+				classLoader = new URLClassLoader(url, ClassLoader.getSystemClassLoader());
 			}
 
 			Class drvClass = null;
-			if (this.classLoader != null)
+			if (classLoader != null)
 			{
 				// New Firebird 2.0 driver needs this, and it does not seem to do any harm
 				// for other drivers
-				Thread.currentThread().setContextClassLoader(this.classLoader);
-				drvClass = this.classLoader.loadClass(this.driverClass);
+				Thread.currentThread().setContextClassLoader(classLoader);
+				drvClass = this.classLoader.loadClass(driverClass);
 			}
 			else
 			{
@@ -249,7 +249,7 @@ public class DbDriver
 				drvClass = Class.forName(this.driverClass);
 			}
 
-			this.driverClassInstance = (Driver)drvClass.newInstance();
+			driverClassInstance = (Driver)drvClass.newInstance();
 			if (Settings.getInstance().getBoolProperty("workbench.db.registerdriver", false))
 			{
 				// Some drivers expect to be registered with the DriverManager...
@@ -277,7 +277,6 @@ public class DbDriver
 					LogMgr.logError("DbDriver.loadDriverClass()", "Error setting driverManager logWriter", e);
 				}
 			}
-
 		}
 		catch (UnsupportedClassVersionError e)
 		{
@@ -308,7 +307,7 @@ public class DbDriver
 		return copy;
 	}
 
-	Connection connect(String url, String user, String password, String id, Properties connProps)
+	public Connection connect(String url, String user, String password, String id, Properties connProps)
 		throws ClassNotFoundException, SQLException
 	{
 		Connection c = null;
