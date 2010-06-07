@@ -114,7 +114,8 @@ public class WbSchemaReport
 
 		String tableNames = this.cmdLine.getValue(PARAM_TABLE_NAMES);
 		String exclude = cmdLine.getValue(PARAM_EXCLUDE_TABLES);
-		SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, this.currentConnection);
+
+		SourceTableArgument tableArg = new SourceTableArgument(tableNames, exclude, "%", this.currentConnection);
 
 		List<TableIdentifier> tables = tableArg.getTables();
 		if (tables != null && tables.size() > 0)

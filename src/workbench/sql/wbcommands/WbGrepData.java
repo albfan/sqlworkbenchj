@@ -14,7 +14,6 @@ package workbench.sql.wbcommands;
 import java.sql.SQLException;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import workbench.WbManager;
 import workbench.db.JdbcUtils;
 import workbench.db.TableIdentifier;
@@ -52,7 +51,6 @@ public class WbGrepData
 {
 	public static final String VERB = "WBGREPDATA";
 	public static final String PARAM_TABLES = "tables";
-	public static final String PARAM_TYPES = "types";
 	public static final String PARAM_EXPRESSION = "searchValue";
 	public static final String PARAM_EXCLUDE_LOBS = "excludeLobs";
 	public static final String PARAM_IGNORE_CASE = "ignoreCase";
@@ -71,8 +69,8 @@ public class WbGrepData
 
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(PARAM_TABLES, ArgumentType.TableArgument);
-		cmdLine.addArgument(PARAM_TYPES);
 		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
+		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES);
 		cmdLine.addArgument(PARAM_EXCLUDE_LOBS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_IGNORE_CASE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_EXPRESSION);
@@ -117,30 +115,11 @@ public class WbGrepData
 		{
 			tableNames = "%";
 		}
-		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, currentConnection);
+
+		String types = cmdLine.getValue(SourceTableArgument.PARAM_TYPES);
+		SourceTableArgument parser = new SourceTableArgument(tableNames, excludeTables, types, currentConnection);
+		
 		tables = parser.getTables();
-
-		Set<String> types = CollectionUtil.caseInsensitiveSet();
-		types.addAll(cmdLine.getListValue(PARAM_TYPES));
-		if (types.size() == 0)
-		{
-			types.add("TABLE");
-		}
-
-		Iterator<TableIdentifier> itr = tables.iterator();
-		while (itr.hasNext())
-		{
-			TableIdentifier tbl = itr.next();
-
-			// if no type is present, this means the tables
-			// were directly specified on the commandline.
-			if (tbl.getType() == null) continue;
-
-			if (!types.contains(tbl.getType()))
-			{
-				itr.remove();
-			}
-		}
 
 		searcher = new ClientSideTableSearcher();
 		searcher.setExcludeLobColumns(cmdLine.getBoolean(PARAM_EXCLUDE_LOBS, false));

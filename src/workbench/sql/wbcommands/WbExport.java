@@ -142,6 +142,7 @@ public class WbExport
 		cmdLine.addArgument(ARG_COL_COMMENTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
+		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -551,7 +552,8 @@ public class WbExport
 		try
 		{
 			String excluded = cmdLine.getValue(SourceTableArgument.PARAM_EXCLUDE_TABLES);
-			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, this.currentConnection);
+			String types = cmdLine.getValue(SourceTableArgument.PARAM_TYPES);
+			SourceTableArgument argParser = new SourceTableArgument(tables, excluded, types, this.currentConnection);
 			tablesToExport = argParser.getTables();
 			if (tablesToExport.isEmpty() && argParser.wasWildCardArgument())
 			{

@@ -30,6 +30,7 @@ import workbench.util.WbStringTokenizer;
 public class SourceTableArgument
 {
 	public static final String PARAM_EXCLUDE_TABLES = "excludeTables";
+	public static final String PARAM_TYPES = "types";
 
 	private List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 	private boolean wildcardsPresent;
@@ -37,24 +38,48 @@ public class SourceTableArgument
 	public SourceTableArgument(String includeTables, WbConnection dbConn)
 		throws SQLException
 	{
-		this(includeTables, null, dbConn);
+		this(includeTables, null, null, dbConn);
 	}
 
-	public SourceTableArgument(String includeTables, String excludeTables, WbConnection dbConn)
+	/**
+	 *
+	 * @param includeTables the parameter value to include tables
+	 * @param excludeTables the parameter value to exclude tables
+	 * @param types the parameter value for the table types
+	 * @param dbConn the connection to use
+	 * @throws SQLException
+	 */
+	public SourceTableArgument(String includeTables, String excludeTables, String types, WbConnection dbConn)
 		throws SQLException
 	{
 		if (StringUtil.isEmptyString(includeTables)) return;
 		if (dbConn == null) return;
 
-		tables.addAll(parseArgument(includeTables, true, dbConn));
+		String[] typeList = parseTypes(types, dbConn);
+
+		tables.addAll(parseArgument(includeTables, true, typeList, dbConn));
 		
 		if (StringUtil.isNonBlank(excludeTables))
 		{
-			tables.removeAll(parseArgument(excludeTables, false, dbConn));
+			tables.removeAll(parseArgument(excludeTables, false, null, dbConn));
 		}
 	}
 
-	private List<TableIdentifier> parseArgument(String arg, boolean checkWildcard, WbConnection dbConn)
+	private String[] parseTypes(String types, WbConnection conn)
+	{
+		if (StringUtil.isBlank(types)) return new String[] { conn.getMetadata().getTableTypeName() };
+		if ("%".equals(types) || "*".equals(types)) return null;
+		
+		List<String> typeList = StringUtil.stringToList(types.toUpperCase());
+
+		if (typeList.isEmpty()) return new String[] { conn.getMetadata().getTableTypeName() };
+
+		String[] result = new String[typeList.size()];
+
+		return typeList.toArray(result);
+	}
+	
+	private List<TableIdentifier> parseArgument(String arg, boolean checkWildcard, String[] types, WbConnection dbConn)
 		throws SQLException
 	{
 		List<String> args = getObjectNames(arg);
@@ -75,7 +100,7 @@ public class SourceTableArgument
 					tbl.setSchema(dbConn.getMetadata().getSchemaToUse());
 				}
 				tbl.adjustCase(dbConn);
-				List<TableIdentifier> l = dbConn.getMetadata().getSelectableObjectsList(tbl.getTableName(), tbl.getSchema());
+				List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types);
 				result.addAll(l);
 			}
 			else
