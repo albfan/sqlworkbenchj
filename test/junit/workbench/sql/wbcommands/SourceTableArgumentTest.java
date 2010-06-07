@@ -34,7 +34,7 @@ public class SourceTableArgumentTest
     super(testName);
   }
 
-  public void testExclude()
+  public void testExcludeWithWildcard()
 		throws Exception
   {
     WbConnection con = null;
@@ -58,6 +58,53 @@ public class SourceTableArgumentTest
       SourceTableArgument parser = new SourceTableArgument("t%", "ta%", "TABLE", con);
       List<TableIdentifier> tables = parser.getTables();
       assertEquals("Wrong number of table", 4, tables.size());
+    }
+    finally
+    {
+      SqlUtil.closeStatement(stmt);
+      ConnectionMgr.getInstance().disconnectAll();
+    }
+	}
+
+  public void testExcludeSingleTable()
+		throws Exception
+  {
+    WbConnection con = null;
+    Statement stmt = null;
+    try
+    {
+      TestUtil util = new TestUtil("argsExclude");
+      con = util.getConnection();
+
+			String script = 
+				"CREATE SCHEMA one;\n" +
+				"SET SCHEMA one;\n" +
+				"CREATE TABLE t1 (id integer);\n" +
+				"create table t2 (id integer);\n" +
+				"create table t3 (id integer);\n" +
+				"create table ta (id integer);\n" +
+				"create table taa (id integer);\n" +
+				"create table taaa (id integer);\n" +
+				"create table tb (id integer);\n" +
+				"commit;\n";
+			TestUtil.executeScript(con, script);
+
+
+      SourceTableArgument parser = new SourceTableArgument("t%", "T2,T3", "TABLE", con);
+      List<TableIdentifier> tables = parser.getTables();
+			System.out.println("tables: " + tables);
+      assertEquals("Wrong number of table", 5, tables.size());
+			for (TableIdentifier tbl : tables)
+			{
+				if (tbl.getTableName().equals("T2"))
+				{
+					fail("T2 not excluded!");
+				}
+				if (tbl.getTableName().equals("T3"))
+				{
+					fail("T2 not excluded!");
+				}
+			}
     }
     finally
     {

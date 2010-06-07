@@ -89,6 +89,7 @@ public class SourceTableArgument
 		
 		if (argCount <= 0) return result;
 
+		String schemaToUse = dbConn.getMetadata().getSchemaToUse();
 		for (String t : args)
 		{
 			if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
@@ -97,7 +98,7 @@ public class SourceTableArgument
 				TableIdentifier tbl = new TableIdentifier(t);
 				if (tbl.getSchema() == null)
 				{
-					tbl.setSchema(dbConn.getMetadata().getSchemaToUse());
+					tbl.setSchema(schemaToUse);
 				}
 				tbl.adjustCase(dbConn);
 				List<TableIdentifier> l = dbConn.getMetadata().getObjectList(tbl.getTableName(), tbl.getSchema(), types);
@@ -105,7 +106,12 @@ public class SourceTableArgument
 			}
 			else
 			{
-				result.add(new TableIdentifier(t));
+				TableIdentifier toRemove = new TableIdentifier(t);
+				if (toRemove.getSchema() == null)
+				{
+					toRemove.setSchema(schemaToUse);
+				}
+				result.add(toRemove);
 			}
 		}
 		return result;

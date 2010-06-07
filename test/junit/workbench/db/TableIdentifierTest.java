@@ -11,7 +11,9 @@
  */
 package workbench.db;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import junit.framework.*;
@@ -30,6 +32,20 @@ public class TableIdentifierTest
 		super(testName);
 	}
 
+	public void testRemoveCollection()
+	{
+		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
+		tables.add(new TableIdentifier("SCHEMA", "TABLE_1"));
+		tables.add(new TableIdentifier("SCHEMA", "TABLE_2"));
+		tables.add(new TableIdentifier("SCHEMA", "TABLE_3"));
+
+		List<TableIdentifier> toRemove = new ArrayList<TableIdentifier>();
+		toRemove.add(new TableIdentifier("SCHEMA", "TABLE_2"));
+		tables.removeAll(toRemove);
+
+		assertEquals(2, tables.size());
+	}
+	
 	public void testSQLServerNaming()
 	{
 		String name = "[linked_server].[some_catalog].dbo.some_table";
