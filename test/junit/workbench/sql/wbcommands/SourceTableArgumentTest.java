@@ -55,7 +55,7 @@ public class SourceTableArgumentTest
 			TestUtil.executeScript(con, script);
 			
 
-      SourceTableArgument parser = new SourceTableArgument("t%", "ta%", con);
+      SourceTableArgument parser = new SourceTableArgument("t%", "ta%", "TABLE", con);
       List<TableIdentifier> tables = parser.getTables();
       assertEquals("Wrong number of table", 4, tables.size());
     }
