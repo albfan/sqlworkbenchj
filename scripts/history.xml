@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-06-01">
+    <entry dev-build="8" type="enh">WbExport now only exports TABLEs (views, synonyms and similar objects where included by default until now). To include other types than tables, a new parameter -types has been added.</entry>
     <entry dev-build="7" type="enh">When editing a value in the result set, the value can now be set to NULL (either through the popup menu or a shortcut)</entry>
     <entry dev-build="7" type="enh">Sequences and UDTs in Derby 10.6 are now supported</entry>
     <entry dev-build="6" type="enh">A new editor option to disable "Execute selected" when no text is selected is available.</entry>
