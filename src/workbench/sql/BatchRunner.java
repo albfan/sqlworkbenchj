@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import workbench.AppArguments;
+import workbench.WbManager;
 import workbench.console.ConsolePrompter;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
@@ -1001,9 +1002,7 @@ public class BatchRunner
 			if (profile == null)
 			{
 				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
-				System.err.println(msg);
 				LogMgr.logError("BatchRunner.createBatchRunner()", msg, null);
-				return null;
 			}
 			boolean readOnly = cmdLine.getBoolean(AppArguments.ARG_READ_ONLY, false);
 			if (readOnly)
@@ -1017,12 +1016,14 @@ public class BatchRunner
 		if (cmdLine.hasUnknownArguments())
 		{
 			StringBuilder err = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
-			err.append(' ');
-			err.append(cmdLine.getUnknownArguments());
-			System.err.println(err.toString());
+			if (!WbManager.getInstance().isConsoleMode())
+			{
+				err.append(' ');
+				err.append(cmdLine.getUnknownArguments());
+				System.err.println(err.toString());
+			}
 			LogMgr.logWarning("BatchRunner.createBatchRunner()", err.toString());
 		}
-
 
 		if (profile != null)
 		{

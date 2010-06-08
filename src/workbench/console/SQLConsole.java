@@ -16,7 +16,9 @@ import java.util.Map;
 import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
+import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
+import workbench.gui.profiles.ProfileKey;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
@@ -110,6 +112,28 @@ public class SQLConsole
 			WbFile f = new WbFile(Settings.getInstance().getConfigDir());
 			System.out.println(ResourceMgr.getFormattedString("MsgConfigDir", f.getFullPath()));
 			System.out.println("");
+
+			// check the presence of the Profile again to put a possible error message after the startup messages.
+			String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
+			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
+			ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
+
+			ConnectionProfile profile = ConnectionMgr.getInstance().getProfile(def);
+			if (profile == null)
+			{
+				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
+				System.err.println();
+				System.err.println(msg);
+			}
+
+			if (cmdLine.hasUnknownArguments())
+			{
+				StringBuilder err = new StringBuilder(ResourceMgr.getString("ErrUnknownParameter"));
+				err.append(' ');
+				err.append(cmdLine.getUnknownArguments());
+				System.err.println(err.toString());
+				System.err.println();
+			}
 
 			// Enable console-specific commands for the batch runner
 			runner.addCommand(new WbDisconnect());
