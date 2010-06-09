@@ -40,7 +40,7 @@ public class LiquibaseSupportTest
              "  xsi:schemaLocation=\"http://www.liquibase.org/xml/ns/dbchangelog/1.9 \n" +
              "         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd\"> \n" +
              "  \n" +
-             "    <changeSet id=\"1\" author=\"arthur\"> \n" +
+             "    <changeSet id=\"1\" author=\"Arthur\"> \n" +
 						 "         <sql splitStatements=\"false\"> \n" +
 						 "            SELECT 42 FROM DUAL; \n" +
 						 "            COMMIT;" +
@@ -60,9 +60,21 @@ public class LiquibaseSupportTest
 						 "        </sql>\n" +
              "    </changeSet> \n" +
 						 "\n" +
-             "    <changeSet id=\"3\" author=\"zaphod\"> \n" +
+             "    <changeSet id=\"5\" author=\"Zaphod\"> \n" +
 						 "         <createProcedure> \n" +
-						 "            SELECT 2 FROM DUAL; \n" +
+						 "            SELECT 'zaphod-5' FROM DUAL; \n" +
+						 "        </createProcedure>\n" +
+             "    </changeSet> \n" +
+						 "\n" +
+             "    <changeSet id=\"5\" author=\"Arthur\"> \n" +
+						 "         <createProcedure> \n" +
+						 "            SELECT 'arthur-5' FROM DUAL; \n" +
+						 "        </createProcedure>\n" +
+             "    </changeSet> \n" +
+						 "\n" +
+             "    <changeSet id=\"3\" author=\"Zaphod\"> \n" +
+						 "         <createProcedure> \n" +
+						 "            SELECT 3 FROM DUAL; \n" +
 						 "        </createProcedure>\n" +
              "    </changeSet> \n" +
              "  \n" +
@@ -87,26 +99,39 @@ public class LiquibaseSupportTest
 
 		TestUtil.writeFile(xmlFile, xml, "UTF-8");
 		LiquibaseSupport lb = new LiquibaseSupport(xmlFile);
-		List<String> sql = lb.getSQLFromChangeSet("1", null);
+		List<String> sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("1"));
 		assertNotNull(sql);
 		assertEquals(1, sql.size());
 
-		sql = lb.getSQLFromChangeSet("2");
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("2"));
 		assertEquals(3, sql.size());
 
-		sql = lb.getSQLFromChangeSet("3");
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("3"));
 		assertNotNull(sql);
 		assertEquals(1, sql.size());
 
-		sql = lb.getSQLFromChangeSet("1", "2");
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("1"), new ChangeSetIdentifier("2"));
 		assertNotNull(sql);
 		assertEquals(4, sql.size());
 
 		lb.setAlternateDelimiter(DelimiterDefinition.DEFAULT_MS_DELIMITER);
-		sql = lb.getSQLFromChangeSet("4");
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("4"));
 
 		assertNotNull(sql);
 		assertEquals(3, sql.size());
 
+		lb.setAlternateDelimiter(null);
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("5"));
+		assertEquals(2, sql.size());
+
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("Arthur;5"));
+		assertEquals(1, sql.size());
+		assertEquals("SELECT 'arthur-5' FROM DUAL;", sql.get(0).trim());
+
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("3"), new ChangeSetIdentifier("Arthur;5"));
+		assertEquals(2, sql.size());
+		assertEquals("SELECT 'arthur-5' FROM DUAL;", sql.get(0).trim());
+		assertEquals("SELECT 3 FROM DUAL;", sql.get(1).trim());
 	}
+	
 }

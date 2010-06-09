@@ -40,7 +40,7 @@ public class LiquibaseParser
 	private SAXParser saxParser;
 	private Set<String> tagsToRead = CollectionUtil.hashSet("sql", "createProcedure");
 	private List<LiquibaseTagContent> resultTags = new ArrayList<LiquibaseTagContent>();
-	private List<String> idsToRead;
+	private List<ChangeSetIdentifier> idsToRead;
 
 	private boolean captureContent;
 	private static final String CHANGESET_TAG = "changeSet";
@@ -76,10 +76,10 @@ public class LiquibaseParser
 	 * @param changeSetIds a list of changeSetIds to use. If this is null, all changesets are used
 	 * @return null if no supported tag was found, all stored SQL scripts otherwise
 	 */
-	public List<LiquibaseTagContent> getContentFromChangeSet(List<String> changeSetIds)
+	public List<LiquibaseTagContent> getContentFromChangeSet(List<ChangeSetIdentifier> changeSetIds)
 		throws IOException, SAXException
 	{
-		idsToRead = changeSetIds == null ? null : new ArrayList<String>(changeSetIds);
+		idsToRead = changeSetIds == null ? null : new ArrayList<ChangeSetIdentifier>(changeSetIds);
 		Reader in = EncodingUtil.createReader(changeLog, xmlEncoding);
 		try
 		{
@@ -93,13 +93,29 @@ public class LiquibaseParser
 		return resultTags;
 	}
 
+	private boolean isChangeSetIncluded(ChangeSetIdentifier toCheck)
+	{
+		if (CollectionUtil.isEmpty(idsToRead)) return true;
+		for (ChangeSetIdentifier id : idsToRead)
+		{
+			if (id == null) continue;
+
+			boolean idsEqual = StringUtil.equalString(toCheck.getId(), id.getId());
+			if (id.getAuthor() == null && idsEqual) return true;
+			
+			boolean authorsEqual = StringUtil.equalString(toCheck.getAuthor(), id.getAuthor());
+			if (idsEqual && authorsEqual) return true;
+		}
+		return false;
+	}
+	
 	public void startElement(String namespaceURI, String sName, String tagName, Attributes attrs)
 		throws SAXException
 	{
 		if (tagName.equals(CHANGESET_TAG))
 		{
-			String id = attrs.getValue("id");
-			if (CollectionUtil.isEmpty(idsToRead) || idsToRead.contains(id))
+			ChangeSetIdentifier id = new ChangeSetIdentifier(attrs.getValue("author"), attrs.getValue("id"));
+			if (isChangeSetIncluded(id))
 			{
 				captureContent = true;
 			}

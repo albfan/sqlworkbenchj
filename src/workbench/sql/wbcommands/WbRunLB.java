@@ -12,7 +12,9 @@
 package workbench.sql.wbcommands;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import workbench.liquibase.ChangeSetIdentifier;
 import workbench.liquibase.LiquibaseSupport;
 import workbench.util.ArgumentType;
 import workbench.util.ExceptionUtil;
@@ -22,6 +24,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 import workbench.storage.RowActionMonitor;
+import workbench.util.CollectionUtil;
 import workbench.util.WbFile;
 
 /**
@@ -40,7 +43,7 @@ public class WbRunLB
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
-		cmdLine.addArgument("changeSet");
+		cmdLine.addArgument("changeSet", ArgumentType.Repeatable);
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
@@ -96,7 +99,18 @@ public class WbRunLB
 		}
 
 		boolean continueOnError = checkParameters ? cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false) : false;
-		List<String> ids = checkParameters ? StringUtil.stringToList(cmdLine.getValue("changeSet")) : null;
+		List<String> idStrings = checkParameters ? cmdLine.getListValue("changeSet") : null;
+		
+		List<ChangeSetIdentifier> ids = null;
+		if (CollectionUtil.isNonEmpty(idStrings))
+		{
+			ids = new ArrayList<ChangeSetIdentifier>(idStrings.size());
+			for (String param : idStrings)
+			{
+				ChangeSetIdentifier id = new ChangeSetIdentifier(param);
+				ids.add(id);
+			}
+		}
 
 		String encoding = checkParameters ? cmdLine.getValue("encoding", "UTF-8") : "UTF-8";
 
@@ -109,7 +123,7 @@ public class WbRunLB
 		{
 			LiquibaseSupport lb = new LiquibaseSupport(file, encoding);
 
-			List<String> statements =lb.getSQLFromChangeSet(ids);
+			List<String> statements = lb.getSQLFromChangeSet(ids);
 			rowMonitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 
 			for (int i=0; i < statements.size(); i++)

@@ -44,7 +44,7 @@ public class LiquibaseSupport
 		alternateDelimiter = delimiter;
 	}
 	
-	public List<String> getSQLFromChangeSet(String ... ids)
+	public List<String> getSQLFromChangeSet(ChangeSetIdentifier ... ids)
 	{
 		return getSQLFromChangeSet(ids == null ? null : Arrays.asList(ids));
 	}
@@ -56,7 +56,7 @@ public class LiquibaseSupport
 	 * @param changeSetId
 	 * @return null if no supported tag was found, all stored SQL scripts otherwise
 	 */
-	public List<String> getSQLFromChangeSet(List<String> ids)
+	public List<String> getSQLFromChangeSet(List<ChangeSetIdentifier> ids)
 	{
 		LiquibaseParser parser = new LiquibaseParser(changeLog, fileEncoding);
 		List<String> result = null;
