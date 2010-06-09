@@ -240,6 +240,16 @@
 					</row>
 
 					<row>
+						<entry>-types</entry>
+						<entry>
+              <para>
+                Selects the object types to be exported. By default only TABLEs are exported. If you want to export
+                the content of VIEWs or SYNONYMs as well, you have to specify all types with this parameter. 
+              </para>
+              <para><literal>-sourceTable=* -types=VIEW,SYNONYM</literal> or <literal>-sourceTable=T% -types=TABLE,VIEW,SYNONYM</literal></para>
+            </entry>
+          </row>
+					<row>
 						<entry>-excludeTables</entry>
 						<entry>
               <para>

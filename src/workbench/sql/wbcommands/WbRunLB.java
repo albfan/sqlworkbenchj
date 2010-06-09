@@ -44,7 +44,7 @@ public class WbRunLB
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument("changeSet", ArgumentType.Repeatable);
-		cmdLine.addArgument("author");
+		cmdLine.addArgument("author", ArgumentType.Repeatable);
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}

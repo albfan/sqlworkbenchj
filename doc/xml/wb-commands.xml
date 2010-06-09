@@ -1262,7 +1262,8 @@ $$ LANGUAGE plpgsql;
          This is NOT a replacement for Liquibase.
        </para>
        <para>
-         <literal>WbRunLB</literal> will only extract SQL statements stored in the &lt;sql&gt; or &lt;createProcedure&gt; tags.
+         <literal>WbRunLB</literal> will only extract SQL statements stored in <literal>&lt;sql&gt;</literal> or
+         <literal>&lt;createProcedure&gt;</literal> tags. 
        </para>
        <para>
          It will not convert any of the Liquibase tags to "real" SQL.
@@ -1277,6 +1278,11 @@ $$ LANGUAGE plpgsql;
          It is merely a convenient way to extract and run SQL statements stored in a Liquibase XML file!
        </para>
      </important>
+     <para>
+        The attribute <literal>splitStatements</literal> for the <literal>sql</literal>
+        tag is evaluated. The delimiter used to split the statements follows the usual &wb-productname; rules (including the use
+        of the <link linkend="understand-alternate-delim">alternate delimiter</link>).
+     </para>
 
     <para><literal>WbRunLB</literal> supports the following parameters:</para>
 
@@ -1294,13 +1300,27 @@ $$ LANGUAGE plpgsql;
         <tbody valign="top">
           <row>
             <entry>-file</entry>
-            <entry>The filename of the Liquibase changeLog (XML) file. The <literal>&lt;include&gt;</literal> tag is NOT supported!</entry>
+            <entry>
+              The filename of the Liquibase changeLog (XML) file. The <literal>&lt;include&gt;</literal> tag is NOT supported! SQL statements stored in files
+              that are referenced using Liquibase's <literal>include</literal> tag will not be processed.
+            </entry>
           </row>
 
           <row>
             <entry>-changeSet</entry>
             <entry>
-              A list of changeSet ids to be run. If this is omitted, then the SQL from all changesets (containing ) are executed.
+              A list of changeSet ids to be run. If this is omitted, then the SQL from all changesets (containing ) are executed. The value
+              specified can include the value for the author attribute as well, <literal>-changeSet="Arthur;42"</literal> selects the changeSet
+              where <literal>author="Arthur"</literal> and <literal>id="42"</literal>. This parameter can be repeated in order to select
+              multiple changesets: <literal>-changeSet="Arthur;42" -changeSet="Arthur;43"</literal>.
+            </entry>
+          </row>
+
+          <row>
+            <entry>-author</entry>
+            <entry>
+              Select all changeSets with a given author, e.g. <literal>-author=Arthur</literal>. If this parameter is specified, <literal>-changeSet</literal>
+              is ignored. This parameter can be repeated in order to select changesets from multiple authors: <literal>-author=Arthur -author=Zaphod</literal>.
             </entry>
           </row>
 
