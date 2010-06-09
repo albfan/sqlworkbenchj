@@ -105,6 +105,8 @@ public class LiquibaseParser
 			
 			boolean authorsEqual = StringUtil.equalString(toCheck.getAuthor(), id.getAuthor());
 			if (idsEqual && authorsEqual) return true;
+			
+			if (authorsEqual && id.getId().equals("*")) return true;
 		}
 		return false;
 	}

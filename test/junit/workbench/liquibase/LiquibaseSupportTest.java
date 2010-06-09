@@ -132,6 +132,9 @@ public class LiquibaseSupportTest
 		assertEquals(2, sql.size());
 		assertEquals("SELECT 'arthur-5' FROM DUAL;", sql.get(0).trim());
 		assertEquals("SELECT 3 FROM DUAL;", sql.get(1).trim());
+
+		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("Arthur", "*"));
+		assertEquals(2, sql.size());
 	}
 	
 }

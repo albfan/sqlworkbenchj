@@ -44,6 +44,7 @@ public class WbRunLB
 		cmdLine.addArgument("file");
 		cmdLine.addArgument(CommonArgs.ARG_CONTINUE, ArgumentType.BoolArgument);
 		cmdLine.addArgument("changeSet", ArgumentType.Repeatable);
+		cmdLine.addArgument("author");
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
 	}
@@ -100,9 +101,19 @@ public class WbRunLB
 
 		boolean continueOnError = checkParameters ? cmdLine.getBoolean(CommonArgs.ARG_CONTINUE, false) : false;
 		List<String> idStrings = checkParameters ? cmdLine.getListValue("changeSet") : null;
-		
+		List<String> authors = checkParameters ? cmdLine.getListValue("author") : null;
 		List<ChangeSetIdentifier> ids = null;
-		if (CollectionUtil.isNonEmpty(idStrings))
+
+		if (CollectionUtil.isNonEmpty(authors))
+		{
+			ids = new ArrayList<ChangeSetIdentifier>(authors.size());
+			for (String author : authors)
+			{
+				ChangeSetIdentifier id = new ChangeSetIdentifier(author, "*");
+				ids.add(id);
+			}
+		}
+		else if (CollectionUtil.isNonEmpty(idStrings))
 		{
 			ids = new ArrayList<ChangeSetIdentifier>(idStrings.size());
 			for (String param : idStrings)
@@ -111,7 +122,7 @@ public class WbRunLB
 				ids.add(id);
 			}
 		}
-
+		
 		String encoding = checkParameters ? cmdLine.getValue("encoding", "UTF-8") : "UTF-8";
 
 		if (checkParameters)
