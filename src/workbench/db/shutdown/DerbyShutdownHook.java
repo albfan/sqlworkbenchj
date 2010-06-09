@@ -33,7 +33,7 @@ public class DerbyShutdownHook
 		throws SQLException
 	{
 		if (ConnectionMgr.getInstance().isActive(conn)) return;
-		
+
 		conn.shutdown();
 		
 		if (!canShutdown(conn)) return;
@@ -50,6 +50,7 @@ public class DerbyShutdownHook
 		
 		try
 		{
+			conn.rollback();
 			DbDriver drv = ConnectionMgr.getInstance().findDriverByName(drvClass, drvName);
 			LogMgr.logInfo("ConnectionMgr.shutdownDerby()", "Local Derby connection detected. Shutting down engine...");
 			drv.commandConnect(command);

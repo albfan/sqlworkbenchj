@@ -38,7 +38,7 @@ public class RecentWorkspaceManager
 		protected static final RecentWorkspaceManager instance = new RecentWorkspaceManager();
 	}
 
-	public static final RecentWorkspaceManager getInstance()
+	public static RecentWorkspaceManager getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
