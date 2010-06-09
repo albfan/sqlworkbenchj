@@ -677,9 +677,11 @@ public class JEditTextArea
 		return scrollTo(line, offset);
 	}
 
+	private int scrollRetries = 0;
 	/**
 	 * Ensures that the specified line and offset is visible by scrolling
 	 * the text area if necessary.
+	 *
 	 * @param line The line to scroll to
 	 * @param offset The offset in the line to scroll to
 	 * @return True if scrolling was actually performed, false if the
@@ -689,18 +691,25 @@ public class JEditTextArea
 	{
 		if (visibleLines == 0)
 		{
-			// visibleLines == 0 before the component is realized
-			// we can't do any proper scrolling, so we'll try again later
-			EventQueue.invokeLater(new Runnable()
+			scrollRetries ++;
+			// if the editor is very small (e.g. because it has been made so by the user),
+			// visibleLines might never be > 0. In order to avoid an "endless loop" an upper limit is applied
+			if (scrollRetries < 25)
 			{
-				public void run()
+				// visibleLines might be 0 before the component is realized
+				// we can't do any proper scrolling, so we'll try again later
+				EventQueue.invokeLater(new Runnable()
 				{
-					scrollTo(line, offset);
-				}
-			});
+					public void run()
+					{
+						scrollTo(line, offset);
+					}
+				});
+			}
 			return false;
 		}
-
+		scrollRetries = 0;
+		
 		int newFirstLine = firstLine;
 		int newHorizontalOffset = horizontalOffset;
 		int lineCount = getLineCount();
@@ -1761,7 +1770,7 @@ public class JEditTextArea
 
 					if (selectedText == null) continue;
 
-					currNewline = selectedText.indexOf("\n",lastNewline);
+					currNewline = selectedText.indexOf('\n',lastNewline);
 					if (currNewline == -1)
 					{
 						currNewline = selectedText.length();
