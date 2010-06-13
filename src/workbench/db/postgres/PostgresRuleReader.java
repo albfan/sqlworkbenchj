@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
+import workbench.db.DbSettings;
 import workbench.db.ObjectListExtender;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -57,7 +58,7 @@ public class PostgresRuleReader
              "  left join pg_namespace n on n.oid = c.relnamespace \n" +
              "  left join pg_description d on r.oid = d.objoid ";
 
-	private String getSql(String ruleSchemaPattern, String ruleNamePattern, String ruleTable)
+	private String getSql(String ruleSchemaPattern, String ruleNamePattern, String ruleTable, boolean excludeSelectView)
 	{
 		StringBuilder sql = new StringBuilder(150);
 
@@ -111,7 +112,21 @@ public class PostgresRuleReader
 			sql.append(ruleTable);
 			sql.append("'");
 		}
-		sql.append(" ORDER BY 1, 2 ");
+
+		if (excludeSelectView)
+		{
+			if (!whereAdded)
+			{
+				sql.append("\n WHERE ");
+				whereAdded = true;
+			}
+			else
+			{
+				sql.append("\n AND");
+			}
+			sql.append(" not (c.relkind = 'v' and r.ev_type = '1')");
+		}
+		sql.append("\n ORDER BY 1, 2 ");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -131,7 +146,7 @@ public class PostgresRuleReader
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(schemaPattern, namePattern, ruleTable);
+			String sql = getSql(schemaPattern, namePattern, ruleTable, DbSettings.getExcludePostgresDefaultRules());
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{

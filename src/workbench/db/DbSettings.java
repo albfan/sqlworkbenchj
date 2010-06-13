@@ -1035,4 +1035,13 @@ public class DbSettings
 		return types.contains(type);
 	}
 
+	/**
+	 * Setting to control the display of the auto-generated SELECT rules for views.
+	 * 
+	 * @return true if the auto-generated SELECT rules should be excluded
+	 */
+	public static boolean getExcludePostgresDefaultRules()
+	{
+		return Settings.getInstance().getBoolProperty("workbench.db.postgresql.exclude.defaultselectrule", true);
+	}
 }
