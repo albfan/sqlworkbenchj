@@ -12,13 +12,17 @@
 package workbench.db.exporter;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.sql.Types;
+import workbench.db.ColumnIdentifier;
+import workbench.db.TableDefinition;
 
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.TagWriter;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.RowData;
 import workbench.util.SqlUtil;
@@ -457,6 +461,8 @@ public class XmlRowDataConverter
 		result.append("  <");
 		result.append(TABLE_NAME_TAG);
 		result.append('>');
+
+		TableDefinition tableDef = null;
 		if (this.tableToUse != null)
 		{
 			result.append(tableToUse);
@@ -467,6 +473,14 @@ public class XmlRowDataConverter
 			if (table != null)
 			{
 				result.append(table.getTableName());
+				try
+				{
+					tableDef = originalConnection.getMetadata().getTableDefinition(table);
+				}
+				catch (SQLException sql)
+				{
+					LogMgr.logError("XmlRowDataConverter.getMetaDataAsXml()", "Error retrieving table definition", sql);
+				}
 			}
 		}
 		result.append("</");
@@ -530,6 +544,16 @@ public class XmlRowDataConverter
 				}
 				result.append("</data-format>");
 				result.append(this.lineEnding);
+			}
+
+			if (tableDef != null)
+			{
+				ColumnIdentifier realCol = tableDef.findColumn(metaData.getColumnName(i));
+				if (realCol != null)
+				{
+					result.append(indent);
+					appendTag(result, "    ", ReportColumn.TAG_COLUMN_PK, Boolean.toString(realCol.isPkColumn()));
+				}
 			}
 			result.append(indent);
 			result.append("  </");

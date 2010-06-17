@@ -292,7 +292,7 @@ public class DbExplorerPanel
 		// not used
 	}
 
-	public void setDbExecutionListener(DbExecutionListener l)
+	public final void setDbExecutionListener(DbExecutionListener l)
 	{
 		if (this.tables != null)
 		{

@@ -1212,7 +1212,7 @@ public class SqlPanel
 		this.statusBar.clearStatusMessage();
 	}
 
-	public void initStatementHistory()
+	public final void initStatementHistory()
 	{
 		int size = Settings.getInstance().getMaxHistorySize();
 		this.sqlHistory = new SqlHistory(editor,size);

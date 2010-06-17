@@ -244,7 +244,7 @@ public class MainWindow
 		);
 	}
 
-	protected void updateTabPolicy()
+	protected final void updateTabPolicy()
 	{
 		int tabPolicy = Settings.getInstance().getIntProperty(Settings.PROPERTY_TAB_POLICY, JTabbedPane.WRAP_TAB_LAYOUT);
 		this.sqlTab.setTabLayoutPolicy(tabPolicy);
@@ -1101,7 +1101,7 @@ public class MainWindow
 		}
 	}
 
-	public void restoreSettings()
+	public final void restoreSettings()
 	{
 		Settings s = Settings.getInstance();
 
@@ -1578,7 +1578,7 @@ public class MainWindow
 	public void disconnect(final boolean background, final boolean closeWorkspace, final boolean saveWorkspace)
 	{
 		if (this.isConnectInProgress()) return;
-		
+
 		setConnectIsInProgress();
 
 		if (Settings.getInstance().getLogConnectionDetails())
@@ -2156,7 +2156,7 @@ public class MainWindow
 		boolean useNewConnection = Settings.getInstance().getAlwaysUseSeparateConnForDbExpWindow()
 			      || currentProfile.getUseSeparateConnectionPerTab()
 						|| this.currentConnection == null;
-		
+
 		if (useNewConnection)
 		{
 			explorer.connect(this.currentProfile);

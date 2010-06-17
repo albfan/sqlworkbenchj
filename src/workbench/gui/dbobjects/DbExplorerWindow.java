@@ -43,12 +43,12 @@ public class DbExplorerWindow
 	private boolean standalone;
 	protected ConnectionSelector connectionSelector;
 	protected RunningJobIndicator jobIndicator;
-	
+
 	public DbExplorerWindow(DbExplorerPanel aPanel)
 	{
 		this(aPanel, null);
 	}
-	
+
 	public DbExplorerWindow(DbExplorerPanel aPanel, String aProfileName)
 	{
 		super();
@@ -67,14 +67,14 @@ public class DbExplorerWindow
 	{
 		return this;
 	}
-	
+
 	public void activate()
 	{
 		setVisible(true);
 		toFront();
 	}
-	
-	public void setProfileName(String aProfileName)
+
+	public final void setProfileName(String aProfileName)
 	{
 		if (aProfileName != null)
 		{
@@ -97,12 +97,12 @@ public class DbExplorerWindow
 			this.panel.showConnectButton(this.connectionSelector);
 		}
 	}
-	
+
 	public void selectConnection()
 	{
 		connectionSelector.selectConnection();
 	}
-	
+
 	public void executionEnd(WbConnection conn, Object source)
 	{
 		jobIndicator.jobEnded();
@@ -112,12 +112,12 @@ public class DbExplorerWindow
 	{
 		jobIndicator.jobStarted();
 	}
-	
+
 	public WbConnection getConnection()
 	{
 		return panel.getConnection();
 	}
-	
+
 	public void closeWindow()
 	{
 		this.saveSettings();
@@ -126,12 +126,12 @@ public class DbExplorerWindow
 		this.setVisible(false);
 		this.dispose();
 	}
-	
+
 	public void disconnect()
 	{
 		this.panel.disconnect();
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings.getInstance().storeWindowPosition(this);
@@ -139,7 +139,7 @@ public class DbExplorerWindow
 		this.panel.saveSettings();
 	}
 
-	public void restorePosition()
+	public final void restorePosition()
 	{
 		Settings s = Settings.getInstance();
 
@@ -215,16 +215,16 @@ public class DbExplorerWindow
 			}
 		});
 	}
-	
+
 	public boolean connectBegin(ConnectionProfile profile, StatusBar info)
 	{
 		return true;
 	}
-	
+
 	public void connectCancelled()
 	{
 	}
-	
+
 	public void connectFailed(String error)
 	{
 		this.setProfileName(null);
@@ -232,13 +232,13 @@ public class DbExplorerWindow
 		String msg = ResourceMgr.getFormattedString("ErrConnectFailed", error.trim());
 		WbSwingUtilities.showErrorMessage(this, msg);
 	}
-	
+
 	public void connected(WbConnection conn)
 	{
 		this.setProfileName(conn.getProfile().getName());
 		this.panel.setConnection(conn);
 	}
-	
+
 	public String getConnectionId(ConnectionProfile profile)
 	{
 		if (this.panel == null) return "DbExplorerWindow";
