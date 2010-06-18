@@ -196,8 +196,10 @@ public class DataDisplayOptions
     jPanel4 = new javax.swing.JPanel();
     minColSizeLabel = new javax.swing.JLabel();
     minColSizeField = new NumberField();
+    jLabel4 = new javax.swing.JLabel();
     maxColSizeLabel = new javax.swing.JLabel();
     maxColSizeField = new NumberField();
+    jLabel6 = new javax.swing.JLabel();
     rowHeightPanel = new javax.swing.JPanel();
     autoRowHeight = new javax.swing.JCheckBox();
     ignoreEmptyRows = new javax.swing.JCheckBox();
@@ -266,28 +268,51 @@ public class DataDisplayOptions
     minColSizeLabel.setToolTipText(ResourceMgr.getString("d_LblMinColsize")); // NOI18N
     minColSizeLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 5, 0));
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(3, 0, 0, 6);
     jPanel4.add(minColSizeLabel, gridBagConstraints);
 
     minColSizeField.setColumns(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     jPanel4.add(minColSizeField, gridBagConstraints);
+
+    jLabel4.setText("px");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    jPanel4.add(jLabel4, gridBagConstraints);
 
     maxColSizeLabel.setText(ResourceMgr.getString("LblMaxColsize")); // NOI18N
     maxColSizeLabel.setToolTipText(ResourceMgr.getString("d_LblMaxColsize")); // NOI18N
     maxColSizeLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 10, 0, 5));
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
     jPanel4.add(maxColSizeLabel, gridBagConstraints);
 
     maxColSizeField.setColumns(5);
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    jPanel4.add(maxColSizeField, gridBagConstraints);
+
+    jLabel6.setText("px");
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    jPanel4.add(maxColSizeField, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(0, 2, 0, 0);
+    jPanel4.add(jLabel6, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
@@ -642,7 +667,9 @@ public class DataDisplayOptions
   private javax.swing.JLabel jLabel1;
   private javax.swing.JLabel jLabel2;
   private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel4;
   private javax.swing.JLabel jLabel5;
+  private javax.swing.JLabel jLabel6;
   private javax.swing.JPanel jPanel1;
   private javax.swing.JPanel jPanel2;
   private javax.swing.JPanel jPanel3;
