@@ -74,6 +74,10 @@ public class TableSelectBuilder
 			String expr = null;
 			int type  = columns.get(i).getDataType();
 			String dbmsType = columns.get(i).getDbmsType();
+			if (dbmsType == null)
+			{
+				dbmsType = SqlUtil.getTypeName(type);
+			}
 
 			if (!excludeLobColumns || dbConnection.getDbSettings().isSearchable(dbmsType))
 			{

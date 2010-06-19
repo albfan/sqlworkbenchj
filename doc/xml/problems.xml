@@ -44,7 +44,7 @@
       always be correct, especially when daylight savings time (DST) is in effect.
     </para>
     <para>
-      This is caused by the handling of time data in Java and is usually not caused by the database, the driver or &wb-productname;
+      This is caused by the handling of time data in Java and is usually <emphasis>not</emphasis> caused by the database, the driver or &wb-productname;
     </para>
     <para>
       If your time data is not displayed correctly, you might try to explicitely specify the timezone when starting the application.
@@ -527,6 +527,18 @@ workbench.db.postgresql.sql.usesavepoint=true
 		</section>
 
 	</section>
+	<section id="sqlanywhere-problems">
+		<title>Sybase SQL Anywhere Problems</title>
+    <indexterm><primary>Problems</primary><secondary>Sybase SQL Anywhere</secondary></indexterm>
+		<section id="pg-result-buffer">
+			<title>Columns with type <literal>nvarchar</literal> are not displayed properly</title>
+      <para>
+        The jConnect driver seems to have a problem with <literal>nvarchar</literal> columns. The data type is not reported properly by the driver,
+        so the display of the table structure in the DbExplorer will be wrong for those columns.
+
+      </para>
+    </section>
+  </section>
 
 </section>
 	

@@ -91,7 +91,7 @@ import workbench.util.WbThread;
  */
 public class DataPumper
 	extends JPanel
-	implements ActionListener, WindowListener, PropertyChangeListener, 
+	implements ActionListener, WindowListener, PropertyChangeListener,
 						 RowActionMonitor, ToolWindow
 {
 	private File sourceFile;
@@ -109,9 +109,9 @@ public class DataPumper
 
 	private ColumnMapper columnMapper;
 	private final String copyMsg = ResourceMgr.getString("MsgCopyingRow");
-	protected boolean copyRunning = false;
+	protected boolean copyRunning;
 	private EditorPanel sqlEditor;
-	private boolean supportsBatch = false;
+	private boolean supportsBatch;
 
 	// used in the Jemmy Unit Test to wait for the connection thread
 	boolean isConnecting = false;
@@ -126,7 +126,9 @@ public class DataPumper
 		super();
 		this.sourceProfile = source;
 		this.targetProfile = target;
+
 		initComponents();
+		sourceTable.setAutoSyncVisible(false);
 
 		commitEvery.setMinimumSize(commitEvery.getPreferredSize());
 		batchSize.setMinimumSize(batchSize.getPreferredSize());
@@ -162,7 +164,7 @@ public class DataPumper
 	{
 		return window;
 	}
-	
+
 	public void saveSettings()
 	{
 		Settings s = Settings.getInstance();
@@ -181,6 +183,8 @@ public class DataPumper
 		s.setProperty("workbench.datapumper.usequery", Boolean.toString(this.useQueryCbx.isSelected()));
 		s.setProperty("workbench.datapumper.droptable", Boolean.toString(this.dropTargetCbx.isSelected()));
 		s.setProperty("workbench.datapumper.updatemode", (String)this.modeComboBox.getSelectedItem());
+		s.setProperty("workbench.datapumper.alwayssynctables", targetTable.isAutoSyncSelected());
+
 		String where = this.sqlEditor.getText();
 		if (where != null && where.length() > 0)
 		{
@@ -250,6 +254,8 @@ public class DataPumper
 		{
 			this.batchSize.setText(Integer.toString(size));
 		}
+		s.getBoolProperty("workbench.datapumper.alwayssynctables", true);
+		targetTable.setAutoSyncSelected(Settings.getInstance().getBoolProperty("workbench.datapumper.alwayssynctables", true));
 	}
 
 	private void selectInputFile()
@@ -1430,7 +1436,7 @@ public class DataPumper
 		TableIdentifier source = this.sourceTable.getSelectedTable();
 
 		checkType();
-		
+
 		if (evt.getSource() == this.sourceTable && source != null)
 		{
 			if (theTarget != null && theTarget.isNewTable())
@@ -1438,7 +1444,7 @@ public class DataPumper
 				this.targetTable.resetNewTableItem();
 				theTarget = null;
 			}
-			if (theTarget == null)
+			if (theTarget == null || targetTable.isAutoSyncSelected())
 			{
 				this.targetTable.findAndSelectTable(source.getTableName());
 			}
@@ -1694,7 +1700,7 @@ public class DataPumper
 			}
 		}
 		mapping.append('\'');
-		
+
 		if (!allEqual || colMapping.hasSkippedColumns)
 		{
 			result.append(mapping);

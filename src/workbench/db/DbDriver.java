@@ -334,7 +334,7 @@ public class DbDriver
 				}
 			}
 
-			setAppInfo(props, url, id, user);
+			setAppInfo(props, url.toLowerCase(), id, user);
 
 			c = this.driverClassInstance.connect(url, props);
 			if (c == null)
@@ -379,6 +379,7 @@ public class DbDriver
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
 	}
+
 	private void setAppInfo(Properties props, String url, String id, String user)
 		throws UnknownHostException
 	{
@@ -439,6 +440,10 @@ public class DbDriver
 		else if (url.startsWith("jdbc:firebirdsql:"))
 		{
 			System.setProperty("org.firebirdsql.jdbc.processName", StringUtil.getMaxSubstring(prgName, 253));
+		}
+		else if (url.startsWith("jdbc:sybase:tds"))
+		{
+			appNameProperty = "APPLICATIONNAME";
 		}
 
 		if (appNameProperty != null && !props.containsKey(appNameProperty))

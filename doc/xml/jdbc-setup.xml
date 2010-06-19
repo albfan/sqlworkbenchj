@@ -234,6 +234,17 @@
 					</row>
 
 					<row>
+						<entry>Sybase SQL Anywhere</entry>
+						<entry>com.sybase.jdbc3.jdbc.SybDriver</entry>
+						<entry>
+							<simplelist columns="1">
+							  <member>jconnect.jar</member>
+								<member><ulink url="http://www.sybase.com/products/allproductsa-z/softwaredeveloperkit/jconnect"/></member>
+							</simplelist>
+						</entry>
+					</row>
+
+					<row>
 						<entry>MySQL</entry>
 						<entry>com.mysql.jdbc.Driver</entry>
 						<entry>

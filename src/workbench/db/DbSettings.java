@@ -806,6 +806,7 @@ public class DbSettings
 	 */
 	public String getDataTypeExpression(String cleanType)
 	{
+		if (cleanType == null) return null;
 		return Settings.getInstance().getProperty(prefix + "selectexpression." + cleanType.toLowerCase(), null);
 	}
 
@@ -1037,7 +1038,7 @@ public class DbSettings
 
 	/**
 	 * Setting to control the display of the auto-generated SELECT rules for views.
-	 * 
+	 *
 	 * @return true if the auto-generated SELECT rules should be excluded
 	 */
 	public static boolean getExcludePostgresDefaultRules()

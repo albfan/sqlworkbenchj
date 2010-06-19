@@ -26,6 +26,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 
@@ -69,6 +70,8 @@ public class TableSelectorPanel
 		this.tableLabel.setText(ResourceMgr.getString("LblTable"));
 		this.tableSelector.setMaximumRowCount(15);
 		this.editNewTableNameButton.setVisible(false);
+		autoSync.setText(ResourceMgr.getString("LblDPAutoSyncTarget"));
+		autoSync.setToolTipText(ResourceMgr.getDescription("LblDPAutoSyncTarget"));
 	}
 
 	public void reset()
@@ -77,6 +80,29 @@ public class TableSelectorPanel
 		this.tableSelector.removeItemListener(this);
 		this.schemaSelector.removeAllItems();
 		this.tableSelector.removeAllItems();
+	}
+
+	public boolean isAutoSyncSelected()
+	{
+		if (autoSync.isVisible())
+		{
+			return autoSync.isSelected();
+		}
+		return false;
+	}
+
+	public void setAutoSyncSelected(boolean flag)
+	{
+		if (autoSync.isVisible())
+		{
+			autoSync.setSelected(flag);
+		}
+	}
+
+	public void setAutoSyncVisible(boolean flag)
+	{
+		autoSync.setVisible(flag);
+		autoSync.setEnabled(flag);
 	}
 
 	public void resetNewTableItem()
@@ -268,6 +294,7 @@ public class TableSelectorPanel
 
 			for (TableIdentifier table : tables)
 			{
+				if (table.getType().equalsIgnoreCase("sequence")) continue;
 				table.setShowTablenameOnly(true);
 				tableSelector.addItem(table);
 			}
@@ -396,9 +423,11 @@ public class TableSelectorPanel
     schemaSelector = new JComboBox();
     tableSelector = new JComboBox();
     schemaLabel = new JLabel();
-    tableLabel = new JLabel();
     editNewTableNameButton = new FlatButton();
     refreshButton = new FlatButton();
+    jPanel1 = new JPanel();
+    tableLabel = new JLabel();
+    autoSync = new JCheckBox();
 
     setMinimumSize(new Dimension(68, 65));
     setPreferredSize(new Dimension(68, 65));
@@ -436,22 +465,9 @@ public class TableSelectorPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 0, 2, 0);
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 0, 2, 0);
     add(schemaLabel, gridBagConstraints);
-
-    tableLabel.setText("jLabel1");
-    tableLabel.setVerticalAlignment(SwingConstants.TOP);
-    tableLabel.setMaximumSize(new Dimension(32768, 21));
-    tableLabel.setMinimumSize(new Dimension(34, 21));
-    tableLabel.setPreferredSize(new Dimension(34, 21));
-    gridBagConstraints = new GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 0;
-    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
-    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new Insets(0, 0, 2, 0);
-    add(tableLabel, gridBagConstraints);
 
     editNewTableNameButton.setIcon(ResourceMgr.getImage("Rename"));
     editNewTableNameButton.setToolTipText(ResourceMgr.getString("LblEditNewTableName"));
@@ -483,6 +499,36 @@ public class TableSelectorPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 2, 0, 0);
     add(refreshButton, gridBagConstraints);
+
+    jPanel1.setLayout(new GridBagLayout());
+
+    tableLabel.setText("jLabel1");
+    tableLabel.setVerticalAlignment(SwingConstants.TOP);
+    tableLabel.setMaximumSize(new Dimension(32768, 21));
+    tableLabel.setMinimumSize(new Dimension(34, 21));
+    tableLabel.setPreferredSize(new Dimension(34, 21));
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(4, 0, 0, 0);
+    jPanel1.add(tableLabel, gridBagConstraints);
+
+    autoSync.setText("jCheckBox1");
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.EAST;
+    jPanel1.add(autoSync, gridBagConstraints);
+
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    add(jPanel1, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 	private void refreshButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_refreshButtonActionPerformed
@@ -491,7 +537,9 @@ public class TableSelectorPanel
 	}//GEN-LAST:event_refreshButtonActionPerformed
 
   // Variables declaration - do not modify//GEN-BEGIN:variables
+  private JCheckBox autoSync;
   private JButton editNewTableNameButton;
+  private JPanel jPanel1;
   private JButton refreshButton;
   private JLabel schemaLabel;
   private JComboBox schemaSelector;
