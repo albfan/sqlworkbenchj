@@ -12,16 +12,23 @@
 package workbench.gui.dbobjects;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import javax.swing.JMenuItem;
 
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import workbench.WbManager;
@@ -42,23 +49,26 @@ import workbench.log.LogMgr;
  */
 public class TableDependencyTreeDisplay
   extends JPanel
-	implements Resettable
+	implements Resettable, MouseListener
 {
 	private WbConnection connection;
 	private DependencyTreeCellRenderer renderer;
 	private List<TreeNode[]> nodesToExpand;
 	private boolean showExported;
+	private JTree tree;
+	private TableLister tables;
 
-	public TableDependencyTreeDisplay()
+	public TableDependencyTreeDisplay(TableLister lister)
 	{
 		super();
-		this.setLayout(new BorderLayout());
+		setLayout(new BorderLayout());
 		setBorder(WbSwingUtilities.EMPTY_BORDER);
+		tables = lister;
 	}
 
 	public void setConnection(WbConnection aConn)
 	{
-		this.connection = aConn;
+		connection = aConn;
 	}
 
 	public void readReferencedTables(TableIdentifier table)
@@ -75,7 +85,6 @@ public class TableDependencyTreeDisplay
 
 	private void readTree(TableIdentifier aTable, boolean exportedKeys)
 	{
-		this.renderer = new DependencyTreeCellRenderer();
 		this.showExported = exportedKeys;
 		try
 		{
@@ -106,25 +115,30 @@ public class TableDependencyTreeDisplay
 
 	public void reset()
 	{
-		this.removeAll();//this.createTreeDisplay(emptyRoot);
-		this.invalidate();
-		this.repaint();
-		this.doLayout();
+		if (tree != null)
+		{
+			DefaultTreeModel model = new DefaultTreeModel(new DefaultMutableTreeNode(), false);
+			tree.setModel(model);
+		}
 	}
 
 	private void createTreeDisplay(DefaultMutableTreeNode root)
 	{
-		this.removeAll();
-		this.invalidate();
-		JTree tree = new JTree(root);
-		ToolTipManager.sharedInstance().registerComponent(tree);
-		tree.putClientProperty("JTree.lineStyle", "Angled");
-		tree.setCellRenderer(this.renderer);
-		WbScrollPane scroll = new WbScrollPane(tree);
+		if (tree == null)
+		{
+			tree = new JTree();
+			renderer = new DependencyTreeCellRenderer();
+			tree.putClientProperty("JTree.lineStyle", "Angled");
+			tree.setCellRenderer(renderer);
+			tree.addMouseListener(this);
+			ToolTipManager.sharedInstance().registerComponent(tree);
+			WbScrollPane scroll = new WbScrollPane(tree);
+			add(scroll, BorderLayout.CENTER);
+		}
+		DefaultTreeModel model = new DefaultTreeModel(root, false);
+		tree.setModel(model);
 		this.expandNodes(tree);
-		this.add(scroll, BorderLayout.CENTER);
-		this.updateUI();
-		this.repaint();
+		WbSwingUtilities.repaintLater(this);
 	}
 
   private void readTreeNodes(DependencyNode root)
@@ -223,4 +237,56 @@ public class TableDependencyTreeDisplay
 		this.nodesToExpand = null;
 	}
 
+	public void mouseClicked(MouseEvent e)
+	{
+		if (e.getButton() == MouseEvent.BUTTON3 && e.getClickCount() == 1)
+		{
+			TreePath p = tree.getClosestPathForLocation(e.getX(), e.getY());
+			if (p == null) return;
+
+			tree.setSelectionPath(p);
+
+			Object pathObject = p.getLastPathComponent();
+			if (pathObject == tree.getModel().getRoot()) return;
+
+			Object o = ((DefaultMutableTreeNode)pathObject).getUserObject();
+			if (o instanceof DependencyNode)
+			{
+				JPopupMenu popup = new JPopupMenu();
+				JMenuItem item = new JMenuItem("Select in Object list");
+				DependencyNode node = (DependencyNode)o;
+				final TableIdentifier table = node.getTable();
+				item.addActionListener(new ActionListener()
+				{
+					@Override
+					public void actionPerformed(ActionEvent e)
+					{
+						tables.selectTable(table);
+					}
+				});
+				popup.add(item);
+				popup.show(tree, e.getX(), e.getY());
+			}
+		}
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e)
+	{
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e)
+	{
+	}
 }

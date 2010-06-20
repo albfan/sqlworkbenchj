@@ -120,7 +120,7 @@ public class TableListPanel
 	extends JPanel
 	implements ActionListener, ChangeListener, ListSelectionListener, MouseListener,
 						 ShareableDisplay, Exporter, PropertyChangeListener,
-						 TableModelListener, DbObjectList, ListSelectionControl
+						 TableModelListener, DbObjectList, ListSelectionControl, TableLister
 {
 	// <editor-fold defaultstate="collapsed" desc=" Variables ">
 	protected WbConnection dbConnection;
@@ -272,7 +272,7 @@ public class TableListPanel
 		this.importedPanel.setDividerLocation(100);
 		this.importedPanel.setDividerSize(8);
 		this.importedPanel.setTopComponent(scroll);
-		this.importedTableTree = new TableDependencyTreeDisplay();
+		this.importedTableTree = new TableDependencyTreeDisplay(this);
 		this.importedPanel.setBottomComponent(this.importedTableTree);
 
 		this.exportedKeys = new WbTable();
@@ -282,7 +282,7 @@ public class TableListPanel
 		this.exportedPanel.setDividerLocation(100);
 		this.exportedPanel.setDividerSize(8);
 		this.exportedPanel.setTopComponent(scroll);
-		this.exportedTableTree = new TableDependencyTreeDisplay();
+		this.exportedTableTree = new TableDependencyTreeDisplay(this);
 		this.exportedPanel.setBottomComponent(this.exportedTableTree);
 
 		this.triggers = new TriggerDisplayPanel();
@@ -1948,47 +1948,19 @@ public class TableListPanel
 		return result;
 	}
 
-	private void checkSelectedTypes(TableIdentifier toSelect)
+	public void selectTable(TableIdentifier table)
 	{
-		String currentType = (String)this.tableTypes.getSelectedItem();
-		String newType = toSelect.getType();
-		if (StringUtil.isBlank(newType)) return;
-
-		if (currentType.equalsIgnoreCase(newType)) return;
-
-		for (int i=0; i < tableTypes.getItemCount(); i++)
-		{
-			String item = (String)tableTypes.getItemAt(i);
-			if (item.indexOf(newType) > -1)
-			{
-				tableTypes.setSelectedIndex(0);
-				return;
-			}
-		}
-		return;
-	}
-
-	public boolean selectTable(TableIdentifier table)
-	{
-		if (this.shouldRetrieve)
-		{
-			retrieve();
-		}
-		checkSelectedTypes(table);
-
 		for (int row = 0; row < this.tableList.getRowCount(); row ++)
 		{
 			TableIdentifier tbl = createTableIdentifier(row);
 			if (tbl.equals(table))
 			{
-				ListSelectionModel model = tableList.getSelectionModel();
-				model.setValueIsAdjusting(true);
-				model.clearSelection();
-				model.setSelectionInterval(row, row);
-				return  true;
+				displayTab.setSelectedIndex(0);
+				tableList.scrollToRow(row);
+				tableList.setRowSelectionInterval(row, row);
+				break;
 			}
 		}
-		return false;
 	}
 
 	public void exportData()
