@@ -42,6 +42,7 @@ import workbench.gui.components.WbScrollPane;
 import workbench.gui.renderer.DependencyTreeCellRenderer;
 import workbench.interfaces.Resettable;
 import workbench.log.LogMgr;
+import workbench.resource.ResourceMgr;
 
 /**
  *
@@ -253,7 +254,7 @@ public class TableDependencyTreeDisplay
 			if (o instanceof DependencyNode)
 			{
 				JPopupMenu popup = new JPopupMenu();
-				JMenuItem item = new JMenuItem("Select in Object list");
+				JMenuItem item = new JMenuItem(ResourceMgr.getString("MnuTextSelectInList"));
 				DependencyNode node = (DependencyNode)o;
 				final TableIdentifier table = node.getTable();
 				item.addActionListener(new ActionListener()
