@@ -14,8 +14,11 @@ package workbench.gui.components;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Insets;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextArea;
+import javax.swing.border.Border;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -73,40 +76,28 @@ public class ColumnWidthOptimizer
 		this.optimizeColWidth(aColumn, minWidth, maxWidth, false);
 	}
 
-	public void optimizeColWidth(int aColumn, int minWidth, int maxWidth, boolean respectColumnName)
+	public void optimizeColWidth(int col, int minWidth, int maxWidth, boolean respectColumnName)
 	{
-		if (aColumn < 0 || aColumn > this.table.getColumnCount() - 1)
+		if (col < 0 || col > this.table.getColumnCount() - 1)
 		{
 			return;
 		}
 		TableColumnModel colMod = this.table.getColumnModel();
-		TableColumn col = colMod.getColumn(aColumn);
-		int addWidth = this.getAdditionalColumnSpace();
+		TableColumn column = colMod.getColumn(col);
+		
 		int optWidth = minWidth;
 
 		if (respectColumnName)
 		{
-			JTableHeader th = this.table.getTableHeader();
-			TableCellRenderer rend = null;
-			try
-			{
-				rend = th.getColumnModel().getColumn(aColumn).getCellRenderer();
-			}
-			catch (Exception e)
-			{
-				LogMgr.logWarning("ColumnWidthOptimizer.optimizeColWidth()", "Could not obtain header renderer!", e);
-				rend = null;
-			}
+			JTableHeader th = table.getTableHeader();
+			TableCellRenderer rend = th.getDefaultRenderer();
+			String colName = table.getColumnName(col);
 
-			if (rend == null)
-			{
-				rend = th.getDefaultRenderer();
-			}
-			String colName = table.getColumnName(aColumn);
-			Component c = rend.getTableCellRendererComponent(this.table, colName, false, false, 0, aColumn);
+			JComponent c = (JComponent)rend.getTableCellRendererComponent(table, colName, false, false, -1, col);
 			Font headerFont = c.getFont();
 			FontMetrics hfm = c.getFontMetrics(headerFont);
-			int headerWidth = hfm.stringWidth(colName) + addWidth + 5;
+			Insets ins = c.getInsets();
+			int headerWidth = hfm.stringWidth(colName) + getAdditionalHeaderSpace(col) + ins.left + ins.right;
 			optWidth = Math.max(minWidth, headerWidth);
 		}
 
@@ -115,10 +106,12 @@ public class ColumnWidthOptimizer
 		String s = null;
 		int stringWidth = 0;
 
+		int addWidth = getAdditionalColumnSpace(col);
+
 		for (int row = 0; row < rowCount; row++)
 		{
-			TableCellRenderer rend = this.table.getCellRenderer(row, aColumn);
-			Component c = rend.getTableCellRendererComponent(this.table, table.getValueAt(row, aColumn), false, false, row, aColumn);
+			TableCellRenderer rend = this.table.getCellRenderer(row, col);
+			Component c = rend.getTableCellRendererComponent(this.table, table.getValueAt(row, col), false, false, row, col);
 			Font f = c.getFont();
 			FontMetrics fm = c.getFontMetrics(f);
 			
@@ -142,7 +135,7 @@ public class ColumnWidthOptimizer
 			}
 			else
 			{
-				s = this.table.getValueAsString(row, aColumn);
+				s = this.table.getValueAsString(row, col);
 			}
 
 			if (s == null || s.length() == 0)
@@ -161,23 +154,43 @@ public class ColumnWidthOptimizer
 
 			optWidth = Math.max(optWidth, stringWidth + addWidth);
 		}
+		System.out.println("optWidth: " + optWidth);
 		if (maxWidth > 0)
 		{
 			optWidth = Math.min(optWidth, maxWidth);
 		}
 		if (optWidth > 0)
 		{
-			col.setPreferredWidth(optWidth);
+			column.setPreferredWidth(optWidth);
 		}
 	}
 
-	private int getAdditionalColumnSpace()
+	private int getAdditionalHeaderSpace(int col)
 	{
-		int addWidth = this.table.getIntercellSpacing().width * 2;
-		if (this.table.getShowVerticalLines())
+		int addWidth = table.getIntercellSpacing().width;
+		if (table.getShowVerticalLines())
 		{
-			addWidth += 4;
+			addWidth += table.getColumnCount() + 2;
 		}
+		
+		JTableHeader header = table.getTableHeader();
+		TableColumnModel headerCols = header.getColumnModel();
+
+		int headerMargin = headerCols.getColumnMargin();
+
+		addWidth += headerMargin;
+		
+		return addWidth;
+	}
+
+	private int getAdditionalColumnSpace(int col)
+	{
+		int addWidth = table.getIntercellSpacing().width;
+		if (table.getShowVerticalLines())
+		{
+			addWidth += table.getColumnCount() + 2;
+		}
+		addWidth += table.getColumnModel().getColumnMargin();
 		return addWidth;
 	}
 
@@ -207,8 +220,8 @@ public class ColumnWidthOptimizer
 		for (int i = 0; i < colMod.getColumnCount(); i++)
 		{
 			TableColumn col = colMod.getColumn(i);
-			int addWidth = this.getAdditionalColumnSpace();
-			int addHeaderWidth = this.getAdditionalColumnSpace();
+			int addWidth = this.getAdditionalColumnSpace(i);
+			int addHeaderWidth = this.getAdditionalColumnSpace(i);
 
 			int lblWidth = 0;
 			if (adjustToColumnLabel)

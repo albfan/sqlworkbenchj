@@ -65,7 +65,7 @@ public class TabButtonComponent
 
 		closeButton = new WbButton(ResourceMgr.getPng("closePanel"));
 		closeButton.setBackground(getBackground());
-		Dimension d = new Dimension(14, 16);
+		Dimension d = new Dimension(12, 15);
 		closeButton.setPreferredSize(d);
 		closeButton.setMinimumSize(d);
 		closeButton.enableBasicRollover();
