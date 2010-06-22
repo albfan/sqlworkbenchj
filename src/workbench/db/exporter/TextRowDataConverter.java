@@ -122,6 +122,8 @@ public class TextRowDataConverter
 			boolean addQuote = quoteAlways;
 			boolean isConverted = row.typeIsConverted(colType, dbmsType);
 
+			boolean isClob = SqlUtil.isClobType(colType, this.originalConnection.getDbSettings()) || originalConnection.getDbSettings().isClobType(dbmsType);
+
 			if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
 			{
 				File blobFile = createBlobFile(row, c, rowIndex);
@@ -141,7 +143,7 @@ public class TextRowDataConverter
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
 			}
-			else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, this.originalConnection.getDbSettings()))
+			else if (!isConverted && writeClobFiles && isClob)
 			{
 				Object clobData = row.getValue(c);
 				if (clobData != null)

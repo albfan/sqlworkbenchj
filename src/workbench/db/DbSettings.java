@@ -1045,4 +1045,10 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty("workbench.db.postgresql.exclude.defaultselectrule", true);
 	}
+
+	public boolean isClobType(String dbmsType)
+	{
+		if (dbmsType == null) return false;
+		return Settings.getInstance().getBoolProperty(prefix + "isclob." + dbmsType, false);
+	}
 }
