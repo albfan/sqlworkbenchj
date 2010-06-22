@@ -9,7 +9,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.gui.components;
+package workbench.gui.renderer;
 
 import java.awt.Component;
 
@@ -20,6 +20,9 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import workbench.db.ColumnIdentifier;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.SortArrowIcon;
+import workbench.gui.components.WbTable;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -148,7 +151,7 @@ public class SortHeaderRenderer
 				tip.append("<br>");
 				tip.append(table.getColumnClass(col).getName());
 				tip.append("<br>");
-				tip.append(javaTypeName + " (" + javaType + ")");
+				tip.append(javaType + "/" + javaTypeName);
 			}
 			tip.append("</code></html>");
 			display.setToolTipText(tip.toString());

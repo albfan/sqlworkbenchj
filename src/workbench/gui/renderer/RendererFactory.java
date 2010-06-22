@@ -47,7 +47,7 @@ public class RendererFactory
 	
 	public static TableCellRenderer getSortHeaderRenderer()
 	{
-		return createRenderer("workbench.gui.components.SortHeaderRenderer");
+		return createRenderer("workbench.gui.renderer.SortHeaderRenderer");
 	}
 	
 	public static TableCellRenderer getDateRenderer(String format)
