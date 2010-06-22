@@ -268,9 +268,8 @@
     <br/>
     <xsl:for-each select="document('../scripts/history.xml')/history/release[@build != '-1']">
       <xsl:variable name="build-nr" select="@build"/>
-      <a name="build_{$build-nr}">
+      <a name="build_{$build-nr}"></a>
       <h1 class="build-nr">Build <xsl:value-of select="@build"/> (<xsl:value-of select="@date"/>)</h1>
-      </a>
 
       <xsl:if test="count(entry[@type='enh']) &gt; 0">
         <h3 class="history-entry">Enhancements</h3>
@@ -502,6 +501,13 @@
       <xsl:apply-templates/>
     </xsl:copy>
   </xsl:template>
+  <xsl:template match="h4">
+    <xsl:copy>
+      <xsl:apply-templates select="@*"/>
+      <xsl:apply-templates/>
+    </xsl:copy>
+  </xsl:template>
+  
   <xsl:template match="div">
     <xsl:copy>
       <xsl:apply-templates select="@*"/>

@@ -136,11 +136,23 @@ VALUES
       </p>
       
       <h3 style="padding-top:10px">Starting the application</h3>
-
-      <p>If you are using Windows&reg; start the application by double-clicking the
+      
+      <h4>Microsoft Windows</h4>
+      
+      <p>
+        If you are using Windows&reg; start the application by double-clicking the
         <tt>SQLWorkbench.exe</tt> executable (Windows Vista users please <a href="vista.html">read this</a>).
       </p>
+      <p style="padding-left:15px;">
+        SQLWorkbench.exe is a <b>32bit</b> application and will <b>not</b> work on a 64bit Windows system. <br/>
+        Please use the supplied <tt>SQLWorkbench.vbs</tt> script to start SQL Workbench in that case.
+      </p>
+      <p>
+        The supplied script <tt>MakeShortcut.vbs</tt> can be used to create a Windows shortcut to start SQL Workbench without the .exe. 
+        The shortcut will use the default Java installation on the system.
+      </p>
       
+      <h4>Linux and other Unix-style operating systems</h4>
       <p>
         If you are running Linux (or another Unix&reg; like operating system) you can use
         the supplied shell script <tt>sqlworkbench.sh</tt> to start the application.
@@ -262,8 +274,7 @@ VALUES
       XML outputs of SQL Workbench/J and would like to share it, please send
       it to <mail-to/></p>
       <h2 style="text-align:left;padding-top:25px">WbReport transformations</h2>
-        <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbReport</a>
-      command</p>
+      <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbReport</a> command</p>
       <ul>
         <li><a href="wbreport2html.xslt">HTML output</a></li>
         <li><a href="wbreport2pg.xslt">Create a script for PostgreSQL</a></li>
@@ -281,7 +292,15 @@ VALUES
         <li><a href="wbdiff2oracle.xslt">Transform to an Oracle script</a></li>
         <li><a href="wbdiff2derby.xslt">Transform to an Apache Derby script</a></li>
         <li><a href="wbdiff2mssql.xslt">Transform to an Microsoft SQL Server script</a></li>
-       </ul>
+      </ul>
+
+      <h2 style="text-align:left;padding-top:5px">WbExport transformations</h2>
+      <p>The following files will transform the XML output of the <a href="manual/command-export.html">WbExport</a> command</p>
+      <ul>
+        <li><a href="wbexport2lbinsert.xslt">Transform an XML export into a Liquibase INSERT changeset</a>&nbsp;&nbsp;&nbsp;(See <a target="_blank" href="http://www.liquibase.org/manual/insert_data">Liquibase Insert Data</a>)</li>
+        <li><a href="wbexport2text.xslt">Transform an XML export into a CSV file</a></li>
+      </ul>
+      
     </content>
   </page>
 
