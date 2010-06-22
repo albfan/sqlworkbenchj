@@ -15,6 +15,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.Collections;
@@ -24,6 +25,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.table.TableCellEditor;
@@ -32,17 +34,22 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.SetNullAction;
 import workbench.gui.renderer.TextAreaRenderer;
 import workbench.interfaces.NullableEditor;
+import workbench.util.StringUtil;
 
 /**
  * A TableCellEditor that displays multiple lines
  *
  * @author Thomas Kellerer
  */
-@SuppressWarnings({"deprecation"})
+@SuppressWarnings(
+{
+	"deprecation"
+})
 public class WbCellEditor
 	extends AbstractCellEditor
 	implements TableCellEditor, MouseListener, NullableEditor, DocumentListener
 {
+
 	private TextAreaEditor editor;
 	private WbTable parentTable;
 	private JScrollPane scroll;
@@ -85,7 +92,6 @@ public class WbCellEditor
 		return editor;
 	}
 
-
 	@Override
 	public void cancelCellEditing()
 	{
@@ -124,11 +130,13 @@ public class WbCellEditor
 		return scroll;
 	}
 
-
 	@Override
 	public Object getCellEditorValue()
 	{
-		if (isNull) return null;
+		if (isNull)
+		{
+			return null;
+		}
 		return editor.getText();
 	}
 
@@ -139,7 +147,10 @@ public class WbCellEditor
 		{
 			result = ((MouseEvent) anEvent).getClickCount() >= 2;
 		}
-		if (result) WbSwingUtilities.requestFocus(editor);
+		if (result)
+		{
+			WbSwingUtilities.requestFocus(editor);
+		}
 		return result;
 	}
 
@@ -256,11 +267,19 @@ public class WbCellEditor
 		{
 			return TextAreaRenderer.AREA_INSETS;
 		}
+
+		@Override
+		public boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
+		{
+			return super.processKeyBinding(ks, e, condition, pressed);
+		}
+
 	}
 
 	public class TextAreaScrollPane
 		extends JScrollPane
 	{
+
 		TextAreaScrollPane(TextAreaEditor content)
 		{
 			super(content);
@@ -299,5 +318,14 @@ public class WbCellEditor
 			return editor.requestFocusInWindow();
 		}
 
+		/**
+		 * Overriding processKeyBinding is needed in order to forward the initial keystrokes
+		 * from the JTable to the editor (because the scroll component is registered as the "editor component" with the table)
+		 */
+		@Override
+		protected boolean processKeyBinding(KeyStroke ks, KeyEvent e, int condition, boolean pressed)
+		{
+			return editor.processKeyBinding(ks, e, condition, pressed);
+		}
 	}
 }

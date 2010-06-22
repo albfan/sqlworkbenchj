@@ -875,18 +875,6 @@ public class WbTable
 				public void run()
 				{
 					clearSelection();
-
-					// for some reason the first keystroke (that starts the editing mode)
-					// is not passed on to the multiline editor, so I'm faking that here
-					if (e instanceof KeyEvent && getCellEditor() == multiLineEditor)
-					{
-						KeyEvent key = (KeyEvent)e;
-						char c = key.getKeyChar();
-						if (Character.isDefined(c))
-						{
-							multiLineEditor.setText(Character.toString(c));
-						}
-					}
 				}
 			});
 		}

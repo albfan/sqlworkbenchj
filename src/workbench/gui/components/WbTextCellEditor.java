@@ -46,12 +46,12 @@ public class WbTextCellEditor
 	private boolean changed;
 	private boolean isNull;
 
-	public static final WbTextCellEditor createInstance()
+	public static WbTextCellEditor createInstance()
 	{
 		return createInstance(null);
 	}
 
-	public static final WbTextCellEditor createInstance(WbTable parent)
+	public static WbTextCellEditor createInstance(WbTable parent)
 	{
 		JTextField field = new JTextField();
 		WbTextCellEditor editor = new WbTextCellEditor(parent, field);

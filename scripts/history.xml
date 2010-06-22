@@ -24,6 +24,8 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="8" type="fix">When initiating editing a column that is rendered as multiline column by using the DELETE key, a non-printable character was inserted into the text field</entry>
+    <entry dev-build="8" type="fix">When exporting text columns from PostgreSQL, they are now properly recognized as CLOB columns (e.g. for the -clobAsFile parameter)</entry>
     <entry dev-build="8" type="fix">The SQL console did not start if a profile was passed (using -profile) on the commandline that did not exist</entry>
     <entry dev-build="8" type="fix">Fixed some initialization problems with the DbExplorer which caused errors when using SQL Server with the Microsoft Driver</entry>
     <entry dev-build="7" type="fix">The generated WbCopy command in the DataPumper was wrong, if * was selected as the schema</entry>
