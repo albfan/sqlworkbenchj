@@ -530,7 +530,7 @@ workbench.db.postgresql.sql.usesavepoint=true
 	<section id="sqlanywhere-problems">
 		<title>Sybase SQL Anywhere Problems</title>
     <indexterm><primary>Problems</primary><secondary>Sybase SQL Anywhere</secondary></indexterm>
-		<section id="pg-result-buffer">
+		<section id="sqa-nchar">
 			<title>Columns with type <literal>nvarchar</literal> are not displayed properly</title>
       <para>
         The jConnect driver seems to have a problem with <literal>nvarchar</literal> columns. The data type is not reported properly by the driver,
