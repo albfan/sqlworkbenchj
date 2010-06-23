@@ -11,8 +11,10 @@
  */
 package workbench.gui.completion;
 
+import java.util.List;
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
+import workbench.util.TableAlias;
 
 /**
  *
@@ -33,6 +35,23 @@ public class SelectAnalyzerTest
 
 	protected void tearDown() throws Exception
 	{
+	}
+
+	public void testSpaces()
+	{
+		String sql = "SELECT x. FROM \"Dumb Named Schema\".\"Problematically Named Table\" x";
+		SelectAnalyzer analyzer = new SelectAnalyzer(null, sql, sql.indexOf(" FROM"));
+		List<TableAlias> tables = analyzer.getTables();
+		assertEquals(1, tables.size());
+		TableAlias alias = tables.get(0);
+		TableIdentifier tbl = alias.getTable();
+		assertEquals("\"Dumb Named Schema\".\"Problematically Named Table\"", tbl.getTableExpression());
+		assertEquals("Dumb Named Schema", tbl.getSchema());
+		assertEquals("Problematically Named Table", tbl.getTableName());
+		assertEquals("x", alias.getAlias());
+		analyzer.checkContext();
+		tbl = analyzer.getTableForColumnList();
+		assertEquals("\"Dumb Named Schema\".\"Problematically Named Table\"", tbl.getTableExpression());
 	}
 
 	public void testAnalyzer()

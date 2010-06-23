@@ -641,6 +641,16 @@ public class SqlUtilTest
 		assertEquals("project_resource pr", l.get(0));
 		assertEquals("assigned_resource_activity ara", l.get(1));
 		assertEquals("resource r", l.get(2));
+
+		sql = "SELECT x. FROM \"Dumb Named Schema\".\"Problematically Named Table\" x";
+		l = SqlUtil.getTables(sql, false);
+		assertEquals(l.size(), 1);
+		assertEquals(l.get(0), "\"Dumb Named Schema\".\"Problematically Named Table\"");
+
+		l = SqlUtil.getTables(sql, true);
+		assertEquals(l.size(), 1);
+		assertEquals(l.get(0), "\"Dumb Named Schema\".\"Problematically Named Table\" x");
+
 	}
 
 	public void testDataTypeNames()
@@ -668,6 +678,5 @@ public class SqlUtilTest
 			fail(th.getMessage());
 		}
 	}
-
 
 }

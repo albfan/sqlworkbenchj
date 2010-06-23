@@ -37,6 +37,14 @@ public class AliasTest
 		assertNull(alias.getAlias());
 		assertEquals("f123", alias.getNameToUse());
 		assertEquals("f123", alias.getObjectName());
+
+		alias = new Alias("some_schema.my_table as bla");
+		assertEquals("bla", alias.getAlias());
+		assertEquals("some_schema.my_table", alias.getObjectName());
+
+		alias = new Alias("\"Imbecile Schema Name\".\"Daft table name\"");
+		assertEquals("\"Imbecile Schema Name\".\"Daft table name\"", alias.getObjectName());
+		assertNull(alias.getAlias());
 	}
 
 }

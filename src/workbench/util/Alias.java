@@ -11,6 +11,9 @@
  */
 package workbench.util;
 
+import workbench.sql.formatter.SQLLexer;
+import workbench.sql.formatter.SQLToken;
+
 /**
  * @author Thomas Kellerer
  */
@@ -24,36 +27,31 @@ public class Alias
 	{
 		if (StringUtil.isEmptyString(value)) throw new IllegalArgumentException("Identifier must not be empty");
 
-		String tablename = null;
-		String[] words = value.split("\\s");
-
-		if (words.length > 0)
+		SQLLexer lexer = new SQLLexer(value);
+		StringBuilder name = new StringBuilder(value.length());
+		SQLToken t = lexer.getNextToken(false, true);
+		boolean objectNamePart = true;
+		while (t != null)
 		{
-			tablename = words[0].trim();
-		}
-
-		if (words.length == 2)
-		{
-			alias = words[1].trim();
-		}
-		else if (words.length == 3)
-		{
-			// Assuming "table AS t1" syntax
-			if (words[1].equalsIgnoreCase("as"))
+			if (t.isWhiteSpace())
 			{
-				alias = words[2].trim();
+				objectNamePart = false;
+			}
+			if (objectNamePart)
+			{
+				name.append(t.getText());
+			}
+			else if ("AS".equals(t.getContents()))
+			{
+				objectNamePart = false;
 			}
 			else
 			{
-				alias = words[1].trim();
+				alias = t.getText();
 			}
+			t = lexer.getNextToken(false, true);
 		}
-		else
-		{
-			this.alias = null;
-		}
-
-		objectName = tablename;
+		objectName = name.toString();
 	}
 
 	public final String getAlias()
