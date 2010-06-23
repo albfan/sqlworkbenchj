@@ -20,6 +20,7 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.util.ArgumentParser;
 import workbench.util.StringUtil;
 
 
@@ -38,6 +39,9 @@ public class WbListProcedures
 
 	public WbListProcedures()
 	{
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument("schema");
+		cmdLine.addArgument("catalog");
 	}
 
 	public String getVerb()
@@ -53,11 +57,18 @@ public class WbListProcedures
 
 		String args = getCommandLine(aSql);
 
+		cmdLine.parse(args);
+
 		String schema = null;
 		String catalog = null;
 		String name = null;
 
-		if (StringUtil.isNonBlank(args))
+		if (cmdLine.hasArguments())
+		{
+			schema = cmdLine.getValue("schema");
+			catalog = cmdLine.getValue("catalog");
+		}
+		else if (StringUtil.isNonBlank(args))
 		{
 			DbObject db = new TableIdentifier(args);
 			schema = db.getSchema();

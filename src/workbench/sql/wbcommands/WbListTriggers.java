@@ -20,24 +20,33 @@ import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import workbench.util.ArgumentParser;
 
 /**
  * List all triggers defined for the current schema.
  * <br>
  * This is the same information as displayed in the DbExplorer's "Triggers" tab.
  *
- * @see workbench.db.TriggerReader#getTriggers(java.lang.String, java.lang.String) 
+ * @see workbench.db.TriggerReader#getTriggers(java.lang.String, java.lang.String)
  * @author Thomas Kellerer
  */
-public class WbListTriggers extends SqlCommand
+public class WbListTriggers
+	extends SqlCommand
 {
 	public static final String VERB = "WBLISTTRIGGERS";
 	public static final String FORMATTED_VERB = "WbListTriggers";
 
 	public WbListTriggers()
 	{
+		cmdLine = new ArgumentParser();
+		cmdLine.addArgument("schema");
+		cmdLine.addArgument("catalog");
 	}
-	public String getVerb() { return VERB; }
+
+	public String getVerb()
+	{
+		return VERB;
+	}
 
 	public StatementRunnerResult execute(String aSql)
 		throws SQLException
@@ -52,5 +61,4 @@ public class WbListTriggers extends SqlCommand
 		result.addDataStore(ds);
 		return result;
 	}
-
 }

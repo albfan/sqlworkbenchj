@@ -154,11 +154,12 @@ public class ColumnWidthOptimizer
 
 			optWidth = Math.max(optWidth, stringWidth + addWidth);
 		}
-		System.out.println("optWidth: " + optWidth);
+		
 		if (maxWidth > 0)
 		{
 			optWidth = Math.min(optWidth, maxWidth);
 		}
+		
 		if (optWidth > 0)
 		{
 			column.setPreferredWidth(optWidth);
