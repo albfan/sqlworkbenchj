@@ -1818,51 +1818,39 @@ public class WbTable
 			TableColumnModel colMod = this.getColumnModel();
 			int viewColumn = colMod.getColumnIndexAtX(e.getX());
 			int realColumn = this.convertColumnIndexToModel(viewColumn);
-			boolean addSortColumn = e.isControlDown(); //(e.getModifiers() & ActionEvent.CTRL_MASK) == ActionEvent.CTRL_MASK);
+			boolean addSortColumn = e.isControlDown();
 			if (realColumn >= 0)
 			{
 				if (e.isShiftDown())
 				{
-					this.dwModel.removeSortColumn(realColumn);
-					this.repaint();
+					dwModel.removeSortColumn(realColumn);
+					repaint();
 				}
 				else
 				{
-					this.dwModel.sortInBackground(this, realColumn, addSortColumn);
+					dwModel.sortInBackground(this, realColumn, addSortColumn);
 				}
 			}
 		}
 	}
 
-	/** Invoked when the mouse enters a component.
-	 *
-	 */
 	public void mouseEntered(MouseEvent e)
 	{
 	}
 
-	/** Invoked when the mouse exits a component.
-	 *
-	 */
 	public void mouseExited(MouseEvent e)
 	{
 	}
 
-	/** Invoked when a mouse button has been pressed on a component.
-	 *
-	 */
 	public void mousePressed(MouseEvent e)
 	{
 		if (e.getButton() == MouseEvent.BUTTON1)
 		{
 			boolean altDown = ((e.getModifiersEx() & MouseEvent.ALT_DOWN_MASK) == MouseEvent.ALT_DOWN_MASK);
-			this.setColumnSelectionAllowed(altDown);
+			setColumnSelectionAllowed(altDown);
 		}
 	}
 
-	/** Invoked when a mouse button has been released on a component.
-	 *
-	 */
 	public void mouseReleased(MouseEvent e)
 	{
 	}
@@ -1885,11 +1873,11 @@ public class WbTable
 		int column = getPopupColumnIndex();
 		if (e.getSource() == this.sortAscending && this.dwModel != null)
 		{
-			this.dwModel.sortInBackground(this, column, true, false);
+			dwModel.sortInBackground(this, column, true, false);
 		}
 		else if (e.getSource() == this.sortDescending && this.dwModel != null)
 		{
-			this.dwModel.sortInBackground(this, column, false, false);
+			dwModel.sortInBackground(this, column, false, false);
 		}
 		else if (e.getSource() == this.setColWidth)
 		{

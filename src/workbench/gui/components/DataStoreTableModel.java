@@ -413,7 +413,7 @@ public class DataStoreTableModel
 
 	public boolean isCellEditable(int row, int column)
 	{
-		if (this.noneditableColumns.size() != 0)
+		if (!this.noneditableColumns.isEmpty())
 		{
 			return (this.allowEditing && !noneditableColumns.contains(column));
 		}
@@ -568,19 +568,6 @@ public class DataStoreTableModel
 	}
 
 	/**
-	 * Sort the data by the given column. If the data is already
-	 * sorted by this column, then the sort order will be reversed
-	 */
-	public void sortByColumn(int column)
-	{
-		// if the column was not sorted at all isSortAscending will return false
-		// thus negating ascending will sort ascending for non-sorted
-		// columns and will toggle the sort direction for an existing sort column
-		boolean ascending = !isSortAscending(column);
-		sortByColumn(column, ascending, false);
-	}
-
-	/**
 	 *	Re-apply the last sort order defined.
 	 *  If no sort order was defined this method does nothing
 	 */
@@ -593,8 +580,8 @@ public class DataStoreTableModel
 
 	public void removeSortColumn(int column)
 	{
-		boolean isPrimaryColumn = this.sortColumns.isPrimarySortColumn(column);
-		this.sortColumns.removeSortColumn(column);
+		boolean isPrimaryColumn = sortColumns.isPrimarySortColumn(column);
+		sortColumns.removeSortColumn(column);
 
 		// if the primary (== first) column was removed
 		// we have to re-apply the sort definition
@@ -622,15 +609,15 @@ public class DataStoreTableModel
 
 	private void applySortColumns()
 	{
-		if (this.sortColumns == null) return;
-		if (this.dataCache == null) return;
+		if (sortColumns == null) return;
+		if (dataCache == null) return;
 
 		synchronized (model_change_lock)
 		{
 			try
 			{
 				setSortInProgress(true);
-				this.dataCache.sort(this.sortColumns);
+				dataCache.sort(this.sortColumns);
 			}
 			catch (Throwable th)
 			{
