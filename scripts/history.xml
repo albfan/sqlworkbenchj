@@ -2,7 +2,6 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-06-22">
-    <entry dev-build="10" type="enh"></entry>
     <entry dev-build="9" type="enh">A new option in the DataPumper is available to automatically select a matching entry in the target table dropdown when the source table is changed</entry>
     <entry dev-build="8" type="enh">Changesets for WbRunLB can now also be selected by specifying an author (not only the ID)</entry>
     <entry dev-build="8" type="enh">WbExport now only exports TABLEs (views, synonyms and similar objects where included by default until now). To include other types than tables, a new parameter -types has been added.</entry>
@@ -25,7 +24,7 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
-    <entry dev-build="10" type="fix"></entry>
+    <entry dev-build="10" type="fix">When the maximum number of backups for workspaces was reached, the newest backup was overwritten instead of the oldest</entry>
     <entry dev-build="10" type="fix">Auto completion of column names did not work for table or column names that contained spaces (and thus needed qutoes)</entry>
     <entry dev-build="10" type="fix">The width of the column&amp;s header was not evaluated correctly for all look and feels when optimizing width</entry>
     <entry dev-build="9" type="fix">When initiating editing a column that is rendered as multiline column by using the DELETE key, a non-printable character was inserted into the text field</entry>
