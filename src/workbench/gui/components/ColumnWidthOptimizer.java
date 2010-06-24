@@ -17,7 +17,6 @@ import java.awt.FontMetrics;
 import java.awt.Insets;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
@@ -166,10 +165,9 @@ public class ColumnWidthOptimizer
 		{
 			TableColumn column = colMod.getColumn(col);
 
-			// This method is only used to adjust the column header after
-			// the sort indicators have been displayed.
-			// as the current width is most probably already adjusted (and reflects the size of the data in this column)
-			// the new width may not be smaller than the oldwidth
+			// This method is only used to adjust the column header after the sort indicators have been displayed.
+			// As the current width is most probably already adjusted (and reflects the size of the data in this column)
+			// the new width should not be smaller than the old width (because the row data is not evaluated here!)
 			int oldWidth = column.getWidth();
 			int width = optimizeHeaderColumn(col);
 
