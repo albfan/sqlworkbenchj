@@ -1300,15 +1300,24 @@ public class WbTable
 	public void sortingFinished()
 	{
 		final Container c = (this.scrollPane == null ? this : scrollPane);
-		WbSwingUtilities.invoke(new Runnable()
+		EventQueue.invokeLater(new Runnable()
 		{
 			public void run()
 			{
 				adjustRowHeight();
-				updateSortRenderer();
+				
+				if (GuiSettings.getAutomaticOptimalWidth() && GuiSettings.getIncludeHeaderInOptimalWidth())
+				{
+					ColumnWidthOptimizer optimizer = new ColumnWidthOptimizer(WbTable.this);
+					optimizer.optimizeHeader();
+				}
+
 				WbSwingUtilities.showDefaultCursor(c.getParent());
-				// The sorting indicator is not properly displayed
-				// if repaint() is not called
+				WbSwingUtilities.showDefaultCursor(getTableHeader());
+
+				// For some reason, the sorting indicator is not properly displayed
+				// if repaint() is not called. It needs two clicks int order to
+				// display the new sort icon if
 				getTableHeader().repaint();
 			}
 		});
