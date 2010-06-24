@@ -138,9 +138,7 @@ public class FileVersioner
 
 	private void slideVersions(File target)
 	{
-		if (!target.exists()) return;
-
-		File dir = target.getParentFile();
+		File dir = getTargetDir(target);
 		String name = target.getName();
 
 		File max = new File(dir, name + versionSeparator + '1');
