@@ -143,7 +143,7 @@ VALUES
         If you are using Windows&reg; start the application by double-clicking the
         <tt>SQLWorkbench.exe</tt> executable (Windows Vista users please <a href="vista.html">read this</a>).
       </p>
-      <p style="padding-left:15px;">
+      <p style="margin-left:15px;margin-right:15px;padding:10px;border-style:solid;border-width:2px;border-color:red">
         SQLWorkbench.exe is a <b>32bit</b> application and will <b>not</b> work on a 64bit Windows system. <br/>
         Please use the supplied <tt>SQLWorkbench.vbs</tt> script to start SQL Workbench in that case.
       </p>
@@ -365,7 +365,7 @@ VALUES
       a 64bit executable (especially not on a 32bit Windows).
     </p>
     <p>
-      To run SQL Workbench/J under Windows 64bit, please use the supplied VBScript "SQLWorkbench.vbs". <br/>
+      To run SQL Workbench/J under Windows 64bit using a 64bit JavaVM, please use the supplied VBScript "SQLWorkbench.vbs". <br/>
       The only drawback to this solution is, that it will not show up as "SQLWorkbench.exe" in the Taskmanager, but as "javaw.exe".
     </p>
     </content>
