@@ -45,6 +45,7 @@ import java.util.regex.Matcher;
 import workbench.db.exporter.BlobMode;
 import workbench.db.importer.modifier.ImportValueModifier;
 import workbench.util.BlobDecoder;
+import workbench.util.CollectionUtil;
 import workbench.util.FixedLengthLineParser;
 import workbench.util.LineParser;
 import workbench.util.QuoteEscapeType;
@@ -720,7 +721,7 @@ public class TextFileParser
 			throw e;
 		}
 
-		if (this.importColumns == null || importColumns.size() == 0)
+		if (CollectionUtil.isEmpty(importColumns))
 		{
 			throw new Exception("Cannot import file without a column definition");
 		}
@@ -861,6 +862,7 @@ public class TextFileParser
 					{
 						ColumnIdentifier col = fileCol.getColumn();
 						int colType = col.getDataType();
+						String dbmsType = col.getDbmsType();
 
 						if (fileCol.getColumnFilter() != null)
 						{
@@ -884,7 +886,7 @@ public class TextFileParser
 
 						if (SqlUtil.isCharacterType(colType))
 						{
-							if (clobsAreFilenames && value != null && SqlUtil.isClobType(colType))
+							if (clobsAreFilenames && value != null && SqlUtil.isClobType(colType, dbmsType, connection.getDbSettings()))
 							{
 								File cfile = new File(value);
 								if (!cfile.isAbsolute())
@@ -1097,7 +1099,7 @@ public class TextFileParser
 	{
 		TableDefinition def = getTargetTable();
 
-		if (def == null || def.getColumns() == null || def.getColumns().size() == 0)
+		if (def == null || CollectionUtil.isEmpty(def.getColumns()))
 		{
 			TableIdentifier tbl = createTargetTableId();
 			String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", tbl.getTableExpression());

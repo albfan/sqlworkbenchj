@@ -1132,8 +1132,7 @@ public class DataImporter
 					pstmt.setObject(colIndex, null);
 				}
 			}
-			else if ( SqlUtil.isClobType(targetSqlType) || "LONG".equals(targetDbmsType) ||
-				       "CLOB".equals(targetDbmsType) )
+			else if ( SqlUtil.isClobType(targetSqlType, targetDbmsType, dbConn.getDbSettings()))
 			{
 				Reader in = null;
 				int size = -1;

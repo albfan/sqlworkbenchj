@@ -100,8 +100,10 @@ public class OracleControlFileWriter
 			{
 				String col = resultInfo.getColumnName(i);
 				int type = resultInfo.getColumnType(i);
+				String dbmsType = resultInfo.getDbmsTypeName(i);
+				
 				out.print("  ");
-				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type, exporter.getConnection().getDbSettings())))
+				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type, dbmsType, exporter.getConnection().getDbSettings())))
 				{
 					blobColumns.add(col);
 					out.print("lob_file_" + col.toLowerCase() + " FILLER");

@@ -141,7 +141,7 @@ public class TextRowDataConverter
 					throw new RuntimeException("Error writing BLOB file", e);
 				}
 			}
-			else if (!isConverted && writeClobFiles && (SqlUtil.isClobType(colType, this.originalConnection.getDbSettings()) || originalConnection.getDbSettings().isClobType(dbmsType)))
+			else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, dbmsType, this.originalConnection.getDbSettings()))
 			{
 				Object clobData = row.getValue(c);
 				if (clobData != null)

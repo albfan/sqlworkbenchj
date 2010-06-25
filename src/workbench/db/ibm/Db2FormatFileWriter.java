@@ -74,7 +74,8 @@ public class Db2FormatFileWriter
 			for (int i = 0; i < count; i++)
 			{
 				int type = resultInfo.getColumnType(i);
-				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type, getDbSettings(exporter))))
+				String dbmsType = resultInfo.getDbmsTypeName(i);
+				if (SqlUtil.isBlobType(type) || (clobAsFile && SqlUtil.isClobType(type, dbmsType, getDbSettings(exporter))))
 				{
 					containsLobs = true;
 					break;

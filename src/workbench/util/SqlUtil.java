@@ -1004,8 +1004,9 @@ public class SqlUtil
 		return (aSqlType == Types.CLOB || aSqlType == Types.NCLOB);
 	}
 
-	public static boolean isClobType(int aSqlType, DbSettings dbInfo)
+	public static boolean isClobType(int aSqlType, String dbmsType, DbSettings dbInfo)
 	{
+		if (dbInfo != null && dbInfo.isClobType(dbmsType)) return true;
 		boolean treatLongVarcharAsClob = (dbInfo == null ? false : dbInfo.longVarcharIsClob());
 		return isClobType(aSqlType, treatLongVarcharAsClob);
 	}

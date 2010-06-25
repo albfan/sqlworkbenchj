@@ -247,6 +247,7 @@ public class SqlLiteralFormatter
 		if (value == null) return "NULL";
 		
 		int type = data.getIdentifier().getDataType();
+		String dbmsType = data.getIdentifier().getDbmsType();
 		
 		if (value == null)
 		{
@@ -255,7 +256,7 @@ public class SqlLiteralFormatter
 		else if (value instanceof String)
 		{
 			String t = (String)value;
-			if (this.treatClobAsFile  && clobWriter != null && SqlUtil.isClobType(type, dbSettings))
+			if (this.treatClobAsFile  && clobWriter != null && SqlUtil.isClobType(type, dbmsType, dbSettings))
 			{
 				File f = clobWriter.generateDataFileName(data);
 				try

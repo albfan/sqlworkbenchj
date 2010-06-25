@@ -231,6 +231,7 @@ public class XmlRowDataConverter
 
 			Object data = row.getValue(c);
 			int type = this.metaData.getColumnType(c);
+			String dbmsType = metaData.getDbmsTypeName(c);
 			boolean isNull = (data == null);
 			boolean writeCloseTag = true;
 
@@ -268,7 +269,7 @@ public class XmlRowDataConverter
 					xml.append(Long.toString(d.getTime()));
 					xml.append('"');
 				}
-				else if (writeClobFiles && SqlUtil.isClobType(type, originalConnection.getDbSettings()))
+				else if (writeClobFiles && SqlUtil.isClobType(type, dbmsType, originalConnection.getDbSettings()))
 				{
 					externalFile = true;
 					File clobFile = createBlobFile(row, c, rowIndex);
