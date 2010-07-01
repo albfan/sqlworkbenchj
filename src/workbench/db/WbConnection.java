@@ -475,6 +475,7 @@ public class WbConnection
 	public void rollback()
 		throws SQLException
 	{
+		if (sqlConnection == null) return;
 		this.sqlConnection.rollback();
 	}
 
