@@ -54,7 +54,7 @@ import workbench.util.WbProperties;
 public class VariablePool
 {
 	public static final String PROP_PREFIX = "wbp.";
-	final private Map<String, String> data = new HashMap<String, String>();
+	private final Map<String, String> data = new HashMap<String, String>();
 	private String prefix;
 	private String suffix;
 	private int prefixLen;
@@ -62,7 +62,7 @@ public class VariablePool
 	private Pattern validNamePattern = Pattern.compile("[\\w]*");;
 	private Pattern promptPattern;
 
-	public static final VariablePool getInstance()
+	public static VariablePool getInstance()
 	{
 		return InstanceHolder.INSTANCE;
 	}
@@ -138,7 +138,7 @@ public class VariablePool
 	public DataStore getParametersToBePrompted(String sql)
 	{
 		Set<String> toPrompt = getVariablesNeedingPrompt(sql);
-		if (toPrompt.size() == 0) return null;
+		if (toPrompt.isEmpty()) return null;
 		return getVariablesDataStore(toPrompt);
 	}
 
@@ -184,7 +184,10 @@ public class VariablePool
 
 	public DataStore getVariablesDataStore()
 	{
-		return this.getVariablesDataStore(Collections.synchronizedSet(this.data.keySet()));
+		synchronized (this.data)
+		{
+			return this.getVariablesDataStore(data.keySet());
+		}
 	}
 
 	public DataStore getVariablesDataStore(Set<String> varNames)
@@ -212,7 +215,7 @@ public class VariablePool
 		if (varName == null) return null;
 		synchronized (this.data)
 		{
-			return this.data.get(varName);
+			return data.get(varName);
 		}
 	}
 
@@ -221,16 +224,15 @@ public class VariablePool
 	 */
 	public int getParameterCount()
 	{
-		if (this.data == null) return 0;
 		synchronized (this.data)
 		{
-			return this.data.size();
+			return data.size();
 		}
 	}
 
 	public String replaceAllParameters(String sql)
 	{
-		if (this.data == null || this.data.size() == 0) return sql;
+		if (data.isEmpty()) return sql;
 		synchronized (this.data)
 		{
 			return this.replaceParameters(this.data.keySet(), sql, false);

@@ -473,18 +473,11 @@ public class DbDriver
 		if (other instanceof DbDriver)
 		{
 			DbDriver o = (DbDriver)other;
-			if (o.driverClass != null && o.driverClass.equals(this.driverClass))
-			{
-				return (this.name != null && this.name.equalsIgnoreCase(o.name));
-			}
-			else
-			{
-				return false;
-			}
+			return StringUtil.equalString(o.getId(), getId());
 		}
 		else if (other instanceof String)
 		{
-			return (this.driverClass != null && this.driverClass.equals(other));
+			return StringUtil.equalString(this.driverClass, (String)other);
 		}
 		else
 		{
@@ -494,7 +487,7 @@ public class DbDriver
 
 	protected String getId()
 	{
-		StringBuilder b = new StringBuilder(60);
+		StringBuilder b = new StringBuilder(driverClass == null ? name.length() : driverClass.length() + name.length() + 1);
 		b.append(driverClass == null ? "" : driverClass);
 		b.append('$');
 		b.append(name);
@@ -508,7 +501,7 @@ public class DbDriver
 
 	public int compareTo(DbDriver o)
 	{
-		return getDescription().compareTo(o.getDescription());
+		return getId().compareTo(o.getId());
 	}
 
 }

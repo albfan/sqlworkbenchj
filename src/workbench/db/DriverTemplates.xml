@@ -192,13 +192,13 @@
   <void method="add">
    <object class="workbench.db.DbDriver">
     <void property="driverClass">
-     <string>com.sybase.jdbc2.jdbc.SybDriver</string>
+     <string>com.sybase.jdbc3.jdbc.SybDriver</string>
     </void>
     <void property="library">
-     <string>jconn2.jar</string>
+     <string>jconn3.jar</string>
     </void>
     <void property="name">
-     <string>Sybase jConnect</string>
+     <string>Sybase jConnect 6.0</string>
     </void>
     <void property="sampleUrl">
      <string>jdbc:sybase:Tds:machine-name:port-number</string>
