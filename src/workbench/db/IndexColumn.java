@@ -66,7 +66,7 @@ public class IndexColumn
 		if (other instanceof IndexColumn)
 		{
 			IndexColumn otherCol = (IndexColumn)other;
-			return StringUtil.equalString(column, otherCol.column) && getDirection().equals(otherCol.getDirection());
+			return StringUtil.equalString(column, otherCol.column) && StringUtil.equalStringIgnoreCase(getDirection(), otherCol.getDirection());
 		}
 		else
 		{

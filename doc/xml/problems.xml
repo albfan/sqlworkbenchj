@@ -448,7 +448,7 @@ SELECT 42 FROM dual;</programlisting>
 		<section id="pg-result-buffer">
 			<title>WbExport using a lot of memory</title>
       <para>
-        The Postgres JDBC driver defaults to buffer the results obtained from the database
+        The PostgreSQL JDBC driver defaults to buffer the results obtained from the database
         in memory before returning them to the application. This means that when retrieving
         data, &wb-productname; uses (for a short amount of time) twice as much memory as really
         needed. This also means that <link linkend="command-export">WbExport</link> will
@@ -471,7 +471,7 @@ SELECT 42 FROM dual;</programlisting>
 		<section id="pg-statement-savepoint">
 			<title>Getting the error: Current transaction is aborted</title>
 			<para>
-				Postgres - unlike other DBMS - marks a complete transaction as failed if
+				PostgreSQL - unlike other DBMS - marks a complete transaction as failed if
 				a single statement fails. In such a case the transaction cannot be committed, e.g.
 				consider the following script:
 			</para>
@@ -481,7 +481,7 @@ INSERT INTO person (id, firstname, lastname) VALUES (2, 'Ford', 'Prefect');
 COMMIT;</programlisting>
 			<para>
 				As the ID column is the primary key, the third insert will fail with a unique key violation.
-				In Postgres you cannot commit anyway and thus persist the first two <literal>INSERT</literal>s.
+				In PostgreSQL you cannot commit anyway and thus persist the first two <literal>INSERT</literal>s.
 			</para>
 			<para>
 				This problem can only be solved by using a SAVEPOINT before and after each

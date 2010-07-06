@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-06-22">
+  <release build="-1" date="2010-07-06">
     <entry dev-build="9" type="enh">A new option in the DataPumper is available to automatically select a matching entry in the target table dropdown when the source table is changed</entry>
     <entry dev-build="8" type="enh">Changesets for WbRunLB can now also be selected by specifying an author (not only the ID)</entry>
     <entry dev-build="8" type="enh">WbExport now only exports TABLEs (views, synonyms and similar objects where included by default until now). To include other types than tables, a new parameter -types has been added.</entry>

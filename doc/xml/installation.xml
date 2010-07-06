@@ -577,7 +577,7 @@ another_variable=24</programlisting>
       <para>Example (on one line):</para>
 
       <programlisting>java -jar sqlworkbench.jar
-     -profile='Postgres - Test'
+     -profile='PostgreSQL - Test'
      -script='test.sql'</programlisting>
       <para>
         In this case the file <literal>WbProfiles.xml</literal> must be in the current
@@ -590,7 +590,7 @@ another_variable=24</programlisting>
         need to specify the profile group as well (in one line):
       </para>
       <programlisting>java -jar sqlworkbench.jar
-     -profile='Postgres - Test'
+     -profile='PostgreSQL - Test'
      -profilegroup='Local'
      -script='test.sql'</programlisting>
     </section>

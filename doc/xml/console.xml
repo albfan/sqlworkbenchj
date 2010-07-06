@@ -289,8 +289,8 @@ SQL></screen>
 					(<literal>-url</literal>, <literal>-username</literal> and so on) either on the commandline
 					or through  <literal>WbConnect</literal>.
 				</para>
-				<screen>SQL> WbStoreProfile {MyGroup}/Postgres Production
-Profile '{MyGroup}/Postgres Production' added
+				<screen>SQL> WbStoreProfile {MyGroup}/PostgreSQL Production
+Profile '{MyGroup}/PostgreSQL Production' added
 SQL> </screen>
 				<para>
 					As the profile name is the only parameter to this command, no quoting is necessary.

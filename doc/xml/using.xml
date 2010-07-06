@@ -616,7 +616,7 @@ WHERE id=42;</programlisting>
 				Alternatively you can add a new macro through
 				<menuchoice><guimenu>Macros</guimenu><guimenuitem>Manage Macros...</guimenuitem></menuchoice>.
 				This dialog can also be used to delete and and edit existing macros.
-				You can put macros into separate groups (e.g. one for Postgres macros, one for Oracle etc).
+				You can put macros into separate groups (e.g. one for PostgreSQL macros, one for Oracle etc).
 				If you have only one group defined (or only one visible group), all macros of that group
 				will be listed in the menu directly. If you define more than one group, each group will appear
 				as a separate sub-menu.
@@ -857,7 +857,7 @@ SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY);</programlisting>
 		<section id="server-msg-pg">
 			<title>PostgreSQL</title>
 			<para>
-				Postgres supports sending of messages to the client using the <literal>RAISE</literal> statement in PL/pgSQL.
+				PostgreSQL supports sending of messages to the client using the <literal>RAISE</literal> statement in PL/pgSQL.
         The following function will display a result set (with the number 42) and the message area will contain the
         message <emphasis>Thinking hard...</emphasis>
 			</para>

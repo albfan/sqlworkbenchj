@@ -541,7 +541,7 @@
               <para>
                 The syntax to specify a SELECT statement is similar to a function call:
                 <literal>-constantValues="$@{SELECT type_id FROM type_definition WHERE type_name = $4"</literal> where <literal>$4</literal>
-                references the fourth column from the input file.
+                references the fourth column from the input file. The first column is $1 (not $0).
               </para>
               <para>
                 The parameter for the SELECT statement do not need to be quoted as internally a prepared statement is used. However
@@ -987,9 +987,9 @@
   <section id="wbimport-example-2">
     <title>Excluding input columns from the import</title>
     <programlisting>WbImport -file=c:/temp/contacts.txt
-       -table=person
-       -filecolumns=lastname,firstname,$wb_skip$,birthday
-       -dateformat="yyyy-MM-dd";</programlisting>
+         -table=person
+         -filecolumns=lastname,firstname,$wb_skip$,birthday
+         -dateformat="yyyy-MM-dd";</programlisting>
 
      <para>
        This will import a file with four columns. The third column in the file
@@ -1080,7 +1080,7 @@
 
     <programlisting>WbImport -sourceDir=c:/data/backup
          -extension=txt
-				 -table=person
+         -table=person
          -header=true</programlisting>
 
     <para>
@@ -1116,12 +1116,13 @@
     <para>
       To import this file, the following statement can be used:
     </para>
-    <programlisting>WbImport -file=contacts.txt
-         -type=text
-         -header=true
-         -table=contact
-         -importColumns=contact_id, first_name, last_name
-         -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $3}"
+    <programlisting>WbImport
+  -file=contacts.txt
+  -type=text
+  -header=true
+  -table=contact
+  -importColumns=contact_id, first_name, last_name
+  -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $4}"
          </programlisting>
     <para>
       For every row from the input file, &wb-productname; will run the specified SELECT statement. The value of the first column
@@ -1129,7 +1130,8 @@
       statement will use the value of the third column of the row that is currently being inserted as the value for the WHERE condition.
     </para>
     <para>
-      You must use the -importColumns parameter as well to make sure the type_name column is not processed!
+      You must use the -importColumns parameter as well to make sure the type_name column is not processed! As an alternative
+      you can also use <literal>-fileColumns=contact_id, first_name, last_name, $wb_skip$</literal> instead of -importColumns.
     </para>
     <note>
       <para>The "placeholders" with the column index must not be quoted (e.g. '$1' for a character column will not work)!</para>
@@ -1137,18 +1139,20 @@
     <para>
       If the column <literal>contact_id</literal> should be populated by a sequence, the above statement can be extended to
       include a function call to retrieve the sequence value (PostgreSQL syntax:)
-      
     </para>
-    <programlisting>WbImport -file=contacts.txt
-         -type=text
-         -header=true
-         -table=contact
-         -importColumns=first_name, last_name
-         -constantValues="id=${nextval('contact_id_seq'::regclass)}"
-         -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $3}"
-         </programlisting>
+    
+    <programlisting>WbImport
+  -file=contacts.txt
+  -type=text
+  -header=true
+  -table=contact
+  -importColumns=first_name, last_name
+  -constantValues="id=${nextval('contact_id_seq'::regclass)}"
+  -constantValues="type_id=$@{SELECT type_id FROM contact_type WHERE type_name = $4}"</programlisting>
     <para>
-      As the ID column is now populated through a constant expression, it may not appear in the <literal>-importColumns</literal> list.
+      As the ID column is now populated through a constant expression, it may not appear in the <literal>-importColumns</literal> list. Again you
+      could alternatively use  <literal>-fileColumns=$wb_skip$, first_name, last_name, $wb_skip$</literal> to make sure the columns that
+      are populated through the -constantValue parameter are not taken from the input file.
     </para>
     
   </section>
@@ -1297,7 +1301,7 @@
 		</para>
 
 		<para>
-			To use insert/update or update/insert with Postgres, make sure you have
+			To use insert/update or update/insert with PostgreSQL, make sure you have
 			<link linkend="pg-statement-savepoint">enabled savepoints</link> for the import.
 		</para>
 	</section>

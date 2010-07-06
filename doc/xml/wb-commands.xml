@@ -1097,7 +1097,7 @@ END;
 
       <para>
         When using ref cursors in PostgreSQL, normally such a function can simply be used inside a SELECT
-        statement, e.g. <literal>SELECT * FROM refcursorfunc();</literal>. Unfortunately the Postgres JDBC driver
+        statement, e.g. <literal>SELECT * FROM refcursorfunc();</literal>. Unfortunately the PostgreSQL JDBC driver
         does not handle this correctly and you will not see the result set returned by the function.
       </para>
 

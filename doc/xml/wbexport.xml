@@ -70,7 +70,7 @@
    </para>
 
    <para>
-      Some JDBC drivers (e.g. Postgres, jTDS and the Microsoft Driver) read the full result obtained
+      Some JDBC drivers (e.g. PostgreSQL, jTDS and the Microsoft Driver) read the full result obtained
       from the database into memory. In that case, exporting large results might still require a lot
       of memory. Please refer to the chapter <link linkend="troubleshooting">Common problems</link>
       for details on how to configure the individual drivers if this happens to you.
@@ -722,7 +722,7 @@
 								file for Microsoft's <literal>bcp</literal> utility.
 								The format file has the same filename as the output file but with the ending <literal>.ctl</literal>
 								for Oracle and <literal>.fmt</literal> for SQL Server.
-								For Postgres, this will create the necessary <literal>COPY</literal>
+								For PostgreSQL, this will create the necessary <literal>COPY</literal>
 								syntax to import the generated text file. For DB2 this will create an IMPORT command
                 to import the exported data.
 							</para>
@@ -917,7 +917,7 @@
 							</para>
 							<para>
 								<emphasis role="bold"><literal>default</literal></emphasis> selects the creation of quoted date and timestamp
-								literals in ISO format (e.g. '2004-04-28'). Several DBMS support this format (e.g. Postgres, Microsoft SQL Server)
+								literals in ISO format (e.g. '2004-04-28'). Several DBMS support this format (e.g. PostgreSQL, Microsoft SQL Server)
 							</para>
 
 							<para>

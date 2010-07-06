@@ -19,7 +19,7 @@
 		At the top of the window, the current schema and/or catalog can be selected. Whether both dropdowns
 		are available depends on the current DBMS. For Microsoft SQL Server, both the schema and the database
 		can be changed. The labels next to the dropdown are retrieved from the JDBC driver and should reflect
-		the terms used for the current DBMS (Schema for Postgres and Oracle, Owner and Database for SQL Server,
+		the terms used for the current DBMS (Schema for PostgreSQL and Oracle, Owner and Database for SQL Server,
 		Database for MySQL).
 	</para>
   
@@ -454,7 +454,7 @@
 		</para>
 		<para>
 			To tell the DbExplorer to replace the retrieval of columns of type <literal>geometry</literal>
-			in Postgres with the above expression, the following line in <literal>workbench.settings</literal>
+			in PostgreSQL with the above expression, the following line in <literal>workbench.settings</literal>
 			is necessary:
 			<programlisting>workbench.db.postgres.selectexpression.geometry=astext(transform(${column},4326)) </programlisting>
 			For e.g. the table <literal>geo_table (id integer, geo_col geometry)</literal> &wb-productname;

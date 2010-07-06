@@ -252,7 +252,7 @@
       <para>Default values:
         <simplelist columns="1">
           <member><literal>.defaultt=view,table,system view,system table</literal></member>
-          <member><literal>.postgres=view,table,system view,system table,sequence</literal></member>
+          <member><literal>.postgresql=view,table,system view,system table,sequence</literal></member>
           <member><literal>.rdb=view,table,system,system view</literal></member>
         </simplelist>
 				The values in this property are not case-sensitiv (TABLE is the same as table)
@@ -283,7 +283,7 @@
       </para>
       <para>Default values:
         <simplelist columns="1">
-          <member>For postgres: <literal>text</literal></member>
+          <member>For PostgreSQL: <literal>text</literal></member>
           <member>For MySQL: <literal>longtext,tinytext,mediumtext</literal></member>
         </simplelist>
       </para>
@@ -1054,7 +1054,7 @@
 				Default values:
 				<simplelist columns="1">
 					<member><literal>.oracle=PUBLIC</literal></member>
-					<member><literal>.postgres=public</literal></member>
+					<member><literal>.postgresql=public</literal></member>
 					<member><literal>.rdb=*</literal></member>
 				</simplelist>
 			</para>

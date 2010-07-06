@@ -360,7 +360,7 @@
 		<para><emphasis role="bold">Executing several scripts with a cleanup and failure script:</emphasis></para>
 		<programlisting>java -jar sqlworkbench.jar
      -script='c:/scripts/script-1.sql','c:/scripts/script-2.sql',c:/scripts/script3.sql
-     -profile=Postgres
+     -profile=PostgreSQL
      -abortOnError=false
      -cleanupSuccess=commit.sql
      -cleanupError=rollback.sql</programlisting>
