@@ -24,6 +24,7 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="10" type="fix">WbSchemaDiff did not work when indexes were included (-includeIndex=true)</entry>
     <entry dev-build="10" type="fix">When the maximum number of backups for workspaces was reached, the newest backup was overwritten instead of the oldest</entry>
     <entry dev-build="10" type="fix">Auto completion of column names did not work for table or column names that contained spaces (and thus needed qutoes)</entry>
     <entry dev-build="10" type="fix">The width of the column&amp;s header was not evaluated correctly for all look and feels when optimizing width</entry>

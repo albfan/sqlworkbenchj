@@ -19,6 +19,7 @@ import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
+import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
@@ -232,5 +233,45 @@ public class WbDataDiffTest
 		{
 			stmt.executeUpdate("insert into person_address (address_id, person_id) values (" +i + ", " + i + ")");
 		}
+	}
+
+	public void _testMissingColumns()
+		throws Exception
+	{
+		setupConnections();
+
+		try
+		{
+			TestUtil.executeScript(source, "DROP ALL OBJECTS;\n"
+				+ "create table person (id integer primary key, name varchar(50), nickname varchar(50));\n"
+				+ "insert into person values (1, 'Arthur Dent', 'Earthling');\n"
+				+ "insert into person values (2, 'Zaphod Beeblebrox', 'President');\n"
+				+ "commit;\n");
+
+			TestUtil.executeScript(target, "DROP ALL OBJECTS;\n"
+				+ "create table person (id integer primary key, name varchar(50));\n"
+				+ "insert into person values (1, 'Arthur');\n"
+				+ "insert into person values (2, 'Zaphod Beeblebrox');\n"
+				+ "commit;\n");
+
+			StatementRunner runner = new StatementRunner();
+			runner.setBaseDir(util.getBaseDir());
+			util.emptyBaseDirectory();
+
+			WbFile main = new WbFile(util.getBaseDir(), "sync.sql");
+
+			String sql = "WbDataDiff -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -file=sync.sql -encoding=UTF8";
+			runner.runStatement(sql);
+			StatementRunnerResult result = runner.getResult();
+			assertTrue(result.isSuccess());
+			
+			assertTrue(main.exists());
+		}
+		finally
+		{
+			source.disconnect();
+			target.disconnect();
+		}
+
 	}
 }

@@ -48,7 +48,8 @@ public class SimpleLogger
 		messageFormat = messageFormat.replace("{source}", "%3$s");
 		messageFormat = messageFormat.replace("{message}", "%4$s");
 		messageFormat = messageFormat.replace("{error}", "%5$s");
-		showStackTrace = messageFormat.indexOf("{stacktrace}") > -1;
+		showStackTrace = messageFormat.indexOf("{stacktrace}") > -1; 
+		messageFormat = messageFormat.replace("{stacktrace}", "");
 	}
 
 	public void logToSystemError(boolean flag)
@@ -177,12 +178,8 @@ public class SimpleLogger
 		{
 			if (th != null)
 			{
-				String trace = (th == null ? "" : th.getMessage());
-				if (showStackTrace || this.level == LogLevel.debug)
-				{
-					trace = getStackTrace(th);
-				}
-				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, trace);
+				String error = ExceptionUtil.getDisplay(th, showStackTrace || this.level == LogLevel.debug);
+				return String.format(messageFormat, logLevel, new java.util.Date(), caller == null ? "" : caller, msg, error);
 			}
 			else
 			{
@@ -197,23 +194,4 @@ public class SimpleLogger
 		return msg;
 	}
 
-	private String getStackTrace(Throwable th)
-	{
-		if (th == null)
-		{
-			return StringUtil.EMPTY_STRING;
-		}
-		try
-		{
-			StringWriter sw = new StringWriter(2000);
-			PrintWriter pw = new PrintWriter(sw);
-			pw.println();
-			th.printStackTrace(pw);
-			return sw.toString();
-		}
-		catch (Exception ex)
-		{
-		}
-		return StringUtil.EMPTY_STRING;
-	}
 }

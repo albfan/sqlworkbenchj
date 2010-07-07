@@ -37,6 +37,7 @@ import workbench.storage.RowData;
 import workbench.storage.RowDataFactory;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.CaseInsensitiveComparator;
+import workbench.util.CollectionUtil;
 import workbench.util.MessageBuffer;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -241,12 +242,12 @@ public class TableDataDiff
 			}
 		}
 
-		if (pkColumns.size() == 0)
+		if (CollectionUtil.isEmpty(pkColumns))
 		{
 			throw new SQLException("No primary key found for table " + referenceTable);
 		}
 
-		this.tableToSync = this.toSync.getMetadata().findTable(tableToVerify);
+		tableToSync = this.toSync.getMetadata().findTable(tableToVerify);
 		if (tableToSync == null)
 		{
 			throw new SQLException("Target table " + tableToVerify.getTableName() + " not found!");
@@ -254,6 +255,7 @@ public class TableDataDiff
 		else
 		{
 			toSyncDef = this.toSync.getMetadata().getTableDefinition(tableToSync);
+			tableToSync = toSyncDef.getTable();
 		}
 	}
 
@@ -451,8 +453,9 @@ public class TableDataDiff
 		sql.append("SELECT ");
 		for (int i=0; i < info.getColumnCount(); i++)
 		{
-			if (i > 0) sql.append(',');
 			ColumnIdentifier targetCol = findTargetColumn(info.getColumn(i));
+			if (targetCol == null) continue;
+			if (i > 0) sql.append(',');
 			sql.append(targetCol.getColumnName(toSync));
 		}
 		sql.append(" FROM ");
