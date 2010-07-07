@@ -22,6 +22,7 @@ import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
+import workbench.util.MessageBuffer;
 import workbench.util.WbFile;
 
 /**
@@ -235,7 +236,7 @@ public class WbDataDiffTest
 		}
 	}
 
-	public void _testMissingColumns()
+	public void testMissingColumns()
 		throws Exception
 	{
 		setupConnections();
@@ -264,8 +265,21 @@ public class WbDataDiffTest
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertTrue(result.isSuccess());
-			
-			assertTrue(main.exists());
+			assertTrue(result.hasWarning());
+			CharSequence msg = result.getMessageBuffer();
+			assertNotNull(msg);
+			assertTrue(msg.toString().indexOf("The columns from the table PERSON do not match the columns of the target table PERSON") > -1);
+
+			util.emptyBaseDirectory();
+			sql = "WbDataDiff -referenceProfile=dataDiffTarget -targetProfile=dataDiffSource -file=sync.sql -encoding=UTF8";
+			runner.runStatement(sql);
+			result = runner.getResult();
+			assertTrue(result.isSuccess());
+			assertFalse(result.hasWarning());
+			msg = result.getMessageBuffer();
+			assertNotNull(msg);
+			assertTrue(msg.toString().indexOf("The columns from the table PERSON do not match the columns of the target table PERSON") == -1);
+
 		}
 		finally
 		{

@@ -342,9 +342,11 @@ VALUES
             You can subscribe to the <a href="wb_news.xml">RSS Feed</a> to receive information about new releases
         </p>
         <p>If you are having problems unzipping the distribution archive with WinZip, please read <a href="winzip.html">this</a>.</p>
+        <!--
         <p>
           Looking for a free entity relationship modeling tool? Try <a href="http://www.sqlpower.ca/page/architect">Power*Architect</a>.
         </p>
+        -->
         <p><a style="color:red" href="windows64.html">SQL Workbench/J and 64bit Windows versions</a>.</p>
         <p><a style="color:red" href="vista.html">A note to Windows Vista users</a>.</p>
         <p><a href="macos.html">A note to Mac OS X users</a></p>

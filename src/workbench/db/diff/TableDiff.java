@@ -16,14 +16,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import workbench.db.IndexDefinition;
 import workbench.db.TableConstraint;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
+import workbench.db.report.ForeignKeyDefinition;
 import workbench.db.report.ReportColumn;
 import workbench.db.report.ReportTable;
 import workbench.db.report.ReportTableGrants;
 import workbench.db.report.TagWriter;
+import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -100,7 +103,8 @@ public class TableDiff
 			{
 				ColumnDiff d = new ColumnDiff(refCols[i], tcol);
 				//d.setCompareComments(this.compareComments);
-				d.setCompareForeignKeys(this.diff.getIncludeForeignKeys());
+				boolean oldFormat = Settings.getInstance().getBoolProperty("workbench.tablediff.columnfk", false);
+				d.setCompareForeignKeys(oldFormat && this.diff.getIncludeForeignKeys());
 				d.setCompareJdbcTypes(diff.getCompareJdbcTypes());
 				d.setTagWriter(this.writer);
 				d.setIndent(myindent);
@@ -143,6 +147,9 @@ public class TableDiff
 		List<TableConstraint> modifiedConstraints = getModifiedConstraints();
 		List<TableConstraint> constraintsToDelete = getConstraintsToDelete();
 
+		List<ForeignKeyDefinition> missingFK = getMissingForeignKeys();
+		List<ForeignKeyDefinition> fkToDelete = getFKsToDelete();
+
 		List<TriggerDefinition> refTriggers = referenceTable.getTriggers();
 		List<TriggerDefinition> tarTriggers = targetTable.getTriggers();
 
@@ -154,10 +161,8 @@ public class TableDiff
 			triggersDifferent = trgDiff.hasChanges();
 		}
 
-		boolean constraintsAreEqual =
-			(missingConstraints.isEmpty() &&
-			modifiedConstraints.isEmpty() &&
-			constraintsToDelete.isEmpty());
+		boolean fksAreEqual = missingFK.isEmpty() && fkToDelete.isEmpty();
+		boolean constraintsAreEqual = missingConstraints.isEmpty() && modifiedConstraints.isEmpty() && constraintsToDelete.isEmpty();
 
 		List<String> refPk = this.referenceTable.getPrimaryKeyColumns();
 		List<String> tPk = this.targetTable.getPrimaryKeyColumns();
@@ -170,7 +175,7 @@ public class TableDiff
 		boolean indexDifferent = indexDiff != null && indexDiff.length() > 0;
 
 		if (colDiff.length() == 0 && !rename && colsToBeAdded.isEmpty()
-			  && colsToBeRemoved.isEmpty() && refPk.equals(tPk) && constraintsAreEqual
+			  && colsToBeRemoved.isEmpty() && refPk.equals(tPk) && constraintsAreEqual && fksAreEqual
 				&& !indexDifferent && !grantDifferent && !triggersDifferent)
 		{
 			return result;
@@ -245,6 +250,12 @@ public class TableDiff
 			writer.appendCloseTag(result, myindent, ReportTable.TAG_TABLE_CONSTRAINTS);
 		}
 
+		if (!fksAreEqual)
+		{
+			writeFKs(fkToDelete, result, "drop-foreign-keys", myindent);
+			writeFKs(missingFK, result, "add-foreign-keys", myindent);
+		}
+		
 		if (indexDifferent)
 		{
 			result.append(indexDiff);
@@ -262,6 +273,92 @@ public class TableDiff
 
 		writer.appendCloseTag(result, this.indent, TAG_MODIFY_TABLE);
 		return result;
+	}
+
+	private ForeignKeyDefinition findFKByDefinition(Collection<ForeignKeyDefinition> fkDefs, ForeignKeyDefinition toFind)
+	{
+		for (ForeignKeyDefinition fk : fkDefs)
+		{
+			if (fk.isDefinitionEqual(toFind)) return fk;
+		}
+		return null;
+	}
+	
+	private List<ForeignKeyDefinition> getMissingForeignKeys()
+	{
+		if (!diff.getIncludeForeignKeys()) Collections.emptyList();
+		Collection<ForeignKeyDefinition> sourceFK = referenceTable.getForeignKeys().values();
+		Collection<ForeignKeyDefinition> targetFK = targetTable.getForeignKeys().values();
+
+		List<ForeignKeyDefinition> missing = new ArrayList<ForeignKeyDefinition>();
+		for (ForeignKeyDefinition fk : sourceFK)
+		{
+			ForeignKeyDefinition other = findFKByDefinition(targetFK, fk);
+			if (other == null)
+			{
+				missing.add(fk);
+			}
+		}
+		return missing;
+	}
+
+//	private	List<ForeignKeyDefinition> getModifiedForeignKeys()
+//	{
+//		if (!diff.getIncludeForeignKeys()) Collections.emptyList();
+//		Map<String, ForeignKeyDefinition> refFK = referenceTable.getForeignKeys();
+//		Map<String, ForeignKeyDefinition> targetFK = targetTable.getForeignKeys();
+//
+//		List<ForeignKeyDefinition> modified = new ArrayList<ForeignKeyDefinition>();
+//		for (Map.Entry<String, ForeignKeyDefinition> entry : refFK.entrySet())
+//		{
+//			ForeignKeyDefinition rFK = entry.getValue();
+//			ForeignKeyDefinition other = targetFK.get(entry.getKey());
+//			if (other != null && !other.isDefinitionEqual(rFK))
+//			{
+//				modified.add(rFK);
+//			}
+//		}
+//		return modified;
+//	}
+
+	private List<ForeignKeyDefinition> getFKsToDelete()
+	{
+		if (!diff.getIncludeForeignKeys()) Collections.emptyList();
+		Collection<ForeignKeyDefinition> sourceFK = referenceTable.getForeignKeys().values();
+		Collection<ForeignKeyDefinition> targetFK = targetTable.getForeignKeys().values();
+
+		List<ForeignKeyDefinition> toDelete = new ArrayList<ForeignKeyDefinition>();
+		for (ForeignKeyDefinition fk : targetFK)
+		{
+			ForeignKeyDefinition other = findFKByDefinition(sourceFK, fk);
+			if (other == null)
+			{
+				toDelete.add(fk);
+			}
+		}
+		return toDelete;
+	}
+
+	private void writeFKs(List<ForeignKeyDefinition> fks, StrBuffer result, String tag, StrBuffer mainIndent)
+	{
+		if (fks.isEmpty()) return;
+		writer.appendOpenTag(result, mainIndent, tag);
+		result.append('\n');
+		StrBuffer fkIndent = new StrBuffer(mainIndent);
+		fkIndent.append("  ");
+		StrBuffer fkDefIndent = new StrBuffer(fkIndent);
+		fkDefIndent.append("  ");
+
+		for (ForeignKeyDefinition fk : fks)
+		{
+			if (fk == null) continue;
+			StrBuffer xml = fk.getInnerXml(fkDefIndent);
+			writer.appendOpenTag(result, fkIndent, ForeignKeyDefinition.TAG_FOREIGN_KEY);
+			result.append('\n');
+			result.append(xml);
+			writer.appendCloseTag(result, fkIndent, ForeignKeyDefinition.TAG_FOREIGN_KEY);
+		}
+		writer.appendCloseTag(result, mainIndent, tag);
 	}
 
 

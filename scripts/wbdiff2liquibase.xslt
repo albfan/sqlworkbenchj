@@ -12,7 +12,7 @@
 
 <xsl:variable name="schema-owner">${schema.owner}</xsl:variable>
 
-<xsl:import href="liquibase_createtable.xslt"/>
+<xsl:import href="liquibase_common.xslt"/>
 
 <xsl:template match="/schema-diff">
   <databaseChangeLog 
@@ -56,7 +56,18 @@
             </xsl:if>
             
           </xsl:for-each> <!-- table columns -->
-          
+
+          <xsl:for-each select="drop-foreign-keys/foreign-key">
+            <xsl:variable name="fk-name" select="constraint-name"/>
+            <dropForeignKeyConstraint constraintName="{$fk-name}" baseTableName="{$table-name}"/>
+          </xsl:for-each>
+
+          <xsl:for-each select="add-foreign-keys/foreign-key">
+            <xsl:call-template name="add-fk">
+              <xsl:with-param name="tablename" select="$table-name"/>
+            </xsl:call-template>
+          </xsl:for-each>
+
         </xsl:for-each> <!-- alter tables -->
         
         <xsl:for-each select="drop-table/table-name">

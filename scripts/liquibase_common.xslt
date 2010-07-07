@@ -128,44 +128,10 @@
     now process all index definitions for this table 
   -->
   <xsl:for-each select="index-def">
-  
-    <xsl:variable name="index-name">
-      <xsl:value-of select="name"/>
-    </xsl:variable>
-    
-    <xsl:variable name="unique-flag">
-      <xsl:value-of select="unique"/>
-    </xsl:variable>
-
-    <!-- 
-       Primary keys with a single column are already defined in the table itself
-       so we only need to take care of those with more than one column
-    -->
-    <xsl:if test="primary-key='true' and count(column-list/column) &gt; 1">
-      <xsl:variable name="pk-columns">
-        <xsl:for-each select="column-list/column">
-          <xsl:value-of select="@name"/>
-          <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
-        </xsl:for-each> 
-      </xsl:variable>
-      
-      <addPrimaryKey tableName="{$table-name}" columnNames="{$pk-columns}" constraintName="{$index-name}"/>
-    </xsl:if>
-            
-    <xsl:if test="primary-key='false'">
-      <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}" schemaName="{$schema-owner}" tablespace="{$index-space}">
-      
-        <xsl:for-each select="column-list/column">
-          <column>
-            <xsl:attribute name="name">
-              <xsl:value-of select="@name"/>
-            </xsl:attribute>
-          </column>
-        </xsl:for-each> <!-- index columns -->
-        
-      </createIndex>
-   </xsl:if>
-    
+    <xsl:call-template name="create-index">
+       <xsl:with-param name="table-name" select="$table-name"/>
+       <xsl:with-param name="tbl-space" select="$index-space"/>
+    </xsl:call-template>
   </xsl:for-each> <!-- table index -->
   
   <xsl:for-each select="table-constraints/constraint-definition[@type='check']">
@@ -177,6 +143,73 @@
   
 </xsl:template>
   
+<xsl:template name="create-index">
+  <xsl:param name="table-name"/>
+  <xsl:param name="tbl-space"/>
+  
+  <xsl:variable name="index-name">
+    <xsl:value-of select="name"/>
+  </xsl:variable>
+
+  <xsl:variable name="unique-flag">
+    <xsl:value-of select="unique"/>
+  </xsl:variable>
+
+  <!--
+     Primary keys with a single column are already defined in the table itself
+     so we only need to take care of those with more than one column
+  -->
+  <xsl:if test="primary-key='true' and count(column-list/column) &gt; 1">
+    <xsl:variable name="pk-columns">
+      <xsl:for-each select="column-list/column">
+        <xsl:value-of select="@name"/>
+        <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
+      </xsl:for-each>
+    </xsl:variable>
+
+    <addPrimaryKey tableName="{$table-name}" columnNames="{$pk-columns}" constraintName="{$index-name}"/>
+  </xsl:if>
+
+  <xsl:if test="primary-key='false'">
+    <createIndex indexName="{$index-name}" tableName="{$table-name}" unique="{$unique-flag}" schemaName="{$schema-owner}" tablespace="{$tbl-space}">
+
+    <xsl:for-each select="column-list/column">
+      <column>
+        <xsl:attribute name="name">
+          <xsl:value-of select="@name"/>
+        </xsl:attribute>
+      </column>
+    </xsl:for-each> <!-- index columns -->
+    </createIndex>
+  </xsl:if>
+</xsl:template>
+
+<xsl:template name="add-fk">
+  <xsl:param name="tablename"/>
+  
+  <xsl:variable name="fk-name" select="constraint-name"/>
+  <xsl:variable name="referenced-table" select="references/table-name"/>
+  
+  <xsl:variable name="base-columns">
+    <xsl:for-each select="source-columns/column">
+      <xsl:copy-of select="."/>
+      <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
+    </xsl:for-each>
+  </xsl:variable>
+
+  <xsl:variable name="referenced-columns">
+    <xsl:for-each select="referenced-columns/column">
+      <xsl:copy-of select="."/>
+      <xsl:if test="position() &lt; last()"><xsl:text>,</xsl:text></xsl:if>
+    </xsl:for-each>
+  </xsl:variable>
+
+  <addForeignKeyConstraint constraintName="{$fk-name}"
+                           baseTableName="{$tablename}"
+                           baseColumnNames="{$base-columns}"
+                           referencedTableName="{$referenced-table}"
+                           referencedColumnNames="{$referenced-columns}"/>
+</xsl:template>
 
 <!-- 
   Map jdbc data types (from java.sql.Types) to a proper data type

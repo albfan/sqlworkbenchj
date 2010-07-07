@@ -207,7 +207,7 @@ public class ForeignKeyDefinition
 		}
 	}
 	
-	public boolean isDefinitionEquals(ForeignKeyDefinition ref)
+	public boolean isDefinitionEqual(ForeignKeyDefinition ref)
 	{
 		try
 		{
@@ -235,7 +235,7 @@ public class ForeignKeyDefinition
 	{
 		try
 		{
-			return isDefinitionEquals(ref) && isNameEqual(ref);
+			return isDefinitionEqual(ref) && isNameEqual(ref);
 		}
 		catch (Exception e)
 		{

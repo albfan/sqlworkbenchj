@@ -44,6 +44,7 @@ public class ColumnReference
 	{
 		if (this.fkDefinition != null) fkDefinition.setCompareFKRules(flag);
 	}
+
 	public ReportTable getForeignTable()
 	{
 		return fkDefinition.getForeignTable();
@@ -129,7 +130,7 @@ public class ColumnReference
 	
 	public boolean isFkDefinitionEqual(ColumnReference ref)
 	{
-		return this.fkDefinition.isDefinitionEquals(ref.fkDefinition);
+		return this.fkDefinition.isDefinitionEqual(ref.fkDefinition);
 	}
 
 }

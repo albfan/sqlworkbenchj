@@ -105,6 +105,20 @@
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
 
+      <xsl:for-each select="drop-foreign-keys/foreign-key">
+        <xsl:call-template name="drop-fk">
+          <xsl:with-param name="tablename" select="$table"/>
+        </xsl:call-template>
+        <xsl:value-of select="$newline"/>
+      </xsl:for-each>
+
+      <xsl:for-each select="add-foreign-keys/foreign-key">
+        <xsl:call-template name="add-fk">
+          <xsl:with-param name="tablename" select="$table"/>
+        </xsl:call-template>
+        <xsl:value-of select="$newline"/>
+      </xsl:for-each>
+
     </xsl:for-each>
 
     <xsl:for-each select="/schema-diff/drop-view">
@@ -128,6 +142,47 @@
   
   </xsl:template>
 
+  <xsl:template name="drop-fk">
+     <xsl:param name="tablename"/>
+    <xsl:text>ALTER TABLE </xsl:text>
+    <xsl:value-of select="$tablename"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>  DROP CONSTRAINT </xsl:text>
+    <xsl:value-of select="constraint-name"/>
+    <xsl:text>;</xsl:text>
+    <xsl:value-of select="$newline"/>
+  </xsl:template>
+
+  <xsl:template name="add-fk">
+     <xsl:param name="tablename"/>
+    <xsl:text>ALTER TABLE </xsl:text>
+    <xsl:value-of select="$tablename"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>  ADD CONSTRAINT </xsl:text>
+    <xsl:value-of select="constraint-name"/>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>  FOREIGN KEY (</xsl:text>
+    <xsl:for-each select="source-columns/column">
+        <xsl:copy-of select="."/>
+        <xsl:if test="position() &lt; last()">
+          <xsl:text>, </xsl:text>
+        </xsl:if>
+    </xsl:for-each>
+    <xsl:text>)</xsl:text>
+    <xsl:value-of select="$newline"/>
+    <xsl:text>  REFERENCES </xsl:text>
+    <xsl:value-of select="references/table-name"/>
+    <xsl:text> (</xsl:text>
+    <xsl:for-each select="referenced-columns/column">
+        <xsl:copy-of select="."/>
+        <xsl:if test="position() &lt; last()">
+          <xsl:text>, </xsl:text>
+        </xsl:if>
+    </xsl:for-each>
+    <xsl:text>);</xsl:text>
+    <xsl:value-of select="$newline"/>
+  </xsl:template>
+  
   <xsl:template match="proc-def">
     <xsl:value-of select="normalize-space(proc-source)"/>
     <xsl:value-of select="$newline"/>

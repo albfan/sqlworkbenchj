@@ -84,8 +84,23 @@ public class SchemaDiffTest
 		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON']/modify-column[@name='FIRSTNAME']/dbms-data-type");
 		assertEquals("Firstname column not changed", "VARCHAR(100)", value);
 
-		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/modify-column[@name='ADDRESS_ID']/add-reference/table-name");
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-foreign-keys/foreign-key)");
+		assertEquals("Wrong FK count", "1", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-foreign-keys/foreign-key/references/table-name");
 		assertEquals("FK to address not added", "ADDRESS", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-foreign-keys/foreign-key/source-columns/column[1]");
+		assertEquals("Wrong FK source column", "ADDRESS_ID", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-foreign-keys/foreign-key/source-columns/column)");
+		assertEquals("Wrong FK source column count", "1", value);
+
+		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-foreign-keys/foreign-key/referenced-columns/column[1]");
+		assertEquals("Wrong FK target column", "ADDRESS_ID", value);
+
+		value = TestUtil.getXPathValue(xml, "count(/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-foreign-keys/foreign-key/referenced-columns/column)");
+		assertEquals("Wrong FK target column count", "1", value);
 
 		value = TestUtil.getXPathValue(xml, "/schema-diff/modify-table[@name='PERSON_ADDRESS']/add-index/index-def/index-expression");
 		assertEquals("Index for address_id not added", "ADDRESS_ID ASC", value);

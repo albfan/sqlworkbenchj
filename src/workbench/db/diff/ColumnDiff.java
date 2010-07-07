@@ -37,7 +37,6 @@ public class ColumnDiff
 	public static final String TAG_ADD_FK = "add-reference";
 	public static final String TAG_RENAME_FK = "rename-reference";
 	
-	// Use a ReportColumn for future FK reference diff...
 	private ReportColumn referenceColumn;
 	private ReportColumn targetColumn;
 	private StrBuffer indent;

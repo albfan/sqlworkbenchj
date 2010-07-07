@@ -16,6 +16,7 @@ import java.io.Writer;
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -258,6 +259,7 @@ public class ReportTable
 				if (def == null)
 				{
 					def = new ForeignKeyDefinition(fkname);
+					def.setCompareFKRules(true);
 					def.setDeleteRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
 					def.setUpdateRuleValue(ds.getValueAsInt(i, FKHandler.COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE, DatabaseMetaData.importedKeyNoAction));
 					def.setDeleteRule(ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_DELETE_RULE));
@@ -269,7 +271,7 @@ public class ReportTable
 				String colExpr = ds.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
 				String reftable = null;
 				String refcolumn = null;
-				int pos = colExpr.lastIndexOf(".");
+				int pos = colExpr.lastIndexOf('.');
 				if (pos  > -1)
 				{
 					reftable = colExpr.substring(0, pos);
@@ -285,6 +287,11 @@ public class ReportTable
 		}
 	}
 
+	public Map<String, ForeignKeyDefinition> getForeignKeys()
+	{
+		return foreignKeys;
+	}
+	
 	/**
 	 * Find a column witht the given name.
 	 */
@@ -326,10 +333,7 @@ public class ReportTable
 			}
 		};
 		List<ReportColumn> result = new ArrayList<ReportColumn>(columns.length);
-		for (ReportColumn col : columns)
-		{
-			result.add(col);
-		}
+		result.addAll(Arrays.asList(columns));
 		Collections.sort(result, comp);
 		return result;
 	}

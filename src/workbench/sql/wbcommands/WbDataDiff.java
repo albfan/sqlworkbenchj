@@ -254,6 +254,7 @@ public class WbDataDiff
 					else
 					{
 						result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffNoTableMatch", refTable.getTableName(), targetTable.getTableName()));
+						result.setWarning(true);
 					}
 				}
 				finally
