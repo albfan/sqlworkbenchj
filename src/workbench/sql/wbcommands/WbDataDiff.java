@@ -247,8 +247,14 @@ public class WbDataDiff
 				{
 					dataDiff.setOutputWriters(updates, inserts, nl, encoding);
 					dataDiff.setBaseDir(outputDir);
-					dataDiff.setTableName(refTable, targetTable);
-					dataDiff.doSync();
+					if (dataDiff.setTableName(refTable, targetTable))
+					{
+						dataDiff.doSync();
+					}
+					else
+					{
+						result.addMessage(ResourceMgr.getFormattedString("ErrDataDiffNoTableMatch", refTable.getTableName(), targetTable.getTableName()));
+					}
 				}
 				finally
 				{

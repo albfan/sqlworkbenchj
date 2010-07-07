@@ -100,8 +100,8 @@ public class TableDataDiff
 	public TableDataDiff(WbConnection original, WbConnection compareTo)
 		throws SQLException
 	{
-		this.toSync = compareTo;
-		this.reference = original;
+		toSync = compareTo;
+		reference = original;
 		formatter = new SqlLiteralFormatter(toSync);
 		formatter.setDateLiteralType("jdbc");
 		chunkSize = Settings.getInstance().getSyncChunkSize();
@@ -213,7 +213,6 @@ public class TableDataDiff
 		this.encoding = encoding;
 	}
 
-
 	/**
 	 * Define the tables to be compared.
 	 *
@@ -222,12 +221,12 @@ public class TableDataDiff
 	 * @throws java.sql.SQLException if the refTable does not have a primary key
 	 * or the tableToVerify is not found
 	 */
-	public void setTableName(TableIdentifier refTable, TableIdentifier tableToVerify)
+	public boolean setTableName(TableIdentifier refTable, TableIdentifier tableToVerify)
 		throws SQLException
 	{
 		firstUpdate = true;
 		firstInsert = true;
-		this.referenceTable = this.reference.getMetadata().findSelectableObject(refTable);
+		referenceTable = this.reference.getMetadata().findSelectableObject(refTable);
 		if (referenceTable == null)
 		{
 			throw new SQLException("Reference table " + refTable.getTableName() + " not found!");
@@ -257,6 +256,17 @@ public class TableDataDiff
 			toSyncDef = this.toSync.getMetadata().getTableDefinition(tableToSync);
 			tableToSync = toSyncDef.getTable();
 		}
+
+		boolean columnMatch = true;
+		for (ColumnIdentifier col : cols)
+		{
+			if (findTargetColumn(col) == null)
+			{
+				columnMatch = false;
+				LogMgr.logError("TableDataDiff.setTableName()", "Reference column " + col.getColumnName() + " not found in target table!", null);
+			}
+		}
+		return columnMatch;
 	}
 
 	public void cancel()
