@@ -24,6 +24,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -94,6 +95,12 @@ public class PostgresTypeReader
 		}
 
 		select += " ORDER BY TABLE_TYPE,TABLE_SCHEM,TABLE_NAME ";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("PostgresTypeReader.extendObjectList()", "Using SQL: " + select);
+		}
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		try

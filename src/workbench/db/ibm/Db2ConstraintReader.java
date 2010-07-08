@@ -19,7 +19,7 @@ import workbench.db.AbstractConstraintReader;
  * Constraint reader for the Derby database
  * @author  Thomas Kellerer
  */
-public class Db2ConstraintReader 
+public class Db2ConstraintReader
 	extends AbstractConstraintReader
 {
 	private static final String HOST_TABLE_SQL = "select checkname, '('||checkcondition||')' \n" +
@@ -33,7 +33,7 @@ public class Db2ConstraintReader
 					 " where cons.table_name = ? " +
 					 " and cons.table_schema = ?";
 
-	
+
 	private static final String LUW_TABLE_SQL = "select cons.constname, '('||cons.text||')' \n" +
 					 "from syscat.checks cons \n" +
 					 "where type <> 'S' " +
@@ -44,7 +44,7 @@ public class Db2ConstraintReader
 	private final boolean isAS400; // aka iSeries
 
 	private Pattern sysname = Pattern.compile("^SQL[0-9]+");
-	
+
 	public Db2ConstraintReader(String dbid)
 	{
 		isHostDB2 = dbid.equals("db2h");
@@ -63,14 +63,14 @@ public class Db2ConstraintReader
 	{
 		return null;
 	}
-	
-	public String getTableConstraintSql() 
+
+	public String getTableConstraintSql()
 	{
 		if (isHostDB2) return HOST_TABLE_SQL;
 		if (isAS400) return AS400_TABLE_SQL;
 		return LUW_TABLE_SQL;
 	}
-	
+
 	public int getIndexForTableNameParameter()
 	{
 		return 1;

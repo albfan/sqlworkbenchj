@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-07-06">
+    <entry dev-build="10" type="enh">For MySQL table comments are now shown in the DbExplorer.</entry>
     <entry dev-build="10" type="enh">WbDataDiff now outputs differences for foreign key in their own tag listing all FK columns instead of listing the foreign key as a modification for each column.</entry>
     <entry dev-build="9" type="enh">A new option in the DataPumper is available to automatically select a matching entry in the target table dropdown when the source table is changed</entry>
     <entry dev-build="8" type="enh">Changesets for WbRunLB can now also be selected by specifying an author (not only the ID)</entry>
@@ -59,7 +60,7 @@
     <entry dev-build="9" type="enh">The argument parser for Workbench specific commands has been changed in order to recognize empty values (e.g. -replaceWith=' ') Existing scripts should work, but it could be that some combinations of parameter values are not covered by my tests. So please verify that your scripts still work with the new version.</entry>
     <entry dev-build="9" type="enh">A new option for WbExport (-replaceValues) is available to replace text (using regular expressions) in all character columns during export.</entry>
     <entry dev-build="8" type="enh">For Oracle the DbExplorer will now also show OBJECT TYPEs</entry>
-    <entry dev-build="6" type="enh">For DB2 the list of procedures is no long retrieved through the driver, so that functions will also be shown in the DbExplorer.</entry>
+    <entry dev-build="6" type="enh">For DB2 the list of procedures is no longer retrieved through the driver, so that functions will also be shown in the DbExplorer.</entry>
     <entry dev-build="6" type="enh">When using a JDBC 4.0 compliant driver the table definition in the DbExplorer will now also display the IS_AUTOINCREMENT flag. (with pre-JDBC 4.0 drivers the column will always display NO)</entry>
     <entry dev-build="6" type="enh">For SQL Server, column and table remarks that are defined through sp_addextendedproperty() are now retrieved and displayed in the DbExplorer.</entry>
     <entry dev-build="6" type="enh">Computed/Virtual columns are now shown in a table's SQL for Firebird, H2 Database, HSQLDB 2.0, Oracle 11g, DB2 (LUW) and SQL Server 2005</entry>

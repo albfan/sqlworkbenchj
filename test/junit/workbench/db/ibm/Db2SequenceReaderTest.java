@@ -30,7 +30,7 @@ public class Db2SequenceReaderTest
 {
 
 	private WbConnection db;
-	
+
 	public Db2SequenceReaderTest(String testName)
 	{
 		super(testName);
@@ -91,9 +91,9 @@ public class Db2SequenceReaderTest
 		db.disconnect();
 	}
 
-	public void testGetSequences()
+	public void testLUW()
 	{
-		Db2SequenceReader reader = new Db2SequenceReader(db);
+		Db2SequenceReader reader = new Db2SequenceReader(db, "db2");
 		reader.setQuoteKeyword(true);
 		List<SequenceDefinition> result = reader.getSequences("FAKE_DB2", null);
 		Collections.sort(result, new Comparator<DbObject>()
@@ -103,7 +103,33 @@ public class Db2SequenceReaderTest
 				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
 			}
 		});
-		
+
+		assertNotNull(result);
+		assertEquals(2, result.size());
+		assertEquals("SEQ_AAA", result.get(0).getSequenceName());
+		assertEquals("SEQ_BBB", result.get(1).getSequenceName());
+
+		CharSequence sql = result.get(0).getSource();
+		assertNotNull(sql);
+		String source = sql.toString();
+
+		assertTrue(source.startsWith("CREATE SEQUENCE"));
+		assertTrue(source.indexOf("COMMENT ON SEQUENCE SEQ_AAA IS 'aaa comment'") > -1);
+	}
+
+	public void testDB2Host()
+	{
+		Db2SequenceReader reader = new Db2SequenceReader(db, "db2h");
+		reader.setQuoteKeyword(true);
+		List<SequenceDefinition> result = reader.getSequences("FAKE_DB2", null);
+		Collections.sort(result, new Comparator<DbObject>()
+		{
+			public int compare(DbObject o1, DbObject o2)
+			{
+				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
+			}
+		});
+
 		assertNotNull(result);
 		assertEquals(2, result.size());
 		assertEquals("SEQ_AAA", result.get(0).getSequenceName());

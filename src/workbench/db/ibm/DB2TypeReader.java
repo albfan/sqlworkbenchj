@@ -26,6 +26,7 @@ import workbench.db.ObjectListEnhancer;
 import workbench.db.ObjectListExtender;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -69,15 +70,6 @@ public class DB2TypeReader
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
 	{
-//		int count = result.getRowCount();
-//		for (int row=0; row < count; row++)
-//		{
-//			String type = result.getValueAsString(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE);
-//			if (type == null)
-//			{
-//				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, "TYPE");
-//			}
-//		}
 	}
 
 	@Override
@@ -135,6 +127,11 @@ public class DB2TypeReader
 		}
 
 		select += " ORDER BY typeschema, typename ";
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("DB2TypeReader.getTypes()", "Using SQL: " + select);
+		}
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		try
@@ -161,7 +158,7 @@ public class DB2TypeReader
 		}
 		return result;
 	}
-	
+
 	@Override
 	public List<String> supportedTypes()
 	{
@@ -270,6 +267,12 @@ public class DB2TypeReader
 		sql += " WHERE typename = '" + type.getObjectName() + "' \n";
 		sql += " AND typeschema = '" + type.getSchema() + "' \n";
 		sql += " ORDER BY ordinal";
+
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logInfo("DB2TypeReader.getAttributes()", "Using SQL: " + sql);
+		}
+
 		Statement stmt = null;
 		ResultSet rs = null;
 		List<ColumnIdentifier> result = new ArrayList<ColumnIdentifier>(type.getNumberOfAttributes());
