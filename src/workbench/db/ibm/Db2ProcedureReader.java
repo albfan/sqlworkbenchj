@@ -33,10 +33,10 @@ public class Db2ProcedureReader
 {
 	private boolean useJDBC;
 
-	public Db2ProcedureReader(WbConnection conn)
+	public Db2ProcedureReader(WbConnection conn, String dbID)
 	{
 		super(conn);
-		useJDBC = conn.getMetadata().getDbId().equals("db2i");
+		useJDBC = dbID.equals("db2i");
 	}
 
 	@Override

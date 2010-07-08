@@ -38,16 +38,7 @@ public class Db2SequenceReader
 	private final String dbid;
 	private boolean quoteKeyword;
 
-	public Db2SequenceReader(WbConnection conn)
-	{
-		this.connection = conn;
-		dbid = conn.getMetadata().getDbId();
-	}
-
-	/**
-	 * For testing purposes only!
-	 */
-	Db2SequenceReader(WbConnection conn, String useId)
+	public Db2SequenceReader(WbConnection conn, String useId)
 	{
 		this.connection = conn;
 		dbid = useId;
@@ -74,7 +65,17 @@ public class Db2SequenceReader
 
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
-		String name = ds.getValueAsString(row, "SEQNAME");
+		String name = null;
+		// When running the unit test, H2 will return SEQNAME as the column alias and NAME as the column name
+		// so we need to check for this here.
+		if (ds.getColumnIndex("SEQNAME") > -1)
+		{
+			name = ds.getValueAsString(row, "SEQNAME");
+		}
+		else if (ds.getColumnIndex("NAME") > -1)
+		{
+			name = ds.getValueAsString(row, "NAME");
+		}
 		SequenceDefinition result = new SequenceDefinition(null, name);
 		result.setSequenceProperty("START", ds.getValue(row, "START"));
 		result.setSequenceProperty("MINVALUE", ds.getValue(row, "MINVALUE"));
