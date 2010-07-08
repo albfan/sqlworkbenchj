@@ -264,6 +264,7 @@ public class DbMetadata
 			synonymReader = new Db2SynonymReader();
 			sequenceReader = new Db2SequenceReader(dbConnection);
 			procedureReader = new Db2ProcedureReader(dbConnection);
+
 			// Generated columns are not available on the host version...
 			if (getDbId().equals("db2"))
 			{
@@ -554,16 +555,20 @@ public class DbMetadata
 
 			if (productName.startsWith("DB2"))
 			{
-				if (productName.startsWith("DB2 UDB") || productName.equals("DB2") )
+				// DB/2 for Host-Systems
+				// apparently DB2 for z/OS identifies itself as "DB2" whereas
+				// DB2 for AS/400 identifies itself as "DB2 UDB for AS/400"
+				if (productName.contains("AS/400") || productName.contains("iSeries"))
 				{
-					// DB/2 for Host-Systems
-					// apparently DB2 for z/OS identifies itself as "DB2" whereas
-					// DB2 for AS/400 identifies itself as "DB2 UDB for AS/400"
+					dbId = "db2i";
+				}
+				else if(productName.equals("DB2"))
+				{
 					dbId = "db2h";
 				}
 				else
 				{
-					// Use the same dbid for DB2/LINUX, DB2/NT, DB2/NT64, DB2/AIX64
+					// Everything else is LUW (Linux, Unix, Windows)
 					dbId = "db2";
 				}
 			}

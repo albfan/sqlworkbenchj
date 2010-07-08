@@ -88,7 +88,27 @@ public class Db2SequenceReader
 
 		String nameCol;
 		String schemaCol;
-		if (this.connection.getMetadata().getDbId().equals("db2h") || isHost)
+		String dbid = this.connection.getMetadata().getDbId();
+
+		if (dbid.equals("db2i"))
+		{
+			// Host system on AS/400
+			sql = "SELECT NAME, \n" +
+			"       START, \n" +
+			"       MINVALUE, \n" +
+			"       MAXVALUE, \n" +
+			"       INCREMENT, \n" +
+			"       CYCLE, \n" +
+			"       ORDER, \n" +
+			"       CACHE, \n" +
+			"       DATATYPEID, \n" +
+			"       REMARKS \n" +
+			"FROM   SYSIBM.SYSSEQUENCES \n";
+
+			nameCol = "name";
+			schemaCol = "schema";
+		}
+		else if(this.connection.getMetadata().getDbId().equals("db2h") || isHost)
 		{
 			// Host system
 			sql = "SELECT NAME, \n" +

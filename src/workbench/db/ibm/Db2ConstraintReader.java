@@ -26,6 +26,13 @@ public class Db2ConstraintReader
 					 "from  sysibm.syschecks \n" +
 					 "where tbname = ? " +
 					 "and tbowner = ?";
+
+	private static final String AS400_TABLE_SQL = "select chk.constraint_name, '('||chk.check_clause||')' \n" +
+					 "from  qsys2.syschkcst chk \n" +
+					 "  JOIN qsys2.syscst cons ON cons.constraint_schema = chk.constraint_schema AND cons.constraint_name = chk.constraint_name " +
+					 " where cons.table_name = ? " +
+					 " and cons.table_schema = ?";
+
 	
 	private static final String LUW_TABLE_SQL = "select cons.constname, '('||cons.text||')' \n" +
 					 "from syscat.checks cons \n" +
@@ -34,12 +41,14 @@ public class Db2ConstraintReader
 					 "and tabschema = ?";
 
 	private final boolean isHostDB2;
+	private final boolean isAS400; // aka iSeries
 
 	private Pattern sysname = Pattern.compile("^SQL[0-9]+");
 	
 	public Db2ConstraintReader(String dbid)
 	{
 		isHostDB2 = dbid.equals("db2h");
+		isAS400 = dbid.equals("db2i");
 	}
 
 	@Override
@@ -58,6 +67,7 @@ public class Db2ConstraintReader
 	public String getTableConstraintSql() 
 	{
 		if (isHostDB2) return HOST_TABLE_SQL;
+		if (isAS400) return AS400_TABLE_SQL;
 		return LUW_TABLE_SQL;
 	}
 	

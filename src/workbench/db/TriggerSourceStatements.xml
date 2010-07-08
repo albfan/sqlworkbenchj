@@ -23,7 +23,20 @@
 
   <void method="put">
     <string>DB2 UDB for AS/400</string>
-    <object idref="db2_host_trg_source"/>
+		 <object id="db2_as400_source" class="workbench.db.GetMetaDataSql">
+			<void property="baseSql">
+			 <string>SELECT action_statement FROM qsys2.systriggers</string>
+			</void>
+			<void property="objectNameField">
+			 <string>trigger_name</string>
+			</void>
+			<void property="schemaField">
+			 <string>trigger_schema</string>
+			</void>
+			<void property="useUpperCase">
+			 <boolean>true</boolean>
+			</void>
+		 </object>
   </void>
 
   <void method="put">

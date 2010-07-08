@@ -101,8 +101,25 @@
   </void>
 
   <void method="put">
-    <string>DB2 UDB for AS/400</string>
-		<object idref="db2_host_trg"/>
+   <string>DB2 UDB for AS/400</string>
+   <object id="db2_as400_lsttrg" class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+			 SELECT trigger_name,
+              action_timing as trigger_type,
+              event_manipulation as trigger_event
+        FROM qsys2.systriggers</string>
+    </void>
+    <void property="objectNameField">
+     <string>EVENT_OBJECT_TABLE</string>
+    </void>
+    <void property="schemaField">
+     <string>EVENT_OBJECT_SCHEMA</string>
+    </void>
+    <void property="orderBy">
+     <string>ORDER BY 1</string>
+    </void>
+   </object>
 	</void>
 	
   <void method="put">

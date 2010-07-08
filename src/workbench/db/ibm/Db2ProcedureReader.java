@@ -24,7 +24,7 @@ import workbench.util.StringUtil;
 /**
  * DB2's JDBC driver only returns procedures, not functions.
  * <br/>
- * This class uses its own SQL Statement to retrieve both objects fromt the database.
+ * This class uses its own SQL Statement to retrieve both objects from the database.
  *
  * @author Thomas Kellerer
  */
@@ -36,6 +36,7 @@ public class Db2ProcedureReader
 	public Db2ProcedureReader(WbConnection conn)
 	{
 		super(conn);
+		useJDBC = !conn.getMetadata().getDbId().equals("db2i");
 	}
 
 	@Override
@@ -73,6 +74,22 @@ public class Db2ProcedureReader
 	private String getSQL(String schemaPattern, String namePattern)
 	{
 		StringBuilder sql = new StringBuilder(100);
+//		if (this.connection.getMetadata().getDbId().equals("db2i"))
+//		{
+//			sql.append("SELECT '' as PROCEDURE_CAT,  \n" +
+//             "       ROUTINE_SCHEMA  as PROCEDURE_SCHEM, \n" +
+//             "       ROUTINE_NAME as PROCEDURE_NAME, \n" +
+//             "       LONG_COMMENT AS REMARKS, \n" +
+//             "       CASE  \n" +
+//             "         WHEN RESULT_SETS > 0 THEN " + DatabaseMetaData.procedureReturnsResult + "  \n" +
+//             "         ELSE " + DatabaseMetaData.procedureNoResult + "  \n" +
+//             "       END as PROCEDURE_TYPE \n" +
+//             "FROM qsys2.sysprocs ");
+//
+//			appendCondition(sql, "ROUTINE_SCHEMA", schemaPattern);
+//			appendCondition(sql, "ROUTINE_NAME", namePattern);
+//		}
+
 		if (this.connection.getMetadata().getDbId().equals("db2h"))
 		{
 			// DB Host
