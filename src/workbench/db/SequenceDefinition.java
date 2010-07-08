@@ -146,12 +146,12 @@ public class SequenceDefinition
 	 */
 	public void setSequenceProperty(String property, Object value)
 	{
-		this.properties.put(property, value);
+		this.properties.put(property.toUpperCase().trim(), value);
 	}
 	
 	public Object getSequenceProperty(String property)
 	{
-		return properties.get(property);
+		return properties.get(property.toUpperCase().trim());
 	}
 	
 	public CharSequence getSource()

@@ -36,7 +36,7 @@ public class Db2ProcedureReader
 	public Db2ProcedureReader(WbConnection conn)
 	{
 		super(conn);
-		useJDBC = !conn.getMetadata().getDbId().equals("db2i");
+		useJDBC = conn.getMetadata().getDbId().equals("db2i");
 	}
 
 	@Override

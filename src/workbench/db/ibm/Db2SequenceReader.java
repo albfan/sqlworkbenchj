@@ -35,12 +35,22 @@ public class Db2SequenceReader
 	implements SequenceReader
 {
 	private WbConnection connection;
-	private boolean isHost;
+	private final String dbid;
 	private boolean quoteKeyword;
 
 	public Db2SequenceReader(WbConnection conn)
 	{
 		this.connection = conn;
+		dbid = conn.getMetadata().getDbId();
+	}
+
+	/**
+	 * For testing purposes only!
+	 */
+	Db2SequenceReader(WbConnection conn, String useId)
+	{
+		this.connection = conn;
+		dbid = useId;
 	}
 
 	public List<SequenceDefinition> getSequences(String owner, String namePattern)
@@ -73,7 +83,15 @@ public class Db2SequenceReader
 		result.setSequenceProperty("CYCLE", ds.getValue(row, "CYCLE"));
 		result.setSequenceProperty("ORDER", ds.getValue(row, "ORDER"));
 		result.setSequenceProperty("CACHE", ds.getValue(row, "CACHE"));
-		result.setSequenceProperty("DATATYPEID", ds.getValue(row, "DATATYPEID"));
+		if (ds.getColumnIndex("DATATYPEID") > -1)
+		{
+			result.setSequenceProperty("DATATYPEID", ds.getValue(row, "DATATYPEID"));
+		}
+		
+		if (ds.getColumnIndex("DATA_TYPE") > -1)
+		{
+			result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
+		}
 		result.setComment(ds.getValueAsString(row, "REMARKS"));
 		readSequenceSource(result);
 		return result;
@@ -88,30 +106,31 @@ public class Db2SequenceReader
 
 		String nameCol;
 		String schemaCol;
-		String dbid = this.connection.getMetadata().getDbId();
 
 		if (dbid.equals("db2i"))
 		{
 			// Host system on AS/400
-			sql = "SELECT NAME, \n" +
-			"       START, \n" +
-			"       MINVALUE, \n" +
-			"       MAXVALUE, \n" +
+			sql =
+			"SELECT sequence_name as SEQNAME, \n" +
+			"       0 as START, \n" +
+			"       minimum_value as MINVALUE, \n" +
+			"       maximum_value as MAXVALUE, \n" +
 			"       INCREMENT, \n" +
-			"       CYCLE, \n" +
-			"       ORDER, \n" +
+			"       case cycle_option when 'YES' then 'Y' else 'N' end as CYCLE, \n" +
+			"       case order when 'YES' then 'Y' else 'N' end as order, \n" +
 			"       CACHE, \n" +
-			"       DATATYPEID, \n" +
-			"       REMARKS \n" +
-			"FROM   SYSIBM.SYSSEQUENCES \n";
+			"       data_type, \n" +
+			"       long_comment as remarks \n" +
+			"FROM   qsys2.syssequences \n";
 
-			nameCol = "name";
-			schemaCol = "schema";
+			nameCol = "sequence_name";
+			schemaCol = "sequence_schema";
 		}
-		else if(this.connection.getMetadata().getDbId().equals("db2h") || isHost)
+		else if (dbid.equals("db2h"))
 		{
-			// Host system
-			sql = "SELECT NAME, \n" +
+			// Host system on z/OS
+			sql = 
+			"SELECT NAME AS SEQNAME, \n" +
 			"       START, \n" +
 			"       MINVALUE, \n" +
 			"       MAXVALUE, \n" +
@@ -225,11 +244,20 @@ public class Db2SequenceReader
 		String cycle = (String) def.getSequenceProperty("CYCLE");
 		String order = (String) def.getSequenceProperty("ORDER");
 		Number cache = (Number) def.getSequenceProperty("CACHE");
-		Number typeid = (Number) def.getSequenceProperty("typeid");
+		Number typeid = (Number) def.getSequenceProperty("TYPEID");
 
 		if (typeid != null)
 		{
       result.append(" AS " + typeIdToName(typeid.intValue()));
+		}
+		else
+		{
+			Object oname = def.getSequenceProperty("DATA_TYPE");
+			String typeName = (oname != null ? oname.toString() : null);
+			if (typeName != null)
+			{
+				result.append(" AS " + typeIdToName(typeid.intValue()));
+			}
 		}
 
 		result.append(buildSequenceDetails(true, start, minvalue, maxvalue, increment, cycle, order, cache));

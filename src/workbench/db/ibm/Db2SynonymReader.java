@@ -53,10 +53,10 @@ public class Db2SynonymReader
 		boolean isAS400 = con.getMetadata().getDbId().equals("db2i");
 		if (isAS400)
 		{
-			sql.append("SELECT base_table_schema, base_table_name FROM systables");
+			sql.append("SELECT base_table_schema, base_table_name FROM qsys2.systables");
 			sql.append(" WHERE table_type = 'A' AND table_name = ? AND table_owner = ?");
 		}
-		else if(isHostDB2)
+		else if (isHostDB2)
 		{
 			sql.append("SELECT tbcreator, tbname FROM sysibm.syssynonyms ");
 			sql.append(" WHERE name = ? and creator = ?");
@@ -65,7 +65,7 @@ public class Db2SynonymReader
 		else
 		{
 			sql.append("SELECT base_tabschema, base_tabname FROM syscat.tables ");
-			sql.append(" WHERE TYPE = 'A' and tabname = ? and tabschema = ?");
+			sql.append(" WHERE type = 'A' and tabname = ? and tabschema = ?");
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
