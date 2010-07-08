@@ -67,6 +67,7 @@ import workbench.db.mssql.SqlServerColumnEnhancer;
 import workbench.db.mssql.SqlServerObjectListEnhancer;
 import workbench.db.mssql.SqlServerSynonymReader;
 import workbench.db.mssql.SqlServerTypeReader;
+import workbench.db.mysql.MySQLTableCommentReader;
 import workbench.db.oracle.OracleSequenceReader;
 import workbench.db.oracle.OracleTypeReader;
 import workbench.db.postgres.PostgresDataTypeResolver;
@@ -273,6 +274,7 @@ public class DbMetadata
 		{
 			this.isMySql = true;
 			columnEnhancer = new MySqlEnumReader();
+			objectListEnhancer = new MySQLTableCommentReader();
 		}
 		else if (productLower.indexOf("cloudscape") > -1)
 		{
