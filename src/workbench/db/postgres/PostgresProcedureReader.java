@@ -35,6 +35,8 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
+ * A class to read procedure and function definitions from a Postgres database.
+ *
  * @author  Thomas Kellerer
  */
 public class PostgresProcedureReader
@@ -170,7 +172,7 @@ public class PostgresProcedureReader
 			PGProcName pg = new PGProcName(procName, getTypeLookup());
 			namePattern = pg.getName();
 		}
-		
+
 		Statement stmt = null;
 		Savepoint sp = null;
 		ResultSet rs = null;
@@ -181,15 +183,16 @@ public class PostgresProcedureReader
 				sp = this.connection.setSavepoint();
 			}
 
-			String sql = "SELECT NULL AS PROCEDURE_CAT, " +
-						" n.nspname AS PROCEDURE_SCHEM, " +
-						" p.proname AS PROCEDURE_NAME, " +
-						"	d.description AS REMARKS, " +
-						" array_to_string(p.proargtypes, ';') as PG_ARGUMENTS " +
-						" FROM pg_catalog.pg_namespace n, pg_catalog.pg_proc p " +
-						" LEFT JOIN pg_catalog.pg_description d ON (p.oid=d.objoid) " +
-						" LEFT JOIN pg_catalog.pg_class c ON (d.classoid=c.oid AND c.relname='pg_proc') " +
-						" LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog') " +
+			String sql =
+						"SELECT NULL AS PROCEDURE_CAT, \n" +
+						"       n.nspname AS PROCEDURE_SCHEM, \n" +
+						"       p.proname AS PROCEDURE_NAME, \n" +
+						"	      d.description AS REMARKS, \n" +
+						"       array_to_string(p.proargtypes, ';') as PG_ARGUMENTS \n" +
+						" FROM pg_catalog.pg_namespace n, pg_catalog.pg_proc p \n" +
+						"   LEFT JOIN pg_catalog.pg_description d ON (p.oid=d.objoid) \n" +
+						"   LEFT JOIN pg_catalog.pg_class c ON (d.classoid=c.oid AND c.relname='pg_proc') \n" +
+						"   LEFT JOIN pg_catalog.pg_namespace pn ON (c.relnamespace=pn.oid AND pn.nspname='pg_catalog') \n" +
 						" WHERE p.pronamespace=n.oid ";
 
 			if (StringUtil.isNonBlank(schemaPattern))
@@ -259,28 +262,39 @@ public class PostgresProcedureReader
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", true) && JdbcUtils.hasMinimumServerVersion(this.connection, "8.4"))
+		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", true);
+		if (usePGFunction && JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
 			readFunctionDef(def);
 			return;
 		}
-		
+
 		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
+
 		String sql = "SELECT p.prosrc, \n" +
-								"        l.lanname as lang_name, " +
-								"        p.prorettype as return_type_oid, \n" +
-								"        coalesce(array_to_string(p.proallargtypes, ';'), " +
-								"                 array_to_string(p.proargtypes, ';')) as argtypes, \n" +
-								"        array_to_string(p.proargnames, ';') as argnames, \n" +
-								"        array_to_string(p.proargmodes, ';') as argmodes, \n " +
-								"        p.prosecdef, " +
-								"        p.proretset, " +
-								"        p.provolatile, " +
-								"        p.proisstrict, " +
-								"        p.proisagg ";
-		
+								"        l.lanname as lang_name, \n";
+
+		if (JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
+		{
+			sql += "        pg_get_function_result(p.oid) as formatted_return_type, \n";
+		}
+		else
+		{
+			sql += "        null::text as formatted_return_type, \n";
+		}
+		sql +=	"        p.prorettype as return_type_oid, \n" +
+						"        coalesce(array_to_string(p.proallargtypes, ';'), " +
+						"                 array_to_string(p.proargtypes, ';')) as argtypes, \n" +
+						"        array_to_string(p.proargnames, ';') as argnames, \n" +
+						"        array_to_string(p.proargmodes, ';') as argmodes, \n " +
+						"        p.prosecdef, " +
+						"        p.proretset, " +
+						"        p.provolatile, " +
+						"        p.proisstrict, " +
+						"        p.proisagg ";
+
 		boolean hasCost = JdbcUtils.hasMinimumServerVersion(connection, "8.3");
-		if (hasCost) 
+		if (hasCost)
 		{
 			sql += ", p.procost, p.prorows ";
 		}
@@ -304,9 +318,9 @@ public class PostgresProcedureReader
 		{
 			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Using SQL=" + sql);
 		}
-		
+
 		StringBuilder source = new StringBuilder(500);
-		
+
 		ResultSet rs = null;
 		Savepoint sp = null;
 		Statement stmt = null;
@@ -331,19 +345,20 @@ public class PostgresProcedureReader
 			{
 				source.append("CREATE OR REPLACE FUNCTION ");
 				source.append(name.getName());
-			
+
 				String src = rs.getString(1);
 				if (rs.wasNull() || src == null) src = "";
-				
+
 				String lang = rs.getString("lang_name");
 				int retTypeOid = rs.getInt("return_type_oid");
+				String readableReturnType = rs.getString("formatted_return_type");
 
 				String types = rs.getString("argtypes");
 				String names = rs.getString("argnames");
 				String modes = rs.getString("argmodes");
 				boolean returnSet = rs.getBoolean("proretset");
 
-				
+
 				boolean securityDefiner = rs.getBoolean("prosecdef");
 				boolean strict = rs.getBoolean("proisstrict");
 				String volat = rs.getString("provolatile");
@@ -361,7 +376,7 @@ public class PostgresProcedureReader
 
 				source.append('(');
 				int paramCount = 0;
-				
+
 				for (int i=0; i < argTypes.size(); i++)
 				{
 					if (paramCount > 0) source.append(", ");
@@ -372,7 +387,7 @@ public class PostgresProcedureReader
 						if ("o".equals(mode)) source.append("OUT ");
 						if ("b".equals(mode)) source.append("INOUT");
 					}
-					
+
 					if (i < argNames.size())
 					{
 						source.append(argNames.get(i));
@@ -385,11 +400,18 @@ public class PostgresProcedureReader
 				}
 
 				source.append(")\n  RETURNS ");
-				if (returnSet)
+				if (readableReturnType == null)
 				{
-					source.append("SETOF ");
+					if (returnSet)
+					{
+						source.append("SETOF ");
+					}
+					source.append(getRawTypeNameFromOID(retTypeOid));
 				}
-				source.append(getRawTypeNameFromOID(retTypeOid));
+				else
+				{
+					source.append(readableReturnType);
+				}
 				source.append("\n  LANGUAGE ");
 				source.append(lang);
 				source.append("\nAS\n$body$\n");
@@ -463,20 +485,27 @@ public class PostgresProcedureReader
 		def.setSource(source);
 	}
 
+	/**
+	 * Read the definition of a function using pg_get_functiondef()
+	 *
+	 * @param def
+	 */
 	protected void readFunctionDef(ProcedureDefinition def)
 	{
 		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
 		String funcname = def.getSchema() + "." + name.getFormattedName();
-		ResultSet rs = null;
-		Savepoint sp = null;
-		Statement stmt = null;
+
 		String sql = "select pg_get_functiondef('" + funcname + "'::regprocedure)";
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("PostgresProcedureReader.readFunctionDef()", "Using SQL=" + sql);
 		}
-		
+
 		StringBuilder source = null;
+		ResultSet rs = null;
+		Savepoint sp = null;
+		Statement stmt = null;
 		try
 		{
 			if (useSavepoint)
@@ -510,14 +539,15 @@ public class PostgresProcedureReader
 		}
 		def.setSource(source);
 	}
-	
+
 	protected StringBuilder getAggregateSource(PGProcName name, String schema)
 	{
-		String baseSelect = "SELECT a.aggtransfn, a.aggfinalfn, format_type(a.aggtranstype, null) as stype, a.agginitval, op.oprname";
-	  String from = "FROM pg_proc p \n" +
-             "  JOIN pg_namespace n ON p.pronamespace = n.oid \n" +
-             "  JOIN pg_aggregate a ON a.aggfnoid = p.oid \n" +
-             "  LEFT JOIN pg_operator op ON op.oid = a.aggsortop ";
+		String baseSelect = "SELECT a.aggtransfn, a.aggfinalfn, format_type(a.aggtranstype, null) as stype, a.agginitval, op.oprname ";
+	  String from =
+			 " FROM pg_proc p \n" +
+       "  JOIN pg_namespace n ON p.pronamespace = n.oid \n" +
+       "  JOIN pg_aggregate a ON a.aggfnoid = p.oid \n" +
+       "  LEFT JOIN pg_operator op ON op.oid = a.aggsortop ";
 
 		boolean hasSort = JdbcUtils.hasMinimumServerVersion(connection, "8.1");
 		if (hasSort)
@@ -525,13 +555,13 @@ public class PostgresProcedureReader
 			baseSelect += ", a.aggsortop ";
 		}
 
-		String sql = baseSelect + from;
+		String sql = baseSelect + "\n" + from;
 		sql += " WHERE p.proname = '" + name.getName() + "' ";
 		if (StringUtil.isNonBlank(schema))
 		{
 			sql += " and n.nspname = '" + schema + "' ";
 		}
-		
+
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("PostgresProcedureReader.getAggregateSource()", "Using SQL=" + sql);
@@ -600,7 +630,7 @@ public class PostgresProcedureReader
 	/**
 	 * A workaround for pre 8.3 drivers so that argument names are retrieved properly
 	 * from the database. This was mainly inspired by the source code of pgAdmin III
-	 * and the current 8.3 driver sources
+	 * and the 8.3 driver sources
 	 *
 	 * @param catalog
 	 * @param schema
@@ -632,7 +662,7 @@ public class PostgresProcedureReader
 		ResultSet rs = null;
 		try
 		{
-			sp = this.connection.setSavepoint();
+			sp = connection.setSavepoint();
 
 			String oids = procname.getOIDs();
 			if (StringUtil.isNonBlank(oids))
@@ -697,7 +727,6 @@ public class PostgresProcedureReader
 							md = "INOUT";
 						}
 					}
-
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, md);
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, getJavaType(pgt));
 					result.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, getFormattedTypeFromOID(typeOid));
@@ -710,11 +739,11 @@ public class PostgresProcedureReader
 				return super.getProcedureColumns(catalog, schema, procname.getName());
 			}
 
-			this.connection.releaseSavepoint(sp);
+			connection.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
-			this.connection.rollback(sp);
+			connection.rollback(sp);
 			LogMgr.logError("PostgresProcedureReader.getProcedureHeader()", "Error retrieving header", e);
 			return super.getProcedureColumns(catalog, schema, procname.getName());
 		}
