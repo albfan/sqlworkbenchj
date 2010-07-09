@@ -259,6 +259,12 @@ public class PostgresProcedureReader
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
+		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", true) && JdbcUtils.hasMinimumServerVersion(this.connection, "8.4"))
+		{
+			readFunctionDef(def);
+			return;
+		}
+		
 		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
 		String sql = "SELECT p.prosrc, \n" +
 								"        l.lanname as lang_name, " +
@@ -271,7 +277,6 @@ public class PostgresProcedureReader
 								"        p.proretset, " +
 								"        p.provolatile, " +
 								"        p.proisstrict, " +
-								"        p.proretset," +
 								"        p.proisagg ";
 		
 		boolean hasCost = JdbcUtils.hasMinimumServerVersion(connection, "8.3");
@@ -380,6 +385,10 @@ public class PostgresProcedureReader
 				}
 
 				source.append(")\n  RETURNS ");
+				if (returnSet)
+				{
+					source.append("SETOF ");
+				}
 				source.append(getRawTypeNameFromOID(retTypeOid));
 				source.append("\n  LANGUAGE ");
 				source.append(lang);
@@ -454,6 +463,54 @@ public class PostgresProcedureReader
 		def.setSource(source);
 	}
 
+	protected void readFunctionDef(ProcedureDefinition def)
+	{
+		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
+		String funcname = def.getSchema() + "." + name.getFormattedName();
+		ResultSet rs = null;
+		Savepoint sp = null;
+		Statement stmt = null;
+		String sql = "select pg_get_functiondef('" + funcname + "'::regprocedure)";
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("PostgresProcedureReader.readFunctionDef()", "Using SQL=" + sql);
+		}
+		
+		StringBuilder source = null;
+		try
+		{
+			if (useSavepoint)
+			{
+				sp = this.connection.setSavepoint();
+			}
+			stmt = connection.createStatementForQuery();
+			rs = stmt.executeQuery(sql);
+			if (rs.next())
+			{
+				String s = rs.getString(1);
+				if (s != null)
+				{
+					source = new StringBuilder(s.length() + 10);
+					source.append(s);
+					source.append('\n');
+					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
+					source.append('\n');
+				}
+			}
+		}
+		catch (SQLException e)
+		{
+			source = new StringBuilder(ExceptionUtil.getDisplay(e));
+			connection.rollback(sp);
+			LogMgr.logError("PostgresProcedureReader.readProcedureSource()", "Error retrieving source for " + name.getFormattedName(), e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		def.setSource(source);
+	}
+	
 	protected StringBuilder getAggregateSource(PGProcName name, String schema)
 	{
 		String baseSelect = "SELECT a.aggtransfn, a.aggfinalfn, format_type(a.aggtranstype, null) as stype, a.agginitval, op.oprname";
@@ -477,7 +534,7 @@ public class PostgresProcedureReader
 		
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logDebug("PostgresProcedureReader.readProcedureSource()", "Using SQL=" + sql);
+			LogMgr.logDebug("PostgresProcedureReader.getAggregateSource()", "Using SQL=" + sql);
 		}
 		StringBuilder source = new StringBuilder();
 		ResultSet rs = null;
