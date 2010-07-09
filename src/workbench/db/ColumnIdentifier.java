@@ -545,4 +545,18 @@ public class ColumnIdentifier
 		};
 		Collections.sort(columnList, c);
 	}
+
+	public static int getMaxNameLength(List<ColumnIdentifier> columns)
+	{
+		int maxLength = 0;
+		for (ColumnIdentifier col : columns)
+		{
+			if (col.getColumnName().length() > maxLength)
+			{
+				maxLength = col.getColumnName().length();
+			}
+		}
+		return maxLength;
+	}
+
 }

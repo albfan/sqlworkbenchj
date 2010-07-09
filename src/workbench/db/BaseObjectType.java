@@ -8,19 +8,21 @@
  * 
  *  To contact the author please send an email to: support@sql-workbench.net
  */
-package workbench.db.postgres;
+package workbench.db;
 
 import java.sql.SQLException;
-import workbench.db.DbObject;
-import workbench.db.WbConnection;
+import java.util.ArrayList;
+import java.util.List;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
- * Postgres TYPE objects
+ * A generic TYPE object
+ * (used for Postgres, Oracle and DB2)
  * 
  * @author Thomas Kellerer
  */
-public class PostgresObjectType
+public class BaseObjectType
 	implements DbObject
 {
 	private String catalog;
@@ -29,6 +31,13 @@ public class PostgresObjectType
 	private final String objectType = "TYPE";
 	private String remarks;
 	private String source;
+	private List<ColumnIdentifier> columns;
+
+	public BaseObjectType(String schema, String typeName)
+	{
+		this.schema = schema;
+		this.typeName = typeName;
+	}
 
 	public String getCatalog()
 	{
@@ -90,6 +99,16 @@ public class PostgresObjectType
 		return source;
 	}
 
+	public List<ColumnIdentifier> getAttributes()
+	{
+		return columns;
+	}
+
+	public void setAttributes(List<ColumnIdentifier> attr)
+	{
+		columns = new ArrayList<ColumnIdentifier>(attr);
+	}
+	
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
@@ -109,5 +128,11 @@ public class PostgresObjectType
 	public void setComment(String cmt)
 	{
 		remarks = cmt;
+	}
+
+	public int getNumberOfAttributes()
+	{
+		if (CollectionUtil.isEmpty(columns)) return 0;
+		return columns.size();
 	}
 }

@@ -29,6 +29,10 @@ public class PostgresDataTypeResolver
 		{
 			return "char(" + size + ")";
 		}
+		if (sqlType == Types.VARCHAR && size == Integer.MAX_VALUE)
+		{
+			return "VARCHAR";
+		}
 		if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)
 		{
 			if (size == 65535 || size == 131089) size = 0;

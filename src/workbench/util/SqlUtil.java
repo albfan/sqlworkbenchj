@@ -1382,4 +1382,33 @@ public class SqlUtil
 		return charLength >= sizeThreshold;
 	}
 
+	/**
+	 * Appends an AND condition for the given column. If the value contains
+	 * a wildcard the condition will use LIKE, otherwise =
+	 *
+	 * @param baseSql
+	 * @param column
+	 * @param value
+	 */
+	public static void appendAndCondition(StringBuilder baseSql, String column, String value)
+	{
+		if (StringUtil.isBlank(value)) return;
+		if (StringUtil.isEmptyString(column)) return;
+
+		baseSql.append(" AND ");
+		baseSql.append(column);
+
+		if (value.indexOf('%') > -1)
+		{
+			baseSql.append(" LIKE '");
+			baseSql.append(value);
+		}
+		else
+		{
+			baseSql.append(" = '");
+			baseSql.append(value);
+		}
+		baseSql.append("'");
+	}
+
 }

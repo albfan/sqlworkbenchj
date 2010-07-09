@@ -229,7 +229,7 @@ public class DB2TypeReader
 		sql.append(type.getObjectName());
 		sql.append(" AS\n(\n");
 		List<ColumnIdentifier> columns = type.getAttributes();
-		int maxLen = getMaxNameLength(columns);
+		int maxLen = ColumnIdentifier.getMaxNameLength(columns);
 		for (int i=0; i < columns.size(); i++)
 		{
 			sql.append("  ");
@@ -239,19 +239,6 @@ public class DB2TypeReader
 		}
 		sql.append("\n);\n");
 		return sql.toString();
-	}
-
-	private int getMaxNameLength(List<ColumnIdentifier> columns)
-	{
-		int maxLength = 0;
-		for (ColumnIdentifier col : columns)
-		{
-			if (col.getColumnName().length() > maxLength)
-			{
-				maxLength = col.getColumnName().length();
-			}
-		}
-		return maxLength;
 	}
 
 	public List<ColumnIdentifier> getAttributes(WbConnection con, DB2ObjectType type)

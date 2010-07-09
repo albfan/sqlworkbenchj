@@ -19,7 +19,6 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 
 /**
  * DB2's JDBC driver only returns procedures, not functions.
@@ -86,8 +85,8 @@ public class Db2ProcedureReader
 //             "       END as PROCEDURE_TYPE \n" +
 //             "FROM qsys2.sysprocs ");
 //
-//			appendCondition(sql, "ROUTINE_SCHEMA", schemaPattern);
-//			appendCondition(sql, "ROUTINE_NAME", namePattern);
+//			SqlUtil.appendAndCondition(sql, "ROUTINE_SCHEMA", schemaPattern);
+//			SqlUtil.appendAndCondition(sql, "ROUTINE_NAME", namePattern);
 //		}
 
 		if (this.connection.getMetadata().getDbId().equals("db2h"))
@@ -105,8 +104,8 @@ public class Db2ProcedureReader
              "WHERE routinetype in ('F', 'P') \n" +
              "AND origin in ('Q', 'U') ");
 
-			appendCondition(sql, "schema", schemaPattern);
-			appendCondition(sql, "name", namePattern);
+			SqlUtil.appendAndCondition(sql, "schema", schemaPattern);
+			SqlUtil.appendAndCondition(sql, "name", namePattern);
 		}
 		else
 		{
@@ -123,28 +122,10 @@ public class Db2ProcedureReader
 					 "WHERE routinetype in ('F', 'P') \n" +
 					 "AND origin in ('Q', 'U') \n");
 			
-			appendCondition(sql, "routineschema", schemaPattern);
-			appendCondition(sql, "routinename", namePattern);
+			SqlUtil.appendAndCondition(sql, "routineschema", schemaPattern);
+			SqlUtil.appendAndCondition(sql, "routinename", namePattern);
 		}
 		return sql.toString();
 	}
 
-	private void appendCondition(StringBuilder baseSql, String column, String value)
-	{
-		if (StringUtil.isBlank(value)) return;
-		baseSql.append(" AND ");
-		baseSql.append(column);
-
-		if (value.indexOf('%') > -1)
-		{
-			baseSql.append(" LIKE '");
-			baseSql.append(value);
-		}
-		else
-		{
-			baseSql.append(" = '");
-			baseSql.append(value);
-		}
-		baseSql.append("'");
-	}
 }

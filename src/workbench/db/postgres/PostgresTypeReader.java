@@ -10,9 +10,12 @@
  */
 package workbench.db.postgres;
 
+import workbench.db.BaseObjectType;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
+import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
@@ -21,13 +24,13 @@ import workbench.db.ObjectListExtender;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
-import workbench.db.TableSourceBuilder;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * An ObjectlistEnhancer to work around a bug in the Postgres JDBC driver, as that driver
@@ -71,9 +74,30 @@ public class PostgresTypeReader
 			updateObjectList(con, result, catalog, schemaPattern, objectPattern, requestedTypes);
 			return true;
 		}
+		
+		List<BaseObjectType> types = getTypes(con, schemaPattern, objectPattern);
+		if (types.isEmpty()) return false;
 
-    String select =
-				" SELECT NULL AS TABLE_CAT, " +
+		for (BaseObjectType type : types)
+		{
+			int row = result.addRow();
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, type.getSchema());
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, type.getObjectName());
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type.getObjectType());
+			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, type.getComment());
+			result.getRow(row).setUserObject(type);
+		}
+		return true;
+	}
+
+	public List<BaseObjectType> getTypes(WbConnection con, String schemaPattern, String objectPattern)
+	{
+		List<BaseObjectType> result = new ArrayList<BaseObjectType>();
+		
+    StringBuilder select = new StringBuilder(100);
+
+		select.append(" SELECT NULL AS TABLE_CAT, " +
 				" n.nspname AS TABLE_SCHEM, " +
 				" c.relname AS TABLE_NAME, " +
 				" 'TYPE' as TABLE_TYPE, " +
@@ -82,19 +106,12 @@ public class PostgresTypeReader
 				" LEFT JOIN pg_catalog.pg_description d ON (c.oid = d.objoid AND d.objsubid = 0) " +
 				" LEFT JOIN pg_catalog.pg_class dc ON (d.classoid=dc.oid AND dc.relname='pg_class') " +
 				" LEFT JOIN pg_catalog.pg_namespace dn ON (dn.oid=dc.relnamespace AND dn.nspname='pg_catalog') " +
-				" WHERE c.relkind = 'c' AND c.relnamespace = n.oid ";
+				" WHERE c.relkind = 'c' AND c.relnamespace = n.oid ");
 
-		if (schemaPattern != null && !"".equals(schemaPattern))
-		{
-				select += " AND n.nspname LIKE '" + schemaPattern + "' ";
-		}
+		SqlUtil.appendAndCondition(select, "n.nspname", schemaPattern);
+		SqlUtil.appendAndCondition(select, "c.relname", objectPattern);
 
-		if (objectPattern != null)
-		{
-				select += " AND c.relname LIKE '" + objectPattern + "' ";
-		}
-
-		select += " ORDER BY TABLE_TYPE,TABLE_SCHEM,TABLE_NAME ";
+		select.append(" ORDER BY TABLE_TYPE,TABLE_SCHEM,TABLE_NAME ");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -106,30 +123,27 @@ public class PostgresTypeReader
 		try
 		{
 			stmt = con.createStatementForQuery();
-			rs = stmt.executeQuery(select);
+			rs = stmt.executeQuery(select.toString());
 			while (rs.next())
 			{
 				String schema = rs.getString("TABLE_SCHEM");
 				String name = rs.getString("TABLE_NAME");
 				String type = rs.getString("TABLE_TYPE");
 				String remarks = rs.getString("REMARKS");
-				int row = result.addRow();
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_CATALOG, null);
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_SCHEMA, schema);
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, name);
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, type);
-				result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, remarks);
+				BaseObjectType pgtype = new BaseObjectType(schema, name);
+				pgtype.setComment(remarks);
+				result.add(pgtype);
 			}
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("PostgresTypeReader.extendObjectList()", "Error retrieving object types", e);
+			LogMgr.logError("PostgresTypeReader.getTypes()", "Error retrieving object types", e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
-		return true;
+		return result;
 	}
 
 	@Override
@@ -172,10 +186,20 @@ public class PostgresTypeReader
 	}
 
 	@Override
-	public DbObject getObjectDefinition(WbConnection con, DbObject name)
+	public BaseObjectType getObjectDefinition(WbConnection con, DbObject name)
 	{
-		// Only used in the SchemaReporter. If this method returns null
-		// the reporter will treat the object as a table
+		try
+		{
+			TableDefinition tdef = con.getMetadata().getTableDefinition(createTableIdentifier(name));
+			BaseObjectType type = new BaseObjectType(tdef.getTable().getSchema(), tdef.getTable().getTableName());
+			type.setComment(tdef.getTable().getComment());
+			type.setAttributes(tdef.getColumns());
+			return type;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("PostgresTypeReader.getObjectDetails()", "Cannot retrieve type columns", e);
+		}
 		return null;
 	}
 
@@ -190,16 +214,22 @@ public class PostgresTypeReader
 	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
-		TableSourceBuilder builder = new PostgresTableSourceBuilder(con);
-		try
+		BaseObjectType type = getObjectDefinition(con, object);
+		if (type == null) return null;
+		StringBuilder sql = new StringBuilder(50 + type.getNumberOfAttributes() * 50);
+		sql.append("CREATE TYPE ");
+		sql.append(type.getObjectName());
+		sql.append(" AS\n(\n");
+		List<ColumnIdentifier> columns = type.getAttributes();
+		int maxLen = ColumnIdentifier.getMaxNameLength(columns);
+		for (int i=0; i < columns.size(); i++)
 		{
-			CharSequence sql = builder.getTableSource(createTableIdentifier(object), true, true);
-			return sql == null ? "" : sql.toString();
+			sql.append("  ");
+			sql.append(StringUtil.padRight(columns.get(i).getColumnName(), maxLen + 2));
+			sql.append(columns.get(i).getDbmsType());
+			if (i < columns.size() - 1) sql.append(",\n");
 		}
-		catch (Exception e)
-		{
-			LogMgr.logError("PostgresTypeReader.getObjectSource()", "Cannot build type source ", e);
-			return "";
-		}
+		sql.append("\n);\n");
+		return sql.toString();
 	}
 }
