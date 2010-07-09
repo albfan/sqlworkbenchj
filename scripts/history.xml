@@ -26,6 +26,9 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="10" type="fix">Fixed sequence, view and procedure display in the DbExplorer for DB2 on iSeries (AS/400)</entry>
+    <entry dev-build="10" type="fix">The source code for Postgres TYPEs was not show correctly.</entry>
+    <entry dev-build="10" type="fix">The source code for Postgres functions returning SETOF or TABLEs was not show correctly.</entry>
     <entry dev-build="10" type="fix">WbDataDiff failed with no clear error message when the columns from the source table were missing in the target table.</entry>
     <entry dev-build="10" type="fix">WbSchemaDiff did not work when indexes were included (-includeIndex=true)</entry>
     <entry dev-build="10" type="fix">When the maximum number of backups for workspaces was reached, the newest backup was overwritten instead of the oldest</entry>
