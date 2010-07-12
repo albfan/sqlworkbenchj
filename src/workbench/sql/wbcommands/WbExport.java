@@ -42,6 +42,7 @@ import workbench.db.exporter.WrongFormatFileException;
 import workbench.interfaces.ResultSetConsumer;
 import workbench.util.ExceptionUtil;
 import workbench.util.WbFile;
+import workbench.util.XsltTransformer;
 
 /**
  * SQL Command for running an export.
@@ -467,7 +468,8 @@ public class WbExport
 
 			if (xsl != null && output != null)
 			{
-				File f = new File(xsl);
+				XsltTransformer transformer = new XsltTransformer();
+				File f = transformer.findStylesheet(xsl);
 				if (f.exists())
 				{
 					exporter.setXsltTransformation(xsl);
@@ -475,8 +477,7 @@ public class WbExport
 				}
 				else
 				{
-					String msg = ResourceMgr.getString("ErrSpoolXsltNotFound");
-					msg = msg.replace("%xslt%", f.getAbsolutePath());
+					String msg = ResourceMgr.getFormattedString("ErrXsltNotFound", f.getAbsolutePath());
 					result.addMessage(msg);
 				}
 			}

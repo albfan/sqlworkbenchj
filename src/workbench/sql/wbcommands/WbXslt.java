@@ -132,24 +132,9 @@ public class WbXslt
 		catch (Exception e)
 		{
 			LogMgr.logError("WbXslt.execute()", "Error when transforming '" + inputFile + "' to '" + outputFile + "' using " + xsltFile, e);
-			String msg = transformer.getAllOutputs();
-			if (msg.length() != 0)
-			{
-				LogMgr.logError("WbXslt.execute()", msg, null);
-				result.addMessage(msg);
-			}
-			else
-			{
-				if (transformer.getNestedError() != null)
-				{
-					result.addMessage(e.getMessage() + ": " + ExceptionUtil.getDisplay(transformer.getNestedError()));
-				}
-				else
-				{
-					result.addMessage(e.getMessage());
-				}
-			}
-
+			String msg = transformer.getAllOutputs(e);
+			LogMgr.logError("WbXslt.execute()", msg, null);
+			result.addMessage(msg);
 		}
 		return result;
 	}

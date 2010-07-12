@@ -82,14 +82,15 @@ public class XmlExportWriter
 		String output = this.exporter.getXsltTransformationOutput();
 		if (xsltFile != null && output != null)
 		{
+			XsltTransformer transformer = new XsltTransformer();
 			try
 			{
-				XsltTransformer transformer = new XsltTransformer();
 				transformer.transform(exportFile, output, xsltFile);
 			}
 			catch (Exception e)
 			{
 				LogMgr.logError("DataSpooler.startExport()", "Error when transforming " + output + " using " + xsltFile, e);
+				exporter.addError(transformer.getAllOutputs(e));
 			}
 		}
 		return rowsWritten;

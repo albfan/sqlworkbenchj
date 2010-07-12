@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -199,15 +200,21 @@ public class WbSchemaReport
 				result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 				result.setSuccess();
 			}
+			catch (FileNotFoundException fnf)
+			{
+				LogMgr.logError("WbSchemaReport.execute()", "Stylesheet " + xslt + " not found!", fnf);
+				result.addMessage(ResourceMgr.getFormattedString("ErrXsltNotFound", xslt));
+				result.setFailure();
+			}
 			catch (Exception e)
 			{
 				LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
-				LogMgr.logError("WbSchemaReport.execute()", transformer.getAllOutputs(), null);
-				result.addMessage(transformer.getAllOutputs());
+				String msg = transformer.getAllOutputs(e);
+				LogMgr.logError("WbSchemaReport.execute()", msg, null);
+				result.addMessage(msg);
+				result.setFailure();
 			}
 		}
-
-
 		return result;
 	}
 

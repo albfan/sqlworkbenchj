@@ -13,6 +13,7 @@ package workbench.sql.wbcommands;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -277,18 +278,25 @@ public class WbSchemaDiff
 
 				if (StringUtil.isNonBlank(xslt) && StringUtil.isNonBlank(xsltOutput))
 				{
+					XsltTransformer transformer = new XsltTransformer();
 					try
 					{
-						XsltTransformer transformer = new XsltTransformer();
 						transformer.setXsltBaseDir(new File(runner.getBaseDir()));
 						transformer.transform(output.getFullPath(), xsltOutput, xslt);
 						result.addMessage(ResourceMgr.getFormattedString("MsgXsltSuccessful", xsltOutput));
 						result.setSuccess();
 					}
+					catch (FileNotFoundException fnf)
+					{
+						LogMgr.logError("WbSchemaDiff.execute()", "Stylesheet " + xslt + " not found!", fnf);
+						result.addMessage(ResourceMgr.getFormattedString("ErrXsltNotFound", xslt));
+						result.setFailure();
+					}
 					catch (Exception e)
 					{
 						LogMgr.logError("WbSchemaReport.execute()", "Error when transforming '" + output.getFullPath() + "' to '" + xsltOutput + "' using " + xslt, e);
-						result.addMessage(e.getMessage());
+						result.addMessage(transformer.getAllOutputs(e));
+						result.setFailure();
 					}
 				}
 			}

@@ -32,6 +32,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.URIResolver;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 
 /**
@@ -42,7 +43,7 @@ import workbench.resource.Settings;
 public class XsltTransformer
 	implements URIResolver
 {
-	private Exception resolveError;
+	private Exception nestedError;
 	private File xsltBasedir;
 	private String sysOut;
 	private String sysErr;
@@ -163,10 +164,15 @@ public class XsltTransformer
 	
 	public Exception getNestedError()
 	{
-		return resolveError;
+		return nestedError;
 	}
 
 	public String getAllOutputs()
+	{
+		return getAllOutputs(null);
+	}
+	
+	public String getAllOutputs(Exception e)
 	{
 		StringBuilder result = new StringBuilder();
 		if (StringUtil.isNonBlank(sysErr))
@@ -178,7 +184,19 @@ public class XsltTransformer
 			if (result.length() > 0) result.append('\n');
 			result.append(sysOut.trim());
 		}
-		
+		if (nestedError != null)
+		{
+			result.append('\n');
+			if (e != null)
+			{
+				result.append(e.getMessage() + ": ");
+			}
+			result.append(ExceptionUtil.getDisplay(nestedError));
+		}
+		if (result.length() == 0 && e != null)
+		{
+			result.append(ResourceMgr.getFormattedString("ErrXsltProcessing", xsltUsed.getAbsolutePath(), ExceptionUtil.getDisplay(e)));
+		}
 		return result.toString();
 	}
 	
@@ -204,7 +222,7 @@ public class XsltTransformer
 		}
 		catch (FileNotFoundException e)
 		{
-			resolveError = e;
+			nestedError = e;
 			throw new TransformerException(e);
 		}
 	}
