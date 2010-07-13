@@ -26,12 +26,15 @@ import java.util.Enumeration;
 import java.util.Properties;
 
 import workbench.log.LogMgr;
-import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.resource.ResourceMgr;
+import workbench.util.SqlUtil;
 
 /**
  *	Represents a JDBC Driver definition.
@@ -348,6 +351,31 @@ public class DbDriver
 			if (adjustProgramName() && url.startsWith("jdbc:firebirdsql:"))
 			{
 				System.clearProperty("org.firebirdsql.jdbc.processName");
+			}
+			
+			if (adjustProgramName() && 
+					url.startsWith("jdbc:postgresql") &&
+					JdbcUtils.hasMinimumServerVersion(c, "9.0") &&
+					Settings.getInstance().getBoolProperty("workbench.db.postgresql.set.appname", true))
+			{
+				Statement stmt = null;
+				try
+				{
+					stmt = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+					stmt.execute("SET application_name = '" + getProgramName() + "'");
+					// make sure the transaction is ended
+					// as this is absolutely the first thing we did, rollback() should be save
+					// and not interfere with any
+					c.rollback();  
+				}
+				catch (Exception e)
+				{
+					LogMgr.logWarning("DbDriver.setClientInfo()", "Could not set client info", e);
+				}
+				finally
+				{
+					SqlUtil.closeStatement(stmt);
+				}
 			}
 		}
 		catch (ClassNotFoundException e)

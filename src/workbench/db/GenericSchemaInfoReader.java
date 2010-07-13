@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Savepoint;
 import java.sql.Statement;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -27,10 +28,12 @@ public class GenericSchemaInfoReader
 	implements SchemaInformationReader
 {
 	private String schemaQuery = null;
+	private boolean useSavepoint = false;
 	
 	public GenericSchemaInfoReader(String dbid)
 	{
 		this.schemaQuery = Settings.getInstance().getProperty("workbench.db." + dbid + ".currentschema.query", null);
+		useSavepoint = Settings.getInstance().getBoolProperty("workbench.db." + dbid + ".currentschema.query.usesavepoint", false);
 	}
 	
 	/**
@@ -46,16 +49,17 @@ public class GenericSchemaInfoReader
 		if (conn == null) return null;
 		if (StringUtil.isEmptyString(this.schemaQuery)) return null;
 		Statement stmt = null;
-		ResultSet rs = null;
 		String currentSchema = null;
 
-//		if (Settings.getInstance().getDebugMetadataSql())
-//		{
-//			LogMgr.logInfo("GenericSchemaInfoReader.getCurrentSchema()", "Using query=" + schemaQuery);
-//		}
+		Savepoint sp = null;
+		ResultSet rs = null;
 
 		try
 		{
+			if (useSavepoint)
+			{
+				sp = conn.setSavepoint();
+			}
 			stmt = conn.createStatementForQuery();
 			rs = stmt.executeQuery(schemaQuery);
 			if (rs.next())
@@ -77,6 +81,7 @@ public class GenericSchemaInfoReader
 		}
 		finally
 		{
+			conn.rollback(sp);
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return currentSchema;
