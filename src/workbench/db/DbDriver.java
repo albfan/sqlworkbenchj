@@ -362,7 +362,7 @@ public class DbDriver
 				try
 				{
 					stmt = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-					stmt.execute("SET application_name = '" + getProgramName() + "'");
+					stmt.execute("SET application_name = '" + getProgramName() + " (" + id + ") '");
 					// make sure the transaction is ended
 					// as this is absolutely the first thing we did, rollback() should be save
 					// and not interfere with any

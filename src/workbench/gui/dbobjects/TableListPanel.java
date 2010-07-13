@@ -953,6 +953,7 @@ public class TableListPanel
 		{
 			WbSwingUtilities.showDefaultCursor(this);
 			setBusy(false);
+			endTransaction();
 		}
 	}
 
@@ -1557,14 +1558,19 @@ public class TableListPanel
 		}
 		finally
 		{
-			if (this.dbConnection.selectStartsTransaction() && !this.dbConnection.getAutoCommit())
-			{
-				try { this.dbConnection.commit(); } catch (Throwable th) {}
-			}
 			WbSwingUtilities.showDefaultCursor(this);
 			this.setBusy(false);
 			this.repaint();
 			closeInfoWindow();
+			endTransaction();
+		}
+	}
+
+	private void endTransaction()
+	{
+		if (this.dbConnection.selectStartsTransaction() && !this.dbConnection.getAutoCommit())
+		{
+			try { this.dbConnection.commit(); } catch (Throwable th) {}
 		}
 	}
 

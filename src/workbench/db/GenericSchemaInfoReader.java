@@ -61,15 +61,18 @@ public class GenericSchemaInfoReader
 				sp = conn.setSavepoint();
 			}
 			stmt = conn.createStatementForQuery();
-			rs = stmt.executeQuery(schemaQuery);
-			if (rs.next())
+			stmt.execute(schemaQuery);
+			rs = stmt.getResultSet();
+			if (rs != null && rs.next())
 			{
 				currentSchema = rs.getString(1);
 			}
 			if (currentSchema != null) currentSchema = currentSchema.trim();
+			conn.releaseSavepoint(sp);
 		}
 		catch (Exception e)
 		{
+			conn.rollback(sp);
 			LogMgr.logWarning("GenericSchemaInfoReader.getCurrentSchema()", "Error reading current schema using query: " + schemaQuery, e);
 			if (e instanceof SQLException)
 			{
@@ -81,7 +84,6 @@ public class GenericSchemaInfoReader
 		}
 		finally
 		{
-			conn.rollback(sp);
 			SqlUtil.closeAll(rs, stmt);
 		}
 		return currentSchema;
