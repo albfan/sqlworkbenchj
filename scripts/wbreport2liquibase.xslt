@@ -17,7 +17,7 @@
 
 <xsl:variable name="schema-owner">${schema.owner}</xsl:variable>
 
-<xsl:import href="liquibase_createtable.xslt"/>
+<xsl:import href="liquibase_common.xslt"/>
 
 <xsl:template match="/schema-report">
   
@@ -32,7 +32,7 @@
     <xsl:for-each select="table-def">
       <xsl:sort select="table-name"/>
       
-      <!-- the create-table template is defined in liquibase_createtable.xslt -->
+      <!-- the create-table template is defined in liquibase_common.xslt -->
       <xsl:call-template name="create-table"/>
       
     </xsl:for-each>  <!-- tables -->
