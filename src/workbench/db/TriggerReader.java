@@ -258,9 +258,6 @@ public class TriggerReader
 		ResultSet rs = null;
 		try
 		{
-			// for some DBMS (e.g. SQL Server)
-			// we need to run a exec which might not work
-			// when using executeQuery() (depending on the JDBC driver)
 			stmt.execute(query);
 			rs = stmt.getResultSet();
 
@@ -271,7 +268,8 @@ public class TriggerReader
 				{
 					for (int i=1; i <= colCount; i++)
 					{
-						result.append(rs.getString(i));
+						String line = rs.getString(i);
+						result.append(line);
 					}
 				}
 			}

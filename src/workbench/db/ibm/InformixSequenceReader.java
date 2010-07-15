@@ -1,5 +1,5 @@
 /*
- * DerbySequenceReader.java
+ * InformixSequenceReader.java
  *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
@@ -9,7 +9,7 @@
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
-package workbench.db.derby;
+package workbench.db.ibm;
 
 import workbench.db.SequenceDefinition;
 import workbench.db.SequenceReader;
@@ -32,27 +32,26 @@ import workbench.db.WbConnection;
  *
  * @author  Thomas Kellerer
  */
-public class DerbySequenceReader
+public class InformixSequenceReader
 	implements SequenceReader
 {
 	private WbConnection dbConn;
 	private String baseQuery;
 
-	public DerbySequenceReader(WbConnection conn)
+	public InformixSequenceReader(WbConnection conn)
 	{
 		dbConn = conn;
-		baseQuery = "SELECT sch.schemaname,  \n" +
-             "       seq.sequencename, \n" +
-             "       seq.sequencedatatype, \n" +
-             "       seq.currentvalue, \n" +
-             "       seq.startvalue, \n" +
-             "       seq.minimumvalue, \n" +
-             "       seq.maximumvalue, \n" +
-             "       seq.increment, \n" +
-             "       seq.cycleoption \n" +
-             "FROM sys.syssequences seq \n" +
-             "  JOIN sys.sysschemas sch ON sch.schemaid = seq.schemaid";
-	}
+		baseQuery = "select trim(t.tabname) as sequence_name, \n" +
+             "       trim(t.owner) as sequence_schema, \n" +
+             "       seq.start_val, \n" +
+             "       seq.inc_val, \n" +
+             "       seq.min_val, \n" +
+             "       seq.max_val, \n" +
+             "       seq.cycle, \n" +
+             "       seq.cache, \n" +
+             "       seq.order \n" +
+             " from syssequences seq \n" +
+             "   join systables t on seq.tabid = t.tabid";	}
 
 	@Override
 	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
@@ -77,15 +76,15 @@ public class DerbySequenceReader
 
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
-		String name = ds.getValueAsString(row, "sequencename");
-		String schema = ds.getValueAsString(row, "schemaname");
+		String name = ds.getValueAsString(row, "sequence_name");
+		String schema = ds.getValueAsString(row, "sequence_schema");
 		SequenceDefinition result = new SequenceDefinition(schema, name);
-		result.setSequenceProperty("START", ds.getValue(row, "startvalue"));
-		result.setSequenceProperty("MINVALUE", ds.getValue(row, "minimumvalue"));
-		result.setSequenceProperty("MAXVALUE", ds.getValue(row, "maximumvalue"));
-		result.setSequenceProperty("INCREMENT", ds.getValue(row, "increment"));
-		result.setSequenceProperty("CYCLE", ds.getValue(row, "cycleoption"));
-		result.setSequenceProperty("DATATYPE", ds.getValueAsString(row, "sequencedatatype"));
+		result.setSequenceProperty("START", ds.getValue(row, "start_val"));
+		result.setSequenceProperty("MINVALUE", ds.getValue(row, "min_val"));
+		result.setSequenceProperty("MAXVALUE", ds.getValue(row, "max_val"));
+		result.setSequenceProperty("INCREMENT", ds.getValue(row, "inc_al"));
+		result.setSequenceProperty("CYCLE", ds.getValue(row, "cycle"));
+		result.setSequenceProperty("ORDER", ds.getValue(row, "order"));
 		readSequenceSource(result);
 		return result;
 	}
@@ -97,7 +96,7 @@ public class DerbySequenceReader
 		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(schema))
 		{
-			sql += " WHERE sch.schemaname = '" + schema + "'";
+			sql += " WHERE t.owner = '" + schema + "'";
 			whereAdded = true;
 		}
 
@@ -111,12 +110,12 @@ public class DerbySequenceReader
 			{
 				sql += " WHERE ";
 			}
-			sql += " seq.sequencename LIKE '" + namePattern + "'";
+			sql += " t.tabname LIKE '" + namePattern + "'";
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
-			LogMgr.logInfo("DerbySequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
+			LogMgr.logInfo("InformixSequenceReader.getRawSequenceDefinition()", "Using query=\n" + sql);
 		}
 
 		Statement stmt = null;
@@ -130,7 +129,7 @@ public class DerbySequenceReader
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("DerbySequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
+			LogMgr.logError("InformixSequenceReader.getRawSequenceDefinition()", "Error when retrieving sequence definition", e);
 		}
 		finally
 		{
@@ -165,17 +164,15 @@ public class DerbySequenceReader
 		String cycle = (String) def.getSequenceProperty("CYCLE");
 		String order = (String) def.getSequenceProperty("ORDER");
 		Number cache = (Number) def.getSequenceProperty("CACHE");
-		String type = (String) def.getSequenceProperty("DATATYPE");
 
-    result.append(" AS " + type);
-		result.append(buildSequenceDetails(true, type, start, minvalue, maxvalue, increment, cycle, order, cache));
+		result.append(buildSequenceDetails(true, start, minvalue, maxvalue, increment, cycle, order, cache));
 
 		result.append(';');
 		result.append(nl);
 		def.setSource(result);
 	}
 
-	public static CharSequence buildSequenceDetails(boolean doFormat, String type, Number start, Number minvalue, Number maxvalue, Number increment, String cycle, String order, Number cache)
+	public static CharSequence buildSequenceDetails(boolean doFormat, Number start, Number minvalue, Number maxvalue, Number increment, String cycle, String order, Number cache)
 	{
 		StringBuilder result = new StringBuilder(30);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
@@ -193,16 +190,8 @@ public class DerbySequenceReader
 
 		if (doFormat) result.append(nl + "      ");
 
-		boolean hasMinValue = false;
-		if ("integer".equalsIgnoreCase(type))
-		{
-			hasMinValue = minvalue != null && minvalue.intValue() != Integer.MIN_VALUE;
-		}
-		else if ("bigint".equalsIgnoreCase(type))
-		{
-			hasMinValue = minvalue != null && minvalue.longValue() != Long.MIN_VALUE;
-		}
-
+		boolean hasMinValue = minvalue != null && minvalue.longValue() != 1;
+		
 		if (hasMinValue)
 		{
 			result.append(" MINVALUE ");
@@ -210,17 +199,15 @@ public class DerbySequenceReader
 		}
 		else
 		{
-			if (doFormat) result.append(" NO MINVALUE");
+			if (doFormat) result.append(" NOMINVALUE");
 		}
 
 		if (doFormat) result.append(nl + "      ");
-		if (maxvalue != null && maxvalue.longValue() == -1)
+		boolean hasMaxValue = maxvalue != null && maxvalue.longValue() != Long.MAX_VALUE;
+		if (hasMaxValue)
 		{
-			if (maxvalue.longValue() != Long.MAX_VALUE)
-			{
-				result.append(" MAXVALUE ");
-				result.append(maxvalue);
-			}
+			result.append(" MAXVALUE ");
+			result.append(maxvalue);
 		}
 		else if (doFormat)
 		{
@@ -228,7 +215,7 @@ public class DerbySequenceReader
 		}
 
 		if (doFormat) result.append(nl + "      ");
-		if (cycle != null && cycle.equals("Y"))
+		if (cycle != null && cycle.equals("1"))
 		{
 			result.append(" CYCLE");
 		}
@@ -239,5 +226,5 @@ public class DerbySequenceReader
 
 		return result;
 	}
-
+	
 }

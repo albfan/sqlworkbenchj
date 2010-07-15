@@ -51,7 +51,7 @@ public class GetMetaDataSql
 		boolean needsAnd = false;
 		boolean needsWhere = false;
 		StringBuilder sql = new StringBuilder(baseSql);
-		if (baseSql.toLowerCase().indexOf("where") == -1)
+		if (baseSql.toLowerCase().indexOf("where") == -1 || baseSql.trim().endsWith(")"))
 		{
 			needsWhere = true;
 		}

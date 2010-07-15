@@ -369,20 +369,29 @@ and   t.schemaid = s.schemaid
 
   <void method="put">
    <string>Informix Dynamic Server</string>
-   <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
+   <object id="list_informix_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
-        SELECT b.data, b.seqno
-        FROM informix.systriggers t, informix.systrigbody b
-        WHERE t.trigid=b.trigid
-          AND b.datakey IN ('A', 'D')
+        select data
+        FROM
+        (
+          SELECT b.data||'\n' as data, -1 as seqno, t.trigname
+          FROM informix.systriggers t, informix.systrigbody b
+          WHERE t.trigid=b.trigid
+            AND b.datakey = 'D'
+          union all
+          SELECT b.data||'\n' as data, b.seqno, t.trigname
+          FROM informix.systriggers t, informix.systrigbody b
+          WHERE t.trigid=b.trigid
+            AND b.datakey = 'A'
+        )
       </string>
     </void>
     <void property="objectNameField">
-     <string>t.trigname</string>
+     <string>trigname</string>
     </void>
     <void property="orderBy">
-     <string>ORDER BY b.seqno</string>
+     <string>ORDER BY seqno</string>
     </void>
    </object>
   </void>

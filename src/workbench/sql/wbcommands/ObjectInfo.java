@@ -26,6 +26,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.ColumnRemover;
@@ -91,91 +92,119 @@ public class ObjectInfo
 		TableIdentifier synonymTarget = null;
 		if (toDescribe != null && dbs.isSynonymType(toDescribe.getType()))
 		{
-			synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
-			if (synonymTarget != null)
+			try
 			{
-				String msg = 
-					"--------[ " + StringUtil.capitalize(toDescribe.getType()) + ": " + toDescribe.getTableName() + " ]--------\n" +
-					toDescribe.getObjectExpression(connection) + " --> " +
-					synonymTarget.getTableExpression(connection) + " (" +
-					synonymTarget.getObjectType() + ")";
+				synonymTarget = connection.getMetadata().getSynonymTable(toDescribe);
+				if (synonymTarget != null)
+				{
+					String msg =
+						"--------[ " + StringUtil.capitalize(toDescribe.getType()) + ": " + toDescribe.getTableName() + " ]--------\n" +
+						toDescribe.getObjectExpression(connection) + " --> " +
+						synonymTarget.getTableExpression(connection) + " (" +
+						synonymTarget.getObjectType() + ")";
 
-				result.addMessage(msg + "\n");
-				result.setSourceCommand(msg);
+					result.addMessage(msg + "\n");
+					result.setSourceCommand(msg);
+				}
+				toDescribe = synonymTarget;
 			}
-			toDescribe = synonymTarget;
+			catch (Exception e)
+			{
+				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving synonym table", e);
+			}
 		}
 
 		if (toDescribe != null && "SEQUENCE".equals(toDescribe.getType()))
 		{
-			SequenceReader seqReader = connection.getMetadata().getSequenceReader();
-			if (seqReader != null)
+			try
 			{
-				String schema = (toDescribe == null ? tbl.getSchema() : toDescribe.getSchema());
-				String name = (toDescribe == null ? tbl.getObjectName() : toDescribe.getObjectName());
-				String catalog = (toDescribe == null ? tbl.getCatalog() : toDescribe.getCatalog());
-				SequenceDefinition seq = seqReader.getSequenceDefinition(catalog, schema, name);
-				if (seq != null)
+				SequenceReader seqReader = connection.getMetadata().getSequenceReader();
+				if (seqReader != null)
 				{
-					DataStore ds = seq.getRawDefinition();
-					ds.setResultName(seq.getObjectType() + ": " + seq.getObjectName());
-					result.addDataStore(ds);
-
-					CharSequence source = seq.getSource();
-					if (source == null)
+					String schema = (toDescribe == null ? tbl.getSchema() : toDescribe.getSchema());
+					String name = (toDescribe == null ? tbl.getObjectName() : toDescribe.getObjectName());
+					String catalog = (toDescribe == null ? tbl.getCatalog() : toDescribe.getCatalog());
+					SequenceDefinition seq = seqReader.getSequenceDefinition(catalog, schema, name);
+					if (seq != null)
 					{
-						// source was not build by the reader during initial retrieval
-						source = seq.getSource(connection);
-					}
+						DataStore ds = seq.getRawDefinition();
+						ds.setResultName(seq.getObjectType() + ": " + seq.getObjectName());
+						result.addDataStore(ds);
 
-					if (source != null)
-					{
-						String src = source.toString();
-						result.addMessage("--------[ " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
-						result.addMessage(src);
-						result.addMessage("--------");
-						if (StringUtil.isBlank(result.getSourceCommand()))
+						CharSequence source = seq.getSource();
+						if (source == null)
 						{
-							result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
+							// source was not build by the reader during initial retrieval
+							source = seq.getSource(connection);
 						}
+
+						if (source != null)
+						{
+							String src = source.toString();
+							result.addMessage("--------[ " + StringUtil.capitalize(seq.getObjectType()) + ": " + seq.getObjectName() + " ]--------");
+							result.addMessage(src);
+							result.addMessage("--------");
+							if (StringUtil.isBlank(result.getSourceCommand()))
+							{
+								result.setSourceCommand(StringUtil.getMaxSubstring(src, 350, "..."));
+							}
+						}
+						return result;
 					}
-					return result;
 				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving sequences", e);
 			}
 		}
 		
 		if (toDescribe == null)
 		{
-			// No table or something similar found, try to find a procedure with that name
-			ProcedureReader reader = connection.getMetadata().getProcedureReader();
-			List<ProcedureDefinition> procs = reader.getProcedureList(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
-			
-			if (procs.size() == 1)
+			try
 			{
-				ProcedureDefinition def = procs.get(0);
-				CharSequence source = def.getSource(connection);
-				result.addMessage("--------[ " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + " ]--------");
-				result.addMessage(source);
-				result.addMessage("--------");
-				result.setSuccess();
-				return result;
+				// No table or something similar found, try to find a procedure with that name
+				ProcedureReader reader = connection.getMetadata().getProcedureReader();
+				List<ProcedureDefinition> procs = reader.getProcedureList(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+
+				if (procs.size() == 1)
+				{
+					ProcedureDefinition def = procs.get(0);
+					CharSequence source = def.getSource(connection);
+					result.addMessage("--------[ " + StringUtil.capitalize(def.getObjectType())  + ": " + def.getObjectExpression(connection) + " ]--------");
+					result.addMessage(source);
+					result.addMessage("--------");
+					result.setSuccess();
+					return result;
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving procedures", e);
 			}
 
-			// No procedure found, try to find a trigger.
-			TriggerReader trgReader = new TriggerReader(connection);
-			TriggerDefinition trg = trgReader.findTrigger(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
-			String source = null;
-			if (trg != null)
+			try
 			{
-				source = trgReader.getTriggerSource(trg);
+				// No procedure found, try to find a trigger.
+				TriggerReader trgReader = new TriggerReader(connection);
+				TriggerDefinition trg = trgReader.findTrigger(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
+				String source = null;
+				if (trg != null)
+				{
+					source = trgReader.getTriggerSource(trg);
+				}
+				if (StringUtil.isNonBlank(source))
+				{
+					result.addMessage("--------[ Trigger: " + tbl.getObjectName() + " ]--------");
+					result.addMessage(source);
+					result.addMessage("--------");
+					result.setSuccess();
+					return result;
+				}
 			}
-			if (StringUtil.isNonBlank(source))
+			catch (Exception e)
 			{
-				result.addMessage("--------[ Trigger: " + tbl.getObjectName() + " ]--------");
-				result.addMessage(source);
-				result.addMessage("--------");
-				result.setSuccess();
-				return result;
+				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving triggers", e);
 			}
 		}
 
@@ -226,36 +255,57 @@ public class ObjectInfo
 		}
 		else if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{
-			IndexReader idxReader = connection.getMetadata().getIndexReader();
-			DataStore index = idxReader != null ? idxReader.getTableIndexInformation(toDescribe) : null;
-			if (index != null && index.getRowCount() > 0)
+			try
 			{
-				index.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
-				result.addDataStore(index);
+				IndexReader idxReader = connection.getMetadata().getIndexReader();
+				DataStore index = idxReader != null ? idxReader.getTableIndexInformation(toDescribe) : null;
+				if (index != null && index.getRowCount() > 0)
+				{
+					index.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
+					result.addDataStore(index);
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving index info for " + toDescribe, e);
 			}
 
-			TriggerReader trgReader = new TriggerReader(connection);
-			DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
-			if (triggers != null && triggers.getRowCount() > 0)
+			try
 			{
-				triggers.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
-				result.addDataStore(triggers);
+				TriggerReader trgReader = new TriggerReader(connection);
+				DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
+				if (triggers != null && triggers.getRowCount() > 0)
+				{
+					triggers.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));
+					result.addDataStore(triggers);
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving triggers for " + toDescribe, e);
 			}
 
-			FKHandler fk = new FKHandler(connection);
-			DataStore references = fk.getForeignKeys(toDescribe, false);
-			if (references.getRowCount() > 0)
+			try
 			{
-				references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
-				result.addDataStore(references);
+				FKHandler fk = new FKHandler(connection);
+				DataStore references = fk.getForeignKeys(toDescribe, false);
+				if (references.getRowCount() > 0)
+				{
+					references.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerFkColumns"));
+					result.addDataStore(references);
+				}
+				DataStore referencedBy = fk.getReferencedBy(toDescribe);
+				if (referencedBy.getRowCount() > 0)
+				{
+					referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
+					result.addDataStore(referencedBy);
+				}
+			}
+			catch (Exception e)
+			{
+				LogMgr.logError("ObjectInfo.getObjectInfo()", "Error retrieving foreign keys for " + toDescribe, e);
 			}
 
-			DataStore referencedBy = fk.getReferencedBy(toDescribe);
-			if (referencedBy.getRowCount() > 0)
-			{
-				referencedBy.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerReferencedColumns"));
-				result.addDataStore(referencedBy);
-			}
 		}
 
 		return result;

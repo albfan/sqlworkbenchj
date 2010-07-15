@@ -46,10 +46,7 @@
     <void property="baseSql">
      <string>
        SELECT trg.trigname as trigger_name,
-              case
-                 when trg.type ='A' then 'AFTER'
-                 else 'BEFORE'
-              end as trigger_type ,
+              '' trigger_type ,
               case
                 when trg.event = 'D' then 'DELETE'
                 when trg.event = 'I' then 'INSERT'
