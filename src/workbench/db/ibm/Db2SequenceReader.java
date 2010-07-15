@@ -44,9 +44,9 @@ public class Db2SequenceReader
 		dbid = useId;
 	}
 
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>(ds.getRowCount());
 		for (int row = 0; row < ds.getRowCount(); row ++)
@@ -56,30 +56,45 @@ public class Db2SequenceReader
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
 		if (ds == null || ds.getRowCount() != 1) return null;
 		return createSequenceDefinition(ds, 0);
 	}
 
+	private String getDSValueString(DataStore ds, int row, String ... colNames)
+	{
+		Object o = getDSValue(ds, row, colNames);
+		if (o == null) return null;
+		return o.toString();
+	}
+	
+	private Object getDSValue(DataStore ds, int row, String ... colNames)
+	{
+		if (colNames == null) return null;
+		for (String col : colNames)
+		{
+			if (ds.getColumnIndex(col) > -1)
+			{
+				return ds.getValue(row, col);
+			}
+		}
+		return null;
+	}
+	
 	private SequenceDefinition createSequenceDefinition(DataStore ds, int row)
 	{
-		String name = null;
-		// When running the unit test, H2 will return SEQNAME as the column alias and NAME as the column name
-		// so we need to check for this here.
-		if (ds.getColumnIndex("SEQNAME") > -1)
-		{
-			name = ds.getValueAsString(row, "SEQNAME");
-		}
-		else if (ds.getColumnIndex("NAME") > -1)
-		{
-			name = ds.getValueAsString(row, "NAME");
-		}
-		SequenceDefinition result = new SequenceDefinition(null, name);
+		String name = getDSValueString(ds, row, "SEQNAME", "NAME", "SEQUENCE_NAME");
+		String schema = getDSValueString(ds, row, "SEQUENCE_SCHEMA", "SEQSCHEMA", "SCHEMA");
+		String catalog = getDSValueString(ds, row, "SEQUENCE_CATALOG", "SEQUENCE_OWNER");
+
+		SequenceDefinition result = new SequenceDefinition(schema, name);
+		result.setCatalog(catalog);
+
 		result.setSequenceProperty("START", ds.getValue(row, "START"));
-		result.setSequenceProperty("MINVALUE", ds.getValue(row, "MINVALUE"));
-		result.setSequenceProperty("MAXVALUE", ds.getValue(row, "MAXVALUE"));
+		result.setSequenceProperty("MINVALUE", getDSValue(ds, row, "MINVALUE", "MINIMUM_VALUE"));
+		result.setSequenceProperty("MAXVALUE", getDSValue(ds, row, "MAXVALUE", "MAXIMUM_VALUE"));
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT"));
 		result.setSequenceProperty("CYCLE", ds.getValue(row, "CYCLE"));
 		result.setSequenceProperty("ORDER", ds.getValue(row, "ORDER"));
@@ -93,12 +108,13 @@ public class Db2SequenceReader
 		{
 			result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
 		}
+		
 		result.setComment(ds.getValueAsString(row, "REMARKS"));
 		readSequenceSource(result);
 		return result;
 	}
 
-	public DataStore getRawSequenceDefinition(String schema, String namePattern)
+	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
 		String sql = null;
 
@@ -107,12 +123,15 @@ public class Db2SequenceReader
 
 		String nameCol;
 		String schemaCol;
+		String catalogCol = null;
 
 		if (dbid.equals("db2i"))
 		{
 			// Host system on AS/400
 			sql =
-			"SELECT sequence_name as SEQNAME, \n" +
+			"SELECT SEQUENCE_NAME, \n" +
+			"       SEQUENCE_SCHEMA \n, " +
+			"       SEQUENCE_OWNER as sequence_catalog \n, " +
 			"       0 as START, \n" +
 			"       minimum_value as MINVALUE, \n" +
 			"       maximum_value as MAXVALUE, \n" +
@@ -132,6 +151,7 @@ public class Db2SequenceReader
 			// Host system on z/OS
 			sql = 
 			"SELECT NAME AS SEQNAME, \n" +
+			"       SCHEMA AS SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
 			"       MINVALUE, \n" +
 			"       MAXVALUE, \n" +
@@ -148,7 +168,9 @@ public class Db2SequenceReader
 		}
 		else
 		{
-			sql = "SELECT SEQNAME, \n" +
+			sql =
+			"SELECT SEQNAME, \n" +
+			"       SEQSCHEMA as SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
 			"       MINVALUE, \n" +
 			"       MAXVALUE, \n" +
@@ -222,9 +244,9 @@ public class Db2SequenceReader
 		return result;
 	}
 
-	public CharSequence getSequenceSource(String schema, String sequence)
+	public CharSequence getSequenceSource(String catalog, String schema, String sequence)
 	{
-		SequenceDefinition def = getSequenceDefinition(schema, sequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, schema, sequence);
 		if (def == null) return null;
 		return def.getSource();
 	}
@@ -255,9 +277,10 @@ public class Db2SequenceReader
 		{
 			Object oname = def.getSequenceProperty("DATA_TYPE");
 			String typeName = (oname != null ? oname.toString() : null);
-			if (typeName != null)
+			if (typeName != null )
 			{
-				result.append(" AS " + typeIdToName(typeid.intValue()));
+				result.append(" AS ");
+				result.append(typeName);
 			}
 		}
 

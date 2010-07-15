@@ -67,11 +67,11 @@ public class HsqlSequenceReader
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
-		CharSequence s = getSequenceSource(def.getSequenceOwner(), def.getSequenceName());
+		CharSequence s = getSequenceSource(def.getCatalog(), def.getSequenceOwner(), def.getSequenceName());
 		def.setSource(s);
 	}
 
-	public DataStore getRawSequenceDefinition(String owner, String namePattern)
+	public DataStore getRawSequenceDefinition(String catalog, String owner, String namePattern)
 	{
 		String query = baseQuery;
 
@@ -107,9 +107,9 @@ public class HsqlSequenceReader
 	}
 
 
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
@@ -141,16 +141,16 @@ public class HsqlSequenceReader
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
 		if (ds == null) return null;
 		return createSequenceDefinition(ds, 0);
 	}
 
-	public CharSequence getSequenceSource(String owner, String sequence)
+	public CharSequence getSequenceSource(String catalog, String owner, String sequence)
 	{
-		SequenceDefinition def = getSequenceDefinition(owner, sequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, owner, sequence);
 		return buildSource(def);
 	}
 

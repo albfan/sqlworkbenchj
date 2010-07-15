@@ -72,7 +72,7 @@ public class OracleSequenceReaderTest
 	public void testGetSequences()
 	{
 		OracleSequenceReader instance = new OracleSequenceReader(db);
-		List<SequenceDefinition> result = instance.getSequences("PUBLIC", null);
+		List<SequenceDefinition> result = instance.getSequences(null, "PUBLIC", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
 

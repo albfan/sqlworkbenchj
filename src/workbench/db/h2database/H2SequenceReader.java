@@ -45,16 +45,16 @@ public class H2SequenceReader
 	 *
 	 *	@return The SQL to recreate the given sequence
 	 */
-	public CharSequence getSequenceSource(String owner, String aSequence)
+	public CharSequence getSequenceSource(String catalog, String owner, String aSequence)
 	{
-		SequenceDefinition def = getSequenceDefinition(owner, aSequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, owner, aSequence);
 		if (def == null) return "";
 		return def.getSource();
 	}
 
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
@@ -65,9 +65,9 @@ public class H2SequenceReader
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
-    DataStore ds = getRawSequenceDefinition(owner, sequence);
+    DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
     if (ds == null || ds.getRowCount() == 0) return null;
 
 		return createSequenceDefinition(ds, 0);
@@ -131,7 +131,7 @@ public class H2SequenceReader
 		return;
 	}
 
-	public DataStore getRawSequenceDefinition(String owner, String sequence)
+	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		Statement stmt = null;
 		ResultSet rs = null;

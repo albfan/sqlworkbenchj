@@ -54,9 +54,10 @@ public class DerbySequenceReader
              "  JOIN sys.sysschemas sch ON sch.schemaid = seq.schemaid";
 	}
 
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	@Override
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>(ds.getRowCount());
 		for (int row = 0; row < ds.getRowCount(); row ++)
@@ -66,9 +67,10 @@ public class DerbySequenceReader
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	@Override
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
 		if (ds == null || ds.getRowCount() != 1) return null;
 		return createSequenceDefinition(ds, 0);
 	}
@@ -88,7 +90,7 @@ public class DerbySequenceReader
 		return result;
 	}
 
-	public DataStore getRawSequenceDefinition(String schema, String namePattern)
+	public DataStore getRawSequenceDefinition(String catalog, String schema, String namePattern)
 	{
 		String sql = baseQuery;
 
@@ -138,13 +140,15 @@ public class DerbySequenceReader
 		return result;
 	}
 
-	public CharSequence getSequenceSource(String schema, String sequence)
+	@Override
+	public CharSequence getSequenceSource(String catalog, String schema, String sequence)
 	{
-		SequenceDefinition def = getSequenceDefinition(schema, sequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, schema, sequence);
 		if (def == null) return null;
 		return def.getSource();
 	}
 
+	@Override
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		StringBuilder result = new StringBuilder(100);

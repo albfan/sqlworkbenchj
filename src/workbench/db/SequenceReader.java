@@ -24,15 +24,15 @@ public interface SequenceReader
 	/**
 	 *	Return a SQL String to recreate the given sequence
 	 */
-	CharSequence getSequenceSource(String schema, String sequence);
+	CharSequence getSequenceSource(String catalog, String schema, String sequence);
 	void readSequenceSource(SequenceDefinition def);
 	
 	/**
 	 * 	Get a list of sequences for the given owner. 
 	 */
-	List<SequenceDefinition> getSequences(String schema, String namePattern)
+	List<SequenceDefinition> getSequences(String catalogPattern, String schemaPattern, String namePattern)
 		throws SQLException;
 	
-	SequenceDefinition getSequenceDefinition(String schema, String sequence);
-	DataStore getRawSequenceDefinition(String schema, String sequence);
+	SequenceDefinition getSequenceDefinition(String catalog, String schema, String sequence);
+	DataStore getRawSequenceDefinition(String catalog, String schema, String sequence);
 }

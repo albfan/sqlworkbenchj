@@ -53,7 +53,7 @@ public class WbDescribeObject
 	public WbDescribeObject()
 	{
 		super();
-		this.isUpdatingCommand = true;
+		isUpdatingCommand = false;
 		cmdLine = new ArgumentParser();
 		cmdLine.addArgument(ARG_DEPEND, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_OBJECT);

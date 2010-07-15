@@ -164,16 +164,16 @@ public class PostgresSequenceReader
 	 *
 	 *	@return The SQL to recreate the given sequence
 	 */
-	public CharSequence getSequenceSource(String owner, String aSequence)
+	public CharSequence getSequenceSource(String catalog, String owner, String aSequence)
 	{
-		SequenceDefinition def = getSequenceDefinition(owner, aSequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, owner, aSequence);
 		return def.getSource();
 	}
 
 	/**
 	 * Retrieve the list of full SequenceDefinitions from the database.
 	 */
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 
@@ -191,7 +191,7 @@ public class PostgresSequenceReader
 			{
 				String name = rs.getString("TABLE_NAME");
 				String schema = rs.getString("TABLE_SCHEM");
-				result.add(getSequenceDefinition(schema, name));
+				result.add(getSequenceDefinition(catalog, schema, name));
 			}
 			this.dbConnection.releaseSavepoint(sp);
 
@@ -249,7 +249,7 @@ public class PostgresSequenceReader
 			this.dbConnection.releaseSavepoint(sp);
 			if (exists)
 			{
-				DataStore ds = getRawSequenceDefinition(owner, sequence);
+				DataStore ds = getRawSequenceDefinition(null, owner, sequence);
 				result = createDefinition(sequence, owner, comment, ds);
 				readRelatedTable(result);
 				readSequenceSource(result); // should be called after readRelatedTable() !!
@@ -273,7 +273,7 @@ public class PostgresSequenceReader
 	{
 		if (def == null) return;
 
-		DataStore ds = getRawSequenceDefinition(def.getSequenceOwner(), def.getSequenceName());
+		DataStore ds = getRawSequenceDefinition(null, def.getSequenceOwner(), def.getSequenceName());
 		if (ds == null) return;
 		if (ds.getRowCount() == 0) return;
 
@@ -291,12 +291,12 @@ public class PostgresSequenceReader
 		readSequenceSource(def);
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		return getSequence(owner, sequence);
 	}
 
-	public DataStore getRawSequenceDefinition(String owner, String sequence)
+	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		if (sequence == null) return null;
 

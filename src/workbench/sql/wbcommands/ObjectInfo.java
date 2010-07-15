@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.util.List;
 import workbench.db.DbSettings;
 import workbench.db.FKHandler;
+import workbench.db.IndexReader;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.SequenceDefinition;
@@ -112,7 +113,8 @@ public class ObjectInfo
 			{
 				String schema = (toDescribe == null ? tbl.getSchema() : toDescribe.getSchema());
 				String name = (toDescribe == null ? tbl.getObjectName() : toDescribe.getObjectName());
-				SequenceDefinition seq = seqReader.getSequenceDefinition(schema, name);
+				String catalog = (toDescribe == null ? tbl.getCatalog() : toDescribe.getCatalog());
+				SequenceDefinition seq = seqReader.getSequenceDefinition(catalog, schema, name);
 				if (seq != null)
 				{
 					DataStore ds = seq.getRawDefinition();
@@ -224,15 +226,16 @@ public class ObjectInfo
 		}
 		else if (toDescribe != null && toDescribe.getType().indexOf("TABLE") > -1 && includeDependencies)
 		{
-			DataStore index = connection.getMetadata().getIndexReader().getTableIndexInformation(toDescribe);
-			if (index.getRowCount() > 0)
+			IndexReader idxReader = connection.getMetadata().getIndexReader();
+			DataStore index = idxReader != null ? idxReader.getTableIndexInformation(toDescribe) : null;
+			if (index != null && index.getRowCount() > 0)
 			{
 				index.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerIndexes"));
 				result.addDataStore(index);
 			}
 
 			TriggerReader trgReader = new TriggerReader(connection);
-			DataStore triggers = trgReader.getTableTriggers(toDescribe);
+			DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
 			if (triggers != null && triggers.getRowCount() > 0)
 			{
 				triggers.setResultName(toDescribe.getTableName() +  " - " + ResourceMgr.getString("TxtDbExplorerTriggers"));

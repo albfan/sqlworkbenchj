@@ -1301,7 +1301,7 @@ public class DbMetadata
 				Settings.getInstance().getBoolProperty("workbench.db." + this.getDbId() + ".retrieve_sequences", true)
 				&& !sequencesReturned)
 		{
-			List<SequenceDefinition> sequences = sequenceReader.getSequences(schemaPattern, namePattern);
+			List<SequenceDefinition> sequences = sequenceReader.getSequences(catalogPattern, schemaPattern, namePattern);
 			for (SequenceDefinition sequence : sequences)
 			{
 				int row = result.addRow();
@@ -1849,7 +1849,8 @@ public class DbMetadata
 			tbl.adjustCase(this.dbConnection);
 			String schema = StringUtil.trimQuotes(table.getSchema());
 			String seqname = StringUtil.trimQuotes(table.getObjectName());
-			def = getSequenceReader().getRawSequenceDefinition(schema, seqname);
+			String catalog = StringUtil.trimQuotes(table.getCatalog());
+			def = getSequenceReader().getRawSequenceDefinition(catalog, schema, seqname);
 		}
 		else if (def == null)
 		{

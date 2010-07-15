@@ -1344,12 +1344,12 @@ public class SqlUtil
 	{
 		StringBuilder result = new StringBuilder(30);
 		DbMetadata meta = conn.getMetadata();
-		if (!StringUtil.isEmptyString(catalog) && !conn.getMetadata().ignoreCatalog(catalog))
+		if (StringUtil.isNonEmpty(catalog) && !conn.getMetadata().ignoreCatalog(catalog))
 		{
 			result.append(meta.quoteObjectname(catalog));
 			result.append('.');
 		}
-		if (!StringUtil.isEmptyString(schema) && !conn.getMetadata().ignoreSchema(schema))
+		if (StringUtil.isNonEmpty(schema) && !conn.getMetadata().ignoreSchema(schema))
 		{
 			result.append(meta.quoteObjectname(schema));
 			result.append('.');

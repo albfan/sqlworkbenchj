@@ -70,7 +70,7 @@ public class IngresMetadataTest
 	public void testGetSequences()
 	{
 		IngresMetadata instance = new IngresMetadata(db.getSqlConnection());
-		List<SequenceDefinition> result = instance.getSequences("PUBLIC", null);
+		List<SequenceDefinition> result = instance.getSequences(null, "PUBLIC", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
 			public int compare(DbObject o1, DbObject o2)

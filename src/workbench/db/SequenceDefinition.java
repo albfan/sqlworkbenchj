@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
 
 
 /**
@@ -28,6 +29,7 @@ public class SequenceDefinition
 {
 	private String sequenceName;
 	private String schema;
+	private String catalog;
 	private CharSequence source;
 	private String comment;
 	private TableIdentifier relatedTable;
@@ -63,7 +65,7 @@ public class SequenceDefinition
 		if (con == null) return null;
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		if (reader == null) return null;
-		return reader.getSequenceSource(schema, sequenceName);
+		return reader.getSequenceSource(catalog, schema, sequenceName);
 	}
 
 	public String getComment()
@@ -81,9 +83,15 @@ public class SequenceDefinition
 		return schema;
 	}
 	
+	public void setCatalog(String cat)
+	{
+		catalog = cat;
+	}
+	
+	@Override
 	public String getCatalog()
 	{
-		return null;
+		return catalog;
 	}
 
 	@Override
@@ -109,14 +117,7 @@ public class SequenceDefinition
 
 	public String getObjectExpression(WbConnection conn)
 	{
-		StringBuilder expr = new StringBuilder(30);
-		if (schema != null)
-		{
-			expr.append(conn.getMetadata().quoteObjectname(schema));
-			expr.append('.');
-		}
-		expr.append(conn.getMetadata().quoteObjectname(sequenceName));
-		return expr.toString();
+		return SqlUtil.buildExpression(conn, catalog, schema, sequenceName);
 	}
 	
 	public String getObjectType()

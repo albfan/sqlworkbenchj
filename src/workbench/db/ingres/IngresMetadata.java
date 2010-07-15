@@ -148,7 +148,7 @@ public class IngresMetadata
 	}
 
 
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
 		StringBuilder sql = new StringBuilder(SELECT_SEQUENCE_DEF);
 
@@ -205,9 +205,9 @@ public class IngresMetadata
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
 		if (ds == null || ds.getRowCount() == 0) return null;
 		return getDefinition(ds, 0, owner, sequence);
 	}
@@ -225,7 +225,7 @@ public class IngresMetadata
 		return def;
 	}
 
-	public DataStore getRawSequenceDefinition(String owner, String sequence)
+	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -254,7 +254,7 @@ public class IngresMetadata
 	public void readSequenceSource(SequenceDefinition def)
 	{
 		if (def == null) return;
-		CharSequence s = getSequenceSource(def.getSequenceOwner(), def.getSequenceName());
+		CharSequence s = getSequenceSource(null, def.getSequenceOwner(), def.getSequenceName());
 		def.setSource(s);
 	}
 
@@ -312,7 +312,7 @@ public class IngresMetadata
 		return result.toString();
 	}
 
-	public String getSequenceSource(String owner, String sequence)
+	public String getSequenceSource(String catalog, String owner, String sequence)
 	{
 		ResultSet rs = null;
 		PreparedStatement stmt = null;

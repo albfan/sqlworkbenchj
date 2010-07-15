@@ -39,9 +39,10 @@ public class OracleSequenceReader
     this.connection = conn;
   }
 
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	@Override
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null || ds.getRowCount() == 0) return Collections.emptyList();
 		ArrayList<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 		for (int row = 0; row < ds.getRowCount(); row ++)
@@ -51,15 +52,16 @@ public class OracleSequenceReader
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	@Override
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
 		if (ds == null || ds.getRowCount() == 0) return null;
 		SequenceDefinition def = createDefinition(ds, 0);
 		return def;
 	}
 
-  public DataStore getRawSequenceDefinition(String owner, String sequence)
+  public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
   {
     String sql = "SELECT SEQUENCE_OWNER, SEQUENCE_NAME, \n       " +
 			"MIN_VALUE, \n       " +
@@ -105,9 +107,10 @@ public class OracleSequenceReader
     return result;
   }
 
-  public CharSequence getSequenceSource(String owner, String sequence)
+	@Override
+  public CharSequence getSequenceSource(String catalog, String owner, String sequence)
   {
-		SequenceDefinition def = getSequenceDefinition(owner, sequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, owner, sequence);
 		if (def == null) return null;
 		return def.getSource();
 	}

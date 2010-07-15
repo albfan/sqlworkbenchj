@@ -95,7 +95,7 @@ public class Db2SequenceReaderTest
 	{
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2");
 		reader.setQuoteKeyword(true);
-		List<SequenceDefinition> result = reader.getSequences("FAKE_DB2", null);
+		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
 			public int compare(DbObject o1, DbObject o2)
@@ -121,7 +121,7 @@ public class Db2SequenceReaderTest
 	{
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2h");
 		reader.setQuoteKeyword(true);
-		List<SequenceDefinition> result = reader.getSequences("FAKE_DB2", null);
+		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
 			public int compare(DbObject o1, DbObject o2)

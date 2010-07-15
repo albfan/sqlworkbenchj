@@ -456,6 +456,11 @@ public class StringUtil
 		return isWhitespace(value);
 	}
 
+	public static boolean isNonEmpty(CharSequence value)
+	{
+		return !isEmptyString(value);
+	}
+
 	/**
 	 * Checks if the given String is null or has a zero length.
 	 * A String containing only whitespaces is not considered empty.

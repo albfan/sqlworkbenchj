@@ -59,7 +59,7 @@ public class H2SequenceReaderTest
 	public void testGetSequences()
 	{
 		H2SequenceReader instance = new H2SequenceReader(db.getSqlConnection());
-		List<SequenceDefinition> result = instance.getSequences("PUBLIC", null);
+		List<SequenceDefinition> result = instance.getSequences(null, "PUBLIC", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
 

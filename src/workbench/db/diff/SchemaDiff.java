@@ -304,7 +304,7 @@ public class SchemaDiff
 	 */
 	public void setExcludeTables(List<String> tables)
 	{
-		if (tables == null || tables.size() == 0)
+		if (tables == null || tables.isEmpty())
 		{
 			this.tablesToIgnore.clear();
 			return;
@@ -430,11 +430,11 @@ public class SchemaDiff
 			SequenceReader tarReader = targetDb.getMetadata().getSequenceReader();
 			if (refReader != null)
 			{
-				refSeqs = refReader.getSequences(this.referenceSchema, null);
+				refSeqs = refReader.getSequences(null, this.referenceSchema, null);
 			}
 			if (tarReader != null)
 			{
-				tarSeqs = tarReader.getSequences(this.referenceSchema, null);
+				tarSeqs = tarReader.getSequences(null, this.referenceSchema, null);
 			}
 			processSequenceList(refSeqs, tarSeqs);
 		}
@@ -554,7 +554,7 @@ public class SchemaDiff
 			SequenceDiffEntry entry = null;
 			if (targetReader != null)
 			{
-				SequenceDefinition def = targetReader.getSequenceDefinition(this.targetSchema, refSeq.getSequenceName());
+				SequenceDefinition def = targetReader.getSequenceDefinition(null, this.targetSchema, refSeq.getSequenceName());
 				entry = new SequenceDiffEntry(refSeq, def);
 				objectsToCompare.add(entry);
 				refSeqNames.add(refSeq.getSequenceName());
@@ -843,7 +843,7 @@ public class SchemaDiff
 			}
 		}
 
-		if (this.sequencesToDelete == null || sequencesToDelete.size() == 0) return;
+		if (this.sequencesToDelete == null || sequencesToDelete.isEmpty()) return;
 
 		out.write('\n');
 		writeTag(out, indent, TAG_DROP_SEQUENCE, true);
@@ -913,7 +913,7 @@ public class SchemaDiff
 	private void appendDropViews(Writer out, StrBuffer indent)
 		throws IOException
 	{
-		if (this.viewsToDelete == null || this.viewsToDelete.size() == 0) return;
+		if (this.viewsToDelete == null || this.viewsToDelete.isEmpty()) return;
 		out.write("\n");
 		writeTag(out, indent, TAG_DROP_VIEW, true);
 		Iterator itr = this.viewsToDelete.iterator();
@@ -930,7 +930,7 @@ public class SchemaDiff
 	private void appendDropTables(Writer out, StrBuffer indent)
 		throws IOException
 	{
-		if (this.tablesToDelete == null || this.tablesToDelete.size() == 0) return;
+		if (this.tablesToDelete == null || this.tablesToDelete.isEmpty()) return;
 		out.write("\n");
 		writeTag(out, indent, TAG_DROP_TABLE, true);
 		Iterator itr = this.tablesToDelete.iterator();

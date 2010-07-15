@@ -21,6 +21,7 @@ import java.util.Date;
  * A class to create a readable display for java.sql.Struct objects
  * retrieved from the database.
  * <br/>
+ * <br/>
  * This is a singleton to avoid excessive object creation during data retrieval.
  * <br/>
  * Currently this will only be used when retrieving data from an Oracle database.

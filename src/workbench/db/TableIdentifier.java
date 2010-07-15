@@ -670,7 +670,7 @@ public class TableIdentifier
 		else if ("SEQUENCE".equalsIgnoreCase(type))
 		{
 			SequenceReader reader = meta.getSequenceReader();
-			source = (reader != null ? reader.getSequenceSource(getSchema(), getTableName()) : null);
+			source = (reader != null ? reader.getSequenceSource(getCatalog(), getSchema(), getTableName()) : null);
 		}
 		else
 		{

@@ -39,9 +39,9 @@ public class McKoiSequenceReader
 		this.connection = con;
 	}
 
-	public List<SequenceDefinition> getSequences(String owner, String namePattern)
+	public List<SequenceDefinition> getSequences(String catalog, String owner, String namePattern)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, namePattern);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, namePattern);
 		if (ds == null) return Collections.emptyList();
 		List<SequenceDefinition> result = new ArrayList<SequenceDefinition>();
 		for (int row=0; row < ds.getRowCount(); row++)
@@ -52,15 +52,15 @@ public class McKoiSequenceReader
 		return result;
 	}
 
-	public SequenceDefinition getSequenceDefinition(String owner, String sequence)
+	public SequenceDefinition getSequenceDefinition(String catalog, String owner, String sequence)
 	{
-		DataStore ds = getRawSequenceDefinition(owner, sequence);
+		DataStore ds = getRawSequenceDefinition(catalog, owner, sequence);
 		if (ds == null || ds.getRowCount() != 1) return null;
 		SequenceDefinition def = createDefinition(ds, 0);
 		return def;
 	}
 
-	public DataStore getRawSequenceDefinition(String owner, String sequence)
+	public DataStore getRawSequenceDefinition(String catalog, String owner, String sequence)
 	{
 		String sql = "SELECT si.name, " +
 								 "       sd.minvalue, " +
@@ -122,9 +122,9 @@ public class McKoiSequenceReader
 		return result;
 	}
 
-	public CharSequence getSequenceSource(String owner, String sequence)
+	public CharSequence getSequenceSource(String catalog, String owner, String sequence)
 	{
-		SequenceDefinition def = getSequenceDefinition(owner, sequence);
+		SequenceDefinition def = getSequenceDefinition(catalog, owner, sequence);
 		if (def == null) return null;
 		return def.getSource();
 	}
