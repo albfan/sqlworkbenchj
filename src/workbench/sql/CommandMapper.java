@@ -85,7 +85,6 @@ public class CommandMapper
 	private Set<String> passThrough = new HashSet<String>();
 	private boolean supportsSelectInto;
 	private DbMetadata metaData;
-	private boolean useExecuteForSelect;
 	private boolean allowAbbreviated;
 
 	public CommandMapper()
@@ -154,7 +153,6 @@ public class CommandMapper
 		this.cmdDispatch.put("CREATE OR REPLACE", DdlCommand.CREATE);
 
 		this.dbSpecificCommands = new LinkedList<String>();
-		this.useExecuteForSelect = Settings.getInstance().getUseGenericExecuteForSelect();
 		this.allowAbbreviated = Settings.getInstance().getBoolProperty("workbench.sql.allow.abbreviation", false);
 	}
 
@@ -239,17 +237,6 @@ public class CommandMapper
 			this.dbSpecificCommands.add(DdlCommand.RECREATE.getVerb());
 		}
 
-		if (metaData.isMySql())
-		{
-			// MySQL implements its own DESCRIBE command
-			cmdDispatch.remove(WbDescribeObject.VERB_LONG);
-		}
-		else
-		{
-			SqlCommand cmd = cmdDispatch.get(WbDescribeObject.VERB);
-			this.cmdDispatch.put(WbDescribeObject.VERB_LONG, cmd);
-		}
-
 		if (metaData.getDbSettings().useWbProcedureCall())
 		{
 			SqlCommand wbcall = this.cmdDispatch.get(WbCall.VERB);
@@ -304,12 +291,16 @@ public class CommandMapper
 		String verb = SqlUtil.getSqlVerb(sql);
 		if (StringUtil.isEmptyString(verb)) return null;
 
-		if (!useExecuteForSelect && this.supportsSelectInto && "SELECT".equals(verb) && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))
+		if (this.supportsSelectInto && "SELECT".equals(verb) && this.metaData != null && this.metaData.isSelectIntoNewTable(sql))
 		{
 			LogMgr.logDebug("CommandMapper.getCommandToUse()", "Found 'SELECT ... INTO new_table'");
 			// use the generic SqlCommand implementation for this and not the SelectCommand
 			cmd = this.cmdDispatch.get("*");
 		}
+		// checking for the collection size before checking for the presence
+		// is a bit faster because of the hashing that is necessary to look up
+		// the entry. Again this doesn't matter for a single command, but when
+		// running a large script this does make a difference
 		else if (passThrough.size() > 0 && passThrough.contains(verb))
 		{
 			cmd = this.cmdDispatch.get("*");
