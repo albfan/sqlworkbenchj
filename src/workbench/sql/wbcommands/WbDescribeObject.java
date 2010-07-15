@@ -16,10 +16,12 @@ import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 
 import workbench.db.TriggerReader;
+import workbench.log.LogMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -75,34 +77,46 @@ public class WbDescribeObject
 	public StatementRunnerResult execute(String sql)
 		throws SQLException
 	{
-		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
-
-		cmdLine.parse(getCommandLine(sql));
-		String object = null;
-		boolean includeDependencies = true;
-
-		if (cmdLine.hasArguments())
+		try
 		{
-			object = cmdLine.getValue(ARG_OBJECT);
-			includeDependencies = cmdLine.getBoolean(ARG_DEPEND, true);
-			if (object == null)
+			ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
+
+			cmdLine.parse(getCommandLine(sql));
+			String object = null;
+			boolean includeDependencies = true;
+
+			if (cmdLine.hasArguments())
 			{
-				object = cmdLine.getUnknownArguments();
-				if (object.startsWith("-"))
+				object = cmdLine.getValue(ARG_OBJECT);
+				includeDependencies = cmdLine.getBoolean(ARG_DEPEND, true);
+				if (object == null)
 				{
-					object = object.substring(1);
+					object = cmdLine.getUnknownArguments();
+					if (object.startsWith("-"))
+					{
+						object = object.substring(1);
+					}
 				}
 			}
+			else
+			{
+				object = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
+			}
+
+			ObjectInfo info = new ObjectInfo();
+			StatementRunnerResult result = info.getObjectInfo(currentConnection, object, includeDependencies);
+			result.setSourceCommand(sql);
+			result.setShowRowCount(false);
+			return result;
 		}
-		else
+		catch (Exception e)
 		{
-			object = SqlUtil.stripVerb(SqlUtil.makeCleanSql(sql, false, false));
+			LogMgr.logError("WbDescribeObject.execute()", "Error getting object details", e);
+			StatementRunnerResult result = new StatementRunnerResult(sql);
+			result.setFailure();
+			result.addMessageByKey(ExceptionUtil.getDisplay(e));
+			return result;
 		}
-		ObjectInfo info = new ObjectInfo();
-		StatementRunnerResult result = info.getObjectInfo(currentConnection, object, includeDependencies);
-		result.setSourceCommand(sql);
-		result.setShowRowCount(false);
-		return result;
 	}
 
 }
