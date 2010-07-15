@@ -42,7 +42,7 @@
 
   <void method="put">
    <string>Informix Dynamic Server</string>
-   <object id="list_derby_trg" class="workbench.db.GetMetaDataSql">
+   <object id="list_informix_trg" class="workbench.db.GetMetaDataSql">
     <void property="baseSql">
      <string>
        SELECT trg.trigname as trigger_name,
