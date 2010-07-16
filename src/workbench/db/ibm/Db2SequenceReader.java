@@ -87,10 +87,10 @@ public class Db2SequenceReader
 	{
 		String name = getDSValueString(ds, row, "SEQNAME", "NAME", "SEQUENCE_NAME");
 		String schema = getDSValueString(ds, row, "SEQUENCE_SCHEMA", "SEQSCHEMA", "SCHEMA");
-		String catalog = getDSValueString(ds, row, "SEQUENCE_CATALOG", "SEQUENCE_OWNER");
+//		String catalog = getDSValueString(ds, row, "SEQUENCE_CATALOG", "SEQUENCE_CATALOG");
 
 		SequenceDefinition result = new SequenceDefinition(schema, name);
-		result.setCatalog(catalog);
+//		result.setCatalog(catalog);
 
 		result.setSequenceProperty("START", ds.getValue(row, "START"));
 		result.setSequenceProperty("MINVALUE", getDSValue(ds, row, "MINVALUE", "MINIMUM_VALUE"));
@@ -109,7 +109,7 @@ public class Db2SequenceReader
 			result.setSequenceProperty("DATA_TYPE", ds.getValue(row, "DATA_TYPE"));
 		}
 		
-		result.setComment(ds.getValueAsString(row, "REMARKS"));
+		result.setComment(getDSValueString(ds, row, "REMARKS", "LONG_COMMENT"));
 		readSequenceSource(result);
 		return result;
 	}
@@ -123,7 +123,9 @@ public class Db2SequenceReader
 
 		String nameCol;
 		String schemaCol;
-		String catalogCol = null;
+
+//		String catExpr = StringUtil.isBlank(catalog) ? "''" : "'" + catalog + "'";
+//		catExpr += "as sequence_catalog, \n";
 
 		if (dbid.equals("db2i"))
 		{
@@ -131,13 +133,12 @@ public class Db2SequenceReader
 			sql =
 			"SELECT SEQUENCE_NAME, \n" +
 			"       SEQUENCE_SCHEMA \n, " +
-			"       SEQUENCE_OWNER as sequence_catalog \n, " +
 			"       0 as START, \n" +
 			"       minimum_value as MINVALUE, \n" +
 			"       maximum_value as MAXVALUE, \n" +
 			"       INCREMENT, \n" +
-			"       case cycle_option when 'YES' then 'Y' else 'N' end as CYCLE, \n" +
-			"       case order when 'YES' then 'Y' else 'N' end as order, \n" +
+			"       case cycle when 'YES' then 'Y' else 'N' end as CYCLE, \n" +
+			"       case ORDER when 'YES' then 'Y' else 'N' end as ORDER, \n" +
 			"       CACHE, \n" +
 			"       data_type, \n" +
 			"       long_comment as remarks \n" +
@@ -168,8 +169,9 @@ public class Db2SequenceReader
 		}
 		else
 		{
+			// LUW Version
 			sql =
-			"SELECT SEQNAME, \n" +
+			"SELECT SEQNAME AS SEQUENCE_NAME, \n" +
 			"       SEQSCHEMA as SEQUENCE_SCHEMA, \n" +
 			"       START, \n" +
 			"       MINVALUE, \n" +
@@ -214,6 +216,7 @@ public class Db2SequenceReader
 		if (quoteKeyword)
 		{
 			sql = sql.replace(" ORDER,", " \"ORDER\",");
+			sql = sql.replace(" ORDER ", " \"ORDER\" ");
 		}
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -235,6 +238,7 @@ public class Db2SequenceReader
 		catch (Exception e)
 		{
 			LogMgr.logError("OracleMetaData.getSequenceDefinition()", "Error when retrieving sequence definition", e);
+			e.printStackTrace();
 		}
 		finally
 		{

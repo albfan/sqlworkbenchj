@@ -76,6 +76,22 @@ public class Db2SequenceReaderTest
 			"       42 as DATATYPEID," +
 			"       REMARKS \n" +
 			"from information_schema.sequences; \n" +
+			"create schema qsys2;\n" +
+			"set schema qsys2;\n" +
+			"create view syssequences \n" +
+			"AS \n" +
+			"select sequence_name,  \n" +
+			"       sequence_catalog as sequence_schema, \n " +
+			"       0 as START,  \n" +
+			"       0 as minimum_value,  \n" +
+			"       9999999 as maximum_value,  \n" +
+			"       increment, \n" +
+			"       'N' as CYCLE, \n" +
+			"       'N' as \"ORDER\",  \n" +
+			"       cache, \n" +
+			"       'INTEGER' as data_type," +
+			"       REMARKS as long_comment\n" +
+			"from information_schema.sequences; \n" +
 			"set schema public;" +
 			"create sequence seq_aaa;\n" +
 			"comment on sequence seq_aaa IS 'aaa comment';\n" +
@@ -94,6 +110,32 @@ public class Db2SequenceReaderTest
 	public void testLUW()
 	{
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2");
+		reader.setQuoteKeyword(true);
+		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
+		Collections.sort(result, new Comparator<DbObject>()
+		{
+			public int compare(DbObject o1, DbObject o2)
+			{
+				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);
+			}
+		});
+
+		assertNotNull(result);
+		assertEquals(2, result.size());
+		assertEquals("SEQ_AAA", result.get(0).getSequenceName());
+		assertEquals("SEQ_BBB", result.get(1).getSequenceName());
+
+		CharSequence sql = result.get(0).getSource();
+		assertNotNull(sql);
+		String source = sql.toString();
+
+		assertTrue(source.startsWith("CREATE SEQUENCE"));
+		assertTrue(source.indexOf("COMMENT ON SEQUENCE SEQ_AAA IS 'aaa comment'") > -1);
+	}
+
+	public void testDBI()
+	{
+		Db2SequenceReader reader = new Db2SequenceReader(db, "db2i");
 		reader.setQuoteKeyword(true);
 		List<SequenceDefinition> result = reader.getSequences(null, "FAKE_DB2", null);
 		Collections.sort(result, new Comparator<DbObject>()
