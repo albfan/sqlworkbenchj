@@ -28,7 +28,7 @@ public class PostgresBlobFormatterTest
 	public void testGetBlobLiteral()
 		throws Exception
 	{
-		PostgresBlobFormatter formatter = new PostgresBlobFormatter();
+		PostgresBlobFormatter formatter = new PostgresBlobFormatter(true);
 		ByteArrayOutputStream b = new ByteArrayOutputStream();
 		b.write(255);
 		b.write(0);
@@ -36,7 +36,10 @@ public class PostgresBlobFormatterTest
 		b.write(15);
 		byte[] blob = b.toByteArray();
 		String literal = formatter.getBlobLiteral(blob).toString();
+		assertEquals("Wrong literal created", "E'\\\\377\\\\000\\\\020\\\\017'::bytea", literal);
 
-		assertEquals("Wrong literal created", "'\\377\\000\\020\\017'", literal);
+		formatter = new PostgresBlobFormatter(false);
+		String decodeLiteral = formatter.getBlobLiteral(blob).toString();
+		assertEquals("Wrong literal created", "decode('ff00100f', 'hex')", decodeLiteral);
 	}
 }
