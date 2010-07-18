@@ -89,7 +89,7 @@ public class SQLTokenMarker
 					}
 					else if (token == Token.NULL)
 					{
-						searchBack(lineIndex, line, i);
+						searchBack(lineIndex, line, i, true);
 						addToken(lineIndex, 1, Token.OPERATOR);
 						lastOffset = i + 1;
 					}
@@ -97,7 +97,7 @@ public class SQLTokenMarker
 				case '[':
 					if (token == Token.NULL)
 					{
-						searchBack(lineIndex, line, i);
+						searchBack(lineIndex, line, i, true);
 						token = Token.LITERAL2;
 						literalChar = '[';
 						lastOffset = i;
@@ -118,7 +118,7 @@ public class SQLTokenMarker
 				case ')':
 					if (token == Token.NULL)
 					{
-						searchBack(lineIndex, line, i);
+						searchBack(lineIndex, line, i, true);
 						addToken(lineIndex, 1, Token.NULL);
 						lastOffset = i + 1;
 					}
@@ -134,7 +134,7 @@ public class SQLTokenMarker
 				case '=':
 					if (token == Token.NULL)
 					{
-						searchBack(lineIndex, line, i);
+						searchBack(lineIndex, line, i, true);
 						addToken(lineIndex, 1, Token.OPERATOR);
 						lastOffset = i + 1;
 					}
@@ -152,14 +152,14 @@ public class SQLTokenMarker
 					{
 						if (currentLength - i >= 2 && array[i1] == '*')
 						{
-							searchBack(lineIndex, line, i);
+							searchBack(lineIndex, line, i, true);
 							token = Token.COMMENT1;
 							lastOffset = i;
 							i++;
 						}
 						else
 						{
-							searchBack(lineIndex, line, i);
+							searchBack(lineIndex, line, i, true);
 							addToken(lineIndex, 1, Token.OPERATOR);
 							lastOffset = i + 1;
 						}
@@ -170,14 +170,14 @@ public class SQLTokenMarker
 					{
 						if (currentLength - i >= 2 && array[i1] == '-')
 						{
-							searchBack(lineIndex, line, i);
+							searchBack(lineIndex, line, i, true);
 							addToken(lineIndex, currentLength - i, Token.COMMENT2);
 							lastOffset = currentLength;
 							break loop;
 						}
 						else
 						{
-							searchBack(lineIndex, line, i);
+							searchBack(lineIndex, line, i, true);
 							addToken(lineIndex, 1, Token.OPERATOR);
 							lastOffset = i + 1;
 						}
@@ -188,7 +188,7 @@ public class SQLTokenMarker
 					{
 						if (currentLength - i >= 1)
 						{
-							searchBack(lineIndex, line, i);
+							searchBack(lineIndex, line, i, true);
 							addToken(lineIndex, currentLength - i, Token.COMMENT2);
 							lastOffset = currentLength;
 							break loop;
@@ -226,11 +226,6 @@ public class SQLTokenMarker
 		{
 			addToken(lineIndex, currentLength - lastOffset, token);
 		}
-	}
-
-	private void searchBack(int lineIndex, Segment line, int pos)
-	{
-		searchBack(lineIndex, line, pos, true);
 	}
 
 	private void searchBack(int lineIndex, Segment line, int pos, boolean padNull)

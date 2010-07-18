@@ -168,7 +168,6 @@ public class SyntaxUtilities
 				break;
 			}
 
-			int length = tokens.length;
 			if (tokens.id == Token.NULL)
 			{
 				gfx.setColor(defaultColor);
@@ -178,9 +177,9 @@ public class SyntaxUtilities
 			{
 				styles[tokens.id].setGraphicsFlags(gfx, defaultFont);
 			}
-			line.count = length;
+			line.count = tokens.length;
 			x = Utilities.drawTabbedText(line, x, y, gfx, expander, addwidth);
-			line.offset += length;
+			line.offset += tokens.length;
 
 			tokens = tokens.next;
 		}
