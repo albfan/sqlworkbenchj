@@ -11,6 +11,7 @@
  */
 package workbench.util;
 
+import java.io.BufferedOutputStream;
 import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -47,10 +48,10 @@ public class WbWorkspace
 		{
 			this.isReadOnly = false;
 			File f = new File(archiveName);
-			OutputStream out = new FileOutputStream(f);
-			this.zout = new ZipOutputStream(out);
-			this.zout.setLevel(9);
-			this.zout.setComment("SQL Workbench/J Workspace file");
+			OutputStream out = new BufferedOutputStream(new FileOutputStream(f), 128*1024);
+			zout = new ZipOutputStream(out);
+			zout.setLevel(Settings.getInstance().getIntProperty("workbench.workspace.compression", 3));
+			zout.setComment("SQL Workbench/J Workspace file");
 		}
 		else
 		{
