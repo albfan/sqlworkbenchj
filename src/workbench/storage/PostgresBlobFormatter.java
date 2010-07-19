@@ -47,6 +47,11 @@ public class PostgresBlobFormatter
 		useEscape = useEscapedOctal;
 	}
 
+	public PostgresBlobFormatter(BlobLiteralType mode)
+	{
+		useEscape = (mode == BlobLiteralType.pgEscape);
+	}
+
 	public CharSequence getBlobLiteral(Object value)
 		throws SQLException
 	{

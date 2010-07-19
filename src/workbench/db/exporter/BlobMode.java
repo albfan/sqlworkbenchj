@@ -46,6 +46,18 @@ public enum BlobMode
 	 */
 	Base64,
 
+	/**
+	 * Encode the blob using Postgres' decode() function
+	 * @see workbench.storage.PostgresBlobFormatter
+	 */
+  pgDecode,
+
+	/**
+	 * Encode the blob using Postgres' Octal escaping
+	 * @see workbench.storage.PostgresBlobFormatter
+	 */
+	pgEscape,
+	
 	None;
 
 	/**
@@ -69,12 +81,14 @@ public enum BlobMode
 		if ("dbms".equalsIgnoreCase(type.trim())) return BlobMode.DbmsLiteral;
 		if ("file".equalsIgnoreCase(type.trim())) return BlobMode.SaveToFile;
 		if ("base64".equalsIgnoreCase(type.trim())) return BlobMode.Base64;
+		if ("pgescape".equalsIgnoreCase(type.trim())) return BlobMode.pgEscape;
+		if ("pgdecode".equalsIgnoreCase(type.trim())) return BlobMode.pgDecode;
 		return null;
 	}
 
 	public static List<String> getTypes()
 	{
-		return CollectionUtil.arrayList("file", "ansi", "dbms", "base64");
+		return CollectionUtil.arrayList("file", "ansi", "dbms", "base64", "pgescape", "pgdecode");
 	}
 
 }

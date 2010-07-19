@@ -33,6 +33,10 @@ public class BlobFormatterFactory
 
 	public static BlobLiteralFormatter createInstance(BlobLiteralType type)
 	{
+		if (type == BlobLiteralType.pgDecode || type == BlobLiteralType.pgEscape)
+		{
+			return new PostgresBlobFormatter(type);
+		}
 		DefaultBlobFormatter f = new DefaultBlobFormatter();
 		f.setLiteralType(type);
 		return f;

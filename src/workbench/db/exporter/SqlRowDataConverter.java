@@ -22,6 +22,7 @@ import workbench.interfaces.Committer;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.storage.BlobLiteralType;
 import workbench.storage.DmlStatement;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
@@ -351,7 +352,7 @@ public class SqlRowDataConverter
 
 		if (type == BlobMode.DbmsLiteral)
 		{
-			this.literalFormatter.createDbmsBlobLiterals(originalConnection);
+			literalFormatter.createDbmsBlobLiterals(originalConnection);
 		}
 		else if (type == BlobMode.AnsiLiteral)
 		{
@@ -361,16 +362,24 @@ public class SqlRowDataConverter
 		{
 			literalFormatter.createBlobFiles(this);
 		}
+		else if (type == BlobMode.pgDecode)
+		{
+			literalFormatter.setBlobFormat(BlobLiteralType.pgDecode);
+		}
+		else if (type == BlobMode.pgEscape)
+		{
+			literalFormatter.setBlobFormat(BlobLiteralType.pgEscape);
+		}
 		else
 		{
-			this.literalFormatter.noBlobHandling();
+			literalFormatter.noBlobHandling();
 		}
 	}
 
 	public void setClobAsFile(String encoding)
 	{
 		if (StringUtil.isEmptyString(encoding)) return;
-		if (this.literalFormatter != null)
+		if (literalFormatter != null)
 		{
 			literalFormatter.setTreatClobAsFile(this, encoding);
 		}

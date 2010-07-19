@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
+import workbench.db.exporter.BlobMode;
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -145,7 +146,12 @@ public class SqlLiteralFormatter
 		this.blobWriter = null;
 		this.blobFormatter = null;
 	}
-	
+
+	public void setBlobFormat(BlobLiteralType type)
+	{
+		blobWriter = null;
+		blobFormatter = BlobFormatterFactory.createInstance(type);
+	}
 	/**
 	 * Create ANSI compatible BLOB literals
 	 */
