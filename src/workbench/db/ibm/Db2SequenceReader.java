@@ -262,7 +262,7 @@ public class Db2SequenceReader
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 
 		result.append("CREATE SEQUENCE ");
-		result.append(def.getSequenceName());
+		result.append(def.getObjectExpression(connection));
 
 		Number start = (Number) def.getSequenceProperty("START");
 		Number minvalue = (Number) def.getSequenceProperty("MINVALUE");

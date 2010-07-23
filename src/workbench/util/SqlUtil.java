@@ -30,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
+import workbench.db.DbObject;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -1340,21 +1341,44 @@ public class SqlUtil
 		return msg;
 	}
 
+	public static String buildExpression(WbConnection conn, DbObject object)
+	{
+		if (object == null) return null;
+		return buildExpression(conn, object.getCatalog(), object.getSchema(), object.getObjectName());
+	}
+
 	public static String buildExpression(WbConnection conn, String catalog, String schema, String name)
 	{
 		StringBuilder result = new StringBuilder(30);
-		DbMetadata meta = conn.getMetadata();
-		if (StringUtil.isNonEmpty(catalog) && !conn.getMetadata().ignoreCatalog(catalog))
+		DbMetadata meta = (conn != null ? conn.getMetadata() : null);
+		if (meta == null)
 		{
-			result.append(meta.quoteObjectname(catalog));
-			result.append('.');
+			if (StringUtil.isNonEmpty(catalog))
+			{
+				result.append(SqlUtil.quoteObjectname(catalog, false));
+				result.append('.');
+			}
+			if (StringUtil.isNonEmpty(schema))
+			{
+				result.append(SqlUtil.quoteObjectname(schema, false));
+				result.append('.');
+			}
+			result.append(SqlUtil.quoteObjectname(name, false));
 		}
-		if (StringUtil.isNonEmpty(schema) && !conn.getMetadata().ignoreSchema(schema))
+		else
 		{
-			result.append(meta.quoteObjectname(schema));
-			result.append('.');
+			if (StringUtil.isNonEmpty(catalog) && !conn.getMetadata().ignoreCatalog(catalog))
+			{
+				result.append(meta.quoteObjectname(catalog));
+				result.append('.');
+			}
+			if (StringUtil.isNonEmpty(schema) && !conn.getMetadata().ignoreSchema(schema))
+			{
+				result.append(meta.quoteObjectname(schema));
+				result.append('.');
+			}
+			result.append(meta.quoteObjectname(name));
 		}
-		result.append(meta.quoteObjectname(name));
 		return result.toString();
 	}
 

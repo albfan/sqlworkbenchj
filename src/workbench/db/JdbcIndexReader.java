@@ -182,7 +182,7 @@ public class JdbcIndexReader
 				}
 
 				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, definition.getExpression());
-				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, definition.getName());
+				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, definition.getObjectExpression(metaData.getWbConnection()));
 				idx.append(sql);
 				String options = getIndexOptions(definition);
 				if (options != null)
@@ -325,7 +325,14 @@ public class JdbcIndexReader
 				{
 					def = new IndexDefinition(tbl, indexName);
 					def.setUnique(!unique);
-					def.setPrimaryKeyIndex(pkName != null && indexName.equals(pkName));
+					if (metaData.getDbSettings().pkIndexHasTableName())
+					{
+						def.setPrimaryKeyIndex(indexName.equals(table.getTableName()));
+					}
+					else
+					{
+						def.setPrimaryKeyIndex(pkName != null && indexName.equals(pkName));
+					}
 					defs.put(indexName, def);
 
 					// The ResultSet produced by getIndexInfo() might not be 100%

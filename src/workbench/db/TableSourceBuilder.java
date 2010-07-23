@@ -549,7 +549,6 @@ public class TableSourceBuilder
 
 		for (int i=0; i < count; i++)
 		{
-			//"FK_NAME", "COLUMN_NAME", "REFERENCES"};
 			fkname = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_FK_NAME);
 			col = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_COLUMN_NAME);
 			fkCol = aFkDef.getValueAsString(i, FKHandler.COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME);
@@ -591,7 +590,7 @@ public class TableSourceBuilder
 				// first time we hit this FK definition in this loop
 				stmt = template;
 			}
-			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableName() : tableNameToUse));
+			stmt = StringUtil.replace(stmt, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, (tableNameToUse == null ? table.getTableExpression(dbConnection) : tableNameToUse));
 
 			if (meta.isSystemConstraintName(fkname))
 			{
@@ -600,7 +599,15 @@ public class TableSourceBuilder
 			}
 			else
 			{
-				stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fkname);
+				if (dbConnection.getDbSettings().useFQConstraintName())
+				{
+					String fqName = SqlUtil.buildExpression(dbConnection, table.getCatalog(), table.getSchema(), fkname);
+					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fqName);
+				}
+				else
+				{
+					stmt = StringUtil.replace(stmt, MetaDataSqlManager.FK_NAME_PLACEHOLDER, fkname);
+				}
 			}
 
 			String entry = StringUtil.listToString(colList, ", ", false);
@@ -650,11 +657,10 @@ public class TableSourceBuilder
 
 			while (itr.hasNext())
 			{
-				col = (String)itr.next();//tok.nextToken();
+				col = (String)itr.next();
 				int pos = col.lastIndexOf('.');
 				if (targetTable == null)
 				{
-					// The last element has to be the column name!
 					String t = col.substring(0, pos);
 					TableIdentifier tbl = new TableIdentifier(t);
 					targetTable = tbl.getTableExpression(this.dbConnection);

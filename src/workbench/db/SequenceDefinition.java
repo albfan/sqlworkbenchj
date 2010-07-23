@@ -112,7 +112,7 @@ public class SequenceDefinition
 
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return getObjectExpression(conn);
+		return SqlUtil.buildExpression(null, catalog, schema, sequenceName);
 	}
 
 	public String getObjectExpression(WbConnection conn)

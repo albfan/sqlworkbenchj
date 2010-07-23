@@ -247,6 +247,11 @@ public class DbSettings
 		return verb;
 	}
 
+	public boolean useFQConstraintName()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "constraints.use_fqname", false);
+	}
+	
 	public boolean useCatalogInDML()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "catalog.dml", true);
@@ -854,9 +859,16 @@ public class DbSettings
 	}
 
 	/**
-	 *
+	 * If customized SQL is configured to retrieve the source of a table, this setting controls if table and column
+	 * comments should be gnerated by SQL Workbench.
+	 * <br/>
+	 * If no SQL is configured, this method always returns true. Otherwise the value of the config property <br/>
+	 * <tt>workbench.db.[dbid].retrieve.create.table.comments_included</tt> is checked. If that is true to indicate that
+	 * comments <i>are</i> returned by the custom SQL, this method returns false.
+	 * <br/>
+	 * 
 	 * @see #getUseCustomizedCreateTableRetrieval()
-	 * @return true if table comments (including columns) should be generated even if the table source is retrieved by a customized statement
+	 * @return true if table comments (including columns) should be generated
 	 */
 	public boolean getGenerateTableComments()
 	{
@@ -1050,5 +1062,10 @@ public class DbSettings
 	{
 		if (dbmsType == null) return false;
 		return Settings.getInstance().getBoolProperty(prefix + "isclob." + dbmsType, false);
+	}
+
+	public boolean pkIndexHasTableName()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + ".pkconstraint.is_table_name", false);
 	}
 }

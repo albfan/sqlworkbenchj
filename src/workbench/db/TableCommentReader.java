@@ -57,8 +57,16 @@ public class TableCommentReader
 		String result = null;
 		if (Settings.getInstance().getIncludeEmptyComments() || StringUtil.isNonBlank(comment))
 		{
-			result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
-			result = StringUtil.replace(result, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
+			if (commentStatement.contains(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER))
+			{
+				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(dbConnection));
+			}
+			else
+			{
+				result = StringUtil.replace(commentStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
+				result = replaceObjectNamePlaceholder(result, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
+				result = replaceObjectNamePlaceholder(result, CommentSqlManager.COMMENT_CATALOG_PLACEHOLDER, table.getCatalog());
+			}
 			result = StringUtil.replace(result, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : comment.replace("'", "''"));
 			result += ";";
 		}
@@ -120,8 +128,17 @@ public class TableCommentReader
 			{
 				try
 				{
-					String commentSql = StringUtil.replace(columnStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
-					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
+					String commentSql = null;
+					if (columnStatement.contains(CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER))
+					{
+						commentSql = StringUtil.replace(columnStatement, CommentSqlManager.COMMENT_FQ_OBJECT_NAME_PLACEHOLDER, table.getTableExpression(con));
+					}
+					else
+					{
+						commentSql = StringUtil.replace(columnStatement, CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getTableName());
+						commentSql = replaceObjectNamePlaceholder(commentSql, CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema());
+						commentSql = replaceObjectNamePlaceholder(commentSql, CommentSqlManager.COMMENT_CATALOG_PLACEHOLDER, table.getCatalog());
+					}
 					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, column);
 					commentSql = StringUtil.replace(commentSql, CommentSqlManager.COMMENT_PLACEHOLDER, comment == null ? "" : SqlUtil.escapeQuotes(comment));
 					result.append(commentSql);
@@ -134,6 +151,15 @@ public class TableCommentReader
 			}
 		}
 		return result;
+	}
+
+	private String replaceObjectNamePlaceholder(String source, String placeHolder, String replacement)
+	{
+		if (StringUtil.isBlank(replacement))
+		{
+			return source.replace(placeHolder + ".", "");
+		}
+		return source.replace(placeHolder, replacement);
 	}
 
 }
