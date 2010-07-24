@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-07-06">
+  <release build="-1" date="2010-07-24">
+    <entry dev-build="10" type="enh">WbExport now supports two new literal formats for PostgreSQL when exporting SQL statements using binary data (pgDecode and pgEscape)</entry>
     <entry dev-build="10" type="enh">For MySQL table comments are now shown in the DbExplorer.</entry>
     <entry dev-build="10" type="enh">WbDataDiff now outputs differences for foreign key in their own tag listing all FK columns instead of listing the foreign key as a modification for each column.</entry>
     <entry dev-build="9" type="enh">A new option in the DataPumper is available to automatically select a matching entry in the target table dropdown when the source table is changed</entry>
@@ -26,6 +27,7 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="10" type="fix">DESCRIBE did not longer work for Informix</entry>
     <entry dev-build="10" type="fix">Fixed sequence, view and procedure display in the DbExplorer for DB2 on iSeries (AS/400)</entry>
     <entry dev-build="10" type="fix">The source code for Postgres TYPEs was not show correctly.</entry>
     <entry dev-build="10" type="fix">The source code for Postgres functions returning SETOF or TABLEs was not show correctly.</entry>
