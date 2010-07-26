@@ -34,6 +34,11 @@ public class TableCommentReader
 	 */
 	public String getTableCommentSql(WbConnection dbConnection, TableIdentifier table)
 	{
+		return getTableCommentSql(dbConnection.getDbSettings().getDbId(), dbConnection, table);
+	}
+
+	String getTableCommentSql(String dbId, WbConnection dbConnection, TableIdentifier table)
+	{
 		CommentSqlManager mgr = new CommentSqlManager(dbConnection.getMetadata().getDbId());
 
 		String commentStatement = mgr.getCommentSqlTemplate(table.getType());
@@ -115,7 +120,15 @@ public class TableCommentReader
 	 */
 	public StringBuilder getTableColumnCommentsSql(WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
 	{
-		CommentSqlManager mgr = new CommentSqlManager(con.getMetadata().getDbId());
+		return getTableColumnCommentsSql(con.getMetadata().getDbId(), con, table, columns);
+	}
+
+	/**
+	 * For Unit-Testing only
+	 */
+	StringBuilder getTableColumnCommentsSql(String dbId, WbConnection con, TableIdentifier table, List<ColumnIdentifier> columns)
+	{
+		CommentSqlManager mgr = new CommentSqlManager(dbId);
 
 		String columnStatement = mgr.getCommentSqlTemplate("column");
 		if (StringUtil.isBlank(columnStatement)) return null;

@@ -16,7 +16,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.sql.ScriptParser;
-import workbench.util.StringUtil;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -25,48 +25,123 @@ import workbench.util.StringUtil;
 public class TableCommentReaderTest
 	extends TestCase
 {
-	
+	private WbConnection connection;
+
 	public TableCommentReaderTest(String testName)
 	{
 		super(testName);
 	}
 
+	@Override
+	protected void setUp()
+		throws Exception
+	{
+		super.setUp();
+		TestUtil util = new TestUtil("Comments");
+		connection = util.getConnection("commentsTest");
+		Statement stmt = null;
+		try
+		{
+			TestUtil.executeScript(connection,
+			"drop all objects;\n" +
+			"CREATE TABLE comment_test (id integer PRIMARY KEY, first_name varchar(50));\n" +
+			"COMMENT ON TABLE comment_test IS 'Table comment';\n" +
+			"COMMENT ON COLUMN comment_test.id IS 'Primary key column';\n" +
+			"COMMENT ON COLUMN comment_test.first_name IS 'Firstname';\n" +
+			"commit;\n");
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
+	}
+
+	@Override
+	protected void tearDown()
+		throws Exception
+	{
+		super.tearDown();
+	}
+
+
 	public void testCommentSql()
+		throws Exception
 	{
 		
 		try
 		{
-			TestUtil util = new TestUtil("Comments");
-			WbConnection con = util.getConnection("commentsTest");
-			Statement stmt = con.createStatement();
-			stmt.executeUpdate("create table comment_test (id integer primary key, first_name varchar(50))");
-			stmt.executeUpdate("COMMENT ON TABLE comment_test IS 'Table comment'");
-			stmt.executeUpdate("COMMENT ON COLUMN comment_test.id IS 'Primary key column'");
-			stmt.executeUpdate("COMMENT ON COLUMN comment_test.first_name IS 'Firstname'");
-			con.commit();
-			
-			TableIdentifier table = con.getMetadata().findTable(new TableIdentifier("COMMENT_TEST"));
+			TableIdentifier table = connection.getMetadata().findTable(new TableIdentifier("COMMENT_TEST"));
 			TableCommentReader reader = new TableCommentReader();
 			
-			String tableComment = reader.getTableCommentSql(con, table);
+			String tableComment = reader.getTableCommentSql(connection, table);
 			assertNotNull(tableComment);
 			assertTrue("Comment not found ", tableComment.equalsIgnoreCase("COMMENT ON TABLE comment_test IS 'Table comment';"));
 			
-			List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(table);
+			List<ColumnIdentifier> columns = connection.getMetadata().getTableColumns(table);
 			
-			StringBuilder colComments = reader.getTableColumnCommentsSql(con, table, columns);
+			StringBuilder colComments = reader.getTableColumnCommentsSql(connection, table, columns);
 			assertNotNull(colComments);
-			//System.out.println("*********\n" + colComments + "\n**********");
 			ScriptParser p = new ScriptParser(colComments.toString());
 			p.setReturnStartingWhitespace(false);
 			assertEquals(2, p.getSize());
 			assertEquals("COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column'", p.getCommand(0));
 			assertEquals("COMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname'", p.getCommand(1));
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	public void testFallbackDBID()
+		throws Exception
+	{
+		try
+		{
+			TableIdentifier table = connection.getMetadata().findTable(new TableIdentifier("COMMENT_TEST"));
+			TableCommentReader reader = new TableCommentReader();
+
+			String tableComment = reader.getTableCommentSql("XXX", connection, table);
+			assertNotNull(tableComment);
+			assertTrue("Comment not found ", tableComment.equalsIgnoreCase("COMMENT ON TABLE comment_test IS 'Table comment';"));
+
+			List<ColumnIdentifier> columns = connection.getMetadata().getTableColumns(table);
+
+			StringBuilder colComments = reader.getTableColumnCommentsSql("xxx", connection, table, columns);
+			assertNotNull(colComments);
+			ScriptParser p = new ScriptParser(colComments.toString());
+			p.setReturnStartingWhitespace(false);
+			assertEquals(2, p.getSize());
+			assertEquals("COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column'", p.getCommand(0));
+			assertEquals("COMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname'", p.getCommand(1));
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	public void testDB2()
+		throws Exception
+	{
+		try
+		{
+			TableIdentifier table = connection.getMetadata().findTable(new TableIdentifier("COMMENT_TEST"));
+			TableCommentReader reader = new TableCommentReader();
+
+			String tableComment = reader.getTableCommentSql("db2i", connection, table);
+			assertNotNull(tableComment);
+			assertTrue("Comment not found ", tableComment.equalsIgnoreCase("COMMENT ON TABLE comment_test IS 'Table comment';"));
+
+			List<ColumnIdentifier> columns = connection.getMetadata().getTableColumns(table);
+
+			StringBuilder colComments = reader.getTableColumnCommentsSql("db2i", connection, table, columns);
+			assertNotNull(colComments);
+			ScriptParser p = new ScriptParser(colComments.toString());
+			p.setReturnStartingWhitespace(false);
+			assertEquals(2, p.getSize());
+			assertEquals("COMMENT ON COLUMN COMMENT_TEST.ID IS 'Primary key column'", p.getCommand(0));
+			assertEquals("COMMENT ON COLUMN COMMENT_TEST.FIRST_NAME IS 'Firstname'", p.getCommand(1));
 		}
 		finally
 		{
