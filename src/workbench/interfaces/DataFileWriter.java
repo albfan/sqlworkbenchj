@@ -25,7 +25,8 @@ public interface DataFileWriter
 	 * Creates File object which can be used to write the
 	 * BLOB data to an external file
 	 */
-	File generateDataFileName(ColumnData column);
+	File generateDataFileName(ColumnData column)
+		throws IOException;
 	
 	/**
 	 * Write the data contained in the value object

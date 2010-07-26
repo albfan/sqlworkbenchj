@@ -58,6 +58,7 @@ public abstract class RowDataConverter
 	protected ResultInfo metaData;
 	protected boolean writeHeader = true;
 	private File outputFile;
+	private File baseDirectory;
 	private String baseFilename;
 	private String pageTitle;
 	private boolean[] columnsToExport = null;
@@ -85,7 +86,10 @@ public abstract class RowDataConverter
 	protected BlobLiteralFormatter blobFormatter;
 	protected ExportDataModifier columnModifier;
 	protected boolean includeColumnComments = false;
-
+	private String baseBlobDir;
+	private long maxBlobFilesPerDir;
+	private long blobsWritten;
+	
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
 	 */
@@ -157,6 +161,22 @@ public abstract class RowDataConverter
 		this.includeColumnComments = flag;
 	}
 
+	/**
+	 * Enable distribution of LOB files over several directories, in order 
+	 * to keep the number of files per directory in a reasonable limit.
+	 * <br/>
+	 * A running number will be appended to the <tt>baseDir</tt> parameter, for each 
+	 * directory that gets created.
+	 * 
+	 * @param baseDir 
+	 * @param maxFiles
+	 */
+	public void distributeLobFiles(String baseDir, int maxFiles)
+	{
+		baseBlobDir = baseDir;
+		maxBlobFilesPerDir = maxFiles;
+	}
+	
 	public String getPageTitle(String defaultTitle)
 	{
 		if (StringUtil.isEmptyString(pageTitle))
@@ -250,10 +270,23 @@ public abstract class RowDataConverter
 
 	public void setOutputFile(WbFile f)
 	{
-		this.outputFile = f;
+		baseDirectory = null;
+		outputFile = f;
 		if (f != null && !f.isDirectory())
 		{
-			this.baseFilename = f.getFileName();
+			baseFilename = f.getFileName();
+		}
+		
+		if (outputFile != null)
+		{
+			if (this.outputFile.isDirectory())
+			{
+				baseDirectory = new File(outputFile.getAbsolutePath());
+			}
+			else if (outputFile != null)
+			{
+				baseDirectory = this.outputFile.getParentFile();
+			}
 		}
 	}
 
@@ -301,6 +334,7 @@ public abstract class RowDataConverter
 	 * Needed for the SqlLiteralFormatter
 	 */
 	public File generateDataFileName(ColumnData data)
+		throws IOException
 	{
 		StringBuilder fname = new StringBuilder(80);
 		if (this.currentRowData != null && currentRow != -1)
@@ -322,7 +356,7 @@ public abstract class RowDataConverter
 				fname.append(currentRow);
 			}
 			fname.append(getFileExtension());
-			File f = new File(getBaseDir(), fname.toString());
+			File f = new File(getBlobDir(), fname.toString());
 			return f;
 		}
 	}
@@ -340,7 +374,6 @@ public abstract class RowDataConverter
 			Object value = row.getValue(filenameColumnIndex);
 			if (value != null)
 			{
-				//filename = StringUtil.makeFilename(value.toString());
 				filename = value.toString();
 			}
 		}
@@ -348,18 +381,11 @@ public abstract class RowDataConverter
 	}
 
 	public File createBlobFile(RowData row, int colIndex, long rowNum)
+		throws IOException
 	{
 		String name = createFilename(row, colIndex, rowNum);
 		File f = null;
-		if (name != null)
-		{
-			WbFile wf = new WbFile(name);
-			if (!wf.isAbsolute())
-			{
-				f = new WbFile(getBaseDir(), name);
-			}
-		}
-		else
+		if (name == null)
 		{
 			StringBuilder fname = new StringBuilder(baseFilename.length() + 25);
 
@@ -405,10 +431,28 @@ public abstract class RowDataConverter
 			}
 
 			fname.append(getFileExtension());
-			f = new File(getBaseDir(), fname.toString());
+			name = fname.toString();
 		}
-
+		f = new File(getBlobDir(), name);
 		return f;
+	}
+
+	private File getBlobDir()
+		throws IOException
+	{
+		if (maxBlobFilesPerDir <= 0)
+		{
+			return getBaseDir();
+		}
+		blobsWritten ++;
+		String dirName = baseFilename + "_blobs";
+		int dirNumber = (int)(blobsWritten / maxBlobFilesPerDir) + 1;
+		File blobDir = new File(getBaseDir(), dirName + "_" + Integer.toString(dirNumber));
+		if (!blobDir.exists())
+		{
+			blobDir.mkdirs();
+		}
+		return blobDir;
 	}
 
 	public void writeClobFile(String value, File f, String encoding)
@@ -455,9 +499,7 @@ public abstract class RowDataConverter
 	public File getBaseDir()
 	{
 		if (this.outputFile == null) return new File(".");
-		if (this.outputFile.isDirectory()) return this.outputFile;
-		if (this.outputFile.isAbsolute()) return this.outputFile.getParentFile();
-		return new File(".");
+		return baseDirectory;
 	}
 
 	protected File getOutputFile()

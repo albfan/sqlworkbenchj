@@ -18,7 +18,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import workbench.db.DbSettings;
 import workbench.db.WbConnection;
-import workbench.db.exporter.BlobMode;
 import workbench.interfaces.DataFileWriter;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -264,9 +263,9 @@ public class SqlLiteralFormatter
 			String t = (String)value;
 			if (this.treatClobAsFile  && clobWriter != null && SqlUtil.isClobType(type, dbmsType, dbSettings))
 			{
-				File f = clobWriter.generateDataFileName(data);
 				try
 				{
+					File f = clobWriter.generateDataFileName(data);
 					clobWriter.writeClobFile(t, f, this.clobEncoding);
 					return "{$clobfile='" + f.getName() + "' encoding='" + this.clobEncoding + "'}";
 				}
@@ -325,9 +324,9 @@ public class SqlLiteralFormatter
 		{
 			if (blobWriter != null)
 			{
-				File f = blobWriter.generateDataFileName(data);
 				try
 				{
+					File f = blobWriter.generateDataFileName(data);
 					blobWriter.writeBlobFile(value, f);
 					return "{$blobfile='" + f.getName() + "'}";
 				}
