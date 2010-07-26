@@ -407,6 +407,13 @@
     </redirect:write>
   </xsl:template>
 
+  <xsl:template match="not-mysql">
+    <p style="margin:15px;padding:5px;border-style:solid;border-color:red;border-width:1px">
+      Please note that SQL Workbench/J has no relation to the product <a href="http://www.mysql.com/products/workbench/"><b>My</b>SQL Workbench</a>
+      which is maintained and owned by Oracle. If you are looking for <b>My</b>SQL Workbench support please contact Oracle.
+    </p>
+  </xsl:template>
+
   <xsl:template match="mail-to">
     <xsl:text disable-output-escaping="yes"><![CDATA[<a href=mailto:&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;>&#115;&#117;&#112;&#112;&#111;&#114;&#116;&#64;&#115;&#113;&#108;&#45;&#119;&#111;&#114;&#107;&#98;&#101;&#110;&#99;&#104;&#46;&#110;&#101;&#116;</a>]]>
     </xsl:text>

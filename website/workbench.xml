@@ -19,8 +19,11 @@
     </p>
     
     <p>
-    It's main focus is on running SQL scripts (either interactively or as a batch) and export/import features.
-    Graphical query building or more advanced DBA tasks are not the focus and are not planned</p>
+      It's main focus is on running SQL scripts (either interactively or as a batch) and export/import features.
+      Graphical query building or more advanced DBA tasks are not the focus and are not planned
+    </p>
+
+    <not-mysql/>
     
     <p>
       Current stable version: <span style="font-weight:bold"><a href="downloads.html">Build <build-number/> (<build-date/>)</a></span>
@@ -121,6 +124,7 @@ VALUES
     <subtitle>Getting started</subtitle>
     <content>
       <h3>Prerequisites</h3>
+      <not-mysql/>
       <p>
         SQL Workbench/J needs a <a target="_blank" href="http://www.java.com/en/">Java runtime</a>.<br/>
         You have to install Java 6 before you can run SQL Workbench/J.
@@ -199,10 +203,11 @@ VALUES
     <title>SQL Workbench/J</title>
     <subtitle>Support</subtitle>
     <content>
+      <not-mysql/>
       <p>There are three ways how you can get support for SQL Workbench/J</p>
       <ul>
         <li>Read the <a href="manual/workbench-manual.html" target="_blank">manual</a></li>
-        <li style="padding-bottom:20px">Check out the SQL Workbench/J <a href="http://groups.google.com/group/sql-workbench" target="_blank">google group</a></li>
+        <li>Check out the SQL Workbench/J <a href="http://groups.google.com/group/sql-workbench" target="_blank">google group</a></li>
         <li>Send an email to <mail-to/></li>
       </ul>
     </content>
@@ -309,7 +314,8 @@ VALUES
         <title>SQL Workbench/J</title>
         <subtitle>Available Downloads</subtitle>
         <content>
-            <p style="margin-top:15px;text-align:center;font-weight:bold">
+        <not-mysql/>
+          <p style="margin-top:15px;text-align:center;font-weight:bold">
                 SQL Workbench/J requires Java 6 (aka JDK 1.6) or later!
             </p>
         <h3 style="margin-top:25px">Stable release</h3>
