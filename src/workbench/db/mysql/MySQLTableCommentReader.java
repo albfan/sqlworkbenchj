@@ -35,7 +35,7 @@ public class MySQLTableCommentReader
 	@Override
 	public void updateObjectList(WbConnection con, DataStore result, String aCatalog, String aSchema, String objects, String[] requestedTypes)
 	{
-		if (Settings.getInstance().getBoolProperty("workbench.db.mysql.tablecomments.retrieve", true))
+		if (Settings.getInstance().getBoolProperty("workbench.db.mysql.tablecomments.retrieve", false))
 		{
 			updateObjectRemarks(con, result, aCatalog, aSchema, objects, requestedTypes);
 		}
