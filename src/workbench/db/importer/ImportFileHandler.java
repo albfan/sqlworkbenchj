@@ -177,15 +177,31 @@ public class ImportFileHandler
 		}
 		else
 		{
-			if (attachmentFile.isAbsolute())
+			File inputFile = getRealFile(attachmentFile);
+			return new BufferedInputStream(new FileInputStream(inputFile), getFileBufferSize());
+		}
+	}
+
+	private File getRealFile(File attachmentFile)
+	{
+		if (attachmentFile.isAbsolute())
+		{
+			return attachmentFile;
+		}
+		else
+		{
+			File subdir = attachmentFile.getParentFile();
+			File blobdir = null;
+			if (subdir != null)
 			{
-				return new BufferedInputStream(new FileInputStream(attachmentFile), getFileBufferSize());
+				blobdir = new File(baseDir, subdir.getName());
 			}
 			else
 			{
-				File realFile = new File(this.baseDir,attachmentFile.getName());
-				return new BufferedInputStream(new FileInputStream(realFile), getFileBufferSize());
+				blobdir = baseDir;
 			}
+			File realFile = new File(blobdir,attachmentFile.getName());
+			return realFile;
 		}
 	}
 
@@ -210,17 +226,8 @@ public class ImportFileHandler
 			return getLength(f);
 		}
 
-		long result = 0;
-		if (f.isAbsolute())
-		{
-			result = FileUtil.getCharacterLength(f, this.encoding);
-		}
-		else
-		{
-			File realFile = new File(this.baseDir, f.getName());
-			result = FileUtil.getCharacterLength(realFile, this.encoding);
-		}
-		return result;
+		File inputFile = getRealFile(f);
+		return FileUtil.getCharacterLength(inputFile, this.encoding);
 	}
 
 	/**
@@ -238,15 +245,9 @@ public class ImportFileHandler
 			ZipEntry entry = findEntry(toTest);
 			return entry.getSize();
 		}
-		else
-		{
-			if (toTest.isAbsolute())
-			{
-				return toTest.length();
-			}
-			File realFile = new File(this.baseDir, toTest.getName());
-			return realFile.length();
-		}
+		
+		File realFile = getRealFile(toTest);
+		return realFile.length();
 	}
 
 	public String getEncoding()
