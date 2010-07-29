@@ -18,7 +18,7 @@ end if
 wbpath = Left(WScript.ScriptFullName, Len(WScript.ScriptFullName) - Len(WScript.ScriptName))
 jarpath = wbpath & "sqlworkbench.jar"
 
-javaCmd = javaPath & " -Xmx256m -jar " & chr(34) & jarpath & chr(34)
+javaCmd = chr(34) & javaPath & chr(34) & " -Xmx256m -jar " & chr(34) & jarpath & chr(34)
 if (args.length > 0) then
   for each arg in args
     javaCmd = javaCmd & " " & arg
