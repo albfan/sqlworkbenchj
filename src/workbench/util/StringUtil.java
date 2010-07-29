@@ -1151,6 +1151,24 @@ public class StringUtil
 		return result.toString();
 	}
 
+	/**
+	 * Convert an int value to a String with leading zeros
+	 * @param value
+	 * @param length
+	 * @return
+	 */
+	public static CharSequence formatInt(int value, int length)
+	{
+		StringBuilder result = new StringBuilder(length);
+		String nr = Integer.toString(value);
+		for (int i=0; i < length - nr.length(); i++)
+		{
+			result.append('0');
+		}
+		result.append(nr);
+		return result;
+	}
+	
 	public static String formatNumber(int value, int length, boolean fillRight)
 	{
 		String s = NumberStringCache.getNumberString(value);

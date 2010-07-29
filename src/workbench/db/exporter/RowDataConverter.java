@@ -86,7 +86,7 @@ public abstract class RowDataConverter
 	protected BlobLiteralFormatter blobFormatter;
 	protected ExportDataModifier columnModifier;
 	protected boolean includeColumnComments = false;
-	private String baseBlobDir;
+
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
 	
@@ -171,12 +171,11 @@ public abstract class RowDataConverter
 	 * @param baseDir 
 	 * @param maxFiles
 	 */
-	public void distributeLobFiles(String baseDir, int maxFiles)
+	public void setMaxLobFilesPerDirectory(int maxFiles)
 	{
-		baseBlobDir = baseDir;
 		maxBlobFilesPerDir = maxFiles;
 	}
-	
+
 	public String getPageTitle(String defaultTitle)
 	{
 		if (StringUtil.isEmptyString(pageTitle))
@@ -380,6 +379,14 @@ public abstract class RowDataConverter
 		return filename;
 	}
 
+	protected String getBlobFileValue(File f)
+	{
+		if (!distributeLobFiles()) return f.getName();
+		String dir = f.getParentFile().getName();
+		String fname = f.getName();
+		return dir + "/" + fname;
+	}
+	
 	public File createBlobFile(RowData row, int colIndex, long rowNum)
 		throws IOException
 	{
@@ -437,17 +444,24 @@ public abstract class RowDataConverter
 		return f;
 	}
 
+	private boolean distributeLobFiles()
+	{
+		return (maxBlobFilesPerDir > 0 && !compressExternalFiles);
+	}
+	
 	private File getBlobDir()
 		throws IOException
 	{
-		if (maxBlobFilesPerDir <= 0)
+		if (!distributeLobFiles())
 		{
 			return getBaseDir();
 		}
-		blobsWritten ++;
-		String dirName = baseFilename + "_blobs";
+		StringBuilder dirName = new StringBuilder(baseFilename.length() + 15);
+		dirName.append(baseFilename);
+		dirName.append("_lobs_");
 		int dirNumber = (int)(blobsWritten / maxBlobFilesPerDir) + 1;
-		File blobDir = new File(getBaseDir(), dirName + "_" + Integer.toString(dirNumber));
+		dirName.append(StringUtil.formatInt(dirNumber, 6));
+		File blobDir = new File(getBaseDir(), dirName.toString());
 		if (!blobDir.exists())
 		{
 			blobDir.mkdirs();
@@ -464,6 +478,7 @@ public abstract class RowDataConverter
 		{
 			OutputStream out = this.createOutputStream(f);
 			w = EncodingUtil.createWriter(out, encoding);
+			blobsWritten ++;
 			w.write(value);
 		}
 		finally
@@ -482,6 +497,7 @@ public abstract class RowDataConverter
 		{
 			OutputStream out = this.createOutputStream(f);
 			size = BlobHandler.saveBlobToFile(value, out);
+			blobsWritten ++;
 			return size;
 		}
 		catch (IOException io)

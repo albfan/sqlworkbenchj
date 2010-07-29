@@ -600,6 +600,7 @@ public class WbExportTest
 	}
 
 	public void testTextBlobExport()
+		throws Exception
 	{
 		try
 		{
@@ -617,10 +618,55 @@ public class WbExportTest
 			assertEquals("Blob data not exported", true, bfile.exists());
 			assertEquals("Wrong file size", 7218, bfile.length());
 		}
-		catch (Exception e)
+		finally 
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	public void testBlobDistribution()
+		throws Exception
+	{
+		try
+		{
+			File exportFile = new File(this.basedir, "blob_export.txt");
+			TestUtil.executeScript(connection, 
+				"INSERT INTO BLOB_TEST VALUES (3,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (4,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (5,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (6,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (7,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (8,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (9,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (10,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (11,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST VALUES (12,'01010101');\n"	+
+				"commit;\n"
+				);
+			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -lobsPerDirectory=5 -type=text -header=true -sourcetable=blob_test");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			assertEquals("No export file created", true, exportFile.exists());
+
+			File dir1 = new File(basedir, "blob_export_lobs_000001");
+			assertTrue(dir1.exists());
+			File bfile = new File(dir1, "blob_export_r1_c2.data");
+			assertEquals("Blob data not exported", true, bfile.exists());
+
+			File dir2 = new File(basedir, "blob_export_lobs_000002");
+			assertTrue(dir2.exists());
+			bfile = new File(dir2, "blob_export_r6_c2.data");
+			assertEquals("Blob data not exported", true, bfile.exists());
+
+			File dir3 = new File(basedir, "blob_export_lobs_000003");
+			assertTrue(dir3.exists());
+			bfile = new File(dir3, "blob_export_r11_c2.data");
+			assertEquals("Blob data not exported", true, bfile.exists());
+
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 

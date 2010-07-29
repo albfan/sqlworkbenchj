@@ -28,6 +28,14 @@ public class StringUtilTest
 		super(testName);
 	}
 
+	public void testFormatString()
+	{
+		assertEquals("0001", StringUtil.formatInt(1, 4).toString());
+		assertEquals("0123", StringUtil.formatInt(123, 4).toString());
+		assertEquals("123", StringUtil.formatInt(123, 3).toString());
+		assertEquals("123", StringUtil.formatInt(123, 1).toString());
+	}
+
 	public void testHexString()
 	{
 		String hex = StringUtil.hexString(4, 2);

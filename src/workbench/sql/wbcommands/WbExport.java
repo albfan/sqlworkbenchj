@@ -76,6 +76,7 @@ public class WbExport
 	public static final String ARG_EXCLUDE_TABLES = "excludeTables";
 	public static final String ARG_FORMATFILE = "formatFile";
 	public static final String ARG_COL_COMMENTS = "includeColumnComments";
+	public static final String ARG_DISTRIBUTE_LOB_FILES = "lobsPerDirectory";
 
 	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
 
@@ -144,6 +145,7 @@ public class WbExport
 		cmdLine.addArgument(WbImport.ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(SourceTableArgument.PARAM_EXCLUDE_TABLES);
 		cmdLine.addArgument(SourceTableArgument.PARAM_TYPES);
+		cmdLine.addArgument(ARG_DISTRIBUTE_LOB_FILES, ArgumentType.IntegerArgument);
 		RegexModifierParameter.addArguments(cmdLine);
 	}
 
@@ -541,8 +543,12 @@ public class WbExport
 		}
 
 		List<String> columns = StringUtil.stringToList(cols, ",", true, true, false);
-		this.exporter.setBlobIdColumns(columns);
-		this.exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
+		exporter.setBlobIdColumns(columns);
+		if (cmdLine.isArgPresent(ARG_DISTRIBUTE_LOB_FILES))
+		{
+			exporter.setMaxLobFilesPerDirectory(cmdLine.getIntValue(ARG_DISTRIBUTE_LOB_FILES, -1));
+		}
+		exporter.setCompressOutput(cmdLine.getBoolean("compress", false));
 
 		// Setting the output type should be the last step in the configuration
 		// of the exporter as this will trigger some initialization

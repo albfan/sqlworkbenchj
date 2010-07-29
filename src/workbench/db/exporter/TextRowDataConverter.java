@@ -124,11 +124,10 @@ public class TextRowDataConverter
 
 			if (!isConverted && writeBlobFiles && SqlUtil.isBlobType(colType))
 			{
-				File blobFile = createBlobFile(row, c, rowIndex);
-
-				value = blobFile.getName();
 				try
 				{
+					File blobFile = createBlobFile(row, c, rowIndex);
+					value = getBlobFileValue(blobFile);
 					long blobSize = writeBlobFile(row.getValue(c), blobFile);
 					if (blobSize <= 0)
 					{
@@ -146,10 +145,10 @@ public class TextRowDataConverter
 				Object clobData = row.getValue(c);
 				if (clobData != null)
 				{
-					File clobFile = createBlobFile(row, c, rowIndex);
-					value = clobFile.getName();
 					try
 					{
+						File clobFile = createBlobFile(row, c, rowIndex);
+						value = getBlobFileValue(clobFile);
 						String s = clobData.toString();
 						writeClobFile(s, clobFile, this.encoding);
 					}

@@ -85,6 +85,7 @@ public abstract class ExportWriter
 		converter.setEnableFixedHeader(exporter.getEnableFixedHeader());
 		converter.setDataModifier(exporter.getDataModifier());
 		converter.setIncludeColumnComments(exporter.getIncludeColumnComments());
+		converter.setMaxLobFilesPerDirectory(exporter.getMaxLobFilesPerDirectory());
     trimCharData = getTrimCharData();
 	}
 

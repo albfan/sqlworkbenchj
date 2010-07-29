@@ -145,6 +145,9 @@ public class DataExporter
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
 	private ExportDataModifier modifier;
 	private boolean includeColumnComments;
+	
+	private int maxBlobFilesPerDir = -1;
+
 
 	/**
 	 * Toggles an additional sheet for Spreedsheet exports
@@ -436,6 +439,16 @@ public class DataExporter
 		this.rowMonitor = monitor;
 	}
 
+	public void setMaxLobFilesPerDirectory(int maxFiles)
+	{
+		maxBlobFilesPerDir = maxFiles;
+	}
+
+	public int getMaxLobFilesPerDirectory()
+	{
+		return maxBlobFilesPerDir;
+	}
+	
 	/**
 	 * Define the columns whose values should be used
 	 * for creating the blob files during export

@@ -441,6 +441,27 @@
 					</row>
 
 					<row>
+						<entry id="export-lobfiles-per-dir">-lobsPerDirectory</entry>
+						<entry>
+							<para>
+								When exporting CLOB or BLOB columns as external files, the generated files
+                can be distributed over several directories to avoid an excessive number of
+                files in a single directory. The parameter <literal>lobsPerDirectory</literal> defines
+                how many LOB files are written into a single directory. When the specified number of files have been written,
+                a new directory is created. The directories are always created as a sub-directory of the target directory. The name 
+                for each directory is the base export filename plus "_lobs" plus a running number. So if you export
+                the data into a file "the_big_table.txt", the LOB files will be stored in "the_big_table_lobs_1",
+                "the_big_table_lobs_2", "the_big_table_lobs_3" and so on.
+							</para>
+              <para>
+                The directories will be created if needed, but if the directories already exist (e.g. because of a previous
+                export) <emphasis role="bold">their contents will not be deleted</emphasis>!
+              </para>
+						</entry>
+					</row>
+
+
+					<row>
 						<entry id="export-extensioncol">-extensionColumn</entry>
 						<entry>
 							<para>

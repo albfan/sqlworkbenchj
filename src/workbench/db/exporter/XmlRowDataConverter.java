@@ -272,44 +272,44 @@ public class XmlRowDataConverter
 				else if (writeClobFiles && SqlUtil.isClobType(type, dbmsType, originalConnection.getDbSettings()))
 				{
 					externalFile = true;
-					File clobFile = createBlobFile(row, c, rowIndex);
-					String dataFile = clobFile.getName();
 					try
 					{
+						File clobFile = createBlobFile(row, c, rowIndex);
+						String dataFile = getBlobFileValue(clobFile);
 						writeClobFile((String)data, clobFile, this.encoding);
-					}
-					catch (Exception e)
-					{
-						throw new RuntimeException("Error writing CLOB file", e);
-					}
-					xml.append(' ');
-					xml.append(ATTR_DATA_FILE);
-					xml.append("=\"");
-					xml.append(dataFile);
-					xml.append("\"/");
-					writeCloseTag = false;
-				}
-				else if (SqlUtil.isBlobType(type))
-				{
-					if (writeBlobFiles)
-					{
-						externalFile = true;
-						File blobFile = createBlobFile(row, c, rowIndex);
-						String dataFile = blobFile.getName();
-						try
-						{
-							writeBlobFile(data, blobFile);
-						}
-						catch (Exception e)
-						{
-							throw new RuntimeException("Error writing BLOB file", e);
-						}
 						xml.append(' ');
 						xml.append(ATTR_DATA_FILE);
 						xml.append("=\"");
 						xml.append(dataFile);
 						xml.append("\"/");
 						writeCloseTag = false;
+					}
+					catch (Exception e)
+					{
+						throw new RuntimeException("Error writing CLOB file", e);
+					}
+				}
+				else if (SqlUtil.isBlobType(type))
+				{
+					if (writeBlobFiles)
+					{
+						externalFile = true;
+						try
+						{
+							File blobFile = createBlobFile(row, c, rowIndex);
+							String dataFile = getBlobFileValue(blobFile);
+							writeBlobFile(data, blobFile);
+							xml.append(' ');
+							xml.append(ATTR_DATA_FILE);
+							xml.append("=\"");
+							xml.append(dataFile);
+							xml.append("\"/");
+							writeCloseTag = false;
+						}
+						catch (Exception e)
+						{
+							throw new RuntimeException("Error writing BLOB file", e);
+						}
 					}
 					else if (blobFormatter != null)
 					{
