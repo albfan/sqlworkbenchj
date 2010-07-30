@@ -47,6 +47,7 @@ public class WbRunLB
 		cmdLine.addArgument("author", ArgumentType.Repeatable);
 		cmdLine.addArgument("verbose", ArgumentType.BoolArgument);
 		CommonArgs.addEncodingParameter(cmdLine);
+		isUpdatingCommand = true;
 	}
 
 	@Override
