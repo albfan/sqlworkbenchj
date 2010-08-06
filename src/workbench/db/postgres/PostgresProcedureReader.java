@@ -30,6 +30,7 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -262,7 +263,7 @@ public class PostgresProcedureReader
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", true);
+		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", false);
 		if (usePGFunction && JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
 			readFunctionDef(def);
@@ -495,6 +496,11 @@ public class PostgresProcedureReader
 		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
 		String funcname = def.getSchema() + "." + name.getFormattedName();
 
+		if (CollectionUtil.isEmpty(name.getArguments()))
+		{
+			funcname += "()";
+		}
+		
 		String sql = "select pg_get_functiondef('" + funcname + "'::regprocedure)";
 
 		if (Settings.getInstance().getDebugMetadataSql())
