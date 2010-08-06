@@ -15,10 +15,13 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.DatabaseMetaData;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
@@ -26,44 +29,46 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
+import workbench.WbManager;
 import workbench.db.DbMetadata;
+import workbench.db.DbObject;
+import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.db.oracle.OraclePackageParser;
+import workbench.gui.MainWindow;
 import workbench.gui.WbSwingUtilities;
+import workbench.gui.actions.CompileDbObjectAction;
+import workbench.gui.actions.DropDbObjectAction;
 import workbench.gui.actions.ReloadAction;
+import workbench.gui.actions.ScriptDbObjectAction;
+import workbench.gui.actions.WbAction;
+import workbench.gui.components.DataStoreTableModel;
+import workbench.gui.components.QuickFilterPanel;
 import workbench.gui.components.WbScrollPane;
 import workbench.gui.components.WbSplitPane;
+import workbench.gui.components.WbTabbedPane;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTraversalPolicy;
 import workbench.gui.renderer.ProcStatusRenderer;
+import workbench.gui.renderer.RendererFactory;
+import workbench.gui.settings.PlacementChooser;
+import workbench.gui.sql.PanelContentSender;
+import workbench.interfaces.CriteriaPanel;
 import workbench.interfaces.PropertyStorage;
 import workbench.interfaces.Reloadable;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
-import workbench.util.StringUtil;
-import javax.swing.JLabel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
-import workbench.WbManager;
-import workbench.db.DbObject;
-import workbench.db.ProcedureDefinition;
-import workbench.db.TableIdentifier;
-import workbench.db.oracle.OraclePackageParser;
-import workbench.gui.MainWindow;
-import workbench.gui.actions.CompileDbObjectAction;
-import workbench.gui.actions.DropDbObjectAction;
-import workbench.gui.actions.ScriptDbObjectAction;
-import workbench.gui.components.DataStoreTableModel;
-import workbench.gui.components.QuickFilterPanel;
-import workbench.gui.components.WbTabbedPane;
-import workbench.gui.renderer.RendererFactory;
-import workbench.gui.settings.PlacementChooser;
-import workbench.interfaces.CriteriaPanel;
 import workbench.storage.DataStore;
+import workbench.util.ExceptionUtil;
 import workbench.util.FilteredProperties;
 import workbench.util.LowMemoryException;
+import workbench.util.StringUtil;
 import workbench.util.WbWorkspace;
 
 /**
@@ -75,7 +80,7 @@ import workbench.util.WbWorkspace;
  */
 public class ProcedureListPanel
 	extends JPanel
-	implements ListSelectionListener, Reloadable, DbObjectList
+	implements ListSelectionListener, Reloadable, DbObjectList, ActionListener
 {
 	private WbConnection dbConnection;
 	private JPanel listPanel;
@@ -97,6 +102,8 @@ public class ProcedureListPanel
 	private MainWindow parentWindow;
 	private boolean initialized;
 	private FilteredProperties workspaceSettings;
+
+   private EditorTabSelectMenu generateWbCall;
 
 	public ProcedureListPanel(MainWindow window)
 	{
@@ -196,6 +203,7 @@ public class ProcedureListPanel
 		pol.addComponent(this.procColumns);
 		this.setFocusTraversalPolicy(pol);
 		this.reset();
+
 		this.extendPopupMenu();
 
 		source.setDatabaseConnection(dbConnection);
@@ -212,6 +220,13 @@ public class ProcedureListPanel
 
 	private void extendPopupMenu()
 	{
+		if (this.parentWindow != null)
+		{
+			this.generateWbCall = new EditorTabSelectMenu(this, ResourceMgr.getString("MnuTxtShowProcData"), "LblWbCallInNewTab", "LblWbCallInTab", parentWindow);
+			this.generateWbCall.setEnabled(false);
+			this.procList.addPopupMenu(this.generateWbCall, true);
+		}
+
 		ScriptDbObjectAction createScript = new ScriptDbObjectAction(this, procList.getSelectionModel());
 		procList.addPopupAction(createScript, true);
 
@@ -408,16 +423,22 @@ public class ProcedureListPanel
 
 		if (e.getSource() != this.procList.getSelectionModel()) return;
 		if (e.getValueIsAdjusting()) return;
+
 		retrieveCurrentProcedure();
+
+		if (e.getSource() == this.procList.getSelectionModel())
+		{
+			if (this.generateWbCall != null)
+			{
+				this.generateWbCall.setEnabled(this.procList.getSelectedRowCount() == 1);
+			}
+		}
 	}
 
 	protected void retrieveCurrentProcedure()
 	{
-		int row = this.procList.getSelectedRow();
-
-		if (row < 0) return;
-
-		final ProcedureDefinition def = getDefinition(row);
+		final ProcedureDefinition def = getCurrentProcedureDefinition();
+		if (def == null) return;
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -428,22 +449,48 @@ public class ProcedureListPanel
 		});
 	}
 
+   /**
+    * Returns the current defintion.
+    * @return The {@link ProcedureDefinition} or null if no row is selected.
+    */
+	private ProcedureDefinition getCurrentProcedureDefinition()
+	{
+		int row = this.procList.getSelectedRow();
+
+		ProcedureDefinition def = null;
+
+		if (row > -1)
+		{
+			def = getDefinition(row);
+		}
+		return def;
+	}
+
 	private ProcedureDefinition getDefinition(int row)
 	{
-		String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
-		String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
-		String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
-		String comment = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
-		int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
 		ProcedureDefinition def = null;
-		if (this.dbConnection.getMetadata().isOracle() && catalog != null)
+		Object obj = procList.getDataStore().getRow(row).getUserObject();
+		if (obj instanceof ProcedureDefinition)
 		{
-			def = ProcedureDefinition.createOracleDefinition(schema, proc, catalog, type, comment);
+			def = (ProcedureDefinition)obj;
 		}
 		else
 		{
-			def = new ProcedureDefinition(catalog, schema, proc, type);
-			def.setComment(comment);
+			String proc = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
+			String schema = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA);
+			String catalog = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG);
+			String comment = this.procList.getValueAsString(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
+			int type = this.procList.getDataStore().getValueAsInt(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureResultUnknown);
+
+			if (this.dbConnection.getMetadata().isOracle() && catalog != null)
+			{
+				def = ProcedureDefinition.createOracleDefinition(schema, proc, catalog, type, comment);
+			}
+			else
+			{
+				def = new ProcedureDefinition(catalog, schema, proc, type);
+				def.setComment(comment);
+			}
 		}
 		return def;
 	}
@@ -463,7 +510,7 @@ public class ProcedureListPanel
 			dbConnection.setBusy(true);
 			try
 			{
-				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureReader().getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName()));
+				DataStoreTableModel model = new DataStoreTableModel(meta.getProcedureReader().getProcedureColumns(def));
 				procColumns.setModel(model, true);
 
 				TableColumnModel colmod = procColumns.getColumnModel();
@@ -498,7 +545,7 @@ public class ProcedureListPanel
 			dbConnection.setBusy(false);
 		}
 
-		final int pos = findOracleProcedureInPackage(sql, def.getPackageName(), def.getProcedureName());
+		final int pos = findOracleProcedureInPackage(sql, def);
 
 		EventQueue.invokeLater(new Runnable()
 		{
@@ -510,14 +557,29 @@ public class ProcedureListPanel
 		});
 	}
 
-	private int findOracleProcedureInPackage(CharSequence sql, String packageName, String procName)
+	private List<String> getParameterNames()
+	{
+		int rows = procColumns.getRowCount();
+		List<String> names = new ArrayList<String>(rows);
+		for (int row = 0; row < rows; row ++)
+		{
+			String name = procColumns.getValueAsString(row, 0);
+			if (name != null)
+			{
+				names.add(name);
+			}
+		}
+		return names;
+	}
+	
+	private int findOracleProcedureInPackage(CharSequence sql, ProcedureDefinition def)
 	{
 		if (sql == null) return 0;
 		if (this.dbConnection == null) return 0;
 		if (!this.dbConnection.getMetadata().isOracle()) return 0;
 
-		if (StringUtil.isEmptyString(packageName)) return 0;
-		int pos = OraclePackageParser.findProcedurePosition(sql, procName);
+		if (StringUtil.isEmptyString(def.getPackageName())) return 0;
+		int pos = OraclePackageParser.findProcedurePosition(sql, def, getParameterNames());
 
 		return (pos < 0 ? 0 : pos);
 	}
@@ -567,6 +629,68 @@ public class ProcedureListPanel
 		if (!WbSwingUtilities.checkConnection(this, dbConnection)) return;
 		this.reset();
 		this.retrieve();
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e)
+	{
+		String command = e.getActionCommand();
+		if (command.startsWith(EditorTabSelectMenu.PANEL_CMD_PREFIX) && this.parentWindow != null)
+		{
+			try
+			{
+				final int panelIndex = Integer.parseInt(command.substring(EditorTabSelectMenu.PANEL_CMD_PREFIX.length()));
+				final boolean appendText = WbAction.isCtrlPressed(e);
+
+				// Allow the selection change to finish so that
+				// we have the correct table name in the instance variables
+				EventQueue.invokeLater(new Runnable()
+				{
+					public void run()
+					{
+						showProcedureCallData(panelIndex, appendText);
+					}
+				});
+			}
+			catch (Exception ex)
+			{
+				LogMgr.logError("ProcedureListPanel().actionPerformed()", "Error when accessing editor tab", ex);
+			}
+		}
+	}
+
+	private void showProcedureCallData(int panelIndex, boolean appendText)
+	{
+		PanelContentSender sender = new PanelContentSender(this.parentWindow);
+		String sql = buildProcedureCallForTable();
+		if (sql != null)
+		{
+			sender.sendContent(sql, panelIndex, appendText);
+		}
+	}
+
+	private String buildProcedureCallForTable()
+	{
+		ProcedureDefinition currentDefinition = null;
+
+		try
+		{
+			currentDefinition = this.getCurrentProcedureDefinition();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("TableListPanel.buildProcedureCallForTable()", "Error retrieving procedure definition", e);
+			String msg = ExceptionUtil.getDisplay(e);
+			WbSwingUtilities.showErrorMessage(this, msg);
+			return null;
+		}
+
+		if (currentDefinition == null)
+		{
+			return null;
+		}
+
+		return currentDefinition.toWbCallStatement(this.getConnection());
 	}
 
 }

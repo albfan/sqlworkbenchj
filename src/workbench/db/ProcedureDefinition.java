@@ -16,7 +16,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+import workbench.log.LogMgr;
 import workbench.storage.DataStore;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -27,17 +30,23 @@ import workbench.util.StringUtil;
 public class ProcedureDefinition
 	implements DbObject
 {
+
 	private String schema;
 	private String catalog;
 	private String procName;
 	private String comment;
+	private String displayName;
 
-	// as returned by the JDBC driver corresponds to
-	// DatabaseMetaData.procedureNoResult
-	// DatabaseMetaData.procedureReturnsResult
+	/**
+	 * as returned by the JDBC driver corresponds to
+	 * DatabaseMetaData.procedureNoResult
+	 * DatabaseMetaData.procedureReturnsResult
+	 */
 	private int resultType;
 
-	private OracleType oracleType;;
+	private OracleType oracleType;
+	private String oracleOverloadIndex;
+
 	private CharSequence source;
 	private List<String> parameterTypes;
 
@@ -58,6 +67,16 @@ public class ProcedureDefinition
 		return def;
 	}
 
+	public void setOracleOverloadIndex(String indicator)
+	{
+		oracleOverloadIndex = indicator;
+	}
+
+	public String getOracleOverloadIndex()
+	{
+		return oracleOverloadIndex;
+	}
+	
 	public ProcedureDefinition(String name, int type)
 	{
 		procName = name;
@@ -72,6 +91,16 @@ public class ProcedureDefinition
 		resultType = type;
 	}
 
+	public void setDisplayName(String name)
+	{
+		displayName = name;
+	}
+
+	public String getDisplayName()
+	{
+		return displayName;
+	}
+	
 	public String getComment()
 	{
 		return comment;
@@ -84,19 +113,16 @@ public class ProcedureDefinition
 
 	public synchronized List<String> getParameterTypes(WbConnection con)
 	{
-		if (this.parameterTypes == null)
+		if (parameterTypes == null)
 		{
 			ProcedureReader reader = con.getMetadata().getProcedureReader();
 			DbMetadata meta = con.getMetadata();
 			try
 			{
-				String cat = meta.removeQuotes(this.catalog);
-				String schem = meta.removeQuotes(this.schema);
-				String name = meta.removeQuotes(this.procName);
-				DataStore ds = reader.getProcedureColumns(cat, schem, name);
+				DataStore ds = reader.getProcedureColumns(this);
 				parameterTypes = new ArrayList<String>(ds.getRowCount());
 
-				for (int i=0; i < ds.getRowCount(); i++ )
+				for (int i = 0; i < ds.getRowCount(); i++)
 				{
 					String type = ds.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 					if ("IN".equalsIgnoreCase(type) || "INOUT".equalsIgnoreCase(type))
@@ -117,7 +143,7 @@ public class ProcedureDefinition
 	{
 		if (isOraclePackage())
 		{
-			return "DROP PACKAGE " + con.getMetadata().quoteObjectname(schema) + "." + con.getMetadata().quoteObjectname(catalog);
+			return "DROP PACKAGE "  + con.getMetadata().quoteObjectname(schema) + "." + con.getMetadata().quoteObjectname(catalog);
 		}
 		if (isOracleObjectType())
 		{
@@ -128,6 +154,7 @@ public class ProcedureDefinition
 			}
 			return drop;
 		}
+		// Apply default statements
 		return null;
 	}
 
@@ -227,7 +254,7 @@ public class ProcedureDefinition
 
 	public String getCatalog()
 	{
-//		if (oracleType != null) return null;
+		//		if (oracleType != null) return null;
 		return this.catalog;
 	}
 
@@ -272,16 +299,48 @@ public class ProcedureDefinition
 	public String toString()
 	{
 		String name = oracleType != null ? catalog + "." + procName : procName;
-		if (parameterTypes != null && parameterTypes.size() > 0)
+		if (CollectionUtil.isNonEmpty(parameterTypes))
 		{
 			return name + "( " + StringUtil.listToString(parameterTypes, ", ", false) + " )";
 		}
 		return name;
 	}
 
+	public String toWbCallStatement(WbConnection con)
+	{
+		StringBuilder call = new StringBuilder(150);
+		call.append("WbCall ");
+		call.append(oracleType != null ? catalog + "." + procName : procName);
+		call.append("(");
+
+		int rows = 0;
+		try
+		{
+			DataStore dataStore = con.getMetadata().getProcedureReader().getProcedureColumns(this);
+			rows = dataStore.getRowCount();
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
+			return null;
+		}
+
+		for (int i = 0; i < rows; i++)
+		{
+			call.append("?");
+			if (i + 1 != rows)
+			{
+				call.append(",");
+			}
+		}
+		call.append(");");
+
+		return call.toString();
+	}
+
 	private static enum OracleType
 	{
 		packageType,
-	  objectType;
+		objectType;
 	}
 }

@@ -32,7 +32,7 @@ public class PGProcName
 	 * procedure's name and all parameter types in brackets.
 	 * <br/>
 	 * e.g. my_func(int4, varchar, date)
-	 * 
+	 *
 	 * @param fullname
 	 * @param typeMap
 	 */
@@ -98,12 +98,12 @@ public class PGProcName
 		}
 		return argTypes.toString();
 	}
-	
+
 	public List<PGType> getArguments()
 	{
 		return arguments;
 	}
-	
+
 	public int compareTo(PGProcName o)
 	{
 		return getFormattedName().compareTo(o.getFormattedName());
@@ -113,10 +113,10 @@ public class PGProcName
 	{
 		return procName;
 	}
-	
+
 	public String getFormattedName()
 	{
-		if (arguments == null || arguments.isEmpty()) return procName;
+		if (arguments == null || arguments.isEmpty()) return procName +"()";
 		if (formattedName == null)
 		{
 			StringBuilder b = new StringBuilder(procName.length() + arguments.size() * 10);
@@ -132,7 +132,7 @@ public class PGProcName
 		}
 		return formattedName;
 	}
-	
+
 	public String toString()
 	{
 		return getFormattedName();

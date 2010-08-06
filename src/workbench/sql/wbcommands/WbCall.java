@@ -399,7 +399,18 @@ public class WbCall
 		}
 		String nameToUse = StringUtil.trimQuotes(meta.adjustObjectnameCase(procname));
 
-		DataStore params = meta.getProcedureReader().getProcedureColumns(catalog, schemaToUse, nameToUse);
+		ProcedureDefinition procDef = null;
+		List<ProcedureDefinition> procs = meta.getProcedureReader().getProcedureList(catalog, schemaToUse, nameToUse);
+		if (procs.size() > 0)
+		{
+			procDef = procs.get(0);
+		}
+		else
+		{
+			procDef = new ProcedureDefinition(catalog, schemaToUse, nameToUse, -1);
+		}
+		
+		DataStore params = meta.getProcedureReader().getProcedureColumns(procDef);
 
 		boolean needFuncCall = returnsRefCursor(params);
 		sqlUsed = getSqlToPrepare(sql, needFuncCall);

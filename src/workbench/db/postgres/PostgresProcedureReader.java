@@ -30,7 +30,6 @@ import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.CollectionUtil;
 import workbench.util.ExceptionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
@@ -222,11 +221,14 @@ public class PostgresProcedureReader
 
 				PGProcName pname = new PGProcName(name, args, getTypeLookup());
 
+				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
+				def.setDisplayName(pname.getFormattedName());
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, pname.getFormattedName());
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, java.sql.DatabaseMetaData.procedureReturnsResult);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
+				ds.getRow(row).setUserObject(def);
 			}
 
 			this.connection.releaseSavepoint(sp);
@@ -244,18 +246,18 @@ public class PostgresProcedureReader
 		}
 	}
 
-	public DataStore getProcedureColumns(String catalog, String schema, String procname)
+	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		PGProcName pgName = new PGProcName(procname, getTypeLookup());
+		PGProcName pgName = new PGProcName(def.getProcedureName(), getTypeLookup());
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
 			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{
-			return getColumns(catalog, schema, pgName);
+			return getColumns(def.getCatalog(), def.getSchema(), pgName);
 		}
 		else
 		{
-			return super.getProcedureColumns(catalog, schema, procname);
+			return super.getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName());
 		}
 	}
 
@@ -263,7 +265,7 @@ public class PostgresProcedureReader
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", false);
+		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", true);
 		if (usePGFunction && JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
 		{
 			readFunctionDef(def);
@@ -457,7 +459,7 @@ public class PostgresProcedureReader
 				source.append('\n');
 				if (StringUtil.isNonBlank(def.getComment()))
 				{
-					source.append("\nCOMMENT ON " + name.getFormattedName() + " IS '" + SqlUtil.escapeQuotes(def.getComment()) + "'\n" );
+					source.append("\nCOMMENT ON FUNCTION " + name.getFormattedName() + " IS '" + SqlUtil.escapeQuotes(def.getComment()) + "'\n" );
 					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 					source.append('\n');
 				}
@@ -495,12 +497,6 @@ public class PostgresProcedureReader
 	{
 		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
 		String funcname = def.getSchema() + "." + name.getFormattedName();
-
-		if (CollectionUtil.isEmpty(name.getArguments()))
-		{
-			funcname += "()";
-		}
-		
 		String sql = "select pg_get_functiondef('" + funcname + "'::regprocedure)";
 
 		if (Settings.getInstance().getDebugMetadataSql())
@@ -523,13 +519,19 @@ public class PostgresProcedureReader
 			if (rs.next())
 			{
 				String s = rs.getString(1);
-				if (s != null)
+				if (StringUtil.isNonBlank(s))
 				{
-					source = new StringBuilder(s.length() + 10);
+					source = new StringBuilder(s.length() + 50);
 					source.append(s);
-					source.append('\n');
+					if (!s.endsWith("\n"))	source.append('\n');
 					source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
 					source.append('\n');
+					if (StringUtil.isNonBlank(def.getComment()))
+					{
+						source.append("\nCOMMENT ON FUNCTION " + name.getFormattedName() + " IS '" + SqlUtil.escapeQuotes(def.getComment()) + "'\n" );
+						source.append(Settings.getInstance().getAlternateDelimiter(connection).getDelimiter());
+						source.append('\n');
+					}
 				}
 			}
 		}

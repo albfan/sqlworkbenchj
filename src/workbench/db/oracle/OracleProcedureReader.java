@@ -11,6 +11,7 @@
  */
 package workbench.db.oracle;
 
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,6 +22,7 @@ import workbench.db.JdbcProcedureReader;
 import workbench.db.JdbcUtils;
 import workbench.db.NoConfigException;
 import workbench.db.ProcedureDefinition;
+import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
@@ -181,10 +183,32 @@ public class OracleProcedureReader
 	}
 
 	@Override
-	public DataStore getProcedureColumns(String catalog, String schema, String procname)
+	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		DataStore result = super.getProcedureColumns(catalog, schema, procname);
+		String overload = def.getOracleOverloadIndex();
+		DataStore result = createProcColsDataStore();
+		ResultSet rs = null;
+
+		try
+		{
+			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), "%");
+			int overloadIndex = JdbcUtils.getColumnIndex(rs, "OVERLOAD");
+
+			while (rs.next())
+			{
+				if (overload != null && overloadIndex > 0)
+				{
+					String toTest = rs.getString(overloadIndex);
+					if (!StringUtil.equalString(toTest, overload)) continue;
+				}
+				processProcedureColumnResultRow(result, rs);
+			}
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+		}
 
 		// Remove the implicit parameter for Object type functions that passes
 		// the instance of that object to the function
@@ -215,12 +239,10 @@ public class OracleProcedureReader
 			return super.getProcedures(catalog, schema, name);
 		}
 
-		String standardProcs = "select null as procedure_cat,  \n" +
-             "       ap.owner as procedure_schem,  \n" +
+		String standardProcs = "select null as package_name,  \n" +
+             "       ap.owner as procedure_owner,  \n" +
              "       ap.object_name as procedure_name, \n" +
-						 "       null, \n" +
-						 "       null, \n" +
-						 "       null, \n" +
+						 "       null as overload_index, \n" +
              "       null as remarks, \n" +
              "       decode(ao.object_type, 'PROCEDURE', 1, 'FUNCTION', 2, 0) as PROCEDURE_TYPE \n" +
              "from all_procedures ap \n" +
@@ -239,17 +261,15 @@ public class OracleProcedureReader
 
 		standardProcs += " AND ao.object_name LIKE '" + name + "' ";
 
-		String pkgProcs = "select aa.package_name as procedure_cat, \n" +
-             "       ao.owner as procedure_schem, \n" +
+		String pkgProcs = "select aa.package_name, \n" +
+             "       ao.owner as procedure_owner, \n" +
              "       aa.object_name as procedure_name, \n" +
-             "       null, \n" +
-             "       null, \n" +
-             "       null, \n" +
+             "       aa.overload as overload_index, \n" +
              "       decode(ao.object_type, 'TYPE', 'OBJECT TYPE', ao.object_type) as remarks, \n" +
              "       decode(aa.in_out, 'IN', 1, 'OUT', 2, 0) as PROCEDURE_TYPE \n" +
              "from all_arguments aa \n" +
              "  join all_objects ao on aa.package_name = ao.object_name and aa.owner = ao.owner and ao.object_type IN ('PACKAGE', 'TYPE') \n" +
-             "where aa.owner = user \n" +
+             "where aa.owner = ao.owner \n" +
              "and aa.package_name IS NOT NULL \n" +
              "and (    (aa.position = 0 and aa.sequence = 1 AND aa.IN_OUT = 'OUT') \n" +
              "      OR (aa.position = 1 and aa.sequence = 1) \n" +
@@ -276,20 +296,52 @@ public class OracleProcedureReader
 		}
 
 		Statement stmt = null;
+		ResultSet rs = null;
+		DataStore ds = buildProcedureListDataStore(this.connection.getMetadata(), false);
 		try
 		{
 			stmt = this.connection.createStatementForQuery();
-			ResultSet rs = stmt.executeQuery(sql);
+			rs = stmt.executeQuery(sql);
 
-			// the result set will be closed by fillProcedureListDataStore()
-			DataStore ds = fillProcedureListDataStore(rs);
+			while (rs.next())
+			{
+				String packageName = rs.getString("PACKAGE_NAME");
+				String owner = rs.getString("PROCEDURE_OWNER");
+				String procedureName = rs.getString("PROCEDURE_NAME");
+				String remark = rs.getString("REMARKS");
+				String overloadIndicator = rs.getString("OVERLOAD_INDEX");
+				int type = rs.getInt("PROCEDURE_TYPE");
+
+				Integer iType;
+				if (rs.wasNull())
+				{
+					iType = Integer.valueOf(DatabaseMetaData.procedureResultUnknown);
+				}
+				else
+				{
+					iType = Integer.valueOf(type);
+				}
+				ProcedureDefinition def = ProcedureDefinition.createOracleDefinition(owner, procedureName, packageName, type, remark);
+				def.setOracleOverloadIndex(overloadIndicator);
+				int row = ds.addRow();
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, packageName);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, procedureName);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, iType);
+				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS, remark);
+				ds.getRow(row).setUserObject(def);
+			}
 			ds.resetStatus();
-			return ds;
+		}
+		catch (Exception e)
+		{
+			LogMgr.logError("JdbcProcedureReader.getProcedures()", "Error while retrieving procedures", e);
 		}
 		finally
 		{
-			SqlUtil.closeStatement(stmt);
+			SqlUtil.closeAll(rs, stmt);
 		}
+		return ds;
 	}
 
 	public void readProcedureSource(ProcedureDefinition def)

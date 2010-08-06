@@ -12,8 +12,13 @@
 package workbench.db.oracle;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import workbench.db.ProcedureDefinition;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.CollectionUtil;
+import workbench.util.StringUtil;
 
 /**
  * @author Thomas Kellerer
@@ -147,7 +152,7 @@ public class OraclePackageParser
 		return null;
 	}
 	
-	public static int findProcedurePosition(CharSequence source, String procName)
+	public static int findProcedurePosition(CharSequence source, ProcedureDefinition def, List<String> parameters)
 	{
 		int procPos = -1;
 		
@@ -182,10 +187,21 @@ public class OraclePackageParser
 		while (t != null)
 		{
 			String text = t.getContents();
-			if (lastKeywordPos > -1 && text.equalsIgnoreCase(procName))
+			if (lastKeywordPos > -1 && text.equalsIgnoreCase(def.getProcedureName()))
 			{
 				procPos = lastKeywordPos;
-				break;
+				if (CollectionUtil.isNonEmpty(parameters))
+				{
+					t = lexer.getNextToken(false, false);
+					if (t.getContents().equals("("))
+					{
+						List<String> params = getParameters(lexer);
+						if (compareArguments(params, parameters))
+						{
+							break;
+						}
+					}
+				}
 			}
 			if (text.equals("PROCEDURE") || text.equals("FUNCTION"))
 			{
@@ -200,4 +216,42 @@ public class OraclePackageParser
 		return procPos;
 	}
 
+	private static List<String> getParameters(SQLLexer lexer)
+	{
+		List<String> params = new ArrayList<String>();
+		SQLToken t = lexer.getNextToken(false, false);
+		boolean nextIsName = true;
+		while (t != null)
+		{
+			if (t.getText().equals(")"))
+			{
+				break;
+			}
+			
+			if (nextIsName)
+			{
+				params.add(t.getText());
+				nextIsName = false;
+			}
+			else
+			{
+				nextIsName = t.getText().equals(",");
+			}
+			t = lexer.getNextToken(false, false);
+		}
+		return params;
+	}
+
+	private static boolean compareArguments(List<String> list1, List<String> list2)
+	{
+		if (CollectionUtil.isEmpty(list1) && CollectionUtil.isEmpty(list2)) return true;
+		if (CollectionUtil.isEmpty(list1) && CollectionUtil.isNonEmpty(list2)) return false;
+		if (CollectionUtil.isNonEmpty(list1) && CollectionUtil.isEmpty(list2)) return false;
+		if (list1.size() != list2.size()) return false;
+		for (int i=0; i < list1.size(); i++)
+		{
+			if (!StringUtil.equalStringIgnoreCase(list1.get(i), list2.get(i))) return false;
+		}
+		return true;
+	}
 }

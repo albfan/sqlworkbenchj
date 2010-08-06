@@ -233,6 +233,12 @@ public class JdbcProcedureReader
 		return procname.substring(0,pos);
 	}
 
+	public DataStore getProcedureColumns(ProcedureDefinition def)
+		throws SQLException
+	{
+		return getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName());
+	}
+
 	public DataStore getProcedureColumns(String aCatalog, String aSchema, String aProcname)
 		throws SQLException
 	{
@@ -248,47 +254,7 @@ public class JdbcProcedureReader
 			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(aCatalog, aSchema, aProcname, "%");
 			while (rs.next())
 			{
-				int row = ds.addRow();
-				String colName = rs.getString("COLUMN_NAME");
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
-				int colType = rs.getInt("COLUMN_TYPE");
-				String stype;
-
-				switch (colType)
-				{
-					case DatabaseMetaData.procedureColumnUnknown:
-						stype = "UNKNOWN";
-						break;
-					case DatabaseMetaData.procedureColumnInOut:
-						stype = "INOUT";
-						break;
-					case DatabaseMetaData.procedureColumnIn:
-						stype = "IN";
-						break;
-					case DatabaseMetaData.procedureColumnOut:
-						stype = "OUT";
-						break;
-					case DatabaseMetaData.procedureColumnResult:
-						stype = "RESULTSET";
-						break;
-					case DatabaseMetaData.procedureColumnReturn:
-						stype = "RETURN";
-						break;
-					default:
-						stype = NumberStringCache.getNumberString(colType);
-				}
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, stype);
-
-				int sqlType = rs.getInt("DATA_TYPE");
-				String typeName = rs.getString("TYPE_NAME");
-				int digits = rs.getInt("PRECISION");
-				int size = rs.getInt("LENGTH");
-				String rem = rs.getString("REMARKS");
-
-				String display = connection.getMetadata().getDataTypeResolver().getSqlTypeDisplay(typeName, sqlType, size, digits);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, display);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
-				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);
+				processProcedureColumnResultRow(ds, rs);
 			}
 			this.connection.releaseSavepoint(sp);
 		}
@@ -305,6 +271,52 @@ public class JdbcProcedureReader
 		return ds;
 	}
 
+	protected void processProcedureColumnResultRow(DataStore ds, ResultSet rs)
+		throws SQLException
+	{
+		int row = ds.addRow();
+		String colName = rs.getString("COLUMN_NAME");
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
+		int colType = rs.getInt("COLUMN_TYPE");
+		String stype;
+
+		switch (colType)
+		{
+			case DatabaseMetaData.procedureColumnUnknown:
+				stype = "UNKNOWN";
+				break;
+			case DatabaseMetaData.procedureColumnInOut:
+				stype = "INOUT";
+				break;
+			case DatabaseMetaData.procedureColumnIn:
+				stype = "IN";
+				break;
+			case DatabaseMetaData.procedureColumnOut:
+				stype = "OUT";
+				break;
+			case DatabaseMetaData.procedureColumnResult:
+				stype = "RESULTSET";
+				break;
+			case DatabaseMetaData.procedureColumnReturn:
+				stype = "RETURN";
+				break;
+			default:
+				stype = NumberStringCache.getNumberString(colType);
+		}
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE, stype);
+
+		int sqlType = rs.getInt("DATA_TYPE");
+		String typeName = rs.getString("TYPE_NAME");
+		int digits = rs.getInt("PRECISION");
+		int size = rs.getInt("LENGTH");
+		String rem = rs.getString("REMARKS");
+
+		String display = connection.getMetadata().getDataTypeResolver().getSqlTypeDisplay(typeName, sqlType, size, digits);
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, display);
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);
+		
+	}
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{

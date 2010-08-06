@@ -49,7 +49,7 @@ public interface ProcedureReader
 	DataStore getProcedures(String catalog, String schema, String name)
 		throws SQLException;
 
-	DataStore getProcedureColumns(String catalog, String schema, String procname)
+	DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException;
 
 	void readProcedureSource(ProcedureDefinition def)

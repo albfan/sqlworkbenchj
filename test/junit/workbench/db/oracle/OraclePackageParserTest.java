@@ -11,7 +11,10 @@
  */
 package workbench.db.oracle;
 
+import java.sql.DatabaseMetaData;
 import workbench.WbTestCase;
+import workbench.db.ProcedureDefinition;
+import workbench.util.CollectionUtil;
 
 /**
  * @author Thomas Kellerer
@@ -30,6 +33,7 @@ public class OraclePackageParserTest
              "      comm   NUMBER, \n" +
              "      deptno NUMBER) \n" +
              "   PROCEDURE fire_employee (emp_id NUMBER); \n" +
+             "   PROCEDURE fire_employee (emp_id NUMBER, fire_date DATE); \n" +
              "END emp_actions;";
 
   String body = "CREATE \nOR\t    REPLACE PACKAGE BODY emp_actions AS  -- body \n" +
@@ -49,7 +53,13 @@ public class OraclePackageParserTest
              "   END hire_employee; \n" +
              " \n" +
 						 "   /** Procedure fire_employee **/ \n" +
-             "   PROCEDURE fire_employee( emp_id NUMBER) IS \n" +
+             "   PROCEDURE fire_employee(emp_id NUMBER) IS \n" +
+             "   BEGIN \n" +
+             "      DELETE FROM emp WHERE empno = emp_id; \n" +
+             "   END fire_employee; \n" +
+             " \n" +
+             " \n" +
+             "   PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE) IS \n" +
              "   BEGIN \n" +
              "      DELETE FROM emp WHERE empno = emp_id; \n" +
              "   END fire_employee; \n" +
@@ -74,7 +84,18 @@ public class OraclePackageParserTest
 	{
 		String script = decl + "\n/\n/" + body;
 		int pos = script.indexOf("   PROCEDURE hire_employee(") + 3;
-		int procPos = OraclePackageParser.findProcedurePosition(script, "hire_employee");
+		ProcedureDefinition proc = new ProcedureDefinition("HIRE_EMPLOYEE", DatabaseMetaData.procedureNoResult);
+		int procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id"));
+		assertEquals(pos, procPos);
+
+		pos = script.indexOf("PROCEDURE fire_employee(emp_id NUMBER, fire_date DATE)");
+		proc = new ProcedureDefinition("fire_employee", DatabaseMetaData.procedureNoResult);
+		procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id", "fire_date"));
+		assertEquals(pos, procPos);
+
+		pos = script.indexOf("PROCEDURE fire_employee(emp_id NUMBER)");
+		proc = new ProcedureDefinition("fire_employee", DatabaseMetaData.procedureNoResult);
+		procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id"));
 		assertEquals(pos, procPos);
 	}
 
@@ -82,11 +103,19 @@ public class OraclePackageParserTest
 	{
 		String script = decl + "\n/\n";
 		int pos = script.indexOf("PROCEDURE hire_employee (");
-		int procPos = OraclePackageParser.findProcedurePosition(script, "hire_employee");
+		ProcedureDefinition proc = new ProcedureDefinition("HIRE_EMPLOYEE", DatabaseMetaData.procedureNoResult);
+		int procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id"));
 		assertEquals(pos, procPos);
 
-		pos = script.indexOf("PROCEDURE fire_employee (emp_id");
-		procPos = OraclePackageParser.findProcedurePosition(script, "fire_employee");
+		pos = script.indexOf("PROCEDURE fire_employee (emp_id NUMBER);");
+		proc = new ProcedureDefinition("FIRE_EMPLOYEE", DatabaseMetaData.procedureNoResult);
+		procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("emp_id"));
 		assertEquals(pos, procPos);
+
+		pos = script.indexOf("PROCEDURE fire_employee (emp_id NUMBER, fire_date DATE); ");
+		proc = new ProcedureDefinition("FIRE_EMPLOYEE", DatabaseMetaData.procedureNoResult);
+		procPos = OraclePackageParser.findProcedurePosition(script, proc, CollectionUtil.arrayList("EMP_ID", "FIRE_DATE"));
+		assertEquals(pos, procPos);
+
 	}
 }
