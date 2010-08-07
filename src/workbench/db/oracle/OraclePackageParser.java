@@ -190,17 +190,23 @@ public class OraclePackageParser
 			if (lastKeywordPos > -1 && text.equalsIgnoreCase(def.getProcedureName()))
 			{
 				procPos = lastKeywordPos;
-				if (CollectionUtil.isNonEmpty(parameters))
+				t = lexer.getNextToken(false, false);
+				if (t != null && t.getContents().equals("("))
 				{
-					t = lexer.getNextToken(false, false);
-					if (t.getContents().equals("("))
+					List<String> params = getParameters(lexer);
+					if (compareArguments(params, parameters))
 					{
-						List<String> params = getParameters(lexer);
-						if (compareArguments(params, parameters))
-						{
-							break;
-						}
+						break;
 					}
+				}
+				else if (CollectionUtil.isEmpty(parameters))
+				{
+					break;
+				}
+				else
+				{
+					lastKeywordPos = -1;
+					continue;
 				}
 			}
 			if (text.equals("PROCEDURE") || text.equals("FUNCTION"))

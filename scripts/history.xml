@@ -2,6 +2,7 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-07-24">
+    <entry dev-build="11" type="enh">The context menu of the procedure list now has a new item "Put WbCall into..." (similar to the "Put SELECT into") for tables. Thanks Andreas for contributing this.</entry>
     <entry dev-build="11" type="enh">When exporting LOB data into external files using WbExport, the generated LOB files can now be distributed over several directories to avoid directories with too many files</entry>
     <entry dev-build="10" type="enh">WbExport now supports two new literal formats for PostgreSQL when exporting SQL statements using binary data (pgDecode and pgEscape)</entry>
     <entry dev-build="10" type="enh">For MySQL table comments are now shown in the DbExplorer.</entry>
@@ -28,6 +29,8 @@
     <entry dev-build="1" type="enh">When an import with multiple files fails, the error message now includes the parameter to skip the successfully imported files, when re-running the WbImport command</entry>
     <entry dev-build="1" type="enh">A new option to exclude tables for WbExport using -excludeTables is available.</entry>
 
+    <entry dev-build="11" type="fix">For Oracle, overloaded procedures and functions (in packages) are now displayed correctly in the DbExplorer.</entry>
+    <entry dev-build="11" type="fix">For PostgreSQL 8.4 and above the source for procedures without parameters was no longer displayed.</entry>
     <entry dev-build="10" type="fix">DESCRIBE did not longer work for Informix</entry>
     <entry dev-build="10" type="fix">Fixed sequence, view and procedure display in the DbExplorer for DB2 on iSeries (AS/400)</entry>
     <entry dev-build="10" type="fix">The source code for Postgres TYPEs was not show correctly.</entry>
