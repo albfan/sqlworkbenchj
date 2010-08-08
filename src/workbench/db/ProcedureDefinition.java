@@ -13,11 +13,14 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import workbench.log.LogMgr;
+import workbench.sql.wbcommands.CommandTester;
+import workbench.sql.wbcommands.WbCall;
 import workbench.storage.DataStore;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
@@ -309,7 +312,9 @@ public class ProcedureDefinition
 	public String toWbCallStatement(WbConnection con)
 	{
 		StringBuilder call = new StringBuilder(150);
-		call.append("WbCall ");
+		CommandTester c = new CommandTester();
+		call.append(c.formatVerb(WbCall.VERB));
+		call.append(' ');
 		call.append(oracleType != null ? catalog + "." + procName : procName);
 		call.append("(");
 
@@ -318,22 +323,49 @@ public class ProcedureDefinition
 		{
 			DataStore dataStore = con.getMetadata().getProcedureReader().getProcedureColumns(this);
 			rows = dataStore.getRowCount();
+
+			for (int i = 0; i < rows; i++)
+			{
+				String inOut = dataStore.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+				String param = dataStore.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+				int type = dataStore.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
+
+				
+				if (inOut.equals("IN"))
+				{
+					// Input parameters need to be literals provided by the user
+					// so just put a placeholder here
+					if (SqlUtil.isCharacterType(type))
+					{
+						call.append('\'');
+						call.append(param);
+						call.append("_value");
+						call.append('\'');
+					}
+					else
+					{
+						call.append(param);
+						call.append("_value");
+					}
+				}
+				else if (inOut.endsWith("OUT")) 
+				{
+					// only append a ? for OUT or INOUT parameters, not for RETURN parameters
+					call.append("?");
+				}
+				
+				if (i + 1 != rows)
+				{
+					call.append(",");
+				}
+			}
+			call.append(");");
 		}
 		catch (Exception ex)
 		{
 			LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
 			return null;
 		}
-
-		for (int i = 0; i < rows; i++)
-		{
-			call.append("?");
-			if (i + 1 != rows)
-			{
-				call.append(",");
-			}
-		}
-		call.append(");");
 
 		return call.toString();
 	}
