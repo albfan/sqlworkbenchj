@@ -71,6 +71,7 @@ public class PostgresProcedureReader
 			pgType2Java = new HashMap<String, Integer>();
 			pgType2Java.put("int2", Integer.valueOf(Types.SMALLINT));
 			pgType2Java.put("int4", Integer.valueOf(Types.INTEGER));
+			pgType2Java.put("integer", Integer.valueOf(Types.INTEGER));
 			pgType2Java.put("oid", Integer.valueOf(Types.INTEGER));
 			pgType2Java.put("int8", Integer.valueOf(Types.BIGINT));
 			pgType2Java.put("money", Integer.valueOf(Types.DOUBLE));
@@ -249,7 +250,7 @@ public class PostgresProcedureReader
 	public DataStore getProcedureColumns(ProcedureDefinition def)
 		throws SQLException
 	{
-		PGProcName pgName = new PGProcName(def.getProcedureName(), getTypeLookup());
+		PGProcName pgName = new PGProcName(def.getDisplayName(), getTypeLookup());
 		if (Settings.getInstance().getBoolProperty("workbench.db.postgresql.fixproctypes", true)
 			  && JdbcUtils.hasMinimumServerVersion(connection, "8.1"))
 		{
@@ -272,7 +273,7 @@ public class PostgresProcedureReader
 			return;
 		}
 
-		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
+		PGProcName name = new PGProcName(def.getDisplayName(), getTypeLookup());
 
 		String sql = "SELECT p.prosrc, \n" +
 								"        l.lanname as lang_name, \n";
@@ -495,7 +496,7 @@ public class PostgresProcedureReader
 	 */
 	protected void readFunctionDef(ProcedureDefinition def)
 	{
-		PGProcName name = new PGProcName(def.getProcedureName(), getTypeLookup());
+		PGProcName name = new PGProcName(def.getDisplayName(), getTypeLookup());
 		String funcname = def.getSchema() + "." + name.getFormattedName();
 		String sql = "select pg_get_functiondef('" + funcname + "'::regprocedure)";
 

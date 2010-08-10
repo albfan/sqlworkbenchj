@@ -101,6 +101,7 @@ public class ProcedureDefinition
 
 	public String getDisplayName()
 	{
+		if (displayName == null) return procName;
 		return displayName;
 	}
 	
@@ -313,12 +314,15 @@ public class ProcedureDefinition
 	{
 		StringBuilder call = new StringBuilder(150);
 		CommandTester c = new CommandTester();
+		StringBuilder paramNames = new StringBuilder(50);
+		paramNames.append("-- Parameters: ");
 		call.append(c.formatVerb(WbCall.VERB));
 		call.append(' ');
 		call.append(oracleType != null ? catalog + "." + procName : procName);
 		call.append("(");
 
 		int rows = 0;
+		int numParams = 0;
 		try
 		{
 			DataStore dataStore = con.getMetadata().getProcedureReader().getProcedureColumns(this);
@@ -328,35 +332,19 @@ public class ProcedureDefinition
 			{
 				String inOut = dataStore.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
 				String param = dataStore.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-				int type = dataStore.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
 
-				
-				if (inOut.equals("IN"))
+				if (numParams > 0)
 				{
-					// Input parameters need to be literals provided by the user
-					// so just put a placeholder here
-					if (SqlUtil.isCharacterType(type))
-					{
-						call.append('\'');
-						call.append(param);
-						call.append("_value");
-						call.append('\'');
-					}
-					else
-					{
-						call.append(param);
-						call.append("_value");
-					}
+					call.append(',');
+					paramNames.append(", ");
 				}
-				else if (inOut.endsWith("OUT")) 
+
+				// only append a ? for OUT or INOUT parameters, not for RETURN parameters
+				if (inOut.equals("IN") || inOut.endsWith("OUT"))
 				{
-					// only append a ? for OUT or INOUT parameters, not for RETURN parameters
-					call.append("?");
-				}
-				
-				if (i + 1 != rows)
-				{
-					call.append(",");
+					paramNames.append(param);
+					call.append('?');
+					numParams ++;
 				}
 			}
 			call.append(");");
@@ -366,7 +354,8 @@ public class ProcedureDefinition
 			LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
 			return null;
 		}
-
+		paramNames.append('\n');
+		call.insert(0, paramNames);
 		return call.toString();
 	}
 

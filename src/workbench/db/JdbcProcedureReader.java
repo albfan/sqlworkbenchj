@@ -440,15 +440,18 @@ public class JdbcProcedureReader
 			String procName = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME);
 			String remarks = procs.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_LIST_REMARKS);
 			int type = procs.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_LIST_TYPE, DatabaseMetaData.procedureNoResult);
-			ProcedureDefinition def = null;
-			if (this.connection.getMetadata().isOracle() && cat != null)
+			ProcedureDefinition def = (ProcedureDefinition)procs.getRow(i).getUserObject();
+			if (def == null)
 			{
-				def = ProcedureDefinition.createOracleDefinition(schema, procName, cat, type, remarks);
-			}
-			else
-			{
-				def = new ProcedureDefinition(cat, schema, procName, type);
-				def.setComment(remarks);
+				if (this.connection.getMetadata().isOracle() && cat != null)
+				{
+					def = ProcedureDefinition.createOracleDefinition(schema, procName, cat, type, remarks);
+				}
+				else
+				{
+					def = new ProcedureDefinition(cat, schema, procName, type);
+					def.setComment(remarks);
+				}
 			}
 			if (def != null) result.add(def);
 		}
