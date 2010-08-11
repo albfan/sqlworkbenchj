@@ -14,6 +14,7 @@ package workbench.gui.dbobjects;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionListener;
+import java.util.List;
 import javax.swing.JMenuItem;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -24,6 +25,7 @@ import workbench.gui.components.WbMenuItem;
 import workbench.interfaces.FilenameChangeListener;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
+import workbench.util.CollectionUtil;
 import workbench.util.NumberStringCache;
 
 /**
@@ -69,8 +71,8 @@ public class EditorTabSelectMenu
 	{
 		if (parentWindow == null) return;
 		
-		String[] panels = this.parentWindow.getPanelLabels();
-		if (panels == null) return;
+		List<String> panels = this.parentWindow.getPanelLabels();
+		if (CollectionUtil.isEmpty(panels)) return;
 		
 		int count = this.getItemCount();
 		// Make sure none of the items has an ActionListener attached
@@ -98,9 +100,21 @@ public class EditorTabSelectMenu
 
 		addSeparator();
 
-		for (int i=0; i < panels.length; i++)
+		for (int i=0; i < panels.size(); i++)
 		{
-			JMenuItem item = new WbMenuItem(panels[i]);
+			if (panels.get(i) == null) continue;
+
+			String menuText = panels.get(i);
+			if (i < 9)
+			{
+				menuText += " &" + NumberStringCache.getNumberString(i+1);
+			}
+			else
+			{
+				menuText += NumberStringCache.getNumberString(i+1);
+			}
+			JMenuItem item = new WbMenuItem(menuText);
+
 			item.setActionCommand(EditorTabSelectMenu.PANEL_CMD_PREFIX + NumberStringCache.getNumberString(i));
 			if (i == current && boldFont != null)
 			{

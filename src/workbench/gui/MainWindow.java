@@ -729,31 +729,26 @@ public class MainWindow
 		return -1;
 	}
 
-	public String[] getPanelLabels()
+	/**
+	 * Return a list of titles for all sql panels. 
+	 * For indexes where a DbExplorer is open a NULL string will be returned
+	 * at that index position in the list.
+	 */
+	public List<String> getPanelLabels()
 	{
 		int tabCount = this.sqlTab.getTabCount();
 
-		int realCount = 0;
+		List<String> result = new ArrayList<String>(tabCount);
 		for (int i=0; i < tabCount; i++)
 		{
 			MainPanel p = this.getSqlPanel(i);
 			if (p instanceof SqlPanel)
 			{
-				realCount ++;
-			}
-		}
-
-		String[] result = new String[realCount];
-		for (int i=0; i < realCount; i++)
-		{
-			MainPanel p = this.getSqlPanel(i);
-			if (i < 9)
-			{
-				result[i] = p.getTabTitle() + " &" + NumberStringCache.getNumberString(i+1);
+				result.add(p.getTabTitle());
 			}
 			else
 			{
-				result[i] = p.getTabTitle() + " " + NumberStringCache.getNumberString(i+1);
+				result.add(null);
 			}
 		}
 		return result;
