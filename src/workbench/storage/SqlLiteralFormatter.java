@@ -14,6 +14,7 @@ package workbench.storage;
 import java.io.File;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import workbench.db.DbSettings;
@@ -257,6 +258,10 @@ public class SqlLiteralFormatter
 		if (value == null)
 		{
 			return "NULL";
+		}
+		else if (type == Types.STRUCT)
+		{
+			return value.toString();
 		}
 		else if (value instanceof String)
 		{
