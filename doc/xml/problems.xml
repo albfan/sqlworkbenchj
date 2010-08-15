@@ -140,6 +140,7 @@
 	<section id="oracle-problems">
 		<title>Oracle Problems</title>
     <indexterm><primary>Problems</primary><secondary>Oracle</secondary></indexterm>
+    <indexterm><primary>Oracle</primary><secondary>Problems</secondary></indexterm>
     
 		<section id="oracle-long-problems">
 			<title>Error: "Stream has already been closed"</title>
@@ -248,6 +249,7 @@ SELECT 42 FROM dual;</programlisting>
 	
 	<section id="mysql-problems">
 		<title>MySQL Problems</title>
+    <indexterm><primary>MySQL</primary><secondary>problems</secondary></indexterm>
     <indexterm><primary>Problems</primary><secondary>MySQL</secondary></indexterm>
     
 		<section id="mysql-no-info-schema">
@@ -295,6 +297,7 @@ SELECT 42 FROM dual;</programlisting>
 	<section id="mssql-problems">
 		<title>Microsoft SQL Server Problems</title>
     <indexterm><primary>Problems</primary><secondary>Microsoft SQL Server</secondary></indexterm>
+    <indexterm><primary>Microsoft SQL Server</primary><secondary>Problems</secondary></indexterm>
     
 		<section id="mssql-cloned-connection">
 		  <title>Can't start a cloned connection while in manual transaction mode</title>
@@ -378,6 +381,7 @@ SELECT 42 FROM dual;</programlisting>
 	<section id="db2-problems">
 		<title>DB2 Problems</title>
     <indexterm><primary>Problems</primary><secondary>IBM DB2</secondary></indexterm>
+    <indexterm><primary>DB2</primary><secondary>Problems</secondary></indexterm>
 
 		<section id="db2-charset">
 			<title>"Connection closed" errors</title>
@@ -444,6 +448,7 @@ SELECT 42 FROM dual;</programlisting>
 	<section id="pg-problems">
 		<title>PostgreSQL Problems</title>
     <indexterm><primary>Problems</primary><secondary>PostgreSQL</secondary></indexterm>
+    <indexterm><primary>PostgreSQL</primary><secondary>Problems</secondary></indexterm>
 
 		<section id="pg-result-buffer">
 			<title>WbExport using a lot of memory</title>
