@@ -490,7 +490,10 @@
         <exclude name="**/.nb*"/>
         <exclude name="**/.new"/>
         <exclude name="**/*test*"/>
-        <exclude name="publish-dev.cmd"/>
+        <exclude name="**/*.txt"/>
+        <exclude name="history.html"/>
+        <exclude name="make_manual.cmd"/>
+        <exclude name="make_release.cmd"/>
         <exclude name="docbook-history.xml"/>
       </zipfileset>
 
@@ -634,17 +637,10 @@
         <include name="history.html"/>
       </tarfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="wbdiff2derby.xslt"/>
-        <include name="wbdiff2mssql.xslt"/>
-        <include name="wbdiff2oracle.xslt"/>
-        <include name="wbdiff2pg.xslt"/>
-        <include name="liquibase_createtable.xslt.xslt"/>
-        <include name="wbdiff2liquibase.xslt"/>
-        <include name="wbreport2liquibase.xslt"/>
-        <include name="wbreport2html.xslt"/>
-        <include name="wbreport2oracle.xslt"/>
-        <include name="wbreport2proc.xslt"/>
-        <include name="wbreport2wiki.xslt"/>
+        <include name="**/*.xslt"/>
+        <exclude name="get_builds_from_history.xslt"/>
+        <exclude name="history2html.xslt"/>
+        <exclude name="history2docbook.xslt"/>
       </zipfileset>
     </tar>
   </target>
@@ -671,17 +667,10 @@
         <include name="**/*.*"/>
       </zipfileset>
       <zipfileset dir="${scriptsrc}" prefix="xslt">
-        <include name="wbdiff2derby.xslt"/>
-        <include name="wbdiff2mssql.xslt"/>
-        <include name="wbdiff2oracle.xslt"/>
-        <include name="wbdiff2pg.xslt"/>
-        <include name="wbreport2ctl.xslt"/>
-        <include name="wbreport2html.xslt"/>
-        <include name="wbreport2oracle.xslt"/>
-        <include name="wbreport2pg.xslt"/>
-        <include name="wbreport2proc.xslt"/>
-        <include name="wbreport2liquibase.xslt"/>
-        <include name="wbreport2wiki.xslt"/>
+        <include name="**/*.xslt"/>
+        <exclude name="get_builds_from_history.xslt"/>
+        <exclude name="history2html.xslt"/>
+        <exclude name="history2docbook.xslt"/>
       </zipfileset>
     </zip>
     <delete file="docbook-history.xml" failonerror="false"/>
