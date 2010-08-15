@@ -401,6 +401,13 @@ VALUES
     <content>
       <p>Download archive for SQL Workbench/J</p>
       <ul class="archive-list">
+        <li>Build 108<br/>
+          <ul>
+            <li><a href="archive/Workbench-Build108.zip">All Platforms</a></li>
+            <li><a href="archive/Workbench-Build108-Mac.tgz">Mac Package</a></li>
+            <li><a href="archive/WorkbenchSrc-Build108.zip">Source Code</a></li>
+          </ul>
+        </li>
         <li>Build 107<br/>
           <ul>
             <li><a href="archive/Workbench-Build107.zip">All Platforms</a></li>
