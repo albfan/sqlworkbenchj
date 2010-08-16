@@ -24,20 +24,20 @@ import workbench.util.NumberStringCache;
  *
  *
  * @see workbench.resource.Settings#getConvertOracleTypes()
- * 
+ *
  * @author Thomas Kellerer
  */
 public class OracleDataConverter
 	implements DataConverter
 {
 	private Method stringValueMethod;
-	
+
 	protected static class LazyInstanceHolder
 	{
 		protected static final OracleDataConverter instance = new OracleDataConverter();
 	}
 
-	public static final OracleDataConverter getInstance()
+	public static OracleDataConverter getInstance()
 	{
 		return LazyInstanceHolder.instance;
 	}
@@ -47,7 +47,7 @@ public class OracleDataConverter
 	}
 
 	/**
-	 * Two Oracle datatypes are supported 
+	 * Two Oracle datatypes are supported
 	 * <ul>
 	 * <li>RAW (jdbcType == Types.VARBINARY && dbmsType == "RAW")</li>
 	 * <li>ROWID (jdbcType = Types.ROWID)</li>
@@ -62,39 +62,6 @@ public class OracleDataConverter
 			      jdbcType == Types.ROWID);
 	}
 
-	private synchronized Method stringValueMethod(Object value)
-	{
-		if (stringValueMethod == null)
-		{
-			try
-			{
-				stringValueMethod = value.getClass().getDeclaredMethod("stringValue");
-			}
-			catch (Throwable th)
-			{
-				// ignore
-			}
-		}
-		return stringValueMethod;
-	}
-
-
-	private Object convertRowId(Object value)
-	{
-		Method valueMethod = stringValueMethod(value);
-		if (valueMethod == null) return value.toString();
-		
-		try
-		{
-			Object result = valueMethod.invoke(value);
-			return result;
-		}
-		catch (Throwable th)
-		{
-			return value.toString();
-		}
-	}
-	
 	/**
 	 * If the type of the originalValue is RAW, then
 	 * the value is converted into a corresponding hex display, e.g. <br/>
@@ -143,4 +110,37 @@ public class OracleDataConverter
 		}
 		return newValue;
 	}
+
+	private Object convertRowId(Object value)
+	{
+		Method valueMethod = stringValueMethod(value);
+		if (valueMethod == null) return value.toString();
+
+		try
+		{
+			Object result = valueMethod.invoke(value);
+			return result;
+		}
+		catch (Throwable th)
+		{
+			return value.toString();
+		}
+	}
+
+	private synchronized Method stringValueMethod(Object value)
+	{
+		if (stringValueMethod == null)
+		{
+			try
+			{
+				stringValueMethod = value.getClass().getDeclaredMethod("stringValue");
+			}
+			catch (Throwable th)
+			{
+				// ignore
+			}
+		}
+		return stringValueMethod;
+	}
+
 }

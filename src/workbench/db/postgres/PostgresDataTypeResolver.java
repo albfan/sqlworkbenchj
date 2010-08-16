@@ -24,15 +24,21 @@ public class PostgresDataTypeResolver
 
 	public String getSqlTypeDisplay(String dbmsName, int sqlType, int size, int digits)
 	{
-		if ("text".equalsIgnoreCase(dbmsName)) return "text";
-		if (sqlType == Types.CHAR && "bpchar".equalsIgnoreCase(dbmsName))
+		if (sqlType == Types.VARCHAR && "text".equals(dbmsName)) return "text";
+		if (sqlType == Types.SMALLINT && "int2".equals(dbmsName)) return "smallint";
+		if (sqlType == Types.INTEGER && "int4".equals(dbmsName)) return "integer";
+		if (sqlType == Types.BIGINT && "int8".equals(dbmsName)) return "bigint";
+
+		if (sqlType == Types.CHAR && "bpchar".equals(dbmsName))
 		{
 			return "char(" + size + ")";
 		}
+
 		if (sqlType == Types.VARCHAR && size == Integer.MAX_VALUE)
 		{
-			return "VARCHAR";
+			return "varchar";
 		}
+
 		if (sqlType == Types.NUMERIC || sqlType == Types.DECIMAL)
 		{
 			if (size == 65535 || size == 131089) size = 0;

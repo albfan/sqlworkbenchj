@@ -74,7 +74,7 @@ public class PostgresTypeReader
 			updateObjectList(con, result, catalog, schemaPattern, objectPattern, requestedTypes);
 			return true;
 		}
-		
+
 		List<BaseObjectType> types = getTypes(con, schemaPattern, objectPattern);
 		if (types.isEmpty()) return false;
 
@@ -94,7 +94,7 @@ public class PostgresTypeReader
 	public List<BaseObjectType> getTypes(WbConnection con, String schemaPattern, String objectPattern)
 	{
 		List<BaseObjectType> result = new ArrayList<BaseObjectType>();
-		
+
     StringBuilder select = new StringBuilder(100);
 
 		select.append(" SELECT NULL AS TABLE_CAT, " +

@@ -11,6 +11,7 @@
  */
 package workbench.gui.actions;
 
+import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
@@ -25,7 +26,7 @@ import workbench.resource.ResourceMgr;
 /**
  *	@author  Thomas Kellerer
  */
-public class RemoveTabAction 
+public class RemoveTabAction
 	extends WbAction
 	implements ChangeListener
 {
@@ -49,6 +50,13 @@ public class RemoveTabAction
 
 	public void stateChanged(ChangeEvent e)
 	{
-		this.setEnabled(client.canCloseTab());
+		EventQueue.invokeLater(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				setEnabled(client.canCloseTab());
+			}
+		});
 	}
 }

@@ -730,7 +730,7 @@ public class MainWindow
 	}
 
 	/**
-	 * Return a list of titles for all sql panels. 
+	 * Return a list of titles for all sql panels.
 	 * For indexes where a DbExplorer is open a NULL string will be returned
 	 * at that index position in the list.
 	 */
@@ -2658,7 +2658,6 @@ public class MainWindow
 		int index = sqlTab.getSelectedIndex();
 		return canCloseTab(index);
 	}
-
 
 	public boolean canCloseTab(int index)
 	{
