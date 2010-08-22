@@ -108,6 +108,7 @@ import workbench.gui.actions.ShowHelpAction;
 import workbench.gui.actions.CreateNewConnection;
 import workbench.gui.actions.DisconnectTabAction;
 import workbench.gui.actions.FileCloseAction;
+import workbench.gui.actions.HelpContactAction;
 import workbench.gui.actions.NextTabAction;
 import workbench.gui.actions.ObjectSearchAction;
 import workbench.gui.actions.OpenFileAction;
@@ -2194,6 +2195,7 @@ public class MainWindow
 		new ShowHelpAction().addToMenu(result);
 		new ShowManualAction().addToMenu(result);
 		result.add(ShowDbmsManualAction.getInstance());
+		result.add(HelpContactAction.getInstance());
 		result.add(WhatsNewAction.getInstance());
 		result.addSeparator();
 
