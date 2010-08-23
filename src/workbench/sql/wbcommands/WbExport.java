@@ -792,7 +792,7 @@ public class WbExport
 				else
 				{
 					String sql = "SELECT * FROM " + prefix + tbl.getTableExpression();
-					exporter.addQueryJob(sql, f);
+					exporter.addQueryJob(sql, f, where);
 				}
 			}
 			catch (SQLException e)

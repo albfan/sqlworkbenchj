@@ -33,7 +33,7 @@ public class ExportJobEntry
 	private TableIdentifier baseTable;
 	private ResultInfo resultInfo;
 	
-	public ExportJobEntry(File file, String sql)
+	public ExportJobEntry(File file, String sql, String where)
 	{
 		outputFile = new WbFile(file);
 		query = sql;
@@ -42,6 +42,7 @@ public class ExportJobEntry
 		{
 			this.baseTable = new TableIdentifier(tables.get(0)); 
 		}
+		appendWhere(where);
 	}
 
 	public ExportJobEntry(File file, TableIdentifier table, String where, WbConnection con)
@@ -61,17 +62,22 @@ public class ExportJobEntry
 		sql.append(" FROM ");
 		baseTable = table;
 		sql.append(table.getTableExpression(con));
+		query = sql.toString();
+		resultInfo.setUpdateTable(baseTable);
+		appendWhere(where);
+	}
+
+	private void appendWhere(String where)
+	{
 		if (StringUtil.isNonBlank(where))
 		{
 			if (!where.trim().toLowerCase().startsWith("where"))
 			{
-				sql.append(" WHERE");
+				query += " WHERE";
 			}
-			sql.append(" ");
-			sql.append(SqlUtil.trimSemicolon(where));
+			query += " ";
+			query += SqlUtil.trimSemicolon(where);
 		}
-		resultInfo.setUpdateTable(baseTable);
-		this.query = sql.toString();
 	}
 	
 	public WbFile getOutputFile()

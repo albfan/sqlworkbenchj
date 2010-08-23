@@ -1882,7 +1882,7 @@ public class SqlPanel
 		final DataExporter exporter = new DataExporter(this.dbConnection);
 		exporter.setRowMonitor(this.rowMonitor);
 		WbFile f = new WbFile(dialog.getSelectedFilename());
-		exporter.addQueryJob(sql, f);
+		exporter.addQueryJob(sql, f, null);
 		dialog.setExporterOptions(exporter);
 
 		this.worker = exporter;

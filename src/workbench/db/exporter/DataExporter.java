@@ -847,9 +847,9 @@ public class DataExporter
 		return symb.getDecimalSeparator();
 	}
 
-	public void addQueryJob(String query, WbFile outputFile)
+	public void addQueryJob(String query, WbFile outputFile, String where)
 	{
-		ExportJobEntry entry = new ExportJobEntry(outputFile, query);
+		ExportJobEntry entry = new ExportJobEntry(outputFile, query, where);
 		this.jobQueue.add(entry);
 	}
 
