@@ -113,7 +113,7 @@ public class DataExporterTest
 			exporter.setTextOptions(getTextOptions());
 
 			WbFile exportFile = new WbFile(util.getBaseDir(), "query_export.txt");
-			exporter.addQueryJob("SELECT * FROM person ORDER BY nr;", exportFile);
+			exporter.addQueryJob("SELECT * FROM person ORDER BY nr;", exportFile, null);
 
 			long rowCount = exporter.startExport();
 			assertEquals(4, rowCount);
