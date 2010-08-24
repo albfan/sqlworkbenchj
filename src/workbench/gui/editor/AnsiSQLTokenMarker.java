@@ -60,9 +60,14 @@ public class AnsiSQLTokenMarker
 		}
 	}
 
+	public void setIsMicrosoft(boolean flag)
+	{
+		isMicrosoft = flag;
+	}
+
 	public void setIsMySQL(boolean flag)
 	{
-		this.isMySql = flag;
+		isMySql = flag;
 	}
 
 	public void initKeywordMap()

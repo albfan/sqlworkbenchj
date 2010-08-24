@@ -19,7 +19,8 @@ public class SQLTokenMarker
 	extends TokenMarker
 {
 	private int offset, lastOffset, lastKeyword;
-	protected boolean isMySql = false;
+	protected boolean isMySql;
+	protected boolean isMicrosoft;
 	protected KeywordMap keywords;
 	private char literalChar = 0;
 
@@ -95,7 +96,7 @@ public class SQLTokenMarker
 					}
 					break;
 				case '[':
-					if (token == Token.NULL)
+					if (isMicrosoft && token == Token.NULL)
 					{
 						searchBack(lineIndex, line, i, true);
 						token = Token.LITERAL2;
@@ -104,7 +105,7 @@ public class SQLTokenMarker
 					}
 					break;
 				case ']':
-					if (token == Token.LITERAL2 && literalChar == '[')
+					if (isMicrosoft && token == Token.LITERAL2 && literalChar == '[')
 					{
 						token = Token.NULL;
 						literalChar = 0;

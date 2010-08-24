@@ -236,12 +236,16 @@ public class EditorPanel
 
 		if (aConnection != null)
 		{
-			this.isMySQL = aConnection.getMetadata().isMySql();
+			// Support MySQL's non-standard line comment
+			isMySQL = aConnection.getMetadata().isMySql();
 			token.setIsMySQL(isMySQL);
 			if (isMySQL && Settings.getInstance().getBoolProperty("workbench.editor.mysql.usehashcomment", false))
 			{
-				this.commentChar = "#";
+				commentChar = "#";
 			}
+			
+			// Support Microsoft's broken object quoting using square brackets (e.g. [wrong_table])
+			token.setIsMicrosoft(aConnection.getMetadata().isSqlServer());
 		}
 
 		this.commentChar = "--";
