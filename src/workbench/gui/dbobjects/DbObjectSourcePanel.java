@@ -158,13 +158,15 @@ public class DbObjectSourcePanel
 	public void setText(final String sql)
 	{
 		initGui();
-		boolean hasText = !StringUtil.isEmptyString(sql);
+		boolean hasText = StringUtil.isNonEmpty(sql);
 		if (reloadSource != null) reloadSource.setEnabled(hasText);
 
 		if (editButton != null) editButton.setEnabled(hasText);
-		if (hasText && sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) ||
-				sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
-				sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
+		if (hasText &&
+					(sql.startsWith(SourceStatementsHelp.VIEW_ERROR_START) ||
+					 sql.startsWith(SourceStatementsHelp.PROC_ERROR_START) ||
+					 sql.startsWith(ResourceMgr.getString("MsgSynonymSourceNotImplemented"))
+					)
 			 )
 		{
 			setEditorText(sql, false);

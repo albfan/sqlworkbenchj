@@ -192,7 +192,8 @@ public class OracleProcedureReader
 
 		try
 		{
-			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(def.getCatalog(), def.getSchema(), def.getProcedureName(), "%");
+			String catalog = def.getCatalog();
+			rs = this.connection.getSqlConnection().getMetaData().getProcedureColumns(catalog, def.getSchema(), def.getProcedureName(), "%");
 			int overloadIndex = JdbcUtils.getColumnIndex(rs, "OVERLOAD");
 
 			while (rs.next())
@@ -202,7 +203,11 @@ public class OracleProcedureReader
 					String toTest = rs.getString(overloadIndex);
 					if (!StringUtil.equalString(toTest, overload)) continue;
 				}
-				processProcedureColumnResultRow(result, rs);
+				String colCatalog = rs.getString("PROCEDURE_CAT");
+				if (StringUtil.equalString(catalog, colCatalog))
+				{
+					processProcedureColumnResultRow(result, rs);
+				}
 			}
 		}
 		finally
