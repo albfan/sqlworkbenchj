@@ -229,6 +229,9 @@ VALUES
             As a quickfix, please download <a href="TriggerSourceStatements.xml">this XML file</a> and copy it to your 
             <a href="http://www.sql-workbench.net/manual/install.html#config-dir">Configuration directory</a>. (fixed in 108.2)
         </li>
+        <li>
+            When exporting TIME columns (including copying to the clipboard) the value was converted to a date, not a time (fixed in 108.2)
+        </li>
       </ul>
       
       <p>
@@ -264,12 +267,11 @@ VALUES
   <page name="xslt" title="XSLT" toc="main">
     <title>Sample XSL transformations</title>
     <content>
-      <p>Several SQL Workbench/J commands produce XML output (e.g. WbReport to
-      generate a report of the current schema, or the output of the WbSchemaDiff command).
+      <p>Several SQL Workbench/J commands produce XML output (e.g. <a href="manual/wb-commands.html#command-schema-report">WbSchemaReport</a> 
+      or <a href="manual/wb-commands.html#command-schema-diff">WbSchemaDiff</a>).
       </p>
       <p>On this page you can find some sample XSLT files to transform these output
-      formats into SQL scripts or HTML documents. These scripts are meant to be a
-      starting point that can be enhanced to meet your own needs.
+      formats into SQL scripts or HTML documents. 
       </p>
       <p>They are far from beeing production-quality scripts and are meant
       as a starting point for your own needs.
@@ -277,15 +279,16 @@ VALUES
       <p>If you have developed an XSLT file to support the various
       XML outputs of SQL Workbench/J and would like to share it, please send
       it to <mail-to/></p>
-      <h2 style="text-align:left;padding-top:25px">WbReport transformations</h2>
-      <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbReport</a> command</p>
+      <h2 style="text-align:left;padding-top:25px">WbSchemaReport transformations</h2>
+      <p>The following files will transform the output of the <a href="manual/wb-commands.html#command-schema-report">WbSchemaReport</a> command</p>
       <ul>
         <li><a href="wbreport2html.xslt">HTML output</a></li>
         <li><a href="wbreport2pg.xslt">Create a script for PostgreSQL</a></li>
         <li><a href="wbreport2oracle.xslt">Create a script for Oracle</a></li>
         <li><a href="wbreport2liquibase.xslt">Generate a Liquibase Changeset</a><br/>
-            The script includes <a href="liquibase_createtable.xslt">liquibase_createtable.xslt</a>. Both files are needed</li>
+            The script includes <a href="liquibase_common.xslt">liquibase_common.xslt</a>. Both files are needed</li>
         <li><a href="wbreport2proc.xslt">Extract procedures</a></li>
+        <li><a href="wbreport2wiki.xslt">Generate Confluence Wiki code</a></li>
        </ul>
 
       <h2 style="text-align:left;padding-top:5px">WbSchemaDiff transformations</h2>
@@ -294,6 +297,8 @@ VALUES
       <ul>
         <li><a href="wbdiff2pg.xslt">Transform to a PostgreSQL script</a></li>
         <li><a href="wbdiff2oracle.xslt">Transform to an Oracle script</a></li>
+        <li><a href="wbdiff2liquibase.xslt">Transform to a Liquibase changeset</a><br/>
+            The script includes <a href="liquibase_common.xslt">liquibase_common.xslt</a>. Both files are needed</li>
         <li><a href="wbdiff2derby.xslt">Transform to an Apache Derby script</a></li>
         <li><a href="wbdiff2mssql.xslt">Transform to an Microsoft SQL Server script</a></li>
       </ul>
