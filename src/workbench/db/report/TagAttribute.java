@@ -11,6 +11,8 @@
  */
 package workbench.db.report;
 
+import workbench.util.HtmlUtil;
+
 /**
  *
  * @author Thomas Kellerer
@@ -24,7 +26,7 @@ public class TagAttribute
 		StringBuilder b = new StringBuilder(name.length() + value.length() + 1);
 		b.append(name);
 		b.append("=\"");
-		b.append(value.replace("\"", "&quot;"));
+		b.append(HtmlUtil.escapeHTML(value));
 		b.append('"');
 		tagText = b;
 	}
