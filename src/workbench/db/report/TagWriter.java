@@ -26,11 +26,11 @@ public class TagWriter
 {
 	public static final String CDATA_START = "<![CDATA[";
 	public static final String CDATA_END = "]]>";
-	
+
 	public TagWriter()
 	{
 	}
-	
+
 	/**
 	 * Appends an integer value for a tag in one line. There will be a new line
 	 * after the closing tag.
@@ -39,7 +39,7 @@ public class TagWriter
 	{
 		appendTag(target, indent, tag, String.valueOf(value), false);
 	}
-	
+
 	/**
 	 * Appends a boolean value for a tag in one line. There will be a new line
 	 * after the closing tag.
@@ -51,7 +51,7 @@ public class TagWriter
 		else
 			appendTag(target, indent, tag, "false", false);
 	}
-	
+
 	/**
 	 * Appends the tag and the value in one line. There will be a new line
 	 * after the closing tag.
@@ -60,12 +60,12 @@ public class TagWriter
 	{
 		appendTag(target, indent, tag, value, false);
 	}
-	
+
 	public void appendTagConditionally(StrBuffer target, StrBuffer indent, String tag, String value)
 	{
 		if (!StringUtil.isEmptyString(value)) appendTag(target, indent, tag, value, false);
 	}
-	
+
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, String attr, String attValue)
 	{
 		appendOpenTag(target, indent, tag, attr, attValue);
@@ -78,7 +78,8 @@ public class TagWriter
 		TagAttribute ta = new TagAttribute(attr, attValue);
 		appendCDATATag(target, indent, tag, value, ta);
 	}
-		public void appendCDATATag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, TagAttribute... attrs)
+
+	public void appendCDATATag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, TagAttribute... attrs)
 	{
 		appendOpenTag(target, indent, tag, true, attrs);
 		target.append('\n');
@@ -91,23 +92,23 @@ public class TagWriter
 		target.append(indent);
 		appendCloseTag(target, null, tag);
 	}
-	
+
 	/**
 	 * Appends the tag and the value in one line. There will be a new line
-	 * after the closing tag. If checkCData is true, then the value 
+	 * after the closing tag. If checkCData is true, then the value
 	 * is checked for characters which require a <![CDATA[ "quoting"
 	 */
 	public void appendTag(StrBuffer target, StrBuffer indent, String tag, CharSequence value, boolean checkCData)
 	{
 		appendOpenTag(target, indent, tag);
 		boolean useCData = checkCData && needsCData(value);
-		if (useCData) 
+		if (useCData)
 		{
 			target.append(CDATA_START);
 			target.append('\n');
 		}
 		target.append(value);
-		if (useCData) 
+		if (useCData)
 		{
 			target.append(CDATA_END);
 			target.append('\n');
@@ -125,12 +126,12 @@ public class TagWriter
 		appendOpenTag(target, indent, tag, false, new TagAttribute(attribute, attValue));
 		target.append("/>");
 	}
-	
+
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag)
 	{
 		this.appendOpenTag(target, indent, tag, null, true);
 	}
-	
+
 	public  void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String attribute, String attValue)
 	{
 		if (StringUtil.isNonBlank(attribute))
@@ -142,15 +143,15 @@ public class TagWriter
 			appendOpenTag(target, indent, tag, true);
 		}
 	}
-	
+
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values)
 	{
 		appendOpenTag(target, indent, tag, attributes, values, true);
 	}
-	
+
 	/**
 	 * Appends a opening tag to the target buffer including attributes.
-	 * No new line will be written 
+	 * No new line will be written
 	 */
 	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, String[] attributes, String[] values, boolean closeTag)
 	{
@@ -165,8 +166,8 @@ public class TagWriter
 		}
 		appendOpenTag(target, indent, tag, att, closeTag);
 	}
-	
-	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, Collection<TagAttribute> attributes, boolean closeTag)		
+
+	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, Collection<TagAttribute> attributes, boolean closeTag)
 	{
 		if (indent != null) target.append(indent);
 		target.append('<');
@@ -182,7 +183,7 @@ public class TagWriter
 		if (closeTag) target.append('>');
 	}
 
-	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, boolean closeTag, TagAttribute ... attributes)		
+	public void appendOpenTag(StrBuffer target, StrBuffer indent, String tag, boolean closeTag, TagAttribute ... attributes)
 	{
 		if (indent != null) target.append(indent);
 		target.append('<');
@@ -200,7 +201,7 @@ public class TagWriter
 		}
 		if (closeTag) target.append('>');
 	}
-	
+
 	public  void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)
 	{
 		if (indent != null) target.append(indent);
@@ -210,7 +211,7 @@ public class TagWriter
 	}
 
 	private static final char[] SPECIAL_CHARS = new char[] {'<', '>', '&', '\n', '\r' };
-	
+
 	public static boolean needsCData(CharSequence value)
 	{
 		if (value == null) return false;
@@ -220,5 +221,5 @@ public class TagWriter
 		}
 		return false;
 	}
-	
+
 }

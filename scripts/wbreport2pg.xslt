@@ -14,6 +14,8 @@
   omit-xml-declaration="yes"
 />
 
+  <xsl:param name="useJdbcTypes">false</xsl:param>
+
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
     <xsl:text>"</xsl:text>
@@ -72,22 +74,33 @@
       </xsl:variable>
     
       <xsl:variable name="datatype">
-        <xsl:choose>
-          <xsl:when test="dbms-data-type = 'CLOB'">
-            <xsl:value-of select="'text'"/>
-          </xsl:when>
-          <xsl:when test="dbms-data-type = 'BLOB'">
-            <xsl:value-of select="'bytea'"/>
-          </xsl:when>
-          <xsl:when test="java-sql-type-name = 'VARCHAR2'">
-            <xsl:value-of select="'varchar('"/>
-            <xsl:value-of select="dbms-data-size"/>
-            <xsl:value-of select="')'"/>
-          </xsl:when>
-          <xsl:otherwise>
-            <xsl:value-of select="dbms-data-type"/>
-          </xsl:otherwise>
-        </xsl:choose>
+        <xsl:if test="$useJdbcTypes = 'true'">
+          <xsl:call-template name="write-data-type">
+            <xsl:with-param name="type-id" select="java-sql-type"/>
+            <xsl:with-param name="precision" select="dbms-data-size"/>
+            <xsl:with-param name="scale" select="dbms-data-digits"/>
+          </xsl:call-template>
+        </xsl:if>
+        
+        <xsl:if test="$useJdbcTypes = 'false'">
+          <xsl:choose>
+            <xsl:when test="dbms-data-type = 'CLOB'">
+              <xsl:value-of select="'text'"/>
+            </xsl:when>
+            <xsl:when test="dbms-data-type = 'BLOB'">
+              <xsl:value-of select="'bytea'"/>
+            </xsl:when>
+            <xsl:when test="java-sql-type-name = 'VARCHAR'">
+              <xsl:value-of select="'varchar('"/>
+              <xsl:value-of select="dbms-data-size"/>
+              <xsl:value-of select="')'"/>
+            </xsl:when>
+            <xsl:otherwise>
+              <xsl:value-of select="dbms-data-type"/>
+            </xsl:otherwise>
+          </xsl:choose>
+        </xsl:if>
+        
       </xsl:variable>
     
       <xsl:text>  </xsl:text>
@@ -335,6 +348,94 @@
       </xsl:otherwise>
     </xsl:choose>
   </xsl:template>
+
+
+<!-- 
+  Map jdbc data types (from java.sql.Types) to a proper data type
+  using scale and precision where approriate.
+-->
+<xsl:template name="write-data-type">
+  <xsl:param name="type-id"/>
+  <xsl:param name="precision"/>
+  <xsl:param name="scale"/>
+  <xsl:choose>
+    <xsl:when test="$type-id = 2005"> <!-- CLOB -->
+      <xsl:text>text</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 2011"> <!-- NCLOB -->
+      <xsl:text>text</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 2004"> <!-- BLOB -->
+      <xsl:text>bytea</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -3"> <!-- VARBINARY -->
+      <xsl:text>bytea</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -4"> <!-- LONGVARBINARY -->
+      <xsl:text>bytea</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -1"> <!-- LONGVARCHAR -->
+      <xsl:text>text</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 93">
+      <xsl:text>timestamp</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 92">
+      <xsl:text>time</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 91">
+      <xsl:text>date</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 1">
+      <xsl:text>char(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -15"> <!-- NCHAR -->
+      <xsl:text>char(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 4">
+      <xsl:text>integer</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -5">
+      <xsl:text>bigint</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 5">
+      <xsl:text>smallint</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -6">
+      <xsl:text>smallint</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 8">
+      <xsl:text>double</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 7">
+      <xsl:text>real</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 6">
+      <xsl:text>float</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 16">
+      <xsl:text>boolean</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -7"> <!-- BIT -->
+      <xsl:text>boolean</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 2 or $type-id = 3">
+      <xsl:text>numeric(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 3">
+      <xsl:text>numeric(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = 12">
+      <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+    </xsl:when>
+    <xsl:when test="$type-id = -9"> <!-- NVARCHAR -->
+      <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
+    </xsl:when>
+    <xsl:otherwise>
+        <xsl:text>[</xsl:text><xsl:value-of select="$type-id"/><xsl:text>]</xsl:text>
+    </xsl:otherwise>  
+  </xsl:choose>
+</xsl:template>
 
 </xsl:stylesheet>
 

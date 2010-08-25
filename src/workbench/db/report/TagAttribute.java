@@ -24,7 +24,7 @@ public class TagAttribute
 		StringBuilder b = new StringBuilder(name.length() + value.length() + 1);
 		b.append(name);
 		b.append("=\"");
-		b.append(value);
+		b.append(value.replace("\"", "&quot;"));
 		b.append('"');
 		tagText = b;
 	}

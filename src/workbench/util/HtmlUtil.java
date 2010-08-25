@@ -19,7 +19,7 @@ import java.awt.Color;
 public class HtmlUtil
 {
 
-	public static final String getHtmlColor(Color c)
+	public static String getHtmlColor(Color c)
 	{
 		StringBuilder result = new StringBuilder(7);
 		result.append(StringUtil.hexString(c.getRed(), 2));
@@ -27,8 +27,8 @@ public class HtmlUtil
 		result.append(StringUtil.hexString(c.getBlue(), 2));
 		return result.toString();
 	}
-	
-	public static final String escapeHTML(String s)
+
+	public static String escapeHTML(String s)
 	{
 		if (s == null) return null;
 		StringBuilder sb = new StringBuilder(s.length() + 100);
@@ -136,7 +136,7 @@ public class HtmlUtil
 //			{  "&copy;"   , "\u00ae" } ,
 //			{  "&euro;"   , "\u20a0" }
 //		};
-//		
+//
 //		int i, j, k;
 //
 //		i = s.indexOf("&");
@@ -159,5 +159,5 @@ public class HtmlUtil
 //		}
 //		return s;
 //	}
-	
+
 }
