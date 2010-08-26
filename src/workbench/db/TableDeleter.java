@@ -94,7 +94,7 @@ public class TableDeleter
 	 * @see TableDependencySorter#sortForDelete(java.util.List, boolean)
 	 * @see #setErrorHandler(workbench.interfaces.JobErrorHandler)
 	 */
-	public List<TableIdentifier> deleteTableData(List<TableIdentifier> objectNames, boolean commitEach, boolean useTruncate)
+	public List<TableIdentifier> deleteTableData(List<TableIdentifier> objectNames, boolean commitEach, boolean useTruncate, boolean cascadedTruncate)
 			throws SQLException
 	{
 		this.cancelExecution = false;
@@ -136,7 +136,7 @@ public class TableDeleter
 				}
 				try
 				{
-					deleteTable(table, useTruncate, commitEach);
+					deleteTable(table, useTruncate, commitEach, cascadedTruncate);
 					deletedTables.add(table);
 				}
 				catch (SQLException ex)
@@ -242,7 +242,7 @@ public class TableDeleter
 		return deletedTables;
 	}
 
-	private void deleteTable(final TableIdentifier table, final boolean useTruncate, final boolean doCommit)
+	private void deleteTable(final TableIdentifier table, final boolean useTruncate, final boolean doCommit, final boolean cascadedTruncate)
 			throws SQLException
 	{
 		Savepoint sp = null;
@@ -252,7 +252,7 @@ public class TableDeleter
 			{
 				sp = connection.setSavepoint();
 			}
-			String deleteSql = getDeleteStatement(table, useTruncate);
+			String deleteSql = getDeleteStatement(table, useTruncate, cascadedTruncate);
 			LogMgr.logInfo("TableDeleterUI.deleteTable()", "Executing: [" + deleteSql + "] to delete target table...");
 			currentStatement.executeUpdate(deleteSql);
 			if (doCommit && !this.connection.getAutoCommit())
@@ -272,13 +272,14 @@ public class TableDeleter
 		}
 	}
 
-	private String getDeleteStatement(final TableIdentifier table, final boolean useTruncate)
+	private String getDeleteStatement(final TableIdentifier table, final boolean useTruncate, boolean cascade)
 	{
 		String deleteSql = null;
 		String tableName = table.createCopy().getTableExpression(this.connection);
 		if (useTruncate)
 		{
-			deleteSql = "TRUNCATE TABLE " + tableName;
+			String sql = connection.getDbSettings().getTruncateCommand(cascade);
+			deleteSql = sql.replace(MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
 		}
 		else
 		{
@@ -287,16 +288,17 @@ public class TableDeleter
 		return deleteSql;
 	}
 
-	public CharSequence generateScript(List<TableIdentifier> objectNames, boolean commitEach, boolean useTruncate)
+	public CharSequence generateScript(List<TableIdentifier> objectNames, boolean commitEach, boolean useTruncate, boolean cascadedTruncate)
 	{
-		if (useTruncate)
+		boolean commitTruncate = connection.getDbSettings().truncateNeedsCommit();
+		if (commitEach && useTruncate)
 		{
-			commitEach = false;
+			commitEach = commitTruncate;
 		}
 		StringBuilder script = new StringBuilder(objectNames.size() * 30);
 		for (TableIdentifier table : objectNames)
 		{
-			String sql = this.getDeleteStatement(table, useTruncate);
+			String sql = this.getDeleteStatement(table, useTruncate, cascadedTruncate);
 			script.append(sql);
 			script.append(";\n");
 			if (commitEach)
@@ -305,7 +307,13 @@ public class TableDeleter
 			}
 		}
 
-		if (!commitEach && !useTruncate)
+		boolean commitNeeded = !commitEach;
+		if (commitNeeded && useTruncate)
+		{
+			commitNeeded = commitTruncate;
+		}
+
+		if (commitNeeded)
 		{
 			script.append("\nCOMMIT;\n");
 		}

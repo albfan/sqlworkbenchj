@@ -450,6 +450,22 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "procversiondelimiter", null);
 	}
 
+	public boolean supportsCascadedTruncate()
+	{
+		String sql = Settings.getInstance().getProperty(prefix + "sql.truncate.cascade", null);
+		return sql != null;
+	}
+
+	public String getTruncateCommand(boolean cascade)
+	{
+		String truncate = Settings.getInstance().getProperty(prefix + "postgresql.sql.truncate", "TRUNCATE TABLE %table_name%");
+		if (cascade)
+		{
+			truncate = Settings.getInstance().getProperty(prefix + "sql.truncate.cascade", truncate);
+		}
+		return truncate;
+	}
+	
 	public boolean truncateNeedsCommit()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "truncate.commit", false);
@@ -1073,4 +1089,5 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + ".pkconstraint.is_table_name", false);
 	}
+
 }

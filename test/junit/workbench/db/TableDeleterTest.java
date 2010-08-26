@@ -53,7 +53,7 @@ public class TableDeleterTest extends TestCase {
 			tables.add(new TableIdentifier("company"));
 
 			TableDeleter deleter = new TableDeleter(con);
-			List<TableIdentifier> deleted = deleter.deleteTableData(tables, false, false);
+			List<TableIdentifier> deleted = deleter.deleteTableData(tables, false, false, false);
 			assertEquals(tables.size(), deleted.size());
 			stmt = con.createStatement();
 
@@ -120,7 +120,7 @@ public class TableDeleterTest extends TestCase {
 			TableDeleter deleter = new TableDeleter(con);
 			deleter.setErrorHandler(handler);
 			
-			List<TableIdentifier> deleted = deleter.deleteTableData(tables, false, false);
+			List<TableIdentifier> deleted = deleter.deleteTableData(tables, false, false, false);
 			assertTrue(errorCalled);
 			assertFalse(fatalError);
 			assertEquals(0, deleted.size());
@@ -148,7 +148,7 @@ public class TableDeleterTest extends TestCase {
 			// company and person cannot be deleted, but person_company and person_address can.
 			// As the job error handler will make the deleter continue, two tables should be
 			// deleted in the end.
-			deleted = deleter.deleteTableData(tables, true, false);
+			deleted = deleter.deleteTableData(tables, true, false, false);
 			assertTrue(errorCalled);
 			assertFalse(fatalError);
 			assertEquals(2, deleted.size());
@@ -159,7 +159,7 @@ public class TableDeleterTest extends TestCase {
 			deleter.setErrorHandler(handler);
 
 			// Now test with a single commit at the end.
-			deleted = deleter.deleteTableData(tables, false, false);
+			deleted = deleter.deleteTableData(tables, false, false, false);
 			assertTrue(errorCalled);
 			assertFalse(fatalError);
 			assertEquals(2, deleted.size());
@@ -186,13 +186,13 @@ public class TableDeleterTest extends TestCase {
 			tables.add(new TableIdentifier("company"));
 
 			TableDeleter deleter = new TableDeleter(con);
-			String sql = deleter.generateScript(tables, false, false).toString();
+			String sql = deleter.generateScript(tables, false, false, false).toString();
 			ScriptParser p = new ScriptParser(sql);
 			assertEquals(5, p.getSize());
 			assertTrue(p.getCommand(0).startsWith("DELETE"));
 			assertTrue(p.getCommand(4).startsWith("COMMIT"));
 			
-			sql = deleter.generateScript(tables, true, false).toString();
+			sql = deleter.generateScript(tables, true, false, false).toString();
 			p = new ScriptParser(sql);
 			assertEquals(tables.size() * 2, p.getSize());
 			assertTrue(p.getCommand(0).startsWith("DELETE"));
@@ -200,7 +200,7 @@ public class TableDeleterTest extends TestCase {
 			assertTrue(p.getCommand(2).startsWith("DELETE"));
 			assertTrue(p.getCommand(3).startsWith("COMMIT"));
 			
-			sql = deleter.generateScript(tables, true, true).toString();
+			sql = deleter.generateScript(tables, true, true, false).toString();
 			p = new ScriptParser(sql);
 			assertEquals(tables.size(), p.getSize());
 			assertTrue(p.getCommand(0).startsWith("TRUNCATE"));

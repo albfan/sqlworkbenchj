@@ -105,6 +105,7 @@ public class TableDeleterUI
     commitAtEnd = new JRadioButton();
     useTruncateCheckBox = new JCheckBox();
     jPanel3 = new JPanel();
+    cascadeTruncate = new JCheckBox();
     showScript = new JButton();
     addMissingTables = new JCheckBox();
 
@@ -190,7 +191,7 @@ public class TableDeleterUI
     gridBagConstraints.insets = new Insets(4, 6, 0, 0);
     jPanel2.add(commitAtEnd, gridBagConstraints);
 
-    useTruncateCheckBox.setText(ResourceMgr.getString("LblUseTruncate"));
+    useTruncateCheckBox.setText(ResourceMgr.getString("LblUseTruncate")); // NOI18N
     useTruncateCheckBox.setBorder(null);
     useTruncateCheckBox.addItemListener(new ItemListener() {
       public void itemStateChanged(ItemEvent evt) {
@@ -202,14 +203,29 @@ public class TableDeleterUI
     gridBagConstraints.gridy = 2;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new Insets(6, 6, 0, 0);
+    gridBagConstraints.insets = new Insets(7, 6, 0, 0);
     jPanel2.add(useTruncateCheckBox, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     jPanel2.add(jPanel3, gridBagConstraints);
+
+    cascadeTruncate.setText(ResourceMgr.getString("LblCascadeConstraints")); // NOI18N
+    cascadeTruncate.setBorder(null);
+    cascadeTruncate.addItemListener(new ItemListener() {
+      public void itemStateChanged(ItemEvent evt) {
+        cascadeTruncateItemStateChanged(evt);
+      }
+    });
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 3;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new Insets(3, 22, 0, 0);
+    jPanel2.add(cascadeTruncate, gridBagConstraints);
 
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 2;
@@ -259,7 +275,7 @@ public class TableDeleterUI
 
 	private void useTruncateCheckBoxItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_useTruncateCheckBoxItemStateChanged
 	{//GEN-HEADEREND:event_useTruncateCheckBoxItemStateChanged
-		checkCommitState();
+		checkState();
 	}//GEN-LAST:event_useTruncateCheckBoxItemStateChanged
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
@@ -322,6 +338,11 @@ public class TableDeleterUI
 	private void showScriptActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_showScriptActionPerformed
 		showScript();
 	}//GEN-LAST:event_showScriptActionPerformed
+
+	private void cascadeTruncateItemStateChanged(ItemEvent evt)//GEN-FIRST:event_cascadeTruncateItemStateChanged
+	{//GEN-HEADEREND:event_cascadeTruncateItemStateChanged
+		// TODO add your handling code here:
+	}//GEN-LAST:event_cascadeTruncateItemStateChanged
 
 	protected void fkCheckFinished(final List<TableIdentifier> newlist)
 	{
@@ -403,12 +424,11 @@ public class TableDeleterUI
 		if (connection != null)
 		{
 			useTruncateCheckBox.setEnabled(this.connection.getDbSettings().supportsTruncate());
-			boolean autoCommit = this.connection.getAutoCommit();
-			checkCommitState();
+			checkState();
 		}
 	}
 
-	protected void checkCommitState()
+	protected void checkState()
 	{
 		boolean autoCommit = connection == null ? true : connection.getAutoCommit();
 		boolean useTruncate = useTruncateCheckBox.isSelected();
@@ -428,6 +448,12 @@ public class TableDeleterUI
 			commitEach.setEnabled(true);
 		}
 
+		boolean canCascade = connection == null ? false : connection.getDbSettings().supportsCascadedTruncate();
+		cascadeTruncate.setEnabled(canCascade && useTruncate);
+		if (!canCascade) 
+		{
+			cascadeTruncate.setSelected(false);
+		}
 	}
 
 	protected void startDelete()
@@ -450,6 +476,7 @@ public class TableDeleterUI
 
 		boolean doCommitEach = commitEach.isEnabled() && this.commitEach.isSelected();
 		boolean useTruncate = useTruncateCheckBox.isSelected();
+		boolean cascadedTruncate = useTruncate ? cascadeTruncate.isSelected() : false;
 
 		deleter = new TableDeleter(this.connection);
 		deleter.setStatusBar((StatusBar)statusLabel);
@@ -459,7 +486,7 @@ public class TableDeleterUI
 
 		try
 		{
-			deletedTables = deleter.deleteTableData(this.objectNames, doCommitEach, useTruncate);
+			deletedTables = deleter.deleteTableData(this.objectNames, doCommitEach, useTruncate, cascadedTruncate);
 		}
 		catch (SQLException e)
 		{
@@ -493,8 +520,9 @@ public class TableDeleterUI
 	{
 		boolean doCommitEach = this.commitEach.isSelected();
 		boolean useTruncate = this.useTruncateCheckBox.isSelected();
+		boolean cascade = useTruncate && cascadeTruncate.isSelected();
 		TableDeleter tblDeleter = new TableDeleter(this.connection);
-		CharSequence script = tblDeleter.generateScript(objectNames, doCommitEach, useTruncate);
+		CharSequence script = tblDeleter.generateScript(objectNames, doCommitEach, useTruncate, cascade);
 		final EditWindow w = new EditWindow(this.dialog, ResourceMgr.getString("TxtWindowTitleGeneratedScript"), script.toString(), "workbench.tabledeleter.scriptwindow", true);
 		w.setVisible(true);
 		w.dispose();
@@ -596,6 +624,7 @@ public class TableDeleterUI
   public ButtonGroup buttonGroup1;
   public JPanel buttonPanel;
   public JButton cancelButton;
+  public JCheckBox cascadeTruncate;
   public JButton checkFKButton;
   public JRadioButton commitAtEnd;
   public JRadioButton commitEach;
