@@ -106,10 +106,6 @@ public class TableDeleter
 			LogMgr.logWarning("TableDeleterUI.deleteTables()", "Use of TRUNCATE requested, but DBMS does not support truncate. Using DELETE instead.");
 		}
 
-		if (useTruncate)
-		{
-			commitEach = false;
-		}
 		boolean hasError = false;
 
 		List<TableIdentifier> deletedTables = new ArrayList<TableIdentifier>();
@@ -140,7 +136,7 @@ public class TableDeleter
 				}
 				try
 				{
-					this.deleteTable(table, useTruncate, commitEach);
+					deleteTable(table, useTruncate, commitEach);
 					deletedTables.add(table);
 				}
 				catch (SQLException ex)
@@ -183,17 +179,29 @@ public class TableDeleter
 				}
 			}
 
-			boolean doCommit = true;
+			boolean commitNeeded = !connection.getAutoCommit();
+			
+			if (commitNeeded && useTruncate)
+			{
+				commitNeeded = connection.getDbSettings().truncateNeedsCommit();
+			}
+
+			boolean commitDone = false;
+
 			try
 			{
-				if (hasError || cancelExecution)
+				if (commitNeeded)
 				{
-					doCommit = false;
-					this.connection.rollback();
-				}
-				else
-				{
-					this.connection.commit();
+					if (hasError || cancelExecution)
+					{
+						commitDone = false;
+						connection.rollback();
+					}
+					else if (commitNeeded)
+					{
+						commitDone = true;
+						connection.commit();
+					}
 				}
 			}
 			catch (SQLException e)
@@ -202,13 +210,17 @@ public class TableDeleter
 				String error = ExceptionUtil.getDisplay(e);
 				String msg = null;
 
-				if (doCommit)
+				if (commitDone)
 				{
 					msg = ResourceMgr.getFormattedString("ErrCommit", error);
 				}
-				else
+				else if (commitNeeded)
 				{
 					msg = ResourceMgr.getFormattedString("ErrRollbackTableData", error);
+				}
+				else
+				{
+					msg = error;
 				}
 
 				if (this.errorHandler != null)
@@ -220,11 +232,11 @@ public class TableDeleter
 		finally
 		{
 			SqlUtil.closeStatement(currentStatement);
-			this.connection.setBusy(false);
+			connection.setBusy(false);
 		}
-		if (this.statusDisplay != null)
+		if (statusDisplay != null)
 		{
-			this.statusDisplay.clearStatusMessage();
+			statusDisplay.clearStatusMessage();
 		}
 
 		return deletedTables;

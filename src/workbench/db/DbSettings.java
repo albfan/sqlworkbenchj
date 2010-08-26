@@ -450,6 +450,11 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "procversiondelimiter", null);
 	}
 
+	public boolean truncateNeedsCommit()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "truncate.commit", false);
+	}
+	
 	public boolean supportsTruncate()
 	{
 		String s = Settings.getInstance().getProperty("workbench.db.truncatesupported", StringUtil.EMPTY_STRING);

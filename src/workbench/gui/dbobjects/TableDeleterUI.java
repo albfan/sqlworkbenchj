@@ -259,14 +259,7 @@ public class TableDeleterUI
 
 	private void useTruncateCheckBoxItemStateChanged(java.awt.event.ItemEvent evt)//GEN-FIRST:event_useTruncateCheckBoxItemStateChanged
 	{//GEN-HEADEREND:event_useTruncateCheckBoxItemStateChanged
-		if (this.useTruncateCheckBox.isSelected())
-		{
-			this.disableCommitSettings();
-		}
-		else if (!this.connection.getAutoCommit())
-		{
-			this.enableCommitSettings();
-		}
+		checkCommitState();
 	}//GEN-LAST:event_useTruncateCheckBoxItemStateChanged
 
 	private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt)//GEN-FIRST:event_cancelButtonActionPerformed
@@ -407,32 +400,34 @@ public class TableDeleterUI
 	public void setConnection(WbConnection aConn)
 	{
 		this.connection = aConn;
-		if (this.connection != null)
+		if (connection != null)
 		{
-
-			this.useTruncateCheckBox.setEnabled(this.connection.getDbSettings().supportsTruncate());
+			useTruncateCheckBox.setEnabled(this.connection.getDbSettings().supportsTruncate());
 			boolean autoCommit = this.connection.getAutoCommit();
-			if (autoCommit)
-			{
-				this.disableCommitSettings();
-			}
-			else
-			{
-				this.enableCommitSettings();
-			}
+			checkCommitState();
 		}
 	}
 
-	protected void disableCommitSettings()
+	protected void checkCommitState()
 	{
-		this.commitAtEnd.setEnabled(false);
-		this.commitEach.setEnabled(false);
-	}
+		boolean autoCommit = connection == null ? true : connection.getAutoCommit();
+		boolean useTruncate = useTruncateCheckBox.isSelected();
+		if (autoCommit)
+		{
+			commitAtEnd.setEnabled(false);
+			commitEach.setEnabled(false);
+		}
+		else if (useTruncate)
+		{
+			commitAtEnd.setEnabled(connection.getDbSettings().truncateNeedsCommit());
+			commitEach.setEnabled(connection.getDbSettings().truncateNeedsCommit());
+		}
+		else
+		{
+			commitAtEnd.setEnabled(true);
+			commitEach.setEnabled(true);
+		}
 
-	protected void enableCommitSettings()
-	{
-		this.commitAtEnd.setEnabled(true);
-		this.commitEach.setEnabled(true);
 	}
 
 	protected void startDelete()
@@ -453,16 +448,12 @@ public class TableDeleterUI
 	{
 		this.cancelled = false;
 
-		boolean doCommitEach = this.commitEach.isSelected();
-		boolean useTruncate = this.useTruncateCheckBox.isSelected();
+		boolean doCommitEach = commitEach.isEnabled() && this.commitEach.isSelected();
+		boolean useTruncate = useTruncateCheckBox.isSelected();
 
 		deleter = new TableDeleter(this.connection);
 		deleter.setStatusBar((StatusBar)statusLabel);
 
-		if (useTruncate)
-		{
-			doCommitEach = false;
-		}
 		boolean hasError = false;
 		List<TableIdentifier> deletedTables = null;
 
