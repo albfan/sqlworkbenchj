@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
+  <release build="-1" date="2010-08-15">
+    <entry dev-build="1" type="fix">When using the new lobsPerDirectory parameter for WbExport, the directory numbering did not restart with a new table.</entry>
+    <entry dev-build="1" type="fix">WbSchemaReport created invalid SQL if column names contained characters that needed a replacement with an XML entity.</entry>
+  </release>
+  
   <release build="109" date="2010-08-15">
     <entry dev-build="11" type="enh">The context menu of the procedure list now has a new item "Put WbCall into..." (similar to the "Put SELECT into") for tables. Thanks Andreas for contributing this.</entry>
     <entry dev-build="11" type="enh">When exporting LOB data into external files using WbExport, the generated LOB files can now be distributed over several directories to avoid directories with too many files</entry>

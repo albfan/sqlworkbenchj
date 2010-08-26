@@ -641,6 +641,17 @@ public class WbExportTest
 				"INSERT INTO BLOB_TEST VALUES (10,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST VALUES (11,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST VALUES (12,'01010101');\n"	+
+				"commit;\n"	+ 
+				"INSERT INTO BLOB_TEST2 VALUES (3,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (4,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (5,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (6,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (7,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (8,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (9,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (10,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (11,'01010101');\n"	+
+				"INSERT INTO BLOB_TEST2 VALUES (12,'01010101');\n"	+
 				"commit;\n"
 				);
 			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -lobsPerDirectory=5 -type=text -header=true -sourcetable=blob_test");
@@ -663,6 +674,19 @@ public class WbExportTest
 			bfile = new File(dir3, "blob_export_r11_c2.data");
 			assertEquals("Blob data not exported", true, bfile.exists());
 
+
+			util.emptyBaseDirectory();
+			result = exportCmd.execute("wbexport -outputDir='" + exportFile.getParentFile().getAbsolutePath() + "' -lobsPerDirectory=5 -type=text -header=true -sourcetable=blob*");
+			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+
+			for (int i=1; i <=3; i++)
+			{
+				File lobDir = new File(basedir, "blob_test_lobs_00000" + Integer.toString(i));
+				assertTrue(lobDir.exists());
+
+				lobDir = new File(basedir, "blob_test2_lobs_00000" + Integer.toString(i));
+				assertTrue(lobDir.exists());
+			}
 		}
 		finally
 		{

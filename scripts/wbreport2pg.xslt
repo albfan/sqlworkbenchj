@@ -14,7 +14,7 @@
   omit-xml-declaration="yes"
 />
 
-  <xsl:param name="useJdbcTypes">false</xsl:param>
+  <xsl:param name="useJdbcTypes">true</xsl:param>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -33,10 +33,6 @@
   <xsl:template match="table-def">
 
     <xsl:variable name="tablename" select="table-name"/>
-    <xsl:text>-- BEGIN TABLE </xsl:text>
-    <xsl:value-of select="table-name"/>
-    <xsl:text> --</xsl:text>
-    <xsl:value-of select="$newline"/>
     <xsl:text>DROP TABLE IF EXISTS</xsl:text>
     <xsl:value-of select="table-name"/>
     <xsl:text> CASCADE CONSTRAINTS;</xsl:text>
@@ -154,7 +150,6 @@
         </xsl:if>
         <xsl:value-of select="$newline"/>
       </xsl:for-each>
-      <xsl:value-of select="$newline"/>
       <xsl:text>);</xsl:text>
       <xsl:value-of select="$newline"/>
     </xsl:if>
@@ -188,11 +183,6 @@
         <xsl:with-param name="tablename" select="$tablename"/>
       </xsl:call-template>
     </xsl:for-each>
-  
-    <xsl:text>-- END TABLE </xsl:text>
-    <xsl:value-of select="table-name"/>
-    <xsl:text> --</xsl:text>
-    <xsl:value-of select="$newline"/>
     <xsl:value-of select="$newline"/>
   
   </xsl:template>
@@ -214,7 +204,6 @@
           </xsl:otherwise>
         </xsl:choose>
       </xsl:variable>
-      <xsl:value-of select="$newline"/>
       <xsl:text>CREATE </xsl:text>
       <xsl:value-of select="$unique"/>
       <xsl:text>INDEX </xsl:text>
@@ -420,10 +409,17 @@
       <xsl:text>boolean</xsl:text>
     </xsl:when>
     <xsl:when test="$type-id = 2 or $type-id = 3">
-      <xsl:text>numeric(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
-    </xsl:when>
-    <xsl:when test="$type-id = 3">
-      <xsl:text>numeric(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
+      <xsl:if test="$scale &gt; 0">
+        <xsl:text>numeric(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
+      </xsl:if>
+      <xsl:if test="$scale = 0">
+        <xsl:if test="$precision &lt; 11">
+          <xsl:text>integer</xsl:text>
+        </xsl:if>
+        <xsl:if test="$precision &gt; 10">
+          <xsl:text>bigint</xsl:text>
+        </xsl:if>
+      </xsl:if>
     </xsl:when>
     <xsl:when test="$type-id = 12">
       <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>

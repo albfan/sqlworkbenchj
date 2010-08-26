@@ -287,6 +287,7 @@ public abstract class RowDataConverter
 				baseDirectory = this.outputFile.getParentFile();
 			}
 		}
+		blobsWritten = 0;
 	}
 
 	public void setCompressExternalFiles(boolean flag)
