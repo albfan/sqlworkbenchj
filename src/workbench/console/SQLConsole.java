@@ -116,14 +116,17 @@ public class SQLConsole
 			// check the presence of the Profile again to put a possible error message after the startup messages.
 			String profilename = cmdLine.getValue(AppArguments.ARG_PROFILE);
 			String group = cmdLine.getValue(AppArguments.ARG_PROFILE_GROUP);
-			ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
-
-			ConnectionProfile profile = ConnectionMgr.getInstance().getProfile(def);
-			if (profile == null)
+			if (StringUtil.isNonBlank(profilename))
 			{
-				String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
-				System.err.println();
-				System.err.println(msg);
+				ProfileKey def = new ProfileKey(StringUtil.trimQuotes(profilename), StringUtil.trimQuotes(group));
+
+				ConnectionProfile profile = ConnectionMgr.getInstance().getProfile(def);
+				if (profile == null)
+				{
+					String msg = ResourceMgr.getFormattedString("ErrProfileNotFound", def);
+					System.err.println();
+					System.err.println(msg);
+				}
 			}
 
 			if (cmdLine.hasUnknownArguments())

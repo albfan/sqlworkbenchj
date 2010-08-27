@@ -50,6 +50,8 @@ public class ProfileKey
 
 	private void setName(String pname)
 	{
+		if (pname == null) return;
+		
 		String tname = pname.trim();
 		if (tname.length() > 0 && tname.charAt(0) == '{')
 		{

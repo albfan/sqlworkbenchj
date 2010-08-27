@@ -3,6 +3,7 @@
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-08-15">
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. the CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="1" type="fix">The console interface was no longer working.</entry>
     <entry dev-build="1" type="fix">When copying data to the clipboard, the data was always copied in the column order as retrieved from the database. If the column order was changed, this was not reflected in the copied data</entry>
     <entry dev-build="1" type="fix">If a stored procedure in Oracle with the same name existed as a standalone procedure and a packaged procedure, the procedure columns for the standalone procedure where not displayed correctly in the DbExplorer</entry>
     <entry dev-build="1" type="fix">When using the new lobsPerDirectory parameter for WbExport, the directory numbering did not restart with a new table.</entry>
