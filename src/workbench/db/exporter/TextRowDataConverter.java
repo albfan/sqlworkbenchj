@@ -211,6 +211,11 @@ public class TextRowDataConverter
 
 	public StrBuffer getStart()
 	{
+		return getStart(null);
+	}
+
+	public StrBuffer getStart(int[] colMap)
+	{
 		this.setAdditionalEncodeCharacters();
 		
 		if (!this.writeHeader) return null;
@@ -227,8 +232,9 @@ public class TextRowDataConverter
 
 		for (int c=0; c < colCount; c ++)
 		{
-			if (!this.includeColumnInExport(c)) continue;
-			String name = this.metaData.getColumnName(c);
+			int colIndex = getRealIndex(c, colMap);
+			if (!this.includeColumnInExport(colIndex)) continue;
+			String name = this.metaData.getColumnName(colIndex);
 
 			if (first)
 			{
@@ -245,6 +251,12 @@ public class TextRowDataConverter
 		return result;
 	}
 
+	private int getRealIndex(int colIndex, int[] colMap)
+	{
+		if (colMap == null) return colIndex;
+		return colMap[colIndex];
+	}
+	
 	public void setDelimiter(String delimit)
 	{
 		if (StringUtil.isBlank(delimit)) return;

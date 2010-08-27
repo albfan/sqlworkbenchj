@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
+import javax.swing.table.TableColumnModel;
 import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -103,6 +104,8 @@ public class ClipBoardCopier
 			// because for some reason this creates additional empty lines
 			// under Windows
 			DataPrinter printer = new DataPrinter(this.data, "\t", "\n", columnsToCopy, includeHeaders);
+			printer.setColumnMapping(getColumnOrder());
+			
 			out = new StringWriter(count * 250);
 			printer.writeDataString(out, rows);
 
@@ -128,6 +131,22 @@ public class ClipBoardCopier
 		WbSwingUtilities.showDefaultCursorOnWindow(this.client);
 	}
 
+	private int[] getColumnOrder()
+	{
+		if (!client.isColumnOrderChanged()) return null;
+		
+		TableColumnModel model = client.getColumnModel();
+		int colCount = model.getColumnCount();
+		int[] result = new int[colCount];
+
+		for (int i=0; i < colCount; i++)
+		{
+			int modelIndex = model.getColumn(i).getModelIndex();
+			result[modelIndex] = i;
+		}
+		return result;
+	}
+	
 	public void copyAsSqlInsert(boolean selectedOnly, boolean showSelectColumns)
 	{
 		this.copyAsSql(false, selectedOnly, showSelectColumns, false);

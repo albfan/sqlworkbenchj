@@ -322,6 +322,9 @@ public class RowData
 	{
 		RowData result = new RowData(this.colData.length);
 		System.arraycopy(colData, 0, result.colData, 0, colData.length);
+		result.converter = this.converter;
+		result.userObject = this.userObject;
+		result.ignoreReadErrors = this.ignoreReadErrors;
 		return result;
 	}
 

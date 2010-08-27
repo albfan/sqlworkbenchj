@@ -12,13 +12,10 @@
 package workbench.storage;
 
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.exporter.TextRowDataConverter;
-import workbench.log.LogMgr;
 import workbench.util.CharacterRange;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
@@ -32,6 +29,7 @@ public class DataPrinter
 {
 	private DataStore data;
 	private TextRowDataConverter converter;
+	private int[] columnMap;
 
 	public DataPrinter(DataStore source)
 	{
@@ -64,13 +62,24 @@ public class DataPrinter
 	}
 
 	/**
+	 * Define a mapping from the stored order of columns to the order
+	 * that is visible to the user.
+	 *
+	 * @param map
+	 */
+	public void setColumnMapping(int[] map)
+	{
+		columnMap = map;
+	}
+
+	/**
 	 *	Write the contents of the DataStore into the writer but only the rows
 	 *  that have been passed in the rows[] parameter
 	 */
 	public void writeDataString(Writer out, int[] rows)
 		throws IOException
 	{
-		StrBuffer header = converter.getStart();
+		StrBuffer header = converter.getStart(columnMap);
 		if (header != null)
 		{
 			header.writeTo(out);
@@ -82,10 +91,24 @@ public class DataPrinter
 		for (int i=0; i < count; i++)
 		{
 			int row = (rows == null ? i : rows[i]);
-			RowData rowData = data.getRow(row);
+			RowData rowData = adjustColumnOrder(data.getRow(row));
 			StrBuffer line = converter.convertRowData(rowData, row);
 			line.writeTo(out);
 			out.flush();
 		}
+	}
+
+	private RowData adjustColumnOrder(RowData row)
+	{
+		if (columnMap == null) return row;
+
+		RowData newRow = row.createCopy();
+		if (columnMap.length != row.getColumnCount()) return row;
+
+		for (int i=0; i < row.getColumnCount(); i++)
+		{
+			newRow.setValue(columnMap[i], row.getValue(i));
+		}
+		return newRow;
 	}
 }
