@@ -1345,6 +1345,28 @@ public class DataImporter
 		}
 	}
 
+	public void tableImportFinished()
+		throws SQLException
+	{
+		// be prepared to import more then one table...
+		if (this.targetTable != null)
+		{
+			try
+			{
+				finishTable();
+				targetTable = null;
+			}
+			catch (SQLException e)
+			{
+				if (!this.continueOnError)
+				{
+					this.hasErrors = true;
+					throw e;
+				}
+			}
+		}
+	}
+	
 	/**
 	 *	Callback function from the RowDataProducer
 	 */

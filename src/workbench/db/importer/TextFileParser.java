@@ -976,14 +976,12 @@ public class TextFileParser
 				}
 			}
 			filesProcessed.add(inputFile);
+			receiver.tableImportFinished();
 		}
 		finally
 		{
 			FileUtil.closeQuietely(in);
-			// do not close the ImportFileHandler here, because the DataImporter
-			// might still need the references to the ZIP archives if running
-			// in batch mode. So the fileHandler is closed after sending the finishImport()
-			// to the DataImporter
+			fileHandler.done();
 		}
 
 	}

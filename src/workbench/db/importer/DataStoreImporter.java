@@ -191,6 +191,12 @@ public class DataStoreImporter
 		}
 	}
 
+	public void tableImportFinished()
+		throws SQLException
+	{
+		
+	}
+	
 	public void importFinished()
 	{
 	}

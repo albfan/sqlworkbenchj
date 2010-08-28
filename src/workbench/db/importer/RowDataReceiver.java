@@ -52,6 +52,8 @@ public interface RowDataReceiver
 	void importFinished();
 	void importCancelled();
 	void tableImportError();
+	void tableImportFinished()
+		throws SQLException;
 	
 	/**
 	 * Log an error with the receiver that might have occurred
