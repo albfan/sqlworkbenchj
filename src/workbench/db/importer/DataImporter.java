@@ -248,6 +248,17 @@ public class DataImporter
 		}
 	}
 
+	/**
+	 * Indicates that this DataImporter is used for multiple import files into one or more target tables.
+	 * If setDeleteTarget() has been set to anything other than none, then all tables that have been defined
+	 * so far are deleted.
+	 *
+	 * @throws SQLException
+	 * @see #deleteTargetTables()
+	 * @see #setDeleteTarget(workbench.db.importer.DeleteType)
+	 * @see #setTableList(java.util.List)
+	 * @see #setTargetTable(workbench.db.TableIdentifier, java.util.List)
+	 */
 	public void beginMultiTable()
 		throws SQLException
 	{
@@ -469,7 +480,7 @@ public class DataImporter
 		catch (Exception e)
 		{
 			LogMgr.logError("DataImporter.estimateReportIntervalFromFileSize()", "Error when checking input file", e);
-			return 0;
+			return 10;
 		}
 	}
 
@@ -1366,7 +1377,7 @@ public class DataImporter
 			}
 		}
 	}
-	
+
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
