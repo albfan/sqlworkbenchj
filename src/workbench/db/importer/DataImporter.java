@@ -1371,7 +1371,8 @@ public class DataImporter
 			{
 				if (!this.continueOnError)
 				{
-					this.hasErrors = true;
+					targetTable = null;
+					hasErrors = true;
 					throw e;
 				}
 			}
