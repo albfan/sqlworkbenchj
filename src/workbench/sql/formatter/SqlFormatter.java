@@ -75,6 +75,7 @@ public class SqlFormatter
 	private static final String NL = "\n";
 	private boolean lowerCaseFunctions;
 	private boolean upperCaseKeywords = true;
+	private boolean addSpaceAfterComma;
 
 	public SqlFormatter(CharSequence aScript)
 	{
@@ -97,10 +98,11 @@ public class SqlFormatter
 			this.indent = new StringBuilder(indentCount);
 			for (int i=0; i < indentCount; i++) this.indent.append(' ');
 		}
-		this.maxSubselectLength = maxLength;
-		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
-		this.lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
-		this.upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
+		maxSubselectLength = maxLength;
+		dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
+		lowerCaseFunctions = Settings.getInstance().getFormatterLowercaseFunctions();
+		upperCaseKeywords = Settings.getInstance().getFormatterUpperCaseKeywords();
+		addSpaceAfterComma = Settings.getInstance().getFormatterAddSpaceAfterComma();
 		addStandardFunctions(dbFunctions);
 	}
 
@@ -123,6 +125,11 @@ public class SqlFormatter
 		}
 	}
 
+	public void setAddSpaceAfterCommInList(boolean flag)
+	{
+		addSpaceAfterComma = flag;
+	}
+	
 	public void setDBFunctions(Set<String> functionNames)
 	{
 		this.dbFunctions = new TreeSet<String>(new CaseInsensitiveComparator());
@@ -1278,6 +1285,7 @@ public class SqlFormatter
 		SQLToken t = this.lexer.getNextToken(true, false);
 		SQLToken lastToken = previousToken;
 		int bracketCount = 0;
+
 		while (t != null)
 		{
 			String verb = t.getContents();
@@ -1301,13 +1309,12 @@ public class SqlFormatter
 			{
 				this.appendComment(verb);
 			}
-			else if (t.getContents().equals("("))
+			else if (verb.equals("("))
 			{
 				String lastWord = lastToken.getContents();
 
-				if (lastWord != null) lastWord = lastWord.toUpperCase();
 				if (!lastToken.isSeparator() && !this.dbFunctions.contains(lastWord)) this.appendText(' ');
-				this.appendText(t.getContents());
+				appendText(t.getContents());
 
 				SQLToken next = skipComments();
 				if (next == null) return null;
@@ -1321,7 +1328,6 @@ public class SqlFormatter
 				else
 				{
 					bracketCount ++;
-
 					lastToken = t;
 					t = next;
 					continue;
@@ -1337,6 +1343,11 @@ public class SqlFormatter
 				this.appendText(verb);
 				this.appendText("  ");
 				if (verb.equals("OR")) this.appendText(' ');
+			}
+			else if (verb.equals(","))
+			{
+				appendText(',');
+				if (addSpaceAfterComma) appendText(' ');
 			}
 			else
 			{

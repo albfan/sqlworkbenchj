@@ -73,7 +73,7 @@ public class SqlFormatterTest
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 	}
-	
+
 	public void testUpdate()
 		throws Exception
 	{
@@ -243,6 +243,7 @@ public class SqlFormatterTest
 		SqlFormatter f = new SqlFormatter(sql);
 		String formatted = f.getFormattedSql().toString();
 		String expected = "SELECT *\nFROM mytable\nWHERE id IN ($[somestuff])";
+//		System.out.println("*******\n" + formatted + "\n**********");
 		assertEquals(expected, formatted);
 
 		sql = "SELECT * FROM mytable WHERE id in ($[&somestuff])";
@@ -786,51 +787,48 @@ public class SqlFormatterTest
 	}
 
 	public void testDecode()
+		throws Exception
 	{
-		try
-		{
-			String sql = "SELECT DECODE((MOD(INPUT-4,12)+1),1,'RAT',2,'OX',3,'TIGER',4,'RABBIT',5,'DRAGON',6,'SNAKE',7,'HORSE',8,'SHEEP/GOAT',9,'MONKEY',10,'ROOSTER',11,'DOG',12,'PIG')  YR FROM DUAL";
+		String sql = "SELECT DECODE((MOD(INPUT-4,12)+1),1,'RAT',2,'OX',3,'TIGER',4,'RABBIT',5,'DRAGON',6,'SNAKE',7,'HORSE',8,'SHEEP/GOAT',9,'MONKEY',10,'ROOSTER',11,'DOG',12,'PIG')  YR FROM DUAL";
 
-			String expected = "SELECT DECODE((MOD(INPUT-4,12)+1),\n" + "             1,'RAT',\n" + "             2,'OX',\n" + "             3,'TIGER',\n" + "             4,'RABBIT',\n" + "             5,'DRAGON',\n" + "             6,'SNAKE',\n" + "             7,'HORSE',\n" + "             8,'SHEEP/GOAT',\n" + "             9,'MONKEY',\n" + "             10,'ROOSTER',\n" + "             11,'DOG',\n" + "             12,'PIG'\n" + "       )  YR\n" + "FROM DUAL";
+		String expected = "SELECT DECODE((MOD(INPUT-4,12)+1),\n" + "             1,'RAT',\n" + "             2,'OX',\n" + "             3,'TIGER',\n" + "             4,'RABBIT',\n" + "             5,'DRAGON',\n" + "             6,'SNAKE',\n" + "             7,'HORSE',\n" + "             8,'SHEEP/GOAT',\n" + "             9,'MONKEY',\n" + "             10,'ROOSTER',\n" + "             11,'DOG',\n" + "             12,'PIG'\n" + "       )  YR\n" + "FROM DUAL";
 
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			CharSequence formatted = f.getFormattedSql();
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
 
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals("Complex DECODE not formatted correctly", expected, formatted);
+		assertEquals("Complex DECODE not formatted correctly", expected, formatted);
 
 
-			sql = "select decode(col1, 'a', 1, 'b', 2, 'c', 3, 99) from dual";
-			f = new SqlFormatter(sql, 100);
-			formatted = f.getFormattedSql();
-			expected = "SELECT decode(col1,\n" + "              'a', 1,\n" + "              'b', 2,\n" + "              'c', 3,\n" + "              99\n" + "       ) \n" + "FROM dual";
+		sql = "select decode(col1, 'a', 1, 'b', 2, 'c', 3, 99) from dual";
+		f = new SqlFormatter(sql, 100);
+		formatted = f.getFormattedSql();
+		expected = "SELECT decode(col1,\n" + "              'a', 1,\n" + "              'b', 2,\n" + "              'c', 3,\n" + "              99\n" + "       ) \n" + "FROM dual";
 
 //			System.out.println("**************\n" + formatted + "\n**********\n" + expected);
-			assertEquals("DECODE not formatted correctly", expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertEquals("DECODE not formatted correctly", expected, formatted);
 	}
 
 	public void testQuotedIdentifier()
 		throws Exception
 	{
-		try
-		{
-			String sql = "SELECT a,b,\"c d\" from mytable";
-			SqlFormatter f = new SqlFormatter(sql, 100);
-			CharSequence formatted = f.getFormattedSql();
-			String expected = "SELECT a,\n       b,\n       \"c d\"\nFROM mytable";
-			assertEquals(expected, formatted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String sql = "SELECT a,b,\"c d\" from mytable";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		CharSequence formatted = f.getFormattedSql();
+		String expected = "SELECT a,\n       b,\n       \"c d\"\nFROM mytable";
+		assertEquals(expected, formatted);
+	}
+
+	public void testInListCommas()
+		throws Exception
+	{
+		String sql = "select a from b where c in (1,2,3);";
+		SqlFormatter f = new SqlFormatter(sql, 100);
+		f.setAddSpaceAfterCommInList(true);
+		CharSequence formatted = f.getFormattedSql();
+		String expected = "SELECT a\nFROM b\nWHERE c IN (1, 2, 3);";
+//		System.out.println("*****************\n" + formatted + "\n*************\n" + expected + "\n------------------");
+		assertEquals(expected, formatted);
 	}
 
 	public void testGetFormattedSql()

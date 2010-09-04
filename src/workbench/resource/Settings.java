@@ -721,6 +721,16 @@ public class Settings
 		setProperty("workbench.sql.formatter.keywords.uppercase", flag);
 	}
 
+	public boolean getFormatterAddSpaceAfterComma()
+	{
+		return getBoolProperty("workbench.sql.formatter.comma.spaceafter", false);
+	}
+
+	public void setFormatterAddSpaceAfterComma(boolean flag)
+	{
+		setProperty("workbench.sql.formatter.comma.spaceafter", flag);
+	}
+
 	public int getFormatterMaxSubselectLength()
 	{
 		return getIntProperty("workbench.sql.formatter.subselect.maxlength", 60);

@@ -37,6 +37,7 @@ public class FormatterOptionsPanel
 		insertColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInInsert()));
 		updateColumns.setText(Integer.toString(Settings.getInstance().getFormatterMaxColumnsInUpdate()));
 		keywordsUpper.setSelected(Settings.getInstance().getFormatterUpperCaseKeywords());
+		spaceAfterComma.setSelected(Settings.getInstance().getFormatterAddSpaceAfterComma());
 	}
 
 	public void saveSettings()
@@ -50,6 +51,7 @@ public class FormatterOptionsPanel
 		set.setFormatterMaxColumnsInInsert(StringUtil.getIntValue(insertColumns.getText(),1));
 		set.setFormatterMaxColumnsInUpdate(StringUtil.getIntValue(updateColumns.getText(),1));
 		set.setFormatterUpperCaseKeywords(keywordsUpper.isSelected());
+		set.setFormatterAddSpaceAfterComma(spaceAfterComma.isSelected());
 	}
 	/** This method is called from within the constructor to
 	 * initialize the form.
@@ -74,6 +76,7 @@ public class FormatterOptionsPanel
     updateColumns = new javax.swing.JTextField();
     updateColumnsLabel = new javax.swing.JLabel();
     keywordsUpper = new javax.swing.JCheckBox();
+    spaceAfterComma = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -213,9 +216,20 @@ public class FormatterOptionsPanel
     gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = 2;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
     add(keywordsUpper, gridBagConstraints);
+
+    spaceAfterComma.setText(ResourceMgr.getString("LblSpaceAfterComma")); // NOI18N
+    spaceAfterComma.setToolTipText(ResourceMgr.getString("d_LblSpaceAfterComma")); // NOI18N
+    spaceAfterComma.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(10, 10, 0, 0);
+    add(spaceAfterComma, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -230,6 +244,7 @@ public class FormatterOptionsPanel
   private javax.swing.JLabel maxNumElementsLabel;
   private javax.swing.JTextField selectColumns;
   private javax.swing.JLabel selectColumnsLabel;
+  private javax.swing.JCheckBox spaceAfterComma;
   private javax.swing.JLabel subselectMaxLabel;
   private javax.swing.JTextField subselectMaxLength;
   private javax.swing.JTextField updateColumns;
