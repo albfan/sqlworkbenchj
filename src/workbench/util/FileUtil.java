@@ -112,24 +112,18 @@ public class FileUtil
 	 * @param lineEnd the lineEnding to be used
 	 * @return the number of lines read
 	 */
-	public static final int readLines(BufferedReader in, StringBuilder buffer, int numLines, String lineEnd)
+	public static int readLines(BufferedReader in, StringBuilder buffer, int numLines, String lineEnd)
 		throws IOException
 	{
 		int lines = 0;
 		String line = in.readLine();
-		while (line != null && lines < numLines) 
+		while (line != null)
 		{
 			buffer.append(line);
 			buffer.append(lineEnd);
 			lines ++;
+			if (lines >= numLines) break;
 			line = in.readLine();
-		}
-		if (line != null) 
-		{
-			// loop was ended due to numLines reached, so append the 
-			// last line retrieved
-			buffer.append(line);
-			buffer.append(lineEnd);
 		}
 		return lines;
 	}
@@ -143,7 +137,7 @@ public class FileUtil
 	 * @return the sequence of characters used as the line ending (e.g. \n or \r\n)
 	 * @throws java.io.IOException
 	 */
-	public static final String getLineEnding(Reader in)
+	public static String getLineEnding(Reader in)
 		throws IOException
 	{
 		String ending = null;
@@ -170,7 +164,7 @@ public class FileUtil
 	}
 	
 	
-	public static final long estimateRecords(File f)
+	public static long estimateRecords(File f)
 		throws IOException
 	{
 		return estimateRecords(f, 5);

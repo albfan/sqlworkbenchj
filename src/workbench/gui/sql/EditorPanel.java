@@ -655,11 +655,11 @@ public class EditorPanel
 			else
 			{
 				doc.resumeUndo();
-				this.setDocument(doc);
-				this.currentFile = aFile;
-				this.fileEncoding = encoding;
+				setDocument(doc);
+				currentFile = aFile;
+				fileEncoding = encoding;
 				result = true;
-				this.fireFilenameChanged(filename);
+				fireFilenameChanged(filename);
 			}
 		}
 		catch (BadLocationException bl)
@@ -679,9 +679,10 @@ public class EditorPanel
 		}
 		finally
 		{
-			this.resetModified();
+			resetModified();
 			FileUtil.closeQuietely(reader);
 		}
+
 		return result;
 	}
 
@@ -797,8 +798,16 @@ public class EditorPanel
 			{
 				String line = this.getLineText(i);
 				int len = StringUtil.getRealLineLength(line);
-				if (len > 0) writer.write(line, 0, len);
-				writer.write(lineEnding);
+				if (len > 0)
+				{
+					writer.write(line, 0, len);
+					writer.write(lineEnding);
+				}
+				else if (i < count - 1) 
+				{
+					// do not append an empty line at the end
+					writer.write(lineEnding);
+				}
 			}
 			writer.close();
 			this.currentFile = aFile;

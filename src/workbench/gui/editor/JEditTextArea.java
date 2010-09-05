@@ -709,7 +709,7 @@ public class JEditTextArea
 			return false;
 		}
 		scrollRetries = 0;
-		
+
 		int newFirstLine = firstLine;
 		int newHorizontalOffset = horizontalOffset;
 		int lineCount = getLineCount();
@@ -960,11 +960,11 @@ public class JEditTextArea
 
 	/**
 	 * Sets the document this text area is editing.
-	 * @param document The document
+	 * @param newDocument The document
 	 */
-	public void setDocument(SyntaxDocument document)
+	public void setDocument(SyntaxDocument newDocument)
 	{
-		if (this.document == document) return;
+		if (this.document == newDocument) return;
 
 		if (this.document != null)
 		{
@@ -973,10 +973,9 @@ public class JEditTextArea
 			if (this.currentTokenMarker != null) currentTokenMarker.reset();
 		}
 
-		this.document = document;
+		document = newDocument;
 
-		selectionStart = 0;
-		selectionEnd = 0;
+		select(0,0,null);
 
 		if (this.document != null)
 		{
@@ -993,14 +992,14 @@ public class JEditTextArea
 			{
 				public void run()
 				{
-					painter.invalidateLineRange(0,getLineCount());
+					validate();
 					painter.repaint();
 					painter.validate();
 					repaint();
-					validate();
 					updateScrollBars();
 				}
 			});
+
 		}
 	}
 
@@ -1625,7 +1624,6 @@ public class JEditTextArea
 			throw new IllegalArgumentException("Bounds out of"+ " range: " + newStart + "," +	newEnd);
 		}
 
-
 		// If the new position is the same as the old, we don't
 		// do all this crap, however we still do the stuff at
 		// the end (clearing magic position, scrolling)
@@ -1639,9 +1637,9 @@ public class JEditTextArea
 
 			if (painter.isBracketHighlightEnabled())
 			{
-				if(bracketLine != -1)	painter.invalidateLine(bracketLine);
+				if (bracketLine != -1)	painter.invalidateLine(bracketLine);
 				updateBracketHighlight(end);
-				if(bracketLine != -1) painter.invalidateLine(bracketLine);
+				if (bracketLine != -1) painter.invalidateLine(bracketLine);
 			}
 
 			painter.invalidateLineRange(selectionStartLine,selectionEndLine);
@@ -2043,24 +2041,6 @@ public class JEditTextArea
 	public final void removeTextChangeListener(TextChangeListener l)
 	{
 		listeners.remove(TextChangeListener.class, l);
-	}
-
-	/**
-	 * Adds a caret change listener to this text area.
-	 * @param listener The listener
-	 */
-	public final void addCaretListener(CaretListener listener)
-	{
-		listeners.add(CaretListener.class,listener);
-	}
-
-	/**
-	 * Removes a caret change listener from this text area.
-	 * @param listener The listener
-	 */
-	public final void removeCaretListener(CaretListener listener)
-	{
-		listeners.remove(CaretListener.class,listener);
 	}
 
 	/**

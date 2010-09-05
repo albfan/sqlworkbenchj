@@ -461,7 +461,7 @@ public class TextAreaPainter
 	 */
 	public final void invalidateLineRange(int firstLine, int lastLine)
 	{
-		repaint(0,textArea.lineToY(firstLine) + fm.getMaxDescent() + fm.getLeading(),getWidth(),(lastLine - firstLine + 1) * fm.getHeight());
+		repaint(0, textArea.lineToY(firstLine) + fm.getMaxDescent() + fm.getLeading(), getWidth(), (lastLine - firstLine + 1) * fm.getHeight());
 	}
 
 	/**
@@ -495,7 +495,7 @@ public class TextAreaPainter
 		Font defaultFont = getFont();
 		Color defaultColor = getForeground();
 
-		if(tokenMarker == null)
+		if (tokenMarker == null)
 		{
 			paintPlainLine(gfx,line,defaultFont,defaultColor,x,y);
 		}

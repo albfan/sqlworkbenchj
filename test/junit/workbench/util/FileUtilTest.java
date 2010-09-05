@@ -101,10 +101,10 @@ public class FileUtilTest
 			content = new StringBuilder();
 			in = EncodingUtil.createBufferedReader(f, encoding);
 			lines = FileUtil.readLines(in, content, 10, "\n");
-			assertEquals("Not enough lines", 10, lines);
+			assertEquals("Wrong line count: ", 10, lines);
 			lines = FileUtil.readLines(in, content, 10, "\n");
 			in.close();
-			assertEquals("Not enough lines", 4, lines);
+			assertEquals("Wrong line count: ", 5, lines);
 			assertEquals("Wrong content retrieved", fileContent.toString(), content.toString());
 
 			fileContent = new StringBuilder();
