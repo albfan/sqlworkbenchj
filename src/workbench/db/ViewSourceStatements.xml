@@ -152,7 +152,30 @@
     </void> 
    </object> 
   </void> 
-  
+
+  <!-- Alternative retrieval for PostgreSQL using the "pretty print" feature of pg_get_viewdef.
+       But the output for complicated views (especially ones with UNIONs isn't really that pretty
+  <void method="put">
+   <string>PostgreSQL</string>
+   <object class="workbench.db.GetMetaDataSql">
+    <void property="baseSql">
+     <string>
+SELECT pg_get_viewdef(c.oid, true) AS definition
+FROM pg_class c
+   LEFT JOIN pg_namespace n ON n.oid = c.relnamespace
+WHERE c.relkind = 'v'::char
+</string>
+    </void>
+    <void property="objectNameField">
+     <string>c.relname</string>
+    </void>
+    <void property="schemaField">
+     <string>n.nspname</string>
+    </void>
+   </object>
+  </void>
+  -->
+
   <void method="put"> 
    <string>PostgreSQL</string> 
    <object class="workbench.db.GetMetaDataSql"> 
