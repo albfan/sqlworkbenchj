@@ -2028,7 +2028,7 @@ public class SqlPanel
 		if (!this.currentData.startEdit()) return;
 		ImportFileDialog dialog = new ImportFileDialog(this);
 		dialog.allowImportModeSelection(false);
-		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"));
+		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"), "general");
 		if (!ok) return;
 		DataStoreImporter importer = new DataStoreImporter(currentData.getTable().getDataStore(), currentData.getRowMonitor(), this);
 		File importFile = dialog.getSelectedFile();
