@@ -49,9 +49,14 @@ public class GeneralImportOptionsPanel
 	{
 		saveSettings("general");
 	}
+
 	public void saveSettings(String key)
 	{
 		Settings s = Settings.getInstance();
+		if (StringUtil.isEmptyString(key))
+		{
+			key = "general";
+		}
 		s.setProperty("workbench.import." + key + ".dateformat", this.getDateFormat());
 		s.setProperty("workbench.import." + key + ".timestampformat", this.getTimestampFormat());
 		s.setProperty("workbench.import." + key + ".encoding", this.getEncoding());
@@ -62,6 +67,7 @@ public class GeneralImportOptionsPanel
 	{
 		restoreSettings("general");
 	}
+
 	public void restoreSettings(String key)
 	{
 		Settings s = Settings.getInstance();
@@ -114,7 +120,7 @@ public class GeneralImportOptionsPanel
 	public boolean validateInput()
 	{
 		String format = dateFormat.getText();
-		
+
 		if (StringUtil.isNonBlank(format))
 		{
 			String err = StringUtil.isDatePatternValid(format);

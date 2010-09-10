@@ -11,15 +11,17 @@
  */
 package workbench.gui.dialogs.dataimport;
 
+import javax.swing.JPanel;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
  * @author  Thomas Kellerer
  */
 public class XmlOptionsPanel
-	extends javax.swing.JPanel
+	extends JPanel
 	implements XmlImportOptions
 {
 
@@ -29,16 +31,24 @@ public class XmlOptionsPanel
 		initComponents();
 	}
 
-	public void saveSettings()
+	public void saveSettings(String section)
 	{
 		Settings s = Settings.getInstance();
-		s.setProperty("workbench.export.xml.verbosexml", this.getUseVerboseXml());
+		if (StringUtil.isBlank(section))
+		{
+			section = "xml";
+		}
+		s.setProperty("workbench.import." + section + ".verbosexml", getUseVerboseXml());
 	}
 
-	public void restoreSettings()
+	public void restoreSettings(String section)
 	{
 		Settings s = Settings.getInstance();
-		this.setUseVerboseXml(s.getBoolProperty("workbench.export.xml.verbosexml", true));
+		if (StringUtil.isBlank(section))
+		{
+			section = "xml";
+		}
+		setUseVerboseXml(s.getBoolProperty("workbench.import." + section + ".verbosexml", true));
 	}
 
 	public boolean getUseVerboseXml()
@@ -48,7 +58,7 @@ public class XmlOptionsPanel
 
 	public void setUseVerboseXml(boolean flag)
 	{
-		this.verboseXmlCheckBox.setSelected(flag);
+		verboseXmlCheckBox.setSelected(flag);
 	}
 
 	/** This method is called from within the constructor to

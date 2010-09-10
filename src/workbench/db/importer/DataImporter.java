@@ -1673,6 +1673,8 @@ public class DataImporter
 			}
 		}
 
+		DbMetadata meta = dbConn.getMetadata();
+		
 		this.columnMap = new int[this.colCount];
 		int pkIndex = this.colCount - this.keyColumns.size();
 		int pkCount = 0;
@@ -1692,7 +1694,7 @@ public class DataImporter
 				this.columnMap[i] = pkIndex;
 				if (pkAdded) where.append(" AND ");
 				else pkAdded = true;
-				where.append(col.getColumnName());
+				where.append(meta.quoteObjectname(col.getColumnName()));
 				where.append(" = ?");
 				pkIndex ++;
 				pkCount ++;
@@ -1704,7 +1706,7 @@ public class DataImporter
 				{
 					sql.append(", ");
 				}
-				sql.append(col.getColumnName());
+				sql.append(meta.quoteObjectname(col.getColumnName()));
 				sql.append(" = ?");
 				colIndex ++;
 			}

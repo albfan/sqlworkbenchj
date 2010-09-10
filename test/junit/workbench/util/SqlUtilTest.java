@@ -44,6 +44,10 @@ public class SqlUtilTest
 		// No quoting needed because quotes are already there
 		assertEquals(quoted, name);
 
+		name = "stupid-name";
+		quoted = SqlUtil.quoteObjectname(name);
+		assertEquals("\"stupid-name\"", quoted);
+
 	}
 
 	public void testGetFunctionParams()

@@ -26,6 +26,7 @@ import workbench.gui.components.DividerBorder;
 import workbench.interfaces.EncodingSelector;
 import workbench.interfaces.ValidatingComponent;
 import workbench.resource.Settings;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -43,7 +44,7 @@ public class ImportOptionsPanel
 	private TextOptionsPanel textOptions;
 	private XmlOptionsPanel xmlOptions;
 	private ProducerFactory.ImportType currentType = null;
-	
+
 	public ImportOptionsPanel()
 	{
 		super();
@@ -52,7 +53,7 @@ public class ImportOptionsPanel
 		JPanel p = new JPanel();
 		p.setLayout(new BorderLayout());
 		p.add(this.generalOptions, BorderLayout.CENTER);
-		
+
 		JPanel s = new JPanel(new BorderLayout(2, 2));
 		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 0, 5, 0));
 		s.setBorder(b);
@@ -63,50 +64,58 @@ public class ImportOptionsPanel
 		s.add(type, BorderLayout.WEST);
 		s.add(typeSelector, BorderLayout.CENTER);
 		p.add(s, BorderLayout.SOUTH);
-		
+
 		this.add(p, BorderLayout.NORTH);
-		
+
 		this.textOptions = new TextOptionsPanel();
 		this.typePanel = new JPanel();
 		this.card = new CardLayout();
 		this.typePanel.setLayout(card);
 		this.typePanel.add(this.textOptions, "text");
-		
+
 		this.xmlOptions = new XmlOptionsPanel();
 		this.typePanel.add(this.xmlOptions, "xml");
-		
+
 		this.add(typePanel, BorderLayout.CENTER);
 		typeSelector.addActionListener(this);
 	}
-	
+
 	public void allowImportTypeSelection(boolean flag)
 	{
-		
+
 	}
 	public void allowImportModeSelection(boolean flag)
 	{
 		this.generalOptions.setModeSelectorEnabled(flag);
 	}
-	
-	public void saveSettings()
+
+	public void saveSettings(String section)
 	{
-		this.generalOptions.saveSettings();
-		this.textOptions.saveSettings();
-		this.xmlOptions.saveSettings();
-		Settings.getInstance().setProperty("workbench.import.type", this.currentType == null ? -1 : currentType.toInteger());
+		this.generalOptions.saveSettings(section);
+		this.textOptions.saveSettings(section + ".text");
+		this.xmlOptions.saveSettings(section + ".xml");
+		if (StringUtil.isBlank(section))
+		{
+			section = "import";
+		}
+		Settings.getInstance().setProperty("workbench." + section + ".type", this.currentType == null ? -1 : currentType.toInteger());
 	}
-	
-	public void restoreSettings()
+
+	public void restoreSettings(String section)
 	{
-		this.generalOptions.restoreSettings();
-		this.textOptions.restoreSettings();
-		this.xmlOptions.restoreSettings();
-		int type = Settings.getInstance().getIntProperty("workbench.import.type", -1);
+		if (StringUtil.isBlank(section))
+		{
+			section = "import";
+		}
+		this.generalOptions.restoreSettings(section);
+		this.textOptions.restoreSettings(section + ".text");
+		this.xmlOptions.restoreSettings(section + ".xml");
+		int type = Settings.getInstance().getIntProperty("workbench." + section + ".type", -1);
 		this.setImportType(ProducerFactory.ImportType.valueOf(type));
 	}
-	
+
 	/**
-	 *	Sets the displayed options according to 
+	 *	Sets the displayed options according to
 	 *  DataExporter.EXPORT_XXXX types
 	 */
 	public void setImportType(ProducerFactory.ImportType type)
@@ -125,14 +134,14 @@ public class ImportOptionsPanel
 	{
 		return this.currentType;
 	}
-	
+
 	public void setTypeText()
 	{
 		this.card.show(this.typePanel, "text");
 		this.currentType = ProducerFactory.ImportType.Text;
 		typeSelector.setSelectedIndex(0);
 	}
-	
+
 	public void setTypeXml()
 	{
 		this.card.show(this.typePanel, "xml");
@@ -144,7 +153,7 @@ public class ImportOptionsPanel
 	{
 		return this.generalOptions;
 	}
-	
+
 	public TextImportOptions getTextOptions()
 	{
 		return textOptions;
@@ -154,12 +163,12 @@ public class ImportOptionsPanel
 	{
 		return xmlOptions;
 	}
-	
-	public String getEncoding() 
+
+	public String getEncoding()
 	{
 		return generalOptions.getEncoding();
 	}
-	
+
 	public void setEncoding(String enc)
 	{
 		generalOptions.setEncoding(enc);
@@ -178,7 +187,7 @@ public class ImportOptionsPanel
 				this.currentType = ProducerFactory.ImportType.Text;
 			else if ("xml".equals(item))
 				this.currentType = ProducerFactory.ImportType.XML;
-			
+
 			if (oldType != currentType) firePropertyChange("exportType", oldType, this.currentType);
 		}
 	}
@@ -195,5 +204,5 @@ public class ImportOptionsPanel
 	public void componentDisplayed()
 	{
 	}
-	
+
 }

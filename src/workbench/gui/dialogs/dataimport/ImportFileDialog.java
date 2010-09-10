@@ -43,7 +43,7 @@ public class ImportFileDialog
 	private boolean filterChange = false;
 	private String lastDirConfigKey = "workbench.import.lastdir";
 	private Component parentComponent;
-	
+
 	public ImportFileDialog(Component caller)
 	{
 		this.importOptions = new ImportOptionsPanel();
@@ -54,37 +54,48 @@ public class ImportFileDialog
 	{
 		this.importOptions.allowImportModeSelection(flag);
 	}
-	
+
+
 	public void saveSettings()
 	{
-		importOptions.saveSettings();
+		saveSettings("general");
 	}
-	
+
+	public void saveSettings(String section)
+	{
+		importOptions.saveSettings(section);
+	}
+
 	public void restoreSettings()
 	{
-		importOptions.restoreSettings();
+		restoreSettings("general");
+	}
+
+	public void restoreSettings(String section)
+	{
+		importOptions.restoreSettings(section);
 	}
 
 	public XmlImportOptions getXmlOptions()
 	{
 		return importOptions.getXmlOptions();
 	}
-	
+
 	public TextImportOptions getTextOptions()
 	{
 		return importOptions.getTextOptions();
 	}
-	
+
 	public ImportOptions getGeneralOptions()
 	{
 		return importOptions.getGeneralOptions();
 	}
-	
+
 	public File getSelectedFile()
 	{
 		return this.selectedFile;
 	}
-	
+
 	public ProducerFactory.ImportType getImportType()
 	{
 		return this.importType;
@@ -94,42 +105,50 @@ public class ImportFileDialog
 	{
 		return this.isCancelled;
 	}
-	
+
 	/**
 	 *	Set the config key for the Settings object
 	 *  where the selected directory should be stored
 	 */
-	public void setConfigKey(String key)
+	public void setLastDirConfigKey(String key)
 	{
 		this.lastDirConfigKey = key;
 	}
-	
-	public boolean selectInput()
-	{
-		return this.selectInput(null);
-	}
-	
-	public boolean selectInput(String title)
+
+	public boolean selectInput(String title, String configSection)
 	{
 		this.importType = null;
 		this.selectedFile = null;
 		boolean result = false;
-		
+
 		String lastDir = settings.getProperty(lastDirConfigKey, null);
 		this.chooser = new WbFileChooser(lastDir);
-		chooser.setSettingsID("workbench.import.selectfile");
+		chooser.setSettingsID("workbench." + configSection + ".selectfile");
 		if (title != null) this.chooser.setDialogTitle(title);
-		
+
 		chooser.addChoosableFileFilter(ExtensionFileFilter.getTextFileFilter());
 		chooser.addChoosableFileFilter(ExtensionFileFilter.getXmlFileFilter());
 		chooser.addPropertyChangeListener("fileFilterChanged", this);
 		chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
-		this.importOptions.addPropertyChangeListener("exportType", this);
-		this.restoreSettings();
-		this.importOptions.setTypeText();
-			
+		importOptions.addPropertyChangeListener("exportType", this);
+		restoreSettings(configSection);
+		if (importOptions.getImportType() == null)
+		{
+			importOptions.setTypeText();
+		}
+
+		switch (importOptions.getImportType())
+		{
+			case XML:
+				this.chooser.setFileFilter(ExtensionFileFilter.getXmlFileFilter());
+				break;
+			case Text:
+				this.chooser.setFileFilter(ExtensionFileFilter.getTextFileFilter());
+				break;
+		}
+
 		chooser.setAccessory(this.importOptions);
-		
+
 		Window parentWindow = SwingUtilities.getWindowAncestor(this.parentComponent);
 
 		int answer = chooser.showOpenDialog(parentWindow);
@@ -138,7 +157,7 @@ public class ImportFileDialog
 			String filename = null;
 			this.isCancelled = false;
 			File fl = chooser.getSelectedFile();
-			
+
 			FileFilter ff = chooser.getFileFilter();
 			if (ff instanceof ExtensionFileFilter)
 			{
@@ -159,9 +178,9 @@ public class ImportFileDialog
 				this.importType = this.importOptions.getImportType();
 			}
 			lastDir = chooser.getCurrentDirectory().getAbsolutePath();
-				
+
 			settings.setProperty(this.lastDirConfigKey, lastDir);
-			this.saveSettings();
+			this.saveSettings(configSection);
 			this.selectedFile = new File(filename);
 			result = true;
 		}
@@ -185,11 +204,11 @@ public class ImportFileDialog
 		}
 		return null;
 	}
-	
-	public void propertyChange(PropertyChangeEvent evt) 
+
+	public void propertyChange(PropertyChangeEvent evt)
 	{
 		if (this.importOptions == null) return;
-		
+
 		if (evt.getSource() instanceof JFileChooser && !filterChange)
 		{
 			JFileChooser fc = (JFileChooser)evt.getSource();
@@ -211,7 +230,7 @@ public class ImportFileDialog
 
 				ProducerFactory.ImportType type = (ProducerFactory.ImportType)evt.getNewValue();
 				this.filterChange = true;
-				
+
 				switch (type)
 				{
 					case XML:
@@ -226,7 +245,7 @@ public class ImportFileDialog
 			{
 				LogMgr.logError("ImportFileDialog.propertyChange", "Error: ", th);
 			}
-			finally 
+			finally
 			{
 				this.filterChange = false;
 			}

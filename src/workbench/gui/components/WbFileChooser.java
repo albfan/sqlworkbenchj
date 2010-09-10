@@ -56,7 +56,7 @@ public class WbFileChooser
 		addPropertyChangeListener("JFileChooserDialogIsClosingProperty", this);
 		putClientProperty("FileChooser.useShellFolder", GuiSettings.getUseShellFolders());
 	}
-	
+
 	public void setSettingsID(String id)
 	{
 		this.windowSettingsId = id;
@@ -66,7 +66,7 @@ public class WbFileChooser
 	{
 		return dialog;
 	}
-	
+
 	@Override
 	public JDialog createDialog(Component parent)
 		throws HeadlessException
@@ -81,8 +81,7 @@ public class WbFileChooser
 
 	public void propertyChange(PropertyChangeEvent evt)
 	{
-		if (evt.getPropertyName().equals("JFileChooserDialogIsClosingProperty") &&
-				windowSettingsId != null)
+		if (evt.getPropertyName().equals("JFileChooserDialogIsClosingProperty") && windowSettingsId != null)
 		{
 			try
 			{

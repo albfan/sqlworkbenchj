@@ -261,7 +261,9 @@ public class DataPumper
 	private void selectInputFile()
 	{
 		ImportFileDialog dialog = new ImportFileDialog(this);
-		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"));
+		dialog.setLastDirConfigKey("workbench.datapumper.lastdir");
+		boolean ok = dialog.selectInput(ResourceMgr.getString("TxtWindowTitleSelectImportFile"), "datapumper");
+
 		if (!ok) return;
 		if (this.sourceProfile != null)
 		{
@@ -283,8 +285,8 @@ public class DataPumper
 		this.fileImporter.setGeneralOptions(dialog.getGeneralOptions());
 		this.fileImporter.setXmlOptions(dialog.getXmlOptions());
 		this.fileImporter.setType(dialog.getImportType());
-
 		this.checkType();
+		modeComboBox.setSelectedItem(dialog.getGeneralOptions().getMode());
 
 		this.updateSourceDisplay();
 		if (this.targetProfile != null)
