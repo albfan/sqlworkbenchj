@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-08-29">
+  <release build="-1" date="2010-09-11">
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
