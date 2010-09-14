@@ -632,7 +632,7 @@ public class BatchRunner
 
 			try
 			{
-				if (this.resultDisplay == null)
+				if (this.resultDisplay == null && !Settings.getInstance().getLogAllStatements())
 				{
 					LogMgr.logDebug("BatchRunner", ResourceMgr.getString("MsgBatchExecutingStatement") + ": "  + sql);
 				}
