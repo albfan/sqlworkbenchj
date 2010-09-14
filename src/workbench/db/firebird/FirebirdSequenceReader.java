@@ -124,17 +124,17 @@ public class FirebirdSequenceReader
 				"SELECT trim(rdb$generator_name) AS SEQUENCE_NAME, \n" +
 				"       trim(rdb$description) AS REMARKS \n" +
 				"FROM rdb$generators \n" +
-				"WHERE rdb$system_flag = 0";
+				"WHERE (rdb$system_flag = 0 OR rdb$system_flag IS NULL) \n";
 
 			if (StringUtil.isNonBlank(sequence))
 			{
 				if (sequence.indexOf("%") > 0)
 				{
-					sql += " AND rdb$generator_name LIKE '" + sequence + "'";
+					sql += " AND rdb$generator_name LIKE '" + sequence + "' \n";
 				}
 				else
 				{
-					sql += " AND rdb$generator_name = '" + sequence + "'";
+					sql += " AND rdb$generator_name = '" + sequence + "' \n";
 				}
 			}
 			sql += " ORDER BY 1";

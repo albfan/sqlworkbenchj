@@ -64,6 +64,7 @@ public class StatementRunner
 	private boolean ignoreDropErrors;
 	protected CommandMapper cmdMapper;
 	private boolean useSavepoint;
+	private boolean logAllStatements;
 	private Savepoint savepoint;
 	private boolean returnOnlyErrorMessages;
 	private List<PropertyChangeListener> changeListeners = new ArrayList<PropertyChangeListener>();
@@ -73,9 +74,10 @@ public class StatementRunner
 
 	public StatementRunner()
 	{
-		this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
-		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate");
-		this.cmdMapper = new CommandMapper();
+		verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
+		cmdMapper = new CommandMapper();
+		logAllStatements = Settings.getInstance().getLogAllStatements();
+		Settings.getInstance().addPropertyChangeListener(this, "workbench.gui.log.consolidate", Settings.PROPERTY_LOG_ALL_SQL);
 	}
 
 	public void dispose()
@@ -107,6 +109,10 @@ public class StatementRunner
 		if ("workbench.gui.log.consolidate".equals(evt.getPropertyName()))
 		{
 			this.verboseLogging = !Settings.getInstance().getConsolidateLogMsg();
+		}
+		else if (Settings.PROPERTY_LOG_ALL_SQL.equals(evt.getPropertyName()))
+		{
+			logAllStatements = Settings.getInstance().getLogAllStatements();
 		}
 	}
 
@@ -369,6 +375,11 @@ public class StatementRunner
 		boolean oldReporting = this.currentCommand.getFullErrorReporting();
 
 		this.currentCommand.setFullErrorReporting(this.fullErrorReporting);
+
+		if (logAllStatements)
+		{
+			LogMgr.logInfo("StatementRunner.execute()", "Executing: " + realSql);
+		}
 
 		long sqlExecStart = System.currentTimeMillis();
 

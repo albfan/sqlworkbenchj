@@ -109,7 +109,7 @@ public class CommonDiffParametersTest
 		assertEquals("t_person", result.targetTables.get(0).getTableName().toLowerCase());
 	}
 
-	public void testSchemaTables()
+	public void testExclude()
 		throws Exception
 	{
 		String sql = "create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" + 
@@ -129,6 +129,42 @@ public class CommonDiffParametersTest
 		assertEquals(2, result.targetTables.size());
 		assertEquals(result.targetTables.get(0).getTableName(), result.referenceTables.get(0).getTableName());
 		assertEquals(result.targetTables.get(1).getTableName(), result.referenceTables.get(1).getTableName());
+	}
+
+	public void testSchemaParameter()
+		throws Exception
+	{
+		String sql = "drop all objects;\n" +
+			"create schema difftest;\n" +
+			"set schema difftest;\n" +
+			"create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
+			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id)); \n" +
+			"create table dummy (some_id integer); \n" +
+			"alter table person_address add constraint fk_adr foreign key (address_id) references address (address_id);\n" +
+			"alter table person_address add constraint fk_per foreign key (person_id) references person (person_id);\n" + 
+			"commit;\n";
+
+		TestUtil.executeScript(source, sql);
+		TestUtil.executeScript(target, sql);
+
+		ArgumentParser cmdLine = new ArgumentParser();
+
+		CommonDiffParameters params = new CommonDiffParameters(cmdLine);
+		cmdLine.parse("-referenceSchema=difftest -targetSchema=difftest -referenceTables=person");
+
+		TableMapping result = params.getTables(source, target);
+		assertEquals(1, result.referenceTables.size());
+		assertEquals(1, result.targetTables.size());
+
+		cmdLine = new ArgumentParser();
+		params = new CommonDiffParameters(cmdLine);
+		cmdLine.parse("-referenceTables=difftest.person,difftest.address -targetTables=difftest.person,difftest.address");
+		result = params.getTables(source, target);
+		assertEquals(2, result.referenceTables.size());
+		assertEquals(2, result.targetTables.size());
+		assertTrue("Wrong tables", result.referenceTables.get(0).equals(result.targetTables.get(0)));
+		assertTrue("Wrong tables", result.referenceTables.get(1).equals(result.targetTables.get(1)));
 	}
 	
 }

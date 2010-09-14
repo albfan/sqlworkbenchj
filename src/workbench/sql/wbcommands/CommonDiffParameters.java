@@ -24,6 +24,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.RowActionMonitor;
 import workbench.util.ArgumentParser;
 import workbench.util.ArgumentType;
+import workbench.util.StringUtil;
 
 /**
  * Arguments for diff-ing data that are used by several commands.
@@ -125,26 +126,67 @@ public class CommonDiffParameters
 		List<TableIdentifier> targetTables = null;
 		boolean matchNames = true;
 		
-		if (cmdLine.isArgPresent(PARAM_REFERENCESCHEMA) || cmdLine.isArgPresent(PARAM_TARGETSCHEMA)
-			|| !cmdLine.isArgPresent(PARAM_REFERENCETABLES))
+		if (cmdLine.isArgPresent(PARAM_REFERENCESCHEMA) || cmdLine.isArgPresent(PARAM_TARGETSCHEMA))
 		{
 			String refSchema = cmdLine.getValue(PARAM_REFERENCESCHEMA);
 			String targetSchema = cmdLine.getValue(PARAM_TARGETSCHEMA);
 
-			if (refSchema == null) refSchema = referenceConn.getMetadata().getSchemaToUse();
-			if (targetSchema == null) targetSchema = targetCon.getMetadata().getSchemaToUse();
-			
-			refTables = referenceConn.getMetadata().getObjectList(refSchema, new String[] { referenceConn.getMetadata().getTableTypeName() });
-			targetTables = targetCon.getMetadata().getObjectList(targetSchema, new String[] { targetCon.getMetadata().getTableTypeName() });
+			if (refSchema == null) 
+			{
+				refSchema = referenceConn.getMetadata().getSchemaToUse();
+			}
+			else
+			{
+				refSchema = referenceConn.getMetadata().adjustSchemaNameCase(refSchema);
+			}
+
+			if (targetSchema == null) 
+			{
+				targetSchema = targetCon.getMetadata().getSchemaToUse();
+			}
+			else
+			{
+				targetSchema = targetCon.getMetadata().adjustSchemaNameCase(targetSchema);
+			}
+			String refTableNames = cmdLine.getValue(PARAM_REFERENCETABLES);
+			String targetTableNames = cmdLine.getValue(PARAM_TARGETTABLES);
+
+			if (StringUtil.isNonBlank(refTableNames))
+			{
+				SourceTableArgument refArg = new SourceTableArgument(refTableNames, null, refSchema, referenceConn.getMetadata().getTableTypeName(), referenceConn);
+				refTables = refArg.getTables();
+			}
+			else
+			{
+				refTables = referenceConn.getMetadata().getObjectList(refSchema, new String[] { referenceConn.getMetadata().getTableTypeName() });
+			}
+
+			if (StringUtil.isNonBlank(targetTableNames))
+			{
+				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon.getMetadata().getTableTypeName(), targetCon);
+				targetTables = targetArg.getTables();
+			}
+			else 
+			{
+				targetTables = targetCon.getMetadata().getObjectList(targetSchema, new String[] { targetCon.getMetadata().getTableTypeName() });
+				matchNames = true;
+			}
 		}
 		else
 		{
 			String tableNames = cmdLine.getValue(PARAM_REFERENCETABLES);
-			SourceTableArgument refTableArgs = new SourceTableArgument(tableNames, referenceConn);
-			refTables = refTableArgs.getTables();
+			if (StringUtil.isBlank(tableNames))
+			{
+				refTables = referenceConn.getMetadata().getTableList();
+			}
+			else
+			{
+				SourceTableArgument refTableArgs = new SourceTableArgument(tableNames, referenceConn);
+				refTables = refTableArgs.getTables();
+			}
 
 			tableNames = cmdLine.getValue(PARAM_TARGETTABLES);
-			if (tableNames == null)
+			if (StringUtil.isBlank(tableNames))
 			{
 				targetTables = targetCon.getMetadata().getTableList();
 			}
@@ -168,12 +210,13 @@ public class CommonDiffParameters
 		for (TableIdentifier refTable : refTables)
 		{
 			if (TableIdentifier.findTableByName(excluded, refTable) != null) continue;
-			mapping.referenceTables.add(refTable);
+			
 			if (matchNames)
 			{
 				TableIdentifier other = TableIdentifier.findTableByName(targetTables, refTable);
 				if (other != null)
 				{
+					mapping.referenceTables.add(refTable);
 					mapping.targetTables.add(other);
 				}
 			}
@@ -181,7 +224,9 @@ public class CommonDiffParameters
 			{
 				if (index < targetTables.size())
 				{
+					mapping.referenceTables.add(refTable);
 					mapping.targetTables.add(targetTables.get(index));
+					index ++;
 				}
 			}
 		}

@@ -38,9 +38,14 @@ public class SourceTableArgument
 	public SourceTableArgument(String includeTables, WbConnection dbConn)
 		throws SQLException
 	{
-		this(includeTables, null, null, dbConn);
+		this(includeTables, null, null, null, dbConn);
 	}
 
+	public SourceTableArgument(String includeTables, String excludeTables, String types, WbConnection dbConn)
+		throws SQLException
+	{
+		this(includeTables, excludeTables, null, types, dbConn);
+	}
 	/**
 	 *
 	 * @param includeTables the parameter value to include tables
@@ -49,7 +54,7 @@ public class SourceTableArgument
 	 * @param dbConn the connection to use
 	 * @throws SQLException
 	 */
-	public SourceTableArgument(String includeTables, String excludeTables, String types, WbConnection dbConn)
+	public SourceTableArgument(String includeTables, String excludeTables, String schema, String types, WbConnection dbConn)
 		throws SQLException
 	{
 		if (StringUtil.isEmptyString(includeTables)) return;
@@ -57,11 +62,11 @@ public class SourceTableArgument
 
 		String[] typeList = parseTypes(types, dbConn);
 
-		tables.addAll(parseArgument(includeTables, true, typeList, dbConn));
-		
+		tables.addAll(parseArgument(includeTables, schema, true, typeList, dbConn));
+
 		if (StringUtil.isNonBlank(excludeTables))
 		{
-			tables.removeAll(parseArgument(excludeTables, false, null, dbConn));
+			tables.removeAll(parseArgument(excludeTables, schema, false, null, dbConn));
 		}
 	}
 
@@ -69,7 +74,7 @@ public class SourceTableArgument
 	{
 		if (StringUtil.isBlank(types)) return new String[] { conn.getMetadata().getTableTypeName() };
 		if ("%".equals(types) || "*".equals(types)) return null;
-		
+
 		List<String> typeList = StringUtil.stringToList(types.toUpperCase());
 
 		if (typeList.isEmpty()) return new String[] { conn.getMetadata().getTableTypeName() };
@@ -78,18 +83,18 @@ public class SourceTableArgument
 
 		return typeList.toArray(result);
 	}
-	
-	private List<TableIdentifier> parseArgument(String arg, boolean checkWildcard, String[] types, WbConnection dbConn)
+
+	private List<TableIdentifier> parseArgument(String arg, String schema, boolean checkWildcard, String[] types, WbConnection dbConn)
 		throws SQLException
 	{
 		List<String> args = getObjectNames(arg);
 		int argCount = args.size();
 
 		List<TableIdentifier> result = CollectionUtil.arrayList();
-		
+
 		if (argCount <= 0) return result;
 
-		String schemaToUse = dbConn.getMetadata().getSchemaToUse();
+		String schemaToUse = StringUtil.isBlank(schema) ? dbConn.getMetadata().getSchemaToUse() : schema;
 		for (String t : args)
 		{
 			if (t.indexOf('*') > -1 || t.indexOf('%') > -1)
@@ -116,7 +121,7 @@ public class SourceTableArgument
 		}
 		return result;
 	}
-	
+
 	/**
 	 * Returns all DB Object names from the comma separated list.
 	 * This is different to stringToList() as it keeps any quotes that

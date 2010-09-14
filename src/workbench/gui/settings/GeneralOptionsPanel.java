@@ -125,6 +125,7 @@ public class GeneralOptionsPanel
 		String durationDisplay = KeepAliveDaemon.getTimeDisplay(duration);
 		alertDuration.setText(durationDisplay);
 		alertDuration.setEnabled(showFinishAlert.isSelected());
+		logAllStatements.setSelected(Settings.getInstance().getLogAllStatements());
 	}
 
 	public void saveSettings()
@@ -143,6 +144,7 @@ public class GeneralOptionsPanel
 		set.setConsolidateLogMsg(this.consolidateLog.isSelected());
 		set.setExitOnFirstConnectCancel(exitOnConnectCancel.isSelected());
 		set.setShowConnectDialogOnStartup(autoConnect.isSelected());
+		set.setLogAllStatements(logAllStatements.isSelected());
 		int index = checkInterval.getSelectedIndex();
 		switch (index)
 		{
@@ -235,6 +237,7 @@ public class GeneralOptionsPanel
     languageDropDown = new JComboBox();
     checkUpdatesLabel = new JLabel();
     checkInterval = new JComboBox();
+    logAllStatements = new JCheckBox();
 
     setLayout(new GridBagLayout());
 
@@ -488,7 +491,7 @@ public class GeneralOptionsPanel
     logLevelLabel.setToolTipText(ResourceMgr.getString("d_LblLogLevel")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 11, 0, 0);
     add(logLevelLabel, gridBagConstraints);
@@ -496,7 +499,7 @@ public class GeneralOptionsPanel
     logLevel.setModel(new DefaultComboBoxModel(new String[] { "ERROR", "WARNING", "INFO", "DEBUG" }));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridy = 10;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -588,6 +591,21 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     add(jPanel5, gridBagConstraints);
+
+    logAllStatements.setSelected(Settings.getInstance().getConsolidateLogMsg());
+    logAllStatements.setText(ResourceMgr.getString("LblLogAllSql")); // NOI18N
+    logAllStatements.setToolTipText(ResourceMgr.getString("d_LblLogAllSql")); // NOI18N
+    logAllStatements.setBorder(null);
+    logAllStatements.setHorizontalAlignment(SwingConstants.LEFT);
+    logAllStatements.setHorizontalTextPosition(SwingConstants.RIGHT);
+    logAllStatements.setIconTextGap(5);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 9;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.insets = new Insets(3, 11, 8, 0);
+    add(logAllStatements, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -626,6 +644,7 @@ public class GeneralOptionsPanel
   private JSeparator jSeparator4;
   private JLabel langLabel;
   private JComboBox languageDropDown;
+  private JCheckBox logAllStatements;
   private JComboBox logLevel;
   private JLabel logLevelLabel;
   private JCheckBox onlyActiveTab;

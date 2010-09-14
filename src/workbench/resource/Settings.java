@@ -97,6 +97,8 @@ public class Settings
 	public static final String PROPERTY_EDITOR_FG_COLOR = "workbench.editor.color.foreground";
 	public static final String PROPERTY_EDITOR_CURSOR_COLOR = "workbench.editor.color.cursor";
 	public static final String PROPERTY_EDITOR_DATATYPE_COLOR = "workbench.editor.color.datatype";
+
+	public static final String PROPERTY_LOG_ALL_SQL = "workbench.sql.log.statements";
 	// </editor-fold>
 
 	public static final String TEST_MODE_PROPERTY = "workbench.gui.testmode";
@@ -615,6 +617,21 @@ public class Settings
 		return props.containsKey(key);
 	}
 
+	public boolean getLogAllStatements()
+	{
+		return getBoolProperty(PROPERTY_LOG_ALL_SQL, false);
+	}
+
+	public void setLogAllStatements(boolean flag)
+	{
+		setProperty(PROPERTY_LOG_ALL_SQL, flag);
+	}
+	
+	/**
+	 * Controls if the initialization of connections in the main window is logged
+	 * for debugging purposes.
+	 * @return
+	 */
 	public boolean getLogConnectionDetails()
 	{
 		return getBoolProperty("workbench.connection.debug", false);

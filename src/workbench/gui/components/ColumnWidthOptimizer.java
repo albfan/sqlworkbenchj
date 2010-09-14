@@ -215,7 +215,7 @@ public class ColumnWidthOptimizer
 		int addWidth = table.getIntercellSpacing().width;
 		if (table.getShowVerticalLines())
 		{
-			addWidth += table.getColumnCount() + 2;
+			addWidth += 4;
 		}
 
 		JTableHeader header = table.getTableHeader();
@@ -233,7 +233,7 @@ public class ColumnWidthOptimizer
 		int addWidth = table.getIntercellSpacing().width;
 		if (table.getShowVerticalLines())
 		{
-			addWidth += table.getColumnCount() + 2;
+			addWidth += 4;
 		}
 		addWidth += table.getColumnModel().getColumnMargin();
 		return addWidth;
