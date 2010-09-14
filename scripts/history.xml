@@ -2,11 +2,13 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-09-11">
+    <entry dev-build="3" type="enh">A new option to log all executed SQL statements to the logfile has been added (Tools -&gt; Options -&gt; General -&gt; Log all SQL statements).</entry>
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="3" type="fix">Using WbDataDiff (and WbSchemaDiff) with the -referenceSchema parameter or selecting specific tables for comparison did not work.</entry>
+    <entry dev-build="3" type="fix">Optimize column width calculated a width that was too wide (and increased with the total number of columns)</entry>
     <entry dev-build="2" type="fix">When using the DataPumper to import xml files, non-standard column names were not quoted properly in the UPDATE statement</entry>
-    <entry dev-build="2" type="fix">When using the DataPumper to import files, the selected import mode was not applied correctly</entry>
     <entry dev-build="2" type="fix">When saving and loading the same file an empty line was appended each time the file was loaded.</entry>
     <entry dev-build="1" type="fix">The console interface was no longer working.</entry>
     <entry dev-build="1" type="fix">Importing multiple zipped text files into tables with BLOB columns did not work when using a batch size &gt; 1</entry>
