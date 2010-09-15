@@ -238,6 +238,7 @@ public class GeneralOptionsPanel
     checkUpdatesLabel = new JLabel();
     checkInterval = new JComboBox();
     logAllStatements = new JCheckBox();
+    jSeparator5 = new JSeparator();
 
     setLayout(new GridBagLayout());
 
@@ -336,7 +337,7 @@ public class GeneralOptionsPanel
     settingsfilename.setText("jTextField1");
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 12;
+    gridBagConstraints.gridy = 13;
     gridBagConstraints.gridwidth = 4;
     gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.SOUTHWEST;
@@ -482,7 +483,7 @@ public class GeneralOptionsPanel
     add(jSeparator3, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 3;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridy = 12;
     gridBagConstraints.weightx = 1.0;
     gridBagConstraints.weighty = 1.0;
     add(jPanel3, gridBagConstraints);
@@ -491,7 +492,7 @@ public class GeneralOptionsPanel
     logLevelLabel.setToolTipText(ResourceMgr.getString("d_LblLogLevel")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 11, 0, 0);
     add(logLevelLabel, gridBagConstraints);
@@ -499,7 +500,7 @@ public class GeneralOptionsPanel
     logLevel.setModel(new DefaultComboBoxModel(new String[] { "ERROR", "WARNING", "INFO", "DEBUG" }));
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridy = 11;
     gridBagConstraints.gridwidth = 3;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
@@ -606,6 +607,13 @@ public class GeneralOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(3, 11, 8, 0);
     add(logAllStatements, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 10;
+    gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(2, 7, 12, 10);
+    add(jSeparator5, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -642,6 +650,7 @@ public class GeneralOptionsPanel
   private JSeparator jSeparator2;
   private JSeparator jSeparator3;
   private JSeparator jSeparator4;
+  private JSeparator jSeparator5;
   private JLabel langLabel;
   private JComboBox languageDropDown;
   private JCheckBox logAllStatements;

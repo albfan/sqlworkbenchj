@@ -33,9 +33,9 @@
   <xsl:template match="table-def">
 
     <xsl:variable name="tablename" select="table-name"/>
-    <xsl:text>DROP TABLE IF EXISTS</xsl:text>
+    <xsl:text>DROP TABLE IF EXISTS </xsl:text>
     <xsl:value-of select="table-name"/>
-    <xsl:text> CASCADE CONSTRAINTS;</xsl:text>
+    <xsl:text> CASCADE;</xsl:text>
     <xsl:value-of select="$newline"/>
   
     <xsl:text>CREATE TABLE </xsl:text>
@@ -75,6 +75,7 @@
             <xsl:with-param name="type-id" select="java-sql-type"/>
             <xsl:with-param name="precision" select="dbms-data-size"/>
             <xsl:with-param name="scale" select="dbms-data-digits"/>
+            <xsl:with-param name="dbms-type" select="dbms-data-type"/>
           </xsl:call-template>
         </xsl:if>
         
@@ -347,6 +348,7 @@
   <xsl:param name="type-id"/>
   <xsl:param name="precision"/>
   <xsl:param name="scale"/>
+  <xsl:param name="dbms-type"/>
   <xsl:choose>
     <xsl:when test="$type-id = 2005"> <!-- CLOB -->
       <xsl:text>text</xsl:text>
@@ -412,7 +414,7 @@
       <xsl:if test="$scale &gt; 0">
         <xsl:text>numeric(</xsl:text><xsl:value-of select="$precision"/><xsl:text>,</xsl:text><xsl:value-of select="$scale"/><xsl:text>)</xsl:text>
       </xsl:if>
-      <xsl:if test="$scale = 0">
+      <xsl:if test="$scale = 0 or $scale = ''">
         <xsl:if test="$precision &lt; 11">
           <xsl:text>integer</xsl:text>
         </xsl:if>
@@ -428,7 +430,7 @@
       <xsl:text>varchar(</xsl:text><xsl:value-of select="$precision"/><xsl:text>)</xsl:text>
     </xsl:when>
     <xsl:otherwise>
-        <xsl:text>[</xsl:text><xsl:value-of select="$type-id"/><xsl:text>]</xsl:text>
+        <xsl:value-of select="$dbms-type"/>
     </xsl:otherwise>  
   </xsl:choose>
 </xsl:template>
