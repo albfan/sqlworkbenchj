@@ -37,6 +37,7 @@ import workbench.resource.Settings;
 import workbench.sql.ResultNameParser;
 import workbench.storage.filter.ColumnExpression;
 import workbench.storage.filter.FilterExpression;
+import workbench.util.CollectionUtil;
 import workbench.util.ConverterException;
 import workbench.util.ExceptionUtil;
 import workbench.util.LowMemoryException;
@@ -73,7 +74,7 @@ public class DataStore
 
 	// A ColumnExpression that was used while populating this datastore
 	private ColumnExpression generatingFilter;
-	
+
 	private ResultInfo resultInfo;
 	private TableIdentifier updateTable;
 	private TableIdentifier updateTableToBeUsed;
@@ -231,7 +232,7 @@ public class DataStore
 
 	/**
 	 * Create an empty DataStore based on the information given in the MetaData
-	 * object. 
+	 * object.
 	 * <br/>
 	 * The DataStore can be populated with the {@link #initData(java.sql.ResultSet) }  method.
 	 */
@@ -294,7 +295,7 @@ public class DataStore
 	 * Set a descriptive name for this result
 	 *
 	 * This is used in the GUI when displaying result tabs.
-	 * 
+	 *
 	 * @param name new value of resultName
 	 */
 	public void setResultName(String name)
@@ -316,7 +317,7 @@ public class DataStore
 			this.addRow(row);
 		}
 	}
-	
+
 	public int duplicateRow(int aRow)
 	{
 		if (aRow < 0 || aRow >= this.getRowCount()) return -1;
@@ -356,20 +357,41 @@ public class DataStore
 		return modifiedCount;
 	}
 
-	public int getColumnType(int aColumn)
+	public int getColumnType(int column)
 		throws IndexOutOfBoundsException
 	{
-		return this.resultInfo.getColumnType(aColumn);
+		return this.resultInfo.getColumnType(column);
 	}
 
-	public String getColumnClassName(int aColumn)
+	public String getColumnClassName(int column)
 	{
-		return this.resultInfo.getColumnClassName(aColumn);
+		DataConverter conv = RowDataFactory.getConverterInstance(originalConnection);
+		if (conv != null)
+		{
+			int type = resultInfo.getColumnType(column);
+			String dbmsType = resultInfo.getDbmsTypeName(column);
+			if (conv.convertsType(type, dbmsType))
+			{
+				Class clz = conv.getConvertedClass(type, dbmsType);
+				if (clz != null) return clz.getName();
+			}
+		}
+		return this.resultInfo.getColumnClassName(column);
 	}
 
-	public Class getColumnClass(int aColumn)
+	public Class getColumnClass(int column)
 	{
-		return this.resultInfo.getColumnClass(aColumn);
+		DataConverter conv = RowDataFactory.getConverterInstance(originalConnection);
+		if (conv != null)
+		{
+			int type = resultInfo.getColumnType(column);
+			String dbmsType = resultInfo.getDbmsTypeName(column);
+			if (conv.convertsType(type, dbmsType))
+			{
+				return conv.getConvertedClass(type, dbmsType);
+			}
+		}
+		return this.resultInfo.getColumnClass(column);
 	}
 
 	/**
@@ -553,7 +575,7 @@ public class DataStore
 
 	public boolean pkColumnsComplete()
 	{
-		return (this.missingPkcolumns == null || this.missingPkcolumns.size() == 0);
+		return (CollectionUtil.isEmpty(this.missingPkcolumns));
 	}
 
 	public void setUpdateTable(TableIdentifier tbl)
@@ -595,7 +617,7 @@ public class DataStore
 
 		// check the columns which are in the new table so that we can refuse any changes to columns
 		// which do not derive from that table.
-		
+
 		// Note that this does not work, if the columns were renamed via an alias in the
 		// select statement
 		try
@@ -609,7 +631,7 @@ public class DataStore
 
 			// No table found --> nothing to do.
 			if (updateTable == null) return;
-			
+
 			// If the object that was used in the original SELECT is
 			// a synonym we have to get the definition of the underlying
 			// table in order to find the primary key columns
@@ -694,7 +716,7 @@ public class DataStore
 	 *
 	 * @param col The index of the column in this DataStore. The first column index is 0
 	 * @return The display label of the column
-	 * @see ResultInfo#getColumnDisplayName(int) 
+	 * @see ResultInfo#getColumnDisplayName(int)
 	 */
 	public String getColumnDisplayName(int col)
 	{
@@ -723,7 +745,7 @@ public class DataStore
 	{
 		return this.resultInfo.getColumn(col).getDisplaySize();
 	}
-	
+
 	public Object getOriginalValue(int aRow, int aColumn)
 	{
 		RowData row = this.getRow(aRow);
@@ -1110,7 +1132,7 @@ public class DataStore
 
 		this.cancelRetrieve = false;
 		boolean lowMemory = false;
-		
+
 		final int reportInterval = Settings.getInstance().getIntProperty("workbench.gui.data.reportinterval", 10);
 
 		try
@@ -1131,7 +1153,7 @@ public class DataStore
 				row.setTrimCharData(trimCharData);
 				row.read(aResultSet, this.resultInfo);
 				this.data.add(row);
-				
+
 				if (maxRows > 0 && rowCount > maxRows) break;
 				if (MemoryWatcher.isMemoryLow())
 				{
@@ -1169,7 +1191,7 @@ public class DataStore
 		{
 			this.modified = false;
 		}
-		
+
 		if (lowMemory)
 		{
 			throw new LowMemoryException();
@@ -1196,7 +1218,7 @@ public class DataStore
 	{
 		return generatingFilter;
 	}
-	
+
 	public String getGeneratingSql() { return this.sql; }
 
 	public boolean checkUpdateTable()
@@ -1266,7 +1288,7 @@ public class DataStore
 	 * Checks if the underlying SQL statement references only one table.
 	 * @return true if only one table is found in the SELECT statement
 	 *
-	 * @see workbench.util.SqlUtil#getTables(java.lang.String) 
+	 * @see workbench.util.SqlUtil#getTables(java.lang.String)
 	 */
 	public boolean sqlHasUpdateTable()
 	{
@@ -1827,7 +1849,7 @@ public class DataStore
 		if (this.deletedRows == null) return 0;
 		return deletedRows.size();
 	}
-	
+
 	public Object getDeletedValue(int row, int col)
 	{
 		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;
@@ -1836,7 +1858,7 @@ public class DataStore
 		RowData rowData = this.deletedRows.get(row);
 		return rowData.getValue(col);
 	}
-	
+
 	protected RowData getNextDeletedRow()
 	{
 		if (this.deletedRows == null || this.deletedRows.size() == 0) return null;

@@ -46,6 +46,12 @@ public class OracleDataConverter
 	{
 	}
 
+	@Override
+	public Class getConvertedClass(int jdbcType, String dbmsType)
+	{
+		return String.class;
+	}
+	
 	/**
 	 * Two Oracle datatypes are supported
 	 * <ul>

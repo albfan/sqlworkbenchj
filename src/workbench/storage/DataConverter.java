@@ -31,4 +31,5 @@ public interface DataConverter
 {
 	boolean convertsType(int jdbcType, String dbmsType);
 	Object convertValue(int jdbcType, String dbmsType, Object originalValue);
+	Class getConvertedClass(int jdbcType, String dbmsType);
 }
