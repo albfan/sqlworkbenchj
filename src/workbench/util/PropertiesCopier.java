@@ -43,6 +43,9 @@ public class PropertiesCopier
 		remove(source, System.getProperties());
 	}
 
+	/**
+	 * Removes all properties from target that are present in source.
+	 */
 	public void remove(Properties source, Properties target)
 	{
 		if (source == null || target == null) return;

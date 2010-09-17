@@ -47,7 +47,6 @@ public class ExecutionTimeLogger
 		String cleanSql = SqlUtil.makeCleanSql(sql, false, false);
 		cleanSql = StringUtil.escapeUnicode(cleanSql, CharacterRange.RANGE_CONTROL);
 		line.append(cleanSql);
-
 	}
 
 	

@@ -73,8 +73,11 @@ public class DataPrinter
 	}
 
 	/**
-	 *	Write the contents of the DataStore into the writer but only the rows
-	 *  that have been passed in the rows[] parameter
+	 * Write the contents of the DataStore into the writer but only the rows
+	 * that have been passed in the rows[] parameter
+	 * 
+	 * @param out the writer to use
+	 * @param rows the rows to print, if this is null all rows are printed
 	 */
 	public void writeDataString(Writer out, int[] rows)
 		throws IOException

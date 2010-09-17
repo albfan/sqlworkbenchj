@@ -18,7 +18,6 @@ import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
-import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
 /**
@@ -36,18 +35,18 @@ public class UpdateAnalyzer
 	protected void checkContext()
 	{
 		checkOverwrite();
-		
+
 		final int IN_SET = 1;
 		final int IN_UPDATE = 2;
 		final int IN_WHERE = 3;
-		
+
 		int state = -1;
 		boolean nextIsTable = false;
 		String table = null;
-		
+
 		SQLLexer lexer = new SQLLexer(sql);
 		SQLToken t = lexer.getNextToken(false, false);
-		
+
 		while (t != null)
 		{
 			if (nextIsTable)
@@ -79,7 +78,7 @@ public class UpdateAnalyzer
 			}
 			t = lexer.getNextToken(false, false);
 		}
-		
+
 		if (state == IN_UPDATE)
 		{
 			context = CONTEXT_TABLE_LIST;
