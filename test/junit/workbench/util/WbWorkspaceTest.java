@@ -14,21 +14,20 @@ package workbench.util;
 import java.io.InputStream;
 import junit.framework.TestCase;
 import workbench.gui.sql.PanelType;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbWorkspaceTest
-	extends TestCase
 {
 
-	public WbWorkspaceTest(String testName)
-	{
-		super(testName);
-	}
-
-	public void testOldFormat2()
+	@Test
+	public void testOldFormat()
 		throws Exception
 	{
 		InputStream in = getClass().getResourceAsStream("tabinfo_1.properties");

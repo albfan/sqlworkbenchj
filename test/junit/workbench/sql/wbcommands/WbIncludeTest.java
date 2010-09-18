@@ -24,57 +24,61 @@ import workbench.db.WbConnection;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class WbIncludeTest 
+public class WbIncludeTest
 	extends WbTestCase
 {
 	private TestUtil util;
 	private StatementRunner runner;
-	
-	public WbIncludeTest(String testName)
+
+	public WbIncludeTest()
 	{
-		super(testName);
-		util = getTestUtil(testName);
+		super("WbIncludeTest");
+		util = getTestUtil();
 	}
 
-	@Override
+	@Before
 	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		util.emptyBaseDirectory();
 		runner = util.createConnectedStatementRunner();
 	}
 
+	@Test
 	public void testAlternateInclude()
+		throws Exception
 	{
 		try
 		{
 			WbConnection con = runner.getConnection();
-			
+
 			Statement stmt = con.createStatement();
 			stmt.execute("create table include_test (file_name varchar(100))");
 			con.commit();
-			
+
 			String encoding = "ISO-8859-1";
 			File scriptFile = new File(util.getBaseDir(), "test.sql");
-			
+
 			Writer w = EncodingUtil.createWriter(scriptFile, encoding, false);
 			w.write("insert into include_test (file_name) values ('" + scriptFile.getAbsolutePath() + "');\n");
 			w.write("commit;\n");
 			w.close();
-			
+
 			String sql = "-- comment\n\n@test.sql\n";
 			runner.runStatement(sql);
 			StatementRunnerResult result = runner.getResult();
 			assertEquals("Statement not executed", true, result.isSuccess());
-			
+
 			ResultSet rs = stmt.executeQuery("select count(*) from include_test");
-			
+
 			if (rs.next())
 			{
 				int count = rs.getInt(1);
@@ -86,18 +90,14 @@ public class WbIncludeTest
 			}
 			rs.close();
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
-	public void testFileNotFound() 
+
+	@Test
+	public void testFileNotFound()
 		throws Exception
 	{
 		try
@@ -108,50 +108,46 @@ public class WbIncludeTest
 			String msg = result.getMessageBuffer().toString();
 			assertTrue("Wrong error", msg.indexOf("not found") > -1);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
-	public void testNestedInclude() 
+
+	@Test
+	public void testNestedInclude()
 		throws Exception
 	{
 		try
 		{
 			WbConnection con = runner.getConnection();
-			
+
 			File subdir1 = new File(util.getBaseDir(), "subdir1");
 			subdir1.mkdir();
-			
+
 			File include1 = new File(subdir1, "include1.sql");
-			
+
 			Statement stmt = con.createStatement();
 			stmt.execute("create table include_test (file_name varchar(100))");
 			con.commit();
-			
+
 			String encoding = "ISO-8859-1";
 			Writer w = EncodingUtil.createWriter(include1, encoding, false);
 			w.write("insert into include_test (file_name) values ('" + include1.getAbsolutePath() + "');\n");
 			w.write("commit;\n");
 			w.close();
-			
+
 			File main = new File(util.getBaseDir(), "main.sql");
 			w = EncodingUtil.createWriter(main, encoding, false);
 			w.write("insert into include_test (file_name) values ('" + main.getAbsolutePath() + "');\n");
 			w.write("commit;\n");
 			w.write("@./" + subdir1.getName() + "/" + include1.getName() + "\n");
 			w.close();
-			
+
 			runner.runStatement("wbinclude -file='" + main.getAbsolutePath() + "';\n");
 			StatementRunnerResult result = runner.getResult();
 			assertEquals("Runner not successful", true, result.isSuccess());
-			
+
 			ResultSet rs = stmt.executeQuery("select * from include_test");
 			List files = new ArrayList();
 			while (rs.next())
@@ -163,18 +159,11 @@ public class WbIncludeTest
 			assertEquals("Main file not run", true, files.contains(main.getAbsolutePath()));
 			assertEquals("Second file not run", true, files.contains(include1.getAbsolutePath()));
 			stmt.close();
-			
-			
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 }

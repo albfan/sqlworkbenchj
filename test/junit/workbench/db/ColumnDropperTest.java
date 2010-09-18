@@ -15,21 +15,21 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.TestUtil;
-import workbench.WbTestCase;
 import workbench.sql.ScriptParser;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ColumnDropperTest
-	extends WbTestCase
 {
-	public ColumnDropperTest(String testName)
+	public ColumnDropperTest()
 	{
-		super(testName);
 	}
 
+	@Test
 	public void testDropObjects()
 		throws Exception
 	{

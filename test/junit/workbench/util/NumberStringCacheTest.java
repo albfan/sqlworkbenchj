@@ -11,34 +11,30 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author thomas
  */
 public class NumberStringCacheTest
-	extends TestCase
 {
-	public NumberStringCacheTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetNumberString()
 	{
 		String s = NumberStringCache.getNumberString(10);
 		assertEquals(s, "10");
-		
+
 		char c = 32;
 		s = NumberStringCache.getNumberString(c);
 		assertEquals(s, "32");
-		
+
 		s = NumberStringCache.getNumberString(NumberStringCache.CACHE_SIZE);
 		assertEquals(Integer.toString(NumberStringCache.CACHE_SIZE), s);
-		
 	}
-	
+
+	@Test
 	public void testHexString()
 	{
 		assertEquals("00", NumberStringCache.getHexString(0));

@@ -11,21 +11,17 @@
  */
 package workbench.db;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DomainIdentifierTest
-	extends TestCase
 {
 
-	public DomainIdentifierTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testDomain()
 		throws Exception
 	{

@@ -12,22 +12,18 @@
 package workbench.db.importer;
 
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 import workbench.db.ColumnIdentifier;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ImportFileColumnTest
-	extends TestCase
 {
 
-	public ImportFileColumnTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testEquals()
 	{
 		List<ImportFileColumn> columns = ImportFileColumn.createList();

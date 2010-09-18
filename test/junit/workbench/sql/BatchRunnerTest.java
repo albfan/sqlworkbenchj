@@ -20,9 +20,9 @@ import java.io.FileWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.Properties;
-import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbDriver;
@@ -32,23 +32,25 @@ import workbench.util.ArgumentParser;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class BatchRunnerTest
-	extends TestCase
+	extends WbTestCase
 {
 	private TestUtil	util;
 
-	public BatchRunnerTest(String testName)
+	public BatchRunnerTest()
 		throws Exception
 	{
-		super(testName);
-		util = new TestUtil(testName);
-		util.prepareEnvironment();
+		super("BatchRunnerTest");
+		util = getTestUtil();
 	}
 
+	@Test
 	public void testSingleCommand()
 		throws Exception
 	{
@@ -106,6 +108,7 @@ public class BatchRunnerTest
 		}
 	}
 
+	@Test
 	public void testTransactionControlError()
 		throws Exception
 	{
@@ -174,6 +177,7 @@ public class BatchRunnerTest
 		}
 	}
 
+	@Test
 	public void testTransactionControlSuccess()
 		throws Exception
 	{
@@ -244,6 +248,7 @@ public class BatchRunnerTest
 		}
 	}
 
+	@Test
 	public void testCreateCommandLineProfile()
 		throws Exception
 	{
@@ -269,6 +274,7 @@ public class BatchRunnerTest
 		assertEquals(".", dir);
 	}
 
+	@Test
 	public void testEmptyStatement()
 		throws Exception
 	{
@@ -307,6 +313,7 @@ public class BatchRunnerTest
 		runner.setShowProgress(false);
 	}
 	
+	@Test
 	public void testBatchRunner()
 		throws Exception
 	{
@@ -368,6 +375,7 @@ public class BatchRunnerTest
 		}
 	}
 
+	@Test
 	public void testNoConnection()
 	{
 		Statement stmt = null;
@@ -417,6 +425,7 @@ public class BatchRunnerTest
 		}
 	}
 
+	@Test
 	public void testAltDelimiter()
 	{
 		try
@@ -486,6 +495,7 @@ public class BatchRunnerTest
 		}
 	}
 
+	@Test
 	public void testConsoleOutput()
 	{
 		WbConnection con = null;

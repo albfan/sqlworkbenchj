@@ -11,33 +11,39 @@
  */
 package workbench.db.diff;
 
+import org.junit.Test;
 import java.sql.SQLException;
 import java.sql.Statement;
+import org.junit.After;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class SchemaDiffTest
-	extends junit.framework.TestCase
+	extends WbTestCase
 {
 	private WbConnection source;
 	private WbConnection target;
 
-	public SchemaDiffTest(String testName)
+	public SchemaDiffTest()
 	{
-		super(testName);
+		super("SchemaDiffTest");
 	}
 
+	@After
 	public void tearDown()
 	{
 		try { source.disconnect(); } catch (Throwable th) {}
 		try { target.disconnect(); } catch (Throwable th) {}
 	}
 
+	@Test
 	public void testBaseDiff()
 		throws Exception
 	{
@@ -125,6 +131,7 @@ public class SchemaDiffTest
 
 	}
 
+	@Test
 	public void testGrantDiff()
 	{
 		try
@@ -162,6 +169,7 @@ public class SchemaDiffTest
 	/**
 	 * Check if an index change is detected even though nothing else has changed
 	 */
+	@Test
 	public void testIndexChangeOnly()
 	{
 		try
@@ -207,6 +215,7 @@ public class SchemaDiffTest
 		}
 	}
 
+	@Test
 	public void testCheckConstraint()
 	{
 		try
@@ -275,6 +284,7 @@ public class SchemaDiffTest
 			")");
 
 	}
+	
 	private void setupGrantTestDb()
 		throws SQLException, ClassNotFoundException
 	{

@@ -11,6 +11,8 @@
  */
 package workbench.resource;
 
+import org.junit.Test;
+import workbench.WbTestCase;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -19,34 +21,36 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import junit.framework.TestCase;
 import workbench.util.FileUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ResourceMgrTest extends TestCase
+public class ResourceMgrTest
+	extends WbTestCase
 {
 
-	public ResourceMgrTest(String testName)
+	public ResourceMgrTest()
 	{
-		super(testName);
+		super("ResourceMgrTest");
 	}
 
 	/**
 	 * Make sure all keys are translated.
 	 */
+	@Test
 	public void testTranslation()
 	{
 		Locale en = new Locale("en");
 		Locale de = new Locale("de");
-		
+
 		ResourceBundle enBundle = ResourceMgr.getResourceBundle(en);
 		ResourceBundle deBundle = ResourceMgr.getResourceBundle(de);
 		assertNotNull(enBundle);
 		assertNotNull(deBundle);
-		
+
 		HashSet<String> wrongKeys = new HashSet<String>();
 		InputStream in = getClass().getResourceAsStream("ignore_keys.txt");
 		List<String> keys = FileUtil.getLines(new BufferedReader(new InputStreamReader(in)), true);
@@ -64,6 +68,7 @@ public class ResourceMgrTest extends TestCase
 				wrongKeys.add(key + ", en=" + enValue + ", de=" + deValue);
 			}
 		}
+
 		if (wrongKeys.size() > 0)
 		{
 			System.out.println("Keys not translated!");
@@ -74,5 +79,5 @@ public class ResourceMgrTest extends TestCase
 			fail("Not all translation keys translated!");
 		}
 	}
-	
+
 }

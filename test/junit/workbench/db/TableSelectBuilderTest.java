@@ -13,6 +13,8 @@ package workbench.db;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -22,11 +24,12 @@ public class TableSelectBuilderTest
 	extends WbTestCase
 {
 
-	public TableSelectBuilderTest(String testName)
+	public TableSelectBuilderTest()
 	{
-		super(testName);
+		super("TableSelectBuilderTest");
 	}
 
+	@Test
 	public void testBuildSelect()
 		throws Exception
 	{
@@ -66,6 +69,7 @@ public class TableSelectBuilderTest
 		assertEquals(expected, sql);
 	}
 
+	@Test
 	public void testCleanDataType()
 	{
 		TableSelectBuilder builder = new TableSelectBuilder(null);

@@ -11,50 +11,46 @@
  */
 package workbench.sql.wbcommands;
 
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ObjectInfoTest
-	extends TestCase
+	extends WbTestCase
 {
+
 	private WbConnection db;
-	
-	public ObjectInfoTest(String testName)
+
+	public ObjectInfoTest()
 	{
-		super(testName);
+		super("ObjectInfoTest");
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
-		TestUtil util = new TestUtil(getName());
-		db = util.getConnection(getName());
+		TestUtil util = getTestUtil();
+		db = util.getConnection();
 		TestUtil.executeScript(db,
-				"CREATE TABLE person (nr integer primary key, person_name varchar(100)); \n" +
-				"CREATE TABLE person_group (person_nr integer, group_nr integer); \n" +
-				"ALTER TABLE person_group ADD CONSTRAINT fk_pg_p FOREIGN KEY (person_nr) REFERENCES person (nr); \n" +
-				"CREATE VIEW v_person (pnr, pname) AS SELECT nr, person_name FROM PERSON; \n" +
-				"create sequence seq_id; \n" +
-				"commit;"
-		);
+			"CREATE TABLE person (nr integer primary key, person_name varchar(100)); \n"
+			+ "CREATE TABLE person_group (person_nr integer, group_nr integer); \n"
+			+ "ALTER TABLE person_group ADD CONSTRAINT fk_pg_p FOREIGN KEY (person_nr) REFERENCES person (nr); \n"
+			+ "CREATE VIEW v_person (pnr, pname) AS SELECT nr, person_name FROM PERSON; \n"
+			+ "create sequence seq_id; \n"
+			+ "commit;");
 	}
 
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
-	}
-
+	@Test
 	public void testGetObjectInfo()
 		throws Exception
 	{
@@ -90,12 +86,12 @@ public class ObjectInfoTest
 		fk = tableInfo.getDataStores().get(2);
 		assertEquals("PERSON_GROUP - References", fk.getResultName());
 		assertEquals(1, fk.getRowCount());
-		
+
 		StatementRunnerResult viewInfo = info.getObjectInfo(db, "v_person", false);
 //		System.out.println(viewInfo.getSourceCommand());
 		assertTrue(viewInfo.getSourceCommand().startsWith("CREATE FORCE VIEW"));
 		assertTrue(viewInfo.hasDataStores());
-		
+
 		DataStore viewDs = viewInfo.getDataStores().get(0);
 		assertEquals(2, viewDs.getRowCount());
 		assertEquals("PNR", viewDs.getValueAsString(0, 0));

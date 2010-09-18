@@ -11,25 +11,22 @@
  */
 package workbench.db;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class DbSettingsTest
-	extends WbTestCase
 {
-	public DbSettingsTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testOraDefaults()
 	{
 		DbSettings pg = new DbSettings("postgresql", "Postgres Test");
 		assertFalse(pg.getConvertDateInExport());
 	}
 
+	@Test
 	public void testPgDefaults()
 	{
 		DbSettings pg = new DbSettings("postgresql", "Postgres Test");

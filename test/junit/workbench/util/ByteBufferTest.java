@@ -11,20 +11,17 @@
  */
 package workbench.util;
 
-import junit.framework.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ByteBufferTest extends TestCase
+public class ByteBufferTest
 {
 
-	public ByteBufferTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testByteBuffer()
 	{
 		try

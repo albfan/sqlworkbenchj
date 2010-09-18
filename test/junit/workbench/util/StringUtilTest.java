@@ -13,21 +13,17 @@ package workbench.util;
 
 import java.util.LinkedList;
 import java.util.List;
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class StringUtilTest
-	extends WbTestCase
 {
 
-	public StringUtilTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testFormatString()
 	{
 		assertEquals("0001", StringUtil.formatInt(1, 4).toString());
@@ -36,6 +32,7 @@ public class StringUtilTest
 		assertEquals("123", StringUtil.formatInt(123, 1).toString());
 	}
 
+	@Test
 	public void testHexString()
 	{
 		String hex = StringUtil.hexString(4, 2);
@@ -53,7 +50,8 @@ public class StringUtilTest
 		hex = StringUtil.hexString(256, 4);
 		assertEquals("0100", hex);
 	}
-	
+
+	@Test
 	public void testStartsWith()
 	{
 		String input = "this is a test";
@@ -63,7 +61,8 @@ public class StringUtilTest
 		assertTrue(StringUtil.lineStartsWith(input, 9, "test"));
 		assertFalse(StringUtil.lineStartsWith(input, 13, "test"));
 	}
-	
+
+	@Test
 	public void testRemoveQuotes()
 	{
 		String name = "test";
@@ -95,6 +94,7 @@ public class StringUtilTest
 		assertEquals("test", trimmed);
 	}
 
+	@Test
 	public void testLongestLine()
 	{
 		String s = "this\na test for\nseveral lines";
@@ -124,6 +124,7 @@ public class StringUtilTest
 		assertEquals(s, line);
 	}
 
+	@Test
 	public void testGetWordLefOfCursor()
 	{
 		String input = "ab test\nmore text";
@@ -131,6 +132,8 @@ public class StringUtilTest
 		assertNotNull(word);
 		assertEquals("ab", word);
 	}
+
+	@Test
 	public void testLineStartsWith()
 	{
 		String s = "some stuff     -- this is a comment";
@@ -155,6 +158,7 @@ public class StringUtilTest
 		assertTrue(isComment);
 	}
 
+	@Test
 	public void testFindFirstNonWhitespace()
 	{
 		String s = "   Hello, world";
@@ -169,6 +173,7 @@ public class StringUtilTest
 		assertEquals(15, pos);
 	}
 
+	@Test
 	public void testGetStartingWhitespace()
 	{
 		String s = "   Hello, world";
@@ -184,6 +189,7 @@ public class StringUtilTest
 		assertEquals("\t\n", p);
 	}
 
+	@Test
 	public void testMakeFilename()
 	{
 		try
@@ -204,6 +210,8 @@ public class StringUtilTest
 			fail(e.getMessage());
 		}
 	}
+
+	@Test
 	public void testReplace()
 	{
 		try
@@ -224,6 +232,7 @@ public class StringUtilTest
 		}
 	}
 
+	@Test
 	public void testEndsWith()
 	{
 		try
@@ -245,6 +254,7 @@ public class StringUtilTest
 		}
 	}
 
+	@Test
 	public void testIndexOf()
 	{
 		try
@@ -269,6 +279,7 @@ public class StringUtilTest
 		}
 	}
 
+	@Test
 	public void testLastIndexOf()
 	{
 		try
@@ -301,6 +312,7 @@ public class StringUtilTest
 		}
 	}
 
+	@Test
 	public void testDecodeUnicode()
 	{
 		try
@@ -363,6 +375,7 @@ public class StringUtilTest
 
 	}
 
+	@Test
 	public void testEncodeUnicode()
 	{
 		String value = "\u00E4";
@@ -387,6 +400,7 @@ public class StringUtilTest
 
 	}
 
+	@Test
 	public void testMakePlainLF()
 	{
 		String line = "line1\r\nline2";
@@ -406,6 +420,7 @@ public class StringUtilTest
 		assertEquals("line1\nline2", newline);
 	}
 
+	@Test
 	public void testTrimStringBuilder()
 	{
 		StringBuilder s = new StringBuilder();
@@ -433,6 +448,7 @@ public class StringUtilTest
 		assertEquals("", s.toString());
 	}
 
+	@Test
 	public void testRtrim()
 	{
 		String s = "bla";
@@ -454,6 +470,7 @@ public class StringUtilTest
 		assertEquals(s, StringUtil.rtrim(s));
 	}
 
+	@Test
 	public void testEqualString()
 	{
 		String one = "bla";
@@ -485,6 +502,8 @@ public class StringUtilTest
 
 
 	}
+
+	@Test
 	public void testCaseCheck()
 	{
 		assertEquals(false, StringUtil.isUpperCase("This is a test"));
@@ -497,6 +516,7 @@ public class StringUtilTest
 		assertEquals(true, StringUtil.isLowerCase("1234567890"));
 	}
 
+	@Test
 	public void testGetRealLineLenght()
 	{
 		int len = StringUtil.getRealLineLength("bla\r");
@@ -521,6 +541,7 @@ public class StringUtilTest
 		assertEquals(0,len);
 	}
 
+	@Test
 	public void testIsWhitespace()
 	{
 		try
@@ -547,6 +568,8 @@ public class StringUtilTest
 			fail(e.getMessage());
 		}
 	}
+
+	@Test
 	public void testTrimBuffer()
 	{
 		try
@@ -574,6 +597,8 @@ public class StringUtilTest
 			fail(e.getMessage());
 		}
 	}
+
+	@Test
 	public void testToArray()
 	{
 		try
@@ -597,6 +622,8 @@ public class StringUtilTest
 			e.printStackTrace();
 		}
 	}
+
+	@Test
 	public void testGetDoubleValue()
 	{
 		try
@@ -618,6 +645,7 @@ public class StringUtilTest
 		}
 	}
 
+	@Test
 	public void testGetIntValue()
 	{
 		try
@@ -638,6 +666,7 @@ public class StringUtilTest
 		}
 	}
 
+	@Test
 	public void testStringToList()
 	{
 		String list = "1,2,3";
@@ -675,6 +704,7 @@ public class StringUtilTest
 
 	}
 
+	@Test
 	public void testHasOpenQuotes()
 	{
 		String value = "this line does not have quotes";
@@ -687,6 +717,7 @@ public class StringUtilTest
 		assertEquals("Wrong check for open quotes", true, StringUtil.hasOpenQuotes(value, '\''));
 	}
 
+	@Test
 	public void testIsNumber()
 	{
 		boolean isNumber = StringUtil.isNumber("1");
@@ -702,6 +733,7 @@ public class StringUtilTest
 		assertEquals(false, isNumber);
 	}
 
+	@Test
 	public void testMaxString()
 	{
 		String s = StringUtil.getMaxSubstring("Dent", 4, null);
@@ -721,6 +753,7 @@ public class StringUtilTest
 
 	}
 
+	@Test
 	public void testTrimQuotes()
 	{
 		String s = StringUtil.trimQuotes(" \"bla\" ");
@@ -731,7 +764,7 @@ public class StringUtilTest
 		assertEquals("bla", s);
 	}
 
-
+	@Test
 	public void testPadRight()
 	{
 		String result = StringUtil.padRight("someStuff", 20);
@@ -739,6 +772,7 @@ public class StringUtilTest
 		assertTrue(result.startsWith("someStuff"));
 	}
 
+	@Test
 	public void testFormatNumber()
 	{
 		String result = StringUtil.formatNumber(10, 10, true);
@@ -754,6 +788,7 @@ public class StringUtilTest
 		assertEquals("100000", result);
 	}
 
+	@Test
 	public void testContainsWords()
 	{
 		String input = "So long and thanks for all the fish";

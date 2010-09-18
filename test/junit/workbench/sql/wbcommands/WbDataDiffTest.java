@@ -23,6 +23,10 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -35,12 +39,13 @@ public class WbDataDiffTest
 	private WbConnection target;
 	private TestUtil util;
 
-	public WbDataDiffTest(String testName)
+	public WbDataDiffTest()
 	{
-		super(testName);
+		super("WbDataDiffTest");
 		util = new TestUtil("dataDiffTest");
 	}
 
+	@Test
 	public void testIsConnectionRequired()
 	{
 		WbDataDiff diff = new WbDataDiff();
@@ -54,6 +59,7 @@ public class WbDataDiffTest
 		this.target = util.getConnection("dataDiffTarget");
 	}
 
+	@Test
 	public void testExecute()
 		throws Exception
 	{
@@ -155,7 +161,7 @@ public class WbDataDiffTest
 
 
 			TestUtil.executeScript(source, "update person set lastname = '<name>' where person_id = 10;commit;");
-			
+
 			sql = "WbDataDiff -type=xml -referenceProfile=dataDiffSource -targetProfile=dataDiffTarget -includeDelete=true -checkDependencies=true -file=sync.xml -encoding=UTF8";
 			runner.runStatement(sql);
 
@@ -235,6 +241,7 @@ public class WbDataDiffTest
 		}
 	}
 
+	@Test
 	public void testMissingColumns()
 		throws Exception
 	{
@@ -285,6 +292,7 @@ public class WbDataDiffTest
 		}
 	}
 
+	@Test
 	public void testSingleTable()
 		throws Exception
 	{
@@ -361,7 +369,7 @@ public class WbDataDiffTest
 				"person_$insert.sql",
 				"person_$update.sql",
 			};
-			
+
 //			for (String fname : expectedFiles)
 //			{
 //				WbFile f = new WbFile(util.getBaseDir(), fname);

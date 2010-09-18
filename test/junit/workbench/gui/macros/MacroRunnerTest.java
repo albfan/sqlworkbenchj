@@ -14,6 +14,10 @@ package workbench.gui.macros;
 import javax.swing.JComponent;
 import workbench.WbTestCase;
 import workbench.sql.macros.MacroDefinition;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -23,11 +27,12 @@ public class MacroRunnerTest
 	extends WbTestCase
 {
 
-	public MacroRunnerTest(String testName)
+	public MacroRunnerTest()
 	{
-		super(testName);
+		super("MacroRunnerTest");
 	}
 
+	@Test
 	public void testRunNoParameter()
 	{
 		final MacroDefinition macro = new MacroDefinition("test", "select 42 from dual;");
@@ -62,6 +67,7 @@ public class MacroRunnerTest
 		runner.runMacro(macro, p, false);
 	}
 
+	@Test
 	public void testSelectedText()
 	{
 		final MacroDefinition macro = new MacroDefinition("test", "select ${selection}$ from dual;");
@@ -96,6 +102,7 @@ public class MacroRunnerTest
 		runner.runMacro(macro, p, false);
 	}
 
+	@Test
 	public void testCurrentStatement()
 	{
 		final MacroDefinition macro = new MacroDefinition("test", "explain ${current_statement}$;");
@@ -130,6 +137,7 @@ public class MacroRunnerTest
 		runner.runMacro(macro, p, false);
 	}
 
+	@Test
 	public void testSelectedStatement()
 	{
 		final MacroDefinition macro = new MacroDefinition("test", "explain ${selected_statement}$");
@@ -164,7 +172,7 @@ public class MacroRunnerTest
 		runner.runMacro(macro, p, false);
 	}
 
-
+	@Test
 	public void testWholeText()
 	{
 		final MacroDefinition macro = new MacroDefinition("test", "explain ${text}$");

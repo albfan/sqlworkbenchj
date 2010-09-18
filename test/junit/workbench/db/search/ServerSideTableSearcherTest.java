@@ -11,33 +11,33 @@
  */
 package workbench.db.search;
 
+import org.junit.After;
+import org.junit.Test;
+import org.junit.Before;
+import workbench.WbTestCase;
 import java.util.List;
 import workbench.TestUtil;
-import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.interfaces.TableSearchConsumer;
 import workbench.storage.DataStore;
-import workbench.storage.filter.ContainsComparator;
 import workbench.util.CollectionUtil;
 import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ClientSideTableSearcherTest
+
+public class ServerSideTableSearcherTest
 	extends WbTestCase
 {
 	private WbConnection con;
 
-	public ClientSideTableSearcherTest()
+	public ServerSideTableSearcherTest()
 	{
-		super("ClientSideTableSearcherTest");
+		super("ServerSideTableSearcherTest");
 	}
 
 	@Before
@@ -78,9 +78,10 @@ public class ClientSideTableSearcherTest
 	@Test
 	public void testSearch()
 	{
-		ClientSideTableSearcher searcher = new ClientSideTableSearcher();
+		ServerSideTableSearcher searcher = new ServerSideTableSearcher();
 		searcher.setConnection(con);
-		searcher.setCriteria("dent", true);
+		searcher.setCriteria("'%dent%'", true);
+		searcher.setColumnFunction("lower($col$)");
 		List<TableIdentifier> tables = CollectionUtil.arrayList(
 			new TableIdentifier("PERSON"),
 			new TableIdentifier("SHIP")
@@ -89,7 +90,6 @@ public class ClientSideTableSearcherTest
 		searcher.setTableNames(tables);
 		SearchConsumer consumer = new SearchConsumer();
 		searcher.setConsumer(consumer);
-		searcher.setComparator(new ContainsComparator());
 		searcher.search();
 
 		List<DataStore> searchResult = consumer.getResults();
@@ -97,14 +97,6 @@ public class ClientSideTableSearcherTest
 		assertEquals(2, searchResult.size());
 		assertEquals(1, searchResult.get(0).getRowCount());
 		assertEquals(0, searchResult.get(1).getRowCount());
-
-		searcher.setCriteria("2", true);
-		searcher.search();
-		searchResult = consumer.getResults();
-		assertNotNull(searchResult);
-		assertEquals(2, searchResult.size());
-		assertEquals(1, searchResult.get(0).getRowCount());
-		assertEquals(2, searchResult.get(1).getRowCount());
 
 		// Check exclusion of CLOB column
 		tables = CollectionUtil.arrayList(new TableIdentifier("DOCUMENT"));
@@ -118,21 +110,13 @@ public class ClientSideTableSearcherTest
 		assertEquals(1, searchResult.size());
 		assertEquals(0, searchResult.get(0).getRowCount());
 
-		searcher.setExcludeLobColumns(false);
-		searcher.search();
-
-		searchResult = consumer.getResults();
-		assertNotNull(searchResult);
-		assertEquals(1, searchResult.size());
-		assertEquals(1, searchResult.get(0).getRowCount());
-
-
 		tables = CollectionUtil.arrayList(
 			new TableIdentifier("PERSON"),
 			new TableIdentifier("SHIP")
 		);
-		searcher.setCriteria("dent", false);
+		searcher.setCriteria("'%dent%'", false);
 		searcher.setTableNames(tables);
+		searcher.setColumnFunction(null);
 		searcher.search();
 		searchResult = consumer.getResults();
 		assertNotNull(searchResult);

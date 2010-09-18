@@ -10,28 +10,26 @@
  *
  */
 package workbench.gui.editor;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class SearchAndReplaceTest extends junit.framework.TestCase
+public class SearchAndReplaceTest
 {
-	
-	public SearchAndReplaceTest(String testName)
-	{
-		super(testName);
-	}
-	
+
+	@Test
 	public void testCreateSearchPattern()
 	{
 		String input = "thetext";
 		String expression = SearchAndReplace.getSearchExpression(input, false, false, false);
 		assertEquals("Wrong expression", "(" + input + ")", expression);
-		
+
 		expression = SearchAndReplace.getSearchExpression(input, false, true, false);
 		assertEquals("Wrong expression", "\\b(" + input + ")\\b", expression);
-		
+
 		expression = SearchAndReplace.getSearchExpression(input, true, true, false);
 		assertEquals("Wrong expression", "(?i)\\b(" + input + ")\\b", expression);
 

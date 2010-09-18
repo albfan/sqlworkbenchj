@@ -11,36 +11,39 @@
  */
 package workbench.db.ingres;
 
+import org.junit.Test;
+import org.junit.After;
+import org.junit.Before;
+import workbench.WbTestCase;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.DbObject;
 import workbench.db.SequenceDefinition;
 import workbench.db.WbConnection;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class IngresMetadataTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	private WbConnection db;
 
-	public IngresMetadataTest(String testName)
+	public IngresMetadataTest()
 	{
-		super(testName);
+		super("IngresMetadataTest");
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil(getName());
 		db = util.getConnection("fake_ingres");
 		TestUtil.executeScript(db,
@@ -60,13 +63,14 @@ public class IngresMetadataTest
 			"commit;");
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
 		db.disconnect();
 	}
 
+	@Test
 	public void testGetSequences()
 	{
 		IngresMetadata instance = new IngresMetadata(db.getSqlConnection());

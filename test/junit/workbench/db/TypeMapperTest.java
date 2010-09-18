@@ -12,6 +12,14 @@
 package workbench.db;
 
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -21,16 +29,15 @@ public class TypeMapperTest
 	extends WbTestCase
 {
 
-	public TypeMapperTest(String testName)
+	public TypeMapperTest()
 	{
-		super(testName);
-		// this is needed to make sure the LogMgr is initalized correctly
-		getTestUtil(); 
+		super("TypeMapperTest");
 	}
 
+	@Test
 	public void testGetTypeName()
 	{
-		
+
 		TypeMapper mapper = new TypeMapper();
 		mapper.parseTypeMap("3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size);93:datetime year to second");
 		String type = mapper.getUserMapping(3, 1, 1);

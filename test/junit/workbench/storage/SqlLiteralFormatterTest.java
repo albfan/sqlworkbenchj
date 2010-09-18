@@ -15,6 +15,8 @@ import java.sql.Types;
 import java.util.Calendar;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -23,128 +25,108 @@ import workbench.db.ColumnIdentifier;
 public class SqlLiteralFormatterTest
 	extends WbTestCase
 {
-	public SqlLiteralFormatterTest(String testName)
+
+	public SqlLiteralFormatterTest()
 	{
-		super(testName);
+		super("SqlLiteralFormatterTest");
 	}
 
+	@Test
 	public void testGetJdbcLiteral()
 	{
-		try
-		{
-			SqlLiteralFormatter f = new SqlLiteralFormatter();
-			f.setDateLiteralType(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE);
+		SqlLiteralFormatter f = new SqlLiteralFormatter();
+		f.setDateLiteralType(SqlLiteralFormatter.JDBC_DATE_LITERAL_TYPE);
 
-			Calendar c = Calendar.getInstance();
-			c.clear();
-			c.set(Calendar.YEAR, 2002);
-			c.set(Calendar.MONTH, 3); // April
+		Calendar c = Calendar.getInstance();
+		c.clear();
+		c.set(Calendar.YEAR, 2002);
+		c.set(Calendar.MONTH, 3); // April
 
-			c.set(Calendar.DAY_OF_MONTH, 2);
-			c.set(Calendar.HOUR_OF_DAY, 14);
-			c.set(Calendar.MINUTE, 15);
-			c.set(Calendar.SECOND, 16);
+		c.set(Calendar.DAY_OF_MONTH, 2);
+		c.set(Calendar.HOUR_OF_DAY, 14);
+		c.set(Calendar.MINUTE, 15);
+		c.set(Calendar.SECOND, 16);
 
-			java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
-			ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
-			ColumnData data = new ColumnData(tm, timecol);
-			CharSequence literal = f.getDefaultLiteral(data);
-			assertEquals("JDBC time incorrect", "{t '14:15:16'}", literal);
+		java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
+		ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
+		ColumnData data = new ColumnData(tm, timecol);
+		CharSequence literal = f.getDefaultLiteral(data);
+		assertEquals("JDBC time incorrect", "{t '14:15:16'}", literal);
 
-			java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
-			ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
-			data = new ColumnData(dt, datecol);
-			literal = f.getDefaultLiteral(data);
-			assertEquals("JDBC date incorrect", "{d '2002-04-02'}", literal);
+		java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
+		ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
+		data = new ColumnData(dt, datecol);
+		literal = f.getDefaultLiteral(data);
+		assertEquals("JDBC date incorrect", "{d '2002-04-02'}", literal);
 
-			java.sql.Timestamp ts = new java.sql.Timestamp(c.getTime().getTime());
-			ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
-			data = new ColumnData(ts, tscol);
-			literal = f.getDefaultLiteral(data);
-			assertEquals("JDBC timestamp incorrect", "{ts '2002-04-02 14:15:16.000'}", literal);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		java.sql.Timestamp ts = new java.sql.Timestamp(c.getTime().getTime());
+		ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
+		data = new ColumnData(ts, tscol);
+		literal = f.getDefaultLiteral(data);
+		assertEquals("JDBC timestamp incorrect", "{ts '2002-04-02 14:15:16.000'}", literal);
 	}
 
+	@Test
 	public void testGetAnsiLiteral()
 	{
-		try
-		{
-			SqlLiteralFormatter f = new SqlLiteralFormatter();
-			f.setDateLiteralType(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
+		SqlLiteralFormatter f = new SqlLiteralFormatter();
+		f.setDateLiteralType(SqlLiteralFormatter.ANSI_DATE_LITERAL_TYPE);
 
-			Calendar c = Calendar.getInstance();
-			c.clear();
-			c.set(Calendar.YEAR, 2002);
-			c.set(Calendar.MONTH, 3); // April
+		Calendar c = Calendar.getInstance();
+		c.clear();
+		c.set(Calendar.YEAR, 2002);
+		c.set(Calendar.MONTH, 3); // April
 
-			c.set(Calendar.DAY_OF_MONTH, 2);
-			c.set(Calendar.HOUR_OF_DAY, 14);
-			c.set(Calendar.MINUTE, 15);
-			c.set(Calendar.SECOND, 16);
+		c.set(Calendar.DAY_OF_MONTH, 2);
+		c.set(Calendar.HOUR_OF_DAY, 14);
+		c.set(Calendar.MINUTE, 15);
+		c.set(Calendar.SECOND, 16);
 
-			java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
-			ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
-			ColumnData data = new ColumnData(tm, timecol);
-			CharSequence literal = f.getDefaultLiteral(data);
-			assertEquals("ANSI time incorrect", "TIME '14:15:16'", literal);
+		java.sql.Time tm = new java.sql.Time(c.getTime().getTime());
+		ColumnIdentifier timecol = new ColumnIdentifier("TIME_COL", Types.TIME);
+		ColumnData data = new ColumnData(tm, timecol);
+		CharSequence literal = f.getDefaultLiteral(data);
+		assertEquals("ANSI time incorrect", "TIME '14:15:16'", literal);
 
-			java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
-			ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
-			data = new ColumnData(dt, datecol);
-			literal = f.getDefaultLiteral(data);
-			assertEquals("ANSI date incorrect", "DATE '2002-04-02'", literal);
+		java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
+		ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
+		data = new ColumnData(dt, datecol);
+		literal = f.getDefaultLiteral(data);
+		assertEquals("ANSI date incorrect", "DATE '2002-04-02'", literal);
 
-			java.sql.Timestamp ts = new java.sql.Timestamp(c.getTime().getTime());
-			ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
-			data = new ColumnData(ts, tscol);
-			literal = f.getDefaultLiteral(data);
-			assertEquals("ANSI timestamp incorrect", "TIMESTAMP '2002-04-02 14:15:16'", literal);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		java.sql.Timestamp ts = new java.sql.Timestamp(c.getTime().getTime());
+		ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
+		data = new ColumnData(ts, tscol);
+		literal = f.getDefaultLiteral(data);
+		assertEquals("ANSI timestamp incorrect", "TIMESTAMP '2002-04-02 14:15:16'", literal);
 	}
 
+	@Test
 	public void testGetOracleLiteral()
 	{
-		try
-		{
-			SqlLiteralFormatter f = new SqlLiteralFormatter();
-			f.setDateLiteralType("oracle");
+		SqlLiteralFormatter f = new SqlLiteralFormatter();
+		f.setDateLiteralType("oracle");
 
-			Calendar c = Calendar.getInstance();
-			c.clear();
-			c.set(Calendar.YEAR, 2002);
-			c.set(Calendar.MONTH, 3); // April
+		Calendar c = Calendar.getInstance();
+		c.clear();
+		c.set(Calendar.YEAR, 2002);
+		c.set(Calendar.MONTH, 3); // April
 
-			c.set(Calendar.DAY_OF_MONTH, 2);
-			c.set(Calendar.HOUR_OF_DAY, 14);
-			c.set(Calendar.MINUTE, 15);
-			c.set(Calendar.SECOND, 16);
+		c.set(Calendar.DAY_OF_MONTH, 2);
+		c.set(Calendar.HOUR_OF_DAY, 14);
+		c.set(Calendar.MINUTE, 15);
+		c.set(Calendar.SECOND, 16);
 
-			java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
-			ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
-			ColumnData data = new ColumnData(dt, datecol);
-			CharSequence literal = f.getDefaultLiteral(data);
-			assertEquals("Oracle date incorrect", "to_date('2002-04-02', 'YYYY-MM-DD')", literal);
+		java.sql.Date dt = new java.sql.Date(c.getTime().getTime());
+		ColumnIdentifier datecol = new ColumnIdentifier("DATE_COL", Types.DATE);
+		ColumnData data = new ColumnData(dt, datecol);
+		CharSequence literal = f.getDefaultLiteral(data);
+		assertEquals("Oracle date incorrect", "to_date('2002-04-02', 'YYYY-MM-DD')", literal);
 
-			java.sql.Timestamp ts = new java.sql.Timestamp(c.getTime().getTime());
-			ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
-			data = new ColumnData(ts, tscol);
-			literal = f.getDefaultLiteral(data);
-			assertEquals("Oracle timestamp incorrect", "to_date('2002-04-02 14:15:16', 'YYYY-MM-DD HH24:MI:SS')", literal);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		java.sql.Timestamp ts = new java.sql.Timestamp(c.getTime().getTime());
+		ColumnIdentifier tscol = new ColumnIdentifier("TS_COL", Types.TIMESTAMP);
+		data = new ColumnData(ts, tscol);
+		literal = f.getDefaultLiteral(data);
+		assertEquals("Oracle timestamp incorrect", "to_date('2002-04-02 14:15:16', 'YYYY-MM-DD HH24:MI:SS')", literal);
 	}
 }

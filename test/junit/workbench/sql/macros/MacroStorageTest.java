@@ -17,25 +17,28 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import javax.swing.KeyStroke;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.resource.StoreableKeyStroke;
 import workbench.util.WbFile;
 import workbench.util.WbPersistence;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class MacroStorageTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public MacroStorageTest(String testName)
+	public MacroStorageTest()
 	{
-		super(testName);
+		super("MacroStorageTest");
 	}
 
+	@Test
 	public void testSave()
 	{
 		MacroStorage macros = new MacroStorage();
@@ -59,11 +62,12 @@ public class MacroStorageTest
 		assertEquals(key, key2);
 	}
 
+	@Test
 	public void testCopy()
 	{
 		MacroStorage macros = new MacroStorage();
 		assertFalse(macros.isModified());
-		
+
 		macros.addMacro("Default", "sessions", "select * from v$session");
 		macros.addMacro("Default", "WHO", "sp_who2");
 		macros.addMacro("Default", "clean", "delete from $[table]");
@@ -104,6 +108,7 @@ public class MacroStorageTest
 
 	}
 
+	@Test
 	public void testEmpty()
 	{
 		MacroStorage macros = new MacroStorage();
@@ -138,7 +143,8 @@ public class MacroStorageTest
 		macros.addGroup(group3);
 		assertEquals(2, group3.getSortOrder());
 	}
-	
+
+	@Test
 	public void testConvertOld()
 		throws Exception
 	{
@@ -164,5 +170,4 @@ public class MacroStorageTest
 		new2.loadMacros(newfile);
 		assertEquals(m1, new2.getMacro("macro1"));
 	}
-
 }

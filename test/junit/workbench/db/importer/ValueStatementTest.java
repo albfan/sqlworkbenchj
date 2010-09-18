@@ -10,6 +10,7 @@
  */
 package workbench.db.importer;
 
+import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -17,6 +18,7 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -26,11 +28,12 @@ public class ValueStatementTest
 	extends WbTestCase
 {
 
-	public ValueStatementTest(String testName)
+	public ValueStatementTest()
 	{
-		super(testName);
+		super("ValueStatementTest");
 	}
 
+	@Test
 	public void testStatementParsing()
 	{
 		String sql = "select max(id) from the_table where some_col = $2 and other_col = $14";
@@ -44,6 +47,7 @@ public class ValueStatementTest
 		assertTrue(indexes.contains(new Integer(14)));
 	}
 	
+	@Test
 	public void testGetValue()
 		throws Exception
 	{

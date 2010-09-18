@@ -11,21 +11,17 @@
  */
 package workbench.db.importer;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ValueDisplayTest
-	extends TestCase
 {
 
-	public ValueDisplayTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testToString()
 	{
 		ValueDisplay value = new ValueDisplay((new Object[] { "one", "two", new Integer(42)} ));

@@ -10,12 +10,14 @@
  */
 package workbench.db.exporter;
 
+import org.junit.Test;
 import java.sql.Types;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -25,11 +27,12 @@ public class RegexReplacingModifierTest
 	extends WbTestCase
 {
 
-	public RegexReplacingModifierTest(String testName)
+	public RegexReplacingModifierTest()
 	{
-		super(testName);
+		super("RegexReplacingModifierTest");
 	}
 
+	@Test
 	public void testReplacePattern()
 	{
 		RegexReplacingModifier modifier = new RegexReplacingModifier("[\\n\\r]+", " ");

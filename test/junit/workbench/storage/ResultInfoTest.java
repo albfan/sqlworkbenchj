@@ -11,52 +11,43 @@
  */
 package workbench.storage;
 
-import junit.framework.TestCase;
 import workbench.db.ColumnIdentifier;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ResultInfoTest extends TestCase
+public class ResultInfoTest
 {
-	
-	public ResultInfoTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testFindColumn()
+		throws Exception
 	{
-		try
-		{
-			ColumnIdentifier col1 = new ColumnIdentifier("\"KEY\"", java.sql.Types.VARCHAR, true);
-			ColumnIdentifier col2 = new ColumnIdentifier("\"Main Cat\"", java.sql.Types.VARCHAR, false);
-			ColumnIdentifier col3 = new ColumnIdentifier("firstname", java.sql.Types.VARCHAR, false);
-			ResultInfo info = new ResultInfo(new ColumnIdentifier[] { col1, col2, col3 } );
-			assertEquals(3, info.getColumnCount());
-			assertEquals(true, info.hasPkColumns());
+		ColumnIdentifier col1 = new ColumnIdentifier("\"KEY\"", java.sql.Types.VARCHAR, true);
+		ColumnIdentifier col2 = new ColumnIdentifier("\"Main Cat\"", java.sql.Types.VARCHAR, false);
+		ColumnIdentifier col3 = new ColumnIdentifier("firstname", java.sql.Types.VARCHAR, false);
+		ResultInfo info = new ResultInfo(new ColumnIdentifier[] { col1, col2, col3 } );
+		assertEquals(3, info.getColumnCount());
+		assertEquals(true, info.hasPkColumns());
 
-			int index = info.findColumn("key");
-			assertEquals(0, index);
+		int index = info.findColumn("key");
+		assertEquals(0, index);
 
-			index = info.findColumn("\"KEY\"");
-			assertEquals(0, index);
+		index = info.findColumn("\"KEY\"");
+		assertEquals(0, index);
 
-			index = info.findColumn("\"key\"");
-			assertEquals(0, index);
+		index = info.findColumn("\"key\"");
+		assertEquals(0, index);
 
-			index = info.findColumn("\"Main Cat\"");
-			assertEquals(1, index);
-			
-			index = info.findColumn("firstname");
-			assertEquals(2, index);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		index = info.findColumn("\"Main Cat\"");
+		assertEquals(1, index);
+
+		index = info.findColumn("firstname");
+		assertEquals(2, index);
 	}
 
-	
+
 }

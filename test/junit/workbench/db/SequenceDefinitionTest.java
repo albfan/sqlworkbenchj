@@ -11,19 +11,16 @@
  */
 package workbench.db;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class SequenceDefinitionTest
-	extends TestCase
 {
-	public SequenceDefinitionTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testEquals()
 	{
 		SequenceDefinition def1 = new SequenceDefinition("public", "seq_one");

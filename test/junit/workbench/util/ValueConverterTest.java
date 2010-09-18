@@ -17,20 +17,23 @@ import java.sql.Date;
 import java.sql.Types;
 import java.util.Calendar;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class ValueConverterTest 
+public class ValueConverterTest
 	extends WbTestCase
 {
-	
-	public ValueConverterTest(String testName)
+
+	public ValueConverterTest()
 	{
-		super(testName);
+		super("ValueConverterTest");
 	}
-	
+
+	@Test
 	public void testConvertBoolLiterals()
 	{
 		ValueConverter converter = new ValueConverter();
@@ -81,6 +84,7 @@ public class ValueConverterTest
 		}
 	}
 
+	@Test
 	public void testIntegerConvert()
 		throws Exception
 	{
@@ -124,6 +128,7 @@ public class ValueConverterTest
 		}
 	}
 	
+	@Test
 	public void testBooleanConvert()
 		throws Exception
 	{
@@ -167,6 +172,7 @@ public class ValueConverterTest
 		
 	}
 
+	@Test
 	public void testConvertNumbers()
 		throws Exception
 	{
@@ -183,6 +189,7 @@ public class ValueConverterTest
 		assertEquals("Wrong value", 3.14152, d.doubleValue(), 0.001);
 	}
 	
+	@Test
 	public void testConvertStrings() throws Exception
 	{
 		ValueConverter converter = new ValueConverter();
@@ -193,6 +200,7 @@ public class ValueConverterTest
 		assertEquals("Test", data);
 	}
 	
+	@Test
 	public void testConvertDateLiterals() throws Exception
 	{
 		String aDate = "2007-04-01";

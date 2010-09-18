@@ -11,20 +11,17 @@
  */
 package workbench.db.postgres;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class PostgresDDLFilterTest
-	extends TestCase
 {
-	public PostgresDDLFilterTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testAdjustDDL()
 	{
 		PostgresDDLFilter filter = new PostgresDDLFilter();

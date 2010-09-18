@@ -21,8 +21,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
@@ -37,13 +37,17 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbExportTest
-	extends TestCase
+	extends WbTestCase
 {
 	private String basedir;
 	private final int rowcount = 10;
@@ -51,36 +55,31 @@ public class WbExportTest
 	private WbConnection connection;
 	private TestUtil util;
 
-	public WbExportTest(String testName)
+	public WbExportTest()
 	{
-		super(testName);
-
-		try
-		{
-			util = new TestUtil(testName);
-			util.prepareEnvironment();
-			this.basedir = util.getBaseDir();
-			exportCmd = new WbExport();
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+		super("WbExportTest");
+		util = getTestUtil();
+		basedir = util.getBaseDir();
+		exportCmd = new WbExport();
 	}
 
-	protected void setUp() throws Exception
+	@Before
+	public void setUp()
+		throws Exception
 	{
-		super.setUp();
-		this.connection = prepareDatabase();
-		this.exportCmd.setConnection(this.connection);
+		util.prepareEnvironment();
+		connection = prepareDatabase();
+		exportCmd.setConnection(this.connection);
 	}
 
-	protected void tearDown() throws Exception
+	@After
+	public void tearDown()
+		throws Exception
 	{
-		this.connection.disconnect();
-		super.tearDown();
+		connection.disconnect();
 	}
 
+	@Test
 	public void testIsTypeValid()
 	{
 		WbExport exp = new WbExport();
@@ -99,6 +98,7 @@ public class WbExportTest
 		assertFalse(exp.isTypeValid("odt"));
 	}
 
+	@Test
 	public void testPrefix()
 		throws Exception
 	{
@@ -114,6 +114,7 @@ public class WbExportTest
 		assertTrue(test.exists());
 	}
 
+	@Test
 	public void testAppendSQL()
 		throws Exception
 	{
@@ -167,6 +168,7 @@ public class WbExportTest
 		assertEquals("PERSON", TestUtil.getCreateTable(create2));
 	}
 
+	@Test
 	public void testExportRownum()
 		throws Exception
 	{
@@ -201,6 +203,7 @@ public class WbExportTest
 		}
 	}
 
+	@Test
 	public void testCreateDir()
 		throws Exception
 	{
@@ -224,6 +227,7 @@ public class WbExportTest
 		assertTrue("Export file for table BLOB_TEST not created", f.exists());
 	}
 
+	@Test
 	public void testQuoteEscaping()
 	{
 		try
@@ -278,6 +282,7 @@ public class WbExportTest
 		}
 	}
 
+	@Test
 	public void testCommit()
 	{
 		try
@@ -330,207 +335,154 @@ public class WbExportTest
 		}
 	}
 
-	/**
-	 * Test the creation of date literals
-	 */
+	@Test
 	public void testDateLiterals()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "date_literal_test.sql");
-			exportFile.delete();
+		File exportFile = new File(this.basedir, "date_literal_test.sql");
+		exportFile.delete();
 
-			Statement stmt = this.connection.createStatement();
-			stmt.executeUpdate("CREATE TABLE literal_test (nr integer, date_col DATE, ts_col TIMESTAMP)");
-			stmt.executeUpdate("insert into literal_test (nr, date_col, ts_col) values (1, '2006-01-01', '2007-02-02 14:15:16')");
-			this.connection.commit();
+		Statement stmt = this.connection.createStatement();
+		stmt.executeUpdate("CREATE TABLE literal_test (nr integer, date_col DATE, ts_col TIMESTAMP)");
+		stmt.executeUpdate("insert into literal_test (nr, date_col, ts_col) values (1, '2006-01-01', '2007-02-02 14:15:16')");
+		this.connection.commit();
 
-			// Test JDBC literals
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=jdbc -sourcetable=literal_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			assertEquals("Export file not created", true, exportFile.exists());
+		// Test JDBC literals
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=jdbc -sourcetable=literal_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			FileReader in = new FileReader(exportFile);
-			String script = FileUtil.readCharacters(in);
-			ScriptParser p = new ScriptParser(script);
+		FileReader in = new FileReader(exportFile);
+		String script = FileUtil.readCharacters(in);
+		ScriptParser p = new ScriptParser(script);
 
-			// WbExport creates 2 statements: the INSERT and the COMMIT
-			assertEquals("Wrong number of statements", 2, p.getSize());
+		// WbExport creates 2 statements: the INSERT and the COMMIT
+		assertEquals("Wrong number of statements", 2, p.getSize());
 
-			String sql = p.getCommand(0);
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("Not an insert statement", "INSERT", verb);
-			assertEquals("JDBC Date literal not found", true, sql.indexOf("{d '2006-01-01'}") > -1);
-			assertEquals("JDBC Timestamp literal not found", true, sql.indexOf("{ts '2007-02-02 14:15:16") > -1);
+		String sql = p.getCommand(0);
+		String verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("Not an insert statement", "INSERT", verb);
+		assertEquals("JDBC Date literal not found", true, sql.indexOf("{d '2006-01-01'}") > -1);
+		assertEquals("JDBC Timestamp literal not found", true, sql.indexOf("{ts '2007-02-02 14:15:16") > -1);
 
-			// Test ANSI literals
-			exportFile.delete();
-			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=ansi -sourcetable=literal_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			assertEquals("Export file not created", true, exportFile.exists());
+		// Test ANSI literals
+		exportFile.delete();
+		result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=ansi -sourcetable=literal_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			in = new FileReader(exportFile);
-			script = FileUtil.readCharacters(in);
-			p = new ScriptParser(script);
-			sql = p.getCommand(0);
-			verb = SqlUtil.getSqlVerb(script);
-			assertEquals("Not an insert statement", "INSERT", verb);
-			assertEquals("ANSI Date literal not found", true, sql.indexOf("DATE '2006-01-01'") > -1);
-			assertEquals("ANSI Timestamp literal not found", true, sql.indexOf("TIMESTAMP '2007-02-02 14:15:16'") > -1);
+		in = new FileReader(exportFile);
+		script = FileUtil.readCharacters(in);
+		p = new ScriptParser(script);
+		sql = p.getCommand(0);
+		verb = SqlUtil.getSqlVerb(script);
+		assertEquals("Not an insert statement", "INSERT", verb);
+		assertEquals("ANSI Date literal not found", true, sql.indexOf("DATE '2006-01-01'") > -1);
+		assertEquals("ANSI Timestamp literal not found", true, sql.indexOf("TIMESTAMP '2007-02-02 14:15:16'") > -1);
 
-			// Test Standard literals
-			exportFile.delete();
-			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=standard -sourcetable=literal_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			assertEquals("Export file not created", true, exportFile.exists());
+		// Test Standard literals
+		exportFile.delete();
+		result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=standard -sourcetable=literal_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			in = new FileReader(exportFile);
-			script = FileUtil.readCharacters(in);
-			p = new ScriptParser(script);
-			sql = p.getCommand(0);
-			verb = SqlUtil.getSqlVerb(script);
-			assertEquals("Not an insert statement", "INSERT", verb);
-			assertEquals("STANDARD Date literal not found", true, sql.indexOf("'2006-01-01'") > -1);
-			assertEquals("STANDARD Timestamp literal not found", true, sql.indexOf("'2007-02-02 14:15:16'") > -1);
+		in = new FileReader(exportFile);
+		script = FileUtil.readCharacters(in);
+		p = new ScriptParser(script);
+		sql = p.getCommand(0);
+		verb = SqlUtil.getSqlVerb(script);
+		assertEquals("Not an insert statement", "INSERT", verb);
+		assertEquals("STANDARD Date literal not found", true, sql.indexOf("'2006-01-01'") > -1);
+		assertEquals("STANDARD Timestamp literal not found", true, sql.indexOf("'2007-02-02 14:15:16'") > -1);
 
-			// Test Oracle literals
-			exportFile.delete();
-			result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=Oracle -sourcetable=literal_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
-			assertEquals("Export file not created", true, exportFile.exists());
+		// Test Oracle literals
+		exportFile.delete();
+		result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sqlDateLiterals=Oracle -sourcetable=literal_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			in = new FileReader(exportFile);
-			script = FileUtil.readCharacters(in);
-			p = new ScriptParser(script);
-			sql = p.getCommand(0);
-			verb = SqlUtil.getSqlVerb(script);
+		in = new FileReader(exportFile);
+		script = FileUtil.readCharacters(in);
+		p = new ScriptParser(script);
+		sql = p.getCommand(0);
+		verb = SqlUtil.getSqlVerb(script);
 //			System.out.println("Statement=" + sql);
-			assertEquals("Not an insert statement", "INSERT", verb);
-			assertEquals("Oracle Date literal not found", true, sql.indexOf("to_date('2006-01-01'") > -1);
-			assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_date('2007-02-02 14:15:16'") > -1);
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-
+		assertEquals("Not an insert statement", "INSERT", verb);
+		assertEquals("Oracle Date literal not found", true, sql.indexOf("to_date('2006-01-01'") > -1);
+		assertEquals("Oracle Timestamp literal not found", true, sql.indexOf("to_date('2007-02-02 14:15:16'") > -1);
 	}
 
-	/**
-	 * Test if the -append parameter is working properly
-	 */
+	@Test
 	public void testAppend()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "export_append.txt");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "export_append.txt");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
-			// WbExport creates an empty line at the end plus the header line
-			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
+		assertEquals("Export file not created", true, exportFile.exists());
+		// WbExport creates an empty line at the end plus the header line
+		assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
 
-			result = exportCmd.execute("wbexport -append=true -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		result = exportCmd.execute("wbexport -append=true -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Wrong number of lines", (rowcount * 2) + 1, TestUtil.countLines(exportFile));
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
+		assertEquals("Wrong number of lines", (rowcount * 2) + 1, TestUtil.countLines(exportFile));
 	}
 
-	/**
-	 * Test if an invalid file results in an error message
-	 */
+	@Test
 	public void testInvalidFile()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File("/this/is/expected/to/fail/no_export.txt");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
-			assertEquals("Export did not fail", result.isSuccess(), false);
-//			System.out.println(result.getMessageBuffer().toString());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		File exportFile = new File("/this/is/expected/to/fail/no_export.txt");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test");
+		assertEquals("Export did not fail", result.isSuccess(), false);
 	}
 
-	/**
-	 * Test the export to compressed text files
-	 */
+	@Test
 	public void testTextExportCompressed()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "zip_text_export.txt");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test -compress=true");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "zip_text_export.txt");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=blob_test -compress=true");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			File zip = new File(this.basedir, "zip_text_export_lobs.zip");
-			assertEquals("Archive not created", true, zip.exists());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		File zip = new File(this.basedir, "zip_text_export_lobs.zip");
+		assertEquals("Archive not created", true, zip.exists());
 	}
 
-	/**
-	 * Test the export to compressed xml files
-	 */
+	@Test
 	public void testXmlExportCompressed()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "zip_xml_export.xml");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -sourcetable=blob_test -compress=true");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "zip_xml_export.xml");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -sourcetable=blob_test -compress=true");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			File zip = new File(this.basedir, "zip_xml_export_lobs.zip");
-			assertEquals("Archive not created", true, zip.exists());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		File zip = new File(this.basedir, "zip_xml_export_lobs.zip");
+		assertEquals("Archive not created", true, zip.exists());
 	}
 
+	@Test
 	public void testAlternateBlobExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "blob_export.txt");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobidcols=nr -sourcetable=blob_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "blob_export.txt");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -blobidcols=nr -sourcetable=blob_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("No export file created", true, exportFile.exists());
+		assertEquals("No export file created", true, exportFile.exists());
 
-			File bfile = new File(this.basedir, "blob_export_data_#1.data");
-			assertEquals("Blob data not exported", true, bfile.exists());
-			assertEquals("Wrong file size", 21378, bfile.length());
+		File bfile = new File(this.basedir, "blob_export_data_#1.data");
+		assertEquals("Blob data not exported", true, bfile.exists());
+		assertEquals("Wrong file size", 21378, bfile.length());
 
-			bfile = new File(this.basedir, "blob_export_data_#2.data");
-			assertEquals("Blob data not exported", true, bfile.exists());
-			assertEquals("Wrong file size", 7218, bfile.length());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		bfile = new File(this.basedir, "blob_export_data_#2.data");
+		assertEquals("Blob data not exported", true, bfile.exists());
+		assertEquals("Wrong file size", 7218, bfile.length());
 	}
 
+	@Test
 	public void testBlobEncoding()
 		throws Exception
 	{
@@ -564,41 +516,36 @@ public class WbExportTest
 
 	}
 
+	@Test
 	public void testBlobExtensionCol()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "blob_ext.txt");
+		File exportFile = new File(this.basedir, "blob_ext.txt");
 
-			StatementRunner runner = util.createConnectedStatementRunner(connection);
-			runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;");
-			StatementRunnerResult result = runner.getResult();
+		StatementRunner runner = util.createConnectedStatementRunner(connection);
+		runner.runStatement("wbexport -filenameColumn=fname -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true;");
+		StatementRunnerResult result = runner.getResult();
 //			System.out.println("**************\n" + result.getMessageBuffer().toString() + "\n**************");
-			runner.runStatement("select  \n" +
-             "   case \n" +
-             "     when nr = 1 then 'first.jpg' \n" +
-             "     when nr = 2 then 'second.gif' \n" +
-             "     else nr||'.data' \n" +
-             "   end as fname,  \n" +
-             "   data \n" +
-             "from blob_test ");
-			result = runner.getResult();
-			assertEquals("No export file created", true, exportFile.exists());
+		runner.runStatement("select  \n" +
+					 "   case \n" +
+					 "     when nr = 1 then 'first.jpg' \n" +
+					 "     when nr = 2 then 'second.gif' \n" +
+					 "     else nr||'.data' \n" +
+					 "   end as fname,  \n" +
+					 "   data \n" +
+					 "from blob_test ");
+		result = runner.getResult();
+		assertEquals("No export file created", true, exportFile.exists());
 
-			File bfile = new File(this.basedir, "first.jpg");
-			assertEquals("jpeg file not found", true, bfile.exists());
+		File bfile = new File(this.basedir, "first.jpg");
+		assertEquals("jpeg file not found", true, bfile.exists());
 
-			bfile = new File(this.basedir, "second.gif");
-			assertEquals("gif file not found", true, bfile.exists());
-			runner.done();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		bfile = new File(this.basedir, "second.gif");
+		assertEquals("gif file not found", true, bfile.exists());
+		runner.done();
 	}
 
+	@Test
 	public void testTextBlobExport()
 		throws Exception
 	{
@@ -618,19 +565,20 @@ public class WbExportTest
 			assertEquals("Blob data not exported", true, bfile.exists());
 			assertEquals("Wrong file size", 7218, bfile.length());
 		}
-		finally 
+		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
+	@Test
 	public void testBlobDistribution()
 		throws Exception
 	{
 		try
 		{
 			File exportFile = new File(this.basedir, "blob_export.txt");
-			TestUtil.executeScript(connection, 
+			TestUtil.executeScript(connection,
 				"INSERT INTO BLOB_TEST VALUES (3,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST VALUES (4,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST VALUES (5,'01010101');\n"	+
@@ -641,7 +589,7 @@ public class WbExportTest
 				"INSERT INTO BLOB_TEST VALUES (10,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST VALUES (11,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST VALUES (12,'01010101');\n"	+
-				"commit;\n"	+ 
+				"commit;\n"	+
 				"INSERT INTO BLOB_TEST2 VALUES (3,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST2 VALUES (4,'01010101');\n"	+
 				"INSERT INTO BLOB_TEST2 VALUES (5,'01010101');\n"	+
@@ -694,103 +642,87 @@ public class WbExportTest
 		}
 	}
 
+	@Test
 	public void testMultipleCompressedBlobExport()
+		throws Exception
 	{
-		try
-		{
-			File dir = new File(this.basedir);
-			StatementRunnerResult result = exportCmd.execute("wbexport -outputdir='" + dir.getAbsolutePath() + "' -type=text -header=true -compress=true -sourcetable=blob_test%");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File dir = new File(this.basedir);
+		StatementRunnerResult result = exportCmd.execute("wbexport -outputdir='" + dir.getAbsolutePath() + "' -type=text -header=true -compress=true -sourcetable=blob_test%");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			File f1 = new File(this.basedir, "blob_test.zip");
-			assertTrue("No export file created", f1.exists());
+		File f1 = new File(this.basedir, "blob_test.zip");
+		assertTrue("No export file created", f1.exists());
 
-			File f2 = new File(this.basedir, "blob_test2.zip");
-			assertTrue("No export file created", f2.exists());
+		File f2 = new File(this.basedir, "blob_test2.zip");
+		assertTrue("No export file created", f2.exists());
 
-			File bfile1 = new File(this.basedir, "blob_test_lobs.zip");
-			assertTrue("Blob data not exported", bfile1.exists());
+		File bfile1 = new File(this.basedir, "blob_test_lobs.zip");
+		assertTrue("Blob data not exported", bfile1.exists());
 
-			File bfile2 = new File(this.basedir, "blob_test2_lobs.zip");
-			assertTrue("Blob data not exported", bfile2.exists());
+		File bfile2 = new File(this.basedir, "blob_test2_lobs.zip");
+		assertTrue("Blob data not exported", bfile2.exists());
 
-			List<String> entries1 = ZipUtil.getFiles(bfile1);
-			assertEquals("Not enough blob entries", 2, entries1.size());
-			assertTrue("First blob not in ZIP Archive", entries1.contains("r1_c2.data"));
-			assertTrue("Second blob not in ZIP Archive", entries1.contains("r2_c2.data"));
+		List<String> entries1 = ZipUtil.getFiles(bfile1);
+		assertEquals("Not enough blob entries", 2, entries1.size());
+		assertTrue("First blob not in ZIP Archive", entries1.contains("r1_c2.data"));
+		assertTrue("Second blob not in ZIP Archive", entries1.contains("r2_c2.data"));
 
-			List<String> entries2 = ZipUtil.getFiles(bfile2);
-			assertEquals("Not enough blob entries", 2, entries2.size());
-			assertTrue("First blob not in ZIP Archive", entries2.contains("r1_c2.data"));
-			assertTrue("Second blob not in ZIP Archive", entries2.contains("r2_c2.data"));
+		List<String> entries2 = ZipUtil.getFiles(bfile2);
+		assertEquals("Not enough blob entries", 2, entries2.size());
+		assertTrue("First blob not in ZIP Archive", entries2.contains("r1_c2.data"));
+		assertTrue("Second blob not in ZIP Archive", entries2.contains("r2_c2.data"));
 
-			assertTrue("Could not delete file", f1.delete());
-			assertTrue("Could not delete file", f2.delete());
-			assertTrue("Could not delete file", bfile1.delete());
-			assertTrue("Could not delete file", bfile2.delete());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertTrue("Could not delete file", f1.delete());
+		assertTrue("Could not delete file", f2.delete());
+		assertTrue("Could not delete file", bfile1.delete());
+		assertTrue("Could not delete file", bfile2.delete());
 	}
 
+	@Test
 	public void testSingleExportWithDir()
+		throws Exception
 	{
-		try
-		{
-			StatementRunnerResult result = exportCmd.execute("wbexport -outputdir='" + basedir + "' -type=text -header=true -sourcetable=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		StatementRunnerResult result = exportCmd.execute("wbexport -outputdir='" + basedir + "' -type=text -header=true -sourcetable=junit_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			File exportFile = new File(this.basedir, "junit_test.txt");
-			assertEquals("Export file not created", true, exportFile.exists());
-			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		File exportFile = new File(this.basedir, "junit_test.txt");
+		assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
 	}
 
+	@Test
 	public void testTextExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "export.txt");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test -formatFile=oracle,sqlserver");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "export.txt");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=junit_test -formatFile=oracle,sqlserver");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
-			assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
+		assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Wrong number of lines", rowcount + 1, TestUtil.countLines(exportFile));
 
-			File ctl = new File(this.basedir, "export.ctl");
-			assertEquals("Control file not created", true, ctl.exists());
+		File ctl = new File(this.basedir, "export.ctl");
+		assertEquals("Control file not created", true, ctl.exists());
 
-			List<String> lines = TestUtil.readLines(ctl);
+		List<String> lines = TestUtil.readLines(ctl);
 //			System.out.println("first line: " + lines.get(0));
-			assertTrue(lines.get(0).startsWith("--"));
-			assertTrue(lines.get(1).indexOf("skip=1") > -1);
+		assertTrue(lines.get(0).startsWith("--"));
+		assertTrue(lines.get(1).indexOf("skip=1") > -1);
 
-			File bcp = new File(this.basedir, "export.fmt");
-			assertEquals("BCP format file not created", true, bcp.exists());
-			lines = TestUtil.readLines(bcp);
-			assertEquals("7.0", lines.get(0));
-			assertEquals("3", lines.get(1));
-			assertTrue(lines.get(2).indexOf(" NR") > -1);
-			assertTrue(lines.get(2).indexOf(" \"\\t\"") > -1);
-			assertTrue(lines.get(3).indexOf(" FIRSTNAME") > -1);
-			assertTrue(lines.get(4).indexOf(" LASTNAME") > -1);
-			assertTrue(lines.get(4).indexOf(" \"\\n\"") > -1);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		File bcp = new File(this.basedir, "export.fmt");
+		assertEquals("BCP format file not created", true, bcp.exists());
+		lines = TestUtil.readLines(bcp);
+		assertEquals("7.0", lines.get(0));
+		assertEquals("3", lines.get(1));
+		assertTrue(lines.get(2).indexOf(" NR") > -1);
+		assertTrue(lines.get(2).indexOf(" \"\\t\"") > -1);
+		assertTrue(lines.get(3).indexOf(" FIRSTNAME") > -1);
+		assertTrue(lines.get(4).indexOf(" LASTNAME") > -1);
+		assertTrue(lines.get(4).indexOf(" \"\\n\"") > -1);
+
 	}
 
+	@Test
 	public void testTableWhere()
 		throws Exception
 	{
@@ -811,47 +743,41 @@ public class WbExportTest
 	}
 
 
+	@Test
 	public void testXmlClobExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "export.xml");
-			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
-			String data1 = "This is the first clob content";
-			stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
-			String data2 = "This is the second clob content";
-			stmt.executeUpdate("insert into clob_test values (2, '" +  data2+ "')");
-			connection.commit();
-			stmt.close();
+		File exportFile = new File(this.basedir, "export.xml");
+		Statement stmt = connection.createStatement();
+		stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
+		String data1 = "This is the first clob content";
+		stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
+		String data2 = "This is the second clob content";
+		stmt.executeUpdate("insert into clob_test values (2, '" +  data2+ "')");
+		connection.commit();
+		stmt.close();
 
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -header=true -sourcetable=clob_test -clobAsFile=true");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=xml -header=true -sourcetable=clob_test -clobAsFile=true");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			File dataFile1 = new File(this.basedir, "export_r1_c2.data");
-			assertEquals("Clob file not created", true, dataFile1.exists());
+		File dataFile1 = new File(this.basedir, "export_r1_c2.data");
+		assertEquals("Clob file not created", true, dataFile1.exists());
 
-			File dataFile2 = new File(this.basedir, "export_r2_c2.data");
-			assertEquals("Clob file not created", true, dataFile2.exists());
+		File dataFile2 = new File(this.basedir, "export_r2_c2.data");
+		assertEquals("Clob file not created", true, dataFile2.exists());
 
-			Reader in = EncodingUtil.createReader(dataFile1, "UTF-8");
-			String content = FileUtil.readCharacters(in);
-			assertEquals("Wrong clob content exported", data1, content);
-			in = EncodingUtil.createReader(dataFile2, "UTF-8");
-			content = FileUtil.readCharacters(in);
-			assertEquals("Wrong clob content exported", data2, content);
-
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		Reader in = EncodingUtil.createReader(dataFile1, "UTF-8");
+		String content = FileUtil.readCharacters(in);
+		assertEquals("Wrong clob content exported", data1, content);
+		in = EncodingUtil.createReader(dataFile2, "UTF-8");
+		content = FileUtil.readCharacters(in);
+		assertEquals("Wrong clob content exported", data2, content);
 	}
 
 
+	@Test
 	public void testDataModifier()
 		throws Exception
 	{
@@ -877,318 +803,270 @@ public class WbExportTest
 		assertEquals("1\tthis is a test", content.trim());
 	}
 
+	@Test
 	public void testTextClobExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "export.txt");
-			Statement stmt = connection.createStatement();
-			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
-			String data1 = "This is the first clob content";
-			stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
-			String data2 = "This is the second clob content";
-			stmt.executeUpdate("insert into clob_test values (2, '" +  data2+ "')");
-			connection.commit();
-			stmt.close();
+		File exportFile = new File(this.basedir, "export.txt");
+		Statement stmt = connection.createStatement();
+		stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
+		String data1 = "This is the first clob content";
+		stmt.executeUpdate("insert into clob_test values (1, '" +  data1+ "')");
+		String data2 = "This is the second clob content";
+		stmt.executeUpdate("insert into clob_test values (2, '" +  data2+ "')");
+		connection.commit();
+		stmt.close();
 
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true -writeOracleLoader=true");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=text -header=true -sourcetable=clob_test -clobAsFile=true -writeOracleLoader=true");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			File dataFile1 = new File(this.basedir, "export_r1_c2.data");
-			assertEquals("Clob file not created", true, dataFile1.exists());
+		File dataFile1 = new File(this.basedir, "export_r1_c2.data");
+		assertEquals("Clob file not created", true, dataFile1.exists());
 
-			File dataFile2 = new File(this.basedir, "export_r2_c2.data");
-			assertEquals("Clob file not created", true, dataFile2.exists());
+		File dataFile2 = new File(this.basedir, "export_r2_c2.data");
+		assertEquals("Clob file not created", true, dataFile2.exists());
 
-			Reader in = EncodingUtil.createReader(dataFile1, "UTF-8");
-			String content = FileUtil.readCharacters(in);
-			assertEquals("Wrong clob content exported", data1, content);
-			in = EncodingUtil.createReader(dataFile2, "UTF-8");
-			content = FileUtil.readCharacters(in);
-			assertEquals("Wrong clob content exported", data2, content);
+		Reader in = EncodingUtil.createReader(dataFile1, "UTF-8");
+		String content = FileUtil.readCharacters(in);
+		assertEquals("Wrong clob content exported", data1, content);
+		in = EncodingUtil.createReader(dataFile2, "UTF-8");
+		content = FileUtil.readCharacters(in);
+		assertEquals("Wrong clob content exported", data2, content);
 
-			File ctl = new File(this.basedir, "export.ctl");
-			assertEquals("Oracle loader file not written", true, ctl.exists());
+		File ctl = new File(this.basedir, "export.ctl");
+		assertEquals("Oracle loader file not written", true, ctl.exists());
 
-			// Now check if the SQL*Loader file contains the correct
-			// syntax to load the external files.
-			FileReader fr = new FileReader(ctl);
-			String ctlfile = FileUtil.readCharacters(fr);
+		// Now check if the SQL*Loader file contains the correct
+		// syntax to load the external files.
+		FileReader fr = new FileReader(ctl);
+		String ctlfile = FileUtil.readCharacters(fr);
 
-			int pos = ctlfile.indexOf("lob_file_clob_data FILLER");
-			assertEquals("FILLER not found", true, pos > -1);
-			pos = ctlfile.indexOf("CLOB_DATA LOBFILE(lob_file_clob_data)");
-			assertEquals("File statement not found", true, pos > -1);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		int pos = ctlfile.indexOf("lob_file_clob_data FILLER");
+		assertEquals("FILLER not found", true, pos > -1);
+		pos = ctlfile.indexOf("CLOB_DATA LOBFILE(lob_file_clob_data)");
+		assertEquals("File statement not found", true, pos > -1);
 	}
 
+	@Test
 	public void testExportWithSelect()
+		throws Exception
 	{
-		try
-		{
-			File script = new File(this.basedir, "export.sql");
-			File output = new File(this.basedir, "test.txt");
-			PrintWriter writer = new PrintWriter(script);
-			writer.println("wbexport -file='" + output.getAbsolutePath() + "' -type=text -header=true;");
-			writer.println("select * from junit_test;");
-			writer.close();
+		File script = new File(this.basedir, "export.sql");
+		File output = new File(this.basedir, "test.txt");
+		PrintWriter writer = new PrintWriter(script);
+		writer.println("wbexport -file='" + output.getAbsolutePath() + "' -type=text -header=true;");
+		writer.println("select * from junit_test;");
+		writer.close();
 
-			BatchRunner runner = new BatchRunner(script.getAbsolutePath());
-			// this is a workaround for a bug in NetBeans 6.7
-			// which gets confused when running JUnit tests that
-			// output a '\r' character to standard out.
-			runner.setVerboseLogging(false);
-			runner.setShowProgress(false);
+		BatchRunner runner = new BatchRunner(script.getAbsolutePath());
+		// this is a workaround for a bug in NetBeans 6.7
+		// which gets confused when running JUnit tests that
+		// output a '\r' character to standard out.
+		runner.setVerboseLogging(false);
+		runner.setShowProgress(false);
 
 
-			runner.setBaseDir(this.basedir);
-			runner.setConnection(this.connection);
-			runner.execute();
-			assertEquals("Script not executed", true, runner.isSuccess());
-			assertEquals("Export file not created", true, output.exists());
+		runner.setBaseDir(this.basedir);
+		runner.setConnection(this.connection);
+		runner.execute();
+		assertEquals("Script not executed", true, runner.isSuccess());
+		assertEquals("Export file not created", true, output.exists());
 
-			int lines = TestUtil.countLines(output);
-			assertEquals("Not enough lines", rowcount + 1, lines);
+		int lines = TestUtil.countLines(output);
+		assertEquals("Not enough lines", rowcount + 1, lines);
 
-			boolean deleted = output.delete();
-			assertEquals("Export file is still locked", true, deleted);
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		boolean deleted = output.delete();
+		assertEquals("Export file is still locked", true, deleted);
 	}
 
+	@Test
 	public void testSqlClobExport()
+		throws Exception
 	{
-		try
-		{
-			Statement stmt = this.connection.createStatement();
-			stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
-			stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (1, 'First clob')");
-			stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (2, 'Second clob')");
-			this.connection.commit();
-			stmt.close();
+		Statement stmt = this.connection.createStatement();
+		stmt.executeUpdate("CREATE MEMORY TABLE clob_test(nr integer, clob_data CLOB)");
+		stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (1, 'First clob')");
+		stmt.executeUpdate("INSERT INTO clob_test (nr, clob_data) values (2, 'Second clob')");
+		this.connection.commit();
+		stmt.close();
 
-			File exportFile = new File(this.basedir, "clob_export.sql");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=clob_test -clobAsFile=true -encoding=utf8");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "clob_export.sql");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=clob_test -clobAsFile=true -encoding=utf8");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			File dataFile = new File(this.basedir, "clob_export_r1_c2.data");
-			assertEquals("First blob file not created", true, dataFile.exists());
+		File dataFile = new File(this.basedir, "clob_export_r1_c2.data");
+		assertEquals("First blob file not created", true, dataFile.exists());
 
-			Reader in = EncodingUtil.createReader(dataFile, "UTF8");
-			String contents = FileUtil.readCharacters(in);
-			assertEquals("Wrong first clob content", "First clob", contents);
+		Reader in = EncodingUtil.createReader(dataFile, "UTF8");
+		String contents = FileUtil.readCharacters(in);
+		assertEquals("Wrong first clob content", "First clob", contents);
 
-			dataFile = new File(this.basedir, "clob_export_r2_c2.data");
-			assertEquals("Second blob file not created", true, dataFile.exists());
-			in = EncodingUtil.createReader(dataFile, "UTF8");
-			contents = FileUtil.readCharacters(in);
-			assertEquals("Wrong second clob content", "Second clob", contents);
+		dataFile = new File(this.basedir, "clob_export_r2_c2.data");
+		assertEquals("Second blob file not created", true, dataFile.exists());
+		in = EncodingUtil.createReader(dataFile, "UTF8");
+		contents = FileUtil.readCharacters(in);
+		assertEquals("Wrong second clob content", "Second clob", contents);
 
-			ScriptParser p = new ScriptParser(1024*1024);
-			p.setFile(exportFile);
+		ScriptParser p = new ScriptParser(1024*1024);
+		p.setFile(exportFile);
 
-			assertEquals("Wrong number of statements", 3, p.getSize());
-			String sql = p.getCommand(0);
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("Not an insert file", "INSERT", verb);
+		assertEquals("Wrong number of statements", 3, p.getSize());
+		String sql = p.getCommand(0);
+		String verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("Not an insert file", "INSERT", verb);
 
-			LobFileStatement lob = new LobFileStatement(sql, this.basedir);
-			assertEquals("No parameter detected", 1, lob.getParameterCount());
+		LobFileStatement lob = new LobFileStatement(sql, this.basedir);
+		assertEquals("No parameter detected", 1, lob.getParameterCount());
 
-			LobFileParameter[] parms = lob.getParameters();
-			assertNotNull("No encoding found in parameter", parms[0].getEncoding());
-			assertEquals("Wrong parameter", "UTF8", parms[0].getEncoding().toUpperCase());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		LobFileParameter[] parms = lob.getParameters();
+		assertNotNull("No encoding found in parameter", parms[0].getEncoding());
+		assertEquals("Wrong parameter", "UTF8", parms[0].getEncoding().toUpperCase());
 	}
 
+	@Test
 	public void testSqlBlobExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "blob_export.sql");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=blob_test -blobtype=file");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "blob_export.sql");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sql -sourcetable=blob_test -blobtype=file");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			File dataFile = new File(this.basedir, "blob_export_r1_c2.data");
-			assertEquals("First blob file not created", true, dataFile.exists());
+		File dataFile = new File(this.basedir, "blob_export_r1_c2.data");
+		assertEquals("First blob file not created", true, dataFile.exists());
 
-			dataFile = new File(this.basedir, "blob_export_r2_c2.data");
-			assertEquals("Second blob file not created", true, dataFile.exists());
+		dataFile = new File(this.basedir, "blob_export_r2_c2.data");
+		assertEquals("Second blob file not created", true, dataFile.exists());
 
-			ScriptParser p = new ScriptParser(1024*1024);
-			p.setFile(exportFile);
+		ScriptParser p = new ScriptParser(1024*1024);
+		p.setFile(exportFile);
 
-			assertEquals("Wrong number of statements", 3, p.getSize());
-			String sql = p.getCommand(0);
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("Not an insert file", "INSERT", verb);
+		assertEquals("Wrong number of statements", 3, p.getSize());
+		String sql = p.getCommand(0);
+		String verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("Not an insert file", "INSERT", verb);
 
-			LobFileStatement lob = new LobFileStatement(sql, this.basedir);
-			assertEquals("No BLOB parameter detected", 1, lob.getParameterCount());
+		LobFileStatement lob = new LobFileStatement(sql, this.basedir);
+		assertEquals("No BLOB parameter detected", 1, lob.getParameterCount());
 
-			LobFileParameter[] parms = lob.getParameters();
-			assertEquals("Wrong parameter", true, parms[0].isBinary());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		LobFileParameter[] parms = lob.getParameters();
+		assertEquals("Wrong parameter", true, parms[0].isBinary());
 	}
 
+	@Test
 	public void testSqlUpdateExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "update_export.sql");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlupdate -sourcetable=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "update_export.sql");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlupdate -sourcetable=junit_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			ScriptParser p = new ScriptParser(1024*1024);
-			p.setFile(exportFile);
+		ScriptParser p = new ScriptParser(1024*1024);
+		p.setFile(exportFile);
 
-			assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
-			String sql = p.getCommand(0);
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("Not an insert file", "UPDATE", verb);
-			String table = SqlUtil.getUpdateTable(sql);
-			assertNotNull("No insert table found", table);
-			assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
+		String sql = p.getCommand(0);
+		String verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("Not an insert file", "UPDATE", verb);
+		String table = SqlUtil.getUpdateTable(sql);
+		assertNotNull("No insert table found", table);
+		assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
 	}
 
-
+	@Test
 	public void testSqlDeleteInsertExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "delete_insert_export.sql");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqldeleteinsert -sourcetable=junit_test");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "delete_insert_export.sql");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqldeleteinsert -sourcetable=junit_test");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			ScriptParser p = new ScriptParser(1024*1024);
-			p.setFile(exportFile);
+		ScriptParser p = new ScriptParser(1024*1024);
+		p.setFile(exportFile);
 
-			assertEquals("Wrong number of statements", (rowcount * 2) + 1, p.getSize());
-			String sql = p.getCommand(0);
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("No DELETE as the first statement", "DELETE", verb);
+		assertEquals("Wrong number of statements", (rowcount * 2) + 1, p.getSize());
+		String sql = p.getCommand(0);
+		String verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("No DELETE as the first statement", "DELETE", verb);
 
-			String table = SqlUtil.getDeleteTable(sql);
-			assertNotNull("No DELETE table found", table);
-			assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
+		String table = SqlUtil.getDeleteTable(sql);
+		assertNotNull("No DELETE table found", table);
+		assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
 
-			sql = p.getCommand(1);
-			verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("No INSERT as the second statement", "INSERT", verb);
-			table = SqlUtil.getInsertTable(sql);
-			assertNotNull("No INSERT table found", table);
-			assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		sql = p.getCommand(1);
+		verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("No INSERT as the second statement", "INSERT", verb);
+		table = SqlUtil.getInsertTable(sql);
+		assertNotNull("No INSERT table found", table);
+		assertEquals("Wrong target table", "JUNIT_TEST", table.toUpperCase());
 	}
 
+	@Test
 	public void testSqlInsertExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "insert_export.sql");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -table=other_table");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "insert_export.sql");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -table=other_table");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			ScriptParser p = new ScriptParser(1024*1024);
-			p.setFile(exportFile);
+		ScriptParser p = new ScriptParser(1024*1024);
+		p.setFile(exportFile);
 
-			assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
-			String sql = p.getCommand(0);
-			String verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("Not an insert file", "INSERT", verb);
-			String table = SqlUtil.getInsertTable(sql);
-			assertNotNull("No insert table found", table);
-			assertEquals("Wrong target table", "OTHER_TABLE", table.toUpperCase());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertEquals("Wrong number of statements", rowcount + 1, p.getSize());
+		String sql = p.getCommand(0);
+		String verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("Not an insert file", "INSERT", verb);
+		String table = SqlUtil.getInsertTable(sql);
+		assertNotNull("No insert table found", table);
+		assertEquals("Wrong target table", "OTHER_TABLE", table.toUpperCase());
 	}
 
+	@Test
 	public void testSqlInsertCreateTableExport()
+		throws Exception
 	{
-		try
-		{
-			File exportFile = new File(this.basedir, "insert_export.sql");
-			StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -createTable=true -table=OTHER_TABLE");
-			assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
+		File exportFile = new File(this.basedir, "insert_export.sql");
+		StatementRunnerResult result = exportCmd.execute("wbexport -file='" + exportFile.getAbsolutePath() + "' -type=sqlinsert -sourcetable=junit_test -createTable=true -table=OTHER_TABLE");
+		assertEquals("Export failed: " + result.getMessageBuffer().toString(), result.isSuccess(), true);
 
-			assertEquals("Export file not created", true, exportFile.exists());
+		assertEquals("Export file not created", true, exportFile.exists());
 
-			ScriptParser p = new ScriptParser(1024*1024);
-			p.setFile(exportFile);
+		ScriptParser p = new ScriptParser(1024*1024);
+		p.setFile(exportFile);
 
-			assertEquals("Wrong number of statements", rowcount + 3, p.getSize());
-			String sql = p.getCommand(0);
-			String verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("Wrong number of statements", rowcount + 3, p.getSize());
+		String sql = p.getCommand(0);
+		String verb = SqlUtil.getSqlVerb(sql);
 
-			// first verb must be the CREATE TABLE statement
-			assertEquals("Not a CREATE TABLE statement", "CREATE", verb);
+		// first verb must be the CREATE TABLE statement
+		assertEquals("Not a CREATE TABLE statement", "CREATE", verb);
 
-			sql = p.getCommand(1);
-			verb = SqlUtil.getSqlVerb(sql);
-			// then we expect the ALTER TABLE statement to define the primary key
-			assertEquals("Not an ALTER TABLE statement", "ALTER", verb);
+		sql = p.getCommand(1);
+		verb = SqlUtil.getSqlVerb(sql);
+		// then we expect the ALTER TABLE statement to define the primary key
+		assertEquals("Not an ALTER TABLE statement", "ALTER", verb);
 
-			sql = p.getCommand(2);
-			verb = SqlUtil.getSqlVerb(sql);
-			assertEquals("Not an insert file", "INSERT", verb);
+		sql = p.getCommand(2);
+		verb = SqlUtil.getSqlVerb(sql);
+		assertEquals("Not an insert file", "INSERT", verb);
 
-			String table = SqlUtil.getInsertTable(sql);
-			assertNotNull("No insert table found", table);
-			assertEquals("Wrong target table", "OTHER_TABLE", table.toUpperCase());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String table = SqlUtil.getInsertTable(sql);
+		assertNotNull("No insert table found", table);
+		assertEquals("Wrong target table", "OTHER_TABLE", table.toUpperCase());
 	}
 
+	@Test
 	public void testXmlBlobEncoding()
 		throws Exception
 	{
@@ -1211,10 +1089,9 @@ public class WbExportTest
 		{
 			assertTrue(blob.startsWith("/9j/4AAQSkZJRgABAQEBLAEsAAD/2"));
 		}
-
-
 	}
 
+	@Test
 	public void testXmlExport()
 		throws Exception
 	{
@@ -1247,6 +1124,7 @@ public class WbExportTest
 		}
 	}
 
+	@Test
 	public void testExcludeTables()
 		throws Exception
 	{
@@ -1273,7 +1151,7 @@ public class WbExportTest
 		assertEquals(1, count);
 	}
 
-
+	@Test
 	public void testEmptyWithAppend()
 		throws Exception
 	{
@@ -1288,7 +1166,7 @@ public class WbExportTest
 			assertFalse(f.exists());
 	}
 
-
+	@Test
 	public void testEmptyResult()
 		throws Exception
 	{

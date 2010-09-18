@@ -11,20 +11,17 @@
  */
 package workbench.util;
 
-import junit.framework.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class WbFileTest extends TestCase
+public class WbFileTest
 {
-	
-	public WbFileTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetFileName()
 	{
 		WbFile f = new WbFile("test.dat");
@@ -37,6 +34,7 @@ public class WbFileTest extends TestCase
 		assertEquals("Wrong filename returned", "test", f.getFileName());
 	}
 
+	@Test
 	public void testGetExtension()
 	{
 		WbFile f = new WbFile("test.dat");

@@ -14,28 +14,26 @@ package workbench.util;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  *
- * @author thomas
+ * @author Thomas Kellerer
  */
 public class WbPropertiesTest
-	extends TestCase
+	extends WbTestCase
 	implements PropertyChangeListener
 {
   private String changedProperty = null;
 
-	public WbPropertiesTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testMultiLine()
 		throws Exception
 	{
-		TestUtil util = new TestUtil(this.getName());
+		TestUtil util = getTestUtil();
 
 		File file = new File(util.getBaseDir(), "multiline.properties");
 		TestUtil.writeFile(file,
@@ -56,11 +54,12 @@ public class WbPropertiesTest
 		newprops.loadTextFile(newfile.getAbsolutePath());
 		assertEquals("value1 \nvalue2", newprops.getProperty("key1"));
 	}
-	
+
+	@Test
 	public void testComments()
 		throws Exception
 	{
-		TestUtil util = new TestUtil(this.getName());
+		TestUtil util = getTestUtil();
 
 		File file = new File(util.getBaseDir(), "myprops.properties");
 		TestUtil.writeFile(file,
@@ -112,6 +111,7 @@ public class WbPropertiesTest
 		assertEquals("#", props.getProperty("key6"));
 	}
 
+	@Test
 	public void testChangeNotification()
 	{
     WbProperties props = new WbProperties();
@@ -121,7 +121,7 @@ public class WbPropertiesTest
     changedProperty = null;
     props.setProperty("test.property", "blub");
     assertEquals("test.property", changedProperty);
-    
+
     changedProperty = null;
     props.setProperty("test2.property", "nothing");
     assertEquals("test2.property", changedProperty);

@@ -12,27 +12,23 @@
 package workbench.storage;
 
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.TableIdentifier;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class PkMappingTest
-	extends TestCase
 {
 
-	public PkMappingTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testMapping()
 	{
-		TestUtil util = new TestUtil(getName());
+		TestUtil util = new TestUtil("PkMappingTest");
 		WbFile f = new WbFile(util.getBaseDir(), "mapping_test.properties");
 		PkMapping map = new PkMapping(f.getFullPath());
 		TableIdentifier tbl = new TableIdentifier("PERSON");
@@ -43,5 +39,4 @@ public class PkMappingTest
 		assertEquals(1, col.size());
 		assertEquals("id", col.get(0));
 	}
-
 }

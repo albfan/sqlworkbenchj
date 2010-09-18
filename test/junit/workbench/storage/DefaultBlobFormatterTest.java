@@ -12,19 +12,16 @@
 package workbench.storage;
 
 import java.io.ByteArrayOutputStream;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class DefaultBlobFormatterTest
-	extends TestCase
 {
-	public DefaultBlobFormatterTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetBlobLiteral()
 		throws Exception
 	{
@@ -60,7 +57,7 @@ public class DefaultBlobFormatterTest
 		formatter.setSuffix("'))");
 		literal = formatter.getBlobLiteral(blob);
 		assertEquals("Wrong literal created", "to_lob(utl_raw.cast_to_raw('0xFF00100F'))", literal);
-		
+
 		formatter.setUseUpperCase(false);
 		formatter.setPrefix(null);
 		formatter.setSuffix(null);

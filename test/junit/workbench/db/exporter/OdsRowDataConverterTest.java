@@ -11,6 +11,8 @@
  */
 package workbench.db.exporter;
 
+import org.junit.Test;
+import workbench.WbTestCase;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Types;
@@ -18,27 +20,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.FileUtil;
 import workbench.util.ValueConverter;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class OdsRowDataConverterTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public OdsRowDataConverterTest(String testName)
+	public OdsRowDataConverterTest()
 	{
-		super(testName);
+		super("OdsRowDataConverterTest");
 	}
 
+	@Test
 	public void testColumnToName()
 	{
 		OdsRowDataConverter converter = new OdsRowDataConverter();
@@ -54,6 +57,7 @@ public class OdsRowDataConverterTest
 		assertEquals("AMJ", converter.columnToName(1024));
 	}
 	
+	@Test
 	public void testConvert()
 		throws Exception
 	{

@@ -14,27 +14,28 @@ package workbench.db.importer;
 import java.io.File;
 import java.io.FileWriter;
 import java.sql.Types;
-import junit.framework.TestCase;
+import org.junit.Test;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.gui.dialogs.dataimport.ImportOptions;
 import workbench.gui.dialogs.dataimport.TextImportOptions;
 import workbench.storage.DataStore;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DataStoreImporterTest 
-	extends TestCase
+	extends WbTestCase
 {
 	private TestUtil util;
 	
-	public DataStoreImporterTest(String testName)
+	public DataStoreImporterTest()
 		throws Exception
 	{
-		super(testName);
-		util = new TestUtil(testName);
-		util.prepareEnvironment();
+		super();
+		util = getTestUtil();
 	}
 
 	private DataStore prepareDataStore()
@@ -46,7 +47,8 @@ public class DataStoreImporterTest
 		DataStore ds = new DataStore(cols, types, sizes);
 		return ds;
 	}
-	
+
+	@Test
 	public void testImportFile()
 	{
 		try
@@ -77,8 +79,9 @@ public class DataStoreImporterTest
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
 	}
+	
+	@Test
 	public void testImportString()
 	{
 		try

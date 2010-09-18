@@ -11,42 +11,45 @@
  */
 package workbench.db.compare;
 
+import org.junit.Test;
+import org.junit.Before;
+import workbench.WbTestCase;
 import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableDeleteSyncTest
-	extends TestCase
+	extends WbTestCase
 {
 	private WbConnection source;
 	private WbConnection target;
-	private TestUtil util;
 	private int rowCount = 127;
 	private int toDelete = 53;
+	private TestUtil util;
 	
-	public TableDeleteSyncTest(String testName)
+	public TableDeleteSyncTest()
 	{
-		super(testName);
-		util	= new TestUtil("syncDelete");
+		super("syncDelete");
+		util = getTestUtil();
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		Statement sourceStmt = null;
 		Statement targetStmt = null;
+		
 		try
 		{
 			source = util.getConnection("sync_delete_reference");
@@ -88,7 +91,8 @@ public class TableDeleteSyncTest
 			SqlUtil.closeStatement(targetStmt);
 		}
 	}
-	
+
+	@Test
 	public void testDeleteTarget()
 		throws Exception
 	{
@@ -117,6 +121,7 @@ public class TableDeleteSyncTest
 		
 	}
 
+	@Test
 	public void testCreateScript()
 		throws Exception
 	{

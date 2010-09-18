@@ -14,22 +14,18 @@ package workbench.sql.macros;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import javax.swing.KeyStroke;
-import junit.framework.TestCase;
 import workbench.resource.StoreableKeyStroke;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class MacroDefinitionTest
-	extends TestCase
 {
 
-	public MacroDefinitionTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testCreateCopy()
 	{
 		MacroDefinition macro = new MacroDefinition("test", "select 42 from dual");

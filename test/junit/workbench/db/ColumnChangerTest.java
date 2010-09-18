@@ -13,6 +13,10 @@ package workbench.db;
 
 import java.util.List;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -22,11 +26,13 @@ public class ColumnChangerTest
 	extends WbTestCase
 {
 
-	public ColumnChangerTest(String testName)
+	public ColumnChangerTest()
 	{
-		super(testName);
+		super();
+		prepare();
 	}
 
+	@Test
 	public void testPostgres()
 	{
 		DbSettings settings = new DbSettings("postgresql", "PostgreSQL");
@@ -87,7 +93,7 @@ public class ColumnChangerTest
 		assertEquals("COMMENT ON COLUMN PERSON.PERSON_HOBBY IS 'new comment'", sqls.get(1).trim());
 	}
 
-
+	@Test
 	public void testOracle()
 	{
 		DbSettings settings = new DbSettings("oracle", "Oracle");

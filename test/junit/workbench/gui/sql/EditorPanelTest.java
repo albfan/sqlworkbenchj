@@ -12,7 +12,6 @@
 package workbench.gui.sql;
 
 import java.awt.event.ActionEvent;
-import junit.framework.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,41 +19,30 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.gui.editor.InputHandler;
 import workbench.resource.Settings;
 import workbench.util.CharacterRange;
 import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
-public class EditorPanelTest extends TestCase
+public class EditorPanelTest
+	extends WbTestCase
 {
 	private TestUtil util;
-	
-	public EditorPanelTest(String testName)
+
+	public EditorPanelTest()
 	{
-		super(testName);
-		util = new TestUtil(testName);
-		try
-		{
-			util.prepareEnvironment();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail();
-		}
+		super("EditorPanelTest");
+		util = getTestUtil();
 	}
-	
-	protected void setUp() throws Exception
-	{
-		super.setUp();
-		util.emptyBaseDirectory();
-	}
-	
+
 	private int writeTestFile(File f, String nl)
 		throws IOException
 	{
@@ -68,8 +56,8 @@ public class EditorPanelTest extends TestCase
 		w.close();
 		return count;
 	}
-	
-	public void _testSaveFile()
+
+	public void testSaveFile()
 	{
 		String dir = util.getBaseDir();
 		try
@@ -79,7 +67,7 @@ public class EditorPanelTest extends TestCase
 
 			set.setExternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
 			set.setInternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
-			
+
 			ActionEvent evt = new ActionEvent(p,1,"break");
 			p.setAutoIndent(false);
 			p.appendLine("Line1");
@@ -92,21 +80,21 @@ public class EditorPanelTest extends TestCase
 			String content = p.getText();
 			int pos = content.indexOf("Line2\r\n");
 			assertEquals("Wrong internal line ending (DOS) used", 7, pos);
-			
+
 			File f = new File(dir, "editor_unx.txt");
 			f.delete();
 			p.saveFile(f, "UTF-8", "\n");
-			
+
 			Reader r = EncodingUtil.createReader(f, "UTF-8");
 			content = FileUtil.readCharacters(r);
 			f.delete();
-			
+
 			pos = content.indexOf("Line2\n");
 			assertEquals("Wrong external line ending (Unix) used", 6, pos);
-			
+
 			set.setExternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
 			set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
-			
+
 			p = EditorPanel.createTextEditor();
 			evt = new ActionEvent(p,1,"break");
 			p.setAutoIndent(false);
@@ -120,16 +108,16 @@ public class EditorPanelTest extends TestCase
 			content = p.getText();
 			System.out.println(StringUtil.escapeUnicode(content, CharacterRange.RANGE_8BIT));
 			pos = content.indexOf("Line2\n");
-			assertEquals("Wrong internal line ending (Unix) used", 6, pos);			
-			
+			assertEquals("Wrong internal line ending (Unix) used", 6, pos);
+
 			f = new File(dir, "editor_dos.txt");
 			f.delete();
 			p.saveFile(f, "UTF-8", "\r\n");
 			r = EncodingUtil.createReader(f, "UTF-8");
 			content = FileUtil.readCharacters(r);
-			
+
 			pos = content.indexOf("Line2\r\n");
-			assertEquals("Wrong exteranl line ending (DOS) used", 7, pos);			
+			assertEquals("Wrong exteranl line ending (DOS) used", 7, pos);
 		}
 		catch (Exception e)
 		{
@@ -137,7 +125,8 @@ public class EditorPanelTest extends TestCase
 			fail("Error loading file");
 		}
 	}
-	
+
+	@Test
 	public void testReadFile()
 	{
 		String dir = util.getBaseDir();
@@ -149,17 +138,17 @@ public class EditorPanelTest extends TestCase
 			//set.setInternalEditorLineEnding(Settings.UNIX_LINE_TERMINATOR_PROP_VALUE);
 			EditorPanel p = EditorPanel.createTextEditor();
 			int lines = writeTestFile(f, "\n");
-			
+
 			p.readFile(f, "UTF-8");
 			assertEquals("File not loaded", true, p.hasFileLoaded());
 			assertEquals("Wrong line count", lines + 1, p.getLineCount());
 
 			p.dispose();
-			
+
 			set.setInternalEditorLineEnding(Settings.DOS_LINE_TERMINATOR_PROP_VALUE);
 			p = EditorPanel.createTextEditor();
 			lines = writeTestFile(f, "\r\n");
-			
+
 			p.readFile(f, "UTF-8");
 			assertEquals("File not loaded", true, p.hasFileLoaded());
 			assertEquals("Wrong line count", lines + 1, p.getLineCount());

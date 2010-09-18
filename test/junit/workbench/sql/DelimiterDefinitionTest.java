@@ -10,20 +10,17 @@
  *
  */
 package workbench.sql;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author thomas
  */
-public class DelimiterDefinitionTest 
-	extends junit.framework.TestCase
+public class DelimiterDefinitionTest
 {
-	
-	public DelimiterDefinitionTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testTerminatesScript()
 	{
 		try
@@ -49,6 +46,8 @@ public class DelimiterDefinitionTest
 			fail(e.getMessage());
 		}
 	}
+
+	@Test
 	public void testDelimiter()
 	{
 		try
@@ -56,17 +55,17 @@ public class DelimiterDefinitionTest
 			DelimiterDefinition d = new DelimiterDefinition();
 			assertEquals(true, d.isEmpty());
 			assertEquals(false, d.isSingleLine());
-			
+
 			d.setDelimiter(";");
 			assertEquals(true, d.isStandard());
-			
+
 			d.setDelimiter(" ; ");
 			assertEquals(true, d.isStandard());
-			
+
 			d = new DelimiterDefinition("/", true);
 			assertEquals(false, d.isStandard());
 			assertEquals(true, d.isSingleLine());
-			
+
 			d = new DelimiterDefinition("   / \n", true);
 			assertEquals("/", d.getDelimiter());
 			assertEquals(true, d.isSingleLine());
@@ -77,7 +76,8 @@ public class DelimiterDefinitionTest
 			fail(e.getMessage());
 		}
 	}
-	
+
+	@Test
 	public void testParse()
 	{
 		try
@@ -86,12 +86,12 @@ public class DelimiterDefinitionTest
 			assertEquals(false, d.isEmpty());
 			assertEquals(true, d.isSingleLine());
 			assertEquals("/", d.getDelimiter());
-			
+
 			d = DelimiterDefinition.parseCmdLineArgument("/;bla");
 			assertEquals(false, d.isEmpty());
 			assertEquals(false, d.isSingleLine());
-			assertEquals("/", d.getDelimiter());			
-			
+			assertEquals("/", d.getDelimiter());
+
 			d = DelimiterDefinition.parseCmdLineArgument("/   ");
 			assertEquals(false, d.isEmpty());
 			assertEquals(false, d.isSingleLine());
@@ -114,5 +114,5 @@ public class DelimiterDefinitionTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 }

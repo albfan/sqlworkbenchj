@@ -11,25 +11,22 @@
  */
 package workbench.db.importer;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 import workbench.db.TableIdentifier;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableStatementsTest
-	extends TestCase
 {
-	public TableStatementsTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetTableStatement()
 	{
 		TableIdentifier tbl = new TableIdentifier("tsch", "address");
-		
+
 		TableStatements stmt = new TableStatements("delete from ${table.name}", null);
 		String sql = stmt.getPreStatement(tbl);
 		assertEquals("delete from address", sql);
@@ -38,6 +35,6 @@ public class TableStatementsTest
 		stmt = new TableStatements("set identity insert ${table.expression} on", "set identity insert ${table.expression} off");
 		assertEquals("set identity insert tsch.address on", stmt.getPreStatement(tbl));
 		assertEquals("set identity insert tsch.address off", stmt.getPostStatement(tbl));
-		
+
 	}
 }

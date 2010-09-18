@@ -16,30 +16,32 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.sql.Statement;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbSchemaReportTest
-	extends TestCase
+	extends WbTestCase
 {
-
 	private WbConnection source;
 	private TestUtil util;
-	
-	public WbSchemaReportTest(String testName)
+
+	public WbSchemaReportTest()
 	{
-		super(testName);
+		super("WbSchemaReportTest");
 	}
 
+	@Test
 	public void testExcludeViews()
 		throws Exception
 	{
@@ -48,26 +50,26 @@ public class WbSchemaReportTest
 			setupDatabase();
 			WbSchemaReport report = new WbSchemaReport();
 			report.setConnection(source);
-			
+
 			File output = new File(util.getBaseDir(), "report.xml");
 			output.delete();
 			StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -includeSequences=false -includeTableGrants=false -includeViews=false");
 			assertTrue(result.isSuccess());
 			assertTrue("File not created", output.exists());
-			
+
 			InputStreamReader r = new InputStreamReader(new FileInputStream(output), "UTF-8");
 			String xml = FileUtil.readCharacters(r);
 			r.close();
-			
+
 			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
 			assertEquals("Incorrect table count", "4", count);
-			
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='V_PERSON'])");
 			assertEquals("Incorrect view count", "0", count);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def)");
 			assertEquals("Incorrect sequence count", "0", count);
-			
+
 			if (!output.delete())
 			{
 				fail("could not delete output file");
@@ -78,7 +80,8 @@ public class WbSchemaReportTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
+	@Test
 	public void testExecute()
 		throws Exception
 	{
@@ -87,29 +90,29 @@ public class WbSchemaReportTest
 			setupDatabase();
 			WbSchemaReport report = new WbSchemaReport();
 			report.setConnection(source);
-			
+
 			File output = new File(util.getBaseDir(), "report.xml");
 			output.delete();
 			StatementRunnerResult result = report.execute("WbReport -file='" + output.getAbsolutePath() + "' -includeSequences=true -includeTableGrants=true");
 			assertTrue(result.isSuccess());
 			assertTrue("File not created", output.exists());
-			
+
 			InputStreamReader r = new InputStreamReader(new FileInputStream(output), "UTF-8");
 			String xml = FileUtil.readCharacters(r);
 			r.close();
-			
+
 			String count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def)");
 			assertEquals("Incorrect table count", "4", count);
-			
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/view-def[@name='V_PERSON'])");
 			assertEquals("Incorrect view count", "1", count);
 
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/sequence-def)");
 			assertEquals("Incorrect sequence count", "3", count);
-			
+
 			String value = TestUtil.getXPathValue(xml, "/schema-report/table-def[@name='Person']/grant/privilege");
 			assertEquals("Wrong privilege", "SELECT", value);
-			 
+
 			count = TestUtil.getXPathValue(xml, "count(/schema-report/table-def[@name='Address']/grant)");
 			assertEquals("Incorrect grant count", "4", count);
 
@@ -129,6 +132,7 @@ public class WbSchemaReportTest
 		}
 	}
 
+	@Test
 	public void testSchemaOnly()
 		throws Exception
 	{
@@ -175,7 +179,7 @@ public class WbSchemaReportTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	private void setupDatabase()
 		throws SQLException, ClassNotFoundException
 	{
@@ -183,7 +187,7 @@ public class WbSchemaReportTest
 		this.source = util.getConnection();
 
 		Statement stmt = null;
-		
+
 		try
 		{
 			stmt = source.createStatement();
@@ -191,7 +195,7 @@ public class WbSchemaReportTest
 			stmt.executeUpdate("create table \"Address\" (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50))");
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("create table person_address_status (person_id integer, address_id integer, status_name varchar(10), primary key (person_id, address_id))");
-			
+
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references \"Person\"(person_id)");
       stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references \"Address\"(address_id)");
       stmt.executeUpdate("alter table person_address_status add constraint fk_pas_pa foreign key (person_id, address_id) references person_address(person_id, address_id)");
@@ -200,7 +204,7 @@ public class WbSchemaReportTest
 			stmt.executeUpdate("CREATE sequence seq_one");
 			stmt.executeUpdate("CREATE sequence seq_two  increment by 5");
 			stmt.executeUpdate("CREATE sequence seq_three");
-			
+
 			stmt.executeUpdate("create user arthur password '42'");
 			stmt.executeUpdate("GRANT SELECT ON \"Person\" TO arthur");
 			stmt.executeUpdate("GRANT SELECT,INSERT,UPDATE,DELETE ON \"Address\" TO arthur");
@@ -210,5 +214,5 @@ public class WbSchemaReportTest
 			SqlUtil.closeStatement(stmt);
 		}
 	}
-	
+
 }

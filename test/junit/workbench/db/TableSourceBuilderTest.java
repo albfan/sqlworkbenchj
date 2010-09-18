@@ -11,27 +11,30 @@
  */
 package workbench.db;
 
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.resource.Settings;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableSourceBuilderTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public TableSourceBuilderTest(String testName)
+	public TableSourceBuilderTest()
 	{
-		super(testName);
+		super("TableSourceBuilderTest");
 	}
 
+	@Test
 	public void testGetTableSource()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("TableSourceBuilder");
+		TestUtil util = getTestUtil();
 		WbConnection con = util.getConnection();
 		try
 		{

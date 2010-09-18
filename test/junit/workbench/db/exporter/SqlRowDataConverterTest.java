@@ -11,13 +11,14 @@
  */
 package workbench.db.exporter;
 
+import org.junit.Test;
+import workbench.WbTestCase;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -27,20 +28,22 @@ import workbench.storage.RowData;
 import workbench.storage.SqlLiteralFormatter;
 import workbench.util.SqlUtil;
 import workbench.util.StrBuffer;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class SqlRowDataConverterTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public SqlRowDataConverterTest(String testName)
+	public SqlRowDataConverterTest()
 	{
-		super(testName);
+		super("SqlRowDataConverterTest");
 	}
 
+	@Test
 	public void testSqlGeneration()
 		throws Exception
 	{
@@ -81,6 +84,7 @@ public class SqlRowDataConverterTest
 		}
 	}
 
+	@Test
 	public void testConvert()
 	{
 		try

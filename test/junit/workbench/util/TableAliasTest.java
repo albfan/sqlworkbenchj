@@ -11,17 +11,13 @@
  */
 package workbench.util;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 public class TableAliasTest
-	extends WbTestCase
 {
 
-	public TableAliasTest(String name)
-	{
-		super(name);
-	}
-
+	@Test
 	public void testAlias()
 	{
 		String value = "table1";
@@ -44,6 +40,7 @@ public class TableAliasTest
 		assertEquals("Wrong value name", "t1", ta.getNameToUse());
 	}
 
+	@Test
 	public void testCompare()
 	{
 		String value = "table1";

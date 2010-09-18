@@ -12,26 +12,42 @@
 package workbench;
 
 import java.io.IOException;
-import junit.framework.TestCase;
 
 /**
  * @author Thomas Kellerer
  */
 public class WbTestCase
-	extends TestCase
 {
+	private String name;
+	private boolean prepared;
+	
+	public WbTestCase()
+	{
+		name = "WbTestCase";
+		prepared = false;
+	}
+	
 	public WbTestCase(String testName)
 	{
-		super(testName);
-		System.setProperty("workbench.log.console", "false");
+		name = testName;
+		prepare();
 	}
 
-	protected TestUtil getTestUtil()
+	protected void prepare()
+	{
+		System.setProperty("workbench.log.console", "false");
+		getTestUtil();
+	}
+	
+	protected synchronized TestUtil getTestUtil()
 	{
 		TestUtil util = new TestUtil(getName());
+		if (prepared) return util;
+		
 		try
 		{
 			util.prepareEnvironment();
+			prepared = true;
 		}
 		catch (IOException io)
 		{
@@ -43,5 +59,10 @@ public class WbTestCase
 	protected TestUtil getTestUtil(String method)
 	{
 		return new TestUtil(getName() + "_" + "method");
+	}
+
+	public String getName()
+	{
+		return name;
 	}
 }

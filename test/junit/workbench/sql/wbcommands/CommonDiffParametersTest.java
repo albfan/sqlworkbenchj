@@ -11,63 +11,66 @@
  */
 package workbench.sql.wbcommands;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import workbench.WbTestCase;
 import workbench.TestUtil;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.wbcommands.CommonDiffParameters.TableMapping;
 import workbench.util.ArgumentParser;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class CommonDiffParametersTest 
-	extends TestCase 
+public class CommonDiffParametersTest
+	extends WbTestCase
 {
 	private WbConnection source;
 	private WbConnection target;
 	private TestUtil util;
-    
-	public CommonDiffParametersTest(String testName) 
+
+	public CommonDiffParametersTest()
 	{
-		super(testName);
-		util = new TestUtil("diffParameterTest");
+		super("CommonDiffParametersTest");
+		util = getTestUtil();
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		this.source = util.getConnection("diffParameterSource");
 		this.target = util.getConnection("diffParameterTarget");
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
 		this.source.disconnect();
 		this.target.disconnect();
-		super.tearDown();
 	}
-	
+
+	@Test
 	public void testGetMatchingTables()
 		throws Exception
 	{
-		String sql = "create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" + 
-			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" + 
+		String sql = "create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
 			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n";
-		
+
 		TestUtil.executeScript(source, sql);
 		TestUtil.executeScript(target, sql);
-		
+
 		ArgumentParser cmdLine = new ArgumentParser();
-		
+
 		CommonDiffParameters params = new CommonDiffParameters(cmdLine);
 		cmdLine.parse("-referenceTables=person, address, person_address");
-		
+
 		TableMapping result = params.getTables(source, target);
 		assertEquals(3, result.referenceTables.size());
 		assertEquals(3, result.targetTables.size());
@@ -78,30 +81,31 @@ public class CommonDiffParametersTest
 		assertEquals(2, result.targetTables.size());
 		assertNotNull(TableIdentifier.findTableByName(result.referenceTables, "PERSON"));
 		assertNotNull(TableIdentifier.findTableByName(result.referenceTables, "PERSON_ADDRESS"));
-		
+
 		assertNotNull(TableIdentifier.findTableByName(result.targetTables, "PERSON"));
 		assertNotNull(TableIdentifier.findTableByName(result.targetTables, "PERSON_ADDRESS"));
 	}
 
+	@Test
 	public void testTableMapping()
 		throws Exception
 	{
-		String sql1 = "create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" + 
-			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" + 
+		String sql1 = "create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
 			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n";
 
-		String sql2 = "create table t_person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" + 
-			"create table t_address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" + 
+		String sql2 = "create table t_person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table t_address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
 			"create table l_person2address (person_id integer, address_id integer, primary key (person_id, address_id));\n";
-		
+
 		TestUtil.executeScript(source, sql1);
 		TestUtil.executeScript(target, sql2);
-		
+
 		ArgumentParser cmdLine = new ArgumentParser();
-		
+
 		CommonDiffParameters params = new CommonDiffParameters(cmdLine);
 		cmdLine.parse("-referenceTables=person, address, person_address -targetTables=t_person,t_address,l_person2address");
-		
+
 		TableMapping result = params.getTables(source, target);
 		assertEquals(3, result.referenceTables.size());
 		assertEquals(3, result.targetTables.size());
@@ -109,21 +113,22 @@ public class CommonDiffParametersTest
 		assertEquals("t_person", result.targetTables.get(0).getTableName().toLowerCase());
 	}
 
+	@Test
 	public void testExclude()
 		throws Exception
 	{
-		String sql = "create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" + 
-			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" + 
+		String sql = "create table person (person_id integer primary key, firstname varchar(100), lastname varchar(100));\n" +
+			"create table address (address_id integer primary key, street varchar(50), city varchar(100), phone varchar(50), email varchar(50));\n" +
 			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id));\n";
 
 		TestUtil.executeScript(source, sql);
 		TestUtil.executeScript(target, sql);
-		
+
 		ArgumentParser cmdLine = new ArgumentParser();
-		
+
 		CommonDiffParameters params = new CommonDiffParameters(cmdLine);
 		cmdLine.parse("-excludeTables=person_address");
-		
+
 		TableMapping result = params.getTables(source, target);
 		assertEquals(2, result.referenceTables.size());
 		assertEquals(2, result.targetTables.size());
@@ -131,6 +136,7 @@ public class CommonDiffParametersTest
 		assertEquals(result.targetTables.get(1).getTableName(), result.referenceTables.get(1).getTableName());
 	}
 
+	@Test
 	public void testSchemaParameter()
 		throws Exception
 	{
@@ -142,7 +148,7 @@ public class CommonDiffParametersTest
 			"create table person_address (person_id integer, address_id integer, primary key (person_id, address_id)); \n" +
 			"create table dummy (some_id integer); \n" +
 			"alter table person_address add constraint fk_adr foreign key (address_id) references address (address_id);\n" +
-			"alter table person_address add constraint fk_per foreign key (person_id) references person (person_id);\n" + 
+			"alter table person_address add constraint fk_per foreign key (person_id) references person (person_id);\n" +
 			"commit;\n";
 
 		TestUtil.executeScript(source, sql);
@@ -166,5 +172,5 @@ public class CommonDiffParametersTest
 		assertTrue("Wrong tables", result.referenceTables.get(0).equals(result.targetTables.get(0)));
 		assertTrue("Wrong tables", result.referenceTables.get(1).equals(result.targetTables.get(1)));
 	}
-	
+
 }

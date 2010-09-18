@@ -13,21 +13,17 @@ package workbench.util;
 
 import java.util.List;
 import java.util.Set;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class CollectionUtilTest
-	extends TestCase
 {
-
-	public CollectionUtilTest(String testName)
-	{
-		super(testName);
-	}
-
+	
+	@Test
 	public void testCreateHashSet()
 	{
 		Set<String> set = CollectionUtil.hashSet("one", "two");
@@ -51,6 +47,7 @@ public class CollectionUtilTest
 		assertFalse(set.contains("five"));
 	}
 
+	@Test
 	public void testCaseInsensitiveSet()
 	{
 		Set<String> result = CollectionUtil.caseInsensitiveSet("one", "two", "THREE");
@@ -59,6 +56,7 @@ public class CollectionUtilTest
 		assertTrue(result.contains("three"));
 	}
 
+	@Test
 	public void testCreateList()
 	{
 		List<Integer> result = CollectionUtil.arrayList(1, 2, 3);

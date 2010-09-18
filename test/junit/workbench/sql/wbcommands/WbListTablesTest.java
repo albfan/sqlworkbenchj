@@ -12,39 +12,30 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.DbMetadata;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  * @author Thomas Kellerer
  */
 public class WbListTablesTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public WbListTablesTest(String testName)
+	public WbListTablesTest()
 	{
-		super(testName);
+		super("WbListTablesTest");
 	}
 
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
-	}
-
+	@Test
 	public void testExecute()
 		throws Exception
 	{
@@ -95,6 +86,7 @@ public class WbListTablesTest
 		}
 	}
 
+	@Test
 	public void testSchemaRetrieve()
 		throws Exception
 	{

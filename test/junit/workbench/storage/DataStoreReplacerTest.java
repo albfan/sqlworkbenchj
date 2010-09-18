@@ -12,6 +12,8 @@
 package workbench.storage;
 
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -21,11 +23,12 @@ public class DataStoreReplacerTest
 	extends WbTestCase
 {
 
-	public DataStoreReplacerTest(String testName)
+	public DataStoreReplacerTest()
 	{
-		super(testName);
+		super("DataStoreReplacerTest");
 	}
 
+	@Test
 	public void testReplaceSelection()
 	{
 		try
@@ -66,6 +69,7 @@ public class DataStoreReplacerTest
 		}
 	}
 
+	@Test
 	public void testReplace()
 	{
 		try
@@ -132,6 +136,7 @@ public class DataStoreReplacerTest
 		}
 	}
 
+	@Test
 	public void testFind()
 	{
 		try

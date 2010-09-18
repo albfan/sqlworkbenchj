@@ -11,8 +11,9 @@
  */
 package workbench.db.ibm;
 
+import org.junit.Test;
+import workbench.WbTestCase;
 import java.io.IOException;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -23,20 +24,22 @@ import workbench.storage.RowData;
 import workbench.util.FileUtil;
 import workbench.util.StrBuffer;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class Db2FormatFileWriterTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public Db2FormatFileWriterTest(String testName)
+	public Db2FormatFileWriterTest()
 	{
-		super(testName);
+		super("Db2FormatFileWriterTest");
 	}
 
+	@Test
 	public void testWriteFormatFile()
 		throws IOException
 	{

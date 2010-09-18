@@ -16,6 +16,8 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -24,18 +26,12 @@ import workbench.util.CollectionUtil;
 public class SqlFormatterTest
 	extends WbTestCase
 {
-	public SqlFormatterTest(String testName)
+	public SqlFormatterTest()
 	{
-		super(testName);
+		super("SqlFormatterTest");
 	}
 
-	public void setUp()
-		throws Exception
-	{
-		TestUtil util = new TestUtil(this.getName());
-		util.prepareEnvironment();
-	}
-
+	@Test
 	public void testNestedSubselect()
 		throws Exception
 	{
@@ -63,6 +59,7 @@ public class SqlFormatterTest
 
 	}
 
+	@Test
 	public void testQuotes()
 		throws Exception
 	{
@@ -74,6 +71,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testUpdate()
 		throws Exception
 	{
@@ -95,6 +93,8 @@ public class SqlFormatterTest
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 
 	}
+
+	@Test
 	public void testAsOf()
 		throws Exception
 	{
@@ -106,6 +106,8 @@ public class SqlFormatterTest
 //		System.out.println("+++++++++++++++++++ result: \n" + formatted + "\n********** expected:\n" + expected + "\n-------------------");
 		assertEquals(expected, formatted);
 	}
+
+	@Test
 	public void testSubSelect()
 		throws Exception
 	{
@@ -158,6 +160,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testUnion()
 		throws Exception
 	{
@@ -223,6 +226,7 @@ public class SqlFormatterTest
 
 	}
 
+	@Test
 	public void testKeywordsAsFunction()
 		throws Exception
 	{
@@ -236,6 +240,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testWbVars()
 		throws Exception
 	{
@@ -260,6 +265,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testCTE()
 		throws Exception
 	{
@@ -410,6 +416,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testCTAS()
 		throws Exception
 	{
@@ -426,6 +433,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testUnknown()
 		throws Exception
 	{
@@ -457,6 +465,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testLowerCaseKeywords()
 		throws Exception
 	{
@@ -478,6 +487,7 @@ public class SqlFormatterTest
 		}
 	}
 
+	@Test
 	public void testFormatMultiValueInsert()
 		throws Exception
 	{
@@ -528,6 +538,7 @@ public class SqlFormatterTest
 
 	}
 
+	@Test
 	public void testFormatInsert()
 		throws Exception
 	{
@@ -556,6 +567,7 @@ public class SqlFormatterTest
 		}
 	}
 
+	@Test
 	public void testFormatUpdate()
 		throws Exception
 	{
@@ -581,6 +593,7 @@ public class SqlFormatterTest
 		}
 	}
 
+	@Test
 	public void testFormatUnicode()
 		throws Exception
 	{
@@ -591,6 +604,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testCreateTable()
 		throws Exception
 	{
@@ -621,6 +635,7 @@ public class SqlFormatterTest
 		assertEquals("  PRIMARY KEY (id1,id2)", lines.get(6));
 	}
 
+	@Test
 	public void testFileParam()
 		throws Exception
 	{
@@ -630,6 +645,7 @@ public class SqlFormatterTest
 		assertTrue(formatted.indexOf("\"c:\\Documents and Settings\\test.txt\"") > 0);
 	}
 
+	@Test
 	public void testWbConfirm()
 		throws Exception
 	{
@@ -640,6 +656,7 @@ public class SqlFormatterTest
 		assertEquals("WbConfirm not formatted correctly", expected, formatted);
 	}
 
+	@Test
 	public void testAliasForSubselect()
 		throws Exception
 	{
@@ -650,6 +667,7 @@ public class SqlFormatterTest
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
+	@Test
 	public void testAsInFrom()
 		throws Exception
 	{
@@ -660,6 +678,7 @@ public class SqlFormatterTest
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
+	@Test
 	public void testInsertWithSubselect()
 		throws Exception
 	{
@@ -671,6 +690,7 @@ public class SqlFormatterTest
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
+	@Test
 	public void testLowerCaseFunctions()
 		throws Exception
 	{
@@ -683,6 +703,7 @@ public class SqlFormatterTest
 		assertEquals("SELECT in VALUES not formatted", expected, formatted);
 	}
 
+	@Test
 	public void testCase()
 		throws Exception
 	{
@@ -728,6 +749,7 @@ public class SqlFormatterTest
 		assertEquals("CASE alias not formatted", expected, formatted);
 	}
 
+	@Test
 	public void testWhitespace()
 	{
 		try
@@ -744,6 +766,7 @@ public class SqlFormatterTest
 		}
 	}
 
+	@Test
 	public void testColumnThreshold()
 		throws Exception
 	{
@@ -767,6 +790,7 @@ public class SqlFormatterTest
 		}
 	}
 
+	@Test
 	public void testBracketIdentifier()
 		throws Exception
 	{
@@ -786,6 +810,7 @@ public class SqlFormatterTest
 		}
 	}
 
+	@Test
 	public void testDecode()
 		throws Exception
 	{
@@ -809,6 +834,7 @@ public class SqlFormatterTest
 		assertEquals("DECODE not formatted correctly", expected, formatted);
 	}
 
+	@Test
 	public void testQuotedIdentifier()
 		throws Exception
 	{
@@ -819,6 +845,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testInListCommas()
 		throws Exception
 	{
@@ -831,6 +858,7 @@ public class SqlFormatterTest
 		assertEquals(expected, formatted);
 	}
 
+	@Test
 	public void testGetFormattedSql()
 		throws Exception
 	{

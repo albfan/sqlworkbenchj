@@ -16,7 +16,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.Writer;
 import java.util.Collection;
-import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
@@ -25,29 +24,31 @@ import workbench.sql.BatchRunner;
 import workbench.util.ArgumentParser;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbConnectTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public WbConnectTest(String testName)
+	public WbConnectTest()
 	{
-		super(testName);
+		super("WbConnectTest");
 	}
 
+	@Test
 	public void testConnectionRequired()
 	{
 		WbConnect cmd = new WbConnect();
 		assertFalse(cmd.isConnectionRequired());
 	}
 
-	/**
-	 * Test of execute method, of class WbConnect.
-	 */
+	@Test
 	public void testExecute()
 		throws Exception
 	{
@@ -59,7 +60,7 @@ public class WbConnectTest
 			"insert into person (nr, firstname, lastname) values (4, 'Tricia', 'McMillian');\n " +
 			"commit;";
 
-		TestUtil util = new TestUtil("WbConnect");
+		TestUtil util = getTestUtil();
 		util.emptyBaseDirectory();
 
 		try

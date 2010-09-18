@@ -12,22 +12,18 @@
 package workbench.util;
 
 import java.io.File;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author tkellerer
  */
 public class ToolDefinitionTest
-	extends TestCase
 {
 
-	public ToolDefinitionTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetExecutable()
 		throws Exception
 	{

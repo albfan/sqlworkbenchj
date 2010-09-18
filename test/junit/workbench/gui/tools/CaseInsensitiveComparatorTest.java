@@ -13,32 +13,29 @@ package workbench.gui.tools;
 
 import workbench.util.CaseInsensitiveComparator;
 import java.util.Comparator;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class CaseInsensitiveComparatorTest
-	extends TestCase
 {
-	public CaseInsensitiveComparatorTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testComparator()
 	{
 		Comparator<String> c = new CaseInsensitiveComparator();
 		int i = c.compare("Test", "TEST");
 		assertEquals(0, i);
-		
+
 		i = c.compare("TEST", "test");
 		assertEquals(0, i);
-		
+
 		i = c.compare("test", "test");
 		assertEquals(0, i);
-		
+
 		i = c.compare("test", "tesd");
 		assertEquals(false, (i == 0));
-	}	
+	}
 }

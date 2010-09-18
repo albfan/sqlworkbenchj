@@ -11,20 +11,17 @@
  */
 package workbench.db.oracle;
 
+import org.junit.Test;
 import java.sql.Types;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
  */
 public class OracleMetadataTest
-	extends TestCase
 {
-	public OracleMetadataTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetSqlTypeDisplay()
 	{
 		// Test with BYTE as default semantics

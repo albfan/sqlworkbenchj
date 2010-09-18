@@ -11,7 +11,8 @@
  */
 package workbench.db.importer.modifier;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 import workbench.db.ColumnIdentifier;
 
 /**
@@ -19,13 +20,12 @@ import workbench.db.ColumnIdentifier;
  * @author Thomas Kellerer
  */
 public class RegexModifierTest
-	extends TestCase
 {
-	public RegexModifierTest(String testName)
+	public RegexModifierTest()
 	{
-		super(testName);
 	}
 
+	@Test
 	public void testModifyValue()
 	{
 		RegexModifier modifier = new RegexModifier();
@@ -42,7 +42,5 @@ public class RegexModifierTest
 		assertEquals("Zaphod Beeblebronx", modified);
 
 		modified = modifier.modifyValue(lname, "Test\" value");
-//		System.out.println(modified);
-		
 	}
 }

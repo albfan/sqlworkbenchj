@@ -17,6 +17,10 @@ import java.util.Collection;
 import java.util.Set;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -25,15 +29,15 @@ import workbench.WbTestCase;
 public class SqlKeywordHelperTest
 	extends WbTestCase
 {
-
 	private TestUtil util;
 
-	public SqlKeywordHelperTest(String testName)
+	public SqlKeywordHelperTest()
 	{
-		super(testName);
+		super("SqlKeywordHelperTest");
 		util = getTestUtil();
 	}
 
+	@Test
 	public void testGetKeywords()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
@@ -47,6 +51,7 @@ public class SqlKeywordHelperTest
 		assertTrue(result.contains("KEY"));
 	}
 
+	@Test
 	public void testOracleKeywords()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper("oracle");
@@ -56,6 +61,7 @@ public class SqlKeywordHelperTest
 		assertTrue(keywords.contains("EXCEPTION"));
 	}
 
+	@Test
 	public void testSqlServerKeywords()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper("microsoft_sql_server");
@@ -63,6 +69,7 @@ public class SqlKeywordHelperTest
 		assertTrue(keywords.contains("OPEN"));
 	}
 
+	@Test
 	public void testGetDataTypes()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
@@ -70,6 +77,7 @@ public class SqlKeywordHelperTest
 		assertTrue(result.size() > 0);
 	}
 
+	@Test
 	public void testGetOperators()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
@@ -77,6 +85,7 @@ public class SqlKeywordHelperTest
 		assertTrue(result.size() > 0);
 	}
 
+	@Test
 	public void testGetSystemFunctions()
 	{
 		SqlKeywordHelper helper = new SqlKeywordHelper();
@@ -84,6 +93,7 @@ public class SqlKeywordHelperTest
 		assertTrue(result.size() > 0);
 	}
 
+	@Test
 	public void testCustomKeywords()
 		throws IOException
 	{

@@ -14,30 +14,26 @@ package workbench.db;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class DummyInsertTest 
-	extends TestCase 
+public class DummyInsertTest
 {
-    
-	public DummyInsertTest(String testName) 
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetSource()
 		throws Exception
 	{
 		TestUtil util = new TestUtil("dummyInsertGen1");
 		WbConnection con = util.getConnection();
-		
+
 		try
 		{
 			Statement stmt = con.createStatement();
@@ -62,6 +58,7 @@ public class DummyInsertTest
 		}
 	}
 
+	@Test
 	public void testSelectedColumns()
 		throws Exception
 	{
@@ -76,7 +73,7 @@ public class DummyInsertTest
 			TableIdentifier person = con.getMetadata().findTable(new TableIdentifier("PERSON"));
 			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
 			cols.add(new ColumnIdentifier("NR"));
-			
+
 			DummyInsert insert = new DummyInsert(person, cols);
 			String sql = insert.getSource(con).toString();
 //			System.out.println("*********\n"+sql);

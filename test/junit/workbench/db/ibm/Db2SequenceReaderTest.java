@@ -11,15 +11,19 @@
  */
 package workbench.db.ibm;
 
+import org.junit.After;
+import org.junit.Test;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import junit.framework.TestCase;
+import org.junit.Before;
 import workbench.TestUtil;
 import workbench.db.DbObject;
 import workbench.db.SequenceDefinition;
 import workbench.db.WbConnection;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -31,13 +35,13 @@ public class Db2SequenceReaderTest
 
 	private WbConnection db;
 
-	public Db2SequenceReaderTest(String testName)
+	public Db2SequenceReaderTest()
 	{
-		super(testName);
+		super("Db2SequenceReaderTest");
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
 		super.setUp();
@@ -100,13 +104,14 @@ public class Db2SequenceReaderTest
 			"commit;");
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
 		db.disconnect();
 	}
 
+	@Test
 	public void testLUW()
 	{
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2");
@@ -133,6 +138,7 @@ public class Db2SequenceReaderTest
 		assertTrue(source.indexOf("COMMENT ON SEQUENCE SEQ_AAA IS 'aaa comment'") > -1);
 	}
 
+	@Test
 	public void testDBI()
 	{
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2i");
@@ -159,6 +165,7 @@ public class Db2SequenceReaderTest
 		assertTrue(source.indexOf("COMMENT ON SEQUENCE SEQ_AAA IS 'aaa comment'") > -1);
 	}
 
+	@Test
 	public void testDB2Host()
 	{
 		Db2SequenceReader reader = new Db2SequenceReader(db, "db2h");

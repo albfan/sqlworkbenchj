@@ -11,8 +11,9 @@
 package workbench.db;
 
 import java.sql.Types;
-import org.junit.Test;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *

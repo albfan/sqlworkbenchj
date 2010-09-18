@@ -11,10 +11,11 @@
  */
 package workbench.db.exporter;
 
+import org.junit.Test;
+import workbench.WbTestCase;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
@@ -29,20 +30,22 @@ import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DataExporterTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public DataExporterTest(String testName)
+	public DataExporterTest()
 	{
-		super(testName);
+		super("DataExporterTest");
 	}
 
+	@Test
 	public void testDuplicateTable()
 		throws Exception
 	{
@@ -89,6 +92,7 @@ public class DataExporterTest
 		}
 	}
 	
+	@Test
 	public void testExporQueryResult()
 		throws Exception
 	{
@@ -216,6 +220,7 @@ public class DataExporterTest
 		};
 	}
 
+	@Test
 	public void testReplaceValues()
 		throws Exception
 	{
@@ -258,6 +263,7 @@ public class DataExporterTest
 		}
 	}
 
+	@Test
 	public void testExportWhere()
 		throws Exception
 	{
@@ -299,6 +305,7 @@ public class DataExporterTest
 		}
 	}
 
+	@Test
 	public void testExportColumns()
 		throws Exception
 	{

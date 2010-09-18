@@ -13,8 +13,8 @@ package workbench.sql;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -27,25 +27,29 @@ import workbench.sql.wbcommands.WbFeedback;
 import workbench.sql.wbcommands.WbInclude;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class StatementRunnerTest
-	extends TestCase
+	extends WbTestCase
 {
 	private TestUtil util;
 	private boolean confirmExecution = false;
 	private boolean controllerCalled = false;
 
-	public StatementRunnerTest(String testName)
+	public StatementRunnerTest()
 	{
-		super(testName);
-		util = new TestUtil(testName);
+		super("StatementRunnerTest");
+		util = getTestUtil();
 	}
 
+	@Test
 	public void testReadOnly()
+		throws Exception
 	{
 		try
 		{
@@ -150,17 +154,13 @@ public class StatementRunnerTest
 
 			SqlUtil.closeStatement(stmt);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
-
+	@Test
 	public void testWbCommands()
 		throws Exception
 	{
@@ -179,20 +179,15 @@ public class StatementRunnerTest
 			boolean verbose = runner.getVerboseLogging();
 			assertEquals("Feedback not executed", false, verbose);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
-	/**
-	 * Test of getCommandToUse method, of class workbench.sql.StatementRunner.
-	 */
-	public void testCommands() throws Exception
+	@Test
+	public void testCommands()
+		throws Exception
 	{
 		String sql = "\n\ninsert into bla (col) values (1)";
 		StatementRunner runner = new StatementRunner();

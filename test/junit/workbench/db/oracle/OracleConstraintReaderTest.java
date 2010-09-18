@@ -12,6 +12,8 @@
 package workbench.db.oracle;
 
 import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -19,12 +21,8 @@ import junit.framework.TestCase;
  */
 public class OracleConstraintReaderTest extends TestCase
 {
-	
-	public OracleConstraintReaderTest(String testName)
-	{
-		super(testName);
-	}
-	
+
+	@Test
 	public void testIsDefaultNNConstraint()
 	{
 		OracleConstraintReader instance = new OracleConstraintReader();
@@ -35,7 +33,6 @@ public class OracleConstraintReaderTest extends TestCase
 		definition = "\"MY_COL\" IS NOT NULL OR COL2 IS NOT NULL";
 		result = instance.isDefaultNNConstraint(definition);
 		assertEquals("Default NN not recognized", false, result);
-		
 	}
 	
 }

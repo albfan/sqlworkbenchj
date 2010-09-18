@@ -11,21 +11,18 @@
  */
 package workbench.db;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableConstraintTest
-	extends WbTestCase
 {
 
-	public TableConstraintTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testEquals()
 	{
 		TableConstraint c1 = new TableConstraint("POSITIVE_NR", "(NR > 0)");

@@ -11,37 +11,40 @@
  */
 package workbench.db.importer;
 
+import workbench.WbTestCase;
+import org.junit.After;
+import org.junit.Test;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.FileUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableDependencySorterTest
-	extends TestCase
+	extends WbTestCase
 {
 	private WbConnection dbConn;
 	
-	public TableDependencySorterTest(String testName)
+	public TableDependencySorterTest()
 	{
-		super(testName);
+		super("ImportFileHandlerTest");
 	}
 
-	protected void createTables()
+	private void createTables()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("dependencyTest");
+		TestUtil util = getTestUtil("dependencyTest");
 		dbConn = util.getConnection();
 		Statement stmt = dbConn.createStatement();
 			String baseSql = "CREATE TABLE base  \n" + 
@@ -113,14 +116,14 @@ public class TableDependencySorterTest
 			stmt.executeUpdate(sql);
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
 		ConnectionMgr.getInstance().disconnectAll();
-		super.tearDown();
 	}
 
+	@Test
 	public void testPlainTables()
 		throws Exception
 	{
@@ -136,10 +139,11 @@ public class TableDependencySorterTest
 		assertEquals("Not enough entries", tables.size(), result.size());
 	}
 
+	@Test
 	public void testNonExistingTable()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("dependencyTest");
+		TestUtil util = getTestUtil("dependencyTest");
 		dbConn = util.getConnection();
 		Statement stmt = dbConn.createStatement();
 		stmt.executeUpdate("create table person (nr integer not null primary key, lastname varchar(50), firstname varchar(50), binary_data blob)");
@@ -166,6 +170,7 @@ public class TableDependencySorterTest
 		assertTrue(address.compareNames(result.get(1)));
 	}
 
+	@Test
 	public void testCheckDependencies()
 		throws Exception
 	{
@@ -214,6 +219,7 @@ public class TableDependencySorterTest
 		assertTrue("Wrong first table for insert", base.compareNames(insertList.get(0)));
 	}
 
+	@Test
 	public void testCheckAddMissing()
 		throws Exception
 	{
@@ -239,6 +245,7 @@ public class TableDependencySorterTest
 		assertEquals("Wrong third table", "child1", result.get(2).getTableName().toLowerCase());
 	}
 
+	@Test
 	public void testCatDeleteDependency()
 		throws Exception
 	{
@@ -265,7 +272,8 @@ public class TableDependencySorterTest
 		assertTrue(result.get(4).compareNames(catNode));
 		assertTrue(result.get(5).compareNames(product));
 	}
-	
+
+	@Test
 	public void testCatDependencyForInsert()
 		throws Exception
 	{

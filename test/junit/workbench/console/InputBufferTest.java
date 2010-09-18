@@ -11,8 +11,12 @@
  */
 package workbench.console;
 
+
+import org.junit.Test;
+import static org.junit.Assert.*;
 import workbench.WbTestCase;
 import workbench.sql.DelimiterDefinition;
+
 
 /**
  *
@@ -26,6 +30,7 @@ public class InputBufferTest
 		super("InputBufferTest");
 	}
 
+	@Test
 	public void testAddLine()
 	{
 		InputBuffer buffer = new InputBuffer();

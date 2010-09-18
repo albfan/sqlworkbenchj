@@ -11,36 +11,39 @@
  */
 package workbench.db.h2database;
 
+import org.junit.Test;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.DbObject;
 import workbench.db.SequenceDefinition;
 import workbench.db.WbConnection;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class H2SequenceReaderTest
-	extends TestCase
+	extends WbTestCase
 {
 	private WbConnection db;
 
-	public H2SequenceReaderTest(String testName)
+	public H2SequenceReaderTest()
 	{
-		super(testName);
+		super("H2SequenceReaderTest");
 	}
 
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil(getName());
 		db = util.getConnection("h2_seq_test");
 		TestUtil.executeScript(db,
@@ -49,13 +52,14 @@ public class H2SequenceReaderTest
 			"commit;");
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
 		db.disconnect();
 	}
 
+	@Test
 	public void testGetSequences()
 	{
 		H2SequenceReader instance = new H2SequenceReader(db.getSqlConnection());

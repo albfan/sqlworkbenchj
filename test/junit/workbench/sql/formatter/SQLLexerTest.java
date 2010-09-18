@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -24,9 +26,9 @@ public class SQLLexerTest
 	extends WbTestCase
 {
 	
-	public SQLLexerTest(String testName)
+	public SQLLexerTest()
 	{
-		super(testName);
+		super("SQLLexerTest");
 	}
 	
 	private List<SQLToken> getTokenList(String sql)
@@ -43,15 +45,7 @@ public class SQLLexerTest
 		return result;
 	}
 
-//	public void testEscapedQuote()
-//	{
-//		String sql = "select 'test\\'value'";
-//		List<SQLToken> tokens = getTokenList(sql);
-//		for (SQLToken t : tokens)
-//		{
-//			System.out.println(t.toString());
-//		}
-//	}
+	@Test
 	public void testWbVar()
 	{
 		String sql = "select $[?wbvar] from table";
@@ -74,6 +68,7 @@ public class SQLLexerTest
 		assertTrue(l.get(7).isWbVar());
 	}
 
+	@Test
 	public void testUnicode()
 	{
 		String sql = "insert into mytable (col1, col2, col3) values ('\u32A5\u0416','col2_value', 1234)";
@@ -84,39 +79,33 @@ public class SQLLexerTest
 		assertEquals("1234", l.get(16).getText());
 	}
 	
+	@Test
 	public void testQuotedIdentifier()
 	{
-		try
-		{
-			String sql = "Select \"one AND two\" from thetable;";
-			SQLLexer l = new SQLLexer(sql);
-			SQLToken select = l.getNextToken(false, false);
-			
-			assertEquals(select.getContents(), "SELECT");
-			SQLToken col = l.getNextToken(false, false);
-			assertEquals("\"one AND two\"", col.getContents());
-			
-			
-			sql = "WbExport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
-			l = new SQLLexer(sql);
-			SQLToken t = l.getNextToken(false, false);
-			assertEquals("WBEXPORT", t.getText().toUpperCase());
-			t = l.getNextToken(false, false);
-			assertEquals("-", t.getText());
-			t = l.getNextToken(false, false);
-			assertEquals("file", t.getText());
-			t = l.getNextToken(false, false);
-			assertEquals("=", t.getText());
-			t = l.getNextToken(false, false);
-			assertEquals("\"c:\\Documents and Settings\\test.txt\"", t.getContents());
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String sql = "Select \"one AND two\" from thetable;";
+		SQLLexer l = new SQLLexer(sql);
+		SQLToken select = l.getNextToken(false, false);
+
+		assertEquals(select.getContents(), "SELECT");
+		SQLToken col = l.getNextToken(false, false);
+		assertEquals("\"one AND two\"", col.getContents());
+
+
+		sql = "WbExport -file=\"c:\\Documents and Settings\\test.txt\" -type=text";
+		l = new SQLLexer(sql);
+		SQLToken t = l.getNextToken(false, false);
+		assertEquals("WBEXPORT", t.getText().toUpperCase());
+		t = l.getNextToken(false, false);
+		assertEquals("-", t.getText());
+		t = l.getNextToken(false, false);
+		assertEquals("file", t.getText());
+		t = l.getNextToken(false, false);
+		assertEquals("=", t.getText());
+		t = l.getNextToken(false, false);
+		assertEquals("\"c:\\Documents and Settings\\test.txt\"", t.getContents());
 	}
 	
+	@Test
 	public void testLexer()
 	{
 		// Test if the multi-word keywords are detected properly
@@ -155,6 +144,7 @@ public class SQLLexerTest
 		assertEquals(true, t.isReservedWord());
 	}
 
+	@Test
 	public void testMultilineLiterals()
 		throws IOException
 	{
@@ -173,6 +163,7 @@ public class SQLLexerTest
 		assertTrue(tokens.get(4).isLiteral());
 	}
 	
+	@Test
 	public void testKeywords()
 	{
 		String sql = "union\nall \ngroup    by something\n"+
@@ -252,6 +243,7 @@ public class SQLLexerTest
 		}
 	}
 
+	@Test
 	public void testQuotes()
 		throws Exception
 	{

@@ -18,20 +18,26 @@ import java.util.Set;
 import java.util.TreeSet;
 import junit.framework.*;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableIdentifierTest
-	extends TestCase
+	extends WbTestCase
 {
-	public TableIdentifierTest(String testName)
+	public TableIdentifierTest()
 	{
-		super(testName);
+		super("TableIdentifierTest");
 	}
 
+	@Test
 	public void testRemoveCollection()
 	{
 		List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
@@ -45,7 +51,8 @@ public class TableIdentifierTest
 
 		assertEquals(2, tables.size());
 	}
-	
+
+	@Test
 	public void testSQLServerNaming()
 	{
 		String name = "[linked_server].[some_catalog].dbo.some_table";
@@ -65,11 +72,13 @@ public class TableIdentifierTest
 		assertEquals(tbl, copy);
 	}
 
+	@Test
 	public void testDropName()
+		throws Exception
 	{
 		try
 		{
-			TestUtil util = new TestUtil("tableIdentifierTest");
+			TestUtil util = getTestUtil();
 			WbConnection con = util.getConnection("dropExpressionTest");
 
 			TestUtil.executeScript(con, "create schema s1;\n " +
@@ -82,7 +91,7 @@ public class TableIdentifierTest
 				"create table table3 (id integer);\n " +
 				"set schema s1;\n " +
 				"commit; \n");
-			
+
 			TableIdentifier t1 = con.getMetadata().findTable(new TableIdentifier("PUBLIC.TABLE1"));
 			TestUtil.executeScript(con, "set schema s1;");
 			assertEquals("PUBLIC.TABLE1", t1.getObjectNameForDrop(con));
@@ -92,22 +101,19 @@ public class TableIdentifierTest
 			assertEquals("TABLE1", t1.getObjectNameForDrop(con));
 //			System.out.println("table: " + t1.getObjectNameForDrop(con));
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
-		
 	}
+
+	@Test
 	public void testQuoteSpecialChars()
+		throws Exception
 	{
 		try
 		{
-			TestUtil util = new TestUtil("tableIdentifierTest");
+			TestUtil util = getTestUtil();
 			WbConnection con = util.getConnection("tidTest");
 			String t = "\"123\".TABLENAME";
 			TableIdentifier tbl = new TableIdentifier(t);
@@ -164,17 +170,13 @@ public class TableIdentifierTest
 			exp = tbl.getTableExpression(con);
 //			System.out.println("****" + exp);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
+	@Test
 	public void testIdentifier()
 	{
 		String sql = "BDB_IE.dbo.tblBDBMMPGroup";
@@ -215,6 +217,7 @@ public class TableIdentifierTest
 		assertEquals("information_schema", tbl.getSchema());
 	}
 
+	@Test
 	public void testCopy()
 	{
 		String sql = "\"catalog\".\"schema\".\"table\"";
@@ -236,6 +239,7 @@ public class TableIdentifierTest
 		assertEquals("this is a comment", t2.getComment());
 	}
 
+	@Test
 	public void testEqualsAndHashCode()
 	{
 		TableIdentifier one = new TableIdentifier("person");

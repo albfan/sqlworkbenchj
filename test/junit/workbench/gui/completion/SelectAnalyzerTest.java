@@ -15,6 +15,10 @@ import java.util.List;
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.util.TableAlias;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -24,19 +28,12 @@ public class SelectAnalyzerTest
 	extends WbTestCase
 {
 
-	public SelectAnalyzerTest(String testName)
+	public SelectAnalyzerTest()
 	{
-		super(testName);
+		super("SelectAnalyzerTest");
 	}
 
-	protected void setUp() throws Exception
-	{
-	}
-
-	protected void tearDown() throws Exception
-	{
-	}
-
+	@Test
 	public void testSpaces()
 	{
 		String sql = "SELECT x. FROM \"Dumb Named Schema\".\"Problematically Named Table\" x";
@@ -54,6 +51,7 @@ public class SelectAnalyzerTest
 		assertEquals("\"Dumb Named Schema\".\"Problematically Named Table\"", tbl.getTableExpression());
 	}
 
+	@Test
 	public void testAnalyzer()
 	{
 		String sql = "SELECT a.att1\n      ,a.\nFROM   adam   a";

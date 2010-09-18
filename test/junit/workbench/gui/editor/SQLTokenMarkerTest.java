@@ -15,6 +15,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Element;
 import javax.swing.text.Segment;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
@@ -22,127 +24,113 @@ import workbench.WbTestCase;
 public class SQLTokenMarkerTest
 	extends WbTestCase
 {
-	public SQLTokenMarkerTest(String testName)
+	public SQLTokenMarkerTest()
 	{
-		super(testName);
+		super("SQLTokenMarkerTest");
 	}
 
+	@Test
 	public void testMultiLineComment()
+		throws Exception
 	{
-		try
-		{
-			SyntaxDocument doc = new SyntaxDocument();
-			
-			SQLTokenMarker marker = new AnsiSQLTokenMarker();
-			doc.setTokenMarker(marker);
-			
-			String sql = "/* first line comment \n" +
-				"second line */\n" +
-				"SELECT x FROM thetable;\n" +
-				"-- line comment\n" +
-				"SELECT x from y;\n" +
-				"/* \n" +
-				" block comment \n\n" +
-				"*/\n" +
-				"select x from y;";			
-			
-			doc.insertString(0, sql, null);
-	
-			Segment lineContent = new Segment();
-			int lineCount = doc.getDefaultRootElement().getElementCount();
+		SyntaxDocument doc = new SyntaxDocument();
+
+		SQLTokenMarker marker = new AnsiSQLTokenMarker();
+		doc.setTokenMarker(marker);
+
+		String sql = "/* first line comment \n" +
+			"second line */\n" +
+			"SELECT x FROM thetable;\n" +
+			"-- line comment\n" +
+			"SELECT x from y;\n" +
+			"/* \n" +
+			" block comment \n\n" +
+			"*/\n" +
+			"select x from y;";
+
+		doc.insertString(0, sql, null);
+
+		Segment lineContent = new Segment();
+		int lineCount = doc.getDefaultRootElement().getElementCount();
 //			assertEquals(9, lineCount);
 //			assertEquals(9, marker.getLineCount());
 
-			// Expected token IDs 
-			int[][] expectedTokens = new int[][]
-			{
-				{Token.COMMENT1 }, // First line opens the block comment
-				{Token.COMMENT1, Token.NULL }, // Second line continues the block comment and closes it
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }, 
-				{Token.COMMENT2 }, // Line comment
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL },
-				{Token.COMMENT1 }, // Second block comment
-				{Token.COMMENT1 },
-				{Token.NULL },
-				{Token.COMMENT1, Token.NULL }, 
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }
-			};
-			
-			for (int lineIndex = 0; lineIndex < lineCount; lineIndex ++)
-			{
-				getLineText(doc, lineIndex, lineContent);
-				Token token = marker.markTokens(lineContent, lineIndex);
-//				printTokenLine(lineContent, token);
-				verifyLine(expectedTokens, token, lineIndex);
-			}
-
-		}
-		catch (Exception ex)
+		// Expected token IDs
+		int[][] expectedTokens = new int[][]
 		{
-			ex.printStackTrace();
-			fail(ex.getMessage());
+			{Token.COMMENT1 }, // First line opens the block comment
+			{Token.COMMENT1, Token.NULL }, // Second line continues the block comment and closes it
+			{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL },
+			{Token.COMMENT2 }, // Line comment
+			{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL },
+			{Token.COMMENT1 }, // Second block comment
+			{Token.COMMENT1 },
+			{Token.NULL },
+			{Token.COMMENT1, Token.NULL },
+			{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }
+		};
+
+		for (int lineIndex = 0; lineIndex < lineCount; lineIndex ++)
+		{
+			getLineText(doc, lineIndex, lineContent);
+			Token token = marker.markTokens(lineContent, lineIndex);
+			verifyLine(expectedTokens, token, lineIndex);
 		}
 	}
 
+	@Test
 	public void testMultiLineLiteral()
+		throws Exception
 	{
-		try
-		{
-			SyntaxDocument doc = new SyntaxDocument();
-			
-			SQLTokenMarker marker = new AnsiSQLTokenMarker();
-			doc.setTokenMarker(marker);
-			
-			String sql = 
-				"SELECT x FROM thetable\n" +
-				"WHERE desc = 'this is a \n" +
-				" multiline \n" + 
-				"string literal' \n" + 
-				"AND name = 'arthur'\n" + 
-				"AND col = 5\n" +
-				"AND filename IS NOT NULL \n" + 
-        "AND   http_status IN ('200')";			
-			
-			// Expected token IDs 
-			int[][] expectedTokens = new int[][]
-			{
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }, // SELECT ...
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // WHERE ...
-				{Token.LITERAL1 }, // multiline 
-				{Token.LITERAL1, Token.NULL }, // string literal'
-				{Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // AND name = ...
-				{Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // AND col = ...
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL} , // AND filename ...
-				{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.NULL, Token.LITERAL1, Token.NULL} // AND htpp ...
-			};
-			
-			doc.insertString(0, sql, null);
-	
-			Segment lineContent = new Segment();
-			int lineCount = doc.getDefaultRootElement().getElementCount();
-			assertEquals(8, lineCount);
-			assertEquals(8, marker.getLineCount());
-			
-			for (int lineIndex = 0; lineIndex < lineCount; lineIndex ++)
-			{
-				getLineText(doc, lineIndex, lineContent);
-				Token token = marker.markTokens(lineContent, lineIndex);
-//				printTokenLine(lineContent, token);
-				verifyLine(expectedTokens, token, lineIndex);
-			}
+		SyntaxDocument doc = new SyntaxDocument();
 
-			// Test access in the middle of the text
-			for (int lineIndex = 2; lineIndex < lineCount; lineIndex++)
-			{
-				getLineText(doc, lineIndex, lineContent);
-				Token token = marker.markTokens(lineContent, lineIndex);
-				verifyLine(expectedTokens, token, lineIndex);
-			}
-		}
-		catch (Exception ex)
+		SQLTokenMarker marker = new AnsiSQLTokenMarker();
+		doc.setTokenMarker(marker);
+
+		String sql =
+			"SELECT x FROM thetable\n" +
+			"WHERE desc = 'this is a \n" +
+			" multiline \n" +
+			"string literal' \n" +
+			"AND name = 'arthur'\n" +
+			"AND col = 5\n" +
+			"AND filename IS NOT NULL \n" +
+			"AND   http_status IN ('200')";
+
+		// Expected token IDs
+		int[][] expectedTokens = new int[][]
 		{
-			ex.printStackTrace();
-			fail(ex.getMessage());
+			{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL }, // SELECT ...
+			{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // WHERE ...
+			{Token.LITERAL1 }, // multiline
+			{Token.LITERAL1, Token.NULL }, // string literal'
+			{Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // AND name = ...
+			{Token.KEYWORD1, Token.NULL, Token.OPERATOR, Token.NULL, Token.LITERAL1 }, // AND col = ...
+			{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL} , // AND filename ...
+			{Token.KEYWORD1, Token.NULL, Token.KEYWORD1, Token.NULL, Token.NULL, Token.LITERAL1, Token.NULL} // AND htpp ...
+		};
+
+		doc.insertString(0, sql, null);
+
+		Segment lineContent = new Segment();
+		int lineCount = doc.getDefaultRootElement().getElementCount();
+		assertEquals(8, lineCount);
+		assertEquals(8, marker.getLineCount());
+
+		for (int lineIndex = 0; lineIndex < lineCount; lineIndex ++)
+		{
+			getLineText(doc, lineIndex, lineContent);
+			Token token = marker.markTokens(lineContent, lineIndex);
+//				printTokenLine(lineContent, token);
+			verifyLine(expectedTokens, token, lineIndex);
+		}
+
+		// Test access in the middle of the text
+		for (int lineIndex = 2; lineIndex < lineCount; lineIndex++)
+		{
+			getLineText(doc, lineIndex, lineContent);
+			Token token = marker.markTokens(lineContent, lineIndex);
+			verifyLine(expectedTokens, token, lineIndex);
 		}
 	}
 

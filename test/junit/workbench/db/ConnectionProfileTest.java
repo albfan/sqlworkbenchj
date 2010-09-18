@@ -17,6 +17,10 @@ import java.util.List;
 import java.util.Properties;
 import workbench.WbTestCase;
 import workbench.sql.DelimiterDefinition;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  * @author Thomas Kellerer
@@ -24,11 +28,12 @@ import workbench.sql.DelimiterDefinition;
 public class ConnectionProfileTest
 	extends WbTestCase
 {
-	public ConnectionProfileTest(String testName)
+	public ConnectionProfileTest()
 	{
-		super(testName);
+		super("ConnectionProfileTest");
 	}
 
+	@Test
 	public void testCreateCopy()
 		throws Exception
 	{
@@ -94,6 +99,7 @@ public class ConnectionProfileTest
 		assertNull(copy.getAlternateDelimiter());
 	}
 
+	@Test
 	public void testSessionProps()
 	{
 		ConnectionProfile profile = new ConnectionProfile();
@@ -117,6 +123,7 @@ public class ConnectionProfileTest
 		assertFalse(profile.getConfirmUpdates());
 	}
 	
+	@Test
 	public void testProps()
 		throws Exception
 	{
@@ -241,6 +248,7 @@ public class ConnectionProfileTest
 		assertTrue(profile.isChanged());
 	}
 
+	@Test
 	public void testFindInList()
 	{
 		ConnectionProfile profile = new ConnectionProfile();

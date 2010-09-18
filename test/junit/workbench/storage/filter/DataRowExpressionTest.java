@@ -13,26 +13,24 @@ package workbench.storage.filter;
 
 import java.util.HashMap;
 import java.util.Map;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class DataRowExpressionTest extends TestCase {
-    
-	public DataRowExpressionTest(String testName) 
-	{
-		super(testName);
-	}
+public class DataRowExpressionTest
+{
 
+	@Test
 	public void testEvaluate()
 		throws Exception
 	{
 		DataRowExpression expr = new DataRowExpression(new ContainsComparator(), "Zapho");
 		expr.setIgnoreCase(true);
 		assertTrue(expr.isIgnoreCase());
-		
+
 		Map<String, Object> values = new HashMap<String, Object>();
 		values.put("firstname", "zaphod");
 		values.put("lastname", "Beeblebrox");
@@ -43,7 +41,7 @@ public class DataRowExpressionTest extends TestCase {
 
 		expr.setIgnoreCase(false);
 		assertFalse(expr.isIgnoreCase());
-		
+
 		assertFalse(expr.evaluate(values));
 
 		expr = new DataRowExpression(new ContainsComparator(), "Arthur");

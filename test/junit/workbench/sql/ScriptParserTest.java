@@ -23,6 +23,8 @@ import workbench.util.EncodingUtil;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -32,11 +34,12 @@ public class ScriptParserTest
 	extends WbTestCase
 {
 
-	public ScriptParserTest(String testName)
+	public ScriptParserTest()
 	{
-		super(testName);
+		super("ScriptParserTest");
 	}
 
+	@Test
 	public void testQuotes()
 		throws Exception
 	{
@@ -77,6 +80,7 @@ public class ScriptParserTest
 		assertEquals(2, p.getSize());
 	}
 
+	@Test
 	public void testArrayBasedGetNext()
 		throws Exception
 	{
@@ -97,10 +101,12 @@ public class ScriptParserTest
 		assertEquals(2, count);
 	}
 	
+	@Test
 	public void testMultiByteEncoding()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("ScriptParserTest");
+		TestUtil util = getTestUtil();
+		
 		File f = new File(util.getBaseDir(), "insert.sql");
 		ScriptParser parser = null;
 		int commandsInFile = 0;
@@ -139,6 +145,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testEmptyStatement()
 	{
 		try
@@ -157,6 +164,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testCursorInEmptyLine()
 	{
 		try
@@ -176,6 +184,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testEndPosition()
 	{
 		try
@@ -196,6 +205,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testCursorPosInCommand()
 	{
 		try
@@ -216,6 +226,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testEmptyLines()
 	{
 		try
@@ -251,6 +262,8 @@ public class ScriptParserTest
 			e.printStackTrace();
 		}
 	}
+
+	@Test
 	public void testSingleLineDelimiter()
 	{
 		String sql = "DROP\n" +
@@ -286,62 +299,58 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testAlternateFileParsing()
+		throws Exception
 	{
-		try
+		TestUtil util = getTestUtil();
+		util.prepareEnvironment();
+
+		File scriptFile = new File(util.getBaseDir(), "testscript.sql");
+		PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
+		writer.println("-- test script");
+		writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100))");
+		writer.println("/");
+		writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')");
+		writer.println("/");
+		writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect')");
+		writer.println("/");
+		writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox')");
+		writer.println("/");
+		writer.println("commit");
+		writer.println("/");
+		writer.close();
+
+		// Make sure the iterating parser is used, by setting
+		// a very low max file size
+		ScriptParser p = new ScriptParser(10);
+
+		p.setDelimiter(new DelimiterDefinition("/", true));
+		p.setSupportOracleInclude(false);
+		p.setCheckForSingleLineCommands(false);
+		p.setCheckEscapedQuotes(false);
+
+		p.setFile(scriptFile);
+		p.startIterator();
+		int size = 0;
+		while (p.hasNext())
 		{
-			TestUtil util = new TestUtil("alternateFileParsing");
-			util.prepareEnvironment();
+			String sql = p.getNextCommand();
+			if (sql == null) break;
+			if (StringUtil.isBlank(sql)) break;
+			size ++;
 
-			File scriptFile = new File(util.getBaseDir(), "testscript.sql");
-			PrintWriter writer = new PrintWriter(new FileWriter(scriptFile));
-			writer.println("-- test script");
-			writer.println("CREATE TABLE person (nr integer primary key, firstname varchar(100), lastname varchar(100))");
-			writer.println("/");
-			writer.println("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')");
-			writer.println("/");
-			writer.println("insert into person (nr, firstname, lastname) values (2,'Ford', 'Prefect')");
-			writer.println("/");
-			writer.println("insert into person (nr, firstname, lastname) values (3,'Zaphod', 'Beeblebrox')");
-			writer.println("/");
-			writer.println("commit");
-			writer.println("/");
-			writer.close();
-
-			// Make sure the iterating parser is used, by setting
-			// a very low max file size
-			ScriptParser p = new ScriptParser(10);
-
-			p.setDelimiter(new DelimiterDefinition("/", true));
-			p.setSupportOracleInclude(false);
-			p.setCheckForSingleLineCommands(false);
-			p.setCheckEscapedQuotes(false);
-
-			p.setFile(scriptFile);
-			p.startIterator();
-			int size = 0;
-			while (p.hasNext())
+			if (size == 2)
 			{
-				String sql = p.getNextCommand();
-				if (sql == null) break;
-				if (StringUtil.isBlank(sql)) break;
-				size ++;
-
-				if (size == 2)
-				{
-					assertEquals("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')", sql);
-				}
-//				System.out.println("** "+ size + ": " + sql);
+				assertEquals("insert into person (nr, firstname, lastname) values (1,'Arthur', 'Dent')", sql);
 			}
-			assertEquals("Wrong number of statements", 5, size);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		assertEquals("Wrong number of statements", 5, size);
+		p.done();
+		assertTrue(scriptFile.delete());
 	}
 
+	@Test
 	public void testQuotedDelimiter()
 	{
 		String sql = "SELECT id,';' \n" +
@@ -363,6 +372,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testMsGO()
 	{
 		String sql = "SELECT id \n" +
@@ -424,6 +434,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testGoWithComments()
 	{
 		String sql =
@@ -446,6 +457,7 @@ public class ScriptParserTest
 		assertEquals(2, size);
 	}
 
+	@Test
 	public void testAlternateDelimiter()
 	{
 		String sql = "SELECT id \n" +
@@ -540,6 +552,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testAccessByCursorPos()
 	{
 		try
@@ -604,6 +617,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testShortInclude()
 	{
 		try
@@ -642,7 +656,6 @@ public class ScriptParserTest
 		}
 	}
 
-
 	private File createScript(int counter, String lineEnd)
 		throws IOException
 	{
@@ -667,6 +680,7 @@ public class ScriptParserTest
 		return script;
 	}
 
+	@Test
 	public void testFileParsing()
 	{
 		try
@@ -713,6 +727,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testMultiStatements()
 	{
 		String sql = "SELECT '(select l.label from template_field_label l where l.template_field_id = f.id and l.language_code = '''|| l.code ||''') as \"'||l.code||' ('||l.name||')\",' \n" +
@@ -789,6 +804,7 @@ public class ScriptParserTest
 		assertEquals(2, p.getSize());
 	}
 
+	@Test
 	public void testCommentWithQuote()
 	{
 		try
@@ -825,6 +841,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testSingleLineStatements()
 	{
 		try
@@ -846,6 +863,7 @@ public class ScriptParserTest
 		}
 	}
 
+	@Test
 	public void testAlternateLineComment()
 	{
 		String sql =  "# this is a non-standard comment;\n" +
@@ -871,6 +889,7 @@ public class ScriptParserTest
 		assertEquals("Wrong statement count.", 3, count);
 	}
 
+	@Test
 	public void testUnicodeComments()
 	{
 		String sql = "-- \u32A5\u0416\u32A5\u0416\u2013\u2021\u00e6\u00b3\u00a8\u00e9\u2021\u0160\n" +
@@ -889,6 +908,7 @@ public class ScriptParserTest
 //		System.out.println("cmd=" + cmd);
 	}
 
+	@Test
 	public void testMerge()
 	{
 		String sql = "MERGE INTO T085_ITEMSALE_DAY itd \n" +

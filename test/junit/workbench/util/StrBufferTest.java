@@ -11,16 +11,17 @@
  */
 package workbench.util;
 
-import junit.framework.*;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author  Thomas Kellerer
  */
 public class StrBufferTest
-	extends TestCase
 {
 
+	@Test
 	public void testRemove()
 	{
 		StrBuffer buffer = new StrBuffer("0123456789");
@@ -33,7 +34,7 @@ public class StrBufferTest
 		assertEquals("Remove not working", "0456789", buffer.toString());
 	}
 
-
+	@Test
 	public void testAppend()
 	{
 		StrBuffer buffer = new StrBuffer("0");

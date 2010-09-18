@@ -13,41 +13,30 @@ package workbench.storage;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.WbConnection;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ResultColumnMetaDataTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public ResultColumnMetaDataTest(String testName)
+	public ResultColumnMetaDataTest()
 	{
-		super(testName);
+		super("ResultColumnMetaDataTest");
 	}
 
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
-	}
-
+	@Test
 	public void testRetrieveColumnRemarks()
 		throws Exception
 	{
-		TestUtil util = new TestUtil(getName());
+		TestUtil util = getTestUtil();
 		WbConnection con = util.getConnection();
 		try
 		{
@@ -79,7 +68,7 @@ public class ResultColumnMetaDataTest
 			}
 
 			rs.close();
-			
+
 			TestUtil.executeScript(con, "create table address (person_id integer not null, address_info varchar(500));\n" +
 				"comment on column address.person_id is 'The person ID';\n" +
 				"comment on column address.address_info is 'The address';\n" +
@@ -169,7 +158,7 @@ public class ResultColumnMetaDataTest
 					assertEquals("The address", info.getColumn(i).getComment());
 				}
 			}
-			
+
 		}
 		finally
 		{

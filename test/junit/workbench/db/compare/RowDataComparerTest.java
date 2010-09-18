@@ -11,6 +11,7 @@
  */
 package workbench.db.compare;
 
+import org.junit.Test;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
@@ -18,6 +19,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.storage.StatementFactory;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
@@ -26,11 +28,12 @@ public class RowDataComparerTest
 	extends WbTestCase
 {
 
-	public RowDataComparerTest(String testName)
+	public RowDataComparerTest()
 	{
-		super(testName);
+		super("RowDataComparerTest");
 	}
 
+	@Test
 	public void testGetMigrationSql()
 	{
 		ColumnIdentifier[] cols = new ColumnIdentifier[3];
@@ -99,6 +102,7 @@ public class RowDataComparerTest
 		assertNull(sql);
 	}
 
+	@Test
 	public void testGetMigrationXml()
 	{
 		ColumnIdentifier[] cols = new ColumnIdentifier[3];

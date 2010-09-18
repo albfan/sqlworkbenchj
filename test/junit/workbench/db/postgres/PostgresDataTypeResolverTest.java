@@ -12,19 +12,16 @@
 package workbench.db.postgres;
 
 import java.sql.Types;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class PostgresDataTypeResolverTest
-	extends TestCase
 {
-	public PostgresDataTypeResolverTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetSqlTypeDisplay()
 	{
 		PostgresDataTypeResolver resolver = new PostgresDataTypeResolver();

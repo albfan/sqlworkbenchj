@@ -18,6 +18,10 @@ import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
 import workbench.storage.DataStore;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -28,16 +32,15 @@ public class WbGrepDataTest
 {
 	private WbConnection con;
 
-	public WbGrepDataTest(String testName)
+	public WbGrepDataTest()
 	{
-		super(testName);
+		super("WbGrepDataTest");
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = getTestUtil();
 		con = util.getConnection();
 		TestUtil.executeScript(con, "create table person (nr integer, firstname varchar(20), lastname varchar(20));\n" +
@@ -53,14 +56,14 @@ public class WbGrepDataTest
 			"commit;");
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
-		super.tearDown();
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
+	@Test
 	public void testExecute()
 		throws Exception
 	{

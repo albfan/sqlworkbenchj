@@ -11,25 +11,21 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
 import workbench.storage.BlobFormatterFactory;
 import workbench.storage.BlobLiteralFormatter;
 import workbench.storage.BlobLiteralType;
 import workbench.storage.RowData;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DecodeUtilTest
-	extends TestCase
 {
 
-	public DecodeUtilTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testDecodeString()
 		throws Exception
 	{

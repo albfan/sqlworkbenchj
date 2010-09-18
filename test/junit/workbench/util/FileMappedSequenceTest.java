@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.Writer;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -25,12 +27,13 @@ public class FileMappedSequenceTest
 {
   private TestUtil util;
 
-	public FileMappedSequenceTest(String testName)
+	public FileMappedSequenceTest()
 	{
-		super(testName);
-		util = new TestUtil("ScriptParserTest");
+		super("FileMappedSequenceTest");
+		util = getTestUtil();
 	}
 
+	@Test
   public void testLastChar()
     throws Exception
   {
@@ -44,8 +47,11 @@ public class FileMappedSequenceTest
 		int charLength = sequence.length();
     assertEquals(content.length(), charLength);
     assertEquals(content, sequence.subSequence(0, charLength));
+		sequence.done();
+		assertTrue(f.delete());
   }
 
+	@Test
 	public void testLength()
 		throws Exception
 	{
@@ -111,10 +117,10 @@ public class FileMappedSequenceTest
 		value = sequence.subSequence(0, len);
 		expected = content.subSequence(0, len).toString();
 		assertEquals(expected, value);
+		sequence.done();
 
 		for (int chunkSize =  contentLength / 3; chunkSize < contentLength * 2; chunkSize += contentLength / 4)
 		{
-//			System.out.println("Using chunk size: " + chunkSize);
 			sequence = new FileMappedSequence(f, "UTF-8", chunkSize);
 
 			len = sequence.getCurrentChunkLength();
@@ -156,7 +162,9 @@ public class FileMappedSequenceTest
 				expected = content.subSequence(len - 2, len + 2).toString();
 				assertEquals(expected, value);
 			}
+			sequence.done();
 		}
+		assertTrue(f.delete());
 	}
 
 }

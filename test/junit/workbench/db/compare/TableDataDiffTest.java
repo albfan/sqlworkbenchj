@@ -13,28 +13,30 @@ package workbench.db.compare;
 
 import java.io.StringWriter;
 import java.sql.Statement;
-import junit.framework.TestCase;
+import org.junit.Test;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableDataDiffTest
-	extends TestCase
+	extends WbTestCase
 {
 
 	private WbConnection source;
 	private WbConnection target;
 	private TestUtil util;
 	
-	public TableDataDiffTest(String testName)
+	public TableDataDiffTest()
 	{
-		super(testName);
-		util	= new TestUtil("tableDiff");
+		super("TableDataDiffTest");
+		util = getTestUtil();
 	}
 
 	protected void createDefaultDb()
@@ -95,6 +97,7 @@ public class TableDataDiffTest
 	/**
 	 * Test of doSync method, of class TableDataDiff.
 	 */
+	@Test
 	public void testDoSync()
 		throws Exception
 	{
@@ -177,6 +180,8 @@ public class TableDataDiffTest
 			SqlUtil.closeStatement(targetStmt);
 		}
 	}
+
+	@Test
 	public void testDifferentCase()
 		throws Exception
 	{
@@ -188,7 +193,6 @@ public class TableDataDiffTest
 		diff.setTableName(new TableIdentifier("person"), new TableIdentifier("person"));
 		diff.doSync();
 		String output = updates.toString() + "\n" + inserts.toString();
-		System.out.println("----- sync script start \n" + output.toString() + "----- sync script end");
-
+//		System.out.println("----- sync script start \n" + output.toString() + "----- sync script end");
 	}
 }

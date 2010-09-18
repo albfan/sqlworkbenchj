@@ -11,12 +11,14 @@
  */
 package workbench.db.importer;
 
+import org.junit.Test;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.PrintWriter;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.util.ZipOutputFactory;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -26,11 +28,12 @@ public class ImportFileHandlerTest
 	extends WbTestCase
 {
 
-	public ImportFileHandlerTest(String testName)
+	public ImportFileHandlerTest()
 	{
-		super(testName);
+		super("ImportFileHandlerTest");
 	}
 
+	@Test
 	public void testHandler()
 	{
 		try

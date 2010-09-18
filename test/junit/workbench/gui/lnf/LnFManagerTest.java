@@ -16,6 +16,10 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -24,20 +28,12 @@ import workbench.util.StringUtil;
 public class LnFManagerTest
 	extends WbTestCase
 {
-	public LnFManagerTest(String testName)
+	public LnFManagerTest()
 	{
-		super(testName);
+		super("LnFManagerTest");
 	}
 
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-		TestUtil util = getTestUtil();
-		util.emptyBaseDirectory();
-	}
-
+	@Test
 	public void testSeparatorConvert()
 	{
 		LnFManager mgr = new LnFManager();

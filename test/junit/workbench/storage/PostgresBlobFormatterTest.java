@@ -12,19 +12,16 @@
 package workbench.storage;
 
 import java.io.ByteArrayOutputStream;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class PostgresBlobFormatterTest
-	extends TestCase
 {
-	public PostgresBlobFormatterTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetBlobLiteral()
 		throws Exception
 	{

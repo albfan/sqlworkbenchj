@@ -13,22 +13,18 @@ package workbench.db;
 
 import java.util.Collection;
 import java.util.Set;
-import junit.framework.TestCase;
 import workbench.util.CollectionUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ObjectNameFilterTest
-	extends TestCase
 {
 
-	public ObjectNameFilterTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testIsExcluded()
 	{
 		ObjectNameFilter filter = new ObjectNameFilter();

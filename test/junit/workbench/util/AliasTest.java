@@ -11,21 +11,17 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class AliasTest
-	extends TestCase
 {
 
-	public AliasTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetAlias()
 	{
 		Alias alias = new Alias("f123 as first_name");
@@ -46,5 +42,4 @@ public class AliasTest
 		assertEquals("\"Imbecile Schema Name\".\"Daft table name\"", alias.getObjectName());
 		assertNull(alias.getAlias());
 	}
-
 }

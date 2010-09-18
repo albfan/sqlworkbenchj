@@ -16,6 +16,8 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -25,17 +27,19 @@ public class WbListProfilesTest
 	extends WbTestCase
 {
 
-	public WbListProfilesTest(String testName)
+	public WbListProfilesTest()
 	{
-		super(testName);
+		super("WbListProfilesTest");
 	}
 
+	@Test
 	public void testNeedsConnection()
 	{
 		WbListProfiles list = new WbListProfiles();
 		assertFalse(list.isConnectionRequired());
 	}
 
+	@Test
 	public void testExecute()
 		throws Exception
 	{

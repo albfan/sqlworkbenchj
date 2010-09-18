@@ -11,26 +11,23 @@
  */
 package workbench.db;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DependencyNodeTest
-	extends TestCase
 {
-	public DependencyNodeTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testGetLevel()
 	{
 		TableIdentifier root = new TableIdentifier("root");
 		DependencyNode rootNode = new DependencyNode(root);
 		assertEquals("Wrong level for root", 0, rootNode.getLevel());
-		
+
 		TableIdentifier child1 = new TableIdentifier("child1");
 		DependencyNode cnode = rootNode.addChild(child1, "test");
 		assertEquals("Wrong level for first child", 1, cnode.getLevel());
@@ -42,10 +39,10 @@ public class DependencyNodeTest
 		TableIdentifier child3 = new TableIdentifier("child3");
 		DependencyNode cnode3 = cnode2.addChild(child3, "test_3");
 		assertEquals("Wrong level for third child", 2, cnode3.getLevel());
-		
+
 		DependencyNode f = rootNode.findNode(cnode3);
 		assertNotNull(f);
 		assertEquals(f, cnode3);
 	}
-	
+
 }

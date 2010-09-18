@@ -23,6 +23,8 @@ import workbench.gui.profiles.ProfileKey;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.FileUtil;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -31,13 +33,15 @@ import workbench.util.SqlUtil;
 public class WbSchemaDiffTest
 	extends WbTestCase
 {
+
 	private TestUtil util;
 
-	public WbSchemaDiffTest(String testName)
+	public WbSchemaDiffTest()
 	{
-		super(testName);
+		super("WbSchemaDiffTest");
 	}
 
+	@Test
 	public void testTreatViewAsTable()
 		throws Exception
 	{
@@ -75,6 +79,7 @@ public class WbSchemaDiffTest
 		assertEquals("Connections not closed", 0, ConnectionMgr.getInstance().getOpenCount());
 	}
 
+	@Test
 	public void testBaseDiff()
 		throws Exception
 	{
@@ -98,7 +103,7 @@ public class WbSchemaDiffTest
 
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/table-info)");
 		assertEquals("Incorrect table info count", "3", value);
-		
+
 		value = TestUtil.getXPathValue(xml, "count(/schema-diff/compare-settings/view-info)");
 		assertEquals("Incorrect view info count", "1", value);
 
@@ -163,7 +168,7 @@ public class WbSchemaDiffTest
 			stmt.executeUpdate("create table person_address (person_id integer, address_id integer, primary key (person_id, address_id))");
 			stmt.executeUpdate("create table to_ignore (some_id integer, another_id integer)");
 			stmt.executeUpdate("alter table person_address add constraint fk_pa_person foreign key (person_id) references person(person_id)");
-      stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
+			stmt.executeUpdate("alter table person_address add constraint fk_pa_address foreign key (address_id) references address(address_id)");
 
 			stmt.executeUpdate("CREATE VIEW v_person AS SELECT * FROM person");
 			stmt.executeUpdate("CREATE sequence seq_one");

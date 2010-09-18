@@ -14,18 +14,17 @@ package workbench.storage.filter;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  * @author Thomas Kellerer
  */
 public class ComplexExpressionTest
-	extends TestCase
 {
-	public ComplexExpressionTest(String name)
-	{
-		super(name);
-	}
-
+	@Test
 	public void testOrExpression()
 	{
 		ComplexExpression expr = new OrExpression();
@@ -39,7 +38,8 @@ public class ComplexExpressionTest
 		values.put("spaceship", null);
 		assertTrue(expr.evaluate(values));
 	}
-	
+
+	@Test
 	public void testAndExpression()
 		throws Exception
 	{
@@ -69,5 +69,5 @@ public class ComplexExpressionTest
 		expr.addColumnExpression("lastname", new IsNullComparator(), null);
 		assertTrue(expr.evaluate(values));
 	}
-	
+
 }

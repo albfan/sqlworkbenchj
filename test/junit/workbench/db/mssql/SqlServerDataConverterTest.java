@@ -13,20 +13,16 @@ package workbench.db.mssql;
 
 import java.sql.Types;
 import junit.framework.TestCase;
-
+import org.junit.Test;
+import static org.junit.Assert.*;
 /**
  *
  * @author Thomas Kellerer
  */
 public class SqlServerDataConverterTest
-	extends TestCase
 {
 
-	public SqlServerDataConverterTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testConvertsType()
 	{
 		SqlServerDataConverter converter = SqlServerDataConverter.getInstance();
@@ -43,6 +39,7 @@ public class SqlServerDataConverterTest
 		assertEquals("0x0101010101010101", newValue.toString());
 	}
 
+	@Test
 	public void testConvertValue()
 	{
 		SqlServerDataConverter converter = SqlServerDataConverter.getInstance();

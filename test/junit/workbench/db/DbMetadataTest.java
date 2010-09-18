@@ -14,6 +14,9 @@ package workbench.db;
 import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 
 /**
  *
@@ -23,25 +26,12 @@ public class DbMetadataTest
 	extends WbTestCase
 {
 
-	public DbMetadataTest(String testName)
+	public DbMetadataTest()
 	{
-		super(testName);
+		super("DbMetadataTest");
 	}
 
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
-	}
-
+	@Test
 	public void testGetTableDefinition()
 		throws Exception
 	{

@@ -11,6 +11,7 @@
  */
 package workbench.db.exporter;
 
+import org.junit.Test;
 import java.sql.Types;
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,7 @@ import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 import workbench.util.ValueConverter;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -29,11 +31,12 @@ public class XlsXMLRowDataConverterTest
 	extends WbTestCase
 {
 
-	public XlsXMLRowDataConverterTest(String testName)
+	public XlsXMLRowDataConverterTest()
 	{
-		super(testName);
+		super("XlsXMLRowDataConverterTest");
 	}
 
+	@Test
 	public void testConvert()
 		throws Exception
 	{

@@ -15,20 +15,19 @@ import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import java.util.Map;
 import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ColumnExpressionTest
-	extends TestCase
 {
 
-	public ColumnExpressionTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testComparators()
 	{
 		Map<String, Object> values = new HashMap<String, Object>();
@@ -44,7 +43,7 @@ public class ColumnExpressionTest
 		assertTrue(col.evaluate(values));
 		col = new ColumnExpression("firstname", new IsNullComparator(), null);
 		assertFalse(col.evaluate(values));
-		
+
 		col = new ColumnExpression("spaceship", new IsNotNullComparator(), null);
 		assertFalse(col.evaluate(values));
 		col = new ColumnExpression("firstname", new IsNotNullComparator(), null);
@@ -69,7 +68,7 @@ public class ColumnExpressionTest
 		assertTrue(col.evaluate(values));
 		col = new ColumnExpression("age", new NumberEqualsComparator(), new Integer(44));
 		assertFalse(col.evaluate(values));
-		
+
 		col = new ColumnExpression("firstname", new NotStartsWithComparator(), "Tricia");
 		col.setIgnoreCase(true);
 		assertTrue(col.evaluate(values));
@@ -80,20 +79,20 @@ public class ColumnExpressionTest
 
 		col.setIgnoreCase(true);
 		assertFalse(col.evaluate(values));
-		
+
 		col = new ColumnExpression("firstname", new ContainsComparator(), "Pho");
 		col.setIgnoreCase(true);
 		assertTrue(col.evaluate(values));
 		col.setIgnoreCase(false);
 		assertFalse(col.evaluate(values));
 
-		
+
 		col = new ColumnExpression("firstname", new ContainsNotComparator(), "Pho");
 		col.setIgnoreCase(true);
 		assertFalse(col.evaluate(values));
 		col.setIgnoreCase(false);
 		assertTrue(col.evaluate(values));
-		
+
 		col = new ColumnExpression("firstname", new StringEqualsComparator(), "Zaphod");
 		col.setIgnoreCase(true);
 		assertTrue(col.evaluate(values));
@@ -105,7 +104,7 @@ public class ColumnExpressionTest
 		assertTrue(col.evaluate(values));
 		col.setIgnoreCase(true);
 		assertTrue(col.evaluate(values));
-		
+
 		col = new ColumnExpression("firstname", new StringNotEqualsComparator(), "Zaphod");
 		col.setIgnoreCase(false);
 		assertTrue(col.evaluate(values));
@@ -113,13 +112,14 @@ public class ColumnExpressionTest
 		assertFalse(col.evaluate(values));
 	}
 
+	@Test
 	public void testDateComparison()
 		throws Exception
 	{
 		SimpleDateFormat f = new SimpleDateFormat("yyyy-MM-dd");
 		Map<String, Object> values = new HashMap<String, Object>();
 		values.put("changed_on", f.parse("2006-11-01"));
-		
+
 		ColumnExpression expr = new ColumnExpression("changed_on", new GreaterThanComparator(), f.parse("2006-10-01"));
 		assertTrue(expr.evaluate(values));
 
@@ -131,9 +131,9 @@ public class ColumnExpressionTest
 
 		expr = new ColumnExpression("changed_on", new LessThanComparator(), f.parse("2006-11-02"));
 		assertTrue(expr.evaluate(values));
-		
+
 		expr = new ColumnExpression("changed_on", new LessThanComparator(), f.parse("2006-10-20"));
 		assertFalse(expr.evaluate(values));
 	}
-	
+
 }

@@ -11,21 +11,19 @@
  */
 package workbench.db.exporter;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import workbench.WbTestCase;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class BlobModeTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public BlobModeTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetMode()
 	{
 		assertEquals(BlobMode.SaveToFile, BlobMode.getMode("file "));

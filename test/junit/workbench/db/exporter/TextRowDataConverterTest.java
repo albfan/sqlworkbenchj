@@ -15,6 +15,7 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import org.junit.Test;
 import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.storage.BlobFormatterFactory;
@@ -22,6 +23,7 @@ import workbench.storage.BlobLiteralType;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -31,11 +33,12 @@ public class TextRowDataConverterTest
 	extends WbTestCase
 {
 	
-	public TextRowDataConverterTest(String testName)
+	public TextRowDataConverterTest()
 	{
-		super(testName);
+		super("TextRowDataConverterTest");
 	}
 
+	@Test
 	public void testConvert()
 		throws Exception
 	{
@@ -85,6 +88,7 @@ public class TextRowDataConverterTest
 		assertEquals("Wrong columns exporter", "data1;42", line.toString().trim());
 	}
 
+	@Test
 	public void testBlobEncoding()
 		throws Exception
 	{

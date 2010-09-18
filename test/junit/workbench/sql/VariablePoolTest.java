@@ -15,124 +15,115 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Set;
-import junit.framework.TestCase;
 import workbench.AppArguments;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.storage.DataStore;
 import workbench.util.ArgumentParser;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class VariablePoolTest extends TestCase
+public class VariablePoolTest
+	extends WbTestCase
 {
-	
-	public VariablePoolTest(String testName)
+
+	public VariablePoolTest()
 	{
-		super(testName);
+		super("VariablePoolTest");
 	}
 
-
+	@Test
 	public void testInitFromCommandLine()
+		throws Exception
 	{
-		try
-		{
-			TestUtil util = new TestUtil(this.getName());
-			
-			ArgumentParser p = new ArgumentParser();
-			p.addArgument(AppArguments.ARG_VARDEF);
-			p.parse("-" + AppArguments.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");
-			VariablePool pool = VariablePool.getInstance();
-			pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
-			assertEquals("Wrong parameter retrieved from commandline", "/user/home/test.txt", pool.getParameterValue("exportfile"));
-			
-			File f = new File(util.getBaseDir(), "vars.properties");
-			
-			FileWriter out = new FileWriter(f);
-			out.write("exportfile=/user/home/export.txt\n");
-			out.write("exporttable=person\n");
-			out.close();
+		TestUtil util = getTestUtil();
 
-			pool.clear();
-			p.parse("-" + AppArguments.ARG_VARDEF + "='" + f.getAbsolutePath() + "'");
-			pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
-			assertEquals("Wrong parameter retrieved from file", "/user/home/export.txt", pool.getParameterValue("exportfile"));
-			assertEquals("Wrong parameter retrieved from file", "person", pool.getParameterValue("exporttable"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		ArgumentParser p = new ArgumentParser();
+		p.addArgument(AppArguments.ARG_VARDEF);
+		p.parse("-" + AppArguments.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");
+		VariablePool pool = VariablePool.getInstance();
+		pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
+		assertEquals("Wrong parameter retrieved from commandline", "/user/home/test.txt", pool.getParameterValue("exportfile"));
+
+		File f = new File(util.getBaseDir(), "vars.properties");
+
+		FileWriter out = new FileWriter(f);
+		out.write("exportfile=/user/home/export.txt\n");
+		out.write("exporttable=person\n");
+		out.close();
+
+		pool.clear();
+		p.parse("-" + AppArguments.ARG_VARDEF + "='" + f.getAbsolutePath() + "'");
+		pool.readDefinition(p.getValue(AppArguments.ARG_VARDEF));
+		assertEquals("Wrong parameter retrieved from file", "/user/home/export.txt", pool.getParameterValue("exportfile"));
+		assertEquals("Wrong parameter retrieved from file", "person", pool.getParameterValue("exporttable"));
 	}
-	
+
+	@Test
 	public void testInitFromProperties()
+		throws Exception
 	{
-		try
-		{
-			System.setProperty(VariablePool.PROP_PREFIX + "testvalue", "value1");
-			System.setProperty(VariablePool.PROP_PREFIX + "myprop", "value2");
-			System.setProperty("someprop.testvalue", "value2");
-			VariablePool pool = VariablePool.getInstance();
-		
-			pool.initFromProperties(System.getProperties());
-			assertEquals("Wrong firstvalue", "value1", pool.getParameterValue("testvalue"));
-			assertEquals("Wrong firstvalue", "value2", pool.getParameterValue("myprop"));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		System.setProperty(VariablePool.PROP_PREFIX + "testvalue", "value1");
+		System.setProperty(VariablePool.PROP_PREFIX + "myprop", "value2");
+		System.setProperty("someprop.testvalue", "value2");
+		VariablePool pool = VariablePool.getInstance();
+
+		pool.initFromProperties(System.getProperties());
+		assertEquals("Wrong firstvalue", "value1", pool.getParameterValue("testvalue"));
+		assertEquals("Wrong firstvalue", "value2", pool.getParameterValue("myprop"));
 	}
-	
+
+	@Test
 	public void testPool()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("testPool");
+		TestUtil util = getTestUtil();
 		util.prepareEnvironment();
-		
+
 		VariablePool pool = VariablePool.getInstance();
-		
+
 		pool.setParameterValue("id", "42");
-		
+
 		String value = pool.getParameterValue("id");
 		assertEquals("Wrong value stored", "42", value);
-		
+
 		String sql = "select * from test where id=$[id]";
 		String realSql = pool.replaceAllParameters(sql);
 		assertEquals("Parameter not replaced", "select * from test where id=42", realSql);
-		
+
 		sql = "select * from test where id=$[?id]";
 		boolean hasPrompt = pool.hasPrompt(sql);
 		assertEquals("Prompt not detected", true, hasPrompt);
-		
+
 		sql = "select * from test where id=$[&id]";
 		Set vars = pool.getVariablesNeedingPrompt(sql);
 		assertEquals("Prompt not detected", 0, vars.size());
-		
+
 		pool.removeValue("id");
 		vars = pool.getVariablesNeedingPrompt(sql);
-		assertEquals("Prompt not detected", 1, vars.size());		
-		assertEquals("Variable not in prompt pool", true, vars.contains("id"));		
+		assertEquals("Prompt not detected", 1, vars.size());
+		assertEquals("Variable not in prompt pool", true, vars.contains("id"));
 
 		File f = new File(util.getBaseDir(), "vardef.props");
-		
+
 		PrintWriter pw = new PrintWriter(new FileWriter(f));
 		pw.println("lastname=Dent");
 		pw.println("firstname=Arthur");
 		pw.close();
 		pool.readFromFile(f.getAbsolutePath(), null);
-		
+
 		value = pool.getParameterValue("lastname");
 		assertEquals("Lastname not defined", "Dent", value);
 		value = pool.getParameterValue("firstname");
 		assertEquals("Firstname not defined", "Arthur", value);
-		
-		f.delete();
+		assertTrue(f.delete());
 	}
 
+	@Test
 	public void testDataStore()
 		throws Exception
 	{

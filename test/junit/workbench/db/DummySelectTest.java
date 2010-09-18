@@ -16,20 +16,19 @@ import java.util.List;
 import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.resource.Settings;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DummySelectTest
-	extends TestCase
 {
 
-	public DummySelectTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetSource()
 		throws Exception
 	{
@@ -56,6 +55,7 @@ public class DummySelectTest
 		}
 	}
 
+	@Test
 	public void testSelectedColumns()
 		throws Exception
 	{

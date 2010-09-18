@@ -17,6 +17,8 @@ import workbench.WbTestCase;
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
 import workbench.util.CollectionUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -26,11 +28,12 @@ public class ObjectSourceSearcherTest
 	extends WbTestCase
 {
 
-	public ObjectSourceSearcherTest(String testName)
+	public ObjectSourceSearcherTest()
 	{
-		super(testName);
+		super("ObjectSourceSearcherTest");
 	}
 
+	@Test
 	public void testSearchObjects()
 		throws Exception
 	{

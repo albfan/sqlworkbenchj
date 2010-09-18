@@ -26,6 +26,8 @@ import java.io.Writer;
 import java.util.Collection;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -36,12 +38,13 @@ public class FileUtilTest
 {
 	private TestUtil testUtil;
 
-	public FileUtilTest(String testName)
+	public FileUtilTest()
 	{
-		super(testName);
+		super("FileUtilTest");
 		testUtil = getTestUtil();
 	}
 
+	@Test
 	public void testGetLines()
 	{
 		try
@@ -71,6 +74,7 @@ public class FileUtilTest
 		}
 	}
 
+	@Test
 	public void testReadLines()
 	{
 		try
@@ -133,6 +137,7 @@ public class FileUtilTest
 		}
 	}
 
+	@Test
 	public void testGetLineEnding()
 		throws Exception
 	{
@@ -169,7 +174,9 @@ public class FileUtilTest
 		}
 	}
 
-	public void testEstimateRecords() throws Exception
+	@Test
+	public void testEstimateRecords()
+		throws Exception
 	{
 		try
 		{
@@ -204,6 +211,7 @@ public class FileUtilTest
 		}
 	}
 
+	@Test
 	public void testCopy()
 	{
 		try
@@ -233,7 +241,9 @@ public class FileUtilTest
 		}
 	}
 
-	public void testReadCharacters() throws Exception
+	@Test
+	public void testReadCharacters()
+		throws Exception
 	{
 		try
 		{
@@ -254,7 +264,9 @@ public class FileUtilTest
 		}
 	}
 
-	public void testReadBytes() throws Exception
+	@Test
+	public void testReadBytes()
+		throws Exception
 	{
 		try
 		{
@@ -282,6 +294,7 @@ public class FileUtilTest
 		}
 	}
 
+	@Test
 	public void testGetCharacterLength()
 	{
 		try

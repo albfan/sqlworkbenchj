@@ -13,64 +13,48 @@ package workbench.util;
 
 import java.util.ArrayList;
 import java.util.List;
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class CsvLineParserTest 
-	extends WbTestCase
+public class CsvLineParserTest
 {
-	
-	public CsvLineParserTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testEscapedQuotes()
 	{
-		try
-		{
-			CsvLineParser parser = new CsvLineParser('\t','"');
-			parser.setLine("one\twith\\\"quotes\t\"three\tvalues\\\"\"\t\tdef");
-			parser.setQuoteEscaping(QuoteEscapeType.escape);
-			List<String> result = getParserElements(parser);
-			assertEquals("Not enough values", 5, result.size());
-			String v = result.get(1);
-			assertEquals("Wrong second value", "with\"quotes", v);
-			v = result.get(2);
-			assertEquals("Wrong third value", "three\tvalues\"", v);
-			assertNull(result.get(3));
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+		CsvLineParser parser = new CsvLineParser('\t','"');
+		parser.setLine("one\twith\\\"quotes\t\"three\tvalues\\\"\"\t\tdef");
+		parser.setQuoteEscaping(QuoteEscapeType.escape);
+		List<String> result = getParserElements(parser);
+		assertEquals("Not enough values", 5, result.size());
+		String v = result.get(1);
+		assertEquals("Wrong second value", "with\"quotes", v);
+		v = result.get(2);
+		assertEquals("Wrong third value", "three\tvalues\"", v);
+		assertNull(result.get(3));
 	}
-	
+
+	@Test
 	public void testDuplicatedQuotes()
 	{
-		try
-		{
-			CsvLineParser parser = new CsvLineParser('\t','"');
-			parser.setLine("one\twith\"\"quotes\t\"three\tvalue\"\"s\"\t");
-			parser.setQuoteEscaping(QuoteEscapeType.duplicate);
-			List<String> result = getParserElements(parser);
-			assertEquals("Not enough values", 4, result.size());
-			String v = result.get(1);
-			assertEquals("Wrong second value", "with\"quotes", v);
-			v = result.get(2);
-			assertEquals("Wrong third value", "three\tvalue\"s", v);
-			
-			assertNull(result.get(3));
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+		CsvLineParser parser = new CsvLineParser('\t','"');
+		parser.setLine("one\twith\"\"quotes\t\"three\tvalue\"\"s\"\t");
+		parser.setQuoteEscaping(QuoteEscapeType.duplicate);
+		List<String> result = getParserElements(parser);
+		assertEquals("Not enough values", 4, result.size());
+		String v = result.get(1);
+		assertEquals("Wrong second value", "with\"quotes", v);
+		v = result.get(2);
+		assertEquals("Wrong third value", "three\tvalue\"s", v);
+
+		assertNull(result.get(3));
 	}
-	
+
+	@Test
 	public void testGetEmptyValues()
 	{
 		// Check for empty elements at the end
@@ -79,9 +63,9 @@ public class CsvLineParserTest
 		parser.setReturnEmptyStrings(true);
 		List<String> result = getParserElements(parser);
 		assertEquals("Not enough values", 2, result.size());
-		
+
 		assertNotNull("Null string returned", result.get(1));
-		
+
 		parser.setLine("one\t");
 		parser.setReturnEmptyStrings(false);
 		result = getParserElements(parser);
@@ -100,7 +84,7 @@ public class CsvLineParserTest
 		{
 			fail("No value returned");
 		}
-		
+
 		parser.setReturnEmptyStrings(false);
 		parser.setLine("\ttwo\tthree");
 		if (parser.hasNext())
@@ -113,7 +97,8 @@ public class CsvLineParserTest
 			fail("No value returned");
 		}
 	}
-	
+
+	@Test
 	public void testParser()
 	{
 		String line = "one\ttwo\tthree\tfour\tfive";
@@ -123,19 +108,19 @@ public class CsvLineParserTest
 		assertEquals("Wrong number of elements", 5, elements.size());
 		assertEquals("Wrong first value", "one", elements.get(0));
 		assertEquals("Wrong second value", "two", elements.get(1));
-		
+
 		// check for embedded quotes without a quote defined!
 		parser.setLine("one\ttwo\"values\tthree");
 		parser.getNext(); // skip the first
 		String value = parser.getNext();
 		assertEquals("Invalid second element", "two\"values", value);
-		
+
 		parser = new CsvLineParser('\t', '"');
 		parser.setTrimValues(false);
 		parser.setReturnEmptyStrings(false);
 		parser.setLine("one\t\"quoted\tdelimiter\"\t  three  ");
 		List<String> l = getParserElements(parser);
-		
+
 		assertEquals("Not enough values", 3, l.size());
 		assertEquals("Wrong quoted value", "quoted\tdelimiter", l.get(1));
 		assertEquals("Value was trimmed", "  three  ", l.get(2));
@@ -143,7 +128,7 @@ public class CsvLineParserTest
 		parser.setTrimValues(true);
 		parser.setLine("one\t   two   ");
 		l = getParserElements(parser);
-		
+
 		assertEquals("Not enough values", 2, l.size());
 		assertEquals("Value was not trimmed", "two", l.get(1));
 
@@ -155,7 +140,6 @@ public class CsvLineParserTest
 		assertEquals("Wrong first value", "one", elements.get(0));
 		assertEquals("Wrong second value", "two", elements.get(1));
 		assertEquals("Wrong third value", "one;element", elements.get(2));
-		
 	}
 
 	private List<String> getParserElements(CsvLineParser parser)

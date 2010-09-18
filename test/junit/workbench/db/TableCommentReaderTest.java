@@ -13,30 +13,32 @@ package workbench.db;
 
 import java.sql.Statement;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TableCommentReaderTest
-	extends TestCase
+	extends WbTestCase
 {
 	private WbConnection connection;
 
-	public TableCommentReaderTest(String testName)
+	public TableCommentReaderTest()
 	{
-		super(testName);
+		super("TableCommentReaderTest");
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil("Comments");
 		connection = util.getConnection("commentsTest");
 		Statement stmt = null;
@@ -56,29 +58,21 @@ public class TableCommentReaderTest
 		}
 	}
 
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
-	}
-
-
+	@Test
 	public void testCommentSql()
 		throws Exception
 	{
-		
 		try
 		{
 			TableIdentifier table = connection.getMetadata().findTable(new TableIdentifier("COMMENT_TEST"));
 			TableCommentReader reader = new TableCommentReader();
-			
+
 			String tableComment = reader.getTableCommentSql(connection, table);
 			assertNotNull(tableComment);
 			assertTrue("Comment not found ", tableComment.equalsIgnoreCase("COMMENT ON TABLE comment_test IS 'Table comment';"));
-			
+
 			List<ColumnIdentifier> columns = connection.getMetadata().getTableColumns(table);
-			
+
 			StringBuilder colComments = reader.getTableColumnCommentsSql(connection, table, columns);
 			assertNotNull(colComments);
 			ScriptParser p = new ScriptParser(colComments.toString());
@@ -93,6 +87,7 @@ public class TableCommentReaderTest
 		}
 	}
 
+	@Test
 	public void testFallbackDBID()
 		throws Exception
 	{
@@ -121,6 +116,7 @@ public class TableCommentReaderTest
 		}
 	}
 
+	@Test
 	public void testDB2()
 		throws Exception
 	{

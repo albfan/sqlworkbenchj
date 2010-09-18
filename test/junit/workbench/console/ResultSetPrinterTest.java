@@ -16,6 +16,8 @@ import java.io.PrintStream;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import junit.framework.TestCase;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import workbench.TestUtil;
 import workbench.db.WbConnection;
 import workbench.sql.StatementRunnerResult;
@@ -28,25 +30,12 @@ import workbench.util.StringUtil;
 public class ResultSetPrinterTest
 	extends TestCase
 {
-	public ResultSetPrinterTest(String testName)
+	public ResultSetPrinterTest()
 	{
-		super(testName);
+		super("ResultSetPrinterTest");
 	}
 
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
-	}
-
+	@Test
 	public void testConsumeResult()
 		throws Exception
 	{

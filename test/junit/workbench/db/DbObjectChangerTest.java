@@ -13,6 +13,8 @@ package workbench.db;
 
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -22,11 +24,12 @@ public class DbObjectChangerTest
 	extends WbTestCase
 {
 
-	public DbObjectChangerTest(String testName)
+	public DbObjectChangerTest()
 	{
-		super(testName);
+		super("DbObjectChangerTest");
 	}
 
+	@Test
 	public void testGetDropPK_H2()
 		throws Exception
 	{

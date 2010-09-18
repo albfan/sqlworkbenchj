@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.regex.Pattern;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -25,11 +27,12 @@ public class SqlUtilTest
 	extends WbTestCase
 {
 
-	public SqlUtilTest(String testName)
+	public SqlUtilTest()
 	{
-		super(testName);
+		super("SqlUtilTest");
 	}
 
+	@Test
 	public void testQuoteObject()
 	{
 		String name = "test";
@@ -50,6 +53,7 @@ public class SqlUtilTest
 
 	}
 
+	@Test
 	public void testGetFunctionParams()
 		throws Exception
 	{
@@ -76,6 +80,7 @@ public class SqlUtilTest
 		assertEquals("\"1,2\"", params.get(0));
 	}
 
+	@Test
 	public void testIsSelectIntoNewTable()
 		throws Exception
 	{
@@ -104,6 +109,7 @@ public class SqlUtilTest
 		selectIntoPattern = Pattern.compile(p, Pattern.CASE_INSENSITIVE);
 	}
 
+	@Test
 	public void testGetCreateType()
 	{
 		try
@@ -139,6 +145,8 @@ public class SqlUtilTest
 		}
 
 	}
+
+	@Test
 	public void testGetDeleteTable()
 	{
 		try
@@ -175,6 +183,7 @@ public class SqlUtilTest
 
 	}
 
+	@Test
 	public void testGetObjectInfo()
 		throws Exception
 	{
@@ -274,8 +283,7 @@ public class SqlUtilTest
 
 	}
 
-
-
+	@Test
 	public void testGetInsertTable()
 	{
 		try
@@ -299,6 +307,7 @@ public class SqlUtilTest
 		}
 	}
 
+	@Test
 	public void testRemoveComments()
 		throws Exception
 	{
@@ -318,6 +327,7 @@ public class SqlUtilTest
 		assertEquals("SELECT 42\n from dual", clean);
 	}
 
+	@Test
 	public void testCleanSql()
 	{
 		String sql = "select \r\n from project";
@@ -364,6 +374,7 @@ public class SqlUtilTest
 		assertEquals("Not correctly cleaned", "/* this is a comment */  select from \"project\"", clean);
 	}
 
+	@Test
 	public void testGetSelectColumns()
 	{
 		String sql = "select x,y,z from bla";
@@ -423,7 +434,7 @@ public class SqlUtilTest
 
 	}
 
-
+	@Test
 	public void testStripColumnAlias()
 	{
 		String expression = "p.name as lastname";
@@ -444,6 +455,7 @@ public class SqlUtilTest
 
 	}
 
+	@Test
 	public void testGetSqlVerb()
 	{
 		String sql = "-- comment line1\nSELECT * from dummy";
@@ -481,6 +493,7 @@ public class SqlUtilTest
 		assertEquals("None-empty verb returned", true, StringUtil.isEmptyString(verb));
 	}
 
+	@Test
 	public void testGetTables()
 	{
 		String sql = "select *\nfrom\n-- list the tables here\ntable1 t1, table2 t2, table3 t3";
@@ -657,6 +670,7 @@ public class SqlUtilTest
 
 	}
 
+	@Test
 	public void testDataTypeNames()
 	{
 		try

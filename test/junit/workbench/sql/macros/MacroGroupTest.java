@@ -11,21 +11,17 @@
  */
 package workbench.sql.macros;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class MacroGroupTest
-	extends TestCase
 {
 
-	public MacroGroupTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testCreateCopy()
 	{
 		MacroGroup group = new MacroGroup("Default Group");

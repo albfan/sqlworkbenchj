@@ -17,27 +17,32 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.interfaces.JobErrorHandler;
 import workbench.sql.ScriptParser;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class TableDeleterTest extends TestCase {
+public class TableDeleterTest
+	extends WbTestCase
+{
 
 	private boolean errorCalled;
 	private int errorAction;
 	private boolean fatalError;
 
-	public TableDeleterTest(String testName) 
+	public TableDeleterTest()
 	{
-		super(testName);
+		super("TableDeleterTest");
 	}
 
+	@Test
 	public void testDeleteTableData()
 		throws Exception
 	{
@@ -77,6 +82,7 @@ public class TableDeleterTest extends TestCase {
 	}
 
 
+	@Test
 	public void testErrorHandling()
 		throws Exception
 	{
@@ -85,7 +91,7 @@ public class TableDeleterTest extends TestCase {
 		try
 		{
 			con = setupDatabase();
-			
+
 			final List<TableIdentifier> tables =
 				Collections.unmodifiableList(
 					Arrays.asList(new TableIdentifier[]
@@ -116,10 +122,10 @@ public class TableDeleterTest extends TestCase {
 					fatalError = true;
 				}
 			};
-			
+
 			TableDeleter deleter = new TableDeleter(con);
 			deleter.setErrorHandler(handler);
-			
+
 			List<TableIdentifier> deleted = deleter.deleteTableData(tables, false, false, false);
 			assertTrue(errorCalled);
 			assertFalse(fatalError);
@@ -163,7 +169,7 @@ public class TableDeleterTest extends TestCase {
 			assertTrue(errorCalled);
 			assertFalse(fatalError);
 			assertEquals(2, deleted.size());
-			
+
 		}
 		finally
 		{
@@ -171,7 +177,8 @@ public class TableDeleterTest extends TestCase {
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
+	@Test
 	public void testGenerateScript()
 		throws Exception
 	{
@@ -191,7 +198,7 @@ public class TableDeleterTest extends TestCase {
 			assertEquals(5, p.getSize());
 			assertTrue(p.getCommand(0).startsWith("DELETE"));
 			assertTrue(p.getCommand(4).startsWith("COMMIT"));
-			
+
 			sql = deleter.generateScript(tables, true, false, false).toString();
 			p = new ScriptParser(sql);
 			assertEquals(tables.size() * 2, p.getSize());
@@ -199,7 +206,7 @@ public class TableDeleterTest extends TestCase {
 			assertTrue(p.getCommand(1).startsWith("COMMIT"));
 			assertTrue(p.getCommand(2).startsWith("DELETE"));
 			assertTrue(p.getCommand(3).startsWith("COMMIT"));
-			
+
 			sql = deleter.generateScript(tables, true, true, false).toString();
 			p = new ScriptParser(sql);
 			assertEquals(tables.size(), p.getSize());
@@ -231,7 +238,7 @@ public class TableDeleterTest extends TestCase {
 				"alter table person_address add constraint fk_pa_a foreign key (address_id) references address (address_id);\n" +
 				"commit;\n";
 		TestUtil.executeScript(conn, fk);
-		
+
 		String data = "insert into person values (1, 'Arthur', 'Dent');\n" +
 			"insert into person values (2, 'Ford', 'Prefect');\n" +
 			"insert into person values (3, 'Zaphod', 'Beeblebrox');\n" +

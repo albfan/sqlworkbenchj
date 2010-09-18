@@ -17,22 +17,19 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.storage.ColumnData;
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 
 /**
  * @author Thomas Kellerer
  */
 public class ReferenceTableNavigationTest
-	extends TestCase
 {
-	
-	public ReferenceTableNavigationTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testChildNavigation()
 	{
 		TestUtil util = new TestUtil("childNav");
@@ -41,43 +38,43 @@ public class ReferenceTableNavigationTest
 			WbConnection con = util.getConnection();
 			Connection sqlCon = con.getSqlConnection();
 			Statement stmt = sqlCon.createStatement();
-			String baseSql = "CREATE TABLE base  \n" + 
-             "( \n" + 
-             "   id1  INTEGER NOT NULL, \n" + 
-             "   id2  INTEGER NOT NULL, \n" + 
-             "   primary key (id1, id2) \n" + 
-             ")";			
+			String baseSql = "CREATE TABLE base  \n" +
+             "( \n" +
+             "   id1  INTEGER NOT NULL, \n" +
+             "   id2  INTEGER NOT NULL, \n" +
+             "   primary key (id1, id2) \n" +
+             ")";
 			stmt.execute(baseSql);
-			String child1Sql = "CREATE TABLE child1 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   base_id1    INTEGER NOT NULL, \n" + 
-             "   base_id2    INTEGER NOT NULL, \n" + 
+			String child1Sql = "CREATE TABLE child1 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   base_id1    INTEGER NOT NULL, \n" +
+             "   base_id2    INTEGER NOT NULL, \n" +
              "   CONSTRAINT fk_child1_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
-             ")";			
+             ")";
 			stmt.execute(child1Sql);
-			
-			String child2Sql = "CREATE TABLE child2 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   base_id1    INTEGER NOT NULL, \n" + 
-             "   base_id2    INTEGER NOT NULL, \n" + 
+
+			String child2Sql = "CREATE TABLE child2 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   base_id1    INTEGER NOT NULL, \n" +
+             "   base_id2    INTEGER NOT NULL, \n" +
              "   CONSTRAINT fk_child2_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
-             ")";			
+             ")";
 			stmt.execute(child2Sql);
 
-			String child3Sql = "CREATE TABLE child2_detail \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   child_id    INTEGER NOT NULL, \n" + 
-             "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" + 
-             ")";			
+			String child3Sql = "CREATE TABLE child2_detail \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   child_id    INTEGER NOT NULL, \n" +
+             "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" +
+             ")";
 			stmt.execute(child3Sql);
-			
+
 			stmt.execute("insert into base (id1, id2) values (1,1)");
 			stmt.execute("insert into base (id1, id2) values (2,2)");
 			stmt.execute("insert into base (id1, id2) values (3,3)");
-			
+
 			// child records for base(1,1)
 			stmt.execute("insert into child1 (id, base_id1,base_id2) values (1,1,1)");
 
@@ -101,9 +98,9 @@ public class ReferenceTableNavigationTest
 			stmt.execute("insert into child2 (id, base_id1,base_id2) values (204,3,3)");
 			stmt.execute("insert into child2 (id, base_id1,base_id2) values (205,3,3)");
 			stmt.execute("insert into child2 (id, base_id1,base_id2) values (206,3,3)");
-			
+
 			List<List<ColumnData>> rows = new LinkedList<List<ColumnData>>();
-			
+
 			List<ColumnData> row = new LinkedList<ColumnData>();
 			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("id1",java.sql.Types.INTEGER)));
 			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("id2",java.sql.Types.INTEGER)));
@@ -113,18 +110,18 @@ public class ReferenceTableNavigationTest
 			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("id1",java.sql.Types.INTEGER)));
 			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("id2",java.sql.Types.INTEGER)));
 			rows.add(row);
-			
+
 			TableIdentifier base = new TableIdentifier("base");
-			
+
 			ReferenceTableNavigation nav = new ReferenceTableNavigation(base, con);
 			nav.readTreeForChildren();
-			
+
 			TableIdentifier t1 = new TableIdentifier("child1");
 			t1.adjustCase(con);
-			
+
 			String select = nav.getSelectForChild(t1, "fk_child1_base", rows);
 			assertNotNull("Select for Child1 not created", select);
-			
+
 //			System.out.println("select child1 with:" + select);
 			ResultSet rs = stmt.executeQuery(select);
 			int count = 0;
@@ -134,7 +131,7 @@ public class ReferenceTableNavigationTest
 				int id = rs.getInt(1);
 				int bid1 = rs.getInt(2);
 				int bid2 = rs.getInt(3);
-				if (id == 1) 
+				if (id == 1)
 				{
 					assertEquals(1, bid1);
 					assertEquals(1, bid2);
@@ -151,13 +148,13 @@ public class ReferenceTableNavigationTest
 			}
 			assertEquals(3, count);
 			rs.close();
-			
+
 			TableIdentifier t2 = new TableIdentifier("child2");
 			t2.adjustCase(con);
-			
+
 			String select2 = nav.getSelectForChild(t2, "fk_child2_base", rows);
 			assertNotNull("Child table 2 not found", select2);
-			
+
 //			System.out.println("select child2 with:" + select2);
 			rs = stmt.executeQuery(select2);
 			count = 0;
@@ -167,7 +164,7 @@ public class ReferenceTableNavigationTest
 				int id = rs.getInt(1);
 				int bid1 = rs.getInt(2);
 				int bid2 = rs.getInt(3);
-				if (id == 201) 
+				if (id == 201)
 				{
 					assertEquals(1, bid1);
 					assertEquals(1, bid2);
@@ -183,7 +180,7 @@ public class ReferenceTableNavigationTest
 				}
 			}
 			assertEquals(3, count);
-			
+
 		}
 		catch (Exception e)
 		{
@@ -192,6 +189,7 @@ public class ReferenceTableNavigationTest
 		}
 	}
 
+	@Test
 	public void testDoubleLink()
 		throws Exception
 	{
@@ -240,6 +238,7 @@ public class ReferenceTableNavigationTest
 		assertTrue(sql.indexOf("(ORIGINAL_ID = 1)") > -1);
 	}
 
+	@Test
 	public void testParentNavigation()
 	{
 		TestUtil util = new TestUtil("parentNav");
@@ -248,44 +247,44 @@ public class ReferenceTableNavigationTest
 			WbConnection con = util.getConnection();
 			Connection sqlCon = con.getSqlConnection();
 			Statement stmt = sqlCon.createStatement();
-			String baseSql = "CREATE TABLE base  \n" + 
-             "( \n" + 
-             "   id1  INTEGER NOT NULL, \n" + 
-             "   id2  INTEGER NOT NULL, \n" + 
-             "   data  VARCHAR(10), \n" + 
-             "   primary key (id1, id2) \n" + 
-             ")";			
+			String baseSql = "CREATE TABLE base  \n" +
+             "( \n" +
+             "   id1  INTEGER NOT NULL, \n" +
+             "   id2  INTEGER NOT NULL, \n" +
+             "   data  VARCHAR(10), \n" +
+             "   primary key (id1, id2) \n" +
+             ")";
 			stmt.execute(baseSql);
-			String child1Sql = "CREATE TABLE child1 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   base_id1    INTEGER NOT NULL, \n" + 
-             "   base_id2    INTEGER NOT NULL, \n" + 
+			String child1Sql = "CREATE TABLE child1 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   base_id1    INTEGER NOT NULL, \n" +
+             "   base_id2    INTEGER NOT NULL, \n" +
              "   CONSTRAINT fk_child1_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
-             ")";			
+             ")";
 			stmt.execute(child1Sql);
-			
-			String child2Sql = "CREATE TABLE child2 \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   base_id1    INTEGER NOT NULL, \n" + 
-             "   base_id2    INTEGER NOT NULL, \n" + 
+
+			String child2Sql = "CREATE TABLE child2 \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   base_id1    INTEGER NOT NULL, \n" +
+             "   base_id2    INTEGER NOT NULL, \n" +
              "   CONSTRAINT fk_child2_base FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
-             ")";			
+             ")";
 			stmt.execute(child2Sql);
 
-			String child3Sql = "CREATE TABLE child2_detail \n" + 
-             "( \n" + 
-             "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-             "   child_id    INTEGER NOT NULL, \n" + 
+			String child3Sql = "CREATE TABLE child2_detail \n" +
+             "( \n" +
+             "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+             "   child_id    INTEGER NOT NULL, \n" +
              "   CONSTRAINT fk_child2d_base FOREIGN KEY (child_id) REFERENCES child2 (id) \n" +
-             ")";			
+             ")";
 			stmt.execute(child3Sql);
-			
+
 			stmt.execute("insert into base (id1, id2, data) values (1,1, 'one')");
 			stmt.execute("insert into base (id1, id2, data) values (2,2, 'two')");
 			stmt.execute("insert into base (id1, id2, data) values (3,3, 'three')");
-			
+
 			// child records for base(1,1)
 			stmt.execute("insert into child1 (id, base_id1,base_id2) values (1,1,1)");
 
@@ -309,9 +308,9 @@ public class ReferenceTableNavigationTest
 			stmt.execute("insert into child2 (id, base_id1,base_id2) values (204,3,3)");
 			stmt.execute("insert into child2 (id, base_id1,base_id2) values (205,3,3)");
 			stmt.execute("insert into child2 (id, base_id1,base_id2) values (206,3,3)");
-			
+
 			List<List<ColumnData>> rows = new LinkedList<List<ColumnData>>();
-			
+
 			List<ColumnData> row = new LinkedList<ColumnData>();
 			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("base_id1",java.sql.Types.INTEGER)));
 			row.add(new ColumnData(new Integer(1), new ColumnIdentifier("base_id2",java.sql.Types.INTEGER)));
@@ -321,7 +320,7 @@ public class ReferenceTableNavigationTest
 			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("base_id1",java.sql.Types.INTEGER)));
 			row.add(new ColumnData(new Integer(2), new ColumnIdentifier("base_id2",java.sql.Types.INTEGER)));
 			rows.add(row);
-			
+
 			TableIdentifier base = new TableIdentifier("child1");
 			ReferenceTableNavigation nav = new ReferenceTableNavigation(base, con);
 			nav.readTreeForParents();
@@ -333,7 +332,7 @@ public class ReferenceTableNavigationTest
 
 			TableIdentifier tbl = new TableIdentifier("base");
 			String select1 = nav.getSelectForParent(tbl, "fk_child1_base", rows);
-			
+
 //			System.out.println("select parent with = " + select1);
 			ResultSet rs = stmt.executeQuery(select1);
 			int count = 0;
@@ -343,8 +342,8 @@ public class ReferenceTableNavigationTest
 				int bid1 = rs.getInt("id1");
 				int bid2 = rs.getInt("id2");
 				String data = rs.getString("data");
-				
-				if ("one".equals(data)) 
+
+				if ("one".equals(data))
 				{
 					assertEquals(1, bid1);
 					assertEquals(1, bid2);
@@ -361,7 +360,7 @@ public class ReferenceTableNavigationTest
 			}
 			assertEquals(2, count);
 			rs.close();
-			
+
 		}
 		catch (Exception e)
 		{
@@ -369,5 +368,5 @@ public class ReferenceTableNavigationTest
 			fail(e.getMessage());
 		}
 	}
-	
+
 }

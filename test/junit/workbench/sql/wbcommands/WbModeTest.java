@@ -13,31 +13,36 @@ package workbench.sql.wbcommands;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.interfaces.ExecutionController;
 import workbench.sql.BatchRunner;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbModeTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public WbModeTest(String testName)
+	public WbModeTest()
 	{
-		super(testName);
+		super("WbModeTest");
 	}
 
+	@Test
 	public void testExecute()
 		throws Exception
 	{
-		TestUtil util = new TestUtil("WbModeTest");
+		TestUtil util = getTestUtil();
 
 		try
 		{

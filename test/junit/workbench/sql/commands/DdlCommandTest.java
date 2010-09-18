@@ -15,6 +15,8 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -24,11 +26,12 @@ public class DdlCommandTest
 	extends WbTestCase
 {
 
-	public DdlCommandTest(String testName)
+	public DdlCommandTest()
 	{
-		super(testName);
+		super("ResourceMgrTest");
 	}
 
+	@Test
 	public void testIgnoreDropErrors()
 	{
 		try

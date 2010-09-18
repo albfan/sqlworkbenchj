@@ -11,21 +11,17 @@
  */
 package workbench.util;
 
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DurationFormatterTest
-	extends WbTestCase
 {
 
-	public DurationFormatterTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetDurationAsSeconds()
 	{
 		DurationFormatter f = new DurationFormatter('.');

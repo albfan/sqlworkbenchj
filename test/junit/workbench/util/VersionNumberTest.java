@@ -11,60 +11,58 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class VersionNumberTest extends TestCase
+public class VersionNumberTest
 {
-	
-	public VersionNumberTest(String testName)
-	{
-		super(testName);
-	}
-	
+
+	@Test
 	public void testVersion()
 	{
 		VersionNumber one = new VersionNumber("94");
 		assertEquals(94, one.getMajorVersion());
 		assertEquals(-1, one.getMinorVersion());
-		
+
 		VersionNumber two = new VersionNumber("94.2");
 		assertEquals(94, two.getMajorVersion());
 		assertEquals(2, two.getMinorVersion());
-		
+
 		assertTrue(two.isNewerThan(one));
 		assertFalse(one.isNewerThan(two));
-		
+
 		VersionNumber na = new VersionNumber(null);
 		assertFalse(na.isNewerThan(two));
 		assertTrue(two.isNewerThan(na));
-		
+
 		VersionNumber dev = new VersionNumber("@BUILD_NUMBER@");
 		assertFalse(one.isNewerThan(dev));
 		assertTrue(dev.isNewerThan(one));
-		
+
 		assertTrue(dev.isNewerThan(two));
 		assertFalse(two.isNewerThan(dev));
-		
+
 		VersionNumber current = new VersionNumber("96.8");
 		VersionNumber stable = new VersionNumber("97");
 		assertTrue(stable.isNewerThan(current));
 		assertFalse(current.isNewerThan(stable));
-		
+
 		VersionNumber v2 = new VersionNumber("96.9");
 		assertTrue(v2.isNewerOrEqual(current));
 		VersionNumber v3 = new VersionNumber("96.8");
 		assertTrue(v3.isNewerOrEqual(current));
 	}
 
+	@Test
 	public void testPoiVersion()
 	{
 		VersionNumber strange = new VersionNumber("3.5-FINAL-20090928");
 		assertEquals(3, strange.getMajorVersion());
 		assertEquals(5, strange.getMinorVersion());
 	}
-	
+
 }

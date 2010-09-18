@@ -13,64 +13,65 @@ package workbench.db;
 
 import java.util.HashSet;
 import java.util.Set;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class TableGrantTest extends junit.framework.TestCase
+public class TableGrantTest
 {
-	
-	public TableGrantTest(String testName)
-	{
-		super(testName);
-	}
-	
+
+	@Test
 	public void testCompareTo()
 	{
 		TableGrant g1 = new TableGrant("testuser", "DELETE", false);
 		TableGrant g2 = new TableGrant("testuser", "DELETE", false);
 		assertEquals("incorrect compareTo for equals objects", 0, g1.compareTo(g2));
-		
+
 		g1 = new TableGrant("testuser", "DELETE", true);
 		g2 = new TableGrant("testuser", "DELETE", false);
 		assertEquals("incorrect compareTo for equals objects", 1, g1.compareTo(g2));
-		
+
 	}
-	
+
+	@Test
 	public void testEquals()
 	{
 		TableGrant g1 = new TableGrant("testuser", "DELETE", false);
 		TableGrant g2 = new TableGrant("testuser", "DELETE", false);
-		
+
 		assertEquals("incorrect equals for equals objects", true, g1.equals(g2));
-		
+
 		g1 = new TableGrant("testuser", "DELETE", true);
 		g2 = new TableGrant("testuser", "DELETE", false);
-		
+
 		assertEquals("incorrect equals for equals objects", false, g1.equals(g2));
 
 		g1 = new TableGrant("someuser", "DELETE", false);
 		g2 = new TableGrant("testuser", "DELETE", false);
-		
+
 		assertEquals("incorrect equals for equals objects", false, g1.equals(g2));
 
 		g1 = new TableGrant("testuser", "INSERT", false);
 		g2 = new TableGrant("testuser", "DELETE", false);
-		
+
 		assertEquals("incorrect equals for equals objects", false, g1.equals(g2));
-		
+
 		Set<TableGrant> grants = new HashSet<TableGrant>();
 		g1 = new TableGrant("testuser", "DELETE", true);
 		g2 = new TableGrant("testuser", "DELETE", false);
 		grants.add(g1);
 		grants.add(g2);
 		assertEquals("Not all grants added", 2, grants.size());
-		
+
 		// This should not be added as it is equal to g2
 		grants.add(new TableGrant("testuser", "DELETE", false));
 		assertEquals("Not all grants added", 2, grants.size());
 	}
-	
-	
+
+
 }

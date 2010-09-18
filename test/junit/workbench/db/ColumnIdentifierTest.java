@@ -12,20 +12,17 @@
 package workbench.db;
 
 import java.sql.Types;
-
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.Test;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
+
 
 public class ColumnIdentifierTest
-	extends TestCase
 {
-	public ColumnIdentifierTest(String testName)
-	{
-		super(testName);
-	}
-
+	
+	@Test
 	public void testAdjustQuotes()
 	{
 		QuoteHandler ansi = new QuoteHandler()
@@ -117,6 +114,7 @@ public class ColumnIdentifierTest
 
 	}
 
+	@Test
 	public void testCopy()
 	{
 		ColumnIdentifier col = new ColumnIdentifier("mycol", Types.VARCHAR, true);
@@ -126,6 +124,7 @@ public class ColumnIdentifierTest
 		assertEquals("other_col * 2", copy.getComputedColumnExpression());
 	}
 	
+	@Test
 	public void testSort()
 	{
 		ColumnIdentifier col1 = new ColumnIdentifier("one", Types.VARCHAR, true);
@@ -161,6 +160,7 @@ public class ColumnIdentifierTest
 		
 	}
 
+	@Test
 	public void testCompare()
 	{
 		ColumnIdentifier col1 = new ColumnIdentifier("mycol", Types.VARCHAR, true);

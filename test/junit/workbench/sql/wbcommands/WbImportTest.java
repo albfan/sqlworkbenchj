@@ -28,7 +28,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
@@ -41,48 +40,50 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.ZipOutputFactory;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbImportTest
-	extends TestCase
+	extends WbTestCase
 {
 	private TestUtil util;
 	private String basedir;
 	private WbImport importCmd;
 	private WbConnection connection;
 
-	public WbImportTest(String testName)
+	public WbImportTest()
+		throws Exception
 	{
-		super(testName);
-		try
-		{
-			util = new TestUtil(testName);
-			util.prepareEnvironment();
-			this.basedir = util.getBaseDir();
-			importCmd = new WbImport();
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+		super("WbImportTest");
+		util = getTestUtil();
+		util.prepareEnvironment();
+		basedir = util.getBaseDir();
 	}
 
-	protected void setUp() throws Exception
+	@Before
+	public void setUp()
+		throws Exception
 	{
-		super.setUp();
-		this.connection = prepareDatabase();
-		this.importCmd.setConnection(this.connection);
+		connection = prepareDatabase();
+		importCmd = new WbImport();
+		importCmd.setConnection(this.connection);
 	}
 
-	protected void tearDown() throws Exception
+	@After
+	public void tearDown()
+		throws Exception
 	{
 		this.connection.disconnect();
-		super.tearDown();
 	}
 
+	@Test
 	public void testFailedInsert()
 		throws Exception
 	{
@@ -117,6 +118,7 @@ public class WbImportTest
 
 	}
 
+	@Test
 	public void testPreAndPostStatements()
 	{
 		ResultSet rs = null;
@@ -186,6 +188,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testFunctionConstant()
 		throws Exception
 	{
@@ -252,7 +255,7 @@ public class WbImportTest
 		}
 	}
 
-
+	@Test
 	public void testConstantWithSelect()
 		throws Exception
 	{
@@ -325,6 +328,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testConstantValues()
 	{
 		try
@@ -379,7 +383,7 @@ public class WbImportTest
 		}
 	}
 
-
+	@Test
 	public void testPartialColumnXmlImport()
 		throws Exception
 	{
@@ -501,6 +505,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testEscapedQuotes()
 	{
 		String data =
@@ -571,6 +576,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testImportQuotedColumn()
 	{
 		String xml1 = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -656,6 +662,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMissingXmlColumn()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -737,6 +744,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testBooleanLiterals()
 	{
 		try
@@ -817,6 +825,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testAutoConvertBooleanToNumber()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -893,6 +902,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testTextClobImport()
 	{
 		try
@@ -956,6 +966,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testRegularImport()
 		throws Exception
 	{
@@ -1034,6 +1045,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testColumnLimit()
 		throws Exception
 	{
@@ -1086,6 +1098,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testSkipImport()
 		throws Exception
 	{
@@ -1137,6 +1150,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testPartialTextImport()
 		throws Exception
 	{
@@ -1185,6 +1199,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testUnmatchedFileColumn()
 		throws Exception
 	{
@@ -1233,14 +1248,15 @@ public class WbImportTest
 			{
 				fail("Could not delete input file: " + importFile.getCanonicalPath());
 			}
-			
+
 		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
+	@Test
 	public void testPartialColumnTextImport()
 		throws Exception
 	{
@@ -1291,6 +1307,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMultiLineImport()
 	{
 		int rowCount = 10;
@@ -1354,6 +1371,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testZipMultiLineImport()
 	{
 		try
@@ -1404,6 +1422,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testEmptyStringIsNull()
 		throws Exception
 	{
@@ -1464,6 +1483,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testNullNumeric()
 		throws Exception
 	{
@@ -1508,6 +1528,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMissingTarget()
 		throws Exception
 	{
@@ -1547,6 +1568,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testNoHeader()
 		throws Exception
 	{
@@ -1594,6 +1616,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testColumnsFromTable()
 		throws Exception
 	{
@@ -1642,6 +1665,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testDirImport()
 		throws Exception
 	{
@@ -1700,6 +1724,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMultiFileSingleTableImport()
 		throws Exception
 	{
@@ -1768,6 +1793,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMultiFileSingleTableImportWithHeader()
 		throws Exception
 	{
@@ -1833,6 +1859,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMappedImport()
 		throws Exception
 	{
@@ -1873,6 +1900,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testDataTypes()
 		throws Exception
 	{
@@ -1930,6 +1958,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testZippedTextBlobImport()
 	{
 		int rowCount = 10;
@@ -2006,6 +2035,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testVerboseXmlImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -2098,6 +2128,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testXmlImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -2182,6 +2213,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testXmlImportChangeStructure()
 	{
 		String xml = "<?xml version=\"1.1\" encoding=\"UTF-8\"?> \n" +
@@ -2294,6 +2326,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testXmlImportCreateTable()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -2378,6 +2411,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testPartialXmlImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -2490,13 +2524,14 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testEncodedBlobImport()
 		throws Exception
 	{
 		try
 		{
 			util.copyResourceFile(this, "encoded_blob_input.xml");
-			
+
 			File xmlFile = new File(this.basedir, "encoded_blob_input.xml");
 
 			StatementRunnerResult result = importCmd.execute("wbimport -encoding='ISO-8859-1' -file='" + xmlFile.getAbsolutePath() + "' -type=xml -table=blob_test");
@@ -2509,7 +2544,7 @@ public class WbImportTest
 
 			int id1 = Integer.parseInt(TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[1]/column-data[1]"));
 			String blob1 = TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[1]/column-data[2]");
-			
+
 			int id2 = Integer.parseInt(TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[2]/column-data[1]"));
 			String blob2 = TestUtil.getXPathValue(xmlContent, "/wb-export/data/row-data[2]/column-data[2]");
 
@@ -2547,7 +2582,8 @@ public class WbImportTest
 		}
 
 	}
-	
+
+	@Test
 	public void testXmlBlobImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -2656,6 +2692,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testXmlClobImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -2748,6 +2785,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testCommit()
 	{
 		try
@@ -2820,6 +2858,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testNoCommit()
 	{
 		try
@@ -2867,6 +2906,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testZippedXmlBlobImport()
 	{
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?> \n" +
@@ -2994,6 +3034,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testTextBlobImport()
 	{
 		try
@@ -3052,6 +3093,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testEncodedBlob()
 	{
 		try
@@ -3108,6 +3150,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testBadFile()
 	{
 		try
@@ -3169,6 +3212,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testPartialFixedWidthImport()
 	{
 		try
@@ -3224,6 +3268,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testFixedWidthImport()
 	{
 		try
@@ -3314,6 +3359,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testDeleteTargetFails()
 	{
 		try
@@ -3361,6 +3407,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testEmptyFile()
 	{
 		try
@@ -3383,6 +3430,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testDependencyXmlImport()
 	{
 		try
@@ -3581,6 +3629,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testDependencyTextImport()
 	{
 		try
@@ -3689,6 +3738,7 @@ public class WbImportTest
 		}
 	}
 
+	@Test
 	public void testMultiImportWithWarning()
 		throws Exception
 	{
@@ -3720,7 +3770,7 @@ public class WbImportTest
 			String toFind = "Column \"not_there\" ";
 			int pos = msg.indexOf(toFind);
 			assertTrue(pos > -1);
-			
+
 			int pos2 = msg.indexOf(toFind, pos + toFind.length());
 			assertTrue(pos2 == -1);
 		}

@@ -14,40 +14,46 @@ package workbench.gui.completion;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author thomas
  */
-public class InsertAnalyzerTest extends TestCase
+public class InsertAnalyzerTest
+	extends WbTestCase
 {
 	private TestUtil util;
 	
-	public InsertAnalyzerTest(String testName)
+	public InsertAnalyzerTest()
 	{
-		super(testName);
+		super("InsertAnalyzerTest");
 	}
 
-  protected void setUp()
+	@Before
+  public void setUp()
     throws Exception
   {
-    super.setUp();
 		util = new TestUtil("InsertAnalyzerTest");
   }
 
-  protected void tearDown()
+	@After
+  public void tearDown()
     throws Exception
   {
 		util.emptyBaseDirectory();
-    super.tearDown();
   }
 
+	@Test
   public void testCheckContext()
   {
 		WbConnection con = null;

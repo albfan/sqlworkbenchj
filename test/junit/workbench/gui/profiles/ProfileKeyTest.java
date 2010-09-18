@@ -11,24 +11,23 @@
  */
 package workbench.gui.profiles;
 
+import static org.junit.Assert.*;
+import org.junit.Test;
+
 /**
  *
  * @author Thomas Kellerer
  */
-public class ProfileKeyTest extends junit.framework.TestCase
+public class ProfileKeyTest
 {
-	
-	public ProfileKeyTest(String testName)
-	{
-		super(testName);
-	}
-	
+
+	@Test
 	public void testCreate()
 	{
 		ProfileKey key = new ProfileKey(" { Group } / ProfileName ");
 		assertEquals("Wrong group detected", "Group", key.getGroup());
 		assertEquals("Wrong name detected", "ProfileName", key.getName());
-		
+
 		key = new ProfileKey("{Group}/ProfileName ");
 		assertEquals("Wrong group detected", "Group", key.getGroup());
 		assertEquals("Wrong name detected", "ProfileName", key.getName());
@@ -38,7 +37,8 @@ public class ProfileKeyTest extends junit.framework.TestCase
 		assertEquals("Wrong group detected", "Group", key.getGroup());
 		assertEquals("Wrong name detected", "ProfileName", key.getName());
 	}
-	
+
+	@Test
 	public void testCompare()
 	{
 		ProfileKey key1 = new ProfileKey("Profile1");
@@ -48,11 +48,11 @@ public class ProfileKeyTest extends junit.framework.TestCase
 		key1 = new ProfileKey("Profile1");
 		key2 = new ProfileKey("Profile1");
 		assertEquals(key1, key2);
-		
+
 		key1 = new ProfileKey("{DefaultGroup}/Profile1");
 		key2 = new ProfileKey("Profile1", "Other Group");
 		assertNotSame(key1, key2);
-		
+
 		key1 = new ProfileKey("Profile1", "Default Group");
 		key2 = new ProfileKey("Profile2", "Default Group");
 		assertNotSame(key1, key2);

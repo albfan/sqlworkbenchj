@@ -13,22 +13,18 @@ package workbench.util;
 
 import java.io.File;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class FileVersionerTest
-	extends TestCase
 {
 
-	public FileVersionerTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testBackupDir()
 		throws Exception
 	{
@@ -43,6 +39,7 @@ public class FileVersionerTest
 		assertTrue(bck.exists());
 	}
 
+	@Test
 	public void testCreateBackup()
 		throws Exception
 	{
@@ -51,7 +48,7 @@ public class FileVersionerTest
 		util.emptyBaseDirectory();
 		File main = new File(util.getBaseDir(), "mystuff.conf");
 		TestUtil.writeFile(main, "this is a test\n");
-		
+
 		v.createBackup(main);
 		TestUtil.writeFile(main, "1 this is a test\n");
 		File bck = new File(util.getBaseDir(), "mystuff.conf.1");

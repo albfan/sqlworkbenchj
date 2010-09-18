@@ -11,16 +11,17 @@
  */
 package workbench.db.oracle;
 
+import org.junit.Test;
 import java.sql.DatabaseMetaData;
-import workbench.WbTestCase;
 import workbench.db.ProcedureDefinition;
 import workbench.util.CollectionUtil;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
  */
 public class OraclePackageParserTest
-	extends WbTestCase
+
 {
 	String decl = "CREATE   OR   REPLACE PACKAGE emp_actions AS  -- spec \n" +
              "   TYPE EmpRecTyp IS RECORD (emp_id INT, salary REAL); \n" +
@@ -69,11 +70,8 @@ public class OraclePackageParserTest
              "   END fire_employee; \n" +
              "END emp_actions;";
 
-	public OraclePackageParserTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testParser()
 	{
 		String script = decl + "\n/\n/" + body;
@@ -84,6 +82,7 @@ public class OraclePackageParserTest
 		assertEquals(decl, parsedDecl);
 	}
 
+	@Test
 	public void testFindProc()
 	{
 		String script = decl + "\n/\n/" + body;
@@ -108,6 +107,7 @@ public class OraclePackageParserTest
 		assertEquals(pos, procPos);
 	}
 
+	@Test
 	public void testfindProcInHeader()
 	{
 		String script = decl + "\n/\n";

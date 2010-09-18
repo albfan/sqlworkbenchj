@@ -14,33 +14,39 @@ package workbench.sql.wbcommands;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
-import junit.framework.*;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
-import workbench.db.WbConnection;
 import workbench.sql.StatementRunner;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class WbDefineVarTest extends TestCase
+public class WbDefineVarTest
+	extends WbTestCase
 {
 
-	public WbDefineVarTest(String testName)
+	public WbDefineVarTest()
 	{
-		super(testName);
+		super("WbDefineVarTest");
 	}
 
-	public void testExecute() throws Exception
+	@Test
+	public void testExecute()
+		throws Exception
 	{
 		try
 		{
-			TestUtil util = new TestUtil(getClass().getName()+"_testExecute");
+			TestUtil util = new TestUtil(getClass().getName() + "_testExecute");
 			util.prepareEnvironment();
 			StatementRunner runner = util.createConnectedStatementRunner();
 
@@ -123,16 +129,9 @@ public class WbDefineVarTest extends TestCase
 			varValue = VariablePool.getInstance().getParameterValue("var5");
 			assertNull("Variable not deleted", varValue);
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("Error when defining variable");
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-
-
 }

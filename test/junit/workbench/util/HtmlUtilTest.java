@@ -12,20 +12,17 @@
 package workbench.util;
 
 import java.awt.Color;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class HtmlUtilTest extends TestCase
+public class HtmlUtilTest
 {
-	
-	public HtmlUtilTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testHtmlColor()
 	{
 		assertEquals("ff0000", HtmlUtil.getHtmlColor(Color.RED));
@@ -35,6 +32,7 @@ public class HtmlUtilTest extends TestCase
 		assertEquals("ffffff", HtmlUtil.getHtmlColor(Color.WHITE));
 	}
 
+	@Test
   public void testEscapeHTML()
 	{
 		String input = "<sometag> sometext";
@@ -45,6 +43,6 @@ public class HtmlUtilTest extends TestCase
 		escaped = HtmlUtil.escapeHTML(input);
 		assertEquals("a &amp;lt; b", escaped);
 	}
-	
-	
+
+
 }

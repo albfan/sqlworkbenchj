@@ -11,21 +11,17 @@
  */
 package workbench.sql;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ResultNameParserTest
-	extends TestCase
 {
 
-	public ResultNameParserTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetResultName()
 	{
 		String sql = "/* test select */\nSELECT * FROM dummy;";

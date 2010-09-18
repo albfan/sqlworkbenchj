@@ -13,24 +13,28 @@ package workbench.sql;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.resource.Settings;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  * @author Thomas Kellerer
  */
 public class CommandMapperTest
-	extends TestCase
+	extends WbTestCase
 {
-	public CommandMapperTest(String testName)
+
+	public CommandMapperTest()
 	{
-		super(testName);
+		super();
+		prepare();
 	}
 
+	@Test
 	public void testSelectIntoPattern()
 	{
-		TestUtil util = new TestUtil("testPattern");
 		try
 		{
 			String pgPattern = Settings.getInstance().getProperty("workbench.db.postgresql.selectinto.pattern", null);

@@ -13,21 +13,17 @@ package workbench.util;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class NumberUtilTest
-	extends TestCase
 {
 
-	public NumberUtilTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testValuesAreEquals()
 	{
 		assertTrue(NumberUtil.valuesAreEquals(new Integer(42), new Long(42)));

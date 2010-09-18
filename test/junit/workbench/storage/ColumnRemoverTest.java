@@ -12,22 +12,24 @@
 package workbench.storage;
 
 import java.sql.Types;
-import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.TestUtil;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ColumnRemoverTest
-	extends WbTestCase
 {
-	public ColumnRemoverTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testRemoveColumns()
+		throws Exception
 	{
+		TestUtil util = new TestUtil("ColumnRemoverTest");
+		util.prepareEnvironment();
+
 		String[] cols = new String[] {"NAME", "TYPE", "CATALOG", "SCHEMA", "REMARKS"};
 		int types[] = {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.VARCHAR};
 		int sizes[] = {30,12,10,10,20};

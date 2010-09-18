@@ -12,12 +12,14 @@
 package workbench.db.diff;
 
 import java.util.List;
+import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.util.CollectionUtil;
 import workbench.util.StrBuffer;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -27,11 +29,12 @@ public class TriggerListDiffTest
 	extends WbTestCase
 {
 
-	public TriggerListDiffTest(String testName)
+	public TriggerListDiffTest()
 	{
-		super(testName);
+		super("TriggerListDiffTest");
 	}
 
+	@Test
 	public void testWriteXml()
 	{
 		TriggerDefinition one = new TriggerDefinition(null, null, "trg_one");

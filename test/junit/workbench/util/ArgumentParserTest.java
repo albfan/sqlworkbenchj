@@ -17,7 +17,8 @@ import java.util.List;
 import java.util.Map;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -26,11 +27,12 @@ import workbench.WbTestCase;
 public class ArgumentParserTest
 	extends WbTestCase
 {
-	public ArgumentParserTest(String testname)
+	public ArgumentParserTest()
 	{
-		super(testname);
+		super("ArgumentParserTest");
 	}
 
+	@Test
 	public void testPropFile()
 		throws Exception
 	{
@@ -46,6 +48,7 @@ public class ArgumentParserTest
 		f.delete();
 	}
 
+	@Test
 	public void testAllowedValues()
 	{
 		ArgumentParser arg = new ArgumentParser();
@@ -56,6 +59,7 @@ public class ArgumentParserTest
 		assertTrue(c.contains("Text"));
 	}
 
+	@Test
 	public void testRepeatableArgs()
 	{
 		ArgumentParser parser = new ArgumentParser();
@@ -73,6 +77,7 @@ public class ArgumentParserTest
 		assertEquals(2, constants.size());
 	}
 
+	@Test
 	public void testMapValue()
 	{
 		ArgumentParser arg = new ArgumentParser();
@@ -99,6 +104,8 @@ public class ArgumentParserTest
 		assertEquals("4,2", props.get("other.thing"));
 
 	}
+	
+	@Test
 	public void testParser()
 	{
 		String cmdline = "-delimiter=',' -autoCommit=true -altdelimiter='/;nl' -emptyValue=\" \" -otherbool=1 -nosettings -table='\"MIND\"' -boolarg=true -profile='test-prof' -script=bla.sql -arg2=\"with space and quote\"";

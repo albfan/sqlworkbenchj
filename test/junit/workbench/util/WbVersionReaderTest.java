@@ -11,20 +11,17 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class WbVersionReaderTest
-	extends TestCase
 {
-	public WbVersionReaderTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testAvailableUpdate()
 	{
 		VersionNumber current = new VersionNumber("96.8");

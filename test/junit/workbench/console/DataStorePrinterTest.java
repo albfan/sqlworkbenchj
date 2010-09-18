@@ -14,9 +14,12 @@ package workbench.console;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.sql.Types;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import workbench.WbTestCase;
 import workbench.storage.DataStore;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -25,16 +28,14 @@ import workbench.util.StringUtil;
 public class DataStorePrinterTest
 	extends WbTestCase
 {
-	public DataStorePrinterTest(String testName)
+	public DataStorePrinterTest()
 	{
-		super(testName);
+		super("DataStorePrinterTest");
 	}
 
-	@Override
-	protected void setUp()
-		throws Exception
+	@BeforeClass
+	public static void init()
 	{
-		super.setUp();
 		System.setProperty("workbench.gui.language", "en");
 	}
 
@@ -72,7 +73,7 @@ public class DataStorePrinterTest
 		return ds;
 	}
 
-
+	@Test
 	public void testTabularPrint()
 	{
 		DataStore ds = createTestData();
@@ -115,6 +116,7 @@ public class DataStorePrinterTest
 		assertEquals("My comment | 3 | lastname \\nwith two lines", lines[3]);
 	}
 
+	@Test
 	public void testRecordPrint()
 	{
 		DataStore ds = createTestData();

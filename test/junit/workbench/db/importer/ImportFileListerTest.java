@@ -11,53 +11,45 @@
  */
 package workbench.db.importer;
 
+import org.junit.Test;
+import workbench.WbTestCase;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ImportFileListerTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public ImportFileListerTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testIgnoreFiles()
+		throws Exception
 	{
-		TestUtil util = new TestUtil("ImportFileLister");
-		try
+		TestUtil util = getTestUtil("ImportFileLister");
+		for (int i=0; i < 5; i++)
 		{
-			for (int i=0; i < 5; i++)
-			{
-				FileOutputStream out = new FileOutputStream(new File(util.getBaseDir(), "dbo.table-" + i + ".zip"));
-				out.write(42);
-				out.close();
-			}
-			ImportFileLister lister = new ImportFileLister(null, new File(util.getBaseDir()), "zip");
-			List<WbFile> files = lister.getFiles();
-			assertNotNull(files);
-			assertEquals(5, files.size());
-
-			List<String> toIgnore = StringUtil.stringToList("dbo.table-2.zip", ",");
-			lister.ignoreFiles(toIgnore);
-
-			files = lister.getFiles();
-			assertEquals(4, files.size());
+			FileOutputStream out = new FileOutputStream(new File(util.getBaseDir(), "dbo.table-" + i + ".zip"));
+			out.write(42);
+			out.close();
 		}
-		catch (Exception io)
-		{
-			io.printStackTrace();
-		}
+		ImportFileLister lister = new ImportFileLister(null, new File(util.getBaseDir()), "zip");
+		List<WbFile> files = lister.getFiles();
+		assertNotNull(files);
+		assertEquals(5, files.size());
+
+		List<String> toIgnore = StringUtil.stringToList("dbo.table-2.zip", ",");
+		lister.ignoreFiles(toIgnore);
+
+		files = lister.getFiles();
+		assertEquals(4, files.size());
 	}
 
 }

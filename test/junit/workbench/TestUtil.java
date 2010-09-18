@@ -183,6 +183,31 @@ public class TestUtil
 	}
 
 	/**
+	 * Return a connection to a locally running PostgreSQL database
+	 */
+	public static WbConnection getPostgresConnection()
+	{
+		final String id = "WBJUnitPostgres";
+		try
+		{
+			WbConnection con = ConnectionMgr.getInstance().findConnection(id);
+			if (con != null) return con;
+
+			ArgumentParser parser = new AppArguments();
+			parser.parse("-url='jdbc:postgresql://localhost/wbjunit' -username=wbjunit -password=wbjunit -driver=org.postgresql.Driver");
+			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+			prof.setName("WBJUnitPostgres");
+			ConnectionMgr.getInstance().addProfile(prof);
+			con = ConnectionMgr.getInstance().getConnection(prof, id);
+			return con;
+		}
+		catch (Throwable th)
+		{
+			return null;
+		}
+	}
+
+	/**
 	 * Return a connection to an H2 (in-memory) Database with the name of this TestUtil
 	 * @see TestUtil#TestUtil(String)
 	 */
@@ -283,7 +308,7 @@ public class TestUtil
 	 * The basedir of the StatementRunner is set to this basedir
 	 *
 	 * @see #getBaseDir()
-	 * @see StatementRunner#setBaseDir(java.lang.String) 
+	 * @see StatementRunner#setBaseDir(java.lang.String)
 	 */
 	public StatementRunner createConnectedStatementRunner(WbConnection con)
 		throws Exception
@@ -555,5 +580,5 @@ public class TestUtil
 		{
 			return null;
 		}
-	}	
+	}
 }

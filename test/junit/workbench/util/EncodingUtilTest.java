@@ -11,20 +11,16 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author tkellerer
  */
 public class EncodingUtilTest
-	extends TestCase
 {
-	public EncodingUtilTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testCleanupEncoding()
 	{
 		assertEquals("UTF-8", EncodingUtil.cleanupEncoding("utf"));

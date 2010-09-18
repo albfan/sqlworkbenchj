@@ -11,53 +11,52 @@
  */
 package workbench.db.importer;
 
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import junit.framework.TestCase;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.db.ColumnIdentifier;
 import workbench.db.WbConnection;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class TextFileParserTest
-	extends TestCase
+	extends WbTestCase
 {
 	private TestUtil util;
 	private WbConnection connection;
 
-	public TextFileParserTest(String testName)
+	public TextFileParserTest()
 	{
-		super(testName);
-		try
-		{
-			util = new TestUtil(testName);
-			util.prepareEnvironment();
-		}
-		catch (Exception e)
-		{
-			fail(e.getMessage());
-		}
+		super("TextFileParserTest");
+		util = getTestUtil();
 	}
 
-	protected void setUp() throws Exception
+	@Before
+	public void setUp()
+		throws Exception
 	{
-		super.setUp();
-		this.connection = prepareDatabase();
+		connection = prepareDatabase();
 	}
 
-	protected void tearDown() throws Exception
+	@After
+	public void tearDown()
+		throws Exception
 	{
 		this.connection.disconnect();
-		super.tearDown();
 	}
 
+	@Test
 	public void testSetColumns()
 		throws Exception
 	{
@@ -95,35 +94,6 @@ public class TextFileParserTest
 		assertEquals("LASTNAME", toImport.get(0).getColumnName());
 	}
 
-	public void setColumnWidths()
-		throws Exception
-	{
-		TextFileParser parser = new TextFileParser();
-		parser.setConnection(connection);
-		List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
-		cols.add(new ColumnIdentifier("lastname"));
-		cols.add(new ColumnIdentifier("firstname"));
-		cols.add(new ColumnIdentifier("nr"));
-		parser.setTableName("person");
-		parser.setColumns(cols);
-		Map<ColumnIdentifier, Integer> widths = new HashMap<ColumnIdentifier, Integer>();
-		widths.put(new ColumnIdentifier("lastname"), Integer.valueOf(15));
-		widths.put(new ColumnIdentifier("nr"), Integer.valueOf(3));
-		widths.put(new ColumnIdentifier("firstname"), Integer.valueOf(10));
-		parser.setColumnWidths(widths);
-
-		List<ImportFileColumn> importCols = parser.getImportColumns();
-		assertEquals(3, importCols.size());
-		assertEquals("NR", importCols.get(0).getColumn().getColumnName());
-		assertEquals(3, importCols.get(0).getDataWidth());
-
-		assertEquals("LASTNAME", importCols.get(1).getColumn().getColumnName());
-		assertEquals(15, importCols.get(1).getDataWidth());
-
-		assertEquals("FIRSTNAME", importCols.get(2).getColumn().getColumnName());
-		assertEquals(10, importCols.get(2).getDataWidth());
-	}
-	
 	private WbConnection prepareDatabase()
 		throws SQLException, ClassNotFoundException
 	{

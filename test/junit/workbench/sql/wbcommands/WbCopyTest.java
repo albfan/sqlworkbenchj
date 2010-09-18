@@ -23,6 +23,10 @@ import workbench.db.WbConnection;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -32,18 +36,21 @@ public class WbCopyTest
 	extends WbTestCase
 {
 
-	public WbCopyTest(String testName)
+	public WbCopyTest()
 	{
-		super(testName);
+		super("WbCopyTest");
 	}
 
+	@Test
 	public void testIsConnectionRequired()
 	{
 		WbCopy copy = new WbCopy();
 		assertFalse(copy.isConnectionRequired());
 	}
 
-	public void testCopyWithSyncDelete() throws Exception
+	@Test
+	public void testCopyWithSyncDelete()
+		throws Exception
 	{
 		try
 		{
@@ -110,6 +117,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testCopy() throws Exception
 	{
 		try
@@ -203,6 +211,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testCreateWithMap() throws Exception
 	{
 		try
@@ -275,6 +284,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testWithColumnMap()
 	{
 		try
@@ -343,6 +353,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testCreateTargetFromQuery1()
 	{
 		try
@@ -416,6 +427,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testCreateTargetFromQuery2()
 	{
 		try
@@ -489,6 +501,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testQueryCopy()
 	{
 		try
@@ -555,6 +568,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testQueryCopyNoColumns()
 	{
 		try
@@ -619,6 +633,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testQueryCopyNoPK()
 	{
 		try
@@ -708,6 +723,7 @@ public class WbCopyTest
 		}
 	}
 
+	@Test
 	public void testCopySchema()
 	{
 		try
@@ -842,8 +858,9 @@ public class WbCopyTest
 		int dummy = 5;
 	}
 
-
+	@Test
 	public void testCreateTarget()
+		throws Exception
 	{
 		try
 		{
@@ -929,19 +946,15 @@ public class WbCopyTest
 			ConnectionMgr.getInstance().removeProfile(target.getProfile());
 
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
-
+	@Test
 	public void testCopySchemaCreateTable()
+		throws Exception
 	{
 		try
 		{
@@ -998,17 +1011,13 @@ public class WbCopyTest
 			ConnectionMgr.getInstance().removeProfile(con.getProfile());
 			ConnectionMgr.getInstance().removeProfile(target.getProfile());
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
 
+	@Test
 	public void testQuotedColumns()
 		throws Exception
 	{
@@ -1029,7 +1038,7 @@ public class WbCopyTest
 
 			WbCopy copyCmd = new WbCopy();
 			copyCmd.setConnection(con);
-			
+
 			StatementRunnerResult result = copyCmd.execute(sql);
 			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
 			Statement stmt = con.createStatement();

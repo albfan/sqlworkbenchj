@@ -1,11 +1,11 @@
 /*
  * LiquibaseSupportTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.liquibase;
@@ -15,6 +15,10 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.sql.DelimiterDefinition;
 import workbench.util.WbFile;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
@@ -24,11 +28,12 @@ public class LiquibaseSupportTest
 	extends WbTestCase
 {
 
-	public LiquibaseSupportTest(String testName)
+	public LiquibaseSupportTest()
 	{
-		super(testName);
+		super("LiquibaseSupportTest");
 	}
 
+	@Test
 	public void testGetCustomSQL()
 		throws Exception
 	{
@@ -136,5 +141,5 @@ public class LiquibaseSupportTest
 		sql = lb.getSQLFromChangeSet(new ChangeSetIdentifier("Arthur", "*"));
 		assertEquals(2, sql.size());
 	}
-	
+
 }

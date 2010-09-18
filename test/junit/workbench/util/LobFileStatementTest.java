@@ -13,30 +13,34 @@ package workbench.util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import junit.framework.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class LobFileStatementTest 
+public class LobFileStatementTest
 	extends WbTestCase
 {
 	private TestUtil util;
 
-	public LobFileStatementTest(String testName)
+	public LobFileStatementTest()
 	{
-		super(testName);
+		super("LobFileStatementTest");
 		util = getTestUtil();
 	}
 
+	@Before
 	public void setUp()
 	{
 		util.emptyBaseDirectory();
 	}
 
+	@Test
 	public void testSyntaxError()
 	{
 		boolean hasException = false;
@@ -48,14 +52,14 @@ public class LobFileStatementTest
 		catch (FileNotFoundException e)
 		{
 			// a FileNotFound is not expected as the syntax is not correct
-			hasException = false; 
+			hasException = false;
 		}
 		catch (IllegalArgumentException e)
 		{
 			hasException = true;
 		}
 		assertEquals("Wrong exception or no exception thrown", true, hasException);
-		
+
 		try
 		{
 			String sql = "insert into test (x,y,z) values (1,2, {$blobfile=dummy_file.data)";
@@ -65,7 +69,7 @@ public class LobFileStatementTest
 		catch (FileNotFoundException e)
 		{
 			// a FileNotFound is not expected as the syntax is not correct
-			hasException = false; 
+			hasException = false;
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -81,7 +85,7 @@ public class LobFileStatementTest
 		}
 		catch (FileNotFoundException e)
 		{
-			hasException = true; 
+			hasException = true;
 		}
 		catch (IllegalArgumentException e)
 		{
@@ -89,10 +93,12 @@ public class LobFileStatementTest
 			hasException = false;
 		}
 		assertEquals("Wrong exception or no exception thrown", true, hasException);
-		
+
 	}
-	
+
+	@Test
 	public void testGetParameterCount()
+		throws Exception
 	{
 		File f = new File(util.getBaseDir(), "test.data");
 		try
@@ -118,19 +124,15 @@ public class LobFileStatementTest
 			File target = new File(parms[0].getFilename());
 			assertEquals("Wrong filename parsed", "some file.data", f.getName());
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("could not parse statement");
-		}
 		finally
 		{
 			f.delete();
 		}
 	}
 
-
+	@Test
 	public void testGetPreparedSql()
+		throws Exception
 	{
 		File f = new File(util.getBaseDir(), "test.data");
 		try
@@ -151,11 +153,6 @@ public class LobFileStatementTest
 			stmt = new LobFileStatement(sql);
 			assertEquals("Wrong SQL generated", "update bla set col =  ?  where x = 1", stmt.getPreparedSql());
 
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail("could not parse statement");
 		}
 		finally
 		{

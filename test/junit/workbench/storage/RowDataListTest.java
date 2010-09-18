@@ -12,6 +12,8 @@
 package workbench.storage;
 
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
@@ -19,33 +21,26 @@ import workbench.WbTestCase;
 public class RowDataListTest
 	extends WbTestCase
 {
-	public RowDataListTest(String testName)
+
+	public RowDataListTest()
 	{
-		super(testName);
+		super("RowDataListTest");
 	}
 
+	@Test
 	public void testAdd()
 	{
-		try
-		{
-			RowDataList list = new RowDataList();
-			list.reset();
+		RowDataList list = new RowDataList();
+		list.reset();
 
-			// Make sure add() still works properly after calling reset()
-			RowData row = new RowData(2);
-			row.setValue(0, "Test");
-			row.setValue(1, new Integer(42));
-			list.add(row);
-			RowData r = list.get(0);
-			assertNotNull(r);
-			assertEquals(r.getValue(0), "Test");
-			assertEquals(r.getValue(1), new Integer(42));
-		}
-		catch (Throwable th)
-		{
-			th.printStackTrace();
-			fail(th.getMessage());
-		}
+		// Make sure add() still works properly after calling reset()
+		RowData row = new RowData(2);
+		row.setValue(0, "Test");
+		row.setValue(1, new Integer(42));
+		list.add(row);
+		RowData r = list.get(0);
+		assertNotNull(r);
+		assertEquals(r.getValue(0), "Test");
+		assertEquals(r.getValue(1), new Integer(42));
 	}
-
 }

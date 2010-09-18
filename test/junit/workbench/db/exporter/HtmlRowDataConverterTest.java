@@ -12,12 +12,14 @@
 package workbench.db.exporter;
 
 import java.sql.Types;
+import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.storage.ResultInfo;
 import workbench.storage.RowData;
 import workbench.util.StrBuffer;
 import workbench.util.ValueConverter;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -27,11 +29,12 @@ public class HtmlRowDataConverterTest
 	extends WbTestCase
 {
 
-	public HtmlRowDataConverterTest(String testName)
+	public HtmlRowDataConverterTest()
 	{
-		super(testName);
+		super("HtmlRowDataConverterTest");
 	}
 
+	@Test
 	public void testConvert()
 		throws Exception
 	{

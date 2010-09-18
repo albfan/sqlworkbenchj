@@ -11,6 +11,7 @@
  */
 package workbench.db.importer;
 
+import org.junit.Test;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +22,7 @@ import workbench.db.WbConnection;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 import workbench.util.ValueConverter;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -30,11 +32,12 @@ public class ConstantColumnValuesTest
 	extends WbTestCase
 {
 
-	public ConstantColumnValuesTest(String testName)
+	public ConstantColumnValuesTest()
 	{
-		super(testName);
+		super("ConstantColumnValuesTest");
 	}
 
+	@Test
 	public void testGetStaticValues()
 		throws Exception
 	{
@@ -69,23 +72,7 @@ public class ConstantColumnValuesTest
 		assertEquals(false, values.removeColumn(new ColumnIdentifier("kkk", java.sql.Types.VARCHAR)));
 	}
 
-//	public void testColumnReferences()
-//		throws Exception
-//	{
-//		List<ColumnIdentifier> columns = new ArrayList<ColumnIdentifier>();
-//		columns.add(new ColumnIdentifier("test_run_id", java.sql.Types.INTEGER));
-//
-//		List<String> entries = CollectionUtil.arrayList("test_run_id=\"${myfunc($id, '$firstname', '$lastname')}\"");
-//		ConstantColumnValues values = new ConstantColumnValues(entries, columns);
-//		assertEquals(1, values.getColumnCount());
-//		assertEquals("myfunc($id, '$firstname', '$lastname')", values.getFunctionLiteral(0));
-//		List<String> cols = values.getInputColumnsForFunction(0);
-//		assertEquals(3, cols.size());
-//		assertEquals("id", cols.get(0));
-//		assertEquals("firstname", cols.get(1));
-//		assertEquals("lastname", cols.get(2));
-//	}
-
+	@Test
 	public void testInitFromDb()
 	{
 		TestUtil util = new TestUtil("testConstants");

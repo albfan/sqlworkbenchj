@@ -12,33 +12,35 @@
 package workbench.sql.preparedstatement;
 
 import java.sql.Statement;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class PreparedStatementPoolTest
-	extends TestCase
+	extends WbTestCase
 {
 
-	public PreparedStatementPoolTest(String testName)
+	public PreparedStatementPoolTest()
 	{
-		super(testName);
+		super("PreparedStatementPoolTest");
 	}
 
+	@Test
 	public void testPool()
+		throws Exception
 	{
-		TestUtil util = new TestUtil("PreparedStatementPoolTest");
+		TestUtil util = getTestUtil();
 		try
 		{
-			util.prepareEnvironment();
-			// Still using HSQLDB as H2 does not implement getParameterMetaData() correctly
+			// Using HSQLDB as H2 does not implement getParameterMetaData() correctly
 			WbConnection con = util.getHSQLConnection("testPool");
-//			WbConnection con = util.getConnection("testPool");
 			Statement stmt = con.createStatement();
 			stmt.executeUpdate("CREATE TABLE prep_test (nr integer, name varchar(100))");
 			PreparedStatementPool pool = new PreparedStatementPool(con);
@@ -65,16 +67,9 @@ public class PreparedStatementPoolTest
 			assertEquals("Incorrect number of parameters", 1, p.getParameterCount());
 			assertEquals("Incorrect parameter type", java.sql.Types.INTEGER, p.getParameterType(0));
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-
-
 }

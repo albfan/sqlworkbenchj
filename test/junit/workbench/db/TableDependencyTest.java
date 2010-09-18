@@ -15,6 +15,9 @@ import java.sql.Statement;
 import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.After;
 
 /**
  *
@@ -23,78 +26,77 @@ import workbench.WbTestCase;
 public class TableDependencyTest
 	extends WbTestCase
 {
-	public TableDependencyTest(String testName)
+	public TableDependencyTest()
 	{
-		super(testName);
+		super("TableDependencyTest");
 	}
 
 	protected WbConnection createRegularDB()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil("dependencyTest");
 		WbConnection dbConn = util.getConnection();
 		Statement stmt = dbConn.createStatement();
-		String baseSql = "CREATE TABLE base  \n" + 
-					 "( \n" + 
-					 "   id1  INTEGER NOT NULL, \n" + 
-					 "   id2  INTEGER NOT NULL, \n" + 
-					 "   primary key (id1, id2) \n" + 
-					 ")";			
+		String baseSql = "CREATE TABLE base  \n" +
+					 "( \n" +
+					 "   id1  INTEGER NOT NULL, \n" +
+					 "   id2  INTEGER NOT NULL, \n" +
+					 "   primary key (id1, id2) \n" +
+					 ")";
 		stmt.execute(baseSql);
 
-		String child1Sql = "CREATE TABLE child1 \n" + 
-					 "( \n" + 
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-					 "   base_id1    INTEGER NOT NULL, \n" + 
-					 "   base_id2    INTEGER NOT NULL, \n" + 
-					 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
-					 ")";			
+		String child1Sql = "CREATE TABLE child1 \n" +
+					 "( \n" +
+					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+					 "   base_id1    INTEGER NOT NULL, \n" +
+					 "   base_id2    INTEGER NOT NULL, \n" +
+					 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
+					 ")";
 		stmt.executeUpdate(child1Sql);
 
-		String child2Sql = "CREATE TABLE child2 \n" + 
-					 "( \n" + 
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-					 "   base_id1    INTEGER NOT NULL, \n" + 
-					 "   base_id2    INTEGER NOT NULL, \n" + 
-					 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" + 
-					 ")";			
+		String child2Sql = "CREATE TABLE child2 \n" +
+					 "( \n" +
+					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+					 "   base_id1    INTEGER NOT NULL, \n" +
+					 "   base_id2    INTEGER NOT NULL, \n" +
+					 "   FOREIGN KEY (base_id1, base_id2) REFERENCES base (id1,id2) \n" +
+					 ")";
 		stmt.executeUpdate(child2Sql);
 
-		String child3Sql = "CREATE TABLE child2_detail \n" + 
-					 "( \n" + 
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-					 "   child_id    INTEGER NOT NULL, \n" + 
-					 "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" + 
-					 ")";			
+		String child3Sql = "CREATE TABLE child2_detail \n" +
+					 "( \n" +
+					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+					 "   child_id    INTEGER NOT NULL, \n" +
+					 "   FOREIGN KEY (child_id) REFERENCES child2 (id) \n" +
+					 ")";
 		stmt.executeUpdate(child3Sql);
 
-		String sql = "CREATE TABLE child1_detail \n" + 
-					 "( \n" + 
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-					 "   child1_id    INTEGER NOT NULL, \n" + 
-					 "   FOREIGN KEY (child1_id) REFERENCES child1 (id) \n" + 
-					 ")";			
+		String sql = "CREATE TABLE child1_detail \n" +
+					 "( \n" +
+					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+					 "   child1_id    INTEGER NOT NULL, \n" +
+					 "   FOREIGN KEY (child1_id) REFERENCES child1 (id) \n" +
+					 ")";
 		stmt.executeUpdate(sql);
 
-		sql = "CREATE TABLE child1_detail2 \n" + 
-					 "( \n" + 
-					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" + 
-					 "   detail_id    INTEGER NOT NULL, \n" + 
-					 "   FOREIGN KEY (detail_id) REFERENCES child1_detail (id) \n" + 
-					 ")";			
+		sql = "CREATE TABLE child1_detail2 \n" +
+					 "( \n" +
+					 "   id          INTEGER NOT NULL PRIMARY KEY, \n" +
+					 "   detail_id    INTEGER NOT NULL, \n" +
+					 "   FOREIGN KEY (detail_id) REFERENCES child1_detail (id) \n" +
+					 ")";
 		stmt.executeUpdate(sql);
 		return dbConn;
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
 		ConnectionMgr.getInstance().disconnectAll();
-		super.tearDown();
 	}
 
+	@Test
 	public void testDependency()
 		throws Exception
 	{
@@ -124,59 +126,55 @@ public class TableDependencyTest
 				}
 			}
 		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	protected WbConnection createTwoLevelCycleDB()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil("dependencyCycleTest");
 		WbConnection dbConn = util.getConnection();
 		Statement stmt = dbConn.createStatement();
 
 		String sql = null;
-		
+
 		sql = "CREATE TABLE base \n" +
-					 "( \n" + 
+					 "( \n" +
 					 "   id          INTEGER NOT NULL PRIMARY KEY " +
-					 ")";			
+					 ")";
 		stmt.executeUpdate(sql);
-		
-		sql = "CREATE TABLE tbl1 \n" + 
-					 "( \n" + 
+
+		sql = "CREATE TABLE tbl1 \n" +
+					 "( \n" +
 					 "   id          INTEGER NOT NULL PRIMARY KEY, " +
 					 "   base_id     INTEGER, " +
 					 "   tbl2_id     integer," +
 					 "   foreign key (base_id) references base (id) " +
-					 ")";			
+					 ")";
 		stmt.executeUpdate(sql);
 
-		sql = "CREATE TABLE tbl2 \n" + 
-					 "( \n" + 
+		sql = "CREATE TABLE tbl2 \n" +
+					 "( \n" +
 					 "   id          INTEGER NOT NULL PRIMARY KEY," +
 					 "   tbl1_id     integer " +
-					 ")";			
+					 ")";
 		stmt.executeUpdate(sql);
 
 		sql = "alter table tbl1 add foreign key (tbl2_id) references tbl2 (id)";
 		stmt.executeUpdate(sql);
-		
+
 		sql = "alter table tbl2 add foreign key (tbl1_id) references tbl1 (id)";
 		stmt.executeUpdate(sql);
-		
+
 		return dbConn;
 	}
 
+	@Test
 	public void testCycle()
+		throws Exception
 	{
 		try
 		{
@@ -186,52 +184,46 @@ public class TableDependencyTest
 			dep.readTreeForChildren();
 			assertEquals(false, dep.wasAborted());
 			assertNotNull("No root returned", dep.getRootNode());
-//			dep.getRootNode().printAll();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 		finally
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	protected WbConnection createSingleLevelCycleDB()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil("dependencyCycleTest");
 		WbConnection dbConn = util.getConnection();
 		Statement stmt = dbConn.createStatement();
 
 		String sql = null;
-		
-		sql = "CREATE TABLE tbl1 \n" + 
-					 "( \n" + 
+
+		sql = "CREATE TABLE tbl1 \n" +
+					 "( \n" +
 					 "   id          INTEGER NOT NULL PRIMARY KEY, " +
 					 "   tbl2_id     integer" +
-					 ")";			
+					 ")";
 		stmt.executeUpdate(sql);
 
-		sql = "CREATE TABLE tbl2 \n" + 
-					 "( \n" + 
+		sql = "CREATE TABLE tbl2 \n" +
+					 "( \n" +
 					 "   id          INTEGER NOT NULL PRIMARY KEY," +
 					 "   tbl1_id     integer " +
-					 ")";			
+					 ")";
 		stmt.executeUpdate(sql);
 
 		sql = "alter table tbl1 add foreign key (tbl2_id) references tbl2 (id)";
 		stmt.executeUpdate(sql);
-		
+
 		sql = "alter table tbl2 add foreign key (tbl1_id) references tbl1 (id)";
 		stmt.executeUpdate(sql);
-		
+
 		return dbConn;
 	}
-	
+
+	@Test
 	public void testDirectCycle()
 		throws Exception
 	{
@@ -250,6 +242,7 @@ public class TableDependencyTest
 		}
 	}
 
+	@Test
 	public void testIndirectCycle()
 		throws Exception
 	{
@@ -298,7 +291,7 @@ public class TableDependencyTest
              "ALTER TABLE invoicegroup ADD FOREIGN KEY (lastChangedById) REFERENCES user_account (id); \n" +
              "ALTER TABLE invoicegroup ADD FOREIGN KEY (createdById) REFERENCES user_account (id); ";
 
-		WbConnection con = super.getTestUtil().getConnection();
+		WbConnection con = getTestUtil().getConnection();
 		TestUtil.executeScript(con, sql);
 
 		try

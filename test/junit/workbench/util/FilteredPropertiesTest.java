@@ -11,22 +11,18 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
 import workbench.interfaces.PropertyStorage;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class FilteredPropertiesTest
-	extends TestCase
 {
 
-	public FilteredPropertiesTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testCopyTo()
 	{
 		PropertyStorage old = new WbProperties();

@@ -19,6 +19,8 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -28,11 +30,12 @@ public class RowDataTest
 	extends WbTestCase
 {
 
-	public RowDataTest(String testName)
+	public RowDataTest()
 	{
-		super(testName);
+		super("RowDataTest");
 	}
 
+	@Test
 	public void testTrimCharData()
 		throws Exception
 	{
@@ -79,6 +82,7 @@ public class RowDataTest
 		util.emptyBaseDirectory();
 	}
 
+	@Test
 	public void testConverter()
 		throws Exception
 	{
@@ -145,6 +149,7 @@ public class RowDataTest
 		util.emptyBaseDirectory();
 	}
 
+	@Test
 	public void testBlobs()
 	{
 		RowData row = new RowData(2);
@@ -157,6 +162,7 @@ public class RowDataTest
 		assertFalse(row.isModified());
 	}
 
+	@Test
 	public void testResetStatus()
 	{
 		RowData row = new RowData(2);
@@ -179,6 +185,7 @@ public class RowDataTest
 		assertFalse(row.isModified());
 	}
 
+	@Test
 	public void testChangeValues()
 	{
 		RowData row = new RowData(2);
@@ -222,6 +229,7 @@ public class RowDataTest
 		assertFalse(row.isModified());
 	}
 
+	@Test
 	public void testCopy()
 		throws Exception
 	{

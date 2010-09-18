@@ -12,6 +12,8 @@ package workbench.sql.preparedstatement;
 
 import java.sql.Types;
 import workbench.WbTestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
@@ -21,11 +23,12 @@ public class ParameterDefinitionTest
 	extends WbTestCase
 {
 
-	public ParameterDefinitionTest(String testName)
+	public ParameterDefinitionTest()
 	{
-		super(testName);
+		super("ParameterDefinitionTest");
 	}
 
+	@Test
 	public void testParameter()
 	{
 		ParameterDefinition varcharDef = new ParameterDefinition(1, Types.VARCHAR);

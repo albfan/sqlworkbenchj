@@ -11,35 +11,38 @@
  */
 package workbench.db.oracle;
 
+import org.junit.After;
+import org.junit.Test;
+import org.junit.Before;
+import workbench.WbTestCase;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.DbObject;
 import workbench.db.SequenceDefinition;
 import workbench.db.WbConnection;
 import workbench.util.StringUtil;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class OracleSequenceReaderTest
-	extends TestCase
+	extends WbTestCase
 {
 	private WbConnection db;
 	
-	public OracleSequenceReaderTest(String testName)
+	public OracleSequenceReaderTest()
 	{
-		super(testName);
+		super("OracleSequenceReaderTest");
 	}
 
-	@Override
-	protected void setUp()
+	@Before
+	public void setUp()
 		throws Exception
 	{
-		super.setUp();
 		TestUtil util = new TestUtil(getName());
 		db = util.getHSQLConnection("fake_ora");
 		TestUtil.executeScript(db,
@@ -62,13 +65,14 @@ public class OracleSequenceReaderTest
 		);
 	}
 
-	@Override
-	protected void tearDown()
+	@After
+	public void tearDown()
 		throws Exception
 	{
 		db.disconnect();
 	}
 
+	@Test
 	public void testGetSequences()
 	{
 		OracleSequenceReader instance = new OracleSequenceReader(db);

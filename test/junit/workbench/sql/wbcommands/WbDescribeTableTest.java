@@ -12,41 +12,47 @@
 package workbench.sql.wbcommands;
 
 import java.util.List;
-import junit.framework.*;
 import workbench.TestUtil;
+import workbench.WbTestCase;
 import workbench.console.DataStorePrinter;
 import workbench.db.ConnectionMgr;
 import workbench.db.IndexDefinition;
 import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
+import workbench.sql.wbcommands.WbDescribeTableTest;
 import workbench.storage.DataStore;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class WbDescribeTableTest extends TestCase
+public class WbDescribeTableTest
+	extends WbTestCase
 {
-	public WbDescribeTableTest(String testName)
+
+	public WbDescribeTableTest()
 	{
-		super(testName);
+		super("WbDescribeTableTest");
 	}
 
-	protected void tearDown() throws Exception
+	@After
+	public void tearDown()
+		throws Exception
 	{
 		ConnectionMgr.getInstance().disconnectAll();
-		super.tearDown();
 	}
 
+	@Test
 	public void testExecute()
 		throws Exception
 	{
-		TestUtil util;
-		StatementRunner runner;
-		
-		util = new TestUtil(getClass().getName()+"_testExecute");
+		TestUtil util = getTestUtil();
 		util.prepareEnvironment();
-		runner = util.createConnectedStatementRunner();
+		StatementRunner runner = util.createConnectedStatementRunner();
 		String sql = "create table describe_test (nr integer, info_text varchar(100));";
 		runner.runStatement(sql);
 		StatementRunnerResult result = runner.getResult();
@@ -84,16 +90,14 @@ public class WbDescribeTableTest extends TestCase
 		assertEquals("Not enough returned", 2, data.size());
 		DataStore indexDs = data.get(1);
 		DataStorePrinter p = new DataStorePrinter(indexDs);
-//		p.printTo(System.out);
 
 		assertEquals(1, indexDs.getRowCount());
 		assertEquals("IDX_NR", indexDs.getValue(0, "INDEX_NAME"));
 		assertEquals("NO", indexDs.getValue(0, "UNIQUE"));
 		Object o = indexDs.getValue(0, "DEFINITION");
 		assertTrue(o instanceof IndexDefinition);
-		String def = ((IndexDefinition)o).getExpression();
+		String def = ((IndexDefinition) o).getExpression();
 		assertEquals("NR ASC", def);
 
 	}
-	
 }

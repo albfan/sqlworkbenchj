@@ -12,35 +12,17 @@
 package workbench.sql;
 
 import java.io.IOException;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class LexerBasedParserTest
-	extends TestCase
 {
 
-	public LexerBasedParserTest(String testName)
-	{
-		super(testName);
-	}
-
-	@Override
-	protected void setUp()
-		throws Exception
-	{
-		super.setUp();
-	}
-
-	@Override
-	protected void tearDown()
-		throws Exception
-	{
-		super.tearDown();
-	}
-
+	@Test
 	public void testGetNextCommand()
 		throws Exception
 	{
@@ -66,6 +48,8 @@ public class LexerBasedParserTest
 		}
 
 	}
+
+	@Test
 	public void testStoreIndexOnly()
 		throws Exception
 	{
@@ -94,6 +78,7 @@ public class LexerBasedParserTest
 		}
 	}
 
+	@Test
 	public void testTrimLeadingWhiteSpace()
 		throws Exception
 	{
@@ -138,6 +123,7 @@ public class LexerBasedParserTest
 		}
 	}
 
+	@Test
 	public void testReturnLeadingWhiteSpace()
 		throws Exception
 	{
@@ -163,6 +149,7 @@ public class LexerBasedParserTest
 		}
 	}
 
+	@Test
 	public void testPatterns()
 	{
 		assertTrue(LexerBasedParser.isMultiLine("\n\n"));
@@ -180,7 +167,7 @@ public class LexerBasedParserTest
 		assertTrue(LexerBasedParser.isLineBreak("           \t\r\n\t"));
 	}
 
-
+	@Test
 	public void testCursorInEmptyLine()
 		throws Exception
 	{
@@ -193,6 +180,7 @@ public class LexerBasedParserTest
 //		System.out.println("*** start: " + cmd.getWhitespaceStart());
 	}
 
+	@Test
 	public void testEmptyLineDelimiter()
 		throws Exception
 	{
@@ -236,6 +224,7 @@ public class LexerBasedParserTest
 		}
 	}
 
+	@Test
 	public void testMsGO()
 		throws Exception
 	{
@@ -261,6 +250,7 @@ public class LexerBasedParserTest
 		}
 	}
 
+	@Test
 	public void testQuotedDelimiter()
 		throws Exception
 	{
@@ -304,6 +294,7 @@ public class LexerBasedParserTest
 
 	}
 
+	@Test
 	public void testAlternateDelimiter()
 		throws Exception
 	{
@@ -349,6 +340,7 @@ public class LexerBasedParserTest
 		}
 	}
 
+	@Test
 	public void testWhiteSpaceAtEnd()
 		throws IOException
 	{
@@ -368,7 +360,8 @@ public class LexerBasedParserTest
 		assertNull(cmd.getSQL());
 		assertEquals(sql.length(), cmd.getEndPositionInScript());
 	}
-	
+
+	@Test
 	public void testOraInclude()
 		throws Exception
 	{

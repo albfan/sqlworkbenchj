@@ -13,20 +13,16 @@ package workbench.sql.macros;
 
 import java.util.Set;
 import java.util.TreeSet;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class SorterTest
-	extends TestCase
 {
-	public SorterTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testCompare()
 	{
 		Set<SortOrderElement> list = new TreeSet<SortOrderElement>(new Sorter());

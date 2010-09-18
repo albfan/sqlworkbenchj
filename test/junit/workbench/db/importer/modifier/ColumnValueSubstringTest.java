@@ -11,20 +11,20 @@
  */
 package workbench.db.importer.modifier;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class ColumnValueSubstringTest
-	extends TestCase
 {
-	public ColumnValueSubstringTest(String testName)
+	public ColumnValueSubstringTest()
 	{
-		super(testName);
 	}
 
+	@Test
 	public void testGetSubstring()
 	{
 		ColumnValueSubstring sub = new ColumnValueSubstring(5, 20);

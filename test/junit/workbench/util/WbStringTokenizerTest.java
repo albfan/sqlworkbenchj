@@ -12,31 +12,45 @@
 package workbench.util;
 
 import java.util.List;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
-public class WbStringTokenizerTest extends TestCase
+public class WbStringTokenizerTest
 {
-	public WbStringTokenizerTest(String testName)
-	{
-		super(testName);
-	}
 
+	@Test
 	public void testParameterTokens()
 	{
 		WbStringTokenizer tok = new WbStringTokenizer('-', "\"'", false);
 		tok.setDelimiterNeedsWhitspace(true);
 		tok.setSourceString(" -other='stuff' -empty= -list='a','b' -one=' ' -nested='\"test\"'");
 		List<String> tokens = tok.getAllTokens();
+		int i = 0;
 		for (String t : tokens)
 		{
-			System.out.println("[" + t + "]");
+			switch (i)
+			{
+				case 1:
+					assertEquals("other=stuff", t.trim());
+					break;
+				case 2:
+					assertEquals("empty=", t.trim());
+					break;
+				case 3:
+					assertEquals("list=a,b", t.trim());
+					break;
+				case 5:
+					assertEquals("nested=\"test\"", t.trim());
+			}
+			i ++;
 		}
 	}
 
+	@Test
 	public void testTokenizer()
 	{
 		String data = "value1\t\"quoted value\"\t  \tlast";

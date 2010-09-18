@@ -18,11 +18,13 @@ import java.util.Arrays;
 import java.util.Random;
 
 import junit.framework.TestCase;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import org.junit.Before;
+import org.junit.After;
 
 public class Base64Test
-	extends TestCase
 {
-
 	private static final long SEED = 12345678;
 	private static Random s_random = new Random(SEED);
 
@@ -59,6 +61,7 @@ public class Base64Test
 		assertTrue(Arrays.equals(data, decoded));
 	}
 
+	@Test
 	public void testStreams()
 		throws Exception
 	{

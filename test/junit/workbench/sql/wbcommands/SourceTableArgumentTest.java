@@ -14,26 +14,29 @@ package workbench.sql.wbcommands;
 import java.sql.Statement;
 import java.util.Collections;
 import java.util.List;
-import junit.framework.TestCase;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.util.SqlUtil;
+import static org.junit.Assert.*;
+import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class SourceTableArgumentTest
-  extends TestCase
+  extends WbTestCase
 {
 
-  public SourceTableArgumentTest(String testName)
+  public SourceTableArgumentTest()
   {
-    super(testName);
+    super("SourceTableArgumentTest");
   }
 
+	@Test
   public void testExcludeWithWildcard()
 		throws Exception
   {
@@ -66,6 +69,7 @@ public class SourceTableArgumentTest
     }
 	}
 
+	@Test
   public void testExcludeSingleTable()
 		throws Exception
   {
@@ -89,10 +93,9 @@ public class SourceTableArgumentTest
 				"commit;\n";
 			TestUtil.executeScript(con, script);
 
-
       SourceTableArgument parser = new SourceTableArgument("t%", "T2,T3", "TABLE", con);
       List<TableIdentifier> tables = parser.getTables();
-			System.out.println("tables: " + tables);
+//			System.out.println("tables: " + tables);
       assertEquals("Wrong number of table", 5, tables.size());
 			for (TableIdentifier tbl : tables)
 			{
@@ -113,6 +116,7 @@ public class SourceTableArgumentTest
     }
 	}
 	
+	@Test
   public void testGetTables()
 		throws Exception
   {
@@ -164,21 +168,15 @@ public class SourceTableArgumentTest
     }
   }
 	
+	@Test
 	public void testGetObjectNames()
+		throws Exception
 	{
-		try
-		{
-			String s = "\"MIND\",\"test\"";
-      SourceTableArgument parser = new SourceTableArgument(null, null);			
-			List<String> tables = parser.getObjectNames(s);
-			assertEquals(2, tables.size());
-			assertEquals("\"MIND\"", tables.get(0));
-			assertEquals("\"test\"", tables.get(1));
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
+		String s = "\"MIND\",\"test\"";
+		SourceTableArgument parser = new SourceTableArgument(null, null);
+		List<String> tables = parser.getObjectNames(s);
+		assertEquals(2, tables.size());
+		assertEquals("\"MIND\"", tables.get(0));
+		assertEquals("\"test\"", tables.get(1));
 	}	
 }

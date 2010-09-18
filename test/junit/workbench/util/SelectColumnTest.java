@@ -11,21 +11,17 @@
  */
 package workbench.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class SelectColumnTest
-	extends TestCase
 {
 
-	public SelectColumnTest(String testName)
-	{
-		super(testName);
-	}
-
+	@Test
 	public void testGetColumnTable()
 	{
 		SelectColumn col = new SelectColumn("first_name");
