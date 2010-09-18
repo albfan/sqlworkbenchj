@@ -10,8 +10,10 @@
  *
  */
 package workbench.db.exporter;
+
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import workbench.log.LogMgr;
 import workbench.storage.ResultInfo;
 import workbench.util.FileUtil;
 import workbench.util.WbFile;
@@ -20,7 +22,7 @@ import workbench.util.WbFile;
  *
  * Creates a COPY statement to import a flat file created by the DataExporter.
  *
- * This COPY statement can be used to import the flat file in Postgres
+ * This COPY statement can be used to import the flat file into a PostgreSQL database
  *
  * @author Thomas Kellerer
  */
@@ -49,15 +51,15 @@ public class PostgresCopyStatementWriter
 				out.print(resultInfo.getColumnName(i));
 			}
 			out.print(") ");
-			
+
 
 			out.print(" from ");
 			out.print("\"" + baseFile.getFullPath() + "\"");
-			
+
 			String delim = exporter.getTextDelimiter();
 			if (delim.equals("\t")) delim = "\\t";
 			out.print(" delimiter as '" + delim + "' ");
-			
+
 			if (exporter.getExportHeaders())
 			{
 				out.print(" csv header ");
@@ -71,7 +73,7 @@ public class PostgresCopyStatementWriter
 		}
 		catch (Exception e)
 		{
-
+			LogMgr.logError("PostgresCopyStatementWriter.writeFormatFile()", "Could not write format file", e);
 		}
 		finally
 		{

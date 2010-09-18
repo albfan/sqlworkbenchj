@@ -479,6 +479,19 @@ public class WbConnection
 		this.sqlConnection.rollback();
 	}
 
+	public void rollbackSilently()
+	{
+		if (sqlConnection == null) return;
+		try
+		{
+			this.sqlConnection.rollback();
+		}
+		catch (Exception e)
+		{
+			LogMgr.logWarning("WbConnection.rollbackSilently()", "Could not rollback!", e);
+		}
+	}
+
 	public boolean getIgnoreDropErrors()
 	{
 		if (this.profile != null)
