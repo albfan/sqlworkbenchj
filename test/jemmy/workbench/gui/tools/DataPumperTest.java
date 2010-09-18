@@ -13,7 +13,6 @@ package workbench.gui.tools;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
-import junit.framework.TestCase;
 import org.netbeans.jemmy.ClassReference;
 import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
@@ -31,21 +30,22 @@ import workbench.gui.NamedComponentChooser;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *
  * @author Thomas Kellerer
  */
 public class DataPumperTest
-	extends TestCase
 {
 	private GuiTestUtil util;
 	private WbFile targetDb;
 	private WbFile sourceDb;
-	public DataPumperTest(String testName)
+
+	public DataPumperTest()
 	{
-		super(testName);
-		util = new GuiTestUtil(testName);
+		util = new GuiTestUtil("DataPumperTest");
 		targetDb  = new WbFile(util.getBaseDir(), "targetdb");
 		sourceDb  = new WbFile(util.getBaseDir(), "sourcedb");
 		try
@@ -239,7 +239,9 @@ public class DataPumperTest
 		close.push();
 	}
 
+	@Test
 	public void testDataPumper()
+		throws Exception
 	{
 		try
 		{
@@ -252,13 +254,11 @@ public class DataPumperTest
 			checkData();
 			closeWindow();
 			WbThread.sleep(500);
+		}
+		finally
+		{
 			util.stopApplication();
 			util.emptyBaseDirectory();
-		}
-		catch (Exception e)
-		{
-			e.printStackTrace();
-			fail(e.getMessage());
 		}
 	}
 }

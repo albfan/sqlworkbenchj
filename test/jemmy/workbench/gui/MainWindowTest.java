@@ -11,11 +11,11 @@
  */
 package workbench.gui;
 
+import org.junit.Test;
 import javax.swing.Action;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JTabbedPane;
-import junit.framework.TestCase;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JComboBoxOperator;
@@ -38,18 +38,17 @@ import workbench.gui.sql.SqlPanel;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
+import static org.junit.Assert.*;
 
 /**
  * @author Thomas Kellerer
  */
 public class MainWindowTest
-	extends TestCase
 {
 	private GuiTestUtil testUtil;
 
-	public MainWindowTest(String testName)
+	public MainWindowTest()
 	{
-		super(testName);
 		this.testUtil = new GuiTestUtil("MainWindowTest");
 	}
 
@@ -438,6 +437,7 @@ public class MainWindowTest
 		return panel.getLogMessage();
 	}
 
+	@Test
 	public void testWindow()
 	{
 		try
@@ -450,12 +450,11 @@ public class MainWindowTest
 			appendTest();
 			pkWarningsTest();
 			definePKTest();
-			testUtil.stopApplication();
+			
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			testUtil.stopApplication();
 		}
 	}
 }

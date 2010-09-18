@@ -16,7 +16,6 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.KeyEvent;
 import javax.swing.JMenuItem;
-import junit.framework.TestCase;
 import org.netbeans.jemmy.JemmyProperties;
 import org.netbeans.jemmy.QueueTool;
 import org.netbeans.jemmy.operators.JButtonOperator;
@@ -32,18 +31,19 @@ import org.netbeans.jemmy.operators.JMenuOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import workbench.gui.sql.EditorPanel;
 import workbench.resource.Settings;
+import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Thomas Kellerer
  */
 public class EditorTest
-	extends TestCase
+
 {
 	private GuiTestUtil testUtil;
 
-	public EditorTest(String testName)
+	public EditorTest()
 	{
-		super(testName);
 		this.testUtil = new GuiTestUtil("EditorTest");
 	}
 
@@ -294,6 +294,7 @@ public class EditorTest
 		cbx.setSelected(selected);
 	}
 
+	@Test
 	public void testEditor()
 	{
 		try
@@ -304,12 +305,10 @@ public class EditorTest
 			commentText();
 			copySnippet();
 			checkWordSep();
-			testUtil.stopApplication();
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			testUtil.stopApplication();
 		}
 	}
 }
