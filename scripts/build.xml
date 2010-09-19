@@ -8,6 +8,7 @@
   <property name="testsrc" value="../test"/>
   <property name="unittest" value="../test/junit"/>
   <property name="guitest" value="../test/jemmy"/>
+  <property name="dbtest" value="../test/dbtest"/>
   <property name="csrc" value="../launcher"/>
   <property name="junitdir" value="../junit"/>
   <property name="scriptsrc" value="."/>
@@ -31,13 +32,6 @@
 
   <property name="coverage.report.dir" value="${root}/junit/coverage" />
   <property name="instrumented.dir" value="${root}/build/instrumented" />
-
-  <path id="emma.path" >
-    <fileset dir="${junitdir}">
-      <include name="emma*.jar"/>
-    </fileset>
-  </path>
-  <taskdef resource="emma_ant.properties" classpathref="emma.path" />
 
   <property name="cobertura.dir" value="${junitdir}/cobertura" />
 
@@ -762,7 +756,6 @@
   <path id="junit.path">
     <fileset dir="${junitdir}">
       <include name="*.jar"/>
-      <exclude name="emma*.jar"/>
     </fileset>
   </path>
 
@@ -784,10 +777,15 @@
     </javac>
   </target>
 
-  <!-- Define which classes will be reported in the coverage reports -->
-  <path id="emma.coverage.classes" >
-    <pathelement location="${build}"/>
-  </path>
+  <target name="compile-db-tests" depends="prepare-test, compile-tests">
+    <javac debug="on" destdir="${build.test}" optimize="off" srcdir="${dbtest}" target="1.6" source="1.6" encoding="ISO-8859-1">
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="junit.path"/>
+      </classpath>
+    </javac>
+  </target>
+
 
   <target name="init-cobertura">
     <delete dir="${instrumented.dir}" />
@@ -797,6 +795,7 @@
     <cobertura-instrument datafile="${junitdir}/cobertura.ser" todir="${instrumented.dir}">
       <fileset dir="${build}">
         <include name="workbench/**/*.class" />
+        <exclude name="workbench/**/*Exception*.class" />
         <exclude name="workbench/gui/lnf/**" />
         <exclude name="workbench/db/mysql/**" />
         <exclude name="workbench/db/firstsql/**" />
@@ -807,42 +806,16 @@
         <exclude name="workbench/db/hsqldb/**" />
         <exclude name="workbench/db/ibm/**" />
         <exclude name="workbench/interfaces/*" />
+        <exclude name="workbench/gui/print/**" />
+        <exclude name="workbench/gui/log/**" />
         <exclude name="workbench/gui/lnf/**" />
-        <!-- <exclude name="workbench/gui/dialogs/**" />
-        <exclude name="workbench/gui/renderer/**" />-->
+        <exclude name="workbench/gui/dialogs/**" />
+        <exclude name="workbench/gui/renderer/**" />
         <exclude name="workbench/gui/help/**" />
         <exclude name="workbench/gui/print/**" />
         <exclude name="workbench/gui/dbobjects/**" />
       </fileset>
     </cobertura-instrument>
-  </target>
-
-  <target name="init-emma" depends="init">
-    <delete dir="${instrumented.dir}" />
-    <mkdir dir="${instrumented.dir}" />
-
-    <emma verbosity="info">
-      <instr instrpathref="emma.coverage.classes" destdir="${instrumented.dir}" metadatafile="${coverage.report.dir}/metadata.emma" merge="true">
-        <filter includes="workbench.*"
-                excludes="workbench.db.firstsql.*,
-                          workbench.db.firebird.*,
-                          workbench.db.derby.*,
-                          workbench.db.ingres.*,
-                          workbench.db.mckoi.*,
-                          workbench.db.mysql.*,
-                          workbench.db.hsqldb.*
-                          workbench.db.mssql.*,
-                          workbench.db.ibm.*,
-                          workbench.gui.help.*,
-                          workbench.gui.lnf.*,
-                          workbench.gui.renderer.*,
-                          workbench.interfaces.*,
-                          workbench.gui.print.*,
-                          workbench.gui.dbobjects.*,
-                          workbench.WbStarter,
-                          jline.*" />
-      </instr>
-    </emma>
   </target>
 
   <target name="coverage" depends="compile-tests, compile-gui-tests, init-cobertura">
@@ -904,6 +877,23 @@
       <batchtest todir="../junit">
         <formatter type="plain"/>
         <fileset dir="${guitest}">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="db-test" depends="compile-db-tests, clean-junit">
+    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true">
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${build.test}"/>
+        <path refid="junit.path"/>
+      </classpath>
+
+      <batchtest todir="../junit">
+        <formatter type="plain"/>
+        <fileset dir="${dbtest}">
           <include name="**/*Test.java"/>
         </fileset>
       </batchtest>

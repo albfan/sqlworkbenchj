@@ -18,9 +18,9 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.DbObject;
 import workbench.db.EnumIdentifier;
 import workbench.db.WbConnection;
+import workbench.sql.ScriptParser;
 import workbench.util.CollectionUtil;
 
 /**
@@ -59,16 +59,10 @@ public class PostgresEnumReaderTest
 	@Test
 	public void testSupportedTypes()
 	{
-		PostgresEnumReader instance = new PostgresEnumReader();
-		List<String> expResult = CollectionUtil.arrayList("ENUM");
-		List<String> result = instance.supportedTypes();
-		assertEquals(expResult, result);
-	}
-
-	@Test
-	public void testHandlesType()
-	{
 		PostgresEnumReader reader = new PostgresEnumReader();
+		List<String> expResult = CollectionUtil.arrayList("ENUM");
+		List<String> result = reader.supportedTypes();
+		assertEquals(expResult, result);
 		assertTrue(reader.handlesType("ENUM"));
 		assertTrue(reader.handlesType("enum"));
 		assertFalse(reader.handlesType("enumeration"));
@@ -76,6 +70,7 @@ public class PostgresEnumReaderTest
 
 	@Test
 	public void testEnumRetrieval()
+		throws Exception
 	{
 		WbConnection con = TestUtil.getPostgresConnection();
 		PostgresEnumReader reader = new PostgresEnumReader();
@@ -84,7 +79,14 @@ public class PostgresEnumReaderTest
 		EnumIdentifier enumId = enums.iterator().next();
 		assertEquals("stimmung", enumId.getObjectName());
 		assertEquals("my enum", enumId.getComment());
-	}
 
+		String sql = enumId.getSource(con).toString();
+		ScriptParser parser = new ScriptParser(sql.toString());
+		assertEquals(2, parser.getSize());
+		String create = parser.getCommand(0);
+		assertEquals(create, "CREATE TYPE stimmung AS ENUM ('sad','ok','happy')");
+		String comment = parser.getCommand(1);
+		assertEquals(comment, "COMMENT ON TYPE stimmung IS 'my enum'");
+	}
 
 }

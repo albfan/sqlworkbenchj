@@ -36,8 +36,13 @@ public class PostgresTestCase
 	{
 		TestUtil util = new TestUtil(schema);
 		util.prepareEnvironment();
-		
+
 		WbConnection con = TestUtil.getPostgresConnection();
+		if (con == null)
+		{
+			return;
+		}
+		
 		Statement stmt = null;
 		try
 		{
