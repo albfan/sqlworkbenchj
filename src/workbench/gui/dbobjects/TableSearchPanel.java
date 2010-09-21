@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
@@ -189,13 +190,16 @@ public class TableSearchPanel
 		criteriaContainer.removeAll();
 		if (serverSideSearch.isSelected())
 		{
+			clientSearcherCriteria.setVisible(false);
 			criteriaContainer.add(serverSearcherCriteria, BorderLayout.CENTER, 0);
+			serverSearcherCriteria.setVisible(true);
 		}
 		else
 		{
+			serverSearcherCriteria.setVisible(false);
 			criteriaContainer.add(clientSearcherCriteria, BorderLayout.CENTER, 0);
+			clientSearcherCriteria.setVisible(true);
 		}
-		criteriaContainer.doLayout();
 		WbSwingUtilities.repaintLater(criteriaContainer);
 	}
 
