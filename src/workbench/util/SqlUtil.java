@@ -1406,6 +1406,11 @@ public class SqlUtil
 		return charLength >= sizeThreshold;
 	}
 
+	public static void appendAndCondition(StringBuilder baseSql, String column, String value)
+	{
+		baseSql.append(" AND ");
+		appendExpression(baseSql, column, value);
+	}
 	/**
 	 * Appends an AND condition for the given column. If the value contains
 	 * a wildcard the condition will use LIKE, otherwise =
@@ -1414,12 +1419,11 @@ public class SqlUtil
 	 * @param column
 	 * @param value
 	 */
-	public static void appendAndCondition(StringBuilder baseSql, String column, String value)
+	public static void appendExpression(StringBuilder baseSql, String column, String value)
 	{
 		if (StringUtil.isBlank(value)) return;
 		if (StringUtil.isEmptyString(column)) return;
 
-		baseSql.append(" AND ");
 		baseSql.append(column);
 
 		if (value.indexOf('%') > -1)

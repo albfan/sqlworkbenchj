@@ -18,7 +18,6 @@ import workbench.db.WbConnection;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import workbench.db.postgres.PostgresTestCase;
 import static org.junit.Assert.*;
 
 /**
@@ -40,7 +39,7 @@ public class PostgresSequenceReaderTest
 	public static void setUp()
 		throws Exception
 	{
-		PostgresTestCase.initTestCase(TEST_ID);
+		PostgresTestUtil.initTestCase(TEST_ID);
 		WbConnection con = TestUtil.getPostgresConnection();
 		if (con == null)
 		{
@@ -56,7 +55,7 @@ public class PostgresSequenceReaderTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestCase.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase(TEST_ID);
 	}
 
 	@Test
@@ -83,7 +82,7 @@ public class PostgresSequenceReaderTest
 
 		seq = objects.get(1);
 		sql = seq.getSource(con).toString();
-		System.out.println(sql);
+//		System.out.println(sql);
 		expected = "CREATE SEQUENCE seq_two\n" +
              "       INCREMENT BY 10\n" +
              "       MINVALUE 100\n" +

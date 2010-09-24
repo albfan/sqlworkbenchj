@@ -122,7 +122,6 @@ public class OracleSequenceReader
 		String owner = ds.getValueAsString(row, "SEQUENCE_OWNER");
 		SequenceDefinition result = new SequenceDefinition(owner, name);
 		result.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
-		result.setSequenceProperty("MIN_VALUE", ds.getValue(row, "MIN_VALUE"));
 		result.setSequenceProperty("MAX_VALUE", ds.getValue(row, "MAX_VALUE"));
 		result.setSequenceProperty("INCREMENT", ds.getValue(row, "INCREMENT_BY"));
 		result.setSequenceProperty("CYCLE_FLAG", ds.getValue(row, "CYCLE_FLAG"));
@@ -156,14 +155,14 @@ public class OracleSequenceReader
 		result.append(nl + "      INCREMENT BY ");
 		result.append(increment);
 
-		if (minValue != null && minValue.intValue() != 0)
-		{
-			result.append(nl + "      NOMINVALUE");
-		}
-		else
+		if (minValue != null && minValue.intValue() != 1)
 		{
 			result.append(nl + "      MINVALUE ");
 			result.append(minValue);
+		}
+		else
+		{
+			result.append(nl + "      NOMINVALUE");
 		}
 
 		if (maxValue != null && !maxValue.toString().equals("999999999999999999999999999"))

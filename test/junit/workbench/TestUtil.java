@@ -208,6 +208,32 @@ public class TestUtil
 	}
 
 	/**
+	 * Return a connection to a locally running Oracle database
+	 * @return null if Oracle is not available
+	 */
+	public static WbConnection getOracleConnection()
+	{
+		final String id = "WBJUnitOracle";
+		try
+		{
+			WbConnection con = ConnectionMgr.getInstance().findConnection(id);
+			if (con != null) return con;
+
+			ArgumentParser parser = new AppArguments();
+			parser.parse("-url='jdbc:oracle:thin:@localhost:1521:oradb' -username=wbjunit -password=wbjunit -driver=oracle.jdbc.OracleDriver");
+			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
+			prof.setName("WBJUnitOracle");
+			ConnectionMgr.getInstance().addProfile(prof);
+			con = ConnectionMgr.getInstance().getConnection(prof, id);
+			return con;
+		}
+		catch (Throwable th)
+		{
+			return null;
+		}
+	}
+
+	/**
 	 * Return a connection to an H2 (in-memory) Database with the name of this TestUtil
 	 * @see TestUtil#TestUtil(String)
 	 */
@@ -438,6 +464,8 @@ public class TestUtil
 	public static void executeScript(WbConnection con, String script)
 		throws SQLException
 	{
+		if (con == null) return;
+		
 		ScriptParser parser = new ScriptParser(script);
 		int count = parser.getSize();
 		for (int i=0; i < count; i++)

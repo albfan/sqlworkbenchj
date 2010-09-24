@@ -13,7 +13,6 @@ package workbench.db.postgres;
 import java.sql.Statement;
 import java.util.List;
 import workbench.TestUtil;
-import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
 import workbench.db.WbConnection;
 import workbench.util.StringUtil;
@@ -22,14 +21,8 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class PostgresTestCase
-	extends WbTestCase
+public class PostgresTestUtil
 {
-
-	public PostgresTestCase(String testName)
-	{
-		super(testName);
-	}
 
 	public static void initTestCase(String schema)
 		throws Exception
@@ -47,7 +40,6 @@ public class PostgresTestCase
 		try
 		{
 			stmt = con.createStatement();
-
 
 			if (StringUtil.isBlank(schema))
 			{

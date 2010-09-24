@@ -79,19 +79,15 @@ public class PostgresDomainReader
 		boolean whereAdded = false;
 		if (StringUtil.isNonBlank(name))
 		{
-			sql.append(" WHERE domain_name like '");
-			sql.append(connection.getMetadata().quoteObjectname(name));
-			sql.append("' ");
+			sql.append(" WHERE ");
+			SqlUtil.appendExpression(sql, "domain_name", name);
 			whereAdded = true;
 		}
 
 		if (StringUtil.isNonBlank(schema))
 		{
 			sql.append(whereAdded ? " AND " : " WHERE ");
-
-			sql.append(" domain_schema = '");
-			sql.append(connection.getMetadata().quoteObjectname(schema));
-			sql.append("'");
+			SqlUtil.appendExpression(sql, "domain_schema", schema);
 		}
 		sql.append(" ORDER BY 1, 2 ");
 

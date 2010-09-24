@@ -17,7 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import workbench.TestUtil;
-import workbench.db.ConnectionMgr;
+import workbench.WbTestCase;
 import workbench.db.DbMetadata;
 import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
@@ -30,7 +30,7 @@ import workbench.util.SqlUtil;
  * @author Thomas Kellerer
  */
 public class PostgresIndexReaderTest
-	extends PostgresTestCase
+	extends WbTestCase
 {
 	private static final String TESTID = "indexreader";
 
@@ -43,14 +43,14 @@ public class PostgresIndexReaderTest
 	public static void setUpClass()
 		throws Exception
 	{
-		PostgresTestCase.initTestCase(TESTID);
+		PostgresTestUtil.initTestCase(TESTID);
 	}
 
 	@AfterClass
 	public static void tearDownClass()
 		throws Exception
 	{
-		PostgresTestCase.cleanUpTestCase(TESTID);
+		PostgresTestUtil.cleanUpTestCase(TESTID);
 	}
 	
 	@Test

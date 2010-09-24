@@ -1,11 +1,11 @@
 /*
  * PostgresEnumReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -41,9 +41,9 @@ public class PostgresEnumReaderTest
 	public static void setUp()
 		throws Exception
 	{
-		PostgresTestCase.initTestCase(TEST_ID);
+		PostgresTestUtil.initTestCase(TEST_ID);
 		WbConnection con = TestUtil.getPostgresConnection();
-		TestUtil.executeScript(con, 
+		TestUtil.executeScript(con,
 			"CREATE TYPE stimmung AS ENUM ('sad','ok','happy');\n" +
 			"COMMENT ON TYPE stimmung IS 'my enum';\n" +
 			"COMMIT;\n");
@@ -53,7 +53,7 @@ public class PostgresEnumReaderTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestCase.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase(TEST_ID);
 	}
 
 	@Test

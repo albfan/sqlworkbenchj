@@ -18,7 +18,7 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.postgres.PostgresTestCase;
+import workbench.db.postgres.PostgresTestUtil;
 import static org.junit.Assert.*;
 /**
  *
@@ -38,7 +38,7 @@ public class PostgresRuleReaderTest
 	public static void setUp()
 		throws Exception
 	{
-		PostgresTestCase.initTestCase(TEST_ID);
+		PostgresTestUtil.initTestCase(TEST_ID);
 		WbConnection con = TestUtil.getPostgresConnection();
 		TestUtil.executeScript(con,
 			"CREATE table person (id integer, firstname varchar(50), lastname varchar(50));\n" +
@@ -52,7 +52,7 @@ public class PostgresRuleReaderTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestCase.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase(TEST_ID);
 	}
 
 	@Test
