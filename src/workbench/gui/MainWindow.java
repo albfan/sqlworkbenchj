@@ -16,6 +16,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.EventQueue;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -214,7 +215,11 @@ public class MainWindow
 		prevTab = new PrevTabAction(sqlTab);
 
 		initMenu();
-		setIconImage(ResourceMgr.getPicture("workbench16").getImage());
+		
+		List<Image> icons = new ArrayList<Image>(2);
+		icons.add(ResourceMgr.getPicture("workbench16").getImage());
+		icons.add(ResourceMgr.getPicture("workbench").getImage());
+		setIconImages(icons);
 
 		getContentPane().add(this.sqlTab, BorderLayout.CENTER);
 
