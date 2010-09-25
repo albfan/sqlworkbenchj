@@ -29,12 +29,10 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.db.postgres.PostgresUtil;
 import workbench.resource.ResourceMgr;
-import workbench.util.SqlUtil;
 
 /**
  *	Represents a JDBC Driver definition.
@@ -347,36 +345,18 @@ public class DbDriver
 			}
 
 			// The system property for the Firebird driver is only needed when the connection is created
-			// so after the connect is done, we can clean up the system properties
+			// so after the connect was successful, we can clean up the system properties
 			if (adjustProgramName() && url.startsWith("jdbc:firebirdsql:"))
 			{
 				System.clearProperty("org.firebirdsql.jdbc.processName");
 			}
-			
-			if (adjustProgramName() && 
-					url.startsWith("jdbc:postgresql") &&
-					JdbcUtils.hasMinimumServerVersion(c, "9.0") &&
-					Settings.getInstance().getBoolProperty("workbench.db.postgresql.set.appname", true))
+
+			// PostgreSQL 9.0 allows to set an application name, but currently only by executing a SQL statement
+			if (adjustProgramName() && url.startsWith("jdbc:postgresql"))
 			{
-				Statement stmt = null;
-				try
-				{
-					stmt = c.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-					stmt.execute("SET application_name = '" + getProgramName() + " (" + id + ") '");
-					// make sure the transaction is ended
-					// as this is absolutely the first thing we did, rollback() should be save
-					// and not interfere with any
-					c.rollback();  
-				}
-				catch (Exception e)
-				{
-					LogMgr.logWarning("DbDriver.setClientInfo()", "Could not set client info", e);
-				}
-				finally
-				{
-					SqlUtil.closeStatement(stmt);
-				}
+				PostgresUtil.setApplicationName(c, getProgramName() + " (" + id + ")");
 			}
+			
 		}
 		catch (ClassNotFoundException e)
 		{
@@ -408,6 +388,14 @@ public class DbDriver
 		return Settings.getInstance().getBoolProperty("workbench.db.connection.set.appname", true);
 	}
 
+	/**
+	 * Pust the application name and connection information into the passed connection properties
+	 * @param props the properties to be used when establishing the connection
+	 * @param url the JDBC url (needed to identify the DBMS)
+	 * @param id the internal connection id
+	 * @param user the user for the connection
+	 * @throws UnknownHostException
+	 */
 	private void setAppInfo(Properties props, String url, String id, String user)
 		throws UnknownHostException
 	{
