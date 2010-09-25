@@ -81,9 +81,10 @@ public class PostgresIndexReaderTest
 		assertEquals("idx_person_id", index.getObjectName());
 		String sql = index.getSource(conn).toString();
 		String type = SqlUtil.getCreateType(sql);
+		System.out.println(sql);
 		assertEquals("INDEX", type);
 		assertTrue(sql.contains("idx_person_id"));
-		assertTrue(sql.contains("(id)"));
+		assertTrue(sql.contains("person (id"));
 	}
 
 }
