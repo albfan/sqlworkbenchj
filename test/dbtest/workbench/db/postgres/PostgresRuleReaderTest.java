@@ -18,7 +18,6 @@ import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
-import workbench.db.postgres.PostgresTestUtil;
 import static org.junit.Assert.*;
 /**
  *
@@ -39,7 +38,7 @@ public class PostgresRuleReaderTest
 		throws Exception
 	{
 		PostgresTestUtil.initTestCase(TEST_ID);
-		WbConnection con = TestUtil.getPostgresConnection();
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		TestUtil.executeScript(con,
 			"CREATE table person (id integer, firstname varchar(50), lastname varchar(50));\n" +
 			"COMMIT;\n" + 
@@ -59,7 +58,7 @@ public class PostgresRuleReaderTest
 	public void retrieveRules()
 		throws Exception
 	{
-		WbConnection con = TestUtil.getPostgresConnection();
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		List<TableIdentifier> objects = con.getMetadata().getObjectList(TEST_ID, new String[] { "RULE" });
 		assertEquals(1, objects.size());
 		TableIdentifier tbl = objects.get(0);

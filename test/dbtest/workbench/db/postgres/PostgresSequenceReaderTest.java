@@ -40,7 +40,7 @@ public class PostgresSequenceReaderTest
 		throws Exception
 	{
 		PostgresTestUtil.initTestCase(TEST_ID);
-		WbConnection con = TestUtil.getPostgresConnection();
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null)
 		{
 			return;
@@ -62,7 +62,7 @@ public class PostgresSequenceReaderTest
 	public void retrieveSequences()
 		throws Exception
 	{
-		WbConnection con = TestUtil.getPostgresConnection();
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null)
 		{
 			System.out.println("No PostgreSQL connection available. Skipping test...");

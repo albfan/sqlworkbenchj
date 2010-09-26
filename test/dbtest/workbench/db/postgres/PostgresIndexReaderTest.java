@@ -1,11 +1,11 @@
 /*
  * PostgresIndexReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -52,12 +52,12 @@ public class PostgresIndexReaderTest
 	{
 		PostgresTestUtil.cleanUpTestCase(TESTID);
 	}
-	
+
 	@Test
 	public void testGetIndexSource()
 		throws SQLException
 	{
-		WbConnection conn = TestUtil.getPostgresConnection();
+		WbConnection conn = PostgresTestUtil.getPostgresConnection();
 		if (conn == null)
 		{
 			System.out.println("No local postgres connection. Skipping test...");

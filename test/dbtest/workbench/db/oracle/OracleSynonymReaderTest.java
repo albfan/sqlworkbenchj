@@ -1,11 +1,11 @@
 /*
  * OracleSynonymReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -40,7 +40,7 @@ public class OracleSynonymReaderTest
 		throws Exception
 	{
 		OracleTestUtil.initTestCase();
-		WbConnection con = TestUtil.getOracleConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		TestUtil.executeScript(con,
 			"CREATE TABLE person (id integer, firstname varchar(50), lastname varchar(50));\n" +
 			"CREATE SYNONYM s_person FOR person;");
@@ -58,7 +58,7 @@ public class OracleSynonymReaderTest
 	public void testGetSynonymList()
 		throws Exception
 	{
-		WbConnection con = TestUtil.getOracleConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		SynonymReader reader = con.getMetadata().getSynonymReader();
 		assertNotNull(reader);
 		Collection<String> types = con.getMetadata().getObjectTypes();

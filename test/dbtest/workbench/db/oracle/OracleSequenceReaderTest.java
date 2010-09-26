@@ -1,11 +1,11 @@
 /*
  * OracleSynonymReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -41,7 +41,7 @@ public class OracleSequenceReaderTest
 		throws Exception
 	{
 		OracleTestUtil.initTestCase();
-		WbConnection con = TestUtil.getOracleConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		TestUtil.executeScript(con,
 			"CREATE SEQUENCE seq_one;"  +
 			"CREATE SEQUENCE seq_two MINVALUE 33 increment by 12 CACHE 42;");
@@ -58,7 +58,7 @@ public class OracleSequenceReaderTest
 	public void testGetSynonymList()
 		throws Exception
 	{
-		WbConnection con = TestUtil.getOracleConnection();
+		WbConnection con = OracleTestUtil.getOracleConnection();
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		assertNotNull(reader);
 		Collection<String> types = con.getMetadata().getObjectTypes();

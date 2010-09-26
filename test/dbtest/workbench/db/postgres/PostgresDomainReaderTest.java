@@ -1,11 +1,11 @@
 /*
  * PostgresDomainReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code maybe reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -44,7 +44,7 @@ public class PostgresDomainReaderTest
 		throws Exception
 	{
 		PostgresTestUtil.initTestCase(TEST_ID);
-		WbConnection con = TestUtil.getPostgresConnection();
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null)
 		{
 			return;
@@ -65,7 +65,7 @@ public class PostgresDomainReaderTest
 	public void testGetDomainRetrieval()
 		throws Exception
 	{
-		WbConnection con = TestUtil.getPostgresConnection();
+		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null)
 		{
 			System.out.println("No PostgreSQL connection available. Skipping test...");
@@ -80,9 +80,9 @@ public class PostgresDomainReaderTest
 
 		List<DomainIdentifier> domains = reader.getDomainList(con, "%", "%");
 		assertEquals(1, domains.size());
-		
+
 		DbObject domain = objects.get(0);
-		
+
 		assertEquals("DOMAIN", domain.getObjectType());
 		String sql = domain.getSource(con).toString().trim();
 		String expected = "CREATE DOMAIN salary AS numeric(12,2)\n" +
