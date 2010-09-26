@@ -1,11 +1,11 @@
 /*
  * FirebirdColumnEnhancer
- * 
+ *
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  * Copyright 2002-2009, Thomas Kellerer
  * No part of this code maybe reused without the permission of the author
- * 
+ *
  * To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.firebird;
@@ -18,6 +18,7 @@ import workbench.db.ColumnDefinitionEnhancer;
 import workbench.db.ColumnIdentifier;
 import workbench.db.TableDefinition;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
@@ -55,12 +56,13 @@ public class FirebirdColumnEnhancer
 		}
 		catch (Exception e)
 		{
-
+			LogMgr.logWarning("FirebirdColumnEnhancer.updateColumnDefinition()", "Error retrieving computed columns", e);
 		}
 		finally
 		{
 			SqlUtil.closeAll(rs, stmt);
 		}
+
 		for (ColumnIdentifier col : table.getColumns())
 		{
 			String expr = expressions.get(col.getColumnName());
@@ -70,5 +72,5 @@ public class FirebirdColumnEnhancer
 			}
 		}
 	}
-	
+
 }
