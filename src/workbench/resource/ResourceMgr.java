@@ -230,7 +230,7 @@ public class ResourceMgr
 		return retrieveImage(filename + extension);
 	}
 
-	private static ImageIcon retrieveImage(String fname)
+	private static synchronized ImageIcon retrieveImage(String fname)
 	{
 		ImageIcon result = null;
 		URL imageIconUrl = ResourceMgr.class.getClassLoader().getResource("workbench/resource/images/" + fname);

@@ -884,20 +884,39 @@
   </target>
 
   <target name="db-test" depends="compile-db-tests, clean-junit">
-    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="false" includeantruntime="true">
+    <echo message="Testing ${test.db}"/>
+    <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${build.test}"/>
         <path refid="junit.path"/>
       </classpath>
 
-      <batchtest todir="../junit">
+      <batchtest todir="../junit" if="test.db">
+        <formatter type="plain"/>
+        <fileset dir="${dbtest}/">
+          <include name="workbench/db/${test.db}/*Test.java"/>
+        </fileset>
+      </batchtest>
+
+      <batchtest todir="../junit" unless="test.db">
         <formatter type="plain"/>
         <fileset dir="${dbtest}">
           <include name="**/*Test.java"/>
         </fileset>
       </batchtest>
+
     </junit>
+  </target>
+
+  <target name="test-pg">
+    <property name="test.db" value="postgres"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="test-ora">
+    <property name="test.db" value="oracle"/>
+    <antcall target="db-test"/>
   </target>
 
   <target name="javadoc">
