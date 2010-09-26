@@ -835,27 +835,6 @@ public final class WbManager
 		};
 		t2.setPriority(Thread.MIN_PRIORITY);
 		t2.start();
-
-		WbThread t3 = new WbThread("WarmUp3")
-		{
-			public void run()
-			{
-				long start = System.currentTimeMillis();
-				String[] images = new String[]
-				{
-					"workbench16", "workbench", "AppendResult", "Back", "colfilter", "Commit", "CopyRow", "Copy", "Cut", "Database", "DataPumper", "Delete", "ExecuteAll", "ExecuteCurrent", "ExecuteSel",
-					"Find", "FindAgain", "First", "Forward", "IgnoreError", "key", "Last", "Open", "Paste", "Print", "Redo", "Refresh", "Remove", "resetFilter", "Rollback",
-					"RowInsertAfter", "Save", "SaveAs", "SpoolData", "Stop", "table", "Undo", "Up"
-				};
-				for (String image : images)
-				{
-					ResourceMgr.getPicture(image);
-				}
-			}
-		};
-		t3.setPriority(Thread.MIN_PRIORITY);
-		t3.start();
-
 	}
 
 	public void runGui()
