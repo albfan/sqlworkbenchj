@@ -26,7 +26,7 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * SequenceReader for <a href="http://www.h2database.com">H2 Database</a>
+ * SequenceReader for Firebird
  *
  * @author  Thomas Kellerer
  */
@@ -120,7 +120,7 @@ public class FirebirdSequenceReader
 		DataStore ds = null;
 		try
 		{
-			String sql = 
+			String sql =
 				"SELECT trim(rdb$generator_name) AS SEQUENCE_NAME, \n" +
 				"       trim(rdb$description) AS REMARKS \n" +
 				"FROM rdb$generators \n" +
