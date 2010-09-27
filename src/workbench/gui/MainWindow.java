@@ -217,8 +217,8 @@ public class MainWindow
 		initMenu();
 		
 		List<Image> icons = new ArrayList<Image>(2);
-		icons.add(ResourceMgr.getPicture("workbench16").getImage());
-		icons.add(ResourceMgr.getPicture("workbench").getImage());
+		icons.add(ResourceMgr.getPng("workbench16").getImage());
+		icons.add(ResourceMgr.getPng("workbench").getImage());
 		setIconImages(icons);
 
 		getContentPane().add(this.sqlTab, BorderLayout.CENTER);
