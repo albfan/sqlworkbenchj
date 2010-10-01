@@ -41,6 +41,8 @@ public class OracleSynonymReaderTest
 	{
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
 		TestUtil.executeScript(con,
 			"CREATE TABLE person (id integer, firstname varchar(50), lastname varchar(50));\n" +
 			"CREATE SYNONYM s_person FOR person;");
@@ -59,6 +61,8 @@ public class OracleSynonymReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
 		SynonymReader reader = con.getMetadata().getSynonymReader();
 		assertNotNull(reader);
 		Collection<String> types = con.getMetadata().getObjectTypes();

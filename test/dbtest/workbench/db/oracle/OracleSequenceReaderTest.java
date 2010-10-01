@@ -42,6 +42,8 @@ public class OracleSequenceReaderTest
 	{
 		OracleTestUtil.initTestCase();
 		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
 		TestUtil.executeScript(con,
 			"CREATE SEQUENCE seq_one;"  +
 			"CREATE SEQUENCE seq_two MINVALUE 33 increment by 12 CACHE 42;");
@@ -59,6 +61,8 @@ public class OracleSequenceReaderTest
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		assertNotNull(reader);
 		Collection<String> types = con.getMetadata().getObjectTypes();
