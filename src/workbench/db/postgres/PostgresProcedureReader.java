@@ -189,7 +189,8 @@ public class PostgresProcedureReader
 						"       n.nspname AS PROCEDURE_SCHEM, \n" +
 						"       p.proname AS PROCEDURE_NAME, \n" +
 						"	      d.description AS REMARKS, \n" +
-						"       array_to_string(p.proargtypes, ';') as PG_ARGUMENTS \n" +
+						"       array_to_string(p.proargtypes, ';') as PG_ARGUMENTS, \n" +
+						"       case when p.proisagg then 'aggregate' else 'function' end as proc_type \n" +
 						" FROM pg_catalog.pg_namespace n, pg_catalog.pg_proc p \n" +
 						"   LEFT JOIN pg_catalog.pg_description d ON (p.oid=d.objoid) \n" +
 						"   LEFT JOIN pg_catalog.pg_class c ON (d.classoid=c.oid AND c.relname='pg_proc') \n" +
@@ -218,12 +219,14 @@ public class PostgresProcedureReader
 				String name = rs.getString("PROCEDURE_NAME");
 				String remark = rs.getString("REMARKS");
 				String args = rs.getString("PG_ARGUMENTS");
+				String type = rs.getString("proc_type");
 				int row = ds.addRow();
 
 				PGProcName pname = new PGProcName(name, args, getTypeLookup());
 
 				ProcedureDefinition def = new ProcedureDefinition(cat, schema, name, java.sql.DatabaseMetaData.procedureReturnsResult);
 				def.setDisplayName(pname.getFormattedName());
+				def.setDbmsProcType(type);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_CATALOG, cat);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_SCHEMA, schema);
 				ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_LIST_NAME, pname.getFormattedName());
@@ -266,8 +269,9 @@ public class PostgresProcedureReader
 	public void readProcedureSource(ProcedureDefinition def)
 		throws NoConfigException
 	{
-		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", true);
-		if (usePGFunction && JdbcUtils.hasMinimumServerVersion(connection, "8.4"))
+		boolean usePGFunction = Settings.getInstance().getBoolProperty("workbench.db.postgresql.procsource.useinternal", false);
+
+		if (usePGFunction && JdbcUtils.hasMinimumServerVersion(connection, "8.4") && "function".equals(def.getDbmsProcType()))
 		{
 			readFunctionDef(def);
 			return;

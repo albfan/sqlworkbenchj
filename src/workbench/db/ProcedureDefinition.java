@@ -32,7 +32,6 @@ import workbench.util.StringUtil;
 public class ProcedureDefinition
 	implements DbObject
 {
-
 	private String schema;
 	private String catalog;
 	private String procName;
@@ -51,7 +50,8 @@ public class ProcedureDefinition
 
 	private CharSequence source;
 	private List<String> parameterTypes;
-
+	private String dbmsProcType;
+	
 	public static ProcedureDefinition createOracleDefinition(String schema, String name, String packageName, int type, String remarks)
 	{
 		ProcedureDefinition def = new ProcedureDefinition(packageName, schema, name, type);
@@ -93,6 +93,16 @@ public class ProcedureDefinition
 		resultType = type;
 	}
 
+	public void setDbmsProcType(String type)
+	{
+		dbmsProcType = type;
+	}
+
+	public String getDbmsProcType()
+	{
+		return dbmsProcType;
+	}
+	
 	public void setDisplayName(String name)
 	{
 		displayName = name;

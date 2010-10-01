@@ -883,8 +883,16 @@
     </junit>
   </target>
 
-  <target name="db-test" depends="compile-db-tests, clean-junit">
+  <target name="echo-dbtest-type" if="test.db">
     <echo message="Testing ${test.db}"/>
+  </target>
+
+  <target name="echo-dbtest" unless="test.db">
+    <echo message="Testing all DBMS"/>
+  </target>
+  
+  <target name="db-test" depends="compile-db-tests, clean-junit, echo-dbtest-type, echo-dbtest">
+  
     <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${build}"/>

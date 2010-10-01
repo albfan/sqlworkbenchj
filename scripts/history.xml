@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-09-11">
+  <release build="-1" date="2010-09-20">
     <entry dev-build="3" type="enh">A new option to log all executed SQL statements to the logfile has been added (Tools -&gt; Options -&gt; General -&gt; Log all SQL statements).</entry>
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>

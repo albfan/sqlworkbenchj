@@ -652,6 +652,11 @@ public class Settings
 		return getBoolProperty("workbench.db.oracle.types.autoconvert", true);
 	}
 
+	public void setConvertOracleTypes(boolean flag)
+	{
+		setProperty("workbench.db.oracle.types.autoconvert", flag);
+	}
+
 	/**
 	 * Return a list of popular encodings to be used for the code-completion
 	 * of the -encoding parameter.
