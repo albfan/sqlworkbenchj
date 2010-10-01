@@ -50,14 +50,8 @@ public class OracleIndexReader
 
 	public void indexInfoProcessed()
 	{
-		try
-		{
-			this.indexStatement.close();
-			this.indexStatement = null;
-		}
-		catch (Throwable th)
-		{
-		}
+		SqlUtil.closeStatement(this.indexStatement);
+		this.indexStatement = null;
 	}
 
 	/**
@@ -121,6 +115,7 @@ public class OracleIndexReader
 			LogMgr.logDebug("OracleIndexReader.getIndexInfo()", "Using SQL to retrieve index info for " + table.getTableExpression() + ":\n" + sql.toString());
 		}
 		this.indexStatement = this.metaData.getWbConnection().getSqlConnection().prepareStatement(sql.toString());
+
 		this.indexStatement.setString(1,table.getTableName());
 		if (table.getSchema() != null) this.indexStatement.setString(2, table.getSchema());
 		ResultSet rs = this.indexStatement.executeQuery();
