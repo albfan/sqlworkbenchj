@@ -107,7 +107,7 @@ public class OracleMetadata
 			try
 			{
 				stmt = this.connection.createStatement();
-				String sql = "select value from v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
+				String sql = "SELECT /* wb */ value FROM v$nls_parameters where parameter = 'NLS_LENGTH_SEMANTICS'";
 				rs = stmt.executeQuery(sql);
 				if (rs.next())
 				{

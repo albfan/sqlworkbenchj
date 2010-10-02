@@ -1,11 +1,11 @@
 /*
  *  OracleTypeReader.java
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
- *  No part of this code maybe reused without the permission of the author
- * 
+ *  No part of this code may be reused without the permission of the author
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -81,7 +81,7 @@ public class OracleTypeReader
 		int schemaIndex = -1;
 		int nameIndex = -1;
 
-		if (StringUtil.isNonBlank(schema)) 
+		if (StringUtil.isNonBlank(schema))
 		{
 			select += " WHERE owner LIKE ? ";
 			schemaIndex = 1;
@@ -130,6 +130,10 @@ public class OracleTypeReader
 		catch (SQLException e)
 		{
 			LogMgr.logError("OracleTypeReader.getTypes()", "Error retrieving attributes", e);
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
 		}
 		return result;
 	}
@@ -187,7 +191,7 @@ public class OracleTypeReader
 	{
 		if (type == null) return null;
 
-		String sql = 
+		String sql =
 			"SELECT attr_name,  \n" +
 			"       attr_type_name, \n" +
 			"       length,  \n" +
@@ -216,7 +220,7 @@ public class OracleTypeReader
 				int scale = rs.getInt(4);
 				int precision = rs.getInt(5);
 				int jdbcType = rs.getInt(6);
-				
+
 				ColumnIdentifier col = new ColumnIdentifier(colname, jdbcType);
 
 				if (SqlUtil.isCharacterTypeWithLength(jdbcType))
@@ -270,7 +274,7 @@ public class OracleTypeReader
 			stmt = con.getSqlConnection().prepareStatement(sql);
 			stmt.setString(1, object.getObjectName());
 			stmt.setString(2, object.getSchema());
-			
+
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
@@ -308,7 +312,7 @@ public class OracleTypeReader
 		}
 		return source;
 	}
-	
+
 	@Override
 	public String getObjectSource(WbConnection con, DbObject object)
 	{
@@ -317,7 +321,7 @@ public class OracleTypeReader
 		OracleObjectType type = getObjectDefinition(con, object);
 
 		String source = type.getSource();
-		
+
 		if (StringUtil.isBlank(source))
 		{
 			source = retrieveSource(con, object);
