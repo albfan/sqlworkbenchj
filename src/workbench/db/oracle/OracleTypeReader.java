@@ -49,6 +49,7 @@ public class OracleTypeReader
 		// if TYPE has specifically been requested, the objects are returned
 
 		if (requestedTypes != null) return false;
+		if (!DbMetadata.typeIncluded("TYPE", requestedTypes)) return false;
 
 		List<OracleObjectType> types = getTypes(con, schemaPattern, namePattern);
 		for (OracleObjectType type : types)

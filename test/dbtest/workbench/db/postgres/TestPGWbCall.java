@@ -4,18 +4,23 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db.postgres;
 
+import workbench.storage.DataStore;
+import workbench.util.SqlUtil;
+import java.sql.Statement;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.WbConnection;
+import workbench.sql.StatementRunner;
 import workbench.sql.StatementRunnerResult;
 import workbench.sql.wbcommands.WbCall;
 import static org.junit.Assert.*;
@@ -42,8 +47,35 @@ public class TestPGWbCall
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
 
-//		String sql = "commit;\n";
-//		TestUtil.executeScript(con, sql);
+		TestUtil.executeScript(con,
+			"create table person (id integer, first_name varchar(50), last_name varchar(50));\n" +
+			"insert into person (id, first_name, last_name) values (1, 'Arthur', 'Dent');\n" +
+			"insert into person (id, first_name, last_name) values (2, 'Ford', 'Prefect');\n" +
+			"commit;\n");
+
+		Statement stmt = null;
+		try
+		{
+			String sql =
+			"CREATE OR REPLACE FUNCTION refcursorfunc() \n" +
+			 "  RETURNS refcursor \n" +
+			 "  LANGUAGE plpgsql \n" +
+			 "AS \n" +
+			 "$body$ \n" +
+			 "DECLARE  \n" +
+			 "    mycurs refcursor;  \n" +
+			 " BEGIN  \n" +
+			 "    OPEN mycurs FOR SELECT * FROM person ORDER BY id;  \n" +
+			 "    RETURN mycurs;  \n" +
+			 " END \n" +
+			 "$body$\n";
+			stmt = con.createStatement();
+			stmt.execute(sql);
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
 	}
 
 	@AfterClass
@@ -54,14 +86,27 @@ public class TestPGWbCall
 	}
 
 	@Test
-	public void testGetAggregateSource()
+	public void testWbCall()
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		WbCall call = new WbCall();
-		String cmd = "WbCall get_proc(?);";
+		StatementRunner runner = new StatementRunner();
+		runner.setConnection(con);
+		call.setStatementRunner(runner);
+		call.setConnection(con);
+		String cmd = "WbCall refcursorfunc()";
 		StatementRunnerResult result = call.execute(cmd);
-		assertTrue(result.isSuccess());
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+		DataStore ds = result.getDataStores().get(0);
+		assertEquals(2, ds.getRowCount());
+		assertEquals(Integer.valueOf(1), ds.getValue(0, 0));
+		assertEquals("Arthur", ds.getValue(0, 1));
+		assertEquals("Dent", ds.getValue(0, 2));
+		assertEquals(Integer.valueOf(2), ds.getValue(1, 0));
+		assertEquals("Ford", ds.getValue(1, 1));
+		assertEquals("Prefect", ds.getValue(1, 2));
 	}
 
 }

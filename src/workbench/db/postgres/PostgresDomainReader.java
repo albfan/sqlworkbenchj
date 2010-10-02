@@ -68,7 +68,7 @@ public class PostgresDomainReader
 		return result;
 	}
 
-	private String getSql(WbConnection connection, String schema, String name)
+	private String getSql(String schema, String name)
 	{
 		StringBuilder sql = new StringBuilder(baseSql.length() + 40);
 
@@ -109,7 +109,7 @@ public class PostgresDomainReader
 		{
 			sp = connection.setSavepoint();
 			stmt = connection.createStatementForQuery();
-			String sql = getSql(connection, schemaPattern, namePattern);
+			String sql = getSql(schemaPattern, namePattern);
 			rs = stmt.executeQuery(sql);
 			while (rs.next())
 			{
