@@ -804,9 +804,11 @@ public abstract class RowDataConverter
 		}
 	}
 
+
 	protected void writeEscapedXML(StrBuffer out, String s, boolean keepCR)
 	{
 		if (s == null) return;
+		
 		for (int i = 0; i < s.length(); i++)
 		{
 			char c = s.charAt(i);
@@ -836,4 +838,13 @@ public abstract class RowDataConverter
 			}
 		}
 	}
+
+	protected CharSequence escapeXML(String s, boolean keepCR)
+	{
+		if (s == null) return "";
+		StrBuffer out = new StrBuffer(s.length() + 5);
+		writeEscapedXML(out, s, keepCR);
+		return out;
+	}
+	
 }

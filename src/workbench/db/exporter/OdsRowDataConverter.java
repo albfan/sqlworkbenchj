@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -17,6 +17,7 @@ import java.sql.Types;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
+import workbench.db.report.TagWriter;
 import workbench.log.LogMgr;
 import workbench.storage.RowData;
 import workbench.util.FileUtil;
@@ -100,7 +101,9 @@ public class OdsRowDataConverter
 
 					content.write("  <table:table-cell table:style-name=\"ce1\" office:value-type=\"string\">\n");
 					content.write("    <text:p>");
+					content.write(TagWriter.CDATA_START);
 					content.write(comment);
+					content.write(TagWriter.CDATA_END);
 					content.write("</text:p>\n");
 					content.write("  </table:table-cell>\n");
 				}
@@ -121,7 +124,9 @@ public class OdsRowDataConverter
 
 					content.write("  <table:table-cell table:style-name=\"ce1\" office:value-type=\"string\">\n");
 					content.write("    <text:p>");
+					content.write(TagWriter.CDATA_START);
 					content.write(colname);
+					content.write(TagWriter.CDATA_END);
 					content.write("</text:p>\n");
 					content.write("  </table:table-cell>\n");
 				}
@@ -205,7 +210,9 @@ public class OdsRowDataConverter
 				s = "SELECT * FROM " + metaData.getUpdateTable().getTableExpression(originalConnection);
 			}
 			out.write("<dc:description>");
+			out.write(TagWriter.CDATA_START);
 			out.write(s);
+			out.write(TagWriter.CDATA_END);
 			out.write("</dc:description>");
 			out.write("<meta:initial-creator>SQL Workbench/J</meta:initial-creator>\n");
 			out.write("<meta:creation-date>");
@@ -277,7 +284,7 @@ public class OdsRowDataConverter
 			if (getEnableAutoFilter() && writeHeader)
 			{
 				String colName = columnToName(getRealColumnCount());
-				String title = "&apos;" + getPageTitle("Export") + "&apos;";
+				String title = "&apos;" + escapeXML(getPageTitle("Export"), false) + "&apos;";
 				String start = "A1";
 				if (includeColumnComments)
 				{

@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -13,6 +13,7 @@ package workbench.db.exporter;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import workbench.db.report.TagWriter;
 import workbench.storage.RowData;
 import workbench.util.EncodingUtil;
 import workbench.util.StrBuffer;
@@ -53,7 +54,7 @@ public class XlsXMLRowDataConverter
 
 		int colCount = metaData.getColumnCount();
 
-		out.append("<Worksheet ss:Name=\"" + getPageTitle("Export") + "\">\n");
+		out.append("<Worksheet ss:Name=\"" + escapeXML(getPageTitle("Export"), false) + "\">\n");
 		out.append("<Table ss:ExpandedColumnCount=\"" + getRealColumnCount() + "\" x:FullColumns=\"1\" x:FullRows=\"1\">\n");
 
 		for (int i = 0; i < colCount; i++)
@@ -69,7 +70,9 @@ public class XlsXMLRowDataConverter
 			{
 				if (!this.includeColumnInExport(i)) continue;
 				out.append("  <Cell ss:StyleID=\"wbHeader\"><Data ss:Type=\"String\">");
+				out.append(TagWriter.CDATA_START);
 				out.append(metaData.getColumn(i).getComment());
+				out.append(TagWriter.CDATA_END);
 				out.append("</Data></Cell>\n");
 			}
 			out.append("</Row>");
@@ -117,7 +120,9 @@ public class XlsXMLRowDataConverter
 			out.append("  <Table ss:ExpandedColumnCount=\"1\">\n");
 			out.append("    <Row>\n");
 			out.append("      <Cell ss:StyleID=\"wbNW\"><Data ss:Type=\"String\">");
+			out.append(TagWriter.CDATA_START);
 			out.append(generatingSql);
+			out.append(TagWriter.CDATA_END);
 			out.append("      </Data></Cell>");
 			out.append("    </Row>\n");
 			out.append("  </Table>\n");
