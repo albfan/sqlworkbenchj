@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -56,7 +56,7 @@ public class OdsRowDataConverterTest
 		assertEquals("AKI", converter.columnToName(971));
 		assertEquals("AMJ", converter.columnToName(1024));
 	}
-	
+
 	@Test
 	public void testConvert()
 		throws Exception
@@ -77,9 +77,12 @@ public class OdsRowDataConverterTest
 		converter.setWriteHeader(true);
 		converter.setResultInfo(info);
 
+		String generatingSql = "select * from my_table where some_id < 100";
+		converter.setGeneratingSql(generatingSql);
+
 		// Start writing
 		converter.getStart();
-		
+
 		RowData data = new RowData(info);
 		data.setValue(0, "char_column_data");
 		data.setValue(1, new Integer(42));
@@ -88,17 +91,24 @@ public class OdsRowDataConverterTest
 		data.setValue(3, valueConverter.convertValue("2008-07-23 13:42:01", Types.TIMESTAMP));
 
 		converter.convertRowData(data, 1);
-		
+
 		// Finish writing, make sure the archive is closed properly
 		converter.getEnd(1);
 
 		assertTrue(output.exists());
-		
+
 		ZipFile archive = new ZipFile(output);
 		ZipEntry entry = archive.getEntry("content.xml");
 		InputStream in = archive.getInputStream(entry);
 		InputStreamReader reader = new InputStreamReader(in, "UTF-8");
 		String content = FileUtil.readCharacters(reader);
+
+		entry = archive.getEntry("meta.xml");
+		in = archive.getInputStream(entry);
+		reader = new InputStreamReader(in, "UTF-8");
+		String meta = FileUtil.readCharacters(reader);
+//		TestUtil.writeFile(new File("c:/temp/meta.xml"), meta);
+
 		archive.close();
 //		System.out.println(content);
 
@@ -106,37 +116,40 @@ public class OdsRowDataConverterTest
 		nsMap.put("office", "urn:oasis:names:tc:opendocument:xmlns:office:1.0");
 		nsMap.put("text", "urn:oasis:names:tc:opendocument:xmlns:text:1.0");
 		nsMap.put("table", "urn:oasis:names:tc:opendocument:xmlns:table:1.0");
+		nsMap.put("dc", "http://purl.org/dc/elements/1.1/");
 
-		String colValue = TestUtil.getXPathValue(content, 
+		String colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[1]/text:p/text()",
 			nsMap);
 		assertEquals(data.getValue(0), colValue);
-		
+
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[2]/text:p/text()",
 			nsMap);
-		assertEquals(data.getValue(1).toString(), colValue);		
-		
+		assertEquals(data.getValue(1).toString(), colValue);
+
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[3]/text:p/text()",
 			nsMap);
-		assertEquals("2008-07-23", colValue);		
+		assertEquals("2008-07-23", colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[3]/@office:date-value",
 			nsMap);
-		assertEquals("2008-07-23", colValue);		
+		assertEquals("2008-07-23", colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[4]/text:p/text()",
 			nsMap);
-		assertEquals("2008-07-23 13:42:01", colValue);		
+		assertEquals("2008-07-23 13:42:01", colValue);
 
 		colValue = TestUtil.getXPathValue(content,
 			"/office:document-content/office:body/office:spreadsheet/table:table[1]/table:table-row[1]/table:table-cell[4]/@office:date-value",
 			nsMap);
-		assertEquals("2008-07-23T13:42:01", colValue);		
-		
+		assertEquals("2008-07-23T13:42:01", colValue);
+
+		String sql = TestUtil.getXPathValue(meta,"/office:document-meta/office:meta/dc:description",nsMap);
+		assertEquals(generatingSql, sql);
 	}
-	
+
 }

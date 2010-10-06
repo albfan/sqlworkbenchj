@@ -196,10 +196,10 @@
           <xsl:text>,</xsl:text><xsl:value-of select="$newline"/>
         </xsl:if>        
     </xsl:for-each>
-	<xsl:value-of select="$newline"/>
-    <xsl:text>);</xsl:text>
     <xsl:value-of select="$newline"/>
-  </xsl:if>  
+      <xsl:text>);</xsl:text>
+      <xsl:value-of select="$newline"/>
+    </xsl:if>  
 </xsl:template>
 
 <xsl:template name="process-fk">

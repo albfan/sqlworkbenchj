@@ -52,6 +52,7 @@ public class OracleMetadataTest
 		String sql = "create table person (id integer, first_name varchar(100), last_name varchar(100), check (id > 0));\n" +
 			"create view v_person (id, full_name) as select id, first_name || ' ' || last_name from person;\n" +
 			"create synonym syn_person for person;\n" +
+			"create materialized view mv_person as select * from person;\n" +
 			"create type address_type as object (street varchar(100), city varchar(50), zipcode varchar(10));\n";
 		TestUtil.executeScript(con, sql);
 	}
@@ -64,7 +65,7 @@ public class OracleMetadataTest
 	}
 
 	@Test
-	public void testRetrieveViews()
+	public void testRetrieveObjects()
 		throws Exception
 	{
 		WbConnection con = OracleTestUtil.getOracleConnection();
@@ -86,6 +87,15 @@ public class OracleMetadataTest
 		assertEquals(1, types.size());
 		TableIdentifier type = types.get(0);
 		assertEquals("TYPE", type.getType());
+
+		List<TableIdentifier> tables = con.getMetadata().getObjectList("WBJUNIT", new String[] { "TABLE" });
+		assertEquals(2, tables.size());
+		TableIdentifier tbl = tables.get(0);
+		assertEquals("MV_PERSON", tbl.getTableName());
+		assertEquals("MATERIALIZED VIEW", tbl.getType());
+
+		String sql = tbl.getSource(con).toString().trim();
+		assertTrue(sql.startsWith("CREATE MATERIALIZED VIEW MV_PERSON"));
 	}
 
 	@Test

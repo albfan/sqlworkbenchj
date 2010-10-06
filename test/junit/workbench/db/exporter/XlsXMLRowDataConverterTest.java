@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -59,6 +59,9 @@ public class XlsXMLRowDataConverterTest
 		converter.setDefaultDateFormat("yyyy-MM-dd");
 		converter.setWriteHeader(true);
 		converter.setResultInfo(info);
+		String generatingSql = "SELECT * FROM some_table WHERE some_id < 1000";
+		converter.setGeneratingSql(generatingSql);
+
 		converter.setEncoding("UTF-8");
 		StrBuffer header = converter.getStart();
 		assertNotNull(header);
@@ -77,6 +80,7 @@ public class XlsXMLRowDataConverterTest
 		String row = converted.toString();
 
 		String xml = header.toString() + row + footer.toString();
+//		TestUtil.writeFile(new File("c:/temp/xls.xml"), xml);
 //		System.out.println(xml);
 //		System.out.println("-----------------------------------------");
 

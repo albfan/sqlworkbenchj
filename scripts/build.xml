@@ -796,29 +796,27 @@
       <fileset dir="${build}">
         <include name="workbench/**/*.class" />
         <exclude name="workbench/**/*Exception*.class" />
+        <exclude name="workbench/**/*$*.class" />
+        <exclude name="workbench/sql/wbcommands/console/**" />
         <exclude name="workbench/gui/lnf/**" />
         <exclude name="workbench/db/mysql/**" />
         <exclude name="workbench/db/firstsql/**" />
         <exclude name="workbench/db/derby/**" />
         <exclude name="workbench/db/mckoi/**" />
         <exclude name="workbench/db/mssql/**" />
-        <exclude name="workbench/db/firebird/**" />
-        <exclude name="workbench/db/hsqldb/**" />
-        <exclude name="workbench/db/ibm/**" />
-        <exclude name="workbench/interfaces/*" />
-        <exclude name="workbench/gui/print/**" />
+        <exclude name="workbench/interfaces/**" />
+        <exclude name="workbench/db/search/TableDataSearcher"/>
+        <exclude name="workbench/print/**" />
         <exclude name="workbench/gui/log/**" />
         <exclude name="workbench/gui/lnf/**" />
         <exclude name="workbench/gui/dialogs/**" />
         <exclude name="workbench/gui/renderer/**" />
         <exclude name="workbench/gui/help/**" />
-        <exclude name="workbench/gui/print/**" />
-        <exclude name="workbench/gui/dbobjects/**" />
       </fileset>
     </cobertura-instrument>
   </target>
 
-  <target name="coverage" depends="compile-tests, compile-gui-tests, init-cobertura">
+  <target name="coverage" depends="clean, clean-junit, compile-tests, compile-db-tests, compile-gui-tests, init-cobertura">
     <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${instrumented.dir}"/>
@@ -829,10 +827,17 @@
       </classpath>
 
       <sysproperty key="net.sourceforge.cobertura.datafile" file="${junitdir}/cobertura.ser" />
-      
+
       <batchtest todir="../junit">
         <formatter type="plain"/>
         <fileset dir="${unittest}">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+
+      <batchtest todir="../junit">
+        <formatter type="plain"/>
+        <fileset dir="${dbtest}">
           <include name="**/*Test.java"/>
         </fileset>
       </batchtest>
@@ -843,7 +848,6 @@
           <include name="**/*Test.java"/>
         </fileset>
       </batchtest>
-
     </junit>
 
     <cobertura-report datafile="${junitdir}/cobertura.ser" format="html" destdir="${coverage.report.dir}" srcdir="${src}" />
@@ -890,9 +894,9 @@
   <target name="echo-dbtest" unless="test.db">
     <echo message="Testing all DBMS"/>
   </target>
-  
+
   <target name="db-test" depends="compile-db-tests, clean-junit, echo-dbtest-type, echo-dbtest">
-  
+
     <junit fork="true" forkmode="perBatch" showoutput="false" haltonerror="true" haltonfailure="true" printsummary="true" includeantruntime="true">
       <classpath>
         <pathelement location="${build}"/>

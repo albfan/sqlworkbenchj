@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -57,7 +57,7 @@ public class PostgresConstraintReaderTest
 	}
 
 	@Test
-	public void testSomeMethod()
+	public void testGetConstraints()
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
@@ -72,5 +72,5 @@ public class PostgresConstraintReaderTest
 		assertEquals("check", constraint.getType());
 		assertEquals("CONSTRAINT positive_id CHECK (id > 42)", constraint.getSql());
 	}
-	
+
 }

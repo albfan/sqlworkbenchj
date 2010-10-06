@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -121,6 +121,7 @@ public class WbTextCellEditor
 		return textField;
 	}
 
+	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected,int row, int column)
 	{
 		Component result = super.getTableCellEditorComponent(table, value, isSelected, row, column);
@@ -136,6 +137,7 @@ public class WbTextCellEditor
 		textField.setBackground(c);
 	}
 
+	@Override
 	public boolean shouldSelectCell(EventObject anEvent)
 	{
 		boolean shouldSelect = super.shouldSelectCell(anEvent);
@@ -146,6 +148,7 @@ public class WbTextCellEditor
 		return shouldSelect;
 	}
 
+	@Override
 	public void mouseClicked(java.awt.event.MouseEvent evt)
 	{
 		if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1)
@@ -154,28 +157,34 @@ public class WbTextCellEditor
 		}
 	}
 
+	@Override
 	public void mouseEntered(java.awt.event.MouseEvent mouseEvent)
 	{
 	}
 
+	@Override
 	public void mouseExited(java.awt.event.MouseEvent mouseEvent)
 	{
 	}
 
+	@Override
 	public void mousePressed(java.awt.event.MouseEvent mouseEvent)
 	{
 	}
 
+	@Override
 	public void mouseReleased(java.awt.event.MouseEvent mouseEvent)
 	{
 	}
 
+	@Override
 	public void cancelCellEditing()
 	{
 		super.cancelCellEditing();
 		fireEditingCanceled();
 	}
 
+	@Override
 	public boolean stopCellEditing()
 	{
 		boolean result = super.stopCellEditing();

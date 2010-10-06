@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -34,17 +34,13 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.actions.SetNullAction;
 import workbench.gui.renderer.TextAreaRenderer;
 import workbench.interfaces.NullableEditor;
-import workbench.util.StringUtil;
 
 /**
  * A TableCellEditor that displays multiple lines
  *
  * @author Thomas Kellerer
  */
-@SuppressWarnings(
-{
-	"deprecation"
-})
+@SuppressWarnings({"deprecation"})
 public class WbCellEditor
 	extends AbstractCellEditor
 	implements TableCellEditor, MouseListener, NullableEditor, DocumentListener
@@ -140,6 +136,7 @@ public class WbCellEditor
 		return editor.getText();
 	}
 
+	@Override
 	public boolean isCellEditable(EventObject anEvent)
 	{
 		boolean result = true;
@@ -154,6 +151,7 @@ public class WbCellEditor
 		return result;
 	}
 
+	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column)
 	{
 		editor.setText(value != null ? value.toString() : "");
@@ -165,11 +163,13 @@ public class WbCellEditor
 		return scroll;
 	}
 
+	@Override
 	public boolean shouldSelectCell(EventObject anEvent)
 	{
 		return true;
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent evt)
 	{
 		if (evt.getClickCount() == 2 && evt.getButton() == MouseEvent.BUTTON1 && this.parentTable != null)
@@ -178,18 +178,22 @@ public class WbCellEditor
 		}
 	}
 
+	@Override
 	public void mousePressed(MouseEvent evt)
 	{
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent evt)
 	{
 	}
 
+	@Override
 	public void mouseEntered(MouseEvent evt)
 	{
 	}
 
+	@Override
 	public void mouseExited(MouseEvent evt)
 	{
 	}
