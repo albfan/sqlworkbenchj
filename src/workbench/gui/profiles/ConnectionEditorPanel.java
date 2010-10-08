@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -105,7 +105,7 @@ public class ConnectionEditorPanel
 		policy.addComponent(tfWorkspaceFile);
 		policy.addComponent(editConnectionScriptsButton);
 		policy.addComponent(editFilterButton);
-		
+
 		policy.setDefaultComponent(tfProfileName);
 
 		this.setFocusCycleRoot(false);
@@ -207,8 +207,11 @@ public class ConnectionEditorPanel
     tfFetchSize = new IntegerPropertyEditor();
     cbAutocommit = new BooleanPropertyEditor();
     extendedProps = new FlatButton();
-    propLabel = new javax.swing.JLabel();
+    timeoutLabel = new javax.swing.JLabel();
+    tfTimeout = new IntegerPropertyEditor();
+    jLabel1 = new javax.swing.JLabel();
     fetchSizeLabel = new javax.swing.JLabel();
+    propLabel = new javax.swing.JLabel();
     jPanel3 = new javax.swing.JPanel();
     workspaceFileLabel = new javax.swing.JLabel();
     infoColor = new WbColorPicker(true);
@@ -222,6 +225,7 @@ public class ConnectionEditorPanel
     jPanel5 = new javax.swing.JPanel();
     editFilterButton = new FlatButton();
     filterLabel = new javax.swing.JLabel();
+    timeoutpanel = new javax.swing.JPanel();
 
     FormListener formListener = new FormListener();
 
@@ -327,7 +331,7 @@ public class ConnectionEditorPanel
     add(lblUrl, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 7;
     gridBagConstraints.gridwidth = java.awt.GridBagConstraints.REMAINDER;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
@@ -525,62 +529,94 @@ public class ConnectionEditorPanel
 
     jPanel2.setLayout(new java.awt.GridBagLayout());
 
-    tfFetchSize.setColumns(5);
+    tfFetchSize.setColumns(4);
+    tfFetchSize.setToolTipText(ResourceMgr.getString("d_LblFetchSize")); // NOI18N
     tfFetchSize.setName("defaultFetchSize"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridx = 2;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
     jPanel2.add(tfFetchSize, gridBagConstraints);
 
     cbAutocommit.setText("Autocommit");
     cbAutocommit.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
     cbAutocommit.setName("autocommit"); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 9, 0, 0);
     jPanel2.add(cbAutocommit, gridBagConstraints);
 
     extendedProps.setText(ResourceMgr.getString("LblConnExtendedProps")); // NOI18N
     extendedProps.setToolTipText(ResourceMgr.getString("d_LblConnExtendedProps")); // NOI18N
     extendedProps.addMouseListener(formListener);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 3;
+    gridBagConstraints.gridx = 8;
     gridBagConstraints.gridy = 0;
     jPanel2.add(extendedProps, gridBagConstraints);
 
-    propLabel.setIconTextGap(0);
-    propLabel.setMaximumSize(new java.awt.Dimension(16, 16));
-    propLabel.setMinimumSize(new java.awt.Dimension(16, 16));
-    propLabel.setPreferredSize(new java.awt.Dimension(16, 16));
+    timeoutLabel.setLabelFor(tfTimeout);
+    timeoutLabel.setText(ResourceMgr.getString("LblConnTimeout")); // NOI18N
+    timeoutLabel.setToolTipText(ResourceMgr.getString("d_LblConnTimeout")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 2;
+    gridBagConstraints.gridx = 3;
     gridBagConstraints.gridy = 0;
-    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
-    jPanel2.add(propLabel, gridBagConstraints);
-
-    gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 5;
-    gridBagConstraints.gridwidth = 2;
-    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(1, 6, 0, 6);
-    add(jPanel2, gridBagConstraints);
+    gridBagConstraints.insets = new java.awt.Insets(1, 16, 1, 0);
+    jPanel2.add(timeoutLabel, gridBagConstraints);
 
+    tfTimeout.setColumns(4);
+    tfTimeout.setToolTipText(ResourceMgr.getString("d_LblConnTimeout")); // NOI18N
+    tfTimeout.setName("connectionTimeout"); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 4;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 3, 0, 0);
+    jPanel2.add(tfTimeout, gridBagConstraints);
+
+    jLabel1.setText(ResourceMgr.getString("LblSeconds")); // NOI18N
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 5;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(0, 1, 0, 0);
+    jPanel2.add(jLabel1, gridBagConstraints);
+
+    fetchSizeLabel.setLabelFor(tfFetchSize);
     fetchSizeLabel.setText(ResourceMgr.getString("LblFetchSize")); // NOI18N
     fetchSizeLabel.setToolTipText(ResourceMgr.getString("d_LblFetchSize")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(1, 15, 1, 0);
+    jPanel2.add(fetchSizeLabel, gridBagConstraints);
+
+    propLabel.setFocusable(false);
+    propLabel.setIconTextGap(0);
+    propLabel.setInheritsPopupMenu(false);
+    propLabel.setMaximumSize(new java.awt.Dimension(16, 16));
+    propLabel.setMinimumSize(new java.awt.Dimension(16, 16));
+    propLabel.setPreferredSize(new java.awt.Dimension(16, 16));
+    propLabel.setRequestFocusEnabled(false);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 7;
+    gridBagConstraints.gridy = 0;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
+    gridBagConstraints.weightx = 1.0;
+    jPanel2.add(propLabel, gridBagConstraints);
+
+    gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridwidth = 3;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(1, 5, 0, 0);
-    add(fetchSizeLabel, gridBagConstraints);
+    gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(1, 1, 0, 6);
+    add(jPanel2, gridBagConstraints);
 
     jPanel3.setLayout(new java.awt.GridBagLayout());
 
@@ -710,6 +746,15 @@ public class ConnectionEditorPanel
     gridBagConstraints.weighty = 1.0;
     gridBagConstraints.insets = new java.awt.Insets(8, 5, 0, 0);
     add(jPanel5, gridBagConstraints);
+
+    timeoutpanel.setLayout(new java.awt.GridBagLayout());
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
+    gridBagConstraints.insets = new java.awt.Insets(3, 6, 0, 0);
+    add(timeoutpanel, gridBagConstraints);
   }
 
   // Code for dispatching events from components to event handlers.
@@ -761,7 +806,7 @@ public class ConnectionEditorPanel
 		{
 			return;
 		}
-		
+
 		if (evt.getStateChange() == ItemEvent.SELECTED)
 		{
 			String oldDriver = null;
@@ -838,6 +883,7 @@ public class ConnectionEditorPanel
   protected javax.swing.JCheckBox includeNull;
   protected workbench.gui.components.WbColorPicker infoColor;
   protected javax.swing.JLabel infoColorLabel;
+  protected javax.swing.JLabel jLabel1;
   protected javax.swing.JPanel jPanel1;
   protected javax.swing.JPanel jPanel2;
   protected javax.swing.JPanel jPanel3;
@@ -860,9 +906,12 @@ public class ConnectionEditorPanel
   protected javax.swing.JTextField tfFetchSize;
   protected javax.swing.JTextField tfProfileName;
   protected javax.swing.JPasswordField tfPwd;
+  protected javax.swing.JTextField tfTimeout;
   protected javax.swing.JTextField tfURL;
   protected javax.swing.JTextField tfUserName;
   protected javax.swing.JTextField tfWorkspaceFile;
+  protected javax.swing.JLabel timeoutLabel;
+  protected javax.swing.JPanel timeoutpanel;
   protected javax.swing.JCheckBox trimCharData;
   protected javax.swing.JPanel wbOptionsPanel;
   protected javax.swing.JLabel workspaceFileLabel;
@@ -1027,7 +1076,7 @@ public class ConnectionEditorPanel
 			scriptLabel.setIcon(null);
 		}
 	}
-	
+
 	private void checkExtendedProps()
 	{
 		Properties props = (currentProfile == null ? null : currentProfile.getConnectionProperties());

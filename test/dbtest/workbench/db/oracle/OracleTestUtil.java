@@ -1,11 +1,11 @@
 /*
  * PostgresTestHelper
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
- *  No part of this code maybe reused without the permission of the author
- * 
+ *  No part of this code may be reused without the permission of the author
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.oracle;
@@ -62,7 +62,7 @@ public class OracleTestUtil
 		util.prepareEnvironment();
 
 		if (!isAvailable) return;
-		
+
 		WbConnection con = getOracleConnection();
 		if (con == null)
 		{
@@ -79,7 +79,7 @@ public class OracleTestUtil
 		dropAllObjects(con);
 		ConnectionMgr.getInstance().disconnectAll();
 	}
-	
+
 	public static void dropAllObjects(WbConnection con)
 	{
 		if (con == null) return;

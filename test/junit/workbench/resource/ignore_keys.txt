@@ -4,6 +4,7 @@ LblCascadeConstraints
 LblCommit
 LblCompletionListIndex
 LblConnReadOnly
+LblConnTimeout
 LblDbURL
 LblDriverName
 LblDrop
@@ -33,6 +34,7 @@ LblStartSql
 LblTableSearchSqlLog
 LblTabStatement
 LblThresholdLevel
+LblSeconds
 LblVariableName
 MnuTxtCommit
 MnuTxtDataPumper

@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -188,7 +188,7 @@ public class PostgresDomainReader
 
 		List<DomainIdentifier> domains = getDomainList(con, schema, objects);
 		if (domains.isEmpty()) return false;
-		
+
 		for (DomainIdentifier domain : domains)
 		{
 			int row = result.addRow();

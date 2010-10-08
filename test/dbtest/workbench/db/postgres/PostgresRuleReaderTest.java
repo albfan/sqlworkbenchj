@@ -1,11 +1,11 @@
 /*
  * PostgresRuleReaderTest
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
- *  No part of this code maybe reused without the permission of the author
- * 
+ *  No part of this code may be reused without the permission of the author
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.db.postgres;
@@ -41,7 +41,7 @@ public class PostgresRuleReaderTest
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		TestUtil.executeScript(con,
 			"CREATE table person (id integer, firstname varchar(50), lastname varchar(50));\n" +
-			"COMMIT;\n" + 
+			"COMMIT;\n" +
 			"CREATE RULE \"_INSERT\" AS ON INSERT TO person DO INSTEAD NOTHING;\n " +
 			"COMMIT; \n"
 		);

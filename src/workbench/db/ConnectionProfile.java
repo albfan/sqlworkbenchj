@@ -72,7 +72,7 @@ public class ConnectionProfile
 	private long idleTime = 0;
 	private Color infoColor;
 	private boolean copyPropsToSystem;
-	private int connectionTimeout;
+	private Integer connectionTimeout;
 
 	private DelimiterDefinition alternateDelimiter;
 	private ObjectNameFilter schemaFilter;
@@ -159,14 +159,27 @@ public class ConnectionProfile
 		this.hideWarnings = flag;
 	}
 
-	public int getConnectionTimeout()
+	public int getConnectionTimeoutValue()
+	{
+		if (connectionTimeout == null) return 0;
+		return connectionTimeout.intValue();
+	}
+	
+	public Integer getConnectionTimeout()
 	{
 		return connectionTimeout;
 	}
 
-	public void setConnectionTimeout(int seconds)
+	public void setConnectionTimeout(Integer seconds)
 	{
-		connectionTimeout = seconds;
+		int currentValue = (connectionTimeout == null ? Integer.MIN_VALUE : connectionTimeout.intValue());
+		int newValue = (seconds == null ? Integer.MIN_VALUE : seconds.intValue());
+
+		if (currentValue != newValue)
+		{
+			this.connectionTimeout = (newValue > 0 ? seconds : null);
+			this.changed = true;
+		}
 	}
 
 	public void setInfoDisplayColor(Color c)

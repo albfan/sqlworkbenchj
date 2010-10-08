@@ -79,7 +79,7 @@ public class ConnectionProfileTest
 		assertEquals(1, copy.getCatalogFilter().getSize());
 		assertEquals(42, copy.getIdleTime());
 		assertEquals(filter, copy.getCatalogFilter());
-		assertEquals(42, copy.getConnectionTimeout());
+		assertEquals(Integer.valueOf(42), copy.getConnectionTimeout());
 		
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());
@@ -245,6 +245,11 @@ public class ConnectionProfileTest
 
 		profile.reset();
 		profile.setDefaultFetchSize(4242);
+		assertTrue(profile.isChanged());
+
+		profile.setConnectionTimeout(1);
+		profile.reset();
+		profile.setConnectionTimeout(42);
 		assertTrue(profile.isChanged());
 	}
 

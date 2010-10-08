@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ import workbench.resource.Settings;
 import workbench.util.CaseInsensitiveComparator;
 import workbench.util.FileUtil;
 import workbench.util.PropertiesCopier;
+import workbench.util.WbFile;
 import workbench.util.WbPersistence;
 
 /**
@@ -153,7 +155,7 @@ public class ConnectionMgr
 		Connection sql = null;
 		try
 		{
-			int timeout = profile.getConnectionTimeout();
+			int timeout = profile.getConnectionTimeoutValue();
 			if (timeout > 0)
 			{
 				DriverManager.setLoginTimeout(timeout);
@@ -594,7 +596,7 @@ public class ConnectionMgr
 		InputStream in = null;
 		try
 		{
-			in = this.getClass().getResourceAsStream("DriverTemplates.xml");
+			in = getDriverTemplates();
 
 			WbPersistence reader = new WbPersistence();
 			ArrayList<DbDriver> templates = (ArrayList<DbDriver>)reader.readObject(in);
@@ -617,6 +619,18 @@ public class ConnectionMgr
 			FileUtil.closeQuietely(in);
 		}
 		this.templatesImported = true;
+	}
+
+	private InputStream getDriverTemplates()
+		throws IOException
+	{
+		WbFile f = new WbFile(WbManager.getInstance().getJarPath(), "DriverTemplates.xml");
+		if (f.exists())
+		{
+			LogMgr.logInfo("ConnectionMgr.getDriverTemplates()", "Reading external DriverTemplates from " + f.getFullPath());
+			return new FileInputStream(f);
+		}
+		return this.getClass().getResourceAsStream("DriverTemplates.xml");
 	}
 
 	/**
