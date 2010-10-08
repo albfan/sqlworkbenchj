@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -72,6 +72,7 @@ public class ConnectionProfile
 	private long idleTime = 0;
 	private Color infoColor;
 	private boolean copyPropsToSystem;
+	private int connectionTimeout;
 
 	private DelimiterDefinition alternateDelimiter;
 	private ObjectNameFilter schemaFilter;
@@ -156,6 +157,16 @@ public class ConnectionProfile
 	{
 		this.changed = hideWarnings != flag;
 		this.hideWarnings = flag;
+	}
+
+	public int getConnectionTimeout()
+	{
+		return connectionTimeout;
+	}
+
+	public void setConnectionTimeout(int seconds)
+	{
+		connectionTimeout = seconds;
 	}
 
 	public void setInfoDisplayColor(Color c)
@@ -686,6 +697,7 @@ public class ConnectionProfile
 		ConnectionProfile result = new ConnectionProfile();
 		result.setAutocommit(autocommit);
 		result.setDriverclass(driverclass);
+		result.setConnectionTimeout(connectionTimeout);
 		result.setDriverName(driverName);
 		result.setName(name);
 		result.setGroup(group);

@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -19,8 +19,6 @@ import workbench.WbTestCase;
 import workbench.sql.DelimiterDefinition;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  * @author Thomas Kellerer
@@ -42,6 +40,7 @@ public class ConnectionProfileTest
 		old.setAutocommit(false);
 		old.setConfirmUpdates(true);
 		old.setDriverName("Postgres");
+		old.setConnectionTimeout(42);
 		old.setEmptyStringIsNull(true);
 		old.setUseSeparateConnectionPerTab(true);
 		old.setIgnoreDropErrors(true);
@@ -80,6 +79,7 @@ public class ConnectionProfileTest
 		assertEquals(1, copy.getCatalogFilter().getSize());
 		assertEquals(42, copy.getIdleTime());
 		assertEquals(filter, copy.getCatalogFilter());
+		assertEquals(42, copy.getConnectionTimeout());
 		
 		assertEquals("select 12 from dual", old.getIdleScript());
 		assertEquals("jdbc:some:database", copy.getUrl());

@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.Driver;
+import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -131,12 +132,12 @@ public class ConnectionMgr
 		return drv.loadClassFromDriverLib(className);
 	}
 
-	WbConnection connect(ConnectionProfile aProfile, String anId)
+	WbConnection connect(ConnectionProfile profile, String anId)
 		throws ClassNotFoundException, SQLException, UnsupportedClassVersionError
 	{
 
-		String drvClass = aProfile.getDriverclass();
-		String drvName = aProfile.getDriverName();
+		String drvClass = profile.getDriverclass();
+		String drvName = profile.getDriverName();
 		//long start, end;
 		//start = System.currentTimeMillis();
 		DbDriver drv = this.findDriverByName(drvClass, drvName);
@@ -147,12 +148,25 @@ public class ConnectionMgr
 			throw new SQLException("Driver class not registered");
 		}
 
-		copyPropsToSystem(aProfile);
-
-		Connection sql = drv.connect(aProfile.getUrl(), aProfile.getUsername(), aProfile.decryptPassword(), anId, aProfile.getConnectionProperties());
+		copyPropsToSystem(profile);
+		int oldTimeout = DriverManager.getLoginTimeout();
+		Connection sql = null;
 		try
 		{
-			sql.setAutoCommit(aProfile.getAutocommit());
+			int timeout = profile.getConnectionTimeout();
+			if (timeout > 0)
+			{
+				DriverManager.setLoginTimeout(timeout);
+			}
+			sql = drv.connect(profile.getUrl(), profile.getUsername(), profile.decryptPassword(), anId, profile.getConnectionProperties());
+		}
+		finally
+		{
+			DriverManager.setLoginTimeout(oldTimeout);
+		}
+		try
+		{
+			sql.setAutoCommit(profile.getAutocommit());
 		}
 		catch (Throwable th)
 		{
@@ -160,7 +174,7 @@ public class ConnectionMgr
 			// we just ignore the error :-)
 			LogMgr.logInfo("ConnectionMgr.connect()", "Driver (" + drv.getDriverClass() + ") does not support the autocommit property: " + ExceptionUtil.getDisplay(th));
 		}
-		WbConnection conn = new WbConnection(anId, sql, aProfile);
+		WbConnection conn = new WbConnection(anId, sql, profile);
 		return conn;
 	}
 
