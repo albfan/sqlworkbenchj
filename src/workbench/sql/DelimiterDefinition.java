@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -28,7 +28,7 @@ public class DelimiterDefinition
 	/**
 	 * A default alternate delimiter. This is Oracle's slash on a single line
 	 */
-	public static final DelimiterDefinition DEFAULT_ALTERNATE_DELIMITER = new DelimiterDefinition("/", true);
+	public static final DelimiterDefinition DEFAULT_ORA_DELIMITER = new DelimiterDefinition("/", true);
 
 	/**
 	 * A default alternate delimiter that matches SQL Server's GO command

@@ -56,13 +56,13 @@ public class OracleIndexReader
 
 	/**
 	 * Replacement for the DatabaseMetaData.getIndexInfo() method.
+	 * <br/>
 	 * Oracle's JDBC driver does an ANALYZE INDEX each time an indexInfo is
 	 * requested which slows down the retrieval of index information.
-	 * (and is not necessary at all for the Workbench, as we don't use the
-	 * cardinality field anyway)
+	 * (and is not necessary at all for SQL Workbench, as we the cardinality field isn't used anyway)
 	 * <br/>
-	 * Additionally function based indexes are not returned correctly by the
-	 * Oracle driver.
+	 * Additionally, function based indexes are not returned correctly by the Oracle driver
+	 * which is also fixed with this method
 	 */
 	public ResultSet getIndexInfo(TableIdentifier table, boolean unique)
 		throws SQLException
@@ -123,13 +123,16 @@ public class OracleIndexReader
 	}
 
 	@Override
-	public String getIndexSourceForType(TableIdentifier table, IndexDefinition definition)
+	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition definition, String tableNameToUse)
 	{
 		if (definition == null) return null;
 
 		boolean alwaysUseDbmsMeta = this.metaData.getDbSettings().getUseOracleDBMSMeta("index");
 
-		if (!alwaysUseDbmsMeta && !"DOMAIN".equals(definition.getIndexType())) return null;
+		if (!alwaysUseDbmsMeta && !"DOMAIN".equals(definition.getIndexType()))
+		{
+			return super.getIndexSource(table, definition, tableNameToUse);
+		}
 
 		PreparedStatement stmt = null;
 		ResultSet rs = null;
@@ -143,7 +146,7 @@ public class OracleIndexReader
 
 			stmt.setString(1, definition.getObjectName());
 			stmt.setString(2, definition.getSchema());
-			
+
 			rs = stmt.executeQuery();
 			if (rs.next())
 			{
@@ -177,6 +180,7 @@ public class OracleIndexReader
 	 * 	as elements. Each Element of the list is one part (=function call to a column)
 	 * 	of the index definition.
 	 */
+	@Override
 	public void processIndexList(TableIdentifier tbl, Collection<IndexDefinition> indexDefs)
 	{
 		if (CollectionUtil.isEmpty(indexDefs)) return;

@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -14,10 +14,13 @@ package workbench.console;
 import java.sql.SQLException;
 import workbench.interfaces.ExecutionController;
 import workbench.interfaces.ParameterPrompter;
+import workbench.interfaces.StatementParameterPrompter;
 import workbench.resource.ResourceMgr;
 import workbench.sql.VariablePool;
+import workbench.sql.preparedstatement.StatementParameters;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * An implementation of {@link workbench.interfaces.ParameterPrompter} and
@@ -26,13 +29,13 @@ import workbench.util.SqlUtil;
  *
  * It will interactively prompt the user for variables or the confirmation
  * to continue with a given SQL statement.
- * 
+ *
  * @author Thomas Kellerer
  * @see workbench.interfaces.ParameterPrompter
  * @see workbench.interfaces.ExecutionController
  */
 public class ConsolePrompter
-	implements ParameterPrompter, ExecutionController
+	implements ParameterPrompter, ExecutionController, StatementParameterPrompter
 {
 	private boolean executeAll = false;
 
@@ -44,7 +47,7 @@ public class ConsolePrompter
 	{
 		this.executeAll = false;
 	}
-	
+
 	public boolean processParameterPrompts(String sql)
 	{
 		VariablePool pool = VariablePool.getInstance();
@@ -58,7 +61,8 @@ public class ConsolePrompter
 			String varName = ds.getValueAsString(row, 0);
 			String value = ds.getValueAsString(row, 1);
 
-			String newValue = readLine(varName + " [" + value + "]: ");
+			String msg = StringUtil.isBlank(value) ? varName + ": " : varName + " [" + value + "]: ";
+			String newValue = readLine(msg);
 			ds.setValue(row, 1, newValue);
 		}
 
@@ -77,7 +81,7 @@ public class ConsolePrompter
 	{
 		return ConsoleReaderFactory.getConsoleReader().readLine(prompt);
 	}
-	
+
 	public String getPassword(String prompt)
 	{
 		return ConsoleReaderFactory.getConsoleReader().readPassword(prompt + " ");
@@ -106,14 +110,32 @@ public class ConsolePrompter
 
 		String msg = ResourceMgr.getFormattedString("MsgConfirmConsoleExec", verb, yesNo);
 		String choice = readLine(msg + " ");
-		
+
 		if (all.equalsIgnoreCase(choice))
 		{
 			this.executeAll = true;
 			return true;
 		}
-		
+
 		// allow the localized version and the english yes
 		return yes.equalsIgnoreCase(choice) || "yes".equalsIgnoreCase(choice);
+	}
+
+	@Override
+	public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+	{
+		System.out.println(ResourceMgr.getString("TxtVariableInputText"));
+		for (int param = 0; param < parms.getParameterCount(); param ++)
+		{
+			String varName = parms.getParameterName(param);
+			Object value = parms.getParameterValue(param);
+			String stringValue = (value == null ? "" : value.toString());
+
+			String msg = StringUtil.isBlank(stringValue) ? varName : varName + " [" + stringValue + "]";
+
+			String newValue = readLine(msg + ": ");
+			parms.setParameterValue(param, newValue);
+		}
+		return true;
 	}
 }

@@ -64,6 +64,14 @@ public interface IndexReader
 	StringBuilder getIndexSource(TableIdentifier table, DataStore indexDefinition, String tableNameToUse);
 
 	/**
+	 * Return the CREATE INDEX for a single index
+	 * @param table
+	 * @param indexDefinition
+	 * @param tableNameToUse
+	 */
+	CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition, String tableNameToUse);
+
+	/**
 	 * 	Build a SQL statement (from scratch) to create a new index on the given table.
 	 *
 	 * 	@param table - The table for which the index should be constructed
@@ -107,5 +115,12 @@ public interface IndexReader
 	 * @param definition
 	 * @return the CREATE INDEX statement
 	 */
-	String getIndexSourceForType(TableIdentifier table, IndexDefinition definition);
+	//String getIndexSourceForType(TableIdentifier table, IndexDefinition definition);
+
+	/**
+	 * Return any addition option that should be appended to a CREATE INDEX statement
+	 * @param index
+	 * @return
+	 */
+	String getIndexOptions(IndexDefinition index);
 }

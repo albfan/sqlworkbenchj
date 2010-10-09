@@ -41,7 +41,7 @@ public class InputBufferTest
 		result = buffer.addLine(";");
 		assertTrue(result);
 
-		buffer.setDelimiter(DelimiterDefinition.DEFAULT_ALTERNATE_DELIMITER);
+		buffer.setDelimiter(DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 		buffer.clear();
 
 		result = buffer.addLine("create or replace procedure proc");

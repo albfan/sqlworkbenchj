@@ -109,13 +109,6 @@ public class JdbcIndexReader
 		return pkName;
 	}
 
-	@Override
-	public String getIndexSourceForType(TableIdentifier table, IndexDefinition definition)
-	{
-		return null;
-	}
-
-
 	/**
 	 * Return the SQL to re-create the indexes defined for the table.
 	 *
@@ -129,85 +122,87 @@ public class JdbcIndexReader
 		if (indexDefinition == null) return null;
 		int count = indexDefinition.getRowCount();
 		if (count == 0) return StringUtil.emptyBuffer();
-		StringBuilder idx = new StringBuilder();
-		String template = this.metaData.getDbSettings().getCreateIndexSQL();
 
-		int idxCount = 0;
+		StringBuilder result = new StringBuilder(count * 100);
+
 		for (int i = 0; i < count; i++)
 		{
 			IndexDefinition definition = (IndexDefinition)indexDefinition.getValue(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_COL_DEF);
-
-			if (definition == null) continue;
-
-			String typeSource = getIndexSourceForType(table, definition);
-			if (typeSource != null)
-			{
-				idx.append(typeSource);
-				idx.append('\n');
-				continue;
-			}
-			
-			String type = indexDefinition.getValueAsString(i, IndexReader.COLUMN_IDX_TABLE_INDEXLIST_TYPE);
-			type = getSQLKeywordForType(type);
-
-			String tableName = tableNameToUse;
-			if (tableName == null)
-			{
-				tableName = table.getTableExpression(this.metaData.getWbConnection());
-			}
 			// Only add non-PK Indexes here. The indexes related to the PK constraints
 			// are usually auto-created when the PK is defined, so there is no need
 			// to re-create a CREATE INDEX statement for them.
-			if (!definition.isPrimaryKeyIndex())
+			if (definition != null && !definition.isPrimaryKeyIndex())
 			{
-				idxCount ++;
-				String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
-				if (definition.isUnique())
+				CharSequence idx = getIndexSource(table, definition, tableNameToUse);
+				if (idx != null)
 				{
-					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
-					if ("unique".equalsIgnoreCase(type)) type = "";
+					result.append(idx);
+					result.append('\n');
 				}
-				else
-				{
-					sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
-				}
-
-				if (StringUtil.isEmptyString(type))
-				{
-					sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER + " ", type);
-				}
-				else
-				{
-					sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
-				}
-
-				sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, definition.getExpression());
-				sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, definition.getObjectExpression(metaData.getWbConnection()));
-				idx.append(sql);
-				String options = getIndexOptions(definition);
-				if (options != null)
-				{
-					idx.append(options);
-				}
-				idx.append(";\n");
 			}
 		}
-		if (idxCount > 0) idx.append("\n");
+		return result;
+	}
+
+	public CharSequence getIndexSource(TableIdentifier table, IndexDefinition indexDefinition, String tableNameToUse)
+	{
+		if (indexDefinition == null) return null;
+		StringBuilder idx = new StringBuilder(100);
+		String template = this.metaData.getDbSettings().getCreateIndexSQL();
+
+		String type = indexDefinition.getIndexType();
+		type = getSQLKeywordForType(type);
+
+		String tableName = tableNameToUse;
+		if (tableName == null)
+		{
+			tableName = table.getTableExpression(this.metaData.getWbConnection());
+		}
+		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+		if (indexDefinition.isUnique())
+		{
+			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
+			if ("unique".equalsIgnoreCase(type)) type = "";
+		}
+		else
+		{
+			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
+		}
+
+		if (StringUtil.isEmptyString(type))
+		{
+			sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER + " ", type);
+		}
+		else
+		{
+			sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_TYPE_PLACEHOLDER, type);
+		}
+
+		sql = StringUtil.replace(sql, MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, indexDefinition.getExpression());
+		sql = StringUtil.replace(sql, MetaDataSqlManager.INDEX_NAME_PLACEHOLDER, indexDefinition.getObjectExpression(metaData.getWbConnection()));
+		idx.append(sql);
+		String options = getIndexOptions(indexDefinition);
+		if (options != null)
+		{
+			idx.append(options);
+		}
+		idx.append(";\n");
 		return idx;
 	}
 
+	@Override
 	public String getIndexOptions(IndexDefinition type)
 	{
 		return null;
 	}
-	
+
 	public String getSQLKeywordForType(String type)
 	{
 		if (type == null || type.startsWith("NORMAL")) return "";
 		return type;
 	}
 
-	
+
 	/**
 	 * 	Build the SQL statement to create an Index on the given table.
 	 *

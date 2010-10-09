@@ -36,7 +36,7 @@ public class DelimiterDefinitionTest
 					"  null;" +
 					"end; \n" +
 					" / ";
-			assertTrue(DelimiterDefinition.DEFAULT_ALTERNATE_DELIMITER.terminatesScript(sql));
+			assertTrue(DelimiterDefinition.DEFAULT_ORA_DELIMITER.terminatesScript(sql));
 			DelimiterDefinition del = new DelimiterDefinition("/", false);
 			assertTrue(del.terminatesScript(sql));
 		}

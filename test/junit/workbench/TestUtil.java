@@ -42,6 +42,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
+import workbench.sql.DelimiterDefinition;
 import workbench.sql.ScriptParser;
 import workbench.sql.StatementRunner;
 import workbench.sql.formatter.SQLLexer;
@@ -413,9 +414,20 @@ public class TestUtil
 	public static void executeScript(WbConnection con, String script)
 		throws SQLException
 	{
+		executeScript(con, script, null);
+	}
+
+	public static void executeScript(WbConnection con, String script, DelimiterDefinition alternateDelimiter)
+		throws SQLException
+	{
 		if (con == null) return;
 
 		ScriptParser parser = new ScriptParser(script);
+		if (alternateDelimiter != null)
+		{
+			parser.setAlternateDelimiter(alternateDelimiter);
+		}
+		
 		int count = parser.getSize();
 		for (int i=0; i < count; i++)
 		{

@@ -12,17 +12,24 @@
 package workbench.db.oracle;
 
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import workbench.db.IndexColumn;
+import workbench.db.IndexReader;
 import workbench.resource.Settings;
 import workbench.util.SqlUtil;
 import workbench.storage.DataStore;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.Comparator;
 import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
@@ -49,11 +56,13 @@ public class OracleMetadataTest
 		WbConnection con = OracleTestUtil.getOracleConnection();
 		if (con == null) return;
 
-		String sql = "create table person (id integer, first_name varchar(100), last_name varchar(100), check (id > 0));\n" +
+		String sql = "create table person (id integer primary key, first_name varchar(100), last_name varchar(100), check (id > 0));\n" +
 			"create view v_person (id, full_name) as select id, first_name || ' ' || last_name from person;\n" +
 			"create synonym syn_person for person;\n" +
 			"create materialized view mv_person as select * from person;\n" +
-			"create type address_type as object (street varchar(100), city varchar(50), zipcode varchar(10));\n";
+			"create type address_type as object (street varchar(100), city varchar(50), zipcode varchar(10));\n" +
+			"create index idx_person_a on person (upper(first_name));\n" +
+		  "create index idx_person_b on person (last_name) reverse;\n";
 		TestUtil.executeScript(con, sql);
 	}
 
@@ -96,6 +105,42 @@ public class OracleMetadataTest
 
 		String sql = tbl.getSource(con).toString().trim();
 		assertTrue(sql.startsWith("CREATE MATERIALIZED VIEW MV_PERSON"));
+		IndexReader r = con.getMetadata().getIndexReader();
+		assertNotNull(r);
+		assertTrue(r instanceof OracleIndexReader);
+		OracleIndexReader reader = (OracleIndexReader)r;
+
+		TableIdentifier person = new TableIdentifier("WBJUNIT", "PERSON");
+		Collection<IndexDefinition> list = reader.getTableIndexList(person);
+		assertEquals(3, list.size());
+
+		List<IndexDefinition> indexes = new ArrayList<IndexDefinition>(list);
+
+		Comparator<IndexDefinition> comp = new Comparator<IndexDefinition>() {
+
+			@Override
+			public int compare(IndexDefinition i1, IndexDefinition i2)
+			{
+				return i1.getName().compareTo(i2.getName());
+			}
+		};
+		Collections.sort(indexes, comp);
+
+		IndexDefinition functionIndex = indexes.get(0);
+		IndexDefinition reverse = indexes.get(1);
+		IndexDefinition pk = indexes.get(2);
+
+		List<IndexColumn> cols = functionIndex.getColumns();
+		assertEquals(1, cols.size());
+		String expr = cols.get(0).getExpression();
+		assertEquals("UPPER(\"FIRST_NAME\") ASC", expr);
+
+		assertEquals("NORMAL/REV", reverse.getIndexType());
+		String source = reverse.getSource(con).toString();
+		assertTrue(source.trim().endsWith("REVERSE;"));
+
+		assertTrue(pk.isUnique());
+		assertTrue(pk.isPrimaryKeyIndex());
 	}
 
 	@Test

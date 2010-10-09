@@ -31,6 +31,7 @@ import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.ValidatingDialog;
 import workbench.gui.components.WbTable;
 import workbench.gui.components.WbTextCellEditor;
+import workbench.interfaces.StatementParameterPrompter;
 import workbench.interfaces.ValidatingComponent;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -126,6 +127,15 @@ public class ParameterEditor
 	}
 
 	private static boolean dialogResult = false;
+
+	public static final StatementParameterPrompter GUI_PROMPTER = new StatementParameterPrompter()
+			{
+				@Override
+				public boolean showParameterDialog(StatementParameters parms, boolean showNames)
+				{
+					return ParameterEditor.showParameterDialog(parms, showNames);
+				}
+			};
 
 	public static synchronized boolean showParameterDialog(final StatementParameters parms, final boolean showNames)
 	{

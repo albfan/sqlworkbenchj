@@ -77,11 +77,18 @@ public class PostgresIndexReaderTest
 
 		TableIdentifier table = meta.findTable(new TableIdentifier("person"));
 		Collection<IndexDefinition> indexes = reader.getTableIndexList(table);
+		if (indexes.isEmpty())
+		{
+			System.err.println("No indexes returned. If you are running PostgreSQL 9.0.0 please upgrade to 9.0.1");
+		}
+		assertFalse(indexes.isEmpty());
+
+		
 		IndexDefinition index = indexes.iterator().next();
 		assertEquals("idx_person_id", index.getObjectName());
 		String sql = index.getSource(conn).toString();
 		String type = SqlUtil.getCreateType(sql);
-//		System.out.println(sql);
+
 		assertEquals("INDEX", type);
 		assertTrue(sql.contains("idx_person_id"));
 		assertTrue(sql.contains("person (id"));

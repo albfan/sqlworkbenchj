@@ -28,7 +28,8 @@ import workbench.util.ArgumentParser;
 public class OracleTestUtil
 {
 	private static boolean isAvailable = true;
-
+	public static final String SCHEMA_NAME = "WBJUNIT";
+	
 	/**
 	 * Return a connection to a locally running Oracle database
 	 * @return null if Oracle is not available

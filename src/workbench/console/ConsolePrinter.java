@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -75,7 +75,7 @@ public abstract class ConsolePrinter
 	{
 		this.showRowCount = flag;
 	}
-	
+
 	protected void printHeader(PrintWriter pw)
 	{
 		if (!printRowAsLine) return;
@@ -86,7 +86,7 @@ public abstract class ConsolePrinter
 		}
 
 		String resultName = getResultName();
-		
+
 		if (StringUtil.isNonBlank(resultName))
 		{
 			pw.println("---- " + resultName);
@@ -139,7 +139,7 @@ public abstract class ConsolePrinter
 		int colwidth = 0;
 
 		pw.println("---- [" + ResourceMgr.getString("TxtRow") + " " + (rowNum + 1) + "] -------------------------------");
-		
+
 		// Calculate max. colname width
 		for (int col=0; col < colcount; col++)
 		{
@@ -283,7 +283,7 @@ public abstract class ConsolePrinter
 
 	private int writePadded(PrintWriter out, String value, int width)
 	{
-		StringBuffer result = new StringBuffer(width);
+		StringBuilder result = new StringBuilder(width);
 		if (value != null) result.append(value);
 
 		if (width > 0)

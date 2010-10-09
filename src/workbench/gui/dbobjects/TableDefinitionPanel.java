@@ -35,6 +35,7 @@ import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.IndexColumn;
+import workbench.db.IndexReader;
 import workbench.db.TableColumnsDatastore;
 import workbench.db.TableIdentifier;
 import workbench.db.TableSelectBuilder;
@@ -568,7 +569,8 @@ public class TableDefinitionPanel
 			columns.add(col);
 		}
 
-		String sql = this.dbConnection.getMetadata().buildIndexSource(this.currentTable, indexName, false, columns);
+		IndexReader reader = this.dbConnection.getMetadata().getIndexReader();
+		String sql = reader.buildCreateIndexSql(this.currentTable, indexName, false, columns);
 		if (!sql.trim().endsWith(";"))
 		{
 			sql += ";\n";

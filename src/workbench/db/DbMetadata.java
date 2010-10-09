@@ -2557,19 +2557,6 @@ public class DbMetadata
 	}
 
 	/**
-	 * 	Build the SQL statement to create an Index on the given table.
-	 * 	@param aTable - The table name for which the index should be constructed
-	 * 	@param indexName - The name of the Index
-	 * 	@param unique - Should the index be unique
-	 *  @param columnList - The columns that should build the index
-	 */
-	public String buildIndexSource(TableIdentifier aTable, String indexName, boolean unique, List<IndexColumn> columnList)
-	{
-		return getIndexReader().buildCreateIndexSql(aTable, indexName, unique, columnList);
-	}
-
-
-	/**
 	 * Returns the errors available for the given object and type. This call
 	 * is delegated to the available {@link ErrorInformationReader}
 	 * @return extended error information if the current DBMS is Oracle. An empty string otherwise.

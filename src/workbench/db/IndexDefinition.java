@@ -187,6 +187,7 @@ public class IndexDefinition
 	public CharSequence getSource(WbConnection con)
 	{
 		if (con == null) return null;
-		return con.getMetadata().buildIndexSource(baseTable, indexName, isUnique, this.columns);
+		IndexReader reader = con.getMetadata().getIndexReader();
+		return reader.getIndexSource(baseTable, this, null);
 	}
 }

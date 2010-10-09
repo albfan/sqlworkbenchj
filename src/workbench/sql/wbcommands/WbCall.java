@@ -22,11 +22,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import workbench.WbManager;
+import workbench.console.ConsolePrompter;
 import workbench.db.DbMetadata;
 import workbench.db.ProcedureDefinition;
 import workbench.db.ProcedureReader;
 import workbench.db.oracle.OracleProcedureReader;
 import workbench.gui.preparedstatement.ParameterEditor;
+import workbench.interfaces.StatementParameterPrompter;
 import workbench.log.LogMgr;
 import workbench.util.ExceptionUtil;
 import workbench.resource.ResourceMgr;
@@ -60,6 +62,21 @@ public class WbCall
 	// Stores all parameters that need an input
 	private List<ParameterDefinition> inputParameters = new ArrayList<ParameterDefinition>(5);
 	private String sqlUsed = null;
+
+	private StatementParameterPrompter parameterPrompter;
+
+	public WbCall()
+	{
+		super();
+		if (WbManager.getInstance().isConsoleMode())
+		{
+			parameterPrompter = new ConsolePrompter();
+		}
+		else
+		{
+			parameterPrompter = ParameterEditor.GUI_PROMPTER;
+		}
+	}
 
 	@Override
 	public String getVerb()
@@ -169,10 +186,10 @@ public class WbCall
 				}
 			}
 
-			if (hasParameters && !WbManager.getInstance().isBatchMode() && this.inputParameters.size() > 0)
+			if (hasParameters && this.inputParameters.size() > 0 && this.parameterPrompter != null)
 			{
 				StatementParameters input = new StatementParameters(this.inputParameters);
-				boolean ok = ParameterEditor.showParameterDialog(input, namesAvailable);
+				boolean ok = parameterPrompter.showParameterDialog(input, namesAvailable);
 				if (!ok)
 				{
 					result.addMessage(ResourceMgr.getString("MsgStatementCancelled"));
@@ -329,7 +346,7 @@ public class WbCall
 		List<String> sqlParams = SqlUtil.getFunctionParameters(sql);
 
 		DbMetadata meta = this.currentConnection.getMetadata();
-		
+
 		// Detect the name/schema of the called procedure
 		SQLLexer l = new SQLLexer(sql);
 
@@ -409,7 +426,7 @@ public class WbCall
 		{
 			procDef = new ProcedureDefinition(catalog, schemaToUse, nameToUse, -1);
 		}
-		
+
 		DataStore params = meta.getProcedureReader().getProcedureColumns(procDef);
 
 		boolean needFuncCall = returnsRefCursor(params);
@@ -427,7 +444,7 @@ public class WbCall
 		{
 			SqlUtil.closeStatement(currentStatement);
 		}
-		
+
 		CallableStatement cstmt = currentConnection.getSqlConnection().prepareCall(sqlUsed);
 		this.currentStatement = cstmt;
 
@@ -544,5 +561,14 @@ public class WbCall
 			if (isRefCursor(typeName) && "RETURN".equals(resultType)) return true;
 		}
 		return false;
+	}
+
+	/**
+	 * For testing purposes
+	 * @param prompter
+	 */
+	public void setParameterPrompter(StatementParameterPrompter prompter)
+	{
+		parameterPrompter = prompter;
 	}
 }
