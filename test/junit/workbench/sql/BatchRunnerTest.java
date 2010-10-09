@@ -79,6 +79,7 @@ public class BatchRunnerTest
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-url='jdbc:h2:mem:testSingleCommand' " +
 				" -username=sa " +
+				" -password='' " +
 				" -driver=org.h2.Driver " +
 				" -rollbackOnDisconnect=true "  +
 				" -command='delete from person; commit;' ");

@@ -54,6 +54,7 @@ public class WbConnect
 		cmdLine.addArgument(AppArguments.ARG_PROFILE_GROUP);
 		cmdLine.addArgument(AppArguments.ARG_CONN_URL);
 		cmdLine.addArgument(AppArguments.ARG_CONN_DRIVER);
+		cmdLine.addArgument(AppArguments.ARG_CONN_DRIVER_CLASS);
 		cmdLine.addArgument(AppArguments.ARG_CONN_JAR);
 		cmdLine.addArgument(AppArguments.ARG_CONN_USER);
 		cmdLine.addArgument(AppArguments.ARG_CONN_PWD);
@@ -184,8 +185,7 @@ public class WbConnect
 		catch (Exception e)
 		{
 			String err = ExceptionUtil.getDisplay(e);
-			result.addMessage(ResourceMgr.getFormattedString("MsgBatchConnectError"));
-			result.addMessage(err);
+			result.addMessage(ResourceMgr.getFormattedString("ErrConnectFailed", err));
 			result.setFailure();
 		}
 

@@ -151,7 +151,22 @@ public class SQLConsole
 
 			if (runner.hasProfile())
 			{
-				runner.connect();
+				ConnectionProfile profile = runner.getProfile();
+				if (!profile.getStorePassword())
+				{
+					String pwd = ConsoleReaderFactory.getConsoleReader().readPassword(ResourceMgr.getString("MsgInputPwd"));
+					profile.setInputPassword(pwd);
+				}
+
+				try
+				{
+					runner.connect();
+				}
+				catch (Exception e)
+				{
+					// nothing to log, already done by the runner
+				}
+				
 				if (runner.isConnected() && !runner.getVerboseLogging())
 				{
 					WbConnection conn = runner.getConnection();

@@ -204,6 +204,7 @@ public class TestUtil
 		parser.parse("-url='jdbc:h2:mem:" + db + "' -username=sa -driver=org.h2.Driver");
 		ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 		prof.setName(db);
+		prof.setStorePassword(true);
 		ConnectionMgr.getInstance().addProfile(prof);
 		WbConnection con = ConnectionMgr.getInstance().getConnection(prof, db);
 		dropAll(con, true);

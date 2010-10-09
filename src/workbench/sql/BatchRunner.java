@@ -230,6 +230,11 @@ public class BatchRunner
 		this.stmtRunner.setIgnoreDropErrors(flag);
 	}
 
+	public ConnectionProfile getProfile()
+	{
+		return this.profile;
+	}
+	
 	public boolean hasProfile()
 	{
 		return this.profile != null;
@@ -322,8 +327,8 @@ public class BatchRunner
 		catch (SQLException e)
 		{
 			success = false;
-			String msg = ResourceMgr.getString("MsgBatchConnectError") + ": " + ExceptionUtil.getDisplay(e);
-			LogMgr.logError("BatchRunner.connect()", msg, LogMgr.isDebugEnabled() ? e : null);
+			LogMgr.logError("BatchRunner.connect()", "Connection failed", e);
+			String msg = ResourceMgr.getFormattedString("ErrConnectFailed", ExceptionUtil.getDisplay(e));
 			printMessage(msg);
 			throw e;
 		}
@@ -917,6 +922,7 @@ public class BatchRunner
 			result.setDriverclass(driverclass);
 			result.setDriverName(null);
 			result.setStoreExplorerSchema(false);
+			result.setStorePassword(cmdLine.isArgPresent(AppArguments.ARG_CONN_PWD));
 			result.setUrl(url);
 			result.setUsername(user);
 			result.setPassword(pwd);
