@@ -2,6 +2,9 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-09-20">
+    <entry dev-build="4" type="enh">The JDBC driver templates can now be loaded from an external a file named "DriverTemplates.xml" that has to be stored in the directory where the jar file is located.</entry>
+    <entry dev-build="4" type="enh">Starting the console mode without specifying a password or when using a profile without a password, the application now prompts to enter a password</entry>
+    <entry dev-build="4" type="enh">A new option "Connection Timeout" has been added to the connectioin profiles.</entry>
     <entry dev-build="3" type="enh">A new option to log all executed SQL statements to the logfile has been added (Tools -&gt; Options -&gt; General -&gt; Log all SQL statements).</entry>
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
