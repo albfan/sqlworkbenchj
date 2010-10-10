@@ -134,6 +134,19 @@
 					choose not to store the password in the connection profile.</para></entry>
 				</row>
 				<row>
+					<entry id="profile-autocommit"><para>Autocommit</para></entry>
+					<entry><para>
+              <indexterm><primary>Connection profile</primary><secondary>autocommit</secondary></indexterm>
+              This checkbox enables/disables the property
+							for the connection. If autocommit is enabled, then each SQL statement
+							is automatically committed on the DBMS. If this is disabled, any DML
+							statement (<literal>UPDATE, INSERT, DELETE, ...</literal>) has to be
+							committed in order to make the change permanent. Some DBMS
+							require a commit for DDL statements (<literal>CREATE TABLE, ...</literal>)
+							as well. Please refer to the documentation of your DBMS.
+					</para></entry>
+				</row>
+				<row>
 					<entry id="profile-fetch-size"><para>Fetch size</para></entry>
 					<entry>
             <para>
@@ -160,16 +173,12 @@
 					</entry>
 				</row>
 				<row>
-					<entry id="profile-autocommit"><para>Autocommit</para></entry>
+					<entry id="profile-timeout"><para>Timeout</para></entry>
 					<entry><para>
-              <indexterm><primary>Connection profile</primary><secondary>autocommit</secondary></indexterm>
-              This checkbox enables/disables the property
-							for the connection. If autocommit is enabled, then each SQL statement
-							is automatically committed on the DBMS. If this is disabled, any DML
-							statement (<literal>UPDATE, INSERT, DELETE, ...</literal>) has to be
-							committed in order to make the change permanent. Some DBMS
-							require a commit for DDL statements (<literal>CREATE TABLE, ...</literal>)
-							as well. Please refer to the documentation of your DBMS.
+              <indexterm><primary>Connection profile</primary><secondary>timeout</secondary></indexterm>
+              This property defines a timeout in seconds that is applied when establishing the connection to the
+              database server. If no connection is possible in that time, the attempt will be aborted. If this
+              is empty, the default timeout defined by the JDBC driver is used.
 					</para></entry>
 				</row>
 
