@@ -24,7 +24,7 @@ public class DefaultDataTypeResolver
 	}
 
 	@Override
-	public int fixColumnType(int type)
+	public int fixColumnType(int type, String dbmsType)
 	{
 		// Nothing to do
 		return type;

@@ -9,6 +9,7 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="4" type="fix">A workaround for an Oracle driver bug was implemented, where the datatype for TIMESTAMP(3) was reported incorrectly.</entry>
     <entry dev-build="4" type="fix">The generated XML content was not valid for ODS or OpenXML export if the generating SQL contained characters that needed escaping in XML.</entry>
     <entry dev-build="4" type="fix">Statements where not closed properly when retrieving Oracle Object type information.</entry>
     <entry dev-build="3" type="fix">Oracle RAW columns were not displayed correctly if the automatic data conversion was turned on.</entry>

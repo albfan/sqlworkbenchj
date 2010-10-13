@@ -606,6 +606,7 @@ public class ConnectionEditorPanel
     gridBagConstraints.gridy = 0;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.EAST;
     gridBagConstraints.weightx = 1.0;
+    gridBagConstraints.insets = new java.awt.Insets(0, 0, 0, 2);
     jPanel2.add(propLabel, gridBagConstraints);
 
     gridBagConstraints = new java.awt.GridBagConstraints();

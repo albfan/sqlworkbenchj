@@ -48,7 +48,7 @@ public class PostgresDataTypeResolver
 	}
 
 	@Override
-	public int fixColumnType(int type)
+	public int fixColumnType(int type, String dbmsType)
 	{
 		return type;
 	}

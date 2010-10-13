@@ -136,8 +136,6 @@ public class ResultInfo
 				realColumn = false;
 			}
 
-			int type = metaData.getColumnType(i + 1);
-			if (dbMeta != null) type = dbMeta.getDataTypeResolver().fixColumnType(type); // currently only for Oracle's DATE type
 			ColumnIdentifier col = new ColumnIdentifier(name);
 
 			if (!name.equals(alias))
@@ -145,7 +143,6 @@ public class ResultInfo
 				col.setColumnAlias(alias);
 			}
 
-			col.setDataType(type);
 			col.setUpdateable(realColumn);
 			try
 			{
@@ -167,12 +164,15 @@ public class ResultInfo
 				typename = null;
 			}
 
+			int type = metaData.getColumnType(i + 1);
 			if (StringUtil.isEmptyString(typename))
 			{
 				// use the Java name if the driver did not return a type name for this column
-				typename = SqlUtil.getTypeName(col.getDataType());
+				typename = SqlUtil.getTypeName(type);
 			}
+			if (dbMeta != null) type = dbMeta.getDataTypeResolver().fixColumnType(type, typename);
 
+			col.setDataType(type);
 			col.setColumnTypeName(typename);
 
 			int scale = 0;

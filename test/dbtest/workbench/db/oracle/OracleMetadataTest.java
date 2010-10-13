@@ -11,6 +11,7 @@
  */
 package workbench.db.oracle;
 
+import workbench.db.ColumnIdentifier;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +63,8 @@ public class OracleMetadataTest
 			"create materialized view mv_person as select * from person;\n" +
 			"create type address_type as object (street varchar(100), city varchar(50), zipcode varchar(10));\n" +
 			"create index idx_person_a on person (upper(first_name));\n" +
-		  "create index idx_person_b on person (last_name) reverse;\n";
+		  "create index idx_person_b on person (last_name) reverse;\n" +
+			"create table ts_test (modified_at timestamp(3));\n";
 		TestUtil.executeScript(con, sql);
 	}
 
@@ -98,7 +100,7 @@ public class OracleMetadataTest
 		assertEquals("TYPE", type.getType());
 
 		List<TableIdentifier> tables = con.getMetadata().getObjectList("WBJUNIT", new String[] { "TABLE" });
-		assertEquals(2, tables.size());
+		assertEquals(3, tables.size());
 		TableIdentifier tbl = tables.get(0);
 		assertEquals("MV_PERSON", tbl.getTableName());
 		assertEquals("MATERIALIZED VIEW", tbl.getType());
@@ -203,6 +205,18 @@ public class OracleMetadataTest
 
 		display = meta.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 200, 0, OracleMetadata.CHAR_SEMANTICS);
 		assertEquals("VARCHAR(200 Char)", display);
+	}
 
+	@Test
+	public void testStupidTimestamp()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(new TableIdentifier("TS_TEST"));
+		assertNotNull(columns);
+		assertEquals(1, columns.size());
+		assertEquals(Types.TIMESTAMP, columns.get(0).getDataType());
 	}
 }

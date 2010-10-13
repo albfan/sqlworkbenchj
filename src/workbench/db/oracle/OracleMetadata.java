@@ -201,7 +201,7 @@ public class OracleMetadata
 		return value;
 	}
 
-	public int fixColumnType(int type)
+	public int fixColumnType(int type, String dbmsType)
 	{
 		if (type == Types.DATE && getMapDateToTimestamp()) return Types.TIMESTAMP;
 
@@ -209,6 +209,13 @@ public class OracleMetadata
 		// value -101 (which is not an official java.sql.Types value
 		// TIMESTAMP WITH LOCAL TIMEZONE is reported as -102
 		if (type == -101 || type == -102) return Types.TIMESTAMP;
+
+		// The Oracle driver stupidly reports TIMESTAMP(n) columns as Types.OTHER
+		if (type == Types.OTHER && dbmsType != null && dbmsType.startsWith("TIMESTAMP(")) 
+		{
+			LogMgr.logDebug("OracleMetaData.fixColumnType()", "Got Types.OTHER but expected Types.TIMESTAMP!");
+			return Types.TIMESTAMP;
+		}
 
 		return type;
 	}
@@ -243,9 +250,8 @@ public class OracleMetadata
 			{
 				String colName = rs.getString("COLUMN_NAME");
 				int sqlType = rs.getInt("DATA_TYPE");
-				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), fixColumnType(sqlType));
-
 				String typeName = rs.getString("TYPE_NAME");
+				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), fixColumnType(sqlType, typeName));
 
 				int size = rs.getInt("COLUMN_SIZE");
 				int digits = rs.getInt("DECIMAL_DIGITS");
@@ -699,7 +705,7 @@ public class OracleMetadata
 		if (sqlType == Types.VARCHAR)
 		{
 			// Hack to get Oracle's VARCHAR2(xx Byte) or VARCHAR2(xxx Char) display correct
-			// Our own statement to retrieve column information in OracleMetaData
+			// My own statement to retrieve column information in OracleMetaData
 			// will return the byte/char semantics in the field WB_SQL_DATA_TYPE
 			// Oracle's JDBC driver does not supply this information (because
 			// the JDBC standard does not define a column for this)
@@ -719,6 +725,10 @@ public class OracleMetadata
 			{
 				return "NUMBER(" + size + "," + digits + ")";
 			}
+		}
+		else if (sqlType == Types.VARBINARY && "RAW".equals(dbmsName))
+		{
+			return "RAW(" + size  + ")";
 		}
 		else
 		{

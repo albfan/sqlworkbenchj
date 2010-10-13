@@ -33,5 +33,5 @@ public interface DataTypeResolver
 	 * @param type
 	 * @return the JDBC data type to be used instead
 	 */
-	int fixColumnType(int type);
+	int fixColumnType(int type, String dbmsType);
 }

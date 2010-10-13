@@ -74,9 +74,9 @@ public class JdbcTableDefinitionReader
 			{
 				String colName = rs.getString("COLUMN_NAME");
 				int sqlType = rs.getInt("DATA_TYPE");
-				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), typeResolver.fixColumnType(sqlType));
-
 				String typeName = rs.getString("TYPE_NAME");
+				ColumnIdentifier col = new ColumnIdentifier(dbmeta.quoteObjectname(colName), typeResolver.fixColumnType(sqlType, typeName));
+
 
 				int size = rs.getInt("COLUMN_SIZE");
 				int digits = -1;
