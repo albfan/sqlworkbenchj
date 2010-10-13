@@ -54,6 +54,17 @@ public class SqlUtilTest
 	}
 
 	@Test
+	public void testAppendAndCondition()
+		throws Exception
+	{
+		StringBuilder sql = new StringBuilder("select * from sometable");
+		SqlUtil.appendAndCondition(sql, "some_col", "some_condition");
+		assertEquals("select * from sometable AND some_col = 'some_condition'", sql.toString());
+		SqlUtil.appendAndCondition(sql, "some_col", null);
+		assertEquals("select * from sometable AND some_col = 'some_condition'", sql.toString());
+	}
+	
+	@Test
 	public void testGetFunctionParams()
 		throws Exception
 	{

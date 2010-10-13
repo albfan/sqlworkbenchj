@@ -17,6 +17,7 @@ import java.sql.Statement;
 import workbench.db.JdbcProcedureReader;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
+import workbench.resource.Settings;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
@@ -52,6 +53,10 @@ public class Db2ProcedureReader
 		try
 		{
 			String sql = getSQL(schemaPattern, namePattern);
+			if (Settings.getInstance().getDebugMetadataSql())
+			{
+				LogMgr.logDebug("Db2ProcedureReader.getProcedures()", "Using SQL:\n" + sql);
+			}
 			stmt = connection.createStatementForQuery();
 			rs = stmt.executeQuery(sql);
 			DataStore ds = fillProcedureListDataStore(rs);
@@ -102,7 +107,7 @@ public class Db2ProcedureReader
              "       END as PROCEDURE_TYPE \n" +
              "FROM SYSIBM.SYSROUTINES \n" +
              "WHERE routinetype in ('F', 'P') \n" +
-             "AND origin in ('Q', 'U') ");
+             "AND origin in ('Q', 'U') \n");
 
 			SqlUtil.appendAndCondition(sql, "schema", schemaPattern);
 			SqlUtil.appendAndCondition(sql, "name", namePattern);

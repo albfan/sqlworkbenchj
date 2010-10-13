@@ -1408,8 +1408,11 @@ public class SqlUtil
 
 	public static void appendAndCondition(StringBuilder baseSql, String column, String value)
 	{
-		baseSql.append(" AND ");
-		appendExpression(baseSql, column, value);
+		if (StringUtil.isNonBlank(value) && StringUtil.isNonEmpty(column))
+		{
+			baseSql.append(" AND ");
+			appendExpression(baseSql, column, value);
+		}
 	}
 	/**
 	 * Appends an AND condition for the given column. If the value contains
