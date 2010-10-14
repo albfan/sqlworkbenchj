@@ -3,21 +3,14 @@
      version="1.0" 
      xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
 >
-
 <!--
 
 Convert the output of SQL Workbench's WbSchemaDiff command to SQL for PostgreSQL
-Author: support@sql-workbench.net
+Author: Thomas Kellerer, Henri Tremblay
 
 -->
 
-  <xsl:output
-  encoding="iso-8859-15" 
-  method="text" 
-  indent="no" 
-  standalone="yes"  
-  omit-xml-declaration="yes"
-/>
+<xsl:output  encoding="iso-8859-15" method="text" indent="no" standalone="yes" omit-xml-declaration="yes"/>
 
   <xsl:strip-space elements="*"/>
   <xsl:variable name="quote">
@@ -56,13 +49,17 @@ Author: support@sql-workbench.net
         <xsl:with-param name="table" select="$table"/>
       </xsl:apply-templates>
 
-      <xsl:apply-templates select="add-index">
-        <xsl:with-param name="table" select="$table"/>
-      </xsl:apply-templates>
-
       <xsl:apply-templates select="drop-index">
         <xsl:with-param name="table" select="$table"/>
       </xsl:apply-templates>
+
+      <xsl:apply-templates select="add-index">
+        <xsl:with-param name="table" select="$table"/>
+      </xsl:apply-templates>
+	  
+      <xsl:apply-templates select="update-trigger">
+        <xsl:with-param name="table" select="$table"/>
+      </xsl:apply-templates>	  
 
       <xsl:for-each select="table-constraints/drop-constraint/constraint-definition">
         <xsl:text>ALTER TABLE </xsl:text>
@@ -146,15 +143,6 @@ Author: support@sql-workbench.net
   
   </xsl:template>
 
-  <xsl:template match="add-index">
-    <xsl:param name="table"/>
-    <xsl:for-each select="index-def">
-      <xsl:call-template name="create-index">
-        <xsl:with-param name="tablename" select="$table"/>
-      </xsl:call-template>
-    </xsl:for-each>
-  </xsl:template>
-
   <xsl:template match="drop-index">
     <xsl:param name="table"/>
     <xsl:text>ALTER TABLE </xsl:text>
@@ -164,7 +152,25 @@ Author: support@sql-workbench.net
     <xsl:text>;</xsl:text>
     <xsl:value-of select="$newline"/>
   </xsl:template>
+  
+  <xsl:template match="add-index">
+    <xsl:param name="table"/>
+    <xsl:for-each select="index-def">
+      <xsl:call-template name="create-index">
+        <xsl:with-param name="tablename" select="$table"/>
+      </xsl:call-template>
+    </xsl:for-each>
+  </xsl:template>
 
+  <xsl:template match="update-trigger">
+    <xsl:param name="table"/>
+    <xsl:for-each select="trigger-def">
+      <xsl:call-template name="create-trigger">
+        <xsl:with-param name="tablename" select="$table"/>
+      </xsl:call-template>
+    </xsl:for-each>
+  </xsl:template>
+  
   <xsl:template match="remove-column">
     <xsl:param name="table"/>
     <xsl:text>ALTER TABLE </xsl:text>
@@ -474,4 +480,11 @@ Author: support@sql-workbench.net
     </xsl:if>
   </xsl:template>
 
+  <xsl:template name="create-trigger">
+    <xsl:param name="tablename"/>
+	<xsl:variable name="source" select="trigger-source"/>
+    <xsl:value-of select="$source"/>
+    <xsl:value-of select="$newline"/>
+  </xsl:template>
+  
 </xsl:stylesheet>
