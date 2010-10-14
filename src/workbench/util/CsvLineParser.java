@@ -119,7 +119,7 @@ public class CsvLineParser
 				{
 					char next = 0;
 					if (current < lineData.length() - 1) next = this.lineData.charAt(current + 1);
-					if (next == '"') 
+					if (next == quoteChar)
 					{
 						current ++;
 					}
@@ -159,7 +159,9 @@ public class CsvLineParser
 			}
 			else if (this.escapeType == QuoteEscapeType.duplicate)
 			{
-				next = StringUtil.replace(next, "\"\"", "\"");
+				String two = new String(new char[] { quoteChar, quoteChar} );
+				String one = new String(new char[] { quoteChar} );
+				next = StringUtil.replace(next, two, one);
 			}
 		}
 		

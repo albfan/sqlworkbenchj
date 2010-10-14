@@ -19,6 +19,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
 import workbench.util.ArgumentParser;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -93,6 +94,10 @@ public class PostgresTestUtil
 		{
 			con.rollbackSilently();
 		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
+		}
 	}
 
 	public static void cleanUpTestCase(String schema)
@@ -126,6 +131,10 @@ public class PostgresTestUtil
 		catch (Exception e)
 		{
 			con.rollbackSilently();
+		}
+		finally
+		{
+			SqlUtil.closeStatement(stmt);
 		}
 	}
 }

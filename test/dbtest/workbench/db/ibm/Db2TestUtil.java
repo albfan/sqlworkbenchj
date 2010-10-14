@@ -10,16 +10,18 @@
  */
 package workbench.db.ibm;
 
-import java.util.List;
+import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
 import workbench.util.ArgumentParser;
-import workbench.util.StringUtil;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -28,8 +30,22 @@ import workbench.util.StringUtil;
 public class Db2TestUtil
 {
 	private static boolean isAvailable = true;
-	public static final String SCHEMA_NAME = "WBJUNIT";
-	
+
+
+	public static String getSchemaName()
+	{
+		return getProperty("wbjunit.db2.schema", "wbjunit").toUpperCase();
+	}
+
+	private static String getProperty(String key, String defaultValue)
+	{
+		String value= System.getProperty(key, null);
+		if (value == null || value.equals("${" + key + "}"))
+		{
+			return defaultValue;
+		}
+		return value;
+	}
 	/**
 	 * Return a connection to a locally running DB2 database
 	 * @return null if DB2 is not available
@@ -37,13 +53,18 @@ public class Db2TestUtil
 	public static WbConnection getDb2Connection()
 	{
 		final String id = "WBJUnitDB2";
+		if (!isAvailable) return null;
 		try
 		{
 			WbConnection con = ConnectionMgr.getInstance().findConnection(id);
 			if (con != null) return con;
 
+			String dbname = getProperty("wbjunit.db2.testdb", "tkdb");
+			String username = getProperty("wbjunit.db2.user", "thomas");
+			String pwd = getProperty("wbjunit.db2.password", "welcome");
+
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:db2://localhost:50000/wbjunit' -username=wbjunit -password=wbjunit -driver=com.ibm.db2.jcc.DB2Driver");
+			parser.parse("-url='jdbc:db2://localhost:50000/" + dbname + "' -username=" + username + " -password=" + pwd + " -driver=com.ibm.db2.jcc.DB2Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName("WBJUnitDB2");
 			ConnectionMgr.getInstance().addProfile(prof);
@@ -52,19 +73,24 @@ public class Db2TestUtil
 		}
 		catch (Throwable th)
 		{
+			isAvailable = false;
 			return null;
 		}
 	}
 
-	public static void initTestCase(String schema)
+	public static void initTestCase()
 		throws Exception
 	{
+		String schema = getSchemaName();
 		TestUtil util = new TestUtil(schema);
 		util.prepareEnvironment();
 
+		if (!isAvailable) return;
+		
 		WbConnection con = getDb2Connection();
 		if (con == null)
 		{
+			isAvailable = false;
 			return;
 		}
 
@@ -73,23 +99,8 @@ public class Db2TestUtil
 		{
 			stmt = con.createStatement();
 
-			if (StringUtil.isBlank(schema))
-			{
-				schema = "junit";
-			}
-			else
-			{
-				schema = schema.toLowerCase();
-			}
-
-			List<String> schemas = con.getMetadata().getSchemas();
-			if (schemas.contains(schema))
-			{
-				// Make sure everything is cleaned up
-				dropTestSchema(con, schema);
-			}
-			stmt.execute("create schema "+ schema);
-			stmt.execute("set session schema '" + schema + "'");
+			stmt.execute("set schema " + schema);
+			dropAllObjects(con, schema);
 			con.commit();
 		}
 		catch (Exception e)
@@ -98,38 +109,46 @@ public class Db2TestUtil
 		}
 	}
 
-	public static void cleanUpTestCase(String schema)
+	public static void cleanUpTestCase()
 	{
 		if (!isAvailable) return;
 		WbConnection con = getDb2Connection();
-		dropTestSchema(con, schema);
+		String schema = getSchemaName();
+		//dropAllObjects(con, schema);
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
-	public static void dropTestSchema(WbConnection con, String schema)
+	public static void dropAllObjects(WbConnection con, String schema)
 	{
 		if (con == null) return;
 
-		Statement stmt = null;
+		Statement drop = null;
+
 		try
 		{
-			stmt = con.createStatement();
-
-			if (StringUtil.isBlank(schema))
+			List<TableIdentifier> tables = con.getMetadata().getObjectList(getSchemaName(), null);
+			drop = con.createStatement();
+			for (TableIdentifier tbl : tables)
 			{
-				schema = "junit";
+				String dropSql = tbl.getDropStatement(con, true);
+				try
+				{
+					drop.execute(dropSql);
+				}
+				catch (SQLException e)
+				{
+					// ignore
+				}
 			}
-			else
-			{
-				schema = schema.toLowerCase();
-			}
-
-			stmt.execute("drop schema "+ schema + " cascade");
 			con.commit();
 		}
 		catch (Exception e)
 		{
 			con.rollbackSilently();
+		}
+		finally
+		{
+			SqlUtil.closeStatement(drop);
 		}
 	}
 

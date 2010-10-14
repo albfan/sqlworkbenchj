@@ -179,14 +179,17 @@ public class ProcedureDefinition
 			return catalog;
 		}
 		boolean needParameters = con.getDbSettings().needParametersToDropFunction();
-		if (!needParameters) return getObjectName();
+		if (!needParameters) 
+		{
+			return getObjectExpression(con);
+		}
 
 		if (this.procName.indexOf('(') > -1) return procName;
 
 		List<String> params = getParameterTypes(con);
 		if (params.isEmpty()) return procName + "()";
 		StringBuilder result = new StringBuilder(procName.length() + params.size() * 5 + 5);
-		result.append(procName);
+		result.append(getObjectExpression(con));
 		result.append('(');
 		for (int i=0; i < params.size(); i++)
 		{

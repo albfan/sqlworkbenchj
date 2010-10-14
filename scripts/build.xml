@@ -904,6 +904,11 @@
         <path refid="junit.path"/>
       </classpath>
 
+      <sysproperty key="wbjunit.db2.testdb" value="${wbjunit.db2.testdb}"/>
+      <sysproperty key="wbjunit.db2.username" value="${wbjunit.db2.username}"/>
+      <sysproperty key="wbjunit.db2.password" value="${wbjunit.db2.password}"/>
+      <sysproperty key="wbjunit.db2.schema" value="${wbjunit.db2.schema}"/>
+
       <batchtest todir="../junit" if="test.db">
         <formatter type="plain"/>
         <fileset dir="${dbtest}/">
@@ -919,6 +924,12 @@
       </batchtest>
 
     </junit>
+  </target>
+
+  <target name="test-db2">
+    <property name="test.db" value="ibm"/>
+    <property file="db2.test.properties"/>
+    <antcall target="db-test"/>
   </target>
 
   <target name="test-pg">

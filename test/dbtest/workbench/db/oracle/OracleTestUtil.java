@@ -20,6 +20,7 @@ import workbench.db.ConnectionProfile;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
 import workbench.util.ArgumentParser;
+import workbench.util.SqlUtil;
 
 /**
  *
@@ -113,6 +114,12 @@ public class OracleTestUtil
 		catch (Exception e)
 		{
 			con.rollbackSilently();
+		}
+		finally
+		{
+			SqlUtil.closeResult(rs);
+			SqlUtil.closeStatement(stmt);
+			SqlUtil.closeStatement(drop);
 		}
 	}
 

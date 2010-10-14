@@ -52,6 +52,15 @@ public class CsvLineParserTest
 		assertEquals("Wrong third value", "three\tvalue\"s", v);
 
 		assertNull(result.get(3));
+
+		parser = new CsvLineParser(';', '\'');
+		String line = "2;'ab''c'';d''ef'";
+		parser.setQuoteEscaping(QuoteEscapeType.duplicate);
+		parser.setLine(line);
+		result = getParserElements(parser);
+		assertEquals(2, result.size());
+		assertEquals("2", result.get(0));
+		assertEquals("ab'c';d'ef", result.get(1));
 	}
 
 	@Test
