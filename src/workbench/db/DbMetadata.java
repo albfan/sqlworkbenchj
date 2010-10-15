@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -500,7 +499,7 @@ public class DbMetadata
 
 	private Set<String> getObjectsWithData()
 	{
-		Set<String> objectsWithData = new HashSet<String>(7);
+		Set<String> objectsWithData = new TreeSet<String>();
 		String keyPrefix = "workbench.db.objecttype.selectable.";
 		String defValue = Settings.getInstance().getProperty(keyPrefix + "default", null);
 		String types = Settings.getInstance().getProperty(keyPrefix + getDbId(), defValue);

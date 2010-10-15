@@ -34,7 +34,7 @@ public class StatementContext
 {
 	private BaseAnalyzer analyzer;
 	private CommandTester wbTester = new CommandTester();
-	private final Set<String> unionKeywords = CollectionUtil.hashSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
+	private final Set<String> unionKeywords = CollectionUtil.treeSet("UNION", "UNION ALL", "MINUS", "INTERSECT");
 
 	public StatementContext(WbConnection conn, String sql, int pos)
 	{

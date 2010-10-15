@@ -52,7 +52,7 @@ public class DbObjectCache
 
 	private void createCache()
 	{
-		schemasInCache = new HashSet<String>();
+		schemasInCache = new TreeSet<String>();
 		objects = new TreeMap<TableIdentifier, List<ColumnIdentifier>>();
 	}
 	/**

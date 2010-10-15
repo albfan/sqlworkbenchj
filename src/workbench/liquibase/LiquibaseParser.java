@@ -38,7 +38,7 @@ public class LiquibaseParser
 	private WbFile changeLog;
 	private String xmlEncoding;
 	private SAXParser saxParser;
-	private Set<String> tagsToRead = CollectionUtil.hashSet("sql", "createProcedure");
+	private Set<String> tagsToRead = CollectionUtil.treeSet("sql", "createProcedure");
 	private List<LiquibaseTagContent> resultTags = new ArrayList<LiquibaseTagContent>();
 	private List<ChangeSetIdentifier> idsToRead;
 

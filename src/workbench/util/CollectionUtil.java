@@ -57,6 +57,25 @@ public class CollectionUtil
 		return result;
 	}
 
+	public static <E> Set<E> treeSet(E... add)
+	{
+		Set<E> result = new TreeSet<E>();
+		for (E e : add)
+		{
+			result.add(e);
+		}
+		return result;
+	}
+	public static <E> Set<E> treeSet(Set<E> base, E... add)
+	{
+		Set<E> result = new TreeSet<E>();
+		result.addAll(base);
+		for (E e : add)
+		{
+			result.add(e);
+		}
+		return result;
+	}
 	public static Set<String> caseInsensitiveSet()
 	{
 		return new TreeSet<String>(new CaseInsensitiveComparator());

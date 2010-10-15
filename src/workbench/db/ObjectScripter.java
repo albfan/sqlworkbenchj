@@ -55,7 +55,7 @@ public class ObjectScripter
 	{
 		this.objectList = objects;
 		this.dbConnection = aConnection;
-		commitTypes = CollectionUtil.hashSet(TYPE_SEQUENCE,
+		commitTypes = CollectionUtil.treeSet(TYPE_SEQUENCE,
 			TYPE_TABLE, TYPE_VIEW, TYPE_SYNONYM, TYPE_PROC, TYPE_FUNC, TYPE_TRG,
 			TYPE_DOMAIN, TYPE_ENUM);
 	}

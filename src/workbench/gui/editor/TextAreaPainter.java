@@ -66,7 +66,7 @@ public class TextAreaPainter
 	public static final Color GUTTER_BACKGROUND = new Color(238,240,238);
 	public static final Color GUTTER_COLOR = Color.DARK_GRAY;
 
-	private static final Set<String> COLOR_PROPS = CollectionUtil.hashSet(
+	private static final Set<String> COLOR_PROPS = CollectionUtil.treeSet(
 		Settings.PROPERTY_EDITOR_FG_COLOR,
 		Settings.PROPERTY_EDITOR_BG_COLOR,
 		Settings.PROPERTY_EDITOR_CURSOR_COLOR,

@@ -51,10 +51,10 @@ public class SqlServerTypeReader
 									 "where t.is_user_defined = 1";
 
 		// the data types for which the max_length information are valid
-	private Set<String> maxLengthTypes = CollectionUtil.hashSet("varchar", "nvarchar", "char", "text", "ntext", "varbinary");
+	private Set<String> maxLengthTypes = CollectionUtil.treeSet("varchar", "nvarchar", "char", "text", "ntext", "varbinary");
 
 		// the data types for which the scale and precision columns are valid
-	private Set<String> numericTypes = CollectionUtil.hashSet("decimal", "numeric");
+	private Set<String> numericTypes = CollectionUtil.treeSet("decimal", "numeric");
 
 	public static boolean versionSupportsTypes(WbConnection con)
 	{

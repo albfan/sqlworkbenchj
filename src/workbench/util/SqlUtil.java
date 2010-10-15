@@ -68,7 +68,7 @@ public class SqlUtil
 	private static class KnownTypesHolder
 	{
 		protected final static Set<String> KNOWN_TYPES =
-			Collections.unmodifiableSet(CollectionUtil.hashSet(
+			Collections.unmodifiableSet(CollectionUtil.treeSet(
 			"INDEX", "TABLE", "PROCEDURE", "FUNCTION", "VIEW", "PACKAGE", "PACKAGE BODY",
 			"SYNONYM", "SEQUENCE", "ALIAS", "TRIGGER", "DOMAIN", "ROLE", "CAST", "AGGREGATE",
 			"TABLESPACE", "TYPE", "USER", "MATERIALIZED VIEW LOG", "MATERIALIZED VIEW", "SNAPSHOT",
@@ -78,8 +78,7 @@ public class SqlUtil
 	private static class TypesWithoutNamesHolder
 	{
 		protected final static Set<String> TYPES =
-			Collections.unmodifiableSet(CollectionUtil.hashSet(
-			"MATERIALIZED VIEW LOG", "SNAPSHOT LOG"));
+			Collections.unmodifiableSet(CollectionUtil.treeSet("MATERIALIZED VIEW LOG", "SNAPSHOT LOG"));
 	}
 
 	public static Set<String> getTypesWithoutNames()
