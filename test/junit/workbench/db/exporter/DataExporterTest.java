@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -28,6 +28,7 @@ import workbench.storage.DataStore;
 import workbench.util.CharacterRange;
 import workbench.util.CollectionUtil;
 import workbench.util.FileUtil;
+import workbench.util.QuoteEscapeType;
 import workbench.util.SqlUtil;
 import workbench.util.WbFile;
 import static org.junit.Assert.*;
@@ -91,7 +92,7 @@ public class DataExporterTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
-	
+
 	@Test
 	public void testExporQueryResult()
 		throws Exception
@@ -136,7 +137,7 @@ public class DataExporterTest
 	{
 		return getTextOptions(false, "\t");
 	}
-	
+
 	private TextOptions getTextOptions(final boolean useEscape, final String delimiter)
 	{
 		return new TextOptions()
@@ -150,7 +151,7 @@ public class DataExporterTest
 			@Override
 			public boolean getQuoteAlways() { return false; }
 			@Override
-			public CharacterRange getEscapeRange() 
+			public CharacterRange getEscapeRange()
 			{
 				if (useEscape)
 				{
@@ -176,6 +177,12 @@ public class DataExporterTest
 			public void setLineEnding(String ending) { }
 			@Override
 			public void setDecimalSymbol(String decimal) { }
+
+			@Override
+			public QuoteEscapeType getQuoteEscaping()
+			{
+				return QuoteEscapeType.none;
+			}
 		};
 	}
 
@@ -247,7 +254,7 @@ public class DataExporterTest
 			WbFile exportFile = new WbFile(util.getBaseDir(), "replaced.txt");
 			TableIdentifier tbl = con.getMetadata().findTable(new TableIdentifier("PERSON"));
 			exporter.addTableExportJob(exportFile, tbl);
-			
+
 			long rowCount = exporter.startExport();
 			assertEquals(2, rowCount);
 			List<String> lines = TestUtil.readLines(exportFile);
@@ -255,7 +262,7 @@ public class DataExporterTest
 			assertEquals("NR,NAME,DESCRIPTION", lines.get(0));
 			assertEquals("1,Arthur Dent,this*should*be*one*line\\t", lines.get(1));
 			assertEquals("2,Zaphod Beeblebrox,Some\\tother stuff", lines.get(2));
-			
+
 		}
 		finally
 		{
@@ -331,7 +338,7 @@ public class DataExporterTest
 
 			Statement stmt = con.createStatement();
 			ResultSet rs = stmt.executeQuery("select nr, firstname, lastname from person");
-			
+
 			DataStore ds = new DataStore(rs, con, true);
 			ds.setUpdateTable(new TableIdentifier("PERSON"));
 			List<ColumnIdentifier> cols = CollectionUtil.arrayList(new ColumnIdentifier("FIRSTNAME"));
@@ -355,7 +362,7 @@ public class DataExporterTest
 			assertEquals(5, p.getSize()); // 4 inserts + 1 commit
 			String sql = SqlUtil.makeCleanSql(p.getCommand(0), false);
 			assertTrue(sql.contains("(FIRSTNAME)"));
-			
+
 		}
 		finally
 		{

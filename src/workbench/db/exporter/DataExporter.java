@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -84,7 +84,7 @@ public class DataExporter
 
 	// When compressing the output this holds the name of the archive.
 	private WbFile realOutputfile;
-	
+
 	private WbFile outputfile;
 	private String xsltFile;
 	private String transformOutputFile;
@@ -145,7 +145,7 @@ public class DataExporter
 	private List<DbExecutionListener> listener = new ArrayList<DbExecutionListener>();
 	private ExportDataModifier modifier;
 	private boolean includeColumnComments;
-	
+
 	private int maxBlobFilesPerDir = -1;
 
 
@@ -153,7 +153,7 @@ public class DataExporter
 	 * Toggles an additional sheet for Spreedsheet exports
 	 */
 	private boolean appendInfoSheet;
-	
+
 	/**
 	 * Enables an auto-filter for ODS and Excel XML exports
 	 */
@@ -168,7 +168,7 @@ public class DataExporter
 	 * Should the ExportWriter create an output file, even if the result set for the export is empty?
 	 */
 	private boolean writeEmptyResults = true;
-	
+
 	private ZipOutputStream zipArchive;
 	private ZipEntry zipEntry;
 	private BlobMode blobMode;
@@ -448,7 +448,7 @@ public class DataExporter
 	{
 		return maxBlobFilesPerDir;
 	}
-	
+
 	/**
 	 * Define the columns whose values should be used
 	 * for creating the blob files during export
@@ -1310,6 +1310,7 @@ public class DataExporter
 		this.setDecimalSymbol(text.getDecimalSymbol());
 		this.setLineEnding(text.getLineEnding());
 		this.exportWriter.configureConverter();
+		setQuoteEscaping(text.getQuoteEscaping());
 	}
 
 	public void setXlsXOptions(SpreadSheetOptions xlsOptions)

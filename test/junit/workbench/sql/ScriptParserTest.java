@@ -193,7 +193,7 @@ public class ScriptParserTest
 			ScriptParser p = new ScriptParser();
 			p.setEmptyLineIsDelimiter(false);
 			p.setScript(sql);
-			int pos = sql.lastIndexOf(";");
+			int pos = sql.lastIndexOf(';');
 			int index = p.getCommandIndexAtCursorPos(pos);
 			assertEquals(2, p.getSize());
 			assertEquals(1, index);
@@ -502,7 +502,7 @@ public class ScriptParserTest
 			p.setAlternateDelimiter(new DelimiterDefinition("/", true));
 			size = p.getSize();
 			assertEquals("Wrong number of statements", 1, size);
-			assertEquals(sql.substring(0, sql.lastIndexOf("/")).trim(), p.getCommand(0));
+			assertEquals(sql.substring(0, sql.lastIndexOf('/')).trim(), p.getCommand(0));
 
 			sql = "DECLARE \n" +
              "   Last_name    VARCHAR2(10) \n" +
@@ -522,7 +522,7 @@ public class ScriptParserTest
 			size = p.getSize();
 
 			assertEquals("Wrong number of statements", 1, size);
-			assertEquals(sql.substring(0, sql.lastIndexOf("/")).trim(), p.getCommand(0));
+			assertEquals(sql.substring(0, sql.lastIndexOf('/')).trim(), p.getCommand(0));
 
 			sql = "DECLARE\n" +
 					   "\tresult varchar (100) := 'Hello, world!';\n" +
@@ -864,6 +864,36 @@ public class ScriptParserTest
 	}
 
 	@Test
+	public void testIdioticQuoting()
+	{
+		String sql = "SELECT * FROM [Some;Table];DELETE FROM [Other;Table];";
+    ScriptParser parser = new ScriptParser(sql);
+		parser.setSupportIdioticQuotes(true);
+		int count = parser.getSize();
+		assertEquals(2, count);
+		assertEquals("SELECT * FROM [Some;Table]", parser.getCommand(0).trim());
+
+		sql = "SELECT '[SomeTable];' FROM dual;DELETE FROM \"[Other];Table\";";
+    parser = new ScriptParser(sql);
+		parser.setSupportIdioticQuotes(true);
+		count = parser.getSize();
+		assertEquals(2, count);
+		assertEquals("SELECT '[SomeTable];' FROM dual", parser.getCommand(0).trim());
+		assertEquals("DELETE FROM \"[Other];Table\"", parser.getCommand(1).trim());
+
+		sql = "SELECT * FROM [Some;Table];DELETE FROM [Other;Table];";
+    parser = new ScriptParser(sql);
+		parser.setSupportIdioticQuotes(false);
+		count = parser.getSize();
+		assertEquals(4, count);
+		assertEquals("SELECT * FROM [Some", parser.getCommand(0).trim());
+		assertEquals("Table]", parser.getCommand(1).trim());
+		assertEquals("DELETE FROM [Other", parser.getCommand(2).trim());
+		assertEquals("Table]", parser.getCommand(3).trim());
+
+	}
+
+	@Test
 	public void testAlternateLineComment()
 	{
 		String sql =  "# this is a non-standard comment;\n" +
@@ -875,7 +905,7 @@ public class ScriptParserTest
     ScriptParser parser = new ScriptParser(sql);
 		parser.setAlternateLineComment("#");
 		int count = parser.getSize();
-		assertEquals("Wrong statement count", count, 3);
+		assertEquals("Wrong statement count", 3, count);
 
 		sql =  "-- this is a non-standard comment;\n" +
 									"select * from test1;\n"+

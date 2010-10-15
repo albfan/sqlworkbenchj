@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -17,7 +17,6 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -186,7 +185,6 @@ public class ImportStringVerifier
 	{
 		return textOptions;
 	}
-
 
 	public final StringBuilder getLines(String s, int lineCount)
 	{

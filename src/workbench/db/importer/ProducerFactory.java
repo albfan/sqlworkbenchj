@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -199,6 +199,7 @@ public class ProducerFactory
 		parser.setDecodeUnicode(this.textOptions.getDecode());
 		parser.setDelimiter(this.textOptions.getTextDelimiter());
 		parser.setConnection(this.connection);
+		parser.setQuoteEscaping(textOptions.getQuoteEscaping());
 
 		ValueConverter converter = new ValueConverter();
 		converter.setDefaultDateFormat(this.generalOptions.getDateFormat());
@@ -248,6 +249,7 @@ public class ProducerFactory
 		appendArgument(command, WbImport.ARG_QUOTE, textOptions.getTextQuoteChar(), indent);
 		appendArgument(command, CommonArgs.ARG_DECCHAR, textOptions.getDecimalChar(), indent);
 		appendArgument(command, WbImport.ARG_FILECOLUMNS, this.fileParser.getColumns(), indent);
+		appendArgument(command, CommonArgs.ARG_QUOTE_ESCAPE, textOptions.getQuoteEscaping().toString(), indent);
 	}
 
 	private void appendArgument(StringBuilder result, String arg, boolean value, StringBuilder indent)

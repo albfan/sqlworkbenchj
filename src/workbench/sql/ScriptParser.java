@@ -49,6 +49,7 @@ public class ScriptParser
 	private boolean emptyLineIsSeparator;
 	private boolean supportOracleInclude = true;
 	private boolean checkSingleLineCommands;
+	private boolean supportIdioticQuotes;
 	private boolean returnTrailingWhitesapce;
 	private String alternateLineComment;
 	private boolean useAlternateDelimiter;
@@ -220,6 +221,11 @@ public class ScriptParser
 		this.supportOracleInclude = flag;
 	}
 
+	public void setSupportIdioticQuotes(boolean flag)
+	{
+		this.supportIdioticQuotes = flag;
+	}
+	
 	/**
 	 *	Define the script to be parsed.
 	 *	The delimiter to be used will be checked automatically
@@ -462,9 +468,10 @@ public class ScriptParser
 		ScriptIterator p = null;
 		boolean useOldParser = Settings.getInstance().getBoolProperty("workbench.sql.use.oldparser", false);
 
-		if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands)
+		if (useOldParser || checkEscapedQuotes || alternateLineComment != null || checkSingleLineCommands || supportIdioticQuotes)
 		{
 			p = new IteratingScriptParser();
+			((IteratingScriptParser)p).setSupportIdioticQuotes(this.supportIdioticQuotes);
 //			LogMgr.logDebug("ScriptParser.getParserInstance()", "Using IteratingScriptParser");
 		}
 		else

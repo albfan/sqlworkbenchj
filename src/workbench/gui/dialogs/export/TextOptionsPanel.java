@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -26,9 +26,11 @@ import javax.swing.JTextField;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import workbench.gui.components.WbComboBox;
+import workbench.gui.dialogs.QuoteEscapeSelector;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CharacterRange;
+import workbench.util.QuoteEscapeType;
 import workbench.util.StringUtil;
 
 /**
@@ -97,6 +99,7 @@ public class TextOptionsPanel
 		s.setProperty("workbench.export.text.decimal", getDecimalSymbol());
 		s.setDefaultTextDelimiter(this.getTextDelimiter());
 		s.setQuoteChar(this.getTextQuoteChar());
+		s.setProperty("workbench.export.text.quote.escape", getQuoteEscaping().toString());
 	}
 
 	public void restoreSettings()
@@ -112,6 +115,23 @@ public class TextOptionsPanel
 		this.setTextQuoteChar(s.getQuoteChar());
 		this.setTextDelimiter(s.getDefaultTextDelimiter(true));
 		setDecimalSymbol(s.getProperty("workbench.export.text.decimal", s.getDecimalSymbol()));
+		String quote = s.getProperty("workbench.export.text.quote.escape", "none");
+		QuoteEscapeType escape = null;
+		try
+		{
+			escape = QuoteEscapeType.valueOf(quote);
+		}
+		catch (Exception e)
+		{
+			escape = QuoteEscapeType.none;
+		}
+		quoteEscape.setEscapeType(escape);
+	}
+
+	@Override
+	public QuoteEscapeType getQuoteEscaping()
+	{
+		return quoteEscape.getEscapeType();
 	}
 
 	public void setDecimalSymbol(String symbol)
@@ -271,6 +291,7 @@ public class TextOptionsPanel
     lineEnding = new JComboBox();
     decimalLabel = new JLabel();
     decimalChar = new JTextField();
+    quoteEscape = new QuoteEscapeSelector();
 
     setLayout(new GridBagLayout());
 
@@ -317,8 +338,10 @@ public class TextOptionsPanel
     add(quoteChar, gridBagConstraints);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
     gridBagConstraints.weighty = 1.0;
+    gridBagConstraints.insets = new Insets(3, 0, 0, 0);
     add(jPanel1, gridBagConstraints);
 
     quoteAlways.setText(ResourceMgr.getString("LblExportQuoteAlways")); // NOI18N
@@ -379,6 +402,13 @@ public class TextOptionsPanel
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(2, 4, 0, 4);
     add(decimalChar, gridBagConstraints);
+    gridBagConstraints = new GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.insets = new Insets(7, 4, 0, 4);
+    add(quoteEscape, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -396,6 +426,7 @@ public class TextOptionsPanel
   private JCheckBox quoteAlways;
   private JTextField quoteChar;
   private JLabel quoteCharLabel;
+  private QuoteEscapeSelector quoteEscape;
   // End of variables declaration//GEN-END:variables
 
 

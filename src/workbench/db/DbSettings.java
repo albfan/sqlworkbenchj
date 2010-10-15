@@ -410,6 +410,11 @@ public class DbSettings
 		return dbs.contains(this.getDbId());
 	}
 
+	public boolean getUseIdioticQuotes()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "bracket.quoting", false);
+	}
+
 	/**
 	 * Returns the string that is used for line comments if the DBMS does not use
 	 * the ANSI comment character (such as MySQL)
