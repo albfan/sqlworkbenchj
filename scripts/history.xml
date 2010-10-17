@@ -2,6 +2,8 @@
 <history>
   <!-- build number must be set to -1 for development builds -->
   <release build="-1" date="2010-10-10">
+    <entry dev-build="4" type="enh">The escaping of embedded quotes can now also be selected when using "Save Data as" or "Import file".</entry>
+    <entry dev-build="4" type="enh">When connected to an Excel Spreadsheet, [] are now also recognizes as quote characters (to allow a semicolon in a "table" name).</entry>
     <entry dev-build="4" type="enh">The JDBC driver templates can now be loaded from an external a file named "DriverTemplates.xml" that has to be stored in the directory where the jar file is located.</entry>
     <entry dev-build="4" type="enh">Starting the console mode without specifying a password or when using a profile without a password, the application now prompts to enter a password</entry>
     <entry dev-build="4" type="enh">A new option "Connection Timeout" has been added to the connectioin profiles.</entry>
@@ -9,6 +11,7 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="4" type="fix">When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</entry>
     <entry dev-build="4" type="fix">-quoteCharEscaping=duplicate was not working for WbImport if a quote character other than &quot; was used.</entry>
     <entry dev-build="4" type="fix">Procedures were no longer displayed in DbExplorer for DB2.</entry>
     <entry dev-build="4" type="fix">A workaround for an Oracle driver bug was implemented, where the datatype for TIMESTAMP(3) was reported incorrectly.</entry>
