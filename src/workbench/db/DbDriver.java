@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -176,6 +176,10 @@ public class DbDriver
 		// the classpath already, so there is no need to check them here.
 		if (Settings.getInstance().isTestMode()) return true;
 
+		if (this.isInternal()) return true;
+
+		if ("sun.jdbc.odbc.JdbcOdbcDriver".equals(driverClass)) return true;
+
 		if (libraryList != null)
 		{
 			for (String lib : libraryList)
@@ -198,8 +202,15 @@ public class DbDriver
 		return this.getDescription();
 	}
 
-	public void setSampleUrl(String anUrl) { this.sampleUrl = anUrl; }
-	public String getSampleUrl() { return this.sampleUrl; }
+	public void setSampleUrl(String anUrl)
+	{
+		this.sampleUrl = anUrl;
+	}
+
+	public String getSampleUrl()
+	{
+		return this.sampleUrl;
+	}
 
 	public Class loadClassFromDriverLib(String className)
 		throws ClassNotFoundException
@@ -356,7 +367,7 @@ public class DbDriver
 			{
 				PostgresUtil.setApplicationName(c, getProgramName() + " (" + id + ")");
 			}
-			
+
 		}
 		catch (ClassNotFoundException e)
 		{
