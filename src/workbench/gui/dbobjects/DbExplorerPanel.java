@@ -382,6 +382,10 @@ public class DbExplorerPanel
 
 				this.schemaSelector.removeAllItems();
 				this.schemaSelector.addItem("*");
+				if ("*".equals(currentSchema))
+				{
+					schemaToSelect = "*";
+				}
 
 				for (String schema : schemas)
 				{
@@ -397,7 +401,7 @@ public class DbExplorerPanel
 					// to "current" schema
 					schemaToSelect = this.dbConnection.getMetadata().getCurrentSchema();
 				}
-				//LogMgr.logDebug("DbExplorerPanel.readSchemas()", "Selected schema entry: " + schemaToSelect);
+
 				if (schemaToSelect != null)
 				{
 					schemaSelector.setSelectedItem(schemaToSelect);

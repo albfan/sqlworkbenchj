@@ -128,7 +128,7 @@ public class DomainIdentifier
 
 	public String getObjectExpression(WbConnection conn)
 	{
-		return domain;
+		return SqlUtil.buildExpression(conn, this);
 	}
 
 	public String toString()

@@ -40,7 +40,7 @@ import workbench.util.StringUtil;
 public class PostgresDomainReader
 	implements ObjectListExtender
 {
-	final String baseSql = "SELECT current_database() as domain_catalog,  \n" +
+	final String baseSql = "SELECT null::text as domain_catalog,  \n" +
              "       n.nspname as domain_schema, \n" +
              "       t.typname as domain_name, \n" +
              "       pg_catalog.format_type(t.typbasetype, t.typtypmod) as data_type, \n" +
@@ -54,8 +54,8 @@ public class PostgresDomainReader
              "  LEFT JOIN pg_catalog.pg_constraint c ON t.oid = c.contypid \n" +
              "WHERE t.typtype = 'd' \n" +
              "  AND n.nspname <> 'pg_catalog' \n" +
-             "  AND n.nspname <> 'information_schema' \n" +
-             "  AND pg_catalog.pg_type_is_visible(t.oid)";
+             "  AND n.nspname <> 'information_schema' \n";
+
 
 	public Map<String, DomainIdentifier> getDomainInfo(WbConnection connection, String schema)
 	{
@@ -148,9 +148,10 @@ public class PostgresDomainReader
 	public String getDomainSource(DomainIdentifier domain)
 	{
 		if (domain == null) return null;
+		String name = SqlUtil.buildExpression(null, domain);
 		StringBuilder result = new StringBuilder(50);
 		result.append("CREATE DOMAIN ");
-		result.append(domain.getObjectName());
+		result.append(name);
 		result.append(" AS ");
 		result.append(domain.getDataType());
 		if (domain.getDefaultValue() != null)
@@ -174,7 +175,7 @@ public class PostgresDomainReader
 		result.append(";\n");
 		if (StringUtil.isNonBlank(domain.getComment()))
 		{
-			result.append("\nCOMMENT ON DOMAIN " + domain.getObjectName() + " IS '");
+			result.append("\nCOMMENT ON DOMAIN " + name + " IS '");
 			result.append(SqlUtil.escapeQuotes(domain.getComment()));
 			result.append("';\n");
 		}
