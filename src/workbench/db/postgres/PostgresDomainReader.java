@@ -44,7 +44,7 @@ public class PostgresDomainReader
              "       n.nspname as domain_schema, \n" +
              "       t.typname as domain_name, \n" +
              "       pg_catalog.format_type(t.typbasetype, t.typtypmod) as data_type, \n" +
-             "       t.typnotnull as nullable, \n" +
+             "       not t.typnotnull as nullable, \n" +
              "       t.typdefault as default_value, \n" +
              "       c.conname as constraint_name, \n" +
              "       pg_catalog.pg_get_constraintdef(c.oid, true) as constraint_definition, \n" +
