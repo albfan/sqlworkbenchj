@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -45,6 +45,7 @@ import workbench.db.DbObject;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.gui.MainWindow;
 import workbench.gui.actions.CompileDbObjectAction;
 import workbench.gui.actions.DropDbObjectAction;
@@ -219,7 +220,7 @@ public class TriggerListPanel
 	public void setConnection(WbConnection aConnection)
 	{
 		this.dbConnection = aConnection;
-		this.reader = new TriggerReader(dbConnection);
+		this.reader = TriggerReaderFactory.createReader(dbConnection);
 		if (source != null) source.setDatabaseConnection(aConnection);
 		if (compileAction != null) compileAction.setConnection(aConnection);
 		this.reset();
@@ -417,7 +418,7 @@ public class TriggerListPanel
 					if (tbl.getSchema() == null) tbl.setSchema(currentSchema);
 				}
 
-				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl, comment);
+				String sql = reader.getTriggerSource(currentCatalog, currentSchema, triggerName, tbl, comment, true);
 				source.setText(sql == null ? "" : sql);
 			}
 			catch (Throwable ex)
@@ -481,7 +482,7 @@ public class TriggerListPanel
 			// To build the correct schema, catalog and trigger name
 			// we use the functionality built into TableIdentifier
 			// The name of a trigger should follow the same rules as a table
-			// name. So it should be save to apply the same algorithm to
+			// name. So it should be safe to apply the same algorithm to
 			// build a correctly qualified name
 			TriggerDefinition trg = new TriggerDefinition(currentCatalog, currentSchema, name);
 			String tableName = triggerList.getValueAsString(rows[i], TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_TABLE);

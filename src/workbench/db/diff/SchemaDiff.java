@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -362,6 +362,23 @@ public class SchemaDiff
 	}
 
 	/**
+	 * Define the reference and target schema without an automatic retrieval of all objects.
+	 * 
+	 * This should be used when only specific tables should be compared, but stored procedures 
+	 * and sequences as well. In this case, setting reference and target schema will limit
+	 * the list of procedures and sequences processed.
+	 * 
+	 * @param rSchema the name of the references schema
+	 * @param tSchema the name of the target schema
+	 */
+	public void setSchemaNames(String rSchema, String tSchema)
+	{
+		referenceSchema = rSchema;
+		targetSchema = tSchema;
+	}
+
+	
+	/**
 	 *	Setup this SchemaDiff object to compare all tables that the user
 	 *  can access in the reference connection with all matching (=same name)
 	 *  tables in the target connection.
@@ -414,15 +431,11 @@ public class SchemaDiff
 		}
 
 		processTableList(refTables, target);
+	}
 
-		if (diffProcs)
-		{
-			List<ProcedureDefinition> refProcs = referenceDb.getMetadata().getProcedureReader().getProcedureList(null, this.referenceSchema, null);
-			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureReader().getProcedureList(null, this.targetSchema, null);
-			processProcedureList(refProcs, targetProcs);
-		}
-
-		if (diffSequences)
+	private void buildSequenceList()
+	{
+		try
 		{
 			List<SequenceDefinition> refSeqs = Collections.emptyList();
 			List<SequenceDefinition> tarSeqs = Collections.emptyList();
@@ -437,6 +450,24 @@ public class SchemaDiff
 				tarSeqs = tarReader.getSequences(null, this.referenceSchema, null);
 			}
 			processSequenceList(refSeqs, tarSeqs);
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("SchemaDiff.buildSequenceList()", "Error retrieving procedures", sql);
+		}
+	}
+
+	private void buildProcedureList()
+	{
+		try
+		{
+			List<ProcedureDefinition> refProcs = referenceDb.getMetadata().getProcedureReader().getProcedureList(null, this.referenceSchema, null);
+			List<ProcedureDefinition> targetProcs = targetDb.getMetadata().getProcedureReader().getProcedureList(null, this.targetSchema, null);
+			processProcedureList(refProcs, targetProcs);
+		}
+		catch (SQLException sql)
+		{
+			LogMgr.logError("SchemaDiff.buildProcedureList()", "Error retrieving procedures", sql);
 		}
 	}
 
@@ -701,7 +732,17 @@ public class SchemaDiff
 	public void writeXml(Writer out)
 		throws IOException
 	{
-		if (objectsToCompare == null) throw new NullPointerException("Source tables may not be null");
+		if (diffProcs)
+		{
+			buildProcedureList();
+		}
+
+		if (diffSequences)
+		{
+			buildSequenceList();
+		}
+		
+		if (objectsToCompare == null) return;
 
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer tblIndent = new StrBuffer("    ");
@@ -949,6 +990,9 @@ public class SchemaDiff
 	{
 		StrBuffer indent = new StrBuffer("  ");
 		StrBuffer indent2 = new StrBuffer("    ");
+		
+		TagWriter.writeWorkbenchVersion(out, indent);
+		
 		writeTag(out, indent, TAG_REF_CONN, true);
 		StrBuffer info = this.referenceDb.getDatabaseInfoAsXml(indent2);
 		info.writeTo(out);
@@ -963,8 +1007,8 @@ public class SchemaDiff
 		writeTag(out, indent, TAG_TARGET_CONN, false);
 		out.write("\n");
 
-		info = new StrBuffer();
 		TagWriter tw = new TagWriter();
+		info = new StrBuffer();
 
 		tw.appendOpenTag(info, indent, TAG_COMPARE_INFO);
 		info.append('\n');

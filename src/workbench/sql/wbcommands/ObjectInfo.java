@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -25,6 +25,7 @@ import workbench.db.TableDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -186,12 +187,12 @@ public class ObjectInfo
 			try
 			{
 				// No procedure found, try to find a trigger.
-				TriggerReader trgReader = new TriggerReader(connection);
+				TriggerReader trgReader = TriggerReaderFactory.createReader(connection);
 				TriggerDefinition trg = trgReader.findTrigger(tbl.getCatalog(), tbl.getSchema(), tbl.getObjectName());
 				String source = null;
 				if (trg != null)
 				{
-					source = trgReader.getTriggerSource(trg);
+					source = trgReader.getTriggerSource(trg, true);
 				}
 				if (StringUtil.isNonBlank(source))
 				{
@@ -272,7 +273,7 @@ public class ObjectInfo
 
 			try
 			{
-				TriggerReader trgReader = new TriggerReader(connection);
+				TriggerReader trgReader = TriggerReaderFactory.createReader(connection);
 				DataStore triggers = trgReader != null ? trgReader.getTableTriggers(toDescribe) : null;
 				if (triggers != null && triggers.getRowCount() > 0)
 				{

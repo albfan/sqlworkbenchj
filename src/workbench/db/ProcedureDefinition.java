@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -51,7 +51,17 @@ public class ProcedureDefinition
 	private CharSequence source;
 	private List<String> parameterTypes;
 	private String dbmsProcType;
-	
+
+	/**
+	 * Creates a new ProcedureDefinition.
+	 *
+	 * @param schema the schema of the procedure
+	 * @param name the name of the procedure
+	 * @param packageName the name of the Oracle package, may be null
+	 * @param type the return type of the procedure (DatabaseMetaData.procedureNoResult or DatabaseMetaData.procedureReturnsResult)
+	 * @param remarks the comment for this procedure
+	 * @return the new ProcedureDefinition
+	 */
 	public static ProcedureDefinition createOracleDefinition(String schema, String name, String packageName, int type, String remarks)
 	{
 		ProcedureDefinition def = new ProcedureDefinition(packageName, schema, name, type);

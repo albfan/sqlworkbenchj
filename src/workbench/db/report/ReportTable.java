@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -36,6 +36,7 @@ import workbench.db.TableCommentReader;
 import workbench.db.TableConstraint;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
 
@@ -150,7 +151,7 @@ public class ReportTable
 
 		if (includeTriggers)
 		{
-			TriggerReader trgReader = new TriggerReader(conn);
+			TriggerReader trgReader = TriggerReaderFactory.createReader(conn);
 			try
 			{
 				triggers = trgReader.getTriggerList(table.getCatalog(), table.getSchema(), table.getTableName());
@@ -158,7 +159,7 @@ public class ReportTable
 				{
 					for (TriggerDefinition trg : triggers)
 					{
-						trg.setSource(trgReader.getTriggerSource(trg));
+						trg.setSource(trgReader.getTriggerSource(trg, false));
 					}
 				}
 			}

@@ -1092,7 +1092,11 @@ public class DbSettings
 
 	public boolean pkIndexHasTableName()
 	{
-		return Settings.getInstance().getBoolProperty(prefix + ".pkconstraint.is_table_name", false);
+		return Settings.getInstance().getBoolProperty(prefix + "pkconstraint.is_table_name", false);
 	}
 
+	public boolean createTriggerNeedsAlternateDelimiter()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "alternate.delim.create.trigger", true);
+	}
 }

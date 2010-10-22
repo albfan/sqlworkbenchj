@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -22,6 +22,7 @@ import workbench.db.ProcedureReader;
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -277,7 +278,7 @@ public class ObjectSourceSearcher
 			monitor.setMonitorType(RowActionMonitor.MONITOR_PLAIN);
 			monitor.setCurrentObject(ResourceMgr.getString("MsgRetrievingTriggers"), -1, -1);
 		}
-		TriggerReader trgReader = new TriggerReader(connection);
+		TriggerReader trgReader = TriggerReaderFactory.createReader(connection);
 		List<DbObject> result = CollectionUtil.sizedArrayList(50);
 		for (String schema : schemas)
 		{

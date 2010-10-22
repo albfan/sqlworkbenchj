@@ -47,7 +47,18 @@ public class Db2TestUtil
 		return value;
 	}
 	/**
-	 * Return a connection to a locally running DB2 database
+	 * Return a connection to a locally running DB2 database.
+	 *
+	 * The connection information is obtained from the following system properties:
+	 * <ul>
+	 * <li>Database name: wbjunit.db2.testdb (default: tkdb)</li>
+	 * <li>Database user: wbjunit.db2.user (default: thomas)</li>
+	 * <li>Password: wbjunit.db2.password (default: welcome)</li>
+	 * <li>Schema: wbjunit.db2.schema (default: wbjunit)</li>
+	 * </ul>
+	 * The build script (build.xml) will set those system properties from a
+	 * file called <tt>db2.test.properties</tt> if it is present.
+	 * 
 	 * @return null if DB2 is not available
 	 */
 	public static WbConnection getDb2Connection()
@@ -114,7 +125,7 @@ public class Db2TestUtil
 		if (!isAvailable) return;
 		WbConnection con = getDb2Connection();
 		String schema = getSchemaName();
-		//dropAllObjects(con, schema);
+		dropAllObjects(con, schema);
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 

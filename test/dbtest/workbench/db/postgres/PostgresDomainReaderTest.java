@@ -51,7 +51,7 @@ public class PostgresDomainReaderTest
 		}
 		TestUtil.executeScript(con,
 			"CREATE SCHEMA other; \n" +
-			"CREATE DOMAIN salary AS numeric(12,2) CHECK (value > 0);\n" +
+			"CREATE DOMAIN salary AS numeric(12,2) NOT NULL CHECK (value > 0);\n" +
 			"CREATE DOMAIN other.positive_int AS integer CHECK (value > 0);\n" +
 			"COMMIT; \n");
 	}
@@ -61,11 +61,6 @@ public class PostgresDomainReaderTest
 		throws Exception
 	{
 		PostgresTestUtil.cleanUpTestCase(TEST_ID);
-		WbConnection con = PostgresTestUtil.getPostgresConnection();
-		if (con == null) return;
-		TestUtil.executeScript(con,
-			"DROP SCHEMA other CASCADE; \n " +
-			"COMMIT; \n");
 	}
 
 	@Test
@@ -88,7 +83,7 @@ public class PostgresDomainReaderTest
 		assertEquals(1, objects.size());
 
 		objects = con.getMetadata().getObjectList("%", new String[] { "DOMAIN" });
-		assertEquals(2, objects.size());
+		assertEquals(objects.toString(), 2, objects.size());
 
 		PostgresDomainReader reader = new PostgresDomainReader();
 

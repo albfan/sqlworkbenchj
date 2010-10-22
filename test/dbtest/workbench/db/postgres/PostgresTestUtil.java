@@ -11,7 +11,6 @@
 package workbench.db.postgres;
 
 import java.sql.Statement;
-import java.util.List;
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
@@ -29,6 +28,10 @@ import workbench.util.StringUtil;
 public class PostgresTestUtil
 {
 
+	public static final String TEST_USER = "wbjunit";
+	public static final String TEST_PWD = "wbjunit";
+	
+
 	/**
 	 * Return a connection to a locally running PostgreSQL database
 	 */
@@ -41,7 +44,7 @@ public class PostgresTestUtil
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
-			parser.parse("-url='jdbc:postgresql://localhost/wbjunit' -username=wbjunit -password=wbjunit -driver=org.postgresql.Driver");
+			parser.parse("-url='jdbc:postgresql://localhost/wbjunit' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=org.postgresql.Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName("WBJUnitPostgres");
 			ConnectionMgr.getInstance().addProfile(prof);
@@ -61,10 +64,7 @@ public class PostgresTestUtil
 		util.prepareEnvironment();
 
 		WbConnection con = getPostgresConnection();
-		if (con == null)
-		{
-			return;
-		}
+		if (con == null) return;
 
 		Statement stmt = null;
 		try
@@ -80,12 +80,8 @@ public class PostgresTestUtil
 				schema = schema.toLowerCase();
 			}
 
-			List<String> schemas = con.getMetadata().getSchemas();
-			if (schemas.contains(schema))
-			{
-				// Make sure everything is cleaned up
-				dropTestSchema(con, schema);
-			}
+			dropAllObjects(con, schema);
+
 			stmt.execute("create schema "+ schema);
 			stmt.execute("set session schema '" + schema + "'");
 			con.commit();
@@ -103,11 +99,11 @@ public class PostgresTestUtil
 	public static void cleanUpTestCase(String schema)
 	{
 		WbConnection con = getPostgresConnection();
-		dropTestSchema(con, schema);
+		dropAllObjects(con, schema);
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
-	public static void dropTestSchema(WbConnection con, String schema)
+	public static void dropAllObjects(WbConnection con, String schema)
 	{
 		if (con == null) return;
 
@@ -115,17 +111,7 @@ public class PostgresTestUtil
 		try
 		{
 			stmt = con.createStatement();
-
-			if (StringUtil.isBlank(schema))
-			{
-				schema = "junit";
-			}
-			else
-			{
-				schema = schema.toLowerCase();
-			}
-
-			stmt.execute("drop schema "+ schema + " cascade");
+			stmt.execute("drop owned by wbjunit cascade");
 			con.commit();
 		}
 		catch (Exception e)

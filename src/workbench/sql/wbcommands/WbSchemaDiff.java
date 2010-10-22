@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -142,7 +142,6 @@ public class WbSchemaDiff
 		diff.setTreatViewAsTable(cmdLine.getBoolean(ARG_VIEWS_AS_TABLES, false));
 		diff.setCompareConstraintsByName(cmdLine.getBoolean(ARG_COMPARE_CHK_CONS_BY_NAME, true));
 		diff.setIncludeTriggers(cmdLine.getBoolean(WbSchemaReport.PARAM_INCLUDE_TRIGGERS, true));
-		//diff.setIncludeComments(cmdLine.getBoolean(PARAM_INCLUDE_COMMENTS, false));
 
 		String refTables = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCETABLES);
 		String tarTables = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETTABLES);
@@ -154,12 +153,12 @@ public class WbSchemaDiff
 			List<String> l = StringUtil.stringToList(excludeTables, ",", true, true);
 			diff.setExcludeTables(l);
 		}
-
+		
+		String refSchema = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCESCHEMA);
+		String targetSchema = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETSCHEMA);
 
 		if (refTables == null)
 		{
-			String refSchema = cmdLine.getValue(CommonDiffParameters.PARAM_REFERENCESCHEMA);
-			String targetSchema = cmdLine.getValue(CommonDiffParameters.PARAM_TARGETSCHEMA);
 			if (refSchema == null && targetSchema == null)
 			{
 				if (referenceConnection == targetCon)
@@ -196,6 +195,7 @@ public class WbSchemaDiff
 				}
 			}
 			diff.setTables(tables);
+			diff.setSchemaNames(refSchema, targetSchema);
 		}
 		else
 		{
@@ -208,6 +208,7 @@ public class WbSchemaDiff
 				return result;
 			}
 			diff.setTableNames(rl, tl);
+			diff.setSchemaNames(refSchema, targetSchema);
 		}
 
 		Writer out = null;

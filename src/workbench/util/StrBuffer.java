@@ -328,7 +328,15 @@ public class StrBuffer
 	{
 		buff.append(this.charData, 0, this.numchar);
 	}
-	
+
+	/**
+	 * Writes the content of this StrBuffer to the Writer.
+	 *
+	 * This is more efficient than calling writer.write(StrBuffer)
+	 * 
+	 * @param out
+	 * @throws IOException
+	 */
 	public void writeTo(Writer out)
 		throws IOException
 	{

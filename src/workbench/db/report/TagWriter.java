@@ -4,16 +4,19 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db.report;
 
+import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import workbench.resource.ResourceMgr;
 import workbench.util.StrBuffer;
 import workbench.util.StringUtil;
 
@@ -26,6 +29,8 @@ public class TagWriter
 {
 	public static final String CDATA_START = "<![CDATA[";
 	public static final String CDATA_END = "]]>";
+
+	public static final String TAG_GENERATED_BY = "generated-by";
 
 	public TagWriter()
 	{
@@ -202,7 +207,7 @@ public class TagWriter
 		if (closeTag) target.append('>');
 	}
 
-	public  void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)
+	public void appendCloseTag(StrBuffer target, StrBuffer indent, String tag)
 	{
 		if (indent != null) target.append(indent);
 		target.append("</");
@@ -220,6 +225,24 @@ public class TagWriter
 			if (StringUtil.indexOf(value, SPECIAL_CHARS[i]) > -1) return true;
 		}
 		return false;
+	}
+
+	public void writeWorkbenchVersion(StrBuffer target, StrBuffer indent)
+	{
+		appendTag(target, indent, TAG_GENERATED_BY, ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
+	}
+
+	public static void writeWorkbenchVersion(Writer out, StrBuffer indent)
+		throws IOException
+	{
+		indent.writeTo(out);
+		out.append('<');
+		out.append(TAG_GENERATED_BY);
+		out.append('>');
+		out.append(ResourceMgr.TXT_PRODUCT_NAME + " " + ResourceMgr.getBuildInfo());
+		out.append("</");
+		out.append(TAG_GENERATED_BY);
+		out.append(">\n");
 	}
 
 }

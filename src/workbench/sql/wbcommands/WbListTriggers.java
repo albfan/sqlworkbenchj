@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -16,6 +16,7 @@ import java.sql.SQLException;
 import workbench.console.ConsoleSettings;
 import workbench.console.RowDisplay;
 import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -54,7 +55,7 @@ public class WbListTriggers
 		StatementRunnerResult result = new StatementRunnerResult();
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);
 
-		TriggerReader reader = new TriggerReader(this.currentConnection);
+		TriggerReader reader = TriggerReaderFactory.createReader(this.currentConnection);
 
 		DataStore ds = reader.getTriggers(currentConnection.getMetadata().getCurrentCatalog(), currentConnection.getCurrentSchema());
 		ds.setResultName(ResourceMgr.getString("TxtDbExplorerTriggers"));

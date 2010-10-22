@@ -117,23 +117,10 @@
      <string>tbl.relname</string>
     </void>
     <void property="baseSql">
-     <string>SELECT replace(replace(pg_get_triggerdef(trg.oid), ' ON ', chr(10)||'  ON '), ' EXECUTE ', chr(10)||'  EXECUTE ')
-       || ';' || chr(10)
-       || chr(10) 
-       || case
-            when obj_description(trg.oid)::text is not null then
-              'COMMENT ON '||trg.tgname||' ON '||tbl.relname||' IS '||quote_literal(obj_description(trg.oid))||';'||chr(10)
-            else ''
-          end
-       || chr(10)
-       || '---[ ' || src.proname || ' ]---' || chr(10)
-       || 'CREATE OR REPLACE FUNCTION '||src.proname||'() RETURNS TRIGGER AS'||chr(10)||'$$'||chr(10)
-       || src.prosrc
-       || '$$'||chr(10)||'language '''||l.lanname||''''
-from pg_trigger trg, pg_class tbl, pg_proc src, pg_language l
-where trg.tgrelid = tbl.oid
- AND l.oid = src.prolang
- AND trg.tgfoid = src.oid
+     <string>
+SELECT replace(replace(pg_get_triggerdef(trg.oid), ' ON ', chr(10)||'  ON '), ' EXECUTE ', chr(10)||'  EXECUTE ') || ';'
+FROM pg_trigger trg
+  JOIN pg_class tbl on tbl.oid = trg.tgrelid
 </string>
     </void>
     <void property="objectNameField">

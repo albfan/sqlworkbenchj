@@ -17,6 +17,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 
 import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.resource.ResourceMgr;
 import workbench.sql.SqlCommand;
 import workbench.sql.StatementRunnerResult;
@@ -54,12 +55,12 @@ public class WbTriggerSource
 
 		DbObject object = new TableIdentifier(args);
 
-		TriggerReader reader = new TriggerReader(currentConnection);
+		TriggerReader reader = TriggerReaderFactory.createReader(currentConnection);
 		TriggerDefinition trg = reader.findTrigger(object.getCatalog(), object.getSchema(), object.getObjectName());
 		String source = null;
 		if (trg != null)
 		{
-			source = reader.getTriggerSource(trg);
+			source = reader.getTriggerSource(trg, true);
 		}
 
 		if (source != null)

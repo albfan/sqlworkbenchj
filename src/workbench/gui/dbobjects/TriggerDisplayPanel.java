@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -21,6 +21,7 @@ import javax.swing.event.ListSelectionListener;
 
 import workbench.db.TableIdentifier;
 import workbench.db.TriggerReader;
+import workbench.db.TriggerReaderFactory;
 import workbench.db.WbConnection;
 import workbench.gui.WbSwingUtilities;
 import workbench.gui.components.DataStoreTableModel;
@@ -61,7 +62,7 @@ public class TriggerDisplayPanel
 
 		JPanel list = new JPanel(new BorderLayout());
 		list.add(new WbScrollPane(this.triggers), BorderLayout.CENTER);
-		
+
 		splitPane = new WbSplitPane(JSplitPane.VERTICAL_SPLIT, list, this.source);
 		splitPane.setDividerSize(8);
 		add(splitPane, BorderLayout.CENTER);
@@ -82,7 +83,7 @@ public class TriggerDisplayPanel
 
 	public void setConnection(WbConnection aConnection)
 	{
-		this.reader = new TriggerReader(aConnection);
+		this.reader = TriggerReaderFactory.createReader(aConnection);
 		this.source.setDatabaseConnection(aConnection);
 		this.reset();
 	}
@@ -139,7 +140,7 @@ public class TriggerDisplayPanel
 		{
 			String triggerName = this.triggers.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_NAME);
 			String comment = this.triggers.getValueAsString(row, TriggerReader.COLUMN_IDX_TABLE_TRIGGERLIST_TRG_COMMENT);
-			String sql = reader.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName, triggerTable, comment);
+			String sql = reader.getTriggerSource(this.triggerCatalog, this.triggerSchema, triggerName, triggerTable, comment, true);
 			this.source.setText(sql);
 			this.source.setCaretPosition(0);
 		}

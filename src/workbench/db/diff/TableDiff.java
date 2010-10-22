@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -155,7 +155,7 @@ public class TableDiff
 
 		boolean triggersDifferent = false;
 		TriggerListDiff trgDiff = null;
-		if (!CollectionUtil.isEmpty(refTriggers) || !CollectionUtil.isEmpty(tarTriggers))
+		if (CollectionUtil.isNonEmpty(refTriggers) || CollectionUtil.isNonEmpty(tarTriggers))
 		{
 			trgDiff = new TriggerListDiff(refTriggers, tarTriggers);
 			triggersDifferent = trgDiff.hasChanges();

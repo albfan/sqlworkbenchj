@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -22,6 +22,11 @@ import workbench.util.SqlUtil;
 public class TriggerDefinition
 	implements DbObject
 {
+
+	public static final String PLACEHOLDER_TRIGGER_NAME = "%trigger_name%";
+	public static final String PLACEHOLDER_TRIGGER_SCHEMA = "%trigger_schema%";
+	public static final String PLACEHOLDER_TRIGGER_TABLE = "%trigger_table%";
+
 	private String schema;
 	private String catalog;
 	private String triggerName;
@@ -104,11 +109,11 @@ public class TriggerDefinition
 		ddl = ddl.replace("%name%", triggerName);
 
 		// specialized statements have different placeholders
-		ddl = ddl.replace("%trigger_name%", triggerName);
-		ddl = ddl.replace("%trigger_schema%", schema);
+		ddl = ddl.replace(PLACEHOLDER_TRIGGER_NAME, triggerName);
+		ddl = ddl.replace(PLACEHOLDER_TRIGGER_SCHEMA, schema);
 		if (table != null)
 		{
-			ddl = ddl.replace("%trigger_table%", table.getTableExpression(con));
+			ddl = ddl.replace(PLACEHOLDER_TRIGGER_TABLE, table.getTableExpression(con));
 		}
 
 		return ddl;
@@ -127,9 +132,15 @@ public class TriggerDefinition
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
+		return getSource(con, true);
+	}
+
+	public CharSequence getSource(WbConnection con, boolean includeDependencies)
+		throws SQLException
+	{
 		if (con == null) return null;
-		TriggerReader reader = new TriggerReader(con);
-		return reader.getTriggerSource(catalog, schema, triggerName, table, comment);
+		TriggerReader reader = TriggerReaderFactory.createReader(con);
+		return reader.getTriggerSource(catalog, schema, triggerName, table, comment, includeDependencies);
 	}
 
 	public String getSchema()
