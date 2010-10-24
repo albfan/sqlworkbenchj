@@ -81,6 +81,7 @@ public class TextFileParser
 	private boolean cancelImport;
 	private boolean regularStop;
 	private boolean emptyStringIsNull;
+	private boolean alwaysQuoted;
 	private boolean trimValues;
 
 	private RowDataReceiver receiver;
@@ -191,6 +192,11 @@ public class TextFileParser
 		this.importColumns = null;
 	}
 
+	public void setAlwaysQuoted(boolean flag)
+	{
+		this.alwaysQuoted = flag;
+	}
+	
 	public void setQuoteEscaping(QuoteEscapeType type)
 	{
 		this.quoteEscape = type;
@@ -753,6 +759,7 @@ public class TextFileParser
 		{
 			CsvLineParser csv = new CsvLineParser(delimiter.charAt(0), quoteCharToUse);
 			csv.setReturnEmptyStrings(true);
+			csv.setUnquotedEmptyStringIsNull(alwaysQuoted);
 			csv.setQuoteEscaping(this.quoteEscape);
 			tok = csv;
 		}

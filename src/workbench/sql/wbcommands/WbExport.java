@@ -55,16 +55,8 @@ public class WbExport
 	implements RowActionMonitor, ProgressReporter, ResultSetConsumer
 {
 	public static final String VERB = "WBEXPORT";
-	private DataExporter exporter;
-	private WbFile pendingOutput;
 
-	private boolean consumeQuery;
-	private boolean continueOnError;
-	private String currentTable;
-	private String defaultExtension;
-	private boolean showProgress = true;
-	private int progressInterval = 1;
-
+	// <editor-fold defaultstate="collapsed" desc=" Arguments ">
 	public static final String ARG_CREATE_OUTPUTDIR = "createDir";
 	public static final String ARG_BLOB_TYPE = "blobType";
 	public static final String ARG_XML_VERSION = "xmlVersion";
@@ -77,6 +69,49 @@ public class WbExport
 	public static final String ARG_FORMATFILE = "formatFile";
 	public static final String ARG_COL_COMMENTS = "includeColumnComments";
 	public static final String ARG_DISTRIBUTE_LOB_FILES = "lobsPerDirectory";
+	public static final String ARG_QUOTE_ALWAYS = "quoteAlways";
+	public static final String ARG_QUOTECHAR = "quotechar";
+	public static final String ARG_APPEND = "append";
+	public static final String ARG_CLOB_AS_FILE = "clobAsFile";
+	public static final String ARG_CONTINUE_ON_ERROR = "continueOnError";
+	public static final String ARG_HEADER = "header";
+	public static final String ARG_TABLEWHERE = "tableWhere";
+	public static final String ARG_EXPORT_TYPE = "type";
+	public static final String ARG_OUTPUT_FILENAME = "file";
+	public static final String ARG_ADD_INFOSHEET = "infoSheet";
+	public static final String ARG_AUTOFILTER = "autoFilter";
+	public static final String ARG_CHARFUNC = "charFunc";
+	public static final String ARG_CONCAT_FUNCTION = "concatFunc";
+	public static final String ARG_CONCAT_OPERATOR = "concat";
+	public static final String ARG_CREATEFULL_HTML_PAGE = "createFullHTML";
+	public static final String ARG_DATEFORMAT = "dateFormat";
+	public static final String ARG_DECIMAL_SYMBOL = "decimal";
+	public static final String ARG_ESCAPETEXT = "escapeText";
+	public static final String ARG_ESCAPE_HTML = "escapeHTML";
+	public static final String ARG_FIXED_HEADER = "fixedHeader";
+	public static final String ARG_INCLUDE_CREATETABLE = "createTable";
+	public static final String ARG_KEY_COLUMNS = "keyColumns";
+	public static final String ARG_LINEENDING = "lineEnding";
+	public static final String ARG_OUTPUTDIR = "outputDir";
+	public static final String ARG_PAGE_TITLE = "title";
+	public static final String ARG_POSTDATA_HTML = "postDataHtml";
+	public static final String ARG_PREDATA_HTML = "preDataHtml";
+	public static final String ARG_SHOW_ENCODINGS = "showEncodings";
+	public static final String ARG_SOURCETABLE = "sourceTable";
+	public static final String ARG_TABLE = "table";
+	public static final String ARG_TIMEFORMAT = "timeFormat";
+	public static final String ARG_TIMESTAMP_FORMAT = "timestampFormat";
+	// </editor-fold>
+
+	private DataExporter exporter;
+	private WbFile pendingOutput;
+
+	private boolean consumeQuery;
+	private boolean continueOnError;
+	private String currentTable;
+	private String defaultExtension;
+	private boolean showProgress = true;
+	private int progressInterval = 1;
 
 	private final String exportTypes = "text,xml,sql,sqlinsert,sqlupdate,sqldeleteinsert,ods,xlsm,html,xlsx,xls";
 
@@ -92,38 +127,37 @@ public class WbExport
 		CommonArgs.addQuoteEscaping(cmdLine);
 		CommonArgs.addSqlDateLiteralParameter(cmdLine);
 
-		cmdLine.addArgument("type", StringUtil.stringToList(exportTypes));
-		cmdLine.addArgument("file");
+		cmdLine.addArgument(ARG_EXPORT_TYPE, StringUtil.stringToList(exportTypes));
+		cmdLine.addArgument(ARG_OUTPUT_FILENAME);
 		cmdLine.addArgument(ARG_TABLE_PREFIX);
-		cmdLine.addArgument("title");
-		cmdLine.addArgument("table");
-		cmdLine.addArgument("quotechar");
-		cmdLine.addArgument("dateFormat");
-		cmdLine.addArgument("timestampFormat");
-		cmdLine.addArgument("timeFormat");
-		cmdLine.addArgument("decimal");
-		cmdLine.addArgument("charFunc");
-		cmdLine.addArgument("concat");
-		cmdLine.addArgument("concatFunc");
-		cmdLine.addArgument("header", ArgumentType.BoolArgument);
-		cmdLine.addArgument("createTable", ArgumentType.BoolArgument);
-		cmdLine.addArgument("keyColumns");
-		cmdLine.addArgument("append", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_PAGE_TITLE);
+		cmdLine.addArgument(ARG_TABLE);
+		cmdLine.addArgument(ARG_QUOTECHAR);
+		cmdLine.addArgument(ARG_DATEFORMAT);
+		cmdLine.addArgument(ARG_TIMESTAMP_FORMAT);
+		cmdLine.addArgument(ARG_TIMEFORMAT);
+		cmdLine.addArgument(ARG_DECIMAL_SYMBOL);
+		cmdLine.addArgument(ARG_CHARFUNC);
+		cmdLine.addArgument(ARG_CONCAT_OPERATOR);
+		cmdLine.addArgument(ARG_CONCAT_FUNCTION);
+		cmdLine.addArgument(ARG_HEADER, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_INCLUDE_CREATETABLE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_KEY_COLUMNS);
+		cmdLine.addArgument(ARG_APPEND, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_XML_VERSION, StringUtil.stringToList("1.0", "1.1"));
 		cmdLine.addArgument(WbXslt.ARG_STYLESHEET);
 		cmdLine.addArgument(WbXslt.ARG_OUTPUT);
-		cmdLine.addArgument("escapeHTML", ArgumentType.BoolArgument);
-		cmdLine.addArgument("createFullHTML", ArgumentType.BoolArgument);
-		cmdLine.addArgument("preDataHtml");
-		cmdLine.addArgument("postDataHtml");
-		cmdLine.addArgument("sourceTable", ArgumentType.TableArgument);
-		cmdLine.addArgument("outputDir");
+		cmdLine.addArgument(ARG_ESCAPE_HTML, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CREATEFULL_HTML_PAGE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_PREDATA_HTML);
+		cmdLine.addArgument(ARG_POSTDATA_HTML);
+		cmdLine.addArgument(ARG_SOURCETABLE, ArgumentType.TableArgument);
+		cmdLine.addArgument(ARG_OUTPUTDIR);
 		cmdLine.addArgument(ARG_USE_CDATA, ArgumentType.BoolArgument);
-		cmdLine.addArgument("escapeText", StringUtil.stringToList("control,7bit,8bit,extended,none"));
-		cmdLine.addArgument("escapeType", StringUtil.stringToList("unicode,hex"));
-		cmdLine.addArgument("quoteAlways", ArgumentType.BoolArgument);
-		cmdLine.addArgument("lineEnding", StringUtil.stringToList("crlf,lf"));
-		cmdLine.addArgument("showEncodings");
+		cmdLine.addArgument(ARG_ESCAPETEXT, StringUtil.stringToList("control,7bit,8bit,extended,none"));
+		cmdLine.addArgument(ARG_QUOTE_ALWAYS, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_LINEENDING, StringUtil.stringToList("crlf,lf"));
+		cmdLine.addArgument(ARG_SHOW_ENCODINGS);
 		cmdLine.addArgument("writeOracleLoader", ArgumentType.Deprecated);
 		cmdLine.addArgument(ARG_FORMATFILE, StringUtil.stringToList("postgres,oracle,sqlserver,db2"));
 		cmdLine.addArgument("compress", ArgumentType.BoolArgument);
@@ -132,14 +166,14 @@ public class WbExport
 		cmdLine.addArgument("lobIdCols");
 		cmdLine.addArgument("filenameColumn");
 		cmdLine.addArgument(ARG_BLOB_TYPE, BlobMode.getTypes());
-		cmdLine.addArgument("clobAsFile", ArgumentType.BoolArgument);
-		cmdLine.addArgument("continueOnError", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CLOB_AS_FILE, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_CONTINUE_ON_ERROR, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_CREATE_OUTPUTDIR, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_ROWNUM);
-		cmdLine.addArgument("tableWhere");
-		cmdLine.addArgument("infoSheet", ArgumentType.BoolArgument);
-		cmdLine.addArgument("autoFilter", ArgumentType.BoolArgument);
-		cmdLine.addArgument("fixedHeader", ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_TABLEWHERE);
+		cmdLine.addArgument(ARG_ADD_INFOSHEET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_AUTOFILTER, ArgumentType.BoolArgument);
+		cmdLine.addArgument(ARG_FIXED_HEADER, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_USE_SCHEMA, ArgumentType.BoolArgument);
 		cmdLine.addArgument(ARG_COL_COMMENTS, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_IGNORE_OWNER, ArgumentType.BoolArgument);
@@ -223,7 +257,7 @@ public class WbExport
 
 		cmdLine.parse(getCommandLine(sql));
 
-		if (cmdLine.isArgPresent("showencodings"))
+		if (cmdLine.isArgPresent(ARG_SHOW_ENCODINGS))
 		{
 			result.addMessage(ResourceMgr.getString("MsgAvailableEncodings"));
 			result.addMessage("");
@@ -241,8 +275,8 @@ public class WbExport
 			return result;
 		}
 
-		WbFile outputFile = evaluateFileArgument(cmdLine.getValue("file"));
-		String type = cmdLine.getValue("type");
+		WbFile outputFile = evaluateFileArgument(cmdLine.getValue(ARG_OUTPUT_FILENAME));
+		String type = cmdLine.getValue(ARG_EXPORT_TYPE);
 
 		if (type == null)
 		{
@@ -288,8 +322,8 @@ public class WbExport
 
 		this.exporter = new DataExporter(this.currentConnection);
 
-		String tables = cmdLine.getValue("sourcetable");
-		String od = cmdLine.getValue("outputdir");
+		String tables = cmdLine.getValue(ARG_SOURCETABLE);
+		String od = cmdLine.getValue(ARG_OUTPUTDIR);
 		WbFile outputdir = (od == null ? null : new WbFile(od));
 
 		if (outputFile == null && outputdir == null)
@@ -307,7 +341,7 @@ public class WbExport
 			return result;
 		}
 
-		boolean appendToFile = cmdLine.getBoolean("append", false);
+		boolean appendToFile = cmdLine.getBoolean(ARG_APPEND, false);
 		if (appendToFile && !type.equals("text") && !type.startsWith("sql"))
 		{
 			result.setFailure();
@@ -315,37 +349,37 @@ public class WbExport
 			return result;
 		}
 
-		String updateTable = cmdLine.getValue("table");
+		String updateTable = cmdLine.getValue(ARG_TABLE);
 
-		String encoding = cmdLine.getValue("encoding");
+		String encoding = cmdLine.getValue(CommonArgs.ARG_ENCODING);
 		if (encoding != null)
 		{
 			exporter.setEncoding(encoding);
 		}
 
 		exporter.setWriteEmptyResults(cmdLine.getBoolean(ARG_EMPTY_RESULTS, true));
-		exporter.setAppendToFile(cmdLine.getBoolean("append"));
-		exporter.setWriteClobAsFile(cmdLine.getBoolean("clobasfile", false));
+		exporter.setAppendToFile(appendToFile);
+		exporter.setWriteClobAsFile(cmdLine.getBoolean(ARG_CLOB_AS_FILE, false));
 
-		this.continueOnError = cmdLine.getBoolean("continueonerror", false);
+		this.continueOnError = cmdLine.getBoolean(ARG_CONTINUE_ON_ERROR, false);
 
-		String format = cmdLine.getValue("dateformat");
+		String format = cmdLine.getValue(ARG_DATEFORMAT);
 		if (format != null) exporter.setDateFormat(format);
 
-		format = cmdLine.getValue("timestampformat");
+		format = cmdLine.getValue(ARG_TIMESTAMP_FORMAT);
 		if (format != null) exporter.setTimestampFormat(format);
 
-		format = cmdLine.getValue("timeformat");
+		format = cmdLine.getValue(ARG_TIMEFORMAT);
 		if (format != null) exporter.setTimeFormat(format);
 
-		format = cmdLine.getValue("decimal");
+		format = cmdLine.getValue(ARG_DECIMAL_SYMBOL);
 		if (format != null) exporter.setDecimalSymbol(format);
 
-		exporter.setEnableAutoFilter(cmdLine.getBoolean("autoFilter", true));
-		exporter.setEnableFixedHeader(cmdLine.getBoolean("fixedHeader", true));
-		exporter.setAppendInfoSheet(cmdLine.getBoolean("infoSheet", Settings.getInstance().getDefaultExportInfoSheet(type)));
-		exporter.setPageTitle(cmdLine.getValue("title"));
-		exporter.setExportHeaders(cmdLine.getBoolean("header", getHeaderDefault(type)));
+		exporter.setEnableAutoFilter(cmdLine.getBoolean(ARG_AUTOFILTER, true));
+		exporter.setEnableFixedHeader(cmdLine.getBoolean(ARG_FIXED_HEADER, true));
+		exporter.setAppendInfoSheet(cmdLine.getBoolean(ARG_ADD_INFOSHEET, Settings.getInstance().getDefaultExportInfoSheet(type)));
+		exporter.setPageTitle(cmdLine.getValue(ARG_PAGE_TITLE));
+		exporter.setExportHeaders(cmdLine.getBoolean(ARG_HEADER, getHeaderDefault(type)));
 		exporter.setIncludeColumnComments(cmdLine.getBoolean(ARG_COL_COMMENTS, false));
 
 		ExportDataModifier modifier = RegexModifierParameter.buildFromCommandline(cmdLine);
@@ -389,14 +423,14 @@ public class WbExport
 				result.setFailure();
 				return result;
 			}
-			
-			String delimiter = cmdLine.getValue("delimiter");
+
+			String delimiter = cmdLine.getValue(CommonArgs.ARG_DELIM);
 			if (delimiter != null) exporter.setTextDelimiter(delimiter);
 
-			String quote = cmdLine.getValue("quotechar");
+			String quote = cmdLine.getValue(ARG_QUOTECHAR);
 			if (quote != null) exporter.setTextQuoteChar(quote);
 
-			String escape = cmdLine.getValue("escapetext");
+			String escape = cmdLine.getValue(ARG_ESCAPETEXT);
 			if (escape != null)
 			{
 				if ("control".equalsIgnoreCase(escape) ||"ctrl".equalsIgnoreCase(escape))
@@ -426,21 +460,21 @@ public class WbExport
 					result.addMessage(msg);
 				}
 			}
-			exporter.setQuoteAlways(cmdLine.getBoolean("quotealways"));
+			exporter.setQuoteAlways(cmdLine.getBoolean(ARG_QUOTE_ALWAYS));
 			exporter.setQuoteEscaping(CommonArgs.getQuoteEscaping(cmdLine));
 			exporter.setRowIndexColumnName(cmdLine.getValue(ARG_ROWNUM));
 			this.defaultExtension = ".txt";
 		}
 		else if (type.startsWith("sql"))
 		{
-			exporter.setIncludeCreateTable(cmdLine.getBoolean("createtable"));
-			exporter.setChrFunction(cmdLine.getValue("charfunc"));
-			exporter.setConcatFunction(cmdLine.getValue("concatfunc"));
-			exporter.setConcatString(cmdLine.getValue("concat"));
+			exporter.setIncludeCreateTable(cmdLine.getBoolean(ARG_INCLUDE_CREATETABLE));
+			exporter.setChrFunction(cmdLine.getValue(ARG_CHARFUNC));
+			exporter.setConcatFunction(cmdLine.getValue(ARG_CONCAT_FUNCTION));
+			exporter.setConcatString(cmdLine.getValue(ARG_CONCAT_OPERATOR));
 
 			CommonArgs.setCommitEvery(exporter, cmdLine);
 
-			String c = cmdLine.getValue("keycolumns");
+			String c = cmdLine.getValue(ARG_KEY_COLUMNS);
 			if (c != null)
 			{
 				List cols = StringUtil.stringToList(c, ",");
@@ -493,26 +527,26 @@ public class WbExport
 		}
 		else if ("html".equals(type))
 		{
-			String value = cmdLine.getValue("escapehtml");
+			String value = cmdLine.getValue(ARG_ESCAPE_HTML);
 			if (value != null)
 			{
 				exporter.setEscapeHtml("true".equalsIgnoreCase(value));
 			}
-			value = cmdLine.getValue("createfullhtml");
+			value = cmdLine.getValue(ARG_CREATEFULL_HTML_PAGE);
 			if (value != null)
 			{
 				exporter.setCreateFullHtmlPage("true".equalsIgnoreCase(value));
 			}
 
-			exporter.setHtmlHeading(cmdLine.getValue("preDataHtml"));
-			exporter.setHtmlTrailer(cmdLine.getValue("postDataHtml"));
+			exporter.setHtmlHeading(cmdLine.getValue(ARG_PREDATA_HTML));
+			exporter.setHtmlTrailer(cmdLine.getValue(ARG_POSTDATA_HTML));
 
 			this.defaultExtension = ".html";
 		}
 
 		exporter.setAppendToFile(appendToFile);
 
-		String ending = cmdLine.getValue("lineending");
+		String ending = cmdLine.getValue(ARG_LINEENDING);
 		if (ending != null)
 		{
 			if ("crlf".equalsIgnoreCase(ending) ||
@@ -686,7 +720,7 @@ public class WbExport
 		else
 		{
 			boolean ignoreOwner = cmdLine.getBoolean(WbImport.ARG_IGNORE_OWNER, false);
-			String where = cmdLine.getValue("tableWhere");
+			String where = cmdLine.getValue(ARG_TABLEWHERE);
 			try
 			{
 				exporter.setRowMonitor(this);
@@ -715,7 +749,7 @@ public class WbExport
 	boolean isTypeValid(String type)
 	{
 		if (type == null) return false;
-		Collection<String> types = cmdLine.getAllowedValues("type");
+		Collection<String> types = cmdLine.getAllowedValues(ARG_EXPORT_TYPE);
 		return types.contains(type);
 	}
 

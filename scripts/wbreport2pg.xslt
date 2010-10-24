@@ -315,7 +315,7 @@
     <xsl:call-template name="_replace_text">
       <xsl:with-param name="text" select="view-source"/>
       <xsl:with-param name="replace" select="$backtick"/>
-      <xsl:with-param name="by" select=""/>
+      <xsl:with-param name="by" select="''"/>
     </xsl:call-template>
   </xsl:template>
 

@@ -105,6 +105,16 @@ public class CsvLineParserTest
 		{
 			fail("No value returned");
 		}
+
+		parser = new CsvLineParser('\t', '\'');
+		parser.setUnquotedEmptyStringIsNull(true);
+		parser.setLine("''\t\tvalue");
+		result = getParserElements(parser);
+		assertEquals(3, result.size());
+		assertNotNull(result.get(0));
+		assertEquals("", result.get(0));
+		assertNull(result.get(1));
+		assertEquals("value", result.get(2));
 	}
 
 	@Test

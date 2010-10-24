@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -39,15 +39,15 @@ public class TextRowDataConverter
 	extends RowDataConverter
 {
 	private String delimiter = "\t";
-	private String quoteCharacter = null;
-	private boolean quoteAlways = false;
-	private CharacterRange escapeRange = null;
-	private String delimiterAndQuote = null;
+	private String quoteCharacter;
+	private boolean quoteAlways;
+	private CharacterRange escapeRange;
+	private String delimiterAndQuote;
 	private String lineEnding = StringUtil.LINE_TERMINATOR;
 	private boolean writeBlobFiles = true;
 	private boolean writeClobFiles = false;
 	private QuoteEscapeType quoteEscape = QuoteEscapeType.none;
-	private String rowIndexColumnName = null;
+	private String rowIndexColumnName;
 	private char escapeHexType = 'u';
 	
 	public void setWriteClobToFile(boolean flag)
@@ -163,9 +163,15 @@ public class TextRowDataConverter
 				value = this.getValueAsFormattedString(row, c);
 			}
 
-			if (value == null) value = "";
+			boolean isNull = (value == null);
+			if (value == null) 
+			{
+				value = "";
+				// Never quote null values
+				addQuote = false;
+			}
 
-			if (SqlUtil.isCharacterType(colType))
+			if (SqlUtil.isCharacterType(colType) && !isNull)
 			{
 				boolean containsDelimiter = value.indexOf(this.delimiter) > -1;
 				addQuote = (this.quoteAlways || (canQuote && containsDelimiter));
