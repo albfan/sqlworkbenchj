@@ -4,18 +4,20 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
  */
 package workbench.db;
 
+import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.util.CollectionUtil;
 
 /**
  *
@@ -78,6 +80,27 @@ public class TableSourceBuilderTest
 			sql = builder.getTableSource(tbl, false, false);
 //			System.out.println(sql);
 			assertTrue(sql.indexOf("FIRSTNAME  VARCHAR(20)   DEFAULT 'Arthur'") > -1);
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+			ConnectionMgr.getInstance().clearProfiles();
+		}
+	}
+
+	@Test
+	public void generatePKName()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		WbConnection con = util.getConnection();
+		try
+		{
+			TableIdentifier tbl = new TableIdentifier("OTHER.PERSON");
+			TableSourceBuilder builder = new TableSourceBuilder(con);
+			List<ColumnIdentifier> cols = CollectionUtil.arrayList(new ColumnIdentifier("ID"));
+			String sql = builder.getPkSource(tbl, cols, null).toString();
+			assertTrue(sql.indexOf("ADD CONSTRAINT pk_person") > -1);
 		}
 		finally
 		{

@@ -345,6 +345,16 @@ public class StringUtil
 		return -1;
 	}
 
+	/*
+	 * Null safe string replacement.
+	 *
+	 * This is a wrapper around String.replace(String, String) but does not throw an
+	 * exception if any parameter is null.
+	 *
+	 * @param haystack the string in which to replace. If null, null is returned
+	 * @param needle the string to search for. If null, haystack is returned.
+	 * @param replacement the replacement. If null haystack is returned
+	 */
 	public static String replace(String haystack, String needle, String replacement)
 	{
 		if (replacement == null) return haystack;

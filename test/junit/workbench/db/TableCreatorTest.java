@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.util.ArrayList;
 import java.sql.Statement;
+import java.sql.Types;
 import java.util.List;
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -87,10 +88,48 @@ public class TableCreatorTest
 			assertEquals("\"W\u00E4hrung\"", clist.get(4).getColumnName());
 			assertFalse(clist.get(4).isNullable());
 		}
-		catch (Exception e)
+		finally
 		{
-			e.printStackTrace();
-			fail(e.getMessage());
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
+	public void createInOtherSchema()
+		throws Exception
+	{
+		try
+		{
+			WbConnection con = util.getConnection();
+			
+			TestUtil.executeScript(con, 
+				"create schema other;\n" +
+				"commit;\n");
+
+			List<TableIdentifier> tables = con.getMetadata().getTableList("%", "OTHER");
+			assertEquals(0, tables.size());
+
+			TableIdentifier tbl = new TableIdentifier("other.foo");
+			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+
+			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
+			id.setIsPkColumn(true);
+			id.setIsNullable(false);
+			cols.add(id);
+
+			ColumnIdentifier name = new ColumnIdentifier("SOME_NAME", Types.VARCHAR);
+			name.setColumnSize(50);
+			name.setIsPkColumn(false);
+			name.setIsNullable(true);
+			cols.add(name);
+			TableCreator creator = new TableCreator(con, tbl, cols);
+			creator.createTable();
+
+			tables = con.getMetadata().getTableList("%", "OTHER");
+			assertEquals(1, tables.size());
+
+			tables = con.getMetadata().getTableList("%", "PUBLIC");
+			assertEquals(0, tables.size());
 		}
 		finally
 		{

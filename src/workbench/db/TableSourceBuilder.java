@@ -481,7 +481,7 @@ public class TableSourceBuilder
 
 		if (pkName == null && Settings.getInstance().getAutoGeneratePKName())
 		{
-			pkName = "pk_" + StringUtil.trimQuotes(tablename.toLowerCase());
+			pkName = "pk_" + SqlUtil.cleanupIdentifier(table.getTableName().toLowerCase());
 		}
 
 		if (meta.isKeyword(pkName)) pkName = meta.getQuoteCharacter() + pkName + meta.getQuoteCharacter() ;

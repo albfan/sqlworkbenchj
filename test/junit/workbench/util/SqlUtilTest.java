@@ -686,8 +686,6 @@ public class SqlUtilTest
 	{
 		try
 		{
-//			System.out.println("Checking if all types defined by java.sql.Types are covered by getTypeName()...");
-//			System.out.println(System.getProperty("java.version"));
 			Field[] fields = java.sql.Types.class.getDeclaredFields();
 			boolean missing = false;
 			for (int i=0; i < fields.length; i++)
@@ -708,4 +706,19 @@ public class SqlUtilTest
 		}
 	}
 
+	@Test
+	public void testCleanup()
+	{
+		String cleaned = SqlUtil.cleanupIdentifier("SOME_THING");
+		assertEquals("SOME_THING", cleaned);
+
+		cleaned = SqlUtil.cleanupIdentifier("SOME THING");
+		assertEquals("SOMETHING", cleaned);
+
+		cleaned = SqlUtil.cleanupIdentifier("1&SOME-\\THING2");
+		assertEquals("1SOMETHING2", cleaned);
+
+		cleaned = SqlUtil.cleanupIdentifier("&\"SOM'E-\\THING");
+		assertEquals("SOMETHING", cleaned);
+	}
 }

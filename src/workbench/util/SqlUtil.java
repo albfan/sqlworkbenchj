@@ -1441,4 +1441,8 @@ public class SqlUtil
 		baseSql.append("'");
 	}
 
+	public static String cleanupIdentifier(String identifier)
+	{
+		return identifier.replaceAll("[^A-Za-z0-9_]+", "");
+	}
 }
