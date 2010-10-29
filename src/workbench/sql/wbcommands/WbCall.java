@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -429,7 +429,7 @@ public class WbCall
 
 		DataStore params = meta.getProcedureReader().getProcedureColumns(procDef);
 
-		boolean needFuncCall = returnsRefCursor(params);
+		boolean needFuncCall = ProcedureDefinition.returnsRefCursor(currentConnection, params);
 		sqlUsed = getSqlToPrepare(sql, needFuncCall);
 
 		if (meta.isOracle() && !needFuncCall && !hasPlaceHolder(sqlParams))
@@ -479,9 +479,11 @@ public class WbCall
 				def.setParameterName(paramName);
 
 				boolean needsInput = resultType.equals("IN");
+				boolean isRefCursorParam = ProcedureDefinition.isRefCursor(currentConnection, typeName);
+				
 				if (resultType.equals("INOUT"))
 				{
-					needsInput = !isRefCursor(typeName);
+					needsInput = !isRefCursorParam;
 				}
 
 				// Only real input parameters need to be added to the dialog
@@ -508,7 +510,7 @@ public class WbCall
 				}
 				else if (resultType != null && resultType.endsWith("OUT") || (needFuncCall && StringUtil.equalString(resultType, "RETURN")))
 				{
-					if (isRefCursor(typeName))
+					if (isRefCursorParam)
 					{
 						// these parameters should not be added to the regular parameter list
 						// as they have to be retrieved in a different manner.
@@ -539,26 +541,6 @@ public class WbCall
 		for (String p : params)
 		{
 			if (p.indexOf('?') > -1) return true;
-		}
-		return false;
-	}
-
-	private boolean isRefCursor(String type)
-	{
-		List<String> refTypes = currentConnection.getDbSettings().getRefCursorTypeNames();
-		return refTypes.contains(type);
-	}
-
-	private boolean returnsRefCursor(DataStore params)
-	{
-		// A function in Postgres that returns a refcursor
-		// must be called using {? = call('procname')} in order
-		// to be able to retrieve the result set from the refcursor
-		for (int i=0; i < params.getRowCount(); i++)
-		{
-			String typeName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
-			String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-			if (isRefCursor(typeName) && "RETURN".equals(resultType)) return true;
 		}
 		return false;
 	}

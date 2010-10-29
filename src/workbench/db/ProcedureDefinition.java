@@ -13,6 +13,7 @@ package workbench.db;
 
 import java.sql.DatabaseMetaData;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -332,7 +333,49 @@ public class ProcedureDefinition
 		return name;
 	}
 
-	public String toWbCallStatement(WbConnection con)
+	public String createSql(WbConnection con)
+	{
+		boolean hasOutParameters = false;
+		boolean returnsRefCursor = false;
+		boolean isFunction = false;
+		DataStore params = null;
+
+		try
+		{
+			params = con.getMetadata().getProcedureReader().getProcedureColumns(this);
+			returnsRefCursor = returnsRefCursor(con, params);
+			int rows = params.getRowCount();
+
+			for (int i = 0; i < rows; i++)
+			{
+				String type = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+
+				if (type.endsWith("OUT"))
+				{
+					hasOutParameters = true;
+				}
+
+				if (type.equals("RETURN"))
+				{
+					isFunction = true;
+				}
+			}
+
+		}
+		catch (Exception ex)
+		{
+			LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
+			return null;
+		}
+
+		if (isFunction && !returnsRefCursor && !hasOutParameters)
+		{
+			return buildFunctionCall(con, params);
+		}
+		return createWbCallStatement(con, params);
+	}
+
+	private String createWbCallStatement(WbConnection con, DataStore params)
 	{
 		StringBuilder call = new StringBuilder(150);
 		CommandTester c = new CommandTester();
@@ -345,40 +388,95 @@ public class ProcedureDefinition
 
 		int rows = 0;
 		int numParams = 0;
-		try
-		{
-			DataStore dataStore = con.getMetadata().getProcedureReader().getProcedureColumns(this);
-			rows = dataStore.getRowCount();
 
-			for (int i = 0; i < rows; i++)
+		for (int i = 0; i < rows; i++)
+		{
+			String type = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+			String param = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+
+			if (numParams > 0)
 			{
-				String inOut = dataStore.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
-				String param = dataStore.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
-
-				if (numParams > 0)
-				{
-					call.append(',');
-					paramNames.append(", ");
-				}
-
-				// only append a ? for OUT or INOUT parameters, not for RETURN parameters
-				if (inOut.equals("IN") || inOut.endsWith("OUT"))
-				{
-					paramNames.append(param);
-					call.append('?');
-					numParams ++;
-				}
+				call.append(',');
+				paramNames.append(", ");
 			}
-			call.append(");");
+
+			// only append a ? for OUT or INOUT parameters, not for RETURN parameters
+			if (type.equals("IN") || type.endsWith("OUT"))
+			{
+				paramNames.append(param);
+				call.append('?');
+				numParams ++;
+			}
 		}
-		catch (Exception ex)
-		{
-			LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure definition", ex);
-			return null;
-		}
+		call.append(");");
 		paramNames.append('\n');
 		call.insert(0, paramNames);
+
 		return call.toString();
+	}
+
+	private String buildFunctionCall(WbConnection conn, DataStore params)
+	{
+		String template = conn.getDbSettings().getSelectForFunctionSQL();
+
+		StringBuilder call = new StringBuilder(150);
+		call.append(oracleType != null ? catalog + "." + procName : procName);
+		call.append("( ");
+
+		int rows = params.getRowCount();
+		int numParams = 0;
+
+		for (int i = 0; i < rows; i++)
+		{
+			String type = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+			String param = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME);
+			int dataType = params.getValueAsInt(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, Types.OTHER);
+
+			if (numParams > 0)
+			{
+				call.append(", ");
+			}
+
+			if (!type.equals("RETURN"))
+			{
+				if (SqlUtil.isCharacterType(dataType))
+				{
+					call.append('\'');
+				}
+				call.append("$[?");
+				call.append(param);
+				call.append(']');
+				if (SqlUtil.isCharacterType(dataType))
+				{
+					call.append('\'');
+				}
+				numParams ++;
+			}
+		}
+		call.append(" )");
+
+		String sql = template.replace("%function%", call.toString());
+		return sql;
+	}
+
+	public static boolean isRefCursor(WbConnection conn, String type)
+	{
+		List<String> refTypes = conn.getDbSettings().getRefCursorTypeNames();
+		return refTypes.contains(type);
+	}
+
+	public static boolean returnsRefCursor(WbConnection conn, DataStore params)
+	{
+		// A function in Postgres that returns a refcursor
+		// must be called using {? = call('procname')} in order
+		// to be able to retrieve the result set from the refcursor
+		for (int i=0; i < params.getRowCount(); i++)
+		{
+			String typeName = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE);
+			String resultType = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
+			if (isRefCursor(conn, typeName) && "RETURN".equals(resultType)) return true;
+		}
+		return false;
 	}
 
 	private static enum OracleType

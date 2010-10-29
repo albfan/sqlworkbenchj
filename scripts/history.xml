@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-10-18">
+  <release build="-1" date="2010-10-29">
+    <entry dev-build="6" type="enh">When using WbExport and -quoteAlways=true, null values are no longer escaped. The parameter can now be use with WbImport to distinguis between null values and empty strings.</entry>
     <entry dev-build="5" type="enh">The escaping of embedded quotes can now also be selected when using "Save Data as" or "Import file".</entry>
     <entry dev-build="5" type="enh">When connected to an Excel Spreadsheet, [] are now also recognized as quote characters (to allow a semicolon in a "table" name).</entry>
     <entry dev-build="4" type="enh">The JDBC driver templates can now be loaded from an external a file named "DriverTemplates.xml" that has to be stored in the directory where the jar file is located.</entry>
@@ -12,6 +13,7 @@
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
     <entry dev-build="5" type="fix">When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</entry>
+    <entry dev-build="6" type="fix">When using WbCopy and -createTarget with a fully qualified table name (otherschema.sometable) the table was not created in the specified schema</entry>
     <entry dev-build="6" type="fix">Postgres DOMAINs where not displayed if the DOMAIN was created in a schema that is not in the schema search_path</entry>
     <entry dev-build="6" type="fix">A selection of '*' in the DbExplorer's schema selector was not restored if "Remember DbExplorer schema" was enabled for the workspace</entry>
     <entry dev-build="5" type="fix">-quoteCharEscaping=duplicate was not working for WbImport if a quote character other than " was used.</entry>

@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -319,6 +319,15 @@ public class WbExport
 
 		type = type.trim().toLowerCase();
 		if ("txt".equals(type)) type = "text";
+
+		if ("text".equals(type) && !CommonArgs.checkQuoteEscapting(cmdLine))
+			{
+				String msg = ResourceMgr.getString("ErrQuoteAlwaysEscape");
+				LogMgr.logError("WbExport.execute()", msg, null);
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
 
 		this.exporter = new DataExporter(this.currentConnection);
 

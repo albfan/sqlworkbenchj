@@ -108,6 +108,7 @@ public class CsvLineParserTest
 
 		parser = new CsvLineParser('\t', '\'');
 		parser.setUnquotedEmptyStringIsNull(true);
+		parser.setQuoteEscaping(QuoteEscapeType.escape);
 		parser.setLine("''\t\tvalue");
 		result = getParserElements(parser);
 		assertEquals(3, result.size());
@@ -115,6 +116,17 @@ public class CsvLineParserTest
 		assertEquals("", result.get(0));
 		assertNull(result.get(1));
 		assertEquals("value", result.get(2));
+
+		parser = new CsvLineParser(';', '\'');
+		parser.setUnquotedEmptyStringIsNull(true);
+		parser.setQuoteEscaping(QuoteEscapeType.none);
+		parser.setLine("1;''");
+		result = getParserElements(parser);
+		assertEquals(2, result.size());
+		assertNotNull(result.get(0));
+		assertNotNull(result.get(1));
+		assertEquals("1", result.get(0));
+		assertEquals("", result.get(1));
 	}
 
 	@Test

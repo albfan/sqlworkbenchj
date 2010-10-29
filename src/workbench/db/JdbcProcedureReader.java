@@ -216,9 +216,9 @@ public class JdbcProcedureReader
 
 	protected DataStore createProcColsDataStore()
 	{
-		final String[] cols = {"COLUMN_NAME", "TYPE", "TYPE_NAME", TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "REMARKS"};
-		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR};
-		final int[] sizes =   {20, 10, 18, 5, 30};
+		final String[] cols = {"COLUMN_NAME", "TYPE", "TYPE_NAME", TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "REMARKS", "POSITION"};
+		final int[] types =   {Types.VARCHAR, Types.VARCHAR, Types.VARCHAR, Types.INTEGER, Types.VARCHAR, Types.INTEGER};
+		final int[] sizes =   {5, 20, 10, 18, 5, 30};
 		DataStore ds = new DataStore(cols, types, sizes);
 		return ds;
 	}
@@ -275,6 +275,7 @@ public class JdbcProcedureReader
 		throws SQLException
 	{
 		int row = ds.addRow();
+		
 		String colName = rs.getString("COLUMN_NAME");
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NAME, colName);
 		int colType = rs.getInt("COLUMN_TYPE");
@@ -310,8 +311,20 @@ public class JdbcProcedureReader
 		int digits = rs.getInt("PRECISION");
 		int size = rs.getInt("LENGTH");
 		String rem = rs.getString("REMARKS");
+		int ordinal = -1;
+		try
+		{
+			ordinal = rs.getInt("ORDINAL_POSITION");
+		}
+		catch (Exception e)
+		{
+			LogMgr.logDebug("JdbcProcedureReader.processProcedureColumnResultRow()", "Error retrieving ordinal_position", e);
+			// Some Oracle driver versions do not seem to return the correct column list...
+			ordinal = row;
+		}
 
 		String display = connection.getMetadata().getDataTypeResolver().getSqlTypeDisplay(typeName, sqlType, size, digits);
+		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_COL_NR, ordinal);
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_DATA_TYPE, display);
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_JDBC_DATA_TYPE, sqlType);
 		ds.setValue(row, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_REMARKS, rem);

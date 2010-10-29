@@ -336,6 +336,15 @@ public class WbImport
 				return result;
 			}
 
+			if (!CommonArgs.checkQuoteEscapting(cmdLine))
+			{
+				String msg = ResourceMgr.getString("ErrQuoteAlwaysEscape");
+				LogMgr.logError("WbImport.execute()", msg, null);
+				result.addMessage(msg);
+				result.setFailure();
+				return result;
+			}
+
 			defaultExtension = "txt";
 
 			TextFileParser textParser = new TextFileParser();

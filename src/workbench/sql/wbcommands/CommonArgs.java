@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -129,6 +129,14 @@ public class CommonArgs
 		cmdLine.addArgument(ARG_DELIM, getDelimiterArguments());
 	}	
 
+	public static boolean checkQuoteEscapting(ArgumentParser cmdLine)
+	{
+		boolean quoteAlways = cmdLine.getBoolean(WbExport.ARG_QUOTE_ALWAYS, false);
+		QuoteEscapeType escape = getQuoteEscaping(cmdLine);
+		if (quoteAlways && escape == QuoteEscapeType.duplicate) return false;
+		return true;
+	}
+	
 	/**
 	 * Adds the quoteCharEscaping argument. Valid values 
 	 * are none, duplicate, escape.

@@ -213,16 +213,9 @@ public class TableIdentifier
 	
 	private String buildTableExpression(WbConnection conn)
 	{
-		if (this.isNewTable)
+		if (this.isNewTable && this.tablename == null)
 		{
-			if (this.tablename == null)
-			{
-				return ResourceMgr.getString("TxtNewTableIdentifier");
-			}
-			else
-			{
-				return this.tablename;
-			}
+			return ResourceMgr.getString("TxtNewTableIdentifier");
 		}
 
 		StringBuilder result = new StringBuilder(30);

@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -287,6 +287,11 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "create.index", Settings.getInstance().getProperty("workbench.db.sql.create.index", null));
 	}
 
+	public String getSelectForFunctionSQL()
+	{
+		return Settings.getInstance().getProperty(prefix + "function.select", "SELECT %function%");
+	}
+	
 	/**
 	 * Return the complete DDL to drop the given type of DB-Object.
 	 * <br/>

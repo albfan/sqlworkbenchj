@@ -81,22 +81,32 @@ public class ScriptParserTest
 	}
 
 	@Test
+	public void testEmbeddedQuotes()
+		throws Exception
+	{
+		String sql =
+			"wbexport  -type=text -delimiter=';' -quoteChar=\"'\" -sourceTable=test -file=test.txt; \n" +
+      "wbimport  -type=text;";
+		
+		ScriptParser p = new ScriptParser(sql);
+		int count = 0;
+		while (p.getNextCommand() != null)
+		{
+			count ++;
+		}
+		assertEquals(2, count);
+	}
+	
+	@Test
 	public void testArrayBasedGetNext()
 		throws Exception
 	{
 		String script = "select 1 from bla;\nselect 2 from blub;\n";
 		ScriptParser p = new ScriptParser(script);
 		int count = 0;
-		try
+		while (p.getNextCommand() != null)
 		{
-			while (p.getNextCommand() != null)
-			{
-				count ++;
-			}
-		}
-		catch (Exception e)
-		{
-			fail("Error when iterating over commands");
+			count ++;
 		}
 		assertEquals(2, count);
 	}
