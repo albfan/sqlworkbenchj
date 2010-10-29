@@ -1,0 +1,37 @@
+<row>
+  <entry><para>-preTableStatement -postTableStatement</para></entry>
+  <entry>
+    <para>
+      This parameter defines a SQL statement that should be executed before the import
+      process starts inserting data into the target table. The name of the current
+      table (when e.g. importing a whole directory) can be referenced using
+      <literal>${table.name}</literal>.
+    </para>
+    <para>
+      To define a statement that should be executed after all rows have been
+      inserted and have been committed, you can use the <literal>-postTableStatement</literal>
+      parameter.
+    </para>
+    <para>
+      These parameters can e.g. be used to enable identity insert for MS SQL Server:
+      <programlisting>-preTableStatement="set identity_insert ${table.name} on"
+-postTableStatement="set identity_insert ${table.name} off"</programlisting>
+      Errors resulting from executing these statements will be ignored. If you want
+      to abort the import in that case you can specify <literal>-ignorePrePostErrors=false</literal>
+      and <literal>-continueOnError=false</literal>.
+    </para>
+
+  </entry>
+</row>
+<row>
+  <entry>-ignorePrePostErrors=false</entry>
+  <entry>
+    <para>
+      Controls handling of errors for the <literal>-preTableStatement</literal> and
+      <literal>-postTableStatement</literal> parameters.
+      If this is set to false, errors resulting from executing the
+      supplied parameters are ignored. If set to true (default) then error handling
+      depends on the parameter <literal>-continueOnError</literal>.
+    </para>
+  </entry>
+</row>

@@ -690,7 +690,7 @@
 						<entry>
 							<para>Possible values: <literal>true</literal>, <literal>false</literal></para>
 							<para>
-								If quoting is enabled (via <literal>-quotechar</literal>,
+								If quoting is enabled (via <literal>-quoteChar</literal>,
 								then character data will normally only be quoted
 								if the delimiter is found inside the actual value that is
 								written to the output file. If <literal>-quoteAlways=true</literal> is
@@ -700,6 +700,11 @@
 								character escaping, otherwise the quote character that is part of the
 								exported value will break the quote during import.
 							</para>
+              <para>
+                NULL values will not be quoted even if this parameter is set to true. This
+                is usefull to distinguish between NULL values and empty strings.
+              </para>
+
 						</entry>
 					</row>
 

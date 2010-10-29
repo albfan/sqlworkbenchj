@@ -333,31 +333,9 @@ Please check <link linkend="command-copy-query">Copying data based on a SQL quer
 						</entry>
 					</row>
 
-					<row>
-						<entry>-preTableStatement</entry>
-						<entry>
-							<para>
-								This parameter defines a SQL statement that should be executed before the copy
-								process starts inserting data into the target table. The name of the current
-								table (when e.g. importing a whole directory) can be referenced using
-								<literal>${table.name}</literal>.
-							</para>
-							<para>
-								To define a statement that should be executed after all rows have been
-								inserted but before the data is committed, you can use the
-								<literal>-postTableStatement</literal> parameter.
-							</para>
-							<para>
-								These parameters can e.g. be used to enable identity insert for MS SQL Server:
-								<programlisting>-preTableStatement="set identity_insert ${table.name} on"
--postTableStatement="set identity_insert ${table.name} off"</programlisting>
-								Errors resulting from executing these statements will be ignored. If you want
-								to abort the copy in that case you can specify <literal>-ignorePrePostErrors=false</literal>
-								and <literal>-continueOnError=false</literal>.
-							</para>
+          &table-statements;
 
-						</entry>
-					</row>
+
 				</tbody>
 			</tgroup>
 		</informaltable>

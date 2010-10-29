@@ -26,6 +26,7 @@
 	<!ENTITY wbcopy SYSTEM "wbcopy.xml">
 	<!ENTITY progress-parameter SYSTEM "progress.xml">
 	<!ENTITY common-connect-args SYSTEM "common-connect-args.xml">
+  <!ENTITY table-statements SYSTEM "table-statements.xml">
 	<!ENTITY release-history SYSTEM "docbook-history.xml">
 ]>
 
