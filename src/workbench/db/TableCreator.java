@@ -19,6 +19,7 @@ import java.util.List;
 
 import workbench.log.LogMgr;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  * A class to create a table in the database based on column definitions.
@@ -33,8 +34,19 @@ public class TableCreator
 	private TypeMapper mapper;
 	private boolean useDbmsDataType;
 	private boolean useColumnAlias;
+	private String creationType;
 
-	public TableCreator(WbConnection target, TableIdentifier newTable, Collection<ColumnIdentifier> columns)
+	/**
+	 * Create a new TableCreator.
+	 *
+	 * @param target the connection where to create the table
+	 * @param type a keyword identifying the type of the table. This will be used to retrieve the corresponding
+	 *             SQL template from {@link DbSettings#getCreateTableTemplate(workbench.db.TableCreator.CreationType)
+	 * @param newTable the name of the new table
+	 * @param columns the columns of the new table
+	 * @throws SQLException if something goes wrong
+	 */
+	public TableCreator(WbConnection target, String type, TableIdentifier newTable, Collection<ColumnIdentifier> columns)
 		throws SQLException
 	{
 		this.connection = target;
@@ -48,6 +60,7 @@ public class TableCreator
 		ColumnIdentifier.sortByPosition(columnDefinition);
 
 		this.mapper = new TypeMapper(this.connection);
+		creationType = type;
 	}
 
 	public void setUseColumnAlias(boolean flag)
@@ -68,11 +81,10 @@ public class TableCreator
 	public void createTable()
 		throws SQLException
 	{
-		StringBuilder sql = new StringBuilder(100);
-		sql.append("CREATE TABLE ");
+		StringBuilder columns = new StringBuilder(100);
+		String template = connection.getDbSettings().getCreateTableTemplate(creationType);
 		String name = this.tablename.getTableExpression(this.connection);
-		sql.append(name);
-		sql.append(" (");
+		
 		int numCols = 0;
 		List<String> pkCols = new ArrayList<String>();
 		
@@ -82,16 +94,19 @@ public class TableCreator
 			String def = this.getColumnDefintionString(col);
 			if (def == null) continue;
 			
-			if (numCols > 0) sql.append(", ");
-			sql.append(def);
+			if (numCols > 0) columns.append(", ");
+			columns.append(def);
 			numCols++;
 		}
-		sql.append(')');
+
+		String sql = template.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, name);
+		sql = sql.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, columns);
+
 		LogMgr.logInfo("TableCreator.createTable()", "Creating table using sql: " + sql);
 		Statement stmt = this.connection.createStatement();
 		try
 		{
-			stmt.executeUpdate(sql.toString());
+			stmt.executeUpdate(sql);
 			
 			if (pkCols.size() > 0)
 			{

@@ -15,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import workbench.WbManager;
@@ -758,8 +757,7 @@ public class WbExport
 	boolean isTypeValid(String type)
 	{
 		if (type == null) return false;
-		Collection<String> types = cmdLine.getAllowedValues(ARG_EXPORT_TYPE);
-		return types.contains(type);
+		return cmdLine.isAllowedValue(ARG_EXPORT_TYPE, type);
 	}
 
 	private void setExportType(DataExporter exporter, String code)

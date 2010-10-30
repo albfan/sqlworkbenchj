@@ -77,7 +77,7 @@ public class TableCreatorTest
 			c1.setColumnName(c1.getColumnName().toLowerCase());
 			c2.setColumnName(c2.getColumnName().toLowerCase());
 
-			TableCreator creator = new TableCreator(con, newTable, cols);
+			TableCreator creator = new TableCreator(con, null, newTable, cols);
 			creator.createTable();
 
 			clist = con.getMetadata().getTableColumns(newTable);
@@ -87,6 +87,47 @@ public class TableCreatorTest
 			assertEquals("\"PRIMARY\"", clist.get(3).getColumnName());
 			assertEquals("\"W\u00E4hrung\"", clist.get(4).getColumnName());
 			assertFalse(clist.get(4).isNullable());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
+	public void testCreateTempTable()
+		throws Exception
+	{
+		try
+		{
+			WbConnection con = util.getConnection();
+
+			List<TableIdentifier> tables = con.getMetadata().getTableList("%", "PUBLIC");
+			assertEquals(0, tables.size());
+
+			TableIdentifier tbl = new TableIdentifier("mytemp");
+			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+
+			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
+			id.setIsPkColumn(true);
+			id.setIsNullable(false);
+			cols.add(id);
+
+			ColumnIdentifier name = new ColumnIdentifier("SOME_NAME", Types.VARCHAR);
+			name.setColumnSize(50);
+			name.setIsPkColumn(false);
+			name.setIsNullable(true);
+			cols.add(name);
+
+			// For H2 a a localtemp definition is part of default.properties
+			List<CreateTableTypeDefinition> types = DbSettings.getCreateTableTypes(con.getMetadata().getDbId());
+			assertEquals(1, types.size());
+
+			TableCreator creator = new TableCreator(con, types.get(0).getType(), tbl, cols);
+			creator.createTable();
+
+			tables = con.getMetadata().getTableList("%", "PUBLIC");
+			assertEquals(1, tables.size());
 		}
 		finally
 		{
@@ -122,7 +163,7 @@ public class TableCreatorTest
 			name.setIsPkColumn(false);
 			name.setIsNullable(true);
 			cols.add(name);
-			TableCreator creator = new TableCreator(con, tbl, cols);
+			TableCreator creator = new TableCreator(con, null, tbl, cols);
 			creator.createTable();
 
 			tables = con.getMetadata().getTableList("%", "OTHER");

@@ -17,6 +17,7 @@ import workbench.AppArguments;
 import workbench.WbManager;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
@@ -51,6 +52,13 @@ public class WbCopy
 	public static final String PARAM_KEYS = "keyColumns";
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
+	/**
+	 * If PARAM_CREATETARGET is set to true, this parameter defines
+	 * the table type to be created.
+	 * The value specifies the CREATE TABLE template to be used.
+	 * @see workbench.db.DbSettings#getCreateTableTemplate(java.lang.String) 
+	 */
+	public static final String PARAM_TABLE_TYPE = "tableType";
 	public static final String PARAM_DELETE_SYNC = "syncDelete";
 
 	private static final String ID_PREFIX = "$Wb-Copy$";
@@ -89,6 +97,7 @@ public class WbCopy
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
 		cmdLine.addArgument(WbImport.ARG_USE_SAVEPOINT, ArgumentType.BoolArgument);
+		cmdLine.addArgumentWithValues(PARAM_TABLE_TYPE, DbSettings.getCreateTableTypes());
 	}
 
 	public String getVerb() { return VERB; }

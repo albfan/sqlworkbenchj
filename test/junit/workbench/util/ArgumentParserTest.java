@@ -53,10 +53,16 @@ public class ArgumentParserTest
 	{
 		ArgumentParser arg = new ArgumentParser();
 		arg.addArgument("type", StringUtil.stringToList("text,xml,sql"));
-		Collection c = arg.getAllowedValues("type");
-		assertTrue(c.contains("text"));
-		assertTrue(c.contains("TEXT"));
-		assertTrue(c.contains("Text"));
+		Collection<ArgumentValue> c = arg.getAllowedValues("type");
+		assertEquals(3, c.size());
+		
+		assertTrue(c.contains(new StringArgumentValue("text")));
+		assertTrue(c.contains(new StringArgumentValue("TEXT")));
+		assertTrue(c.contains(new StringArgumentValue("TeXt")));
+
+		assertTrue(arg.isAllowedValue("type", "Text"));
+		assertTrue(arg.isAllowedValue("type", "TEXT"));
+		assertTrue(arg.isAllowedValue("type", "text"));
 	}
 
 	@Test

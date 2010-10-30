@@ -161,6 +161,18 @@ public class DataCopier
 	 *	If the columnMapping is null, the matching columns from both tables are used.
 	 *	It is expected that the mapping contains String objects. The key is the name of the
 	 *	source column, the mapped value is the name of the target column
+	 *
+	 * @param source the source connection
+	 * @param target the target connection
+	 * @param sourceTable the table to copy (in the database defined by source)
+	 * @param targetTable the table write to (in the database defined by target)
+	 * @param columnMapping define a mapping from source columns to target columns (may be null)
+	 * @param additionalWhere a WHERE condition to be appended to the SELECT that retrieves the data from the source table
+	 * @param createTableType if not null, the target table will be created with the template defined by this type
+	 * @param dropTable if true, the target table will be dropped
+	 * @param ignoreDropError if true, an error during drop will not terminate the copy
+	 * 
+	 * @see DbSettings#getCreateTableTemplate(java.lang.String)
 	 */
 	public void copyFromTable(WbConnection source,
 														WbConnection target,
@@ -168,7 +180,7 @@ public class DataCopier
 														TableIdentifier targetTable,
 														Map<String, String> columnMapping,
 														String additionalWhere,
-														boolean createTable,
+														String createTableType,
 														boolean dropTable,
 														boolean ignoreDropError)
 		throws SQLException
@@ -186,11 +198,11 @@ public class DataCopier
 			throw new SQLException("Table " + sourceTable.getTableName() + " not found in source connection");
 		}
 
-		this.initColumnMapping(columnMapping, createTable);
+		this.initColumnMapping(columnMapping, createTableType != null);
 
-		if (createTable)
+		if (createTableType != null)
 		{
-			createTable(this.columnMap.values(), dropTable, ignoreDropError);
+			createTable(this.columnMap.values(), dropTable, ignoreDropError, createTableType);
 		}
 
 		this.initImporterForTable(additionalWhere);
@@ -212,7 +224,7 @@ public class DataCopier
 		return realTable;
 	}
 
-	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError)
+	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError, String createType)
 		throws SQLException
 	{
 		if (dropIfExists)
@@ -261,7 +273,7 @@ public class DataCopier
 				targetCols.add(col);
 			}
 
-			TableCreator creator = new TableCreator(this.targetConnection, this.targetTable, targetCols);
+			TableCreator creator = new TableCreator(this.targetConnection, createType, this.targetTable, targetCols);
 			creator.setUseColumnAlias(true); // if an alias was specified in the original query, the new table should use that one
 			creator.useDbmsDataType(this.sourceConnection.getDatabaseProductName().equals(this.targetConnection.getDatabaseProductName()));
 			creator.createTable();
@@ -320,13 +332,23 @@ public class DataCopier
 
 	/**
 	 *	Copy data from a SQL SELECT result to the given target table.
-	 */
-	public void copyFromQuery(WbConnection source,
+	 *
+	 * @param source the source connection
+	 * @param target the target connection
+	 * @param the query to be executed on the source connection
+	 * @param targetTable the table write to (in the database defined by target)
+	 * @param the columns from the query
+	 * @param createTableType if not null, the target table will be created with the template defined by this type
+	 * @param dropTable if true, the target table will be dropped
+	 * @param ignoreDropError if true, an error during drop will not terminate the copy
+	 *
+	 * @see DbSettings#getCreateTableTemplate(java.lang.String)
+	 */	public void copyFromQuery(WbConnection source,
 														WbConnection target,
 														String query,
 														TableIdentifier aTargetTable,
 														List<ColumnIdentifier> queryColumns,
-														boolean createTarget,
+														String createTableType,
 														boolean dropTarget,
 														boolean ignoreDropError)
 		throws SQLException
@@ -338,9 +360,9 @@ public class DataCopier
 		this.targetTable = aTargetTable;
 
 		this.targetColumnsForQuery = new ArrayList<ColumnIdentifier>(queryColumns);
-		if (createTarget)
+		if (createTableType != null)
 		{
-			createTable(targetColumnsForQuery, dropTarget, ignoreDropError);
+			createTable(targetColumnsForQuery, dropTarget, ignoreDropError, createTableType);
 		}
 		this.initImporterForQuery(query);
 	}

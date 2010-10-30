@@ -15,7 +15,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
-import java.awt.Window;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -46,6 +45,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ColumnSortType;
 import workbench.resource.GuiSettings;
 import workbench.resource.Settings;
+import workbench.util.ArgumentValue;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 import workbench.util.WbThread;
@@ -422,6 +422,15 @@ public class CompletionPopup
 				}
 				value = cols.toString();
 				break;
+			}
+			else if (o instanceof ArgumentValue)
+			{
+				ArgumentValue v = (ArgumentValue)o;
+				if (value.length() > 0)
+				{
+					value += ", ";
+				}
+				value += v.getValue();
 			}
 			else
 			{

@@ -83,6 +83,7 @@ public class DataImporter
 
 	private DeleteType deleteTarget = DeleteType.none;
 	private boolean createTarget = false;
+	private String createType;
 	private boolean continueOnError = true;
 
 	private long totalRows = 0;
@@ -714,7 +715,7 @@ public class DataImporter
 	private void createTarget()
 		throws SQLException
 	{
-		TableCreator creator = new TableCreator(this.dbConn, this.targetTable, this.targetColumns);
+		TableCreator creator = new TableCreator(this.dbConn, createType, this.targetTable, this.targetColumns);
 		creator.useDbmsDataType(true);
 		creator.createTable();
 		String table = creator.getTable().getTableName();

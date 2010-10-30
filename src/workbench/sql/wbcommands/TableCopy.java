@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import workbench.AppArguments;
 import workbench.db.ColumnIdentifier;
+import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
@@ -57,7 +58,7 @@ public class TableCopy
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		boolean ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
-		
+
 		String keys = cmdLine.getValue(WbCopy.PARAM_KEYS);
 
 		this.copier = new DataCopier();
@@ -80,11 +81,13 @@ public class TableCopy
 
 		copier.setDeleteTarget(CommonArgs.getDeleteType(cmdLine));
 
+		String createTableType = null;
 		TableIdentifier targetId = null;
 		if (createTable)
 		{
 			targetId = new TableIdentifier(targettable);
 			targetId.setNewTable(true);
+			createTableType = cmdLine.getValue(WbCopy.PARAM_TABLE_TYPE, DbSettings.DEFAULT_CREATE_TABLE_TYPE);
 		}
 		else
 		{
@@ -96,7 +99,7 @@ public class TableCopy
 			TableIdentifier srcTable = new TableIdentifier(sourcetable);
 			String where = cmdLine.getValue(WbCopy.PARAM_SOURCEWHERE);
 			Map<String, String> mapping = this.parseMapping(cmdLine);
-			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTable, dropTable, ignoreDropError);
+			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropTable, ignoreDropError);
 		}
 		else
 		{
@@ -120,7 +123,7 @@ public class TableCopy
 					queryCols.get(i).setColumnAlias(null);
 				}
 			}
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTable, dropTable, ignoreDropError);
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropTable, ignoreDropError);
 		}
 
 		boolean useSp = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, targetConnection.getDbSettings().useSavepointForImport());
@@ -163,7 +166,7 @@ public class TableCopy
 		List<ColumnIdentifier> result = CollectionUtil.sizedArrayList(count);
 		for (String c : l)
 		{
-			if (c.indexOf("/") > -1)
+			if (c.indexOf('/') > -1)
 			{
 				copier.addError(ResourceMgr.getString("MsgCopyErrIllegalMapping"));
 				return null;

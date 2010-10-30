@@ -27,6 +27,7 @@ import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import workbench.gui.components.WbComboBox;
 import workbench.gui.dialogs.QuoteEscapeSelector;
+import workbench.gui.dialogs.QuoteSettingVerifier;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.CharacterRange;
@@ -39,11 +40,11 @@ import workbench.util.StringUtil;
  */
 public class TextOptionsPanel
 	extends JPanel
-	implements TextOptions, PopupMenuListener
+	implements TextOptions
 {
 	private int preferredWidth;
+	private QuoteSettingVerifier verifier;
 
-	/** Creates new form TextoptionsPanel */
 	public TextOptionsPanel()
 	{
 		super();
@@ -84,8 +85,8 @@ public class TextOptionsPanel
 		Dimension max = new Dimension(width, (int)pref.getHeight());
 		escapeRange.setMaximumSize(max);
 		escapeRange.setPreferredSize(max);
-		escapeRange.addPopupMenuListener(this);
 		((WbComboBox)escapeRange).setPopupWidth(preferredWidth);
+		verifier = new QuoteSettingVerifier(quoteEscape, quoteAlways);
 	}
 
 	public void saveSettings()
@@ -176,6 +177,7 @@ public class TextOptionsPanel
 
 	public boolean getQuoteAlways()
 	{
+		if (!quoteAlways.isEnabled()) return false;
 		return this.quoteAlways.isSelected();
 	}
 
@@ -226,47 +228,6 @@ public class TextOptionsPanel
 		{
 			lineEnding.setSelectedItem(ending.toUpperCase());
 		}
-	}
-
-	public void popupMenuWillBecomeVisible(PopupMenuEvent e)
-	{
-//		JComboBox box = (JComboBox) e.getSource();
-//		Object comp = box.getUI().getAccessibleChild(box, 0);
-//		if (!(comp instanceof JPopupMenu))
-//		{
-//			return;
-//		}
-//		try
-//		{
-//			final JPopupMenu menu = (JPopupMenu) comp;
-//			final JScrollPane scrollPane = (JScrollPane)(menu.getComponent(0));
-//			final Dimension size = scrollPane.getPreferredSize();
-//			size.width = preferredWidth;
-//			EventQueue.invokeLater(new Runnable()
-//			{
-//				public void run()
-//				{
-////					menu.setMinimumSize(size);
-////					menu.setSize(size);
-////					menu.setPreferredSize(size);
-//					scrollPane.setPreferredSize(size);
-//					scrollPane.setSize(size);
-//					scrollPane.setMinimumSize(size);
-//				}
-//			});
-//		}
-//		catch (Throwable th)
-//		{
-//
-//		}
-	}
-
-	public void popupMenuWillBecomeInvisible(PopupMenuEvent e)
-	{
-	}
-
-	public void popupMenuCanceled(PopupMenuEvent e)
-	{
 	}
 
 	/** This method is called from within the constructor to

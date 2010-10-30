@@ -49,6 +49,7 @@ import workbench.WbManager;
 import workbench.db.ColumnIdentifier;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.DbSettings;
 import workbench.db.datacopy.DataCopier;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -1894,7 +1895,8 @@ public class DataPumper
 		try
 		{
 			this.copyRunning = true;
-
+			String tableType = (ttable.isNewTable() ? DbSettings.DEFAULT_CREATE_TABLE_TYPE : null);
+			
 			if (this.fileImporter != null)
 			{
 				this.initImporter();
@@ -1904,7 +1906,7 @@ public class DataPumper
 			}
 			else if (this.useQueryCbx.isSelected())
 			{
-				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, Arrays.asList(colMapping.targetColumns), ttable.isNewTable(), dropTarget, ignoreDrop);
+				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, Arrays.asList(colMapping.targetColumns), tableType, dropTarget, ignoreDrop);
 			}
 			else
 			{
@@ -1925,7 +1927,7 @@ public class DataPumper
 				{
 					mapping.put(colMapping.sourceColumns[i].getColumnName(), colMapping.targetColumns[i].getColumnName());
 				}
-				this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, createTable, dropTarget, ignoreDrop);
+				this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, tableType, dropTarget, ignoreDrop);
 			}
 
 			this.copier.startBackgroundCopy();

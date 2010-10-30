@@ -1,15 +1,16 @@
 /*
  * QuoteEscapeSelector
- * 
+ *
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
- * 
+ *
  *  Copyright 2002-2009, Thomas Kellerer
  *  No part of this code may be reused without the permission of the author
- * 
+ *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
 package workbench.gui.dialogs;
 
+import java.awt.event.ActionListener;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
@@ -24,7 +25,6 @@ public class QuoteEscapeSelector
 	extends JPanel
 {
 
-	/** Creates new form QuoteEscapeSelector */
 	public QuoteEscapeSelector()
 	{
 		initComponents();
@@ -59,6 +59,11 @@ public class QuoteEscapeSelector
 		if (index == 1) return QuoteEscapeType.escape;
 		if (index == 2) return QuoteEscapeType.duplicate;
 		return QuoteEscapeType.none;
+	}
+
+	public void addComboBoxActionListener(ActionListener l)
+	{
+		this.escapeSelect.addActionListener(l);
 	}
 
 	/** This method is called from within the constructor to

@@ -386,6 +386,14 @@ public class Settings
 		}
 	}
 
+	/**
+	 * Return all keys that contain the specified string
+	 */
+	public List<String> getKeysLike(String partialKey)
+	{
+		return props.getKeysWithPrefix(partialKey);
+	}
+
 	public void addSaveListener(SettingsListener l)
 	{
 		saveListener.add(l);
@@ -626,7 +634,7 @@ public class Settings
 	{
 		setProperty(PROPERTY_LOG_ALL_SQL, flag);
 	}
-	
+
 	/**
 	 * Controls if the initialization of connections in the main window is logged
 	 * for debugging purposes.
@@ -860,7 +868,7 @@ public class Settings
 	{
 		return getBoolProperty("workbench.dbexplorer.connection.always.separate", false);
 	}
-	
+
 	public String getDefaultExplorerObjectType()
 	{
 		return getProperty("workbench.gui.dbobjects.TableListPanel.objecttype", null);

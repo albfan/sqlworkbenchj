@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import workbench.AppArguments;
+import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.db.compare.TableDeleteSync;
@@ -47,7 +48,7 @@ public class SchemaCopy
 	private MessageBuffer messages = new MessageBuffer();
 	private DataCopier copier;
 	private boolean success;
-	private boolean createTable;
+	private String createTableType;
 	private boolean dropTable;
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
@@ -105,7 +106,7 @@ public class SchemaCopy
 				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
 				this.messages.appendNewLine();
 
-				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTable, dropTable, ignoreDropError);
+				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTableType, dropTable, ignoreDropError);
 				copier.setUseSavepoint(useSavepoint);
 				copier.startCopy();
 
@@ -151,7 +152,7 @@ public class SchemaCopy
 			TableIdentifier targetTable = new TableIdentifier(table.getTableName());
 			targetTable.setSchema(this.targetConnection.getMetadata().getSchemaToUse());
 
-			if (!createTable)
+			if (!createTargetTable())
 			{
 				targetTable = this.targetConnection.getMetadata().findTable(targetTable);
 				// check if the target table exists. DataCopier will throw an exception if
@@ -277,7 +278,16 @@ public class SchemaCopy
 
 		DeleteType deleteTarget = CommonArgs.getDeleteType(cmdLine);
 		boolean continueOnError = cmdLine.getBoolean(CommonArgs.ARG_CONTINUE);
-		createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
+		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET, false);
+		if (createTable)
+		{
+			createTableType = cmdLine.getValue(WbCopy.PARAM_TABLE_TYPE, DbSettings.DEFAULT_CREATE_TABLE_TYPE);
+		}
+		else
+		{
+			createTableType = null;
+		}
+		
 		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 
@@ -303,7 +313,7 @@ public class SchemaCopy
 		copier.setContinueOnError(continueOnError);
 		copier.setDeleteTarget(deleteTarget);
 		copier.setRowActionMonitor(rowMonitor);
-		this.doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && !createTable;
+		this.doSyncDelete = cmdLine.getBoolean(WbCopy.PARAM_DELETE_SYNC, false) && (!createTargetTable());
 		mapTables();
 
 		useSavepoint = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, target.getDbSettings().useSavepointForImport());
@@ -320,6 +330,11 @@ public class SchemaCopy
 		return true;
 	}
 
+	private boolean createTargetTable()
+	{
+		return createTableType != null;
+	}
+	
 	public boolean isSuccess()
 	{
 		return this.success;

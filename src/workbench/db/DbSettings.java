@@ -12,6 +12,8 @@
 package workbench.db;
 
 import java.sql.DatabaseMetaData;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +57,8 @@ public class DbSettings
 
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
+	public static final String DEFAULT_CREATE_TABLE_TYPE = "default";
+	
 	private Set<String> updatingCommands;
 	private final String prefix;
 
@@ -121,6 +125,25 @@ public class DbSettings
 		return updatingCommands.contains(verb);
 	}
 
+	public static Map<String, String> getDBMSNames()
+	{
+		Map<String, String> dbmsNames = new HashMap<String, String>();
+		dbmsNames.put("h2", "H2");
+		dbmsNames.put("oracle", "Oracle");
+		dbmsNames.put("hsql_database_engine", "HSQLDB");
+		dbmsNames.put("postgresql", "PostgreSQL");
+		dbmsNames.put("db2", "DB2 (LUW)");
+		dbmsNames.put("db2h", "DB2 Host");
+		dbmsNames.put("db2i", "DB2 iSeries");
+		dbmsNames.put("mysql", "MySQL");
+		dbmsNames.put("firebird", "Firebird SQL");
+		dbmsNames.put("informix_dynamic_server", "Informix");
+		dbmsNames.put("sql_anywhere", "SQL Anywhere");
+		dbmsNames.put("microsoft_sql_server", "Microsoft SQL Server");
+		dbmsNames.put("apache_derby", "Apache Derby");
+		return dbmsNames;
+	}
+	
 	public boolean getUseOracleDBMSMeta(String type)
 	{
 		if (type == null) return false;
@@ -963,6 +986,55 @@ public class DbSettings
 	}
 
 	/**
+	 * Return all configured "CREATE TABLE" types.
+	 *
+	 * @see #getCreateTableTemplate(java.lang.String)
+	 */
+	public static List<CreateTableTypeDefinition> getCreateTableTypes()
+	{
+		return getCreateTableTypes(null);
+	}
+
+	/**
+	 * Return configured "CREATE TABLE" types for the specified DBID.
+	 *
+	 * @see #getCreateTableTemplate(java.lang.String) 
+	 */
+	public static List<CreateTableTypeDefinition> getCreateTableTypes(String dbid)
+	{
+		List<String> types = Settings.getInstance().getKeysLike(".create.table.");
+		List<CreateTableTypeDefinition> result = new ArrayList<CreateTableTypeDefinition>(types.size());
+		for (String type : types)
+		{
+			CreateTableTypeDefinition createType = new CreateTableTypeDefinition(type);
+			if (dbid == null || dbid.equals(createType.getDbId()))
+			{
+				result.add(createType);
+			}
+		}
+		Collections.sort(result);
+		return result;
+	}
+	
+	/**
+	 * The SQL template that is used to create a table of the specified type
+	 *
+	 * @return the temp table keyword or null
+	 */
+	public String getCreateTableTemplate(String type)
+	{
+		final String defaultSql =
+			"CREATE TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
+			"\n(\n" +
+			MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + 
+			"\n)";
+
+		if (StringUtil.isBlank(type)) type = DEFAULT_CREATE_TABLE_TYPE;
+		
+		return Settings.getInstance().getProperty(prefix + "create.table." + type.toLowerCase(), defaultSql);
+	}
+	
+	/**
 	 * Returns true if the placeholders for retrieving the table source need to be checked
 	 * for quoting. This is necessary if the SQL is a SELECT statement, but might not
 	 * be necessary if the SQL (defined by getRetrieveTableSourceSql()) is a procedure call
@@ -1012,6 +1084,10 @@ public class DbSettings
 		return Settings.getInstance().getProperty(prefix + "alter.column.default", null);
 	}
 
+	/**
+	 * The SQL to set a column's default.
+	 * @return
+	 */
 	public String getSetColumnDefaultSql()
 	{
 		return Settings.getInstance().getProperty(prefix + "alter.column.default.set", null);

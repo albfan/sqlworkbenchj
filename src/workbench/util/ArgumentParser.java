@@ -42,7 +42,9 @@ public class ArgumentParser
 	private Map<String, ArgumentType> argTypes;
 
 	private List<String> unknownParameters = new ArrayList<String>();
-	private Map<String, Collection<String>> allowedValues;
+
+	// Stores the allowed values for a parameter
+	private Map<String, Collection<ArgumentValue>> allowedValues;
 	private int argCount = 0;
 	private boolean needSwitch = true;
 
@@ -52,7 +54,7 @@ public class ArgumentParser
 		Comparator<String> c = new CaseInsensitiveComparator();
 		arguments = new TreeMap<String, Object>(c);
 		argTypes = new TreeMap<String, ArgumentType>(c);
-		allowedValues = new TreeMap<String, Collection<String>>(c);
+		allowedValues = new TreeMap<String, Collection<ArgumentValue>>(c);
 	}
 
 	public ArgumentParser(boolean parameterSwitchNeeded)
@@ -66,7 +68,14 @@ public class ArgumentParser
 		return needSwitch;
 	}
 
-	public Collection<String> getAllowedValues(String key)
+	public boolean isAllowedValue(String key, String value)
+	{
+		StringArgumentValue argValue = new StringArgumentValue(value);
+		Collection<ArgumentValue> allowed = getAllowedValues(key);
+		return allowed.contains(argValue);
+	}
+	
+	public Collection<ArgumentValue> getAllowedValues(String key)
 	{
 		return allowedValues.get(key);
 	}
@@ -75,7 +84,7 @@ public class ArgumentParser
 	{
 		String value = getValue(parameter);
 		if (value == null) return true;
-		Collection<String> allowed = this.getAllowedValues(parameter);
+		Collection<ArgumentValue> allowed = this.getAllowedValues(parameter);
 		if (allowed == null || allowed.isEmpty()) return true;
 		return allowed.contains(value);
 	}
@@ -84,7 +93,19 @@ public class ArgumentParser
 	{
 		addArgument(key, ArgumentType.ListArgument);
 		if (values == null) return;
-		Collection<String> v = new TreeSet<String>(new CaseInsensitiveComparator());
+		Collection<ArgumentValue> v = new TreeSet<ArgumentValue>(ArgumentValue.COMPARATOR);
+		for (String value : values)
+		{
+			v.add(new StringArgumentValue(value));
+		}
+		allowedValues.put(key, v);
+	}
+
+	public void addArgumentWithValues(String key, List<? extends ArgumentValue> values)
+	{
+		addArgument(key, ArgumentType.ListArgument);
+		if (values == null) return;
+		Collection<ArgumentValue> v = new TreeSet<ArgumentValue>();
 		v.addAll(values);
 		allowedValues.put(key, v);
 	}

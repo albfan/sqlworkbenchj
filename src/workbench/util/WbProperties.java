@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -203,7 +203,7 @@ public class WbProperties
 
 	private String getSections(String aString, int aNum)
 	{
-		int pos = aString.indexOf(".");
+		int pos = aString.indexOf('.');
 		String result = null;
 		for (int i=1; i < aNum; i++)
 		{
@@ -279,6 +279,26 @@ public class WbProperties
 		return super.stringPropertyNames();
 	}
 
+	public List<String> getKeysWithPrefix(String prefix)
+	{
+		if (prefix == null)
+		{
+			return new ArrayList<String>(getKeys());
+		}
+
+		Set<String> keys = getKeys();
+		List<String> result = new ArrayList<String>();
+
+		for (String key : keys)
+		{
+			if (key.contains(prefix))
+			{
+				result.add(key);
+			}
+		}
+		return result;
+	}
+
 	public Object setProperty(String name, String value)
 	{
     return setProperty(name, value, true);
@@ -335,7 +355,7 @@ public class WbProperties
 		if (line == null) return;
 		if (StringUtil.isBlank(line)) return;
 		if (line.charAt(0) == '#') return;
-		int pos = line.indexOf("=");
+		int pos = line.indexOf('=');
 		if (pos == -1) return;
 		String key = line.substring(0, pos);
 		String value = line.substring(pos + 1);
@@ -409,7 +429,7 @@ public class WbProperties
 			}
 			else if (line.trim().endsWith("\\"))
 			{
-				line = line.substring(0, line.lastIndexOf("\\"));
+				line = line.substring(0, line.lastIndexOf('\\'));
 				if (lineFragment == null)
 				{
 					lineFragment = line;

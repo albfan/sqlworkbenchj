@@ -12,6 +12,7 @@
 package workbench.gui.dialogs.dataimport;
 
 import javax.swing.JPanel;
+import workbench.gui.dialogs.QuoteSettingVerifier;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.QuoteEscapeType;
@@ -25,12 +26,13 @@ public class TextOptionsPanel
 	extends JPanel
 	implements TextImportOptions
 {
-
-	/** Creates new form TextoptionsPanel */
+	private QuoteSettingVerifier verifier;
+	
 	public TextOptionsPanel()
 	{
 		super();
 		initComponents();
+		verifier = new QuoteSettingVerifier(quoteEscape, quoteAlways);
 	}
 
 	public void saveSettings()
