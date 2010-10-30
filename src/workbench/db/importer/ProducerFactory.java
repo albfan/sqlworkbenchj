@@ -200,7 +200,7 @@ public class ProducerFactory
 		parser.setDelimiter(this.textOptions.getTextDelimiter());
 		parser.setConnection(this.connection);
 		parser.setQuoteEscaping(textOptions.getQuoteEscaping());
-
+		parser.setAlwaysQuoted(textOptions.getQuoteAlways());
 		ValueConverter converter = new ValueConverter();
 		converter.setDefaultDateFormat(this.generalOptions.getDateFormat());
 		converter.setDefaultTimestampFormat(this.generalOptions.getTimestampFormat());

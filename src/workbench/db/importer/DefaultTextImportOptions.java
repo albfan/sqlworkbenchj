@@ -36,6 +36,9 @@ public class DefaultTextImportOptions
 	public boolean getContainsHeader() {  return true; }
 
 	@Override
+	public boolean getQuoteAlways() { return false; }
+
+	@Override
 	public String getTextQuoteChar() { return quoteChar;	}
 
 	@Override

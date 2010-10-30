@@ -48,27 +48,31 @@ public class ImportOptionsPanel
 	public ImportOptionsPanel()
 	{
 		super();
-		this.setLayout(new BorderLayout());
-		this.generalOptions = new GeneralImportOptionsPanel();
-		JPanel p = new JPanel();
-		p.setLayout(new BorderLayout());
-		p.add(this.generalOptions, BorderLayout.CENTER);
+		setLayout(new BorderLayout(0,2));
+		generalOptions = new GeneralImportOptionsPanel();
+		
+		JPanel generalContainer = new JPanel();
+		generalContainer.setLayout(new BorderLayout(0,0));
+		generalContainer.add(this.generalOptions, BorderLayout.CENTER);
+		Border leftMargin = new EmptyBorder(0, 3, 0, 0);
+		generalContainer.setBorder(leftMargin);
 
-		JPanel s = new JPanel(new BorderLayout(2, 2));
+		JPanel selectorPanel = new JPanel(new BorderLayout(2, 2));
 		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 0, 5, 0));
-		s.setBorder(b);
+		selectorPanel.setBorder(b);
 		typeSelector = new JComboBox();
 		typeSelector.addItem("Text");
 		typeSelector.addItem("XML");
 		JLabel type = new JLabel("Type");
-		s.add(type, BorderLayout.WEST);
-		s.add(typeSelector, BorderLayout.CENTER);
-		p.add(s, BorderLayout.SOUTH);
+		selectorPanel.add(type, BorderLayout.WEST);
+		selectorPanel.add(typeSelector, BorderLayout.CENTER);
+		generalContainer.add(selectorPanel, BorderLayout.SOUTH);
 
-		this.add(p, BorderLayout.NORTH);
+		this.add(generalContainer, BorderLayout.NORTH);
 
 		this.textOptions = new TextOptionsPanel();
 		this.typePanel = new JPanel();
+		typePanel.setBorder(leftMargin);
 		this.card = new CardLayout();
 		this.typePanel.setLayout(card);
 		this.typePanel.add(this.textOptions, "text");

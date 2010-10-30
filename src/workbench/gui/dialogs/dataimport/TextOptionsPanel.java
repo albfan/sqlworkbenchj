@@ -47,6 +47,7 @@ public class TextOptionsPanel
 		s.setProperty("workbench.import." + key + ".quotechar", this.getTextQuoteChar());
 		s.setProperty("workbench.import." + key + ".decimalchar", this.getDecimalChar());
 		s.setProperty("workbench.import." + key + ".quote.escape", getQuoteEscaping().toString());
+		s.setProperty("workbench.import." + key + ".quotealways", this.getQuoteAlways());
 	}
 
 	public void restoreSettings()
@@ -60,6 +61,7 @@ public class TextOptionsPanel
 		this.setContainsHeader(s.getBoolProperty("workbench.import." + key + ".containsheader", true));
 		this.setDecode(s.getBoolProperty("workbench.import." + key + ".decode", false));
 		this.setTextQuoteChar(s.getProperty("workbench.import." + key + ".quotechar", s.getQuoteChar()));
+		this.quoteAlways.setSelected(s.getBoolProperty("workbench.import." + key + ".quotealways", false));
 		this.setTextDelimiter(s.getDelimiter("workbench.import." + key + ".fielddelimiter", "\\t", true));
 		this.setDecimalChar(s.getProperty("workbench.import." + key + ".decimalchar", "."));
 		String quote = s.getProperty("workbench.import." + key + ".quote.escape", "none");
@@ -75,6 +77,12 @@ public class TextOptionsPanel
 		quoteEscape.setEscapeType(escape);
 	}
 
+	@Override
+	public boolean getQuoteAlways()
+	{
+		return this.quoteAlways.isSelected();
+	}
+	
 	@Override
 	public QuoteEscapeType getQuoteEscaping()
 	{
@@ -155,6 +163,7 @@ public class TextOptionsPanel
     decimalCharLabel = new javax.swing.JLabel();
     decimalCharTextField = new javax.swing.JTextField();
     quoteEscape = new workbench.gui.dialogs.QuoteEscapeSelector();
+    quoteAlways = new javax.swing.JCheckBox();
 
     setLayout(new java.awt.GridBagLayout());
 
@@ -165,15 +174,15 @@ public class TextOptionsPanel
     gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(6, 4, 0, 4);
     add(delimiterLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 5;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 4;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 4);
     add(delimiter, gridBagConstraints);
 
     headerIncluded.setText(ResourceMgr.getString("LblImportIncludeHeaders")); // NOI18N
@@ -181,6 +190,7 @@ public class TextOptionsPanel
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 1;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(headerIncluded, gridBagConstraints);
@@ -189,27 +199,28 @@ public class TextOptionsPanel
     quoteCharLabel.setToolTipText(ResourceMgr.getString("d_LblQuoteChar")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(6, 4, 0, 4);
     add(quoteCharLabel, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 5;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
-    gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 4);
     add(quoteChar, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 11;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 9;
     gridBagConstraints.weighty = 1.0;
     add(jPanel1, gridBagConstraints);
 
     decode.setText(ResourceMgr.getString("LblImportDecode")); // NOI18N
     decode.setToolTipText(ResourceMgr.getString("d_LblImportDecode")); // NOI18N
     gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     add(decode, gridBagConstraints);
@@ -221,24 +232,36 @@ public class TextOptionsPanel
     gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
-    gridBagConstraints.insets = new java.awt.Insets(4, 4, 0, 4);
+    gridBagConstraints.insets = new java.awt.Insets(3, 4, 0, 4);
     add(decimalCharLabel, gridBagConstraints);
 
     decimalCharTextField.setToolTipText(ResourceMgr.getDescription("LblImportDecimalChar"));
     gridBagConstraints = new java.awt.GridBagConstraints();
-    gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 3;
+    gridBagConstraints.gridx = 1;
+    gridBagConstraints.gridy = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(0, 4, 0, 4);
     add(decimalCharTextField, gridBagConstraints);
     gridBagConstraints = new java.awt.GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridwidth = 2;
     gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
     gridBagConstraints.insets = new java.awt.Insets(5, 4, 0, 4);
     add(quoteEscape, gridBagConstraints);
+
+    quoteAlways.setText(ResourceMgr.getString("LblExportQuoteAlways")); // NOI18N
+    quoteAlways.setBorder(null);
+    gridBagConstraints = new java.awt.GridBagConstraints();
+    gridBagConstraints.gridx = 0;
+    gridBagConstraints.gridy = 8;
+    gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = java.awt.GridBagConstraints.HORIZONTAL;
+    gridBagConstraints.anchor = java.awt.GridBagConstraints.NORTHWEST;
+    gridBagConstraints.insets = new java.awt.Insets(9, 4, 0, 0);
+    add(quoteAlways, gridBagConstraints);
   }// </editor-fold>//GEN-END:initComponents
 
 
@@ -250,6 +273,7 @@ public class TextOptionsPanel
   private javax.swing.JLabel delimiterLabel;
   private javax.swing.JCheckBox headerIncluded;
   private javax.swing.JPanel jPanel1;
+  private javax.swing.JCheckBox quoteAlways;
   private javax.swing.JTextField quoteChar;
   private javax.swing.JLabel quoteCharLabel;
   private workbench.gui.dialogs.QuoteEscapeSelector quoteEscape;

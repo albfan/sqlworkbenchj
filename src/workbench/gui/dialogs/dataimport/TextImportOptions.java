@@ -30,4 +30,5 @@ public interface TextImportOptions
 	String getDecimalChar();
 	void setDecimalChar(String s);
 	QuoteEscapeType getQuoteEscaping();
+	boolean getQuoteAlways();
 }

@@ -88,6 +88,8 @@ public class ExportOptionsPanel
 		this.dataStoreColumns = columns;
 		this.generalOptions = new GeneralExportOptionsPanel();
 		generalOptions.allowSelectColumns(allowColumnSelection);
+		//generalOptions.setBorder(new EmptyBorder(0, 1, 0, 0));
+
 		if (allowColumnSelection)
 		{
 			generalOptions.showSelectColumnsLabel();
@@ -98,7 +100,7 @@ public class ExportOptionsPanel
 		p.add(this.generalOptions, BorderLayout.CENTER);
 		
 		JPanel s = new JPanel(new BorderLayout(2, 2));
-		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 0, 5, 0));
+		Border b = new CompoundBorder(DividerBorder.BOTTOM_DIVIDER, new EmptyBorder(0, 2, 5, 0));
 		s.setBorder(b);
 		
 		poiAvailable = PoiHelper.isPoiAvailable();
