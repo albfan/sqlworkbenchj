@@ -1071,6 +1071,35 @@
 			</para>
     </simplesect>
 
+    <simplesect id="create-table-types">
+			<title>Defining CREATE TABLE templates for WbCopy</title>
+			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.create.table.[typename]</literal></para>
+			<para>
+        This defines a complete <literal>CREATE TABLE</literal> statement that is used by 
+        <link linkend="copy-create-type"><literal>WbCopy</literal></link> to create the target table.
+        The <literal>typename</literal> value is the value that has to be used for the
+        <literal>-tableType</literal> parameter of the <literal>WbCopy</literal> command.
+      </para> 
+      <para>
+       The following placeholders are supported in the template
+				<simplelist columns="1">
+					<member><literal>%fq_table_name%</literal> replaced by the fully qualified table name</member>
+					<member><literal>%table_name%</literal> replaced by the specified table name (without schema or catalog)</member>
+					<member><literal>%columnlist%</literal> replaced by the column definitions</member>
+				</simplelist>
+			</para>
+			<para>
+				Default values:
+				<simplelist columns="1">
+					<member><literal>.postgresql.create.table.temp=CREATE LOCAL TEMPORARY TABLE %fq_table_name% ( %columnlist% ) ON COMMIT DROP</literal></member>
+          <member><literal>.oracle.create.table.globaltemp=CREATE GLOBAL TEMPORARY TABLE %fq_table_name% ( %columnlist% ) ON COMMIT DELETE ROWS</literal></member>
+          <member><literal>.h2.create.table.temp=CREATE LOCAL TEMPORARY TABLE %fq_table_name% ( %columnlist% )</literal></member>
+          <member><literal>.informix_dynamic_server.create.table.temp_nolog=CREATE TEMP TABLE %fq_table_name% ( %columnlist% ) WITH NO LOG</literal></member>
+				</simplelist>
+			</para>
+      
+    </simplesect>
+
     <simplesect id="manual-setting-system-names">
 			<title>System generated names for contraints</title>
 			<para>Property: <literal>workbench.db.<link linkend="dbid">[dbid]</link>.constraints.systemname</literal></para>

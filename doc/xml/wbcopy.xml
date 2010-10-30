@@ -293,6 +293,29 @@
 
 					</row>
 
+          <row>
+						<entry id="copy-create-type">-tableType</entry>
+						<entry>
+							<para>
+                When <literal>-createTarget</literal> is set to <literal>true</literal>, this parameter
+                can be used to control the SQL statement that is generated to create the
+                target table. This is useful if the target table should e.g. be a temporary table
+							</para>
+							<para>
+                When using the auto-completion for this parameter, all defined "create types" that
+                are configured in workbench.settings (or are part of the default settings) are displayed
+                together with the name of the DBMS they are used for. The list is <emphasis role="bold">not</emphasis>
+                limited to definitions for the target database! The specified type must nonetheless match a type
+                defined for the target connection. If you specify a type that does not exist, the default
+                <literal>CREATE TABLE</literal> will be used.
+                </para>
+              <para>
+                For details on how to configure a CREATE TABLE template for this parameter, please refer to the
+                chapter <link linkend="setting-sql-generation">Settings related to SQL statement generation</link>
+              </para>
+						</entry>
+          </row>
+
 					<row>
 						<entry>-dropTarget</entry>
 						<entry>

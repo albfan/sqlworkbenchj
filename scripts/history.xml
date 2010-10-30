@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-10-29">
+  <release build="-1" date="2010-10-30">
+    <entry dev-build="6" type="enh">A new parameter (-tableType) is available for WbCopy to control what kind of table is created when using -createTarget. The parameter value selects a SQL "template" that is defined in workbench.settings</entry>
     <entry dev-build="6" type="enh">When using WbExport and -quoteAlways=true, null values are no longer escaped. The parameter can now be use with WbImport to distinguis between null values and empty strings.</entry>
     <entry dev-build="5" type="enh">The escaping of embedded quotes can now also be selected when using "Save Data as" or "Import file".</entry>
     <entry dev-build="5" type="enh">When connected to an Excel Spreadsheet, [] are now also recognized as quote characters (to allow a semicolon in a "table" name).</entry>
