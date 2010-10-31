@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -14,12 +14,6 @@ package workbench.db;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
-import static org.junit.Assert.*;
-import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
@@ -39,7 +33,7 @@ public class TypeMapperTest
 	{
 
 		TypeMapper mapper = new TypeMapper();
-		mapper.parseTypeMap("3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size);93:datetime year to second");
+		mapper.parseUserTypeMap("3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size);93:datetime year to second");
 		String type = mapper.getUserMapping(3, 1, 1);
 		assertEquals("DOUBLE", type);
 		type = mapper.getUserMapping(2, 11, 3);

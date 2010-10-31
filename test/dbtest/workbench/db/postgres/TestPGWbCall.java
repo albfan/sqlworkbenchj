@@ -90,6 +90,8 @@ public class TestPGWbCall
 		throws Exception
 	{
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
+		if (con == null) return;
+
 		WbCall call = new WbCall();
 		StatementRunner runner = new StatementRunner();
 		runner.setConnection(con);

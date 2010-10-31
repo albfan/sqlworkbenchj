@@ -4,7 +4,7 @@
  *  This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  *  Copyright 2002-2009, Thomas Kellerer
- *  No part of this code maybe reused without the permission of the author
+ *  No part of this code may be reused without the permission of the author
  *
  *  To contact the author please send an email to: support@sql-workbench.net
  */
@@ -14,7 +14,10 @@ import workbench.resource.Settings;
 import workbench.util.StringUtil;
 
 /**
- * A template class for column definitions, used to reconstruct the source code of a table
+ * A template class for column definitions, used when reconstructing the source code of a table.
+ *
+ * The template only deals with the column <b>definition</b> (i.e. data type and constraints) not the actual column name.
+ *
  * @author Thomas Kellerer
  */
 public class ColumnDefinitionTemplate
@@ -53,12 +56,47 @@ public class ColumnDefinitionTemplate
 		dbid = id;
 	}
 
+	/**
+	 * Build the datatype part of a column definition.
+	 *
+	 * The result will not include the column's name.
+	 *
+	 * @param column  the column definition to use
+	 * @param colConstraint column constraints if available (e.g. CHECK constraints)
+	 * @param typeLength the datatype will be padded with spaces to fill this length
+	 *
+	 * @return the data definition part of a column in a CREATE TABLE statement
+	 */
 	public String getColumnDefinitionSQL(ColumnIdentifier column, String colConstraint, int typeLength)
+	{
+		return getColumnDefinitionSQL(column, colConstraint, typeLength, null);
+	}
+
+	/**
+	 * Build the datatype part of a column definition.
+	 *
+	 * The result will not include the column's name.
+	 *
+	 * @param column  the column definition to use
+	 * @param colConstraint column constraints if available (e.g. CHECK constraints)
+	 * @param typeLength the datatype will be padded with spaces to fill this length
+	 * @param dataTypeOverride an alternative data type, if this is non-null it will be used instead
+	 *                        (otherwise the one stored in the column definition will be use)
+	 *
+	 * @return the data definition part of a column in a CREATE TABLE statement
+	 *
+	 * @see ColumnChanger#PARAM_DATATYPE
+	 * @see ColumnChanger#PARAM_DEFAULT_VALUE
+	 * @see ColumnChanger#PARAM_NULLABLE
+	 */
+	public String getColumnDefinitionSQL(ColumnIdentifier column, String colConstraint, int typeLength, String dataTypeOverride)
 	{
 		String expr = column.getComputedColumnExpression();
 		boolean isComputed = StringUtil.isNonBlank(expr);
 		String sql = getTemplate(isComputed, column.isAutoincrement());
-		String type = StringUtil.padRight(column.getDbmsType(), typeLength);
+
+		String type = StringUtil.padRight(dataTypeOverride == null ? column.getDbmsType() : dataTypeOverride, typeLength);
+
 		sql = replaceArg(sql, ColumnChanger.PARAM_DATATYPE, type);
 		String def = column.getDefaultValue();
 		if (StringUtil.isNonBlank(def))

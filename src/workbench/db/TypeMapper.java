@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code mayv be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -24,12 +24,15 @@ import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
- * A class to map datatypes from one DBMS to another.
+ * A class to map datatypes from one JDBC types to DBMS types.
  *
  * @author Thomas Kellerer
  */
 public class TypeMapper
 {
+	public static final String PLACEHOLDER_DIGITS = "$digits";
+	public static final String PLACEHOLDER_SIZE = "$size";
+	
 	private WbConnection targetDb;
 	private Map<Integer, String> typeInfo;
 	private Map<Integer, String> userMapping;
@@ -79,9 +82,8 @@ public class TypeMapper
 	{
 		List<Integer> allClobTypes = new ArrayList<Integer>(4);
 
-		// BLOBs are reported as BLOB, VARBINARY (Postgres), LONGVARBNARY (HSQL) and
-		// possibly as BINARY. So we need to test each of them. The order here
-		// is a personal feeling which type should be preferred over others ;)
+		// CLOBs are reported as CLOB, LONGVARCHAR
+		// The order here is a personal feeling which type should be preferred over others ;)
 		allClobTypes.add(Integer.valueOf(Types.CLOB));
 		allClobTypes.add(Integer.valueOf(Types.LONGVARCHAR));
 		allClobTypes.add(Integer.valueOf(Types.NCLOB));
@@ -100,6 +102,18 @@ public class TypeMapper
 		return null;
 	}
 
+	/**
+	 * Returns a parsed version of the user type-mapping if available.
+	 *
+	 * If a user type-mappin is available for the given type, this will
+	 * be returned, with the placeholders <tt>$size</tt> and <tt>$digits</tt>
+	 * replaced in the type definition.
+	 * 
+	 * @param type
+	 * @param size
+	 * @param digits
+	 * @return a valid data type definition for the DBMS
+	 */
 	protected String getUserMapping(int type, int size, int digits)
 	{
 		if (userMapping == null) return null;
@@ -107,8 +121,8 @@ public class TypeMapper
 		String userType = userMapping.get(key);
 		if (userType == null) return null;
 
-		userType = userType.replace("$size", Integer.toString(size));
-		userType = userType.replace("$digits", Integer.toString(digits));
+		userType = userType.replace(PLACEHOLDER_SIZE, Integer.toString(size));
+		userType = userType.replace(PLACEHOLDER_DIGITS, Integer.toString(digits));
 
 		return userType;
 	}
@@ -149,22 +163,28 @@ public class TypeMapper
 		return this.targetDb.getMetadata().getDataTypeResolver().getSqlTypeDisplay(name, type, size, digits);
 	}
 
-	private void parseTypeMap()
-	{
-		String mapping = targetDb.getDbSettings().getJDBCTypeMapping();
-		parseTypeMap(mapping);
-	}
-
 	/**
-	 * Mad protected for testing purposes
+	 * Parse and apply a user-defined type mapping.
+	 *
+	 * The mapping string has the format:
+	 * Mapping pairs are delimited with a colon, e.g. 12:varchar (maps Types.VARCHAR to "varchar")
+	 * <br/>
+	 * Multiple pairs are delimited with a semicolon, e.g:<br/>
+	 * <tt>3:DOUBLE;2:NUMERIC($size, $digits);-1:VARCHAR2($size);93:DATETIME YEAR TO SECOND</tt><br/>
+	 * <br/>
+	 * The placeholders <tt>$size</tt> and <tt>$digits</tt> are replaced with the approriate values when
+	 * the data type is used
 	 *
 	 * @param mapping
+	 * @see #getTypeName(int, int, int) 
 	 */
-	protected void parseTypeMap(String mapping)
+	public void parseUserTypeMap(String mapping)
 	{
-		if (StringUtil.isBlank(mapping)) return;
 		userMapping = new HashMap<Integer, String>();
+		
+		if (StringUtil.isBlank(mapping)) return;
 		List<String> types = StringUtil.stringToList(mapping, ";", true, true, false, false);
+
 		for (String type : types)
 		{
 			String[] def = type.split(":");
@@ -184,6 +204,16 @@ public class TypeMapper
 		}
 	}
 
+	/**
+	 * Builds up the mapping from JDBC type values (integers) to DBMS data types as reported by the driver.
+	 * The getTypeInfo() from the driver is intended to be used in the different direction (from a DBMS type to a JDBC type)
+	 * and thus a single JDBC type can map to multiple different DBMS types (especially STRUCT and OTHER).
+	 * <br/>
+	 * The TypeMapper always uses the first match that is returned from the driver and ignores all others.
+	 * To overwrite this behaviour, create a user mapping in workbench.settings.
+	 * <br>
+	 * @see #parseUserTypeMap(java.lang.String)
+	 */
 	private void createTypeMap()
 	{
 		ResultSet rs = null;
@@ -220,7 +250,7 @@ public class TypeMapper
 		{
 			SqlUtil.closeResult(rs);
 		}
-		parseTypeMap();
+		parseUserTypeMap(targetDb.getDbSettings().getJDBCTypeMapping());
 	}
 }
 

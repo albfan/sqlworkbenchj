@@ -127,6 +127,11 @@ public class ColumnIdentifier
 		this.expression = expr;
 	}
 
+	/**
+	 * Returns the column alias if not null, otherwise the column's name.
+	 *
+	 * @return the column display name.
+	 */
 	public String getDisplayName()
 	{
 		if (alias == null) return name;
@@ -274,6 +279,7 @@ public class ColumnIdentifier
 
 	/**
 	 * Creates a deep copy of this ColumnIdentifier.
+	 * 
 	 * @return a copy of this identifier
 	 */
 	public ColumnIdentifier createCopy()
@@ -297,7 +303,8 @@ public class ColumnIdentifier
 		result.position = this.position;
 		result.displaySize = this.displaySize;
 		result.expression = this.expression;
-
+		result.alias = this.alias;
+		
 		return result;
 	}
 

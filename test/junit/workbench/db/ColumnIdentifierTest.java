@@ -122,6 +122,23 @@ public class ColumnIdentifierTest
 		ColumnIdentifier copy = col.createCopy();
 		assertEquals("Copy not equals", true, col.equals(copy));
 		assertEquals("other_col * 2", copy.getComputedColumnExpression());
+
+		col = new ColumnIdentifier("count(*)", Types.INTEGER, false);
+		assertEquals("count(*)", col.getDisplayName());
+		col.setColumnAlias("NUM_ORDERS");
+		assertEquals("NUM_ORDERS", col.getDisplayName());
+		assertEquals("count(*)", col.getColumnName());
+
+		copy = col.createCopy();
+		assertEquals("NUM_ORDERS", copy.getDisplayName());
+		assertEquals("NUM_ORDERS", copy.getColumnAlias());
+
+		col = new ColumnIdentifier("ID", Types.INTEGER, false);
+		col.setDefaultValue("42");
+		assertEquals("42", col.getDefaultValue());
+
+		copy = col.createCopy();
+		assertEquals("42", copy.getDefaultValue());
 	}
 	
 	@Test
