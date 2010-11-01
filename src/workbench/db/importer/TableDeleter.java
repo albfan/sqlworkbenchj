@@ -109,7 +109,7 @@ public class TableDeleter
 					break;
 				}
 				
-				TableIdentifier targetTable = dbConn.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()));
+				TableIdentifier targetTable = dbConn.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()), false);
 				if (this.rowMonitor != null)
 				{
 					this.rowMonitor.setCurrentObject(targetTable.getTableName(), table, tables.size());

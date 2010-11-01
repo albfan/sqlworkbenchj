@@ -50,11 +50,7 @@ public class WbListTables extends SqlCommand
 	{
 		String options = getCommandLine(aSql);
 
-		String[] types = new String[]
-			{
-				currentConnection.getMetadata().getTableTypeName(),
-				currentConnection.getMetadata().getMViewTypeName()
-			};
+		String[] types = currentConnection.getMetadata().getTableTypesArray();
 
 		StatementRunnerResult result = new StatementRunnerResult();
 		ConsoleSettings.getInstance().setNextRowDisplay(RowDisplay.SingleLine);

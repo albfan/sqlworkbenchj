@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -77,26 +77,26 @@ public class DataImporter
 	private BatchedStatement insertStatement;
 	private BatchedStatement updateStatement;
 
-	private TableIdentifier targetTable = null;
+	private TableIdentifier targetTable;
 
 	private int commitEvery = 0;
 
 	private DeleteType deleteTarget = DeleteType.none;
-	private boolean createTarget = false;
+	private boolean createTarget;
 	private String createType;
-	private boolean continueOnError = true;
+	private boolean continueOnError;
 
 	private long totalRows = 0;
 	private long updatedRows = 0;
 	private long insertedRows = 0;
 	private long currentImportRow = 0;
 	private int mode = MODE_INSERT;
-	private boolean useBatch = false;
+	private boolean useBatch;
 	private int batchSize = -1;
-	private boolean commitBatch = false;
+	private boolean commitBatch;
 
-	private boolean hasErrors = false;
-	private boolean hasWarnings = false;
+	private boolean hasErrors;
+	private boolean hasWarnings;
 	private int reportInterval = 10;
 	private MessageBuffer messages;
 
@@ -104,7 +104,7 @@ public class DataImporter
 	private int totalTables = -1;
 	private int currentTable = -1;
 	private boolean transactionControl = true;
-	private boolean useSetNull = false;
+	private boolean useSetNull;
 
 	private List<TableIdentifier> tablesToBeProcessed;
 	private TableDeleter tableDeleter;
@@ -126,13 +126,13 @@ public class DataImporter
 	private ConstantColumnValues columnConstants;
 
 	private RowActionMonitor progressMonitor;
-	private boolean isRunning = false;
+	private boolean isRunning;
 	private ImportFileParser parser;
 
 	// Use for partial imports
 	private long startRow = 0;
 	private long endRow = Long.MAX_VALUE;
-	private boolean partialImportEnded = false;
+	private boolean partialImportEnded;
 
 	// Additional WHERE clause for UPDATE statements
 	private String whereClauseForUpdate;
@@ -143,10 +143,12 @@ public class DataImporter
 	private Savepoint insertSavepoint;
 	private Savepoint updateSavepoint;
 
-	private boolean checkRealClobLength = false;
-	private boolean isOracle = false;
-	private boolean useSetObjectWithType = false;
+	private boolean checkRealClobLength;
+	private boolean isOracle;
+	private boolean useSetObjectWithType;
 	private int maxErrorCount = 1000;
+
+	private boolean verifyTargetTable = true;
 
 	/**
 	 * Indicates multiple imports run with this instance oft DataImporter.
@@ -1380,6 +1382,11 @@ public class DataImporter
 		}
 	}
 
+	public void verifyTargetExistence(boolean flag)
+	{
+		verifyTargetTable = flag;
+	}
+
 	/**
 	 *	Callback function from the RowDataProducer
 	 */
@@ -1453,23 +1460,26 @@ public class DataImporter
 				}
 			}
 
-			try
+			if (verifyTargetTable)
 			{
-				this.checkTable();
-			}
-			catch (SQLException e)
-			{
-				String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", this.targetTable.getTableExpression());
-				if (parser != null)
+				try
 				{
-					String s = ResourceMgr.getString("ErrImportFileNotProcessed");
-					msg = msg + " " + StringUtil.replace(s, "%filename%", this.parser.getSourceFilename());
+					this.checkTable();
 				}
-				this.hasErrors = true;
-				this.messages.append(msg);
-				this.messages.appendNewLine();
-				this.targetTable = null;
-				throw e;
+				catch (SQLException e)
+				{
+					String msg = ResourceMgr.getFormattedString("ErrImportTableNotFound", this.targetTable.getTableExpression());
+					if (parser != null)
+					{
+						String s = ResourceMgr.getString("ErrImportFileNotProcessed");
+						msg = msg + " " + StringUtil.replace(s, "%filename%", this.parser.getSourceFilename());
+					}
+					this.hasErrors = true;
+					this.messages.append(msg);
+					this.messages.appendNewLine();
+					this.targetTable = null;
+					throw e;
+				}
 			}
 
 			checkConstantValues();
@@ -1675,7 +1685,7 @@ public class DataImporter
 		}
 
 		DbMetadata meta = dbConn.getMetadata();
-		
+
 		this.columnMap = new int[this.colCount];
 		int pkIndex = this.colCount - this.keyColumns.size();
 		int pkCount = 0;

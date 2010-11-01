@@ -40,7 +40,7 @@ public class TableDependency
 		this.connection = con;
 		this.wbMetadata = this.connection.getMetadata();
 		fkHandler = new FKHandler(connection);
-		this.theTable = this.wbMetadata.findTable(tbl);
+		this.theTable = this.wbMetadata.findTable(tbl, false);
 	}
 
 	public void setRetrieveDirectChildrenOnly(boolean flag)
@@ -96,7 +96,7 @@ public class TableDependency
 		TableIdentifier tableToUse = this.theTable;
 		if (!this.theTable.getNeverAdjustCase())
 		{
-			tableToUse = this.wbMetadata.findTable(theTable);
+			tableToUse = this.wbMetadata.findTable(theTable, false);
 		}
 		if (tableToUse == null) return;
 

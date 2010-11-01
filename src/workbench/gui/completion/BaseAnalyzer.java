@@ -75,7 +75,7 @@ public abstract class BaseAnalyzer
 	protected static final int CONTEXT_WB_COMMANDS = 7;
 
 	private final SelectAllMarker allColumnsMarker = new SelectAllMarker();
-	private String typeFilter;
+	private List<String> typeFilter;
 	protected String keywordFile;
 	protected WbConnection dbConnection;
 	protected final String sql;
@@ -372,9 +372,9 @@ public abstract class BaseAnalyzer
 		return (elements == null ? false : (elements.size() > 0));
 	}
 
-	protected void setTableTypeFilter(String filter)
+	protected void setTableTypeFilter(List<String> filter)
 	{
-		this.typeFilter = filter;
+		this.typeFilter = new ArrayList<String>(filter);
 	}
 
 	protected String getQualifierLeftOfCursor()

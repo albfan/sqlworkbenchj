@@ -76,7 +76,7 @@ public class SchemaReporter
 	public SchemaReporter(WbConnection conn)
 	{
 		this.dbConn = conn;
-		types = CollectionUtil.arrayList(conn.getMetadata().getTableTypeName());
+		types = conn.getMetadata().getTableTypes();
 		setIncludeViews(true);
 	}
 

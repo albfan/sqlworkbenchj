@@ -54,7 +54,7 @@ public class DbMetadataTest
 			assertNotNull(def.getTable());
 			assertEquals("MyTest", def.getTable().getTableName());
 
-			tbl = meta.findObject(new TableIdentifier("MyTest"), false);
+			tbl = meta.findObject(new TableIdentifier("MyTest"), false, false);
 			assertNotNull(tbl);
 			assertEquals("MyTest", tbl.getTableName());
 

@@ -1180,4 +1180,10 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "alternate.delim.create.trigger", true);
 	}
+
+	public boolean getSearchAllSchemas()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "search.all.schemas", true);
+	}
+
 }

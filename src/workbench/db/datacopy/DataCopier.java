@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -171,7 +171,9 @@ public class DataCopier
 	 * @param createTableType if not null, the target table will be created with the template defined by this type
 	 * @param dropTable if true, the target table will be dropped
 	 * @param ignoreDropError if true, an error during drop will not terminate the copy
-	 * 
+	 * @param useSourceTableDefinition  use the columns from the source table for the target table.
+	 *                                  This can be useful if the JDBC driver does not return information
+	 *                                  about the target table e.g. because it is a temporary table.
 	 * @see DbSettings#getCreateTableTemplate(java.lang.String)
 	 */
 	public void copyFromTable(WbConnection source,
@@ -182,7 +184,8 @@ public class DataCopier
 														String additionalWhere,
 														String createTableType,
 														boolean dropTable,
-														boolean ignoreDropError)
+														boolean ignoreDropError,
+														boolean useSourceTableDefinition)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -198,20 +201,24 @@ public class DataCopier
 			throw new SQLException("Table " + sourceTable.getTableName() + " not found in source connection");
 		}
 
-		this.initColumnMapping(columnMapping, createTableType != null);
+		this.initColumnMapping(columnMapping, createTableType != null, useSourceTableDefinition);
 
 		if (createTableType != null)
 		{
 			createTable(this.columnMap.values(), dropTable, ignoreDropError, createTableType);
 		}
 
+		// this flag must be set before calling initImporterForTable!
+		importer.verifyTargetExistence(!useSourceTableDefinition);
+
 		this.initImporterForTable(additionalWhere);
+
 	}
 
 	private TableIdentifier findTargetTable()
 	{
 		LogMgr.logDebug("DataCopier.findTargetTable()", "Looking for table " + targetTable.getQualifiedName() + " in target database");
-		TableIdentifier realTable = this.targetConnection.getMetadata().findTable(targetTable);
+		TableIdentifier realTable = this.targetConnection.getMetadata().findTable(targetTable, false);
 		if (realTable == null)
 		{
 			TableIdentifier toFind = targetTable.createCopy();
@@ -219,7 +226,7 @@ public class DataCopier
 			toFind.setSchema(toFind.getSchemaToUse(targetConnection));
 			toFind.setCatalog(toFind.getCatalogToUse(targetConnection));
 			LogMgr.logDebug("DataCopier.findTargetTable()", "Table " + targetTable.getQualifiedName() + " not found. Trying " + toFind.getQualifiedName());
-			realTable = this.targetConnection.getMetadata().findTable(toFind);
+			realTable = this.targetConnection.getMetadata().findTable(toFind, false);
 		}
 		return realTable;
 	}
@@ -641,12 +648,22 @@ public class DataCopier
 	 *	exist in both tables).
 	 *	If no mapping is provided, all matching columns from both tables are copied
 	 */
-	private void initColumnMapping(Map<String, String> columnMapping, boolean createNew)
+	private void initColumnMapping(Map<String, String> columnMapping, boolean createNew, boolean useSourceColumns)
 		throws SQLException
 	{
 		List<ColumnIdentifier> sourceCols = getSourceColumns();
 		List<ColumnIdentifier> targetCols = null;
-		if (!createNew) targetCols = this.targetConnection.getMetadata().getTableColumns(this.targetTable);
+		if (!createNew)
+		{
+			if (useSourceColumns)
+			{
+				targetCols =  this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
+			}
+			else
+			{
+				targetCols =  this.targetConnection.getMetadata().getTableColumns(this.targetTable);
+			}
+		}
 
 		this.columnMap = new HashMap<ColumnIdentifier, ColumnIdentifier>(sourceCols.size());
 

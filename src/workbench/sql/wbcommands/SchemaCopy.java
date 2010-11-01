@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -53,6 +53,7 @@ public class SchemaCopy
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
 	private boolean useSavepoint;
+	private boolean useSourceTableDefinition;
 
 	private List<TableIdentifier> sourceTables;
 	private Map<String, TableIdentifier> tableMap;
@@ -106,7 +107,7 @@ public class SchemaCopy
 				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
 				this.messages.appendNewLine();
 
-				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTableType, dropTable, ignoreDropError);
+				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTableType, dropTable, ignoreDropError, useSourceTableDefinition);
 				copier.setUseSavepoint(useSavepoint);
 				copier.startCopy();
 
@@ -154,14 +155,22 @@ public class SchemaCopy
 
 			if (!createTargetTable())
 			{
-				targetTable = this.targetConnection.getMetadata().findTable(targetTable);
+				targetTable = this.targetConnection.getMetadata().findTable(targetTable, false);
 				// check if the target table exists. DataCopier will throw an exception if
 				// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
 				if (targetTable == null)
 				{
-					this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", table.getTableName()));
-					this.messages.appendNewLine();
-					continue;
+					if (useSourceTableDefinition)
+					{
+						targetTable = table.createCopy();
+						LogMgr.logWarning("SchemaCopy.mapTables()", "Table " + table.getFullyQualifiedName(sourceConnection) + " not found in target. Assuming same structure and name");
+					}
+					else
+					{
+						this.messages.append(ResourceMgr.getFormattedString("MsgCopyTableIgnored", table.getTableName()));
+						this.messages.appendNewLine();
+						continue;
+					}
 				}
 			}
 			tableMap.put(table.getTableName(), targetTable);
@@ -183,7 +192,7 @@ public class SchemaCopy
 				break;
 			}
 
-			TableIdentifier targetTable = this.targetConnection.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()));
+			TableIdentifier targetTable = this.targetConnection.getMetadata().findTable(new TableIdentifier(sourceTable.getTableName()), false);
 			if (targetTable == null) continue;
 
 			TableDeleteSync sync = new TableDeleteSync(targetConnection, sourceConnection);
@@ -290,7 +299,8 @@ public class SchemaCopy
 		
 		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
-
+		useSourceTableDefinition = cmdLine.getBoolean(WbCopy.PARAM_USE_SOURCE_DEF, false);
+		
 		this.copier = new DataCopier();
 
 		this.rowMonitor = monitor;

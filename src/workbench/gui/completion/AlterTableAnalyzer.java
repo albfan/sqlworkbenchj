@@ -80,7 +80,7 @@ public class AlterTableAnalyzer
 			 (modifyPos == -1 && addPos == -1))
 		{
 			context = CONTEXT_TABLE_LIST;
-			setTableTypeFilter(this.dbConnection.getMetadata().getTableTypeName());
+			setTableTypeFilter(this.dbConnection.getMetadata().getTableTypes());
 		}
 		else if (modifyPos > -1 && tableEnd > -1)
 		{

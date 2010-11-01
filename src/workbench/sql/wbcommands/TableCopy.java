@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -19,6 +19,7 @@ import workbench.AppArguments;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
+import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.db.datacopy.DataCopier;
 import workbench.resource.ResourceMgr;
@@ -58,6 +59,7 @@ public class TableCopy
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		boolean ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
+		boolean useSourceTableDef = cmdLine.getBoolean(WbCopy.PARAM_USE_SOURCE_DEF, false);
 
 		String keys = cmdLine.getValue(WbCopy.PARAM_KEYS);
 
@@ -91,7 +93,12 @@ public class TableCopy
 		}
 		else
 		{
-			targetId = targetConnection.getMetadata().findTable(new TableIdentifier(targettable));
+			targetId = targetConnection.getMetadata().findTable(new TableIdentifier(targettable), false);
+		}
+
+		if (targetId == null && !useSourceTableDef)
+		{
+			throw new TableNotFoundException(targettable);
 		}
 
 		if (sourcetable != null)
@@ -99,7 +106,11 @@ public class TableCopy
 			TableIdentifier srcTable = new TableIdentifier(sourcetable);
 			String where = cmdLine.getValue(WbCopy.PARAM_SOURCEWHERE);
 			Map<String, String> mapping = this.parseMapping(cmdLine);
-			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropTable, ignoreDropError);
+			if (targetId == null && useSourceTableDef && sourcetable != null)
+			{
+				targetId = new TableIdentifier(targettable);
+			}
+			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropTable, ignoreDropError, useSourceTableDef);
 		}
 		else
 		{

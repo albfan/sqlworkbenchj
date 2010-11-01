@@ -16,7 +16,6 @@ import java.beans.PropertyChangeListener;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,7 +82,7 @@ public class DbObjectCache
 	/**
 	 * Get the tables (and views) the are currently in the cache
 	 */
-	public Set<TableIdentifier> getTables(String schema, String type)
+	public Set<TableIdentifier> getTables(String schema, List<String> type)
 	{
 		String schemaToUse = getSchemaToUse(schema);
 		if (this.objects.size() == 0 || (!schemasInCache.contains(schemaToUse == null ? NULL_SCHEMA : schemaToUse)))
@@ -135,7 +134,7 @@ public class DbObjectCache
 		return procs;
 	}
 
-	private Set<TableIdentifier> filterTablesByType(String schema, String type)
+	private Set<TableIdentifier> filterTablesByType(String schema, List<String> type)
 	{
 		this.getTables(schema);
 		String schemaToUse = getSchemaToUse(schema);
@@ -144,7 +143,7 @@ public class DbObjectCache
 		{
 			String ttype = tbl.getType();
 			String tSchema = tbl.getSchema();
-			if ( type.equalsIgnoreCase(ttype) &&
+			if ( type.contains(ttype) &&
 				   ((schemaToUse == null || schemaToUse.equalsIgnoreCase(tSchema) || tSchema == null || "public".equalsIgnoreCase(tSchema)))
 				 )
 			{

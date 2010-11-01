@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -1920,14 +1920,13 @@ public class DataPumper
 				}
 				if (!ignoreSelect) where = this.sqlEditor.getText();
 
-				boolean createTable = ttable.isNewTable();
 				Map<String, String> mapping = new HashMap<String, String>();
 				int count = colMapping.sourceColumns.length;
 				for (int i=0; i < count; i++)
 				{
 					mapping.put(colMapping.sourceColumns[i].getColumnName(), colMapping.targetColumns[i].getColumnName());
 				}
-				this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, tableType, dropTarget, ignoreDrop);
+				this.copier.copyFromTable(this.sourceConnection, this.targetConnection, stable, ttable, mapping, where, tableType, dropTarget, ignoreDrop, false);
 			}
 
 			this.copier.startBackgroundCopy();

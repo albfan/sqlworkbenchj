@@ -71,7 +71,7 @@ public class DeleteScriptGenerator
 
 		// Make sure we are using a completely filled TableIdentifier
 		// otherwise comparisons won't work correctly
-		this.rootTable = this.meta.findTable(table);
+		this.rootTable = this.meta.findTable(table, false);
 		this.dependency = new TableDependency(this.connection, this.rootTable);
 	}
 

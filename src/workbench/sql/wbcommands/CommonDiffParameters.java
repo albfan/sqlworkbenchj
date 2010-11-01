@@ -153,22 +153,22 @@ public class CommonDiffParameters
 
 			if (StringUtil.isNonBlank(refTableNames))
 			{
-				SourceTableArgument refArg = new SourceTableArgument(refTableNames, null, refSchema, referenceConn.getMetadata().getTableTypeName(), referenceConn);
+				SourceTableArgument refArg = new SourceTableArgument(refTableNames, null, refSchema, referenceConn.getMetadata().getTableTypesArray(), referenceConn);
 				refTables = refArg.getTables();
 			}
 			else
 			{
-				refTables = referenceConn.getMetadata().getObjectList(refSchema, new String[] { referenceConn.getMetadata().getTableTypeName() });
+				refTables = referenceConn.getMetadata().getObjectList(refSchema, referenceConn.getMetadata().getTableTypesArray());
 			}
 
 			if (StringUtil.isNonBlank(targetTableNames))
 			{
-				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, targetCon.getMetadata().getTableTypeName(), targetCon);
+				SourceTableArgument targetArg = new SourceTableArgument(targetTableNames, null, targetSchema, referenceConn.getMetadata().getTableTypesArray(), targetCon);
 				targetTables = targetArg.getTables();
 			}
 			else 
 			{
-				targetTables = targetCon.getMetadata().getObjectList(targetSchema, new String[] { targetCon.getMetadata().getTableTypeName() });
+				targetTables = targetCon.getMetadata().getObjectList(targetSchema, referenceConn.getMetadata().getTableTypesArray());
 				matchNames = true;
 			}
 		}

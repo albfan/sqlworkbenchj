@@ -221,9 +221,9 @@ public class SchemaDiff
 		for (int i=0; i < referenceList.size(); i++)
 		{
 			String rname = referenceList.get(i);
-			TableIdentifier rtbl = referenceDb.getMetadata().findTable(new TableIdentifier(rname));
+			TableIdentifier rtbl = referenceDb.getMetadata().findTable(new TableIdentifier(rname), false);
 			String tname = targetList.get(i);
-			TableIdentifier ttbl = targetDb.getMetadata().findTable(new TableIdentifier(tname));
+			TableIdentifier ttbl = targetDb.getMetadata().findTable(new TableIdentifier(tname), false);
 			if (rtbl != null && ttbl != null)
 			{
 				reference.add(rtbl);
@@ -407,20 +407,20 @@ public class SchemaDiff
 		String[] types;
 		if (diffViews || treatViewAsTable)
 		{
-			types = new String[] { this.referenceDb.getMetadata().getTableTypeName(), this.referenceDb.getMetadata().getViewTypeName() };
+			types = this.referenceDb.getMetadata().getTablesAndViewTypes();
 		}
 		else
 		{
-			types = new String[] { this.referenceDb.getMetadata().getTableTypeName() };
+			types = this.referenceDb.getMetadata().getTableTypesArray();
 		}
-
+		
 		List<TableIdentifier> refTables = referenceDb.getMetadata().getObjectList(this.referenceSchema, types);
 		List<TableIdentifier> target = targetDb.getMetadata().getObjectList(this.targetSchema, types);
 
 		if (treatViewAsTable)
 		{
 			String viewType = referenceDb.getMetadata().getViewTypeName();
-			String tblType = referenceDb.getMetadata().getTableTypeName();
+			String tblType = referenceDb.getMetadata().getBaseTableTypeName();
 			for (TableIdentifier table : refTables)
 			{
 				if (table.getType().equals(viewType))
@@ -530,7 +530,7 @@ public class SchemaDiff
 
 		if (targetTables != null)
 		{
-			String tableType = targetDb.getMetadata().getTableTypeName();
+			DbMetadata meta = targetDb.getMetadata();
 			count = targetTables.size();
 			for (int i=0; i < count; i++)
 			{
@@ -544,7 +544,7 @@ public class SchemaDiff
 				}
 				if (!refTableNames.contains(tbl))
 				{
-					if (tableType.equals(t.getType()))
+					if (meta.isTableType(t.getType()))
 					{
 						this.tablesToDelete.add(t);
 					}
@@ -760,7 +760,7 @@ public class SchemaDiff
 		writeDiffInfo(out);
 		int count = this.objectsToCompare.size();
 		List<ViewDiff> viewDiffs = new ArrayList<ViewDiff>();
-		String tableType = referenceDb.getMetadata().getTableTypeName();
+
 		// First we have to process the tables
 		for (int i=0; i < count; i++)
 		{
@@ -778,7 +778,7 @@ public class SchemaDiff
 
 			try
 			{
-				if (tableType.equalsIgnoreCase(entry.reference.getType()))
+				if (referenceDb.getMetadata().isTableType(entry.reference.getType()))
 				{
 					ReportTable source = createReportTableInstance(entry.reference, this.referenceDb);
 					if (entry.target == null)

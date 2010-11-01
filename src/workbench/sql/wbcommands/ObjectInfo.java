@@ -82,11 +82,18 @@ public class ObjectInfo
 		TableIdentifier tbl = new TableIdentifier(objectName);
 		tbl.adjustCase(connection);
 
-		TableIdentifier toDescribe = connection.getMetadata().findObject(tbl);
+		boolean searchAllSchemas = connection.getDbSettings().getSearchAllSchemas();
+		TableIdentifier toDescribe = connection.getMetadata().findObject(tbl, true, searchAllSchemas);
 		if (toDescribe == null)
 		{
-			// try again with the same case as entered by the user
-			toDescribe = connection.getMetadata().findObject(tbl, false);
+			TableIdentifier adjusted = tbl.createCopy();
+			adjusted.adjustCase(connection);
+			if (!adjusted.getTableName().equals(tbl.getTableName()))
+			{
+				// try again with the same case as entered by the user, but only if adjusting
+				// the case of the name changed anything. This is just a minor performance improvement
+				toDescribe = connection.getMetadata().findObject(tbl, false, searchAllSchemas);
+			}
 		}
 
 		DbSettings dbs = connection.getDbSettings();
@@ -243,7 +250,7 @@ public class ObjectInfo
 
 		ColumnRemover remover = new ColumnRemover(details);
 		DataStore cols = remover.removeColumnsByName(TableColumnsDatastore.JAVA_SQL_TYPE_COL_NAME, "SCALE/SIZE", "PRECISION");
-		cols.setResultName(toDescribe.getTableName());
+		cols.setResultName(toDescribe.getObjectExpression(connection));
 		result.setSuccess();
 		result.addDataStore(cols);
 

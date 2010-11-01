@@ -91,6 +91,8 @@ public class DbMetadata
 	implements QuoteHandler
 {
 	public static final String MVIEW_NAME = "MATERIALIZED VIEW";
+	private final String[] EMPTY_STRING_ARRAY = new String[]{};
+	
 	private String schemaTerm;
 	private String catalogTerm;
 	private String productName;
@@ -135,9 +137,10 @@ public class DbMetadata
 
 	private Pattern selectIntoPattern;
 
-	private String tableTypeName;
+	private String baseTableTypeName;
 
-	private String[] tableTypesTable;
+	private Set<String> tableTypesList;
+	private String[] tableTypes;
 	private String[] tableTypesSelectable;
 	private List<String> schemasToIgnore;
 	private List<String> catalogsToIgnore;
@@ -359,8 +362,14 @@ public class DbMetadata
 
 		this.metaSqlMgr = new MetaDataSqlManager(this.getProductName());
 
-		tableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
-		tableTypesTable = new String[] { tableTypeName };
+
+		baseTableTypeName = Settings.getInstance().getProperty("workbench.db.basetype.table." + this.getDbId(), "TABLE");
+
+		List<String> ttypes = Settings.getInstance().getListProperty("workbench.db." + getDbId() + ".tabletypes", false, "TABLE");
+		tableTypesList = new TreeSet<String>(new CaseInsensitiveComparator());
+		tableTypesList.addAll(ttypes);
+
+		tableTypes = tableTypesList.toArray(new String[]{});
 
 		// The tableTypesSelectable array will be used
 		// to fill the completion cache. In that case
@@ -428,8 +437,32 @@ public class DbMetadata
 		return this.quoteCharacter;
 	}
 
-	public String getTableTypeName() { return tableTypeName; }
-	public String getMViewTypeName() { return MVIEW_NAME;	}
+	public String getBaseTableTypeName()
+	{
+		return baseTableTypeName;
+	}
+
+	public String[] getTableTypesArray()
+	{
+		return tableTypesList.toArray(EMPTY_STRING_ARRAY);
+	}
+	
+	public String[] getTablesAndViewTypes()
+	{
+		List<String> types = new ArrayList<String>(tableTypesList);
+		types.add(getViewTypeName());
+		return types.toArray(EMPTY_STRING_ARRAY);
+	}
+	
+	public List<String> getTableTypes()
+	{
+		return new ArrayList<String>(tableTypesList);
+	}
+
+	public String getMViewTypeName()
+	{
+		return MVIEW_NAME;
+	}
 
 	public String getViewTypeName()
 	{
@@ -1386,10 +1419,10 @@ public class DbMetadata
 
 	public TableIdentifier findObject(TableIdentifier tbl)
 	{
-		return findObject(tbl, true);
+		return findObject(tbl, true, false);
 	}
 
-	public TableIdentifier findObject(TableIdentifier tbl, boolean adjustCase)
+	public TableIdentifier findObject(TableIdentifier tbl, boolean adjustCase, boolean searchAllSchemas)
 	{
 		if (tbl == null) return null;
 		TableIdentifier result = null;
@@ -1398,10 +1431,17 @@ public class DbMetadata
 
 		try
 		{
+			boolean schemaWasNull = false;
+
 			String schema = table.getSchema();
 			if (schema == null)
 			{
+				schemaWasNull = true;
 				schema = getCurrentSchema();
+			}
+			else
+			{
+				searchAllSchemas = false;
 			}
 
 			String catalog = table.getCatalog();
@@ -1417,6 +1457,11 @@ public class DbMetadata
 			{
 				// try again with PUBLIC, maybe it's a public synonym
 				ds = getObjects(null, "PUBLIC", table.getRawTableName(), null);
+			}
+
+			if (ds.getRowCount() == 0 && schemaWasNull && searchAllSchemas)
+			{
+				ds = getObjects(null, null, table.getRawTableName(), null);
 			}
 
 			if (ds.getRowCount() == 1)
@@ -1455,7 +1500,7 @@ public class DbMetadata
 	 */
 	public boolean tableExists(TableIdentifier aTable)
 	{
-		return objectExists(aTable, tableTypesTable);
+		return objectExists(aTable, tableTypes);
 	}
 
 	public boolean objectExists(TableIdentifier aTable, String type)
@@ -1470,20 +1515,25 @@ public class DbMetadata
 
 	public boolean objectExists(TableIdentifier aTable, String[] types)
 	{
-		return findTable(aTable, types) != null;
+		return findTable(aTable, types, false) != null;
 	}
 
 	public TableIdentifier findSelectableObject(TableIdentifier tbl)
 	{
-		return findTable(tbl, tableTypesSelectable);
+		return findTable(tbl, tableTypesSelectable, false);
+	}
+
+	public TableIdentifier findTable(TableIdentifier tbl, boolean searchAllSchemas)
+	{
+		return findTable(tbl, tableTypes, searchAllSchemas);
 	}
 
 	public TableIdentifier findTable(TableIdentifier tbl)
 	{
-		return findTable(tbl, tableTypesTable);
+		return findTable(tbl, tableTypes, false);
 	}
 
-	private TableIdentifier findTable(TableIdentifier tbl, String[] types)
+	private TableIdentifier findTable(TableIdentifier tbl, String[] types, boolean searchAllSchemas)
 	{
 		if (tbl == null) return null;
 
@@ -1493,7 +1543,7 @@ public class DbMetadata
 		try
 		{
 			String schema = table.getSchema();
-			if (schema == null)
+			if (schema == null && !searchAllSchemas)
 			{
 				schema = getCurrentSchema();
 			}
@@ -1978,7 +2028,7 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList()
 		throws SQLException
 	{
-		return getObjectList(null, getCurrentSchema(), tableTypesTable);
+		return getObjectList(null, getCurrentSchema(), tableTypes);
 	}
 
 	public List<TableIdentifier> getObjectList(String schema, String[] types)
@@ -1991,7 +2041,7 @@ public class DbMetadata
 	public List<TableIdentifier> getTableList(String table, String schema)
 		throws SQLException
 	{
-		return getObjectList(table, schema, tableTypesTable);
+		return getObjectList(table, schema, tableTypes);
 	}
 
 	/**
@@ -2360,11 +2410,8 @@ public class DbMetadata
 
 	public boolean isTableType(String type)
 	{
-		for (String t : tableTypesTable)
-		{
-			if (t.equalsIgnoreCase(type)) return true;
-		}
-		return false;
+		if (type == null) return false;
+		return tableTypesList.contains(type);
 	}
 
 	/**

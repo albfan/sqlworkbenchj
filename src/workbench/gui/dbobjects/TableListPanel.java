@@ -758,7 +758,7 @@ public class TableListPanel
 				this.tableTypes.addItem(type);
 			}
 
-			String tableView = this.dbConnection.getMetadata().getTableTypeName() + "," + this.dbConnection.getMetadata().getViewTypeName();
+			String tableView = this.dbConnection.getMetadata().getBaseTableTypeName() + "," + this.dbConnection.getMetadata().getViewTypeName();
 			String add = Settings.getInstance().getProperty("workbench.dbexplorer.typefilter.additional", tableView);
 			List<String> userFilter = StringUtil.stringToList(add, ";", true, true);
 

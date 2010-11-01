@@ -171,7 +171,7 @@ public class TableDeleteSync
 		if (tableToDelete == null) throw new IllegalArgumentException("Target table (for source: " + tableToCheck.getTableName() + ") may not be null!");
 
 		this.checkTable = this.reference.getMetadata().findSelectableObject(tableToCheck);
-		this.deleteTable = this.toDelete.getMetadata().findTable(tableToDelete);
+		this.deleteTable = this.toDelete.getMetadata().findTable(tableToDelete, false);
 
 		if (deleteTable == null) throw new SQLException("Table " + tableToDelete.getTableName() + " not found in target database");
 		firstDelete = true;

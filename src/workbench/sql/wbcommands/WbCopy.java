@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -19,6 +19,7 @@ import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
 import workbench.db.DbSettings;
 import workbench.db.TableIdentifier;
+import workbench.db.TableNotFoundException;
 import workbench.db.WbConnection;
 import workbench.gui.profiles.ProfileKey;
 import workbench.util.ExceptionUtil;
@@ -52,13 +53,17 @@ public class WbCopy
 	public static final String PARAM_KEYS = "keyColumns";
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
+	
+
 	/**
 	 * If PARAM_CREATETARGET is set to true, this parameter defines
 	 * the table type to be created.
 	 * The value specifies the CREATE TABLE template to be used.
-	 * @see workbench.db.DbSettings#getCreateTableTemplate(java.lang.String) 
+	 * @see workbench.db.DbSettings#getCreateTableTemplate(java.lang.String)
 	 */
 	public static final String PARAM_TABLE_TYPE = "tableType";
+	public static final String PARAM_USE_SOURCE_DEF = "useSourceTableDefinition";
+	
 	public static final String PARAM_DELETE_SYNC = "syncDelete";
 
 	private static final String ID_PREFIX = "$Wb-Copy$";
@@ -93,6 +98,7 @@ public class WbCopy
 		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_USE_SOURCE_DEF, ArgumentType.BoolArgument);
 
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
@@ -219,7 +225,7 @@ public class WbCopy
 				result.setFailure();
 				return result;
 			}
-			
+
 			copier.copyData();
 			if (copier.isSuccess())
 			{
@@ -230,6 +236,12 @@ public class WbCopy
 				result.setFailure();
 			}
 			result.addMessage(copier.getMessages());
+		}
+		catch (TableNotFoundException tnf)
+		{
+			String err = ResourceMgr.getFormattedString("ErrImportTableNotFound", tnf.getTableName());
+			result.addMessage(err);
+			result.setFailure();
 		}
 		catch (SQLException e)
 		{

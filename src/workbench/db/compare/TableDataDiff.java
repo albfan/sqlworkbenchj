@@ -246,7 +246,7 @@ public class TableDataDiff
 			throw new SQLException("No primary key found for table " + referenceTable);
 		}
 
-		tableToSync = this.toSync.getMetadata().findTable(tableToVerify);
+		tableToSync = this.toSync.getMetadata().findTable(tableToVerify, false);
 		if (tableToSync == null)
 		{
 			throw new SQLException("Target table " + tableToVerify.getTableName() + " not found!");

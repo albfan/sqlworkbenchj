@@ -188,7 +188,7 @@ public class WbSchemaDiff
 			List<TableIdentifier> tables = new ArrayList<TableIdentifier>();
 			for (TableIdentifier tbl : parms.getTables())
 			{
-				TableIdentifier realTable = referenceConnection.getMetadata().findTable(tbl);
+				TableIdentifier realTable = referenceConnection.getMetadata().findTable(tbl, false);
 				if (realTable != null)
 				{
 					tables.add(realTable);

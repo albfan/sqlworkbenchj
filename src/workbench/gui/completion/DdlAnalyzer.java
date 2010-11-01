@@ -14,6 +14,7 @@ package workbench.gui.completion;
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
+import workbench.util.CollectionUtil;
 
 /**
  * Analyze a DDL statement regarding the context for the auto-completion
@@ -71,12 +72,12 @@ public class DdlAnalyzer
 			if ("TABLE".equals(type) && cursorPos >= typeToken.getCharEnd())
 			{
 				context = CONTEXT_TABLE_LIST;
-				setTableTypeFilter(this.dbConnection.getMetadata().getTableTypeName());
+				setTableTypeFilter(this.dbConnection.getMetadata().getTableTypes());
 			}
 			else if ("VIEW".equals(type) && cursorPos >= typeToken.getCharEnd())
 			{
 				context = CONTEXT_TABLE_LIST;
-				setTableTypeFilter(this.dbConnection.getMetadata().getViewTypeName());
+				setTableTypeFilter(CollectionUtil.arrayList(this.dbConnection.getMetadata().getViewTypeName()));
 			}
 		}
 		else
