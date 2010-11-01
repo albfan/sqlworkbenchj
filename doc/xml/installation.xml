@@ -9,6 +9,7 @@
       is required. You can either use a JRE ("Runtime") or a JDK ("Development Kit") to run &wb-productname;.
     </para>
 
+    <!--
     <para>
       &wb-productname; does not need a "fully installed" runtime environment, you can also copy
       the <literal>jre</literal> directory from an existing Java installation and specify the
@@ -22,7 +23,8 @@
       You have to unzip the archive into a subdirectory named <literal>jre</literal> in the directory where <literal>sqlworkbench.jar</literal>
       is located.
     </para>
-
+    -->
+    
   </section>
 
   <section id="first-time-install">
@@ -146,7 +148,8 @@
 
     <important>
       <para>
-        The launcher can only be used with a 32bit JDK. It will <emphasis role="bold">not</emphasis> work with a 64bit JDK
+        For a Windows 64bit system, you have to use <literal>SQLWorkbench64.exe</literal>. It will automatically search
+        for a 64bit Java installation.
       </para>
     </important>
     
@@ -164,132 +167,17 @@
       on how to increase the memory that is available to &wb-productname;
     </para>
 
-    <section id="launcher-jdk-search">
-      <title>How the Windows launcher searches for a Sun JDK</title>
-
-      <para>First the launcher checks for a system variable <literal>WORKBENCH_JDK</literal>.
-      If that is defined, the JDK specified by that directory is used. If
-      <literal>WORKBENCH_JDK</literal> is not found, <literal>JAVA_HOME</literal> is used.
-      If <literal>JAVA_HOME</literal> is not defined, then the launcher checks if
-      a sub-directory JRE exists in the folder where SQLWorkbench.exe is located. If
-      that sub-directory exists, it is assumed that it contains a valid JRE. If the
-      sub-directory does not exist, or if it is not a JRE installation, then the registry key
-      <literal>HKLM\Software\JavaSoft\Java Runtime Environment</literal> is queried.
-      If that is not defined, <literal>HKLM\Software\JavaSoft\Java Development Kit</literal>
-      is queried.</para>
-
-      <para>In the registry key, a subkey for the version 1.6 is retrieved, and
-      the directory specified by that key is used as the base JDK
-      directory.</para>
-      <para>If your JDK/JRE installation cannot be found by the launcher, but you do have
-      a JDK available, you can specify the location of the JDK with the -jdk parameter</para>
-      <para>The launcher assumes the layout of the Sun jdk in the specified directory. If you
-      specify <literal>c:\jdk</literal> as the JDK directory, the launcher looks for the file
-      <literal>c:\jdk\bin\client\jvm.dll</literal> (the specified directory would actually be a
-      JRE then). If that is not found, it looks for <literal>c:\jdk\jre\bin\client\jvm.dll</literal>
-      (that would be a &quot;true&quot; JRE installation). If the <literal>-sever</literal> parameter
-      is specified, it will look for a sub-directory <literal>server</literal> instead of
-      <literal>client</literal>. If your non-Sun JDK/JRE follows the same directory layout
-      and filename conventions, you can use the launcher for that JDK as well.</para>
-    </section>
-
+  
     <section id="launcher-parameters">
       <title>Parameters for the Windows launcher</title>
 
-      <para>To distinguish parameters for the launcher and parameters to the
-      JVM, JVM parameter need to be prefixed with -J.
-      If you want to pass the parameter <literal>-Xmx256m</literal> to the JVM,
-      pass the parameter <literal>-J-Xmx256m</literal> to the launcher.
-      To define a system property you need to pass the parameter
-      <literal>-J-Dproperty.name=property_value</literal>.</para>
-
-      <para>The following parameters are recognized:</para>
-
-      <informaltable frame="all">
-        <tgroup cols="2" align="left">
-          <colspec colname="c1" colwidth="3cm" />
-          <colspec colname="c2"  />
-          <thead>
-            <row>
-              <entry>Parameter</entry>
-              <entry>Description</entry>
-            </row>
-          </thead>
-          <tbody valign="top">
-            <row>
-              <entry>-jdk</entry>
-              <entry>Specify the installation directory of the JDK e.g.: -jdk=c:\Java\jdk1.6
-                When this parameter is specified the launcher will not look for a JDK
-                installation as described <link linkend="launcher-jdk-search">here</link>
-              </entry>
-            </row>
-
-            <row>
-              <entry>-J</entry>
-              <entry>
-                Pass a parameter directly to the JVM e.g: -J-Xms128m or to set a JVM system property using <literal>-J-Dproperty=value</literal>
-                which can be used to overwrite a <link linkend="settings">configuration properties</link> from <literal>workbench.settings</literal> using e.g.
-                <literal>-J-Dworkbench.log.file=/mylogs/workbench.log</literal>
-              </entry>
-            </row>
-
-            <row>
-              <entry>-server</entry>
-              <entry>Select the server JVM (instead of the default client JVM).
-              This switch only works with the Sun JVM.</entry>
-            </row>
-
-            <row>
-              <entry>-client</entry>
-              <entry>Select the client JVM. This switch only works with the Sun JVM.</entry>
-            </row>
-
-            <row>
-              <entry>-jvmtype</entry>
-              <entry>Select the JVM type to be loaded. For the Sun JVM this
-                may be either <literal>client</literal> or <literal>server</literal> (equivalent
-                to the -server or -client switches). If the JDK identified with the
-                -jdk switch points to BEA's JRockit JVM, this should be
-                <literal>jrockit</literal> (i.e. -jvmtype=jrockit). Basically the value
-                of this switch is used to locate the <literal>jvm.dll</literal>
-                in the base directory specified with the -jdk switch.
-              </entry>
-            </row>
-
-            <row>
-              <entry>-noddraw</entry>
-              <entry>Disable the use of DirectDraw routines for the JVM. Use this
-                parameter when you are running &wb-productname; through PC-Duo or a similar
-                program, or if you are experiencing crashes when starting &wb-productname;
-              </entry>
-            </row>
-
-            <row>
-              <entry>-debug</entry>
-              <entry>Write debug information to the file workbench.dbg to identify problems when using the launcher</entry>
-            </row>
-
-            <row>
-              <entry>-help</entry>
-              <entry>Display a message with the list of parameters</entry>
-            </row>
-          </tbody>
-        </tgroup>
-      </informaltable>
-
-      <para>All other parameters are passed unchanged to the program.
-      See <xref linkend="commandline"/> for details.</para>
-
-      <para>The following call to the launcher:</para>
-
-      <programlisting>SQLWorkbench -noddraw -configDir=c:\MyConf</programlisting>
-
-      <para>is the same as directly starting sqlworkbench.jar with these
-      parameters:</para>
-
-      <programlisting>java -Dsun.java2d.noddraw=true -jar sqlworkbench.jar -configDir=c:\MyConf</programlisting>
+      <para>
+        The launcher executables are based on <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>, further documentation on
+        the format of the configuration file and parameters can also be found there.
+      </para>
     </section>
 
+    <!--
     <section id="launcher-vista">
       <title>Windows Vista</title>
       <para>
@@ -304,7 +192,7 @@
       </para>
       <para>Thanks to Jon for this tip.</para>
     </section>
-
+    -->
   </section>
 
 
@@ -418,22 +306,25 @@
     </para>
     <para>
       When you use the Windows&reg; <link linkend="launcher-using">Launcher</link> to start &wb-productname;
-      you need to pass the parameter -J-Xmx512m to the executable:
-      <programlisting>SQLWorkbench.exe -J-Xmx512m</programlisting>This example
-      will increase the maximum memory to 512MB. The recommended way
-      is to create Windows&reg; shortcut (e.g. on the desktop) and add the above parameter
-      to the shortcut definition. The launcher sets the available heap size
-      for &wb-productname; to 256MB.
+      you need to create a configuration file named <literal>SQLWorkbench.ini</literal> (or <literal>SQLWorkbench64.ini</literal>
+      when using the 64bit launcher) with the following content:
+      <programlisting>vm.heapsize.preferred=512</programlisting>
+      This will increase the memory for the application to 512MB. For more options to configure the JVM, please refer to the
+      documentation of <ulink url="http://winrun4j.sourceforge.net/">WinRun4J</ulink>
     </para>
+    
     <para>
       If you are running &wb-productname; on a non-Windows&reg; operating system or do not
       want to use the launcher, then you need to pass this parameter directly to the JVM
     </para>
     <para><programlisting>java -Xmx512m -jar sqlworkbench.jar</programlisting></para>
+    
     <para>
       If you are using the supplied shell scripts to start &wb-productname;, you can
-      edit the scripts to change the parameter that sets the maximum memory to 256MB.
+      edit the scripts and change the value for the -Xmx parameter in there.
     </para>
+
+    <!--
     <para>
       The default heap size for your Java environment depends on your operating
       system and your JDK implementation. Most JDKs use a default of 64MB.
@@ -443,6 +334,8 @@
       memory to the given value. This does not mean that the application will use
       that much memory
     </para>
+    -->
+    
   </section>
 
   <section id="commandline" xreflabel="command line parameters">
