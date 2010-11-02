@@ -1033,7 +1033,15 @@ public class DbSettings
 		
 		return Settings.getInstance().getProperty(prefix + "create.table." + type.toLowerCase(), defaultSql);
 	}
-	
+
+	/**
+	 * For testing purposes.
+	 */
+	public void setCreateTableTemplate(String type, String template)
+	{
+		Settings.getInstance().setProperty(prefix + "create.table." + type.toLowerCase(), template);
+	}
+
 	/**
 	 * Returns true if the placeholders for retrieving the table source need to be checked
 	 * for quoting. This is necessary if the SQL is a SELECT statement, but might not
@@ -1186,4 +1194,8 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "search.all.schemas", true);
 	}
 
+	public String getInlinePKDef()
+	{
+		return Settings.getInstance().getProperty(prefix + "sql.pk.inline", "PRIMARY KEY");
+	}
 }

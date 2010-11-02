@@ -485,11 +485,32 @@ public class StringUtil
 		return false;
 	}
 
-	public static int findFirstNonWhitespace(final CharSequence line)
+	public static char getFirstNonWhitespace(CharSequence line)
+	{
+		int pos = findFirstNonWhitespace(line);
+		if (pos < line.length())
+		{
+			return line.charAt(pos);
+		}
+		return 0;
+	}
+	
+	/**
+	 * Return the position of the first non-whitespace character in the String
+	 * @param line
+	 * @return the position of the first whitespace or the length of the string
+	 */
+	public static int findFirstNonWhitespace(CharSequence line)
 	{
 		return findFirstNonWhitespace(line, 0);
 	}
 
+	/**
+	 * Return the position of the first non-whitespace character in the String
+	 * @param line
+	 * @param startPos the position where to start searching
+	 * @return the position of the first whitespace or the length of the string
+	 */
 	public static int findFirstNonWhitespace(final CharSequence line, int startPos)
 	{
 		int pos = startPos;
@@ -497,12 +518,13 @@ public class StringUtil
 		if (len == 0) return -1;
 
 		char c = line.charAt(pos);
-		while (c <= ' ' && pos < len - 1)
+		while (pos < len - 1)
 		{
+			if (c > ' ') return pos;
 			pos ++;
 			c = line.charAt(pos);
 		}
-		return pos;
+		return len;
 	}
 
 	public static String getStartingWhiteSpace(final String line)

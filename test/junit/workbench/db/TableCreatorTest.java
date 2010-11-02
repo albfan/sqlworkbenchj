@@ -95,7 +95,7 @@ public class TableCreatorTest
 	}
 
 	@Test
-	public void testCreateTempTable()
+	public void testCreateTemplateTable()
 		throws Exception
 	{
 		try
@@ -113,21 +113,156 @@ public class TableCreatorTest
 			id.setIsNullable(false);
 			cols.add(id);
 
-			ColumnIdentifier name = new ColumnIdentifier("SOME_NAME", Types.VARCHAR);
+			ColumnIdentifier name = new ColumnIdentifier("FIRST_NAME", Types.VARCHAR);
 			name.setColumnSize(50);
 			name.setIsPkColumn(false);
 			name.setIsNullable(true);
+			name.setDefaultValue("Arthur");
 			cols.add(name);
+
+			ColumnIdentifier lastname = new ColumnIdentifier("LAST_NAME", Types.VARCHAR);
+			lastname.setColumnSize(50);
+			lastname.setIsPkColumn(false);
+			lastname.setIsNullable(true);
+			lastname.setDefaultValue(" 'Dent'");
+			cols.add(lastname);
 
 			// For H2 a a localtemp definition is part of default.properties
 			List<CreateTableTypeDefinition> types = DbSettings.getCreateTableTypes(con.getMetadata().getDbId());
 			assertEquals(1, types.size());
 
 			TableCreator creator = new TableCreator(con, types.get(0).getType(), tbl, cols);
+			creator.setStoreSQL(true);
 			creator.createTable();
+			List<String> sql = creator.getGeneratedSQL();
+			assertEquals(2, sql.size());
 
 			tables = con.getMetadata().getTableList("%", "PUBLIC");
 			assertEquals(1, tables.size());
+			TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("mytemp"));
+			assertNotNull(def);
+			assertEquals(3, def.getColumnCount());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
+	public void testCreateInlinePK()
+		throws Exception
+	{
+		try
+		{
+			WbConnection con = util.getConnection();
+
+			String template =
+				"CREATE TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
+			"\n(\n" +
+			MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + " " +
+				MetaDataSqlManager.PK_INLINE_DEFINITION +
+			"\n)";
+			
+			con.getDbSettings().setCreateTableTemplate("creator_inline_test", template);
+
+			List<TableIdentifier> tables = con.getMetadata().getTableList("%", "PUBLIC");
+			assertEquals(0, tables.size());
+
+			TableIdentifier tbl = new TableIdentifier("INLINE_PK");
+			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+
+			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
+			id.setIsPkColumn(true);
+			id.setIsNullable(false);
+			cols.add(id);
+
+			ColumnIdentifier id2 = new ColumnIdentifier("ID2", Types.INTEGER);
+			id2.setIsPkColumn(true);
+			id2.setIsNullable(false);
+			id2.setDefaultValue("42");
+			cols.add(id2);
+
+			ColumnIdentifier name = new ColumnIdentifier("FIRST_NAME", Types.VARCHAR);
+			name.setColumnSize(50);
+			name.setIsPkColumn(false);
+			name.setIsNullable(true);
+			name.setDefaultValue("Arthur");
+			cols.add(name);
+
+			ColumnIdentifier lastname = new ColumnIdentifier("LAST_NAME", Types.VARCHAR);
+			lastname.setColumnSize(50);
+			lastname.setIsPkColumn(false);
+			lastname.setIsNullable(true);
+			lastname.setDefaultValue(" 'Dent'");
+			cols.add(lastname);
+
+			TableCreator creator = new TableCreator(con, "creator_inline_test", tbl, cols);
+			creator.setStoreSQL(true);
+			creator.createTable();
+			List<String> sql = creator.getGeneratedSQL();
+			assertEquals(1, sql.size());
+
+			tables = con.getMetadata().getTableList("%", "PUBLIC");
+			assertEquals(1, tables.size());
+			TableDefinition def = con.getMetadata().getTableDefinition(new TableIdentifier("INLINE_PK"));
+			assertNotNull(def);
+			assertEquals(4, def.getColumnCount());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
+	public void testTemplateWithoutPK()
+		throws Exception
+	{
+		try
+		{
+			WbConnection con = util.getConnection();
+
+			String template =
+				"CREATE TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
+			"\n(\n" +
+			MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + " " +
+				MetaDataSqlManager.PK_INLINE_DEFINITION +
+			"\n)";
+
+			con.getDbSettings().setCreateTableTemplate("creator_inline_test", template);
+
+			List<ColumnIdentifier> cols = new ArrayList<ColumnIdentifier>();
+			// Now a table without PK, but with the PK template
+			ColumnIdentifier id = new ColumnIdentifier("ID", Types.INTEGER);
+			id.setIsPkColumn(false);
+			id.setIsNullable(false);
+			cols.add(id);
+
+			ColumnIdentifier name = new ColumnIdentifier("FIRST_NAME", Types.VARCHAR);
+			name.setColumnSize(50);
+			name.setIsPkColumn(false);
+			name.setIsNullable(true);
+			name.setDefaultValue("Arthur");
+			cols.add(name);
+
+			ColumnIdentifier lastname = new ColumnIdentifier("LAST_NAME", Types.VARCHAR);
+			lastname.setColumnSize(50);
+			lastname.setIsPkColumn(false);
+			lastname.setIsNullable(true);
+			lastname.setDefaultValue(" 'Dent'");
+			cols.add(lastname);
+
+			TableIdentifier tbl = new TableIdentifier("INLINE_NOPK");
+			TableCreator creator = new TableCreator(con, "creator_inline_test", tbl, cols);
+			creator.setStoreSQL(true);
+			creator.createTable();
+			List<String> sqls = creator.getGeneratedSQL();
+			assertEquals(1, sqls.size());
+
+			TableDefinition def = con.getMetadata().getTableDefinition(tbl);
+			assertNotNull(def);
+			assertEquals(3, def.getColumnCount());
 		}
 		finally
 		{

@@ -35,7 +35,9 @@ public class TableCreator
 	private boolean useColumnAlias;
 	private String creationType;
 	private ColumnDefinitionTemplate columnTemplate;
-
+	private boolean storeSQL;
+	private List<String> generatedSQL;
+	
 	/**
 	 * Create a new TableCreator.
 	 *
@@ -108,13 +110,14 @@ public class TableCreator
 		int numCols = 0;
 		List<String> pkCols = new ArrayList<String>();
 
+		columns.append("  ");
 		for (ColumnIdentifier col : columnDefinition)
 		{
 			if (col.isPkColumn()) pkCols.add(col.getColumnName());
 			String def = this.getColumnDefintionString(col);
 			if (def == null) continue;
 
-			if (numCols > 0) columns.append(", ");
+			if (numCols > 0) columns.append(",\n  ");
 			columns.append(def);
 			numCols++;
 		}
@@ -122,13 +125,44 @@ public class TableCreator
 		String sql = template.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, name);
 		sql = sql.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, columns);
 
+		int pos = sql.indexOf(MetaDataSqlManager.PK_INLINE_DEFINITION);
+		boolean useAlterPK = true;
+
+		if (pkCols.size() > 0 && pos > -1)
+		{
+			useAlterPK = false;
+			StringBuilder inlinePK = new StringBuilder(pkCols.size() * 10);
+			inlinePK.append(",\n  ");
+			String pkKeyword = connection.getDbSettings().getInlinePKDef();
+			inlinePK.append(pkKeyword);
+			inlinePK.append(" (");
+			for (int i=0; i < pkCols.size(); i++)
+			{
+				if (i > 0) inlinePK.append(',');
+				inlinePK.append(connection.getMetadata().quoteObjectname(pkCols.get(i)));
+			}
+			inlinePK.append(')');
+			sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, inlinePK.toString());
+		} 
+		else if (pos > -1)
+		{
+			// make sure the placeholder is removed if no PK is defined.
+			sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, "");
+		}
+
+		if (storeSQL)
+		{
+			generatedSQL = new ArrayList<String>(2);
+			generatedSQL.add(sql);
+		}
+		
 		LogMgr.logInfo("TableCreator.createTable()", "Creating table using sql: " + sql);
 		Statement stmt = this.connection.createStatement();
 		try
 		{
 			stmt.executeUpdate(sql);
 
-			if (pkCols.size() > 0)
+			if (pkCols.size() > 0 && useAlterPK)
 			{
 				TableSourceBuilder builder = TableSourceBuilderFactory.getBuilder(connection);
 				CharSequence pkSql = builder.getPkSource(this.tablename, pkCols, null);
@@ -136,6 +170,10 @@ public class TableCreator
 				{
 					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());
 					stmt.executeUpdate(pkSql.toString());
+				}
+				if (storeSQL)
+				{
+					generatedSQL.add(pkSql.toString());
 				}
 			}
 
@@ -199,4 +237,16 @@ public class TableCreator
 		return result.toString();
 	}
 
+	public List<String> getGeneratedSQL()
+	{
+		return generatedSQL;
+	}
+	
+	/**
+	 * For testing purposes only.
+	 */
+	public void setStoreSQL(boolean flag)
+	{
+		this.storeSQL = flag;
+	}
 }

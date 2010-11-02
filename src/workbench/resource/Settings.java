@@ -2660,6 +2660,7 @@ public class Settings
 
 	private void renameOldProps()
 	{
+		this.renameProperty("workbench.worspace.recent", "workbench.workspace.recent");
 		this.renameProperty("workbench.sql.search.lastValue", "workbench.sql.search.lastvalue");
 		this.renameProperty("workbench.sql.maxcolwidth","workbench.gui.optimalwidth.maxsize");
 		this.renameProperty("workbench.sql.mincolwidth","workbench.gui.optimalwidth.minsize");

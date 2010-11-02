@@ -171,6 +171,23 @@ public class StringUtilTest
 
 		pos = StringUtil.findFirstNonWhitespace(s, 12);
 		assertEquals(15, pos);
+
+		String empty = "   ";
+		pos = StringUtil.findFirstNonWhitespace(empty);
+		assertEquals(empty.length(), pos);
+	}
+
+	@Test
+	public void testGetFirsNonWhitespace()
+	{
+		String value = "   this is a test";
+		char c = StringUtil.getFirstNonWhitespace(value);
+		assertEquals('t', c);
+
+		value = "   ";
+		c = StringUtil.getFirstNonWhitespace(value);
+		assertEquals(0, c);
+
 	}
 
 	@Test

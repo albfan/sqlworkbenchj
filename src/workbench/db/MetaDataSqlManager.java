@@ -29,6 +29,7 @@ public class MetaDataSqlManager
 	public static final String INDEX_TYPE_PLACEHOLDER = "%indextype%";
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
+	public static final String PK_INLINE_DEFINITION = "%pk_definition%";
 	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
 	public static final String COLUMN_NAME_PLACEHOLDER = "%column_name%";
 	public static final String COLUMN_LIST_PLACEHOLDER = "%columnlist%";

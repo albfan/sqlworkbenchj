@@ -11,6 +11,7 @@
 package workbench.db;
 
 import workbench.resource.Settings;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -98,7 +99,7 @@ public class ColumnDefinitionTemplate
 		String type = StringUtil.padRight(dataTypeOverride == null ? column.getDbmsType() : dataTypeOverride, typeLength);
 
 		sql = replaceArg(sql, ColumnChanger.PARAM_DATATYPE, type);
-		String def = column.getDefaultValue();
+		String def = getDefaultExpression(column);
 		if (StringUtil.isNonBlank(def))
 		{
 			sql = replaceArg(sql, ColumnChanger.PARAM_DEFAULT_VALUE, "DEFAULT " + def);
@@ -111,6 +112,32 @@ public class ColumnDefinitionTemplate
 		sql = replaceArg(sql, PARAM_COL_CONSTRAINTS, colConstraint);
 		sql = replaceArg(sql, PARAM_EXPRESSION, expr);
 		return sql.trim();
+	}
+
+	/**
+	 * Fix a problem with default values for some JDBC drivers.
+	 *
+	 * Some drivers seem to return default values that are not "real" expressions but e.g. an
+	 * unquoted string even though the column is a character column.
+	 *
+	 * This method will fix this for character columns. Defaults for other data types
+	 * will be returned unchanged.
+	 *
+	 * @param column the column
+	 * @return a valid expression for the column default.
+	 */
+	private String getDefaultExpression(ColumnIdentifier column)
+	{
+		String value = column.getDefaultValue();
+		if (value == null) return null;
+		if (SqlUtil.isCharacterType(column.getDataType()))
+		{
+			if (StringUtil.getFirstNonWhitespace(value) != '\'')
+			{
+				return "'" + value + "'";
+			}
+		}
+		return value;
 	}
 
 	public static String replaceNullable(String sql, String dbIdentifier, boolean isNullable)

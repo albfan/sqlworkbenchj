@@ -1083,18 +1083,27 @@
       <para>
        The following placeholders are supported in the template
 				<simplelist columns="1">
-					<member><literal>%fq_table_name%</literal> replaced by the fully qualified table name</member>
-					<member><literal>%table_name%</literal> replaced by the specified table name (without schema or catalog)</member>
-					<member><literal>%columnlist%</literal> replaced by the column definitions</member>
+					<member><literal>%fq_table_name%</literal> replaced with the fully qualified table name</member>
+					<member><literal>%table_name%</literal> replaced with the specified table name (without schema or catalog)</member>
+					<member><literal>%columnlist%</literal> replaced with the column definitions (for all columns)</member>
+					<member><literal>%pk_definition%</literal> replaced with the primary key definition.</member>
 				</simplelist>
 			</para>
+      <para>
+        The placeholder <literal>%pk_definition%</literal> can be used if the DBMS does not support defining a primary
+        key using an ALTER TABLE on the created table. If this placeholder is present in the template and the table
+        has a primary key, the placeholder will replaced with an approriate <literal>PRIMARY KEY (col1, ...)</literal>
+        expression. Note that the template must <emphasis role="bold">not</emphasis> contain the needed
+        comma for the <literal>PRIMARY KEY</literal>. The comma will be added by &wb-productname; if a primary key
+        is defined. If the table has no primary key, the placeholder will automatically be removed.
+      </para>
 			<para>
 				Default values:
 				<simplelist columns="1">
 					<member><literal>.postgresql.create.table.temp=CREATE LOCAL TEMPORARY TABLE %fq_table_name% ( %columnlist% ) ON COMMIT DROP</literal></member>
           <member><literal>.oracle.create.table.globaltemp=CREATE GLOBAL TEMPORARY TABLE %fq_table_name% ( %columnlist% ) ON COMMIT DELETE ROWS</literal></member>
           <member><literal>.h2.create.table.temp=CREATE LOCAL TEMPORARY TABLE %fq_table_name% ( %columnlist% )</literal></member>
-          <member><literal>.informix_dynamic_server.create.table.temp_nolog=CREATE TEMP TABLE %fq_table_name% ( %columnlist% ) WITH NO LOG</literal></member>
+          <member><literal>.informix_dynamic_server.create.table.temp_nolog=CREATE TEMP TABLE %fq_table_name% ( %columnlist% %pk_definition% ) WITH NO LOG</literal></member>
 				</simplelist>
 			</para>
       

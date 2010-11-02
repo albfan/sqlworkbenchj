@@ -27,7 +27,7 @@ import workbench.util.WbFile;
 public class RecentWorkspaceManager
 	implements SettingsListener
 {
-	private final String PROP_NAME = "worspace.recent";
+	private final String PROP_NAME = "workspace.recent";
 	private FixedSizeList<WbFile> workspaces;
 
 	/**
