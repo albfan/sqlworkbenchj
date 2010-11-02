@@ -30,8 +30,7 @@ public class ColumnDefinitionTemplate
 	}
 
 	/**
-	 * Will be replaced only if the column is not null, if the column
-	 * is nullable no SQL will be generated
+	 * Will be replaced only if the column is not null
 	 */
 	public static final String PARAM_NOT_NULL = "%not_null%";
 
@@ -47,6 +46,7 @@ public class ColumnDefinitionTemplate
 
 	private String dbid;
 	private String template;
+	private boolean fixDefaultExpression;
 
 	public ColumnDefinitionTemplate()
 	{
@@ -114,8 +114,13 @@ public class ColumnDefinitionTemplate
 		return sql.trim();
 	}
 
+	public void setFixDefaultValues(boolean flag)
+	{
+		this.fixDefaultExpression = flag;
+	}
+	
 	/**
-	 * Fix a problem with default values for some JDBC drivers.
+	 * Fix potential problems with default values for some JDBC drivers.
 	 *
 	 * Some drivers seem to return default values that are not "real" expressions but e.g. an
 	 * unquoted string even though the column is a character column.
@@ -128,6 +133,8 @@ public class ColumnDefinitionTemplate
 	 */
 	private String getDefaultExpression(ColumnIdentifier column)
 	{
+		if (!fixDefaultExpression) return column.getDefaultValue();
+		
 		String value = column.getDefaultValue();
 		if (value == null) return null;
 		if (SqlUtil.isCharacterType(column.getDataType()))
@@ -196,6 +203,7 @@ public class ColumnDefinitionTemplate
 		}
 		return sql;
 	}
+
 	/**
 	 * For unit testing only
 	 */

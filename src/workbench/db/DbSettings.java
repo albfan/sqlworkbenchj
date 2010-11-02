@@ -1194,8 +1194,18 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "search.all.schemas", true);
 	}
 
-	public String getInlinePKDef()
+	public String getInlinePKKeyword()
 	{
 		return Settings.getInstance().getProperty(prefix + "sql.pk.inline", "PRIMARY KEY");
+	}
+
+	/**
+	 * Returns a flag if the driver returns "read-made" expressions for the DEFAULT value of a column.
+	 * 
+	 * @return
+	 */
+	public boolean returnsValidDefaultExpressions()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "defaultvalue.isexpression", true);
 	}
 }

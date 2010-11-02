@@ -181,7 +181,22 @@ public class TableSourceBuilder
 		return null;
 	}
 
-	protected CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore aIndexDef, DataStore aFkDef, boolean includeDrop, String tableNameToUse, boolean includeFk)
+	/**
+	 * Generate the pure CREATE TABLE statement for the passed table definition.
+	 *
+	 * Any table constraints will be retrieved if needed.
+	 * 
+	 * @param table the table name
+	 * @param columns the columns of the table
+	 * @param indexDefinition defined indexes for the table (may be null)
+	 * @param fkDefinitions defined foreign keys for the table (may be null)
+	 * @param includeDrop if true, a DROP TABLE will be added before the CREATE TABLE
+	 * @param tableNameToUse an alternate name to use (instead of the one in the table parameter)
+	 * @param includeFk if true, foreign key definitions (if present) will be included
+	 *
+	 * @return the CREATE TABLE statement for the table
+	 */
+	public CharSequence getCreateTable(TableIdentifier table, List<ColumnIdentifier> columns, DataStore indexDefinition, DataStore fkDefinitions, boolean includeDrop, String tableNameToUse, boolean includeFk)
 	{
 		if (table == null) return StringUtil.EMPTY_STRING;
 
@@ -192,7 +207,7 @@ public class TableSourceBuilder
 
 		if ("MVIEW_NAME".equals(table.getType()))
 		{
-			return dbConnection.getMetadata().getMViewSource(table, columns, aIndexDef, includeDrop);
+			return dbConnection.getMetadata().getMViewSource(table, columns, indexDefinition, includeDrop);
 		}
 
 		StringBuilder result = new StringBuilder(250);
@@ -266,7 +281,7 @@ public class TableSourceBuilder
 			result.append(lineEnding);
 		}
 
-		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(aIndexDef);
+		String pkname = table.getPrimaryKeyName() != null ? table.getPrimaryKeyName() : getPKName(indexDefinition);
 
 		if (this.createInlineConstraints && pkCols.size() > 0)
 		{
@@ -275,14 +290,16 @@ public class TableSourceBuilder
 			{
 				result.append("CONSTRAINT " + pkname);
 			}
-			result.append(" PRIMARY KEY (");
+			result.append(' ');
+			result.append(dbConnection.getDbSettings().getInlinePKKeyword());
+			result.append(" (");
 
 			result.append(StringUtil.listToString(pkCols, ", ", false));
 			result.append(")" + lineEnding);
 
 			if (includeFk)
 			{
-				StringBuilder fk = getFkSource(table, aFkDef, tableNameToUse, createInlineConstraints);
+				StringBuilder fk = getFkSource(table, fkDefinitions, tableNameToUse, createInlineConstraints);
 				if (fk.length() > 0)
 				{
 					result.append(fk);
@@ -291,7 +308,7 @@ public class TableSourceBuilder
 		}
 
 		result.append(")");
-		String options = getAdditionalTableOptions(table, columns, aIndexDef);
+		String options = getAdditionalTableOptions(table, columns, indexDefinition);
 		if (options != null)
 		{
 			result.append(lineEnding);
@@ -303,7 +320,7 @@ public class TableSourceBuilder
 		// end of CREATE TABLE
 
 		// Add additional column information provided by any specialized descendant class
-		String colInfo = getAdditionalColumnSql(table, columns, aIndexDef);
+		String colInfo = getAdditionalColumnSql(table, columns, indexDefinition);
 		if (StringUtil.isNonBlank(colInfo))
 		{
 			result.append(colInfo);
@@ -338,6 +355,7 @@ public class TableSourceBuilder
 		}
 
 		ColumnDefinitionTemplate tmpl = new ColumnDefinitionTemplate(meta.getDbId());
+		tmpl.setFixDefaultValues(!dbConnection.getDbSettings().returnsValidDefaultExpressions());
 		result.append(tmpl.getColumnDefinitionSQL(toUse, columnConstraint, maxTypeLength));
 
 		if (includeCommentInTableSource && StringUtil.isNonBlank(column.getComment()))

@@ -39,8 +39,14 @@ public class ColumnDefinitionTemplateTest
 		String colConstraint = "";
 
 		ColumnDefinitionTemplate tmpl = new ColumnDefinitionTemplate();
-		String t = ColumnChanger.PARAM_DATATYPE + " " + ColumnChanger.PARAM_DEFAULT_VALUE + " " + ColumnDefinitionTemplate.PARAM_NOT_NULL + " " + ColumnDefinitionTemplate.PARAM_COL_CONSTRAINTS;
-		tmpl.setTemplate(t);
+
+		String templateSql =
+			ColumnChanger.PARAM_DATATYPE + " " +
+			ColumnChanger.PARAM_DEFAULT_VALUE + " " +
+			ColumnDefinitionTemplate.PARAM_NOT_NULL + " " +
+			ColumnDefinitionTemplate.PARAM_COL_CONSTRAINTS;
+
+		tmpl.setTemplate(templateSql);
 
 		String expResult = "INTEGER    DEFAULT 42 NOT NULL";
 		String result = tmpl.getColumnDefinitionSQL(column, colConstraint, 10);
@@ -60,6 +66,43 @@ public class ColumnDefinitionTemplateTest
 		expResult = "INTEGER    NOT NULL";
 		result = tmpl.getColumnDefinitionSQL(column, colConstraint, 10);
 		assertEquals(expResult, result);
+	}
+
+	@Test
+	public void testFixDefaultExpression()
+	{
+		ColumnDefinitionTemplate tmpl = new ColumnDefinitionTemplate();
+
+		String templateSql =
+			ColumnChanger.PARAM_DATATYPE + " " +
+			ColumnChanger.PARAM_DEFAULT_VALUE + " " +
+			ColumnDefinitionTemplate.PARAM_NOT_NULL + " " +
+			ColumnDefinitionTemplate.PARAM_COL_CONSTRAINTS;
+
+		tmpl.setTemplate(templateSql);
+		
+		ColumnIdentifier column = new ColumnIdentifier("first_name", Types.VARCHAR, false);
+		column.setDbmsType("VARCHAR(50)");
+		column.setColumnSize(50);
+		column.setIsNullable(true);
+		column.setDefaultValue("'Arthur'");
+
+		tmpl.setFixDefaultValues(false);
+		String expResult = "VARCHAR(50)  DEFAULT 'Arthur'";
+		assertEquals(expResult, tmpl.getColumnDefinitionSQL(column, null, 12));
+
+		tmpl.setFixDefaultValues(true);
+		assertEquals(expResult, tmpl.getColumnDefinitionSQL(column, null, 12));
+
+		column.setDefaultValue("Arthur");
+		tmpl.setFixDefaultValues(false);
+		expResult = "VARCHAR(50)  DEFAULT Arthur";
+		assertEquals(expResult, tmpl.getColumnDefinitionSQL(column, null, 12));
+
+		column.setDefaultValue("Arthur");
+		tmpl.setFixDefaultValues(true);
+		expResult = "VARCHAR(50)  DEFAULT 'Arthur'";
+		assertEquals(expResult, tmpl.getColumnDefinitionSQL(column, null, 12));
 
 	}
 }

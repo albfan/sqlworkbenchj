@@ -274,9 +274,9 @@ public class DataCopier
 			for (ColumnIdentifier col : columns)
 			{
 				// When copying a table from MySQL or SQL Server to a standard compliant DBMS we must ensure
-				// that wrong quoting characters are replaced with the standard characters
+				// that wrong quoting characters are removed
 				ColumnIdentifier copy = col.createCopy();
-				copy.adjustQuotes(sourceConnection.getMetadata(), targetConnection.getMetadata());
+				copy.setColumnName(sourceConnection.getMetadata().removeQuotes(copy.getColumnName()));
 				targetCols.add(col);
 			}
 

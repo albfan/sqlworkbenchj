@@ -35,7 +35,7 @@ import workbench.util.StringUtil;
  *
  * @author Thomas Kellerer
  */
-public class TableCopy
+class TableCopy
 	implements CopyTask
 {
 	private DataCopier copier;

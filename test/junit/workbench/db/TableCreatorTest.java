@@ -117,7 +117,7 @@ public class TableCreatorTest
 			name.setColumnSize(50);
 			name.setIsPkColumn(false);
 			name.setIsNullable(true);
-			name.setDefaultValue("Arthur");
+			name.setDefaultValue("'Arthur'");
 			cols.add(name);
 
 			ColumnIdentifier lastname = new ColumnIdentifier("LAST_NAME", Types.VARCHAR);
@@ -187,7 +187,7 @@ public class TableCreatorTest
 			name.setColumnSize(50);
 			name.setIsPkColumn(false);
 			name.setIsNullable(true);
-			name.setDefaultValue("Arthur");
+			name.setDefaultValue("'Arthur'");
 			cols.add(name);
 
 			ColumnIdentifier lastname = new ColumnIdentifier("LAST_NAME", Types.VARCHAR);
@@ -243,7 +243,7 @@ public class TableCreatorTest
 			name.setColumnSize(50);
 			name.setIsPkColumn(false);
 			name.setIsNullable(true);
-			name.setDefaultValue("Arthur");
+			name.setDefaultValue("'Arthur'");
 			cols.add(name);
 
 			ColumnIdentifier lastname = new ColumnIdentifier("LAST_NAME", Types.VARCHAR);

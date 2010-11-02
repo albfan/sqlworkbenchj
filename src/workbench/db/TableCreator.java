@@ -23,6 +23,9 @@ import workbench.util.SqlUtil;
 /**
  * A class to create a table in the database based on column definitions.
  *
+ * The necessary CREATE TABLE is not generated using a TableSourceBuilder because dependent constraints
+ * and other options should not be created as well.
+ *
  * @author  Thomas Kellerer
  */
 public class TableCreator
@@ -64,6 +67,7 @@ public class TableCreator
 		this.mapper = new TypeMapper(this.connection);
 		creationType = type;
 		columnTemplate = new ColumnDefinitionTemplate(connection.getMetadata().getDbId());
+		columnTemplate.setFixDefaultValues(!connection.getDbSettings().returnsValidDefaultExpressions());
 	}
 
 	/**
@@ -100,6 +104,16 @@ public class TableCreator
 		return this.tablename;
 	}
 
+	/**
+	 * Generate the necessary SQL and create the table in the database defined by the current connection.
+	 *
+	 * If enabled, the generated SQL statements are stored and can be obtained using
+	 * getGeneratedSQL() afterwards.
+	 *
+	 * @throws SQLException
+	 * @see #getGeneratedSQL()
+	 * @see #setStoreSQL(boolean) 
+	 */
 	public void createTable()
 		throws SQLException
 	{
@@ -114,7 +128,7 @@ public class TableCreator
 		for (ColumnIdentifier col : columnDefinition)
 		{
 			if (col.isPkColumn()) pkCols.add(col.getColumnName());
-			String def = this.getColumnDefintionString(col);
+			String def = getColumnDefintionString(col);
 			if (def == null) continue;
 
 			if (numCols > 0) columns.append(",\n  ");
@@ -133,7 +147,7 @@ public class TableCreator
 			useAlterPK = false;
 			StringBuilder inlinePK = new StringBuilder(pkCols.size() * 10);
 			inlinePK.append(",\n  ");
-			String pkKeyword = connection.getDbSettings().getInlinePKDef();
+			String pkKeyword = connection.getDbSettings().getInlinePKKeyword();
 			inlinePK.append(pkKeyword);
 			inlinePK.append(" (");
 			for (int i=0; i < pkCols.size(); i++)
@@ -221,8 +235,7 @@ public class TableCreator
 		String name = (useColumnAlias ? col.getDisplayName() : col.getColumnName());
 
 		StringBuilder result = new StringBuilder(30);
-		boolean isKeyword = connection.getMetadata().isKeyword(name);
-		name = SqlUtil.quoteObjectname(name, isKeyword);
+		name = connection.getMetadata().quoteObjectname(name);
 		result.append(name);
 		result.append(' ');
 
@@ -237,13 +250,23 @@ public class TableCreator
 		return result.toString();
 	}
 
+	/**
+	 * Return the generated SQL statement(s) if any.
+	 *
+	 * Will return null if setStoreSQL() has not been enabled.
+	 *
+	 * @return the generated SQL statement(s) if any.
+	 */
 	public List<String> getGeneratedSQL()
 	{
 		return generatedSQL;
 	}
 	
 	/**
-	 * For testing purposes only.
+	 * Controls if the generated SQL is stored for later use.
+	 *
+	 * Intended for testing purposes only.
+	 * @see #getGeneratedSQL() 
 	 */
 	public void setStoreSQL(boolean flag)
 	{

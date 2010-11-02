@@ -1008,15 +1008,15 @@ public class DbMetadata
 	 *  For Oracle and HSQL strings starting with a digit will
 	 *  always be quoted.
 	 */
-	public String quoteObjectname(String aName, boolean quoteAlways)
+	public String quoteObjectname(String name, boolean quoteAlways)
 	{
-		if (aName == null) return null;
-		if (aName.length() == 0) return aName;
+		if (name == null) return null;
+		if (name.length() == 0) return name;
 
 		// already quoted?
-		if (isQuoted(aName)) return aName;
+		if (isQuoted(name)) return name;
 
-		if (this.dbSettings.neverQuoteObjects()) return StringUtil.trimQuotes(aName);
+		if (this.dbSettings.neverQuoteObjects()) return removeQuotes(name);
 
 		boolean needQuote = quoteAlways;
 
@@ -1026,7 +1026,7 @@ public class DbMetadata
 		if (this.isExcel)
 		{
 			Pattern chars = Pattern.compile("[A-Za-z0-9]*");
-			Matcher m = chars.matcher(aName);
+			Matcher m = chars.matcher(name);
 			needQuote = !m.matches();
 		}
 
@@ -1034,21 +1034,21 @@ public class DbMetadata
 		{
 			if (!needQuote && !this.storesMixedCaseIdentifiers())
 			{
-				if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(aName))
+				if (this.storesUpperCaseIdentifiers() && !StringUtil.isUpperCase(name))
 				{
 					needQuote = true;
 				}
-				else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(aName))
+				else if (this.storesLowerCaseIdentifiers() && !StringUtil.isLowerCase(name))
 				{
 					needQuote = true;
 				}
 			}
 
-			if (needQuote || isKeyword(aName))
+			if (needQuote || isKeyword(name))
 			{
-				StringBuilder result = new StringBuilder(aName.length() + 4);
+				StringBuilder result = new StringBuilder(name.length() + 4);
 				result.append(this.quoteCharacter);
-				result.append(aName.trim());
+				result.append(name.trim());
 				result.append(this.quoteCharacter);
 				return result.toString();
 			}
@@ -1061,7 +1061,7 @@ public class DbMetadata
 
 		// if it is not a keyword, we have to check for special characters such
 		// as a space, $, digits at the beginning etc
-		return SqlUtil.quoteObjectname(aName);
+		return SqlUtil.quoteObjectname(name);
 	}
 
 	public String adjustSchemaNameCase(String schema)

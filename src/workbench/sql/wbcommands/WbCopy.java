@@ -53,17 +53,17 @@ public class WbCopy
 	public static final String PARAM_KEYS = "keyColumns";
 	public static final String PARAM_DROPTARGET = "dropTarget";
 	public static final String PARAM_CREATETARGET = "createTarget";
-	
+
 
 	/**
 	 * If PARAM_CREATETARGET is set to true, this parameter defines
-	 * the table type to be created.
-	 * The value specifies the CREATE TABLE template to be used.
+	 * the table type (template) to be used when creating the table.
+	 *
 	 * @see workbench.db.DbSettings#getCreateTableTemplate(java.lang.String)
 	 */
 	public static final String PARAM_TABLE_TYPE = "tableType";
 	public static final String PARAM_USE_SOURCE_DEF = "useSourceTableDefinition";
-	
+
 	public static final String PARAM_DELETE_SYNC = "syncDelete";
 
 	private static final String ID_PREFIX = "$Wb-Copy$";

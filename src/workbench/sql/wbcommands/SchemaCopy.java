@@ -40,7 +40,7 @@ import workbench.util.MessageBuffer;
  *
  * @author Thomas Kellerer
  */
-public class SchemaCopy
+class SchemaCopy
 	implements CopyTask
 {
 	private WbConnection sourceConnection;
@@ -296,11 +296,11 @@ public class SchemaCopy
 		{
 			createTableType = null;
 		}
-		
+
 		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
 		useSourceTableDefinition = cmdLine.getBoolean(WbCopy.PARAM_USE_SOURCE_DEF, false);
-		
+
 		this.copier = new DataCopier();
 
 		this.rowMonitor = monitor;
@@ -344,7 +344,7 @@ public class SchemaCopy
 	{
 		return createTableType != null;
 	}
-	
+
 	public boolean isSuccess()
 	{
 		return this.success;
