@@ -40,7 +40,7 @@ public class TableCreator
 	private ColumnDefinitionTemplate columnTemplate;
 	private boolean storeSQL;
 	private List<String> generatedSQL;
-	
+
 	/**
 	 * Create a new TableCreator.
 	 *
@@ -112,7 +112,7 @@ public class TableCreator
 	 *
 	 * @throws SQLException
 	 * @see #getGeneratedSQL()
-	 * @see #setStoreSQL(boolean) 
+	 * @see #setStoreSQL(boolean)
 	 */
 	public void createTable()
 		throws SQLException
@@ -157,7 +157,7 @@ public class TableCreator
 			}
 			inlinePK.append(')');
 			sql = sql.replace(MetaDataSqlManager.PK_INLINE_DEFINITION, inlinePK.toString());
-		} 
+		}
 		else if (pos > -1)
 		{
 			// make sure the placeholder is removed if no PK is defined.
@@ -169,7 +169,7 @@ public class TableCreator
 			generatedSQL = new ArrayList<String>(2);
 			generatedSQL.add(sql);
 		}
-		
+
 		LogMgr.logInfo("TableCreator.createTable()", "Creating table using sql: " + sql);
 		Statement stmt = this.connection.createStatement();
 		try
@@ -235,7 +235,12 @@ public class TableCreator
 		String name = (useColumnAlias ? col.getDisplayName() : col.getColumnName());
 
 		StringBuilder result = new StringBuilder(30);
-		name = connection.getMetadata().quoteObjectname(name);
+
+		// just use "simple" quoting rules for the target database (instead of checking
+		// the case of the column name by using DbMetadata.quoteObjectName()
+		// This is to ensure that the columns are created with the default case of the target DBMS
+		boolean isKeyword = connection.getMetadata().isKeyword(name);
+		name = SqlUtil.quoteObjectname(name, isKeyword);
 		result.append(name);
 		result.append(' ');
 
@@ -261,12 +266,12 @@ public class TableCreator
 	{
 		return generatedSQL;
 	}
-	
+
 	/**
 	 * Controls if the generated SQL is stored for later use.
 	 *
 	 * Intended for testing purposes only.
-	 * @see #getGeneratedSQL() 
+	 * @see #getGeneratedSQL()
 	 */
 	public void setStoreSQL(boolean flag)
 	{
