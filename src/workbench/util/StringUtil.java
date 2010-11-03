@@ -513,9 +513,11 @@ public class StringUtil
 	 */
 	public static int findFirstNonWhitespace(final CharSequence line, int startPos)
 	{
-		int pos = startPos;
+		if (line == null) return -1;
 		int len = line.length();
 		if (len == 0) return -1;
+
+		int pos = startPos;
 
 		char c = line.charAt(pos);
 		while (pos < len - 1)

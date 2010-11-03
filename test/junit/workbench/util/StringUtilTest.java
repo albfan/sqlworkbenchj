@@ -188,6 +188,13 @@ public class StringUtilTest
 		c = StringUtil.getFirstNonWhitespace(value);
 		assertEquals(0, c);
 
+		value = "";
+		c = StringUtil.getFirstNonWhitespace(value);
+		assertEquals(0, c);
+
+		value = null;
+		c = StringUtil.getFirstNonWhitespace(value);
+		assertEquals(0, c);
 	}
 
 	@Test
