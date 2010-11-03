@@ -488,7 +488,7 @@ public class StringUtil
 	public static char getFirstNonWhitespace(CharSequence line)
 	{
 		int pos = findFirstNonWhitespace(line);
-		if (pos < line.length())
+		if (pos > -1 && pos < line.length())
 		{
 			return line.charAt(pos);
 		}
@@ -524,7 +524,7 @@ public class StringUtil
 			pos ++;
 			c = line.charAt(pos);
 		}
-		return len;
+		return -1;
 	}
 
 	public static String getStartingWhiteSpace(final String line)

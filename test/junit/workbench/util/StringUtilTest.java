@@ -174,7 +174,7 @@ public class StringUtilTest
 
 		String empty = "   ";
 		pos = StringUtil.findFirstNonWhitespace(empty);
-		assertEquals(empty.length(), pos);
+		assertEquals(-1, pos);
 	}
 
 	@Test

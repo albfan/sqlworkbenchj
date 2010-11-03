@@ -53,20 +53,26 @@ public class CreateSnippetAction extends WbAction
 		{
 			sql = this.client.getText();
 		}
-		String code = makeJavaString(sql);
+		boolean removeSemicolon = true;
+		if (invokedByMouse(e) && isCtrlPressed(e))
+		{
+			removeSemicolon = false;
+		}
+		String code = makeJavaString(sql, removeSemicolon);
 		Clipboard clp = Toolkit.getDefaultToolkit().getSystemClipboard();
 		StringSelection sel = new StringSelection(code);
 		clp.setContents(sel, sel);
 	}
 	
-	public String makeJavaString(String sql)
+	public String makeJavaString(String sql, boolean removeSemicolon)
 	{
 		if (sql == null) return "";
 		
 		String prefix = Settings.getInstance().getProperty("workbench.clipcreate.codeprefix", "String sql = ");
 		String concat = Settings.getInstance().getProperty("workbench.clipcreate.concat", "+");
 		boolean includeNewLine = Settings.getInstance().getBoolProperty("workbench.clipcreate.includenewline", true);
-		
+
+
 		StringBuilder result = new StringBuilder(sql.length() + prefix.length() + 10);
 		result.append(prefix);
 		if (prefix.endsWith("=")) result.append(" ");
@@ -84,9 +90,9 @@ public class CreateSnippetAction extends WbAction
 				if (first) first = false;
 				else result.append(indent);
 				result.append('"');
-				if (line.endsWith(";"))
+				if (removeSemicolon && line.trim().endsWith(";"))
 				{
-					line = line.substring(0, line.length() - 1);
+					line = line.substring(0, line.trim().length() - 1);
 				}
 				result.append(line);
 

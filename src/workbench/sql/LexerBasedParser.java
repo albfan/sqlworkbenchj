@@ -218,7 +218,12 @@ public class LexerBasedParser
 		}
 
 		int i = StringUtil.findFirstNonWhitespace(sql);
-		String toStore = storeStatementText ? sql.substring(i) : null;
+		String toStore = null;
+		if (storeStatementText)
+		{
+			if (i > -1) toStore = sql.substring(i);
+			else toStore = sql.toString();
+		}
 		ScriptCommandDefinition cmd = new ScriptCommandDefinition(toStore, start + i, end);
 		cmd.setWhitespaceStart(start);
 
