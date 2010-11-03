@@ -658,6 +658,16 @@ public class DataCopier
 			if (useSourceColumns)
 			{
 				targetCols =  this.sourceConnection.getMetadata().getTableColumns(this.sourceTable);
+				for (ColumnIdentifier col : targetCols)
+				{
+					String colname = sourceConnection.getMetadata().removeQuotes(col.getColumnName());
+					col.setColumnName(colname);
+					String alias = col.getColumnAlias();
+					if (alias != null)
+					{
+						col.setColumnAlias(sourceConnection.getMetadata().removeQuotes(alias));
+					}
+				}
 			}
 			else
 			{
