@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import workbench.db.search.ClientSideTableSearcher;
 import workbench.db.search.TableDataSearcher;
+import workbench.gui.components.TextComponentMouseListener;
 import workbench.gui.filter.ComparatorListItem;
 import workbench.gui.filter.ListComboBoxModel;
 import workbench.interfaces.PropertyStorage;
@@ -63,6 +64,7 @@ public class ClientSideTableSearchPanel
     lbl.setToolTipText(tip);
 
 		searchText = new JTextField();
+		new TextComponentMouseListener(searchText);
     searchText.setToolTipText(tip);
 
 		GridBagConstraints constraints = new GridBagConstraints();
