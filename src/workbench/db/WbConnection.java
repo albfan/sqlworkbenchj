@@ -78,6 +78,8 @@ public class WbConnection
 	private boolean removeNewLines;
 	private Integer fetchSize;
 
+	private boolean supportsGetWarnings = true;
+	
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -318,9 +320,10 @@ public class WbConnection
 	 */
 	public String getWarnings()
 	{
+		if (!supportsGetWarnings) return null;
+		
 		try
 		{
-
 			SQLWarning warn = this.getSqlConnection().getWarnings();
 			if (warn == null)
 			{
@@ -346,6 +349,12 @@ public class WbConnection
 			}
 			this.clearWarnings();
 			return msg.toString();
+		}
+		catch (UnsupportedOperationException e)
+		{
+			supportsGetWarnings = false;
+			LogMgr.logWarning("WbConnection.getWarnings()", "getWarnings() not supported by the driver");
+			return null;
 		}
 		catch (SQLException e)
 		{
@@ -424,6 +433,7 @@ public class WbConnection
 	public void commit()
 		throws SQLException
 	{
+		if (!getDbSettings().supportsTransactions()) return;
 		this.sqlConnection.commit();
 	}
 
@@ -476,12 +486,16 @@ public class WbConnection
 		throws SQLException
 	{
 		if (sqlConnection == null) return;
+		if (!getDbSettings().supportsTransactions()) return;
+
 		this.sqlConnection.rollback();
 	}
 
 	public void rollbackSilently()
 	{
 		if (sqlConnection == null) return;
+		if (!getDbSettings().supportsTransactions()) return;
+		
 		try
 		{
 			this.sqlConnection.rollback();
@@ -520,6 +534,8 @@ public class WbConnection
 	public void setAutoCommit(boolean flag)
 		throws SQLException
 	{
+		if (!getDbSettings().supportsTransactions()) return;
+
 		boolean old = this.getAutoCommit();
 		if (old != flag)
 		{
@@ -540,16 +556,20 @@ public class WbConnection
 	 *
 	 * @see workbench.gui.dbobjects.TableDataPanel#doRetrieve(boolean)
 	 * @see workbench.gui.dbobjects.TableDataPanel#showRowCount()
+	 * @see DbSettings#selectStartsTransaction()
 	 */
 	public boolean selectStartsTransaction()
 	{
-		String key = "workbench.db." + this.metaData.getDbId() + ".select.startstransaction";
-		boolean flag = Settings.getInstance().getBoolProperty(key, false);
-		return flag;
+		return getDbSettings().selectStartsTransaction();
 	}
 
 	public boolean getAutoCommit()
 	{
+		if (!getDbSettings().supportsTransactions())
+		{
+			return true;
+		}
+		
 		if (this.sqlConnection == null) return false;
 		try
 		{

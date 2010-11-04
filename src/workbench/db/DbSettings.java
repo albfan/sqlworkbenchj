@@ -443,6 +443,11 @@ public class DbSettings
 		return Settings.getInstance().getBoolProperty(prefix + "bracket.quoting", false);
 	}
 
+	public boolean selectStartsTransaction()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "select.startstransaction", false);
+	}
+
 	/**
 	 * Returns the string that is used for line comments if the DBMS does not use
 	 * the ANSI comment character (such as MySQL)
@@ -470,6 +475,12 @@ public class DbSettings
 		return result;
 	}
 
+	public boolean supportsTransactions()
+	{
+		boolean result = Settings.getInstance().getBoolProperty(prefix + "supports.transactions", true);
+		return result;
+	}
+	
 	public boolean supportShortInclude()
 	{
 		String ids = Settings.getInstance().getProperty("workbench.db.supportshortinclude", "");
