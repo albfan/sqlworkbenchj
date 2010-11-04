@@ -1906,7 +1906,7 @@ public class DataPumper
 			}
 			else if (this.useQueryCbx.isSelected())
 			{
-				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, Arrays.asList(colMapping.targetColumns), tableType, dropTarget, ignoreDrop);
+				this.copier.copyFromQuery(this.sourceConnection, this.targetConnection, this.sqlEditor.getText(), ttable, Arrays.asList(colMapping.targetColumns), tableType, dropTarget, ignoreDrop, false);
 			}
 			else
 			{
@@ -1972,7 +1972,7 @@ public class DataPumper
 
 		this.copier.setKeyColumns(keys);
 
-		if (mode.indexOf("update") > -1 && keys.size() == 0)
+		if (mode.indexOf("update") > -1 && keys.isEmpty())
 		{
 			WbSwingUtilities.showErrorMessageKey(this, "ErrDPNoKeyColumns");
 			return false;

@@ -21,6 +21,7 @@ import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Collections;
 import java.util.List;
 import workbench.db.ColumnIdentifier;
 import workbench.db.DbMetadata;
@@ -604,6 +605,12 @@ public class DataImporter
 		}
 	}
 
+	public List<ColumnIdentifier> getKeyColumns()
+	{
+		if (this.keyColumns == null) return Collections.emptyList();
+		return Collections.unmodifiableList(keyColumns);
+	}
+	
 	/**
 	 * 	Set the key columns for the target table to be used
 	 * 	for update mode.

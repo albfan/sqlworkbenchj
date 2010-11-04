@@ -270,6 +270,8 @@ public class DataCopier
 
 		try
 		{
+			List<ColumnIdentifier> pkCols = this.importer.getKeyColumns();
+			
 			List<ColumnIdentifier> targetCols = new ArrayList<ColumnIdentifier>(columns.size());
 			for (ColumnIdentifier col : columns)
 			{
@@ -277,6 +279,11 @@ public class DataCopier
 				// that wrong quoting characters are removed
 				ColumnIdentifier copy = col.createCopy();
 				copy.setColumnName(sourceConnection.getMetadata().removeQuotes(copy.getColumnName()));
+				if (pkCols.size() > 0)
+				{
+					boolean isPK = findColumn(pkCols, copy.getColumnName()) != null;
+					col.setIsPkColumn(isPK);
+				}
 				targetCols.add(col);
 			}
 
@@ -357,7 +364,8 @@ public class DataCopier
 														List<ColumnIdentifier> queryColumns,
 														String createTableType,
 														boolean dropTarget,
-														boolean ignoreDropError)
+														boolean ignoreDropError,
+														boolean useQueryDefinition)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -371,6 +379,9 @@ public class DataCopier
 		{
 			createTable(targetColumnsForQuery, dropTarget, ignoreDropError, createTableType);
 		}
+		// this flag must be set before calling initImporterForTable!
+		importer.verifyTargetExistence(!useQueryDefinition);
+		
 		this.initImporterForQuery(query);
 	}
 
