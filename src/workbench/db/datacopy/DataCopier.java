@@ -171,7 +171,7 @@ public class DataCopier
 	 * @param createTableType if not null, the target table will be created with the template defined by this type
 	 * @param dropTable if true, the target table will be dropped
 	 * @param ignoreDropError if true, an error during drop will not terminate the copy
-	 * @param useSourceTableDefinition  use the columns from the source table for the target table.
+	 * @param skipTargetCheck  use the columns from the source table for the target table.
 	 *                                  This can be useful if the JDBC driver does not return information
 	 *                                  about the target table e.g. because it is a temporary table.
 	 * @see DbSettings#getCreateTableTemplate(java.lang.String)
@@ -185,7 +185,7 @@ public class DataCopier
 														String createTableType,
 														boolean dropTable,
 														boolean ignoreDropError,
-														boolean useSourceTableDefinition)
+														boolean skipTargetCheck)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -201,15 +201,15 @@ public class DataCopier
 			throw new SQLException("Table " + sourceTable.getTableName() + " not found in source connection");
 		}
 
-		this.initColumnMapping(columnMapping, createTableType != null, useSourceTableDefinition);
+		this.initColumnMapping(columnMapping, createTableType != null, skipTargetCheck);
 
 		if (createTableType != null)
 		{
-			createTable(this.columnMap.values(), dropTable, ignoreDropError, createTableType);
+			createTable(this.columnMap.values(), dropTable, ignoreDropError, createTableType, skipTargetCheck);
 		}
 
 		// this flag must be set before calling initImporterForTable!
-		importer.verifyTargetExistence(!useSourceTableDefinition);
+		importer.skipTargetCheck(skipTargetCheck);
 
 		this.initImporterForTable(additionalWhere);
 
@@ -231,7 +231,7 @@ public class DataCopier
 		return realTable;
 	}
 
-	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError, String createType)
+	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError, String createType, boolean ignoreTargetCheck)
 		throws SQLException
 	{
 		if (dropIfExists)
@@ -278,13 +278,24 @@ public class DataCopier
 				// When copying a table from MySQL or SQL Server to a standard compliant DBMS we must ensure
 				// that wrong quoting characters are removed
 				ColumnIdentifier copy = col.createCopy();
-				copy.setColumnName(sourceConnection.getMetadata().removeQuotes(copy.getColumnName()));
+				String name = col.getColumnName();
+
+				if (ignoreTargetCheck)
+				{
+					name = sourceConnection.getMetadata().removeQuotes(name);
+					name = targetConnection.getMetadata().adjustObjectnameCase(name);
+					copy.setColumnName(name);
+				}
+				else
+				{
+					copy.adjustQuotes(sourceConnection.getMetadata(), targetConnection.getMetadata());
+				}
 				if (pkCols.size() > 0)
 				{
 					boolean isPK = findColumn(pkCols, copy.getColumnName()) != null;
 					col.setIsPkColumn(isPK);
 				}
-				targetCols.add(col);
+				targetCols.add(copy);
 			}
 
 			TableCreator creator = new TableCreator(this.targetConnection, createType, this.targetTable, targetCols);
@@ -365,7 +376,7 @@ public class DataCopier
 														String createTableType,
 														boolean dropTarget,
 														boolean ignoreDropError,
-														boolean useQueryDefinition)
+														boolean skipTargetCheck)
 		throws SQLException
 	{
 		this.sourceConnection = source;
@@ -377,10 +388,10 @@ public class DataCopier
 		this.targetColumnsForQuery = new ArrayList<ColumnIdentifier>(queryColumns);
 		if (createTableType != null)
 		{
-			createTable(targetColumnsForQuery, dropTarget, ignoreDropError, createTableType);
+			createTable(targetColumnsForQuery, dropTarget, ignoreDropError, createTableType, skipTargetCheck);
 		}
 		// this flag must be set before calling initImporterForTable!
-		importer.verifyTargetExistence(!useQueryDefinition);
+		importer.skipTargetCheck(skipTargetCheck);
 		
 		this.initImporterForQuery(query);
 	}

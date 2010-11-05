@@ -127,11 +127,13 @@ public class TableCreatorTest
 			lastname.setDefaultValue(" 'Dent'");
 			cols.add(lastname);
 
-			// For H2 a a localtemp definition is part of default.properties
-			List<CreateTableTypeDefinition> types = DbSettings.getCreateTableTypes(con.getMetadata().getDbId());
-			assertEquals(1, types.size());
+			String template =
+				"CREATE LOCAL TEMPORARY TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
+				"\n(\n" + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + "\n)";
 
-			TableCreator creator = new TableCreator(con, types.get(0).getType(), tbl, cols);
+			con.getDbSettings().setCreateTableTemplate("table_creator_default", template);
+
+			TableCreator creator = new TableCreator(con, "table_creator_default", tbl, cols);
 			creator.setStoreSQL(true);
 			creator.createTable();
 			List<String> sql = creator.getGeneratedSQL();

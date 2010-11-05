@@ -185,13 +185,16 @@ public class TableCreator
 					LogMgr.logInfo("TableCreator.createTable()", "Adding primary key using: " + pkSql.toString());
 					stmt.executeUpdate(pkSql.toString());
 				}
+				
 				if (storeSQL)
 				{
 					generatedSQL.add(pkSql.toString());
 				}
 			}
 
-			if (this.connection.getDbSettings().ddlNeedsCommit() && !this.connection.getAutoCommit())
+			if (this.connection.getDbSettings().ddlNeedsCommit() && 
+				  connection.getDbSettings().commitCreateTable(creationType) &&
+				  !this.connection.getAutoCommit())
 			{
 				LogMgr.logDebug("TableCreator.createTable()", "Commiting the CREATE TABLE");
 				this.connection.commit();

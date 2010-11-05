@@ -1389,9 +1389,9 @@ public class DataImporter
 		}
 	}
 
-	public void verifyTargetExistence(boolean flag)
+	public void skipTargetCheck(boolean flag)
 	{
-		verifyTargetTable = flag;
+		verifyTargetTable = !flag;
 	}
 
 	/**
@@ -1627,6 +1627,12 @@ public class DataImporter
 			}
 			ColumnIdentifier col = this.targetColumns.get(i);
 			String colname = col.getColumnName();
+			if (!verifyTargetTable)
+			{
+				// if the target table was not verified, we need to make
+				// sure the default case for column names is used
+				colname = meta.adjustObjectnameCase(meta.removeQuotes(colname));
+			}
 			colname = meta.quoteObjectname(colname);
 			text.append(colname);
 
@@ -1707,12 +1713,20 @@ public class DataImporter
 		for (int i=0; i < this.colCount; i++)
 		{
 			ColumnIdentifier col = this.targetColumns.get(i);
+			String colname = col.getColumnName();
+			if (!verifyTargetTable)
+			{
+				// if the target table was not verified, we need to make
+				// sure the default case for column names is used
+				colname = meta.adjustObjectnameCase(meta.removeQuotes(colname));
+			}
+			colname = meta.quoteObjectname(colname);
 			if (keyColumns.contains(col))
 			{
 				this.columnMap[i] = pkIndex;
 				if (pkAdded) where.append(" AND ");
 				else pkAdded = true;
-				where.append(meta.quoteObjectname(col.getColumnName()));
+				where.append(colname);
 				where.append(" = ?");
 				pkIndex ++;
 				pkCount ++;
@@ -1724,7 +1738,7 @@ public class DataImporter
 				{
 					sql.append(", ");
 				}
-				sql.append(meta.quoteObjectname(col.getColumnName()));
+				sql.append(colname);
 				sql.append(" = ?");
 				colIndex ++;
 			}

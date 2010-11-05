@@ -59,7 +59,7 @@ class TableCopy
 		boolean createTable = cmdLine.getBoolean(WbCopy.PARAM_CREATETARGET);
 		boolean dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		boolean ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
-		boolean useSourceTableDef = cmdLine.getBoolean(WbCopy.PARAM_USE_SOURCE_DEF, false);
+		boolean skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 
 		String keys = cmdLine.getValue(WbCopy.PARAM_KEYS);
 
@@ -96,7 +96,7 @@ class TableCopy
 			targetId = targetConnection.getMetadata().findTable(new TableIdentifier(targettable), false);
 		}
 
-		if (targetId == null && !useSourceTableDef)
+		if (targetId == null && !skipTargetCheck)
 		{
 			throw new TableNotFoundException(targettable);
 		}
@@ -106,11 +106,11 @@ class TableCopy
 			TableIdentifier srcTable = new TableIdentifier(sourcetable);
 			String where = cmdLine.getValue(WbCopy.PARAM_SOURCEWHERE);
 			Map<String, String> mapping = this.parseMapping(cmdLine);
-			if (targetId == null && useSourceTableDef && sourcetable != null)
+			if (targetId == null && skipTargetCheck && sourcetable != null)
 			{
 				targetId = new TableIdentifier(targettable);
 			}
-			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropTable, ignoreDropError, useSourceTableDef);
+			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 		}
 		else
 		{
@@ -134,7 +134,7 @@ class TableCopy
 					queryCols.get(i).setColumnAlias(null);
 				}
 			}
-			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropTable, ignoreDropError, useSourceTableDef);
+			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 		}
 
 		boolean useSp = cmdLine.getBoolean(WbImport.ARG_USE_SAVEPOINT, targetConnection.getDbSettings().useSavepointForImport());

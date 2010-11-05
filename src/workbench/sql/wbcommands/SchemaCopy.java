@@ -53,7 +53,7 @@ class SchemaCopy
 	private boolean ignoreDropError;
 	private boolean checkDependencies;
 	private boolean useSavepoint;
-	private boolean useSourceTableDefinition;
+	private boolean skipTargetCheck;
 
 	private List<TableIdentifier> sourceTables;
 	private Map<String, TableIdentifier> tableMap;
@@ -107,7 +107,7 @@ class SchemaCopy
 				this.messages.append(ResourceMgr.getFormattedString("MsgCopyTable", table.getTableName()));
 				this.messages.appendNewLine();
 
-				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTableType, dropTable, ignoreDropError, useSourceTableDefinition);
+				copier.copyFromTable(sourceConnection, targetConnection, table, targetTable, null, null, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 				copier.setUseSavepoint(useSavepoint);
 				copier.startCopy();
 
@@ -160,7 +160,7 @@ class SchemaCopy
 				// it doesn't but in SchemaCopy we want to simply ignore non-existing tables
 				if (targetTable == null)
 				{
-					if (useSourceTableDefinition)
+					if (skipTargetCheck)
 					{
 						targetTable = table.createCopy();
 						LogMgr.logWarning("SchemaCopy.mapTables()", "Table " + table.getFullyQualifiedName(sourceConnection) + " not found in target. Assuming same structure and name");
@@ -299,7 +299,7 @@ class SchemaCopy
 
 		dropTable = cmdLine.getBoolean(WbCopy.PARAM_DROPTARGET);
 		ignoreDropError = cmdLine.getBoolean(AppArguments.ARG_IGNORE_DROP, false);
-		useSourceTableDefinition = cmdLine.getBoolean(WbCopy.PARAM_USE_SOURCE_DEF, false);
+		skipTargetCheck = cmdLine.getBoolean(WbCopy.PARAM_SKIP_TARGET_CHECK, false);
 
 		this.copier = new DataCopier();
 

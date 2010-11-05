@@ -1026,7 +1026,21 @@ public class DbSettings
 		Collections.sort(result);
 		return result;
 	}
-	
+
+	/**
+	 * Checks if a CREATE TABLE for the specific type should be committed.
+	 *
+	 * @param createType
+	 * @return true if this type can/should be committed
+	 * @see #getCreateTableTemplate(java.lang.String) 
+	 */
+	public boolean commitCreateTable(String createType)
+	{
+		if (createType == null) return true;
+		String key = prefix + ".create.table."+ createType.toLowerCase() + ".commit";
+		return Settings.getInstance().getBoolProperty(key, true);
+	}
+
 	/**
 	 * The SQL template that is used to create a table of the specified type
 	 *

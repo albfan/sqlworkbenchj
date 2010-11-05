@@ -25,6 +25,7 @@ import workbench.sql.StatementRunnerResult;
 import workbench.util.SqlUtil;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.db.MetaDataSqlManager;
 
 /**
  *
@@ -853,7 +854,6 @@ public class WbCopyTest
 		{
 			ConnectionMgr.getInstance().disconnectAll();
 		}
-		int dummy = 5;
 	}
 
 	@Test
@@ -877,7 +877,6 @@ public class WbCopyTest
 			tstmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (4,'Perfect', 'Ford')");
 			source.commit();
 
-			// First test a copy with a fully specified column mapping
 			String sql = "wbcopy -createTarget=true " +
 				"-sourceTable=person " +
 				"-targetTable=participants " +
@@ -949,6 +948,147 @@ public class WbCopyTest
 			ConnectionMgr.getInstance().disconnectAll();
 		}
 	}
+
+	@Test
+	public void testCreateTypedTarget()
+		throws Exception
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyCreateTest");
+			util.prepareEnvironment();
+
+			WbConnection source = util.getConnection("copyCreateTestSource"); // H2
+			WbConnection target = util.getHSQLConnection("copyCreateTestTarget");
+
+			target.getDbSettings().setCreateTableTemplate("junit_type",
+				"CREATE TEMPORARY TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER  +
+				" ( " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + " ) ");
+
+			Statement sourceStmt = source.createStatement();
+
+			sourceStmt.executeUpdate("create table person (nr integer not null primary key, \"Lastname\" varchar(50), firstname varchar(50))");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (1,'Dent', 'Arthur')");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (2,'Beeblebrox', 'Zaphod')");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (3,'Moviestar', 'Mary')");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (4,'Perfect', 'Ford')");
+			source.commit();
+
+			// Now test the table creation without columns
+			String sql = "wbcopy -createTarget=true " +
+				"-dropTarget=true " +
+				"-sourceTable=person " +
+				"-targetTable=participants " +
+				"-tableType=junit_type " +
+				"-skipTargetCheck=true " +
+				"-sourceProfile='copyCreateTestSource' " +
+				"-targetProfile='copyCreateTestTarget' ";
+
+			WbCopy copyCmd = new WbCopy();
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			Statement targetStmt = target.createStatement();
+
+			ResultSet rs = targetStmt.executeQuery("select nr, Lastname, firstname from participants");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String ln = rs.getString(2);
+				String fn = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Incorrect data copied", "Dent", ln);
+					assertEquals("Incorrect data copied", "Arthur", fn);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Incorrect data copied", "Beeblebrox", ln);
+					assertEquals("Incorrect data copied", "Zaphod", fn);
+				}
+			}
+			SqlUtil.closeResult(rs);
+
+			ConnectionMgr.getInstance().removeProfile(source.getProfile());
+			ConnectionMgr.getInstance().removeProfile(target.getProfile());
+
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
+	@Test
+	public void testCreateTypedFromQuery()
+		throws Exception
+	{
+		try
+		{
+			TestUtil util = new TestUtil("WbCopyCreateTest");
+			util.prepareEnvironment();
+
+			WbConnection source = util.getConnection("copyCreateTestSource"); // H2
+			WbConnection target = util.getHSQLConnection("copyCreateTestTarget");
+
+			target.getDbSettings().setCreateTableTemplate("junit_type", 
+				"CREATE TEMPORARY TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER  +
+				" ( " + MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + " ) ");
+
+			Statement sourceStmt = source.createStatement();
+
+			sourceStmt.executeUpdate("create table person (nr integer not null primary key, \"Lastname\" varchar(50), firstname varchar(50))");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (1,'Dent', 'Arthur')");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (2,'Beeblebrox', 'Zaphod')");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (3,'Moviestar', 'Mary')");
+			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (4,'Perfect', 'Ford')");
+			source.commit();
+
+			// Now test the table creation without columns
+			String sql = "wbcopy -createTarget=true " +
+				"-dropTarget=true " +
+				"-sourceQuery='select nr as person_id, \"Lastname\" as last_name, firstname as first_name from person' " +
+				"-targetTable=participants " +
+				"-tableType=junit_type " +
+				"-skipTargetCheck=true " +
+				"-sourceProfile='copyCreateTestSource' " +
+				"-targetProfile='copyCreateTestTarget' ";
+
+			WbCopy copyCmd = new WbCopy();
+			StatementRunnerResult result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			Statement targetStmt = target.createStatement();
+
+			ResultSet rs = targetStmt.executeQuery("select person_id, last_name, first_name from participants");
+			while (rs.next())
+			{
+				int nr = rs.getInt(1);
+				String ln = rs.getString(2);
+				String fn = rs.getString(3);
+				if (nr == 1)
+				{
+					assertEquals("Incorrect data copied", "Dent", ln);
+					assertEquals("Incorrect data copied", "Arthur", fn);
+				}
+				else if (nr == 2)
+				{
+					assertEquals("Incorrect data copied", "Beeblebrox", ln);
+					assertEquals("Incorrect data copied", "Zaphod", fn);
+				}
+			}
+			SqlUtil.closeResult(rs);
+
+			ConnectionMgr.getInstance().removeProfile(source.getProfile());
+			ConnectionMgr.getInstance().removeProfile(target.getProfile());
+
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+	}
+
 
 	@Test
 	public void testCopySchemaCreateTable()

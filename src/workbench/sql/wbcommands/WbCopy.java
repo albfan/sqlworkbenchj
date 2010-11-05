@@ -62,7 +62,7 @@ public class WbCopy
 	 * @see workbench.db.DbSettings#getCreateTableTemplate(java.lang.String)
 	 */
 	public static final String PARAM_TABLE_TYPE = "tableType";
-	public static final String PARAM_USE_SOURCE_DEF = "useSourceTableDefinition";
+	public static final String PARAM_SKIP_TARGET_CHECK = "skipTargetCheck";
 
 	public static final String PARAM_DELETE_SYNC = "syncDelete";
 
@@ -98,7 +98,7 @@ public class WbCopy
 		cmdLine.addArgument(CommonArgs.ARG_TRUNCATE_TABLE, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_KEYS);
 		cmdLine.addArgument(PARAM_DROPTARGET, ArgumentType.BoolArgument);
-		cmdLine.addArgument(PARAM_USE_SOURCE_DEF, ArgumentType.BoolArgument);
+		cmdLine.addArgument(PARAM_SKIP_TARGET_CHECK, ArgumentType.BoolArgument);
 
 		cmdLine.addArgument(PARAM_CREATETARGET, ArgumentType.BoolArgument);
 		cmdLine.addArgument(PARAM_DELETE_SYNC, ArgumentType.BoolArgument);
