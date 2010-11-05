@@ -25,4 +25,4 @@ fi
 # installed the option -Djava.awt.headless=true might
 # be needed for some combinations of OS and JDK
 
-$JAVACMD -Xmx256m -jar $scriptpath/sqlworkbench.jar $@
+$JAVACMD -Dvisualvm.display.name=SQLWorkbench -Xmx256m -jar $scriptpath/sqlworkbench.jar $@

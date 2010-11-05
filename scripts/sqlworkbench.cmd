@@ -11,13 +11,18 @@ set wbdir=%~dp0
 if "%1"=="console" goto console_mode
 
 :gui
-start "SQL Workbench/J" "%JAVA_BINPATH%javaw" -Xmx256m -jar %wbdir%sqlworkbench.jar %*
+start "SQL Workbench/J" "%JAVA_BINPATH%javaw"^ 
+      -Xmx256m 
+      -Dvisualvm.display.name=SQLWorkbench ^
+      -Dsun.awt.keepWorkingSetOnMinimize=true ^
+      -jar %wbdir%sqlworkbench.jar %*
 goto :eof
 
 :console_mode
 title SQL Workbench/J
 set cp=%wbdir%sqlworkbench.jar;%wbdir%poi.jar
-"%JAVA_BINPATH%java" -Xmx256m -cp %cp% workbench.console.SQLConsole %*
+"%JAVA_BINPATH%java" -Dvisualvm.display.name=SQLWorkbench ^
+                     -Xmx256m -cp %cp% workbench.console.SQLConsole %*
 
 goto :eof
 
