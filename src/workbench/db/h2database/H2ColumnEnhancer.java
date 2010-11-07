@@ -65,7 +65,7 @@ public class H2ColumnEnhancer
 		}
 		catch (Exception e)
 		{
-			LogMgr.logError("H2ColumnEnhancer.updateComputedColumns()", "Error retrieving remarks", e);
+			LogMgr.logError("H2ColumnEnhancer.updateComputedColumns()", "Error retrieving column info", e);
 		}
 		finally
 		{

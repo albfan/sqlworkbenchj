@@ -17,6 +17,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -212,12 +213,12 @@ public class PostgresEnumReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionUtil.arrayList("ENUM");
+		return Collections.singletonList("ENUM");
 	}
 
 	public boolean handlesType(String type)
 	{
-		return StringUtil.isBlank(type) || "*".equals(type) || StringUtil.equalStringIgnoreCase("ENUM", type);
+		return StringUtil.equalStringIgnoreCase("ENUM", type);
 	}
 
 	public boolean handlesType(String[] types)

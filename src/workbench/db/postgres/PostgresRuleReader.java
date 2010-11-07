@@ -233,7 +233,7 @@ public class PostgresRuleReader
 
 	public boolean handlesType(String type)
 	{
-		return StringUtil.equalStringIgnoreCase("RULE", type) || "*".equals(type);
+		return StringUtil.equalStringIgnoreCase("RULE", type);
 	}
 
 	public boolean handlesType(String[] types)

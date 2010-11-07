@@ -17,6 +17,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -138,7 +139,7 @@ public class H2DomainReader
 	public String getDomainSource(DomainIdentifier domain)
 	{
 		if (domain == null) return null;
-		
+
 		StringBuilder result = new StringBuilder(50);
 		result.append("CREATE DOMAIN ");
 		result.append(domain.getObjectName());
@@ -194,7 +195,7 @@ public class H2DomainReader
 
 	public boolean handlesType(String type)
 	{
-		return StringUtil.equalStringIgnoreCase("DOMAIN", type) || "*".equals(type);
+		return StringUtil.equalStringIgnoreCase("DOMAIN", type);
 	}
 
 	public boolean handlesType(String[] types)
@@ -231,7 +232,7 @@ public class H2DomainReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionUtil.arrayList("DOMAIN");
+		return Collections.singletonList("DOMAIN");
 	}
 
 	public String getObjectSource(WbConnection con, DbObject object)

@@ -17,6 +17,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -205,7 +206,7 @@ public class PostgresDomainReader
 
 	public boolean handlesType(String type)
 	{
-		return StringUtil.equalStringIgnoreCase("DOMAIN", type) || "*".equals(type);
+		return StringUtil.equalStringIgnoreCase("DOMAIN", type);
 	}
 
 	public boolean handlesType(String[] types)
@@ -242,7 +243,7 @@ public class PostgresDomainReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionUtil.arrayList("DOMAIN");
+		return Collections.singletonList("DOMAIN");
 	}
 
 	public String getObjectSource(WbConnection con, DbObject object)

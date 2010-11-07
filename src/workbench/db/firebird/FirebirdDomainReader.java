@@ -190,7 +190,7 @@ public class FirebirdDomainReader
 
 	public boolean handlesType(String type)
 	{
-		return StringUtil.equalStringIgnoreCase("DOMAIN", type) || "*".equals(type);
+		return StringUtil.equalStringIgnoreCase("DOMAIN", type);
 	}
 
 	public boolean handlesType(String[] types)

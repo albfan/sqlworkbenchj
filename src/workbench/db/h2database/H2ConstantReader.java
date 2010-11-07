@@ -17,6 +17,7 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
@@ -127,7 +128,7 @@ public class H2ConstantReader
 	public String getConstantSource(H2Constant constant)
 	{
 		if (constant == null) return null;
-		
+
 		StringBuilder result = new StringBuilder(50);
 		result.append("CREATE CONSTANT ");
 		result.append(constant.getObjectName());
@@ -157,13 +158,14 @@ public class H2ConstantReader
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_NAME, constant.getObjectName());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_REMARKS, constant.getComment());
 			result.setValue(row, DbMetadata.COLUMN_IDX_TABLE_LIST_TYPE, constant.getObjectType());
+			result.getRow(row).setUserObject(constant);
 		}
 		return true;
 	}
 
 	public boolean handlesType(String type)
 	{
-		return StringUtil.equalStringIgnoreCase("CONSTANT", type) || "*".equals(type);
+		return StringUtil.equalStringIgnoreCase("CONSTANT", type);
 	}
 
 	public boolean handlesType(String[] types)
@@ -199,7 +201,7 @@ public class H2ConstantReader
 
 	public List<String> supportedTypes()
 	{
-		return CollectionUtil.arrayList("CONSTANT");
+		return Collections.singletonList("CONSTANT");
 	}
 
 	public String getObjectSource(WbConnection con, DbObject object)

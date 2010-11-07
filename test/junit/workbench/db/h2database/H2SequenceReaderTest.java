@@ -66,7 +66,6 @@ public class H2SequenceReaderTest
 		List<SequenceDefinition> result = instance.getSequences(null, "PUBLIC", null);
 		Collections.sort(result, new Comparator<DbObject>()
 		{
-
 			public int compare(DbObject o1, DbObject o2)
 			{
 				return StringUtil.compareStrings(o1.getObjectName(), o2.getObjectName(), true);

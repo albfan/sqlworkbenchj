@@ -30,10 +30,22 @@ public class CommentSqlManagerTest
 	}
 
 	@Test
+	public void testH2()
+	{
+		CommentSqlManager mgr = new CommentSqlManager("h2");
+		List<String> types = CollectionUtil.arrayList("alias", "domain", "constant", "table", "view", "column", "index", "sequence");
+		for (String type : types)
+		{
+			String sql = mgr.getCommentSqlTemplate(type);
+			assertNotNull("No template found for type " + type, sql);
+		}
+	}
+
+	@Test
 	public void testPostgreSQL()
 	{
 		CommentSqlManager mgr = new CommentSqlManager("postgresql");
-		List<String> types = CollectionUtil.arrayList("function", "table", "view", "column", "trigger", "type", "index", "sequence", "trigger");
+		List<String> types = CollectionUtil.arrayList("function", "table", "view", "column", "type", "index", "sequence", "trigger");
 		for (String type : types)
 		{
 			String sql = mgr.getCommentSqlTemplate(type);
@@ -64,5 +76,7 @@ public class CommentSqlManagerTest
 			assertNotNull("No template found for type " + type, sql);
 		}
 	}
+
+
 
 }
