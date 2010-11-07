@@ -101,14 +101,14 @@ public class Db2SynonymReader
 		return result;
 	}
 
-	public String getSynonymSource(WbConnection con, String anOwner, String aSynonym)
+	public String getSynonymSource(WbConnection con, String synonymSchema, String synonymName)
 		throws SQLException
 	{
-		TableIdentifier id = getSynonymTable(con, anOwner, aSynonym);
+		TableIdentifier id = getSynonymTable(con, synonymSchema, synonymName);
 		StringBuilder result = new StringBuilder(200);
 		String nl = Settings.getInstance().getInternalEditorLineEnding();
 		result.append("CREATE ALIAS ");
-		result.append(aSynonym);
+		result.append(SqlUtil.buildExpression(con, null, synonymSchema, synonymName));
 		result.append(nl + "   FOR ");
 		result.append(id.getTableExpression());
 		result.append(';');

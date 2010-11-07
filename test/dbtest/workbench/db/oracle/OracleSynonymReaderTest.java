@@ -19,6 +19,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
+import workbench.db.SynonymDDLHandler;
 import workbench.db.WbConnection;
 import static org.junit.Assert.*;
 
@@ -79,6 +80,29 @@ public class OracleSynonymReaderTest
 //		System.out.println(sql);
 		String expected = "CREATE SYNONYM S_PERSON\n   FOR WBJUNIT.PERSON;";
 		assertEquals(expected, sql.trim());
+	}
+
+	@Test
+	public void testHandler()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+
+		SynonymDDLHandler handler = new SynonymDDLHandler();
+		List<TableIdentifier> objects = con.getMetadata().getObjectList(null, new String[] { "SYNONYM"});
+		assertNotNull(objects);
+		assertEquals(1, objects.size());
+		TableIdentifier syn = objects.get(0);
+
+		String sql = handler.getSynonymSource(con, syn, true);
+		assertTrue(sql.contains("CREATE SYNONYM S_PERSON"));
+		assertTrue(sql.contains("CREATE TABLE PERSON"));
+
+		sql = handler.getSynonymSource(con, syn, false);
+		System.out.println(sql);
+		assertTrue(sql.contains("CREATE SYNONYM S_PERSON"));
+		assertFalse(sql.contains("CREATE TABLE PERSON"));
 	}
 
 }

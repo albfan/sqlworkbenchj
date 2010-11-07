@@ -140,7 +140,6 @@ public class ObjectCompilerUI
 		if (this.worker != null)
 		{
 			this.worker.interrupt();
-			this.compiler.close();
 			this.compiler = null;
 			this.worker = null;
 		}

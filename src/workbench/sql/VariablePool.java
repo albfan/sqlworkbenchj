@@ -114,7 +114,7 @@ public class VariablePool
 	/**
 	 * Used to reset the pool during testing
 	 */
-	void clear()
+	public void clear()
 	{
 		synchronized (this.data)
 		{

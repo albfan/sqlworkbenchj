@@ -42,21 +42,39 @@ public class DbObjectChanger
 		dbConnection = con;
 	}
 
+	/**
+	 * For testing purposes
+	 * 
+	 * @param dbSettings
+	 */
+	DbObjectChanger(DbSettings dbSettings)
+	{
+		settings = dbSettings;
+		commentMgr = new CommentSqlManager(settings.getDbId());
+		dbConnection = null;
+	}
+
+	/**
+	 * Generate a complete SQL script to apply a rename or changed comment on the supplied objects.
+	 *
+	 * @param changedObjects old/new definitions of the objects
+	 * @return the complete srcipt to apply the changes
+	 */
 	public String getAlterScript(Map<DbObject, DbObject> changedObjects)
 	{
 		StringBuilder result = new StringBuilder(changedObjects.size() * 50);
 		for (Map.Entry<DbObject, DbObject> entry : changedObjects.entrySet())
 		{
-			String sql = getRename(entry.getKey(), entry.getValue());
-			if (sql != null)
-			{
-				result.append(sql);
-				result.append(";\n");
-			}
 			String commentSql = getCommentSql(entry.getKey(), entry.getValue());
 			if (commentSql != null)
 			{
 				result.append(commentSql);
+				result.append(";\n");
+			}
+			String sql = getRename(entry.getKey(), entry.getValue());
+			if (sql != null)
+			{
+				result.append(sql);
 				result.append(";\n");
 			}
 		}
@@ -84,23 +102,23 @@ public class DbObjectChanger
 		return sql;
 	}
 
-	public String getCommentSql(DbObject oldTable, DbObject newTable)
+	public String getCommentSql(DbObject oldDefinition, DbObject newDefinition)
 	{
-		if (commentMgr == null || newTable == null || oldTable == null) return null;
+		if (commentMgr == null || newDefinition == null || oldDefinition == null) return null;
 
-		String type = oldTable.getObjectType();
+		String type = oldDefinition.getObjectType();
 
 		String sql = getCommentSql(type);
 		if (sql == null) return null;
 
-		String oldComment = oldTable.getComment();
-		String newComment = newTable.getComment();
+		String oldComment = oldDefinition.getComment();
+		String newComment = newDefinition.getComment();
 
-		String schema = oldTable.getSchema();
+		String schema = oldDefinition.getSchema();
 		if (schema == null) schema = "";
 		
 		if (StringUtil.equalStringOrEmpty(oldComment, newComment, true)) return null; // no change
-		String oldname = oldTable.getObjectName(dbConnection);
+		String oldname = oldDefinition.getObjectName(dbConnection);
 		if (oldname == null) oldname = "";
 
 		// object_name placeholder is expected to be used where a fully qualified name is needed
@@ -108,7 +126,7 @@ public class DbObjectChanger
 
 		// schema and table name placeholders are intended where those names are individual parameters
 		// this is mainly used for the kludgy and non-standard way SQL Server "supports" comments
-		sql = sql.replace(ColumnChanger.PARAM_TABLE_NAME, oldTable.getObjectName());
+		sql = sql.replace(ColumnChanger.PARAM_TABLE_NAME, oldDefinition.getObjectName());
 		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, schema);
 		
 		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, newComment.replace("'", "''"));
@@ -151,7 +169,7 @@ public class DbObjectChanger
 		{
 			// The database doesn't support "DROP PRIMARY KEY", so we need to
 			// drop the corresponding constraint
-			if (StringUtil.isBlank(pkConstraint))
+			if (StringUtil.isBlank(pkConstraint) && dbConnection != null)
 			{
 				try
 				{
@@ -177,6 +195,17 @@ public class DbObjectChanger
 		return sql;
 	}
 
+	/**
+	 * Returns the SQL script to add a primary key to the table.
+	 *
+	 * If the DBMS supports transactional DDL, the script will contain
+	 * a COMMIT statement. Otherwise it will be identical to the result of getAddPK()
+	 *
+	 * @param table the table for which to create the PK
+	 * @param pkCols the (new) PK columns
+	 * @return null if adding a PK is not possible, the necessary statement otherwise
+	 * @see #getAddPK(workbench.db.TableIdentifier, java.util.List)
+	 */
 	public String getAddPKScript(TableIdentifier table, List<ColumnIdentifier> pkCols)
 	{
 		String sql = getAddPK(table, pkCols);
@@ -190,6 +219,16 @@ public class DbObjectChanger
 		return script.toString();
 	}
 
+	/**
+	 * Returns the SQL Statement to add a primary key to the table.
+	 *
+	 * The primary key will be created using the columns provide.
+	 *
+	 * @param table the table for which to create the PK
+	 * @param pkCols the (new) PK columns (the isPK() attribute for the columns is not checked or modified)
+	 * @return null if adding a PK is not possible, the necessary statement otherwise
+	 * @see #getAddPKScript(workbench.db.TableIdentifier, java.util.List) 
+	 */
 	public String getAddPK(TableIdentifier table, List<ColumnIdentifier> pkCols)
 	{
 		String type = table.getObjectType();
@@ -198,7 +237,7 @@ public class DbObjectChanger
 		if (StringUtil.isBlank(sql)) return null;
 
 		String pkName = "PK_" + table.getTableName().toUpperCase();
-		if (dbConnection.getMetadata().storesLowerCaseIdentifiers())
+		if (dbConnection != null && dbConnection.getMetadata().storesLowerCaseIdentifiers())
 		{
 			pkName = pkName.toLowerCase();
 		}
@@ -213,7 +252,7 @@ public class DbObjectChanger
 		for (int i=0; i < pkCols.size(); i++)
 		{
 			if (i > 0) cols.append(", ");
-			cols.append(pkCols.get(0).getColumnName(dbConnection));
+			cols.append(pkCols.get(i).getColumnName(dbConnection));
 		}
 		sql = sql.replace(MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER, cols);
 		return sql;

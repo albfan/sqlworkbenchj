@@ -117,6 +117,7 @@ public class TableIdentifier
 
 	public String getObjectName(WbConnection conn)
 	{
+		if (conn == null) return SqlUtil.quoteObjectname(tablename);
 		return conn.getMetadata().quoteObjectname(this.tablename);
 	}
 

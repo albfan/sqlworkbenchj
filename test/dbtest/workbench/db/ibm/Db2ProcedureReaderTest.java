@@ -62,7 +62,7 @@ public class Db2ProcedureReaderTest
 		if (con == null) return;
 
 		String sql =
-			"drop procedure wbjunit.wb_test; \n" +
+			"drop procedure " + Db2TestUtil.getSchemaName() + ".wb_test; \n" +
       "commit;\n";
 		TestUtil.executeScript(con, sql);
 		Db2TestUtil.cleanUpTestCase();

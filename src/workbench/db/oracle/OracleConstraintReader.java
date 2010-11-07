@@ -78,7 +78,8 @@ public class OracleConstraintReader
 				if (constraint != null)
 				{
 					// NOT NULL constraints do not need to be taken into account
-          if (isDefaultNNConstraint(constraint)) continue;
+					if (isDefaultNNConstraint(constraint)) continue;
+
 					TableConstraint c = new TableConstraint(name, "(" + constraint + ")");
 					c.setIsSystemName(name.startsWith("SYS_"));
 					result.add(c);

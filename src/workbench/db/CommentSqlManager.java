@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -43,7 +43,7 @@ public class CommentSqlManager
 		if (StringUtil.isBlank(objectType)) return null;
 
 		objectType = objectType.toLowerCase().replace(" ", "_");
-		
+
 		String defaultValue = Settings.getInstance().getProperty("workbench.db.sql.comment." + objectType, null);
 		String key = "workbench.db." + dbid + ".sql.comment." + objectType;
 		String sql = Settings.getInstance().getProperty(key, defaultValue);
@@ -51,7 +51,7 @@ public class CommentSqlManager
 		{
 			// If the DB specific property is present, but empty, this means
 			// the database does not support this type of comments.
-			// if I would not test for presence of the key, the default would
+			// if I did not test for presence of the key, the default would
 			// always be returned, and thus it would not be possible to "delete"
 			// the default by overwriting it with an empty key
 			if (Settings.getInstance().isPropertyDefined(key))

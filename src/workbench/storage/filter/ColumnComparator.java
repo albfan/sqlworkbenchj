@@ -27,12 +27,17 @@ public interface ColumnComparator
 	String getDescription();
 	
 	/**
-	 * Evaluate this ColumnComparator. 
+	 * Evaluate this ColumnComparator.
+	 *
 	 * reference is the value entered by the user in the filter definition.
 	 * value is the actual value against which the reference should be 
 	 * compared. 
-	 * Comparators with needsValue() == true should ignore the reference
+	 * Comparators with needsValue() == false should ignore the reference
 	 * value
+	 *
+	 * @param reference The "filter" definition
+	 * @param value the value to test
+	 * @param ignoreCase if true, comparison should be done case-insesitive it the filter supports it
 	 */
 	boolean evaluate(Object reference, Object value, boolean ignoreCase);
 	

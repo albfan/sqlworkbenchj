@@ -33,6 +33,46 @@ public class SqlUtilTest
 	}
 
 	@Test
+	public void testAddSemicolon()
+	{
+		String input = "  from some_table;   ";
+		String sql = SqlUtil.addSemicolon(input);
+		assertEquals(input, sql);
+
+		input = "  from some_table   ";
+		sql = SqlUtil.addSemicolon(input);
+		assertEquals(input + ";", sql);
+
+		input = "  from; some_table   ";
+		sql = SqlUtil.addSemicolon(input);
+		assertEquals(input + ";", sql);
+
+		input = "";
+		sql = SqlUtil.addSemicolon(input);
+		assertEquals(";", sql);
+
+		input = "       ;        ";
+		sql = SqlUtil.addSemicolon(input);
+		assertEquals(input, sql);
+	}
+
+	@Test
+	public void testTrimSemicolon()
+	{
+		String input = "  from some_table;   ";
+		String trimmed = SqlUtil.trimSemicolon(input);
+		assertEquals("  from some_table", trimmed);
+
+		input = "DELETE FROM some_table; COMMIT; ";
+		trimmed = SqlUtil.trimSemicolon(input);
+		assertEquals("DELETE FROM some_table; COMMIT", trimmed);
+
+		input = "DELETE FROM some_table; COMMIT";
+		trimmed = SqlUtil.trimSemicolon(input);
+		assertEquals("DELETE FROM some_table; COMMIT", trimmed);
+	}
+
+	@Test
 	public void testQuoteObject()
 	{
 		String name = "test";

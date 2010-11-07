@@ -51,8 +51,9 @@ public interface DbObject
 	 * schema or catalog.
 	 * To get an always fully qualified name use, getFullyQualifiedName()
 	 * 
-	 * @param conn The connection for which the qualified name should be createdd
+	 * @param conn The connection for which the qualified name should be created, may be null
 	 * @return the qualified name including catalog and schema if applicable
+	 * @see #getFullyQualifiedName(workbench.db.WbConnection) 
 	 */
 	String getObjectExpression(WbConnection conn);
 
@@ -60,6 +61,8 @@ public interface DbObject
 	 * Return the fully qualified name of this object including
 	 * catalog and schema if available, even if the current user's
 	 * schema wouldn't need it.
+	 * @param conn the connection for which the qualified name should be created, may be null
+	 * @see #getObjectExpression(workbench.db.WbConnection)
 	 */
 	String getFullyQualifiedName(WbConnection conn);
 	

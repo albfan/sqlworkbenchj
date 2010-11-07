@@ -75,7 +75,7 @@ public class IndexDefinition
 
 	public String getFullyQualifiedName(WbConnection conn)
 	{
-		return getObjectExpression(conn);
+		return SqlUtil.buildExpression(conn, null, getSchema(), indexName);
 	}
 
 	public String getObjectExpression(WbConnection conn)
@@ -91,7 +91,7 @@ public class IndexDefinition
 
 	public String getObjectNameForDrop(WbConnection con)
 	{
-		return getObjectName(con);
+		return getFullyQualifiedName(con);
 	}
 
 	public String getObjectName(WbConnection conn)

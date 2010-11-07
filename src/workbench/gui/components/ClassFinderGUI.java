@@ -118,7 +118,7 @@ public class ClassFinderGUI
 				statusBar.setText(ResourceMgr.getString(statusKey));
 				try
 				{
-					List<String> drivers = finder.findClass(classPath);
+					List<String> drivers = finder.findImplementations(classPath);
 					checkFinished(drivers);
 				}
 				catch (Exception e)

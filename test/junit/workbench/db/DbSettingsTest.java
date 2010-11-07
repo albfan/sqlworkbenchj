@@ -13,12 +13,20 @@ package workbench.db;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.WbTestCase;
 
 /**
  * @author Thomas Kellerer
  */
 public class DbSettingsTest
+	extends WbTestCase
 {
+
+	public DbSettingsTest()
+	{
+		super("DbSettingsTest");
+	}
+	
 	@Test
 	public void testOraDefaults()
 	{
@@ -33,4 +41,24 @@ public class DbSettingsTest
 		assertFalse(pg.getConvertDateInExport());
 	}
 
+	@Test
+	public void testGetIdentifierCase()
+	{
+		DbSettings test = new DbSettings("dummy", "Dummy Test");
+
+		IdentifierCase idCase = test.getObjectNameCase();
+		assertEquals(IdentifierCase.unknown, idCase);
+
+		test.setObjectNameCase("mixed");
+		idCase = test.getObjectNameCase();
+		assertEquals(IdentifierCase.mixed, idCase);
+
+		test.setObjectNameCase("gaga");
+		idCase = test.getObjectNameCase();
+		assertEquals(IdentifierCase.unknown, idCase);
+
+		test.setObjectNameCase("lower");
+		idCase = test.getObjectNameCase();
+		assertEquals(IdentifierCase.lower, idCase);
+	}
 }

@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Map;
+import org.junit.AfterClass;
 import workbench.TestUtil;
 import workbench.WbTestCase;
 import workbench.db.ConnectionMgr;
@@ -24,8 +25,6 @@ import workbench.sql.StatementRunnerResult;
 import workbench.storage.PkMapping;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
@@ -38,6 +37,12 @@ public class WbLoadPkMappingTest
 	public WbLoadPkMappingTest()
 	{
 		super("WbLoadPkMappingTest");
+	}
+
+	@AfterClass
+	public static void tearDown()
+	{
+		PkMapping.getInstance().clear();
 	}
 
 	@Test

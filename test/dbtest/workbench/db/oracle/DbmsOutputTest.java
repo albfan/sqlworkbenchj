@@ -11,6 +11,7 @@
  */
 package workbench.db.oracle;
 
+import workbench.util.StringUtil;
 import java.sql.Statement;
 import workbench.util.SqlUtil;
 import org.junit.AfterClass;
@@ -54,6 +55,13 @@ public class DbmsOutputTest
 			stmt.execute("begin\n dbms_output.put_line('Hello, World'); end;");
 			String out = output.getResult();
 			assertEquals("Hello, World", out.trim());
+
+			output.disable();
+			stmt.execute("begin\n dbms_output.put_line('Hello, World'); end;");
+			out = output.getResult();
+			assertTrue(StringUtil.isEmptyString(out));
+
+			output.close();
 		}
 		finally
 		{

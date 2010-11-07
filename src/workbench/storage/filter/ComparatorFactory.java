@@ -47,6 +47,11 @@ public class ComparatorFactory
 		return comparatorList;
 	}
 
+	/**
+	 * Returns the first ColumnComparator that supports an equality comparator for the given class.
+	 *
+	 * @param clz the class to compare
+	 */
 	public ColumnComparator findEqualityComparatorFor(Class clz)
 	{
 		for (ColumnComparator comp : comparatorList)
@@ -59,6 +64,11 @@ public class ComparatorFactory
 		return null;
 	}
 
+	/**
+	 * Returns the first ColumnComparator that supports the given class.
+	 *
+	 * @param clz the class to compare
+	 */
 	public ColumnComparator findComparatorFor(Class clz)
 	{
 		for (ColumnComparator comp : comparatorList)

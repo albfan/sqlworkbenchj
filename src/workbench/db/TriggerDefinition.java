@@ -155,7 +155,7 @@ public class TriggerDefinition
 
 	public String getObjectNameForDrop(WbConnection con)
 	{
-		return getObjectName(con);
+		return getFullyQualifiedName(con);
 	}
 
 	public String getObjectName(WbConnection conn)

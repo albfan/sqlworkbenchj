@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -30,7 +30,7 @@ public class MetaDataSqlManager
 	public static final String INDEX_NAME_PLACEHOLDER = "%indexname%";
 	public static final String PK_NAME_PLACEHOLDER = "%pk_name%";
 	public static final String PK_INLINE_DEFINITION = "%pk_definition%";
-	public static final String UNIQUE_PLACEHOLDER = "%unique_key% ";
+	public static final String UNIQUE_PLACEHOLDER = "%unique_key%";
 	public static final String COLUMN_NAME_PLACEHOLDER = "%column_name%";
 	public static final String COLUMN_LIST_PLACEHOLDER = "%columnlist%";
 	public static final String FK_NAME_PLACEHOLDER = "%constraintname%";

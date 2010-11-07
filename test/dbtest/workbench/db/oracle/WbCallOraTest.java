@@ -32,11 +32,11 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class TestWbCallOra
+public class WbCallOraTest
 	extends WbTestCase
 {
 
-	public TestWbCallOra()
+	public WbCallOraTest()
 	{
 		super("TestWbCallOra");
 	}

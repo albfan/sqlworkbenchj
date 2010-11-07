@@ -42,9 +42,11 @@ public class Db2SequenceReaderTester
 		WbConnection con = Db2TestUtil.getDb2Connection();
 		if (con == null) return;
 
+		String schema = Db2TestUtil.getSchemaName();
+
 		String sql =
-			"create sequence wbjunit.wb_sequence_a;\n"+
-			"create sequence wbjunit.wb_sequence_b increment by 2 start with 42;\n"+
+			"create sequence " + schema + ".wb_sequence_a;\n"+
+			"create sequence " + schema + ".wb_sequence_b increment by 2 start with 42;\n"+
 			"commit;\n";
 		TestUtil.executeScript(con, sql);
 	}
@@ -55,12 +57,6 @@ public class Db2SequenceReaderTester
 	{
 		WbConnection con = Db2TestUtil.getDb2Connection();
 		if (con == null) return;
-
-		String sql =
-			"drop sequence wbjunit.wb_sequence_a;\n"+
-			"drop sequence wbjunit.wb_sequence_b;\n"+
-			"commit;\n";
-		TestUtil.executeScript(con, sql);
 		Db2TestUtil.cleanUpTestCase();
 	}
 
@@ -78,12 +74,15 @@ public class Db2SequenceReaderTester
 		SequenceReader reader = con.getMetadata().getSequenceReader();
 		assertTrue(reader instanceof Db2SequenceReader);
 
-		List<SequenceDefinition> seqs = reader.getSequences(null, Db2TestUtil.getSchemaName(), null);
+		String schema = Db2TestUtil.getSchemaName();
+
+		List<SequenceDefinition> seqs = reader.getSequences(null, schema, null);
 		assertNotNull(seqs);
 		assertEquals(2, seqs.size());
 		assertEquals("WB_SEQUENCE_A", seqs.get(0).getSequenceName());
+
 		String sql = seqs.get(1).getSource(con).toString();
-		String src = "CREATE SEQUENCE WBJUNIT.WB_SEQUENCE_B\n" +
+		String src = "CREATE SEQUENCE " + schema + ".WB_SEQUENCE_B\n" +
     "       START WITH 42\n" +
     "       INCREMENT BY 2\n" +
     "       MINVALUE 42\n" +

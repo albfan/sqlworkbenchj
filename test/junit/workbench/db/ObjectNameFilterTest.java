@@ -28,7 +28,7 @@ public class ObjectNameFilterTest
 	public void testIsExcluded()
 	{
 		ObjectNameFilter filter = new ObjectNameFilter();
-		Set<String> names = CollectionUtil.hashSet("ONE ", "^DEV[0-9]+");
+		Set<String> names = CollectionUtil.treeSet("ONE ", "^DEV[0-9]+");
 		filter.setFilterExpressions(names);
 		assertTrue(filter.isExcluded("one"));
 		assertTrue(filter.isExcluded("dev1"));
@@ -58,7 +58,7 @@ public class ObjectNameFilterTest
 	public void testCopy()
 	{
 		ObjectNameFilter filter = new ObjectNameFilter();
-		Set<String> names = CollectionUtil.hashSet("ONE", "two");
+		Set<String> names = CollectionUtil.treeSet("ONE", "two");
 		filter.setFilterExpressions(names);
 		ObjectNameFilter copy = filter.createCopy();
 		assertTrue(filter.equals(copy));

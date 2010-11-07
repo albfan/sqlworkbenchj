@@ -32,7 +32,7 @@ public class PostgresDomainReaderTest
 	extends WbTestCase
 {
 
-	private static final String TEST_ID = "domaintest";
+	private static final String TEST_SCHEMA = "domaintest";
 
 	public PostgresDomainReaderTest()
 	{
@@ -43,7 +43,7 @@ public class PostgresDomainReaderTest
 	public static void setUp()
 		throws Exception
 	{
-		PostgresTestUtil.initTestCase(TEST_ID);
+		PostgresTestUtil.initTestCase(TEST_SCHEMA);
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null)
 		{
@@ -60,7 +60,7 @@ public class PostgresDomainReaderTest
 	public static void tearDown()
 		throws Exception
 	{
-		PostgresTestUtil.cleanUpTestCase(TEST_ID);
+		PostgresTestUtil.cleanUpTestCase(TEST_SCHEMA);
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class PostgresDomainReaderTest
 		}
 		Collection<String> types = con.getMetadata().getObjectTypes();
 		assertTrue(types.contains("DOMAIN"));
-		List<TableIdentifier> objects = con.getMetadata().getObjectList(TEST_ID, new String[] { "DOMAIN" });
+		List<TableIdentifier> objects = con.getMetadata().getObjectList(TEST_SCHEMA, new String[] { "DOMAIN" });
 		assertEquals(1, objects.size());
 		DbObject domain = objects.get(0);
 
@@ -94,7 +94,7 @@ public class PostgresDomainReaderTest
 		assertTrue(domains.get(0) instanceof DomainIdentifier);
 		
 		String sql = domain.getSource(con).toString().trim();
-		String expected = "CREATE DOMAIN " + TEST_ID.toLowerCase() + ".salary AS numeric(12,2)\n" +
+		String expected = "CREATE DOMAIN " + TEST_SCHEMA.toLowerCase() + ".salary AS numeric(12,2)\n" +
                       "   CONSTRAINT NOT NULL CHECK (VALUE > 0::numeric);";
 		assertEquals(expected, sql);
 		GenericObjectDropper dropper = new GenericObjectDropper();
@@ -103,7 +103,8 @@ public class PostgresDomainReaderTest
 		dropper.setConnection(con);
 
 		String drop = dropper.getScript().toString().trim();
-		assertTrue(drop.startsWith("DROP DOMAIN salary"));
+		assertTrue(drop.startsWith("DROP DOMAIN " + TEST_SCHEMA + ".salary"));
+		assertTrue(drop.contains("DROP DOMAIN other.positive_int"));
 	}
 
 

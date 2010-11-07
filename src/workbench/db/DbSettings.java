@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import workbench.db.exporter.RowDataConverter;
 import workbench.gui.dbobjects.TableSearchPanel;
 import workbench.log.LogMgr;
 import workbench.resource.Settings;
@@ -58,7 +57,7 @@ public class DbSettings
 	private Map<Integer, String> indexTypeMapping;
 	public static final String IDX_TYPE_NORMAL = "NORMAL";
 	public static final String DEFAULT_CREATE_TABLE_TYPE = "default";
-	
+
 	private Set<String> updatingCommands;
 	private final String prefix;
 
@@ -143,11 +142,17 @@ public class DbSettings
 		dbmsNames.put("apache_derby", "Apache Derby");
 		return dbmsNames;
 	}
-	
+
 	public boolean getUseOracleDBMSMeta(String type)
 	{
 		if (type == null) return false;
 		return Settings.getInstance().getBoolProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), false);
+	}
+
+	public void setUseOracleDBMSMeta(String type, boolean flag)
+	{
+		if (type == null) return;
+		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), flag);
 	}
 
 	public boolean useGetStringForClobs()
@@ -274,7 +279,7 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "constraints.use_fqname", false);
 	}
-	
+
 	public boolean useCatalogInDML()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "catalog.dml", true);
@@ -314,7 +319,7 @@ public class DbSettings
 	{
 		return Settings.getInstance().getProperty(prefix + "function.select", "SELECT %function%");
 	}
-	
+
 	/**
 	 * Return the complete DDL to drop the given type of DB-Object.
 	 * <br/>
@@ -480,7 +485,7 @@ public class DbSettings
 		boolean result = Settings.getInstance().getBoolProperty(prefix + "supports.transactions", true);
 		return result;
 	}
-	
+
 	public boolean supportShortInclude()
 	{
 		String ids = Settings.getInstance().getProperty("workbench.db.supportshortinclude", "");
@@ -509,12 +514,12 @@ public class DbSettings
 		}
 		return truncate;
 	}
-	
+
 	public boolean truncateNeedsCommit()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "truncate.commit", false);
 	}
-	
+
 	public boolean supportsTruncate()
 	{
 		String s = Settings.getInstance().getProperty("workbench.db.truncatesupported", StringUtil.EMPTY_STRING);
@@ -603,20 +608,21 @@ public class DbSettings
 		String nameCase = Settings.getInstance().getProperty(prefix + "schemaname.case", null);
 		if (nameCase != null)
 		{
-			if ("lower".equals(nameCase))
+			try
 			{
-				return IdentifierCase.lower;
+				return IdentifierCase.valueOf(nameCase);
 			}
-			else if ("upper".equals(nameCase))
+			catch (Exception e)
 			{
-				return IdentifierCase.upper;
-			}
-			else if ("mixed".equals(nameCase))
-			{
-				return IdentifierCase.mixed;
+				LogMgr.logWarning("DbSettings.getSchemaNameCase()", "Invalid IdentifierCase value '" + nameCase + "' specified");
 			}
 		}
 		return IdentifierCase.unknown;
+	}
+
+	public void setObjectNameCase(String oCase)
+	{
+		Settings.getInstance().setProperty(prefix + "objectname.case", oCase);
 	}
 
 	public IdentifierCase getObjectNameCase()
@@ -625,17 +631,13 @@ public class DbSettings
 		String nameCase = Settings.getInstance().getProperty(prefix + "objectname.case", null);
 		if (nameCase != null)
 		{
-			if ("lower".equals(nameCase))
+			try
 			{
-				return IdentifierCase.lower;
+				return IdentifierCase.valueOf(nameCase);
 			}
-			else if ("upper".equals(nameCase))
+			catch (Exception e)
 			{
-				return IdentifierCase.upper;
-			}
-			else if ("mixed".equals(nameCase))
-			{
-				return IdentifierCase.mixed;
+				LogMgr.logWarning("DbSettings.getObjectNameCase()", "Invalid IdentifierCase value '" + nameCase + "' specified");
 			}
 		}
 		return IdentifierCase.unknown;
@@ -931,7 +933,7 @@ public class DbSettings
 	 * <tt>workbench.db.[dbid].retrieve.create.table.comments_included</tt> is checked. If that is true to indicate that
 	 * comments <i>are</i> returned by the custom SQL, this method returns false.
 	 * <br/>
-	 * 
+	 *
 	 * @see #getUseCustomizedCreateTableRetrieval()
 	 * @return true if table comments (including columns) should be generated
 	 */
@@ -1009,7 +1011,7 @@ public class DbSettings
 	/**
 	 * Return configured "CREATE TABLE" types for the specified DBID.
 	 *
-	 * @see #getCreateTableTemplate(java.lang.String) 
+	 * @see #getCreateTableTemplate(java.lang.String)
 	 */
 	public static List<CreateTableTypeDefinition> getCreateTableTypes(String dbid)
 	{
@@ -1032,7 +1034,7 @@ public class DbSettings
 	 *
 	 * @param createType
 	 * @return true if this type can/should be committed
-	 * @see #getCreateTableTemplate(java.lang.String) 
+	 * @see #getCreateTableTemplate(java.lang.String)
 	 */
 	public boolean commitCreateTable(String createType)
 	{
@@ -1051,11 +1053,11 @@ public class DbSettings
 		final String defaultSql =
 			"CREATE TABLE " + MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER +
 			"\n(\n" +
-			MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER + 
+			MetaDataSqlManager.COLUMN_LIST_PLACEHOLDER +
 			"\n)";
 
 		if (StringUtil.isBlank(type)) type = DEFAULT_CREATE_TABLE_TYPE;
-		
+
 		return Settings.getInstance().getProperty(prefix + "create.table." + type.toLowerCase(), defaultSql);
 	}
 
@@ -1226,7 +1228,7 @@ public class DbSettings
 
 	/**
 	 * Returns a flag if the driver returns "read-made" expressions for the DEFAULT value of a column.
-	 * 
+	 *
 	 * @return
 	 */
 	public boolean returnsValidDefaultExpressions()

@@ -228,24 +228,31 @@ public class DefaultViewReader
 					source.append(line);
 				}
 			}
-			StringUtil.trimTrailingWhitespace(source);
-			if (this.connection.getDbSettings().getFormatViewSource())
+			
+			if (source.length() > 0)
 			{
-				SqlFormatter f = new SqlFormatter(source);
-				source = new StringBuilder(f.getFormattedSql());
-			}
-			if (!StringUtil.endsWith(source, ';')) source.append(';');
-			source.append(Settings.getInstance().getInternalEditorLineEnding());
-
-			ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(connection);
-			if (grantReader != null)
-			{
-				CharSequence grants = grantReader.getViewGrantSource(connection, viewId);
-				if (grants != null && grants.length() > 0)
+				StringUtil.trimTrailingWhitespace(source);
+				if (this.connection.getDbSettings().getFormatViewSource())
 				{
+					SqlFormatter f = new SqlFormatter(source);
+					source = new StringBuilder(f.getFormattedSql());
+				}
+
+				if (!StringUtil.endsWith(source, ';'))
+				{
+					source.append(';');
 					source.append(Settings.getInstance().getInternalEditorLineEnding());
-					source.append(grants);
-					source.append(Settings.getInstance().getInternalEditorLineEnding());
+				}
+				ViewGrantReader grantReader = ViewGrantReader.createViewGrantReader(connection);
+				if (grantReader != null)
+				{
+					CharSequence grants = grantReader.getViewGrantSource(connection, viewId);
+					if (grants != null && grants.length() > 0)
+					{
+						source.append(Settings.getInstance().getInternalEditorLineEnding());
+						source.append(grants);
+						source.append(Settings.getInstance().getInternalEditorLineEnding());
+					}
 				}
 			}
 		}

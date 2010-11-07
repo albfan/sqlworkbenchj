@@ -12,9 +12,9 @@
 package workbench.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -36,44 +36,17 @@ public class CollectionUtil
 		return (c == null || c.isEmpty());
 	}
 	
-	public static <E> Set<E> hashSet(E... add)
-	{
-		Set<E> result = new HashSet<E>(add.length);
-		for (E e : add)
-		{
-			result.add(e);
-		}
-		return result;
-	}
-
-	public static <E> Set<E> hashSet(Set<E> base, E... add)
-	{
-		Set<E> result = new HashSet<E>(base.size() + add.length);
-		result.addAll(base);
-		for (E e : add)
-		{
-			result.add(e);
-		}
-		return result;
-	}
-
 	public static <E> Set<E> treeSet(E... add)
 	{
 		Set<E> result = new TreeSet<E>();
-		for (E e : add)
-		{
-			result.add(e);
-		}
+		result.addAll(Arrays.asList(add));
 		return result;
 	}
 	public static <E> Set<E> treeSet(Set<E> base, E... add)
 	{
 		Set<E> result = new TreeSet<E>();
 		result.addAll(base);
-		for (E e : add)
-		{
-			result.add(e);
-		}
+		result.addAll(Arrays.asList(add));
 		return result;
 	}
 	public static Set<String> caseInsensitiveSet()
@@ -84,11 +57,7 @@ public class CollectionUtil
 	public static Set<String> caseInsensitiveSet(String... a)
 	{
 		Set<String> result = caseInsensitiveSet();
-
-		for (String e : a)
-		{
-			result.add(e);
-		}
+		result.addAll(Arrays.asList(a));
 		return result;
 	}
 
@@ -110,15 +79,12 @@ public class CollectionUtil
 	/**
 	 * Create an ArrayList from the given elements. The returned list
 	 * can be changed (in constrast to Arrays.asList() where a non-modifieable list
-	 * is returned
+	 * is returned)
 	 */
 	public static <E> List<E> arrayList(E... a)
 	{
 		ArrayList<E> result = new ArrayList<E>(a.length);
-		for (E e : a)
-		{
-			result.add(e);
-		}
+		result.addAll(Arrays.asList(a));
 		return result;
 	}
 

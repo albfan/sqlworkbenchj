@@ -19,7 +19,6 @@ package workbench.db;
  * @author Thomas Kellerer
  * @see workbench.db.postgres.PostgresDDLFilter
  * @see workbench.sql.commands.DdlCommand#execute(java.lang.String)
- * @see workbench.db.ProcedureCreator#recreate()
  */
 public interface DDLFilter
 {

@@ -233,7 +233,7 @@ public class SqlFormatterTest
 		String sql = "SELECT right(name,5) FROM person";
 		SqlFormatter f = new SqlFormatter(sql);
 		f.setUseLowerCaseFunctions(true);
-		f.setDBFunctions(CollectionUtil.hashSet("RIGHT", "LEFT"));
+		f.setDBFunctions(CollectionUtil.treeSet("RIGHT", "LEFT"));
 		String formatted = f.getFormattedSql().toString();
 //		System.out.println("*******\n" + formatted + "\n**********");
 		String expected = "SELECT right(name,5)\nFROM person";

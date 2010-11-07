@@ -11,6 +11,7 @@
  */
 package workbench.sql.wbcommands;
 
+import org.junit.AfterClass;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
@@ -23,9 +24,8 @@ import workbench.sql.StatementRunnerResult;
 import workbench.sql.VariablePool;
 import workbench.util.StringUtil;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
@@ -40,14 +40,20 @@ public class WbDefineVarTest
 		super("WbDefineVarTest");
 	}
 
+	@AfterClass
+	public static void tearDown()
+	{
+		VariablePool.getInstance().clear();
+	}
+
 	@Test
 	public void testExecute()
 		throws Exception
 	{
 		try
 		{
-			TestUtil util = new TestUtil(getClass().getName() + "_testExecute");
-			util.prepareEnvironment();
+			TestUtil util = getTestUtil();
+			VariablePool.getInstance().clear();
 			StatementRunner runner = util.createConnectedStatementRunner();
 
 			String sql = "--define some vars\nwbvardef theanswer = 42";

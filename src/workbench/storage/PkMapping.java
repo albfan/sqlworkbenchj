@@ -72,6 +72,13 @@ public class PkMapping
 		loadMapping(filename);
 	}
 
+	public synchronized void clear()
+	{
+		if (columnMapping != null)
+		{
+			columnMapping.clear();
+		}
+	}
 	public synchronized String getMappingAsText()
 	{
 		if (this.columnMapping == null) return null;

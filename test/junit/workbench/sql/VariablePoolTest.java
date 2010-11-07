@@ -15,6 +15,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.Set;
+import org.junit.AfterClass;
+import org.junit.Before;
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.WbTestCase;
@@ -36,12 +38,24 @@ public class VariablePoolTest
 		super("VariablePoolTest");
 	}
 
+	@AfterClass
+	public static void tearDown()
+	{
+		VariablePool.getInstance().clear();
+	}
+
+	@Before
+	public void beforeTest()
+	{
+		VariablePool.getInstance().clear();
+	}
+
 	@Test
 	public void testInitFromCommandLine()
 		throws Exception
 	{
 		TestUtil util = getTestUtil();
-
+		
 		ArgumentParser p = new ArgumentParser();
 		p.addArgument(AppArguments.ARG_VARDEF);
 		p.parse("-" + AppArguments.ARG_VARDEF + "='#exportfile=/user/home/test.txt'");

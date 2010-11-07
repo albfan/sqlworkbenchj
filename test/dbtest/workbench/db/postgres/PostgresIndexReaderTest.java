@@ -23,6 +23,7 @@ import workbench.db.IndexDefinition;
 import workbench.db.IndexReader;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
+import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 
 /**
@@ -89,9 +90,18 @@ public class PostgresIndexReaderTest
 		String sql = index.getSource(conn).toString();
 		String type = SqlUtil.getCreateType(sql);
 
+		System.out.println(sql);
 		assertEquals("INDEX", type);
 		assertTrue(sql.contains("idx_person_id"));
-		assertTrue(sql.contains("person (id"));
+		assertTrue(sql.contains("(id"));
+
+		DataStore indexDS = conn.getMetadata().getIndexReader().getTableIndexInformation(table);
+		String sql2 = reader.getIndexSource(table, indexDS, null).toString();
+
+		System.out.println(sql2);
+
 	}
+
+
 
 }

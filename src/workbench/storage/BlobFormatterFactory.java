@@ -83,7 +83,7 @@ public class BlobFormatterFactory
 			// and will probably fail on BLOBs > 4KB
 			DefaultBlobFormatter f = new DefaultBlobFormatter();
 			f.setUseUpperCase(true);
-			f.setPrefix("to_blob(utl_raw.cast_to_raw('0x");
+			f.setPrefix("to_blob(utl_raw.cast_to_raw('");
 			f.setSuffix("'))");
 			return f;
 		}

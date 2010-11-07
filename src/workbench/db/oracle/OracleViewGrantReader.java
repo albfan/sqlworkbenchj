@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -15,7 +15,7 @@ import workbench.db.ViewGrantReader;
 
 /**
  *
- * @author tkellerer
+ * @author Thomas Kellerer
  */
 public class OracleViewGrantReader
 	extends ViewGrantReader
@@ -24,11 +24,10 @@ public class OracleViewGrantReader
 	@Override
 	public String getViewGrantSql()
 	{
-		String sql = "select grantee, privilege, grantable  \n" +
+		return "select grantee, privilege, grantable \n" +
              "from ALL_TAB_PRIVS \n" +
              "where table_name = ? \n" +
              " and table_schema = ? ";
-		return sql;
 	}
 
 

@@ -32,7 +32,7 @@ public class OracleObjectType
 	@Override
 	public String getDropStatement(WbConnection con, boolean cascade)
 	{
-		return "DROP TYPE " + getSchema() + "." + getObjectName() + " FORCE";
+		return "DROP TYPE " + getFullyQualifiedName(con) + " FORCE";
 	}
 
 	public void setNumberOfMethods(int count)

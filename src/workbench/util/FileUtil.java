@@ -67,23 +67,23 @@ public class FileUtil
 	 * Read the lines of the given Reader into a Collection.
 	 * <br/>
 	 * The Reader will be closed after all lines have been read.
-	 * Empty lines are ignored and not add to the collection.
+	 * Empty lines are ignored and not added to the collection.
 	 *
-	 * @param in the "file" to read
+	 * @param input the "file" to read
 	 * @param trim if true, each line will be trimmed after reading
 	 * 
 	 * @return a Collection with all the lines in the file
 	 */
-	public static List<String> getLines(BufferedReader in, boolean trim)
+	public static List<String> getLines(BufferedReader input, boolean trim)
 	{
 		List<String> result = new ArrayList<String>();
 
 		try
 		{
 			String line; 
-			while ( (line = in.readLine()) != null)
+			while ( (line = input.readLine()) != null)
 			{
-				if (!StringUtil.isEmptyString(line)) 
+				if (StringUtil.isNonEmpty(line))
 				{
 					result.add(trim ? line.trim() : line);
 				}
@@ -95,7 +95,7 @@ public class FileUtil
 		}
 		finally
 		{
-			closeQuietely(in);
+			closeQuietely(input);
 		}
 		return result;
 	}
@@ -179,7 +179,7 @@ public class FileUtil
 	 * @param f the file to check
 	 * @param sampleLines the number of lines to read 
 	 */
-	public static final long estimateRecords(File f, long sampleLines)
+	public static long estimateRecords(File f, long sampleLines)
 		throws IOException
 	{
 		if (sampleLines <= 0) throw new IllegalArgumentException("Sample size must be greater then zero");

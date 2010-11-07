@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -156,17 +156,24 @@ public class JdbcIndexReader
 		String tableName = tableNameToUse;
 		if (tableName == null)
 		{
-			tableName = table.getTableExpression(this.metaData.getWbConnection());
+			tableName = table.getTableName();
 		}
+
 		String sql = StringUtil.replace(template, MetaDataSqlManager.TABLE_NAME_PLACEHOLDER, tableName);
+
+		if (tableNameToUse != null)
+		{
+			sql = sql.replace(MetaDataSqlManager.FQ_TABLE_NAME_PLACEHOLDER, table.getTableExpression(this.metaData.getWbConnection()));
+		}
+
 		if (indexDefinition.isUnique())
 		{
-			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE ");
+			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "UNIQUE");
 			if ("unique".equalsIgnoreCase(type)) type = "";
 		}
 		else
 		{
-			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER, "");
+			sql = StringUtil.replace(sql, MetaDataSqlManager.UNIQUE_PLACEHOLDER + " ", "");
 		}
 
 		if (StringUtil.isEmptyString(type))

@@ -29,12 +29,12 @@ import static org.junit.Assert.*;
  *
  * @author Thomas Kellerer
  */
-public class TestPGWbCall
+public class WbCallPostgresTest
 	extends WbTestCase
 {
 	private static final String TEST_ID = "wbcalltest";
 
-	public TestPGWbCall()
+	public WbCallPostgresTest()
 	{
 		super(TEST_ID);
 	}

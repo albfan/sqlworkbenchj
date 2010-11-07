@@ -15,8 +15,6 @@ import java.util.List;
 import workbench.WbTestCase;
 import static org.junit.Assert.*;
 import org.junit.Test;
-import org.junit.Before;
-import org.junit.After;
 
 /**
  *
@@ -37,6 +35,12 @@ public class ColumnChangerTest
 	{
 		DbSettings settings = new DbSettings("postgresql", "PostgreSQL");
 		ColumnChanger changer = new ColumnChanger(settings);
+
+		assertTrue(changer.canAddColumn());
+		assertTrue(changer.canAlterType());
+		assertTrue(changer.canChangeComment());
+		assertTrue(changer.canChangeNullable());
+		assertTrue(changer.canRenameColumn());
 		
 		TableIdentifier table = new TableIdentifier("PERSON");
 		ColumnIdentifier oldCol = new ColumnIdentifier("FIRST_NAME", java.sql.Types.VARCHAR, false);
@@ -98,6 +102,12 @@ public class ColumnChangerTest
 	{
 		DbSettings settings = new DbSettings("oracle", "Oracle");
 		ColumnChanger changer = new ColumnChanger(settings);
+
+		assertTrue(changer.canAddColumn());
+		assertTrue(changer.canAlterType());
+		assertTrue(changer.canChangeComment());
+		assertTrue(changer.canChangeNullable());
+		assertTrue(changer.canRenameColumn());
 
 		TableIdentifier table = new TableIdentifier("PERSON");
 		ColumnIdentifier oldCol = new ColumnIdentifier("FIRST_NAME", java.sql.Types.VARCHAR, false);

@@ -675,7 +675,6 @@ public class DbMetadata
 	 *
 	 * @see workbench.db.postgres.PostgresDDLFilter
 	 * @see workbench.sql.commands.DdlCommand#execute(java.lang.String)
-	 * @see workbench.db.ProcedureCreator#recreate()
 	 */
 	public String filterDDL(String sql)
 	{

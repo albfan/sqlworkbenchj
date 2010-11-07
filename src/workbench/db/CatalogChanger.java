@@ -54,7 +54,7 @@ public class CatalogChanger
 		// If for some reason this does not work, it could be turned off
 		if (useSetCatalog)
 		{
-			conn.getSqlConnection().setCatalog(trimQuotes(meta.isSqlServer(), newCatalog));
+			conn.getSqlConnection().setCatalog(conn.getMetadata().removeQuotes(newCatalog.trim()));
 		}
 		else
 		{
@@ -62,7 +62,7 @@ public class CatalogChanger
 			try
 			{
 				stmt = conn.createStatement();
-				String cat = meta.quoteObjectname(newCatalog);
+				String cat = meta.quoteObjectname(newCatalog.trim());
 				stmt.execute("USE " + cat);
 				if (clearWarnings)
 				{
@@ -88,27 +88,5 @@ public class CatalogChanger
 		LogMgr.logDebug("DbMetadata.setCurrentCatalog()", "Catalog changed to " + newCat);
 
 		return true;
-	}
-
-	/**
-	 * Remove quotes from an object's name.
-	 * For MS SQL Server this also removes [] brackets
-	 * around the identifier.
-	 */
-	private String trimQuotes(boolean sqlServer, String s)
-	{
-		if (s.length() < 2) return s;
-		
-		if (sqlServer)
-		{
-			String clean = s.trim();
-			int len = clean.length();
-			if (clean.charAt(0) == '[' && clean.charAt(len - 1) == ']')
-			{
-				return clean.substring(1, len - 1);
-			}
-		}
-
-		return StringUtil.trimQuotes(s);
 	}
 }

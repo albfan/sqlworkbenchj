@@ -50,7 +50,7 @@ public class DomainIdentifier
 	{
 		return defaultValue;
 	}
-	
+
 	public void setDataType(String dbmsType)
 	{
 		dataType = dbmsType;
@@ -80,7 +80,7 @@ public class DomainIdentifier
 	{
 		return constraintName;
 	}
-	
+
 	public void setCheckConstraint(String check)
 	{
 		this.constraintDefinition = check;
@@ -90,7 +90,7 @@ public class DomainIdentifier
 	{
 		return constraintDefinition;
 	}
-	
+
 	public String getCatalog()
 	{
 		return catalog;
@@ -105,7 +105,7 @@ public class DomainIdentifier
 	{
 		objectType = type;
 	}
-	
+
 	public String getObjectType()
 	{
 		return objectType;
@@ -135,7 +135,7 @@ public class DomainIdentifier
 	{
 		return getSummary();
 	}
-	
+
 	public String getSummary()
 	{
 		StringBuilder result = new StringBuilder(25);
@@ -160,7 +160,7 @@ public class DomainIdentifier
 	{
 		source = sql;
 	}
-	
+
 	public CharSequence getSource(WbConnection con)
 		throws SQLException
 	{
@@ -179,7 +179,7 @@ public class DomainIdentifier
 
 	public String getObjectNameForDrop(WbConnection con)
 	{
-		return domain;
+		return getFullyQualifiedName(con);
 	}
 
 	public String getComment()

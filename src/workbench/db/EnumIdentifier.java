@@ -96,7 +96,7 @@ public class EnumIdentifier
 
 	public String getObjectNameForDrop(WbConnection con)
 	{
-		return enumName;
+		return getFullyQualifiedName(con);
 	}
 
 	public String getComment()

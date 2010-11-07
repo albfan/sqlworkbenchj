@@ -13,9 +13,13 @@ package workbench.db.oracle;
 
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Set;
 
 import workbench.db.DbObject;
 import workbench.db.WbConnection;
+import workbench.log.LogMgr;
+import workbench.resource.Settings;
+import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
 
 /**
@@ -25,30 +29,29 @@ import workbench.util.SqlUtil;
 public class OracleObjectCompiler
 {
 	private WbConnection dbConnection;
-	private Statement stmt;
-	
+	private static final Set<String> COMPILABLE_TYPES = CollectionUtil.caseInsensitiveSet(
+		"VIEW", "PROCEDURE", "MATERIALIZED VIEW", "FUNCTION", "PACKAGE", "TRIGGER"
+	);
+
 	public OracleObjectCompiler(WbConnection conn)
 		throws SQLException
 	{
 		this.dbConnection = conn;
-		this.stmt = this.dbConnection.createStatement();
 	}
 
-	public void close()
-	{
-		if (this.stmt != null)
-		{
-			SqlUtil.closeStatement(stmt);
-		}
-	}
-	
 	public String compileObject(DbObject object)
 	{
 		String sql = "ALTER " + object.getObjectType() + " " + object.getObjectExpression(dbConnection) + " COMPILE";
+		if (Settings.getInstance().getDebugMetadataSql())
+		{
+			LogMgr.logDebug("OracleObjectCompiler.compileObject()", "Using SQL: " + sql);
+		}
+		Statement stmt = null;
 		try
 		{
+			stmt = dbConnection.createStatement();
 			this.dbConnection.setBusy(true);
-			this.stmt.executeUpdate(sql);
+			stmt.executeUpdate(sql);
 			return null;
 		}
 		catch (SQLException e)
@@ -57,6 +60,7 @@ public class OracleObjectCompiler
 		}
 		finally
 		{
+			SqlUtil.closeStatement(stmt);
 			this.dbConnection.setBusy(false);
 		}
 	}
@@ -65,12 +69,7 @@ public class OracleObjectCompiler
 	{
 		if (object == null) return false;
 		String type = object.getObjectType();
-		return (type.equalsIgnoreCase("VIEW") || 
-			type.equalsIgnoreCase("PROCEDURE") || 
-			type.equalsIgnoreCase("MATERIALIZED VIEW") || 
-			type.equalsIgnoreCase("FUNCTION") || 
-			type.equalsIgnoreCase("PACKAGE") ||
-			type.equalsIgnoreCase("TRIGGER"));
+		return COMPILABLE_TYPES.contains(type);
 	}
 	
 }

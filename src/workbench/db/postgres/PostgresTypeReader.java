@@ -15,7 +15,9 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import workbench.db.ColumnChanger;
 import workbench.db.ColumnIdentifier;
+import workbench.db.CommentSqlManager;
 import workbench.db.DbMetadata;
 import workbench.db.DbObject;
 import workbench.db.JdbcUtils;
@@ -97,21 +99,24 @@ public class PostgresTypeReader
 
     StringBuilder select = new StringBuilder(100);
 
-		select.append(" SELECT NULL AS TABLE_CAT, " +
-				" n.nspname AS TABLE_SCHEM, " +
-				" c.relname AS TABLE_NAME, " +
-				" 'TYPE' as TABLE_TYPE, " +
-				" d.description AS REMARKS " +
-				" FROM pg_catalog.pg_namespace n, pg_catalog.pg_class c " +
-				" LEFT JOIN pg_catalog.pg_description d ON (c.oid = d.objoid AND d.objsubid = 0) " +
-				" LEFT JOIN pg_catalog.pg_class dc ON (d.classoid=dc.oid AND dc.relname='pg_class') " +
-				" LEFT JOIN pg_catalog.pg_namespace dn ON (dn.oid=dc.relnamespace AND dn.nspname='pg_catalog') " +
-				" WHERE c.relkind = 'c' AND c.relnamespace = n.oid ");
+		String baseSelect =
+			"SELECT null as table_cat, \n" +
+		 "       n.nspname as table_schem, \n" +
+		 "       pg_catalog.format_type(t.oid, NULL) as table_name, \n" +
+		 "       'TYPE' as table_type, \n" +
+		 "       pg_catalog.obj_description(t.oid, 'pg_type') as remarks \n" +
+		 "FROM pg_catalog.pg_type t \n" +
+		 "     JOIN pg_catalog.pg_namespace n ON n.oid = t.typnamespace \n" +
+		 "WHERE (t.typrelid = 0 OR (SELECT c.relkind = 'c' FROM pg_catalog.pg_class c WHERE c.oid = t.typrelid)) \n" +
+		 "  AND NOT EXISTS(SELECT 1 FROM pg_catalog.pg_type el WHERE el.oid = t.typelem AND el.typarray = t.oid) \n" +
+		 "      AND n.nspname <> 'pg_catalog' \n" +
+		 "      AND n.nspname <> 'information_schema' \n";
 
+		select.append(baseSelect);
 		SqlUtil.appendAndCondition(select, "n.nspname", schemaPattern);
-		SqlUtil.appendAndCondition(select, "c.relname", objectPattern);
+		SqlUtil.appendAndCondition(select, "t.typname", objectPattern);
 
-		select.append(" ORDER BY TABLE_TYPE,TABLE_SCHEM,TABLE_NAME ");
+		select.append("\n ORDER BY 2,3 ");
 
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
@@ -128,7 +133,6 @@ public class PostgresTypeReader
 			{
 				String schema = rs.getString("TABLE_SCHEM");
 				String name = rs.getString("TABLE_NAME");
-				String type = rs.getString("TABLE_TYPE");
 				String remarks = rs.getString("REMARKS");
 				BaseObjectType pgtype = new BaseObjectType(schema, name);
 				pgtype.setComment(remarks);
@@ -190,11 +194,17 @@ public class PostgresTypeReader
 	{
 		try
 		{
-			TableDefinition tdef = con.getMetadata().getTableDefinition(createTableIdentifier(name));
-			BaseObjectType type = new BaseObjectType(tdef.getTable().getSchema(), tdef.getTable().getTableName());
-			type.setComment(tdef.getTable().getComment());
-			type.setAttributes(tdef.getColumns());
-			return type;
+			// Currently the Postgres driver does not return the comments defined for a type
+			// so it's necessary to retrieve the type definition again in order to get the correct remarks
+			List<BaseObjectType> types = getTypes(con, name.getSchema(), name.getObjectName());
+			if (types.size() == 1)
+			{
+				TableDefinition tdef = con.getMetadata().getTableDefinition(createTableIdentifier(name));
+				BaseObjectType result = types.get(0);
+				result.setAttributes(tdef.getColumns());
+				return result;
+			}
+			return null;
 		}
 		catch (Exception e)
 		{
@@ -230,6 +240,30 @@ public class PostgresTypeReader
 			if (i < columns.size() - 1) sql.append(",\n");
 		}
 		sql.append("\n);\n");
+
+		String comment = type.getComment();
+		CommentSqlManager mgr = new CommentSqlManager(con.getDbSettings().getDbId());
+		String template = mgr.getCommentSqlTemplate("type");
+		if (StringUtil.isNonBlank(comment) && template != null)
+		{
+			template = template.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, type.getObjectExpression(con));
+			template = template.replace(CommentSqlManager.COMMENT_PLACEHOLDER, comment);
+			sql.append('\n');
+			sql.append(template);
+			sql.append(";\n");
+		}
+
+		ColumnChanger changer = new ColumnChanger(con);
+		for (ColumnIdentifier col : columns)
+		{
+			String colComment = col.getComment();
+			if (StringUtil.isNonBlank(colComment))
+			{
+				String commentSql = changer.getColumnCommentSql(object, col);
+				sql.append(commentSql);
+				sql.append(";\n");
+			}
+		}
 		return sql.toString();
 	}
 }

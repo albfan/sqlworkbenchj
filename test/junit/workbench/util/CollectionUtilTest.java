@@ -26,7 +26,7 @@ public class CollectionUtilTest
 	@Test
 	public void testCreateHashSet()
 	{
-		Set<String> set = CollectionUtil.hashSet("one", "two");
+		Set<String> set = CollectionUtil.treeSet("one", "two");
 		assertNotNull(set);
 		assertEquals(2, set.size());
 		set.add("three");
@@ -35,7 +35,7 @@ public class CollectionUtilTest
 		assertTrue(set.contains("two"));
 		assertTrue(set.contains("three"));
 
-		Set<String> second = CollectionUtil.hashSet(set, "four", "five");
+		Set<String> second = CollectionUtil.treeSet(set, "four", "five");
 		assertEquals(5, second.size());
 		assertTrue(second.contains("one"));
 		assertTrue(second.contains("two"));

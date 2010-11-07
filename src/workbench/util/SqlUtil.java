@@ -319,24 +319,58 @@ public class SqlUtil
 
 	public static String addSemicolon(String sql)
 	{
-		if (sql == null) return null;
-		sql = sql.trim();
-		if (sql.endsWith(";")) return sql;
+		int index = findSemicolonFromEnd(sql);
+		if (index > -1) return sql;
 		return sql + ";";
 	}
-	
+
+	/**
+	 * Remove any semicolon at the end of the string.
+	 *
+	 * The input is also trimmed from whitespaces after the last semicolon (if any)
+	 * @param sql
+	 * @return the input string without a trailing semicolon
+	 */
 	public static String trimSemicolon(String sql)
 	{
-		if (sql == null) return null;
-		String newSql = sql.trim();
-		if (newSql.length() == 0) return sql;
-		if (newSql.endsWith(";"))
+		int index = findSemicolonFromEnd(sql);
+
+		if (index > -1)
 		{
-			return newSql.substring(0, newSql.length() - 1);
+			return sql.substring(0, index);
 		}
 		return sql;
 	}
 
+	/**
+	 * Finds the first semicolon at the end of the input string.
+	 *
+	 * The search from the end stops at the first non-whitespace character.
+	 * 
+	 * @param input
+	 * @return -1, no semicolon found otherwise the position of the semicolon.
+	 */
+	private static int findSemicolonFromEnd(String input)
+	{
+		if (input == null) return -1;
+		int len = input.length();
+		if (len == 0) return -1;
+
+		int index = -1;
+
+		for (int i=(len - 1); i > 0; i--)
+		{
+			char c = input.charAt(i);
+
+			if (c == ';')
+			{
+				index = i;
+				break;
+			}
+			if (!Character.isWhitespace(c)) break;
+		}
+		return index;
+	}
 	/**
 	 *  Returns the SQL Verb for the given SQL string.
 	 */

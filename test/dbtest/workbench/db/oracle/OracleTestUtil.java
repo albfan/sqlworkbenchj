@@ -47,6 +47,7 @@ public class OracleTestUtil
 			parser.parse("-url='jdbc:oracle:thin:@localhost:1521:oradb' -username=wbjunit -password=wbjunit -driver=oracle.jdbc.OracleDriver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName("WBJUnitOracle");
+			prof.addConnectionProperty("oracle.jdbc.remarksReporting", "true");
 			ConnectionMgr.getInstance().addProfile(prof);
 			con = ConnectionMgr.getInstance().getConnection(prof, id);
 			return con;

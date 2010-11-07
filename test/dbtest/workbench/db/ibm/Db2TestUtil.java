@@ -10,18 +10,17 @@
  */
 package workbench.db.ibm;
 
-import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import workbench.AppArguments;
 import workbench.TestUtil;
 import workbench.db.ConnectionMgr;
 import workbench.db.ConnectionProfile;
+import workbench.db.GenericObjectDropper;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.sql.BatchRunner;
 import workbench.util.ArgumentParser;
-import workbench.util.SqlUtil;
 
 /**
  *
@@ -78,6 +77,7 @@ public class Db2TestUtil
 			parser.parse("-url='jdbc:db2://localhost:50000/" + dbname + "' -username=" + username + " -password=" + pwd + " -driver=com.ibm.db2.jcc.DB2Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
 			prof.setName("WBJUnitDB2");
+			prof.addConnectionProperty("retrieveMessagesFromServerOnGetMessage", "true");
 			ConnectionMgr.getInstance().addProfile(prof);
 			con = ConnectionMgr.getInstance().getConnection(prof, id);
 			return con;
@@ -111,7 +111,7 @@ public class Db2TestUtil
 			stmt = con.createStatement();
 
 			stmt.execute("set schema " + schema);
-			dropAllObjects(con, schema);
+			dropAllObjects(con);
 			con.commit();
 		}
 		catch (Exception e)
@@ -124,42 +124,27 @@ public class Db2TestUtil
 	{
 		if (!isAvailable) return;
 		WbConnection con = getDb2Connection();
-		String schema = getSchemaName();
-		dropAllObjects(con, schema);
+		dropAllObjects(con);
 		ConnectionMgr.getInstance().disconnectAll();
 	}
 
-	public static void dropAllObjects(WbConnection con, String schema)
+	public static void dropAllObjects(WbConnection con)
 	{
 		if (con == null) return;
-
-		Statement drop = null;
 
 		try
 		{
 			List<TableIdentifier> tables = con.getMetadata().getObjectList(getSchemaName(), null);
-			drop = con.createStatement();
-			for (TableIdentifier tbl : tables)
-			{
-				String dropSql = tbl.getDropStatement(con, true);
-				try
-				{
-					drop.execute(dropSql);
-				}
-				catch (SQLException e)
-				{
-					// ignore
-				}
-			}
+			GenericObjectDropper dropper = new GenericObjectDropper();
+			dropper.setConnection(con);
+			dropper.setObjects(tables);
+			dropper.setCascade(true);
+			dropper.dropObjects();
 			con.commit();
 		}
 		catch (Exception e)
 		{
 			con.rollbackSilently();
-		}
-		finally
-		{
-			SqlUtil.closeStatement(drop);
 		}
 	}
 

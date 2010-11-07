@@ -12,6 +12,7 @@
 package workbench.sql.wbcommands;
 
 import java.util.Map;
+import org.junit.AfterClass;
 import workbench.TestUtil;
 import workbench.sql.StatementRunner;
 import workbench.sql.SqlCommand;
@@ -31,6 +32,12 @@ public class WbDefinePkTest
 	public WbDefinePkTest()
 	{
 		super("WbDefinePkTest");
+	}
+
+	@AfterClass
+	public static void tearDown()
+	{
+		PkMapping.getInstance().clear();
 	}
 
 	@Test

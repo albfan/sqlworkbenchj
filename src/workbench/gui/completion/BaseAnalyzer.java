@@ -12,6 +12,8 @@
 package workbench.gui.completion;
 
 import java.awt.Toolkit;
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +26,10 @@ import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
+import workbench.util.EncodingUtil;
+import workbench.util.FileUtil;
 import workbench.util.StringUtil;
 import workbench.util.TableAlias;
-import workbench.util.TextlistReader;
 
 /**
  * Base class to analyze a SQL statement to find out what kind and which
@@ -313,13 +316,19 @@ public abstract class BaseAnalyzer
 	}
 
 	@SuppressWarnings("unchecked")
-	private List readKeywords()
+	private List<String> readKeywords()
 	{
 		if (this.keywordFile == null) return null;
 		InputStream in = getClass().getResourceAsStream(keywordFile);
-		TextlistReader reader = new TextlistReader(in);
-		List result = new ArrayList(reader.getValues());
-		return result;
+		try
+		{
+			BufferedReader reader = new BufferedReader(EncodingUtil.createReader(in, "ISO-8859-1"));
+			return FileUtil.getLines(reader, true);
+		}
+		catch (IOException io)
+		{
+			return new ArrayList<String>();
+		}
 	}
 
 	@SuppressWarnings("unchecked")

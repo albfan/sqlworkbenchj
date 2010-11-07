@@ -163,6 +163,7 @@ public class ColumnIdentifier
 	@Override
 	public String getObjectName(WbConnection conn)
 	{
+		if (conn == null) return SqlUtil.quoteObjectname(name);
 		return conn.getMetadata().quoteObjectname(this.name);
 	}
 

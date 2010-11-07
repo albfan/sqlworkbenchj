@@ -4,7 +4,7 @@
  * This file is part of SQL Workbench/J, http://www.sql-workbench.net
  *
  * Copyright 2002-2010, Thomas Kellerer
- * No part of this code maybe reused without the permission of the author
+ * No part of this code may be reused without the permission of the author
  *
  * To contact the author please send an email to: support@sql-workbench.net
  *
@@ -27,6 +27,7 @@ import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
 import workbench.resource.Settings;
 import workbench.util.FileUtil;
+import workbench.util.SqlUtil;
 import workbench.util.StringUtil;
 
 /**
@@ -64,22 +65,22 @@ public class CreateSnippetAction extends WbAction
 		clp.setContents(sel, sel);
 	}
 	
-	public String makeJavaString(String sql, boolean removeSemicolon)
+	public String makeJavaString(String text, boolean removeSemicolon)
 	{
-		if (sql == null) return "";
+		if (text == null) return "";
 		
 		String prefix = Settings.getInstance().getProperty("workbench.clipcreate.codeprefix", "String sql = ");
 		String concat = Settings.getInstance().getProperty("workbench.clipcreate.concat", "+");
 		boolean includeNewLine = Settings.getInstance().getBoolProperty("workbench.clipcreate.includenewline", true);
 
 
-		StringBuilder result = new StringBuilder(sql.length() + prefix.length() + 10);
+		StringBuilder result = new StringBuilder(text.length() + prefix.length() + 10);
 		result.append(prefix);
 		if (prefix.endsWith("=")) result.append(" ");
 		int k = result.length();
 		StringBuilder indent = new StringBuilder(k);
 		for (int i=0; i < k; i++) indent.append(' ');
-		BufferedReader reader = new BufferedReader(new StringReader(sql));
+		BufferedReader reader = new BufferedReader(new StringReader(text));
 		boolean first = true;
 		try
 		{
@@ -90,9 +91,9 @@ public class CreateSnippetAction extends WbAction
 				if (first) first = false;
 				else result.append(indent);
 				result.append('"');
-				if (removeSemicolon && line.trim().endsWith(";"))
+				if (removeSemicolon)
 				{
-					line = line.substring(0, line.trim().length() - 1);
+					line = SqlUtil.trimSemicolon(line);
 				}
 				result.append(line);
 

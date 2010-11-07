@@ -313,6 +313,24 @@ public class ColumnChanger
 		return sql;
 	}
 
+	public String getColumnCommentSql(DbObject table, ColumnIdentifier column)
+	{
+		String remarks = column.getComment();
+		if (StringUtil.isBlank(remarks)) remarks = "";
+		String sql = commentMgr.getCommentSqlTemplate("column");
+
+		sql = sql.replace(CommentSqlManager.COMMENT_OBJECT_NAME_PLACEHOLDER, table.getObjectExpression(dbConn));
+		sql = sql.replace(PARAM_TABLE_NAME, table.getObjectName());
+		sql = sql.replace(CommentSqlManager.COMMENT_SCHEMA_PLACEHOLDER, table.getSchema() == null ? "" : table.getSchema());
+		sql = sql.replace(CommentSqlManager.COMMENT_COLUMN_PLACEHOLDER, getColumnExpression(column));
+		sql = sql.replace(CommentSqlManager.COMMENT_PLACEHOLDER, remarks.replace("'", "''"));
+		if (column != null)
+		{
+			sql = sql.replace(PARAM_NEW_DATATYPE, column.getDbmsType());
+		}
+		return sql;
+	}
+	
 	private String changeDefault(TableIdentifier table, ColumnIdentifier oldDefinition, ColumnIdentifier newDefinition)
 	{
 		String alterDefault = dbSettings.getAlterColumnDefaultSql();

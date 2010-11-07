@@ -23,13 +23,13 @@ import workbench.util.SqlUtil;
 import workbench.storage.DataStore;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Comparator;
 import java.util.List;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
+import workbench.db.DbObjectComparator;
 import workbench.db.IndexDefinition;
 import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
@@ -64,7 +64,9 @@ public class OracleMetadataTest
 			"create type address_type as object (street varchar(100), city varchar(50), zipcode varchar(10));\n" +
 			"create index idx_person_a on person (upper(first_name));\n" +
 		  "create index idx_person_b on person (last_name) reverse;\n" +
-			"create table ts_test (modified_at timestamp(3));\n";
+			"create table ts_test (modified_at timestamp(3));\n" +
+			"comment on table person is 'person comment';\n" +
+			"comment on column person.id is 'person id';\n";
 		TestUtil.executeScript(con, sql);
 	}
 
@@ -105,6 +107,16 @@ public class OracleMetadataTest
 		assertEquals("MV_PERSON", tbl.getTableName());
 		assertEquals("MATERIALIZED VIEW", tbl.getType());
 
+		TableIdentifier person = tables.get(1);
+		assertEquals("PERSON", person.getTableName());
+		assertEquals("person comment", person.getComment());
+
+		List<ColumnIdentifier> columns = con.getMetadata().getTableColumns(person);
+		assertEquals(3, columns.size());
+		ColumnIdentifier id = columns.get(0);
+		assertEquals("ID", id.getColumnName());
+		assertEquals("person id", id.getComment());
+
 		String sql = tbl.getSource(con).toString().trim();
 		assertTrue(sql.startsWith("CREATE MATERIALIZED VIEW MV_PERSON"));
 		IndexReader r = con.getMetadata().getIndexReader();
@@ -112,21 +124,12 @@ public class OracleMetadataTest
 		assertTrue(r instanceof OracleIndexReader);
 		OracleIndexReader reader = (OracleIndexReader)r;
 
-		TableIdentifier person = new TableIdentifier("WBJUNIT", "PERSON");
 		Collection<IndexDefinition> list = reader.getTableIndexList(person);
 		assertEquals(3, list.size());
 
 		List<IndexDefinition> indexes = new ArrayList<IndexDefinition>(list);
 
-		Comparator<IndexDefinition> comp = new Comparator<IndexDefinition>() {
-
-			@Override
-			public int compare(IndexDefinition i1, IndexDefinition i2)
-			{
-				return i1.getName().compareTo(i2.getName());
-			}
-		};
-		Collections.sort(indexes, comp);
+		Collections.sort(indexes, new DbObjectComparator());
 
 		IndexDefinition functionIndex = indexes.get(0);
 		IndexDefinition reverse = indexes.get(1);
@@ -145,6 +148,24 @@ public class OracleMetadataTest
 		assertTrue(pk.isPrimaryKeyIndex());
 	}
 
+	@Test
+	public void testObjectCompiler()
+		throws Exception
+	{
+		WbConnection con = OracleTestUtil.getOracleConnection();
+		if (con == null) return;
+		OracleObjectCompiler compiler = new OracleObjectCompiler(con);
+		TableIdentifier tbl = con.getMetadata().findObject(new TableIdentifier("V_PERSON"));
+		assertTrue(OracleObjectCompiler.canCompile(tbl));
+		String error = compiler.compileObject(tbl);
+		assertNull(error);
+
+		TableIdentifier mv = con.getMetadata().findObject(new TableIdentifier("MV_PERSON"));
+		assertTrue(OracleObjectCompiler.canCompile(mv));
+		error = compiler.compileObject(mv);
+		assertNull(error);
+	}
+	
 	@Test
 	public void testRowIDConverter()
 		throws Exception
