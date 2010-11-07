@@ -799,6 +799,11 @@
     <cobertura-instrument datafile="${junitdir}/cobertura.ser" todir="${instrumented.dir}">
       <fileset dir="${build}">
         <include name="workbench/**/*.class" />
+        <exclude name="workbench/sql/wbcommands/MissingWidthDefinition.class"/> <!-- exception -->
+        <exclude name="workbench/db/SourceStatementsHelp.class"/>
+        <exclude name="workbench/db/KeepAliveDaemon.class"/>
+        <exclude name="workbench/db/ASAConstraintReader.class"/>
+        <exclude name="workbench/db/search/TableDataSearcher"/> <!-- interface -->
         <exclude name="workbench/**/*Exception*.class" />
         <exclude name="workbench/**/*$*.class" />
         <exclude name="workbench/sql/wbcommands/console/**" />
@@ -809,7 +814,6 @@
         <exclude name="workbench/db/mckoi/**" />
         <exclude name="workbench/db/mssql/**" />
         <exclude name="workbench/interfaces/**" />
-        <exclude name="workbench/db/search/TableDataSearcher"/>
         <exclude name="workbench/print/**" />
         <exclude name="workbench/gui/log/**" />
         <exclude name="workbench/gui/lnf/**" />
@@ -933,6 +937,11 @@
   <target name="test-db2">
     <property name="test.db" value="ibm"/>
     <property file="db2.test.properties"/>
+    <antcall target="db-test"/>
+  </target>
+
+  <target name="test-fb">
+    <property name="test.db" value="firebird"/>
     <antcall target="db-test"/>
   </target>
 
