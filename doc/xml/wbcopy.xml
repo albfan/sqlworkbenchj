@@ -317,12 +317,12 @@
           </row>
 
           <row>
-						<entry id="copy-user-source-table">-useSourceDefinition</entry>
+						<entry id="copy-user-source-table">-skipTargetCheck</entry>
 						<entry>
 							<para>
                 Normally WbCopy will check if the specified target table does exist. However, some JDBC drivers
                 do not always return all table information correctly (e.g. temporary tables). If you know that the
-                target table exists, the parameter <literal>-useSourceDefinition=true</literal> can be used to tell
+                target table exists, the parameter <literal>-skipTargetCheck=true</literal> can be used to tell
                 WbCopy, that the (column) definition of the source table should be assumed for the target table and
                 not further test for the target table will be done.
 							</para>
