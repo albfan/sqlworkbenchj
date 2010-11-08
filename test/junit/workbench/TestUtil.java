@@ -26,6 +26,7 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -451,6 +452,31 @@ public class TestUtil
 		}
 	}
 
+	public static Object getSingleQueryValue(WbConnection conn, String query)
+	{
+		Statement stmt = null;
+		ResultSet rs = null;
+		Object result = null;
+		try
+		{
+			stmt = conn.createStatement();
+			rs = stmt.executeQuery(query);
+			if (rs.next())
+			{
+				result = rs.getObject(1);
+			}
+		}
+		catch (Exception e)
+		{
+			result = null;
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		return result;
+	}
+	
 	public void prepareSource(WbFile sourceDb)
 		throws SQLException, ClassNotFoundException
 	{

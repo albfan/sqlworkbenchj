@@ -73,10 +73,9 @@ public class DataCopier
 	{
 		sourceData = null;
 		sourceTable = null;
+		targetTable = null;
 		sourceConnection = null;
-		targetTable = null;
 		targetColumnsForQuery = null;
-		targetTable = null;
 		targetConnection = null;
 		columnMap = null;
 		importer.clearMessages();
@@ -165,7 +164,7 @@ public class DataCopier
 	 *
 	 * @param source the source connection
 	 * @param target the target connection
-	 * @param sourceTable the table to copy (in the database defined by source)
+	 * @param sourceTbl the table to copy (in the database defined by source)
 	 * @param targetTable the table write to (in the database defined by target)
 	 * @param columnMapping define a mapping from source columns to target columns (may be null)
 	 * @param additionalWhere a WHERE condition to be appended to the SELECT that retrieves the data from the source table
@@ -179,8 +178,8 @@ public class DataCopier
 	 */
 	public void copyFromTable(WbConnection source,
 														WbConnection target,
-														TableIdentifier sourceTable,
-														TableIdentifier targetTable,
+														TableIdentifier sourceTbl,
+														TableIdentifier targetTbl,
 														Map<String, String> columnMapping,
 														String additionalWhere,
 														String createTableType,
@@ -192,14 +191,14 @@ public class DataCopier
 		this.sourceConnection = source;
 		this.targetConnection = target;
 		this.importer.setConnection(target);
-		this.sourceTable = sourceTable;
-		this.targetTable = targetTable;
+		this.sourceTable = sourceTbl;
+		this.targetTable = targetTbl;
 		this.targetColumnsForQuery = null;
 
-		if (!this.sourceConnection.getMetadata().objectExists(sourceTable, (String)null))
+		if (!this.sourceConnection.getMetadata().objectExists(sourceTbl, (String)null))
 		{
-			this.addError(ResourceMgr.getFormattedString("ErrCopySourceTableNotFound", sourceTable.getQualifiedName()));
-			throw new SQLException("Table " + sourceTable.getTableName() + " not found in source connection");
+			this.addError(ResourceMgr.getFormattedString("ErrCopySourceTableNotFound", sourceTbl.getQualifiedName()));
+			throw new SQLException("Table " + sourceTbl.getTableName() + " not found in source connection");
 		}
 
 		this.initColumnMapping(columnMapping, createTableType != null, skipTargetCheck);
@@ -240,13 +239,14 @@ public class DataCopier
 			TableIdentifier toDrop = null;
 			if (skipTargetCheck)
 			{
-				toDrop = sourceTable.createCopy();
+				toDrop = targetTable.createCopy();
+				targetTable.adjustCase(targetConnection);
 			}
 			else
 			{
 				toDrop = findTargetTable();
 			}
-			
+
 			if (toDrop != null)
 			{
 				LogMgr.logInfo("DataCopier.createTable()", "About to drop table " + toDrop.getQualifiedName());
@@ -281,7 +281,7 @@ public class DataCopier
 		try
 		{
 			List<ColumnIdentifier> pkCols = this.importer.getKeyColumns();
-			
+
 			List<ColumnIdentifier> targetCols = new ArrayList<ColumnIdentifier>(columns.size());
 			for (ColumnIdentifier col : columns)
 			{
@@ -402,8 +402,8 @@ public class DataCopier
 		}
 		// this flag must be set before calling initImporterForTable!
 		importer.skipTargetCheck(skipTargetCheck);
-		
-		this.initImporterForQuery(query);
+
+		initImporterForQuery(query, skipTargetCheck);
 	}
 
 	public void setRowActionMonitor(RowActionMonitor rowMonitor)
@@ -551,12 +551,16 @@ public class DataCopier
 		this.sourceData.cancel();
 	}
 
-	private void initImporterForQuery(String query)
+	private void initImporterForQuery(String query, boolean skipTargetCheck)
 		throws SQLException
 	{
 		if (this.targetColumnsForQuery == null) return;
-		List<ColumnIdentifier> realCols = targetConnection.getMetadata().getTableColumns(targetTable);
-		updateTargetColumns(realCols, targetColumnsForQuery);
+
+		if (!skipTargetCheck)
+		{
+			List<ColumnIdentifier> realCols = targetConnection.getMetadata().getTableColumns(targetTable);
+			updateTargetColumns(realCols, targetColumnsForQuery);
+		}
 		this.importer.setTargetTable(this.targetTable, this.targetColumnsForQuery);
 		initQuerySource(query);
 	}

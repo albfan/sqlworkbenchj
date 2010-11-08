@@ -13,6 +13,7 @@ package workbench.util;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -426,6 +427,7 @@ public class SqlUtil
 		return result;
 	}
 
+
 	public static ResultInfo getResultInfoFromQuery(String sql, WbConnection conn)
 		throws SQLException
 	{
@@ -433,6 +435,7 @@ public class SqlUtil
 
 		ResultSet rs = null;
 		Statement stmt = null;
+		PreparedStatement pstmt = null;
 		final ResultInfo result;
 		Savepoint sp = null;
 
@@ -442,10 +445,32 @@ public class SqlUtil
 			{
 				sp = conn.setSavepoint();
 			}
-			stmt = conn.createStatementForQuery();
-			stmt.setMaxRows(1);
-			rs = stmt.executeQuery(trimSemicolon(sql));
-			ResultSetMetaData meta = rs.getMetaData();
+			
+			ResultSetMetaData meta = null;
+			if (conn.getDbSettings().usePreparedStatementForQueryInfo())
+			{
+				try
+				{
+					pstmt = conn.getSqlConnection().prepareStatement(sql);
+					meta = pstmt.getMetaData();
+				}
+				catch (Exception e)
+				{
+					LogMgr.logError("SqlUtil.getResultInfoFromQuery()", "Could not obtain result info from prepared statement", e);
+					closeStatement(pstmt);
+					pstmt = null;
+					meta = null;
+				}
+			}
+
+			if (meta == null)
+			{
+				stmt = conn.createStatementForQuery();
+				stmt.setMaxRows(1);
+				rs = stmt.executeQuery(trimSemicolon(sql));
+				meta = rs.getMetaData();
+			}
+
 			result = new ResultInfo(meta, conn);
 			List tables = getTables(sql, false);
 			if (tables.size() == 1)
@@ -463,6 +488,7 @@ public class SqlUtil
 		}
 		finally
 		{
+			closeStatement(pstmt);
 			closeAll(rs, stmt);
 		}
 		return result;

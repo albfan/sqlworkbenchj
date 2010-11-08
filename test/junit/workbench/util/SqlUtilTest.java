@@ -16,8 +16,13 @@ import java.util.List;
 import java.util.regex.Pattern;
 import workbench.WbTestCase;
 import workbench.resource.Settings;
+import workbench.storage.ResultInfo;
 import static org.junit.Assert.*;
 import org.junit.Test;
+import workbench.TestUtil;
+import workbench.db.ColumnIdentifier;
+import workbench.db.ConnectionMgr;
+import workbench.db.WbConnection;
 
 /**
  *
@@ -760,5 +765,44 @@ public class SqlUtilTest
 
 		cleaned = SqlUtil.cleanupIdentifier("&\"SOM'E-\\THING");
 		assertEquals("SOMETHING", cleaned);
+	}
+
+	@Test
+	public void testQueryInfo()
+		throws Exception
+	{
+		TestUtil util = getTestUtil();
+		try
+		{
+			WbConnection con = util.getConnection();
+			TestUtil.executeScript(con, 
+				"CREATE TABLE person (id integer, firstname varchar(100), lastname varchar(100));\n" +
+				"COMMIT;\n");
+
+			con.getDbSettings().setUsePreparedStatementForQueryInfo(false);
+			ResultInfo info = SqlUtil.getResultInfoFromQuery("SELECT * from person", con);
+			assertNotNull(info);
+			assertEquals(3, info.getColumnCount());
+			assertEquals("ID", info.getColumn(0).getColumnName());
+
+			List<ColumnIdentifier> columns = SqlUtil.getResultSetColumns("SELECT * FROM PERSON", con);
+			assertNotNull(columns);
+			assertEquals(3, columns.size());
+
+			con.getDbSettings().setUsePreparedStatementForQueryInfo(true);
+			ResultInfo info2 = SqlUtil.getResultInfoFromQuery("SELECT * from person", con);
+			assertNotNull(info2);
+			assertEquals(3, info2.getColumnCount());
+			assertEquals("ID", info2.getColumn(0).getColumnName());
+
+			List<ColumnIdentifier> columns2 = SqlUtil.getResultSetColumns("SELECT * FROM PERSON", con);
+			assertNotNull(columns2);
+			assertEquals(3, columns2.size());
+		}
+		finally
+		{
+			ConnectionMgr.getInstance().disconnectAll();
+		}
+
 	}
 }

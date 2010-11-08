@@ -976,7 +976,6 @@ public class WbCopyTest
 
 			// Now test the table creation without columns
 			String sql = "wbcopy -createTarget=true " +
-				"-dropTarget=true " +
 				"-sourceTable=person " +
 				"-targetTable=participants " +
 				"-tableType=junit_type " +
@@ -1044,9 +1043,7 @@ public class WbCopyTest
 			sourceStmt.executeUpdate("insert into person (nr, \"Lastname\", firstname) values (4,'Perfect', 'Ford')");
 			source.commit();
 
-			// Now test the table creation without columns
 			String sql = "wbcopy -createTarget=true " +
-				"-dropTarget=true " +
 				"-sourceQuery='select nr as person_id, \"Lastname\" as last_name, firstname as first_name from person' " +
 				"-targetTable=participants " +
 				"-tableType=junit_type " +
@@ -1079,9 +1076,47 @@ public class WbCopyTest
 			}
 			SqlUtil.closeResult(rs);
 
+
+			sql = "wbcopy -sourceQuery='select nr as person_id, \"Lastname\" as last_name, firstname as first_name from person' " +
+				"-targetTable=person_2 " +
+				"-skipTargetCheck=true " +
+				"-sourceProfile='copyCreateTestSource' " +
+				"-targetProfile='copyCreateTestTarget' ";
+
+			TestUtil.executeScript(target, 
+				"create table person_2 (person_id integer not null primary key, last_name varchar(50), first_name varchar(50));\n" +
+				"commit;\n");
+
+			result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			Object count = TestUtil.getSingleQueryValue(target, "select count(*) from person_2");
+			assertEquals(4, count);
+
+			Object lastName = TestUtil.getSingleQueryValue(target, "select last_name from person_2 where person_id = 3");
+			assertNotNull(lastName);
+			assertEquals("Moviestar", lastName);
+
+			TestUtil.executeScript(target,
+				"delete from person_2;\n" +
+				"commit;\n");
+
+			sql = "wbcopy -sourceQuery='select nr, \"Lastname\", firstname from person' " +
+				"-targetTable=person_2 " +
+				"-skipTargetCheck=true " +
+				"-sourceProfile='copyCreateTestSource' " +
+				"-targetProfile='copyCreateTestTarget' " +
+				"-columns=person_id,last_name,first_name ";
+
+			result = copyCmd.execute(sql);
+			assertEquals(result.getMessageBuffer().toString(), true, result.isSuccess());
+
+			lastName = TestUtil.getSingleQueryValue(target, "select last_name from person_2 where person_id = 3");
+			assertNotNull(lastName);
+			assertEquals("Moviestar", lastName);
+			
 			ConnectionMgr.getInstance().removeProfile(source.getProfile());
 			ConnectionMgr.getInstance().removeProfile(target.getProfile());
-
 		}
 		finally
 		{

@@ -1626,7 +1626,7 @@ public class DataImporter
 				parms.append(',');
 			}
 			ColumnIdentifier col = this.targetColumns.get(i);
-			String colname = col.getColumnName();
+			String colname = col.getDisplayName();
 			if (!verifyTargetTable)
 			{
 				// if the target table was not verified, we need to make
@@ -1713,7 +1713,7 @@ public class DataImporter
 		for (int i=0; i < this.colCount; i++)
 		{
 			ColumnIdentifier col = this.targetColumns.get(i);
-			String colname = col.getColumnName();
+			String colname = col.getDisplayName();
 			if (!verifyTargetTable)
 			{
 				// if the target table was not verified, we need to make

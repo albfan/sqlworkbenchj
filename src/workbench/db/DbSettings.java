@@ -1235,4 +1235,15 @@ public class DbSettings
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "defaultvalue.isexpression", true);
 	}
+
+	public boolean usePreparedStatementForQueryInfo()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "queryinfo.preparedstatement", false);
+	}
+
+	public void setUsePreparedStatementForQueryInfo(boolean flag)
+	{
+		Settings.getInstance().setProperty(prefix + "queryinfo.preparedstatement", flag);
+	}
+
 }
