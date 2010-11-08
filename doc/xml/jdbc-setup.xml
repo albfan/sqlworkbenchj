@@ -173,7 +173,7 @@
 						<entry>
 							<simplelist columns="1">
 								<member>ojdbc6.jar</member>
-								<member><ulink url="http://otn.oracle.com/software/tech/java/sqlj_jdbc/content.html"/></member>
+								<member><ulink url="http://www.oracle.com/technetwork/database/features/jdbc/index-091264.html"/></member>
 							</simplelist>
 						</entry>
 					</row>
