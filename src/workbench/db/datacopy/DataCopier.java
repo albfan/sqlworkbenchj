@@ -11,6 +11,7 @@
  */
 package workbench.db.datacopy;
 
+import java.util.Collections;
 import workbench.db.*;
 import workbench.db.compare.TableDeleteSync;
 import workbench.db.importer.*;
@@ -231,19 +232,28 @@ public class DataCopier
 		return realTable;
 	}
 
-	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError, String createType, boolean ignoreTargetCheck)
+	private void createTable(Collection<ColumnIdentifier> columns, boolean dropIfExists, boolean ignoreError, String createType, boolean skipTargetCheck)
 		throws SQLException
 	{
 		if (dropIfExists)
 		{
-			TableIdentifier toDrop = findTargetTable();
+			TableIdentifier toDrop = null;
+			if (skipTargetCheck)
+			{
+				toDrop = sourceTable.createCopy();
+			}
+			else
+			{
+				toDrop = findTargetTable();
+			}
+			
 			if (toDrop != null)
 			{
 				LogMgr.logInfo("DataCopier.createTable()", "About to drop table " + toDrop.getQualifiedName());
 				try
 				{
 					ObjectDropper dropper = new GenericObjectDropper();
-					dropper.setObjects(CollectionUtil.arrayList(toDrop));
+					dropper.setObjects(Collections.singletonList(toDrop));
 					dropper.setConnection(targetConnection);
 					dropper.dropObjects();
 					this.addMessage(ResourceMgr.getFormattedString("MsgCopyTableDropped", toDrop.getQualifiedName()));
@@ -280,7 +290,7 @@ public class DataCopier
 				ColumnIdentifier copy = col.createCopy();
 				String name = col.getColumnName();
 
-				if (ignoreTargetCheck)
+				if (skipTargetCheck)
 				{
 					name = sourceConnection.getMetadata().removeQuotes(name);
 					name = targetConnection.getMetadata().adjustObjectnameCase(name);
