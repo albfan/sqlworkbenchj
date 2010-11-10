@@ -92,6 +92,7 @@ public class ColumnRemover
 				Object value = original.getValue(row, colname);
 				newDs.setValue(newRow, i, value);
 			}
+			newDs.getRow(newRow).setUserObject(original.getRow(row).getUserObject());
 		}
 		newDs.resetStatus();
 		return newDs;

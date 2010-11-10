@@ -95,6 +95,11 @@ public class TextRowDataConverter
 
 	public StrBuffer convertRowData(RowData row, long rowIndex)
 	{
+		return convertRowData(row, rowIndex, null);
+	}
+
+	public StrBuffer convertRowData(RowData row, long rowIndex, int[] colMap)
+	{
 		int count = this.metaData.getColumnCount();
 		StrBuffer result = new StrBuffer(count * 30);
 		boolean canQuote = this.quoteCharacter != null;
@@ -106,16 +111,17 @@ public class TextRowDataConverter
 			result.append(this.delimiter);
 		}
 
-		for (int c=0; c < count; c ++)
+		for (int c=0; c < count; c++)
 		{
-			if (!this.includeColumnInExport(c)) continue;
+			int colIndex = getRealIndex(c, colMap);
+			if (!this.includeColumnInExport(colIndex)) continue;
 
 			if (currentColIndex > 0)
 			{
 				result.append(this.delimiter);
 			}
-			int colType = this.metaData.getColumnType(c);
-			String dbmsType = this.metaData.getDbmsTypeName(c);
+			int colType = this.metaData.getColumnType(colIndex);
+			String dbmsType = this.metaData.getDbmsTypeName(colIndex);
 			
 			String value = null;
 
@@ -126,9 +132,9 @@ public class TextRowDataConverter
 			{
 				try
 				{
-					File blobFile = createBlobFile(row, c, rowIndex);
+					File blobFile = createBlobFile(row, colIndex, rowIndex);
 					value = getBlobFileValue(blobFile);
-					long blobSize = writeBlobFile(row.getValue(c), blobFile);
+					long blobSize = writeBlobFile(row.getValue(colIndex), blobFile);
 					if (blobSize <= 0)
 					{
 						value = null;
@@ -142,12 +148,12 @@ public class TextRowDataConverter
 			}
 			else if (!isConverted && writeClobFiles && SqlUtil.isClobType(colType, dbmsType, this.originalConnection.getDbSettings()))
 			{
-				Object clobData = row.getValue(c);
+				Object clobData = row.getValue(colIndex);
 				if (clobData != null)
 				{
 					try
 					{
-						File clobFile = createBlobFile(row, c, rowIndex);
+						File clobFile = createBlobFile(row, colIndex, rowIndex);
 						value = getBlobFileValue(clobFile);
 						String s = clobData.toString();
 						writeClobFile(s, clobFile, this.encoding);
@@ -160,7 +166,7 @@ public class TextRowDataConverter
 			}
 			else
 			{
-				value = this.getValueAsFormattedString(row, c);
+				value = this.getValueAsFormattedString(row, colIndex);
 			}
 
 			boolean isNull = (value == null);
@@ -260,6 +266,7 @@ public class TextRowDataConverter
 	private int getRealIndex(int colIndex, int[] colMap)
 	{
 		if (colMap == null) return colIndex;
+		if (colIndex >= colMap.length) return -1;
 		return colMap[colIndex];
 	}
 	

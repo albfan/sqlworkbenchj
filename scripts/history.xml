@@ -16,6 +16,7 @@
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
     <entry dev-build="5" type="fix">When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</entry>
+    <entry dev-build="6" type="fix">Copying a table's column definitions into the clipboard did not work.</entry>
     <entry dev-build="6" type="fix">When using WbCopy and -createTarget with a fully qualified table name (otherschema.sometable) the table was not created in the specified schema</entry>
     <entry dev-build="6" type="fix">Postgres DOMAINs where not displayed if the DOMAIN was created in a schema that is not in the schema search_path</entry>
     <entry dev-build="6" type="fix">A selection of '*' in the DbExplorer's schema selector was not restored if "Remember DbExplorer schema" was enabled for the workspace</entry>

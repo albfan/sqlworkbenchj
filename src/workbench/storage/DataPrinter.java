@@ -94,24 +94,10 @@ public class DataPrinter
 		for (int i=0; i < count; i++)
 		{
 			int row = (rows == null ? i : rows[i]);
-			RowData rowData = adjustColumnOrder(data.getRow(row));
-			StrBuffer line = converter.convertRowData(rowData, row);
+			StrBuffer line = converter.convertRowData(data.getRow(row), row, columnMap);
 			line.writeTo(out);
 			out.flush();
 		}
 	}
 
-	private RowData adjustColumnOrder(RowData row)
-	{
-		if (columnMap == null) return row;
-
-		RowData newRow = row.createCopy();
-		if (columnMap.length != row.getColumnCount()) return row;
-
-		for (int i=0; i < row.getColumnCount(); i++)
-		{
-			newRow.setValue(columnMap[i], row.getValue(i));
-		}
-		return newRow;
-	}
 }

@@ -142,7 +142,7 @@ public class ClipBoardCopier
 		for (int i=0; i < colCount; i++)
 		{
 			int modelIndex = model.getColumn(i).getModelIndex();
-			result[modelIndex] = i;
+			result[i] = modelIndex;
 		}
 		return result;
 	}

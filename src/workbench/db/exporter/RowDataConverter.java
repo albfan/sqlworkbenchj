@@ -89,7 +89,7 @@ public abstract class RowDataConverter
 
 	private long maxBlobFilesPerDir;
 	private long blobsWritten;
-	
+
 	/**
 	 * Spreadsheet option to add an additional sheet with the generating SQL
 	 */
@@ -162,13 +162,13 @@ public abstract class RowDataConverter
 	}
 
 	/**
-	 * Enable distribution of LOB files over several directories, in order 
+	 * Enable distribution of LOB files over several directories, in order
 	 * to keep the number of files per directory in a reasonable limit.
 	 * <br/>
-	 * A running number will be appended to the <tt>baseDir</tt> parameter, for each 
+	 * A running number will be appended to the <tt>baseDir</tt> parameter, for each
 	 * directory that gets created.
-	 * 
-	 * @param baseDir 
+	 *
+	 * @param baseDir
 	 * @param maxFiles
 	 */
 	public void setMaxLobFilesPerDirectory(int maxFiles)
@@ -275,7 +275,7 @@ public abstract class RowDataConverter
 		{
 			baseFilename = f.getFileName();
 		}
-		
+
 		if (outputFile != null)
 		{
 			if (this.outputFile.isDirectory())
@@ -387,7 +387,7 @@ public abstract class RowDataConverter
 		String fname = f.getName();
 		return dir + "/" + fname;
 	}
-	
+
 	public File createBlobFile(RowData row, int colIndex, long rowNum)
 		throws IOException
 	{
@@ -449,7 +449,7 @@ public abstract class RowDataConverter
 	{
 		return (maxBlobFilesPerDir > 0 && !compressExternalFiles);
 	}
-	
+
 	private File getBlobDir()
 		throws IOException
 	{
@@ -531,6 +531,7 @@ public abstract class RowDataConverter
 
 	public boolean includeColumnInExport(int col)
 	{
+		if (col < 0) return false;
 		if (this.columnsToExport == null) return true;
 		return this.columnsToExport[col];
 	}
@@ -808,7 +809,7 @@ public abstract class RowDataConverter
 	protected void writeEscapedXML(StrBuffer out, String s, boolean keepCR)
 	{
 		if (s == null) return;
-		
+
 		for (int i = 0; i < s.length(); i++)
 		{
 			char c = s.charAt(i);
@@ -846,5 +847,5 @@ public abstract class RowDataConverter
 		writeEscapedXML(out, s, keepCR);
 		return out;
 	}
-	
+
 }

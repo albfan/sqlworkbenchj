@@ -14,6 +14,7 @@ import java.io.StringWriter;
 import java.sql.Types;
 import java.io.Writer;
 import org.junit.Test;
+import workbench.WbTestCase;
 import static org.junit.Assert.*;
 
 /**
@@ -21,17 +22,18 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class DataPrinterTest
+	extends WbTestCase
 {
 
 	public DataPrinterTest()
 	{
+		super("DataPrinterTest");
 	}
 
 	@Test
 	public void testWriteDataString()
 		throws Exception
 	{
-		System.out.println("writeDataString");
 		int[] types = new int[] {Types.INTEGER, Types.VARCHAR, Types.VARCHAR };
 		String[] names = new String[] {"ID", "FIRSTNAME", "LASTNAME" };
 		DataStore ds = new DataStore(names, types);
@@ -55,12 +57,11 @@ public class DataPrinterTest
 		printer.writeDataString(out, new int[] {1} );
 		assertEquals("ID;FIRSTNAME;LASTNAME\n2;Zaphod;Beeblebrox\n", out.toString());
 
-		int[] colMap = new int[] {2,1,0};
+		int[] colMap = new int[] { 2, 1, 0 };
 		printer.setColumnMapping(colMap);
 
 		out = new StringWriter(50);
 		printer.writeDataString(out, new int[] {0} );
 		assertEquals("LASTNAME;FIRSTNAME;ID\nDent;Arthur;1\n", out.toString());
-
 	}
 }
