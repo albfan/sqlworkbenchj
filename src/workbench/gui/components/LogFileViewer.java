@@ -48,7 +48,7 @@ public class LogFileViewer
 	public LogFileViewer(Frame owner)
 	{
 		super();
-		setIconImage(ResourceMgr.getImage("script").getImage());
+		ResourceMgr.setWindowIcons(this, "logfile");
 		display = new SearchableTextPane(this);
 		display.setFont(Settings.getInstance().getEditorFont());
 		display.setEditable(false);
