@@ -64,13 +64,13 @@ public abstract class TokenMarker
 		return null;
 	}
 
-	public synchronized Token getFirstTokenInLine(int lineIndex)
+	public Token getFirstTokenInLine(int lineIndex)
 	{
 		if (lineIndex < 0 || lineIndex >= length) return null;
 		return lineStartTokens.get(lineIndex);
 	}
 
-	public synchronized Token getToken(Segment line, int lineIndex)
+	public Token getToken(Segment line, int lineIndex)
 	{
 		Token token = getFirstTokenInLine(lineIndex);
 		if (token == null)

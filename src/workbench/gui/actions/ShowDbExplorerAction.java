@@ -34,7 +34,7 @@ public class ShowDbExplorerAction
 		super();
 		mainWin = aWindow;
 		this.initMenuDefinition("MnuTxtShowDbExplorer",KeyStroke.getKeyStroke(KeyEvent.VK_D, PlatformShortcuts.getDefaultModifier()));
-		this.setIcon("Database");
+		this.setIcon("database16.png");
 		setEnabled(false);
 	}
 

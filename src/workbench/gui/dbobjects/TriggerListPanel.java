@@ -423,7 +423,7 @@ public class TriggerListPanel
 			}
 			catch (Throwable ex)
 			{
-				LogMgr.logError("ProcedureListPanel.valueChanged() thread", "Could not read procedure source", ex);
+				LogMgr.logError("TriggerListPanel.retrieveTriggerSource() thread", "Could not read trigger source", ex);
 				source.setText(ExceptionUtil.getDisplay(ex));
 			}
 		}

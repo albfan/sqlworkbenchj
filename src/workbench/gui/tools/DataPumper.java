@@ -17,6 +17,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -1074,7 +1075,9 @@ public class DataPumper
 		};
 
 		this.window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		this.window.setIconImage(ResourceMgr.getImage("DataPumper").getImage());
+
+		ResourceMgr.setWindowIcons(window, "datapumper");
+
 		this.window.getContentPane().add(this);
 		this.restoreSettings();
 		this.window.addWindowListener(this);

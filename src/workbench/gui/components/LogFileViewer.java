@@ -17,7 +17,6 @@ import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
 
 import java.io.Reader;
 import java.util.Timer;

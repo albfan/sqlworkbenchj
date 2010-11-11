@@ -11,16 +11,20 @@
  */
 package workbench.resource;
 
+import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import javax.swing.ImageIcon;
+import javax.swing.JFrame;
 
 import workbench.log.LogMgr;
 import workbench.util.StringUtil;
@@ -102,6 +106,23 @@ public class ResourceMgr
 		return new VersionNumber(nr);
 	}
 
+	public static void setWindowIcons(JFrame window, String baseName)
+	{
+		List<Image> icons = new ArrayList<Image>(2);
+		icons.add(ResourceMgr.getPng(baseName + "16").getImage());
+		icons.add(ResourceMgr.getPng(baseName + "32").getImage());
+		window.setIconImages(icons);
+	}
+
+	public static void setMainWindowIcons(JFrame window)
+	{
+		List<Image> icons = new ArrayList<Image>(3);
+		icons.add(getPng("workbench16").getImage());
+		icons.add(getPng("workbench32").getImage());
+		icons.add(getPng("workbench48").getImage());
+		window.setIconImages(icons);
+	}
+	
 	public static String getDefaultTabLabel()
 	{
 		return Settings.getInstance().getProperty("workbench.gui.tabs.defaultlabel", getString("LblTabStatement"));

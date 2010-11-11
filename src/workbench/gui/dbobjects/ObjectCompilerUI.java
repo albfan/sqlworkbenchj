@@ -111,7 +111,9 @@ public class ObjectCompilerUI
 			this.window = new JFrame(ResourceMgr.getString("TxtWindowTitleCompileStatus"));
 			this.window.getContentPane().setLayout(new BorderLayout());
 			this.window.getContentPane().add(this, BorderLayout.CENTER);
-			this.window.setIconImage(ResourceMgr.getImage("workbench").getImage());
+
+			ResourceMgr.setWindowIcons(window, "compile");
+
 			if (!Settings.getInstance().restoreWindowSize(this.window, ObjectCompilerUI.class.getName()))
 			{
 				this.window.setSize(500,400);

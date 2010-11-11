@@ -40,7 +40,7 @@ public class ScriptDbObjectAction
 		this.source = client;
 		this.selection = list;
 		setEnabled(false);
-		setIcon("script");
+		setIcon("script16.png");
 		list.addListSelectionListener(this);
 	}
 
@@ -50,7 +50,7 @@ public class ScriptDbObjectAction
 		if (!WbSwingUtilities.checkConnection(source.getComponent(), source.getConnection())) return;
 
 		List<? extends DbObject> objects = source.getSelectedObjects();
-		if (objects == null || objects.size() == 0) return;
+		if (objects == null || objects.isEmpty()) return;
 
 		ObjectScripter s = new ObjectScripter(objects, source.getConnection());
 		ObjectScripterUI scripterUI = new ObjectScripterUI(s);

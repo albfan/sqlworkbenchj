@@ -21,6 +21,7 @@ import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.CollectionUtil;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 
 /**
  *
@@ -41,7 +42,8 @@ public class OracleObjectCompiler
 
 	public String compileObject(DbObject object)
 	{
-		String sql = "ALTER " + object.getObjectType() + " " + object.getObjectExpression(dbConnection) + " COMPILE";
+		String sql = createCompileStatement(object);
+	    
 		if (Settings.getInstance().getDebugMetadataSql())
 		{
 			LogMgr.logDebug("OracleObjectCompiler.compileObject()", "Using SQL: " + sql);
@@ -63,6 +65,29 @@ public class OracleObjectCompiler
 			SqlUtil.closeStatement(stmt);
 			this.dbConnection.setBusy(false);
 		}
+	}
+
+	public String createCompileStatement(DbObject object)
+	{
+		StringBuilder sql = new StringBuilder(50);
+		sql.append("ALTER ");
+
+		if (StringUtil.isNonBlank(object.getCatalog()))
+		{
+			// If it's a package, compile the whole package.
+			sql.append("PACKAGE ");
+			sql.append(object.getSchema());
+			sql.append('.');
+			sql.append(object.getCatalog());
+		}
+		else
+		{
+			sql.append(object.getObjectType());
+			sql.append(' ');
+			sql.append(object.getObjectExpression(dbConnection));
+		}
+		sql.append(" COMPILE");
+		return sql.toString();
 	}
 	
 	public static boolean canCompile(DbObject object)

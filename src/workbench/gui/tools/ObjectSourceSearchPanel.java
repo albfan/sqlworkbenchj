@@ -15,9 +15,11 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import javax.swing.DefaultListModel;
@@ -458,7 +460,9 @@ public class ObjectSourceSearchPanel
 		};
 
 		this.window.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		this.window.setIconImage(ResourceMgr.getPng("searchsource16").getImage());
+
+		ResourceMgr.setWindowIcons(window, "searchsource");
+
 		this.window.getContentPane().add(this);
 		this.restoreSettings();
 		this.window.addWindowListener(this);

@@ -133,7 +133,7 @@ public class ObjectScripterUI
 			this.window = new JFrame(ResourceMgr.getString("TxtWindowTitleGeneratedScript"));
 			this.window.getContentPane().setLayout(new BorderLayout());
 			this.window.getContentPane().add(this, BorderLayout.CENTER);
-			this.window.setIconImage(ResourceMgr.getImage("script").getImage());
+			ResourceMgr.setWindowIcons(window, "script");
 			if (!Settings.getInstance().restoreWindowSize(this.window, ObjectScripterUI.class.getName()))
 			{
 				this.window.setSize(500,400);

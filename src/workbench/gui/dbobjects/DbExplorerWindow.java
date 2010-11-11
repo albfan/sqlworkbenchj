@@ -12,8 +12,11 @@
 package workbench.gui.dbobjects;
 
 import java.awt.EventQueue;
+import java.awt.Image;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.WindowConstants;
@@ -56,7 +59,8 @@ public class DbExplorerWindow
 		this.panel = aPanel;
 		this.addWindowListener(this);
 		this.getContentPane().add(this.panel);
-		this.setIconImage(ResourceMgr.getImage("Database").getImage());
+		ResourceMgr.setWindowIcons(this, "database");
+
 		this.setProfileName(aProfileName);
 		this.restorePosition();
 		this.jobIndicator = new RunningJobIndicator(this);

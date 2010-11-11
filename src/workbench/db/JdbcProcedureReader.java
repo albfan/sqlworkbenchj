@@ -312,13 +312,14 @@ public class JdbcProcedureReader
 		int size = rs.getInt("LENGTH");
 		String rem = rs.getString("REMARKS");
 		int ordinal = -1;
+		
 		try
 		{
 			ordinal = rs.getInt("ORDINAL_POSITION");
 		}
 		catch (Exception e)
 		{
-			LogMgr.logDebug("JdbcProcedureReader.processProcedureColumnResultRow()", "Error retrieving ordinal_position", e);
+			// LogMgr.logDebug("JdbcProcedureReader.processProcedureColumnResultRow()", "Error retrieving ordinal_position", e);
 			// Some Oracle driver versions do not seem to return the correct column list...
 			ordinal = row;
 		}
