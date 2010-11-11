@@ -1565,7 +1565,8 @@ public class DataImporter
 		catch (RuntimeException th)
 		{
 			this.hasErrors = true;
-			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table " + this.targetTable.getTableExpression(), th);
+			String tname = targetTable == null ? "null" : this.targetTable.getTableExpression();
+			LogMgr.logError("DataImporter.setTargetTable()", "Error when setting target table " + tname, th);
 			throw th;
 		}
 	}

@@ -68,6 +68,17 @@ public class WbCallOraTest
       "/";
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 
+		sql =
+			"create or replace function get_stuff(p_id in number) \n" +
+			"return sys_refcursor \n" +
+			"is \n" +
+			"    p_cur sys_refcursor; \n" +
+			"begin \n" +
+			"  open p_cur for select * from person where id = p_id; \n" +
+			"  return p_cur; " +
+			"end get_stuff; \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
 	}
 
 	@AfterClass
@@ -125,7 +136,26 @@ public class WbCallOraTest
 		assertEquals(BigDecimal.valueOf(1), address.getValue(0, 1));
 		assertEquals("Arthur's Address", address.getValue(0, 2));
 
+		String callSql = procs.get(0).createSql(con);
+		assertEquals("-- Parameters: PID, PERSON_RESULT, ADDR_RESULT\nWbCall REF_CURSOR_EXAMPLE(?,?,?);", callSql);
+
+		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_STUFF");
+		assertEquals(1, procs.size());
+
+		ProcedureDefinition def = procs.get(0);
+		assertNotNull(def);
+
+		String sql = def.createSql(con);
+		assertEquals("-- Parameters: P_ID\nWbCall GET_STUFF(?);", sql);
+
+		result = call.execute("WbCall GET_STUFF(?)");
+		assertTrue(result.getMessageBuffer().toString(), result.isSuccess());
+		assertTrue(result.hasDataStores());
+
+		results = result.getDataStores();
+		assertEquals(1, results.size());
+
+		DataStore person2 = results.get(0);
+		assertEquals(1, person2.getRowCount());
 	}
-
-
 }

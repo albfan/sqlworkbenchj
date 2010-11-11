@@ -372,23 +372,25 @@ public class ProcedureDefinition
 		{
 			return buildFunctionCall(con, params);
 		}
-		return createWbCallStatement(con, params);
+		return createWbCallStatement(params);
 	}
 
-	private String createWbCallStatement(WbConnection con, DataStore params)
+	public String createWbCallStatement(DataStore params)
 	{
 		StringBuilder call = new StringBuilder(150);
 		CommandTester c = new CommandTester();
+
+		
 		StringBuilder paramNames = new StringBuilder(50);
-		paramNames.append("-- Parameters: ");
+
 		call.append(c.formatVerb(WbCall.VERB));
 		call.append(' ');
 		call.append(oracleType != null ? catalog + "." + procName : procName);
 		call.append("(");
 
-		int rows = 0;
 		int numParams = 0;
-
+		int rows = params.getRowCount();
+		
 		for (int i = 0; i < rows; i++)
 		{
 			String type = params.getValueAsString(i, ProcedureReader.COLUMN_IDX_PROC_COLUMNS_RESULT_TYPE);
@@ -397,20 +399,30 @@ public class ProcedureDefinition
 			if (numParams > 0)
 			{
 				call.append(',');
-				paramNames.append(", ");
 			}
 
 			// only append a ? for OUT or INOUT parameters, not for RETURN parameters
 			if (type.equals("IN") || type.endsWith("OUT"))
 			{
+				if (numParams == 0)
+				{
+					paramNames.append("-- Parameters: ");
+				}
+				else
+				{
+					paramNames.append(", ");
+				}
 				paramNames.append(param);
 				call.append('?');
 				numParams ++;
 			}
 		}
 		call.append(");");
-		paramNames.append('\n');
-		call.insert(0, paramNames);
+		if (numParams > 0)
+		{
+			paramNames.append('\n');
+			call.insert(0, paramNames);
+		}
 
 		return call.toString();
 	}

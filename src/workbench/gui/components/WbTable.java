@@ -1029,9 +1029,16 @@ public class WbTable
 	public boolean isColumnOrderChanged()
 	{
 		TableColumnModel model = getColumnModel();
-		for (int i=0; i < model.getColumnCount(); i++)
+		int count = model.getColumnCount();
+		for (int i=0; i < count; i++)
 		{
-			if (i != model.getColumn(i).getModelIndex()) return true;
+			int modelIndex = model.getColumn(i).getModelIndex();
+			// Any index larger than the current count means, the column
+			// has been removed, and thus is not relevant
+			if (modelIndex < count)
+			{
+				if (i != modelIndex) return true;
+			}
 		}
 		return false;
 	}

@@ -11,6 +11,8 @@
  */
 package workbench.db.postgres;
 
+import java.util.List;
+import workbench.db.ProcedureDefinition;
 import workbench.storage.DataStore;
 import workbench.util.SqlUtil;
 import java.sql.Statement;
@@ -109,6 +111,16 @@ public class WbCallPostgresTest
 		assertEquals(Integer.valueOf(2), ds.getValue(1, 0));
 		assertEquals("Ford", ds.getValue(1, 1));
 		assertEquals("Prefect", ds.getValue(1, 2));
+
+		List<ProcedureDefinition> procs = con.getMetadata().getProcedureReader().getProcedureList(null, TEST_ID, "refcursorfunc");
+		assertEquals(1, procs.size());
+		ProcedureDefinition proc = procs.get(0);
+		String callCmd = proc.createSql(con);
+		assertEquals("WbCall refcursorfunc();", callCmd);
+
+		DataStore params = con.getMetadata().getProcedureReader().getProcedureColumns(proc);
+		assertEquals(1, params.getRowCount());
+		assertTrue(ProcedureDefinition.returnsRefCursor(con, params));
 	}
 
 }

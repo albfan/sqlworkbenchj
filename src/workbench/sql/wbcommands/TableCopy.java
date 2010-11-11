@@ -110,6 +110,11 @@ class TableCopy
 			{
 				targetId = new TableIdentifier(targettable);
 			}
+
+			if (targetId == null)
+			{
+				throw new TableNotFoundException(targettable);
+			}
 			copier.copyFromTable(sourceConnection, targetConnection, srcTable, targetId, mapping, where, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 		}
 		else
@@ -133,6 +138,10 @@ class TableCopy
 					queryCols.get(i).setColumnName(cols.get(i).getColumnName());
 					queryCols.get(i).setColumnAlias(null);
 				}
+			}
+			if (targetId == null)
+			{
+				targetId = new TableIdentifier(targettable);
 			}
 			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 		}
