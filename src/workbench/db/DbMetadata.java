@@ -142,8 +142,8 @@ public class DbMetadata
 	private Set<String> tableTypesList;
 	private String[] tableTypes;
 	private String[] tableTypesSelectable;
-	private List<String> schemasToIgnore;
-	private List<String> catalogsToIgnore;
+	private Set<String> schemasToIgnore;
+	private Set<String> catalogsToIgnore;
 
 	private DbSettings dbSettings;
 	private ViewReader viewReader;
@@ -700,16 +700,24 @@ public class DbMetadata
 			String ids = Settings.getInstance().getProperty("workbench.sql.ignoreschema." + this.getDbId(), null);
 			if (ids != null)
 			{
-				schemasToIgnore = StringUtil.stringToList(ids, ",");
+				schemasToIgnore = new TreeSet<String>(StringUtil.stringToList(ids, ","));
 			}
 			else
 			{
-				 schemasToIgnore = Collections.emptyList();
+				 schemasToIgnore = Collections.emptySet();
 			}
 		}
 		return schemasToIgnore.contains("*") || schemasToIgnore.contains(schema);
 	}
 
+	/**
+	 * For testing purposes only
+	 */
+	public void resetSchemasToIgnores()
+	{
+		schemasToIgnore = null;
+	}
+	
 	/**
 	 * Check if the given {@link TableIdentifier} requires
 	 * the usage of the schema for a DML or DDL statement
@@ -815,11 +823,11 @@ public class DbMetadata
 			String cats = Settings.getInstance().getProperty("workbench.sql.ignorecatalog." + this.getDbId(), null);
 			if (cats != null)
 			{
-				catalogsToIgnore = StringUtil.stringToList(cats, ",");
+				catalogsToIgnore = new TreeSet<String>(StringUtil.stringToList(cats, ","));
 			}
 			else
 			{
-				 catalogsToIgnore = Collections.emptyList();
+				 catalogsToIgnore = Collections.emptySet();
 			}
 		}
 		return catalogsToIgnore.contains("*") || catalogsToIgnore.contains(catalog);

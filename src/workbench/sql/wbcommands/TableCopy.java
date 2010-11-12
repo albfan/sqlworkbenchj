@@ -100,16 +100,17 @@ class TableCopy
 		{
 			throw new TableNotFoundException(targettable);
 		}
+		
+		if (targetId == null && skipTargetCheck)
+		{
+			targetId = new TableIdentifier(targettable);
+		}
 
 		if (sourcetable != null)
 		{
 			TableIdentifier srcTable = new TableIdentifier(sourcetable);
 			String where = cmdLine.getValue(WbCopy.PARAM_SOURCEWHERE);
 			Map<String, String> mapping = this.parseMapping(cmdLine);
-			if (targetId == null && skipTargetCheck && sourcetable != null)
-			{
-				targetId = new TableIdentifier(targettable);
-			}
 
 			if (targetId == null)
 			{
@@ -138,10 +139,6 @@ class TableCopy
 					queryCols.get(i).setColumnName(cols.get(i).getColumnName());
 					queryCols.get(i).setColumnAlias(null);
 				}
-			}
-			if (targetId == null)
-			{
-				targetId = new TableIdentifier(targettable);
 			}
 			copier.copyFromQuery(sourceConnection, targetConnection, sourcequery, targetId, queryCols, createTableType, dropTable, ignoreDropError, skipTargetCheck);
 		}

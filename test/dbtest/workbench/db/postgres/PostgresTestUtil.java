@@ -88,6 +88,7 @@ public class PostgresTestUtil
 		}
 		catch (Exception e)
 		{
+			e.printStackTrace();
 			con.rollbackSilently();
 		}
 		finally
