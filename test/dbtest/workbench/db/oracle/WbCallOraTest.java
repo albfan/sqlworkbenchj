@@ -60,7 +60,7 @@ public class WbCallOraTest
 		TestUtil.executeScript(con, tableSql);
 
 		String sql =
-			"CREATE OR REPLACE procedure ref_cursor_example(pid number, person_result out sys_refcursor, addr_result out sys_refcursor) is \n" +
+			"CREATE OR REPLACE PROCEDURE ref_cursor_example(pid number, person_result out sys_refcursor, addr_result out sys_refcursor) is \n" +
       "begin \n" +
       "    open person_result for select id, person_name from person where id = pid;\n" +
       "    open addr_result for select a.id, a.person_id, a.address_info from address a join person p on a.person_id = p.id where p.id = pid;\n" +
@@ -79,7 +79,19 @@ public class WbCallOraTest
 			"end get_stuff; \n" +
 			"/";
 		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
-	}
+
+		sql =
+			"CREATE OR REPLACE PROCEDURE get_magic(errorcode out number, app_id in number, p_cur in out sys_refcursor)  \n" +
+			"IS \n" +
+			"BEGIN \n" +
+			"  errorcode   := 42;  \n" +
+			"  OPEN p_cur FOR  \n" +
+			"     SELECT 42 AS MAGIC_NUMBER \n" +
+			"     FROM DUAL;  \n" +
+			"END GET_MAGIC;  \n" +
+			"/";
+		TestUtil.executeScript(con, sql, DelimiterDefinition.DEFAULT_ORA_DELIMITER);
+}
 
 	@AfterClass
 	public static void tearDownClass()
@@ -142,10 +154,10 @@ public class WbCallOraTest
 		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_STUFF");
 		assertEquals(1, procs.size());
 
-		ProcedureDefinition def = procs.get(0);
-		assertNotNull(def);
+		ProcedureDefinition getStuff = procs.get(0);
+		assertNotNull(getStuff);
 
-		String sql = def.createSql(con);
+		String sql = getStuff.createSql(con);
 		assertEquals("-- Parameters: P_ID\nWbCall GET_STUFF(?);", sql);
 
 		result = call.execute("WbCall GET_STUFF(?)");
@@ -157,5 +169,14 @@ public class WbCallOraTest
 
 		DataStore person2 = results.get(0);
 		assertEquals(1, person2.getRowCount());
+
+		procs = con.getMetadata().getProcedureReader().getProcedureList(null, OracleTestUtil.SCHEMA_NAME, "GET_MAGIC");
+		assertEquals(1, procs.size());
+
+		ProcedureDefinition magic = procs.get(0);
+		assertNotNull(magic);
+		String magicSql = magic.createSql(con);
+		System.out.println(magicSql);
+
 	}
 }
