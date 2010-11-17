@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <history>
   <!-- build number must be set to -1 for development builds -->
-  <release build="-1" date="2010-11-02">
-    <entry dev-build="6" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry>
-    <entry dev-build="6" type="enh">A new parameter -skipTargetCheck is available for WbCopy to disable checking of the target table. This is useful if the target table is not visible by the JDBC driver (e.g. temporary tables for Informix)</entry>
-    <entry dev-build="6" type="enh">A new parameter (-tableType) is available for WbCopy to control what kind of table is created when using -createTarget. The parameter value selects a SQL "template" that is defined in workbench.settings</entry>
+  <release build="-1" date="2010-11-16">
+    <!-- <entry dev-build="8" type="enh">The (self-written) Windows launcher has been dropped and replaced with executables from Winrun4J, including suppport for 64bit executables (thanks to Markus for testing this).</entry> -->
+    <entry dev-build="7" type="enh">A new parameter -skipTargetCheck is available for WbCopy to disable checking of the target table. This is useful if the target table is not visible by the JDBC driver (e.g. temporary tables for Informix)</entry>
+    <entry dev-build="7" type="enh">A new parameter (-tableType) is available for WbCopy to control what kind of table is created when using -createTarget. The parameter value selects a SQL "template" that is defined in workbench.settings</entry>
     <entry dev-build="6" type="enh">When using WbExport and -quoteAlways=true, null values are no longer escaped. The parameter can now be use with WbImport to distinguis between null values and empty strings.</entry>
     <entry dev-build="5" type="enh">The escaping of embedded quotes can now also be selected when using "Save Data as" or "Import file".</entry>
     <entry dev-build="5" type="enh">When connected to an Excel Spreadsheet, [] are now also recognized as quote characters (to allow a semicolon in a "table" name).</entry>
@@ -15,7 +15,8 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
-    <entry dev-build="5" type="fix">When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</entry>
+    <entry dev-build="8" type="fix">The datatype for parameters in Oracle stored procedures was not always displayed correctly.</entry>
+    <entry dev-build="7" type="fix">When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</entry>
     <entry dev-build="6" type="fix">Copying a table's column definitions into the clipboard did not work.</entry>
     <entry dev-build="6" type="fix">When using WbCopy and -createTarget with a fully qualified table name (otherschema.sometable) the table was not created in the specified schema</entry>
     <entry dev-build="6" type="fix">Postgres DOMAINs where not displayed if the DOMAIN was created in a schema that is not in the schema search_path</entry>
