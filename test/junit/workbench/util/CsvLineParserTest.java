@@ -24,6 +24,42 @@ public class CsvLineParserTest
 {
 
 	@Test
+	public void testEscapedEscapes()
+	{
+		CsvLineParser parser = new CsvLineParser(';','\'');
+		parser.setQuoteEscaping(QuoteEscapeType.escape);
+		parser.setReturnEmptyStrings(true);
+		parser.setLine("'\\\\\\'ku\"la'");
+		
+		String result = null;
+		if (parser.hasNext())
+		{
+			result = parser.getNext();
+		}
+		String ex = "\\\\'ku\"la";
+		assertEquals(ex, result);
+
+		parser.setLine("'\\\\ku\"la'");
+		result = null;
+		if (parser.hasNext())
+		{
+			result = parser.getNext();
+		}
+		ex = "\\\\ku\"la";
+		assertEquals(ex, result);
+
+		parser.setLine("'\\'ku\"la'");
+		result = null;
+		if (parser.hasNext())
+		{
+			result = parser.getNext();
+		}
+		ex = "'ku\"la";
+		assertEquals(ex, result);
+
+	}
+	
+	@Test
 	public void testEscapedQuotes()
 	{
 		CsvLineParser parser = new CsvLineParser('\t','"');

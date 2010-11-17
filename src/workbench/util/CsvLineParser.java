@@ -114,6 +114,7 @@ public class CsvLineParser
 			{
 				break;
 			}
+			
 			if (c == this.quoteChar)
 			{
 				// don't return the quote at the end
@@ -173,7 +174,9 @@ public class CsvLineParser
 		{
 			if (this.escapeType == QuoteEscapeType.escape)
 			{
-				next = StringUtil.replace(next, "\\", "");
+				String quoteString = new String(new char[] { quoteChar } );
+				next = StringUtil.replace(next, "\\" + quoteChar, quoteString);
+//				next = StringUtil.replace(next, "\\\\", "\\");
 			}
 			else if (this.escapeType == QuoteEscapeType.duplicate)
 			{
