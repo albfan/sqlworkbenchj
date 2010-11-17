@@ -308,8 +308,28 @@ public class JdbcProcedureReader
 
 		int sqlType = rs.getInt("DATA_TYPE");
 		String typeName = rs.getString("TYPE_NAME");
-		int digits = rs.getInt("PRECISION");
-		int size = rs.getInt("LENGTH");
+		int precision = rs.getInt("PRECISION");
+		int length = rs.getInt("LENGTH");
+		int scale = rs.getInt("SCALE");
+		if (rs.wasNull())
+		{
+			scale = -1;
+		}
+
+		int size = 0;
+		int digits = 0;
+
+		if (SqlUtil.isNumberType(sqlType))
+		{
+			size = precision;
+			digits = (scale == -1 ? 0 : scale);
+		}
+		else
+		{
+			size = length;
+			digits = 0;
+		}
+		
 		String rem = rs.getString("REMARKS");
 		int ordinal = -1;
 		
