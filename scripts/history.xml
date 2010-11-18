@@ -15,6 +15,7 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="8" type="fix">When running a statement there was a built-in limit on 15 warnings that would be displayed by SQL Workbench. That limited the output of messages with RAISe NOTICE to 15 as well in PostgreSQL.</entry>
     <entry dev-build="8" type="fix">The datatype for parameters in Oracle stored procedures was not always displayed correctly.</entry>
     <entry dev-build="7" type="fix">When selecting JdbcOdbc bridge as the Driver class, SQL Workbench incorrectly showed an error message that the driver could not be found.</entry>
     <entry dev-build="6" type="fix">Copying a table's column definitions into the clipboard did not work.</entry>

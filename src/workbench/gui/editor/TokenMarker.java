@@ -66,7 +66,10 @@ public abstract class TokenMarker
 
 	public Token getFirstTokenInLine(int lineIndex)
 	{
-		if (lineIndex < 0 || lineIndex >= length) return null;
+		if (lineIndex < 0 || lineIndex >= length)
+		{
+			return null;
+		}
 		return lineStartTokens.get(lineIndex);
 	}
 
@@ -82,11 +85,17 @@ public abstract class TokenMarker
 
 	protected Token getPreviousLineToken(int lineIndex)
 	{
-		if (lineIndex <= 0) return null;
-		lineIndex --;
-		Token prev = getLastTokenInLine(lineIndex);
-		if (prev == null) return getPreviousLineToken(lineIndex);
-		else return prev;
+	    Token token = null;
+	    while (lineIndex > 0)
+	    {
+	        lineIndex --;
+	        token = getLastTokenInLine(lineIndex);
+	        if (token != null)
+	        {
+	            break;
+	        }
+	    }
+	    return token;
 	}
 
 	/**

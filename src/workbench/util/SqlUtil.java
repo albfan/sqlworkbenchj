@@ -37,6 +37,7 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.log.LogMgr;
 import workbench.resource.GuiSettings;
+import workbench.resource.Settings;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.sql.formatter.SqlFormatter;
@@ -1348,7 +1349,7 @@ public class SqlUtil
 			SQLWarning warn = (stmt == null ? null : stmt.getWarnings());
 			boolean hasWarnings = warn != null;
 			int count = 0;
-
+			int maxLoops = Settings.getInstance().getIntProperty("workbench.db.warnings.max", 2500);
 			while (warn != null)
 			{
 				count ++;
@@ -1359,7 +1360,8 @@ public class SqlUtil
 					if (!s.endsWith("\n")) msg.append('\n');
 					added.add(s);
 				}
-				if (count > 15) break; // prevent endless loop
+				if (count > maxLoops) break; // prevent endless loop
+				if (warn == warn.getNextWarning()) break;
 				warn = warn.getNextWarning();
 			}
 
@@ -1377,7 +1379,8 @@ public class SqlUtil
 					msg = append(msg, s);
 					if (!s.endsWith("\n")) msg.append('\n');
 				}
-				if (count > 25) break; // prevent endless loop
+				if (count > maxLoops) break; // prevent endless loop
+				if (warn == warn.getNextWarning()) break;
 				warn = warn.getNextWarning();
 			}
 
