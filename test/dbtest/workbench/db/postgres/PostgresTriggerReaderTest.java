@@ -16,7 +16,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import workbench.TestUtil;
 import workbench.WbTestCase;
-import workbench.db.TableIdentifier;
 import workbench.db.TriggerDefinition;
 import workbench.db.TriggerReader;
 import workbench.db.TriggerReaderFactory;
@@ -84,7 +83,6 @@ public class PostgresTriggerReaderTest
 		WbConnection con = PostgresTestUtil.getPostgresConnection();
 		if (con == null) return;
 
-		TableIdentifier tbl = new TableIdentifier(TEST_SCHEMA, "some_table");
 		TriggerReader reader = TriggerReaderFactory.createReader(con);
 		assertTrue(reader instanceof PostgresTriggerReader);
 		List<TriggerDefinition> triggers = reader.getTriggerList(null, TEST_SCHEMA, "some_table");
