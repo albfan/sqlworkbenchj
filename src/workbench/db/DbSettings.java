@@ -155,6 +155,11 @@ public class DbSettings
 		Settings.getInstance().setProperty("workbench.db.oracle.use.dbmsmeta." + type.trim().toLowerCase(), flag);
 	}
 
+	public boolean useGetStringForBit()
+	{
+		return Settings.getInstance().getBoolProperty(prefix + "bit.use.getstring", false);
+	}
+
 	public boolean useGetStringForClobs()
 	{
 		return Settings.getInstance().getBoolProperty(prefix + "clob.use.getstring", false);

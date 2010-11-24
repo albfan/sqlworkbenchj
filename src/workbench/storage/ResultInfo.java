@@ -43,6 +43,7 @@ public class ResultInfo
 	private boolean useGetBytesForBlobs;
 	private boolean useGetStringForClobs;
 	private boolean isUserDefinedPK;
+	private boolean useGetStringForBit;
 
 	public ResultInfo(ColumnIdentifier[] cols)
 	{
@@ -93,7 +94,7 @@ public class ResultInfo
 				toUse.setCatalog(meta.getCurrentCatalog());
 			}
 		}
-	
+
 		List<ColumnIdentifier> cols = meta.getTableColumns(toUse);
 		this.columns = new ColumnIdentifier[cols.size()];
 		int i = 0;
@@ -118,13 +119,14 @@ public class ResultInfo
 			treatLongVarcharAsClob = sourceConnection.getDbSettings().longVarcharIsClob();
 			useGetBytesForBlobs = sourceConnection.getDbSettings().useGetBytesForBlobs();
 			useGetStringForClobs = sourceConnection.getDbSettings().useGetStringForClobs();
+			useGetStringForBit = sourceConnection.getDbSettings().useGetStringForBit();
 		}
 
 		for (int i=0; i < this.colCount; i++)
 		{
 			String name = metaData.getColumnName(i + 1);
 			String alias = metaData.getColumnLabel(i + 1);
-			
+
 			boolean realColumn = true;
 			if (StringUtil.isNonBlank(name))
 			{
@@ -214,7 +216,16 @@ public class ResultInfo
 
 			col.setDisplaySize(size);
 			col.setDecimalDigits(scale);
-			String dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
+			String dbmsType = null;
+			if (dbMeta != null)
+			{
+				dbmsType = dbMeta.getDataTypeResolver().getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
+			}
+			else
+			{
+				dbmsType = SqlUtil.getSqlTypeDisplay(typename, col.getDataType(), prec, scale);
+			}
+
 			if (type == Types.VARCHAR)
 			{
 				// HSQL reports the VARCHAR size in displaySize()
@@ -237,10 +248,14 @@ public class ResultInfo
 
 			try
 			{
-				if (Settings.getInstance().getFixSqlServerTimestampDisplay() && type == Types.BINARY && "timestamp".equals(typename))
+				if (dbMeta != null && dbMeta.isSqlServer() && Settings.getInstance().getFixSqlServerTimestampDisplay() && type == Types.BINARY && "timestamp".equals(typename))
 				{
 					// hack for SQL Server
 					// RowData#readRow() will convert the byte[] into a hex String
+					col.setColumnClassName("java.lang.String");
+				}
+				else if (useGetStringForBit && type == Types.BIT)
+				{
 					col.setColumnClassName("java.lang.String");
 				}
 				else
@@ -255,6 +270,11 @@ public class ResultInfo
 			}
 			this.columns[i] = col;
 		}
+	}
+
+	public boolean useGetStringForBit()
+	{
+		return useGetStringForBit;
 	}
 
 	public boolean useGetStringForClobs()
@@ -420,7 +440,7 @@ public class ResultInfo
 	{
 		return this.columns[i].getDisplayName();
 	}
-	
+
 	public String getColumnName(int i)
 	{
 		return this.columns[i].getColumnName();

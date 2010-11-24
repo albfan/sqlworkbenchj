@@ -170,6 +170,7 @@ public class RowData
 		boolean longVarcharAsClob = info.treatLongVarcharAsClob();
 		boolean useGetBytesForBlobs = info.useGetBytesForBlobs();
 		boolean useGetStringForClobs = info.useGetStringForClobs();
+		boolean useGetStringForBit = info.useGetStringForBit();
 
 		Object value = null;
 
@@ -197,6 +198,10 @@ public class RowData
 				else if (type == java.sql.Types.DATE)
 				{
 					value = rs.getDate(i+1);
+				}
+				else if (useGetStringForBit && type == java.sql.Types.BIT)
+				{
+					value = rs.getString(i + 1);
 				}
 				else if (type == java.sql.Types.STRUCT)
 				{
