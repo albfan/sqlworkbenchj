@@ -40,9 +40,12 @@ public class ProcedureDefinition
 	private String displayName;
 
 	/**
-	 * as returned by the JDBC driver corresponds to
-	 * DatabaseMetaData.procedureNoResult
-	 * DatabaseMetaData.procedureReturnsResult
+	 * The result type as returned by the JDBC driver.
+	 * Corresponds to:
+	 * <ul>
+	 *   <li>DatabaseMetaData.procedureNoResult</li>
+	 *   <li>DatabaseMetaData.procedureReturnsResult</li>
+	 * </ul>
 	 */
 	private int resultType;
 

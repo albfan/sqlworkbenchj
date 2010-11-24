@@ -34,6 +34,21 @@ public class PostgresDataTypeResolverTest
 
 		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, 300, 0);
 		assertEquals("VARCHAR(300)", display);
+
+		display = resolver.getSqlTypeDisplay("VARCHAR", Types.VARCHAR, Integer.MAX_VALUE, 0);
+		assertEquals("varchar", display);
+
+		display = resolver.getSqlTypeDisplay("text", Types.VARCHAR, 300, 0);
+		assertEquals("text", display);
+
+		display = resolver.getSqlTypeDisplay("int8", Types.BIGINT, 0, 0);
+		assertEquals("bigint", display);
+
+		display = resolver.getSqlTypeDisplay("int4", Types.INTEGER, 0, 0);
+		assertEquals("integer", display);
+
+		display = resolver.getSqlTypeDisplay("int2", Types.SMALLINT, 0, 0);
+		assertEquals("smallint", display);
 	}
 	
 }
