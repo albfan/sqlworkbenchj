@@ -219,12 +219,13 @@ public class TriggerListPanel
 
 	public void setConnection(WbConnection aConnection)
 	{
+		shouldRetrieve = true;
+		reset();
+
 		this.dbConnection = aConnection;
 		this.reader = TriggerReaderFactory.createReader(dbConnection);
 		if (source != null) source.setDatabaseConnection(aConnection);
 		if (compileAction != null) compileAction.setConnection(aConnection);
-		this.reset();
-		shouldRetrieve = true;
 	}
 
 	public void setCatalogAndSchema(String aCatalog, String aSchema, boolean retrieve)

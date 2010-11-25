@@ -21,6 +21,8 @@ public class TriggerReaderFactory
 	public static TriggerReader createReader(WbConnection con)
 	{
 		if (con == null) return null;
+		if (con.getMetadata() == null) return null;
+		
 		if (con.getMetadata().isPostgres())
 		{
 			return new PostgresTriggerReader(con);
