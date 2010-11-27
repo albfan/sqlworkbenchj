@@ -1032,7 +1032,7 @@ public class DbMetadata
 		// be quoted.
 		if (this.isExcel)
 		{
-			Pattern chars = Pattern.compile("[A-Za-z0-9]*");
+			Pattern chars = Pattern.compile("[A-Za-z0-9]+");
 			Matcher m = chars.matcher(name);
 			needQuote = !m.matches();
 		}

@@ -83,6 +83,7 @@ public class CompletionPopup
 		this.elementList.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 		Border b = new CompoundBorder(elementList.getBorder(), new EmptyBorder(0,2,0,2));
 		this.elementList.setBorder(b);
+		elementList.setCellRenderer(new CompletionListRenderer());
 
 		elementList.addFocusListener(this);
 		elementList.addMouseListener(this);

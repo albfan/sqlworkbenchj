@@ -47,7 +47,7 @@ public class ComparatorFactoryTest
 		ComparatorFactory factory = new ComparatorFactory();
 		List<ColumnComparator> comps = factory.getAvailableComparators();
 		assertNotNull(comps);
-		assertEquals(count, comps.size());
+		assertEquals("Not all comparators regisgered!", count, comps.size());
 
 		ColumnComparator comp = factory.findEqualityComparatorFor(String.class);
 		assertTrue(comp instanceof StringEqualsComparator);
@@ -55,7 +55,9 @@ public class ComparatorFactoryTest
 		comp = factory.findEqualityComparatorFor(Date.class);
 		assertTrue(comp instanceof DateEqualsComparator);
 
-		System.out.println(System.getProperty("java.class.path"));
+		comp = factory.findEqualityComparatorFor(Boolean.class);
+		assertTrue(comp instanceof BooleanEqualsComparator);
+
 	}
 	
 }

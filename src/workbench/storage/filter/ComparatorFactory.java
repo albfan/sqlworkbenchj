@@ -38,7 +38,8 @@ public class ComparatorFactory
 			new GreaterOrEqualComparator(),
 			new IsNullComparator(),
 			new IsNotNullComparator(),
-			new RegExComparator()
+			new RegExComparator(),
+			new BooleanEqualsComparator()
 		);
 	}
 
