@@ -184,11 +184,11 @@ public class DbDriver
 		{
 			for (String lib : libraryList)
 			{
-				lib = Settings.getInstance().replaceLibDirKey(lib);
-				File f = new File(lib);
+				String realLib = Settings.getInstance().replaceLibDirKey(lib);
+				File f = new File(realLib);
 				if (f.getParentFile() == null)
 				{
-					f = new File(Settings.getInstance().getLibDir(), lib);
+					f = new File(Settings.getInstance().getLibDir(), realLib);
 				}
 				if (!f.exists()) return false;
 			}

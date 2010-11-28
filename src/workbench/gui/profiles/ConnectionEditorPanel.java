@@ -967,7 +967,7 @@ public class ConnectionEditorPanel
 		this.tfWorkspaceFile.setText(filename);
 	}
 
-	public void setSourceList(ProfileListModel aSource)
+	void setSourceList(ProfileListModel aSource)
 	{
 		this.sourceModel = aSource;
 	}

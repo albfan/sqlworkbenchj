@@ -20,7 +20,8 @@ import workbench.resource.ResourceMgr;
 import workbench.gui.filter.SelectionFilter;
 
 /**
- *	Filter data from a WbTable based on the currently selected column value
+ *	Filters data from a WbTable based on the currently selected column value.
+ * 
  *	@author  Thomas Kellerer
  */
 public class SelectionFilterAction

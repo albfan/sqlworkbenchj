@@ -21,6 +21,8 @@ import workbench.util.SqlUtil;
  * A ListCellRenderer for the completion popup.
  *
  * If a ColumnIdentifier is displayed, and that is a PK column, the name will be displayed in bold face.
+ *
+ * For instances of DbObject, the object's comment (remark) is shown as a tooltip.
  * 
  * @author Thomas Kellerer
  */

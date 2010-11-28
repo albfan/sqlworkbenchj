@@ -53,7 +53,6 @@ public class HexPanel
 		scroll.setRowHeaderView(lines);
 		JTableHeader header = dataTable.getTableHeader();
 		DefaultTableCellRenderer rend = new DefaultTableCellRenderer();
-		//header.setBorder(new LineBorder(Color.LIGHT_GRAY, 1));
 		rend.setBackground(new Color(238,240,238));
 		header.setDefaultRenderer(rend);
 		this.add(header, BorderLayout.NORTH);
@@ -99,10 +98,10 @@ public class HexPanel
 class ByteBufferTableModel
 	implements TableModel
 {
-	private byte[] data;
-	private int rowCount;
-	private int columns = 16;
-	private String[] labels;
+	private final byte[] data;
+	private final int rowCount;
+	private final int columns = 16;
+	private final String[] labels;
 
 	public ByteBufferTableModel(byte[] buffer)
 	{
@@ -167,9 +166,6 @@ class ByteBufferTableModel
 		if (offset >= data.length) return "";
 		int c = (data[offset] < 0 ? 256 + data[offset] : data[offset]);
 		return NumberStringCache.getHexString(c);
-
-//		if (c < 16) return "0" + Integer.toHexString(c);
-//		else return Integer.toHexString(c);
 	}
 
 	public void setValueAt(Object aValue, int rowIndex, int columnIndex)
