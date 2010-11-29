@@ -82,6 +82,7 @@ public final class WbManager
 	private WbThread shutdownHook = new WbThread(this, "ShutdownHook");
 	private AppArguments cmdLine = new AppArguments();
 	private boolean isWindowsClassic;
+	private JDialog closeMessage;
 
 	private WbManager()
 	{
@@ -192,7 +193,7 @@ public final class WbManager
 		return null;
 	}
 
-	protected JFrame getCurrentToolWindow()
+	private JFrame getCurrentToolWindow()
 	{
 		if (this.toolWindows == null) return null;
 		if (this.toolWindows.size() == 1)
@@ -313,8 +314,6 @@ public final class WbManager
 			});
 		}
 	}
-
-	protected JDialog closeMessage;
 
 	private boolean saveWindowSettings()
 	{
@@ -465,7 +464,7 @@ public final class WbManager
 		WbSwingUtilities.center(this.closeMessage, parent);
 	}
 
-	protected void disconnectWindows()
+	private void disconnectWindows()
 	{
 		for (MainWindow w : mainWindows)
 		{
@@ -478,7 +477,7 @@ public final class WbManager
 	/**
 	 *	this gets called from exitWorkbench() when disconnecting everything
 	 */
-	protected void disconnected()
+	private void disconnected()
 	{
 		WbSwingUtilities.invoke(new Runnable()
 		{
@@ -496,7 +495,7 @@ public final class WbManager
 		doShutdown(0);
 	}
 
-	protected void closeAllWindows()
+	private void closeAllWindows()
 	{
 		for (MainWindow w : mainWindows)
 		{
@@ -509,7 +508,7 @@ public final class WbManager
 		closeToolWindows();
 	}
 
-	protected void saveSettings()
+	private void saveSettings()
 	{
 		if (this.writeSettings && !this.isBatchMode())
 		{
@@ -618,7 +617,7 @@ public final class WbManager
 
 	}
 
-	protected void openNewWindow(boolean checkCmdLine)
+	private void openNewWindow(boolean checkCmdLine)
 	{
 		final MainWindow main = new MainWindow();
 		mainWindows.add(main);
@@ -814,7 +813,7 @@ public final class WbManager
 		}
 	}
 
-	protected void warmUp()
+	private void warmUp()
 	{
 		WbThread t1 = new WbThread("WarmUp1")
 		{
