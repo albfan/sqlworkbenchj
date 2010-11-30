@@ -30,25 +30,24 @@ public class PostgresTestUtil
 
 	public static final String TEST_USER = "wbjunit";
 	public static final String TEST_PWD = "wbjunit";
-	
+	public static final String PROFILE_NAME = "WBJUnitPostgres";
 
 	/**
 	 * Return a connection to a locally running PostgreSQL database
 	 */
 	public static WbConnection getPostgresConnection()
 	{
-		final String id = "WBJUnitPostgres";
 		try
 		{
-			WbConnection con = ConnectionMgr.getInstance().findConnection(id);
+			WbConnection con = ConnectionMgr.getInstance().findConnection(PROFILE_NAME);
 			if (con != null) return con;
 
 			ArgumentParser parser = new AppArguments();
 			parser.parse("-url='jdbc:postgresql://localhost/wbjunit' -username=" + TEST_USER + " -password=" + TEST_PWD + " -driver=org.postgresql.Driver");
 			ConnectionProfile prof = BatchRunner.createCmdLineProfile(parser);
-			prof.setName("WBJUnitPostgres");
+			prof.setName(PROFILE_NAME);
 			ConnectionMgr.getInstance().addProfile(prof);
-			con = ConnectionMgr.getInstance().getConnection(prof, id);
+			con = ConnectionMgr.getInstance().getConnection(prof, PROFILE_NAME);
 			return con;
 		}
 		catch (Throwable th)

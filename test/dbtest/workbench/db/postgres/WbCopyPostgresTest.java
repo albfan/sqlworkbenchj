@@ -101,7 +101,6 @@ public class WbCopyPostgresTest
 				int count = rs.getInt(1);
 				assertEquals("Incorrect number of rows copied", 2, count);
 			}
-			
 		}
 		finally
 		{
@@ -109,5 +108,48 @@ public class WbCopyPostgresTest
 		}
 	}
 
+	public void testCopyFromH2()
+		throws Exception
+	{
+		Statement stmt = null;
+		ResultSet rs = null;
+		try
+		{
+			WbConnection pgCon = PostgresTestUtil.getPostgresConnection();
+			if (pgCon == null) return;
 
+			TestUtil util = getTestUtil();
+			WbConnection source = util.getConnection("copyCreateTestSource"); // H2
+			
+			WbCopy copyCmd = new WbCopy();
+			copyCmd.setConnection(pgCon);
+
+			TestUtil.executeScript(source,
+				"create table person (id integer, first_name varchar(50), last_name varchar(50));\n " +
+				"insert into person (id, first_name, last_name) values (1, 'Arthur', 'Dent');\n" +
+				"commit;\n");
+
+			String sql =
+				"wbcopy -sourceQuery='select id as person_id, first_name as vorname, last_name  as nachname from person' " +
+				"       -targetTable=some_person -createTarget=true \n"+
+				"       -sourceProfile=" + source.getProfile().getName() + " \n ";
+
+			StatementRunnerResult result = copyCmd.execute(sql);
+			String msg = result.getMessageBuffer().toString();
+			assertEquals(msg, true, result.isSuccess());
+
+			stmt = pgCon.createStatement();
+			rs = stmt.executeQuery("select count(*) from some_person where nachname = 'Dent'");
+			if (rs.next())
+			{
+				int count = rs.getInt(1);
+				assertEquals("Incorrect number of rows copied", 1, count);
+			}
+		}
+		finally
+		{
+			SqlUtil.closeAll(rs, stmt);
+		}
+		
+	}
 }
