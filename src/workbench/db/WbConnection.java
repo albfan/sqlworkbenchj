@@ -79,7 +79,7 @@ public class WbConnection
 	private Integer fetchSize;
 
 	private boolean supportsGetWarnings = true;
-	
+
 	/**
 	 * Create a new wrapper connection around the original SQL connection.
 	 * This will also initialize a {@link DbMetadata} instance.
@@ -321,7 +321,7 @@ public class WbConnection
 	public String getWarnings()
 	{
 		if (!supportsGetWarnings) return null;
-		
+
 		try
 		{
 			SQLWarning warn = this.getSqlConnection().getWarnings();
@@ -495,7 +495,7 @@ public class WbConnection
 	{
 		if (sqlConnection == null) return;
 		if (!getDbSettings().supportsTransactions()) return;
-		
+
 		try
 		{
 			this.sqlConnection.rollback();
@@ -569,7 +569,7 @@ public class WbConnection
 		{
 			return true;
 		}
-		
+
 		if (this.sqlConnection == null) return false;
 		try
 		{
@@ -1087,9 +1087,19 @@ public class WbConnection
 		return currentCatalog;
 	}
 
+	/**
+	 * This is called whenever the current catalog was changed.
+	 *
+	 * It will fire a connectionStateChanged event and will clear the object cache
+	 * as the cache is schema based.
+	 *
+	 * @param oldCatalog
+	 * @param newCatalog
+	 */
 	public void catalogChanged(String oldCatalog, String newCatalog)
 	{
 		this.currentCatalog = newCatalog;
+		this.getObjectCache().clear();
 		this.fireConnectionStateChanged(PROP_CATALOG, oldCatalog, newCatalog);
 	}
 

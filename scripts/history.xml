@@ -15,6 +15,8 @@
     <entry dev-build="2" type="enh">The DataPumper now remembers the settings for importing text or XML files</entry>
     <entry dev-build="2" type="enh">A new SQL formatter option has been added, to insert a spaces after a comma when processing IN (...) lists.</entry>
     <entry dev-build="1" type="enh">The "Delete data" dialog in the DbExplorer now correctly commits for DBMS where TRUNCATE is transaction safe. The CASCADE option for PostgreSQL is also supported.</entry>
+    <entry dev-build="8" type="fix">When using a query as the source for WbCopy that used column aliases between databases that store object names in different case a wrong isnert or update statement was created</entry>
+    <entry dev-build="8" type="fix">When changing the current database, the object cache was not updated correctly</entry>
     <entry dev-build="8" type="fix">"Filter by selected value" did not work for boolean columns</entry>
     <entry dev-build="8" type="fix">For PostgreSQL, columns defined as bit(x) with x > 1 where not displayed correctly.</entry>
     <entry dev-build="8" type="fix">When running a statement there was a built-in limit on 15 warnings that would be displayed by SQL Workbench. That limited the output of messages with RAISe NOTICE to 15 as well in PostgreSQL.</entry>

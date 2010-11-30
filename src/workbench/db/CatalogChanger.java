@@ -21,11 +21,11 @@ import workbench.util.StringUtil;
 /**
  * A class to change the current catalog in the database.
  *
- * This class uses DatabaseMetaData.setCatalog() to change the current catalog (database).
- * This can be changed in <tt>workbench.settings</tt> to use the SQL command <tt>USE</tt>
- * instead.
- * 
+ * This class uses DatabaseMetaData.setCatalog() to change the current catalog (database) or runs the USE command
+ * depending on the DB property <tt>usesetcatalog</tt>
+ *
  * @author Thomas Kellerer
+ * @see workbench.db.DbSettings#useSetCatalog()
  */
 public class CatalogChanger
 {
@@ -77,6 +77,9 @@ public class CatalogChanger
 
 		if (clearWarnings)
 		{
+			// Some JDBC drivers report the success of changing the catalog through a warning
+			// as we are displaying our own message anyway in the USE command, there is no need
+			// to display the warning as well.
 			conn.clearWarnings();
 		}
 
