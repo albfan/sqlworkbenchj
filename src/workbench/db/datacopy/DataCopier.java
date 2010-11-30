@@ -356,7 +356,8 @@ public class DataCopier
 			ColumnIdentifier realCol = findColumn(realCols, targetCol.getDisplayName());
 			if (realCol != null)
 			{
-				targetCol.setColumnName(realCol.getDisplayName());
+				targetCol.setColumnName(realCol.getColumnName());
+				targetCol.setColumnAlias(realCol.getDisplayName());
 				targetCol.setDbmsType(realCol.getDbmsType());
 				targetCol.setDataType(realCol.getDataType());
 				targetCol.setColumnSize(realCol.getColumnSize());
