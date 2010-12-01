@@ -48,6 +48,8 @@ public class PostgresSequenceReaderTest
 		TestUtil.executeScript(con,
 			"CREATE SEQUENCE seq_one;\n" +
 			"CREATE SEQUENCE seq_two cache 25 minvalue 100 increment by 10;\n" +
+			"CREATE TABLE seq_table (id integer);\n" +
+			"ALTER SEQUENCE seq_one OWNED BY seq_table.id;\n" +
 			"COMMIT; \n");
 	}
 
@@ -77,7 +79,10 @@ public class PostgresSequenceReaderTest
              "       INCREMENT BY 1\n" +
              "       MINVALUE 1\n" +
              "       CACHE 1\n" +
-             "       NO CYCLE;";
+             "       NO CYCLE;\n\n" +
+						 "ALTER SEQUENCE seq_one OWNER TO seq_table.id;";
+//		System.out.println(sql + "\n-------------\n" + expected);
+		
 		assertEquals(expected, sql.trim());
 
 		seq = objects.get(1);
