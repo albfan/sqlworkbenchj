@@ -109,17 +109,16 @@ public class ResourceMgr
 	public static void setWindowIcons(JFrame window, String baseName)
 	{
 		List<Image> icons = new ArrayList<Image>(2);
-		icons.add(ResourceMgr.getPng(baseName + "16").getImage());
-		icons.add(ResourceMgr.getPng(baseName + "32").getImage());
+		icons.add(getPng(baseName + "16").getImage());
+		icons.add(getPng(baseName + "32").getImage());
 		window.setIconImages(icons);
 	}
 
 	public static void setMainWindowIcons(JFrame window)
 	{
-		List<Image> icons = new ArrayList<Image>(3);
-		icons.add(getPng("workbench16").getImage());
-		icons.add(getPng("workbench32").getImage());
-		icons.add(getPng("workbench48").getImage());
+		List<Image> icons = new ArrayList<Image>(2);
+		icons.add(retrieveImage("workbench16.png").getImage());
+		icons.add(retrieveImage("workbench32.png").getImage());
 		window.setIconImages(icons);
 	}
 	
