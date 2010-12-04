@@ -209,8 +209,10 @@ public class TableListPanel
 		int location = PlacementChooser.getLocationProperty("workbench.gui.dbobjects.tabletabs");
 		displayTab = new WbTabbedPane(location);
 		displayTab.setBorder(WbSwingUtilities.EMPTY_BORDER);
+		displayTab.setName("displaytab");
 
 		this.tableDefinition = new TableDefinitionPanel();
+		this.tableDefinition.setName("tabledefinition");
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.INDEX_PROP, this);
 		this.tableDefinition.addPropertyChangeListener(TableDefinitionPanel.DEFINITION_PROP, this);
 
@@ -237,6 +239,7 @@ public class TableListPanel
 		};
 
 		this.indexes = new WbTable();
+		this.indexes.setName("indexlist");
 		this.indexes.setAdjustToColumnLabel(false);
 		this.indexes.setSelectOnRightButtonClick(true);
 		this.indexPanel = new TableIndexPanel(this.indexes, indexReload);
@@ -289,6 +292,7 @@ public class TableListPanel
 
 		this.listPanel = new JPanel();
 		this.tableList = new DbObjectTable();
+		this.tableList.setName("dbtablelist");
 		this.tableList.setSelectOnRightButtonClick(true);
 		this.tableList.getSelectionModel().addListSelectionListener(this);
 		this.tableList.getSelectionModel().setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -1576,7 +1580,7 @@ public class TableListPanel
 
 	private final Object busyLock = new Object();
 
-	private boolean isBusy()
+	public boolean isBusy()
 	{
 		synchronized (busyLock)
 		{

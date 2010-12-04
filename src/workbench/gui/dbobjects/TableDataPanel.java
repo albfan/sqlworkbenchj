@@ -116,6 +116,7 @@ public class TableDataPanel
 	public TableDataPanel()
 	{
 		super();
+		setName("tabledata");
 	}
 
 	private void initGui()
@@ -275,6 +276,16 @@ public class TableDataPanel
 		dataDisplay.setConnection(dbConnection);
 
 		initialized = true;
+	}
+
+	/**
+	 * Return the displayed table data. 
+	 * Intended for testing purposes
+	 * @return
+	 */
+	public WbTable getData()
+	{
+		return this.dataDisplay.getTable();
 	}
 
 	public boolean isModified()

@@ -35,8 +35,8 @@ import org.netbeans.jemmy.operators.Operator.StringComparator;
 import workbench.db.ConnectionMgr;
 import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.actions.SqlPanelReloadAction;
-import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.sql.SqlPanel;
+import workbench.log.LogMgr;
 import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
@@ -116,8 +116,8 @@ public class MainWindowTest
 		JFrameOperator mainWindowOp = new JFrameOperator("SQL Workbench");
 
 		QueueTool tool = new QueueTool();
-		
-		new JMenuBarOperator(mainWindowOp).pushMenuNoBlock("Tools|Show Database Explorer", "|");
+
+		new JMenuBarOperator(mainWindowOp).pushMenu("Tools|Show Database Explorer", "|");
 		tool.waitEmpty();
 		NamedComponentChooser chooser = new NamedComponentChooser();
 		chooser.setName("dbexplorer");
@@ -127,7 +127,7 @@ public class MainWindowTest
 
 		tool.waitEmpty();
 
-		new JMenuBarOperator(mainWindowOp).pushMenuNoBlock("View|Close Tab", "|");
+		new JMenuBarOperator(mainWindowOp).pushMenu("View|Close Tab", "|");
 		tool.waitEmpty();
 
 		Thread.sleep(250);
@@ -395,6 +395,18 @@ public class MainWindowTest
 		tool.waitEmpty();
 	}
 
+	private void showLogFile()
+	{
+		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
+		new JMenuBarOperator(mainWindow).pushMenuNoBlock("Help|View Logfile", "|");
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		WbFile f = LogMgr.getLogfile();
+		String fname = f.getFullPath();
+		JFrameOperator logWindow = new JFrameOperator(fname);
+		assertNotNull(logWindow);
+		logWindow.close();
+	}
+	
 	private void appendTest()
 	{
 		JFrameOperator mainWindow = new JFrameOperator("SQL Workbench");
@@ -482,6 +494,7 @@ public class MainWindowTest
 		try
 		{
 			startApplication();
+			showLogFile();
 			connect();
 			aboutTest();
 			settingsTest();

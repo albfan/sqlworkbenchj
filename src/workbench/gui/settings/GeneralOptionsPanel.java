@@ -521,16 +521,18 @@ public class GeneralOptionsPanel
     showFinishAlert.addActionListener(this);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 6;
+    gridBagConstraints.gridy = 0;
     gridBagConstraints.gridwidth = 2;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 10, 7, 0);
     jPanel4.add(showFinishAlert, gridBagConstraints);
 
     jLabel2.setText(ResourceMgr.getString("LblScriptEndAlertDuration")); // NOI18N
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 0;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.insets = new Insets(0, 11, 0, 0);
     jPanel4.add(jLabel2, gridBagConstraints);
@@ -538,8 +540,9 @@ public class GeneralOptionsPanel
     alertDuration.setColumns(8);
     gridBagConstraints = new GridBagConstraints();
     gridBagConstraints.gridx = 1;
-    gridBagConstraints.gridy = 7;
+    gridBagConstraints.gridy = 1;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
+    gridBagConstraints.weightx = 1.0;
     gridBagConstraints.insets = new Insets(0, 10, 0, 0);
     jPanel4.add(alertDuration, gridBagConstraints);
 
@@ -547,6 +550,7 @@ public class GeneralOptionsPanel
     gridBagConstraints.gridx = 0;
     gridBagConstraints.gridy = 6;
     gridBagConstraints.gridwidth = 4;
+    gridBagConstraints.fill = GridBagConstraints.HORIZONTAL;
     gridBagConstraints.anchor = GridBagConstraints.WEST;
     gridBagConstraints.weightx = 1.0;
     add(jPanel4, gridBagConstraints);

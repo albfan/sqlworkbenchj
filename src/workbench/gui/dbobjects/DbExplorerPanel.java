@@ -136,9 +136,11 @@ public class DbExplorerPanel
 		super();
 		this.internalId = ++instanceCount;
 		this.mainWindow = aParent;
+		setName("dbexplorer");
 		try
 		{
 			tables = new TableListPanel(aParent);
+			tables.setName("tablelistpanel");
 			procs = new ProcedureListPanel(aParent);
 			this.searchPanel = new TableSearchPanel(tables);
 			tabPane = new WbTabbedPane(JTabbedPane.TOP);
