@@ -11,6 +11,7 @@
  */
 package workbench.gui;
 
+import workbench.gui.tools.DbExplorerTester;
 import org.junit.Test;
 import javax.swing.Action;
 import javax.swing.JMenuBar;
@@ -34,7 +35,9 @@ import org.netbeans.jemmy.operators.Operator.StringComparator;
 import workbench.db.ConnectionMgr;
 import workbench.gui.actions.AppendResultsAction;
 import workbench.gui.actions.SqlPanelReloadAction;
+import workbench.gui.dbobjects.DbExplorerWindow;
 import workbench.gui.sql.SqlPanel;
+import workbench.resource.Settings;
 import workbench.util.StringUtil;
 import workbench.util.WbFile;
 import workbench.util.WbThread;
@@ -56,8 +59,7 @@ public class MainWindowTest
 	{
 		try
 		{
-//			JemmyProperties.getCurrentTimeouts().loadDebugTimeouts();
-			testUtil.startApplication();
+			testUtil.startApplication(false);
 		}
 		catch (Exception e)
 		{
@@ -105,6 +107,42 @@ public class MainWindowTest
 		}
 
 		new JButtonOperator(dialog, "Cancel").push();
+	}
+
+	private void dbExplorerTest()
+		throws InterruptedException
+	{
+		Settings.getInstance().setRetrieveDbExplorer(true);
+		JFrameOperator mainWindowOp = new JFrameOperator("SQL Workbench");
+
+		QueueTool tool = new QueueTool();
+		
+		new JMenuBarOperator(mainWindowOp).pushMenuNoBlock("Tools|Show Database Explorer", "|");
+		tool.waitEmpty();
+		NamedComponentChooser chooser = new NamedComponentChooser();
+		chooser.setName("dbexplorer");
+		JComponentOperator panel = new JComponentOperator(mainWindowOp, chooser);
+		DbExplorerTester tester = new DbExplorerTester();
+		tester.testPanel(panel);
+
+		tool.waitEmpty();
+
+		new JMenuBarOperator(mainWindowOp).pushMenuNoBlock("View|Close Tab", "|");
+		tool.waitEmpty();
+
+		Thread.sleep(250);
+
+		// Now test the DbExplorer in a stand-alone window
+		
+		new JMenuBarOperator(mainWindowOp).pushMenuNoBlock("Tools|New DbExplorer Window", "|");
+		tool.waitEmpty();
+
+		JFrameOperator dbExpOp = new JFrameOperator("Database Explorer");
+		chooser.setName("dbexplorer");
+		panel = new JComponentOperator(dbExpOp, chooser);
+		tester = new DbExplorerTester();
+		tester.testPanel(panel);
+		dbExpOp.close();
 	}
 
 	private void definePKTest()
@@ -439,6 +477,7 @@ public class MainWindowTest
 
 	@Test
 	public void testWindow()
+		throws Exception
 	{
 		try
 		{
@@ -450,7 +489,7 @@ public class MainWindowTest
 			appendTest();
 			pkWarningsTest();
 			definePKTest();
-			
+			dbExplorerTest();
 		}
 		finally
 		{
