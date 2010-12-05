@@ -950,11 +950,6 @@ public class MainWindow
 	 */
 	protected void connectPanel(final MainPanel aPanel)
 	{
-		if (Settings.getInstance().getLogConnectionDetails())
-		{
-			LogMgr.logDebug("MainWindow.connectPanel()", getWindowId() + ": connectPanel()" + aPanel.getId());
-		}
-
 		if (this.isConnectInProgress()) return;
 		this.setConnectIsInProgress();
 		this.showConnectingInfo();
@@ -966,6 +961,9 @@ public class MainWindow
 
 		try
 		{
+			// prevent tab change during connection as this is not working properly
+			sqlTab.setEnabled(false);
+
 			WbConnection conn = this.getConnectionForTab(aPanel, true);
 			int index = this.getIndexForPanel(aPanel);
 			if (Settings.getInstance().getLogConnectionDetails())
@@ -984,6 +982,7 @@ public class MainWindow
 		}
 		finally
 		{
+			sqlTab.setEnabled(true);
 			closeConnectingInfo();
 			clearConnectIsInProgress();
 			this.connectThread = null;

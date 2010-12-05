@@ -21,13 +21,23 @@ import workbench.util.SqlUtil;
 
 /**
  * Retrieve FK information from the database.
- * 
+ *
  * @author Thomas Kellerer
  */
 public class FKHandler
 {
 	public static final int COLUMN_IDX_FK_DEF_FK_NAME = 0;
+
+	/**
+	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
+	 * indicating the source column name
+	 */
 	public static final int COLUMN_IDX_FK_DEF_COLUMN_NAME = 1;
+
+	/**
+	 * The column index in the DataStore returned by getForeignKeys() or getReferencedBy()
+	 * indicating the column name of the target table (as tablename.columnname)
+	 */
 	public static final int COLUMN_IDX_FK_DEF_REFERENCE_COLUMN_NAME = 2;
 	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE = 3;
 	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE = 4;
@@ -35,7 +45,7 @@ public class FKHandler
 	public static final int COLUMN_IDX_FK_DEF_UPDATE_RULE_VALUE = 6;
 	public static final int COLUMN_IDX_FK_DEF_DELETE_RULE_VALUE = 7;
 	public static final int COLUMN_IDX_FK_DEF_DEFERRABLE_RULE_VALUE = 8;
-	
+
 	private WbConnection dbConnection;
 
 	public FKHandler(WbConnection conn)
@@ -43,16 +53,64 @@ public class FKHandler
 		dbConnection = conn;
 	}
 
-	public DataStore getExportedKeys(TableIdentifier tbl)
+	/**
+	 * Returns a DataStore with the exported keys with the raw information copied from the result
+	 * of the DatabaseMetaData.getExportedKeys()
+	 *
+	 * @param source the table to check
+	 * @return the defined foreign keys
+	 * @throws SQLException
+	 */
+	public DataStore getExportedKeys(TableIdentifier source)
 		throws SQLException
 	{
-		return getRawKeyList(tbl, true);
+		return getRawKeyList(source, true);
 	}
 
-	public DataStore getImportedKeys(TableIdentifier tbl)
+	/**
+	 * Returns a DataStore with the imported keys with the raw information copied from the result
+	 * of the DatabaseMetaData.getImportedKeys()
+	 *
+	 * These are "incoming" foreign keys to the passed table.
+	 *
+	 * @param target the table to check
+	 * @return foreign keys referencing the target table
+	 * @throws SQLException
+	 */
+	public DataStore getImportedKeys(TableIdentifier target)
 		throws SQLException
 	{
-		return getRawKeyList(tbl, false);
+		return getRawKeyList(target, false);
+	}
+
+	/**
+	 * Returns a list of foreign keys defined for the passed table.
+	 *
+	 * This will include all foreign key constraints on columns of the passed table that reference other tables.
+	 *
+	 * @param table the table to check
+	 * @param includeNumericRuleValue
+	 * @return all "outgoing" foreign keys
+	 */
+	public DataStore getForeignKeys(TableIdentifier table, boolean includeNumericRuleValue)
+	{
+		DataStore ds = this.getKeyList(table, true, includeNumericRuleValue);
+		return ds;
+	}
+
+	/**
+	 * Returns a list of foreign keys referencing the passed table.
+	 *
+	 * This will include all foreign key constraints from other tables that reference the passed table.
+	 *
+	 * @param table the table to check
+	 * @param includeNumericRuleValue
+	 * @return all "incoming" foreign keys
+	 */
+	public DataStore getReferencedBy(TableIdentifier table)
+	{
+		DataStore ds = this.getKeyList(table, false, false);
+		return ds;
 	}
 
 	private DataStore getRawKeyList(TableIdentifier tbl, boolean exported)
@@ -75,21 +133,20 @@ public class FKHandler
 			while (rs.next())
 			{
 				int row = ds.addRow();
-				ds.setValue(row, 0, rs.getString(1));
-				ds.setValue(row, 1, rs.getString(2));
-				ds.setValue(row, 2, rs.getString(3));
-				ds.setValue(row, 3, rs.getString(4));
-				ds.setValue(row, 4, rs.getString(5));
-				ds.setValue(row, 5, rs.getString(6));
-				ds.setValue(row, 6, rs.getString(7));
-				ds.setValue(row, 7, rs.getString(8));
-				ds.setValue(row, 8, Integer.valueOf(rs.getInt(9)));
-				ds.setValue(row, 9, Integer.valueOf(rs.getInt(10)));
-				ds.setValue(row, 10, rs.getString(11));
-				String fk_name = rs.getString(12);
-				ds.setValue(row, 11, fk_name);
-				ds.setValue(row, 12, rs.getString(13));
-				ds.setValue(row, 13, Integer.valueOf(rs.getInt(14)));
+				ds.setValue(row, 0, rs.getString(1)); // PKTABLE_CAT
+				ds.setValue(row, 1, rs.getString(2)); // PKTABLE_SCHEM
+				ds.setValue(row, 2, rs.getString(3)); // PKTABLE_NAME
+				ds.setValue(row, 3, rs.getString(4)); // PKCOLUMN_NAME
+				ds.setValue(row, 4, rs.getString(5)); // FKTABLE_CAT
+				ds.setValue(row, 5, rs.getString(6)); // FKTABLE_SCHEM
+				ds.setValue(row, 6, rs.getString(7)); // FKTABLE_NAME
+				ds.setValue(row, 7, rs.getString(8)); // FKCOLUMN_NAME
+				ds.setValue(row, 8, Integer.valueOf(rs.getInt(9))); // KEY_SEQ
+				ds.setValue(row, 9, Integer.valueOf(rs.getInt(10))); // UPDATE_RULE
+				ds.setValue(row, 10, rs.getString(11)); // DELETE_RULE
+				ds.setValue(row, 11, rs.getString(12)); // FK_NAME
+				ds.setValue(row, 12, rs.getString(13)); // PK_NAME
+				ds.setValue(row, 13, Integer.valueOf(rs.getInt(14))); // DEFERRABILITY
 			}
 			ds.resetStatus();
 		}
@@ -100,24 +157,12 @@ public class FKHandler
 		return ds;
 	}
 
-	public DataStore getForeignKeys(TableIdentifier table, boolean includeNumericRuleValue)
-	{
-		DataStore ds = this.getKeyList(table, true, includeNumericRuleValue);
-		return ds;
-	}
-
-	public DataStore getReferencedBy(TableIdentifier table)
-	{
-		DataStore ds = this.getKeyList(table, false, false);
-		return ds;
-	}
-
 	private DataStore getKeyList(TableIdentifier tableId, boolean getOwnFk, boolean includeNumericRuleValue)
 	{
 		String cols[] = null;
 		String refColName = null;
 		DbSettings dbSettings = dbConnection.getDbSettings();
-		
+
 		if (getOwnFk)
 		{
 			refColName = "REFERENCES";
