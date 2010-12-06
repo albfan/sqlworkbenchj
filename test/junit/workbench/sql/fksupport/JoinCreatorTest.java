@@ -33,7 +33,7 @@ public class JoinCreatorTest
 	public void testJoinCreator()
 		throws Exception
 	{
-		String sql = "select * from person p join address a ";
+		String sql = "select * from person p join address a join address_type at ";
 		int pos = sql.indexOf("address a") + "address a".length() + 1;
 		JoinCreator creator = new JoinCreator(sql, pos, null);
 		
