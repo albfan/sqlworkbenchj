@@ -148,7 +148,15 @@ public class NumberColumnRenderer
 					displayValue = decimalFormatter.format(n.doubleValue());
 				}
 			}
-			this.tooltip = aValue.toString();
+			
+			if (showTooltip)
+			{
+				this.tooltip = aValue.toString();
+			}
+			else
+			{
+				this.tooltip = null;
+			}
 		}
 		catch (Throwable th)
 		{
