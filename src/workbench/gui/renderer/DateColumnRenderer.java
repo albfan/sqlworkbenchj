@@ -67,7 +67,14 @@ public class DateColumnRenderer
 			{
 				this.displayValue = this.dateFormatter.format(d);
 			}
-			tooltip = d.toString();
+			if (showTooltip)
+			{
+				this.tooltip = displayValue;
+			}
+			else
+			{
+				this.tooltip = null;
+			}
 		}
 		catch (Throwable cc)
 		{
