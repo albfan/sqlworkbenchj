@@ -55,9 +55,14 @@ public class JoinColumnsDetectorTest
 
 		TableAlias person = new TableAlias("person p");
 		TableAlias address = new TableAlias("address a");
+		TableAlias history = new TableAlias("address_history ah");
 		JoinColumnsDetector detector = new JoinColumnsDetector(conn, person, address);
 		Settings.getInstance().setAutoCompletionPasteCase("lower");
 		String join = detector.getJoinCondition();
 		assertEquals("p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", join.trim());
+		
+		detector = new JoinColumnsDetector(conn, address, history);
+		join = detector.getJoinCondition();
+		assertEquals("a.adr_id = ah.address_id", join.trim());
 	}
 }

@@ -918,6 +918,33 @@ public class StringUtil
 		return -1;
 	}
 
+	public static String findWordLeftOfCursor(String text, int pos)
+	{
+		if (pos < 0) return null;
+
+		// skip whitespace until a character is found
+		try
+		{
+			int index = pos;
+			char c = text.charAt(index);
+			while (index > 0 && Character.isWhitespace(c))
+			{
+				index --;
+				c = text.charAt(index);
+			}
+			if (index > 0)
+			{
+				return getWordLeftOfCursor(text, index + 1, null);
+			}
+			return null;
+		}
+		catch (Exception e)
+		{
+			return null;
+		}
+	}
+
+	
 	public static String getWordLeftOfCursor(String text, int pos, String wordBoundaries)
 	{
 		try

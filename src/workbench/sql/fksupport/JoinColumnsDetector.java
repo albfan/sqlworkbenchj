@@ -5,6 +5,7 @@
 package workbench.sql.fksupport;
 
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import workbench.db.FKHandler;
@@ -12,7 +13,6 @@ import workbench.db.TableIdentifier;
 import workbench.db.WbConnection;
 import workbench.resource.Settings;
 import workbench.storage.DataStore;
-import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
 /**
@@ -73,14 +73,28 @@ public class JoinColumnsDetector
 	private Map<String, String> getJoinColumns()
 		throws SQLException
 	{
-		Map<String, String> columns = new HashMap<String, String>(2);
 		TableIdentifier realJoinTable = connection.getMetadata().findObject(joinTable.getTable());
 		TableIdentifier realJoinedTable = connection.getMetadata().findObject(joinedTable.getTable());
-		
-		if (realJoinTable == null || realJoinedTable == null) return columns;
 
+		if (realJoinTable == null || realJoinedTable == null)
+		{
+			return Collections.emptyMap();
+		}
+
+		Map<String, String> columns = getJoinColumns(realJoinTable, realJoinedTable);
+		if (columns.isEmpty())
+		{
+			columns = getJoinColumns(realJoinedTable, realJoinTable);
+		}
+		return columns;
+	}
+
+	private Map<String, String> getJoinColumns(TableIdentifier table1, TableIdentifier table2)
+		throws SQLException
+	{
+		Map<String, String> columns = new HashMap<String, String>(2);
 		FKHandler fkHandler = new FKHandler(connection);
-		DataStore ds = fkHandler.getImportedKeys(realJoinedTable);
+		DataStore ds = fkHandler.getImportedKeys(table1);
 		int count = ds.getRowCount();
 		for (int row = 0; row < count; row ++)
 		{
@@ -90,7 +104,7 @@ public class JoinColumnsDetector
 			String pkTableName = ds.getValueAsString(row, 2);
 			TableIdentifier pkTable = new TableIdentifier(pkTableCat, pkTableSchema, pkTableName);
 
-			if (pkTable.equals(realJoinTable))
+			if (pkTable.equals(table2))
 			{
 				String pkColName = ds.getValueAsString(row, 3);
 				String pkColumnExpr = joinTable.getNameToUse() + "." + getColumnName(pkColName);

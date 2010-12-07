@@ -101,6 +101,7 @@ import workbench.gui.actions.HighlightCurrentStatement;
 import workbench.gui.actions.IgnoreErrorsAction;
 import workbench.gui.actions.ImportFileAction;
 import workbench.gui.actions.InsertRowAction;
+import workbench.gui.actions.JoinCompletionAction;
 import workbench.gui.actions.JumpToStatement;
 import workbench.gui.actions.MakeInListAction;
 import workbench.gui.actions.MakeLowerCaseAction;
@@ -248,7 +249,8 @@ public class SqlPanel
 	protected AutoCompletionAction autoCompletion;
 	protected SqlPanelReloadAction reloadAction;
 	protected ShowObjectInfoAction showObjectInfoAction;
-
+	protected JoinCompletionAction joinCompletion;
+	
 	protected WbMenu copySelectedMenu;
 	protected ToggleAutoCommitAction toggleAutoCommit;
 	protected CommitAction commitAction;
@@ -844,6 +846,10 @@ public class SqlPanel
 		this.autoCompletion = new AutoCompletionAction(this.editor, this.statusBar);
 		this.autoCompletion.setCreateMenuSeparator(true);
 		this.actions.add(this.autoCompletion);
+
+		this.joinCompletion = new JoinCompletionAction(this);
+		this.actions.add(joinCompletion);
+		
 		this.clearCompletionCache = new ClearCompletionCacheAction();
 		this.actions.add(this.clearCompletionCache);
 		this.actions.add(showObjectInfoAction);
@@ -3328,6 +3334,7 @@ public class SqlPanel
 				}
 				spoolData.canExport(flag);
 				appendResultsAction.setEnabled(flag);
+				joinCompletion.setEnabled(flag);
 			}
 		});
 	}

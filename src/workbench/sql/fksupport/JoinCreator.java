@@ -21,6 +21,7 @@ import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
 import workbench.util.SqlUtil;
+import workbench.util.StringUtil;
 import workbench.util.TableAlias;
 
 /**
@@ -48,10 +49,14 @@ public class JoinCreator
 	{
 		this.sql = statement;
 		this.connection = dbConn;
-		this.cursorPos = positionInStatement;
-		retrieveTablePositions();
+		setCursorPosition(positionInStatement);
 	}
 
+	public void setCursorPosition(int position)
+	{
+		cursorPos = position;
+		retrieveTablePositions();
+	}
 	public String getJoinCondition()
 		throws SQLException
 	{
@@ -59,9 +64,34 @@ public class JoinCreator
 		TableAlias joinedTable = getJoinedTable();
 		if (joinTable == null || joinedTable == null) return null;
 		JoinColumnsDetector detector = new JoinColumnsDetector(connection, joinTable, joinedTable);
-		return detector.getJoinCondition();
+		String condition = detector.getJoinCondition();
+		if (!condition.isEmpty())
+		{
+			String currentWord = StringUtil.findWordLeftOfCursor(sql, cursorPos);
+			boolean whiteSpaceAtLeft = isWhitespaceAtCursor();
+
+			if (currentWord == null || !currentWord.equalsIgnoreCase("on"))
+			{
+				condition = "ON " + condition;
+			}
+			if (!whiteSpaceAtLeft)
+			{
+				condition = " " + condition;
+			}
+		}
+		return condition;
 	}
 
+	private boolean isWhitespaceAtCursor()
+	{
+		if (cursorPos > 0)
+		{
+			char c = sql.charAt(cursorPos - 1);
+			return Character.isWhitespace(c);
+		}
+		return false;
+	}
+	
 	public TableAlias getJoinTable()
 	{
 		Integer pos = getTableIndexBeforeCursor();

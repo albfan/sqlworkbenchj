@@ -125,6 +125,17 @@ public class StringUtilTest
 	}
 
 	@Test
+	public void testFindWordLeftOfCursor()
+	{
+		String input = "  ab   test   more    text";
+		String word = StringUtil.findWordLeftOfCursor(input, 1);
+		assertNull(word);
+		word = StringUtil.findWordLeftOfCursor(input, 5);
+		assertNotNull(word);
+		assertEquals("ab", word);
+	}
+
+	@Test
 	public void testGetWordLefOfCursor()
 	{
 		String input = "ab test\nmore text";

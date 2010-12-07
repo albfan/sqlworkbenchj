@@ -10,11 +10,13 @@
  */
 package workbench.sql.fksupport;
 
-import org.junit.After;
+import workbench.resource.Settings;
 import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import workbench.TestUtil;
+import workbench.db.ConnectionMgr;
+import workbench.db.WbConnection;
 import org.junit.Test;
+import workbench.WbTestCase;
 import workbench.util.TableAlias;
 import static org.junit.Assert.*;
 
@@ -23,23 +25,62 @@ import static org.junit.Assert.*;
  * @author Thomas Kellerer
  */
 public class JoinCreatorTest
+	extends WbTestCase
 {
 
 	public JoinCreatorTest()
 	{
 	}
 
+	@AfterClass
+	public static void tearDownClass()
+		throws Exception
+	{
+		ConnectionMgr.getInstance().disconnectAll();
+	}
+
 	@Test
 	public void testJoinCreator()
 		throws Exception
 	{
-		String sql = "select * from person p join address a join address_type at ";
+		TestUtil util = getTestUtil();
+		WbConnection conn = util.getConnection();
+		TestUtil.executeScript(conn,
+			"create table person (per_id integer not null, tenant_id integer not null, person_name varchar(10), primary key (per_id, tenant_id));\n" +
+			"create table address_type (type_id integer primary key, type_name varchar(50));\n" +
+			"create table address (" +
+			"   adr_id integer primary key, \n" +
+			"   address varchar(50), \n" +
+			"   person_id integer, \n" +
+			"   person_tenant_id integer, \n" +
+			"   adr_type_id integer, \n" +
+			"   foreign key (person_id, person_tenant_id) references person(per_id, tenant_id), \n" +
+			"   foreign key (adr_type_id) references address_type(type_id) \n" +
+			");\n" +
+			"commit;"
+		);
+		
+		String sql = "select * from person p join address a join address_type adt on  ";
 		int pos = sql.indexOf("address a") + "address a".length() + 1;
-		JoinCreator creator = new JoinCreator(sql, pos, null);
+		Settings.getInstance().setAutoCompletionPasteCase("lower");
+		JoinCreator creator = new JoinCreator(sql, pos, conn);
 		
 		TableAlias join = creator.getJoinTable();
-		System.out.println("main: " + join);
+		assertEquals("person", join.getObjectName());
+		assertEquals("p", join.getNameToUse());
 		TableAlias joined = creator.getJoinedTable();
-		System.out.println("joined: " + joined);
+		assertEquals("address", joined.getObjectName());
+		assertEquals("a", joined.getNameToUse());
+		String condition = creator.getJoinCondition();
+		assertEquals("ON p.tenant_id = a.person_tenant_id AND p.per_id = a.person_id", condition);
+
+		pos = sql.indexOf("address_type adt on") + "address_type adt on".length();
+		creator.setCursorPosition(pos);
+		condition = creator.getJoinCondition();
+		assertEquals(" a.type_id = adt.adr_type_id", condition);
+
+		creator.setCursorPosition(pos + 1);
+		condition = creator.getJoinCondition();
+		assertEquals("a.type_id = adt.adr_type_id", condition);
 	}
 }
