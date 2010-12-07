@@ -110,7 +110,10 @@ public class TextAreaRenderer
 				this.displayValue = value.toString();
 			}
 			this.textDisplay.setText(this.displayValue);
-			this.textDisplay.setToolTipText(StringUtil.getMaxSubstring(this.displayValue, maxTooltipSize));
+			if (showTooltip) 
+			{
+				this.textDisplay.setToolTipText(StringUtil.getMaxSubstring(this.displayValue, maxTooltipSize));
+			}
 		}
 	}
 

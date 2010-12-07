@@ -93,7 +93,7 @@ public class ToolTipRenderer
 	private int halign = SwingConstants.LEFT;
 
 	private boolean isAlternatingRow;
-
+	protected boolean showTooltip = true;
 	protected Map renderingHints;
 
 	public ToolTipRenderer()
@@ -104,6 +104,7 @@ public class ToolTipRenderer
 		regularInsets = getDefaultInsets();
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		renderingHints = (Map) tk.getDesktopProperty("awt.font.desktophints");
+		showTooltip = Settings.getInstance().getBoolProperty("workbench.gui.renderer.showtooltip", true);
 	}
 
 	static Insets getDefaultInsets()
@@ -394,10 +395,14 @@ public class ToolTipRenderer
 
 	protected void setTooltip(String tip)
 	{
-		if (tip != null && tip.length() > 0)
+		if (showTooltip && tip != null && tip.length() > 0)
+		{
 			tooltip = StringUtil.getMaxSubstring(tip, maxTooltipSize);
+		}
 		else
+		{
 			tooltip = null;
+		}
 	}
 
 	public String getDisplayValue()
