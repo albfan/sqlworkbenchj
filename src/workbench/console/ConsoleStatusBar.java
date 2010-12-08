@@ -44,6 +44,13 @@ public class ConsoleStatusBar
 		return result.toString();
 	}
 
+	@Override
+	public void setStatusMessage(String message, int duration)
+	{
+		setStatusMessage(message);
+	}
+
+	@Override
 	public void setStatusMessage(String message)
 	{
 		if (lastMessage != null)

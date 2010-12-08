@@ -35,6 +35,12 @@ public class SimpleStatusBar
 	}
 
 	@Override
+	public void setStatusMessage(String message, int duration)
+	{
+		setStatusMessage(message);
+	}
+
+	@Override
 	public void setStatusMessage(final String message)
 	{
 		WbSwingUtilities.invoke(new Runnable()

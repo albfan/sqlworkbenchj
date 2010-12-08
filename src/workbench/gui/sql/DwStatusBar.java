@@ -55,6 +55,7 @@ import workbench.util.EventNotifier;
 import workbench.util.NotifierEvent;
 import workbench.util.NumberStringCache;
 import workbench.util.StringUtil;
+import workbench.util.WbThread;
 
 
 /**
@@ -329,6 +330,22 @@ public class DwStatusBar
 	public String getText()
 	{
 		return this.tfStatus.getText();
+	}
+
+	@Override
+	public void setStatusMessage(final String message, int duration)
+	{
+		setStatusMessage(message);
+		WbThread t = new WbThread("Notification")
+		{
+			public void run()
+			{
+				WbThread.sleepSilently(2500);
+				String m = getText();
+				if (message.equals(m)) clearStatusMessage();
+			}
+		};
+		t.start();
 	}
 
 	/**

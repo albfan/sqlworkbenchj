@@ -146,6 +146,12 @@ public class MacroDefinitionPanel
 		{
 			completeAction = new AutoCompletionAction(macroEditor, new StatusBar()
 			{
+
+				@Override
+				public void setStatusMessage(String message, int duration)
+				{
+				}
+
 				@Override
 				public void setStatusMessage(String message)
 				{

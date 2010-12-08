@@ -65,6 +65,7 @@ import workbench.interfaces.DbExecutionNotifier;
 import workbench.interfaces.Moveable;
 import workbench.interfaces.ParameterPrompter;
 import workbench.interfaces.ResultReceiver;
+import workbench.interfaces.StatusBar;
 import workbench.sql.StatementRunnerResult;
 import workbench.util.ExceptionUtil;
 import workbench.gui.WbSwingUtilities;
@@ -1201,6 +1202,11 @@ public class SqlPanel
 		});
 	}
 
+	public StatusBar getStatusBar()
+	{
+		return statusBar;
+	}
+	
 	/**
 	 *	Display a message in the status bar of the DwPanel.
 	 */

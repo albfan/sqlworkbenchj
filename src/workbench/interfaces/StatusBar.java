@@ -17,6 +17,7 @@ package workbench.interfaces;
 public interface StatusBar
 {
 	void setStatusMessage(String message);
+	void setStatusMessage(String message, int duration);
 	void clearStatusMessage();
 	void repaint();
 	String getText();

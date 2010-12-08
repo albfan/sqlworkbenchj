@@ -17,9 +17,9 @@ import java.sql.SQLException;
 
 import javax.swing.KeyStroke;
 import workbench.db.WbConnection;
-import workbench.gui.completion.BaseAnalyzer;
 import workbench.gui.sql.EditorPanel;
 import workbench.gui.sql.SqlPanel;
+import workbench.interfaces.StatusBar;
 
 import workbench.log.LogMgr;
 import workbench.resource.ResourceMgr;
@@ -67,18 +67,27 @@ public class JoinCompletionAction
 			return;
 		}
 
-		JoinCreator creator = new JoinCreator(sql, commandCursorPos, conn);
+		StatusBar statusbar = client.getStatusBar();
+		
 		try
 		{
+			statusbar.setStatusMessage(ResourceMgr.getString("MsgCompletionRetrievingObjects"));
+			JoinCreator creator = new JoinCreator(sql, commandCursorPos, conn);
 			String condition = creator.getJoinCondition();
 			if (StringUtil.isNonBlank(condition))
 			{
 				editor.insertText(condition + " ");
+				statusbar.clearStatusMessage();
+			}
+			else
+			{
+				statusbar.setStatusMessage(ResourceMgr.getString("MsgCompletionNothingFound"), 2500);
 			}
 		}
 		catch (SQLException ex)
 		{
 			LogMgr.logWarning("JoinCompletionAction.executeAction()", "Error retrieving condition", ex);
+			statusbar.clearStatusMessage();
 		}
 	}
 

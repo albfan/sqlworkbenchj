@@ -285,6 +285,12 @@ public class ConnectionSelector
 		this.connectInProgress = false;
 	}
 
+	@Override
+	public void setStatusMessage(String message, int duration)
+	{
+		setStatusMessage(message);
+	}
+
 	public void setStatusMessage(final String message)
 	{
 		WbSwingUtilities.invoke(new Runnable()

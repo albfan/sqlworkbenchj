@@ -12,11 +12,10 @@ package workbench.sql.fksupport;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import workbench.db.WbConnection;
 import workbench.sql.formatter.SQLLexer;
 import workbench.sql.formatter.SQLToken;
@@ -96,7 +95,7 @@ public class JoinCreator
 	{
 		Integer pos = getTableIndexBeforeCursor();
 		List<Integer> tableIndex = new ArrayList<Integer>(tablePositions.keySet());
-		Collections.sort(tableIndex);
+		//Collections.sort(tableIndex);
 		int index = tableIndex.indexOf(pos);
 		if (index > 0)
 		{
@@ -115,7 +114,7 @@ public class JoinCreator
 	private Integer getTableIndexBeforeCursor()
 	{
 		List<Integer> tableIndex = new ArrayList<Integer>(tablePositions.keySet());
-		Collections.sort(tableIndex);
+		//Collections.sort(tableIndex);
 		for (int i=0; i < tableIndex.size(); i++)
 		{
 			if (tableIndex.get(i) > cursorPos && i > 0)
@@ -128,7 +127,7 @@ public class JoinCreator
 	
 	private void retrieveTablePositions()
 	{
-		tablePositions = new HashMap<Integer, TableAlias>(5);
+		tablePositions = new TreeMap<Integer, TableAlias>();
 		SQLLexer lexer = new SQLLexer(sql);
 		int bracketCount = 0;
 

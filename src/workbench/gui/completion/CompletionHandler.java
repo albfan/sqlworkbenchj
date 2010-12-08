@@ -246,18 +246,8 @@ public class CompletionHandler
 
 	private void showNoObjectsFoundMessage()
 	{
-		WbThread t = new WbThread("Notification")
-		{
-			public void run()
-			{
-				String msg = ResourceMgr.getString("MsgCompletionNothingFound");
-				statusBar.setStatusMessage(msg);
-				WbThread.sleepSilently(2500);
-				String m = statusBar.getText();
-				if (msg.equals(m)) statusBar.clearStatusMessage();
-			}
-		};
-		t.start();
+		String msg = ResourceMgr.getString("MsgCompletionNothingFound");
+		statusBar.setStatusMessage(msg, 2500);
 	}
 
 	private void showFailedMessage(String sql)
